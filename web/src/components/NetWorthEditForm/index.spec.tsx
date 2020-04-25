@@ -174,6 +174,9 @@ describe('Net worth entry form', () => {
     expect(buttonNext).toBeInTheDocument();
 
     nock('https://api.exchangeratesapi.io')
+      .defaultReplyHeaders({
+        'Access-Control-Allow-Origin': '*',
+      })
       .get(`/latest?_timestamp=${now.getTime() + 100}&base=GBP&symbols=USD`)
       .reply(200, {
         rates: {

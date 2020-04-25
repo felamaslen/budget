@@ -17,7 +17,7 @@ import food from '~client/reducers/food';
 import general from '~client/reducers/general';
 import holiday from '~client/reducers/holiday';
 import social from '~client/reducers/social';
-import suggestions from '~client/reducers/suggestions';
+import * as Suggestions from '~client/reducers/suggestions';
 
 export type State = {
   now: DateTime;
@@ -38,7 +38,7 @@ export type State = {
   general: object;
   holiday: object;
   social: object;
-  suggestions: object;
+  suggestions: Suggestions.State;
 };
 
 export default combineReducers({
@@ -58,5 +58,5 @@ export default combineReducers({
   general,
   holiday,
   social,
-  suggestions,
+  suggestions: Suggestions.default,
 });

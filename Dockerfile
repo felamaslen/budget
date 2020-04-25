@@ -14,9 +14,9 @@ RUN apk add --no-cache \
 WORKDIR /opt/app
 
 COPY package.json ./
-COPY package-lock.json ./
+COPY yarn.lock ./
 
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 ARG BIRTH_DATE
 ENV BIRTH_DATE=${BIRTH_DATE}
@@ -31,6 +31,6 @@ ARG DEFAULT_FUND_PERIOD
 ENV DEFAULT_FUND_PERIOD=${DEFAULT_FUND_PERIOD}
 
 COPY . .
-RUN npm run build
+RUN yarn build
 
-CMD ["npm", "start"]
+CMD ["yarn", "start"]

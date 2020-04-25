@@ -22,23 +22,23 @@ For info on building the Android app, see `android/README.md`.
 - Set environment variables
     - These are in `.env.example`, which you should copy to `.env` and edit with the appropriate values (see below).
 
-- Run `npm install` to install Node dependencies
+- Run `yarn install` to install Node dependencies
 
-- Run `npm run build` to build the web app
+- Run `yarn build` to build the web app
 
 ### Production:
 
-- Run `npm start` and access the app at `http://localhost:3000` by default.
+- Run `yarn start` and access the app at `http://localhost:3000` by default.
 
 ### Maintenance:
 
-- Run `npm run scrape_funds` to scrape and cache current fund prices
+- Run `yarn scrape_funds` to scrape and cache current fund prices
 
-- Run `npm run scrape_holdings` to scrape and cache current fund holdings
+- Run `yarn scrape_holdings` to scrape and cache current fund holdings
 
 ### Development:
 
-- Run `npm run dev` to run a development server with hot module replacement
+- Run `yarn dev` to run a development server with hot module replacement
     - This runs inside a Docker containerised environment
     - All external services are created by docker-compose
 

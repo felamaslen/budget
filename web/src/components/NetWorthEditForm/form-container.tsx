@@ -28,7 +28,7 @@ const FormContainer: React.FC<Props> = ({
   return (
     <Styled.FormContainer add={add}>
       <ButtonCancel onClick={onComplete}>{'Cancel'}</ButtonCancel>
-      <Styled.FormSection step={step || null}>{children}</Styled.FormSection>
+      <Styled.FormSection step={step}>{children}</Styled.FormSection>
       <Navigation
         onPrevStep={onPrevStep}
         onNextStep={onNextStep}

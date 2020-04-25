@@ -1,4 +1,4 @@
-import styled, { css, SimpleInterpolation } from 'styled-components';
+import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 import { rem } from '~client/styled/mixins';
 import { colors } from '~client/styled/variables';
 import { Step } from './constants';
@@ -15,13 +15,13 @@ export const FormNavigation = styled.div`
   }
 `;
 
-export const FormContainer = styled.div`
+export const FormContainer = styled.div<{ add: boolean }>`
   display: flex;
   flex-flow: column;
   flex: 1;
   min-height: 0;
 
-  ${({ add }): SimpleInterpolation =>
+  ${({ add }): false | FlattenSimpleInterpolation =>
     add &&
     css`
       flex: 1 1 0;
@@ -32,7 +32,7 @@ export const FormContainer = styled.div`
     `};
 `;
 
-function stepStyles({ step }: { step: Step }): SimpleInterpolation {
+function stepStyles({ step }: { step?: Step }): FlattenSimpleInterpolation | null {
   if (step === Step.Values) {
     return css`
       min-height: 0;
