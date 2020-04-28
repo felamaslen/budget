@@ -36,6 +36,8 @@ export const sortByKey: SortByKey;
 
 export const randnBm: () => number;
 
+export const fieldExists: <V = never>(value: V) => boolean;
+
 export const NULL: () => null;
 
 export type Identity<I, O = I> = (state: I) => O;
@@ -46,3 +48,5 @@ export const arrayAverage: <T>(values: T[], mode?: Average) => number | NaN;
 export const leftPad: (array: number[], length: number) => number[];
 
 export const sortByDate: <T extends { date: Date | DateTime }>(data: T[]) => T[];
+
+export const getValueFromTransmit: <I = never, O = I>(dataType: string, value: I) => O;

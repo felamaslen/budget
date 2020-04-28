@@ -226,7 +226,7 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value: initialValue, onChange
       {!isComplex(value) && <FormFieldCost value={value} onChange={onChangeTruthy} />}
       {isComplex(value) && (
         <Styled.NetWorthValueList>
-          {value.map(({ value: numberValue, currency }, index) => (
+          {value.filter(isFX).map(({ value: numberValue, currency }, index) => (
             <FormFieldWithCurrency
               key={currency}
               index={index}

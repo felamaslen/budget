@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 
 import { Data } from '~client/types/graph';
 import { Color } from '~client/constants/colors';
+import { DATA_KEY_ABBR } from '~client/constants/data';
 
 export type TransactionRaw = {
   date: string;
@@ -55,3 +56,17 @@ export type Stock = {
 };
 
 export type Index = Omit<Stock, 'price'> & Partial<Pick<Stock, 'price'>>;
+
+export type ItemRaw = {
+  [DATA_KEY_ABBR.id]: string;
+  [DATA_KEY_ABBR.item]: string;
+  [DATA_KEY_ABBR.transactions]: TransactionRaw[] | null;
+  pr: number[];
+  prStartIndex: number;
+};
+
+export type ReadResponse = {
+  data: ItemRaw[];
+  startTime: number;
+  cacheTimes: number[];
+};
