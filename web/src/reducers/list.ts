@@ -262,9 +262,6 @@ export function makeListReducer<I extends Item, R extends {} = I, ES extends obj
   };
 }
 
-// TODO: remove this legacy default export
-export default makeListReducer;
-
 type DailyProps = {
   total: number;
   olderExists: boolean | null;
