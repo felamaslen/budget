@@ -47,3 +47,5 @@
 - Rewrite tests in jest
 - Use date-fns instead of luxon
 - typescript styled-components
+- react-redux hooks
+- fix daily total recalculation / inconsistency when refreshing page
