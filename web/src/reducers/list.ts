@@ -28,7 +28,8 @@ import {
   State as CrudState,
 } from '~client/reducers/crud';
 
-type Item = { id: string; cost: number };
+type Item = { id: string; cost?: number };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CrudItems<I extends Item> = CrudState<I>;
 
 export type ListState<I extends Item, ES extends object = {}> = ES & {
@@ -73,7 +74,7 @@ const onCreate = <I extends Item, ES extends object>(
     } as Partial<ListState<I, ES>>;
   });
 
-const onRead = <I extends Item, ES extends object = {}>(page: string) => (
+export const onRead = <I extends Item, R extends {}, ES extends object = {}>(page: string) => (
   state: ListState<I, ES>,
   action: Action,
 ): Partial<ListState<I, ES>> => {
@@ -84,15 +85,18 @@ const onRead = <I extends Item, ES extends object = {}>(page: string) => (
     return { ...state, items: [] };
   }
 
-  const dataKeys = Object.keys(DATA_KEY_ABBR).filter(
-    longKey => typeof action.res[page].data[0][DATA_KEY_ABBR[longKey]] !== 'undefined',
+  const dataKeys = Object.entries(DATA_KEY_ABBR).filter(([, shortKey]) =>
+    Reflect.has(action.res[page].data[0], shortKey),
   );
 
-  const items = action.res[page].data.map((item: I) =>
-    dataKeys.reduce(
-      (last, longKey) => ({
+  const longKeys = dataKeys.map(([longKey]) => longKey) as (keyof I)[];
+  const shortKeys = dataKeys.map(([, shortKey]) => shortKey) as (keyof R)[];
+
+  const items = action.res[page].data.map((item: R) =>
+    longKeys.reduce(
+      (last, longKey, index) => ({
         ...last,
-        [longKey]: getValueFromTransmit(longKey, item[DATA_KEY_ABBR[longKey] as never]),
+        [longKey]: getValueFromTransmit(longKey as string, item[shortKeys[index]]),
       }),
       {},
     ),
@@ -222,7 +226,7 @@ const onSyncReceived = <I extends Item, ES extends object = {}>(page: string) =>
   return { ...state, items };
 };
 
-export function makeListReducer<I extends Item, ES extends object = {}>(
+export function makeListReducer<I extends Item, R extends {} = I, ES extends object = {}>(
   page: string,
   extraHandlers: ReducerMap<ListState<I, ES>> = {},
   extraState: ES = {} as ES,
@@ -237,7 +241,7 @@ export function makeListReducer<I extends Item, ES extends object = {}>(
   const handlers: ReducerMap<ListState<I, ES>> = {
     [LOGGED_OUT]: (): ListState<I, ES> => initialState,
     [LIST_ITEM_CREATED]: onCreate<I, ES>(page, columns),
-    [DATA_READ]: onRead<I, ES>(page),
+    [DATA_READ]: onRead<I, R, ES>(page),
     [LIST_ITEM_UPDATED]: onUpdate<I, ES>(page, columns),
     [LIST_ITEM_DELETED]: onDelete<I, ES>(page),
     [SYNC_RECEIVED]: onSyncReceived<I, ES>(page),
@@ -321,7 +325,7 @@ const onSyncReceivedDaily = <I extends Item, ES extends object = {}>(
   return { ...state, total };
 };
 
-export function makeDailyListReducer<I extends Item, ES extends object = {}>(
+export function makeDailyListReducer<I extends Item, R extends {} = Item, ES extends object = {}>(
   page: string,
   extraHandlers: ReducerMap<ListState<I, ES>> = {},
   extraState: ES = {} as ES,
@@ -333,7 +337,7 @@ export function makeDailyListReducer<I extends Item, ES extends object = {}>(
     olderExists: null,
   };
 
-  const listReducer = makeListReducer<I, ES>(page, extraHandlers, extraState);
+  const listReducer = makeListReducer<I, R, ES>(page, extraHandlers, extraState);
 
   const dailyReducer = createReducerObject<DailyState<I, ES>>(
     {

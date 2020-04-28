@@ -44,9 +44,19 @@ describe('List reducer', () => {
     olderExists: null,
   };
 
-  const myListReducer = makeListReducer<Item, ExtraState>(page, customHandlers, initialState);
+  type RawItem = {
+    I: string;
+    i: string;
+    c: number;
+  };
 
-  const dailyReducer = makeDailyListReducer<Item, Omit<State, 'baz'>>(page);
+  const myListReducer = makeListReducer<Item, RawItem, ExtraState>(
+    page,
+    customHandlers,
+    initialState,
+  );
+
+  const dailyReducer = makeDailyListReducer<Item, RawItem, Omit<State, 'baz'>>(page);
 
   describe.each([
     ['Null action', null],

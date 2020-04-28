@@ -56,6 +56,12 @@ export enum Period {
 
 export const GRAPH_FUNDS_PERIODS = Object.entries(Period);
 
+export const DEFAULT_FUND_PERIOD: Period = GRAPH_FUNDS_PERIODS.reduce(
+  (last: Period, [shortPeriod, next]): Period =>
+    shortPeriod === process.env.DEFAULT_FUND_PERIOD ? next : last,
+  Period.year1,
+);
+
 export const GRAPH_FUNDS_NUM_TICKS = 10;
 
 export const GRAPH_STOCKS_WIDTH = 150;

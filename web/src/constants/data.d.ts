@@ -10,6 +10,14 @@ export const PAGES: {
 
 export const PAGES_SUGGESTIONS: string[];
 
-export const DATA_KEY_ABBR: {
-  [longKey: string]: string;
-};
+export enum DATA_KEY_ABBR {
+  id = 'I',
+  date = 'd',
+  item = 'i',
+  cost = 'c',
+  shop = 's',
+  category = 'k',
+  holiday = 'h',
+  society = 'y',
+  transactions = 'tr',
+}
