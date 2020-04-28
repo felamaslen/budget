@@ -50,3 +50,4 @@
 - react-redux hooks
 - fix daily total recalculation / inconsistency when refreshing page
 - update overview totals when refreshing funds data
+- fix axes not showing on overview graphs
