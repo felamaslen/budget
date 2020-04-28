@@ -1,4 +1,7 @@
 export const CREATE_ID: string;
+
+export const CREATE: string;
+export const UPDATE: string;
 export const DELETE: string;
 
 export const PAGES: {
