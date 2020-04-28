@@ -9,3 +9,5 @@ export enum RequestType {
 }
 
 export type WithCrud<V> = V & { __optimistic?: RequestType };
+
+export type RawDate<V> = Omit<V, 'date'> & { date: string };

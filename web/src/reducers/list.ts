@@ -123,12 +123,15 @@ type Res = {
   total?: number;
 };
 
+export type Request = {
+  route: string;
+  fakeId?: string;
+  id?: string;
+  type: RequestType;
+};
+
 type RequestItem = {
-  request: {
-    route: string;
-    [id: string]: string;
-    type: RequestType;
-  };
+  request: Request;
   index: number;
   res: Res;
 };
@@ -152,7 +155,7 @@ function filterRequestItems<I extends Item>(
   requestItems: RequestItem[],
   requestType: RequestType,
   postProcess: PostProcess<I>,
-  idKey = 'id',
+  idKey: 'id' | 'fakeId' = 'id',
 ): FilterRequestItems<I> {
   return (items: CrudItems<I>): CrudItems<I> =>
     postProcess(

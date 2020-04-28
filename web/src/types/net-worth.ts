@@ -20,7 +20,7 @@ type FXValue = {
   currency: string;
 };
 
-type ComplexValueItem = FXValue;
+type ComplexValueItem = number | FXValue;
 type ComplexValue = ComplexValueItem[];
 
 export type Value = number | ComplexValue;

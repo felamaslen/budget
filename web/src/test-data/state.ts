@@ -92,19 +92,23 @@ export const testState: State = {
         date: DateTime.fromISO('2018-02-28'),
         values: [
           {
+            id: 'value-id-a1',
             subcategory: 'real-wallet-subcategory-id',
             value: [10324, { currency: 'CZK', value: 37.5 }],
           },
           {
+            id: 'value-id-a2',
             subcategory: 'real-house-subcategory-id',
             value: -18744200,
             skip: true,
           },
           {
+            id: 'value-id-a3',
             subcategory: 'real-bank-subcategory-id',
             value: 1296523,
           },
           {
+            id: 'value-id-a4',
             subcategory: 'real-credit-card-subcategory-id',
             value: -8751,
           },
@@ -115,26 +119,30 @@ export const testState: State = {
             value: 120000,
           },
         ],
-        currencies: [{ currency: 'CZK', rate: 0.035 }],
+        currencies: [{ id: 'currency-id-a1', currency: 'CZK', rate: 0.035 }],
       },
       {
         id: 'real-entry-id-b',
         date: DateTime.fromISO('2018-03-31'),
         values: [
           {
+            id: 'value-id-b1',
             subcategory: 'real-wallet-subcategory-id',
             value: [9752],
           },
           {
+            id: 'value-id-b2',
             subcategory: 'real-house-subcategory-id',
             value: -18420900,
             skip: true,
           },
           {
+            id: 'value-id-b3',
             subcategory: 'real-bank-subcategory-id',
             value: 1051343,
           },
           {
+            id: 'value-id-b4',
             subcategory: 'real-credit-card-subcategory-id',
             value: -21939,
           },
@@ -146,8 +154,8 @@ export const testState: State = {
           },
         ],
         currencies: [
-          { currency: 'USD', rate: 0.865 },
-          { currency: 'CZK', rate: 0.0314 },
+          { id: 'currency-id-b1', currency: 'USD', rate: 0.865 },
+          { id: 'currency-id-b2', currency: 'CZK', rate: 0.0314 },
         ],
       },
     ],
