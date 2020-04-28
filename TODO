@@ -51,3 +51,5 @@
 - fix daily total recalculation / inconsistency when refreshing page
 - update overview totals when refreshing funds data
 - fix axes not showing on overview graphs
+- split balance graph into stocks/ISA/options/cash with filled in-between area
+- keyboard shortcuts to navigate between pages
