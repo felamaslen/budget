@@ -19,9 +19,10 @@ import {
 } from '~client/constants/graph';
 import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
 import { colorKey } from '~client/modules/color';
+import { Page } from '~client/types/app';
 
 describe('Fund selectors / graph', () => {
-  const state: Pick<State, 'now' | 'funds'> = {
+  const state: Pick<State, 'now' | Page.funds> = {
     ...testState,
     now: DateTime.fromISO('2017-09-01T19:01Z'),
     funds: {

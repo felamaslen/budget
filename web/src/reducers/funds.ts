@@ -1,5 +1,6 @@
 import { Action } from 'create-reducer-object';
 
+import { Page } from '~client/types/app';
 import { makeListReducer, onRead, ListState } from '~client/reducers/list';
 import { DATA_READ } from '~client/constants/actions/api';
 import { FUNDS_VIEW_SOLD_TOGGLED, FUNDS_RECEIVED } from '~client/constants/actions/funds';
@@ -94,4 +95,4 @@ const handlers = {
   [FUNDS_RECEIVED]: onPeriodLoad,
 };
 
-export default makeListReducer<LegacyRow, ItemRaw, ExtraState>('funds', handlers, initialState);
+export default makeListReducer<LegacyRow, ItemRaw, ExtraState>(Page.funds, handlers, initialState);

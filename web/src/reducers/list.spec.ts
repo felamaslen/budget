@@ -6,6 +6,7 @@ import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actio
 import { dataRead, syncReceived } from '~client/actions/api';
 import { loggedOut } from '~client/actions/login';
 import { RequestType } from '~client/types/crud';
+import { Page } from '~client/types/app';
 import { DATA_KEY_ABBR } from '~client/constants/data';
 
 jest.mock('shortid', () => ({
@@ -19,13 +20,14 @@ describe('List reducer', () => {
 
   type Item = {
     id: string;
+    date: DateTime;
     item: string;
     cost: number;
   };
 
   type State = ListState<Item, ExtraState>;
 
-  const page = 'food';
+  const page = Page.food;
 
   const customHandlers = {
     CUSTOM_HANDLER_101: (_: State, action: Action): Partial<State> => ({
@@ -57,6 +59,8 @@ describe('List reducer', () => {
   );
 
   const dailyReducer = makeDailyListReducer<Item, RawItem, Omit<State, 'baz'>>(page);
+
+  const testDate = DateTime.fromISO('2020-04-20');
 
   describe.each([
     ['Null action', null],
@@ -235,7 +239,7 @@ describe('List reducer', () => {
   describe('LIST_ITEM_UPDATED', () => {
     const state: State = {
       ...initialState,
-      items: [{ id: 'some-real-id', item: 'some-item', cost: 23 }],
+      items: [{ id: 'some-real-id', date: testDate, item: 'some-item', cost: 23 }],
     };
 
     const action = listItemUpdated(page, 'some-real-id', { item: 'other item' });
@@ -246,6 +250,7 @@ describe('List reducer', () => {
       expect(result.items).toEqual([
         {
           id: 'some-real-id',
+          date: testDate,
           item: 'other item',
           cost: 23,
           __optimistic: RequestType.update,
@@ -258,7 +263,9 @@ describe('List reducer', () => {
 
       const resultNull = myListReducer(state, actionNull);
 
-      expect(resultNull.items).toEqual([{ id: 'some-real-id', item: 'some-item', cost: 23 }]);
+      expect(resultNull.items).toEqual([
+        expect.objectContaining({ id: 'some-real-id', item: 'some-item', cost: 23 }),
+      ]);
 
       const actionSome = listItemUpdated(page, 'some-real-id', {
         other: 'should not exist',
@@ -268,12 +275,12 @@ describe('List reducer', () => {
       const resultSome = myListReducer(state, actionSome);
 
       expect(resultSome.items).toEqual([
-        {
+        expect.objectContaining({
           id: 'some-real-id',
           item: 'next item',
           cost: 23,
           __optimistic: RequestType.update,
-        },
+        }),
       ]);
     });
 
@@ -294,19 +301,19 @@ describe('List reducer', () => {
       const result = myListReducer(stateCreate, actionAfterCreate);
 
       expect(result.items).toEqual([
-        {
+        expect.objectContaining({
           id: 'some-fake-id',
           item: 'updated item',
           cost: 23,
           __optimistic: RequestType.create,
-        },
+        }),
       ]);
     });
 
     it('should ignore actions intended for other pages', () => {
       const initialStateUpdate = {
         ...initialState,
-        items: [{ id: 'some-id', item: 'some item', cost: 3 }],
+        items: [{ id: 'some-id', date: testDate, item: 'some item', cost: 3 }],
       };
 
       expect(
@@ -343,7 +350,7 @@ describe('List reducer', () => {
   describe('LIST_ITEM_DELETED', () => {
     const state: State = {
       ...initialState,
-      items: [{ id: 'some-real-id', item: 'some item', cost: 29 }],
+      items: [{ id: 'some-real-id', date: testDate, item: 'some item', cost: 29 }],
     };
 
     const action = listItemDeleted('some-real-id', { page });
@@ -352,12 +359,12 @@ describe('List reducer', () => {
       const result = myListReducer(state, action);
 
       expect(result.items).toEqual([
-        {
+        expect.objectContaining({
           id: 'some-real-id',
           item: 'some item',
           cost: 29,
           __optimistic: RequestType.delete,
-        },
+        }),
       ]);
     });
 
@@ -391,19 +398,19 @@ describe('List reducer', () => {
       const result = myListReducer(stateUpdating, action);
 
       expect(result.items).toEqual([
-        {
+        expect.objectContaining({
           id: 'some-real-id',
           item: 'some item',
           cost: 29,
           __optimistic: RequestType.delete,
-        },
+        }),
       ]);
     });
 
     it('should ignore actions intended for other pages', () => {
       const initialStateDelete = {
         ...initialState,
-        items: [{ id: 'some-id', item: 'some item', cost: 3 }],
+        items: [{ id: 'some-id', date: testDate, item: 'some item', cost: 3 }],
       };
 
       expect(
@@ -498,6 +505,7 @@ describe('List reducer', () => {
         items: [
           {
             id: 'some-fake-id',
+            date: testDate,
             item: 'some item',
             cost: 3,
             __optimistic: RequestType.create,
@@ -509,12 +517,14 @@ describe('List reducer', () => {
         const result = myListReducer(state, syncReceivedAction);
 
         expect(result.items).toHaveLength(1);
-        expect(result.items[0]).toEqual({
-          id: 'real-id-b',
-          item: 'some item',
-          cost: 3,
-          __optimistic: undefined,
-        });
+        expect(result.items[0]).toEqual(
+          expect.objectContaining({
+            id: 'real-id-b',
+            item: 'some item',
+            cost: 3,
+            __optimistic: undefined,
+          }),
+        );
       });
 
       describe('for daily lists', () => {
@@ -524,6 +534,7 @@ describe('List reducer', () => {
           items: [
             {
               id: 'some-fake-id',
+              date: testDate,
               item: 'some item',
               cost: 3,
               __optimistic: RequestType.create,
@@ -566,6 +577,7 @@ describe('List reducer', () => {
         items: [
           {
             id: 'real-id-z',
+            date: testDate,
             item: 'updated item',
             cost: 10,
             __optimistic: RequestType.update,
@@ -577,12 +589,14 @@ describe('List reducer', () => {
         const result = myListReducer(state, syncReceivedAction);
 
         expect(result.items).toHaveLength(1);
-        expect(result.items[0]).toEqual({
-          id: 'real-id-z',
-          item: 'updated item',
-          cost: 10,
-          __optimistic: undefined,
-        });
+        expect(result.items[0]).toEqual(
+          expect.objectContaining({
+            id: 'real-id-z',
+            item: 'updated item',
+            cost: 10,
+            __optimistic: undefined,
+          }),
+        );
       });
 
       describe('for daily lists', () => {
@@ -606,6 +620,7 @@ describe('List reducer', () => {
         items: [
           {
             id: 'real-id-x',
+            date: testDate,
             item: 'some item',
             cost: 3,
             __optimistic: RequestType.delete,

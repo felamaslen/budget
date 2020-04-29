@@ -2,8 +2,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { DateTime } from 'luxon';
 
 import { PickUnion } from '~client/types';
+import { Page } from '~client/types/app';
 import { LegacyTransaction as Transaction } from '~client/types/funds';
-import { PAGES, PAGES_SUGGESTIONS } from '~client/constants/data';
+import { PAGES } from '~client/constants/data';
 import SuggestionsList from '~client/components/SuggestionsList';
 import FormFieldText from '~client/components/FormField';
 import FormFieldDate from '~client/components/FormField/date';
@@ -67,7 +68,7 @@ const EditableField: React.FC<FieldProps> = ({ id, item, value, onChange, ...res
 };
 
 type Props = PickUnion<FieldProps, 'item' | 'value' | 'onChange'> & {
-  page: string;
+  page: Page;
   id?: string;
   active?: boolean;
   onSuggestion?: () => void;
@@ -90,10 +91,7 @@ const Editable: React.FC<Props> = ({
   }, [active]);
 
   const showSuggestions = Boolean(
-    active &&
-      typed.length &&
-      PAGES_SUGGESTIONS.includes(page) &&
-      PAGES[page].suggestions?.includes(item),
+    active && typed.length && PAGES[page].suggestions?.includes(item),
   );
 
   return (

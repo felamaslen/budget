@@ -9,6 +9,7 @@ import {
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { Period } from '~client/constants/graph';
+import { Page } from '~client/types/app';
 
 describe('Funds selectors / gains', () => {
   const testCache = {
@@ -17,7 +18,7 @@ describe('Funds selectors / gains', () => {
     prices: testPrices,
   };
 
-  const stateWithGains: Pick<State, 'funds'> = {
+  const stateWithGains: Pick<State, Page.funds> = {
     funds: {
       viewSoldFunds: true,
       items: [
@@ -234,7 +235,7 @@ describe('Funds selectors / gains', () => {
       });
 
       describe('when there are no items', () => {
-        const stateNone: Pick<State, 'funds'> = {
+        const stateNone: Pick<State, Page.funds> = {
           funds: {
             ...stateWithGains.funds,
             items: [],
@@ -264,7 +265,7 @@ describe('Funds selectors / gains', () => {
       });
 
       describe('when there is no cache', () => {
-        const stateNoCache: Pick<State, 'funds'> = {
+        const stateNoCache: Pick<State, Page.funds> = {
           funds: {
             ...stateWithGains.funds,
             items: [
@@ -295,7 +296,7 @@ describe('Funds selectors / gains', () => {
       });
 
       describe('when the cache contains only one item', () => {
-        const stateOneItem: Pick<State, 'funds'> = {
+        const stateOneItem: Pick<State, Page.funds> = {
           funds: {
             ...stateWithGains.funds,
             items: [
