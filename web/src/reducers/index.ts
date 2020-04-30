@@ -8,7 +8,7 @@ import app from '~client/reducers/app';
 import api from '~client/reducers/api';
 import login from '~client/reducers/login';
 import error from '~client/reducers/error';
-import overview from '~client/reducers/overview';
+import overview, { State as OverviewState } from '~client/reducers/overview';
 import netWorth, { State as NetWorthState } from '~client/reducers/net-worth';
 import analysis from '~client/reducers/analysis';
 import * as Stocks from '~client/reducers/stocks';
@@ -29,7 +29,7 @@ export type State = {
   login: object;
   api: object;
   error: object[];
-  overview: object;
+  overview: OverviewState;
   netWorth: NetWorthState;
   stocks: Stocks.State;
   [Page.funds]: Funds.State;
