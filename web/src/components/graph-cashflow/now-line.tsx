@@ -6,39 +6,39 @@ import { rgba } from '~client/modules/color';
 import { Pix, RangeY } from '~client/types/graph';
 
 type Props = {
-    now: DateTime;
+  now: DateTime;
 } & Pix &
-    RangeY;
+  RangeY;
 
 export const NowLine: React.FC<Props> = ({ now, minY, maxY, pixX, pixY1 }) => {
-    if (minY === maxY) {
-        return null;
-    }
+  if (minY === maxY) {
+    return null;
+  }
 
-    const nowLineX = Math.floor(pixX(now.toSeconds())) + 0.5;
+  const nowLineX = Math.floor(pixX(now.toSeconds())) + 0.5;
 
-    const [fontSize, fontFamily] = FONT_GRAPH_KEY;
+  const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
-    return (
-        <g>
-            <line
-                x1={nowLineX}
-                y1={pixY1(minY)}
-                x2={nowLineX}
-                y2={pixY1(maxY)}
-                stroke={rgba(COLOR_DARK)}
-                strokeWidth={1}
-            />
+  return (
+    <g>
+      <line
+        x1={nowLineX}
+        y1={pixY1(minY)}
+        x2={nowLineX}
+        y2={pixY1(maxY)}
+        stroke={rgba(COLOR_DARK)}
+        strokeWidth={1}
+      />
 
-            <text
-                x={nowLineX}
-                y={pixY1(maxY)}
-                color={rgba(COLOR_GRAPH_TITLE)}
-                fontSize={fontSize}
-                fontFamily={fontFamily}
-            >
-                {'Now'}
-            </text>
-        </g>
-    );
+      <text
+        x={nowLineX}
+        y={pixY1(maxY)}
+        color={rgba(COLOR_GRAPH_TITLE)}
+        fontSize={fontSize}
+        fontFamily={fontFamily}
+      >
+        {'Now'}
+      </text>
+    </g>
+  );
 };
