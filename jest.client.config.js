@@ -9,4 +9,5 @@ module.exports = {
     '\\.(jpg|png)': '<rootDir>/web/src/mocks/file-loader.js',
   },
   setupFilesAfterEnv: ['<rootDir>/web/src/test-after-env.ts'],
+  coverageDirectory: 'coverage/web',
 };

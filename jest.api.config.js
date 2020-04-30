@@ -10,4 +10,5 @@ module.exports = {
   globalSetup: '<rootDir>/api/src/test-setup.ts',
   globalTeardown: '<rootDir>/api/src/test-teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/api/src/test-after-env.ts'],
+  coverageDirectory: 'coverage/api',
 };
