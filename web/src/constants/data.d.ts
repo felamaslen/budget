@@ -8,6 +8,7 @@ export const PAGES: {
   [page: string]: {
     suggestions?: string[];
     cols?: string[];
+    path?: string;
   };
 };
 
