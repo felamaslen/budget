@@ -163,7 +163,7 @@ const YAxis: React.FC<Props> = props => {
   const x0 = pixX(minX);
   const xMax = pixX(maxX);
 
-  const [alignPosPrimary, alignPosSecondary] = yAlign === 'left' ? [x0, xMax] : [xMax, x0];
+  const [alignPosPrimary, alignPosSecondary] = yAlign === 'right' ? [xMax, x0] : [x0, xMax];
 
   return (
     <>
@@ -172,7 +172,7 @@ const YAxis: React.FC<Props> = props => {
       <TicksYText
         ticksY={ticksY}
         labelY={labelY}
-        align={yAlign || 'left'}
+        align={yAlign ?? 'left'}
         alignPos={alignPosPrimary}
       />
       {dualAxis && (
