@@ -1,18 +1,23 @@
+import { Page, PageListCalc } from '~client/types/app';
+import { RequestType } from '~client/types/crud';
+
 export const CREATE_ID: string;
 
-export const CREATE: string;
-export const UPDATE: string;
-export const DELETE: string;
+export const CREATE: RequestType.create;
+export const UPDATE: RequestType.update;
+export const DELETE: RequestType.delete;
 
 export const PAGES: {
-  [page: string]: {
+  [page in Page]: {
     suggestions?: string[];
     cols?: string[];
     path?: string;
+    daily?: boolean;
   };
 };
 
-export const PAGES_SUGGESTIONS: string[];
+export const PAGES_LIST: PageListCalc[];
+export const PAGES_SUGGESTIONS: PageListCalc[];
 
 export enum DATA_KEY_ABBR {
   id = 'I',

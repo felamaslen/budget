@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 
+import { Page } from '~client/types/app';
 import { State } from '~client/reducers';
 import { Period } from '~client/constants/graph';
 import * as funds from './funds';
@@ -181,7 +182,7 @@ export const testState: State = {
     deepBlock: null,
     saved: 67123,
   },
-  funds: {
+  [Page.funds]: {
     items: funds.testRows,
     viewSoldFunds: false,
     period: Period.year1,
@@ -209,14 +210,19 @@ export const testState: State = {
     history: [],
     lastPriceUpdate: null,
   },
-  income: {
+  [Page.income]: {
     items: [],
+    total: 0,
+    olderExists: null,
   },
-  bills: {
+  [Page.bills]: {
     items: [],
+    total: 0,
+    olderExists: null,
   },
-  food: {
+  [Page.food]: {
     total: 8755601,
+    olderExists: true,
     items: [
       {
         id: 'id19',
@@ -252,14 +258,20 @@ export const testState: State = {
       },
     ],
   },
-  general: {
+  [Page.general]: {
     items: [],
+    total: 0,
+    olderExists: null,
   },
-  holiday: {
+  [Page.holiday]: {
     items: [],
+    total: 0,
+    olderExists: false,
   },
-  social: {
+  [Page.social]: {
     items: [],
+    total: 0,
+    olderExists: false,
   },
   suggestions: {
     loading: false,

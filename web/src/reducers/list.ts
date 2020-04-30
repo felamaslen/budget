@@ -7,6 +7,7 @@ import {
   PartialReducer,
 } from 'create-reducer-object';
 import { replaceAtIndex } from 'replace-array';
+import { DateTime } from 'luxon';
 
 import {
   LIST_ITEM_CREATED,
@@ -14,6 +15,7 @@ import {
   LIST_ITEM_DELETED,
 } from '~client/constants/actions/list';
 
+import { Page, PageListCalc } from '~client/types/app';
 import { RequestType, Create } from '~client/types/crud';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
@@ -28,7 +30,7 @@ import {
   State as CrudState,
 } from '~client/reducers/crud';
 
-type Item = { id: string; cost?: number };
+export type Item = { id: string; cost?: number };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CrudItems<I extends Item> = CrudState<I>;
 
@@ -132,6 +134,7 @@ export type Request = {
   fakeId?: string;
   id?: string;
   type: RequestType;
+  body: object;
 };
 
 type RequestItem = {
@@ -227,7 +230,7 @@ const onSyncReceived = <I extends Item, ES extends object = {}>(page: string) =>
 };
 
 export function makeListReducer<I extends Item, R extends {} = I, ES extends object = {}>(
-  page: string,
+  page: Page,
   extraHandlers: ReducerMap<ListState<I, ES>> = {},
   extraState: ES = {} as ES,
 ): Reducer<ListState<I, ES>> {
@@ -267,11 +270,17 @@ type DailyProps = {
   olderExists: boolean | null;
 };
 
-export type DailyState<I extends Item, ES extends object = {}> = ListState<I, ES> & DailyProps;
+export interface ListCalcItem extends Item {
+  date: DateTime;
+  cost: number;
+}
+
+export type DailyState<I extends ListCalcItem, ES extends object = {}> = ListState<I, ES> &
+  DailyProps;
 
 const withTotals = (
   getNewTotal: (previousTotal: number, previousItemCost: number, nextItemCost: number) => number,
-) => <I extends Item, ES extends object = {}>(
+) => <I extends ListCalcItem, ES extends object = {}>(
   page: string,
 ): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) =>
   filterByPage<I, ES, DailyState<I, ES>>(page, (state, action) => ({
@@ -285,7 +294,7 @@ const withTotals = (
 
 const onCreateDaily = withTotals((total, _, cost) => total + cost);
 
-const onReadDaily = <I extends Item, ES extends object = {}>(
+const onReadDaily = <I extends ListCalcItem, ES extends object = {}>(
   page: string,
 ): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => (
   state: DailyState<I, ES>,
@@ -306,7 +315,7 @@ const onUpdateDaily = withTotals(
 
 const onDeleteDaily = withTotals((total, previousCost) => total - previousCost);
 
-const onSyncReceivedDaily = <I extends Item, ES extends object = {}>(
+const onSyncReceivedDaily = <I extends ListCalcItem, ES extends object = {}>(
   page: string,
 ): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => (
   state: DailyState<I, ES>,
@@ -322,8 +331,12 @@ const onSyncReceivedDaily = <I extends Item, ES extends object = {}>(
   return { ...state, total };
 };
 
-export function makeDailyListReducer<I extends Item, R extends {} = Item, ES extends object = {}>(
-  page: string,
+export function makeDailyListReducer<
+  I extends ListCalcItem,
+  R extends {} = Item,
+  ES extends object = {}
+>(
+  page: PageListCalc,
   extraHandlers: ReducerMap<ListState<I, ES>> = {},
   extraState: ES = {} as ES,
 ): Reducer<DailyState<I, ES>> {

@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux';
 import { DateTime } from 'luxon';
 
+import { Page } from '~client/types/app';
+
 import now from '~client/reducers/now';
 import app from '~client/reducers/app';
 import api from '~client/reducers/api';
@@ -11,12 +13,12 @@ import netWorth, { State as NetWorthState } from '~client/reducers/net-worth';
 import analysis from '~client/reducers/analysis';
 import * as Stocks from '~client/reducers/stocks';
 import * as Funds from './funds';
-import income from '~client/reducers/income';
-import bills from '~client/reducers/bills';
-import food from '~client/reducers/food';
-import general from '~client/reducers/general';
-import holiday from '~client/reducers/holiday';
-import social from '~client/reducers/social';
+import income, { State as IncomeState } from './income';
+import bills, { State as BillsState } from './bills';
+import food, { State as FoodState } from './food';
+import general, { State as GeneralState } from './general';
+import holiday, { State as HolidayState } from './holiday';
+import social, { State as SocialState } from './social';
 import * as Suggestions from '~client/reducers/suggestions';
 
 export type State = {
@@ -30,14 +32,14 @@ export type State = {
   overview: object;
   netWorth: NetWorthState;
   stocks: Stocks.State;
-  funds: Funds.State;
+  [Page.funds]: Funds.State;
   analysis: object;
-  income: object;
-  bills: object;
-  food: object;
-  general: object;
-  holiday: object;
-  social: object;
+  [Page.income]: IncomeState;
+  [Page.bills]: BillsState;
+  [Page.food]: FoodState;
+  [Page.general]: GeneralState;
+  [Page.holiday]: HolidayState;
+  [Page.social]: SocialState;
   suggestions: Suggestions.State;
 };
 

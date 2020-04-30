@@ -2,10 +2,11 @@ import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 
 import Editable from '.';
+import { Page } from '~client/types/app';
 
 describe('<Editable />', () => {
   const props = {
-    page: 'some-page',
+    page: Page.food,
     onType: jest.fn(),
     onChange: jest.fn(),
   };

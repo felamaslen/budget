@@ -50,3 +50,6 @@ export const leftPad: (array: number[], length: number) => number[];
 export const sortByDate: <T extends { date: Date | DateTime }>(data: T[]) => T[];
 
 export const getValueFromTransmit: <I = never, O = I>(dataType: string, value: I) => O;
+export const getValueForTransmit: <I = never, O = I>(dataType: string, value: I) => O;
+
+export const withoutDeleted: <I = never>(items: I[]) => I[];

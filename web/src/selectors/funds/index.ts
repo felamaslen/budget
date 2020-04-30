@@ -2,6 +2,7 @@ import { createSelector } from 'reselect';
 import humanizeDuration from 'humanize-duration';
 import { DateTime } from 'luxon';
 
+import { Page } from '~client/types/app';
 import { LegacyRow } from '~client/types/funds';
 import { State } from '~client/reducers';
 import * as Funds from '~client/reducers/funds';
@@ -17,7 +18,7 @@ import {
   getDayGainAbs,
 } from '~client/selectors/funds/gains';
 
-export const getPeriod = (state: Pick<State, 'funds'>): Period => state.funds.period;
+export const getPeriod = (state: Pick<State, Page.funds>): Period => state.funds.period;
 
 export function getFundsCachedValueAgeText(
   startTime: number,
