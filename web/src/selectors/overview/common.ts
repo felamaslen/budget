@@ -21,10 +21,9 @@ export const getSpendingColumn = <K extends keyof CostProcessed = never>(dates: 
   ),
 });
 
-export const getStartDate = (state: Pick<State, Page.overview>): DateTime | null =>
+export const getStartDate = (state: Pick<State, Page.overview>): DateTime =>
   state.overview.startDate;
-export const getEndDate = (state: Pick<State, Page.overview>): DateTime | null =>
-  state.overview.endDate;
+export const getEndDate = (state: Pick<State, Page.overview>): DateTime => state.overview.endDate;
 
 export const getNumMonths = createSelector(
   getStartDate,

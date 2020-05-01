@@ -91,5 +91,5 @@ export type UnkeyedLine = Pick<Line, Exclude<keyof Line, 'key'>>;
 export type TimeScale = {
   pix: number;
   major: 0 | 1 | 2;
-  text: string;
+  text: string | null;
 }[];

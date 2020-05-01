@@ -20,8 +20,10 @@ import { LOGGED_OUT } from '~client/constants/actions/login';
 export { State } from '~client/types/overview';
 
 export const initialState: State = {
-  startDate: null,
-  endDate: null,
+  startDate: DateTime.local()
+    .startOf('year')
+    .endOf('month'),
+  endDate: DateTime.local().endOf('month'),
   cost: {
     [Page.funds]: [],
     [Page.income]: [],

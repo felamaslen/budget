@@ -19,8 +19,8 @@ export type CostProcessed = Cost & {
 };
 
 export type State = {
-  startDate: DateTime | null;
-  endDate: DateTime | null;
+  startDate: DateTime;
+  endDate: DateTime;
   cost: Cost;
 };
 
