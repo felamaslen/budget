@@ -1,5 +1,8 @@
 import { DateTime } from 'luxon';
 
+import { Request } from '~client/reducers/list';
+import { WithCrud, RawDate } from './crud';
+
 export type Category = {
   id: string;
   type: 'asset' | 'liability';
@@ -37,13 +40,14 @@ export type ValueObject = {
 };
 
 export type CreditLimit = {
+  id?: string; // only present on response, not used in web app
   subcategory: Subcategory['id'];
   value: number;
 };
 
 export type Entry = {
   id: string;
-  date: Date | DateTime;
+  date: DateTime;
   values: ValueObject[];
   creditLimit: CreditLimit[];
   currencies: Currency[];
@@ -59,3 +63,10 @@ export type Item = Pick<Entry, 'id' | 'date' | 'values' | 'creditLimit'> & {
   spend: number;
   fti: () => number;
 };
+
+export type NetWorthRequest<I extends WithCrud<{ id: string }> = never> = Request & {
+  res: I;
+};
+
+export type RequestItem = Category | Subcategory | RawDate<Entry>;
+export type NetWorthRequestGeneric = NetWorthRequest<RequestItem>;

@@ -13,7 +13,7 @@ describe('Overview reducer', () => {
     ['LOGGED_OUT', loggedOut()],
   ])('%s', (_, action) => {
     it('should return the initial state', () => {
-      expect(reducer(undefined, action)).toEqual(initialState);
+      expect(reducer(undefined, action)).toStrictEqual(initialState);
     });
   });
 
@@ -53,7 +53,7 @@ describe('Overview reducer', () => {
     it('should set the cost data', () => {
       const result = reducer(initialState, action);
 
-      expect(result.cost).toEqual({
+      expect(result.cost).toStrictEqual({
         [Page.funds]: [0, 0, 510000, 2160465],
         fundChanges: [1, 1, 0, 1],
         [Page.income]: [0, 30040, 229838, 196429],
@@ -69,9 +69,11 @@ describe('Overview reducer', () => {
 
   describe('LIST_ITEM_CREATED', () => {
     const state: State = {
+      ...initialState,
       startDate: DateTime.fromISO('2019-04-30T23:59:59.999Z'),
       endDate: DateTime.fromISO('2019-07-31T23:59:59.999Z'),
       cost: {
+        ...initialState.cost,
         [Page.funds]: [0, 0, 510000, 2160465],
         fundChanges: [1, 1, 0, 1],
         income: [0, 30040, 229838, 196429],
@@ -104,7 +106,7 @@ describe('Overview reducer', () => {
         }),
       );
 
-      expect(withMissingDate).toEqual(state);
+      expect(withMissingDate).toStrictEqual(state);
 
       const withMissingCost = reducer(
         state,
@@ -113,7 +115,7 @@ describe('Overview reducer', () => {
         }),
       );
 
-      expect(withMissingCost).toEqual(state);
+      expect(withMissingCost).toStrictEqual(state);
     });
   });
 

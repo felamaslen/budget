@@ -1,47 +1,24 @@
 import { combineReducers } from 'redux';
-import { DateTime } from 'luxon';
 
-import { Page } from '~client/types/app';
-
-import now from '~client/reducers/now';
-import app from '~client/reducers/app';
-import api from '~client/reducers/api';
-import login from '~client/reducers/login';
-import error from '~client/reducers/error';
-import overview, { State as OverviewState } from '~client/reducers/overview';
-import netWorth, { State as NetWorthState } from '~client/reducers/net-worth';
-import analysis from '~client/reducers/analysis';
-import * as Stocks from '~client/reducers/stocks';
+import now from './now';
+import app from './app';
+import api from './api';
+import login from './login';
+import error from './error';
+import overview from './overview';
+import netWorth from './net-worth';
+import analysis from './analysis';
+import * as Stocks from './stocks';
 import * as Funds from './funds';
-import income, { State as IncomeState } from './income';
-import bills, { State as BillsState } from './bills';
-import food, { State as FoodState } from './food';
-import general, { State as GeneralState } from './general';
-import holiday, { State as HolidayState } from './holiday';
-import social, { State as SocialState } from './social';
-import * as Suggestions from '~client/reducers/suggestions';
+import income from './income';
+import bills from './bills';
+import food from './food';
+import general from './general';
+import holiday from './holiday';
+import social from './social';
+import * as Suggestions from './suggestions';
 
-export type State = {
-  now: DateTime;
-  app: {
-    windowWidth: number;
-  };
-  login: object;
-  api: object;
-  error: object[];
-  overview: OverviewState;
-  netWorth: NetWorthState;
-  stocks: Stocks.State;
-  [Page.funds]: Funds.State;
-  analysis: object;
-  [Page.income]: IncomeState;
-  [Page.bills]: BillsState;
-  [Page.food]: FoodState;
-  [Page.general]: GeneralState;
-  [Page.holiday]: HolidayState;
-  [Page.social]: SocialState;
-  suggestions: Suggestions.State;
-};
+export { State } from './types';
 
 export default combineReducers({
   now,

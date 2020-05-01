@@ -18,7 +18,7 @@ import { Key } from '~client/components/graph-balance/key';
 import { Targets } from '~client/components/graph-balance/targets';
 import { AfterCanvas } from '~client/components/graph-balance/after-canvas';
 import { Point, Line, Data, BasicProps } from '~client/types/graph';
-import { Cost, Target } from '~client/types/overview';
+import { Target, CostProcessed } from '~client/types/overview';
 
 const colorBalance: [string, string] = [rgba(COLOR_BALANCE_PREDICTED), rgba(COLOR_BALANCE_ACTUAL)];
 const colorBalanceStocks = rgba(COLOR_BALANCE_STOCKS);
@@ -56,7 +56,7 @@ function getData(
 
 type RawData = {
   startDate: DateTime;
-  cost: Cost;
+  cost: CostProcessed;
   netWorthOld: number[];
   showAll: boolean;
   futureMonths: number;
@@ -133,7 +133,7 @@ function makeAfterLines({
 export type Props = {
   startDate: DateTime;
   futureMonths: number;
-  cost: Cost;
+  cost: CostProcessed;
   netWorthOld: number[];
   targets: Target[];
 } & Omit<GraphCashFlowProps, 'name' | 'lines'>;

@@ -1,5 +1,6 @@
 import { Page, PageListCalc } from '~client/types/app';
 import { RequestType } from '~client/types/crud';
+import { CostProcessed as OverviewTable } from '~client/types/overview';
 
 export const CREATE_ID: string;
 
@@ -30,3 +31,10 @@ export enum DATA_KEY_ABBR {
   society = 'y',
   transactions = 'tr',
 }
+
+// TODO: use a Dictionary for this
+export const OVERVIEW_COLUMNS: [
+  'month' | keyof OverviewTable,
+  string,
+  { to: string; replace?: boolean } | undefined,
+][];

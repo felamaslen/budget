@@ -4,7 +4,8 @@ import { DateTime } from 'luxon';
 import memoize from 'fast-memoize';
 import { replaceAtIndex } from 'replace-array';
 
-import { Page, PageListCalc } from '~client/types/app';
+import { PageListCalc, Page } from '~client/types/app';
+import { State } from '~client/types/overview';
 import {
   LIST_ITEM_CREATED,
   LIST_ITEM_UPDATED,
@@ -16,20 +17,22 @@ import { ListCalcItem } from './list';
 import { DATA_READ } from '~client/constants/actions/api';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 
-export type State = {
-  startDate: DateTime | null;
-  endDate: DateTime | null;
-  cost: Partial<
-    {
-      [page in (PageListCalc | Page.funds | 'fundChanges') | 'balance' | 'old']: number[];
-    }
-  >;
-};
+export { State } from '~client/types/overview';
 
-export const initialState = {
+export const initialState: State = {
   startDate: null,
   endDate: null,
-  cost: {},
+  cost: {
+    [Page.funds]: [],
+    [Page.income]: [],
+    [Page.bills]: [],
+    [Page.food]: [],
+    [Page.general]: [],
+    [Page.holiday]: [],
+    [Page.social]: [],
+    fundChanges: [],
+    old: [],
+  },
 };
 
 const onRead = (_: State, action: Action): State => ({
