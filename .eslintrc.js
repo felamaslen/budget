@@ -1,5 +1,5 @@
 module.exports = {
-  plugins: ['prettier', 'react', 'react-hooks', 'import'],
+  plugins: ['prettier', 'react', 'react-hooks', 'import', 'jest'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 8,
@@ -18,6 +18,7 @@ module.exports = {
     'prettier',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:jest/all',
     'plugin:react/recommended',
   ],
   settings: {
@@ -75,6 +76,9 @@ module.exports = {
     ],
     'import/prefer-default-export': 0,
     'jest/lowercase-name': 0,
+    'jest/no-hooks': 0,
+    'jest/prefer-expect-assertions': 'warn',
+    'jest/prefer-strict-equal': 'warn',
     'jest/require-top-level-describe': 0,
     'max-len': ['error', 120],
     'no-bitwise': 0,
