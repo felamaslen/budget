@@ -70,6 +70,7 @@ module.exports = {
           '**/*.spec.tsx',
           '**/*.spec.js',
           'api/src/test-after-env.ts',
+          'web/src/test-after-env.ts',
           'api/src/global.d.ts',
         ],
       },
