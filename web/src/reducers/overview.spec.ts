@@ -51,19 +51,22 @@ describe('Overview reducer', () => {
     });
 
     it('should set the cost data', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.cost).toStrictEqual({
-        [Page.funds]: [0, 0, 510000, 2160465],
-        fundChanges: [1, 1, 0, 1],
-        [Page.income]: [0, 30040, 229838, 196429],
-        [Page.bills]: [99778, 101073, 118057, 212450],
-        [Page.food]: [11907, 24108, 28123, 38352],
-        [Page.general]: [12192, 9515, 28335, 160600],
-        [Page.holiday]: [46352, 0, 47398, 55597],
-        [Page.social]: [13275, 12593, 12400, 8115],
-        old: [488973, 434353, 1234689],
-      });
+      expect(result.cost).toStrictEqual(
+        expect.objectContaining({
+          [Page.funds]: [0, 0, 510000, 2160465],
+          fundChanges: [1, 1, 0, 1],
+          [Page.income]: [0, 30040, 229838, 196429],
+          [Page.bills]: [99778, 101073, 118057, 212450],
+          [Page.food]: [11907, 24108, 28123, 38352],
+          [Page.general]: [12192, 9515, 28335, 160600],
+          [Page.holiday]: [46352, 0, 47398, 55597],
+          [Page.social]: [13275, 12593, 12400, 8115],
+          old: [488973, 434353, 1234689],
+        }),
+      );
     });
   });
 

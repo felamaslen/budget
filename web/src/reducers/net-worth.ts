@@ -12,7 +12,7 @@ import {
   RequestItem,
   NetWorthRequestGeneric,
 } from '~client/types/net-worth';
-import { WithCrud, RequestType, RawDate } from '~client/types/crud';
+import { WithCrud, RequestType, RawDate, Request } from '~client/types/crud';
 
 import {
   NET_WORTH_CATEGORY_CREATED,
@@ -35,7 +35,6 @@ import {
   onDeleteOptimistic,
   State as CrudState,
 } from '~client/reducers/crud';
-import { Request } from '~client/reducers/list';
 
 import { IDENTITY } from '~client/modules/data';
 

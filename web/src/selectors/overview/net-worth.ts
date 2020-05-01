@@ -6,7 +6,7 @@ import { getCost, getSpendingColumn, getMonthDates } from '~client/selectors/ove
 
 import { sortByKey, withoutDeleted } from '~client/modules/data';
 import { getRequests } from '~client/selectors/crud';
-import { Create, CreateEdit, RequestType, WithCrud } from '~client/types/crud';
+import { Create, CreateEdit, RequestType, WithCrud, Request } from '~client/types/crud';
 import {
   Category,
   Subcategory,
@@ -17,7 +17,7 @@ import {
   CreditLimit,
   isComplex,
   isFX,
-  NetWorthRequestGeneric,
+  RequestItem,
 } from '~client/types/net-worth';
 import { Cost } from '~client/types/overview';
 import { State } from '~client/reducers';
@@ -31,9 +31,10 @@ const nullEntry = (date: DateTime): Create<Entry> => ({
 
 const FTI_START = DateTime.fromISO(process.env.BIRTH_DATE || '1990-01-01');
 
-const getNonFilteredCategories = (state: State): Category[] => state.netWorth.categories;
-const getNonFilteredSubcategories = (state: State): Subcategory[] => state.netWorth.subcategories;
-const getNonFilteredEntries = (state: State): Entry[] => state.netWorth.entries;
+const getNonFilteredCategories = (state: State): WithCrud<Category>[] => state.netWorth.categories;
+const getNonFilteredSubcategories = (state: State): WithCrud<Subcategory>[] =>
+  state.netWorth.subcategories;
+const getNonFilteredEntries = (state: State): WithCrud<Entry>[] => state.netWorth.entries;
 
 export const getEntries = createSelector(getNonFilteredEntries, withoutDeleted);
 export const getCategories = createSelector(
@@ -244,19 +245,19 @@ export const getNetWorthTable = createSelector(
     )(entries),
 );
 
-const withCategoryRequests = (categories: Category[]) => (
-  requests: NetWorthRequestGeneric[],
-): NetWorthRequestGeneric[] =>
-  requests.concat(getRequests('data/net-worth/categories')(categories));
+const withCategoryRequests = (categories: WithCrud<Category>[]) => (
+  requests: Request[],
+): Request[] => requests.concat(getRequests('data/net-worth/categories')(categories));
 
 const subcategoryPending = (categories: WithCrud<Category>[]) => (categoryId: string): boolean =>
   categories.some(
     ({ id, __optimistic }) => id === categoryId && __optimistic === RequestType.create,
   );
 
-const withSubcategoryRequests = (categories: Category[], subcategories: Subcategory[]) => (
-  requests: NetWorthRequestGeneric[],
-): NetWorthRequestGeneric[] =>
+const withSubcategoryRequests = (
+  categories: WithCrud<Category>[],
+  subcategories: WithCrud<Subcategory>[],
+) => (requests: Request[]): Request[] =>
   requests.concat(
     getRequests('data/net-worth/subcategories')(
       subcategories.filter(
@@ -281,17 +282,17 @@ const withoutIds = <T extends { id?: string }>(items: T[]): Omit<T, 'id'>[] =>
 const withEntryRequests = (
   categories: Category[],
   subcategories: Subcategory[],
-  entries: Entry[],
-) => (requests: NetWorthRequestGeneric[]): NetWorthRequestGeneric[] =>
+  entries: WithCrud<Entry>[],
+) => (requests: Request[]): Request[] =>
   requests.concat(
-    getRequests('data/net-worth')(
+    getRequests<RequestItem>('data/net-worth')(
       entries
-        .filter(({ values, creditLimit }: Entry) =>
+        .filter(({ values, creditLimit }: WithCrud<Entry>) =>
           [values, creditLimit].every(
             group => !group.some(groupPending(categories, subcategories)),
           ),
         )
-        .map(({ date, values, creditLimit, currencies, ...rest }: Entry) => ({
+        .map(({ date, values, creditLimit, currencies, ...rest }: WithCrud<Entry>) => ({
           date: date.toISODate(),
           values: withoutIds(values),
           creditLimit: withoutIds(creditLimit),

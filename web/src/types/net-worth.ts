@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon';
 
-import { Request } from '~client/reducers/list';
-import { WithCrud, RawDate } from './crud';
+import { WithCrud, RawDate, Request } from './crud';
 
 export type Category = {
   id: string;
@@ -53,6 +52,14 @@ export type Entry = {
   currencies: Currency[];
 };
 
+type OptionalId<V extends { id?: string }> = Omit<V, 'id'> & { id?: string };
+
+type EntryWithOptionalIds = Omit<Entry, 'values' | 'creditLimit' | 'currencies'> & {
+  values: OptionalId<ValueObject>[];
+  creditLimit: OptionalId<CreditLimit>[];
+  currencies: OptionalId<Currency>[];
+};
+
 export type Currency = {
   id: string;
   currency: string;
@@ -68,5 +75,5 @@ export type NetWorthRequest<I extends WithCrud<{ id: string }> = never> = Reques
   res: I;
 };
 
-export type RequestItem = Category | Subcategory | RawDate<Entry>;
+export type RequestItem = Category | Subcategory | RawDate<EntryWithOptionalIds>;
 export type NetWorthRequestGeneric = NetWorthRequest<RequestItem>;

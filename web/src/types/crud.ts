@@ -8,6 +8,15 @@ export enum RequestType {
   delete = 'DELETE',
 }
 
+export type Request = {
+  route: string;
+  method: 'post' | 'put' | 'delete';
+  fakeId?: string;
+  id?: string;
+  type: RequestType;
+  body?: object;
+};
+
 export type WithCrud<V> = V & { __optimistic?: RequestType };
 
 export type RawDate<V> = Omit<V, 'date'> & { date: string };
