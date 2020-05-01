@@ -110,7 +110,7 @@ describe('List selectors', () => {
     it('should get all rows except optimistically deleted ones', () => {
       const result = getAllPageRows(stateWithUnorderedRows, { page: Page.general });
 
-      expect(result).toEqual([
+      expect(result).toStrictEqual([
         expect.objectContaining({
           id: 'id300',
         }),
@@ -132,7 +132,7 @@ describe('List selectors', () => {
       expect(PAGES[Page.general].daily).toBe(true);
       const result = getSortedPageRows(stateWithManyRows, { page: Page.general });
 
-      expect(result).toEqual([
+      expect(result).toStrictEqual([
         expect.objectContaining({
           id: 'id37',
           date: DateTime.fromISO('2019-08-21'),
@@ -235,7 +235,7 @@ describe('List selectors', () => {
     it('should add future and firstPresent props', () => {
       const result = getSortedPageRows(stateWithManyRows, { page: Page.general });
 
-      expect(result).toEqual([
+      expect(result).toStrictEqual([
         expect.objectContaining({
           future: true,
           firstPresent: false,
@@ -290,7 +290,7 @@ describe('List selectors', () => {
     it('should add daily totals', () => {
       const result = getSortedPageRows(stateWithManyRows, { page: Page.general });
 
-      expect(result).toEqual([
+      expect(result).toStrictEqual([
         expect.objectContaining({
           daily: 37,
         }),
@@ -410,10 +410,11 @@ describe('List selectors', () => {
 
     describe('for non-daily pages', () => {
       it('should get future / firstPresent information', () => {
-        expect(PAGES[Page.income].daily).toBeFalsy();
+        expect.assertions(2);
+        expect(PAGES[Page.income].daily).not.toBe(true);
         const result = getSortedPageRows(stateWithManyRows, { page: Page.income });
 
-        expect(result).toEqual([
+        expect(result).toStrictEqual([
           expect.objectContaining({
             future: true,
             firstPresent: false,
@@ -562,7 +563,7 @@ describe('List selectors', () => {
         [Page.social]: { ...state[Page.social], items: [] },
       };
 
-      expect(getCrudRequests(stateWithUpdates)).toEqual([
+      expect(getCrudRequests(stateWithUpdates)).toStrictEqual([
         {
           type: RequestType.update,
           id: 'some-fund-id',
