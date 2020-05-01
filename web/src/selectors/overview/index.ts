@@ -6,7 +6,7 @@ import { replaceAtIndex } from 'replace-array';
 import { Page } from '~client/types/app';
 import { Cost, CostProcessed, TableValues, Range, Median } from '~client/types/overview';
 import { LegacyRow as FundRow } from '~client/types/funds';
-import { AVERAGE_MEDIAN } from '~client/constants';
+import { Average } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
 import { Color } from '~client/constants/colors';
@@ -57,7 +57,7 @@ function predictByPastAverages(
     Math.round(cost[currentIndex] * currentMonthRatio),
   );
 
-  const average = Math.round(arrayAverage(currentItems, AVERAGE_MEDIAN));
+  const average = Math.round(arrayAverage(currentItems, Average.Median));
 
   return currentItems.concat(new Array(futureMonths).fill(average));
 }
@@ -275,8 +275,8 @@ export const getOverviewTable = createSelector(
       (last, key) => ({
         ...last,
         [key]: {
-          positive: arrayAverage((scoreValues[key] ?? []).filter(isPositive), AVERAGE_MEDIAN),
-          negative: arrayAverage((scoreValues[key] ?? []).filter(isNegative), AVERAGE_MEDIAN),
+          positive: arrayAverage((scoreValues[key] ?? []).filter(isPositive), Average.Median),
+          negative: arrayAverage((scoreValues[key] ?? []).filter(isNegative), Average.Median),
         },
       }),
       {} as TableValues,

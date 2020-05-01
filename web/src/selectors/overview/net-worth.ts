@@ -39,11 +39,15 @@ const getNonFilteredEntries = (state: State): WithCrud<Entry>[] => state.netWort
 export const getEntries = createSelector(getNonFilteredEntries, withoutDeleted);
 export const getCategories = createSelector(
   getNonFilteredCategories,
-  compose(withoutDeleted, sortByKey('type', 'category')),
+  compose(withoutDeleted, sortByKey<'type' | 'category', WithCrud<Category>>('type', 'category')),
 );
 export const getSubcategories = createSelector(
   getNonFilteredSubcategories,
-  compose(withoutDeleted, sortByKey('subcategory'), sortByKey('categoryId')),
+  compose(
+    withoutDeleted,
+    sortByKey<'subcategory', WithCrud<Subcategory>>('subcategory'),
+    sortByKey<'categoryId', WithCrud<Subcategory>>('categoryId'),
+  ),
 );
 
 const withoutSkipValues = (entries: Entry[]): Entry[] =>

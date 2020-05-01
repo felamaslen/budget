@@ -55,6 +55,11 @@ export enum Period {
   month3 = '3 months',
 }
 
+export type PeriodObject = {
+  period: string;
+  length: number;
+};
+
 export const GRAPH_FUNDS_PERIODS = Object.entries(Period);
 
 export const DEFAULT_FUND_PERIOD: Period = GRAPH_FUNDS_PERIODS.reduce(
