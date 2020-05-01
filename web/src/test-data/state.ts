@@ -205,7 +205,6 @@ export const testState: State = {
         gain: 0,
         up: false,
         down: false,
-        weight: 0,
       },
     ],
     shares: [],

@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon';
 
 import { LegacyTransaction as Transaction, TransactionRaw } from '~client/types/funds';
+import { Data as Line } from '~client/types/graph';
 import { Average } from '~client/constants';
 
 type LegacyTransactionRaw = Omit<TransactionRaw, 'date'> & {
@@ -53,3 +54,5 @@ export const getValueFromTransmit: <I = never, O = I>(dataType: string, value: I
 export const getValueForTransmit: <I = never, O = I>(dataType: string, value: I) => O;
 
 export const withoutDeleted: <I = never>(items: I[]) => I[];
+
+export const limitTimeSeriesLength: (timeSeries: Line, limit: number) => Line;
