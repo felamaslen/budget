@@ -1374,6 +1374,11 @@
     "@types/connect" "*"
     "@types/node" "*"
 
+"@types/color-hash@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/color-hash/-/color-hash-1.0.0.tgz#2671e71d46ce07248ca149ca058bdc01c2dbb975"
+  integrity sha512-Vj9gPc43pJeILnI0Yh0ds4+1toNUmvVqKxg/5sY8ESZafKo24TY5eCKXwXPym1xcgEMb2Qxy3dRwaYOro4U5Tg==
+
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
