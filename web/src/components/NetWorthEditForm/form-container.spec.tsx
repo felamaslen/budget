@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
+import { DateTime } from 'luxon';
 
 import FormContainer, { Props } from './form-container';
 import { Step } from './constants';
@@ -10,7 +11,7 @@ describe('(net worth edit form) <FormContainer />', () => {
     step: Step.Date,
     item: {
       id: 'some-fake-id',
-      date: new Date('2020-04-20'),
+      date: DateTime.fromJSDate(new Date('2020-04-20')),
       values: [],
       creditLimit: [],
       currencies: [],

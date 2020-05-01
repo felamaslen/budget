@@ -6,9 +6,7 @@ export const SYMBOL_CURRENCY_HTML = '\u00a3';
 export const SYMBOL_CURRENCY_RAW = '£';
 
 export enum Average {
+  Mean,
   Median,
   Exp,
 }
-
-export const AVERAGE_MEDIAN = Average.Median;
-export const AVERAGE_EXP = Average.Exp;

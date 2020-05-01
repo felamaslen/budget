@@ -67,11 +67,11 @@ describe('List reducer', () => {
     ['LOGGED_OUT', loggedOut()],
   ])('%s', (_, action) => {
     it('should return the initial state', () => {
-      expect(myListReducer(undefined, action)).toEqual(initialState);
+      expect(myListReducer(undefined, action)).toStrictEqual(initialState);
     });
 
     it('should return the initial (daily) state', () => {
-      expect(dailyReducer(undefined, action)).toEqual(initialStateDaily);
+      expect(dailyReducer(undefined, action)).toStrictEqual(initialStateDaily);
     });
   });
 
@@ -88,7 +88,7 @@ describe('List reducer', () => {
     it('should insert rows into the state', () => {
       const result = myListReducer(initialState, action);
 
-      expect(result.items).toEqual([
+      expect(result.items).toStrictEqual([
         { id: 'some-id', item: 'yes' },
         { id: 'other-id', item: 'no' },
       ]);
@@ -113,7 +113,7 @@ describe('List reducer', () => {
       it('should insert the all-time total value from the response', () => {
         const result = dailyReducer(initialStateDaily, actionRead);
 
-        expect(result).toEqual(
+        expect(result).toStrictEqual(
           expect.objectContaining({
             total: 335,
             olderExists: true,
@@ -143,7 +143,7 @@ describe('List reducer', () => {
     it('should optimistically create a list item', () => {
       const result = myListReducer(initialState, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           items: [
             {
@@ -168,7 +168,7 @@ describe('List reducer', () => {
 
       const result = myListReducer(initialState, actionNone);
 
-      expect(result.items).toEqual([]);
+      expect(result.items).toStrictEqual([]);
     });
 
     it("should omit properties which are not in the page's column definition", () => {
@@ -183,7 +183,7 @@ describe('List reducer', () => {
 
       const result = myListReducer(initialState, actionExtra);
 
-      expect(result.items).toEqual([
+      expect(result.items).toStrictEqual([
         {
           id: actionExtra.fakeId,
           date: DateTime.fromISO('2019-07-14'),
@@ -247,7 +247,7 @@ describe('List reducer', () => {
     it('should optimistically update a list item', () => {
       const result = myListReducer(state, action);
 
-      expect(result.items).toEqual([
+      expect(result.items).toStrictEqual([
         {
           id: 'some-real-id',
           date: testDate,
@@ -263,7 +263,7 @@ describe('List reducer', () => {
 
       const resultNull = myListReducer(state, actionNull);
 
-      expect(resultNull.items).toEqual([
+      expect(resultNull.items).toStrictEqual([
         expect.objectContaining({ id: 'some-real-id', item: 'some-item', cost: 23 }),
       ]);
 
@@ -274,7 +274,7 @@ describe('List reducer', () => {
 
       const resultSome = myListReducer(state, actionSome);
 
-      expect(resultSome.items).toEqual([
+      expect(resultSome.items).toStrictEqual([
         expect.objectContaining({
           id: 'some-real-id',
           item: 'next item',
@@ -300,7 +300,7 @@ describe('List reducer', () => {
 
       const result = myListReducer(stateCreate, actionAfterCreate);
 
-      expect(result.items).toEqual([
+      expect(result.items).toStrictEqual([
         expect.objectContaining({
           id: 'some-fake-id',
           item: 'updated item',
@@ -358,7 +358,7 @@ describe('List reducer', () => {
     it('should optimistically delete a list item', () => {
       const result = myListReducer(state, action);
 
-      expect(result.items).toEqual([
+      expect(result.items).toStrictEqual([
         expect.objectContaining({
           id: 'some-real-id',
           item: 'some item',
@@ -381,7 +381,7 @@ describe('List reducer', () => {
 
       const result = myListReducer(stateCreating, action);
 
-      expect(result.items).toEqual([]);
+      expect(result.items).toStrictEqual([]);
     });
 
     it('should update the optimistic state to delete, if it was in an optimistic update status', () => {
@@ -397,7 +397,7 @@ describe('List reducer', () => {
 
       const result = myListReducer(stateUpdating, action);
 
-      expect(result.items).toEqual([
+      expect(result.items).toStrictEqual([
         expect.objectContaining({
           id: 'some-real-id',
           item: 'some item',
@@ -517,7 +517,7 @@ describe('List reducer', () => {
         const result = myListReducer(state, syncReceivedAction);
 
         expect(result.items).toHaveLength(1);
-        expect(result.items[0]).toEqual(
+        expect(result.items[0]).toStrictEqual(
           expect.objectContaining({
             id: 'real-id-b',
             item: 'some item',
@@ -562,11 +562,13 @@ describe('List reducer', () => {
 
           const res = [{ total: 8743 }];
 
-          const action = syncReceived({ list: [{ ...req, res: res[0] }] });
+          it("shouldn't update the list total", () => {
+            expect.assertions(1);
 
-          const result = dailyReducer(stateDaily, action);
-
-          expect(result.total).toBe(100); // not 8743
+            const action = syncReceived({ list: [{ ...req, res: res[0] }] });
+            const result = dailyReducer(stateDaily, action);
+            expect(result.total).toBe(100); // not 8743
+          });
         });
       });
     });
@@ -589,7 +591,7 @@ describe('List reducer', () => {
         const result = myListReducer(state, syncReceivedAction);
 
         expect(result.items).toHaveLength(1);
-        expect(result.items[0]).toEqual(
+        expect(result.items[0]).toStrictEqual(
           expect.objectContaining({
             id: 'real-id-z',
             item: 'updated item',

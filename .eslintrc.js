@@ -1,5 +1,5 @@
 module.exports = {
-  plugins: ['prettier', 'react', 'react-hooks', 'import'],
+  plugins: ['prettier', 'react', 'react-hooks', 'import', 'jest'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 8,
@@ -18,6 +18,7 @@ module.exports = {
     'prettier',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:jest/all',
     'plugin:react/recommended',
   ],
   settings: {
@@ -69,12 +70,17 @@ module.exports = {
           '**/*.spec.tsx',
           '**/*.spec.js',
           'api/src/test-after-env.ts',
+          'web/src/test-after-env.ts',
           'api/src/global.d.ts',
+          'webpack.config.js',
         ],
       },
     ],
     'import/prefer-default-export': 0,
     'jest/lowercase-name': 0,
+    'jest/no-hooks': 0,
+    'jest/prefer-expect-assertions': 'warn',
+    'jest/prefer-strict-equal': 'warn',
     'jest/require-top-level-describe': 0,
     'max-len': ['error', 120],
     'no-bitwise': 0,

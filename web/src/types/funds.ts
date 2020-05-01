@@ -55,7 +55,13 @@ export type Stock = {
   down: boolean;
 };
 
-export type Index = Omit<Stock, 'price'> & Partial<Pick<Stock, 'price'>>;
+export type Index = Omit<Stock, 'price' | 'weight'> & Partial<Pick<Stock, 'price'>>;
+
+export type StockPrice = {
+  code: string;
+  open: number;
+  close: number;
+};
 
 export type ItemRaw = {
   [DATA_KEY_ABBR.id]: string;

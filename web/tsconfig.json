@@ -1,32 +1,27 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
+    "outDir": "./build",
+    "target": "es5",
+    "module": "es6",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "jsx": "react",
     "allowJs": true,
-    "noEmit": true,
+    "noEmit": false,
     "strict": true,
     "isolatedModules": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
+    "sourceMap": true,
     "lib": ["es2015", "dom"],
     "baseUrl": ".",
     "paths": {
-      "~api/*": ["./api/src/*"],
-      "~client/*": ["./web/src/*"]
+      "~client/*": ["./src/*"]
     }
   },
   "include": [
-    "web/src/**/*",
-    "api/src/**/*",
-    "seeds/*",
-    "migrations/*"
-  ],
-  "exclude": [
-    "node_modules"
+    "src/**/*"
   ]
 }

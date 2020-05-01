@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import Media from 'react-media';
+import { DateTime } from 'luxon';
 
 import { State } from '~client/reducers';
 
@@ -51,7 +52,7 @@ const GraphOverview: React.FC<Props> = props => (
 
 const mapStateToProps = (state: State): Props => ({
   now: getCurrentDate(state),
-  startDate: getStartDate(state),
+  startDate: getStartDate(state) || DateTime.local(),
   graphWidth: Math.min(state.app.windowWidth, GRAPH_WIDTH),
   cost: getProcessedCost(state),
   netWorthOld: getNetWorthSummaryOld(state),

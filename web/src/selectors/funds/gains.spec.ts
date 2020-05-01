@@ -87,7 +87,7 @@ describe('Funds selectors / gains', () => {
         },
       };
 
-      expect(result).toEqual(expectedResult);
+      expect(result).toStrictEqual(expectedResult);
     });
 
     describe('for funds with no transaction data', () => {
@@ -102,7 +102,7 @@ describe('Funds selectors / gains', () => {
       it('should set the value to 0 for funds with no data', () => {
         const result = getRowGains(rows, testCache);
 
-        expect(result).toEqual({
+        expect(result).toStrictEqual({
           'non-existent-id': {
             value: 0,
             gain: 0,
@@ -126,7 +126,7 @@ describe('Funds selectors / gains', () => {
           testCache,
         );
 
-        expect(result).toEqual({
+        expect(result).toStrictEqual({
           'non-existent-id': {
             value: 1302,
             gainAbs: 1302 - 1199,
@@ -136,6 +136,7 @@ describe('Funds selectors / gains', () => {
       });
 
       it('should set a colour', () => {
+        expect.assertions(5);
         const rowGains = {
           10: {
             value: 399098.2,
@@ -163,15 +164,24 @@ describe('Funds selectors / gains', () => {
           },
         };
 
-        expect(getGainsForRow(rowGains, '10')).toEqual({
+        expect(getGainsForRow(rowGains, '10')).toStrictEqual({
           ...rowGains['10'],
           color: [255, 250, 250],
         });
-        expect(getGainsForRow(rowGains, '3')).toEqual({ ...rowGains['3'], color: [163, 246, 170] });
-        expect(getGainsForRow(rowGains, '1')).toEqual({ ...rowGains['1'], color: [255, 44, 44] });
-        expect(getGainsForRow(rowGains, '5')).toEqual({ ...rowGains['5'], color: [0, 230, 18] });
+        expect(getGainsForRow(rowGains, '3')).toStrictEqual({
+          ...rowGains['3'],
+          color: [163, 246, 170],
+        });
+        expect(getGainsForRow(rowGains, '1')).toStrictEqual({
+          ...rowGains['1'],
+          color: [255, 44, 44],
+        });
+        expect(getGainsForRow(rowGains, '5')).toStrictEqual({
+          ...rowGains['5'],
+          color: [0, 230, 18],
+        });
 
-        expect(getGainsForRow(rowGains, 'non-existent-id')).toBeFalsy();
+        expect(getGainsForRow(rowGains, 'non-existent-id')).toBeNull();
       });
 
       it('should return null if there are no gain data for the fund', () => {

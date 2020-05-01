@@ -4,8 +4,8 @@ import { DateTime } from 'luxon';
 
 import { Page, PageListCalc } from '~client/types/app';
 import { State } from '~client/reducers';
-import { Item, Request, ListCalcItem } from '~client/reducers/list';
-import { RequestType, WithCrud } from '~client/types/crud';
+import { Item, ListCalcItem } from '~client/reducers/list';
+import { RequestType, WithCrud, Request } from '~client/types/crud';
 import { PAGES, PAGES_LIST } from '~client/constants/data';
 import { getCurrentDate } from '~client/selectors/now';
 import { getFundsCost } from '~client/selectors/funds';
@@ -204,7 +204,7 @@ export const getTotalCost = createSelector(
 );
 
 const withTransmitValues = (requests: Request[]): Request[] =>
-  requests.map(({ body, ...rest }) => ({
+  requests.map(({ body = {}, ...rest }) => ({
     ...rest,
     body: Object.keys(body).reduce(
       (last, column) => ({

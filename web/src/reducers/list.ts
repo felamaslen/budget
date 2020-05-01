@@ -16,7 +16,7 @@ import {
 } from '~client/constants/actions/list';
 
 import { Page, PageListCalc } from '~client/types/app';
-import { RequestType, Create } from '~client/types/crud';
+import { RequestType, Create, Request } from '~client/types/crud';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
 
@@ -127,14 +127,6 @@ const onDelete = <I extends Item, ES extends object>(
 type Res = {
   id: string;
   total?: number;
-};
-
-export type Request = {
-  route: string;
-  fakeId?: string;
-  id?: string;
-  type: RequestType;
-  body: object;
 };
 
 type RequestItem = {

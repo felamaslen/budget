@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon';
 
+import { WithCrud, RawDate, Request } from './crud';
+
 export type Category = {
   id: string;
   type: 'asset' | 'liability';
@@ -37,16 +39,25 @@ export type ValueObject = {
 };
 
 export type CreditLimit = {
+  id?: string; // only present on response, not used in web app
   subcategory: Subcategory['id'];
   value: number;
 };
 
 export type Entry = {
   id: string;
-  date: Date | DateTime;
+  date: DateTime;
   values: ValueObject[];
   creditLimit: CreditLimit[];
   currencies: Currency[];
+};
+
+type OptionalId<V extends { id?: string }> = Omit<V, 'id'> & { id?: string };
+
+type EntryWithOptionalIds = Omit<Entry, 'values' | 'creditLimit' | 'currencies'> & {
+  values: OptionalId<ValueObject>[];
+  creditLimit: OptionalId<CreditLimit>[];
+  currencies: OptionalId<Currency>[];
 };
 
 export type Currency = {
@@ -59,3 +70,10 @@ export type Item = Pick<Entry, 'id' | 'date' | 'values' | 'creditLimit'> & {
   spend: number;
   fti: () => number;
 };
+
+export type NetWorthRequest<I extends WithCrud<{ id: string }> = never> = Request & {
+  res: I;
+};
+
+export type RequestItem = Category | Subcategory | RawDate<EntryWithOptionalIds>;
+export type NetWorthRequestGeneric = NetWorthRequest<RequestItem>;

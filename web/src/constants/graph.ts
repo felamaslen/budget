@@ -1,4 +1,5 @@
 import { Padding } from '~client/types/graph';
+import { Page, PageListCalc } from '~client/types/app';
 
 const defaultFont = 'Arial, Helvetica, sans-serif';
 
@@ -17,14 +18,14 @@ export const GRAPH_ZOOM_SPEED = 0.15;
 export const GRAPH_CASHFLOW_NUM_TICKS = 5;
 export const GRAPH_CASHFLOW_PADDING: Padding = [40, 0, 0, 0];
 
-type SpendCategory = { name: string; key: number };
+type SpendCategory = { name: PageListCalc; key: number };
 
 export const GRAPH_SPEND_CATEGORIES: SpendCategory[] = [
-  { name: 'bills', key: 15 },
-  { name: 'food', key: 67 },
-  { name: 'general', key: 125 },
-  { name: 'holiday', key: 195 },
-  { name: 'social', key: 260 },
+  { name: Page.bills, key: 15 },
+  { name: Page.food, key: 67 },
+  { name: Page.general, key: 125 },
+  { name: Page.holiday, key: 195 },
+  { name: Page.social, key: 260 },
 ];
 
 export const GRAPH_FUNDS_OVERALL_ID = 'overall';
@@ -53,6 +54,11 @@ export enum Period {
   month1 = '1 month',
   month3 = '3 months',
 }
+
+export type PeriodObject = {
+  period: string;
+  length: number;
+};
 
 export const GRAPH_FUNDS_PERIODS = Object.entries(Period);
 

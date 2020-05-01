@@ -9,8 +9,10 @@ import {
   CreditLimit,
   ValueObject,
   Currency,
+  RequestItem,
+  NetWorthRequestGeneric,
 } from '~client/types/net-worth';
-import { WithCrud, RequestType, RawDate } from '~client/types/crud';
+import { WithCrud, RequestType, RawDate, Request } from '~client/types/crud';
 
 import {
   NET_WORTH_CATEGORY_CREATED,
@@ -33,7 +35,6 @@ import {
   onDeleteOptimistic,
   State as CrudState,
 } from '~client/reducers/crud';
-import { Request } from '~client/reducers/list';
 
 import { IDENTITY } from '~client/modules/data';
 
@@ -152,15 +153,7 @@ const onRead = (
   old: entries.data.old || [],
 });
 
-type NetWorthRequest<I extends WithCrud<{ id: string }> = never> = Request & {
-  res: I;
-};
-
-type PossibleItem = WithCrud<Category | Subcategory | Entry>;
-type RequestItem = Category | Subcategory | RawDate<Entry>;
 type Response = { id: string };
-
-type NetWorthRequestGeneric = NetWorthRequest<RequestItem>;
 
 const withoutUnnecessaryChange = <T>(items: T[], updatedItems: T[]): T[] =>
   updatedItems.length === items.length && updatedItems.every((item, index) => item === items[index])
@@ -203,7 +196,8 @@ const withChanges = (
     items,
     items.map(item => {
       const changed = requests.find(
-        ({ type, [reqIdKey]: reqId }: Request) => type === requestType && reqId === getId(item),
+        ({ type, [reqIdKey]: reqId }: Request): boolean =>
+          type === requestType && reqId === getId(item),
       );
       if (changed) {
         return getItem(item, mapResponse(changed.res));
