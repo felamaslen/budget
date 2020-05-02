@@ -3,6 +3,14 @@ import { KeyboardEvent } from 'react';
 export enum ActionType {
   ValueSet = 'VALUE_SET',
   Cancelled = 'CANCELLED',
+  ItemsSet = 'ITEMS_SET',
+  ColumnsSet = 'COLUMNS_SET',
+  NavToggled = 'NAV_TOGGLED',
+  NavNext = 'NAV_NEXT',
+  NavPrev = 'NAV_PREV',
+  NavXY = 'NAV_XY',
+  ActiveSet = 'ACTIVE_SET',
+  CommandSet = 'COMMAND_SET',
 }
 
 export const CANCELLED = ActionType.Cancelled;
