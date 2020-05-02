@@ -10,10 +10,13 @@ export enum Page {
   social = 'social',
 }
 
-export type PageListCalc =
+export type PageList =
+  | Page.funds
   | Page.income
   | Page.bills
   | Page.food
   | Page.general
   | Page.holiday
   | Page.social;
+
+export type PageListCalc = Exclude<PageList, Page.funds>;

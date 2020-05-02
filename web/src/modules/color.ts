@@ -29,13 +29,15 @@ function getOverviewCategoryKeyColor(key: string): Color | [Color, Color] {
 }
 
 export const getOverviewCategoryColor = (): Partial<TableValues<Color>> =>
-  OVERVIEW_COLUMNS.slice(1).reduce(
-    (last, [key]) => ({
-      ...last,
-      [key]: getOverviewCategoryKeyColor(key),
-    }),
-    {},
-  );
+  Object.entries(OVERVIEW_COLUMNS)
+    .filter(([key]) => key !== 'month')
+    .reduce(
+      (last, [key]) => ({
+        ...last,
+        [key]: getOverviewCategoryKeyColor(key),
+      }),
+      {},
+    );
 
 const blank: Color = [255, 255, 255]; // white
 

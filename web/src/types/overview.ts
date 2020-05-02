@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon';
 
-import { Page, PageListCalc } from './app';
+import { PageList } from './app';
 
 export type Cost = {
-  [page in PageListCalc | Page.funds]: number[];
+  [page in PageList]: number[];
 } & {
   fundChanges: number[];
   old: number[];

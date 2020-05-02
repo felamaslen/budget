@@ -7,7 +7,7 @@ import { dataRead, syncReceived } from '~client/actions/api';
 import { loggedOut } from '~client/actions/login';
 import { RequestType } from '~client/types/crud';
 import { Page } from '~client/types/app';
-import { DATA_KEY_ABBR } from '~client/constants/data';
+import { DataKeyAbbr } from '~client/constants/data';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -79,8 +79,8 @@ describe('List reducer', () => {
     const action = dataRead({
       [page]: {
         data: [
-          { [DATA_KEY_ABBR.id]: 'some-id', [DATA_KEY_ABBR.item]: 'yes' },
-          { [DATA_KEY_ABBR.id]: 'other-id', [DATA_KEY_ABBR.item]: 'no' },
+          { [DataKeyAbbr.id]: 'some-id', [DataKeyAbbr.item]: 'yes' },
+          { [DataKeyAbbr.id]: 'other-id', [DataKeyAbbr.item]: 'no' },
         ],
       },
     });
@@ -101,10 +101,10 @@ describe('List reducer', () => {
           olderExists: true,
           data: [
             {
-              [DATA_KEY_ABBR.id]: 'some-id',
-              [DATA_KEY_ABBR.date]: '2019-05-03',
-              [DATA_KEY_ABBR.item]: 'some-item',
-              [DATA_KEY_ABBR.cost]: 102,
+              [DataKeyAbbr.id]: 'some-id',
+              [DataKeyAbbr.date]: '2019-05-03',
+              [DataKeyAbbr.item]: 'some-item',
+              [DataKeyAbbr.cost]: 102,
             },
           ],
         },

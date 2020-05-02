@@ -2,7 +2,7 @@ import reducer, { initialState } from '~client/reducers/funds';
 import { dataRead } from '~client/actions/api';
 import { fundsViewSoldToggled, fundsReceived } from '~client/actions/funds';
 import { getTransactionsList } from '~client/modules/data';
-import { DATA_KEY_ABBR } from '~client/constants/data';
+import { DataKeyAbbr } from '~client/constants/data';
 import { Period } from '~client/constants/graph';
 
 jest.mock('shortid', () => ({
@@ -43,16 +43,16 @@ describe('Funds reducer', () => {
         cacheTimes: [1, 2, 100, 183],
         data: [
           {
-            [DATA_KEY_ABBR.id]: 'id-1',
-            [DATA_KEY_ABBR.item]: 'My fund 1',
-            [DATA_KEY_ABBR.transactions]: [{ date: '2019-06-30', units: 100, cost: 9923 }],
+            [DataKeyAbbr.id]: 'id-1',
+            [DataKeyAbbr.item]: 'My fund 1',
+            [DataKeyAbbr.transactions]: [{ date: '2019-06-30', units: 100, cost: 9923 }],
             pr: [45, 45.6, 44.9],
             prStartIndex: 1,
           },
           {
-            [DATA_KEY_ABBR.id]: 'id-2',
-            [DATA_KEY_ABBR.item]: 'My fund 2',
-            [DATA_KEY_ABBR.transactions]: [],
+            [DataKeyAbbr.id]: 'id-2',
+            [DataKeyAbbr.item]: 'My fund 2',
+            [DataKeyAbbr.transactions]: [],
             pr: [101.2, 100.94, 101.4, 102.03],
             prStartIndex: 0,
           },
@@ -65,7 +65,7 @@ describe('Funds reducer', () => {
     it('should set funds-related properties', () => {
       const result = reducer(initialState, action);
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         ...initialState,
         items: [
           {
@@ -96,16 +96,16 @@ describe('Funds reducer', () => {
         cacheTimes: [2, 100, 183],
         data: [
           {
-            [DATA_KEY_ABBR.id]: 'id-1',
-            [DATA_KEY_ABBR.item]: 'My fund 1',
-            [DATA_KEY_ABBR.transactions]: [{ date: '2019-06-30', units: 100, cost: 9923 }],
+            [DataKeyAbbr.id]: 'id-1',
+            [DataKeyAbbr.item]: 'My fund 1',
+            [DataKeyAbbr.transactions]: [{ date: '2019-06-30', units: 100, cost: 9923 }],
             pr: [45.6, 44.9],
             prStartIndex: 1,
           },
           {
-            [DATA_KEY_ABBR.id]: 'id-2',
-            [DATA_KEY_ABBR.item]: 'My fund 2',
-            [DATA_KEY_ABBR.transactions]: [],
+            [DataKeyAbbr.id]: 'id-2',
+            [DataKeyAbbr.item]: 'My fund 2',
+            [DataKeyAbbr.transactions]: [],
             pr: [100.94, 101.4, 102.03],
             prStartIndex: 0,
           },
@@ -128,7 +128,7 @@ describe('Funds reducer', () => {
 
     it('should cache the new values', () => {
       const result = reducer(initialState, action);
-      expect(result.cache[Period.month3]).toEqual({
+      expect(result.cache[Period.month3]).toStrictEqual({
         startTime: 1430,
         cacheTimes: [2, 100, 183],
         prices: {
