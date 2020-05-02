@@ -6,7 +6,7 @@ import { Page, PageListCalc } from '~client/types/app';
 import { State } from '~client/reducers';
 import { Item, ListCalcItem } from '~client/reducers/list';
 import { RequestType, WithCrud, Request } from '~client/types/crud';
-import { PAGES, PAGES_LIST } from '~client/constants/data';
+import { PAGES, PAGES_LIST_CALC } from '~client/constants/data';
 import { getCurrentDate } from '~client/selectors/now';
 import { getFundsCost } from '~client/selectors/funds';
 import { withoutDeleted, getValueForTransmit } from '~client/modules/data';
@@ -160,7 +160,7 @@ type NonFilteredItem = {
 };
 
 const getAllNonFilteredItems = (state: State): NonFilteredItem[] =>
-  PAGES_LIST.map(page => ({
+  PAGES_LIST_CALC.map(page => ({
     page,
     items: getNonFilteredItems(state, { page }),
   }));

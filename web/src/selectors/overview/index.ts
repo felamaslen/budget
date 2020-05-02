@@ -7,7 +7,7 @@ import { Page } from '~client/types/app';
 import { Cost, CostProcessed, TableValues, Range, Median } from '~client/types/overview';
 import { LegacyRow as FundRow } from '~client/types/funds';
 import { Average } from '~client/constants';
-import { OVERVIEW_COLUMNS } from '~client/constants/data';
+import { OVERVIEW_COLUMNS, OverviewColumn, OverviewHeader } from '~client/constants/data';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
 import { Color } from '~client/constants/colors';
 import { IDENTITY, arrayAverage, randnBm } from '~client/modules/data';
@@ -246,12 +246,11 @@ export const getOverviewTable = createSelector(
 
     const months = dates.map(date => date.toFormat('LLL-yy'));
 
-    const values: TableValues<number[]> = OVERVIEW_COLUMNS.slice(1).reduce(
-      (last, [key]) => ({ [key]: cost[key as keyof TableValues], ...last }),
-      {
+    const values: TableValues<number[]> = Object.entries(OVERVIEW_COLUMNS)
+      .filter(([header]) => header !== 'month')
+      .reduce((last, [key]) => ({ [key]: cost[key as keyof TableValues], ...last }), {
         netWorth,
-      },
-    );
+      });
 
     const scoreValues: TableValues<number[]> = {
       ...values,
@@ -293,8 +292,8 @@ export const getOverviewTable = createSelector(
       );
 
     const getCells = (monthText: string, index: number): Cell[] =>
-      OVERVIEW_COLUMNS.map(
-        ([key, display]): Cell => {
+      (Object.entries(OVERVIEW_COLUMNS) as [OverviewHeader, OverviewColumn][]).map(
+        ([key, { name: display }]): Cell => {
           const column: Cell['column'] = [key, display];
 
           if (key === 'month') {

@@ -20,7 +20,7 @@ import { RequestType, Create, Request } from '~client/types/crud';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
 
-import { PAGES, DATA_KEY_ABBR } from '~client/constants/data';
+import { PAGES, DataKeyAbbr } from '~client/constants/data';
 import { getValueFromTransmit, fieldExists } from '~client/modules/data';
 
 import {
@@ -87,7 +87,7 @@ export const onRead = <I extends Item, R extends {}, ES extends object = {}>(pag
     return { ...state, items: [] };
   }
 
-  const dataKeys = Object.entries(DATA_KEY_ABBR).filter(([, shortKey]) =>
+  const dataKeys = Object.entries(DataKeyAbbr).filter(([, shortKey]) =>
     Reflect.has(action.res[page].data[0], shortKey),
   );
 
