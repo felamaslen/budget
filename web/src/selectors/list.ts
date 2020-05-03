@@ -2,16 +2,16 @@ import { createSelector } from 'reselect';
 import { compose } from '@typed/compose';
 import { DateTime } from 'luxon';
 
-import { Page, PageListCalc } from '~client/types/app';
+import { Page, PageList, PageListCalc } from '~client/types/app';
 import { State } from '~client/reducers';
 import { Item, ListCalcItem } from '~client/reducers/list';
 import { RequestType, WithCrud, Request } from '~client/types/crud';
-import { PAGES, PAGES_LIST_CALC } from '~client/constants/data';
+import { PAGES, PAGES_LIST } from '~client/constants/data';
 import { getCurrentDate } from '~client/selectors/now';
 import { getFundsCost } from '~client/selectors/funds';
 import { withoutDeleted, getValueForTransmit } from '~client/modules/data';
 
-type Params = { page: PageListCalc };
+type Params<P extends Page = PageListCalc> = { page: P };
 
 type SortedItem = ListCalcItem &
   Partial<{
@@ -21,13 +21,15 @@ type SortedItem = ListCalcItem &
     future: boolean;
   }>;
 
-const getPageProp = (_: State, { page }: Params): PageListCalc => page;
-const getAnyPageProp = (_: State, { page }: { page: Page }): Page => page;
+const getPageProp = (_: State, { page }: Params<Page>): Page => page;
+const getCalcPageProp = (_: State, { page }: Params<PageListCalc>): PageListCalc => page;
 
-const getNonFilteredItems = (state: State, { page }: Params): ListCalcItem[] => state[page].items;
+const getNonFilteredItems = (state: State, { page }: Params<PageList>): Item[] => state[page].items;
+const getCalcNonFilteredItems = (state: State, { page }: Params): ListCalcItem[] =>
+  state[page].items;
 
 export const getAllPageRows = createSelector<State, Params, ListCalcItem[], ListCalcItem[]>(
-  getNonFilteredItems,
+  getCalcNonFilteredItems,
   withoutDeleted,
 );
 
@@ -146,7 +148,7 @@ export const getSortedPageRows = createSelector<
   ListCalcItem[],
   SortedItem[]
 >(
-  getPageProp,
+  getCalcPageProp,
   getCurrentDate,
   getAllPageRows,
   (page: PageListCalc, now: DateTime, items: ListCalcItem[]): SortedItem[] => {
@@ -155,45 +157,48 @@ export const getSortedPageRows = createSelector<
 );
 
 type NonFilteredItem = {
-  page: PageListCalc;
-  items: ListCalcItem[];
+  page: PageList;
+  items: Item[];
 };
 
 const getAllNonFilteredItems = (state: State): NonFilteredItem[] =>
-  PAGES_LIST_CALC.map(page => ({
+  PAGES_LIST.map(page => ({
     page,
     items: getNonFilteredItems(state, { page }),
   }));
 
-export const getWeeklyAverages = createSelector([getPageProp, getSortedPageRows], (page, rows) => {
-  if (!(rows && PAGES[page].daily)) {
-    return null;
-  }
+export const getWeeklyAverages = createSelector(
+  [getCalcPageProp, getSortedPageRows],
+  (page, rows) => {
+    if (!(rows && PAGES[page].daily)) {
+      return null;
+    }
 
-  // note that this is calculated only based on the visible data,
-  // not past data
+    // note that this is calculated only based on the visible data,
+    // not past data
 
-  const visibleTotal = rows.reduce((sum, { cost }) => sum + cost, 0);
-  if (!rows.length) {
-    return 0;
-  }
+    const visibleTotal = rows.reduce((sum, { cost }) => sum + cost, 0);
+    if (!rows.length) {
+      return 0;
+    }
 
-  const firstDate = rows[0].date;
-  const lastDate = rows[rows.length - 1].date;
+    const firstDate = rows[0].date;
+    const lastDate = rows[rows.length - 1].date;
 
-  const numWeeks = firstDate.diff(lastDate).as('days') / 7;
-  if (!numWeeks) {
-    return 0;
-  }
+    const numWeeks = firstDate.diff(lastDate).as('days') / 7;
+    if (!numWeeks) {
+      return 0;
+    }
 
-  return Math.round(visibleTotal / numWeeks);
-});
+    return Math.round(visibleTotal / numWeeks);
+  },
+);
 
 const getAllTimeTotal = (state: State, { page }: { page: Page }): number =>
   Reflect.get(state[page], 'total') ?? 0;
 
 export const getTotalCost = createSelector(
-  [getAnyPageProp, getAllTimeTotal, getFundsCost],
+  [getPageProp, getAllTimeTotal, getFundsCost],
   (page, total, fundsTotal) => {
     if (page === Page.funds) {
       return fundsTotal;
