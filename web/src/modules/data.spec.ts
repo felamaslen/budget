@@ -13,10 +13,13 @@ import {
   getTotalCost,
   isSold,
   arrayAverage,
+  sortByTotal,
   limitTimeSeriesLength,
   randnBm,
   getValueFromTransmit,
   getValueForTransmit,
+  sortByDate,
+  sortByKey,
   withoutDeleted,
 } from './data';
 import { mockRandom } from '~client/mocks/random';
@@ -27,10 +30,10 @@ import { Data } from '~client/types/graph';
 describe('data module', () => {
   describe('getPeriodMatch', () => {
     const envBefore = process.env.DEFAULT_FUND_PERIOD ?? '';
-    beforeAll(() => {
+    beforeEach(() => {
       process.env.DEFAULT_FUND_PERIOD = 'year11';
     });
-    afterAll(() => {
+    afterEach(() => {
       process.env.DEFAULT_FUND_PERIOD = envBefore;
     });
 
@@ -43,6 +46,12 @@ describe('data module', () => {
       expect.assertions(2);
       expect(getPeriodMatch('month5')).toStrictEqual({ period: 'month', length: 5 });
       expect(getPeriodMatch('year10')).toStrictEqual({ period: 'year', length: 10 });
+    });
+
+    it('should handle the case when the env variable is not a match', () => {
+      expect.assertions(1);
+      process.env.DEFAULT_FUND_PERIOD = 'gobbledegook';
+      expect(getPeriodMatch('foo')).toStrictEqual({ period: 'year', length: 1 });
     });
   });
 
@@ -176,6 +185,15 @@ describe('data module', () => {
         },
       ]);
     });
+
+    it('should not mutate the original value', () => {
+      expect.assertions(1);
+      const transactionsList = getTransactionsList(transactionsData);
+      const copy = transactionsList.slice();
+      formatTransactionsList(transactionsList);
+
+      expect(transactionsList).toStrictEqual(copy);
+    });
   });
 
   describe('addToTransactionsList', () => {
@@ -289,12 +307,23 @@ describe('data module', () => {
     });
   });
 
+  describe('sortByTotal', () => {
+    it('should sort items by the total attribute (descending)', () => {
+      expect.assertions(1);
+      expect(sortByTotal([{ total: 1, foo: 'bar' }, { total: 3 }])).toStrictEqual([
+        { total: 3 },
+        { total: 1, foo: 'bar' },
+      ]);
+    });
+  });
+
   describe('arrayAverage', () => {
     it('should get the median of a list of data', () => {
       expect.assertions(2);
       expect(arrayAverage([1, 2, 5, 10, 10, 11, 9, 3, 20], Average.Median)).toBe(9);
       expect(arrayAverage([1, 5, 10, 10, 11, 9, 3, 20], Average.Median)).toBe(9.5);
     });
+
     it('should get an exponential average for a list of data', () => {
       expect.assertions(1);
       const theList = [1, 2, 5, 10, 10, 11, 9, 3, 20];
@@ -303,18 +332,25 @@ describe('data module', () => {
 
       expect(arrayAverage(theList, Average.Exp)).toBe(averageExp);
     });
+
     it('should get the mean by default', () => {
       expect.assertions(2);
 
       expect(arrayAverage([1, 2, 5, 10, 10, 11, 9, 3, 20])).toBe(71 / 9);
       expect(arrayAverage([1, 5, 10, 10, 11, 9, 3, 20])).toBe(8.625);
     });
+
     it('should not mutate the array', () => {
       expect.assertions(1);
 
       const values = [1, 7, 3, 9];
       arrayAverage(values, Average.Median);
       expect(values).toStrictEqual([1, 7, 3, 9]);
+    });
+
+    it('should handle the case when the array is empty', () => {
+      expect.assertions(1);
+      expect(arrayAverage([])).toBeNaN();
     });
   });
 
@@ -462,6 +498,110 @@ describe('data module', () => {
       expect(getValueForTransmit('transactions', getTransactionsList(transactions))).toStrictEqual(
         transactions,
       );
+    });
+  });
+
+  describe('sortByKey', () => {
+    const items: { foo: number; bar?: string }[] = [
+      {
+        foo: 1,
+      },
+      {
+        foo: 3,
+        bar: 'no',
+      },
+      {
+        foo: 3,
+        bar: 'yes',
+      },
+      {
+        foo: 2,
+      },
+    ];
+
+    it('should sort a list of items by date', () => {
+      expect.assertions(1);
+      expect(sortByKey('foo')(items.slice())).toStrictEqual([
+        {
+          foo: 1,
+        },
+        {
+          foo: 2,
+        },
+        {
+          foo: 3,
+          bar: 'no',
+        },
+        {
+          foo: 3,
+          bar: 'yes',
+        },
+      ]);
+    });
+
+    it('should not mutate the original array', () => {
+      expect.assertions(1);
+      const original = [{ foo: 2 }, { foo: 1 }];
+      const copy = [...original];
+      sortByKey<'foo', { foo: number }>('foo')(original);
+      expect(original).toStrictEqual(copy);
+    });
+  });
+
+  describe('sortByDate', () => {
+    const items = [
+      {
+        date: new Date('2020-04-20'),
+      },
+      {
+        date: new Date('2020-03-19'),
+      },
+      {
+        date: new Date('2020-03-19T00:00:00.001'),
+      },
+    ];
+
+    it('should sort a list of items by date', () => {
+      expect.assertions(1);
+      expect(sortByDate(items)).toStrictEqual([
+        {
+          date: new Date('2020-03-19'),
+        },
+        {
+          date: new Date('2020-03-19T00:00:00.001'),
+        },
+        {
+          date: new Date('2020-04-20'),
+        },
+      ]);
+    });
+
+    it('should accept strings as dates', () => {
+      expect.assertions(1);
+      expect(
+        sortByDate([
+          {
+            date: new Date('2020-04-20'),
+          },
+          {
+            date: '2020-03-19',
+          },
+        ]),
+      ).toStrictEqual([
+        {
+          date: '2020-03-19',
+        },
+        {
+          date: new Date('2020-04-20'),
+        },
+      ]);
+    });
+
+    it('should not mutate the original array', () => {
+      expect.assertions(1);
+      const copy = items.slice();
+      sortByDate(items);
+      expect(items).toStrictEqual(copy);
     });
   });
 

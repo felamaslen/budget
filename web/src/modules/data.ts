@@ -81,7 +81,7 @@ export const modifyTransactionById = (
   );
 
 export const formatTransactionsList = (transactionsList: Transaction[]): TransactionRaw[] =>
-  transactionsList
+  [...transactionsList]
     .sort(({ date: dateA }, { date: dateB }) => Number(dateA) - Number(dateB))
     .map(({ date, units, cost }) => ({
       date: formatDate(date, 'yyyy-MM-dd'),
@@ -94,7 +94,7 @@ export function arrayAverage(values: number[], mode: Average = Average.Mean): nu
     return NaN;
   }
   if (mode === Average.Median) {
-    const sorted = values.slice().sort((prev, next) => prev - next);
+    const sorted = [...values].sort((prev, next) => prev - next);
 
     const oddLength = sorted.length & 1;
     if (oddLength) {
@@ -124,9 +124,6 @@ export function arrayAverage(values: number[], mode: Average = Average.Mean): nu
   // mean
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
-
-export const sortByTotal = <R extends { total: number }>(rows: R[]): R[] =>
-  rows.slice().sort(({ total: totalA }, { total: totalB }) => totalB - totalA);
 
 export const limitTimeSeriesLength = (timeSeries: Line, limit: number): Line =>
   new Array(timeSeries.length).fill(0).reduce(last => {
@@ -215,7 +212,7 @@ const asTimestamp = (date: string | Date): number => {
 };
 
 export const sortByDate = <I extends { date: string | Date }>(data: I[]): I[] =>
-  data.sort(({ date: dateA }, { date: dateB }) => asTimestamp(dateA) - asTimestamp(dateB));
+  [...data].sort(({ date: dateA }, { date: dateB }) => asTimestamp(dateA) - asTimestamp(dateB));
 
 function sortKey<K extends string, I extends { [key in K]: number | string }>(
   key: K,
@@ -235,7 +232,12 @@ function sortKey<K extends string, I extends { [key in K]: number | string }>(
 export const sortByKey = <K extends string, I extends { [key in K]: number | string }>(
   ...keys: K[]
 ) => (items: I[]): I[] =>
-  items.sort((itemA, itemB) => keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0));
+  [...items].sort((itemA, itemB) =>
+    keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0),
+  );
+
+export const sortByTotal = <R extends { total: number }>(items: R[]): R[] =>
+  sortByKey<'total', R>('total')(items).reverse();
 
 export const fieldExists = <V = never>(value?: V): boolean =>
   typeof value !== 'undefined' && !(typeof value === 'string' && !value.length);
