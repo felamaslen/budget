@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Graph, GraphProps, GraphRef } from '~client/components/graph';
+import React, { useMemo, forwardRef } from 'react';
+import { Graph, GraphProps } from '~client/components/graph';
 import { RenderedLine } from '~client/components/graph/rendered-line';
 import { HighlightPoint } from '~client/components/HighlightPoint';
 import { Dimensions, Calc, BasicProps, Line } from '~client/types/graph';
@@ -21,24 +21,25 @@ export type Props = GraphProps & {
   beforeLines?: React.FC<BasicProps>;
   afterLines?: React.FC<BasicProps>;
   hoverEffect?: HoverEffect;
-  graphRef?: GraphRef;
 };
 
-export const LineGraphDumb: React.FC<Props> = ({
-  name,
-  before,
-  after,
-  dimensions,
-  calc,
-  lines,
-  hlPoint,
-  beforeLines,
-  afterLines,
+const LineGraphDumbWithoutRef: React.RefForwardingComponent<HTMLDivElement, Props> = (
+  {
+    name,
+    before,
+    after,
+    dimensions,
+    calc,
+    lines,
+    hlPoint,
+    beforeLines,
+    afterLines,
+    outerProperties,
+    svgProperties,
+    hoverEffect,
+  },
   graphRef,
-  outerProperties,
-  svgProperties,
-  hoverEffect,
-}) => {
+) => {
   const basicProps = useMemo<BasicProps>(
     () => ({
       ...dimensions,
@@ -51,7 +52,6 @@ export const LineGraphDumb: React.FC<Props> = ({
     name,
     before,
     after,
-    graphRef,
     outerProperties,
     svgProperties,
     ...basicProps,
@@ -69,11 +69,11 @@ export const LineGraphDumb: React.FC<Props> = ({
   const afterLinesProc = useBeforeAfter(afterLines, basicProps);
 
   if (!lines.length) {
-    return <Graph {...graphProps} />;
+    return <Graph ref={graphRef} {...graphProps} />;
   }
 
   return (
-    <Graph {...graphProps}>
+    <Graph ref={graphRef} {...graphProps}>
       {beforeLinesProc}
       {renderedLines}
       {afterLinesProc}
@@ -92,3 +92,5 @@ export const LineGraphDumb: React.FC<Props> = ({
     </Graph>
   );
 };
+
+export const LineGraphDumb = forwardRef(LineGraphDumbWithoutRef);

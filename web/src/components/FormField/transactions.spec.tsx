@@ -57,94 +57,146 @@ describe('<FormFieldTransactions />', () => {
       expect(getByText('Cost')).toBeInTheDocument();
     });
 
-    it.each([[0], [1]])('should handle date input', async index => {
-      expect.assertions(4);
-      const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
+    // prettier-ignore
+    describe.each`
+    index | description
+    ${0}  | ${'first'}
+    ${1}  | ${'second'}
+    `('for the $description transaction', ({ index }) => {
 
-      const inputDate = await findByDisplayValue(transactions[index].date);
-      expect(inputDate).toBeInTheDocument();
+      it('should handle date input', async () => {
+        expect.assertions(4);
+        const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
 
-      act(() => {
-        fireEvent.change(inputDate, { target: { value: '2017-04-03' } });
+        const inputDate = await findByDisplayValue(transactions[index].date);
+        expect(inputDate).toBeInTheDocument();
+
+        act(() => {
+          fireEvent.change(inputDate, { target: { value: '2017-04-03' } });
+        });
+
+        expect(propsActive.onChange).not.toHaveBeenCalled();
+
+        act(() => {
+          fireEvent.blur(inputDate);
+        });
+
+        expect(propsActive.onChange).not.toHaveBeenCalled();
+
+        act(() => {
+          render(<FormFieldTransactions {...propsActive} active={false} />, { container });
+        });
+
+        expect(propsActive.onChange).toHaveBeenCalledWith(
+          modifyTransaction(value, index, {
+            date: new Date('2017-04-03'),
+          }),
+        );
       });
 
-      expect(propsActive.onChange).not.toHaveBeenCalled();
+      it('should handle units input', async () => {
+        expect.assertions(4);
+        const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
 
-      act(() => {
-        fireEvent.blur(inputDate);
+        const inputUnits = await findByDisplayValue(String(transactions[index].units));
+        expect(inputUnits).toBeInTheDocument();
+
+        act(() => {
+          fireEvent.change(inputUnits, { target: { value: '34.2219' } });
+        });
+
+        expect(propsActive.onChange).not.toHaveBeenCalled();
+
+        act(() => {
+          fireEvent.blur(inputUnits);
+        });
+
+        expect(propsActive.onChange).not.toHaveBeenCalled();
+
+        act(() => {
+          render(<FormFieldTransactions {...propsActive} active={false} />, { container });
+        });
+
+        expect(propsActive.onChange).toHaveBeenCalledWith(
+          modifyTransaction(value, index, {
+            units: 34.2219,
+          }),
+        );
       });
 
-      expect(propsActive.onChange).not.toHaveBeenCalled();
+      it('should handle cost input', async () => {
+        expect.assertions(4);
+        const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
 
-      act(() => {
-        render(<FormFieldTransactions {...propsActive} active={false} />, { container });
+        const inputCost = await findByDisplayValue(String(transactions[index].cost / 100));
+        expect(inputCost).toBeInTheDocument();
+
+        act(() => {
+          fireEvent.change(inputCost, { target: { value: '126.7692' } });
+        });
+
+        expect(propsActive.onChange).not.toHaveBeenCalled();
+
+        act(() => {
+          fireEvent.blur(inputCost);
+        });
+
+        expect(propsActive.onChange).not.toHaveBeenCalled();
+
+        act(() => {
+          render(<FormFieldTransactions {...propsActive} active={false} />, { container });
+        });
+
+        expect(propsActive.onChange).toHaveBeenCalledWith(
+          modifyTransaction(value, index, {
+            cost: 12677,
+          }),
+        );
       });
+      
+      it('should handle input of multiple fields', async () => {
+        expect.assertions(2);
+        const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
 
-      expect(propsActive.onChange).toHaveBeenCalledWith(
-        modifyTransaction(value, index, {
-          date: new Date('2017-04-03'),
-        }),
-      );
-    });
+        const inputDate = await findByDisplayValue(transactions[index].date);
+        const inputUnits = await findByDisplayValue(String(transactions[index].units));
+        const inputCost = await findByDisplayValue(String(transactions[index].cost / 100));
 
-    it.each([[0], [1]])('should handle units input', async index => {
-      expect.assertions(4);
-      const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
+        act(() => {
+          fireEvent.change(inputCost, { target: { value: '126.7692' } });
+        });
+        act(() => {
+          fireEvent.blur(inputCost);
+        });
 
-      const inputUnits = await findByDisplayValue(String(transactions[index].units));
-      expect(inputUnits).toBeInTheDocument();
+        act(() => {
+          fireEvent.change(inputUnits, { target: { value: '34.2219' } });
+        });
+        act(() => {
+          fireEvent.blur(inputUnits);
+        });
 
-      act(() => {
-        fireEvent.change(inputUnits, { target: { value: '34.2219' } });
+        act(() => {
+          fireEvent.change(inputDate, { target: { value: '2017-04-03' } });
+        });
+        act(() => {
+          fireEvent.blur(inputDate);
+        });
+
+        expect(propsActive.onChange).not.toHaveBeenCalled();
+
+        act(() => {
+          render(<FormFieldTransactions {...propsActive} active={false} />, { container });
+        });
+
+        expect(propsActive.onChange).toHaveBeenCalledWith(
+          modifyTransaction(value, index, {
+            date: new Date('2017-04-03'),
+            units: 34.2219,
+            cost: 12677,
+          }),
+        );
       });
-
-      expect(propsActive.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.blur(inputUnits);
-      });
-
-      expect(propsActive.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        render(<FormFieldTransactions {...propsActive} active={false} />, { container });
-      });
-
-      expect(propsActive.onChange).toHaveBeenCalledWith(
-        modifyTransaction(value, index, {
-          units: 34.2219,
-        }),
-      );
-    });
-
-    it.each([[0], [1]])('should handle cost input', async index => {
-      expect.assertions(4);
-      const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
-
-      const inputCost = await findByDisplayValue(String(transactions[index].cost / 100));
-      expect(inputCost).toBeInTheDocument();
-
-      act(() => {
-        fireEvent.change(inputCost, { target: { value: '126.7692' } });
-      });
-
-      expect(propsActive.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.blur(inputCost);
-      });
-
-      expect(propsActive.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        render(<FormFieldTransactions {...propsActive} active={false} />, { container });
-      });
-
-      expect(propsActive.onChange).toHaveBeenCalledWith(
-        modifyTransaction(value, index, {
-          cost: 12677,
-        }),
-      );
     });
 
     it('should handle adding a transaction', async () => {
@@ -209,6 +261,57 @@ describe('<FormFieldTransactions />', () => {
           cost: 109591,
         }),
       ]);
+    });
+
+    // prettier-ignore
+    it.each`
+    property
+    ${'units'}
+    ${'cost'}
+    `('should not add a transaction with zero $property', async ({ property }) => {
+      expect.assertions(1);
+
+      const { container, findByTestId } = render(
+        <FormFieldTransactions {...propsActive} />,
+      );
+
+      const inputGroup = await findByTestId('create-input');
+
+      const inputs = inputGroup.querySelectorAll('input');
+
+      const inputDate = inputs[0];
+      const inputUnits = inputs[1];
+      const inputCost = inputs[2];
+
+      act(() => {
+        fireEvent.change(inputDate, { target: { value: '2019-02-11' } });
+      });
+      act(() => {
+        fireEvent.blur(inputDate);
+      });
+
+      if (property !== 'units') {
+        act(() => {
+          fireEvent.change(inputUnits, { target: { value: '562.23' } });
+        });
+        act(() => {
+          fireEvent.blur(inputUnits);
+        });
+      }
+      if (property !== 'cost') {
+        act(() => {
+          fireEvent.change(inputCost, { target: { value: '1095.91' } });
+        });
+        act(() => {
+          fireEvent.blur(inputCost);
+        });
+      }
+
+      act(() => {
+        render(<FormFieldTransactions {...propsActive} active={false} />, { container });
+      });
+
+      expect(propsActive.onChange).not.toHaveBeenCalled();
     });
 
     it.each([[0], [1]])('should handle removing a transaction', async index => {

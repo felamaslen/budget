@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { Transaction } from '~client/types/funds';
 import { useField } from '~client/hooks/field';
@@ -26,18 +26,15 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
   active,
   create,
 }) => {
-  const onChangeDate = useCallback((value: Date) => onChange(item.id, { date: value }), [
-    onChange,
-    item.id,
-  ]);
-  const onChangeUnits = useCallback((value = 0) => onChange(item.id, { units: value }), [
-    onChange,
-    item.id,
-  ]);
-  const onChangeCost = useCallback((value = 0) => onChange(item.id, { cost: value }), [
-    onChange,
-    item.id,
-  ]);
+  const [delta, setDelta] = useState<Partial<Transaction>>({});
+  useEffect(() => {
+    if (Object.keys(delta).length) {
+      onChange(item.id, delta);
+    }
+  }, [delta, onChange, item.id]);
+  const onChangeDate = useCallback((date?: Date) => setDelta(last => ({ ...last, date })), []);
+  const onChangeUnits = useCallback((units?: number) => setDelta(last => ({ ...last, units })), []);
+  const onChangeCost = useCallback((cost?: number) => setDelta(last => ({ ...last, cost })), []);
 
   return (
     <Styled.TransactionsListItem data-testid={create ? 'create-input' : 'edit-input'}>
@@ -116,7 +113,7 @@ const FormFieldTransactions: React.FC<Props> = ({
   }, []);
 
   const onAdd = useCallback(() => {
-    if (!newItem) {
+    if (!(newItem.units && newItem.cost)) {
       return;
     }
 

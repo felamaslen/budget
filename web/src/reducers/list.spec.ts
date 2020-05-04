@@ -565,9 +565,28 @@ describe('List reducer', () => {
         ],
       };
 
-      it('should update with the real IDs and remove the optimistic status', () => {
+      const stateDaily = {
+        ...initialStateDaily,
+        total: 100,
+        items: [
+          {
+            id: 'some-fake-id',
+            date: testDate,
+            item: 'some item',
+            cost: 3,
+            __optimistic: RequestType.create,
+          },
+        ],
+      };
+
+      // prettier-ignore
+      it.each`
+      reducer          | testState
+      ${myListReducer} | ${state}
+      ${dailyReducer}  | ${stateDaily}
+      `('should update with the real IDs and remove the optimistic status', ({ reducer, testState }) => {
         expect.assertions(2);
-        const result = myListReducer(state, syncReceivedAction);
+        const result = reducer(testState, syncReceivedAction);
 
         expect(result.items).toHaveLength(1);
         expect(result.items[0]).toStrictEqual(
@@ -581,20 +600,6 @@ describe('List reducer', () => {
       });
 
       describe('for daily lists', () => {
-        const stateDaily = {
-          ...initialStateDaily,
-          total: 100,
-          items: [
-            {
-              id: 'some-fake-id',
-              date: testDate,
-              item: 'some item',
-              cost: 3,
-              __optimistic: RequestType.create,
-            },
-          ],
-        };
-
         it('should update the list total from the last response', () => {
           expect.assertions(1);
           const result = dailyReducer(stateDaily, syncReceivedAction);
@@ -641,9 +646,20 @@ describe('List reducer', () => {
         ],
       };
 
-      it('should remove the optimistic status', () => {
+      const stateDaily = {
+        ...state,
+        total: 105,
+        olderExists: null,
+      };
+
+      // prettier-ignore
+      it.each`
+      reducer          | testState
+      ${myListReducer} | ${state}
+      ${dailyReducer}  | ${stateDaily}
+      `('should remove the optimistic status', ({ reducer, testState }) => {
         expect.assertions(2);
-        const result = myListReducer(state, syncReceivedAction);
+        const result = reducer(testState, syncReceivedAction);
 
         expect(result.items).toHaveLength(1);
         expect(result.items[0]).toStrictEqual(
@@ -657,12 +673,6 @@ describe('List reducer', () => {
       });
 
       describe('for daily lists', () => {
-        const stateDaily = {
-          ...state,
-          total: 105,
-          olderExists: null,
-        };
-
         it('should update the total from the response', () => {
           expect.assertions(1);
           const resultDaily = dailyReducer(stateDaily, syncReceivedAction);
@@ -686,20 +696,25 @@ describe('List reducer', () => {
         ],
       };
 
-      it('should remove the item from the state', () => {
+      const stateDaily = {
+        ...state,
+        total: 105,
+        olderExists: null,
+      };
+
+      // prettier-ignore
+      it.each`
+      reducer          | testState
+      ${myListReducer} | ${state}
+      ${dailyReducer}  | ${stateDaily}
+      `('should remove the item from the state', ({ reducer, testState }) => {
         expect.assertions(1);
-        const result = myListReducer(state, syncReceivedAction);
+        const result = reducer(testState, syncReceivedAction);
 
         expect(result.items).toHaveLength(0);
       });
 
       describe('for daily lists', () => {
-        const stateDaily = {
-          ...state,
-          total: 105,
-          olderExists: null,
-        };
-
         it('should update the total from the response', () => {
           expect.assertions(1);
           const resultDaily = dailyReducer(stateDaily, syncReceivedAction);

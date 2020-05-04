@@ -1,17 +1,41 @@
-/**
- * Hook for an interactive, generic form field
- * `setValue` is used to set the *state value* from the *input value*
- * Components which use this hook are responsible for rendering the input
- */
-
 import { useRef, useReducer, useCallback, useEffect } from 'react';
 
 import * as Data from '~client/modules/data';
-import { VALUE_SET, CANCELLED } from '~client/modules/nav';
+import { ActionType as NavActionType } from '~client/modules/nav';
 import { NULL_COMMAND } from '~client/hooks/nav';
 
-const ACTIVE_TOGGLED = 'ACTIVE_TOGGLED';
-const TYPED = 'TYPED';
+enum ActionType {
+  ActiveToggled,
+  Typed,
+}
+
+type ActionActiveToggled<FV, IV> = {
+  type: ActionType.ActiveToggled;
+  active: boolean;
+  value: FV;
+  inputValue: IV;
+};
+
+type ActionTyped<FV, IV> = {
+  type: ActionType.Typed;
+  value: FV;
+  inputValue?: IV;
+};
+
+type ActionValueSet<FV> = {
+  type: NavActionType.ValueSet;
+  payload: FV;
+};
+
+type ActionCancelled = {
+  type: NavActionType.Cancelled;
+};
+
+type Action<FV, IV> =
+  | ActionActiveToggled<FV, IV>
+  | ActionTyped<FV, IV>
+  | ActionValueSet<FV>
+  | ActionCancelled;
 
 type State<FV, IV> = {
   active: boolean;
@@ -20,22 +44,22 @@ type State<FV, IV> = {
   inputValue: IV;
 };
 
-type Action = {
-  type?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [x: string]: any;
-};
+type Reducer<FV, IV> = (state: State<FV, IV>, action: Action<FV, IV>) => State<FV, IV>;
 
-type Reducer<FV, IV> = (state: State<FV, IV>, action: Action) => State<FV, IV>;
+const isAction = <FV, IV>(action: Action<FV, IV> | {}): action is Action<FV, IV> =>
+  Reflect.has(action, 'type');
 
-function fieldReducer<FV, IV>(state: State<FV, IV>, action: Action): State<FV, IV> {
-  if (action.type === VALUE_SET) {
-    return { ...state, currentValue: action.payload as FV };
+function fieldReducer<FV, IV>(state: State<FV, IV>, action: Action<FV, IV> | {}): State<FV, IV> {
+  if (!isAction<FV, IV>(action)) {
+    return state;
   }
-  if (action.type === CANCELLED) {
+  if (action.type === NavActionType.ValueSet) {
+    return { ...state, currentValue: action.payload };
+  }
+  if (action.type === NavActionType.Cancelled) {
     return { ...state, currentValue: state.initialValue };
   }
-  if (action.type === ACTIVE_TOGGLED) {
+  if (action.type === ActionType.ActiveToggled) {
     if (action.active && !state.active) {
       return {
         ...state,
@@ -51,10 +75,12 @@ function fieldReducer<FV, IV>(state: State<FV, IV>, action: Action): State<FV, I
       inputValue: action.inputValue,
     };
   }
-  if (action.type === TYPED) {
-    const { value: currentValue, inputValue = currentValue } = action;
-
-    return { ...state, currentValue, inputValue };
+  if (action.type === ActionType.Typed) {
+    return {
+      ...state,
+      currentValue: action.value,
+      inputValue: action.inputValue ?? ((action.value as unknown) as IV),
+    };
   }
 
   return state;
@@ -79,7 +105,7 @@ type Options<FV, IV> = {
   onType?: (value: FV | Split<FV, IV>) => void;
   setValue?: Data.Identity<string, FV | Split<FV, IV>>;
   getInitialInputValue?: (value: FV) => IV;
-  command?: Action;
+  command?: Action<FV, IV> | {};
   active?: boolean;
 };
 
@@ -111,7 +137,7 @@ export function useField<FV = string, IV = string, I extends HTMLInputElement = 
   });
 
   useEffect(() => {
-    dispatch({ type: VALUE_SET, payload: value });
+    dispatch({ type: NavActionType.ValueSet, payload: value });
   }, [value]);
 
   useEffect(() => {
@@ -123,7 +149,7 @@ export function useField<FV = string, IV = string, I extends HTMLInputElement = 
     }
     if (active !== state.active) {
       dispatch({
-        type: ACTIVE_TOGGLED,
+        type: ActionType.ActiveToggled,
         active,
         value,
         inputValue: getInitialInputValue(state.initialValue),
@@ -153,7 +179,7 @@ export function useField<FV = string, IV = string, I extends HTMLInputElement = 
   ]);
 
   useEffect(() => {
-    if (inline && command !== NULL_COMMAND) {
+    if (inline && isAction(command)) {
       dispatch(command);
     }
   }, [inline, command]);
@@ -165,12 +191,12 @@ export function useField<FV = string, IV = string, I extends HTMLInputElement = 
         if (valueIsSplit(newValue)) {
           const { fieldValue, inputValue } = newValue;
           dispatch({
-            type: TYPED,
+            type: ActionType.Typed,
             value: fieldValue,
             inputValue,
           });
         } else {
-          dispatch({ type: TYPED, value: newValue });
+          dispatch({ type: ActionType.Typed, value: newValue });
         }
 
         onType(newValue);
