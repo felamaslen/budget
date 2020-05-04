@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon';
-
 import { Action } from 'create-reducer-object';
 import { makeListReducer, makeDailyListReducer, ListState, DailyState } from './list';
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
@@ -20,7 +18,7 @@ describe('List reducer', () => {
 
   type Item = {
     id: string;
-    date: DateTime;
+    date: Date;
     item: string;
     cost: number;
   };
@@ -60,38 +58,63 @@ describe('List reducer', () => {
 
   const dailyReducer = makeDailyListReducer<Item, RawItem, Omit<State, 'baz'>>(page);
 
-  const testDate = DateTime.fromISO('2020-04-20');
+  const testDate = new Date('2020-04-20');
 
   describe.each([
     ['Null action', null],
+    ['Undefined action', undefined],
     ['LOGGED_OUT', loggedOut()],
   ])('%s', (_, action) => {
     it('should return the initial state', () => {
+      expect.assertions(1);
       expect(myListReducer(undefined, action)).toStrictEqual(initialState);
     });
 
     it('should return the initial (daily) state', () => {
+      expect.assertions(1);
       expect(dailyReducer(undefined, action)).toStrictEqual(initialStateDaily);
     });
   });
 
   describe('DATA_READ', () => {
+    const response = {
+      data: [
+        { [DataKeyAbbr.id]: 'some-id', [DataKeyAbbr.item]: 'yes' },
+        { [DataKeyAbbr.id]: 'other-id', [DataKeyAbbr.item]: 'no' },
+      ],
+    };
+
     const action = dataRead({
-      [page]: {
-        data: [
-          { [DataKeyAbbr.id]: 'some-id', [DataKeyAbbr.item]: 'yes' },
-          { [DataKeyAbbr.id]: 'other-id', [DataKeyAbbr.item]: 'no' },
-        ],
-      },
+      [page]: response,
     });
 
     it('should insert rows into the state', () => {
+      expect.assertions(1);
       const result = myListReducer(initialState, action);
 
       expect(result.items).toStrictEqual([
         { id: 'some-id', item: 'yes' },
         { id: 'other-id', item: 'no' },
       ]);
+    });
+
+    it('should ignore actions where the response has no data for the current page', () => {
+      expect.assertions(1);
+      expect(myListReducer(initialState, dataRead({ [Page.bills]: response }))).toBe(initialState);
+    });
+
+    it('should handle the case when the response data contain no items', () => {
+      expect.assertions(1);
+      expect(
+        myListReducer(
+          initialState,
+          dataRead({
+            [page]: {
+              data: [],
+            },
+          }),
+        ),
+      ).toStrictEqual(initialState);
     });
 
     describe('for daily lists', () => {
@@ -111,6 +134,7 @@ describe('List reducer', () => {
       });
 
       it('should insert the all-time total value from the response', () => {
+        expect.assertions(1);
         const result = dailyReducer(initialStateDaily, actionRead);
 
         expect(result).toStrictEqual(
@@ -120,7 +144,7 @@ describe('List reducer', () => {
             items: [
               {
                 id: 'some-id',
-                date: DateTime.fromISO('2019-05-03'),
+                date: new Date('2019-05-03'),
                 item: 'some-item',
                 cost: 102,
               },
@@ -133,7 +157,7 @@ describe('List reducer', () => {
 
   describe('LIST_ITEM_CREATED', () => {
     const action = listItemCreated(page, {
-      date: DateTime.fromISO('2019-07-10'),
+      date: new Date('2019-07-10'),
       item: 'some item',
       category: 'some category',
       cost: 3,
@@ -141,6 +165,7 @@ describe('List reducer', () => {
     });
 
     it('should optimistically create a list item', () => {
+      expect.assertions(1);
       const result = myListReducer(initialState, action);
 
       expect(result).toStrictEqual(
@@ -148,7 +173,7 @@ describe('List reducer', () => {
           items: [
             {
               id: action.fakeId,
-              date: DateTime.fromISO('2019-07-10'),
+              date: new Date('2019-07-10'),
               item: 'some item',
               category: 'some category',
               cost: 3,
@@ -161,6 +186,7 @@ describe('List reducer', () => {
     });
 
     it('should not do anything if not all the data exist', () => {
+      expect.assertions(1);
       const actionNone = listItemCreated(page, {
         shop: 'prop',
         cost: 3,
@@ -172,8 +198,9 @@ describe('List reducer', () => {
     });
 
     it("should omit properties which are not in the page's column definition", () => {
+      expect.assertions(1);
       const actionExtra = listItemCreated(page, {
-        date: DateTime.fromISO('2019-07-14'),
+        date: new Date('2019-07-14'),
         item: 'some item',
         category: 'some category',
         cost: 21,
@@ -186,7 +213,7 @@ describe('List reducer', () => {
       expect(result.items).toStrictEqual([
         {
           id: actionExtra.fakeId,
-          date: DateTime.fromISO('2019-07-14'),
+          date: new Date('2019-07-14'),
           item: 'some item',
           category: 'some category',
           cost: 21,
@@ -197,6 +224,7 @@ describe('List reducer', () => {
     });
 
     it('should ignore actions intended for other pages', () => {
+      expect.assertions(1);
       const initialStateCreate: State = {
         ...initialState,
         items: [],
@@ -214,8 +242,13 @@ describe('List reducer', () => {
     });
 
     describe('for daily lists', () => {
+      const stateDaily = {
+        ...initialStateDaily,
+        total: 3,
+      };
+
       const actionDaily = listItemCreated(page, {
-        date: DateTime.fromISO('2019-07-12'),
+        date: new Date('2019-07-12'),
         item: 'some item',
         category: 'some category',
         cost: 34,
@@ -223,15 +256,14 @@ describe('List reducer', () => {
       });
 
       it('should update the total', () => {
-        const result = dailyReducer(
-          {
-            ...initialStateDaily,
-            total: 3,
-          },
-          actionDaily,
-        );
-
+        expect.assertions(1);
+        const result = dailyReducer(stateDaily, actionDaily);
         expect(result.total).toBe(3 + 34);
+      });
+
+      it('should ignore actions intended for other pages', () => {
+        expect.assertions(1);
+        expect(dailyReducer(stateDaily, { ...actionDaily, page: Page.bills })).toBe(stateDaily);
       });
     });
   });
@@ -245,6 +277,7 @@ describe('List reducer', () => {
     const action = listItemUpdated(page, 'some-real-id', { item: 'other item' });
 
     it('should optimistically update a list item', () => {
+      expect.assertions(1);
       const result = myListReducer(state, action);
 
       expect(result.items).toStrictEqual([
@@ -259,6 +292,7 @@ describe('List reducer', () => {
     });
 
     it('should omit properties which are not present on the item', () => {
+      expect.assertions(2);
       const actionNull = listItemUpdated(page, 'some-real-id', { other: 'should not exist' });
 
       const resultNull = myListReducer(state, actionNull);
@@ -285,6 +319,7 @@ describe('List reducer', () => {
     });
 
     it('should not alter the status of optimistically created items', () => {
+      expect.assertions(1);
       const stateCreate = {
         ...state,
         items: [
@@ -311,6 +346,7 @@ describe('List reducer', () => {
     });
 
     it('should ignore actions intended for other pages', () => {
+      expect.assertions(1);
       const initialStateUpdate = {
         ...initialState,
         items: [{ id: 'some-id', date: testDate, item: 'some item', cost: 3 }],
@@ -319,7 +355,7 @@ describe('List reducer', () => {
       expect(
         myListReducer(
           initialStateUpdate,
-          listItemUpdated('other-page', 'some-id', {
+          listItemUpdated(Page.bills, 'some-id', {
             some: 'prop',
             is: true,
           }),
@@ -340,9 +376,15 @@ describe('List reducer', () => {
       });
 
       it('should update the total', () => {
+        expect.assertions(1);
         const result = dailyReducer(stateDaily, actionDaily);
 
         expect(result.total).toBe(5 + 41 - 23);
+      });
+
+      it('should ignore actions intended for other pages', () => {
+        expect.assertions(1);
+        expect(dailyReducer(stateDaily, { ...actionDaily, page: Page.bills })).toBe(stateDaily);
       });
     });
   });
@@ -356,6 +398,7 @@ describe('List reducer', () => {
     const action = listItemDeleted('some-real-id', { page });
 
     it('should optimistically delete a list item', () => {
+      expect.assertions(1);
       const result = myListReducer(state, action);
 
       expect(result.items).toStrictEqual([
@@ -369,6 +412,7 @@ describe('List reducer', () => {
     });
 
     it('should simply remove the item from state, if it was already in an optimistic creation state', () => {
+      expect.assertions(1);
       const stateCreating = {
         ...state,
         items: [
@@ -385,6 +429,7 @@ describe('List reducer', () => {
     });
 
     it('should update the optimistic state to delete, if it was in an optimistic update status', () => {
+      expect.assertions(1);
       const stateUpdating = {
         ...state,
         items: [
@@ -408,6 +453,7 @@ describe('List reducer', () => {
     });
 
     it('should ignore actions intended for other pages', () => {
+      expect.assertions(1);
       const initialStateDelete = {
         ...initialState,
         items: [{ id: 'some-id', date: testDate, item: 'some item', cost: 3 }],
@@ -431,9 +477,15 @@ describe('List reducer', () => {
       };
 
       it('should update the total', () => {
+        expect.assertions(1);
         const result = dailyReducer(stateDaily, action);
 
         expect(result.total).toBe(51 - 29);
+      });
+
+      it('should ignore actions intended for other pages', () => {
+        expect.assertions(1);
+        expect(dailyReducer(stateDaily, { ...action, page: Page.bills })).toBe(stateDaily);
       });
     });
   });
@@ -514,6 +566,7 @@ describe('List reducer', () => {
       };
 
       it('should update with the real IDs and remove the optimistic status', () => {
+        expect.assertions(2);
         const result = myListReducer(state, syncReceivedAction);
 
         expect(result.items).toHaveLength(1);
@@ -543,6 +596,7 @@ describe('List reducer', () => {
         };
 
         it('should update the list total from the last response', () => {
+          expect.assertions(1);
           const result = dailyReducer(stateDaily, syncReceivedAction);
 
           expect(result.total).toBe(117);
@@ -588,6 +642,7 @@ describe('List reducer', () => {
       };
 
       it('should remove the optimistic status', () => {
+        expect.assertions(2);
         const result = myListReducer(state, syncReceivedAction);
 
         expect(result.items).toHaveLength(1);
@@ -609,6 +664,7 @@ describe('List reducer', () => {
         };
 
         it('should update the total from the response', () => {
+          expect.assertions(1);
           const resultDaily = dailyReducer(stateDaily, syncReceivedAction);
 
           expect(resultDaily.total).toBe(117);
@@ -631,6 +687,7 @@ describe('List reducer', () => {
       };
 
       it('should remove the item from the state', () => {
+        expect.assertions(1);
         const result = myListReducer(state, syncReceivedAction);
 
         expect(result.items).toHaveLength(0);
@@ -644,6 +701,7 @@ describe('List reducer', () => {
         };
 
         it('should update the total from the response', () => {
+          expect.assertions(1);
           const resultDaily = dailyReducer(stateDaily, syncReceivedAction);
 
           expect(resultDaily.total).toBe(117);
@@ -656,6 +714,7 @@ describe('List reducer', () => {
     const action = { type: 'CUSTOM_HANDLER_101', foo: 'something else' };
 
     it('should produce custom results', () => {
+      expect.assertions(1);
       const result = myListReducer(initialState, action);
 
       expect(result.baz).toBe('something else');

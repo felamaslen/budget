@@ -1,6 +1,6 @@
 import format from 'date-fns/format';
-import { DateTime } from 'luxon';
 
+import { Transaction } from '~client/types/funds';
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
 
 export const percent = (frac: number): string => `${Math.round(100000 * frac) / 1000}%`;
@@ -60,23 +60,16 @@ export function leadingZeroes(value: number, numZeroes: number): string {
 function getCurrencyValueRaw(
   absValue: number,
   log: number,
-  abbreviate: boolean,
   precision: number,
   noPence: boolean,
 ): string {
   if (log > 0) {
     const measure = absValue / 10 ** (log * 3);
-
-    if (abbreviate || noPence) {
-      return round(measure, precision).toString();
-    }
-
-    return String(measure);
+    return round(measure, precision).toString();
   }
   if (noPence) {
     return absValue.toFixed();
   }
-
   return absValue.toFixed(precision);
 }
 
@@ -126,13 +119,7 @@ export function formatCurrency(value: number, customOptions: FormatCurrencyOptio
 
   const suffix = options.suffix || '';
 
-  const valueRaw = getCurrencyValueRaw(
-    absValue,
-    log,
-    options.abbreviate,
-    precision,
-    options.noPence,
-  );
+  const valueRaw = getCurrencyValueRaw(absValue, log, precision, options.noPence);
 
   const formatted = numberFormat(valueRaw);
 
@@ -175,7 +162,14 @@ export function getTickSize(min: number, max: number, numTicks: number): number 
   return normaliseTickSize(minimum);
 }
 
-export function formatItem<V = string>(item: string, value?: V): string {
+export function formatItem(item: 'transactions', value: Transaction[]): string;
+export function formatItem(item: 'date', value?: Date): string;
+export function formatItem(item: 'cost', value?: number): string;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function formatItem(item: string, value?: any): string;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function formatItem(item: string, value?: any): string {
   if (item === 'transactions') {
     return String(Array.isArray(value) ? value.length : 0);
   }
@@ -184,9 +178,6 @@ export function formatItem<V = string>(item: string, value?: V): string {
   }
   if (value instanceof Date) {
     return format(value, 'dd/MM/yyyy');
-  }
-  if (value instanceof DateTime) {
-    return value.toLocaleString(DateTime.DATE_SHORT);
   }
   if (item === 'cost') {
     return formatCurrency(Number(value));

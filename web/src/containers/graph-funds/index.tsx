@@ -1,8 +1,8 @@
 import { connect } from 'react-redux';
-import { DateTime } from 'luxon';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import fromUnixTime from 'date-fns/fromUnixTime';
 
-import { getTickSize } from '~client/modules/format';
+import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { rgba } from '~client/modules/color';
 import { State } from '~client/reducers';
@@ -26,12 +26,8 @@ import {
   getFundLines,
 } from '~client/selectors/funds/graph';
 
-import {
-  LineGraph,
-  Props as LineGraphProps,
-  ZoomProps,
-  ZoomEffect,
-} from '~client/components/graph/line-graph';
+import { LineGraph, Props as LineGraphProps } from '~client/components/graph/line-graph';
+import { ZoomedDimensions, ZoomEffect } from '~client/components/graph/hooks/zoom';
 import { TimeAxes, LabelY } from '~client/components/graph/time-axes';
 import { AfterCanvas } from '~client/containers/graph-funds/after-canvas';
 import { Padding, Line, BasicProps } from '~client/types/graph';
@@ -66,7 +62,7 @@ const makeGetRanges = ({
   zoomRange: [number, number];
   lines: Line[];
   cacheTimes: number[];
-}): ZoomEffect => (zoomedLines = lines, minX = zoomMin, maxX = zoomMax): ZoomProps => {
+}): ZoomEffect => (zoomedLines = lines, minX = zoomMin, maxX = zoomMax): ZoomedDimensions => {
   if (!(zoomedLines && cacheTimes.length >= 2)) {
     return {
       minX,
@@ -224,7 +220,7 @@ const GraphFunds: React.FC<Props> = ({
 
   const getRanges = useMemo<ZoomEffect>(() => {
     if (!haveData) {
-      return (): ZoomProps => ({
+      return (): ZoomedDimensions => ({
         minX: 0,
         maxX: 0,
         minY: 0,
@@ -241,11 +237,7 @@ const GraphFunds: React.FC<Props> = ({
     });
   }, [haveData, mode, cacheTimes, lines]);
 
-  const { minX, maxX, minY, maxY, tickSizeY } = useMemo<ZoomProps>(() => {
-    const zoomProps: ZoomProps = getRanges();
-
-    return zoomProps;
-  }, [getRanges]);
+  const { minX, maxX, minY, maxY, tickSizeY } = useMemo<ZoomedDimensions>(getRanges, [getRanges]);
 
   const labelY = useCallback(value => formatValue(value, mode), [mode]);
 
@@ -281,11 +273,9 @@ const GraphFunds: React.FC<Props> = ({
     return After;
   }, [isMobile, period, mode, fundItems, toggleList, setToggleList, changePeriod]);
 
-  const labelX = useCallback(
-    value =>
-      DateTime.fromJSDate(new Date(1000 * (value + startTime))).toLocaleString(DateTime.DATE_SHORT),
-    [startTime],
-  );
+  const labelX = useCallback(value => formatItem('date', fromUnixTime(value + startTime)), [
+    startTime,
+  ]);
 
   const hoverEffect = useMemo(
     () => ({

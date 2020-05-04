@@ -2,7 +2,6 @@ import sinon from 'sinon';
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import isValid from 'date-fns/isValid';
-import { DateTime } from 'luxon';
 
 import FormFieldDate from './date';
 
@@ -14,6 +13,7 @@ describe('<FormFieldDate />', () => {
   };
 
   it('should render an input with the value', async () => {
+    expect.assertions(2);
     const { findByDisplayValue } = render(<FormFieldDate {...props} />);
     const input = (await findByDisplayValue('2017-11-10')) as HTMLInputElement;
 
@@ -22,6 +22,7 @@ describe('<FormFieldDate />', () => {
   });
 
   it('should call onChange when changing the value, after the blur', async () => {
+    expect.assertions(3);
     const { findByDisplayValue } = render(<FormFieldDate {...props} />);
     const input = await findByDisplayValue('2017-11-10');
 
@@ -39,6 +40,7 @@ describe('<FormFieldDate />', () => {
   });
 
   it('should not handle bad values', async () => {
+    expect.assertions(4);
     // This should never happen in practice, as the "date" input type
     // should always fire an event with a valid date string
     const { findByDisplayValue } = render(<FormFieldDate {...props} />);
@@ -58,6 +60,16 @@ describe('<FormFieldDate />', () => {
     expect(isValid(props.onChange.mock.calls[0][0])).toBe(false);
   });
 
+  it('should use the current date by default', async () => {
+    expect.assertions(1);
+    const clock = sinon.useFakeTimers(new Date('2020-04-20T15:34:18Z'));
+
+    const { findByDisplayValue } = render(<FormFieldDate {...props} value={undefined} />);
+    expect(await findByDisplayValue('2020-04-20')).toBeInTheDocument();
+
+    clock.restore();
+  });
+
   describe('when rendering inline', () => {
     let clock: sinon.SinonFakeTimers;
     const now = new Date('2019-07-06T16:47:20Z');
@@ -70,6 +82,7 @@ describe('<FormFieldDate />', () => {
     });
 
     it('should render as a text input with localised value', async () => {
+      expect.assertions(2);
       const { findByDisplayValue } = render(<FormFieldDate {...props} inline />);
       const input = (await findByDisplayValue('10/11/2017')) as HTMLInputElement;
 
@@ -78,6 +91,7 @@ describe('<FormFieldDate />', () => {
     });
 
     it('should set dates based on a single number', async () => {
+      expect.assertions(3);
       const { findByDisplayValue, container } = render(<FormFieldDate {...props} inline />);
       const input = (await findByDisplayValue('10/11/2017')) as HTMLInputElement;
 
@@ -96,6 +110,7 @@ describe('<FormFieldDate />', () => {
     });
 
     it('should set dates based on a date and month', async () => {
+      expect.assertions(3);
       const { findByDisplayValue, container } = render(<FormFieldDate {...props} inline />);
       const input = (await findByDisplayValue('10/11/2017')) as HTMLInputElement;
 
@@ -114,6 +129,7 @@ describe('<FormFieldDate />', () => {
     });
 
     it('should set dates based on an abbreviated full date', async () => {
+      expect.assertions(3);
       const { findByDisplayValue, container } = render(<FormFieldDate {...props} inline />);
       const input = (await findByDisplayValue('10/11/2017')) as HTMLInputElement;
 
@@ -132,6 +148,7 @@ describe('<FormFieldDate />', () => {
     });
 
     it('should set dates based on a full date with full year', async () => {
+      expect.assertions(3);
       const { findByDisplayValue, container } = render(<FormFieldDate {...props} inline />);
       const input = (await findByDisplayValue('10/11/2017')) as HTMLInputElement;
 
@@ -150,6 +167,7 @@ describe('<FormFieldDate />', () => {
     });
 
     it('should not call onChange with an invalid value', async () => {
+      expect.assertions(2);
       const { findByDisplayValue, container } = render(<FormFieldDate {...props} inline />);
       const input = (await findByDisplayValue('10/11/2017')) as HTMLInputElement;
 
@@ -164,28 +182,6 @@ describe('<FormFieldDate />', () => {
       });
 
       expect(props.onChange).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('when passing in a deprecated luxon DateTime object', () => {
-    const legacyDate = DateTime.fromISO('2020-04-20');
-
-    it('should emit DateTime objects on the change event', async () => {
-      const { findByDisplayValue } = render(<FormFieldDate {...props} value={legacyDate} />);
-
-      const input = await findByDisplayValue('2020-04-20');
-
-      act(() => {
-        fireEvent.change(input, { target: { value: '2014-04-09' } });
-      });
-      expect(props.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.blur(input);
-      });
-
-      expect(props.onChange).toHaveBeenCalledTimes(1);
-      expect(props.onChange).toHaveBeenCalledWith(DateTime.fromISO('2014-04-09'));
     });
   });
 });

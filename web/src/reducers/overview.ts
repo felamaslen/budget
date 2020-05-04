@@ -1,10 +1,15 @@
 import { createReducerObject, Action } from 'create-reducer-object';
 import { compose } from '@typed/compose';
-import { DateTime } from 'luxon';
 import memoize from 'fast-memoize';
+import endOfMonth from 'date-fns/endOfMonth';
+import addYears from 'date-fns/addYears';
+import setYear from 'date-fns/setYear';
+import setMonth from 'date-fns/setMonth';
+import isSameMonth from 'date-fns/isSameMonth';
 import { replaceAtIndex } from 'replace-array';
 
 import { PageListCalc, Page } from '~client/types/app';
+import { ListCalcItem } from '~client/types/list';
 import { State } from '~client/types/overview';
 import {
   LIST_ITEM_CREATED,
@@ -12,7 +17,6 @@ import {
   LIST_ITEM_DELETED,
 } from '~client/constants/actions/list';
 import { getMonthDates } from '~client/selectors/overview/common';
-import { ListCalcItem } from './list';
 
 import { DATA_READ } from '~client/constants/actions/api';
 import { LOGGED_OUT } from '~client/constants/actions/login';
@@ -20,10 +24,8 @@ import { LOGGED_OUT } from '~client/constants/actions/login';
 export { State } from '~client/types/overview';
 
 export const initialState: State = {
-  startDate: DateTime.local()
-    .startOf('year')
-    .endOf('month'),
-  endDate: DateTime.local().endOf('month'),
+  startDate: endOfMonth(addYears(new Date(), -1)),
+  endDate: endOfMonth(new Date()),
   cost: {
     [Page.funds]: [],
     [Page.income]: [],
@@ -38,24 +40,28 @@ export const initialState: State = {
 };
 
 const onRead = (_: State, action: Action): State => ({
-  startDate: DateTime.fromObject({
-    year: action.res?.overview?.startYearMonth?.[0],
-    month: action.res?.overview?.startYearMonth?.[1],
-  }).endOf('month'),
-  endDate: DateTime.fromObject({
-    year: action.res?.overview?.endYearMonth?.[0],
-    month: action.res?.overview?.endYearMonth?.[1],
-  }).endOf('month'),
+  startDate: endOfMonth(
+    setMonth(
+      setYear(new Date(), action.res?.overview?.startYearMonth?.[0]),
+      action.res?.overview?.startYearMonth?.[1] - 1,
+    ),
+  ),
+  endDate: endOfMonth(
+    setMonth(
+      setYear(new Date(), action.res?.overview?.endYearMonth?.[0]),
+      action.res?.overview?.endYearMonth?.[1] - 1,
+    ),
+  ),
   cost: {
     ...action.res?.overview?.cost,
     balance: undefined,
   },
 });
 
-const getStateRowDates = memoize((state: State): DateTime[] => getMonthDates({ overview: state }));
+const getStateRowDates = memoize((state: State): Date[] => getMonthDates({ overview: state }));
 
-const getDateIndex = (state: State, date: DateTime): number =>
-  getStateRowDates(state).findIndex(item => date.hasSame(item, 'month'));
+const getDateIndex = (state: State, date: Date): number =>
+  getStateRowDates(state).findIndex(item => isSameMonth(date, item));
 
 function getUpdatedCost(
   state: State,
@@ -67,7 +73,7 @@ function getUpdatedCost(
     return state;
   }
 
-  const setCost = (date: DateTime, diff: number) => (last: number[]): number[] =>
+  const setCost = (date: Date, diff: number) => (last: number[]): number[] =>
     replaceAtIndex(last, getDateIndex(state, date), value => value + diff);
 
   return {

@@ -10,7 +10,7 @@ import {
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
 import { getTimeScale } from '~client/components/graph/helpers';
-import { BasicProps, TimeScale } from '~client/types/graph';
+import { BasicProps, Tick } from '~client/types/graph';
 
 const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 
@@ -189,7 +189,7 @@ const YAxis: React.FC<Props> = props => {
 };
 
 type TicksXProps = {
-  timeScale: TimeScale;
+  timeScale: Tick[];
   y0: number;
 };
 
@@ -277,7 +277,7 @@ export const TimeAxes: React.FC<Props> = props => {
 
   const y0 = pixY1(minY);
 
-  const timeScale: TimeScale = getTimeScale({ minX, maxX, pixX })(offset);
+  const timeScale: Tick[] = getTimeScale({ minX, maxX, pixX })(offset);
 
   return (
     <g>

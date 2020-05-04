@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon';
-
 import reducer, { initialState, State } from '~client/reducers/overview';
 
 import { dataRead } from '~client/actions/api';
@@ -42,12 +40,12 @@ describe('Overview reducer', () => {
 
     it('should set the start date to the end of the month', () => {
       const result = reducer(initialState, action);
-      expect(result).toHaveProperty('startDate', DateTime.fromISO('2019-04-30T23:59:59.999Z'));
+      expect(result).toHaveProperty('startDate', new Date('2019-04-30T23:59:59.999Z'));
     });
 
     it('should set the end date to the end of the month', () => {
       const result = reducer(initialState, action);
-      expect(result).toHaveProperty('endDate', DateTime.fromISO('2019-07-31T23:59:59.999Z'));
+      expect(result).toHaveProperty('endDate', new Date('2019-07-31T23:59:59.999Z'));
     });
 
     it('should set the cost data', () => {
@@ -73,8 +71,8 @@ describe('Overview reducer', () => {
   describe('LIST_ITEM_CREATED', () => {
     const state: State = {
       ...initialState,
-      startDate: DateTime.fromISO('2019-04-30T23:59:59.999Z'),
-      endDate: DateTime.fromISO('2019-07-31T23:59:59.999Z'),
+      startDate: new Date('2019-04-30T23:59:59.999Z'),
+      endDate: new Date('2019-07-31T23:59:59.999Z'),
       cost: {
         ...initialState.cost,
         [Page.funds]: [0, 0, 510000, 2160465],
@@ -93,7 +91,7 @@ describe('Overview reducer', () => {
       const withGeneral = reducer(
         state,
         listItemCreated('general', {
-          date: DateTime.fromISO('2019-06-02T00:00:00.000Z'),
+          date: new Date('2019-06-02T00:00:00.000Z'),
           cost: 34,
         }),
       );
@@ -114,7 +112,7 @@ describe('Overview reducer', () => {
       const withMissingCost = reducer(
         state,
         listItemCreated('general', {
-          date: DateTime.fromISO('2019-06-02T00:00:00.000Z'),
+          date: new Date('2019-06-02T00:00:00.000Z'),
         }),
       );
 
@@ -124,8 +122,8 @@ describe('Overview reducer', () => {
 
   describe('LIST_ITEM_UPDATED', () => {
     const state = {
-      startDate: DateTime.fromISO('2019-04-30T23:59:59.999Z'),
-      endDate: DateTime.fromISO('2019-07-31T23:59:59.999Z'),
+      startDate: new Date('2019-04-30T23:59:59.999Z'),
+      endDate: new Date('2019-07-31T23:59:59.999Z'),
       cost: {
         funds: [0, 0, 510000, 2160465],
         fundChanges: [1, 1, 0, 1],
@@ -146,11 +144,11 @@ describe('Overview reducer', () => {
           'food',
           'some-id',
           {
-            date: DateTime.fromISO('2019-06-02T00:00Z'),
+            date: new Date('2019-06-02T00:00Z'),
             cost: 34,
           },
           {
-            date: DateTime.fromISO('2019-05-10T00:00Z'),
+            date: new Date('2019-05-10T00:00Z'),
             cost: 34,
           },
         ),
@@ -167,11 +165,11 @@ describe('Overview reducer', () => {
           'food',
           'some-id',
           {
-            date: DateTime.fromISO('2019-06-02T00:00Z'),
+            date: new Date('2019-06-02T00:00Z'),
             cost: 98,
           },
           {
-            date: DateTime.fromISO('2019-06-02T00:00Z'),
+            date: new Date('2019-06-02T00:00Z'),
             cost: 34,
           },
         ),
@@ -187,11 +185,11 @@ describe('Overview reducer', () => {
           'food',
           'some-id',
           {
-            date: DateTime.fromISO('2019-06-02T00:00Z'),
+            date: new Date('2019-06-02T00:00Z'),
             cost: 98,
           },
           {
-            date: DateTime.fromISO('2019-04-24T00:00Z'),
+            date: new Date('2019-04-24T00:00Z'),
             cost: 34,
           },
         ),
@@ -204,8 +202,8 @@ describe('Overview reducer', () => {
 
   describe('LIST_ITEM_DELETED', () => {
     const state: State = {
-      startDate: DateTime.fromISO('2019-04-30T23:59:59.999Z'),
-      endDate: DateTime.fromISO('2019-07-31T23:59:59.999Z'),
+      startDate: new Date('2019-04-30T23:59:59.999Z'),
+      endDate: new Date('2019-07-31T23:59:59.999Z'),
       cost: {
         funds: [0, 0, 510000, 2160465],
         fundChanges: [1, 1, 0, 1],
@@ -226,7 +224,7 @@ describe('Overview reducer', () => {
           'some-id',
           { page: 'holiday' },
           {
-            date: DateTime.fromISO('2019-07-12T00:00Z'),
+            date: new Date('2019-07-12T00:00Z'),
             cost: 1235,
           },
         ),

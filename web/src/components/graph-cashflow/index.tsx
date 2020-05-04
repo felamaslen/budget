@@ -1,5 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
-import { DateTime } from 'luxon';
+import addMonths from 'date-fns/addMonths';
+import endOfMonth from 'date-fns/endOfMonth';
+import isSameMonth from 'date-fns/isSameMonth';
+import getUnixTime from 'date-fns/getUnixTime';
+import fromUnixTime from 'date-fns/fromUnixTime';
+import format from 'date-fns/format';
+
 import { PickUnion } from '~client/types';
 import { LineGraph, Props as GraphProps } from '~client/components/graph/line-graph';
 import { TimeAxes } from '~client/components/graph/time-axes';
@@ -10,44 +16,37 @@ import { Range, BasicProps, Line } from '~client/types/graph';
 
 export type Props = PickUnion<GraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
   isMobile?: boolean;
-  now: DateTime;
+  now: Date;
   graphWidth: number;
   graphHeight?: number;
 };
 
-function getTime(
-  key: number,
+function getTimeAtIndex(
+  index: number,
   offset: number,
-  startDate: DateTime,
-  now?: DateTime,
+  startDate: Date,
+  now?: Date,
   breakAtToday?: boolean,
-): DateTime {
-  // converts a key index to a UNIX time stamp
-  const date = startDate.plus({ months: key - offset }).endOf('month');
-
-  if (breakAtToday && now && date.year === now.year && date.month === now.month) {
-    return now;
-  }
-
-  return date;
+): number {
+  const date = endOfMonth(addMonths(startDate, index - offset));
+  return getUnixTime(breakAtToday && now && isSameMonth(now, date) ? now : date);
 }
 
 export type TimeValuesProps = {
-  now?: DateTime;
+  now?: Date;
   oldOffset: number;
   breakAtToday?: boolean;
-  startDate: DateTime;
+  startDate: Date;
 };
 
-export function getValuesWithTime(data: number[], props: TimeValuesProps): [number, number][] {
-  const { oldOffset, breakAtToday, startDate } = props;
-
-  return data.map((value, index) => {
-    const date = getTime(index, oldOffset, startDate, props.now, breakAtToday);
-
-    return [date.toSeconds(), value];
-  });
-}
+export const getValuesWithTime = (
+  data: number[],
+  { now, oldOffset, breakAtToday, startDate }: TimeValuesProps,
+): [number, number][] =>
+  data.map((value, index) => [
+    getTimeAtIndex(index, oldOffset, startDate, now, breakAtToday),
+    value,
+  ]);
 
 export function getRanges(lines: Line[]): Range {
   return lines.reduce(
@@ -97,7 +96,7 @@ export const GraphCashFlow: React.FC<Props> = ({
   const beforeLines = useMemo(() => makeBeforeLines({ now }), [now]);
 
   const labelX = useCallback(
-    value => DateTime.fromJSDate(new Date(1000 * value)).toFormat('LLL y'),
+    (value: number): string => format(fromUnixTime(value), 'MMM yyyy'),
     [],
   );
 

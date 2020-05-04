@@ -1,10 +1,11 @@
 import { createSelector } from 'reselect';
 import { compose } from '@typed/compose';
-import { DateTime } from 'luxon';
+import isSameDay from 'date-fns/isSameDay';
+import differenceInDays from 'date-fns/differenceInDays';
 
 import { Page, PageList, PageListCalc } from '~client/types/app';
+import { Item, ListCalcItem } from '~client/types/list';
 import { State } from '~client/reducers';
-import { Item, ListCalcItem } from '~client/reducers/list';
 import { RequestType, WithCrud, Request } from '~client/types/crud';
 import { PAGES, PAGES_LIST } from '~client/constants/data';
 import { getCurrentDate } from '~client/selectors/now';
@@ -13,7 +14,7 @@ import { withoutDeleted, getValueForTransmit } from '~client/modules/data';
 
 type Params<P extends Page = PageListCalc> = { page: P };
 
-type SortedItem = ListCalcItem &
+export type SortedItem = ListCalcItem &
   Partial<{
     daily: number;
     total: number;
@@ -40,7 +41,7 @@ type ResultsCache = {
 type PageCache = {
   [page in Page]?: {
     result: SortedItem[];
-    now: DateTime;
+    now: Date;
     items: ListCalcItem[];
   };
 };
@@ -60,7 +61,7 @@ const makeGetDaily = (page: PageListCalc, items: ListCalcItem[]): GetDaily => {
   return (last, item, index): DailyCounts => {
     const sum = last + (item.cost ?? 0);
     if (
-      (index < items.length - 1 && !item.date.hasSame(items[index + 1].date, 'day')) ||
+      (index < items.length - 1 && !isSameDay(item.date, items[index + 1].date)) ||
       index === items.length - 1
     ) {
       return { daily: sum, dailySum: 0 };
@@ -72,16 +73,13 @@ const makeGetDaily = (page: PageListCalc, items: ListCalcItem[]): GetDaily => {
 
 function makeMemoisedRowProcessor(): (
   page: PageListCalc,
-  now: DateTime,
+  now: Date,
   items: WithCrud<ListCalcItem>[],
 ) => SortedItem[] {
   const resultsCache: ResultsCache = {};
   const perPageCache: PageCache = {};
 
-  return (page: PageListCalc, now: DateTime, items: WithCrud<ListCalcItem>[]): SortedItem[] => {
-    if (!items) {
-      return [];
-    }
+  return (page: PageListCalc, now: Date, items: WithCrud<ListCalcItem>[]): SortedItem[] => {
     if (
       now === perPageCache[page]?.now &&
       items.length === perPageCache[page]?.items.length &&
@@ -142,16 +140,16 @@ const memoisedRowProcessor = makeMemoisedRowProcessor();
 
 export const getSortedPageRows = createSelector<
   State,
-  Params,
+  Params<PageListCalc>,
   PageListCalc,
-  DateTime,
+  Date,
   ListCalcItem[],
   SortedItem[]
 >(
   getCalcPageProp,
   getCurrentDate,
   getAllPageRows,
-  (page: PageListCalc, now: DateTime, items: ListCalcItem[]): SortedItem[] => {
+  (page: PageListCalc, now: Date, items: ListCalcItem[]): SortedItem[] => {
     return memoisedRowProcessor(page, now, items as WithCrud<ListCalcItem>[]);
   },
 );
@@ -182,10 +180,10 @@ export const getWeeklyAverages = createSelector(
       return 0;
     }
 
-    const firstDate = rows[0].date;
-    const lastDate = rows[rows.length - 1].date;
+    const lastDate = rows[0].date; // sorted descending
+    const firstDate = rows[rows.length - 1].date;
 
-    const numWeeks = firstDate.diff(lastDate).as('days') / 7;
+    const numWeeks = differenceInDays(lastDate, firstDate) / 7;
     if (!numWeeks) {
       return 0;
     }

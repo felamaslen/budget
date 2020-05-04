@@ -1,9 +1,8 @@
 import { createSelector } from 'reselect';
 import humanizeDuration from 'humanize-duration';
-import { DateTime } from 'luxon';
 
 import { Page } from '~client/types/app';
-import { LegacyRow } from '~client/types/funds';
+import { Row } from '~client/types/funds';
 import { State } from '~client/reducers';
 import * as Funds from '~client/reducers/funds';
 import { Period } from '~client/constants/graph';
@@ -23,9 +22,9 @@ export const getPeriod = (state: Pick<State, Page.funds>): Period => state.funds
 export function getFundsCachedValueAgeText(
   startTime: number,
   cacheTimes: number[],
-  now: DateTime,
+  now: Date,
 ): string {
-  const age = now.toSeconds() * 1000 - 1000 * (cacheTimes[cacheTimes.length - 1] + startTime);
+  const age = now.getTime() - 1000 * (cacheTimes[cacheTimes.length - 1] + startTime);
 
   if (Number.isNaN(age)) {
     return 'no values';
@@ -40,7 +39,7 @@ export function getFundsCachedValueAgeText(
 const getFundCacheAge = createSelector(
   getNow,
   getCurrentFundsCache,
-  (now: DateTime, cache: Funds.Cache | undefined) => {
+  (now: Date, cache: Funds.Cache | undefined) => {
     if (!cache) {
       return '';
     }
@@ -103,7 +102,7 @@ function getPricesForRow(
   ]);
 }
 
-export type ProcessedFundsRow = LegacyRow & {
+export type ProcessedFundsRow = Row & {
   gain: GainsForRow;
   prices: RowPrices;
   sold: boolean;

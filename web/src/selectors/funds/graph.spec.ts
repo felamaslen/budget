@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon';
-
 import { State } from '~client/reducers';
 import { getStartTime, getCacheTimes, getFundItems, getFundLines } from './graph';
 import { testState } from '~client/test-data/state';
@@ -24,7 +22,7 @@ import { Page } from '~client/types/app';
 describe('Fund selectors / graph', () => {
   const state: Pick<State, 'now' | Page.funds> = {
     ...testState,
-    now: DateTime.fromISO('2017-09-01T19:01Z'),
+    now: new Date('2017-09-01T19:01Z'),
     funds: {
       ...testState.funds,
       viewSoldFunds: true,
@@ -34,19 +32,22 @@ describe('Fund selectors / graph', () => {
 
   describe('getStartTime', () => {
     it('should get the current funds cache start time', () => {
+      expect.assertions(1);
       expect(getStartTime(state)).toBe(testStartTime);
     });
   });
 
   describe('getCacheTimes', () => {
     it('should get the current funds cache times list', () => {
+      expect.assertions(1);
       expect(getCacheTimes(state)).toBe(testCacheTimes);
     });
   });
 
   describe('getFundItems', () => {
     it('should get the list of available funds with an overall item in addition', () => {
-      expect(getFundItems(state)).toEqual([
+      expect.assertions(1);
+      expect(getFundItems(state)).toStrictEqual([
         { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: COLOR_GRAPH_FUND_LINE },
         { id: '10', item: 'some fund 1', color: colorKey('some fund 1') },
         { id: '3', item: 'some fund 2', color: colorKey('some fund 2') },
@@ -56,6 +57,7 @@ describe('Fund selectors / graph', () => {
     });
 
     it('should filter out sold funds, if the options is set', () => {
+      expect.assertions(1);
       const stateNoSold = {
         ...state,
         funds: {
@@ -64,7 +66,7 @@ describe('Fund selectors / graph', () => {
         },
       };
 
-      expect(getFundItems(stateNoSold)).toEqual([
+      expect(getFundItems(stateNoSold)).toStrictEqual([
         { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: COLOR_GRAPH_FUND_LINE },
         { id: '10', item: 'some fund 1', color: colorKey('some fund 1') },
       ]);
@@ -73,7 +75,8 @@ describe('Fund selectors / graph', () => {
 
   describe('getFundLines', () => {
     it('should get a list (by mode) of graphed, split fund lines', () => {
-      expect(getFundLines(state)).toEqual({
+      expect.assertions(1);
+      expect(getFundLines(state)).toStrictEqual({
         [GRAPH_FUNDS_MODE_ROI]: testLinesRoi,
         [GRAPH_FUNDS_MODE_ABSOLUTE]: testLinesAbsolute,
         [GRAPH_FUNDS_MODE_PRICE]: testLinesPrice,
@@ -81,6 +84,7 @@ describe('Fund selectors / graph', () => {
     });
 
     it('should filter out sold funds, if the option is set', () => {
+      expect.assertions(1);
       const stateNoSold = {
         ...state,
         funds: {
@@ -91,7 +95,7 @@ describe('Fund selectors / graph', () => {
 
       const soldIds = ['3', '1', '5'];
 
-      expect(getFundLines(stateNoSold)).toEqual({
+      expect(getFundLines(stateNoSold)).toStrictEqual({
         [GRAPH_FUNDS_MODE_ROI]: testLinesRoi.filter(({ id }) => !soldIds.includes(id)),
         [GRAPH_FUNDS_MODE_ABSOLUTE]: testLinesAbsolute.filter(({ id }) => !soldIds.includes(id)),
         [GRAPH_FUNDS_MODE_PRICE]: testLinesPrice.filter(({ id }) => !soldIds.includes(id)),

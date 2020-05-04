@@ -1,6 +1,10 @@
 import { createSelector } from 'reselect';
-import { DateTime } from 'luxon';
 import { compose } from '@typed/compose';
+import isSameMonth from 'date-fns/isSameMonth';
+import differenceInYears from 'date-fns/differenceInYears';
+import differenceInDays from 'date-fns/differenceInDays';
+import startOfYear from 'date-fns/startOfYear';
+import format from 'date-fns/format';
 
 import { getCost, getSpendingColumn, getMonthDates } from '~client/selectors/overview/common';
 
@@ -18,18 +22,20 @@ import {
   isComplex,
   isFX,
   RequestItem,
+  Aggregate,
+  AggregateSums,
 } from '~client/types/net-worth';
 import { Cost } from '~client/types/overview';
 import { State } from '~client/reducers';
 
-const nullEntry = (date: DateTime): Create<Entry> => ({
+const nullEntry = (date: Date): Create<Entry> => ({
   date,
   values: [],
   currencies: [],
   creditLimit: [],
 });
 
-const FTI_START = DateTime.fromISO(process.env.BIRTH_DATE || '1990-01-01');
+const FTI_START = new Date(process.env.BIRTH_DATE || '1990-01-01');
 
 const getNonFilteredCategories = (state: State): WithCrud<Category>[] => state.netWorth.categories;
 const getNonFilteredSubcategories = (state: State): WithCrud<Subcategory>[] =>
@@ -107,24 +113,25 @@ function getSumByCategory(
   return sumValues(currencies, valuesFiltered);
 }
 
-type Names = { [key: string]: string };
-const getAggregateNames = (_: State, names: Names): Names => names;
-
-export const getAggregates = createSelector(
-  [getAggregateNames, getCategories, getSubcategories, getEntries],
-  (categoryNames, categories, subcategories, entries) =>
-    Object.keys(categoryNames).reduce(
-      (last, key) => ({
-        ...last,
-        [key]: getSumByCategory(categories, subcategories, entries, categoryNames[key]),
-      }),
-      {},
-    ),
+export const getAggregates = createSelector<
+  State,
+  Category[],
+  Subcategory[],
+  Entry[],
+  AggregateSums
+>(getCategories, getSubcategories, getEntries, (categories, subcategories, entries) =>
+  Object.entries(Aggregate).reduce(
+    (last: AggregateSums, [key, categoryName]) => ({
+      ...last,
+      [key]: getSumByCategory(categories, subcategories, entries, categoryName),
+    }),
+    {} as AggregateSums,
+  ),
 );
 
-const getEntryForMonth = (entries: CreateEdit<Entry>[]) => (date: DateTime): CreateEdit<Entry> => {
+const getEntryForMonth = (entries: CreateEdit<Entry>[]) => (date: Date): CreateEdit<Entry> => {
   const matchingEntries = entries
-    .filter(({ date: entryDate }) => entryDate.hasSame(date, 'month'))
+    .filter(({ date: entryDate }) => isSameMonth(entryDate, date))
     .sort(({ date: dateA }, { date: dateB }) => Number(dateB) - Number(dateA));
 
   if (!matchingEntries.length) {
@@ -181,8 +188,8 @@ const withTypeSplit = (categories: Category[], subcategories: Subcategory[]) => 
     liabilities: -sumByType('liability', categories, subcategories, entry),
   }));
 
-function getSpendingByDate(spending: number[], dates: DateTime[], date: DateTime): number {
-  const dateIndex = dates.findIndex(compare => compare.hasSame(date, 'month'));
+function getSpendingByDate(spending: number[], dates: Date[], date: Date): number {
+  const dateIndex = dates.findIndex(compare => isSameMonth(compare, date));
   if (dateIndex === -1) {
     return 0;
   }
@@ -192,7 +199,7 @@ function getSpendingByDate(spending: number[], dates: DateTime[], date: DateTime
 
 type EntryWithSpend = EntryTypeSplit & { expenses: number };
 
-const withSpend = (dates: DateTime[], spending: number[]) => (
+const withSpend = (dates: Date[], spending: number[]) => (
   rows: EntryTypeSplit[],
 ): EntryWithSpend[] =>
   rows.map(entry => ({
@@ -204,13 +211,15 @@ type EntryWithFTI = EntryWithSpend & { fti: number; pastYearAverageSpend: number
 
 const withFTI = (rows: EntryWithSpend[]): EntryWithFTI[] =>
   rows.map((entry, index) => {
-    const { years } = entry.date.diff(FTI_START, 'years').toObject();
+    const fullYears = differenceInYears(entry.date, FTI_START);
+    const days = differenceInDays(entry.date, startOfYear(entry.date));
+    const years = fullYears + days / 365;
 
     const pastYear = rows.slice(Math.max(0, index - 11), index + 1);
     const pastYearSpend = pastYear.reduce((sum, { expenses }) => sum + expenses, 0);
     const pastYearAverageSpend = (pastYearSpend * 12) / pastYear.length;
 
-    const fti = (entry.assets - entry.liabilities) * ((years ?? 0) / pastYearAverageSpend);
+    const fti = (entry.assets - entry.liabilities) * (years / pastYearAverageSpend);
 
     return { ...entry, fti, pastYearAverageSpend };
   });
@@ -236,7 +245,7 @@ export const getNetWorthTable = createSelector(
   getSummaryEntries,
   (
     costMap: Cost,
-    dates: DateTime[],
+    dates: Date[],
     categories: Category[],
     subcategories: Subcategory[],
     entries: Entry[],
@@ -297,7 +306,7 @@ const withEntryRequests = (
           ),
         )
         .map(({ date, values, creditLimit, currencies, ...rest }: WithCrud<Entry>) => ({
-          date: date.toISODate(),
+          date: format(date, 'yyyy-MM-dd'),
           values: withoutIds(values),
           creditLimit: withoutIds(creditLimit),
           currencies: withoutIds(currencies),

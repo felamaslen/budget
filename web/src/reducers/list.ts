@@ -7,7 +7,6 @@ import {
   PartialReducer,
 } from 'create-reducer-object';
 import { replaceAtIndex } from 'replace-array';
-import { DateTime } from 'luxon';
 
 import {
   LIST_ITEM_CREATED,
@@ -15,12 +14,13 @@ import {
   LIST_ITEM_DELETED,
 } from '~client/constants/actions/list';
 
-import { Page, PageListCalc } from '~client/types/app';
+import { Page, PageListCalc, PageList } from '~client/types/app';
 import { RequestType, Create, Request } from '~client/types/crud';
+import { getColumns, Item, ListCalcItem } from '~client/types/list';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
 
-import { PAGES, DataKeyAbbr } from '~client/constants/data';
+import { DataKeyAbbr } from '~client/constants/data';
 import { getValueFromTransmit, fieldExists } from '~client/modules/data';
 
 import {
@@ -30,7 +30,6 @@ import {
   State as CrudState,
 } from '~client/reducers/crud';
 
-export type Item = { id: string; cost?: number };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CrudItems<I extends Item> = CrudState<I>;
 
@@ -43,7 +42,7 @@ const filterByPage = <
   ES extends object = {},
   S extends ListState<I, ES> = ListState<I, ES>
 >(
-  thisPage: string,
+  thisPage: Page,
   handler: (state: S, action: Action) => Partial<S>,
 ) => (state: S, action: Action): Partial<S> => {
   if (action.page !== thisPage) {
@@ -62,7 +61,7 @@ const filterExtraProps = <I extends object>(
     .reduce((last, column) => ({ ...last, [column]: item[column] }), {} as Create<I>);
 
 const onCreate = <I extends Item, ES extends object>(
-  page: string,
+  page: Page,
   columns: (keyof Create<I>)[],
 ): PartialReducer<ListState<I, ES>> =>
   filterByPage<I, ES>(page, (state, action) => {
@@ -76,7 +75,7 @@ const onCreate = <I extends Item, ES extends object>(
     } as Partial<ListState<I, ES>>;
   });
 
-export const onRead = <I extends Item, R extends {}, ES extends object = {}>(page: string) => (
+export const onRead = <I extends Item, R extends {}, ES extends object = {}>(page: Page) => (
   state: ListState<I, ES>,
   action: Action,
 ): Partial<ListState<I, ES>> => {
@@ -108,7 +107,7 @@ export const onRead = <I extends Item, R extends {}, ES extends object = {}>(pag
 };
 
 const onUpdate = <I extends Item, ES extends object>(
-  page: string,
+  page: Page,
   columns: (keyof Create<I>)[],
 ): PartialReducer<ListState<I, ES>> =>
   filterByPage<I, ES>(page, (state, action) => ({
@@ -117,7 +116,7 @@ const onUpdate = <I extends Item, ES extends object>(
   }));
 
 const onDelete = <I extends Item, ES extends object>(
-  page: string,
+  page: Page,
 ): PartialReducer<ListState<I, ES>> =>
   filterByPage<I, ES>(page, (state, action) => ({
     ...state,
@@ -201,12 +200,12 @@ const confirmDeletes = <I extends Item>(requestItems: RequestItem[]): FilterRequ
     return items.filter(({ id }) => !idsToDelete.includes(id));
   });
 
-const getRequestItems = (page: string, action: Action): RequestItem[] =>
+const getRequestItems = (page: Page, action: Action): RequestItem[] =>
   (action.res.list as ResponseItem[])
     .map(({ res, ...request }, index): RequestItem => ({ request, index, res }))
     .filter(({ request }: RequestItem) => request.route === page);
 
-const onSyncReceived = <I extends Item, ES extends object = {}>(page: string) => (
+const onSyncReceived = <I extends Item, ES extends object = {}>(page: Page) => (
   state: ListState<I, ES>,
   action: Action,
 ): Partial<ListState<I, ES>> => {
@@ -222,7 +221,7 @@ const onSyncReceived = <I extends Item, ES extends object = {}>(page: string) =>
 };
 
 export function makeListReducer<I extends Item, R extends {} = I, ES extends object = {}>(
-  page: Page,
+  page: PageList,
   extraHandlers: ReducerMap<ListState<I, ES>> = {},
   extraState: ES = {} as ES,
 ): Reducer<ListState<I, ES>> {
@@ -231,7 +230,7 @@ export function makeListReducer<I extends Item, R extends {} = I, ES extends obj
     items: [],
   };
 
-  const columns = PAGES[page].cols as (keyof Create<I>)[];
+  const columns = getColumns<Create<I>>(page);
 
   const handlers: ReducerMap<ListState<I, ES>> = {
     [LOGGED_OUT]: (): ListState<I, ES> => initialState,
@@ -243,18 +242,7 @@ export function makeListReducer<I extends Item, R extends {} = I, ES extends obj
     ...extraHandlers,
   };
 
-  const reducer = createReducerObject(handlers, initialState);
-
-  return (
-    state: ListState<I, ES> = initialState,
-    action: Action | null = null,
-  ): ListState<I, ES> => {
-    if (action?.page && action?.page !== page) {
-      return state;
-    }
-
-    return reducer(state, action);
-  };
+  return createReducerObject(handlers, initialState);
 }
 
 type DailyProps = {
@@ -262,53 +250,60 @@ type DailyProps = {
   olderExists: boolean | null;
 };
 
-export interface ListCalcItem extends Item {
-  date: DateTime;
-  cost: number;
-}
-
 export type DailyState<I extends ListCalcItem, ES extends object = {}> = ListState<I, ES> &
   DailyProps;
 
 const withTotals = (
+  makeListHandler: <I extends ListCalcItem, ES extends object>(
+    page: Page,
+    columns: (keyof Create<I>)[],
+  ) => PartialReducer<ListState<I, ES>>,
   getNewTotal: (previousTotal: number, previousItemCost: number, nextItemCost: number) => number,
 ) => <I extends ListCalcItem, ES extends object = {}>(
-  page: string,
-): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) =>
-  filterByPage<I, ES, DailyState<I, ES>>(page, (state, action) => ({
-    ...state,
-    total: getNewTotal(
-      state.total,
-      Number(state.items.find(({ id }) => id === action?.id)?.cost ?? 0),
-      Number(action?.item?.cost ?? 0),
-    ),
-  }));
+  page: Page,
+  columns: (keyof Create<I>)[],
+): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => {
+  const listHandler = makeListHandler<I, ES>(page, columns);
+  return filterByPage<I, ES, DailyState<I, ES>>(
+    page,
+    (state, action) =>
+      ({
+        ...listHandler(state, action),
+        total: getNewTotal(
+          state.total,
+          Number(state.items.find(({ id }) => id === action?.id)?.cost ?? 0),
+          Number(action?.item?.cost ?? 0),
+        ),
+      } as Partial<DailyState<I, ES>>),
+  );
+};
 
-const onCreateDaily = withTotals((total, _, cost) => total + cost);
+const onCreateDaily = withTotals(onCreate, (total, _, cost) => total + cost);
 
-const onReadDaily = <I extends ListCalcItem, ES extends object = {}>(
-  page: string,
-): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => (
-  state: DailyState<I, ES>,
-  action: Action,
-): Partial<DailyState<I, ES>> => {
-  const {
-    res: { [page]: pageRes = { total: 0, olderExists: null } },
-  } = action;
+const onReadDaily = <I extends ListCalcItem, R extends {}, ES extends object = {}>(
+  page: Page,
+): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => {
+  const onReadList = onRead<I, R, ES>(page);
+  return (state: DailyState<I, ES>, action: Action): Partial<DailyState<I, ES>> => {
+    const {
+      res: { [page]: pageRes = { total: 0, olderExists: null } },
+    } = action;
 
-  const { total, olderExists } = pageRes as DailyProps;
+    const { total, olderExists } = pageRes as DailyProps;
 
-  return { ...state, total, olderExists };
+    return { ...onReadList(state, action), total, olderExists } as Partial<DailyState<I, ES>>;
+  };
 };
 
 const onUpdateDaily = withTotals(
+  onUpdate,
   (total, previousCost, nextCost) => total + nextCost - previousCost,
 );
 
-const onDeleteDaily = withTotals((total, previousCost) => total - previousCost);
+const onDeleteDaily = withTotals(onDelete, (total, previousCost) => total - previousCost);
 
 const onSyncReceivedDaily = <I extends ListCalcItem, ES extends object = {}>(
-  page: string,
+  page: Page,
 ): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => (
   state: DailyState<I, ES>,
   action: Action,
@@ -339,26 +334,16 @@ export function makeDailyListReducer<
     olderExists: null,
   };
 
-  const listReducer = makeListReducer<I, R, ES>(page, extraHandlers, extraState);
+  const columns = getColumns<Create<I>>(page);
 
-  const dailyReducer = createReducerObject<DailyState<I, ES>>(
-    {
-      [LIST_ITEM_CREATED]: onCreateDaily<I, ES>(page),
-      [DATA_READ]: onReadDaily<I, ES>(page),
-      [LIST_ITEM_UPDATED]: onUpdateDaily<I, ES>(page),
-      [LIST_ITEM_DELETED]: onDeleteDaily<I, ES>(page),
-      [SYNC_RECEIVED]: onSyncReceivedDaily<I, ES>(page),
-    },
-    initialState,
-  );
-
-  return (
-    state: DailyState<I, ES> = initialState,
-    action: Action | null = null,
-  ): DailyState<I, ES> => {
-    const nextState = listReducer(state, action);
-    const { total, olderExists } = dailyReducer(state, action);
-
-    return { ...nextState, total, olderExists };
+  const handlers = {
+    [LIST_ITEM_CREATED]: onCreateDaily<I, ES>(page, columns),
+    [DATA_READ]: onReadDaily<I, R, ES>(page),
+    [LIST_ITEM_UPDATED]: onUpdateDaily<I, ES>(page, columns),
+    [LIST_ITEM_DELETED]: onDeleteDaily<I, ES>(page, columns),
+    [SYNC_RECEIVED]: onSyncReceivedDaily<I, ES>(page),
+    ...extraHandlers,
   };
+
+  return makeListReducer<I, R, DailyState<I, ES>>(page, handlers, initialState);
 }

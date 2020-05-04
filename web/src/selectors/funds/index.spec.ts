@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import getUnixTime from 'date-fns/getUnixTime';
 
 import { State } from '~client/reducers';
 import state from '~client/test-data/state';
@@ -15,28 +15,31 @@ import { getTransactionsList } from '~client/modules/data';
 describe('Funds selectors', () => {
   describe('getFundsCachedValueAgeText', () => {
     it('should return the expected string', () => {
-      const now = DateTime.fromISO('2018-06-03');
+      expect.assertions(1);
+      const now = new Date('2018-06-03');
 
-      expect(getFundsCachedValueAgeText(now.toSeconds() - 4000, [0, 100, 400], now)).toBe(
+      expect(getFundsCachedValueAgeText(getUnixTime(now) - 4000, [0, 100, 400], now)).toBe(
         '1 hour ago',
       );
     });
 
     it('getFundsCachedValueAgeText uses only one unit', () => {
-      const now = DateTime.fromISO('2018-06-03');
+      expect.assertions(1);
+      const now = new Date('2018-06-03');
 
       expect(
-        getFundsCachedValueAgeText(now.toSeconds() - 86400 - 3600 * 5.4, [0, 100, 400], now),
+        getFundsCachedValueAgeText(getUnixTime(now) - 86400 - 3600 * 5.4, [0, 100, 400], now),
       ).toBe('1 day ago');
     });
   });
 
   describe('getFundsCachedValue', () => {
     it('should get an age text and value', () => {
+      expect.assertions(1);
       const expectedValue = 399098.2;
       const expectedAgeText = '7 months ago';
 
-      expect(getFundsCachedValue(state)).toEqual({
+      expect(getFundsCachedValue(state)).toStrictEqual({
         value: expectedValue,
         ageText: expectedAgeText,
         dayGain: getDayGain(state),
@@ -45,6 +48,7 @@ describe('Funds selectors', () => {
     });
 
     it('should return a default value if there are no data', () => {
+      expect.assertions(1);
       const stateNoCache: State = {
         ...state,
         funds: {
@@ -53,7 +57,7 @@ describe('Funds selectors', () => {
         },
       };
 
-      expect(getFundsCachedValue(stateNoCache)).toEqual({
+      expect(getFundsCachedValue(stateNoCache)).toStrictEqual({
         dayGain: getDayGain(stateNoCache),
         dayGainAbs: getDayGainAbs(stateNoCache),
         value: 0,
@@ -62,6 +66,7 @@ describe('Funds selectors', () => {
     });
 
     it('should skip funds without price data', () => {
+      expect.assertions(1);
       const stateNoPrice = {
         ...state,
         funds: {
@@ -77,7 +82,7 @@ describe('Funds selectors', () => {
         },
       };
 
-      expect(getFundsCachedValue(stateNoPrice)).toEqual({
+      expect(getFundsCachedValue(stateNoPrice)).toStrictEqual({
         dayGain: getDayGain(stateNoPrice),
         dayGainAbs: getDayGainAbs(stateNoPrice),
         value: 399098.2,
@@ -88,12 +93,14 @@ describe('Funds selectors', () => {
 
   describe('getFundsCost', () => {
     it('should get the total fund cost, excluding sold funds', () => {
+      expect.assertions(1);
       expect(getFundsCost(state)).toBe(400000);
     });
   });
 
   describe('getProcessedFundsRows', () => {
     it('should set gain, prices, sold and class information on each fund row', () => {
+      expect.assertions(4);
       const result = getProcessedFundsRows(state);
 
       expect(result).toBeInstanceOf(Array);
@@ -102,7 +109,7 @@ describe('Funds selectors', () => {
 
       const match10 = result.find(({ id }) => id === '10');
 
-      expect(match10).toEqual(
+      expect(match10).toStrictEqual(
         expect.objectContaining({
           id: '10',
           item: 'some fund 1',
@@ -122,7 +129,7 @@ describe('Funds selectors', () => {
 
       const match1 = result.find(({ id }: ProcessedFundsRow) => id === '1');
 
-      expect(match1).toEqual(
+      expect(match1).toStrictEqual(
         expect.objectContaining({
           id: '1',
           item: 'some fund 3',

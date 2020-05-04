@@ -1,18 +1,15 @@
-import { DateTime } from 'luxon';
 import shortid from 'shortid';
+import formatDate from 'date-fns/format';
 import { replaceAtIndex } from 'replace-array';
 
-import { RequestType, WithCrud } from '~client/types/crud';
-import {
-  TransactionRaw as TransactionRawNew,
-  LegacyTransaction as Transaction,
-} from '~client/types/funds';
+import { RequestType, WithCrud, Create } from '~client/types/crud';
+import { TransactionRaw as TransactionRawNew, Transaction } from '~client/types/funds';
 import { Average } from '~client/constants';
 import { PeriodObject } from '~client/constants/graph';
 import { Data as Line } from '~client/types/graph';
 
 type TransactionRaw = Omit<TransactionRawNew, 'date'> & {
-  date: DateTime | string;
+  date: Date | string;
 };
 
 export type Identity<I, O = I> = (state: I) => O;
@@ -34,14 +31,11 @@ export function getPeriodMatch(
   return { period: match[1], length: Number(match[2]) };
 }
 
-const dateAsDateTime = (date: DateTime | string): DateTime =>
-  typeof date === 'string' ? DateTime.fromISO(date) : date;
-
 export const getTransactionsList = (data: TransactionRaw[]): Transaction[] =>
   data.map(
     ({ date, units, cost }: TransactionRaw): Transaction => ({
       id: shortid.generate(),
-      date: dateAsDateTime(date),
+      date: new Date(date),
       units: Number(units) || 0,
       cost: Number(cost) || 0,
     }),
@@ -60,36 +54,37 @@ export const isSold = (transactionsList: Transaction[]): boolean =>
 
 export const addToTransactionsList = (
   transactionsList: Transaction[],
-  item: TransactionRaw,
-): Transaction[] => transactionsList.concat(getTransactionsList([item]));
+  item: Create<Transaction>,
+): Transaction[] => [
+  ...transactionsList,
+  {
+    ...item,
+    id: shortid.generate(),
+  },
+];
 
-export function modifyTransaction(
+export const modifyTransaction = (
   transactionsList: Transaction[],
   index: number,
-  item: Partial<TransactionRaw>,
-): Transaction[] {
-  const oldItem = transactionsList[index];
-  const date = item.date ? dateAsDateTime(item.date) : oldItem.date;
-
-  return replaceAtIndex(transactionsList, index, { ...oldItem, ...item, date });
-}
+  delta: Partial<Transaction>,
+): Transaction[] => replaceAtIndex(transactionsList, index, oldItem => ({ ...oldItem, ...delta }));
 
 export const modifyTransactionById = (
   transactionsList: Transaction[],
   id: string,
-  item: Partial<TransactionRaw>,
+  delta: Partial<Transaction>,
 ): Transaction[] =>
   modifyTransaction(
     transactionsList,
     transactionsList.findIndex(({ id: itemId }) => itemId === id),
-    item,
+    delta,
   );
 
 export const formatTransactionsList = (transactionsList: Transaction[]): TransactionRaw[] =>
   transactionsList
     .sort(({ date: dateA }, { date: dateB }) => Number(dateA) - Number(dateB))
     .map(({ date, units, cost }) => ({
-      date: date.toISODate(),
+      date: formatDate(date, 'yyyy-MM-dd'),
       units,
       cost,
     }));
@@ -161,7 +156,7 @@ export const limitTimeSeriesLength = (timeSeries: Line, limit: number): Line =>
 export const randnBm = (): number =>
   Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
 
-export function getValueFromTransmit(dataType: 'date', value: string): DateTime;
+export function getValueFromTransmit(dataType: 'date', value: string): Date;
 export function getValueFromTransmit(dataType: 'cost', value: string): number;
 export function getValueFromTransmit(
   dataType: 'transactions',
@@ -174,7 +169,7 @@ export function getValueFromTransmit(dataType: string, value: any): string;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getValueFromTransmit(dataType: string, value: any): any {
   if (dataType === 'date') {
-    return DateTime.fromISO(value);
+    return new Date(value);
   }
   if (dataType === 'cost') {
     return parseInt(value, 10) || 0;
@@ -186,7 +181,7 @@ export function getValueFromTransmit(dataType: string, value: any): any {
   return String(value);
 }
 
-export function getValueForTransmit(dataType: 'date', value: DateTime): string;
+export function getValueForTransmit(dataType: 'date', value: Date): string;
 export function getValueForTransmit(
   dataType: 'transactions',
   value: Transaction[],
@@ -203,7 +198,7 @@ export function getValueForTransmit(dataType: string, value: string): string;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getValueForTransmit(dataType: string, value: any): any {
   if (dataType === 'date') {
-    return value.toISODate();
+    return formatDate(value, 'yyyy-MM-dd');
   }
   if (dataType === 'transactions') {
     return formatTransactionsList(value);
@@ -212,17 +207,14 @@ export function getValueForTransmit(dataType: string, value: any): any {
   return getValueFromTransmit(dataType, value);
 }
 
-const asTimestamp = (date: string | Date | DateTime): number => {
-  if (date instanceof DateTime) {
-    return date.toMillis();
-  }
+const asTimestamp = (date: string | Date): number => {
   if (date instanceof Date) {
     return date.getTime();
   }
   return new Date(date).getTime();
 };
 
-export const sortByDate = <I extends { date: string | Date | DateTime }>(data: I[]): I[] =>
+export const sortByDate = <I extends { date: string | Date }>(data: I[]): I[] =>
   data.sort(({ date: dateA }, { date: dateB }) => asTimestamp(dateA) - asTimestamp(dateB));
 
 function sortKey<K extends string, I extends { [key in K]: number | string }>(
@@ -245,7 +237,6 @@ export const sortByKey = <K extends string, I extends { [key in K]: number | str
 ) => (items: I[]): I[] =>
   items.sort((itemA, itemB) => keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fieldExists = <V = never>(value?: V): boolean =>
   typeof value !== 'undefined' && !(typeof value === 'string' && !value.length);
 

@@ -4,7 +4,7 @@ import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { Color, COLOR_FUND_UP, COLOR_FUND_DOWN } from '~client/constants/colors';
 import { getCurrentFundsCache, getFundsRows } from '~client/selectors/funds/helpers';
 import { PickRequire } from '~client/types';
-import { LegacyRow, LegacyTransaction } from '~client/types/funds';
+import { Row, Transaction } from '~client/types/funds';
 import * as Funds from '~client/reducers/funds';
 
 const scoreColor = (score: number, channel: number): number =>
@@ -35,7 +35,7 @@ type CostValue = {
 };
 
 function getCostValue(
-  transactions: LegacyTransaction[],
+  transactions: Transaction[],
   price: number,
   yesterdayPrice: number,
 ): CostValue {
@@ -77,7 +77,7 @@ type RowGain = Partial<
 >;
 
 export function getRowGains(
-  rows: LegacyRow[],
+  rows: Row[],
   cache: Funds.Cache,
 ): {
   [id: string]: RowGain;
@@ -129,7 +129,7 @@ export function getGainsForRow(rowGains: { [fundId: string]: RowGain }, id: stri
 
   const [min, max] = getMinMax(rowGains);
 
-  return { ...rowGains[id], color: getFundColor(rowGains[id].gain || 0, min, max) };
+  return { ...rowGains[id], color: getFundColor(rowGains[id].gain ?? 0, min, max) };
 }
 
 const getItemsWithPrices = createSelector(getCurrentFundsCache, getFundsRows, (cache, items) => {

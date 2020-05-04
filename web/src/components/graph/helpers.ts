@@ -1,3 +1,5 @@
+import { replaceAtIndex } from 'replace-array';
+
 import { GRAPH_CURVINESS } from '~client/constants/graph';
 import { timeSeriesTicks } from '~client/modules/date';
 import {
@@ -13,7 +15,7 @@ import {
   Data,
   PathProps,
   SVGPathProps,
-  TimeScale,
+  Tick,
   DynamicLineColor,
   ColorSwitcher,
 } from '~client/types/graph';
@@ -68,24 +70,28 @@ export const getPixY = (calc: PixY, secondary = false): ((value: number) => numb
 export const getValY = (calc: ValY, secondary = false): ((value: number) => number) =>
   secondary ? calc.valY2 : calc.valY1;
 
-export const getTimeScale = ({
-  minX,
-  maxX,
-  pixX,
-}: RangeX & PixX): ((offset: number) => TimeScale) => (offset = 0): TimeScale => {
-  // divides the time axis (horizontal) into appropriate chunks
-  const ticks = timeSeriesTicks(offset + minX, offset + maxX);
-
-  if (ticks) {
-    return ticks.map((tick: { major: 0 | 1 | 2; time: number; label: string | null }) => ({
-      major: tick.major,
-      pix: Math.floor(pixX(tick.time - offset)) + 0.5,
-      text: tick.label,
-    }));
-  }
-
-  return [];
-};
+// divides the time axis (horizontal) into appropriate chunks
+export const getTimeScale = ({ minX, maxX, pixX }: RangeX & PixX): ((offset: number) => Tick[]) => (
+  offset = 0,
+): Tick[] =>
+  timeSeriesTicks(offset + minX, offset + maxX)
+    .map(
+      (tick): Tick => ({
+        major: tick.major,
+        pix: Math.floor(pixX(tick.time - offset)) + 0.5,
+        text: tick.label,
+      }),
+    )
+    .reduce((last: Tick[], tick: Tick): Tick[] => {
+      const samePixIndex = last.findIndex(({ pix }) => pix === tick.pix);
+      if (samePixIndex === -1) {
+        return [...last, tick];
+      }
+      if (last[samePixIndex].major >= tick.major) {
+        return last;
+      }
+      return replaceAtIndex(last, samePixIndex, tick);
+    }, []);
 
 type ControlPoint = [Point, Point];
 

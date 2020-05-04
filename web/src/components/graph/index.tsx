@@ -3,10 +3,9 @@ import React from 'react';
 import { Size } from '~client/types/graph';
 import * as Styled from './styles';
 
-export type GraphRef = React.MutableRefObject<HTMLElement | undefined>;
+export type GraphRef = React.MutableRefObject<HTMLDivElement | null>;
 
 export type GraphProps = {
-  graphRef?: GraphRef;
   outerProperties?: object;
   svgProperties?: object;
   before?: React.FC;
@@ -15,21 +14,25 @@ export type GraphProps = {
 
 export type Props = Size & GraphProps;
 
-export const Graph: React.FC<Props> = ({
-  width,
-  height,
-  graphRef,
-  svgProperties,
-  outerProperties,
-  before: Before = null,
-  after: After = null,
-  children,
-}) => (
-  <Styled.Graph ref={graphRef} {...outerProperties} width={width} height={height}>
+const GraphWithoutRef: React.RefForwardingComponent<HTMLDivElement, Props> = (
+  {
+    width,
+    height,
+    svgProperties,
+    outerProperties,
+    before: Before = null,
+    after: After = null,
+    children,
+  },
+  ref,
+) => (
+  <Styled.Graph ref={ref} {...outerProperties} width={width} height={height}>
     {Before && <Before />}
-    <svg width={width} height={height} {...svgProperties}>
+    <svg data-testid="graph-svg" width={width} height={height} {...svgProperties}>
       {children}
     </svg>
     {After && <After />}
   </Styled.Graph>
 );
+
+export const Graph = React.forwardRef<HTMLDivElement, Props>(GraphWithoutRef);

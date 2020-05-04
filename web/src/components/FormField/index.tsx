@@ -23,14 +23,20 @@ export const Wrapper: <V = string>(
   small = false,
   children,
 }) => (
-  <Styled.FormField item={item} active={active} invalid={invalid} small={small}>
+  <Styled.FormField
+    data-testid={`form-field-${item}`}
+    item={item}
+    active={active}
+    invalid={invalid}
+    small={small}
+  >
     {active && children}
     {!active && formatItem(item, value)}
   </Styled.FormField>
 );
 
 type Props = {
-  onChange: (value?: string) => void;
+  onChange: (value: string) => void;
   inline?: boolean;
   label?: string;
   item?: string;

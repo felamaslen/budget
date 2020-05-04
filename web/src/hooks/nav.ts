@@ -1,6 +1,7 @@
 import { useReducer, useCallback, useEffect } from 'react';
 
 import { PageList } from '~client/types/app';
+import { Column, getColumns } from '~client/types/list';
 import {
   ActionType,
   isEscape,
@@ -9,7 +10,7 @@ import {
   getNavDirection,
   DirectionDelta,
 } from '~client/modules/nav';
-import { CREATE_ID, PAGES } from '~client/constants/data';
+import { CREATE_ID } from '~client/constants/data';
 
 export { ActionType } from '~client/modules/nav';
 
@@ -27,9 +28,7 @@ export const NAV_PREV = ActionType.NavPrev;
 export const NAV_XY = ActionType.NavXY;
 export const ACTIVE_SET = ActionType.ActiveSet;
 
-type Column<I extends {} = {}> = keyof I;
-
-type Command<I extends {} = {}, T = never> = Partial<{
+export type Command<I extends {} = {}, T = never> = Partial<{
   type: ActionType;
   id: string | null;
   column: Column<I> | Button | null;
@@ -270,9 +269,6 @@ export function navReducer<I extends { id: string }>(state: State<I>, action: Ac
 
   return nextState;
 }
-
-const getColumns = <I extends { id: string }>(page?: PageList): Column<I>[] =>
-  (page && ((PAGES[page].cols ?? []) as Column<I>[])) ?? [];
 
 type SetCommand<I extends { id: string }> = (
   action:

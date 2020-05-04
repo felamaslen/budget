@@ -1,7 +1,7 @@
 import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
 import { compose } from '@typed/compose';
-import { DateTime } from 'luxon';
 import { replaceAtIndex } from 'replace-array';
+import startOfDay from 'date-fns/startOfDay';
 
 import { validateField } from '~client/modules/validate';
 import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared/button';
@@ -64,7 +64,7 @@ const withDefaultDate = (fields: Field[]): Field[] =>
     fields.findIndex(({ item, value }) => item === 'date' && !value),
     {
       item: 'date',
-      value: DateTime.local(),
+      value: startOfDay(new Date()),
     },
   );
 

@@ -1,6 +1,5 @@
 import { createReducerObject, Action } from 'create-reducer-object';
 import { compose } from '@typed/compose';
-import { DateTime } from 'luxon';
 
 import {
   Category,
@@ -143,7 +142,7 @@ const onRead = (
       creditLimit: CreditLimit[];
       currencies: Currency[];
     }) => ({
-      date: DateTime.fromISO(date),
+      date: new Date(date),
       values,
       creditLimit,
       currencies,
@@ -170,7 +169,7 @@ const withDates = (entries: (Entry | RawDate<Entry>)[]): Entry[] =>
       entryIsRaw(entry)
         ? {
             ...entry,
-            date: DateTime.fromISO(entry.date),
+            date: new Date(entry.date),
           }
         : entry,
     ),

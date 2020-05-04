@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon';
-
 import { Data } from '~client/types/graph';
 import { Color } from '~client/constants/colors';
 import { DataKeyAbbr } from '~client/constants/data';
@@ -15,16 +13,10 @@ export type Transaction = Omit<TransactionRaw, 'date'> & {
   date: Date;
 };
 
-export type LegacyTransaction = Omit<Transaction, 'date'> & { date: DateTime };
-
 export type Row = {
   id: string;
   item: string;
   transactions: Transaction[] | null;
-};
-
-export type LegacyRow = Omit<Row, 'transactions'> & {
-  transactions: LegacyTransaction[] | null;
 };
 
 export type FundPrices = {

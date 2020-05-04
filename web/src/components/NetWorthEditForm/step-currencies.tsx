@@ -5,7 +5,6 @@ import { debounce } from 'throttle-debounce';
 import shortid from 'shortid';
 import { replaceAtIndex } from 'replace-array';
 
-import { isLegacyDate } from '~client/types';
 import { CreateEdit } from '~client/types/crud';
 import { Entry, Currency } from '~client/types/net-worth';
 import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared/button';
@@ -336,7 +335,7 @@ const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }) => {
     <FormContainer {...containerProps} step={Step.Currencies}>
       <Styled.SectionTitle>
         {'Currencies - '}
-        {format(isLegacyDate(item.date) ? item.date.toJSDate() : item.date, 'yyyy-MM-dd')}
+        {format(item.date, 'yyyy-MM-dd')}
       </Styled.SectionTitle>
       {errorRates && (
         <Styled.Error>

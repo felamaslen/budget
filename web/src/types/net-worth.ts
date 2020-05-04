@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon';
-
 import { WithCrud, RawDate, Request } from './crud';
 
 export type Category = {
@@ -46,7 +44,7 @@ export type CreditLimit = {
 
 export type Entry = {
   id: string;
-  date: DateTime;
+  date: Date;
   values: ValueObject[];
   creditLimit: CreditLimit[];
   currencies: Currency[];
@@ -77,3 +75,24 @@ export type NetWorthRequest<I extends WithCrud<{ id: string }> = never> = Reques
 
 export type RequestItem = Category | Subcategory | RawDate<EntryWithOptionalIds>;
 export type NetWorthRequestGeneric = NetWorthRequest<RequestItem>;
+
+export type TableRow = {
+  id: string;
+  date: Date;
+  assets: number;
+  liabilities: number;
+  expenses: number;
+  fti: number;
+  pastYearAverageSpend: number;
+};
+
+export enum Aggregate {
+  cashEasyAccess = 'Cash (easy access)',
+  cashOther = 'Cash (other)',
+  stocks = 'Stocks',
+  pension = 'Pension',
+}
+
+export type AggregateSums = {
+  [key in Aggregate]: number;
+};

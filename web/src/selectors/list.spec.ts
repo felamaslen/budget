@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import { compose } from '@typed/compose';
 import { replaceAtIndex } from 'replace-array';
 
@@ -8,6 +7,7 @@ import {
   getWeeklyAverages,
   getTotalCost,
   getCrudRequests,
+  SortedItem,
 } from '~client/selectors/list';
 import state from '~client/test-data/state';
 import { getTransactionsList } from '~client/modules/data';
@@ -21,13 +21,13 @@ describe('List selectors', () => {
 
   const stateWithUnorderedRows: State = {
     ...state,
-    now: DateTime.fromJSDate(now),
+    now,
     [Page.general]: {
       ...state[Page.general],
       items: [
         {
           id: 'id300',
-          date: DateTime.fromISO('2018-02-03'),
+          date: new Date('2018-02-03'),
           item: 'foo1',
           category: 'bar1',
           cost: 1139,
@@ -35,7 +35,7 @@ describe('List selectors', () => {
         },
         {
           id: 'id29',
-          date: DateTime.fromISO('2018-02-02'),
+          date: new Date('2018-02-02'),
           item: 'foo3',
           category: 'bar3',
           cost: 498,
@@ -43,7 +43,7 @@ describe('List selectors', () => {
         },
         {
           id: 'id81',
-          date: DateTime.fromISO('2018-02-03'),
+          date: new Date('2018-02-03'),
           item: 'foo2',
           category: 'bar2',
           cost: 876,
@@ -51,7 +51,7 @@ describe('List selectors', () => {
         },
         {
           id: 'id956__SHOULD_NOT_SEE_THIS!',
-          date: DateTime.fromISO('2018-03-09'),
+          date: new Date('2018-03-09'),
           item: 'foo4',
           category: 'bar4',
           cost: 198,
@@ -60,7 +60,7 @@ describe('List selectors', () => {
         },
         {
           id: 'id19',
-          date: DateTime.fromISO('2018-04-17'),
+          date: new Date('2018-04-17'),
           item: 'foo3',
           category: 'bar3',
           cost: 29,
@@ -71,23 +71,23 @@ describe('List selectors', () => {
   };
 
   const testItems = [
-    { id: 'id2', date: DateTime.fromISO('2019-06-16'), cost: 2 },
-    { id: 'id3', date: DateTime.fromISO('2019-06-16'), cost: 3 },
-    { id: 'id5', date: DateTime.fromISO('2019-06-16'), cost: 5 },
-    { id: 'id7', date: DateTime.fromISO('2019-06-15'), cost: 7 },
-    { id: 'id11', date: DateTime.fromISO('2019-06-16'), cost: 11 },
-    { id: 'id13', date: DateTime.fromISO('2019-06-16'), cost: 13 },
-    { id: 'id17', date: DateTime.fromISO('2019-06-15'), cost: 17 },
-    { id: 'id19', date: DateTime.fromISO('2019-06-14'), cost: 19 },
-    { id: 'id29', date: DateTime.fromISO('2019-06-13'), cost: 29 },
-    { id: 'id23', date: DateTime.fromISO('2019-06-14'), cost: 23 },
-    { id: 'id31', date: DateTime.fromISO('2019-07-25'), cost: 31 },
-    { id: 'id37', date: DateTime.fromISO('2019-08-21'), cost: 37 },
+    { id: 'id2', date: new Date('2019-06-16'), cost: 2 },
+    { id: 'id3', date: new Date('2019-06-16'), cost: 3 },
+    { id: 'id5', date: new Date('2019-06-16'), cost: 5 },
+    { id: 'id7', date: new Date('2019-06-15'), cost: 7 },
+    { id: 'id11', date: new Date('2019-06-16'), cost: 11 },
+    { id: 'id13', date: new Date('2019-06-16'), cost: 13 },
+    { id: 'id17', date: new Date('2019-06-15'), cost: 17 },
+    { id: 'id19', date: new Date('2019-06-14'), cost: 19 },
+    { id: 'id29', date: new Date('2019-06-13'), cost: 29 },
+    { id: 'id23', date: new Date('2019-06-14'), cost: 23 },
+    { id: 'id31', date: new Date('2019-07-25'), cost: 31 },
+    { id: 'id37', date: new Date('2019-08-21'), cost: 37 },
   ];
 
   const stateWithManyRows: State = {
     ...state,
-    now: DateTime.fromISO('2019-07-13T15:23:39Z'),
+    now: new Date('2019-07-13T15:23:39Z'),
     [Page.general]: {
       ...state[Page.general],
       items: testItems.map(item => ({
@@ -108,6 +108,7 @@ describe('List selectors', () => {
 
   describe('getAllPageRows', () => {
     it('should get all rows except optimistically deleted ones', () => {
+      expect.assertions(1);
       const result = getAllPageRows(stateWithUnorderedRows, { page: Page.general });
 
       expect(result).toStrictEqual([
@@ -129,13 +130,14 @@ describe('List selectors', () => {
 
   describe('getSortedPageRows', () => {
     it('should sort list rows by date, newest first', () => {
+      expect.assertions(2);
       expect(PAGES[Page.general].daily).toBe(true);
       const result = getSortedPageRows(stateWithManyRows, { page: Page.general });
 
       expect(result).toStrictEqual([
         expect.objectContaining({
           id: 'id37',
-          date: DateTime.fromISO('2019-08-21'),
+          date: new Date('2019-08-21'),
           cost: 37,
           future: true,
           firstPresent: false,
@@ -143,7 +145,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id31',
-          date: DateTime.fromISO('2019-07-25'),
+          date: new Date('2019-07-25'),
           cost: 31,
           future: true,
           firstPresent: false,
@@ -151,7 +153,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id5',
-          date: DateTime.fromISO('2019-06-16'),
+          date: new Date('2019-06-16'),
           cost: 5,
           future: false,
           firstPresent: true,
@@ -159,7 +161,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id2',
-          date: DateTime.fromISO('2019-06-16'),
+          date: new Date('2019-06-16'),
           cost: 2,
           future: false,
           firstPresent: false,
@@ -167,7 +169,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id11',
-          date: DateTime.fromISO('2019-06-16'),
+          date: new Date('2019-06-16'),
           cost: 11,
           future: false,
           firstPresent: false,
@@ -175,7 +177,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id13',
-          date: DateTime.fromISO('2019-06-16'),
+          date: new Date('2019-06-16'),
           cost: 13,
           future: false,
           firstPresent: false,
@@ -183,7 +185,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id3',
-          date: DateTime.fromISO('2019-06-16'),
+          date: new Date('2019-06-16'),
           cost: 3,
           future: false,
           firstPresent: false,
@@ -191,7 +193,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id7',
-          date: DateTime.fromISO('2019-06-15'),
+          date: new Date('2019-06-15'),
           cost: 7,
           future: false,
           firstPresent: false,
@@ -199,7 +201,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id17',
-          date: DateTime.fromISO('2019-06-15'),
+          date: new Date('2019-06-15'),
           cost: 17,
           future: false,
           firstPresent: false,
@@ -207,7 +209,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id19',
-          date: DateTime.fromISO('2019-06-14'),
+          date: new Date('2019-06-14'),
           cost: 19,
           future: false,
           firstPresent: false,
@@ -215,7 +217,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id23',
-          date: DateTime.fromISO('2019-06-14'),
+          date: new Date('2019-06-14'),
           cost: 23,
           future: false,
           firstPresent: false,
@@ -223,7 +225,7 @@ describe('List selectors', () => {
         }),
         expect.objectContaining({
           id: 'id29',
-          date: DateTime.fromISO('2019-06-13'),
+          date: new Date('2019-06-13'),
           cost: 29,
           future: false,
           firstPresent: false,
@@ -233,6 +235,7 @@ describe('List selectors', () => {
     });
 
     it('should add future and firstPresent props', () => {
+      expect.assertions(1);
       const result = getSortedPageRows(stateWithManyRows, { page: Page.general });
 
       expect(result).toStrictEqual([
@@ -288,6 +291,7 @@ describe('List selectors', () => {
     });
 
     it('should add daily totals', () => {
+      expect.assertions(1);
       const result = getSortedPageRows(stateWithManyRows, { page: Page.general });
 
       expect(result).toStrictEqual([
@@ -331,13 +335,14 @@ describe('List selectors', () => {
     });
 
     it('should return shallowly equal rows where possible', () => {
+      expect.assertions(10);
       const result0 = getSortedPageRows(state, { page: Page.food });
 
       expect(result0).toHaveLength(4);
 
       const modifiedState: State = {
         ...state,
-        now: DateTime.fromISO('2018-04-18'),
+        now: new Date('2018-04-18'),
         [Page.food]: {
           ...state[Page.food],
           items: compose(
@@ -369,6 +374,7 @@ describe('List selectors', () => {
     });
 
     it('should memoise the result set across different pages', () => {
+      expect.assertions(2);
       const resultFood0 = getSortedPageRows(state, { page: Page.food });
       const resultGeneral0 = getSortedPageRows(state, { page: Page.general });
       const resultFood1 = getSortedPageRows(state, { page: Page.food });
@@ -379,9 +385,10 @@ describe('List selectors', () => {
     });
 
     it("shouldn't recalculate until the next day", () => {
+      expect.assertions(6);
       const getState = (date: string): State => ({
         ...stateWithUnorderedRows,
-        now: DateTime.fromISO(date),
+        now: new Date(date),
       });
 
       const resultA = getSortedPageRows(getState('2019-07-13T16:45:23Z'), { page: Page.general });
@@ -467,12 +474,14 @@ describe('List selectors', () => {
       });
 
       it('should not get daily totals', () => {
+        expect.assertions(1);
         const result = getSortedPageRows(stateWithManyRows, { page: Page.income });
 
-        expect(result.every(item => typeof item.daily === 'undefined')).toBe(true);
+        expect(result.every((item: SortedItem) => typeof item.daily === 'undefined')).toBe(true);
       });
 
       it('should memoize the result', () => {
+        expect.assertions(1);
         const result0 = getSortedPageRows(stateWithManyRows, { page: Page.income });
         const result1 = getSortedPageRows(stateWithManyRows, { page: Page.income });
 
@@ -483,19 +492,63 @@ describe('List selectors', () => {
 
   describe('getWeeklyAverages', () => {
     it('should return the data with a processed weekly value', () => {
+      expect.assertions(1);
       expect(getWeeklyAverages(state, { page: Page.food })).toBeCloseTo(
         Math.round((29 + 1139 + 876 + 498) / (10 + 4 / 7)),
       );
+    });
+
+    it('should be able to handle non-daily-calculated pages gracefully', () => {
+      expect.assertions(1);
+      expect(getWeeklyAverages(state, { page: Page.bills })).toBeNull();
+    });
+
+    it('should handle the case when there are no rows', () => {
+      expect.assertions(1);
+      expect(
+        getWeeklyAverages(
+          {
+            ...state,
+            [Page.food]: {
+              ...state[Page.food],
+              items: [],
+            },
+          },
+          {
+            page: Page.food,
+          },
+        ),
+      ).toBe(0);
+    });
+
+    it('should handle the case when there is only one item', () => {
+      expect.assertions(1);
+      expect(
+        getWeeklyAverages(
+          {
+            ...state,
+            [Page.food]: {
+              ...state[Page.food],
+              items: [state[Page.food].items[0]],
+            },
+          },
+          {
+            page: Page.food,
+          },
+        ),
+      ).toBe(0);
     });
   });
 
   describe('getTotalCost', () => {
     it('should return the total cost of a list page', () => {
+      expect.assertions(1);
       expect(getTotalCost(state, { page: Page.food })).toBe(8755601);
     });
 
     describe('on the funds page', () => {
       it('should return the fund cost value', () => {
+        expect.assertions(1);
         expect(getTotalCost(state, { page: Page.funds })).toBe(400000);
       });
     });
@@ -503,6 +556,7 @@ describe('List selectors', () => {
 
   describe('getCrudRequests', () => {
     it('should map optimistically updated items to an HTTP request list', () => {
+      expect.assertions(1);
       const stateWithUpdates: State = {
         ...state,
         [Page.income]: { ...state[Page.income], items: [] },
@@ -523,7 +577,7 @@ describe('List selectors', () => {
           items: [
             {
               id: 'real-id-z',
-              date: DateTime.fromISO('2020-04-29'),
+              date: new Date('2020-04-29'),
               item: 'some-food-item',
               category: 'some-food-category',
               cost: 27,
@@ -537,7 +591,7 @@ describe('List selectors', () => {
           items: [
             {
               id: 'some-fake-id',
-              date: DateTime.fromISO('2020-04-29'),
+              date: new Date('2020-04-29'),
               item: 'some-general-item',
               category: 'some-general-category',
               cost: 913,
@@ -551,7 +605,7 @@ describe('List selectors', () => {
           items: [
             {
               id: 'real-id-x',
-              date: DateTime.fromISO('2020-04-29'),
+              date: new Date('2020-04-29'),
               item: 'some-holiday-item',
               holiday: 'some-holiday-holiday',
               cost: 103,

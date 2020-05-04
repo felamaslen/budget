@@ -2,9 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import shortid from 'shortid';
 import endOfMonth from 'date-fns/endOfMonth';
 import addMonths from 'date-fns/addMonths';
-import { DateTime } from 'luxon';
 
-import { isLegacyDate } from '~client/types';
 import { CreateEdit, Create } from '~client/types/crud';
 import {
   Entry,
@@ -14,6 +12,7 @@ import {
   ValueObject,
   Currency,
 } from '~client/types/net-worth';
+import { SetActiveId, OnUpdate, OnCreate } from '~client/hooks/crud';
 import { sortByDate } from '~client/modules/data';
 import StepDate from '~client/components/NetWorthEditForm/step-date';
 import StepCurrencies from '~client/components/NetWorthEditForm/step-currencies';
@@ -27,7 +26,7 @@ type PropsItemForm = {
   item: CreateEdit<Entry>;
   categories: Category[];
   subcategories: Subcategory[];
-  setActiveId: (id: string | null) => void;
+  setActiveId: SetActiveId;
   onEdit: (
     item: CreateEdit<Entry>,
     onComplete: React.EventHandler<React.MouseEvent | React.KeyboardEvent | React.TouchEvent>,
@@ -120,7 +119,7 @@ const withContrivedIds = ({ id, ...item }: Entry): Create<Entry> => ({
 type PropsBase = Omit<PropsItemForm, 'add' | 'onEdit'>;
 
 export type PropsEdit = PropsBase & {
-  onUpdate: (id: string, item: Entry) => void;
+  onUpdate: OnUpdate<Entry>;
 };
 
 export const NetWorthEditForm: React.FC<PropsEdit> = ({ onUpdate, ...props }) => {
@@ -137,7 +136,7 @@ export const NetWorthEditForm: React.FC<PropsEdit> = ({ onUpdate, ...props }) =>
 
 export type PropsAdd = Omit<PropsBase, 'item'> & {
   data: Entry[];
-  onCreate: (item: Entry) => void;
+  onCreate: OnCreate<Entry>;
 };
 
 export const NetWorthAddForm: React.FC<PropsAdd> = ({ data, onCreate, ...props }) => {
@@ -149,16 +148,12 @@ export const NetWorthAddForm: React.FC<PropsAdd> = ({ data, onCreate, ...props }
 
       return {
         ...withContrivedIds(lastItem),
-        date: DateTime.fromJSDate(
-          endOfMonth(
-            addMonths(isLegacyDate(lastItem.date) ? lastItem.date.toJSDate() : lastItem.date, 1),
-          ),
-        ),
+        date: endOfMonth(addMonths(lastItem.date, 1)),
       };
     }
 
     return {
-      date: DateTime.fromJSDate(new Date()),
+      date: new Date(),
       creditLimit: [],
       currencies: [],
       values: [],

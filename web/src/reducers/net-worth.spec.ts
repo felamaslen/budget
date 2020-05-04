@@ -1,6 +1,4 @@
 /* eslint-disable max-lines */
-import { DateTime } from 'luxon';
-
 import { RequestType } from '~client/types/crud';
 import { Category, Subcategory, Currency } from '~client/types/net-worth';
 import reducer, { State, initialState } from '~client/reducers/net-worth';
@@ -79,7 +77,8 @@ describe('Net worth reducer', () => {
     ['LOGGED_OUT', loggedOut()],
   ])('%s', (_, action) => {
     it('should return the initial state', () => {
-      expect(reducer(undefined, action)).toEqual(initialState);
+      expect.assertions(1);
+      expect(reducer(undefined, action)).toStrictEqual(initialState);
     });
   });
 
@@ -91,9 +90,10 @@ describe('Net worth reducer', () => {
     });
 
     it('should optimistically create a category', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.categories).toEqual([
+      expect(result.categories).toStrictEqual([
         {
           id: action.fakeId,
           type: 'asset',
@@ -125,9 +125,10 @@ describe('Net worth reducer', () => {
     });
 
     it('should optimistically update a category', () => {
+      expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.categories).toEqual([
+      expect(result.categories).toStrictEqual([
         {
           id: 'some-real-id',
           type: 'liability',
@@ -157,9 +158,10 @@ describe('Net worth reducer', () => {
     const action = netWorthCategoryDeleted('some-real-id');
 
     it('should optimistically delete a category', () => {
+      expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [
             {
@@ -177,6 +179,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should delete a pending category and its dependencies', () => {
+      expect.assertions(1);
       const otherCategory: Category = {
         id: 'other-cat-id',
         type: 'liability',
@@ -217,7 +220,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'entry-A0',
-            date: DateTime.local(),
+            date: new Date(),
             values: [
               { id: 'value-id-1', subcategory: 'subcat-B', value: 3 },
               { id: 'value-id-2', subcategory: 'subcat-A', value: 4 },
@@ -231,7 +234,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(statePendingChildren, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [otherCategory],
           subcategories: [otherSubcategory],
@@ -256,9 +259,10 @@ describe('Net worth reducer', () => {
     });
 
     it('should optimistically create a subcategory', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.subcategories).toEqual([
+      expect(result.subcategories).toStrictEqual([
         {
           id: action.fakeId,
           categoryId: 'some-category-id',
@@ -293,9 +297,10 @@ describe('Net worth reducer', () => {
     });
 
     it('should optimistically update a subcategory', () => {
+      expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.subcategories).toEqual([
+      expect(result.subcategories).toStrictEqual([
         {
           id: 'some-subcategory-id',
           categoryId: 'other-category-id',
@@ -334,9 +339,10 @@ describe('Net worth reducer', () => {
     const action = netWorthSubcategoryDeleted('some-subcategory-id');
 
     it('should optimistically delete a subcategory', () => {
+      expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.subcategories).toEqual([
+      expect(result.subcategories).toStrictEqual([
         {
           id: 'some-subcategory-id',
           categoryId: 'some-category-id',
@@ -349,6 +355,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should delete a pending subcategory and its dependencies', () => {
+      expect.assertions(1);
       const statePendingChildren: State = {
         ...state,
         subcategories: [
@@ -365,7 +372,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'entry-A0',
-            date: DateTime.local(),
+            date: new Date(),
             values: [
               { id: 'value-id-a', value: 1, subcategory: 'some-subcategory-id' },
               { id: 'value-id-b', value: 1, subcategory: 'subcat-A' },
@@ -379,7 +386,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(statePendingChildren, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: statePendingChildren.categories,
           subcategories: [
@@ -399,7 +406,7 @@ describe('Net worth reducer', () => {
 
   describe('NET_WORTH_CREATED', () => {
     const action = netWorthCreated({
-      date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+      date: new Date('2019-07-12T12:36:03Z'),
       values: [
         {
           subcategory: 'some-subcategory-id',
@@ -417,12 +424,13 @@ describe('Net worth reducer', () => {
     });
 
     it('should optimistically create an entry', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.entries).toEqual([
+      expect(result.entries).toStrictEqual([
         {
           id: action.fakeId,
-          date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+          date: new Date('2019-07-12T12:36:03Z'),
           values: [
             {
               subcategory: 'some-subcategory-id',
@@ -449,7 +457,7 @@ describe('Net worth reducer', () => {
       entries: [
         {
           id: 'some-entry-id',
-          date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+          date: new Date('2019-07-12T12:36:03Z'),
           values: [
             {
               id: 'value-id-1',
@@ -471,7 +479,7 @@ describe('Net worth reducer', () => {
     };
 
     const action = netWorthUpdated('some-entry-id', {
-      date: DateTime.fromISO('2019-07-31T23:54:00Z'),
+      date: new Date('2019-07-31T23:54:00Z'),
       values: [
         {
           subcategory: 'some-subcategory-id',
@@ -484,12 +492,13 @@ describe('Net worth reducer', () => {
     });
 
     it('should optimistically update an entry', () => {
+      expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.entries).toEqual([
+      expect(result.entries).toStrictEqual([
         {
           id: 'some-entry-id',
-          date: DateTime.fromISO('2019-07-31T23:54:00Z'),
+          date: new Date('2019-07-31T23:54:00Z'),
           values: [
             expect.objectContaining({
               subcategory: 'some-subcategory-id',
@@ -511,7 +520,7 @@ describe('Net worth reducer', () => {
       entries: [
         {
           id: 'some-entry-id',
-          date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+          date: new Date('2019-07-12T12:36:03Z'),
           values: [
             {
               id: 'value-id-1',
@@ -535,12 +544,13 @@ describe('Net worth reducer', () => {
     const action = netWorthDeleted('some-entry-id');
 
     it('should optimistically delete an entry', () => {
+      expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.entries).toEqual([
+      expect(result.entries).toStrictEqual([
         {
           id: 'some-entry-id',
-          date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+          date: new Date('2019-07-12T12:36:03Z'),
           values: [
             {
               id: 'value-id-1',
@@ -616,9 +626,10 @@ describe('Net worth reducer', () => {
     });
 
     it('should insert data into the state', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [
             {
@@ -640,7 +651,7 @@ describe('Net worth reducer', () => {
           entries: [
             {
               id: 'some-entry-id',
-              date: DateTime.fromISO('2019-07-12'),
+              date: new Date('2019-07-12'),
               values: [
                 {
                   subcategory: 'some-subcategory-id',
@@ -663,6 +674,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should set default empty arrays for missing items', () => {
+      expect.assertions(1);
       const actionMissing = dataRead({
         netWorth: {
           categories: {
@@ -693,14 +705,14 @@ describe('Net worth reducer', () => {
 
       const result = reducer(initialState, actionMissing);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [],
           subcategories: [],
           entries: [
             {
               id: 'some-entry-id',
-              date: DateTime.fromISO('2019-07-12'),
+              date: new Date('2019-07-12'),
               values: [
                 {
                   subcategory: 'some-subcategory-id',
@@ -720,6 +732,7 @@ describe('Net worth reducer', () => {
 
   describe('SYNC_RECEIVED', () => {
     it('should confirm category creates, updating any dependencies', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [
@@ -742,7 +755,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'some-fake-entry-id',
-            date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+            date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
                 id: 'value-id-1',
@@ -783,7 +796,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [CATEGORY_CASH, { ...CATEGORY_CC, __optimistic: undefined }],
           subcategories: [
@@ -798,7 +811,7 @@ describe('Net worth reducer', () => {
           entries: [
             {
               id: 'some-fake-entry-id',
-              date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+              date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
                   id: 'value-id-1',
@@ -824,6 +837,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should confirm category updates', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [
@@ -860,7 +874,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [
             {
@@ -878,6 +892,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should confirm category deletes, removing any dependencies', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [
@@ -891,7 +906,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'some-entry-id',
-            date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+            date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
                 id: 'value-id-1',
@@ -926,7 +941,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [CATEGORY_CASH],
           // The dependencies are deleted from the database through foreign key cascading,
@@ -935,7 +950,7 @@ describe('Net worth reducer', () => {
           entries: [
             {
               id: 'some-entry-id',
-              date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+              date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
                   id: 'value-id-2',
@@ -953,6 +968,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should confirm subcategory creates, updating any dependencies', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
@@ -968,7 +984,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'some-entry-id',
-            date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+            date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
                 id: 'value-id-1',
@@ -1010,7 +1026,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
           subcategories: [
@@ -1024,7 +1040,7 @@ describe('Net worth reducer', () => {
           entries: [
             {
               id: 'some-entry-id',
-              date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+              date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
                   id: 'value-id-1',
@@ -1049,6 +1065,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should confirm subcategory updates', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [CATEGORY_MORTGAGE],
@@ -1081,7 +1098,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [CATEGORY_MORTGAGE],
           subcategories: [
@@ -1096,6 +1113,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should confirm subcategory deletes, removing any dependencies', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
@@ -1110,7 +1128,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'some-entry-id',
-            date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+            date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
                 id: 'value-id-1',
@@ -1145,7 +1163,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
           // The dependencies are deleted from the database through foreign key cascading,
@@ -1154,7 +1172,7 @@ describe('Net worth reducer', () => {
           entries: [
             {
               id: 'some-entry-id',
-              date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+              date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
                   id: 'value-id-2',
@@ -1172,6 +1190,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should confirm entry creates', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
@@ -1179,7 +1198,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'some-fake-entry-id',
-            date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+            date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
                 id: 'value-id-1',
@@ -1251,14 +1270,14 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
           subcategories: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
           entries: [
             expect.objectContaining({
               id: 'some-real-entry-id',
-              date: DateTime.fromISO('2019-07-12'),
+              date: new Date('2019-07-12'),
               values: [
                 {
                   id: 'value-id-1',
@@ -1283,6 +1302,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should confirm entry updates', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
@@ -1290,7 +1310,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'some-real-entry-id',
-            date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+            date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
                 id: 'value-id-1',
@@ -1364,14 +1384,14 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
           subcategories: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
           entries: [
             expect.objectContaining({
               id: 'some-real-entry-id',
-              date: DateTime.fromISO('2019-07-12'),
+              date: new Date('2019-07-12'),
               values: [
                 {
                   id: 'value-id-1',
@@ -1396,6 +1416,7 @@ describe('Net worth reducer', () => {
     });
 
     it('should confirm entry deletes', () => {
+      expect.assertions(1);
       const state: State = {
         ...initialState,
         categories: [CATEGORY_CC, CATEGORY_CASH],
@@ -1403,7 +1424,7 @@ describe('Net worth reducer', () => {
         entries: [
           {
             id: 'some-real-entry-id',
-            date: DateTime.fromISO('2019-07-12T12:36:03Z'),
+            date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
                 id: 'subcategory-id-1',
@@ -1439,7 +1460,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toEqual(
+      expect(result).toStrictEqual(
         expect.objectContaining({
           categories: [CATEGORY_CC, CATEGORY_CASH],
           subcategories: [SUBCATEGORY_CC, SUBCATEGORY_WALLET],

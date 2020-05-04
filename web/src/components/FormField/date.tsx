@@ -5,13 +5,9 @@ import setMonth from 'date-fns/setMonth';
 import setDate from 'date-fns/setDate';
 import getYear from 'date-fns/getYear';
 import getMonth from 'date-fns/getMonth';
-import getDate from 'date-fns/getDate';
 import startOfDay from 'date-fns/startOfDay';
-import isValid from 'date-fns/isValid';
 import format from 'date-fns/format';
-import { DateTime } from 'luxon';
 
-import { isLegacyDate } from '~client/types';
 import { Wrapper, WrapperProps } from '~client/components/FormField';
 import { useField } from '~client/hooks/field';
 
@@ -30,16 +26,14 @@ function setValueString(value: string): Date {
 
   const now = startOfDay(new Date());
 
-  const result = setYear(
-    setMonth(setDate(now, Number(day) || getDate(now)), Number(month) - 1 || getMonth(now)),
+  return setYear(
+    setMonth(setDate(now, Number(day)), Number(month) - 1 || getMonth(now)),
     parseYear(year) || getYear(now),
   );
-
-  return isValid(result) ? result : now;
 }
 
-type Props = WrapperProps<Date | DateTime> & {
-  onChange: (value: Date | DateTime) => void;
+type Props = WrapperProps<Date> & {
+  onChange: (value: Date) => void;
   inline?: boolean;
   label?: string | null;
   invalid?: boolean;
@@ -48,35 +42,33 @@ type Props = WrapperProps<Date | DateTime> & {
 const FormFieldDate: React.FC<Props> = ({
   label = null,
   invalid = false,
-  value = new Date(),
+  value: fieldValue,
   onChange,
   ...props
 }) => {
   const setValue = props.inline ? setValueString : setValueDate;
   const type = props.inline ? 'text' : 'date';
 
-  const dateValue = React.useMemo<Date>(() => (isLegacyDate(value) ? value.toJSDate() : value), [
-    value,
-  ]);
+  const value = React.useMemo<Date>(() => fieldValue ?? new Date(), [fieldValue]);
 
   const onChangeBackwardsCompatible = React.useCallback(
     (newValue: Date): void => {
-      onChange(isLegacyDate(value) ? DateTime.fromJSDate(newValue) : newValue);
+      onChange(newValue);
     },
-    [value, onChange],
+    [onChange],
   );
 
   const [, , onChangeInput, ref, onBlur] = useField({
     ...props,
-    value: dateValue,
+    value,
     setValue,
     onChange: onChangeBackwardsCompatible,
   });
 
-  const defaultValue = format(dateValue, props.inline ? 'dd/MM/yyyy' : 'yyyy-MM-dd');
+  const defaultValue = format(value, props.inline ? 'dd/MM/yyyy' : 'yyyy-MM-dd');
 
   return (
-    <Wrapper<Date> item="date" value={dateValue} active={props.active} invalid={invalid}>
+    <Wrapper<Date> item="date" value={value} active={props.active} invalid={invalid}>
       <input
         ref={ref}
         aria-label={label || undefined}

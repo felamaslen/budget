@@ -1,4 +1,5 @@
-import { DateTime } from 'luxon';
+import getUnixTime from 'date-fns/getUnixTime';
+
 import { testRows, testPrices, testStartTime, testCacheTimes } from '~client/test-data/funds';
 import {
   getRowGains,
@@ -26,22 +27,22 @@ describe('Funds selectors / gains', () => {
           id: 'fund1',
           item: 'Some fund',
           transactions: getTransactionsList([
-            { date: DateTime.fromISO('2019-10-09'), units: 345, cost: 1199 },
+            { date: new Date('2019-10-09'), units: 345, cost: 1199 },
           ]),
         },
         {
           id: 'fund2',
           item: 'Other fund',
           transactions: getTransactionsList([
-            { date: DateTime.fromISO('2019-10-01'), units: 167, cost: 98503 },
-            { date: DateTime.fromISO('2019-10-27'), units: -23, cost: -130 },
+            { date: new Date('2019-10-01'), units: 167, cost: 98503 },
+            { date: new Date('2019-10-27'), units: -23, cost: -130 },
           ]),
         },
       ],
       period: Period.year1,
       cache: {
         [Period.year1]: {
-          startTime: DateTime.fromISO('2019-10-10').toSeconds(),
+          startTime: getUnixTime(new Date('2019-10-10')),
           cacheTimes: [0, 86400 * 5, 86400 * 32],
           prices: {
             fund1: {
@@ -60,6 +61,7 @@ describe('Funds selectors / gains', () => {
 
   describe('getRowGains', () => {
     it('should return the correct values', () => {
+      expect.assertions(1);
       const result = getRowGains(testRows, testCache);
 
       const expectedResult = {
@@ -100,6 +102,7 @@ describe('Funds selectors / gains', () => {
       ];
 
       it('should set the value to 0 for funds with no data', () => {
+        expect.assertions(1);
         const result = getRowGains(rows, testCache);
 
         expect(result).toStrictEqual({
@@ -112,6 +115,7 @@ describe('Funds selectors / gains', () => {
       });
 
       it('should set the cost and estimated value, if there are transactions available', () => {
+        expect.assertions(1);
         const result = getRowGains(
           [
             {
@@ -135,66 +139,70 @@ describe('Funds selectors / gains', () => {
         });
       });
 
-      it('should set a colour', () => {
-        expect.assertions(5);
-        const rowGains = {
-          10: {
-            value: 399098.2,
-            gain: -0.0023,
-            gainAbs: -902,
-            dayGain: 0.0075,
-            dayGainAbs: 2989,
-          },
-          3: {
-            value: 50300,
-            gain: 0.1178,
-            gainAbs: 5300,
-          },
-          1: {
-            id: '1',
-            value: 80760,
-            gain: -0.1027,
-            gainAbs: -9240,
-          },
-          5: {
-            id: '5',
-            value: 265622,
-            gain: 0.3281,
-            gainAbs: 65622,
-          },
-        };
+      const rowGains = {
+        10: {
+          value: 399098.2,
+          gain: -0.0023,
+          gainAbs: -902,
+          dayGain: 0.0075,
+          dayGainAbs: 2989,
+        },
+        3: {
+          value: 50300,
+          gain: 0.1178,
+          gainAbs: 5300,
+        },
+        1: {
+          id: '1',
+          value: 80760,
+          gain: -0.1027,
+          gainAbs: -9240,
+        },
+        5: {
+          id: '5',
+          value: 265622,
+          gain: 0.3281,
+          gainAbs: 65622,
+        },
+        6: {
+          id: '6',
+          value: 2600,
+          gain: 0,
+          gainAbs: 0,
+        },
+        'some-id': {},
+      };
 
-        expect(getGainsForRow(rowGains, '10')).toStrictEqual({
-          ...rowGains['10'],
-          color: [255, 250, 250],
-        });
-        expect(getGainsForRow(rowGains, '3')).toStrictEqual({
-          ...rowGains['3'],
-          color: [163, 246, 170],
-        });
-        expect(getGainsForRow(rowGains, '1')).toStrictEqual({
-          ...rowGains['1'],
-          color: [255, 44, 44],
-        });
-        expect(getGainsForRow(rowGains, '5')).toStrictEqual({
-          ...rowGains['5'],
-          color: [0, 230, 18],
-        });
-
-        expect(getGainsForRow(rowGains, 'non-existent-id')).toBeNull();
+      // prettier-ignore
+      it.each`
+      id                | expected
+      ${10}             | ${[255, 250, 250]}
+      ${3}              | ${[163, 246, 170]}
+      ${1}              | ${[255, 44, 44]}
+      ${5}              | ${[0, 230, 18]}
+      ${6}              | ${[255, 255, 255]}
+      ${'NOEXIST'}      | ${null}
+      `('should set the correct colour for fund ID $id', ({ id, expected }) => {
+        expect.assertions(1);
+        if (expected === null) {
+          expect(getGainsForRow(rowGains, id)).toBeNull();
+        } else {
+          expect(getGainsForRow(rowGains, id)).toStrictEqual({
+            ...rowGains[id as '10' | '3' | '1' | '5' | '6'],
+            color: expected,
+          });
+        }
       });
 
       it('should return null if there are no gain data for the fund', () => {
-        const rowGains = {
-          'some-id': {},
-        };
-
+        expect.assertions(1);
         expect(getGainsForRow(rowGains, 'some-id')).toBeNull();
       });
     });
 
     describe('getDayGainAbs', () => {
       it('should return the absolute gain from the previous scrape', () => {
+        expect.assertions(1);
         const valueLatest = 345 * 113.2 + (167 - 23) * 49.3;
         const valuePrev = 345 * 109 + 167 * 57.9;
 
@@ -204,6 +212,7 @@ describe('Funds selectors / gains', () => {
 
     describe('getDayGain', () => {
       it('should return the gain from the previous scrape', () => {
+        expect.assertions(1);
         const costLatest = 1199 + (98503 - 130);
         const valueLatest = 345 * 113.2 + (167 - 23) * 49.3;
 
@@ -240,6 +249,7 @@ describe('Funds selectors / gains', () => {
         };
 
         it('should not be NaN', () => {
+          expect.assertions(1);
           expect(getDayGain(stateOne)).not.toBeNaN();
         });
       });
@@ -252,7 +262,7 @@ describe('Funds selectors / gains', () => {
             period: Period.year5,
             cache: {
               [Period.year5]: {
-                startTime: DateTime.fromISO('2019-10-10').toSeconds(),
+                startTime: getUnixTime(new Date('2019-10-10')),
                 cacheTimes: [0, 86400 * 5, 86400 * 32],
                 prices: {
                   fund1: {
@@ -270,6 +280,7 @@ describe('Funds selectors / gains', () => {
         };
 
         it('should return 0', () => {
+          expect.assertions(1);
           expect(getDayGain(stateNone)).toBe(0);
         });
       });
@@ -283,15 +294,15 @@ describe('Funds selectors / gains', () => {
                 id: 'fund1',
                 item: 'Some fund',
                 transactions: getTransactionsList([
-                  { date: DateTime.fromISO('2019-10-09'), units: 345, cost: 1199 },
+                  { date: new Date('2019-10-09'), units: 345, cost: 1199 },
                 ]),
               },
               {
                 id: 'fund2',
                 item: 'Other fund',
                 transactions: getTransactionsList([
-                  { date: DateTime.fromISO('2019-10-01'), units: 167, cost: 98503 },
-                  { date: DateTime.fromISO('2019-10-27'), units: -23, cost: -130 },
+                  { date: new Date('2019-10-01'), units: 167, cost: 98503 },
+                  { date: new Date('2019-10-27'), units: -23, cost: -130 },
                 ]),
               },
             ],
@@ -301,6 +312,7 @@ describe('Funds selectors / gains', () => {
         };
 
         it('should return 0', () => {
+          expect.assertions(1);
           expect(getDayGain(stateNoCache)).toBe(0);
         });
       });
@@ -314,22 +326,22 @@ describe('Funds selectors / gains', () => {
                 id: 'fund1',
                 item: 'Some fund',
                 transactions: getTransactionsList([
-                  { date: DateTime.fromISO('2019-10-09'), units: 345, cost: 1199 },
+                  { date: new Date('2019-10-09'), units: 345, cost: 1199 },
                 ]),
               },
               {
                 id: 'fund2',
                 item: 'Other fund',
                 transactions: getTransactionsList([
-                  { date: DateTime.fromISO('2019-10-01'), units: 167, cost: 98503 },
-                  { date: DateTime.fromISO('2019-10-27'), units: -23, cost: -130 },
+                  { date: new Date('2019-10-01'), units: 167, cost: 98503 },
+                  { date: new Date('2019-10-27'), units: -23, cost: -130 },
                 ]),
               },
             ],
             period: Period.year1,
             cache: {
               [Period.year1]: {
-                startTime: DateTime.fromISO('2019-10-10').toSeconds(),
+                startTime: getUnixTime(new Date('2019-10-10')),
                 cacheTimes: [10],
                 prices: {
                   fund1: {
@@ -347,6 +359,7 @@ describe('Funds selectors / gains', () => {
         };
 
         it('should return 0', () => {
+          expect.assertions(1);
           expect(getDayGain(stateOneItem)).toBe(0);
         });
       });

@@ -88,8 +88,8 @@ export type Line = {
 
 export type UnkeyedLine = Pick<Line, Exclude<keyof Line, 'key'>>;
 
-export type TimeScale = {
+export type Tick = {
   pix: number;
   major: 0 | 1 | 2;
   text: string | null;
-}[];
+};

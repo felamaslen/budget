@@ -1,11 +1,10 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import { removeAtIndex } from 'replace-array';
-import { DateTime } from 'luxon';
 
 import FormFieldTransactions, { Props } from './transactions';
 import { getTransactionsList, modifyTransaction } from '~client/modules/data';
-import { LegacyTransaction as Transaction, TransactionRaw } from '~client/types/funds';
+import { Transaction, TransactionRaw } from '~client/types/funds';
 
 describe('<FormFieldTransactions />', () => {
   const transactions: TransactionRaw[] = [
@@ -27,6 +26,7 @@ describe('<FormFieldTransactions />', () => {
     };
 
     it('should render a preview of the number of transactions', () => {
+      expect.assertions(2);
       const { container, getByText } = render(<FormFieldTransactions {...propsInactive} />);
 
       expect(container.childNodes).toHaveLength(1);
@@ -43,11 +43,13 @@ describe('<FormFieldTransactions />', () => {
     };
 
     it('should render a preview of the number of transactions', () => {
+      expect.assertions(1);
       const { getByText } = render(<FormFieldTransactions {...propsActive} />);
       expect(getByText('2')).toBeInTheDocument();
     });
 
     it('should render a modal dialog', () => {
+      expect.assertions(3);
       const { getByText } = render(<FormFieldTransactions {...propsActive} />);
 
       expect(getByText('Date')).toBeInTheDocument();
@@ -56,6 +58,7 @@ describe('<FormFieldTransactions />', () => {
     });
 
     it.each([[0], [1]])('should handle date input', async index => {
+      expect.assertions(4);
       const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
 
       const inputDate = await findByDisplayValue(transactions[index].date);
@@ -79,12 +82,13 @@ describe('<FormFieldTransactions />', () => {
 
       expect(propsActive.onChange).toHaveBeenCalledWith(
         modifyTransaction(value, index, {
-          date: '2017-04-03',
+          date: new Date('2017-04-03'),
         }),
       );
     });
 
     it.each([[0], [1]])('should handle units input', async index => {
+      expect.assertions(4);
       const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
 
       const inputUnits = await findByDisplayValue(String(transactions[index].units));
@@ -114,6 +118,7 @@ describe('<FormFieldTransactions />', () => {
     });
 
     it.each([[0], [1]])('should handle cost input', async index => {
+      expect.assertions(4);
       const { container, findByDisplayValue } = render(<FormFieldTransactions {...propsActive} />);
 
       const inputCost = await findByDisplayValue(String(transactions[index].cost / 100));
@@ -143,6 +148,7 @@ describe('<FormFieldTransactions />', () => {
     });
 
     it('should handle adding a transaction', async () => {
+      expect.assertions(9);
       const { container, findByTestId, findByText } = render(
         <FormFieldTransactions {...propsActive} />,
       );
@@ -198,8 +204,7 @@ describe('<FormFieldTransactions />', () => {
       expect(propsActive.onChange).toHaveBeenCalledWith([
         ...value,
         expect.objectContaining({
-          // TODO: use Date
-          date: DateTime.fromISO('2019-02-11'),
+          date: new Date('2019-02-11'),
           units: 562.23,
           cost: 109591,
         }),
@@ -207,6 +212,7 @@ describe('<FormFieldTransactions />', () => {
     });
 
     it.each([[0], [1]])('should handle removing a transaction', async index => {
+      expect.assertions(3);
       const { container, findAllByText } = render(<FormFieldTransactions {...propsActive} />);
 
       const removeButtons = await findAllByText('−');

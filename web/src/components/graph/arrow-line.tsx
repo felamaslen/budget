@@ -6,45 +6,45 @@ import { getPixY } from '~client/components/graph/helpers';
 type Props = UnkeyedLine & RangeY & Pix;
 
 export const ArrowLine: React.FC<Props> = ({ data, color, pixY1, pixY2, secondary, ...props }) => {
-    const pixY = getPixY({ pixY1, pixY2 }, secondary);
+  const pixY = getPixY({ pixY1, pixY2 }, secondary);
 
-    const getColor = useMemo<(point: Point) => string>(() => {
-        if (isConstantColor(color)) {
-            return (): string => color;
-        }
-        if (typeof color === 'function') {
-            return color;
-        }
-
-        return (): string => '#000';
-    }, [color]);
-
-    if (props.minY === 0 || props.maxY === 0) {
-        return null;
+  const getColor = useMemo<(point: Point) => string>(() => {
+    if (isConstantColor(color)) {
+      return (): string => color;
+    }
+    if (typeof color === 'function') {
+      return color;
     }
 
-    const y0 = pixY(0);
+    return (): string => '#000';
+  }, [color]);
 
-    const arrows = data.map((point, key) => {
-        const [xValue, yValue] = point;
-        const sizeRatio = yValue > 0 ? yValue / props.maxY : yValue / props.minY;
+  if (props.minY === 0 || props.maxY === 0) {
+    return null;
+  }
 
-        return (
-            <Arrow
-                key={key}
-                pixY={pixY}
-                startX={xValue}
-                startY={0}
-                length={Math.abs(pixY(yValue) - y0)}
-                angle={Math.PI * (yValue < 0 ? 1.5 : 0.5)}
-                arrowSize={sizeRatio}
-                color={getColor(point)}
-                fill
-                strokeWidth={3 * sizeRatio}
-                {...props}
-            />
-        );
-    });
+  const y0 = pixY(0);
 
-    return <g>{arrows}</g>;
+  const arrows = data.map((point, key) => {
+    const [xValue, yValue] = point;
+    const sizeRatio = yValue > 0 ? yValue / props.maxY : yValue / props.minY;
+
+    return (
+      <Arrow
+        key={key}
+        pixY={pixY}
+        startX={xValue}
+        startY={0}
+        length={Math.abs(pixY(yValue) - y0)}
+        angle={Math.PI * (yValue < 0 ? 1.5 : 0.5)}
+        arrowSize={sizeRatio}
+        color={getColor(point)}
+        fill
+        strokeWidth={3 * sizeRatio}
+        {...props}
+      />
+    );
+  });
+
+  return <g>{arrows}</g>;
 };

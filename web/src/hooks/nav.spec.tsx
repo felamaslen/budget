@@ -1,7 +1,6 @@
 import sinon from 'sinon';
 import React from 'react';
 import { render, fireEvent, act, RenderResult } from '@testing-library/react';
-import { DateTime } from 'luxon';
 
 import { Button, ActionType, useNav, NULL_COMMAND } from './nav';
 import { CREATE_ID } from '~client/constants/data';
@@ -16,9 +15,9 @@ describe('Navigation hook', () => {
   };
 
   const bills: Bill[] = [
-    { id: 'id1', date: DateTime.fromISO('2020-04-20'), item: 'Water', cost: 3654 },
-    { id: 'id2', date: DateTime.fromISO('2020-04-21'), item: 'Rent', cost: 176900 },
-    { id: 'id3', date: DateTime.fromISO('2020-04-22'), item: 'Phone', cost: 1096 },
+    { id: 'id1', date: new Date('2020-04-20'), item: 'Water', cost: 3654 },
+    { id: 'id2', date: new Date('2020-04-21'), item: 'Rent', cost: 176900 },
+    { id: 'id3', date: new Date('2020-04-22'), item: 'Phone', cost: 1096 },
   ];
 
   const TestComponent: React.FC<TestProps> = ({
@@ -55,7 +54,7 @@ describe('Navigation hook', () => {
     expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual({
       nav: true,
       command: NULL_COMMAND,
-      items: bills.map(({ date, ...rest }) => ({ date: date.toISO(), ...rest })),
+      items: bills.map(({ date, ...rest }) => ({ date: date.toISOString(), ...rest })),
       columns: ['date', 'item', 'cost'],
       activeId: null,
       activeItem: null,
@@ -70,7 +69,7 @@ describe('Navigation hook', () => {
 
     const newItems = [
       ...bills,
-      { id: 'id4', date: DateTime.fromISO('2020-04-23'), item: 'Mortgage', cost: 79565 },
+      { id: 'id4', date: new Date('2020-04-23'), item: 'Mortgage', cost: 79565 },
     ];
 
     act(() => {
@@ -79,7 +78,7 @@ describe('Navigation hook', () => {
 
     expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual(
       expect.objectContaining({
-        items: newItems.map(({ date, ...rest }) => ({ date: date.toISO(), ...rest })),
+        items: newItems.map(({ date, ...rest }) => ({ date: date.toISOString(), ...rest })),
       }),
     );
   });

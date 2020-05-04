@@ -1,5 +1,5 @@
-import { connect } from 'react-redux';
-import React, { useRef, useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 
 import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
 import { State } from '~client/reducers';
@@ -30,37 +30,36 @@ const StockListItems: React.FC<StockListItemsProps> = ({ stockMap }) => (
   </>
 );
 
-type Props = {
-  enabled?: boolean;
-  loading: boolean;
-  shares: Stock[];
-  indices: Index[];
-  history: Data;
-  lastPriceUpdate: number | null;
-  requestList: () => void;
-  requestPrices: () => void;
-};
+const getLoading = (state: State): boolean => state.stocks.loading;
+const getShares = (state: State): Stock[] => state.stocks.shares;
+const getIndices = (state: State): Index[] => state.stocks.indices;
+const getHistory = (state: State): Data => state.stocks.history;
+const getLastPriceUpdate = (state: State): number | null => state.stocks.lastPriceUpdate;
 
-const StocksList: React.FC<Props> = ({
-  enabled = DO_STOCKS_LIST,
-  shares,
-  indices,
-  history,
-  lastPriceUpdate,
-  requestList,
-  requestPrices,
-}) => {
+const StocksList: React.FC<{ enabled?: boolean }> = ({ enabled = DO_STOCKS_LIST }) => {
+  const loading = useSelector(getLoading);
+  const shares = useSelector(getShares);
+  const indices = useSelector(getIndices);
+  const history = useSelector(getHistory);
+  const lastPriceUpdate = useSelector(getLastPriceUpdate);
+
+  const dispatch = useDispatch();
+  const requestList = useCallback((): void => {
+    dispatch(stocksListRequested());
+  }, [dispatch]);
+  const requestPrices = useCallback((): void => {
+    dispatch(stockPricesRequested());
+  }, [dispatch]);
+
   useEffect(() => {
     if (enabled) {
       setImmediate(requestList);
-
       return requestList;
     }
-
     return (): null => null;
   }, [enabled, requestList]);
 
-  const [prevLastPriceUpdate, setLastPriceUpdate] = useState(lastPriceUpdate ?? 0);
+  const [prevLastPriceUpdate, setLastPriceUpdate] = useState<number>(lastPriceUpdate ?? 0);
   const timer = useRef<number>();
 
   const [, setOldWeightedGain] = useState(0);
@@ -93,7 +92,7 @@ const StocksList: React.FC<Props> = ({
   }
 
   return (
-    <Styled.List>
+    <Styled.List isLoading={loading}>
       <Styled.StocksGraph>
         <Styled.ListUl>
           <StockListItems stockMap={shares} />
@@ -113,20 +112,4 @@ const StocksList: React.FC<Props> = ({
   );
 };
 
-type DispatchProps = Pick<Props, 'requestList' | 'requestPrices'>;
-type StateProps = Omit<Props, keyof DispatchProps>;
-
-const mapStateToProps = (state: State): StateProps => ({
-  loading: state.stocks.loading,
-  shares: state.stocks.shares,
-  indices: state.stocks.indices,
-  history: state.stocks.history,
-  lastPriceUpdate: state.stocks.lastPriceUpdate,
-});
-
-const mapDispatchToProps = {
-  requestList: stocksListRequested,
-  requestPrices: stockPricesRequested,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(StocksList);
+export default StocksList;

@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { DateTime } from 'luxon';
 
 import { PickUnion } from '~client/types';
 import { Page } from '~client/types/app';
-import { LegacyTransaction as Transaction } from '~client/types/funds';
+import { Transaction } from '~client/types/funds';
 import { PAGES } from '~client/constants/data';
 import SuggestionsList from '~client/components/SuggestionsList';
 import FormFieldText from '~client/components/FormField';
@@ -12,7 +11,7 @@ import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldTransactions from '~client/components/FormField/transactions';
 import * as Styled from './styles';
 
-type DateValue = Date | DateTime;
+type DateValue = Date;
 type Value = DateValue | Transaction[] | number | string | undefined | null;
 
 type OnChange = (item: string, value?: Value) => void;
@@ -27,7 +26,7 @@ type FieldProps = {
 };
 
 const isDate = (value: Value): value is DateValue =>
-  typeof value === 'undefined' || value instanceof Date || value instanceof DateTime;
+  typeof value === 'undefined' || value instanceof Date;
 
 const isTransactions = (value: Value): value is Transaction[] =>
   value === null || Array.isArray(value);

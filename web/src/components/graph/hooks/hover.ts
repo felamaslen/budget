@@ -8,134 +8,134 @@ import { Point, Line, Calc, LineColor, isConstantColor } from '~client/types/gra
 import { getPixY } from '~client/components/graph/helpers';
 
 function getHlColor(color: LineColor, point: Point, index: number): string {
-    if (isConstantColor(color)) {
-        return color;
-    }
-    if (typeof color === 'function') {
-        return color(point, index);
-    }
+  if (isConstantColor(color)) {
+    return color;
+  }
+  if (typeof color === 'function') {
+    return color(point, index);
+  }
 
-    return rgba(COLOR_GRAPH_TITLE);
+  return rgba(COLOR_GRAPH_TITLE);
 }
 
 type Position = {
-    posX: number;
-    posY: number;
+  posX: number;
+  posY: number;
 };
 
 type Closest = {
-    distX: number;
-    distY: number;
-    lineIndex: number;
-    point: Point;
-    index: number;
+  distX: number;
+  distY: number;
+  lineIndex: number;
+  point: Point;
+  index: number;
 };
 
 export type HoverEffect = {
-    labelX: (value: number) => string;
-    labelY: (value: number) => string;
-    labelWidthX?: number;
-    labelWidthY?: number;
+  labelX: (value: number) => string;
+  labelY: (value: number) => string;
+  labelWidthX?: number;
+  labelWidthY?: number;
 };
 
 export type HLPoint = {
-    valX: number;
-    valY: number;
-    color: string;
+  valX: number;
+  valY: number;
+  color: string;
 };
 
 function getClosest(lines: Line[], position: Position, calc: Calc): Closest | null {
-    if (!position) {
-        return null;
-    }
+  if (!position) {
+    return null;
+  }
 
-    const { posX, posY } = position;
+  const { posX, posY } = position;
 
-    return lines.reduce((red: Closest | null, line: Line, lineIndex: number) => {
-        const pixY = getPixY(calc, line.secondary);
+  return lines.reduce((red: Closest | null, line: Line, lineIndex: number) => {
+    const pixY = getPixY(calc, line.secondary);
 
-        return line.data.reduce((last: Closest | null, point: Point, index: number): Closest => {
-            const distX = Math.abs(calc.pixX(point[0]) - posX);
-            const distY = Math.abs(pixY(point[1]) - posY);
+    return line.data.reduce((last: Closest | null, point: Point, index: number): Closest => {
+      const distX = Math.abs(calc.pixX(point[0]) - posX);
+      const distY = Math.abs(pixY(point[1]) - posY);
 
-            if (last && !(distX < last.distX || (distX === last.distX && distY < last.distY))) {
-                return last;
-            }
+      if (last && !(distX < last.distX || (distX === last.distX && distY < last.distY))) {
+        return last;
+      }
 
-            return {
-                distX,
-                distY,
-                lineIndex,
-                point,
-                index,
-            };
-        }, red);
-    }, null);
+      return {
+        distX,
+        distY,
+        lineIndex,
+        point,
+        index,
+      };
+    }, red);
+  }, null);
 }
 
-export function useHover({
-    lines,
-    isMobile,
-    calc,
-    hoverEffect,
-}: {
-    lines: Line[];
-    isMobile?: boolean;
-    calc: Calc;
-    hoverEffect?: HoverEffect;
-}): [
-    HLPoint | undefined,
-    ((o: { pageX: number; pageY: number; currentTarget: HTMLElement }) => void),
-    () => void,
-] {
-    const [hlPoint, setHlPoint] = useState<HLPoint | undefined>();
+export type Props = {
+  lines: Line[];
+  isMobile?: boolean;
+  calc: Calc;
+  hoverEffect?: HoverEffect;
+};
 
-    const onHover = useCallback(
-        (position: Position) => {
-            if (!(calc && lines && !isMobile)) {
-                return null;
-            }
+export type HookResult = [
+  HLPoint | undefined,
+  (o: { pageX: number; pageY: number; currentTarget: HTMLElement }) => void,
+  () => void,
+];
 
-            const closest = getClosest(lines, position, calc);
-            if (!closest) {
-                return setHlPoint(undefined);
-            }
+export function useHover({ lines, isMobile, calc, hoverEffect }: Props): HookResult {
+  const [hlPoint, setHlPoint] = useState<HLPoint | undefined>();
 
-            const { lineIndex, point, index } = closest;
-            const color = getHlColor(lines[lineIndex].color, point, index);
-            const [valX, valY] = point;
+  const onHover = useCallback(
+    (position: Position): void => {
+      if (!(calc && lines && !isMobile)) {
+        return;
+      }
 
-            return setHlPoint({ valX, valY, color });
-        },
-        [lines, isMobile, calc],
-    );
+      const closest = getClosest(lines, position, calc);
+      if (!closest) {
+        setHlPoint(undefined);
+        return;
+      }
 
-    const onMouseMove = useMemo(() => {
-        const handler = throttle(10, true, (pageX, pageY, currentTarget) => {
-            const { left, top } = currentTarget.getBoundingClientRect();
+      const { lineIndex, point, index } = closest;
+      const color = getHlColor(lines[lineIndex].color, point, index);
+      const [valX, valY] = point;
 
-            onHover({
-                posX: pageX - left,
-                posY: pageY - top,
-            });
-        });
+      setHlPoint({ valX, valY, color });
+    },
+    [lines, isMobile, calc],
+  );
 
-        return ({
-            pageX,
-            pageY,
-            currentTarget,
-        }: {
-            pageX: number;
-            pageY: number;
-            currentTarget: HTMLElement;
-        }): void => handler(pageX, pageY, currentTarget);
-    }, [onHover]);
+  const onMouseMove = useMemo(() => {
+    const handler = throttle(10, true, (pageX, pageY, currentTarget) => {
+      const { left, top } = currentTarget.getBoundingClientRect();
 
-    const onMouseLeave = useCallback(() => setHlPoint(undefined), []);
+      onHover({
+        posX: pageX - left,
+        posY: pageY - top,
+      });
+    });
 
-    if (!hoverEffect) {
-        return [undefined, NULL, NULL];
-    }
+    return ({
+      pageX,
+      pageY,
+      currentTarget,
+    }: {
+      pageX: number;
+      pageY: number;
+      currentTarget: HTMLElement;
+    }): void => handler(pageX, pageY, currentTarget);
+  }, [onHover]);
 
-    return [hlPoint, onMouseMove, onMouseLeave];
+  const onMouseLeave = useCallback(() => setHlPoint(undefined), []);
+
+  if (!hoverEffect) {
+    return [undefined, NULL, NULL];
+  }
+
+  return [hlPoint, onMouseMove, onMouseLeave];
 }

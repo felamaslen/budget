@@ -1,25 +1,19 @@
-import { DateTime } from 'luxon';
-
 import { State } from '~client/reducers/types';
 import state from '~client/test-data/state';
 import { getProcessedCost, getOverviewTable } from '.';
 import { getNetWorthSummary } from './net-worth';
 import { getTransactionsList } from '~client/modules/data';
+import { mockRandom } from '~client/mocks/random';
 
 describe('Net worth selectors', () => {
   beforeEach(() => {
-    const testRandoms = [0.15, 0.99];
-    let randomIndex = -1;
-    jest.spyOn(global.Math, 'random').mockImplementation(() => {
-      randomIndex += 1;
-      return testRandoms[randomIndex % 2];
-    });
+    mockRandom([0.15, 0.99]);
   });
 
   describe('getProcessedCost', () => {
     const testState: State = {
       ...state,
-      now: DateTime.fromISO('2018-03-23T11:54:23.000Z'),
+      now: new Date('2018-03-23T11:54:23.000Z'),
       funds: {
         ...state.funds,
         items: [
@@ -27,15 +21,15 @@ describe('Net worth selectors', () => {
             id: 'fund-A',
             item: 'some fund 1',
             transactions: getTransactionsList([
-              { date: DateTime.fromISO('2018-02-05'), units: 10, cost: 56123 },
-              { date: DateTime.fromISO('2018-03-27'), units: -1.32, cost: -2382 },
+              { date: new Date('2018-02-05'), units: 10, cost: 56123 },
+              { date: new Date('2018-03-27'), units: -1.32, cost: -2382 },
             ]),
           },
           {
             id: 'fund-B',
             item: 'some fund 2',
             transactions: getTransactionsList([
-              { date: DateTime.fromISO('2018-03-17'), units: 51, cost: 10662 },
+              { date: new Date('2018-03-17'), units: 51, cost: 10662 },
             ]),
           },
         ],
@@ -89,7 +83,7 @@ describe('Net worth selectors', () => {
     describe('if the current day is the last of the month', () => {
       const testStateEndOfMonth: State = {
         ...testState,
-        now: DateTime.fromISO('2018-03-31'),
+        now: new Date('2018-03-31'),
         funds: {
           ...testState.funds,
           items: [
@@ -97,15 +91,15 @@ describe('Net worth selectors', () => {
               id: 'fund-A',
               item: 'some fund 1',
               transactions: getTransactionsList([
-                { date: DateTime.fromISO('2018-02-05'), units: 10, cost: 56123 },
-                { date: DateTime.fromISO('2018-03-27'), units: -1.32, cost: -2382 },
+                { date: new Date('2018-02-05'), units: 10, cost: 56123 },
+                { date: new Date('2018-03-27'), units: -1.32, cost: -2382 },
               ]),
             },
             {
               id: 'fund-B',
               item: 'some fund 2',
               transactions: getTransactionsList([
-                { date: DateTime.fromISO('2018-03-17'), units: 51, cost: 10662 },
+                { date: new Date('2018-03-17'), units: 51, cost: 10662 },
               ]),
             },
           ],

@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import { replaceAtIndex } from 'replace-array';
 
 import state from '~client/test-data/state';
@@ -165,8 +164,8 @@ describe('Overview selectors (net worth)', () => {
         ...state,
         overview: {
           ...state.overview,
-          startDate: DateTime.fromISO('2018-03-31'),
-          endDate: DateTime.fromISO('2018-05-31'),
+          startDate: new Date('2018-03-31'),
+          endDate: new Date('2018-05-31'),
         },
         netWorth: {
           ...state.netWorth,
@@ -185,7 +184,7 @@ describe('Overview selectors (net worth)', () => {
       expect(getNetWorthTable(state)).toStrictEqual([
         {
           id: 'real-entry-id-a',
-          date: DateTime.fromISO('2018-02-28'),
+          date: new Date('2018-02-28'),
           assets: 10324 + 3750 * 0.035 + 1296523,
           liabilities: 8751,
           expenses: 900 + 13 + 90 + 1000 + 65,
@@ -196,7 +195,7 @@ describe('Overview selectors (net worth)', () => {
         },
         {
           id: 'real-entry-id-b',
-          date: DateTime.fromISO('2018-03-31'),
+          date: new Date('2018-03-31'),
           assets: 9752 + 1051343,
           liabilities: 21939,
           expenses: 400 + 20 + 10 + 95 + 134,
@@ -213,18 +212,23 @@ describe('Overview selectors (net worth)', () => {
   describe('getAggregates', () => {
     it('should return the latest summed value of a group of categories', () => {
       expect.assertions(1);
+      expect(getAggregates(state)).toStrictEqual({
+        cashEasyAccess: 9752 + 1051343,
+        cashOther: 0,
+        stocks: 0,
+        pension: 0,
+      });
+    });
+
+    it('should return 0 for each aggregate if there are no entries', () => {
+      expect.assertions(1);
       expect(
-        getAggregates(state, {
-          cash: 'Cash (easy access)',
-          mortgage: 'Mortgage',
-          cc: 'Credit cards',
-          no: 'nonexistent category',
-        }),
+        getAggregates({ ...state, netWorth: { ...state.netWorth, entries: [] } }),
       ).toStrictEqual({
-        cash: 9752 + 1051343,
-        mortgage: -18420900,
-        cc: -21939,
-        no: 0,
+        cashEasyAccess: 0,
+        cashOther: 0,
+        stocks: 0,
+        pension: 0,
       });
     });
   });
@@ -271,7 +275,7 @@ describe('Overview selectors (net worth)', () => {
           entries: [
             {
               id: 'real-entry-id',
-              date: DateTime.fromISO('2019-07-27'),
+              date: new Date('2019-07-27'),
               values: [{ id: 'some-value-id', value: 3, subcategory: 'real-subcategory-id' }],
               currencies: [],
               creditLimit: [],
@@ -279,7 +283,7 @@ describe('Overview selectors (net worth)', () => {
             },
             {
               id: 'fake-entry-id',
-              date: DateTime.fromISO('2019-07-04'),
+              date: new Date('2019-07-04'),
               values: [
                 { id: 'value-id-a', value: 4, subcategory: 'real-subcategory-id' },
                 { id: 'value-id-b', value: 5, subcategory: 'fake-subcategory-id-a' },
@@ -375,7 +379,7 @@ describe('Overview selectors (net worth)', () => {
           entries: [
             {
               id: 'fake-entry-id',
-              date: DateTime.fromISO('2019-07-31'),
+              date: new Date('2019-07-31'),
               values: [{ id: 'fake-value-id', subcategory: 'real-subcategory-id', value: 2 }],
               creditLimit: [
                 { id: 'some-credit-limit-id', subcategory: 'real-subcategory-id', value: 100 },

@@ -1,11 +1,26 @@
-import { DateTime } from 'luxon';
 import { createSelector } from 'reselect';
 import { compose } from '@typed/compose';
+import getDaysInMonth from 'date-fns/getDaysInMonth';
+import getDate from 'date-fns/getDate';
+import isSameMonth from 'date-fns/isSameMonth';
+import isSameDay from 'date-fns/isSameDay';
+import endOfMonth from 'date-fns/endOfMonth';
+import addMonths from 'date-fns/addMonths';
+import format from 'date-fns/format';
 import { replaceAtIndex } from 'replace-array';
 
 import { Page } from '~client/types/app';
-import { Cost, CostProcessed, TableValues, Range, Median } from '~client/types/overview';
-import { LegacyRow as FundRow } from '~client/types/funds';
+import {
+  Cost,
+  CostProcessed,
+  TableValues,
+  Range,
+  Median,
+  Table,
+  TableRow,
+  Cell,
+} from '~client/types/overview';
+import { Row as FundRow } from '~client/types/funds';
 import { Average } from '~client/constants';
 import { OVERVIEW_COLUMNS, OverviewColumn, OverviewHeader } from '~client/constants/data';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
@@ -83,14 +98,14 @@ function predictCategory(
 
 function calculateFutures(
   numRows: number,
-  currentDate: DateTime,
+  currentDate: Date,
   futureMonths: number,
 ): (cost: Cost & Pick<CostProcessed, 'fundsOld'>) => Cost & Pick<CostProcessed, 'fundsOld'> {
   if (futureMonths <= 0) {
     return IDENTITY;
   }
 
-  const currentMonthRatio = currentDate.daysInMonth / currentDate.day;
+  const currentMonthRatio = getDaysInMonth(currentDate) / getDate(currentDate);
 
   return (cost): Cost & Pick<CostProcessed, 'fundsOld'> =>
     (Object.keys(cost) as (keyof (Cost & Pick<CostProcessed, 'fundsOld'>))[]).reduce(
@@ -108,7 +123,7 @@ function calculateFutures(
     );
 }
 
-const getNetCashFlow = <K extends keyof CostProcessed>(dates: DateTime[]) => (
+const getNetCashFlow = <K extends keyof CostProcessed>(dates: Date[]) => (
   data: Cost & Pick<CostProcessed, K | 'spending'>,
 ): Cost & Pick<CostProcessed, K | 'spending' | 'net'> => ({
   ...data,
@@ -119,8 +134,8 @@ const getNetCashFlow = <K extends keyof CostProcessed>(dates: DateTime[]) => (
 });
 
 const getPredictedNetWorth = <K extends keyof CostProcessed>(
-  dates: DateTime[],
-  currentDate: DateTime,
+  dates: Date[],
+  currentDate: Date,
   netWorth: number[],
   fundsRows: FundRow[],
 ) => (
@@ -130,15 +145,15 @@ const getPredictedNetWorth = <K extends keyof CostProcessed>(
     fundsRows.reduce(
       (sum, { transactions }) =>
         (transactions ?? [])
-          .filter(({ date }) => date.hasSame(monthDate, 'month'))
+          .filter(({ date }) => isSameMonth(date, monthDate))
           .reduce((last, { cost }) => last + cost, sum),
       0,
     ),
   );
 
-  const endOfCurrentMonth = currentDate.endOf('month');
-  const futureStart = endOfCurrentMonth.hasSame(currentDate, 'day')
-    ? endOfCurrentMonth.plus({ months: 1 })
+  const endOfCurrentMonth = endOfMonth(currentDate);
+  const futureStart = isSameDay(endOfCurrentMonth, currentDate)
+    ? addMonths(endOfCurrentMonth, 1)
     : endOfCurrentMonth;
 
   return {
@@ -163,13 +178,13 @@ const getPredictedNetWorth = <K extends keyof CostProcessed>(
 };
 
 const getCombinedNetWorth = <K extends keyof CostProcessed>(
-  currentDate: DateTime,
+  currentDate: Date,
   futureMonths: number,
   netWorth: number[],
 ) => (
   table: Cost & Pick<CostProcessed, K | 'netWorth' | 'netWorthPredicted'>,
 ): Cost & Pick<CostProcessed, K | 'netWorth' | 'netWorthPredicted' | 'netWorthCombined'> => {
-  const includeThisMonth = currentDate.endOf('month').hasSame(currentDate, 'day') ? 0 : 1;
+  const includeThisMonth = isSameDay(endOfMonth(currentDate), currentDate) ? 0 : 1;
 
   const slice = -(futureMonths + includeThisMonth);
 
@@ -180,8 +195,8 @@ const getCombinedNetWorth = <K extends keyof CostProcessed>(
 };
 
 const withNetWorth = <K extends keyof CostProcessed>(
-  dates: DateTime[],
-  currentDate: DateTime,
+  dates: Date[],
+  currentDate: Date,
   futureMonths: number,
   netWorth: number[],
   fundsRows: FundRow[],
@@ -201,8 +216,8 @@ const withNetWorth = <K extends keyof CostProcessed>(
   )(cost);
 
 const withPredictedSpending = (
-  dates: DateTime[],
-  currentDate: DateTime,
+  dates: Date[],
+  currentDate: Date,
   futureMonths: number,
   numRows: number,
 ) => (cost: Cost): Cost & Pick<CostProcessed, 'fundsOld' | 'spending'> =>
@@ -231,20 +246,18 @@ export const getProcessedCost = createSelector(
 const isPositive = (value: number): boolean => value >= 0;
 const isNegative = (value: number): boolean => value < 0;
 
-type Cell = {
-  column: ['month' | keyof TableValues, string];
-  value: string | number;
-  rgb: Color | null;
-};
-
 export const getOverviewTable = createSelector(
-  [getCurrentDate, getMonthDates, getFutureMonths, getProcessedCost, getNetWorthSummary],
-  (currentDate, dates, futureMonths, cost, netWorth) => {
+  getCurrentDate,
+  getMonthDates,
+  getFutureMonths,
+  getProcessedCost,
+  getNetWorthSummary,
+  (currentDate, dates, futureMonths, cost, netWorth): Table | null => {
     if (!dates) {
       return null;
     }
 
-    const months = dates.map(date => date.toFormat('LLL-yy'));
+    const months = dates.map(date => format(date, 'LLL-yy'));
 
     const values: TableValues<number[]> = Object.entries(OVERVIEW_COLUMNS)
       .filter(([header]) => header !== 'month')
@@ -314,23 +327,25 @@ export const getOverviewTable = createSelector(
         },
       );
 
-    const endOfCurrentMonth = currentDate.endOf('month');
+    const endOfCurrentMonth = endOfMonth(currentDate);
 
-    return months.map((monthText, index) => {
-      const date = dates[index];
-      const past = date < currentDate;
-      const future = date > endOfCurrentMonth;
-      const active = !past && !future;
+    return months.map(
+      (monthText, index): TableRow => {
+        const date = dates[index];
+        const past = date < currentDate;
+        const future = date > endOfCurrentMonth;
+        const active = !past && !future;
 
-      const cells = getCells(monthText, index);
+        const cells = getCells(monthText, index);
 
-      return {
-        key: monthText,
-        cells,
-        past,
-        active,
-        future,
-      };
-    });
+        return {
+          key: monthText,
+          cells,
+          past,
+          active,
+          future,
+        };
+      },
+    );
   },
 );

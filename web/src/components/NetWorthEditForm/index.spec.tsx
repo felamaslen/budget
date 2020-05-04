@@ -2,7 +2,6 @@ import sinon from 'sinon';
 import React from 'react';
 import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/react';
 import nock from 'nock';
-import { DateTime } from 'luxon';
 
 import { Category, Subcategory, Entry } from '~client/types/net-worth';
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
@@ -60,7 +59,7 @@ describe('Net worth entry form', () => {
 
   const item: Entry = {
     id: 'some-fake-id',
-    date: DateTime.fromJSDate(new Date(oldDate)),
+    date: new Date(oldDate),
     values: [
       {
         id: 'fake-value-id-bank-account',
@@ -259,12 +258,14 @@ describe('Net worth entry form', () => {
 
     describe('when initially opened', () => {
       it('should start on the date step', () => {
+        expect.assertions(1);
         const { getByText } = render(<NetWorthEditForm {...props} />);
         const title = getByText('On what date were the data collected?');
         expect(title).toBeInTheDocument();
       });
 
       it('should move to the currencies step when hitting next', () => {
+        expect.assertions(4);
         const renderProps = render(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
 
@@ -277,6 +278,7 @@ describe('Net worth entry form', () => {
 
     describe('when on the currencies step', () => {
       it('should move to the assets step when hitting next', () => {
+        expect.assertions(5);
         const renderProps = render(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
         updateCurrencyManually(renderProps);
@@ -284,10 +286,27 @@ describe('Net worth entry form', () => {
         const title = renderProps.getByText('Assets');
         expect(title).toBeInTheDocument();
       });
+
+      it('should move back to the date step when hitting previous', () => {
+        expect.assertions(4);
+        const renderProps = render(<NetWorthEditForm {...props} />);
+        updateDate(renderProps);
+
+        const prevButton = renderProps.getByText('Previous') as HTMLButtonElement;
+        expect(prevButton).toBeInTheDocument();
+
+        act(() => {
+          fireEvent.click(prevButton);
+        });
+
+        const title = renderProps.getByText('On what date were the data collected?');
+        expect(title).toBeInTheDocument();
+      });
     });
 
     describe('when on the assets step', () => {
       it('should move to the liabilities step when hitting next', () => {
+        expect.assertions(9);
         const renderProps = render(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
         updateCurrencyManually(renderProps);
@@ -301,18 +320,20 @@ describe('Net worth entry form', () => {
     describe('when on the liabilities step', () => {
       let renderProps: RenderResult;
 
-      beforeEach(async () => {
+      const setup = async (): Promise<void> => {
         renderProps = render(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
         await updateCurrencyAutomatically(renderProps);
         updateAssets(renderProps);
         updateLiabilities(renderProps);
-      });
+      };
 
-      it('should call onUpdate when hitting finish', () => {
+      it('should call onUpdate when hitting finish', async () => {
+        expect.assertions(17);
+        await setup();
         expect(props.onUpdate).toHaveBeenCalledWith('some-fake-id', {
           id: 'some-fake-id',
-          date: DateTime.fromJSDate(new Date(newDate)),
+          date: new Date(newDate),
           values: [
             {
               id: 'fake-value-id-bank-account',
@@ -343,7 +364,9 @@ describe('Net worth entry form', () => {
         });
       });
 
-      it('should reset the active ID', () => {
+      it('should reset the active ID', async () => {
+        expect.assertions(17);
+        await setup();
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });
     });
@@ -359,12 +382,14 @@ describe('Net worth entry form', () => {
 
     describe('when initially opened', () => {
       it('should start on the date step', () => {
+        expect.assertions(1);
         const { getByText } = render(<NetWorthAddForm {...props} />);
         const title = getByText('On what date were the data collected?');
         expect(title).toBeInTheDocument();
       });
 
       it('should move to the currencies step when hitting next', () => {
+        expect.assertions(4);
         const renderProps = render(<NetWorthAddForm {...props} />);
         updateDate(renderProps);
 
@@ -377,6 +402,7 @@ describe('Net worth entry form', () => {
 
     describe('when on the currencies step', () => {
       it('should move to the assets step when hitting next', () => {
+        expect.assertions(5);
         const renderProps = render(<NetWorthAddForm {...props} />);
         updateDate(renderProps);
         updateCurrencyManually(renderProps);
@@ -388,6 +414,7 @@ describe('Net worth entry form', () => {
 
     describe('when on the assets step', () => {
       it('should move to the liabilities step when hitting next', () => {
+        expect.assertions(9);
         const renderProps = render(<NetWorthAddForm {...props} />);
         updateDate(renderProps);
         updateCurrencyManually(renderProps);
@@ -401,18 +428,20 @@ describe('Net worth entry form', () => {
     describe('when on the liabilities step', () => {
       let renderProps: RenderResult;
 
-      beforeEach(async () => {
+      const setup = async (): Promise<void> => {
         renderProps = render(<NetWorthAddForm {...props} />);
         updateDate(renderProps);
         await updateCurrencyAutomatically(renderProps);
         updateAssets(renderProps);
         updateLiabilities(renderProps);
-      });
+      };
 
       it('should call onCreate when hitting finish', async () => {
+        expect.assertions(17);
+        await setup();
         expect(props.onCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            date: DateTime.fromJSDate(new Date(newDate)),
+            date: new Date(newDate),
             values: expect.arrayContaining([
               expect.objectContaining({
                 subcategory: 'fake-subcategory-id-bank-account',
@@ -441,13 +470,16 @@ describe('Net worth entry form', () => {
         );
       });
 
-      it('should reset the active ID', () => {
+      it('should reset the active ID', async () => {
+        expect.assertions(17);
+        await setup();
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });
     });
 
     describe('if a date is not entered', () => {
       it('should use the end date of the next month', async () => {
+        expect.assertions(17);
         const renderProps = render(<NetWorthAddForm {...props} />);
         updateDate(renderProps, false);
         await updateCurrencyAutomatically(renderProps);
@@ -456,9 +488,27 @@ describe('Net worth entry form', () => {
 
         expect(props.onCreate).toHaveBeenCalledWith(
           expect.objectContaining({
-            date: DateTime.fromJSDate(new Date('2020-05-31T23:59:59.999Z')),
+            date: new Date('2020-05-31T23:59:59.999Z'),
           }),
         );
+      });
+    });
+
+    describe('when there are no existing net worth entries', () => {
+      const propsNoEntries: PropsAdd = {
+        ...props,
+        data: [],
+      };
+
+      it('should set the date to today', () => {
+        expect.assertions(2);
+        const { getByText, getByDisplayValue } = render(<NetWorthAddForm {...propsNoEntries} />);
+
+        const title = getByText('On what date were the data collected?');
+        const input = getByDisplayValue('2020-06-03');
+
+        expect(title).toBeInTheDocument();
+        expect(input).toBeInTheDocument();
       });
     });
   });

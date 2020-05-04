@@ -1,12 +1,10 @@
-import { DateTime } from 'luxon';
-
 import { Page } from '~client/types/app';
 import { State } from '~client/reducers';
 import { Period } from '~client/constants/graph';
 import * as funds from './funds';
 
 export const testState: State = {
-  now: DateTime.fromISO('2018-03-23T11:45:20Z'),
+  now: new Date('2018-03-23T11:45:20Z'),
   app: {
     windowWidth: 1000,
   },
@@ -24,8 +22,8 @@ export const testState: State = {
   },
   error: [],
   overview: {
-    startDate: DateTime.fromISO('2018-01-31T23:59:59.999Z'),
-    endDate: DateTime.fromISO('2018-07-31T23:59:59.999Z'),
+    startDate: new Date('2018-01-31T23:59:59.999Z'),
+    endDate: new Date('2018-07-31T23:59:59.999Z'),
     cost: {
       [Page.funds]: [94004, 105390, 110183, 100779, 101459, 102981, 103293, 0, 0, 0],
       fundChanges: [],
@@ -92,7 +90,7 @@ export const testState: State = {
     entries: [
       {
         id: 'real-entry-id-a',
-        date: DateTime.fromISO('2018-02-28'),
+        date: new Date('2018-02-28'),
         values: [
           {
             id: 'value-id-a1',
@@ -126,7 +124,7 @@ export const testState: State = {
       },
       {
         id: 'real-entry-id-b',
-        date: DateTime.fromISO('2018-03-31'),
+        date: new Date('2018-03-31'),
         values: [
           {
             id: 'value-id-b1',
@@ -227,7 +225,7 @@ export const testState: State = {
     items: [
       {
         id: 'id19',
-        date: DateTime.fromISO('2018-04-17'),
+        date: new Date('2018-04-17'),
         item: 'foo3',
         category: 'bar3',
         cost: 29,
@@ -235,7 +233,7 @@ export const testState: State = {
       },
       {
         id: 'id300',
-        date: DateTime.fromISO('2018-02-03'),
+        date: new Date('2018-02-03'),
         item: 'foo1',
         category: 'bar1',
         cost: 1139,
@@ -243,7 +241,7 @@ export const testState: State = {
       },
       {
         id: 'id29',
-        date: DateTime.fromISO('2018-02-02'),
+        date: new Date('2018-02-02'),
         item: 'foo3',
         category: 'bar3',
         cost: 498,
@@ -251,7 +249,7 @@ export const testState: State = {
       },
       {
         id: 'id81',
-        date: DateTime.fromISO('2018-02-03'),
+        date: new Date('2018-02-03'),
         item: 'foo2',
         category: 'bar2',
         cost: 876,

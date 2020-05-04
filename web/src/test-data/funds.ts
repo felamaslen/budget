@@ -1,13 +1,13 @@
 /* eslint-disable max-lines */
-import { DateTime } from 'luxon';
+import getUnixTime from 'date-fns/getUnixTime';
 
-import { LegacyRow } from '~client/types/funds';
+import { Row } from '~client/types/funds';
 import { getTransactionsList } from '~client/modules/data';
 import { colorKey } from '~client/modules/color';
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
 
-export const testRows: LegacyRow[] = [
+export const testRows: Row[] = [
   {
     id: '10',
     item: 'some fund 1',
@@ -238,7 +238,7 @@ export const testPrices = {
   },
 };
 
-export const testStartTime = Math.floor(DateTime.fromISO('2016-10-05T10:01:01.000Z').toSeconds());
+export const testStartTime = getUnixTime(new Date('2016-10-05T10:01:01.000Z'));
 
 export const testCacheTimes = [
   0,

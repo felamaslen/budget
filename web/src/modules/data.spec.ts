@@ -1,5 +1,4 @@
 /* eslint-disable max-lines */
-import { DateTime } from 'luxon';
 import shortid from 'shortid';
 import { removeAtIndex } from 'replace-array';
 
@@ -20,6 +19,7 @@ import {
   getValueForTransmit,
   withoutDeleted,
 } from './data';
+import { mockRandom } from '~client/mocks/random';
 import { Average } from '~client/constants';
 import { RequestType } from '~client/types/crud';
 import { Data } from '~client/types/graph';
@@ -71,11 +71,31 @@ describe('data module', () => {
 
   describe('getTransactionsList', () => {
     it('should make a list from API response data', () => {
-      expect.assertions(2);
+      expect.assertions(1);
       const transactionsList = getTransactionsList(transactionsData);
 
-      expect(Array.isArray(transactionsList)).toBe(true);
-      expect(transactionsList).toHaveLength(transactionsData.length);
+      expect(transactionsList).toStrictEqual([
+        expect.objectContaining({
+          date: new Date('2017-05-09T00:00:00.000Z'),
+          units: 934,
+          cost: 399924,
+        }),
+        expect.objectContaining({
+          date: new Date('2018-03-13T00:00:00.000Z'),
+          units: 25,
+          cost: -10512,
+        }),
+        expect.objectContaining({
+          date: new Date('2018-06-07T00:00:00.000Z'),
+          units: -1239,
+          cost: -539814,
+        }),
+        expect.objectContaining({
+          date: new Date('2018-04-26T00:00:00.000Z'),
+          units: 280,
+          cost: 119931,
+        }),
+      ]);
     });
 
     it('should add fake IDs to each item', () => {
@@ -165,7 +185,7 @@ describe('data module', () => {
       const transactionsList = getTransactionsList(transactionsData);
 
       const transactionsListAdded = addToTransactionsList(transactionsList, {
-        date: '2018-09-13T03:20Z',
+        date: new Date('2018-09-13T03:20Z'),
         units: 20,
         cost: 3,
       });
@@ -175,7 +195,7 @@ describe('data module', () => {
       expect(transactionsListAdded[transactionsListAdded.length - 1]).toStrictEqual(
         expect.objectContaining({
           id: expect.stringMatching(/^([^\s]{7})/),
-          date: DateTime.fromISO('2018-09-13T03:20Z'),
+          date: new Date('2018-09-13T03:20Z'),
           units: 20,
           cost: 3,
         }),
@@ -189,10 +209,10 @@ describe('data module', () => {
       const transactionsList = getTransactionsList(transactionsData);
 
       const modifiedDate = modifyTransaction(transactionsList, 1, {
-        date: '2018-03-14T00:00:00.000Z',
+        date: new Date('2018-03-14T00:00:00.000Z'),
       });
 
-      expect(modifiedDate[1].date.day).toBe(14);
+      expect(modifiedDate[1].date.getDate()).toBe(14);
 
       const modifiedUnits = modifyTransaction(transactionsList, 3, { units: 281 });
 
@@ -203,7 +223,7 @@ describe('data module', () => {
       expect(modifiedCost[2].cost).toBe(-100);
 
       // check that the original list wasn't mutated
-      expect(transactionsList[1].date.day).toBe(13);
+      expect(transactionsList[1].date.getDate()).toBe(13);
       expect(transactionsList[3].units).toBe(280);
       expect(transactionsList[2].cost).toBe(-539814);
     });
@@ -219,10 +239,10 @@ describe('data module', () => {
       const id3 = transactionsList[3].id;
 
       const modifiedDate = modifyTransactionById(transactionsList, id1, {
-        date: '2018-03-14T00:00:00.000Z',
+        date: new Date('2018-03-14T00:00:00.000Z'),
       });
 
-      expect(modifiedDate[1].date).toStrictEqual(DateTime.fromISO('2018-03-14T00:00:00.000Z'));
+      expect(modifiedDate[1].date).toStrictEqual(new Date('2018-03-14T00:00:00.000Z'));
 
       const modifiedUnits = modifyTransactionById(transactionsList, id3, { units: 281 });
 
@@ -233,7 +253,7 @@ describe('data module', () => {
       expect(modifiedCost[2].cost).toBe(-100);
 
       // check that the original list wasn't mutated
-      expect(transactionsList[1].date.day).toBe(13);
+      expect(transactionsList[1].date.getDate()).toBe(13);
       expect(transactionsList[3].units).toBe(280);
       expect(transactionsList[2].cost).toBe(-539814);
     });
@@ -339,24 +359,15 @@ describe('data module', () => {
   describe('randnBm', () => {
     it('should return a Gaussian-incremented value from two random numbers', () => {
       expect.assertions(1);
-
-      const testRandoms = [0.36123, 0.96951];
-      let randomIndex = -1;
-      jest.spyOn(global.Math, 'random').mockImplementation(() => {
-        randomIndex += 1;
-        return testRandoms[randomIndex % 2];
-      });
-
+      mockRandom();
       expect(randnBm()).toBe(Math.sqrt(-2 * Math.log(0.36123)) * Math.cos(2 * Math.PI * 0.96951));
     });
   });
 
   describe('getValueFromTransmit', () => {
-    it('should return "date" as DateTime', () => {
+    it('should return "date" as a Date object', () => {
       expect.assertions(1);
-      expect(getValueFromTransmit('date', '2019-06-05')).toStrictEqual(
-        DateTime.fromISO('2019-06-05'),
-      );
+      expect(getValueFromTransmit('date', '2019-06-05')).toStrictEqual(new Date('2019-06-05'));
     });
 
     it('should return "item" as-is', () => {
@@ -408,9 +419,9 @@ describe('data module', () => {
   });
 
   describe('getValueForTransmit', () => {
-    it('should return date as ISO date', () => {
+    it('should return date as an ISO date string', () => {
       expect.assertions(1);
-      expect(getValueForTransmit('date', DateTime.fromISO('2019-06-05'))).toBe('2019-06-05');
+      expect(getValueForTransmit('date', new Date('2019-06-05'))).toBe('2019-06-05');
     });
 
     it('should return "item" as-is', () => {

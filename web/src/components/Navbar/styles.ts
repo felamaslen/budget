@@ -5,6 +5,7 @@ import { breakpoint } from '~client/styled/mixins';
 import { PAGES } from '~client/constants/data';
 
 import nav from '../../images/nav.png';
+import { Page } from '~client/types/app';
 
 export const NavList = styled.nav`
   display: flex;
@@ -26,7 +27,7 @@ export const NavList = styled.nav`
 `;
 
 export const Link = styled(NavLink)<{
-  page: string;
+  page: Page | 'logout' | 'netWorth';
   to: string;
 }>`
   display: ${({ page }): 'none' | 'block' => (page === 'logout' ? 'none' : 'block')};
@@ -77,8 +78,7 @@ export const Link = styled(NavLink)<{
         return colors.light as string;
       }
       if (colors[page]) {
-        // TODO: index Page on Colors
-        return (colors[page] as { main: string }).main;
+        return colors[page].main;
       }
 
       return 'transparent';

@@ -12,14 +12,7 @@ import {
 } from '~client/selectors/funds/helpers';
 import { getFundLineProcessed, PUC } from '~client/selectors/funds/lines';
 import { Data } from '~client/types/graph';
-import {
-  LegacyRow,
-  LegacyTransaction,
-  Prices,
-  FundPrices,
-  FundLine,
-  FundItem,
-} from '~client/types/funds';
+import { Row, Transaction, Prices, FundPrices, FundLine, FundItem } from '~client/types/funds';
 
 type IndexedNumber = { [id: string]: number };
 type IndexedNumberArray = { [id: string]: number[] };
@@ -72,14 +65,14 @@ const getMaxLength = createSelector(
     Object.keys(prices).reduce((last, id) => Math.max(last, rowLengths[id]), 0),
 );
 
-type WithInfo<V = {}> = LegacyRow &
+type WithInfo<V = {}> = Row &
   V & {
-    transactionsToDate: LegacyTransaction[][];
+    transactionsToDate: Transaction[][];
   };
 
 const getItemsWithInfo = createSelector(
   [getFundsRows, getPrices, getStartTime, getCacheTimes],
-  (items: LegacyRow[], prices: Prices, startTime, cacheTimes) =>
+  (items: Row[], prices: Prices, startTime, cacheTimes) =>
     items
       .filter(({ id }) => prices[id])
       .map(

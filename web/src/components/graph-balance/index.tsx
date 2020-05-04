@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { DateTime } from 'luxon';
 
 import {
   COLOR_BALANCE_ACTUAL,
@@ -17,6 +16,7 @@ import {
 import { Key } from '~client/components/graph-balance/key';
 import { Targets } from '~client/components/graph-balance/targets';
 import { AfterCanvas } from '~client/components/graph-balance/after-canvas';
+import { Page } from '~client/types/app';
 import { Point, Line, Data, BasicProps } from '~client/types/graph';
 import { Target, CostProcessed } from '~client/types/overview';
 
@@ -28,6 +28,8 @@ type BalanceData = {
   funds: number[];
   oldOffset: number;
 };
+
+type CostProps = Pick<CostProcessed, Page.funds | 'fundsOld' | 'netWorthCombined'>;
 
 function getData(
   netWorthCombined: number[],
@@ -55,8 +57,8 @@ function getData(
 }
 
 type RawData = {
-  startDate: DateTime;
-  cost: CostProcessed;
+  startDate: Date;
+  cost: CostProps;
   netWorthOld: number[];
   showAll: boolean;
   futureMonths: number;
@@ -131,9 +133,9 @@ function makeAfterLines({
 }
 
 export type Props = {
-  startDate: DateTime;
+  startDate: Date;
   futureMonths: number;
-  cost: CostProcessed;
+  cost: CostProps;
   netWorthOld: number[];
   targets: Target[];
 } & Omit<GraphCashFlowProps, 'name' | 'lines'>;

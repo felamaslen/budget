@@ -30,6 +30,7 @@ describe('<Navbar />', () => {
   ];
 
   it.each(pageCases)('should render a button for the %s page', async (page, path) => {
+    expect.assertions(2);
     const { findByText } = getContainer();
 
     const link = (await findByText(page)) as HTMLAnchorElement;
@@ -38,6 +39,7 @@ describe('<Navbar />', () => {
   });
 
   it('should render a logout button', async () => {
+    expect.assertions(2);
     const { findByText } = getContainer();
 
     const link = (await findByText('Log out')) as HTMLButtonElement;

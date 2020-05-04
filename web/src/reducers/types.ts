@@ -1,7 +1,6 @@
-import { DateTime } from 'luxon';
-
 import { Page } from '~client/types/app';
 
+import { State as LoginState } from './login';
 import { State as OverviewState } from '~client/types/overview';
 import { State as NetWorthState } from './net-worth';
 import * as Stocks from './stocks';
@@ -15,11 +14,11 @@ import { State as SocialState } from './social';
 import * as Suggestions from './suggestions';
 
 export type State = {
-  now: DateTime;
+  now: Date;
   app: {
     windowWidth: number;
   };
-  login: object;
+  login: LoginState;
   api: object;
   error: object[];
   [Page.overview]: OverviewState;

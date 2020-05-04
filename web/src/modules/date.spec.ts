@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon';
-
 import { timeSeriesTicks, getMonthDatesList } from './date';
 
 describe('date module', () => {
@@ -220,25 +218,23 @@ describe('date module', () => {
   describe('getMonthDatesList', () => {
     it('should get a list of dates at the end of each month', () => {
       expect.assertions(1);
-      const startDate = DateTime.fromISO('2018-01-01');
-      const endDate = DateTime.fromISO('2018-07-01');
+      const startDate = new Date('2018-01-01');
+      const endDate = new Date('2018-07-01');
 
       expect(getMonthDatesList(startDate, endDate)).toStrictEqual([
-        DateTime.fromISO('2018-01-31T23:59:59.999Z'),
-        DateTime.fromISO('2018-02-28T23:59:59.999Z'),
-        DateTime.fromISO('2018-03-31T23:59:59.999Z'),
-        DateTime.fromISO('2018-04-30T23:59:59.999Z'),
-        DateTime.fromISO('2018-05-31T23:59:59.999Z'),
-        DateTime.fromISO('2018-06-30T23:59:59.999Z'),
-        DateTime.fromISO('2018-07-31T23:59:59.999Z'),
+        new Date('2018-01-31T23:59:59.999Z'),
+        new Date('2018-02-28T23:59:59.999Z'),
+        new Date('2018-03-31T23:59:59.999Z'),
+        new Date('2018-04-30T23:59:59.999Z'),
+        new Date('2018-05-31T23:59:59.999Z'),
+        new Date('2018-06-30T23:59:59.999Z'),
+        new Date('2018-07-31T23:59:59.999Z'),
       ]);
     });
 
     it('should return an empty array if both dates are in the same month', () => {
       expect.assertions(1);
-      expect(
-        getMonthDatesList(DateTime.fromISO('2018-01-03'), DateTime.fromISO('2018-01-29')),
-      ).toStrictEqual([]);
+      expect(getMonthDatesList(new Date('2018-01-03'), new Date('2018-01-29'))).toStrictEqual([]);
     });
   });
 });

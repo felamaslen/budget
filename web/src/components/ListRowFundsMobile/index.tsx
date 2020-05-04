@@ -3,7 +3,7 @@ import { formatCurrency } from '~client/modules/format';
 import { getTotalCost, isSold } from '~client/modules/data';
 
 import * as Styled from './styles';
-import { LegacyTransaction } from '~client/types/funds';
+import { Transaction } from '~client/types/funds';
 
 const formatOptions = {
   abbreviate: true,
@@ -12,7 +12,7 @@ const formatOptions = {
 
 type Props = {
   item: {
-    transactions: LegacyTransaction[];
+    transactions: Transaction[];
     gain: {
       value: number;
     } | null;

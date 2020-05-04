@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
-import { DateTime } from 'luxon';
 
 import FormContainer, { Props } from './form-container';
 import { Step } from './constants';
@@ -11,7 +10,7 @@ describe('(net worth edit form) <FormContainer />', () => {
     step: Step.Date,
     item: {
       id: 'some-fake-id',
-      date: DateTime.fromJSDate(new Date('2020-04-20')),
+      date: new Date('2020-04-20'),
       values: [],
       creditLimit: [],
       currencies: [],
@@ -25,11 +24,13 @@ describe('(net worth edit form) <FormContainer />', () => {
 
   describe('cancel button', () => {
     it('should be rendered', () => {
+      expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
       const cancelButton = getByText('Cancel');
       expect(cancelButton).toBeInTheDocument();
     });
     it('should call onComplete when clicked', () => {
+      expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
       const cancelButton = getByText('Cancel');
       act(() => {
@@ -41,11 +42,13 @@ describe('(net worth edit form) <FormContainer />', () => {
 
   describe('previous button', () => {
     it('should be rendered', () => {
+      expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
       const prevButton = getByText('Previous');
       expect(prevButton).toBeInTheDocument();
     });
     it('should call onPrevStep when clicked', () => {
+      expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
       const prevButton = getByText('Previous');
       act(() => {
@@ -57,11 +60,13 @@ describe('(net worth edit form) <FormContainer />', () => {
 
   describe('next button', () => {
     it('should be rendered', () => {
+      expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
       const nextButton = getByText('Next');
       expect(nextButton).toBeInTheDocument();
     });
     it('should call onPrevStep when clicked', () => {
+      expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
       const nextButton = getByText('Next');
       act(() => {

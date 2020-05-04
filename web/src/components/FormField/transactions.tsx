@@ -1,11 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { DateTime } from 'luxon';
-import format from 'date-fns/format';
 
-import {
-  LegacyTransaction as Transaction,
-  Transaction as NewTransaction,
-} from '~client/types/funds';
+import { Transaction } from '~client/types/funds';
 import { useField } from '~client/hooks/field';
 import { Button } from '~client/styled/shared/button';
 import { Wrapper, WrapperProps } from '.';
@@ -18,9 +13,8 @@ import { CREATE_ID } from '~client/constants/data';
 import * as Styled from './styles';
 
 type PropsTransaction = {
-  item: Transaction | NewTransaction;
-  // TODO: make this a delta: Partial<Transaction>
-  onChange: (id: string, column: 'date' | 'units' | 'cost', value: string | number) => void;
+  item: Transaction;
+  onChange: (id: string, delta: Partial<Transaction>) => void;
   active?: boolean;
   create?: boolean;
 };
@@ -32,19 +26,15 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
   active,
   create,
 }) => {
-  const onChangeDate = useCallback(
-    (value: Date | DateTime) => {
-      // TODO: pass value as a Date here
-      const date = value instanceof Date ? format(value, 'yyyy-MM-dd') : value.toISODate();
-      onChange(item.id, 'date', date);
-    },
-    [onChange, item.id],
-  );
-  const onChangeUnits = useCallback((value = 0) => onChange(item.id, 'units', value), [
+  const onChangeDate = useCallback((value: Date) => onChange(item.id, { date: value }), [
     onChange,
     item.id,
   ]);
-  const onChangeCost = useCallback((value = 0) => onChange(item.id, 'cost', value), [
+  const onChangeUnits = useCallback((value = 0) => onChange(item.id, { units: value }), [
+    onChange,
+    item.id,
+  ]);
+  const onChangeCost = useCallback((value = 0) => onChange(item.id, { cost: value }), [
     onChange,
     item.id,
   ]);
@@ -74,7 +64,7 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
   );
 };
 
-const newItemInit: NewTransaction = {
+const newItemInit: Transaction = {
   id: CREATE_ID,
   date: new Date(),
   units: 0,
@@ -109,12 +99,8 @@ const FormFieldTransactions: React.FC<Props> = ({
   const { active } = props;
 
   const onChangeTransaction = useCallback(
-    (id, field, fieldValue) =>
-      onChange(
-        modifyTransactionById(value, id, {
-          [field]: fieldValue,
-        }),
-      ),
+    (id: string, delta: Partial<Transaction>): void =>
+      onChange(modifyTransactionById(value, id, delta)),
     [value, onChange],
   );
 
@@ -123,23 +109,11 @@ const FormFieldTransactions: React.FC<Props> = ({
     [currentValue, onChange],
   );
 
-  const [newItem, setNewItem] = useState<NewTransaction>(newItemInit);
+  const [newItem, setNewItem] = useState<Transaction>(newItemInit);
 
-  const onChangeAddField = useCallback(
-    // TODO: use delta: Partial<Transaction>
-    (_, field: 'date' | 'units' | 'cost', fieldValue: string | number) => {
-      setNewItem(
-        (last: NewTransaction): NewTransaction => {
-          const result = {
-            ...last,
-            [field]: field === 'date' ? new Date(fieldValue) : fieldValue,
-          };
-          return result;
-        },
-      );
-    },
-    [],
-  );
+  const onChangeAddField = useCallback((_, delta: Partial<Transaction>): void => {
+    setNewItem(last => ({ ...last, ...delta }));
+  }, []);
 
   const onAdd = useCallback(() => {
     if (!newItem) {
@@ -147,13 +121,7 @@ const FormFieldTransactions: React.FC<Props> = ({
     }
 
     setNewItem(newItemInit);
-    onChange(
-      addToTransactionsList(currentValue, {
-        // TODO: remove this hack
-        ...newItem,
-        date: format(newItem.date, 'yyyy-MM-dd'),
-      }),
-    );
+    onChange(addToTransactionsList(currentValue, newItem));
   }, [newItem, currentValue, onChange]);
 
   return (
