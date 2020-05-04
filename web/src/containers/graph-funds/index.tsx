@@ -1,11 +1,10 @@
-import { connect } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import fromUnixTime from 'date-fns/fromUnixTime';
 
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { rgba } from '~client/modules/color';
-import { State } from '~client/reducers';
 
 import { graphFundsHeightMobile } from '~client/styled/variables';
 import {
@@ -17,6 +16,7 @@ import {
   GRAPH_FUNDS_NUM_TICKS,
 } from '~client/constants/graph';
 
+import { getWindowWidth } from '~client/selectors/app';
 import { fundsRequested } from '~client/actions/funds';
 import { getPeriod } from '~client/selectors/funds';
 import {
@@ -31,26 +31,12 @@ import { ZoomedDimensions, ZoomEffect } from '~client/components/graph/hooks/zoo
 import { TimeAxes, LabelY } from '~client/components/graph/time-axes';
 import { AfterCanvas } from '~client/containers/graph-funds/after-canvas';
 import { Padding, Line, BasicProps } from '~client/types/graph';
-import { FundItem, FundLine } from '~client/types/funds';
+import { FundLine } from '~client/types/funds';
 
 import * as Styled from './styles';
 
 const PADDING_DESKTOP: Padding = [36, 0, 0, 0];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
-
-type Props = {
-  isMobile: boolean;
-  width: number;
-  height: number;
-  startTime?: number;
-  fundItems: FundItem[];
-  fundLines: {
-    [mode in Mode]: FundLine[];
-  };
-  cacheTimes: number[];
-  period: Period;
-  onFundsRequested: (fromCache: boolean, period: string) => void;
-};
 
 const makeGetRanges = ({
   mode,
@@ -148,17 +134,30 @@ const modeListAll: Mode[] = [Mode.ROI, Mode.Value, Mode.Price];
 
 type FilterFunds = (filteredItems: { id: string }) => boolean;
 
-const GraphFunds: React.FC<Props> = ({
-  isMobile,
-  width,
-  height,
-  startTime = 0,
-  fundItems,
-  fundLines,
-  cacheTimes,
-  period,
-  onFundsRequested,
-}) => {
+export type Props = {
+  isMobile: boolean;
+};
+
+const GraphFunds: React.FC<Props> = ({ isMobile }) => {
+  const windowWidth = useSelector(getWindowWidth);
+  const width = Math.min(windowWidth, GRAPH_FUNDS_WIDTH);
+  const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
+  const fundItems = useSelector(getFundItems);
+  const fundLines: {
+    [mode in Mode]: FundLine[];
+  } = useSelector(getFundLines);
+  const startTime = useSelector(getStartTime);
+  const cacheTimes = useSelector(getCacheTimes);
+  const period = useSelector(getPeriod);
+
+  const dispatch = useDispatch();
+  const onFundsRequested = useCallback(
+    (fromCache: boolean, newPeriod: Period): void => {
+      dispatch(fundsRequested(fromCache, newPeriod));
+    },
+    [dispatch],
+  );
+
   const haveData = cacheTimes.length > 0;
 
   const modeList = useMemo<Mode[]>(() => {
@@ -317,26 +316,4 @@ const GraphFunds: React.FC<Props> = ({
   );
 };
 
-type ExternalProps = {
-  isMobile: boolean;
-};
-
-type DispatchProps = Pick<Props, 'onFundsRequested'>;
-
-type StateProps = Omit<Props, keyof (ExternalProps & DispatchProps)>;
-
-const mapStateToProps = (state: State, { isMobile }: ExternalProps): StateProps => ({
-  width: Math.min(state.app.windowWidth, GRAPH_FUNDS_WIDTH),
-  height: isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT,
-  fundItems: getFundItems(state),
-  fundLines: getFundLines(state),
-  startTime: getStartTime(state),
-  cacheTimes: getCacheTimes(state),
-  period: getPeriod(state),
-});
-
-const mapDispatchToProps = {
-  onFundsRequested: fundsRequested,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(GraphFunds);
+export default GraphFunds;

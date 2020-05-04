@@ -1,9 +1,8 @@
-import { useReducer, useMemo, useEffect } from 'react';
+import React, { useReducer, useMemo, useEffect } from 'react';
 import { throttle } from 'throttle-debounce';
 
 import { NULL } from '~client/modules/data';
 import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
-import { GraphRef } from '~client/components/graph';
 import { genPixelCompute, pointVisible } from '~client/components/graph/helpers';
 import { Dimensions, Range, RangeX, Calc, Line } from '~client/types/graph';
 
@@ -61,7 +60,7 @@ type ZoomState = {
   disabled?: boolean;
   valX?: (p: number) => number;
   zoomEffect?: ZoomEffect;
-  graphRef: GraphRef;
+  graphRef: React.MutableRefObject<HTMLDivElement | null>;
   fullWidth: number;
   calc: Calc;
   lines: Line[];
@@ -69,27 +68,38 @@ type ZoomState = {
   dimensions: Dimensions;
   lastDimensions: Dimensions;
   level: number;
-  pageX: number | null;
   position: number;
   zoomedLines: Line[];
   zoomedDimensions: Dimensions;
 };
 
-interface ZoomAction {
-  type: string;
+enum ActionType {
+  Wheel,
+  SetPosition,
+  Reset,
 }
 
-type ResetAction = ZoomAction & {
-  type: 'reset';
+type WheelAction = {
+  type: ActionType.Wheel;
+  deltaY: number;
+};
+
+type SetPositionAction = {
+  type: ActionType.SetPosition;
+  clientX: number;
+};
+
+type ResetAction = {
+  type: ActionType.Reset;
   disabled: boolean;
   dimensions: Dimensions;
   lines: Line[];
   calc: Calc;
   zoomEffect: ZoomEffect;
-  graphRef: GraphRef;
+  graphRef: ZoomState['graphRef'];
 };
 
-const isResetAction = (action: ZoomAction): action is ResetAction => action.type === 'reset';
+type Action = WheelAction | SetPositionAction | ResetAction;
 
 const init = (
   state: ZoomState,
@@ -104,29 +114,18 @@ const init = (
   lastLines: lines,
   lastDimensions: dimensions,
   level: 0,
-  pageX: null,
   position: 0,
   zoomedLines: lines,
   zoomedDimensions: dimensions,
 });
 
-type WheelAction = ZoomAction & {
-  type: 'wheel';
-  evt: WheelEvent;
-};
-
-const isWheelAction = (action: ZoomAction): action is WheelAction => action.type === 'wheel';
-
-function onWheel(state: ZoomState, { evt }: WheelAction): ZoomState {
-  if (state.disabled || !state.zoomEffect || !state.graphRef.current || !evt.deltaY) {
+function onWheel(state: ZoomState, { deltaY }: WheelAction): ZoomState {
+  if (state.disabled || !state.zoomEffect || !state.graphRef.current || !deltaY) {
     return state;
   }
 
-  const level = Math.max(0, state.level - evt.deltaY / Math.abs(evt.deltaY));
-  const position =
-    evt.pageX === state.pageX || !state.valX
-      ? state.position
-      : state.valX(evt.pageX - state.graphRef.current.offsetLeft);
+  const level = Math.max(0, state.level - deltaY / Math.abs(deltaY));
+  const position = state.position;
 
   if (!position) {
     return state;
@@ -152,29 +151,34 @@ function onWheel(state: ZoomState, { evt }: WheelAction): ZoomState {
   return {
     ...state,
     level,
-    pageX: evt.pageX,
-    position,
     zoomedLines,
     zoomedDimensions,
   };
 }
 
-function reducer(state: ZoomState, action: ZoomAction): ZoomState {
-  if (isResetAction(action)) {
+function reducer(state: ZoomState, action: Action): ZoomState {
+  if (action.type === ActionType.Reset) {
     return init(state, action);
   }
-  if (isWheelAction(action)) {
+  if (action.type === ActionType.SetPosition) {
+    return {
+      ...state,
+      position: state.valX
+        ? state.valX(action.clientX - (state.graphRef.current?.offsetLeft ?? 0))
+        : state.position,
+    };
+  }
+  if (action.type === ActionType.Wheel) {
     return onWheel(state, action);
   }
-
-  throw new Error(`Unhandled zoom hook action: ${action.type}`);
+  return state;
 }
 
 type ZoomProps = {
   dimensions: Dimensions;
   lines: Line[];
   isMobile?: boolean;
-  graphRef: GraphRef;
+  graphRef: ZoomState['graphRef'];
   calc: Calc;
   setCalc: (next: Calc) => void;
   zoomEffect?: ZoomEffect;
@@ -204,7 +208,6 @@ export function useZoom({
     graphRef,
     fullWidth: 0,
     level: 0,
-    pageX: 0,
     position: 0,
     zoomedLines: [],
   });
@@ -217,7 +220,7 @@ export function useZoom({
     ) {
       const nextCalc = genPixelCompute(dimensions);
       dispatch({
-        type: 'reset',
+        type: ActionType.Reset,
         disabled,
         dimensions,
         lines,
@@ -249,7 +252,12 @@ export function useZoom({
       return NULL;
     }
 
-    const handler = throttle(10, evt => dispatch({ type: 'wheel', evt } as WheelAction));
+    const handler = throttle(10, ({ deltaY }: WheelEvent) =>
+      dispatch({
+        type: ActionType.Wheel,
+        deltaY,
+      }),
+    );
 
     return (evt: WheelEvent): void => {
       evt.preventDefault();
@@ -257,10 +265,19 @@ export function useZoom({
     };
   }, [disabled]);
 
+  const onMouseMoveThrottled = useMemo(
+    () =>
+      throttle(10, ({ clientX }: MouseEvent) => {
+        dispatch({ type: ActionType.SetPosition, clientX });
+      }),
+    [],
+  );
+
   useEffect(() => {
     let lastRef: HTMLElement | null;
     setImmediate(() => {
       if (graphRef.current && onWheelThrottled !== NULL) {
+        graphRef.current.addEventListener<'mousemove'>('mousemove', onMouseMoveThrottled);
         graphRef.current.addEventListener<'wheel'>('wheel', onWheelThrottled);
       }
       lastRef = graphRef.current;
@@ -269,9 +286,10 @@ export function useZoom({
     return (): void => {
       if (lastRef) {
         lastRef.removeEventListener('wheel', onWheelThrottled);
+        lastRef.removeEventListener('mousemove', onMouseMoveThrottled);
       }
     };
-  }, [graphRef, onWheelThrottled]);
+  }, [graphRef, onWheelThrottled, onMouseMoveThrottled]);
 
   return [state.zoomedLines, state.zoomedDimensions];
 }

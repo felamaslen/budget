@@ -35,6 +35,19 @@ describe('Fund selectors / graph', () => {
       expect.assertions(1);
       expect(getStartTime(state)).toBe(testStartTime);
     });
+
+    it('should default to zero', () => {
+      expect.assertions(1);
+      expect(
+        getStartTime({
+          ...state,
+          [Page.funds]: {
+            ...state[Page.funds],
+            period: Period.year5,
+          },
+        }),
+      ).toBe(0);
+    });
   });
 
   describe('getCacheTimes', () => {

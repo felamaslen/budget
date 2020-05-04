@@ -3,13 +3,12 @@ import React from 'react';
 import { Size } from '~client/types/graph';
 import * as Styled from './styles';
 
-export type GraphRef = React.MutableRefObject<HTMLDivElement | null>;
-
 export type GraphProps = {
   outerProperties?: object;
   svgProperties?: object;
   before?: React.FC;
   after?: React.FC;
+  children?: React.ReactNode;
 };
 
 export type Props = Size & GraphProps;

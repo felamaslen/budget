@@ -28,7 +28,7 @@ const getPrices = createSelector(
 
 export const getStartTime = createSelector(
   getCurrentFundsCache,
-  (cache?: Funds.Cache) => cache?.startTime,
+  (cache?: Funds.Cache) => cache?.startTime ?? 0,
 );
 
 export const getCacheTimes = createSelector(

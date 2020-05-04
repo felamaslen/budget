@@ -137,10 +137,9 @@ export const LineGraph: React.FC<Props> = ({
     calc,
     hlPoint,
     hoverEffect,
-    graphRef,
     outerProperties: outerPropertiesProc,
     svgProperties,
   };
 
-  return <LineGraphDumb {...graphProps} />;
+  return <LineGraphDumb ref={graphRef} {...graphProps} />;
 };
