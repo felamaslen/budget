@@ -13,7 +13,6 @@ export enum ActionType {
   CommandSet = 'COMMAND_SET',
 }
 
-export const CANCELLED = ActionType.Cancelled;
 export const VALUE_SET = ActionType.ValueSet;
 
 export const isShift = (event: KeyboardEvent): boolean => event.shiftKey;
