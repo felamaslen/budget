@@ -304,18 +304,19 @@ const onDeleteDaily = withTotals(onDelete, (total, previousCost) => total - prev
 
 const onSyncReceivedDaily = <I extends ListCalcItem, ES extends object = {}>(
   page: Page,
-): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => (
-  state: DailyState<I, ES>,
-  action: Action,
-): Partial<DailyState<I, ES>> => {
-  const requestItems = getRequestItems(page, action);
+): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => {
+  const onReceivedList = onSyncReceived<I, ES>(page);
 
-  const total = requestItems.reduce(
-    (last, { res: { total: next = last } = {} }) => next,
-    state.total,
-  );
+  return (state: DailyState<I, ES>, action: Action): Partial<DailyState<I, ES>> => {
+    const requestItems = getRequestItems(page, action);
 
-  return { ...state, total };
+    const total = requestItems.reduce(
+      (last, { res: { total: next = last } = {} }) => next,
+      state.total,
+    );
+
+    return { ...onReceivedList(state, action), total } as Partial<DailyState<I, ES>>;
+  };
 };
 
 export function makeDailyListReducer<
