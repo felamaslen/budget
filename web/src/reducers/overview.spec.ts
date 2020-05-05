@@ -6,11 +6,13 @@ import { loggedOut } from '~client/actions/login';
 import { Page } from '~client/types/app';
 
 describe('Overview reducer', () => {
-  describe.each([
-    ['Null action', null],
-    ['LOGGED_OUT', loggedOut()],
-  ])('%s', (_, action) => {
+  describe.each`
+    description      | action
+    ${'Null action'} | ${null}
+    ${'LOGGED_OUT'}  | ${loggedOut()}
+  `('$description', ({ action }) => {
     it('should return the initial state', () => {
+      expect.assertions(1);
       expect(reducer(undefined, action)).toStrictEqual(initialState);
     });
   });

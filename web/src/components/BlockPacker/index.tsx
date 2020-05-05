@@ -1,13 +1,12 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 
 import * as Styled from './styles';
-import { Block, Preview, BlockName } from './types';
+import { Block, Preview } from './types';
 import Blocks, { Props as BlocksProps } from './blocks';
 
 export type Props = {
   blocks: Block[];
   blocksDeep?: Block[];
-  deepBlock: BlockName;
   status: string;
 } & Pick<BlocksProps, 'activeMain' | 'activeSub' | 'onHover' | 'onClick'>;
 

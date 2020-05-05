@@ -60,7 +60,6 @@ describe('<BlockPacker />', () => {
     ],
     activeMain: 'not_foo',
     activeSub: 'not_bar',
-    deepBlock: Page.food,
     status: 'some-status bar',
     onClick: jest.fn(),
     onHover: jest.fn(),

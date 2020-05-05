@@ -44,3 +44,5 @@ export type BlockStyleProps = {
 };
 
 export type Preview = BlockStyleProps & { opened?: boolean };
+
+export type OnBlockClick = (name: string, preview?: Preview) => void;

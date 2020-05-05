@@ -1,6 +1,6 @@
 import React, { useRef, useCallback } from 'react';
 
-import { Block, Preview } from './types';
+import { Block, Preview, OnBlockClick } from './types';
 import BlockBits, { PropsSubBlock } from './block-bits';
 
 import * as Styled from './styles';
@@ -10,7 +10,7 @@ export type Props = {
   blocks: Block[];
   activeMain: string | null;
   activeSub: string | null;
-  onClick: (name: string, preview?: Preview) => void;
+  onClick: OnBlockClick;
 } & Pick<PropsSubBlock, 'onHover'>;
 
 type OuterProps = {

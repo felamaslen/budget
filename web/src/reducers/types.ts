@@ -2,6 +2,7 @@ import { Page } from '~client/types/app';
 
 import { State as LoginState } from './login';
 import { State as OverviewState } from '~client/types/overview';
+import { State as AnalysisState } from '~client/reducers/analysis';
 import { State as NetWorthState } from './net-worth';
 import * as Stocks from './stocks';
 import * as Funds from './funds';
@@ -25,7 +26,7 @@ export type State = {
   netWorth: NetWorthState;
   stocks: Stocks.State;
   [Page.funds]: Funds.State;
-  analysis: object;
+  analysis: AnalysisState;
   [Page.income]: IncomeState;
   [Page.bills]: BillsState;
   [Page.food]: FoodState;

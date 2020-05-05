@@ -60,11 +60,12 @@ describe('List reducer', () => {
 
   const testDate = new Date('2020-04-20');
 
-  describe.each([
-    ['Null action', null],
-    ['Undefined action', undefined],
-    ['LOGGED_OUT', loggedOut()],
-  ])('%s', (_, action) => {
+  describe.each`
+    description           | action
+    ${'Null action'}      | ${null}
+    ${'Undefined action'} | ${undefined}
+    ${'LOGGED_OUT'}       | ${loggedOut()}
+  `('$description', ({ action }) => {
     it('should return the initial state', () => {
       expect.assertions(1);
       expect(myListReducer(undefined, action)).toStrictEqual(initialState);

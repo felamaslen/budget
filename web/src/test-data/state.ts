@@ -1,6 +1,7 @@
 import { Page } from '~client/types/app';
 import { State } from '~client/reducers';
-import { Period } from '~client/constants/graph';
+import { Period as FundsPeriod } from '~client/constants/graph';
+import { Period as AnalysisPeriod, Grouping as AnalysisGrouping } from '~client/constants/analysis';
 import * as funds from './funds';
 
 export const testState: State = {
@@ -163,31 +164,33 @@ export const testState: State = {
     old: [],
   },
   analysis: {
-    period: 'year',
-    grouping: 'category',
+    period: AnalysisPeriod.year,
+    grouping: AnalysisGrouping.category,
+    loading: false,
+    loadingDeep: false,
     page: 0,
     timeline: [[1, 2, 3]],
     treeVisible: {},
     cost: [
       [
-        'foo2',
+        Page.food,
         [
           ['foo2_bar2', 137650],
           ['foo2_bar1', 156842],
         ],
       ],
-      ['foo1', [['foo1_bar1', 1642283]]],
+      [Page.general, [['foo1_bar1', 1642283]]],
     ],
-    deep: null,
-    deepBlock: null,
+    costDeep: null,
     saved: 67123,
+    description: 'Some description',
   },
   [Page.funds]: {
     items: funds.testRows,
     viewSoldFunds: false,
-    period: Period.year1,
+    period: FundsPeriod.year1,
     cache: {
-      [Period.year1]: {
+      [FundsPeriod.year1]: {
         startTime: funds.testStartTime,
         cacheTimes: funds.testCacheTimes,
         prices: funds.testPrices,

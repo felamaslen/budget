@@ -19,7 +19,11 @@ describe('PageAnalysis / <Upper />', () => {
       expect(getByText('Period:')).toBeInTheDocument();
     });
 
-    describe.each([[Period.month], [Period.month], [Period.week]])('%s group', (period: Period) => {
+    describe.each`
+      group      | period
+      ${'month'} | ${Period.month}
+      ${'week'}  | ${Period.week}
+    `('when the selected period is $group', ({ period }: { period: Period }) => {
       it('should render the group name', () => {
         expect.assertions(1);
         const { getByText } = render(<Upper {...props} />);
@@ -80,7 +84,11 @@ describe('PageAnalysis / <Upper />', () => {
       expect(getByText('Grouping:')).toBeInTheDocument();
     });
 
-    describe.each([[Grouping.category], [Grouping.shop]])('%s group', (grouping: Grouping) => {
+    describe.each`
+      group         | grouping
+      ${'category'} | ${Grouping.category}
+      ${'shop'}     | ${Grouping.shop}
+    `('when the selected group is $group', ({ grouping }: { grouping: Grouping }) => {
       it('should render the group name', () => {
         expect.assertions(1);
         const { getByText } = render(<Upper {...props} />);
