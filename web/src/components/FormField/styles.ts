@@ -146,8 +146,6 @@ export const FormField = styled.div<{
     }
 `;
 
-export const FormColor = styled.div``;
-
 const transactionsWidthDate = 120;
 const transactionsWidthUnits = 60;
 const transactionsWidthCost = 60;

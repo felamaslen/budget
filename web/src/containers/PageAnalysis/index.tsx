@@ -82,7 +82,6 @@ function useTreeToggle(
       cacheLoaded.current = true;
 
       if (cachedTreeVisible) {
-        console.log({ cachedTreeVisible });
         (Object.keys(cachedTreeVisible) as (keyof TreeVisible)[])
           .filter(
             key =>
@@ -90,7 +89,6 @@ function useTreeToggle(
               cachedTreeVisible[key] !== (treeVisible[key] !== false),
           )
           .forEach(key => {
-            console.log('toggling', key);
             toggleTreeItem(key);
           });
       }

@@ -1,4 +1,3 @@
-import sinon from 'sinon';
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 
@@ -10,60 +9,42 @@ describe('<FormFieldColor />', () => {
     onChange: jest.fn(),
   };
 
-  describe('when inactive', () => {
-    it('should render a button', () => {
-      const { getByRole } = render(<FormFieldColor {...props} />);
-      const activateButton = getByRole('button');
-
-      expect(activateButton).toBeInTheDocument();
-      expect(activateButton).toHaveTextContent('Edit colour');
-    });
-
-    it('should not render a colour picker', () => {
-      const { queryByDisplayValue } = render(<FormFieldColor {...props} />);
-      const hexField = queryByDisplayValue('AA09B3');
-      expect(hexField).not.toBeInTheDocument();
-    });
+  it('should render a color input', () => {
+    expect.assertions(1);
+    const { getByDisplayValue } = render(<FormFieldColor {...props} />);
+    const input = getByDisplayValue('#aa09b3') as HTMLInputElement;
+    expect(input).toBeInTheDocument();
   });
 
-  describe('when active', () => {
-    it('should render a colour picker', () => {
-      const { getByText, getByDisplayValue } = render(<FormFieldColor {...props} />);
+  it('should call onChange when changing the value, after the blur', async () => {
+    expect.assertions(2);
+    const { getByDisplayValue } = render(<FormFieldColor {...props} />);
+    const input = getByDisplayValue('#aa09b3') as HTMLInputElement;
 
-      const activateButton = getByText('Edit colour');
-      act(() => {
-        fireEvent.click(activateButton);
-      });
-
-      const hexField = getByDisplayValue('AA09B3');
-      expect(hexField).toBeInTheDocument();
+    act(() => {
+      fireEvent.change(input, { target: { value: '#aa83b9' } });
     });
 
-    it('should fire the onChange event', () => {
-      const clock = sinon.useFakeTimers();
+    expect(props.onChange).toHaveBeenCalledWith('#aa83b9');
 
-      const { getByText, getByDisplayValue } = render(<FormFieldColor {...props} />);
-
-      const activateButton = getByText('Edit colour');
-      act(() => {
-        fireEvent.click(activateButton);
-      });
-
-      const hexField = getByDisplayValue('AA09B3');
-      expect(hexField).toBeInTheDocument();
-
-      act(() => {
-        fireEvent.change(hexField, { target: { value: 'aBc123' } });
-        fireEvent.blur(hexField);
-      });
-
-      expect(props.onChange).not.toHaveBeenCalled();
-
-      clock.tick(101);
-      expect(props.onChange).toHaveBeenCalledTimes(1);
-      expect(props.onChange).toHaveBeenCalledWith('#abc123');
-
-      clock.restore();
+    act(() => {
+      fireEvent.blur(input);
     });
+
+    expect(props.onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('should update its input value when the value prop changes', async () => {
+    expect.assertions(2);
+    const { container, getByDisplayValue } = render(<FormFieldColor {...props} />);
+    const input = getByDisplayValue('#aa09b3') as HTMLInputElement;
+
+    expect(input.value).toBe('#aa09b3');
+
+    act(() => {
+      render(<FormFieldColor {...props} value="#123654" />, { container });
+    });
+
+    expect(input.value).toBe('#123654');
   });
 });

@@ -3,11 +3,7 @@ import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 import { CategoryItemForm, ToggleVisibility } from '~client/components/NetWorthCategoryList/styles';
 import { CrudList } from '~client/components/CrudList/styles';
-import {
-  centerGridOne,
-  FormColor,
-  NetWorthValueComplex,
-} from '~client/components/FormField/styles';
+import { centerGridOne, NetWorthValueComplex } from '~client/components/FormField/styles';
 import { ButtonDelete as RowButtonDelete } from '~client/components/ListRowDesktop/styles';
 import { ButtonAdd as MobileButtonAdd } from '~client/components/ListFootMobile/styles';
 import { ButtonDelete as NetWorthEntryDelete } from '~client/components/NetWorthList/styles';
@@ -125,20 +121,6 @@ export const Button = styled.button<{
       cursor: default;
       border: 1px solid ${colors['medium-slightly-dark']};
     }
-  }
-
-  ${CategoryItemForm} ${FormColor} & {
-    display: flex;
-    padding: 0.1em 1em;
-    align-items: center;
-    top: 0;
-    height: 20px;
-    line-height: 20px;
-    font-size: 14px;
-    cursor: pointer;
-    background: ${colors['shadow-l3']};
-    border: none;
-    box-shadow: none;
   }
 
   ${EditCurrency} & {

@@ -37,7 +37,7 @@ const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
 }) => {
   const [tempType, setTempType] = useState<Category['type']>(type);
   const [tempCategory, setTempCategory] = useState<string>(category);
-  const [tempColor, setTempColor] = useState(color);
+  const [tempColor, setTempColor] = useState<string>(color);
 
   const touched =
     id === CREATE_ID || !(tempType === type && tempCategory === category && tempColor === color);
