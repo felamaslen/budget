@@ -1,3 +1,4 @@
+import * as boom from '@hapi/boom';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jwt-simple';
 import passport from 'passport';
@@ -7,9 +8,8 @@ import bcrypt from 'bcrypt';
 
 import config from '~api/config';
 import db from '~api/modules/db';
-import { clientError } from '~api/modules/error-handling';
 
-type User = {
+export type User = {
   uid: string;
 };
 
@@ -19,6 +19,10 @@ type UserInfo = User & {
 
 type UserRow = UserInfo & {
   pin_hash: string;
+};
+
+export type AuthenticatedRequest = Omit<Request, 'user'> & {
+  user: User;
 };
 
 export function getStrategy(): Strategy {
@@ -101,7 +105,7 @@ export async function checkLoggedIn(pin: number | string): Promise<UserInfo> {
 
   const validUser = await users.reduce(checkValidUser(pin), Promise.resolve(null));
   if (!validUser) {
-    throw clientError(config.msg.errorLoginBad, 401);
+    throw boom.unauthorized(config.msg.errorLoginBad);
   }
 
   return validUser;
@@ -115,22 +119,22 @@ export function authMiddleware(): (req: Request, res: Response, next: NextFuncti
         session: false,
         failWithError: true,
       },
-      (err, user, info) => {
+      (err: Error, user: User, info?: Error): void => {
         if (err) {
-          return next(err);
+          next(err);
+          return;
         }
 
         if (!user) {
-          if (info.name === 'TokenExpiredError') {
-            return res.status(401).json({ errorMessage: 'Token expired' });
+          if (info?.name === 'TokenExpiredError') {
+            res.status(401).json({ errorMessage: 'Token expired' });
+          } else {
+            res.status(401).json({ errorMessage: info?.message });
           }
-
-          return res.status(401).json({ errorMessage: info.message });
+        } else {
+          req.user = user;
+          next();
         }
-
-        req.user = user;
-
-        return next();
       },
     )(req, res, next);
   };

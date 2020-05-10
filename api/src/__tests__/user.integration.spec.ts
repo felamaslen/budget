@@ -23,6 +23,7 @@ describe('API integration tests - Authentication', () => {
     });
 
     it('should return a successful login response', async () => {
+      expect.assertions(5);
       const res = await global.agent.post('/api/v4/user/login').send({
         pin: 1234,
       });
@@ -33,10 +34,10 @@ describe('API integration tests - Authentication', () => {
           .from('users')
           .first()) || {};
 
-      expect(uid).toBeTruthy();
+      expect(uid).not.toBeUndefined();
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual(
+      expect(res.body).toStrictEqual(
         expect.objectContaining({
           uid,
           name: 'test-user',
@@ -45,16 +46,17 @@ describe('API integration tests - Authentication', () => {
       );
 
       expect(res.body).toHaveProperty('apiKey');
-      expect(res.body.apiKey).toBeTruthy();
+      expect(res.body.apiKey).toStrictEqual(expect.any(String));
     });
 
     it('should return an unsuccessful login response', async () => {
+      expect.assertions(5);
       const res = await global.agent.post('/api/v4/user/login').send({
         pin: 1235,
       });
 
       expect(res.status).toBe(401);
-      expect(res.body).toEqual(
+      expect(res.body).toStrictEqual(
         expect.objectContaining({
           err: 'Bad PIN',
         }),
@@ -98,6 +100,7 @@ describe('API integration tests - Authentication', () => {
       };
 
       it(`should start after ${config.user.banTries} successive bad login attempts`, async () => {
+        expect.assertions(2);
         const resGoodPre = await goodLogin();
 
         await delayedBadLogins(config.user.banTries, config.user.banLimit - 1);
@@ -111,6 +114,7 @@ describe('API integration tests - Authentication', () => {
       });
 
       it(`should require the bad login attemps to be within ${config.user.banLimit}ms`, async () => {
+        expect.assertions(2);
         const resGoodPre = await goodLogin();
 
         await delayedBadLogins(config.user.banTries, config.user.banLimit + 1);
@@ -124,6 +128,7 @@ describe('API integration tests - Authentication', () => {
       });
 
       it(`should expire after ${config.user.banTime}ms`, async () => {
+        expect.assertions(3);
         const resGoodPre = await goodLogin();
 
         await delayedBadLogins(config.user.banTries, config.user.banLimit - 1);
@@ -142,6 +147,7 @@ describe('API integration tests - Authentication', () => {
       });
 
       it('should distinguish between different IPs', async () => {
+        expect.assertions(4);
         const resGoodPre0 = await goodLogin(ip0);
         const resGoodPre1 = await goodLogin(ip1);
 

@@ -1,8 +1,9 @@
+import * as boom from '@hapi/boom';
 import { Router, Request, Response } from 'express';
 import joi from 'joi';
 
 import { checkLoggedIn, genToken, LoginResponse } from '~api/modules/auth';
-import { clientError, catchAsyncErrors } from '~api/modules/error-handling';
+import { catchAsyncErrors } from '~api/modules/error-handling';
 import { getIp } from '~api/modules/headers';
 
 import config from '~api/config';
@@ -22,7 +23,7 @@ async function attemptLogin(req: Request): Promise<LoginResponse> {
   );
 
   if (error) {
-    throw clientError(error.message);
+    throw boom.badRequest(error.message);
   }
 
   const { pin } = value;
@@ -105,7 +106,7 @@ async function loginBanCheck(loggedIn: boolean, ip: string): Promise<void> {
     await updateIpLog(ip, now, shouldBan);
   }
   if (banned) {
-    throw clientError(config.msg.errorIpBanned, 401);
+    throw boom.unauthorized(config.msg.errorIpBanned);
   }
 }
 
@@ -118,7 +119,7 @@ const login = catchAsyncErrors(async (req: Request, res: Response) => {
   try {
     response = await attemptLogin(req);
   } catch (err) {
-    if (err.status === 401) {
+    if (boom.isBoom(err) && err.output.statusCode === 401) {
       loginErr = err;
     } else {
       throw err;

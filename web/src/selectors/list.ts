@@ -90,7 +90,21 @@ function makeMemoisedRowProcessor(): (
 
     const sortedByDate = items
       .slice()
-      .sort(({ date: dateA }, { date: dateB }) => Number(dateB) - Number(dateA));
+      .sort(({ date: dateA, id: idA }, { date: dateB, id: idB }) => {
+        if (dateA < dateB) {
+          return 1;
+        }
+        if (dateA > dateB) {
+          return -1;
+        }
+        if (idA < idB) {
+          return -1;
+        }
+        if (idA > idB) {
+          return 1;
+        }
+        return 0;
+      });
 
     const getDaily = makeGetDaily(page, sortedByDate);
 

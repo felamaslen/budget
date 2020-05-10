@@ -15,16 +15,18 @@
     "skipLibCheck": true,
     "lib": ["es2015", "dom"],
     "baseUrl": ".",
+    "typeRoots": ["./types", "./node_modules/@types"],
     "paths": {
       "~api/*": ["./api/src/*"],
       "~client/*": ["./web/src/*"]
     }
   },
   "include": [
-    "web/src/**/*",
-    "api/src/**/*",
-    "seeds/*",
-    "migrations/*"
+    "types",
+    "web/src",
+    "api/src",
+    "seeds",
+    "migrations"
   ],
   "exclude": [
     "node_modules"

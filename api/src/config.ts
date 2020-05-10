@@ -40,6 +40,7 @@ export type Config = {
   db: {
     client: string;
     connection: PgConnectionConfig;
+    url: string;
   };
   app: {
     port: number;
@@ -104,6 +105,7 @@ const config: Config = {
   db: {
     client: 'pg',
     connection: parseConnectionURI(databaseUrl),
+    url: databaseUrl ?? '',
   },
   app: {
     port: Number(process.env.PORT) || 3000,

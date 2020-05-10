@@ -1,4 +1,4 @@
-FROM node:10-alpine
+FROM node:12-alpine
 
 RUN apk add --no-cache \
   python \
@@ -18,10 +18,11 @@ COPY yarn.lock ./
 
 ENV NODE_ENV=development
 ENV BABEL_ENV=node
+ENV PATH="/opt/app/node_modules/.bin:${PATH}"
 
 RUN yarn install --frozen-lockfile
 
 ENV SKIP_APP=false
 ENV DEBUG=
 
-CMD ./node_modules/.bin/nodemon
+CMD nodemon | roarr pretty-print

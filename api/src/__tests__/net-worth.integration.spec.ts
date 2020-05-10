@@ -31,16 +31,18 @@ describe('Server - integration tests (net-worth)', () => {
   describe('categories', () => {
     describe('POST /net-worth/categories', () => {
       it('should respond with the category', async () => {
+        expect.assertions(3);
         const res = await global
           .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
           .send(category);
 
         expect(res.status).toBe(201);
-        expect(res.body).toEqual(expect.objectContaining(category));
+        expect(res.body).toStrictEqual(expect.objectContaining(category));
         expect(res.body).toHaveProperty('id');
       });
 
       it('should create the category in the database', async () => {
+        expect.assertions(2);
         await global
           .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
           .send(category);
@@ -48,7 +50,7 @@ describe('Server - integration tests (net-worth)', () => {
         const categories = await db('net_worth_categories').select();
 
         expect(categories).toHaveLength(1);
-        expect(categories[0]).toEqual(expect.objectContaining(category));
+        expect(categories[0]).toStrictEqual(expect.objectContaining(category));
       });
     });
 
@@ -62,14 +64,15 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should respond with the category', async () => {
-        expect(categoryId).toBeTruthy();
+        expect.assertions(3);
+        expect(categoryId).toStrictEqual(expect.any(String));
 
         const res = await global.withAuth(
           global.agent.get(`/api/v4/data/net-worth/categories/${categoryId}`),
         );
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({
+        expect(res.body).toStrictEqual({
           id: categoryId,
           ...category,
         });
@@ -86,7 +89,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should respond with the updated category', async () => {
-        expect(categoryId).toBeTruthy();
+        expect.assertions(3);
+        expect(categoryId).toStrictEqual(expect.any(String));
 
         const res = await global
           .withAuth(global.agent.put(`/api/v4/data/net-worth/categories/${categoryId}`))
@@ -96,7 +100,7 @@ describe('Server - integration tests (net-worth)', () => {
           });
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({
+        expect(res.body).toStrictEqual({
           id: categoryId,
           ...category,
           category: 'Bank',
@@ -104,6 +108,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should update the category in the database', async () => {
+        expect.assertions(2);
         await global
           .withAuth(global.agent.put(`/api/v4/data/net-worth/categories/${categoryId}`))
           .send({
@@ -114,7 +119,7 @@ describe('Server - integration tests (net-worth)', () => {
         const categories = await db('net_worth_categories').select();
 
         expect(categories).toHaveLength(1);
-        expect(categories[0]).toEqual(
+        expect(categories[0]).toStrictEqual(
           expect.objectContaining({
             ...category,
             category: 'Bank',
@@ -133,7 +138,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should respond with the 204 no content', async () => {
-        expect(categoryId).toBeTruthy();
+        expect.assertions(2);
+        expect(categoryId).toStrictEqual(expect.any(String));
 
         const res = await global.withAuth(
           global.agent.delete(`/api/v4/data/net-worth/categories/${categoryId}`),
@@ -143,6 +149,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should delete the category in the database', async () => {
+        expect.assertions(1);
         await global.withAuth(
           global.agent.delete(`/api/v4/data/net-worth/categories/${categoryId}`),
         );
@@ -173,16 +180,18 @@ describe('Server - integration tests (net-worth)', () => {
 
     describe('POST /net-worth/subcategories', () => {
       it('should respond with the subcategory', async () => {
+        expect.assertions(3);
         const res = await global
           .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
           .send(subcategory);
 
         expect(res.status).toBe(201);
-        expect(res.body).toEqual(expect.objectContaining(subcategory));
+        expect(res.body).toStrictEqual(expect.objectContaining(subcategory));
         expect(res.body).toHaveProperty('id');
       });
 
       it('should create the subcategory in the database', async () => {
+        expect.assertions(2);
         await global
           .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
           .send(subcategory);
@@ -190,7 +199,7 @@ describe('Server - integration tests (net-worth)', () => {
         const subcategories = await db('net_worth_subcategories').select();
 
         expect(subcategories).toHaveLength(1);
-        expect(subcategories[0]).toEqual(
+        expect(subcategories[0]).toStrictEqual(
           expect.objectContaining({
             category_id: categoryId,
             subcategory: subcategory.subcategory,
@@ -216,14 +225,15 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should respond with the subcategory', async () => {
-        expect(subcategoryId).toBeTruthy();
+        expect.assertions(3);
+        expect(categoryId).toStrictEqual(expect.any(String));
 
         const res = await global.withAuth(
           global.agent.get(`/api/v4/data/net-worth/subcategories/${subcategoryId}`),
         );
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({
+        expect(res.body).toStrictEqual({
           id: subcategoryId,
           ...subcategory,
         });
@@ -245,7 +255,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should respond with the updated subcategory', async () => {
-        expect(subcategoryId).toBeTruthy();
+        expect.assertions(3);
+        expect(categoryId).toStrictEqual(expect.any(String));
 
         const res = await global
           .withAuth(global.agent.put(`/api/v4/data/net-worth/subcategories/${subcategoryId}`))
@@ -255,7 +266,7 @@ describe('Server - integration tests (net-worth)', () => {
           });
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual({
+        expect(res.body).toStrictEqual({
           id: subcategoryId,
           ...subcategory,
           subcategory: 'Savings account',
@@ -263,6 +274,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should update the subcategory in the database', async () => {
+        expect.assertions(2);
         await global
           .withAuth(global.agent.put(`/api/v4/data/net-worth/subcategories/${subcategoryId}`))
           .send({
@@ -273,7 +285,7 @@ describe('Server - integration tests (net-worth)', () => {
         const subcategories = await db('net_worth_subcategories').select();
 
         expect(subcategories).toHaveLength(1);
-        expect(subcategories[0]).toEqual(
+        expect(subcategories[0]).toStrictEqual(
           expect.objectContaining({
             category_id: categoryId,
             subcategory: 'Savings account',
@@ -299,7 +311,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should respond with the 204 no content', async () => {
-        expect(subcategoryId).toBeTruthy();
+        expect.assertions(2);
+        expect(categoryId).toStrictEqual(expect.any(String));
 
         const res = await global.withAuth(
           global.agent.delete(`/api/v4/data/net-worth/subcategories/${subcategoryId}`),
@@ -309,6 +322,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should delete the subcategory in the database', async () => {
+        expect.assertions(1);
         await global.withAuth(
           global.agent.delete(`/api/v4/data/net-worth/subcategories/${subcategoryId}`),
         );
@@ -405,7 +419,7 @@ describe('Server - integration tests (net-worth)', () => {
       subcategoryTravelCC.id = subcategoryIdTravelCC;
 
       entry = {
-        date: new Date('2020-04-14'),
+        date: '2020-04-14',
         values: [
           {
             subcategory: (subcategoryCurrentAccount as Subcategory).id,
@@ -449,6 +463,7 @@ describe('Server - integration tests (net-worth)', () => {
 
     describe('POST /net-worth', () => {
       it('should respond with the entry', async () => {
+        expect.assertions(6);
         const res = await global.withAuth(global.agent.post('/api/v4/data/net-worth')).send(entry);
 
         expect(res.status).toBe(201);
@@ -482,12 +497,13 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should respond with the entry', async () => {
-        expect(entryId).toBeTruthy();
+        expect.assertions(3);
+        expect(entryId).toStrictEqual(expect.any(String));
 
         const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth/${entryId}`));
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual(
+        expect(res.body).toStrictEqual(
           expect.objectContaining({
             id: entryId,
             date: '2020-04-14',
@@ -516,16 +532,16 @@ describe('Server - integration tests (net-worth)', () => {
       beforeEach(async () => {
         mods = [
           {
-            date: new Date('2020-04-14'),
+            date: '2020-04-14',
           },
-          { date: new Date('2020-01-31') },
-          { date: new Date('2020-03-30') },
-          { date: new Date('2020-02-29') },
-          { date: new Date('2019-12-31') },
-          { date: new Date('2019-12-18') },
-          { date: new Date('2020-02-28') },
+          { date: '2020-01-31' },
+          { date: '2020-03-30' },
+          { date: '2020-02-29' },
+          { date: '2019-12-31' },
+          { date: '2019-12-18' },
+          { date: '2020-02-28' },
           {
-            date: addMonths(now, -(config.data.overview.numLast + 1)),
+            date: format(addMonths(now, -(config.data.overview.numLast + 1)), 'yyyy-MM-dd'),
             values: [
               {
                 ...entry.values[0],
@@ -534,7 +550,7 @@ describe('Server - integration tests (net-worth)', () => {
               ...entry.values.slice(1),
             ],
           },
-          { date: addMonths(now, -(config.data.overview.numLast + 3)) },
+          { date: format(addMonths(now, -(config.data.overview.numLast + 3)), 'yyyy-MM-dd') },
         ];
 
         await Promise.all(
@@ -548,11 +564,12 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should get a list of net worth entries', async () => {
+        expect.assertions(2);
         const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
 
         const expectedResults = mods.slice(0, 7).map(({ date }) =>
           expect.objectContaining({
-            date: format(date || entry.date, 'yyyy-MM-dd'),
+            date: date || entry.date,
             values: expect.arrayContaining(entry.values.map(expect.objectContaining)),
             creditLimit: expect.arrayContaining(entry.creditLimit.map(expect.objectContaining)),
             currencies: expect.arrayContaining(entry.currencies.map(expect.objectContaining)),
@@ -560,7 +577,7 @@ describe('Server - integration tests (net-worth)', () => {
         );
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual(
+        expect(res.body).toStrictEqual(
           expect.objectContaining({
             items: expect.arrayContaining(expectedResults),
           }),
@@ -568,13 +585,14 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should put old values in their own section', async () => {
+        expect.assertions(2);
         const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
 
         const entryValueOld = 500000 - 15000;
         const entryValueOlder = 62000 * 0.113 * 100 - 15000;
 
         expect(res.status).toBe(200);
-        expect(res.body).toEqual(
+        expect(res.body).toStrictEqual(
           expect.objectContaining({
             old: [entryValueOlder, entryValueOld],
           }),
@@ -592,6 +610,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should update the date', async () => {
+        expect.assertions(2);
         const updatedEntry = {
           ...entry,
           date: '2020-04-15',
@@ -606,6 +625,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should update a value', async () => {
+        expect.assertions(2);
         const updatedEntry = {
           ...entry,
           values: [
@@ -629,6 +649,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should update a credit limit', async () => {
+        expect.assertions(2);
         const updatedEntry = {
           ...entry,
           creditLimit: [
@@ -652,6 +673,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should update a currency', async () => {
+        expect.assertions(2);
         const updatedEntry = {
           ...entry,
           currencies: [
@@ -685,7 +707,8 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should respond with the 204 no content', async () => {
-        expect(entryId).toBeTruthy();
+        expect.assertions(2);
+        expect(entryId).toStrictEqual(expect.any(String));
 
         const res = await global.withAuth(global.agent.delete(`/api/v4/data/net-worth/${entryId}`));
 
@@ -693,6 +716,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       it('should delete the entry in the database', async () => {
+        expect.assertions(1);
         await global.withAuth(global.agent.delete(`/api/v4/data/net-worth/${entryId}`));
 
         const entries = await db('net_worth').select();

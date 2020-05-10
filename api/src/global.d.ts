@@ -9,6 +9,7 @@ declare global {
     interface Global {
       server: Server;
       agent: Agent;
+      uid: string;
       bearerToken: string;
       withAuth: WithAuth;
     }

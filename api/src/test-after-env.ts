@@ -14,11 +14,12 @@ beforeAll(async () => {
   global.agent = request.agent(global.server);
 
   const {
-    body: { apiKey },
+    body: { uid, apiKey },
   } = await global.agent.post('/api/v4/user/login').send({
     pin: 1234,
   });
 
+  global.uid = uid;
   global.bearerToken = apiKey;
 
   global.withAuth = (req, token = apiKey): Request => req.set('Authorization', token);

@@ -11,10 +11,11 @@ servers:
   - url: https://budget.fela.space/api/v4
     description: prod
 
-securitySchemas:
-  BearerAuth:
-    type: http
-    scheme: bearer
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
 
 security:
   - BearerAuth: []
@@ -205,6 +206,12 @@ paths:
             type: number
             default: 5
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -222,7 +229,15 @@ paths:
                         type: array
                         items:
                           type: string
-                        example: [Pizza, Peas, Pasta]
+                        example: [Pizza, Peas, Penne]
+                      nextCategory:
+                        type: array
+                        items:
+                          type: string
+                        example: [Pizza, Vegetables, Pasta]
+                      nextField:
+                        type: string
+                        example: "category"
 
   /data/overview:
     get:
@@ -235,6 +250,12 @@ paths:
       produces:
         - application/json
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -268,6 +289,12 @@ paths:
                   items:
                     $ref: "#/definitions/FundTransaction"
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         201:
           description: successful operation
           content:
@@ -305,6 +332,12 @@ paths:
             type: integer
             example: 3
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -340,6 +373,12 @@ paths:
                   items:
                     $ref: "#/definitions/FundTransaction"
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -373,6 +412,12 @@ paths:
                   format: uuid
                   required: true
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -397,6 +442,12 @@ paths:
       produces:
         - application/json
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -451,6 +502,12 @@ paths:
           schema:
             type: integer
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -506,6 +563,12 @@ paths:
           schema:
             type: integer
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -554,6 +617,12 @@ paths:
                   example: 325670
                   required: true
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         201:
           description: successful operation
           content:
@@ -597,6 +666,12 @@ paths:
                   example: 325610
                   required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -620,6 +695,12 @@ paths:
           required: true
           type: integer
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -651,6 +732,12 @@ paths:
           default: 0
           required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -692,6 +779,12 @@ paths:
                   example: 12801
                   required: true
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         201:
           description: successful operation
           content:
@@ -735,6 +828,12 @@ paths:
                   example: 16400
                   required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -758,6 +857,12 @@ paths:
           required: true
           type: integer
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -789,6 +894,12 @@ paths:
           default: 0
           required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -837,6 +948,12 @@ paths:
                   example: Tesco
                   required: true
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         201:
           description: successful operation
           content:
@@ -888,6 +1005,12 @@ paths:
                   example: "Tesco"
                   required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -911,6 +1034,12 @@ paths:
           required: true
           type: integer
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -965,6 +1094,12 @@ paths:
                   example: Argos
                   required: true
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         201:
           description: successful operation
           content:
@@ -1016,6 +1151,12 @@ paths:
                   example: "Argos"
                   required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1039,6 +1180,12 @@ paths:
           required: true
           type: integer
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1070,6 +1217,12 @@ paths:
           default: 0
           required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1096,6 +1249,12 @@ paths:
           default: 0
           required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1144,6 +1303,12 @@ paths:
                   example: "Bowling alley 101"
                   required: true
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         201:
           description: successful operation
           content:
@@ -1195,6 +1360,12 @@ paths:
                   example: "Bowling alley 101"
                   required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1218,6 +1389,12 @@ paths:
           required: true
           type: integer
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1249,6 +1426,12 @@ paths:
           default: 0
           required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1297,6 +1480,12 @@ paths:
                   example: Easyjet
                   required: true
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         201:
           description: successful operation
           content:
@@ -1348,6 +1537,12 @@ paths:
                   example: "Easyjet"
                   required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1371,6 +1566,12 @@ paths:
           required: true
           type: integer
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1402,6 +1603,12 @@ paths:
           default: 0
           required: false
       responses:
+        401:
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: "#/definitions/ErrorResponse"
         200:
           description: successful operation
           content:
@@ -1416,6 +1623,7 @@ definitions:
       error:
         type: boolean
         example: true
+        optional: true
       errorMessage:
         type: string
         example: An error occurred
