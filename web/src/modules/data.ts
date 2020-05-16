@@ -243,8 +243,15 @@ export const sortByTotal = <R extends { total: number }>(items: R[]): R[] =>
 export const fieldExists = <V = never>(value?: V): boolean =>
   typeof value !== 'undefined' && !(typeof value === 'string' && !value.length);
 
-export const leftPad = (array: number[], length: number): number[] =>
-  new Array(Math.max(0, length - array.length)).fill(0).concat(array);
+export const leftPad = (array: number[], length: number, fill = 0): number[] =>
+  Array(Math.max(0, length - array.length))
+    .fill(fill)
+    .concat(array);
+
+export const rightPad = (array: number[], length: number, fill?: number): number[] =>
+  array.concat(
+    Array(Math.max(0, length - array.length)).fill(fill ?? array[array.length - 1] ?? 0),
+  );
 
 export const withoutDeleted = <T>(items: WithCrud<T>[]): WithCrud<T>[] =>
   (items || []).filter(({ __optimistic }) => __optimistic !== RequestType.delete);

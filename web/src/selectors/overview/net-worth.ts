@@ -26,6 +26,7 @@ import {
   AggregateSums,
   isOption,
   OptionValue,
+  TableRow,
 } from '~client/types/net-worth';
 import { Cost } from '~client/types/overview';
 import { State } from '~client/reducers';
@@ -95,12 +96,12 @@ const sumValues = (currencies: Currency[], values: ValueObject[]): number =>
   values.reduce((last: number, { value }): number => last + getComplexValue(value, currencies), 0);
 
 function getSumByCategory(
+  categoryName: string,
   categories: Category[],
   subcategories: Subcategory[],
-  entries: CreateEdit<Entry>[],
-  categoryName: string,
+  { values, currencies }: CreateEdit<Entry>,
 ): number {
-  if (!(entries.length && categories.length && subcategories.length)) {
+  if (!(categories.length && subcategories.length)) {
     return 0;
   }
 
@@ -109,8 +110,6 @@ function getSumByCategory(
     return 0;
   }
 
-  const { currencies, values } = entries[entries.length - 1];
-
   const valuesFiltered = values.filter(({ subcategory }) =>
     subcategories.some(({ id, categoryId }) => id === subcategory && categoryId === category.id),
   );
@@ -118,21 +117,30 @@ function getSumByCategory(
   return sumValues(currencies, valuesFiltered);
 }
 
-export const getAggregates = createSelector<
-  State,
-  Category[],
-  Subcategory[],
-  Entry[],
-  AggregateSums
->(getCategories, getSubcategories, getEntries, (categories, subcategories, entries) =>
+const getEntryAggregate = (
+  categories: Category[],
+  subcategories: Subcategory[],
+  entry: CreateEdit<Entry>,
+): AggregateSums =>
   Object.entries(Aggregate).reduce(
-    (last: AggregateSums, [key, categoryName]) => ({
+    (last: AggregateSums, [, categoryName]) => ({
       ...last,
-      [key]: getSumByCategory(categories, subcategories, entries, categoryName),
+      [categoryName]: getSumByCategory(categoryName, categories, subcategories, entry),
     }),
     {} as AggregateSums,
-  ),
-);
+  );
+
+type EntryWithAggregates = Entry & {
+  aggregate: AggregateSums;
+};
+
+const withAggregates = (categories: Category[], subcategories: Subcategory[]) => (
+  rows: Entry[],
+): EntryWithAggregates[] =>
+  rows.map(entry => ({
+    ...entry,
+    aggregate: getEntryAggregate(categories, subcategories, entry),
+  }));
 
 const getEntryForMonth = (entries: CreateEdit<Entry>[]) => (date: Date): CreateEdit<Entry> => {
   const matchingEntries = entries
@@ -151,20 +159,32 @@ const getNetWorthRows = createSelector(getMonthDates, getSummaryEntries, (monthD
 );
 
 const getValues = ({ currencies, values }: CreateEdit<Entry>): number =>
-  sumValues(currencies, values);
+  sumValues(
+    currencies,
+    values.filter(({ value }) => !(isComplex(value) && value.some(isOption))),
+  );
 
 export const getNetWorthSummary = createSelector<State, CreateEdit<Entry>[], number[]>(
   getNetWorthRows,
   (rows: CreateEdit<Entry>[]): number[] => rows.map(getValues),
 );
 
-export const getNetWorthSummaryOld = (state: State): number[] => state.netWorth.old;
+export type NetWorthSummaryOld = {
+  main: number[];
+  options: number[];
+};
+
+export const getNetWorthSummaryOld = (state: State): NetWorthSummaryOld => ({
+  main: state.netWorth.old,
+  options: state.netWorth.oldOptions,
+});
 
 const sumByType = (
   categoryType: string,
   categories: Category[],
   subcategories: Subcategory[],
   { currencies, values }: CreateEdit<Entry>,
+  categoryPredicate: (category: Category) => boolean = (): true => true,
 ): number =>
   sumValues(
     currencies,
@@ -172,24 +192,26 @@ const sumByType = (
       subcategories.some(
         ({ id, categoryId }) =>
           id === subcategory &&
-          categories.some(
-            ({ id: compare, type }) => compare === categoryId && type === categoryType,
-          ),
+          categories
+            .filter(categoryPredicate)
+            .some(({ id: compare, type }) => compare === categoryId && type === categoryType),
       ),
     ),
   );
 
-type EntryTypeSplit = Entry & {
+type EntryTypeSplit = EntryWithAggregates & {
   assets: number;
+  options: number;
   liabilities: number;
 };
 
 const withTypeSplit = (categories: Category[], subcategories: Subcategory[]) => (
-  rows: Entry[],
+  rows: EntryWithAggregates[],
 ): EntryTypeSplit[] =>
   rows.map(entry => ({
     ...entry,
-    assets: sumByType('asset', categories, subcategories, entry),
+    assets: sumByType('asset', categories, subcategories, entry, category => !category.isOption),
+    options: sumByType('asset', categories, subcategories, entry, category => category.isOption),
     liabilities: -sumByType('liability', categories, subcategories, entry),
   }));
 
@@ -229,18 +251,10 @@ const withFTI = (rows: EntryWithSpend[]): EntryWithFTI[] =>
     return { ...entry, fti, pastYearAverageSpend };
   });
 
-type EntryWithTableProps = Omit<EntryWithFTI, 'values' | 'creditLimit' | 'currencies'>;
+type EntryWithTableProps = TableRow;
 
 const withTableProps = (rows: EntryWithFTI[]): EntryWithTableProps[] =>
-  rows.map(({ id, date, assets, liabilities, expenses, fti, pastYearAverageSpend }) => ({
-    id,
-    date,
-    assets,
-    liabilities,
-    expenses,
-    fti,
-    pastYearAverageSpend,
-  }));
+  rows.map(({ values, creditLimit, currencies, ...rest }) => rest);
 
 export const getNetWorthTable = createSelector(
   getCost,
@@ -260,6 +274,7 @@ export const getNetWorthTable = createSelector(
       withFTI,
       withSpend(dates, getSpendingColumn(dates)(costMap).spending),
       withTypeSplit(categories, subcategories),
+      withAggregates(categories, subcategories),
     )(entries),
 );
 

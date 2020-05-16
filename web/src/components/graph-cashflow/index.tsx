@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux';
 import React, { useCallback, useMemo } from 'react';
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
@@ -12,12 +13,11 @@ import { TimeAxes } from '~client/components/graph/time-axes';
 import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatCurrency } from '~client/modules/format';
+import { getCurrentDate, getGraphWidth } from '~client/selectors';
 import { Range, BasicProps, Line } from '~client/types/graph';
 
 export type Props = PickUnion<GraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
   isMobile?: boolean;
-  now: Date;
-  graphWidth: number;
   graphHeight?: number;
 };
 
@@ -50,9 +50,9 @@ export const getValuesWithTime = (
 
 export function getRanges(lines: Line[]): Range {
   return lines.reduce(
-    ({ minX, maxX, minY, maxY }, { data }) => {
+    ({ minX, maxX, minY, maxY }, { data, stack }) => {
       const dataX = data.map(([xValue]) => xValue);
-      const dataY = data.map(([, yValue]) => yValue);
+      const dataY = data.map(([, yValue], index) => yValue + (stack?.[index]?.[1] ?? 0));
 
       return {
         minX: dataX.reduce((min, value) => Math.min(min, value), minX),
@@ -70,7 +70,7 @@ export function getRanges(lines: Line[]): Range {
   );
 }
 
-function makeBeforeLines({ now }: Pick<Props, 'now'>): React.FC<BasicProps> {
+function makeBeforeLines(now: Date): React.FC<BasicProps> {
   const BeforeLines: React.FC<BasicProps> = props => (
     <g>
       <TimeAxes {...props} />
@@ -84,16 +84,17 @@ function makeBeforeLines({ now }: Pick<Props, 'now'>): React.FC<BasicProps> {
 export const GraphCashFlow: React.FC<Props> = ({
   name,
   isMobile = false,
-  now,
-  graphWidth,
   graphHeight = GRAPH_HEIGHT,
   lines,
   afterLines,
   after,
 }) => {
+  const now: Date = useSelector(getCurrentDate);
+  const graphWidth: number = useSelector(getGraphWidth);
+
   const ranges = useMemo<Range>(() => getRanges(lines), [lines]);
 
-  const beforeLines = useMemo(() => makeBeforeLines({ now }), [now]);
+  const beforeLines = useMemo(() => makeBeforeLines(now), [now]);
 
   const labelX = useCallback(
     (value: number): string => format(fromUnixTime(value), 'MMM yyyy'),

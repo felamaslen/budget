@@ -6,11 +6,13 @@ import { Aggregate, AggregateSums } from '~client/types/net-worth';
 
 export type Props = {
   item: Aggregate;
-  aggregate: AggregateSums;
+  aggregate?: Partial<AggregateSums>;
 };
 
 const SumByCategory: React.FC<Props> = ({ item, aggregate }) => (
-  <Styled.SumValue item={item}>{formatCurrency(aggregate[item], { precision: 0 })}</Styled.SumValue>
+  <Styled.SumValue item={item}>
+    {formatCurrency(aggregate?.[item] ?? 0, { precision: 0 })}
+  </Styled.SumValue>
 );
 
 export default SumByCategory;

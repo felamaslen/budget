@@ -87,7 +87,9 @@ export type TableRow = {
   id: string;
   date: Date;
   assets: number;
+  options: number;
   liabilities: number;
+  aggregate: AggregateSums;
   expenses: number;
   fti: number;
   pastYearAverageSpend: number;

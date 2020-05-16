@@ -38,6 +38,9 @@ import {
 import { getFundsRows } from '~client/selectors/funds/helpers';
 import { getNetWorthSummary } from './net-worth';
 
+export * from './common';
+export * from './net-worth';
+
 const futureCategories: (keyof (Cost & Pick<CostProcessed, 'fundsOld'>))[] = [
   Page.funds,
   Page.food,

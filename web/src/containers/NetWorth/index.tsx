@@ -8,7 +8,6 @@ import {
   getCategories,
   getSubcategories,
   getEntries,
-  getAggregates,
   getNetWorthTable,
 } from '~client/selectors/overview/net-worth';
 import { useCrud } from '~client/hooks/crud';
@@ -34,7 +33,6 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
   const categories = useSelector(getCategories);
   const subcategories = useSelector(getSubcategories);
   const entries = useSelector(getEntries);
-  const aggregate = useSelector(getAggregates);
   const table = useSelector(getNetWorthTable);
 
   const [onCreateCategory, onUpdateCategory, onDeleteCategory] = useCrud<Category>(
@@ -78,7 +76,11 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
         exact
         path="/net-worth"
         render={(routeProps): React.ReactElement => (
-          <NetWorthView {...routeProps} table={table} aggregate={aggregate} />
+          <NetWorthView
+            {...routeProps}
+            table={table}
+            aggregate={table[table.length - 1]?.aggregate}
+          />
         )}
       />
       <Route

@@ -8,16 +8,17 @@ import configureStore from 'redux-mock-store';
 
 import PageOverview from '.';
 import '~client/mocks/match-media';
-import { testState } from '~client/test-data/state';
+import state from '~client/test-data/state';
 import { mockRandom } from '~client/mocks/random';
 import { State } from '~client/reducers';
 
 describe('<PageOverview />', () => {
   const mockStore = configureStore<State>();
+  const now = new Date('2020-04-20T16:29Z');
   const getContainer = (): RenderResult =>
     render(
       <MemoryRouter>
-        <Provider store={mockStore(testState)}>
+        <Provider store={mockStore({ ...state, now })}>
           <PageOverview />
         </Provider>
       </MemoryRouter>,
@@ -37,7 +38,7 @@ describe('<PageOverview />', () => {
           class="sc-htpNat sc-ifAKCX Xrznz"
         >
           <div
-            class="sc-bxivhb sc-EHOje gryqJc"
+            class="sc-bxivhb sc-EHOje gvRYDM"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -46,7 +47,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje coasnK"
+            class="sc-bxivhb sc-EHOje cVYjGo"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -55,7 +56,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje coasnK"
+            class="sc-bxivhb sc-EHOje cVYjGo"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -64,7 +65,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje coasnK"
+            class="sc-bxivhb sc-EHOje cVYjGo"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -73,7 +74,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje coasnK"
+            class="sc-bxivhb sc-EHOje cVYjGo"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -82,7 +83,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje coasnK"
+            class="sc-bxivhb sc-EHOje cVYjGo"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -91,7 +92,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje coasnK"
+            class="sc-bxivhb sc-EHOje cVYjGo"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -100,7 +101,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje fXkNjZ"
+            class="sc-bxivhb sc-EHOje iCvKyX"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -109,7 +110,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje iSErfp"
+            class="sc-bxivhb sc-EHOje jnNlFj"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -118,7 +119,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje cBtrwg"
+            class="sc-bxivhb sc-EHOje ggSTWr"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -127,7 +128,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje gqTUbD"
+            class="sc-bxivhb sc-EHOje ddwoau"
           >
             <span
               class="sc-bZQynM jdQAmB"
@@ -136,7 +137,7 @@ describe('<PageOverview />', () => {
             </span>
           </div>
           <div
-            class="sc-bxivhb sc-EHOje cXWcfV"
+            class="sc-bxivhb sc-EHOje cYCNYR"
           >
             <a
               class="sc-bZQynM jdQAmB"
@@ -161,7 +162,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb bTHCEP"
-              style="background-color: rgb(255, 255, 255);"
+              style="background-color: rgb(170, 183, 189);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -201,7 +202,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb bTHCEP"
-              style="background-color: rgb(255, 255, 255);"
+              style="background-color: rgb(128, 196, 189);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -211,7 +212,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb bTHCEP"
-              style="background-color: rgb(255, 255, 255);"
+              style="background-color: rgb(213, 191, 110);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -231,7 +232,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb fPGNYZ"
-              style="background-color: rgb(211, 103, 103);"
+              style="background-color: rgb(209, 99, 99);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -241,7 +242,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb JzZId"
-              style="background-color: rgb(202, 239, 206);"
+              style="background-color: rgb(210, 242, 214);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -282,7 +283,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb bTHCEP"
-              style="background-color: rgb(235, 238, 239);"
+              style="background-color: rgb(146, 163, 171);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -302,7 +303,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb bTHCEP"
-              style="background-color: rgb(255, 255, 255);"
+              style="background-color: rgb(161, 208, 163);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -312,7 +313,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb bTHCEP"
-              style="background-color: rgb(128, 171, 205);"
+              style="background-color: rgb(55, 123, 176);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -332,7 +333,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb bTHCEP"
-              style="background-color: rgb(223, 207, 146);"
+              style="background-color: rgb(209, 185, 97);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -371,7 +372,7 @@ describe('<PageOverview />', () => {
             </div>
             <div
               class="sc-bxivhb fSxTEn"
-              style="background-color: rgb(255, 255, 255);"
+              style="background-color: rgb(230, 248, 232);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -391,18 +392,18 @@ describe('<PageOverview />', () => {
             </div>
           </div>
           <div
-            class="sc-htpNat jgKGyg"
+            class="sc-htpNat kjPaM"
           >
             <div
-              class="sc-bxivhb fqMtTN"
+              class="sc-bxivhb jfSVUT"
             >
               <span>
                 Mar-18
               </span>
             </div>
             <div
-              class="sc-bxivhb egfsBe"
-              style="background-color: rgb(190, 200, 204);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(95, 119, 130);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -411,7 +412,7 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb egfsBe"
+              class="sc-bxivhb bTHCEP"
               style="background-color: rgb(219, 142, 142);"
             >
               <span
@@ -421,18 +422,18 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb egfsBe"
-              style="background-color: rgb(161, 208, 163);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(143, 199, 146);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.3
+                £0.2
               </span>
             </div>
             <div
-              class="sc-bxivhb egfsBe"
-              style="background-color: rgb(255, 255, 255);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(128, 171, 205);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -441,27 +442,27 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb egfsBe"
-              style="background-color: rgb(128, 196, 189);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(117, 191, 183);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £1.28
+                £0.9
               </span>
             </div>
             <div
-              class="sc-bxivhb egfsBe"
+              class="sc-bxivhb bTHCEP"
               style="background-color: rgb(191, 158, 36);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £1.81
+                £1.34
               </span>
             </div>
             <div
-              class="sc-bxivhb ifBTGL"
+              class="sc-bxivhb hLBMqG"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
@@ -471,28 +472,28 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb huWcdu"
+              class="sc-bxivhb fPGNYZ"
               style="background-color: rgb(223, 146, 146);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £7.49
+                £6.59
               </span>
             </div>
             <div
-              class="sc-bxivhb iAthgK"
-              style="background-color: rgb(201, 239, 205);"
+              class="sc-bxivhb JzZId"
+              style="background-color: rgb(203, 240, 208);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £7.51
+                £8.41
               </span>
             </div>
             <div
-              class="sc-bxivhb kpgRfT"
-              style="background-color: rgb(146, 223, 155);"
+              class="sc-bxivhb fSxTEn"
+              style="background-color: rgb(36, 191, 55);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -501,8 +502,8 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb ihyNBd"
-              style="background-color: rgb(80, 204, 95);"
+              class="sc-bxivhb kHsobB"
+              style="background-color: rgb(58, 197, 75);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -512,18 +513,18 @@ describe('<PageOverview />', () => {
             </div>
           </div>
           <div
-            class="sc-htpNat fCMRGf"
+            class="sc-htpNat kjPaM"
           >
             <div
-              class="sc-bxivhb iqPouv"
+              class="sc-bxivhb jfSVUT"
             >
               <span>
                 Apr-18
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(170, 183, 189);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(84, 110, 122);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -532,7 +533,7 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
+              class="sc-bxivhb bTHCEP"
               style="background-color: rgb(204, 94, 94);"
             >
               <span
@@ -542,8 +543,18 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(161, 208, 163);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(146, 200, 148);"
+            >
+              <span
+                class="sc-gzVnrw DaTdd"
+              >
+                £0.2
+              </span>
+            </div>
+            <div
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(105, 156, 196);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
@@ -552,37 +563,27 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(128, 171, 205);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(127, 196, 189);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.9
+                £0.1
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(128, 196, 189);"
-            >
-              <span
-                class="sc-gzVnrw DaTdd"
-              >
-                £1.28
-              </span>
-            </div>
-            <div
-              class="sc-bxivhb fBJWDU"
+              class="sc-bxivhb bTHCEP"
               style="background-color: rgb(223, 207, 146);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.7
+                £0.1
               </span>
             </div>
             <div
-              class="sc-bxivhb bNTNvC"
+              class="sc-bxivhb hLBMqG"
               style="background-color: rgb(54, 196, 72);"
             >
               <span
@@ -592,37 +593,37 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb jzbxwy"
-              style="background-color: rgb(218, 128, 128);"
+              class="sc-bxivhb fPGNYZ"
+              style="background-color: rgb(221, 140, 140);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £9.60
+                £7.27
               </span>
             </div>
             <div
-              class="sc-bxivhb lgvHlb"
-              style="background-color: rgb(142, 222, 152);"
+              class="sc-bxivhb JzZId"
+              style="background-color: rgb(146, 223, 156);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £15.40
+                £17.73
               </span>
             </div>
             <div
-              class="sc-bxivhb kdLode"
-              style="background-color: rgb(146, 223, 155);"
+              class="sc-bxivhb fSxTEn"
+              style="background-color: rgb(58, 197, 75);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £13k
+                £10.4k
               </span>
             </div>
             <div
-              class="sc-bxivhb jhuyHm"
+              class="sc-bxivhb kHsobB"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
@@ -633,27 +634,17 @@ describe('<PageOverview />', () => {
             </div>
           </div>
           <div
-            class="sc-htpNat fCMRGf"
+            class="sc-htpNat kjPaM"
           >
             <div
-              class="sc-bxivhb iqPouv"
+              class="sc-bxivhb jfSVUT"
             >
               <span>
                 May-18
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(141, 158, 166);"
-            >
-              <span
-                class="sc-gzVnrw DaTdd"
-              >
-                £1k
-              </span>
-            </div>
-            <div
-              class="sc-bxivhb fBJWDU"
+              class="sc-bxivhb bTHCEP"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
@@ -663,47 +654,57 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(161, 208, 163);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.3
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(128, 171, 205);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.9
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(128, 196, 189);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £1.28
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(223, 207, 146);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.7
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb bNTNvC"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
+            >
+              <span
+                class="sc-gzVnrw DaTdd"
+              >
+                £0.00
+              </span>
+            </div>
+            <div
+              class="sc-bxivhb hLBMqG"
               style="background-color: rgb(91, 207, 105);"
             >
               <span
@@ -713,37 +714,36 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb jzbxwy"
+              class="sc-bxivhb fPGNYZ"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £3.10
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb lgvHlb"
-              style="background-color: rgb(78, 203, 94);"
+              class="sc-bxivhb JzZId"
+              style="background-color: rgb(76, 203, 92);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £19.90
+                £23.00
               </span>
             </div>
             <div
-              class="sc-bxivhb kdLode"
-              style="background-color: rgb(108, 212, 121);"
+              class="sc-bxivhb fSxTEn"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £13.1k
+                (£1k)
               </span>
             </div>
             <div
-              class="sc-bxivhb jhuyHm"
+              class="sc-bxivhb kHsobB"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
@@ -754,27 +754,17 @@ describe('<PageOverview />', () => {
             </div>
           </div>
           <div
-            class="sc-htpNat fCMRGf"
+            class="sc-htpNat kjPaM"
           >
             <div
-              class="sc-bxivhb iqPouv"
+              class="sc-bxivhb jfSVUT"
             >
               <span>
                 Jun-18
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(113, 134, 144);"
-            >
-              <span
-                class="sc-gzVnrw DaTdd"
-              >
-                £1.1k
-              </span>
-            </div>
-            <div
-              class="sc-bxivhb fBJWDU"
+              class="sc-bxivhb bTHCEP"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
@@ -784,47 +774,57 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(161, 208, 163);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.3
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(128, 171, 205);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.9
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(128, 196, 189);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £1.28
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(223, 207, 146);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.7
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb bNTNvC"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
+            >
+              <span
+                class="sc-gzVnrw DaTdd"
+              >
+                £0.00
+              </span>
+            </div>
+            <div
+              class="sc-bxivhb hLBMqG"
               style="background-color: rgb(189, 236, 195);"
             >
               <span
@@ -834,37 +834,37 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb jzbxwy"
+              class="sc-bxivhb fPGNYZ"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £3.10
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb lgvHlb"
-              style="background-color: rgb(147, 224, 157);"
+              class="sc-bxivhb JzZId"
+              style="background-color: rgb(144, 222, 153);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £14.90
+                £18.00
               </span>
             </div>
             <div
-              class="sc-bxivhb kdLode"
-              style="background-color: rgb(78, 203, 93);"
+              class="sc-bxivhb fSxTEn"
+              style="background-color: rgb(165, 229, 173);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £13.1k
+                £18.00
               </span>
             </div>
             <div
-              class="sc-bxivhb jhuyHm"
+              class="sc-bxivhb kHsobB"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
@@ -875,27 +875,17 @@ describe('<PageOverview />', () => {
             </div>
           </div>
           <div
-            class="sc-htpNat fCMRGf"
+            class="sc-htpNat kjPaM"
           >
             <div
-              class="sc-bxivhb iqPouv"
+              class="sc-bxivhb jfSVUT"
             >
               <span>
                 Jul-18
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(84, 110, 122);"
-            >
-              <span
-                class="sc-gzVnrw DaTdd"
-              >
-                £1.1k
-              </span>
-            </div>
-            <div
-              class="sc-bxivhb fBJWDU"
+              class="sc-bxivhb bTHCEP"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
@@ -905,47 +895,57 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(161, 208, 163);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.3
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(128, 171, 205);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.9
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(128, 196, 189);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £1.28
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb fBJWDU"
-              style="background-color: rgb(223, 207, 146);"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £0.7
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb bNTNvC"
+              class="sc-bxivhb bTHCEP"
+              style="background-color: rgb(255, 255, 255);"
+            >
+              <span
+                class="sc-gzVnrw DaTdd"
+              >
+                £0.00
+              </span>
+            </div>
+            <div
+              class="sc-bxivhb hLBMqG"
               style="background-color: rgb(36, 191, 55);"
             >
               <span
@@ -955,37 +955,37 @@ describe('<PageOverview />', () => {
               </span>
             </div>
             <div
-              class="sc-bxivhb jzbxwy"
+              class="sc-bxivhb fPGNYZ"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £3.10
+                £0.00
               </span>
             </div>
             <div
-              class="sc-bxivhb lgvHlb"
+              class="sc-bxivhb JzZId"
               style="background-color: rgb(36, 191, 55);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £22.90
+                £26.00
               </span>
             </div>
             <div
-              class="sc-bxivhb kdLode"
-              style="background-color: rgb(36, 191, 55);"
+              class="sc-bxivhb fSxTEn"
+              style="background-color: rgb(145, 223, 155);"
             >
               <span
                 class="sc-gzVnrw DaTdd"
               >
-                £13.1k
+                £26.00
               </span>
             </div>
             <div
-              class="sc-bxivhb jhuyHm"
+              class="sc-bxivhb kHsobB"
               style="background-color: rgb(255, 255, 255);"
             >
               <span
@@ -1009,7 +1009,7 @@ describe('<PageOverview />', () => {
     const { getByTestId } = getContainer();
     expect(getByTestId('graph-overview')).toMatchInlineSnapshot(`
       <div
-        class="sc-hzDkRC sc-fMiknA bmTdHa"
+        class="sc-hzDkRC sc-hmzhuo fvLzdg"
         data-testid="graph-overview"
       >
         <div
@@ -1030,24 +1030,24 @@ describe('<PageOverview />', () => {
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="300.5"
-                    y2="300.5"
+                    y1="281.5"
+                    y2="281.5"
                   />
                   <line
                     stroke="rgb(153,153,153)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="200.5"
-                    y2="200.5"
+                    y1="189.5"
+                    y2="189.5"
                   />
                   <line
                     stroke="rgb(153,153,153)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="101.5"
-                    y2="101.5"
+                    y1="96.5"
+                    y2="96.5"
                   />
                 </g>
                 <g>
@@ -1056,96 +1056,104 @@ describe('<PageOverview />', () => {
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="280.5"
-                    y2="280.5"
+                    y1="318.5"
+                    y2="318.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="260.5"
-                    y2="260.5"
+                    y1="299.5"
+                    y2="299.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="240.5"
-                    y2="240.5"
+                    y1="262.5"
+                    y2="262.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="220.5"
-                    y2="220.5"
+                    y1="244.5"
+                    y2="244.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="180.5"
-                    y2="180.5"
+                    y1="225.5"
+                    y2="225.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="161.5"
-                    y2="161.5"
+                    y1="207.5"
+                    y2="207.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="141.5"
-                    y2="141.5"
+                    y1="170.5"
+                    y2="170.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="121.5"
-                    y2="121.5"
+                    y1="152.5"
+                    y2="152.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="81.5"
-                    y2="81.5"
+                    y1="133.5"
+                    y2="133.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="61.5"
-                    y2="61.5"
+                    y1="115.5"
+                    y2="115.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="42.5"
-                    y2="42.5"
+                    y1="78.5"
+                    y2="78.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="22.5"
-                    y2="22.5"
+                    y1="59.5"
+                    y2="59.5"
+                  />
+                  <line
+                    stroke="rgb(238,238,238)"
+                    stroke-width="1"
+                    x1="0"
+                    x2="500"
+                    y1="41.5"
+                    y2="41.5"
                   />
                 </g>
                 <g>
@@ -1155,7 +1163,7 @@ describe('<PageOverview />', () => {
                     font-size="11"
                     text-anchor="start"
                     x="0"
-                    y="298.5"
+                    y="279.5"
                   >
                     £0
                   </text>
@@ -1165,7 +1173,7 @@ describe('<PageOverview />', () => {
                     font-size="11"
                     text-anchor="start"
                     x="0"
-                    y="198.5"
+                    y="187.5"
                   >
                     £5k
                   </text>
@@ -1175,7 +1183,7 @@ describe('<PageOverview />', () => {
                     font-size="11"
                     text-anchor="start"
                     x="0"
-                    y="99.5"
+                    y="94.5"
                   >
                     £10k
                   </text>
@@ -1805,8 +1813,8 @@ describe('<PageOverview />', () => {
                 <line
                   stroke="rgb(51,51,51)"
                   stroke-width="1"
-                  x1="140.5"
-                  x2="140.5"
+                  x1="2237.5"
+                  x2="2237.5"
                   y1="300"
                   y2="40"
                 />
@@ -1814,7 +1822,7 @@ describe('<PageOverview />', () => {
                   color="rgb(0,0,0)"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
-                  x="140.5"
+                  x="2237.5"
                   y="40"
                 >
                   Now
@@ -1823,28 +1831,40 @@ describe('<PageOverview />', () => {
             </g>
             <g>
               <path
-                d="M0.0,300.0 Q43,208 77.3,171.2 C100,148 132,140 163.0,128.2 C191,117 217,113 245.9,106.5 C276,100 301,97 331.5,93.4 C360,90 385,87 414.4,84.6 Q444,82 500.0,78.2"
+                d="M0,281.28500936581725 Q36,89 77.3,40.0 C93,21 144,61 163.0,87.8 C203,145 204,232 245.9,279.5 C263,299 302,279 331.5,279.5 C360,279 385,279 414.4,279.5 Q444,279 500.0,279.5"
                 fill="none"
-                stroke="rgb(153,153,153)"
+                stroke="#00348a"
                 stroke-dasharray="3,5"
                 stroke-width="1"
               />
+            </g>
+            <g>
               <path
-                d="M0.0,300.0 Q34,111 77.3,42.5 C91,21 133,42 163.0,42.0"
-                fill="none"
-                stroke="rgb(0,51,153)"
-                stroke-width="2"
-              />
-              <path
-                d="M163.0,42.0 C192,42 217,42 245.9,41.6 C276,41 302,41 331.5,41.0 C360,41 385,41 414.4,40.6 Q444,40 500.0,40.0"
-                fill="none"
-                stroke="rgb(255,0,0)"
+                d="M0,281.28500936581725 Q36,90 77.3,41.8 C93,23 144,63 163.0,89.6 C203,147 204,234 245.9,281.3 C263,301 302,281 331.5,281.3 C360,281 385,281 414.4,281.3 Q444,281 500.0,281.3 L500.0,281.3 Q444,281 414.4,281.3 C385,281 360,281 331.5,281.3 C302,281 263,301 245.9,281.3 C204,234 203,147 163.0,89.6 C144,63 93,23 77.3,41.8 Q36,90 0.0,281.3"
+                fill="rgba(47,123,211,0.5)"
+                stroke="none"
                 stroke-width="2"
               />
             </g>
             <g>
               <path
-                d="M0.0,280.0 Q50,280 77.3,279.9 C107,280 133,280 163.0,279.6 C192,279 217,279 245.9,279.4 C276,279 302,279 331.5,279.3 C360,279 385,279 414.4,279.2 Q444,279 500.0,279.0 L500,300 L0.0,300"
+                d="M0,281.28500936581725 Q36,90 77.3,41.8 C93,23 144,63 163.0,89.6 C203,147 204,234 245.9,281.3 C263,301 302,281 331.5,281.3 C360,281 385,281 414.4,281.3 Q444,281 500.0,281.3"
+                fill="none"
+                stroke="rgb(0,51,153)"
+                stroke-width="2"
+              />
+            </g>
+            <g>
+              <path
+                d="M0,281.28500936581725 Q50,281 77.3,281.3 C107,281 133,281 163.0,281.0 C192,281 217,278 245.9,280.9 C276,284 301,297 331.5,300.0 C360,303 385,300 414.4,300.0 Q444,300 500.0,300.0 L500.0,281.3 Q444,281 414.4,281.3 C385,281 360,285 331.5,281.3 C301,278 276,266 245.9,262.2 C217,259 192,262 163.0,262.3 C133,262 107,262 77.3,262.6 Q50,263 0.0,262.7"
+                fill="rgba(200,200,200,0.3)"
+                stroke="none"
+                stroke-width="2"
+              />
+            </g>
+            <g>
+              <path
+                d="M0,262.6954506167432 Q50,263 77.3,262.6 C107,262 133,262 163.0,262.3 C192,262 217,259 245.9,262.2 C276,266 301,278 331.5,281.3 C360,285 385,281 414.4,281.3 Q444,281 500.0,281.3 L500,300 L0,300"
                 fill="rgba(200,200,200,0.5)"
                 stroke="none"
                 stroke-width="2"
@@ -1857,7 +1877,7 @@ describe('<PageOverview />', () => {
                   height="70"
                   width="100"
                   x="48"
-                  y="70"
+                  y="100"
                 />
                 <text
                   alignment-baseline="hanging"
@@ -1865,9 +1885,9 @@ describe('<PageOverview />', () => {
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="50"
-                  y="72"
+                  y="100"
                 >
-                  £98k (1y)
+                  −£NaN (1y)
                 </text>
                 <text
                   alignment-baseline="hanging"
@@ -1875,9 +1895,9 @@ describe('<PageOverview />', () => {
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="50"
-                  y="94"
+                  y="122"
                 >
-                  £109k (3y)
+                  −£NaN (3y)
                 </text>
                 <text
                   alignment-baseline="hanging"
@@ -1885,13 +1905,13 @@ describe('<PageOverview />', () => {
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="50"
-                  y="116"
+                  y="144"
                 >
-                  £85k (5y)
+                  −£NaN (5y)
                 </text>
                 <g>
                   <path
-                    d="M0,300 L51.14061934614897,221.48677147835343  L45.1,220.7 L54.1,217.0 L54.3,226.8 L51.1,221.5"
+                    d="M245.85635359116023,281.28500936581725 LNaN,NaN  LNaN,NaN LNaN,NaN LNaN,NaN LNaN,NaN"
                     fill="none"
                     stroke="rgb(51,51,51)"
                     stroke-width="1"
@@ -1899,7 +1919,7 @@ describe('<PageOverview />', () => {
                 </g>
                 <g>
                   <path
-                    d="M331.49171270718233,300 L491.43984914284323,201.77635900273702  L480.6,195.0 L501.2,195.8 L492.6,214.6 L491.4,201.8"
+                    d="M0,281.28500936581725 LNaN,NaN  LNaN,NaN LNaN,NaN LNaN,NaN LNaN,NaN"
                     fill="none"
                     stroke="rgb(51,51,51)"
                     stroke-width="1"
@@ -1907,7 +1927,7 @@ describe('<PageOverview />', () => {
                 </g>
                 <g>
                   <path
-                    d="M414.36464088397787,300 L685.6924619258672,224.26293160769637  L672.6,209.7 L702.5,219.6 L682.0,243.5 L685.7,224.3"
+                    d="M77.34806629834254,41.81575750259327 LNaN,NaN  LNaN,NaN LNaN,NaN LNaN,NaN LNaN,NaN"
                     fill="none"
                     stroke="rgb(51,51,51)"
                     stroke-width="1"
@@ -1917,7 +1937,7 @@ describe('<PageOverview />', () => {
               <g>
                 <rect
                   fill="rgba(255,255,255,0.5)"
-                  height="60"
+                  height="80"
                   width="200"
                   x="45"
                   y="8"
@@ -1973,7 +1993,7 @@ describe('<PageOverview />', () => {
                   height="6"
                   width="24"
                   x="50"
-                  y="54"
+                  y="53"
                 />
                 <text
                   alignment-baseline="middle"
@@ -1981,21 +2001,74 @@ describe('<PageOverview />', () => {
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="78"
-                  y="57"
+                  y="56"
                 >
                   Stocks
+                </text>
+                <rect
+                  fill="rgba(200,200,200,0.3)"
+                  height="6"
+                  width="24"
+                  x="130"
+                  y="53"
+                />
+                <text
+                  alignment-baseline="middle"
+                  fill="rgb(51,51,51)"
+                  font-family="Arial, Helvetica, sans-serif"
+                  font-size="11"
+                  x="158"
+                  y="56"
+                >
+                  Locked cash
+                </text>
+                <rect
+                  fill="rgba(47,123,211,0.5)"
+                  height="6"
+                  width="24"
+                  x="130"
+                  y="69"
+                />
+                <text
+                  alignment-baseline="middle"
+                  fill="rgb(51,51,51)"
+                  font-family="Arial, Helvetica, sans-serif"
+                  font-size="11"
+                  x="158"
+                  y="72"
+                >
+                  Pension
+                </text>
+                <line
+                  stroke="#00348a"
+                  stroke-dasharray="3,4"
+                  stroke-width="1"
+                  x1="50"
+                  x2="74"
+                  y1="72.5"
+                  y2="72.5"
+                />
+                <text
+                  alignment-baseline="middle"
+                  fill="rgb(51,51,51)"
+                  font-family="Arial, Helvetica, sans-serif"
+                  font-size="11"
+                  x="78"
+                  y="72"
+                >
+                  Options
                 </text>
               </g>
             </g>
           </svg>
           <span
-            class="sc-jhAzac cBfGzl"
+            class="sc-cJSrbW iKWsas"
           >
             <span>
               Show all
             </span>
             <a
-              class="sc-fBuWsC WXtfb"
+              class="sc-ksYbfQ eijAEV"
             />
           </span>
         </div>
@@ -2017,40 +2090,24 @@ describe('<PageOverview />', () => {
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="282.5"
-                    y2="282.5"
+                    y1="284.5"
+                    y2="284.5"
                   />
                   <line
                     stroke="rgb(153,153,153)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="229.5"
-                    y2="229.5"
+                    y1="190.5"
+                    y2="190.5"
                   />
                   <line
                     stroke="rgb(153,153,153)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="176.5"
-                    y2="176.5"
-                  />
-                  <line
-                    stroke="rgb(153,153,153)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="123.5"
-                    y2="123.5"
-                  />
-                  <line
-                    stroke="rgb(153,153,153)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="70.5"
-                    y2="70.5"
+                    y1="96.5"
+                    y2="96.5"
                   />
                 </g>
                 <g>
@@ -2067,160 +2124,88 @@ describe('<PageOverview />', () => {
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="292.5"
-                    y2="292.5"
+                    y1="265.5"
+                    y2="265.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="271.5"
-                    y2="271.5"
+                    y1="246.5"
+                    y2="246.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="261.5"
-                    y2="261.5"
+                    y1="227.5"
+                    y2="227.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="250.5"
-                    y2="250.5"
+                    y1="209.5"
+                    y2="209.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="239.5"
-                    y2="239.5"
+                    y1="171.5"
+                    y2="171.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="218.5"
-                    y2="218.5"
+                    y1="152.5"
+                    y2="152.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="208.5"
-                    y2="208.5"
+                    y1="133.5"
+                    y2="133.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="197.5"
-                    y2="197.5"
+                    y1="115.5"
+                    y2="115.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="187.5"
-                    y2="187.5"
+                    y1="77.5"
+                    y2="77.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="165.5"
-                    y2="165.5"
+                    y1="58.5"
+                    y2="58.5"
                   />
                   <line
                     stroke="rgb(238,238,238)"
                     stroke-width="1"
                     x1="0"
                     x2="500"
-                    y1="155.5"
-                    y2="155.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="144.5"
-                    y2="144.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="134.5"
-                    y2="134.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="112.5"
-                    y2="112.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="102.5"
-                    y2="102.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="91.5"
-                    y2="91.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="81.5"
-                    y2="81.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="60.5"
-                    y2="60.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="49.5"
-                    y2="49.5"
-                  />
-                  <line
-                    stroke="rgb(238,238,238)"
-                    stroke-width="1"
-                    x1="0"
-                    x2="500"
-                    y1="38.5"
-                    y2="38.5"
+                    y1="40.5"
+                    y2="40.5"
                   />
                 </g>
                 <g>
@@ -2230,7 +2215,7 @@ describe('<PageOverview />', () => {
                     font-size="11"
                     text-anchor="start"
                     x="0"
-                    y="280.5"
+                    y="282.5"
                   >
                     £0
                   </text>
@@ -2240,17 +2225,7 @@ describe('<PageOverview />', () => {
                     font-size="11"
                     text-anchor="start"
                     x="0"
-                    y="227.5"
-                  >
-                    £5
-                  </text>
-                  <text
-                    alignment-baseline="baseline"
-                    font-family="Arial, Helvetica, sans-serif"
-                    font-size="11"
-                    text-anchor="start"
-                    x="0"
-                    y="174.5"
+                    y="188.5"
                   >
                     £10
                   </text>
@@ -2260,17 +2235,7 @@ describe('<PageOverview />', () => {
                     font-size="11"
                     text-anchor="start"
                     x="0"
-                    y="121.5"
-                  >
-                    £15
-                  </text>
-                  <text
-                    alignment-baseline="baseline"
-                    font-family="Arial, Helvetica, sans-serif"
-                    font-size="11"
-                    text-anchor="start"
-                    x="0"
-                    y="68.5"
+                    y="94.5"
                   >
                     £20
                   </text>
@@ -2900,8 +2865,8 @@ describe('<PageOverview />', () => {
                 <line
                   stroke="rgb(51,51,51)"
                   stroke-width="1"
-                  x1="140.5"
-                  x2="140.5"
+                  x1="2237.5"
+                  x2="2237.5"
                   y1="300"
                   y2="40"
                 />
@@ -2909,7 +2874,7 @@ describe('<PageOverview />', () => {
                   color="rgb(0,0,0)"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
-                  x="140.5"
+                  x="2237.5"
                   y="40"
                 >
                   Now
@@ -2919,15 +2884,15 @@ describe('<PageOverview />', () => {
             <g>
               <g>
                 <path
-                  d="M0,282.2294548413344 L4.472736235067494e-15,209.18412882273725  L-4.5,211.4 L0.0,204.8 L4.5,211.4 L0.0,209.2"
+                  d="M0,284.21965317919074 L3.952230628091076e-15,219.67482881280569  L-4.3,221.8 L0.0,215.5 L4.3,221.8 L0.0,219.7"
                   fill="rgb(0,204,51)"
                   stroke="rgb(0,204,51)"
-                  stroke-width="0.9694323144104803"
+                  stroke-width="0.8538461538461538"
                 />
               </g>
               <g>
                 <path
-                  d="M77.34806629834254,282.2294548413344 L77.34806629834254,290.1  L84.8,286.5 L77.3,297.3 L69.8,286.5 L77.3,290.1"
+                  d="M77.34806629834254,284.21965317919074 L77.34806629834254,290.1  L84.8,286.5 L77.3,297.3 L69.8,286.5 L77.3,290.1"
                   fill="rgb(204,51,0)"
                   stroke="rgb(204,51,0)"
                   stroke-width="3"
@@ -2935,39 +2900,39 @@ describe('<PageOverview />', () => {
               </g>
               <g>
                 <path
-                  d="M162.98342541436463,282.2294548413344 L162.98342541436463,208.05372532786623  L158.5,210.2 L163.0,203.7 L167.5,210.2 L163.0,208.1"
+                  d="M162.98342541436463,284.21965317919074 L162.98342541436463,210.45587305469098  L158.5,212.6 L163.0,206.1 L167.4,212.6 L163.0,210.5"
                   fill="rgb(0,204,51)"
                   stroke="rgb(0,204,51)"
-                  stroke-width="0.9838427947598254"
+                  stroke-width="0.9703846153846154"
                 />
               </g>
               <g>
                 <path
-                  d="M245.85635359116023,282.2294548413344 L245.85635359116023,126.972965559389  L239.8,129.9 L245.9,121.1 L251.9,129.9 L245.9,127.0"
+                  d="M245.85635359116023,284.21965317919074 L245.85635359116023,125.3859050689195  L239.8,128.3 L245.9,119.5 L251.9,128.3 L245.9,125.4"
                   fill="rgb(0,204,51)"
                   stroke="rgb(0,204,51)"
-                  stroke-width="2.017467248908297"
+                  stroke-width="2.045769230769231"
                 />
               </g>
               <g>
                 <path
-                  d="M331.49171270718233,282.2294548413344 L331.49171270718233,80.72918622375556  L324.6,84.1 L331.5,74.1 L338.4,84.1 L331.5,80.7"
+                  d="M331.49171270718233,284.21965317919074 L331.49171270718233,77.28303690529125  L324.5,80.6 L331.5,70.6 L338.5,80.6 L331.5,77.3"
                   fill="rgb(0,204,51)"
                   stroke="rgb(0,204,51)"
-                  stroke-width="2.606986899563319"
+                  stroke-width="2.6538461538461537"
                 />
               </g>
               <g>
                 <path
-                  d="M414.36464088397787,282.2294548413344 L414.36464088397787,132.11116326334826  L408.4,135.0 L414.4,126.4 L420.3,135.0 L414.4,132.1"
+                  d="M414.36464088397787,284.21965317919074 L414.36464088397787,122.92143174744331  L408.2,125.9 L414.4,117.0 L420.5,125.9 L414.4,122.9"
                   fill="rgb(0,204,51)"
                   stroke="rgb(0,204,51)"
-                  stroke-width="1.9519650655021832"
+                  stroke-width="2.0769230769230766"
                 />
               </g>
               <g>
                 <path
-                  d="M500,282.2294548413344 L500,49.900000000000006  L492.5,53.5 L500.0,42.7 L507.5,53.5 L500.0,49.9"
+                  d="M500,284.21965317919074 L500,49.900000000000006  L492.5,53.5 L500.0,42.7 L507.5,53.5 L500.0,49.9"
                   fill="rgb(0,204,51)"
                   stroke="rgb(0,204,51)"
                   stroke-width="3"
@@ -2976,13 +2941,13 @@ describe('<PageOverview />', () => {
             </g>
             <g>
               <path
-                d="M0.0,149.0 Q54,56 77.3,63.5 C111,75 124,176 163.0,203.0 C183,217 220,174 245.9,180.7 C279,190 298,236 331.5,249.4 C357,260 385,249 414.4,249.4 Q444,249 500.0,249.4"
+                d="M0,165.8670520231214 Q54,82 77.3,90.0 C111,102 124,193 163.0,222.3 C183,238 220,207 245.9,215.9 C279,228 298,271 331.5,284.2 C357,295 385,284 414.4,284.2 Q444,284 500.0,284.2"
                 fill="none"
                 stroke="rgb(0,51,153)"
                 stroke-width="2"
               />
               <path
-                d="M0.0,149.0 Q49,108 77.3,106.2 C106,104 132,131 163.0,138.5 C191,146 217,144 245.9,149.0 C276,155 301,163 331.5,169.1 C360,175 385,177 414.4,182.5 Q444,188 500.0,199.2"
+                d="M0,165.8670520231214 Q50,129 77.3,127.9 C107,127 132,151 163.0,159.4 C191,167 217,167 245.9,173.5 C276,180 301,189 331.5,195.7 C360,202 386,205 414.4,210.4 Q444,217 500.0,230.1"
                 fill="none"
                 stroke="rgb(153,153,153)"
                 stroke-dasharray="3,5"

@@ -5,14 +5,15 @@ import { FONT_GRAPH_TITLE } from '~client/constants/graph';
 
 export type Props = {
   title: string;
+  height?: number;
   children?: React.ReactNode;
 };
 
 const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
 
-export const BaseKey: React.FC<Props> = ({ title, children }) => (
+export const BaseKey: React.FC<Props> = ({ title, children, height = 60 }) => (
   <g>
-    <rect x={45} y={8} width={200} height={60} fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
+    <rect x={45} y={8} width={200} height={height} fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
 
     <text
       x={65}

@@ -248,6 +248,7 @@ export const Header = styled(Row)`
 `;
 
 export const HeaderLink = styled(Cell)`
+  align-items: center;
   padding: 2px 0;
   overflow: hidden;
   white-space: nowrap;

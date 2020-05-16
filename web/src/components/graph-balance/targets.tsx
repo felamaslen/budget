@@ -17,11 +17,13 @@ type Props = {
 
 const monthSeconds = 2628000;
 
+const yOffset = 100;
+
 export const Targets: React.FC<Props> = ({ showAll, targets, minY, maxY, pixX, pixY1 }) => (
   <g>
     <rect
       x={48}
-      y={70}
+      y={yOffset}
       width={100}
       height={targets.length * 22 + 4}
       fill={rgba(COLOR_TRANSLUCENT_LIGHT)}
@@ -30,7 +32,7 @@ export const Targets: React.FC<Props> = ({ showAll, targets, minY, maxY, pixX, p
       <text
         key={tag}
         x={50}
-        y={72 + 22 * index}
+        y={yOffset + 22 * index}
         fill={rgba(COLOR_DARK)}
         alignmentBaseline="hanging"
         fontFamily={fontFamily}

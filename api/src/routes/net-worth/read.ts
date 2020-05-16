@@ -250,16 +250,25 @@ const fetchOld = async (
   uid: string,
   startDate: Date,
   oldDateEnd: Date,
-): Promise<number[]> => {
-  const { rows } = await db.query<{ value: number }>(sql`
-    SELECT (${sql.join(
+): Promise<{
+  old: number[];
+  oldOptions: number[];
+}> => {
+  const { rows } = await db.query<{ value: number; option_value: number }>(sql`
+    SELECT ${sql.join(
       [
-        sql`SUM(COALESCE(nwv.value, 0))`,
-        sql`SUM(COALESCE(nwfx.value * nwc.rate * 100, 0))::integer`,
-        sql`SUM(COALESCE(nwop.units * nwop.market_price, 0))::integer`,
+        sql`(${sql.join(
+          [
+            sql`SUM(COALESCE(nwv.value, 0))`,
+            sql`SUM(COALESCE(nwfx.value * nwc.rate * 100, 0))::integer`,
+          ],
+          sql` + `,
+        )}) as value`,
+
+        sql`SUM(COALESCE(nwop.units * nwop.market_price, 0))::integer as option_value`,
       ],
-      sql` + `,
-    )}) as value
+      sql`, `,
+    )}
     FROM net_worth as nw
     LEFT JOIN net_worth_values as nwv ON nwv.net_worth_id = nw.id
     LEFT JOIN net_worth_fx_values as nwfx ON nwfx.values_id = nwv.id
@@ -280,7 +289,10 @@ const fetchOld = async (
     ORDER BY nw.date
   `);
 
-  return rows.map(({ value }) => Number(value));
+  const old = rows.map(({ value }) => value);
+  const oldOptions = rows.map(({ option_value }) => option_value);
+
+  return { old, oldOptions };
 };
 
 const fetchAll = async (
@@ -325,12 +337,12 @@ export const onRead = authDbRoute(async (db, req, res) => {
     const oldDateEnd = startOfMonth(addMonths(new Date(), -numLast));
     const startDate = startOfMonth(setMonth(setYear(new Date(), startYear), startMonth));
 
-    const [items, old] = await Promise.all([
+    const [items, { old, oldOptions }] = await Promise.all([
       fetchAll(db, uid, oldDateEnd),
       fetchOld(db, uid, startDate, oldDateEnd),
     ]);
 
-    res.json({ items, old });
+    res.json({ items, old, oldOptions });
     return;
   }
 

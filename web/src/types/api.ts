@@ -60,7 +60,8 @@ export type ReadResponse = Partial<
       entries: {
         data: {
           items: RawDate<Entry>[];
-          old: number[];
+          old?: number[];
+          oldOptions?: number[];
         };
       };
     };

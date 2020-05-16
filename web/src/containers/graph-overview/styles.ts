@@ -8,6 +8,7 @@ export const GraphOverview = styled(GraphOuter)`
   height: ${graphOverviewHeightMobile}px;
   box-shadow: 0 -2px 6px ${colors['shadow-l3']};
   z-index: 10;
+  overflow: hidden;
 
   ${breakpoint(breakpoints.mobile)} {
     display: flex;

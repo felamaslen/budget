@@ -133,15 +133,60 @@ type LineProps = Pix & {
   width?: number;
   height?: number;
   data: Data;
+  stack?: Data;
   secondary?: boolean;
   smooth?: boolean;
   fill?: boolean;
 };
 
+function getSmoothLinePart(pixels: Data, pixelsRounded: SVGPoint[]): LineDescription {
+  const controlPoints = getControlPoints(pixels);
+
+  return pixels.slice(0, pixels.length - 1).map((point: SVGPoint, index: number) => {
+    if (index === 0) {
+      return {
+        start: point,
+        type: 'Q',
+        args: [controlPoints[index + 1][0], pixelsRounded[index + 1]],
+      };
+    }
+    if (index === pixels.length - 2) {
+      return {
+        start: point,
+        type: 'Q',
+        args: [controlPoints[index][1], pixelsRounded[index + 1]],
+      };
+    }
+
+    return {
+      start: point,
+      type: 'C',
+      args: [controlPoints[index][1], controlPoints[index + 1][0], pixelsRounded[index + 1]],
+    };
+  });
+}
+
+type GetPixPoint = (point: Point) => Point;
+
+function getLinePathPart(pixels: Data, smooth = false): LineDescription {
+  const pixelsRounded = pixels.map(([x, y]: Point): SVGPoint => [x.toFixed(1), y.toFixed(1)]);
+
+  if (smooth && pixels.length > 2) {
+    return getSmoothLinePart(pixels, pixelsRounded);
+  }
+
+  return pixelsRounded.slice(1).map((point, index) => ({
+    start: pixelsRounded[index],
+    type: 'L',
+    args: [point],
+  }));
+}
+
 export function getLinePath({
   width = 0,
   height = 0,
   data,
+  stack,
   secondary,
   smooth,
   fill,
@@ -150,46 +195,31 @@ export function getLinePath({
   pixY2,
 }: LineProps): LineDescription {
   const pixY = getPixY({ pixY1, pixY2 }, secondary);
-  const getPixPoint = ([xValue, yValue]: Point): Point => [pixX(xValue), pixY(yValue)];
-  const pixelsNumeric: Data = data.map(getPixPoint);
-  const pixels = pixelsNumeric.map(([x, y]: Point): SVGPoint => [x.toFixed(1), y.toFixed(1)]);
+  const getPixPoint: GetPixPoint = ([xValue, yValue]: Point): Point => [pixX(xValue), pixY(yValue)];
+  const dataStacked: Data = stack
+    ? data.map(([xValue, yValue], index) => [xValue, yValue + stack[index][1]])
+    : data;
+  const pixels: Data = dataStacked.map(getPixPoint);
+  const line = getLinePathPart(pixels, smooth);
 
-  let line: LineDescription;
-
-  if (smooth && pixels.length > 2) {
-    const controlPoints = getControlPoints(pixelsNumeric);
-
-    line = pixels.slice(0, pixels.length - 1).map((point: SVGPoint, index: number) => {
-      if (index === 0) {
-        return {
-          start: point,
-          type: 'Q',
-          args: [controlPoints[index + 1][0], pixels[index + 1]],
-        };
-      }
-      if (index === pixels.length - 2) {
-        return {
-          start: point,
-          type: 'Q',
-          args: [controlPoints[index][1], pixels[index + 1]],
-        };
-      }
-
-      return {
-        start: point,
-        type: 'C',
-        args: [controlPoints[index][1], controlPoints[index + 1][0], pixels[index + 1]],
-      };
-    });
-  } else {
-    line = pixels.slice(1).map((point, index) => ({
-      start: pixels[index],
-      type: 'L',
-      args: [point],
-    }));
-  }
   if (fill) {
-    return line.concat([
+    if (stack) {
+      const pixelsStack: Data = stack.map(getPixPoint);
+      const lineStack = getLinePathPart(pixelsStack.reverse(), smooth);
+
+      return [
+        ...line,
+        {
+          start: pixels[pixels.length - 1],
+          type: 'L',
+          args: [[pixelsStack[0][0].toFixed(1), pixelsStack[0][1].toFixed(1)]],
+        },
+        ...lineStack,
+      ];
+    }
+
+    return [
+      ...line,
       {
         start: pixels[pixels.length - 1],
         type: 'L',
@@ -200,13 +230,13 @@ export function getLinePath({
         type: 'L',
         args: [[pixels[0][0], height]],
       },
-    ]);
+    ];
   }
 
   return line;
 }
 
-export function getLinePathPart(linePath: LineDescription): string {
+export function joinLinePath(linePath: LineDescription): string {
   if (linePath.length < 1) {
     return '';
   }
@@ -220,7 +250,7 @@ export function getLinePathPart(linePath: LineDescription): string {
   return `M${start.join(',')} ${parts.join(' ')}`;
 }
 
-export const getSingleLinePath = (props: LineProps): string => getLinePathPart(getLinePath(props));
+export const getSingleLinePath = (props: LineProps): string => joinLinePath(getLinePath(props));
 
 export function getPathProps({ strokeWidth = 2, dashed = false }: PathProps): SVGPathProps {
   if (dashed) {
@@ -244,7 +274,7 @@ export const joinChoppedPath = (
     .slice(1)
     .concat([linePath.length])
     .map((end, endIndex) => ({
-      path: getLinePathPart(linePath.slice(ends[endIndex], end)),
+      path: joinLinePath(linePath.slice(ends[endIndex], end)),
       stroke: color(end, endIndex),
     }))
     .filter(({ path }) => path.length);

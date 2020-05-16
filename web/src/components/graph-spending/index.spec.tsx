@@ -1,31 +1,31 @@
 /* eslint-disable max-len */
+import { render, RenderResult } from '@testing-library/react';
+import { Provider } from 'react-redux';
 import React from 'react';
-import { render } from '@testing-library/react';
+import createStore from 'redux-mock-store';
 import sinon from 'sinon';
 
-import { GraphSpending, Props } from '.';
+import state from '~client/test-data/state';
+import { GraphSpending } from '.';
 
 describe('<GraphSpending />', () => {
-  let clock: sinon.SinonFakeTimers;
-  beforeEach(() => {
-    clock = sinon.useFakeTimers(new Date('2020-04-20T16:29Z'));
-  });
+  const makeStore = createStore();
+  const now = new Date('2020-04-20T16:29Z');
 
-  afterEach(() => {
-    clock.restore();
-  });
+  const setup = (): RenderResult => {
+    const store = makeStore({ ...state, now });
 
-  const props: Props = {
-    now: new Date('2020-04-20T16:29Z'),
-    graphWidth: 500,
-    valuesNet: [16000, 87322, -1055, -20665, 14402, 260454],
-    valuesSpending: [15000, 14500, 20550, 60412, 1033, 10064],
-    startDate: new Date('2019-11-30'),
+    return render(
+      <Provider store={store}>
+        <GraphSpending />
+      </Provider>,
+    );
   };
 
   it('should render a graph', async () => {
     expect.assertions(1);
-    const { getByTestId } = render(<GraphSpending {...props} />);
+    const clock = sinon.useFakeTimers();
+    const { getByTestId } = setup();
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
       <svg
         data-testid="graph-svg"
@@ -40,24 +40,24 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="280.5"
-                y2="280.5"
+                y1="284.5"
+                y2="284.5"
               />
               <line
                 stroke="rgb(153,153,153)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="188.5"
-                y2="188.5"
+                y1="190.5"
+                y2="190.5"
               />
               <line
                 stroke="rgb(153,153,153)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="95.5"
-                y2="95.5"
+                y1="96.5"
+                y2="96.5"
               />
             </g>
             <g>
@@ -66,80 +66,72 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="317.5"
-                y2="317.5"
+                y1="303.5"
+                y2="303.5"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="299.5"
-                y2="299.5"
+                y1="265.5"
+                y2="265.5"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="262.5"
-                y2="262.5"
+                y1="246.5"
+                y2="246.5"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="243.5"
-                y2="243.5"
+                y1="227.5"
+                y2="227.5"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="225.5"
-                y2="225.5"
+                y1="209.5"
+                y2="209.5"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="206.5"
-                y2="206.5"
+                y1="171.5"
+                y2="171.5"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="169.5"
-                y2="169.5"
+                y1="152.5"
+                y2="152.5"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="151.5"
-                y2="151.5"
+                y1="133.5"
+                y2="133.5"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="132.5"
-                y2="132.5"
-              />
-              <line
-                stroke="rgb(238,238,238)"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="114.5"
-                y2="114.5"
+                y1="115.5"
+                y2="115.5"
               />
               <line
                 stroke="rgb(238,238,238)"
@@ -173,7 +165,7 @@ describe('<GraphSpending />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="278.5"
+                y="282.5"
               >
                 £0
               </text>
@@ -183,9 +175,9 @@ describe('<GraphSpending />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="186.5"
+                y="188.5"
               >
-                £1k
+                £10
               </text>
               <text
                 alignment-baseline="baseline"
@@ -193,17 +185,17 @@ describe('<GraphSpending />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="93.5"
+                y="94.5"
               >
-                £2k
+                £20
               </text>
             </g>
             <g>
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="-19.5"
-                x2="-19.5"
+                x1="-8.5"
+                x2="-8.5"
                 y1="295"
                 y2="0"
               />
@@ -218,16 +210,16 @@ describe('<GraphSpending />', () => {
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="3.5"
-                x2="3.5"
+                x1="11.5"
+                x2="11.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="26.5"
-                x2="26.5"
+                x1="30.5"
+                x2="30.5"
                 y1="295"
                 y2="0"
               />
@@ -242,152 +234,184 @@ describe('<GraphSpending />', () => {
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="72.5"
-                x2="72.5"
-                y1="295"
-                y2="0"
-              />
-              <line
-                stroke="rgb(238,238,238)"
-                stroke-width="0.5"
-                x1="95.5"
-                x2="95.5"
+                x1="69.5"
+                x2="69.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(153,153,153)"
                 stroke-width="0.5"
-                x1="101.5"
-                x2="101.5"
+                x1="77.5"
+                x2="77.5"
                 y1="285"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="118.5"
-                x2="118.5"
+                x1="88.5"
+                x2="88.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="141.5"
-                x2="141.5"
+                x1="107.5"
+                x2="107.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="164.5"
-                x2="164.5"
+                x1="127.5"
+                x2="127.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="187.5"
-                x2="187.5"
+                x1="146.5"
+                x2="146.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(153,153,153)"
                 stroke-width="0.5"
-                x1="203.5"
-                x2="203.5"
+                x1="162.5"
+                x2="162.5"
                 y1="285"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="210.5"
-                x2="210.5"
+                x1="165.5"
+                x2="165.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="233.5"
-                x2="233.5"
+                x1="185.5"
+                x2="185.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="256.5"
-                x2="256.5"
+                x1="204.5"
+                x2="204.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="279.5"
-                x2="279.5"
+                x1="223.5"
+                x2="223.5"
+                y1="295"
+                y2="0"
+              />
+              <line
+                stroke="rgb(238,238,238)"
+                stroke-width="0.5"
+                x1="243.5"
+                x2="243.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(153,153,153)"
                 stroke-width="0.5"
-                x1="299.5"
-                x2="299.5"
+                x1="245.5"
+                x2="245.5"
                 y1="285"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="302.5"
-                x2="302.5"
+                x1="262.5"
+                x2="262.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="325.5"
-                x2="325.5"
+                x1="281.5"
+                x2="281.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="348.5"
-                x2="348.5"
+                x1="301.5"
+                x2="301.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="371.5"
-                x2="371.5"
-                y1="295"
-                y2="0"
-              />
-              <line
-                stroke="rgb(238,238,238)"
-                stroke-width="0.5"
-                x1="394.5"
-                x2="394.5"
+                x1="320.5"
+                x2="320.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(153,153,153)"
                 stroke-width="0.5"
-                x1="401.5"
-                x2="401.5"
+                x1="331.5"
+                x2="331.5"
+                y1="285"
+                y2="0"
+              />
+              <line
+                stroke="rgb(238,238,238)"
+                stroke-width="0.5"
+                x1="339.5"
+                x2="339.5"
+                y1="295"
+                y2="0"
+              />
+              <line
+                stroke="rgb(238,238,238)"
+                stroke-width="0.5"
+                x1="359.5"
+                x2="359.5"
+                y1="295"
+                y2="0"
+              />
+              <line
+                stroke="rgb(238,238,238)"
+                stroke-width="0.5"
+                x1="378.5"
+                x2="378.5"
+                y1="295"
+                y2="0"
+              />
+              <line
+                stroke="rgb(238,238,238)"
+                stroke-width="0.5"
+                x1="397.5"
+                x2="397.5"
+                y1="295"
+                y2="0"
+              />
+              <line
+                stroke="rgb(153,153,153)"
+                stroke-width="0.5"
+                x1="414.5"
+                x2="414.5"
                 y1="285"
                 y2="0"
               />
@@ -402,24 +426,32 @@ describe('<GraphSpending />', () => {
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="440.5"
-                x2="440.5"
+                x1="436.5"
+                x2="436.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="463.5"
-                x2="463.5"
+                x1="455.5"
+                x2="455.5"
                 y1="295"
                 y2="0"
               />
               <line
                 stroke="rgb(238,238,238)"
                 stroke-width="0.5"
-                x1="486.5"
-                x2="486.5"
+                x1="475.5"
+                x2="475.5"
+                y1="295"
+                y2="0"
+              />
+              <line
+                stroke="rgb(238,238,238)"
+                stroke-width="0.5"
+                x1="494.5"
+                x2="494.5"
                 y1="295"
                 y2="0"
               />
@@ -436,8 +468,8 @@ describe('<GraphSpending />', () => {
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="-19.5"
-                x2="-19.5"
+                x1="-8.5"
+                x2="-8.5"
                 y1="300"
                 y2="295"
               />
@@ -452,16 +484,16 @@ describe('<GraphSpending />', () => {
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="3.5"
-                x2="3.5"
+                x1="11.5"
+                x2="11.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="26.5"
-                x2="26.5"
+                x1="30.5"
+                x2="30.5"
                 y1="300"
                 y2="295"
               />
@@ -476,152 +508,184 @@ describe('<GraphSpending />', () => {
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="72.5"
-                x2="72.5"
-                y1="300"
-                y2="295"
-              />
-              <line
-                stroke="rgb(0,0,0)"
-                stroke-width="1"
-                x1="95.5"
-                x2="95.5"
+                x1="69.5"
+                x2="69.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(51,51,51)"
                 stroke-width="1"
-                x1="101.5"
-                x2="101.5"
+                x1="77.5"
+                x2="77.5"
                 y1="300"
                 y2="285"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="118.5"
-                x2="118.5"
+                x1="88.5"
+                x2="88.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="141.5"
-                x2="141.5"
+                x1="107.5"
+                x2="107.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="164.5"
-                x2="164.5"
+                x1="127.5"
+                x2="127.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="187.5"
-                x2="187.5"
+                x1="146.5"
+                x2="146.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(51,51,51)"
                 stroke-width="1"
-                x1="203.5"
-                x2="203.5"
+                x1="162.5"
+                x2="162.5"
                 y1="300"
                 y2="285"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="210.5"
-                x2="210.5"
+                x1="165.5"
+                x2="165.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="233.5"
-                x2="233.5"
+                x1="185.5"
+                x2="185.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="256.5"
-                x2="256.5"
+                x1="204.5"
+                x2="204.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="279.5"
-                x2="279.5"
+                x1="223.5"
+                x2="223.5"
+                y1="300"
+                y2="295"
+              />
+              <line
+                stroke="rgb(0,0,0)"
+                stroke-width="1"
+                x1="243.5"
+                x2="243.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(51,51,51)"
                 stroke-width="1"
-                x1="299.5"
-                x2="299.5"
+                x1="245.5"
+                x2="245.5"
                 y1="300"
                 y2="285"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="302.5"
-                x2="302.5"
+                x1="262.5"
+                x2="262.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="325.5"
-                x2="325.5"
+                x1="281.5"
+                x2="281.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="348.5"
-                x2="348.5"
+                x1="301.5"
+                x2="301.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="371.5"
-                x2="371.5"
-                y1="300"
-                y2="295"
-              />
-              <line
-                stroke="rgb(0,0,0)"
-                stroke-width="1"
-                x1="394.5"
-                x2="394.5"
+                x1="320.5"
+                x2="320.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(51,51,51)"
                 stroke-width="1"
-                x1="401.5"
-                x2="401.5"
+                x1="331.5"
+                x2="331.5"
+                y1="300"
+                y2="285"
+              />
+              <line
+                stroke="rgb(0,0,0)"
+                stroke-width="1"
+                x1="339.5"
+                x2="339.5"
+                y1="300"
+                y2="295"
+              />
+              <line
+                stroke="rgb(0,0,0)"
+                stroke-width="1"
+                x1="359.5"
+                x2="359.5"
+                y1="300"
+                y2="295"
+              />
+              <line
+                stroke="rgb(0,0,0)"
+                stroke-width="1"
+                x1="378.5"
+                x2="378.5"
+                y1="300"
+                y2="295"
+              />
+              <line
+                stroke="rgb(0,0,0)"
+                stroke-width="1"
+                x1="397.5"
+                x2="397.5"
+                y1="300"
+                y2="295"
+              />
+              <line
+                stroke="rgb(51,51,51)"
+                stroke-width="1"
+                x1="414.5"
+                x2="414.5"
                 y1="300"
                 y2="285"
               />
@@ -636,24 +700,32 @@ describe('<GraphSpending />', () => {
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="440.5"
-                x2="440.5"
+                x1="436.5"
+                x2="436.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="463.5"
-                x2="463.5"
+                x1="455.5"
+                x2="455.5"
                 y1="300"
                 y2="295"
               />
               <line
                 stroke="rgb(0,0,0)"
                 stroke-width="1"
-                x1="486.5"
-                x2="486.5"
+                x1="475.5"
+                x2="475.5"
+                y1="300"
+                y2="295"
+              />
+              <line
+                stroke="rgb(0,0,0)"
+                stroke-width="1"
+                x1="494.5"
+                x2="494.5"
                 y1="300"
                 y2="295"
               />
@@ -675,34 +747,14 @@ describe('<GraphSpending />', () => {
                 x="0.5"
                 y="285"
               >
-                Dec
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                transform="rotate(-30 101.5 285)"
-                x="101.5"
-                y="285"
-              >
-                Jan
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                transform="rotate(-30 203.5 285)"
-                x="203.5"
-                y="285"
-              >
                 Feb
               </text>
               <text
                 alignment-baseline="baseline"
                 font-family="Arial, Helvetica, sans-serif"
                 font-size="11"
-                transform="rotate(-30 299.5 285)"
-                x="299.5"
+                transform="rotate(-30 77.5 285)"
+                x="77.5"
                 y="285"
               >
                 Mar
@@ -711,11 +763,41 @@ describe('<GraphSpending />', () => {
                 alignment-baseline="baseline"
                 font-family="Arial, Helvetica, sans-serif"
                 font-size="11"
-                transform="rotate(-30 401.5 285)"
-                x="401.5"
+                transform="rotate(-30 162.5 285)"
+                x="162.5"
                 y="285"
               >
                 Apr
+              </text>
+              <text
+                alignment-baseline="baseline"
+                font-family="Arial, Helvetica, sans-serif"
+                font-size="11"
+                transform="rotate(-30 245.5 285)"
+                x="245.5"
+                y="285"
+              >
+                May
+              </text>
+              <text
+                alignment-baseline="baseline"
+                font-family="Arial, Helvetica, sans-serif"
+                font-size="11"
+                transform="rotate(-30 331.5 285)"
+                x="331.5"
+                y="285"
+              >
+                Jun
+              </text>
+              <text
+                alignment-baseline="baseline"
+                font-family="Arial, Helvetica, sans-serif"
+                font-size="11"
+                transform="rotate(-30 414.5 285)"
+                x="414.5"
+                y="285"
+              >
+                Jul
               </text>
               <text
                 alignment-baseline="baseline"
@@ -725,7 +807,7 @@ describe('<GraphSpending />', () => {
                 x="500.5"
                 y="285"
               >
-                May
+                Aug
               </text>
             </g>
           </g>
@@ -733,8 +815,8 @@ describe('<GraphSpending />', () => {
             <line
               stroke="rgb(51,51,51)"
               stroke-width="1"
-              x1="466.5"
-              x2="466.5"
+              x1="2237.5"
+              x2="2237.5"
               y1="300"
               y2="40"
             />
@@ -742,7 +824,7 @@ describe('<GraphSpending />', () => {
               color="rgb(0,0,0)"
               font-family="Arial, Helvetica, sans-serif"
               font-size="11"
-              x="466.5"
+              x="2237.5"
               y="40"
             >
               Now
@@ -752,31 +834,15 @@ describe('<GraphSpending />', () => {
         <g>
           <g>
             <path
-              d="M0,280.88745335605205 L6.964645005288263e-16,269.51332489691214  L-3.3,271.1 L0.0,266.3 L3.3,271.1 L0.0,269.5"
+              d="M0,284.21965317919074 L3.952230628091076e-15,219.67482881280569  L-4.3,221.8 L0.0,215.5 L4.3,221.8 L0.0,219.7"
               fill="rgb(0,204,51)"
               stroke="rgb(0,204,51)"
-              stroke-width="0.18429357967241816"
+              stroke-width="0.8538461538461538"
             />
           </g>
           <g>
             <path
-              d="M101.97368421052632,280.88745335605205 L101.97368421052632,205.4388505242385  L97.5,207.6 L102.0,201.0 L106.5,207.6 L102.0,205.4"
-              fill="rgb(0,204,51)"
-              stroke="rgb(0,204,51)"
-              stroke-width="1.005805247759681"
-            />
-          </g>
-          <g>
-            <path
-              d="M203.94736842105263,280.88745335605205 L203.94736842105263,278.5109344453027  L207.2,276.9 L203.9,281.7 L200.7,276.9 L203.9,278.5"
-              fill="rgb(204,51,0)"
-              stroke="rgb(204,51,0)"
-              stroke-width="0.15315751270263733"
-            />
-          </g>
-          <g>
-            <path
-              d="M299.3421052631579,280.88745335605205 L299.3421052631579,290.1  L306.8,286.5 L299.3,297.3 L291.8,286.5 L299.3,290.1"
+              d="M77.34806629834254,284.21965317919074 L77.34806629834254,290.1  L84.8,286.5 L77.3,297.3 L69.8,286.5 L77.3,290.1"
               fill="rgb(204,51,0)"
               stroke="rgb(204,51,0)"
               stroke-width="3"
@@ -784,15 +850,39 @@ describe('<GraphSpending />', () => {
           </g>
           <g>
             <path
-              d="M401.3157894736842,280.88745335605205 L401.3157894736842,270.94894097676877  L398.1,272.6 L401.3,267.7 L404.6,272.6 L401.3,270.9"
+              d="M162.98342541436463,284.21965317919074 L162.98342541436463,210.45587305469098  L158.5,212.6 L163.0,206.1 L167.4,212.6 L163.0,210.5"
               fill="rgb(0,204,51)"
               stroke="rgb(0,204,51)"
-              stroke-width="0.1658872584026354"
+              stroke-width="0.9703846153846154"
             />
           </g>
           <g>
             <path
-              d="M500,280.88745335605205 L500,49.900000000000006  L492.5,53.5 L500.0,42.7 L507.5,53.5 L500.0,49.9"
+              d="M245.85635359116023,284.21965317919074 L245.85635359116023,125.3859050689195  L239.8,128.3 L245.9,119.5 L251.9,128.3 L245.9,125.4"
+              fill="rgb(0,204,51)"
+              stroke="rgb(0,204,51)"
+              stroke-width="2.045769230769231"
+            />
+          </g>
+          <g>
+            <path
+              d="M331.49171270718233,284.21965317919074 L331.49171270718233,77.28303690529125  L324.5,80.6 L331.5,70.6 L338.5,80.6 L331.5,77.3"
+              fill="rgb(0,204,51)"
+              stroke="rgb(0,204,51)"
+              stroke-width="2.6538461538461537"
+            />
+          </g>
+          <g>
+            <path
+              d="M414.36464088397787,284.21965317919074 L414.36464088397787,122.92143174744331  L408.2,125.9 L414.4,117.0 L420.5,125.9 L414.4,122.9"
+              fill="rgb(0,204,51)"
+              stroke="rgb(0,204,51)"
+              stroke-width="2.0769230769230766"
+            />
+          </g>
+          <g>
+            <path
+              d="M500,284.21965317919074 L500,49.900000000000006  L492.5,53.5 L500.0,42.7 L507.5,53.5 L500.0,49.9"
               fill="rgb(0,204,51)"
               stroke="rgb(0,204,51)"
               stroke-width="3"
@@ -801,13 +891,13 @@ describe('<GraphSpending />', () => {
         </g>
         <g>
           <path
-            d="M0.0,267.0 Q66,268 102.0,267.5 C138,267 169,269 203.9,261.9 C239,254 267,222 299.3,225.0 C336,228 363,271 401.3,279.9 Q434,287 500.0,271.6"
+            d="M0,165.8670520231214 Q54,82 77.3,90.0 C111,102 124,193 163.0,222.3 C183,238 220,207 245.9,215.9 C279,228 298,271 331.5,284.2 C357,295 385,284 414.4,284.2 Q444,284 500.0,284.2"
             fill="none"
             stroke="rgb(0,51,153)"
             stroke-width="2"
           />
           <path
-            d="M0.0,267.0 Q66,268 102.0,267.2 C138,267 168,268 203.9,265.5 C237,263 266,256 299.3,255.3 C335,254 366,259 401.3,260.3 Q436,261 500.0,262.1"
+            d="M0,165.8670520231214 Q50,129 77.3,127.9 C107,127 132,151 163.0,159.4 C191,167 217,167 245.9,173.5 C276,180 301,189 331.5,195.7 C360,202 386,205 414.4,210.4 Q444,217 500.0,230.1"
             fill="none"
             stroke="rgb(153,153,153)"
             stroke-dasharray="3,5"
@@ -854,13 +944,15 @@ describe('<GraphSpending />', () => {
             <rect
               fill="rgba(255,255,255,0.5)"
               height="260"
-              width="33.924943652534125"
-              x="466.0750563474659"
+              width="49016.57455366278"
+              x="-48516.57455366278"
               y="40"
             />
           </g>
         </g>
       </svg>
     `);
+
+    clock.restore();
   });
 });

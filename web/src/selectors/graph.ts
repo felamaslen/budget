@@ -3,8 +3,9 @@ import getUnixTime from 'date-fns/getUnixTime';
 
 import { State } from '~client/reducers';
 import { Target, CostProcessed } from '~client/types/overview';
-import { getProcessedCost } from '~client/selectors/overview';
-import { getFutureMonths, getMonthDates } from '~client/selectors/overview/common';
+import { GRAPH_WIDTH } from '~client/constants/graph';
+import { getProcessedCost, getFutureMonths, getMonthDates } from './overview';
+import { getWindowWidth } from './app';
 
 const targetPeriods = [
   { last: 3, months: 12, tag: '1y' },
@@ -42,4 +43,8 @@ export const getTargets = createSelector<State, CostProcessed, number, Date[], T
       };
     });
   },
+);
+
+export const getGraphWidth = createSelector(getWindowWidth, windowWidth =>
+  Math.min(windowWidth, GRAPH_WIDTH),
 );

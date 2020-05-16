@@ -78,10 +78,12 @@ export const isConstantColor = (color: LineColor): color is string => typeof col
 export type Line = {
   key: string;
   data: Data;
+  stack?: Data;
   secondary?: boolean;
   color: LineColor;
   smooth?: boolean;
   fill?: boolean;
+  dashed?: boolean;
   movingAverage?: number;
   arrows?: boolean;
 } & PathProps;

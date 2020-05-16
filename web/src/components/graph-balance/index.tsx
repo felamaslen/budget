@@ -1,3 +1,5 @@
+import { rgba as rgbaNormal } from 'polished';
+import { useSelector } from 'react-redux';
 import React, { useState, useMemo, useCallback } from 'react';
 
 import {
@@ -5,9 +7,9 @@ import {
   COLOR_BALANCE_PREDICTED,
   COLOR_BALANCE_STOCKS,
 } from '~client/constants/colors';
-import { graphOverviewHeightMobile } from '~client/styled/variables';
+import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
 import { rgba } from '~client/modules/color';
-import { leftPad } from '~client/modules/data';
+import { leftPad, rightPad } from '~client/modules/data';
 import {
   GraphCashFlow,
   Props as GraphCashFlowProps,
@@ -16,50 +18,116 @@ import {
 import { Key } from '~client/components/graph-balance/key';
 import { Targets } from '~client/components/graph-balance/targets';
 import { AfterCanvas } from '~client/components/graph-balance/after-canvas';
+import { colors as netWorthColors } from '~client/components/net-worth-graph/styles';
+import {
+  getStartDate,
+  getFutureMonths,
+  getProcessedCost,
+  getTargets,
+  getNetWorthSummaryOld,
+  getNetWorthTable,
+  NetWorthSummaryOld,
+} from '~client/selectors';
 import { Page } from '~client/types/app';
 import { Point, Line, Data, BasicProps } from '~client/types/graph';
 import { Target, CostProcessed } from '~client/types/overview';
+import { TableRow as NetWorthRow, Aggregate } from '~client/types/net-worth';
 
 const colorBalance: [string, string] = [rgba(COLOR_BALANCE_PREDICTED), rgba(COLOR_BALANCE_ACTUAL)];
 const colorBalanceStocks = rgba(COLOR_BALANCE_STOCKS);
+const colorBalanceLockedCash = rgbaNormal(colorBalanceStocks, 0.3);
 
 type BalanceData = {
   balance: number[];
+  options: number[];
+  optionsStartIndex: number;
   funds: number[];
   oldOffset: number;
+  cashOther: number[];
+  pension: number[];
 };
 
 type CostProps = Pick<CostProcessed, Page.funds | 'fundsOld' | 'netWorthCombined'>;
 
+const fillAggregate = (
+  combinedLength: number,
+  netWorth: NetWorthRow[],
+  key: Aggregate,
+  rightFill = true,
+): number[] => {
+  const presentData = netWorth.map(({ aggregate }) => aggregate[key]);
+  return rightFill ? rightPad(presentData, combinedLength) : presentData;
+};
+
 function getData(
   netWorthCombined: number[],
-  netWorthOld: number[],
+  netWorthOldMain: number[],
+  netWorthOldOptions: number[],
+  netWorth: NetWorthRow[],
   fundsCurrent: number[],
   fundsOld: number[],
   showAll: boolean,
 ): BalanceData {
+  const currentOptions = netWorth.map(({ options }) => options);
+  const optionsStartIndex = currentOptions.findIndex(value => value > 0);
+  const options = rightPad(currentOptions, netWorthCombined.length).map(
+    (value, index) => value + netWorthCombined[index],
+  );
+
+  // value of "stocks" section that isn't accounted for by stock value
+  const ISACash = fillAggregate(netWorthCombined.length, netWorth, Aggregate.stocks, false).map(
+    (value, index) => value - fundsCurrent[index],
+  );
+
+  const lastISACash = ISACash[ISACash.length - 1] ?? 0;
+  const cashOther = fillAggregate(netWorthCombined.length, netWorth, Aggregate.cashOther).map(
+    (value, index) => value + (ISACash[index] ?? lastISACash),
+  );
+
+  const pension = fillAggregate(netWorthCombined.length, netWorth, Aggregate.pension);
+
+  const withoutPension = netWorthCombined.map((value, index) => value - pension[index]);
+
   if (showAll) {
-    const oldOffset = Math.max(fundsOld.length, netWorthOld.length);
+    const oldOffset = Math.max(fundsOld.length, netWorthOldMain.length, netWorthOldOptions.length);
     const totalLength = oldOffset + netWorthCombined.length;
+    const balance = leftPad(netWorthOldMain.concat(withoutPension), totalLength);
+
+    const fundsOldPadded = leftPad(fundsOld, oldOffset);
+
+    const optionsFull = leftPad(
+      netWorthOldOptions.map((value, index) => value + netWorthOldMain[index]),
+      oldOffset,
+    ).concat(options);
 
     return {
-      balance: leftPad(netWorthOld.concat(netWorthCombined), totalLength),
-      funds: leftPad(fundsOld.concat(fundsCurrent), totalLength),
+      balance,
+      options: optionsFull,
+      optionsStartIndex: netWorthOldOptions.concat(currentOptions).findIndex(value => value > 0),
+      funds: fundsOldPadded.concat(fundsCurrent),
       oldOffset,
+      cashOther: leftPad(cashOther, totalLength),
+      pension: leftPad(pension, totalLength),
     };
   }
 
   return {
-    balance: netWorthCombined,
+    balance: withoutPension,
+    options,
+    optionsStartIndex,
     funds: fundsCurrent,
     oldOffset: 0,
+    cashOther,
+    pension,
   };
 }
 
 type RawData = {
   startDate: Date;
   cost: CostProps;
-  netWorthOld: number[];
+  netWorthOldMain: number[];
+  netWorthOldOptions: number[];
+  netWorth: NetWorthRow[];
   showAll: boolean;
   futureMonths: number;
 };
@@ -67,13 +135,17 @@ type RawData = {
 function processData({
   startDate,
   cost: { netWorthCombined, funds: fundsCurrent, fundsOld },
-  netWorthOld,
+  netWorthOldMain,
+  netWorthOldOptions,
+  netWorth,
   showAll,
   futureMonths,
 }: RawData): Line[] {
-  const { balance, funds, oldOffset } = getData(
+  const { balance, options, optionsStartIndex, funds, oldOffset, cashOther, pension } = getData(
     netWorthCombined,
-    netWorthOld,
+    netWorthOldMain,
+    netWorthOldOptions,
+    netWorth,
     fundsCurrent,
     fundsOld,
     showAll,
@@ -81,22 +153,50 @@ function processData({
 
   const futureKey = oldOffset + netWorthCombined.length - futureMonths;
 
-  const dataBalance = getValuesWithTime(balance, {
-    oldOffset,
-    breakAtToday: false,
-    startDate,
-  });
+  const opts = { oldOffset, startDate };
+
+  const dataBalance = getValuesWithTime(balance, opts);
+  const dataOptions =
+    optionsStartIndex === -1
+      ? []
+      : getValuesWithTime(options, opts).slice(Math.max(0, optionsStartIndex - 1));
+  const dataCashOther = getValuesWithTime(cashOther, opts);
+  const dataPension = getValuesWithTime(pension, { oldOffset, startDate });
 
   const dataFunds: Data = funds.map((value, index) => [dataBalance[index][0], value]);
 
   return [
     {
+      key: 'options',
+      data: dataOptions,
+      fill: false,
+      smooth: true,
+      color: netWorthColors.options,
+      dashed: true,
+      strokeWidth: 1,
+    },
+    {
+      key: 'pension',
+      data: dataPension,
+      stack: dataBalance,
+      fill: true,
+      smooth: true,
+      color: rgbaNormal(colors.netWorth.aggregate[Aggregate.pension], 0.5),
+    },
+    {
       key: 'balance',
       data: dataBalance,
       fill: false,
       smooth: true,
-      movingAverage: 12,
-      color: (point: Point, index = 0): string => colorBalance[index < futureKey - 1 ? 1 : 0],
+      color: (_: Point, index = 0): string => colorBalance[index < futureKey - 1 ? 1 : 0],
+    },
+    {
+      key: 'cash-locked',
+      data: dataCashOther,
+      stack: dataFunds,
+      fill: true,
+      smooth: true,
+      color: colorBalanceLockedCash,
     },
     {
       key: 'funds',
@@ -132,35 +232,32 @@ function makeAfterLines({
   return AfterLines;
 }
 
-export type Props = {
-  startDate: Date;
-  futureMonths: number;
-  cost: CostProps;
-  netWorthOld: number[];
-  targets: Target[];
-} & Omit<GraphCashFlowProps, 'name' | 'lines'>;
+export type Props = { isMobile: boolean };
 
-export const GraphBalance: React.FC<Props> = ({
-  startDate,
-  futureMonths,
-  now,
-  graphWidth,
-  cost,
-  netWorthOld,
-  targets,
-  isMobile,
-}) => {
+const isNetWorthSummaryOldEqual = (left: NetWorthSummaryOld, right: NetWorthSummaryOld): boolean =>
+  left.main === right.main && left.options === right.options;
+
+export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
+  const startDate = useSelector(getStartDate);
+  const netWorthOld = useSelector(getNetWorthSummaryOld, isNetWorthSummaryOldEqual);
+  const netWorth = useSelector(getNetWorthTable);
+  const futureMonths = useSelector(getFutureMonths);
+  const cost = useSelector(getProcessedCost);
+  const targets = useSelector(getTargets);
+
   const [showAll, setShowAll] = useState(false);
   const lines = useMemo(
     () =>
       processData({
         startDate,
         cost,
-        netWorthOld,
+        netWorthOldMain: netWorthOld.main,
+        netWorthOldOptions: netWorthOld.options,
+        netWorth,
         showAll,
         futureMonths,
       }),
-    [startDate, cost, netWorthOld, showAll, futureMonths],
+    [startDate, cost, netWorthOld.main, netWorthOld.options, netWorth, showAll, futureMonths],
   );
 
   const afterLines = useMemo(
@@ -179,9 +276,7 @@ export const GraphBalance: React.FC<Props> = ({
 
   const graphProps: GraphCashFlowProps = {
     name: 'balance',
-    now,
     lines,
-    graphWidth,
     afterLines,
     after,
   };

@@ -725,14 +725,28 @@ describe('Server - integration tests (net-worth)', () => {
         expect.assertions(2);
         const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
 
-        const entryValueOld =
-          5871 + Math.round(2040.76 * 0.113 * 100) + Math.round(1324 * 19.27) - 15000;
+        const entryValueOld = 5871 + Math.round(2040.76 * 0.113 * 100) - 15000;
         const entryValueOlder = 62000 * 0.113 * 100 - 15000;
 
         expect(res.status).toBe(200);
         expect(res.body).toStrictEqual(
           expect.objectContaining({
             old: [entryValueOlder, entryValueOld],
+          }),
+        );
+      });
+
+      it('should put old option values in a separate array', async () => {
+        expect.assertions(2);
+        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
+
+        const entryOptionValueOld = Math.round(1324 * 19.27);
+        const entryOptionValueOlder = 0;
+
+        expect(res.status).toBe(200);
+        expect(res.body).toStrictEqual(
+          expect.objectContaining({
+            oldOptions: [entryOptionValueOlder, entryOptionValueOld],
           }),
         );
       });

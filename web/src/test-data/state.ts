@@ -49,6 +49,13 @@ export const testState: State = {
         isOption: false,
       },
       {
+        id: 'real-option-category-id',
+        type: 'asset',
+        category: 'Options',
+        color: '#0a9cff',
+        isOption: true,
+      },
+      {
         id: 'real-mortgage-category-id',
         type: 'liability',
         category: 'Mortgage',
@@ -70,6 +77,13 @@ export const testState: State = {
         subcategory: 'My wallet',
         hasCreditLimit: null,
         opacity: 0.2,
+      },
+      {
+        id: 'real-option-subcategory-id',
+        categoryId: 'real-option-category-id',
+        subcategory: 'Some share',
+        hasCreditLimit: null,
+        opacity: 0.9,
       },
       {
         id: 'real-bank-subcategory-id',
@@ -153,6 +167,17 @@ export const testState: State = {
             subcategory: 'real-credit-card-subcategory-id',
             value: -21939,
           },
+          {
+            id: 'value-id-b5',
+            subcategory: 'real-option-subcategory-id',
+            value: [
+              {
+                units: 103,
+                strikePrice: 77.65,
+                marketPrice: 95.57,
+              },
+            ],
+          },
         ],
         creditLimit: [
           {
@@ -167,6 +192,7 @@ export const testState: State = {
       },
     ],
     old: [],
+    oldOptions: [],
   },
   analysis: {
     period: AnalysisPeriod.year,

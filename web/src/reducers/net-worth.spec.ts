@@ -637,6 +637,7 @@ describe('Net worth reducer', () => {
               },
             ],
             old: [145, 210],
+            oldOptions: [1330, 19],
           },
         },
       },
@@ -689,6 +690,7 @@ describe('Net worth reducer', () => {
             },
           ],
           old: [145, 210],
+          oldOptions: [1330, 19],
         }),
       );
     });
@@ -721,7 +723,6 @@ describe('Net worth reducer', () => {
                   currencies: [],
                 },
               ],
-              old: [],
             },
           },
         },
@@ -750,6 +751,7 @@ describe('Net worth reducer', () => {
             },
           ],
           old: [],
+          oldOptions: [],
         }),
       );
     });

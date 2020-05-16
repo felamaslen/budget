@@ -39,6 +39,7 @@ import { IDENTITY } from '~client/modules/data';
 
 type ExtraState = {
   old: number[];
+  oldOptions: number[];
 };
 
 export type State = {
@@ -52,6 +53,7 @@ export const initialState: State = {
   subcategories: [],
   entries: [],
   old: [],
+  oldOptions: [],
 };
 
 const removeDeletedSubcategories = (state: State): State => ({
@@ -149,7 +151,8 @@ const onRead = (
       ...rest,
     }),
   ),
-  old: entries.data.old || [],
+  old: entries.data.old ?? [],
+  oldOptions: entries.data.oldOptions ?? [],
 });
 
 type Response = { id: string };

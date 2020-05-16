@@ -84,6 +84,14 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
   const dataNetWorth = React.useMemo<Line[]>(
     () => [
       {
+        key: 'options',
+        data: table.map(({ date, assets, options }) => [getUnixTime(date), assets + options]),
+        color: Styled.colors.options,
+        smooth: true,
+        dashed: true,
+        strokeWidth: 1,
+      },
+      {
         key: 'assets',
         data: table.map(({ date, assets }) => [getUnixTime(date), assets]),
         color: Styled.colors.assets,
@@ -119,7 +127,9 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ table }) => {
     <>
       <Styled.GraphKey>
         <ul>
-          <Styled.KeyAssets>&mdash; Assets</Styled.KeyAssets>
+          <Styled.KeyAssets>
+            &mdash; Assets (<Styled.KeyOptions>incl. options</Styled.KeyOptions>)
+          </Styled.KeyAssets>
           <Styled.KeyLiabilities>&mdash; Liabilities</Styled.KeyLiabilities>
           <Styled.KeyExpenses>&mdash; Expenses</Styled.KeyExpenses>
         </ul>
