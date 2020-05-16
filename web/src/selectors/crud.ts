@@ -1,8 +1,8 @@
 import { compose } from '@typed/compose';
 
-import { RequestType, WithCrud, Request } from '~client/types/crud';
+import { RequestType, WithCrud, Request, IdKey } from '~client/types/crud';
 
-const filterByType = (type: RequestType, method: Request['method'], idKey: 'id' | 'fakeId') => <
+const filterByType = (type: RequestType, method: Request['method'], idKey: IdKey) => <
   I extends { id: string }
 >(
   route: string,

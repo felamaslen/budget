@@ -1,106 +1,175 @@
-import db from '~api/modules/db';
-import { catchAsyncErrors } from '~api/modules/error-handling';
+import { sql, DatabasePoolConnectionType } from 'slonik';
+
+import { authDbRoute } from '~api/middleware/request';
 import { formatDate, fetchById } from './read';
-import { ComplexValueItem, ValueObject, ValueRow, FXValueRow } from './types';
+import {
+  Value,
+  CreditLimit,
+  Currency,
+  ComplexValue,
+  ComplexValueItem,
+  ValueObject,
+  FXValue,
+  OptionValue,
+} from './types';
 
 const getSimpleValues = (value: ComplexValueItem): value is number => typeof value === 'number';
-const getComplexValues = (value: ComplexValueItem): value is Exclude<ComplexValueItem, number> =>
-  typeof value !== 'number';
+const getComplexValues = (value?: Value | ComplexValue): value is ComplexValue =>
+  !!value && Array.isArray(value);
+const getFxValues = (value: ComplexValueItem): value is FXValue =>
+  typeof value !== 'number' && Reflect.has(value, 'currency');
+const getOptionValues = (value: ComplexValueItem): value is OptionValue =>
+  typeof value !== 'number' && Reflect.has(value, 'strikePrice');
 
-function getValueRow(netWorthId: string): (value: ValueObject) => ValueRow {
-  return ({ subcategory, skip = null, value }): ValueRow => {
-    const base = {
-      net_worth_id: netWorthId,
-      skip,
-      subcategory,
-    };
+function getRowValue(value: ValueObject['value']): number | null {
+  if (!(value && Array.isArray(value))) {
+    return value;
+  }
 
-    if (!(value && Array.isArray(value))) {
-      return { ...base, value };
-    }
+  const simpleValues: number[] = value.filter(getSimpleValues);
+  if (!simpleValues.length) {
+    return null;
+  }
 
-    const simpleValues: number[] = value.filter(getSimpleValues);
-
-    if (!simpleValues.length) {
-      return { ...base, value: null };
-    }
-
-    return {
-      ...base,
-      value: simpleValues.reduce((sum, item) => sum + item, 0),
-    };
-  };
+  return simpleValues.reduce((sum, item) => sum + item, 0);
 }
 
-function getFxValueRow(valueIds: string[]) {
-  return (last: FXValueRow[], { value }: ValueObject, index: number): FXValueRow[] => {
-    if (!(value && Array.isArray(value))) {
-      return last;
-    }
+const getValueRow = (netWorthId: string) => ({
+  subcategory,
+  skip = null,
+  value,
+}: ValueObject): [string, boolean | null, string, number | null] => [
+  netWorthId,
+  skip,
+  subcategory,
+  getRowValue(value),
+];
 
-    const valueId = valueIds[index];
+type WithValueId<V> = V & { valueId: string };
 
-    return [
-      ...last,
-      ...value.filter(getComplexValues).map(({ value: fxValue, currency }) => ({
-        values_id: valueId,
-        value: fxValue,
-        currency,
-      })),
-    ];
-  };
-}
+const filterComplexValues = <V extends Exclude<ComplexValueItem, number>>(
+  valueIds: string[],
+  filterItems: (value: ComplexValueItem) => value is V,
+  values: ValueObject[],
+): WithValueId<V>[] =>
+  values
+    .map(({ value }: ValueObject): Value => value)
+    .reduce(
+      (last: WithValueId<V>[], items: Value, index: number): WithValueId<V>[] =>
+        getComplexValues(items)
+          ? [
+              ...last,
+              ...items
+                .filter(filterItems)
+                .map((item: V) => ({ ...item, valueId: valueIds[index] })),
+            ]
+          : last,
+      [],
+    );
 
-export async function insertValues(netWorthId: string, values: ValueObject[] = []): Promise<void> {
+export const insertValues = async (
+  db: DatabasePoolConnectionType,
+  netWorthId: string,
+  values: ValueObject[] = [],
+): Promise<void> => {
   if (!values.length) {
     return;
   }
 
-  const valuesRows: ValueRow[] = values.map(getValueRow(netWorthId));
+  const valuesRows = values.map(getValueRow(netWorthId));
 
-  const valueIds: string[] = await db('net_worth_values')
-    .insert(valuesRows)
-    .returning('id');
+  const { rows: insertRows } = await db.query<{ id: string }>(sql`
+      INSERT INTO net_worth_values (net_worth_id, skip, subcategory, value)
+      SELECT * FROM ${sql.unnest(valuesRows, ['uuid', 'bool', 'uuid', 'int4'])}
+      RETURNING id
+    `);
 
-  const fxValuesRows: FXValueRow[] = values.reduce(getFxValueRow(valueIds), []);
+  const valueIds: string[] = insertRows.map(({ id }) => id);
 
-  await db('net_worth_fx_values').insert(fxValuesRows);
-}
+  const fxValuesRows = filterComplexValues<FXValue>(
+    valueIds,
+    getFxValues,
+    values,
+  ).map(({ valueId, value, currency }) => [valueId, value, currency]);
 
-function insertWithNetWorthId(table: string) {
-  return async (netWorthId: string, rows: object[] = []): Promise<void> => {
-    if (!rows.length) {
-      return;
-    }
+  const optionValuesRows = filterComplexValues<OptionValue>(
+    valueIds,
+    getOptionValues,
+    values,
+  ).map(({ valueId, units, strikePrice, marketPrice }) => [
+    valueId,
+    units,
+    strikePrice,
+    marketPrice,
+  ]);
 
-    const rowsWithId = rows.map(row => ({ net_worth_id: netWorthId, ...row }));
+  await Promise.all([
+    fxValuesRows.length
+      ? db.query(sql`
+          INSERT INTO net_worth_fx_values (values_id, value, currency)
+          SELECT * FROM ${sql.unnest(fxValuesRows, ['uuid', 'float4', 'varchar'])}
+        `)
+      : null,
+    optionValuesRows.length
+      ? db.query(sql`
+          INSERT INTO net_worth_option_values (values_id, units, strike_price, market_price)
+          SELECT * FROM ${sql.unnest(optionValuesRows, ['uuid', 'float4', 'float4', 'float4'])}
+        `)
+      : null,
+  ]);
+};
 
-    await db.insert(rowsWithId).into(table);
-  };
-}
+const insertWithNetWorthId = <R extends {}>(
+  table: string,
+  keys: (keyof R)[],
+  types: string[],
+) => async (db: DatabasePoolConnectionType, netWorthId: string, rows: R[] = []): Promise<void> => {
+  if (!rows.length) {
+    return;
+  }
 
-export const insertCreditLimits = insertWithNetWorthId('net_worth_credit_limit');
+  const rowsWithId = rows.map(row => [netWorthId, ...keys.map(key => row[key])]);
+  const columns = [
+    sql.identifier(['net_worth_id']),
+    ...keys.map(key => sql.identifier([key as string])),
+  ];
 
-export const insertCurrencies = insertWithNetWorthId('net_worth_currencies');
+  await db.query(sql`
+    INSERT INTO ${sql.identifier([table])} (${sql.join(columns, sql`, `)})
+    SELECT * FROM ${sql.unnest(rowsWithId, ['uuid', ...types])}
+  `);
+};
 
-export const onCreate = catchAsyncErrors(async (req, res) => {
+export const insertCreditLimits = insertWithNetWorthId<CreditLimit>(
+  'net_worth_credit_limit',
+  ['subcategory', 'value'],
+  ['uuid', 'float4'],
+);
+
+export const insertCurrencies = insertWithNetWorthId<Currency>(
+  'net_worth_currencies',
+  ['currency', 'rate'],
+  ['varchar', 'float8'],
+);
+
+export const onCreate = authDbRoute(async (db, req, res) => {
   const { date, values, creditLimit, currencies } = req.body;
 
-  const uid = req.user?.uid;
+  const uid = req.user.uid;
 
-  const [netWorthId] = await db
-    .insert({
-      uid,
-      date: formatDate(date),
-    })
-    .returning('id')
-    .into('net_worth');
+  const {
+    rows: [{ id: netWorthId }],
+  } = await db.query(sql`
+    INSERT INTO net_worth (uid, date)
+    VALUES (${uid}, ${formatDate(date)})
+    RETURNING id
+  `);
 
-  await insertValues(netWorthId, values);
-  await insertCreditLimits(netWorthId, creditLimit);
-  await insertCurrencies(netWorthId, currencies);
+  await insertValues(db, netWorthId, values);
+  await insertCreditLimits(db, netWorthId, creditLimit);
+  await insertCurrencies(db, netWorthId, currencies);
 
-  const netWorth = await fetchById(netWorthId, uid);
+  const netWorth = await fetchById(db, netWorthId, uid);
 
   res.status(201).json(netWorth);
 });

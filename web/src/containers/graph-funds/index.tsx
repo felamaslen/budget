@@ -170,7 +170,7 @@ const GraphFunds: React.FC<Props> = ({ isMobile }) => {
 
   const [mode, setMode] = useState<Mode>(modeList[0]);
   const [toggleList, setToggleList] = useState<{ [id: string]: boolean | null }>({});
-  const [numFundItems, setNumFundItems] = useState(0);
+  const [numFundItems, setNumFundItems] = useState<number>(0);
 
   useEffect(() => {
     if (fundItems.length !== numFundItems) {

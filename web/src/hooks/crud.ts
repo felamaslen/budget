@@ -1,4 +1,4 @@
-import { Action } from 'redux';
+import { Action } from 'create-reducer-object';
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 

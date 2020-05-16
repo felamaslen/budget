@@ -6,6 +6,7 @@ import { RequestType, WithCrud, Create } from '~client/types/crud';
 import { TransactionRaw as TransactionRawNew, Transaction } from '~client/types/funds';
 import { Average } from '~client/constants';
 import { PeriodObject } from '~client/constants/graph';
+import { IdMap } from '~client/types';
 import { Data as Line } from '~client/types/graph';
 
 type TransactionRaw = Omit<TransactionRawNew, 'date'> & {
@@ -247,3 +248,12 @@ export const leftPad = (array: number[], length: number): number[] =>
 
 export const withoutDeleted = <T>(items: WithCrud<T>[]): WithCrud<T>[] =>
   (items || []).filter(({ __optimistic }) => __optimistic !== RequestType.delete);
+
+export const toIdMap = <V extends { id: string }>(items: V[]): IdMap<V> =>
+  items.reduce(
+    (last, item) => ({
+      ...last,
+      [item.id]: item,
+    }),
+    {},
+  );

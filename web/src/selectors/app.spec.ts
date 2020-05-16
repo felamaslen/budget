@@ -9,6 +9,7 @@ describe('App selectors', () => {
         getLoggedIn({
           ...testState,
           api: {
+            ...testState.api,
             key: 'some-api-key',
           },
           login: {
@@ -24,6 +25,7 @@ describe('App selectors', () => {
         getLoggedIn({
           ...testState,
           api: {
+            ...testState.api,
             key: null,
           },
           login: {
@@ -39,6 +41,7 @@ describe('App selectors', () => {
         getLoggedIn({
           ...testState,
           api: {
+            ...testState.api,
             key: 'some-api-key',
           },
           login: {

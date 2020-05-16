@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
 
 import Navbar from '.';
+import { Page } from '~client/types/app';
 
 describe('<Navbar />', () => {
   const props = {
@@ -17,19 +18,18 @@ describe('<Navbar />', () => {
     );
   };
 
-  const pageCases = [
-    ['overview', '/'],
-    ['analysis', '/analysis'],
-    ['funds', '/funds'],
-    ['income', '/income'],
-    ['bills', '/bills'],
-    ['food', '/food'],
-    ['general', '/general'],
-    ['holiday', '/holiday'],
-    ['social', '/social'],
-  ];
-
-  it.each(pageCases)('should render a button for the %s page', async (page, path) => {
+  it.each`
+    page             | path
+    ${Page.overview} | ${'/'}
+    ${Page.analysis} | ${'/analysis'}
+    ${Page.funds}    | ${'/funds'}
+    ${Page.income}   | ${'/income'}
+    ${Page.bills}    | ${'/bills'}
+    ${Page.food}     | ${'/food'}
+    ${Page.general}  | ${'/general'}
+    ${Page.holiday}  | ${'/holiday'}
+    ${Page.social}   | ${'/social'}
+  `('should render a button for the $page page', async ({ page, path }) => {
     expect.assertions(2);
     const { findByText } = getContainer();
 
@@ -40,9 +40,9 @@ describe('<Navbar />', () => {
 
   it('should render a logout button', async () => {
     expect.assertions(2);
-    const { findByText } = getContainer();
+    const { getByText } = getContainer();
 
-    const link = (await findByText('Log out')) as HTMLButtonElement;
+    const link = getByText('Log out') as HTMLAnchorElement;
 
     expect(link).toBeInTheDocument();
 

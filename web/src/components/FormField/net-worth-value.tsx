@@ -1,12 +1,21 @@
-import React, { useReducer, useState, useCallback, useMemo, useEffect } from 'react';
-import { replaceAtIndex } from 'replace-array';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { replaceAtIndex, removeAtIndex } from 'replace-array';
 
-import { Value, Currency, isComplex, isFX } from '~client/types/net-worth';
+import {
+  Value,
+  Currency,
+  isComplex,
+  isFX,
+  isOption,
+  OptionValue,
+  FXValue,
+} from '~client/types/net-worth';
 import { ButtonDelete, ButtonAdd } from '~client/styled/shared/button';
 import FormFieldCost from '~client/components/FormField/cost';
 import FormFieldNumber from '~client/components/FormField/number';
 import FormFieldTickbox from '~client/components/FormField/tickbox';
 import FormFieldSelect, { Options } from '~client/components/FormField/select';
+import { NULL } from '~client/modules/data';
 
 import * as Styled from './styles';
 
@@ -31,9 +40,7 @@ const FormFieldWithCurrency: React.FC<PropsWithCurrency> = ({
   value,
   currency,
   currencyOptions,
-  onChange = (): void => {
-    // do nothing
-  },
+  onChange = NULL,
   onRemove,
   onAdd,
 }) => {
@@ -68,7 +75,7 @@ const FormFieldWithCurrency: React.FC<PropsWithCurrency> = ({
   }, [onAdd, newValue, newCurrency]);
 
   return (
-    <Styled.NetWorthValueComplex add={add}>
+    <Styled.NetWorthValueFX add={add}>
       <FormFieldNumber value={newValue} onChange={setNewValue} />
       <FormFieldSelect
         item="currency"
@@ -78,159 +85,115 @@ const FormFieldWithCurrency: React.FC<PropsWithCurrency> = ({
       />
       {onRemove && <ButtonDelete onClick={onRemoveCallback}>&minus;</ButtonDelete>}
       {onAdd && <ButtonAdd onClick={onAddCallback}>+</ButtonAdd>}
-    </Styled.NetWorthValueComplex>
+    </Styled.NetWorthValueFX>
   );
-};
-
-enum ActionType {
-  ComplexToggled,
-  ValueSet,
-}
-
-type ActionComplexToggled = {
-  type: ActionType.ComplexToggled;
-};
-
-type ActionValueSet = {
-  type: ActionType.ValueSet;
-  value: Value;
-};
-
-type Action = ActionComplexToggled | ActionValueSet;
-
-type State = {
-  complex: boolean;
-  otherValue: Value;
-  value: Value;
-};
-
-type Reducer = (state: State, action: Action) => State;
-
-const reducer: Reducer = (state, action): State => {
-  if (action.type === ActionType.ComplexToggled) {
-    return {
-      ...state,
-      complex: !state.complex,
-      otherValue: state.value,
-      value: state.otherValue,
-    };
-  }
-  if (action.type === ActionType.ValueSet) {
-    return { ...state, value: action.value };
-  }
-
-  return state;
 };
 
 export type Props = {
   value: Value;
+  isOption?: boolean;
   onChange: (value: Value) => void;
-  currencies: Currency[];
+  currencies: Omit<Currency, 'id'>[];
 };
 
-const FormFieldNetWorthValue: React.FC<Props> = ({ value: initialValue, onChange, currencies }) => {
-  const onChangeTruthy = useCallback(
-    (newValue?: Value): void => {
-      if (newValue) {
-        onChange(newValue);
-      }
-    },
-    [onChange],
-  );
+const coerceSimpleFXValue = (value: Value): number | FXValue[] => {
+  if (isComplex(value) && value.every(isFX)) {
+    return value as FXValue[];
+  }
+  return isComplex(value) ? 0 : value;
+};
 
-  const [{ value, complex }, dispatch] = useReducer<Reducer>(reducer, {
-    complex: isComplex(initialValue),
-    otherValue: isComplex(initialValue) ? 0 : [],
-    value: initialValue,
+type State = {
+  simpleValue: number;
+  fxValue: FXValue[];
+  selected: 'simpleValue' | 'fxValue';
+};
+
+const FormFieldSimpleFX: React.FC<Omit<Props, 'isOption'>> = ({
+  value: initialValue,
+  onChange,
+  currencies,
+}) => {
+  const initialValueCoerced = useMemo(() => coerceSimpleFXValue(initialValue), [initialValue]);
+
+  const [{ simpleValue, fxValue, selected }, setState] = useState<State>({
+    simpleValue: isComplex(initialValueCoerced) ? 0 : initialValueCoerced,
+    fxValue: isComplex(initialValueCoerced) ? initialValueCoerced : [],
+    selected: isComplex(initialValueCoerced) ? 'fxValue' : 'simpleValue',
   });
 
-  const toggleComplex = useCallback(() => {
-    dispatch({ type: ActionType.ComplexToggled });
-  }, []);
+  const toggleFX = useCallback(
+    () =>
+      setState(last => ({
+        ...last,
+        selected: last.selected === 'fxValue' ? 'simpleValue' : 'fxValue',
+      })),
+    [],
+  );
 
   useEffect(() => {
-    if (complex !== isComplex(value) && value !== initialValue) {
-      onChangeTruthy(value);
-    }
-  }, [onChangeTruthy, complex, value, initialValue]);
-
-  useEffect(() => {
-    dispatch({ type: ActionType.ValueSet, value: initialValue });
-  }, [initialValue]);
+    setState(last => ({
+      ...last,
+      simpleValue: isComplex(initialValueCoerced) ? last.simpleValue : initialValueCoerced,
+      fxValue: isComplex(initialValueCoerced) ? initialValueCoerced : last.fxValue,
+      selected: isComplex(initialValueCoerced) ? 'fxValue' : 'simpleValue',
+    }));
+  }, [initialValueCoerced]);
 
   const currencyOptions = useMemo(() => currencies.map(({ currency }) => currency), [currencies]);
 
   const otherCurrencyOptions = useMemo<string[]>(() => {
-    if (!isComplex(value)) {
+    if (selected === 'simpleValue') {
       return [];
     }
 
-    return currencyOptions.filter(
-      option => !value.filter(isFX).some(({ currency }) => currency === option),
-    );
-  }, [currencyOptions, value]);
+    return currencyOptions.filter(option => !fxValue.some(({ currency }) => currency === option));
+  }, [currencyOptions, selected, fxValue]);
 
   const onChangeComplexValue = useCallback(
-    ({ index, value: numberValue, currency }: FXEventChange) => {
-      if (!isComplex(value)) {
-        return;
-      }
-      const valueAtIndex = value[index];
+    ({ index, value, currency }: FXEventChange) => {
       const fxValueUnchanged =
-        isFX(valueAtIndex) &&
-        numberValue === valueAtIndex.value &&
-        currency === valueAtIndex.currency;
-
+        value === fxValue[index]?.value && currency === fxValue[index]?.currency;
       if (fxValueUnchanged) {
         return;
       }
 
-      onChangeTruthy(
-        replaceAtIndex(value, index, {
-          value: numberValue,
-          currency,
-        }),
-      );
+      onChange(replaceAtIndex(fxValue, index, { value, currency }));
     },
-    [onChangeTruthy, value],
+    [onChange, fxValue],
   );
 
   const onRemoveComplexValue = useCallback(
     ({ index }: FXEventRemove) => {
-      if (!isComplex(value) || value.length < 2) {
+      if (fxValue.length < 2) {
         return;
       }
-
-      onChangeTruthy(value.slice(0, index).concat(value.slice(index + 1)));
+      onChange(removeAtIndex(fxValue, index));
     },
-    [onChangeTruthy, value],
+    [onChange, fxValue],
   );
 
   const onAddComplexValue = useCallback(
-    ({ value: numberValue, currency }: FXEventAdd) => {
-      if (!isComplex(value) || !numberValue) {
-        return;
-      }
-
-      onChangeTruthy(value.concat([{ value: numberValue, currency }]));
-    },
-    [onChangeTruthy, value],
+    ({ value, currency }: FXEventAdd) => onChange([...fxValue, { value, currency }]),
+    [onChange, fxValue],
   );
 
   return (
-    <Styled.NetWorthValue>
-      <Styled.NetWorthValueComplexToggle>
-        <FormFieldTickbox item="fx-toggle" value={isComplex(value)} onChange={toggleComplex} />
+    <>
+      <Styled.NetWorthValueFXToggle>
+        <FormFieldTickbox item="fx-toggle" value={selected === 'fxValue'} onChange={toggleFX} />
         {'FX'}
-      </Styled.NetWorthValueComplexToggle>
-      {!isComplex(value) && <FormFieldCost value={value} onChange={onChangeTruthy} />}
-      {isComplex(value) && (
+      </Styled.NetWorthValueFXToggle>
+      {selected === 'simpleValue' && (
+        <FormFieldCost value={simpleValue} onChange={(value = 0): void => onChange(value)} />
+      )}
+      {selected === 'fxValue' && (
         <Styled.NetWorthValueList>
-          {value.filter(isFX).map(({ value: numberValue, currency }, index) => (
+          {fxValue.map(({ value, currency }, index) => (
             <FormFieldWithCurrency
               key={currency}
               index={index}
-              value={numberValue}
+              value={value}
               currency={currency}
               currencyOptions={otherCurrencyOptions}
               onChange={onChangeComplexValue}
@@ -249,6 +212,80 @@ const FormFieldNetWorthValue: React.FC<Props> = ({ value: initialValue, onChange
             />
           )}
         </Styled.NetWorthValueList>
+      )}
+    </>
+  );
+};
+
+const coerceOptionValue = (value: Value): Partial<OptionValue> =>
+  isComplex(value) ? value.find(isOption) ?? {} : {};
+
+const optionDeltaComplete = (delta: Partial<OptionValue> | OptionValue): delta is OptionValue =>
+  Object.keys(delta).length === 3 &&
+  Object.values(delta).every(value => typeof value !== 'undefined');
+
+const FormFieldOption: React.FC<Omit<Props, 'isOption' | 'currencies'>> = ({ value, onChange }) => {
+  const initialDelta = useMemo<Partial<OptionValue>>(() => coerceOptionValue(value), [value]);
+  const [delta, setDelta] = useState<Partial<OptionValue>>(coerceOptionValue(value));
+  useEffect(() => {
+    setDelta(initialDelta);
+  }, [initialDelta]);
+
+  const onChangeUnits = useCallback((units = 0) => setDelta(last => ({ ...last, units })), []);
+  const onChangeStrike = useCallback(
+    (strikePrice = 0) => setDelta(last => ({ ...last, strikePrice })),
+    [],
+  );
+  const onChangeMarket = useCallback(
+    (marketPrice = 0) => setDelta(last => ({ ...last, marketPrice })),
+    [],
+  );
+
+  useEffect(() => {
+    if (Object.keys(delta).length === 3 && optionDeltaComplete(delta)) {
+      onChange([delta]);
+    }
+  }, [delta, onChange]);
+
+  return (
+    <Styled.NetWorthValueOption>
+      <div>
+        <label>Units</label>
+        <FormFieldNumber placeholder="Units" value={delta.units ?? 0} onChange={onChangeUnits} />
+      </div>
+      <div>
+        <label>Strike price</label>
+        <FormFieldNumber
+          placeholder="Strike price"
+          value={delta.strikePrice ?? 0}
+          onChange={onChangeStrike}
+        />
+        p
+      </div>
+      <div>
+        <label>Market price</label>
+        <FormFieldNumber
+          placeholder="Market price"
+          value={delta.marketPrice ?? 0}
+          onChange={onChangeMarket}
+        />
+        p
+      </div>
+    </Styled.NetWorthValueOption>
+  );
+};
+
+const FormFieldNetWorthValue: React.FC<Props> = ({
+  value,
+  isOption: valueIsOption = false,
+  onChange,
+  currencies,
+}) => {
+  return (
+    <Styled.NetWorthValue>
+      {valueIsOption && <FormFieldOption value={value} onChange={onChange} />}
+      {!valueIsOption && (
+        <FormFieldSimpleFX value={value} onChange={onChange} currencies={currencies} />
       )}
     </Styled.NetWorthValue>
   );

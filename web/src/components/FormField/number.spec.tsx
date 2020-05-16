@@ -10,6 +10,7 @@ describe('<FormFieldNumber />', () => {
   };
 
   it('should render an input with the value', async () => {
+    expect.assertions(2);
     const { findByDisplayValue } = render(<FormFieldNumber {...props} />);
     const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
 
@@ -18,6 +19,7 @@ describe('<FormFieldNumber />', () => {
   });
 
   it('should call onChange when changing the value, after the blur', async () => {
+    expect.assertions(4);
     const { findByDisplayValue } = render(<FormFieldNumber {...props} />);
     const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
 
@@ -33,6 +35,7 @@ describe('<FormFieldNumber />', () => {
   });
 
   it('should update its input value when the value prop changes', async () => {
+    expect.assertions(2);
     const { container, findByDisplayValue } = render(<FormFieldNumber {...props} />);
     const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
 
@@ -43,5 +46,14 @@ describe('<FormFieldNumber />', () => {
     });
 
     expect(input.value).toBe('103.46');
+  });
+
+  it('should accept a placeholder', () => {
+    expect.assertions(1);
+    const { getByDisplayValue } = render(
+      <FormFieldNumber {...props} placeholder="my placeholder" />,
+    );
+    const input = getByDisplayValue('103.45') as HTMLInputElement;
+    expect(input.placeholder).toBe('my placeholder');
   });
 });

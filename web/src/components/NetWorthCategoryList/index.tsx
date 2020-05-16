@@ -14,9 +14,10 @@ import { CREATE_ID } from '~client/constants/data';
 
 import * as Styled from './styles';
 
-const typeOptions: Options<Category['type']> = [
+const typeOptions: Options<Category['type'] | 'option'> = [
   { internal: 'asset', external: 'Asset' },
   { internal: 'liability', external: 'Liability' },
+  { internal: 'option', external: 'Option' },
 ];
 
 type PropsForm = {
@@ -26,21 +27,29 @@ type PropsForm = {
 };
 
 const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
-  item: { id, type, category, color } = {
+  item: { id, type, category, color, isOption } = {
     id: CREATE_ID,
     type: 'asset',
     category: 'Cash',
     color: '#ccffcc',
+    isOption: false,
   },
   onChange,
   buttonText,
 }) => {
   const [tempType, setTempType] = useState<Category['type']>(type);
+  const [tempIsOption, setTempIsOption] = useState<Category['isOption']>(isOption);
   const [tempCategory, setTempCategory] = useState<string>(category);
   const [tempColor, setTempColor] = useState<string>(color);
 
   const touched =
-    id === CREATE_ID || !(tempType === type && tempCategory === category && tempColor === color);
+    id === CREATE_ID ||
+    !(
+      tempType === type &&
+      tempIsOption === isOption &&
+      tempCategory === category &&
+      tempColor === color
+    );
 
   const onChangeItem = useCallback(
     () =>
@@ -48,13 +57,24 @@ const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
         type: tempType,
         category: tempCategory,
         color: tempColor,
+        isOption: tempIsOption,
       }),
-    [onChange, tempType, tempCategory, tempColor],
+    [onChange, tempType, tempIsOption, tempCategory, tempColor],
   );
+
+  const onChangeType = useCallback((value: Category['type'] | 'option') => {
+    setTempIsOption(value === 'option');
+    setTempType(value === 'option' ? 'asset' : value);
+  }, []);
 
   return (
     <Styled.CategoryItemForm style={{ backgroundColor: tempColor }}>
-      <FormFieldSelect item="type" options={typeOptions} value={tempType} onChange={setTempType} />
+      <FormFieldSelect
+        item="type"
+        options={typeOptions}
+        value={tempIsOption ? 'option' : tempType}
+        onChange={onChangeType}
+      />
       <FormFieldText item="category" value={tempCategory} onChange={setTempCategory} />
       <FormFieldColor value={tempColor} onChange={setTempColor} />
       <Button disabled={!touched} onClick={onChangeItem}>
@@ -113,10 +133,10 @@ const NetWorthCategoryItem: React.FC<PropsItem> = ({
   const onExpand = useCallback(() => onExpandToggle(item.id), [onExpandToggle, item.id]);
 
   return (
-    <Styled.CategoryItem style={itemStyle}>
+    <Styled.CategoryItem data-testid={`category-item-${item.id}`} style={itemStyle}>
       <Styled.CategoryItemMain>
         <Styled.ToggleVisibility>
-          <Button expanded={!!expanded} onClick={onExpand} />
+          <Button data-testid="handle" expanded={!!expanded} onClick={onExpand} />
         </Styled.ToggleVisibility>
         <NetWorthCategoryItemForm
           key="category-form"
@@ -147,12 +167,12 @@ type PropsCreate = {
 };
 
 const NetWorthCategoryCreateItem: React.FC<PropsCreate> = ({ onCreate }) => (
-  <Styled.CategoryItem>
+  <Styled.CategoryItem data-testid="category-item-create">
     <NetWorthCategoryItemForm onChange={onCreate} buttonText="Create" />
   </Styled.CategoryItem>
 );
 
-type Props = {
+export type Props = {
   categories: Category[];
   subcategories: Subcategory[];
   onCreateCategory: OnCreate<Category>;

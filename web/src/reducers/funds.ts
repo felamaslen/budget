@@ -4,7 +4,7 @@ import { Page } from '~client/types/app';
 import { makeListReducer, onRead, ListState } from '~client/reducers/list';
 import { DATA_READ } from '~client/constants/actions/api';
 import { FUNDS_VIEW_SOLD_TOGGLED, FUNDS_RECEIVED } from '~client/constants/actions/funds';
-import { DataKeyAbbr } from '~client/constants/data';
+import { DataKeyAbbr } from '~client/constants/api';
 import { Row, ItemRaw, ReadResponse } from '~client/types/funds';
 import { Period, DEFAULT_FUND_PERIOD } from '~client/constants/graph';
 

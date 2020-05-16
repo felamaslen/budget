@@ -20,3 +20,11 @@ export type PageList =
   | Page.social;
 
 export type PageListCalc = Exclude<PageList, Page.funds>;
+
+export type PageProps<I = never> = {
+  path?: string;
+  cols?: (keyof I)[];
+  list?: boolean;
+  daily?: boolean;
+  suggestions?: string[];
+};

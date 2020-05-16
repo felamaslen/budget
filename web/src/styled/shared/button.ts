@@ -3,7 +3,7 @@ import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
 import { CategoryItemForm, ToggleVisibility } from '~client/components/NetWorthCategoryList/styles';
 import { CrudList } from '~client/components/CrudList/styles';
-import { centerGridOne, NetWorthValueComplex } from '~client/components/FormField/styles';
+import { centerGridOne, NetWorthValueFX } from '~client/components/FormField/styles';
 import { ButtonDelete as RowButtonDelete } from '~client/components/ListRowDesktop/styles';
 import { ButtonAdd as MobileButtonAdd } from '~client/components/ListFootMobile/styles';
 import { ButtonDelete as NetWorthEntryDelete } from '~client/components/NetWorthList/styles';
@@ -132,7 +132,7 @@ export const Button = styled.button<{
 `;
 
 export const ButtonCrud = styled(Button)`
-    ${NetWorthValueComplex} & {
+    ${NetWorthValueFX} & {
         margin: 0 3px;
         top: 0;
         flex: 0 0 auto;

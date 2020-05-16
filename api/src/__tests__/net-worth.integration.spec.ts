@@ -1,6 +1,6 @@
-import sinon from 'sinon';
 import addMonths from 'date-fns/addMonths';
 import format from 'date-fns/format';
+import sinon from 'sinon';
 
 import config from '~api/config';
 import db from '~api/modules/db';
@@ -26,6 +26,7 @@ describe('Server - integration tests (net-worth)', () => {
     type: 'asset',
     category: 'Cash',
     color: '#33ff11',
+    isOption: false,
   };
 
   describe('categories', () => {
@@ -50,7 +51,32 @@ describe('Server - integration tests (net-worth)', () => {
         const categories = await db('net_worth_categories').select();
 
         expect(categories).toHaveLength(1);
-        expect(categories[0]).toStrictEqual(expect.objectContaining(category));
+        expect(categories[0]).toStrictEqual(
+          expect.objectContaining({
+            type: category.type,
+            category: category.category,
+            color: category.color,
+            is_option: category.isOption,
+          }),
+        );
+      });
+
+      it('should accept isOption value', async () => {
+        expect.assertions(3);
+
+        const res = await global
+          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+          .send({
+            ...category,
+            isOption: true,
+          });
+
+        expect(res.body).toHaveProperty('isOption', true);
+
+        const categories = await db('net_worth_categories').select();
+
+        expect(categories).toHaveLength(1);
+        expect(categories[0]).toHaveProperty('is_option', true);
       });
     });
 
@@ -59,7 +85,12 @@ describe('Server - integration tests (net-worth)', () => {
 
       beforeEach(async () => {
         [categoryId] = await db('net_worth_categories')
-          .insert(category)
+          .insert({
+            type: category.type,
+            category: category.category,
+            color: category.color,
+            is_option: category.isOption,
+          })
           .returning('id');
       });
 
@@ -84,7 +115,12 @@ describe('Server - integration tests (net-worth)', () => {
 
       beforeEach(async () => {
         [categoryId] = await db('net_worth_categories')
-          .insert(category)
+          .insert({
+            type: category.type,
+            category: category.category,
+            color: category.color,
+            is_option: category.isOption,
+          })
           .returning('id');
       });
 
@@ -97,6 +133,7 @@ describe('Server - integration tests (net-worth)', () => {
           .send({
             ...category,
             category: 'Bank',
+            isOption: true,
           });
 
         expect(res.status).toBe(200);
@@ -104,6 +141,7 @@ describe('Server - integration tests (net-worth)', () => {
           id: categoryId,
           ...category,
           category: 'Bank',
+          isOption: true,
         });
       });
 
@@ -114,6 +152,7 @@ describe('Server - integration tests (net-worth)', () => {
           .send({
             ...category,
             category: 'Bank',
+            isOption: true,
           });
 
         const categories = await db('net_worth_categories').select();
@@ -121,8 +160,10 @@ describe('Server - integration tests (net-worth)', () => {
         expect(categories).toHaveLength(1);
         expect(categories[0]).toStrictEqual(
           expect.objectContaining({
-            ...category,
+            type: category.type,
+            color: category.color,
             category: 'Bank',
+            is_option: true,
           }),
         );
       });
@@ -133,7 +174,12 @@ describe('Server - integration tests (net-worth)', () => {
 
       beforeEach(async () => {
         [categoryId] = await db('net_worth_categories')
-          .insert(category)
+          .insert({
+            type: category.type,
+            category: category.category,
+            color: category.color,
+            is_option: category.isOption,
+          })
           .returning('id');
       });
 
@@ -167,7 +213,12 @@ describe('Server - integration tests (net-worth)', () => {
 
     beforeEach(async () => {
       [categoryId] = await db('net_worth_categories')
-        .insert(category)
+        .insert({
+          type: category.type,
+          category: category.category,
+          color: category.color,
+          is_option: category.isOption,
+        })
         .returning('id');
 
       subcategory = {
@@ -345,6 +396,13 @@ describe('Server - integration tests (net-worth)', () => {
       color: 'green',
     };
 
+    const categoryOptions: OptionalId<Category> = {
+      type: 'asset',
+      category: 'Options',
+      color: 'turquoise',
+      isOption: true,
+    };
+
     const categoryCC: OptionalId<Category> = {
       type: 'liability',
       category: 'Credit Cards',
@@ -356,6 +414,13 @@ describe('Server - integration tests (net-worth)', () => {
       subcategory: 'Current account',
       hasCreditLimit: null,
       opacity: 0.8,
+    };
+
+    const subcategoryOptions: OptionalId<Subcategory> = {
+      categoryId: '',
+      subcategory: 'Company X Ord 5p',
+      hasCreditLimit: null,
+      opacity: 1,
     };
 
     const subcategoryMainCC: OptionalId<Subcategory> = {
@@ -380,12 +445,23 @@ describe('Server - integration tests (net-worth)', () => {
         .returning('id');
       categoryBank.id = categoryIdBank;
 
+      const [categoryIdOptions] = await db('net_worth_categories')
+        .insert({
+          type: categoryOptions.type,
+          category: categoryOptions.category,
+          color: categoryOptions.color,
+          is_option: categoryOptions.isOption,
+        })
+        .returning('id');
+      categoryOptions.id = categoryIdOptions;
+
       const [categoryIdCC] = await db('net_worth_categories')
         .insert({ ...categoryCC, id: undefined })
         .returning('id');
       categoryCC.id = categoryIdBank;
 
       subcategoryCurrentAccount.categoryId = categoryIdBank;
+      subcategoryOptions.categoryId = categoryIdOptions;
       subcategoryMainCC.categoryId = categoryIdCC;
       subcategoryTravelCC.categoryId = categoryIdCC;
 
@@ -395,6 +471,14 @@ describe('Server - integration tests (net-worth)', () => {
           subcategory: subcategoryCurrentAccount.subcategory,
           has_credit_limit: subcategoryCurrentAccount.hasCreditLimit,
           opacity: subcategoryCurrentAccount.opacity,
+        })
+        .returning('id');
+      const [subcategoryIdOptions] = await db('net_worth_subcategories')
+        .insert({
+          category_id: categoryIdOptions,
+          subcategory: 'Company X Ord 5p',
+          has_credit_limit: null,
+          opacity: 1,
         })
         .returning('id');
       const [subcategoryIdMainCC] = await db('net_worth_subcategories')
@@ -415,6 +499,7 @@ describe('Server - integration tests (net-worth)', () => {
         .returning('id');
 
       subcategoryCurrentAccount.id = subcategoryIdCurrentAccount;
+      subcategoryOptions.id = subcategoryIdOptions;
       subcategoryMainCC.id = subcategoryIdMainCC;
       subcategoryTravelCC.id = subcategoryIdTravelCC;
 
@@ -485,6 +570,46 @@ describe('Server - integration tests (net-worth)', () => {
         ]);
         expect(res.body).toHaveProperty('id');
       });
+
+      describe('sending entry with option values', () => {
+        let entryWithOption: Omit<Entry, 'id'>;
+
+        beforeEach(async () => {
+          entryWithOption = {
+            date: '2020-04-15',
+            values: [
+              {
+                subcategory: (subcategoryOptions as Subcategory).id,
+                skip: null,
+                value: [
+                  {
+                    units: 157,
+                    strikePrice: 140.53,
+                    marketPrice: 197.812,
+                  },
+                ],
+              },
+            ],
+            currencies: [],
+            creditLimit: [],
+          };
+        });
+
+        it('should add the option value to the entry', async () => {
+          expect.assertions(3);
+
+          const res = await global
+            .withAuth(global.agent.post('/api/v4/data/net-worth'))
+            .send(entryWithOption);
+
+          expect(res.status).toBe(201);
+          expect(res.body).toHaveProperty(
+            'values',
+            expect.arrayContaining([expect.objectContaining(entryWithOption.values[0])]),
+          );
+          expect(res.body).toHaveProperty('id');
+        });
+      });
     });
 
     describe('GET /net-worth/:entryId', () => {
@@ -526,7 +651,7 @@ describe('Server - integration tests (net-worth)', () => {
       });
 
       afterAll(() => {
-        clock.reset();
+        clock.restore();
       });
 
       beforeEach(async () => {
@@ -545,7 +670,19 @@ describe('Server - integration tests (net-worth)', () => {
             values: [
               {
                 ...entry.values[0],
-                value: 500000,
+                subcategory: (subcategoryOptions as Subcategory).id,
+                value: [
+                  5871,
+                  {
+                    value: 2040.76,
+                    currency: 'CNY',
+                  },
+                  {
+                    units: 1324,
+                    strikePrice: 4.53,
+                    marketPrice: 19.27,
+                  },
+                ],
               },
               ...entry.values.slice(1),
             ],
@@ -588,7 +725,8 @@ describe('Server - integration tests (net-worth)', () => {
         expect.assertions(2);
         const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
 
-        const entryValueOld = 500000 - 15000;
+        const entryValueOld =
+          5871 + Math.round(2040.76 * 0.113 * 100) + Math.round(1324 * 19.27) - 15000;
         const entryValueOlder = 62000 * 0.113 * 100 - 15000;
 
         expect(res.status).toBe(200);
@@ -693,6 +831,42 @@ describe('Server - integration tests (net-worth)', () => {
         expect(res.body).toHaveProperty(
           'currencies',
           expect.arrayContaining(updatedEntry.currencies.map(expect.objectContaining)),
+        );
+      });
+
+      it('should update an option price', async () => {
+        expect.assertions(2);
+
+        const updatedEntry = {
+          ...entry,
+          values: [
+            {
+              ...entry.values[0],
+              subcategory: (subcategoryMainCC as Subcategory).id,
+              value: -103,
+            },
+            {
+              ...entry.values[0],
+              subcategory: (subcategoryOptions as Subcategory).id,
+              value: [
+                {
+                  units: 1324,
+                  strikePrice: 4.53,
+                  marketPrice: 19.27,
+                },
+              ],
+            },
+          ],
+        };
+
+        const res = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
+          .send(updatedEntry);
+
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty(
+          'values',
+          expect.arrayContaining(updatedEntry.values.map(expect.objectContaining)),
         );
       });
     });

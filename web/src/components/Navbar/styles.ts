@@ -1,11 +1,12 @@
 import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
+
+import { PAGES } from '~client/constants/data';
 import { sizes, colors, breakpoints } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
-import { PAGES } from '~client/constants/data';
+import { Page } from '~client/types/app';
 
 import nav from '../../images/nav.png';
-import { Page } from '~client/types/app';
 
 export const NavList = styled.nav`
   display: flex;
@@ -76,6 +77,9 @@ export const Link = styled(NavLink)<{
     border-color: ${({ page }): string => {
       if (page === 'logout') {
         return colors.light as string;
+      }
+      if (page === 'netWorth') {
+        return 'transparent';
       }
       if (colors[page]) {
         return colors[page].main;

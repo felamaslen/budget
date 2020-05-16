@@ -1,7 +1,7 @@
 import { useReducer, useCallback, useEffect } from 'react';
 
 import { PageList } from '~client/types/app';
-import { Column, getColumns } from '~client/types/list';
+import { Column } from '~client/types/list';
 import {
   ActionType,
   isEscape,
@@ -10,7 +10,7 @@ import {
   getNavDirection,
   DirectionDelta,
 } from '~client/modules/nav';
-import { CREATE_ID } from '~client/constants/data';
+import { CREATE_ID, getColumns } from '~client/constants/data';
 
 export { ActionType } from '~client/modules/nav';
 

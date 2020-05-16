@@ -5,7 +5,7 @@ import { dataRead, syncReceived } from '~client/actions/api';
 import { loggedOut } from '~client/actions/login';
 import { RequestType } from '~client/types/crud';
 import { Page } from '~client/types/app';
-import { DataKeyAbbr } from '~client/constants/data';
+import { DataKeyAbbr } from '~client/constants/api';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -234,7 +234,7 @@ describe('List reducer', () => {
       expect(
         myListReducer(
           initialStateCreate,
-          listItemCreated('other-page', {
+          listItemCreated('other-page' as Page, {
             some: 'prop',
             is: true,
           }),
@@ -275,7 +275,12 @@ describe('List reducer', () => {
       items: [{ id: 'some-real-id', date: testDate, item: 'some-item', cost: 23 }],
     };
 
-    const action = listItemUpdated(page, 'some-real-id', { item: 'other item' });
+    const action = listItemUpdated(
+      page,
+      'some-real-id',
+      { item: 'other item' },
+      { item: 'old item' },
+    );
 
     it('should optimistically update a list item', () => {
       expect.assertions(1);
@@ -294,7 +299,12 @@ describe('List reducer', () => {
 
     it('should omit properties which are not present on the item', () => {
       expect.assertions(2);
-      const actionNull = listItemUpdated(page, 'some-real-id', { other: 'should not exist' });
+      const actionNull = listItemUpdated(
+        page,
+        'some-real-id',
+        { other: 'should not exist' },
+        { other: 'old value' },
+      );
 
       const resultNull = myListReducer(state, actionNull);
 
@@ -302,10 +312,18 @@ describe('List reducer', () => {
         expect.objectContaining({ id: 'some-real-id', item: 'some-item', cost: 23 }),
       ]);
 
-      const actionSome = listItemUpdated(page, 'some-real-id', {
-        other: 'should not exist',
-        item: 'next item',
-      });
+      const actionSome = listItemUpdated(
+        page,
+        'some-real-id',
+        {
+          other: 'should not exist',
+          item: 'next item',
+        },
+        {
+          other: 'old value',
+          item: 'old item',
+        },
+      );
 
       const resultSome = myListReducer(state, actionSome);
 
@@ -332,7 +350,12 @@ describe('List reducer', () => {
         ],
       };
 
-      const actionAfterCreate = listItemUpdated(page, 'some-fake-id', { item: 'updated item' });
+      const actionAfterCreate = listItemUpdated(
+        page,
+        'some-fake-id',
+        { item: 'updated item' },
+        { item: 'old item' },
+      );
 
       const result = myListReducer(stateCreate, actionAfterCreate);
 
@@ -356,10 +379,15 @@ describe('List reducer', () => {
       expect(
         myListReducer(
           initialStateUpdate,
-          listItemUpdated(Page.bills, 'some-id', {
-            some: 'prop',
-            is: true,
-          }),
+          listItemUpdated(
+            Page.bills,
+            'some-id',
+            {
+              some: 'prop',
+              is: true,
+            },
+            { some: 'old prop', is: false },
+          ),
         ),
       ).toBe(initialStateUpdate);
     });
@@ -371,10 +399,15 @@ describe('List reducer', () => {
         olderExists: null,
       };
 
-      const actionDaily = listItemUpdated(page, 'some-real-id', {
-        cost: 41,
-        item: 'different item',
-      });
+      const actionDaily = listItemUpdated(
+        page,
+        'some-real-id',
+        {
+          cost: 41,
+          item: 'different item',
+        },
+        {},
+      );
 
       it('should update the total', () => {
         expect.assertions(1);
@@ -396,7 +429,7 @@ describe('List reducer', () => {
       items: [{ id: 'some-real-id', date: testDate, item: 'some item', cost: 29 }],
     };
 
-    const action = listItemDeleted('some-real-id', { page });
+    const action = listItemDeleted('some-real-id', { page }, { some: 'item' });
 
     it('should optimistically delete a list item', () => {
       expect.assertions(1);
@@ -463,9 +496,13 @@ describe('List reducer', () => {
       expect(
         myListReducer(
           initialStateDelete,
-          listItemDeleted('some-id', {
-            page: 'other-page',
-          }),
+          listItemDeleted(
+            'some-id',
+            {
+              page: 'other-page' as Page,
+            },
+            { some: 'old item' },
+          ),
         ),
       ).toBe(initialStateDelete);
     });
@@ -495,29 +532,34 @@ describe('List reducer', () => {
     const syncRequests = [
       {
         type: RequestType.create,
+        method: 'post' as const,
         fakeId: 'other-fake-id',
         route: 'some-other-page',
         body: { some: 'data' },
       },
       {
         type: RequestType.update,
+        method: 'put' as const,
         route: page,
         id: 'real-id-z',
         body: { other: 'something' },
       },
       {
         type: RequestType.delete,
+        method: 'delete' as const,
         route: page,
         id: 'real-id-x',
       },
       {
         type: RequestType.create,
+        method: 'post' as const,
         fakeId: 'some-fake-id',
         route: page,
         body: { thisItem: true },
       },
       {
         type: RequestType.create,
+        method: 'post' as const,
         fakeId: 'different-fake-id',
         route: 'different-route',
         body: { some: 'data' },
@@ -609,16 +651,14 @@ describe('List reducer', () => {
         });
 
         describe("if there wasn't a relevant response", () => {
-          const req = [
-            {
-              type: RequestType.update,
-              id: 'some-real-id',
-              method: 'put',
-              route: `not-${page}`,
-              query: {},
-              body: { some: 'body' },
-            },
-          ];
+          const req = {
+            type: RequestType.update,
+            id: 'some-real-id',
+            method: 'put' as const,
+            route: `not-${page}`,
+            query: {},
+            body: { some: 'body' },
+          };
 
           const res = [{ total: 8743 }];
 
@@ -653,11 +693,10 @@ describe('List reducer', () => {
         olderExists: null,
       };
 
-      // prettier-ignore
       it.each`
-      reducer          | testState
-      ${myListReducer} | ${state}
-      ${dailyReducer}  | ${stateDaily}
+        reducer          | testState
+        ${myListReducer} | ${state}
+        ${dailyReducer}  | ${stateDaily}
       `('should remove the optimistic status', ({ reducer, testState }) => {
         expect.assertions(2);
         const result = reducer(testState, syncReceivedAction);

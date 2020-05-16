@@ -17,7 +17,9 @@ export const testState: State = {
     name: 'Some user',
   },
   api: {
+    initialLoading: false,
     loading: false,
+    locked: false,
     error: null,
     key: 'some api key',
   },
@@ -44,18 +46,21 @@ export const testState: State = {
         type: 'asset',
         category: 'Cash (easy access)',
         color: '#00ff00',
+        isOption: false,
       },
       {
         id: 'real-mortgage-category-id',
         type: 'liability',
         category: 'Mortgage',
         color: '#fa0000',
+        isOption: false,
       },
       {
         id: 'real-credit-card-category-id',
         type: 'liability',
         category: 'Credit cards',
         color: '#fc0000',
+        isOption: false,
       },
     ],
     subcategories: [

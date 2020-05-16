@@ -1,6 +1,7 @@
 import { Page } from '~client/types/app';
 
 import { State as LoginState } from './login';
+import { State as ApiState } from './api';
 import { State as OverviewState } from '~client/types/overview';
 import { State as AnalysisState } from '~client/reducers/analysis';
 import { State as NetWorthState } from './net-worth';
@@ -20,7 +21,7 @@ export type State = {
     windowWidth: number;
   };
   login: LoginState;
-  api: object;
+  api: ApiState;
   error: object[];
   [Page.overview]: OverviewState;
   netWorth: NetWorthState;

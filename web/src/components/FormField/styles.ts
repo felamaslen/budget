@@ -1,6 +1,6 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 import { breakpoints, colors } from '~client/styled/variables';
-import { breakpoint } from '~client/styled/mixins';
+import { rem, breakpoint } from '~client/styled/mixins';
 import { ModalDialog, FormRowInner } from '~client/components/ModalDialog/styles';
 import { Editable } from '~client/components/Editable/styles';
 import { Row as ListRowDesktop } from '~client/components/ListRowDesktop/styles';
@@ -343,7 +343,7 @@ export const NetWorthValue = styled.div`
   }
 `;
 
-export const NetWorthValueComplexToggle = styled.span`
+export const NetWorthValueFXToggle = styled.span`
   display: inline-flex;
   align-items: center;
   margin-right: 6px;
@@ -357,7 +357,7 @@ export const NetWorthValueList = styled.ul`
   list-style: none;
 `;
 
-export const NetWorthValueComplex = styled.li<{ add: boolean }>`
+export const NetWorthValueFX = styled.li<{ add: boolean }>`
   display: flex;
   select {
     flex: 0 0 60px;
@@ -375,6 +375,28 @@ export const NetWorthValueComplex = styled.li<{ add: boolean }>`
     flex: 0 0 64px;
     input {
       width: 64px;
+    }
+  }
+`;
+
+export const NetWorthValueOption = styled.div`
+  display: flex;
+  flex-flow: column;
+
+  input[type='number'] {
+    font-size: ${rem(12)};
+    width: ${rem(64)};
+  }
+  & > div {
+    display: flex;
+    margin-bottom: ${rem(4)};
+    align-items: flex-end;
+    font-size: ${rem(12)};
+  }
+  label {
+    flex: 0 0 ${rem(100)};
+    &::after {
+      content: ':';
     }
   }
 `;

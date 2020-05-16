@@ -73,7 +73,7 @@ export const AfterCanvas: React.FC<Props> = ({
   setToggleList,
   changePeriod,
 }) => {
-  const onChange = useCallback(evt => changePeriod(evt.target.value), [changePeriod]);
+  const onChange = useCallback(({ target: { value } }) => changePeriod(value), [changePeriod]);
 
   return (
     <div>
@@ -81,8 +81,8 @@ export const AfterCanvas: React.FC<Props> = ({
         <Styled.FundSidebar>
           <li>
             <select defaultValue={period} onChange={onChange}>
-              {GRAPH_FUNDS_PERIODS.map(([value, display]) => (
-                <option key={value} value={value}>
+              {GRAPH_FUNDS_PERIODS.map(([key, display]: [string, Period]) => (
+                <option key={key} value={display}>
                   {display}
                 </option>
               ))}

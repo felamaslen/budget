@@ -3,9 +3,9 @@ export type CreateEdit<V> = V | Create<V>;
 export type Edit<V> = Create<V> & { id: string };
 
 export enum RequestType {
-  create = 'CREATE',
-  update = 'UPDATE',
-  delete = 'DELETE',
+  create = 'create',
+  update = 'update',
+  delete = 'delete',
 }
 
 export type Request = {
@@ -20,3 +20,5 @@ export type Request = {
 export type WithCrud<V> = V & { __optimistic?: RequestType };
 
 export type RawDate<V> = Omit<V, 'date'> & { date: string };
+
+export type IdKey = 'id' | 'fakeId';

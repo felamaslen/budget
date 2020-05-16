@@ -5,18 +5,9 @@ import { Router } from 'express';
 import { makeCrudRoute, checkItem } from '~api/modules/crud';
 import { DJMap, mapExternalToInternal, mapInternalToExternal } from '~api/modules/key-map';
 import { schemaSubcategory } from '~api/schema/net-worth';
+import { Subcategory, SubcategoryRow } from './types';
 
-type DbResult = {
-  category_id: string;
-  has_credit_limit: boolean | null;
-};
-
-type JSResult = {
-  categoryId: string;
-  hasCreditLimit: boolean | null;
-};
-
-const dbMap: DJMap<DbResult> = [
+const dbMap: DJMap<SubcategoryRow> = [
   { external: 'categoryId', internal: 'category_id' },
   { external: 'hasCreditLimit', internal: 'has_credit_limit' },
 ];
@@ -49,7 +40,7 @@ export function routeSubCategories(): Router {
   router.post('/*', checkCategoryExists);
   router.put('/*', checkCategoryExists);
 
-  makeCrudRoute<DbResult, JSResult>({
+  makeCrudRoute<SubcategoryRow, Subcategory>({
     table: 'net_worth_subcategories',
     item: 'Subcategory',
     schema: schemaSubcategory,

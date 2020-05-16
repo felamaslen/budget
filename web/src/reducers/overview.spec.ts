@@ -4,6 +4,7 @@ import { dataRead } from '~client/actions/api';
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
 import { loggedOut } from '~client/actions/login';
 import { Page } from '~client/types/app';
+import { Food, Holiday } from '~client/types/list';
 
 describe('Overview reducer', () => {
   describe.each`
@@ -19,7 +20,7 @@ describe('Overview reducer', () => {
 
   describe('DATA_READ', () => {
     const action = dataRead({
-      overview: {
+      [Page.overview]: {
         startYearMonth: [2019, 4],
         endYearMonth: [2019, 7],
         currentYear: 2019,
@@ -41,11 +42,13 @@ describe('Overview reducer', () => {
     });
 
     it('should set the start date to the end of the month', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
       expect(result).toHaveProperty('startDate', new Date('2019-04-30T23:59:59.999Z'));
     });
 
     it('should set the end date to the end of the month', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
       expect(result).toHaveProperty('endDate', new Date('2019-07-31T23:59:59.999Z'));
     });
@@ -90,9 +93,10 @@ describe('Overview reducer', () => {
     };
 
     it('should add to the relevant month and category', () => {
+      expect.assertions(1);
       const withGeneral = reducer(
         state,
-        listItemCreated('general', {
+        listItemCreated(Page.general, {
           date: new Date('2019-06-02T00:00:00.000Z'),
           cost: 34,
         }),
@@ -102,9 +106,10 @@ describe('Overview reducer', () => {
     });
 
     it('should be ignored if the item has insufficient data', () => {
+      expect.assertions(2);
       const withMissingDate = reducer(
         state,
-        listItemCreated('general', {
+        listItemCreated(Page.general, {
           cost: 34,
         }),
       );
@@ -113,7 +118,7 @@ describe('Overview reducer', () => {
 
       const withMissingCost = reducer(
         state,
-        listItemCreated('general', {
+        listItemCreated(Page.general, {
           date: new Date('2019-06-02T00:00:00.000Z'),
         }),
       );
@@ -140,10 +145,11 @@ describe('Overview reducer', () => {
     };
 
     it('should handle an updated date', () => {
+      expect.assertions(2);
       const withDate = reducer(
         state,
         listItemUpdated(
-          'food',
+          Page.food,
           'some-id',
           {
             date: new Date('2019-06-02T00:00Z'),
@@ -161,10 +167,11 @@ describe('Overview reducer', () => {
     });
 
     it('should handle an updated cost', () => {
+      expect.assertions(1);
       const withCost = reducer(
         state,
         listItemUpdated(
-          'food',
+          Page.food,
           'some-id',
           {
             date: new Date('2019-06-02T00:00Z'),
@@ -181,18 +188,25 @@ describe('Overview reducer', () => {
     });
 
     it('should handle a simultaneous update', () => {
+      expect.assertions(2);
       const withBoth = reducer(
         state,
-        listItemUpdated(
-          'food',
+        listItemUpdated<Food>(
+          Page.food,
           'some-id',
           {
             date: new Date('2019-06-02T00:00Z'),
+            item: 'some item',
+            category: 'some caetgory',
             cost: 98,
+            shop: 'some shop',
           },
           {
             date: new Date('2019-04-24T00:00Z'),
+            item: 'some item',
+            category: 'some caetgory',
             cost: 34,
+            shop: 'some shop',
           },
         ),
       );
@@ -220,14 +234,18 @@ describe('Overview reducer', () => {
     };
 
     it('should remove from the relevant month and category', () => {
+      expect.assertions(1);
       const withHoliday = reducer(
         state,
-        listItemDeleted(
+        listItemDeleted<Holiday>(
           'some-id',
-          { page: 'holiday' },
+          { page: Page.holiday },
           {
             date: new Date('2019-07-12T00:00Z'),
+            item: 'some item',
+            holiday: 'some holiday',
             cost: 1235,
+            shop: 'some shop',
           },
         ),
       );

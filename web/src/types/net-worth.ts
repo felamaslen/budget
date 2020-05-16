@@ -1,10 +1,11 @@
-import { WithCrud, RawDate, Request } from './crud';
+import { Create, WithCrud, RawDate, Request } from './crud';
 
 export type Category = {
   id: string;
   type: 'asset' | 'liability';
   category: string;
   color: string;
+  isOption: boolean;
 };
 
 export type Subcategory = {
@@ -15,19 +16,27 @@ export type Subcategory = {
   opacity: number;
 };
 
-type FXValue = {
+export type FXValue = {
   value: number;
   currency: string;
 };
 
-type ComplexValueItem = number | FXValue;
-type ComplexValue = ComplexValueItem[];
+export type OptionValue = {
+  units: number;
+  strikePrice: number;
+  marketPrice: number;
+};
+
+export type ComplexValueItem = number | FXValue | OptionValue;
+export type ComplexValue = ComplexValueItem[];
 
 export type Value = number | ComplexValue;
 
 export const isComplex = (value: Value): value is ComplexValue => Array.isArray(value);
 export const isFX = (value: ComplexValueItem): value is FXValue =>
   typeof value === 'object' && Reflect.has(value, 'currency');
+export const isOption = (value: ComplexValueItem): value is OptionValue =>
+  typeof value === 'object' && Reflect.has(value, 'strikePrice');
 
 export type ValueObject = {
   id: string;
@@ -50,12 +59,10 @@ export type Entry = {
   currencies: Currency[];
 };
 
-type OptionalId<V extends { id?: string }> = Omit<V, 'id'> & { id?: string };
-
-type EntryWithOptionalIds = Omit<Entry, 'values' | 'creditLimit' | 'currencies'> & {
-  values: OptionalId<ValueObject>[];
-  creditLimit: OptionalId<CreditLimit>[];
-  currencies: OptionalId<Currency>[];
+export type EntryWithOptionalIds = Omit<Entry, 'values' | 'creditLimit' | 'currencies'> & {
+  values: Create<ValueObject>[];
+  creditLimit: Create<CreditLimit>[];
+  currencies: Create<Currency>[];
 };
 
 export type Currency = {

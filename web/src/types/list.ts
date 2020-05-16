@@ -1,14 +1,14 @@
-import { PAGES } from '~client/constants/data';
-import { PageList } from './app';
+import { PageProps, Page } from './app';
+import { Row as Fund } from './funds';
 
-export type Item = { id: string; cost?: number };
+export type Item = { id: string };
 
 export interface ListCalcItem extends Item {
   date: Date;
   cost: number;
 }
 
-interface ListItem extends ListCalcItem {
+export interface ListItem extends ListCalcItem {
   item: string;
 }
 
@@ -29,5 +29,14 @@ export type Social = ShopItem & { society: string };
 
 export type Column<I extends {} = {}> = keyof I;
 
-export const getColumns = <I extends {}>(page?: PageList): Column<I>[] =>
-  (page && ((PAGES[page].cols ?? []) as Column<I>[])) ?? [];
+export type Pages = {
+  [Page.overview]: PageProps;
+  [Page.analysis]: PageProps;
+  [Page.funds]: PageProps<Fund>;
+  [Page.income]: PageProps<Income>;
+  [Page.bills]: PageProps<Bill>;
+  [Page.food]: PageProps<Food>;
+  [Page.general]: PageProps<General>;
+  [Page.holiday]: PageProps<Holiday>;
+  [Page.social]: PageProps<Social>;
+};

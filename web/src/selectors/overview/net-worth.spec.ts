@@ -23,6 +23,7 @@ describe('Overview selectors (net worth)', () => {
     type: 'asset',
     category: 'Some category',
     color: 'green',
+    isOption: false,
   };
 
   const testSubcategory: Subcategory = {
@@ -154,6 +155,60 @@ describe('Overview selectors (net worth)', () => {
       expect(result[4]).toBe(0); // May 2018 "
       expect(result[5]).toBe(0); // June 2018 "
       expect(result[6]).toBe(0); // July 2018 "
+    });
+
+    it('should calculate the current value of options', () => {
+      expect.assertions(1);
+
+      const result = getNetWorthSummary({
+        ...state,
+        netWorth: {
+          ...state.netWorth,
+          categories: [
+            {
+              id: 'real-option-category-id',
+              type: 'asset',
+              category: 'Options',
+              color: 'orange',
+              isOption: true,
+            },
+          ],
+          subcategories: [
+            {
+              id: 'real-option-subcategory-id',
+              categoryId: 'real-option-category-id',
+              subcategory: 'LON:RELX',
+              hasCreditLimit: null,
+              opacity: 1,
+            },
+          ],
+          entries: [
+            {
+              id: 'real-entry-id-a',
+              date: new Date('2018-05-27'),
+              values: [
+                {
+                  id: 'value-id-1',
+                  subcategory: 'real-option-subcategory-id',
+                  value: [{ units: 1326, strikePrice: 1350.23, marketPrice: 1988.39 }],
+                },
+              ],
+              creditLimit: [],
+              currencies: [],
+            },
+          ],
+        },
+      });
+
+      expect(result).toStrictEqual([
+        0, // Jan 2018
+        0, // Feb 2018
+        0, // Mar 2018
+        0, // Apr 2018
+        1326 * 1988.39, // May 2018
+        0, // Jun 2018
+        0, // Jul 2018
+      ]);
     });
   });
 
@@ -309,6 +364,7 @@ describe('Overview selectors (net worth)', () => {
               type: testCategory.type,
               category: testCategory.category,
               color: testCategory.color,
+              isOption: testCategory.isOption,
             },
           },
           {
@@ -407,6 +463,143 @@ describe('Overview selectors (net worth)', () => {
           },
         },
       ]);
+    });
+
+    describe('for option values', () => {
+      const stateWithOptions: State = {
+        ...state,
+        netWorth: {
+          ...state.netWorth,
+          categories: [
+            {
+              ...testCategory,
+              id: 'real-category-id',
+              isOption: true,
+            },
+          ],
+          subcategories: [
+            {
+              ...testSubcategory,
+              id: 'real-subcategory-id',
+              categoryId: 'real-category-id',
+            },
+          ],
+          entries: [
+            {
+              id: 'fake-entry-id',
+              date: new Date('2019-07-31'),
+              values: [],
+              creditLimit: [],
+              currencies: [],
+              __optimistic: RequestType.create,
+            },
+          ],
+        },
+      };
+
+      it('should remove orphaned components of the value', () => {
+        expect.assertions(1);
+        const stateWithEntryCreate: State = {
+          ...stateWithOptions,
+          netWorth: {
+            ...stateWithOptions.netWorth,
+            entries: [
+              {
+                ...stateWithOptions.netWorth.entries[0],
+                values: [
+                  {
+                    id: 'fake-value-id',
+                    subcategory: 'real-subcategory-id',
+                    value: [
+                      3,
+                      { units: 67, strikePrice: 35.27, marketPrice: 32.99 },
+                      { value: 10, currency: 'USD' },
+                      { units: 103, strikePrice: 135.27, marketPrice: 132.99 },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        };
+
+        const result = getNetWorthRequests(stateWithEntryCreate);
+
+        expect(result).toStrictEqual([
+          {
+            type: RequestType.create,
+            fakeId: 'fake-entry-id',
+            method: 'post',
+            route: 'data/net-worth',
+            body: {
+              date: '2019-07-31',
+              values: [
+                {
+                  subcategory: 'real-subcategory-id',
+                  value: [
+                    expect.objectContaining({
+                      units: 67,
+                      strikePrice: 35.27,
+                      marketPrice: 32.99,
+                    }),
+                  ],
+                },
+              ],
+              creditLimit: [],
+              currencies: [],
+            },
+          },
+        ]);
+      });
+
+      it('should revert to a zero-value field if there is no valid data', () => {
+        expect.assertions(1);
+        const stateWithEntryCreate: State = {
+          ...stateWithOptions,
+          netWorth: {
+            ...stateWithOptions.netWorth,
+            entries: [
+              {
+                ...stateWithOptions.netWorth.entries[0],
+                values: [
+                  {
+                    id: 'fake-value-id',
+                    subcategory: 'real-subcategory-id',
+                    value: [3, { value: 10, currency: 'USD' }],
+                  },
+                ],
+              },
+            ],
+          },
+        };
+
+        const result = getNetWorthRequests(stateWithEntryCreate);
+
+        expect(result).toStrictEqual([
+          {
+            type: RequestType.create,
+            fakeId: 'fake-entry-id',
+            method: 'post',
+            route: 'data/net-worth',
+            body: {
+              date: '2019-07-31',
+              values: [
+                expect.objectContaining({
+                  value: [
+                    {
+                      units: 0,
+                      strikePrice: 0,
+                      marketPrice: 0,
+                    },
+                  ],
+                }),
+              ],
+              creditLimit: [],
+              currencies: [],
+            },
+          },
+        ]);
+      });
     });
   });
 });

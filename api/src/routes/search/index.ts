@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import joi from 'joi';
-import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
+import { sql, TaggedTemplateLiteralInvocationType, DatabasePoolConnectionType } from 'slonik';
 
-import { withSlonik } from '~api/modules/db';
-import { catchAsyncErrors } from '~api/modules/error-handling';
+import { authDbRoute } from '~api/middleware/request';
 import { searchSchema } from '~api/schema';
 
 type Params = {
@@ -78,15 +77,18 @@ const getColumnResults = (
   `;
 };
 
-const getSuggestions = withSlonik<Result, [Params, string]>(
-  async (db, params: Params, uid: string): Promise<Result> => {
-    const { table, column } = params;
+const getSuggestions = async (
+  db: DatabasePoolConnectionType,
+  params: Params,
+  uid: string,
+): Promise<Result> => {
+  const { table, column } = params;
 
-    if (['food', 'general'].includes(table) && column === 'item') {
-      const nextField = 'category'; // TODO: make this dynamic / define it somewhere
+  if (['food', 'general'].includes(table) && column === 'item') {
+    const nextField = 'category'; // TODO: make this dynamic / define it somewhere
 
-      const result = await db.query<{ value: string; nextField: string }>(
-        sql`
+    const result = await db.query<{ value: string; nextField: string }>(
+      sql`
           select ${sql.join(
             [
               sql.identifier(['items', 'value']),
@@ -105,33 +107,30 @@ const getSuggestions = withSlonik<Result, [Params, string]>(
               limit 1
             )
         `,
-      );
+    );
 
-      const list = result.rows.map(({ value }) => value);
-      const nextCategory = result.rows.map(({ nextField: value }) => value);
-
-      return { list, nextCategory, nextField };
-    }
-
-    const result = await db.query<{ value: string }>(getColumnResults(params, uid));
     const list = result.rows.map(({ value }) => value);
-    return { list };
-  },
-);
+    const nextCategory = result.rows.map(({ nextField: value }) => value);
 
-const routeGet = catchAsyncErrors(
-  async (req, res): Promise<void> => {
-    const { error, value } = joi.validate<Params>((req.params as unknown) as Params, searchSchema);
-    if (error) {
-      res.status(400);
-      res.json({ errorMessage: error.message });
-      return;
-    }
+    return { list, nextCategory, nextField };
+  }
 
-    const data = await getSuggestions(value, req.user.uid);
-    res.json({ data });
-  },
-);
+  const result = await db.query<{ value: string }>(getColumnResults(params, uid));
+  const list = result.rows.map(({ value }) => value);
+  return { list };
+};
+
+const routeGet = authDbRoute(async (db, req, res) => {
+  const { error, value } = joi.validate<Params>((req.params as unknown) as Params, searchSchema);
+  if (error) {
+    res.status(400);
+    res.json({ errorMessage: error.message });
+    return;
+  }
+
+  const data = await getSuggestions(db, value, req.user.uid);
+  res.json({ data });
+});
 
 export function handler(): Router {
   const router = Router();

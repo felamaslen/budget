@@ -11,7 +11,7 @@ import {
   RequestItem,
   NetWorthRequestGeneric,
 } from '~client/types/net-worth';
-import { WithCrud, RequestType, RawDate, Request } from '~client/types/crud';
+import { WithCrud, RequestType, RawDate, Request, IdKey } from '~client/types/crud';
 
 import {
   NET_WORTH_CATEGORY_CREATED,
@@ -175,10 +175,10 @@ const withDates = (entries: (Entry | RawDate<Entry>)[]): Entry[] =>
     ),
   );
 
-const withChanges = (
-  requestType: RequestType.create | RequestType.update,
-  reqIdKey: 'id' | 'fakeId',
-) => <T extends { [id in K]: string }, K extends string = 'id'>({
+const withChanges = (requestType: RequestType.create | RequestType.update, reqIdKey: IdKey) => <
+  T extends { [id in K]: string },
+  K extends string = 'id'
+>({
   getId = (item): string => Reflect.get(item, 'id'),
   mapResponse = IDENTITY,
   getItem = (item, res): T => ({

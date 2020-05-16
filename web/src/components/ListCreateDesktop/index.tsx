@@ -4,21 +4,12 @@ import { compose } from '@typed/compose';
 
 import { PageList } from '~client/types/app';
 import { Edit } from '~client/types/crud';
-import {
-  Column,
-  getColumns,
-  Income,
-  Bill,
-  Food,
-  General,
-  Holiday,
-  Social,
-} from '~client/types/list';
+import { Column, Income, Bill, Food, General, Holiday, Social } from '~client/types/list';
 import { Row as Fund } from '~client/types/funds';
 import { Button } from '~client/styled/shared/button';
 import { ListRowDesktopBase } from '~client/components/ListRowDesktop';
 import { IDENTITY, fieldExists } from '~client/modules/data';
-import { CREATE_ID } from '~client/constants/data';
+import { CREATE_ID, getColumns } from '~client/constants/data';
 import { Button as NavButton, Command } from '~client/hooks/nav';
 
 import * as Styled from './styles';

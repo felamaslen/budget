@@ -64,6 +64,7 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
 
   return (
     <Styled.ItemForm
+      data-testid={`subcategory-item-${subcategory}`}
       style={{
         backgroundColor: `rgba(255, 255, 255, ${tempOpacity}`,
       }}
@@ -166,7 +167,7 @@ const NetWorthSubcategoryList: React.FC<Props> = ({
   onUpdate,
   onDelete,
 }) => (
-  <Styled.SubcategoryList>
+  <Styled.SubcategoryList data-testid="subcategory-form">
     <Styled.ListHead>
       <Styled.Name>{'Name'}</Styled.Name>
       {!getCreditLimitDisabled(parent) && <Styled.CreditLimit>{'Credit limit'}</Styled.CreditLimit>}

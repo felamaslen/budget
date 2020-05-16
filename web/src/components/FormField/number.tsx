@@ -31,6 +31,7 @@ type Props = WrapperProps<number | undefined> & {
   min?: number;
   max?: number;
   step?: number;
+  placeholder?: string;
 };
 
 const FormFieldNumber: React.FC<Props> = ({
@@ -40,6 +41,7 @@ const FormFieldNumber: React.FC<Props> = ({
   min,
   max,
   step,
+  placeholder,
   ...props
 }) => {
   const [currentValue, , onChange, ref, onBlur] = useField<number | undefined>({
@@ -57,6 +59,7 @@ const FormFieldNumber: React.FC<Props> = ({
         min={min}
         max={max}
         step={step}
+        placeholder={placeholder}
         disabled={disabled}
         onChange={onChange}
         onBlur={onBlur}

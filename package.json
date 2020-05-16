@@ -221,7 +221,7 @@
     "sass-loader": "^7.0.1",
     "sass-values-loader": "^1.0.4",
     "sass-variable-loader": "^0.1.2",
-    "sinon": "^4.5.0",
+    "sinon": "^9.0.2",
     "sqlite3": "^4.0.6",
     "style-loader": "^0.19.1",
     "supertest": "^4.0.2",

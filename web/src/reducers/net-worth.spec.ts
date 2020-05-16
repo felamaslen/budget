@@ -26,6 +26,7 @@ describe('Net worth reducer', () => {
     type: 'asset',
     category: 'Cash (easy access)',
     color: '#00ff00',
+    isOption: false,
   };
 
   const CATEGORY_MORTGAGE: Category = {
@@ -33,6 +34,7 @@ describe('Net worth reducer', () => {
     type: 'liability',
     category: 'Mortgage',
     color: '#fa0000',
+    isOption: false,
   };
 
   const CATEGORY_CC: Category = {
@@ -40,6 +42,7 @@ describe('Net worth reducer', () => {
     type: 'liability',
     category: 'Credit cards',
     color: '#fc0000',
+    isOption: false,
   };
 
   const SUBCATEGORY_WALLET: Subcategory = {
@@ -88,6 +91,7 @@ describe('Net worth reducer', () => {
       type: 'asset',
       category: 'Cash (easy access)',
       color: '#00ff00',
+      isOption: false,
     });
 
     it('should optimistically create a category', () => {
@@ -100,6 +104,7 @@ describe('Net worth reducer', () => {
           type: 'asset',
           category: 'Cash (easy access)',
           color: '#00ff00',
+          isOption: false,
           __optimistic: RequestType.create,
         },
       ]);
@@ -115,6 +120,7 @@ describe('Net worth reducer', () => {
           type: 'asset',
           category: 'Cash (easy access)',
           color: '#00ff00',
+          isOption: false,
         },
       ],
     };
@@ -123,6 +129,7 @@ describe('Net worth reducer', () => {
       type: 'liability',
       category: 'Mortgage',
       color: '#fa0000',
+      isOption: false,
     });
 
     it('should optimistically update a category', () => {
@@ -135,6 +142,7 @@ describe('Net worth reducer', () => {
           type: 'liability',
           category: 'Mortgage',
           color: '#fa0000',
+          isOption: false,
           __optimistic: RequestType.update,
         },
       ]);
@@ -150,6 +158,7 @@ describe('Net worth reducer', () => {
           type: 'asset',
           category: 'Cash (easy access)',
           color: '#00ff00',
+          isOption: false,
         },
       ],
       subcategories: [],
@@ -170,6 +179,7 @@ describe('Net worth reducer', () => {
               type: 'asset',
               category: 'Cash (easy access)',
               color: '#00ff00',
+              isOption: false,
               __optimistic: RequestType.delete,
             },
           ],
@@ -186,6 +196,7 @@ describe('Net worth reducer', () => {
         type: 'liability',
         category: 'Some liability',
         color: 'red',
+        isOption: false,
       };
       const otherSubcategory: Subcategory = {
         id: 'subcat-B',
@@ -203,6 +214,7 @@ describe('Net worth reducer', () => {
             type: 'asset',
             category: 'Cash (easy access)',
             color: '#00ff00',
+            isOption: false,
             __optimistic: RequestType.create,
           },
           otherCategory,
@@ -323,6 +335,7 @@ describe('Net worth reducer', () => {
           category: 'some-category',
           type: 'asset',
           color: 'green',
+          isOption: false,
         },
       ],
       subcategories: [
@@ -584,6 +597,7 @@ describe('Net worth reducer', () => {
               type: 'asset',
               category: 'Cash (easy access)',
               color: '#00ff00',
+              isOption: false,
             },
           ],
         },
@@ -606,11 +620,13 @@ describe('Net worth reducer', () => {
                 date: '2019-07-12',
                 values: [
                   {
+                    id: 'some-value-id-a',
                     subcategory: 'some-subcategory-id',
                     skip: true,
                     value: -239,
                   },
                   {
+                    id: 'some-value-id-b',
                     subcategory: 'other-subcategory-id',
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
@@ -638,6 +654,7 @@ describe('Net worth reducer', () => {
               type: 'asset',
               category: 'Cash (easy access)',
               color: '#00ff00',
+              isOption: false,
             },
           ],
           subcategories: [
@@ -655,11 +672,13 @@ describe('Net worth reducer', () => {
               date: new Date('2019-07-12'),
               values: [
                 {
+                  id: expect.any(String),
                   subcategory: 'some-subcategory-id',
                   skip: true,
                   value: -239,
                 },
                 {
+                  id: expect.any(String),
                   subcategory: 'other-subcategory-id',
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
@@ -692,13 +711,17 @@ describe('Net worth reducer', () => {
                   date: '2019-07-12',
                   values: [
                     {
+                      id: 'some-value-id-a',
                       subcategory: 'some-subcategory-id',
                       skip: true,
                       value: -239,
                     },
                   ],
+                  creditLimit: [],
+                  currencies: [],
                 },
               ],
+              old: [],
             },
           },
         },
@@ -716,6 +739,7 @@ describe('Net worth reducer', () => {
               date: new Date('2019-07-12'),
               values: [
                 {
+                  id: expect.any(String),
                   subcategory: 'some-subcategory-id',
                   skip: true,
                   value: -239,
@@ -856,7 +880,7 @@ describe('Net worth reducer', () => {
           {
             type: RequestType.update,
             id: CATEGORY_CC.id,
-            method: 'put',
+            method: 'put' as const,
             route: 'net-worth/categories',
             body: {
               type: 'asset',
@@ -865,9 +889,10 @@ describe('Net worth reducer', () => {
             },
             res: {
               id: CATEGORY_CC.id,
-              type: 'asset',
+              type: 'asset' as const,
               category: 'This is now an asset group',
               color: '#00aa00',
+              isOption: false,
             },
           },
         ],
@@ -883,6 +908,7 @@ describe('Net worth reducer', () => {
               type: 'asset',
               category: 'This is now an asset group',
               color: '#00aa00',
+              isOption: false,
               __optimistic: undefined,
             },
           ],
@@ -933,9 +959,9 @@ describe('Net worth reducer', () => {
           {
             type: RequestType.delete,
             id: CATEGORY_CC.id,
-            method: 'delete',
+            method: RequestType.delete,
             route: 'net-worth/categories',
-            res: null,
+            res: undefined,
           },
         ],
       });
@@ -1155,9 +1181,9 @@ describe('Net worth reducer', () => {
           {
             type: RequestType.delete,
             id: SUBCATEGORY_CC.id,
-            method: 'delete',
+            method: RequestType.delete,
             route: 'net-worth/subcategories',
-            res: null,
+            res: undefined,
           },
         ],
       });
@@ -1454,7 +1480,7 @@ describe('Net worth reducer', () => {
             id: 'some-real-entry-id',
             method: 'delete',
             route: 'net-worth',
-            res: null,
+            res: undefined,
           },
         ],
       });

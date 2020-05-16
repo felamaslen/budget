@@ -14,14 +14,21 @@ import {
   LIST_ITEM_DELETED,
 } from '~client/constants/actions/list';
 
+import {
+  RequestWithResponse,
+  SyncResponseList,
+  SyncResponsePostList,
+  SyncResponsePutList,
+  SyncResponseDeleteList,
+} from '~client/types/api';
 import { Page, PageListCalc, PageList } from '~client/types/app';
-import { RequestType, Create, Request } from '~client/types/crud';
-import { getColumns, Item, ListCalcItem } from '~client/types/list';
+import { RequestType, Create, Request, IdKey } from '~client/types/crud';
+import { Item, ListCalcItem } from '~client/types/list';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
-
-import { DataKeyAbbr } from '~client/constants/data';
-import { getValueFromTransmit, fieldExists } from '~client/modules/data';
+import { DataKeyAbbr } from '~client/constants/api';
+import { getColumns } from '~client/constants/data';
+import { getValueFromTransmit, fieldExists, IDENTITY } from '~client/modules/data';
 
 import {
   onCreateOptimistic,
@@ -123,45 +130,42 @@ const onDelete = <I extends Item, ES extends object>(
     items: onDeleteOptimistic<I>(state.items, action.id),
   }));
 
-type Res = {
-  id: string;
-  total?: number;
-};
-
-type RequestItem = {
+type RequestItem<R extends SyncResponseList = SyncResponseList> = {
   request: Request;
   index: number;
-  res: Res;
+  res: R;
 };
 
-type ResponseItem = RequestItem['request'] & {
-  res: Res;
-};
+type ResponseItem<R extends SyncResponseList = SyncResponseList> = RequestItem['request'] &
+  Pick<RequestWithResponse<R>, 'res'>;
 
-type PostProcess<I extends Item> = (
-  items: CrudItems<I>,
-  filteredRequestItems: RequestItemWithListIndex[],
-) => CrudItems<I>;
-
-type RequestItemWithListIndex = RequestItem & {
+type FilteredRequestItem<R extends SyncResponseList> = RequestItem<R> & {
   listIndex: number;
 };
 
+type PostProcess<I extends Item, R extends SyncResponseList> = (
+  items: CrudItems<I>,
+  filteredRequestItems: FilteredRequestItem<R>[],
+) => CrudItems<I>;
+
 type FilterRequestItems<I extends Item> = (items: CrudItems<I>) => CrudItems<I>;
 
-function filterRequestItems<I extends Item>(
+function filterRequestItems<I extends Item, R extends SyncResponseList>(
   requestItems: RequestItem[],
   requestType: RequestType,
-  postProcess: PostProcess<I>,
-  idKey: 'id' | 'fakeId' = 'id',
+  postProcess: PostProcess<I, R> = IDENTITY,
+  idKey: IdKey = 'id',
 ): FilterRequestItems<I> {
   return (items: CrudItems<I>): CrudItems<I> =>
     postProcess(
       items,
       requestItems
-        .filter(({ request: { type } }) => type === requestType)
+        .filter(
+          (requestItem: RequestItem): requestItem is RequestItem<R> =>
+            requestItem.request.type === requestType,
+        )
         .map(
-          ({ request, index, res }): RequestItemWithListIndex => ({
+          ({ request, index, res }): FilteredRequestItem<R> => ({
             request,
             index,
             res,
@@ -173,36 +177,57 @@ function filterRequestItems<I extends Item>(
     );
 }
 
-const withCreatedIds = <I extends Item>(
-  items: CrudItems<I>,
-  requestItems: RequestItemWithListIndex[],
-): CrudItems<I> =>
-  requestItems.reduce(
-    (last, { res, listIndex }: RequestItemWithListIndex) =>
-      replaceAtIndex(last, listIndex, value => ({
-        ...value,
-        id: res.id || value.id,
-        __optimistic: undefined,
-      })),
-    items,
+const confirmCreates = <I extends Item>(requestItems: RequestItem[]): FilterRequestItems<I> =>
+  filterRequestItems<I, SyncResponsePostList>(
+    requestItems,
+    RequestType.create,
+    (items, filteredRequestItems): CrudItems<I> =>
+      filteredRequestItems.reduce(
+        (last, { res, listIndex }) =>
+          replaceAtIndex(last, listIndex, value => ({
+            ...value,
+            id: res.id,
+            __optimistic: undefined,
+          })),
+        items,
+      ),
+    'fakeId',
   );
 
-const confirmCreates = <I extends Item>(requestItems: RequestItem[]): FilterRequestItems<I> =>
-  filterRequestItems<I>(requestItems, RequestType.create, withCreatedIds, 'fakeId');
-
 const confirmUpdates = <I extends Item>(requestItems: RequestItem[]): FilterRequestItems<I> =>
-  filterRequestItems(requestItems, RequestType.update, withCreatedIds);
+  filterRequestItems<I, SyncResponsePutList>(
+    requestItems,
+    RequestType.update,
+    (items, filteredRequestItems): CrudItems<I> =>
+      filteredRequestItems.reduce(
+        (last, { listIndex }) =>
+          replaceAtIndex(last, listIndex, value => ({
+            ...value,
+            __optimistic: undefined,
+          })),
+        items,
+      ),
+  );
 
 const confirmDeletes = <I extends Item>(requestItems: RequestItem[]): FilterRequestItems<I> =>
-  filterRequestItems(requestItems, RequestType.delete, (items, filteredRequestItems) => {
-    const idsToDelete = filteredRequestItems.map(({ request: { id } }) => id);
-
-    return items.filter(({ id }) => !idsToDelete.includes(id));
-  });
+  filterRequestItems<I, SyncResponseDeleteList>(
+    requestItems,
+    RequestType.delete,
+    (items, filteredRequestItems) => {
+      const idsToDelete = filteredRequestItems.map(({ request: { id } }) => id);
+      return items.filter(({ id }) => !idsToDelete.includes(id));
+    },
+  );
 
 const getRequestItems = (page: Page, action: Action): RequestItem[] =>
   (action.res.list as ResponseItem[])
-    .map(({ res, ...request }, index): RequestItem => ({ request, index, res }))
+    .map(
+      ({ res, ...request }: ResponseItem, index: number): RequestItem => ({
+        request,
+        index,
+        res,
+      }),
+    )
     .filter(({ request }: RequestItem) => request.route === page);
 
 const onSyncReceived = <I extends Item, ES extends object = {}>(page: Page) => (

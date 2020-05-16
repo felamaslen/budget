@@ -1,4 +1,4 @@
-import { Action } from 'redux';
+import { Action } from 'create-reducer-object';
 import isSameSecond from 'date-fns/isSameSecond';
 
 import { TIME_UPDATED } from '~client/constants/actions/now';

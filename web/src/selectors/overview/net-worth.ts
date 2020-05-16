@@ -24,6 +24,8 @@ import {
   RequestItem,
   Aggregate,
   AggregateSums,
+  isOption,
+  OptionValue,
 } from '~client/types/net-worth';
 import { Cost } from '~client/types/overview';
 import { State } from '~client/reducers';
@@ -80,6 +82,9 @@ function getComplexValue(value: Value, currencies: Currency[]): number {
 
       // converting from currency to GBX, but rate is against GBP
       return last + currencyMatch.rate * numberValue * 100;
+    }
+    if (isOption(part)) {
+      return last + part.units * part.marketPrice;
     }
 
     return last + part;
@@ -289,6 +294,29 @@ const groupPending = (
       (__optimistic === RequestType.create || subcategoryPending(categories)(categoryId)),
   );
 
+const baseOption: OptionValue = {
+  units: 0,
+  strikePrice: 0,
+  marketPrice: 0,
+};
+
+const withSingleOptionValues = (categories: Category[], subcategories: Subcategory[]) => (
+  values: Omit<ValueObject, 'id'>[],
+): Omit<ValueObject, 'id'>[] =>
+  values.map((valueObject: Omit<ValueObject, 'id'>) => {
+    const categoryId = subcategories.find(({ id }) => id === valueObject.subcategory)?.categoryId;
+    if (categories.find(({ id }) => id === categoryId)?.isOption) {
+      return {
+        ...valueObject,
+        value: isComplex(valueObject.value)
+          ? [valueObject.value.find(isOption) ?? baseOption]
+          : [baseOption],
+      };
+    }
+
+    return valueObject;
+  });
+
 const withoutIds = <T extends { id?: string }>(items: T[]): Omit<T, 'id'>[] =>
   items.map(({ id, ...rest }) => rest);
 
@@ -307,7 +335,10 @@ const withEntryRequests = (
         )
         .map(({ date, values, creditLimit, currencies, ...rest }: WithCrud<Entry>) => ({
           date: format(date, 'yyyy-MM-dd'),
-          values: withoutIds(values),
+          values: compose<ValueObject[], Omit<ValueObject, 'id'>[], Omit<ValueObject, 'id'>[]>(
+            withSingleOptionValues(categories, subcategories),
+            withoutIds,
+          )(values),
           creditLimit: withoutIds(creditLimit),
           currencies: withoutIds(currencies),
           ...rest,

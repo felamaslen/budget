@@ -22,6 +22,7 @@ import FormFieldSelect, { Options } from '~client/components/FormField/select';
 import FormContainer, {
   Props as ContainerProps,
 } from '~client/components/NetWorthEditForm/form-container';
+import { toIdMap } from '~client/modules/data';
 import { Step } from './constants';
 
 import * as Styled from './styles';
@@ -52,7 +53,7 @@ const SkipToggle: React.FC<PropsSkipToggle> = ({ skip, setSkip }) => (
 
 type PropsEditByType = {
   isLiability: boolean;
-  categories: Category[];
+  isOption: boolean;
   subcategories: Subcategory[];
   creditLimit: CreditLimit[];
   currencies: Currency[];
@@ -63,6 +64,7 @@ type PropsEditByType = {
 
 const EditByType: React.FC<PropsEditByType> = ({
   isLiability,
+  isOption,
   subcategories,
   creditLimit: creditLimitList,
   currencies,
@@ -98,7 +100,12 @@ const EditByType: React.FC<PropsEditByType> = ({
   return (
     <Styled.EditByCategoryValue>
       <Styled.Subcategory>{subcategoryName}</Styled.Subcategory>
-      <FormFieldNetWorthValue value={value} onChange={setNewValue} currencies={currencies} />
+      <FormFieldNetWorthValue
+        value={value}
+        isOption={isOption}
+        onChange={setNewValue}
+        currencies={currencies}
+      />
       {hasCreditLimit && (
         <CreditLimitEditor creditLimit={creditLimit ?? 0} setCreditLimit={setCreditLimit} />
       )}
@@ -110,10 +117,8 @@ const EditByType: React.FC<PropsEditByType> = ({
 
 const getFirstOption = (options: Options): string => (options[0] || {}).internal;
 
-type PropsAddByType = Pick<
-  PropsEditByType,
-  'isLiability' | 'categories' | 'subcategories' | 'currencies'
-> & {
+type PropsAddByType = Pick<PropsEditByType, 'isLiability' | 'subcategories' | 'currencies'> & {
+  categories: Category[];
   onAdd: (
     value: Value,
     creditLimit: number | null,
@@ -163,6 +168,8 @@ const AddByType: React.FC<PropsAddByType> = ({
   const initialCreditLimit = hasCreditLimit ? 0 : null;
   const [creditLimit, setCreditLimit] = useState<number | null | undefined>(initialCreditLimit);
 
+  const isOption = categories.find(({ id }) => id === category)?.isOption;
+
   const onAddCallback = useCallback(() => {
     onAdd(value, creditLimit || null, subcategory, skip);
   }, [onAdd, subcategory, value, creditLimit, skip]);
@@ -187,7 +194,12 @@ const AddByType: React.FC<PropsAddByType> = ({
           onChange={setSubcategory}
         />
       </Styled.AddSubcategory>
-      <FormFieldNetWorthValue value={value} onChange={setValue} currencies={currencies} />
+      <FormFieldNetWorthValue
+        value={value}
+        isOption={isOption}
+        onChange={setValue}
+        currencies={currencies}
+      />
       {hasCreditLimit && (
         <CreditLimitEditor creditLimit={creditLimit ?? 0} setCreditLimit={setCreditLimit} />
       )}
@@ -325,14 +337,35 @@ const CategoryGroup: React.FC<{ category: Category }> = ({
   );
 };
 
-const toIdMap = <V extends { id: string }>(items: V[]): IdMap<V> =>
-  items.reduce(
-    (last, item) => ({
-      ...last,
-      [item.id]: item,
-    }),
-    {},
+const EditByCategory: React.FC<{
+  item: CreateEdit<Entry>;
+  category: Category;
+  subcategories: Subcategory[];
+  onEdit: Props['onEdit'];
+  values: IdMap<ValueWithCategory[]>;
+  isLiability: boolean;
+}> = ({ item, category, subcategories, onEdit, values, isLiability }) => {
+  const onChangeValue = useChangeValue(item, onEdit);
+  const onRemoveValue = useRemoveValue(item, onEdit);
+
+  return (
+    <CategoryGroup key={category.id} category={category}>
+      {values[category.id].map(value => (
+        <EditByType
+          key={value.id}
+          isLiability={isLiability}
+          isOption={category.isOption}
+          subcategories={subcategories}
+          creditLimit={item.creditLimit}
+          currencies={item.currencies}
+          value={value}
+          onChange={onChangeValue}
+          onRemove={onRemoveValue}
+        />
+      ))}
+    </CategoryGroup>
   );
+};
 
 const StepValues: React.FC<PropsStep> = ({
   typeFilter,
@@ -417,8 +450,6 @@ const StepValues: React.FC<PropsStep> = ({
   );
 
   const onAddValue = useAddValue(item, onEdit);
-  const onChangeValue = useChangeValue(item, onEdit);
-  const onRemoveValue = useRemoveValue(item, onEdit);
 
   return (
     <FormContainer {...containerProps} step={Step.Values}>
@@ -431,27 +462,15 @@ const StepValues: React.FC<PropsStep> = ({
       </Styled.SectionTitle>
       <Styled.EditByCategory>
         {valueKeys.map(categoryId => (
-          <CategoryGroup
+          <EditByCategory
             key={categoryId}
-            category={
-              categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId) ||
-              ({} as Category)
-            }
-          >
-            {valuesByType[categoryId].map(value => (
-              <EditByType
-                key={value.id}
-                isLiability={isLiability}
-                categories={categoriesByType}
-                subcategories={subcategories}
-                creditLimit={item.creditLimit}
-                currencies={item.currencies}
-                value={value}
-                onChange={onChangeValue}
-                onRemove={onRemoveValue}
-              />
-            ))}
-          </CategoryGroup>
+            item={item}
+            category={categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId)!}
+            subcategories={subcategories}
+            values={valuesByType}
+            onEdit={onEdit}
+            isLiability={isLiability}
+          />
         ))}
         {availableCategories.length > 0 && (
           <AddByType

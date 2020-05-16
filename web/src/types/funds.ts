@@ -1,6 +1,6 @@
 import { Data } from '~client/types/graph';
 import { Color } from '~client/constants/colors';
-import { DataKeyAbbr } from '~client/constants/data';
+import { DataKeyAbbr } from '~client/constants/api';
 
 export type TransactionRaw = {
   date: string;

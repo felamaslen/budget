@@ -1,5 +1,5 @@
 import { Page, PageList, PageListCalc } from '~client/types/app';
-import { RequestType } from '~client/types/crud';
+import { Pages, Column } from '~client/types/list';
 import { CostProcessed } from '~client/types/overview';
 
 // debounce requests to update the server by 1 second
@@ -11,22 +11,6 @@ export const API_BACKOFF_TIME = 5000;
 export const LOGIN_INPUT_LENGTH = 4;
 
 export const CREATE_ID = 'CREATE_ID';
-
-export const CREATE = RequestType.create;
-export const UPDATE = RequestType.update;
-export const DELETE = RequestType.delete;
-
-export enum DataKeyAbbr {
-  id = 'I',
-  date = 'd',
-  item = 'i',
-  cost = 'c',
-  shop = 's',
-  category = 'k',
-  holiday = 'h',
-  society = 'y',
-  transactions = 'tr',
-}
 
 export type OverviewHeader = 'month' & Exclude<keyof CostProcessed, 'fundsOld'>;
 
@@ -59,58 +43,53 @@ export const OVERVIEW_COLUMNS: Record<OverviewHeader, OverviewColumn> = {
   },
 };
 
-export const PAGES: {
-  [page in Page]: {
-    list?: boolean;
-    suggestions?: string[];
-    cols?: string[];
-    path?: string;
-    daily?: boolean;
-  };
-} = {
-  overview: {
+export const PAGES: Pages = {
+  [Page.overview]: {
     path: '/',
     cols: ['balance'],
   },
-  analysis: {},
-  funds: {
+  [Page.analysis]: {},
+  [Page.funds]: {
     list: true,
     cols: ['item', 'transactions'],
   },
-  income: {
+  [Page.income]: {
     list: true,
     cols: ['date', 'item', 'cost'],
   },
-  bills: {
+  [Page.bills]: {
     list: true,
     cols: ['date', 'item', 'cost'],
     suggestions: ['item'],
   },
-  food: {
+  [Page.food]: {
     list: true,
     cols: ['date', 'item', 'category', 'cost', 'shop'],
     daily: true,
     suggestions: ['item', 'category', 'shop'],
   },
-  general: {
+  [Page.general]: {
     list: true,
     cols: ['date', 'item', 'category', 'cost', 'shop'],
     daily: true,
     suggestions: ['item', 'category', 'shop'],
   },
-  holiday: {
+  [Page.holiday]: {
     list: true,
     cols: ['date', 'item', 'holiday', 'cost', 'shop'],
     daily: true,
     suggestions: ['item', 'holiday', 'shop'],
   },
-  social: {
+  [Page.social]: {
     list: true,
     cols: ['date', 'item', 'society', 'cost', 'shop'],
     daily: true,
     suggestions: ['item', 'society', 'shop'],
   },
 };
+
+export const getColumns = <I extends {}>(page?: PageList): Column<I>[] =>
+  (page && ((PAGES[page].cols ?? []) as Column<I>[])) ?? [];
 
 export const PAGES_LIST_CALC: PageListCalc[] = [
   Page.income,
@@ -127,3 +106,10 @@ export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
 
 // maximum number of search suggestions to request
 export const MAX_SUGGESTIONS = 5;
+
+export const NET_WORTH_AGGREGATE = {
+  'cash-easy-access': 'Cash (easy access)',
+  'cash-other': 'Cash (other)',
+  stocks: 'Stocks',
+  pension: 'Pension',
+};

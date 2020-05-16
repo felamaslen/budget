@@ -27,10 +27,17 @@ function getInitialInputValue(value: number | undefined): string {
 type Props = WrapperProps<number | undefined> & {
   onChange: (value?: number) => void;
   label?: string;
+  placeholder?: string;
   inline?: boolean;
 };
 
-const FormFieldCost: React.FC<Props> = ({ label = null, value, invalid = false, ...props }) => {
+const FormFieldCost: React.FC<Props> = ({
+  label = null,
+  value,
+  placeholder,
+  invalid = false,
+  ...props
+}) => {
   const [, inputValue, onChange, ref, onBlur] = useField<number | undefined>({
     ...props,
     value,
@@ -49,6 +56,7 @@ const FormFieldCost: React.FC<Props> = ({ label = null, value, invalid = false, 
         value={inputValue}
         onChange={onChange}
         onBlur={onBlur}
+        placeholder={placeholder}
       />
     </Wrapper>
   );
