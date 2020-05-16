@@ -207,6 +207,7 @@
     "husky": "^4.2.3",
     "ignore-styles": "^5.0.1",
     "jest": "^25.1.0",
+    "jest-matchmedia-mock": "^1.0.1",
     "lint-staged": "^10.0.8",
     "match-media-mock": "^0.1.1",
     "mini-css-extract-plugin": "^0.4.0",

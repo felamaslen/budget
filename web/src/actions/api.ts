@@ -3,7 +3,7 @@ import * as actions from '~client/constants/actions/api';
 import { ReadResponse, SyncResponse } from '~client/types/api';
 import { Request } from '~client/types/crud';
 
-export const dataRead = (res: ReadResponse): Action & { res: ReadResponse } => ({
+export const dataRead = (res: ReadResponse): { type: string; res: ReadResponse } => ({
   type: actions.DATA_READ,
   res,
 });

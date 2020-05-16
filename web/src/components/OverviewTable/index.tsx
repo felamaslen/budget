@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
-import Media from 'react-media';
 
 import { mediaQueryMobile } from '~client/constants';
+import { useMediaQuery } from '~client/hooks/media';
 import OverviewTableHeader from './OverviewTableHeader';
 import OverviewTableRows, { Props as RowsProps } from './OverviewTableRows';
 
@@ -11,17 +11,15 @@ type Props = {
   rows: RowsProps['rows'] | null;
 };
 
-const OverviewTable: React.FC<Props> = ({ rows }) => (
-  <Styled.OverviewTable data-testid="overview-table">
-    <OverviewTableHeader />
-    {!!rows && (
-      <Media query={mediaQueryMobile}>
-        {(isMobile: boolean): React.ReactElement => (
-          <OverviewTableRows rows={rows} numToSkip={isMobile ? 19 : 0} />
-        )}
-      </Media>
-    )}
-  </Styled.OverviewTable>
-);
+const OverviewTable: React.FC<Props> = ({ rows }) => {
+  const isMobile = useMediaQuery(mediaQueryMobile);
+
+  return (
+    <Styled.OverviewTable data-testid="overview-table">
+      <OverviewTableHeader />
+      {!!rows && <OverviewTableRows rows={rows} numToSkip={isMobile ? 19 : 0} />}
+    </Styled.OverviewTable>
+  );
+};
 
 export default memo(OverviewTable);
