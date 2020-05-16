@@ -35,7 +35,7 @@ import {
   State as CrudState,
 } from '~client/reducers/crud';
 
-import { IDENTITY } from '~client/modules/data';
+import { IDENTITY, sortByKey } from '~client/modules/data';
 
 type ExtraState = {
   old: number[];
@@ -145,7 +145,7 @@ const onRead = (
       currencies: Currency[];
     }) => ({
       date: new Date(date),
-      values,
+      values: sortByKey('id')(values),
       creditLimit,
       currencies,
       ...rest,
@@ -164,6 +164,12 @@ const withoutUnnecessaryChange = <T>(items: T[], updatedItems: T[]): T[] =>
 
 const entryIsRaw = (entry: Entry | RawDate<Entry>): entry is RawDate<Entry> =>
   typeof entry.date === 'string';
+
+const sortEntryValues = (entries: Entry[]): Entry[] =>
+  entries.map(entry => ({
+    ...entry,
+    values: sortByKey<'id', ValueObject>('id')(entry.values),
+  }));
 
 const withDates = (entries: (Entry | RawDate<Entry>)[]): Entry[] =>
   withoutUnnecessaryChange(
@@ -246,6 +252,7 @@ const confirmCreates = (requests: NetWorthRequestGeneric[]) => (state: State): S
     withCreates<Subcategory>()(requests),
   )(state.subcategories),
   entries: compose(
+    sortEntryValues,
     withDates,
     updateEntriesOnSubcategoryCreate(requests),
     withCreates<Entry>()(requests),

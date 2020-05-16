@@ -1,5 +1,5 @@
 import { Response, NextFunction, RequestHandler } from 'express';
-import { DatabasePoolConnectionType } from 'slonik';
+import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { withSlonik } from '~api/modules/db';
 import { catchAsyncErrors } from '~api/modules/error-handling';
@@ -7,9 +7,10 @@ import { AuthenticatedRequest } from '~api/modules/auth';
 
 export const authDbRoute = (
   handler: (
-    db: DatabasePoolConnectionType,
+    db: DatabaseTransactionConnectionType,
     req: AuthenticatedRequest,
     res: Response,
-    next?: NextFunction,
+    next: NextFunction,
   ) => Promise<void>,
-): RequestHandler => catchAsyncErrors(withSlonik<void, [AuthenticatedRequest, Response]>(handler));
+): RequestHandler =>
+  catchAsyncErrors(withSlonik<void, [AuthenticatedRequest, Response, NextFunction]>(handler));

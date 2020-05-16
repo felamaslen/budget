@@ -1,5 +1,5 @@
 import knex from 'knex';
-import { createPool, DatabasePoolConnectionType } from 'slonik';
+import { createPool, DatabaseTransactionConnectionType } from 'slonik';
 import { createQueryLoggingInterceptor } from 'slonik-interceptor-query-logging';
 
 import config from '../config';
@@ -11,19 +11,8 @@ export const pool = createPool(config.db.url, { interceptors });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withSlonik = <R = void, A extends any[] = never[]>(
-  handler: (connection: DatabasePoolConnectionType, ...args: A) => Promise<R>,
-): ((...args: A) => Promise<R>) => (...args: A): Promise<R> =>
-  new Promise((resolve, reject) => {
-    pool.connect(
-      async (connection): Promise<void> => {
-        try {
-          const result = await handler(connection, ...args);
-          resolve(result);
-        } catch (err) {
-          reject(err);
-        }
-      },
-    );
-  });
+  handler: (connection: DatabaseTransactionConnectionType, ...args: A) => Promise<R>,
+): ((...args: A) => Promise<R>) => async (...args: A): Promise<R> =>
+  pool.transaction((connection): Promise<R> => handler(connection, ...args));
 
 export default knex(config.db);

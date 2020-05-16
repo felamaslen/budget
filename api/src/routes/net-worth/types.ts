@@ -40,6 +40,7 @@ export type ComplexValue = ComplexValueItem[];
 export type Value = number | ComplexValue;
 
 export type ValueObject = {
+  id?: string;
   subcategory: Subcategory['id'];
   skip?: boolean | null;
   value: Value;
@@ -51,6 +52,7 @@ export type CreditLimit = {
 };
 
 export type Currency = {
+  id?: string;
   currency: string;
   rate: number;
 };

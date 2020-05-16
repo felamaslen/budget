@@ -753,12 +753,12 @@ describe('Server - integration tests (net-worth)', () => {
     });
 
     describe('PUT /net-worth/:entryId', () => {
-      let entryId: string;
+      let entryBefore: Entry;
 
       beforeEach(async () => {
-        ({
-          body: { id: entryId },
-        } = await global.withAuth(global.agent.post('/api/v4/data/net-worth')).send(entry));
+        ({ body: entryBefore } = await global
+          .withAuth(global.agent.post('/api/v4/data/net-worth'))
+          .send(entry));
       });
 
       it('should update the date', async () => {
@@ -769,7 +769,7 @@ describe('Server - integration tests (net-worth)', () => {
         };
 
         const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryBefore.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -790,7 +790,7 @@ describe('Server - integration tests (net-worth)', () => {
         };
 
         const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryBefore.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -814,7 +814,7 @@ describe('Server - integration tests (net-worth)', () => {
         };
 
         const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryBefore.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -838,7 +838,7 @@ describe('Server - integration tests (net-worth)', () => {
         };
 
         const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryBefore.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -874,13 +874,137 @@ describe('Server - integration tests (net-worth)', () => {
         };
 
         const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryId}`))
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryBefore.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty(
           'values',
           expect.arrayContaining(updatedEntry.values.map(expect.objectContaining)),
+        );
+      });
+
+      it('should not change IDs where unnecessary', async () => {
+        expect.assertions(5);
+        const updatedEntry = {
+          ...entry,
+          values: [
+            ...entry.values.slice(1),
+            {
+              ...entry.values[0],
+              subcategory: (subcategoryCurrentAccount as Subcategory).id,
+              value: 20311,
+            },
+          ],
+          currencies: [
+            ...entry.currencies,
+            {
+              currency: 'USD',
+              rate: 0.796,
+            },
+          ],
+        };
+
+        const res = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryBefore.id}`))
+          .send(updatedEntry);
+
+        expect(res.status).toBe(200);
+
+        const entryAfter: Entry = res.body;
+
+        expect(entryAfter.id).toBe(entryBefore.id);
+        expect(entryAfter.values).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              value: 20311,
+            }),
+            ...entryBefore.values.slice(1).map(({ id }) => expect.objectContaining({ id })),
+          ]),
+        );
+
+        expect(entryAfter.currencies).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              currency: 'USD',
+            }),
+            ...entryBefore.currencies.map(({ id }) => expect.objectContaining({ id })),
+          ]),
+        );
+
+        expect(res.body).toStrictEqual(
+          expect.objectContaining({
+            date: updatedEntry.date,
+            values: expect.arrayContaining(updatedEntry.values.map(expect.objectContaining)),
+            creditLimit: expect.arrayContaining(
+              updatedEntry.creditLimit.map(expect.objectContaining),
+            ),
+            currencies: expect.arrayContaining(
+              updatedEntry.currencies.map(expect.objectContaining),
+            ),
+          }),
+        );
+      });
+
+      it('should not duplicate options', async () => {
+        expect.assertions(4);
+
+        const updateOptionA = {
+          ...entry,
+          values: [
+            ...entry.values,
+            {
+              ...entry.values[0],
+              subcategory: (subcategoryOptions as Subcategory).id,
+              value: [
+                {
+                  units: 10,
+                  strikePrice: 11,
+                  marketPrice: 12,
+                },
+              ],
+            },
+          ],
+        };
+
+        const updateOptionB = {
+          ...entry,
+          values: [
+            {
+              ...entry.values[0],
+              value: 11111,
+            },
+            ...updateOptionA.values.slice(1),
+          ],
+        };
+
+        const resA = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryBefore.id}`))
+          .send(updateOptionA);
+
+        const resB = await global
+          .withAuth(global.agent.put(`/api/v4/data/net-worth/${entryBefore.id}`))
+          .send(updateOptionB);
+
+        expect(resA.status).toBe(200);
+        expect(resB.status).toBe(200);
+
+        expect(resA.body).not.toStrictEqual(resB.body);
+
+        expect((resB.body as Entry).values).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              value: [
+                {
+                  units: 10,
+                  strikePrice: 11,
+                  marketPrice: 12,
+                },
+              ],
+            }),
+          ]),
         );
       });
     });

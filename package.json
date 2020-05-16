@@ -79,6 +79,7 @@
     "deepmerge": "^2.0.1",
     "ejs": "^2.5.7",
     "express": "^4.17.1",
+    "fast-deep-equal": "^3.1.1",
     "fast-levenshtein": "^2.0.6",
     "fast-memoize": "^2.5.1",
     "flat": "^4.1.0",

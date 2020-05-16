@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import joi from 'joi';
-import { sql, TaggedTemplateLiteralInvocationType, DatabasePoolConnectionType } from 'slonik';
+import {
+  sql,
+  TaggedTemplateLiteralInvocationType,
+  DatabaseTransactionConnectionType,
+} from 'slonik';
 
 import { authDbRoute } from '~api/middleware/request';
 import { searchSchema } from '~api/schema';
@@ -78,7 +82,7 @@ const getColumnResults = (
 };
 
 const getSuggestions = async (
-  db: DatabasePoolConnectionType,
+  db: DatabaseTransactionConnectionType,
   params: Params,
   uid: string,
 ): Promise<Result> => {

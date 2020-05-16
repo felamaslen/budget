@@ -404,9 +404,7 @@ describe('Overview selectors (net worth)', () => {
               id: 'fake-entry-id',
               date: new Date('2019-07-31'),
               values: [{ id: 'fake-value-id', subcategory: 'real-subcategory-id', value: 2 }],
-              creditLimit: [
-                { id: 'some-credit-limit-id', subcategory: 'real-subcategory-id', value: 100 },
-              ],
+              creditLimit: [{ subcategory: 'real-subcategory-id', value: 100 }],
               currencies: [{ id: 'fake-currency-id', currency: 'CZK', rate: 0.031 }],
               __optimistic: RequestType.create,
             },

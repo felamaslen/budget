@@ -620,16 +620,16 @@ describe('Net worth reducer', () => {
                 date: '2019-07-12',
                 values: [
                   {
-                    id: 'some-value-id-a',
-                    subcategory: 'some-subcategory-id',
-                    skip: true,
-                    value: -239,
-                  },
-                  {
                     id: 'some-value-id-b',
                     subcategory: 'other-subcategory-id',
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
+                  },
+                  {
+                    id: 'some-value-id-a',
+                    subcategory: 'some-subcategory-id',
+                    skip: true,
+                    value: -239,
                   },
                 ],
                 creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
@@ -755,6 +755,39 @@ describe('Net worth reducer', () => {
         }),
       );
     });
+
+    it('should order the values by ID', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          categories: [
+            expect.objectContaining({
+              id: 'some-category-id',
+            }),
+          ],
+          subcategories: [
+            expect.objectContaining({
+              id: 'some-subcategory-id',
+            }),
+          ],
+          entries: [
+            expect.objectContaining({
+              id: 'some-entry-id',
+              values: [
+                expect.objectContaining({
+                  id: 'some-value-id-a',
+                }),
+                expect.objectContaining({
+                  id: 'some-value-id-b',
+                }),
+              ],
+            }),
+          ],
+        }),
+      );
+    });
   });
 
   describe('SYNC_RECEIVED', () => {
@@ -825,7 +858,10 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [CATEGORY_CASH, { ...CATEGORY_CC, __optimistic: undefined }],
+          categories: expect.arrayContaining([
+            CATEGORY_CASH,
+            { ...CATEGORY_CC, __optimistic: undefined },
+          ]),
           subcategories: [
             SUBCATEGORY_WALLET,
             {
@@ -1330,8 +1366,7 @@ describe('Net worth reducer', () => {
       );
     });
 
-    it('should confirm entry updates', () => {
-      expect.assertions(1);
+    describe('when confirming entry updates', () => {
       const state: State = {
         ...initialState,
         categories: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
@@ -1392,16 +1427,16 @@ describe('Net worth reducer', () => {
               date: '2019-07-12',
               values: [
                 {
-                  id: 'value-id-1',
-                  subcategory: SUBCATEGORY_HOUSE.id,
-                  skip: true,
-                  value: -239,
-                },
-                {
                   id: 'value-id-2',
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
+                },
+                {
+                  id: 'value-id-1',
+                  subcategory: SUBCATEGORY_HOUSE.id,
+                  skip: true,
+                  value: -239,
                 },
               ],
               creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
@@ -1411,37 +1446,60 @@ describe('Net worth reducer', () => {
         ],
       });
 
-      const result = reducer(state, action);
+      it('should update the optimistic status', () => {
+        expect.assertions(1);
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          categories: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
-          subcategories: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
-          entries: [
-            expect.objectContaining({
-              id: 'some-real-entry-id',
-              date: new Date('2019-07-12'),
-              values: [
-                {
-                  id: 'value-id-1',
-                  subcategory: SUBCATEGORY_HOUSE.id,
-                  skip: true,
-                  value: -239,
-                },
-                {
-                  id: 'value-id-2',
-                  subcategory: SUBCATEGORY_WALLET.id,
-                  skip: null,
-                  value: [10, { currency: 'CZK', value: 37.34 }],
-                },
-              ],
-              creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
-              currencies: [CURRENCY_CZK],
-              __optimistic: undefined,
-            }),
-          ],
-        }),
-      );
+        const result = reducer(state, action);
+
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            categories: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
+            subcategories: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
+            entries: [
+              expect.objectContaining({
+                id: 'some-real-entry-id',
+                date: new Date('2019-07-12'),
+                values: expect.arrayContaining([
+                  {
+                    id: 'value-id-1',
+                    subcategory: SUBCATEGORY_HOUSE.id,
+                    skip: true,
+                    value: -239,
+                  },
+                  {
+                    id: 'value-id-2',
+                    subcategory: SUBCATEGORY_WALLET.id,
+                    skip: null,
+                    value: [10, { currency: 'CZK', value: 37.34 }],
+                  },
+                ]),
+                creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
+                currencies: [CURRENCY_CZK],
+                __optimistic: undefined,
+              }),
+            ],
+          }),
+        );
+      });
+
+      it('should preserve the order of entry value IDs', () => {
+        expect.assertions(1);
+
+        const result = reducer(state, action);
+
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            entries: [
+              expect.objectContaining({
+                values: [
+                  expect.objectContaining({ id: 'value-id-1' }),
+                  expect.objectContaining({ id: 'value-id-2' }),
+                ],
+              }),
+            ],
+          }),
+        );
+      });
     });
 
     it('should confirm entry deletes', () => {

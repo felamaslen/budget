@@ -46,7 +46,6 @@ export type ValueObject = {
 };
 
 export type CreditLimit = {
-  id?: string; // only present on response, not used in web app
   subcategory: Subcategory['id'];
   value: number;
 };

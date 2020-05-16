@@ -5,7 +5,7 @@ import startOfMonth from 'date-fns/startOfMonth';
 import setYear from 'date-fns/setYear';
 import setMonth from 'date-fns/setMonth';
 import format from 'date-fns/format';
-import { sql, DatabasePoolConnectionType } from 'slonik';
+import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
 import { authDbRoute } from '~api/middleware/request';
@@ -107,7 +107,7 @@ function processValuesRows({
 }
 
 const getValuesRows = async (
-  db: DatabasePoolConnectionType,
+  db: DatabaseTransactionConnectionType,
   ids: string[],
 ): Promise<ValuesProcessed[]> => {
   const { rows } = await db.query<ValuesDerivedRow>(sql`
@@ -144,7 +144,7 @@ type CreditLimitRow = {
 };
 
 const getCreditLimit = async (
-  db: DatabasePoolConnectionType,
+  db: DatabaseTransactionConnectionType,
   ids: string[],
 ): Promise<readonly CreditLimitRow[]> => {
   const { rows } = await db.query<CreditLimitRow>(sql`
@@ -171,7 +171,7 @@ type CurrencyRow = {
 };
 
 const getCurrencies = async (
-  db: DatabasePoolConnectionType,
+  db: DatabaseTransactionConnectionType,
   ids: string[],
 ): Promise<readonly CurrencyRow[]> => {
   const { rows } = await db.query<CurrencyRow>(sql`
@@ -191,14 +191,12 @@ const getCurrencies = async (
   return rows;
 };
 
-type WithoutKey<T> = Pick<T, Exclude<keyof T, 'netWorthId'>>[];
-
-function withoutId<T extends { netWorthId: string }>(rows: readonly T[]): WithoutKey<T> {
+function withoutId<T extends { netWorthId: string }>(rows: readonly T[]): Omit<T, 'netWorthId'>[] {
   return rows.map(({ netWorthId: discard, ...rest }) => rest);
 }
 
 export const fetchById = async (
-  db: DatabasePoolConnectionType,
+  db: DatabaseTransactionConnectionType,
   netWorthId: string,
   uid: string,
 ): Promise<Entry | null> => {
@@ -234,10 +232,10 @@ export const fetchById = async (
 function splitById<T extends { netWorthId: string }>(
   rows: readonly T[],
 ): {
-  [netWorthId: string]: WithoutKey<T>;
+  [netWorthId: string]: Omit<T, 'netWorthId'>[];
 } {
   return rows.reduce(
-    (items: { [netWorthId: string]: WithoutKey<T> }, { netWorthId, ...rest }) => ({
+    (items: { [netWorthId: string]: Omit<T, 'netWorthId'>[] }, { netWorthId, ...rest }) => ({
       ...items,
       [netWorthId]: [...(items[netWorthId] || []), rest],
     }),
@@ -246,7 +244,7 @@ function splitById<T extends { netWorthId: string }>(
 }
 
 const fetchOld = async (
-  db: DatabasePoolConnectionType,
+  db: DatabaseTransactionConnectionType,
   uid: string,
   startDate: Date,
   oldDateEnd: Date,
@@ -296,7 +294,7 @@ const fetchOld = async (
 };
 
 const fetchAll = async (
-  db: DatabasePoolConnectionType,
+  db: DatabaseTransactionConnectionType,
   uid: string,
   oldDateEnd: Date,
 ): Promise<Entry[]> => {

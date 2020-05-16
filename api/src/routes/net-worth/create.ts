@@ -1,4 +1,4 @@
-import { sql, DatabasePoolConnectionType } from 'slonik';
+import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import { authDbRoute } from '~api/middleware/request';
 import { formatDate, fetchById } from './read';
@@ -68,7 +68,7 @@ const filterComplexValues = <V extends Exclude<ComplexValueItem, number>>(
     );
 
 export const insertValues = async (
-  db: DatabasePoolConnectionType,
+  db: DatabaseTransactionConnectionType,
   netWorthId: string,
   values: ValueObject[] = [],
 ): Promise<void> => {
@@ -79,10 +79,14 @@ export const insertValues = async (
   const valuesRows = values.map(getValueRow(netWorthId));
 
   const { rows: insertRows } = await db.query<{ id: string }>(sql`
-      INSERT INTO net_worth_values (net_worth_id, skip, subcategory, value)
-      SELECT * FROM ${sql.unnest(valuesRows, ['uuid', 'bool', 'uuid', 'int4'])}
-      RETURNING id
-    `);
+    INSERT INTO net_worth_values (net_worth_id, skip, subcategory, value)
+    SELECT * FROM ${sql.unnest(valuesRows, ['uuid', 'bool', 'uuid', 'int4'])}
+    ON CONFLICT (net_worth_id, subcategory) DO UPDATE SET ${sql.join(
+      [sql`skip = excluded.skip`, sql`value = excluded.value`],
+      sql`, `,
+    )}
+    RETURNING id
+  `);
 
   const valueIds: string[] = insertRows.map(({ id }) => id);
 
@@ -108,6 +112,8 @@ export const insertValues = async (
       ? db.query(sql`
           INSERT INTO net_worth_fx_values (values_id, value, currency)
           SELECT * FROM ${sql.unnest(fxValuesRows, ['uuid', 'float4', 'varchar'])}
+          ON CONFLICT (values_id, currency)
+            DO UPDATE SET value = excluded.value
         `)
       : null,
     optionValuesRows.length
@@ -121,9 +127,13 @@ export const insertValues = async (
 
 const insertWithNetWorthId = <R extends {}>(
   table: string,
-  keys: (keyof R)[],
+  keys: [keyof R, keyof R],
   types: string[],
-) => async (db: DatabasePoolConnectionType, netWorthId: string, rows: R[] = []): Promise<void> => {
+) => async (
+  db: DatabaseTransactionConnectionType,
+  netWorthId: string,
+  rows: R[] = [],
+): Promise<void> => {
   if (!rows.length) {
     return;
   }
@@ -137,6 +147,10 @@ const insertWithNetWorthId = <R extends {}>(
   await db.query(sql`
     INSERT INTO ${sql.identifier([table])} (${sql.join(columns, sql`, `)})
     SELECT * FROM ${sql.unnest(rowsWithId, ['uuid', ...types])}
+    ON CONFLICT (net_worth_id, ${sql.identifier([keys[0] as string])})
+      DO UPDATE SET
+        ${sql.identifier([keys[1] as string])} =
+        ${sql.identifier(['excluded', keys[1] as string])}
   `);
 };
 

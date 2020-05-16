@@ -354,7 +354,7 @@ const withEntryRequests = (
             withSingleOptionValues(categories, subcategories),
             withoutIds,
           )(values),
-          creditLimit: withoutIds(creditLimit),
+          creditLimit,
           currencies: withoutIds(currencies),
           ...rest,
         })),

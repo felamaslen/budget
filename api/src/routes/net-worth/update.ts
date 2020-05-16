@@ -1,12 +1,14 @@
 import * as boom from '@hapi/boom';
 import { sql } from 'slonik';
+import deepEqual from 'fast-deep-equal';
 
 import { insertValues, insertCreditLimits, insertCurrencies } from './create';
 import { formatDate, fetchById } from './read';
 import { authDbRoute } from '~api/middleware/request';
+import { Entry } from '~api/routes/net-worth/types';
 
 export const onUpdate = authDbRoute(async (db, req, res) => {
-  const { date, values, creditLimit, currencies } = req.body;
+  const { date, values, creditLimit, currencies }: Entry = req.body;
 
   const uid = req.user.uid;
   const netWorthId = req.params.id;
@@ -17,23 +19,100 @@ export const onUpdate = authDbRoute(async (db, req, res) => {
   }
 
   await db.query(sql`
-        UPDATE net_worth
-        SET date = ${formatDate(date)}
-        WHERE id = ${netWorthId}
-      `);
+    UPDATE net_worth
+    SET date = ${formatDate(new Date(date))}
+    WHERE id = ${netWorthId}
+  `);
 
-  await Promise.all(
-    ['net_worth_values', 'net_worth_credit_limit', 'net_worth_currencies'].map(table =>
-      db.query(sql`
-            DELETE FROM ${sql.identifier([table])}
-            WHERE net_worth_id = ${netWorthId}
-          `),
-    ),
-  );
+  const deletedValues = item.values
+    .filter(oldValue => !values.some(({ subcategory }) => subcategory === oldValue.subcategory))
+    .map(({ subcategory }) => subcategory);
 
-  await insertValues(db, netWorthId, values);
-  await insertCreditLimits(db, netWorthId, creditLimit);
-  await insertCurrencies(db, netWorthId, currencies);
+  const deletedCreditLimit = item.creditLimit
+    .filter(
+      oldValue => !creditLimit.some(({ subcategory }) => subcategory === oldValue.subcategory),
+    )
+    .map(({ subcategory }) => subcategory);
+
+  const deletedCurrencies = item.currencies
+    .filter(oldValue => !currencies.some(({ currency }) => currency === oldValue.currency))
+    .map(({ currency }) => currency);
+
+  const changedValues = values
+    .filter(
+      ({ id: newId, ...newValue }) =>
+        !item.values.some(({ id: oldId, ...oldValue }) => deepEqual(oldValue, newValue)),
+    )
+    .map(({ subcategory }) => subcategory);
+
+  const allSubcategories = values.map(({ subcategory }) => subcategory);
+
+  await Promise.all([
+    db.query(sql`
+      DELETE FROM net_worth_values
+      WHERE ${sql.join(
+        [
+          sql`net_worth_id = ${netWorthId}`,
+          sql`subcategory = ANY(${sql.array(deletedValues, 'uuid')})`,
+        ],
+        sql` AND `,
+      )}
+    `),
+
+    db.query(sql`
+      DELETE FROM net_worth_credit_limit
+      WHERE ${sql.join(
+        [
+          sql`net_worth_id = ${netWorthId}`,
+          sql`subcategory = ANY(${sql.array(deletedCreditLimit, 'uuid')})`,
+        ],
+        sql` AND `,
+      )}
+    `),
+
+    db.query(sql`
+      DELETE FROM net_worth_currencies
+      WHERE ${sql.join(
+        [
+          sql`net_worth_id = ${netWorthId}`,
+          sql`currency = ANY(${sql.array(deletedCurrencies, 'text')})`,
+        ],
+        sql` AND `,
+      )}
+    `),
+
+    db.query(sql`
+      DELETE FROM net_worth_fx_values nwfxv
+      USING net_worth_values nwv
+      WHERE ${sql.join(
+        [
+          sql`nwfxv.values_id = nwv.id`,
+          sql`nwv.net_worth_id = ${netWorthId}`,
+          sql`nwv.subcategory = ANY(${sql.array(changedValues, 'uuid')})`,
+        ],
+        sql` AND `,
+      )}
+    `),
+
+    db.query(sql`
+      DELETE FROM net_worth_option_values nwopv
+      USING net_worth_values nwv
+      WHERE ${sql.join(
+        [
+          sql`nwopv.values_id = nwv.id`,
+          sql`nwv.net_worth_id = ${netWorthId}`,
+          sql`nwv.subcategory = ANY(${sql.array(allSubcategories, 'uuid')})`,
+        ],
+        sql` AND `,
+      )}
+    `),
+  ]);
+
+  await Promise.all([
+    insertValues(db, netWorthId, values),
+    insertCreditLimits(db, netWorthId, creditLimit),
+    insertCurrencies(db, netWorthId, currencies),
+  ]);
 
   const updated = await fetchById(db, netWorthId, uid);
 
