@@ -1,10 +1,8 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { rgb } from 'polished';
 import isSameDay from 'date-fns/isSameDay';
 import endOfMonth from 'date-fns/endOfMonth';
 import { breakpoints, colors } from '~client/styled/variables';
 import { breakpoint, unimportant } from '~client/styled/mixins';
-import { Color } from '~client/constants/colors';
 
 const columnsDesktop = [
   'month',
@@ -121,10 +119,10 @@ const displayMobile = (column: string, past: boolean, active: boolean): boolean 
   (active && !isEndOfMonth && column === 'netWorthPredicted') ||
   (!past && !active && column === 'netWorthPredicted');
 
-export const Cell = styled.div.attrs(({ cellColor: color }: { cellColor?: Color }) => ({
-  style: color ? { backgroundColor: rgb(color[0], color[1], color[2]) } : {},
+export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColor?: string }) => ({
+  style: backgroundColor ? { backgroundColor } : {},
 }))<{
-  cellColor?: Color | null;
+  cellColor?: string | null;
   column: string;
   past?: boolean;
   active?: boolean;

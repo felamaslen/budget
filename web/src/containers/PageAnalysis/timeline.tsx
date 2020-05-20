@@ -1,8 +1,9 @@
 import React, { memo, useMemo } from 'react';
-import { COLOR_CATEGORY } from '~client/constants/colors';
-import { rgba, averageColor } from '~client/modules/color';
+import { averageColor, scoreColor } from '~client/modules/color';
+import { colors } from '~client/styled/variables';
 
 import * as Styled from './styles';
+import { Page } from '~client/types/app';
 
 const categories = ['bills', 'food', 'general', 'holiday', 'social'];
 
@@ -27,15 +28,13 @@ const Timeline: React.FC<Props> = ({ data }) => {
         const score = getSumScore(sums[timeIndex]);
         const backgroundColor = averageColor(
           row
-            .map(value => score * (value / sums[timeIndex]))
-            .map((value, categoryKey) => [
-              255 - (255 - COLOR_CATEGORY[categories[categoryKey]][0]) * value,
-              255 - (255 - COLOR_CATEGORY[categories[categoryKey]][1]) * value,
-              255 - (255 - COLOR_CATEGORY[categories[categoryKey]][2]) * value,
-            ]),
+            .map(value => score * (value / sums[timeIndex]) || 0)
+            .map((value, index) =>
+              scoreColor(Reflect.get(colors[Page.overview].category, categories[index]), value),
+            ),
         );
 
-        return <Styled.DataItem key={timeIndex} color={rgba(backgroundColor)} />;
+        return <Styled.DataItem key={timeIndex} color={backgroundColor} />;
       })}
     </Styled.Timeline>
   );

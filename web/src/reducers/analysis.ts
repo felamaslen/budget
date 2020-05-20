@@ -54,15 +54,18 @@ const onRequest = (
   loadingDeep: false,
 });
 
-const onReceive = (_: State, { res }: Action): Partial<State> => ({
-  timeline: res.data.timeline,
-  cost: res.data.cost as Cost<MainBlockName>,
-  saved: res.data.saved,
-  costDeep: null,
-  description: res.data.description,
-  loading: false,
-  loadingDeep: false,
-});
+const onReceive = (state: State, { res }: Action): Partial<State> =>
+  res
+    ? {
+        timeline: res.data.timeline,
+        cost: res.data.cost as Cost<MainBlockName>,
+        saved: res.data.saved,
+        costDeep: null,
+        description: res.data.description,
+        loading: false,
+        loadingDeep: false,
+      }
+    : state;
 
 function onBlockRequest(state: State, { name }: Action): Partial<State> {
   if (state.costDeep) {

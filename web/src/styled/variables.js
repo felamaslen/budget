@@ -1,4 +1,5 @@
-import { rgb, rgba } from 'polished';
+import { compose } from '@typed/compose';
+import { rgb, rgba, lighten, desaturate } from 'polished';
 
 import { ERROR_LEVEL_DEBUG, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR } from '~client/constants/error';
 
@@ -23,6 +24,8 @@ export const upArrowStrong = "'\\2b08'";
 
 const colorDark = rgb(34, 34, 34);
 const colorLight = rgb(234, 234, 234);
+
+const colorStocks = rgb(84, 110, 122);
 
 export const colors = {
   primary: rgb(216, 77, 77),
@@ -65,6 +68,7 @@ export const colors = {
   'highlight-light': rgb(255, 252, 218),
   white: rgb(255, 255, 255),
   black: rgb(0, 0, 0),
+  transparent: rgba(255, 255, 255, 0),
   blue: rgb(0, 153, 238),
   profit: rgb(72, 59, 228),
   'profit-light': rgb(204, 255, 213),
@@ -95,10 +99,25 @@ export const colors = {
   },
   overview: {
     main: rgb(66, 66, 66),
+    category: {
+      funds: colorStocks,
+      bills: rgb(183, 28, 28),
+      food: rgb(67, 160, 71),
+      general: rgb(1, 87, 155),
+      holiday: rgb(0, 137, 123),
+      social: rgb(191, 158, 36),
+      income: rgb(36, 191, 55),
+      spending: rgb(191, 36, 36),
+    },
     monthMobile: rgb(255, 252, 163),
     incomeMobile: rgb(183, 255, 163),
     spendingMobile: rgb(255, 163, 163),
     netWorthMobile: rgb(163, 186, 255),
+    balanceActual: rgb(0, 51, 153),
+    balancePredicted: compose(lighten(0.2), desaturate(1))(rgb(0, 51, 153)),
+    balanceStocks: rgba(200, 200, 200, 0.5),
+    balanceLockedCash: compose(lighten(0.3), desaturate(0.9))(rgb(0, 255, 0)),
+    spending: rgb(0, 51, 153),
   },
   netWorth: {
     date: rgb(238, 238, 239),
@@ -109,7 +128,7 @@ export const colors = {
     aggregate: {
       'Cash (easy access)': rgb(180, 214, 169),
       'Cash (other)': rgb(145, 194, 129),
-      Stocks: rgb(159, 195, 199),
+      Stocks: lighten(0.3)(colorStocks),
       Pension: rgb(47, 123, 211),
     },
   },

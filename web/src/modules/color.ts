@@ -1,8 +1,10 @@
 import ColorHash from 'color-hash';
+import { parseToRgb, rgb } from 'polished';
 
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
-import { COLOR_CATEGORY, Color } from '~client/constants/colors';
+import { Color } from '~client/constants/colors';
 import { arrayAverage } from '~client/modules/data';
+import { colors } from '~client/styled/variables';
 import { TableValues, Range, Median } from '~client/types/overview';
 
 const rgbaHelper = ([open]: TemplateStringsArray, ...args: number[]): string => {
@@ -12,23 +14,33 @@ const rgbaHelper = ([open]: TemplateStringsArray, ...args: number[]): string => 
   return `${open}${rounded.join(',')})`;
 };
 
+// TODO: deprecated
 export const rgba = ([red, green, blue, alpha]: Color): string =>
   typeof alpha === 'undefined'
     ? rgbaHelper`rgb(${red}, ${green}, ${blue})`
     : rgbaHelper`rgba(${red}, ${green}, ${blue}, ${alpha}`;
 
-function getOverviewCategoryKeyColor(key: string): Color | [Color, Color] {
-  if (COLOR_CATEGORY[key]) {
-    return COLOR_CATEGORY[key];
+type OverviewColorRange = { negative: string; positive: string };
+type OverviewBaseColor = string | OverviewColorRange;
+
+const isColorRange = (color: OverviewBaseColor): color is OverviewColorRange =>
+  typeof color !== 'string';
+
+function getOverviewCategoryKeyColor(key: string): OverviewBaseColor {
+  if (Reflect.has(colors.overview.category, key)) {
+    return Reflect.get(colors.overview.category, key);
   }
   if (key.startsWith('net')) {
-    return [COLOR_CATEGORY.spending, COLOR_CATEGORY.income];
+    return {
+      negative: colors.overview.category.spending,
+      positive: colors.overview.category.income,
+    };
   }
 
   throw new Error(`Unknown overview column: ${key}`);
 }
 
-export const getOverviewCategoryColor = (): Partial<TableValues<Color>> =>
+export const getOverviewCategoryColor = (): Partial<TableValues<string>> =>
   Object.entries(OVERVIEW_COLUMNS)
     .filter(([key]) => key !== 'month')
     .reduce(
@@ -39,16 +51,17 @@ export const getOverviewCategoryColor = (): Partial<TableValues<Color>> =>
       {},
     );
 
-const blank: Color = [255, 255, 255]; // white
-
 const scoreComponent = (score: number, value: number): number =>
   Math.round(255 - (255 - value) * score);
 
-const scoreColor = ([r, g, b]: Color, score: number): Color => [
-  scoreComponent(score, r),
-  scoreComponent(score, g),
-  scoreComponent(score, b),
-];
+export function scoreColor(color: string, score: number): string {
+  const { red, green, blue } = parseToRgb(color);
+  return rgb(
+    scoreComponent(score, red ?? 0),
+    scoreComponent(score, green ?? 0),
+    scoreComponent(score, blue ?? 0),
+  );
+}
 
 function getScore(value: number, median: number, min: number, max: number): number {
   if (min / max > 0 && value / min < 1) {
@@ -68,18 +81,17 @@ export function getOverviewScoreColor(
   value: number,
   { min, maxNegative = 0, minPositive = 0, max }: Range,
   { negative = 0, positive = 0 }: Partial<Median> = {},
-  color: Color | [Color, Color] = blank,
-): Color {
+  color: OverviewBaseColor = colors.white,
+): string {
   if (!value || min === max) {
-    return blank;
+    return colors.white;
   }
-
-  if (color.length === 2) {
+  if (isColorRange(color)) {
     if (value < 0) {
-      return scoreColor(color[0], getScore(-value, -negative, -maxNegative, -min));
+      return scoreColor(color.negative, getScore(-value, -negative, -maxNegative, -min));
     }
 
-    return scoreColor(color[1], getScore(value, positive, minPositive, max));
+    return scoreColor(color.positive, getScore(value, positive, minPositive, max));
   }
 
   return scoreColor(color, getScore(value, positive, min, max));
@@ -92,14 +104,15 @@ const colorHash = new ColorHash({
 
 export const colorKey = (color: string): Color => colorHash.rgb(color);
 
-export function averageColor(colors: Color[]): Color {
-  if (!colors.length) {
-    return [255, 255, 255, 0];
+export function averageColor(values: string[]): string {
+  if (!values.length) {
+    return colors.transparent;
   }
 
-  return [
-    arrayAverage(colors.map(([red]) => red)),
-    arrayAverage(colors.map(([, green]) => green)),
-    arrayAverage(colors.map(([, , blue]) => blue)),
-  ];
+  const parsed = values.map(parseToRgb);
+  return rgb(
+    arrayAverage(parsed.map(({ red }) => red)),
+    arrayAverage(parsed.map(({ green }) => green)),
+    arrayAverage(parsed.map(({ blue }) => blue)),
+  );
 }

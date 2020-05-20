@@ -1,5 +1,4 @@
 import { PageList } from './app';
-import { Color } from '~client/constants/colors';
 
 export type Cost = {
   [page in PageList]: number[];
@@ -23,8 +22,8 @@ export type State = {
   cost: Cost;
 };
 
-export type TableValues<T = never> = {
-  [key in keyof CostProcessed]?: T;
+export type TableValues<T = never, K extends keyof CostProcessed = keyof CostProcessed> = {
+  [key in K]: T;
 } & {
   netWorth: T;
 };
@@ -32,7 +31,7 @@ export type TableValues<T = never> = {
 export type Cell = {
   column: ['month' | keyof TableValues, string];
   value: string | number;
-  rgb: Color | null;
+  rgb: string | null;
 };
 
 export type TableRow = {

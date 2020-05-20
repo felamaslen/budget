@@ -66,17 +66,18 @@ describe('Analysis reducer', () => {
   });
 
   describe('ANALYSIS_RECEIVED', () => {
+    const state: State = {
+      ...testState.analysis,
+      loading: true,
+      period: Period.year,
+      grouping: Grouping.category,
+      page: 0,
+      timeline: null,
+      treeVisible: { bills: false, general: true },
+    };
+
     it('should update data in state', () => {
       expect.assertions(7);
-      const state: State = {
-        ...testState.analysis,
-        loading: true,
-        period: Period.year,
-        grouping: Grouping.category,
-        page: 0,
-        timeline: null,
-        treeVisible: { bills: false, general: true },
-      };
 
       const action = received({
         data: {
@@ -151,6 +152,14 @@ describe('Analysis reducer', () => {
       expect(result.saved).toBe(996899);
 
       expect(result.description).toBe('2019');
+    });
+
+    it('should not do anything if the response was null', () => {
+      expect.assertions(1);
+
+      const action = received(null);
+
+      expect(reducer(state, action)).toBe(state);
     });
   });
 

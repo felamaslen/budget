@@ -10,7 +10,7 @@ export type Props = {
 };
 
 const SumByCategory: React.FC<Props> = ({ item, aggregate }) => (
-  <Styled.SumValue item={item}>
+  <Styled.SumValue item={item} title={item}>
     {formatCurrency(aggregate?.[item] ?? 0, { precision: 0 })}
   </Styled.SumValue>
 );

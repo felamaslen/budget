@@ -1,22 +1,23 @@
+import { rgb, rgba } from 'polished';
+
 import {
-  rgba,
+  rgba as rgba__deprecated,
   getOverviewCategoryColor,
   getOverviewScoreColor,
   colorKey,
   averageColor,
 } from './color';
-import { Color } from '~client/constants/colors';
 
 describe('color module', () => {
   describe('rgba', () => {
     it('should return rgba for four values', () => {
       expect.assertions(1);
-      expect(rgba([254, 19, 99, 0.4])).toBe('rgba(254,19,99,0.4)');
+      expect(rgba__deprecated([254, 19, 99, 0.4])).toBe('rgba(254,19,99,0.4)');
     });
 
     it('should return rgb for three values', () => {
       expect.assertions(1);
-      expect(rgba([0, 92, 29])).toBe('rgb(0,92,29)');
+      expect(rgba__deprecated([0, 92, 29])).toBe('rgb(0,92,29)');
     });
   });
 
@@ -24,81 +25,76 @@ describe('color module', () => {
     it('should return the correct colour list', () => {
       expect.assertions(1);
       expect(getOverviewCategoryColor()).toStrictEqual({
-        funds: [84, 110, 122],
-        bills: [183, 28, 28],
-        food: [67, 160, 71],
-        general: [1, 87, 155],
-        holiday: [0, 137, 123],
-        social: [191, 158, 36],
-        income: [36, 191, 55],
-        spending: [191, 36, 36],
-        net: [
-          [191, 36, 36],
-          [36, 191, 55],
-        ],
-        netWorthPredicted: [
-          [191, 36, 36],
-          [36, 191, 55],
-        ],
-        netWorth: [
-          [191, 36, 36],
-          [36, 191, 55],
-        ],
+        funds: rgb(84, 110, 122),
+        bills: rgb(183, 28, 28),
+        food: rgb(67, 160, 71),
+        general: rgb(1, 87, 155),
+        holiday: rgb(0, 137, 123),
+        social: rgb(191, 158, 36),
+        income: rgb(36, 191, 55),
+        spending: rgb(191, 36, 36),
+        net: { negative: rgb(191, 36, 36), positive: rgb(36, 191, 55) },
+        netWorthPredicted: { negative: rgb(191, 36, 36), positive: rgb(36, 191, 55) },
+        netWorth: { negative: rgb(191, 36, 36), positive: rgb(36, 191, 55) },
       });
     });
   });
 
   describe('getOverviewScoreColor', () => {
-    it('should return white if the range is zero', () => {
-      expect.assertions(1);
-      expect(getOverviewScoreColor(10, { min: 1, max: 1 })).toStrictEqual([255, 255, 255]);
-    });
-
-    it('should return white if the value is zero', () => {
-      expect.assertions(3);
-      expect(getOverviewScoreColor(0, { min: 1, max: 1 })).toStrictEqual([255, 255, 255]);
-      expect(getOverviewScoreColor(0, { min: 0, max: 1 })).toStrictEqual([255, 255, 255]);
-      expect(getOverviewScoreColor(0, { min: -1, max: 1 })).toStrictEqual([255, 255, 255]);
+    describe.each`
+      case                                      | value | range
+      ${'the range is zero'}                    | ${10} | ${{ min: 1, max: 1 }}
+      ${'the value is zero and range zero > 0'} | ${0}  | ${{ min: 1, max: 1 }}
+      ${'the value is zero and range positive'} | ${0}  | ${{ min: 0, max: 1 }}
+      ${'the value is zero and range zero < 0'} | ${0}  | ${{ min: -1, max: 1 }}
+    `('if $case', ({ value, range }) => {
+      it('should return white', () => {
+        expect.assertions(1);
+        expect(getOverviewScoreColor(value, range)).toBe(rgb(255, 255, 255));
+      });
     });
 
     it('should return white if the (positive) value is less than the minimum', () => {
       expect.assertions(2);
-      expect(
-        getOverviewScoreColor(1, { min: 3, max: 10 }, { positive: 7 }, [36, 106, 43]),
-      ).toStrictEqual([255, 255, 255]);
+      expect(getOverviewScoreColor(1, { min: 3, max: 10 }, { positive: 7 }, rgb(36, 106, 43))).toBe(
+        rgb(255, 255, 255),
+      );
 
       expect(
-        getOverviewScoreColor(-2, { min: 3, max: 10 }, { positive: 7 }, [36, 106, 43]),
-      ).toStrictEqual([255, 255, 255]);
+        getOverviewScoreColor(-2, { min: 3, max: 10 }, { positive: 7 }, rgb(36, 106, 43)),
+      ).toBe(rgb(255, 255, 255));
     });
 
     it('should return white if the (negative) value is greater than the maximum', () => {
       expect.assertions(2);
       expect(
-        getOverviewScoreColor(-1, { min: -3, max: -10 }, { negative: -7 }, [36, 106, 43]),
-      ).toStrictEqual([255, 255, 255]);
+        getOverviewScoreColor(-1, { min: -3, max: -10 }, { negative: -7 }, rgb(36, 106, 43)),
+      ).toBe(rgb(255, 255, 255));
 
       expect(
-        getOverviewScoreColor(3.1, { min: -3, max: -10 }, { negative: -7 }, [36, 106, 43]),
-      ).toStrictEqual([255, 255, 255]);
+        getOverviewScoreColor(3.1, { min: -3, max: -10 }, { negative: -7 }, rgb(36, 106, 43)),
+      ).toBe(rgb(255, 255, 255));
     });
 
     it('should get the correct color', () => {
       expect.assertions(2);
       expect(
-        getOverviewScoreColor(10, { min: -10, max: 20 }, { negative: -4, positive: 8 }, [
-          160,
-          44,
-          92,
-        ]),
-      ).toStrictEqual([200, 132, 160]);
+        getOverviewScoreColor(
+          10,
+          { min: -10, max: 20 },
+          { negative: -4, positive: 8 },
+          rgb(160, 44, 92),
+        ),
+      ).toBe(rgb(200, 132, 160));
 
       expect(
-        getOverviewScoreColor(-9.4, { min: -10, max: 20 }, { negative: -4, positive: 8 }, [
-          [160, 44, 92],
-          [9, 119, 203],
-        ]),
-      ).toStrictEqual([165, 55, 100]);
+        getOverviewScoreColor(
+          -9.4,
+          { min: -10, max: 20 },
+          { negative: -4, positive: 8 },
+          { negative: rgb(160, 44, 92), positive: rgb(9, 119, 203) },
+        ),
+      ).toBe(rgb(165, 55, 100));
     });
 
     const range = {
@@ -113,27 +109,28 @@ describe('color module', () => {
       positive: 5.5,
     };
 
-    const color: [Color, Color] = [
-      [36, 230, 105],
-      [10, 51, 210],
-    ];
+    const color = { negative: rgb(36, 230, 105), positive: rgb(10, 51, 210) };
 
-    it.each([
-      ['negative below lower bound', -11, [36, 230, 105]],
-      ['negative minimum', -10, [36, 230, 105]],
-      ['negative median', -6, [146, 243, 180]],
-      ['negative maximum', -3, [255, 255, 255]],
-      ['negative above upper bound', -1, [255, 255, 255]],
-      ['zero', 0, [255, 255, 255]],
-      ['positive below lower bound', 3, [255, 255, 255]],
-      ['positive minimum', 4, [255, 255, 255]],
-      ['positive median', 5.5, [133, 153, 233]],
-      ['positive maximum', 11, [10, 51, 210]],
-      ['positive above upper bound', 13, [10, 51, 210]],
-    ])('should separate non-zero-bound ranges: %s', (_, score, expectedColor) => {
-      expect.assertions(1);
-      expect(getOverviewScoreColor(score, range, median, color)).toStrictEqual(expectedColor);
-    });
+    it.each`
+      case                            | score  | expectedColor
+      ${'negative below lower bound'} | ${-11} | ${rgb(36, 230, 105)}
+      ${'negative minimum'}           | ${-10} | ${rgb(36, 230, 105)}
+      ${'negative median'}            | ${-6}  | ${rgb(146, 243, 180)}
+      ${'negative maximum'}           | ${-3}  | ${rgb(255, 255, 255)}
+      ${'negative above upper bound'} | ${-1}  | ${rgb(255, 255, 255)}
+      ${'zero'}                       | ${0}   | ${rgb(255, 255, 255)}
+      ${'positive below lower bound'} | ${3}   | ${rgb(255, 255, 255)}
+      ${'positive minimum'}           | ${4}   | ${rgb(255, 255, 255)}
+      ${'positive median'}            | ${5.5} | ${rgb(133, 153, 233)}
+      ${'positive maximum'}           | ${11}  | ${rgb(10, 51, 210)}
+      ${'positive above upper bound'} | ${13}  | ${rgb(10, 51, 210)}
+    `(
+      'should separate non-zero-bound ranges when the score is $case',
+      ({ score, expectedColor }) => {
+        expect.assertions(1);
+        expect(getOverviewScoreColor(score, range, median, color)).toBe(expectedColor);
+      },
+    );
   });
 
   describe('colorKey', () => {
@@ -153,17 +150,13 @@ describe('color module', () => {
     it('should return an average colour', () => {
       expect.assertions(1);
       expect(
-        averageColor([
-          [123, 245, 3],
-          [255, 2, 30],
-          [39, 128, 255],
-        ]),
-      ).toStrictEqual([139, 125, 96]);
+        averageColor([rgb(123, 245, 3), rgb(255, 2, 30), rgb(39, 128, 255)]),
+      ).toMatchInlineSnapshot(`"#8b7d60"`);
     });
 
     it('should return transparent by default', () => {
       expect.assertions(1);
-      expect(averageColor([])).toStrictEqual([255, 255, 255, 0]);
+      expect(averageColor([])).toBe(rgba(255, 255, 255, 0));
     });
   });
 });

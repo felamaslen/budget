@@ -19,6 +19,10 @@ export const Table = styled.table`
   thead {
     border-right: 1px solid ${colors['slightly-light']};
     border-left: 1px solid ${colors['slightly-light']};
+
+    tr {
+      border-bottom: none;
+    }
   }
   tr {
     border-bottom: 1px solid ${colors['slightly-light']};

@@ -1,14 +1,8 @@
-import { rgba as rgbaNormal } from 'polished';
+import { rgba } from 'polished';
 import { useSelector } from 'react-redux';
 import React, { useState, useMemo, useCallback } from 'react';
 
-import {
-  COLOR_BALANCE_ACTUAL,
-  COLOR_BALANCE_PREDICTED,
-  COLOR_BALANCE_STOCKS,
-} from '~client/constants/colors';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
-import { rgba } from '~client/modules/color';
 import { leftPad, rightPad } from '~client/modules/data';
 import {
   GraphCashFlow,
@@ -32,10 +26,6 @@ import { Page } from '~client/types/app';
 import { Point, Line, Data, BasicProps } from '~client/types/graph';
 import { Target, CostProcessed } from '~client/types/overview';
 import { TableRow as NetWorthRow, Aggregate } from '~client/types/net-worth';
-
-const colorBalance: [string, string] = [rgba(COLOR_BALANCE_PREDICTED), rgba(COLOR_BALANCE_ACTUAL)];
-const colorBalanceStocks = rgba(COLOR_BALANCE_STOCKS);
-const colorBalanceLockedCash = rgbaNormal(colorBalanceStocks, 0.3);
 
 type BalanceData = {
   balance: number[];
@@ -181,14 +171,15 @@ function processData({
       stack: dataBalance,
       fill: true,
       smooth: true,
-      color: rgbaNormal(colors.netWorth.aggregate[Aggregate.pension], 0.5),
+      color: rgba(colors.netWorth.aggregate[Aggregate.pension], 0.5),
     },
     {
       key: 'balance',
       data: dataBalance,
       fill: false,
       smooth: true,
-      color: (_: Point, index = 0): string => colorBalance[index < futureKey - 1 ? 1 : 0],
+      color: (_: Point, index = 0): string =>
+        index < futureKey - 1 ? colors.overview.balanceActual : colors.overview.balancePredicted,
     },
     {
       key: 'cash-locked',
@@ -196,14 +187,14 @@ function processData({
       stack: dataFunds,
       fill: true,
       smooth: true,
-      color: colorBalanceLockedCash,
+      color: rgba(colors.netWorth.aggregate[Aggregate.cashOther], 0.4),
     },
     {
       key: 'funds',
       data: dataFunds,
       fill: true,
       smooth: true,
-      color: colorBalanceStocks,
+      color: rgba(colors[Page.overview].category.funds, 0.4),
     },
   ];
 }

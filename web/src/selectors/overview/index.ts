@@ -24,7 +24,6 @@ import { Row as FundRow } from '~client/types/funds';
 import { Average } from '~client/constants';
 import { OVERVIEW_COLUMNS, OverviewColumn, OverviewHeader } from '~client/constants/data';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
-import { Color } from '~client/constants/colors';
 import { IDENTITY, arrayAverage, randnBm } from '~client/modules/data';
 import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
 import { getCurrentDate } from '~client/selectors/now';
@@ -262,13 +261,13 @@ export const getOverviewTable = createSelector(
 
     const months = dates.map(date => format(date, 'LLL-yy'));
 
-    const values: TableValues<number[]> = Object.entries(OVERVIEW_COLUMNS)
+    const values: TableValues<number[], 'netWorth'> = Object.entries(OVERVIEW_COLUMNS)
       .filter(([header]) => header !== 'month')
       .reduce((last, [key]) => ({ [key]: cost[key as keyof TableValues], ...last }), {
         netWorth,
       });
 
-    const scoreValues: TableValues<number[]> = {
+    const scoreValues: TableValues<number[], 'netWorth'> = {
       ...values,
       netWorth: values.netWorth.slice(0, -(futureMonths + 1)),
     };
@@ -276,10 +275,16 @@ export const getOverviewTable = createSelector(
     const ranges: TableValues<Range> = (Object.keys(values) as (keyof TableValues)[]).reduce(
       (last, key) => ({
         [key]: {
-          min: Math.min(...(scoreValues[key] ?? [])),
-          maxNegative: key === 'net' ? 0 : Math.max(...(scoreValues[key] ?? []).filter(isNegative)),
-          minPositive: key === 'net' ? 0 : Math.min(...(scoreValues[key] ?? []).filter(isPositive)),
-          max: Math.max(...(scoreValues[key] ?? [])),
+          min: Math.min(...(Reflect.get(scoreValues, key) ?? [])),
+          maxNegative:
+            key === 'net'
+              ? 0
+              : Math.max(...(Reflect.get(scoreValues, key) ?? []).filter(isNegative)),
+          minPositive:
+            key === 'net'
+              ? 0
+              : Math.min(...(Reflect.get(scoreValues, key) ?? []).filter(isPositive)),
+          max: Math.max(...(Reflect.get(scoreValues, key) ?? [])),
         },
         ...last,
       }),
@@ -290,8 +295,14 @@ export const getOverviewTable = createSelector(
       (last, key) => ({
         ...last,
         [key]: {
-          positive: arrayAverage((scoreValues[key] ?? []).filter(isPositive), Average.Median),
-          negative: arrayAverage((scoreValues[key] ?? []).filter(isNegative), Average.Median),
+          positive: arrayAverage(
+            (Reflect.get(scoreValues, key) ?? []).filter(isPositive),
+            Average.Median,
+          ),
+          negative: arrayAverage(
+            (Reflect.get(scoreValues, key) ?? []).filter(isNegative),
+            Average.Median,
+          ),
         },
       }),
       {} as TableValues,
@@ -299,13 +310,8 @@ export const getOverviewTable = createSelector(
 
     const categoryColor = getOverviewCategoryColor();
 
-    const getColor = (value: number, key: keyof TableValues): Color =>
-      getOverviewScoreColor(
-        value,
-        ranges[key] as Range,
-        medians[key] as Median,
-        categoryColor[key] as Color,
-      );
+    const getColor = (value: number, key: keyof TableValues): string =>
+      getOverviewScoreColor(value, ranges[key], medians[key], categoryColor[key]);
 
     const getCells = (monthText: string, index: number): Cell[] =>
       (Object.entries(OVERVIEW_COLUMNS) as [OverviewHeader, OverviewColumn][]).map(

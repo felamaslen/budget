@@ -31,9 +31,14 @@ type PageColors = ColorsBase & {
 };
 
 type Colors = ColorsBase & {
+  white: string;
+  black: string;
+  transparent: string;
   button: ColorsBase;
   messages: ColorsBase;
-  [Page.overview]: PageColors;
+  [Page.overview]: PageColors & {
+    category: Record<Exclude<Page, Page.analysis> | 'income' | 'spending', string>;
+  };
   [Page.analysis]: PageColors;
   [Page.funds]: PageColors;
   [Page.income]: PageColors;
