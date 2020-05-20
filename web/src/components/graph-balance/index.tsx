@@ -215,13 +215,14 @@ function makeAfterLines({
   showAll: boolean;
   targets: Target[];
 }): React.FC<BasicProps> {
-  const AfterLines: React.FC<BasicProps> = ({ minY, maxY, pixX, pixY1 }) => (
+  const AfterLines: React.FC<BasicProps> = ({ width, minY, maxY, pixX, pixY1 }) => (
     <g>
       <Targets
         minY={minY}
         maxY={maxY}
         pixX={pixX}
         pixY1={pixY1}
+        width={width}
         showAll={showAll}
         targets={targets}
       />
