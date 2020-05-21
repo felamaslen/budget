@@ -1850,14 +1850,14 @@ describe('<PageOverview />', () => {
               <path
                 d="M0,281.28500936581725 Q36,90 77.3,41.8 C93,23 144,63 163.0,89.6 C203,147 204,234 245.9,281.3 C263,301 302,281 331.5,281.3 C360,281 385,281 414.4,281.3 Q444,281 500.0,281.3"
                 fill="none"
-                stroke="rgb(0,51,153)"
+                stroke="#039"
                 stroke-width="2"
               />
             </g>
             <g>
               <path
                 d="M0,281.28500936581725 Q50,281 77.3,281.3 C107,281 133,281 163.0,281.0 C192,281 217,278 245.9,280.9 C276,284 301,297 331.5,300.0 C360,303 385,300 414.4,300.0 Q444,300 500.0,300.0 L500.0,281.3 Q444,281 414.4,281.3 C385,281 360,285 331.5,281.3 C301,278 276,266 245.9,262.2 C217,259 192,262 163.0,262.3 C133,262 107,262 77.3,262.6 Q50,263 0.0,262.7"
-                fill="rgba(200,200,200,0.3)"
+                fill="rgba(145,194,129,0.4)"
                 stroke="none"
                 stroke-width="2"
               />
@@ -1865,7 +1865,7 @@ describe('<PageOverview />', () => {
             <g>
               <path
                 d="M0,262.6954506167432 Q50,263 77.3,262.6 C107,262 133,262 163.0,262.3 C192,262 217,259 245.9,262.2 C276,266 301,278 331.5,281.3 C360,285 385,281 414.4,281.3 Q444,281 500.0,281.3 L500,300 L0,300"
-                fill="rgba(200,200,200,0.5)"
+                fill="rgba(84,110,122,0.4)"
                 stroke="none"
                 stroke-width="2"
               />
@@ -1874,10 +1874,10 @@ describe('<PageOverview />', () => {
               <g>
                 <rect
                   fill="rgba(255,255,255,0.5)"
-                  height="70"
-                  width="100"
+                  height="62"
+                  width="64"
                   x="48"
-                  y="100"
+                  y="88"
                 />
                 <text
                   alignment-baseline="hanging"
@@ -1885,7 +1885,7 @@ describe('<PageOverview />', () => {
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="50"
-                  y="100"
+                  y="92"
                 >
                   −£NaN (1y)
                 </text>
@@ -1895,7 +1895,7 @@ describe('<PageOverview />', () => {
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="50"
-                  y="122"
+                  y="114"
                 >
                   −£NaN (3y)
                 </text>
@@ -1905,7 +1905,7 @@ describe('<PageOverview />', () => {
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="50"
-                  y="144"
+                  y="136"
                 >
                   −£NaN (5y)
                 </text>
@@ -1953,7 +1953,7 @@ describe('<PageOverview />', () => {
                   Balance
                 </text>
                 <line
-                  stroke="rgb(0,51,153)"
+                  stroke="#039"
                   stroke-width="2"
                   x1="50"
                   x2="74"
@@ -1962,7 +1962,7 @@ describe('<PageOverview />', () => {
                 />
                 <text
                   alignment-baseline="middle"
-                  fill="rgb(51,51,51)"
+                  fill="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="78"
@@ -1971,7 +1971,7 @@ describe('<PageOverview />', () => {
                   Actual
                 </text>
                 <line
-                  stroke="rgb(255,0,0)"
+                  stroke="#808080"
                   stroke-width="2"
                   x1="130"
                   x2="154"
@@ -1980,7 +1980,7 @@ describe('<PageOverview />', () => {
                 />
                 <text
                   alignment-baseline="middle"
-                  fill="rgb(51,51,51)"
+                  fill="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="158"
@@ -1989,7 +1989,7 @@ describe('<PageOverview />', () => {
                   Predicted
                 </text>
                 <rect
-                  fill="rgba(200,200,200,0.5)"
+                  fill="rgba(84,110,122,0.5)"
                   height="6"
                   width="24"
                   x="50"
@@ -1997,7 +1997,7 @@ describe('<PageOverview />', () => {
                 />
                 <text
                   alignment-baseline="middle"
-                  fill="rgb(51,51,51)"
+                  fill="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="78"
@@ -2006,7 +2006,7 @@ describe('<PageOverview />', () => {
                   Stocks
                 </text>
                 <rect
-                  fill="rgba(200,200,200,0.3)"
+                  fill="#91c281"
                   height="6"
                   width="24"
                   x="130"
@@ -2014,7 +2014,7 @@ describe('<PageOverview />', () => {
                 />
                 <text
                   alignment-baseline="middle"
-                  fill="rgb(51,51,51)"
+                  fill="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="158"
@@ -2031,7 +2031,7 @@ describe('<PageOverview />', () => {
                 />
                 <text
                   alignment-baseline="middle"
-                  fill="rgb(51,51,51)"
+                  fill="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="158"
@@ -2050,7 +2050,7 @@ describe('<PageOverview />', () => {
                 />
                 <text
                   alignment-baseline="middle"
-                  fill="rgb(51,51,51)"
+                  fill="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="78"

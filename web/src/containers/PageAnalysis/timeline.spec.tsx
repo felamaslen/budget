@@ -29,28 +29,23 @@ describe('<PageAnalysis /> / <Timeline />', () => {
         >
           <span
             class="sc-cMhqgX eoUPhG"
-            color="rgb(211,231,227)"
-            style="background-color: rgb(211, 231, 227);"
+            color="#d3e6.4e2.8"
           />
           <span
             class="sc-cMhqgX eoUPhG"
-            color="rgb(218,209,209)"
-            style="background-color: rgb(218, 209, 209);"
+            color="#d9.cd1d1.4"
           />
           <span
             class="sc-cMhqgX eoUPhG"
-            color="rgb(215,213,214)"
-            style="background-color: rgb(215, 213, 214);"
+            color="#d7.4d5.8d6.8"
           />
           <span
             class="sc-cMhqgX eoUPhG"
-            color="rgb(204,219,223)"
-            style="background-color: rgb(204, 219, 223);"
+            color="#cc.8db.8df.4"
           />
           <span
             class="sc-cMhqgX eoUPhG"
-            color="rgb(224,213,211)"
-            style="background-color: rgb(224, 213, 211);"
+            color="#df.cd5.4d3.8"
           />
         </div>
       </div>
