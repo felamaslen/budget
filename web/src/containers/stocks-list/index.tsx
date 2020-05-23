@@ -73,12 +73,12 @@ const StocksList: React.FC<{ enabled?: boolean }> = ({ enabled = DO_STOCKS_LIST 
   }, [history, weightedGain]);
 
   useEffect(() => {
-    if (lastPriceUpdate !== prevLastPriceUpdate) {
+    if (enabled && lastPriceUpdate !== prevLastPriceUpdate) {
       clearTimeout(timer.current);
       timer.current = setTimeout(requestPrices, STOCK_PRICES_DELAY);
       setLastPriceUpdate(lastPriceUpdate ?? 0);
     }
-  }, [lastPriceUpdate, prevLastPriceUpdate, requestPrices]);
+  }, [enabled, lastPriceUpdate, prevLastPriceUpdate, requestPrices]);
 
   useEffect(() => {
     if (enabled && (shares.length || indices.length)) {
