@@ -1,11 +1,13 @@
+import { compose } from '@typed/compose';
 import ColorHash from 'color-hash';
-import { parseToRgb, rgb } from 'polished';
+import moize from 'moize';
+import { parseToRgb, rgb, setLightness, setSaturation } from 'polished';
 
-import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { Color } from '~client/constants/colors';
+import { OVERVIEW_COLUMNS, isPage } from '~client/constants/data';
 import { arrayAverage } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { TableValues, Range, Median } from '~client/types/overview';
+import { TableValues, SplitRange, Median } from '~client/types';
 
 const rgbaHelper = ([open]: TemplateStringsArray, ...args: number[]): string => {
   const rounded = args.map((value, index) =>
@@ -27,13 +29,16 @@ const isColorRange = (color: OverviewBaseColor): color is OverviewColorRange =>
   typeof color !== 'string';
 
 function getOverviewCategoryKeyColor(key: string): OverviewBaseColor {
-  if (Reflect.has(colors.overview.category, key)) {
-    return Reflect.get(colors.overview.category, key);
+  if (Reflect.has(colors.overview, key)) {
+    return colors.overview[key];
+  }
+  if (isPage(key)) {
+    return colors[key].main;
   }
   if (key.startsWith('net')) {
     return {
-      negative: colors.overview.category.spending,
-      positive: colors.overview.category.income,
+      negative: colors.overview.spending,
+      positive: colors.overview.income,
     };
   }
 
@@ -79,7 +84,7 @@ function getScore(value: number, median: number, min: number, max: number): numb
 
 export function getOverviewScoreColor(
   value: number,
-  { min, maxNegative = 0, minPositive = 0, max }: Range,
+  { min, maxNegative = 0, minPositive = 0, max }: SplitRange,
   { negative = 0, positive = 0 }: Partial<Median> = {},
   color: OverviewBaseColor = colors.white,
 ): string {
@@ -96,6 +101,10 @@ export function getOverviewScoreColor(
 
   return scoreColor(color, getScore(value, positive, min, max));
 }
+
+export const pageColor = moize((color: string): string =>
+  compose(setLightness(0.9), setSaturation(0.8))(color),
+);
 
 const colorHash = new ColorHash({
   lightness: 0.3,

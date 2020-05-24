@@ -1,19 +1,14 @@
-import { createReducerObject, Action } from 'create-reducer-object';
-
 import {
-  ANALYSIS_REQUESTED,
-  ANALYSIS_RECEIVED,
-  ANALYSIS_BLOCK_REQUESTED,
-  ANALYSIS_BLOCK_RECEIVED,
-  ANALYSIS_TREE_DISPLAY_TOGGLED,
-} from '~client/constants/actions/analysis';
+  ActionTypeAnalysis,
+  ActionAnalysisRequested,
+  ActionAnalysisReceived,
+  ActionAnalysisBlockRequested,
+  ActionAnalysisBlockReceived,
+  ActionAnalysisTreeDisplayToggled,
+  ActionAnalysis,
+} from '~client/actions/analysis';
 import { Period, Grouping } from '~client/constants/analysis';
-import { MainBlockName } from '~client/containers/PageAnalysis/types';
-import { Page } from '~client/types/app';
-
-export type Tree<B extends string = string> = [B, [string, number][]];
-export type Cost<B extends string = string> = Tree<B>[];
-export type TreeVisible = { [key in MainBlockName]?: boolean };
+import { Page, AnalysisCost, MainBlockName, AnalysisTreeVisible } from '~client/types';
 
 export type State = {
   loading: boolean;
@@ -22,11 +17,11 @@ export type State = {
   grouping: Grouping;
   page: number;
   timeline: number[][] | null;
-  cost: Cost<MainBlockName>;
-  costDeep: Cost | null;
+  cost: AnalysisCost<MainBlockName>;
+  costDeep: AnalysisCost | null;
   saved: number;
   description: string | null;
-  treeVisible: TreeVisible;
+  treeVisible: AnalysisTreeVisible;
 };
 
 export const initialState: State = {
@@ -45,7 +40,7 @@ export const initialState: State = {
 
 const onRequest = (
   state: State,
-  { period = state.period, grouping = state.grouping, page = 0 }: Action,
+  { period = state.period, grouping = state.grouping, page = 0 }: ActionAnalysisRequested,
 ): Partial<State> => ({
   period,
   grouping,
@@ -54,20 +49,20 @@ const onRequest = (
   loadingDeep: false,
 });
 
-const onReceive = (state: State, { res }: Action): Partial<State> =>
+const onReceive = (_: State, { res }: ActionAnalysisReceived): Partial<State> | undefined =>
   res
     ? {
         timeline: res.data.timeline,
-        cost: res.data.cost as Cost<MainBlockName>,
+        cost: res.data.cost,
         saved: res.data.saved,
         costDeep: null,
         description: res.data.description,
         loading: false,
         loadingDeep: false,
       }
-    : state;
+    : undefined;
 
-function onBlockRequest(state: State, { name }: Action): Partial<State> {
+function onBlockRequest(state: State, { name }: ActionAnalysisBlockRequested): Partial<State> {
   if (state.costDeep) {
     return {
       loading: false,
@@ -88,25 +83,43 @@ function onBlockRequest(state: State, { name }: Action): Partial<State> {
   };
 }
 
-const onBlockReceive = (_: State, { res }: Action): Partial<State> => ({
-  costDeep: res.data.items,
+const onBlockReceive = (_: State, { res }: ActionAnalysisBlockReceived): Partial<State> => ({
+  costDeep: res?.data.items ?? null,
   loading: false,
   loadingDeep: false,
 });
 
-const onTreeDisplayToggle = (state: State, { group }: Action): Partial<State> => ({
+const onTreeDisplayToggle = (
+  state: State,
+  { group }: ActionAnalysisTreeDisplayToggled,
+): Partial<State> => ({
   treeVisible: {
     ...state.treeVisible,
     [group]: state.treeVisible[group as MainBlockName] === false,
   },
 });
 
-const handlers = {
-  [ANALYSIS_REQUESTED]: onRequest,
-  [ANALYSIS_RECEIVED]: onReceive,
-  [ANALYSIS_BLOCK_REQUESTED]: onBlockRequest,
-  [ANALYSIS_BLOCK_RECEIVED]: onBlockReceive,
-  [ANALYSIS_TREE_DISPLAY_TOGGLED]: onTreeDisplayToggle,
+const partialReducer = (
+  state: State,
+  action?: ActionAnalysis | null,
+): Partial<State> | undefined => {
+  switch (action?.type) {
+    case ActionTypeAnalysis.Requested:
+      return onRequest(state, action);
+    case ActionTypeAnalysis.Received:
+      return onReceive(state, action);
+    case ActionTypeAnalysis.BlockRequested:
+      return onBlockRequest(state, action);
+    case ActionTypeAnalysis.BlockReceived:
+      return onBlockReceive(state, action);
+    case ActionTypeAnalysis.TreeDisplayToggled:
+      return onTreeDisplayToggle(state, action);
+    default:
+      return undefined;
+  }
 };
 
-export default createReducerObject<State>(handlers, initialState);
+export default (state: State = initialState, action?: ActionAnalysis | null): State => {
+  const partial = partialReducer(state, action);
+  return partial ? { ...state, ...partial } : state;
+};

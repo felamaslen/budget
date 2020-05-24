@@ -1,13 +1,13 @@
 /* eslint-disable max-lines */
 import getUnixTime from 'date-fns/getUnixTime';
 
-import { Row } from '~client/types/funds';
-import { getTransactionsList } from '~client/modules/data';
-import { colorKey } from '~client/modules/color';
-import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
+import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { colorKey } from '~client/modules/color';
+import { getTransactionsList } from '~client/modules/data';
+import { Fund } from '~client/types/funds';
 
-export const testRows: Row[] = [
+export const testRows: Fund[] = [
   {
     id: '10',
     item: 'some fund 1',

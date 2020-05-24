@@ -1,25 +1,21 @@
-import { createReducerObject, Action } from 'create-reducer-object';
 import { compose } from '@typed/compose';
-import memoize from 'fast-memoize';
-import endOfMonth from 'date-fns/endOfMonth';
+import { createReducerObject, Action } from 'create-reducer-object';
 import addYears from 'date-fns/addYears';
-import setYear from 'date-fns/setYear';
-import setMonth from 'date-fns/setMonth';
+import endOfMonth from 'date-fns/endOfMonth';
 import isSameMonth from 'date-fns/isSameMonth';
+import setMonth from 'date-fns/setMonth';
+import setYear from 'date-fns/setYear';
+import memoize from 'fast-memoize';
 import { replaceAtIndex } from 'replace-array';
 
-import { PageListCalc, Page } from '~client/types/app';
-import { ListCalcItem } from '~client/types/list';
-import { State } from '~client/types/overview';
-import {
-  LIST_ITEM_CREATED,
-  LIST_ITEM_UPDATED,
-  LIST_ITEM_DELETED,
-} from '~client/constants/actions/list';
-import { getMonthDates } from '~client/selectors/overview/common';
+import { ListActionType } from '~client/actions/list';
 
 import { DATA_READ } from '~client/constants/actions/api';
 import { LOGGED_OUT } from '~client/constants/actions/login';
+import { getMonthDates } from '~client/selectors/overview/common';
+import { PageListCalc, Page } from '~client/types/app';
+import { ListCalcItem } from '~client/types/list';
+import { State } from '~client/types/overview';
 
 export { State } from '~client/types/overview';
 
@@ -61,7 +57,7 @@ const onRead = (_: State, action: Action): State => ({
 const getStateRowDates = memoize((state: State): Date[] => getMonthDates({ overview: state }));
 
 const getDateIndex = (state: State, date: Date): number =>
-  getStateRowDates(state).findIndex(item => isSameMonth(date, item));
+  getStateRowDates(state).findIndex((item) => isSameMonth(date, item));
 
 function getUpdatedCost(
   state: State,
@@ -74,7 +70,7 @@ function getUpdatedCost(
   }
 
   const setCost = (date: Date, diff: number) => (last: number[]): number[] =>
-    replaceAtIndex(last, getDateIndex(state, date), value => value + diff);
+    replaceAtIndex(last, getDateIndex(state, date), (value) => value + diff);
 
   return {
     cost: {
@@ -87,20 +83,20 @@ function getUpdatedCost(
   };
 }
 
-const onCreate = (state: State, { page, item }: Action): Partial<State> =>
-  getUpdatedCost(state, page, item);
+const onCreate = (state: State, { page, delta }: Action): Partial<State> =>
+  getUpdatedCost(state, page, delta);
 
-const onUpdate = (state: State, { page, item, oldItem }: Action): Partial<State> =>
-  getUpdatedCost(state, page, item, oldItem);
+const onUpdate = (state: State, { page, delta, item }: Action): Partial<State> =>
+  getUpdatedCost(state, page, delta, item);
 
-const onDelete = (state: State, { page, oldItem }: Action): Partial<State> =>
-  getUpdatedCost(state, page, { date: oldItem.date, cost: 0 }, oldItem);
+const onDelete = (state: State, { page, item }: Action): Partial<State> =>
+  getUpdatedCost(state, page, { date: item.date, cost: 0 }, item);
 
 const handlers = {
   [DATA_READ]: onRead,
-  [LIST_ITEM_CREATED]: onCreate,
-  [LIST_ITEM_UPDATED]: onUpdate,
-  [LIST_ITEM_DELETED]: onDelete,
+  [ListActionType.created]: onCreate,
+  [ListActionType.updated]: onUpdate,
+  [ListActionType.deleted]: onDelete,
   [LOGGED_OUT]: (): State => initialState,
 };
 

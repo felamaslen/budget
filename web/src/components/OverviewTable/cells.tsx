@@ -1,11 +1,11 @@
 import React from 'react';
 
-import HoverCost from '~client/components/HoverCost';
-import { TableRow } from '~client/types/overview';
 import * as Styled from './styles';
+import HoverCost from '~client/components/HoverCost';
+import { OverviewTableRow } from '~client/types';
 
 type Props = {
-  row: Omit<TableRow, 'key'>;
+  row: Omit<OverviewTableRow, 'key'>;
 };
 
 const OverviewTableCells: React.FC<Props> = ({ row: { cells, past, active, future } }) => (

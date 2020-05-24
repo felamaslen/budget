@@ -1,12 +1,11 @@
 import { Action } from 'create-reducer-object';
 
-import { Page } from '~client/types/app';
-import { makeListReducer, onRead, ListState } from '~client/reducers/list';
 import { DATA_READ } from '~client/constants/actions/api';
 import { FUNDS_VIEW_SOLD_TOGGLED, FUNDS_RECEIVED } from '~client/constants/actions/funds';
 import { DataKeyAbbr } from '~client/constants/api';
-import { Row, ItemRaw, ReadResponse } from '~client/types/funds';
 import { Period, DEFAULT_FUND_PERIOD } from '~client/constants/graph';
+import { makeListReducer, onRead, ListState } from '~client/reducers/list';
+import { Page, Fund, FundRaw, ReadResponseFunds as ReadResponse } from '~client/types';
 
 export type Cache = {
   startTime: number;
@@ -27,7 +26,7 @@ type ExtraState = {
   };
 };
 
-export type State = ListState<Row, ExtraState>;
+export type State = ListState<Fund, ExtraState>;
 
 export const initialState: State = {
   viewSoldFunds: false,
@@ -60,7 +59,7 @@ function getPriceCache(funds: ReadResponse): Cache {
   };
 }
 
-const onReadRows = onRead<Row, ExtraState>(Page.funds);
+const onReadRows = onRead<Fund, ExtraState>(Page.funds);
 
 const onReadFunds = (state: State, action: Action): Partial<State> =>
   action.res.funds
@@ -95,4 +94,4 @@ const handlers = {
   [FUNDS_RECEIVED]: onPeriodLoad,
 };
 
-export default makeListReducer<Row, ItemRaw, ExtraState>(Page.funds, handlers, initialState);
+export default makeListReducer<Fund, FundRaw, ExtraState>(Page.funds, handlers, initialState);

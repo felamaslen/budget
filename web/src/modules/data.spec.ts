@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
-import shortid from 'shortid';
 import { removeAtIndex } from 'replace-array';
+import shortid from 'shortid';
 
 import {
   getPeriodMatch,
@@ -22,8 +22,9 @@ import {
   sortByKey,
   withoutDeleted,
 } from './data';
-import { mockRandom } from '~client/mocks/random';
 import { Average } from '~client/constants';
+import { Period } from '~client/constants/graph';
+import { mockRandom } from '~client/mocks/random';
 import { RequestType } from '~client/types/crud';
 import { Data } from '~client/types/graph';
 
@@ -42,10 +43,15 @@ describe('data module', () => {
       expect(getPeriodMatch('foo')).toStrictEqual({ period: 'year', length: 11 });
     });
 
-    it('should split up a short period representation', () => {
+    it('should return an object from a Period', () => {
       expect.assertions(2);
-      expect(getPeriodMatch('month5')).toStrictEqual({ period: 'month', length: 5 });
-      expect(getPeriodMatch('year10')).toStrictEqual({ period: 'year', length: 10 });
+      expect(getPeriodMatch(Period.year5)).toStrictEqual({ period: 'year', length: 5 });
+      expect(getPeriodMatch(Period.month3)).toStrictEqual({ period: 'month', length: 3 });
+    });
+
+    it('should return an object from a string', () => {
+      expect.assertions(1);
+      expect(getPeriodMatch('year7')).toStrictEqual({ period: 'year', length: 7 });
     });
 
     it('should handle the case when the env variable is not a match', () => {
@@ -519,7 +525,7 @@ describe('data module', () => {
       },
     ];
 
-    it('should sort a list of items by date', () => {
+    it('should sort a list of items by a given key', () => {
       expect.assertions(1);
       expect(sortByKey('foo')(items.slice())).toStrictEqual([
         {
@@ -536,6 +542,77 @@ describe('data module', () => {
           foo: 3,
           bar: 'yes',
         },
+      ]);
+    });
+
+    it('should allow reverse sorting', () => {
+      expect.assertions(1);
+      expect(sortByKey({ key: 'foo', order: -1 })(items.slice())).toStrictEqual([
+        {
+          foo: 3,
+          bar: 'no',
+        },
+        {
+          foo: 3,
+          bar: 'yes',
+        },
+        {
+          foo: 2,
+        },
+        {
+          foo: 1,
+        },
+      ]);
+    });
+
+    it('should allow different order for each key', () => {
+      expect.assertions(1);
+      expect(
+        sortByKey(
+          {
+            key: 'foo',
+            order: 1,
+          },
+          {
+            key: 'bar',
+            order: -1,
+          },
+        )(items.slice()),
+      ).toStrictEqual([
+        {
+          foo: 1,
+        },
+        {
+          foo: 2,
+        },
+        {
+          foo: 3,
+          bar: 'yes',
+        },
+        {
+          foo: 3,
+          bar: 'no',
+        },
+      ]);
+    });
+
+    it('should allow sorting by date', () => {
+      expect.assertions(2);
+      const itemsWithDate: { someKey: Date }[] = [
+        { someKey: new Date('2020-03-10') },
+        { someKey: new Date('2020-03-11') },
+        { someKey: new Date('2020-01-20') },
+      ];
+
+      expect(sortByKey('someKey')(itemsWithDate)).toStrictEqual([
+        { someKey: new Date('2020-01-20') },
+        { someKey: new Date('2020-03-10') },
+        { someKey: new Date('2020-03-11') },
+      ]);
+      expect(sortByKey({ key: 'someKey', order: -1 })(itemsWithDate)).toStrictEqual([
+        { someKey: new Date('2020-03-11') },
+        { someKey: new Date('2020-03-10') },
+        { someKey: new Date('2020-01-20') },
       ]);
     });
 

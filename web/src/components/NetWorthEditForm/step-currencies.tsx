@@ -1,19 +1,18 @@
-import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import format from 'date-fns/format';
 import axios, { CancelTokenSource } from 'axios';
-import { debounce } from 'throttle-debounce';
-import shortid from 'shortid';
+import format from 'date-fns/format';
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { replaceAtIndex } from 'replace-array';
-
-import { CreateEdit } from '~client/types/crud';
-import { Entry, Currency } from '~client/types/net-worth';
-import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared/button';
-import FormFieldText from '~client/components/FormField';
-import FormFieldNumber from '~client/components/FormField/number';
-import FormContainer, { Props as ContainerProps } from './form-container';
+import shortid from 'shortid';
+import { debounce } from 'throttle-debounce';
 
 import { Step } from './constants';
+import FormContainer, { Props as ContainerProps } from './form-container';
 import * as Styled from './styles';
+import { FormFieldText } from '~client/components/FormField';
+import { FormFieldNumber } from '~client/components/FormField/number';
+import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared/button';
+import { CreateEdit } from '~client/types/crud';
+import { Entry, Currency } from '~client/types/net-worth';
 
 const BASE = 'GBP';
 
@@ -87,7 +86,7 @@ function useCurrencyApi(symbols: string[]): [Rates, GetRates, boolean, Error | u
   const [cacheTime, setCacheTime] = useState<number>(0);
 
   const onSuccess: OnSuccess = useCallback(
-    newRates => {
+    (newRates) => {
       setRates(
         Object.keys(newRates).reduce(
           (last, symbol) => ({
@@ -111,9 +110,9 @@ function useCurrencyApi(symbols: string[]): [Rates, GetRates, boolean, Error | u
     (extraSymbol?: string) => {
       const allSymbols: string[] = Array.from(
         new Set(extraSymbol ? [...symbols, extraSymbol] : symbols),
-      ).filter(value => value.length > 0);
+      ).filter((value) => value.length > 0);
 
-      const allCached = allSymbols.every(symbol => rates[symbol]);
+      const allCached = allSymbols.every((symbol) => rates[symbol]);
       if (allCached && cacheTime && cacheTime > Date.now() - 3600 * 1000) {
         return;
       }
@@ -195,7 +194,7 @@ const EditCurrency: React.FC<PropsEditCurrency> = ({
   getRates,
   loadingRates,
 }) => {
-  const [tempRate, setTempRate] = useState<number | undefined>(entry.rate);
+  const [tempRate, setTempRate] = useState<number>(entry.rate);
   const [error, setError] = useState<Error>();
 
   const [refreshButton, refreshing] = useRateRefresh(
@@ -227,7 +226,13 @@ const EditCurrency: React.FC<PropsEditCurrency> = ({
     <Styled.EditCurrency>
       <Styled.CurrencyTitle>{entry.currency}</Styled.CurrencyTitle>
       <Styled.CurrencyInputGroup>
-        <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
+        <FormFieldNumber
+          value={tempRate}
+          onChange={setTempRate}
+          inputProps={{
+            disabled: refreshing,
+          }}
+        />
         {error && <Styled.Error>{error}</Styled.Error>}
       </Styled.CurrencyInputGroup>
       {refreshButton}
@@ -248,8 +253,8 @@ const AddCurrency: React.FC<PropsAddCurrency> = ({
   getRates,
   loadingRates,
 }) => {
-  const [tempCurrency, setTempCurrency] = useState<string | undefined>('USD');
-  const [tempRate, setTempRate] = useState<number | undefined>(0);
+  const [tempCurrency, setTempCurrency] = useState<string>('USD');
+  const [tempRate, setTempRate] = useState<number>(0);
 
   const [refreshButton, refreshing] = useRateRefresh(
     rates,
@@ -264,7 +269,7 @@ const AddCurrency: React.FC<PropsAddCurrency> = ({
   const onAddCallback = useCallback(() => {
     try {
       const currency = validateCurrency(tempCurrency || '', currencies);
-      const rate = validateRate(tempRate || 0);
+      const rate = validateRate(tempRate);
 
       setError(undefined);
       onAdd({ currency, rate });
@@ -279,7 +284,11 @@ const AddCurrency: React.FC<PropsAddCurrency> = ({
       <Styled.FormSection>
         <FormFieldText value={tempCurrency} onChange={setTempCurrency} />
         <Styled.CurrencyInputGroup>
-          <FormFieldNumber value={tempRate} onChange={setTempRate} disabled={refreshing} />
+          <FormFieldNumber
+            value={tempRate}
+            onChange={setTempRate}
+            inputProps={{ disabled: refreshing }}
+          />
           {error && <Styled.Error>{error}</Styled.Error>}
         </Styled.CurrencyInputGroup>
         {refreshButton}
@@ -297,7 +306,7 @@ type Props = {
 
 const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }) => {
   const onAddValue = useCallback(
-    currency => {
+    (currency) => {
       const newCurrencies = item.currencies.concat([
         {
           id: shortid.generate(),
@@ -310,7 +319,7 @@ const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }) => {
   );
 
   const onChangeValue = useCallback(
-    currency => {
+    (currency) => {
       const index = item.currencies.findIndex(({ id }: Currency): boolean => id === currency.id);
       const newCurrencies = replaceAtIndex(item.currencies, index, currency);
       onEdit({ ...item, currencies: newCurrencies });
@@ -319,7 +328,7 @@ const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }) => {
   );
 
   const onRemoveValue = useCallback(
-    id => {
+    (id) => {
       const newCurrencies = item.currencies.filter(
         ({ id: currencyId }: Currency): boolean => currencyId !== id,
       );
@@ -344,7 +353,7 @@ const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }) => {
         </Styled.Error>
       )}
       <div>
-        {item.currencies.map(currency => (
+        {item.currencies.map((currency) => (
           <EditCurrency
             key={currency.id}
             entry={currency}

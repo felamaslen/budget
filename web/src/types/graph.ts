@@ -47,7 +47,7 @@ export type PixPrimary = Pick<Pix, 'pixX' | 'pixY1'>;
 
 export type Calc = Pix & Val;
 
-export type BasicProps = Dimensions & Calc;
+export type DrawProps = Dimensions & Calc;
 
 export type Point = [number, number];
 

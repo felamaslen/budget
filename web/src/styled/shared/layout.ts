@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { breakpoints } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
+import { breakpoints } from '~client/styled/variables';
 
 export const MobileOnly = styled.div`
   ${breakpoint(breakpoints.mobile)} {
@@ -39,4 +39,10 @@ export const InlineFlexCenter = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+`;
+
+export const ListWithoutMargin = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
 `;

@@ -1,13 +1,10 @@
 import React, { useCallback } from 'react';
 
-import { formatCurrency } from '~client/modules/format';
 import ListTreeHead from './list-tree-head';
-import SubTree, { Props as SubTreeProps } from './sub-tree';
-
 import * as Styled from './styles';
-import { MainBlockName } from './types';
-import { TreeVisible } from '~client/reducers/analysis';
-import { SortedTree } from '~client/selectors/analysis';
+import { SubTree, Props as SubTreeProps } from './sub-tree';
+import { formatCurrency } from '~client/modules/format';
+import { MainBlockName, AnalysisTreeVisible, AnalysisSortedTree } from '~client/types';
 
 type PropsItem = {
   item: Pick<SubTreeProps, 'name' | 'itemCost' | 'subTree'> & {
@@ -30,7 +27,7 @@ const ListTreeItem: React.FC<PropsItem> = ({
   const onMouseOut = useCallback(() => onHover(null), [onHover]);
 
   const onToggleCallback = useCallback(
-    event => {
+    (event) => {
       event.stopPropagation();
       onToggle(name);
     },
@@ -45,7 +42,9 @@ const ListTreeItem: React.FC<PropsItem> = ({
         open={open}
         onClick={onToggleExpandCallback}
         onMouseOver={onMouseOver}
+        onFocus={onMouseOver}
         onMouseOut={onMouseOut}
+        onBlur={onMouseOut}
       >
         <Styled.TreeIndicator name={name} />
         <input type="checkbox" defaultChecked={visible} onClick={onToggleCallback} />
@@ -62,13 +61,13 @@ const ListTreeItem: React.FC<PropsItem> = ({
   );
 };
 
-type Toggler = (next: TreeVisible | ((last: TreeVisible) => TreeVisible)) => void;
+type Toggler = React.Dispatch<React.SetStateAction<AnalysisTreeVisible>>;
 
 const useToggle = (onToggle: Toggler): ((name: MainBlockName) => void) =>
   useCallback(
-    name =>
+    (name) =>
       onToggle(
-        (last: TreeVisible): TreeVisible => ({
+        (last: AnalysisTreeVisible): AnalysisTreeVisible => ({
           ...last,
           [name]: !last[name],
         }),
@@ -77,9 +76,9 @@ const useToggle = (onToggle: Toggler): ((name: MainBlockName) => void) =>
   );
 
 export type Props = {
-  cost: SortedTree<MainBlockName>[];
-  treeVisible: TreeVisible;
-  treeOpen: TreeVisible;
+  cost: AnalysisSortedTree<MainBlockName>[];
+  treeVisible: AnalysisTreeVisible;
+  treeOpen: AnalysisTreeVisible;
   onHover: PropsItem['onHover'];
   toggleTreeItem: PropsItem['onToggle'];
   setTreeOpen: Toggler;
@@ -110,7 +109,7 @@ const ListTree: React.FC<Props> = ({
     <Styled.Tree>
       <Styled.TreeList>
         <ListTreeHead items={costPct} />
-        {costPct.map(item => (
+        {costPct.map((item) => (
           <ListTreeItem
             key={item.name}
             item={item}

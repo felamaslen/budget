@@ -99,25 +99,16 @@ export const colors = {
   },
   overview: {
     main: rgb(66, 66, 66),
-    category: {
-      funds: colorStocks,
-      bills: rgb(183, 28, 28),
-      food: rgb(67, 160, 71),
-      general: rgb(1, 87, 155),
-      holiday: rgb(0, 137, 123),
-      social: rgb(191, 158, 36),
-      income: rgb(36, 191, 55),
-      spending: rgb(191, 36, 36),
-    },
-    monthMobile: rgb(255, 252, 163),
+    income: rgb(36, 191, 55),
     incomeMobile: rgb(183, 255, 163),
+    spending: rgb(191, 36, 36),
+    monthMobile: rgb(255, 252, 163),
     spendingMobile: rgb(255, 163, 163),
     netWorthMobile: rgb(163, 186, 255),
     balanceActual: rgb(0, 51, 153),
     balancePredicted: compose(lighten(0.2), desaturate(1))(rgb(0, 51, 153)),
     balanceStocks: rgba(200, 200, 200, 0.5),
     balanceLockedCash: compose(lighten(0.3), desaturate(0.9))(rgb(0, 255, 0)),
-    spending: rgb(0, 51, 153),
   },
   netWorth: {
     date: rgb(238, 238, 239),
@@ -133,8 +124,11 @@ export const colors = {
     },
   },
   funds: {
-    main: rgb(84, 110, 122),
-    light: rgb(194, 221, 234),
+    main: colorStocks,
+    profit: rgb(0, 204, 51),
+    loss: rgb(204, 51, 0),
+    fundUp: rgb(0, 230, 18),
+    fundDown: rgb(255, 44, 44),
   },
   income: {
     main: rgb(216, 67, 21),
@@ -147,7 +141,6 @@ export const colors = {
   },
   general: {
     main: rgb(1, 87, 155),
-    light: rgb(170, 200, 224),
   },
   holiday: {
     main: rgb(0, 137, 123),

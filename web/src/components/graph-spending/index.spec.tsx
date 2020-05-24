@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
 import { render, RenderResult } from '@testing-library/react';
-import { Provider } from 'react-redux';
 import React from 'react';
+import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
 import sinon from 'sinon';
 
-import state from '~client/test-data/state';
 import { GraphSpending } from '.';
+import { testState as state } from '~client/test-data/state';
 
 describe('<GraphSpending />', () => {
   const makeStore = createStore();
@@ -27,6 +27,18 @@ describe('<GraphSpending />', () => {
     const clock = sinon.useFakeTimers();
     const { getByTestId } = setup();
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
+      @media only screen and (min-width:690px) {
+
+      }
+
+      @media only screen and (min-width:690px) {
+
+      }
+
+      @media only screen and (min-width:1200px) {
+
+      }
+
       <svg
         data-testid="graph-svg"
         height="300"
@@ -835,56 +847,56 @@ describe('<GraphSpending />', () => {
           <g>
             <path
               d="M0,284.21965317919074 L3.952230628091076e-15,219.67482881280569  L-4.3,221.8 L0.0,215.5 L4.3,221.8 L0.0,219.7"
-              fill="rgb(0,204,51)"
-              stroke="rgb(0,204,51)"
+              fill="#0c3"
+              stroke="#0c3"
               stroke-width="0.8538461538461538"
             />
           </g>
           <g>
             <path
               d="M77.34806629834254,284.21965317919074 L77.34806629834254,290.1  L84.8,286.5 L77.3,297.3 L69.8,286.5 L77.3,290.1"
-              fill="rgb(204,51,0)"
-              stroke="rgb(204,51,0)"
+              fill="#c30"
+              stroke="#c30"
               stroke-width="3"
             />
           </g>
           <g>
             <path
               d="M162.98342541436463,284.21965317919074 L162.98342541436463,210.45587305469098  L158.5,212.6 L163.0,206.1 L167.4,212.6 L163.0,210.5"
-              fill="rgb(0,204,51)"
-              stroke="rgb(0,204,51)"
+              fill="#0c3"
+              stroke="#0c3"
               stroke-width="0.9703846153846154"
             />
           </g>
           <g>
             <path
               d="M245.85635359116023,284.21965317919074 L245.85635359116023,125.3859050689195  L239.8,128.3 L245.9,119.5 L251.9,128.3 L245.9,125.4"
-              fill="rgb(0,204,51)"
-              stroke="rgb(0,204,51)"
+              fill="#0c3"
+              stroke="#0c3"
               stroke-width="2.045769230769231"
             />
           </g>
           <g>
             <path
               d="M331.49171270718233,284.21965317919074 L331.49171270718233,77.28303690529125  L324.5,80.6 L331.5,70.6 L338.5,80.6 L331.5,77.3"
-              fill="rgb(0,204,51)"
-              stroke="rgb(0,204,51)"
+              fill="#0c3"
+              stroke="#0c3"
               stroke-width="2.6538461538461537"
             />
           </g>
           <g>
             <path
               d="M414.36464088397787,284.21965317919074 L414.36464088397787,122.92143174744331  L408.2,125.9 L414.4,117.0 L420.5,125.9 L414.4,122.9"
-              fill="rgb(0,204,51)"
-              stroke="rgb(0,204,51)"
+              fill="#0c3"
+              stroke="#0c3"
               stroke-width="2.0769230769230766"
             />
           </g>
           <g>
             <path
               d="M500,284.21965317919074 L500,49.900000000000006  L492.5,53.5 L500.0,42.7 L507.5,53.5 L500.0,49.9"
-              fill="rgb(0,204,51)"
-              stroke="rgb(0,204,51)"
+              fill="#0c3"
+              stroke="#0c3"
               stroke-width="3"
             />
           </g>
@@ -893,7 +905,7 @@ describe('<GraphSpending />', () => {
           <path
             d="M0,165.8670520231214 Q54,82 77.3,90.0 C111,102 124,193 163.0,222.3 C183,238 220,207 245.9,215.9 C279,228 298,271 331.5,284.2 C357,295 385,284 414.4,284.2 Q444,284 500.0,284.2"
             fill="none"
-            stroke="rgb(0,51,153)"
+            stroke="#039"
             stroke-width="2"
           />
           <path

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { getTickSize, formatCurrency } from '~client/modules/format';
+import { getTimeScale } from '~client/components/graph/helpers';
 import {
   COLOR_LIGHT,
   COLOR_DARK,
@@ -9,8 +9,8 @@ import {
 } from '~client/constants/colors';
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
-import { getTimeScale } from '~client/components/graph/helpers';
-import { BasicProps, Tick } from '~client/types/graph';
+import { getTickSize, formatCurrency } from '~client/modules/format';
+import { DrawProps, Tick } from '~client/types';
 
 const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 
@@ -24,7 +24,7 @@ export type Props = {
   yAlign?: 'left' | 'right';
   labelY?: LabelY;
   labelY2?: LabelY;
-} & BasicProps;
+} & DrawProps;
 
 type TicksY = {
   pos: number;
@@ -146,7 +146,7 @@ const TicksYText: React.FC<YAxisTextProps> = ({ secondary, ticksY, labelY, align
   </g>
 );
 
-const YAxis: React.FC<Props> = props => {
+const YAxis: React.FC<Props> = (props) => {
   const ticksY = getTicksY(props);
 
   const {
@@ -257,7 +257,7 @@ const TicksXText: React.FC<TicksXTextProps> = ({ timeScale, y0 }) => (
   </g>
 );
 
-export const TimeAxes: React.FC<Props> = props => {
+export const TimeAxes: React.FC<Props> = (props) => {
   const {
     minX,
     minY,

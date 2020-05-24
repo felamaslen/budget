@@ -1,12 +1,11 @@
-import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
-
-import { PAGES } from '~client/constants/data';
-import { sizes, colors, breakpoints } from '~client/styled/variables';
-import { breakpoint } from '~client/styled/mixins';
-import { Page } from '~client/types/app';
+import styled from 'styled-components';
 
 import nav from '../../images/nav.png';
+import { PAGES } from '~client/constants/data';
+import { breakpoint } from '~client/styled/mixins';
+import { sizes, colors, breakpoints } from '~client/styled/variables';
+import { Page } from '~client/types/app';
 
 export const NavList = styled.nav`
   display: flex;
@@ -41,6 +40,9 @@ export const Link = styled(NavLink)<{
   cursor: pointer;
   &.active {
     border-color: ${colors.accent as string};
+  }
+  &:focus {
+    outline: none;
   }
   &::before {
     display: block;

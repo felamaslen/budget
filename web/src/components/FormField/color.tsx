@@ -1,13 +1,14 @@
 import React from 'react';
 
-import { Wrapper, WrapperProps } from '.';
+import { Wrapper, WrapperProps } from './shared';
 
-type Props = WrapperProps<string | undefined> & {
+type Props = WrapperProps & {
+  value: string;
   onChange: (color: string) => void;
 };
 
-const FormFieldColor: React.FC<Props> = ({ value, onChange }) => (
-  <Wrapper item="color" value={value} active={true}>
+export const FormFieldColor: React.FC<Props> = ({ value, onChange }) => (
+  <Wrapper item="color">
     <input
       type="color"
       value={value}
@@ -15,5 +16,3 @@ const FormFieldColor: React.FC<Props> = ({ value, onChange }) => (
     />
   </Wrapper>
 );
-
-export default FormFieldColor;

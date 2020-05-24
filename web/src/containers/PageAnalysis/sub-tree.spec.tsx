@@ -1,9 +1,8 @@
 import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
 
-import { Page } from '~client/types/app';
-import SubTree from './sub-tree';
-import { MainBlockName } from './types';
+import { SubTree } from './sub-tree';
+import { Page, MainBlockName } from '~client/types';
 
 describe('<PageAnalysis /> / <SubTree />', () => {
   const props = {

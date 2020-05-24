@@ -1,24 +1,22 @@
-import { createSelector } from 'reselect';
 import { compose } from '@typed/compose';
+import { createSelector } from 'reselect';
 
-import { Page } from '~client/types/app';
+import { Period } from '~client/constants/graph';
+import { sortByKey } from '~client/modules/data';
 import { State } from '~client/reducers';
 import * as Funds from '~client/reducers/funds';
-import { Row } from '~client/types/funds';
-import { WithCrud, RequestType } from '~client/types/crud';
-import { sortByKey } from '~client/modules/data';
-import { Period } from '~client/constants/graph';
+import { Page, Fund, WithCrud, RequestType } from '~client/types';
 
 type StateSliced = Pick<State, Page.funds>;
 
 export const getViewSoldFunds = (state: StateSliced): boolean => !!state[Page.funds].viewSoldFunds;
 
-const getNonFilteredFundsRows = (state: StateSliced): WithCrud<Row>[] => state[Page.funds].items;
+const getNonFilteredFundsRows = (state: StateSliced): WithCrud<Fund>[] => state[Page.funds].items;
 
 export const getFundsRows = createSelector(
   getNonFilteredFundsRows,
   compose(
-    (items: WithCrud<Row>[]): WithCrud<Row>[] =>
+    (items: WithCrud<Fund>[]): WithCrud<Fund>[] =>
       items.filter(({ __optimistic }) => __optimistic !== RequestType.delete),
     sortByKey('item'),
   ),

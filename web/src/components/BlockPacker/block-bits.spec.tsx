@@ -135,28 +135,52 @@ describe('<BlockPacker /> / <BlockBits />', () => {
       expect.assertions(1);
       const { container } = getBlockBits();
       expect(container).toMatchInlineSnapshot(`
+        .c1 {
+          float: left;
+          display: inline-block;
+        }
+
+        .c0 {
+          float: left;
+          position: relative;
+          box-shadow: inset 0 0 13px rgba(0,0,0,0.6);
+          z-index: 1;
+        }
+
+        .c0:hover {
+          z-index: 2;
+          box-shadow: inset 0 0 13px rgba(0,0,0,0.2),0 0 16px 3px rgba(0,0,0,0.4);
+        }
+
+        .c2 {
+          float: left;
+          position: relative;
+          box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
+          background-image: linear-gradient( to bottom right, rgba(255,255,255,0.6), rgba(0,0,0,0.3) );
+        }
+
         <div>
           <div
-            class="sc-bdVaJa sc-htpNat sc-bxivhb Wlpig"
+            class="sc-AxjAm sc-AxiKw c0"
             height="13"
             name="bills"
             style="background-color: rgb(183, 28, 28); width: 21px; height: 13px;"
             width="21"
           >
             <div
-              class="sc-bdVaJa sc-bwzfXH iEDPNl"
+              class="sc-AxjAm c1"
               height="13"
               style="width: 15px; height: 13px;"
               width="15"
             >
               <div
-                class="sc-bdVaJa sc-htpNat sc-EHOje hshgXl"
+                class="sc-AxjAm sc-AxiKw c2"
                 height="1"
                 style="width: 1px; height: 1px;"
                 width="1"
               />
               <div
-                class="sc-bdVaJa sc-htpNat sc-EHOje hshgXl"
+                class="sc-AxjAm sc-AxiKw c2"
                 height="1"
                 style="width: 1px; height: 1px;"
                 width="1"
@@ -179,9 +203,21 @@ describe('<BlockPacker /> / <BlockBits />', () => {
         },
       });
       expect(container).toMatchInlineSnapshot(`
+        .c0 {
+          float: left;
+          position: relative;
+          box-shadow: inset 0 0 13px rgba(0,0,0,0.6);
+          z-index: 1;
+        }
+
+        .c0:hover {
+          z-index: 2;
+          box-shadow: inset 0 0 13px rgba(0,0,0,0.2),0 0 16px 3px rgba(0,0,0,0.4);
+        }
+
         <div>
           <div
-            class="sc-bdVaJa sc-htpNat sc-bxivhb Wlpig"
+            class="sc-AxjAm sc-AxiKw c0"
             height="13"
             name="food"
             style="background-color: rgb(67, 160, 71); width: 21px; height: 13px;"

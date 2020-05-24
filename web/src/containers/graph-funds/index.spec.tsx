@@ -1,20 +1,28 @@
-import sinon from 'sinon';
-import React from 'react';
 import { render, RenderResult, fireEvent, act } from '@testing-library/react';
+import getUnixTime from 'date-fns/getUnixTime';
+import MatchMediaMock from 'jest-matchmedia-mock';
+import React from 'react';
 import { Provider } from 'react-redux';
 import getStore from 'redux-mock-store';
-import getUnixTime from 'date-fns/getUnixTime';
+import sinon from 'sinon';
 
-import { testState } from '~client/test-data/state';
-
-import GraphFunds, { Props } from '.';
-import { Page } from '~client/types/app';
+import GraphFunds from '.';
 import { Period } from '~client/constants/graph';
 import { State } from '~client/reducers';
+import { testState } from '~client/test-data/state';
+import { Page } from '~client/types';
 
 describe('<GraphFunds />', () => {
+  let matchMedia: MatchMediaMock;
+  beforeAll(() => {
+    matchMedia = new MatchMediaMock();
+  });
+  afterEach(() => {
+    matchMedia.clear();
+  });
+
   const mockStore = getStore<State>();
-  const getContainer = (props: Props): RenderResult =>
+  const getContainer = (props = {}): RenderResult =>
     render(
       <Provider
         store={mockStore({
@@ -54,7 +62,7 @@ describe('<GraphFunds />', () => {
           },
         })}
       >
-        <GraphFunds {...props} />
+        <GraphFunds isMobile={false} {...props} />
       </Provider>,
     );
 

@@ -1,10 +1,9 @@
-import reducer, { initialState, State } from '~client/reducers/overview';
-
 import { dataRead } from '~client/actions/api';
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
 import { loggedOut } from '~client/actions/login';
+import reducer, { initialState, State } from '~client/reducers/overview';
 import { Page } from '~client/types/app';
-import { Food, Holiday } from '~client/types/list';
+import { Food, General, Holiday } from '~client/types/list';
 
 describe('Overview reducer', () => {
   describe.each`
@@ -73,7 +72,7 @@ describe('Overview reducer', () => {
     });
   });
 
-  describe('LIST_ITEM_CREATED', () => {
+  describe('ListAction.create', () => {
     const state: State = {
       ...initialState,
       startDate: new Date('2019-04-30T23:59:59.999Z'),
@@ -96,38 +95,20 @@ describe('Overview reducer', () => {
       expect.assertions(1);
       const withGeneral = reducer(
         state,
-        listItemCreated(Page.general, {
+        listItemCreated<General>(Page.general)({
           date: new Date('2019-06-02T00:00:00.000Z'),
+          item: 'some item',
+          category: 'some category',
           cost: 34,
+          shop: 'some shop',
         }),
       );
 
       expect(withGeneral.cost?.general?.[2]).toBe(28335 + 34);
     });
-
-    it('should be ignored if the item has insufficient data', () => {
-      expect.assertions(2);
-      const withMissingDate = reducer(
-        state,
-        listItemCreated(Page.general, {
-          cost: 34,
-        }),
-      );
-
-      expect(withMissingDate).toStrictEqual(state);
-
-      const withMissingCost = reducer(
-        state,
-        listItemCreated(Page.general, {
-          date: new Date('2019-06-02T00:00:00.000Z'),
-        }),
-      );
-
-      expect(withMissingCost).toStrictEqual(state);
-    });
   });
 
-  describe('LIST_ITEM_UPDATED', () => {
+  describe('ListAction.update', () => {
     const state = {
       startDate: new Date('2019-04-30T23:59:59.999Z'),
       endDate: new Date('2019-07-31T23:59:59.999Z'),
@@ -148,8 +129,7 @@ describe('Overview reducer', () => {
       expect.assertions(2);
       const withDate = reducer(
         state,
-        listItemUpdated(
-          Page.food,
+        listItemUpdated<Food>(Page.food)(
           'some-id',
           {
             date: new Date('2019-06-02T00:00Z'),
@@ -157,7 +137,10 @@ describe('Overview reducer', () => {
           },
           {
             date: new Date('2019-05-10T00:00Z'),
+            item: 'some item',
+            category: 'some category',
             cost: 34,
+            shop: 'some shop',
           },
         ),
       );
@@ -170,8 +153,7 @@ describe('Overview reducer', () => {
       expect.assertions(1);
       const withCost = reducer(
         state,
-        listItemUpdated(
-          Page.food,
+        listItemUpdated<Food>(Page.food)(
           'some-id',
           {
             date: new Date('2019-06-02T00:00Z'),
@@ -179,7 +161,10 @@ describe('Overview reducer', () => {
           },
           {
             date: new Date('2019-06-02T00:00Z'),
+            item: 'some item',
+            category: 'some category',
             cost: 34,
+            shop: 'some shop',
           },
         ),
       );
@@ -191,8 +176,7 @@ describe('Overview reducer', () => {
       expect.assertions(2);
       const withBoth = reducer(
         state,
-        listItemUpdated<Food>(
-          Page.food,
+        listItemUpdated<Food>(Page.food)(
           'some-id',
           {
             date: new Date('2019-06-02T00:00Z'),
@@ -204,7 +188,7 @@ describe('Overview reducer', () => {
           {
             date: new Date('2019-04-24T00:00Z'),
             item: 'some item',
-            category: 'some caetgory',
+            category: 'some category',
             cost: 34,
             shop: 'some shop',
           },
@@ -216,7 +200,7 @@ describe('Overview reducer', () => {
     });
   });
 
-  describe('LIST_ITEM_DELETED', () => {
+  describe('ListAction.delete', () => {
     const state: State = {
       startDate: new Date('2019-04-30T23:59:59.999Z'),
       endDate: new Date('2019-07-31T23:59:59.999Z'),
@@ -237,17 +221,13 @@ describe('Overview reducer', () => {
       expect.assertions(1);
       const withHoliday = reducer(
         state,
-        listItemDeleted<Holiday>(
-          'some-id',
-          { page: Page.holiday },
-          {
-            date: new Date('2019-07-12T00:00Z'),
-            item: 'some item',
-            holiday: 'some holiday',
-            cost: 1235,
-            shop: 'some shop',
-          },
-        ),
+        listItemDeleted<Holiday>(Page.holiday)('some-id', {
+          date: new Date('2019-07-12T00:00Z'),
+          item: 'some item',
+          holiday: 'some holiday',
+          cost: 1235,
+          shop: 'some shop',
+        }),
       );
 
       expect(withHoliday.cost?.holiday?.[3]).toBe(55597 - 1235);

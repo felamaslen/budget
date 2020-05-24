@@ -70,7 +70,7 @@ export type Currency = {
   rate: number;
 };
 
-export type Item = Pick<Entry, 'id' | 'date' | 'values' | 'creditLimit'> & {
+export type NetWorthItem = Pick<Entry, 'id' | 'date' | 'values' | 'creditLimit'> & {
   spend: number;
   fti: () => number;
 };
@@ -82,7 +82,7 @@ export type NetWorthRequest<I extends WithCrud<{ id: string }> = never> = Reques
 export type RequestItem = Category | Subcategory | RawDate<EntryWithOptionalIds>;
 export type NetWorthRequestGeneric = NetWorthRequest<RequestItem>;
 
-export type TableRow = {
+export type NetWorthTableRow = {
   id: string;
   date: Date;
   assets: number;

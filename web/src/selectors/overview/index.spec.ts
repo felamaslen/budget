@@ -1,9 +1,9 @@
-import { State } from '~client/reducers/types';
-import state from '~client/test-data/state';
-import { getProcessedCost, getOverviewTable } from '.';
 import { getNetWorthSummary } from './net-worth';
-import { getTransactionsList } from '~client/modules/data';
+import { getProcessedCost, getOverviewTable } from '.';
 import { mockRandom } from '~client/mocks/random';
+import { getTransactionsList } from '~client/modules/data';
+import { State } from '~client/reducers/types';
+import { testState as state } from '~client/test-data/state';
 
 describe('Net worth selectors', () => {
   beforeEach(() => {

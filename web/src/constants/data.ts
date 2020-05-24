@@ -102,14 +102,8 @@ export const PAGES_LIST_CALC: PageListCalc[] = [
 export const PAGES_LIST: PageList[] = [Page.funds, ...PAGES_LIST_CALC];
 export const PAGES_SUGGESTIONS = PAGES_LIST_CALC;
 
-export const LIST_COLS_MOBILE = ['date', 'item', 'cost'];
+export const isPage = <T extends string>(name?: T | Page): name is Page =>
+  !!name && Reflect.has(PAGES, name);
 
-// maximum number of search suggestions to request
-export const MAX_SUGGESTIONS = 5;
-
-export const NET_WORTH_AGGREGATE = {
-  'cash-easy-access': 'Cash (easy access)',
-  'cash-other': 'Cash (other)',
-  stocks: 'Stocks',
-  pension: 'Pension',
-};
+export const isCalcPage = <T extends string>(name?: T | Page): name is PageListCalc =>
+  !!name && (PAGES_LIST_CALC as string[]).includes(name);

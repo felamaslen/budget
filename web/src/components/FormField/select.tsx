@@ -1,23 +1,24 @@
 import React, { useCallback, useEffect } from 'react';
 
-import { Wrapper } from '.';
+import { Wrapper } from './shared';
 
-export type Options<V extends string = string> = {
+export type SelectOptions<V extends string = string> = {
   internal: V;
   external?: string;
 }[];
 
-export type Props<V extends string> = {
+type Props<V extends string> = {
   item?: string;
-  options: Options<V>;
+  options: SelectOptions<V>;
   value: V;
   onChange: (value: V) => void;
 };
+export { Props as PropsSelect };
 
-const FormFieldSelect: <V extends string = string>(
+export const FormFieldSelect: <V extends string = string>(
   props: React.PropsWithChildren<Props<V>>,
 ) => React.ReactElement<Props<V>> = ({ item = '', options, value, onChange, ...props }) => {
-  const onChangeCallback = useCallback(event => onChange(event.target.value), [onChange]);
+  const onChangeCallback = useCallback((event) => onChange(event.target.value), [onChange]);
 
   useEffect(() => {
     if (options.length && !options.some(({ internal }) => internal === value)) {
@@ -26,8 +27,8 @@ const FormFieldSelect: <V extends string = string>(
   }, [onChange, options, value]);
 
   return (
-    <Wrapper item={item} value={value} active {...props}>
-      <select value={value} onChange={onChangeCallback} {...props}>
+    <Wrapper item={item} {...props}>
+      <select value={value} onBlur={onChangeCallback} onChange={onChangeCallback} {...props}>
         {options.map(({ internal, external = internal }) => (
           <option key={internal} value={internal}>
             {external}
@@ -37,5 +38,3 @@ const FormFieldSelect: <V extends string = string>(
     </Wrapper>
   );
 };
-
-export default FormFieldSelect;

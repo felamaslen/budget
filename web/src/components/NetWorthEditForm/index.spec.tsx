@@ -1,10 +1,10 @@
-import sinon from 'sinon';
-import React from 'react';
 import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/react';
 import nock from 'nock';
+import React from 'react';
+import sinon from 'sinon';
 
-import { Category, Subcategory, Entry } from '~client/types/net-worth';
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
+import { Category, Subcategory, Entry } from '~client/types/net-worth';
 
 const categories: Category[] = [
   {
@@ -171,7 +171,7 @@ describe('Net worth entry form', () => {
       fireEvent.click(sectionCategoryMyAssets);
     });
 
-    const inputMyBank = getByDisplayValue('3856.1');
+    const inputMyBank = getByDisplayValue('3856.10');
     expect(inputMyBank).toBeInTheDocument();
 
     act(() => {
@@ -310,7 +310,7 @@ describe('Net worth entry form', () => {
     const inputMyCC = getByDisplayValue('-210.54');
     expect(inputMyCC).toBeInTheDocument();
 
-    const inputCreditLimit = getByDisplayValue('6500');
+    const inputCreditLimit = getByDisplayValue('6500.00');
     expect(inputCreditLimit).toBeInTheDocument();
 
     act(() => {

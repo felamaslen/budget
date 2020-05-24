@@ -2,6 +2,7 @@ import { replaceAtIndex } from 'replace-array';
 
 import { GRAPH_CURVINESS } from '~client/constants/graph';
 import { timeSeriesTicks } from '~client/modules/date';
+import { colors } from '~client/styled/variables';
 import {
   Dimensions,
   Padding,
@@ -19,8 +20,6 @@ import {
   DynamicLineColor,
   ColorSwitcher,
 } from '~client/types/graph';
-import { rgba } from '~client/modules/color';
-import { COLOR_PROFIT, COLOR_LOSS } from '~client/constants/colors';
 
 type SVGNumber = number | string;
 type SVGPoint = [SVGNumber, SVGNumber];
@@ -242,7 +241,7 @@ export function joinLinePath(linePath: LineDescription): string {
   }
 
   const parts = linePath.map(
-    ({ type, args }) => `${type}${args.map(point => point.join(',')).join(' ')}`,
+    ({ type, args }) => `${type}${args.map((point) => point.join(',')).join(' ')}`,
   );
 
   const [{ start }] = linePath;
@@ -338,7 +337,7 @@ export function getDynamicLinePathsStop({
     pixY2,
   });
 
-  return joinChoppedPath(linePath, ends, end => values[getColorIndex(items[end - 1][1])]);
+  return joinChoppedPath(linePath, ends, (end) => values[getColorIndex(items[end - 1][1])]);
 }
 
 export function getDynamicLinePaths({
@@ -375,10 +374,10 @@ export function getDynamicLinePaths({
     pixY2,
   });
 
-  const colors = data.map((point, index) => color(point, index));
-  const ends = colors.reduce(
+  const dataColors = data.map((point, index) => color(point, index));
+  const ends = dataColors.reduce(
     (indexes, value, index) => {
-      const next = index === colors.length - 1 || (index > 0 && colors[index - 1] !== value);
+      const next = index === dataColors.length - 1 || (index > 0 && colors[index - 1] !== value);
 
       if (next) {
         return [...indexes, index];
@@ -396,4 +395,4 @@ export const pointVisible = (valX: number, minX: number, maxX: number): boolean 
   valX >= minX && valX <= maxX;
 
 export const profitLossColor = ([, value]: Point): string =>
-  rgba(value < 0 ? COLOR_LOSS : COLOR_PROFIT);
+  value < 0 ? colors.funds.loss : colors.funds.profit;

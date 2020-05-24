@@ -1,13 +1,16 @@
-import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
-import { compose } from '@typed/compose';
-import { replaceAtIndex } from 'replace-array';
 import startOfDay from 'date-fns/startOfDay';
+import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
 
-import { validateField } from '~client/modules/validate';
-import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared/button';
-import ModalDialogField from './field';
-
+import { ModalDialogField, ModalFields } from './field';
 import * as Styled from './styles';
+
+import { CREATE_ID } from '~client/constants/data';
+import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared/button';
+import { Item, Delta, Create, FieldKey } from '~client/types';
+
+export * from './field';
+
+type DialogType = 'edit' | 'add';
 
 type State = {
   visible: boolean;
@@ -22,7 +25,7 @@ enum ActionType {
 }
 
 type PersistentStatePayload = {
-  type: Props['type'];
+  type: DialogType;
   id?: string;
   canRemove: boolean;
 };
@@ -52,20 +55,33 @@ function getTitle({ type, id }: Pick<PersistentStatePayload, 'type' | 'id'>): st
 
 export const animationTime = 350;
 
-type Field = {
+export type Field<V> = {
   item: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value?: any;
+  value: V;
 };
 
-const withDefaultDate = (fields: Field[]): Field[] =>
-  replaceAtIndex(
-    fields,
-    fields.findIndex(({ item, value }) => item === 'date' && !value),
-    {
-      item: 'date',
-      value: startOfDay(new Date()),
-    },
+function initField<I extends Item>(field: 'date', item: Delta<I>): Date;
+function initField<I extends Item>(field: 'cost', item: Delta<I>): number;
+function initField<I extends Item, K extends keyof I>(field: keyof I, item: Delta<I>): I[K];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function initField<I extends Item>(field: FieldKey<I>, item: Delta<I>): any {
+  if (field === 'date' && !Reflect.get(item, field)) {
+    return startOfDay(new Date());
+  }
+  if (field === 'cost' && typeof Reflect.get(item, field) === 'undefined') {
+    return 0;
+  }
+  return item[field] ?? '';
+}
+
+const initFields = <I extends Item>(item: Delta<I>, fields: ModalFields<I>): Create<I> =>
+  (Object.keys(fields) as FieldKey<I>[]).reduce<Create<I>>(
+    (last, field) => ({
+      ...last,
+      [field]: initField(field, item),
+    }),
+    item as Create<I>,
   );
 
 const updatePersistentState = (
@@ -99,28 +115,31 @@ const reducer: Reducer = (state, action): State => {
   return state;
 };
 
-export type Props = {
+export type Props<I extends Item> = {
   active: boolean;
   loading?: boolean;
-  type?: 'edit' | 'add';
+  type?: DialogType;
   id?: string;
-  fields?: Field[];
+  item?: Delta<I>;
+  fields?: ModalFields<I>;
   onCancel: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSubmit: (item: any) => void;
+  onSubmit: (item: I) => void;
   onRemove?: () => void;
 };
 
-const ModalDialog: React.FC<Props> = ({
+const empty = {};
+
+const ModalDialog = <I extends Item>({
   active,
   loading = false,
-  id,
-  fields = [],
+  id = CREATE_ID,
+  item = empty,
+  fields = empty as ModalFields<I>,
   type = 'edit',
   onCancel,
   onSubmit,
   onRemove,
-}) => {
+}: Props<I>): null | React.ReactElement<I> => {
   const canRemove = !!onRemove;
   const [state, dispatch] = useReducer<Reducer>(reducer, {
     title: getTitle({ type, id }),
@@ -144,77 +163,69 @@ const ModalDialog: React.FC<Props> = ({
 
   useEffect((): (() => void) => (): void => clearTimeout(timer.current), []);
 
-  const [tempFields, setTempFields] = useState<Field[]>([]);
+  const [tempFields, setTempFields] = useState<Create<I>>(initFields(item, fields));
   useEffect(() => {
-    setTempFields(compose(withDefaultDate)(fields.slice()));
-  }, [fields]);
+    setTempFields(initFields(item, fields));
+  }, [item, fields]);
 
-  const [invalid, setInvalid] = useState<Record<string, boolean>>({});
+  const [invalid, setInvalid] = useState<FieldKey<I>[]>([]);
+  const isInvalid = invalid.length > 0;
 
   const onChangeField = useCallback(
-    (item, value) =>
-      setTempFields(last =>
-        replaceAtIndex(
-          last,
-          last.findIndex(({ item: thisItem }) => thisItem === item),
-          {
-            item,
-            value,
-          },
-        ),
-      ),
+    <F extends FieldKey<I>>(field: string, value: I[F]): void =>
+      setTempFields((last) => ({
+        ...last,
+        [field]: value,
+      })),
     [],
   );
 
   const onSubmitCallback = useCallback(() => {
-    const nextInvalid = tempFields.reduce((last, { item, value }) => {
-      try {
-        validateField(item, value);
-
-        return last;
-      } catch (err) {
-        return { ...last, [item]: true };
-      }
-    }, {});
-
+    const nextInvalid = (Object.keys(fields) as FieldKey<I>[]).filter(
+      (field) =>
+        typeof tempFields[field] === 'undefined' ||
+        (typeof tempFields[field] === 'string' && !tempFields[field]),
+    );
     setInvalid(nextInvalid);
 
-    if (!Object.keys(nextInvalid).length) {
-      onSubmit(tempFields.reduce((last, { item, value }) => ({ ...last, [item]: value }), { id }));
+    if (!nextInvalid.length) {
+      onSubmit({ id, ...tempFields } as I);
     }
-  }, [onSubmit, tempFields, id]);
+  }, [fields, onSubmit, tempFields, id]);
 
   useEffect(() => {
-    if (!active && Object.keys(invalid).length) {
-      setInvalid({});
+    if (!active && isInvalid) {
+      setInvalid([]);
     }
-  }, [active, invalid]);
+  }, [active, isInvalid]);
 
   if (!visible) {
     return null;
   }
 
   return (
-    <Styled.ModalDialog>
+    <Styled.ModalDialog data-testid="modal-dialog">
       <Styled.ModalInner active={active} isLoading={loading}>
         <Styled.Title>{title}</Styled.Title>
         <Styled.FormList data-testid="form-list">
-          {fields.map(({ item, value }) => (
+          {(Object.keys(fields) as FieldKey<I>[]).map((field: FieldKey<I>) => (
             <ModalDialogField
-              key={item}
-              item={item}
-              value={value}
-              invalid={Boolean(invalid[item])}
+              key={field as string}
+              id={`${id}-${field}`}
+              field={field}
+              Field={fields[field]}
+              value={tempFields[field]}
+              invalid={invalid.includes(field as FieldKey<I>)}
               onChange={onChangeField}
             />
           ))}
         </Styled.FormList>
         <Styled.Buttons>
           <ButtonCancel type="button" disabled={loading} onClick={onCancel}>
-            {'nope.avi'}
+            nope.avi
           </ButtonCancel>
           <ButtonSubmit type="button" disabled={loading} onClick={onSubmitCallback}>
-            {'Do it.'}
+            Do it.
           </ButtonSubmit>
           {state.canRemove && (
             <Button type="button" disabled={loading} onClick={onRemove}>

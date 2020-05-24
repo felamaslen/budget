@@ -1,18 +1,23 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { breakpoints, colors } from '~client/styled/variables';
-import { rem, breakpoint } from '~client/styled/mixins';
+
+import {
+  Row as AccessibleRow,
+  fieldSizes,
+  borderColor,
+} from '~client/components/accessible-list/styles';
 import { ModalDialog, FormRowInner } from '~client/components/ModalDialog/styles';
-import { Editable } from '~client/components/Editable/styles';
-import { Row as ListRowDesktop } from '~client/components/ListRowDesktop/styles';
-import { RowCreate } from '~client/components/ListCreateDesktop/styles';
+import { CategoryItemForm as NetWorthCategoryItemForm } from '~client/components/NetWorthCategoryList/styles';
 import {
   EditByCategory,
   AddByCategoryValue,
   AddCurrency,
   currencyTitleWidth,
 } from '~client/components/NetWorthEditForm/styles';
-import { CategoryItemForm as NetWorthCategoryItemForm } from '~client/components/NetWorthCategoryList/styles';
 import { SubcategoryList as NetWorthSubcategoryList } from '~client/components/NetWorthSubcategoryList/styles';
+import { PageFunds, fieldSizes as fundFieldSizes } from '~client/components/page-funds/styles';
+import { breakpoint, rem } from '~client/styled/mixins';
+import { fontFamily } from '~client/styled/reset';
+import { breakpoints, colors } from '~client/styled/variables';
 
 export const centerGridOne = css`
   display: flex;
@@ -29,167 +34,211 @@ export const FormField = styled.div<{
   active: boolean;
   invalid: boolean;
 }>`
-    ${breakpoint(breakpoints.mobile)} {
-        opacity: ${({ small, active }): number => (small && !active ? 0.3 : 1)};
+  display: flex;
+  position: relative;
+  align-items: center;
+  font-size: ${rem(13)};
+  font-family: sans-serif;
+
+  & > span {
+    display: inline-flex;
+    font-size: inherit;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+  & > input {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    opacity: ${({ small, active }): number => (small && !active ? 0.3 : 1)};
+
+    ${AccessibleRow} & {
+      display: inline-flex;
+      font-family: ${fontFamily};
+      font-size: ${rem(16)};
+      width: ${({ item }): string => {
+        if (item === 'date') {
+          return rem(fieldSizes.date);
+        }
+        if (item === 'cost') {
+          return rem(fieldSizes.cost);
+        }
+        return rem(fieldSizes.default);
+      }};
+
+      & > span {
+        position: static;
+        width: ${rem(8)};
+      }
+
+      input {
+        font: inherit;
+        color: inherit;
+        height: inherit;
+      }
     }
 
-    ${({ small }): false | FlattenSimpleInterpolation =>
-      small &&
-      css`
-        &,
+    ${PageFunds} & {
+      width: ${({ item }): string => rem(Reflect.get(fundFieldSizes, item) ?? 0)};
+      border-bottom: 1px solid ${borderColor};
+    }
+  }
+
+  ${({ small }): false | FlattenSimpleInterpolation =>
+    small &&
+    css`
+      &,
+      input {
+        width: 100px;
+      }
+    `}
+
+  ${({ item }): false | FlattenSimpleInterpolation =>
+    item === 'text' &&
+    css`
+      ${AddCurrency} & {
+        margin: 0 5px;
+        flex: 0 0 ${currencyTitleWidth}px;
         input {
-          width: 100px;
+          margin: 0;
+          padding-left: 0;
+          padding-right: 0;
+          width: ${currencyTitleWidth - 4}px;
         }
-      `}
+      }
+    `}
 
+  ${NetWorthCategoryItemForm} & {
     ${({ item }): false | FlattenSimpleInterpolation =>
-      item === 'text' &&
+      ['type', 'category', 'color'].includes(item) && centerGridOne};
+    ${({ item }): false | FlattenSimpleInterpolation =>
+      item === 'category' &&
       css`
-        ${AddCurrency} & {
-          margin: 0 5px;
-          flex: 0 0 ${currencyTitleWidth}px;
+        padding: 0 0.2em;
+        border: none;
+        outline: none;
+        font-size: 18px;
+
+        input {
+          width: 100%;
+          font-size: 16px;
+        }
+      `};
+  }
+
+  ${NetWorthSubcategoryList} & {
+    ${({ item }): null | FlattenSimpleInterpolation => {
+      if (item === 'subcategory') {
+        return css`
+          margin: 0 2em;
+          padding: 0 0.5em;
+          grid-column: 1;
+        `;
+      }
+      if (item === 'credit-limit') {
+        return css`
+          margin: auto;
+          grid-column: 2;
+        `;
+      }
+      if (item === 'opacity') {
+        return css`
+          margin: 0 1em;
+          grid-column: 3;
+
           input {
-            margin: 0;
-            padding-left: 0;
-            padding-right: 0;
-            width: ${currencyTitleWidth - 4}px;
+            width: 100%;
           }
+        `;
+      }
+
+      return null;
+    }};
+  }
+
+  ${ModalDialog} & {
+    display: flex;
+    flex-basis: 0;
+    flex-grow: 2;
+    border: 0;
+    line-height: 28px;
+    font-size: ${rem(16)};
+    position: relative;
+
+    ${({ name, invalid }): false | FlattenSimpleInterpolation =>
+      name !== 'transactions' &&
+      css`
+        & > input {
+          border: none;
+          line-height: 28px;
+          outline: none;
+          width: 100%;
         }
-      `}
 
-    ${NetWorthCategoryItemForm} & {
-        ${({ item }): false | FlattenSimpleInterpolation =>
-          ['type', 'category', 'color'].includes(item) && centerGridOne};
-        ${({ item }): false | FlattenSimpleInterpolation =>
-          item === 'category' &&
-          css`
-            padding: 0 0.2em;
-            border: none;
-            outline: none;
-            font-size: 18px;
-
-            input {
-              width: 100%;
-              font-size: 16px;
-            }
-          `};
-    }
-
-    ${NetWorthSubcategoryList} & {
-        ${({ item }): null | FlattenSimpleInterpolation => {
-          if (item === 'subcategory') {
-            return css`
-              margin: 0 2em;
-              padding: 0 0.5em;
-              grid-column: 1;
-            `;
-          }
-          if (item === 'credit-limit') {
-            return css`
-              margin: auto;
-              grid-column: 2;
-            `;
-          }
-          if (item === 'opacity') {
-            return css`
-              margin: 0 1em;
-              grid-column: 3;
-
-              input {
-                width: 100%;
-              }
-            `;
-          }
-
-          return null;
-        }};
-    }
-
-    ${ModalDialog} & {
-        display: flex;
-        flex-flow: column nowrap;
-        flex-basis: 0;
-        flex-grow: 2;
-        border: 0;
-        line-height: 28px;
         &::after {
-            display: block;
-            content: '';
-            width: 100%;
-            height: 4px;
-        border: 1px solid ${({ invalid }): string =>
-          invalid ? (colors.error as string) : (colors['slightly-light'] as string)};
-            border-top: none;
+          border: 1px solid ${invalid ? colors.error : colors['slightly-light']};
+          border-top: none;
+          content: '';
+          display: block;
+          height: ${rem(4)};
+          margin-top: ${rem(-4)};
+          position: absolute;
+          top: 100%;
+          width: 100%;
         }
-        input[type='text'],
-        input[type='number'],
-        input[type='date'] {
-            display: block;
-            border: none;
-            outline: none;
-            line-height: 28px;
-            width: 100%;
-            font-size: 16px;
-        }
+      `};
 
     ${({ name }): false | FlattenSimpleInterpolation =>
       name === 'transactions' &&
       css`
         flex-basis: auto;
       `};
-        }
+  }
 
-    ${FormRowInner} > & {
-        &::after {
-            display: none;
-        }
+  ${FormRowInner} > & {
+    &::after {
+      display: none;
     }
+  }
 `;
 
-const transactionsWidthDate = 120;
-const transactionsWidthUnits = 60;
-const transactionsWidthCost = 60;
+const transactionsWidthDate = 104;
+const transactionsWidthUnits = 72;
+const transactionsWidthCost = 80;
 
 export const TransactionsModal = styled.div`
   ${breakpoint(breakpoints.mobile)} {
-    padding: 2px 1px 4px 1px;
+    background: ${colors['translucent-l8']};
+    border-right: 1px solid ${colors['slightly-light']};
+    border-bottom: 1px solid ${colors['slightly-light']};
+    box-shadow: 0 3px 6px ${colors['shadow-l2']};
     position: absolute;
-    top: 0;
-    z-index: 2;
-    background: ${colors['translucent-l8'] as string};
-    box-shadow: 0 3px 6px ${colors['shadow-l2'] as string};
+    top: 100%;
+    z-index: 5;
 
-    ${Editable} & {
-      left: 0;
-      width: 300px;
-      min-height: 100px;
-      z-index: 5;
-      line-height: 26px;
+    ${FormField} {
+      border: 1px solid ${colors.light};
+      font-size: ${rem(14)};
+      width: 100%;
+
       input {
-        width: 95%;
+        border-right: none;
+        &:not(:last-child) {
+          margin-right: ${rem(4)};
+        }
       }
-      thead {
-        font-size: 0.9em;
-      }
-    }
-
-    ${ListRowDesktop}:nth-last-child (-n + 3) & {
-      top: initial;
-      bottom: 0;
-    }
-
-    ${RowCreate} & {
-      top: 0;
-      bottom: initial;
     }
   }
 `;
 
 export const ModalInner = styled.div`
   ${breakpoint(breakpoints.mobile)} {
-    ${Editable} & {
-      padding: 0.2em;
-    }
+    display: flex;
+    flex-flow: column;
+    max-height: ${rem(192)};
   }
 `;
 
@@ -206,7 +255,10 @@ export const TransactionsList = styled.ul`
   list-style: none;
 
   ${ModalDialog} & {
-    font-size: 85%;
+    font-size: 95%;
+    padding: 0 0 ${rem(8)} ${rem(4)};
+    margin: 0;
+    width: 100%;
   }
   ${breakpoint(breakpoints.mobile)} {
     display: flex;
@@ -220,11 +272,17 @@ export const TransactionsList = styled.ul`
 
 export const TransactionsListItem = styled.li`
   ${ModalDialog} & {
-    flex-flow: column;
+    display: flex;
+    flex-flow: row;
+
+    & > div {
+      display: flex;
+      flex-flow: column;
+    }
 
     &:not(:last-child) {
       padding-bottom: 3px;
-      border-bottom: 1px solid ${colors['medium-very-light'] as string};
+      border-bottom: 1px dotted ${colors['slightly-light']};
     }
   }
 
@@ -245,15 +303,21 @@ export const TransactionsListItem = styled.li`
   }
 `;
 
+// Col, Label, Fields only used on modal (mobile) dialog
 export const TransactionCol = styled.span`
-  ${breakpoint(breakpoints.mobile)} {
-    display: block;
+  flex: 1;
+  padding-right: ${rem(4)};
+
+  input {
+    width: 100%;
   }
 `;
 export const TransactionLabel = styled(TransactionCol)`
-  ${breakpoint(breakpoints.mobile)} {
-    display: none;
-  }
+  flex: 0 0 ${rem(104)};
+`;
+
+export const TransactionFields = styled.div`
+  flex: 1;
 `;
 
 export const ModalHeadColumn = styled.span`
@@ -274,7 +338,7 @@ const transactionItem = (width: number): FlattenSimpleInterpolation => css`
   }
 `;
 
-export const TransactionRow = styled.span`
+export const TransactionRow = styled.div`
   ${ModalDialog} & {
     display: flex;
     flex-flow: row nowrap;
@@ -286,6 +350,21 @@ export const TransactionRow = styled.span`
 `;
 
 export const TransactionRowButton = styled(TransactionRow)`
+  ${ModalDialog} & {
+    align-items: center;
+    display: flex;
+    flex: 0 0 ${rem(32)};
+    justify-content: center;
+
+    button {
+      border-radius: 100%;
+      flex: 0 0 ${rem(24)};
+      height: ${rem(24)};
+      margin: 0;
+      padding: 0;
+      width: ${rem(24)};
+    }
+  }
   ${breakpoint(breakpoints.mobile)} {
     button {
       margin-top: 3px;
@@ -313,14 +392,27 @@ export const ModalHeadCost = styled(ModalHeadColumn)`
   ${transactionItem(transactionsWidthCost)};
 `;
 
-export const NumTransactions = styled.span<{ active?: boolean }>`
-  display: block;
-  text-align: center;
+export const NumTransactions = styled.button<{ active?: boolean }>`
+  display: none;
 
-  ${ModalDialog} & {
-    display: none;
-  }
   ${breakpoint(breakpoints.mobile)} {
+    background: none;
+    border: none;
+    border-right: 1px solid ${colors['slightly-light']};
+    color: inherit;
+    display: block;
+    font: inherit;
+    height: 100%;
+    margin: 0;
+    outline: none;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+
+    &:focus {
+      box-shadow: inset 0 0 1px 1px ${colors.blue};
+    }
+
     ${({ active }): undefined | false | FlattenSimpleInterpolation =>
       active &&
       css`

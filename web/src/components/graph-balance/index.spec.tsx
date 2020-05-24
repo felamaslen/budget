@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
 import { render, RenderResult } from '@testing-library/react';
-import { Provider } from 'react-redux';
 import React from 'react';
+import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
 import sinon from 'sinon';
 
-import state from '~client/test-data/state';
 import { GraphBalance, Props } from '.';
+import { testState as state } from '~client/test-data/state';
 
 describe('<GraphBalance />', () => {
   let clock: sinon.SinonFakeTimers;
@@ -38,6 +38,18 @@ describe('<GraphBalance />', () => {
     expect.assertions(1);
     const { getByTestId } = setup({ isMobile: false });
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
+      @media only screen and (min-width:690px) {
+
+      }
+
+      @media only screen and (min-width:690px) {
+
+      }
+
+      @media only screen and (min-width:1200px) {
+
+      }
+
       <svg
         data-testid="graph-svg"
         height="300"
@@ -869,9 +881,33 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,281.28500936581725 Q36,90 77.3,41.8 C93,23 144,63 163.0,89.6 C203,147 204,234 245.9,281.3 C263,301 302,281 331.5,281.3 C360,281 385,281 414.4,281.3 Q444,281 500.0,281.3"
+            d="M0,281.28500936581725 Q36,90 77.3,41.8"
             fill="none"
-            stroke="#039"
+            stroke-width="2"
+          />
+          <path
+            d="M77.34806629834254,41.81575750259327 C93,23 144,63 163.0,89.6"
+            fill="none"
+            stroke-width="2"
+          />
+          <path
+            d="M162.98342541436463,89.60369171578304 C203,147 204,234 245.9,281.3"
+            fill="none"
+            stroke-width="2"
+          />
+          <path
+            d="M245.85635359116023,281.28500936581725 C263,301 302,281 331.5,281.3"
+            fill="none"
+            stroke-width="2"
+          />
+          <path
+            d="M331.49171270718233,281.28500936581725 C360,281 385,281 414.4,281.3"
+            fill="none"
+            stroke-width="2"
+          />
+          <path
+            d="M414.36464088397787,281.28500936581725 Q444,281 500.0,281.3"
+            fill="none"
             stroke-width="2"
           />
         </g>

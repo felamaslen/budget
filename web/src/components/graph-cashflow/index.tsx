@@ -1,20 +1,19 @@
-import { useSelector } from 'react-redux';
-import React, { useCallback, useMemo } from 'react';
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
-import isSameMonth from 'date-fns/isSameMonth';
-import getUnixTime from 'date-fns/getUnixTime';
-import fromUnixTime from 'date-fns/fromUnixTime';
 import format from 'date-fns/format';
+import fromUnixTime from 'date-fns/fromUnixTime';
+import getUnixTime from 'date-fns/getUnixTime';
+import isSameMonth from 'date-fns/isSameMonth';
+import React, { useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
-import { PickUnion } from '~client/types';
+import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { LineGraph, Props as GraphProps } from '~client/components/graph/line-graph';
 import { TimeAxes } from '~client/components/graph/time-axes';
-import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatCurrency } from '~client/modules/format';
 import { getCurrentDate, getGraphWidth } from '~client/selectors';
-import { Range, BasicProps, Line } from '~client/types/graph';
+import { PickUnion, Range, DrawProps, Line } from '~client/types';
 
 export type Props = PickUnion<GraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
   isMobile?: boolean;
@@ -70,8 +69,8 @@ export function getRanges(lines: Line[]): Range {
   );
 }
 
-function makeBeforeLines(now: Date): React.FC<BasicProps> {
-  const BeforeLines: React.FC<BasicProps> = props => (
+function makeBeforeLines(now: Date): React.FC<DrawProps> {
+  const BeforeLines: React.FC<DrawProps> = (props) => (
     <g>
       <TimeAxes {...props} />
       <NowLine now={now} {...props} />
@@ -101,7 +100,7 @@ export const GraphCashFlow: React.FC<Props> = ({
     [],
   );
 
-  const labelY = useCallback(value => formatCurrency(value, { precision: 2 }), []);
+  const labelY = useCallback((value) => formatCurrency(value, { precision: 2 }), []);
 
   const hoverEffect = useMemo(
     () => ({

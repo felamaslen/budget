@@ -1,21 +1,20 @@
-import { createSelector } from 'reselect';
 import humanizeDuration from 'humanize-duration';
+import { createSelector } from 'reselect';
 
-import { Page } from '~client/types/app';
-import { Row } from '~client/types/funds';
+import { getFundsRows, getCurrentFundsCache } from './helpers';
+import { Period } from '~client/constants/graph';
+import { getTotalUnits, getTotalCost } from '~client/modules/data';
 import { State } from '~client/reducers';
 import * as Funds from '~client/reducers/funds';
-import { Period } from '~client/constants/graph';
-import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
+import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
 import { getNow } from '~client/selectors/now';
-import { getFundsRows, getCurrentFundsCache } from './helpers';
-import {
-  getRowGains,
-  getGainsForRow,
-  GainsForRow,
-  getDayGain,
-  getDayGainAbs,
-} from '~client/selectors/funds/gains';
+import { Page, Data } from '~client/types';
+
+export * from './gains';
+export * from './graph';
+export * from './helpers';
+export * from './lines';
+export * from './stocks';
 
 export const getPeriod = (state: Pick<State, Page.funds>): Period => state.funds.period;
 
@@ -65,28 +64,25 @@ const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (
   }, 0);
 });
 
+export type CachedValue = {
+  value: number;
+  dayGain: number;
+  dayGainAbs: number;
+  ageText: string;
+};
+
 export const getFundsCachedValue = createSelector(
   [getLastFundsValue, getFundCacheAge, getDayGain, getDayGainAbs],
   (value, ageText, dayGain, dayGainAbs) => ({ value, ageText, dayGain, dayGainAbs }),
 );
 
-export const getFundsCost = createSelector(getFundsRows, rows => {
-  if (!rows) {
-    return 0;
-  }
+export const getFundsCost = createSelector(getFundsRows, (rows) =>
+  rows.reduce((sum, { transactions }) => sum + getTotalCost(transactions), 0),
+);
 
-  return rows.reduce((sum, { transactions }) => {
-    if (isSold(transactions || [])) {
-      return sum;
-    }
+type RowPrices = Data | null;
 
-    return sum + getTotalCost(transactions || []);
-  }, 0);
-});
-
-type RowPrices = [number, number][] | null;
-
-function getPricesForRow(
+export function getPricesForRow(
   prices: Funds.Cache['prices'],
   id: string,
   startTime: number,
@@ -101,35 +97,3 @@ function getPricesForRow(
     price,
   ]);
 }
-
-export type ProcessedFundsRow = Row & {
-  gain: GainsForRow;
-  prices: RowPrices;
-  sold: boolean;
-  small: boolean;
-};
-
-export const getProcessedFundsRows = createSelector(
-  [getFundsRows, getCurrentFundsCache],
-  (rows, cache): ProcessedFundsRow[] => {
-    if (!(rows && cache)) {
-      return [];
-    }
-
-    const { startTime, cacheTimes, prices } = cache;
-
-    const rowGains = getRowGains(rows, cache);
-
-    return rows.map(row => {
-      const sold = isSold(row.transactions || []);
-
-      return {
-        ...row,
-        gain: getGainsForRow(rowGains, row.id),
-        prices: getPricesForRow(prices, row.id, startTime, cacheTimes),
-        sold,
-        small: sold,
-      };
-    });
-  },
-);

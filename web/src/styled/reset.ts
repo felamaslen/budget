@@ -2,6 +2,8 @@ import { css, createGlobalStyle } from 'styled-components';
 import { breakpoint, rem } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
+export const fontFamily = `'Noto sans', Ubuntu, Arial, Helvetica, sans-serif`;
+
 export const reset = css`
   html {
     box-sizing: border-box;
@@ -22,7 +24,7 @@ export const reset = css`
 
   body {
     margin: 0;
-    font: 1em 'Noto sans', Ubuntu, Arial, Helvetica, sans-serif;
+    font: 1em ${fontFamily};
     &.wait * {
       cursor: wait !important;
     }

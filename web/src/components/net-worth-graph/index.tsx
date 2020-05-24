@@ -1,12 +1,10 @@
-import React from 'react';
 import getUnixTime from 'date-fns/getUnixTime';
-
-import { LineGraph } from '~client/components/graph/line-graph';
-import { TimeAxes, Props as TimeAxesProps } from '~client/components/graph/time-axes';
-import { Range, BasicProps, Line } from '~client/types/graph';
-import { TableRow } from '~client/types/net-worth';
+import React from 'react';
 
 import * as Styled from './styles';
+import { LineGraph } from '~client/components/graph/line-graph';
+import { TimeAxes, Props as TimeAxesProps } from '~client/components/graph/time-axes';
+import { NetWorthTableRow as TableRow, Range, DrawProps, Line } from '~client/types';
 
 export type GraphProps = {
   table: TableRow[];
@@ -14,8 +12,8 @@ export type GraphProps = {
 
 const labelY = (value: number): string => String(value);
 
-const makeBeforeLines = (axisProps: Partial<TimeAxesProps> = {}): React.FC<BasicProps> => {
-  const BeforeLines: React.FC<BasicProps> = props => (
+const makeBeforeLines = (axisProps: Partial<TimeAxesProps> = {}): React.FC<DrawProps> => {
+  const BeforeLines: React.FC<DrawProps> = (props) => (
     <TimeAxes {...props} yAlign="right" hideMinorTicks dualAxis {...axisProps} />
   );
 

@@ -1,16 +1,11 @@
 import React, { useState, useCallback } from 'react';
 
-import { Create } from '~client/types/crud';
-import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
-import { Subcategory, Category } from '~client/types/net-worth';
-import { InlineFlexCenter } from '~client/styled/shared/layout';
-import { Button, ButtonDelete } from '~client/styled/shared/button';
-import FormFieldText from '~client/components/FormField';
-import FormFieldRange from '~client/components/FormField/range';
-import FormFieldTickbox from '~client/components/FormField/tickbox';
-import CrudList from '~client/components/CrudList';
-
 import * as Styled from './styles';
+import CrudList from '~client/components/CrudList';
+import { FormFieldText, FormFieldRange, FormFieldTickbox } from '~client/components/FormField';
+import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
+import { Button, ButtonDelete, InlineFlexCenter } from '~client/styled/shared';
+import { Create, Subcategory, Category } from '~client/types';
 
 const getCreditLimitDisabled = (parent: Pick<Category, 'type'>): boolean =>
   parent.type !== 'liability';
@@ -118,7 +113,7 @@ const NetWorthSubcategoryItem: React.FC<PropsItem> = ({
   onDelete,
 }) => {
   const onChange = useCallback(
-    values => {
+    (values) => {
       onUpdate(id, values);
     },
     [onUpdate, id],
@@ -157,7 +152,7 @@ type Props = {
   subcategories: Subcategory[];
   onCreate: OnCreate<Subcategory>;
   onUpdate: OnUpdate<Subcategory>;
-  onDelete: OnDelete;
+  onDelete: OnDelete<Subcategory>;
 };
 
 const NetWorthSubcategoryList: React.FC<Props> = ({
@@ -173,9 +168,13 @@ const NetWorthSubcategoryList: React.FC<Props> = ({
       {!getCreditLimitDisabled(parent) && <Styled.CreditLimit>{'Credit limit'}</Styled.CreditLimit>}
       <Styled.Opacity>{'Opacity'}</Styled.Opacity>
     </Styled.ListHead>
-    <CrudList
+    <CrudList<
+      Subcategory,
+      {
+        parent: Category;
+      }
+    >
       items={subcategories}
-      real
       Item={NetWorthSubcategoryItem}
       CreateItem={NetWorthSubcategoryCreateItem}
       onCreate={onCreate}

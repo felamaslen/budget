@@ -1,38 +1,86 @@
+import memoize from 'fast-memoize';
 import shortid from 'shortid';
-import { Action } from 'create-reducer-object';
 
-import * as actions from '~client/constants/actions/list';
-import { Page } from '~client/types/app';
-import { Create } from '~client/types/crud';
+import { PageList } from '~client/types/app';
+import { Create, CreateEdit, DeltaEdit } from '~client/types/crud';
 import { Item } from '~client/types/list';
 
-export const listItemCreated = <I extends Item>(page: Page, item: Omit<I, 'id'>): Action => ({
-  type: actions.LIST_ITEM_CREATED,
-  page,
-  item,
-  fakeId: shortid.generate(),
-});
+export enum ListActionType {
+  created = '@@list/ITEM_CREATED',
+  updated = '@@list/ITEM_UPDATED',
+  deleted = '@@list/ITEM_DELETED',
+}
 
-export const listItemUpdated = <I extends Item>(
-  page: Page,
-  id: string,
-  item: Create<I>,
-  oldItem: Create<I>,
-): Action => ({
-  page,
-  type: actions.LIST_ITEM_UPDATED,
-  id,
-  item,
-  oldItem,
-});
+export type ListItemCreated<I extends Item, P extends string> = {
+  type: ListActionType.created;
+  page: P;
+  delta: Create<I>;
+  fakeId: string;
+};
 
-export const listItemDeleted = <I extends Item>(
+export type OnCreateList<I extends Item, P extends string, O = ListItemCreated<I, P>> = (
+  delta: Create<I>,
+) => O;
+
+export const listItemCreated = memoize(
+  <I extends Item, P extends string = PageList>(page: P): OnCreateList<I, P> => (
+    delta,
+  ): ListItemCreated<I, P> => ({
+    type: ListActionType.created,
+    page,
+    delta,
+    fakeId: shortid.generate(),
+  }),
+);
+
+export type ListItemUpdated<I extends Item, P extends string> = {
+  type: ListActionType.updated;
+  page: P;
+  id: string;
+  delta: DeltaEdit<I>;
+  item: CreateEdit<I>;
+};
+
+export type OnUpdateList<I extends Item, P extends string, O = ListItemUpdated<I, P>> = (
   id: string,
-  { page }: { page: Page },
-  oldItem: Create<I>,
-): Action => ({
-  page,
-  type: actions.LIST_ITEM_DELETED,
-  id,
-  oldItem,
-});
+  delta: DeltaEdit<I>,
+  item: CreateEdit<I>,
+) => O;
+
+export const listItemUpdated = memoize(
+  <I extends Item, P extends string = PageList>(page: P): OnUpdateList<I, P> => (
+    id,
+    delta,
+    item,
+  ): ListItemUpdated<I, P> => ({
+    page,
+    type: ListActionType.updated,
+    id,
+    delta,
+    item,
+  }),
+);
+
+export type ListItemDeleted<I extends Item, P extends string> = {
+  type: ListActionType.deleted;
+  page: P;
+  id: string;
+  item: CreateEdit<I>;
+};
+
+export type OnDeleteList<I extends Item, P extends string, O = ListItemDeleted<I, P>> = (
+  id: string,
+  item: CreateEdit<I>,
+) => O;
+
+export const listItemDeleted = memoize(
+  <I extends Item, P extends string = PageList>(page: P): OnDeleteList<I, P> => (
+    id,
+    item,
+  ): ListItemDeleted<I, P> => ({
+    page,
+    type: ListActionType.deleted,
+    id,
+    item,
+  }),
+);

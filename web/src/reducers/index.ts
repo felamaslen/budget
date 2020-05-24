@@ -1,22 +1,21 @@
 import { combineReducers } from 'redux';
 
-import now from './now';
-import app from './app';
-import api from './api';
-import login from './login';
-import error from './error';
-import overview from './overview';
-import netWorth from './net-worth';
 import analysis from './analysis';
-import * as Stocks from './stocks';
-import * as Funds from './funds';
-import income from './income';
+import api from './api';
+import app from './app';
 import bills from './bills';
+import error from './error';
 import food from './food';
+import * as Funds from './funds';
 import general from './general';
 import holiday from './holiday';
+import income from './income';
+import login from './login';
+import netWorth from './net-worth';
+import now from './now';
+import overview from './overview';
 import social from './social';
-import * as Suggestions from './suggestions';
+import * as Stocks from './stocks';
 
 export { State } from './types';
 
@@ -37,5 +36,4 @@ export default combineReducers({
   general,
   holiday,
   social,
-  suggestions: Suggestions.default,
 });

@@ -1,10 +1,11 @@
 import { render, act, fireEvent, RenderResult } from '@testing-library/react';
 import React from 'react';
 
-import FormFieldNetWorthValue from './net-worth-value';
+import { FormFieldNetWorthValue } from './net-worth-value';
 
 describe('<FormFieldNetWorthValue />', () => {
   const props = {
+    id: 'some-subcategory-id',
     value: 156,
     currencies: [
       {
@@ -55,13 +56,13 @@ describe('<FormFieldNetWorthValue />', () => {
 
       const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
       expect(inputs).toHaveLength(1);
-      expect(inputs[0].value).toBe('0');
+      expect(inputs[0].value).toBe('0.00');
     });
 
     it('should call onChange as usual', () => {
       expect.assertions(2);
       const { getByDisplayValue } = setupErroneous();
-      const input = getByDisplayValue('0') as HTMLInputElement;
+      const input = getByDisplayValue('0.00') as HTMLInputElement;
 
       act(() => {
         fireEvent.change(input, { target: { value: '123.45' } });
@@ -333,7 +334,7 @@ describe('<FormFieldNetWorthValue />', () => {
         const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
 
         expect(inputs).toHaveLength(3);
-        inputs.forEach(input => {
+        inputs.forEach((input) => {
           expect(input.value).toBe('0');
         });
       });

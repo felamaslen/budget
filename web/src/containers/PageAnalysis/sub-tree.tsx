@@ -1,9 +1,8 @@
 import React, { useCallback } from 'react';
 
-import { formatCurrency } from '~client/modules/format';
-
 import * as Styled from './styles';
-import { MainBlockName } from './types';
+import { formatCurrency } from '~client/modules/format';
+import { MainBlockName } from '~client/types';
 
 export type Props = {
   open: boolean;
@@ -16,13 +15,44 @@ export type Props = {
   onHover: (name: MainBlockName | null, subItemName?: string) => void;
 };
 
-const SubTree: React.FC<Props> = ({ open, subTree, name, itemCost, onHover }) => {
-  const makeOnMouseOver = useCallback(subItemName => (): void => onHover(name, subItemName), [
+const SubTreeItem: React.FC<
+  Pick<Props, 'name' | 'onHover' | 'itemCost'> & {
+    subItemName: string;
+    onDeactivate: () => void;
+    total: number;
+  }
+> = ({ name, subItemName, onDeactivate, onHover, total, itemCost }) => {
+  const onActivate = useCallback((): void => onHover(name, subItemName), [
     onHover,
     name,
+    subItemName,
   ]);
 
-  const onMouseOut = useCallback(() => onHover(null), [onHover]);
+  return (
+    <Styled.TreeListItem
+      key={subItemName}
+      onFocus={onActivate}
+      onMouseOver={onActivate}
+      onTouchStart={onActivate}
+      onBlur={onDeactivate}
+      onMouseOut={onDeactivate}
+      onTouchEnd={onDeactivate}
+    >
+      <Styled.TreeMain>
+        <Styled.TreeTitle>{subItemName}</Styled.TreeTitle>
+        <Styled.TreeValue>{formatCurrency(total)}</Styled.TreeValue>
+        <Styled.TreeValue>
+          {' ('}
+          {(100 * (total / itemCost)).toFixed(1)}
+          {'%)'}
+        </Styled.TreeValue>
+      </Styled.TreeMain>
+    </Styled.TreeListItem>
+  );
+};
+
+export const SubTree: React.FC<Props> = ({ open, subTree, name, itemCost, onHover }) => {
+  const onDeactivate = useCallback(() => onHover(null), [onHover]);
 
   if (!(open && subTree)) {
     return null;
@@ -31,26 +61,16 @@ const SubTree: React.FC<Props> = ({ open, subTree, name, itemCost, onHover }) =>
   return (
     <Styled.SubTree>
       {subTree.map(({ name: subItemName, total }) => (
-        <Styled.TreeListItem
+        <SubTreeItem
           key={subItemName}
-          onMouseOver={makeOnMouseOver(subItemName)}
-          onMouseOut={onMouseOut}
-          onTouchStart={makeOnMouseOver(subItemName)}
-          onTouchEnd={onMouseOut}
-        >
-          <Styled.TreeMain>
-            <Styled.TreeTitle>{subItemName}</Styled.TreeTitle>
-            <Styled.TreeValue>{formatCurrency(total)}</Styled.TreeValue>
-            <Styled.TreeValue>
-              {' ('}
-              {(100 * (total / itemCost)).toFixed(1)}
-              {'%)'}
-            </Styled.TreeValue>
-          </Styled.TreeMain>
-        </Styled.TreeListItem>
+          name={name}
+          subItemName={subItemName}
+          onHover={onHover}
+          onDeactivate={onDeactivate}
+          total={total}
+          itemCost={itemCost}
+        />
       ))}
     </Styled.SubTree>
   );
 };
-
-export default SubTree;

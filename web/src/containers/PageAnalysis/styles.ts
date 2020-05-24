@@ -1,11 +1,9 @@
 import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
 
-import { Page as PageType } from '~client/types/app';
-import { Page as PageBase } from '~client/styled/shared/page';
-import { Button as ButtonBase } from '~client/styled/shared/button';
 import { breakpoint } from '~client/styled/mixins';
+import { Page as PageBase, Button as ButtonBase } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
-import { MainBlockName } from './types';
+import { Page as PageType, MainBlockName } from '~client/types';
 
 export const Input = styled.span`
   display: block;

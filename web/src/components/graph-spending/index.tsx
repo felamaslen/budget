@@ -1,17 +1,16 @@
-import { useSelector } from 'react-redux';
 import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
-import { rgba } from '~client/modules/color';
-import { profitLossColor } from '~client/components/graph/helpers';
-import { COLOR_SPENDING } from '~client/constants/colors';
+import { Key } from './key';
 import {
   GraphCashFlow,
   getValuesWithTime,
   TimeValuesProps,
 } from '~client/components/graph-cashflow';
-import { Key } from '~client/components/graph-spending/key';
+import { profitLossColor } from '~client/components/graph/helpers';
 import { getStartDate, getProcessedCost } from '~client/selectors';
-import { Line, BasicProps } from '~client/types/graph';
+import { colors } from '~client/styled/variables';
+import { Line, DrawProps } from '~client/types';
 
 function processData(startDate: Date, net: number[], spending: number[]): Line[] {
   const props: TimeValuesProps = {
@@ -34,7 +33,7 @@ function processData(startDate: Date, net: number[], spending: number[]): Line[]
       data: dataSpending,
       fill: false,
       smooth: true,
-      color: rgba(COLOR_SPENDING),
+      color: colors.overview.balanceActual,
       movingAverage: 6,
     },
   ];
@@ -50,8 +49,8 @@ export const GraphSpending: React.FC = () => {
     spending,
   ]);
 
-  const afterLines = useMemo<React.FC<BasicProps>>(() => {
-    const AfterLines: React.FC<BasicProps> = ({ pixX, pixY1, maxX, minY, maxY }) => (
+  const afterLines = useMemo<React.FC<DrawProps>>(() => {
+    const AfterLines: React.FC<DrawProps> = ({ pixX, pixY1, maxX, minY, maxY }) => (
       <g>
         <Key title="Cash flow" pixX={pixX} pixY1={pixY1} maxX={maxX} minY={minY} maxY={maxY} />
       </g>

@@ -1,5 +1,5 @@
-import state from '~client/test-data/state';
 import { getNow, getCurrentDate } from '~client/selectors/now';
+import { testState as state } from '~client/test-data/state';
 
 describe('now selector', () => {
   describe('getNow', () => {

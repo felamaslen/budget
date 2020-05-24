@@ -1,12 +1,14 @@
-import { useSelector, useDispatch } from 'react-redux';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import fromUnixTime from 'date-fns/fromUnixTime';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { getTickSize, formatItem } from '~client/modules/format';
-import { formatValue } from '~client/modules/funds';
-import { rgba } from '~client/modules/color';
+import * as Styled from './styles';
 
-import { graphFundsHeightMobile } from '~client/styled/variables';
+import { fundsRequested } from '~client/actions/funds';
+
+import { ZoomedDimensions, ZoomEffect } from '~client/components/graph/hooks/zoom';
+import { LineGraph, Props as LineGraphProps } from '~client/components/graph/line-graph';
+import { TimeAxes, LabelY } from '~client/components/graph/time-axes';
 import {
   GRAPH_FUNDS_WIDTH,
   GRAPH_FUNDS_HEIGHT,
@@ -16,24 +18,25 @@ import {
   GRAPH_FUNDS_NUM_TICKS,
 } from '~client/constants/graph';
 
+import { AfterCanvas } from '~client/containers/graph-funds/after-canvas';
+
+import { rgba } from '~client/modules/color';
+import { getTickSize, formatItem } from '~client/modules/format';
+import { formatValue } from '~client/modules/funds';
+
 import { getWindowWidth } from '~client/selectors/app';
-import { fundsRequested } from '~client/actions/funds';
-import { getPeriod } from '~client/selectors/funds';
 import {
+  getPeriod,
   getStartTime,
   getCacheTimes,
   getFundItems,
   getFundLines,
-} from '~client/selectors/funds/graph';
+} from '~client/selectors/funds';
 
-import { LineGraph, Props as LineGraphProps } from '~client/components/graph/line-graph';
-import { ZoomedDimensions, ZoomEffect } from '~client/components/graph/hooks/zoom';
-import { TimeAxes, LabelY } from '~client/components/graph/time-axes';
-import { AfterCanvas } from '~client/containers/graph-funds/after-canvas';
-import { Padding, Line, BasicProps } from '~client/types/graph';
+import { graphFundsHeightMobile } from '~client/styled/variables';
+
+import { Padding, Line, DrawProps } from '~client/types';
 import { FundLine } from '~client/types/funds';
-
-import * as Styled from './styles';
 
 const PADDING_DESKTOP: Padding = [36, 0, 0, 0];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
@@ -60,7 +63,7 @@ const makeGetRanges = ({
 
   const valuesY = zoomedLines
     .map(({ data }) => data.map(([, yValue]) => yValue))
-    .filter(values => values.length);
+    .filter((values) => values.length);
 
   let minY = 0;
   if (mode !== Mode.Value) {
@@ -115,8 +118,8 @@ function makeBeforeLines({
   startTime: number;
   tickSizeY?: number;
   labelY: LabelY;
-}): React.FC<BasicProps> {
-  const BeforeLines: React.FC<BasicProps> = props => (
+}): React.FC<DrawProps> {
+  const BeforeLines: React.FC<DrawProps> = (props) => (
     <TimeAxes
       {...props}
       hideMinorTicks
@@ -134,11 +137,7 @@ const modeListAll: Mode[] = [Mode.ROI, Mode.Value, Mode.Price];
 
 type FilterFunds = (filteredItems: { id: string }) => boolean;
 
-export type Props = {
-  isMobile: boolean;
-};
-
-const GraphFunds: React.FC<Props> = ({ isMobile }) => {
+const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
   const windowWidth = useSelector(getWindowWidth);
   const width = Math.min(windowWidth, GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
@@ -162,7 +161,7 @@ const GraphFunds: React.FC<Props> = ({ isMobile }) => {
 
   const modeList = useMemo<Mode[]>(() => {
     if (isMobile) {
-      return modeListAll.filter(value => value !== Mode.Price);
+      return modeListAll.filter((value) => value !== Mode.Price);
     }
 
     return modeListAll;
@@ -176,7 +175,7 @@ const GraphFunds: React.FC<Props> = ({ isMobile }) => {
     if (fundItems.length !== numFundItems) {
       setNumFundItems(fundItems.length);
 
-      setToggleList(lastList =>
+      setToggleList((lastList) =>
         fundItems.reduce(
           (last, { id }) => ({
             [id]: true,
@@ -238,13 +237,13 @@ const GraphFunds: React.FC<Props> = ({ isMobile }) => {
 
   const { minX, maxX, minY, maxY, tickSizeY } = useMemo<ZoomedDimensions>(getRanges, [getRanges]);
 
-  const labelY = useCallback(value => formatValue(value, mode), [mode]);
+  const labelY = useCallback((value) => formatValue(value, mode), [mode]);
 
-  const changePeriod = useCallback(nextPeriod => onFundsRequested(true, nextPeriod), [
+  const changePeriod = useCallback((nextPeriod) => onFundsRequested(true, nextPeriod), [
     onFundsRequested,
   ]);
 
-  const beforeLines = useMemo<React.FC<BasicProps>>(() => {
+  const beforeLines = useMemo<React.FC<DrawProps>>(() => {
     if (!haveData) {
       return (): null => null;
     }
@@ -256,23 +255,7 @@ const GraphFunds: React.FC<Props> = ({ isMobile }) => {
     });
   }, [haveData, startTime, tickSizeY, labelY]);
 
-  const after = useMemo<React.FC>(() => {
-    const After: React.FC = () => (
-      <AfterCanvas
-        isMobile={isMobile}
-        period={period}
-        mode={mode}
-        fundItems={fundItems}
-        toggleList={toggleList}
-        setToggleList={setToggleList}
-        changePeriod={changePeriod}
-      />
-    );
-
-    return After;
-  }, [isMobile, period, mode, fundItems, toggleList, setToggleList, changePeriod]);
-
-  const labelX = useCallback(value => formatItem('date', fromUnixTime(value + startTime)), [
+  const labelX = useCallback((value) => formatItem('date', fromUnixTime(value + startTime)), [
     startTime,
   ]);
 
@@ -285,7 +268,7 @@ const GraphFunds: React.FC<Props> = ({ isMobile }) => {
   );
 
   const onClick = useCallback(
-    () => setMode(last => modeList[(modeList.indexOf(last) + 1) % modeList.length]),
+    () => setMode((last) => modeList[(modeList.indexOf(last) + 1) % modeList.length]),
     [modeList],
   );
 
@@ -303,15 +286,23 @@ const GraphFunds: React.FC<Props> = ({ isMobile }) => {
     maxY,
     beforeLines,
     lines,
-    after,
     svgProperties,
     hoverEffect,
     zoomEffect: getRanges,
   };
 
   return (
-    <Styled.GraphFunds>
+    <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
       <LineGraph {...graphProps} />
+      <AfterCanvas
+        isMobile={isMobile}
+        period={period}
+        mode={mode}
+        fundItems={fundItems}
+        toggleList={toggleList}
+        setToggleList={setToggleList}
+        changePeriod={changePeriod}
+      />
     </Styled.GraphFunds>
   );
 };

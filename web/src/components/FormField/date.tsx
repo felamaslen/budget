@@ -1,29 +1,28 @@
-import React from 'react';
-import parseISO from 'date-fns/parseISO';
-import setYear from 'date-fns/setYear';
-import setMonth from 'date-fns/setMonth';
-import setDate from 'date-fns/setDate';
-import getYear from 'date-fns/getYear';
-import getMonth from 'date-fns/getMonth';
-import startOfDay from 'date-fns/startOfDay';
 import format from 'date-fns/format';
+import getMonth from 'date-fns/getMonth';
+import getYear from 'date-fns/getYear';
+import parseISO from 'date-fns/parseISO';
+import setDate from 'date-fns/setDate';
+import setMonth from 'date-fns/setMonth';
+import setYear from 'date-fns/setYear';
+import startOfDay from 'date-fns/startOfDay';
 
-import { Wrapper, WrapperProps } from '~client/components/FormField';
-import { useField } from '~client/hooks/field';
+import { makeInlineField } from './shared';
+import { Split } from '~client/hooks/field';
 
-const setValueDate: (value: string) => Date = parseISO;
+const setValueDate: (event: React.ChangeEvent<HTMLInputElement>) => Date = (event): Date =>
+  event.target.value ? parseISO(event.target.value ?? '') : new Date();
 
 const parseYear = (year: string): number =>
   year && year.length <= 2 ? 2000 + Number(year) : Number(year);
 
-function setValueString(value: string): Date {
-  const shortMatch = value.match(/^(\d{1,2})(\/(\d{1,2})(\/(\d{2,4}))?)?$/);
+function parseDate(value: string): Date | undefined {
+  const shortMatch = value.match(/^((\d{1,2})\/?)((\d{1,2})\/?((\d{2,4})\/?)?)?$/);
   if (!shortMatch) {
-    throw new Error('Not a valid date');
+    return undefined;
   }
 
-  const [, day, , month, , year] = shortMatch;
-
+  const [, , day, , month, , year] = shortMatch;
   const now = startOfDay(new Date());
 
   return setYear(
@@ -32,53 +31,31 @@ function setValueString(value: string): Date {
   );
 }
 
-type Props = WrapperProps<Date> & {
-  onChange: (value: Date) => void;
-  inline?: boolean;
-  label?: string | null;
-  invalid?: boolean;
-};
+const setValueString = ({
+  target: { value },
+}: React.ChangeEvent<HTMLInputElement>): Split<Date | undefined> => ({
+  __split: true,
+  fieldValue: parseDate(value),
+  inputValue: value,
+});
 
-const FormFieldDate: React.FC<Props> = ({
-  label = null,
-  invalid = false,
-  value: fieldValue,
-  onChange,
-  ...props
-}) => {
-  const setValue = props.inline ? setValueString : setValueDate;
-  const type = props.inline ? 'text' : 'date';
+const toISO = (value: Date): string => format(value, 'yyyy-MM-dd');
+const toLocal = (value: Date | undefined): string => format(value ?? new Date(), 'dd/MM/yyyy');
 
-  const value = React.useMemo<Date>(() => fieldValue ?? new Date(), [fieldValue]);
+const { Field, FieldInline } = makeInlineField<Date>({
+  hookOptions: {
+    convertExternalToInputValue: toISO,
+    convertInputToExternalValue: setValueDate,
+    immediate: true,
+  },
+  hookOptionsInline: {
+    convertExternalToInputValue: toLocal,
+    convertInputToExternalValue: setValueString,
+  },
+  inputProps: {
+    type: 'date',
+  },
+});
 
-  const onChangeBackwardsCompatible = React.useCallback(
-    (newValue: Date): void => {
-      onChange(newValue);
-    },
-    [onChange],
-  );
-
-  const [, , onChangeInput, ref, onBlur] = useField({
-    ...props,
-    value,
-    setValue,
-    onChange: onChangeBackwardsCompatible,
-  });
-
-  const defaultValue = format(value, props.inline ? 'dd/MM/yyyy' : 'yyyy-MM-dd');
-
-  return (
-    <Wrapper<Date> item="date" value={value} active={props.active} invalid={invalid}>
-      <input
-        ref={ref}
-        aria-label={label || undefined}
-        type={type}
-        defaultValue={defaultValue}
-        onChange={onChangeInput}
-        onBlur={onBlur}
-      />
-    </Wrapper>
-  );
-};
-
-export default FormFieldDate;
+export { Field as FormFieldDate };
+export { FieldInline as FormFieldDateInline };

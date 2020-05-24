@@ -1,17 +1,13 @@
-import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
 import { compose } from '@typed/compose';
+import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
 
-import { PageListCalc } from '~client/types/app';
+import { BlockStyleProps as BlockProps } from './types';
+import { isCalcPage } from '~client/constants/data';
 import { breakpoint, diagonalBg } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
-import { BlockStyleProps as BlockProps } from './types';
-import { PAGES_LIST_CALC } from '~client/constants/data';
 
 type SizeProps = Pick<BlockProps, 'width' | 'height'>;
 type PositionProps = Pick<BlockProps, 'left' | 'top'>;
-
-const isPage = (name?: BlockProps['name']): name is PageListCalc =>
-  !!name && (PAGES_LIST_CALC as string[]).includes(name);
 
 function getBlockColor({
   active,
@@ -21,7 +17,7 @@ function getBlockColor({
   if (active) {
     return undefined;
   }
-  if (isPage(name)) {
+  if (isCalcPage(name)) {
     return colors[name].main;
   }
   if (name && colors.blockColor[name]) {

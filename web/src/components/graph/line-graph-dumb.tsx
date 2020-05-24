@@ -1,13 +1,14 @@
 import React, { useMemo, forwardRef } from 'react';
-import { Graph, GraphProps } from '~client/components/graph';
-import { RenderedLine } from '~client/components/graph/rendered-line';
+
+import { HoverEffect, HLPoint } from './hooks/hover';
+import { RenderedLine } from './rendered-line';
+import { Graph, GraphProps } from '.';
 import { HighlightPoint } from '~client/components/HighlightPoint';
-import { Dimensions, Calc, BasicProps, Line } from '~client/types/graph';
-import { HoverEffect, HLPoint } from '~client/components/graph/hooks/hover';
+import { Dimensions, Calc, DrawProps, Line } from '~client/types/graph';
 
 function useBeforeAfter(
-  component: React.FC<BasicProps> | undefined,
-  basicProps: BasicProps,
+  component: React.FC<DrawProps> | undefined,
+  basicProps: DrawProps,
 ): React.ReactElement | null {
   return useMemo(() => (component ? component(basicProps) : null), [component, basicProps]);
 }
@@ -18,8 +19,8 @@ export type Props = GraphProps & {
   calc: Calc;
   lines: Line[];
   hlPoint?: HLPoint;
-  beforeLines?: React.FC<BasicProps>;
-  afterLines?: React.FC<BasicProps>;
+  beforeLines?: React.FC<DrawProps>;
+  afterLines?: React.FC<DrawProps>;
   hoverEffect?: HoverEffect;
 };
 
@@ -40,7 +41,7 @@ const LineGraphDumbWithoutRef: React.RefForwardingComponent<HTMLDivElement, Prop
   },
   graphRef,
 ) => {
-  const basicProps = useMemo<BasicProps>(
+  const basicProps = useMemo<DrawProps>(
     () => ({
       ...dimensions,
       ...calc,

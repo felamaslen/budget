@@ -19,6 +19,7 @@ module.exports = {
           },
         ],
       ],
+      plugins: ['babel-plugin-react-remove-properties'],
     },
     development: {
       sourceMaps: 'inline',

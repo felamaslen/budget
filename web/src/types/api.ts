@@ -1,7 +1,8 @@
-import { DataKeyAbbr } from '~client/constants/api';
-import { PageList, Page } from './app';
+import { PageListCalc, Page } from './app';
 import { RawDate, Request } from './crud';
+import { ReadResponseFunds } from './funds';
 import { Category, Subcategory, Entry } from './net-worth';
+import { DataKeyAbbr } from '~client/constants/api';
 
 export type RequestWithResponse<R = never> = Request & {
   res: R;
@@ -22,7 +23,7 @@ export type SyncResponse = Partial<{
 
 export type ReadResponse = Partial<
   {
-    [page in PageList]: {
+    [page in PageListCalc]: {
       data: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         [key in DataKeyAbbr]?: any;
@@ -30,6 +31,8 @@ export type ReadResponse = Partial<
       total?: number;
       olderExists?: boolean | null;
     };
+  } & {
+    [Page.funds]: ReadResponseFunds;
   } & {
     [Page.overview]: {
       startYearMonth: [number, number];

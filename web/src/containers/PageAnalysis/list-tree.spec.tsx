@@ -1,9 +1,8 @@
 import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
 
-import ListTree from './list-tree';
-import { Page } from '~client/types/app';
-import { MainBlockName } from './types';
+import ListTree, { Props } from './list-tree';
+import { Page } from '~client/types';
 
 describe('<PageAnalysis /> / <ListTree />', () => {
   const treeVisible = {
@@ -19,13 +18,13 @@ describe('<PageAnalysis /> / <ListTree />', () => {
     [Page.holiday]: true,
   };
 
-  const props = {
+  const props: Props = {
     cost: [
-      { name: Page.food as MainBlockName, total: 1, subTree: [{ name: 'bar1', total: 1 }] },
-      { name: Page.general as MainBlockName, total: 4, subTree: [{ name: 'bar2', total: 2 }] },
-      { name: Page.bills as MainBlockName, total: 3, subTree: [{ name: 'bar3', total: 2 }] },
-      { name: Page.holiday as MainBlockName, total: 6, subTree: [{ name: 'bar4', total: 2 }] },
-      { name: Page.social as MainBlockName, total: 10, subTree: [{ name: 'bar5', total: 3 }] },
+      { name: Page.food, total: 1, subTree: [{ name: 'bar1', total: 1 }] },
+      { name: Page.general, total: 4, subTree: [{ name: 'bar2', total: 2 }] },
+      { name: Page.bills, total: 3, subTree: [{ name: 'bar3', total: 2 }] },
+      { name: Page.holiday, total: 6, subTree: [{ name: 'bar4', total: 2 }] },
+      { name: Page.social, total: 10, subTree: [{ name: 'bar5', total: 3 }] },
     ],
     treeVisible,
     treeOpen,

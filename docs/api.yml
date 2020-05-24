@@ -232,13 +232,14 @@ paths:
                         example: [Pizza, Peas, Penne]
                       nextCategory:
                         type: array
+                        optional: true
                         items:
                           type: string
                         example: [Pizza, Vegetables, Pasta]
                       nextField:
                         type: string
                         example: "category"
-
+                        optional: true
   /data/overview:
     get:
       summary: Get overview budget data

@@ -1,7 +1,7 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 
-import FormFieldColor from './color';
+import { FormFieldColor } from './color';
 
 describe('<FormFieldColor />', () => {
   const props = {
@@ -16,7 +16,7 @@ describe('<FormFieldColor />', () => {
     expect(input).toBeInTheDocument();
   });
 
-  it('should call onChange when changing the value, after the blur', async () => {
+  it('should call onChange when changing the value, without waiting for blur', async () => {
     expect.assertions(2);
     const { getByDisplayValue } = render(<FormFieldColor {...props} />);
     const input = getByDisplayValue('#aa09b3') as HTMLInputElement;

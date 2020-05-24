@@ -1,10 +1,9 @@
 import { rgba } from 'polished';
 import React from 'react';
 import { BaseKey, Props } from '~client/components/graph-cashflow/base-key';
-import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { colors as netWorthColors } from '~client/components/net-worth-graph/styles';
+import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
-import { Page } from '~client/types/app';
 import { Aggregate } from '~client/types/net-worth';
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
@@ -22,7 +21,7 @@ const keyY0 = 40;
 const keyY1 = 56;
 const keyY2 = 72;
 
-export const Key: React.FC<Props> = props => (
+export const Key: React.FC<Props> = (props) => (
   <BaseKey {...props} height={80}>
     <line
       x1={keyX0}
@@ -67,7 +66,7 @@ export const Key: React.FC<Props> = props => (
       y={keyY1 - 3}
       width={keyLineWidth}
       height={6}
-      fill={rgba(colors[Page.overview].category.funds, 0.5)}
+      fill={rgba(colors.funds.main, 0.5)}
     />
     <text
       x={keyTextX0}

@@ -1,7 +1,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import FormFieldRange from './range';
+import { FormFieldRange } from './range';
 
 describe('<FormFieldRange />', () => {
   const props = {
@@ -9,17 +9,19 @@ describe('<FormFieldRange />', () => {
     onChange: jest.fn(),
   };
 
-  it('should render a range input with the value', async () => {
-    const { findByDisplayValue } = render(<FormFieldRange {...props} />);
-    const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
+  it('should render a range input with the value', () => {
+    expect.assertions(2);
+    const { getByDisplayValue } = render(<FormFieldRange {...props} />);
+    const input = getByDisplayValue('103.45') as HTMLInputElement;
 
     expect(input).toBeInTheDocument();
     expect(input.type).toBe('range');
   });
 
-  it('should call onChange when changing the value', async () => {
-    const { findByDisplayValue } = render(<FormFieldRange {...props} />);
-    const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
+  it('should call onChange when changing the value', () => {
+    expect.assertions(2);
+    const { getByDisplayValue } = render(<FormFieldRange {...props} />);
+    const input = getByDisplayValue('103.45') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: '10.93' } });
 

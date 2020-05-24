@@ -28,21 +28,21 @@ export type TableValues<T = never, K extends keyof CostProcessed = keyof CostPro
   netWorth: T;
 };
 
-export type Cell = {
+export type OverviewCell = {
   column: ['month' | keyof TableValues, string];
   value: string | number;
   rgb: string | null;
 };
 
-export type TableRow = {
+export type OverviewTableRow = {
   key: string;
-  cells: Cell[];
+  cells: OverviewCell[];
   past: boolean;
   active: boolean;
   future: boolean;
 };
 
-export type Table = TableRow[];
+export type OverviewTable = OverviewTableRow[];
 
 export type Target = {
   date: number;
@@ -53,7 +53,7 @@ export type Target = {
   tag: string;
 };
 
-export type Range = {
+export type SplitRange = {
   min: number;
   maxNegative?: number;
   minPositive?: number;

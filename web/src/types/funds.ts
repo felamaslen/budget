@@ -1,6 +1,6 @@
-import { Data } from '~client/types/graph';
-import { Color } from '~client/constants/colors';
 import { DataKeyAbbr } from '~client/constants/api';
+import { Color } from '~client/constants/colors';
+import { Data } from '~client/types/graph';
 
 export type TransactionRaw = {
   date: string;
@@ -13,10 +13,10 @@ export type Transaction = Omit<TransactionRaw, 'date'> & {
   date: Date;
 };
 
-export type Row = {
+export type Fund = {
   id: string;
   item: string;
-  transactions: Transaction[] | null;
+  transactions: Transaction[];
 };
 
 export type FundPrices = {
@@ -55,7 +55,7 @@ export type StockPrice = {
   close: number;
 };
 
-export type ItemRaw = {
+export type FundRaw = {
   [DataKeyAbbr.id]: string;
   [DataKeyAbbr.item]: string;
   [DataKeyAbbr.transactions]: TransactionRaw[] | null;
@@ -63,8 +63,8 @@ export type ItemRaw = {
   prStartIndex: number;
 };
 
-export type ReadResponse = {
-  data: ItemRaw[];
+export type ReadResponseFunds = {
+  data: FundRaw[];
   startTime: number;
   cacheTimes: number[];
 };

@@ -1,22 +1,22 @@
 import React from 'react';
 
-import { Period, Grouping } from '~client/constants/analysis';
-
 import * as Styled from './styles';
+import { Period, Grouping } from '~client/constants/analysis';
+import { AnalysisRequest } from '~client/types';
 
 type Props = {
   period: Period;
   grouping: Grouping;
   page: number;
   description: string;
-  onRequest: (request: { period?: Period; grouping?: Grouping; page?: number }) => void;
+  onRequest: (request: AnalysisRequest) => void;
 };
 
 const Upper: React.FC<Props> = ({ period, grouping, page, description, onRequest }) => (
   <Styled.Upper>
     <Styled.Input>
       <span>{'Period:'}</span>
-      {(Object.keys(Period) as Period[]).map(value => (
+      {(Object.keys(Period) as Period[]).map((value) => (
         <span key={value}>
           <input
             type="radio"
@@ -30,7 +30,7 @@ const Upper: React.FC<Props> = ({ period, grouping, page, description, onRequest
     </Styled.Input>
     <Styled.Input>
       <span>{'Grouping:'}</span>
-      {(Object.keys(Grouping) as Grouping[]).map(value => (
+      {(Object.keys(Grouping) as Grouping[]).map((value) => (
         <span key={value}>
           <input
             type="radio"

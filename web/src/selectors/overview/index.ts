@@ -1,31 +1,22 @@
-import { createSelector } from 'reselect';
 import { compose } from '@typed/compose';
-import getDaysInMonth from 'date-fns/getDaysInMonth';
-import getDate from 'date-fns/getDate';
-import isSameMonth from 'date-fns/isSameMonth';
-import isSameDay from 'date-fns/isSameDay';
-import endOfMonth from 'date-fns/endOfMonth';
 import addMonths from 'date-fns/addMonths';
+import endOfMonth from 'date-fns/endOfMonth';
 import format from 'date-fns/format';
+import getDate from 'date-fns/getDate';
+import getDaysInMonth from 'date-fns/getDaysInMonth';
+import isSameDay from 'date-fns/isSameDay';
+import isSameMonth from 'date-fns/isSameMonth';
 import { replaceAtIndex } from 'replace-array';
+import { createSelector } from 'reselect';
 
-import { Page } from '~client/types/app';
-import {
-  Cost,
-  CostProcessed,
-  TableValues,
-  Range,
-  Median,
-  Table,
-  TableRow,
-  Cell,
-} from '~client/types/overview';
-import { Row as FundRow } from '~client/types/funds';
+import { getNetWorthSummary } from './net-worth';
+
 import { Average } from '~client/constants';
 import { OVERVIEW_COLUMNS, OverviewColumn, OverviewHeader } from '~client/constants/data';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
-import { IDENTITY, arrayAverage, randnBm } from '~client/modules/data';
 import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
+import { IDENTITY, arrayAverage, randnBm } from '~client/modules/data';
+import { getFundsRows } from '~client/selectors/funds/helpers';
 import { getCurrentDate } from '~client/selectors/now';
 import {
   getCost,
@@ -34,8 +25,18 @@ import {
   getFutureMonths,
   getMonthDates,
 } from '~client/selectors/overview/common';
-import { getFundsRows } from '~client/selectors/funds/helpers';
-import { getNetWorthSummary } from './net-worth';
+import {
+  Page,
+  Cost,
+  CostProcessed,
+  TableValues,
+  SplitRange,
+  Median,
+  OverviewTable as Table,
+  OverviewTableRow as TableRow,
+  OverviewCell as Cell,
+  Fund,
+} from '~client/types';
 
 export * from './common';
 export * from './net-worth';
@@ -139,11 +140,11 @@ const getPredictedNetWorth = <K extends keyof CostProcessed>(
   dates: Date[],
   currentDate: Date,
   netWorth: number[],
-  fundsRows: FundRow[],
+  fundsRows: Fund[],
 ) => (
   data: Cost & Pick<CostProcessed, K | 'net' | 'netWorth'>,
 ): Cost & Pick<CostProcessed, K | 'net' | 'netWorth' | 'netWorthPredicted'> => {
-  const fundCosts = dates.map(monthDate =>
+  const fundCosts = dates.map((monthDate) =>
     fundsRows.reduce(
       (sum, { transactions }) =>
         (transactions ?? [])
@@ -201,7 +202,7 @@ const withNetWorth = <K extends keyof CostProcessed>(
   currentDate: Date,
   futureMonths: number,
   netWorth: number[],
-  fundsRows: FundRow[],
+  fundsRows: Fund[],
 ) => (
   cost: Cost & Pick<CostProcessed, K | 'spending' | 'net'>,
 ): Cost &
@@ -259,7 +260,7 @@ export const getOverviewTable = createSelector(
       return null;
     }
 
-    const months = dates.map(date => format(date, 'LLL-yy'));
+    const months = dates.map((date) => format(date, 'LLL-yy'));
 
     const values: TableValues<number[], 'netWorth'> = Object.entries(OVERVIEW_COLUMNS)
       .filter(([header]) => header !== 'month')
@@ -272,7 +273,7 @@ export const getOverviewTable = createSelector(
       netWorth: values.netWorth.slice(0, -(futureMonths + 1)),
     };
 
-    const ranges: TableValues<Range> = (Object.keys(values) as (keyof TableValues)[]).reduce(
+    const ranges: TableValues<SplitRange> = (Object.keys(values) as (keyof TableValues)[]).reduce(
       (last, key) => ({
         [key]: {
           min: Math.min(...(Reflect.get(scoreValues, key) ?? [])),
@@ -288,7 +289,7 @@ export const getOverviewTable = createSelector(
         },
         ...last,
       }),
-      {} as TableValues<Range>,
+      {} as TableValues<SplitRange>,
     );
 
     const medians: TableValues<Median> = (Object.keys(values) as (keyof TableValues)[]).reduce(

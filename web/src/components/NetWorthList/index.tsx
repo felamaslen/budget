@@ -1,12 +1,11 @@
 import React from 'react';
 
+import NetWorthListCreateItem from './net-worth-list-create-item';
+import NetWorthListItem from './net-worth-list-item';
+import * as Styled from './styles';
+import CrudList from '~client/components/CrudList';
 import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
 import { Category, Subcategory, Entry } from '~client/types/net-worth';
-import CrudList from '~client/components/CrudList';
-import NetWorthListItem from './net-worth-list-item';
-import NetWorthListCreateItem from './net-worth-list-create-item';
-
-import * as Styled from './styles';
 
 type Props = {
   data: Entry[];
@@ -14,7 +13,7 @@ type Props = {
   subcategories: Subcategory[];
   onCreate: OnCreate<Entry>;
   onUpdate: OnUpdate<Entry>;
-  onDelete: OnDelete;
+  onDelete: OnDelete<Entry>;
 };
 
 const NetWorthList: React.FC<Props> = ({
@@ -26,9 +25,8 @@ const NetWorthList: React.FC<Props> = ({
   onDelete,
 }) => (
   <Styled.NetWorthList>
-    <CrudList
+    <CrudList<Entry, Pick<Props, 'data' | 'categories' | 'subcategories'>>
       items={data}
-      real
       Item={NetWorthListItem}
       CreateItem={NetWorthListCreateItem}
       onCreate={onCreate}

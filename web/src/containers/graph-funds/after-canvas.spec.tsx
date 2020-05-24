@@ -37,6 +37,9 @@ describe('<AfterCanvas /> (funds graph)', () => {
       act(() => {
         fireEvent.change(periodSelector, { target: { value: period } });
       });
+      act(() => {
+        fireEvent.blur(periodSelector);
+      });
 
       expect(props.changePeriod).toHaveBeenCalledWith(period);
     });

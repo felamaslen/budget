@@ -1,23 +1,14 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { replaceAtIndex, removeAtIndex } from 'replace-array';
 
-import {
-  Value,
-  Currency,
-  isComplex,
-  isFX,
-  isOption,
-  OptionValue,
-  FXValue,
-} from '~client/types/net-worth';
-import { ButtonDelete, ButtonAdd } from '~client/styled/shared/button';
-import FormFieldCost from '~client/components/FormField/cost';
-import FormFieldNumber from '~client/components/FormField/number';
-import FormFieldTickbox from '~client/components/FormField/tickbox';
-import FormFieldSelect, { Options } from '~client/components/FormField/select';
-import { NULL } from '~client/modules/data';
-
+import { FormFieldCost } from './cost';
+import { FormFieldNumber } from './number';
+import { FormFieldSelect, SelectOptions } from './select';
 import * as Styled from './styles';
+import { FormFieldTickbox } from './tickbox';
+import { NULL } from '~client/modules/data';
+import { ButtonDelete, ButtonAdd } from '~client/styled/shared';
+import { Value, Currency, isComplex, isFX, isOption, OptionValue, FXValue } from '~client/types';
 
 type FXEventAdd = { value: number; currency: string };
 type FXEventRemove = { index: number };
@@ -44,16 +35,16 @@ const FormFieldWithCurrency: React.FC<PropsWithCurrency> = ({
   onRemove,
   onAdd,
 }) => {
-  const options = useMemo<Options>(
+  const options = useMemo<SelectOptions>(
     () =>
-      Array.from(new Set(currencyOptions.concat([currency]))).map(item => ({
+      Array.from(new Set(currencyOptions.concat([currency]))).map((item) => ({
         internal: item,
         external: item,
       })),
     [currencyOptions, currency],
   );
 
-  const [newValue, setNewValue] = useState<number | undefined>(value);
+  const [newValue, setNewValue] = useState<number>(value);
   const [newCurrency, setNewCurrency] = useState<string>(currency);
 
   useEffect(() => {
@@ -89,12 +80,14 @@ const FormFieldWithCurrency: React.FC<PropsWithCurrency> = ({
   );
 };
 
-export type Props = {
+type Props = {
+  id: string;
   value: Value;
   isOption?: boolean;
   onChange: (value: Value) => void;
   currencies: Omit<Currency, 'id'>[];
 };
+export { Props as PropsNetWorthValue };
 
 const coerceSimpleFXValue = (value: Value): number | FXValue[] => {
   if (isComplex(value) && value.every(isFX)) {
@@ -109,7 +102,11 @@ type State = {
   selected: 'simpleValue' | 'fxValue';
 };
 
-const FormFieldSimpleFX: React.FC<Omit<Props, 'isOption'>> = ({
+type PropsFieldSimpleFX = Pick<Props, 'value' | 'currencies'> & {
+  onChange: (value: number | FXValue[]) => void;
+};
+
+const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
   value: initialValue,
   onChange,
   currencies,
@@ -124,7 +121,7 @@ const FormFieldSimpleFX: React.FC<Omit<Props, 'isOption'>> = ({
 
   const toggleFX = useCallback(
     () =>
-      setState(last => ({
+      setState((last) => ({
         ...last,
         selected: last.selected === 'fxValue' ? 'simpleValue' : 'fxValue',
       })),
@@ -132,7 +129,7 @@ const FormFieldSimpleFX: React.FC<Omit<Props, 'isOption'>> = ({
   );
 
   useEffect(() => {
-    setState(last => ({
+    setState((last) => ({
       ...last,
       simpleValue: isComplex(initialValueCoerced) ? last.simpleValue : initialValueCoerced,
       fxValue: isComplex(initialValueCoerced) ? initialValueCoerced : last.fxValue,
@@ -147,7 +144,7 @@ const FormFieldSimpleFX: React.FC<Omit<Props, 'isOption'>> = ({
       return [];
     }
 
-    return currencyOptions.filter(option => !fxValue.some(({ currency }) => currency === option));
+    return currencyOptions.filter((option) => !fxValue.some(({ currency }) => currency === option));
   }, [currencyOptions, selected, fxValue]);
 
   const onChangeComplexValue = useCallback(
@@ -222,22 +219,30 @@ const coerceOptionValue = (value: Value): Partial<OptionValue> =>
 
 const optionDeltaComplete = (delta: Partial<OptionValue> | OptionValue): delta is OptionValue =>
   Object.keys(delta).length === 3 &&
-  Object.values(delta).every(value => typeof value !== 'undefined');
+  Object.values(delta).every((value) => typeof value !== 'undefined');
 
-const FormFieldOption: React.FC<Omit<Props, 'isOption' | 'currencies'>> = ({ value, onChange }) => {
+const unitsProps = { placeholder: 'Units' };
+const strikeProps = { placeholder: 'Strike price' };
+const marketProps = { placeholder: 'Market price' };
+
+type PropsFieldOption = Pick<Props, 'id' | 'value'> & {
+  onChange: (value: OptionValue[]) => void;
+};
+
+const FormFieldOption: React.FC<PropsFieldOption> = ({ id, value, onChange }) => {
   const initialDelta = useMemo<Partial<OptionValue>>(() => coerceOptionValue(value), [value]);
   const [delta, setDelta] = useState<Partial<OptionValue>>(coerceOptionValue(value));
   useEffect(() => {
     setDelta(initialDelta);
   }, [initialDelta]);
 
-  const onChangeUnits = useCallback((units = 0) => setDelta(last => ({ ...last, units })), []);
+  const onChangeUnits = useCallback((units = 0) => setDelta((last) => ({ ...last, units })), []);
   const onChangeStrike = useCallback(
-    (strikePrice = 0) => setDelta(last => ({ ...last, strikePrice })),
+    (strikePrice = 0) => setDelta((last) => ({ ...last, strikePrice })),
     [],
   );
   const onChangeMarket = useCallback(
-    (marketPrice = 0) => setDelta(last => ({ ...last, marketPrice })),
+    (marketPrice = 0) => setDelta((last) => ({ ...last, marketPrice })),
     [],
   );
 
@@ -250,22 +255,29 @@ const FormFieldOption: React.FC<Omit<Props, 'isOption' | 'currencies'>> = ({ val
   return (
     <Styled.NetWorthValueOption>
       <div>
-        <label>Units</label>
-        <FormFieldNumber placeholder="Units" value={delta.units ?? 0} onChange={onChangeUnits} />
+        <label htmlFor={`option-units-${id}`}>Units</label>
+        <FormFieldNumber
+          id={`option-units-${id}`}
+          inputProps={unitsProps}
+          value={delta.units ?? 0}
+          onChange={onChangeUnits}
+        />
       </div>
       <div>
-        <label>Strike price</label>
+        <label htmlFor={`option-strike-${id}`}>Strike price</label>
         <FormFieldNumber
-          placeholder="Strike price"
+          id={`option-strike-${id}`}
+          inputProps={strikeProps}
           value={delta.strikePrice ?? 0}
           onChange={onChangeStrike}
         />
         p
       </div>
       <div>
-        <label>Market price</label>
+        <label htmlFor={`option-market-${id}`}>Market price</label>
         <FormFieldNumber
-          placeholder="Market price"
+          id={`option-market-${id}`}
+          inputProps={marketProps}
           value={delta.marketPrice ?? 0}
           onChange={onChangeMarket}
         />
@@ -275,7 +287,8 @@ const FormFieldOption: React.FC<Omit<Props, 'isOption' | 'currencies'>> = ({ val
   );
 };
 
-const FormFieldNetWorthValue: React.FC<Props> = ({
+export const FormFieldNetWorthValue: React.FC<Props> = ({
+  id,
   value,
   isOption: valueIsOption = false,
   onChange,
@@ -283,12 +296,10 @@ const FormFieldNetWorthValue: React.FC<Props> = ({
 }) => {
   return (
     <Styled.NetWorthValue>
-      {valueIsOption && <FormFieldOption value={value} onChange={onChange} />}
+      {valueIsOption && <FormFieldOption id={id} value={value} onChange={onChange} />}
       {!valueIsOption && (
         <FormFieldSimpleFX value={value} onChange={onChange} currencies={currencies} />
       )}
     </Styled.NetWorthValue>
   );
 };
-
-export default FormFieldNetWorthValue;

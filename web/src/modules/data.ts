@@ -1,12 +1,12 @@
-import shortid from 'shortid';
 import formatDate from 'date-fns/format';
 import { replaceAtIndex } from 'replace-array';
+import shortid from 'shortid';
 
+import { Average } from '~client/constants';
+import { PeriodObject, Period } from '~client/constants/graph';
+import { IdMap, Item } from '~client/types';
 import { RequestType, WithCrud, Create } from '~client/types/crud';
 import { TransactionRaw as TransactionRawNew, Transaction } from '~client/types/funds';
-import { Average } from '~client/constants';
-import { PeriodObject } from '~client/constants/graph';
-import { IdMap } from '~client/types';
 import { Data as Line } from '~client/types/graph';
 
 type TransactionRaw = Omit<TransactionRawNew, 'date'> & {
@@ -15,14 +15,19 @@ type TransactionRaw = Omit<TransactionRawNew, 'date'> & {
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const IDENTITY: Identity<any, any> = state => state;
+export const IDENTITY: Identity<any, any> = (state) => state;
 
 export const NULL = (): null => null;
 
 export function getPeriodMatch(
-  shortPeriod: string,
+  shortPeriod: string | Period,
   defaultPeriod = process.env.DEFAULT_FUND_PERIOD,
 ): PeriodObject {
+  const matchingPeriod = Object.entries(Period).find(([, match]) => match === shortPeriod);
+  if (matchingPeriod) {
+    return getPeriodMatch(matchingPeriod[0]);
+  }
+
   const periodRegex = /^([a-z]+)([0-9]+)$/;
   const match = shortPeriod.match(periodRegex) || (defaultPeriod ?? '').match(periodRegex);
   if (!match) {
@@ -68,7 +73,8 @@ export const modifyTransaction = (
   transactionsList: Transaction[],
   index: number,
   delta: Partial<Transaction>,
-): Transaction[] => replaceAtIndex(transactionsList, index, oldItem => ({ ...oldItem, ...delta }));
+): Transaction[] =>
+  replaceAtIndex(transactionsList, index, (oldItem) => ({ ...oldItem, ...delta }));
 
 export const modifyTransactionById = (
   transactionsList: Transaction[],
@@ -127,7 +133,7 @@ export function arrayAverage(values: number[], mode: Average = Average.Mean): nu
 }
 
 export const limitTimeSeriesLength = (timeSeries: Line, limit: number): Line =>
-  new Array(timeSeries.length).fill(0).reduce(last => {
+  new Array(timeSeries.length).fill(0).reduce((last) => {
     if (last.length <= limit) {
       return last;
     }
@@ -153,6 +159,17 @@ export const limitTimeSeriesLength = (timeSeries: Line, limit: number): Line =>
 
 export const randnBm = (): number =>
   Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+
+export const isDate = <I extends Item, F extends keyof I>(value?: I[F] | Date): value is Date =>
+  typeof value === 'undefined' || value instanceof Date;
+
+export const isTransactions = <I extends Item, F extends keyof I>(
+  value?: I[F] | Transaction[],
+): value is Transaction[] => value === null || Array.isArray(value);
+
+export const isNumber = <I extends Item, F extends keyof I>(
+  value?: I[F] | number,
+): value is number => typeof value === 'undefined' || typeof value === 'number';
 
 export function getValueFromTransmit(dataType: 'date', value: string): Date;
 export function getValueFromTransmit(dataType: 'cost', value: string): number;
@@ -205,43 +222,40 @@ export function getValueForTransmit(dataType: string, value: any): any {
   return getValueFromTransmit(dataType, value);
 }
 
-const asTimestamp = (date: string | Date): number => {
-  if (date instanceof Date) {
-    return date.getTime();
-  }
-  return new Date(date).getTime();
-};
-
-export const sortByDate = <I extends { date: string | Date }>(data: I[]): I[] =>
-  [...data].sort(({ date: dateA }, { date: dateB }) => asTimestamp(dateA) - asTimestamp(dateB));
-
-function sortKey<K extends string, I extends { [key in K]: number | string }>(
-  key: K,
+type SortKey<K extends string> = K | { key: K; order: -1 | 1 };
+function sortKey<K extends string, I extends { [key in K]?: number | string | Date }>(
+  criteria: SortKey<K>,
   itemA: I,
   itemB: I,
 ): -1 | 1 | 0 {
+  const key: K = typeof criteria === 'object' ? criteria.key : criteria;
+  const order = typeof criteria === 'object' ? criteria.order : 1;
+
   if (itemA[key] < itemB[key]) {
-    return -1;
+    return -order as -1 | 1;
   }
   if (itemA[key] > itemB[key]) {
-    return 1;
+    return order;
   }
 
   return 0;
 }
 
-export const sortByKey = <K extends string, I extends { [key in K]: number | string }>(
-  ...keys: K[]
+export const sortByKey = <K extends string, I extends { [key in K]?: number | string | Date }>(
+  ...keys: SortKey<K>[]
 ) => (items: I[]): I[] =>
   [...items].sort((itemA, itemB) =>
     keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0),
   );
 
-export const sortByTotal = <R extends { total: number }>(items: R[]): R[] =>
-  sortByKey<'total', R>('total')(items).reverse();
+const asTimestamp = (date: string | Date): number =>
+  (date instanceof Date ? date : new Date(date)).getTime();
 
-export const fieldExists = <V = never>(value?: V): boolean =>
-  typeof value !== 'undefined' && !(typeof value === 'string' && !value.length);
+export const sortByDate = <I extends { date: string | Date }>(items: I[]): I[] =>
+  [...items].sort(({ date: dateA }, { date: dateB }) => asTimestamp(dateA) - asTimestamp(dateB));
+
+export const sortByTotal = <R extends { total: number }>(items: R[]): R[] =>
+  sortByKey<'total', R>({ key: 'total', order: -1 })(items);
 
 export const leftPad = (array: number[], length: number, fill = 0): number[] =>
   Array(Math.max(0, length - array.length))
@@ -252,6 +266,9 @@ export const rightPad = (array: number[], length: number, fill?: number): number
   array.concat(
     Array(Math.max(0, length - array.length)).fill(fill ?? array[array.length - 1] ?? 0),
   );
+
+export const withoutCrud = <T extends object>(items: WithCrud<T>[]): T[] =>
+  items.map(({ __optimistic, ...item }: WithCrud<T>): T => item as T);
 
 export const withoutDeleted = <T>(items: WithCrud<T>[]): WithCrud<T>[] =>
   (items || []).filter(({ __optimistic }) => __optimistic !== RequestType.delete);

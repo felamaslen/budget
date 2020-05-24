@@ -1,16 +1,10 @@
 import getUnixTime from 'date-fns/getUnixTime';
 
-import { State } from '~client/reducers';
-import state from '~client/test-data/state';
-import {
-  getFundsCachedValueAgeText,
-  getFundsCachedValue,
-  getFundsCost,
-  getProcessedFundsRows,
-  ProcessedFundsRow,
-} from '.';
-import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
+import { getFundsCachedValueAgeText, getFundsCachedValue, getFundsCost } from '.';
 import { getTransactionsList } from '~client/modules/data';
+import { State } from '~client/reducers';
+import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
+import { testState as state } from '~client/test-data/state';
 
 describe('Funds selectors', () => {
   describe('getFundsCachedValueAgeText', () => {
@@ -92,58 +86,9 @@ describe('Funds selectors', () => {
   });
 
   describe('getFundsCost', () => {
-    it('should get the total fund cost, excluding sold funds', () => {
+    it('should get the all-time total fund cost', () => {
       expect.assertions(1);
-      expect(getFundsCost(state)).toBe(400000);
-    });
-  });
-
-  describe('getProcessedFundsRows', () => {
-    it('should set gain, prices, sold and class information on each fund row', () => {
-      expect.assertions(4);
-      const result = getProcessedFundsRows(state);
-
-      expect(result).toBeInstanceOf(Array);
-
-      expect(result).toHaveLength(4);
-
-      const match10 = result.find(({ id }) => id === '10');
-
-      expect(match10).toStrictEqual(
-        expect.objectContaining({
-          id: '10',
-          item: 'some fund 1',
-          transactions: state.funds.items[0].transactions,
-          small: false,
-          sold: false,
-          gain: {
-            color: [255, 250, 250],
-            dayGain: 0.0075,
-            dayGainAbs: 2989,
-            gain: -0.0023,
-            gainAbs: -902,
-            value: 399098.2,
-          },
-        }),
-      );
-
-      const match1 = result.find(({ id }: ProcessedFundsRow) => id === '1');
-
-      expect(match1).toStrictEqual(
-        expect.objectContaining({
-          id: '1',
-          item: 'some fund 3',
-          transactions: state.funds.items[2].transactions,
-          small: true,
-          sold: true,
-          gain: {
-            color: [255, 44, 44],
-            gain: -0.1027,
-            gainAbs: -9240,
-            value: 80760,
-          },
-        }),
-      );
+      expect(getFundsCost(state)).toBe(400000 + 45000 - 50300 + 90000 - 80760 + 200000 - 265622);
     });
   });
 });

@@ -1,139 +1,159 @@
-import { useRef, useReducer, useCallback, useEffect } from 'react';
+import memoize from 'memoize-one';
+import { useRef, useReducer, useCallback, useEffect, useState } from 'react';
+import { debounce } from 'throttle-debounce';
 
 import * as Data from '~client/modules/data';
 import { ActionType as NavActionType } from '~client/modules/nav';
-import { NULL_COMMAND } from '~client/hooks/nav';
 
 enum ActionType {
-  ActiveToggled,
-  Typed,
+  ActiveToggled = 'ACTIVE_TOGGLED',
+  Typed = 'TYPED',
 }
 
-type ActionActiveToggled<FV, IV> = {
+type ActionActiveToggled<V> = {
   type: ActionType.ActiveToggled;
   active: boolean;
-  value: FV;
-  inputValue: IV;
+  value: V;
+  inputValue: string;
 };
 
-type ActionTyped<FV, IV> = {
+type ActionTyped<V> = {
   type: ActionType.Typed;
-  value: FV;
-  inputValue?: IV;
+  value: V;
+  inputValue: string | undefined;
 };
 
-type ActionValueSet<FV> = {
+type ActionValueSet<V> = {
   type: NavActionType.ValueSet;
-  payload: FV;
+  payload: V | null;
 };
 
 type ActionCancelled = {
   type: NavActionType.Cancelled;
 };
 
-type Action<FV, IV> =
-  | ActionActiveToggled<FV, IV>
-  | ActionTyped<FV, IV>
-  | ActionValueSet<FV>
-  | ActionCancelled;
+type Action<V> = ActionActiveToggled<V> | ActionTyped<V> | ActionValueSet<V> | ActionCancelled;
 
-type State<FV, IV> = {
+type State<V> = {
   active: boolean;
-  initialValue: FV;
-  currentValue: FV;
-  inputValue: IV;
+  externalValue: V; // reflects value passed into hook, e.g. from redux store
+  currentValue: V; // the temporary value of the form
+  inputValue: string; // the human-input value, which may deviate from currentValue
 };
 
-type Reducer<FV, IV> = (state: State<FV, IV>, action: Action<FV, IV>) => State<FV, IV>;
+type Reducer<V> = (state: State<V>, action: Action<V>) => State<V>;
 
-const isAction = <FV, IV>(action: Action<FV, IV> | {}): action is Action<FV, IV> =>
-  Reflect.has(action, 'type');
+type ConvertExternalToInputValue<V> = (value: V, active?: boolean) => string;
 
-function fieldReducer<FV, IV>(state: State<FV, IV>, action: Action<FV, IV> | {}): State<FV, IV> {
-  if (!isAction<FV, IV>(action)) {
-    return state;
-  }
-  if (action.type === NavActionType.ValueSet) {
-    return { ...state, currentValue: action.payload };
-  }
-  if (action.type === NavActionType.Cancelled) {
-    return { ...state, currentValue: state.initialValue };
-  }
-  if (action.type === ActionType.ActiveToggled) {
-    if (action.active && !state.active) {
+const fieldReducer = memoize(
+  <V>(convertExternalToInputValue: ConvertExternalToInputValue<V>) => (
+    state: State<V>,
+    action: Action<V>,
+  ): State<V> => {
+    if (action.type === NavActionType.ValueSet) {
+      const value = action.payload === null ? state.currentValue : action.payload;
       return {
         ...state,
-        active: true,
-        initialValue: action.value,
+        externalValue: value,
+        currentValue: value,
+        inputValue: convertExternalToInputValue(value, state.active),
+      };
+    }
+    if (action.type === NavActionType.Cancelled) {
+      return {
+        ...state,
+        currentValue: state.externalValue,
+        inputValue: convertExternalToInputValue(state.externalValue, false),
+      };
+    }
+    if (action.type === ActionType.ActiveToggled) {
+      if (action.active && !state.active) {
+        return {
+          ...state,
+          active: true,
+          externalValue: action.value,
+          currentValue: action.value,
+        };
+      }
+
+      return {
+        ...state,
+        active: !!action.active,
+        inputValue: action.inputValue,
+      };
+    }
+    if (action.type === ActionType.Typed) {
+      return {
+        ...state,
         currentValue: action.value,
+        inputValue: action.inputValue ?? convertExternalToInputValue(action.value, true),
       };
     }
 
-    return {
-      ...state,
-      active: !!action.active,
-      inputValue: action.inputValue,
-    };
-  }
-  if (action.type === ActionType.Typed) {
-    return {
-      ...state,
-      currentValue: action.value,
-      inputValue: action.inputValue ?? ((action.value as unknown) as IV),
-    };
-  }
-
-  return state;
-}
+    return state;
+  },
+);
 
 // used to make the input value diverge (temporarily) from the underlying value
-export type Split<FV, IV = string> = {
+export type Split<V> = {
   __split: true;
-  inputValue: IV;
-  fieldValue: FV;
+  inputValue: string;
+  fieldValue: V;
 };
 
-const valueIsNotSplit = <FV, IV>(value: FV | Split<FV, IV>): value is FV =>
-  typeof value !== 'object';
-const valueIsSplit = <FV, IV>(value: FV | Split<FV, IV>): value is Split<FV, IV> =>
-  !valueIsNotSplit(value) && value.__split;
+const valueIsSplit = <V>(value: V | Split<V>): value is Split<V> =>
+  typeof value === 'object' && Reflect.has(value as {}, '__split');
 
-type Options<FV, IV> = {
-  value: FV;
+export type Options<V, E = React.ChangeEvent<HTMLInputElement>> = {
+  value: V;
   inline?: boolean;
-  onChange: (value: FV) => void;
-  onType?: (value: FV | Split<FV, IV>) => void;
-  setValue?: Data.Identity<string, FV | Split<FV, IV>>;
-  getInitialInputValue?: (value: FV) => IV;
-  command?: Action<FV, IV> | {};
+  immediate?: boolean;
+  onChange: (value: V) => void;
+  onType?: (value: V) => void;
+  convertInputToExternalValue?: (event: E, allowEmpty?: boolean) => V | Split<V>;
+  convertExternalToInputValue?: ConvertExternalToInputValue<V>;
+  allowEmpty?: boolean;
   active?: boolean;
 };
 
-type Result<FV, IV, I> = [
-  FV,
-  IV,
-  (event: React.ChangeEvent<I>) => void,
-  React.MutableRefObject<I | null>,
-  () => void,
-];
+type Result<V, E> = Pick<State<V>, 'currentValue' | 'inputValue'> & {
+  inputRef: React.MutableRefObject<HTMLInputElement | null>;
+  onChange: (event: E) => void;
+  onBlur: () => void;
+  onCancel: () => void;
+};
 
-export function useField<FV = string, IV = string, I extends HTMLInputElement = HTMLInputElement>({
+const isCustomEvent = <E>(event: E | React.ChangeEvent<HTMLInputElement>): event is E =>
+  !Reflect.has(event ?? {}, 'target');
+
+const focusInput = debounce(5, <V, E>(inputRef: Result<V, E>['inputRef']): void => {
+  if (inputRef.current) {
+    inputRef.current.focus();
+    inputRef.current.select();
+  }
+});
+
+export function useField<V = string, E = React.ChangeEvent<HTMLInputElement>>({
   value,
   inline = false,
+  immediate = false,
   onChange,
   onType = Data.NULL,
-  setValue = Data.IDENTITY,
-  getInitialInputValue = Data.IDENTITY,
-  command = NULL_COMMAND,
+  convertInputToExternalValue = (event: E | React.ChangeEvent<HTMLInputElement>): V | Split<V> =>
+    isCustomEvent(event)
+      ? ((event as unknown) as V | Split<V>)
+      : ((event.target.value as unknown) as V),
+  convertExternalToInputValue = Data.IDENTITY,
+  allowEmpty = false,
   active = false,
-}: Options<FV, IV>): Result<FV, IV, I> {
-  const inputRef = useRef<I>(null);
+}: Options<V, E>): Result<V, E> {
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [state, dispatch] = useReducer<Reducer<FV, IV>>(fieldReducer, {
+  const [state, dispatch] = useReducer<Reducer<V>>(fieldReducer(convertExternalToInputValue), {
     active: false,
-    initialValue: value,
+    externalValue: value,
     currentValue: value,
-    inputValue: getInitialInputValue(value),
+    inputValue: convertExternalToInputValue(value, false),
   });
 
   useEffect(() => {
@@ -144,28 +164,16 @@ export function useField<FV = string, IV = string, I extends HTMLInputElement = 
     if (!inline) {
       return;
     }
-    if (!active && state.active && state.currentValue !== state.initialValue) {
-      onChange(state.currentValue);
+    if (active && !state.active) {
+      focusInput(inputRef);
     }
     if (active !== state.active) {
       dispatch({
         type: ActionType.ActiveToggled,
         active,
         value,
-        inputValue: getInitialInputValue(state.initialValue),
+        inputValue: convertExternalToInputValue(state.currentValue, active),
       });
-    }
-    if (active && !state.active) {
-      setImmediate((): void => {
-        if (!inputRef.current) {
-          return;
-        }
-
-        inputRef.current.focus();
-        inputRef.current.select();
-      });
-    } else if (!active && state.active && inputRef.current) {
-      inputRef.current.blur();
     }
   }, [
     inline,
@@ -174,44 +182,61 @@ export function useField<FV = string, IV = string, I extends HTMLInputElement = 
     value,
     state.active,
     state.currentValue,
-    state.initialValue,
-    getInitialInputValue,
+    state.externalValue,
+    convertExternalToInputValue,
   ]);
 
-  useEffect(() => {
-    if (inline && isAction(command)) {
-      dispatch(command);
-    }
-  }, [inline, command]);
-
   const onChangeInput = useCallback(
-    event => {
+    (event: E): void => {
       try {
-        const newValue = setValue(event.target.value);
-        if (valueIsSplit(newValue)) {
-          const { fieldValue, inputValue } = newValue;
-          dispatch({
-            type: ActionType.Typed,
-            value: fieldValue,
-            inputValue,
-          });
-        } else {
-          dispatch({ type: ActionType.Typed, value: newValue });
-        }
+        const newValue = convertInputToExternalValue(event, allowEmpty);
+        const fieldValue = valueIsSplit(newValue) ? newValue.fieldValue : newValue;
+        const inputValue = valueIsSplit(newValue) ? newValue.inputValue : undefined;
 
-        onType(newValue);
+        dispatch({
+          type: ActionType.Typed,
+          value: fieldValue,
+          inputValue,
+        });
+
+        onType(fieldValue);
+        if (immediate) {
+          onChange(fieldValue);
+        }
       } catch {
         // do nothing
       }
     },
-    [setValue, onType],
+    [convertInputToExternalValue, allowEmpty, onType, immediate, onChange],
   );
 
-  const onBlurInput = useCallback(() => {
-    if (!inline) {
+  const [shouldCallOnChange, callOnChange] = useState<boolean>(false);
+  const lastOnChangeCallValue = useRef<V>(state.currentValue);
+  useEffect(() => {
+    if (shouldCallOnChange && state.currentValue !== lastOnChangeCallValue.current) {
+      lastOnChangeCallValue.current = state.currentValue;
       onChange(state.currentValue);
     }
-  }, [inline, onChange, state.currentValue]);
+    callOnChange(false);
+  }, [shouldCallOnChange, onChange, state.currentValue]);
 
-  return [state.currentValue, state.inputValue, onChangeInput, inputRef, onBlurInput];
+  const onBlur = useCallback(() => {
+    if (!immediate) {
+      dispatch({ type: NavActionType.ValueSet, payload: null });
+      callOnChange(true);
+    }
+  }, [immediate]);
+
+  const onCancel = useCallback(() => {
+    dispatch({ type: NavActionType.Cancelled });
+  }, []);
+
+  return {
+    currentValue: state.currentValue,
+    inputValue: state.inputValue,
+    inputRef,
+    onChange: onChangeInput,
+    onBlur,
+    onCancel,
+  };
 }

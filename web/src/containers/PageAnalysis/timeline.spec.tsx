@@ -23,28 +23,59 @@ describe('<PageAnalysis /> / <Timeline />', () => {
     expect.assertions(1);
     const { container } = getContainer();
     expect(container).toMatchInlineSnapshot(`
+      .c0 {
+        width: 100%;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex: 0 0 1em;
+        -ms-flex: 0 0 1em;
+        flex: 0 0 1em;
+      }
+
+      .c1 {
+        display: block;
+        -webkit-box-flex: 1;
+        -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+        flex-grow: 1;
+        height: 100%;
+      }
+
+      @media only screen and (min-width:1200px) {
+        .c0 {
+          display: -webkit-box;
+          display: -webkit-flex;
+          display: -ms-flexbox;
+          display: flex;
+          grid-row: 1;
+          grid-column: span 2;
+        }
+      }
+
       <div>
         <div
-          class="sc-hZSUBg bfDKKC"
+          class="c0"
         >
           <span
-            class="sc-cMhqgX eoUPhG"
+            class="c1"
             color="#d3e6.4e2.8"
           />
           <span
-            class="sc-cMhqgX eoUPhG"
+            class="c1"
             color="#d9.cd1d1.4"
           />
           <span
-            class="sc-cMhqgX eoUPhG"
+            class="c1"
             color="#d7.4d5.8d6.8"
           />
           <span
-            class="sc-cMhqgX eoUPhG"
+            class="c1"
             color="#cc.8db.8df.4"
           />
           <span
-            class="sc-cMhqgX eoUPhG"
+            class="c1"
             color="#df.cd5.4d3.8"
           />
         </div>

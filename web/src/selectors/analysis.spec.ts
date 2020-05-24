@@ -1,20 +1,20 @@
 import {
   getLoading,
   getLoadingDeep,
-  getPeriod,
+  getAnalysisPeriod,
   getGrouping,
   getPage,
-  getCost,
+  getCostAnalysis,
   getBlocks,
   getDeepBlocks,
 } from './analysis';
-import { blockPacker } from '~client/modules/block-packer';
 import {
   ANALYSIS_VIEW_WIDTH,
   ANALYSIS_VIEW_HEIGHT,
   Period,
   Grouping,
 } from '~client/constants/analysis';
+import { blockPacker } from '~client/modules/block-packer';
 import { testState } from '~client/test-data/state';
 import { Page } from '~client/types/app';
 
@@ -49,11 +49,11 @@ describe('Analysis selectors', () => {
     });
   });
 
-  describe('getPeriod', () => {
+  describe('getAnalysisPeriod', () => {
     it('should get the period', () => {
       expect.assertions(1);
       expect(
-        getPeriod({
+        getAnalysisPeriod({
           ...testState,
           analysis: {
             ...testState.analysis,
@@ -65,7 +65,7 @@ describe('Analysis selectors', () => {
   });
 
   describe('getGrouping', () => {
-    it('getGrouping gets the grouping', () => {
+    it('should get the grouping', () => {
       expect.assertions(1);
       expect(
         getGrouping({
@@ -80,7 +80,7 @@ describe('Analysis selectors', () => {
   });
 
   describe('getPage', () => {
-    it('getPage gets the page', () => {
+    it('should get the page', () => {
       expect.assertions(1);
       expect(
         getPage({
@@ -94,8 +94,8 @@ describe('Analysis selectors', () => {
     });
   });
 
-  describe('getCost', () => {
-    it('getCost returns the cost data, ordered and mapped into subtrees', () => {
+  describe('getCostAnalysis', () => {
+    it('should return the cost data, ordered and mapped into subtrees', () => {
       expect.assertions(1);
       const expectedResult = [
         {
@@ -117,15 +117,15 @@ describe('Analysis selectors', () => {
         },
       ];
 
-      const result = getCost(testState);
+      const result = getCostAnalysis(testState);
 
       expect(result).toStrictEqual(expectedResult);
     });
 
-    it("getCost doesn't throw an error if cost is empty", () => {
+    it("shouldn'tt throw an error if cost is empty", () => {
       expect.assertions(1);
       expect(() => {
-        getCost({
+        getCostAnalysis({
           ...testState,
           analysis: {
             ...testState.analysis,
@@ -137,17 +137,17 @@ describe('Analysis selectors', () => {
   });
 
   describe('getBlocks', () => {
-    it('getBlocks gets a block-packed map of the state', () => {
+    it('should get a block-packed map of the state', () => {
       expect.assertions(2);
       const result = getBlocks(testState);
 
       expect(result.length).toBeGreaterThan(0);
       expect(result).toStrictEqual(
-        blockPacker(getCost(testState), ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT),
+        blockPacker(getCostAnalysis(testState), ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT),
       );
     });
 
-    it('getBlocks excludes blocks which are not in the visible tree', () => {
+    it('should exclude blocks which are not in the visible tree', () => {
       expect.assertions(1);
       const result = getBlocks({
         ...testState,
@@ -161,7 +161,7 @@ describe('Analysis selectors', () => {
 
       expect(result).toStrictEqual(
         blockPacker(
-          getCost({
+          getCostAnalysis({
             ...testState,
             analysis: {
               ...testState.analysis,

@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import * as nock from 'nock';
+import 'jest-styled-components';
 
 beforeAll(() => {
   nock.disableNetConnect();

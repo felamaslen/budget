@@ -94,10 +94,11 @@ export const FormList = styled.ul`
   flex-flow: column nowrap;
 `;
 
-export const FormRow = styled.li`
+export const FormRow = styled.li<{ field: string }>`
   display: flex;
   line-height: 32px;
-  flex-flow: row nowrap;
+  flex-flow: ${({ field }): 'row' | 'column' => (field === 'transactions' ? 'column' : 'row')}
+    nowrap;
 `;
 
 export const FormLabel = styled.span<{ item: string }>`

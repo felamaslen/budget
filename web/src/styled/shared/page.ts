@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { breakpoints } from '~client/styled/variables';
 import { breakpoint } from '~client/styled/mixins';
+import { breakpoints } from '~client/styled/variables';
 
 export const PageWrapper = styled.div`
   display: flex;
@@ -9,7 +9,6 @@ export const PageWrapper = styled.div`
   min-height: 0;
 
   & > div {
-    // route
     display: flex;
     flex-flow: column;
     width: 100%;

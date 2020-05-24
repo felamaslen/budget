@@ -1,25 +1,35 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+
+import { breakpoint, rem } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
-import { breakpoint } from '~client/styled/mixins';
 
-export const GraphFunds = styled.div``;
+export const GraphFunds = styled.div<{ width: number; height: number }>`
+  background-color: ${colors.white};
+  position: relative;
 
-export const FundSidebar = styled.ul`
+  ${breakpoint(breakpoints.mobile)} {
+    background-color: ${colors['translucent-l2']};
+    flex: 1 0 auto;
+    height: ${({ height }): number => height}px;
+    margin: ${rem(10)};
+    width: ${({ width }): number => width}px;
+  }
+`;
+
+export const FundSidebar = styled.ul<{ isActive: boolean }>`
   margin: 0;
   padding: 0;
   position: absolute;
   left: 0;
   top: 0;
   list-style: none;
-  width: 10%;
+  outline: none;
+  width: ${({ isActive }): string => rem(isActive ? 200 : 50)};
   height: 100%;
-  background: linear-gradient(to bottom, ${colors['translucent-dark'] as string}, transparent);
+  background: linear-gradient(to bottom, ${colors['translucent-dark']}, transparent);
   z-index: 3;
   transition: 0.3s width ease-in-out;
   user-select: none;
-  &:hover {
-    width: 40%;
-  }
   li {
     line-height: 20px;
     height: 20px;

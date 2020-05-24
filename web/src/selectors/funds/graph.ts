@@ -1,18 +1,13 @@
 import { createSelector } from 'reselect';
 
-import * as Funds from '~client/reducers/funds';
-import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { getViewSoldFunds, getCurrentFundsCache, getFundsRows } from './helpers';
+import { getFundLineProcessed, PUC } from './lines';
 import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
+import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import * as Color from '~client/modules/color';
 import { getTotalUnits, getTotalCost, isSold } from '~client/modules/data';
-import {
-  getViewSoldFunds,
-  getCurrentFundsCache,
-  getFundsRows,
-} from '~client/selectors/funds/helpers';
-import { getFundLineProcessed, PUC } from '~client/selectors/funds/lines';
-import { Data } from '~client/types/graph';
-import { Row, Transaction, Prices, FundPrices, FundLine, FundItem } from '~client/types/funds';
+import * as Funds from '~client/reducers/funds';
+import { Data, Fund, Transaction, Prices, FundPrices, FundLine, FundItem } from '~client/types';
 
 type IndexedNumber = { [id: string]: number };
 type IndexedNumberArray = { [id: string]: number[] };
@@ -36,7 +31,7 @@ export const getCacheTimes = createSelector(
   (cache?: Funds.Cache): number[] => cache?.cacheTimes || [],
 );
 
-const getTimeOffsets = createSelector(getPrices, prices =>
+const getTimeOffsets = createSelector(getPrices, (prices) =>
   Object.entries(prices).reduce(
     (last: TimeOffsets, [id, { startIndex }]: [string, FundPrices]): TimeOffsets => ({
       ...last,
@@ -65,14 +60,14 @@ const getMaxLength = createSelector(
     Object.keys(prices).reduce((last, id) => Math.max(last, rowLengths[id]), 0),
 );
 
-type WithInfo<V = {}> = Row &
+type WithInfo<V = {}> = Fund &
   V & {
     transactionsToDate: Transaction[][];
   };
 
 const getItemsWithInfo = createSelector(
   [getFundsRows, getPrices, getStartTime, getCacheTimes],
-  (items: Row[], prices: Prices, startTime, cacheTimes) =>
+  (items: Fund[], prices: Prices, startTime, cacheTimes) =>
     items
       .filter(({ id }) => prices[id])
       .map(
@@ -219,7 +214,7 @@ export const getFundLines = createSelector(
         }
 
         return last.concat(
-          lines.map(data => ({
+          lines.map((data) => ({
             id,
             color,
             data,

@@ -1,7 +1,9 @@
 import { PageProps, Page } from './app';
-import { Row as Fund } from './funds';
+import { Fund } from './funds';
 
 export type Item = { id: string };
+
+export type FieldKey<I extends Item> = keyof Omit<I, 'id'>;
 
 export interface ListCalcItem extends Item {
   date: Date;
@@ -12,7 +14,7 @@ export interface ListItem extends ListCalcItem {
   item: string;
 }
 
-interface ShopItem extends ListItem {
+export interface ShopItem extends ListItem {
   shop: string;
 }
 

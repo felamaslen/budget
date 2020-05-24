@@ -1,5 +1,5 @@
 module.exports = {
-  plugins: ['prettier', 'react', 'react-hooks', 'import', 'jest'],
+  plugins: ['jsx-a11y', 'prettier', 'react', 'react-hooks', 'import', 'jest'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 8,
@@ -19,6 +19,7 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:jest/all',
+    'plugin:jsx-a11y/recommended',
     'plugin:react/recommended',
   ],
   settings: {
@@ -60,6 +61,16 @@ module.exports = {
         jsx: 'never',
         ts: 'never',
         tsx: 'never',
+      },
+    ],
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'parent', 'sibling', 'index'],
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
       },
     ],
     'import/no-extraneous-dependencies': [

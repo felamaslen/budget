@@ -1,10 +1,11 @@
 import { getFundsRows } from './helpers';
 
-import state from '~client/test-data/state';
+import { testState as state } from '~client/test-data/state';
 import { RequestType } from '~client/types/crud';
 
 describe('getFundsRows', () => {
   it('should exclude optimistically deleted items', () => {
+    expect.assertions(1);
     expect(
       getFundsRows({
         funds: {
@@ -13,14 +14,14 @@ describe('getFundsRows', () => {
             {
               id: 'some-id',
               item: 'foo fund',
-              transactions: null,
+              transactions: [],
               __optimistic: RequestType.delete,
             },
-            { id: 'other-id', item: 'bar fund', transactions: null },
+            { id: 'other-id', item: 'bar fund', transactions: [] },
           ],
         },
       }),
-    ).toEqual([{ id: 'other-id', item: 'bar fund', transactions: null }]);
+    ).toStrictEqual([{ id: 'other-id', item: 'bar fund', transactions: [] }]);
   });
 
   it('should order by item', () => {
@@ -29,14 +30,14 @@ describe('getFundsRows', () => {
         funds: {
           ...state.funds,
           items: [
-            { id: 'some-id', item: 'foo fund', transactions: null },
-            { id: 'other-id', item: 'bar fund', transactions: null },
+            { id: 'some-id', item: 'foo fund', transactions: [] },
+            { id: 'other-id', item: 'bar fund', transactions: [] },
           ],
         },
       }),
-    ).toEqual([
-      { id: 'other-id', item: 'bar fund', transactions: null },
-      { id: 'some-id', item: 'foo fund', transactions: null },
+    ).toStrictEqual([
+      { id: 'other-id', item: 'bar fund', transactions: [] },
+      { id: 'some-id', item: 'foo fund', transactions: [] },
     ]);
   });
 });

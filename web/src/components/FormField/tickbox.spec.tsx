@@ -1,7 +1,7 @@
-import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
+import React from 'react';
 
-import FormFieldTickbox from './tickbox';
+import { FormFieldTickbox } from './tickbox';
 
 describe('<FormFieldTickbox />', () => {
   const props = {
@@ -11,8 +11,9 @@ describe('<FormFieldTickbox />', () => {
   };
 
   it('should render an input', () => {
-    const { getByRole } = render(<FormFieldTickbox {...props} />);
-    const input = getByRole('checkbox') as HTMLInputElement;
+    expect.assertions(3);
+    const { getByTestId } = render(<FormFieldTickbox {...props} />);
+    const input = getByTestId('checkbox') as HTMLInputElement;
 
     expect(input).toBeInTheDocument();
     expect(input.type).toBe('checkbox');
@@ -20,8 +21,9 @@ describe('<FormFieldTickbox />', () => {
   });
 
   it('should call onChange when toggled', () => {
-    const { container, getByRole } = render(<FormFieldTickbox {...props} />);
-    const input = getByRole('checkbox') as HTMLInputElement;
+    expect.assertions(3);
+    const { container, getByTestId } = render(<FormFieldTickbox {...props} />);
+    const input = getByTestId('checkbox') as HTMLInputElement;
 
     expect(props.onChange).not.toHaveBeenCalled();
 

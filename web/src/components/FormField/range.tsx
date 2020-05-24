@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 
-import { Wrapper } from '.';
+import { Wrapper } from './shared';
 
 type Props = {
   item?: string;
@@ -11,21 +11,12 @@ type Props = {
   step?: number;
 };
 
-const FormFieldRange: React.FC<Props> = ({ item = '', value = 0, onChange, min, max, step }) => {
-  const onChangeCallback = useCallback(event => onChange(Number(event.target.value)), [onChange]);
+export const FormFieldRange: React.FC<Props> = ({ item = '', value = 0, onChange, ...props }) => {
+  const onChangeCallback = useCallback((event) => onChange(Number(event.target.value)), [onChange]);
 
   return (
-    <Wrapper item={item} value={value} active>
-      <input
-        type="range"
-        value={value}
-        min={min}
-        max={max}
-        step={step}
-        onChange={onChangeCallback}
-      />
+    <Wrapper item={item}>
+      <input {...props} type="range" value={value ?? 0} onChange={onChangeCallback} />
     </Wrapper>
   );
 };
-
-export default FormFieldRange;

@@ -1,8 +1,8 @@
-import { Page } from '~client/types/app';
-import { State } from '~client/reducers';
-import { Period as FundsPeriod } from '~client/constants/graph';
-import { Period as AnalysisPeriod, Grouping as AnalysisGrouping } from '~client/constants/analysis';
 import * as funds from './funds';
+import { Period as AnalysisPeriod, Grouping as AnalysisGrouping } from '~client/constants/analysis';
+import { Period as FundsPeriod } from '~client/constants/graph';
+import { State } from '~client/reducers';
+import { Page } from '~client/types/app';
 
 export const testState: State = {
   now: new Date('2018-03-23T11:45:20Z'),
@@ -306,11 +306,4 @@ export const testState: State = {
     total: 0,
     olderExists: false,
   },
-  suggestions: {
-    loading: false,
-    list: [],
-    next: [],
-  },
 };
-
-export default testState;

@@ -1,65 +1,43 @@
 import React from 'react';
 
-import { Wrapper, WrapperProps } from '.';
 import { setValueInline } from './number';
-import { useField, Split } from '~client/hooks/field';
+import { makeInlineField } from './shared';
+import { SYMBOL_CURRENCY_RAW } from '~client/constants';
+import { Split } from '~client/hooks/field';
 
-const setValue = (cost: string): number =>
-  Math.round(Number((100 * (Number(cost) || 0)).toPrecision(10)));
+const setValueRaw = (cost: string | undefined): number =>
+  Math.round(Number((100 * (Number(cost) ?? 0)).toPrecision(10)));
 
 const getInputValueFromFieldValue = (value = 0): string => String(value / 100);
-const setValueString = setValueInline(setValue, getInputValueFromFieldValue);
+const setValueString = setValueInline(setValueRaw, getInputValueFromFieldValue);
 
-function setValueNumber(inputValue: string): Split<number> {
-  const fieldValue = setValue(inputValue);
+function setValueNumber({
+  target: { value: inputValue },
+}: React.ChangeEvent<HTMLInputElement>): Split<number> {
+  const fieldValue = setValueRaw(inputValue);
 
   return { __split: true, fieldValue, inputValue: getInputValueFromFieldValue(fieldValue) };
 }
 
-function getInitialInputValue(value: number | undefined): string {
-  if (typeof value !== 'number') {
-    return '';
-  }
+const toPounds = (value: number, active = false): string =>
+  active ? String(value / 100) : (value / 100).toFixed(2);
 
-  return String(value / 100);
-}
+const { Field, FieldInline } = makeInlineField<number>({
+  hookOptions: {
+    convertExternalToInputValue: toPounds,
+    convertInputToExternalValue: setValueNumber,
+  },
+  hookOptionsInline: {
+    convertExternalToInputValue: (value: number | undefined, active = false): string =>
+      typeof value === 'undefined' ? '' : toPounds(value, active),
+    convertInputToExternalValue: setValueString,
+  },
+  inputProps: {
+    type: 'number',
+    step: 0.01,
+  },
+  Children: <span>{SYMBOL_CURRENCY_RAW}</span>,
+});
 
-type Props = WrapperProps<number | undefined> & {
-  onChange: (value?: number) => void;
-  label?: string;
-  placeholder?: string;
-  inline?: boolean;
-};
-
-const FormFieldCost: React.FC<Props> = ({
-  label = null,
-  value,
-  placeholder,
-  invalid = false,
-  ...props
-}) => {
-  const [, inputValue, onChange, ref, onBlur] = useField<number | undefined>({
-    ...props,
-    value,
-    getInitialInputValue,
-    setValue: props.inline ? setValueString : setValueNumber,
-  });
-
-  const inputProps = props.inline ? { type: 'text' } : { type: 'number', step: 0.01 };
-
-  return (
-    <Wrapper item="cost" value={value} active={props.active} invalid={invalid} small={props.small}>
-      <input
-        ref={ref}
-        aria-label={label || undefined}
-        {...inputProps}
-        value={inputValue}
-        onChange={onChange}
-        onBlur={onBlur}
-        placeholder={placeholder}
-      />
-    </Wrapper>
-  );
-};
-
-export default FormFieldCost;
+export { Field as FormFieldCost };
+export { FieldInline as FormFieldCostInline };

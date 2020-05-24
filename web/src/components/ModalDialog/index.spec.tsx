@@ -1,20 +1,35 @@
-import sinon from 'sinon';
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
+import sinon from 'sinon';
 
-import ModalDialog, { Props, animationTime } from '.';
+import ModalDialog, { Props, animationTime, makeField } from '.';
+import { FormFieldText } from '~client/components/FormField';
+import { FormFieldCost } from '~client/components/FormField/cost';
+import { FormFieldDate } from '~client/components/FormField/date';
 import { CREATE_ID } from '~client/constants/data';
 
 describe('<ModalDialog />', () => {
-  const props: Props = {
+  type MyItem = {
+    id: string;
+    date: Date;
+    item: string;
+    cost: number;
+  };
+
+  const props: Props<MyItem> = {
     active: true,
     loading: false,
     id: 'some-id',
-    fields: [
-      { item: 'date', value: undefined },
-      { item: 'item', value: 'some item' },
-      { item: 'cost', value: 342 },
-    ],
+    item: {
+      date: undefined,
+      item: 'some item',
+      cost: 342,
+    },
+    fields: {
+      date: makeField('date', FormFieldDate),
+      item: makeField('item', FormFieldText),
+      cost: makeField('cost', FormFieldCost),
+    },
     type: 'edit',
     onCancel: jest.fn(),
     onSubmit: jest.fn(),
@@ -63,7 +78,7 @@ describe('<ModalDialog />', () => {
   });
 
   describe('when adding', () => {
-    const propsAdding: Props = { ...props, id: CREATE_ID, type: 'add' };
+    const propsAdding: Props<MyItem> = { ...props, id: CREATE_ID, type: 'add' };
 
     it('should render an alternative title', () => {
       expect.assertions(1);

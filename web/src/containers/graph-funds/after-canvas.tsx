@@ -1,11 +1,11 @@
-import React, { useCallback } from 'react';
 import { rgb } from 'polished';
-
-import { Mode, Period, GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
-import { Color } from '~client/constants/colors';
-import { FundItem } from '~client/types/funds';
+import React, { useCallback, useState } from 'react';
 
 import * as Styled from './styles';
+import { Color } from '~client/constants/colors';
+import { Mode, Period, GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
+import { useCTA } from '~client/hooks/cta';
+import { FundItem } from '~client/types/funds';
 
 type ToggleList = {
   [id: string]: boolean | null;
@@ -33,26 +33,26 @@ export type Props = {
 };
 
 const Item: React.FC<ItemProps> = ({ numItems, toggleList, setToggleList, id, color, item }) => {
-  const onToggle = useCallback(
-    () =>
-      setToggleList(
-        (last: ToggleList): ToggleList => {
-          const next = { ...last, [id]: last[id] === false };
-          if (
-            Object.keys(next).length === numItems &&
-            Object.keys(next).every(value => !next[value])
-          ) {
-            return last;
-          }
+  const onToggle = useCallback(() => {
+    setToggleList(
+      (last: ToggleList): ToggleList => {
+        const next = { ...last, [id]: last[id] === false };
+        if (
+          Object.keys(next).length === numItems &&
+          Object.keys(next).every((value) => !next[value])
+        ) {
+          return last;
+        }
 
-          return next;
-        },
-      ),
-    [id, setToggleList, numItems],
-  );
+        return next;
+      },
+    );
+  }, [id, setToggleList, numItems]);
+
+  const events = useCTA(onToggle);
 
   return (
-    <li onClick={onToggle}>
+    <li {...events}>
       <Styled.SidebarCheckbox
         style={{
           borderColor: rgb(color[0], color[1], color[2]),
@@ -74,13 +74,23 @@ export const AfterCanvas: React.FC<Props> = ({
   changePeriod,
 }) => {
   const onChange = useCallback(({ target: { value } }) => changePeriod(value), [changePeriod]);
+  const [sidebarActive, setSidebarActive] = useState<boolean>(false);
+  const onHoverSidebar = useCallback(() => setSidebarActive(true), []);
+  const onBlurSidebar = useCallback(() => setSidebarActive(false), []);
 
   return (
-    <div>
+    <>
       {!isMobile && (
-        <Styled.FundSidebar>
+        <Styled.FundSidebar
+          tabIndex={-1}
+          isActive={sidebarActive}
+          onMouseOver={onHoverSidebar}
+          onFocus={onHoverSidebar}
+          onMouseOut={onBlurSidebar}
+          onBlur={onBlurSidebar}
+        >
           <li>
-            <select defaultValue={period} onChange={onChange}>
+            <select defaultValue={period} onBlur={onChange}>
               {GRAPH_FUNDS_PERIODS.map(([key, display]: [string, Period]) => (
                 <option key={key} value={display}>
                   {display}
@@ -101,6 +111,6 @@ export const AfterCanvas: React.FC<Props> = ({
         </Styled.FundSidebar>
       )}
       <Styled.Mode>Mode: {mode}</Styled.Mode>
-    </div>
+    </>
   );
 };

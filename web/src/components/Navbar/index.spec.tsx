@@ -1,6 +1,6 @@
 import { render, act, fireEvent, RenderResult } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
 import Navbar from '.';
 import { Page } from '~client/types/app';
@@ -30,21 +30,23 @@ describe('<Navbar />', () => {
     ${Page.holiday}  | ${'/holiday'}
     ${Page.social}   | ${'/social'}
   `('should render a button for the $page page', async ({ page, path }) => {
-    expect.assertions(2);
+    expect.assertions(3);
     const { findByText } = getContainer();
 
     const link = (await findByText(page)) as HTMLAnchorElement;
     expect(link).toBeInTheDocument();
     expect(link.href).toBe(`http://localhost${path}`);
+    expect(link.tabIndex).toBe(-1);
   });
 
   it('should render a logout button', async () => {
-    expect.assertions(2);
+    expect.assertions(3);
     const { getByText } = getContainer();
 
     const link = getByText('Log out') as HTMLAnchorElement;
 
     expect(link).toBeInTheDocument();
+    expect(link.tabIndex).toBe(-1);
 
     act(() => {
       fireEvent.click(link);

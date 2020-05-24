@@ -7,6 +7,7 @@ jest.mock('shortid', () => ({
 
 describe('CRUD reducer helpers', () => {
   type Item = {
+    id: string;
     foo: string;
     bar: number;
   };
@@ -50,12 +51,13 @@ describe('CRUD reducer helpers', () => {
 
   describe('onCreateOptimistic', () => {
     it('should add an optimistically created item', () => {
+      expect.assertions(1);
       const result = onCreateOptimistic<Item>(stateEmpty, {
         foo: 'some foo',
         bar: 3,
       });
 
-      expect(result).toEqual([
+      expect(result).toStrictEqual([
         {
           id: 'some-fake-id',
           foo: 'some foo',
@@ -68,12 +70,13 @@ describe('CRUD reducer helpers', () => {
 
   describe('onUpdateOptimistic', () => {
     it('should optimistically update an item', () => {
+      expect.assertions(1);
       const result = onUpdateOptimistic<Item>(stateNormal, 'my-real-id', {
         foo: 'updated foo',
         bar: 4,
       });
 
-      expect(result).toEqual([
+      expect(result).toStrictEqual([
         {
           id: 'my-real-id',
           foo: 'updated foo',
@@ -85,11 +88,12 @@ describe('CRUD reducer helpers', () => {
 
     describe('when the item is pending creation', () => {
       it('should not change the request type', () => {
+        expect.assertions(1);
         const result = onUpdateOptimistic<Item>(stateCreating, 'my-fake-id', {
           foo: 'updated foo',
         });
 
-        expect(result).toEqual([
+        expect(result).toStrictEqual([
           {
             id: 'my-fake-id',
             foo: 'updated foo',
@@ -102,6 +106,7 @@ describe('CRUD reducer helpers', () => {
 
     describe('when the item is pending deletion', () => {
       it('should not alter the state', () => {
+        expect.assertions(1);
         const result = onUpdateOptimistic<Item>(stateDeleting, 'my-real-id', {
           foo: 'updated foo',
         });
@@ -112,6 +117,7 @@ describe('CRUD reducer helpers', () => {
 
     describe('when the item has not changed', () => {
       it('should not alter the state', () => {
+        expect.assertions(1);
         const result = onUpdateOptimistic<Item>(stateNormal, 'my-real-id', {
           foo: 'some foo',
         });
@@ -123,9 +129,10 @@ describe('CRUD reducer helpers', () => {
 
   describe('onDeleteOptimistic', () => {
     it('should optimistically delete an item', () => {
+      expect.assertions(1);
       const result = onDeleteOptimistic<Item>(stateNormal, 'my-real-id');
 
-      expect(result).toEqual([
+      expect(result).toStrictEqual([
         {
           id: 'my-real-id',
           foo: 'some foo',
@@ -137,17 +144,19 @@ describe('CRUD reducer helpers', () => {
 
     describe('when the item is pending creation', () => {
       it('should remove the item from state', () => {
+        expect.assertions(1);
         const result = onDeleteOptimistic<Item>(stateCreating, 'my-fake-id');
 
-        expect(result).toEqual([]);
+        expect(result).toStrictEqual([]);
       });
     });
 
     describe('when the item is pending update', () => {
       it('should optimistically delete the item', () => {
+        expect.assertions(1);
         const result = onDeleteOptimistic<Item>(stateUpdating, 'my-real-id');
 
-        expect(result).toEqual([
+        expect(result).toStrictEqual([
           {
             id: 'my-real-id',
             foo: 'updated foo',

@@ -1,12 +1,12 @@
 import { render, RenderResult } from '@testing-library/react';
-import getStore, { MockStore } from 'redux-mock-store';
-import { Provider } from 'react-redux';
 import React from 'react';
+import { Provider } from 'react-redux';
+import getStore, { MockStore } from 'redux-mock-store';
 
 import PageAnalysis from '.';
-import { testState } from '~client/test-data/state';
-import { State } from '~client/reducers';
 import { requested } from '~client/actions/analysis';
+import { State } from '~client/reducers';
+import { testState } from '~client/test-data/state';
 
 describe('<PageAnalysis />', () => {
   const mockStore = getStore();
@@ -38,7 +38,7 @@ describe('<PageAnalysis />', () => {
 
   it('should not render a timeline if there is not one present', () => {
     expect.assertions(1);
-    const { container } = getContainer({}, state => ({
+    const { container } = getContainer({}, (state) => ({
       ...state,
       analysis: {
         ...state.analysis,
@@ -51,7 +51,7 @@ describe('<PageAnalysis />', () => {
 
   it("should not render anything if the page hasn't loaded", () => {
     expect.assertions(1);
-    const { container } = getContainer({}, state => ({
+    const { container } = getContainer({}, (state) => ({
       ...state,
       analysis: {
         ...state.analysis,

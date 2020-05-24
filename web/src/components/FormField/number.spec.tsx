@@ -1,7 +1,7 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 
-import FormFieldNumber from './number';
+import { FormFieldNumber } from './number';
 
 describe('<FormFieldNumber />', () => {
   const props = {
@@ -9,35 +9,39 @@ describe('<FormFieldNumber />', () => {
     onChange: jest.fn(),
   };
 
-  it('should render an input with the value', async () => {
+  it('should render an input with the value', () => {
     expect.assertions(2);
-    const { findByDisplayValue } = render(<FormFieldNumber {...props} />);
-    const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
+    const { getByDisplayValue } = render(<FormFieldNumber {...props} />);
+    const input = getByDisplayValue('103.45') as HTMLInputElement;
 
     expect(input).toBeInTheDocument();
     expect(input.type).toBe('number');
   });
 
-  it('should call onChange when changing the value, after the blur', async () => {
+  it('should call onChange when changing the value, after the blur', () => {
     expect.assertions(4);
-    const { findByDisplayValue } = render(<FormFieldNumber {...props} />);
-    const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
+    const { getByDisplayValue } = render(<FormFieldNumber {...props} />);
+    const input = getByDisplayValue('103.45') as HTMLInputElement;
 
-    fireEvent.change(input, { target: { value: '10.93' } });
+    act(() => {
+      fireEvent.change(input, { target: { value: '10.93' } });
+    });
 
     expect(props.onChange).not.toHaveBeenCalled();
     expect(input.value).toBe('10.93');
 
-    fireEvent.blur(input);
+    act(() => {
+      fireEvent.blur(input);
+    });
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     expect(props.onChange).toHaveBeenCalledWith(10.93);
   });
 
-  it('should update its input value when the value prop changes', async () => {
+  it('should update its input value when the value prop changes', () => {
     expect.assertions(2);
-    const { container, findByDisplayValue } = render(<FormFieldNumber {...props} />);
-    const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
+    const { container, getByDisplayValue } = render(<FormFieldNumber {...props} />);
+    const input = getByDisplayValue('103.45') as HTMLInputElement;
 
     expect(input.value).toBe('103.45');
 
@@ -51,7 +55,7 @@ describe('<FormFieldNumber />', () => {
   it('should accept a placeholder', () => {
     expect.assertions(1);
     const { getByDisplayValue } = render(
-      <FormFieldNumber {...props} placeholder="my placeholder" />,
+      <FormFieldNumber {...props} inputProps={{ placeholder: 'my placeholder' }} />,
     );
     const input = getByDisplayValue('103.45') as HTMLInputElement;
     expect(input.placeholder).toBe('my placeholder');

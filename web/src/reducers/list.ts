@@ -8,12 +8,18 @@ import {
 } from 'create-reducer-object';
 import { replaceAtIndex } from 'replace-array';
 
-import {
-  LIST_ITEM_CREATED,
-  LIST_ITEM_UPDATED,
-  LIST_ITEM_DELETED,
-} from '~client/constants/actions/list';
+import { ListActionType, ListItemCreated, ListItemUpdated } from '~client/actions/list';
 
+import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
+import { LOGGED_OUT } from '~client/constants/actions/login';
+import { DataKeyAbbr } from '~client/constants/api';
+import { getValueFromTransmit, IDENTITY } from '~client/modules/data';
+import {
+  onCreateOptimistic,
+  onUpdateOptimistic,
+  onDeleteOptimistic,
+  State as CrudState,
+} from '~client/reducers/crud';
 import {
   RequestWithResponse,
   SyncResponseList,
@@ -22,20 +28,8 @@ import {
   SyncResponseDeleteList,
 } from '~client/types/api';
 import { Page, PageListCalc, PageList } from '~client/types/app';
-import { RequestType, Create, Request, IdKey } from '~client/types/crud';
+import { RequestType, Request, IdKey } from '~client/types/crud';
 import { Item, ListCalcItem } from '~client/types/list';
-import { LOGGED_OUT } from '~client/constants/actions/login';
-import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
-import { DataKeyAbbr } from '~client/constants/api';
-import { getColumns } from '~client/constants/data';
-import { getValueFromTransmit, fieldExists, IDENTITY } from '~client/modules/data';
-
-import {
-  onCreateOptimistic,
-  onUpdateOptimistic,
-  onDeleteOptimistic,
-  State as CrudState,
-} from '~client/reducers/crud';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CrudItems<I extends Item> = CrudState<I>;
@@ -59,28 +53,13 @@ const filterByPage = <
   return handler(state, action);
 };
 
-const filterExtraProps = <I extends object>(
-  item: Create<I>,
-  columns: (keyof Create<I>)[],
-): Create<I> =>
-  (Object.keys(item) as (keyof Create<I>)[])
-    .filter(column => columns.includes(column))
-    .reduce((last, column) => ({ ...last, [column]: item[column] }), {} as Create<I>);
-
 const onCreate = <I extends Item, ES extends object>(
   page: Page,
-  columns: (keyof Create<I>)[],
 ): PartialReducer<ListState<I, ES>> =>
-  filterByPage<I, ES>(page, (state, action) => {
-    const newItem: Partial<Create<I>> = action.item;
-    if (columns.some(column => !fieldExists(newItem[column]))) {
-      return state;
-    }
-
-    return {
-      items: onCreateOptimistic<I>(state.items, filterExtraProps<I>(action.item, columns)),
-    } as Partial<ListState<I, ES>>;
-  });
+  filterByPage<I, ES>(page, (state, action) => ({
+    ...state,
+    items: onCreateOptimistic<I>(state.items, (action as ListItemCreated<I, Page>).delta),
+  }));
 
 export const onRead = <I extends Item, R extends {}, ES extends object = {}>(page: Page) => (
   state: ListState<I, ES>,
@@ -115,11 +94,14 @@ export const onRead = <I extends Item, R extends {}, ES extends object = {}>(pag
 
 const onUpdate = <I extends Item, ES extends object>(
   page: Page,
-  columns: (keyof Create<I>)[],
 ): PartialReducer<ListState<I, ES>> =>
   filterByPage<I, ES>(page, (state, action) => ({
     ...state,
-    items: onUpdateOptimistic<I>(state.items, action.id, filterExtraProps<I>(action.item, columns)),
+    items: onUpdateOptimistic<I>(
+      state.items,
+      action.id,
+      (action as ListItemUpdated<I, Page>).delta,
+    ),
   }));
 
 const onDelete = <I extends Item, ES extends object>(
@@ -184,7 +166,7 @@ const confirmCreates = <I extends Item>(requestItems: RequestItem[]): FilterRequ
     (items, filteredRequestItems): CrudItems<I> =>
       filteredRequestItems.reduce(
         (last, { res, listIndex }) =>
-          replaceAtIndex(last, listIndex, value => ({
+          replaceAtIndex(last, listIndex, (value) => ({
             ...value,
             id: res.id,
             __optimistic: undefined,
@@ -201,7 +183,7 @@ const confirmUpdates = <I extends Item>(requestItems: RequestItem[]): FilterRequ
     (items, filteredRequestItems): CrudItems<I> =>
       filteredRequestItems.reduce(
         (last, { listIndex }) =>
-          replaceAtIndex(last, listIndex, value => ({
+          replaceAtIndex(last, listIndex, (value) => ({
             ...value,
             __optimistic: undefined,
           })),
@@ -255,14 +237,12 @@ export function makeListReducer<I extends Item, R extends {} = I, ES extends obj
     items: [],
   };
 
-  const columns = getColumns<Create<I>>(page);
-
   const handlers: ReducerMap<ListState<I, ES>> = {
     [LOGGED_OUT]: (): ListState<I, ES> => initialState,
-    [LIST_ITEM_CREATED]: onCreate<I, ES>(page, columns),
+    [ListActionType.created]: onCreate<I, ES>(page),
     [DATA_READ]: onRead<I, R, ES>(page),
-    [LIST_ITEM_UPDATED]: onUpdate<I, ES>(page, columns),
-    [LIST_ITEM_DELETED]: onDelete<I, ES>(page),
+    [ListActionType.updated]: onUpdate<I, ES>(page),
+    [ListActionType.deleted]: onDelete<I, ES>(page),
     [SYNC_RECEIVED]: onSyncReceived<I, ES>(page),
     ...extraHandlers,
   };
@@ -281,14 +261,12 @@ export type DailyState<I extends ListCalcItem, ES extends object = {}> = ListSta
 const withTotals = (
   makeListHandler: <I extends ListCalcItem, ES extends object>(
     page: Page,
-    columns: (keyof Create<I>)[],
   ) => PartialReducer<ListState<I, ES>>,
   getNewTotal: (previousTotal: number, previousItemCost: number, nextItemCost: number) => number,
 ) => <I extends ListCalcItem, ES extends object = {}>(
   page: Page,
-  columns: (keyof Create<I>)[],
 ): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => {
-  const listHandler = makeListHandler<I, ES>(page, columns);
+  const listHandler = makeListHandler<I, ES>(page);
   return filterByPage<I, ES, DailyState<I, ES>>(
     page,
     (state, action) =>
@@ -297,7 +275,7 @@ const withTotals = (
         total: getNewTotal(
           state.total,
           Number(state.items.find(({ id }) => id === action?.id)?.cost ?? 0),
-          Number(action?.item?.cost ?? 0),
+          Number((action as ListItemUpdated<I, Page>)?.delta?.cost ?? 0),
         ),
       } as Partial<DailyState<I, ES>>),
   );
@@ -360,13 +338,11 @@ export function makeDailyListReducer<
     olderExists: null,
   };
 
-  const columns = getColumns<Create<I>>(page);
-
   const handlers = {
-    [LIST_ITEM_CREATED]: onCreateDaily<I, ES>(page, columns),
+    [ListActionType.created]: onCreateDaily<I, ES>(page),
     [DATA_READ]: onReadDaily<I, R, ES>(page),
-    [LIST_ITEM_UPDATED]: onUpdateDaily<I, ES>(page, columns),
-    [LIST_ITEM_DELETED]: onDeleteDaily<I, ES>(page, columns),
+    [ListActionType.updated]: onUpdateDaily<I, ES>(page),
+    [ListActionType.deleted]: onDeleteDaily<I, ES>(page),
     [SYNC_RECEIVED]: onSyncReceivedDaily<I, ES>(page),
     ...extraHandlers,
   };

@@ -1,5 +1,5 @@
-import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
 import { colors } from '~client/styled/variables';
 
 export const NetWorth = styled.div<{ visible: boolean }>`

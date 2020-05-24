@@ -37,10 +37,16 @@ type Colors = ColorsBase & {
   button: ColorsBase;
   messages: ColorsBase;
   [Page.overview]: PageColors & {
-    category: Record<Exclude<Page, Page.analysis> | 'income' | 'spending', string>;
+    income: string;
+    spending: string;
   };
   [Page.analysis]: PageColors;
-  [Page.funds]: PageColors;
+  [Page.funds]: PageColors & {
+    profit: string;
+    loss: string;
+    fundUp: string;
+    fundDown: string;
+  };
   [Page.income]: PageColors;
   [Page.bills]: PageColors;
   [Page.food]: PageColors;

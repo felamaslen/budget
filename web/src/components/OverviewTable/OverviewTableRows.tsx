@@ -1,11 +1,11 @@
 import React, { memo } from 'react';
 
 import Cells from './cells';
-import { Table } from '~client/types/overview';
 import * as Styled from './styles';
+import { OverviewTable } from '~client/types';
 
 export type Props = {
-  rows: Table;
+  rows: OverviewTable;
   numToSkip: number;
 };
 

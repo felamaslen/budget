@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
-import { breakpoints, colors, graphFundsHeightMobile } from '~client/styled/variables';
-import { breakpoint } from '~client/styled/mixins';
 import { FundGraph } from '~client/components/graph-fund-item/styles';
 import { GraphFunds } from '~client/containers/graph-funds/styles';
+import { breakpoint } from '~client/styled/mixins';
+import { breakpoints, colors, graphFundsHeightMobile } from '~client/styled/variables';
 
 export const Graph = styled.div<{
   width?: number;
@@ -18,8 +18,7 @@ export const Graph = styled.div<{
     height: ${graphFundsHeightMobile}px;
 
     ${breakpoint(breakpoints.mobile)} {
-      margin: 10px;
-      height: 300px;
+      height: 100%;
     }
   }
 

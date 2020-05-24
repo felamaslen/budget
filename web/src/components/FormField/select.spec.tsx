@@ -1,13 +1,13 @@
-import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
+import React from 'react';
 
-import FormFieldSelect, { Props } from './select';
+import { FormFieldSelect, PropsSelect } from './select';
 
 describe('<FormFieldSelect />', () => {
   const props = {
     onChange: jest.fn(),
   };
-  const propsSpecific: Props<'something' | 'else'> = {
+  const propsSpecific: PropsSelect<'something' | 'else'> = {
     ...props,
     options: [
       { internal: 'something', external: 'Something' },
@@ -17,6 +17,7 @@ describe('<FormFieldSelect />', () => {
   };
 
   it('should render a select with value', () => {
+    expect.assertions(2);
     const { container } = render(<FormFieldSelect<'something' | 'else'> {...propsSpecific} />);
     const select = container.querySelector('select') as HTMLSelectElement;
 
@@ -25,6 +26,7 @@ describe('<FormFieldSelect />', () => {
   });
 
   it('should render all options', () => {
+    expect.assertions(5);
     const { container } = render(<FormFieldSelect {...propsSpecific} />);
     const options = container.querySelectorAll('option');
 
@@ -38,6 +40,7 @@ describe('<FormFieldSelect />', () => {
   });
 
   it('should call onChange when the select value is changed', () => {
+    expect.assertions(3);
     const { container } = render(<FormFieldSelect {...propsSpecific} />);
     const select = container.querySelector('select') as HTMLSelectElement;
 
@@ -52,6 +55,7 @@ describe('<FormFieldSelect />', () => {
   });
 
   it('should update the value if the available options changes', () => {
+    expect.assertions(6);
     const optionsA = [{ internal: 'A' }, { internal: 'B' }, { internal: 'C' }];
     const optionsB = optionsA.slice(0, 2);
     const optionsC = optionsA.slice(0, 1);
@@ -74,7 +78,7 @@ describe('<FormFieldSelect />', () => {
 
     // Change required, as C is no longer a valid option
     expect(props.onChange).toHaveBeenCalledTimes(2);
-    expect(props.onChange.mock.calls[1]).toEqual(['A']);
+    expect(props.onChange).toHaveBeenCalledWith('A');
 
     act(() => {
       render(<FormFieldSelect {...props} options={optionsB} value="A" />, { container });

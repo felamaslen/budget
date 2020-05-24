@@ -1,12 +1,25 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import shortid from 'shortid';
-import { replaceAtIndex } from 'replace-array';
 import format from 'date-fns/format';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { replaceAtIndex } from 'replace-array';
+import shortid from 'shortid';
 
-import { IdMap } from '~client/types';
-import { CreateEdit } from '~client/types/crud';
-
+import { Step } from './constants';
+import * as Styled from './styles';
 import {
+  FormFieldCost,
+  FormFieldNetWorthValue,
+  FormFieldSelect,
+  SelectOptions,
+} from '~client/components/FormField';
+import FormContainer, {
+  Props as ContainerProps,
+} from '~client/components/NetWorthEditForm/form-container';
+import { CREATE_ID } from '~client/constants/data';
+import { toIdMap } from '~client/modules/data';
+import { ButtonAdd, ButtonDelete } from '~client/styled/shared';
+import {
+  IdMap,
+  CreateEdit,
   Category,
   Subcategory,
   Currency,
@@ -14,18 +27,7 @@ import {
   Entry,
   Value,
   ValueObject,
-} from '~client/types/net-worth';
-import { ButtonAdd, ButtonDelete } from '~client/styled/shared/button';
-import FormFieldNetWorthValue from '~client/components/FormField/net-worth-value';
-import FormFieldCost from '~client/components/FormField/cost';
-import FormFieldSelect, { Options } from '~client/components/FormField/select';
-import FormContainer, {
-  Props as ContainerProps,
-} from '~client/components/NetWorthEditForm/form-container';
-import { toIdMap } from '~client/modules/data';
-import { Step } from './constants';
-
-import * as Styled from './styles';
+} from '~client/types';
 
 type PropsCreditLimitEditor = {
   creditLimit: number;
@@ -101,6 +103,7 @@ const EditByType: React.FC<PropsEditByType> = ({
     <Styled.EditByCategoryValue>
       <Styled.Subcategory>{subcategoryName}</Styled.Subcategory>
       <FormFieldNetWorthValue
+        id={subcategory}
         value={value}
         isOption={isOption}
         onChange={setNewValue}
@@ -115,7 +118,7 @@ const EditByType: React.FC<PropsEditByType> = ({
   );
 };
 
-const getFirstOption = (options: Options): string => (options[0] || {}).internal;
+const getFirstOption = (options: SelectOptions): string => (options[0] || {}).internal;
 
 type PropsAddByType = Pick<PropsEditByType, 'isLiability' | 'subcategories' | 'currencies'> & {
   categories: Category[];
@@ -134,7 +137,7 @@ const AddByType: React.FC<PropsAddByType> = ({
   currencies,
   onAdd,
 }) => {
-  const categoryOptions = useMemo<Options>(
+  const categoryOptions = useMemo<SelectOptions>(
     () =>
       categories.map(({ id, category }: Category) => ({
         internal: id,
@@ -145,7 +148,7 @@ const AddByType: React.FC<PropsAddByType> = ({
 
   const [category, setCategory] = useState<string>(getFirstOption(categoryOptions));
 
-  const subcategoryOptions = useMemo<Options>(
+  const subcategoryOptions = useMemo<SelectOptions>(
     () =>
       subcategories
         .filter(({ categoryId }) => categoryId === category)
@@ -195,6 +198,7 @@ const AddByType: React.FC<PropsAddByType> = ({
         />
       </Styled.AddSubcategory>
       <FormFieldNetWorthValue
+        id={`value-${CREATE_ID}`}
         value={value}
         isOption={isOption}
         onChange={setValue}
@@ -308,7 +312,7 @@ type ValueWithCategory = ValueObject & { category: Category };
 
 function useRemoveValue(item: CreateEdit<Entry>, onEdit: Props['onEdit']): (id: string) => void {
   return useCallback(
-    id => {
+    (id) => {
       const index = item.values.findIndex(({ id: valueId }) => valueId === id);
       const newItemValues = item.values.filter(({ id: valueId }) => valueId !== id);
       const creditLimit = item.creditLimit.filter(
@@ -350,7 +354,7 @@ const EditByCategory: React.FC<{
 
   return (
     <CategoryGroup key={category.id} category={category}>
-      {values[category.id].map(value => (
+      {values[category.id].map((value) => (
         <EditByType
           key={value.id}
           isLiability={isLiability}
@@ -434,7 +438,7 @@ const StepValues: React.FC<PropsStep> = ({
       subcategories.filter(
         ({ id: subcategoryId, categoryId }) =>
           categoriesByType.some(({ id }) => id === categoryId) &&
-          !Object.keys(valuesByType).some(key =>
+          !Object.keys(valuesByType).some((key) =>
             valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId),
           ),
       ),
@@ -461,7 +465,7 @@ const StepValues: React.FC<PropsStep> = ({
         </span>
       </Styled.SectionTitle>
       <Styled.EditByCategory>
-        {valueKeys.map(categoryId => (
+        {valueKeys.map((categoryId) => (
           <EditByCategory
             key={categoryId}
             item={item}
@@ -487,10 +491,10 @@ const StepValues: React.FC<PropsStep> = ({
   );
 };
 
-export const StepAssets: React.FC<Props> = props => (
+export const StepAssets: React.FC<Props> = (props) => (
   <StepValues {...props} typeFilter="asset" name="Assets" />
 );
 
-export const StepLiabilities: React.FC<Props> = props => (
+export const StepLiabilities: React.FC<Props> = (props) => (
   <StepValues {...props} typeFilter="liability" name="Liabilities" />
 );

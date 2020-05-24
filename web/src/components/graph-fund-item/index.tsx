@@ -1,27 +1,24 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
+
+import { Axes } from './axes';
+import * as Styled from './styles';
 import { LineGraph, Props as GraphProps } from '~client/components/graph/line-graph';
-import { Axes } from '~client/components/graph-fund-item/axes';
-import { rgba } from '~client/modules/color';
-import { separateLines } from '~client/modules/funds';
 import {
   GRAPH_FUND_ITEM_WIDTH,
   GRAPH_FUND_ITEM_WIDTH_LARGE,
   GRAPH_FUND_ITEM_HEIGHT,
   GRAPH_FUND_ITEM_HEIGHT_LARGE,
 } from '~client/constants/graph';
-import { COLOR_LOSS, COLOR_PROFIT } from '~client/constants/colors';
-import { Size, Range, BasicProps, Data, Line } from '~client/types/graph';
-
-import * as Styled from './styles';
+import { separateLines } from '~client/modules/funds';
+import { colors } from '~client/styled/variables';
+import { Size, Range, DrawProps, Data, Line } from '~client/types';
 
 type Props = {
-  popout: boolean;
   sold: boolean;
   values: Data;
-  onToggle: () => void;
 } & Pick<GraphProps, 'name'>;
 
-function getDimensions({ popout, sold }: Pick<Props, 'popout' | 'sold'>): Size {
+function getDimensions(popout: boolean, sold: boolean): Size {
   if (popout) {
     return {
       width: GRAPH_FUND_ITEM_WIDTH_LARGE,
@@ -47,7 +44,7 @@ const getRange = (data: number[]): { min: number; max: number } =>
     { min: Infinity, max: -Infinity },
   );
 
-const valuesColor = [rgba(COLOR_LOSS), rgba(COLOR_PROFIT)];
+const valuesColor = [colors.funds.loss, colors.funds.profit];
 
 function processData(
   data: Data,
@@ -98,31 +95,26 @@ function processData(
   };
 }
 
-function makeBeforeLines({ popout }: Pick<Props, 'popout'>): React.FC<BasicProps> {
-  const BeforeLines: React.FC<BasicProps> = props => <Axes popout={popout} {...props} />;
+function makeBeforeLines(popout: boolean): React.FC<DrawProps> {
+  const BeforeLines: React.FC<DrawProps> = (props) => <Axes popout={popout} {...props} />;
 
   return BeforeLines;
 }
 
-export const GraphFundItem: React.FC<Props> = ({ name, sold, values, popout, onToggle }) => {
-  const { width, height } = getDimensions({ popout, sold });
+export const GraphFundItem: React.FC<Props> = ({ name, sold, values }) => {
+  const [popout, setPopout] = useState<boolean>(false);
+  const onFocus = useCallback(() => setPopout(!sold), [sold]);
+  const onBlur = useCallback(() => setPopout(false), []);
+  const { width, height } = getDimensions(popout, sold);
 
-  const beforeLines = useMemo(() => values && makeBeforeLines({ popout }), [values, popout]);
+  const beforeLines = useMemo(() => makeBeforeLines(popout), [popout]);
 
-  const svgProperties = useMemo(
-    () => ({
-      onClick: onToggle,
-    }),
-    [onToggle],
-  );
-
-  if (!values) {
+  if (!values.length) {
     return null;
   }
 
   const graphProps = {
     name,
-    svgProperties,
     beforeLines,
     width,
     height,
@@ -130,7 +122,15 @@ export const GraphFundItem: React.FC<Props> = ({ name, sold, values, popout, onT
   };
 
   return (
-    <Styled.FundGraph sold={sold} popout={popout}>
+    <Styled.FundGraph
+      role="button"
+      tabIndex={0}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      data-testid="fund-graph"
+      sold={sold}
+      popout={popout}
+    >
       <LineGraph {...graphProps} />
     </Styled.FundGraph>
   );

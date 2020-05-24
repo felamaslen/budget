@@ -1,20 +1,20 @@
 import React, { useState, useCallback, useMemo } from 'react';
 
-import { Category, Subcategory } from '~client/types/net-worth';
-import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
-import { Create } from '~client/types/crud';
-import { InlineFlexCenter } from '~client/styled/shared/layout';
-import { Button, ButtonDelete } from '~client/styled/shared/button';
+import * as Styled from './styles';
 import CrudList from '~client/components/CrudList';
-import FormFieldText from '~client/components/FormField';
-import FormFieldSelect, { Options } from '~client/components/FormField/select';
-import FormFieldColor from '~client/components/FormField/color';
+import {
+  FormFieldColor,
+  FormFieldSelect,
+  SelectOptions,
+  FormFieldText,
+} from '~client/components/FormField';
 import NetWorthSubcategoryList from '~client/components/NetWorthSubcategoryList';
 import { CREATE_ID } from '~client/constants/data';
+import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
+import { Button, ButtonDelete, InlineFlexCenter } from '~client/styled/shared';
+import { Create, Category, Subcategory } from '~client/types';
 
-import * as Styled from './styles';
-
-const typeOptions: Options<Category['type'] | 'option'> = [
+const typeOptions: SelectOptions<Category['type'] | 'option'> = [
   { internal: 'asset', external: 'Asset' },
   { internal: 'liability', external: 'Liability' },
   { internal: 'option', external: 'Option' },
@@ -86,7 +86,7 @@ const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
 
 type PropsItem = {
   item: Category;
-  style?: {};
+  style?: object;
   expanded: string | null;
   onExpandToggle: (id: string) => void;
   onUpdate: OnUpdate<Category>;
@@ -95,7 +95,7 @@ type PropsItem = {
   subcategories: Subcategory[];
   onCreateSubcategory: OnCreate<Subcategory>;
   onUpdateSubcategory: OnUpdate<Subcategory>;
-  onDeleteSubcategory: OnDelete;
+  onDeleteSubcategory: OnDelete<Subcategory>;
 };
 
 const NetWorthCategoryItem: React.FC<PropsItem> = ({
@@ -112,7 +112,7 @@ const NetWorthCategoryItem: React.FC<PropsItem> = ({
   onDeleteSubcategory,
 }) => {
   const onChange = useCallback(
-    values => {
+    (values) => {
       onUpdate(item.id, values);
     },
     [onUpdate, item.id],
@@ -177,10 +177,10 @@ export type Props = {
   subcategories: Subcategory[];
   onCreateCategory: OnCreate<Category>;
   onUpdateCategory: OnUpdate<Category>;
-  onDeleteCategory: OnDelete;
+  onDeleteCategory: OnDelete<Category>;
   onCreateSubcategory: OnCreate<Subcategory>;
   onUpdateSubcategory: OnUpdate<Subcategory>;
-  onDeleteSubcategory: OnDelete;
+  onDeleteSubcategory: OnDelete<Subcategory>;
 };
 
 const NetWorthCategoryList: React.FC<Props> = ({
@@ -193,16 +193,9 @@ const NetWorthCategoryList: React.FC<Props> = ({
   onUpdateSubcategory,
   onDeleteSubcategory,
 }) => {
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const onExpandToggle = useCallback(
-    id =>
-      setExpanded(last => {
-        if (last === id) {
-          return null;
-        }
-
-        return id;
-      }),
+    (id: string): void => setExpanded((last) => (last === id ? null : id)),
     [],
   );
 
@@ -222,9 +215,21 @@ const NetWorthCategoryList: React.FC<Props> = ({
 
   return (
     <Styled.CategoryList>
-      <CrudList
+      <CrudList<
+        Category,
+        Pick<
+          Props,
+          | 'categories'
+          | 'subcategories'
+          | 'onCreateSubcategory'
+          | 'onUpdateSubcategory'
+          | 'onDeleteSubcategory'
+        > & {
+          expanded: string | null;
+          onExpandToggle: (id: string) => void;
+        }
+      >
         items={categories}
-        real
         Item={NetWorthCategoryItem}
         CreateItem={NetWorthCategoryCreateItem}
         onCreate={onCreateCategory}

@@ -1,5 +1,3 @@
-import state from '~client/test-data/state';
-
 import {
   getStartDate,
   getEndDate,
@@ -7,6 +5,7 @@ import {
   getFutureMonths,
   getMonthDates,
 } from '~client/selectors/overview/common';
+import { testState as state } from '~client/test-data/state';
 
 describe('Overview selectors (common)', () => {
   describe('getStartDate', () => {

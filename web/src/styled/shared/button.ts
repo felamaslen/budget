@@ -1,18 +1,16 @@
+import { darken } from 'polished';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { breakpoints, colors } from '~client/styled/variables';
-import { breakpoint } from '~client/styled/mixins';
-import { CategoryItemForm, ToggleVisibility } from '~client/components/NetWorthCategoryList/styles';
-import { CrudList } from '~client/components/CrudList/styles';
 import { centerGridOne, NetWorthValueFX } from '~client/components/FormField/styles';
-import { ButtonDelete as RowButtonDelete } from '~client/components/ListRowDesktop/styles';
-import { ButtonAdd as MobileButtonAdd } from '~client/components/ListFootMobile/styles';
-import { ButtonDelete as NetWorthEntryDelete } from '~client/components/NetWorthList/styles';
+import { ModalDialog } from '~client/components/ModalDialog/styles';
+import { CategoryItemForm, ToggleVisibility } from '~client/components/NetWorthCategoryList/styles';
 import {
   EditCurrency,
   EditByCategory,
   AddByCategoryValue,
 } from '~client/components/NetWorthEditForm/styles';
-import { ModalDialog } from '~client/components/ModalDialog/styles';
+import { ButtonDelete as NetWorthEntryDelete } from '~client/components/NetWorthList/styles';
+import { breakpoint } from '~client/styled/mixins';
+import { breakpoints, colors } from '~client/styled/variables';
 
 export const Button = styled.button<{
   expanded?: boolean;
@@ -30,19 +28,6 @@ export const Button = styled.button<{
   outline: none;
   text-transform: uppercase;
   font-weight: bold;
-
-  ${RowButtonDelete} & {
-    width: 18px;
-    height: 18px;
-    line-height: 18px;
-  }
-
-  ${MobileButtonAdd} & {
-    width: 120px;
-    flex-grow: 0;
-    background: ${colors.primaryDarkMobile};
-    color: ${colors.white};
-  }
 
   ${CategoryItemForm} & {
     ${centerGridOne};
@@ -146,7 +131,7 @@ export const ButtonCrud = styled(Button)`
 `;
 
 export const ButtonDelete = styled(ButtonCrud)`
-  ${CrudList} & {
+  ${breakpoint(breakpoints.mobile)} {
     display: inline-flex;
     margin: 0;
     padding: 0;
@@ -160,7 +145,16 @@ export const ButtonDelete = styled(ButtonCrud)`
     border-radius: 100%;
     border: none;
     box-shadow: none;
+
+    &:focus,
+    &:hover {
+      background: ${darken(0.1)(colors.delete)};
+      &:active {
+        background: ${darken(0.2)(colors.delete)};
+      }
+    }
   }
+
   ${CategoryItemForm} > & {
     grid-row: 1;
     grid-column: 3;

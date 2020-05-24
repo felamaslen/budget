@@ -1,17 +1,24 @@
-import { createSelector } from 'reselect';
 import { compose } from '@typed/compose';
-import isSameMonth from 'date-fns/isSameMonth';
-import differenceInYears from 'date-fns/differenceInYears';
 import differenceInDays from 'date-fns/differenceInDays';
-import startOfYear from 'date-fns/startOfYear';
+import differenceInYears from 'date-fns/differenceInYears';
 import format from 'date-fns/format';
-
-import { getCost, getSpendingColumn, getMonthDates } from '~client/selectors/overview/common';
+import isSameMonth from 'date-fns/isSameMonth';
+import startOfYear from 'date-fns/startOfYear';
+import { createSelector } from 'reselect';
 
 import { sortByKey, withoutDeleted } from '~client/modules/data';
+
+import { State } from '~client/reducers';
+
 import { getRequests } from '~client/selectors/crud';
-import { Create, CreateEdit, RequestType, WithCrud, Request } from '~client/types/crud';
+import { getCost, getSpendingColumn, getMonthDates } from '~client/selectors/overview/common';
+
 import {
+  Create,
+  CreateEdit,
+  RequestType,
+  Request,
+  WithCrud,
   Category,
   Subcategory,
   Entry,
@@ -26,10 +33,9 @@ import {
   AggregateSums,
   isOption,
   OptionValue,
-  TableRow,
-} from '~client/types/net-worth';
-import { Cost } from '~client/types/overview';
-import { State } from '~client/reducers';
+  NetWorthTableRow as TableRow,
+  Cost,
+} from '~client/types';
 
 const nullEntry = (date: Date): Create<Entry> => ({
   date,
@@ -137,7 +143,7 @@ type EntryWithAggregates = Entry & {
 const withAggregates = (categories: Category[], subcategories: Subcategory[]) => (
   rows: Entry[],
 ): EntryWithAggregates[] =>
-  rows.map(entry => ({
+  rows.map((entry) => ({
     ...entry,
     aggregate: getEntryAggregate(categories, subcategories, entry),
   }));
@@ -208,15 +214,15 @@ type EntryTypeSplit = EntryWithAggregates & {
 const withTypeSplit = (categories: Category[], subcategories: Subcategory[]) => (
   rows: EntryWithAggregates[],
 ): EntryTypeSplit[] =>
-  rows.map(entry => ({
+  rows.map((entry) => ({
     ...entry,
-    assets: sumByType('asset', categories, subcategories, entry, category => !category.isOption),
-    options: sumByType('asset', categories, subcategories, entry, category => category.isOption),
+    assets: sumByType('asset', categories, subcategories, entry, (category) => !category.isOption),
+    options: sumByType('asset', categories, subcategories, entry, (category) => category.isOption),
     liabilities: -sumByType('liability', categories, subcategories, entry),
   }));
 
 function getSpendingByDate(spending: number[], dates: Date[], date: Date): number {
-  const dateIndex = dates.findIndex(compare => isSameMonth(compare, date));
+  const dateIndex = dates.findIndex((compare) => isSameMonth(compare, date));
   if (dateIndex === -1) {
     return 0;
   }
@@ -229,7 +235,7 @@ type EntryWithSpend = EntryTypeSplit & { expenses: number };
 const withSpend = (dates: Date[], spending: number[]) => (
   rows: EntryTypeSplit[],
 ): EntryWithSpend[] =>
-  rows.map(entry => ({
+  rows.map((entry) => ({
     ...entry,
     expenses: getSpendingByDate(spending, dates, entry.date),
   }));
@@ -345,7 +351,7 @@ const withEntryRequests = (
       entries
         .filter(({ values, creditLimit }: WithCrud<Entry>) =>
           [values, creditLimit].every(
-            group => !group.some(groupPending(categories, subcategories)),
+            (group) => !group.some(groupPending(categories, subcategories)),
           ),
         )
         .map(({ date, values, creditLimit, currencies, ...rest }: WithCrud<Entry>) => ({

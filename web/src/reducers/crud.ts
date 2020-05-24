@@ -1,11 +1,12 @@
-import shortid from 'shortid';
 import { replaceAtIndex, removeAtIndex } from 'replace-array';
+import shortid from 'shortid';
 
-import { WithCrud, Create, RequestType } from '~client/types/crud';
+import { WithCrud, Create, Delta, RequestType } from '~client/types/crud';
+import { Item } from '~client/types/list';
 
-export type State<I extends object> = WithCrud<Create<I> & { id: string }>[];
+export type State<I extends Item> = WithCrud<I>[];
 
-export const onCreateOptimistic = <I extends object>(
+export const onCreateOptimistic = <I extends Item>(
   state: State<I>,
   newItem: Create<I>,
 ): State<I> => [
@@ -14,27 +15,27 @@ export const onCreateOptimistic = <I extends object>(
     ...newItem,
     id: shortid.generate(),
     __optimistic: RequestType.create,
-  },
+  } as WithCrud<I>,
 ];
 
-export const onUpdateOptimistic = <I extends object>(
+export const onUpdateOptimistic = <I extends Item>(
   state: State<I>,
   id: string,
-  updatedItem: Partial<Create<I>>,
+  updatedItem: Delta<I>,
 ): State<I> => {
   const index = state.findIndex(({ id: idMatch }) => idMatch === id);
   const isDeleting = index > -1 && state[index].__optimistic === RequestType.delete;
   const notChanged =
     index === -1 ||
-    (Object.keys(updatedItem) as (keyof Partial<Create<I>>)[]).every(
-      key => updatedItem[key] === state[index][key],
+    (Object.keys(updatedItem) as (keyof Delta<I>)[]).every(
+      (key) => updatedItem[key] === state[index][key],
     );
 
   if (isDeleting || notChanged) {
     return state;
   }
 
-  return replaceAtIndex(state, index, oldItem => ({
+  return replaceAtIndex(state, index, (oldItem) => ({
     ...oldItem,
     ...updatedItem,
     __optimistic:
@@ -42,7 +43,7 @@ export const onUpdateOptimistic = <I extends object>(
   }));
 };
 
-export const onDeleteOptimistic = <I extends object>(state: State<I>, id: string): State<I> => {
+export const onDeleteOptimistic = <I extends Item>(state: State<I>, id: string): State<I> => {
   const index = state.findIndex(({ id: idMatch }) => idMatch === id);
   const isCreating = index > -1 && state[index].__optimistic === RequestType.create;
 
@@ -50,7 +51,7 @@ export const onDeleteOptimistic = <I extends object>(state: State<I>, id: string
     return removeAtIndex(state, index);
   }
 
-  return replaceAtIndex(state, index, oldItem => ({
+  return replaceAtIndex(state, index, (oldItem) => ({
     ...oldItem,
     __optimistic: RequestType.delete,
   }));

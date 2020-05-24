@@ -1,18 +1,17 @@
 import { rgba } from 'polished';
-import { useSelector } from 'react-redux';
 import React, { useState, useMemo, useCallback } from 'react';
+import { useSelector } from 'react-redux';
 
-import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
-import { leftPad, rightPad } from '~client/modules/data';
+import { AfterCanvas } from './after-canvas';
+import { Key } from './key';
+import { Targets } from './targets';
 import {
   GraphCashFlow,
   Props as GraphCashFlowProps,
   getValuesWithTime,
 } from '~client/components/graph-cashflow';
-import { Key } from '~client/components/graph-balance/key';
-import { Targets } from '~client/components/graph-balance/targets';
-import { AfterCanvas } from '~client/components/graph-balance/after-canvas';
 import { colors as netWorthColors } from '~client/components/net-worth-graph/styles';
+import { leftPad, rightPad } from '~client/modules/data';
 import {
   getStartDate,
   getFutureMonths,
@@ -22,10 +21,18 @@ import {
   getNetWorthTable,
   NetWorthSummaryOld,
 } from '~client/selectors';
-import { Page } from '~client/types/app';
-import { Point, Line, Data, BasicProps } from '~client/types/graph';
-import { Target, CostProcessed } from '~client/types/overview';
-import { TableRow as NetWorthRow, Aggregate } from '~client/types/net-worth';
+import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
+import {
+  Page,
+  Point,
+  Line,
+  Data,
+  DrawProps,
+  Target,
+  CostProcessed,
+  NetWorthTableRow,
+  Aggregate,
+} from '~client/types';
 
 type BalanceData = {
   balance: number[];
@@ -41,7 +48,7 @@ type CostProps = Pick<CostProcessed, Page.funds | 'fundsOld' | 'netWorthCombined
 
 const fillAggregate = (
   combinedLength: number,
-  netWorth: NetWorthRow[],
+  netWorth: NetWorthTableRow[],
   key: Aggregate,
   rightFill = true,
 ): number[] => {
@@ -53,13 +60,13 @@ function getData(
   netWorthCombined: number[],
   netWorthOldMain: number[],
   netWorthOldOptions: number[],
-  netWorth: NetWorthRow[],
+  netWorth: NetWorthTableRow[],
   fundsCurrent: number[],
   fundsOld: number[],
   showAll: boolean,
 ): BalanceData {
   const currentOptions = netWorth.map(({ options }) => options);
-  const optionsStartIndex = currentOptions.findIndex(value => value > 0);
+  const optionsStartIndex = currentOptions.findIndex((value) => value > 0);
   const options = rightPad(currentOptions, netWorthCombined.length).map(
     (value, index) => value + netWorthCombined[index],
   );
@@ -93,7 +100,7 @@ function getData(
     return {
       balance,
       options: optionsFull,
-      optionsStartIndex: netWorthOldOptions.concat(currentOptions).findIndex(value => value > 0),
+      optionsStartIndex: netWorthOldOptions.concat(currentOptions).findIndex((value) => value > 0),
       funds: fundsOldPadded.concat(fundsCurrent),
       oldOffset,
       cashOther: leftPad(cashOther, totalLength),
@@ -117,7 +124,7 @@ type RawData = {
   cost: CostProps;
   netWorthOldMain: number[];
   netWorthOldOptions: number[];
-  netWorth: NetWorthRow[];
+  netWorth: NetWorthTableRow[];
   showAll: boolean;
   futureMonths: number;
 };
@@ -194,7 +201,7 @@ function processData({
       data: dataFunds,
       fill: true,
       smooth: true,
-      color: rgba(colors[Page.overview].category.funds, 0.4),
+      color: rgba(colors.funds.main, 0.4),
     },
   ];
 }
@@ -205,8 +212,8 @@ function makeAfterLines({
 }: {
   showAll: boolean;
   targets: Target[];
-}): React.FC<BasicProps> {
-  const AfterLines: React.FC<BasicProps> = ({ width, minY, maxY, pixX, pixY1 }) => (
+}): React.FC<DrawProps> {
+  const AfterLines: React.FC<DrawProps> = ({ width, minY, maxY, pixX, pixY1 }) => (
     <g>
       <Targets
         minY={minY}

@@ -1,7 +1,6 @@
 import { replaceAtIndex } from 'replace-array';
 
-import state from '~client/test-data/state';
-
+import { getNumMonths } from './common';
 import {
   getCategories,
   getSubcategories,
@@ -10,11 +9,11 @@ import {
   getNetWorthTable,
   getNetWorthRequests,
 } from './net-worth';
+import { State } from '~client/reducers';
+import { testState as state } from '~client/test-data/state';
 
-import { getNumMonths } from './common';
 import { RequestType } from '~client/types/crud';
 import { Category, Subcategory, Aggregate } from '~client/types/net-worth';
-import { State } from '~client/reducers';
 
 describe('Overview selectors (net worth)', () => {
   const testCategory: Category = {
@@ -138,7 +137,7 @@ describe('Overview selectors (net worth)', () => {
         ...state,
         netWorth: {
           ...state.netWorth,
-          entries: replaceAtIndex(state.netWorth.entries, 1, entry => ({
+          entries: replaceAtIndex(state.netWorth.entries, 1, (entry) => ({
             ...entry,
             __optimistic: RequestType.delete,
           })),

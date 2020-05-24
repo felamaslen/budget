@@ -1,18 +1,19 @@
 import React, { useCallback } from 'react';
 
-import { Wrapper, WrapperProps } from '.';
+import { Wrapper, WrapperProps } from './shared';
 
-type Props = WrapperProps<boolean> & {
+type Props = WrapperProps & {
+  value: boolean;
   onChange: (value: boolean) => void;
 };
 
-const FormFieldTickbox: React.FC<Props> = ({ value, onChange, ...props }) => {
+export const FormFieldTickbox: React.FC<Props> = ({ value, onChange, ...props }) => {
   const onChangeCallback = useCallback(() => onChange(!value), [onChange, value]);
 
   return (
-    <Wrapper active value={value} {...props}>
+    <Wrapper {...props}>
       <input
-        role="checkbox"
+        data-testid="checkbox"
         type="checkbox"
         checked={value}
         onChange={onChangeCallback}
@@ -21,5 +22,3 @@ const FormFieldTickbox: React.FC<Props> = ({ value, onChange, ...props }) => {
     </Wrapper>
   );
 };
-
-export default FormFieldTickbox;

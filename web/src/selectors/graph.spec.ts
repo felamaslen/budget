@@ -1,9 +1,9 @@
 import endOfDay from 'date-fns/endOfDay';
 import getUnixTime from 'date-fns/getUnixTime';
 
-import { GRAPH_WIDTH } from '~client/constants/graph';
-import state from '~client/test-data/state';
 import { getTargets, getGraphWidth } from './graph';
+import { GRAPH_WIDTH } from '~client/constants/graph';
+import { testState as state } from '~client/test-data/state';
 
 describe('Graph selectors', () => {
   describe('getTargets', () => {
