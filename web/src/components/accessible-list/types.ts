@@ -69,6 +69,7 @@ export type Props<
   deltaSeed?: () => Delta<I>;
   Header?: React.FC<HeaderProps<I, P, MK>> | StyledComponent<'div', HeaderProps<I, P, MK>>;
   sortItems?: (items: I[]) => I[];
+  sortItemsPost?: (items: I[], extraMap: { [id: string]: Partial<E> }) => I[];
   customSelector?: CustomSelector<I, E>;
 };
 

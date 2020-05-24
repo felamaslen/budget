@@ -39,6 +39,14 @@ export const reset = css`
   }
 
   ${breakpoint(breakpoints.mobile)} {
+    input,
+    select,
+    option {
+      &:focus {
+        outline: 1px solid ${colors.blue};
+      }
+    }
+
     * {
       &::-webkit-scrollbar {
         width: ${rem(8)};

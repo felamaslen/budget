@@ -3201,31 +3201,37 @@ exports[`<PageOverview /> should render graphs 1`] = `
         <path
           d="M0,281.28500936581725 Q36,90 77.3,41.8"
           fill="none"
+          stroke="#039"
           stroke-width="2"
         />
         <path
           d="M77.34806629834254,41.81575750259327 C93,23 144,63 163.0,89.6"
           fill="none"
+          stroke="#039"
           stroke-width="2"
         />
         <path
           d="M162.98342541436463,89.60369171578304 C203,147 204,234 245.9,281.3"
           fill="none"
+          stroke="#039"
           stroke-width="2"
         />
         <path
           d="M245.85635359116023,281.28500936581725 C263,301 302,281 331.5,281.3"
           fill="none"
+          stroke="#039"
           stroke-width="2"
         />
         <path
           d="M331.49171270718233,281.28500936581725 C360,281 385,281 414.4,281.3"
           fill="none"
+          stroke="#039"
           stroke-width="2"
         />
         <path
           d="M414.36464088397787,281.28500936581725 Q444,281 500.0,281.3"
           fill="none"
+          stroke="#039"
           stroke-width="2"
         />
       </g>

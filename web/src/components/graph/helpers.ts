@@ -3,6 +3,7 @@ import { replaceAtIndex } from 'replace-array';
 import { GRAPH_CURVINESS } from '~client/constants/graph';
 import { timeSeriesTicks } from '~client/modules/date';
 import { colors } from '~client/styled/variables';
+import { Page } from '~client/types';
 import {
   Dimensions,
   Padding,
@@ -375,7 +376,7 @@ export function getDynamicLinePaths({
   });
 
   const dataColors = data.map((point, index) => color(point, index));
-  const ends = dataColors.reduce(
+  const ends = dataColors.reduce<number[]>(
     (indexes, value, index) => {
       const next = index === dataColors.length - 1 || (index > 0 && colors[index - 1] !== value);
 
@@ -388,11 +389,11 @@ export function getDynamicLinePaths({
     [0],
   );
 
-  return joinChoppedPath(linePath, ends, (_, endIndex) => colors[ends[endIndex]]);
+  return joinChoppedPath(linePath, ends, (_, endIndex) => dataColors[ends[endIndex]]);
 }
 
 export const pointVisible = (valX: number, minX: number, maxX: number): boolean =>
   valX >= minX && valX <= maxX;
 
 export const profitLossColor = ([, value]: Point): string =>
-  value < 0 ? colors.funds.loss : colors.funds.profit;
+  value < 0 ? colors[Page.funds].loss : colors[Page.funds].profit;

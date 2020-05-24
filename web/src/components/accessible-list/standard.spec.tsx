@@ -403,9 +403,6 @@ describe('<AccessibleListStandard />', () => {
 
         .sc-fzoYHE .c12 {
           margin: 2px 4px;
-          width: 32px;
-          height: 22px;
-          line-height: 16px;
         }
 
         @media only screen and (min-width:690px) {

@@ -1,9 +1,11 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import * as Styled from './styles';
 import { FundProps } from './types';
 import { FundGainInfo } from '~client/components/FundGainInfo';
 import { GraphFundItem } from '~client/components/graph-fund-item';
+import { getViewSoldFunds } from '~client/selectors';
 import { Fund } from '~client/types';
 
 export const FundRow: React.FC<{ isMobile: boolean; item: Fund } & Partial<FundProps>> = ({
@@ -14,6 +16,11 @@ export const FundRow: React.FC<{ isMobile: boolean; item: Fund } & Partial<FundP
   prices,
   gain,
 }) => {
+  const viewSoldFunds = useSelector(getViewSoldFunds);
+  if (!viewSoldFunds && isSold) {
+    return null;
+  }
+
   if (isMobile) {
     return <Styled.FundRowMobile isSold={isSold}>{children}</Styled.FundRowMobile>;
   }

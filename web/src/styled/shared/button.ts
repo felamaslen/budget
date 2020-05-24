@@ -110,9 +110,6 @@ export const Button = styled.button<{
 
   ${EditCurrency} & {
     margin: 2px 4px;
-    width: 32px;
-    height: 22px;
-    line-height: 16px;
   }
 `;
 
@@ -130,22 +127,30 @@ export const ButtonCrud = styled(Button)`
     }
 `;
 
-export const ButtonDelete = styled(ButtonCrud)`
-  ${breakpoint(breakpoints.mobile)} {
-    display: inline-flex;
-    margin: 0;
-    padding: 0;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    font-size: 18px;
-    line-height: 22px;
-    background: ${colors.delete};
-    border-radius: 100%;
-    border: none;
-    box-shadow: none;
+const deleteStyles = css`
+  display: inline-flex;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 18px;
+  line-height: 22px;
+  background: ${colors.delete};
+  border-radius: 100%;
+  border: none;
+  box-shadow: none;
+  color: ${colors.white};
+`;
 
+export const ButtonDelete = styled(ButtonCrud)`
+  ${deleteStyles};
+  ${breakpoint(breakpoints.mobile)} {
+    ${deleteStyles};
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
     &:focus,
     &:hover {
       background: ${darken(0.1)(colors.delete)};
@@ -167,7 +172,21 @@ export const ButtonDelete = styled(ButtonCrud)`
   }
 `;
 
-export const ButtonAdd = styled(ButtonCrud)``;
+export const ButtonAdd = styled(ButtonDelete)`
+  background: ${colors.create};
+  ${breakpoint(breakpoints.mobile)} {
+    background: ${colors.create};
+  }
+  ${breakpoint(breakpoints.mobile)} {
+    &:focus,
+    &:hover {
+      background: ${darken(0.1)(colors.create)};
+      &:active {
+        background: ${darken(0.2)(colors.create)};
+      }
+    }
+  }
+`;
 
 export const ButtonCancel = styled(Button)`
   ${ModalDialog} & {

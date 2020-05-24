@@ -186,7 +186,9 @@ function processData({
       fill: false,
       smooth: true,
       color: (_: Point, index = 0): string =>
-        index < futureKey - 1 ? colors.overview.balanceActual : colors.overview.balancePredicted,
+        index < futureKey - 1
+          ? colors[Page.overview].balanceActual
+          : colors[Page.overview].balancePredicted,
     },
     {
       key: 'cash-locked',

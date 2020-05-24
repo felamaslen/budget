@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 
-import { getPathProps, getSingleLinePath } from '~client/components/graph/helpers';
-import { ArrowLine } from '~client/components/graph/arrow-line';
-import { DynamicColorLine } from '~client/components/graph/dynamic-color-line';
-import { AverageLine } from '~client/components/graph/average-line';
-import { UnkeyedLine, RangeY, Calc, isConstantColor, PathProps } from '~client/types/graph';
+import { ArrowLine } from './arrow-line';
+import { AverageLine } from './average-line';
+import { DynamicColorLine } from './dynamic-color-line';
+import { getPathProps, getSingleLinePath } from './helpers';
+import { UnkeyedLine, RangeY, Calc, isConstantColor, PathProps } from '~client/types';
 
 function getStyleProps(
   fill: boolean,

@@ -52,6 +52,7 @@ describe('<PageFunds />', () => {
           ]),
         },
       ],
+      viewSoldFunds: true,
       period: Period.month1,
       cache: {
         [Period.month1]: {
@@ -73,8 +74,8 @@ describe('<PageFunds />', () => {
   };
 
   const getStore = createStore<State>();
-  const setup = (): RenderResult & { store: MockStore<State> } => {
-    const store = getStore(state);
+  const setup = (customState: State = state): RenderResult & { store: MockStore<State> } => {
+    const store = getStore(customState);
     const renderResult = render(
       <Provider store={store}>
         <Funds />
@@ -142,10 +143,10 @@ describe('<PageFunds />', () => {
   });
 
   describe.each`
-    index | description | value
-    ${0}  | ${'first'}  | ${'£4.3k'}
-    ${1}  | ${'second'} | ${'£11k'}
-  `('the $description fund', ({ index, value }) => {
+    index | description | name        | value
+    ${0}  | ${'first'}  | ${'Fund B'} | ${'£11k'}
+    ${1}  | ${'second'} | ${'Fund A'} | ${'£4.3k'}
+  `('the $description fund', ({ index, name, value }) => {
     const setupItem = (): HTMLLIElement => {
       const { getAllByRole } = setup();
       const items = getAllByRole('listitem') as HTMLLIElement[];
@@ -163,10 +164,138 @@ describe('<PageFunds />', () => {
       const { getByText } = within(setupItem());
       expect(getByText(value)).toBeInTheDocument();
     });
+
+    it('should render an input with the name of the fund', () => {
+      expect.assertions(1);
+      const { getByDisplayValue } = within(setupItem());
+      expect(getByDisplayValue(name)).toBeInTheDocument();
+    });
   });
 
   it('should render a funds graph', () => {
     expect.assertions(1);
     expect(setup().getByTestId('graph-funds')).toBeInTheDocument();
+  });
+
+  describe('if hiding sold funds', () => {
+    const setupSoldHidden = (): RenderResult & { store: MockStore<State> } =>
+      setup({
+        ...state,
+        [Page.funds]: {
+          ...state[Page.funds],
+          viewSoldFunds: false,
+        },
+      });
+
+    it('should not show sold funds', () => {
+      expect.assertions(1);
+      const { queryByDisplayValue } = setupSoldHidden();
+      expect(queryByDisplayValue('Fund B')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('sort order', () => {
+    const testStateWithMany: State = {
+      ...testState,
+      [Page.funds]: {
+        ...testState[Page.funds],
+        items: [
+          {
+            id: 'very-large-value',
+            item: 'My fat fund',
+            transactions: getTransactionsList([
+              {
+                date: '2020-04-20',
+                units: 420,
+                cost: 6900000, // £69k
+              },
+            ]),
+          },
+          {
+            id: 'small-value',
+            item: 'My small fund',
+            transactions: getTransactionsList([
+              {
+                date: '2020-04-03',
+                units: 1234,
+                cost: 102401, // £1024.01
+              },
+            ]),
+          },
+          {
+            id: 'null-value',
+            item: 'My fund without a price',
+            transactions: getTransactionsList([
+              {
+                date: '2020-04-05',
+                units: 10,
+                cost: 99,
+              },
+            ]),
+          },
+          {
+            id: 'large-value',
+            item: 'My large fund',
+            transactions: getTransactionsList([
+              {
+                date: '2020-04-02',
+                units: 1776.229,
+                cost: 603866, // £6038.66,
+              },
+            ]),
+          },
+          {
+            id: 'middle-value',
+            item: 'My medium fund',
+            transactions: getTransactionsList([
+              {
+                date: '2020-04-10',
+                units: 996,
+                cost: 15032, // £150.32 (note that size is based on value, not cost)
+              },
+            ]),
+          },
+        ],
+        period: Period.month1,
+        cache: {
+          [Period.month1]: {
+            startTime: getUnixTime(new Date('2020-05-01')),
+            cacheTimes: [0],
+            prices: {
+              'very-large-value': {
+                values: [(100000 * 100) / 420], // => £100k value
+                startIndex: 0,
+              },
+              'small-value': {
+                values: [(500 * 100) / 1234], // => £500 value
+                startIndex: 0,
+              },
+              'large-value': {
+                values: [(18000 * 100) / 1776.229], // => £18k value
+                startIndex: 0,
+              },
+              'middle-value': {
+                values: [(2300 * 100) / 996], // => £2300 value
+                startIndex: 0,
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const setupForSort = (): RenderResult & { store: MockStore<State> } => setup(testStateWithMany);
+
+    it('should be by fund value, descending', () => {
+      expect.assertions(5);
+      const { getAllByRole } = setupForSort();
+      const inputs = getAllByRole('textbox') as HTMLInputElement[];
+
+      expect(inputs[0].value).toBe('My fat fund');
+      expect(inputs[1].value).toBe('My large fund');
+      expect(inputs[2].value).toBe('My medium fund');
+      expect(inputs[3].value).toBe('My small fund');
+      expect(inputs[4].value).toBe('My fund without a price');
+    });
   });
 });

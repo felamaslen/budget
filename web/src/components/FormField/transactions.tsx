@@ -8,7 +8,7 @@ import * as Styled from './styles';
 import { CREATE_ID } from '~client/constants/data';
 import { useField } from '~client/hooks/field';
 import { addToTransactionsList, modifyTransactionById, sortByKey } from '~client/modules/data';
-import { Button } from '~client/styled/shared/button';
+import { ButtonDelete, ButtonAdd } from '~client/styled/shared/button';
 import { Transaction } from '~client/types';
 
 type PropsTransaction = {
@@ -238,7 +238,7 @@ export const FormFieldTransactionsInline: React.FC<PropsInline> = ({
             <Styled.TransactionsList>
               <FormFieldTransactionInline item={newItem} onChange={onChangeAddField} create>
                 <Styled.TransactionRowButton>
-                  <Button onClick={onCreate}>{'+'}</Button>
+                  <ButtonAdd onClick={onCreate}>+</ButtonAdd>
                 </Styled.TransactionRowButton>
               </FormFieldTransactionInline>
               {sortTransactions(currentValue).map((item) => (
@@ -249,7 +249,7 @@ export const FormFieldTransactionsInline: React.FC<PropsInline> = ({
                   onChange={onUpdate}
                 >
                   <span>
-                    <Button onClick={(): void => onDelete(item.id)}>&minus;</Button>
+                    <ButtonDelete onClick={(): void => onDelete(item.id)}>&minus;</ButtonDelete>
                   </span>
                 </FormFieldTransactionInline>
               ))}
@@ -281,13 +281,13 @@ export const FormFieldTransactions: React.FC<Props> = ({ invalid = false, ...pro
       <Styled.TransactionsList>
         <FormFieldTransaction item={newItem} onChange={onChangeAddField} create>
           <Styled.TransactionRowButton>
-            <Button onClick={onCreate}>+</Button>
+            <ButtonAdd onClick={onCreate}>+</ButtonAdd>
           </Styled.TransactionRowButton>
         </FormFieldTransaction>
         {sortTransactions(currentValue).map((item) => (
           <FormFieldTransaction key={item.id} id={item.id} item={item} onChange={onUpdate}>
             <Styled.TransactionRowButton>
-              <Button onClick={(): void => onDelete(item.id)}>&minus;</Button>
+              <ButtonDelete onClick={(): void => onDelete(item.id)}>&minus;</ButtonDelete>
             </Styled.TransactionRowButton>
           </FormFieldTransaction>
         ))}

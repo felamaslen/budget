@@ -79,6 +79,11 @@ const itemProcessor = (fund: Fund): Pick<FundProps, 'name' | 'isSold'> => ({
   isSold: isSold(fund.transactions),
 });
 
+const sortItems = (funds: Fund[], props: { [id: string]: Partial<FundProps> }): Fund[] =>
+  [...funds].sort(
+    ({ id: idA }, { id: idB }) => (props[idB]?.gain?.value ?? 0) - (props[idA]?.gain?.value ?? 0),
+  );
+
 export const Funds: React.FC = () => {
   const isMobile = useIsMobile();
   const cache = useSelector(getCurrentFundsCache);
@@ -95,6 +100,7 @@ export const Funds: React.FC = () => {
         deltaSeed={deltaSeed}
         itemProcessor={itemProcessor}
         customSelector={composedSelector}
+        sortItemsPost={sortItems}
         Row={FundRow}
         Header={FundHeader}
       />

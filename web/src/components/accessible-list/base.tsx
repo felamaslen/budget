@@ -26,6 +26,7 @@ export const AccessibleList = <
   fieldsMobile,
   modalFields,
   sortItems,
+  sortItemsPost,
   suggestionFields,
   deltaSeed,
   customSelector = identitySelector,
@@ -34,12 +35,17 @@ export const AccessibleList = <
   Header,
 }: Props<I, P, MK, E>): React.ReactElement<Props<I, P, MK, E>> => {
   const isMobile = useIsMobile();
-  const itemsSorted: I[] = useSelector(getItems<I, P>(page, sortItems));
+  const itemsSortedPre: I[] = useSelector(getItems<I, P>(page, sortItems));
 
-  const extraProps = useMemo<{ [id: string]: Partial<E> }>(() => customSelector(itemsSorted), [
-    itemsSorted,
+  const extraProps = useMemo<{ [id: string]: Partial<E> }>(() => customSelector(itemsSortedPre), [
+    itemsSortedPre,
     customSelector,
   ]);
+
+  const itemsSorted: I[] = useMemo<I[]>(
+    () => (sortItemsPost ? sortItemsPost(itemsSortedPre, extraProps) : itemsSortedPre),
+    [itemsSortedPre, extraProps, sortItemsPost],
+  );
 
   const [onCreate, onUpdate, onDelete] = useListCrud<I, P>(
     listItemCreated<I, P>(page),

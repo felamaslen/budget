@@ -1,7 +1,7 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { Step } from './constants';
 import { rem } from '~client/styled/mixins';
 import { colors } from '~client/styled/variables';
-import { Step } from './constants';
 
 export const FormNavigation = styled.div`
   display: flex;
