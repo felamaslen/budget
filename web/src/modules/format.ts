@@ -1,7 +1,7 @@
 import format from 'date-fns/format';
 
-import { Transaction } from '~client/types/funds';
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
+import { Transaction } from '~client/types/funds';
 
 export const percent = (frac: number): string => `${Math.round(100000 * frac) / 1000}%`;
 

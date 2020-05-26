@@ -1,63 +1,42 @@
 import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
+import sinon from 'sinon';
 
-import BlockPacker, { Props } from '.';
-import { Page } from '~client/types/app';
+import { BlockPacker, Props } from '.';
+import { blockPacker } from '~client/modules/block-packer';
+import { BlockItem } from '~client/types';
 
 describe('<BlockPacker />', () => {
+  const blocks = blockPacker<BlockItem>(10, 6, [
+    {
+      name: 'parent block 1',
+      total: 24,
+      color: 'darkorange',
+      subTree: [
+        {
+          name: 'child block A',
+          total: 8,
+        },
+        {
+          name: 'child block B',
+          total: 14,
+        },
+        {
+          name: 'child block C',
+          total: 2,
+        },
+      ],
+    },
+    {
+      name: 'parent block 2',
+      total: 36,
+      color: 'purple',
+      hasBreakdown: true,
+    },
+  ]);
+
   const props: Props = {
-    blocks: [
-      {
-        width: 10.4,
-        height: 11.5,
-        bits: [
-          {
-            name: Page.food,
-            value: 5.1,
-            color: 'black',
-            width: 8,
-            height: 9.3,
-            blocks: [
-              {
-                width: 4.9,
-                height: 9.21,
-                bits: [
-                  {
-                    name: 'foo1',
-                    value: 3,
-                    color: 'teal',
-                    width: 3,
-                    height: 3.1,
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            name: Page.general,
-            value: 5.2,
-            width: 3,
-            height: 3.1,
-            color: 'red',
-            blocks: [
-              {
-                width: 3,
-                height: 3.1,
-                bits: [
-                  {
-                    name: 'bar1',
-                    value: 4,
-                    color: 'teal',
-                    width: 3,
-                    height: 3.1,
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
+    blocks,
     activeMain: 'not_foo',
     activeSub: 'not_bar',
     status: 'some-status bar',
@@ -72,31 +51,14 @@ describe('<BlockPacker />', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer();
     expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
-      .c2 {
-        float: left;
-        display: inline-block;
-      }
-
-      .c3 {
-        float: left;
-        position: relative;
-        box-shadow: inset 0 0 13px rgba(0,0,0,0.6);
-        z-index: 1;
-      }
-
-      .c3:hover {
-        z-index: 2;
-        box-shadow: inset 0 0 13px rgba(0,0,0,0.2),0 0 16px 3px rgba(0,0,0,0.4);
-      }
-
-      .c4 {
-        float: left;
-        position: relative;
-        box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
-        background-image: linear-gradient( to bottom right, rgba(255,255,255,0.6), rgba(0,0,0,0.3) );
-      }
-
       .c0 {
+        -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+        flex: 1 0 auto;
+        position: relative;
+      }
+
+      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -104,36 +66,74 @@ describe('<BlockPacker />', () => {
         -webkit-flex-flow: row;
         -ms-flex-flow: row;
         flex-flow: row;
-        -webkit-box-flex: 1;
-        -webkit-flex-grow: 1;
-        -ms-flex-positive: 1;
-        flex-grow: 1;
-        width: 100%;
-        position: relative;
-      }
-
-      .c1 {
-        z-index: 1;
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
+        -webkit-box-flex: 0;
+        -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+        flex-grow: 0;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
         height: 100%;
-        box-shadow: 0 3px 13px rgba(0,0,0,0.6);
+        width: 100%;
       }
 
-      @media only screen and (min-width:350px) {
-
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-flow: column;
+        -ms-flex-flow: column;
+        flex-flow: column;
+        -webkit-box-flex: 0;
+        -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+        flex-grow: 0;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        height: 100%;
+        width: 100%;
       }
 
-      @media only screen and (min-width:690px) {
-
+      .c3 {
+        background-image: linear-gradient(to bottom right,rgba(255,255,255,0.6),rgba(0,0,0,0.3));
+        box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-flex: 0;
+        -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+        flex-grow: 0;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        height: 100%;
+        outline: none;
+        position: relative;
+        width: 100%;
       }
 
-      @media only screen and (min-width:1200px) {
-
+      .c4 {
+        background-image: none;
+        box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-flex: 0;
+        -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+        flex-grow: 0;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
+        height: 100%;
+        outline: none;
+        position: relative;
+        width: 100%;
       }
 
       <div
@@ -142,53 +142,91 @@ describe('<BlockPacker />', () => {
       >
         <div
           class="c1"
+          style="flex-basis: 100%;"
         >
           <div
-            class="sc-AxjAm c2"
-            height="11.5"
-            style="width: 10.4px; height: 11.5px;"
-            width="10.4"
+            class="c2"
+            style="flex-basis: 60%;"
           >
             <div
-              class="sc-AxjAm sc-AxiKw c3"
-              height="9.3"
-              name="food"
-              style="background-color: rgb(67, 160, 71); width: 8px; height: 9.3px;"
-              width="8"
-            >
-              <div
-                class="sc-AxjAm c2"
-                height="9.21"
-                style="width: 4.9px; height: 9.21px;"
-                width="4.9"
-              >
-                <div
-                  class="sc-AxjAm sc-AxiKw c4"
-                  height="3.1"
-                  style="width: 3px; height: 3.1px;"
-                  width="3"
-                />
-              </div>
-            </div>
+              class="c3"
+              data-testid="parent block 2"
+              name="parent block 2"
+              role="button"
+              style="flex-basis: 100%; background-color: purple;"
+              tabindex="0"
+            />
+          </div>
+          <div
+            class="c2"
+            style="flex-basis: 40%;"
+          >
             <div
-              class="sc-AxjAm sc-AxiKw c3"
-              height="3.1"
-              name="general"
-              style="background-color: rgb(1, 87, 155); width: 3px; height: 3.1px;"
-              width="3"
+              class="c2"
+              style="flex-basis: 100%;"
             >
               <div
-                class="sc-AxjAm c2"
-                height="3.1"
-                style="width: 3px; height: 3.1px;"
-                width="3"
+                class="c4"
+                data-testid="parent block 1"
+                name="parent block 1"
+                role="container"
+                style="flex-basis: 100%; background-color: darkorange;"
+                tabindex="0"
               >
                 <div
-                  class="sc-AxjAm sc-AxiKw c4"
-                  height="3.1"
-                  style="width: 3px; height: 3.1px;"
-                  width="3"
-                />
+                  class="c2"
+                  style="flex-basis: 100%;"
+                >
+                  <div
+                    class="c1"
+                    style="flex-basis: 58.333333333333336%;"
+                  >
+                    <div
+                      class="c3"
+                      data-testid="child block B"
+                      name="child block B"
+                      role="container"
+                      style="flex-basis: 100%; background-color: rgb(211, 84, 0);"
+                      tabindex="0"
+                    />
+                  </div>
+                  <div
+                    class="c1"
+                    style="flex-basis: 41.67%;"
+                  >
+                    <div
+                      class="c1"
+                      style="flex-basis: 80%;"
+                    >
+                      <div
+                        class="c3"
+                        data-testid="child block A"
+                        name="child block A"
+                        role="container"
+                        style="flex-basis: 100%; background-color: rgb(26, 188, 156);"
+                        tabindex="0"
+                      />
+                    </div>
+                    <div
+                      class="c2"
+                      style="flex-basis: 20%;"
+                    >
+                      <div
+                        class="c2"
+                        style="flex-basis: 100.00000000000003%;"
+                      >
+                        <div
+                          class="c3"
+                          data-testid="child block C"
+                          name="child block C"
+                          role="container"
+                          style="flex-basis: 100%; background-color: rgb(241, 196, 15);"
+                          tabindex="0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -203,46 +241,15 @@ describe('<BlockPacker />', () => {
     expect(getByTestId('status-bar')).toHaveTextContent('some-status bar');
   });
 
-  it('should call onHover with null when mousing out of the tree', () => {
-    expect.assertions(2);
-    const { getByTestId } = getContainer();
-    act(() => {
-      fireEvent.mouseOut(getByTestId('block-tree'));
-    });
-    expect(props.onHover).toHaveBeenCalledTimes(1);
-    expect(props.onHover).toHaveBeenCalledWith(null);
-  });
-
   it('should not render blocks if they are null', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer({ blocks: null });
     expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
       .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-flow: row;
-        -ms-flex-flow: row;
-        flex-flow: row;
-        -webkit-box-flex: 1;
-        -webkit-flex-grow: 1;
-        -ms-flex-positive: 1;
-        flex-grow: 1;
-        width: 100%;
+        -webkit-flex: 1 0 auto;
+        -ms-flex: 1 0 auto;
+        flex: 1 0 auto;
         position: relative;
-      }
-
-      @media only screen and (min-width:350px) {
-
-      }
-
-      @media only screen and (min-width:690px) {
-
-      }
-
-      @media only screen and (min-width:1200px) {
-
       }
 
       <div
@@ -250,5 +257,117 @@ describe('<BlockPacker />', () => {
         data-testid="block-tree"
       />
     `);
+  });
+
+  describe.each`
+    event             | handler
+    ${'blurring'}     | ${fireEvent.blur}
+    ${'mousing out'}  | ${fireEvent.mouseOut}
+    ${'touching out'} | ${fireEvent.touchEnd}
+  `('$event of the tree', ({ handler }) => {
+    const setup = (): void => {
+      const { getByTestId } = getContainer();
+      act(() => {
+        handler(getByTestId('block-tree'));
+      });
+    };
+
+    it('should call onHover with null', () => {
+      expect.assertions(2);
+      setup();
+      expect(props.onHover).toHaveBeenCalledTimes(1);
+      expect(props.onHover).toHaveBeenCalledWith(null);
+    });
+  });
+
+  const interact = (handler: (elem: HTMLElement) => void, id: string): void => {
+    const { getByTestId } = getContainer();
+    act(() => {
+      handler(getByTestId(id));
+    });
+  };
+
+  describe.each`
+    event             | handler
+    ${'focusing'}     | ${fireEvent.focus}
+    ${'mousing over'} | ${fireEvent.mouseOver}
+    ${'touching'}     | ${fireEvent.touchStart}
+  `('$event a child', ({ handler }) => {
+    it.each`
+      id
+      ${'parent block 1'}
+      ${'parent block 2'}
+    `('should call onHover with the name', ({ id }) => {
+      expect.assertions(2);
+      interact(handler, id);
+      expect(props.onHover).toHaveBeenCalledTimes(1);
+      expect(props.onHover).toHaveBeenCalledWith(id);
+    });
+  });
+
+  describe.each`
+    event             | handler
+    ${'focusing'}     | ${fireEvent.focus}
+    ${'mousing over'} | ${fireEvent.mouseOver}
+    ${'touching'}     | ${fireEvent.touchStart}
+  `('$event a sub-tree child', ({ handler }) => {
+    it.each`
+      parent              | id
+      ${'parent block 1'} | ${'child block A'}
+      ${'parent block 1'} | ${'child block B'}
+      ${'parent block 1'} | ${'child block C'}
+    `('should call onHover with the name and sub-name', ({ parent, id }) => {
+      expect.assertions(2);
+      interact(handler, id);
+      expect(props.onHover).toHaveBeenCalledTimes(1);
+      expect(props.onHover).toHaveBeenCalledWith(parent, id);
+    });
+  });
+
+  const fireActivateEvent = (element: HTMLElement): void => {
+    fireEvent.keyDown(element, {
+      key: 'Enter',
+    });
+  };
+
+  describe.each`
+    event           | handler
+    ${'clicking'}   | ${fireEvent.click}
+    ${'activating'} | ${fireActivateEvent}
+  `('when $event a level-0 block containing a breakdown', ({ handler }) => {
+    let clock: sinon.SinonFakeTimers;
+    beforeEach(() => {
+      clock = sinon.useFakeTimers();
+    });
+    afterEach(() => {
+      clock.restore();
+    });
+
+    it('should expand the block to fill the view', () => {
+      expect.assertions(10);
+
+      const { container, getByTestId } = getContainer();
+      const parentBlock = getByTestId('parent block 2');
+      act(() => {
+        handler(parentBlock);
+      });
+
+      const preview = getByTestId('preview');
+      expect(preview).toBeInTheDocument();
+      expect(preview.style.left).toBe(`${parentBlock.offsetLeft}px`);
+      expect(preview.style.top).toBe(`${parentBlock.offsetTop}px`);
+      expect(preview.style.width).toBe(`${parentBlock.offsetWidth}px`);
+      expect(preview.style.height).toBe(`${parentBlock.offsetHeight}px`);
+      expect(preview.style.backgroundColor).toBe('rgba(128, 0, 128, 0)');
+
+      act(() => {
+        clock.next();
+      });
+
+      expect(preview.style.left).toBe('0px');
+      expect(preview.style.top).toBe('0px');
+      expect(preview.style.width).toBe(`${container.offsetWidth}px`);
+      expect(preview.style.height).toBe(`${container.offsetHeight}px`);
+    });
   });
 });

@@ -142,7 +142,7 @@ describe('Analysis saga', () => {
           headers: { Authorization: 'some api key' },
         })
         .throw(err)
-        .put(errorOpened('Error loading analysis data: something bad happened'))
+        .put(errorOpened('Error loading analysis block data: something bad happened'))
         .next()
         .put(blockReceived(undefined, err))
         .next()

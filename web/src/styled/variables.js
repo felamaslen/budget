@@ -151,8 +151,6 @@ export const colors = {
   },
   analysis: {
     main: rgb(244, 167, 66),
-    statusBg: colorDark,
-    status: colorLight,
   },
   blockIndex: [
     rgb(211, 84, 0),

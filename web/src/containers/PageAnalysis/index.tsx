@@ -9,8 +9,13 @@ import * as Styled from './styles';
 import Timeline from './timeline';
 import Upper from './upper';
 
-import { requested, blockRequested, treeItemDisplayToggled } from '~client/actions/analysis';
-import BlockPacker from '~client/components/BlockPacker';
+import {
+  requested,
+  blockRequested,
+  treeItemDisplayToggled,
+  blockReceived,
+} from '~client/actions/analysis';
+import { BlockPacker } from '~client/components/BlockPacker';
 import { formatCurrency, capitalise } from '~client/modules/format';
 import {
   getAnalysisPeriod,
@@ -24,7 +29,7 @@ import {
   getTimeline,
   getDescription,
 } from '~client/selectors';
-import { Page, MainBlockName, AnalysisTreeVisible } from '~client/types';
+import { Page, MainBlockName, AnalysisTreeVisible, FlexBlocks, BlockItem } from '~client/types';
 
 const keyTreeVisible = 'analysis_treeVisible';
 
@@ -97,8 +102,8 @@ const PageAnalysis: React.FC = () => {
   const timeline = useSelector(getTimeline);
   const cost = useSelector(getCostAnalysis);
   const costDeep = useSelector(getDeepCost);
-  const blocks = useSelector(getBlocks);
-  const blocksDeep = useSelector(getDeepBlocks);
+  const blocks: FlexBlocks<BlockItem> = useSelector(getBlocks);
+  const blocksDeep: FlexBlocks<BlockItem> | undefined = useSelector(getDeepBlocks);
   const period = useSelector(getAnalysisPeriod);
   const grouping = useSelector(getGrouping);
   const page = useSelector(getPage);
@@ -106,8 +111,12 @@ const PageAnalysis: React.FC = () => {
 
   const dispatch = useDispatch();
   const onBlockClick = useCallback(
-    (name: string): void => {
-      dispatch(blockRequested(name));
+    (name: string | null): void => {
+      if (name) {
+        dispatch(blockRequested(name));
+      } else {
+        dispatch(blockReceived(undefined));
+      }
     },
     [dispatch],
   );

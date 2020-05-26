@@ -1,48 +1,13 @@
-export type Color = number | string;
+export * from '~client/types/block-packer';
 
-export type BlockName = string;
-
-export type SubBlockBit = {
-  name: string;
-  color: Color;
-  width: number;
-  height: number;
-  value: number;
-};
-
-export type SubBlock = {
-  width: number;
-  height: number;
-  bits: SubBlockBit[];
-};
-
-export type BlockBit = {
-  name: BlockName;
-  color: Color;
-  value: number;
-  width: number;
-  height: number;
-  blocks: SubBlock[];
-};
-
-export type Block = {
-  width: number;
-  height: number;
-  bits: BlockBit[];
-};
-
-export type BlockStyleProps = {
-  name?: BlockName;
-  width: number;
-  height: number;
+export type Preview = {
+  open: boolean;
+  name: string | null;
   left: number;
   top: number;
-  active?: boolean;
-  blockColor: Color;
-  expanded?: boolean;
-  hidden?: boolean;
+  width: number;
+  height: number;
+  color: string;
 };
 
-export type Preview = BlockStyleProps & { opened?: boolean };
-
-export type OnBlockClick = (name: string, preview?: Preview) => void;
+export type OnBlockClick = (name: string, preview?: Preview) => void | boolean;

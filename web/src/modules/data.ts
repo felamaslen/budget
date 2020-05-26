@@ -16,8 +16,10 @@ type TransactionRaw = Omit<TransactionRawNew, 'date'> & {
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const IDENTITY: Identity<any, any> = (state) => state;
-
 export const NULL = (): null => null;
+export const VOID = (): void => {
+  // pass
+};
 
 export function getPeriodMatch(
   shortPeriod: string | Period,

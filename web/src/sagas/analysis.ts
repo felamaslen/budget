@@ -60,7 +60,7 @@ export function* onBlockRequest({ name }: ActionAnalysisBlockRequested) {
 
     yield put(blockReceived(res.data));
   } catch (err) {
-    yield put(errorOpened(`Error loading analysis data: ${err.message}`));
+    yield put(errorOpened(`Error loading analysis block data: ${err.message}`));
     yield put(blockReceived(undefined, err));
   }
 }

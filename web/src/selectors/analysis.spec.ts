@@ -15,8 +15,9 @@ import {
   Grouping,
 } from '~client/constants/analysis';
 import { blockPacker } from '~client/modules/block-packer';
+import { colors } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
-import { Page } from '~client/types/app';
+import { Page, BlockItem } from '~client/types';
 
 describe('Analysis selectors', () => {
   describe('getLoading', () => {
@@ -100,19 +101,22 @@ describe('Analysis selectors', () => {
       const expectedResult = [
         {
           name: Page.general,
-          subTree: [{ name: 'foo1_bar1', total: 1642283 }],
+          color: colors[Page.general].main,
+          subTree: [{ name: 'foo1_bar1', total: 1642283, color: colors[Page.general].main }],
           total: 1642283,
         },
         {
           name: Page.food,
+          color: colors[Page.food].main,
           subTree: [
-            { name: 'foo2_bar1', total: 156842 },
-            { name: 'foo2_bar2', total: 137650 },
+            { name: 'foo2_bar1', total: 156842, color: colors[Page.food].main },
+            { name: 'foo2_bar2', total: 137650, color: colors[Page.food].main },
           ],
           total: 156842 + 137650,
         },
         {
           name: 'saved',
+          color: colors.blockColor.saved,
           total: testState.analysis.saved,
         },
       ];
@@ -122,7 +126,7 @@ describe('Analysis selectors', () => {
       expect(result).toStrictEqual(expectedResult);
     });
 
-    it("shouldn'tt throw an error if cost is empty", () => {
+    it("shouldn't throw an error if cost is empty", () => {
       expect.assertions(1);
       expect(() => {
         getCostAnalysis({
@@ -138,13 +142,156 @@ describe('Analysis selectors', () => {
 
   describe('getBlocks', () => {
     it('should get a block-packed map of the state', () => {
-      expect.assertions(2);
+      expect.assertions(1);
       const result = getBlocks(testState);
 
-      expect(result.length).toBeGreaterThan(0);
-      expect(result).toStrictEqual(
-        blockPacker(getCostAnalysis(testState), ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT),
-      );
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "box": Object {
+            "flex": 1,
+            "flow": "column",
+          },
+          "childIndex": 0,
+          "children": Object {
+            "box": Object {
+              "flex": 0.1805,
+              "flow": "row",
+            },
+            "childIndex": 1,
+            "children": Object {
+              "box": Object {
+                "flex": 0.1856,
+                "flow": "row",
+              },
+              "childIndex": 2,
+              "items": Object {
+                "blocks": Array [
+                  Object {
+                    "area": 8374.05396881478,
+                    "childCount": 2,
+                    "color": "#113822",
+                    "flex": 1,
+                    "hasBreakdown": false,
+                    "name": "saved",
+                    "subTree": undefined,
+                    "total": 67123,
+                  },
+                ],
+                "box": Object {
+                  "flex": 1.0000000000000016,
+                  "flow": "row",
+                },
+              },
+            },
+            "items": Object {
+              "blocks": Array [
+                Object {
+                  "area": 36739.893946697885,
+                  "childCount": 1,
+                  "color": "#43a047",
+                  "flex": 1,
+                  "hasBreakdown": true,
+                  "name": "food",
+                  "subTree": Object {
+                    "box": Object {
+                      "flex": 1,
+                      "flow": "row",
+                    },
+                    "childIndex": 0,
+                    "children": Object {
+                      "box": Object {
+                        "flex": 0.4674,
+                        "flow": "row",
+                      },
+                      "childIndex": 1,
+                      "items": Object {
+                        "blocks": Array [
+                          Object {
+                            "area": 17172.780251290234,
+                            "childCount": 1,
+                            "color": "#43a047",
+                            "flex": 1,
+                            "name": "foo2_bar2",
+                            "subTree": undefined,
+                            "total": 137650,
+                          },
+                        ],
+                        "box": Object {
+                          "flex": 1.0000000000000002,
+                          "flow": "row",
+                        },
+                      },
+                    },
+                    "items": Object {
+                      "blocks": Array [
+                        Object {
+                          "area": 19567.11369540765,
+                          "childCount": 0,
+                          "color": "#43a047",
+                          "flex": 1,
+                          "name": "foo2_bar1",
+                          "subTree": undefined,
+                          "total": 156842,
+                        },
+                      ],
+                      "box": Object {
+                        "flex": 0.5325849259063065,
+                        "flow": "row",
+                      },
+                    },
+                  },
+                  "total": 294492,
+                },
+              ],
+              "box": Object {
+                "flex": 0.8143799344606835,
+                "flow": "row",
+              },
+            },
+          },
+          "items": Object {
+            "blocks": Array [
+              Object {
+                "area": 204886.05208448734,
+                "childCount": 0,
+                "color": "#01579b",
+                "flex": 1,
+                "hasBreakdown": true,
+                "name": "general",
+                "subTree": Object {
+                  "box": Object {
+                    "flex": 1,
+                    "flow": "row",
+                  },
+                  "childIndex": 0,
+                  "items": Object {
+                    "blocks": Array [
+                      Object {
+                        "area": 204886.05208448734,
+                        "childCount": 0,
+                        "color": "#01579b",
+                        "flex": 1,
+                        "name": "foo1_bar1",
+                        "subTree": undefined,
+                        "total": 1642283,
+                      },
+                    ],
+                    "box": Object {
+                      "flex": 1,
+                      "flow": "row",
+                    },
+                  },
+                },
+                "total": 1642283,
+              },
+            ],
+            "box": Object {
+              "flex": 0.8195442083379494,
+              "flow": "row",
+            },
+          },
+        }
+      `);
     });
 
     it('should exclude blocks which are not in the visible tree', () => {
@@ -159,25 +306,87 @@ describe('Analysis selectors', () => {
         },
       });
 
-      expect(result).toStrictEqual(
-        blockPacker(
-          getCostAnalysis({
-            ...testState,
-            analysis: {
-              ...testState.analysis,
-              cost: testState.analysis.cost.filter(([name]) => name !== Page.food),
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "box": Object {
+            "flex": 1,
+            "flow": "column",
+          },
+          "childIndex": 0,
+          "children": Object {
+            "box": Object {
+              "flex": 0.0393,
+              "flow": "row",
             },
-          }),
-          ANALYSIS_VIEW_WIDTH,
-          ANALYSIS_VIEW_HEIGHT,
-        ),
-      );
+            "childIndex": 1,
+            "items": Object {
+              "blocks": Array [
+                Object {
+                  "area": 9816.714110047584,
+                  "childCount": 1,
+                  "color": "#113822",
+                  "flex": 1,
+                  "hasBreakdown": false,
+                  "name": "saved",
+                  "subTree": undefined,
+                  "total": 67123,
+                },
+              ],
+              "box": Object {
+                "flex": 0.9999999999999986,
+                "flow": "row",
+              },
+            },
+          },
+          "items": Object {
+            "blocks": Array [
+              Object {
+                "area": 240183.2858899524,
+                "childCount": 0,
+                "color": "#01579b",
+                "flex": 1,
+                "hasBreakdown": true,
+                "name": "general",
+                "subTree": Object {
+                  "box": Object {
+                    "flex": 1,
+                    "flow": "row",
+                  },
+                  "childIndex": 0,
+                  "items": Object {
+                    "blocks": Array [
+                      Object {
+                        "area": 240183.2858899524,
+                        "childCount": 0,
+                        "color": "#01579b",
+                        "flex": 1,
+                        "name": "foo1_bar1",
+                        "subTree": undefined,
+                        "total": 1642283,
+                      },
+                    ],
+                    "box": Object {
+                      "flex": 1,
+                      "flow": "row",
+                    },
+                  },
+                },
+                "total": 1642283,
+              },
+            ],
+            "box": Object {
+              "flex": 0.9607331435598097,
+              "flow": "row",
+            },
+          },
+        }
+      `);
     });
   });
 
   describe('getDeepBlocks', () => {
     it('getDeepBlocks gets a block-packed map of the state', () => {
-      expect.assertions(2);
+      expect.assertions(1);
       const result = getDeepBlocks({
         ...testState,
         analysis: {
@@ -202,31 +411,28 @@ describe('Analysis selectors', () => {
         },
       });
 
-      expect(result.length).toBeGreaterThan(0);
       expect(result).toStrictEqual(
-        blockPacker(
-          [
-            {
-              name: Page.food,
-              total: 100 + 130 + 93,
-              subTree: [
-                { name: 'foo2_bar2_baz1_bak1', total: 100 },
-                { name: 'foo2_bar2_baz1_bak2', total: 130 },
-                { name: 'foo2_bar2_baz1_bak3', total: 93 },
-              ],
-            },
-            {
-              name: Page.general,
-              total: 30 + 992,
-              subTree: [
-                { name: 'foo2_bar2_baz2_bak1', total: 30 },
-                { name: 'foo2_bar2_baz2_bak2', total: 992 },
-              ],
-            },
-          ],
-          ANALYSIS_VIEW_WIDTH,
-          ANALYSIS_VIEW_HEIGHT,
-        ),
+        blockPacker<BlockItem>(ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT, [
+          {
+            name: Page.food,
+            total: 100 + 130 + 93,
+            color: colors[Page.food].main,
+            subTree: [
+              { name: 'foo2_bar2_baz1_bak1', color: colors[Page.food].main, total: 100 },
+              { name: 'foo2_bar2_baz1_bak2', color: colors[Page.food].main, total: 130 },
+              { name: 'foo2_bar2_baz1_bak3', color: colors[Page.food].main, total: 93 },
+            ],
+          },
+          {
+            name: Page.general,
+            total: 30 + 992,
+            color: colors[Page.general].main,
+            subTree: [
+              { name: 'foo2_bar2_baz2_bak1', color: colors[Page.general].main, total: 30 },
+              { name: 'foo2_bar2_baz2_bak2', color: colors[Page.general].main, total: 992 },
+            ],
+          },
+        ]),
       );
     });
   });

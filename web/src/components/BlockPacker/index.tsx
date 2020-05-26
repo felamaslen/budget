@@ -1,88 +1,388 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import { rgba, mix, setSaturation } from 'polished';
+import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 
 import * as Styled from './styles';
-import { Block, Preview } from './types';
-import Blocks, { Props as BlocksProps } from './blocks';
+import { Preview } from './types';
+import { useCTA } from '~client/hooks/cta';
+import { VOID } from '~client/modules/data';
+import { colors } from '~client/styled/variables';
+import { BlockItem, FlexBlocks } from '~client/types';
+
+type BlockName = string | null;
+
+type SetPreview = React.Dispatch<React.SetStateAction<Preview>>;
 
 export type Props = {
-  blocks: Block[];
-  blocksDeep?: Block[];
+  blocks: FlexBlocks<BlockItem> | null;
+  blocksDeep?: FlexBlocks<BlockItem>;
+  onHover?: (name: BlockName, subName?: BlockName) => void;
+  onClick?: (name: string | null) => void;
+  activeMain?: string | null;
+  activeSub?: string | null;
   status: string;
-} & Pick<BlocksProps, 'activeMain' | 'activeSub' | 'onHover' | 'onClick'>;
+};
 
-const BlockPacker: React.FC<Props> = ({
-  blocks,
-  blocksDeep,
-  activeMain,
+type CommonProps = {
+  isSubTree?: boolean;
+  isDeep: boolean;
+  onHover?: Props['onHover'];
+  setPreview: SetPreview;
+};
+
+const highlightColor = (color: string): string =>
+  setSaturation(1)(mix(0.2)(color, colors.highlight));
+
+function getBlockColor(bgColor?: string | number): string {
+  if (typeof bgColor === 'string') {
+    return bgColor;
+  }
+  if (typeof bgColor === 'number' && bgColor < colors.blockIndex.length) {
+    return colors.blockIndex[bgColor % colors.blockIndex.length];
+  }
+  return colors.transparent;
+}
+
+const InfiniteChild: React.FC<
+  CommonProps & {
+    name: string;
+    flex: number;
+    color?: string;
+    childCount: number;
+    active?: boolean;
+    activeSub?: string | null;
+    subTree?: FlexBlocks<BlockItem>;
+    hasBreakdown?: boolean;
+  }
+> = ({
+  name,
+  flex,
+  color,
+  childCount,
+  active,
   activeSub,
+  subTree,
+  hasBreakdown,
+  isSubTree,
+  isDeep,
   onHover,
-  onClick,
-  status,
+  setPreview,
 }) => {
-  const onMouseOut = useCallback(() => onHover(null), [onHover]);
-  const [preview, setPreview] = useState<Preview | undefined>();
-  const onClickMain = useCallback(
-    (name, nextPreview) => {
-      onClick(name);
-      setPreview(nextPreview);
-    },
-    [onClick],
+  const childRef = useRef<HTMLDivElement>(null);
+
+  const onActivate = useMemo(
+    () =>
+      onHover
+        ? (event: React.MouseEvent | React.FocusEvent | React.TouchEvent): void => {
+            if (isSubTree) {
+              event.stopPropagation();
+            }
+
+            onHover(name);
+          }
+        : VOID,
+    [isSubTree, onHover, name],
   );
 
-  const [expanded, setExpanded] = useState<boolean>(false);
-  const expandTimer = useRef<number>();
-  const havePreview = !!preview;
-  useEffect(() => (): void => clearTimeout(expandTimer.current), []);
-  useEffect(() => {
-    if (havePreview) {
-      setExpanded(true);
-      clearTimeout(expandTimer.current);
-      expandTimer.current = setTimeout(() => {
-        setPreview(last => (last ? { ...last, opened: true } : undefined));
-      }, Styled.fadeTime);
-    } else {
-      setExpanded(false);
-    }
-  }, [havePreview]);
+  const onActivateChild = useMemo(
+    () => (onHover ? (subName: BlockName): void => onHover(name, subName) : VOID),
+    [onHover, name],
+  );
 
-  const haveDeep = !!(blocksDeep && preview?.opened);
-  useEffect(() => {
-    if (haveDeep) {
-      setPreview(last => (last ? { ...last, hidden: true } : undefined));
-      clearTimeout(expandTimer.current);
-      expandTimer.current = setTimeout(() => {
-        setPreview(undefined);
-      }, Styled.fadeTime);
-    }
-  }, [haveDeep]);
+  const canDive = isDeep || hasBreakdown;
+  const onDiveIn = useMemo(
+    () =>
+      canDive
+        ? (): void => {
+            setPreview({
+              open: true,
+              name,
+              color: rgba(color ?? colors.transparent, 0),
+              left: childRef.current?.offsetLeft ?? 0,
+              top: childRef.current?.offsetTop ?? 0,
+              width: childRef.current?.offsetWidth ?? 0,
+              height: childRef.current?.offsetHeight ?? 0,
+            });
+          }
+        : VOID,
+    [canDive, setPreview, name, color],
+  );
+
+  const diveProps = useCTA(onDiveIn);
+
+  const bgColor = getBlockColor(color ?? childCount);
 
   return (
-    <Styled.BlockView onMouseOut={onMouseOut} onTouchEnd={onMouseOut}>
-      <Styled.BlockTreeOuter data-testid="block-tree">
-        {blocks && (
-          <Blocks
-            blocks={blocks}
-            activeMain={activeMain}
-            activeSub={activeSub}
-            onHover={onHover}
-            onClick={onClickMain}
-          />
-        )}
-        {blocksDeep && !(preview && !preview.hidden) && (
-          <Blocks
-            deep
-            blocks={blocksDeep}
-            activeMain={activeMain}
-            activeSub={activeSub}
-            onHover={onHover}
-            onClick={onClick}
-          />
-        )}
-        {preview && <Styled.Preview {...preview} expanded={expanded} />}
-      </Styled.BlockTreeOuter>
-      <Styled.StatusBar data-testid="status-bar">{status}</Styled.StatusBar>
-    </Styled.BlockView>
+    <Styled.Child
+      ref={childRef}
+      data-testid={name}
+      role={canDive ? 'button' : 'container'}
+      name={name}
+      flex={flex}
+      bgColor={active ? highlightColor(bgColor) : bgColor}
+      tabIndex={0}
+      onFocus={onActivate}
+      onMouseOver={onActivate}
+      onTouchStart={onActivate}
+      {...diveProps}
+      hasSubTree={!!subTree}
+    >
+      {subTree && (
+        <InfiniteBox
+          activeMain={activeSub}
+          blocks={subTree}
+          onHover={onActivateChild}
+          setPreview={setPreview}
+          isSubTree
+          isDeep={isDeep}
+        />
+      )}
+    </Styled.Child>
   );
 };
 
-export default BlockPacker;
+const InfiniteChildMemo = React.memo(InfiniteChild);
+
+const InfiniteBox: React.FC<
+  CommonProps & {
+    blocks: FlexBlocks<BlockItem>;
+    activeMain?: string | null;
+    activeSub?: string | null;
+  }
+> = ({ blocks, activeMain, activeSub, isSubTree, isDeep, onHover, setPreview }) => {
+  const activeItemIndex = useMemo<number>(
+    () =>
+      activeMain
+        ? blocks.items?.blocks.findIndex(
+            (item) =>
+              item.name === activeMain ||
+              (!!activeSub &&
+                item.subTree?.items?.blocks.some((subItem) => subItem.name === activeSub)),
+          ) ?? -1
+        : -1,
+    [activeMain, activeSub, blocks],
+  );
+
+  return (
+    <Styled.Box flex={blocks.box.flex} flow={blocks.box.flow}>
+      {blocks.items && (
+        <Styled.Box flex={blocks.items.box.flex} flow={blocks.items.box.flow}>
+          {blocks.items.blocks.map((item, index) => (
+            <InfiniteChildMemo
+              key={item.name}
+              name={item.name}
+              active={!activeSub && index === activeItemIndex}
+              activeSub={activeItemIndex === -1 ? null : activeSub}
+              flex={item.flex}
+              color={item.color}
+              childCount={item.childCount ?? 0}
+              subTree={item.subTree}
+              isDeep={isDeep}
+              hasBreakdown={item.hasBreakdown}
+              isSubTree={isSubTree}
+              onHover={onHover}
+              setPreview={setPreview}
+            />
+          ))}
+        </Styled.Box>
+      )}
+      {blocks.children && (
+        <InfiniteBox
+          key={`child-${blocks.children.childIndex}`}
+          blocks={blocks.children}
+          activeMain={activeItemIndex === -1 ? activeMain : null}
+          activeSub={activeItemIndex === -1 ? activeSub : null}
+          isSubTree={isSubTree}
+          isDeep={isDeep}
+          onHover={onHover}
+          setPreview={setPreview}
+        />
+      )}
+    </Styled.Box>
+  );
+};
+
+type DiveState = {
+  preview: Preview;
+  lastPreview: Preview;
+};
+
+const initialPreview: Preview = {
+  name: '',
+  color: colors.transparent,
+  open: false,
+  left: 0,
+  top: 0,
+  width: 0,
+  height: 0,
+};
+
+const initialDiveState: DiveState = {
+  preview: initialPreview,
+  lastPreview: initialPreview,
+};
+
+function useClickDive(
+  onClick: Props['onClick'],
+  haveDeepBlocks: boolean,
+): [React.RefObject<HTMLDivElement>, Preview, SetPreview, () => void] {
+  const container = useRef<HTMLDivElement>(null);
+  const [state, dispatch] = useState<DiveState>(initialDiveState);
+  const { preview } = state;
+  const setPreview = useCallback(
+    (action: React.SetStateAction<Preview>): void =>
+      dispatch((last) => ({
+        ...last,
+        preview: typeof action === 'function' ? action(last.preview) : action,
+      })),
+    [],
+  );
+
+  const onDive = useMemo(() => (onClick ? (name: string | null): void => onClick(name) : VOID), [
+    onClick,
+  ]);
+
+  const fadeTimer = useRef<number>();
+  const hadPreview = useRef<boolean>(false);
+  useEffect(() => {
+    // trigger expand animation when diving
+    if (preview.name && preview.open && !hadPreview.current) {
+      setImmediate(() => {
+        dispatch((last) => ({
+          preview: {
+            name: last.preview.name,
+            open: true,
+            color: rgba(last.preview.color, 1),
+            left: 0,
+            top: 0,
+            width: container.current?.offsetWidth ?? 0,
+            height: container.current?.offsetHeight ?? 0,
+          },
+          lastPreview: {
+            ...last.preview,
+            color: rgba(last.preview.color, 1),
+          },
+        }));
+
+        clearTimeout(fadeTimer.current);
+        fadeTimer.current = setTimeout(() => {
+          onDive(preview.name);
+        }, Styled.fadeTime);
+      });
+    }
+    hadPreview.current = preview.open;
+  }, [preview, onDive]);
+
+  useEffect(() => {
+    if (haveDeepBlocks) {
+      // hide preview after loading deep blocks
+      setImmediate(() => {
+        dispatch((last) => {
+          return {
+            ...last,
+            preview: {
+              ...last.preview,
+              color: rgba(last.preview.color, 0),
+            },
+          };
+        });
+
+        clearTimeout(fadeTimer.current);
+        fadeTimer.current = setTimeout(() => {
+          dispatch((last) => {
+            return {
+              ...last,
+              preview: {
+                ...last.preview,
+                open: false,
+              },
+            };
+          });
+        }, Styled.fadeTime);
+      });
+    }
+  }, [haveDeepBlocks]);
+
+  const surface = useCallback(() => {
+    // trigger collapse animation when surfacing
+    dispatch((last) => ({
+      preview: {
+        ...last.preview,
+        name: null,
+        open: true,
+        color: last.lastPreview.color,
+      },
+      lastPreview: {
+        ...last.lastPreview,
+        name: null,
+      },
+    }));
+
+    onDive(null);
+
+    setImmediate(() => {
+      dispatch((last) => ({
+        ...last,
+        preview: {
+          ...last.lastPreview,
+          color: rgba(last.lastPreview.color, 0),
+        },
+      }));
+      clearTimeout(fadeTimer.current);
+      fadeTimer.current = setTimeout(() => {
+        dispatch(initialDiveState);
+      }, Styled.fadeTime);
+    });
+  }, [onDive]);
+
+  useEffect(() => (): void => clearTimeout(fadeTimer.current), []);
+
+  return [container, state.preview, setPreview, surface];
+}
+
+const Blocks: React.FC<Omit<Props, 'status'>> = ({
+  blocks,
+  blocksDeep,
+  activeMain = null,
+  activeSub = null,
+  onHover,
+  onClick,
+}) => {
+  const onDeactivate = useMemo(() => (onHover ? (): void => onHover(null) : VOID), [onHover]);
+
+  const haveDeepBlocks = !!blocksDeep;
+  const [container, preview, setPreview, surface] = useClickDive(onClick, haveDeepBlocks);
+
+  return (
+    <Styled.BoxContainer
+      ref={container}
+      data-testid="block-tree"
+      onMouseOut={onDeactivate}
+      onTouchEnd={onDeactivate}
+      onBlur={onDeactivate}
+    >
+      {preview.open && <Styled.Expander data-testid="preview" {...preview} />}
+      {blocks && !blocksDeep && (
+        <InfiniteBox
+          blocks={blocks}
+          isDeep={false}
+          activeMain={activeMain}
+          activeSub={activeSub}
+          onHover={onHover}
+          setPreview={setPreview}
+        />
+      )}
+      {blocksDeep && (
+        <InfiniteBox isDeep={true} blocks={blocksDeep} onHover={onHover} setPreview={surface} />
+      )}
+    </Styled.BoxContainer>
+  );
+};
+
+const BlocksMemo = React.memo(Blocks);
+
+export const BlockPacker: React.FC<Props> = ({ status, ...props }) => (
+  <Styled.Container>
+    <BlocksMemo {...props} />
+    <Styled.StatusBar data-testid="status-bar">{status}</Styled.StatusBar>
+  </Styled.Container>
+);

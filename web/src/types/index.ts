@@ -2,6 +2,7 @@ export * from './analysis';
 export * from './api';
 export * from './app';
 export * from './auth';
+export * from './block-packer';
 export * from './crud';
 export * from './funds';
 export * from './graph';

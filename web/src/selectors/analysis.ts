@@ -6,14 +6,18 @@ import {
   Period,
   Grouping,
 } from '~client/constants/analysis';
+import { isCalcPage } from '~client/constants/data';
 import { blockPacker } from '~client/modules/block-packer';
 import { sortByTotal } from '~client/modules/data';
 import { State } from '~client/reducers';
+import { colors } from '~client/styled/variables';
 import {
   AnalysisCost,
   AnalysisTreeVisible,
   MainBlockName,
   AnalysisSortedTree,
+  BlockItem,
+  Page,
 } from '~client/types';
 
 export const getLoading = (state: State): boolean => state.analysis.loading;
@@ -29,10 +33,27 @@ export const getTreeVisible = (state: State): AnalysisTreeVisible => state.analy
 const getCostArray = (state: State): AnalysisCost<MainBlockName> => state.analysis.cost;
 const getSaved = (state: State): number => state.analysis.saved;
 
+const getTreeColor = (name: MainBlockName | string): string | undefined => {
+  if (isCalcPage(name)) {
+    return colors[name].main;
+  }
+  if (name === 'saved') {
+    return colors.blockColor.saved;
+  }
+  return undefined;
+};
+
 const getSortedTree = <B extends string = string>(tree: AnalysisCost<B>): AnalysisSortedTree<B>[] =>
   tree.map(([name, subTree]) => ({
     name,
-    subTree: sortByTotal(subTree.map(([item, total]) => ({ name: item, total }))),
+    color: getTreeColor(name),
+    subTree: sortByTotal(
+      subTree.map(([item, total]) => ({
+        name: item,
+        color: getTreeColor(name),
+        total,
+      })),
+    ),
     total: subTree.reduce((sum, [, total]) => sum + total, 0),
   }));
 
@@ -43,14 +64,22 @@ export const getCostAnalysis = createSelector<
   AnalysisSortedTree<MainBlockName>[]
 >(getCostArray, getSaved, (cost, saved) => [
   ...sortByTotal(getSortedTree<MainBlockName>(cost)),
-  { name: 'saved', total: saved },
+  { name: 'saved', color: colors.blockColor.saved, total: saved },
 ]);
 
 export const getBlocks = createSelector(getCostAnalysis, getTreeVisible, (cost, treeVisible) =>
-  blockPacker(
-    cost.filter(({ name }: { name: MainBlockName }) => treeVisible[name] !== false),
+  blockPacker<BlockItem>(
     ANALYSIS_VIEW_WIDTH,
     ANALYSIS_VIEW_HEIGHT,
+    cost
+      .filter(({ name }: { name: MainBlockName }) => treeVisible[name] !== false)
+      .map((block) => ({
+        name: block.name,
+        total: block.total,
+        color: isCalcPage(block.name) ? colors[block.name].main : colors.blockColor.saved,
+        subTree: block.subTree,
+        hasBreakdown: isCalcPage(block.name) && block.name !== Page.bills,
+      })),
   ),
 );
 
@@ -58,7 +87,6 @@ const getDeepArray = (state: State): AnalysisCost | null => state.analysis.costD
 
 export const getDeepCost = createSelector(getDeepArray, (cost) => cost && getSortedTree(cost));
 
-export const getDeepBlocks = createSelector(
-  getDeepCost,
-  (cost) => cost && blockPacker(cost, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT),
+export const getDeepBlocks = createSelector(getDeepCost, (cost) =>
+  cost ? blockPacker<BlockItem>(ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT, cost) : undefined,
 );
