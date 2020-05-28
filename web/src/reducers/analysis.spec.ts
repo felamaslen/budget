@@ -1,11 +1,5 @@
 import reducer, { initialState, State } from './analysis';
-import {
-  requested,
-  received,
-  treeItemDisplayToggled,
-  blockRequested,
-  blockReceived,
-} from '~client/actions/analysis';
+import { requested, received, blockRequested, blockReceived } from '~client/actions/analysis';
 import { loggedOut } from '~client/actions/login';
 import { Period, Grouping } from '~client/constants/analysis';
 import { testState } from '~client/test-data/state';
@@ -73,7 +67,6 @@ describe('Analysis reducer', () => {
       grouping: Grouping.category,
       page: 0,
       timeline: null,
-      treeVisible: { bills: false, general: true },
     };
 
     it('should update data in state', () => {
@@ -229,7 +222,6 @@ describe('Analysis reducer', () => {
         grouping: Grouping.category,
         page: 0,
         timeline: [[1, 2, 3]],
-        treeVisible: { bills: false, general: true },
       };
 
       const action = blockReceived({
@@ -270,25 +262,6 @@ describe('Analysis reducer', () => {
       expect(result.saved).toBe(state.saved);
 
       expect(result.description).toBe(state.description);
-    });
-  });
-
-  describe('ANALYSIS_TREE_DISPLAY_TOGGLED', () => {
-    it('should toggle treeVisible', () => {
-      expect.assertions(3);
-      const state: State = {
-        ...testState.analysis,
-        treeVisible: { bills: false, general: true },
-      };
-
-      const withBills = reducer(state, treeItemDisplayToggled(Page.bills));
-      expect(withBills.treeVisible).toStrictEqual({ bills: true, general: true });
-
-      const withFood = reducer(state, treeItemDisplayToggled(Page.food));
-      expect(withFood.treeVisible).toStrictEqual({ bills: false, general: true, food: false });
-
-      const withGeneral = reducer(state, treeItemDisplayToggled(Page.general));
-      expect(withGeneral.treeVisible).toStrictEqual({ bills: false, general: false });
     });
   });
 });

@@ -4,11 +4,10 @@ import {
   ActionAnalysisReceived,
   ActionAnalysisBlockRequested,
   ActionAnalysisBlockReceived,
-  ActionAnalysisTreeDisplayToggled,
   ActionAnalysis,
 } from '~client/actions/analysis';
 import { Period, Grouping } from '~client/constants/analysis';
-import { Page, AnalysisCost, MainBlockName, AnalysisTreeVisible } from '~client/types';
+import { Page, AnalysisCost, MainBlockName } from '~client/types';
 
 export type State = {
   loading: boolean;
@@ -21,7 +20,6 @@ export type State = {
   costDeep: AnalysisCost | null;
   saved: number;
   description: string | null;
-  treeVisible: AnalysisTreeVisible;
 };
 
 export const initialState: State = {
@@ -35,7 +33,6 @@ export const initialState: State = {
   costDeep: null,
   saved: 0,
   description: null,
-  treeVisible: { bills: false },
 };
 
 const onRequest = (
@@ -89,16 +86,6 @@ const onBlockReceive = (_: State, { res }: ActionAnalysisBlockReceived): Partial
   loadingDeep: false,
 });
 
-const onTreeDisplayToggle = (
-  state: State,
-  { group }: ActionAnalysisTreeDisplayToggled,
-): Partial<State> => ({
-  treeVisible: {
-    ...state.treeVisible,
-    [group]: state.treeVisible[group as MainBlockName] === false,
-  },
-});
-
 const partialReducer = (
   state: State,
   action?: ActionAnalysis | null,
@@ -112,8 +99,6 @@ const partialReducer = (
       return onBlockRequest(state, action);
     case ActionTypeAnalysis.BlockReceived:
       return onBlockReceive(state, action);
-    case ActionTypeAnalysis.TreeDisplayToggled:
-      return onTreeDisplayToggle(state, action);
     default:
       return undefined;
   }

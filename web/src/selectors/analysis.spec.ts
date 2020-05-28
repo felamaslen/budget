@@ -143,7 +143,7 @@ describe('Analysis selectors', () => {
   describe('getBlocks', () => {
     it('should get a block-packed map of the state', () => {
       expect.assertions(1);
-      const result = getBlocks(testState);
+      const result = getBlocks()(testState);
 
       expect(result).toMatchInlineSnapshot(`
         Object {
@@ -297,14 +297,8 @@ describe('Analysis selectors', () => {
     it('should exclude blocks which are not in the visible tree', () => {
       expect.assertions(1);
       const result = getBlocks({
-        ...testState,
-        analysis: {
-          ...testState.analysis,
-          treeVisible: {
-            [Page.food]: false,
-          },
-        },
-      });
+        [Page.food]: false,
+      })(testState);
 
       expect(result).toMatchInlineSnapshot(`
         Object {

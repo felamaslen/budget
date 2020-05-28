@@ -12,7 +12,6 @@ export enum ActionTypeAnalysis {
   Received = '@@analysis/RECEIVED',
   BlockRequested = '@@analysis/BLOCK_REQUESTED',
   BlockReceived = '@@analysis/BLOCK_RECEIVED',
-  TreeDisplayToggled = '@@analysis/TreeDisplayToggled',
 }
 
 export type ActionAnalysisRequested = {
@@ -57,20 +56,9 @@ export const blockReceived = (
   err?: AxiosError,
 ): ActionAnalysisBlockReceived => ({ type: ActionTypeAnalysis.BlockReceived, res, err });
 
-export type ActionAnalysisTreeDisplayToggled = {
-  type: ActionTypeAnalysis.TreeDisplayToggled;
-  group: MainBlockName;
-};
-
-export const treeItemDisplayToggled = (group: MainBlockName): ActionAnalysisTreeDisplayToggled => ({
-  type: ActionTypeAnalysis.TreeDisplayToggled,
-  group,
-});
-
 export type ActionAnalysis =
   | ActionAnalysisRequested
   | ActionAnalysisReceived
   | ActionAnalysisBlockRequested
   | ActionAnalysisBlockReceived
-  | ActionAnalysisReceived
-  | ActionAnalysisTreeDisplayToggled;
+  | ActionAnalysisReceived;

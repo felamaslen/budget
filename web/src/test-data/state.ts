@@ -201,7 +201,6 @@ export const testState: State = {
     loadingDeep: false,
     page: 0,
     timeline: [[1, 2, 3]],
-    treeVisible: {},
     cost: [
       [
         Page.food,

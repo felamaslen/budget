@@ -1,27 +1,19 @@
-import moize from 'moize';
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
-import { debounce } from 'throttle-debounce';
 
 import ListTree, { Props as PropsListTree } from './list-tree';
 import * as Styled from './styles';
 import Timeline from './timeline';
 import Upper from './upper';
 
-import {
-  requested,
-  blockRequested,
-  treeItemDisplayToggled,
-  blockReceived,
-} from '~client/actions/analysis';
+import { requested, blockRequested, blockReceived } from '~client/actions/analysis';
 import { BlockPacker } from '~client/components/BlockPacker';
+import { usePersistentState } from '~client/hooks/persist';
 import { formatCurrency, capitalise } from '~client/modules/format';
 import {
   getAnalysisPeriod,
   getGrouping,
   getPage,
-  getTreeVisible,
   getCostAnalysis,
   getDeepCost,
   getBlocks,
@@ -33,67 +25,31 @@ import { Page, MainBlockName, AnalysisTreeVisible, FlexBlocks, BlockItem } from 
 
 const keyTreeVisible = 'analysis_treeVisible';
 
-const treeEnabled = (value: boolean | undefined): boolean | undefined =>
-  typeof value === 'undefined' ? undefined : !!value;
-
-const makeCachedTreeVisible = (treeVisible: AnalysisTreeVisible): AnalysisTreeVisible => ({
-  [Page.bills]: treeEnabled(treeVisible[Page.bills]),
-  [Page.food]: treeEnabled(treeVisible[Page.food]),
-  [Page.general]: treeEnabled(treeVisible[Page.general]),
-  [Page.holiday]: treeEnabled(treeVisible[Page.holiday]),
-  [Page.social]: treeEnabled(treeVisible[Page.social]),
-  saved: treeEnabled(treeVisible.saved),
-});
-
-const getCachedTreeVisible = moize((): AnalysisTreeVisible | null => {
-  try {
-    const item = JSON.parse(localStorage.getItem(keyTreeVisible) ?? '{}');
-    if (!(item && typeof item === 'object')) {
-      return null;
-    }
-    return makeCachedTreeVisible(item as AnalysisTreeVisible);
-  } catch {
-    return null;
-  }
-});
-
-const setCachedTreeVisible = debounce(100, (treeVisible: AnalysisTreeVisible): void => {
-  localStorage.setItem(keyTreeVisible, JSON.stringify(makeCachedTreeVisible(treeVisible)));
-});
-
-function useTreeToggle(
-  dispatch: Dispatch<{ type: string }>,
-): [AnalysisTreeVisible, PropsListTree['toggleTreeItem']] {
-  const treeVisible = useSelector(getTreeVisible);
-  const toggleTreeItem = useCallback(
-    (name: MainBlockName): void => {
-      dispatch(treeItemDisplayToggled(name));
-    },
-    [dispatch],
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const validateTreeVisible = (value: any | AnalysisTreeVisible): value is AnalysisTreeVisible =>
+  value !== null &&
+  typeof value === 'object' &&
+  Object.entries(value).every(
+    ([key, keyValue]) => typeof key === 'string' && typeof keyValue === 'boolean',
   );
 
-  const cachedTreeVisible = useMemo<AnalysisTreeVisible | null>(getCachedTreeVisible, []);
-  const cacheLoaded = useRef<boolean>(false);
+const defaultTreeVisible: AnalysisTreeVisible = { [Page.bills]: false };
 
-  useEffect(() => {
-    if (cacheLoaded.current) {
-      setCachedTreeVisible(treeVisible);
-    } else {
-      cacheLoaded.current = true;
+function useTreeToggle(): [AnalysisTreeVisible, PropsListTree['toggleTreeItem']] {
+  const [treeVisible, setTreeVisible] = usePersistentState<AnalysisTreeVisible>(
+    defaultTreeVisible,
+    keyTreeVisible,
+    validateTreeVisible,
+  );
 
-      if (cachedTreeVisible) {
-        (Object.keys(cachedTreeVisible) as (keyof AnalysisTreeVisible)[])
-          .filter(
-            (key) =>
-              typeof cachedTreeVisible[key] !== 'undefined' &&
-              cachedTreeVisible[key] !== (treeVisible[key] !== false),
-          )
-          .forEach((key) => {
-            toggleTreeItem(key);
-          });
-      }
-    }
-  }, [cachedTreeVisible, treeVisible, toggleTreeItem]);
+  const toggleTreeItem = useCallback(
+    (name: MainBlockName) =>
+      setTreeVisible((last) => ({
+        ...last,
+        [name]: last[name] === false,
+      })),
+    [setTreeVisible],
+  );
 
   return [treeVisible, toggleTreeItem];
 }
@@ -102,7 +58,9 @@ const PageAnalysis: React.FC = () => {
   const timeline = useSelector(getTimeline);
   const cost = useSelector(getCostAnalysis);
   const costDeep = useSelector(getDeepCost);
-  const blocks: FlexBlocks<BlockItem> = useSelector(getBlocks);
+  const [treeVisible, toggleTreeItem] = useTreeToggle();
+  const getFilteredBlocks = useMemo(() => getBlocks(treeVisible), [treeVisible]);
+  const blocks: FlexBlocks<BlockItem> = useSelector(getFilteredBlocks);
   const blocksDeep: FlexBlocks<BlockItem> | undefined = useSelector(getDeepBlocks);
   const period = useSelector(getAnalysisPeriod);
   const grouping = useSelector(getGrouping);
@@ -126,8 +84,6 @@ const PageAnalysis: React.FC = () => {
     },
     [dispatch],
   );
-
-  const [treeVisible, toggleTreeItem] = useTreeToggle(dispatch);
 
   const [activeBlock, setActiveBlock] = useState<[MainBlockName | null, string | null]>([
     null,
