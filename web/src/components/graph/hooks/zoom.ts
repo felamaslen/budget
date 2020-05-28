@@ -1,9 +1,9 @@
 import React, { useReducer, useMemo, useEffect } from 'react';
 import { throttle } from 'throttle-debounce';
 
-import { NULL } from '~client/modules/data';
+import { genPixelCompute, pointVisible } from '../helpers';
 import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
-import { genPixelCompute, pointVisible } from '~client/components/graph/helpers';
+import { NULL } from '~client/modules/data';
 import { Dimensions, Range, RangeX, Calc, Line } from '~client/types/graph';
 
 const threshold = 4;

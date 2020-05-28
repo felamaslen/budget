@@ -11,4 +11,4 @@ export const loginErrorOccurred = (err: Error): Action => ({
 
 export const loggedIn = (res: LoginResponse): Action => ({ type: actions.LOGGED_IN, res });
 
-export const loggedOut = (): Action => ({ type: actions.LOGGED_OUT });
+export const loggedOut = (): { type: string } => ({ type: actions.LOGGED_OUT });

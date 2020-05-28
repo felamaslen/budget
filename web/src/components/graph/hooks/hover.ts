@@ -1,11 +1,10 @@
 import { useState, useCallback, useMemo } from 'react';
 import { throttle } from 'throttle-debounce';
 
-import { rgba } from '~client/modules/color';
+import { getPixY } from '../helpers';
 import { NULL } from '~client/modules/data';
-import { COLOR_GRAPH_TITLE } from '~client/constants/colors';
+import { colors } from '~client/styled/variables';
 import { Point, Line, Calc, LineColor, isConstantColor } from '~client/types/graph';
-import { getPixY } from '~client/components/graph/helpers';
 
 function getHlColor(color: LineColor, point: Point, index: number): string {
   if (isConstantColor(color)) {
@@ -15,7 +14,7 @@ function getHlColor(color: LineColor, point: Point, index: number): string {
     return color(point, index);
   }
 
-  return rgba(COLOR_GRAPH_TITLE);
+  return colors.black;
 }
 
 type Position = {
@@ -73,12 +72,13 @@ function getClosest(lines: Line[], position: Position, calc: Calc): Closest | nu
   }, null);
 }
 
-export type Props = {
+type Props = {
   lines: Line[];
   isMobile?: boolean;
   calc: Calc;
   hoverEffect?: HoverEffect;
 };
+export { Props as HoverProps };
 
 export type HookResult = [
   HLPoint | undefined,

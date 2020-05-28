@@ -2,8 +2,7 @@ import getUnixTime from 'date-fns/getUnixTime';
 import React from 'react';
 
 import * as Styled from './styles';
-import { LineGraph } from '~client/components/graph/line-graph';
-import { TimeAxes, Props as TimeAxesProps } from '~client/components/graph/time-axes';
+import { LineGraph, TimeAxes, TimeAxesProps } from '~client/components/graph';
 import { NetWorthTableRow as TableRow, Range, DrawProps, Line } from '~client/types';
 
 export type GraphProps = {

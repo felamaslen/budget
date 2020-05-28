@@ -1,14 +1,13 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { genPixelCompute, defaultPadding } from '~client/components/graph/helpers';
-import { LineGraphDumb, Props as GraphProps } from '~client/components/graph/line-graph-dumb';
-import { Dimensions, Calc, RangeY } from '~client/types/graph';
+
+import { genPixelCompute, defaultPadding } from './helpers';
+import { useHover, useZoom, ZoomEffect } from './hooks';
+import { LineGraphDumb, LineGraphDumbProps } from './line-graph-dumb';
 import { getTickSize, normaliseTickSize } from '~client/modules/format';
+import { Dimensions, Calc, RangeY } from '~client/types/graph';
 
-import { useZoom, ZoomEffect } from './hooks/zoom';
-import { useHover } from './hooks/hover';
-
-export type Props = Pick<
-  GraphProps,
+type Props = Pick<
+  LineGraphDumbProps,
   | 'name'
   | 'before'
   | 'beforeLines'
@@ -23,6 +22,7 @@ export type Props = Pick<
     isMobile?: boolean;
     zoomEffect?: ZoomEffect;
   };
+export { Props as LineGraphProps };
 
 function normaliseSecondAxis(minY: number, maxY: number, minY2: number, maxY2: number): RangeY {
   // adjusts Y2 range so that each tick on each axis is a round number

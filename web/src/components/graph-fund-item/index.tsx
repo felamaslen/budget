@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 
 import { Axes } from './axes';
 import * as Styled from './styles';
-import { LineGraph, Props as GraphProps } from '~client/components/graph/line-graph';
+import { LineGraph, LineGraphProps } from '~client/components/graph';
 import {
   GRAPH_FUND_ITEM_WIDTH,
   GRAPH_FUND_ITEM_WIDTH_LARGE,
@@ -16,7 +16,7 @@ import { Size, Range, DrawProps, Data, Line } from '~client/types';
 type Props = {
   sold: boolean;
   values: Data;
-} & Pick<GraphProps, 'name'>;
+} & Pick<LineGraphProps, 'name'>;
 
 function getDimensions(popout: boolean, sold: boolean): Size {
   if (popout) {

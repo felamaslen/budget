@@ -16,7 +16,7 @@ export type CostProcessed = Cost & {
   netWorthCombined: number[];
 };
 
-export type State = {
+export type OverviewState = {
   startDate: Date;
   endDate: Date;
   cost: Cost;

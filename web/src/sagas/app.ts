@@ -1,44 +1,17 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { eventChannel, Channel } from 'redux-saga';
-import { select, fork, take, takeLatest, all, call, put } from 'redux-saga/effects';
-import { debounce } from 'throttle-debounce';
-import axios from 'axios';
 import querystring from 'querystring';
+import axios from 'axios';
+import { select, takeLatest, all, call, put } from 'redux-saga/effects';
 
-import { getFundHistoryQuery } from '~client/sagas/funds';
+import { getFundHistoryQuery } from './funds';
 
-import { windowResized } from '~client/actions/app';
 import { dataRead } from '~client/actions/api';
 import { errorOpened } from '~client/actions/error';
-
-import { getApiKey } from '~client/selectors/api';
 
 import { LOGGED_IN } from '~client/constants/actions/login';
 import { API_PREFIX } from '~client/constants/data';
 
-export type ResizeEvent = {
-  type: string;
-  size: number;
-};
-
-export const windowResizeEventChannel = (): Channel<ResizeEvent> =>
-  eventChannel<ResizeEvent>(emit => {
-    const resizeHandler = debounce(50, () => emit(windowResized(window.innerWidth)));
-
-    window.addEventListener('resize', resizeHandler);
-
-    return (): void => window.removeEventListener('resize', resizeHandler);
-  }) as Channel<ResizeEvent>;
-
-export function* watchEventEmitter(channelCreator: () => Channel<ResizeEvent>) {
-  const channel: Channel<ResizeEvent> = yield call(channelCreator);
-
-  while (true) {
-    const action = yield take<ResizeEvent>(channel);
-
-    yield put(action);
-  }
-}
+import { getApiKey } from '~client/selectors/api';
 
 const getOptions = (apiKey: string): { headers: { Authorization: string } } => ({
   headers: {
@@ -88,7 +61,5 @@ export function* fetchData() {
 }
 
 export default function* appSaga() {
-  yield fork(watchEventEmitter, windowResizeEventChannel);
-
   yield takeLatest(LOGGED_IN, fetchData);
 }

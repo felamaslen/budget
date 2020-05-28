@@ -4,7 +4,6 @@ import rootSaga from '~client/sagas';
 import analysis from '~client/sagas/analysis';
 import app from '~client/sagas/app';
 import crud from '~client/sagas/crud';
-import error from '~client/sagas/error';
 import funds from '~client/sagas/funds';
 import login from '~client/sagas/login';
 import now from '~client/sagas/now';
@@ -17,8 +16,6 @@ describe('Root saga', () => {
       .fork(now)
       .next()
       .fork(app)
-      .next()
-      .fork(error)
       .next()
       .fork(login)
       .next()

@@ -82,6 +82,8 @@ module.exports = {
           '**/*.spec.js',
           'api/src/test-after-env.ts',
           'web/src/test-after-env.ts',
+          'web/src/global.d.ts',
+          'web/src/store/configureStore.dev.ts',
           'api/src/global.d.ts',
           'webpack.config.js',
         ],

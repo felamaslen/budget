@@ -2,43 +2,19 @@ import axios from 'axios';
 import { testSaga } from 'redux-saga-test-plan';
 import { call } from 'redux-saga/effects';
 
-import appSaga, {
-  watchEventEmitter,
-  windowResizeEventChannel,
-  fetchLegacy,
-  fetchNetWorth,
-  fetchData,
-} from '~client/sagas/app';
-import { getFundHistoryQuery } from '~client/sagas/funds';
-import { windowResized } from '~client/actions/app';
+import appSaga, { fetchLegacy, fetchNetWorth, fetchData } from './app';
+import { getFundHistoryQuery } from './funds';
 import { dataRead } from '~client/actions/api';
 import { errorOpened } from '~client/actions/error';
-import { getApiKey } from '~client/selectors/api';
 import { LOGGED_IN } from '~client/constants/actions/login';
 import { API_PREFIX } from '~client/constants/data';
+import { getApiKey } from '~client/selectors/api';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'my-short-id',
 }));
 
 describe('App saga', () => {
-  it('watchEventEmitter dispatching an action emitted by the channel', () => {
-    expect.assertions(0);
-    const channel = windowResizeEventChannel();
-
-    testSaga(watchEventEmitter, windowResizeEventChannel)
-      .next()
-      .call(windowResizeEventChannel)
-      .next(channel)
-      .take(channel)
-      .next(windowResized(100))
-      .put(windowResized(100))
-      .next()
-      .take(channel)
-      .next(windowResized(105))
-      .put(windowResized(105));
-  });
-
   it('fetchLegacy calls GET /data/all with fund query options', () => {
     expect.assertions(0);
     const res = {
@@ -140,12 +116,6 @@ describe('App saga', () => {
 
   it('appSaga forks other sagas', () => {
     expect.assertions(0);
-    testSaga(appSaga)
-      .next()
-      .fork(watchEventEmitter, windowResizeEventChannel)
-      .next()
-      .takeLatest(LOGGED_IN, fetchData)
-      .next()
-      .isDone();
+    testSaga(appSaga).next().takeLatest(LOGGED_IN, fetchData).next().isDone();
   });
 });

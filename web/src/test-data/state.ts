@@ -6,9 +6,6 @@ import { Page } from '~client/types/app';
 
 export const testState: State = {
   now: new Date('2018-03-23T11:45:20Z'),
-  app: {
-    windowWidth: 1000,
-  },
   login: {
     loading: false,
     initialised: true,

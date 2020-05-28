@@ -13,11 +13,9 @@ import { ListActionType } from '~client/actions/list';
 import { DATA_READ } from '~client/constants/actions/api';
 import { LOGGED_OUT } from '~client/constants/actions/login';
 import { getMonthDates } from '~client/selectors/overview/common';
-import { PageListCalc, Page } from '~client/types/app';
-import { ListCalcItem } from '~client/types/list';
-import { State } from '~client/types/overview';
+import { Page, PageListCalc, ListCalcItem, OverviewState as State } from '~client/types';
 
-export { State } from '~client/types/overview';
+export { OverviewState as State } from '~client/types/overview';
 
 export const initialState: State = {
   startDate: endOfMonth(addYears(new Date(), -1)),

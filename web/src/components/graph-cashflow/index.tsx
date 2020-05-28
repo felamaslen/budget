@@ -7,15 +7,14 @@ import isSameMonth from 'date-fns/isSameMonth';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
+import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
 import { NowLine } from '~client/components/graph-cashflow/now-line';
-import { LineGraph, Props as GraphProps } from '~client/components/graph/line-graph';
-import { TimeAxes } from '~client/components/graph/time-axes';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatCurrency } from '~client/modules/format';
-import { getCurrentDate, getGraphWidth } from '~client/selectors';
+import { getCurrentDate } from '~client/selectors';
 import { PickUnion, Range, DrawProps, Line } from '~client/types';
 
-export type Props = PickUnion<GraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
+export type Props = PickUnion<LineGraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
   isMobile?: boolean;
   graphHeight?: number;
 };
@@ -89,7 +88,7 @@ export const GraphCashFlow: React.FC<Props> = ({
   after,
 }) => {
   const now: Date = useSelector(getCurrentDate);
-  const graphWidth: number = useSelector(getGraphWidth);
+  const graphWidth = useGraphWidth();
 
   const ranges = useMemo<Range>(() => getRanges(lines), [lines]);
 

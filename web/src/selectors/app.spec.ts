@@ -1,4 +1,4 @@
-import { getLoggedIn, getWindowWidth } from './app';
+import { getLoggedIn } from './app';
 import { testState } from '~client/test-data/state';
 
 describe('App selectors', () => {
@@ -50,20 +50,6 @@ describe('App selectors', () => {
           },
         }),
       ).toBe(false);
-    });
-  });
-
-  describe('getWindowWidth', () => {
-    it('should return the window width', () => {
-      expect.assertions(1);
-      expect(
-        getWindowWidth({
-          ...testState,
-          app: {
-            windowWidth: 301,
-          },
-        }),
-      ).toBe(301);
     });
   });
 });

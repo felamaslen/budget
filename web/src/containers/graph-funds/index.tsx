@@ -2,13 +2,18 @@ import fromUnixTime from 'date-fns/fromUnixTime';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
+import { AfterCanvas } from './after-canvas';
 import * as Styled from './styles';
-
 import { fundsRequested } from '~client/actions/funds';
-
-import { ZoomedDimensions, ZoomEffect } from '~client/components/graph/hooks/zoom';
-import { LineGraph, Props as LineGraphProps } from '~client/components/graph/line-graph';
-import { TimeAxes, LabelY } from '~client/components/graph/time-axes';
+import {
+  LineGraph,
+  LineGraphProps,
+  ZoomedDimensions,
+  ZoomEffect,
+  TimeAxes,
+  LabelY,
+  useGraphWidth,
+} from '~client/components/graph';
 import {
   GRAPH_FUNDS_WIDTH,
   GRAPH_FUNDS_HEIGHT,
@@ -17,26 +22,18 @@ import {
   Period,
   GRAPH_FUNDS_NUM_TICKS,
 } from '~client/constants/graph';
-
-import { AfterCanvas } from '~client/containers/graph-funds/after-canvas';
-
 import { rgba } from '~client/modules/color';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
-
-import { getWindowWidth } from '~client/selectors/app';
 import {
   getPeriod,
   getStartTime,
   getCacheTimes,
   getFundItems,
   getFundLines,
-} from '~client/selectors/funds';
-
+} from '~client/selectors';
 import { graphFundsHeightMobile } from '~client/styled/variables';
-
-import { Padding, Line, DrawProps } from '~client/types';
-import { FundLine } from '~client/types/funds';
+import { Padding, Line, DrawProps, FundLine } from '~client/types';
 
 const PADDING_DESKTOP: Padding = [36, 0, 0, 0];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
@@ -138,8 +135,7 @@ const modeListAll: Mode[] = [Mode.ROI, Mode.Value, Mode.Price];
 type FilterFunds = (filteredItems: { id: string }) => boolean;
 
 const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
-  const windowWidth = useSelector(getWindowWidth);
-  const width = Math.min(windowWidth, GRAPH_FUNDS_WIDTH);
+  const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
   const fundItems = useSelector(getFundItems);
   const fundLines: {

@@ -1,7 +1,7 @@
 import { compose } from '@typed/compose';
 import { rgb, rgba, lighten, desaturate } from 'polished';
 
-import { ERROR_LEVEL_DEBUG, ERROR_LEVEL_WARN, ERROR_LEVEL_ERROR } from '~client/constants/error';
+import { ErrorLevel } from '~client/constants/error';
 
 export const breakpoints = {
   mobileSmall: 350,
@@ -85,10 +85,10 @@ export const colors = {
   'bg-down-hl': rgb(47, 15, 15),
   'bg-down-rev': rgb(44, 51, 45),
   messages: {
-    [ERROR_LEVEL_DEBUG]: rgba(0, 156, 255, 0.5),
-    [ERROR_LEVEL_WARN]: rgba(255, 147, 0, 0.5),
-    [ERROR_LEVEL_ERROR]: rgba(255, 0, 0, 0.5),
-    fatal: rgba(128, 0, 0, 0.7),
+    [ErrorLevel.Debug]: rgba(0, 156, 255, 0.5),
+    [ErrorLevel.Warn]: rgba(255, 147, 0, 0.5),
+    [ErrorLevel.Err]: rgba(255, 0, 0, 0.5),
+    [ErrorLevel.Fatal]: rgba(128, 0, 0, 0.7),
   },
   button: {
     bg1: rgb(116, 173, 90),

@@ -1,10 +1,10 @@
 import { render, RenderResult } from '@testing-library/react';
 import React from 'react';
-import { LineGraphDumb, Props } from './line-graph-dumb';
+import { LineGraphDumb, LineGraphDumbProps } from './line-graph-dumb';
 
 describe('<LineGraphDumb />', () => {
   const getContainer = (customProps = {}): RenderResult => {
-    const props: Props = {
+    const props: LineGraphDumbProps = {
       name: 'some-dumb-graph',
       dimensions: {
         width: 200,
@@ -108,7 +108,7 @@ describe('<LineGraphDumb />', () => {
 
     expect(svg.childNodes).toHaveLength(5);
 
-    (svg.childNodes as NodeListOf<SVGElement>).forEach(line => {
+    (svg.childNodes as NodeListOf<SVGElement>).forEach((line) => {
       expect(line.tagName).toBe('g');
       expect(line.childNodes).toHaveLength(1);
 

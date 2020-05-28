@@ -1,22 +1,18 @@
 import React from 'react';
 
 import { getTimeScale } from '~client/components/graph/helpers';
-import {
-  COLOR_LIGHT,
-  COLOR_DARK,
-  COLOR_LIGHT_GREY,
-  COLOR_GRAPH_TITLE,
-} from '~client/constants/colors';
+import { COLOR_LIGHT, COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
 import { getTickSize, formatCurrency } from '~client/modules/format';
+import { colors } from '~client/styled/variables';
 import { DrawProps, Tick } from '~client/types';
 
 const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 
 export type LabelY = (value: number) => string;
 
-export type Props = {
+type Props = {
   dualAxis?: boolean;
   offset?: number;
   tickSizeY?: number;
@@ -25,6 +21,7 @@ export type Props = {
   labelY?: LabelY;
   labelY2?: LabelY;
 } & DrawProps;
+export { Props as TimeAxesProps };
 
 type TicksY = {
   pos: number;
@@ -68,7 +65,6 @@ function getTicksY({
   });
 }
 
-const axisColor = rgba(COLOR_LIGHT_GREY);
 const lightColor = rgba(COLOR_LIGHT);
 
 const defaultLabelY = (value: number): string =>
@@ -82,7 +78,7 @@ const defaultLabelY = (value: number): string =>
 const timeTickLength = 10;
 const timeTickSize = (major: 0 | 1 | 2): number => timeTickLength * 0.5 * (major + 1);
 
-const timeLineColors: string[] = [lightColor, rgba(COLOR_LIGHT_GREY)];
+const timeLineColors: string[] = [lightColor, colors['medium-very-light']];
 const timeLineColor = (major: 0 | 1 | 2): string => timeLineColors[major > 1 ? 1 : 0];
 
 const timeTickColors: string[] = [rgba(COLOR_GRAPH_TITLE), rgba(COLOR_DARK)];
@@ -104,7 +100,15 @@ const TicksYMajor: React.FC<YAxisTicksProps> = ({ x0, xMax, ticksY }) => (
     {ticksY
       .filter(({ major }) => major)
       .map(({ pos }) => (
-        <line key={pos} x1={x0} y1={pos} x2={xMax} y2={pos} stroke={axisColor} strokeWidth={1} />
+        <line
+          key={pos}
+          x1={x0}
+          y1={pos}
+          x2={xMax}
+          y2={pos}
+          stroke={colors['medium-very-light']}
+          strokeWidth={1}
+        />
       ))}
   </g>
 );

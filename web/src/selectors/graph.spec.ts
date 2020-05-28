@@ -1,8 +1,7 @@
 import endOfDay from 'date-fns/endOfDay';
 import getUnixTime from 'date-fns/getUnixTime';
 
-import { getTargets, getGraphWidth } from './graph';
-import { GRAPH_WIDTH } from '~client/constants/graph';
+import { getTargets } from './graph';
 import { testState as state } from '~client/test-data/state';
 
 describe('Graph selectors', () => {
@@ -105,38 +104,6 @@ describe('Graph selectors', () => {
           value: 70376 + 2 / 11,
         },
       ]);
-    });
-  });
-
-  describe('getGraphWidth', () => {
-    describe(`if the window width is greater than ${GRAPH_WIDTH}`, () => {
-      it(`should return ${GRAPH_WIDTH}`, () => {
-        expect.assertions(1);
-        expect(
-          getGraphWidth({
-            ...state,
-            app: {
-              ...state.app,
-              windowWidth: GRAPH_WIDTH + 1,
-            },
-          }),
-        ).toBe(GRAPH_WIDTH);
-      });
-    });
-
-    describe(`if the window width is less than ${GRAPH_WIDTH}`, () => {
-      it('should return the window width', () => {
-        expect.assertions(1);
-        expect(
-          getGraphWidth({
-            ...state,
-            app: {
-              ...state.app,
-              windowWidth: GRAPH_WIDTH - 1,
-            },
-          }),
-        ).toBe(GRAPH_WIDTH - 1);
-      });
     });
   });
 });

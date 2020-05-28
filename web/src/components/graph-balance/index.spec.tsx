@@ -59,7 +59,7 @@ describe('<GraphBalance />', () => {
           <g>
             <g>
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -67,7 +67,7 @@ describe('<GraphBalance />', () => {
                 y2="281.5"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -75,7 +75,7 @@ describe('<GraphBalance />', () => {
                 y2="189.5"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -231,7 +231,7 @@ describe('<GraphBalance />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="0.5"
                 x1="0.5"
                 x2="0.5"
@@ -271,7 +271,7 @@ describe('<GraphBalance />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="0.5"
                 x1="77.5"
                 x2="77.5"
@@ -311,7 +311,7 @@ describe('<GraphBalance />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="0.5"
                 x1="162.5"
                 x2="162.5"
@@ -359,7 +359,7 @@ describe('<GraphBalance />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="0.5"
                 x1="245.5"
                 x2="245.5"
@@ -399,7 +399,7 @@ describe('<GraphBalance />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="0.5"
                 x1="331.5"
                 x2="331.5"
@@ -439,7 +439,7 @@ describe('<GraphBalance />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="0.5"
                 x1="414.5"
                 x2="414.5"
@@ -487,7 +487,7 @@ describe('<GraphBalance />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(153,153,153)"
+                stroke="#999"
                 stroke-width="0.5"
                 x1="500.5"
                 x2="500.5"

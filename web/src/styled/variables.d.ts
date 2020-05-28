@@ -1,5 +1,5 @@
-import { Page } from '~client/types/app';
-import { Aggregate as NetWorthAggregate } from '~client/types/net-worth';
+import { ErrorLevel } from '~client/constants/error';
+import { Page, Aggregate } from '~client/types';
 
 export const breakpoints: {
   mobileSmall: number;
@@ -35,7 +35,7 @@ type Colors = ColorsBase & {
   black: string;
   transparent: string;
   button: ColorsBase;
-  messages: ColorsBase;
+  messages: Record<ErrorLevel, string>;
   [Page.overview]: PageColors & {
     income: string;
     spending: string;
@@ -55,7 +55,7 @@ type Colors = ColorsBase & {
   [Page.social]: PageColors;
   netWorth: PageColors & {
     aggregate: {
-      [key in NetWorthAggregate]: string;
+      [key in Aggregate]: string;
     };
   };
   blockIndex: string[];
