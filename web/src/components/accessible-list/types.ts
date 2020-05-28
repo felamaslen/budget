@@ -31,7 +31,7 @@ export type FieldsMobile<I extends Item, MK extends keyof I = FieldKey<I>, E ext
   [K in MK]?: ComponentType<{ field: MK; value: I[K] } & Partial<E>>;
 };
 
-export type HeaderProps<I extends Item, P, MK extends keyof I> = {
+export type HeaderProps<I extends Item, P, MK extends keyof I, H extends {} = {}> = H & {
   page: P;
   isMobile: boolean;
   fields: FieldKey<I>[];
@@ -62,12 +62,14 @@ export type Props<
   I extends Item,
   P extends string,
   MK extends keyof I = never,
-  E extends {} = {}
+  E extends {} = {},
+  H extends {} = {}
 > = CommonProps<I, P, E> & {
   color?: string;
   fieldsMobile?: FieldsMobile<I, MK, E>;
   deltaSeed?: () => Delta<I>;
-  Header?: React.FC<HeaderProps<I, P, MK>> | StyledComponent<'div', HeaderProps<I, P, MK>>;
+  Header?: React.FC<HeaderProps<I, P, MK, H>> | StyledComponent<'div', HeaderProps<I, P, MK, H>>;
+  headerProps?: H;
   sortItems?: (items: I[]) => I[];
   sortItemsPost?: (items: I[], extraMap: { [id: string]: Partial<E> }) => I[];
   customSelector?: CustomSelector<I, E>;

@@ -9,5 +9,3 @@ export const COLOR_TRANSLUCENT_LIGHT: Color = [255, 255, 255, 0.5];
 export const COLOR_TRANSLUCENT_DARK: Color = [255, 255, 255, 0.8];
 
 export const COLOR_SPENDING: Color = [0, 51, 153];
-
-export const COLOR_GRAPH_FUND_LINE: Color = COLOR_GRAPH_TITLE;

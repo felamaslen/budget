@@ -5,7 +5,7 @@ import { FundHeader } from './header';
 import { FundNameMobile, FundDetailMobile } from './mobile';
 import { FundRow } from './row';
 import * as Styled from './styles';
-import { FundProps } from './types';
+import { FundProps, Sort, defaultSort, HeadProps, isSort } from './types';
 import { AccessibleList, Fields } from '~client/components/accessible-list';
 import {
   FormFieldTextInline,
@@ -14,8 +14,9 @@ import {
   FormFieldText,
 } from '~client/components/FormField';
 import { makeField } from '~client/components/ModalDialog';
-import GraphFunds from '~client/containers/graph-funds';
+import { GraphFunds } from '~client/containers/graph-funds';
 import { useIsMobile } from '~client/hooks/media';
+import { usePersistentState } from '~client/hooks/persist';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
 import { Cache } from '~client/reducers/funds';
@@ -79,19 +80,24 @@ const itemProcessor = (fund: Fund): Pick<FundProps, 'name' | 'isSold'> => ({
   isSold: isSold(fund.transactions),
 });
 
-const sortItems = (funds: Fund[], props: { [id: string]: Partial<FundProps> }): Fund[] =>
+type SortItems = (funds: Fund[], props: { [id: string]: Partial<FundProps> }) => Fund[];
+
+const makeSortItems = ({ criteria, direction }: Sort): SortItems => (funds, props): Fund[] =>
   [...funds].sort(
-    ({ id: idA }, { id: idB }) => (props[idB]?.gain?.value ?? 0) - (props[idA]?.gain?.value ?? 0),
+    ({ id: idA }, { id: idB }) =>
+      direction * ((props[idB]?.gain?.[criteria] ?? 0) - (props[idA]?.gain?.[criteria] ?? 0)),
   );
 
 export const Funds: React.FC = () => {
   const isMobile = useIsMobile();
   const cache = useSelector(getCurrentFundsCache);
   const composedSelector = useMemo(() => makeComposedSelector(cache), [cache]);
+  const [sort, setSort] = usePersistentState<Sort>(defaultSort, 'funds_sort', isSort);
+  const sortItems = useMemo(() => makeSortItems(sort), [sort]);
 
   return (
     <Styled.PageFunds>
-      <AccessibleList<Fund, Page.funds, 'item' | 'transactions', FundProps>
+      <AccessibleList<Fund, Page.funds, 'item' | 'transactions', FundProps, HeadProps>
         page={Page.funds}
         color={pageColor(colors.funds.main)}
         fields={fields}
@@ -103,6 +109,7 @@ export const Funds: React.FC = () => {
         sortItemsPost={sortItems}
         Row={FundRow}
         Header={FundHeader}
+        headerProps={{ sort, setSort }}
       />
       {!isMobile && <GraphFunds />}
     </Styled.PageFunds>

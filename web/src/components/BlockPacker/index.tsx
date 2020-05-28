@@ -6,7 +6,7 @@ import { Preview } from './types';
 import { useCTA } from '~client/hooks/cta';
 import { VOID } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { BlockItem, FlexBlocks } from '~client/types';
+import { BlockItem, FlexBlocks, PickUnion } from '~client/types';
 
 type BlockName = string | null;
 
@@ -43,16 +43,13 @@ function getBlockColor(bgColor?: string | number): string {
 }
 
 const InfiniteChild: React.FC<
-  CommonProps & {
-    name: string;
-    flex: number;
-    color?: string;
-    childCount: number;
-    active?: boolean;
-    activeSub?: string | null;
-    subTree?: FlexBlocks<BlockItem>;
-    hasBreakdown?: boolean;
-  }
+  CommonProps &
+    PickUnion<BlockItem, 'name' | 'color' | 'childCount' | 'text' | 'hasBreakdown'> & {
+      flex: number;
+      active?: boolean;
+      activeSub?: string | null;
+      subTree?: FlexBlocks<BlockItem>;
+    }
 > = ({
   name,
   flex,
@@ -61,6 +58,7 @@ const InfiniteChild: React.FC<
   active,
   activeSub,
   subTree,
+  text,
   hasBreakdown,
   isSubTree,
   isDeep,
@@ -126,6 +124,7 @@ const InfiniteChild: React.FC<
       {...diveProps}
       hasSubTree={!!subTree}
     >
+      {text}
       {subTree && (
         <InfiniteBox
           activeMain={activeSub}
@@ -176,6 +175,7 @@ const InfiniteBox: React.FC<
               color={item.color}
               childCount={item.childCount ?? 0}
               subTree={item.subTree}
+              text={item.text}
               isDeep={isDeep}
               hasBreakdown={item.hasBreakdown}
               isSubTree={isSubTree}

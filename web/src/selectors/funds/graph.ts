@@ -2,11 +2,11 @@ import { createSelector } from 'reselect';
 
 import { getViewSoldFunds, getCurrentFundsCache, getFundsRows } from './helpers';
 import { getFundLineProcessed, PUC } from './lines';
-import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
 import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import * as Color from '~client/modules/color';
 import { getTotalUnits, getTotalCost, isSold } from '~client/modules/data';
 import * as Funds from '~client/reducers/funds';
+import { colors } from '~client/styled/variables';
 import { Data, Fund, Transaction, Prices, FundPrices, FundLine, FundItem } from '~client/types';
 
 type IndexedNumber = { [id: string]: number };
@@ -154,22 +154,20 @@ const getCostsById = createSelector(
 
 export const getFundItems = createSelector(
   [getItemsWithInfo, getSoldById],
-  (items: Omit<FundItem, 'color'>[], soldList: { [id: string]: boolean }): FundItem[] =>
-    [
-      {
-        id: GRAPH_FUNDS_OVERALL_ID,
-        item: 'Overall',
-        color: COLOR_GRAPH_FUND_LINE,
-      },
-    ].concat(
-      items
-        .filter(({ id }) => !soldList[id])
-        .map(({ id, item }) => ({
-          id,
-          item,
-          color: Color.colorKey(item),
-        })),
-    ),
+  (items: Omit<FundItem, 'color'>[], soldList: { [id: string]: boolean }): FundItem[] => [
+    {
+      id: GRAPH_FUNDS_OVERALL_ID,
+      item: 'Overall',
+      color: colors.black,
+    },
+    ...items
+      .filter(({ id }) => !soldList[id])
+      .map(({ id, item }) => ({
+        id,
+        item,
+        color: Color.colorKey(item),
+      })),
+  ],
 );
 
 type Times = IndexedNumberArray;

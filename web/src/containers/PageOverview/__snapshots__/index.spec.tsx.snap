@@ -2006,7 +2006,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
   z-index: 2;
 }
 
-.sc-fzowVh .c2 {
+.sc-pciEQ .c2 {
   position: relative;
   height: 125px;
 }
@@ -2262,7 +2262,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 @media only screen and (min-width:690px) {
-  .sc-fzowVh .c2 {
+  .sc-pciEQ .c2 {
     height: 100%;
   }
 }
@@ -2276,7 +2276,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
     box-shadow: 0 3px 10px rgba(0,0,0,0.3);
   }
 
-  .sc-fzqMdD .c2 {
+  .sc-fzowVh .c2 {
     z-index: 10;
     width: 100px;
     height: 100%;
@@ -2360,7 +2360,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 <div
-  class="sc-fznXWL c0"
+  class="sc-pHIBf c0"
   data-testid="graph-overview"
 >
   <div

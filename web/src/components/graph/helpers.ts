@@ -22,16 +22,31 @@ import {
   ColorSwitcher,
 } from '~client/types/graph';
 
-type SVGNumber = number | string;
-type SVGPoint = [SVGNumber, SVGNumber];
+export type SVGNumber = number | string;
+export type SVGPoint = [SVGNumber, SVGNumber];
+export type Arc = [
+  [
+    SVGNumber, // rx
+    SVGNumber, // ry
+  ],
+  [
+    SVGNumber, // x-axis-rotation
+    SVGNumber, // large-arc-flag
+    SVGNumber, // sweep-flag
+  ],
+  [
+    SVGNumber, // x
+    SVGNumber, // y
+  ],
+];
 
-type LinePoint = {
-  start: SVGPoint;
-  type: 'L' | 'M' | 'Q' | 'C';
-  args: SVGPoint[];
+export type LinePoint = {
+  start?: SVGPoint;
+  type: 'A' | 'L' | 'M' | 'Q' | 'C';
+  args: Arc | SVGPoint[];
 };
 
-type LineDescription = LinePoint[];
+export type LineDescription = LinePoint[];
 
 export const defaultPadding: Padding = [0, 0, 0, 0];
 
@@ -236,18 +251,18 @@ export function getLinePath({
   return line;
 }
 
+const joinArgs = (args: SVGNumber[][]): string =>
+  args.map((arg: SVGNumber[]) => arg.join(',')).join(' ');
+
 export function joinLinePath(linePath: LineDescription): string {
   if (linePath.length < 1) {
     return '';
   }
 
-  const parts = linePath.map(
-    ({ type, args }) => `${type}${args.map((point) => point.join(',')).join(' ')}`,
-  );
-
+  const parts = linePath.map(({ type, args }) => `${type}${joinArgs(args)}`).join(' ');
   const [{ start }] = linePath;
 
-  return `M${start.join(',')} ${parts.join(' ')}`;
+  return start ? `M${start.join(',')} ${parts}` : parts;
 }
 
 export const getSingleLinePath = (props: LineProps): string => joinLinePath(getLinePath(props));

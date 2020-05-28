@@ -112,6 +112,7 @@ describe('<BlockPacker />', () => {
         flex-shrink: 0;
         height: 100%;
         outline: none;
+        overflow: hidden;
         position: relative;
         width: 100%;
       }
@@ -132,6 +133,7 @@ describe('<BlockPacker />', () => {
         flex-shrink: 0;
         height: 100%;
         outline: none;
+        overflow: hidden;
         position: relative;
         width: 100%;
       }
@@ -368,6 +370,31 @@ describe('<BlockPacker />', () => {
       expect(preview.style.top).toBe('0px');
       expect(preview.style.width).toBe(`${container.offsetWidth}px`);
       expect(preview.style.height).toBe(`${container.offsetHeight}px`);
+    });
+  });
+
+  describe('when passing a custom child', () => {
+    const setupWithCustomChild = (): RenderResult =>
+      getContainer({
+        blocks: blockPacker<BlockItem>(10, 6, [
+          {
+            name: 'some block',
+            total: 24,
+            text: <div style={{ color: 'red' }}>Some react child</div>,
+          },
+          {
+            name: 'other block',
+            total: 36,
+          },
+        ]),
+      });
+
+    it('should render the child', () => {
+      expect.assertions(2);
+      const { getByText } = setupWithCustomChild();
+      const child = getByText('Some react child');
+      expect(child).toBeInTheDocument();
+      expect(child.style.color).toBe('red');
     });
   });
 });

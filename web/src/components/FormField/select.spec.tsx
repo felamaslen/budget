@@ -1,7 +1,7 @@
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, fireEvent, act, RenderResult } from '@testing-library/react';
 import React from 'react';
 
-import { FormFieldSelect, PropsSelect } from './select';
+import { FormFieldSelect, PropsSelect, SelectOptions } from './select';
 
 describe('<FormFieldSelect />', () => {
   const props = {
@@ -32,8 +32,8 @@ describe('<FormFieldSelect />', () => {
 
     expect(options).toHaveLength(2);
 
-    expect(options[0].value).toBe('something');
-    expect(options[1].value).toBe('else');
+    expect(options[0].value).toBe('Something');
+    expect(options[1].value).toBe('My option');
 
     expect(options[0]).toHaveTextContent('Something');
     expect(options[1]).toHaveTextContent('My option');
@@ -47,7 +47,7 @@ describe('<FormFieldSelect />', () => {
     expect(props.onChange).not.toHaveBeenCalled();
 
     act(() => {
-      fireEvent.change(select, { target: { value: 'else' } });
+      fireEvent.change(select, { target: { value: 'My option' } });
     });
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -89,5 +89,36 @@ describe('<FormFieldSelect />', () => {
 
     // Change not required, as A is still in the options set
     expect(props.onChange).toHaveBeenCalledTimes(2);
+  });
+
+  describe('when the option type is generic', () => {
+    type ComplexObject = {
+      foo: string;
+      bar: number;
+    };
+
+    const optionsGeneric: SelectOptions<ComplexObject> = [
+      { internal: { foo: 'yes', bar: 0 }, external: 'The first option' },
+      { internal: { foo: 'no', bar: 1 }, external: 'This is second option' },
+    ];
+
+    const propsGeneric = {
+      options: optionsGeneric,
+      value: optionsGeneric[0].internal,
+      onChange: jest.fn(),
+    };
+
+    const setupGeneric = (): RenderResult => render(<FormFieldSelect {...propsGeneric} />);
+
+    it('should call onChange with the generic value', () => {
+      expect.assertions(1);
+      const { getByDisplayValue } = setupGeneric();
+      const input = getByDisplayValue('The first option') as HTMLSelectElement;
+      act(() => {
+        fireEvent.change(input, { target: { value: 'This is second option' } });
+      });
+
+      expect(propsGeneric.onChange).toHaveBeenCalledWith({ foo: 'no', bar: 1 });
+    });
   });
 });

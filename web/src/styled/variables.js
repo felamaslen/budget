@@ -8,6 +8,7 @@ export const breakpoints = {
   mobile: 690,
   tabletSmall: 1000,
   tablet: 1200,
+  desktop: 1325,
 };
 
 export const itemHeightDesktop = 24;

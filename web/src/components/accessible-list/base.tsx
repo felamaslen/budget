@@ -14,11 +14,14 @@ import { Item, Create } from '~client/types';
 
 const identitySelector = <E extends {}>(): { [id: string]: Partial<E> } => ({});
 
+const emptyObject = {};
+
 export const AccessibleList = <
   I extends Item,
   P extends string,
   MK extends keyof I = never,
-  E extends {} = {}
+  E extends {} = {},
+  H extends {} = {}
 >({
   page,
   color,
@@ -33,7 +36,8 @@ export const AccessibleList = <
   itemProcessor,
   Row,
   Header,
-}: Props<I, P, MK, E>): React.ReactElement<Props<I, P, MK, E>> => {
+  headerProps = emptyObject as H,
+}: Props<I, P, MK, E, H>): React.ReactElement<Props<I, P, MK, E, H>> => {
   const isMobile = useIsMobile();
   const itemsSortedPre: I[] = useSelector(getItems<I, P>(page, sortItems));
 
@@ -87,7 +91,13 @@ export const AccessibleList = <
   return (
     <Styled.Base color={color}>
       {Header && (
-        <Header isMobile={isMobile} page={page} fields={fieldKeys} fieldsMobile={fieldKeysMobile} />
+        <Header
+          isMobile={isMobile}
+          page={page}
+          fields={fieldKeys}
+          fieldsMobile={fieldKeysMobile}
+          {...headerProps}
+        />
       )}
       {!isMobile && (
         <AccessibleListCreateItem<I, P, E>

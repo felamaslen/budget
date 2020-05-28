@@ -1,5 +1,4 @@
-import { Padding } from '~client/types/graph';
-import { Page, PageListCalc } from '~client/types/app';
+import { Page, PageListCalc, Padding } from '~client/types';
 
 const defaultFont = 'Arial, Helvetica, sans-serif';
 
@@ -44,10 +43,6 @@ export enum Mode {
   Price = 'Price',
 }
 
-export const GRAPH_FUNDS_MODE_ROI = Mode.ROI;
-export const GRAPH_FUNDS_MODE_ABSOLUTE = Mode.Value;
-export const GRAPH_FUNDS_MODE_PRICE = Mode.Price;
-
 export enum Period {
   year1 = '1 year',
   year5 = '5 years',
@@ -62,8 +57,8 @@ export type PeriodObject = {
 
 export const GRAPH_FUNDS_PERIODS = Object.entries(Period);
 
-export const DEFAULT_FUND_PERIOD: Period = GRAPH_FUNDS_PERIODS.reduce(
-  (last: Period, [shortPeriod, next]): Period =>
+export const DEFAULT_FUND_PERIOD: Period = GRAPH_FUNDS_PERIODS.reduce<Period>(
+  (last, [shortPeriod, next]): Period =>
     shortPeriod === process.env.DEFAULT_FUND_PERIOD ? next : last,
   Period.year1,
 );

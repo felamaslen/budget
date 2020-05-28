@@ -8,7 +8,7 @@ import { State } from '~client/reducers';
 import * as Funds from '~client/reducers/funds';
 import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
 import { getNow } from '~client/selectors/now';
-import { Page, Data } from '~client/types';
+import { Page, Data, Portfolio } from '~client/types';
 
 export * from './gains';
 export * from './graph';
@@ -49,30 +49,29 @@ const getFundCacheAge = createSelector(
   },
 );
 
-const getLastFundsValue = createSelector([getFundsRows, getCurrentFundsCache], (rows, cache) => {
-  if (!(rows && cache)) {
-    return 0;
-  }
-
-  return rows.reduce((sum, { id, transactions }) => {
-    const { values: prices } = cache.prices[id] || {};
-    if (!(prices && prices.length)) {
-      return sum;
+export const getAllLatestValues = createSelector(
+  getFundsRows,
+  getCurrentFundsCache,
+  (rows, cache) => {
+    if (!(rows && cache)) {
+      return [];
     }
 
-    return sum + prices[prices.length - 1] * getTotalUnits(transactions || []);
-  }, 0);
-});
+    return rows.reduce<Portfolio>((last, { id, item, transactions }) => {
+      const prices = cache.prices[id]?.values ?? [];
+      return prices.length
+        ? [...last, { id, item, value: prices[prices.length - 1] * getTotalUnits(transactions) }]
+        : last;
+    }, []);
+  },
+);
 
-export type CachedValue = {
-  value: number;
-  dayGain: number;
-  dayGainAbs: number;
-  ageText: string;
-};
+const getLatestTotalValue = createSelector(getAllLatestValues, (portfolio: Portfolio) =>
+  portfolio.reduce<number>((last, { value }) => last + value, 0),
+);
 
 export const getFundsCachedValue = createSelector(
-  [getLastFundsValue, getFundCacheAge, getDayGain, getDayGainAbs],
+  [getLatestTotalValue, getFundCacheAge, getDayGain, getDayGainAbs],
   (value, ageText, dayGain, dayGainAbs) => ({ value, ageText, dayGain, dayGainAbs }),
 );
 

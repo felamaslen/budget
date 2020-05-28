@@ -1,9 +1,15 @@
 import getUnixTime from 'date-fns/getUnixTime';
 
-import { getFundsCachedValueAgeText, getFundsCachedValue, getFundsCost } from '.';
+import {
+  getFundsCachedValueAgeText,
+  getFundsCachedValue,
+  getFundsCost,
+  getAllLatestValues,
+  getDayGain,
+  getDayGainAbs,
+} from '.';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
-import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
 import { testState as state } from '~client/test-data/state';
 
 describe('Funds selectors', () => {
@@ -89,6 +95,37 @@ describe('Funds selectors', () => {
     it('should get the all-time total fund cost', () => {
       expect.assertions(1);
       expect(getFundsCost(state)).toBe(400000 + 45000 - 50300 + 90000 - 80760 + 200000 - 265622);
+    });
+  });
+
+  describe('getAllLatestValues', () => {
+    it('should get the latest value for every fund, where available', () => {
+      expect.assertions(1);
+
+      const result = getAllLatestValues(state);
+
+      expect(result).toStrictEqual([
+        {
+          id: '10',
+          item: 'some fund 1',
+          value: 399098.2,
+        },
+        {
+          id: '3',
+          item: 'some fund 2',
+          value: 0,
+        },
+        {
+          id: '1',
+          item: 'some fund 3',
+          value: 0,
+        },
+        {
+          id: '5',
+          item: 'test fund 4',
+          value: 0,
+        },
+      ]);
     });
   });
 });

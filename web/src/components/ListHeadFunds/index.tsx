@@ -1,21 +1,30 @@
 import React from 'react';
 
 import * as Styled from './styles';
+import { FormFieldSelect, SelectOptions } from '~client/components/FormField';
 import { formatOptionsAbsolute, formatOptionsRelative } from '~client/components/FundGainInfo';
+import { Sort, defaultSort, HeadProps } from '~client/components/page-funds/types';
 import { Period } from '~client/constants/graph';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { CachedValue } from '~client/selectors';
+import { CachedValue } from '~client/types';
 
 export * from './mobile';
 
-type Props = {
+export type Props = {
   totalCost: number;
   viewSoldFunds: boolean;
   period: Period;
   cachedValue: CachedValue;
   onViewSoldToggle: () => void;
   onReloadPrices: () => void;
-};
+} & HeadProps;
+
+const sortOptions: SelectOptions<Sort> = [
+  { internal: { criteria: 'value', direction: 1 }, external: 'Value ↓' },
+  { internal: { criteria: 'value', direction: -1 }, external: 'Value ↑' },
+  { internal: { criteria: 'gain', direction: 1 }, external: 'Gain ↓' },
+  { internal: { criteria: 'gain', direction: -1 }, external: 'Gain ↑' },
+];
 
 export const ListHeadFunds: React.FC<Props> = ({
   totalCost,
@@ -23,6 +32,8 @@ export const ListHeadFunds: React.FC<Props> = ({
   cachedValue: { value, ageText, dayGain, dayGainAbs },
   onReloadPrices,
   onViewSoldToggle,
+  sort = defaultSort,
+  setSort,
 }) => (
   <Styled.ListHeadFunds title={ageText}>
     <Styled.OverallGain
@@ -54,7 +65,10 @@ export const ListHeadFunds: React.FC<Props> = ({
         </Styled.Breakdown>
       )}
     </Styled.OverallGain>
-    <input type="checkbox" checked={viewSoldFunds} onChange={onViewSoldToggle} />
-    <span>View sold</span>
+    <FormFieldSelect options={sortOptions} value={sort} onChange={setSort} />
+    <Styled.ViewSold>
+      <input type="checkbox" checked={viewSoldFunds} onChange={onViewSoldToggle} />
+      <span>View sold</span>
+    </Styled.ViewSold>
   </Styled.ListHeadFunds>
 );

@@ -2,9 +2,10 @@ import { compose } from '@typed/compose';
 import { desaturate, lighten } from 'polished';
 import styled, { css } from 'styled-components';
 
+import { FormField } from '~client/components/FormField/styles';
 import * as GainStyles from '~client/components/FundGainInfo/styles';
 import { rem, breakpoint } from '~client/styled/mixins';
-import { FlexCenter } from '~client/styled/shared';
+import { FlexCenter, Flex } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
 type GainProps = { profit: boolean; loss: boolean };
@@ -18,6 +19,10 @@ export const ListHeadFunds = styled(FlexCenter)`
     flex: 0 0 330px;
     flex-flow: row;
     width: auto;
+
+    ${FormField} {
+      width: auto;
+    }
   }
   ${breakpoint(breakpoints.tablet)} {
     flex: 0 0 322px;
@@ -126,3 +131,9 @@ export const DayGain = styled(GainStyles.DayGain)`
 `;
 
 export const CacheAge = styled.span``;
+
+export const ViewSold = styled(Flex)`
+  font-size: ${rem(13)};
+  margin-left: ${rem(4)};
+  white-space: nowrap;
+`;

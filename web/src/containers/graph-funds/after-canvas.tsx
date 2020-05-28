@@ -1,8 +1,6 @@
-import { rgb } from 'polished';
 import React, { useCallback, useState } from 'react';
 
 import * as Styled from './styles';
-import { Color } from '~client/constants/colors';
 import { Mode, Period, GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
 import { useCTA } from '~client/hooks/cta';
 import { FundItem } from '~client/types/funds';
@@ -18,7 +16,7 @@ type ItemProps = {
   toggleList: ToggleList;
   setToggleList: SetToggleList;
   id: string;
-  color: Color;
+  color: string;
   item: string;
 };
 
@@ -55,7 +53,7 @@ const Item: React.FC<ItemProps> = ({ numItems, toggleList, setToggleList, id, co
     <li {...events}>
       <Styled.SidebarCheckbox
         style={{
-          borderColor: rgb(color[0], color[1], color[2]),
+          borderColor: color,
         }}
         checked={toggleList[id] !== false}
       ></Styled.SidebarCheckbox>

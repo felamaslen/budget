@@ -1,10 +1,11 @@
 import fromUnixTime from 'date-fns/fromUnixTime';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas } from './after-canvas';
 import * as Styled from './styles';
 import { fundsRequested } from '~client/actions/funds';
+import { FundWeights } from '~client/components/fund-weights';
 import {
   LineGraph,
   LineGraphProps,
@@ -22,18 +23,20 @@ import {
   Period,
   GRAPH_FUNDS_NUM_TICKS,
 } from '~client/constants/graph';
-import { rgba } from '~client/modules/color';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
+
 import {
   getPeriod,
   getStartTime,
   getCacheTimes,
   getFundItems,
   getFundLines,
+  getAllLatestValues,
 } from '~client/selectors';
+
 import { graphFundsHeightMobile } from '~client/styled/variables';
-import { Padding, Line, DrawProps, FundLine } from '~client/types';
+import { Padding, Line, DrawProps, FundLine, FundItem } from '~client/types';
 
 const PADDING_DESKTOP: Padding = [36, 0, 0, 0];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
@@ -132,29 +135,7 @@ function makeBeforeLines({
 
 const modeListAll: Mode[] = [Mode.ROI, Mode.Value, Mode.Price];
 
-type FilterFunds = (filteredItems: { id: string }) => boolean;
-
-const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
-  const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
-  const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
-  const fundItems = useSelector(getFundItems);
-  const fundLines: {
-    [mode in Mode]: FundLine[];
-  } = useSelector(getFundLines);
-  const startTime = useSelector(getStartTime);
-  const cacheTimes = useSelector(getCacheTimes);
-  const period = useSelector(getPeriod);
-
-  const dispatch = useDispatch();
-  const onFundsRequested = useCallback(
-    (fromCache: boolean, newPeriod: Period): void => {
-      dispatch(fundsRequested(fromCache, newPeriod));
-    },
-    [dispatch],
-  );
-
-  const haveData = cacheTimes.length > 0;
-
+function useMode(isMobile: boolean): [Mode, () => void] {
   const modeList = useMemo<Mode[]>(() => {
     if (isMobile) {
       return modeListAll.filter((value) => value !== Mode.Price);
@@ -164,13 +145,44 @@ const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
   }, [isMobile]);
 
   const [mode, setMode] = useState<Mode>(modeList[0]);
-  const [toggleList, setToggleList] = useState<{ [id: string]: boolean | null }>({});
-  const [numFundItems, setNumFundItems] = useState<number>(0);
 
+  const switchMode = useCallback(
+    () => setMode((last) => modeList[(modeList.indexOf(last) + 1) % modeList.length]),
+    [modeList],
+  );
+
+  return [mode, switchMode];
+}
+
+type FilterFunds = (filteredItems: { id: string }) => boolean;
+
+function usePeriod(): [Period, (nextPeriod: Period) => void] {
+  const period = useSelector(getPeriod);
+  const dispatch = useDispatch();
+  const onFundsRequested = useCallback(
+    (fromCache: boolean, newPeriod: Period): void => {
+      dispatch(fundsRequested(fromCache, newPeriod));
+    },
+    [dispatch],
+  );
+
+  const changePeriod = useCallback((nextPeriod) => onFundsRequested(true, nextPeriod), [
+    onFundsRequested,
+  ]);
+
+  return [period, changePeriod];
+}
+
+type ToggleList = { [id: string]: boolean | null };
+
+function useToggleList(
+  fundItems: FundItem[],
+): [ToggleList, React.Dispatch<React.SetStateAction<ToggleList>>] {
+  const [toggleList, setToggleList] = useState<ToggleList>({});
+  const numFundItems = useRef<number>(0);
   useEffect(() => {
-    if (fundItems.length !== numFundItems) {
-      setNumFundItems(fundItems.length);
-
+    if (fundItems.length !== numFundItems.current) {
+      numFundItems.current = fundItems.length;
       setToggleList((lastList) =>
         fundItems.reduce(
           (last, { id }) => ({
@@ -181,32 +193,59 @@ const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
         ),
       );
     }
-  }, [fundItems, numFundItems]);
+  }, [fundItems]);
 
-  const filterFunds = useMemo<FilterFunds>(() => {
-    if (isMobile) {
-      return ({ id }): boolean => id === GRAPH_FUNDS_OVERALL_ID;
-    }
+  return [toggleList, setToggleList];
+}
 
-    return ({ id }): boolean => toggleList[id] !== false;
-  }, [isMobile, toggleList]);
+function useGraphProps({
+  width,
+  height,
+  isMobile,
+  mode,
+  changeMode,
+  toggleList,
+}: {
+  width: number;
+  height: number;
+  isMobile: boolean;
+  mode: Mode;
+  changeMode: () => void;
+  toggleList: ToggleList;
+}): LineGraphProps {
+  const fundLines: {
+    [mode in Mode]: FundLine[];
+  } = useSelector(getFundLines);
+
+  const startTime = useSelector(getStartTime);
+  const cacheTimes = useSelector(getCacheTimes);
+  const haveData = cacheTimes.length > 0;
+
+  const filterFunds = useMemo<FilterFunds>(
+    () =>
+      isMobile
+        ? ({ id }): boolean => id === GRAPH_FUNDS_OVERALL_ID
+        : ({ id }): boolean => toggleList[id] !== false,
+    [isMobile, toggleList],
+  );
 
   const lines = useMemo<Line[]>(() => {
     type Accumulator = [Line[], { [id: string]: number }];
-    const [numberedLines] = fundLines[mode].filter(filterFunds).reduce(
-      ([last, idCount]: Accumulator, { id, color, data }: FundLine): Accumulator => [
-        last.concat([
+    const [numberedLines] = fundLines[mode].filter(filterFunds).reduce<Accumulator>(
+      ([last, idCount], { id, color, data }) => [
+        [
+          ...last,
           {
             key: `${id}-${idCount[id] || 0}`,
             data,
-            color: rgba(color),
+            color,
             strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
             smooth: mode !== Mode.Value,
           },
-        ]),
+        ],
         { ...idCount, [id]: (idCount[id] || 0) + 1 },
       ],
-      [[], {}] as Accumulator,
+      [[], {}],
     );
 
     return numberedLines;
@@ -235,21 +274,17 @@ const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
 
   const labelY = useCallback((value) => formatValue(value, mode), [mode]);
 
-  const changePeriod = useCallback((nextPeriod) => onFundsRequested(true, nextPeriod), [
-    onFundsRequested,
-  ]);
-
-  const beforeLines = useMemo<React.FC<DrawProps>>(() => {
-    if (!haveData) {
-      return (): null => null;
-    }
-
-    return makeBeforeLines({
-      startTime,
-      tickSizeY,
-      labelY,
-    });
-  }, [haveData, startTime, tickSizeY, labelY]);
+  const beforeLines = useMemo<React.FC<DrawProps>>(
+    () =>
+      haveData
+        ? makeBeforeLines({
+            startTime,
+            tickSizeY,
+            labelY,
+          })
+        : (): null => null,
+    [haveData, startTime, tickSizeY, labelY],
+  );
 
   const labelX = useCallback((value) => formatItem('date', fromUnixTime(value + startTime)), [
     startTime,
@@ -263,14 +298,9 @@ const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
     [labelX, labelY],
   );
 
-  const onClick = useCallback(
-    () => setMode((last) => modeList[(modeList.indexOf(last) + 1) % modeList.length]),
-    [modeList],
-  );
+  const svgProperties = useMemo(() => ({ onClick: changeMode }), [changeMode]);
 
-  const svgProperties = useMemo(() => ({ onClick }), [onClick]);
-
-  const graphProps: LineGraphProps = {
+  return {
     name: 'fund-history',
     isMobile,
     width,
@@ -286,21 +316,39 @@ const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
     hoverEffect,
     zoomEffect: getRanges,
   };
+}
+
+export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
+  const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
+  const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
+  const fundItems = useSelector(getFundItems);
+
+  const [period, changePeriod] = usePeriod();
+  const [mode, changeMode] = useMode(isMobile);
+  const [toggleList, setToggleList] = useToggleList(fundItems);
+  const graphProps = useGraphProps({ width, height, isMobile, mode, changeMode, toggleList });
+
+  const portfolio = useSelector(getAllLatestValues);
 
   return (
-    <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
-      <LineGraph {...graphProps} />
-      <AfterCanvas
-        isMobile={isMobile}
-        period={period}
-        mode={mode}
-        fundItems={fundItems}
-        toggleList={toggleList}
-        setToggleList={setToggleList}
-        changePeriod={changePeriod}
-      />
-    </Styled.GraphFunds>
+    <Styled.Container>
+      <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
+        <LineGraph {...graphProps} />
+        <AfterCanvas
+          isMobile={isMobile}
+          period={period}
+          mode={mode}
+          fundItems={fundItems}
+          toggleList={toggleList}
+          setToggleList={setToggleList}
+          changePeriod={changePeriod}
+        />
+      </Styled.GraphFunds>
+      {!isMobile && (
+        <Styled.GraphFunds width={width} height={height}>
+          <FundWeights portfolio={portfolio} />
+        </Styled.GraphFunds>
+      )}
+    </Styled.Container>
   );
 };
-
-export default GraphFunds;

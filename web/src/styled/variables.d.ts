@@ -6,6 +6,7 @@ export const breakpoints: {
   mobile: number;
   tabletSmall: number;
   tablet: number;
+  desktop: number;
 };
 
 export const itemHeightDesktop: number;

@@ -1,5 +1,4 @@
 import { DataKeyAbbr } from '~client/constants/api';
-import { Color } from '~client/constants/colors';
 import { Data } from '~client/types/graph';
 
 export type TransactionRaw = {
@@ -30,7 +29,7 @@ export type Prices = {
 export type FundItem = {
   id: string;
   item: string;
-  color: Color;
+  color: string;
 };
 
 export type FundLine = Pick<FundItem, 'id' | 'color'> & {
@@ -67,4 +66,18 @@ export type ReadResponseFunds = {
   data: FundRaw[];
   startTime: number;
   cacheTimes: number[];
+};
+
+export type PortfolioItem = {
+  id: string;
+  item: string;
+  value: number;
+};
+export type Portfolio = PortfolioItem[];
+
+export type CachedValue = {
+  value: number;
+  dayGain: number;
+  dayGainAbs: number;
+  ageText: string;
 };

@@ -89,6 +89,7 @@ export const Child = styled.div.attrs(({ flex, bgColor }: { flex: number; bgColo
   flex-shrink: 0;
   height: 100%;
   outline: none;
+  overflow: hidden;
   position: relative;
   width: 100%;
 `;

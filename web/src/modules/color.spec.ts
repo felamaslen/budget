@@ -134,15 +134,14 @@ describe('color module', () => {
   });
 
   describe('colorKey', () => {
-    it('should return different colours for other numbers', () => {
-      expect.assertions(6);
-      expect(Array.isArray(colorKey('foo'))).toBe(true);
-      expect(colorKey('foo')).toHaveLength(3);
-      expect(colorKey('foo')).not.toStrictEqual([0, 0, 0]);
+    it('should return a colour from a string', () => {
+      expect.assertions(1);
+      expect(colorKey('foo')).toMatchInlineSnapshot(`"#429900"`);
+    });
 
-      expect(Array.isArray(colorKey('bar'))).toBe(true);
-      expect(colorKey('bar')).toHaveLength(3);
-      expect(colorKey('bar')).not.toStrictEqual(colorKey('foo'));
+    it('should return different colours for different strings', () => {
+      expect.assertions(1);
+      expect(colorKey('foo')).not.toBe(colorKey('bar'));
     });
   });
 

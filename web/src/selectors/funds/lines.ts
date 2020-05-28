@@ -1,12 +1,6 @@
+import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { separateLines } from '~client/modules/funds';
 import { Data } from '~client/types/graph';
-import {
-  GRAPH_FUNDS_OVERALL_ID,
-  Mode,
-  GRAPH_FUNDS_MODE_ROI,
-  GRAPH_FUNDS_MODE_ABSOLUTE,
-  GRAPH_FUNDS_MODE_PRICE,
-} from '~client/constants/graph';
 
 export type PUC = {
   [fundId: string]: number[];
@@ -99,11 +93,11 @@ export function getOverallLine(
   const unitsWithOffsets = withOffsets(units);
   const costsWithOffsets = withOffsets(costs);
 
-  if (mode === GRAPH_FUNDS_MODE_ABSOLUTE) {
+  if (mode === Mode.Value) {
     return getOverallAbsolute(pricesWithOffsets, unitsWithOffsets);
   }
 
-  if (mode === GRAPH_FUNDS_MODE_ROI) {
+  if (mode === Mode.ROI) {
     return getOverallROI(pricesWithOffsets, unitsWithOffsets, costsWithOffsets);
   }
 
@@ -115,17 +109,17 @@ export function getFundLine(
   mode: Mode,
   id: string,
 ): number[] | null {
-  if (mode === GRAPH_FUNDS_MODE_ABSOLUTE) {
+  if (mode === Mode.Value) {
     const { prices, units } = priceUnitsCosts;
 
     return getFundLineAbsolute(prices, units, id);
   }
 
-  if (mode === GRAPH_FUNDS_MODE_ROI) {
+  if (mode === Mode.ROI) {
     return getFundLineROI(priceUnitsCosts, id);
   }
 
-  if (mode === GRAPH_FUNDS_MODE_PRICE) {
+  if (mode === Mode.Price) {
     return priceUnitsCosts.prices[id];
   }
 

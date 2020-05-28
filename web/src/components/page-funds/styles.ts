@@ -29,7 +29,7 @@ export const PageFunds = styled(Page)`
       flex: 0 1 800px;
     }
   }
-  ${breakpoint(1325)} {
+  ${breakpoint(breakpoints.desktop)} {
     flex-direction: row;
   }
 `;
@@ -66,6 +66,12 @@ export const FundRowMobile = styled(StandardRow)<{ isSold: boolean }>`
     css`
       color: ${colors['medium-light']};
     `};
+`;
+
+export const MobilePie = styled.div`
+  align-items: center;
+  display: inline-flex;
+  margin-right: ${rem(4)};
 `;
 
 export const FundNameMobile = styled.span`

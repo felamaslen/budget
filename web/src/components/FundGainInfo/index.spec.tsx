@@ -218,29 +218,29 @@ describe('<FundGainInfo />', () => {
               class="sc-AxgMl c3"
             >
               <span
-                class="sc-pAZqv c4"
+                class="sc-pJurq c4"
               >
                 <span
-                  class="sc-pbIaG sc-pkhIR c5"
+                  class="sc-pkhIR sc-psCJM c5"
                 >
                   £40
                 </span>
                 <span
-                  class="sc-pbIaG c6"
+                  class="sc-pkhIR c6"
                 >
                   30.00%
                 </span>
               </span>
               <span
-                class="sc-pAZqv c7"
+                class="sc-pJurq c7"
               >
                 <span
-                  class="sc-pbIaG sc-pkhIR c8"
+                  class="sc-pkhIR sc-psCJM c8"
                 >
                   (£3)
                 </span>
                 <span
-                  class="sc-pbIaG c9"
+                  class="sc-pkhIR c9"
                 >
                   (2.00%)
                 </span>

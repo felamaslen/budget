@@ -1,11 +1,13 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { Pie } from '../pie';
 import * as Styled from './styles';
 import { FundProps } from './types';
 import { FundGainInfo } from '~client/components/FundGainInfo';
 import { GraphFundItem } from '~client/components/graph-fund-item';
-import { getViewSoldFunds } from '~client/selectors';
+import { getViewSoldFunds, getFundsCachedValue } from '~client/selectors';
+import { colors } from '~client/styled/variables';
 import { Fund } from '~client/types';
 
 export const FundRow: React.FC<{ isMobile: boolean; item: Fund } & Partial<FundProps>> = ({
@@ -17,12 +19,22 @@ export const FundRow: React.FC<{ isMobile: boolean; item: Fund } & Partial<FundP
   gain,
 }) => {
   const viewSoldFunds = useSelector(getViewSoldFunds);
+  const latestValue = useSelector(getFundsCachedValue);
   if (!viewSoldFunds && isSold) {
     return null;
   }
 
   if (isMobile) {
-    return <Styled.FundRowMobile isSold={isSold}>{children}</Styled.FundRowMobile>;
+    const valueSlice = (2 * Math.PI * (gain?.value ?? 0)) / latestValue.value;
+
+    return (
+      <Styled.FundRowMobile isSold={isSold}>
+        <Styled.MobilePie>
+          <Pie size={16} slice={valueSlice} color={colors['shadow-l6']} />
+        </Styled.MobilePie>
+        {children}
+      </Styled.FundRowMobile>
+    );
   }
 
   return (

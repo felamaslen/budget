@@ -1,3 +1,5 @@
+import React from 'react';
+
 export type FlexFlow = 'row' | 'column';
 
 type Box = {
@@ -28,4 +30,5 @@ export type BlockItem = {
   color?: string;
   childCount?: number;
   hasBreakdown?: boolean;
+  text?: React.ReactElement | React.ReactText;
 };

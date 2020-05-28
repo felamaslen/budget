@@ -1,7 +1,20 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import { breakpoint, rem } from '~client/styled/mixins';
+import { FlexColumn } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
+
+export const Container = styled(FlexColumn)`
+  display: flex;
+  flex: 1 0 auto;
+  flex-flow: row;
+  flex-wrap: wrap;
+
+  ${breakpoint(breakpoints.desktop)} {
+    flex: 1;
+    flex-flow: column;
+  }
+`;
 
 export const GraphFunds = styled.div<{ width: number; height: number }>`
   background-color: ${colors.white};
@@ -9,10 +22,20 @@ export const GraphFunds = styled.div<{ width: number; height: number }>`
 
   ${breakpoint(breakpoints.mobile)} {
     background-color: ${colors['translucent-l2']};
-    flex: 1 0 auto;
+    border: 1px solid ${colors['medium-light']};
+    flex: 0 0 ${({ height }): number => height}px;
     height: ${({ height }): number => height}px;
-    margin: ${rem(10)};
-    width: ${({ width }): number => width}px;
+    margin: ${rem(10)} ${rem(10)} 0 ${rem(10)};
+    overflow: hidden;
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 0 0 ${({ width }): number => width}px;
+  }
+
+  ${breakpoint(breakpoints.desktop)} {
+    flex: 0 0 ${({ height }): number => height}px;
+    max-width: ${({ width }): number => width}px;
   }
 `;
 

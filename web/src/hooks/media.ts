@@ -6,7 +6,12 @@ export function useMediaQuery(queryString: string): boolean {
 
   const [matches, setMatches] = useState<boolean>(matchQuery.matches);
   useEffect(() => {
-    matchQuery.addListener(({ matches: nowMatches }) => setMatches(nowMatches));
+    const listener = ({ matches: nowMatches }: MediaQueryListEvent): void => setMatches(nowMatches);
+    matchQuery.addListener(listener);
+
+    return (): void => {
+      matchQuery.removeListener(listener);
+    };
   }, [matchQuery]);
 
   return matches;

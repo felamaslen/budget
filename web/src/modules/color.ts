@@ -111,7 +111,10 @@ const colorHash = new ColorHash({
   saturation: 1,
 });
 
-export const colorKey = (color: string): Color => colorHash.rgb(color);
+export const colorKey = moize((item: string): string => {
+  const [red, green, blue] = colorHash.rgb(item);
+  return rgb(red, green, blue);
+});
 
 export function averageColor(values: string[]): string {
   if (!values.length) {

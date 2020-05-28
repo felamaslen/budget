@@ -2,11 +2,16 @@ import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import * as Styled from './styles';
+import { HeadProps } from './types';
 import { fundsViewSoldToggled, fundsRequested } from '~client/actions/funds';
 import { ListHeadFunds, ListHeadFundsMobile } from '~client/components/ListHeadFunds';
 import { getFundsCost, getViewSoldFunds, getPeriod, getFundsCachedValue } from '~client/selectors';
 
-export const FundHeader: React.FC<{ isMobile: boolean }> = ({ isMobile }) => {
+type Props = {
+  isMobile: boolean;
+} & HeadProps;
+
+export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
   const totalCost = useSelector(getFundsCost);
   const viewSoldFunds = useSelector(getViewSoldFunds);
   const period = useSelector(getPeriod);
@@ -36,6 +41,8 @@ export const FundHeader: React.FC<{ isMobile: boolean }> = ({ isMobile }) => {
             viewSoldFunds={viewSoldFunds}
             onViewSoldToggle={onViewSoldToggle}
             onReloadPrices={onReloadPrices}
+            sort={sort}
+            setSort={setSort}
           />
         </Styled.FundHeader>
       )}

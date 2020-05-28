@@ -2,9 +2,9 @@ import React from 'react';
 
 import * as Styled from './styles';
 import { formatOptionsAbsolute, formatOptionsRelative } from '~client/components/FundGainInfo';
-import GraphFunds from '~client/containers/graph-funds';
+import { GraphFunds } from '~client/containers/graph-funds';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { CachedValue } from '~client/selectors';
+import { CachedValue } from '~client/types';
 
 type Props = {
   totalCost: number;

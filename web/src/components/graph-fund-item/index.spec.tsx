@@ -44,7 +44,7 @@ describe('<GraphFundItem />', () => {
         z-index: 2;
       }
 
-      .sc-fzqBkg .c2 {
+      .sc-qapaw .c2 {
         position: relative;
         height: 125px;
       }
@@ -87,7 +87,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:690px) {
-        .c0 .bfcNKN {
+        .c0 .kpwgGR {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -102,7 +102,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:690px) {
-        .sc-fzqBkg .c2 {
+        .sc-qapaw .c2 {
           height: 100%;
         }
       }

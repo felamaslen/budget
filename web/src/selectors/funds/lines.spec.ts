@@ -6,13 +6,8 @@ import {
   getOverallLine,
   getFundLine,
   getFundLineProcessed,
-} from '~client/selectors/funds/lines';
-import {
-  GRAPH_FUNDS_OVERALL_ID,
-  GRAPH_FUNDS_MODE_ROI,
-  GRAPH_FUNDS_MODE_ABSOLUTE,
-  GRAPH_FUNDS_MODE_PRICE,
-} from '~client/constants/graph';
+} from './lines';
+import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 
 describe('Funds selectors / lines', () => {
   const id1 = 'my-fund-id';
@@ -52,6 +47,7 @@ describe('Funds selectors / lines', () => {
     };
 
     it('should sum prices and return a line', () => {
+      expect.assertions(1);
       const result = getOverallAbsolute(prices, units);
 
       const expectedResult = [
@@ -62,12 +58,13 @@ describe('Funds selectors / lines', () => {
         386 * 28,
       ];
 
-      expect(result).toEqual(expectedResult);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
   describe('getFundLineAbsolute', () => {
     it('should get the mapped product of units and prices', () => {
+      expect.assertions(1);
       const id = 'my-fund-id';
       const prices = { [id]: [100, 102, 103] };
       const units = { [id]: [34, 34, 18] };
@@ -76,7 +73,7 @@ describe('Funds selectors / lines', () => {
 
       const expectedResult = [3400, 3468, 1854];
 
-      expect(result).toEqual(expectedResult);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
@@ -102,6 +99,7 @@ describe('Funds selectors / lines', () => {
     const rounded = (value: number): number => Number(value.toPrecision(8));
 
     it('should get the correct value and return a line', () => {
+      expect.assertions(1);
       const result = getOverallROI(prices, units, costs);
 
       const expectedResult = [
@@ -112,7 +110,7 @@ describe('Funds selectors / lines', () => {
         100 * ((386 * 28 + 31 * 10 - (10800 + 300)) / (10800 + 300)),
       ];
 
-      expect(result.map(rounded)).toEqual(expectedResult.map(rounded));
+      expect(result.map(rounded)).toStrictEqual(expectedResult.map(rounded));
     });
   });
 
@@ -123,6 +121,7 @@ describe('Funds selectors / lines', () => {
     const costs = { [id]: [3100, 3100, 1560] };
 
     it('should get the correct values and return a line', () => {
+      expect.assertions(1);
       const result = getFundLineROI({ prices, units, costs }, id);
 
       const expectedResult = [
@@ -131,13 +130,14 @@ describe('Funds selectors / lines', () => {
         100 * ((103 * 18 - 1560) / 1560),
       ];
 
-      expect(result).toEqual(expectedResult);
+      expect(result).toStrictEqual(expectedResult);
     });
   });
 
   describe('getOverallLine', () => {
     it('should return an absolute line if the mode is absolute', () => {
-      expect(getOverallLine(priceUnitsCosts, GRAPH_FUNDS_MODE_ABSOLUTE, timeOffsets)).toEqual([
+      expect.assertions(1);
+      expect(getOverallLine(priceUnitsCosts, Mode.Value, timeOffsets)).toStrictEqual([
         100 * 34 + 0,
         102 * 34 + 954 * 105,
         103 * 18 + 961 * 105,
@@ -145,7 +145,8 @@ describe('Funds selectors / lines', () => {
     });
 
     it('should return an ROI line if the mode is ROI', () => {
-      expect(getOverallLine(priceUnitsCosts, GRAPH_FUNDS_MODE_ROI, timeOffsets)).toEqual([
+      expect.assertions(1);
+      expect(getOverallLine(priceUnitsCosts, Mode.ROI, timeOffsets)).toStrictEqual([
         100 * ((100 * 34 + 0 - (3100 + 0)) / (3100 + 0)),
         100 * ((102 * 34 + 954 * 105 - (3100 + 975400)) / (3100 + 975400)),
         100 * ((103 * 18 + 961 * 105 - (1560 + 975400)) / (1560 + 975400)),
@@ -153,49 +154,51 @@ describe('Funds selectors / lines', () => {
     });
 
     it('should return null if the mode is price', () => {
-      expect(getOverallLine(priceUnitsCosts, GRAPH_FUNDS_MODE_PRICE, timeOffsets)).toBeNull();
+      expect.assertions(1);
+      expect(getOverallLine(priceUnitsCosts, Mode.Price, timeOffsets)).toBeNull();
     });
   });
 
   describe('getFundLine', () => {
     it('should return an absolute line if the mode is absolute', () => {
-      expect(getFundLine(priceUnitsCosts, GRAPH_FUNDS_MODE_ABSOLUTE, id1)).toEqual([
+      expect.assertions(2);
+      expect(getFundLine(priceUnitsCosts, Mode.Value, id1)).toStrictEqual([
         100 * 34,
         102 * 34,
         103 * 18,
       ]);
 
-      expect(getFundLine(priceUnitsCosts, GRAPH_FUNDS_MODE_ABSOLUTE, id2)).toEqual([
-        954 * 105,
-        961 * 105,
-      ]);
+      expect(getFundLine(priceUnitsCosts, Mode.Value, id2)).toStrictEqual([954 * 105, 961 * 105]);
     });
 
     it('should return an ROI line if the mode is ROI', () => {
-      expect(getFundLine(priceUnitsCosts, GRAPH_FUNDS_MODE_ROI, id1)).toEqual([
+      expect.assertions(2);
+      expect(getFundLine(priceUnitsCosts, Mode.ROI, id1)).toStrictEqual([
         100 * ((100 * 34 - 3100) / 3100),
         100 * ((102 * 34 - 3100) / 3100),
         100 * ((103 * 18 - 1560) / 1560),
       ]);
 
-      expect(getFundLine(priceUnitsCosts, GRAPH_FUNDS_MODE_ROI, id2)).toEqual([
+      expect(getFundLine(priceUnitsCosts, Mode.ROI, id2)).toStrictEqual([
         100 * ((954 * 105 - 975400) / 975400),
         100 * ((961 * 105 - 975400) / 975400),
       ]);
     });
 
     it('should return a price line if the mode is price', () => {
-      expect(getFundLine(priceUnitsCosts, GRAPH_FUNDS_MODE_PRICE, id1)).toEqual([100, 102, 103]);
+      expect.assertions(2);
+      expect(getFundLine(priceUnitsCosts, Mode.Price, id1)).toStrictEqual([100, 102, 103]);
 
-      expect(getFundLine(priceUnitsCosts, GRAPH_FUNDS_MODE_PRICE, id2)).toEqual([954, 961]);
+      expect(getFundLine(priceUnitsCosts, Mode.Price, id2)).toStrictEqual([954, 961]);
     });
   });
 
   describe('getFundLineProcessed', () => {
     it('should process a normal fund line', () => {
+      expect.assertions(1);
       expect(
-        getFundLineProcessed(times, timeOffsets, priceUnitsCosts, GRAPH_FUNDS_MODE_ROI, id1),
-      ).toEqual([
+        getFundLineProcessed(times, timeOffsets, priceUnitsCosts, Mode.ROI, id1),
+      ).toStrictEqual([
         [
           [10000, 100 * ((100 * 34 - 3100) / 3100)],
           [10030, 100 * ((102 * 34 - 3100) / 3100)],
@@ -205,15 +208,10 @@ describe('Funds selectors / lines', () => {
     });
 
     it('should process an overall line', () => {
+      expect.assertions(1);
       expect(
-        getFundLineProcessed(
-          times,
-          timeOffsets,
-          priceUnitsCosts,
-          GRAPH_FUNDS_MODE_ROI,
-          GRAPH_FUNDS_OVERALL_ID,
-        ),
-      ).toEqual([
+        getFundLineProcessed(times, timeOffsets, priceUnitsCosts, Mode.ROI, GRAPH_FUNDS_OVERALL_ID),
+      ).toStrictEqual([
         [
           [10000, 100 * ((100 * 34 + 0 - (3100 + 0)) / (3100 + 0))],
           [10030, 100 * ((102 * 34 + 954 * 105 - (3100 + 975400)) / (3100 + 975400))],

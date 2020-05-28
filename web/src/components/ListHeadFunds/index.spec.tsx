@@ -17,6 +17,7 @@ describe('<ListHeadFunds />', () => {
     },
     onViewSoldToggle: jest.fn(),
     onReloadPrices: jest.fn(),
+    setSort: jest.fn(),
   };
 
   const setup = (): RenderResult => render(<ListHeadFunds {...props} />);

@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import getStore from 'redux-mock-store';
 import sinon from 'sinon';
 
-import GraphFunds from '.';
+import { GraphFunds } from '.';
 import { Period } from '~client/constants/graph';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';

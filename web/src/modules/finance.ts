@@ -1,8 +1,9 @@
+import { compose } from '@typed/compose';
 import jsonp from 'jsonp';
 import { replaceAtIndex } from 'replace-array';
 
-import { randnBm } from '~client/modules/data';
 import { FAKE_STOCK_PRICES } from '~client/constants/stocks';
+import { randnBm } from '~client/modules/data';
 
 type Price = {
   code: string;
@@ -13,7 +14,7 @@ type Price = {
 function getStockPricesFromYahoo(symbols: string[]): Promise<Price[]> {
   const symbolsJoined = symbols
     .slice(0, 1)
-    .map(symbol => JSON.stringify(symbol))
+    .map((symbol) => JSON.stringify(symbol))
     .join(',');
 
   const env = "env 'store://datatables.org/alltableswithkeys';";
@@ -94,7 +95,7 @@ function makeGetFakeStockPrices(): (symbols: string[]) => Promise<Price[]> {
 
     const thisResult = prices.slice();
 
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => resolve(thisResult), 100 * randnBm());
     });
   };
@@ -111,4 +112,87 @@ export async function getStockPrices(symbols: string[]): Promise<Price[]> {
   }
 
   return getStockPricesFromYahoo(symbols);
+}
+
+// Fund name abbreviations
+
+// helper functions
+const usingRegex = (regex: RegExp, processor: (name: string, matches: string[]) => string) => (
+  name: string,
+): string => {
+  const matches = name.match(regex);
+  return matches ? processor(name, matches) : name;
+};
+
+const extractConsonants = (value: string): string => value.replace(/[AEIOU]/gi, '');
+
+// constants
+const ordinaryShare = /((Ord(inary)?)|ORD)( Shares)?(( [0-9]+p)|( [0-9]+(\.[0-9]+)?))?( Share)?/;
+
+// common preparation functions
+const removeUnused = (a: string): string =>
+  a.replace(/(\s[A-Z])?\s\((share|fund|accum.|inc.)\)?/, '').replace(ordinaryShare, '');
+
+const withAnd = (a: string): string => a.replace(/([A-Z])[a-z]+ and ([A-Z])[a-z]+/, '$1&$2');
+const withInt = (a: string): string => a.replace(/ International/, ' Int.');
+
+const prepareBase = compose(withInt, withAnd, removeUnused);
+
+// Investment trusts
+const isInvestmentTrust = (name: string): boolean =>
+  (/\s(IT|(Investment )?Trust|)/.test(name) || ordinaryShare.test(name)) && /\(share\)/.test(name);
+
+const removeUnusedIT = (a: string): string => a.replace(/( And| Inc)/g, '');
+const ITToTrust = (a: string): string => a.replace(/\s(IT|Investment Trust)\s/, ' Trust ');
+
+const prepareIT = compose(ITToTrust, removeUnusedIT);
+
+const removeOf = (a: string): string => a.replace(/(\w+) of \w+/, '$1');
+const trustToInitials = (a: string): string => a.replace(/([A-Z])([a-z]+)\s/g, '$1');
+const removeSingletons = (a: string): string =>
+  a
+    .replace(/ [A-Z]($|\s)/, '')
+    .replace(/([A-Z]{2}T)T/, '$1')
+    .toUpperCase();
+
+function abbreviateIT(name: string): string {
+  return compose(
+    removeSingletons,
+    trustToInitials,
+    usingRegex(/^(\w+) Trust\s*/, (_, matches) => extractConsonants(matches[1]).substring(0, 4)),
+    removeOf,
+    prepareIT,
+  )(name);
+}
+
+// Active funds
+const removeUnusedFund = (a: string): string =>
+  a.replace(/((Man GLG|Jupiter|Threadneedle)( \w+)?)\s.*/, '$1');
+
+const prepareFund = compose(removeUnusedFund);
+
+function abbreviateFund(name: string): string {
+  return compose(
+    usingRegex(/^(\w+)(\s.*)?/, (_, matches) => `${extractConsonants(matches[1])}${matches[2]}`),
+    prepareFund,
+  )(name);
+}
+
+// Index trackers
+const isIndex = (name: string): boolean => /\s(Index( Trust)?)/.test(name);
+
+function abbreviateIndex(name: string): string {
+  return name.replace(/Index( Trust)?/, 'Ix');
+}
+
+export function abbreviateFundName(name: string): string {
+  const base = prepareBase(name);
+
+  if (isIndex(name)) {
+    return abbreviateIndex(base);
+  }
+  if (isInvestmentTrust(name)) {
+    return abbreviateIT(base);
+  }
+  return abbreviateFund(base);
 }

@@ -152,7 +152,7 @@ const getLatestTimes = createSelector(getCurrentFundsCache, (cache) => {
   return { timeLatest, timePrev };
 });
 
-const getLatestValues = createSelector(
+const getTodayAndYesterdayTotalValue = createSelector(
   getItemsWithPrices,
   getLatestTimes,
   getCurrentFundsCache,
@@ -193,7 +193,7 @@ const getLatestValues = createSelector(
 export const getDayGainAbs = createSelector(
   getItemsWithPrices,
   getLatestTimes,
-  getLatestValues,
+  getTodayAndYesterdayTotalValue,
   (itemsWithPrices, { timeLatest, timePrev }, values) => {
     if (!(values.latest && values.prev)) {
       return 0;
@@ -217,6 +217,8 @@ export const getDayGainAbs = createSelector(
   },
 );
 
-export const getDayGain = createSelector(getDayGainAbs, getLatestValues, (dayGainAbs, { prev }) =>
-  prev ? dayGainAbs / prev : 0,
+export const getDayGain = createSelector(
+  getDayGainAbs,
+  getTodayAndYesterdayTotalValue,
+  (dayGainAbs, { prev }) => (prev ? dayGainAbs / prev : 0),
 );

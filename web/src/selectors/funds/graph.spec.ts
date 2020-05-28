@@ -1,23 +1,17 @@
-import { State } from '~client/reducers';
 import { getStartTime, getCacheTimes, getFundItems, getFundLines } from './graph';
-import { testState } from '~client/test-data/state';
+import { Period, Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { colorKey } from '~client/modules/color';
+import { State } from '~client/reducers';
+import { colors } from '~client/styled/variables';
 import {
+  testState,
   testStartTime,
   testCacheTimes,
   testLinesRoi,
   testLinesAbsolute,
   testLinesPrice,
-} from '~client/test-data/funds';
-import {
-  Period,
-  GRAPH_FUNDS_MODE_ROI,
-  GRAPH_FUNDS_MODE_ABSOLUTE,
-  GRAPH_FUNDS_MODE_PRICE,
-  GRAPH_FUNDS_OVERALL_ID,
-} from '~client/constants/graph';
-import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
-import { colorKey } from '~client/modules/color';
-import { Page } from '~client/types/app';
+} from '~client/test-data';
+import { Page } from '~client/types';
 
 describe('Fund selectors / graph', () => {
   const state: Pick<State, 'now' | Page.funds> = {
@@ -61,7 +55,7 @@ describe('Fund selectors / graph', () => {
     it('should get the list of available funds with an overall item in addition', () => {
       expect.assertions(1);
       expect(getFundItems(state)).toStrictEqual([
-        { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: COLOR_GRAPH_FUND_LINE },
+        { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: colors.black },
         { id: '10', item: 'some fund 1', color: colorKey('some fund 1') },
         { id: '3', item: 'some fund 2', color: colorKey('some fund 2') },
         { id: '1', item: 'some fund 3', color: colorKey('some fund 3') },
@@ -80,7 +74,7 @@ describe('Fund selectors / graph', () => {
       };
 
       expect(getFundItems(stateNoSold)).toStrictEqual([
-        { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: COLOR_GRAPH_FUND_LINE },
+        { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: colors.black },
         { id: '10', item: 'some fund 1', color: colorKey('some fund 1') },
       ]);
     });
@@ -90,9 +84,9 @@ describe('Fund selectors / graph', () => {
     it('should get a list (by mode) of graphed, split fund lines', () => {
       expect.assertions(1);
       expect(getFundLines(state)).toStrictEqual({
-        [GRAPH_FUNDS_MODE_ROI]: testLinesRoi,
-        [GRAPH_FUNDS_MODE_ABSOLUTE]: testLinesAbsolute,
-        [GRAPH_FUNDS_MODE_PRICE]: testLinesPrice,
+        [Mode.ROI]: testLinesRoi,
+        [Mode.Value]: testLinesAbsolute,
+        [Mode.Price]: testLinesPrice,
       });
     });
 
@@ -109,9 +103,9 @@ describe('Fund selectors / graph', () => {
       const soldIds = ['3', '1', '5'];
 
       expect(getFundLines(stateNoSold)).toStrictEqual({
-        [GRAPH_FUNDS_MODE_ROI]: testLinesRoi.filter(({ id }) => !soldIds.includes(id)),
-        [GRAPH_FUNDS_MODE_ABSOLUTE]: testLinesAbsolute.filter(({ id }) => !soldIds.includes(id)),
-        [GRAPH_FUNDS_MODE_PRICE]: testLinesPrice.filter(({ id }) => !soldIds.includes(id)),
+        [Mode.ROI]: testLinesRoi.filter(({ id }) => !soldIds.includes(id)),
+        [Mode.Value]: testLinesAbsolute.filter(({ id }) => !soldIds.includes(id)),
+        [Mode.Price]: testLinesPrice.filter(({ id }) => !soldIds.includes(id)),
       });
     });
   });

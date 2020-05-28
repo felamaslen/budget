@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { render, RenderResult, within, act, fireEvent } from '@testing-library/react';
 import React from 'react';
 
@@ -73,6 +74,7 @@ describe('<NetWorthCategoryList />', () => {
     const typeDisplayValue = type === 'asset' ? 'Asset' : 'Liability';
 
     const newTypeValue = type === 'asset' ? 'liability' : 'asset';
+    const newTypeInputValue = type === 'asset' ? 'Liability' : 'Asset';
 
     const getForm = (): RenderResult & { form: HTMLElement } => {
       const renderResult = setup();
@@ -92,8 +94,8 @@ describe('<NetWorthCategoryList />', () => {
     describe.each`
       field              | value               | newValue
       ${'category name'} | ${category}         | ${'My new category'}
-      ${'type'}          | ${typeDisplayValue} | ${newTypeValue}
-      ${'isOption'}      | ${typeDisplayValue} | ${'option'}
+      ${'type'}          | ${typeDisplayValue} | ${newTypeInputValue}
+      ${'isOption'}      | ${typeDisplayValue} | ${'Option'}
       ${'Color'}         | ${color}            | ${'#ff0a8b'}
     `('$field field', ({ value, newValue }) => {
       const getInput = (): RenderResult & { input: HTMLInputElement } => {
@@ -143,14 +145,21 @@ describe('<NetWorthCategoryList />', () => {
       });
 
       describe.each`
-        field         | value       | displayValue        | testValue            | updateValue
-        ${'category'} | ${category} | ${undefined}        | ${'My new category'} | ${undefined}
-        ${'color'}    | ${color}    | ${undefined}        | ${'#ff0a8b'}         | ${undefined}
-        ${'type'}     | ${type}     | ${typeDisplayValue} | ${newTypeValue}      | ${undefined}
-        ${'isOption'} | ${type}     | ${typeDisplayValue} | ${'option'}          | ${switchToOption}
+        field         | value       | displayValue        | testValue            | testInputValue       | updateValue
+        ${'category'} | ${category} | ${undefined}        | ${'My new category'} | ${undefined}         | ${undefined}
+        ${'color'}    | ${color}    | ${undefined}        | ${'#ff0a8b'}         | ${undefined}         | ${undefined}
+        ${'type'}     | ${type}     | ${typeDisplayValue} | ${newTypeValue}      | ${newTypeInputValue} | ${undefined}
+        ${'isOption'} | ${type}     | ${typeDisplayValue} | ${'Option'}          | ${undefined}         | ${switchToOption}
       `(
         'when changing the $field field',
-        ({ field, value, displayValue = value, testValue, updateValue }) => {
+        ({
+          field,
+          value,
+          displayValue = value,
+          testValue,
+          testInputValue = testValue,
+          updateValue,
+        }) => {
           it('should call onUpdateCategory on click', () => {
             expect.assertions(3);
             const { button, form } = getUpdateButton();
@@ -158,13 +167,13 @@ describe('<NetWorthCategoryList />', () => {
             const input = getByDisplayValue(displayValue) as HTMLInputElement;
 
             act(() => {
-              fireEvent.change(input, { target: { value: testValue } });
+              fireEvent.change(input, { target: { value: testInputValue } });
             });
             act(() => {
               fireEvent.blur(input);
             });
 
-            expect(input.value).toBe(testValue);
+            expect(input.value).toBe(testInputValue);
             expect(props.onUpdateCategory).not.toHaveBeenCalled();
 
             act(() => {
@@ -188,25 +197,26 @@ describe('<NetWorthCategoryList />', () => {
             const input = getByDisplayValue(displayValue) as HTMLInputElement;
 
             expect(button.disabled).toBe(true);
+            const previousValue = input.value;
 
             act(() => {
-              fireEvent.change(input, { target: { value: testValue } });
+              fireEvent.change(input, { target: { value: testInputValue } });
             });
             act(() => {
               fireEvent.blur(input);
             });
 
-            expect(input.value).toBe(testValue);
+            expect(input.value).toBe(testInputValue);
             expect(button.disabled).toBe(false);
 
             act(() => {
-              fireEvent.change(input, { target: { value } });
+              fireEvent.change(input, { target: { value: previousValue } });
             });
             act(() => {
               fireEvent.blur(input);
             });
 
-            expect(input.value).toBe(value);
+            expect(input.value).toBe(previousValue);
             expect(button.disabled).toBe(true);
           });
         },
@@ -522,10 +532,10 @@ describe('<NetWorthCategoryList />', () => {
     describe.each`
       field              | value        | displayValue | newValue
       ${'category name'} | ${'Cash'}    | ${undefined} | ${'My new category'}
-      ${'type'}          | ${'asset'}   | ${'Asset'}   | ${'liability'}
-      ${'isOption'}      | ${'asset'}   | ${'Asset'}   | ${'option'}
+      ${'type'}          | ${'asset'}   | ${'Asset'}   | ${'Liability'}
+      ${'isOption'}      | ${'asset'}   | ${'Asset'}   | ${'Option'}
       ${'color'}         | ${'#ccffcc'} | ${undefined} | ${'#ff0a8b'}
-    `('$field field', ({ value, newValue, displayValue = value }) => {
+    `('$field field', ({ value, newValue, displayValue = value, newInputValue = newValue }) => {
       const getInput = (): RenderResult & { input: HTMLInputElement } => {
         const renderResult = getForm();
         const { getByDisplayValue } = within(renderResult.form);
@@ -544,13 +554,13 @@ describe('<NetWorthCategoryList />', () => {
         const { input } = getInput();
 
         act(() => {
-          fireEvent.change(input, { target: { value: newValue } });
+          fireEvent.change(input, { target: { value: newInputValue } });
         });
         act(() => {
           fireEvent.blur(input);
         });
 
-        expect(input.value).toBe(newValue);
+        expect(input.value).toBe(newInputValue);
         expect(props.onCreateCategory).not.toHaveBeenCalled();
       });
     });
@@ -573,14 +583,21 @@ describe('<NetWorthCategoryList />', () => {
       });
 
       describe.each`
-        field         | value        | displayValue | testValue            | testCreateValue
-        ${'category'} | ${'Cash'}    | ${undefined} | ${'My new category'} | ${undefined}
-        ${'color'}    | ${'#ccffcc'} | ${undefined} | ${'#ff0a8b'}         | ${undefined}
-        ${'type'}     | ${'asset'}   | ${'Asset'}   | ${'liability'}       | ${undefined}
-        ${'isOption'} | ${'asset'}   | ${'Asset'}   | ${'option'}          | ${switchToOption}
+        field         | value        | displayValue | testValue            | testInputValue | testCreateValue
+        ${'category'} | ${'Cash'}    | ${undefined} | ${'My new category'} | ${undefined}   | ${undefined}
+        ${'color'}    | ${'#ccffcc'} | ${undefined} | ${'#ff0a8b'}         | ${undefined}   | ${undefined}
+        ${'type'}     | ${'Asset'}   | ${'Asset'}   | ${'liability'}       | ${'Liability'} | ${undefined}
+        ${'isOption'} | ${'Asset'}   | ${'Asset'}   | ${'Option'}          | ${undefined}   | ${switchToOption}
       `(
         'when changing the $field field',
-        ({ field, value, displayValue = value, testValue, testCreateValue }) => {
+        ({
+          field,
+          value,
+          displayValue = value,
+          testValue,
+          testInputValue = testValue,
+          testCreateValue,
+        }) => {
           it('should call onCreateCategory on click', () => {
             expect.assertions(3);
             const { button, form } = getCreateButton();
@@ -588,13 +605,13 @@ describe('<NetWorthCategoryList />', () => {
             const input = getByDisplayValue(displayValue) as HTMLInputElement;
 
             act(() => {
-              fireEvent.change(input, { target: { value: testValue } });
+              fireEvent.change(input, { target: { value: testInputValue } });
             });
             act(() => {
               fireEvent.blur(input);
             });
 
-            expect(input.value).toBe(testValue);
+            expect(input.value).toBe(testInputValue);
             expect(props.onCreateCategory).not.toHaveBeenCalled();
 
             act(() => {

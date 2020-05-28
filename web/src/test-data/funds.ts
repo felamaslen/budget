@@ -1,10 +1,10 @@
 /* eslint-disable max-lines */
 import getUnixTime from 'date-fns/getUnixTime';
 
-import { COLOR_GRAPH_FUND_LINE } from '~client/constants/colors';
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
 import { getTransactionsList } from '~client/modules/data';
+import { colors } from '~client/styled/variables';
 import { Fund } from '~client/types/funds';
 
 export const testRows: Fund[] = [
@@ -346,7 +346,7 @@ export const testCacheTimes = [
 export const testLinesRoi = [
   {
     id: GRAPH_FUNDS_OVERALL_ID,
-    color: COLOR_GRAPH_FUND_LINE,
+    color: colors.black,
     data: [
       [0, 3.306834500000012],
       [259200, 2.2045550000000076],
@@ -417,7 +417,7 @@ export const testLinesRoi = [
   },
   {
     id: GRAPH_FUNDS_OVERALL_ID,
-    color: COLOR_GRAPH_FUND_LINE,
+    color: colors.black,
     data: [
       [18860400, 0.28825],
       [19033200, 0.28825],
@@ -627,7 +627,7 @@ export const testLinesRoi = [
 export const testLinesAbsolute = [
   {
     id: GRAPH_FUNDS_OVERALL_ID,
-    color: COLOR_GRAPH_FUND_LINE,
+    color: colors.black,
     data: [
       [0, 206613.66900000002],
       [259200, 204409.11000000002],
@@ -698,7 +698,7 @@ export const testLinesAbsolute = [
   },
   {
     id: GRAPH_FUNDS_OVERALL_ID,
-    color: COLOR_GRAPH_FUND_LINE,
+    color: colors.black,
     data: [
       [18860400, 401153],
       [19033200, 401153],
