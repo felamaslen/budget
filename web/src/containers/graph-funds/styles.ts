@@ -8,7 +8,7 @@ export const Container = styled(FlexColumn)`
   display: flex;
   flex: 1 0 auto;
   flex-flow: row;
-  flex-wrap: wrap;
+  overflow-x: auto;
 
   ${breakpoint(breakpoints.desktop)} {
     flex: 1;
@@ -25,7 +25,7 @@ export const GraphFunds = styled.div<{ width: number; height: number }>`
     border: 1px solid ${colors['medium-light']};
     flex: 0 0 ${({ height }): number => height}px;
     height: ${({ height }): number => height}px;
-    margin: ${rem(10)} ${rem(10)} 0 ${rem(10)};
+    margin: ${rem(10)} 0 0 ${rem(10)};
     overflow: hidden;
   }
 

@@ -26,7 +26,7 @@ export function usePersistentState<S>(
 
   const [state, setState] = useState<S>(initialState);
 
-  const [persistentState] = useDebounce<S>(state, 3000);
+  const [persistentState] = useDebounce<S>(state, 1000);
 
   const stateHasChanged = useRef<boolean>(false);
   useEffect(() => {

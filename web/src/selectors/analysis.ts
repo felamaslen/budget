@@ -49,7 +49,6 @@ const getSortedTree = <B extends string = string>(tree: AnalysisCost<B>): Analys
     subTree: sortByTotal(
       subTree.map(([item, total]) => ({
         name: item,
-        color: getTreeColor(name),
         total,
       })),
     ),
@@ -67,12 +66,14 @@ export const getCostAnalysis = createSelector<
 ]);
 
 export const getBlocks = (
+  width = ANALYSIS_VIEW_WIDTH,
+  height = ANALYSIS_VIEW_HEIGHT,
   treeVisible: AnalysisTreeVisible = {},
 ): ((state: State) => FlexBlocks<BlockItem>) =>
   createSelector(getCostAnalysis, (cost) =>
     blockPacker<BlockItem>(
-      ANALYSIS_VIEW_WIDTH,
-      ANALYSIS_VIEW_HEIGHT,
+      width,
+      height,
       cost
         .filter(({ name }: { name: MainBlockName }) => treeVisible[name] !== false)
         .map((block) => ({
@@ -89,6 +90,19 @@ const getDeepArray = (state: State): AnalysisCost | null => state.analysis.costD
 
 export const getDeepCost = createSelector(getDeepArray, (cost) => cost && getSortedTree(cost));
 
-export const getDeepBlocks = createSelector(getDeepCost, (cost) =>
-  cost ? blockPacker<BlockItem>(ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT, cost) : undefined,
-);
+export const getDeepBlocks = (
+  width = ANALYSIS_VIEW_HEIGHT,
+  height = ANALYSIS_VIEW_HEIGHT,
+): ((state: State) => FlexBlocks<BlockItem> | undefined) =>
+  createSelector(getDeepCost, (cost) =>
+    cost
+      ? blockPacker<BlockItem>(
+          width,
+          height,
+          cost.map((block, index) => ({
+            ...block,
+            color: colors.blockIndex[index % colors.blockIndex.length],
+          })),
+        )
+      : undefined,
+  );

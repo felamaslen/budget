@@ -1,9 +1,11 @@
 import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
 
-import { breakpoint } from '~client/styled/mixins';
+import { rem, breakpoint } from '~client/styled/mixins';
 import { Page as PageBase, Button as ButtonBase } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
 import { Page as PageType, MainBlockName } from '~client/types';
+
+export const blocksHeightMobile = 360;
 
 export const Input = styled.span`
   display: block;
@@ -191,10 +193,13 @@ export const SubTree = styled.ul`
 `;
 
 export const Tree = styled.div`
-  flex: 1 1 0;
-  min-height: 0;
+  flex: 0 0 ${rem(200)};
   overflow-y: auto;
-  padding: 0.3em;
+  padding: ${rem(4)};
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 1 1 0;
+  }
 `;
 
 export const TreeList = styled.ul`
@@ -263,6 +268,7 @@ export const DataItem = styled.span.attrs(({ color }) => ({
 
 export const Page = styled(PageBase)<{ page: PageType }>`
   flex: 1 1 0;
+  overflow-y: auto;
 
   ${breakpoint(breakpoints.mobile)} {
     flex-flow: column;

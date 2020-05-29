@@ -46,7 +46,7 @@ describe('Flex block packer', () => {
           "childIndex": 1,
           "children": Object {
             "box": Object {
-              "flex": 0.2,
+              "flex": 0.20000000000000004,
               "flow": "row",
             },
             "childIndex": 2,
@@ -163,13 +163,13 @@ describe('Flex block packer', () => {
                   "childIndex": 0,
                   "children": Object {
                     "box": Object {
-                      "flex": 0.4167,
+                      "flex": 0.4166666666666667,
                       "flow": "row",
                     },
                     "childIndex": 1,
                     "children": Object {
                       "box": Object {
-                        "flex": 0.2,
+                        "flex": 0.19999999999999996,
                         "flow": "column",
                       },
                       "childIndex": 2,
@@ -337,7 +337,7 @@ describe('Flex block packer', () => {
         "childIndex": 0,
         "children": Object {
           "box": Object {
-            "flex": 0.2482,
+            "flex": 0.24817651924353948,
             "flow": "column",
           },
           "childIndex": 1,
@@ -375,43 +375,43 @@ describe('Flex block packer', () => {
                 "childIndex": 0,
                 "children": Object {
                   "box": Object {
-                    "flex": 0.605,
+                    "flex": 0.6050413342132324,
                     "flow": "column",
                   },
                   "childIndex": 1,
                   "children": Object {
                     "box": Object {
-                      "flex": 0.5605,
+                      "flex": 0.5605152366030115,
                       "flow": "row",
                     },
                     "childIndex": 2,
                     "children": Object {
                       "box": Object {
-                        "flex": 0.3771,
+                        "flex": 0.37708218518614134,
                         "flow": "column",
                       },
                       "childIndex": 3,
                       "children": Object {
                         "box": Object {
-                          "flex": 0.7301,
+                          "flex": 0.7300674584321742,
                           "flow": "column",
                         },
                         "childIndex": 4,
                         "children": Object {
                           "box": Object {
-                            "flex": 0.6328,
+                            "flex": 0.6328342329989942,
                             "flow": "row",
                           },
                           "childIndex": 5,
                           "children": Object {
                             "box": Object {
-                              "flex": 0.4769,
+                              "flex": 0.4768855594403049,
                               "flow": "column",
                             },
                             "childIndex": 6,
                             "children": Object {
                               "box": Object {
-                                "flex": 0.4259,
+                                "flex": 0.42592629792801306,
                                 "flow": "row",
                               },
                               "childIndex": 7,

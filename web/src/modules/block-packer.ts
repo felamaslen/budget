@@ -36,12 +36,9 @@ const getChildHeight = (parent: SimpleNode, filledHeight: number): number =>
   isLandscape(parent) ? parent.height : parent.height - filledHeight;
 
 const getFlex = (parent: SimpleNode, filledWidth: number, filledHeight: number): number =>
-  Number(
-    (parent.width > parent.height
-      ? (parent.width - filledWidth) / parent.width
-      : (parent.height - filledHeight) / parent.height
-    ).toFixed(4),
-  );
+  parent.width > parent.height
+    ? (parent.width - filledWidth) / parent.width
+    : (parent.height - filledHeight) / parent.height;
 
 function worstPossibleAspectRatio(node: NodeRoot, areas: number[]): number {
   if (areas.length === 0) {
@@ -133,9 +130,6 @@ function appendItems<T extends Item>(
   }));
 
   const itemsFlow = getFlow(itemsWidth, itemsHeight);
-
-  // const childWidth = isLandscape(node) ? flex * node.width : node.width;
-  // const childHeight = isLandscape(node) ? node.height : flex * node.height;
 
   return {
     box: {
@@ -258,7 +252,7 @@ export function blockPacker<T extends Item>(
     items: {
       box: {
         flex: 0,
-        flow: 'row',
+        flow: getFlow(width, height),
       },
       blocks: [],
     },

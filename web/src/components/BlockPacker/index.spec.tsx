@@ -52,64 +52,37 @@ describe('<BlockPacker />', () => {
     const { getByTestId } = getContainer();
     expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
       .c0 {
-        -webkit-flex: 1 0 auto;
-        -ms-flex: 1 0 auto;
-        flex: 1 0 auto;
-        position: relative;
-      }
-
-      .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-flow: row;
-        -ms-flex-flow: row;
-        flex-flow: row;
-        -webkit-box-flex: 0;
-        -webkit-flex-grow: 0;
-        -ms-flex-positive: 0;
-        flex-grow: 0;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        position: relative;
+      }
+
+      .c1 {
+        float: left;
         height: 100%;
         width: 100%;
       }
 
       .c2 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-flow: column;
-        -ms-flex-flow: column;
-        flex-flow: column;
-        -webkit-box-flex: 0;
-        -webkit-flex-grow: 0;
-        -ms-flex-positive: 0;
-        flex-grow: 0;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
+        background-image: linear-gradient(to bottom right,rgba(255,255,255,0.6),rgba(0,0,0,0.3));
+        box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
+        float: left;
         height: 100%;
+        outline: none;
+        overflow: hidden;
+        position: relative;
         width: 100%;
       }
 
       .c3 {
-        background-image: linear-gradient(to bottom right,rgba(255,255,255,0.6),rgba(0,0,0,0.3));
+        background-image: none;
         box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-flex: 0;
-        -webkit-flex-grow: 0;
-        -ms-flex-positive: 0;
-        flex-grow: 0;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
+        float: left;
         height: 100%;
         outline: none;
         overflow: hidden;
@@ -117,25 +90,8 @@ describe('<BlockPacker />', () => {
         width: 100%;
       }
 
-      .c4 {
-        background-image: none;
-        box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-flex: 0;
-        -webkit-flex-grow: 0;
-        -ms-flex-positive: 0;
-        flex-grow: 0;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
-        flex-shrink: 0;
-        height: 100%;
-        outline: none;
-        overflow: hidden;
-        position: relative;
-        width: 100%;
+      @media only screen and (min-width:350px) {
+
       }
 
       <div
@@ -144,85 +100,85 @@ describe('<BlockPacker />', () => {
       >
         <div
           class="c1"
-          style="flex-basis: 100%;"
+          style="height: 100%; width: 100%;"
         >
           <div
-            class="c2"
-            style="flex-basis: 60%;"
+            class="c1"
+            style="height: 100%; width: 60%;"
           >
             <div
-              class="c3"
+              class="c2"
               data-testid="parent block 2"
               name="parent block 2"
               role="button"
-              style="flex-basis: 100%; background-color: purple;"
+              style="height: 100%; width: 100%; background-color: purple;"
               tabindex="0"
             />
           </div>
           <div
-            class="c2"
-            style="flex-basis: 40%;"
+            class="c1"
+            style="height: 100%; width: 40%;"
           >
             <div
-              class="c2"
-              style="flex-basis: 100%;"
+              class="c1"
+              style="height: 100%; width: 100%;"
             >
               <div
-                class="c4"
+                class="c3"
                 data-testid="parent block 1"
                 name="parent block 1"
                 role="container"
-                style="flex-basis: 100%; background-color: darkorange;"
+                style="height: 100%; width: 100%; background-color: darkorange;"
                 tabindex="0"
               >
                 <div
-                  class="c2"
-                  style="flex-basis: 100%;"
+                  class="c1"
+                  style="height: 100%; width: 100%;"
                 >
                   <div
                     class="c1"
-                    style="flex-basis: 58.333333333333336%;"
+                    style="height: 58.333333333333336%; width: 100%;"
                   >
                     <div
-                      class="c3"
+                      class="c2"
                       data-testid="child block B"
                       name="child block B"
                       role="container"
-                      style="flex-basis: 100%; background-color: rgb(211, 84, 0);"
+                      style="height: 100%; width: 100%;"
                       tabindex="0"
                     />
                   </div>
                   <div
                     class="c1"
-                    style="flex-basis: 41.67%;"
+                    style="height: 41.66666666666667%; width: 100%;"
                   >
                     <div
                       class="c1"
-                      style="flex-basis: 80%;"
+                      style="height: 100%; width: 80%;"
                     >
                       <div
-                        class="c3"
+                        class="c2"
                         data-testid="child block A"
                         name="child block A"
                         role="container"
-                        style="flex-basis: 100%; background-color: rgb(26, 188, 156);"
+                        style="height: 100%; width: 100%;"
                         tabindex="0"
                       />
                     </div>
                     <div
-                      class="c2"
-                      style="flex-basis: 20%;"
+                      class="c1"
+                      style="height: 100%; width: 19.999999999999996%;"
                     >
                       <div
-                        class="c2"
-                        style="flex-basis: 100.00000000000003%;"
+                        class="c1"
+                        style="height: 100.00000000000003%; width: 100%;"
                       >
                         <div
-                          class="c3"
+                          class="c2"
                           data-testid="child block C"
                           name="child block C"
                           role="container"
-                          style="flex-basis: 100%; background-color: rgb(241, 196, 15);"
+                          style="height: 100%; width: 100%;"
                           tabindex="0"
                         />
                       </div>
@@ -248,10 +204,18 @@ describe('<BlockPacker />', () => {
     const { getByTestId } = getContainer({ blocks: null });
     expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
       .c0 {
-        -webkit-flex: 1 0 auto;
-        -ms-flex: 1 0 auto;
-        flex: 1 0 auto;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
         position: relative;
+      }
+
+      @media only screen and (min-width:350px) {
+
       }
 
       <div

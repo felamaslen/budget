@@ -1,9 +1,11 @@
+import { CSSProperties } from 'react';
 import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
 
 import { Preview } from './types';
-import { rem, diagonalBg } from '~client/styled/mixins';
-import { colors } from '~client/styled/variables';
-import { FlexFlow } from '~client/types';
+import { Page as PageAnalysis, blocksHeightMobile } from '~client/containers/PageAnalysis/styles';
+import { rem, diagonalBg, breakpoint } from '~client/styled/mixins';
+import { colors, breakpoints } from '~client/styled/variables';
+import { Box as BoxProps } from '~client/types';
 
 export const fadeTime = 250;
 
@@ -12,10 +14,18 @@ export const Container = styled.div`
   flex-flow: column;
   height: 100%;
   width: 100%;
+
+  ${PageAnalysis} & {
+    flex: 0 0 ${rem(breakpoints.mobileSmall)};
+    ${breakpoint(breakpoints.mobileSmall)} {
+      flex: 0 0 ${rem(blocksHeightMobile)};
+    }
+  }
 `;
 
 export const BoxContainer = styled.div`
-  flex: 1 0 auto;
+  display: flex;
+  flex: 1;
   position: relative;
 `;
 
@@ -35,33 +45,33 @@ export const Expander = styled.div.attrs(({ left, top, height, width, color }: E
   transition: all ${fadeTime}ms ease-in-out;
 `;
 
-export const Box = styled.div.attrs(({ flex }: { flex: number }) => ({
-  style: {
-    flexBasis: `${flex * 100}%`,
-  },
-}))<{
-  flex: number; // 0 < flex <= 1; used as flex-basis percentage
-  flow: FlexFlow;
-}>`
-  display: flex;
-  flex-flow: ${({ flow }): FlexFlow => flow};
-  flex-grow: 0;
-  flex-shrink: 0;
+const getBoxStyle = ({ flex, flow }: BoxProps): CSSProperties => ({
+  height: `${(flow === 'row' ? 1 : flex) * 100}%`,
+  width: `${(flow === 'row' ? flex : 1) * 100}%`,
+});
+
+export const InfiniteBox = styled.div.attrs(({ flex, flow }: BoxProps) => ({
+  style: getBoxStyle({ flex, flow }),
+}))<BoxProps>`
+  float: left;
   height: 100%;
   width: 100%;
 `;
 
-export const Child = styled.div.attrs(({ flex, bgColor }: { flex: number; bgColor?: string }) => ({
-  style: {
-    flexBasis: `${flex * 100}%`,
-    backgroundColor: bgColor,
-  },
-}))<{
-  flex: number; // 0 < flex <= 1; used as flex-basis percentage
-  name: string;
-  bgColor?: string;
-  hasSubTree: boolean;
-}>`
+export const InfiniteChild = styled.div.attrs(
+  ({ flex, flow, bgColor }: BoxProps & { bgColor?: string }) => ({
+    style: {
+      ...getBoxStyle({ flex, flow }),
+      backgroundColor: bgColor,
+    },
+  }),
+)<
+  BoxProps & {
+    name: string;
+    bgColor?: string;
+    hasSubTree: boolean;
+  }
+>`
   background-image: ${({ hasSubTree }): string =>
     hasSubTree
       ? 'none'
@@ -84,9 +94,7 @@ export const Child = styled.div.attrs(({ flex, bgColor }: { flex: number; bgColo
     `};
 
   box-shadow: inset -1px -1px 13px ${colors['shadow-l4']};
-  display: flex;
-  flex-grow: 0;
-  flex-shrink: 0;
+  float: left;
   height: 100%;
   outline: none;
   overflow: hidden;
@@ -94,12 +102,14 @@ export const Child = styled.div.attrs(({ flex, bgColor }: { flex: number; bgColo
   width: 100%;
 `;
 
+export const statusHeight = 21;
+
 export const StatusBar = styled.div`
   background: ${colors.dark};
   padding: 0 0.8em;
   margin-top: -1px;
   color: ${colors.light};
-  flex: 0 0 ${rem(21)};
+  flex: 0 0 ${rem(statusHeight)};
   font-size: ${rem(16)};
   line-height: ${rem(20)};
   overflow: hidden;

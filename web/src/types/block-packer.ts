@@ -2,7 +2,7 @@ import React from 'react';
 
 export type FlexFlow = 'row' | 'column';
 
-type Box = {
+export type Box = {
   flex: number; // 0 < flex <= 1; root node has flex: 1
   flow: FlexFlow;
 };

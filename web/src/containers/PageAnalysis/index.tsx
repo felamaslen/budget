@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import ListTree, { Props as PropsListTree } from './list-tree';
@@ -8,7 +8,14 @@ import Upper from './upper';
 
 import { requested, blockRequested, blockReceived } from '~client/actions/analysis';
 import { BlockPacker } from '~client/components/BlockPacker';
-import { usePersistentState } from '~client/hooks/persist';
+import { statusHeight } from '~client/components/BlockPacker/styles';
+import {
+  ANALYSIS_VIEW_WIDTH,
+  ANALYSIS_VIEW_HEIGHT,
+  Period,
+  Grouping,
+} from '~client/constants/analysis';
+import { usePersistentState, ResizeContext, useMediaQuery } from '~client/hooks';
 import { formatCurrency, capitalise } from '~client/modules/format';
 import {
   getAnalysisPeriod,
@@ -21,9 +28,12 @@ import {
   getTimeline,
   getDescription,
 } from '~client/selectors';
+import { breakpointBase } from '~client/styled/mixins';
+import { breakpoints } from '~client/styled/variables';
 import { Page, MainBlockName, AnalysisTreeVisible, FlexBlocks, BlockItem } from '~client/types';
 
 const keyTreeVisible = 'analysis_treeVisible';
+const keyState = 'analysis_state';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const validateTreeVisible = (value: any | AnalysisTreeVisible): value is AnalysisTreeVisible =>
@@ -54,17 +64,67 @@ function useTreeToggle(): [AnalysisTreeVisible, PropsListTree['toggleTreeItem']]
   return [treeVisible, toggleTreeItem];
 }
 
+function useBlockDimensions(): { width: number; height: number } {
+  const windowWidth = useContext(ResizeContext);
+  const largerThanSmallMobile = useMediaQuery(breakpointBase(breakpoints.mobileSmall));
+  const isDesktop = useMediaQuery(breakpointBase(breakpoints.tablet));
+
+  if (!isDesktop) {
+    return {
+      width: windowWidth,
+      height:
+        (largerThanSmallMobile ? Styled.blocksHeightMobile : breakpoints.mobileSmall) -
+        statusHeight,
+    };
+  }
+
+  return { width: ANALYSIS_VIEW_WIDTH, height: ANALYSIS_VIEW_HEIGHT - statusHeight };
+}
+
+type AnalysisState = { period: Period; grouping: Grouping; page: number };
+const defaultState: AnalysisState = { period: Period.year, grouping: Grouping.category, page: 0 };
+
+function usePersistentAnalysisState(
+  onRequest: (nextState: Partial<AnalysisState>) => void,
+): AnalysisState {
+  const period = useSelector(getAnalysisPeriod);
+  const grouping = useSelector(getGrouping);
+  const page = useSelector(getPage);
+
+  const [persistentState, setPersistentState] = usePersistentState<AnalysisState>(
+    defaultState,
+    keyState,
+  );
+  const loadedFromPersistent = useRef<boolean>(false);
+  useEffect(() => {
+    if (!loadedFromPersistent.current) {
+      loadedFromPersistent.current = true;
+      onRequest(persistentState);
+    }
+  }, [persistentState, onRequest]);
+
+  useEffect(() => {
+    setPersistentState({ period, grouping, page });
+  }, [setPersistentState, period, grouping, page]);
+
+  return { period, grouping, page };
+}
+
 const PageAnalysis: React.FC = () => {
   const timeline = useSelector(getTimeline);
   const cost = useSelector(getCostAnalysis);
   const costDeep = useSelector(getDeepCost);
   const [treeVisible, toggleTreeItem] = useTreeToggle();
-  const getFilteredBlocks = useMemo(() => getBlocks(treeVisible), [treeVisible]);
+  const { width, height } = useBlockDimensions();
+  const getFilteredBlocks = useMemo(() => getBlocks(width, height, treeVisible), [
+    width,
+    height,
+    treeVisible,
+  ]);
   const blocks: FlexBlocks<BlockItem> = useSelector(getFilteredBlocks);
-  const blocksDeep: FlexBlocks<BlockItem> | undefined = useSelector(getDeepBlocks);
-  const period = useSelector(getAnalysisPeriod);
-  const grouping = useSelector(getGrouping);
-  const page = useSelector(getPage);
+
+  const getSizedDeepBlocks = useMemo(() => getDeepBlocks(width, height), [width, height]);
+  const blocksDeep: FlexBlocks<BlockItem> | undefined = useSelector(getSizedDeepBlocks);
   const description = useSelector(getDescription);
 
   const dispatch = useDispatch();
@@ -79,11 +139,13 @@ const PageAnalysis: React.FC = () => {
     [dispatch],
   );
   const onRequest = useCallback(
-    (request?: Partial<{}>): void => {
+    (request?: Partial<AnalysisState>): void => {
       dispatch(requested(request));
     },
     [dispatch],
   );
+
+  const { period, grouping, page } = usePersistentAnalysisState(onRequest);
 
   const [activeBlock, setActiveBlock] = useState<[MainBlockName | null, string | null]>([
     null,
@@ -93,14 +155,6 @@ const PageAnalysis: React.FC = () => {
   const [activeMain, activeSub] = activeBlock;
 
   const [treeOpen, setTreeOpen] = useState({});
-
-  const hasRequested = useRef<boolean>(false);
-  useEffect(() => {
-    if (!hasRequested.current) {
-      hasRequested.current = true;
-      onRequest();
-    }
-  }, [cost, onRequest]);
 
   const status = useMemo(() => {
     const activeCost = costDeep || cost;

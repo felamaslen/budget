@@ -1,7 +1,8 @@
 import { css, FlattenSimpleInterpolation } from 'styled-components';
 import { colors } from '~client/styled/variables';
 
-export const breakpoint = (size: number): string => `@media only screen and (min-width: ${size}px)`;
+export const breakpointBase = (size: number): string => `only screen and (min-width: ${size}px)`;
+export const breakpoint = (size: number): string => `@media ${breakpointBase(size)}`;
 
 export const diagonalBg = (size = 16): FlattenSimpleInterpolation => css`
   background-image: linear-gradient(

@@ -3,10 +3,10 @@ import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react'
 
 import * as Styled from './styles';
 import { Preview } from './types';
-import { useCTA } from '~client/hooks/cta';
+import { useCTA } from '~client/hooks';
 import { VOID } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { BlockItem, FlexBlocks, PickUnion } from '~client/types';
+import { PickUnion, BlockItem, FlexBlocks, Box } from '~client/types';
 
 type BlockName = string | null;
 
@@ -22,30 +22,19 @@ export type Props = {
   status: string;
 };
 
-type CommonProps = {
+type CommonProps = Box & {
   isSubTree?: boolean;
   isDeep: boolean;
   onHover?: Props['onHover'];
   setPreview: SetPreview;
 };
 
-const highlightColor = (color: string): string =>
+const highlightColor = (color = colors.transparent): string =>
   setSaturation(1)(mix(0.2)(color, colors.highlight));
-
-function getBlockColor(bgColor?: string | number): string {
-  if (typeof bgColor === 'string') {
-    return bgColor;
-  }
-  if (typeof bgColor === 'number' && bgColor < colors.blockIndex.length) {
-    return colors.blockIndex[bgColor % colors.blockIndex.length];
-  }
-  return colors.transparent;
-}
 
 const InfiniteChild: React.FC<
   CommonProps &
     PickUnion<BlockItem, 'name' | 'color' | 'childCount' | 'text' | 'hasBreakdown'> & {
-      flex: number;
       active?: boolean;
       activeSub?: string | null;
       subTree?: FlexBlocks<BlockItem>;
@@ -53,8 +42,8 @@ const InfiniteChild: React.FC<
 > = ({
   name,
   flex,
+  flow,
   color,
-  childCount,
   active,
   activeSub,
   subTree,
@@ -107,16 +96,15 @@ const InfiniteChild: React.FC<
 
   const diveProps = useCTA(onDiveIn);
 
-  const bgColor = getBlockColor(color ?? childCount);
-
   return (
-    <Styled.Child
+    <Styled.InfiniteChild
       ref={childRef}
       data-testid={name}
       role={canDive ? 'button' : 'container'}
       name={name}
       flex={flex}
-      bgColor={active ? highlightColor(bgColor) : bgColor}
+      flow={flow}
+      bgColor={active ? highlightColor(color) : color}
       tabIndex={0}
       onFocus={onActivate}
       onMouseOver={onActivate}
@@ -127,6 +115,8 @@ const InfiniteChild: React.FC<
       {text}
       {subTree && (
         <InfiniteBox
+          flex={1}
+          flow={flow}
           activeMain={activeSub}
           blocks={subTree}
           onHover={onActivateChild}
@@ -135,7 +125,7 @@ const InfiniteChild: React.FC<
           isDeep={isDeep}
         />
       )}
-    </Styled.Child>
+    </Styled.InfiniteChild>
   );
 };
 
@@ -147,7 +137,7 @@ const InfiniteBox: React.FC<
     activeMain?: string | null;
     activeSub?: string | null;
   }
-> = ({ blocks, activeMain, activeSub, isSubTree, isDeep, onHover, setPreview }) => {
+> = ({ flow, blocks, activeMain, activeSub, isSubTree, isDeep, onHover, setPreview }) => {
   const activeItemIndex = useMemo<number>(
     () =>
       activeMain
@@ -162,9 +152,9 @@ const InfiniteBox: React.FC<
   );
 
   return (
-    <Styled.Box flex={blocks.box.flex} flow={blocks.box.flow}>
+    <Styled.InfiniteBox flex={blocks.box.flex} flow={flow}>
       {blocks.items && (
-        <Styled.Box flex={blocks.items.box.flex} flow={blocks.items.box.flow}>
+        <Styled.InfiniteBox flex={blocks.items.box.flex} flow={blocks.box.flow}>
           {blocks.items.blocks.map((item, index) => (
             <InfiniteChildMemo
               key={item.name}
@@ -172,6 +162,7 @@ const InfiniteBox: React.FC<
               active={!activeSub && index === activeItemIndex}
               activeSub={activeItemIndex === -1 ? null : activeSub}
               flex={item.flex}
+              flow={blocks.items!.box.flow}
               color={item.color}
               childCount={item.childCount ?? 0}
               subTree={item.subTree}
@@ -183,11 +174,13 @@ const InfiniteBox: React.FC<
               setPreview={setPreview}
             />
           ))}
-        </Styled.Box>
+        </Styled.InfiniteBox>
       )}
       {blocks.children && (
         <InfiniteBox
           key={`child-${blocks.children.childIndex}`}
+          flex={1}
+          flow={blocks.box.flow}
           blocks={blocks.children}
           activeMain={activeItemIndex === -1 ? activeMain : null}
           activeSub={activeItemIndex === -1 ? activeSub : null}
@@ -197,7 +190,7 @@ const InfiniteBox: React.FC<
           setPreview={setPreview}
         />
       )}
-    </Styled.Box>
+    </Styled.InfiniteBox>
   );
 };
 
@@ -363,6 +356,8 @@ const Blocks: React.FC<Omit<Props, 'status'>> = ({
       {preview.open && <Styled.Expander data-testid="preview" {...preview} />}
       {blocks && !blocksDeep && (
         <InfiniteBox
+          flex={1}
+          flow={blocks.box.flow}
           blocks={blocks}
           isDeep={false}
           activeMain={activeMain}
@@ -372,7 +367,14 @@ const Blocks: React.FC<Omit<Props, 'status'>> = ({
         />
       )}
       {blocksDeep && (
-        <InfiniteBox isDeep={true} blocks={blocksDeep} onHover={onHover} setPreview={surface} />
+        <InfiniteBox
+          flex={1}
+          flow={blocksDeep.box.flow}
+          isDeep={true}
+          blocks={blocksDeep}
+          onHover={onHover}
+          setPreview={surface}
+        />
       )}
     </Styled.BoxContainer>
   );

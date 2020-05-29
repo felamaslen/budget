@@ -1,14 +1,24 @@
 import { render, RenderResult } from '@testing-library/react';
+import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import getStore, { MockStore } from 'redux-mock-store';
 
 import PageAnalysis from '.';
 import { requested } from '~client/actions/analysis';
+import { Period, Grouping } from '~client/constants/analysis';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 
 describe('<PageAnalysis />', () => {
+  let matchMedia: MatchMediaMock;
+  beforeAll(() => {
+    matchMedia = new MatchMediaMock();
+  });
+  afterEach(async () => {
+    matchMedia.clear();
+  });
+
   const mockStore = getStore();
 
   const getContainer = (
@@ -33,7 +43,11 @@ describe('<PageAnalysis />', () => {
   it('should request data on mount', () => {
     expect.assertions(1);
     const { store } = getContainer();
-    expect(store.getActions()).toStrictEqual(expect.arrayContaining([requested({})]));
+    expect(store.getActions()).toStrictEqual(
+      expect.arrayContaining([
+        requested({ period: Period.year, grouping: Grouping.category, page: 0 }),
+      ]),
+    );
   });
 
   it('should not render a timeline if there is not one present', () => {
