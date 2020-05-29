@@ -94,15 +94,17 @@ export function useSuggestions<I extends Item, P extends string>({
                 return;
               }
 
-              const { data } = res.data;
+              const list = res.data.data?.list ?? [];
+              const next = res.data.data?.nextCategory ?? [];
+              const nextField = res.data.data?.nextField ?? null;
 
               setState((last) =>
                 last.activeField === field
                   ? {
                       ...last,
-                      list: data.list,
-                      next: data.nextCategory ?? [],
-                      nextField: data.nextField ?? null,
+                      list,
+                      next,
+                      nextField,
                       requestedField: field,
                     }
                   : last,
