@@ -82,7 +82,6 @@ const CreateField = <I extends Item, E extends {}>({
   ]);
 
   const onFocus = useCallback(() => setActiveField(field), [setActiveField, field]);
-
   return (
     <Styled.CreateField>
       <AccessibleListItemField

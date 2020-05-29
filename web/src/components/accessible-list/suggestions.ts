@@ -178,10 +178,8 @@ export function useSuggestions<I extends Item, P extends string>({
             ...last,
             [state.activeField ?? '']: state.list[index],
           };
-          if (nextValue && nextField) {
-            return { ...withMain, [nextField]: nextValue };
-          }
-          return withMain;
+
+          return nextValue && nextField ? { ...withMain, [nextField]: nextValue } : withMain;
         },
       );
       setImmediate(() => {

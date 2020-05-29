@@ -150,7 +150,7 @@ export function useField<V = string, E = React.ChangeEvent<HTMLInputElement>>({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [state, dispatch] = useReducer<Reducer<V>>(fieldReducer(convertExternalToInputValue), {
-    active: false,
+    active,
     externalValue: value,
     currentValue: value,
     inputValue: convertExternalToInputValue(value, false),
@@ -160,6 +160,8 @@ export function useField<V = string, E = React.ChangeEvent<HTMLInputElement>>({
     dispatch({ type: NavActionType.ValueSet, payload: value });
   }, [value]);
 
+  const lastOnChangeCallValue = useRef<V | undefined>(state.currentValue);
+
   useEffect(() => {
     if (!inline) {
       return;
@@ -168,6 +170,7 @@ export function useField<V = string, E = React.ChangeEvent<HTMLInputElement>>({
       focusInput(inputRef);
     }
     if (active !== state.active) {
+      lastOnChangeCallValue.current = undefined;
       dispatch({
         type: ActionType.ActiveToggled,
         active,
@@ -211,7 +214,6 @@ export function useField<V = string, E = React.ChangeEvent<HTMLInputElement>>({
   );
 
   const [shouldCallOnChange, callOnChange] = useState<boolean>(false);
-  const lastOnChangeCallValue = useRef<V>(state.currentValue);
   useEffect(() => {
     if (shouldCallOnChange && state.currentValue !== lastOnChangeCallValue.current) {
       lastOnChangeCallValue.current = state.currentValue;
