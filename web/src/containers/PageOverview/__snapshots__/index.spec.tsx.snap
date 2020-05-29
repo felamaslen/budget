@@ -448,6 +448,14 @@ exports[`<PageOverview /> should render a table 1`] = `
   color: black;
 }
 
+@media only screen and (min-width:350px) {
+
+}
+
+@media only screen and (min-width:1200px) {
+
+}
+
 @media only screen and (min-width:690px) {
   .c0 {
     cursor: default;
@@ -968,14 +976,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:690px) {
-
-}
-
-@media only screen and (min-width:1200px) {
-
-}
-
-@media only screen and (min-width:350px) {
 
 }
 
@@ -1953,6 +1953,31 @@ exports[`<PageOverview /> should render a table 1`] = `
 `;
 
 exports[`<PageOverview /> should render graphs 1`] = `
+.c2 {
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.sc-pReKu .c2 {
+  position: relative;
+  height: 125px;
+}
+
+.c0 {
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  height: 240px;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.c0 .c1 {
+  overflow: hidden;
+}
+
 .c3 {
   position: absolute;
   right: 0;
@@ -2000,29 +2025,12 @@ exports[`<PageOverview /> should render graphs 1`] = `
   border-radius: 100%;
 }
 
-.c2 {
-  width: 100%;
-  position: relative;
-  z-index: 2;
+@media only screen and (min-width:350px) {
+
 }
 
-.sc-pciEQ .c2 {
-  position: relative;
-  height: 125px;
-}
+@media only screen and (min-width:1200px) {
 
-.c0 {
-  -webkit-flex: 0 0 auto;
-  -ms-flex: 0 0 auto;
-  flex: 0 0 auto;
-  height: 240px;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
-  z-index: 10;
-  overflow: hidden;
-}
-
-.c0 .c1 {
-  overflow: hidden;
 }
 
 @media only screen and (min-width:690px) {
@@ -2262,7 +2270,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 @media only screen and (min-width:690px) {
-  .sc-pciEQ .c2 {
+  .sc-pReKu .c2 {
     height: 100%;
   }
 }
@@ -2276,7 +2284,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
     box-shadow: 0 3px 10px rgba(0,0,0,0.3);
   }
 
-  .sc-fzowVh .c2 {
+  .sc-fzomME .c2 {
     z-index: 10;
     width: 100px;
     height: 100%;
@@ -2351,16 +2359,8 @@ exports[`<PageOverview /> should render graphs 1`] = `
   }
 }
 
-@media only screen and (min-width:350px) {
-
-}
-
-@media only screen and (min-width:1200px) {
-
-}
-
 <div
-  class="sc-pHIBf c0"
+  class="sc-qQMSE c0"
   data-testid="graph-overview"
 >
   <div

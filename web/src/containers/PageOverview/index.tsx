@@ -1,11 +1,10 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 
-import OverviewTable from '~client/components/OverviewTable';
-import GraphOverview from '~client/containers/graph-overview';
-import NetWorth from '~client/containers/NetWorth';
-
 import * as Styled from './styles';
+import OverviewTable from '~client/components/OverviewTable';
+import { GraphOverview } from '~client/containers/graph-overview';
+import NetWorth from '~client/containers/NetWorth';
 
 const PageOverview: React.FC = () => (
   <>
