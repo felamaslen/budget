@@ -20,7 +20,6 @@ import { FormFieldCostInline } from '~client/components/FormField/cost';
 import { FormFieldDateInline } from '~client/components/FormField/date';
 import { ModalFields } from '~client/components/ModalDialog';
 import { formatCurrency, capitalise } from '~client/modules/format';
-import { getCurrentDate } from '~client/selectors';
 import { Delta, ListItem, PickUnion } from '~client/types';
 
 export const standardFields = {
@@ -106,7 +105,7 @@ export const AccessibleListStandard = <
 }: PropsStandard<I, P, MK, E & ExtraProps>): React.ReactElement<
   PropsStandard<I, P, MK, E & ExtraProps>
 > => {
-  const now = useSelector(getCurrentDate);
+  const now = useMemo<Date>(() => startOfDay(new Date()), []);
   const itemProcessor = useMemo(() => makeItemProcessor(now), [now]);
   const allSuggestionFields = useMemo<FieldKey<I>[]>(
     () => [...(suggestionFields ?? []), ...standardSuggestionFields] as FieldKey<I>[],

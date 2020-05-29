@@ -1,4 +1,5 @@
 import getUnixTime from 'date-fns/getUnixTime';
+import moize from 'moize';
 import { createSelector } from 'reselect';
 
 import { getProcessedCost, getFutureMonths, getMonthDates } from './overview';
@@ -11,34 +12,36 @@ const targetPeriods = [
   { last: 12, months: 60, tag: '5y' },
 ];
 
-export const getTargets = createSelector<State, CostProcessed, number, Date[], Target[]>(
-  getProcessedCost,
-  getFutureMonths,
-  getMonthDates,
-  ({ netWorthCombined, netWorth }, futureMonths, dates) => {
-    const values = [
-      netWorthCombined[netWorthCombined.length - 1 - futureMonths],
-      ...netWorth.slice(0, -(futureMonths + 1)).reverse(),
-    ];
+export const getTargets = moize(
+  (today: Date): ((state: State) => Target[]) =>
+    createSelector<State, CostProcessed, number, Date[], Target[]>(
+      getProcessedCost(today),
+      getFutureMonths(today),
+      getMonthDates,
+      ({ netWorthCombined, netWorth }, futureMonths, dates) => {
+        const values = [
+          netWorthCombined[netWorthCombined.length - 1 - futureMonths],
+          ...netWorth.slice(0, -(futureMonths + 1)).reverse(),
+        ];
 
-    return targetPeriods.map(({ last, months, tag }) => {
-      const index =
-        ((-(futureMonths + last) % netWorth.length) + netWorth.length) % netWorth.length;
+        return targetPeriods.map(({ last, months, tag }) => {
+          const index =
+            ((-(futureMonths + last) % netWorth.length) + netWorth.length) % netWorth.length;
 
-      const from = netWorth[index];
+          const from = netWorth[index];
+          const date = getUnixTime(dates[index]);
+          const value = from + (values[0] - from) * ((months + last) / (last - 1));
 
-      const date = getUnixTime(dates[index]);
-
-      const value = from + (values[0] - from) * ((months + last) / (last - 1));
-
-      return {
-        date,
-        from,
-        months,
-        last,
-        tag,
-        value,
-      };
-    });
-  },
+          return {
+            date,
+            from,
+            months,
+            last,
+            tag,
+            value,
+          };
+        });
+      },
+    ),
+  { maxSize: 1 },
 );

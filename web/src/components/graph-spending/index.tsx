@@ -8,6 +8,7 @@ import {
   TimeValuesProps,
 } from '~client/components/graph-cashflow';
 import { profitLossColor } from '~client/components/graph/helpers';
+import { useToday } from '~client/hooks/time';
 import { getStartDate, getProcessedCost } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { Line, DrawProps } from '~client/types';
@@ -40,8 +41,9 @@ function processData(startDate: Date, net: number[], spending: number[]): Line[]
 }
 
 export const GraphSpending: React.FC = () => {
-  const startDate: Date = useSelector(getStartDate);
-  const { net, spending } = useSelector(getProcessedCost);
+  const now = useToday();
+  const startDate = useSelector(getStartDate);
+  const { net, spending } = useSelector(getProcessedCost(now));
 
   const lines = useMemo<Line[]>(() => processData(startDate, net, spending), [
     startDate,
@@ -52,7 +54,15 @@ export const GraphSpending: React.FC = () => {
   const afterLines = useMemo<React.FC<DrawProps>>(() => {
     const AfterLines: React.FC<DrawProps> = ({ pixX, pixY1, maxX, minY, maxY }) => (
       <g>
-        <Key title="Cash flow" pixX={pixX} pixY1={pixY1} maxX={maxX} minY={minY} maxY={maxY} />
+        <Key
+          now={now}
+          title="Cash flow"
+          pixX={pixX}
+          pixY1={pixY1}
+          maxX={maxX}
+          minY={minY}
+          maxY={maxY}
+        />
       </g>
     );
 

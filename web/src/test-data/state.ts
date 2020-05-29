@@ -5,7 +5,6 @@ import { State } from '~client/reducers';
 import { Page } from '~client/types/app';
 
 export const testState: State = {
-  now: new Date('2018-03-23T11:45:20Z'),
   login: {
     loading: false,
     initialised: true,

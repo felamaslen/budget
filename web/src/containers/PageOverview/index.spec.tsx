@@ -14,10 +14,19 @@ import { testState as state } from '~client/test-data/state';
 describe('<PageOverview />', () => {
   const mockStore = configureStore<State>();
   const now = new Date('2020-04-20T16:29Z');
+  let clock: sinon.SinonFakeTimers;
+  beforeEach(() => {
+    clock = sinon.useFakeTimers(now);
+    mockRandom();
+  });
+  afterEach(() => {
+    clock.restore();
+  });
+
   const getContainer = (): RenderResult =>
     render(
       <MemoryRouter>
-        <Provider store={mockStore({ ...state, now })}>
+        <Provider store={mockStore(state)}>
           <PageOverview />
         </Provider>
       </MemoryRouter>,
@@ -25,21 +34,15 @@ describe('<PageOverview />', () => {
 
   it('should render a table', () => {
     expect.assertions(1);
-    mockRandom();
-    const clock = sinon.useFakeTimers();
     const { getByTestId } = getContainer();
     // eslint-disable-next-line  jest/prefer-inline-snapshots
     expect(getByTestId('overview-table')).toMatchSnapshot();
-    clock.restore();
   });
 
   it('should render graphs', () => {
     expect.assertions(1);
-    mockRandom();
-    const clock = sinon.useFakeTimers();
     const { getByTestId } = getContainer();
     // eslint-disable-next-line  jest/prefer-inline-snapshots
     expect(getByTestId('graph-overview')).toMatchSnapshot();
-    clock.restore();
   });
 });

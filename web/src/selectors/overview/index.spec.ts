@@ -5,15 +5,16 @@ import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data/state';
 
-describe('Net worth selectors', () => {
+describe('Overview selectors', () => {
   beforeEach(() => {
     mockRandom([0.15, 0.99]);
   });
 
+  const now = new Date('2018-03-23T11:54:23.127Z');
+
   describe('getProcessedCost', () => {
     const testState: State = {
       ...state,
-      now: new Date('2018-03-23T11:54:23.000Z'),
       funds: {
         ...state.funds,
         items: [
@@ -61,7 +62,7 @@ describe('Net worth selectors', () => {
       // because we're not yet at the end of the month
       const netWorthCombined = [netWorthSummary[0], netWorthSummary[1], mar, apr, may, jun, jul];
 
-      expect(getProcessedCost(testState)).toStrictEqual(
+      expect(getProcessedCost(now)(testState)).toStrictEqual(
         expect.objectContaining({
           spending: [1260, 2068, 749, 960, 310, 310, 310],
           funds,
@@ -81,9 +82,9 @@ describe('Net worth selectors', () => {
     });
 
     describe('if the current day is the last of the month', () => {
+      const nowEndOfMonth = new Date('2018-03-31T11:28:10Z');
       const testStateEndOfMonth: State = {
         ...testState,
-        now: new Date('2018-03-31'),
         funds: {
           ...testState.funds,
           items: [
@@ -106,7 +107,7 @@ describe('Net worth selectors', () => {
         },
       };
 
-      it('should use the actual (non-predicted) net worth value for the current month, if at the last day', () => {
+      it('should use the actual (non-predicted) net worth value for the current month', () => {
         expect.assertions(1);
         const netWorthSummary = getNetWorthSummary(testStateEndOfMonth);
 
@@ -138,7 +139,7 @@ describe('Net worth selectors', () => {
           jul,
         ];
 
-        expect(getProcessedCost(testStateEndOfMonth)).toStrictEqual(
+        expect(getProcessedCost(nowEndOfMonth)(testStateEndOfMonth)).toStrictEqual(
           expect.objectContaining({
             spending: [1260, 2068, 659, 920, 270, 270, 270],
             funds,
@@ -155,7 +156,7 @@ describe('Net worth selectors', () => {
   describe('getOverviewTable', () => {
     it('should get a list of rows for the overview table', () => {
       expect.assertions(1);
-      const table = getOverviewTable(state);
+      const table = getOverviewTable(now)(state);
 
       expect(table).toStrictEqual([
         {

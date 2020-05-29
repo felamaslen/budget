@@ -13,6 +13,8 @@ import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
 
 describe('Funds selectors', () => {
+  const testNow = new Date('2018-03-23T11:45:20Z');
+
   describe('getFundsCachedValueAgeText', () => {
     it('should return the expected string', () => {
       expect.assertions(1);
@@ -39,7 +41,7 @@ describe('Funds selectors', () => {
       const expectedValue = 399098.2;
       const expectedAgeText = '7 months ago';
 
-      expect(getFundsCachedValue(state)).toStrictEqual({
+      expect(getFundsCachedValue(testNow)(state)).toStrictEqual({
         value: expectedValue,
         ageText: expectedAgeText,
         dayGain: getDayGain(state),
@@ -57,7 +59,7 @@ describe('Funds selectors', () => {
         },
       };
 
-      expect(getFundsCachedValue(stateNoCache)).toStrictEqual({
+      expect(getFundsCachedValue(testNow)(stateNoCache)).toStrictEqual({
         dayGain: getDayGain(stateNoCache),
         dayGainAbs: getDayGainAbs(stateNoCache),
         value: 0,
@@ -82,7 +84,7 @@ describe('Funds selectors', () => {
         },
       };
 
-      expect(getFundsCachedValue(stateNoPrice)).toStrictEqual({
+      expect(getFundsCachedValue(testNow)(stateNoPrice)).toStrictEqual({
         dayGain: getDayGain(stateNoPrice),
         dayGainAbs: getDayGainAbs(stateNoPrice),
         value: 399098.2,

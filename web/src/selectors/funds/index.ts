@@ -1,4 +1,5 @@
 import humanizeDuration from 'humanize-duration';
+import moize from 'moize';
 import { createSelector } from 'reselect';
 
 import { getFundsRows, getCurrentFundsCache } from './helpers';
@@ -7,8 +8,7 @@ import { getTotalUnits, getTotalCost } from '~client/modules/data';
 import { State } from '~client/reducers';
 import * as Funds from '~client/reducers/funds';
 import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
-import { getNow } from '~client/selectors/now';
-import { Page, Data, Portfolio } from '~client/types';
+import { Page, Data, Portfolio, CachedValue } from '~client/types';
 
 export * from './gains';
 export * from './graph';
@@ -35,18 +35,18 @@ export function getFundsCachedValueAgeText(
   return `${humanizeDuration(age, { round: true, largest: 1 })} ago`;
 }
 
-const getFundCacheAge = createSelector(
-  getNow,
-  getCurrentFundsCache,
-  (now: Date, cache: Funds.Cache | undefined) => {
-    if (!cache) {
-      return '';
-    }
+const getFundCacheAge = moize(
+  (now: Date): ((state: State) => string) =>
+    createSelector(getCurrentFundsCache, (cache: Funds.Cache | undefined) => {
+      if (!cache) {
+        return '';
+      }
 
-    const { startTime, cacheTimes } = cache;
+      const { startTime, cacheTimes } = cache;
 
-    return getFundsCachedValueAgeText(startTime, cacheTimes, now);
-  },
+      return getFundsCachedValueAgeText(startTime, cacheTimes, now);
+    }),
+  { maxSize: 1 },
 );
 
 export const getAllLatestValues = createSelector(
@@ -70,9 +70,13 @@ const getLatestTotalValue = createSelector(getAllLatestValues, (portfolio: Portf
   portfolio.reduce<number>((last, { value }) => last + value, 0),
 );
 
-export const getFundsCachedValue = createSelector(
-  [getLatestTotalValue, getFundCacheAge, getDayGain, getDayGainAbs],
-  (value, ageText, dayGain, dayGainAbs) => ({ value, ageText, dayGain, dayGainAbs }),
+export const getFundsCachedValue = moize(
+  (now: Date): ((state: State) => CachedValue) =>
+    createSelector(
+      [getLatestTotalValue, getFundCacheAge(now), getDayGain, getDayGainAbs],
+      (value, ageText, dayGain, dayGainAbs) => ({ value, ageText, dayGain, dayGainAbs }),
+    ),
+  { maxSize: 1 },
 );
 
 export const getFundsCost = createSelector(getFundsRows, (rows) =>

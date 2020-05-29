@@ -1,12 +1,11 @@
-import { createSelector } from 'reselect';
 import differenceInMonths from 'date-fns/differenceInMonths';
+import moize from 'moize';
+import { createSelector } from 'reselect';
 
-import { State } from '~client/reducers/types';
-import { Cost, CostProcessed } from '~client/types/overview';
-import { getCurrentDate } from '~client/selectors/now';
-import { getMonthDatesList } from '~client/modules/date';
 import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
-import { Page } from '~client/types/app';
+import { getMonthDatesList } from '~client/modules/date';
+import { State } from '~client/reducers/types';
+import { Page, Cost, CostProcessed } from '~client/types';
 
 export const getCost = (state: State): Cost => state.overview.cost;
 
@@ -30,8 +29,12 @@ export const getNumMonths = createSelector(
   (startDate, endDate) => differenceInMonths(endDate, startDate) + 1,
 );
 
-export const getFutureMonths = createSelector(getCurrentDate, getEndDate, (currentDate, endDate) =>
-  differenceInMonths(endDate, currentDate),
+export const getFutureMonths = moize(
+  (today: Date): ((state: State) => number) =>
+    createSelector(getEndDate, (endDate) => differenceInMonths(endDate, today)),
+  {
+    maxSize: 1,
+  },
 );
 
 export const getMonthDates = createSelector(getStartDate, getEndDate, getMonthDatesList);

@@ -6,6 +6,7 @@ import getDate from 'date-fns/getDate';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import isSameDay from 'date-fns/isSameDay';
 import isSameMonth from 'date-fns/isSameMonth';
+import moize from 'moize';
 import { replaceAtIndex } from 'replace-array';
 import { createSelector } from 'reselect';
 
@@ -16,8 +17,8 @@ import { OVERVIEW_COLUMNS, OverviewColumn, OverviewHeader } from '~client/consta
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
 import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
 import { IDENTITY, arrayAverage, randnBm } from '~client/modules/data';
+import { State } from '~client/reducers';
 import { getFundsRows } from '~client/selectors/funds/helpers';
-import { getCurrentDate } from '~client/selectors/now';
 import {
   getCost,
   getSpendingColumn,
@@ -230,132 +231,142 @@ const withPredictedSpending = (
     separateOldFunds(numRows),
   )(cost);
 
-export const getProcessedCost = createSelector(
-  getCurrentDate,
-  getNumMonths,
-  getFutureMonths,
-  getMonthDates,
-  getNetWorthSummary,
-  getFundsRows,
-  getCost,
-  (currentDate, numRows, futureMonths, dates, netWorth, fundsRows, costMap) =>
-    compose(
-      withNetWorth<'fundsOld' | 'spending'>(dates, currentDate, futureMonths, netWorth, fundsRows),
-      getNetCashFlow<'fundsOld'>(dates),
-      withPredictedSpending(dates, currentDate, futureMonths, numRows),
-    )(costMap),
+export const getProcessedCost = moize(
+  (today: Date): ((state: State) => CostProcessed) =>
+    createSelector(
+      getNumMonths,
+      getFutureMonths(today),
+      getMonthDates,
+      getNetWorthSummary,
+      getFundsRows,
+      getCost,
+      (numRows, futureMonths, dates, netWorth, fundsRows, costMap) =>
+        compose(
+          withNetWorth<'fundsOld' | 'spending'>(dates, today, futureMonths, netWorth, fundsRows),
+          getNetCashFlow<'fundsOld'>(dates),
+          withPredictedSpending(dates, today, futureMonths, numRows),
+        )(costMap),
+    ),
+  { maxSize: 1 },
 );
 
 const isPositive = (value: number): boolean => value >= 0;
 const isNegative = (value: number): boolean => value < 0;
 
-export const getOverviewTable = createSelector(
-  getCurrentDate,
-  getMonthDates,
-  getFutureMonths,
-  getProcessedCost,
-  getNetWorthSummary,
-  (currentDate, dates, futureMonths, cost, netWorth): Table | null => {
-    if (!dates) {
-      return null;
-    }
+export const getOverviewTable = moize(
+  (today: Date): ((state: State) => Table | null) =>
+    createSelector(
+      getMonthDates,
+      getFutureMonths(today),
+      getProcessedCost(today),
+      getNetWorthSummary,
+      (dates, futureMonths, cost, netWorth): Table | null => {
+        if (!dates) {
+          return null;
+        }
 
-    const months = dates.map((date) => format(date, 'LLL-yy'));
+        const months = dates.map((date: Date) => format(date, 'LLL-yy'));
 
-    const values: TableValues<number[], 'netWorth'> = Object.entries(OVERVIEW_COLUMNS)
-      .filter(([header]) => header !== 'month')
-      .reduce((last, [key]) => ({ [key]: cost[key as keyof TableValues], ...last }), {
-        netWorth,
-      });
+        const values: TableValues<number[], 'netWorth'> = Object.entries(OVERVIEW_COLUMNS)
+          .filter(([header]) => header !== 'month')
+          .reduce((last, [key]) => ({ [key]: cost[key as keyof TableValues], ...last }), {
+            netWorth,
+          });
 
-    const scoreValues: TableValues<number[], 'netWorth'> = {
-      ...values,
-      netWorth: values.netWorth.slice(0, -(futureMonths + 1)),
-    };
-
-    const ranges: TableValues<SplitRange> = (Object.keys(values) as (keyof TableValues)[]).reduce(
-      (last, key) => ({
-        [key]: {
-          min: Math.min(...(Reflect.get(scoreValues, key) ?? [])),
-          maxNegative:
-            key === 'net'
-              ? 0
-              : Math.max(...(Reflect.get(scoreValues, key) ?? []).filter(isNegative)),
-          minPositive:
-            key === 'net'
-              ? 0
-              : Math.min(...(Reflect.get(scoreValues, key) ?? []).filter(isPositive)),
-          max: Math.max(...(Reflect.get(scoreValues, key) ?? [])),
-        },
-        ...last,
-      }),
-      {} as TableValues<SplitRange>,
-    );
-
-    const medians: TableValues<Median> = (Object.keys(values) as (keyof TableValues)[]).reduce(
-      (last, key) => ({
-        ...last,
-        [key]: {
-          positive: arrayAverage(
-            (Reflect.get(scoreValues, key) ?? []).filter(isPositive),
-            Average.Median,
-          ),
-          negative: arrayAverage(
-            (Reflect.get(scoreValues, key) ?? []).filter(isNegative),
-            Average.Median,
-          ),
-        },
-      }),
-      {} as TableValues,
-    );
-
-    const categoryColor = getOverviewCategoryColor();
-
-    const getColor = (value: number, key: keyof TableValues): string =>
-      getOverviewScoreColor(value, ranges[key], medians[key], categoryColor[key]);
-
-    const getCells = (monthText: string, index: number): Cell[] =>
-      (Object.entries(OVERVIEW_COLUMNS) as [OverviewHeader, OverviewColumn][]).map(
-        ([key, { name: display }]): Cell => {
-          const column: Cell['column'] = [key, display];
-
-          if (key === 'month') {
-            return {
-              column,
-              value: monthText,
-              rgb: null,
-            };
-          }
-
-          const value = cost[key][index];
-
-          return {
-            column,
-            value,
-            rgb: getColor(value, key),
-          };
-        },
-      );
-
-    const endOfCurrentMonth = endOfMonth(currentDate);
-
-    return months.map(
-      (monthText, index): TableRow => {
-        const date = dates[index];
-        const past = date < currentDate;
-        const future = date > endOfCurrentMonth;
-        const active = !past && !future;
-
-        const cells = getCells(monthText, index);
-
-        return {
-          key: monthText,
-          cells,
-          past,
-          active,
-          future,
+        const scoreValues: TableValues<number[], 'netWorth'> = {
+          ...values,
+          netWorth: values.netWorth.slice(0, -(futureMonths + 1)),
         };
+
+        const ranges: TableValues<SplitRange> = (Object.keys(
+          values,
+        ) as (keyof TableValues)[]).reduce(
+          (last, key) => ({
+            [key]: {
+              min: Math.min(...(Reflect.get(scoreValues, key) ?? [])),
+              maxNegative:
+                key === 'net'
+                  ? 0
+                  : Math.max(...(Reflect.get(scoreValues, key) ?? []).filter(isNegative)),
+              minPositive:
+                key === 'net'
+                  ? 0
+                  : Math.min(...(Reflect.get(scoreValues, key) ?? []).filter(isPositive)),
+              max: Math.max(...(Reflect.get(scoreValues, key) ?? [])),
+            },
+            ...last,
+          }),
+          {} as TableValues<SplitRange>,
+        );
+
+        const medians: TableValues<Median> = (Object.keys(values) as (keyof TableValues)[]).reduce(
+          (last, key) => ({
+            ...last,
+            [key]: {
+              positive: arrayAverage(
+                (Reflect.get(scoreValues, key) ?? []).filter(isPositive),
+                Average.Median,
+              ),
+              negative: arrayAverage(
+                (Reflect.get(scoreValues, key) ?? []).filter(isNegative),
+                Average.Median,
+              ),
+            },
+          }),
+          {} as TableValues,
+        );
+
+        const categoryColor = getOverviewCategoryColor();
+
+        const getColor = (value: number, key: keyof TableValues): string =>
+          getOverviewScoreColor(value, ranges[key], medians[key], categoryColor[key]);
+
+        const getCells = (monthText: string, index: number): Cell[] =>
+          (Object.entries(OVERVIEW_COLUMNS) as [OverviewHeader, OverviewColumn][]).map(
+            ([key, { name: display }]): Cell => {
+              const column: Cell['column'] = [key, display];
+
+              if (key === 'month') {
+                return {
+                  column,
+                  value: monthText,
+                  rgb: null,
+                };
+              }
+
+              const value = cost[key][index];
+
+              return {
+                column,
+                value,
+                rgb: getColor(value, key),
+              };
+            },
+          );
+
+        const endOfCurrentMonth = endOfMonth(today);
+
+        return months.map(
+          (monthText: string, index: number): TableRow => {
+            const date = dates[index];
+            const past = date < today;
+            const future = date > endOfCurrentMonth;
+            const active = !past && !future;
+
+            const cells = getCells(monthText, index);
+
+            return {
+              key: monthText,
+              cells,
+              past,
+              active,
+              future,
+            };
+          },
+        );
       },
-    );
+    ),
+  {
+    maxSize: 1,
   },
 );

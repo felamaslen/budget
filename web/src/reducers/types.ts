@@ -14,7 +14,6 @@ import { State as AnalysisState } from '~client/reducers/analysis';
 import { Page, OverviewState } from '~client/types';
 
 export type State = {
-  now: Date;
   login: LoginState;
   api: ApiState;
   error: ErrorState;

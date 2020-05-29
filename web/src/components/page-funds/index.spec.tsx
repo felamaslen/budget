@@ -9,6 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
 import shortid from 'shortid';
+import sinon from 'sinon';
 
 import { Funds } from '.';
 import { Period } from '~client/constants/graph';
@@ -86,12 +87,17 @@ describe('<PageFunds />', () => {
     return { store, ...renderResult };
   };
 
+  let clock: sinon.SinonFakeTimers;
   let matchMedia: MatchMediaMock;
   beforeAll(() => {
     matchMedia = new MatchMediaMock();
   });
-  afterEach(async () => {
+  beforeEach(() => {
+    clock = sinon.useFakeTimers();
+  });
+  afterEach(() => {
     matchMedia.clear();
+    clock.restore();
   });
 
   it('should render', () => {

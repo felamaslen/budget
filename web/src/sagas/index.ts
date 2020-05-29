@@ -6,10 +6,8 @@ import app from '~client/sagas/app';
 import crud from '~client/sagas/crud';
 import funds from '~client/sagas/funds';
 import login from '~client/sagas/login';
-import now from '~client/sagas/now';
 
 export default function* rootSaga() {
-  yield fork(now);
   yield fork(app);
   yield fork(login);
   yield fork(crud);

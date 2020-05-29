@@ -11,6 +11,7 @@ import {
   getValuesWithTime,
 } from '~client/components/graph-cashflow';
 import { colors as netWorthColors } from '~client/components/net-worth-graph/styles';
+import { useToday } from '~client/hooks/time';
 import { leftPad, rightPad } from '~client/modules/data';
 import {
   getStartDate,
@@ -239,12 +240,13 @@ const isNetWorthSummaryOldEqual = (left: NetWorthSummaryOld, right: NetWorthSumm
   left.main === right.main && left.options === right.options;
 
 export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
+  const today = useToday();
   const startDate = useSelector(getStartDate);
   const netWorthOld = useSelector(getNetWorthSummaryOld, isNetWorthSummaryOldEqual);
   const netWorth = useSelector(getNetWorthTable);
-  const futureMonths = useSelector(getFutureMonths);
-  const cost = useSelector(getProcessedCost);
-  const targets = useSelector(getTargets);
+  const futureMonths = useSelector(getFutureMonths(today));
+  const cost = useSelector(getProcessedCost(today));
+  const targets = useSelector(getTargets(today));
 
   const [showAll, setShowAll] = useState(false);
   const lines = useMemo(

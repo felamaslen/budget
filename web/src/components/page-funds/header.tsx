@@ -5,6 +5,7 @@ import * as Styled from './styles';
 import { HeadProps } from './types';
 import { fundsViewSoldToggled, fundsRequested } from '~client/actions/funds';
 import { ListHeadFunds, ListHeadFundsMobile } from '~client/components/ListHeadFunds';
+import { useTime } from '~client/hooks/time';
 import { getFundsCost, getViewSoldFunds, getPeriod, getFundsCachedValue } from '~client/selectors';
 
 type Props = {
@@ -12,10 +13,11 @@ type Props = {
 } & HeadProps;
 
 export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
+  const now = useTime();
   const totalCost = useSelector(getFundsCost);
   const viewSoldFunds = useSelector(getViewSoldFunds);
   const period = useSelector(getPeriod);
-  const cachedValue = useSelector(getFundsCachedValue);
+  const cachedValue = useSelector(getFundsCachedValue(now));
 
   const dispatch = useDispatch();
   const onViewSoldToggle = useCallback(() => dispatch(fundsViewSoldToggled()), [dispatch]);

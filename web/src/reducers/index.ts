@@ -11,7 +11,6 @@ import holiday from './holiday';
 import income from './income';
 import login from './login';
 import netWorth from './net-worth';
-import now from './now';
 import overview from './overview';
 import social from './social';
 import stocks from './stocks';
@@ -20,7 +19,6 @@ import { State } from './types';
 export { State } from './types';
 
 export default combineReducers<State>({
-  now,
   api,
   login,
   error,

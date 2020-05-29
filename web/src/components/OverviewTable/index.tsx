@@ -1,16 +1,17 @@
-import { useSelector } from 'react-redux';
 import React, { memo } from 'react';
+import { useSelector } from 'react-redux';
 
-import { mediaQueryMobile } from '~client/constants';
-import { useMediaQuery } from '~client/hooks/media';
-import { getOverviewTable } from '~client/selectors/overview';
 import OverviewTableHeader from './OverviewTableHeader';
 import OverviewTableRows from './OverviewTableRows';
-
 import * as Styled from './styles';
+import { mediaQueryMobile } from '~client/constants';
+import { useMediaQuery } from '~client/hooks/media';
+import { useToday } from '~client/hooks/time';
+import { getOverviewTable } from '~client/selectors/overview';
 
 const OverviewTable: React.FC = () => {
-  const rows = useSelector(getOverviewTable);
+  const today = useToday();
+  const rows = useSelector(getOverviewTable(today));
   const isMobile = useMediaQuery(mediaQueryMobile);
 
   return (

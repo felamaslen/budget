@@ -327,11 +327,6 @@ describe('<AccessibleListStandard />', () => {
           height: 1.875rem;
         }
 
-        .c6 input {
-          color: #333;
-          font-style: italic;
-        }
-
         .c12 {
           display: -webkit-box;
           display: -webkit-flex;

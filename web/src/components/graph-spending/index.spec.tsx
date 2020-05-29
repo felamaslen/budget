@@ -13,7 +13,7 @@ describe('<GraphSpending />', () => {
   const now = new Date('2020-04-20T16:29Z');
 
   const setup = (): RenderResult => {
-    const store = makeStore({ ...state, now });
+    const store = makeStore(state);
 
     return render(
       <Provider store={store}>
@@ -24,7 +24,7 @@ describe('<GraphSpending />', () => {
 
   it('should render a graph', async () => {
     expect.assertions(1);
-    const clock = sinon.useFakeTimers();
+    const clock = sinon.useFakeTimers(now);
     const { getByTestId } = setup();
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
       @media only screen and (min-width:690px) {
@@ -956,8 +956,8 @@ describe('<GraphSpending />', () => {
             <rect
               fill="rgba(255,255,255,0.5)"
               height="260"
-              width="49016.57455366278"
-              x="-48516.57455366278"
+              width="-1737.5690607734805"
+              x="2237.5690607734805"
               y="40"
             />
           </g>

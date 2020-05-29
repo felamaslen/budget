@@ -4375,8 +4375,8 @@ exports[`<PageOverview /> should render graphs 1`] = `
           <rect
             fill="rgba(255,255,255,0.5)"
             height="260"
-            width="49016.57455366278"
-            x="-48516.57455366278"
+            width="-1737.5690607734805"
+            x="2237.5690607734805"
             y="40"
           />
         </g>

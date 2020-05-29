@@ -1,19 +1,21 @@
+import getUnixTime from 'date-fns/getUnixTime';
 import React from 'react';
 import { BaseKey } from '~client/components/graph-cashflow/base-key';
-import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
+import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
 import { Range, PixPrimary } from '~client/types/graph';
 
 type Props = PixPrimary &
   Omit<Range, 'minX'> & {
+    now: Date;
     title: string;
   };
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
-export const Key: React.FC<Props> = ({ pixX, pixY1, maxX, minY, maxY, title }) => {
-  const future0 = pixX(Date.now() / 1000);
+export const Key: React.FC<Props> = ({ now, pixX, pixY1, maxX, minY, maxY, title }) => {
+  const future0 = pixX(getUnixTime(now));
   const future1 = pixY1(maxY);
   const futureW = pixX(maxX) - future0;
   const futureH = pixY1(minY) - future1;

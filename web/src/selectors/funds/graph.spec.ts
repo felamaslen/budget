@@ -14,9 +14,8 @@ import {
 import { Page } from '~client/types';
 
 describe('Fund selectors / graph', () => {
-  const state: Pick<State, 'now' | Page.funds> = {
+  const state: State = {
     ...testState,
-    now: new Date('2017-09-01T19:01Z'),
     funds: {
       ...testState.funds,
       viewSoldFunds: true,

@@ -8,7 +8,7 @@ describe('Graph selectors', () => {
   describe('getTargets', () => {
     it('should get a list of savings targets', () => {
       expect.assertions(1);
-      const result = getTargets({
+      const result = getTargets(new Date('2018-03-23T11:45:20Z'))({
         ...state,
         netWorth: {
           ...state.netWorth,
