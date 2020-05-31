@@ -1,4 +1,3 @@
-import reducer, { initialState } from '~client/reducers/api';
 import {
   dataRead,
   syncRequested,
@@ -8,15 +7,10 @@ import {
   syncErrorOccurred,
 } from '~client/actions/api';
 import { loggedIn, loggedOut } from '~client/actions/login';
+import reducer, { initialState } from '~client/reducers/api';
+import { testResponse } from '~client/test-data';
 
 describe('API reducer', () => {
-  describe('Null action', () => {
-    it('Null action returns the initial state', () => {
-      expect.assertions(1);
-      expect(reducer(undefined, null)).toBe(initialState);
-    });
-  });
-
   describe('LOGGED_IN', () => {
     it('LOGGED_IN sets user details and initial loading', () => {
       expect.assertions(2);
@@ -41,11 +35,14 @@ describe('API reducer', () => {
   });
 
   describe('DATA_READ', () => {
-    it('DATA_READ sets initial loading to false', () => {
+    const action = dataRead(testResponse);
+    const state = { ...initialState, initialLoading: true };
+
+    it('should set initial loading to false', () => {
       expect.assertions(1);
-      expect(reducer({ ...initialState, initialLoading: true }, dataRead({})).initialLoading).toBe(
-        false,
-      );
+      const result = reducer(state, action);
+
+      expect(result).toStrictEqual(expect.objectContaining({ initialLoading: false }));
     });
   });
 

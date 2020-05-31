@@ -1,17 +1,8 @@
 import { compose } from '@typed/compose';
-import {
-  createReducerObject,
-  Reducer,
-  ReducerMap,
-  Action,
-  PartialReducer,
-} from 'create-reducer-object';
+import { Reducer } from 'redux';
 import { replaceAtIndex } from 'replace-array';
 
-import { ListActionType, ListItemCreated, ListItemUpdated } from '~client/actions/list';
-
-import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
-import { LOGGED_OUT } from '~client/constants/actions/login';
+import * as Actions from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
 import { getValueFromTransmit, IDENTITY } from '~client/modules/data';
 import {
@@ -21,93 +12,100 @@ import {
   State as CrudState,
 } from '~client/reducers/crud';
 import {
-  RequestWithResponse,
   SyncResponseList,
   SyncResponsePostList,
   SyncResponsePutList,
   SyncResponseDeleteList,
-} from '~client/types/api';
-import { Page, PageListCalc, PageList } from '~client/types/app';
-import { RequestType, Request, IdKey } from '~client/types/crud';
-import { Item, ListCalcItem } from '~client/types/list';
+  Request,
+  RequestWithResponse,
+  RequestType,
+  IdKey,
+  Page,
+  PageList,
+  PageListCalc,
+  Item,
+  ListItem,
+  ListCalcItem,
+  ReadResponse,
+} from '~client/types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type CrudItems<I extends Item> = CrudState<I>;
+
+type FullReducer<S, A> = (state: S, action: A) => S;
 
 export type ListState<I extends Item, ES extends object = {}> = ES & {
   items: CrudState<I>;
 };
 
 const filterByPage = <
-  I extends Item,
-  ES extends object = {},
-  S extends ListState<I, ES> = ListState<I, ES>
+  I extends ListItem,
+  P extends PageList,
+  S extends ListState<I> = ListState<I>,
+  AP extends Actions.ActionList<I, P> = Actions.ActionList<I, P>,
+  AG extends Actions.ActionList<ListItem, PageList> = Actions.ActionList<ListItem, PageList>
 >(
   thisPage: Page,
-  handler: (state: S, action: Action) => Partial<S>,
-) => (state: S, action: Action): Partial<S> => {
-  if (action.page !== thisPage) {
-    return {};
-  }
+  handler: (state: S, action: AP) => S,
+): FullReducer<S, AG> => {
+  const actionIsForPage = (action: AG | AP): action is AP => action.page === thisPage;
 
-  return handler(state, action);
+  return (state, action): S => (actionIsForPage(action) ? handler(state, action) : state);
 };
 
-const onCreate = <I extends Item, ES extends object>(
+const onCreate = <I extends ListItem, P extends PageList, ES extends object>(
   page: Page,
-): PartialReducer<ListState<I, ES>> =>
-  filterByPage<I, ES>(page, (state, action) => ({
+): FullReducer<ListState<I, ES>, Actions.ActionList<ListItem, PageList>> =>
+  filterByPage<I, P, ListState<I, ES>, Actions.ListItemCreated<I, P>>(page, (state, action) => ({
     ...state,
-    items: onCreateOptimistic<I>(state.items, (action as ListItemCreated<I, Page>).delta),
+    items: onCreateOptimistic<I>(state.items, action.delta),
   }));
 
-export const onRead = <I extends Item, R extends {}, ES extends object = {}>(page: Page) => (
+export const onRead = <I extends Item, P extends PageList, ES extends object>(page: P) => (
   state: ListState<I, ES>,
-  action: Action,
-): Partial<ListState<I, ES>> => {
+  action: Actions.ActionApiDataRead,
+): ListState<I, ES> => {
   if (!action.res?.[page]) {
-    return {};
+    return state;
   }
-  if (!action.res[page].data.length) {
+  if (!action.res[page]?.data.length) {
     return { ...state, items: [] };
   }
 
   const dataKeys = Object.entries(DataKeyAbbr).filter(([, shortKey]) =>
-    Reflect.has(action.res[page].data[0], shortKey),
+    Reflect.has(action.res[page]?.data[0] ?? {}, shortKey),
   );
 
-  const longKeys = dataKeys.map(([longKey]) => longKey) as (keyof I)[];
-  const shortKeys = dataKeys.map(([, shortKey]) => shortKey) as (keyof R)[];
+  type RawItem = ReadResponse[P]['data'][0];
+  const rawItems: RawItem[] = action.res[page]?.data ?? [];
 
-  const items = action.res[page].data.map((item: R) =>
-    longKeys.reduce(
+  const longKeys = dataKeys.map(([longKey]) => longKey) as (keyof I)[];
+  const shortKeys = dataKeys.map(([, shortKey]) => shortKey) as (keyof RawItem)[];
+
+  const items = rawItems.map((item: RawItem) =>
+    longKeys.reduce<I>(
       (last, longKey, index) => ({
         ...last,
         [longKey]: getValueFromTransmit(longKey as string, item[shortKeys[index]]),
       }),
-      {},
+      {} as I,
     ),
   );
 
   return { ...state, items };
 };
 
-const onUpdate = <I extends Item, ES extends object>(
+const onUpdate = <I extends ListItem, P extends PageList, ES extends object>(
   page: Page,
-): PartialReducer<ListState<I, ES>> =>
-  filterByPage<I, ES>(page, (state, action) => ({
+): FullReducer<ListState<I, ES>, Actions.ListItemUpdated<ListItem, PageList>> =>
+  filterByPage<I, P, ListState<I, ES>, Actions.ListItemUpdated<I, P>>(page, (state, action) => ({
     ...state,
-    items: onUpdateOptimistic<I>(
-      state.items,
-      action.id,
-      (action as ListItemUpdated<I, Page>).delta,
-    ),
+    items: onUpdateOptimistic<I>(state.items, action.id, action.delta),
   }));
 
-const onDelete = <I extends Item, ES extends object>(
+const onDelete = <I extends ListItem, P extends PageList, ES extends object>(
   page: Page,
-): PartialReducer<ListState<I, ES>> =>
-  filterByPage<I, ES>(page, (state, action) => ({
+): FullReducer<ListState<I, ES>, Actions.ListItemDeleted<ListItem, PageList>> =>
+  filterByPage<I, P, ListState<I, ES>, Actions.ListItemDeleted<I, P>>(page, (state, action) => ({
     ...state,
     items: onDeleteOptimistic<I>(state.items, action.id),
   }));
@@ -201,7 +199,7 @@ const confirmDeletes = <I extends Item>(requestItems: RequestItem[]): FilterRequ
     },
   );
 
-const getRequestItems = (page: Page, action: Action): RequestItem[] =>
+const getRequestItems = (page: Page, action: Actions.ActionApiSyncReceived): RequestItem[] =>
   (action.res.list as ResponseItem[])
     .map(
       ({ res, ...request }: ResponseItem, index: number): RequestItem => ({
@@ -212,10 +210,10 @@ const getRequestItems = (page: Page, action: Action): RequestItem[] =>
     )
     .filter(({ request }: RequestItem) => request.route === page);
 
-const onSyncReceived = <I extends Item, ES extends object = {}>(page: Page) => (
+const onSyncReceived = <I extends ListItem, P extends Page, ES extends object>(page: P) => (
   state: ListState<I, ES>,
-  action: Action,
-): Partial<ListState<I, ES>> => {
+  action: Actions.ActionApiSyncReceived,
+): ListState<I, ES> => {
   const requestItems = getRequestItems(page, action);
 
   const items: CrudItems<I> = compose(
@@ -227,27 +225,42 @@ const onSyncReceived = <I extends Item, ES extends object = {}>(page: Page) => (
   return { ...state, items };
 };
 
-export function makeListReducer<I extends Item, R extends {} = I, ES extends object = {}>(
-  page: PageList,
-  extraHandlers: ReducerMap<ListState<I, ES>> = {},
+export function makeListReducer<I extends ListItem, P extends PageList, ES extends object = {}>(
+  page: P,
   extraState: ES = {} as ES,
-): Reducer<ListState<I, ES>> {
+): Reducer<ListState<I, ES>, Actions.Action> {
   const initialState: ListState<I, ES> = {
     ...extraState,
     items: [],
   };
 
-  const handlers: ReducerMap<ListState<I, ES>> = {
-    [LOGGED_OUT]: (): ListState<I, ES> => initialState,
-    [ListActionType.created]: onCreate<I, ES>(page),
-    [DATA_READ]: onRead<I, R, ES>(page),
-    [ListActionType.updated]: onUpdate<I, ES>(page),
-    [ListActionType.deleted]: onDelete<I, ES>(page),
-    [SYNC_RECEIVED]: onSyncReceived<I, ES>(page),
-    ...extraHandlers,
-  };
+  const handlerCreate = onCreate<I, P, ES>(page);
+  const handlerRead = onRead<I, P, ES>(page);
+  const handlerUpdate = onUpdate<I, P, ES>(page);
+  const handlerDelete = onDelete<I, P, ES>(page);
 
-  return createReducerObject(handlers, initialState);
+  const handlerSyncReceived = onSyncReceived<I, P, ES>(page);
+
+  return function listReducer(state = initialState, action): ListState<I, ES> {
+    switch (action.type) {
+      case Actions.ListActionType.Created:
+        return handlerCreate(state, action);
+      case Actions.ActionTypeApi.DataRead:
+        return handlerRead(state, action);
+      case Actions.ListActionType.Updated:
+        return handlerUpdate(state, action);
+      case Actions.ListActionType.Deleted:
+        return handlerDelete(state, action);
+
+      case Actions.ActionTypeApi.SyncReceived:
+        return handlerSyncReceived(state, action);
+
+      case Actions.ActionTypeLogin.LoggedOut:
+        return initialState;
+      default:
+        return state;
+    }
+  };
 }
 
 type DailyProps = {
@@ -258,59 +271,84 @@ type DailyProps = {
 export type DailyState<I extends ListCalcItem, ES extends object = {}> = ListState<I, ES> &
   DailyProps;
 
-const withTotals = (
-  makeListHandler: <I extends ListCalcItem, ES extends object>(
-    page: Page,
-  ) => PartialReducer<ListState<I, ES>>,
-  getNewTotal: (previousTotal: number, previousItemCost: number, nextItemCost: number) => number,
-) => <I extends ListCalcItem, ES extends object = {}>(
-  page: Page,
-): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => {
-  const listHandler = makeListHandler<I, ES>(page);
-  return filterByPage<I, ES, DailyState<I, ES>>(
-    page,
-    (state, action) =>
-      ({
-        ...listHandler(state, action),
-        total: getNewTotal(
-          state.total,
-          Number(state.items.find(({ id }) => id === action?.id)?.cost ?? 0),
-          Number((action as ListItemUpdated<I, Page>)?.delta?.cost ?? 0),
-        ),
-      } as Partial<DailyState<I, ES>>),
-  );
+const isUpdateDelete = <I extends ListItem, A extends Actions.ActionList<I, PageList>>(
+  action: A | Actions.ListItemUpdated<I, PageList> | Actions.ListItemDeleted<I, PageList>,
+): action is Actions.ListItemUpdated<I, PageList> | Actions.ListItemDeleted<I, PageList> =>
+  Reflect.has(action, 'id');
+
+const isCreateUpdate = <I extends ListItem, A extends Actions.ActionList<I, PageList>>(
+  action: A | Actions.ListItemCreated<I, PageList> | Actions.ListItemUpdated<I, PageList>,
+): action is Actions.ListItemCreated<I, PageList> | Actions.ListItemUpdated<I, PageList> =>
+  Reflect.has(action, 'delta');
+
+const isCreate = <I extends ListItem, A extends Actions.ActionList<I, PageList>>(
+  action: A | Actions.ListItemCreated<I, PageList>,
+): action is Actions.ListItemCreated<I, PageList> => Reflect.has(action, 'fakeId');
+
+const getItemCostWithId = <I extends ListCalcItem>(state: DailyState<I>, id: string): number =>
+  state.items.find((item) => item.id === id)?.cost ?? 0;
+
+const getPreviousItemCost = <I extends ListCalcItem, A extends Actions.ActionList<I, PageListCalc>>(
+  state: DailyState<I>,
+  action: A,
+): number => (isUpdateDelete(action) ? getItemCostWithId(state, action.id) : 0);
+
+const getNextItemCost = <I extends ListCalcItem, A extends Actions.ActionList<I, PageListCalc>>(
+  state: DailyState<I>,
+  action: A,
+): number => {
+  if (!isCreateUpdate(action)) {
+    return 0;
+  }
+  return action.delta.cost ?? (isCreate(action) ? 0 : getItemCostWithId(state, action.id));
 };
 
-const onCreateDaily = withTotals(onCreate, (total, _, cost) => total + cost);
+const withTotals = <
+  I extends ListCalcItem,
+  P extends PageListCalc,
+  ES extends object,
+  AP extends Actions.ActionList<I, P>,
+  AG extends Actions.ActionList<ListItem, PageList>
+>(
+  page: P,
+  makeListHandler: (page: P) => FullReducer<ListState<I>, AP>,
+  getNewTotal: (previousTotal: number, previousItemCost: number, nextItemCost: number) => number,
+): FullReducer<DailyState<I, ES>, AG> => {
+  const listHandler = makeListHandler(page);
+  return filterByPage<I, P, DailyState<I, ES>, AP, AG>(page, (state, action) => {
+    return {
+      ...state,
+      ...listHandler(state, action),
+      total: getNewTotal(
+        state.total,
+        getPreviousItemCost(state, action),
+        getNextItemCost(state, action),
+      ),
+    };
+  });
+};
 
-const onReadDaily = <I extends ListCalcItem, R extends {}, ES extends object = {}>(
-  page: Page,
-): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => {
-  const onReadList = onRead<I, R, ES>(page);
-  return (state: DailyState<I, ES>, action: Action): Partial<DailyState<I, ES>> => {
+const makeOnReadDaily = <I extends ListCalcItem, P extends PageListCalc, ES extends object>(
+  page: P,
+): FullReducer<DailyState<I, ES>, Actions.ActionApiDataRead> => {
+  const onReadList = onRead<I, P, ES>(page);
+  return (state, action): DailyState<I, ES> => {
     const {
       res: { [page]: pageRes = { total: 0, olderExists: null } },
     } = action;
 
     const { total, olderExists } = pageRes as DailyProps;
 
-    return { ...onReadList(state, action), total, olderExists } as Partial<DailyState<I, ES>>;
+    return { ...state, ...onReadList(state, action), total, olderExists };
   };
 };
 
-const onUpdateDaily = withTotals(
-  onUpdate,
-  (total, previousCost, nextCost) => total + nextCost - previousCost,
-);
+const makeOnSyncReceivedDaily = <I extends ListCalcItem, P extends PageListCalc, ES extends object>(
+  page: P,
+): FullReducer<DailyState<I, ES>, Actions.ActionApiSyncReceived> => {
+  const onReceivedList = onSyncReceived<I, P, ES>(page);
 
-const onDeleteDaily = withTotals(onDelete, (total, previousCost) => total - previousCost);
-
-const onSyncReceivedDaily = <I extends ListCalcItem, ES extends object = {}>(
-  page: Page,
-): ((state: DailyState<I, ES>, action: Action) => Partial<DailyState<I, ES>>) => {
-  const onReceivedList = onSyncReceived<I, ES>(page);
-
-  return (state: DailyState<I, ES>, action: Action): Partial<DailyState<I, ES>> => {
+  return (state, action): DailyState<I, ES> => {
     const requestItems = getRequestItems(page, action);
 
     const total = requestItems.reduce(
@@ -318,19 +356,15 @@ const onSyncReceivedDaily = <I extends ListCalcItem, ES extends object = {}>(
       state.total,
     );
 
-    return { ...onReceivedList(state, action), total } as Partial<DailyState<I, ES>>;
+    return { ...state, ...onReceivedList(state, action), total };
   };
 };
 
 export function makeDailyListReducer<
   I extends ListCalcItem,
-  R extends {} = Item,
+  P extends PageListCalc,
   ES extends object = {}
->(
-  page: PageListCalc,
-  extraHandlers: ReducerMap<ListState<I, ES>> = {},
-  extraState: ES = {} as ES,
-): Reducer<DailyState<I, ES>> {
+>(page: P, extraState: ES = {} as ES): Reducer<DailyState<I, ES>, Actions.Action> {
   const initialState: DailyState<I, ES> = {
     ...extraState,
     items: [],
@@ -338,14 +372,51 @@ export function makeDailyListReducer<
     olderExists: null,
   };
 
-  const handlers = {
-    [ListActionType.created]: onCreateDaily<I, ES>(page),
-    [DATA_READ]: onReadDaily<I, R, ES>(page),
-    [ListActionType.updated]: onUpdateDaily<I, ES>(page),
-    [ListActionType.deleted]: onDeleteDaily<I, ES>(page),
-    [SYNC_RECEIVED]: onSyncReceivedDaily<I, ES>(page),
-    ...extraHandlers,
-  };
+  const onCreateDaily = withTotals<
+    I,
+    P,
+    ES,
+    Actions.ListItemCreated<I, P>,
+    Actions.ListItemCreated<ListItem, PageList>
+  >(page, onCreate, (total, _, cost) => total + cost);
 
-  return makeListReducer<I, R, DailyState<I, ES>>(page, handlers, initialState);
+  const onReadDaily = makeOnReadDaily<I, P, ES>(page);
+
+  const onUpdateDaily = withTotals<
+    I,
+    P,
+    ES,
+    Actions.ListItemUpdated<I, P>,
+    Actions.ListItemUpdated<ListItem, PageList>
+  >(page, onUpdate, (total, previousCost, nextCost) => total + nextCost - previousCost);
+
+  const onDeleteDaily = withTotals<
+    I,
+    P,
+    ES,
+    Actions.ListItemDeleted<I, P>,
+    Actions.ListItemDeleted<ListItem, PageList>
+  >(page, onDelete, (total, previousCost) => total - previousCost);
+
+  const onSyncReceivedDaily = makeOnSyncReceivedDaily<I, P, ES>(page);
+
+  const baseListReducer = makeListReducer<I, P, DailyState<I, ES>>(page, initialState);
+
+  return function dailyListReducer(state = initialState, action): DailyState<I, ES> {
+    switch (action.type) {
+      case Actions.ListActionType.Created:
+        return onCreateDaily(state, action);
+      case Actions.ActionTypeApi.DataRead:
+        return onReadDaily(state, action);
+      case Actions.ListActionType.Updated:
+        return onUpdateDaily(state, action);
+      case Actions.ListActionType.Deleted:
+        return onDeleteDaily(state, action);
+
+      case Actions.ActionTypeApi.SyncReceived:
+        return onSyncReceivedDaily(state, action);
+      default:
+        return baseListReducer(state, action);
+    }
+  };
 }

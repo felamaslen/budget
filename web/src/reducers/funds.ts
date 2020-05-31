@@ -1,11 +1,8 @@
-import { Action } from 'create-reducer-object';
-
-import { DATA_READ } from '~client/constants/actions/api';
-import { FUNDS_VIEW_SOLD_TOGGLED, FUNDS_RECEIVED } from '~client/constants/actions/funds';
+import { Action, ActionTypeApi, ActionTypeFunds, ActionApiDataRead } from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
 import { Period, DEFAULT_FUND_PERIOD } from '~client/constants/graph';
 import { makeListReducer, onRead, ListState } from '~client/reducers/list';
-import { Page, Fund, FundRaw, ReadResponseFunds as ReadResponse } from '~client/types';
+import { Page, Fund, ReadResponseFunds } from '~client/types';
 
 export type Cache = {
   startTime: number;
@@ -41,9 +38,7 @@ export const initialState: State = {
   },
 };
 
-function getPriceCache(funds: ReadResponse): Cache {
-  const { data, startTime, cacheTimes } = funds;
-
+function getPriceCache({ data, startTime, cacheTimes }: ReadResponseFunds): Cache {
   const prices = data.reduce(
     (last, { [DataKeyAbbr.id]: id, pr, prStartIndex }) => ({
       ...last,
@@ -59,39 +54,47 @@ function getPriceCache(funds: ReadResponse): Cache {
   };
 }
 
-const onReadRows = onRead<Fund, ExtraState>(Page.funds);
+const onReadRows = onRead<Fund, Page.funds, ExtraState>(Page.funds);
 
-const onReadFunds = (state: State, action: Action): Partial<State> =>
-  action.res.funds
+const onPeriodLoad = (
+  state: State,
+  res?: ReadResponseFunds,
+  period: Period = state.period,
+): State => ({
+  ...state,
+  period,
+  cache: res
     ? {
-        ...onReadRows(state, action),
-        cache: {
-          ...state.cache,
-          [state.period]: getPriceCache(action.res.funds),
-        },
+        ...state.cache,
+        [period]: getPriceCache(res),
       }
-    : {};
+    : state.cache,
+});
 
-function onPeriodLoad(state: State, { res, period }: Action): Partial<State> {
-  if (!res) {
-    return { period };
+const onReadFunds = (state: State, action: ActionApiDataRead): State =>
+  action.res.funds
+    ? onPeriodLoad(
+        {
+          ...state,
+          ...onReadRows(state, action),
+        },
+        action.res.funds,
+      )
+    : state;
+
+const fundsListReducer = makeListReducer<Fund, Page.funds, ExtraState>(Page.funds, initialState);
+
+export default function funds(state: State = initialState, action: Action): State {
+  switch (action.type) {
+    case ActionTypeFunds.ViewSoldToggled:
+      return { ...state, viewSoldFunds: !state.viewSoldFunds };
+    case ActionTypeFunds.Requested:
+      return state;
+    case ActionTypeFunds.Received:
+      return onPeriodLoad(state, action.res?.data, action.period);
+    case ActionTypeApi.DataRead:
+      return onReadFunds(state, action);
+    default:
+      return fundsListReducer(state, action);
   }
-
-  return {
-    period,
-    cache: {
-      ...state.cache,
-      [period]: getPriceCache(res.data),
-    },
-  };
 }
-
-const handlers = {
-  [FUNDS_VIEW_SOLD_TOGGLED]: ({ viewSoldFunds }: State): Partial<State> => ({
-    viewSoldFunds: !viewSoldFunds,
-  }),
-  [DATA_READ]: onReadFunds,
-  [FUNDS_RECEIVED]: onPeriodLoad,
-};
-
-export default makeListReducer<Fund, FundRaw, ExtraState>(Page.funds, handlers, initialState);

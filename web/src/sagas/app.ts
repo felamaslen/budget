@@ -4,14 +4,11 @@ import axios from 'axios';
 import { select, takeLatest, all, call, put } from 'redux-saga/effects';
 
 import { getFundHistoryQuery } from './funds';
-
 import { dataRead } from '~client/actions/api';
 import { errorOpened } from '~client/actions/error';
-
-import { LOGGED_IN } from '~client/constants/actions/login';
+import { ActionTypeLogin } from '~client/actions/login';
 import { API_PREFIX } from '~client/constants/data';
-
-import { getApiKey } from '~client/selectors/api';
+import { getApiKey } from '~client/selectors';
 
 const getOptions = (apiKey: string): { headers: { Authorization: string } } => ({
   headers: {
@@ -61,5 +58,5 @@ export function* fetchData() {
 }
 
 export default function* appSaga() {
-  yield takeLatest(LOGGED_IN, fetchData);
+  yield takeLatest(ActionTypeLogin.LoggedIn, fetchData);
 }

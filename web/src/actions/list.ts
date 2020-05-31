@@ -1,18 +1,16 @@
 import memoize from 'fast-memoize';
 import shortid from 'shortid';
 
-import { PageList } from '~client/types/app';
-import { Create, CreateEdit, DeltaEdit } from '~client/types/crud';
-import { Item } from '~client/types/list';
+import { PageList, Create, CreateEdit, DeltaEdit, Item, ListItem } from '~client/types';
 
 export enum ListActionType {
-  created = '@@list/ITEM_CREATED',
-  updated = '@@list/ITEM_UPDATED',
-  deleted = '@@list/ITEM_DELETED',
+  Created = '@@list/ITEM_CREATED',
+  Updated = '@@list/ITEM_UPDATED',
+  Deleted = '@@list/ITEM_DELETED',
 }
 
 export type ListItemCreated<I extends Item, P extends string> = {
-  type: ListActionType.created;
+  type: ListActionType.Created;
   page: P;
   delta: Create<I>;
   fakeId: string;
@@ -26,7 +24,7 @@ export const listItemCreated = memoize(
   <I extends Item, P extends string = PageList>(page: P): OnCreateList<I, P> => (
     delta,
   ): ListItemCreated<I, P> => ({
-    type: ListActionType.created,
+    type: ListActionType.Created,
     page,
     delta,
     fakeId: shortid.generate(),
@@ -34,7 +32,7 @@ export const listItemCreated = memoize(
 );
 
 export type ListItemUpdated<I extends Item, P extends string> = {
-  type: ListActionType.updated;
+  type: ListActionType.Updated;
   page: P;
   id: string;
   delta: DeltaEdit<I>;
@@ -54,7 +52,7 @@ export const listItemUpdated = memoize(
     item,
   ): ListItemUpdated<I, P> => ({
     page,
-    type: ListActionType.updated,
+    type: ListActionType.Updated,
     id,
     delta,
     item,
@@ -62,7 +60,7 @@ export const listItemUpdated = memoize(
 );
 
 export type ListItemDeleted<I extends Item, P extends string> = {
-  type: ListActionType.deleted;
+  type: ListActionType.Deleted;
   page: P;
   id: string;
   item: CreateEdit<I>;
@@ -79,8 +77,13 @@ export const listItemDeleted = memoize(
     item,
   ): ListItemDeleted<I, P> => ({
     page,
-    type: ListActionType.deleted,
+    type: ListActionType.Deleted,
     id,
     item,
   }),
 );
+
+export type ActionList<I extends ListItem, P extends string> =
+  | ListItemCreated<I, P>
+  | ListItemUpdated<I, P>
+  | ListItemDeleted<I, P>;

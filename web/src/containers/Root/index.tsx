@@ -3,6 +3,7 @@ import { Provider, useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Store } from 'redux';
 
+import { Action } from '~client/actions';
 import Content from '~client/components/Content';
 import { ErrorMessages } from '~client/containers/ErrorMessages';
 import Header from '~client/containers/Header';
@@ -15,7 +16,7 @@ import StyleReset from '~client/styled/reset';
 import { Main } from '~client/styled/shared';
 
 type Props = {
-  store: Store<State>;
+  store: Store<State, Action>;
 } & RouteComponentProps;
 
 const RootProvided: React.FC = () => {

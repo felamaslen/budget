@@ -1,7 +1,6 @@
-import { createReducerObject } from 'create-reducer-object';
 import { replaceAtIndex } from 'replace-array';
 
-import { ActionTypeError } from '~client/actions/error';
+import { Action, ActionTypeError } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 
 export type Message = {
@@ -17,17 +16,20 @@ export type State = Message[];
 
 export const initialState = [];
 
-export default createReducerObject<State>(
-  {
-    [ActionTypeError.Opened]: (state, { id, message }) => [...state, { id, message }],
-    [ActionTypeError.Closed]: (state, { id }) =>
-      replaceAtIndex(
+export default function error(state: State = initialState, action: Action): State {
+  switch (action.type) {
+    case ActionTypeError.Opened:
+      return [...state, { id: action.id, message: action.message }];
+    case ActionTypeError.Closed:
+      return replaceAtIndex(
         state,
-        state.findIndex(({ id: messageId }) => messageId === id),
+        state.findIndex(({ id }) => id === action.id),
         (item) => ({ ...item, closed: true }),
-      ),
-    [ActionTypeError.Removed]: (state, { id }) =>
-      state.filter(({ id: messageId }) => messageId !== id),
-  },
-  initialState,
-);
+      );
+    case ActionTypeError.Removed:
+      return state.filter(({ id }) => id !== action.id);
+
+    default:
+      return state;
+  }
+}

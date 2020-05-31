@@ -10,7 +10,7 @@ import ModalDialog, { ModalFields, makeField } from '~client/components/ModalDia
 import { useCTA } from '~client/hooks/cta';
 import { formatItem } from '~client/modules/format';
 import { Button } from '~client/styled/shared';
-import { ListItem, Item } from '~client/types';
+import { Item, ListCalcItem } from '~client/types';
 
 export type DefaultMobileKeys = 'date' | 'item' | 'cost';
 
@@ -28,13 +28,13 @@ export const StandardFieldMobile = <V, E extends {} = {}>({
   </Styled.StandardFieldMobile>
 );
 
-export const standardFieldsMobile: FieldsMobile<ListItem, DefaultMobileKeys> = {
+export const standardFieldsMobile: FieldsMobile<ListCalcItem, DefaultMobileKeys> = {
   date: StandardFieldMobile,
   item: StandardFieldMobile,
   cost: StandardFieldMobile,
 };
 
-export const standardModalFields: ModalFields<ListItem> = {
+export const standardModalFields: ModalFields<ListCalcItem> = {
   date: makeField('date', FormFieldDate),
   item: makeField('item', FormFieldText),
   cost: makeField('cost', FormFieldCost),

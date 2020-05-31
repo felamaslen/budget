@@ -7,14 +7,14 @@ import { State } from './types';
 import { IDENTITY, withoutDeleted, withoutCrud, sortByKey } from '~client/modules/data';
 import { State as CrudState } from '~client/reducers/crud';
 import { DailyState } from '~client/reducers/list';
-import { ListItem, Item, WithCrud } from '~client/types';
+import { Item, ListCalcItem, WithCrud } from '~client/types';
 
-export type StateStandard<I extends ListItem, P extends string> = {
+export type StateStandard<I extends ListCalcItem, P extends string> = {
   [page in P]: DailyState<I>;
 };
 
 export const getStandardCost = memoize(
-  <I extends ListItem, P extends string, S extends StateStandard<I, P>>(page: P) => (
+  <I extends ListCalcItem, P extends string, S extends StateStandard<I, P>>(page: P) => (
     state: S,
   ): number => state[page].total,
 );
@@ -46,15 +46,15 @@ export const getItem = memoize(<I extends Item, P extends string>(page: P, id: s
   };
 });
 
-export const sortStandardItems = memoize(<I extends ListItem>() =>
+export const sortStandardItems = memoize(<I extends ListCalcItem>() =>
   sortByKey<'id' | 'date', I>({ key: 'date', order: -1 }, 'id'),
 );
 
 export const getWeeklyCost = memoize(
-  <I extends ListItem, P extends string, S extends StateStandard<I, P>>(page: P) =>
+  <I extends ListCalcItem, P extends string, S extends StateStandard<I, P>>(page: P) =>
     createSelector<S, I[], number>(
       getItems<I, P>(page, sortStandardItems<I>()),
-      (items: ListItem[]): number => {
+      (items: ListCalcItem[]): number => {
         // note that this is calculated only based on the visible data,
         // not past data
         if (!items.length) {

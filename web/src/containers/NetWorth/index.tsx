@@ -1,16 +1,9 @@
-import { useSelector } from 'react-redux';
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { Route } from 'react-router-dom';
 
-import { Category, Subcategory, Entry } from '~client/types/net-worth';
-import {
-  getCategories,
-  getSubcategories,
-  getEntries,
-  getNetWorthTable,
-} from '~client/selectors/overview/net-worth';
-import { useCrud } from '~client/hooks/crud';
+import * as Styled from './styles';
 import {
   netWorthCategoryCreated,
   netWorthCategoryUpdated,
@@ -22,17 +15,17 @@ import {
   netWorthUpdated,
   netWorthDeleted,
 } from '~client/actions/net-worth';
-
-import NetWorthView from '~client/components/NetWorthView';
 import NetWorthCategoryList from '~client/components/NetWorthCategoryList';
 import NetWorthList from '~client/components/NetWorthList';
-
-import * as Styled from './styles';
+import NetWorthView from '~client/components/NetWorthView';
+import { useCrud } from '~client/hooks/crud';
+import { getCategories, getSubcategories, getEntries, getNetWorthTable } from '~client/selectors';
+import { Category, Subcategory, Entry, WithCrud } from '~client/types';
 
 const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
   const categories = useSelector(getCategories);
   const subcategories = useSelector(getSubcategories);
-  const entries = useSelector(getEntries);
+  const entries: WithCrud<Entry>[] = useSelector(getEntries);
   const table = useSelector(getNetWorthTable);
 
   const [onCreateCategory, onUpdateCategory, onDeleteCategory] = useCrud<Category>(

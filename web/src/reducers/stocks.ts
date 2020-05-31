@@ -1,17 +1,9 @@
 import { replaceAtIndex } from 'replace-array';
-import { createReducerObject, Action } from 'create-reducer-object';
 
-import { Stock, Index, StockPrice } from '~client/types/funds';
-import { Data } from '~client/types/graph';
-import { limitTimeSeriesLength } from '~client/modules/data';
-
-import {
-  STOCKS_LIST_REQUESTED,
-  STOCKS_LIST_RECEIVED,
-  STOCKS_PRICES_RECEIVED,
-} from '~client/constants/actions/stocks';
-
+import { Action, ActionTypeStocks } from '~client/actions';
 import { STOCK_INDICES, STOCKS_GRAPH_RESOLUTION } from '~client/constants/stocks';
+import { limitTimeSeriesLength } from '~client/modules/data';
+import { Stock, Index, StockPrice, Data, StocksListResponse } from '~client/types';
 
 export type State = {
   loading: boolean;
@@ -35,38 +27,33 @@ export const initialState: State = {
   lastPriceUpdate: null,
 };
 
-const onStocksList = (
-  _: State,
-  {
-    res: {
-      data: { stocks, total },
-    },
-  }: Action,
-): Partial<State> => ({
+const onStocksList = (state: State, res?: StocksListResponse): State => ({
+  ...state,
   loading: false,
   lastPriceUpdate: null,
-  shares: stocks.reduce((last: Stock[], [code, name, weight]: [string, string, number]) => {
-    const codeIndex = last.findIndex(({ code: lastCode }) => lastCode === code);
-    if (codeIndex === -1) {
-      return [
-        ...last,
-        {
-          code,
-          name,
-          weight: weight / total,
-          gain: 0,
-          price: null,
-          up: false,
-          down: false,
-        },
-      ];
-    }
+  shares:
+    res?.data.stocks.reduce<Stock[]>((last, [code, name, weight]) => {
+      const codeIndex = last.findIndex(({ code: lastCode }) => lastCode === code);
+      if (codeIndex === -1) {
+        return [
+          ...last,
+          {
+            code,
+            name,
+            weight: weight / res.data.total,
+            gain: 0,
+            price: null,
+            up: false,
+            down: false,
+          },
+        ];
+      }
 
-    return replaceAtIndex(last, codeIndex, value => ({
-      ...value,
-      weight: value.weight + weight / total,
-    }));
-  }, []),
+      return replaceAtIndex(last, codeIndex, (value) => ({
+        ...value,
+        weight: value.weight + weight / res.data.total,
+      }));
+    }, []) ?? [],
 });
 
 const updateStock = <S extends { code: string; gain: number } = Stock>(prices: StockPrice[]) => (
@@ -90,30 +77,36 @@ const updateStock = <S extends { code: string; gain: number } = Stock>(prices: S
   };
 };
 
-function onStocksPrices(state: State, { res }: Action): Partial<State> {
+function onStocksPrices(state: State, now: Date, res?: StockPrice[]): State {
   if (!res) {
-    return {};
+    return state;
   }
 
-  const lastPriceUpdate = Date.now();
+  const lastPriceUpdate = now.getTime();
   const shares = state.shares.map(updateStock(res));
 
   const weightedGain = shares.reduce((last, { gain, weight }) => last + gain * weight, 0);
 
   return {
+    ...state,
     lastPriceUpdate,
     indices: state.indices.map(updateStock<Index>(res)),
     shares,
     history: limitTimeSeriesLength(state.history, STOCKS_GRAPH_RESOLUTION).concat([
-      [Date.now(), weightedGain],
+      [lastPriceUpdate, weightedGain],
     ]),
   };
 }
 
-const handlers = {
-  [STOCKS_LIST_REQUESTED]: (): Partial<State> => ({ loading: true }),
-  [STOCKS_LIST_RECEIVED]: onStocksList,
-  [STOCKS_PRICES_RECEIVED]: onStocksPrices,
-};
-
-export default createReducerObject(handlers, initialState);
+export default function stocks(state: State = initialState, action: Action): State {
+  switch (action.type) {
+    case ActionTypeStocks.Requested:
+      return { ...state, loading: true };
+    case ActionTypeStocks.Received:
+      return onStocksList(state, action.res);
+    case ActionTypeStocks.PricesReceived:
+      return onStocksPrices(state, action.now, action.res);
+    default:
+      return state;
+  }
+}

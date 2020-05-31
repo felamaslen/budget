@@ -20,7 +20,7 @@ import { FormFieldCostInline } from '~client/components/FormField/cost';
 import { FormFieldDateInline } from '~client/components/FormField/date';
 import { ModalFields } from '~client/components/ModalDialog';
 import { formatCurrency, capitalise } from '~client/modules/format';
-import { Delta, ListItem, PickUnion } from '~client/types';
+import { Delta, ListItem, ListCalcItem, PickUnion } from '~client/types';
 
 export const standardFields = {
   date: FormFieldDateInline,
@@ -30,7 +30,7 @@ export const standardFields = {
 
 const standardSuggestionFields: FieldKey<ListItem>[] = ['item'];
 
-const deltaSeed = <I extends ListItem>(): Delta<I> =>
+const deltaSeed = <I extends ListCalcItem>(): Delta<I> =>
   ({
     date: startOfDay(new Date()),
   } as Delta<I>);
@@ -39,11 +39,11 @@ export type ExtraProps = {
   isFuture: boolean;
 };
 
-const makeItemProcessor = (now: Date) => (item: ListItem): Pick<ExtraProps, 'isFuture'> => ({
+const makeItemProcessor = (now: Date) => (item: ListCalcItem): Pick<ExtraProps, 'isFuture'> => ({
   isFuture: item.date > now,
 });
 
-export const StandardHeader = <I extends ListItem, P extends string, MK extends keyof I>({
+export const StandardHeader = <I extends ListCalcItem, P extends string, MK extends keyof I>({
   page,
   isMobile,
   fields,
@@ -74,7 +74,7 @@ export const StandardHeader = <I extends ListItem, P extends string, MK extends 
 export type ExtraFields<I extends ListItem> = Omit<I, Exclude<keyof ListItem, 'id'>>;
 
 export type PropsStandard<
-  I extends ListItem,
+  I extends ListCalcItem,
   P extends string,
   MK extends keyof I = DefaultMobileKeys,
   E extends {} = {}
@@ -89,7 +89,7 @@ export type PropsStandard<
 
 export const AccessibleListStandard = <
   P extends string = string,
-  I extends ListItem = ListItem,
+  I extends ListCalcItem = ListCalcItem,
   MK extends keyof I = DefaultMobileKeys,
   E extends {} = {}
 >({

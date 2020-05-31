@@ -72,7 +72,6 @@
     "body-parser": "^1.17.2",
     "color-hash": "^1.0.3",
     "colors": "^1.1.2",
-    "create-reducer-object": "^2.0.0",
     "cssnano": "^4.1.10",
     "date-fns": "^2.9.0",
     "dateformat": "^2.0.0",

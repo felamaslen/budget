@@ -1,3 +1,4 @@
+import { ListItem, RawListItem } from './shared';
 import { DataKeyAbbr } from '~client/constants/api';
 import { Data } from '~client/types/graph';
 
@@ -12,9 +13,7 @@ export type Transaction = Omit<TransactionRaw, 'date'> & {
   date: Date;
 };
 
-export type Fund = {
-  id: string;
-  item: string;
+export type Fund = ListItem & {
   transactions: Transaction[];
 };
 
@@ -54,9 +53,7 @@ export type StockPrice = {
   close: number;
 };
 
-export type FundRaw = {
-  [DataKeyAbbr.id]: string;
-  [DataKeyAbbr.item]: string;
+export type FundRaw = RawListItem & {
   [DataKeyAbbr.transactions]: TransactionRaw[] | null;
   pr: number[];
   prStartIndex: number;

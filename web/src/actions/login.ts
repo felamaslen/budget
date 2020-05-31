@@ -1,14 +1,50 @@
-import { Action } from 'create-reducer-object';
-import * as actions from '~client/constants/actions/login';
 import { LoginResponse } from '~client/types/auth';
 
-export const loginRequested = (pin: number): Action => ({ type: actions.LOGIN_REQUESTED, pin });
+export enum ActionTypeLogin {
+  Requested = '@@login/REQUESTED',
+  ErrorOccurred = '@@login/ERROR_OCCURRED',
+  LoggedIn = '@@login/LOGGED_IN',
+  LoggedOut = '@@login/LOGGED_OUT',
+}
 
-export const loginErrorOccurred = (err: Error): Action => ({
-  type: actions.LOGIN_ERROR_OCCURRED,
-  err,
+export type ActionLoginRequested = {
+  type: ActionTypeLogin.Requested;
+  pin: number;
+};
+
+export const loginRequested = (pin: number): ActionLoginRequested => ({
+  type: ActionTypeLogin.Requested,
+  pin,
 });
 
-export const loggedIn = (res: LoginResponse): Action => ({ type: actions.LOGGED_IN, res });
+export type ActionLoginErrorOccurred = {
+  type: ActionTypeLogin.ErrorOccurred;
+  error: string;
+};
 
-export const loggedOut = (): { type: string } => ({ type: actions.LOGGED_OUT });
+export const loginErrorOccurred = (error: string): ActionLoginErrorOccurred => ({
+  type: ActionTypeLogin.ErrorOccurred,
+  error,
+});
+
+export type ActionLoggedIn = {
+  type: ActionTypeLogin.LoggedIn;
+  res: LoginResponse;
+};
+
+export const loggedIn = (res: LoginResponse): ActionLoggedIn => ({
+  type: ActionTypeLogin.LoggedIn,
+  res,
+});
+
+export type ActionLoggedOut = {
+  type: ActionTypeLogin.LoggedOut;
+};
+
+export const loggedOut = (): ActionLoggedOut => ({ type: ActionTypeLogin.LoggedOut });
+
+export type ActionLogin =
+  | ActionLoginRequested
+  | ActionLoginErrorOccurred
+  | ActionLoggedIn
+  | ActionLoggedOut;

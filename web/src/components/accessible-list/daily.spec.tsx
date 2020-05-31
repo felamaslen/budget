@@ -10,7 +10,7 @@ import { State } from '~client/reducers';
 import { DailyState } from '~client/reducers/list';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
-import { Page, ListItem } from '~client/types';
+import { Page, ListCalcItem } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -152,7 +152,7 @@ describe('<AccessibleListDaily />', () => {
     const customPage = 'myPage';
     const customCategory = 'myCategory';
 
-    type CustomItem = ListItem & {
+    type CustomItem = ListCalcItem & {
       [customCategory]: string;
       shop: string;
     };

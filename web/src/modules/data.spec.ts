@@ -21,6 +21,8 @@ import {
   sortByDate,
   sortByKey,
   withoutDeleted,
+  withoutId,
+  withoutIds,
 } from './data';
 import { Average } from '~client/constants';
 import { Period } from '~client/constants/graph';
@@ -697,6 +699,25 @@ describe('data module', () => {
         { foo: 4, __optimistic: RequestType.create },
         { foo: 5, __optimistic: RequestType.update },
       ]);
+    });
+  });
+
+  describe('withoutId', () => {
+    it('should remove the ID from an object', () => {
+      expect.assertions(1);
+      expect(withoutId({ id: 'foo', bar: 'baz' })).toStrictEqual({ bar: 'baz' });
+    });
+  });
+
+  describe('withoutIds', () => {
+    it('should remove IDs from an array of objects', () => {
+      expect.assertions(1);
+      expect(
+        withoutIds([
+          { id: 'bak', bar: 'ban' },
+          { id: 'foo', bar: 'baz' },
+        ]),
+      ).toStrictEqual([{ bar: 'ban' }, { bar: 'baz' }]);
     });
   });
 });

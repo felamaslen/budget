@@ -1,5 +1,4 @@
 import { compose } from '@typed/compose';
-import { createReducerObject, Action } from 'create-reducer-object';
 import addYears from 'date-fns/addYears';
 import endOfMonth from 'date-fns/endOfMonth';
 import isSameMonth from 'date-fns/isSameMonth';
@@ -8,12 +7,18 @@ import setYear from 'date-fns/setYear';
 import memoize from 'fast-memoize';
 import { replaceAtIndex } from 'replace-array';
 
-import { ListActionType } from '~client/actions/list';
-
-import { DATA_READ } from '~client/constants/actions/api';
-import { LOGGED_OUT } from '~client/constants/actions/login';
+import {
+  Action,
+  ActionTypeApi,
+  ActionTypeLogin,
+  ListActionType,
+  ListItemCreated,
+  ListItemUpdated,
+  ListItemDeleted,
+  isCalcListAction,
+} from '~client/actions';
 import { getMonthDates } from '~client/selectors/overview/common';
-import { Page, PageListCalc, ListCalcItem, OverviewState as State } from '~client/types';
+import { Page, PageList, ListCalcItem, OverviewState as State, ReadResponse } from '~client/types';
 
 export { OverviewState as State } from '~client/types/overview';
 
@@ -33,23 +38,17 @@ export const initialState: State = {
   },
 };
 
-const onRead = (_: State, action: Action): State => ({
+const onRead = (_: State, res: ReadResponse): State => ({
   startDate: endOfMonth(
     setMonth(
-      setYear(new Date(), action.res?.overview?.startYearMonth?.[0]),
-      action.res?.overview?.startYearMonth?.[1] - 1,
+      setYear(new Date(), res.overview.startYearMonth[0]),
+      res.overview.startYearMonth[1] - 1,
     ),
   ),
   endDate: endOfMonth(
-    setMonth(
-      setYear(new Date(), action.res?.overview?.endYearMonth?.[0]),
-      action.res?.overview?.endYearMonth?.[1] - 1,
-    ),
+    setMonth(setYear(new Date(), res.overview.endYearMonth[0]), res.overview.endYearMonth[1] - 1),
   ),
-  cost: {
-    ...action.res?.overview?.cost,
-    balance: undefined,
-  },
+  cost: res.overview.cost,
 });
 
 const getStateRowDates = memoize((state: State): Date[] => getMonthDates({ overview: state }));
@@ -57,45 +56,59 @@ const getStateRowDates = memoize((state: State): Date[] => getMonthDates({ overv
 const getDateIndex = (state: State, date: Date): number =>
   getStateRowDates(state).findIndex((item) => isSameMonth(date, item));
 
-function getUpdatedCost(
+const setCost = (state: State, date: Date, diff: number) => (last: number[]): number[] =>
+  replaceAtIndex(last, getDateIndex(state, date), (value) => value + diff);
+
+const onCreate = (
   state: State,
-  page: PageListCalc,
-  newItem: Partial<ListCalcItem>,
-  oldItem: Partial<ListCalcItem> = { date: newItem.date, cost: 0 },
-): Pick<State, 'cost'> {
-  if (!(newItem.date && oldItem.date && typeof newItem.cost !== 'undefined')) {
-    return state;
+  { page, delta }: ListItemCreated<ListCalcItem, PageList>,
+): State => ({
+  ...state,
+  cost: {
+    ...state.cost,
+    [page]: setCost(state, delta.date, delta.cost)(state.cost[page]),
+  },
+});
+
+const onUpdate = (
+  state: State,
+  { page, delta, item }: ListItemUpdated<ListCalcItem, PageList>,
+): State => ({
+  ...state,
+  cost: {
+    ...state.cost,
+    [page]: compose(
+      setCost(state, delta.date ?? item.date, delta.cost ?? item.cost),
+      setCost(state, item.date, -item.cost),
+    )(state.cost[page]),
+  },
+});
+
+const onDelete = (
+  state: State,
+  { page, item }: ListItemDeleted<ListCalcItem, PageList>,
+): State => ({
+  ...state,
+  cost: {
+    ...state.cost,
+    [page]: setCost(state, item.date, -item.cost)(state.cost[page]),
+  },
+});
+
+export default function overview(state: State = initialState, action: Action): State {
+  switch (action.type) {
+    case ActionTypeApi.DataRead:
+      return action.res ? onRead(state, action.res) : state;
+
+    case ListActionType.Created:
+      return isCalcListAction(action) ? onCreate(state, action) : state;
+    case ListActionType.Updated:
+      return isCalcListAction(action) ? onUpdate(state, action) : state;
+    case ListActionType.Deleted:
+      return isCalcListAction(action) ? onDelete(state, action) : state;
+
+    case ActionTypeLogin.LoggedOut:
+    default:
+      return state;
   }
-
-  const setCost = (date: Date, diff: number) => (last: number[]): number[] =>
-    replaceAtIndex(last, getDateIndex(state, date), (value) => value + diff);
-
-  return {
-    cost: {
-      ...state.cost,
-      [page]: compose(
-        setCost(oldItem.date, -(oldItem.cost ?? 0)),
-        setCost(newItem.date, +newItem.cost),
-      )(state.cost?.[page] ?? []),
-    },
-  };
 }
-
-const onCreate = (state: State, { page, delta }: Action): Partial<State> =>
-  getUpdatedCost(state, page, delta);
-
-const onUpdate = (state: State, { page, delta, item }: Action): Partial<State> =>
-  getUpdatedCost(state, page, delta, item);
-
-const onDelete = (state: State, { page, item }: Action): Partial<State> =>
-  getUpdatedCost(state, page, { date: item.date, cost: 0 }, item);
-
-const handlers = {
-  [DATA_READ]: onRead,
-  [ListActionType.created]: onCreate,
-  [ListActionType.updated]: onUpdate,
-  [ListActionType.deleted]: onDelete,
-  [LOGGED_OUT]: (): State => initialState,
-};
-
-export default createReducerObject<State>(handlers, initialState);

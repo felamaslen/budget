@@ -1,18 +1,18 @@
 import sinon from 'sinon';
 
-import reducer, { initialState, State } from '~client/reducers/stocks';
+import reducer, { initialState, State } from './stocks';
+import { loggedOut } from '~client/actions/login';
 import {
   stocksListRequested,
   stocksListReceived,
   stockPricesReceived,
 } from '~client/actions/stocks';
-import { loggedOut } from '~client/actions/login';
+import { StocksListResponse } from '~client/types';
 
 describe('Stocks reducer', () => {
   describe.each`
-    description      | action
-    ${'Null action'} | ${null}
-    ${'LOGGED_OUT'}  | ${loggedOut()}
+    description     | action
+    ${'LOGGED_OUT'} | ${loggedOut()}
   `('$description', ({ action }) => {
     it('should return the initial state', () => {
       expect.assertions(1);
@@ -51,7 +51,7 @@ describe('Stocks reducer', () => {
           ],
           total: 11,
         },
-      });
+      } as StocksListResponse);
 
       const result = reducer(state, action);
 

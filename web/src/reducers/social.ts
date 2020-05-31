@@ -1,6 +1,5 @@
 import { makeDailyListReducer, DailyState } from '~client/reducers/list';
-import { Social } from '~client/types/list';
-import { Page } from '~client/types/app';
+import { Page, Social } from '~client/types';
 
 export type State = DailyState<Social>;
-export default makeDailyListReducer<Social>(Page.social);
+export default makeDailyListReducer<Social, Page.social>(Page.social);

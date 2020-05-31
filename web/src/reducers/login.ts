@@ -1,11 +1,4 @@
-import { createReducerObject, Action } from 'create-reducer-object';
-
-import {
-  LOGIN_REQUESTED,
-  LOGIN_ERROR_OCCURRED,
-  LOGGED_IN,
-  LOGGED_OUT,
-} from '~client/constants/actions/login';
+import { ActionTypeLogin, Action } from '~client/actions';
 
 export type State = {
   initialised: boolean;
@@ -23,24 +16,24 @@ export const initialState: State = {
   name: null,
 };
 
-const handlers = {
-  [LOGIN_REQUESTED]: (): Partial<State> => ({ loading: true }),
-  [LOGIN_ERROR_OCCURRED]: (_: State, { err }: Action): Partial<State> => ({
-    initialised: true,
-    loading: false,
-    error: err,
-  }),
-  [LOGGED_IN]: (_: State, { res: { uid, name } }: Action): State => ({
-    initialised: true,
-    loading: false,
-    error: null,
-    uid,
-    name,
-  }),
-  [LOGGED_OUT]: (): State => ({
-    ...initialState,
-    initialised: true,
-  }),
-};
-
-export default createReducerObject<State>(handlers, initialState);
+export default function login(state: State = initialState, action: Action): State {
+  switch (action.type) {
+    case ActionTypeLogin.Requested:
+      return { ...state, loading: true };
+    case ActionTypeLogin.ErrorOccurred:
+      return { ...state, initialised: true, loading: false, error: action.error };
+    case ActionTypeLogin.LoggedIn:
+      return {
+        ...state,
+        initialised: true,
+        loading: false,
+        error: null,
+        uid: action.res.uid,
+        name: action.res.name,
+      };
+    case ActionTypeLogin.LoggedOut:
+      return { ...initialState, initialised: true };
+    default:
+      return state;
+  }
+}

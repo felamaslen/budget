@@ -18,8 +18,7 @@ import sinon from 'sinon';
 import { AccessibleList, AccessibleListStandard, Props } from '.';
 import { listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions/list';
 import { ListState } from '~client/reducers/list';
-import { RequestType } from '~client/types/crud';
-import { Item, ListItem } from '~client/types/list';
+import { RequestType, Item, ListItem, ListCalcItem } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -39,7 +38,7 @@ describe('<AccessibleList />', () => {
     [myPage]: ListState<I>;
   };
 
-  const testState: MyState<ListItem> = {
+  const testState: MyState<ListCalcItem> = {
     [myPage]: {
       items: [
         {
@@ -471,7 +470,7 @@ describe('<AccessibleList />', () => {
           renderResult: { store },
         } = await setup();
 
-        const expectedAction = listItemCreated<ListItem, MyPage>(myPage)({
+        const expectedAction = listItemCreated<ListCalcItem, MyPage>(myPage)({
           date: new Date('2020-06-05'),
           item: 'Different item innit',
           cost: 1065,

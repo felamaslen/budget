@@ -10,7 +10,7 @@ import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actio
 import { State } from '~client/reducers';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
-import { Page, ListItem } from '~client/types';
+import { Page, ListCalcItem } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -112,7 +112,7 @@ describe('<AccessibleListStandard />', () => {
       fireEvent.click(addButton);
     });
 
-    const expectedAction = listItemCreated<ListItem, Page.bills>(page)({
+    const expectedAction = listItemCreated<ListCalcItem, Page.bills>(page)({
       date: new Date('2020-04-18'),
       item: 'some new item',
       cost: 18993,
@@ -697,7 +697,7 @@ describe('<AccessibleListStandard />', () => {
 
         expect(store.getActions()).toStrictEqual([
           expect.objectContaining(
-            listItemCreated<ListItem, Page.bills>(page)(
+            listItemCreated<ListCalcItem, Page.bills>(page)(
               expect.objectContaining({
                 date: new Date('2020-04-20'),
                 item: 'some new item',
@@ -779,7 +779,7 @@ describe('<AccessibleListStandard />', () => {
 
         expect(store.getActions()).toStrictEqual([
           expect.objectContaining(
-            listItemUpdated<ListItem, Page.bills>(Page.bills)(
+            listItemUpdated<ListCalcItem, Page.bills>(Page.bills)(
               'some-id',
               expect.objectContaining({
                 date: new Date('2020-04-23'),
@@ -815,7 +815,7 @@ describe('<AccessibleListStandard />', () => {
 
         expect(store.getActions()).toStrictEqual([
           expect.objectContaining(
-            listItemDeleted<ListItem, Page.bills>(Page.bills)('some-id', {
+            listItemDeleted<ListCalcItem, Page.bills>(Page.bills)('some-id', {
               id: 'some-id',
               date: new Date('2020-04-20'),
               item: 'item one',

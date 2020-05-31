@@ -1,9 +1,11 @@
-import reducer, { initialState } from '~client/reducers/funds';
+import reducer, { initialState } from './funds';
 import { dataRead } from '~client/actions/api';
 import { fundsViewSoldToggled, fundsReceived } from '~client/actions/funds';
-import { getTransactionsList } from '~client/modules/data';
 import { DataKeyAbbr } from '~client/constants/api';
 import { Period } from '~client/constants/graph';
+import { getTransactionsList } from '~client/modules/data';
+import { testResponse } from '~client/test-data';
+import { Page } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -14,6 +16,8 @@ describe('Funds reducer', () => {
     const action = fundsViewSoldToggled();
 
     it('should toggle the view sold status', () => {
+      expect.assertions(2);
+
       expect(
         reducer(
           {
@@ -38,7 +42,8 @@ describe('Funds reducer', () => {
 
   describe('DATA_READ', () => {
     const res = {
-      funds: {
+      ...testResponse,
+      [Page.funds]: {
         startTime: 1000,
         cacheTimes: [1, 2, 100, 183],
         data: [
@@ -63,6 +68,7 @@ describe('Funds reducer', () => {
     const action = dataRead(res);
 
     it('should set funds-related properties', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
 
       expect(result).toStrictEqual({
@@ -116,17 +122,20 @@ describe('Funds reducer', () => {
     const action = fundsReceived(Period.month3, res);
 
     it('should not touch the current items list', () => {
+      expect.assertions(2);
       expect(initialState.period).not.toBe(Period.month3);
       const result = reducer(initialState, action);
       expect(result.items).toBe(initialState.items);
     });
 
     it('should not touch the cache for the current period', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
       expect(result.cache[initialState.period]).toBe(initialState.cache[initialState.period]);
     });
 
     it('should cache the new values', () => {
+      expect.assertions(1);
       const result = reducer(initialState, action);
       expect(result.cache[Period.month3]).toStrictEqual({
         startTime: 1430,
@@ -142,6 +151,7 @@ describe('Funds reducer', () => {
       const actionNoData = fundsReceived(Period.month3);
 
       it('should just set the period', () => {
+        expect.assertions(3);
         const result = reducer(initialState, actionNoData);
 
         expect(result.items).toBe(initialState.items);

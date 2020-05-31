@@ -2,14 +2,13 @@ import { dataRead } from '~client/actions/api';
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
 import { loggedOut } from '~client/actions/login';
 import reducer, { initialState, State } from '~client/reducers/overview';
-import { Page } from '~client/types/app';
-import { Food, General, Holiday } from '~client/types/list';
+import { testResponse } from '~client/test-data';
+import { Page, Food, General, Holiday } from '~client/types';
 
 describe('Overview reducer', () => {
   describe.each`
-    description      | action
-    ${'Null action'} | ${null}
-    ${'LOGGED_OUT'}  | ${loggedOut()}
+    description     | action
+    ${'LOGGED_OUT'} | ${loggedOut()}
   `('$description', ({ action }) => {
     it('should return the initial state', () => {
       expect.assertions(1);
@@ -19,6 +18,7 @@ describe('Overview reducer', () => {
 
   describe('DATA_READ', () => {
     const action = dataRead({
+      ...testResponse,
       [Page.overview]: {
         startYearMonth: [2019, 4],
         endYearMonth: [2019, 7],
@@ -95,7 +95,7 @@ describe('Overview reducer', () => {
       expect.assertions(1);
       const withGeneral = reducer(
         state,
-        listItemCreated<General>(Page.general)({
+        listItemCreated<General, Page.general>(Page.general)({
           date: new Date('2019-06-02T00:00:00.000Z'),
           item: 'some item',
           category: 'some category',
@@ -125,78 +125,30 @@ describe('Overview reducer', () => {
       },
     };
 
-    it('should handle an updated date', () => {
+    const multiUpdateDelta = { date: new Date('2019-06-02'), cost: 98 };
+
+    it.each`
+      prop       | delta                               | firstCost          | secondCost
+      ${'date'}  | ${{ date: new Date('2019-06-02') }} | ${24108 - 34}      | ${28123 + 34}
+      ${'item'}  | ${{ item: 'updated item' }}         | ${24108}           | ${28123}
+      ${'cost'}  | ${{ cost: 98 }}                     | ${24108 + 98 - 34} | ${28123}
+      ${'multi'} | ${multiUpdateDelta}                 | ${24108 - 34}      | ${28123 + 98}
+    `('should handle $prop updates', ({ delta, firstCost, secondCost }) => {
       expect.assertions(2);
-      const withDate = reducer(
+
+      const result = reducer(
         state,
-        listItemUpdated<Food>(Page.food)(
-          'some-id',
-          {
-            date: new Date('2019-06-02T00:00Z'),
-            cost: 34,
-          },
-          {
-            date: new Date('2019-05-10T00:00Z'),
-            item: 'some item',
-            category: 'some category',
-            cost: 34,
-            shop: 'some shop',
-          },
-        ),
+        listItemUpdated<Food, Page.food>(Page.food)('some-id', delta, {
+          date: new Date('2019-05-10'),
+          item: 'some item',
+          category: 'some category',
+          cost: 34,
+          shop: 'some shop',
+        }),
       );
 
-      expect(withDate.cost?.food?.[1]).toBe(24108 - 34);
-      expect(withDate.cost?.food?.[2]).toBe(28123 + 34);
-    });
-
-    it('should handle an updated cost', () => {
-      expect.assertions(1);
-      const withCost = reducer(
-        state,
-        listItemUpdated<Food>(Page.food)(
-          'some-id',
-          {
-            date: new Date('2019-06-02T00:00Z'),
-            cost: 98,
-          },
-          {
-            date: new Date('2019-06-02T00:00Z'),
-            item: 'some item',
-            category: 'some category',
-            cost: 34,
-            shop: 'some shop',
-          },
-        ),
-      );
-
-      expect(withCost.cost?.food?.[2]).toBe(28123 + 98 - 34);
-    });
-
-    it('should handle a simultaneous update', () => {
-      expect.assertions(2);
-      const withBoth = reducer(
-        state,
-        listItemUpdated<Food>(Page.food)(
-          'some-id',
-          {
-            date: new Date('2019-06-02T00:00Z'),
-            item: 'some item',
-            category: 'some caetgory',
-            cost: 98,
-            shop: 'some shop',
-          },
-          {
-            date: new Date('2019-04-24T00:00Z'),
-            item: 'some item',
-            category: 'some category',
-            cost: 34,
-            shop: 'some shop',
-          },
-        ),
-      );
-
-      expect(withBoth.cost?.food?.[0]).toBe(11907 - 34);
-      expect(withBoth.cost?.food?.[2]).toBe(28123 + 98);
+      expect(result.cost[Page.food][1]).toBe(firstCost);
+      expect(result.cost[Page.food][2]).toBe(secondCost);
     });
   });
 
@@ -221,7 +173,7 @@ describe('Overview reducer', () => {
       expect.assertions(1);
       const withHoliday = reducer(
         state,
-        listItemDeleted<Holiday>(Page.holiday)('some-id', {
+        listItemDeleted<Holiday, Page.holiday>(Page.holiday)('some-id', {
           date: new Date('2019-07-12T00:00Z'),
           item: 'some item',
           holiday: 'some holiday',

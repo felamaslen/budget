@@ -13,9 +13,9 @@ import { sortByDate } from '~client/modules/data';
 import {
   CreateEdit,
   Create,
-  Entry,
   Category,
   Subcategory,
+  Entry,
   ValueObject,
   Currency,
   Item,
@@ -139,15 +139,14 @@ export type PropsAdd = Omit<PropsBase, 'item'> & {
 };
 
 export const NetWorthAddForm: React.FC<PropsAdd> = ({ data, onCreate, ...props }) => {
-  const item = useMemo<Omit<Entry, 'id'>>(() => {
+  const item = useMemo<Create<Entry>>(() => {
     if (data.length) {
-      const itemsSorted: Entry[] = sortByDate<Entry>(data);
-
-      const lastItem = itemsSorted[itemsSorted.length - 1];
+      const itemsSorted = sortByDate(data);
+      const lastItemWithIds: Create<Entry> = withContrivedIds(itemsSorted[itemsSorted.length - 1]);
 
       return {
-        ...withContrivedIds(lastItem),
-        date: endOfMonth(addMonths(lastItem.date, 1)),
+        ...lastItemWithIds,
+        date: endOfMonth(addMonths(lastItemWithIds.date, 1)),
       };
     }
 

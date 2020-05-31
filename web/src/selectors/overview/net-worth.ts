@@ -6,7 +6,7 @@ import isSameMonth from 'date-fns/isSameMonth';
 import startOfYear from 'date-fns/startOfYear';
 import { createSelector } from 'reselect';
 
-import { sortByKey, withoutDeleted } from '~client/modules/data';
+import { sortByKey, withoutDeleted, withoutIds } from '~client/modules/data';
 
 import { State } from '~client/reducers';
 
@@ -22,13 +22,15 @@ import {
   Category,
   Subcategory,
   Entry,
+  CreateEntry,
+  RawDate,
   Value,
   ValueObject,
   Currency,
   CreditLimit,
   isComplex,
   isFX,
-  RequestItem,
+  SyncPayloadNetWorth,
   Aggregate,
   AggregateSums,
   isOption,
@@ -338,25 +340,22 @@ const withSingleOptionValues = (categories: Category[], subcategories: Subcatego
     return valueObject;
   });
 
-const withoutIds = <T extends { id?: string }>(items: T[]): Omit<T, 'id'>[] =>
-  items.map(({ id, ...rest }) => rest);
-
 const withEntryRequests = (
   categories: Category[],
   subcategories: Subcategory[],
   entries: WithCrud<Entry>[],
 ) => (requests: Request[]): Request[] =>
   requests.concat(
-    getRequests<RequestItem>('data/net-worth')(
+    getRequests<SyncPayloadNetWorth>('data/net-worth')(
       entries
         .filter(({ values, creditLimit }: WithCrud<Entry>) =>
           [values, creditLimit].every(
             (group) => !group.some(groupPending(categories, subcategories)),
           ),
         )
-        .map(({ date, values, creditLimit, currencies, ...rest }: WithCrud<Entry>) => ({
+        .map<RawDate<CreateEntry>>(({ date, values, creditLimit, currencies, ...rest }) => ({
           date: format(date, 'yyyy-MM-dd'),
-          values: compose<ValueObject[], Omit<ValueObject, 'id'>[], Omit<ValueObject, 'id'>[]>(
+          values: compose<ValueObject[], Create<ValueObject>[], Create<ValueObject>[]>(
             withSingleOptionValues(categories, subcategories),
             withoutIds,
           )(values),

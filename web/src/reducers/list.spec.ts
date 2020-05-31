@@ -1,11 +1,10 @@
-import { Action } from 'create-reducer-object';
 import { makeListReducer, makeDailyListReducer, ListState, DailyState } from './list';
 import { dataRead, syncReceived } from '~client/actions/api';
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
 import { loggedOut } from '~client/actions/login';
 import { DataKeyAbbr } from '~client/constants/api';
-import { Page } from '~client/types/app';
-import { RequestType } from '~client/types/crud';
+import { testResponse } from '~client/test-data';
+import { Page, PageListCalc, RequestType, Bill } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -25,13 +24,8 @@ describe('List reducer', () => {
 
   type State = ListState<Item, ExtraState>;
 
-  const page = Page.food;
-
-  const customHandlers = {
-    CUSTOM_HANDLER_101: (_: State, action: Action): Partial<State> => ({
-      baz: action.foo,
-    }),
-  };
+  const page: PageListCalc = Page.income;
+  type MyPage = Page.income;
 
   const initialState: State = {
     items: [],
@@ -44,27 +38,15 @@ describe('List reducer', () => {
     olderExists: null,
   };
 
-  type RawItem = {
-    I: string;
-    i: string;
-    c: number;
-  };
+  const myListReducer = makeListReducer<Item, MyPage, ExtraState>(page, initialState);
 
-  const myListReducer = makeListReducer<Item, RawItem, ExtraState>(
-    page,
-    customHandlers,
-    initialState,
-  );
-
-  const dailyReducer = makeDailyListReducer<Item, RawItem, Omit<State, 'baz'>>(page);
+  const dailyReducer = makeDailyListReducer<Item, MyPage, Omit<State, 'baz'>>(page);
 
   const testDate = new Date('2020-04-20');
 
   describe.each`
-    description           | action
-    ${'Null action'}      | ${null}
-    ${'Undefined action'} | ${undefined}
-    ${'LOGGED_OUT'}       | ${loggedOut()}
+    description     | action
+    ${'LOGGED_OUT'} | ${loggedOut()}
   `('$description', ({ action }) => {
     it('should return the initial state', () => {
       expect.assertions(1);
@@ -80,12 +62,23 @@ describe('List reducer', () => {
   describe('DATA_READ', () => {
     const response = {
       data: [
-        { [DataKeyAbbr.id]: 'some-id', [DataKeyAbbr.item]: 'yes' },
-        { [DataKeyAbbr.id]: 'other-id', [DataKeyAbbr.item]: 'no' },
+        {
+          [DataKeyAbbr.id]: 'some-id',
+          [DataKeyAbbr.date]: '2020-04-20',
+          [DataKeyAbbr.item]: 'yes',
+          [DataKeyAbbr.cost]: 123,
+        },
+        {
+          [DataKeyAbbr.id]: 'other-id',
+          [DataKeyAbbr.date]: '2020-04-21',
+          [DataKeyAbbr.item]: 'no',
+          [DataKeyAbbr.cost]: 456,
+        },
       ],
     };
 
     const action = dataRead({
+      ...testResponse,
       [page]: response,
     });
 
@@ -94,14 +87,9 @@ describe('List reducer', () => {
       const result = myListReducer(initialState, action);
 
       expect(result.items).toStrictEqual([
-        { id: 'some-id', item: 'yes' },
-        { id: 'other-id', item: 'no' },
+        expect.objectContaining({ id: 'some-id', item: 'yes' }),
+        expect.objectContaining({ id: 'other-id', item: 'no' }),
       ]);
-    });
-
-    it('should ignore actions where the response has no data for the current page', () => {
-      expect.assertions(1);
-      expect(myListReducer(initialState, dataRead({ [Page.bills]: response }))).toBe(initialState);
     });
 
     it('should handle the case when the response data contain no items', () => {
@@ -110,6 +98,7 @@ describe('List reducer', () => {
         myListReducer(
           initialState,
           dataRead({
+            ...testResponse,
             [page]: {
               data: [],
             },
@@ -120,6 +109,7 @@ describe('List reducer', () => {
 
     describe('for daily lists', () => {
       const actionRead = dataRead({
+        ...testResponse,
         [page]: {
           total: 335,
           olderExists: true,
@@ -156,8 +146,8 @@ describe('List reducer', () => {
     });
   });
 
-  describe('ListAction.create', () => {
-    const action = listItemCreated<Item>(page)({
+  describe('ListAction.Create', () => {
+    const action = listItemCreated<Item, Page.income>(page)({
       date: new Date('2019-07-10'),
       item: 'some item',
       cost: 3,
@@ -192,9 +182,10 @@ describe('List reducer', () => {
       expect(
         myListReducer(
           initialStateCreate,
-          listItemCreated<{ id: string; some: string; is: boolean }>(Page.bills)({
-            some: 'prop',
-            is: true,
+          listItemCreated<Bill, Page.bills>(Page.bills)({
+            date: new Date('2020-04-20'),
+            item: 'some item',
+            cost: 1023,
           }),
         ),
       ).toBe(initialStateCreate);
@@ -206,7 +197,7 @@ describe('List reducer', () => {
         total: 3,
       };
 
-      const actionDaily = listItemCreated<Item>(page)({
+      const actionDaily = listItemCreated<Item, typeof page>(page)({
         date: new Date('2019-07-12'),
         item: 'some item',
         cost: 34,
@@ -225,13 +216,13 @@ describe('List reducer', () => {
     });
   });
 
-  describe('ListAction.update', () => {
+  describe('ListAction.Update', () => {
     const state: State = {
       ...initialState,
       items: [{ id: 'some-real-id', date: testDate, item: 'some-item', cost: 23 }],
     };
 
-    const action = listItemUpdated<Item>(page)(
+    const action = listItemUpdated<Item, typeof page>(page)(
       'some-real-id',
       { item: 'other item' },
       {
@@ -269,7 +260,7 @@ describe('List reducer', () => {
         ],
       };
 
-      const actionAfterCreate = listItemUpdated<Item>(page)(
+      const actionAfterCreate = listItemUpdated<Item, typeof page>(page)(
         'some-fake-id',
         { item: 'updated item' },
         {
@@ -301,15 +292,17 @@ describe('List reducer', () => {
       expect(
         myListReducer(
           initialStateUpdate,
-          listItemUpdated<{ id: string; some: string; is: boolean }>(Page.bills)(
+          listItemUpdated<Bill, Page.bills>(Page.bills)(
             'some-id',
             {
-              some: 'prop',
-              is: true,
+              date: new Date('2020-04-20'),
+              item: 'old item',
+              cost: 2931,
             },
             {
-              some: 'nah',
-              is: false,
+              date: new Date('2020-04-21'),
+              item: 'new item',
+              cost: 2934,
             },
           ),
         ),
@@ -323,7 +316,7 @@ describe('List reducer', () => {
         olderExists: null,
       };
 
-      const actionDaily = listItemUpdated<Item>(page)(
+      const actionDaily = listItemUpdated<Item, typeof page>(page)(
         'some-real-id',
         {
           cost: 41,
@@ -343,6 +336,25 @@ describe('List reducer', () => {
         expect(result.total).toBe(5 + 41 - 23);
       });
 
+      it('should not update the total if it was not updated', () => {
+        expect.assertions(1);
+        const actionDailyNoCost = listItemUpdated<Item, typeof page>(page)(
+          'some-real-id',
+          {
+            item: 'different item',
+          },
+          {
+            date: new Date('2020-04-20'),
+            item: 'some item',
+            cost: 5,
+          },
+        );
+
+        const result = dailyReducer(stateDaily, actionDailyNoCost);
+
+        expect(result.total).toBe(5);
+      });
+
       it('should ignore actions intended for other pages', () => {
         expect.assertions(1);
         expect(dailyReducer(stateDaily, { ...actionDaily, page: Page.bills })).toBe(stateDaily);
@@ -350,13 +362,13 @@ describe('List reducer', () => {
     });
   });
 
-  describe('LIST_ITEM_DELETED', () => {
+  describe('ListAction.Deleted', () => {
     const state: State = {
       ...initialState,
       items: [{ id: 'some-real-id', date: testDate, item: 'some item', cost: 29 }],
     };
 
-    const action = listItemDeleted<Item>(page)('some-real-id', {
+    const action = listItemDeleted<Item, typeof page>(page)('some-real-id', {
       date: new Date('2020-04-20'),
       item: 'some item',
       cost: 3,
@@ -427,7 +439,7 @@ describe('List reducer', () => {
       expect(
         myListReducer(
           initialStateDelete,
-          listItemDeleted<Item>(Page.bills)('some-id', {
+          listItemDeleted<Item, Page.bills>(Page.bills)('some-id', {
             date: new Date('2020-04-20'),
             item: 'some item',
             cost: 3,
@@ -691,17 +703,6 @@ describe('List reducer', () => {
           expect(resultDaily.total).toBe(117);
         });
       });
-    });
-  });
-
-  describe('custom handlers', () => {
-    const action = { type: 'CUSTOM_HANDLER_101', foo: 'something else' };
-
-    it('should produce custom results', () => {
-      expect.assertions(1);
-      const result = myListReducer(initialState, action);
-
-      expect(result.baz).toBe('something else');
     });
   });
 });

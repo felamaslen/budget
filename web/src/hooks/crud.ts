@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Action } from 'create-reducer-object';
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { Action } from 'redux';
 
-import { OnCreateList, OnUpdateList, OnDeleteList } from '~client/actions/list';
-import { PageList } from '~client/types/app';
-import { Create, CreateEdit, DeltaEdit } from '~client/types/crud';
-import { Item } from '~client/types/list';
+import {
+  OnCreateList,
+  OnUpdateList,
+  OnDeleteList,
+  ListItemCreated,
+  ListItemUpdated,
+  ListItemDeleted,
+} from '~client/actions/list';
+import { PageList, Item, Create, CreateEdit, DeltaEdit } from '~client/types';
 
 type Trigger<Args extends any[], O = void> = (...args: Args) => O;
 
@@ -22,10 +27,17 @@ export type CrudProps<I> = {
 
 export type SetActiveId = (id: string | null) => void;
 
-const useCrudFactory = <ArgsC extends any[], ArgsU extends any[], ArgsD extends any[]>(
-  actionOnCreate: Trigger<ArgsC, Action>,
-  actionOnUpdate: Trigger<ArgsU, Action>,
-  actionOnDelete: Trigger<ArgsD, Action>,
+const useCrudFactory = <
+  ArgsC extends any[],
+  ArgsU extends any[],
+  ArgsD extends any[],
+  ActionCreate extends Action = Action,
+  ActionUpdate extends Action = Action,
+  ActionDelete extends Action = Action
+>(
+  actionOnCreate: Trigger<ArgsC, ActionCreate>,
+  actionOnUpdate: Trigger<ArgsU, ActionUpdate>,
+  actionOnDelete: Trigger<ArgsD, ActionDelete>,
 ): [Trigger<ArgsC>, Trigger<ArgsU>, Trigger<ArgsD>] => {
   const dispatch = useDispatch();
   const onCreate: Trigger<ArgsC> = useCallback(
@@ -50,24 +62,35 @@ const useCrudFactory = <ArgsC extends any[], ArgsU extends any[], ArgsD extends 
   return [onCreate, onUpdate, onDelete];
 };
 
-export const useCrud = <I>(
-  onCreate: OnCreate<I, Action>,
-  onUpdate: OnUpdate<I, Action>,
-  onDelete: OnDelete<I, Action>,
+export const useCrud = <
+  I extends Item,
+  ActionCreate extends Action = Action,
+  ActionUpdate extends Action = Action,
+  ActionDelete extends Action = Action
+>(
+  onCreate: OnCreate<I, ActionCreate>,
+  onUpdate: OnUpdate<I, ActionUpdate>,
+  onDelete: OnDelete<I, ActionDelete>,
 ): [OnCreate<I>, OnUpdate<I>, OnDelete<I>] =>
-  useCrudFactory<[Create<I>], [string, Create<I>], [string, I | undefined]>(
-    onCreate,
-    onUpdate,
-    onDelete,
-  );
+  useCrudFactory<
+    [Create<I>],
+    [string, Create<I>],
+    [string, I | undefined],
+    ActionCreate,
+    ActionUpdate,
+    ActionDelete
+  >(onCreate, onUpdate, onDelete);
 
 export const useListCrud = <I extends Item, P extends string = PageList>(
   onCreate: OnCreateList<I, P>,
   onUpdate: OnUpdateList<I, P>,
   onDelete: OnDeleteList<I, P>,
 ): [OnCreateList<I, P, void>, OnUpdateList<I, P, void>, OnDeleteList<I, P, void>] =>
-  useCrudFactory<[Create<I>], [string, DeltaEdit<I>, CreateEdit<I>], [string, CreateEdit<I>]>(
-    onCreate,
-    onUpdate,
-    onDelete,
-  );
+  useCrudFactory<
+    [Create<I>],
+    [string, DeltaEdit<I>, CreateEdit<I>],
+    [string, CreateEdit<I>],
+    ListItemCreated<I, P>,
+    ListItemUpdated<I, P>,
+    ListItemDeleted<I, P>
+  >(onCreate, onUpdate, onDelete);

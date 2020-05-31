@@ -8,9 +8,7 @@ import { useCTA } from '~client/hooks/cta';
 import { Button } from '~client/styled/shared';
 import { Create, Delta, Item } from '~client/types';
 
-const deltaIsComplete = <I extends Item>(
-  delta: Partial<Create<I>> | Create<I>,
-): delta is Create<I> =>
+const deltaIsComplete = <I extends Item>(delta: Delta<I> | Create<I>): delta is Create<I> =>
   Object.keys(delta).every((key) => typeof Reflect.get(delta, key) !== 'undefined');
 
 const getInitialDelta = <I extends Item, E extends {}>(

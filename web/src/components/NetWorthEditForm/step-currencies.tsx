@@ -11,8 +11,7 @@ import * as Styled from './styles';
 import { FormFieldText } from '~client/components/FormField';
 import { FormFieldNumber } from '~client/components/FormField/number';
 import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared/button';
-import { CreateEdit } from '~client/types/crud';
-import { Entry, Currency } from '~client/types/net-worth';
+import { CreateEdit, Currency, Entry } from '~client/types';
 
 const BASE = 'GBP';
 

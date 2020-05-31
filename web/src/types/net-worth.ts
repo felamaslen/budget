@@ -1,4 +1,4 @@
-import { Create, WithCrud, RawDate, Request } from './crud';
+import { Create } from './crud';
 
 export type Category = {
   id: string;
@@ -64,7 +64,7 @@ export type Entry = {
   currencies: Currency[];
 };
 
-export type EntryWithOptionalIds = Omit<Entry, 'values' | 'currencies'> & {
+export type CreateEntry = Omit<Entry, 'values' | 'currencies'> & {
   values: Create<ValueObject>[];
   currencies: Create<Currency>[];
 };
@@ -73,13 +73,6 @@ export type NetWorthItem = Pick<Entry, 'id' | 'date' | 'values' | 'creditLimit'>
   spend: number;
   fti: () => number;
 };
-
-export type NetWorthRequest<I extends WithCrud<{ id: string }> = never> = Request & {
-  res: I;
-};
-
-export type RequestItem = Category | Subcategory | RawDate<EntryWithOptionalIds>;
-export type NetWorthRequestGeneric = NetWorthRequest<RequestItem>;
 
 export type NetWorthTableRow = {
   id: string;

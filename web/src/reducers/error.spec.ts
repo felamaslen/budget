@@ -7,13 +7,8 @@ jest.mock('shortid', () => ({
 }));
 
 describe('Error reducer', () => {
-  it('should return the initial state on null action', () => {
-    expect.assertions(1);
-    expect(reducer(undefined, null)).toBe(initialState);
-  });
-
   describe('ERROR_OPENED', () => {
-    const state: State = [];
+    const state: State = initialState;
     const action = errorOpened('some message', ErrorLevel.Err);
 
     it('should add a message to the list', () => {

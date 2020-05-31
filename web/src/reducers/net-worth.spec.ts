@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
-import { RequestType } from '~client/types/crud';
-import { Category, Subcategory, Currency } from '~client/types/net-worth';
-import reducer, { State, initialState } from '~client/reducers/net-worth';
+import reducer, { State, initialState } from './net-worth';
+import { dataRead, syncReceived } from '~client/actions/api';
+import { loggedOut } from '~client/actions/login';
 import {
   netWorthCategoryCreated,
   netWorthCategoryUpdated,
@@ -13,72 +13,26 @@ import {
   netWorthUpdated,
   netWorthDeleted,
 } from '~client/actions/net-worth';
-import { dataRead, syncReceived } from '~client/actions/api';
-import { loggedOut } from '~client/actions/login';
+import {
+  testResponse,
+  CATEGORY_CASH,
+  CATEGORY_MORTGAGE,
+  CATEGORY_CC,
+  SUBCATEGORY_WALLET,
+  SUBCATEGORY_HOUSE,
+  SUBCATEGORY_CC,
+  CURRENCY_CZK,
+} from '~client/test-data';
+import { RequestType, Category, Subcategory } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
 }));
 
 describe('Net worth reducer', () => {
-  const CATEGORY_CASH: Category = {
-    id: 'real-cash-category-id',
-    type: 'asset',
-    category: 'Cash (easy access)',
-    color: '#00ff00',
-    isOption: false,
-  };
-
-  const CATEGORY_MORTGAGE: Category = {
-    id: 'real-mortgage-category-id',
-    type: 'liability',
-    category: 'Mortgage',
-    color: '#fa0000',
-    isOption: false,
-  };
-
-  const CATEGORY_CC: Category = {
-    id: 'real-credit-card-category-id',
-    type: 'liability',
-    category: 'Credit cards',
-    color: '#fc0000',
-    isOption: false,
-  };
-
-  const SUBCATEGORY_WALLET: Subcategory = {
-    id: 'real-wallet-subcategory-id',
-    categoryId: CATEGORY_CASH.id,
-    subcategory: 'My wallet',
-    hasCreditLimit: null,
-    opacity: 0.2,
-  };
-
-  const SUBCATEGORY_HOUSE: Subcategory = {
-    id: 'real-house-subcategory-id',
-    categoryId: CATEGORY_MORTGAGE.id,
-    subcategory: 'My house',
-    hasCreditLimit: false,
-    opacity: 0.1,
-  };
-
-  const SUBCATEGORY_CC: Subcategory = {
-    id: 'real-credit-card-subcategory-id',
-    categoryId: CATEGORY_CC.id,
-    subcategory: 'My credit card',
-    hasCreditLimit: true,
-    opacity: 0.3,
-  };
-
-  const CURRENCY_CZK: Currency = {
-    id: 'real-currency-czk-id',
-    currency: 'CZK',
-    rate: 0.035,
-  };
-
   describe.each`
-    description      | action
-    ${'Null action'} | ${null}
-    ${'LOGGED_OUT'}  | ${loggedOut()}
+    description     | action
+    ${'LOGGED_OUT'} | ${loggedOut()}
   `('$description', ({ action }) => {
     it('should return the initial state', () => {
       expect.assertions(1);
@@ -423,11 +377,13 @@ describe('Net worth reducer', () => {
       date: new Date('2019-07-12T12:36:03Z'),
       values: [
         {
+          id: 'some-fake-value-id-1',
           subcategory: 'some-subcategory-id',
           skip: true,
           value: -239,
         },
         {
+          id: 'some-fake-value-id-2',
           subcategory: 'other-subcategory-id',
           skip: null,
           value: [10, { currency: 'CZK', value: 37.34 }],
@@ -446,16 +402,16 @@ describe('Net worth reducer', () => {
           id: action.fakeId,
           date: new Date('2019-07-12T12:36:03Z'),
           values: [
-            {
+            expect.objectContaining({
               subcategory: 'some-subcategory-id',
               skip: true,
               value: -239,
-            },
-            {
+            }),
+            expect.objectContaining({
               subcategory: 'other-subcategory-id',
               skip: null,
               value: [10, { currency: 'CZK', value: 37.34 }],
-            },
+            }),
           ],
           creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
           currencies: [CURRENCY_CZK],
@@ -496,6 +452,7 @@ describe('Net worth reducer', () => {
       date: new Date('2019-07-31T23:54:00Z'),
       values: [
         {
+          id: 'some-value-id',
           subcategory: 'some-subcategory-id',
           skip: true,
           value: -239,
@@ -589,6 +546,7 @@ describe('Net worth reducer', () => {
 
   describe('DATA_READ', () => {
     const action = dataRead({
+      ...testResponse,
       netWorth: {
         categories: {
           data: [
@@ -698,6 +656,7 @@ describe('Net worth reducer', () => {
     it('should set default empty arrays for missing items', () => {
       expect.assertions(1);
       const actionMissing = dataRead({
+        ...testResponse,
         netWorth: {
           categories: {
             data: [],
@@ -875,7 +834,7 @@ describe('Net worth reducer', () => {
             {
               id: 'some-fake-entry-id',
               date: new Date('2019-07-12T12:36:03Z'),
-              values: [
+              values: expect.arrayContaining([
                 {
                   id: 'value-id-1',
                   subcategory: 'some-fake-subcategory-id',
@@ -888,10 +847,10 @@ describe('Net worth reducer', () => {
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
                 },
-              ],
+              ]),
               creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
               currencies: [CURRENCY_CZK],
-              // // the entry can only be created after its subcategories are confirmed
+              // the entry can only be created after its subcategories are confirmed
               __optimistic: RequestType.create,
             },
           ],
@@ -1219,7 +1178,7 @@ describe('Net worth reducer', () => {
           {
             type: RequestType.delete,
             id: SUBCATEGORY_CC.id,
-            method: RequestType.delete,
+            method: 'delete',
             route: 'net-worth/subcategories',
             res: undefined,
           },
@@ -1290,7 +1249,7 @@ describe('Net worth reducer', () => {
           {
             type: RequestType.create,
             fakeId: 'some-fake-entry-id',
-            method: 'post',
+            method: 'post' as const,
             route: 'net-worth',
             body: {
               date: '2019-07-12',
@@ -1401,7 +1360,7 @@ describe('Net worth reducer', () => {
           {
             type: RequestType.update,
             id: 'some-real-entry-id',
-            method: 'put',
+            method: 'put' as const,
             route: 'net-worth',
             body: {
               date: '2019-07-12',

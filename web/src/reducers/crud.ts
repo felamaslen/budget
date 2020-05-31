@@ -1,8 +1,7 @@
 import { replaceAtIndex, removeAtIndex } from 'replace-array';
 import shortid from 'shortid';
 
-import { WithCrud, Create, Delta, RequestType } from '~client/types/crud';
-import { Item } from '~client/types/list';
+import { WithCrud, Create, Delta, RequestType, Item } from '~client/types';
 
 export type State<I extends Item> = WithCrud<I>[];
 

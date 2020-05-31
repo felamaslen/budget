@@ -1,41 +1,35 @@
-import { createReducerObject, Action } from 'create-reducer-object';
 import { compose } from '@typed/compose';
 
 import {
-  Category,
-  Subcategory,
-  Entry,
-  CreditLimit,
-  ValueObject,
-  Currency,
-  RequestItem,
-  NetWorthRequestGeneric,
-} from '~client/types/net-worth';
-import { WithCrud, RequestType, RawDate, Request, IdKey } from '~client/types/crud';
-
-import {
-  NET_WORTH_CATEGORY_CREATED,
-  NET_WORTH_CATEGORY_UPDATED,
-  NET_WORTH_CATEGORY_DELETED,
-  NET_WORTH_SUBCATEGORY_CREATED,
-  NET_WORTH_SUBCATEGORY_UPDATED,
-  NET_WORTH_SUBCATEGORY_DELETED,
-  NET_WORTH_CREATED,
-  NET_WORTH_UPDATED,
-  NET_WORTH_DELETED,
-} from '~client/constants/actions/net-worth';
-
-import { LOGGED_OUT } from '~client/constants/actions/login';
-import { DATA_READ, SYNC_RECEIVED } from '~client/constants/actions/api';
-
+  Action,
+  ActionTypeNetWorth,
+  ActionTypeLogin,
+  ActionTypeApi,
+  ActionApiDataRead,
+  ActionApiSyncReceived,
+} from '~client/actions';
+import { IDENTITY, sortByKey } from '~client/modules/data';
 import {
   onCreateOptimistic,
   onUpdateOptimistic,
   onDeleteOptimistic,
   State as CrudState,
 } from '~client/reducers/crud';
-
-import { IDENTITY, sortByKey } from '~client/modules/data';
+import {
+  WithCrud,
+  RequestType,
+  RawDate,
+  Request,
+  IdKey,
+  Category,
+  Subcategory,
+  Entry,
+  CreditLimit,
+  ValueObject,
+  SyncResponseNetWorth as SyncResponse,
+  SyncRequestNetWorth as SyncRequest,
+  Item,
+} from '~client/types';
 
 type ExtraState = {
   old: number[];
@@ -65,9 +59,9 @@ const removeDeletedSubcategories = (state: State): State => ({
 
 const removeDeletedEntries = (state: State): State => ({
   ...state,
-  entries: state.entries.map(({ values, creditLimit, ...rest }: Entry) => ({
+  entries: state.entries.map<Entry>(({ values, creditLimit, ...rest }) => ({
     ...rest,
-    values: values.filter(({ subcategory }: ValueObject) =>
+    values: values.filter(({ subcategory }) =>
       state.subcategories.some(({ id }: Subcategory) => id === subcategory),
     ),
     creditLimit: creditLimit.filter(({ subcategory }: CreditLimit) =>
@@ -79,73 +73,21 @@ const removeDeletedEntries = (state: State): State => ({
 const removeDependencies = (state: State): State =>
   compose(removeDeletedEntries, removeDeletedSubcategories)(state);
 
-const onCreateCategory = (state: State, action: Action): Partial<State> => ({
-  categories: onCreateOptimistic<Category>(state.categories, action.item),
-});
-
-const onUpdateCategory = (state: State, action: Action): Partial<State> => ({
-  categories: onUpdateOptimistic<Category>(state.categories, action.id, action.item),
-});
-
-const onDeleteCategory = (state: State, action: Action): Partial<State> =>
-  removeDependencies({
-    ...state,
-    categories: onDeleteOptimistic<Category>(state.categories, action.id),
-  });
-
-const onCreateSubcategory = (state: State, action: Action): Partial<State> => ({
-  subcategories: onCreateOptimistic<Subcategory>(state.subcategories, action.item),
-});
-
-const onUpdateSubcategory = (state: State, action: Action): Partial<State> => ({
-  subcategories: onUpdateOptimistic<Subcategory>(state.subcategories, action.id, action.item),
-});
-
-const onDeleteSubcategory = (state: State, action: Action): Partial<State> =>
-  removeDependencies({
-    ...state,
-    subcategories: onDeleteOptimistic<Subcategory>(state.subcategories, action.id),
-  });
-
-const onCreateEntry = (state: State, action: Action): Partial<State> => ({
-  entries: onCreateOptimistic<Entry>(state.entries, action.item),
-});
-
-const onUpdateEntry = (state: State, action: Action): Partial<State> => ({
-  entries: onUpdateOptimistic<Entry>(state.entries, action.id, action.item),
-});
-
-const onDeleteEntry = (state: State, action: Action): Partial<State> => ({
-  ...state,
-  entries: onDeleteOptimistic<Entry>(state.entries, action.id),
-});
-
 const onRead = (
   state: State,
   {
     res: {
       netWorth: { categories, subcategories, entries },
     },
-  }: Action,
+  }: ActionApiDataRead,
 ): State => ({
   ...state,
   categories: categories.data,
   subcategories: subcategories.data,
-  entries: entries.data.items.map(
-    ({
-      date,
-      values = [],
-      creditLimit = [],
-      currencies = [],
-      ...rest
-    }: {
-      date: string;
-      values: ValueObject[];
-      creditLimit: CreditLimit[];
-      currencies: Currency[];
-    }) => ({
+  entries: entries.data.items.map<Entry>(
+    ({ date, values = [], creditLimit = [], currencies = [], ...rest }) => ({
       date: new Date(date),
-      values: sortByKey('id')(values),
+      values: sortByKey<'id', ValueObject>('id')(values),
       creditLimit,
       currencies,
       ...rest,
@@ -154,8 +96,6 @@ const onRead = (
   old: entries.data.old ?? [],
   oldOptions: entries.data.oldOptions ?? [],
 });
-
-type Response = { id: string };
 
 const withoutUnnecessaryChange = <T>(items: T[], updatedItems: T[]): T[] =>
   updatedItems.length === items.length && updatedItems.every((item, index) => item === items[index])
@@ -166,22 +106,20 @@ const entryIsRaw = (entry: Entry | RawDate<Entry>): entry is RawDate<Entry> =>
   typeof entry.date === 'string';
 
 const sortEntryValues = (entries: Entry[]): Entry[] =>
-  entries.map(entry => ({
+  entries.map((entry) => ({
     ...entry,
-    values: sortByKey<'id', ValueObject>('id')(entry.values),
+    values: sortByKey<'subcategory', ValueObject>('subcategory')(entry.values),
   }));
 
 const withDates = (entries: (Entry | RawDate<Entry>)[]): Entry[] =>
-  withoutUnnecessaryChange(
-    entries as Entry[],
-    entries.map(entry =>
+  entries.map(
+    (entry): Entry =>
       entryIsRaw(entry)
         ? {
             ...entry,
             date: new Date(entry.date),
           }
         : entry,
-    ),
   );
 
 const withChanges = (requestType: RequestType.create | RequestType.update, reqIdKey: IdKey) => <
@@ -197,15 +135,14 @@ const withChanges = (requestType: RequestType.create | RequestType.update, reqId
   }),
 }: Partial<{
   getId: (item: T) => string;
-  mapResponse: (item: RequestItem) => Partial<Response>;
-  getItem: (item: T, res: Partial<Response>) => T;
-}> = {}) => (requests: NetWorthRequestGeneric[]) => (items: T[]): T[] =>
+  mapResponse: (item: SyncResponse) => Partial<Item>;
+  getItem: (item: T, res: Partial<Item>) => T;
+}> = {}) => (requests: SyncRequest[]) => (items: T[]): T[] =>
   withoutUnnecessaryChange(
     items,
-    items.map(item => {
+    items.map((item) => {
       const changed = requests.find(
-        ({ type, [reqIdKey]: reqId }: Request): boolean =>
-          type === requestType && reqId === getId(item),
+        ({ type, [reqIdKey]: reqId }: Request) => type === requestType && reqId === getId(item),
       );
       if (changed) {
         return getItem(item, mapResponse(changed.res));
@@ -222,14 +159,14 @@ const updateSubcategoriesOnCategoryCreate = withCreates<Subcategory>({
   getItem: (item, res) => ({ ...item, categoryId: res.id as string }),
 });
 
-const updateEntriesOnSubcategoryCreate = (requests: NetWorthRequestGeneric[]) => (
+const updateEntriesOnSubcategoryCreate = (requests: SyncRequest[]) => (
   entries: WithCrud<Entry>[],
 ): WithCrud<Entry>[] =>
   withoutUnnecessaryChange(
     entries,
-    entries.map(entry => ({
+    entries.map<Entry>((entry) => ({
       ...entry,
-      values: withCreates<ValueObject>({
+      values: withCreates<ValueObject, 'subcategory'>({
         getId: ({ subcategory }) => subcategory,
         getItem: (value, { id = '' }) => ({ ...value, subcategory: id }),
       })(requests)(entry.values),
@@ -244,7 +181,7 @@ const updateEntriesOnSubcategoryCreate = (requests: NetWorthRequestGeneric[]) =>
     })),
   );
 
-const confirmCreates = (requests: NetWorthRequestGeneric[]) => (state: State): State => ({
+const confirmCreates = (requests: SyncRequest[]) => (state: State): State => ({
   ...state,
   categories: withCreates<Category>()(requests)(state.categories),
   subcategories: compose(
@@ -259,30 +196,26 @@ const confirmCreates = (requests: NetWorthRequestGeneric[]) => (state: State): S
   )(state.entries),
 });
 
-const withUpdates = <T extends { id: string }>(
-  requests: NetWorthRequestGeneric[],
-  items: T[],
-): T[] => withChanges(RequestType.update, 'id')<T>()(requests)(items);
+const withUpdates = <T extends Item>(requests: SyncRequest[], items: T[]): T[] =>
+  withChanges(RequestType.update, 'id')<T>()(requests)(items);
 
-const confirmUpdates = (requests: NetWorthRequestGeneric[]) => (state: State): State => ({
+const confirmUpdates = (requests: SyncRequest[]) => (state: State): State => ({
   ...state,
   categories: withUpdates<Category>(requests, state.categories),
   subcategories: withUpdates<Subcategory>(requests, state.subcategories),
   entries: withUpdates<Entry>(requests, state.entries),
 });
 
-const withDeletes = <T extends { id: string }>(requests: NetWorthRequestGeneric[]) => (
-  items: T[],
-): T[] =>
+const withDeletes = <T extends Item>(requests: SyncRequest[]) => (items: T[]): T[] =>
   withoutUnnecessaryChange(
     items,
     items.filter(
-      item =>
+      (item) =>
         !requests.some(({ type, id }: Request) => type === RequestType.delete && id === item.id),
     ),
   );
 
-const confirmDeletes = (requests: NetWorthRequestGeneric[]) => (state: State): State =>
+const confirmDeletes = (requests: SyncRequest[]) => (state: State): State =>
   removeDependencies({
     ...state,
     categories: withDeletes<Category>(requests)(state.categories),
@@ -292,28 +225,53 @@ const confirmDeletes = (requests: NetWorthRequestGeneric[]) => (state: State): S
 
 const onSyncReceived = (
   state: State,
-  { res: { netWorth: requests = [] } }: Action,
-): Partial<State> => {
-  return compose(
-    confirmCreates(requests),
-    confirmUpdates(requests),
-    confirmDeletes(requests),
-  )(state);
-};
+  { res: { netWorth: requests = [] } }: ActionApiSyncReceived,
+): State =>
+  compose(confirmCreates(requests), confirmUpdates(requests), confirmDeletes(requests))(state);
 
-const handlers = {
-  [LOGGED_OUT]: (): State => initialState,
-  [NET_WORTH_CATEGORY_CREATED]: onCreateCategory,
-  [NET_WORTH_CATEGORY_UPDATED]: onUpdateCategory,
-  [NET_WORTH_CATEGORY_DELETED]: onDeleteCategory,
-  [NET_WORTH_SUBCATEGORY_CREATED]: onCreateSubcategory,
-  [NET_WORTH_SUBCATEGORY_UPDATED]: onUpdateSubcategory,
-  [NET_WORTH_SUBCATEGORY_DELETED]: onDeleteSubcategory,
-  [NET_WORTH_CREATED]: onCreateEntry,
-  [NET_WORTH_UPDATED]: onUpdateEntry,
-  [NET_WORTH_DELETED]: onDeleteEntry,
-  [DATA_READ]: onRead,
-  [SYNC_RECEIVED]: onSyncReceived,
-};
+export default function netWorth(state: State = initialState, action: Action): State {
+  switch (action.type) {
+    case ActionTypeNetWorth.CategoryCreated:
+      return { ...state, categories: onCreateOptimistic(state.categories, action.item) };
+    case ActionTypeNetWorth.CategoryUpdated:
+      return { ...state, categories: onUpdateOptimistic(state.categories, action.id, action.item) };
+    case ActionTypeNetWorth.CategoryDeleted:
+      return removeDependencies({
+        ...state,
+        categories: onDeleteOptimistic(state.categories, action.id),
+      });
 
-export default createReducerObject<State>(handlers, initialState);
+    case ActionTypeNetWorth.SubcategoryCreated:
+      return { ...state, subcategories: onCreateOptimistic(state.subcategories, action.item) };
+    case ActionTypeNetWorth.SubcategoryUpdated:
+      return {
+        ...state,
+        subcategories: onUpdateOptimistic(state.subcategories, action.id, action.item),
+      };
+    case ActionTypeNetWorth.SubcategoryDeleted:
+      return removeDependencies({
+        ...state,
+        subcategories: onDeleteOptimistic(state.subcategories, action.id),
+      });
+
+    case ActionTypeNetWorth.EntryCreated:
+      return { ...state, entries: onCreateOptimistic(state.entries, action.item) };
+    case ActionTypeNetWorth.EntryUpdated:
+      return {
+        ...state,
+        entries: onUpdateOptimistic(state.entries, action.id, action.item),
+      };
+    case ActionTypeNetWorth.EntryDeleted:
+      return { ...state, entries: onDeleteOptimistic(state.entries, action.id) };
+
+    case ActionTypeApi.DataRead:
+      return onRead(state, action);
+    case ActionTypeApi.SyncReceived:
+      return onSyncReceived(state, action);
+
+    case ActionTypeLogin.LoggedOut:
+      return initialState;
+    default:
+      return state;
+  }
+}

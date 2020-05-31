@@ -275,6 +275,10 @@ export const withoutCrud = <T extends object>(items: WithCrud<T>[]): T[] =>
 export const withoutDeleted = <T>(items: WithCrud<T>[]): WithCrud<T>[] =>
   (items || []).filter(({ __optimistic }) => __optimistic !== RequestType.delete);
 
+export const withoutId = <T extends { id?: string }>({ id, ...rest }: T): Omit<T, 'id'> => rest;
+export const withoutIds = <T extends { id?: string }>(items: T[]): Omit<T, 'id'>[] =>
+  items.map(withoutId);
+
 export const toIdMap = <V extends { id: string }>(items: V[]): IdMap<V> =>
   items.reduce(
     (last, item) => ({

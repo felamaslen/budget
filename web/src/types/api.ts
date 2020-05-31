@@ -1,8 +1,15 @@
-import { PageListCalc, Page } from './app';
+import { Page } from './app';
 import { RawDate, Request } from './crud';
 import { ReadResponseFunds } from './funds';
-import { Category, Subcategory, Entry } from './net-worth';
-import { DataKeyAbbr } from '~client/constants/api';
+import {
+  ReadResponseIncome,
+  ReadResponseBill,
+  ReadResponseFood,
+  ReadResponseGeneral,
+  ReadResponseHoliday,
+  ReadResponseSocial,
+} from './list';
+import { Category, Subcategory, Entry, CreateEntry } from './net-worth';
 
 export type RequestWithResponse<R = never> = Request & {
   res: R;
@@ -15,58 +22,61 @@ export type SyncResponseDeleteList = SyncResponsePutList;
 export type SyncResponseList = SyncResponsePostList | SyncResponsePutList | SyncResponseDeleteList;
 
 export type SyncResponseNetWorth = Category | Subcategory | RawDate<Entry> | undefined;
+export type SyncPayloadNetWorth = Category | Subcategory | RawDate<CreateEntry>;
+export type SyncRequestNetWorth = RequestWithResponse<SyncResponseNetWorth>;
 
 export type SyncResponse = Partial<{
   list: RequestWithResponse<SyncResponseList>[];
-  netWorth: RequestWithResponse<SyncResponseNetWorth>[];
+  netWorth: SyncRequestNetWorth[];
 }>;
 
-export type ReadResponse = Partial<
-  {
-    [page in PageListCalc]: {
+export type ReadResponse = {
+  [Page.overview]: {
+    startYearMonth: [number, number];
+    endYearMonth: [number, number];
+    currentYear: number;
+    currentMonth: number;
+    futureMonths: number;
+    cost: {
+      [Page.funds]: number[];
+      fundChanges: number[];
+      [Page.income]: number[];
+      [Page.bills]: number[];
+      [Page.food]: number[];
+      [Page.general]: number[];
+      [Page.holiday]: number[];
+      [Page.social]: number[];
+      balance: number[];
+      old: number[];
+    };
+  };
+  netWorth: {
+    categories: {
+      data: Category[];
+    };
+    subcategories: {
+      data: Subcategory[];
+    };
+    entries: {
       data: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        [key in DataKeyAbbr]?: any;
-      }[];
-      total?: number;
-      olderExists?: boolean | null;
-    };
-  } & {
-    [Page.funds]: ReadResponseFunds;
-  } & {
-    [Page.overview]: {
-      startYearMonth: [number, number];
-      endYearMonth: [number, number];
-      currentYear: number;
-      currentMonth: number;
-      futureMonths: number;
-      cost: {
-        [Page.funds]: number[];
-        fundChanges: number[];
-        [Page.income]: number[];
-        [Page.bills]: number[];
-        [Page.food]: number[];
-        [Page.general]: number[];
-        [Page.holiday]: number[];
-        [Page.social]: number[];
-        balance: number[];
-        old: number[];
+        items: RawDate<Entry>[];
+        old?: number[];
+        oldOptions?: number[];
       };
     };
-    netWorth: {
-      categories: {
-        data: Category[];
-      };
-      subcategories: {
-        data: Subcategory[];
-      };
-      entries: {
-        data: {
-          items: RawDate<Entry>[];
-          old?: number[];
-          oldOptions?: number[];
-        };
-      };
-    };
-  }
->;
+  };
+  [Page.funds]: ReadResponseFunds;
+  [Page.income]: ReadResponseIncome;
+  [Page.bills]: ReadResponseBill;
+  [Page.food]: ReadResponseFood;
+  [Page.general]: ReadResponseGeneral;
+  [Page.holiday]: ReadResponseHoliday;
+  [Page.social]: ReadResponseSocial;
+};
+
+export type StocksListResponse = {
+  data: {
+    stocks: [string, string, number][];
+    total: number;
+  };
+};

@@ -6,9 +6,11 @@ import appSaga, { fetchLegacy, fetchNetWorth, fetchData } from './app';
 import { getFundHistoryQuery } from './funds';
 import { dataRead } from '~client/actions/api';
 import { errorOpened } from '~client/actions/error';
-import { LOGGED_IN } from '~client/constants/actions/login';
+import { ActionTypeLogin } from '~client/actions/login';
 import { API_PREFIX } from '~client/constants/data';
 import { getApiKey } from '~client/selectors/api';
+import { testResponse } from '~client/test-data';
+import { Page } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'my-short-id',
@@ -66,7 +68,12 @@ describe('App saga', () => {
 
   it('fetchData gets all data from the API', () => {
     expect.assertions(0);
-    const resLegacy = { foo: 'bar' };
+    const resLegacy = {
+      [Page.bills]: {
+        data: [],
+        total: 193,
+      },
+    };
     const resNetWorth = {
       categories: {
         data: [],
@@ -93,10 +100,10 @@ describe('App saga', () => {
         netWorth: call(fetchNetWorth, 'some-api-key'),
       })
       .next({
-        legacy: resLegacy,
+        legacy: { ...testResponse, ...resLegacy },
         netWorth: resNetWorth,
       })
-      .put(dataRead({ ...resLegacy, netWorth: resNetWorth }))
+      .put(dataRead({ ...testResponse, ...resLegacy, netWorth: resNetWorth }))
       .next()
       .isDone();
 
@@ -116,6 +123,6 @@ describe('App saga', () => {
 
   it('appSaga forks other sagas', () => {
     expect.assertions(0);
-    testSaga(appSaga).next().takeLatest(LOGGED_IN, fetchData).next().isDone();
+    testSaga(appSaga).next().takeLatest(ActionTypeLogin.LoggedIn, fetchData).next().isDone();
   });
 });

@@ -3650,11 +3650,6 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-create-reducer-object@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/create-reducer-object/-/create-reducer-object-2.0.1.tgz#a6510f39e51bf86bc4e021ad0126fe701d6aab1f"
-  integrity sha512-wW9AAbItldM6GT+ymg1NV7y+vJQuJGyL6SvzSZ+Pu0Bi3vC4VZPXLJhg1e2psfLxCVZupcd0L6plU0ndoTrFvQ==
-
 cross-spawn@6.0.5, cross-spawn@^6.0.0, cross-spawn@^6.0.5:
   version "6.0.5"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-6.0.5.tgz#4a5ec7c64dfae22c3a14124dbacdee846d80cbc4"

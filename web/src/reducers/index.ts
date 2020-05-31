@@ -15,10 +15,11 @@ import overview from './overview';
 import social from './social';
 import stocks from './stocks';
 import { State } from './types';
+import { Action } from '~client/actions';
 
 export { State } from './types';
 
-export default combineReducers<State>({
+export default combineReducers<State, Action>({
   api,
   login,
   error,

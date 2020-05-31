@@ -1,3 +1,5 @@
+import { Item } from './shared';
+
 export type Create<V> = Omit<V, 'id'>;
 export type CreateEdit<V> = V | Create<V>;
 export type Edit<V> = Create<V> & { id: string };
@@ -18,6 +20,7 @@ export type Request = {
   id?: string;
   type: RequestType;
   body?: object;
+  query?: object;
 };
 
 export type WithCrud<V> = V & { __optimistic?: RequestType };
@@ -25,3 +28,20 @@ export type WithCrud<V> = V & { __optimistic?: RequestType };
 export type RawDate<V> = Omit<V, 'date'> & { date: string };
 
 export type IdKey = 'id' | 'fakeId';
+
+export type ActionCreated<T extends string, I extends Item> = {
+  type: T;
+  fakeId: string;
+  item: Create<I>;
+};
+
+export type ActionUpdated<T extends string, I extends Item> = {
+  type: T;
+  id: string;
+  item: Create<I>;
+};
+
+export type ActionDeleted<T extends string> = {
+  type: T;
+  id: string;
+};

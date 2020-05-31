@@ -1,8 +1,9 @@
 /* eslint-disable no-underscore-dangle, global-require */
-import { applyMiddleware, createStore, Store, Action, compose } from 'redux';
+import { applyMiddleware, createStore, Store, compose } from 'redux';
 import { createLogger } from 'redux-logger';
 import createSagaMiddleware from 'redux-saga';
 
+import { Action } from '~client/actions';
 import rootReducer, { State } from '~client/reducers';
 import rootSaga from '~client/sagas';
 
@@ -16,7 +17,7 @@ const logger = createLogger({
 });
 
 const createDevStore = (): Store<State> => {
-  const store = compose(applyMiddleware(sagaMiddleware, logger))(createStore)(
+  const store = compose(applyMiddleware(sagaMiddleware, logger))(createStore)<State, Action>(
     rootReducer,
     window.__REDUX_DEVTOOLS_EXTENSION__ &&
       window.__REDUX_DEVTOOLS_EXTENSION__({

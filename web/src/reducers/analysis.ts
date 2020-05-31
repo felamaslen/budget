@@ -1,11 +1,11 @@
 import {
+  Action,
   ActionTypeAnalysis,
   ActionAnalysisRequested,
   ActionAnalysisReceived,
   ActionAnalysisBlockRequested,
   ActionAnalysisBlockReceived,
-  ActionAnalysis,
-} from '~client/actions/analysis';
+} from '~client/actions';
 import { Period, Grouping } from '~client/constants/analysis';
 import { Page, AnalysisCost, MainBlockName } from '~client/types';
 
@@ -86,10 +86,7 @@ const onBlockReceive = (_: State, { res }: ActionAnalysisBlockReceived): Partial
   loadingDeep: false,
 });
 
-const partialReducer = (
-  state: State,
-  action?: ActionAnalysis | null,
-): Partial<State> | undefined => {
+const partialReducer = (state: State, action: Action): Partial<State> | undefined => {
   switch (action?.type) {
     case ActionTypeAnalysis.Requested:
       return onRequest(state, action);
@@ -104,7 +101,7 @@ const partialReducer = (
   }
 };
 
-export default (state: State = initialState, action?: ActionAnalysis | null): State => {
+export default (state: State = initialState, action: Action): State => {
   const partial = partialReducer(state, action);
   return partial ? { ...state, ...partial } : state;
 };

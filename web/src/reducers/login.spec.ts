@@ -1,14 +1,7 @@
+import { loginRequested, loginErrorOccurred, loggedIn, loggedOut } from '~client/actions';
 import reducer, { initialState } from '~client/reducers/login';
-import { loginRequested, loginErrorOccurred, loggedIn, loggedOut } from '~client/actions/login';
 
 describe('Login reducer', () => {
-  describe('Null action', () => {
-    it('should return the initial state', () => {
-      expect.assertions(1);
-      expect(reducer(undefined, null)).toStrictEqual(initialState);
-    });
-  });
-
   describe('LOGGED_OUT', () => {
     const action = loggedOut();
 
@@ -31,14 +24,14 @@ describe('Login reducer', () => {
 
   describe('LOGIN_ERROR_OCCURRED', () => {
     const err = new Error('bad pin or something');
-    const action = loginErrorOccurred(err);
+    const action = loginErrorOccurred(err.message);
 
     it('should set error to true and loading to false', () => {
       expect.assertions(3);
       const result = reducer(initialState, action);
 
       expect(result.loading).toBe(false);
-      expect(result.error).toBe(err);
+      expect(result.error).toBe(err.message);
       expect(result.initialised).toBe(true);
     });
   });

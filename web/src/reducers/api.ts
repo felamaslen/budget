@@ -1,14 +1,4 @@
-import { createReducerObject, Action } from 'create-reducer-object';
-
-import {
-  DATA_READ,
-  SYNC_REQUESTED,
-  SYNC_LOCKED,
-  SYNC_UNLOCKED,
-  SYNC_RECEIVED,
-  SYNC_ERROR_OCCURRED,
-} from '~client/constants/actions/api';
-import { LOGGED_IN, LOGGED_OUT } from '~client/constants/actions/login';
+import { Action, ActionTypeApi, ActionTypeLogin } from '~client/actions';
 
 export type State = {
   loading: boolean;
@@ -26,21 +16,31 @@ export const initialState: State = {
   key: null,
 };
 
-const handlers = {
-  [DATA_READ]: (): Partial<State> => ({ initialLoading: false }),
-  [SYNC_REQUESTED]: (): Partial<State> => ({ loading: true }),
-  [SYNC_LOCKED]: (): Partial<State> => ({ locked: true }),
-  [SYNC_UNLOCKED]: (): Partial<State> => ({ locked: false }),
-  [SYNC_RECEIVED]: (): Partial<State> => ({ loading: false, error: null }),
-  [SYNC_ERROR_OCCURRED]: (_: State, { err }: Action): Partial<State> => ({
-    loading: false,
-    error: err,
-  }),
-  [LOGGED_IN]: (_: State, { res: { apiKey } }: Action): Partial<State> => ({
-    key: apiKey,
-    initialLoading: true,
-  }),
-  [LOGGED_OUT]: (): Partial<State> => initialState,
-};
+export default function api(state: State = initialState, action: Action): State {
+  switch (action.type) {
+    case ActionTypeApi.DataRead:
+      return { ...state, initialLoading: false };
+    case ActionTypeApi.SyncRequested:
+      return { ...state, loading: true };
+    case ActionTypeApi.SyncLocked:
+      return { ...state, locked: true };
+    case ActionTypeApi.SyncUnlocked:
+      return { ...state, locked: false };
+    case ActionTypeApi.SyncReceived:
+      return { ...state, loading: false, error: null };
+    case ActionTypeApi.SyncErrorOccurred:
+      return {
+        ...state,
+        error: action.err,
+        loading: false,
+      };
 
-export default createReducerObject<State>(handlers, initialState);
+    case ActionTypeLogin.LoggedIn:
+      return { ...state, key: action.res.apiKey, initialLoading: true };
+    case ActionTypeLogin.LoggedOut:
+      return initialState;
+
+    default:
+      return state;
+  }
+}
