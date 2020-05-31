@@ -50,6 +50,12 @@ export type CreditLimit = {
   value: number;
 };
 
+export type Currency = {
+  id: string;
+  currency: string;
+  rate: number;
+};
+
 export type Entry = {
   id: string;
   date: Date;
@@ -58,16 +64,9 @@ export type Entry = {
   currencies: Currency[];
 };
 
-export type EntryWithOptionalIds = Omit<Entry, 'values' | 'creditLimit' | 'currencies'> & {
+export type EntryWithOptionalIds = Omit<Entry, 'values' | 'currencies'> & {
   values: Create<ValueObject>[];
-  creditLimit: Create<CreditLimit>[];
   currencies: Create<Currency>[];
-};
-
-export type Currency = {
-  id: string;
-  currency: string;
-  rate: number;
 };
 
 export type NetWorthItem = Pick<Entry, 'id' | 'date' | 'values' | 'creditLimit'> & {
