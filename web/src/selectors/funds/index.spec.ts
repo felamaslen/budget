@@ -1,19 +1,67 @@
+import addDays from 'date-fns/addDays';
 import getUnixTime from 'date-fns/getUnixTime';
 
 import {
   getFundsCachedValueAgeText,
   getFundsCachedValue,
   getFundsCost,
-  getAllLatestValues,
+  getPortfolio,
   getDayGain,
   getDayGainAbs,
 } from '.';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
+import { Page } from '~client/types';
 
 describe('Funds selectors', () => {
   const testNow = new Date('2018-03-23T11:45:20Z');
+
+  const testToday = new Date('2020-04-20');
+
+  const stateWithOnlyFutureTransaction: State = {
+    ...state,
+    [Page.funds]: {
+      ...state[Page.funds],
+      items: [
+        {
+          ...state[Page.funds].items[0],
+          id: '10',
+          transactions: getTransactionsList([
+            {
+              ...state[Page.funds].items[0].transactions[0],
+              date: addDays(testToday, 1),
+            },
+          ]),
+        },
+        {
+          ...state[Page.funds].items[1],
+          id: '3',
+        },
+      ],
+    },
+  };
+
+  const stateWithFutureTransaction: State = {
+    ...state,
+    [Page.funds]: {
+      ...state[Page.funds],
+      items: [
+        {
+          ...state[Page.funds].items[0],
+          id: '10',
+          transactions: getTransactionsList([
+            ...state[Page.funds].items[0].transactions,
+            {
+              ...state[Page.funds].items[0].transactions[0],
+              date: addDays(testToday, 1),
+            },
+          ]),
+        },
+        ...state[Page.funds].items.slice(1),
+      ],
+    },
+  };
 
   describe('getFundsCachedValueAgeText', () => {
     it('should return the expected string', () => {
@@ -67,20 +115,41 @@ describe('Funds selectors', () => {
       });
     });
 
-    it('should skip funds without price data', () => {
+    const itemsWithoutPriceData = [
+      ...state[Page.funds].items,
+      {
+        id: 'some-id',
+        item: 'new fund',
+        transactions: getTransactionsList([{ date: '2019-07-23', units: 13, cost: 12 }]),
+      },
+    ];
+
+    const itemsWithFutureTransaction = [
+      {
+        ...state[Page.funds].items[0],
+        transactions: getTransactionsList([
+          ...state[Page.funds].items[0].transactions,
+          {
+            date: addDays(testNow, 1),
+            units: 1000,
+            cost: 100,
+          },
+        ]),
+      },
+      ...state[Page.funds].items.slice(1),
+    ];
+
+    it.each`
+      condition                       | items
+      ${'funds without price data'}   | ${itemsWithoutPriceData}
+      ${'transactions in the future'} | ${itemsWithFutureTransaction}
+    `('should skip $condition', ({ items }) => {
       expect.assertions(1);
       const stateNoPrice = {
         ...state,
-        funds: {
-          ...state.funds,
-          items: [
-            ...state.funds.items,
-            {
-              id: 'some-id',
-              item: 'new fund',
-              transactions: getTransactionsList([{ date: '2019-07-23', units: 13, cost: 12 }]),
-            },
-          ],
+        [Page.funds]: {
+          ...state[Page.funds],
+          items,
         },
       };
 
@@ -96,15 +165,24 @@ describe('Funds selectors', () => {
   describe('getFundsCost', () => {
     it('should get the all-time total fund cost', () => {
       expect.assertions(1);
-      expect(getFundsCost(state)).toBe(400000 + 45000 - 50300 + 90000 - 80760 + 200000 - 265622);
+      expect(getFundsCost(testToday)(state)).toBe(
+        400000 + 45000 - 50300 + 90000 - 80760 + 200000 - 265622,
+      );
+    });
+
+    it('should ignore future transactions', () => {
+      expect.assertions(1);
+      expect(getFundsCost(testToday)(stateWithFutureTransaction)).toBe(
+        getFundsCost(testToday)(state),
+      );
     });
   });
 
-  describe('getAllLatestValues', () => {
+  describe('getPortfolio', () => {
     it('should get the latest value for every fund, where available', () => {
       expect.assertions(1);
 
-      const result = getAllLatestValues(state);
+      const result = getPortfolio(new Date('2020-04-20'))(state);
 
       expect(result).toStrictEqual([
         {
@@ -128,6 +206,14 @@ describe('Funds selectors', () => {
           value: 0,
         },
       ]);
+    });
+
+    it('should not include fund transactions from the future', () => {
+      expect.assertions(1);
+
+      const result = getPortfolio(testToday)(stateWithOnlyFutureTransaction);
+
+      expect(result.find(({ id }) => id === '10')).toBeUndefined();
     });
   });
 });

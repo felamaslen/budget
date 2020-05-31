@@ -93,7 +93,7 @@ describe('<PageFunds />', () => {
     matchMedia = new MatchMediaMock();
   });
   beforeEach(() => {
-    clock = sinon.useFakeTimers();
+    clock = sinon.useFakeTimers(new Date('2020-04-20'));
   });
   afterEach(() => {
     matchMedia.clear();

@@ -6,7 +6,7 @@ import * as Styled from './styles';
 import { FundProps } from './types';
 import { FundGainInfo } from '~client/components/FundGainInfo';
 import { GraphFundItem } from '~client/components/graph-fund-item';
-import { useTime } from '~client/hooks/time';
+import { useToday } from '~client/hooks/time';
 import { getViewSoldFunds, getFundsCachedValue } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { Fund } from '~client/types';
@@ -19,9 +19,9 @@ export const FundRow: React.FC<{ isMobile: boolean; item: Fund } & Partial<FundP
   prices,
   gain,
 }) => {
-  const now = useTime();
+  const today = useToday();
   const viewSoldFunds = useSelector(getViewSoldFunds);
-  const latestValue = useSelector(getFundsCachedValue(now));
+  const latestValue = useSelector(getFundsCachedValue(today));
   if (!viewSoldFunds && isSold) {
     return null;
   }

@@ -23,6 +23,7 @@ import {
   Period,
   GRAPH_FUNDS_NUM_TICKS,
 } from '~client/constants/graph';
+import { useToday } from '~client/hooks';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 
@@ -32,7 +33,7 @@ import {
   getCacheTimes,
   getFundItems,
   getFundLines,
-  getAllLatestValues,
+  getPortfolio,
 } from '~client/selectors';
 
 import { graphFundsHeightMobile } from '~client/styled/variables';
@@ -319,6 +320,7 @@ function useGraphProps({
 }
 
 export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
+  const today = useToday();
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
   const fundItems = useSelector(getFundItems);
@@ -328,7 +330,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   const [toggleList, setToggleList] = useToggleList(fundItems);
   const graphProps = useGraphProps({ width, height, isMobile, mode, changeMode, toggleList });
 
-  const portfolio = useSelector(getAllLatestValues);
+  const portfolio = useSelector(getPortfolio(today));
 
   return (
     <Styled.Container>
