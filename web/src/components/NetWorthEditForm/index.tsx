@@ -1,25 +1,25 @@
+import addMonths from 'date-fns/addMonths';
+import endOfMonth from 'date-fns/endOfMonth';
 import React, { useState, useCallback, useMemo } from 'react';
 import shortid from 'shortid';
-import endOfMonth from 'date-fns/endOfMonth';
-import addMonths from 'date-fns/addMonths';
 
-import { CreateEdit, Create } from '~client/types/crud';
+import { Step, steps } from './constants';
+import { Props as ContainerProps } from './form-container';
+import StepCurrencies from './step-currencies';
+import StepDate from './step-date';
+import { StepAssets, StepLiabilities } from './step-values';
+import { SetActiveId, OnUpdate, OnCreate } from '~client/hooks';
+import { sortByDate } from '~client/modules/data';
 import {
+  CreateEdit,
+  Create,
   Entry,
   Category,
   Subcategory,
-  CreditLimit,
   ValueObject,
   Currency,
-} from '~client/types/net-worth';
-import { SetActiveId, OnUpdate, OnCreate } from '~client/hooks/crud';
-import { sortByDate } from '~client/modules/data';
-import StepDate from '~client/components/NetWorthEditForm/step-date';
-import StepCurrencies from '~client/components/NetWorthEditForm/step-currencies';
-import { StepAssets, StepLiabilities } from '~client/components/NetWorthEditForm/step-values';
-import { Props as ContainerProps } from './form-container';
-
-import { Step, steps } from './constants';
+  Item,
+} from '~client/types';
 
 type PropsItemForm = {
   add?: boolean;
@@ -42,7 +42,7 @@ const NetWorthItemForm: React.FC<PropsItemForm> = ({
   onEdit,
 }) => {
   const onComplete = useCallback(
-    event => {
+    (event) => {
       if (event) {
         event.stopPropagation();
       }
@@ -106,14 +106,13 @@ const NetWorthItemForm: React.FC<PropsItemForm> = ({
   throw new Error('Invalid step set for <NetWorthEditForm />');
 };
 
-const withContrivedRowIds = <V extends object>(row: V[]): V[] =>
-  row.map(item => ({ ...item, id: shortid.generate() }));
+const withContrivedRowIds = <V extends Item>(row: Create<V>[]): V[] =>
+  row.map<V>((item) => ({ ...item, id: shortid.generate() } as V));
 
 const withContrivedIds = ({ id, ...item }: Entry): Create<Entry> => ({
   ...item,
   values: withContrivedRowIds<ValueObject>(item.values),
   currencies: withContrivedRowIds<Currency>(item.currencies),
-  creditLimit: withContrivedRowIds<CreditLimit>(item.creditLimit),
 });
 
 type PropsBase = Omit<PropsItemForm, 'add' | 'onEdit'>;

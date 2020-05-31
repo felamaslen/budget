@@ -563,10 +563,10 @@ describe('Net worth entry form', () => {
               }),
             ]),
             creditLimit: [
-              expect.objectContaining({
+              {
                 subcategory: 'fake-subcategory-id-cc',
                 value: 600000,
-              }),
+              },
             ],
             currencies: [
               expect.objectContaining({
