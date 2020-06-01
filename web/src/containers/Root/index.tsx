@@ -5,9 +5,9 @@ import { Store } from 'redux';
 
 import { Action } from '~client/actions';
 import Content from '~client/components/Content';
+import { LoginForm } from '~client/components/login-form';
 import { ErrorMessages } from '~client/containers/ErrorMessages';
 import Header from '~client/containers/Header';
-import { LoginForm } from '~client/containers/LoginForm';
 import { Spinner } from '~client/containers/Spinner';
 import { ResizeContext, useDebouncedResize } from '~client/hooks/resize';
 import { State } from '~client/reducers';

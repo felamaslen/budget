@@ -30,7 +30,6 @@ export const Link = styled(NavLink)<{
   page: Page | 'logout' | 'netWorth';
   to: string;
 }>`
-  display: ${({ page }): 'none' | 'block' => (page === 'logout' ? 'none' : 'block')};
   flex: 1 0 0;
   height: ${sizes.heightNavMobile - 3}px;
   line-height: 30px;
