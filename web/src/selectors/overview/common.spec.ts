@@ -1,3 +1,7 @@
+import endOfDay from 'date-fns/endOfDay';
+import timezoneMock from 'timezone-mock';
+
+import { State } from '~client/reducers';
 import {
   getStartDate,
   getEndDate,
@@ -6,6 +10,7 @@ import {
   getMonthDates,
 } from '~client/selectors/overview/common';
 import { testState as state } from '~client/test-data/state';
+import { Page } from '~client/types';
 
 describe('Overview selectors (common)', () => {
   describe('getStartDate', () => {
@@ -26,6 +31,42 @@ describe('Overview selectors (common)', () => {
     it('should get the number of months in overview views, given the start and end date', () => {
       expect.assertions(1);
       expect(getNumMonths(state)).toBe(7);
+    });
+
+    describe.each`
+      timezone
+      ${'UTC'}
+      ${'Europe/London'}
+    `('when operating in $timezone', ({ timezone }) => {
+      beforeAll(() => {
+        timezoneMock.register(timezone);
+      });
+
+      afterAll(() => {
+        timezoneMock.unregister();
+      });
+
+      it.each`
+        case                                | startTime       | endTime         | expectedResult
+        ${'both dates in winter time'}      | ${'2019-10-31'} | ${'2020-02-29'} | ${5}
+        ${'crossing from winter to summer'} | ${'2020-02-29'} | ${'2020-06-30'} | ${5}
+        ${'both dates in summer time'}      | ${'2020-06-30'} | ${'2020-08-31'} | ${3}
+        ${'crossing from summer to winter'} | ${'2020-08-31'} | ${'2020-11-30'} | ${4}
+      `('should handle $case', ({ startTime, endTime, expectedResult }) => {
+        expect.assertions(1);
+
+        const stateWithStartEndTime: State = {
+          ...state,
+          [Page.overview]: {
+            ...state[Page.overview],
+            startDate: endOfDay(new Date(startTime)),
+            endDate: endOfDay(new Date(endTime)),
+          },
+        };
+
+        const result = getNumMonths(stateWithStartEndTime);
+        expect(result).toBe(expectedResult);
+      });
     });
   });
 

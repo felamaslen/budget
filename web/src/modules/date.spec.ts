@@ -1,3 +1,6 @@
+import endOfMonth from 'date-fns/endOfMonth';
+import timezoneMock from 'timezone-mock';
+
 import { timeSeriesTicks, getMonthDatesList } from './date';
 
 describe('date module', () => {
@@ -235,6 +238,55 @@ describe('date module', () => {
     it('should return an empty array if both dates are in the same month', () => {
       expect.assertions(1);
       expect(getMonthDatesList(new Date('2018-01-03'), new Date('2018-01-29'))).toStrictEqual([]);
+    });
+
+    describe.each`
+      timezone
+      ${'UTC'}
+      ${'Europe/London'}
+    `('when operating in $timezone', ({ timezone }) => {
+      beforeAll(() => {
+        timezoneMock.register(timezone);
+      });
+
+      afterAll(() => {
+        timezoneMock.unregister();
+      });
+
+      const winterWinterList = [
+        '2019-10-31',
+        '2019-11-30',
+        '2019-12-31',
+        '2020-01-31',
+        '2020-02-29',
+      ];
+
+      const winterSummerList = [
+        '2020-02-29',
+        '2020-03-31',
+        '2020-04-30',
+        '2020-05-31',
+        '2020-06-30',
+      ];
+
+      const summerSummerList = ['2020-06-30', '2020-07-31', '2020-08-31'];
+
+      const summerWinterList = ['2020-08-31', '2020-09-30', '2020-10-31', '2020-11-30'];
+
+      it.each`
+        case                                | startTime       | endTime         | expectedResult
+        ${'both dates in winter time'}      | ${'2019-10-31'} | ${'2020-02-29'} | ${winterWinterList}
+        ${'crossing from winter to summer'} | ${'2020-02-29'} | ${'2020-06-30'} | ${winterSummerList}
+        ${'both dates in summer time'}      | ${'2020-06-30'} | ${'2020-08-31'} | ${summerSummerList}
+        ${'crossing from summer to winter'} | ${'2020-08-31'} | ${'2020-11-30'} | ${summerWinterList}
+      `('should handle $case', ({ startTime, endTime, expectedResult }) => {
+        expect.assertions(1);
+
+        const result = getMonthDatesList(new Date(startTime), new Date(endTime));
+        expect(result).toStrictEqual(
+          expectedResult.map((date: string) => endOfMonth(new Date(date))),
+        );
+      });
     });
   });
 });

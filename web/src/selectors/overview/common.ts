@@ -3,7 +3,7 @@ import moize from 'moize';
 import { createSelector } from 'reselect';
 
 import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
-import { getMonthDatesList } from '~client/modules/date';
+import { getMonthDatesList, inclusiveMonthDifference } from '~client/modules/date';
 import { State } from '~client/reducers/types';
 import { Page, Cost, CostProcessed } from '~client/types';
 
@@ -23,11 +23,7 @@ export const getSpendingColumn = <K extends keyof CostProcessed = never>(dates: 
 export const getStartDate = (state: Pick<State, Page.overview>): Date => state.overview.startDate;
 export const getEndDate = (state: Pick<State, Page.overview>): Date => state.overview.endDate;
 
-export const getNumMonths = createSelector(
-  getStartDate,
-  getEndDate,
-  (startDate, endDate) => differenceInMonths(endDate, startDate) + 1,
-);
+export const getNumMonths = createSelector(getStartDate, getEndDate, inclusiveMonthDifference);
 
 export const getFutureMonths = moize(
   (today: Date): ((state: State) => number) =>

@@ -233,6 +233,7 @@
     "sqlite3": "^4.0.6",
     "style-loader": "^0.19.1",
     "supertest": "^4.0.2",
+    "timezone-mock": "^1.1.0",
     "ts-jest": "^25.2.0",
     "ts-loader": "^7.0.2",
     "ts-node": "^8.6.2",

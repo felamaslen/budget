@@ -1,23 +1,23 @@
-import fromUnixTime from 'date-fns/fromUnixTime';
-import getUnixTime from 'date-fns/getUnixTime';
-import startOfMinute from 'date-fns/startOfMinute';
-import startOfHour from 'date-fns/startOfHour';
-import startOfDay from 'date-fns/startOfDay';
-import startOfISOWeek from 'date-fns/startOfISOWeek';
-import startOfMonth from 'date-fns/startOfMonth';
-import endOfMonth from 'date-fns/endOfMonth';
-import differenceInMonths from 'date-fns/differenceInMonths';
-import addSeconds from 'date-fns/addSeconds';
 import addHours from 'date-fns/addHours';
-import addWeeks from 'date-fns/addWeeks';
 import addMonths from 'date-fns/addMonths';
-import getSeconds from 'date-fns/getSeconds';
-import getMinutes from 'date-fns/getMinutes';
-import getHours from 'date-fns/getHours';
-import getDay from 'date-fns/getDay';
-import getMonth from 'date-fns/getMonth';
-import isSameMonth from 'date-fns/isSameMonth';
+import addSeconds from 'date-fns/addSeconds';
+import addWeeks from 'date-fns/addWeeks';
+import differenceInMonths from 'date-fns/differenceInMonths';
+import endOfMonth from 'date-fns/endOfMonth';
 import format from 'date-fns/format';
+import fromUnixTime from 'date-fns/fromUnixTime';
+import getDay from 'date-fns/getDay';
+import getHours from 'date-fns/getHours';
+import getMinutes from 'date-fns/getMinutes';
+import getMonth from 'date-fns/getMonth';
+import getSeconds from 'date-fns/getSeconds';
+import getUnixTime from 'date-fns/getUnixTime';
+import isSameMonth from 'date-fns/isSameMonth';
+import startOfDay from 'date-fns/startOfDay';
+import startOfHour from 'date-fns/startOfHour';
+import startOfISOWeek from 'date-fns/startOfISOWeek';
+import startOfMinute from 'date-fns/startOfMinute';
+import startOfMonth from 'date-fns/startOfMonth';
 
 import { NULL } from '~client/modules/data';
 
@@ -92,7 +92,7 @@ function timeTickMonthYear(t0: number, t1: number): Tick[] {
       return isHalfYear || isNewYear ? 1 : 0;
     },
     numTicks,
-    label: time => {
+    label: (time) => {
       if (getMonth(time) === 6) {
         return 'H2';
       }
@@ -127,7 +127,7 @@ const timeTickDayWeek = (t0: number, t1: number): Tick[] =>
     start: startOfDay(fromUnixTime(t0)),
     tickSize: 86400,
     getMajor: (time: Date): Major => (getDay(time) === 0 ? 1 : 0),
-    label: time => format(time, 'd LLL'),
+    label: (time) => format(time, 'd LLL'),
   });
 
 function timeTickHourDay(t0: number, t1: number): Tick[] {
@@ -140,7 +140,7 @@ function timeTickHourDay(t0: number, t1: number): Tick[] {
     start,
     tickSize: 3600 * 3,
     getMajor: (time: Date): Major => (getHours(time) === 0 ? 1 : 0),
-    label: time => format(time, 'ccc'),
+    label: (time) => format(time, 'ccc'),
   });
 }
 
@@ -169,8 +169,8 @@ const timeTickSecondMinuteLarge = (t0: number, t1: number): Tick[] =>
   timeTick(t0, t1, {
     start: startOfMinute(fromUnixTime(t0)),
     tickSize: 60,
-    getMajor: time => (getMinutes(time) % 10 === 0 ? 1 : 0),
-    label: time => format(time, 'HH:mm'),
+    getMajor: (time) => (getMinutes(time) % 10 === 0 ? 1 : 0),
+    label: (time) => format(time, 'HH:mm'),
   });
 
 const timeTickSecondMinuteSmall = (t0: number, t1: number): Tick[] =>
@@ -178,7 +178,7 @@ const timeTickSecondMinuteSmall = (t0: number, t1: number): Tick[] =>
     start: startOfMinute(fromUnixTime(t0)),
     tickSize: 30,
     getMajor: (time): Major => (getSeconds(time) === 0 ? 1 : 0),
-    label: time => format(time, 'HH:mm'),
+    label: (time) => format(time, 'HH:mm'),
   });
 
 export function timeSeriesTicks(t0: number, t1: number): Tick[] {
@@ -206,12 +206,16 @@ export function timeSeriesTicks(t0: number, t1: number): Tick[] {
   return timeTickMonthYear(t0, t1);
 }
 
-export const getMonthDatesList = (startDate: Date, endDate: Date): Date[] => {
-  const numMonths = differenceInMonths(endDate, startDate) + 1;
+export const inclusiveMonthDifference = (startDate: Date, endDate: Date): number =>
+  differenceInMonths(endDate, startOfMonth(startDate)) + 1;
 
+export const getMonthDatesList = (startDate: Date, endDate: Date): Date[] => {
+  const numMonths = inclusiveMonthDifference(startDate, endDate);
   if (numMonths <= 1) {
     return [];
   }
 
-  return new Array(numMonths).fill(0).map((_, index) => endOfMonth(addMonths(startDate, index)));
+  return Array(numMonths)
+    .fill(0)
+    .map((_, index) => endOfMonth(addMonths(startDate, index)));
 };
