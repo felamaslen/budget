@@ -21,13 +21,13 @@ import {
   FlexBlocks,
 } from '~client/types';
 
-export const getLoading = (state: State): boolean => state.analysis.loading;
-export const getLoadingDeep = (state: State): boolean => state.analysis.loadingDeep;
+export const getAnalysisLoading = (state: State): boolean => state.analysis.loading;
+export const getAnalysisLoadingDeep = (state: State): boolean => state.analysis.loadingDeep;
 export const getAnalysisPeriod = (state: State): Period => state.analysis.period;
-export const getGrouping = (state: State): Grouping => state.analysis.grouping;
-export const getPage = (state: State): number => state.analysis.page;
-export const getTimeline = (state: State): number[][] | null => state.analysis.timeline;
-export const getDescription = (state: State): string | null => state.analysis.description;
+export const getAnalysisGrouping = (state: State): Grouping => state.analysis.grouping;
+export const getAnalysisPage = (state: State): number => state.analysis.page;
+export const getAnalysisTimeline = (state: State): number[][] | null => state.analysis.timeline;
+export const getAnalysisDescription = (state: State): string | null => state.analysis.description;
 
 const getCostArray = (state: State): AnalysisCost<MainBlockName> => state.analysis.cost;
 const getSaved = (state: State): number => state.analysis.saved;

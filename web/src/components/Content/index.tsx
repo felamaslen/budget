@@ -4,7 +4,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import * as PageList from '~client/components/page-list';
 import PageAnalysis from '~client/containers/PageAnalysis';
 import PageOverview from '~client/containers/PageOverview';
-import { PageWrapper } from '~client/styled/shared/page';
+import { PageWrapper } from '~client/styled/shared';
 
 const routes = [
   { key: 'analysis', component: PageAnalysis },

@@ -3,7 +3,7 @@ import React from 'react';
 import { setValueInline } from './number';
 import { makeInlineField } from './shared';
 import { SYMBOL_CURRENCY_RAW } from '~client/constants';
-import { Split } from '~client/hooks/field';
+import { Split } from '~client/hooks';
 
 const setValueRaw = (cost: string | undefined): number =>
   Math.round(Number((100 * (Number(cost) ?? 0)).toPrecision(10)));

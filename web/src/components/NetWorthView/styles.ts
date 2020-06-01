@@ -1,6 +1,6 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 import { colors } from '~client/styled/variables';
-import { Aggregate } from '~client/types/net-worth';
+import { Aggregate, NetWorthTableColumn } from '~client/types';
 
 export const NetWorthView = styled.div`
   display: flex;
@@ -59,7 +59,7 @@ export const DateQuarter = styled.span`
   font-weight: bold;
 `;
 
-export const Header = styled.th<{ item: string }>`
+export const Header = styled.th<{ item: NetWorthTableColumn }>`
   background: ${({ item }): string => colors.netWorth[item]};
 `;
 

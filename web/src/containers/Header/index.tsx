@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 
 import * as Styled from './styles';
-import { loggedOut } from '~client/actions/login';
+import { loggedOut } from '~client/actions';
 import AppLogo from '~client/components/AppLogo';
 import Navbar from '~client/components/Navbar';
 import { getLoggedIn, getUnsaved, getApiLoading } from '~client/selectors';

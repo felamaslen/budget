@@ -5,9 +5,10 @@ import { debounce } from 'throttle-debounce';
 
 import { FieldKey, State as PageState, ActiveField, ADD_BUTTON } from './types';
 import { API_PREFIX } from '~client/constants/data';
+import { isEscape } from '~client/modules/nav';
 import { Create, Item } from '~client/types';
 
-export type Options<I extends Item, P extends string> = {
+type Options<I extends Item, P extends string> = {
   suggestionFields: FieldKey<I>[];
   fields: FieldKey<I>[];
   page: P;
@@ -211,7 +212,7 @@ export function useSuggestions<I extends Item, P extends string>({
   const firstField = fields[0];
   useEffect(() => {
     const listener = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') {
+      if (isEscape(event)) {
         event.stopPropagation();
         setState((last) => ({
           ...last,

@@ -8,9 +8,8 @@ import { debounce } from 'throttle-debounce';
 import { Step } from './constants';
 import FormContainer, { Props as ContainerProps } from './form-container';
 import * as Styled from './styles';
-import { FormFieldText } from '~client/components/FormField';
-import { FormFieldNumber } from '~client/components/FormField/number';
-import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared/button';
+import { FormFieldText, FormFieldNumber } from '~client/components/FormField';
+import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared';
 import { CreateEdit, Currency, Entry } from '~client/types';
 
 const BASE = 'GBP';

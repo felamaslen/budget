@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { makeInlineField } from './shared';
-import { Split } from '~client/hooks/field';
+import { Split } from '~client/hooks';
 
 export const setValueInline = (
   setValue: (inputValue: string) => number = Number,

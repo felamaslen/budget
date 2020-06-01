@@ -20,7 +20,7 @@ type ItemProps = {
   item: string;
 };
 
-export type Props = {
+type Props = {
   isMobile: boolean;
   period: Period;
   mode: Mode;

@@ -1,7 +1,12 @@
 import { makeListReducer, makeDailyListReducer, ListState, DailyState } from './list';
-import { dataRead, syncReceived } from '~client/actions/api';
-import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
-import { loggedOut } from '~client/actions/login';
+import {
+  dataRead,
+  syncReceived,
+  listItemCreated,
+  listItemUpdated,
+  listItemDeleted,
+  loggedOut,
+} from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
 import { testResponse } from '~client/test-data';
 import { Page, PageListCalc, RequestType, Bill } from '~client/types';
@@ -563,25 +568,27 @@ describe('List reducer', () => {
         ],
       };
 
-      // prettier-ignore
       it.each`
-      reducer          | testState
-      ${myListReducer} | ${state}
-      ${dailyReducer}  | ${stateDaily}
-      `('should update with the real IDs and remove the optimistic status', ({ reducer, testState }) => {
-        expect.assertions(2);
-        const result = reducer(testState, syncReceivedAction);
+        reducer          | testState
+        ${myListReducer} | ${state}
+        ${dailyReducer}  | ${stateDaily}
+      `(
+        'should update with the real IDs and remove the optimistic status',
+        ({ reducer, testState }) => {
+          expect.assertions(2);
+          const result = reducer(testState, syncReceivedAction);
 
-        expect(result.items).toHaveLength(1);
-        expect(result.items[0]).toStrictEqual(
-          expect.objectContaining({
-            id: 'real-id-b',
-            item: 'some item',
-            cost: 3,
-            __optimistic: undefined,
-          }),
-        );
-      });
+          expect(result.items).toHaveLength(1);
+          expect(result.items[0]).toStrictEqual(
+            expect.objectContaining({
+              id: 'real-id-b',
+              item: 'some item',
+              cost: 3,
+              __optimistic: undefined,
+            }),
+          );
+        },
+      );
 
       describe('for daily lists', () => {
         it('should update the list total from the last response', () => {
@@ -683,11 +690,10 @@ describe('List reducer', () => {
         olderExists: null,
       };
 
-      // prettier-ignore
       it.each`
-      reducer          | testState
-      ${myListReducer} | ${state}
-      ${dailyReducer}  | ${stateDaily}
+        reducer          | testState
+        ${myListReducer} | ${state}
+        ${dailyReducer}  | ${stateDaily}
       `('should remove the item from the state', ({ reducer, testState }) => {
         expect.assertions(1);
         const result = reducer(testState, syncReceivedAction);

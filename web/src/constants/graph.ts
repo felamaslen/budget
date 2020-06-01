@@ -14,7 +14,6 @@ export const GRAPH_HEIGHT = 300;
 
 export const GRAPH_ZOOM_SPEED = 0.15;
 
-export const GRAPH_CASHFLOW_NUM_TICKS = 5;
 export const GRAPH_CASHFLOW_PADDING: Padding = [40, 0, 0, 0];
 
 type SpendCategory = { name: PageListCalc; key: number };
@@ -37,7 +36,7 @@ export const GRAPH_FUND_ITEM_HEIGHT_LARGE = 120;
 export const GRAPH_FUNDS_WIDTH = 500;
 export const GRAPH_FUNDS_HEIGHT = 300;
 
-export enum Mode {
+export const enum Mode {
   ROI = 'ROI',
   Value = 'Value',
   Price = 'Price',

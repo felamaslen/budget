@@ -9,7 +9,7 @@ import { LoginForm } from '~client/components/login-form';
 import { ErrorMessages } from '~client/containers/ErrorMessages';
 import Header from '~client/containers/Header';
 import { Spinner } from '~client/containers/Spinner';
-import { ResizeContext, useDebouncedResize } from '~client/hooks/resize';
+import { ResizeContext, useDebouncedResize } from '~client/hooks';
 import { State } from '~client/reducers';
 import { getInitialLoading, getLoggedIn } from '~client/selectors';
 import StyleReset from '~client/styled/reset';

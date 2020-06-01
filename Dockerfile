@@ -11,7 +11,7 @@ RUN apk add --no-cache \
   pango-dev \
   giflib-dev 
 
-WORKDIR /opt/app
+WORKDIR /app
 
 COPY package.json ./
 COPY yarn.lock ./

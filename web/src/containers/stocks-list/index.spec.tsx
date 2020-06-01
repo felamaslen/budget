@@ -1,14 +1,14 @@
-import sinon from 'sinon';
-import React from 'react';
 import { render, RenderResult } from '@testing-library/react';
+import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStoreEnhanced } from 'redux-mock-store';
+import sinon from 'sinon';
 
 import StocksList from '.';
-import { stocksListRequested } from '~client/actions/stocks';
-import { testState } from '~client/test-data/state';
-import { State } from '~client/reducers';
+import { stocksListRequested } from '~client/actions';
 import { IDENTITY } from '~client/modules/data';
+import { State } from '~client/reducers';
+import { testState } from '~client/test-data/state';
 
 describe('<StocksList />', () => {
   const props = {};

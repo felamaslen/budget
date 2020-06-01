@@ -2,12 +2,11 @@ import { Item } from './shared';
 
 export type Create<V> = Omit<V, 'id'>;
 export type CreateEdit<V> = V | Create<V>;
-export type Edit<V> = Create<V> & { id: string };
 
 export type Delta<I> = Partial<Create<I>>;
 export type DeltaEdit<I> = Partial<CreateEdit<I>>;
 
-export enum RequestType {
+export const enum RequestType {
   create = 'create',
   update = 'update',
   delete = 'delete',

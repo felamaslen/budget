@@ -31,7 +31,7 @@ export interface PixY {
   pixY2: (y: number) => number;
 }
 
-export interface ValX {
+interface ValX {
   valX: (p: number) => number;
 }
 
@@ -41,7 +41,7 @@ export interface ValY {
 }
 
 export type Pix = PixX & PixY;
-export type Val = ValX & ValY;
+type Val = ValX & ValY;
 
 export type PixPrimary = Pick<Pix, 'pixX' | 'pixY1'>;
 
@@ -62,7 +62,7 @@ export type SVGPathProps = Pick<PathProps, 'strokeWidth'> & {
   strokeDasharray?: string;
 };
 
-export type ColorFunction = (point: Point, index?: number) => string;
+type ColorFunction = (point: Point, index?: number) => string;
 
 export type ColorSwitcher = {
   changes: number[];

@@ -4,7 +4,7 @@ import NetWorthListCreateItem from './net-worth-list-create-item';
 import NetWorthListItem from './net-worth-list-item';
 import * as Styled from './styles';
 import CrudList from '~client/components/CrudList';
-import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
+import { OnCreate, OnUpdate, OnDelete } from '~client/hooks';
 import { Category, Subcategory, Entry } from '~client/types/net-worth';
 
 type Props = {

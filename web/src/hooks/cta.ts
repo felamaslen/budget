@@ -1,4 +1,5 @@
-import { ReactEventHandler, KeyboardEvent, useMemo } from 'react';
+import React, { ReactEventHandler, useMemo } from 'react';
+import { isEnter } from '~client/modules/nav';
 
 type Options = {
   stopPropagation?: boolean;
@@ -15,7 +16,7 @@ export function useCTA<E extends HTMLElement = HTMLElement>(
   const events = useMemo(
     () => ({
       onKeyDown: (event: React.KeyboardEvent<E>): void => {
-        if (event.key === 'Enter') {
+        if (isEnter(event)) {
           onActivate();
         }
       },

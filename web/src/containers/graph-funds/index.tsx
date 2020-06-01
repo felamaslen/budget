@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas } from './after-canvas';
 import * as Styled from './styles';
-import { fundsRequested } from '~client/actions/funds';
+import { fundsRequested } from '~client/actions';
 import { FundWeights } from '~client/components/fund-weights';
 import {
   LineGraph,

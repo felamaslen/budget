@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import * as Styled from './styles';
-import { errorClosed, errorRemoved } from '~client/actions/error';
+import { errorClosed, errorRemoved } from '~client/actions';
 import { ERROR_CLOSE_TIME, ERROR_MESSAGE_DELAY } from '~client/constants/error';
 import { useCTA } from '~client/hooks/cta';
 import { VOID } from '~client/modules/data';

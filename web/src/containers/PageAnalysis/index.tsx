@@ -6,7 +6,7 @@ import * as Styled from './styles';
 import Timeline from './timeline';
 import Upper from './upper';
 
-import { requested, blockRequested, blockReceived } from '~client/actions/analysis';
+import { analysisRequested, blockRequested, blockReceived } from '~client/actions';
 import { BlockPacker } from '~client/components/BlockPacker';
 import { statusHeight } from '~client/components/BlockPacker/styles';
 import {
@@ -19,14 +19,14 @@ import { usePersistentState, ResizeContext, useMediaQuery } from '~client/hooks'
 import { formatCurrency, capitalise } from '~client/modules/format';
 import {
   getAnalysisPeriod,
-  getGrouping,
-  getPage,
+  getAnalysisGrouping,
+  getAnalysisPage,
   getCostAnalysis,
   getDeepCost,
   getBlocks,
   getDeepBlocks,
-  getTimeline,
-  getDescription,
+  getAnalysisTimeline,
+  getAnalysisDescription,
 } from '~client/selectors';
 import { breakpointBase } from '~client/styled/mixins';
 import { breakpoints } from '~client/styled/variables';
@@ -88,8 +88,8 @@ function usePersistentAnalysisState(
   onRequest: (nextState: Partial<AnalysisState>) => void,
 ): AnalysisState {
   const period = useSelector(getAnalysisPeriod);
-  const grouping = useSelector(getGrouping);
-  const page = useSelector(getPage);
+  const grouping = useSelector(getAnalysisGrouping);
+  const page = useSelector(getAnalysisPage);
 
   const [persistentState, setPersistentState] = usePersistentState<AnalysisState>(
     defaultState,
@@ -111,7 +111,7 @@ function usePersistentAnalysisState(
 }
 
 const PageAnalysis: React.FC = () => {
-  const timeline = useSelector(getTimeline);
+  const timeline = useSelector(getAnalysisTimeline);
   const cost = useSelector(getCostAnalysis);
   const costDeep = useSelector(getDeepCost);
   const [treeVisible, toggleTreeItem] = useTreeToggle();
@@ -125,7 +125,7 @@ const PageAnalysis: React.FC = () => {
 
   const getSizedDeepBlocks = useMemo(() => getDeepBlocks(width, height), [width, height]);
   const blocksDeep: FlexBlocks<BlockItem> | undefined = useSelector(getSizedDeepBlocks);
-  const description = useSelector(getDescription);
+  const description = useSelector(getAnalysisDescription);
 
   const dispatch = useDispatch();
   const onBlockClick = useCallback(
@@ -140,7 +140,7 @@ const PageAnalysis: React.FC = () => {
   );
   const onRequest = useCallback(
     (request?: Partial<AnalysisState>): void => {
-      dispatch(requested(request));
+      dispatch(analysisRequested(request));
     },
     [dispatch],
   );

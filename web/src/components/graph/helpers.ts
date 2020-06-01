@@ -3,8 +3,8 @@ import { replaceAtIndex } from 'replace-array';
 import { GRAPH_CURVINESS } from '~client/constants/graph';
 import { timeSeriesTicks } from '~client/modules/date';
 import { colors } from '~client/styled/variables';
-import { Page } from '~client/types';
 import {
+  Page,
   Dimensions,
   Padding,
   Calc,
@@ -20,7 +20,7 @@ import {
   Tick,
   DynamicLineColor,
   ColorSwitcher,
-} from '~client/types/graph';
+} from '~client/types';
 
 export type SVGNumber = number | string;
 export type SVGPoint = [SVGNumber, SVGNumber];
@@ -393,7 +393,8 @@ export function getDynamicLinePaths({
   const dataColors = data.map((point, index) => color(point, index));
   const ends = dataColors.reduce<number[]>(
     (indexes, value, index) => {
-      const next = index === dataColors.length - 1 || (index > 0 && colors[index - 1] !== value);
+      const next =
+        index === dataColors.length - 1 || (index > 0 && dataColors[index - 1] !== value);
 
       if (next) {
         return [...indexes, index];

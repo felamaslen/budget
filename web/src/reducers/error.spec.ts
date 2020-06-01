@@ -1,4 +1,4 @@
-import { errorOpened, errorClosed, errorRemoved } from '~client/actions/error';
+import { errorOpened, errorClosed, errorRemoved } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import reducer, { initialState, State } from '~client/reducers/error';
 

@@ -176,7 +176,7 @@ describe('<FundGainInfo />', () => {
           text-align: center;
         }
 
-        .sc-fzoLag .c1 {
+        .sc-fznyAO .c1 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -186,7 +186,7 @@ describe('<FundGainInfo />', () => {
           width: 100%;
         }
 
-        .sc-fzoLag .c1 > span {
+        .sc-fznyAO .c1 > span {
           padding: 0;
         }
       }
@@ -215,32 +215,32 @@ describe('<FundGainInfo />', () => {
               £5.6k
             </span>
             <span
-              class="sc-AxgMl c3"
+              class="sc-oTbqq c3"
             >
               <span
-                class="sc-pJurq c4"
+                class="sc-qYiqT c4"
               >
                 <span
-                  class="sc-pkhIR sc-psCJM c5"
+                  class="sc-oTmZL sc-pbIaG c5"
                 >
                   £40
                 </span>
                 <span
-                  class="sc-pkhIR c6"
+                  class="sc-oTmZL c6"
                 >
                   30.00%
                 </span>
               </span>
               <span
-                class="sc-pJurq c7"
+                class="sc-qYiqT c7"
               >
                 <span
-                  class="sc-pkhIR sc-psCJM c8"
+                  class="sc-oTmZL sc-pbIaG c8"
                 >
                   (£3)
                 </span>
                 <span
-                  class="sc-pkhIR c9"
+                  class="sc-oTmZL c9"
                 >
                   (2.00%)
                 </span>

@@ -3,8 +3,8 @@ import React, { useCallback } from 'react';
 import { Step } from './constants';
 import FormContainer, { Props as ContainerProps } from './form-container';
 import * as Styled from './styles';
-import { FormFieldDate } from '~client/components/FormField/date';
-import { CreateEdit } from '~client/types/crud';
+import { FormFieldDate } from '~client/components/FormField';
+import { CreateEdit } from '~client/types';
 import { Entry } from '~client/types/net-worth';
 
 type Props = {

@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import getStore, { MockStore } from 'redux-mock-store';
 
 import PageAnalysis from '.';
-import { requested } from '~client/actions/analysis';
+import { analysisRequested } from '~client/actions';
 import { Period, Grouping } from '~client/constants/analysis';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
@@ -45,7 +45,7 @@ describe('<PageAnalysis />', () => {
     const { store } = getContainer();
     expect(store.getActions()).toStrictEqual(
       expect.arrayContaining([
-        requested({ period: Period.year, grouping: Grouping.category, page: 0 }),
+        analysisRequested({ period: Period.year, grouping: Grouping.category, page: 0 }),
       ]),
     );
   });

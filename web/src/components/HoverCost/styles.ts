@@ -1,19 +1,32 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { colors, breakpoints } from '~client/styled/variables';
+import styled from 'styled-components';
 import { breakpoint } from '~client/styled/mixins';
+import { colors, breakpoints } from '~client/styled/variables';
+
+export const Main = styled.span``;
+
+export const Hover = styled.span`
+  display: none;
+  ${breakpoint(breakpoints.mobile)} {
+    background: ${colors['translucent-l8']};
+    position: absolute;
+    left: 0;
+    padding: 0 2px;
+    top: 0;
+  }
+`;
 
 export const HoverCost = styled.span<{ hover: boolean }>`
-  ${breakpoint(breakpoints.mobile)} {
-    position: absolute;
-    top: 0;
-    left: 0px;
+  outline: none;
 
-    ${({ hover }): false | FlattenSimpleInterpolation =>
-      hover &&
-      css`
-        left: -2px;
-        padding: 0 2px;
-        background: ${colors['translucent-l8']};
-      `}
+  ${breakpoint(breakpoints.mobile)} {
+    &:hover,
+    &:focus {
+      ${Main} {
+        display: none;
+      }
+      ${Hover} {
+        display: block;
+      }
+    }
   }
 `;

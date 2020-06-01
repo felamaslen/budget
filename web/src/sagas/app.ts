@@ -4,9 +4,7 @@ import axios from 'axios';
 import { select, takeLatest, all, call, put } from 'redux-saga/effects';
 
 import { getFundHistoryQuery } from './funds';
-import { dataRead } from '~client/actions/api';
-import { errorOpened } from '~client/actions/error';
-import { ActionTypeLogin } from '~client/actions/login';
+import { dataRead, errorOpened, ActionTypeLogin } from '~client/actions';
 import { API_PREFIX } from '~client/constants/data';
 import { getApiKey } from '~client/selectors';
 

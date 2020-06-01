@@ -5,7 +5,7 @@ import { debounce } from 'throttle-debounce';
 import * as Data from '~client/modules/data';
 import { ActionType as NavActionType } from '~client/modules/nav';
 
-enum ActionType {
+const enum ActionType {
   ActiveToggled = 'ACTIVE_TOGGLED',
   Typed = 'TYPED',
 }
@@ -104,7 +104,7 @@ export type Split<V> = {
 const valueIsSplit = <V>(value: V | Split<V>): value is Split<V> =>
   typeof value === 'object' && Reflect.has(value as {}, '__split');
 
-export type Options<V, E = React.ChangeEvent<HTMLInputElement>> = {
+export type FieldOptions<V, E = React.ChangeEvent<HTMLInputElement>> = {
   value: V;
   inline?: boolean;
   immediate?: boolean;
@@ -146,7 +146,7 @@ export function useField<V = string, E = React.ChangeEvent<HTMLInputElement>>({
   convertExternalToInputValue = Data.IDENTITY,
   allowEmpty = false,
   active = false,
-}: Options<V, E>): Result<V, E> {
+}: FieldOptions<V, E>): Result<V, E> {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [state, dispatch] = useReducer<Reducer<V>>(fieldReducer(convertExternalToInputValue), {

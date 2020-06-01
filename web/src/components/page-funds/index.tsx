@@ -15,8 +15,7 @@ import {
 } from '~client/components/FormField';
 import { makeField } from '~client/components/ModalDialog';
 import { GraphFunds } from '~client/containers/graph-funds';
-import { useIsMobile } from '~client/hooks/media';
-import { usePersistentState } from '~client/hooks/persist';
+import { useIsMobile, usePersistentState } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
 import { Cache } from '~client/reducers/funds';

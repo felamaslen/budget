@@ -45,7 +45,7 @@ export const getValuesWithTime = (
     value,
   ]);
 
-export function getRanges(lines: Line[]): Range {
+function getRanges(lines: Line[]): Range {
   return lines.reduce(
     ({ minX, maxX, minY, maxY }, { data, stack }) => {
       const dataX = data.map(([xValue]) => xValue);

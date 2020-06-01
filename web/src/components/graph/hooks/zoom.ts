@@ -4,7 +4,7 @@ import { throttle } from 'throttle-debounce';
 import { genPixelCompute, pointVisible } from '../helpers';
 import { GRAPH_ZOOM_SPEED } from '~client/constants/graph';
 import { NULL } from '~client/modules/data';
-import { Dimensions, Range, RangeX, Calc, Line } from '~client/types/graph';
+import { Dimensions, Range, RangeX, Calc, Line } from '~client/types';
 
 const threshold = 4;
 
@@ -73,7 +73,7 @@ type ZoomState = {
   zoomedDimensions: Dimensions;
 };
 
-enum ActionType {
+const enum ActionType {
   Wheel,
   SetPosition,
   Reset,

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import * as Styled from './styles';
 import { HeadProps } from './types';
-import { fundsViewSoldToggled, fundsRequested } from '~client/actions/funds';
+import { fundsViewSoldToggled, fundsRequested } from '~client/actions';
 import { ListHeadFunds, ListHeadFundsMobile } from '~client/components/ListHeadFunds';
 import { useToday } from '~client/hooks';
 import { getFundsCost, getViewSoldFunds, getPeriod, getFundsCachedValue } from '~client/selectors';

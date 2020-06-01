@@ -7,8 +7,8 @@ export type Box = {
   flow: FlexFlow;
 };
 
-export type WithBlockDimensions<T> = T & { box: Box };
-export type WithFlex<T> = T & { flex: number };
+type WithBlockDimensions<T> = T & { box: Box };
+type WithFlex<T> = T & { flex: number };
 export type WithSubTree<T> = T & { subTree?: T[] };
 export type WithArea<T> = T & { area: number };
 

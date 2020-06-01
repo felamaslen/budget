@@ -16,7 +16,7 @@ import createStore, { MockStore } from 'redux-mock-store';
 import sinon from 'sinon';
 
 import { AccessibleList, AccessibleListStandard, Props } from '.';
-import { listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions/list';
+import { listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions';
 import { ListState } from '~client/reducers/list';
 import { RequestType, Item, ListItem, ListCalcItem } from '~client/types';
 

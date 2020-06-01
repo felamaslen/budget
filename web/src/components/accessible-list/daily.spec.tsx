@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
 
 import { AccessibleListDaily } from './daily';
-import { listItemUpdated } from '~client/actions/list';
+import { listItemUpdated } from '~client/actions';
 import { State } from '~client/reducers';
 import { DailyState } from '~client/reducers/list';
 import { breakpoints } from '~client/styled/variables';

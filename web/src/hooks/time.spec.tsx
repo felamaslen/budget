@@ -1,10 +1,9 @@
 import { render, RenderResult, act } from '@testing-library/react';
 import endOfDay from 'date-fns/endOfDay';
-import startOfSecond from 'date-fns/startOfSecond';
 import React, { useEffect } from 'react';
 import sinon from 'sinon';
 
-import { useTime, useToday } from './time';
+import { useToday } from './time';
 
 describe('Time hooks', () => {
   const now = new Date('2020-04-20T13:25:10.783Z');
@@ -21,9 +20,8 @@ describe('Time hooks', () => {
   const ticksToEndOfDay = endOfDay(now).getTime() - now.getTime();
 
   describe.each`
-    hook          | useHook     | roundTo     | roundFn          | ticksToNext
-    ${'useTime'}  | ${useTime}  | ${'second'} | ${startOfSecond} | ${217}
-    ${'useToday'} | ${useToday} | ${'day'}    | ${endOfDay}      | ${ticksToEndOfDay}
+    hook          | useHook     | roundTo  | roundFn     | ticksToNext
+    ${'useToday'} | ${useToday} | ${'day'} | ${endOfDay} | ${ticksToEndOfDay}
   `('$hook', ({ useHook, roundTo, roundFn, ticksToNext }) => {
     const callback = jest.fn();
 

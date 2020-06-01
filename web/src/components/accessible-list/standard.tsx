@@ -15,9 +15,11 @@ import {
   CustomSelector,
   Props,
 } from './types';
-import { FormFieldTextInline } from '~client/components/FormField';
-import { FormFieldCostInline } from '~client/components/FormField/cost';
-import { FormFieldDateInline } from '~client/components/FormField/date';
+import {
+  FormFieldTextInline,
+  FormFieldCostInline,
+  FormFieldDateInline,
+} from '~client/components/FormField';
 import { ModalFields } from '~client/components/ModalDialog';
 import { formatCurrency, capitalise } from '~client/modules/format';
 import { Delta, ListItem, ListCalcItem, PickUnion } from '~client/types';
@@ -70,8 +72,6 @@ export const StandardHeader = <I extends ListCalcItem, P extends string, MK exte
     </StyledStandardHeader>
   );
 };
-
-export type ExtraFields<I extends ListItem> = Omit<I, Exclude<keyof ListItem, 'id'>>;
 
 export type PropsStandard<
   I extends ListCalcItem,

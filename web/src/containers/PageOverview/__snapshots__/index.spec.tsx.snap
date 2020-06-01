@@ -85,75 +85,6 @@ exports[`<PageOverview /> should render a table 1`] = `
   line-height: 24px;
 }
 
-.c15 {
-  -webkit-flex-flow: row nowrap;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  -webkit-flex-basis: 0;
-  -ms-flex-preferred-size: 0;
-  flex-basis: 0;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  padding: 4px 2px;
-  position: relative;
-  width: 100%;
-  vertical-align: middle;
-  text-align: left;
-  height: 32px;
-  line-height: 24px;
-}
-
-.c16 {
-  -webkit-flex-flow: row nowrap;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  -webkit-flex-basis: 0;
-  -ms-flex-preferred-size: 0;
-  flex-basis: 0;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  padding: 4px 2px;
-  position: relative;
-  width: 100%;
-  vertical-align: middle;
-  text-align: left;
-  height: 32px;
-  line-height: 24px;
-}
-
-.c17 {
-  -webkit-flex-flow: row nowrap;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  -webkit-flex-basis: 0;
-  -ms-flex-preferred-size: 0;
-  flex-basis: 0;
-  display: none;
-  padding: 4px 2px;
-  position: relative;
-  width: 100%;
-  vertical-align: middle;
-  text-align: left;
-  height: 32px;
-  line-height: 24px;
-}
-
 .c18 {
   -webkit-flex-flow: row nowrap;
   -ms-flex-flow: row nowrap;
@@ -165,7 +96,10 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  display: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
   padding: 4px 2px;
   position: relative;
   width: 100%;
@@ -176,6 +110,72 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 .c19 {
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 4px 2px;
+  position: relative;
+  width: 100%;
+  vertical-align: middle;
+  text-align: left;
+  height: 32px;
+  line-height: 24px;
+}
+
+.c20 {
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  display: none;
+  padding: 4px 2px;
+  position: relative;
+  width: 100%;
+  vertical-align: middle;
+  text-align: left;
+  height: 32px;
+  line-height: 24px;
+}
+
+.c21 {
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  display: none;
+  padding: 4px 2px;
+  position: relative;
+  width: 100%;
+  vertical-align: middle;
+  text-align: left;
+  height: 32px;
+  line-height: 24px;
+}
+
+.c22 {
   -webkit-flex-flow: row nowrap;
   -ms-flex-flow: row nowrap;
   flex-flow: row nowrap;
@@ -448,6 +448,14 @@ exports[`<PageOverview /> should render a table 1`] = `
   color: black;
 }
 
+.c17 {
+  display: none;
+}
+
+.c14 {
+  outline: none;
+}
+
 @media only screen and (min-width:350px) {
 
 }
@@ -560,14 +568,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c15 {
+  .c18 {
     padding: 4px 10px;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:690px) {
-  .c15 {
+  .c18 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -590,14 +598,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c16 {
+  .c19 {
     padding: 4px 10px;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:690px) {
-  .c16 {
+  .c19 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -619,14 +627,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c17 {
+  .c20 {
     padding: 4px 10px;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:690px) {
-  .c17 {
+  .c20 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -649,14 +657,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c18 {
+  .c21 {
     padding: 4px 10px;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:690px) {
-  .c18 {
+  .c21 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -679,14 +687,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c19 {
+  .c22 {
     padding: 4px 10px;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:690px) {
-  .c19 {
+  .c22 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -952,10 +960,24 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:690px) {
-  .c14 {
+  .c17 {
+    background: rgba(255,255,255,0.8);
     position: absolute;
+    left: 0;
+    padding: 0 2px;
     top: 0;
-    left: 0px;
+  }
+}
+
+@media only screen and (min-width:690px) {
+  .c14:hover .c15,
+  .c14:focus .c15 {
+    display: none;
+  }
+
+  .c14:hover .c16,
+  .c14:focus .c16 {
+    display: block;
   }
 }
 
@@ -1119,8 +1141,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £1k
+          <span
+            class="c15 "
+          >
+            £1k
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £1,007.79
+          </span>
         </span>
       </div>
       <div
@@ -1129,8 +1161,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £10.00
+          <span
+            class="c15 "
+          >
+            £10.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £10.00
+          </span>
         </span>
       </div>
       <div
@@ -1139,8 +1181,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.5
+          <span
+            class="c15 "
+          >
+            £0.5
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.50
+          </span>
         </span>
       </div>
       <div
@@ -1149,8 +1201,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £1.50
+          <span
+            class="c15 "
+          >
+            £1.50
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £1.50
+          </span>
         </span>
       </div>
       <div
@@ -1159,8 +1221,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.1
+          <span
+            class="c15 "
+          >
+            £0.1
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.10
+          </span>
         </span>
       </div>
       <div
@@ -1169,58 +1241,118 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.5
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(146, 223, 155);"
-      >
-        <span
-          class="c14"
-        >
-          £20.00
-        </span>
-      </div>
-      <div
-        class="c16"
-        style="background-color: rgb(209, 99, 99);"
-      >
-        <span
-          class="c14"
-        >
-          £12.60
-        </span>
-      </div>
-      <div
-        class="c17"
-        style="background-color: rgb(210, 242, 214);"
-      >
-        <span
-          class="c14"
-        >
-          £7.40
+          <span
+            class="c15 "
+          >
+            £0.5
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.50
+          </span>
         </span>
       </div>
       <div
         class="c18"
-        style="background-color: rgb(255, 255, 255);"
+        style="background-color: rgb(146, 223, 155);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £20.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £20.00
+          </span>
         </span>
       </div>
       <div
         class="c19"
+        style="background-color: rgb(209, 99, 99);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £12.60
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £12.60
+          </span>
+        </span>
+      </div>
+      <div
+        class="c20"
+        style="background-color: rgb(210, 242, 214);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £7.40
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £7.40
+          </span>
+        </span>
+      </div>
+      <div
+        class="c21"
         style="background-color: rgb(255, 255, 255);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c22"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
     </div>
@@ -1240,8 +1372,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £1k
+          <span
+            class="c15 "
+          >
+            £1k
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £1,014.59
+          </span>
         </span>
       </div>
       <div
@@ -1250,8 +1392,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £9.00
+          <span
+            class="c15 "
+          >
+            £9.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £9.00
+          </span>
         </span>
       </div>
       <div
@@ -1260,8 +1412,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.1
+          <span
+            class="c15 "
+          >
+            £0.1
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.13
+          </span>
         </span>
       </div>
       <div
@@ -1270,8 +1432,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.9
+          <span
+            class="c15 "
+          >
+            £0.9
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.90
+          </span>
         </span>
       </div>
       <div
@@ -1280,8 +1452,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £10.00
+          <span
+            class="c15 "
+          >
+            £10.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £10.00
+          </span>
         </span>
       </div>
       <div
@@ -1290,57 +1472,117 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.7
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(167, 229, 175);"
-      >
-        <span
-          class="c14"
-        >
-          £19.00
-        </span>
-      </div>
-      <div
-        class="c16"
-        style="background-color: rgb(191, 36, 36);"
-      >
-        <span
-          class="c14"
-        >
-          £20.68
-        </span>
-      </div>
-      <div
-        class="c17"
-      >
-        <span
-          class="c14"
-        >
-          (£1.68)
+          <span
+            class="c15 "
+          >
+            £0.7
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.65
+          </span>
         </span>
       </div>
       <div
         class="c18"
-        style="background-color: rgb(230, 248, 232);"
+        style="background-color: rgb(167, 229, 175);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £5.12
+          <span
+            class="c15 "
+          >
+            £19.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £19.00
+          </span>
         </span>
       </div>
       <div
         class="c19"
+        style="background-color: rgb(191, 36, 36);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £20.68
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £20.68
+          </span>
+        </span>
+      </div>
+      <div
+        class="c20"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            (£1.68)
+          </span>
+          <span
+            class="c16 c17"
+          >
+            (£1.68)
+          </span>
+        </span>
+      </div>
+      <div
+        class="c21"
+        style="background-color: rgb(230, 248, 232);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £5.12
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £5.12
+          </span>
+        </span>
+      </div>
+      <div
+        class="c22"
         style="background-color: rgb(36, 191, 55);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £13k
+          <span
+            class="c15 "
+          >
+            £13k
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £12,982.27
+          </span>
         </span>
       </div>
     </div>
@@ -1360,8 +1602,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £1k
+          <span
+            class="c15 "
+          >
+            £1k
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £1,029.81
+          </span>
         </span>
       </div>
       <div
@@ -1370,8 +1622,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £4.00
+          <span
+            class="c15 "
+          >
+            £4.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £4.00
+          </span>
         </span>
       </div>
       <div
@@ -1380,8 +1642,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.2
+          <span
+            class="c15 "
+          >
+            £0.2
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.20
+          </span>
         </span>
       </div>
       <div
@@ -1390,8 +1662,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.1
+          <span
+            class="c15 "
+          >
+            £0.1
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.10
+          </span>
         </span>
       </div>
       <div
@@ -1400,8 +1682,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.9
+          <span
+            class="c15 "
+          >
+            £0.9
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.95
+          </span>
         </span>
       </div>
       <div
@@ -1410,58 +1702,118 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £1.34
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(255, 255, 255);"
-      >
-        <span
-          class="c14"
-        >
-          £15.00
-        </span>
-      </div>
-      <div
-        class="c16"
-        style="background-color: rgb(223, 146, 146);"
-      >
-        <span
-          class="c14"
-        >
-          £6.59
-        </span>
-      </div>
-      <div
-        class="c17"
-        style="background-color: rgb(203, 240, 208);"
-      >
-        <span
-          class="c14"
-        >
-          £8.41
+          <span
+            class="c15 "
+          >
+            £1.34
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £1.34
+          </span>
         </span>
       </div>
       <div
         class="c18"
-        style="background-color: rgb(36, 191, 55);"
+        style="background-color: rgb(255, 255, 255);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £13k
+          <span
+            class="c15 "
+          >
+            £15.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £15.00
+          </span>
         </span>
       </div>
       <div
         class="c19"
+        style="background-color: rgb(223, 146, 146);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £6.59
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £6.59
+          </span>
+        </span>
+      </div>
+      <div
+        class="c20"
+        style="background-color: rgb(203, 240, 208);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £8.41
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £8.41
+          </span>
+        </span>
+      </div>
+      <div
+        class="c21"
+        style="background-color: rgb(36, 191, 55);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £13k
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £13,005.90
+          </span>
+        </span>
+      </div>
+      <div
+        class="c22"
         style="background-color: rgb(58, 197, 75);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £10.4k
+          <span
+            class="c15 "
+          >
+            £10.4k
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £10,391.56
+          </span>
         </span>
       </div>
     </div>
@@ -1481,8 +1833,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £1k
+          <span
+            class="c15 "
+          >
+            £1k
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £1,032.93
+          </span>
         </span>
       </div>
       <div
@@ -1491,8 +1853,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £6.50
+          <span
+            class="c15 "
+          >
+            £6.50
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £6.50
+          </span>
         </span>
       </div>
       <div
@@ -1501,8 +1873,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.2
+          <span
+            class="c15 "
+          >
+            £0.2
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.19
+          </span>
         </span>
       </div>
       <div
@@ -1511,8 +1893,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.3
+          <span
+            class="c15 "
+          >
+            £0.3
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.35
+          </span>
         </span>
       </div>
       <div
@@ -1521,8 +1913,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.1
+          <span
+            class="c15 "
+          >
+            £0.1
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.13
+          </span>
         </span>
       </div>
       <div
@@ -1531,58 +1933,118 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.1
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(54, 196, 72);"
-      >
-        <span
-          class="c14"
-        >
-          £25.00
-        </span>
-      </div>
-      <div
-        class="c16"
-        style="background-color: rgb(221, 140, 140);"
-      >
-        <span
-          class="c14"
-        >
-          £7.27
-        </span>
-      </div>
-      <div
-        class="c17"
-        style="background-color: rgb(146, 223, 156);"
-      >
-        <span
-          class="c14"
-        >
-          £17.73
+          <span
+            class="c15 "
+          >
+            £0.1
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.10
+          </span>
         </span>
       </div>
       <div
         class="c18"
-        style="background-color: rgb(58, 197, 75);"
+        style="background-color: rgb(54, 196, 72);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £10.4k
+          <span
+            class="c15 "
+          >
+            £25.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £25.00
+          </span>
         </span>
       </div>
       <div
         class="c19"
+        style="background-color: rgb(221, 140, 140);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £7.27
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £7.27
+          </span>
+        </span>
+      </div>
+      <div
+        class="c20"
+        style="background-color: rgb(146, 223, 156);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £17.73
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £17.73
+          </span>
+        </span>
+      </div>
+      <div
+        class="c21"
+        style="background-color: rgb(58, 197, 75);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £10.4k
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £10,412.41
+          </span>
+        </span>
+      </div>
+      <div
+        class="c22"
         style="background-color: rgb(255, 255, 255);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
     </div>
@@ -1602,8 +2064,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1612,8 +2084,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1622,8 +2104,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1632,8 +2124,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1642,8 +2144,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1652,47 +2164,38 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(91, 207, 105);"
-      >
-        <span
-          class="c14"
-        >
-          £23.00
-        </span>
-      </div>
-      <div
-        class="c16"
-        style="background-color: rgb(255, 255, 255);"
-      >
-        <span
-          class="c14"
-        >
-          £0.00
-        </span>
-      </div>
-      <div
-        class="c17"
-        style="background-color: rgb(76, 203, 92);"
-      >
-        <span
-          class="c14"
-        >
-          £23.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
         class="c18"
+        style="background-color: rgb(91, 207, 105);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          (£1k)
+          <span
+            class="c15 "
+          >
+            £23.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £23.00
+          </span>
         </span>
       </div>
       <div
@@ -1701,8 +2204,77 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c20"
+        style="background-color: rgb(76, 203, 92);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £23.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £23.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c21"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            (£1k)
+          </span>
+          <span
+            class="c16 c17"
+          >
+            (£1,009.93)
+          </span>
+        </span>
+      </div>
+      <div
+        class="c22"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
     </div>
@@ -1722,8 +2294,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1732,8 +2314,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1742,8 +2334,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1752,8 +2354,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1762,8 +2374,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1772,48 +2394,38 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(189, 236, 195);"
-      >
-        <span
-          class="c14"
-        >
-          £18.00
-        </span>
-      </div>
-      <div
-        class="c16"
-        style="background-color: rgb(255, 255, 255);"
-      >
-        <span
-          class="c14"
-        >
-          £0.00
-        </span>
-      </div>
-      <div
-        class="c17"
-        style="background-color: rgb(144, 222, 153);"
-      >
-        <span
-          class="c14"
-        >
-          £18.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
         class="c18"
-        style="background-color: rgb(165, 229, 173);"
+        style="background-color: rgb(189, 236, 195);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £18.00
+          <span
+            class="c15 "
+          >
+            £18.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £18.00
+          </span>
         </span>
       </div>
       <div
@@ -1822,8 +2434,78 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c20"
+        style="background-color: rgb(144, 222, 153);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £18.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £18.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c21"
+        style="background-color: rgb(165, 229, 173);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £18.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £18.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c22"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
     </div>
@@ -1843,8 +2525,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1853,8 +2545,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1863,8 +2565,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1873,8 +2585,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1883,8 +2605,18 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
@@ -1893,48 +2625,38 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(36, 191, 55);"
-      >
-        <span
-          class="c14"
-        >
-          £26.00
-        </span>
-      </div>
-      <div
-        class="c16"
-        style="background-color: rgb(255, 255, 255);"
-      >
-        <span
-          class="c14"
-        >
-          £0.00
-        </span>
-      </div>
-      <div
-        class="c17"
-        style="background-color: rgb(36, 191, 55);"
-      >
-        <span
-          class="c14"
-        >
-          £26.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
       <div
         class="c18"
-        style="background-color: rgb(145, 223, 155);"
+        style="background-color: rgb(36, 191, 55);"
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £26.00
+          <span
+            class="c15 "
+          >
+            £26.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £26.00
+          </span>
         </span>
       </div>
       <div
@@ -1943,8 +2665,78 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         <span
           class="c14"
+          tabindex="0"
         >
-          £0.00
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c20"
+        style="background-color: rgb(36, 191, 55);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £26.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £26.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c21"
+        style="background-color: rgb(145, 223, 155);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £26.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £26.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c22"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c14"
+          tabindex="0"
+        >
+          <span
+            class="c15 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c16 c17"
+          >
+            £0.00
+          </span>
         </span>
       </div>
     </div>
@@ -1985,6 +2777,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
   font-size: 0.9em;
   line-height: 20px;
   padding: 0.1em 0.2em;
+  background: rgba(255,255,255,0.6);
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -2270,6 +3063,10 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 @media only screen and (min-width:690px) {
+
+}
+
+@media only screen and (min-width:690px) {
   .sc-pReKu .c2 {
     height: 100%;
   }
@@ -2281,10 +3078,11 @@ exports[`<PageOverview /> should render graphs 1`] = `
     position: static;
     width: 500px;
     height: 300px;
+    background: rgba(255,255,255,0.95);
     box-shadow: 0 3px 10px rgba(0,0,0,0.3);
   }
 
-  .sc-fzomME .c2 {
+  .sc-fzoYkl .c2 {
     z-index: 10;
     width: 100px;
     height: 100%;
@@ -3199,37 +3997,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,281.28500936581725 Q36,90 77.3,41.8"
-          fill="none"
-          stroke="#039"
-          stroke-width="2"
-        />
-        <path
-          d="M77.34806629834254,41.81575750259327 C93,23 144,63 163.0,89.6"
-          fill="none"
-          stroke="#039"
-          stroke-width="2"
-        />
-        <path
-          d="M162.98342541436463,89.60369171578304 C203,147 204,234 245.9,281.3"
-          fill="none"
-          stroke="#039"
-          stroke-width="2"
-        />
-        <path
-          d="M245.85635359116023,281.28500936581725 C263,301 302,281 331.5,281.3"
-          fill="none"
-          stroke="#039"
-          stroke-width="2"
-        />
-        <path
-          d="M331.49171270718233,281.28500936581725 C360,281 385,281 414.4,281.3"
-          fill="none"
-          stroke="#039"
-          stroke-width="2"
-        />
-        <path
-          d="M414.36464088397787,281.28500936581725 Q444,281 500.0,281.3"
+          d="M0,281.28500936581725 Q36,90 77.3,41.8 C93,23 144,63 163.0,89.6 C203,147 204,234 245.9,281.3 C263,301 302,281 331.5,281.3 C360,281 385,281 414.4,281.3 Q444,281 500.0,281.3"
           fill="none"
           stroke="#039"
           stroke-width="2"

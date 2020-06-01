@@ -1,15 +1,14 @@
-import { useSelector, useDispatch } from 'react-redux';
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-
-import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
-import { State } from '~client/reducers';
-import { GraphStocks } from '~client/containers/stocks-list/graph-stocks';
-import { stocksListRequested, stockPricesRequested } from '~client/actions/stocks';
-import { sigFigs } from '~client/modules/format';
-import { Stock, Index } from '~client/types/funds';
-import { Data } from '~client/types/graph';
+import { useSelector, useDispatch } from 'react-redux';
 
 import * as Styled from './styles';
+import { stocksListRequested, stockPricesRequested } from '~client/actions';
+import { DO_STOCKS_LIST, STOCK_PRICES_DELAY } from '~client/constants/stocks';
+import { GraphStocks } from '~client/containers/stocks-list/graph-stocks';
+import { sigFigs } from '~client/modules/format';
+import { State } from '~client/reducers';
+import { Stock, Index } from '~client/types/funds';
+import { Data } from '~client/types/graph';
 
 type StockListItemsProps = {
   stockMap: Index[];

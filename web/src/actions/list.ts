@@ -3,7 +3,7 @@ import shortid from 'shortid';
 
 import { PageList, Create, CreateEdit, DeltaEdit, Item, ListItem } from '~client/types';
 
-export enum ListActionType {
+export const enum ListActionType {
   Created = '@@list/ITEM_CREATED',
   Updated = '@@list/ITEM_UPDATED',
   Deleted = '@@list/ITEM_DELETED',

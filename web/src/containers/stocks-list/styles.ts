@@ -1,6 +1,6 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { colors } from '~client/styled/variables';
 import { Graph } from '~client/components/graph/styles';
+import { colors } from '~client/styled/variables';
 
 export const Text = styled.span`
   display: inline-block;
@@ -13,10 +13,10 @@ export const List = styled.div<{ isLoading: boolean }>`
     -webkit-box-shadow: none;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: ${colors['translucent-l4']};
+    background-color: ${colors['translucent-l6']};
   }
   &::-webkit-scrollbar-thumb:hover {
-    background-color: ${colors['shadow-grey']};
+    background-color: ${colors['shadow-l5']};
   }
   &::-webkit-scrollbar-thumb:active {
     background-color: ${colors['translucent-l7']};
@@ -159,14 +159,14 @@ export const Item = styled.li<{ up: boolean; down: boolean; hlUp: boolean; hlDow
       ${({ up, hlUp, hlDown }): false | FlattenSimpleInterpolation =>
         up &&
         css`
-          border-bottom: 5px solid ${colors['border-up']};
+          border-bottom: 5px solid ${colors['bg-up']};
           ${hlUp && `background-color: ${colors['bg-up-hl']};`}
           ${hlDown && `background-color: ${colors['bg-up-rev']};`}
         `}
       ${({ down, hlUp, hlDown }): false | FlattenSimpleInterpolation =>
         down &&
         css`
-          border-top: 5px solid ${colors['border-down']};
+          border-top: 5px solid ${colors['bg-down']};
           ${hlUp && `background-color: ${colors['bg-down-hl']};`}
           ${hlDown && `background-color: ${colors['bg-down-rev']};`}
         `}

@@ -1,9 +1,9 @@
 import {
-  getLoading,
-  getLoadingDeep,
+  getAnalysisLoading,
+  getAnalysisLoadingDeep,
   getAnalysisPeriod,
-  getGrouping,
-  getPage,
+  getAnalysisGrouping,
+  getAnalysisPage,
   getCostAnalysis,
   getBlocks,
   getDeepBlocks,
@@ -20,11 +20,11 @@ import { testState } from '~client/test-data/state';
 import { Page, BlockItem, AnalysisCost } from '~client/types';
 
 describe('Analysis selectors', () => {
-  describe('getLoading', () => {
+  describe('getAnalysisLoading', () => {
     it('should get the loading status', () => {
       expect.assertions(1);
       expect(
-        getLoading({
+        getAnalysisLoading({
           ...testState,
           analysis: {
             ...testState.analysis,
@@ -35,11 +35,11 @@ describe('Analysis selectors', () => {
     });
   });
 
-  describe('getLoadingDeep', () => {
+  describe('getAnalysisLoadingDeep', () => {
     it('should get the loading (deep block) status', () => {
       expect.assertions(1);
       expect(
-        getLoadingDeep({
+        getAnalysisLoadingDeep({
           ...testState,
           analysis: {
             ...testState.analysis,
@@ -65,11 +65,11 @@ describe('Analysis selectors', () => {
     });
   });
 
-  describe('getGrouping', () => {
+  describe('getAnalysisGrouping', () => {
     it('should get the grouping', () => {
       expect.assertions(1);
       expect(
-        getGrouping({
+        getAnalysisGrouping({
           ...testState,
           analysis: {
             ...testState.analysis,
@@ -80,11 +80,11 @@ describe('Analysis selectors', () => {
     });
   });
 
-  describe('getPage', () => {
+  describe('getAnalysisPage', () => {
     it('should get the page', () => {
       expect.assertions(1);
       expect(
-        getPage({
+        getAnalysisPage({
           ...testState,
           analysis: {
             ...testState.analysis,

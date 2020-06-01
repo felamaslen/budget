@@ -53,7 +53,7 @@ export type StockPrice = {
   close: number;
 };
 
-export type FundRaw = RawListItem & {
+type FundRaw = RawListItem & {
   [DataKeyAbbr.transactions]: TransactionRaw[] | null;
   pr: number[];
   prStartIndex: number;
@@ -65,7 +65,7 @@ export type ReadResponseFunds = {
   cacheTimes: number[];
 };
 
-export type PortfolioItem = {
+type PortfolioItem = {
   id: string;
   item: string;
   value: number;

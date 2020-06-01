@@ -1,6 +1,6 @@
 import { Request, ReadResponse, SyncResponse } from '~client/types';
 
-export enum ActionTypeApi {
+export const enum ActionTypeApi {
   DataRead = '@@api/DATA_READ',
   SyncRequested = '@@api/SYNC_REQUESTED',
   SyncLocked = '@@api/SYNC_LOCKED',

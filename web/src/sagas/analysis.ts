@@ -4,18 +4,19 @@ import { select, takeLatest, put, call } from 'redux-saga/effects';
 
 import {
   ActionTypeAnalysis,
-  received,
+  analysisReceived,
   blockReceived,
   ActionAnalysisBlockRequested,
-} from '~client/actions/analysis';
-import { errorOpened } from '~client/actions/error';
+  errorOpened,
+} from '~client/actions';
+
 import { API_PREFIX } from '~client/constants/data';
 import {
   getApiKey,
-  getLoadingDeep,
+  getAnalysisLoadingDeep as getLoadingDeep,
   getAnalysisPeriod,
-  getGrouping,
-  getPage,
+  getAnalysisGrouping as getGrouping,
+  getAnalysisPage as getPage,
 } from '~client/selectors';
 
 export function* onRequest() {
@@ -30,10 +31,10 @@ export function* onRequest() {
       headers: { Authorization: apiKey },
     });
 
-    yield put(received(res.data));
+    yield put(analysisReceived(res.data));
   } catch (err) {
     yield put(errorOpened(`Error loading analysis data: ${err.message}`));
-    yield put(received(undefined, err));
+    yield put(analysisReceived(undefined, err));
   }
 }
 

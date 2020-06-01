@@ -1,4 +1,4 @@
-import { PageProps, Page } from './app';
+import { Page } from './app';
 import { Fund } from './funds';
 import { ListItem, RawListItem } from './shared';
 import { DataKeyAbbr } from '~client/constants/api';
@@ -23,7 +23,13 @@ export type Holiday = ShopItem & {
 };
 export type Social = ShopItem & { society: string };
 
-export type Column<I extends {} = {}> = keyof I;
+type PageProps<I = never> = {
+  path?: string;
+  cols?: (keyof I)[];
+  list?: boolean;
+  daily?: boolean;
+  suggestions?: string[];
+};
 
 export type Pages = {
   [Page.overview]: PageProps;
@@ -47,7 +53,7 @@ interface RawShopItem extends RawListCalcItem {
   [DataKeyAbbr.shop]: string;
 }
 
-export type ReadResponseList<Item extends RawListItem> = {
+type ReadResponseList<Item extends RawListItem> = {
   data: Item[];
   total?: number;
   olderExists?: boolean | null;

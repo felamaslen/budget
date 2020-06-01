@@ -1,7 +1,6 @@
 /* eslint-disable max-lines */
 import reducer, { State, initialState } from './net-worth';
-import { dataRead, syncReceived } from '~client/actions/api';
-import { loggedOut } from '~client/actions/login';
+import { dataRead, syncReceived, loggedOut } from '~client/actions';
 import {
   netWorthCategoryCreated,
   netWorthCategoryUpdated,

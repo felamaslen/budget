@@ -1,6 +1,6 @@
 import { LoginResponse } from '~client/types/auth';
 
-export enum ActionTypeLogin {
+export const enum ActionTypeLogin {
   Requested = '@@login/REQUESTED',
   ErrorOccurred = '@@login/ERROR_OCCURRED',
   LoggedIn = '@@login/LOGGED_IN',

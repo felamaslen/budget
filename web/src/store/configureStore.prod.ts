@@ -14,4 +14,5 @@ const createProdStore = (): Store<State> => {
 
   return store;
 };
+// ts-prune-ignore-next
 export { createProdStore as createStore };

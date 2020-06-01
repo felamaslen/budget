@@ -13,7 +13,7 @@ const spin = (offset = 15): Keyframes => keyframes`
 }
 `;
 
-export const Outer = styled.div`
+export const Outer = styled.div<{ initialLoading: boolean }>`
   display: flex;
   position: fixed;
   align-items: center;
@@ -23,7 +23,8 @@ export const Outer = styled.div`
   z-index: 500;
   top: ${sizes.navbarHeight}px;
   left: 0;
-  background: ${colors['translucent-l8']};
+  background: ${({ initialLoading }): string =>
+    initialLoading ? colors['translucent-l8'] : colors.transparent};
 `;
 
 export const Inner = styled.div`

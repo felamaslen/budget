@@ -2,7 +2,7 @@ import shortid from 'shortid';
 
 import { ErrorLevel } from '~client/constants/error';
 
-export enum ActionTypeError {
+export const enum ActionTypeError {
   Opened = '@@error/OPENED',
   Closed = '@@error/CLOSED',
   Removed = '@@error/REMOVED',

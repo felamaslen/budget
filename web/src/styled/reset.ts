@@ -4,7 +4,7 @@ import { breakpoints, colors } from '~client/styled/variables';
 
 export const fontFamily = `'Noto sans', Ubuntu, Arial, Helvetica, sans-serif`;
 
-export const reset = css`
+const reset = css`
   html {
     box-sizing: border-box;
   }

@@ -7,7 +7,7 @@ import {
   AnalysisDeepResponse,
 } from '~client/types';
 
-export enum ActionTypeAnalysis {
+export const enum ActionTypeAnalysis {
   Requested = '@@analysis/REQUESTED',
   Received = '@@analysis/RECEIVED',
   BlockRequested = '@@analysis/BLOCK_REQUESTED',
@@ -18,7 +18,7 @@ export type ActionAnalysisRequested = {
   type: ActionTypeAnalysis.Requested;
 } & AnalysisRequest;
 
-export const requested = (req: AnalysisRequest = {}): ActionAnalysisRequested => ({
+export const analysisRequested = (req: AnalysisRequest = {}): ActionAnalysisRequested => ({
   type: ActionTypeAnalysis.Requested,
   ...req,
 });
@@ -29,7 +29,10 @@ export type ActionAnalysisReceived = {
   err?: AxiosError;
 };
 
-export const received = (res?: AnalysisResponse, err?: AxiosError): ActionAnalysisReceived => ({
+export const analysisReceived = (
+  res?: AnalysisResponse,
+  err?: AxiosError,
+): ActionAnalysisReceived => ({
   type: ActionTypeAnalysis.Received,
   res,
   err,

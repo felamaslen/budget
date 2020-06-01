@@ -27,7 +27,7 @@ export const Graph = styled.div<{
     position: static;
     width: ${({ width = 500 }): number => width}px;
     height: ${({ height = 300 }): number => height}px;
-    background: ${colors['translucent-heavy']};
+    background: ${colors['translucent-l95']};
     box-shadow: 0 3px 10px ${colors['shadow-l3']};
 
     ${FundGraph} & {

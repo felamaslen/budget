@@ -4,9 +4,7 @@ import { call } from 'redux-saga/effects';
 
 import appSaga, { fetchLegacy, fetchNetWorth, fetchData } from './app';
 import { getFundHistoryQuery } from './funds';
-import { dataRead } from '~client/actions/api';
-import { errorOpened } from '~client/actions/error';
-import { ActionTypeLogin } from '~client/actions/login';
+import { dataRead, errorOpened, ActionTypeLogin } from '~client/actions';
 import { API_PREFIX } from '~client/constants/data';
 import { getApiKey } from '~client/selectors/api';
 import { testResponse } from '~client/test-data';

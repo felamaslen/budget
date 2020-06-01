@@ -8,7 +8,7 @@ import setYear from 'date-fns/setYear';
 import startOfDay from 'date-fns/startOfDay';
 
 import { makeInlineField } from './shared';
-import { Split } from '~client/hooks/field';
+import { Split } from '~client/hooks';
 
 const setValueDate: (event: React.ChangeEvent<HTMLInputElement>) => Date = (event): Date =>
   event.target.value ? parseISO(event.target.value ?? '') : new Date();

@@ -1,11 +1,10 @@
 import React from 'react';
 import { Arrow } from '~client/components/arrow';
-import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
-import { formatCurrency } from '~client/modules/format';
+import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
-import { RangeY, PixPrimary, Size } from '~client/types/graph';
-import { Target } from '~client/types/overview';
+import { formatCurrency } from '~client/modules/format';
+import { Target, RangeY, PixPrimary, Size } from '~client/types';
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 

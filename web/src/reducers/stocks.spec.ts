@@ -1,12 +1,12 @@
 import sinon from 'sinon';
 
 import reducer, { initialState, State } from './stocks';
-import { loggedOut } from '~client/actions/login';
 import {
+  loggedOut,
   stocksListRequested,
   stocksListReceived,
   stockPricesReceived,
-} from '~client/actions/stocks';
+} from '~client/actions';
 import { StocksListResponse } from '~client/types';
 
 describe('Stocks reducer', () => {

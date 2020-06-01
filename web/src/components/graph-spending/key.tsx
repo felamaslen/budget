@@ -4,7 +4,7 @@ import { BaseKey } from '~client/components/graph-cashflow/base-key';
 import { COLOR_SPENDING, COLOR_TRANSLUCENT_LIGHT, COLOR_DARK } from '~client/constants/colors';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { rgba } from '~client/modules/color';
-import { Range, PixPrimary } from '~client/types/graph';
+import { Range, PixPrimary } from '~client/types';
 
 type Props = PixPrimary &
   Omit<Range, 'minX'> & {

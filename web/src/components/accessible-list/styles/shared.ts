@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { fieldSizes } from './constants';
 import { fieldSizesMobile } from './mobile';
 import { breakpoint, rem } from '~client/styled/mixins';
-import { ListWithoutMargin } from '~client/styled/shared/layout';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const borderColor = colors['slightly-light'];
@@ -39,6 +38,12 @@ export const HeaderColumn = styled.div<{
     line-height: ${rem(24)};
     text-align: left;
   }
+`;
+
+export const ListWithoutMargin = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
 `;
 
 export const List = styled(ListWithoutMargin)`

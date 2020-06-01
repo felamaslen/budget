@@ -2,14 +2,14 @@
 import { Dispatch, SetStateAction, useMemo, useEffect, useState, useRef } from 'react';
 import { useDebounce } from 'use-debounce';
 
-export type Validator<S> = (value: any | S) => value is S;
+export type PersistentStateValidator<S> = (value: any | S) => value is S;
 
 const validateAnything = (): boolean => true;
 
 export function usePersistentState<S>(
   defaultState: S,
   key: string,
-  validator: Validator<S> | ((value: any) => boolean) = validateAnything,
+  validator: PersistentStateValidator<S> | ((value: any) => boolean) = validateAnything,
 ): [S, Dispatch<SetStateAction<S>>] {
   const initialState = useMemo<S>(() => {
     try {

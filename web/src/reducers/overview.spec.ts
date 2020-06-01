@@ -1,6 +1,10 @@
-import { dataRead } from '~client/actions/api';
-import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
-import { loggedOut } from '~client/actions/login';
+import {
+  dataRead,
+  loggedOut,
+  listItemCreated,
+  listItemUpdated,
+  listItemDeleted,
+} from '~client/actions';
 import reducer, { initialState, State } from '~client/reducers/overview';
 import { testResponse } from '~client/test-data';
 import { Page, Food, General, Holiday } from '~client/types';

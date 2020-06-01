@@ -1,6 +1,4 @@
-import { Page, PageList, PageListCalc } from '~client/types/app';
-import { Pages, Column } from '~client/types/list';
-import { CostProcessed } from '~client/types/overview';
+import { Page, PageList, PageListCalc, Pages, CostProcessed } from '~client/types';
 
 // debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;
@@ -88,10 +86,7 @@ export const PAGES: Pages = {
   },
 };
 
-export const getColumns = <I extends {}>(page?: PageList): Column<I>[] =>
-  (page && ((PAGES[page].cols ?? []) as Column<I>[])) ?? [];
-
-export const PAGES_LIST_CALC: PageListCalc[] = [
+const PAGES_LIST_CALC: PageListCalc[] = [
   Page.income,
   Page.bills,
   Page.food,
@@ -100,7 +95,6 @@ export const PAGES_LIST_CALC: PageListCalc[] = [
   Page.social,
 ];
 export const PAGES_LIST: PageList[] = [Page.funds, ...PAGES_LIST_CALC];
-export const PAGES_SUGGESTIONS = PAGES_LIST_CALC;
 
 export const isPage = <T extends string>(name?: T | Page): name is Page =>
   !!name && Reflect.has(PAGES, name);

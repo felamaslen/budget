@@ -3,9 +3,7 @@ import React from 'react';
 import sinon from 'sinon';
 
 import ModalDialog, { Props, animationTime, makeField } from '.';
-import { FormFieldText } from '~client/components/FormField';
-import { FormFieldCost } from '~client/components/FormField/cost';
-import { FormFieldDate } from '~client/components/FormField/date';
+import { FormFieldText, FormFieldCost, FormFieldDate } from '~client/components/FormField';
 import { CREATE_ID } from '~client/constants/data';
 
 describe('<ModalDialog />', () => {

@@ -10,7 +10,7 @@ import { CachedValue } from '~client/types';
 
 export * from './mobile';
 
-export type Props = {
+type Props = {
   totalCost: number;
   viewSoldFunds: boolean;
   period: Period;

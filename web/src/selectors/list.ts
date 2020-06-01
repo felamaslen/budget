@@ -4,26 +4,9 @@ import { createSelector } from 'reselect';
 import { PAGES_LIST } from '~client/constants/data';
 import { getValueForTransmit } from '~client/modules/data';
 import { State } from '~client/reducers';
-import {
-  Page,
-  PageList,
-  PageListCalc,
-  Item,
-  ListCalcItem,
-  RequestType,
-  WithCrud,
-  Request,
-} from '~client/types';
+import { Page, PageList, PageListCalc, Item, RequestType, WithCrud, Request } from '~client/types';
 
 type Params<P extends Page = PageListCalc> = { page: P };
-
-export type SortedItem = ListCalcItem &
-  Partial<{
-    daily: number;
-    total: number;
-    firstPresent: boolean;
-    future: boolean;
-  }>;
 
 const getNonFilteredItems = (state: State, { page }: Params<PageList>): Item[] => state[page].items;
 

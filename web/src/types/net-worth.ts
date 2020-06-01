@@ -27,8 +27,8 @@ export type OptionValue = {
   marketPrice: number;
 };
 
-export type ComplexValueItem = number | FXValue | OptionValue;
-export type ComplexValue = ComplexValueItem[];
+type ComplexValueItem = number | FXValue | OptionValue;
+type ComplexValue = ComplexValueItem[];
 
 export type Value = number | ComplexValue;
 
@@ -69,11 +69,6 @@ export type CreateEntry = Omit<Entry, 'values' | 'currencies'> & {
   currencies: Create<Currency>[];
 };
 
-export type NetWorthItem = Pick<Entry, 'id' | 'date' | 'values' | 'creditLimit'> & {
-  spend: number;
-  fti: () => number;
-};
-
 export type NetWorthTableRow = {
   id: string;
   date: Date;
@@ -85,6 +80,8 @@ export type NetWorthTableRow = {
   fti: number;
   pastYearAverageSpend: number;
 };
+
+export type NetWorthTableColumn = 'date' | 'assets' | 'liabilities' | 'main' | 'expenses';
 
 export enum Aggregate {
   cashEasyAccess = 'Cash (easy access)',

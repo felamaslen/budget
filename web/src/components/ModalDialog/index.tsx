@@ -5,10 +5,10 @@ import { ModalDialogField, ModalFields } from './field';
 import * as Styled from './styles';
 
 import { CREATE_ID } from '~client/constants/data';
-import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared/button';
+import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared';
 import { Item, Delta, Create, FieldKey } from '~client/types';
 
-export * from './field';
+export { ModalFields, makeField, FieldWrapper } from './field';
 
 type DialogType = 'edit' | 'add';
 
@@ -18,7 +18,7 @@ type State = {
   canRemove: boolean;
 };
 
-enum ActionType {
+const enum ActionType {
   Hidden,
   Shown,
   ChangedId,
@@ -54,11 +54,6 @@ function getTitle({ type, id }: Pick<PersistentStatePayload, 'type' | 'id'>): st
 }
 
 export const animationTime = 350;
-
-export type Field<V> = {
-  item: string;
-  value: V;
-};
 
 function initField<I extends Item>(field: 'date', item: Delta<I>): Date;
 function initField<I extends Item>(field: 'cost', item: Delta<I>): number;

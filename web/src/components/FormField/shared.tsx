@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 
 import * as Styled from './styles';
-import { useField, Options } from '~client/hooks/field';
+import { useField, FieldOptions as Options } from '~client/hooks';
 
 type CommonProps<V> = WrapperProps & {
   id?: string;
@@ -51,7 +51,7 @@ export const Wrapper: React.FC<WrapperProps> = ({
   </Styled.FormField>
 );
 
-export type InlineFieldHookKeys =
+type InlineFieldHookKeys =
   | 'convertExternalToInputValue'
   | 'convertInputToExternalValue'
   | 'immediate';

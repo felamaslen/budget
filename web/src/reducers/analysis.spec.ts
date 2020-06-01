@@ -1,6 +1,12 @@
 import reducer, { initialState, State } from './analysis';
-import { requested, received, blockRequested, blockReceived } from '~client/actions/analysis';
-import { loggedOut } from '~client/actions/login';
+import {
+  analysisRequested,
+  analysisReceived,
+  blockRequested,
+  blockReceived,
+  loggedOut,
+} from '~client/actions';
+
 import { Period, Grouping } from '~client/constants/analysis';
 import { testState } from '~client/test-data/state';
 import { Page } from '~client/types';
@@ -29,28 +35,28 @@ describe('Analysis reducer', () => {
         page: 3,
       };
 
-      const withPeriod = reducer(state, requested({ period: Period.month }));
+      const withPeriod = reducer(state, analysisRequested({ period: Period.month }));
       expect(withPeriod.loading).toBe(true);
       expect(withPeriod.loadingDeep).toBe(false);
       expect(withPeriod.period).toBe('month');
       expect(withPeriod.grouping).toBe('category');
       expect(withPeriod.page).toBe(0);
 
-      const withGrouping = reducer(state, requested({ grouping: Grouping.shop }));
+      const withGrouping = reducer(state, analysisRequested({ grouping: Grouping.shop }));
       expect(withGrouping.loading).toBe(true);
       expect(withGrouping.loadingDeep).toBe(false);
       expect(withGrouping.period).toBe('year');
       expect(withGrouping.grouping).toBe('shop');
       expect(withGrouping.page).toBe(0);
 
-      const withPage = reducer(state, requested({ page: 1 }));
+      const withPage = reducer(state, analysisRequested({ page: 1 }));
       expect(withPage.loading).toBe(true);
       expect(withPage.loadingDeep).toBe(false);
       expect(withPage.period).toBe('year');
       expect(withPage.grouping).toBe('category');
       expect(withPage.page).toBe(1);
 
-      const withNothing = reducer(state, requested());
+      const withNothing = reducer(state, analysisRequested());
       expect(withNothing.loading).toBe(true);
       expect(withNothing.loadingDeep).toBe(false);
       expect(withNothing.period).toBe('year');
@@ -72,7 +78,7 @@ describe('Analysis reducer', () => {
     it('should update data in state', () => {
       expect.assertions(7);
 
-      const action = received({
+      const action = analysisReceived({
         data: {
           timeline: [
             [72500, 1035, 2779, 1745],
@@ -150,7 +156,7 @@ describe('Analysis reducer', () => {
     it('should not do anything if the response was not defined', () => {
       expect.assertions(1);
 
-      const action = received(undefined);
+      const action = analysisReceived(undefined);
 
       expect(reducer(state, action)).toBe(state);
     });

@@ -7,7 +7,7 @@ import * as Styled from './styles';
 import { mediaQueryMobile } from '~client/constants';
 import { useMediaQuery } from '~client/hooks/media';
 import { useToday } from '~client/hooks/time';
-import { getOverviewTable } from '~client/selectors/overview';
+import { getOverviewTable } from '~client/selectors';
 
 const OverviewTable: React.FC = () => {
   const today = useToday();

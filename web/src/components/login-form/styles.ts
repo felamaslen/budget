@@ -44,7 +44,7 @@ export const NumberInputPad = styled.div`
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 12px;
   height: 170px;
-  background: ${colors['medium-dark']};
+  background: ${colors['translucent-l15']};
   box-shadow: inset 0 0 13px ${colors['shadow-l5']};
 
   user-select: none;

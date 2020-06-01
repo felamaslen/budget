@@ -3,7 +3,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
 import { LoginForm } from '.';
-import { loginRequested } from '~client/actions/login';
+import { loginRequested } from '~client/actions';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 

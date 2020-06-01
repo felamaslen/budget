@@ -2,7 +2,7 @@ import { ActionList } from './list';
 import { Period } from '~client/constants/graph';
 import { ReadResponseFunds, Fund, Page } from '~client/types';
 
-export enum ActionTypeFunds {
+export const enum ActionTypeFunds {
   Requested = '@@funds/REQUESTED',
   Received = '@@funds/RECEIVED',
   ViewSoldToggled = '@@funds/VIEW_SOLD_TOGGLED',

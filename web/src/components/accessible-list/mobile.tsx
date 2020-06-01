@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { FieldsMobile, ComponentType } from './types';
-import { OnCreateList } from '~client/actions/list';
+import { OnCreateList } from '~client/actions';
 import { FormFieldText } from '~client/components/FormField';
 import { FormFieldCost } from '~client/components/FormField/cost';
 import { FormFieldDate } from '~client/components/FormField/date';
@@ -19,7 +19,7 @@ type StandardFieldPropsMobile<V, E extends {} = {}> = Partial<E> & {
   value: V;
 };
 
-export const StandardFieldMobile = <V, E extends {} = {}>({
+const StandardFieldMobile = <V, E extends {} = {}>({
   field,
   value,
 }: StandardFieldPropsMobile<V, E>): React.ReactElement<StandardFieldPropsMobile<V, E>> => (
@@ -40,7 +40,7 @@ export const standardModalFields: ModalFields<ListCalcItem> = {
   cost: makeField('cost', FormFieldCost),
 };
 
-export type FieldPropsMobile<I extends Item, F extends keyof I, E extends {}> = {
+type FieldPropsMobile<I extends Item, F extends keyof I, E extends {}> = {
   fieldsMobile: FieldsMobile<I, F, E>;
   field: F;
   item: I;

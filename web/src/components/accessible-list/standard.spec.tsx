@@ -6,7 +6,7 @@ import createStore, { MockStore } from 'redux-mock-store';
 import sinon from 'sinon';
 
 import { AccessibleListStandard } from './standard';
-import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
+import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions';
 import { State } from '~client/reducers';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
@@ -352,7 +352,7 @@ describe('<AccessibleListStandard />', () => {
           font-weight: bold;
         }
 
-        .sc-fznMAR .c12 {
+        .sc-fzqARJ .c12 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -370,15 +370,15 @@ describe('<AccessibleListStandard />', () => {
           grid-column: 4;
         }
 
-        .sc-fznWOq .c12,
-        .sc-fznWOq .c12:hover,
-        .sc-fznWOq .c12:active {
+        .sc-fzqNqU .c12,
+        .sc-fzqNqU .c12:hover,
+        .sc-fzqNqU .c12:active {
           background: none;
           border: none;
           box-shadow: none;
         }
 
-        .sc-fznWOq .c12::after {
+        .sc-fzqNqU .c12::after {
           display: block;
           margin-left: 16px;
           content: '';
@@ -396,7 +396,7 @@ describe('<AccessibleListStandard />', () => {
           background: none;
         }
 
-        .sc-fzoYHE .c12 {
+        .sc-fznMnq .c12 {
           margin: 2px 4px;
         }
 
@@ -552,10 +552,10 @@ describe('<AccessibleListStandard />', () => {
               </div>
             </div>
             <ul
-              class="sc-fzoLsD c5"
+              class="sc-AxgMl c5"
             >
               <li
-                class="sc-fznKkj c6"
+                class="sc-Axmtr c6"
                 role="button"
               >
                 <button

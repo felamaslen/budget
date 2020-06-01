@@ -1,5 +1,5 @@
 import React from 'react';
-import { PixX, SVGPathProps } from '~client/types/graph';
+import { PixX, SVGPathProps } from '~client/types';
 
 type Props = {
   startX: number;

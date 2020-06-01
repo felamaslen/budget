@@ -10,7 +10,7 @@ import {
   ListItemCreated,
   ListItemUpdated,
   ListItemDeleted,
-} from '~client/actions/list';
+} from '~client/actions';
 import { PageList, Item, Create, CreateEdit, DeltaEdit } from '~client/types';
 
 type Trigger<Args extends any[], O = void> = (...args: Args) => O;

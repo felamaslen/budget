@@ -87,7 +87,6 @@ type Props = {
   onChange: (value: Value) => void;
   currencies: Omit<Currency, 'id'>[];
 };
-export { Props as PropsNetWorthValue };
 
 const coerceSimpleFXValue = (value: Value): number | FXValue[] => {
   if (isComplex(value) && value.every(isFX)) {

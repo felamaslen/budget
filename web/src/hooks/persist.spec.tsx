@@ -2,7 +2,7 @@ import { render, RenderResult, act, fireEvent } from '@testing-library/react';
 import React from 'react';
 import sinon from 'sinon';
 
-import { usePersistentState, Validator } from './persist';
+import { usePersistentState, PersistentStateValidator as Validator } from './persist';
 
 describe('usePersistentState', () => {
   let getItemSpy: jest.SpyInstance;

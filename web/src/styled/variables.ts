@@ -2,6 +2,7 @@ import { compose } from '@typed/compose';
 import { rgb, rgba, lighten, desaturate } from 'polished';
 
 import { ErrorLevel } from '~client/constants/error';
+import { Page, Aggregate, NetWorthTableColumn } from '~client/types';
 
 export const breakpoints = {
   mobileSmall: 350,
@@ -11,9 +12,6 @@ export const breakpoints = {
   desktop: 1325,
 };
 
-export const itemHeightDesktop = 24;
-export const itemHeightDesktopFunds = 48;
-export const itemHeightMobile = 30;
 export const graphOverviewHeightMobile = 240;
 export const graphFundsHeightMobile = 125;
 
@@ -28,7 +26,102 @@ const colorLight = rgb(234, 234, 234);
 
 const colorStocks = rgb(84, 110, 122);
 
-export const colors = {
+type ColorsBase = {
+  [key: string]: string;
+};
+
+type PageColors = ColorsBase & {
+  main: string;
+};
+
+type Colors = {
+  primary: string;
+  primaryDark: string;
+  primaryMobile: string;
+  primaryDarkMobile: string;
+  accent: string;
+  highlight: string;
+  'highlight-light': string;
+  error: string;
+  white: string;
+  black: string;
+  transparent: string;
+  green: string;
+  blue: string;
+  amber: string;
+  button: ColorsBase;
+  create: string;
+  delete: string;
+  dark: string;
+  'very-dark': string;
+  'very-dark-1': string;
+  'medium-very-light': string;
+  'medium-light': string;
+  medium: string;
+  'medium-slightly-dark': string;
+  'medium-dark-1': string;
+  'slightly-dark': string;
+  light: string;
+  'slightly-light': string;
+  'very-light': string;
+  'shadow-l05': string;
+  'shadow-l2': string;
+  'shadow-l3': string;
+  'shadow-l4': string;
+  'shadow-l5': string;
+  'shadow-l6': string;
+  'shadow-l8': string;
+  'translucent-dark': string;
+  'translucent-l15': string;
+  'translucent-l1': string;
+  'translucent-l2': string;
+  'translucent-l6': string;
+  'translucent-l7': string;
+  'translucent-l8': string;
+  'translucent-l95': string;
+  profit: string;
+  'profit-light': string;
+  'profit-translucent': string;
+  loss: string;
+  'loss-light': string;
+  'loss-translucent': string;
+  'editable-highlight': string;
+  'bg-up': string;
+  'bg-up-hl': string;
+  'bg-up-rev': string;
+  'bg-down': string;
+  'bg-down-hl': string;
+  'bg-down-rev': string;
+  messages: {
+    [e in ErrorLevel]: string;
+  };
+  [Page.overview]: PageColors & {
+    income: string;
+    spending: string;
+  };
+  [Page.analysis]: PageColors;
+  [Page.funds]: PageColors & {
+    profit: string;
+    loss: string;
+    fundUp: string;
+    fundDown: string;
+  };
+  [Page.income]: PageColors;
+  [Page.bills]: PageColors;
+  [Page.food]: PageColors;
+  [Page.general]: PageColors;
+  [Page.holiday]: PageColors;
+  [Page.social]: PageColors;
+  netWorth: Record<NetWorthTableColumn, string> & {
+    aggregate: {
+      [key in Aggregate]: string;
+    };
+  };
+  blockIndex: string[];
+  blockColor: ColorsBase;
+};
+
+export const colors: Colors = {
   primary: rgb(216, 77, 77),
   primaryDark: rgb(159, 48, 48),
   primaryMobile: rgb(255, 254, 247),

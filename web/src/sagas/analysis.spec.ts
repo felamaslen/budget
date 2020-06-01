@@ -4,18 +4,19 @@ import { testSaga } from 'redux-saga-test-plan';
 import analysisSaga, { onRequest, onBlockRequest } from './analysis';
 import {
   ActionTypeAnalysis,
-  received,
+  analysisReceived,
   blockRequested,
   blockReceived,
-} from '~client/actions/analysis';
-import { errorOpened } from '~client/actions/error';
+  errorOpened,
+} from '~client/actions';
+
 import { API_PREFIX } from '~client/constants/data';
 import {
   getApiKey,
-  getLoadingDeep,
+  getAnalysisLoadingDeep as getLoadingDeep,
   getAnalysisPeriod,
-  getGrouping,
-  getPage,
+  getAnalysisGrouping as getGrouping,
+  getAnalysisPage as getPage,
 } from '~client/selectors';
 import { AnalysisResponse, AnalysisDeepResponse } from '~client/types';
 
@@ -52,7 +53,7 @@ describe('Analysis saga', () => {
           headers: { Authorization: 'some api key' },
         })
         .next(res)
-        .put(received(res.data))
+        .put(analysisReceived(res.data))
         .next()
         .isDone();
     });
@@ -78,7 +79,7 @@ describe('Analysis saga', () => {
         .throw(err)
         .put(errorOpened('Error loading analysis data: something bad happened'))
         .next()
-        .put(received(undefined, err))
+        .put(analysisReceived(undefined, err))
         .next()
         .isDone();
     });

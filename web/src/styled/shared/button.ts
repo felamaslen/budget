@@ -113,7 +113,7 @@ export const Button = styled.button<{
   }
 `;
 
-export const ButtonCrud = styled(Button)`
+const ButtonCrud = styled(Button)`
     ${NetWorthValueFX} & {
         margin: 0 3px;
         top: 0;

@@ -4,7 +4,7 @@ import Cells from './cells';
 import * as Styled from './styles';
 import { OverviewTable } from '~client/types';
 
-export type Props = {
+type Props = {
   rows: OverviewTable;
   numToSkip: number;
 };

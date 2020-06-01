@@ -3,7 +3,7 @@ import { PageListCalc } from '~client/types/app';
 
 export type MainBlockName = Exclude<PageListCalc, 'income'> | 'saved';
 
-export type AnalysisTree<B extends string = string> = [B, [string, number][]];
+type AnalysisTree<B extends string = string> = [B, [string, number][]];
 
 export type AnalysisCost<B extends string = string> = AnalysisTree<B>[];
 
@@ -16,7 +16,7 @@ export type AnalysisSortedTree<B extends string = string> = {
   total: number;
 };
 
-export type AnalysisTimeline = number[][];
+type AnalysisTimeline = number[][];
 
 export type AnalysisRequest = Partial<{
   period: Period;

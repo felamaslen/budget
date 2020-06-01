@@ -1,6 +1,6 @@
 import { StocksListResponse, StockPrice } from '~client/types';
 
-export enum ActionTypeStocks {
+export const enum ActionTypeStocks {
   Requested = '@@stocks/LIST_REQUESTED',
   Received = '@@stocks/LIST_RECEIVED',
   PricesRequested = '@@stocks/PRICES_REQUESTED',

@@ -6,10 +6,9 @@ import { MobileCreateForm } from './mobile';
 import { getItems } from './selectors';
 import * as Styled from './styles';
 import { Props, FieldKey } from './types';
-import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions/list';
+import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions';
 import ModalDialog from '~client/components/ModalDialog';
-import { useListCrud } from '~client/hooks/crud';
-import { useIsMobile } from '~client/hooks/media';
+import { useListCrud, useIsMobile } from '~client/hooks';
 import { Item, Create } from '~client/types';
 
 const identitySelector = <E extends {}>(): { [id: string]: Partial<E> } => ({});

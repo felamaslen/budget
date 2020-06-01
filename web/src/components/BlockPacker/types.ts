@@ -1,5 +1,3 @@
-export * from '~client/types/block-packer';
-
 export type Preview = {
   open: boolean;
   name: string | null;
@@ -9,5 +7,3 @@ export type Preview = {
   height: number;
   color: string;
 };
-
-export type OnBlockClick = (name: string, preview?: Preview) => void | boolean;

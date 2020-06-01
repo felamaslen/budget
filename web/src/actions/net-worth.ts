@@ -10,7 +10,7 @@ import {
   Entry,
 } from '~client/types';
 
-export enum ActionTypeNetWorth {
+export const enum ActionTypeNetWorth {
   CategoryCreated = '@@net-worth/CATEGORY_CREATED',
   CategoryUpdated = '@@net-worth/CATEGORY_UPDATED',
   CategoryDeleted = '@@net-worth/CATEGORY_DELETED',

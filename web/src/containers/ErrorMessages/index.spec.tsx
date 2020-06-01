@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
 import sinon from 'sinon';
 
-import { errorClosed, errorRemoved } from '~client/actions/error';
+import { errorClosed, errorRemoved } from '~client/actions';
 import { ErrorLevel, ERROR_CLOSE_TIME, ERROR_MESSAGE_DELAY } from '~client/constants/error';
 import { ErrorMessages } from '~client/containers/ErrorMessages';
 import { State } from '~client/reducers';

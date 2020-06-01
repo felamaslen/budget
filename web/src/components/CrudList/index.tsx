@@ -4,7 +4,7 @@ import CrudListItem, { ItemComponent } from './item';
 
 import * as Styled from './styles';
 import { CREATE_ID } from '~client/constants/data';
-import { CrudProps } from '~client/hooks/crud';
+import { CrudProps } from '~client/hooks';
 
 type MetaProps<I extends { id: string }, E extends {}> = E &
   Partial<
@@ -15,7 +15,7 @@ type MetaProps<I extends { id: string }, E extends {}> = E &
     }
   >;
 
-export type Props<I extends { id: string }, E extends {} = {}> = CrudProps<I> & {
+type Props<I extends { id: string }, E extends {} = {}> = CrudProps<I> & {
   items: I[];
   Item: ItemComponent<I, E>;
   CreateItem: React.FC<

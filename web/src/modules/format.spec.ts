@@ -1,15 +1,13 @@
+import { getTransactionsList } from '~client/modules/data';
 import {
   capitalise,
   numberFormat,
   sigFigs,
-  leadingZeroes,
   formatCurrency,
   formatPercent,
   getTickSize,
   formatItem,
 } from '~client/modules/format';
-
-import { getTransactionsList } from '~client/modules/data';
 
 describe('format module', () => {
   describe('capitalise', () => {
@@ -56,19 +54,6 @@ describe('format module', () => {
     it('should add the correct number of trailing zeroes', () => {
       expect.assertions(1);
       expect(sigFigs(54.40007, 4)).toBe('54.40');
-    });
-  });
-
-  describe('leadingZeroes', () => {
-    it('should add the expected number of zeroes to a number', () => {
-      expect.assertions(7);
-      expect(leadingZeroes(0, 3)).toBe('000');
-      expect(leadingZeroes(1, 3)).toBe('001');
-      expect(leadingZeroes(10, 3)).toBe('010');
-      expect(leadingZeroes(11, 3)).toBe('011');
-      expect(leadingZeroes(100, 3)).toBe('100');
-      expect(leadingZeroes(999, 3)).toBe('999');
-      expect(leadingZeroes(1313, 3)).toBe('1313');
     });
   });
 

@@ -1,6 +1,5 @@
 import endOfDay from 'date-fns/endOfDay';
 import isSameSecond from 'date-fns/isSameSecond';
-import startOfSecond from 'date-fns/startOfSecond';
 import { useState, useRef, useEffect } from 'react';
 
 import { IDENTITY } from '~client/modules/data';
@@ -25,5 +24,4 @@ function timeHookFactory(roundFn: (date: Date) => Date = IDENTITY): () => Date {
   };
 }
 
-export const useTime = timeHookFactory(startOfSecond);
 export const useToday = timeHookFactory(endOfDay);

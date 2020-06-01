@@ -35,4 +35,5 @@ const createDevStore = (): Store<State> => {
 
   return store;
 };
+// ts-prune-ignore-next
 export { createDevStore as createStore };

@@ -23,7 +23,7 @@ export type State = {
 };
 
 export const initialState: State = {
-  loading: true,
+  loading: false,
   loadingDeep: false,
   period: Period.year,
   grouping: Grouping.category,

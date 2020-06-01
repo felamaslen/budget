@@ -4,7 +4,7 @@ import { throttle } from 'throttle-debounce';
 import { getPixY } from '../helpers';
 import { NULL } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { Point, Line, Calc, LineColor, isConstantColor } from '~client/types/graph';
+import { Point, Line, Calc, LineColor, isConstantColor } from '~client/types';
 
 function getHlColor(color: LineColor, point: Point, index: number): string {
   if (isConstantColor(color)) {

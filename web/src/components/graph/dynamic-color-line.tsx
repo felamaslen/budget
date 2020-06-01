@@ -2,7 +2,7 @@ import React from 'react';
 import { getDynamicLinePaths } from '~client/components/graph/helpers';
 import { RangeY, Pix, Data, PathProps, DynamicLineColor } from '~client/types/graph';
 
-export type Props = {
+type Props = {
   fill?: boolean;
   data: Data;
   smooth?: boolean;

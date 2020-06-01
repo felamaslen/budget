@@ -3,8 +3,6 @@ import format from 'date-fns/format';
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
 import { Transaction } from '~client/types/funds';
 
-export const percent = (frac: number): string => `${Math.round(100000 * frac) / 1000}%`;
-
 export function capitalise(value: string): string {
   return `${value.substring(0, 1).toUpperCase()}${value.substring(1).toLowerCase()}`;
 }
@@ -45,16 +43,6 @@ export function sigFigs(value: number, figs: number): string {
   }
 
   return `${sign}${absResult}`;
-}
-
-export function leadingZeroes(value: number, numZeroes: number): string {
-  const numAdd = value ? numZeroes - Math.floor(Math.log10(value)) - 1 : numZeroes - 1;
-
-  if (numAdd > 0) {
-    return `${new Array(numAdd).fill('0').join('')}${value}`;
-  }
-
-  return value.toString();
 }
 
 function getCurrencyValueRaw(

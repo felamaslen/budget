@@ -1,6 +1,5 @@
 import reducer, { initialState } from './funds';
-import { dataRead } from '~client/actions/api';
-import { fundsViewSoldToggled, fundsReceived } from '~client/actions/funds';
+import { dataRead, fundsViewSoldToggled, fundsReceived } from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
 import { Period } from '~client/constants/graph';
 import { getTransactionsList } from '~client/modules/data';

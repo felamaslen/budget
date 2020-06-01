@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyledComponent } from 'styled-components';
 
-import { OnCreateList, OnUpdateList, OnDeleteList } from '~client/actions/list';
+import { OnCreateList, OnUpdateList, OnDeleteList } from '~client/actions';
 import { FieldComponent } from '~client/components/FormField';
 import { ModalFields } from '~client/components/ModalDialog';
 import { State as AppState } from '~client/reducers';
@@ -41,7 +41,7 @@ export type HeaderProps<I extends Item, P, MK extends keyof I, H extends {} = {}
 export type CustomSelector<I extends Item, E extends {}> = (
   items: I[],
 ) => { [id: string]: Partial<E> };
-export type ItemProcessor<I extends Item, E extends {}> = (item: I) => Partial<E>;
+type ItemProcessor<I extends Item, E extends {}> = (item: I) => Partial<E>;
 
 export type PropsCrud<I extends Item, P extends string> = {
   onCreate: OnCreateList<I, P, void>;

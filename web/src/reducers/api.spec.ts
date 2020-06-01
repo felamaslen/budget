@@ -5,8 +5,9 @@ import {
   syncUnlocked,
   syncReceived,
   syncErrorOccurred,
-} from '~client/actions/api';
-import { loggedIn, loggedOut } from '~client/actions/login';
+  loggedIn,
+  loggedOut,
+} from '~client/actions';
 import reducer, { initialState } from '~client/reducers/api';
 import { testResponse } from '~client/test-data';
 

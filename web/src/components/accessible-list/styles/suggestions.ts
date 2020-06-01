@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
+import { ListWithoutMargin } from './shared';
 import { rem } from '~client/styled/mixins';
-import { ListWithoutMargin } from '~client/styled/shared/layout';
 import { colors } from '~client/styled/variables';
 
 export const SuggestionList = styled(ListWithoutMargin)`

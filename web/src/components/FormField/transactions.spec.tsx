@@ -6,7 +6,7 @@ import sinon from 'sinon';
 
 import { FormFieldTransactions, FormFieldTransactionsInline } from './transactions';
 import { getTransactionsList, modifyTransaction } from '~client/modules/data';
-import { Transaction, TransactionRaw } from '~client/types/funds';
+import { Transaction, TransactionRaw } from '~client/types';
 
 describe('<FormFieldTransactions />', () => {
   const transactions: TransactionRaw[] = [
