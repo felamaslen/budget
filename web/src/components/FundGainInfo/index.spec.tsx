@@ -37,15 +37,13 @@ describe('<FundGainInfo />', () => {
     const { container } = setup();
     expect(container).toMatchInlineSnapshot(`
       .c2 {
-        width: 68px;
-        text-align: left;
-        -webkit-flex: 1 1 0;
-        -ms-flex: 1 1 0;
-        flex: 1 1 0;
-        font-weight: bold;
-        font-size: 1.125rem;
         color: #333;
-        overflow: visible !important;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        font-weight: bold;
+        margin-right: 0.25rem;
+        text-align: right;
       }
 
       .c3 {
@@ -53,9 +51,9 @@ describe('<FundGainInfo />', () => {
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
         display: inline-flex;
-        -webkit-flex: 2 1 0;
-        -ms-flex: 2 1 0;
-        flex: 2 1 0;
+        -webkit-flex: 2;
+        -ms-flex: 2;
+        flex: 2;
       }
 
       .c4 {
@@ -70,11 +68,15 @@ describe('<FundGainInfo />', () => {
         -ms-flex-flow: column;
         flex-flow: column;
         overflow: visible;
-        text-overflow: none;
+        text-overflow: unset;
+        -webkit-flex: 0 0 50%;
+        -ms-flex: 0 0 50%;
+        flex: 0 0 50%;
         font-weight: bold;
         -webkit-flex-flow: column;
         -ms-flex-flow: column;
         flex-flow: column;
+        max-width: 50%;
       }
 
       .c7 {
@@ -89,18 +91,15 @@ describe('<FundGainInfo />', () => {
         -ms-flex-flow: column;
         flex-flow: column;
         overflow: visible;
-        text-overflow: none;
+        text-overflow: unset;
+        -webkit-flex: 0 0 50%;
+        -ms-flex: 0 0 50%;
+        flex: 0 0 50%;
       }
 
       .c5 {
         color: #483be4;
-        -webkit-flex: 1 0 0;
-        -ms-flex: 1 0 0;
-        flex: 1 0 0;
-        font-size: 0.8125rem;
-        line-height: 24px;
-        height: 24px;
-        background: rgba(255,255,255,0.6);
+        text-align: right;
       }
 
       .c5::before {
@@ -111,25 +110,14 @@ describe('<FundGainInfo />', () => {
 
       .c6 {
         color: #483be4;
-        -webkit-flex: 1 0 0;
-        -ms-flex: 1 0 0;
-        flex: 1 0 0;
-        font-size: 0.8125rem;
-        line-height: 24px;
-        height: 24px;
-        background: rgba(255,255,255,0.6);
+        text-align: right;
+        display: none;
+        margin-right: 0.25rem;
       }
 
       .c8 {
         color: #ff2c2c;
-        -webkit-flex: 1 0 0;
-        -ms-flex: 1 0 0;
-        flex: 1 0 0;
-        font-size: 0.8125rem;
-        line-height: 24px;
-        height: 24px;
-        background: rgba(255,255,255,0.6);
-        color: #ca6161;
+        text-align: right;
       }
 
       .c8::before {
@@ -140,38 +128,145 @@ describe('<FundGainInfo />', () => {
 
       .c9 {
         color: #ff2c2c;
-        -webkit-flex: 1 0 0;
-        -ms-flex: 1 0 0;
-        flex: 1 0 0;
-        font-size: 0.8125rem;
-        line-height: 24px;
-        height: 24px;
-        background: rgba(255,255,255,0.6);
-        color: #ca6161;
+        text-align: right;
+        display: none;
       }
 
       .c1 {
-        padding: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
         height: 100%;
+        overflow: hidden;
+        padding: 0;
       }
 
       .c0 {
-        -webkit-flex: 0 0 200px;
-        -ms-flex: 0 0 200px;
-        flex: 0 0 200px;
-        z-index: 1;
         color: #483be4;
+        width: 11.25rem;
+      }
+
+      @media only screen and (min-width:690px) {
+        .c2 {
+          width: 68px;
+          text-align: left;
+          -webkit-flex: 1 1 0;
+          -ms-flex: 1 1 0;
+          flex: 1 1 0;
+          font-size: 1.125rem;
+          margin-right: 0rem;
+          overflow: visible !important;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c3 {
+          background: rgba(255,255,255,0.6);
+          -webkit-flex: 2 1 0;
+          -ms-flex: 2 1 0;
+          flex: 2 1 0;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c4 {
+          max-width: initial;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c7 {
+          -webkit-flex: 1;
+          -ms-flex: 1;
+          flex: 1;
+          padding-right: 0.5rem;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c5 {
+          -webkit-flex: 1 0 0;
+          -ms-flex: 1 0 0;
+          flex: 1 0 0;
+          font-size: 0.8125rem;
+          line-height: 24px;
+          height: 24px;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c6 {
+          -webkit-flex: 1 0 0;
+          -ms-flex: 1 0 0;
+          flex: 1 0 0;
+          font-size: 0.8125rem;
+          line-height: 24px;
+          height: 24px;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c6 {
+          display: block;
+          margin-right: 0rem;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c8 {
+          -webkit-flex: 1 0 0;
+          -ms-flex: 1 0 0;
+          flex: 1 0 0;
+          font-size: 0.8125rem;
+          line-height: 24px;
+          height: 24px;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c8 {
+          color: #ca6161;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c9 {
+          -webkit-flex: 1 0 0;
+          -ms-flex: 1 0 0;
+          flex: 1 0 0;
+          font-size: 0.8125rem;
+          line-height: 24px;
+          height: 24px;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c9 {
+          color: #ca6161;
+        }
+      }
+
+      @media only screen and (min-width:690px) {
+        .c9 {
+          display: block;
+        }
+      }
+
+      @media only screen and (max-width:690px) {
+        .c1 {
+          background-color: transparent !important;
+        }
       }
 
       @media only screen and (min-width:690px) {
         .c1 {
           background: #666;
+          display: block;
         }
 
         .c1 > span {
-          float: left;
           padding: 0 1px;
-          overflow: hidden;
           text-overflow: ellipsis;
           text-align: center;
         }
@@ -191,12 +286,22 @@ describe('<FundGainInfo />', () => {
         }
       }
 
+      @media only screen and (min-width:350px) {
+        .c0 {
+          width: 13.5rem;
+        }
+      }
+
       @media only screen and (min-width:690px) {
         .c0 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
           display: flex;
+          -webkit-flex: 0 0 12.5rem;
+          -ms-flex: 0 0 12.5rem;
+          flex: 0 0 12.5rem;
+          z-index: 1;
         }
       }
 

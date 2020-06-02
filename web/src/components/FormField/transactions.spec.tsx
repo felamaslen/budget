@@ -35,7 +35,7 @@ describe('<FormFieldTransactions />', () => {
     const renderResult = render(<FormFieldTransactionsInline {...props} />);
     const button = renderResult.getByText('2') as HTMLButtonElement;
     act(() => {
-      fireEvent.focus(button);
+      fireEvent.click(button);
     });
     return renderResult;
   };

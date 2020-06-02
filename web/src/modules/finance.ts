@@ -1,5 +1,6 @@
 import { compose } from '@typed/compose';
 import jsonp from 'jsonp';
+import moize from 'moize';
 import { replaceAtIndex } from 'replace-array';
 
 import { FAKE_STOCK_PRICES } from '~client/constants/stocks';
@@ -127,7 +128,7 @@ const usingRegex = (regex: RegExp, processor: (name: string, matches: string[]) 
 const extractConsonants = (value: string): string => value.replace(/[AEIOU]/gi, '');
 
 // constants
-const ordinaryShare = /((Ord(inary)?)|ORD)( Shares)?(( [0-9]+p)|( [0-9]+(\.[0-9]+)?))?( Share)?/;
+const ordinaryShare = /((Ord(inary)?)|ORD)( Shares)?(( [0-9]+( [0-9]+)?p)|( [0-9]+(\.[0-9]+)?))?( Share)?/;
 
 // common preparation functions
 const removeUnused = (a: string): string =>
@@ -138,14 +139,14 @@ const withInt = (a: string): string => a.replace(/ International/, ' Int.');
 
 const prepareBase = compose(withInt, withAnd, removeUnused);
 
-// Investment trusts
-const isInvestmentTrust = (name: string): boolean =>
-  (/\s(IT|(Investment )?Trust|)/.test(name) || ordinaryShare.test(name)) && /\(share\)/.test(name);
+// Shares (including investment trusts)
+const isShare = (name: string): boolean =>
+  /\(share\)/.test(name) && (/\s(IT|(Investment )?Trust|)/.test(name) || ordinaryShare.test(name));
 
 const removeUnusedIT = (a: string): string => a.replace(/( And| Inc)/g, '');
 const ITToTrust = (a: string): string => a.replace(/\s(IT|Investment Trust)\s/, ' Trust ');
 
-const prepareIT = compose(ITToTrust, removeUnusedIT);
+const prepareShare = compose(ITToTrust, removeUnusedIT);
 
 const removeOf = (a: string): string => a.replace(/(\w+) of \w+/, '$1');
 const trustToInitials = (a: string): string => a.replace(/([A-Z])([a-z]+)\s/g, '$1');
@@ -155,13 +156,13 @@ const removeSingletons = (a: string): string =>
     .replace(/([A-Z]{2}T)T/, '$1')
     .toUpperCase();
 
-function abbreviateIT(name: string): string {
+function abbreviateShare(name: string): string {
   return compose(
     removeSingletons,
     trustToInitials,
     usingRegex(/^(\w+) Trust\s*/, (_, matches) => extractConsonants(matches[1]).substring(0, 4)),
     removeOf,
-    prepareIT,
+    prepareShare,
   )(name);
 }
 
@@ -185,14 +186,14 @@ function abbreviateIndex(name: string): string {
   return name.replace(/Index( Trust)?/, 'Ix');
 }
 
-export function abbreviateFundName(name: string): string {
+export const abbreviateFundName = moize((name: string): string => {
   const base = prepareBase(name);
 
   if (isIndex(name)) {
     return abbreviateIndex(base);
   }
-  if (isInvestmentTrust(name)) {
-    return abbreviateIT(base);
+  if (isShare(name)) {
+    return abbreviateShare(base);
   }
   return abbreviateFund(base);
-}
+});

@@ -16,6 +16,7 @@ describe('Finance module', () => {
       ${'Mn GLG Japan'} | ${'Man GLG Japan CoreAlpha Professional (accum.)'}
       ${'BNKR'}         | ${'Bankers Investment Trust Ord 25p Share (share)'}
       ${'MNKS'}         | ${'Monks Investment Trust Ordinary 5p (share)'}
+      ${'RELX'}         | ${'RELX Plc Ord 14 51116p (share)'}
     `('should abbreviate "$long" to "$short"', ({ short, long }) => {
       expect(abbreviateFundName(long)).toBe(short);
     });

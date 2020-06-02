@@ -6,6 +6,7 @@ import { FormFieldNumber, FormFieldNumberInline } from './number';
 import { Wrapper, WrapperProps } from './shared';
 import * as Styled from './styles';
 import { CREATE_ID } from '~client/constants/data';
+import { useCTA } from '~client/hooks';
 import { useField } from '~client/hooks/field';
 import { addToTransactionsList, modifyTransactionById, sortByKey } from '~client/modules/data';
 import { ButtonDelete, ButtonAdd } from '~client/styled/shared/button';
@@ -210,7 +211,7 @@ export const FormFieldTransactionsInline: React.FC<PropsInline> = ({
 
   const [focused, setFocused] = useState<boolean>(!!props.active);
   const modalRef = useRef<HTMLDivElement>(null);
-  const onActivateModal = useCallback(() => setFocused(true), []);
+  const onToggleModal = useCallback(() => setFocused((last) => !last), []);
   const onBlurModal = useCallback((): void => {
     setImmediate(() => {
       if (!modalRef.current?.contains(document.activeElement)) {
@@ -222,9 +223,11 @@ export const FormFieldTransactionsInline: React.FC<PropsInline> = ({
     setFocused(!!props.active);
   }, [props.active]);
 
+  const toggleEvents = useCTA(onToggleModal);
+
   return (
     <Wrapper item="transactions">
-      <Styled.NumTransactions active={props.active} onFocus={onActivateModal} onBlur={onBlurModal}>
+      <Styled.NumTransactions active={props.active} {...toggleEvents}>
         {value.length}
       </Styled.NumTransactions>
       {focused && (

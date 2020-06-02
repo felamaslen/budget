@@ -1,3 +1,4 @@
+import { rgba } from 'polished';
 import { CSSProperties } from 'react';
 import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
 
@@ -58,6 +59,18 @@ export const InfiniteBox = styled.div.attrs(({ flex, flow }: BoxProps) => ({
   width: 100%;
 `;
 
+const highlightColor = rgba(colors.highlight, 0.4);
+
+const activeStyle = css`
+  &::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 100%;
+    background-color: ${highlightColor};
+  }
+`;
+
 export const InfiniteChild = styled.div.attrs(
   ({ flex, flow, bgColor }: BoxProps & { bgColor?: string }) => ({
     style: {
@@ -68,6 +81,7 @@ export const InfiniteChild = styled.div.attrs(
 )<
   BoxProps & {
     name: string;
+    active?: boolean;
     bgColor?: string;
     hasSubTree: boolean;
   }
@@ -94,12 +108,24 @@ export const InfiniteChild = styled.div.attrs(
     `};
 
   box-shadow: inset -1px -1px 13px ${colors['shadow-l4']};
+  cursor: default;
   float: left;
   height: 100%;
   outline: none;
   overflow: hidden;
   position: relative;
   width: 100%;
+
+  ${({ hasSubTree, active }): false | FlattenSimpleInterpolation =>
+    !hasSubTree &&
+    css`
+      ${active ? activeStyle : ''};
+
+      &:hover,
+      &:focus {
+        ${activeStyle};
+      }
+    `}
 `;
 
 export const statusHeight = 21;

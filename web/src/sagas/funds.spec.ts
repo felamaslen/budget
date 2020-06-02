@@ -184,6 +184,13 @@ describe('Funds saga', () => {
   });
 
   describe('requestStocksPrices', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should request stock prices', () => {
       expect.assertions(0);
 

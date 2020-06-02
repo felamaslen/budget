@@ -1,4 +1,4 @@
-import { rgba, mix, setSaturation } from 'polished';
+import { rgba } from 'polished';
 import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 
 import * as Styled from './styles';
@@ -28,9 +28,6 @@ type CommonProps = Box & {
   onHover?: Props['onHover'];
   setPreview: SetPreview;
 };
-
-const highlightColor = (color = colors.transparent): string =>
-  setSaturation(1)(mix(0.2)(color, colors.highlight));
 
 const InfiniteChild: React.FC<
   CommonProps &
@@ -104,7 +101,8 @@ const InfiniteChild: React.FC<
       name={name}
       flex={flex}
       flow={flow}
-      bgColor={active ? highlightColor(color) : color}
+      active={active}
+      bgColor={color}
       tabIndex={0}
       onFocus={onActivate}
       onMouseOver={onActivate}

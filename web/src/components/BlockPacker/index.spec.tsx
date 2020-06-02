@@ -71,6 +71,7 @@ describe('<BlockPacker />', () => {
       .c2 {
         background-image: linear-gradient(to bottom right,rgba(255,255,255,0.6),rgba(0,0,0,0.3));
         box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
+        cursor: default;
         float: left;
         height: 100%;
         outline: none;
@@ -79,9 +80,19 @@ describe('<BlockPacker />', () => {
         width: 100%;
       }
 
+      .c2:hover::after,
+      .c2:focus::after {
+        content: '';
+        display: block;
+        height: 100%;
+        width: 100%;
+        background-color: rgba(255,255,0,0.4);
+      }
+
       .c3 {
         background-image: none;
         box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
+        cursor: default;
         float: left;
         height: 100%;
         outline: none;
