@@ -147,7 +147,7 @@ describe('<FundGainInfo />', () => {
         width: 11.25rem;
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c2 {
           width: 68px;
           text-align: left;
@@ -160,7 +160,7 @@ describe('<FundGainInfo />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c3 {
           background: rgba(255,255,255,0.6);
           -webkit-flex: 2 1 0;
@@ -169,13 +169,13 @@ describe('<FundGainInfo />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c4 {
           max-width: initial;
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c7 {
           -webkit-flex: 1;
           -ms-flex: 1;
@@ -184,7 +184,7 @@ describe('<FundGainInfo />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c5 {
           -webkit-flex: 1 0 0;
           -ms-flex: 1 0 0;
@@ -195,7 +195,7 @@ describe('<FundGainInfo />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c6 {
           -webkit-flex: 1 0 0;
           -ms-flex: 1 0 0;
@@ -206,14 +206,14 @@ describe('<FundGainInfo />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c6 {
           display: block;
           margin-right: 0rem;
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c8 {
           -webkit-flex: 1 0 0;
           -ms-flex: 1 0 0;
@@ -224,13 +224,13 @@ describe('<FundGainInfo />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c8 {
           color: #ca6161;
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c9 {
           -webkit-flex: 1 0 0;
           -ms-flex: 1 0 0;
@@ -241,25 +241,25 @@ describe('<FundGainInfo />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c9 {
           color: #ca6161;
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c9 {
           display: block;
         }
       }
 
-      @media only screen and (max-width:690px) {
+      @media only screen and (max-width:500px) {
         .c1 {
           background-color: transparent !important;
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c1 {
           background: #666;
           display: block;
@@ -292,7 +292,7 @@ describe('<FundGainInfo />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c0 {
           display: -webkit-box;
           display: -webkit-flex;
@@ -320,32 +320,32 @@ describe('<FundGainInfo />', () => {
               £5.6k
             </span>
             <span
-              class="sc-oTbqq c3"
+              class="sc-fznJRM c3"
             >
               <span
-                class="sc-qYiqT c4"
+                class="sc-oTmZL c4"
               >
                 <span
-                  class="sc-oTmZL sc-pbIaG c5"
+                  class="sc-qYSYK sc-pBolk c5"
                 >
                   £40
                 </span>
                 <span
-                  class="sc-oTmZL c6"
+                  class="sc-qYSYK c6"
                 >
                   30.00%
                 </span>
               </span>
               <span
-                class="sc-qYiqT c7"
+                class="sc-oTmZL c7"
               >
                 <span
-                  class="sc-oTmZL sc-pbIaG c8"
+                  class="sc-qYSYK sc-pBolk c8"
                 >
                   (£3)
                 </span>
                 <span
-                  class="sc-oTmZL c9"
+                  class="sc-qYSYK c9"
                 >
                   (2.00%)
                 </span>

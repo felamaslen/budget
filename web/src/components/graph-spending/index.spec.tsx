@@ -27,11 +27,11 @@ describe('<GraphSpending />', () => {
     const clock = sinon.useFakeTimers(now);
     const { getByTestId } = setup();
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
 
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
 
       }
 

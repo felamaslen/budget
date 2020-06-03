@@ -76,9 +76,9 @@ const getCurrencies = debounce(
 
 type GetRates = (extraSymbol?: string) => void;
 
-function useCurrencyApi(symbols: string[]): [Rates, GetRates, boolean, Error | undefined] {
+function useCurrencyApi(symbols: string[]): [Rates, GetRates, boolean, Error | null] {
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | null>(null);
   const source = useRef<CancelTokenSource>();
   const [rates, setRates] = useState<Rates>({});
   const [cacheTime, setCacheTime] = useState<number>(0);
@@ -106,6 +106,7 @@ function useCurrencyApi(symbols: string[]): [Rates, GetRates, boolean, Error | u
 
   const getRates: GetRates = useCallback(
     (extraSymbol?: string) => {
+      setError(null);
       const allSymbols: string[] = Array.from(
         new Set(extraSymbol ? [...symbols, extraSymbol] : symbols),
       ).filter((value) => value.length > 0);
@@ -231,7 +232,7 @@ const EditCurrency: React.FC<PropsEditCurrency> = ({
             disabled: refreshing,
           }}
         />
-        {error && <Styled.Error>{error}</Styled.Error>}
+        {error && <Styled.RequestError>{error}</Styled.RequestError>}
       </Styled.CurrencyInputGroup>
       {refreshButton}
       <ButtonDelete onClick={onRemoveCallback}>&minus;</ButtonDelete>
@@ -277,22 +278,26 @@ const AddCurrency: React.FC<PropsAddCurrency> = ({
   }, [currencies, onAdd, tempCurrency, tempRate]);
 
   return (
-    <Styled.AddCurrency>
+    <>
       <Styled.CurrencyTitle>{'Add a currency'}</Styled.CurrencyTitle>
-      <Styled.FormSection>
-        <FormFieldText value={tempCurrency} onChange={setTempCurrency} />
-        <Styled.CurrencyInputGroup>
-          <FormFieldNumber
-            value={tempRate}
-            onChange={setTempRate}
-            inputProps={{ disabled: refreshing }}
-          />
-          {error && <Styled.Error>{error}</Styled.Error>}
-        </Styled.CurrencyInputGroup>
-        {refreshButton}
-        <ButtonAdd onClick={onAddCallback}>+</ButtonAdd>
-      </Styled.FormSection>
-    </Styled.AddCurrency>
+      <Styled.AddCurrency>
+        <Styled.FormSection>
+          <Styled.CurrencyTitle as="span">
+            <FormFieldText value={tempCurrency} onChange={setTempCurrency} />
+          </Styled.CurrencyTitle>
+          <Styled.CurrencyInputGroup>
+            <FormFieldNumber
+              value={tempRate}
+              onChange={setTempRate}
+              inputProps={{ disabled: refreshing }}
+            />
+            {error && <Styled.RequestError>{error}</Styled.RequestError>}
+          </Styled.CurrencyInputGroup>
+          {refreshButton}
+          <ButtonAdd onClick={onAddCallback}>+</ButtonAdd>
+        </Styled.FormSection>
+      </Styled.AddCurrency>
+    </>
   );
 };
 
@@ -345,12 +350,12 @@ const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }) => {
         {format(item.date, 'yyyy-MM-dd')}
       </Styled.SectionTitle>
       {errorRates && (
-        <Styled.Error>
+        <Styled.RequestError>
           {'Error loading rates: '}
           {errorRates.message}
-        </Styled.Error>
+        </Styled.RequestError>
       )}
-      <div>
+      <Styled.CurrencyForm>
         {item.currencies.map((currency) => (
           <EditCurrency
             key={currency.id}
@@ -370,7 +375,7 @@ const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }) => {
           getRates={getRates}
           loadingRates={loadingRates}
         />
-      </div>
+      </Styled.CurrencyForm>
     </FormContainer>
   );
 };

@@ -38,11 +38,11 @@ describe('<GraphBalance />', () => {
     expect.assertions(1);
     const { getByTestId } = setup({ isMobile: false });
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
 
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
 
       }
 

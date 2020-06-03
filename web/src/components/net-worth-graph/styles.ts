@@ -1,8 +1,47 @@
+import { darken } from 'polished';
 import styled from 'styled-components';
+import { rem, breakpoint } from '~client/styled/mixins';
+import { breakpoints, colors } from '~client/styled/variables';
+
+export const keyColors = {
+  assets: darken(0.5)(colors.netWorth.assets),
+  liabilities: darken(0.5)(colors.netWorth.liabilities),
+  expenses: darken(0.2)(colors.netWorth.expenses),
+  options: colors.netWorth.options,
+};
+
+export const GraphSection = styled.div`
+  display: flex;
+  flex: 0 0 50%;
+  flex-flow: column;
+  max-width: 50%;
+  overflow: hidden;
+
+  &:not(last-child) {
+    border-right: 1px solid ${colors['medium-slightly-dark']};
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    display: block;
+    flex: 1;
+    max-width: initial;
+
+    &:not(last-child) {
+      border-right: none;
+    }
+  }
+`;
 
 export const FTILabel = styled.h3`
-  display: flex;
   align-items: center;
+  display: inline-flex;
+  font-size: ${rem(14)};
+  margin: 0;
+
+  ${breakpoint(breakpoints.mobile)} {
+    margin: ${rem(8)} 0 0 0;
+    font-size: ${rem(16)};
+  }
 `;
 
 export const FTIEquals = styled.span`
@@ -28,6 +67,15 @@ export const FTIFormulaNumerator = styled.span`
 export const FTIFormulaDenominator = styled.span``;
 
 export const GraphKey = styled.div`
+  align-items: center;
+  display: flex;
+  flex: 0 0 ${rem(48)};
+  font-size: ${rem(10)};
+
+  ${breakpoint(breakpoints.mobile)} {
+    font-size: ${rem(16)};
+  }
+
   h4,
   ul {
     margin: 0;
@@ -35,28 +83,23 @@ export const GraphKey = styled.div`
   }
 `;
 
-export const colors = {
-  assets: 'darkgreen',
-  options: '#00348a',
-  liabilities: 'darkred',
-  expenses: 'blueviolet',
-};
-
 const Key = styled.li`
   font-weight: bold;
   list-style: none;
+  margin-left: ${rem(4)};
+  white-space: nowrap;
 `;
 
 export const KeyAssets = styled(Key)`
-  color: ${colors.assets};
+  color: ${keyColors.assets};
 `;
 export const KeyOptions = styled.span`
-  color: ${colors.options};
+  color: ${keyColors.options};
   font-weight: normal;
 `;
 export const KeyLiabilities = styled(Key)`
-  color: ${colors.liabilities};
+  color: ${keyColors.liabilities};
 `;
 export const KeyExpenses = styled(Key)`
-  color: ${colors.expenses};
+  color: ${keyColors.expenses};
 `;

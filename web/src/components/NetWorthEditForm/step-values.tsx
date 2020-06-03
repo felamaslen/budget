@@ -15,6 +15,7 @@ import FormContainer, {
   Props as ContainerProps,
 } from '~client/components/NetWorthEditForm/form-container';
 import { CREATE_ID } from '~client/constants/data';
+import { useCTA } from '~client/hooks';
 import { toIdMap } from '~client/modules/data';
 import { ButtonAdd, ButtonDelete } from '~client/styled/shared';
 import {
@@ -35,10 +36,10 @@ type PropsCreditLimitEditor = {
 };
 
 const CreditLimitEditor: React.FC<PropsCreditLimitEditor> = ({ creditLimit, setCreditLimit }) => (
-  <div>
+  <Styled.CreditLimitEditor>
     <span>{'Credit limit:'}</span>
     <FormFieldCost value={creditLimit || 0} onChange={setCreditLimit} small />
-  </div>
+  </Styled.CreditLimitEditor>
 );
 
 type PropsSkipToggle = {
@@ -47,10 +48,10 @@ type PropsSkipToggle = {
 };
 
 const SkipToggle: React.FC<PropsSkipToggle> = ({ skip, setSkip }) => (
-  <div>
+  <Styled.SkipToggle>
     <input type="checkbox" checked={!!skip} onChange={(): void => setSkip(!skip)} />
     <span>{'Skip in calculations'}</span>
-  </div>
+  </Styled.SkipToggle>
 );
 
 type PropsEditByType = {
@@ -100,20 +101,24 @@ const EditByType: React.FC<PropsEditByType> = ({
   const onRemoveCallback = useCallback(() => onRemove(id), [onRemove, id]);
 
   return (
-    <Styled.EditByCategoryValue>
+    <Styled.EditByCategoryValue isLiability={isLiability} isOption={isOption}>
       <Styled.Subcategory>{subcategoryName}</Styled.Subcategory>
-      <FormFieldNetWorthValue
-        id={subcategory}
-        value={value}
-        isOption={isOption}
-        onChange={setNewValue}
-        currencies={currencies}
-      />
+      <Styled.EditValue>
+        <FormFieldNetWorthValue
+          id={subcategory}
+          value={value}
+          isOption={isOption}
+          onChange={setNewValue}
+          currencies={currencies}
+        />
+      </Styled.EditValue>
       {hasCreditLimit && (
         <CreditLimitEditor creditLimit={creditLimit ?? 0} setCreditLimit={setCreditLimit} />
       )}
       {isLiability && <SkipToggle skip={skip} setSkip={setSkip} />}
-      <ButtonDelete onClick={onRemoveCallback}>&minus;</ButtonDelete>
+      <Styled.ValueDelete>
+        <ButtonDelete onClick={onRemoveCallback}>&minus;</ButtonDelete>
+      </Styled.ValueDelete>
     </Styled.EditByCategoryValue>
   );
 };
@@ -171,14 +176,14 @@ const AddByType: React.FC<PropsAddByType> = ({
   const initialCreditLimit = hasCreditLimit ? 0 : null;
   const [creditLimit, setCreditLimit] = useState<number | null | undefined>(initialCreditLimit);
 
-  const isOption = categories.find(({ id }) => id === category)?.isOption;
+  const isOption = categories.find(({ id }) => id === category)?.isOption ?? false;
 
   const onAddCallback = useCallback(() => {
     onAdd(value, creditLimit || null, subcategory, skip);
   }, [onAdd, subcategory, value, creditLimit, skip]);
 
   return (
-    <Styled.AddByCategoryValue>
+    <Styled.AddByCategoryValue isOption={isOption}>
       <Styled.AddCategory>
         <Styled.AddLabel>{'Category:'}</Styled.AddLabel>
         <FormFieldSelect
@@ -188,7 +193,7 @@ const AddByType: React.FC<PropsAddByType> = ({
           onChange={setCategory}
         />
       </Styled.AddCategory>
-      <Styled.AddSubcategory>
+      <Styled.AddSubcategory isOption={isOption}>
         <Styled.AddLabel>{'Subcategory:'}</Styled.AddLabel>
         <FormFieldSelect
           item="subcategory"
@@ -197,13 +202,15 @@ const AddByType: React.FC<PropsAddByType> = ({
           onChange={setSubcategory}
         />
       </Styled.AddSubcategory>
-      <FormFieldNetWorthValue
-        id={`value-${CREATE_ID}`}
-        value={value}
-        isOption={isOption}
-        onChange={setValue}
-        currencies={currencies}
-      />
+      <Styled.AddValue isOption={isOption}>
+        <FormFieldNetWorthValue
+          id={`value-${CREATE_ID}`}
+          value={value}
+          isOption={isOption}
+          onChange={setValue}
+          currencies={currencies}
+        />
+      </Styled.AddValue>
       {hasCreditLimit && (
         <CreditLimitEditor creditLimit={creditLimit ?? 0} setCreditLimit={setCreditLimit} />
       )}
@@ -324,37 +331,49 @@ function useRemoveValue(item: CreateEdit<Entry>, onEdit: Props['onEdit']): (id: 
   );
 }
 
-const CategoryGroup: React.FC<{ category: Category }> = ({
-  category: { category, color },
-  children,
-}) => {
-  const [hidden, setHidden] = useState<boolean>(true);
-  const onToggleHidden = useCallback(() => setHidden(!hidden), [hidden]);
+const CategoryGroup: React.FC<{
+  category: Category;
+  expanded: boolean;
+  setExpanded: React.Dispatch<React.SetStateAction<string | null>>;
+}> = ({ category: { id, category, color }, expanded, setExpanded, children }) => {
+  const onToggle = useCallback(() => setExpanded((last) => (last === id ? null : id)), [
+    id,
+    setExpanded,
+  ]);
+
+  const toggleEvents = useCTA(onToggle);
 
   return (
     <Styled.EditByCategoryGroup style={{ backgroundColor: color }}>
-      <Styled.SectionSubtitle hidden={hidden} onClick={onToggleHidden}>
+      <Styled.SectionSubtitle hidden={!expanded} {...toggleEvents}>
         {category}
       </Styled.SectionSubtitle>
-      {!hidden && children}
+      {expanded && children}
     </Styled.EditByCategoryGroup>
   );
 };
 
 const EditByCategory: React.FC<{
   item: CreateEdit<Entry>;
+  expanded: boolean;
+  setExpanded: React.Dispatch<React.SetStateAction<string | null>>;
   category: Category;
   subcategories: Subcategory[];
   onEdit: Props['onEdit'];
-  values: IdMap<ValueWithCategory[]>;
+  values: ValueWithCategory[];
   isLiability: boolean;
-}> = ({ item, category, subcategories, onEdit, values, isLiability }) => {
+}> = ({ item, expanded, setExpanded, category, subcategories, onEdit, values, isLiability }) => {
   const onChangeValue = useChangeValue(item, onEdit);
   const onRemoveValue = useRemoveValue(item, onEdit);
 
   return (
-    <CategoryGroup key={category.id} category={category}>
-      {values[category.id].map((value) => (
+    <CategoryGroup
+      key={category.id}
+      category={category}
+      expanded={expanded}
+      setExpanded={setExpanded}
+    >
+      {values.map((value) => (
         <EditByType
           key={value.id}
           isLiability={isLiability}
@@ -386,6 +405,8 @@ const StepValues: React.FC<PropsStep> = ({
     [categories, typeFilter],
   );
 
+  const [expanded, setExpanded] = useState<string | null>(null);
+
   const categoriesById = useMemo<IdMap<Category>>(() => toIdMap<Category>(categoriesByType), [
     categoriesByType,
   ]);
@@ -393,44 +414,33 @@ const StepValues: React.FC<PropsStep> = ({
     subcategories,
   ]);
 
-  const valuesByType = useMemo<IdMap<ValueWithCategory[]>>(
+  const groupedValues = useMemo<IdMap<ValueWithCategory[]>>(
     () =>
       item.values
-        .map(
-          ({ subcategory, ...rest }): ValueWithCategory => {
-            const { categoryId } = subcategoriesById[subcategory];
-            const category = categoriesById[categoryId];
+        .map<ValueWithCategory>(({ subcategory, ...rest }) => {
+          const { categoryId } = subcategoriesById[subcategory];
+          const category = categoriesById[categoryId];
 
-            return { subcategory, category, ...rest };
-          },
-        )
+          return { subcategory, category, ...rest };
+        })
         .filter(({ category }) => category)
-        .reduce(
-          (
-            last: IdMap<ValueWithCategory[]>,
-            value: ValueWithCategory,
-          ): IdMap<ValueWithCategory[]> => ({
+        .sort((a, b) => {
+          if (a.category.category < b.category.category) {
+            return -1;
+          }
+          if (a.category.category > b.category.category) {
+            return 1;
+          }
+          return 0;
+        })
+        .reduce<IdMap<ValueWithCategory[]>>(
+          (last, value) => ({
             ...last,
-            [value.category.id]: (last[value.category.id] || []).concat([value]),
+            [value.category.id]: [...(last[value.category.id] ?? []), value],
           }),
           {},
         ),
     [categoriesById, subcategoriesById, item.values],
-  );
-
-  const valueKeys = useMemo<string[]>(
-    () =>
-      Object.keys(valuesByType).sort((idA, idB) => {
-        if (categoriesById[idA].category < categoriesById[idB].category) {
-          return -1;
-        }
-        if (categoriesById[idA].category < categoriesById[idB].category) {
-          return 1;
-        }
-
-        return 0;
-      }),
-    [valuesByType, categoriesById],
   );
 
   const availableSubcategories = useMemo<Subcategory[]>(
@@ -438,11 +448,11 @@ const StepValues: React.FC<PropsStep> = ({
       subcategories.filter(
         ({ id: subcategoryId, categoryId }) =>
           categoriesByType.some(({ id }) => id === categoryId) &&
-          !Object.keys(valuesByType).some((key) =>
-            valuesByType[key].some(({ subcategory }) => subcategory === subcategoryId),
+          !Object.keys(groupedValues).some((key) =>
+            groupedValues[key].some(({ subcategory }) => subcategory === subcategoryId),
           ),
       ),
-    [subcategories, categoriesByType, valuesByType],
+    [subcategories, categoriesByType, groupedValues],
   );
 
   const availableCategories = useMemo<Category[]>(
@@ -465,13 +475,15 @@ const StepValues: React.FC<PropsStep> = ({
         </span>
       </Styled.SectionTitle>
       <Styled.EditByCategory>
-        {valueKeys.map((categoryId) => (
+        {Object.entries(groupedValues).map(([categoryId, values]) => (
           <EditByCategory
             key={categoryId}
             item={item}
-            category={categories.find(({ id: otherCategoryId }) => otherCategoryId === categoryId)!}
+            category={values[0].category}
+            expanded={expanded === categoryId}
+            setExpanded={setExpanded}
             subcategories={subcategories}
-            values={valuesByType}
+            values={values}
             onEdit={onEdit}
             isLiability={isLiability}
           />

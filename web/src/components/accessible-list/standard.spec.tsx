@@ -352,7 +352,7 @@ describe('<AccessibleListStandard />', () => {
           font-weight: bold;
         }
 
-        .sc-fzqARJ .c12 {
+        .sc-fzqBkg .c12 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -370,15 +370,15 @@ describe('<AccessibleListStandard />', () => {
           grid-column: 4;
         }
 
-        .sc-fzqNqU .c12,
-        .sc-fzqNqU .c12:hover,
-        .sc-fzqNqU .c12:active {
+        .sc-fzqPZZ .c12,
+        .sc-fzqPZZ .c12:hover,
+        .sc-fzqPZZ .c12:active {
           background: none;
           border: none;
           box-shadow: none;
         }
 
-        .sc-fzqNqU .c12::after {
+        .sc-fzqPZZ .c12::after {
           display: block;
           margin-left: 16px;
           content: '';
@@ -396,17 +396,17 @@ describe('<AccessibleListStandard />', () => {
           background: none;
         }
 
-        .sc-fznMnq .c12 {
+        .sc-fzowVh .c12 {
           margin: 2px 4px;
         }
 
-        @media only screen and (min-width:690px) {
+        @media only screen and (min-width:500px) {
           .c0 {
             background-color: #fff;
           }
         }
 
-        @media only screen and (min-width:690px) {
+        @media only screen and (min-width:500px) {
           .c2 {
             -webkit-flex: 0 0 6.25rem;
             -ms-flex: 0 0 6.25rem;
@@ -418,7 +418,7 @@ describe('<AccessibleListStandard />', () => {
           }
         }
 
-        @media only screen and (min-width:690px) {
+        @media only screen and (min-width:500px) {
           .c3 {
             -webkit-flex: 0 0 11.25rem;
             -ms-flex: 0 0 11.25rem;
@@ -430,7 +430,7 @@ describe('<AccessibleListStandard />', () => {
           }
         }
 
-        @media only screen and (min-width:690px) {
+        @media only screen and (min-width:500px) {
           .c4 {
             -webkit-flex: 0 0 6rem;
             -ms-flex: 0 0 6rem;
@@ -442,13 +442,13 @@ describe('<AccessibleListStandard />', () => {
           }
         }
 
-        @media only screen and (min-width:690px) {
+        @media only screen and (min-width:500px) {
           .c5 {
             padding-bottom: 0;
           }
         }
 
-        @media only screen and (min-width:690px) {
+        @media only screen and (min-width:500px) {
           .c6 {
             border-right: 1px solid #ccc;
             height: 1.5rem;
@@ -477,7 +477,7 @@ describe('<AccessibleListStandard />', () => {
           }
         }
 
-        @media only screen and (min-width:690px) {
+        @media only screen and (min-width:500px) {
           .c12 {
             display: inline-block;
             margin: 0;

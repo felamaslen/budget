@@ -55,4 +55,5 @@ const NetWorthListItem: React.FC<Props> = ({
   );
 };
 
-export default memo(NetWorthListItem);
+const NetWorthListItemMemo = memo(NetWorthListItem);
+export { NetWorthListItemMemo as NetWorthListItem };

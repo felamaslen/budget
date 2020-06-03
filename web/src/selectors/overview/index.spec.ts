@@ -158,214 +158,402 @@ describe('Overview selectors', () => {
       expect.assertions(1);
       const table = getOverviewTable(now)(state);
 
-      expect(table).toStrictEqual([
-        {
-          key: 'Jan-18',
-          past: true,
-          active: false,
-          future: false,
-          cells: [
-            expect.objectContaining({
-              column: ['month', 'Month'],
-              value: 'Jan-18',
-            }),
-            expect.objectContaining({
-              column: ['funds', 'Stocks'],
-              value: 100779,
-            }),
-            expect.objectContaining({
-              column: ['bills', 'Bills'],
-              value: 1000,
-            }),
-            expect.objectContaining({
-              column: ['food', 'Food'],
-              value: 50,
-            }),
-            expect.objectContaining({
-              column: ['general', 'General'],
-              value: 150,
-            }),
-            expect.objectContaining({
-              column: ['holiday', 'Holiday'],
-              value: 10,
-            }),
-            expect.objectContaining({
-              column: ['social', 'Social'],
-              value: 50,
-            }),
-            expect.objectContaining({
-              column: ['income', 'Income'],
-              value: 2000,
-            }),
-            expect.objectContaining({
-              column: ['spending', 'Out'],
-              value: 1260,
-            }),
-            expect.objectContaining({
-              column: ['net', 'Net'],
-              value: 740,
-            }),
-            expect.objectContaining({
-              column: ['netWorthPredicted', 'Predicted'],
-              value: 0,
-            }),
-            expect.objectContaining({
-              column: ['netWorth', 'Net Worth'],
-              value: 0,
-            }),
-          ],
-        },
-        {
-          key: 'Feb-18',
-          past: true,
-          active: false,
-          future: false,
-          cells: [
-            expect.objectContaining({
-              column: ['month', 'Month'],
-              value: 'Feb-18',
-            }),
-            expect.objectContaining({
-              column: ['funds', 'Stocks'],
-              value: 101459,
-            }),
-            expect.objectContaining({ column: ['bills', 'Bills'], value: 900 }),
-            expect.objectContaining({ column: ['food', 'Food'], value: 13 }),
-            expect.objectContaining({ column: ['general', 'General'], value: 90 }),
-            expect.objectContaining({
-              column: ['holiday', 'Holiday'],
-              value: 1000,
-            }),
-            expect.objectContaining({ column: ['social', 'Social'], value: 65 }),
-            expect.objectContaining({ column: ['income', 'Income'], value: 1900 }),
-            expect.objectContaining({ column: ['spending', 'Out'], value: 2068 }),
-            expect.objectContaining({ column: ['net', 'Net'], value: -168 }),
-            expect.objectContaining({
-              column: ['netWorthPredicted', 'Predicted'],
-              value: 512,
-            }),
-            expect.objectContaining({
-              column: ['netWorth', 'Net Worth'],
-              value: 1298227.25,
-            }),
-          ],
-        },
-        {
-          key: 'Mar-18',
-          past: false,
-          active: true,
-          future: false,
-          cells: [
-            expect.objectContaining({ column: ['month', 'Month'], value: 'Mar-18' }),
-            expect.objectContaining({ column: ['funds', 'Stocks'], value: 102981 }),
-            expect.objectContaining({ column: ['bills', 'Bills'], value: 400 }),
-            expect.objectContaining({ column: ['food', 'Food'], value: 27 }),
-            expect.objectContaining({ column: ['general', 'General'], value: 13 }),
-            expect.objectContaining({ column: ['holiday', 'Holiday'], value: 128 }),
-            expect.objectContaining({ column: ['social', 'Social'], value: 181 }),
-            expect.objectContaining({ column: ['income', 'Income'], value: 1500 }),
-            expect.objectContaining({ column: ['spending', 'Out'], value: 749 }),
-            expect.objectContaining({ column: ['net', 'Net'], value: 751 }),
-            expect.objectContaining({
-              column: ['netWorthPredicted', 'Predicted'],
-              value: 1300500.25,
-            }),
-            expect.objectContaining({ column: ['netWorth', 'Net Worth'], value: 1039156 }),
-          ],
-        },
-        {
-          key: 'Apr-18',
-          past: false,
-          active: false,
-          future: true,
-          cells: [
-            expect.objectContaining({ column: ['month', 'Month'], value: 'Apr-18' }),
-            expect.objectContaining({ column: ['funds', 'Stocks'], value: 105841 }),
-            expect.objectContaining({ column: ['bills', 'Bills'], value: 650 }),
-            expect.objectContaining({ column: ['food', 'Food'], value: 27 }),
-            expect.objectContaining({ column: ['general', 'General'], value: 90 }),
-            expect.objectContaining({ column: ['holiday', 'Holiday'], value: 128 }),
-            expect.objectContaining({ column: ['social', 'Social'], value: 65 }),
-            expect.objectContaining({ column: ['income', 'Income'], value: 2500 }),
-            expect.objectContaining({ column: ['spending', 'Out'], value: 960 }),
-            expect.objectContaining({ column: ['net', 'Net'], value: 1540 }),
-            expect.objectContaining({
-              column: ['netWorthPredicted', 'Predicted'],
-              value: 1304900.25,
-            }),
-            expect.objectContaining({ column: ['netWorth', 'Net Worth'], value: 0 }),
-          ],
-        },
-        {
-          key: 'May-18',
-          past: false,
-          active: false,
-          future: true,
-          cells: [
-            expect.objectContaining({ column: ['month', 'Month'], value: 'May-18' }),
-            expect.objectContaining({ column: ['funds', 'Stocks'], value: 108781 }),
-            expect.objectContaining({ column: ['bills', 'Bills'], value: 0 }),
-            expect.objectContaining({ column: ['food', 'Food'], value: 27 }),
-            expect.objectContaining({ column: ['general', 'General'], value: 90 }),
-            expect.objectContaining({ column: ['holiday', 'Holiday'], value: 128 }),
-            expect.objectContaining({ column: ['social', 'Social'], value: 65 }),
-            expect.objectContaining({ column: ['income', 'Income'], value: 2300 }),
-            expect.objectContaining({ column: ['spending', 'Out'], value: 310 }),
-            expect.objectContaining({ column: ['net', 'Net'], value: 1990 }),
-            expect.objectContaining({
-              column: ['netWorthPredicted', 'Predicted'],
-              value: 1309830.25,
-            }),
-            expect.objectContaining({ column: ['netWorth', 'Net Worth'], value: 0 }),
-          ],
-        },
-        {
-          key: 'Jun-18',
-          past: false,
-          active: false,
-          future: true,
-          cells: [
-            expect.objectContaining({ column: ['month', 'Month'], value: 'Jun-18' }),
-            expect.objectContaining({ column: ['funds', 'Stocks'], value: 111802 }),
-            expect.objectContaining({ column: ['bills', 'Bills'], value: 0 }),
-            expect.objectContaining({ column: ['food', 'Food'], value: 27 }),
-            expect.objectContaining({ column: ['general', 'General'], value: 90 }),
-            expect.objectContaining({ column: ['holiday', 'Holiday'], value: 128 }),
-            expect.objectContaining({ column: ['social', 'Social'], value: 65 }),
-            expect.objectContaining({ column: ['income', 'Income'], value: 1800 }),
-            expect.objectContaining({ column: ['spending', 'Out'], value: 310 }),
-            expect.objectContaining({ column: ['net', 'Net'], value: 1490 }),
-            expect.objectContaining({
-              column: ['netWorthPredicted', 'Predicted'],
-              value: 1314341.25,
-            }),
-            expect.objectContaining({ column: ['netWorth', 'Net Worth'], value: 0 }),
-          ],
-        },
-        {
-          key: 'Jul-18',
-          past: false,
-          active: false,
-          future: true,
-          cells: [
-            expect.objectContaining({ column: ['month', 'Month'], value: 'Jul-18' }),
-            expect.objectContaining({ column: ['funds', 'Stocks'], value: 114907 }),
-            expect.objectContaining({ column: ['bills', 'Bills'], value: 0 }),
-            expect.objectContaining({ column: ['food', 'Food'], value: 27 }),
-            expect.objectContaining({ column: ['general', 'General'], value: 90 }),
-            expect.objectContaining({ column: ['holiday', 'Holiday'], value: 128 }),
-            expect.objectContaining({ column: ['social', 'Social'], value: 65 }),
-            expect.objectContaining({ column: ['income', 'Income'], value: 2600 }),
-            expect.objectContaining({ column: ['spending', 'Out'], value: 310 }),
-            expect.objectContaining({ column: ['net', 'Net'], value: 2290 }),
-            expect.objectContaining({
-              column: ['netWorthPredicted', 'Predicted'],
-              value: 1319736.25,
-            }),
-            expect.objectContaining({ column: ['netWorth', 'Net Worth'], value: 0 }),
-          ],
-        },
-      ]);
+      expect(table).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "active": false,
+            "cells": Object {
+              "bills": Object {
+                "rgb": "#b71c1c",
+                "value": 1000,
+              },
+              "food": Object {
+                "rgb": "#43a047",
+                "value": 50,
+              },
+              "funds": Object {
+                "rgb": "#fff",
+                "value": 100779,
+              },
+              "general": Object {
+                "rgb": "#01579b",
+                "value": 150,
+              },
+              "holiday": Object {
+                "rgb": "#fff",
+                "value": 10,
+              },
+              "income": Object {
+                "rgb": "#92df9b",
+                "value": 2000,
+              },
+              "net": Object {
+                "rgb": "#caefce",
+                "value": 740,
+              },
+              "netWorth": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "netWorthCombined": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "netWorthPredicted": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "social": Object {
+                "rgb": "#fff",
+                "value": 50,
+              },
+              "spending": Object {
+                "rgb": "#d36767",
+                "value": 1260,
+              },
+            },
+            "future": false,
+            "month": "Jan-18",
+            "past": true,
+          },
+          Object {
+            "active": false,
+            "cells": Object {
+              "bills": Object {
+                "rgb": "#bd2f2f",
+                "value": 900,
+              },
+              "food": Object {
+                "rgb": "#fff",
+                "value": 13,
+              },
+              "funds": Object {
+                "rgb": "#f4f5f6",
+                "value": 101459,
+              },
+              "general": Object {
+                "rgb": "#80abcd",
+                "value": 90,
+              },
+              "holiday": Object {
+                "rgb": "#00897b",
+                "value": 1000,
+              },
+              "income": Object {
+                "rgb": "#a7e5af",
+                "value": 1900,
+              },
+              "net": Object {
+                "rgb": "#NaNNaNNaN",
+                "value": -168,
+              },
+              "netWorth": Object {
+                "rgb": "#24bf37",
+                "value": 1298227.25,
+              },
+              "netWorthCombined": Object {
+                "rgb": "#92df9c",
+                "value": 1298227.25,
+              },
+              "netWorthPredicted": Object {
+                "rgb": "#fff",
+                "value": 512,
+              },
+              "social": Object {
+                "rgb": "#dfcf92",
+                "value": 65,
+              },
+              "spending": Object {
+                "rgb": "#bf2424",
+                "value": 2068,
+              },
+            },
+            "future": false,
+            "month": "Feb-18",
+            "past": true,
+          },
+          Object {
+            "active": true,
+            "cells": Object {
+              "bills": Object {
+                "rgb": "#db8e8e",
+                "value": 400,
+              },
+              "food": Object {
+                "rgb": "#a1d0a3",
+                "value": 27,
+              },
+              "funds": Object {
+                "rgb": "#dadfe2",
+                "value": 102981,
+              },
+              "general": Object {
+                "rgb": "#fff",
+                "value": 13,
+              },
+              "holiday": Object {
+                "rgb": "#80c4bd",
+                "value": 128,
+              },
+              "income": Object {
+                "rgb": "#fff",
+                "value": 1500,
+              },
+              "net": Object {
+                "rgb": "#c9efcd",
+                "value": 751,
+              },
+              "netWorth": Object {
+                "rgb": "#50cc5f",
+                "value": 1039156,
+              },
+              "netWorthCombined": Object {
+                "rgb": "#92df9b",
+                "value": 1300500.25,
+              },
+              "netWorthPredicted": Object {
+                "rgb": "#92df9b",
+                "value": 1300500.25,
+              },
+              "social": Object {
+                "rgb": "#bf9e24",
+                "value": 181,
+              },
+              "spending": Object {
+                "rgb": "#df9292",
+                "value": 749,
+              },
+            },
+            "future": false,
+            "month": "Mar-18",
+            "past": false,
+          },
+          Object {
+            "active": false,
+            "cells": Object {
+              "bills": Object {
+                "rgb": "#cc5e5e",
+                "value": 650,
+              },
+              "food": Object {
+                "rgb": "#a1d0a3",
+                "value": 27,
+              },
+              "funds": Object {
+                "rgb": "#aab7bd",
+                "value": 105841,
+              },
+              "general": Object {
+                "rgb": "#80abcd",
+                "value": 90,
+              },
+              "holiday": Object {
+                "rgb": "#80c4bd",
+                "value": 128,
+              },
+              "income": Object {
+                "rgb": "#36c448",
+                "value": 2500,
+              },
+              "net": Object {
+                "rgb": "#8ede98",
+                "value": 1540,
+              },
+              "netWorth": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "netWorthCombined": Object {
+                "rgb": "#92df9b",
+                "value": 1304900.25,
+              },
+              "netWorthPredicted": Object {
+                "rgb": "#92df9b",
+                "value": 1304900.25,
+              },
+              "social": Object {
+                "rgb": "#dfcf92",
+                "value": 65,
+              },
+              "spending": Object {
+                "rgb": "#da8080",
+                "value": 960,
+              },
+            },
+            "future": true,
+            "month": "Apr-18",
+            "past": false,
+          },
+          Object {
+            "active": false,
+            "cells": Object {
+              "bills": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "food": Object {
+                "rgb": "#a1d0a3",
+                "value": 27,
+              },
+              "funds": Object {
+                "rgb": "#8e9fa7",
+                "value": 108781,
+              },
+              "general": Object {
+                "rgb": "#80abcd",
+                "value": 90,
+              },
+              "holiday": Object {
+                "rgb": "#80c4bd",
+                "value": 128,
+              },
+              "income": Object {
+                "rgb": "#5bcf69",
+                "value": 2300,
+              },
+              "net": Object {
+                "rgb": "#4ecb5e",
+                "value": 1990,
+              },
+              "netWorth": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "netWorthCombined": Object {
+                "rgb": "#6dd47a",
+                "value": 1309830.25,
+              },
+              "netWorthPredicted": Object {
+                "rgb": "#6dd47a",
+                "value": 1309830.25,
+              },
+              "social": Object {
+                "rgb": "#dfcf92",
+                "value": 65,
+              },
+              "spending": Object {
+                "rgb": "#fff",
+                "value": 310,
+              },
+            },
+            "future": true,
+            "month": "May-18",
+            "past": false,
+          },
+          Object {
+            "active": false,
+            "cells": Object {
+              "bills": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "food": Object {
+                "rgb": "#a1d0a3",
+                "value": 27,
+              },
+              "funds": Object {
+                "rgb": "#718791",
+                "value": 111802,
+              },
+              "general": Object {
+                "rgb": "#80abcd",
+                "value": 90,
+              },
+              "holiday": Object {
+                "rgb": "#80c4bd",
+                "value": 128,
+              },
+              "income": Object {
+                "rgb": "#bdecc3",
+                "value": 1800,
+              },
+              "net": Object {
+                "rgb": "#93e09d",
+                "value": 1490,
+              },
+              "netWorth": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "netWorthCombined": Object {
+                "rgb": "#4ccb5b",
+                "value": 1314341.25,
+              },
+              "netWorthPredicted": Object {
+                "rgb": "#4ccb5b",
+                "value": 1314341.25,
+              },
+              "social": Object {
+                "rgb": "#dfcf92",
+                "value": 65,
+              },
+              "spending": Object {
+                "rgb": "#fff",
+                "value": 310,
+              },
+            },
+            "future": true,
+            "month": "Jun-18",
+            "past": false,
+          },
+          Object {
+            "active": false,
+            "cells": Object {
+              "bills": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "food": Object {
+                "rgb": "#a1d0a3",
+                "value": 27,
+              },
+              "funds": Object {
+                "rgb": "#546e7a",
+                "value": 114907,
+              },
+              "general": Object {
+                "rgb": "#80abcd",
+                "value": 90,
+              },
+              "holiday": Object {
+                "rgb": "#80c4bd",
+                "value": 128,
+              },
+              "income": Object {
+                "rgb": "#24bf37",
+                "value": 2600,
+              },
+              "net": Object {
+                "rgb": "#24bf37",
+                "value": 2290,
+              },
+              "netWorth": Object {
+                "rgb": "#fff",
+                "value": 0,
+              },
+              "netWorthCombined": Object {
+                "rgb": "#24bf37",
+                "value": 1319736.25,
+              },
+              "netWorthPredicted": Object {
+                "rgb": "#24bf37",
+                "value": 1319736.25,
+              },
+              "social": Object {
+                "rgb": "#dfcf92",
+                "value": 65,
+              },
+              "spending": Object {
+                "rgb": "#fff",
+                "value": 310,
+              },
+            },
+            "future": true,
+            "month": "Jul-18",
+            "past": false,
+          },
+        ]
+      `);
     });
   });
 });

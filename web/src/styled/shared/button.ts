@@ -7,9 +7,10 @@ import {
   EditCurrency,
   EditByCategory,
   AddByCategoryValue,
+  FormContainer as NetWorthEditForm,
 } from '~client/components/NetWorthEditForm/styles';
 import { ButtonDelete as NetWorthEntryDelete } from '~client/components/NetWorthList/styles';
-import { breakpoint } from '~client/styled/mixins';
+import { rem, breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const Button = styled.button<{
@@ -114,17 +115,16 @@ export const Button = styled.button<{
 `;
 
 const ButtonCrud = styled(Button)`
-    ${NetWorthValueFX} & {
-        margin: 0 3px;
-        top: 0;
-        flex: 0 0 auto;
-        width: 32px;
-    }
-    ${AddByCategoryValue} &,
-    ${EditByCategory} & {
-        margin: 0 5px;
-        flex: 0 0 auto;
-    }
+  ${AddByCategoryValue} &,
+  ${EditByCategory} & {
+    margin: 0 5px;
+    flex: 0 0 auto;
+  }
+  ${NetWorthValueFX} & {
+    margin: 0 3px;
+    top: 0;
+    flex: 0 0 ${rem(22)};
+  }
 `;
 
 const deleteStyles = css`
@@ -170,6 +170,13 @@ export const ButtonDelete = styled(ButtonCrud)`
     font-size: 16px;
     line-height: 16px;
   }
+  ${EditCurrency} & {
+    grid-column: 4;
+    margin: 0;
+  }
+  ${AddByCategoryValue} & {
+    grid-column: 4;
+  }
 `;
 
 export const ButtonAdd = styled(ButtonDelete)`
@@ -200,6 +207,19 @@ export const ButtonCancel = styled(Button)`
       border-right: 1px solid ${colors['medium-very-light']};
     }
   }
+
+  ${NetWorthEditForm} & {
+    flex: 0 0 auto;
+    margin: ${rem(4)} auto;
+    padding: ${rem(8)} ${rem(16)};
+    width: auto;
+
+    ${breakpoint(breakpoints.mobile)} {
+      margin: 0;
+      padding: 0 ${rem(16)};
+    }
+  }
+
   ${breakpoint(breakpoints.mobile)} {
     position: absolute;
     left: 0;
@@ -207,7 +227,17 @@ export const ButtonCancel = styled(Button)`
   }
 `;
 
-export const ButtonRefresh = styled(Button)``;
+export const ButtonRefresh = styled(Button)`
+  ${EditCurrency} & {
+    border-radius: 100%;
+    grid-column: 3;
+    height: ${rem(24)};
+    line-height: ${rem(24)};
+    margin: 0;
+    padding: 0;
+    width: ${rem(24)};
+  }
+`;
 
 export const ButtonSubmit = styled(Button)`
   ${ModalDialog} & {

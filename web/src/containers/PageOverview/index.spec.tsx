@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 import sinon from 'sinon';
 
-import PageOverview from '.';
+import { PageOverview } from '.';
 import '~client/mocks/match-media';
 import { mockRandom } from '~client/mocks/random';
 import { State } from '~client/reducers';

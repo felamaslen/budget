@@ -1,4 +1,12 @@
-import { Page, PageList, PageListCalc, Pages, CostProcessed } from '~client/types';
+import {
+  Page,
+  PageList,
+  PageListCalc,
+  Pages,
+  OverviewHeader,
+  OverviewColumn,
+  OverviewTableColumn,
+} from '~client/types';
 
 // debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;
@@ -10,25 +18,14 @@ export const LOGIN_INPUT_LENGTH = 4;
 
 export const CREATE_ID = 'CREATE_ID';
 
-export type OverviewHeader = 'month' & Exclude<keyof CostProcessed, 'fundsOld'>;
-
-export type OverviewColumn = {
-  name: string;
-  link?: {
-    to: string;
-    replace?: boolean;
-  };
-};
-
-export const OVERVIEW_COLUMNS: Record<OverviewHeader, OverviewColumn> = {
-  month: { name: 'Month' },
-  funds: { name: 'Stocks' },
-  bills: { name: 'Bills' },
-  food: { name: 'Food' },
-  general: { name: 'General' },
-  holiday: { name: 'Holiday' },
-  social: { name: 'Social' },
-  income: { name: 'Income' },
+const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
+  [Page.funds]: { name: 'Stocks' },
+  [Page.bills]: { name: 'Bills' },
+  [Page.food]: { name: 'Food' },
+  [Page.general]: { name: 'General' },
+  [Page.holiday]: { name: 'Holiday' },
+  [Page.social]: { name: 'Social' },
+  [Page.income]: { name: 'Income' },
   spending: { name: 'Out' },
   net: { name: 'Net' },
   netWorthPredicted: { name: 'Predicted' },
@@ -39,7 +36,13 @@ export const OVERVIEW_COLUMNS: Record<OverviewHeader, OverviewColumn> = {
       replace: true,
     },
   },
+  netWorthCombined: {
+    name: 'Balance',
+    link: { to: '/net-worth' },
+  },
 };
+
+export const OVERVIEW_COLUMNS = Object.entries(overviewColumns) as OverviewTableColumn[];
 
 export const PAGES: Pages = {
   [Page.overview]: {

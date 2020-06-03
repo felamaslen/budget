@@ -1,21 +1,31 @@
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
-import { colors } from '~client/styled/variables';
+import { breakpoint, rem } from '~client/styled/mixins';
+import { colors, breakpoints } from '~client/styled/variables';
 
 export const NetWorth = styled.div<{ visible: boolean }>`
+  background: ${colors['shadow-l6']};
   display: flex;
   flex-flow: column;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  max-height: 90%;
-  background: ${colors['shadow-l4']};
-  box-shadow: 0 2px 6px ${colors['shadow-l4']};
-  border-width: 2px 10px 0 10px;
-  z-index: 100;
+  height: 100%;
   opacity: ${({ visible }): number => (visible ? 1 : 0)};
+  position: absolute;
   transition: opacity 0.3s ease-out;
+  width: 100%;
+  z-index: 100;
+
+  ${breakpoint(breakpoints.mobile)} {
+    background: ${colors['shadow-l4']};
+    border-width: 2px 10px 0 10px;
+    box-shadow: 0 2px 6px ${colors['shadow-l4']};
+    left: 50%;
+    height: auto;
+    max-height: 90%;
+    min-width: ${rem(breakpoints.mobile)};
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    width: auto;
+  }
 `;
 
 export const TabBar = styled.div`
@@ -63,7 +73,10 @@ export const Title = styled.h2`
   font-weight: bold;
 `;
 
-export const BackButton = styled.a`
+export const BackButton = styled.a.attrs({
+  role: 'link',
+  tabIndex: 0,
+})`
   display: block;
   position: absolute;
   right: 4px;

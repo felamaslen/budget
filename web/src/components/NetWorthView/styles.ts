@@ -1,21 +1,43 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { colors } from '~client/styled/variables';
+import { rem, breakpoint } from '~client/styled/mixins';
+import { colors, breakpoints } from '~client/styled/variables';
 import { Aggregate, NetWorthTableColumn } from '~client/types';
 
 export const NetWorthView = styled.div`
+  background: ${colors['translucent-l95']};
   display: flex;
+  flex: 1 1 0;
+  flex-flow: column;
   margin: 0 3px;
   min-height: 0;
-  max-height: 720px;
-  overflow: hidden;
-  background: ${colors['translucent-l95']};
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 1;
+    flex-flow: row;
+    min-height: 0;
+    max-height: ${rem(720)};
+  }
 `;
 
-export const Table = styled.table`
-  border-collapse: collapse;
-  border-spacing: 0;
-  font-size: 12px;
-  line-height: 20px;
+export const Table = styled.div`
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 1;
+    height: auto;
+    min-height: initial;
+  }
+
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 12px;
+    line-height: 20px;
+    width: 100%;
+  }
+
   thead {
     border-right: 1px solid ${colors['slightly-light']};
     border-left: 1px solid ${colors['slightly-light']};
@@ -24,6 +46,7 @@ export const Table = styled.table`
       border-bottom: none;
     }
   }
+
   tr {
     border-bottom: 1px solid ${colors['slightly-light']};
   }
@@ -32,7 +55,17 @@ export const Table = styled.table`
   }
 `;
 
-export const Graphs = styled.div``;
+export const Graphs = styled.div`
+  display: flex;
+  box-shadow: 0 0 6px ${colors['shadow-l4']};
+  flex: 0 0 auto;
+  flex-flow: row;
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex-flow: column;
+    box-shadow: none;
+  }
+`;
 
 export const Row = styled.tr``;
 
@@ -64,7 +97,13 @@ export const Header = styled.th<{ item: NetWorthTableColumn }>`
 `;
 
 export const HeaderRetirement = styled(Header)`
-  width: 180px;
+  font-size: ${rem(10)};
+  white-space: nowrap;
+
+  ${breakpoint(breakpoints.mobile)} {
+    font-size: ${rem(14)};
+    width: ${rem(180)};
+  }
 `;
 
 export const Sum = styled.th``;

@@ -9,11 +9,10 @@ import { ModalDialog, FormRowInner } from '~client/components/ModalDialog/styles
 import { CategoryItemForm as NetWorthCategoryItemForm } from '~client/components/NetWorthCategoryList/styles';
 import {
   EditByCategory,
+  EditByCategoryValue,
   AddByCategoryValue,
   AddCurrency,
-  currencyTitleWidth,
 } from '~client/components/NetWorthEditForm/styles';
-import { SubcategoryList as NetWorthSubcategoryList } from '~client/components/NetWorthSubcategoryList/styles';
 import { PageFunds, fieldSizes as fundFieldSizes } from '~client/components/page-funds/styles';
 import { breakpoint, rem } from '~client/styled/mixins';
 import { fontFamily } from '~client/styled/reset';
@@ -101,12 +100,10 @@ export const FormField = styled.div<{
     css`
       ${AddCurrency} & {
         margin: 0 5px;
-        flex: 0 0 ${currencyTitleWidth}px;
         input {
           margin: 0;
           padding-left: 0;
           padding-right: 0;
-          width: ${currencyTitleWidth - 4}px;
         }
       }
     `}
@@ -117,46 +114,19 @@ export const FormField = styled.div<{
     ${({ item }): false | FlattenSimpleInterpolation =>
       item === 'category' &&
       css`
-        padding: 0 0.2em;
-        border: none;
-        outline: none;
-        font-size: 18px;
-
-        input {
+        ${breakpoint(breakpoints.mobile)} {
+          padding: 0 ${rem(4)};
+          border: none;
+          outline: none;
+          font-size: ${rem(18)};
           width: 100%;
-          font-size: 16px;
-        }
-      `};
-  }
-
-  ${NetWorthSubcategoryList} & {
-    ${({ item }): null | FlattenSimpleInterpolation => {
-      if (item === 'subcategory') {
-        return css`
-          margin: 0 2em;
-          padding: 0 0.5em;
-          grid-column: 1;
-        `;
-      }
-      if (item === 'credit-limit') {
-        return css`
-          margin: auto;
-          grid-column: 2;
-        `;
-      }
-      if (item === 'opacity') {
-        return css`
-          margin: 0 1em;
-          grid-column: 3;
 
           input {
             width: 100%;
+            font-size: ${rem(16)};
           }
-        `;
-      }
-
-      return null;
-    }};
+        }
+      `};
   }
 
   ${ModalDialog} & {
@@ -426,20 +396,44 @@ export const NetWorthValue = styled.div`
   flex-flow: column;
   align-items: flex-start;
 
+  ${EditByCategory} &,
+  ${AddByCategoryValue} & {
+    display: grid;
+
+    input[type="number"] {
+      width: 100%;
+    }
+
+    ${breakpoint(breakpoints.mobile)} {
+      input[type="number"] {
+        width: ${rem(96)};
+      }
+    }
+  }
+
   ${EditByCategory} & {
     flex: 3;
   }
+
   ${AddByCategoryValue} & {
-    margin: 0 10px;
-    flex: 2;
+    ${breakpoint(breakpoints.mobile)} {
+      display: block;
+      margin: 0 ${rem(24)};
+      flex: 2;
+    }
   }
 `;
 
 export const NetWorthValueFXToggle = styled.span`
-  display: inline-flex;
   align-items: center;
-  margin-right: 6px;
-  font-size: 12px;
+  display: inline-flex;
+  font-size: ${rem(12)};
+  grid-row: 1;
+
+  ${breakpoint(breakpoints.mobile)} {
+    align-items: center;
+    margin-right: ${rem(6)};
+  }
 `;
 
 export const NetWorthValueList = styled.ul`
@@ -452,7 +446,7 @@ export const NetWorthValueList = styled.ul`
 export const NetWorthValueFX = styled.li<{ add: boolean }>`
   display: flex;
   select {
-    flex: 0 0 60px;
+    width: 100%;
   }
 
   ${({ add }): false | FlattenSimpleInterpolation =>
@@ -460,13 +454,19 @@ export const NetWorthValueFX = styled.li<{ add: boolean }>`
     css`
       margin-top: 3px;
       padding: 3px 0;
-      background: rgba(200, 200, 200, 0.3);
+      background: ${colors['translucent-l2']};
     `}
 
   ${FormField} {
-    flex: 0 0 64px;
+    flex: 0 0 ${rem(40)};
     input {
-      width: 64px;
+      width: ${rem(40)};
+    }
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    ${FormField} {
+      flex: 0 0 ${rem(60)};
     }
   }
 `;
@@ -490,5 +490,21 @@ export const NetWorthValueOption = styled.div`
     &::after {
       content: ':';
     }
+  }
+
+  ${EditByCategoryValue} &,
+  ${AddByCategoryValue} & {
+    grid-column: 2 !important;
+    grid-row: 1 / span 3;
+
+    input[type="number"] {
+      width: ${rem(96)};
+    }
+  }
+
+  ${EditByCategoryValue} & {
+  }
+
+  ${AddByCategoryValue} & {
   }
 `;

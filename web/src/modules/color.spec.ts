@@ -1,12 +1,6 @@
 import { rgb, rgba } from 'polished';
 
-import {
-  rgba as rgba__deprecated,
-  getOverviewCategoryColor,
-  getOverviewScoreColor,
-  colorKey,
-  averageColor,
-} from './color';
+import { rgba as rgba__deprecated, getOverviewScoreColor, colorKey, averageColor } from './color';
 
 describe('color module', () => {
   describe('rgba', () => {
@@ -18,25 +12,6 @@ describe('color module', () => {
     it('should return rgb for three values', () => {
       expect.assertions(1);
       expect(rgba__deprecated([0, 92, 29])).toBe('rgb(0,92,29)');
-    });
-  });
-
-  describe('getOverviewCategoryColor', () => {
-    it('should return the correct colour list', () => {
-      expect.assertions(1);
-      expect(getOverviewCategoryColor()).toStrictEqual({
-        funds: rgb(84, 110, 122),
-        bills: rgb(183, 28, 28),
-        food: rgb(67, 160, 71),
-        general: rgb(1, 87, 155),
-        holiday: rgb(0, 137, 123),
-        social: rgb(191, 158, 36),
-        income: rgb(36, 191, 55),
-        spending: rgb(191, 36, 36),
-        net: { negative: rgb(191, 36, 36), positive: rgb(36, 191, 55) },
-        netWorthPredicted: { negative: rgb(191, 36, 36), positive: rgb(36, 191, 55) },
-        netWorth: { negative: rgb(191, 36, 36), positive: rgb(36, 191, 55) },
-      });
     });
   });
 

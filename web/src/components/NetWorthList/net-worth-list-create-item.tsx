@@ -16,7 +16,7 @@ type Props = {
   onCreate: OnCreate<Entry>;
 };
 
-const NetWorthListCreateItem: React.FC<Props> = ({
+export const NetWorthListCreateItem: React.FC<Props> = ({
   data,
   categories,
   subcategories,
@@ -48,5 +48,3 @@ const NetWorthListCreateItem: React.FC<Props> = ({
     />
   );
 };
-
-export default NetWorthListCreateItem;

@@ -6,8 +6,8 @@ import { Page, Aggregate, NetWorthTableColumn } from '~client/types';
 
 export const breakpoints = {
   mobileSmall: 350,
-  mobile: 690,
-  tabletSmall: 1000,
+  mobile: 500,
+  tabletSmall: 880,
   tablet: 1200,
   desktop: 1325,
 };
@@ -112,7 +112,7 @@ type Colors = {
   [Page.general]: PageColors;
   [Page.holiday]: PageColors;
   [Page.social]: PageColors;
-  netWorth: Record<NetWorthTableColumn, string> & {
+  netWorth: Record<NetWorthTableColumn | 'options', string> & {
     aggregate: {
       [key in Aggregate]: string;
     };
@@ -211,6 +211,7 @@ export const colors: Colors = {
     liabilities: rgb(245, 202, 203),
     main: rgb(178, 166, 211),
     expenses: rgb(213, 164, 187),
+    options: rgb(0, 52, 138),
     aggregate: {
       'Cash (easy access)': rgb(180, 214, 169),
       'Cash (other)': rgb(145, 194, 129),

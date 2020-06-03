@@ -10,7 +10,6 @@ import {
   Props as GraphCashFlowProps,
   getValuesWithTime,
 } from '~client/components/graph-cashflow';
-import { colors as netWorthColors } from '~client/components/net-worth-graph/styles';
 import { useToday } from '~client/hooks/time';
 import { leftPad, rightPad } from '~client/modules/data';
 import {
@@ -169,7 +168,7 @@ function processData({
       data: dataOptions,
       fill: false,
       smooth: true,
-      color: netWorthColors.options,
+      color: colors.netWorth.options,
       dashed: true,
       strokeWidth: 1,
     },

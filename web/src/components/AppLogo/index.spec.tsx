@@ -68,7 +68,7 @@ describe('<AppLogo />', () => {
         background: url(path/to/test/file) 0 -56px;
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c0 {
           -webkit-flex: 0 0 auto;
           -ms-flex: 0 0 auto;
@@ -194,7 +194,7 @@ describe('<AppLogo />', () => {
           animation: spin 1s infinite ease;
         }
 
-        @media only screen and (min-width:690px) {
+        @media only screen and (min-width:500px) {
           .c0 {
             -webkit-flex: 0 0 auto;
             -ms-flex: 0 0 auto;

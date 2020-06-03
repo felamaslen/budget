@@ -44,16 +44,16 @@ describe('<GraphFundItem />', () => {
         z-index: 2;
       }
 
-      .sc-pJurq .c2 {
+      .sc-pkhIR .c2 {
         position: relative;
         height: 125px;
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
 
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c1 {
           height: 100%;
           -webkit-flex: 0 0 100px;
@@ -82,12 +82,12 @@ describe('<GraphFundItem />', () => {
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
 
       }
 
-      @media only screen and (min-width:690px) {
-        .c0 .gliMZm {
+      @media only screen and (min-width:500px) {
+        .c0 .biexlM {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -101,13 +101,13 @@ describe('<GraphFundItem />', () => {
 
       }
 
-      @media only screen and (min-width:690px) {
-        .sc-pJurq .c2 {
+      @media only screen and (min-width:500px) {
+        .sc-pkhIR .c2 {
           height: 100%;
         }
       }
 
-      @media only screen and (min-width:690px) {
+      @media only screen and (min-width:500px) {
         .c2 {
           display: inline-block;
           position: static;

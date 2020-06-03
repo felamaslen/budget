@@ -28,21 +28,32 @@ export type TableValues<T = never, K extends keyof CostProcessed = keyof CostPro
   netWorth: T;
 };
 
+export type OverviewHeader = Exclude<keyof CostProcessed, 'fundsOld'>;
+
 export type OverviewCell = {
-  column: ['month' | keyof TableValues, string];
-  value: string | number;
-  rgb: string | null;
+  value: number;
+  rgb: string;
 };
 
 export type OverviewTableRow = {
-  key: string;
-  cells: OverviewCell[];
+  month: string;
+  cells: { [column in OverviewHeader]: OverviewCell };
   past: boolean;
   active: boolean;
   future: boolean;
 };
 
 export type OverviewTable = OverviewTableRow[];
+
+export type OverviewColumn = {
+  name: string;
+  link?: {
+    to: string;
+    replace?: boolean;
+  };
+};
+
+export type OverviewTableColumn = [OverviewHeader, OverviewColumn];
 
 export type Target = {
   date: number;

@@ -31,7 +31,7 @@ type Props<I extends { id: string }, E extends {} = {}> = CrudProps<I> & {
   extraProps?: E;
 };
 
-const CrudList = <I extends { id: string }, E extends {} = {}>({
+export const CrudList = <I extends { id: string }, E extends {} = {}>({
   items,
   Item,
   CreateItem,
@@ -63,15 +63,6 @@ const CrudList = <I extends { id: string }, E extends {} = {}>({
     <Styled.CrudList active={active}>
       {BeforeList && <BeforeList {...metaProps} />}
       <Styled.CrudListInner active={active}>
-        {CreateItem && (
-          <CreateItem
-            active={createActive}
-            noneActive={noneActive}
-            setActive={setActive}
-            onCreate={onCreate}
-            {...extraProps}
-          />
-        )}
         <Styled.CrudWindow active={active} createActive={createActive}>
           {items.map((item, index) => (
             <CrudListItem<I, E>
@@ -87,10 +78,15 @@ const CrudList = <I extends { id: string }, E extends {} = {}>({
             />
           ))}
         </Styled.CrudWindow>
+        <CreateItem
+          active={createActive}
+          noneActive={noneActive}
+          setActive={setActive}
+          onCreate={onCreate}
+          {...extraProps}
+        />
       </Styled.CrudListInner>
       {AfterList && <AfterList {...metaProps} />}
     </Styled.CrudList>
   );
 };
-
-export default CrudList;

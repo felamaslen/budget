@@ -17,7 +17,7 @@ import {
 } from '~client/actions';
 import NetWorthCategoryList from '~client/components/NetWorthCategoryList';
 import NetWorthList from '~client/components/NetWorthList';
-import NetWorthView from '~client/components/NetWorthView';
+import { NetWorthView } from '~client/components/NetWorthView';
 import { useCrud } from '~client/hooks';
 import { getCategories, getSubcategories, getEntries, getNetWorthTable } from '~client/selectors';
 import { Category, Subcategory, Entry, WithCrud } from '~client/types';

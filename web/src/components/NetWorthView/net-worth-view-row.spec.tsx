@@ -1,10 +1,11 @@
-import React from 'react';
 import { render, RenderResult } from '@testing-library/react';
+import React from 'react';
 
-import NetWorthViewRow from './net-worth-view-row';
+import { NetWorthViewRow } from './net-worth-view-row';
 
 describe('<NetWorthViewRow />', () => {
   const props = {
+    isMobile: false,
     date: new Date('2020-04-20'),
     assets: 8156429,
     liabilities: 287130,
@@ -12,7 +13,7 @@ describe('<NetWorthViewRow />', () => {
     fti: 98.18,
   };
 
-  const getContainer = (customProps = {}): RenderResult =>
+  const setup = (customProps = {}): RenderResult =>
     render(
       <table>
         <thead>
@@ -34,53 +35,69 @@ describe('<NetWorthViewRow />', () => {
     ['October', new Date('2020-10-13'), 'Oct'],
     ['November', new Date('2020-11-01'), 'Nov'],
     ['December', new Date('2020-12-30'), '20Q4'],
-  ])('should render the correct short date for %s', async (_, date, expectedShortDate) => {
+  ])('should render the correct short date for %s', (_, date, expectedShortDate) => {
     expect.assertions(1);
-    const { findByText } = getContainer({ date });
-    expect(await findByText(expectedShortDate)).toBeInTheDocument();
+    const { getByText } = setup({ date });
+    expect(getByText(expectedShortDate)).toBeInTheDocument();
   });
 
-  it('should render the long date', async () => {
+  it('should render the long date', () => {
     expect.assertions(1);
-    const { findByText } = getContainer();
-    expect(await findByText('20/04/2020')).toBeInTheDocument();
+    const { getByText } = setup();
+    expect(getByText('20/04/2020')).toBeInTheDocument();
   });
 
-  it('should render the assets', async () => {
+  it('should render the assets', () => {
     expect.assertions(1);
-    const { findByText } = getContainer();
-    expect(await findByText('£81,564.29')).toBeInTheDocument();
+    const { getByText } = setup();
+    expect(getByText('£81,564.29')).toBeInTheDocument();
   });
 
-  it('should render the liabilities', async () => {
+  it('should render the liabilities', () => {
     expect.assertions(1);
-    const { findByText } = getContainer();
-    expect(await findByText('£2,871.30')).toBeInTheDocument();
+    const { getByText } = setup();
+    expect(getByText('£2,871.30')).toBeInTheDocument();
   });
 
-  it('should render the net worth', async () => {
+  it('should render the net worth', () => {
     expect.assertions(1);
-    const { findByText } = getContainer();
-    expect(await findByText('£78,692.99')).toBeInTheDocument();
+    const { getByText } = setup();
+    expect(getByText('£78,692.99')).toBeInTheDocument();
   });
 
-  it('should render negative net worth with brackets', async () => {
+  it('should render negative net worth with brackets', () => {
     expect.assertions(1);
-    const { findByText } = getContainer({
+    const { getByText } = setup({
       liabilities: props.assets + 25998,
     });
-    expect(await findByText('(£259.98)')).toBeInTheDocument();
+    expect(getByText('(£259.98)')).toBeInTheDocument();
   });
 
-  it('should render the expenses', async () => {
+  it('should render the expenses', () => {
     expect.assertions(1);
-    const { findByText } = getContainer();
-    expect(await findByText('£3,187.15')).toBeInTheDocument();
+    const { getByText } = setup();
+    expect(getByText('£3,187.15')).toBeInTheDocument();
   });
 
-  it('should render the FTI', async () => {
+  it('should render the FTI', () => {
     expect.assertions(1);
-    const { findByText } = getContainer();
-    expect(await findByText('98.18')).toBeInTheDocument();
+    const { getByText } = setup();
+    expect(getByText('98.18')).toBeInTheDocument();
+  });
+
+  describe('when isMobile is true', () => {
+    const setupMobile = (): RenderResult => setup({ isMobile: true });
+
+    it.each`
+      item             | value
+      ${'assets'}      | ${'£81.6k'}
+      ${'liabilities'} | ${'£2.9k'}
+      ${'net worth'}   | ${'£78.7k'}
+      ${'expenses'}    | ${'£3.2k'}
+    `('should render abbreviated $item', ({ value }) => {
+      expect.assertions(1);
+      const { getByText } = setupMobile();
+      expect(getByText(value)).toBeInTheDocument();
+    });
   });
 });

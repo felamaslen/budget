@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 
 import * as Styled from './styles';
-import CrudList from '~client/components/CrudList';
+import { CrudList } from '~client/components/CrudList';
 import {
   FormFieldColor,
   FormFieldSelect,
@@ -11,7 +11,7 @@ import {
 import NetWorthSubcategoryList from '~client/components/NetWorthSubcategoryList';
 import { CREATE_ID } from '~client/constants/data';
 import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
-import { Button, ButtonDelete, InlineFlexCenter } from '~client/styled/shared';
+import { Button, ButtonDelete } from '~client/styled/shared';
 import { Create, Category, Subcategory } from '~client/types';
 
 const typeOptions: SelectOptions<Category['type'] | 'option'> = [
@@ -69,17 +69,25 @@ const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
 
   return (
     <Styled.CategoryItemForm style={{ backgroundColor: tempColor }}>
-      <FormFieldSelect
-        item="type"
-        options={typeOptions}
-        value={tempIsOption ? 'option' : tempType}
-        onChange={onChangeType}
-      />
-      <FormFieldText item="category" value={tempCategory} onChange={setTempCategory} />
-      <FormFieldColor value={tempColor} onChange={setTempColor} />
-      <Button disabled={!touched} onClick={onChangeItem}>
-        {buttonText}
-      </Button>
+      <Styled.CategoryType>
+        <FormFieldSelect
+          item="type"
+          options={typeOptions}
+          value={tempIsOption ? 'option' : tempType}
+          onChange={onChangeType}
+        />
+      </Styled.CategoryType>
+      <Styled.CategoryInput>
+        <FormFieldText item="category" value={tempCategory} onChange={setTempCategory} />
+      </Styled.CategoryInput>
+      <Styled.CategoryColor>
+        <FormFieldColor value={tempColor} onChange={setTempColor} />
+      </Styled.CategoryColor>
+      <Styled.CategoryButton>
+        <Button disabled={!touched} onClick={onChangeItem}>
+          {buttonText}
+        </Button>
+      </Styled.CategoryButton>
     </Styled.CategoryItemForm>
   );
 };
@@ -88,7 +96,7 @@ type PropsItem = {
   item: Category;
   style?: object;
   expanded: string | null;
-  onExpandToggle: (id: string) => void;
+  onExpand: React.Dispatch<React.SetStateAction<string | null>>;
   onUpdate: OnUpdate<Category>;
   onDelete: () => void;
   categories: Category[];
@@ -106,7 +114,7 @@ const NetWorthCategoryItem: React.FC<PropsItem> = ({
   categories,
   subcategories,
   expanded,
-  onExpandToggle,
+  onExpand,
   onCreateSubcategory,
   onUpdateSubcategory,
   onDeleteSubcategory,
@@ -130,13 +138,22 @@ const NetWorthCategoryItem: React.FC<PropsItem> = ({
 
   const itemStyle = useMemo(() => ({ ...style, backgroundColor: item.color }), [style, item.color]);
 
-  const onExpand = useCallback(() => onExpandToggle(item.id), [onExpandToggle, item.id]);
+  const itemExpanded = expanded === item.id;
+  const setExpanded = useCallback(() => onExpand(item.id), [onExpand, item.id]);
+  const toggleExpand = useCallback(() => onExpand((last) => (last === item.id ? null : item.id)), [
+    onExpand,
+    item.id,
+  ]);
 
   return (
-    <Styled.CategoryItem data-testid={`category-item-${item.id}`} style={itemStyle}>
+    <Styled.CategoryItem
+      data-testid={`category-item-${item.id}`}
+      style={itemStyle}
+      onFocus={setExpanded}
+    >
       <Styled.CategoryItemMain>
         <Styled.ToggleVisibility>
-          <Button data-testid="handle" expanded={!!expanded} onClick={onExpand} />
+          <Button data-testid="handle" expanded={itemExpanded} onClick={toggleExpand} />
         </Styled.ToggleVisibility>
         <NetWorthCategoryItemForm
           key="category-form"
@@ -144,11 +161,11 @@ const NetWorthCategoryItem: React.FC<PropsItem> = ({
           onChange={onChange}
           buttonText="Update"
         />
-        <InlineFlexCenter>
+        <Styled.ButtonDeleteContainer>
           <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
-        </InlineFlexCenter>
+        </Styled.ButtonDeleteContainer>
       </Styled.CategoryItemMain>
-      {expanded === item.id && parent && (
+      {itemExpanded && parent && (
         <NetWorthSubcategoryList
           key="subcategory-list"
           parent={parent}
@@ -183,6 +200,18 @@ export type Props = {
   onDeleteSubcategory: OnDelete<Subcategory>;
 };
 
+type CrudProps = Pick<
+  Props,
+  | 'categories'
+  | 'subcategories'
+  | 'onCreateSubcategory'
+  | 'onUpdateSubcategory'
+  | 'onDeleteSubcategory'
+> & {
+  expanded: string | null;
+  onExpand: PropsItem['onExpand'];
+};
+
 const NetWorthCategoryList: React.FC<Props> = ({
   categories,
   subcategories,
@@ -193,17 +222,13 @@ const NetWorthCategoryList: React.FC<Props> = ({
   onUpdateSubcategory,
   onDeleteSubcategory,
 }) => {
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const onExpandToggle = useCallback(
-    (id: string): void => setExpanded((last) => (last === id ? null : id)),
-    [],
-  );
+  const [expanded, onExpand] = useState<string | null>(null);
 
   const extraProps = {
     categories,
     subcategories,
     expanded,
-    onExpandToggle,
+    onExpand,
     onCreateSubcategory,
     onUpdateSubcategory,
     onDeleteSubcategory,
@@ -215,20 +240,7 @@ const NetWorthCategoryList: React.FC<Props> = ({
 
   return (
     <Styled.CategoryList>
-      <CrudList<
-        Category,
-        Pick<
-          Props,
-          | 'categories'
-          | 'subcategories'
-          | 'onCreateSubcategory'
-          | 'onUpdateSubcategory'
-          | 'onDeleteSubcategory'
-        > & {
-          expanded: string | null;
-          onExpandToggle: (id: string) => void;
-        }
-      >
+      <CrudList<Category, CrudProps>
         items={categories}
         Item={NetWorthCategoryItem}
         CreateItem={NetWorthCategoryCreateItem}

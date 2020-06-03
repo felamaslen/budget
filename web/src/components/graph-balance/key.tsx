@@ -1,7 +1,6 @@
 import { rgba } from 'polished';
 import React from 'react';
 import { BaseKey, Props } from '~client/components/graph-cashflow/base-key';
-import { colors as netWorthColors } from '~client/components/net-worth-graph/styles';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
 import { Aggregate } from '~client/types/net-worth';
@@ -120,7 +119,7 @@ export const Key: React.FC<Props> = (props) => (
       y1={keyY2 + 0.5}
       x2={keyX0 + keyLineWidth}
       y2={keyY2 + 0.5}
-      stroke={netWorthColors.options}
+      stroke={colors.netWorth.options}
       strokeDasharray="3,4"
       strokeWidth={1}
     />

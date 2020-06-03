@@ -13,9 +13,9 @@ import { createSelector } from 'reselect';
 import { getNetWorthSummary } from './net-worth';
 
 import { Average } from '~client/constants';
-import { OVERVIEW_COLUMNS, OverviewColumn, OverviewHeader } from '~client/constants/data';
+import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
-import { getOverviewScoreColor, getOverviewCategoryColor } from '~client/modules/color';
+import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
 import { IDENTITY, arrayAverage, randnBm } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { getFundsRows } from '~client/selectors/funds/helpers';
@@ -35,8 +35,8 @@ import {
   Median,
   OverviewTable as Table,
   OverviewTableRow as TableRow,
-  OverviewCell as Cell,
   Fund,
+  OverviewTableRow,
 } from '~client/types';
 
 export * from './common';
@@ -253,113 +253,110 @@ export const getProcessedCost = moize(
 const isPositive = (value: number): boolean => value >= 0;
 const isNegative = (value: number): boolean => value < 0;
 
+const getFormattedMonths = (dates: Date[]): string[] => dates.map((date) => format(date, 'LLL-yy'));
+
+type TableNumberRows = TableValues<number[], 'netWorth'>;
+
+const getTableValues = (cost: CostProcessed, netWorth: number[]): TableNumberRows =>
+  OVERVIEW_COLUMNS.reduce<TableNumberRows>(
+    (last, [key]) => ({
+      [key]: cost[key as keyof TableValues],
+      ...last,
+    }),
+    {
+      netWorth,
+    },
+  );
+
+const getScoreValues = (values: TableNumberRows, futureMonths: number): TableNumberRows => ({
+  ...values,
+  netWorth: values.netWorth.slice(0, -(futureMonths + 1)),
+});
+
+type Ranges = TableValues<SplitRange>;
+
+const getRanges = (values: TableNumberRows, scoreValues: TableNumberRows): Ranges =>
+  (Object.keys(values) as (keyof TableValues)[]).reduce<Ranges>(
+    (last, key) => ({
+      [key]: {
+        min: Math.min(...(Reflect.get(scoreValues, key) ?? [])),
+        maxNegative:
+          key === 'net' ? 0 : Math.max(...(Reflect.get(scoreValues, key) ?? []).filter(isNegative)),
+        minPositive:
+          key === 'net' ? 0 : Math.min(...(Reflect.get(scoreValues, key) ?? []).filter(isPositive)),
+        max: Math.max(...(Reflect.get(scoreValues, key) ?? [])),
+      },
+      ...last,
+    }),
+    {} as Ranges,
+  );
+
+type Medians = TableValues<Median>;
+
+const getMedians = (values: TableNumberRows, scoreValues: TableNumberRows): Medians =>
+  (Object.keys(values) as (keyof TableValues)[]).reduce<Medians>(
+    (last, key) => ({
+      ...last,
+      [key]: {
+        positive: arrayAverage(
+          (Reflect.get(scoreValues, key) ?? []).filter(isPositive),
+          Average.Median,
+        ),
+        negative: arrayAverage(
+          (Reflect.get(scoreValues, key) ?? []).filter(isNegative),
+          Average.Median,
+        ),
+      },
+    }),
+    {} as Medians,
+  );
+
+const getCellColor = (ranges: Ranges, medians: Medians) => (
+  value: number,
+  key: keyof TableValues,
+): string => getOverviewScoreColor(value, ranges[key], medians[key], overviewCategoryColor[key]);
+
+const getCells = (cost: CostProcessed, getColor: ReturnType<typeof getCellColor>) => (
+  index: number,
+): OverviewTableRow['cells'] =>
+  OVERVIEW_COLUMNS.reduce<OverviewTableRow['cells']>(
+    (last, [column]) => ({
+      ...last,
+      [column]: {
+        value: cost[column][index],
+        rgb: getColor(cost[column][index], column),
+      },
+    }),
+    {} as OverviewTableRow['cells'],
+  );
+
 export const getOverviewTable = moize(
-  (today: Date): ((state: State) => Table | null) =>
+  (today: Date): ((state: State) => Table) =>
     createSelector(
       getMonthDates,
       getFutureMonths(today),
       getProcessedCost(today),
       getNetWorthSummary,
-      (dates, futureMonths, cost, netWorth): Table | null => {
-        if (!dates) {
-          return null;
-        }
-
-        const months = dates.map((date: Date) => format(date, 'LLL-yy'));
-
-        const values: TableValues<number[], 'netWorth'> = Object.entries(OVERVIEW_COLUMNS)
-          .filter(([header]) => header !== 'month')
-          .reduce((last, [key]) => ({ [key]: cost[key as keyof TableValues], ...last }), {
-            netWorth,
-          });
-
-        const scoreValues: TableValues<number[], 'netWorth'> = {
-          ...values,
-          netWorth: values.netWorth.slice(0, -(futureMonths + 1)),
-        };
-
-        const ranges: TableValues<SplitRange> = (Object.keys(
-          values,
-        ) as (keyof TableValues)[]).reduce(
-          (last, key) => ({
-            [key]: {
-              min: Math.min(...(Reflect.get(scoreValues, key) ?? [])),
-              maxNegative:
-                key === 'net'
-                  ? 0
-                  : Math.max(...(Reflect.get(scoreValues, key) ?? []).filter(isNegative)),
-              minPositive:
-                key === 'net'
-                  ? 0
-                  : Math.min(...(Reflect.get(scoreValues, key) ?? []).filter(isPositive)),
-              max: Math.max(...(Reflect.get(scoreValues, key) ?? [])),
-            },
-            ...last,
-          }),
-          {} as TableValues<SplitRange>,
-        );
-
-        const medians: TableValues<Median> = (Object.keys(values) as (keyof TableValues)[]).reduce(
-          (last, key) => ({
-            ...last,
-            [key]: {
-              positive: arrayAverage(
-                (Reflect.get(scoreValues, key) ?? []).filter(isPositive),
-                Average.Median,
-              ),
-              negative: arrayAverage(
-                (Reflect.get(scoreValues, key) ?? []).filter(isNegative),
-                Average.Median,
-              ),
-            },
-          }),
-          {} as TableValues,
-        );
-
-        const categoryColor = getOverviewCategoryColor();
-
-        const getColor = (value: number, key: keyof TableValues): string =>
-          getOverviewScoreColor(value, ranges[key], medians[key], categoryColor[key]);
-
-        const getCells = (monthText: string, index: number): Cell[] =>
-          (Object.entries(OVERVIEW_COLUMNS) as [OverviewHeader, OverviewColumn][]).map(
-            ([key, { name: display }]): Cell => {
-              const column: Cell['column'] = [key, display];
-
-              if (key === 'month') {
-                return {
-                  column,
-                  value: monthText,
-                  rgb: null,
-                };
-              }
-
-              const value = cost[key][index];
-
-              return {
-                column,
-                value,
-                rgb: getColor(value, key),
-              };
-            },
-          );
-
+      (dates, futureMonths, cost, netWorth): Table => {
+        const months = getFormattedMonths(dates);
+        const values = getTableValues(cost, netWorth);
+        const scoreValues = getScoreValues(values, futureMonths);
+        const ranges = getRanges(values, scoreValues);
+        const medians = getMedians(values, scoreValues);
         const endOfCurrentMonth = endOfMonth(today);
 
-        return months.map(
-          (monthText: string, index: number): TableRow => {
-            const date = dates[index];
-            const past = date < today;
-            const future = date > endOfCurrentMonth;
-            const active = !past && !future;
+        const getRowCells = getCells(cost, getCellColor(ranges, medians));
 
-            const cells = getCells(monthText, index);
+        return months.map(
+          (month: string, index: number): TableRow => {
+            const past = dates[index] < today;
+            const future = dates[index] > endOfCurrentMonth;
 
             return {
-              key: monthText,
-              cells,
+              month,
+              cells: getRowCells(index),
               past,
-              active,
+              active: !past && !future,
               future,
             };
           },

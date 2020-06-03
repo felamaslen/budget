@@ -1,10 +1,10 @@
-import React from 'react';
+import format from 'date-fns/format';
 import getMonth from 'date-fns/getMonth';
 import getYear from 'date-fns/getYear';
-import format from 'date-fns/format';
+import React from 'react';
 
-import { formatCurrency } from '~client/modules/format';
 import * as Styled from './styles';
+import { formatCurrency } from '~client/modules/format';
 
 function getShortDate(date: Date): string | React.ReactElement {
   if ((getMonth(date) + 1) % 3 === 0) {
@@ -21,6 +21,7 @@ function getShortDate(date: Date): string | React.ReactElement {
 }
 
 type Props = {
+  isMobile: boolean;
   date: Date;
   assets: number;
   liabilities: number;
@@ -28,24 +29,30 @@ type Props = {
   fti: number;
 };
 
-const NetWorthViewRow: React.FC<Props> = ({ date, assets, liabilities, fti, expenses }) => (
-  <Styled.Row>
-    <Styled.Column item="date-short">{getShortDate(date)}</Styled.Column>
-    <Styled.Column item="date-long">{format(date, 'dd/MM/yyyy')}</Styled.Column>
-    <Styled.Column item="assets">{formatCurrency(assets)}</Styled.Column>
-    <Styled.Column item="liabilities">
-      {formatCurrency(liabilities, {
-        brackets: true,
-      })}
-    </Styled.Column>
-    <Styled.Column item="net-worth-value">
-      {formatCurrency(assets - liabilities, {
-        brackets: true,
-      })}
-    </Styled.Column>
-    <Styled.Column item="expenses">{formatCurrency(expenses)}</Styled.Column>
-    <Styled.Column item="fti">{fti.toFixed(2)}</Styled.Column>
-  </Styled.Row>
-);
+const formatCurrencyOptions = { brackets: true };
+const formatCurrencyOptionsMobile = { ...formatCurrencyOptions, abbreviate: true, precision: 1 };
 
-export default NetWorthViewRow;
+export const NetWorthViewRow: React.FC<Props> = ({
+  isMobile,
+  date,
+  assets,
+  liabilities,
+  fti,
+  expenses,
+}) => {
+  const formatOptions = isMobile ? formatCurrencyOptionsMobile : formatCurrencyOptions;
+
+  return (
+    <Styled.Row>
+      <Styled.Column item="date-short">{getShortDate(date)}</Styled.Column>
+      <Styled.Column item="date-long">{format(date, 'dd/MM/yyyy')}</Styled.Column>
+      <Styled.Column item="assets">{formatCurrency(assets, formatOptions)}</Styled.Column>
+      <Styled.Column item="liabilities">{formatCurrency(liabilities, formatOptions)}</Styled.Column>
+      <Styled.Column item="net-worth-value">
+        {formatCurrency(assets - liabilities, formatOptions)}
+      </Styled.Column>
+      <Styled.Column item="expenses">{formatCurrency(expenses, formatOptions)}</Styled.Column>
+      <Styled.Column item="fti">{fti.toFixed(2)}</Styled.Column>
+    </Styled.Row>
+  );
+};

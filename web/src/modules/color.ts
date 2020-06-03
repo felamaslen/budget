@@ -45,16 +45,15 @@ function getOverviewCategoryKeyColor(key: string): OverviewBaseColor {
   throw new Error(`Unknown overview column: ${key}`);
 }
 
-export const getOverviewCategoryColor = (): Partial<TableValues<string>> =>
-  Object.entries(OVERVIEW_COLUMNS)
-    .filter(([key]) => key !== 'month')
-    .reduce(
-      (last, [key]) => ({
-        ...last,
-        [key]: getOverviewCategoryKeyColor(key),
-      }),
-      {},
-    );
+export const overviewCategoryColor: Partial<TableValues<string>> = OVERVIEW_COLUMNS.reduce<
+  Partial<TableValues<string>>
+>(
+  (last, [key]) => ({
+    ...last,
+    [key]: getOverviewCategoryKeyColor(key),
+  }),
+  {},
+);
 
 const scoreComponent = (score: number, value: number): number =>
   Math.round(255 - (255 - value) * score);

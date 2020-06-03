@@ -1,10 +1,12 @@
+import { rgba } from 'polished';
 import React, { useState, useCallback } from 'react';
 
 import * as Styled from './styles';
-import CrudList from '~client/components/CrudList';
+import { CrudList } from '~client/components/CrudList';
 import { FormFieldText, FormFieldRange, FormFieldTickbox } from '~client/components/FormField';
 import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
-import { Button, ButtonDelete, InlineFlexCenter } from '~client/styled/shared';
+import { Button, ButtonDelete } from '~client/styled/shared';
+import { colors } from '~client/styled/variables';
 import { Create, Subcategory, Category } from '~client/types';
 
 const getCreditLimitDisabled = (parent: Pick<Category, 'type'>): boolean =>
@@ -61,39 +63,45 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
     <Styled.ItemForm
       data-testid={`subcategory-item-${subcategory}`}
       style={{
-        backgroundColor: `rgba(255, 255, 255, ${tempOpacity}`,
+        backgroundColor: rgba(colors.white, tempOpacity),
       }}
     >
-      <FormFieldText
-        item="subcategory"
-        value={tempSubcategory}
-        onChange={setTempSubcategory}
-        active
-      />
-      {!creditLimitDisabled && (
-        <FormFieldTickbox
-          item="credit-limit"
-          value={Boolean(tempHasCreditLimit)}
-          onChange={setTempHasCreditLimit}
+      <Styled.Name>
+        <FormFieldText
+          item="subcategory"
+          value={tempSubcategory}
+          onChange={setTempSubcategory}
+          active
         />
+      </Styled.Name>
+      <Styled.Opacity>
+        <FormFieldRange
+          item="opacity"
+          min={0}
+          max={1}
+          step={0.1}
+          value={tempOpacity}
+          onChange={setTempOpacity}
+        />
+      </Styled.Opacity>
+      {!creditLimitDisabled && (
+        <Styled.CreditLimit>
+          <FormFieldTickbox
+            item="credit-limit"
+            value={Boolean(tempHasCreditLimit)}
+            onChange={setTempHasCreditLimit}
+          />
+        </Styled.CreditLimit>
       )}
-      <FormFieldRange
-        item="opacity"
-        min={0}
-        max={1}
-        step={0.1}
-        value={tempOpacity}
-        onChange={setTempOpacity}
-      />
       <Styled.ButtonChange>
         <Button disabled={!touched} onClick={onChangeItem}>
           {buttonText}
         </Button>
       </Styled.ButtonChange>
       {onDelete && (
-        <InlineFlexCenter>
+        <Styled.ButtonDeleteContainer>
           <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
-        </InlineFlexCenter>
+        </Styled.ButtonDeleteContainer>
       )}
     </Styled.ItemForm>
   );
@@ -155,6 +163,8 @@ type Props = {
   onDelete: OnDelete<Subcategory>;
 };
 
+type CrudProps = { parent: Category };
+
 const NetWorthSubcategoryList: React.FC<Props> = ({
   parent,
   subcategories,
@@ -165,15 +175,10 @@ const NetWorthSubcategoryList: React.FC<Props> = ({
   <Styled.SubcategoryList data-testid="subcategory-form">
     <Styled.ListHead>
       <Styled.Name>{'Name'}</Styled.Name>
-      {!getCreditLimitDisabled(parent) && <Styled.CreditLimit>{'Credit limit'}</Styled.CreditLimit>}
-      <Styled.Opacity>{'Opacity'}</Styled.Opacity>
+      <Styled.Opacity>Opacity</Styled.Opacity>
+      {!getCreditLimitDisabled(parent) && <Styled.CreditLimit>Credit limit</Styled.CreditLimit>}
     </Styled.ListHead>
-    <CrudList<
-      Subcategory,
-      {
-        parent: Category;
-      }
-    >
+    <CrudList<Subcategory, CrudProps>
       items={subcategories}
       Item={NetWorthSubcategoryItem}
       CreateItem={NetWorthSubcategoryCreateItem}

@@ -2,27 +2,32 @@ import React from 'react';
 
 import * as Styled from './styles';
 import HoverCost from '~client/components/HoverCost';
-import { OverviewTableRow } from '~client/types';
+import { OverviewTableRow, OverviewTableColumn } from '~client/types';
 
 type Props = {
-  row: Omit<OverviewTableRow, 'key'>;
+  row: OverviewTableRow;
+  columns: OverviewTableColumn[];
 };
 
-const OverviewTableCells: React.FC<Props> = ({ row: { cells, past, active, future } }) => (
+export const OverviewTableCells: React.FC<Props> = ({
+  columns,
+  row: { month, cells, past, active, future },
+}) => (
   <Styled.Row past={past} active={active} future={future}>
-    {cells.map(({ column: [key], value, rgb }) => (
+    <Styled.Cell key="month" column="month" past={past} active={active} future={future}>
+      {month}
+    </Styled.Cell>
+    {columns.map(([column]) => (
       <Styled.Cell
-        key={key}
-        column={key}
-        cellColor={rgb}
+        key={column}
+        column={column}
+        cellColor={cells[column].rgb}
         past={past}
         active={active}
         future={future}
       >
-        <HoverCost value={value} />
+        <HoverCost value={cells[column].value} />
       </Styled.Cell>
     ))}
   </Styled.Row>
 );
-
-export default OverviewTableCells;

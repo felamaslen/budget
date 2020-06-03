@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { testSaga } from 'redux-saga-test-plan';
 import { debounce } from 'redux-saga/effects';
+import sinon from 'sinon';
 
 import fundsSaga, {
   getFundHistoryQuery,
@@ -184,11 +185,12 @@ describe('Funds saga', () => {
   });
 
   describe('requestStocksPrices', () => {
+    let clock: sinon.SinonFakeTimers;
     beforeEach(() => {
-      jest.useFakeTimers();
+      clock = sinon.useFakeTimers();
     });
     afterEach(() => {
-      jest.useRealTimers();
+      clock.restore();
     });
 
     it('should request stock prices', () => {

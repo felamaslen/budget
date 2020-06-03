@@ -1,7 +1,7 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 import { Step } from './constants';
-import { rem } from '~client/styled/mixins';
-import { colors } from '~client/styled/variables';
+import { rem, breakpoint } from '~client/styled/mixins';
+import { colors, breakpoints } from '~client/styled/variables';
 
 export const FormNavigation = styled.div`
   display: flex;
@@ -11,11 +11,21 @@ export const FormNavigation = styled.div`
   background: #efefef;
 
   button {
-    height: 23px;
+    margin: ${rem(4)};
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    width: 100%;
+    overflow: hidden;
+
+    button {
+      height: ${rem(23)};
+    }
   }
 `;
 
 export const FormContainer = styled.div<{ add: boolean }>`
+  background: ${colors.white};
   display: flex;
   flex-flow: column;
   flex: 1;
@@ -30,6 +40,10 @@ export const FormContainer = styled.div<{ add: boolean }>`
       position: relative;
       background: ${colors.white as string};
     `};
+
+  ${breakpoint(breakpoints.mobile)} {
+    align-items: center;
+  }
 `;
 
 function stepStyles({ step }: { step?: Step }): FlattenSimpleInterpolation | null {
@@ -48,57 +62,120 @@ function stepStyles({ step }: { step?: Step }): FlattenSimpleInterpolation | nul
   return null;
 }
 
-export const FormSection = styled.div`
+export const FormSection = styled.div<{ step?: Step }>`
   display: flex;
   flex-flow: column;
   flex: 1;
   align-items: center;
   overflow-y: auto;
   ${stepStyles};
+
+  ${breakpoint(breakpoints.mobile)} {
+    width: ${({ step }): string => (step === Step.Currencies ? 'auto' : '100%')};
+  }
 `;
 
-export const Error = styled.div`
+export const RequestError = styled.div`
+  bottom: ${rem(40)};
   color: #900;
-  font-size: 12px;
+  font-size: ${rem(12)};
+  position: absolute;
+
+  ${breakpoint(breakpoints.mobile)} {
+    bottom: ${rem(28)};
+  }
 `;
 
 export const EditByCategory = styled.div`
   width: 100%;
+  overflow-x: hidden;
   overflow-y: auto;
 `;
 
 export const EditByCategoryGroup = styled.div``;
 
-export const EditByCategoryValue = styled.div`
-  display: flex;
-  padding: 5px 0;
-  align-items: flex-start;
+export const EditByCategoryValue = styled.div<{ isLiability: boolean; isOption: boolean }>`
   background: linear-gradient(
     to bottom,
     ${colors['translucent-l2'] as string},
     ${colors['translucent-l1'] as string}
   );
+  display: grid;
+  grid-template-columns: ${({ isOption }): string =>
+    isOption ? `${rem(64)} auto ${rem(28)}` : `${rem(64)} auto ${rem(104)} ${rem(28)}`};
+  grid-template-rows: ${({ isLiability, isOption }): string => {
+    if (isLiability) {
+      return `${rem(24)} auto ${rem(24)}`;
+    }
+    if (isOption) {
+      return 'auto';
+    }
+    return `${rem(24)} auto`;
+  }};
+
+  ${breakpoint(breakpoints.mobile)} {
+    display: flex;
+    padding: ${rem(5)} 0;
+    align-items: flex-start;
+  }
 `;
 
-export const AddByCategoryValue = styled.div`
-  display: flex;
-  align-items: flex-start;
-  padding: 2px 0;
+export const AddByCategoryValue = styled.div<{ isOption: boolean }>`
+  display: grid;
+  grid-template-columns: ${({ isOption }): string =>
+    isOption ? `auto auto auto ${rem(28)}` : `auto auto ${rem(104)} ${rem(28)}`};
+  grid-template-rows: ${rem(24)} auto;
+  grid-gap: ${rem(2)};
+
+  ${breakpoint(breakpoints.mobile)} {
+    display: flex;
+    align-items: flex-start;
+    padding: ${rem(2)} 0;
+  }
+`;
+
+export const EditValue = styled.div`
+  grid-column: 2;
+  grid-row: 1 / span 2;
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 1;
+  }
 `;
 
 const AddSection = styled.span`
-  display: flex;
-  margin: 0 10px;
-  flex-flow: column;
-  flex: 1;
+  display: grid;
+  grid-template-rows: inherit;
+  grid-row: 1 / span 2;
+
+  ${breakpoint(breakpoints.mobile)} {
+    display: flex;
+    margin: 0 ${rem(10)};
+    flex-flow: column;
+    flex: 1;
+  }
 `;
 
-export const AddCategory = styled(AddSection)``;
-export const AddSubcategory = styled(AddSection)``;
+export const AddCategory = styled(AddSection)`
+  grid-column: 1;
+  grid-row: 2;
+`;
+export const AddSubcategory = styled(AddSection)<{ isOption: boolean }>`
+  grid-column: 1;
+  grid-row: 3 / span 2;
+`;
+export const AddValue = styled.div<{ isOption: boolean }>`
+  grid-column: 2;
+  grid-row: 2;
+`;
 
 export const AddLabel = styled.span`
-  margin-bottom: 3px;
-  font-size: 12px;
+  font-size: ${rem(12)};
+  grid-row: 1;
+
+  ${breakpoint(breakpoints.mobile)} {
+    margin-bottom: 3px;
+  }
 `;
 
 export const SectionTitle = styled.h5`
@@ -107,10 +184,25 @@ export const SectionTitle = styled.h5`
   font-size: 16px;
 `;
 
-export const SectionSubtitle = styled.h6`
+export const SectionSubtitle = styled.h6.attrs({
+  role: 'button',
+  tabIndex: 0,
+})`
   margin: 0;
   font-size: 14px;
   line-height: 24px;
+  outline: none;
+
+  &::after {
+    background: ${colors.transparent};
+    display: block;
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
 
   ${EditByCategoryGroup} & {
     display: flex;
@@ -120,16 +212,10 @@ export const SectionSubtitle = styled.h6`
     padding: 0 5px;
     cursor: pointer;
 
-    &:hover {
+    &:hover,
+    &:focus {
       &::after {
-        display: block;
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.25);
+        background: ${colors['shadow-l2']};
       }
     }
     &::before {
@@ -152,36 +238,89 @@ export const SectionSubtitle = styled.h6`
 
 export const Subcategory = styled.h6`
   ${EditByCategoryGroup} & {
-    margin: 0 5px;
-    flex: 1;
-    padding-top: 5px;
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    padding-top: ${rem(5)};
+
+    ${breakpoint(breakpoints.mobile)} {
+      flex: 1;
+      margin: 0 ${rem(5)};
+    }
   }
 `;
 
-export const currencyTitleWidth = 100;
+export const ValueDelete = styled.div`
+  grid-column: 4;
+`;
+
+export const CurrencyForm = styled.div`
+  display: flex;
+  flex-flow: column;
+  width: 100%;
+`;
 
 export const EditCurrency = styled.div`
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-gap: ${rem(2)};
+  grid-template-columns: ${rem(48)} auto ${rem(24)} ${rem(24)};
+  grid-template-rows: ${rem(28)};
 `;
 
 export const AddCurrency = styled(EditCurrency)`
-  flex-flow: column;
-  align-items: flex-start;
-
   ${FormSection} {
-    display: flex;
-    flex-flow: row;
+    display: grid;
+    grid-column: 1 / span 4;
+    grid-gap: inherit;
+    grid-template-columns: inherit;
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    ${FormSection} {
+      overflow: hidden;
+    }
   }
 `;
 
 export const CurrencyTitle = styled.h5`
   margin: 0 5px;
-  flex: 0 0 ${currencyTitleWidth}px;
+  grid-column: 1;
 
   ${AddCurrency} & {
-    flex: 0 0 auto;
+    width: ${rem(48)};
+    input {
+      margin-right: ${rem(2)};
+      width: 100%;
+    }
   }
 `;
 
-export const CurrencyInputGroup = styled.div``;
+export const CurrencyInputGroup = styled.div`
+  grid-column: 2;
+`;
+
+export const CreditLimitEditor = styled.div`
+  display: grid;
+  font-size: ${rem(12)};
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  white-space: nowrap;
+
+  ${AddByCategoryValue} & {
+    grid-row: 2;
+  }
+`;
+
+export const SkipToggle = styled.div`
+  align-items: center;
+  display: inline-flex;
+  font-size: ${rem(12)};
+  grid-row: 3;
+  grid-column: 3;
+  white-space: nowrap;
+
+  ${AddByCategoryValue} & {
+    grid-row: 1;
+    grid-column: 1;
+  }
+`;
