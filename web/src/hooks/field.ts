@@ -1,4 +1,4 @@
-import memoize from 'memoize-one';
+import moize from 'moize';
 import { useRef, useReducer, useCallback, useEffect, useState } from 'react';
 import { debounce } from 'throttle-debounce';
 
@@ -45,7 +45,7 @@ type Reducer<V> = (state: State<V>, action: Action<V>) => State<V>;
 
 type ConvertExternalToInputValue<V> = (value: V, active?: boolean) => string;
 
-const fieldReducer = memoize(
+const fieldReducer = moize(
   <V>(convertExternalToInputValue: ConvertExternalToInputValue<V>) => (
     state: State<V>,
     action: Action<V>,

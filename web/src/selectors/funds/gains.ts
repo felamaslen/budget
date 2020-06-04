@@ -1,5 +1,5 @@
 import getUnixTime from 'date-fns/getUnixTime';
-import memoize from 'memoize-one';
+import moize from 'moize';
 import { rgb, parseToRgb } from 'polished';
 import { createSelector } from 'reselect';
 
@@ -102,14 +102,16 @@ export const getRowGains = (rows: Fund[], cache: Funds.Cache): RowGains =>
 
 const rowGainExists = (rowGain?: RowGain | null): rowGain is RowGain => !!rowGain;
 
-const getMinMax = memoize((rowGains: RowGains): [number, number] =>
-  Object.keys(rowGains)
-    .map<RowGain | null>((id) => rowGains[id])
-    .filter<RowGain>(rowGainExists)
-    .reduce<[number, number]>(
-      ([min, max], rowGain) => [Math.min(min, rowGain.gain), Math.max(max, rowGain.gain)],
-      [Infinity, -Infinity],
-    ),
+const getMinMax = moize(
+  (rowGains: RowGains): [number, number] =>
+    Object.keys(rowGains)
+      .map<RowGain | null>((id) => rowGains[id])
+      .filter<RowGain>(rowGainExists)
+      .reduce<[number, number]>(
+        ([min, max], rowGain) => [Math.min(min, rowGain.gain), Math.max(max, rowGain.gain)],
+        [Infinity, -Infinity],
+      ),
+  { maxSize: 1 },
 );
 
 export type GainsForRow =

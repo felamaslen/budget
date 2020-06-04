@@ -1,6 +1,6 @@
 import { compose } from '@typed/compose';
 import differenceInDays from 'date-fns/differenceInDays';
-import memoize from 'moize';
+import moize from 'moize';
 import { createSelector } from 'reselect';
 
 import { State } from './types';
@@ -13,7 +13,7 @@ export type StateStandard<I extends ListCalcItem, P extends string> = {
   [page in P]: DailyState<I>;
 };
 
-export const getStandardCost = memoize(
+export const getStandardCost = moize(
   <I extends ListCalcItem, P extends string, S extends StateStandard<I, P>>(page: P) => (
     state: S,
   ): number => state[page].total,
@@ -24,7 +24,7 @@ const getRawItems = <I extends Item, P extends string>(page: P) => (
 ): CrudState<I> => state[page].items;
 
 type SortItems<I extends Item> = (items: I[]) => I[];
-export const getItems = memoize(
+export const getItems = moize(
   <I extends Item, P extends string>(page: P, sortItems: SortItems<I> = IDENTITY) =>
     createSelector(
       getRawItems<I, P>(page),
@@ -32,8 +32,8 @@ export const getItems = memoize(
     ),
 );
 
-export const getItem = memoize(<I extends Item, P extends string>(page: P, id: string) => {
-  const processItem = memoize((item: I): I => item, {
+export const getItem = moize(<I extends Item, P extends string>(page: P, id: string) => {
+  const processItem = moize((item: I): I => item, {
     maxSize: 1,
     isReact: true,
   });
@@ -46,11 +46,11 @@ export const getItem = memoize(<I extends Item, P extends string>(page: P, id: s
   };
 });
 
-export const sortStandardItems = memoize(<I extends ListCalcItem>() =>
+export const sortStandardItems = moize(<I extends ListCalcItem>() =>
   sortByKey<'id' | 'date', I>({ key: 'date', order: -1 }, 'id'),
 );
 
-export const getWeeklyCost = memoize(
+export const getWeeklyCost = moize(
   <I extends ListCalcItem, P extends string, S extends StateStandard<I, P>>(page: P) =>
     createSelector<S, I[], number>(
       getItems<I, P>(page, sortStandardItems<I>()),

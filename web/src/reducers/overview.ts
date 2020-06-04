@@ -4,7 +4,7 @@ import endOfMonth from 'date-fns/endOfMonth';
 import isSameMonth from 'date-fns/isSameMonth';
 import setMonth from 'date-fns/setMonth';
 import setYear from 'date-fns/setYear';
-import memoize from 'fast-memoize';
+import moize from 'moize';
 import { replaceAtIndex } from 'replace-array';
 
 import {
@@ -51,7 +51,7 @@ const onRead = (_: State, res: ReadResponse): State => ({
   cost: res.overview.cost,
 });
 
-const getStateRowDates = memoize((state: State): Date[] => getMonthDates({ overview: state }));
+const getStateRowDates = moize((state: State): Date[] => getMonthDates({ overview: state }));
 
 const getDateIndex = (state: State, date: Date): number =>
   getStateRowDates(state).findIndex((item) => isSameMonth(date, item));

@@ -1,4 +1,4 @@
-import memoize from 'fast-memoize';
+import moize from 'moize';
 import shortid from 'shortid';
 
 import { PageList, Create, CreateEdit, DeltaEdit, Item, ListItem } from '~client/types';
@@ -20,7 +20,7 @@ export type OnCreateList<I extends Item, P extends string, O = ListItemCreated<I
   delta: Create<I>,
 ) => O;
 
-export const listItemCreated = memoize(
+export const listItemCreated = moize(
   <I extends Item, P extends string = PageList>(page: P): OnCreateList<I, P> => (
     delta,
   ): ListItemCreated<I, P> => ({
@@ -45,7 +45,7 @@ export type OnUpdateList<I extends Item, P extends string, O = ListItemUpdated<I
   item: CreateEdit<I>,
 ) => O;
 
-export const listItemUpdated = memoize(
+export const listItemUpdated = moize(
   <I extends Item, P extends string = PageList>(page: P): OnUpdateList<I, P> => (
     id,
     delta,
@@ -71,7 +71,7 @@ export type OnDeleteList<I extends Item, P extends string, O = ListItemDeleted<I
   item: CreateEdit<I>,
 ) => O;
 
-export const listItemDeleted = memoize(
+export const listItemDeleted = moize(
   <I extends Item, P extends string = PageList>(page: P): OnDeleteList<I, P> => (
     id,
     item,

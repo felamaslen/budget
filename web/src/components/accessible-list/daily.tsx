@@ -1,5 +1,5 @@
 import isSameDay from 'date-fns/isSameDay';
-import memoize from 'moize';
+import moize from 'moize';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -41,7 +41,7 @@ type DailyRecord = {
   dailyTotal?: number;
 };
 
-const dailySelector = memoize(
+const dailySelector = moize(
   <K extends string>(sortedItems: DailyItem<K>[]): Record<string, DailyRecord> =>
     sortedItems.reduce<{ dailySum: number; record: Record<string, DailyRecord> }>(
       (last, { id, date, cost }, index) => {
