@@ -17,7 +17,7 @@ import stocks from './stocks';
 import { State } from './types';
 import { Action } from '~client/actions';
 
-export { State } from './types';
+export type { State } from './types';
 
 export default combineReducers<State, Action>({
   api,

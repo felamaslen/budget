@@ -8,7 +8,8 @@ import { CREATE_ID } from '~client/constants/data';
 import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared';
 import { Item, Delta, Create, FieldKey } from '~client/types';
 
-export { ModalFields, makeField, FieldWrapper } from './field';
+export { makeField } from './field';
+export type { ModalFields, FieldWrapper } from './field';
 
 type DialogType = 'edit' | 'add';
 

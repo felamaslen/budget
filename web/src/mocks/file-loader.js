@@ -1,1 +1,1 @@
-export default 'path/to/test/file';
+module.exports = 'path/to/test/file';

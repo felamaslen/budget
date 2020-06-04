@@ -1,21 +1,20 @@
 import { Server } from 'http';
 import path from 'path';
+import bodyParser from 'body-parser';
 import express from 'express';
+import webLogger from 'morgan';
+import passport from 'passport';
+import serveStatic from 'serve-static';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-import serveStatic from 'serve-static';
-import webLogger from 'morgan';
-import bodyParser from 'body-parser';
-import passport from 'passport';
-
-import config from '~api/config';
-import logger from '~api/modules/logger';
-import routes from '~api/routes';
-import { getIp } from '~api/modules/headers';
-import { getStrategy } from '~api/modules/auth';
-import { errorHandler } from '~api/modules/error-handling';
 
 import { version } from '../../package.json';
+import config from '~api/config';
+import { getStrategy } from '~api/modules/auth';
+import { errorHandler } from '~api/modules/error-handling';
+import { getIp } from '~api/modules/headers';
+import logger from '~api/modules/logger';
+import routes from '~api/routes';
 
 const API_PREFIX = '/api/v4';
 

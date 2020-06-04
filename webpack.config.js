@@ -1,4 +1,5 @@
 const path = require('path');
+const { removeDataTestIdTransformer } = require('typescript-transformer-jsx-remove-data-test-id');
 const webpack = require('webpack');
 
 const __DEV__ = process.env.NODE_ENV === 'development';
@@ -31,12 +32,6 @@ function getPlugins() {
   }
 
   return common;
-}
-
-function getOptimization() {
-  return {
-    usedExports: true,
-  };
 }
 
 function getEntry() {
@@ -73,13 +68,15 @@ module.exports = {
     },
     extensions: ['.ts', '.tsx', '.js'],
   },
-  optimization: getOptimization(),
+  optimization: {
+    usedExports: true,
+  },
   module: {
     rules: [
       {
         test: /\.(js|tsx?)$/,
         exclude: /node_modules/,
-        use: ['babel-loader', 'ts-loader'],
+        use: 'babel-loader',
       },
       {
         test: /\.css$/,

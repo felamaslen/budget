@@ -1,5 +1,5 @@
 import { PgConnectionConfig } from 'knex';
-import { fundSalt } from '../fund-salt.json';
+import { fundSalt } from './fund-salt.json';
 
 if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
   // eslint-disable-next-line import/no-extraneous-dependencies

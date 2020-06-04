@@ -3,7 +3,6 @@ import nock from 'nock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
-import sinon from 'sinon';
 
 import { AccessibleListCreateItem } from './item';
 import { PropsItemCreate } from './types';
@@ -39,18 +38,6 @@ describe('Accessible list create item', () => {
     );
 
   describe('when suggestions are available', () => {
-    let clock: sinon.SinonFakeTimers;
-    beforeEach(() => {
-      clock = sinon.useFakeTimers();
-    });
-
-    afterEach(() => {
-      act(() => {
-        clock.runAll();
-      });
-      clock.restore();
-    });
-
     const setupToSuggestions = (
       withNext = false,
     ): RenderResult & {
@@ -91,8 +78,6 @@ describe('Accessible list create item', () => {
     > => {
       const renderResult = setupToSuggestions(withNext);
 
-      clock.runAll(); // trigger debounced request
-
       await waitFor(() => {
         expect(renderResult.getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
       });
@@ -121,7 +106,6 @@ describe('Accessible list create item', () => {
 
       const { queryByRole } = setupToSuggestions();
       expect(queryByRole('list', { hidden: true })).not.toBeInTheDocument();
-      clock.runAll();
 
       await waitFor(() => {
         expect(queryByRole('list', { hidden: true })).toBeInTheDocument();
@@ -142,7 +126,6 @@ describe('Accessible list create item', () => {
         });
       });
 
-      clock.runAll();
       expect(queryByRole('list')).not.toBeInTheDocument();
     });
 
@@ -175,7 +158,6 @@ describe('Accessible list create item', () => {
 
     describe('when selecting a suggestion', () => {
       it('should change the value of the current input', async () => {
-        expect.assertions(2);
         const { inputSomeField } = await setupWithSelection();
 
         await waitFor(() => {
@@ -184,7 +166,6 @@ describe('Accessible list create item', () => {
       });
 
       it('should focus the next input', async () => {
-        expect.assertions(4);
         const { inputSomeField, inputNextField } = await setupWithSelection();
 
         await waitFor(() => {
@@ -192,9 +173,6 @@ describe('Accessible list create item', () => {
         });
         await waitFor(() => {
           expect(inputSomeField.value).toBe('Caster sugar');
-        });
-        act(() => {
-          clock.runAll();
         });
         await waitFor(() => {
           expect(document.activeElement).toBe(inputNextField);
@@ -238,8 +216,6 @@ describe('Accessible list create item', () => {
 
       describe('if on the last field of the create form', () => {
         it('should focus the add button', async () => {
-          expect.assertions(3);
-
           nock('http://localhost')
             .get('/api/v4/data/search/my-page/nextField/z/5')
             .matchHeader('authorization', 'some api key')
@@ -263,8 +239,6 @@ describe('Accessible list create item', () => {
             });
           });
 
-          clock.runAll(); // trigger debounced request
-
           await waitFor(() => {
             expect(getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
           });
@@ -284,10 +258,6 @@ describe('Accessible list create item', () => {
 
           expect(inputNextField.value).toBe('Zenith');
 
-          act(() => {
-            clock.runAll();
-          });
-
           await waitFor(() => {
             expect(document.activeElement).toBe(addButton);
           });
@@ -297,7 +267,6 @@ describe('Accessible list create item', () => {
 
     describe('if there is a next column value', () => {
       it('should add the next column from suggestions', async () => {
-        expect.assertions(3);
         const { inputSomeField, inputNextField } = await setupWithSelection(true, 0);
 
         await waitFor(() => {
@@ -309,14 +278,10 @@ describe('Accessible list create item', () => {
       });
 
       it('should focus the next input', async () => {
-        expect.assertions(5);
         const { inputNextField } = await setupWithSelection(true, 0);
 
         await waitFor(() => {
           expect(inputNextField.value).toBe('Kitchen');
-        });
-        act(() => {
-          clock.runAll();
         });
         await waitFor(() => {
           expect(document.activeElement).toBe(inputNextField);

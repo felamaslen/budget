@@ -9,7 +9,12 @@ import { useMediaQuery, TodayContext } from '~client/hooks';
 import { getOverviewTable } from '~client/selectors';
 import { breakpointBase } from '~client/styled/mixins';
 import { breakpoints } from '~client/styled/variables';
-import { OverviewTable as Rows, OverviewHeader, OverviewTableColumn, Page } from '~client/types';
+import {
+  OverviewTable as OverviewTableRows,
+  OverviewHeader,
+  OverviewTableColumn,
+  Page,
+} from '~client/types';
 
 type ColumnsProps = { columns: OverviewTableColumn[] };
 
@@ -70,7 +75,7 @@ const Header: React.FC<ColumnsProps> = ({ columns }) => (
 
 type PropsRows = ColumnsProps & {
   isMobile: boolean;
-  rows: Rows;
+  rows: OverviewTableRows;
 };
 
 const Rows: React.FC<PropsRows> = ({ isMobile, columns, rows }) => (

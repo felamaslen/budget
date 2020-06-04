@@ -1,7 +1,7 @@
 const md5 = require('md5');
-const { fundSalt } = require('../api/fund-salt.json');
 
 const generateUserPin = require('../api/generate-user-pin');
+const { fundSalt } = require('../api/src/fund-salt.json');
 
 async function generateFunds(uid, db) {
   const cids = await db('fund_cache_time')
@@ -100,13 +100,9 @@ async function seed(db) {
     return;
   }
 
-  await db('users')
-    .select()
-    .del();
+  await db('users').select().del();
 
-  await db('fund_hash')
-    .select()
-    .del();
+  await db('fund_hash').select().del();
 
   const { pinHash } = await generateUserPin('1234');
 

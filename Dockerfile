@@ -18,6 +18,8 @@ COPY yarn.lock ./
 
 RUN yarn install --frozen-lockfile
 
+ENV PATH="/opt/app/node_modules/.bin:${PATH}"
+
 ARG BIRTH_DATE
 ENV BIRTH_DATE=${BIRTH_DATE}
 

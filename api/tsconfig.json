@@ -4,7 +4,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "jsx": "react",
     "allowJs": true,
     "noEmit": true,
     "strict": true,
@@ -13,22 +12,20 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
-    "lib": ["es2015", "dom"],
+    "lib": ["es2015"],
     "baseUrl": ".",
-    "typeRoots": ["./types", "./node_modules/@types"],
+    "outDir": "./build",
+    "typeRoots": ["../types", "../node_modules/@types"],
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths"
+      }
+    ],
     "paths": {
-      "~api/*": ["./api/src/*"],
-      "~client/*": ["./web/src/*"]
+      "~api/*": ["./src/*"]
     }
   },
   "include": [
-    "types",
-    "web/src",
-    "api/src",
-    "seeds",
-    "migrations"
-  ],
-  "exclude": [
-    "node_modules"
+    "src/**/*"
   ]
 }

@@ -9,11 +9,11 @@ import {
 } from '@testing-library/react';
 import format from 'date-fns/format';
 import MatchMediaMock from 'jest-matchmedia-mock';
+import MockDate from 'mockdate';
 import nock from 'nock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
-import sinon from 'sinon';
 
 import { AccessibleList, AccessibleListStandard, Props } from '.';
 import { listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions';
@@ -61,22 +61,19 @@ describe('<AccessibleList />', () => {
 
   beforeAll(() => {
     matchMedia = new MatchMediaMock();
+    MockDate.set(new Date('2020-05-03'));
+  });
+  afterAll(() => {
+    MockDate.reset();
   });
 
-  let clock: sinon.SinonFakeTimers;
   beforeEach(() => {
     nock('http://localhost')
       .get('/api/v4/data/search/myPage/item/Different%20item%20innit/5')
       .reply(200, { data: { list: [] } });
-
-    clock = sinon.useFakeTimers(new Date('2020-05-03T18:01:31Z'));
   });
 
   afterEach(async () => {
-    await act(async () => {
-      await clock.runAllAsync();
-    });
-    clock.restore();
     matchMedia.clear();
   });
 
@@ -88,7 +85,7 @@ describe('<AccessibleList />', () => {
     const store = existingStore ?? createStore<MyState<I>>()(state);
     const utils = render(
       <Provider store={store}>
-        <AccessibleList<I, MyPage, never, E> page={myPage} {...props} />
+        <AccessibleList<I, MyPage, never, E> {...props} />
       </Provider>,
     );
     return { ...utils, store };
@@ -365,9 +362,6 @@ describe('<AccessibleList />', () => {
           act(() => {
             fireEvent.blur(input);
           });
-          await act(async () => {
-            await clock.runAllAsync();
-          });
           expect(input.value).toBe(inputValueAfter);
           expect(renderResult.store.getActions()).toHaveLength(0);
         });
@@ -386,9 +380,6 @@ describe('<AccessibleList />', () => {
               fireEvent.change(input, {
                 target: { value: '' },
               });
-            });
-            await act(async () => {
-              await clock.nextAsync();
             });
 
             return { input, store };
@@ -436,9 +427,6 @@ describe('<AccessibleList />', () => {
         act(() => {
           fireEvent.change(itemInput, { target: { value: 'Different item innit' } });
         });
-        await act(async () => {
-          await clock.runAllAsync();
-        });
         act(() => {
           fireEvent.blur(itemInput);
         });
@@ -456,16 +444,10 @@ describe('<AccessibleList />', () => {
           fireEvent.click(addButton);
         });
 
-        await act(async () => {
-          await clock.runAllAsync();
-        });
-
         return { renderResult, dateInput, itemInput, costInput, addButton };
       };
 
       it('should call onCreate after pressing the add button', async () => {
-        expect.assertions(1);
-
         const {
           renderResult: { store },
         } = await setup();
@@ -476,22 +458,24 @@ describe('<AccessibleList />', () => {
           cost: 1065,
         });
 
-        expect(store.getActions()).toStrictEqual(
-          expect.arrayContaining([{ ...expectedAction, fakeId: 'some-fake-id' }]),
-        );
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual(
+            expect.arrayContaining([{ ...expectedAction, fakeId: 'some-fake-id' }]),
+          );
+        });
       });
 
       it('should reset the input values after creating an item', async () => {
-        expect.assertions(3);
         const { dateInput, itemInput, costInput } = await setup();
 
-        expect(dateInput.value).toBe('03/05/2020');
-        expect(itemInput.value).toBe('');
-        expect(costInput.value).toBe('');
+        await waitFor(() => {
+          expect(dateInput.value).toBe('03/05/2020');
+          expect(itemInput.value).toBe('');
+          expect(costInput.value).toBe('');
+        });
       });
 
       it('should focus the first input field so that another item can be created quickly', async () => {
-        expect.assertions(1);
         const { dateInput } = await setup();
 
         await waitFor(() => {

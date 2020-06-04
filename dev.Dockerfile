@@ -17,7 +17,6 @@ COPY package.json ./
 COPY yarn.lock ./
 
 ENV NODE_ENV=development
-ENV BABEL_ENV=node
 ENV PATH="/opt/app/node_modules/.bin:${PATH}"
 
 RUN yarn install --frozen-lockfile

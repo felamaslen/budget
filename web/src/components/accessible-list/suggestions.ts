@@ -1,7 +1,7 @@
 import axios, { Canceler } from 'axios';
 import { useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { debounce } from 'throttle-debounce';
+import { useDebounce } from 'use-debounce';
 
 import { FieldKey, State as PageState, ActiveField, ADD_BUTTON } from './types';
 import { API_PREFIX } from '~client/constants/data';
@@ -66,65 +66,63 @@ export function useSuggestions<I extends Item, P extends string>({
     requestedField: null,
   });
 
+  const [suggestionRequest, setSuggestionRequest] = useState<[FieldKey<I>, string] | undefined>();
+  const [debouncedSuggestionRequest] = useDebounce(suggestionRequest, 100);
   const cancelRequest = useRef<Canceler>();
-  const requestSuggestions = useMemo(
-    () =>
-      debounce<<F extends FieldKey<I>>(field: F, value: string) => () => void>(
-        100,
-        <F extends FieldKey<I>>(field: F, value: string): (() => void) => {
-          let cancelled = false;
-          const request = async (): Promise<void> => {
-            try {
-              if (cancelRequest.current) {
-                cancelRequest.current();
-              }
-              const res = await axios.get<SuggestionsResponse<I, F>>(
-                `${API_PREFIX}/data/search/${page}/${field}/${sanitizeValue(
-                  value,
-                )}/${numToRequest}`,
-                {
-                  headers: {
-                    authorization: apiKey,
-                  },
-                  cancelToken: new axios.CancelToken((token): void => {
-                    cancelRequest.current = token;
-                  }),
-                },
-              );
-              if (cancelled) {
-                return;
-              }
+  useEffect(() => {
+    let cancelled = false;
+    const request = async (): Promise<void> => {
+      try {
+        if (cancelRequest.current) {
+          cancelRequest.current();
+        }
+        if (!debouncedSuggestionRequest) {
+          return;
+        }
 
-              const list = res.data.data?.list ?? [];
-              const next = res.data.data?.nextCategory ?? [];
-              const nextField = res.data.data?.nextField ?? null;
+        const [field, value] = debouncedSuggestionRequest;
+        const res = await axios.get<SuggestionsResponse<I, typeof field>>(
+          `${API_PREFIX}/data/search/${page}/${field}/${sanitizeValue(value)}/${numToRequest}`,
+          {
+            headers: {
+              authorization: apiKey,
+            },
+            cancelToken: new axios.CancelToken((token): void => {
+              cancelRequest.current = token;
+            }),
+          },
+        );
+        if (cancelled) {
+          return;
+        }
 
-              setState((last) =>
-                last.activeField === field
-                  ? {
-                      ...last,
-                      list,
-                      next,
-                      nextField,
-                      requestedField: field,
-                    }
-                  : last,
-              );
-            } catch (err) {
-              if (!axios.isCancel(err)) {
-                throw err; // TODO: display error message
+        const list = res.data.data?.list ?? [];
+        const next = res.data.data?.nextCategory ?? [];
+        const nextField = res.data.data?.nextField ?? null;
+
+        setState((last) =>
+          last.activeField === field
+            ? {
+                ...last,
+                list,
+                next,
+                nextField,
+                requestedField: field,
               }
-            }
-          };
+            : last,
+        );
+      } catch (err) {
+        if (!axios.isCancel(err)) {
+          throw err; // TODO: display error message
+        }
+      }
+    };
 
-          request();
-          return (): void => {
-            cancelled = true;
-          };
-        },
-      ),
-    [page, apiKey],
-  );
+    request();
+    return (): void => {
+      cancelled = true;
+    };
+  }, [page, apiKey, debouncedSuggestionRequest]);
 
   const onType = useCallback(
     (field: FieldKey<I>, value: string): void => {
@@ -136,12 +134,12 @@ export function useSuggestions<I extends Item, P extends string>({
         last.activeField === field ? last : { ...last, activeField: field, ...stateEmpty },
       );
       if (value) {
-        requestSuggestions(field, value);
+        setSuggestionRequest([field, value]);
       } else {
         setState((last) => ({ ...last, ...stateEmpty }));
       }
     },
-    [suggestionFields, requestSuggestions],
+    [suggestionFields],
   );
 
   useEffect(() => {

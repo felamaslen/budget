@@ -2,5 +2,5 @@
   "watch": ["api/src"],
   "ext": "ts",
   "ignore": ["api/src/**/*.spec.ts", "web/src/**"],
-  "exec": "node --inspect=0.0.0.0 -r ts-node/register -r tsconfig-paths/register ./api/src/index.ts"
+  "exec": "TS_NODE_PROJECT=api/tsconfig.json node --inspect=0.0.0.0 -r ts-node/register -r tsconfig-paths/register ./api/src/index.ts"
 }
