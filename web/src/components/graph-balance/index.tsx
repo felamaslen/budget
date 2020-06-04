@@ -1,16 +1,12 @@
 import { rgba } from 'polished';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AfterCanvas } from './after-canvas';
 import { Key } from './key';
 import { Targets } from './targets';
-import {
-  GraphCashFlow,
-  Props as GraphCashFlowProps,
-  getValuesWithTime,
-} from '~client/components/graph-cashflow';
-import { useToday } from '~client/hooks/time';
+import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashflow';
+import { TodayContext } from '~client/hooks';
 import { leftPad, rightPad } from '~client/modules/data';
 import {
   getStartDate,
@@ -239,7 +235,7 @@ const isNetWorthSummaryOldEqual = (left: NetWorthSummaryOld, right: NetWorthSumm
   left.main === right.main && left.options === right.options;
 
 export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
-  const today = useToday();
+  const today = useContext(TodayContext);
   const startDate = useSelector(getStartDate);
   const netWorthOld = useSelector(getNetWorthSummaryOld, isNetWorthSummaryOldEqual);
   const netWorth = useSelector(getNetWorthTable);
@@ -276,16 +272,15 @@ export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
     setShowAll,
   ]);
 
-  const graphProps: GraphCashFlowProps = {
-    name: 'balance',
-    lines,
-    afterLines,
-    after,
-  };
-
-  if (isMobile) {
-    graphProps.graphHeight = graphOverviewHeightMobile;
-  }
-
-  return <GraphCashFlow isMobile={isMobile} {...graphProps} />;
+  return (
+    <GraphCashFlow
+      isMobile={isMobile}
+      today={today}
+      name="balance"
+      graphHeight={isMobile ? graphOverviewHeightMobile : undefined}
+      lines={lines}
+      afterLines={afterLines}
+      after={after}
+    />
+  );
 };

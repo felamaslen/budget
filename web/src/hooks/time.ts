@@ -1,11 +1,11 @@
 import endOfDay from 'date-fns/endOfDay';
 import isSameSecond from 'date-fns/isSameSecond';
-import { useState, useRef, useEffect } from 'react';
+import { createContext, Context, useState, useRef, useEffect } from 'react';
 
 import { IDENTITY } from '~client/modules/data';
 
-function timeHookFactory(roundFn: (date: Date) => Date = IDENTITY): () => Date {
-  return function useTime(): Date {
+function timeHookFactory(roundFn: (date: Date) => Date = IDENTITY): [() => Date, Context<Date>] {
+  const useTime = (): Date => {
     const [time, setTime] = useState<Date>(roundFn(new Date()));
     const timer = useRef<number>(0);
     useEffect(() => {
@@ -22,6 +22,11 @@ function timeHookFactory(roundFn: (date: Date) => Date = IDENTITY): () => Date {
 
     return time;
   };
+
+  const TimeContext: Context<Date> = createContext(roundFn(new Date()));
+
+  return [useTime, TimeContext];
 }
 
-export const useToday = timeHookFactory(endOfDay);
+const [useToday, TodayContext] = timeHookFactory(endOfDay);
+export { useToday, TodayContext };

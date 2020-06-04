@@ -1,5 +1,5 @@
 import fromUnixTime from 'date-fns/fromUnixTime';
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useContext, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas } from './after-canvas';
@@ -23,7 +23,7 @@ import {
   Period,
   GRAPH_FUNDS_NUM_TICKS,
 } from '~client/constants/graph';
-import { useToday } from '~client/hooks';
+import { TodayContext } from '~client/hooks';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 
@@ -320,7 +320,7 @@ function useGraphProps({
 }
 
 export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
-  const today = useToday();
+  const today = useContext(TodayContext);
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
   const fundItems = useSelector(getFundItems);

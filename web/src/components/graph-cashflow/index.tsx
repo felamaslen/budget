@@ -9,12 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
 import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
-import { useToday } from '~client/hooks/time';
 import { formatCurrency } from '~client/modules/format';
 import { PickUnion, Range, DrawProps, Line } from '~client/types';
 
 export type Props = PickUnion<LineGraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
   isMobile?: boolean;
+  today: Date;
   graphHeight?: number;
 };
 
@@ -81,17 +81,15 @@ function makeBeforeLines(now: Date): React.FC<DrawProps> {
 export const GraphCashFlow: React.FC<Props> = ({
   name,
   isMobile = false,
+  today,
   graphHeight = GRAPH_HEIGHT,
   lines,
   afterLines,
   after,
 }) => {
-  const now = useToday();
   const graphWidth = useGraphWidth();
-
   const ranges = useMemo<Range>(() => getRanges(lines), [lines]);
-
-  const beforeLines = useMemo(() => makeBeforeLines(now), [now]);
+  const beforeLines = useMemo(() => makeBeforeLines(today), [today]);
 
   const labelX = useCallback(
     (value: number): string => format(fromUnixTime(value), 'MMM yyyy'),

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { useSelector } from 'react-redux';
 
 import { Key } from './key';
@@ -8,7 +8,7 @@ import {
   TimeValuesProps,
 } from '~client/components/graph-cashflow';
 import { profitLossColor } from '~client/components/graph/helpers';
-import { useToday } from '~client/hooks/time';
+import { TodayContext } from '~client/hooks/time';
 import { getStartDate, getProcessedCost } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { Page, Line, DrawProps } from '~client/types';
@@ -41,7 +41,7 @@ function processData(startDate: Date, net: number[], spending: number[]): Line[]
 }
 
 export const GraphSpending: React.FC = () => {
-  const today = useToday();
+  const today = useContext(TodayContext);
   const startDate = useSelector(getStartDate);
   const { net, spending } = useSelector(getProcessedCost(today));
 
@@ -69,5 +69,5 @@ export const GraphSpending: React.FC = () => {
     return AfterLines;
   }, [today]);
 
-  return <GraphCashFlow name="spend" lines={lines} afterLines={afterLines} />;
+  return <GraphCashFlow today={today} name="spend" lines={lines} afterLines={afterLines} />;
 };

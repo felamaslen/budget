@@ -9,7 +9,7 @@ import { LoginForm } from '~client/components/login-form';
 import { ErrorMessages } from '~client/containers/ErrorMessages';
 import Header from '~client/containers/Header';
 import { Spinner } from '~client/containers/Spinner';
-import { ResizeContext, useDebouncedResize } from '~client/hooks';
+import { ResizeContext, useDebouncedResize, TodayContext, useToday } from '~client/hooks';
 import { State } from '~client/reducers';
 import { getInitialLoading, getLoggedIn } from '~client/selectors';
 import StyleReset from '~client/styled/reset';
@@ -24,17 +24,20 @@ const RootProvided: React.FC = () => {
   const initialLoading = useSelector(getInitialLoading);
 
   const windowWidth = useDebouncedResize();
+  const today = useToday();
 
   return (
     <ResizeContext.Provider value={windowWidth}>
-      <Main>
-        <StyleReset />
-        <Header />
-        <ErrorMessages />
-        <LoginForm />
-        {loggedIn && !initialLoading && <Content />}
-        <Spinner />
-      </Main>
+      <TodayContext.Provider value={today}>
+        <Main>
+          <StyleReset />
+          <Header />
+          <ErrorMessages />
+          <LoginForm />
+          {loggedIn && !initialLoading && <Content />}
+          <Spinner />
+        </Main>
+      </TodayContext.Provider>
     </ResizeContext.Provider>
   );
 };

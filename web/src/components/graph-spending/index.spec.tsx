@@ -1,30 +1,32 @@
 /* eslint-disable max-len */
 import { render, RenderResult } from '@testing-library/react';
+import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
-import sinon from 'sinon';
 
 import { GraphSpending } from '.';
+import { TodayContext } from '~client/hooks';
 import { testState as state } from '~client/test-data/state';
 
 describe('<GraphSpending />', () => {
   const makeStore = createStore();
-  const now = new Date('2020-04-20T16:29Z');
+  const today = endOfDay(new Date('2020-04-20T16:29Z'));
 
   const setup = (): RenderResult => {
     const store = makeStore(state);
 
     return render(
       <Provider store={store}>
-        <GraphSpending />
+        <TodayContext.Provider value={today}>
+          <GraphSpending />
+        </TodayContext.Provider>
       </Provider>,
     );
   };
 
   it('should render a graph', async () => {
     expect.assertions(1);
-    const clock = sinon.useFakeTimers(now);
     const { getByTestId } = setup();
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
       @media only screen and (min-width:500px) {
@@ -964,7 +966,5 @@ describe('<GraphSpending />', () => {
         </g>
       </svg>
     `);
-
-    clock.restore();
   });
 });

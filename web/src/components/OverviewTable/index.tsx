@@ -1,12 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
 import { OverviewTableCells as Cells } from './cells';
 import * as Styled from './styles';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
-import { useMediaQuery } from '~client/hooks/media';
-import { useToday } from '~client/hooks/time';
+import { useMediaQuery, TodayContext } from '~client/hooks';
 import { getOverviewTable } from '~client/selectors';
 import { breakpointBase } from '~client/styled/mixins';
 import { breakpoints } from '~client/styled/variables';
@@ -84,7 +83,7 @@ const Rows: React.FC<PropsRows> = ({ isMobile, columns, rows }) => (
 const RowsMemo = memo(Rows);
 
 export const OverviewTable: React.FC = () => {
-  const today = useToday();
+  const today = useContext(TodayContext);
   const rows = useSelector(getOverviewTable(today));
 
   const isTablet = useMediaQuery(breakpointBase(breakpoints.mobile));

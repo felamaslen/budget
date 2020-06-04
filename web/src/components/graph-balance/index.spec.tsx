@@ -1,23 +1,16 @@
 /* eslint-disable max-len */
 import { render, RenderResult } from '@testing-library/react';
+import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
-import sinon from 'sinon';
 
 import { GraphBalance, Props } from '.';
+import { TodayContext } from '~client/hooks';
 import { testState as state } from '~client/test-data/state';
 
 describe('<GraphBalance />', () => {
-  let clock: sinon.SinonFakeTimers;
-  const now = new Date('2020-04-20T16:29Z');
-  beforeEach(() => {
-    clock = sinon.useFakeTimers(now);
-  });
-
-  afterEach(() => {
-    clock.restore();
-  });
+  const now = endOfDay(new Date('2020-04-20T16:29Z'));
 
   const makeStore = createStore();
 
@@ -29,7 +22,9 @@ describe('<GraphBalance />', () => {
 
     return render(
       <Provider store={store}>
-        <GraphBalance {...props} />
+        <TodayContext.Provider value={now}>
+          <GraphBalance {...props} />
+        </TodayContext.Provider>
       </Provider>,
     );
   };
