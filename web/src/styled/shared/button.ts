@@ -1,15 +1,18 @@
 import { darken } from 'polished';
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { centerGridOne, NetWorthValueFX } from '~client/components/FormField/styles';
-import { ModalDialog } from '~client/components/ModalDialog/styles';
-import { CategoryItemForm, ToggleVisibility } from '~client/components/NetWorthCategoryList/styles';
+import { centerGridOne, NetWorthValueFX } from '~client/components/form-field/styles';
+import { ModalDialog } from '~client/components/modal-dialog/styles';
+import {
+  CategoryItemForm,
+  ToggleVisibility,
+} from '~client/components/net-worth/category-list/styles';
 import {
   EditCurrency,
   EditByCategory,
   AddByCategoryValue,
   FormContainer as NetWorthEditForm,
-} from '~client/components/NetWorthEditForm/styles';
-import { ButtonDelete as NetWorthEntryDelete } from '~client/components/NetWorthList/styles';
+} from '~client/components/net-worth/edit-form/styles';
+import { ButtonDelete as NetWorthEntryDelete } from '~client/components/net-worth/list/styles';
 import { rem, breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 

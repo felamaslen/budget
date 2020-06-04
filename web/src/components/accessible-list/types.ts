@@ -2,8 +2,8 @@ import React from 'react';
 import { StyledComponent } from 'styled-components';
 
 import { OnCreateList, OnUpdateList, OnDeleteList } from '~client/actions';
-import { FieldComponent } from '~client/components/FormField';
-import { ModalFields } from '~client/components/ModalDialog';
+import { FieldComponent } from '~client/components/form-field';
+import { ModalFields } from '~client/components/modal-dialog';
 import { State as AppState } from '~client/reducers';
 import { ListState } from '~client/reducers/list';
 import { WithCrud, Delta, Item, PickUnion, FieldKey } from '~client/types';

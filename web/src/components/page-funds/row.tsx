@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { Pie } from '../pie';
 import * as Styled from './styles';
 import { FundProps } from './types';
-import { FundGainInfo } from '~client/components/FundGainInfo';
+import { FundGainInfo } from '~client/components/fund-gain-info';
 import { GraphFundItem } from '~client/components/graph-fund-item';
 import { TodayContext } from '~client/hooks/time';
 import { getViewSoldFunds, getFundsCachedValue } from '~client/selectors';

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import { FieldComponent } from '~client/components/FormField';
+import { FieldComponent } from '~client/components/form-field';
 
 type PropsField<V, E extends {}> = {
   Field: FieldComponent<V, E>;
@@ -14,7 +14,7 @@ type PropsField<V, E extends {}> = {
   extraProps?: Partial<E>;
 };
 
-function AccessibleListItemField<V = never, E extends {} = {}>({
+export function AccessibleListItemField<V = never, E extends {} = {}>({
   Field,
   field,
   value,
@@ -39,5 +39,3 @@ function AccessibleListItemField<V = never, E extends {} = {}>({
     />
   );
 }
-
-export default AccessibleListItemField;

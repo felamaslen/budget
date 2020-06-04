@@ -1,7 +1,7 @@
 import React from 'react';
 
 import * as Styled from './styles';
-import { FundGainInfo } from '~client/components/FundGainInfo';
+import { FundGainInfo } from '~client/components/fund-gain-info';
 import { abbreviateFundName } from '~client/modules/finance';
 import { GainsForRow } from '~client/selectors';
 

@@ -7,7 +7,7 @@ import { getItems } from './selectors';
 import * as Styled from './styles';
 import { Props, FieldKey } from './types';
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions';
-import ModalDialog from '~client/components/ModalDialog';
+import { ModalDialog } from '~client/components/modal-dialog';
 import { useListCrud, useIsMobile } from '~client/hooks';
 import { Item, Create } from '~client/types';
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 
-import AccessibleListItemField from '../field';
+import { AccessibleListItemField } from '../field';
 import * as Styled from '../styles';
 import { useSuggestions, Result as Suggestions } from '../suggestions';
 import { Fields, FieldKey, PropsItemCreate, ADD_BUTTON } from '../types';

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 import { FundGraph } from '~client/components/graph-fund-item/styles';
-import { GraphFunds } from '~client/containers/graph-funds/styles';
+import { GraphFunds } from '~client/components/graph-funds/styles';
 import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors, graphFundsHeightMobile } from '~client/styled/variables';
 

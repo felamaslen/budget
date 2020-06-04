@@ -19,8 +19,8 @@ import {
   FormFieldTextInline,
   FormFieldCostInline,
   FormFieldDateInline,
-} from '~client/components/FormField';
-import { ModalFields } from '~client/components/ModalDialog';
+} from '~client/components/form-field';
+import { ModalFields } from '~client/components/modal-dialog';
 import { formatCurrency, capitalise } from '~client/modules/format';
 import { Delta, ListItem, ListCalcItem, PickUnion } from '~client/types';
 

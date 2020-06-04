@@ -5,7 +5,7 @@ import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { BrowserRouter } from 'react-router-dom';
 
-import Root from '~client/containers/Root';
+import { Root } from '~client/components/root';
 import { store } from '~client/store';
 
 import './images/favicon.png';
@@ -27,8 +27,8 @@ if (process.env.NODE_ENV !== 'test') {
 
 if (module.hot) {
   module.hot.accept(
-    './containers/Root',
+    './components/root',
     // eslint-disable-next-line global-require
-    () => renderApp(require('./containers/Root').default),
+    () => renderApp(require('./components/root').Root),
   );
 }

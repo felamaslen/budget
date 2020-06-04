@@ -6,7 +6,7 @@ import createStore from 'redux-mock-store';
 
 import { AccessibleListCreateItem } from './item';
 import { PropsItemCreate } from './types';
-import { FormFieldTextInline } from '~client/components/FormField';
+import { FormFieldTextInline } from '~client/components/form-field';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 

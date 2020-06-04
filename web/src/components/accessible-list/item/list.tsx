@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import AccessibleListItemField from '../field';
+import { AccessibleListItemField } from '../field';
 import { ListFieldMobile } from '../mobile';
 import { getItem } from '../selectors';
 import * as Styled from '../styles';

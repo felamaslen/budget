@@ -19,8 +19,8 @@ import {
   makeInlineTextField,
   FormFieldCost,
   FormFieldDate,
-} from '~client/components/FormField';
-import { ModalFields, makeField, FieldWrapper } from '~client/components/ModalDialog';
+} from '~client/components/form-field';
+import { ModalFields, makeField, FieldWrapper } from '~client/components/modal-dialog';
 import { formatCurrency } from '~client/modules/format';
 import { ShopItem } from '~client/types';
 

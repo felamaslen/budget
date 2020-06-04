@@ -12,9 +12,9 @@ import {
   FormFieldTransactions,
   FormFieldTransactionsInline,
   FormFieldText,
-} from '~client/components/FormField';
-import { makeField } from '~client/components/ModalDialog';
-import { GraphFunds } from '~client/containers/graph-funds';
+} from '~client/components/form-field';
+import { GraphFunds } from '~client/components/graph-funds';
+import { makeField } from '~client/components/modal-dialog';
 import { useIsMobile, usePersistentState } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
