@@ -9,7 +9,7 @@ export const Title = styled.h3`
   line-height: 48px;
   font-size: 24px;
   text-align: center;
-  color: ${colors['very-light']};
+  color: ${colors.light.light};
 
   ${breakpoint(breakpoints.mobile)} {
     height: 60px;
@@ -27,9 +27,9 @@ export const Form = styled.div`
 export const FormInner = styled.div`
   width: 240px;
   height: 300px;
-  background: ${colors['very-dark']};
+  background: ${colors.dark.dark};
   border-radius: 4px;
-  box-shadow: 0 26px 90px ${colors['shadow-l8']};
+  box-shadow: 0 26px 90px ${colors.shadow.dark};
 
   ${breakpoint(breakpoints.mobile)} {
     width: 300px;
@@ -44,8 +44,8 @@ export const NumberInputPad = styled.div`
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 12px;
   height: 170px;
-  background: ${colors['translucent-l15']};
-  box-shadow: inset 0 0 13px ${colors['shadow-l5']};
+  background: ${colors.translucent.dark.mediumDark};
+  box-shadow: inset 0 0 13px ${colors.shadow.mediumLight};
 
   user-select: none;
   ${breakpoint(breakpoints.mobile)} {
@@ -78,12 +78,16 @@ export const Digit = styled(Button)<{ digit: number }>`
   padding: 0;
   height: 100%;
   grid-column: ${({ digit }): number => (digit === 0 ? 2 : 1 + ((digit - 1) % 3))};
-  background-color: ${colors['medium-light']} !important;
-  background-image: linear-gradient(167deg, ${colors['translucent-l1']} 50%, transparent 55%),
-    linear-gradient(to bottom, ${colors['translucent-l15']}, transparent) !important;
-  box-shadow: inset 0 0 0 1px ${colors['medium-light']},
-    inset 0 0 0 2px ${colors['translucent-l15']}, 0 8px 0 0 ${colors.medium},
-    0 8px 0 1px ${colors['shadow-l4']}, 0 8px 8px 1px ${colors['shadow-l5']} !important;
+  background-color: ${colors.medium.light} !important;
+  background-image: linear-gradient(
+      167deg,
+      ${colors.translucent.dark.mediumLight} 50%,
+      transparent 55%
+    ),
+    linear-gradient(to bottom, ${colors.translucent.dark.mediumDark}, transparent) !important;
+  box-shadow: inset 0 0 0 1px ${colors.medium.light},
+    inset 0 0 0 2px ${colors.translucent.dark.mediumDark}, 0 8px 0 0 ${colors.medium},
+    0 8px 0 1px ${colors.shadow.mediumLight}, 0 8px 8px 1px ${colors.shadow.mediumLight} !important;
   color: ${colors.white};
   border: none;
   border-radius: 5px;
@@ -92,12 +96,12 @@ export const Digit = styled(Button)<{ digit: number }>`
   font-weight: bold;
   letter-spacing: -1px;
   position: relative;
-  text-shadow: 0 1px 1px ${colors['shadow-l5']};
+  text-shadow: 0 1px 1px ${colors.shadow.mediumLight};
   transition: all linear 0.05s;
 
   &:active {
-    box-shadow: inset 0 0 0 1px ${colors.medium}, inset 0 0 0 2px ${colors['translucent-l15']},
-      0 0 0 1px ${colors['shadow-l4']};
+    box-shadow: inset 0 0 0 1px ${colors.medium},
+      inset 0 0 0 2px ${colors.translucent.dark.mediumDark}, 0 0 0 1px ${colors.shadow.mediumLight};
     transform: translateY(10px);
   }
 
@@ -117,7 +121,7 @@ export const PinDisplay = styled.div`
 `;
 
 export const InputPin = styled.div<{ done: boolean }>`
-  background-color: ${colors['slightly-dark']};
+  background-color: ${colors.dark.light};
   flex: 1 0 0;
   font-size: 64px;
   height: ${rem(60)};
@@ -134,7 +138,7 @@ export const InputPin = styled.div<{ done: boolean }>`
     z-index: 2;
 
     &:focus {
-      background-color: ${colors['very-light']};
+      background-color: ${colors.light.light};
     }
 
     &,
@@ -158,7 +162,7 @@ export const InputPin = styled.div<{ done: boolean }>`
     display: inline-flex;
     background-color: transparent;
     content: '•';
-    color: ${colors['very-light']};
+    color: ${colors.light.light};
     justify-content: center;
     opacity: 0;
     transition: opacity linear 0.1s;

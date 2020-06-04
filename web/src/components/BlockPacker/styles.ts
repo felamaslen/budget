@@ -1,4 +1,3 @@
-import { rgba } from 'polished';
 import { CSSProperties } from 'react';
 import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
 
@@ -59,15 +58,13 @@ export const InfiniteBox = styled.div.attrs(({ flex, flow }: BoxProps) => ({
   width: 100%;
 `;
 
-const highlightColor = rgba(colors.highlight, 0.4);
-
 const activeStyle = css`
   &::after {
     content: '';
     display: block;
     height: 100%;
     width: 100%;
-    background-color: ${highlightColor};
+    background-color: ${colors.highlight.dark};
   }
 `;
 
@@ -89,7 +86,7 @@ export const InfiniteChild = styled.div.attrs(
   background-image: ${({ hasSubTree }): string =>
     hasSubTree
       ? 'none'
-      : `linear-gradient(to bottom right, ${colors['translucent-l6']}, ${colors['shadow-l3']})`};
+      : `linear-gradient(to bottom right, ${colors.translucent.light.dark}, ${colors.shadow.light})`};
 
   ${({ name }): false | FlattenSimpleInterpolation =>
     name === 'saved' &&
@@ -107,7 +104,7 @@ export const InfiniteChild = styled.div.attrs(
       }
     `};
 
-  box-shadow: inset -1px -1px 13px ${colors['shadow-l4']};
+  box-shadow: inset -1px -1px 13px ${colors.shadow.mediumLight};
   cursor: default;
   float: left;
   height: 100%;
@@ -131,10 +128,10 @@ export const InfiniteChild = styled.div.attrs(
 export const statusHeight = 21;
 
 export const StatusBar = styled.div`
-  background: ${colors.dark};
+  background: ${colors.dark.mediumLight};
   padding: 0 0.8em;
   margin-top: -1px;
-  color: ${colors.light};
+  color: ${colors.light.mediumLight};
   flex: 0 0 ${rem(statusHeight)};
   font-size: ${rem(16)};
   line-height: ${rem(20)};

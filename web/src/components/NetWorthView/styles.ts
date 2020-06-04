@@ -4,7 +4,7 @@ import { colors, breakpoints } from '~client/styled/variables';
 import { Aggregate, NetWorthTableColumn } from '~client/types';
 
 export const NetWorthView = styled.div`
-  background: ${colors['translucent-l95']};
+  background: ${colors.translucent.light.light};
   display: flex;
   flex: 1 1 0;
   flex-flow: column;
@@ -39,8 +39,8 @@ export const Table = styled.div`
   }
 
   thead {
-    border-right: 1px solid ${colors['slightly-light']};
-    border-left: 1px solid ${colors['slightly-light']};
+    border-right: 1px solid ${colors.light.mediumDark};
+    border-left: 1px solid ${colors.light.mediumDark};
 
     tr {
       border-bottom: none;
@@ -48,16 +48,16 @@ export const Table = styled.div`
   }
 
   tr {
-    border-bottom: 1px solid ${colors['slightly-light']};
+    border-bottom: 1px solid ${colors.light.mediumDark};
   }
   td {
-    border-right: 1px solid ${colors['slightly-light']};
+    border-right: 1px solid ${colors.light.mediumDark};
   }
 `;
 
 export const Graphs = styled.div`
   display: flex;
-  box-shadow: 0 0 6px ${colors['shadow-l4']};
+  box-shadow: 0 0 6px ${colors.shadow.mediumLight};
   flex: 0 0 auto;
   flex-flow: row;
 

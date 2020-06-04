@@ -26,8 +26,8 @@ export const FundGraph = styled.div<{
 
           svg {
             position: absolute;
-            background: ${colors['translucent-l8']};
-            box-shadow: 0 3px 7px ${colors['shadow-l2']};
+            background: ${colors.translucent.light.mediumLight};
+            box-shadow: 0 3px 7px ${colors.shadow.light};
             width: 300px;
             height: 120px;
           }

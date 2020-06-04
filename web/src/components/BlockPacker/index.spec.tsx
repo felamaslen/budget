@@ -69,7 +69,7 @@ describe('<BlockPacker />', () => {
       }
 
       .c2 {
-        background-image: linear-gradient(to bottom right,rgba(255,255,255,0.6),rgba(0,0,0,0.3));
+        background-image: linear-gradient(to bottom right,rgba(255,255,255,0.6),rgba(0,0,0,0.2));
         box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
         cursor: default;
         float: left;

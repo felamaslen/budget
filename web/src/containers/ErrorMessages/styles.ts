@@ -17,7 +17,7 @@ export const Message = styled.li<{ closed?: boolean; level: ErrorLevel }>`
   font-size: 0.9em;
   cursor: pointer;
   border-radius: 0.3em;
-  box-shadow: 0 3px 6px ${colors['shadow-l3']};
+  box-shadow: 0 3px 6px ${colors.shadow.light};
   height: 3em;
   background: ${({ level }): string => colors.messages[level] || 'none'};
   overflow: hidden;

@@ -15,6 +15,6 @@ export const Header = styled.header`
     flex-flow: row-reverse;
     justify-content: space-between;
     background: linear-gradient(to bottom, ${colors.primary}, ${colors.primaryDark});
-    box-shadow: 0 0 6px ${colors['shadow-l6']};
+    box-shadow: 0 0 6px ${colors.shadow.mediumDark};
   }
 `;

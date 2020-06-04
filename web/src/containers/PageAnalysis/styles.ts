@@ -16,7 +16,7 @@ export const Input = styled.span`
   ${breakpoint(breakpoints.mobile)} {
     margin: 0 0 0 0.5em;
     padding: 0.5em 0.5em 0.5em 0;
-    border-right: 2px solid ${colors['medium-light']};
+    border-right: 2px solid ${colors.medium.light};
   }
 
   ${breakpoint(breakpoints.tablet)} {
@@ -178,7 +178,7 @@ export const SubTree = styled.ul`
   margin: 0 0.5em 0 3em;
   padding: 0;
   list-style: none;
-  background: ${colors['highlight-light']};
+  background: ${colors.highlight.light};
   ${TreeMain} {
     display: flex;
     font-size: 0.9em;
@@ -209,7 +209,7 @@ export const TreeList = styled.ul`
   & > ${TreeListItem} {
     position: relative;
     &:nth-child(2n + 1) > ${TreeMain} {
-      background: ${colors.light};
+      background: ${colors.light.mediumLight};
     }
     & > ${TreeMain} {
       display: flex;

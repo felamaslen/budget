@@ -21,9 +21,6 @@ export const upArrow = "'\\2197'";
 export const downArrowStrong = "'\\2b0a'";
 export const upArrowStrong = "'\\2b08'";
 
-const colorDark = rgb(34, 34, 34);
-const colorLight = rgb(234, 234, 234);
-
 const colorStocks = rgb(84, 110, 122);
 
 type ColorsBase = {
@@ -34,17 +31,37 @@ type PageColors = ColorsBase & {
   main: string;
 };
 
+type Shade = {
+  light: string;
+  mediumLight: string;
+  mediumDark: string;
+  dark: string;
+};
+
+type LightDark = {
+  light: string;
+  dark: string;
+  translucent?: string;
+};
+
 type Colors = {
   primary: string;
   primaryDark: string;
   primaryMobile: string;
   primaryDarkMobile: string;
   accent: string;
-  highlight: string;
-  'highlight-light': string;
+  highlight: LightDark;
   error: string;
   white: string;
+  light: Shade;
+  medium: Shade;
+  dark: Shade;
   black: string;
+  shadow: Shade;
+  translucent: {
+    light: Shade;
+    dark: Shade;
+  };
   transparent: string;
   green: string;
   blue: string;
@@ -52,40 +69,8 @@ type Colors = {
   button: ColorsBase;
   create: string;
   delete: string;
-  dark: string;
-  'very-dark': string;
-  'very-dark-1': string;
-  'medium-very-light': string;
-  'medium-light': string;
-  medium: string;
-  'medium-slightly-dark': string;
-  'medium-dark-1': string;
-  'slightly-dark': string;
-  light: string;
-  'slightly-light': string;
-  'very-light': string;
-  'shadow-l05': string;
-  'shadow-l2': string;
-  'shadow-l3': string;
-  'shadow-l4': string;
-  'shadow-l5': string;
-  'shadow-l6': string;
-  'shadow-l8': string;
-  'translucent-dark': string;
-  'translucent-l15': string;
-  'translucent-l1': string;
-  'translucent-l2': string;
-  'translucent-l6': string;
-  'translucent-l7': string;
-  'translucent-l8': string;
-  'translucent-l95': string;
-  profit: string;
-  'profit-light': string;
-  'profit-translucent': string;
-  loss: string;
-  'loss-light': string;
-  'loss-translucent': string;
-  'editable-highlight': string;
+  profit: LightDark;
+  loss: LightDark;
   'bg-up': string;
   'bg-up-hl': string;
   'bg-up-rev': string;
@@ -126,52 +111,68 @@ export const colors: Colors = {
   primaryDark: rgb(159, 48, 48),
   primaryMobile: rgb(255, 254, 247),
   primaryDarkMobile: rgb(159, 48, 48),
+  white: rgb(255, 255, 255),
+  light: {
+    light: rgb(254, 254, 254),
+    mediumLight: rgb(234, 234, 234),
+    mediumDark: rgb(204, 204, 204),
+    dark: rgb(153, 153, 153),
+  },
+  medium: {
+    light: rgb(134, 134, 134),
+    mediumLight: rgb(115, 115, 115),
+    mediumDark: rgb(102, 102, 102),
+    dark: rgb(85, 85, 85),
+  },
+  dark: {
+    light: rgb(51, 51, 51),
+    mediumLight: rgb(34, 34, 34),
+    mediumDark: rgb(24, 24, 24),
+    dark: rgb(17, 17, 17),
+  },
+  black: rgb(0, 0, 0),
+  shadow: {
+    light: rgba(0, 0, 0, 0.2),
+    mediumLight: rgba(0, 0, 0, 0.4),
+    mediumDark: rgba(0, 0, 0, 0.6),
+    dark: rgba(0, 0, 0, 0.8),
+  },
+  translucent: {
+    light: {
+      light: rgba(255, 255, 255, 0.95),
+      mediumLight: rgba(255, 255, 255, 0.8),
+      mediumDark: rgba(255, 255, 255, 0.7),
+      dark: rgba(255, 255, 255, 0.6),
+    },
+    dark: {
+      light: rgba(255, 255, 255, 0.2),
+      mediumLight: rgba(255, 255, 255, 0.1),
+      mediumDark: rgba(255, 255, 255, 0.15),
+      dark: rgba(220, 220, 220, 0.4),
+    },
+  },
+  transparent: rgba(255, 255, 255, 0),
   green: rgb(0, 153, 51),
   amber: rgb(251, 224, 127),
   accent: rgb(255, 160, 64),
   error: rgb(153, 0, 0),
   create: rgb(0, 153, 24),
   delete: rgb(204, 0, 0),
-  dark: colorDark,
-  'very-dark': rgb(17, 17, 17),
-  'very-dark-1': rgb(24, 24, 24),
-  'medium-very-light': rgb(153, 153, 153),
-  'medium-light': rgb(134, 134, 134),
-  medium: rgb(115, 115, 115),
-  'medium-slightly-dark': rgb(102, 102, 102),
-  'medium-dark-1': rgb(85, 85, 85),
-  'slightly-dark': rgb(51, 51, 51),
-  light: colorLight,
-  'slightly-light': rgb(204, 204, 204),
-  'very-light': rgb(254, 254, 254),
-  'shadow-l05': rgba(0, 0, 0, 0.05),
-  'shadow-l2': rgba(0, 0, 0, 0.2),
-  'shadow-l3': rgba(0, 0, 0, 0.3),
-  'shadow-l4': rgba(0, 0, 0, 0.4),
-  'shadow-l5': rgba(0, 0, 0, 0.5),
-  'shadow-l6': rgba(0, 0, 0, 0.6),
-  'shadow-l8': rgba(0, 0, 0, 0.8),
-  'translucent-dark': rgba(220, 220, 220, 0.4),
-  'translucent-l15': rgba(255, 255, 255, 0.15),
-  'translucent-l1': rgba(255, 255, 255, 0.1),
-  'translucent-l2': rgba(255, 255, 255, 0.2),
-  'translucent-l6': rgba(255, 255, 255, 0.6),
-  'translucent-l7': rgba(255, 255, 255, 0.7),
-  'translucent-l8': rgba(255, 255, 255, 0.8),
-  'translucent-l95': rgba(255, 255, 255, 0.95),
-  highlight: rgba(255, 255, 0, 0.85),
-  'highlight-light': rgb(255, 252, 218),
-  white: rgb(255, 255, 255),
-  black: rgb(0, 0, 0),
-  transparent: rgba(255, 255, 255, 0),
+  highlight: {
+    dark: rgba(255, 255, 0, 0.4),
+    light: rgb(255, 252, 218),
+  },
   blue: rgb(0, 153, 238),
-  profit: rgb(72, 59, 228),
-  'profit-light': rgb(204, 255, 213),
-  'profit-translucent': rgba(100, 255, 100, 0.7),
-  loss: rgb(255, 44, 44),
-  'loss-light': rgb(255, 167, 167),
-  'loss-translucent': rgba(255, 100, 100, 0.7),
-  'editable-highlight': rgb(255, 140, 0),
+  profit: {
+    dark: rgb(72, 59, 228),
+    light: rgb(204, 255, 213),
+    translucent: rgba(100, 255, 100, 0.7),
+  },
+  loss: {
+    dark: rgb(255, 44, 44),
+    light: rgb(255, 167, 167),
+    translucent: rgba(255, 100, 100, 0.7),
+  },
   'bg-up': rgb(85, 232, 54),
   'bg-up-hl': rgb(18, 45, 12),
   'bg-up-rev': rgb(51, 44, 44),
@@ -192,7 +193,7 @@ export const colors: Colors = {
     mobile: rgb(255, 163, 92),
     disabled: rgb(156, 156, 156),
   },
-  overview: {
+  [Page.overview]: {
     main: rgb(66, 66, 66),
     income: rgb(36, 191, 55),
     incomeMobile: rgb(183, 255, 163),

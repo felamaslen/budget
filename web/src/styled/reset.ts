@@ -52,17 +52,17 @@ const reset = css`
         width: ${rem(8)};
       }
       &::-webkit-scrollbar-track {
-        -webkit-box-shadow: inset 0 0 16px -4px ${colors['shadow-l3']};
+        -webkit-box-shadow: inset 0 0 16px -4px ${colors.shadow.light};
       }
       &::-webkit-scrollbar-thumb {
-        background-color: ${colors['shadow-l3']};
+        background-color: ${colors.shadow.light};
         border-radius: ${rem(8)};
       }
       &::-webkit-scrollbar-thumb:hover {
-        background-color: ${colors['shadow-l4']};
+        background-color: ${colors.shadow.mediumLight};
       }
       &::-webkit-scrollbar-thumb:active {
-        background-color: ${colors['shadow-l6']};
+        background-color: ${colors.shadow.mediumDark};
       }
     }
   }

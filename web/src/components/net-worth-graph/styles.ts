@@ -18,7 +18,7 @@ export const GraphSection = styled.div`
   overflow: hidden;
 
   &:not(last-child) {
-    border-right: 1px solid ${colors['medium-slightly-dark']};
+    border-right: 1px solid ${colors.medium.mediumDark};
   }
 
   ${breakpoint(breakpoints.mobile)} {

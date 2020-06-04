@@ -7,7 +7,7 @@ export const Main = styled.span``;
 export const Hover = styled.span`
   display: none;
   ${breakpoint(breakpoints.mobile)} {
-    background: ${colors['translucent-l8']};
+    background: ${colors.translucent.light.mediumLight};
     position: absolute;
     left: 0;
     padding: 0 2px;

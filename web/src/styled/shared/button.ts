@@ -51,7 +51,7 @@ export const Button = styled.button<{
       width: 0;
       height: 0;
       border: solid transparent;
-      border-left-color: ${colors['very-dark']};
+      border-left-color: ${colors.dark.dark};
       border-width: 6px 8px;
       transform-origin: left center;
       ${({ expanded = false }): false | FlattenSimpleInterpolation =>
@@ -100,12 +100,12 @@ export const Button = styled.button<{
       background: $color-button-active;
     }
     &:focus {
-      box-shadow: 0 2px 3px ${colors['shadow-l3']};
+      box-shadow: 0 2px 3px ${colors.shadow.light};
     }
     &:disabled {
       background: ${colors.button.disabled};
       cursor: default;
-      border: 1px solid ${colors['medium-slightly-dark']};
+      border: 1px solid ${colors.medium.mediumDark};
     }
   }
 
@@ -197,14 +197,14 @@ export const ButtonAdd = styled(ButtonDelete)`
 
 export const ButtonCancel = styled(Button)`
   ${ModalDialog} & {
-    background: ${colors['slightly-light']};
+    background: ${colors.light.mediumDark};
     color: ${colors.black};
     &::after {
       display: block;
       content: '';
       height: 100%;
       width: 0;
-      border-right: 1px solid ${colors['medium-very-light']};
+      border-right: 1px solid ${colors.light.dark};
     }
   }
 

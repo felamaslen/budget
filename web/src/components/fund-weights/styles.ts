@@ -3,7 +3,7 @@ import { rem } from '~client/styled/mixins';
 import { colors } from '~client/styled/variables';
 
 export const Label = styled.span<{ small: boolean }>`
-  color: ${colors['very-light']};
+  color: ${colors.light.light};
   position: absolute;
   left: 50%;
   top: 50%;

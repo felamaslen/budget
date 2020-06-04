@@ -45,7 +45,7 @@ export const AverageLine: React.FC<Props> = ({ value, data, secondary, ...props 
   return (
     <path
       d={averageLinePath}
-      stroke={colors['medium-very-light']}
+      stroke={colors.light.dark}
       strokeDasharray="3,5"
       strokeWidth={1}
       fill="none"

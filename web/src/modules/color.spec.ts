@@ -1,20 +1,8 @@
 import { rgb, rgba } from 'polished';
 
-import { rgba as rgba__deprecated, getOverviewScoreColor, colorKey, averageColor } from './color';
+import { getOverviewScoreColor, colorKey, averageColor } from './color';
 
 describe('color module', () => {
-  describe('rgba', () => {
-    it('should return rgba for four values', () => {
-      expect.assertions(1);
-      expect(rgba__deprecated([254, 19, 99, 0.4])).toBe('rgba(254,19,99,0.4)');
-    });
-
-    it('should return rgb for three values', () => {
-      expect.assertions(1);
-      expect(rgba__deprecated([0, 92, 29])).toBe('rgb(0,92,29)');
-    });
-  });
-
   describe('getOverviewScoreColor', () => {
     describe.each`
       case                                      | value | range

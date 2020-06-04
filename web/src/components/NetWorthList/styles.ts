@@ -20,7 +20,7 @@ export const ItemSummary = styled.div.attrs({
   role: 'button',
   tabIndex: 0,
 })<{ add?: boolean }>`
-  background: ${colors['translucent-l95']};
+  background: ${colors.translucent.light.light};
   display: flex;
   flex-flow: column;
   padding: 0 ${rem(6)};
@@ -41,16 +41,16 @@ export const ItemSummary = styled.div.attrs({
     `};
 
   ${breakpoint(breakpoints.mobile)} {
-    background: ${colors.light};
+    background: ${colors.light.mediumLight};
     margin: 0;
     user-select: none;
 
     &:focus,
     &:hover {
-      background: ${colors['slightly-light']};
+      background: ${colors.light.mediumDark};
     }
     &:active {
-      box-shadow: 0 1px 3px ${colors['shadow-l8']};
+      box-shadow: 0 1px 3px ${colors.shadow.dark};
     }
 
     ${({ add }): FlattenSimpleInterpolation =>

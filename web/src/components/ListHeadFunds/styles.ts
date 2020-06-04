@@ -32,20 +32,19 @@ export const ListHeadFunds = styled(FlexCenter)`
 const getGainColor = (isMobile: boolean) => ({ profit, loss }: GainProps): string => {
   if (isMobile) {
     if (profit) {
-      return colors['profit-translucent'];
+      return colors.profit.translucent ?? '';
     }
     if (loss) {
-      return colors['loss-translucent'];
+      return colors.loss.translucent ?? '';
     }
   }
   if (profit) {
-    return colors['profit-light'];
+    return colors.profit.light;
   }
   if (loss) {
-    return colors['loss-light'];
+    return colors.loss.light;
   }
-
-  return 'transparent';
+  return colors.transparent;
 };
 
 const getGainColorLight = (isMobile: boolean) => ({ profit, loss }: GainProps): string =>

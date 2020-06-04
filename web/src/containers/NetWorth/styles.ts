@@ -4,7 +4,7 @@ import { breakpoint, rem } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const NetWorth = styled.div<{ visible: boolean }>`
-  background: ${colors['shadow-l6']};
+  background: ${colors.shadow.mediumDark};
   display: flex;
   flex-flow: column;
   height: 100%;
@@ -15,9 +15,9 @@ export const NetWorth = styled.div<{ visible: boolean }>`
   z-index: 100;
 
   ${breakpoint(breakpoints.mobile)} {
-    background: ${colors['shadow-l4']};
+    background: ${colors.shadow.mediumLight};
     border-width: 2px 10px 0 10px;
-    box-shadow: 0 2px 6px ${colors['shadow-l4']};
+    box-shadow: 0 2px 6px ${colors.shadow.mediumLight};
     left: 50%;
     height: auto;
     max-height: 90%;
@@ -41,7 +41,7 @@ export const Tab = styled(NavLink)`
   margin: 0 5px;
   padding: 0 10px;
   line-height: 22px;
-  background: ${colors['shadow-l4']};
+  background: ${colors.shadow.mediumLight};
   color: ${colors.white};
   text-decoration: none;
   border-radius: 0 0 6px 6px;
@@ -51,8 +51,8 @@ export const Tab = styled(NavLink)`
     background: ${colors.black};
   }
   &.selected {
-    background: ${colors['shadow-l2']};
-    color: ${colors['slightly-light']};
+    background: ${colors.shadow.light};
+    color: ${colors.light.mediumDark};
     cursor: default;
   }
 `;
@@ -63,7 +63,7 @@ export const Meta = styled.div`
   align-items: center;
   justify-content: center;
   position: relative;
-  background: ${colors['shadow-l4']};
+  background: ${colors.shadow.mediumLight};
   color: ${colors.white};
 `;
 

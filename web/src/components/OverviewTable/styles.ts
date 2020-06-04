@@ -118,7 +118,7 @@ export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColo
     !!past &&
     column === 'month' &&
     css`
-      background: ${colors.light};
+      background: ${colors.light.mediumLight};
     `}
 
   ${({ active, column }): false | FlattenSimpleInterpolation =>
@@ -176,12 +176,12 @@ export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColo
     ${({ column }): false | FlattenSimpleInterpolation =>
       ([Page.income, Page.funds] as (OverviewHeader | 'month')[]).includes(column) &&
       css`
-        border-left: 3px solid ${colors.dark};
+        border-left: 3px solid ${colors.dark.mediumLight};
       `}
     ${({ column }): false | FlattenSimpleInterpolation =>
       column === 'net' &&
       css`
-        border-right: 3px solid ${colors.light};
+        border-right: 3px solid ${colors.light.mediumLight};
       `}
     ${({ column }): false | FlattenSimpleInterpolation =>
       column === 'netWorthPredicted' &&

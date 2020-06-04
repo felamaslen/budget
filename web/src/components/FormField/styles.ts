@@ -149,7 +149,7 @@ export const FormField = styled.div<{
         }
 
         &::after {
-          border: 1px solid ${invalid ? colors.error : colors['slightly-light']};
+          border: 1px solid ${invalid ? colors.error : colors.light.mediumDark};
           border-top: none;
           content: '';
           display: block;
@@ -181,16 +181,16 @@ const transactionsWidthCost = 80;
 
 export const TransactionsModal = styled.div`
   ${breakpoint(breakpoints.mobile)} {
-    background: ${colors['translucent-l8']};
-    border-right: 1px solid ${colors['slightly-light']};
-    border-bottom: 1px solid ${colors['slightly-light']};
-    box-shadow: 0 3px 6px ${colors['shadow-l2']};
+    background: ${colors.translucent.light.mediumLight};
+    border-right: 1px solid ${colors.light.mediumDark};
+    border-bottom: 1px solid ${colors.light.mediumDark};
+    box-shadow: 0 3px 6px ${colors.shadow.light};
     position: absolute;
     top: 100%;
     z-index: 5;
 
     ${FormField} {
-      border: 1px solid ${colors.light};
+      border: 1px solid ${colors.light.mediumLight};
       font-size: ${rem(14)};
       width: 100%;
 
@@ -252,7 +252,7 @@ export const TransactionsListItem = styled.li`
 
     &:not(:last-child) {
       padding-bottom: 3px;
-      border-bottom: 1px dotted ${colors['slightly-light']};
+      border-bottom: 1px dotted ${colors.light.mediumDark};
     }
   }
 
@@ -368,7 +368,7 @@ export const NumTransactions = styled.button<{ active?: boolean }>`
   ${breakpoint(breakpoints.mobile)} {
     background: none;
     border: none;
-    border-right: 1px solid ${colors['slightly-light']};
+    border-right: 1px solid ${colors.light.mediumDark};
     color: inherit;
     display: block;
     font: inherit;
@@ -454,7 +454,7 @@ export const NetWorthValueFX = styled.li<{ add: boolean }>`
     css`
       margin-top: 3px;
       padding: 3px 0;
-      background: ${colors['translucent-l2']};
+      background: ${colors.translucent.dark.light};
     `}
 
   ${FormField} {

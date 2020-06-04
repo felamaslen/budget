@@ -18,7 +18,7 @@ export const StandardRow = styled(Row)<{
     !!isFuture &&
     css`
       input {
-        color: ${colors['slightly-dark']};
+        color: ${colors.dark.light};
         font-style: italic;
       }
     `}

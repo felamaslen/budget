@@ -53,7 +53,7 @@ export const FundRow = styled(StandardRow)<Partial<FundProps>>`
         height: ${rem(24)};
         line-height: ${rem(24)};
         font-style: italic;
-        color: ${colors['slightly-light']};
+        color: ${colors.light.mediumDark};
       `};
   }
 `;
@@ -64,7 +64,7 @@ export const FundRowMobile = styled(StandardRow)<{ isSold: boolean }>`
   ${({ isSold }): false | FlattenSimpleInterpolation =>
     isSold &&
     css`
-      color: ${colors['medium-light']};
+      color: ${colors.medium.light};
     `};
 `;
 

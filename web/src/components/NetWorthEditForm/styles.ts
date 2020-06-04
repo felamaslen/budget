@@ -97,8 +97,8 @@ export const EditByCategoryGroup = styled.div``;
 export const EditByCategoryValue = styled.div<{ isLiability: boolean; isOption: boolean }>`
   background: linear-gradient(
     to bottom,
-    ${colors['translucent-l2'] as string},
-    ${colors['translucent-l1'] as string}
+    ${colors.translucent.dark.light as string},
+    ${colors.translucent.dark.mediumLight as string}
   );
   display: grid;
   grid-template-columns: ${({ isOption }): string =>
@@ -215,7 +215,7 @@ export const SectionSubtitle = styled.h6.attrs({
     &:hover,
     &:focus {
       &::after {
-        background: ${colors['shadow-l2']};
+        background: ${colors.shadow.light};
       }
     }
     &::before {

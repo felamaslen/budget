@@ -8,7 +8,7 @@ export const ShowAll = styled.span`
   font-size: 0.9em;
   line-height: 20px;
   padding: 0.1em 0.2em;
-  background: ${colors['translucent-l6']};
+  background: ${colors.translucent.light.dark};
   cursor: pointer;
   user-select: none;
   span {

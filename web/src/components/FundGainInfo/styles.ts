@@ -19,7 +19,7 @@ type SoldProps = { isSold: boolean };
 
 const profitColor = (postProcess: (value: string) => string = IDENTITY) => ({
   gain,
-}: ProfitProps): string => postProcess(gain >= 0 ? colors.profit : colors.loss);
+}: ProfitProps): string => postProcess(gain >= 0 ? colors.profit.dark : colors.loss.dark);
 
 const Column = styled.span`
   display: flex;
@@ -30,7 +30,7 @@ const Column = styled.span`
 `;
 
 export const Value = styled.span<{ isRow?: boolean }>`
-  color: ${colors['slightly-dark']};
+  color: ${colors.dark.light};
   flex: 1;
   font-weight: bold;
   margin-right: ${rem(4)};
@@ -50,7 +50,8 @@ export const Breakdown = styled(InlineFlex)<{ isRow?: boolean }>`
   flex: 2;
 
   ${breakpoint(breakpoints.mobile)} {
-    background: ${({ isRow }): string => (isRow ? colors['translucent-l6'] : colors.transparent)};
+    background: ${({ isRow }): string =>
+      isRow ? colors.translucent.light.dark : colors.transparent};
     flex: 2 1 0;
   }
 `;
@@ -145,7 +146,7 @@ export const Text = styled.span.attrs(({ color }) => ({
   }
 
   ${breakpoint(breakpoints.mobile)} {
-    background: ${colors['medium-slightly-dark']};
+    background: ${colors.medium.mediumDark};
     display: block;
 
     & > span {

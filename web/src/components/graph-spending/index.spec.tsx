@@ -74,7 +74,7 @@ describe('<GraphSpending />', () => {
             </g>
             <g>
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -82,7 +82,7 @@ describe('<GraphSpending />', () => {
                 y2="303.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -90,7 +90,7 @@ describe('<GraphSpending />', () => {
                 y2="265.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -98,7 +98,7 @@ describe('<GraphSpending />', () => {
                 y2="246.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -106,7 +106,7 @@ describe('<GraphSpending />', () => {
                 y2="227.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -114,7 +114,7 @@ describe('<GraphSpending />', () => {
                 y2="209.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -122,7 +122,7 @@ describe('<GraphSpending />', () => {
                 y2="171.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -130,7 +130,7 @@ describe('<GraphSpending />', () => {
                 y2="152.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -138,7 +138,7 @@ describe('<GraphSpending />', () => {
                 y2="133.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -146,7 +146,7 @@ describe('<GraphSpending />', () => {
                 y2="115.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -154,7 +154,7 @@ describe('<GraphSpending />', () => {
                 y2="77.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -162,7 +162,7 @@ describe('<GraphSpending />', () => {
                 y2="58.5"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -204,7 +204,7 @@ describe('<GraphSpending />', () => {
             </g>
             <g>
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="-8.5"
                 x2="-8.5"
@@ -220,7 +220,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="11.5"
                 x2="11.5"
@@ -228,7 +228,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="30.5"
                 x2="30.5"
@@ -236,7 +236,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="49.5"
                 x2="49.5"
@@ -244,7 +244,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="69.5"
                 x2="69.5"
@@ -260,7 +260,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="88.5"
                 x2="88.5"
@@ -268,7 +268,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="107.5"
                 x2="107.5"
@@ -276,7 +276,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="127.5"
                 x2="127.5"
@@ -284,7 +284,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="146.5"
                 x2="146.5"
@@ -300,7 +300,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="165.5"
                 x2="165.5"
@@ -308,7 +308,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="185.5"
                 x2="185.5"
@@ -316,7 +316,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="204.5"
                 x2="204.5"
@@ -324,7 +324,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="223.5"
                 x2="223.5"
@@ -332,7 +332,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="243.5"
                 x2="243.5"
@@ -348,7 +348,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="262.5"
                 x2="262.5"
@@ -356,7 +356,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="281.5"
                 x2="281.5"
@@ -364,7 +364,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="301.5"
                 x2="301.5"
@@ -372,7 +372,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="320.5"
                 x2="320.5"
@@ -388,7 +388,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="339.5"
                 x2="339.5"
@@ -396,7 +396,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="359.5"
                 x2="359.5"
@@ -404,7 +404,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="378.5"
                 x2="378.5"
@@ -412,7 +412,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="397.5"
                 x2="397.5"
@@ -428,7 +428,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="417.5"
                 x2="417.5"
@@ -436,7 +436,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="436.5"
                 x2="436.5"
@@ -444,7 +444,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="455.5"
                 x2="455.5"
@@ -452,7 +452,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="475.5"
                 x2="475.5"
@@ -460,7 +460,7 @@ describe('<GraphSpending />', () => {
                 y2="0"
               />
               <line
-                stroke="rgb(238,238,238)"
+                stroke="#eaeaea"
                 stroke-width="0.5"
                 x1="494.5"
                 x2="494.5"
@@ -478,7 +478,7 @@ describe('<GraphSpending />', () => {
             </g>
             <g>
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="-8.5"
                 x2="-8.5"
@@ -486,7 +486,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(51,51,51)"
+                stroke="#333"
                 stroke-width="1"
                 x1="0.5"
                 x2="0.5"
@@ -494,7 +494,7 @@ describe('<GraphSpending />', () => {
                 y2="285"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="11.5"
                 x2="11.5"
@@ -502,7 +502,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="30.5"
                 x2="30.5"
@@ -510,7 +510,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="49.5"
                 x2="49.5"
@@ -518,7 +518,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="69.5"
                 x2="69.5"
@@ -526,7 +526,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(51,51,51)"
+                stroke="#333"
                 stroke-width="1"
                 x1="77.5"
                 x2="77.5"
@@ -534,7 +534,7 @@ describe('<GraphSpending />', () => {
                 y2="285"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="88.5"
                 x2="88.5"
@@ -542,7 +542,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="107.5"
                 x2="107.5"
@@ -550,7 +550,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="127.5"
                 x2="127.5"
@@ -558,7 +558,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="146.5"
                 x2="146.5"
@@ -566,7 +566,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(51,51,51)"
+                stroke="#333"
                 stroke-width="1"
                 x1="162.5"
                 x2="162.5"
@@ -574,7 +574,7 @@ describe('<GraphSpending />', () => {
                 y2="285"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="165.5"
                 x2="165.5"
@@ -582,7 +582,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="185.5"
                 x2="185.5"
@@ -590,7 +590,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="204.5"
                 x2="204.5"
@@ -598,7 +598,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="223.5"
                 x2="223.5"
@@ -606,7 +606,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="243.5"
                 x2="243.5"
@@ -614,7 +614,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(51,51,51)"
+                stroke="#333"
                 stroke-width="1"
                 x1="245.5"
                 x2="245.5"
@@ -622,7 +622,7 @@ describe('<GraphSpending />', () => {
                 y2="285"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="262.5"
                 x2="262.5"
@@ -630,7 +630,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="281.5"
                 x2="281.5"
@@ -638,7 +638,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="301.5"
                 x2="301.5"
@@ -646,7 +646,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="320.5"
                 x2="320.5"
@@ -654,7 +654,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(51,51,51)"
+                stroke="#333"
                 stroke-width="1"
                 x1="331.5"
                 x2="331.5"
@@ -662,7 +662,7 @@ describe('<GraphSpending />', () => {
                 y2="285"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="339.5"
                 x2="339.5"
@@ -670,7 +670,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="359.5"
                 x2="359.5"
@@ -678,7 +678,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="378.5"
                 x2="378.5"
@@ -686,7 +686,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="397.5"
                 x2="397.5"
@@ -694,7 +694,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(51,51,51)"
+                stroke="#333"
                 stroke-width="1"
                 x1="414.5"
                 x2="414.5"
@@ -702,7 +702,7 @@ describe('<GraphSpending />', () => {
                 y2="285"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="417.5"
                 x2="417.5"
@@ -710,7 +710,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="436.5"
                 x2="436.5"
@@ -718,7 +718,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="455.5"
                 x2="455.5"
@@ -726,7 +726,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="475.5"
                 x2="475.5"
@@ -734,7 +734,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(0,0,0)"
+                stroke="#000"
                 stroke-width="1"
                 x1="494.5"
                 x2="494.5"
@@ -742,7 +742,7 @@ describe('<GraphSpending />', () => {
                 y2="295"
               />
               <line
-                stroke="rgb(51,51,51)"
+                stroke="#333"
                 stroke-width="1"
                 x1="500.5"
                 x2="500.5"
@@ -825,7 +825,7 @@ describe('<GraphSpending />', () => {
           </g>
           <g>
             <line
-              stroke="rgb(51,51,51)"
+              stroke="#333"
               stroke-width="1"
               x1="2237.5"
               x2="2237.5"
@@ -833,7 +833,7 @@ describe('<GraphSpending />', () => {
               y2="40"
             />
             <text
-              color="rgb(0,0,0)"
+              color="#000"
               font-family="Arial, Helvetica, sans-serif"
               font-size="11"
               x="2237.5"
@@ -905,7 +905,7 @@ describe('<GraphSpending />', () => {
           <path
             d="M0,165.8670520231214 Q54,82 77.3,90.0 C111,102 124,193 163.0,222.3 C183,238 220,207 245.9,215.9 C279,228 298,271 331.5,284.2 C357,295 385,284 414.4,284.2 Q444,284 500.0,284.2"
             fill="none"
-            stroke="#039"
+            stroke="#bf2424"
             stroke-width="2"
           />
           <path
@@ -919,7 +919,7 @@ describe('<GraphSpending />', () => {
         <g>
           <g>
             <rect
-              fill="rgba(255,255,255,0.5)"
+              fill="rgba(255,255,255,0.6)"
               height="60"
               width="200"
               x="45"
@@ -927,7 +927,7 @@ describe('<GraphSpending />', () => {
             />
             <text
               alignment-baseline="hanging"
-              color="rgb(0,0,0)"
+              color="#000"
               font-family="Arial, Helvetica, sans-serif"
               font-size="16"
               x="65"
@@ -936,7 +936,7 @@ describe('<GraphSpending />', () => {
               Cash flow
             </text>
             <line
-              stroke="rgb(0,51,153)"
+              stroke="#bf2424"
               stroke-width="2"
               x1="50"
               x2="74"
@@ -945,7 +945,7 @@ describe('<GraphSpending />', () => {
             />
             <text
               alignment-baseline="middle"
-              fill="rgb(51,51,51)"
+              fill="#333"
               font-family="Arial, Helvetica, sans-serif"
               font-size="11"
               x="78"
@@ -954,7 +954,7 @@ describe('<GraphSpending />', () => {
               Spending
             </text>
             <rect
-              fill="rgba(255,255,255,0.5)"
+              fill="rgba(255,255,255,0.6)"
               height="260"
               width="-1737.5690607734805"
               x="2237.5690607734805"

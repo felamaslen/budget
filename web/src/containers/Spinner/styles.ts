@@ -24,7 +24,7 @@ export const Outer = styled.div<{ initialLoading: boolean }>`
   top: ${sizes.navbarHeight}px;
   left: 0;
   background: ${({ initialLoading }): string =>
-    initialLoading ? colors['translucent-l8'] : colors.transparent};
+    initialLoading ? colors.translucent.light.mediumLight : colors.transparent};
 `;
 
 export const Inner = styled.div`
@@ -37,7 +37,7 @@ export const Inner = styled.div`
   font-size: 6px;
   background: ${colors.white};
   border-radius: 2em;
-  box-shadow: inset 0 0 19px -3px ${colors['shadow-l2']};
+  box-shadow: inset 0 0 19px -3px ${colors.shadow.light};
 `;
 
 const progressWidth = 80;
@@ -60,16 +60,18 @@ export const Progress = styled.div<{ offset: number }>`
     top: 0;
     left: ${rem((progressWidth - 8) / 2)};
     border-radius: 2px;
-    background: ${colors.light};
-    box-shadow: 0 ${rem(progressWidth * 0.7)} ${colors.light};
+    background: ${colors.light.mediumLight};
+    box-shadow: 0 ${rem(progressWidth * 0.7)} ${colors.light.mediumLight};
     transform-origin: 50% ${rem(progressWidth / 2)};
   }
 
   &::before {
-    background: ${({ offset }): string => darken(0.8 - (offset / 360) * 1.5, colors.light)};
+    background: ${({ offset }): string =>
+      darken(0.8 - (offset / 360) * 1.5, colors.light.mediumLight)};
   }
   &::after {
     transform: rotate(-45deg);
-    background: ${({ offset }): string => darken(0.8 - ((offset + 45) / 360) * 1.5, colors.light)};
+    background: ${({ offset }): string =>
+      darken(0.8 - ((offset + 45) / 360) * 1.5, colors.light.mediumLight)};
   }
 `;

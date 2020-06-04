@@ -32,7 +32,7 @@ export const FundRow: React.FC<{ isMobile: boolean; item: Fund } & Partial<FundP
     return (
       <Styled.FundRowMobile isSold={isSold}>
         <Styled.MobilePie>
-          <Pie size={16} slice={valueSlice} color={colors['shadow-l6']} />
+          <Pie size={16} slice={valueSlice} color={colors.shadow.mediumDark} />
         </Styled.MobilePie>
         {children}
       </Styled.FundRowMobile>

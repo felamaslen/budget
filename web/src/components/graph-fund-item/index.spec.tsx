@@ -87,7 +87,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .c0 .biexlM {
+        .c0 .PduwB {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -114,7 +114,7 @@ describe('<GraphFundItem />', () => {
           width: 300px;
           height: 120px;
           background: rgba(255,255,255,0.95);
-          box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+          box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
 
         .c0 .c2 {
@@ -152,7 +152,7 @@ describe('<GraphFundItem />', () => {
             >
               <g>
                 <text
-                  color="rgb(51,51,51)"
+                  color="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="0"
@@ -161,7 +161,7 @@ describe('<GraphFundItem />', () => {
                   42.0p
                 </text>
                 <text
-                  color="rgb(51,51,51)"
+                  color="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="0"
@@ -170,7 +170,7 @@ describe('<GraphFundItem />', () => {
                   44.0p
                 </text>
                 <text
-                  color="rgb(51,51,51)"
+                  color="#333"
                   font-family="Arial, Helvetica, sans-serif"
                   font-size="11"
                   x="0"

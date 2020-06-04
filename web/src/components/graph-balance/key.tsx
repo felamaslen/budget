@@ -33,7 +33,7 @@ export const Key: React.FC<Props> = (props) => (
     <text
       x={keyTextX0}
       y={keyY0}
-      fill={colors['slightly-dark']}
+      fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
       alignmentBaseline="middle"
@@ -52,7 +52,7 @@ export const Key: React.FC<Props> = (props) => (
     <text
       x={keyTextX1}
       y={keyY0}
-      fill={colors['slightly-dark']}
+      fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
       alignmentBaseline="middle"
@@ -70,7 +70,7 @@ export const Key: React.FC<Props> = (props) => (
     <text
       x={keyTextX0}
       y={keyY1}
-      fill={colors['slightly-dark']}
+      fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
       alignmentBaseline="middle"
@@ -88,7 +88,7 @@ export const Key: React.FC<Props> = (props) => (
     <text
       x={keyTextX1}
       y={keyY1}
-      fill={colors['slightly-dark']}
+      fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
       alignmentBaseline="middle"
@@ -106,7 +106,7 @@ export const Key: React.FC<Props> = (props) => (
     <text
       x={keyTextX1}
       y={keyY2}
-      fill={colors['slightly-dark']}
+      fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
       alignmentBaseline="middle"
@@ -126,7 +126,7 @@ export const Key: React.FC<Props> = (props) => (
     <text
       x={keyTextX0}
       y={keyY2}
-      fill={colors['slightly-dark']}
+      fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
       alignmentBaseline="middle"

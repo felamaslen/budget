@@ -11,7 +11,7 @@ import { profitLossColor } from '~client/components/graph/helpers';
 import { useToday } from '~client/hooks/time';
 import { getStartDate, getProcessedCost } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import { Line, DrawProps } from '~client/types';
+import { Page, Line, DrawProps } from '~client/types';
 
 function processData(startDate: Date, net: number[], spending: number[]): Line[] {
   const props: TimeValuesProps = {
@@ -34,16 +34,16 @@ function processData(startDate: Date, net: number[], spending: number[]): Line[]
       data: dataSpending,
       fill: false,
       smooth: true,
-      color: colors.overview.balanceActual,
+      color: colors[Page.overview].spending,
       movingAverage: 6,
     },
   ];
 }
 
 export const GraphSpending: React.FC = () => {
-  const now = useToday();
+  const today = useToday();
   const startDate = useSelector(getStartDate);
-  const { net, spending } = useSelector(getProcessedCost(now));
+  const { net, spending } = useSelector(getProcessedCost(today));
 
   const lines = useMemo<Line[]>(() => processData(startDate, net, spending), [
     startDate,
@@ -55,7 +55,7 @@ export const GraphSpending: React.FC = () => {
     const AfterLines: React.FC<DrawProps> = ({ pixX, pixY1, maxX, minY, maxY }) => (
       <g>
         <Key
-          now={now}
+          now={today}
           title="Cash flow"
           pixX={pixX}
           pixY1={pixY1}
@@ -67,7 +67,7 @@ export const GraphSpending: React.FC = () => {
     );
 
     return AfterLines;
-  }, []);
+  }, [today]);
 
   return <GraphCashFlow name="spend" lines={lines} afterLines={afterLines} />;
 };

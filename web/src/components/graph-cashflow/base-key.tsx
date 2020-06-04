@@ -1,7 +1,6 @@
 import React from 'react';
-import { rgba } from '~client/modules/color';
-import { COLOR_TRANSLUCENT_LIGHT, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';
+import { colors } from '~client/styled/variables';
 
 export type Props = {
   title: string;
@@ -13,12 +12,12 @@ const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
 
 export const BaseKey: React.FC<Props> = ({ title, children, height = 60 }) => (
   <g>
-    <rect x={45} y={8} width={200} height={height} fill={rgba(COLOR_TRANSLUCENT_LIGHT)} />
+    <rect x={45} y={8} width={200} height={height} fill={colors.translucent.light.dark} />
 
     <text
       x={65}
       y={10}
-      color={rgba(COLOR_GRAPH_TITLE)}
+      color={colors.black}
       alignmentBaseline="hanging"
       fontSize={fontSize}
       fontFamily={fontFamily}

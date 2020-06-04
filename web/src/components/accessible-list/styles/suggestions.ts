@@ -5,10 +5,10 @@ import { rem } from '~client/styled/mixins';
 import { colors } from '~client/styled/variables';
 
 export const SuggestionList = styled(ListWithoutMargin)`
-  background-color: ${colors['translucent-l95']};
+  background-color: ${colors.translucent.light.light};
   border-radius: 0 2px 2px 0;
   border-top: none;
-  box-shadow: 0 1px 4px ${colors['shadow-l3']};
+  box-shadow: 0 1px 4px ${colors.shadow.light};
   display: flex;
   flex-flow: column;
   left: 0;

@@ -515,7 +515,7 @@ describe('<AccessibleListStandard />', () => {
           }
 
           .c12:focus {
-            box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
           }
 
           .c12:disabled {

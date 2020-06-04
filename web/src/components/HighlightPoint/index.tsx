@@ -1,8 +1,7 @@
 import React from 'react';
 import { HoverEffect, HLPoint } from '~client/components/graph/hooks';
-import { COLOR_GRAPH_TITLE, COLOR_TRANSLUCENT_DARK } from '~client/constants/colors';
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';
-import { rgba } from '~client/modules/color';
+import { colors } from '~client/styled/variables';
 import { RangeY, PixPrimary, Size } from '~client/types';
 
 type LabelPosX = {
@@ -99,7 +98,7 @@ export const HighlightPoint: React.FC<Props> = ({
 
   const lineProps = { stroke: color, strokeDasharray: '3,2' };
 
-  const textProps = { fontSize, fontFamily, color: rgba(COLOR_GRAPH_TITLE) };
+  const textProps = { fontSize, fontFamily, color: colors.black };
   const textPropsX: TextProps = {
     x: labelPosX,
     y: height - 2,
@@ -122,7 +121,7 @@ export const HighlightPoint: React.FC<Props> = ({
         y={height - labelHeight}
         width={labelWidthX}
         height={labelHeight}
-        fill={rgba(COLOR_TRANSLUCENT_DARK)}
+        fill={colors.translucent.light.mediumLight}
       />
       <text {...textProps} {...textPropsX}>
         {labelTextX}
@@ -132,7 +131,7 @@ export const HighlightPoint: React.FC<Props> = ({
         y={rectPosY}
         width={labelWidthY}
         height={labelHeight}
-        fill={rgba(COLOR_TRANSLUCENT_DARK)}
+        fill={colors.translucent.light.mediumLight}
       />
       <text {...textProps} {...textPropsY}>
         {labelTextY}

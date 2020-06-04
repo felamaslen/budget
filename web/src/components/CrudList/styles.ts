@@ -126,8 +126,8 @@ export const CrudWindow = styled.div<{ active: boolean; createActive: boolean }>
                 z-index: 2;
                 font-weight: bold;
                 text-transform: uppercase;
-                border: 2px dashed ${colors.light};
-                color: ${colors.light};
+                border: 2px dashed ${colors.light.mediumLight};
+                color: ${colors.light.mediumLight};
                 border-radius: 5px;
               }
             `}

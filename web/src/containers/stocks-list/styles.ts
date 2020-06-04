@@ -13,18 +13,18 @@ export const List = styled.div<{ isLoading: boolean }>`
     -webkit-box-shadow: none;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: ${colors['translucent-l6']};
+    background-color: ${colors.translucent.light.dark};
   }
   &::-webkit-scrollbar-thumb:hover {
-    background-color: ${colors['shadow-l5']};
+    background-color: ${colors.shadow.mediumLight};
   }
   &::-webkit-scrollbar-thumb:active {
-    background-color: ${colors['translucent-l7']};
+    background-color: ${colors.translucent.light.mediumDark};
   }
 `;
 
 export const StocksGraph = styled(Graph)`
-  background: ${colors['very-dark']} !important;
+  background: ${colors.dark.dark} !important;
   color: ${colors.white} !important;
   position: static;
   box-shadow: none;
@@ -77,7 +77,7 @@ export const NameColumn = styled(Text)`
 
   ${Sidebar} & {
     width: 60%;
-    color: ${colors.light};
+    color: ${colors.light.mediumLight};
     font-style: italic;
   }
 `;
@@ -92,7 +92,7 @@ export const Code = styled(Text)`
     line-height: 18px;
     color: ${colors.white};
     font-size: 11pt;
-    background: ${colors['shadow-l3']};
+    background: ${colors.shadow.light};
   }
 `;
 
@@ -133,14 +133,14 @@ export const Title = styled(Text)`
   }
 
   ${NameColumn} & {
-    color: ${colors['medium-very-light']};
+    color: ${colors.light.dark};
     font-size: 8pt;
     width: 100%;
   }
 `;
 
 export const Item = styled.li<{ up: boolean; down: boolean; hlUp: boolean; hlDown: boolean }>`
-  border-bottom: 1px solid ${colors.dark};
+  border-bottom: 1px solid ${colors.dark.mediumLight};
   padding-top: 1px;
   font-weight: ${({ hlUp, hlDown }): 'bold' | 'normal' => (hlUp || hlDown ? 'bold' : 'normal')};
 
@@ -174,7 +174,7 @@ export const Item = styled.li<{ up: boolean; down: boolean; hlUp: boolean; hlDow
   }
 
   &:nth-child(2n + 1) {
-    background: ${colors['very-dark-1']};
+    background: ${colors.dark.mediumDark};
   }
 
   background-color: ${({ up, down, hlUp, hlDown }): string => {

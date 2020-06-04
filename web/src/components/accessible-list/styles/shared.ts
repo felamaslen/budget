@@ -5,7 +5,7 @@ import { fieldSizesMobile } from './mobile';
 import { breakpoint, rem } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
 
-export const borderColor = colors['slightly-light'];
+export const borderColor = colors.light.mediumDark;
 const focusColor = colors.blue;
 
 export const Base = styled.div<{ color?: string }>`
@@ -67,7 +67,7 @@ export const Row = styled.li`
     height: ${rem(24)};
 
     &:nth-child(2n) {
-      background-color: ${colors.light};
+      background-color: ${colors.light.mediumLight};
     }
 
     input[type='text'] {

@@ -24,7 +24,7 @@ export const MobileCreateForm = styled.div<{
   bgColor?: string;
 }>`
   align-items: center;
-  background: ${colors['translucent-l8']};
+  background: ${colors.translucent.light.mediumLight};
   bottom: 0;
   display: flex;
   flex-flow: column;

@@ -3,24 +3,10 @@ import ColorHash from 'color-hash';
 import moize from 'moize';
 import { parseToRgb, rgb, setLightness, setSaturation } from 'polished';
 
-import { Color } from '~client/constants/colors';
 import { OVERVIEW_COLUMNS, isPage } from '~client/constants/data';
 import { arrayAverage } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
 import { TableValues, SplitRange, Median } from '~client/types';
-
-const rgbaHelper = ([open]: TemplateStringsArray, ...args: number[]): string => {
-  const rounded = args.map((value, index) =>
-    index === 3 ? value.toFixed(1) : Math.max(0, Math.min(255, Math.round(value))),
-  );
-  return `${open}${rounded.join(',')})`;
-};
-
-// TODO: deprecated
-export const rgba = ([red, green, blue, alpha]: Color): string =>
-  typeof alpha === 'undefined'
-    ? rgbaHelper`rgb(${red}, ${green}, ${blue})`
-    : rgbaHelper`rgba(${red}, ${green}, ${blue}, ${alpha}`;
 
 type OverviewColorRange = { negative: string; positive: string };
 type OverviewBaseColor = string | OverviewColorRange;

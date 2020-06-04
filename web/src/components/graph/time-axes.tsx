@@ -1,9 +1,7 @@
 import React from 'react';
 
 import { getTimeScale } from '~client/components/graph/helpers';
-import { COLOR_LIGHT, COLOR_DARK, COLOR_GRAPH_TITLE } from '~client/constants/colors';
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
-import { rgba } from '~client/modules/color';
 import { getTickSize, formatCurrency } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
 import { DrawProps, Tick } from '~client/types';
@@ -65,8 +63,6 @@ function getTicksY({
   });
 }
 
-const lightColor = rgba(COLOR_LIGHT);
-
 const defaultLabelY = (value: number): string =>
   formatCurrency(value, {
     raw: true,
@@ -78,10 +74,10 @@ const defaultLabelY = (value: number): string =>
 const timeTickLength = 10;
 const timeTickSize = (major: 0 | 1 | 2): number => timeTickLength * 0.5 * (major + 1);
 
-const timeLineColors: string[] = [lightColor, colors['medium-very-light']];
+const timeLineColors: string[] = [colors.light.mediumLight, colors.light.dark];
 const timeLineColor = (major: 0 | 1 | 2): string => timeLineColors[major > 1 ? 1 : 0];
 
-const timeTickColors: string[] = [rgba(COLOR_GRAPH_TITLE), rgba(COLOR_DARK)];
+const timeTickColors: string[] = [colors.black, colors.dark.light];
 const timeTickColor = (major: 0 | 1 | 2): string => timeTickColors[major > 0 ? 1 : 0];
 
 const transformText = (xPix: number, yPix: number): string => `rotate(-30 ${xPix} ${yPix})`;
@@ -106,7 +102,7 @@ const TicksYMajor: React.FC<YAxisTicksProps> = ({ x0, xMax, ticksY }) => (
           y1={pos}
           x2={xMax}
           y2={pos}
-          stroke={colors['medium-very-light']}
+          stroke={colors.light.dark}
           strokeWidth={1}
         />
       ))}
@@ -118,7 +114,15 @@ const TicksYMinor: React.FC<YAxisTicksProps> = ({ x0, xMax, ticksY }) => (
     {ticksY
       .filter(({ major }) => !major)
       .map(({ pos }) => (
-        <line key={pos} x1={x0} y1={pos} x2={xMax} y2={pos} stroke={lightColor} strokeWidth={1} />
+        <line
+          key={pos}
+          x1={x0}
+          y1={pos}
+          x2={xMax}
+          y2={pos}
+          stroke={colors.light.mediumLight}
+          strokeWidth={1}
+        />
       ))}
   </g>
 );

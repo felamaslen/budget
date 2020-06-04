@@ -17,7 +17,7 @@ export const CategoryItem = styled.div`
   margin: 0;
 
   &:not(:last-child) {
-    border-bottom: 1px solid ${colors.medium as string};
+    border-bottom: 1px solid ${colors.medium.mediumLight};
   }
 
   ${breakpoint(breakpoints.mobile)} {

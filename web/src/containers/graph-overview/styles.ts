@@ -1,12 +1,12 @@
 import styled from 'styled-components';
-import { breakpoints, colors, graphOverviewHeightMobile } from '~client/styled/variables';
-import { breakpoint } from '~client/styled/mixins';
 import { GraphOuter } from '~client/components/graph/styles';
+import { breakpoint } from '~client/styled/mixins';
+import { breakpoints, colors, graphOverviewHeightMobile } from '~client/styled/variables';
 
 export const GraphOverview = styled(GraphOuter)`
   flex: 0 0 auto;
   height: ${graphOverviewHeightMobile}px;
-  box-shadow: 0 -2px 6px ${colors['shadow-l3']};
+  box-shadow: 0 -2px 6px ${colors.shadow.light};
   z-index: 10;
   overflow: hidden;
 

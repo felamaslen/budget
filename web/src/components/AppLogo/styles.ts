@@ -34,7 +34,7 @@ export const QueueNotSaved = styled.span`
     white-space: nowrap;
     font-size: 12px;
     font-weight: bold;
-    color: ${colors['translucent-l8']};
+    color: ${colors.translucent.light.mediumLight};
   }
 `;
 

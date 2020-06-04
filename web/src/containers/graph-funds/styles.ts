@@ -21,8 +21,8 @@ export const GraphFunds = styled.div<{ width: number; height: number }>`
   position: relative;
 
   ${breakpoint(breakpoints.mobile)} {
-    background-color: ${colors['translucent-l2']};
-    border: 1px solid ${colors['medium-light']};
+    background-color: ${colors.translucent.dark.light};
+    border: 1px solid ${colors.medium.light};
     flex: 0 0 ${({ height }): number => height}px;
     height: ${({ height }): number => height}px;
     margin: ${rem(10)} 0 0 ${rem(10)};
@@ -49,7 +49,7 @@ export const FundSidebar = styled.ul<{ isActive: boolean }>`
   outline: none;
   width: ${({ isActive }): string => rem(isActive ? 200 : 50)};
   height: 100%;
-  background: linear-gradient(to bottom, ${colors['translucent-dark']}, transparent);
+  background: linear-gradient(to bottom, ${colors.translucent.dark.dark}, transparent);
   z-index: 3;
   transition: 0.3s width ease-in-out;
   user-select: none;

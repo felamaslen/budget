@@ -7,11 +7,11 @@ export const breakpoint = (size: number): string => `@media ${breakpointBase(siz
 export const diagonalBg = (size = 16): FlattenSimpleInterpolation => css`
   background-image: linear-gradient(
     45deg,
-    ${colors['translucent-l2']} 25%,
+    ${colors.translucent.dark.light} 25%,
     transparent 25%,
     transparent 50%,
-    ${colors['translucent-l2']} 50%,
-    ${colors['translucent-l2']} 75%,
+    ${colors.translucent.dark.light} 50%,
+    ${colors.translucent.dark.light} 75%,
     transparent 75%,
     transparent 0
   );
@@ -19,7 +19,7 @@ export const diagonalBg = (size = 16): FlattenSimpleInterpolation => css`
 `;
 
 export const unimportant = css`
-  color: ${colors['slightly-dark']};
+  color: ${colors.dark.light};
   font-style: italic;
 `;
 

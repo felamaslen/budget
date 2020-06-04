@@ -16,8 +16,8 @@ export const NavList = styled.nav`
   width: 100%;
   white-space: nowrap;
   user-select: none;
-  box-shadow: 0 3px 9px ${colors['shadow-l3'] as string},
-    0 -2px 6px ${colors['shadow-l3'] as string};
+  box-shadow: 0 3px 9px ${colors.shadow.light as string},
+    0 -2px 6px ${colors.shadow.light as string};
   transition: 0.2s opacity;
 
   ${breakpoint(breakpoints.mobile)} {
@@ -74,10 +74,10 @@ export const Link = styled(NavLink)<{
     text-transform: capitalize;
     text-decoration: none;
     border-radius: 3px 3px 0 0;
-    color: ${colors.white as string};
+    color: ${colors.white};
     border-color: ${({ page }): string => {
       if (page === 'logout') {
-        return colors.light as string;
+        return colors.light.mediumLight;
       }
       if (page === 'netWorth') {
         return 'transparent';
@@ -89,12 +89,12 @@ export const Link = styled(NavLink)<{
       return 'transparent';
     }};
     &.active {
-      border-bottom-color: ${colors.black as string};
+      border-bottom-color: ${colors.black};
       cursor: default;
       &,
       &:hover,
       &:active {
-        background: ${colors['shadow-l6'] as string};
+        background: ${colors.shadow.mediumDark as string};
       }
     }
 
@@ -113,10 +113,10 @@ export const Link = styled(NavLink)<{
     }
 
     &:hover {
-      background: ${colors['shadow-l3'] as string};
+      background: ${colors.shadow.light as string};
     }
     &:active {
-      background: ${colors['shadow-l5'] as string};
+      background: ${colors.shadow.mediumLight as string};
     }
   }
 

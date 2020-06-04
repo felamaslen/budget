@@ -39,7 +39,7 @@ export const ModalDialog = styled.div`
   width: 100%;
   height: 100%;
   z-index: 10;
-  background: ${colors['shadow-l2']};
+  background: ${colors.shadow.light};
 `;
 
 export const ModalInner = styled.div<{ active: boolean; isLoading: boolean }>`
@@ -51,9 +51,9 @@ export const ModalInner = styled.div<{ active: boolean; isLoading: boolean }>`
   overflow-y: auto;
   overflow-x: hidden;
   font-size: 1.3em;
-  background: ${colors['translucent-l95']};
+  background: ${colors.translucent.light.light};
   border-radius: 3px;
-  box-shadow: 0 3px 7px ${colors['shadow-l3']};
+  box-shadow: 0 3px 7px ${colors.shadow.light};
   transition: filter 0.1s linear;
   animation: ${intoView} 0.3s ease-out;
   transform-origin: bottom;
