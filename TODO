@@ -13,7 +13,6 @@
 - Handle API response codes
 - Fix realtime stock prices
 - More sophisticated authentication
-- Pagination on list data
 - Client response data validation
 - [DONE] Write unit tests for client
 - [DONE] Use logger function instead of console.log
@@ -40,16 +39,17 @@
 - Move overview fund value calculation to frontend
 - Remove obsolete balance response in overview route
 - Lazy / infinite loading of list pages (see https://github.com/bvaughn/react-window-infinite-loader)
-- Use slonik instead of knex
+- Pagination on list data
+- [DONE] Use slonik instead of knex
 - [DONE] Airbnb eslint guidelines
 - [DONE] Styled components
-- Fund portfolio pie chart
-- Rewrite tests in jest
+- [DONE] Fund portfolio pie chart
+- [DONE] Rewrite tests in jest
 - Use date-fns instead of luxon
-- typescript styled-components
-- react-redux hooks
+- [DONE] typescript styled-components
+- [DONE] react-redux hooks
 - fix daily total recalculation / inconsistency when refreshing page
 - update overview totals when refreshing funds data
-- fix axes not showing on overview graphs
-- split balance graph into stocks/ISA/options/cash with filled in-between area
-- keyboard shortcuts to navigate between pages
+- [DONE] fix axes not showing on overview graphs
+- [DONE] split balance graph into stocks/ISA/options/cash with filled in-between area
+- [DONE] keyboard shortcuts to navigate between pages

@@ -6,17 +6,11 @@ import config from '~api/config';
 import db from '~api/modules/db';
 import { Category, Subcategory, Entry } from '~api/routes/net-worth/types';
 
-describe('Server - integration tests (net-worth)', () => {
+describe('Net worth route', () => {
   const clearDb = async (): Promise<void> => {
-    await db('net_worth')
-      .select()
-      .del();
-    await db('net_worth_subcategories')
-      .select()
-      .del();
-    await db('net_worth_categories')
-      .select()
-      .del();
+    await db('net_worth').select().del();
+    await db('net_worth_subcategories').select().del();
+    await db('net_worth_categories').select().del();
   };
 
   beforeEach(clearDb);
@@ -691,7 +685,7 @@ describe('Server - integration tests (net-worth)', () => {
         ];
 
         await Promise.all(
-          mods.map(mod =>
+          mods.map((mod) =>
             global.withAuth(global.agent.post('/api/v4/data/net-worth')).send({
               ...entry,
               ...mod,

@@ -1,13 +1,14 @@
-import * as boom from '@hapi/boom';
+import boom from '@hapi/boom';
+import bcrypt from 'bcrypt';
+import addDays from 'date-fns/addDays';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jwt-simple';
 import passport from 'passport';
-import addDays from 'date-fns/addDays';
 import { Strategy, ExtractJwt, VerifiedCallback } from 'passport-jwt';
-import bcrypt from 'bcrypt';
+import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
-import db from '~api/modules/db';
+import { pool } from '~api/modules/db';
 
 export type User = {
   uid: string;
@@ -21,7 +22,7 @@ type UserRow = UserInfo & {
   pin_hash: string;
 };
 
-export type AuthenticatedRequest = Omit<Request, 'user'> & {
+export type AuthenticatedRequest = Exclude<Request, 'user'> & {
   user: User;
 };
 
@@ -33,18 +34,20 @@ export function getStrategy(): Strategy {
   };
 
   return new Strategy(params, async (_: Request, { uid }: User, done: VerifiedCallback) => {
-    const user = await db
-      .select('name')
-      .from('users')
-      .where('uid', '=', uid);
+    const user = await pool.connect(async (db) => {
+      const result = await db.query<{ name: string }>(
+        sql`SELECT name FROM users WHERE uid = ${uid}`,
+      );
+      return result.rows[0];
+    });
 
-    if (!user.length) {
+    if (!user) {
       return done(null, false, {
         message: 'User was deleted since last login',
       });
     }
 
-    return done(null, { uid, ...user[0] });
+    return done(null, { uid, name: user.name });
   });
 }
 
@@ -72,38 +75,30 @@ export function genToken({ uid }: User): Omit<LoginResponse, 'name'> {
   };
 }
 
-function checkValidUser(
-  pin: number | string,
-): (last: Promise<UserInfo | null>, user: UserRow) => Promise<UserInfo | null> {
-  const stringPin = String(pin);
+export async function checkLoggedIn(
+  db: DatabaseTransactionConnectionType,
+  pin: number,
+): Promise<UserInfo> {
+  const users = await db.query<UserRow>(sql`SELECT uid, name, pin_hash FROM users`);
 
-  return (last, { pin_hash, ...user }): Promise<UserInfo | null> =>
-    last.then(
-      async (previous): Promise<UserInfo | null> => {
-        if (previous) {
-          return previous;
-        }
+  const validUser = await users.rows.reduce<Promise<UserInfo | null>>(
+    (last, { uid, name, pin_hash }) =>
+      last.then(
+        async (next): Promise<UserInfo | null> =>
+          next ??
+          new Promise((resolve, reject) => {
+            bcrypt.compare(String(pin), pin_hash, (err, res) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(res ? { uid, name } : null);
+              }
+            });
+          }),
+      ),
+    Promise.resolve(null),
+  );
 
-        return new Promise((resolve, reject) => {
-          bcrypt.compare(stringPin, pin_hash, (err, res) => {
-            if (err) {
-              return reject(err);
-            }
-            if (!res) {
-              return resolve(null);
-            }
-
-            return resolve(user);
-          });
-        });
-      },
-    );
-}
-
-export async function checkLoggedIn(pin: number | string): Promise<UserInfo> {
-  const users = await db.select<UserRow[]>('uid', 'name', 'pin_hash').from('users');
-
-  const validUser = await users.reduce(checkValidUser(pin), Promise.resolve(null));
   if (!validUser) {
     throw boom.unauthorized(config.msg.errorLoginBad);
   }

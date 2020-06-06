@@ -1,19 +1,10 @@
 import { PgConnectionConfig } from 'knex';
 import { fundSalt } from './fund-salt.json';
+import { ListCategory, Page } from './types';
 
 if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
   // eslint-disable-next-line import/no-extraneous-dependencies
   require('dotenv').config(); // eslint-disable-line global-require
-}
-
-enum ListCategory {
-  funds = 'funds',
-  income = 'income',
-  bills = 'bills',
-  food = 'food',
-  general = 'general',
-  holiday = 'holiday',
-  social = 'social',
 }
 
 function parseConnectionURI(uri = ''): PgConnectionConfig {
@@ -130,13 +121,13 @@ const config: Config = {
   timeZone: 'Europe/London',
   data: {
     listCategories: [
-      ListCategory.funds,
-      ListCategory.income,
-      ListCategory.bills,
-      ListCategory.food,
-      ListCategory.general,
-      ListCategory.holiday,
-      ListCategory.social,
+      Page.funds,
+      Page.income,
+      Page.bills,
+      Page.food,
+      Page.general,
+      Page.holiday,
+      Page.social,
     ],
     currencyUnit: '£',
     columnMapExtra: {

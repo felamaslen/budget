@@ -70,29 +70,101 @@ async function generateListData(uid, db) {
 
   await db
     .insert([
-      { uid, date: '2018-03-25', shop: '', category: 'Food', item: 'Breakfast', cost: 19239 },
-      { uid, date: '2018-03-25', shop: '', category: 'Food', item: 'Lunch', cost: 91923 },
-      { uid, date: '2018-03-25', shop: '', category: 'Snacks', item: 'Nuts', cost: 2239 },
+      { uid, date: '2018-03-25', shop: 'Tesco', category: 'Food', item: 'Breakfast', cost: 19239 },
+      { uid, date: '2018-03-25', shop: 'Morrisons', category: 'Food', item: 'Lunch', cost: 91923 },
+      {
+        uid,
+        date: '2018-03-25',
+        shop: "Sainsbury's",
+        category: 'Snacks',
+        item: 'Nuts',
+        cost: 2239,
+      },
     ])
     .into('food');
 
   await db
     .insert([
-      { uid, date: '2018-03-25', shop: '', category: 'Foo', item: 'Kitchen', cost: 1231 },
-      { uid, date: '2018-03-25', shop: '', category: 'Foo', item: 'Household', cost: 9912 },
+      { uid, date: '2018-03-25', shop: 'Amazon', category: 'Foo', item: 'Kitchen', cost: 1231 },
+      {
+        uid,
+        date: '2018-03-25',
+        shop: 'Hardware store',
+        category: 'Foo',
+        item: 'Household',
+        cost: 9912,
+      },
     ])
     .into('general');
 
   await db
     .insert([
-      { uid, date: '2018-03-25', shop: '', holiday: 'a country', item: 'Somewhere', cost: 11023 },
-      { uid, date: '2018-03-25', shop: '', holiday: 'a country', item: 'Otherplace', cost: 23991 },
+      {
+        uid,
+        date: '2018-03-25',
+        shop: 'Travel agents',
+        holiday: 'a country',
+        item: 'Somewhere',
+        cost: 11023,
+      },
+      {
+        uid,
+        date: '2018-03-25',
+        shop: 'Skyscanner',
+        holiday: 'a country',
+        item: 'Otherplace',
+        cost: 23991,
+      },
     ])
     .into('holiday');
 
   await db
-    .insert([{ uid, date: '2018-03-25', shop: '', society: 'Bar', item: 'Friends', cost: 61923 }])
+    .insert([
+      { uid, date: '2018-03-25', shop: 'Some pub', society: 'Bar', item: 'Friends', cost: 61923 },
+    ])
     .into('social');
+}
+
+async function generateNetWorth(uid, db) {
+  const [categoryId] = await db('net_worth_categories')
+    .insert([
+      {
+        type: 'asset',
+        category: 'Cash',
+        color: '#0f0',
+        is_option: false,
+      },
+    ])
+    .returning('id');
+
+  const [subcategoryId] = await db('net_worth_subcategories')
+    .insert([
+      {
+        category_id: categoryId,
+        subcategory: 'Bank acount',
+        has_credit_limit: null,
+        opacity: 1,
+      },
+    ])
+    .returning('id');
+
+  const [entryId] = await db('net_worth')
+    .insert([
+      {
+        uid,
+        date: new Date('2016-02-27'),
+      },
+    ])
+    .returning('id');
+
+  await db('net_worth_values').insert([
+    {
+      net_worth_id: entryId,
+      subcategory: subcategoryId,
+      value: 450564,
+      skip: null,
+    },
+  ]);
 }
 
 async function seed(db) {
@@ -100,9 +172,9 @@ async function seed(db) {
     return;
   }
 
-  await db('users').select().del();
-
-  await db('fund_hash').select().del();
+  await db('users').del();
+  await db('fund_hash').del();
+  await db('fund_cache_time').del();
 
   const { pinHash } = await generateUserPin('1234');
 
@@ -113,7 +185,7 @@ async function seed(db) {
     })
     .returning('uid');
 
-  await Promise.all([generateFunds(uid, db), generateListData(uid, db)]);
+  await Promise.all([generateFunds(uid, db), generateListData(uid, db), generateNetWorth(uid, db)]);
 }
 
 module.exports = { seed };

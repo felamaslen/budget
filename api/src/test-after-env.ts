@@ -1,13 +1,14 @@
-import request, { Request } from 'supertest';
 import * as nock from 'nock';
+import request, { Request } from 'supertest';
 
-import db from '~api/modules/db';
 import { run } from '~api/index';
+import db from '~api/modules/db';
 
 beforeAll(async () => {
   nock.disableNetConnect();
   nock.enableNetConnect('127.0.0.1');
 
+  await db.migrate.latest();
   await db.seed.run();
 
   global.server = await run(4444);
@@ -26,10 +27,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await new Promise(resolve => global.server.close(resolve));
-  await db('users')
-    .select()
-    .del();
+  await new Promise((resolve) => global.server.close(resolve));
+  await db('users').select().del();
 
   nock.enableNetConnect();
 });

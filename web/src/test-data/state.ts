@@ -25,8 +25,6 @@ export const testState: State = {
     endDate: new Date('2018-07-31T23:59:59.999Z'),
     cost: {
       [Page.funds]: [94004, 105390, 110183, 100779, 101459, 102981, 103293, 0, 0, 0],
-      fundChanges: [],
-      old: [],
       [Page.income]: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
       [Page.bills]: [1000, 900, 400, 650, 0, 0, 0],
       [Page.food]: [50, 13, 20, 19, 0, 0, 0],

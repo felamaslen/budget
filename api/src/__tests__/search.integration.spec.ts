@@ -1,6 +1,6 @@
 import db from '~api/modules/db';
 
-describe('Server - integration tests (search)', () => {
+describe('Search route', () => {
   const cleanup = async (): Promise<void> => {
     await db('food').truncate();
     await db('bills').truncate();

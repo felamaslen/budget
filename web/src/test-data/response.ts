@@ -17,15 +17,12 @@ export const testResponse: ReadResponse = {
     futureMonths: 3,
     cost: {
       [Page.funds]: [],
-      fundChanges: [],
       [Page.income]: [],
       [Page.bills]: [],
       [Page.food]: [],
       [Page.general]: [],
       [Page.holiday]: [],
       [Page.social]: [],
-      balance: [],
-      old: [],
     },
   },
   netWorth: {

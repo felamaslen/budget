@@ -39,15 +39,12 @@ export type ReadResponse = {
     futureMonths: number;
     cost: {
       [Page.funds]: number[];
-      fundChanges: number[];
       [Page.income]: number[];
       [Page.bills]: number[];
       [Page.food]: number[];
       [Page.general]: number[];
       [Page.holiday]: number[];
       [Page.social]: number[];
-      balance: number[];
-      old: number[];
     };
   };
   netWorth: {

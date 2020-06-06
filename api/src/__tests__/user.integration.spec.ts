@@ -1,11 +1,11 @@
-import { Test } from 'supertest';
-import sinon from 'sinon';
 import addDays from 'date-fns/addDays';
+import sinon from 'sinon';
+import { Test } from 'supertest';
 
 import config from '~api/config';
 import db from '~api/modules/db';
 
-describe('API integration tests - Authentication', () => {
+describe('User route', () => {
   describe('POST /user/login', () => {
     let clock: sinon.SinonFakeTimers;
     const now = new Date('2020-03-07T23:06:23Z');
@@ -28,11 +28,7 @@ describe('API integration tests - Authentication', () => {
         pin: 1234,
       });
 
-      const { uid } =
-        (await db
-          .select<{ uid: string }>('uid')
-          .from('users')
-          .first()) || {};
+      const { uid } = (await db.select<{ uid: string }>('uid').from('users').first()) || {};
 
       expect(uid).not.toBeUndefined();
 
@@ -71,16 +67,10 @@ describe('API integration tests - Authentication', () => {
       const ip1 = '1.9.3.7';
 
       const badLogin = (ip = ip0): Test =>
-        global.agent
-          .post(`/api/v4/user/login`)
-          .send({ pin: 9999 })
-          .set('X-Forwarded-For', ip);
+        global.agent.post(`/api/v4/user/login`).send({ pin: 9999 }).set('X-Forwarded-For', ip);
 
       const goodLogin = (ip = ip0): Test =>
-        global.agent
-          .post(`/api/v4/user/login`)
-          .send({ pin: 1234 })
-          .set('X-Forwarded-For', ip);
+        global.agent.post(`/api/v4/user/login`).send({ pin: 1234 }).set('X-Forwarded-For', ip);
 
       const delayedBadLogins = async (
         numLogins: number,

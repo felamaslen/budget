@@ -1,9 +1,9 @@
 import { Response, NextFunction, RequestHandler } from 'express';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import { AuthenticatedRequest } from '~api/modules/auth';
 import { withSlonik } from '~api/modules/db';
 import { catchAsyncErrors } from '~api/modules/error-handling';
-import { AuthenticatedRequest } from '~api/modules/auth';
 
 export const authDbRoute = (
   handler: (

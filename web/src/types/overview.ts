@@ -2,9 +2,6 @@ import { PageList } from './app';
 
 export type Cost = {
   [page in PageList]: number[];
-} & {
-  fundChanges: number[];
-  old: number[];
 };
 
 export type CostProcessed = Cost & {

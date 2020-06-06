@@ -33,8 +33,6 @@ export const initialState: State = {
     [Page.general]: [],
     [Page.holiday]: [],
     [Page.social]: [],
-    fundChanges: [],
-    old: [],
   },
 };
 
