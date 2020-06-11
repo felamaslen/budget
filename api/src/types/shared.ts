@@ -1,3 +1,13 @@
+export type PickPartial<T extends object, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type AsyncReturnType<T extends (...args: any) => any> = T extends (
+  ...args: any
+) => Promise<infer U>
+  ? U
+  : any;
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 export const enum Page {
   overview = 'overview',
   analysis = 'analysis',
@@ -18,3 +28,12 @@ export type ListCategory =
   | Page.general
   | Page.holiday
   | Page.social;
+
+export type ListCalcCategory = Exclude<ListCategory, Page.funds>;
+
+export type Create<V> = Omit<V, 'id'>;
+export type Update<V> = Create<V> & { id: string };
+
+export type IDRow = { id: string };
+
+export type RawDate<V> = V extends { date: Date } ? Omit<V, 'date'> & { date: string } : V;

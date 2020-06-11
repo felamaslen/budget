@@ -12,9 +12,8 @@ import {
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
-import { User } from '~api/modules/auth';
 import { getMonthlyTotalFundValues, getListCostSummary } from '~api/queries';
-import { OverviewResponse, Page, ListCategory } from '~api/types';
+import { OverviewResponse, ListCategory } from '~api/types';
 
 const {
   startYear,
@@ -43,29 +42,34 @@ const mapMonths = (now: Date, start: Date, withFuture = false): Date[] =>
 const getDisplayedMonths = (now: Date): Date[] => mapMonths(now, getStartTime(now), true);
 const getNonFutureMonths = (now: Date): Date[] => mapMonths(now, minStartTime, false);
 
+async function getFundValues(
+  db: DatabaseTransactionConnectionType,
+  uid: string,
+  now: Date,
+): Promise<number[]> {
+  const monthEnds = getNonFutureMonths(now);
+  const monthlyValues = await getMonthlyTotalFundValues(db, uid, monthEnds);
+  return [...monthlyValues, ...Array(futureMonths).fill(monthlyValues[monthlyValues.length - 1])];
+}
+
 async function getMonthCost(
   db: DatabaseTransactionConnectionType,
   uid: string,
   now: Date,
   category: ListCategory,
 ): Promise<number[]> {
-  if (category === Page.funds) {
-    const monthEnds = getNonFutureMonths(now);
-    const monthlyValues = await getMonthlyTotalFundValues(db, uid, monthEnds);
-    return [...monthlyValues, ...Array(futureMonths).fill(monthlyValues[monthlyValues.length - 1])];
-  }
-
   return getListCostSummary(db, uid, getDisplayedMonths(now), category);
 }
 
 async function getMonthlyCategoryValues(
   db: DatabaseTransactionConnectionType,
-  user: User,
+  uid: string,
   now: Date,
 ): Promise<OverviewResponse['cost']> {
-  const [funds, income, bills, food, general, holiday, social] = await Promise.all<number[]>(
-    config.data.listCategories.map((category) => getMonthCost(db, user.uid, now, category)),
-  );
+  const [funds, income, bills, food, general, holiday, social] = await Promise.all<number[]>([
+    getFundValues(db, uid, now),
+    ...config.data.listCategories.map((category) => getMonthCost(db, uid, now, category)),
+  ]);
 
   return { funds, income, bills, food, general, holiday, social };
 }
@@ -74,10 +78,10 @@ const getYearMonth = (date: Date): [number, number] => [getYear(date), getMonth(
 
 export async function getOverviewData(
   db: DatabaseTransactionConnectionType,
-  user: User,
+  uid: string,
+  now: Date = new Date(),
 ): Promise<OverviewResponse> {
-  const now = new Date();
-  const cost = await getMonthlyCategoryValues(db, user, now);
+  const cost = await getMonthlyCategoryValues(db, uid, now);
 
   return {
     startYearMonth: getYearMonth(getStartTime(now)),

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
+import { CurrencyPrices } from './types';
 import config from '~api/config';
 import logger from '~api/modules/logger';
-import { CurrencyPrices } from './types';
 
 export async function getCurrencyPrices(): Promise<CurrencyPrices> {
   logger.verbose('Fetching currency prices for conversion...');

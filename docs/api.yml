@@ -118,7 +118,7 @@ paths:
                       holiday:
                         $ref: "#/definitions/DataResponseHoliday"
 
-  /multiple:
+  /data/multiple:
     patch:
       summary: Run multiple operations
       tags:
@@ -137,7 +137,7 @@ paths:
             schema:
               type: object
               properties:
-                tasks:
+                list:
                   type: array
                   items:
                     type: object

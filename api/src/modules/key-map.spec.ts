@@ -2,6 +2,8 @@ import { DJMap, mapInternalToExternal, mapExternalToInternal } from './key-map';
 
 describe('mapInternalToExternal', () => {
   it('maps a database result to a deep javascript object', () => {
+    expect.assertions(1);
+
     type DbResult = {
       foo_db: 'yes' | null;
       yas: string;
@@ -36,6 +38,7 @@ describe('mapInternalToExternal', () => {
 
 describe('mapExternalToInternal', () => {
   it('maps a javascript object to a database row', () => {
+    expect.assertions(1);
     type DbResult = {
       foo_db: 'yes' | null;
       bar_db: 'no' | null;

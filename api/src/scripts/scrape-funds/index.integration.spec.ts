@@ -1,14 +1,14 @@
-import nock from 'nock';
-import sinon from 'sinon';
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
+import nock from 'nock';
 import prompts from 'prompts';
+import sinon from 'sinon';
 import uuidv4 from 'uuid/v4';
 
-import config from '../../config';
-import db from '~api/modules/db';
-import { run } from '.';
 import mockOpenExchangeRatesResponse from './vendor/currencies.json';
+import { run } from '.';
+import config from '~api/config';
+import db from '~api/modules/db';
 
 type TestFundPrice = {
   cid: string;
@@ -34,24 +34,14 @@ describe('Fund scraper - integration tests', () => {
   const uid2 = uuidv4();
   let fundIds: string[] = [];
 
-  beforeAll(async () => {
-    await db('funds')
-      .select()
-      .del();
-    await db('fund_hash')
-      .select()
-      .del();
-    await db('fund_cache_time')
-      .select()
-      .del();
+  const clearDb = async (): Promise<void> => {
+    await db('funds').select().del();
+    await db('fund_hash').select().del();
+    await db('fund_cache_time').select().del();
 
-    await db('users')
-      .select()
-      .del();
+    await db('users').select().del();
     await db('users').insert({ uid: uid1, name: 'test-user-funds-1', pin_hash: 'some-pin-hash' });
     await db('users').insert({ uid: uid2, name: 'test-user-funds-2', pin_hash: 'other-pin-hash' });
-
-    clock = sinon.useFakeTimers(new Date(now).getTime());
 
     fundIds = await db('funds')
       .insert([
@@ -71,6 +61,10 @@ describe('Fund scraper - integration tests', () => {
           uid: uid2,
           item: 'City of London Investment Trust ORD 25p (share)',
         },
+        {
+          uid: uid1,
+          item: 'Morgan Stanley Sterling Corporate Bond Class F (accum.)',
+        },
       ])
       .returning('id');
 
@@ -83,23 +77,26 @@ describe('Fund scraper - integration tests', () => {
       { fund_id: fundIds[2], date: '2017-12-10', units: 14, cost: 216704 },
       { fund_id: fundIds[2], date: '2018-01-05', units: -13, cost: -276523 },
       { fund_id: fundIds[3], date: '2016-08-07', units: 1032.19, cost: 560321 },
+      { fund_id: fundIds[4], date: '2016-09-19', units: 1678.42, cost: 200000 },
+      { fund_id: fundIds[4], date: '2017-02-14', units: 846.38, cost: 100000 },
+      { fund_id: fundIds[4], date: '2017-10-25', units: 817, cost: 100000 },
+      { fund_id: fundIds[4], date: '2017-03-14', units: 1217.43, cost: 150000 },
+      { fund_id: fundIds[4], date: '2017-09-24', units: -4559.23, cost: -559520 },
     ]);
-  });
+  };
 
   afterAll(async () => {
     clock.restore();
 
-    await db('users')
-      .select()
-      .del();
+    await db('users').select().del();
 
-    await db('funds')
-      .select()
-      .whereIn('id', fundIds)
-      .del();
+    await db('funds').select().whereIn('id', fundIds).del();
   });
 
   beforeEach(async () => {
+    await clearDb();
+    clock = sinon.useFakeTimers(new Date(now).getTime());
+
     nock('https://openexchangerates.org')
       .get(`/api/latest.json?app_id=${config.openExchangeRatesApiKey}`)
       .reply(200, mockOpenExchangeRatesResponse);
@@ -134,12 +131,10 @@ describe('Fund scraper - integration tests', () => {
 
     beforeEach(async () => {
       process.argv = ['script', '--prices'];
-
-      expect(fundIds).toHaveLength(4);
-      await db('fund_cache_time').del();
     });
 
     it('should insert new prices for a GBX share', async () => {
+      expect.assertions(4);
       await run();
 
       const gbxResult = await getTestFundPrice(fundIds[0]);
@@ -151,6 +146,7 @@ describe('Fund scraper - integration tests', () => {
     });
 
     it('should insert new prices for a fund', async () => {
+      expect.assertions(4);
       await run();
 
       const fundResult = await getTestFundPrice(fundIds[1]);
@@ -162,6 +158,7 @@ describe('Fund scraper - integration tests', () => {
     });
 
     it('should insert new prices for a foreign share', async () => {
+      expect.assertions(4);
       await run();
 
       const usdResult = await getTestFundPrice(fundIds[2]);
@@ -173,6 +170,7 @@ describe('Fund scraper - integration tests', () => {
     });
 
     it('should skip funds where the request fails', async () => {
+      expect.assertions(3);
       nock.cleanAll();
 
       nock('http://www.hl.co.uk')
@@ -198,6 +196,12 @@ describe('Fund scraper - integration tests', () => {
       expect(gbxResult).toHaveLength(0);
       expect(fundResult).toHaveLength(1);
       expect(usdResult).toHaveLength(0);
+    });
+
+    it('should skip totally sold funds', async () => {
+      expect.assertions(1);
+      const soldResult = await getTestFundPrice(fundIds[4]);
+      expect(soldResult).toHaveLength(0);
     });
   });
 
@@ -258,6 +262,7 @@ describe('Fund scraper - integration tests', () => {
     });
 
     it('should keep the already existing stock code cache', async () => {
+      expect.assertions(1);
       await run();
 
       const stockCodes = await db('stock_codes')
@@ -268,7 +273,7 @@ describe('Fund scraper - integration tests', () => {
         )
         .orderBy('name');
 
-      expect(stockCodes).toEqual([
+      expect(stockCodes).toStrictEqual([
         expect.objectContaining({
           name: 'Diageo plc Ordinary 28 101/108p',
           code: 'LON:DGE',
@@ -289,6 +294,7 @@ describe('Fund scraper - integration tests', () => {
     });
 
     it('should add to the stock code cache where possible', async () => {
+      expect.assertions(1);
       await run();
 
       const stockCodes = await db('stock_codes')
@@ -300,7 +306,7 @@ describe('Fund scraper - integration tests', () => {
         .whereNotNull('code')
         .orderBy('name');
 
-      expect(stockCodes).toEqual([
+      expect(stockCodes).toStrictEqual([
         expect.objectContaining({
           name: 'BP Plc Ordinary US$0.25',
           code: 'LON:BP',
@@ -329,6 +335,8 @@ describe('Fund scraper - integration tests', () => {
     });
 
     it("should cache null codes, so they don't have to be asked again", async () => {
+      expect.assertions(1);
+
       await run();
 
       const stockCodes = await db('stock_codes')
@@ -340,7 +348,7 @@ describe('Fund scraper - integration tests', () => {
         .whereNull('code')
         .orderBy('name');
 
-      expect(stockCodes).toEqual([
+      expect(stockCodes).toStrictEqual([
         expect.objectContaining({
           name: 'AXA Framlington UK Select Opportunities Class ZI',
           code: null,
@@ -384,17 +392,20 @@ describe('Fund scraper - integration tests', () => {
       ]);
     });
 
-    const testWeightedStocks = (userId: string) => async (): Promise<void> => {
+    it.each`
+      userId  | position
+      ${uid1} | ${1}
+      ${uid2} | ${2}
+    `('should update the list of weighted stocks for user $position', async ({ userId }) => {
+      expect.assertions(2);
+
       await run();
 
-      const stocks = await db('stocks')
-        .select()
-        .where({ uid: userId })
-        .orderBy('name');
+      const stocks = await db('stocks').select().where({ uid: userId }).orderBy('name');
 
       expect(stocks).toHaveLength(10);
 
-      expect(stocks).toEqual([
+      expect(stocks).toStrictEqual([
         expect.objectContaining({
           name: 'BP Plc Ordinary US$0.25',
           code: 'LON:BP',
@@ -456,9 +467,6 @@ describe('Fund scraper - integration tests', () => {
           subweight: 2.71,
         }),
       ]);
-    };
-
-    it('should update the list of weighted stocks for user 1', testWeightedStocks(uid1));
-    it('should update the list of weighted stocks for user 2', testWeightedStocks(uid2));
+    });
   });
 });

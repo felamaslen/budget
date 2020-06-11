@@ -21,7 +21,7 @@ const logger = winston.createLogger({
         format.colorize(),
         format.timestamp(),
         format.splat(),
-        format.printf(info => `${info.level} [${info.timestamp}] ${info.message}`),
+        format.printf((info) => `${info.level} [${info.timestamp}] ${info.message}`),
       ),
       silent: process.env.NODE_ENV === 'test',
     }),

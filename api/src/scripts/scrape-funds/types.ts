@@ -44,7 +44,15 @@ export enum ShortFundType {
   Share = 'share',
 }
 
+export type WeightedHolding = {
+  uid: string;
+  name: string;
+  weight: number;
+  subweight: number;
+};
+
 export type Stock = {
+  uid: string;
   name: string;
   code: string;
   weight: number;

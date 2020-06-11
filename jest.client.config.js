@@ -8,6 +8,13 @@ module.exports = {
     '\\.(jpg|png)': '<rootDir>/web/src/mocks/file-loader.js',
     '~client/(.*)': '<rootDir>/web/src/$1',
   },
-  setupFilesAfterEnv: ['<rootDir>/web/src/test-after-env.ts'],
+  testMatch: ['**/*.spec.ts?(x)'],
+  setupFilesAfterEnv: ['<rootDir>/web/src/test-utils/after-env.ts'],
   coverageDirectory: 'coverage/web',
+  collectCoverageFrom: [
+    'web/src/**/*.{ts,tsx}',
+    '!node_modules/**',
+    '!web/src/test-data/**',
+    ':!web/src/test-utils/**',
+  ],
 };

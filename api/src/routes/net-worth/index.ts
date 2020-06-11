@@ -1,95 +1,51 @@
-import * as boom from '@hapi/boom';
 import { Router } from 'express';
-import { sql, DatabaseTransactionConnectionType, SqlSqlTokenType, QueryResultType } from 'slonik';
 
-import { authDbRoute } from '~api/middleware/request';
-import { validate } from '~api/modules/validate';
-import { schemaNetWorth } from '~api/schema/net-worth';
 import { routeCategories } from './categories';
 import { routeSubCategories } from './subcategories';
+import {
+  createNetWorthEntry,
+  readNetWorthEntry,
+  readAllNetWorthEntries,
+  updateNetWorthEntry,
+  deleteNetWorthEntry,
+} from '~api/controllers';
+import { authDbRoute, validatedAuthDbRoute } from '~api/middleware/request';
+import { schemaNetWorth } from '~api/schema';
+import { CreateEntry } from '~api/types';
 
-import { onCreate } from './create';
-import { onRead } from './read';
-import { onUpdate } from './update';
-import { onDelete } from './delete';
+const routePost = validatedAuthDbRoute<CreateEntry>(
+  {
+    data: schemaNetWorth,
+  },
+  async (db, req, res, data) => {
+    const response = await createNetWorthEntry(db, req.user.uid, data);
+    res.status(201);
+    res.json(response);
+  },
+);
 
-const unionSelectIds = async (
-  db: DatabaseTransactionConnectionType,
-  categories: string[],
-  after: SqlSqlTokenType<QueryResultType<string>>,
-): Promise<readonly { id: string }[]> => {
-  if (!categories.length) {
-    return [];
-  }
+const routeGet = authDbRoute(async (db, req, res) => {
+  const response = req.params.id
+    ? await readNetWorthEntry(db, req.user.uid, req.params.id)
+    : await readAllNetWorthEntries(db, req.user.uid);
 
-  const { rows } = await db.query<{ id: string }>(sql`
-    SELECT ids.id
-    FROM (
-      SELECT ${categories[0]}::uuid AS id
-      ${
-        categories.length > 1
-          ? sql.join(
-              categories.slice(1).map(id => sql`UNION SELECT ${id}::uuid`),
-              sql` `,
-            )
-          : sql``
-      }
-    ) AS ids
-    ${after}
-  `);
+  res.json(response);
+});
 
-  return rows;
-};
+const routePut = validatedAuthDbRoute<CreateEntry>(
+  {
+    data: schemaNetWorth,
+  },
+  async (db, req, res, data) => {
+    const response = await updateNetWorthEntry(db, req.user.uid, req.params.id, data);
+    res.json(response);
+  },
+);
 
-const validateCategories = authDbRoute(async (db, req, _, next) => {
-  const valuesCategories = req.body.values.map(
-    ({ subcategory }: { subcategory: string }) => subcategory,
-  );
-  const creditLimitCategories = req.body.creditLimit.map(
-    ({ subcategory }: { subcategory: string }) => subcategory,
-  );
-
-  const allSubCategories = valuesCategories.concat(creditLimitCategories);
-
-  const invalidIds = await unionSelectIds(
-    db,
-    allSubCategories,
-    sql`
-      LEFT JOIN net_worth_subcategories AS nws ON nws.id = ids.id
-      WHERE nws.id IS NULL
-    `,
-  );
-
-  if (invalidIds.length) {
-    throw boom.notFound(`Nonexistent subcategory IDs: ${invalidIds.map(({ id }) => id).join(',')}`);
-  }
-
-  const invalidCreditCategories = await unionSelectIds(
-    db,
-    creditLimitCategories,
-    sql`
-      LEFT JOIN net_worth_subcategories AS nws ON nws.id = ids.id
-      LEFT JOIN net_worth_categories AS nwc ON nwc.id = nws.category_id
-      WHERE nwc.id IS NULL
-          OR nws.has_credit_limit != TRUE
-          OR nwc.id IS NULL
-          OR nwc.type != 'liability'
-    `,
-  );
-
-  if (invalidCreditCategories.length) {
-    throw boom.badRequest(
-      `Tried to add credit limit to non-credit subcategory: ${invalidCreditCategories
-        .map(({ id }) => id)
-        .join(',')}`,
-    );
-  }
-
-  if (Array.from(new Set(creditLimitCategories)).length !== creditLimitCategories.length) {
-    throw boom.badRequest('Duplicate credit limit subcategories');
-  }
-
-  next();
+const routeDelete = authDbRoute(async (db, req, res) => {
+  await deleteNetWorthEntry(db, req.user.uid, req.params.id);
+  res.status(204);
+  res.end();
 });
 
 export function netWorthRoute(): Router {
@@ -98,13 +54,10 @@ export function netWorthRoute(): Router {
   router.use('/categories', routeCategories());
   router.use('/subcategories', routeSubCategories());
 
-  router.post('/', validate(schemaNetWorth), validateCategories, onCreate);
-
-  router.get('/:id?', onRead);
-
-  router.put('/:id', validate(schemaNetWorth), validateCategories, onUpdate);
-
-  router.delete('/:id', onDelete);
+  router.post('/', routePost);
+  router.get('/:id?', routeGet);
+  router.put('/:id', routePut);
+  router.delete('/:id', routeDelete);
 
   return router;
 }

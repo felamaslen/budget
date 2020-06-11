@@ -1,15 +1,15 @@
 import groupBy from 'lodash/groupBy';
-import { sql } from 'slonik';
+import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getCurrencyPrices } from './currencies';
 import { scrapeFundHoldings } from './holdings';
 import { scrapeFundPrices } from './prices';
+import { selectFunds } from './queries';
 import { getFundUrl, downloadMultipleUrls } from './scrape';
 import { CLIOptions, Broker, Fund } from './types';
 import config from '~api/config';
-import { withSlonik } from '~api/modules/db';
+import { fundHash } from '~api/controllers';
 import logger from '~api/modules/logger';
-import { fundHash } from '~api/routes/data/funds/common';
 
 export function getBroker(name: string): Broker {
   if (config.data.funds.scraper.regex.test(name)) {
@@ -20,32 +20,8 @@ export function getBroker(name: string): Broker {
   throw new Error(`Invalid fund name: ${name}`);
 }
 
-export const getFunds = withSlonik<Fund[]>(async (db) => {
-  const { rows } = await db.query<{
-    uid: string;
-    name: string;
-    units: number;
-    cost: number;
-  }>(sql`
-  SELECT uid, item as name, units, cost
-  FROM (
-    SELECT ${sql.join(
-      [
-        sql`f.uid`,
-        sql`f.item`,
-        sql`ROUND(SUM(ft.units)::decimal, 5) AS units`,
-        sql`SUM(ft.cost)::float AS cost`,
-      ],
-      sql`, `,
-    )}
-    FROM funds f
-    INNER JOIN funds_transactions ft ON ft.fund_id = f.id
-    GROUP BY f.uid, f.item
-  ) r
-  WHERE r.units > 0
-  ORDER BY r.uid, r.item
-  `);
-
+export const getFunds = async (db: DatabaseTransactionConnectionType): Promise<Fund[]> => {
+  const rows = await selectFunds(db);
   return rows
     .map(({ uid, name, units, cost }) => ({
       uid,
@@ -59,9 +35,12 @@ export const getFunds = withSlonik<Fund[]>(async (db) => {
       ...fund,
       url: getFundUrl(fund),
     }));
-});
+};
 
-export async function processScrape(flags: CLIOptions): Promise<void> {
+export async function processScrape(
+  db: DatabaseTransactionConnectionType,
+  flags: CLIOptions,
+): Promise<void> {
   const { holdings, prices } = flags;
 
   if (!holdings && !prices) {
@@ -71,7 +50,7 @@ export async function processScrape(flags: CLIOptions): Promise<void> {
   logger.info('Starting fund scraper...');
 
   try {
-    const funds = await getFunds();
+    const funds = await getFunds(db);
 
     if (!funds.length) {
       logger.info('No funds to scrape - exiting!');
@@ -89,12 +68,11 @@ export async function processScrape(flags: CLIOptions): Promise<void> {
     const rawData = await downloadMultipleUrls(uniqueFunds.map(({ url }) => url));
 
     if (holdings) {
-      await scrapeFundHoldings(funds, uniqueFunds, rawData);
+      await scrapeFundHoldings(db, funds, uniqueFunds, rawData);
     }
     if (prices) {
       const currencyPrices = await getCurrencyPrices();
-
-      await scrapeFundPrices(currencyPrices, uniqueFunds, rawData);
+      await scrapeFundPrices(db, currencyPrices, uniqueFunds, rawData);
     }
 
     logger.info('Finished scraping funds');

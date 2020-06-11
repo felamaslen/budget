@@ -1,6 +1,6 @@
-import config from '~api/config';
-import { Fund, Holding, CurrencyPrices, ShortFundType, LongFundType } from './types';
 import { removeWhitespace } from './helpers';
+import { Fund, Holding, CurrencyPrices, ShortFundType, LongFundType } from './types';
+import config from '~api/config';
 
 export function isHLFundShare(fund: Pick<Fund, 'name'>): boolean {
   return /^.*\(share\.?\)$/.test(fund.name);

@@ -2,12 +2,21 @@ import { Router } from 'express';
 
 import { routeGet as routeAll } from './all';
 import { handler as routeAnalysis } from './analysis';
+import { handler as routeFunds } from './funds';
+import {
+  routeIncome,
+  routeBills,
+  routeFood,
+  routeGeneral,
+  routeHoliday,
+  routeSocial,
+} from './list';
+import { routePatch } from './multiple';
 import { handler as routeOverview } from './overview';
 import * as pie from './pie';
 import * as stocks from './stocks';
 
 import config from '~api/config';
-import { listDataProcessor, routePatch } from '~api/middleware/multiple-update-request';
 import { authMiddleware } from '~api/modules/auth';
 import db from '~api/modules/db';
 import { netWorthRoute } from '~api/routes/net-worth';
@@ -25,15 +34,14 @@ export function handler(): Router {
   router.use('/overview', routeOverview());
   router.use('/analysis', routeAnalysis());
 
-  // list data routes
-  config.data.listCategories.forEach((category) => {
-    const pageParam = category === 'funds' ? '' : '/:page?';
+  router.use('/funds', routeFunds());
 
-    router.get(`/${category}${pageParam}`, listDataProcessor[category].routeGet(config, db));
-    router.post(`/${category}`, listDataProcessor[category].routePost(config, db));
-    router.put(`/${category}`, listDataProcessor[category].routePut(config, db));
-    router.delete(`/${category}`, listDataProcessor[category].routeDelete(config, db));
-  });
+  router.use('/income', routeIncome);
+  router.use('/bills', routeBills);
+  router.use('/food', routeFood);
+  router.use('/general', routeGeneral);
+  router.use('/holiday', routeHoliday);
+  router.use('/social', routeSocial);
 
   router.get('/all', routeAll);
 

@@ -1,10 +1,11 @@
-import prompts from 'prompts';
 import groupBy from 'lodash/groupBy';
+import prompts from 'prompts';
+import { DatabaseTransactionConnectionType } from 'slonik';
 
-import db from '~api/modules/db';
-import logger from '~api/modules/logger';
 import { getHoldingsFromDataHL } from './hl';
-import { Fund, Holding, Stock, StockCode, StockCodes } from './types';
+import { selectStockCodes, insertStockCodes, cleanStocksList, insertStocksList } from './queries';
+import { Fund, Holding, Stock, StockCode, StockCodes, WeightedHolding } from './types';
+import logger from '~api/modules/logger';
 
 type FundWithHoldings = Fund & {
   holdings: Holding[];
@@ -15,39 +16,39 @@ type DataByUrl = {
   [url: string]: string;
 };
 
-async function getStockCodes(): Promise<StockCodes> {
+async function getStockCodes(db: DatabaseTransactionConnectionType): Promise<StockCodes> {
   // get a saved map of saved stock codes so that the user doesn't need to enter
   // them every time
   logger.debug('Getting list of stock codes from database');
 
-  const codes = await db.select('name', 'code').from('stock_codes');
-
-  return codes.reduce((items, { name, code }) => ({ ...items, [name]: code }), {});
+  const codes = await selectStockCodes(db);
+  return codes.reduce<StockCodes>((items, { name, code }) => ({ ...items, [name]: code }), {});
 }
 
-async function saveStockCodes(stockCodes: StockCodes): Promise<void> {
+async function saveStockCodes(
+  db: DatabaseTransactionConnectionType,
+  stockCodes: StockCodes,
+): Promise<void> {
   logger.debug('Saving updated stock codes to database');
 
-  const names = Object.keys(stockCodes);
-  if (!names.length) {
+  if (!Object.keys(stockCodes).length) {
     return;
   }
 
-  const rows = names.map(name => ({ name, code: stockCodes[name] }));
-
-  await db.batchInsert('stock_codes', rows, 30);
+  await insertStockCodes(db, stockCodes);
 }
 
-async function saveStocksList(stocksList: Stock[]): Promise<void> {
+async function saveStocksList(
+  db: DatabaseTransactionConnectionType,
+  stocksList: Stock[],
+): Promise<void> {
   logger.debug('Inserting stocks list into database');
 
-  await db('stocks').truncate();
-
+  await cleanStocksList(db);
   if (!stocksList.length) {
     return;
   }
-
-  await db.batchInsert('stocks', stocksList, 30);
+  await insertStocksList(db, stocksList);
 }
 
 async function getCodeForStock(
@@ -75,15 +76,11 @@ async function getCodeForStock(
   return code || null;
 }
 
-type WeightedHolding = {
-  uid: string;
-  name: string;
-  weight: number;
-  subweight: number;
-};
-
-async function updateHoldings(fundsWithHoldings: FundWithHoldings[]): Promise<void> {
-  const stockCodes = await getStockCodes();
+async function updateHoldings(
+  db: DatabaseTransactionConnectionType,
+  fundsWithHoldings: FundWithHoldings[],
+): Promise<void> {
+  const stockCodes = await getStockCodes(db);
 
   const groupedByUid = groupBy(fundsWithHoldings, 'uid');
   const totalCost: { [uid: string]: number } = Object.keys(groupedByUid).reduce(
@@ -94,8 +91,8 @@ async function updateHoldings(fundsWithHoldings: FundWithHoldings[]): Promise<vo
     {},
   );
 
-  const fundsHoldings: WeightedHolding[] = fundsWithHoldings.reduce(
-    (rows: WeightedHolding[], { holdings, uid, cost }) => [
+  const fundsHoldings = fundsWithHoldings.reduce<WeightedHolding[]>(
+    (rows, { holdings, uid, cost }) => [
       ...rows,
       ...holdings
         .sort(({ name: nameA }, { name: nameB }) => (nameA < nameB ? -1 : 1))
@@ -109,20 +106,25 @@ async function updateHoldings(fundsWithHoldings: FundWithHoldings[]): Promise<vo
     [],
   );
 
-  const newStocks: Stock[] = [];
-  const newStockCodes: StockCodes = {};
-
   logger.debug('Getting any missing stock codes from user input');
-  await fundsHoldings.reduce(
+  const result = await fundsHoldings.reduce<
+    Promise<{
+      stocks: Stock[];
+      codes: StockCodes;
+    }>
+  >(
     (last, { name, ...holding }) =>
-      last.then(async () => {
+      last.then(async (next) => {
+        let stock: Stock | null = null;
+        let stockCode: StockCode | undefined = undefined;
+
         try {
-          const code = await getCodeForStock(name, stockCodes, newStockCodes);
-          if (!(name in stockCodes) && !(name in newStockCodes)) {
-            newStockCodes[name] = code;
+          const code = await getCodeForStock(name, stockCodes, next.codes);
+          if (!(name in stockCodes) && !(name in next.codes)) {
+            stockCode = code;
           }
           if (code) {
-            newStocks.push({ ...holding, name, code });
+            stock = { ...holding, name, code };
           } else {
             logger.warn(`Skipped null code for stock: ${name}`);
           }
@@ -133,13 +135,21 @@ async function updateHoldings(fundsWithHoldings: FundWithHoldings[]): Promise<vo
             logger.info('Fund holdings update process cancelled by user');
           }
         }
+
+        return {
+          stocks: stock ? [...next.stocks, stock] : next.stocks,
+          codes:
+            typeof stockCode === 'undefined' ? next.codes : { ...next.codes, [name]: stockCode },
+        };
       }),
-    Promise.resolve(),
+    Promise.resolve({
+      stocks: [],
+      codes: {},
+    }),
   );
 
-  await saveStockCodes(newStockCodes);
-
-  await saveStocksList(newStocks);
+  await saveStockCodes(db, result.codes);
+  await saveStocksList(db, result.stocks);
 }
 
 function getFundHoldings(fund: Fund, data: string): Holding[] {
@@ -167,7 +177,7 @@ function getFundsWithHoldings(funds: Fund[], data: DataByUrl): FundWithHoldings[
 
       logger.debug(`Processed holdings for ${fund.name}`);
 
-      const numErrors = holdings.filter(item => !item).length;
+      const numErrors = holdings.filter((item) => !item).length;
 
       if (numErrors > 0) {
         logger.warn(`Couldn't process ${numErrors} item(s)`);
@@ -177,7 +187,7 @@ function getFundsWithHoldings(funds: Fund[], data: DataByUrl): FundWithHoldings[
         ...results,
         {
           ...fund,
-          holdings: holdings.filter(item => item),
+          holdings: holdings.filter((item) => item),
         },
       ];
     } catch (err) {
@@ -190,6 +200,7 @@ function getFundsWithHoldings(funds: Fund[], data: DataByUrl): FundWithHoldings[
 }
 
 export async function scrapeFundHoldings(
+  db: DatabaseTransactionConnectionType,
   funds: Fund[],
   uniqueFunds: Fund[],
   data: string[],
@@ -206,5 +217,5 @@ export async function scrapeFundHoldings(
 
   const fundsWithHoldings = getFundsWithHoldings(funds, dataByUrl);
 
-  await updateHoldings(fundsWithHoldings);
+  await updateHoldings(db, fundsWithHoldings);
 }

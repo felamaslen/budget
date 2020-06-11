@@ -1,3 +1,5 @@
+import boom from '@hapi/boom';
+import { Schema } from '@hapi/joi';
 import { Response, NextFunction, RequestHandler } from 'express';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -14,3 +16,40 @@ export const authDbRoute = (
   ) => Promise<void>,
 ): RequestHandler =>
   catchAsyncErrors(withSlonik<void, [AuthenticatedRequest, Response, NextFunction]>(handler));
+
+export const validatedAuthDbRoute = <
+  D extends object | void = void,
+  P extends object | void = void,
+  Q extends object | void = void
+>(
+  schema: Partial<{
+    data: Schema;
+    params: Schema;
+    query: Schema;
+  }>,
+  handler: (
+    db: DatabaseTransactionConnectionType,
+    req: AuthenticatedRequest,
+    res: Response,
+    data: D,
+    params: P,
+    query: Q,
+  ) => Promise<void>,
+): RequestHandler =>
+  authDbRoute(async (db, req, res) => {
+    const dataValidation = schema.data?.validate(req.body);
+    const paramsValidation = schema.params?.validate(req.params);
+    const queryValidation = schema.query?.validate(req.query);
+
+    const validationError =
+      dataValidation?.error ?? paramsValidation?.error ?? queryValidation?.error;
+    if (validationError) {
+      throw boom.badRequest(validationError.message);
+    }
+
+    const data: D = dataValidation?.value;
+    const params: P = paramsValidation?.value;
+    const query: Q = queryValidation?.value;
+
+    await handler(db, req, res, data, params, query);
+  });

@@ -1,6 +1,17 @@
 import { PgConnectionConfig } from 'knex';
 import { fundSalt } from './fund-salt.json';
-import { ListCategory, Page } from './types';
+import {
+  ListCalcCategory,
+  Page,
+  ColumnMap,
+  ListCalcItem,
+  Income,
+  Bill,
+  Food,
+  General,
+  Holiday,
+  Social,
+} from './types';
 
 if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
   // eslint-disable-next-line import/no-extraneous-dependencies
@@ -55,15 +66,18 @@ export type Config = {
   };
   timeZone: string;
   data: {
-    listCategories: ListCategory[];
+    listCategories: ListCalcCategory[];
     currencyUnit: string;
     columnMapExtra: {
-      [k in ListCategory]?: {
-        [h: string]: string;
-      };
+      income: ColumnMap<Omit<Income, keyof ListCalcItem>>;
+      bills: ColumnMap<Omit<Bill, keyof ListCalcItem>>;
+      food: ColumnMap<Omit<Food, keyof ListCalcItem>>;
+      general: ColumnMap<Omit<General, keyof ListCalcItem>>;
+      holiday: ColumnMap<Omit<Holiday, keyof ListCalcItem>>;
+      social: ColumnMap<Omit<Social, keyof ListCalcItem>>;
     };
     listPageLimits: {
-      [k in ListCategory]?: number;
+      [k in ListCalcCategory]: number;
     };
     funds: {
       salt: string;
@@ -120,43 +134,35 @@ const config: Config = {
   },
   timeZone: 'Europe/London',
   data: {
-    listCategories: [
-      Page.funds,
-      Page.income,
-      Page.bills,
-      Page.food,
-      Page.general,
-      Page.holiday,
-      Page.social,
-    ],
+    listCategories: [Page.income, Page.bills, Page.food, Page.general, Page.holiday, Page.social],
     currencyUnit: '£',
     columnMapExtra: {
-      income: {},
-      bills: {},
-      food: {
-        category: 'k',
-        shop: 's',
+      [Page.income]: {},
+      [Page.bills]: {},
+      [Page.food]: {
+        k: 'category',
+        s: 'shop',
       },
-      general: {
-        category: 'k',
-        shop: 's',
+      [Page.general]: {
+        k: 'category',
+        s: 'shop',
       },
-      social: {
-        society: 'y',
-        shop: 's',
+      [Page.holiday]: {
+        h: 'holiday',
+        s: 'shop',
       },
-      holiday: {
-        holiday: 'h',
-        shop: 's',
+      [Page.social]: {
+        y: 'society',
+        s: 'shop',
       },
     },
     listPageLimits: {
-      income: 12,
-      bills: 6,
-      food: 2,
-      general: 4,
-      social: 6,
-      holiday: 12,
+      [Page.income]: 12,
+      [Page.bills]: 6,
+      [Page.food]: 2,
+      [Page.general]: 4,
+      [Page.holiday]: 12,
+      [Page.social]: 6,
     },
     funds: {
       salt: fundSalt,

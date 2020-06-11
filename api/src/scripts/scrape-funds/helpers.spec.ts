@@ -2,6 +2,7 @@ import { removeWhitespace } from './helpers';
 
 describe('removeWhitespace', () => {
   it('removes whitespace', () => {
-    expect(removeWhitespace('a\nb\tc\rd e   f   > >>')).toEqual('abcd e f>>>');
+    expect.assertions(1);
+    expect(removeWhitespace('a\nb\tc\rd e   f   > >>')).toStrictEqual('abcd e f>>>');
   });
 });

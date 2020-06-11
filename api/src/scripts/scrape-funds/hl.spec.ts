@@ -1,12 +1,6 @@
-import * as nock from 'nock';
 import path from 'path';
 import fs from 'fs-extra';
-import {
-  isHLFundShare,
-  getHoldingsFromDataHL,
-  getPriceFromDataHL,
-  getFundUrlHL,
-} from '~api/scripts/scrape-funds/hl';
+import { isHLFundShare, getHoldingsFromDataHL, getPriceFromDataHL, getFundUrlHL } from './hl';
 import { Fund } from './types';
 
 describe('Fund scraper - HL', () => {
@@ -31,6 +25,7 @@ describe('Fund scraper - HL', () => {
 
   describe('isHLFundShare', () => {
     it('returns true for GBX shares', () => {
+      expect.assertions(1);
       const fund: Pick<Fund, 'name'> = {
         name: 'City of London Investment Trust ORD 25p (share)',
       };
@@ -39,6 +34,7 @@ describe('Fund scraper - HL', () => {
     });
 
     it('returns true for foreign shares', () => {
+      expect.assertions(1);
       const fund: Pick<Fund, 'name'> = {
         name: 'Apple Inc Com Stk NPV (share)',
       };
@@ -47,6 +43,7 @@ describe('Fund scraper - HL', () => {
     });
 
     it('returns false for funds', () => {
+      expect.assertions(1);
       const fund: Pick<Fund, 'name'> = {
         name: 'Jupiter Asian Income Class I (accum.)',
       };
@@ -57,11 +54,12 @@ describe('Fund scraper - HL', () => {
 
   describe('getHoldingsFromDataHL', () => {
     it('returns holdings for funds', () => {
+      expect.assertions(1);
       const fund: Pick<Fund, 'name'> = {
         name: 'Jupiter Asian Income Class I (accum.)',
       };
 
-      expect(getHoldingsFromDataHL(fund, testDataFund)).toEqual([
+      expect(getHoldingsFromDataHL(fund, testDataFund)).toStrictEqual([
         {
           name: 'Majedie UK Equity Class X',
           value: 9.85,
@@ -106,11 +104,12 @@ describe('Fund scraper - HL', () => {
     });
 
     it('returns holdings for shares', () => {
+      expect.assertions(1);
       const fund: Pick<Fund, 'name'> = {
         name: 'City of London Investment Trust ORD 25p (share)',
       };
 
-      expect(getHoldingsFromDataHL(fund, testDataShare)).toEqual([
+      expect(getHoldingsFromDataHL(fund, testDataShare)).toStrictEqual([
         {
           name: 'British American Tobacco plc Ordinary 25p',
           value: 4.94,
@@ -155,41 +154,52 @@ describe('Fund scraper - HL', () => {
     });
 
     it('returns an empty array for shares without holdings', () => {
+      expect.assertions(1);
       const fund: Pick<Fund, 'name'> = {
         name: 'Apple Inc Com Stk NPV (share)',
       };
 
-      expect(getHoldingsFromDataHL(fund, testDataShareFX)).toEqual([]);
+      expect(getHoldingsFromDataHL(fund, testDataShareFX)).toHaveLength(0);
     });
   });
 
   describe('getPriceFromDataHL', () => {
     it('should parse the test fund data', () => {
-      expect(getPriceFromDataHL(testDataFund)).toEqual(130.31);
+      expect.assertions(1);
+      expect(getPriceFromDataHL(testDataFund)).toBe(130.31);
     });
 
     it('should parse the test share data', () => {
-      expect(getPriceFromDataHL(testDataShare)).toEqual(424.1);
+      expect.assertions(1);
+      expect(getPriceFromDataHL(testDataShare)).toBe(424.1);
     });
 
     it('should parse the dollar share data and convert the price from USD to GBP', () => {
+      expect.assertions(1);
       const currencyPrices = {
         GBP: 0.76746,
       };
 
-      expect(getPriceFromDataHL(testDataShareFX, currencyPrices)).toEqual(22582 * 0.76746);
+      expect(getPriceFromDataHL(testDataShareFX, currencyPrices)).toBe(22582 * 0.76746);
     });
 
     it('should handle data where there is a comma in the price', () => {
-      expect(getPriceFromDataHL(testDataShareComma)).toEqual(1862);
+      expect.assertions(1);
+      expect(getPriceFromDataHL(testDataShareComma)).toBe(1862);
     });
 
     it('should throw an error on dollar share data if there are no currency data', () => {
-      expect(() => getPriceFromDataHL(testDataShareFX)).toThrow();
-      expect(() => getPriceFromDataHL(testDataShareFX, {})).toThrow();
+      expect.assertions(2);
+      expect(() => getPriceFromDataHL(testDataShareFX)).toThrowErrorMatchingInlineSnapshot(
+        `"no GBP/USD currency conversion available"`,
+      );
+      expect(() => getPriceFromDataHL(testDataShareFX, {})).toThrowErrorMatchingInlineSnapshot(
+        `"no GBP/USD currency conversion available"`,
+      );
     });
 
     it('should throw a nice error if given bad data', () => {
+      expect.assertions(1);
       expect(() => getPriceFromDataHL('flkjflkjavl;kj')).toThrow(
         'Scraped data formatted incorrectly',
       );
@@ -198,6 +208,7 @@ describe('Fund scraper - HL', () => {
 
   describe('getFundUrlHL', () => {
     it('should handle funds', () => {
+      expect.assertions(1);
       const fund = {
         name: 'CF Lindsell Train UK Equity Class D (accum.)',
       };
@@ -210,6 +221,7 @@ describe('Fund scraper - HL', () => {
     });
 
     it('should handle accumulation-inclusive funds', () => {
+      expect.assertions(1);
       const fund = {
         name: 'Threadneedle UK Equity Income Class 1 (accum-inc.)',
       };
@@ -222,6 +234,7 @@ describe('Fund scraper - HL', () => {
     });
 
     it('should handle shares', () => {
+      expect.assertions(1);
       const fund = {
         name: 'City of London Investment Trust ORD 25p (share)',
       };
@@ -233,6 +246,7 @@ describe('Fund scraper - HL', () => {
     });
 
     it('should handle dollar shares', () => {
+      expect.assertions(1);
       const fund = {
         name: 'Apple Inc Com Stk NPV (share)',
       };

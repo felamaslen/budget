@@ -1,5 +1,4 @@
 const path = require('path');
-const { removeDataTestIdTransformer } = require('typescript-transformer-jsx-remove-data-test-id');
 const webpack = require('webpack');
 
 const __DEV__ = process.env.NODE_ENV === 'development';

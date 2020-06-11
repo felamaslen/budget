@@ -1,8 +1,10 @@
-import config from '~api/config';
-import db from '~api/modules/db';
-import logger from '~api/modules/logger';
-import { Fund, CurrencyPrices, Broker } from './types';
+import { DatabaseTransactionConnectionType } from 'slonik';
+
 import { getPriceFromDataHL } from './hl';
+import { upsertFundHash, insertPrice, insertPriceCache } from './queries';
+import { Fund, CurrencyPrices, Broker } from './types';
+import config from '~api/config';
+import logger from '~api/modules/logger';
 
 type FundWithPrice = Fund & { price: number };
 
@@ -40,47 +42,27 @@ function getPricesFromData(
 }
 
 async function insertNewSinglePriceCache(
+  db: DatabaseTransactionConnectionType,
   cid: string,
   fund: Pick<FundWithPrice, 'hash' | 'broker' | 'price'>,
 ): Promise<void> {
   const { hash, broker, price } = fund;
+  const fid = await upsertFundHash(db, hash, broker);
 
-  const cachedHash = await db
-    .select('fid')
-    .from('fund_hash')
-    .where({ hash, broker });
-
-  let fid = null;
-
-  if (cachedHash && cachedHash.length) {
-    fid = cachedHash[0].fid;
-  } else {
-    [fid] = await db
-      .insert({ hash, broker })
-      .returning('fid')
-      .into('fund_hash');
-
-    logger.debug(`Creating previously non-existent fund hash with fid ${fid}`, hash);
-  }
-
-  // cache this value for display in the app
-  await db.insert({ cid, fid, price }).into('fund_cache');
+  await insertPrice(db, cid, fid, price);
 }
 
-async function insertNewPriceCache(fundsWithPrices: FundWithPrice[], now: Date): Promise<void> {
-  const [cid] = await db
-    .insert({ time: now, done: false })
-    .returning('cid')
-    .into('fund_cache_time');
-
-  await Promise.all(fundsWithPrices.map(fund => insertNewSinglePriceCache(cid, fund)));
-
-  await db('fund_cache_time')
-    .where({ cid })
-    .update({ done: true });
+async function insertNewPriceCache(
+  db: DatabaseTransactionConnectionType,
+  fundsWithPrices: FundWithPrice[],
+  now: Date,
+): Promise<void> {
+  const cid = await insertPriceCache(db, now);
+  await Promise.all(fundsWithPrices.map((fund) => insertNewSinglePriceCache(db, cid, fund)));
 }
 
 export async function scrapeFundPrices(
+  db: DatabaseTransactionConnectionType,
   currencyPrices: CurrencyPrices,
   funds: Fund[],
   data: string[],
@@ -97,5 +79,5 @@ export async function scrapeFundPrices(
 
   logger.debug('Inserting prices into database');
 
-  await insertNewPriceCache(fundsWithPrices, new Date());
+  await insertNewPriceCache(db, fundsWithPrices, new Date());
 }

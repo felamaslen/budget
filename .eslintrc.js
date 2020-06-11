@@ -80,12 +80,11 @@ module.exports = {
           '**/*spec.ts',
           '**/*.spec.tsx',
           '**/*.spec.js',
-          'api/src/test-after-env.ts',
-          'web/src/test-after-env.ts',
           'web/src/test-utils/**/*.ts',
           'web/src/global.d.ts',
           'web/src/store/configureStore.dev.ts',
           'api/src/global.d.ts',
+          'scripts/**/*.ts',
           'webpack.config.js',
         ],
       },
@@ -115,6 +114,7 @@ module.exports = {
     {
       files: ['*.ts', '*.tsx'],
       rules: {
+        'no-undef-init': 0,
         'prefer-destructuring': 0,
         '@typescript-eslint/explicit-function-return-type': ['error'],
         '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],

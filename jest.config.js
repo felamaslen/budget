@@ -8,11 +8,5 @@ module.exports = {
     },
   },
   moduleFileExtensions: ['ts', 'tsx', 'js'],
-  collectCoverage: ['true', '1'].includes(process.env.CI),
-  collectCoverageFrom: [
-    'web/src/**/*.{ts,tsx}',
-    'api/src/**/*.ts',
-    '!node_modules/**',
-    '!web/src/test-data/**',
-  ],
+  collectCoverage: process.env.COVERAGE === 'true' || ['true', '1'].includes(process.env.CI),
 };

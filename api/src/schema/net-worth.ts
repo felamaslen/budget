@@ -1,27 +1,20 @@
-import joi from 'joi';
+import joi from '@hapi/joi';
 
 const COLOR_REGEX = /^#[0-9a-f]{6}$/;
 
 export const schemaNetWorth = joi
   .object({
-    date: joi
-      .date()
-      .iso()
-      .required(),
+    date: joi.date().iso().required(),
     values: joi.array().items(
       joi
-        .object()
-        .keys({
-          subcategory: joi
-            .string()
-            .uuid()
-            .required(),
-          skip: joi.boolean().allow(null),
+        .object({
+          subcategory: joi.string().uuid().required(),
+          skip: joi.boolean().allow(null).default(null),
           value: joi
             .alternatives()
             .try(
               joi.number().integer(),
-              joi.array().items([
+              joi.array().items(
                 joi.number().integer(),
                 joi
                   .object({
@@ -36,7 +29,7 @@ export const schemaNetWorth = joi
                     marketPrice: joi.number().required(),
                   })
                   .unknown(false),
-              ]),
+              ),
             )
             .required(),
         })
@@ -44,23 +37,15 @@ export const schemaNetWorth = joi
     ),
     creditLimit: joi.array().items(
       joi
-        .object()
-        .keys({
-          subcategory: joi
-            .string()
-            .uuid()
-            .required(),
-          value: joi
-            .number()
-            .integer()
-            .required(),
+        .object({
+          subcategory: joi.string().uuid().required(),
+          value: joi.number().integer().required(),
         })
         .unknown(false),
     ),
     currencies: joi.array().items(
       joi
-        .object()
-        .keys({
+        .object({
           currency: joi.string().required(),
           rate: joi.number().required(),
         })
@@ -71,25 +56,16 @@ export const schemaNetWorth = joi
 
 export const schemaSubcategory = joi
   .object({
-    categoryId: joi
-      .string()
-      .uuid()
-      .required(),
+    categoryId: joi.string().uuid().required(),
     subcategory: joi.string().required(),
     hasCreditLimit: joi.boolean().allow(null),
-    opacity: joi
-      .number()
-      .min(0)
-      .max(1),
+    opacity: joi.number().min(0).max(1),
   })
   .unknown(false);
 
 export const schemaCategory = joi
   .object({
-    type: joi
-      .string()
-      .valid(['asset', 'liability'])
-      .required(),
+    type: joi.string().valid('asset', 'liability').required(),
     category: joi.string().required(),
     color: joi.string().regex(COLOR_REGEX),
     isOption: joi.boolean().allow(null),
