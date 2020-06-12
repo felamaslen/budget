@@ -40,7 +40,6 @@ export async function getMonthlyTotalFundValues(
             sql`, `,
           )}
           FROM fund_cache_time fct
-          WHERE fct.done
         ) b
         WHERE b.scrape_num_by_month = 1
         ORDER BY b.time DESC

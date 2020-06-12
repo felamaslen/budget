@@ -7,11 +7,10 @@ import { generateUserPin } from '~api/test-utils/generate-user-pin';
 async function generateFunds(uid: string, db: Knex): Promise<void> {
   const cids = await db('fund_cache_time')
     .insert([
-      { time: '2017-09-30 17:01:01', done: true },
-      { time: '2017-09-01 17:01:01', done: true },
-      { time: '2017-08-31 17:01:02', done: true },
-      { time: '2016-12-03 11:30:00', done: false },
-      { time: '2016-11-07 06:26:40', done: true },
+      { time: '2017-09-30T17:01:01Z' },
+      { time: '2017-09-01T17:01:01Z' },
+      { time: '2017-08-31T17:01:02Z' },
+      { time: '2016-11-07T06:26:40Z' },
     ])
     .returning('cid');
 
@@ -31,10 +30,7 @@ async function generateFunds(uid: string, db: Knex): Promise<void> {
       { cid: cids[2], fid: fids[0], price: 123 },
       { cid: cids[2], fid: fids[1], price: 100 },
       { cid: cids[2], fid: fids[2], price: 50.97 },
-      { cid: cids[3], fid: fids[0], price: 121.99 },
-      { cid: cids[3], fid: fids[1], price: 99.13 },
-      { cid: cids[3], fid: fids[2], price: 56.01 },
-      { cid: cids[4], fid: fids[1], price: 95.3 },
+      { cid: cids[3], fid: fids[1], price: 95.3 },
     ])
     .into('fund_cache');
 

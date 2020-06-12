@@ -111,8 +111,8 @@ export async function insertPriceCache(
   now: Date,
 ): Promise<string> {
   const result = await db.query<{ cid: string }>(sql`
-  INSERT INTO fund_cache_time (time, done)
-  VALUES (${now.toISOString()}, ${true})
+  INSERT INTO fund_cache_time (time)
+  VALUES (${now.toISOString()})
   RETURNING cid
   `);
   return result.rows[0].cid;

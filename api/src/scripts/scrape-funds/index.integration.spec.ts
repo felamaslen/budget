@@ -13,7 +13,6 @@ import db from '~api/test-utils/knex';
 type TestFundPrice = {
   cid: string;
   time: string;
-  done: boolean;
   price: number;
 };
 
@@ -117,16 +116,17 @@ describe('Fund scraper - integration tests', () => {
   });
 
   describe('Scraping prices', () => {
-    const getTestFundPrice = async (fundId: string): Promise<TestFundPrice[]> => {
-      const rows = await db
-        .select<TestFundPrice[]>('fct.cid', 'fct.time', 'fct.done', 'fc.price')
+    const getTestFundPrice = async (fundId: string): Promise<TestFundPrice | undefined> => {
+      const result = await db
+        .select<TestFundPrice>('fct.cid', 'fct.time', 'fc.price')
         .from('funds as f')
         .innerJoin('fund_hash as fh', 'fh.hash', db.raw('md5(f.item || ?)', config.data.funds.salt))
         .innerJoin('fund_cache as fc', 'fc.fid', 'fh.fid')
         .innerJoin('fund_cache_time as fct', 'fct.cid', 'fc.cid')
-        .where('f.id', fundId);
+        .where('f.id', fundId)
+        .first();
 
-      return rows;
+      return result;
     };
 
     beforeEach(async () => {
@@ -134,39 +134,45 @@ describe('Fund scraper - integration tests', () => {
     });
 
     it('should insert new prices for a GBX share', async () => {
-      expect.assertions(4);
+      expect.assertions(1);
       await run();
 
       const gbxResult = await getTestFundPrice(fundIds[0]);
 
-      expect(gbxResult).toHaveLength(1);
-      expect(gbxResult[0]).toHaveProperty('time', new Date(now));
-      expect(gbxResult[0]).toHaveProperty('done', true);
-      expect(gbxResult[0]).toHaveProperty('price', testPriceCTY);
+      expect(gbxResult).toStrictEqual(
+        expect.objectContaining({
+          time: new Date(now),
+          price: testPriceCTY,
+        }),
+      );
     });
 
     it('should insert new prices for a fund', async () => {
-      expect.assertions(4);
+      expect.assertions(1);
       await run();
 
       const fundResult = await getTestFundPrice(fundIds[1]);
 
-      expect(fundResult).toHaveLength(1);
-      expect(fundResult[0]).toHaveProperty('time', new Date(now));
-      expect(fundResult[0]).toHaveProperty('done', true);
-      expect(fundResult[0]).toHaveProperty('price', testPriceJupiter);
+      expect(fundResult).toStrictEqual(
+        expect.objectContaining({
+          time: new Date(now),
+          price: testPriceJupiter,
+        }),
+      );
     });
 
     it('should insert new prices for a foreign share', async () => {
-      expect.assertions(4);
+      expect.assertions(1);
       await run();
 
       const usdResult = await getTestFundPrice(fundIds[2]);
 
-      expect(usdResult).toHaveLength(1);
-      expect(usdResult[0]).toHaveProperty('time', new Date(now));
-      expect(usdResult[0]).toHaveProperty('done', true);
-      expect(usdResult[0]).toHaveProperty('price', testPriceAppleUSD * testUSDGBP * 100);
+      expect(usdResult).toStrictEqual(
+        expect.objectContaining({
+          time: new Date(now),
+          price: testPriceAppleUSD * testUSDGBP * 100,
+        }),
+      );
     });
 
     it('should skip funds where the request fails', async () => {
@@ -193,15 +199,16 @@ describe('Fund scraper - integration tests', () => {
       const fundResult = await getTestFundPrice(fundIds[1]);
       const usdResult = await getTestFundPrice(fundIds[2]);
 
-      expect(gbxResult).toHaveLength(0);
-      expect(fundResult).toHaveLength(1);
-      expect(usdResult).toHaveLength(0);
+      expect(gbxResult).toBeUndefined();
+      expect(fundResult).not.toBeUndefined();
+      expect(usdResult).toBeUndefined();
     });
 
     it('should skip totally sold funds', async () => {
       expect.assertions(1);
+      await run();
       const soldResult = await getTestFundPrice(fundIds[4]);
-      expect(soldResult).toHaveLength(0);
+      expect(soldResult).toBeUndefined();
     });
   });
 

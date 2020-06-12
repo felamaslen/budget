@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import nock from 'nock';
 import request, { Request } from 'supertest';
 
@@ -26,7 +27,7 @@ beforeAll(async () => {
 
     global.withAuth = (req, token = apiKey): Request => req.set('Authorization', token);
   } catch (err) {
-    process.exit(1);
+    console.error(err.stack);
   }
 });
 
@@ -37,6 +38,6 @@ afterAll(async () => {
 
     nock.enableNetConnect();
   } catch (err) {
-    process.exit(1);
+    console.error(err.stack);
   }
 });

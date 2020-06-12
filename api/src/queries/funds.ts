@@ -94,10 +94,7 @@ export async function getFundHistoryNumResults(
     INNER JOIN fund_hash fh ON fh.hash = md5(f.item || ${salt})
     INNER JOIN fund_cache fc ON fc.fid = fh.fid
     INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
-    WHERE ${sql.join(
-      [sql`f.uid = ${uid}`, sql`fct.done`, sql`fct.time > ${minTime.toISOString()}`],
-      sql` AND `,
-    )}
+    WHERE ${sql.join([sql`f.uid = ${uid}`, sql`fct.time > ${minTime.toISOString()}`], sql` AND `)}
     GROUP BY fct.cid
   ) results
   `);
@@ -148,7 +145,7 @@ export async function getFundHistory(
       INNER JOIN fund_hash fh ON fh.hash = md5(funds.item || ${salt})
       INNER JOIN fund_cache fc ON fc.fid = fh.fid
       INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
-      WHERE ${sql.join([sql`fct.done`, sql`fct.time > ${minTime.toISOString()}`], sql` AND `)}
+      WHERE fct.time > ${minTime.toISOString()}
       GROUP BY fct.cid
       ORDER BY fct.time
     ) prices

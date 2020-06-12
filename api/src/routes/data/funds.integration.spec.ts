@@ -112,13 +112,13 @@ describe('Funds route', () => {
 
         const cids = await db('fund_cache_time')
           .insert([
-            { time: new Date('2020-04-20T17:01:01Z'), done: true },
-            { time: new Date('2020-04-21T17:01:01Z'), done: true },
-            { time: new Date('2020-04-22T09:49:10Z'), done: true },
-            { time: new Date('2020-04-22T17:01:03Z'), done: true },
-            { time: new Date('2020-04-23T17:03:03Z'), done: true },
-            { time: new Date('2020-04-24T17:01:01Z'), done: true },
-            { time: new Date('2020-04-25T17:01:02Z'), done: true },
+            { time: new Date('2020-04-20T17:01:01Z') },
+            { time: new Date('2020-04-21T17:01:01Z') },
+            { time: new Date('2020-04-22T09:49:10Z') },
+            { time: new Date('2020-04-22T17:01:03Z') },
+            { time: new Date('2020-04-23T17:03:03Z') },
+            { time: new Date('2020-04-24T17:01:01Z') },
+            { time: new Date('2020-04-25T17:01:02Z') },
           ])
           .returning('cid');
 
