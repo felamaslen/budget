@@ -149,19 +149,20 @@ const InfiniteBox: React.FC<
         : -1,
     [activeMain, activeSub, blocks],
   );
+  const items = blocks.items;
 
   return (
     <Styled.InfiniteBox flex={blocks.box.flex} flow={flow}>
-      {blocks.items && (
-        <Styled.InfiniteBox flex={blocks.items.box.flex} flow={blocks.box.flow}>
-          {blocks.items.blocks.map((item, index) => (
+      {items && (
+        <Styled.InfiniteBox flex={items.box.flex} flow={blocks.box.flow}>
+          {items.blocks.map((item, index) => (
             <InfiniteChildMemo
               key={item.name}
               name={item.name}
               active={!activeSub && index === activeItemIndex}
               activeSub={activeItemIndex === -1 ? null : activeSub}
               flex={item.flex}
-              flow={blocks.items!.box.flow}
+              flow={items.box.flow}
               color={item.color}
               childCount={item.childCount ?? 0}
               subTree={item.subTree}

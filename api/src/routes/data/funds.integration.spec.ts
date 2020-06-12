@@ -4,7 +4,7 @@ import MockDate from 'mockdate';
 import { Response } from 'supertest';
 
 import config from '~api/config';
-import db from '~api/modules/db';
+import db from '~api/test-utils/knex';
 import { Create, Fund } from '~api/types';
 
 describe('Funds route', () => {

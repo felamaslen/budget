@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { Test } from 'supertest';
 
 import config from '~api/config';
-import db from '~api/modules/db';
+import db from '~api/test-utils/knex';
 
 describe('User route', () => {
   describe('POST /user/login', () => {

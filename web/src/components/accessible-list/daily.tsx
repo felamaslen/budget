@@ -124,9 +124,9 @@ export const AccessibleListDaily = <
       };
 
     return {
+      ...categoryFields,
       date: makeField('date', FormFieldDate),
       item: makeField('item', FormFieldText),
-      ...categoryFields,
       cost: makeField('cost', FormFieldCost),
       shop: makeField('shop', FormFieldText),
     } as ModalFields<DailyItem<K>>;

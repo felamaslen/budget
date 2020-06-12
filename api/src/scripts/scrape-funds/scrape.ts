@@ -1,9 +1,9 @@
 import axios from 'axios';
 
+import { getFundUrlHL } from './hl';
+import { Broker, Fund } from './types';
 import config from '~api/config';
 import logger from '~api/modules/logger';
-import { Broker, Fund } from './types';
-import { getFundUrlHL } from './hl';
 
 export function getFundUrl(fund: Pick<Fund, 'name' | 'broker'>): string {
   if (fund.broker === Broker.HL) {

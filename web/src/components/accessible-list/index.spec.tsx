@@ -447,6 +447,7 @@ describe('<AccessibleList />', () => {
         return { renderResult, dateInput, itemInput, costInput, addButton };
       };
 
+      // eslint-disable-next-line jest/prefer-expect-assertions
       it('should call onCreate after pressing the add button', async () => {
         const {
           renderResult: { store },
@@ -465,6 +466,7 @@ describe('<AccessibleList />', () => {
         });
       });
 
+      // eslint-disable-next-line jest/prefer-expect-assertions
       it('should reset the input values after creating an item', async () => {
         const { dateInput, itemInput, costInput } = await setup();
 
@@ -475,6 +477,7 @@ describe('<AccessibleList />', () => {
         });
       });
 
+      // eslint-disable-next-line jest/prefer-expect-assertions
       it('should focus the first input field so that another item can be created quickly', async () => {
         const { dateInput } = await setup();
 

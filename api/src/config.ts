@@ -1,4 +1,3 @@
-import { PgConnectionConfig } from 'knex';
 import { fundSalt } from './fund-salt.json';
 import {
   ListCalcCategory,
@@ -14,34 +13,12 @@ import {
 } from './types';
 
 if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
-  // eslint-disable-next-line import/no-extraneous-dependencies
-  require('dotenv').config(); // eslint-disable-line global-require
-}
-
-function parseConnectionURI(uri = ''): PgConnectionConfig {
-  const matches = uri.match(
-    /^postgres(ql)?:\/\/(\w+):(\w+)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/,
-  );
-
-  if (!matches) {
-    throw new Error('invalid database string');
-  }
-
-  const [, , user, password, host, , , port, database] = matches;
-
-  return {
-    user,
-    password,
-    host,
-    port: Number(port) || 5432,
-    database,
-  };
+  // eslint-disable-next-line import/no-extraneous-dependencies, global-require
+  require('dotenv').config();
 }
 
 export type Config = {
   db: {
-    client: string;
-    connection: PgConnectionConfig;
     url: string;
   };
   app: {
@@ -108,8 +85,6 @@ const databaseUrl =
 
 const config: Config = {
   db: {
-    client: 'pg',
-    connection: parseConnectionURI(databaseUrl),
     url: databaseUrl ?? '',
   },
   app: {

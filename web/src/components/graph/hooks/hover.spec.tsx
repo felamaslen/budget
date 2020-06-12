@@ -1,6 +1,6 @@
-import sinon from 'sinon';
-import React from 'react';
 import { render, act } from '@testing-library/react';
+import React from 'react';
+import sinon from 'sinon';
 import { useHover, HookResult } from './hover';
 import { genPixelCompute } from '~client/components/graph/helpers';
 import { Data } from '~client/types/graph';

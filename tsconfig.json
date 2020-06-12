@@ -25,6 +25,7 @@
     "types",
     "web/src",
     "api/src",
+    "api/migrations",
     "scripts",
     "seeds",
     "migrations"

@@ -1,8 +1,8 @@
 import { replaceAtIndex } from 'replace-array';
 
-import { Data } from '~client/types/graph';
 import { Mode } from '~client/constants/graph';
 import { formatCurrency } from '~client/modules/format';
+import { Data } from '~client/types';
 
 export const separateLines = (line: Data): Data[] =>
   line.reduce(
@@ -15,7 +15,7 @@ export const separateLines = (line: Data): Data[] =>
       }
 
       return [
-        replaceAtIndex<Data>(lines, lines.length - 1, part => part.concat([[xValue, yValue]])),
+        replaceAtIndex<Data>(lines, lines.length - 1, (part) => part.concat([[xValue, yValue]])),
         false,
       ];
     },

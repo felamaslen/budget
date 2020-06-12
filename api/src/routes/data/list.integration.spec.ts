@@ -1,7 +1,7 @@
 import MockDate from 'mockdate';
 import { Response } from 'supertest';
 
-import db from '~api/modules/db';
+import db from '~api/test-utils/knex';
 import { Page } from '~api/types';
 
 describe('Standard list routes', () => {

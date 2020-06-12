@@ -157,6 +157,7 @@ describe('Accessible list create item', () => {
     };
 
     describe('when selecting a suggestion', () => {
+      /* eslint-disable jest/prefer-expect-assertions */
       it('should change the value of the current input', async () => {
         const { inputSomeField } = await setupWithSelection();
 
@@ -178,6 +179,7 @@ describe('Accessible list create item', () => {
           expect(document.activeElement).toBe(inputNextField);
         });
       });
+      /* eslint-enable jest/prefer-expect-assertions */
 
       it('should add the suggested values to the created item', async () => {
         expect.assertions(4);
@@ -215,6 +217,7 @@ describe('Accessible list create item', () => {
       });
 
       describe('if on the last field of the create form', () => {
+        /* eslint-disable jest/prefer-expect-assertions */
         it('should focus the add button', async () => {
           nock('http://localhost')
             .get('/api/v4/data/search/my-page/nextField/z/5')
@@ -289,6 +292,7 @@ describe('Accessible list create item', () => {
           expect(inputNextField.selectionEnd).toBe('Kitchen'.length);
         });
       });
+      /* eslint-enable jest/prefer-expect-assertions */
     });
   });
 });

@@ -8,7 +8,7 @@ import uuidv4 from 'uuid/v4';
 import mockOpenExchangeRatesResponse from './vendor/currencies.json';
 import { run } from '.';
 import config from '~api/config';
-import db from '~api/modules/db';
+import db from '~api/test-utils/knex';
 
 type TestFundPrice = {
   cid: string;

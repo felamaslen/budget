@@ -1,9 +1,10 @@
-import { RequestType } from '~client/types/crud';
 import { getRequests } from './crud';
+import { RequestType } from '~client/types';
 
 describe('Crud selector', () => {
   describe('getRequests', () => {
     it('should get create requests', () => {
+      expect.assertions(1);
       const items = [
         {
           id: 'some-fake-id',
@@ -30,6 +31,7 @@ describe('Crud selector', () => {
     });
 
     it('should get update requests', () => {
+      expect.assertions(1);
       const items = [
         {
           id: 'some-real-id',
@@ -56,6 +58,7 @@ describe('Crud selector', () => {
     });
 
     it('should get delete requests', () => {
+      expect.assertions(1);
       const items = [
         {
           id: 'some-real-id',

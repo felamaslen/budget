@@ -6,7 +6,7 @@ type StockIndices = {
 
 export const STOCK_INDICES: StockIndices = (process.env.STOCK_INDICES || '')
   .split(',')
-  .map(code => code.match(stockIndexRegex))
+  .map((code) => code.match(stockIndexRegex))
   .filter((code: RegExpMatchArray | null): code is RegExpMatchArray => !!code)
   .reduce(
     (last, [, code, name]) => ({

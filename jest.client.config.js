@@ -6,7 +6,7 @@ module.exports = {
   roots: ['./web/src'],
   moduleNameMapper: {
     '\\.(jpg|png)': '<rootDir>/web/src/mocks/file-loader.js',
-    '~client/(.*)': '<rootDir>/web/src/$1',
+    ...baseConfig.moduleNameMapper,
   },
   testMatch: ['**/*.spec.ts?(x)'],
   setupFilesAfterEnv: ['<rootDir>/web/src/test-utils/after-env.ts'],
@@ -15,6 +15,6 @@ module.exports = {
     'web/src/**/*.{ts,tsx}',
     '!node_modules/**',
     '!web/src/test-data/**',
-    ':!web/src/test-utils/**',
+    '!web/src/test-utils/**',
   ],
 };

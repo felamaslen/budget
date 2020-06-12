@@ -1,7 +1,7 @@
 import MockDate from 'mockdate';
 import moize from 'moize';
 import { Response } from 'supertest';
-import db from '~api/modules/db';
+import db from '~api/test-utils/knex';
 
 /**
  * This is a legacy route and should eventually be phased out,

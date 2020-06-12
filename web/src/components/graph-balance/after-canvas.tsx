@@ -8,12 +8,12 @@ type Props = {
 };
 
 export const AfterCanvas: React.FC<Props> = ({ showAll, setShowAll }) => {
-  const skip = useCallback(event => {
+  const skip = useCallback((event) => {
     event.stopPropagation();
   }, []);
 
   const onToggle = useCallback(
-    event => {
+    (event) => {
       skip(event);
       setShowAll((last: boolean): boolean => !last);
     },
@@ -25,7 +25,9 @@ export const AfterCanvas: React.FC<Props> = ({ showAll, setShowAll }) => {
       onClick={onToggle}
       onMouseMove={skip}
       onMouseOver={skip}
+      onFocus={skip}
       onMouseOut={skip}
+      onBlur={skip}
       onTouchStart={skip}
       onTouchMove={skip}
       onTouchEnd={skip}

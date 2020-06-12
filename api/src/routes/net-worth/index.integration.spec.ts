@@ -5,7 +5,7 @@ import { Response } from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
 import config from '~api/config';
-import db from '~api/modules/db';
+import db from '~api/test-utils/knex';
 import {
   RawDate,
   Create,

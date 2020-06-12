@@ -1,8 +1,7 @@
-import { testState } from '~client/test-data/state';
-import { getApiKey, getLocked, getUnsaved } from '~client/selectors/api';
 import { getTransactionsList } from '~client/modules/data';
-import { Page } from '~client/types/app';
-import { RequestType } from '~client/types/crud';
+import { getApiKey, getLocked, getUnsaved } from '~client/selectors';
+import { testState } from '~client/test-data';
+import { Page, RequestType } from '~client/types';
 
 describe('API selectors', () => {
   describe('getApiKey', () => {

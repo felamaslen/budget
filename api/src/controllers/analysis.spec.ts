@@ -12,6 +12,8 @@ import { User } from '~api/modules/auth';
 import * as queries from '~api/queries';
 import { Page } from '~api/types';
 
+jest.mock('~api/queries');
+
 describe('Analysis controller', () => {
   describe('periodCondition', () => {
     it('should get weekly periods', () => {

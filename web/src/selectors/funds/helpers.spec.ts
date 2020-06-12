@@ -25,6 +25,7 @@ describe('getFundsRows', () => {
   });
 
   it('should order by item', () => {
+    expect.assertions(1);
     expect(
       getFundsRows({
         funds: {

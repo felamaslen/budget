@@ -1,4 +1,4 @@
-import db from '~api/modules/db';
+import db from '~api/test-utils/knex';
 
 describe('Search route', () => {
   const cleanup = async (): Promise<void> => {

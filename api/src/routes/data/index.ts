@@ -13,12 +13,10 @@ import {
 } from './list';
 import { routePatch } from './multiple';
 import { handler as routeOverview } from './overview';
-import * as pie from './pie';
-import * as stocks from './stocks';
+import { handler as routePie } from './pie';
+import { handler as routeStocks } from './stocks';
 
-import config from '~api/config';
 import { authMiddleware } from '~api/modules/auth';
-import db from '~api/modules/db';
 import { netWorthRoute } from '~api/routes/net-worth';
 import { handler as routeSearch } from '~api/routes/search';
 
@@ -45,11 +43,8 @@ export function handler(): Router {
 
   router.get('/all', routeAll);
 
-  // pie charts
-  router.get('/pie/:category', pie.routeGet(config, db));
-
-  // stocks route
-  router.get('/stocks', stocks.routeGet(config, db));
+  router.use('/pie', routePie());
+  router.use('/stocks', routeStocks());
 
   return router;
 }

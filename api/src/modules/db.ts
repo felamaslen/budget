@@ -1,4 +1,3 @@
-import knex from 'knex';
 import { createPool, DatabaseTransactionConnectionType } from 'slonik';
 import { createQueryLoggingInterceptor } from 'slonik-interceptor-query-logging';
 
@@ -14,5 +13,3 @@ export const withSlonik = <R = void, A extends any[] = never[]>(
   handler: (connection: DatabaseTransactionConnectionType, ...args: A) => Promise<R>,
 ): ((...args: A) => Promise<R>) => async (...args: A): Promise<R> =>
   pool.transaction((connection): Promise<R> => handler(connection, ...args));
-
-export default knex(config.db);
