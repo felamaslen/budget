@@ -24,11 +24,9 @@ import {
   withoutId,
   withoutIds,
 } from './data';
-import { Average } from '~client/constants';
-import { Period } from '~client/constants/graph';
-import { mockRandom } from '~client/mocks/random';
-import { RequestType } from '~client/types/crud';
-import { Data } from '~client/types/graph';
+import { Average, Period } from '~client/constants';
+import { mockRandom } from '~client/test-utils/random';
+import { Data, RequestType } from '~client/types';
 
 describe('data module', () => {
   describe('getPeriodMatch', () => {

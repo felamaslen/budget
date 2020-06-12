@@ -76,14 +76,11 @@ const DailyHeader = <P extends string, K extends string, MK extends keyof DailyI
   );
 };
 
-const DailyRow: React.FC<{ isMobile: boolean } & Partial<DailyRecord & ExtraProps>> = ({
-  isMobile,
-  dailyTotal,
-  isFuture,
-  children,
-}) => {
+const DailyRow: React.FC<
+  { isMobile: boolean; style?: object } & Partial<DailyRecord & ExtraProps>
+> = ({ style, isMobile, dailyTotal, isFuture, children }) => {
   return (
-    <StandardRow isFuture={isFuture}>
+    <StandardRow style={style} isFuture={isFuture}>
       {children}
       {!isMobile && !!dailyTotal && <DailyTotal>{formatCurrency(dailyTotal)}</DailyTotal>}
     </StandardRow>

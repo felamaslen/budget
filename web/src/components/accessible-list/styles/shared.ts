@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { fieldSizes } from './constants';
+import { fieldSizes, rowHeightDesktop, rowHeightMobile } from './constants';
 import { fieldSizesMobile } from './mobile';
 import { breakpoint, rem } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
@@ -60,11 +60,11 @@ export const List = styled(ListWithoutMargin)`
 
 export const Row = styled.li`
   display: flex;
-  height: ${rem(30)};
+  height: ${rem(rowHeightMobile)};
 
   ${breakpoint(breakpoints.mobile)} {
     border-right: 1px solid ${borderColor};
-    height: ${rem(24)};
+    height: ${rem(rowHeightDesktop)};
 
     &:nth-child(2n) {
       background-color: ${colors.light.mediumLight};

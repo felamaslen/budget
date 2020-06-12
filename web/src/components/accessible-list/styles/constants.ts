@@ -3,3 +3,6 @@ export const fieldSizes: { [field: string]: number } = {
   cost: 96,
   default: 180,
 };
+
+export const rowHeightMobile = 30;
+export const rowHeightDesktop = 24;

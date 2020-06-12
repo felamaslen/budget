@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { render, RenderResult, within, act, fireEvent, waitFor } from '@testing-library/react';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
@@ -298,19 +299,6 @@ describe('<AccessibleListStandard />', () => {
           white-space: nowrap;
         }
 
-        .c5 {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          -webkit-flex: 1 1 0;
-          -ms-flex: 1 1 0;
-          flex: 1 1 0;
-          margin: 0;
-          min-height: 0;
-          overflow-y: auto;
-          padding: 0 0 3rem 0;
-        }
-
         .c1 {
           display: -webkit-box;
           display: -webkit-flex;
@@ -325,6 +313,12 @@ describe('<AccessibleListStandard />', () => {
           display: -ms-flexbox;
           display: flex;
           height: 1.875rem;
+        }
+
+        .c5 {
+          -webkit-flex: 1;
+          -ms-flex: 1;
+          flex: 1;
         }
 
         .c12 {
@@ -352,7 +346,7 @@ describe('<AccessibleListStandard />', () => {
           font-weight: bold;
         }
 
-        .sc-fzqBkg .c12 {
+        .sc-fzqPZZ .c12 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -370,15 +364,15 @@ describe('<AccessibleListStandard />', () => {
           grid-column: 4;
         }
 
-        .sc-fzqPZZ .c12,
-        .sc-fzqPZZ .c12:hover,
-        .sc-fzqPZZ .c12:active {
+        .sc-fzoxKX .c12,
+        .sc-fzoxKX .c12:hover,
+        .sc-fzoxKX .c12:active {
           background: none;
           border: none;
           box-shadow: none;
         }
 
-        .sc-fzqPZZ .c12::after {
+        .sc-fzoxKX .c12::after {
           display: block;
           margin-left: 16px;
           content: '';
@@ -396,7 +390,7 @@ describe('<AccessibleListStandard />', () => {
           background: none;
         }
 
-        .sc-fzowVh .c12 {
+        .sc-fzoJus .c12 {
           margin: 2px 4px;
         }
 
@@ -439,12 +433,6 @@ describe('<AccessibleListStandard />', () => {
             height: 1.5rem;
             line-height: 1.5rem;
             text-align: left;
-          }
-        }
-
-        @media only screen and (min-width:500px) {
-          .c5 {
-            padding-bottom: 0;
           }
         }
 
@@ -551,34 +539,46 @@ describe('<AccessibleListStandard />', () => {
                 Cost
               </div>
             </div>
-            <ul
-              class="sc-AxgMl c5"
+            <div
+              class="c5"
+              role="list"
             >
-              <li
-                class="sc-Axmtr c6"
-                role="button"
-              >
-                <button
-                  class="c7"
+              <div>
+                <div
+                  style="position: relative; height: 768px; width: 1024px; overflow: auto; will-change: transform; direction: ltr;"
                 >
-                  <span
-                    class="c8"
+                  <div
+                    style="height: 30px; width: 100%;"
                   >
-                    20/04/2020
-                  </span>
-                  <span
-                    class="c9"
-                  >
-                    item one
-                  </span>
-                  <span
-                    class="c10"
-                  >
-                    £9.31
-                  </span>
-                </button>
-              </li>
-            </ul>
+                    <li
+                      class="sc-Axmtr c6"
+                      role="button"
+                      style="position: absolute; left: 0px; top: 0px; height: 30px; width: 100%;"
+                    >
+                      <button
+                        class="c7"
+                      >
+                        <span
+                          class="c8"
+                        >
+                          20/04/2020
+                        </span>
+                        <span
+                          class="c9"
+                        >
+                          item one
+                        </span>
+                        <span
+                          class="c10"
+                        >
+                          £9.31
+                        </span>
+                      </button>
+                    </li>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div
               class="c11"
             >

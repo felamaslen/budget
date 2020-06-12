@@ -5,7 +5,7 @@ module.exports = {
   testEnvironment: 'jsdom',
   roots: ['./web/src'],
   moduleNameMapper: {
-    '\\.(jpg|png)': '<rootDir>/web/src/mocks/file-loader.js',
+    '\\.(jpg|png)': '<rootDir>/web/src/test-utils/file-loader.js',
     ...baseConfig.moduleNameMapper,
   },
   testMatch: ['**/*.spec.ts?(x)'],

@@ -4,3 +4,4 @@ export * from './mobile';
 export * from './shared';
 export * from './standard';
 export * from './suggestions';
+export * from './window';

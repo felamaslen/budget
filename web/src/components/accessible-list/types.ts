@@ -58,6 +58,12 @@ type CommonProps<I extends Item, P extends string, E extends {}> = {
   suggestionFields?: FieldKey<I>[];
 };
 
+export type SortItemsPre<I extends Item> = (items: I[]) => I[];
+export type SortItemsPost<I extends Item, E extends {}> = (
+  items: I[],
+  extraMap: { [id: string]: Partial<E> },
+) => I[];
+
 export type Props<
   I extends Item,
   P extends string,
@@ -65,24 +71,31 @@ export type Props<
   E extends {} = {},
   H extends {} = {}
 > = CommonProps<I, P, E> & {
+  windowise?: boolean;
   color?: string;
   fieldsMobile?: FieldsMobile<I, MK, E>;
   deltaSeed?: () => Delta<I>;
   Header?: React.FC<HeaderProps<I, P, MK, H>> | StyledComponent<'div', HeaderProps<I, P, MK, H>>;
   headerProps?: H;
-  sortItems?: (items: I[]) => I[];
-  sortItemsPost?: (items: I[], extraMap: { [id: string]: Partial<E> }) => I[];
+  sortItems?: SortItemsPre<I>;
+  sortItemsPost?: SortItemsPost<I, E>;
   customSelector?: CustomSelector<I, E>;
 };
 
 export type PropsItem<I extends Item, P extends string, MK extends keyof I, E extends {} = {}> = {
   id: string;
   isMobile: boolean;
+  style?: object;
   extraProps?: Partial<E>;
   onActivateModal: (id: string) => void;
 } & PickUnion<Props<I, P, MK, E>, 'fieldsMobile'> &
   Omit<CommonProps<I, P, E>, 'suggestionFields'> &
   Pick<PropsCrud<I, P>, 'onUpdate' | 'onDelete'>;
+
+export type PropsMemoisedItem = {
+  id: string;
+  style?: object;
+};
 
 export type PropsItemCreate<I extends Item, P extends string, E extends {} = {}> = {
   deltaSeed?: () => Delta<I>;

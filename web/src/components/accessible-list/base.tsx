@@ -1,17 +1,16 @@
-import React, { useMemo, useCallback, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { memo, useMemo } from 'react';
 
+import { useSortedItems, useMobileEditModal } from './hooks';
 import { AccessibleListItem, AccessibleListCreateItem } from './item';
 import { MobileCreateForm } from './mobile';
-import { getItems } from './selectors';
 import * as Styled from './styles';
-import { Props, FieldKey } from './types';
+import { Props, FieldKey, PropsMemoisedItem } from './types';
+import { InfiniteWindow } from './window';
+
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions';
 import { ModalDialog } from '~client/components/modal-dialog';
 import { useListCrud, useIsMobile } from '~client/hooks';
-import { Item, Create } from '~client/types';
-
-const identitySelector = <E extends {}>(): { [id: string]: Partial<E> } => ({});
+import { Item } from '~client/types';
 
 const emptyObject = {};
 
@@ -23,6 +22,7 @@ export const AccessibleList = <
   H extends {} = {}
 >({
   page,
+  windowise = false,
   color,
   fields,
   fieldsMobile,
@@ -31,23 +31,18 @@ export const AccessibleList = <
   sortItemsPost,
   suggestionFields,
   deltaSeed,
-  customSelector = identitySelector,
+  customSelector,
   itemProcessor,
   Row,
   Header,
   headerProps = emptyObject as H,
 }: Props<I, P, MK, E, H>): React.ReactElement<Props<I, P, MK, E, H>> => {
   const isMobile = useIsMobile();
-  const itemsSortedPre: I[] = useSelector(getItems<I, P>(page, sortItems));
-
-  const extraProps = useMemo<{ [id: string]: Partial<E> }>(() => customSelector(itemsSortedPre), [
-    itemsSortedPre,
+  const { itemsSorted, extraProps } = useSortedItems(
+    page,
+    sortItems,
+    sortItemsPost,
     customSelector,
-  ]);
-
-  const itemsSorted: I[] = useMemo<I[]>(
-    () => (sortItemsPost ? sortItemsPost(itemsSortedPre, extraProps) : itemsSortedPre),
-    [itemsSortedPre, extraProps, sortItemsPost],
   );
 
   const [onCreate, onUpdate, onDelete] = useListCrud<I, P>(
@@ -59,33 +54,40 @@ export const AccessibleList = <
   const fieldKeys = useMemo(() => Object.keys(fields) as FieldKey<I>[], [fields]);
   const fieldKeysMobile = useMemo(() => Object.keys(fieldsMobile ?? {}) as MK[], [fieldsMobile]);
 
-  // used for mobile modal dialog only
-  const [editingIndex, setEditingIndex] = useState<number>(-1);
-  const onCancelModal = useCallback(() => setEditingIndex(-1), []);
-  const activateModal = useCallback(
-    (id: string) => setEditingIndex(itemsSorted.findIndex((item) => item.id === id)),
-    [itemsSorted],
-  );
+  const editModal = useMobileEditModal(itemsSorted, onUpdate, onDelete);
 
-  const editingItem = itemsSorted[editingIndex];
-  const onSubmitModal = useCallback(
-    (delta: Create<I>): void => {
-      if (!editingItem) {
-        return;
-      }
-      setEditingIndex(-1);
-      onUpdate(editingItem.id, delta, editingItem);
-    },
-    [editingItem, onUpdate],
-  );
-
-  const onDeleteModal = useCallback((): void => {
-    if (!editingItem) {
-      return;
-    }
-    setEditingIndex(-1);
-    onDelete(editingItem.id, editingItem);
-  }, [editingItem, onDelete]);
+  const MemoisedItem = useMemo<React.FC<PropsMemoisedItem>>(() => {
+    const ListItemComponent: React.FC<PropsMemoisedItem> = ({ id, style }) => (
+      <AccessibleListItem<I, P, MK, E>
+        fields={fields}
+        fieldsMobile={fieldsMobile}
+        modalFields={modalFields}
+        id={id}
+        page={page}
+        isMobile={isMobile}
+        style={style}
+        onUpdate={onUpdate}
+        onDelete={onDelete}
+        extraProps={extraProps[id]}
+        itemProcessor={itemProcessor}
+        Row={Row}
+        onActivateModal={editModal.activate}
+      />
+    );
+    return memo(ListItemComponent);
+  }, [
+    fields,
+    fieldsMobile,
+    modalFields,
+    page,
+    isMobile,
+    onUpdate,
+    onDelete,
+    extraProps,
+    itemProcessor,
+    editModal.activate,
+    Row,
+  ]);
 
   return (
     <Styled.Base color={color}>
@@ -107,37 +109,28 @@ export const AccessibleList = <
           deltaSeed={deltaSeed}
         />
       )}
-      <Styled.List>
-        {itemsSorted.map(({ id }) => (
-          <AccessibleListItem<I, P, MK, E>
-            key={id}
-            fields={fields}
-            fieldsMobile={fieldsMobile}
-            modalFields={modalFields}
-            id={id}
-            page={page}
-            isMobile={isMobile}
-            onUpdate={onUpdate}
-            onDelete={onDelete}
-            extraProps={extraProps[id]}
-            itemProcessor={itemProcessor}
-            Row={Row}
-            onActivateModal={activateModal}
-          />
-        ))}
-      </Styled.List>
+      {!windowise && (
+        <Styled.List>
+          {itemsSorted.map(({ id }) => (
+            <MemoisedItem key={id} id={id} />
+          ))}
+        </Styled.List>
+      )}
+      {windowise && (
+        <InfiniteWindow isMobile={isMobile} items={itemsSorted} MemoisedItem={MemoisedItem} />
+      )}
       {isMobile && (
         <>
           <MobileCreateForm page={page} color={color} fields={modalFields} onCreate={onCreate} />
           <ModalDialog<I>
-            active={editingIndex !== -1}
+            active={editModal.active}
             type="edit"
-            id={editingItem?.id}
-            item={editingItem}
+            id={editModal.item?.id}
+            item={editModal.item}
             fields={modalFields}
-            onCancel={onCancelModal}
-            onSubmit={onSubmitModal}
-            onRemove={onDeleteModal}
+            onCancel={editModal.onCancel}
+            onSubmit={editModal.onSubmit}
+            onRemove={editModal.onDelete}
           />
         </>
       )}

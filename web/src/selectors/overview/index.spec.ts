@@ -1,9 +1,9 @@
 import { getNetWorthSummary } from './net-worth';
 import { getProcessedCost, getOverviewTable } from '.';
-import { mockRandom } from '~client/mocks/random';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data/state';
+import { mockRandom } from '~client/test-utils/random';
 
 describe('Overview selectors', () => {
   beforeEach(() => {

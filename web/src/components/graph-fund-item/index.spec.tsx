@@ -44,7 +44,7 @@ describe('<GraphFundItem />', () => {
         z-index: 2;
       }
 
-      .sc-pkhIR .c2 {
+      .sc-psCJM .c2 {
         position: relative;
         height: 125px;
       }
@@ -76,7 +76,7 @@ describe('<GraphFundItem />', () => {
           height: 120px;
         }
 
-        .sc-fzoLag:nth-last-child(-n + 3) .c1 svg {
+        .sc-fzoXzr:nth-last-child(-n + 3) .c1 svg {
           top: initial;
           bottom: 0;
         }
@@ -87,7 +87,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .c0 .PduwB {
+        .c0 .MGQSV {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -102,7 +102,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .sc-pkhIR .c2 {
+        .sc-psCJM .c2 {
           height: 100%;
         }
       }

@@ -114,6 +114,7 @@ export const AccessibleListStandard = <
 
   return (
     <AccessibleList<I, P, MK>
+      windowise
       page={page}
       color={color}
       fields={fields}

@@ -60,6 +60,7 @@ const AccessibleListItem = <
   id,
   page,
   isMobile,
+  style,
   onUpdate,
   onDelete,
   onActivateModal,
@@ -83,7 +84,7 @@ const AccessibleListItem = <
     const fieldKeysMobile = Object.keys(fieldsMobile) as MK[];
 
     return (
-      <Row role="button" isMobile={true} item={item} {...itemExtraProps}>
+      <Row role="button" style={style} isMobile={true} item={item} {...itemExtraProps}>
         <Styled.MobileRow {...activateProps}>
           {fieldKeysMobile.map((field: MK) => (
             <ListFieldMobile<I, MK, E>
@@ -102,7 +103,7 @@ const AccessibleListItem = <
   const fieldKeys = Object.keys(fields) as FieldKey<I>[];
 
   return (
-    <Row isMobile={false} item={item} {...itemExtraProps}>
+    <Row isMobile={false} item={item} style={style} {...itemExtraProps}>
       {fieldKeys.map((field: FieldKey<I>) => (
         <ListField<I, P, E>
           key={field as string}
