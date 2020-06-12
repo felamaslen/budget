@@ -88,7 +88,8 @@ export async function upsertFundHash(
 ): Promise<string> {
   const result = await db.query<{ fid: string }>(sql`
   INSERT INTO fund_hash (hash, broker) VALUES (${hash}, ${broker})
-  ON CONFLICT (hash, broker) DO NOTHING
+  ON CONFLICT (hash, broker) DO UPDATE
+    SET hash = excluded.hash
   RETURNING fid
   `);
   return result.rows[0].fid;

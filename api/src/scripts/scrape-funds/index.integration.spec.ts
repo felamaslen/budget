@@ -92,10 +92,7 @@ describe('Fund scraper - integration tests', () => {
     await db('funds').select().whereIn('id', fundIds).del();
   });
 
-  beforeEach(async () => {
-    await clearDb();
-    clock = sinon.useFakeTimers(new Date(now).getTime());
-
+  const setupNocks = async (): Promise<void> => {
     nock('https://openexchangerates.org')
       .get(`/api/latest.json?app_id=${config.openExchangeRatesApiKey}`)
       .reply(200, mockOpenExchangeRatesResponse);
@@ -113,18 +110,23 @@ describe('Fund scraper - integration tests', () => {
     nock('http://www.hl.co.uk')
       .get('/shares/shares-search-results/a/apple-inc-com-stk-npv')
       .reply(200, await fs.readFile(testFileShareFX, 'utf8'));
+  };
+
+  beforeEach(async () => {
+    await clearDb();
+    clock = sinon.useFakeTimers(new Date(now).getTime());
+    await setupNocks();
   });
 
   describe('Scraping prices', () => {
-    const getTestFundPrice = async (fundId: string): Promise<TestFundPrice | undefined> => {
+    const getTestFundPrice = async (fundId: string): Promise<TestFundPrice[]> => {
       const result = await db
-        .select<TestFundPrice>('fct.cid', 'fct.time', 'fc.price')
+        .select<TestFundPrice[]>('fct.cid', 'fct.time', 'fc.price')
         .from('funds as f')
         .innerJoin('fund_hash as fh', 'fh.hash', db.raw('md5(f.item || ?)', config.data.funds.salt))
         .innerJoin('fund_cache as fc', 'fc.fid', 'fh.fid')
         .innerJoin('fund_cache_time as fct', 'fct.cid', 'fc.cid')
-        .where('f.id', fundId)
-        .first();
+        .where('f.id', fundId);
 
       return result;
     };
@@ -139,12 +141,12 @@ describe('Fund scraper - integration tests', () => {
 
       const gbxResult = await getTestFundPrice(fundIds[0]);
 
-      expect(gbxResult).toStrictEqual(
+      expect(gbxResult).toStrictEqual([
         expect.objectContaining({
           time: new Date(now),
           price: testPriceCTY,
         }),
-      );
+      ]);
     });
 
     it('should insert new prices for a fund', async () => {
@@ -153,12 +155,12 @@ describe('Fund scraper - integration tests', () => {
 
       const fundResult = await getTestFundPrice(fundIds[1]);
 
-      expect(fundResult).toStrictEqual(
+      expect(fundResult).toStrictEqual([
         expect.objectContaining({
           time: new Date(now),
           price: testPriceJupiter,
         }),
-      );
+      ]);
     });
 
     it('should insert new prices for a foreign share', async () => {
@@ -167,12 +169,12 @@ describe('Fund scraper - integration tests', () => {
 
       const usdResult = await getTestFundPrice(fundIds[2]);
 
-      expect(usdResult).toStrictEqual(
+      expect(usdResult).toStrictEqual([
         expect.objectContaining({
           time: new Date(now),
           price: testPriceAppleUSD * testUSDGBP * 100,
         }),
-      );
+      ]);
     });
 
     it('should skip funds where the request fails', async () => {
@@ -199,16 +201,38 @@ describe('Fund scraper - integration tests', () => {
       const fundResult = await getTestFundPrice(fundIds[1]);
       const usdResult = await getTestFundPrice(fundIds[2]);
 
-      expect(gbxResult).toBeUndefined();
-      expect(fundResult).not.toBeUndefined();
-      expect(usdResult).toBeUndefined();
+      expect(gbxResult).toHaveLength(0);
+      expect(fundResult).toHaveLength(1);
+      expect(usdResult).toHaveLength(0);
     });
 
     it('should skip totally sold funds', async () => {
       expect.assertions(1);
       await run();
       const soldResult = await getTestFundPrice(fundIds[4]);
-      expect(soldResult).toBeUndefined();
+      expect(soldResult).toHaveLength(0);
+    });
+
+    describe('if the fund hash already exists', () => {
+      it('should not throw an error', async () => {
+        expect.assertions(1);
+
+        await run();
+        clock.tick(86400);
+        await setupNocks();
+        await run();
+
+        const gbxResult = await getTestFundPrice(fundIds[0]);
+
+        expect(gbxResult).toStrictEqual([
+          expect.objectContaining({
+            price: testPriceCTY,
+          }),
+          expect.objectContaining({
+            price: testPriceCTY,
+          }),
+        ]);
+      });
     });
   });
 

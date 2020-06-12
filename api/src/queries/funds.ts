@@ -151,7 +151,12 @@ export async function getFundHistory(
     ) prices
   ) results
   WHERE ${sql.join(
-    [sql`period = 0`, sql`row_num = ${numResults - 1}`, sql`row_num = 0`],
+    [
+      sql`period = 0`,
+      sql`row_num = ${numResults}`,
+      sql`row_num = ${numResults - 1}`,
+      sql`row_num = 1`,
+    ],
     sql` OR `,
   )}
   `);

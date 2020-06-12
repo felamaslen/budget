@@ -1,4 +1,4 @@
-import { getUnixTime } from 'date-fns';
+import { getUnixTime, addHours } from 'date-fns';
 import md5 from 'md5';
 import MockDate from 'mockdate';
 import { Response } from 'supertest';
@@ -96,6 +96,13 @@ describe('Funds route', () => {
     });
 
     describe('if there are historical price data', () => {
+      const numTestPrices = config.data.funds.historyResolution * 5;
+
+      const cacheTimeRows = Array(numTestPrices)
+        .fill(0)
+        .map((_, index) => ({ time: addHours(new Date('2020-04-20'), -index) }))
+        .reverse();
+
       const setupWithPrices = async (): Promise<Response> => {
         const hash = md5(`${fund.item}${config.data.funds.salt}`);
         const {
@@ -104,33 +111,29 @@ describe('Funds route', () => {
           `
         INSERT INTO fund_hash (broker, hash)
         VALUES ('hl', ?)
-        ON CONFLICT (broker, hash) DO NOTHING
+        ON CONFLICT (broker, hash) DO UPDATE set broker = excluded.broker
         RETURNING fid
         `,
           [hash],
         );
 
-        const cids = await db('fund_cache_time')
-          .insert([
-            { time: new Date('2020-04-20T17:01:01Z') },
-            { time: new Date('2020-04-21T17:01:01Z') },
-            { time: new Date('2020-04-22T09:49:10Z') },
-            { time: new Date('2020-04-22T17:01:03Z') },
-            { time: new Date('2020-04-23T17:03:03Z') },
-            { time: new Date('2020-04-24T17:01:01Z') },
-            { time: new Date('2020-04-25T17:01:02Z') },
-          ])
-          .returning('cid');
+        const cids = await db('fund_cache_time').insert(cacheTimeRows).returning('cid');
 
-        await db('fund_cache').insert([
-          { cid: cids[0], fid, price: 105 },
-          { cid: cids[1], fid, price: 103 },
-          { cid: cids[2], fid, price: 105.6 },
-          { cid: cids[3], fid, price: 110.9 },
-          { cid: cids[4], fid, price: 97.2 },
-          { cid: cids[5], fid, price: 91.3 },
-          { cid: cids[6], fid, price: 99.87 },
-        ]);
+        type CacheRow = { cid: string; fid: string; price: number };
+
+        const cacheRows = cids.reduce<CacheRow[]>(
+          (last, cid) => [
+            ...last,
+            {
+              cid,
+              fid,
+              price: (last[last.length - 1]?.price ?? 100) * (1 + 0.05 * (2 * Math.random() - 1)),
+            },
+          ],
+          [],
+        );
+
+        await db('fund_cache').insert(cacheRows);
 
         MockDate.set(new Date('2020-04-26T13:20:03Z'));
         const res = await setup();
@@ -150,7 +153,7 @@ describe('Funds route', () => {
           data: expect.objectContaining({
             data: expect.arrayContaining([
               expect.objectContaining({
-                pr: [105, 103, 105.6, 110.9, 97.2, 91.3, 99.87],
+                pr: expect.arrayContaining([expect.any(Number)]),
                 prStartIndex: 0,
               }),
             ]),
@@ -158,42 +161,73 @@ describe('Funds route', () => {
         });
       });
 
-      it('should attach the timestamp of the first cached price', async () => {
-        expect.assertions(1);
-        const res = await setupWithPrices();
-
-        expect(res.body).toStrictEqual({
-          data: expect.objectContaining({
-            startTime: getUnixTime(new Date('2020-04-20T17:01:01Z')),
-          }),
-        });
-      });
-
-      it('should attach the list of timestamps corresponding to every cached price', async () => {
-        expect.assertions(2);
+      it('should attach the list of timestamps corresponding to each displayed cached price', async () => {
+        expect.assertions(3);
         const res = await setupWithPrices();
 
         expect(res.body).toStrictEqual({
           data: expect.objectContaining({
             cacheTimes: expect.arrayContaining([
-              0,
-              getUnixTime(new Date('2020-04-21T17:01:01Z')) -
-                getUnixTime(new Date('2020-04-20T17:01:01Z')),
-              getUnixTime(new Date('2020-04-22T09:49:10Z')) -
-                getUnixTime(new Date('2020-04-20T17:01:01Z')),
-              getUnixTime(new Date('2020-04-22T17:01:03Z')) -
-                getUnixTime(new Date('2020-04-20T17:01:01Z')),
-              getUnixTime(new Date('2020-04-23T17:03:03Z')) -
-                getUnixTime(new Date('2020-04-20T17:01:01Z')),
-              getUnixTime(new Date('2020-04-24T17:01:01Z')) -
-                getUnixTime(new Date('2020-04-20T17:01:01Z')),
-              getUnixTime(new Date('2020-04-25T17:01:02Z')) -
-                getUnixTime(new Date('2020-04-20T17:01:01Z')),
+              getUnixTime(cacheTimeRows[4].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[9].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[14].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[19].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[24].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[29].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[34].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[39].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[44].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[49].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[54].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[59].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[64].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[69].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[74].time) - getUnixTime(cacheTimeRows[0].time),
+              getUnixTime(cacheTimeRows[79].time) - getUnixTime(cacheTimeRows[0].time),
             ]),
           }),
         });
 
         expect(res.body.data.cacheTimes[0]).toBe(0);
+
+        expect(
+          res.body.data.cacheTimes
+            .slice(1)
+            .every((value: number, index: number) => value > res.body.data.cacheTimes[index]),
+        ).toBe(true);
+      });
+
+      it('should include the first timestamp', async () => {
+        expect.assertions(2);
+        const res = await setupWithPrices();
+
+        expect(res.body).toStrictEqual({
+          data: expect.objectContaining({
+            startTime: getUnixTime(cacheTimeRows[0].time),
+          }),
+        });
+
+        expect(res.body.data.cacheTimes[0]).toBe(0);
+      });
+
+      it('should include the last timestamp', async () => {
+        expect.assertions(1);
+        const res = await setupWithPrices();
+
+        expect(res.body.data.cacheTimes[res.body.data.cacheTimes.length - 1]).toBe(
+          getUnixTime(cacheTimeRows[cacheTimeRows.length - 1].time) -
+            getUnixTime(cacheTimeRows[0].time),
+        );
+      });
+
+      it('should include the second-to-last timestamp', async () => {
+        expect.assertions(1);
+        const res = await setupWithPrices();
+
+        expect(res.body.data.cacheTimes[res.body.data.cacheTimes.length - 2]).toBe(
+          getUnixTime(cacheTimeRows[cacheTimeRows.length - 2].time) -
+            getUnixTime(cacheTimeRows[0].time),
+        );
       });
     });
   });

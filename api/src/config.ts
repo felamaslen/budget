@@ -80,7 +80,7 @@ export type Config = {
 
 const databaseUrl =
   process.env.NODE_ENV === 'test'
-    ? process.env.DATABASE_URL || 'postgres://docker:docker@localhost:5440/budget_test'
+    ? process.env.TEST_DATABASE_URL || 'postgres://docker:docker@localhost:5440/budget_test'
     : process.env.DATABASE_URL;
 
 const config: Config = {
