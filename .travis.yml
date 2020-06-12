@@ -12,4 +12,4 @@ env:
   global:
     - POSTGRES_USER: docker
     - POSTGRES_PASSWORD: docker
-    - DATABASE_URL: postgres://postgres:postgres@localhost:5432/budget_test
+    - TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/budget_test
