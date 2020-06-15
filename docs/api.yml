@@ -1647,6 +1647,9 @@ definitions:
             cost:
             type: object
             properties:
+          annualisedFundReturns:
+            type: number
+            description: Anualised rate of return on investments
           income:
             type: array
             example: [180000, 200000]
@@ -1849,6 +1852,16 @@ definitions:
             type: integer
             example: 1000000
             description: Total-to-date purchase cost of all holdings
+          startTime:
+            type: integer
+            description: Timestamp of the first price cache time
+            example: 1475661661
+          cacheTimes:
+            type: array
+            description: Timestamps of all of the price cache times, relative to startTime
+            items:
+              type: number
+            example: [0, 259200, 518400]
           data:
             type: array
             items:
@@ -1892,13 +1905,3 @@ definitions:
                   description: Where in the list of price-cache times this holding first appears
                   type: integer
                   example: 1
-                startTime:
-                  type: integer
-                  description: Timestamp of the first price cache time
-                  example: 1475661661
-                cacheTimes:
-                  type: array
-                  description: Timestamps of all of the price cache times, relative to startTime
-                  items:
-                    type: number
-                  example: [0, 259200, 518400]

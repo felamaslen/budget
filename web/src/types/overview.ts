@@ -16,6 +16,7 @@ export type CostProcessed = Cost & {
 export type OverviewState = {
   startDate: Date;
   endDate: Date;
+  annualisedFundReturns: number;
   cost: Cost;
 };
 

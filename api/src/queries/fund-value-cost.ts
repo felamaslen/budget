@@ -22,10 +22,7 @@ export async function getMonthlyTotalFundValues(
       d.time
       ,SUM(d.value)::integer AS total_value
     FROM (
-      SELECT ${sql.join(
-        [sql`c.time`, sql`SUM(COALESCE(ft.units * fc.price))::integer AS value`],
-        sql`, `,
-      )}
+      SELECT ${sql.join([sql`c.time`, sql`SUM(ft.units * fc.price)::integer AS value`], sql`, `)}
       FROM (
         SELECT b.cid, b.time
         FROM (
@@ -74,4 +71,53 @@ export async function getMonthlyTotalFundValues(
   `);
 
   return results.rows.map(({ value_or_cost }) => value_or_cost);
+}
+
+export async function getTotalFundValue(
+  db: DatabaseTransactionConnectionType,
+  uid: string,
+  now: Date,
+): Promise<number> {
+  const result = await db.query<{ value: number }>(sql`
+  SELECT COALESCE(SUM(COALESCE(ft.units * fc.price, 0)), 0)::integer AS value
+  FROM (
+    SELECT b.cid, b.time
+    FROM (
+      SELECT ${sql.join(
+        [sql`fct.cid`, sql`fct.time`, sql`row_number() OVER(ORDER BY fct.time DESC) AS scrape_num`],
+        sql`, `,
+      )}
+      FROM fund_cache_time fct
+      WHERE fct.time <= ${now.toISOString()}
+    ) b
+    WHERE b.scrape_num = 1
+  ) c
+  INNER JOIN fund_cache fc on fc.cid = c.cid
+  INNER JOIN fund_hash fh on fh.fid = fc.fid
+
+  INNER JOIN funds f on ${sql.join(
+    [sql`f.uid = ${uid}`, sql`fh.hash = md5(f.item || ${config.data.funds.salt})`],
+    sql` AND `,
+  )}
+  INNER JOIN funds_transactions ft on ${sql.join(
+    [sql`ft.fund_id = f.id`, sql`ft.date <= c.time`],
+    sql` AND `,
+  )}
+  `);
+  return result.rows[0]?.value;
+}
+
+export async function getTotalFundCost(
+  db: DatabaseTransactionConnectionType,
+  uid: string,
+): Promise<number> {
+  const {
+    rows: [{ total }],
+  } = await db.query(sql`
+  SELECT SUM(cost) AS total
+  FROM funds f
+  INNER JOIN funds_transactions ft ON ft.fund_id = f.id
+  WHERE uid = ${uid}
+  `);
+  return total;
 }

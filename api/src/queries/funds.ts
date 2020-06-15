@@ -1,19 +1,19 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 import { Transaction, Fund } from '~api/types';
 
-export async function getTotalFundCost(
+export async function selectTransactions(
   db: DatabaseTransactionConnectionType,
   uid: string,
-): Promise<number> {
-  const {
-    rows: [{ total }],
-  } = await db.query(sql`
-  SELECT SUM(cost) AS total
+  now: Date,
+): Promise<readonly Transaction[]> {
+  const result = await db.query<Transaction>(sql`
+  SELECT ft.*
   FROM funds f
   INNER JOIN funds_transactions ft ON ft.fund_id = f.id
-  WHERE uid = ${uid}
+  WHERE f.uid = ${uid} AND ft.date <= ${now.toISOString()}
+  ORDER BY ft.date
   `);
-  return total;
+  return result.rows;
 }
 
 export async function upsertTransactions(

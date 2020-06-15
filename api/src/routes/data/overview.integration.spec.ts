@@ -118,6 +118,16 @@ describe('Overview route', () => {
       );
     });
 
+    it('should return the annualised fund returns', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res.body.data).toStrictEqual(
+        expect.objectContaining({
+          annualisedFundReturns: expect.any(Number),
+        }),
+      );
+    });
+
     it.each`
       description        | prop                | value
       ${'current month'} | ${'currentMonth'}   | ${4}

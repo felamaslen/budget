@@ -8,12 +8,18 @@ import {
   differenceInMonths,
   endOfMonth,
   startOfMonth,
+  differenceInDays,
 } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
-import { getMonthlyTotalFundValues, getListCostSummary } from '~api/queries';
-import { OverviewResponse, ListCategory } from '~api/types';
+import {
+  getMonthlyTotalFundValues,
+  getListCostSummary,
+  getTotalFundValue,
+  selectTransactions,
+} from '~api/queries';
+import { OverviewResponse, ListCategory, Transaction } from '~api/types';
 
 const {
   startYear,
@@ -74,6 +80,78 @@ async function getMonthlyCategoryValues(
   return { funds, income, bills, food, general, holiday, social };
 }
 
+export const DEFAULT_INVESTMENT_RATE = 0.07;
+
+export function calculateXIRRFromTransactions(
+  now: Date,
+  currentValue: number,
+  transactions: readonly Transaction[],
+): number {
+  if (!currentValue) {
+    return DEFAULT_INVESTMENT_RATE;
+  }
+
+  const maxTries = 100;
+  const initialGuess = 0.1;
+  const tolerance = 0.001;
+
+  const transactionDates = [...transactions.map(({ date }) => new Date(date)), now];
+
+  const datesAsDayIndex = transactionDates.map((date) =>
+    differenceInDays(date, transactionDates[0]),
+  );
+
+  const payments = [...transactions.map(({ cost }) => -cost), currentValue];
+
+  if (!payments.some((value) => value > 0) || !payments.some((value) => value < 0)) {
+    return DEFAULT_INVESTMENT_RATE;
+  }
+
+  const xnpv = (rate: number): number =>
+    datesAsDayIndex.reduce<number>(
+      (last, date, index) => last + payments[index] / (1 + rate) ** (date / 365),
+      0,
+    );
+
+  const xnpvDerivative = (rate: number): number =>
+    datesAsDayIndex.reduce<number>(
+      (last, date, index) =>
+        last +
+        (date / 365) *
+          (1 + rate) ** (date / 365 - 1) *
+          (-payments[index] / ((1 + rate) ** (date / 365)) ** 2),
+      0,
+    );
+
+  return Array(maxTries)
+    .fill(0)
+    .reduce<{ done: boolean; value: number }>(
+      (previous) => {
+        if (previous.done) {
+          return previous;
+        }
+
+        const next = previous.value - xnpv(previous.value) / xnpvDerivative(previous.value);
+
+        return { done: Math.abs(next) < tolerance, value: next };
+      },
+      { done: false, value: initialGuess },
+    ).value;
+}
+
+async function getAnnualisedFundReturns(
+  db: DatabaseTransactionConnectionType,
+  uid: string,
+  now: Date,
+): Promise<number> {
+  const [currentFundsValue, transactions] = await Promise.all([
+    getTotalFundValue(db, uid, now),
+    selectTransactions(db, uid, now),
+  ]);
+
+  return calculateXIRRFromTransactions(now, currentFundsValue, transactions);
+}
+
 const getYearMonth = (date: Date): [number, number] => [getYear(date), getMonth(date) + 1];
 
 export async function getOverviewData(
@@ -81,7 +159,10 @@ export async function getOverviewData(
   uid: string,
   now: Date = new Date(),
 ): Promise<OverviewResponse> {
-  const cost = await getMonthlyCategoryValues(db, uid, now);
+  const [cost, annualisedFundReturns] = await Promise.all([
+    getMonthlyCategoryValues(db, uid, now),
+    getAnnualisedFundReturns(db, uid, now),
+  ]);
 
   return {
     startYearMonth: getYearMonth(getStartTime(now)),
@@ -89,6 +170,7 @@ export async function getOverviewData(
     currentYear: getYear(now),
     currentMonth: getMonth(now) + 1,
     futureMonths,
+    annualisedFundReturns,
     cost,
   };
 }

@@ -23,6 +23,7 @@ export const testState: State = {
   overview: {
     startDate: new Date('2018-01-31T23:59:59.999Z'),
     endDate: new Date('2018-07-31T23:59:59.999Z'),
+    annualisedFundReturns: 0.143,
     cost: {
       [Page.funds]: [94004, 105390, 110183, 100779, 101459, 102981, 103293, 0, 0, 0],
       [Page.income]: [2000, 1900, 1500, 2500, 2300, 1800, 2600],

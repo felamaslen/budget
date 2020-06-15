@@ -29,6 +29,7 @@ describe('Overview reducer', () => {
         currentYear: 2019,
         currentMonth: 7,
         futureMonths: 12,
+        annualisedFundReturns: 0.087,
         cost: {
           [Page.funds]: [0, 0, 510000, 2160465],
           [Page.income]: [0, 30040, 229838, 196429],
@@ -51,6 +52,12 @@ describe('Overview reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
       expect(result).toHaveProperty('endDate', new Date('2019-07-31T23:59:59.999Z'));
+    });
+
+    it('should set the annualised fund returns', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+      expect(result).toHaveProperty('annualisedFundReturns', 0.087);
     });
 
     it('should set the cost data', () => {
@@ -76,6 +83,7 @@ describe('Overview reducer', () => {
       ...initialState,
       startDate: new Date('2019-04-30T23:59:59.999Z'),
       endDate: new Date('2019-07-31T23:59:59.999Z'),
+      annualisedFundReturns: 0.1,
       cost: {
         ...initialState.cost,
         [Page.funds]: [0, 0, 510000, 2160465],
@@ -109,6 +117,7 @@ describe('Overview reducer', () => {
     const state = {
       startDate: new Date('2019-04-30T23:59:59.999Z'),
       endDate: new Date('2019-07-31T23:59:59.999Z'),
+      annualisedFundReturns: 0.1,
       cost: {
         funds: [0, 0, 510000, 2160465],
         income: [0, 30040, 229838, 196429],
@@ -151,6 +160,7 @@ describe('Overview reducer', () => {
     const state: State = {
       startDate: new Date('2019-04-30T23:59:59.999Z'),
       endDate: new Date('2019-07-31T23:59:59.999Z'),
+      annualisedFundReturns: 0.1,
       cost: {
         [Page.funds]: [0, 0, 510000, 2160465],
         [Page.income]: [0, 30040, 229838, 196429],

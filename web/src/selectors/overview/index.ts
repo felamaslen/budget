@@ -14,7 +14,6 @@ import { getNetWorthSummary } from './net-worth';
 
 import { Average } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
-import { FUTURE_INVESTMENT_RATE } from '~client/constants/stocks';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
 import { IDENTITY, arrayAverage, randnBm } from '~client/modules/data';
 import { State } from '~client/reducers';
@@ -61,8 +60,12 @@ const separateOldFunds = (numRows: number) => (
       }
     : { ...data, fundsOld: [] };
 
-const predictCompoundInterest = (annualRate: number, jitter = 0) => (last: number[]): number[] =>
-  last.concat([Math.round(last[last.length - 1] * (1 + annualRate / 12 + randnBm() * jitter))]);
+const getAnnualisedFundReturns = (state: State): number => state.overview.annualisedFundReturns;
+
+const predictCompoundInterest = (annualRate: number, jitter = 0) => (last: number[]): number[] => [
+  ...last,
+  Math.round(last[last.length - 1] * (1 + (annualRate + randnBm() * jitter)) ** (1 / 12)),
+];
 
 function predictByPastAverages(
   cost: number[],
@@ -87,6 +90,7 @@ function predictCategory(
   futureMonths: number,
   currentMonthRatio: number,
   index: number,
+  annualisedFundReturns: number,
 ): number[] {
   if (!futureCategories.includes(category)) {
     return cost;
@@ -94,7 +98,7 @@ function predictCategory(
   if (category === Page.funds) {
     return cost
       .slice(index + 1)
-      .reduce(predictCompoundInterest(FUTURE_INVESTMENT_RATE, 0.01), cost.slice(0, index + 1));
+      .reduce(predictCompoundInterest(annualisedFundReturns, 0.01), cost.slice(0, index + 1));
   }
 
   return predictByPastAverages(cost, futureMonths, currentMonthRatio, index);
@@ -104,6 +108,7 @@ function calculateFutures(
   numRows: number,
   currentDate: Date,
   futureMonths: number,
+  annualisedFundReturns: number,
 ): (cost: Cost & Pick<CostProcessed, 'fundsOld'>) => Cost & Pick<CostProcessed, 'fundsOld'> {
   if (futureMonths <= 0) {
     return IDENTITY;
@@ -121,6 +126,7 @@ function calculateFutures(
           futureMonths,
           currentMonthRatio,
           numRows - 1 - futureMonths,
+          annualisedFundReturns,
         ),
       }),
       {} as Cost & Pick<CostProcessed, 'fundsOld'>,
@@ -224,10 +230,11 @@ const withPredictedSpending = (
   currentDate: Date,
   futureMonths: number,
   numRows: number,
+  annualisedFundReturns: number,
 ) => (cost: Cost): Cost & Pick<CostProcessed, 'fundsOld' | 'spending'> =>
   compose(
     getSpendingColumn<'fundsOld'>(dates),
-    calculateFutures(numRows, currentDate, futureMonths),
+    calculateFutures(numRows, currentDate, futureMonths, annualisedFundReturns),
     separateOldFunds(numRows),
   )(cost);
 
@@ -239,12 +246,13 @@ export const getProcessedCost = moize(
       getMonthDates,
       getNetWorthSummary,
       getFundsRows,
+      getAnnualisedFundReturns,
       getCost,
-      (numRows, futureMonths, dates, netWorth, fundsRows, costMap) =>
+      (numRows, futureMonths, dates, netWorth, fundsRows, annualisedFundReturns, costMap) =>
         compose(
           withNetWorth<'fundsOld' | 'spending'>(dates, today, futureMonths, netWorth, fundsRows),
           getNetCashFlow<'fundsOld'>(dates),
-          withPredictedSpending(dates, today, futureMonths, numRows),
+          withPredictedSpending(dates, today, futureMonths, numRows, annualisedFundReturns),
         )(costMap),
     ),
   { maxSize: 1 },

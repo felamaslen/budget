@@ -37,6 +37,7 @@ export type ReadResponse = {
     currentYear: number;
     currentMonth: number;
     futureMonths: number;
+    annualisedFundReturns: number;
     cost: {
       [Page.funds]: number[];
       [Page.income]: number[];

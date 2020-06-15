@@ -15,6 +15,7 @@ export const testResponse: ReadResponse = {
     currentYear: 2020,
     currentMonth: 1,
     futureMonths: 3,
+    annualisedFundReturns: 0.173,
     cost: {
       [Page.funds]: [],
       [Page.income]: [],

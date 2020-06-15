@@ -6,6 +6,7 @@ export type OverviewResponse = {
   currentYear: number;
   currentMonth: number;
   futureMonths: number;
+  annualisedFundReturns: number;
   cost: {
     [category in ListCategory]: number[];
   };

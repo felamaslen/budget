@@ -37,13 +37,15 @@ describe('Overview selectors', () => {
       },
     };
 
-    it('should process the cost data, including making predictions and derived columns', () => {
-      expect.assertions(1);
+    const funds = [100779, 101459, 102981, 104281, 105597, 106930, 108280];
 
-      const netWorthSummary = getNetWorthSummary(testState);
+    describe('if the current day is not the last day of the month', () => {
+      const spending = [1260, 2068, 749, 960, 310, 310, 310];
+      const fundsOld = [94004, 105390, 110183];
 
       const net = [740, -168, 751, 1540, 1990, 1490, 2290];
-      const funds = [100779, 101459, 102981, 105841, 108781, 111802, 114907];
+
+      const netWorthSummary = getNetWorthSummary(testState);
 
       const jan = netWorthSummary[0];
       const feb = netWorthSummary[0] + net[1] + funds[1] - funds[0] - 56123;
@@ -62,23 +64,36 @@ describe('Overview selectors', () => {
       // because we're not yet at the end of the month
       const netWorthCombined = [netWorthSummary[0], netWorthSummary[1], mar, apr, may, jun, jul];
 
-      expect(getProcessedCost(now)(testState)).toStrictEqual(
-        expect.objectContaining({
-          spending: [1260, 2068, 749, 960, 310, 310, 310],
-          funds,
-          fundsOld: [94004, 105390, 110183],
-          income: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
-          bills: [1000, 900, 400, 650, 0, 0, 0],
-          food: [50, 13, 27, 27, 27, 27, 27],
-          general: [150, 90, 13, 90, 90, 90, 90],
-          social: [50, 65, 181, 65, 65, 65, 65],
-          holiday: [10, 1000, 128, 128, 128, 128, 128],
-          net,
-          netWorthPredicted,
-          netWorthCombined,
-          netWorth: netWorthSummary,
-        }),
-      );
+      const income = [2000, 1900, 1500, 2500, 2300, 1800, 2600];
+      const bills = [1000, 900, 400, 650, 0, 0, 0];
+      const food = [50, 13, 27, 27, 27, 27, 27];
+      const general = [150, 90, 13, 90, 90, 90, 90];
+      const social = [50, 65, 181, 65, 65, 65, 65];
+      const holiday = [10, 1000, 128, 128, 128, 128, 128];
+
+      it.each`
+        description                             | prop                   | value
+        ${'spending data'}                      | ${'spending'}          | ${spending}
+        ${'funds data (including predictions)'} | ${'funds'}             | ${funds}
+        ${'old funds data'}                     | ${'fundsOld'}          | ${fundsOld}
+        ${'net income after expenses'}          | ${'net'}               | ${net}
+        ${'predicted net worth data'}           | ${'netWorthPredicted'} | ${netWorthPredicted}
+        ${'combined net worth data'}            | ${'netWorthCombined'}  | ${netWorthCombined}
+        ${'actual net worth data'}              | ${'netWorth'}          | ${netWorthSummary}
+        ${'income data'}                        | ${'income'}            | ${income}
+        ${'bills data'}                         | ${'bills'}             | ${bills}
+        ${'food data'}                          | ${'food'}              | ${food}
+        ${'general data'}                       | ${'general'}           | ${general}
+        ${'social data'}                        | ${'social'}            | ${social}
+        ${'holiday data'}                       | ${'holiday'}           | ${holiday}
+      `('should add $prop', ({ prop, value }) => {
+        expect.assertions(1);
+        expect(getProcessedCost(now)(testState)).toStrictEqual(
+          expect.objectContaining({
+            [prop]: value,
+          }),
+        );
+      });
     });
 
     describe('if the current day is the last of the month', () => {
@@ -112,7 +127,6 @@ describe('Overview selectors', () => {
         const netWorthSummary = getNetWorthSummary(testStateEndOfMonth);
 
         const net = [740, -168, 841, 1580, 2030, 1530, 2330];
-        const funds = [100779, 101459, 102981, 105841, 108781, 111802, 114907];
 
         const jan = netWorthSummary[0];
         const feb = netWorthSummary[0] + net[1] + funds[1] - funds[0] - 56123;
@@ -228,7 +242,7 @@ describe('Overview selectors', () => {
                 "value": 13,
               },
               "funds": Object {
-                "rgb": "#f4f5f6",
+                "rgb": "#eef1f2",
                 "value": 101459,
               },
               "general": Object {
@@ -252,7 +266,7 @@ describe('Overview selectors', () => {
                 "value": 1298227.25,
               },
               "netWorthCombined": Object {
-                "rgb": "#92df9c",
+                "rgb": "#92df9b",
                 "value": 1298227.25,
               },
               "netWorthPredicted": Object {
@@ -284,7 +298,7 @@ describe('Overview selectors', () => {
                 "value": 27,
               },
               "funds": Object {
-                "rgb": "#dadfe2",
+                "rgb": "#c9d1d5",
                 "value": 102981,
               },
               "general": Object {
@@ -341,7 +355,7 @@ describe('Overview selectors', () => {
               },
               "funds": Object {
                 "rgb": "#aab7bd",
-                "value": 105841,
+                "value": 104281,
               },
               "general": Object {
                 "rgb": "#80abcd",
@@ -365,11 +379,11 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 1304900.25,
+                "value": 1303340.25,
               },
               "netWorthPredicted": Object {
                 "rgb": "#92df9b",
-                "value": 1304900.25,
+                "value": 1303340.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -396,8 +410,8 @@ describe('Overview selectors', () => {
                 "value": 27,
               },
               "funds": Object {
-                "rgb": "#8e9fa7",
-                "value": 108781,
+                "rgb": "#8d9fa7",
+                "value": 105597,
               },
               "general": Object {
                 "rgb": "#80abcd",
@@ -420,12 +434,12 @@ describe('Overview selectors', () => {
                 "value": 0,
               },
               "netWorthCombined": Object {
-                "rgb": "#6dd47a",
-                "value": 1309830.25,
+                "rgb": "#6cd479",
+                "value": 1306646.25,
               },
               "netWorthPredicted": Object {
-                "rgb": "#6dd47a",
-                "value": 1309830.25,
+                "rgb": "#6cd479",
+                "value": 1306646.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -452,8 +466,8 @@ describe('Overview selectors', () => {
                 "value": 27,
               },
               "funds": Object {
-                "rgb": "#718791",
-                "value": 111802,
+                "rgb": "#718690",
+                "value": 106930,
               },
               "general": Object {
                 "rgb": "#80abcd",
@@ -476,12 +490,12 @@ describe('Overview selectors', () => {
                 "value": 0,
               },
               "netWorthCombined": Object {
-                "rgb": "#4ccb5b",
-                "value": 1314341.25,
+                "rgb": "#4dcb5c",
+                "value": 1309469.25,
               },
               "netWorthPredicted": Object {
-                "rgb": "#4ccb5b",
-                "value": 1314341.25,
+                "rgb": "#4dcb5c",
+                "value": 1309469.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -509,7 +523,7 @@ describe('Overview selectors', () => {
               },
               "funds": Object {
                 "rgb": "#546e7a",
-                "value": 114907,
+                "value": 108280,
               },
               "general": Object {
                 "rgb": "#80abcd",
@@ -533,11 +547,11 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#24bf37",
-                "value": 1319736.25,
+                "value": 1313109.25,
               },
               "netWorthPredicted": Object {
                 "rgb": "#24bf37",
-                "value": 1319736.25,
+                "value": 1313109.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",

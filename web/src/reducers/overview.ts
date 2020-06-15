@@ -20,11 +20,12 @@ import {
 import { getMonthDates } from '~client/selectors/overview/common';
 import { Page, PageList, ListCalcItem, OverviewState as State, ReadResponse } from '~client/types';
 
-export { OverviewState as State } from '~client/types/overview';
+export { State };
 
 export const initialState: State = {
   startDate: endOfMonth(addYears(new Date(), -1)),
   endDate: endOfMonth(new Date()),
+  annualisedFundReturns: 0.1,
   cost: {
     [Page.funds]: [],
     [Page.income]: [],
@@ -46,6 +47,7 @@ const onRead = (_: State, res: ReadResponse): State => ({
   endDate: endOfMonth(
     setMonth(setYear(new Date(), res.overview.endYearMonth[0]), res.overview.endYearMonth[1] - 1),
   ),
+  annualisedFundReturns: res.overview.annualisedFundReturns,
   cost: res.overview.cost,
 });
 
