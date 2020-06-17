@@ -34,11 +34,13 @@ describe('List reducer', () => {
 
   const initialState: State = {
     items: [],
+    __optimistic: [],
     baz: 'initial baz',
   };
 
   const initialStateDaily: DailyState<Item> = {
     items: [],
+    __optimistic: [],
     total: 0,
     olderExists: null,
   };
@@ -88,13 +90,14 @@ describe('List reducer', () => {
     });
 
     it('should insert rows into the state', () => {
-      expect.assertions(1);
+      expect.assertions(2);
       const result = myListReducer(initialState, action);
 
       expect(result.items).toStrictEqual([
         expect.objectContaining({ id: 'some-id', item: 'yes' }),
         expect.objectContaining({ id: 'other-id', item: 'no' }),
       ]);
+      expect(result.__optimistic).toStrictEqual([undefined, undefined]);
     });
 
     it('should handle the case when the response data contain no items', () => {
@@ -145,6 +148,7 @@ describe('List reducer', () => {
                 cost: 102,
               },
             ],
+            __optimistic: [undefined],
           }),
         );
       });
@@ -170,9 +174,9 @@ describe('List reducer', () => {
               date: new Date('2019-07-10'),
               item: 'some item',
               cost: 3,
-              __optimistic: RequestType.create,
             },
           ],
+          __optimistic: [RequestType.create],
         }),
       );
     });
@@ -225,6 +229,7 @@ describe('List reducer', () => {
     const state: State = {
       ...initialState,
       items: [{ id: 'some-real-id', date: testDate, item: 'some-item', cost: 23 }],
+      __optimistic: [undefined],
     };
 
     const action = listItemUpdated<Item, typeof page>(page)(
@@ -241,15 +246,19 @@ describe('List reducer', () => {
       expect.assertions(1);
       const result = myListReducer(state, action);
 
-      expect(result.items).toStrictEqual([
-        {
-          id: 'some-real-id',
-          date: testDate,
-          item: 'other item',
-          cost: 23,
-          __optimistic: RequestType.update,
-        },
-      ]);
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          items: [
+            {
+              id: 'some-real-id',
+              date: testDate,
+              item: 'other item',
+              cost: 23,
+            },
+          ],
+          __optimistic: [RequestType.update],
+        }),
+      );
     });
 
     it('should not alter the status of optimistically created items', () => {
@@ -260,9 +269,9 @@ describe('List reducer', () => {
           {
             ...state.items[0],
             id: 'some-fake-id',
-            __optimistic: RequestType.create,
           },
         ],
+        __optimistic: [RequestType.create],
       };
 
       const actionAfterCreate = listItemUpdated<Item, typeof page>(page)(
@@ -277,14 +286,18 @@ describe('List reducer', () => {
 
       const result = myListReducer(stateCreate, actionAfterCreate);
 
-      expect(result.items).toStrictEqual([
+      expect(result).toStrictEqual(
         expect.objectContaining({
-          id: 'some-fake-id',
-          item: 'updated item',
-          cost: 23,
-          __optimistic: RequestType.create,
+          items: [
+            expect.objectContaining({
+              id: 'some-fake-id',
+              item: 'updated item',
+              cost: 23,
+            }),
+          ],
+          __optimistic: [RequestType.create],
         }),
-      ]);
+      );
     });
 
     it('should ignore actions intended for other pages', () => {
@@ -292,6 +305,7 @@ describe('List reducer', () => {
       const initialStateUpdate = {
         ...initialState,
         items: [{ id: 'some-id', date: testDate, item: 'some item', cost: 3 }],
+        __optimistic: [undefined],
       };
 
       expect(
@@ -371,6 +385,7 @@ describe('List reducer', () => {
     const state: State = {
       ...initialState,
       items: [{ id: 'some-real-id', date: testDate, item: 'some item', cost: 29 }],
+      __optimistic: [undefined],
     };
 
     const action = listItemDeleted<Item, typeof page>(page)('some-real-id', {
@@ -383,55 +398,60 @@ describe('List reducer', () => {
       expect.assertions(1);
       const result = myListReducer(state, action);
 
-      expect(result.items).toStrictEqual([
+      expect(result).toStrictEqual(
         expect.objectContaining({
-          id: 'some-real-id',
-          item: 'some item',
-          cost: 29,
-          __optimistic: RequestType.delete,
+          items: [
+            expect.objectContaining({
+              id: 'some-real-id',
+              item: 'some item',
+              cost: 29,
+            }),
+          ],
+          __optimistic: [RequestType.delete],
         }),
-      ]);
+      );
     });
 
     it('should simply remove the item from state, if it was already in an optimistic creation state', () => {
       expect.assertions(1);
       const stateCreating = {
         ...state,
-        items: [
-          {
-            ...state.items[0],
-            __optimistic: RequestType.create,
-          },
-        ],
+        items: [state.items[0]],
+        __optimistic: [RequestType.create],
       };
 
       const result = myListReducer(stateCreating, action);
 
-      expect(result.items).toStrictEqual([]);
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          items: [],
+          __optimistic: [],
+        }),
+      );
     });
 
     it('should update the optimistic state to delete, if it was in an optimistic update status', () => {
       expect.assertions(1);
       const stateUpdating = {
         ...state,
-        items: [
-          {
-            ...state.items[0],
-            __optimistic: RequestType.update,
-          },
-        ],
+        items: [state.items[0]],
+        __optimistic: [RequestType.update],
       };
 
       const result = myListReducer(stateUpdating, action);
 
-      expect(result.items).toStrictEqual([
+      expect(result).toStrictEqual(
         expect.objectContaining({
-          id: 'some-real-id',
-          item: 'some item',
-          cost: 29,
-          __optimistic: RequestType.delete,
+          items: [
+            expect.objectContaining({
+              id: 'some-real-id',
+              item: 'some item',
+              cost: 29,
+            }),
+          ],
+          __optimistic: [RequestType.delete],
         }),
-      ]);
+      );
     });
 
     it('should ignore actions intended for other pages', () => {
@@ -439,6 +459,7 @@ describe('List reducer', () => {
       const initialStateDelete = {
         ...initialState,
         items: [{ id: 'some-id', date: testDate, item: 'some item', cost: 3 }],
+        __optimistic: [undefined],
       };
 
       expect(
@@ -538,6 +559,7 @@ describe('List reducer', () => {
         ...request,
         res: syncResponse[index],
       })),
+      netWorth: [],
     });
 
     describe('when confirming an optimistically created item', () => {
@@ -549,9 +571,9 @@ describe('List reducer', () => {
             date: testDate,
             item: 'some item',
             cost: 3,
-            __optimistic: RequestType.create,
           },
         ],
+        __optimistic: [RequestType.create],
       };
 
       const stateDaily = {
@@ -563,9 +585,9 @@ describe('List reducer', () => {
             date: testDate,
             item: 'some item',
             cost: 3,
-            __optimistic: RequestType.create,
           },
         ],
+        __optimistic: [RequestType.create],
       };
 
       it.each`
@@ -575,16 +597,19 @@ describe('List reducer', () => {
       `(
         'should update with the real IDs and remove the optimistic status',
         ({ reducer, testState }) => {
-          expect.assertions(2);
+          expect.assertions(1);
           const result = reducer(testState, syncReceivedAction);
 
-          expect(result.items).toHaveLength(1);
-          expect(result.items[0]).toStrictEqual(
+          expect(result).toStrictEqual(
             expect.objectContaining({
-              id: 'real-id-b',
-              item: 'some item',
-              cost: 3,
-              __optimistic: undefined,
+              items: [
+                expect.objectContaining({
+                  id: 'real-id-b',
+                  item: 'some item',
+                  cost: 3,
+                }),
+              ],
+              __optimistic: [undefined],
             }),
           );
         },
@@ -613,7 +638,7 @@ describe('List reducer', () => {
           it("shouldn't update the list total", () => {
             expect.assertions(1);
 
-            const action = syncReceived({ list: [{ ...req, res: res[0] }] });
+            const action = syncReceived({ list: [{ ...req, res: res[0] }], netWorth: [] });
             const result = dailyReducer(stateDaily, action);
             expect(result.total).toBe(100); // not 8743
           });
@@ -630,9 +655,9 @@ describe('List reducer', () => {
             date: testDate,
             item: 'updated item',
             cost: 10,
-            __optimistic: RequestType.update,
           },
         ],
+        __optimistic: [RequestType.update],
       };
 
       const stateDaily = {
@@ -646,16 +671,19 @@ describe('List reducer', () => {
         ${myListReducer} | ${state}
         ${dailyReducer}  | ${stateDaily}
       `('should remove the optimistic status', ({ reducer, testState }) => {
-        expect.assertions(2);
+        expect.assertions(1);
         const result = reducer(testState, syncReceivedAction);
 
-        expect(result.items).toHaveLength(1);
-        expect(result.items[0]).toStrictEqual(
+        expect(result).toStrictEqual(
           expect.objectContaining({
-            id: 'real-id-z',
-            item: 'updated item',
-            cost: 10,
-            __optimistic: undefined,
+            items: [
+              expect.objectContaining({
+                id: 'real-id-z',
+                item: 'updated item',
+                cost: 10,
+              }),
+            ],
+            __optimistic: [undefined],
           }),
         );
       });
@@ -679,9 +707,9 @@ describe('List reducer', () => {
             date: testDate,
             item: 'some item',
             cost: 3,
-            __optimistic: RequestType.delete,
           },
         ],
+        __optimistic: [RequestType.delete],
       };
 
       const stateDaily = {
@@ -698,7 +726,12 @@ describe('List reducer', () => {
         expect.assertions(1);
         const result = reducer(testState, syncReceivedAction);
 
-        expect(result.items).toHaveLength(0);
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            items: [],
+            __optimistic: [],
+          }),
+        );
       });
 
       describe('for daily lists', () => {

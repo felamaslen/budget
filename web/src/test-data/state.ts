@@ -35,157 +35,166 @@ export const testState: State = {
     },
   },
   netWorth: {
-    categories: [
-      {
-        id: 'real-cash-category-id',
-        type: 'asset',
-        category: 'Cash (easy access)',
-        color: '#00ff00',
-        isOption: false,
-      },
-      {
-        id: 'real-option-category-id',
-        type: 'asset',
-        category: 'Options',
-        color: '#0a9cff',
-        isOption: true,
-      },
-      {
-        id: 'real-mortgage-category-id',
-        type: 'liability',
-        category: 'Mortgage',
-        color: '#fa0000',
-        isOption: false,
-      },
-      {
-        id: 'real-credit-card-category-id',
-        type: 'liability',
-        category: 'Credit cards',
-        color: '#fc0000',
-        isOption: false,
-      },
-    ],
-    subcategories: [
-      {
-        id: 'real-wallet-subcategory-id',
-        categoryId: 'real-cash-category-id',
-        subcategory: 'My wallet',
-        hasCreditLimit: null,
-        opacity: 0.2,
-      },
-      {
-        id: 'real-option-subcategory-id',
-        categoryId: 'real-option-category-id',
-        subcategory: 'Some share',
-        hasCreditLimit: null,
-        opacity: 0.9,
-      },
-      {
-        id: 'real-bank-subcategory-id',
-        categoryId: 'real-cash-category-id',
-        subcategory: 'My bank',
-        hasCreditLimit: null,
-        opacity: 0.25,
-      },
-      {
-        id: 'real-house-subcategory-id',
-        categoryId: 'real-mortgage-category-id',
-        subcategory: 'My house',
-        hasCreditLimit: false,
-        opacity: 0.1,
-      },
-      {
-        id: 'real-credit-card-subcategory-id',
-        categoryId: 'real-credit-card-category-id',
-        subcategory: 'My credit card',
-        hasCreditLimit: true,
-        opacity: 0.3,
-      },
-    ],
-    entries: [
-      {
-        id: 'real-entry-id-a',
-        date: new Date('2018-02-28'),
-        values: [
-          {
-            id: 'value-id-a1',
-            subcategory: 'real-wallet-subcategory-id',
-            value: [10324, { currency: 'CZK', value: 37.5 }],
-          },
-          {
-            id: 'value-id-a2',
-            subcategory: 'real-house-subcategory-id',
-            value: -18744200,
-            skip: true,
-          },
-          {
-            id: 'value-id-a3',
-            subcategory: 'real-bank-subcategory-id',
-            value: 1296523,
-          },
-          {
-            id: 'value-id-a4',
-            subcategory: 'real-credit-card-subcategory-id',
-            value: -8751,
-          },
-        ],
-        creditLimit: [
-          {
-            subcategory: 'real-credit-card-subcategory-id',
-            value: 120000,
-          },
-        ],
-        currencies: [{ id: 'currency-id-a1', currency: 'CZK', rate: 0.035 }],
-      },
-      {
-        id: 'real-entry-id-b',
-        date: new Date('2018-03-31'),
-        values: [
-          {
-            id: 'value-id-b1',
-            subcategory: 'real-wallet-subcategory-id',
-            value: [9752],
-          },
-          {
-            id: 'value-id-b2',
-            subcategory: 'real-house-subcategory-id',
-            value: -18420900,
-            skip: true,
-          },
-          {
-            id: 'value-id-b3',
-            subcategory: 'real-bank-subcategory-id',
-            value: 1051343,
-          },
-          {
-            id: 'value-id-b4',
-            subcategory: 'real-credit-card-subcategory-id',
-            value: -21939,
-          },
-          {
-            id: 'value-id-b5',
-            subcategory: 'real-option-subcategory-id',
-            value: [
-              {
-                units: 103,
-                strikePrice: 77.65,
-                marketPrice: 95.57,
-              },
-            ],
-          },
-        ],
-        creditLimit: [
-          {
-            subcategory: 'real-credit-card-subcategory-id',
-            value: 150000,
-          },
-        ],
-        currencies: [
-          { id: 'currency-id-b1', currency: 'USD', rate: 0.865 },
-          { id: 'currency-id-b2', currency: 'CZK', rate: 0.0314 },
-        ],
-      },
-    ],
+    categories: {
+      items: [
+        {
+          id: 'real-cash-category-id',
+          type: 'asset',
+          category: 'Cash (easy access)',
+          color: '#00ff00',
+          isOption: false,
+        },
+        {
+          id: 'real-option-category-id',
+          type: 'asset',
+          category: 'Options',
+          color: '#0a9cff',
+          isOption: true,
+        },
+        {
+          id: 'real-mortgage-category-id',
+          type: 'liability',
+          category: 'Mortgage',
+          color: '#fa0000',
+          isOption: false,
+        },
+        {
+          id: 'real-credit-card-category-id',
+          type: 'liability',
+          category: 'Credit cards',
+          color: '#fc0000',
+          isOption: false,
+        },
+      ],
+      __optimistic: [undefined, undefined, undefined, undefined],
+    },
+    subcategories: {
+      items: [
+        {
+          id: 'real-wallet-subcategory-id',
+          categoryId: 'real-cash-category-id',
+          subcategory: 'My wallet',
+          hasCreditLimit: null,
+          opacity: 0.2,
+        },
+        {
+          id: 'real-option-subcategory-id',
+          categoryId: 'real-option-category-id',
+          subcategory: 'Some share',
+          hasCreditLimit: null,
+          opacity: 0.9,
+        },
+        {
+          id: 'real-bank-subcategory-id',
+          categoryId: 'real-cash-category-id',
+          subcategory: 'My bank',
+          hasCreditLimit: null,
+          opacity: 0.25,
+        },
+        {
+          id: 'real-house-subcategory-id',
+          categoryId: 'real-mortgage-category-id',
+          subcategory: 'My house',
+          hasCreditLimit: false,
+          opacity: 0.1,
+        },
+        {
+          id: 'real-credit-card-subcategory-id',
+          categoryId: 'real-credit-card-category-id',
+          subcategory: 'My credit card',
+          hasCreditLimit: true,
+          opacity: 0.3,
+        },
+      ],
+      __optimistic: [undefined, undefined, undefined, undefined, undefined],
+    },
+    entries: {
+      items: [
+        {
+          id: 'real-entry-id-a',
+          date: new Date('2018-02-28'),
+          values: [
+            {
+              id: 'value-id-a1',
+              subcategory: 'real-wallet-subcategory-id',
+              value: [10324, { currency: 'CZK', value: 37.5 }],
+            },
+            {
+              id: 'value-id-a2',
+              subcategory: 'real-house-subcategory-id',
+              value: -18744200,
+              skip: true,
+            },
+            {
+              id: 'value-id-a3',
+              subcategory: 'real-bank-subcategory-id',
+              value: 1296523,
+            },
+            {
+              id: 'value-id-a4',
+              subcategory: 'real-credit-card-subcategory-id',
+              value: -8751,
+            },
+          ],
+          creditLimit: [
+            {
+              subcategory: 'real-credit-card-subcategory-id',
+              value: 120000,
+            },
+          ],
+          currencies: [{ id: 'currency-id-a1', currency: 'CZK', rate: 0.035 }],
+        },
+        {
+          id: 'real-entry-id-b',
+          date: new Date('2018-03-31'),
+          values: [
+            {
+              id: 'value-id-b1',
+              subcategory: 'real-wallet-subcategory-id',
+              value: [9752],
+            },
+            {
+              id: 'value-id-b2',
+              subcategory: 'real-house-subcategory-id',
+              value: -18420900,
+              skip: true,
+            },
+            {
+              id: 'value-id-b3',
+              subcategory: 'real-bank-subcategory-id',
+              value: 1051343,
+            },
+            {
+              id: 'value-id-b4',
+              subcategory: 'real-credit-card-subcategory-id',
+              value: -21939,
+            },
+            {
+              id: 'value-id-b5',
+              subcategory: 'real-option-subcategory-id',
+              value: [
+                {
+                  units: 103,
+                  strikePrice: 77.65,
+                  marketPrice: 95.57,
+                },
+              ],
+            },
+          ],
+          creditLimit: [
+            {
+              subcategory: 'real-credit-card-subcategory-id',
+              value: 150000,
+            },
+          ],
+          currencies: [
+            { id: 'currency-id-b1', currency: 'USD', rate: 0.865 },
+            { id: 'currency-id-b2', currency: 'CZK', rate: 0.0314 },
+          ],
+        },
+      ],
+      __optimistic: [undefined, undefined],
+    },
     old: [],
     oldOptions: [],
   },
@@ -212,6 +221,7 @@ export const testState: State = {
   },
   [Page.funds]: {
     items: funds.testRows,
+    __optimistic: funds.testRows.map(() => undefined),
     viewSoldFunds: false,
     period: FundsPeriod.year1,
     cache: {
@@ -239,11 +249,13 @@ export const testState: State = {
   },
   [Page.income]: {
     items: [],
+    __optimistic: [],
     total: 0,
     olderExists: null,
   },
   [Page.bills]: {
     items: [],
+    __optimistic: [],
     total: 0,
     olderExists: null,
   },
@@ -284,19 +296,23 @@ export const testState: State = {
         shop: 'bak2',
       },
     ],
+    __optimistic: [undefined, undefined, undefined, undefined],
   },
   [Page.general]: {
     items: [],
+    __optimistic: [undefined],
     total: 0,
     olderExists: null,
   },
   [Page.holiday]: {
     items: [],
+    __optimistic: [undefined],
     total: 0,
     olderExists: false,
   },
   [Page.social]: {
     items: [],
+    __optimistic: [undefined],
     total: 0,
     olderExists: false,
   },

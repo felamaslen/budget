@@ -20,12 +20,12 @@ import {
 } from '~client/actions';
 import { useCrud } from '~client/hooks';
 import { getCategories, getSubcategories, getEntries, getNetWorthTable } from '~client/selectors';
-import { Category, Subcategory, Entry, WithCrud } from '~client/types';
+import { Category, Subcategory, Entry } from '~client/types';
 
 const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
   const categories = useSelector(getCategories);
   const subcategories = useSelector(getSubcategories);
-  const entries: WithCrud<Entry>[] = useSelector(getEntries);
+  const entries = useSelector(getEntries);
   const table = useSelector(getNetWorthTable);
 
   const [onCreateCategory, onUpdateCategory, onDeleteCategory] = useCrud<Category>(

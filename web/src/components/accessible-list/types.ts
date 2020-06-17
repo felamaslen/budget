@@ -6,7 +6,7 @@ import { FieldComponent } from '~client/components/form-field';
 import { ModalFields } from '~client/components/modal-dialog';
 import { State as AppState } from '~client/reducers';
 import { ListState } from '~client/reducers/list';
-import { WithCrud, Delta, Item, PickUnion, FieldKey } from '~client/types';
+import { Delta, Item, PickUnion, FieldKey } from '~client/types';
 
 export type State<I extends Item, P extends string> = Record<P, ListState<I>> &
   Partial<Pick<AppState, 'api'>>;
@@ -14,7 +14,7 @@ export type State<I extends Item, P extends string> = Record<P, ListState<I>> &
 export { FieldKey } from '~client/types';
 
 export type Fields<I extends Item, E extends {} = {}> = {
-  [K in FieldKey<I>]: FieldComponent<WithCrud<I>[K] | undefined, E>;
+  [K in FieldKey<I>]: FieldComponent<I[K] | undefined, E>;
 };
 
 export type ComponentType<
@@ -23,7 +23,7 @@ export type ComponentType<
 > = React.FC<P> | StyledComponent<C, P>;
 
 type RowComponent<I extends Item, E extends {}> = ComponentType<
-  { isMobile: boolean; item: I } & Partial<E>,
+  Partial<E> & { isMobile: boolean; item: I; odd?: boolean },
   'li'
 >;
 
@@ -86,15 +86,18 @@ export type PropsItem<I extends Item, P extends string, MK extends keyof I, E ex
   id: string;
   isMobile: boolean;
   style?: object;
+  odd: boolean;
   extraProps?: Partial<E>;
   onActivateModal: (id: string) => void;
 } & PickUnion<Props<I, P, MK, E>, 'fieldsMobile'> &
   Omit<CommonProps<I, P, E>, 'suggestionFields'> &
   Pick<PropsCrud<I, P>, 'onUpdate' | 'onDelete'>;
 
-export type PropsMemoisedItem = {
+export type PropsMemoisedItem<E extends {}> = {
   id: string;
   style?: object;
+  odd: boolean;
+  extraProps?: Partial<E>;
 };
 
 export type PropsItemCreate<I extends Item, P extends string, E extends {} = {}> = {

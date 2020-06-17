@@ -2,9 +2,6 @@ import format from 'date-fns/format';
 import getMonth from 'date-fns/getMonth';
 import getYear from 'date-fns/getYear';
 import parseISO from 'date-fns/parseISO';
-import setDate from 'date-fns/setDate';
-import setMonth from 'date-fns/setMonth';
-import setYear from 'date-fns/setYear';
 import startOfDay from 'date-fns/startOfDay';
 
 import { makeInlineField } from './shared';
@@ -25,10 +22,7 @@ function parseDate(value: string): Date | undefined {
   const [, , day, , month, , year] = shortMatch;
   const now = startOfDay(new Date());
 
-  return setYear(
-    setMonth(setDate(now, Number(day)), Number(month) - 1 || getMonth(now)),
-    parseYear(year) || getYear(now),
-  );
+  return new Date(parseYear(year) || getYear(now), Number(month) - 1 || getMonth(now), Number(day));
 }
 
 const setValueString = ({

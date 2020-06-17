@@ -8,7 +8,7 @@ import { Item, Create } from '~client/types';
 
 const identitySelector = <E extends {}>(): { [id: string]: Partial<E> } => ({});
 
-type ItemExtraPropsMap<E extends {}> = { [id: string]: Partial<E> };
+export type ItemExtraPropsMap<E extends {}> = { [id: string]: Partial<E> };
 
 export function useSortedItems<I extends Item, P extends string, E extends {}>(
   page: P,
@@ -46,22 +46,23 @@ export function useMobileEditModal<I extends Item, P extends string>(
   onSubmit: (delta: Create<I>) => void;
   onDelete: () => void;
 } {
-  const [editingIndex, setEditingIndex] = useState<number>(-1);
-  const item = itemsSorted[editingIndex];
-  const active = editingIndex !== -1;
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const item = useMemo<I | undefined>(() => itemsSorted.find(({ id }) => id === editingId), [
+    editingId,
+    itemsSorted,
+  ]);
+  const active = !!editingId;
 
-  const onCancel = useCallback(() => setEditingIndex(-1), []);
-  const activate = useCallback(
-    (id: string) => setEditingIndex(itemsSorted.findIndex((compare) => compare.id === id)),
-    [itemsSorted],
-  );
+  const onCancel = useCallback(() => setEditingId(null), []);
+
+  const activate = useCallback((id: string) => setEditingId(id), []);
 
   const onSubmit = useCallback(
     (delta: Create<I>): void => {
       if (!item) {
         return;
       }
-      setEditingIndex(-1);
+      setEditingId(null);
       actionOnUpdate(item.id, delta, item);
     },
     [item, actionOnUpdate],
@@ -71,7 +72,7 @@ export function useMobileEditModal<I extends Item, P extends string>(
     if (!item) {
       return;
     }
-    setEditingIndex(-1);
+    setEditingId(null);
     actionOnDelete(item.id, item);
   }, [item, actionOnDelete]);
 

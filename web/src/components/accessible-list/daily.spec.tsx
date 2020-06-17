@@ -173,6 +173,7 @@ describe('<AccessibleListDaily />', () => {
             shop: 'shop one',
           },
         ],
+        __optimistic: [undefined],
         total: 1023,
         olderExists: null,
       },

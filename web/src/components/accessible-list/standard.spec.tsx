@@ -438,12 +438,9 @@ describe('<AccessibleListStandard />', () => {
 
         @media only screen and (min-width:500px) {
           .c6 {
+            background-color: #eaeaea;
             border-right: 1px solid #ccc;
             height: 1.5rem;
-          }
-
-          .c6:nth-child(2n) {
-            background-color: #eaeaea;
           }
 
           .c6 input[type='text'] {

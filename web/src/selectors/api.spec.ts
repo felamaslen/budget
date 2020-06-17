@@ -43,9 +43,9 @@ describe('API selectors', () => {
                 transactions: getTransactionsList([
                   { date: '2019-05-03', units: 103, cost: 99231 },
                 ]),
-                __optimistic: RequestType.update,
               },
             ],
+            __optimistic: [...testState.funds.__optimistic, RequestType.update],
           },
           [Page.food]: {
             ...testState.food,
@@ -58,9 +58,9 @@ describe('API selectors', () => {
                 category: 'some food category',
                 cost: 3,
                 shop: 'some food shop',
-                __optimistic: RequestType.update,
               },
             ],
+            __optimistic: [...testState.food.__optimistic, RequestType.update],
           },
           [Page.general]: {
             ...testState.general,
@@ -73,9 +73,9 @@ describe('API selectors', () => {
                 category: 'some general category',
                 cost: 3,
                 shop: 'some general shop',
-                __optimistic: RequestType.create,
               },
             ],
+            __optimistic: [...testState.general.__optimistic, RequestType.create],
           },
           [Page.holiday]: {
             ...testState.holiday,
@@ -88,9 +88,9 @@ describe('API selectors', () => {
                 holiday: 'some holiday',
                 cost: 3,
                 shop: 'some holiday shop',
-                __optimistic: RequestType.delete,
               },
             ],
+            __optimistic: [...testState.holiday.__optimistic, RequestType.delete],
           },
         }),
       ).toBe(true);
@@ -100,17 +100,19 @@ describe('API selectors', () => {
           ...testState,
           netWorth: {
             ...testState.netWorth,
-            categories: [
-              ...testState.netWorth.categories,
-              {
-                id: 'some-fake-id',
-                type: 'asset',
-                category: 'My asset',
-                color: '#00ff00',
-                isOption: false,
-                __optimistic: RequestType.create,
-              },
-            ],
+            categories: {
+              items: [
+                ...testState.netWorth.categories.items,
+                {
+                  id: 'some-fake-id',
+                  type: 'asset',
+                  category: 'My asset',
+                  color: '#00ff00',
+                  isOption: false,
+                },
+              ],
+              __optimistic: [...testState.netWorth.categories.__optimistic, RequestType.create],
+            },
           },
         }),
       ).toBe(true);
@@ -120,17 +122,19 @@ describe('API selectors', () => {
           ...testState,
           netWorth: {
             ...testState.netWorth,
-            subcategories: [
-              ...testState.netWorth.subcategories,
-              {
-                id: 'some-fake-id',
-                categoryId: 'some-category-id',
-                subcategory: 'My wallet',
-                hasCreditLimit: null,
-                opacity: 0,
-                __optimistic: RequestType.create,
-              },
-            ],
+            subcategories: {
+              items: [
+                ...testState.netWorth.subcategories.items,
+                {
+                  id: 'some-fake-id',
+                  categoryId: 'some-category-id',
+                  subcategory: 'My wallet',
+                  hasCreditLimit: null,
+                  opacity: 0,
+                },
+              ],
+              __optimistic: [...testState.netWorth.subcategories.__optimistic, RequestType.create],
+            },
           },
         }),
       ).toBe(true);
@@ -140,13 +144,10 @@ describe('API selectors', () => {
           ...testState,
           netWorth: {
             ...testState.netWorth,
-            entries: [
-              ...testState.netWorth.entries,
-              {
-                ...testState.netWorth.entries[0],
-                __optimistic: RequestType.update,
-              },
-            ],
+            entries: {
+              items: [...testState.netWorth.entries.items, testState.netWorth.entries.items[0]],
+              __optimistic: [...testState.netWorth.entries.__optimistic, RequestType.update],
+            },
           },
         }),
       ).toBe(true);
@@ -164,9 +165,9 @@ describe('API selectors', () => {
                 transactions: getTransactionsList([
                   { date: '2019-05-03', units: 103, cost: 99231 },
                 ]),
-                __optimistic: undefined,
               },
             ],
+            __optimistic: [...testState.food.__optimistic, undefined],
           },
           [Page.food]: {
             ...testState.food,
@@ -179,9 +180,9 @@ describe('API selectors', () => {
                 category: 'some food category',
                 cost: 3,
                 shop: 'some food shop',
-                __optimistic: undefined,
               },
             ],
+            __optimistic: [...testState.food.__optimistic, undefined],
           },
           [Page.general]: {
             ...testState.general,
@@ -194,9 +195,9 @@ describe('API selectors', () => {
                 category: 'some general category',
                 cost: 3,
                 shop: 'some general shop',
-                __optimistic: undefined,
               },
             ],
+            __optimistic: [...testState.general.__optimistic, undefined],
           },
           [Page.holiday]: {
             ...testState.holiday,
@@ -211,6 +212,7 @@ describe('API selectors', () => {
                 shop: 'some holiday shop',
               },
             ],
+            __optimistic: [...testState.holiday.__optimistic, undefined],
           },
         }),
       ).toBe(false);

@@ -20,13 +20,12 @@ import {
   getValueForTransmit,
   sortByDate,
   sortByKey,
-  withoutDeleted,
   withoutId,
   withoutIds,
 } from './data';
 import { Average, Period } from '~client/constants';
 import { mockRandom } from '~client/test-utils/random';
-import { Data, RequestType } from '~client/types';
+import { Data } from '~client/types';
 
 describe('data module', () => {
   describe('getPeriodMatch', () => {
@@ -679,24 +678,6 @@ describe('data module', () => {
       const copy = items.slice();
       sortByDate(items);
       expect(items).toStrictEqual(copy);
-    });
-  });
-
-  describe('withoutDeleted', () => {
-    it('should remove optimistically deleted items', () => {
-      expect.assertions(1);
-      expect(
-        withoutDeleted([
-          { foo: 3 },
-          { foo: 6, __optimistic: RequestType.delete },
-          { foo: 4, __optimistic: RequestType.create },
-          { foo: 5, __optimistic: RequestType.update },
-        ]),
-      ).toStrictEqual([
-        { foo: 3 },
-        { foo: 4, __optimistic: RequestType.create },
-        { foo: 5, __optimistic: RequestType.update },
-      ]);
     });
   });
 

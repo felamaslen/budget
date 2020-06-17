@@ -54,6 +54,7 @@ describe('<AccessibleList />', () => {
           cost: 287,
         },
       ],
+      __optimistic: [undefined, undefined],
     },
   };
 
@@ -91,8 +92,8 @@ describe('<AccessibleList />', () => {
     return { ...utils, store };
   };
 
-  const getContainerStandard = (
-    state: MyState = testState,
+  const getContainerStandard = <I extends ListCalcItem = ListCalcItem>(
+    state: MyState<I> = testState as MyState<I>,
     existingStore?: MockStore<MyState>,
     renderOptions: RenderOptions = {},
   ): RenderResult & { store: MockStore<MyState> } => {
@@ -128,7 +129,7 @@ describe('<AccessibleList />', () => {
     const setup = (): RenderResult =>
       getContainerBase(
         {
-          [myPage]: { items: [] },
+          [myPage]: { items: [], __optimistic: [] },
         },
         {
           page: myPage,
@@ -176,9 +177,9 @@ describe('<AccessibleList />', () => {
             date: new Date('2020-03-01'),
             item: 'Item c',
             cost: 176,
-            __optimistic: RequestType.delete,
           },
         ],
+        __optimistic: [...testState[myPage].__optimistic, RequestType.delete],
       },
     });
 

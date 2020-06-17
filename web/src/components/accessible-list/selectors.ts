@@ -4,10 +4,11 @@ import moize from 'moize';
 import { createSelector } from 'reselect';
 
 import { State } from './types';
-import { IDENTITY, withoutDeleted, withoutCrud, sortByKey } from '~client/modules/data';
+import { IDENTITY, sortByKey } from '~client/modules/data';
 import { State as CrudState } from '~client/reducers/crud';
 import { DailyState } from '~client/reducers/list';
-import { Item, ListCalcItem, WithCrud } from '~client/types';
+import { withoutDeleted } from '~client/selectors/crud';
+import { Item, ListCalcItem } from '~client/types';
 
 export type StateStandard<I extends ListCalcItem, P extends string> = {
   [page in P]: DailyState<I>;
@@ -21,30 +22,28 @@ export const getStandardCost = moize(
 
 const getRawItems = <I extends Item, P extends string>(page: P) => (
   state: State<I, P>,
-): CrudState<I> => state[page].items;
+): CrudState<I> => state[page];
 
 type SortItems<I extends Item> = (items: I[]) => I[];
 export const getItems = moize(
   <I extends Item, P extends string>(page: P, sortItems: SortItems<I> = IDENTITY) =>
     createSelector(
       getRawItems<I, P>(page),
-      compose<CrudState<I>, I[], I[], I[]>(sortItems, withoutCrud, withoutDeleted),
+      compose<CrudState<I>, I[], I[], I[]>(
+        moize(IDENTITY, {
+          maxSize: 1,
+          isSerialized: true,
+        }),
+        sortItems,
+        withoutDeleted,
+      ),
     ),
 );
 
-export const getItem = moize(<I extends Item, P extends string>(page: P, id: string) => {
-  const processItem = moize((item: I): I => item, {
-    maxSize: 1,
-    isReact: true,
-  });
-
-  return (state: State<I, P>): I => {
-    const { __optimistic, ...rest } = state[page].items.find((item) => item.id === id) as WithCrud<
-      I
-    >;
-    return processItem(rest as I);
-  };
-});
+export const getItem = moize(
+  <I extends Item, P extends string>(page: P, id: string) => (state: State<I, P>): I =>
+    state[page].items.find((item) => item.id === id) as I,
+);
 
 export const sortStandardItems = moize(<I extends ListCalcItem>() =>
   sortByKey<'id' | 'date', I>({ key: 'date', order: -1 }, 'id'),

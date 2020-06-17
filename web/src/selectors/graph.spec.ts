@@ -12,69 +12,80 @@ describe('Graph selectors', () => {
         ...state,
         netWorth: {
           ...state.netWorth,
-          entries: [
-            {
-              id: 'entry-a',
-              date: new Date('2018-01-31'),
-              values: [
-                { id: 'value-id-1', subcategory: 'real-wallet-subcategory-id', value: 13502 },
-              ],
-              creditLimit: [],
-              currencies: [],
-            },
-            {
-              id: 'entry-b',
-              date: new Date('2018-02-28'),
-              values: [
-                { id: 'value-id-2', subcategory: 'real-wallet-subcategory-id', value: 19220 },
-              ],
-              creditLimit: [],
-              currencies: [],
-            },
-            {
-              id: 'entry-c',
-              date: new Date('2018-03-31'),
-              values: [
-                { id: 'value-id-3', subcategory: 'real-wallet-subcategory-id', value: 11876 },
-              ],
-              creditLimit: [],
-              currencies: [],
-            },
-            {
-              id: 'entry-d',
-              date: new Date('2018-04-30'),
-              values: [
-                { id: 'value-id-4', subcategory: 'real-wallet-subcategory-id', value: 14981 },
-              ],
-              creditLimit: [],
-              currencies: [],
-            },
-            {
-              id: 'entry-e',
-              date: new Date('2018-05-31'),
-              values: [
-                { id: 'value-id-5', subcategory: 'real-wallet-subcategory-id', value: 14230 },
-              ],
-              creditLimit: [],
-              currencies: [],
-            },
-            {
-              id: 'entry-f',
-              date: new Date('2018-06-30'),
-              values: [
-                { id: 'value-id-6', subcategory: 'real-wallet-subcategory-id', value: 12678 },
-              ],
-              creditLimit: [],
-              currencies: [],
-            },
-            {
-              id: 'entry-g',
-              date: new Date('2018-07-31'),
-              values: [{ id: 'value-id-7', subcategory: 'real-wallet-subcategory-id', value: 0 }],
-              creditLimit: [],
-              currencies: [],
-            },
-          ],
+          entries: {
+            items: [
+              {
+                id: 'entry-a',
+                date: new Date('2018-01-31'),
+                values: [
+                  { id: 'value-id-1', subcategory: 'real-wallet-subcategory-id', value: 13502 },
+                ],
+                creditLimit: [],
+                currencies: [],
+              },
+              {
+                id: 'entry-b',
+                date: new Date('2018-02-28'),
+                values: [
+                  { id: 'value-id-2', subcategory: 'real-wallet-subcategory-id', value: 19220 },
+                ],
+                creditLimit: [],
+                currencies: [],
+              },
+              {
+                id: 'entry-c',
+                date: new Date('2018-03-31'),
+                values: [
+                  { id: 'value-id-3', subcategory: 'real-wallet-subcategory-id', value: 11876 },
+                ],
+                creditLimit: [],
+                currencies: [],
+              },
+              {
+                id: 'entry-d',
+                date: new Date('2018-04-30'),
+                values: [
+                  { id: 'value-id-4', subcategory: 'real-wallet-subcategory-id', value: 14981 },
+                ],
+                creditLimit: [],
+                currencies: [],
+              },
+              {
+                id: 'entry-e',
+                date: new Date('2018-05-31'),
+                values: [
+                  { id: 'value-id-5', subcategory: 'real-wallet-subcategory-id', value: 14230 },
+                ],
+                creditLimit: [],
+                currencies: [],
+              },
+              {
+                id: 'entry-f',
+                date: new Date('2018-06-30'),
+                values: [
+                  { id: 'value-id-6', subcategory: 'real-wallet-subcategory-id', value: 12678 },
+                ],
+                creditLimit: [],
+                currencies: [],
+              },
+              {
+                id: 'entry-g',
+                date: new Date('2018-07-31'),
+                values: [{ id: 'value-id-7', subcategory: 'real-wallet-subcategory-id', value: 0 }],
+                creditLimit: [],
+                currencies: [],
+              },
+            ],
+            __optimistic: [
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+            ],
+          },
         },
       });
 

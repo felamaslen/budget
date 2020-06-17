@@ -89,7 +89,7 @@ describe('API reducer', () => {
   describe('SYNC_RECEIVED', () => {
     it('SYNC_RECEIVED sets loading to false', () => {
       expect.assertions(2);
-      const action = syncReceived({});
+      const action = syncReceived({ list: [], netWorth: [] });
       const result = reducer(initialState, action);
 
       expect(result.loading).toBe(false);

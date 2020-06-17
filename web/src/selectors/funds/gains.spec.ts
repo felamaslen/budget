@@ -11,8 +11,8 @@ import {
   getDayGainAbs,
   RowGains,
 } from '~client/selectors/funds/gains';
-import { testRows, testPrices, testStartTime, testCacheTimes } from '~client/test-data/funds';
-import { Page } from '~client/types/app';
+import { testState, testRows, testPrices, testStartTime, testCacheTimes } from '~client/test-data';
+import { Page } from '~client/types';
 
 describe('Funds selectors / gains', () => {
   const testCache = {
@@ -21,8 +21,9 @@ describe('Funds selectors / gains', () => {
     prices: testPrices,
   };
 
-  const stateWithGains: Pick<State, Page.funds> = {
-    funds: {
+  const stateWithGains: State = {
+    ...testState,
+    [Page.funds]: {
       viewSoldFunds: true,
       items: [
         {
@@ -41,6 +42,7 @@ describe('Funds selectors / gains', () => {
           ]),
         },
       ],
+      __optimistic: [undefined, undefined],
       period: Period.year1,
       cache: {
         [Period.year1]: {
@@ -240,7 +242,8 @@ describe('Funds selectors / gains', () => {
 
     describe('when a fund has only one scraped price', () => {
       const stateOne = {
-        funds: {
+        ...stateWithGains,
+        [Page.funds]: {
           ...stateWithGains.funds,
           cache: {
             ...stateWithGains.funds.cache,
@@ -265,10 +268,12 @@ describe('Funds selectors / gains', () => {
     });
 
     describe('when there are no items', () => {
-      const stateNone: Pick<State, Page.funds> = {
-        funds: {
-          ...stateWithGains.funds,
+      const stateNone: State = {
+        ...stateWithGains,
+        [Page.funds]: {
+          ...stateWithGains[Page.funds],
           items: [],
+          __optimistic: [],
           period: Period.year5,
           cache: {
             [Period.year5]: {
@@ -296,9 +301,10 @@ describe('Funds selectors / gains', () => {
     });
 
     describe('when there is no cache', () => {
-      const stateNoCache: Pick<State, Page.funds> = {
-        funds: {
-          ...stateWithGains.funds,
+      const stateNoCache: State = {
+        ...stateWithGains,
+        [Page.funds]: {
+          ...stateWithGains[Page.funds],
           items: [
             {
               id: 'fund1',
@@ -328,9 +334,10 @@ describe('Funds selectors / gains', () => {
     });
 
     describe('when the cache contains only one item', () => {
-      const stateOneItem: Pick<State, Page.funds> = {
-        funds: {
-          ...stateWithGains.funds,
+      const stateOneItem: State = {
+        ...stateWithGains,
+        [Page.funds]: {
+          ...stateWithGains[Page.funds],
           items: [
             {
               id: 'fund1',

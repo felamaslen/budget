@@ -80,6 +80,7 @@ describe('Funds reducer', () => {
           },
           { id: 'id-2', item: 'My fund 2', transactions: [] },
         ],
+        __optimistic: [undefined, undefined],
         cache: {
           [initialState.period]: {
             startTime: 1000,

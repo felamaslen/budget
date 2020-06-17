@@ -14,6 +14,7 @@ import {
 } from '~client/actions/net-worth';
 import {
   testResponse,
+  testState,
   CATEGORY_CASH,
   CATEGORY_MORTGAGE,
   CATEGORY_CC,
@@ -51,31 +52,36 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.categories).toStrictEqual([
-        {
-          id: action.fakeId,
-          type: 'asset',
-          category: 'Cash (easy access)',
-          color: '#00ff00',
-          isOption: false,
-          __optimistic: RequestType.create,
-        },
-      ]);
+      expect(result.categories).toStrictEqual({
+        items: [
+          {
+            id: action.fakeId,
+            type: 'asset',
+            category: 'Cash (easy access)',
+            color: '#00ff00',
+            isOption: false,
+          },
+        ],
+        __optimistic: [RequestType.create],
+      });
     });
   });
 
   describe('NET_WORTH_CATEGORY_UPDATED', () => {
     const state: State = {
       ...initialState,
-      categories: [
-        {
-          id: 'some-real-id',
-          type: 'asset',
-          category: 'Cash (easy access)',
-          color: '#00ff00',
-          isOption: false,
-        },
-      ],
+      categories: {
+        items: [
+          {
+            id: 'some-real-id',
+            type: 'asset',
+            category: 'Cash (easy access)',
+            color: '#00ff00',
+            isOption: false,
+          },
+        ],
+        __optimistic: [undefined],
+      },
     };
 
     const action = netWorthCategoryUpdated('some-real-id', {
@@ -89,33 +95,38 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.categories).toStrictEqual([
-        {
-          id: 'some-real-id',
-          type: 'liability',
-          category: 'Mortgage',
-          color: '#fa0000',
-          isOption: false,
-          __optimistic: RequestType.update,
-        },
-      ]);
+      expect(result.categories).toStrictEqual({
+        items: [
+          {
+            id: 'some-real-id',
+            type: 'liability',
+            category: 'Mortgage',
+            color: '#fa0000',
+            isOption: false,
+          },
+        ],
+        __optimistic: [RequestType.update],
+      });
     });
   });
 
   describe('NET_WORTH_CATEGORY_DELETED', () => {
     const state: State = {
       ...initialState,
-      categories: [
-        {
-          id: 'some-real-id',
-          type: 'asset',
-          category: 'Cash (easy access)',
-          color: '#00ff00',
-          isOption: false,
-        },
-      ],
-      subcategories: [],
-      entries: [],
+      categories: {
+        items: [
+          {
+            id: 'some-real-id',
+            type: 'asset',
+            category: 'Cash (easy access)',
+            color: '#00ff00',
+            isOption: false,
+          },
+        ],
+        __optimistic: [undefined],
+      },
+      subcategories: { items: [], __optimistic: [] },
+      entries: { items: [], __optimistic: [] },
     };
 
     const action = netWorthCategoryDeleted('some-real-id');
@@ -126,18 +137,20 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [
-            {
-              id: 'some-real-id',
-              type: 'asset',
-              category: 'Cash (easy access)',
-              color: '#00ff00',
-              isOption: false,
-              __optimistic: RequestType.delete,
-            },
-          ],
-          subcategories: [],
-          entries: [],
+          categories: {
+            items: [
+              {
+                id: 'some-real-id',
+                type: 'asset',
+                category: 'Cash (easy access)',
+                color: '#00ff00',
+                isOption: false,
+              },
+            ],
+            __optimistic: [RequestType.delete],
+          },
+          subcategories: { items: [], __optimistic: [] },
+          entries: { items: [], __optimistic: [] },
         }),
       );
     });
@@ -161,56 +174,64 @@ describe('Net worth reducer', () => {
 
       const statePendingChildren: State = {
         ...state,
-        categories: [
-          {
-            id: 'some-real-id',
-            type: 'asset',
-            category: 'Cash (easy access)',
-            color: '#00ff00',
-            isOption: false,
-            __optimistic: RequestType.create,
-          },
-          otherCategory,
-        ],
-        subcategories: [
-          {
-            id: 'subcat-A',
-            subcategory: 'some-subcategory',
-            categoryId: 'some-real-id',
-            hasCreditLimit: null,
-            opacity: 1,
-            __optimistic: RequestType.create,
-          },
-          otherSubcategory,
-        ],
-        entries: [
-          {
-            id: 'entry-A0',
-            date: new Date(),
-            values: [
-              { id: 'value-id-1', subcategory: 'subcat-B', value: 3 },
-              { id: 'value-id-2', subcategory: 'subcat-A', value: 4 },
-            ],
-            currencies: [],
-            creditLimit: [],
-            __optimistic: RequestType.create,
-          },
-        ],
+        categories: {
+          items: [
+            {
+              id: 'some-real-id',
+              type: 'asset',
+              category: 'Cash (easy access)',
+              color: '#00ff00',
+              isOption: false,
+            },
+            otherCategory,
+          ],
+          __optimistic: [RequestType.create, undefined],
+        },
+        subcategories: {
+          items: [
+            {
+              id: 'subcat-A',
+              subcategory: 'some-subcategory',
+              categoryId: 'some-real-id',
+              hasCreditLimit: null,
+              opacity: 1,
+            },
+            otherSubcategory,
+          ],
+          __optimistic: [RequestType.create, undefined],
+        },
+        entries: {
+          items: [
+            {
+              id: 'entry-A0',
+              date: new Date(),
+              values: [
+                { id: 'value-id-1', subcategory: 'subcat-B', value: 3 },
+                { id: 'value-id-2', subcategory: 'subcat-A', value: 4 },
+              ],
+              currencies: [],
+              creditLimit: [],
+            },
+          ],
+          __optimistic: [RequestType.create],
+        },
       };
 
       const result = reducer(statePendingChildren, action);
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [otherCategory],
-          subcategories: [otherSubcategory],
-          entries: [
-            expect.objectContaining({
-              id: 'entry-A0',
-              values: [{ id: 'value-id-1', subcategory: 'subcat-B', value: 3 }],
-              __optimistic: RequestType.create,
-            }),
-          ],
+          categories: { items: [otherCategory], __optimistic: [undefined] },
+          subcategories: { items: [otherSubcategory], __optimistic: [undefined] },
+          entries: {
+            items: [
+              expect.objectContaining({
+                id: 'entry-A0',
+                values: [{ id: 'value-id-1', subcategory: 'subcat-B', value: 3 }],
+              }),
+            ],
+            __optimistic: [RequestType.create],
+          },
         }),
       );
     });
@@ -228,31 +249,36 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.subcategories).toStrictEqual([
-        {
-          id: action.fakeId,
-          categoryId: 'some-category-id',
-          subcategory: 'My bank account',
-          hasCreditLimit: null,
-          opacity: 0.2,
-          __optimistic: RequestType.create,
-        },
-      ]);
+      expect(result.subcategories).toStrictEqual({
+        items: [
+          {
+            id: action.fakeId,
+            categoryId: 'some-category-id',
+            subcategory: 'My bank account',
+            hasCreditLimit: null,
+            opacity: 0.2,
+          },
+        ],
+        __optimistic: [RequestType.create],
+      });
     });
   });
 
   describe('NET_WORTH_SUBCATEGORY_UPDATED', () => {
     const state: State = {
       ...initialState,
-      subcategories: [
-        {
-          id: 'some-subcategory-id',
-          categoryId: 'some-category-id',
-          subcategory: 'My bank account',
-          hasCreditLimit: null,
-          opacity: 0.2,
-        },
-      ],
+      subcategories: {
+        items: [
+          {
+            id: 'some-subcategory-id',
+            categoryId: 'some-category-id',
+            subcategory: 'My bank account',
+            hasCreditLimit: null,
+            opacity: 0.2,
+          },
+        ],
+        __optimistic: [undefined],
+      },
     };
 
     const action = netWorthSubcategoryUpdated('some-subcategory-id', {
@@ -266,41 +292,49 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.subcategories).toStrictEqual([
-        {
-          id: 'some-subcategory-id',
-          categoryId: 'other-category-id',
-          subcategory: 'My credit card',
-          hasCreditLimit: true,
-          opacity: 0.3,
-          __optimistic: RequestType.update,
-        },
-      ]);
+      expect(result.subcategories).toStrictEqual({
+        items: [
+          {
+            id: 'some-subcategory-id',
+            categoryId: 'other-category-id',
+            subcategory: 'My credit card',
+            hasCreditLimit: true,
+            opacity: 0.3,
+          },
+        ],
+        __optimistic: [RequestType.update],
+      });
     });
   });
 
   describe('NET_WORTH_SUBCATEGORY_DELETED', () => {
     const state: State = {
       ...initialState,
-      categories: [
-        {
-          id: 'some-category-id',
-          category: 'some-category',
-          type: 'asset',
-          color: 'green',
-          isOption: false,
-        },
-      ],
-      subcategories: [
-        {
-          id: 'some-subcategory-id',
-          categoryId: 'some-category-id',
-          subcategory: 'My bank account',
-          hasCreditLimit: null,
-          opacity: 0.2,
-        },
-      ],
-      entries: [],
+      categories: {
+        items: [
+          {
+            id: 'some-category-id',
+            category: 'some-category',
+            type: 'asset',
+            color: 'green',
+            isOption: false,
+          },
+        ],
+        __optimistic: [undefined],
+      },
+      subcategories: {
+        items: [
+          {
+            id: 'some-subcategory-id',
+            categoryId: 'some-category-id',
+            subcategory: 'My bank account',
+            hasCreditLimit: null,
+            opacity: 0.2,
+          },
+        ],
+        __optimistic: [undefined],
+      },
+      entries: { items: [], __optimistic: [] },
     };
 
     const action = netWorthSubcategoryDeleted('some-subcategory-id');
@@ -309,46 +343,52 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.subcategories).toStrictEqual([
-        {
-          id: 'some-subcategory-id',
-          categoryId: 'some-category-id',
-          subcategory: 'My bank account',
-          hasCreditLimit: null,
-          opacity: 0.2,
-          __optimistic: RequestType.delete,
-        },
-      ]);
-    });
-
-    it('should delete a pending subcategory and its dependencies', () => {
-      expect.assertions(1);
-      const statePendingChildren: State = {
-        ...state,
-        subcategories: [
+      expect(result.subcategories).toStrictEqual({
+        items: [
           {
             id: 'some-subcategory-id',
             categoryId: 'some-category-id',
             subcategory: 'My bank account',
             hasCreditLimit: null,
             opacity: 0.2,
-            __optimistic: RequestType.create,
-          },
-          { ...SUBCATEGORY_WALLET, id: 'subcat-A', categoryId: 'some-category-id' },
-        ],
-        entries: [
-          {
-            id: 'entry-A0',
-            date: new Date(),
-            values: [
-              { id: 'value-id-a', value: 1, subcategory: 'some-subcategory-id' },
-              { id: 'value-id-b', value: 1, subcategory: 'subcat-A' },
-            ],
-            currencies: [],
-            creditLimit: [],
-            __optimistic: RequestType.create,
           },
         ],
+        __optimistic: [RequestType.delete],
+      });
+    });
+
+    it('should delete a pending subcategory and its dependencies', () => {
+      expect.assertions(1);
+      const statePendingChildren: State = {
+        ...state,
+        subcategories: {
+          items: [
+            {
+              id: 'some-subcategory-id',
+              categoryId: 'some-category-id',
+              subcategory: 'My bank account',
+              hasCreditLimit: null,
+              opacity: 0.2,
+            },
+            { ...SUBCATEGORY_WALLET, id: 'subcat-A', categoryId: 'some-category-id' },
+          ],
+          __optimistic: [RequestType.create, undefined],
+        },
+        entries: {
+          items: [
+            {
+              id: 'entry-A0',
+              date: new Date(),
+              values: [
+                { id: 'value-id-a', value: 1, subcategory: 'some-subcategory-id' },
+                { id: 'value-id-b', value: 1, subcategory: 'subcat-A' },
+              ],
+              currencies: [],
+              creditLimit: [],
+            },
+          ],
+          __optimistic: [RequestType.create],
+        },
       };
 
       const result = reducer(statePendingChildren, action);
@@ -356,16 +396,19 @@ describe('Net worth reducer', () => {
       expect(result).toStrictEqual(
         expect.objectContaining({
           categories: statePendingChildren.categories,
-          subcategories: [
-            { ...SUBCATEGORY_WALLET, id: 'subcat-A', categoryId: 'some-category-id' },
-          ],
-          entries: [
-            expect.objectContaining({
-              id: 'entry-A0',
-              values: [{ id: 'value-id-b', value: 1, subcategory: 'subcat-A' }],
-              __optimistic: RequestType.create,
-            }),
-          ],
+          subcategories: {
+            items: [{ ...SUBCATEGORY_WALLET, id: 'subcat-A', categoryId: 'some-category-id' }],
+            __optimistic: [undefined],
+          },
+          entries: {
+            items: [
+              expect.objectContaining({
+                id: 'entry-A0',
+                values: [{ id: 'value-id-b', value: 1, subcategory: 'subcat-A' }],
+              }),
+            ],
+            __optimistic: [RequestType.create],
+          },
         }),
       );
     });
@@ -396,55 +439,60 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.entries).toStrictEqual([
-        {
-          id: action.fakeId,
-          date: new Date('2019-07-12T12:36:03Z'),
-          values: [
-            expect.objectContaining({
-              subcategory: 'some-subcategory-id',
-              skip: true,
-              value: -239,
-            }),
-            expect.objectContaining({
-              subcategory: 'other-subcategory-id',
-              skip: null,
-              value: [10, { currency: 'CZK', value: 37.34 }],
-            }),
-          ],
-          creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
-          currencies: [CURRENCY_CZK],
-          __optimistic: RequestType.create,
-        },
-      ]);
+      expect(result.entries).toStrictEqual({
+        items: [
+          {
+            id: action.fakeId,
+            date: new Date('2019-07-12T12:36:03Z'),
+            values: [
+              expect.objectContaining({
+                subcategory: 'some-subcategory-id',
+                skip: true,
+                value: -239,
+              }),
+              expect.objectContaining({
+                subcategory: 'other-subcategory-id',
+                skip: null,
+                value: [10, { currency: 'CZK', value: 37.34 }],
+              }),
+            ],
+            creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+            currencies: [CURRENCY_CZK],
+          },
+        ],
+        __optimistic: [RequestType.create],
+      });
     });
   });
 
   describe('NET_WORTH_UPDATED', () => {
     const state: State = {
       ...initialState,
-      entries: [
-        {
-          id: 'some-entry-id',
-          date: new Date('2019-07-12T12:36:03Z'),
-          values: [
-            {
-              id: 'value-id-1',
-              subcategory: 'some-subcategory-id',
-              skip: true,
-              value: -239,
-            },
-            {
-              id: 'value-id-2',
-              subcategory: 'other-subcategory-id',
-              skip: null,
-              value: [{ currency: 'CZK', value: 37.34 }],
-            },
-          ],
-          creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
-          currencies: [CURRENCY_CZK],
-        },
-      ],
+      entries: {
+        items: [
+          {
+            id: 'some-entry-id',
+            date: new Date('2019-07-12T12:36:03Z'),
+            values: [
+              {
+                id: 'value-id-1',
+                subcategory: 'some-subcategory-id',
+                skip: true,
+                value: -239,
+              },
+              {
+                id: 'value-id-2',
+                subcategory: 'other-subcategory-id',
+                skip: null,
+                value: [{ currency: 'CZK', value: 37.34 }],
+              },
+            ],
+            creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+            currencies: [CURRENCY_CZK],
+          },
+        ],
+        __optimistic: [undefined],
+      },
     };
 
     const action = netWorthUpdated('some-entry-id', {
@@ -465,50 +513,55 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.entries).toStrictEqual([
-        {
-          id: 'some-entry-id',
-          date: new Date('2019-07-31T23:54:00Z'),
-          values: [
-            expect.objectContaining({
-              subcategory: 'some-subcategory-id',
-              skip: true,
-              value: -239,
-            }),
-          ],
-          creditLimit: [],
-          currencies: [],
-          __optimistic: RequestType.update,
-        },
-      ]);
+      expect(result.entries).toStrictEqual({
+        items: [
+          {
+            id: 'some-entry-id',
+            date: new Date('2019-07-31T23:54:00Z'),
+            values: [
+              expect.objectContaining({
+                subcategory: 'some-subcategory-id',
+                skip: true,
+                value: -239,
+              }),
+            ],
+            creditLimit: [],
+            currencies: [],
+          },
+        ],
+        __optimistic: [RequestType.update],
+      });
     });
   });
 
   describe('NET_WORTH_DELETED', () => {
     const state: State = {
       ...initialState,
-      entries: [
-        {
-          id: 'some-entry-id',
-          date: new Date('2019-07-12T12:36:03Z'),
-          values: [
-            {
-              id: 'value-id-1',
-              subcategory: 'some-subcategory-id',
-              skip: true,
-              value: -239,
-            },
-            {
-              id: 'value-id-2',
-              subcategory: 'other-subcategory-id',
-              skip: null,
-              value: [10, { currency: 'CZK', value: 37.34 }],
-            },
-          ],
-          creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
-          currencies: [CURRENCY_CZK],
-        },
-      ],
+      entries: {
+        items: [
+          {
+            id: 'some-entry-id',
+            date: new Date('2019-07-12T12:36:03Z'),
+            values: [
+              {
+                id: 'value-id-1',
+                subcategory: 'some-subcategory-id',
+                skip: true,
+                value: -239,
+              },
+              {
+                id: 'value-id-2',
+                subcategory: 'other-subcategory-id',
+                skip: null,
+                value: [10, { currency: 'CZK', value: 37.34 }],
+              },
+            ],
+            creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+            currencies: [CURRENCY_CZK],
+          },
+        ],
+        __optimistic: [undefined],
+      },
     };
 
     const action = netWorthDeleted('some-entry-id');
@@ -517,29 +570,31 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.entries).toStrictEqual([
-        {
-          id: 'some-entry-id',
-          date: new Date('2019-07-12T12:36:03Z'),
-          values: [
-            {
-              id: 'value-id-1',
-              subcategory: 'some-subcategory-id',
-              skip: true,
-              value: -239,
-            },
-            {
-              id: 'value-id-2',
-              subcategory: 'other-subcategory-id',
-              skip: null,
-              value: [10, { currency: 'CZK', value: 37.34 }],
-            },
-          ],
-          creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
-          currencies: [CURRENCY_CZK],
-          __optimistic: RequestType.delete,
-        },
-      ]);
+      expect(result.entries).toStrictEqual({
+        items: [
+          {
+            id: 'some-entry-id',
+            date: new Date('2019-07-12T12:36:03Z'),
+            values: [
+              {
+                id: 'value-id-1',
+                subcategory: 'some-subcategory-id',
+                skip: true,
+                value: -239,
+              },
+              {
+                id: 'value-id-2',
+                subcategory: 'other-subcategory-id',
+                skip: null,
+                value: [10, { currency: 'CZK', value: 37.34 }],
+              },
+            ],
+            creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+            currencies: [CURRENCY_CZK],
+          },
+        ],
+        __optimistic: [RequestType.delete],
+      });
     });
   });
 
@@ -577,16 +632,16 @@ describe('Net worth reducer', () => {
                 date: '2019-07-12',
                 values: [
                   {
-                    id: 'some-value-id-b',
-                    subcategory: 'other-subcategory-id',
-                    skip: null,
-                    value: [10, { currency: 'CZK', value: 37.34 }],
-                  },
-                  {
                     id: 'some-value-id-a',
                     subcategory: 'some-subcategory-id',
                     skip: true,
                     value: -239,
+                  },
+                  {
+                    id: 'some-value-id-b',
+                    subcategory: 'other-subcategory-id',
+                    skip: null,
+                    value: [10, { currency: 'CZK', value: 37.34 }],
                   },
                 ],
                 creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
@@ -606,46 +661,55 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [
-            {
-              id: 'some-category-id',
-              type: 'asset',
-              category: 'Cash (easy access)',
-              color: '#00ff00',
-              isOption: false,
-            },
-          ],
-          subcategories: [
-            {
-              id: 'some-subcategory-id',
-              categoryId: 'some-category-id',
-              subcategory: 'My bank account',
-              hasCreditLimit: null,
-              opacity: 0.2,
-            },
-          ],
-          entries: [
-            {
-              id: 'some-entry-id',
-              date: new Date('2019-07-12'),
-              values: [
-                {
-                  id: expect.any(String),
-                  subcategory: 'some-subcategory-id',
-                  skip: true,
-                  value: -239,
-                },
-                {
-                  id: expect.any(String),
-                  subcategory: 'other-subcategory-id',
-                  skip: null,
-                  value: [10, { currency: 'CZK', value: 37.34 }],
-                },
-              ],
-              creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
-              currencies: [CURRENCY_CZK],
-            },
-          ],
+          categories: {
+            items: [
+              {
+                id: 'some-category-id',
+                type: 'asset',
+                category: 'Cash (easy access)',
+                color: '#00ff00',
+                isOption: false,
+              },
+            ],
+            __optimistic: [undefined],
+          },
+          subcategories: {
+            items: [
+              {
+                id: 'some-subcategory-id',
+                categoryId: 'some-category-id',
+                subcategory: 'My bank account',
+                hasCreditLimit: null,
+                opacity: 0.2,
+              },
+            ],
+            __optimistic: [undefined],
+          },
+          entries: {
+            items: [
+              {
+                id: 'some-entry-id',
+                date: new Date('2019-07-12'),
+                values: expect.arrayContaining([
+                  {
+                    id: expect.any(String),
+                    subcategory: 'some-subcategory-id',
+                    skip: true,
+                    value: -239,
+                  },
+                  {
+                    id: expect.any(String),
+                    subcategory: 'other-subcategory-id',
+                    skip: null,
+                    value: [10, { currency: 'CZK', value: 37.34 }],
+                  },
+                ]),
+                creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+                currencies: [CURRENCY_CZK],
+              },
+            ],
+            __optimistic: [undefined],
+          },
           old: [145, 210],
           oldOptions: [1330, 19],
         }),
@@ -690,59 +754,56 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [],
-          subcategories: [],
-          entries: [
-            {
-              id: 'some-entry-id',
-              date: new Date('2019-07-12'),
-              values: [
-                {
-                  id: expect.any(String),
-                  subcategory: 'some-subcategory-id',
-                  skip: true,
-                  value: -239,
-                },
-              ],
-              creditLimit: [],
-              currencies: [],
-            },
-          ],
+          categories: { items: [], __optimistic: [] },
+          subcategories: { items: [], __optimistic: [] },
+          entries: {
+            items: [
+              {
+                id: 'some-entry-id',
+                date: new Date('2019-07-12'),
+                values: [
+                  {
+                    id: expect.any(String),
+                    subcategory: 'some-subcategory-id',
+                    skip: true,
+                    value: -239,
+                  },
+                ],
+                creditLimit: [],
+                currencies: [],
+              },
+            ],
+            __optimistic: [undefined],
+          },
           old: [],
           oldOptions: [],
         }),
       );
     });
 
-    it('should order the values by ID', () => {
+    it('should order the values by subcategory ID', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [
-            expect.objectContaining({
-              id: 'some-category-id',
-            }),
-          ],
-          subcategories: [
-            expect.objectContaining({
-              id: 'some-subcategory-id',
-            }),
-          ],
-          entries: [
-            expect.objectContaining({
-              id: 'some-entry-id',
-              values: [
-                expect.objectContaining({
-                  id: 'some-value-id-a',
-                }),
-                expect.objectContaining({
-                  id: 'some-value-id-b',
-                }),
-              ],
-            }),
-          ],
+          entries: expect.objectContaining({
+            items: [
+              expect.objectContaining({
+                id: 'some-entry-id',
+                values: [
+                  expect.objectContaining({
+                    id: 'some-value-id-b',
+                    subcategory: 'other-subcategory-id',
+                  }),
+                  expect.objectContaining({
+                    id: 'some-value-id-a',
+                    subcategory: 'some-subcategory-id',
+                  }),
+                ],
+              }),
+            ],
+          }),
         }),
       );
     });
@@ -753,49 +814,56 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const state: State = {
         ...initialState,
-        categories: [
-          CATEGORY_CASH,
-          {
-            ...CATEGORY_CC,
-            id: 'some-fake-category-id',
-            __optimistic: RequestType.create,
-          },
-        ],
-        subcategories: [
-          SUBCATEGORY_WALLET,
-          {
-            ...SUBCATEGORY_CC,
-            id: 'some-fake-subcategory-id',
-            categoryId: 'some-fake-category-id',
-            __optimistic: RequestType.create,
-          },
-        ],
-        entries: [
-          {
-            id: 'some-fake-entry-id',
-            date: new Date('2019-07-12T12:36:03Z'),
-            values: [
-              {
-                id: 'value-id-1',
-                subcategory: 'some-fake-subcategory-id',
-                skip: true,
-                value: -239,
-              },
-              {
-                id: 'value-id-2',
-                subcategory: SUBCATEGORY_WALLET.id,
-                skip: null,
-                value: [10, { currency: 'CZK', value: 37.34 }],
-              },
-            ],
-            creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
-            currencies: [CURRENCY_CZK],
-            __optimistic: RequestType.create,
-          },
-        ],
+        categories: {
+          items: [
+            CATEGORY_CASH,
+            {
+              ...CATEGORY_CC,
+              id: 'some-fake-category-id',
+            },
+          ],
+          __optimistic: [undefined, RequestType.create],
+        },
+        subcategories: {
+          items: [
+            SUBCATEGORY_WALLET,
+            {
+              ...SUBCATEGORY_CC,
+              id: 'some-fake-subcategory-id',
+              categoryId: 'some-fake-category-id',
+            },
+          ],
+          __optimistic: [undefined, RequestType.create],
+        },
+        entries: {
+          items: [
+            {
+              id: 'some-fake-entry-id',
+              date: new Date('2019-07-12T12:36:03Z'),
+              values: [
+                {
+                  id: 'value-id-1',
+                  subcategory: 'some-fake-subcategory-id',
+                  skip: true,
+                  value: -239,
+                },
+                {
+                  id: 'value-id-2',
+                  subcategory: SUBCATEGORY_WALLET.id,
+                  skip: null,
+                  value: [10, { currency: 'CZK', value: 37.34 }],
+                },
+              ],
+              creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
+              currencies: [CURRENCY_CZK],
+            },
+          ],
+          __optimistic: [RequestType.create],
+        },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.create,
@@ -816,62 +884,69 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: expect.arrayContaining([
-            CATEGORY_CASH,
-            { ...CATEGORY_CC, __optimistic: undefined },
-          ]),
-          subcategories: [
-            SUBCATEGORY_WALLET,
-            {
-              ...SUBCATEGORY_CC,
-              // the subcategory can only be created after its category is confirmed
-              id: 'some-fake-subcategory-id',
-              __optimistic: RequestType.create,
-            },
-          ],
-          entries: [
-            {
-              id: 'some-fake-entry-id',
-              date: new Date('2019-07-12T12:36:03Z'),
-              values: expect.arrayContaining([
-                {
-                  id: 'value-id-1',
-                  subcategory: 'some-fake-subcategory-id',
-                  skip: true,
-                  value: -239,
-                },
-                {
-                  id: 'value-id-2',
-                  subcategory: SUBCATEGORY_WALLET.id,
-                  skip: null,
-                  value: [10, { currency: 'CZK', value: 37.34 }],
-                },
-              ]),
-              creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
-              currencies: [CURRENCY_CZK],
+          categories: { items: [CATEGORY_CASH, CATEGORY_CC], __optimistic: [undefined, undefined] },
+          subcategories: {
+            items: [
+              SUBCATEGORY_WALLET,
+              {
+                ...SUBCATEGORY_CC,
+                // the subcategory can only be created after its category is confirmed
+                id: 'some-fake-subcategory-id',
+              },
+            ],
+            __optimistic: [undefined, RequestType.create],
+          },
+          entries: {
+            items: [
+              {
+                id: 'some-fake-entry-id',
+                date: new Date('2019-07-12T12:36:03Z'),
+                values: expect.arrayContaining([
+                  {
+                    id: 'value-id-1',
+                    subcategory: 'some-fake-subcategory-id',
+                    skip: true,
+                    value: -239,
+                  },
+                  {
+                    id: 'value-id-2',
+                    subcategory: SUBCATEGORY_WALLET.id,
+                    skip: null,
+                    value: [10, { currency: 'CZK', value: 37.34 }],
+                  },
+                ]),
+                creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
+                currencies: [CURRENCY_CZK],
+              },
+            ],
+            __optimistic: [
               // the entry can only be created after its subcategories are confirmed
-              __optimistic: RequestType.create,
-            },
-          ],
+              RequestType.create,
+            ],
+          },
         }),
       );
     });
 
     it('should confirm category updates', () => {
       expect.assertions(1);
+      const updatedCategory: Category = {
+        id: CATEGORY_CC.id,
+        type: 'asset',
+        category: 'This is now an asset group',
+        color: '#00aa00',
+        isOption: false,
+      };
+
       const state: State = {
         ...initialState,
-        categories: [
-          {
-            ...CATEGORY_CC,
-            __optimistic: RequestType.update,
-          },
-        ],
-        subcategories: [],
-        entries: [],
+        categories: { items: [updatedCategory], __optimistic: [RequestType.update] },
+        subcategories: { items: [], __optimistic: [] },
+        entries: { items: [], __optimistic: [] },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.update,
@@ -898,18 +973,12 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [
-            {
-              id: CATEGORY_CC.id,
-              type: 'asset',
-              category: 'This is now an asset group',
-              color: '#00aa00',
-              isOption: false,
-              __optimistic: undefined,
-            },
-          ],
-          subcategories: [],
-          entries: [],
+          categories: {
+            items: [updatedCategory],
+            __optimistic: [undefined],
+          },
+          subcategories: { items: [], __optimistic: [] },
+          entries: { items: [], __optimistic: [] },
         }),
       );
     });
@@ -918,39 +987,43 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const state: State = {
         ...initialState,
-        categories: [
-          {
-            ...CATEGORY_CC,
-            __optimistic: RequestType.delete,
-          },
-          CATEGORY_CASH,
-        ],
-        subcategories: [SUBCATEGORY_CC, SUBCATEGORY_WALLET],
-        entries: [
-          {
-            id: 'some-entry-id',
-            date: new Date('2019-07-12T12:36:03Z'),
-            values: [
-              {
-                id: 'value-id-1',
-                subcategory: SUBCATEGORY_CC.id,
-                skip: true,
-                value: -239,
-              },
-              {
-                id: 'value-id-2',
-                subcategory: SUBCATEGORY_WALLET.id,
-                skip: null,
-                value: [10, { currency: 'CZK', value: 37.34 }],
-              },
-            ],
-            creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
-            currencies: [CURRENCY_CZK],
-          },
-        ],
+        categories: {
+          items: [CATEGORY_CC, CATEGORY_CASH],
+          __optimistic: [RequestType.delete, undefined],
+        },
+        subcategories: {
+          items: [SUBCATEGORY_CC, SUBCATEGORY_WALLET],
+          __optimistic: [undefined, undefined],
+        },
+        entries: {
+          items: [
+            {
+              id: 'some-entry-id',
+              date: new Date('2019-07-12T12:36:03Z'),
+              values: [
+                {
+                  id: 'value-id-1',
+                  subcategory: SUBCATEGORY_CC.id,
+                  skip: true,
+                  value: -239,
+                },
+                {
+                  id: 'value-id-2',
+                  subcategory: SUBCATEGORY_WALLET.id,
+                  skip: null,
+                  value: [10, { currency: 'CZK', value: 37.34 }],
+                },
+              ],
+              creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
+              currencies: [CURRENCY_CZK],
+            },
+          ],
+          __optimistic: [undefined],
+        },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.delete,
@@ -966,26 +1039,29 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [CATEGORY_CASH],
+          categories: { items: [CATEGORY_CASH], __optimistic: [undefined] },
           // The dependencies are deleted from the database through foreign key cascading,
           // but we have to update on the frontend to reflect that
-          subcategories: [SUBCATEGORY_WALLET],
-          entries: [
-            {
-              id: 'some-entry-id',
-              date: new Date('2019-07-12T12:36:03Z'),
-              values: [
-                {
-                  id: 'value-id-2',
-                  subcategory: SUBCATEGORY_WALLET.id,
-                  skip: null,
-                  value: [10, { currency: 'CZK', value: 37.34 }],
-                },
-              ],
-              creditLimit: [],
-              currencies: [CURRENCY_CZK],
-            },
-          ],
+          subcategories: { items: [SUBCATEGORY_WALLET], __optimistic: [undefined] },
+          entries: {
+            items: [
+              {
+                id: 'some-entry-id',
+                date: new Date('2019-07-12T12:36:03Z'),
+                values: [
+                  {
+                    id: 'value-id-2',
+                    subcategory: SUBCATEGORY_WALLET.id,
+                    skip: null,
+                    value: [10, { currency: 'CZK', value: 37.34 }],
+                  },
+                ],
+                creditLimit: [],
+                currencies: [CURRENCY_CZK],
+              },
+            ],
+            __optimistic: [undefined],
+          },
         }),
       );
     });
@@ -994,42 +1070,50 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const state: State = {
         ...initialState,
-        categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
-        subcategories: [
-          SUBCATEGORY_HOUSE,
-          SUBCATEGORY_WALLET,
-          {
-            ...SUBCATEGORY_CC,
-            id: 'some-fake-subcategory-id',
-            __optimistic: RequestType.create,
-          },
-        ],
-        entries: [
-          {
-            id: 'some-entry-id',
-            date: new Date('2019-07-12T12:36:03Z'),
-            values: [
-              {
-                id: 'value-id-1',
-                subcategory: 'some-fake-subcategory-id',
-                skip: true,
-                value: -239,
-              },
-              {
-                id: 'value-id-2',
-                subcategory: SUBCATEGORY_WALLET.id,
-                skip: null,
-                value: [10, { currency: 'CZK', value: 37.34 }],
-              },
-            ],
-            creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
-            currencies: [CURRENCY_CZK],
-            __optimistic: RequestType.create,
-          },
-        ],
+        categories: {
+          items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
+          __optimistic: [undefined, undefined, undefined],
+        },
+        subcategories: {
+          items: [
+            SUBCATEGORY_HOUSE,
+            SUBCATEGORY_WALLET,
+            {
+              ...SUBCATEGORY_CC,
+              id: 'some-fake-subcategory-id',
+            },
+          ],
+          __optimistic: [undefined, undefined, RequestType.create],
+        },
+        entries: {
+          items: [
+            {
+              id: 'some-entry-id',
+              date: new Date('2019-07-12T12:36:03Z'),
+              values: [
+                {
+                  id: 'value-id-1',
+                  subcategory: 'some-fake-subcategory-id',
+                  skip: true,
+                  value: -239,
+                },
+                {
+                  id: 'value-id-2',
+                  subcategory: SUBCATEGORY_WALLET.id,
+                  skip: null,
+                  value: [10, { currency: 'CZK', value: 37.34 }],
+                },
+              ],
+              creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
+              currencies: [CURRENCY_CZK],
+            },
+          ],
+          __optimistic: [RequestType.create],
+        },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.create,
@@ -1051,38 +1135,39 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
-          subcategories: [
-            SUBCATEGORY_HOUSE,
-            SUBCATEGORY_WALLET,
-            {
-              ...SUBCATEGORY_CC,
-              __optimistic: undefined,
-            },
-          ],
-          entries: [
-            {
-              id: 'some-entry-id',
-              date: new Date('2019-07-12T12:36:03Z'),
-              values: [
-                {
-                  id: 'value-id-1',
-                  subcategory: SUBCATEGORY_CC.id,
-                  skip: true,
-                  value: -239,
-                },
-                {
-                  id: 'value-id-2',
-                  subcategory: SUBCATEGORY_WALLET.id,
-                  skip: null,
-                  value: [10, { currency: 'CZK', value: 37.34 }],
-                },
-              ],
-              creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
-              currencies: [CURRENCY_CZK],
-              __optimistic: RequestType.create,
-            },
-          ],
+          categories: {
+            items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
+            __optimistic: [undefined, undefined, undefined],
+          },
+          subcategories: {
+            items: [SUBCATEGORY_HOUSE, SUBCATEGORY_WALLET, SUBCATEGORY_CC],
+            __optimistic: [undefined, undefined, undefined],
+          },
+          entries: {
+            items: [
+              {
+                id: 'some-entry-id',
+                date: new Date('2019-07-12T12:36:03Z'),
+                values: [
+                  {
+                    id: 'value-id-1',
+                    subcategory: SUBCATEGORY_CC.id,
+                    skip: true,
+                    value: -239,
+                  },
+                  {
+                    id: 'value-id-2',
+                    subcategory: SUBCATEGORY_WALLET.id,
+                    skip: null,
+                    value: [10, { currency: 'CZK', value: 37.34 }],
+                  },
+                ],
+                creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
+                currencies: [CURRENCY_CZK],
+              },
+            ],
+            __optimistic: [RequestType.create],
+          },
         }),
       );
     });
@@ -1091,17 +1176,13 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const state: State = {
         ...initialState,
-        categories: [CATEGORY_MORTGAGE],
-        subcategories: [
-          {
-            ...SUBCATEGORY_HOUSE,
-            __optimistic: RequestType.update,
-          },
-        ],
-        entries: [],
+        categories: { items: [CATEGORY_MORTGAGE], __optimistic: [undefined] },
+        subcategories: { items: [SUBCATEGORY_HOUSE], __optimistic: [RequestType.update] },
+        entries: { items: [], __optimistic: [] },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.update,
@@ -1123,14 +1204,9 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [CATEGORY_MORTGAGE],
-          subcategories: [
-            {
-              ...SUBCATEGORY_HOUSE,
-              __optimistic: undefined,
-            },
-          ],
-          entries: [],
+          categories: { items: [CATEGORY_MORTGAGE], __optimistic: [undefined] },
+          subcategories: { items: [SUBCATEGORY_HOUSE], __optimistic: [undefined] },
+          entries: { items: [], __optimistic: [] },
         }),
       );
     });
@@ -1139,40 +1215,43 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const state: State = {
         ...initialState,
-        categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
-        subcategories: [
-          SUBCATEGORY_WALLET,
-          SUBCATEGORY_HOUSE,
-          {
-            ...SUBCATEGORY_CC,
-            __optimistic: RequestType.delete,
-          },
-        ],
-        entries: [
-          {
-            id: 'some-entry-id',
-            date: new Date('2019-07-12T12:36:03Z'),
-            values: [
-              {
-                id: 'value-id-1',
-                subcategory: SUBCATEGORY_CC.id,
-                skip: false,
-                value: -239,
-              },
-              {
-                id: 'value-id-2',
-                subcategory: SUBCATEGORY_WALLET.id,
-                skip: null,
-                value: [10, { currency: 'CZK', value: 37.34 }],
-              },
-            ],
-            creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
-            currencies: [CURRENCY_CZK],
-          },
-        ],
+        categories: {
+          items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
+          __optimistic: [undefined, undefined, undefined],
+        },
+        subcategories: {
+          items: [SUBCATEGORY_WALLET, SUBCATEGORY_HOUSE, SUBCATEGORY_CC],
+          __optimistic: [undefined, undefined, RequestType.delete],
+        },
+        entries: {
+          items: [
+            {
+              id: 'some-entry-id',
+              date: new Date('2019-07-12T12:36:03Z'),
+              values: [
+                {
+                  id: 'value-id-1',
+                  subcategory: SUBCATEGORY_CC.id,
+                  skip: false,
+                  value: -239,
+                },
+                {
+                  id: 'value-id-2',
+                  subcategory: SUBCATEGORY_WALLET.id,
+                  skip: null,
+                  value: [10, { currency: 'CZK', value: 37.34 }],
+                },
+              ],
+              creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
+              currencies: [CURRENCY_CZK],
+            },
+          ],
+          __optimistic: [undefined],
+        },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.delete,
@@ -1188,26 +1267,35 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
+          categories: {
+            items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
+            __optimistic: [undefined, undefined, undefined],
+          },
           // The dependencies are deleted from the database through foreign key cascading,
           // but we have to update on the frontend to reflect that
-          subcategories: [SUBCATEGORY_WALLET, SUBCATEGORY_HOUSE],
-          entries: [
-            {
-              id: 'some-entry-id',
-              date: new Date('2019-07-12T12:36:03Z'),
-              values: [
-                {
-                  id: 'value-id-2',
-                  subcategory: SUBCATEGORY_WALLET.id,
-                  skip: null,
-                  value: [10, { currency: 'CZK', value: 37.34 }],
-                },
-              ],
-              creditLimit: [],
-              currencies: [CURRENCY_CZK],
-            },
-          ],
+          subcategories: {
+            items: [SUBCATEGORY_WALLET, SUBCATEGORY_HOUSE],
+            __optimistic: [undefined, undefined],
+          },
+          entries: {
+            items: [
+              {
+                id: 'some-entry-id',
+                date: new Date('2019-07-12T12:36:03Z'),
+                values: [
+                  {
+                    id: 'value-id-2',
+                    subcategory: SUBCATEGORY_WALLET.id,
+                    skip: null,
+                    value: [10, { currency: 'CZK', value: 37.34 }],
+                  },
+                ],
+                creditLimit: [],
+                currencies: [CURRENCY_CZK],
+              },
+            ],
+            __optimistic: [undefined],
+          },
         }),
       );
     });
@@ -1216,34 +1304,43 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const state: State = {
         ...initialState,
-        categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
-        subcategories: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
-        entries: [
-          {
-            id: 'some-fake-entry-id',
-            date: new Date('2019-07-12T12:36:03Z'),
-            values: [
-              {
-                id: 'value-id-1',
-                subcategory: SUBCATEGORY_HOUSE.id,
-                skip: true,
-                value: -239,
-              },
-              {
-                id: 'value-id-2',
-                subcategory: SUBCATEGORY_WALLET.id,
-                skip: null,
-                value: [10, { currency: 'CZK', value: 37.34 }],
-              },
-            ],
-            creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
-            currencies: [CURRENCY_CZK],
-            __optimistic: RequestType.create,
-          },
-        ],
+        categories: {
+          items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
+          __optimistic: [undefined, undefined, undefined],
+        },
+        subcategories: {
+          items: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
+          __optimistic: [undefined, undefined, undefined],
+        },
+        entries: {
+          items: [
+            {
+              id: 'some-fake-entry-id',
+              date: new Date('2019-07-12T12:36:03Z'),
+              values: [
+                {
+                  id: 'value-id-1',
+                  subcategory: SUBCATEGORY_HOUSE.id,
+                  skip: true,
+                  value: -239,
+                },
+                {
+                  id: 'value-id-2',
+                  subcategory: SUBCATEGORY_WALLET.id,
+                  skip: null,
+                  value: [10, { currency: 'CZK', value: 37.34 }],
+                },
+              ],
+              creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
+              currencies: [CURRENCY_CZK],
+            },
+          ],
+          __optimistic: [RequestType.create],
+        },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.create,
@@ -1295,12 +1392,59 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
-          subcategories: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
-          entries: [
-            expect.objectContaining({
+          categories: {
+            items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
+            __optimistic: [undefined, undefined, undefined],
+          },
+          subcategories: {
+            items: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
+            __optimistic: [undefined, undefined, undefined],
+          },
+          entries: expect.objectContaining({
+            items: [
+              expect.objectContaining({
+                id: 'some-real-entry-id',
+                date: new Date('2019-07-12T12:36:03Z'),
+                values: [
+                  {
+                    id: 'value-id-1',
+                    subcategory: SUBCATEGORY_HOUSE.id,
+                    skip: true,
+                    value: -239,
+                  },
+                  {
+                    id: 'value-id-2',
+                    subcategory: SUBCATEGORY_WALLET.id,
+                    skip: null,
+                    value: [10, { currency: 'CZK', value: 37.34 }],
+                  },
+                ],
+                creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
+                currencies: [CURRENCY_CZK],
+              }),
+            ],
+            __optimistic: [undefined],
+          }),
+        }),
+      );
+    });
+
+    describe('when confirming entry updates', () => {
+      const state: State = {
+        ...initialState,
+        categories: {
+          items: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
+          __optimistic: [undefined, undefined, undefined],
+        },
+        subcategories: {
+          items: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
+          __optimistic: [undefined, undefined, undefined],
+        },
+        entries: {
+          items: [
+            {
               id: 'some-real-entry-id',
-              date: new Date('2019-07-12'),
+              date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
                   id: 'value-id-1',
@@ -1317,44 +1461,14 @@ describe('Net worth reducer', () => {
               ],
               creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
               currencies: [CURRENCY_CZK],
-              __optimistic: undefined,
-            }),
+            },
           ],
-        }),
-      );
-    });
-
-    describe('when confirming entry updates', () => {
-      const state: State = {
-        ...initialState,
-        categories: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
-        subcategories: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
-        entries: [
-          {
-            id: 'some-real-entry-id',
-            date: new Date('2019-07-12T12:36:03Z'),
-            values: [
-              {
-                id: 'value-id-1',
-                subcategory: SUBCATEGORY_HOUSE.id,
-                skip: true,
-                value: -239,
-              },
-              {
-                id: 'value-id-2',
-                subcategory: SUBCATEGORY_WALLET.id,
-                skip: null,
-                value: [10, { currency: 'CZK', value: 37.34 }],
-              },
-            ],
-            creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
-            currencies: [CURRENCY_CZK],
-            __optimistic: RequestType.update,
-          },
-        ],
+          __optimistic: [RequestType.update],
+        },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.update,
@@ -1411,50 +1525,60 @@ describe('Net worth reducer', () => {
 
         expect(result).toStrictEqual(
           expect.objectContaining({
-            categories: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
-            subcategories: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
-            entries: [
-              expect.objectContaining({
-                id: 'some-real-entry-id',
-                date: new Date('2019-07-12'),
-                values: expect.arrayContaining([
-                  {
-                    id: 'value-id-1',
-                    subcategory: SUBCATEGORY_HOUSE.id,
-                    skip: true,
-                    value: -239,
-                  },
-                  {
-                    id: 'value-id-2',
-                    subcategory: SUBCATEGORY_WALLET.id,
-                    skip: null,
-                    value: [10, { currency: 'CZK', value: 37.34 }],
-                  },
-                ]),
-                creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
-                currencies: [CURRENCY_CZK],
-                __optimistic: undefined,
-              }),
-            ],
+            categories: {
+              items: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
+              __optimistic: [undefined, undefined, undefined],
+            },
+            subcategories: {
+              items: [SUBCATEGORY_HOUSE, SUBCATEGORY_CC, SUBCATEGORY_WALLET],
+              __optimistic: [undefined, undefined, undefined],
+            },
+            entries: {
+              items: [
+                expect.objectContaining({
+                  id: 'some-real-entry-id',
+                  date: new Date('2019-07-12T12:36:03Z'),
+                  values: expect.arrayContaining([
+                    {
+                      id: 'value-id-1',
+                      subcategory: SUBCATEGORY_HOUSE.id,
+                      skip: true,
+                      value: -239,
+                    },
+                    {
+                      id: 'value-id-2',
+                      subcategory: SUBCATEGORY_WALLET.id,
+                      skip: null,
+                      value: [10, { currency: 'CZK', value: 37.34 }],
+                    },
+                  ]),
+                  creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
+                  currencies: [CURRENCY_CZK],
+                }),
+              ],
+              __optimistic: [undefined],
+            },
           }),
         );
       });
 
-      it('should preserve the order of entry value IDs', () => {
+      it('should preserve the order of entry value subcategory IDs', () => {
         expect.assertions(1);
 
         const result = reducer(state, action);
 
         expect(result).toStrictEqual(
           expect.objectContaining({
-            entries: [
-              expect.objectContaining({
-                values: [
-                  expect.objectContaining({ id: 'value-id-1' }),
-                  expect.objectContaining({ id: 'value-id-2' }),
-                ],
-              }),
-            ],
+            entries: expect.objectContaining({
+              items: [
+                expect.objectContaining({
+                  values: [
+                    expect.objectContaining({ id: 'value-id-1' }),
+                    expect.objectContaining({ id: 'value-id-2' }),
+                  ],
+                }),
+              ],
+            }),
           }),
         );
       });
@@ -1464,34 +1588,40 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const state: State = {
         ...initialState,
-        categories: [CATEGORY_CC, CATEGORY_CASH],
-        subcategories: [SUBCATEGORY_CC, SUBCATEGORY_WALLET],
-        entries: [
-          {
-            id: 'some-real-entry-id',
-            date: new Date('2019-07-12T12:36:03Z'),
-            values: [
-              {
-                id: 'subcategory-id-1',
-                subcategory: SUBCATEGORY_CC.id,
-                skip: false,
-                value: -239,
-              },
-              {
-                id: 'subcategory-id-2',
-                subcategory: SUBCATEGORY_WALLET.id,
-                skip: null,
-                value: [10, { currency: 'CZK', value: 37.34 }],
-              },
-            ],
-            creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
-            currencies: [CURRENCY_CZK],
-            __optimistic: RequestType.delete,
-          },
-        ],
+        categories: { items: [CATEGORY_CC, CATEGORY_CASH], __optimistic: [undefined, undefined] },
+        subcategories: {
+          items: [SUBCATEGORY_CC, SUBCATEGORY_WALLET],
+          __optimistic: [undefined, undefined],
+        },
+        entries: {
+          items: [
+            {
+              id: 'some-real-entry-id',
+              date: new Date('2019-07-12T12:36:03Z'),
+              values: [
+                {
+                  id: 'subcategory-id-1',
+                  subcategory: SUBCATEGORY_CC.id,
+                  skip: false,
+                  value: -239,
+                },
+                {
+                  id: 'subcategory-id-2',
+                  subcategory: SUBCATEGORY_WALLET.id,
+                  skip: null,
+                  value: [10, { currency: 'CZK', value: 37.34 }],
+                },
+              ],
+              creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
+              currencies: [CURRENCY_CZK],
+            },
+          ],
+          __optimistic: [RequestType.delete],
+        },
       };
 
       const action = syncReceived({
+        list: [],
         netWorth: [
           {
             type: RequestType.delete,
@@ -1507,11 +1637,24 @@ describe('Net worth reducer', () => {
 
       expect(result).toStrictEqual(
         expect.objectContaining({
-          categories: [CATEGORY_CC, CATEGORY_CASH],
-          subcategories: [SUBCATEGORY_CC, SUBCATEGORY_WALLET],
-          entries: [],
+          categories: { items: [CATEGORY_CC, CATEGORY_CASH], __optimistic: [undefined, undefined] },
+          subcategories: {
+            items: [SUBCATEGORY_CC, SUBCATEGORY_WALLET],
+            __optimistic: [undefined, undefined],
+          },
+          entries: { items: [], __optimistic: [] },
         }),
       );
+    });
+
+    describe('if there are no net worth requests', () => {
+      const actionDoNothing = syncReceived({ netWorth: [], list: [] });
+
+      it('should not modify the state', () => {
+        expect.assertions(1);
+        const state = testState.netWorth;
+        expect(reducer(state, actionDoNothing)).toBe(state);
+      });
     });
   });
 });

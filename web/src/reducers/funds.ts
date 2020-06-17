@@ -28,6 +28,7 @@ export type State = ListState<Fund, ExtraState>;
 export const initialState: State = {
   viewSoldFunds: false,
   items: [],
+  __optimistic: [],
   period: DEFAULT_FUND_PERIOD,
   cache: {
     [DEFAULT_FUND_PERIOD]: {

@@ -58,17 +58,14 @@ export const List = styled(ListWithoutMargin)`
   }
 `;
 
-export const Row = styled.li`
+export const Row = styled.li<{ odd?: boolean }>`
   display: flex;
   height: ${rem(rowHeightMobile)};
 
   ${breakpoint(breakpoints.mobile)} {
+    background-color: ${({ odd }): string => (odd ? colors.white : colors.light.mediumLight)};
     border-right: 1px solid ${borderColor};
     height: ${rem(rowHeightDesktop)};
-
-    &:nth-child(2n) {
-      background-color: ${colors.light.mediumLight};
-    }
 
     input[type='text'] {
       background-color: transparent;

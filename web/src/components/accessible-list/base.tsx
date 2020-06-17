@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 
+import { createListContext } from './context';
 import { useSortedItems, useMobileEditModal } from './hooks';
 import { AccessibleListItem, AccessibleListCreateItem } from './item';
 import { MobileCreateForm } from './mobile';
@@ -45,6 +46,8 @@ export const AccessibleList = <
     customSelector,
   );
 
+  const ListContext = createListContext<E>();
+
   const [onCreate, onUpdate, onDelete] = useListCrud<I, P>(
     listItemCreated<I, P>(page),
     listItemUpdated<I, P>(page),
@@ -56,8 +59,13 @@ export const AccessibleList = <
 
   const editModal = useMobileEditModal(itemsSorted, onUpdate, onDelete);
 
-  const MemoisedItem = useMemo<React.FC<PropsMemoisedItem>>(() => {
-    const ListItemComponent: React.FC<PropsMemoisedItem> = ({ id, style }) => (
+  const MemoisedItem = useMemo<React.FC<PropsMemoisedItem<E>>>(() => {
+    const ListItemComponent: React.FC<PropsMemoisedItem<E>> = ({
+      id,
+      style,
+      odd,
+      extraProps: itemExtraProps,
+    }) => (
       <AccessibleListItem<I, P, MK, E>
         fields={fields}
         fieldsMobile={fieldsMobile}
@@ -66,9 +74,10 @@ export const AccessibleList = <
         page={page}
         isMobile={isMobile}
         style={style}
+        odd={odd}
+        extraProps={itemExtraProps}
         onUpdate={onUpdate}
         onDelete={onDelete}
-        extraProps={extraProps[id]}
         itemProcessor={itemProcessor}
         Row={Row}
         onActivateModal={editModal.activate}
@@ -83,57 +92,58 @@ export const AccessibleList = <
     isMobile,
     onUpdate,
     onDelete,
-    extraProps,
     itemProcessor,
     editModal.activate,
     Row,
   ]);
 
   return (
-    <Styled.Base color={color}>
-      {Header && (
-        <Header
-          isMobile={isMobile}
-          page={page}
-          fields={fieldKeys}
-          fieldsMobile={fieldKeysMobile}
-          {...headerProps}
-        />
-      )}
-      {!isMobile && (
-        <AccessibleListCreateItem<I, P, E>
-          page={page}
-          fields={fields}
-          onCreate={onCreate}
-          suggestionFields={suggestionFields}
-          deltaSeed={deltaSeed}
-        />
-      )}
-      {!windowise && (
-        <Styled.List>
-          {itemsSorted.map(({ id }) => (
-            <MemoisedItem key={id} id={id} />
-          ))}
-        </Styled.List>
-      )}
-      {windowise && (
-        <InfiniteWindow isMobile={isMobile} items={itemsSorted} MemoisedItem={MemoisedItem} />
-      )}
-      {isMobile && (
-        <>
-          <MobileCreateForm page={page} color={color} fields={modalFields} onCreate={onCreate} />
-          <ModalDialog<I>
-            active={editModal.active}
-            type="edit"
-            id={editModal.item?.id}
-            item={editModal.item}
-            fields={modalFields}
-            onCancel={editModal.onCancel}
-            onSubmit={editModal.onSubmit}
-            onRemove={editModal.onDelete}
+    <ListContext.Provider value={extraProps}>
+      <Styled.Base color={color}>
+        {Header && (
+          <Header
+            isMobile={isMobile}
+            page={page}
+            fields={fieldKeys}
+            fieldsMobile={fieldKeysMobile}
+            {...headerProps}
           />
-        </>
-      )}
-    </Styled.Base>
+        )}
+        {!isMobile && (
+          <AccessibleListCreateItem<I, P, E>
+            page={page}
+            fields={fields}
+            onCreate={onCreate}
+            suggestionFields={suggestionFields}
+            deltaSeed={deltaSeed}
+          />
+        )}
+        {!windowise && (
+          <Styled.List>
+            {itemsSorted.map(({ id }, index) => (
+              <MemoisedItem key={id} id={id} odd={index % 2 === 1} extraProps={extraProps[id]} />
+            ))}
+          </Styled.List>
+        )}
+        {windowise && (
+          <InfiniteWindow isMobile={isMobile} items={itemsSorted} MemoisedItem={MemoisedItem} />
+        )}
+        {isMobile && (
+          <>
+            <MobileCreateForm page={page} color={color} fields={modalFields} onCreate={onCreate} />
+            <ModalDialog<I>
+              active={editModal.active}
+              type="edit"
+              id={editModal.item?.id}
+              item={editModal.item}
+              fields={modalFields}
+              onCancel={editModal.onCancel}
+              onSubmit={editModal.onSubmit}
+              onRemove={editModal.onDelete}
+            />
+          </>
+        )}
+      </Styled.Base>
+    </ListContext.Provider>
   );
 };

@@ -1,15 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList } from 'react-window';
 
+import { createListContext } from './context';
 import * as Styled from './styles';
 import { PropsMemoisedItem } from './types';
 import { Item } from '~client/types';
 
-type Props<I extends Item> = {
+type Props<I extends Item, E extends {}> = {
   isMobile: boolean;
   items: I[];
-  MemoisedItem: React.FC<PropsMemoisedItem>;
+  MemoisedItem: React.FC<PropsMemoisedItem<E>>;
 };
 
 type PropsRow<I extends Item> = {
@@ -18,17 +19,30 @@ type PropsRow<I extends Item> = {
   style: object;
 };
 
-const makeRow = <I extends Item>(
-  MemoisedItem: React.FC<PropsMemoisedItem>,
-): React.FC<PropsRow<I>> => ({ data, index, style }): React.ReactElement<PropsRow<I>> => (
-  <MemoisedItem id={data[index].id} style={style} />
-);
+const makeRow = <I extends Item, E extends {}>(
+  MemoisedItem: React.FC<PropsMemoisedItem<E>>,
+): React.FC<PropsRow<I>> => {
+  const InfiniteItem: React.FC<PropsRow<I>> = ({ data, index, style }) => {
+    const extraProps = useContext(createListContext<E>());
 
-export const InfiniteWindow = <I extends Item>({
+    return (
+      <MemoisedItem
+        key={data[index].id}
+        id={data[index].id}
+        style={style}
+        odd={index % 2 === 1}
+        extraProps={extraProps[data[index].id]}
+      />
+    );
+  };
+  return InfiniteItem;
+};
+
+export const InfiniteWindow = <I extends Item, E extends {}>({
   isMobile,
   items,
   MemoisedItem,
-}: Props<I>): React.ReactElement<Props<I>> => {
+}: Props<I, E>): React.ReactElement<Props<I, E>> => {
   const Row = useMemo(() => makeRow(MemoisedItem), [MemoisedItem]);
   return (
     <Styled.InfiniteWindow role="list">

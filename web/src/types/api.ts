@@ -25,10 +25,10 @@ export type SyncResponseNetWorth = Category | Subcategory | RawDate<Entry> | und
 export type SyncPayloadNetWorth = Category | Subcategory | RawDate<CreateEntry>;
 export type SyncRequestNetWorth = RequestWithResponse<SyncResponseNetWorth>;
 
-export type SyncResponse = Partial<{
+export type SyncResponse = {
   list: RequestWithResponse<SyncResponseList>[];
   netWorth: SyncRequestNetWorth[];
-}>;
+};
 
 export type ReadResponse = {
   [Page.overview]: {

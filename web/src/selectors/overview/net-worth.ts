@@ -6,11 +6,12 @@ import isSameMonth from 'date-fns/isSameMonth';
 import startOfYear from 'date-fns/startOfYear';
 import { createSelector } from 'reselect';
 
-import { sortByKey, withoutDeleted, withoutIds } from '~client/modules/data';
+import { sortByKey, withoutIds } from '~client/modules/data';
 
 import { State } from '~client/reducers';
+import { State as CrudState } from '~client/reducers/crud';
 
-import { getRequests } from '~client/selectors/crud';
+import { getRequests, withoutDeleted } from '~client/selectors/crud';
 import { getCost, getSpendingColumn, getMonthDates } from '~client/selectors/overview/common';
 
 import {
@@ -18,7 +19,6 @@ import {
   CreateEdit,
   RequestType,
   Request,
-  WithCrud,
   Category,
   Subcategory,
   Entry,
@@ -48,22 +48,25 @@ const nullEntry = (date: Date): Create<Entry> => ({
 
 const FTI_START = new Date(process.env.BIRTH_DATE || '1990-01-01');
 
-const getNonFilteredCategories = (state: State): WithCrud<Category>[] => state.netWorth.categories;
-const getNonFilteredSubcategories = (state: State): WithCrud<Subcategory>[] =>
+const getNonFilteredCategories = (state: State): CrudState<Category> => state.netWorth.categories;
+const getNonFilteredSubcategories = (state: State): CrudState<Subcategory> =>
   state.netWorth.subcategories;
-const getNonFilteredEntries = (state: State): WithCrud<Entry>[] => state.netWorth.entries;
+const getNonFilteredEntries = (state: State): CrudState<Entry> => state.netWorth.entries;
 
 export const getEntries = createSelector(getNonFilteredEntries, withoutDeleted);
 export const getCategories = createSelector(
   getNonFilteredCategories,
-  compose(withoutDeleted, sortByKey<'type' | 'category', WithCrud<Category>>('type', 'category')),
+  compose<CrudState<Category>, Category[], Category[]>(
+    sortByKey('type', 'category'),
+    withoutDeleted,
+  ),
 );
 export const getSubcategories = createSelector(
   getNonFilteredSubcategories,
-  compose(
+  compose<CrudState<Subcategory>, Subcategory[], Subcategory[], Subcategory[]>(
+    sortByKey('subcategory'),
+    sortByKey('categoryId'),
     withoutDeleted,
-    sortByKey<'subcategory', WithCrud<Subcategory>>('subcategory'),
-    sortByKey<'categoryId', WithCrud<Subcategory>>('categoryId'),
   ),
 );
 
@@ -286,42 +289,52 @@ export const getNetWorthTable = createSelector(
     )(entries),
 );
 
-const withCategoryRequests = (categories: WithCrud<Category>[]) => (
+const withCategoryRequests = (categories: CrudState<Category>) => (
   requests: Request[],
-): Request[] => requests.concat(getRequests('data/net-worth/categories')(categories));
-
-const subcategoryPending = (categories: WithCrud<Category>[]) => (categoryId: string): boolean =>
-  categories.some(
-    ({ id, __optimistic }) => id === categoryId && __optimistic === RequestType.create,
-  );
+): Request[] => [...requests, ...getRequests('data/net-worth/categories')(categories)];
 
 const withSubcategoryRequests = (
-  categories: WithCrud<Category>[],
-  subcategories: WithCrud<Subcategory>[],
-) => (requests: Request[]): Request[] =>
-  requests.concat(
-    getRequests('data/net-worth/subcategories')(
-      subcategories.filter(
-        ({ categoryId }: Subcategory) => !subcategoryPending(categories)(categoryId),
-      ),
-    ),
-  );
+  categories: CrudState<Category>,
+  subcategories: CrudState<Subcategory>,
+) => (requests: Request[]): Request[] => [
+  ...requests,
+  ...getRequests('data/net-worth/subcategories')(
+    categories.items
+      .filter((_, index) => categories.__optimistic[index] === RequestType.create)
+      .reduce<CrudState<Subcategory>>((last, category) => {
+        const pendingIndexes = last.items.reduce<number[]>(
+          (lastIndexes, { categoryId }, index) =>
+            categoryId === category.id ? [...lastIndexes, index] : lastIndexes,
+          [],
+        );
 
-const groupPending = (
-  categories: WithCrud<Category>[],
-  subcategories: WithCrud<Subcategory>[],
-) => ({ subcategory }: ValueObject | CreditLimit): boolean =>
-  subcategories.some(
-    ({ id, categoryId, __optimistic }) =>
-      id === subcategory &&
-      (__optimistic === RequestType.create || subcategoryPending(categories)(categoryId)),
-  );
+        return {
+          items: last.items.filter((_, index) => !pendingIndexes.includes(index)),
+          __optimistic: last.__optimistic.filter((_, index) => !pendingIndexes.includes(index)),
+        };
+      }, subcategories),
+  ),
+];
 
 const baseOption: OptionValue = {
   units: 0,
   strikePrice: 0,
   marketPrice: 0,
 };
+
+const groupPending = (categories: CrudState<Category>, subcategories: CrudState<Subcategory>) => ({
+  subcategory,
+}: ValueObject | CreditLimit): boolean =>
+  subcategories.items.some(
+    ({ id, categoryId }, index) =>
+      id === subcategory &&
+      (subcategories.__optimistic[index] === RequestType.create ||
+        categories.items.some(
+          (category, categoryIndex) =>
+            category.id === categoryId &&
+            categories.__optimistic[categoryIndex] === RequestType.create,
+        )),
+  );
 
 const withSingleOptionValues = (categories: Category[], subcategories: Subcategory[]) => (
   values: Omit<ValueObject, 'id'>[],
@@ -341,30 +354,46 @@ const withSingleOptionValues = (categories: Category[], subcategories: Subcatego
   });
 
 const withEntryRequests = (
-  categories: Category[],
-  subcategories: Subcategory[],
-  entries: WithCrud<Entry>[],
-) => (requests: Request[]): Request[] =>
-  requests.concat(
-    getRequests<SyncPayloadNetWorth>('data/net-worth')(
-      entries
-        .filter(({ values, creditLimit }: WithCrud<Entry>) =>
-          [values, creditLimit].every(
-            (group) => !group.some(groupPending(categories, subcategories)),
-          ),
-        )
-        .map<RawDate<CreateEntry>>(({ date, values, creditLimit, currencies, ...rest }) => ({
-          date: format(date, 'yyyy-MM-dd'),
-          values: compose<ValueObject[], Create<ValueObject>[], Create<ValueObject>[]>(
-            withSingleOptionValues(categories, subcategories),
-            withoutIds,
-          )(values),
-          creditLimit,
-          currencies: withoutIds(currencies),
-          ...rest,
-        })),
-    ),
-  );
+  categories: CrudState<Category>,
+  subcategories: CrudState<Subcategory>,
+  entries: CrudState<Entry>,
+) => (requests: Request[]): Request[] => [
+  ...requests,
+  ...getRequests<SyncPayloadNetWorth>('data/net-worth')(
+    entries.items
+      .map<Entry & { __optimistic: RequestType | undefined }>((entry, index) => ({
+        ...entry,
+        __optimistic: entries.__optimistic[index],
+      }))
+      .filter(({ values, creditLimit }) =>
+        [values, creditLimit].every(
+          (group) => !group.some(groupPending(categories, subcategories)),
+        ),
+      )
+      .reduce<CrudState<RawDate<CreateEntry>>>(
+        (last, { __optimistic, ...entry }) => ({
+          items: [
+            ...last.items,
+            {
+              id: entry.id,
+              date: format(entry.date, 'yyyy-MM-dd'),
+              values: compose<ValueObject[], Create<ValueObject>[], Create<ValueObject>[]>(
+                withSingleOptionValues(categories.items, subcategories.items),
+                withoutIds,
+              )(entry.values),
+              creditLimit: entry.creditLimit,
+              currencies: withoutIds(entry.currencies),
+            },
+          ],
+          __optimistic: [...last.__optimistic, __optimistic],
+        }),
+        {
+          items: [],
+          __optimistic: [],
+        },
+      ),
+  ),
+];
 
 export const getNetWorthRequests = createSelector(
   [getNonFilteredCategories, getNonFilteredSubcategories, getNonFilteredEntries],

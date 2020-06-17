@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AccessibleListItemField } from '../field';
@@ -61,21 +61,22 @@ const AccessibleListItem = <
   page,
   isMobile,
   style,
+  odd,
+  extraProps,
   onUpdate,
   onDelete,
   onActivateModal,
-  extraProps,
   itemProcessor = identityProcessor,
   Row = Styled.Row,
 }: PropsItem<I, P, MK, E>): React.ReactElement<PropsItem<I, P, MK, E>> => {
-  const item = useSelector(getItem<I, P>(page, id)) as I;
+  const item: I = useSelector(getItem<I, P>(page, id));
   const onDeleteItem = useCallback((): void => onDelete(item.id, item), [onDelete, item]);
   const deleteEvents = useCTA(onDeleteItem);
   const specificExtraProps = useMemo<Partial<E>>(() => itemProcessor(item), [item, itemProcessor]);
-  const itemExtraProps = useMemo<Partial<E>>(() => ({ ...extraProps, ...specificExtraProps }), [
-    extraProps,
-    specificExtraProps,
-  ]);
+  const itemExtraProps = useMemo<Partial<E>>(
+    () => ({ ...(extraProps ?? {}), ...specificExtraProps }),
+    [extraProps, specificExtraProps],
+  );
 
   const onActivate = useCallback(() => onActivateModal(id), [id, onActivateModal]);
   const activateProps = useCTA(onActivate);
@@ -103,7 +104,7 @@ const AccessibleListItem = <
   const fieldKeys = Object.keys(fields) as FieldKey<I>[];
 
   return (
-    <Row isMobile={false} item={item} style={style} {...itemExtraProps}>
+    <Row isMobile={false} item={item} style={style} odd={odd} {...itemExtraProps}>
       {fieldKeys.map((field: FieldKey<I>) => (
         <ListField<I, P, E>
           key={field as string}
@@ -119,7 +120,7 @@ const AccessibleListItem = <
   );
 };
 
-const typedMemo: <T>(c: T) => T = React.memo;
+const typedMemo: <T>(c: T) => T = memo;
 const AccessibleListItemMemoised = typedMemo(AccessibleListItem);
 
 export { AccessibleListItemMemoised as AccessibleListItem };

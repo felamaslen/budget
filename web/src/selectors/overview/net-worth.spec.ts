@@ -40,13 +40,16 @@ describe('Overview selectors (net worth)', () => {
           ...state,
           netWorth: {
             ...state.netWorth,
-            categories: [
-              { ...testCategory, __optimistic: RequestType.delete },
-              {
-                ...testCategory,
-                id: 'id-b',
-              },
-            ],
+            categories: {
+              items: [
+                testCategory,
+                {
+                  ...testCategory,
+                  id: 'id-b',
+                },
+              ],
+              __optimistic: [RequestType.delete, undefined],
+            },
           },
         }),
       ).toStrictEqual([expect.objectContaining({ id: 'id-b' })]);
@@ -59,12 +62,15 @@ describe('Overview selectors (net worth)', () => {
           ...state,
           netWorth: {
             ...state.netWorth,
-            categories: [
-              { ...testCategory, id: 'id-a', type: 'asset', category: 'foo' },
-              { ...testCategory, id: 'id-b', type: 'liability', category: 'bar' },
-              { ...testCategory, id: 'id-c', type: 'asset', category: 'baz' },
-              { ...testCategory, id: 'id-d', type: 'asset', category: 'bak' },
-            ],
+            categories: {
+              items: [
+                { ...testCategory, id: 'id-a', type: 'asset', category: 'foo' },
+                { ...testCategory, id: 'id-b', type: 'liability', category: 'bar' },
+                { ...testCategory, id: 'id-c', type: 'asset', category: 'baz' },
+                { ...testCategory, id: 'id-d', type: 'asset', category: 'bak' },
+              ],
+              __optimistic: [undefined, undefined, undefined, undefined],
+            },
           },
         }),
       ).toStrictEqual([
@@ -84,10 +90,13 @@ describe('Overview selectors (net worth)', () => {
           ...state,
           netWorth: {
             ...state.netWorth,
-            subcategories: [
-              { ...testSubcategory, id: 'id-a', __optimistic: RequestType.delete },
-              { ...testSubcategory, id: 'id-b' },
-            ],
+            subcategories: {
+              items: [
+                { ...testSubcategory, id: 'id-a' },
+                { ...testSubcategory, id: 'id-b' },
+              ],
+              __optimistic: [RequestType.delete, undefined],
+            },
           },
         }),
       ).toStrictEqual([expect.objectContaining({ id: 'id-b' })]);
@@ -100,11 +109,14 @@ describe('Overview selectors (net worth)', () => {
           ...state,
           netWorth: {
             ...state.netWorth,
-            subcategories: [
-              { ...testSubcategory, id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' },
-              { ...testSubcategory, id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
-              { ...testSubcategory, id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' },
-            ],
+            subcategories: {
+              items: [
+                { ...testSubcategory, id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' },
+                { ...testSubcategory, id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
+                { ...testSubcategory, id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' },
+              ],
+              __optimistic: [undefined, undefined, undefined],
+            },
           },
         }),
       ).toStrictEqual([
@@ -137,10 +149,14 @@ describe('Overview selectors (net worth)', () => {
         ...state,
         netWorth: {
           ...state.netWorth,
-          entries: replaceAtIndex(state.netWorth.entries, 1, (entry) => ({
-            ...entry,
-            __optimistic: RequestType.delete,
-          })),
+          entries: {
+            items: state.netWorth.entries.items,
+            __optimistic: replaceAtIndex(
+              state.netWorth.entries.__optimistic,
+              1,
+              RequestType.delete,
+            ),
+          },
         },
       });
 
@@ -174,7 +190,7 @@ describe('Overview selectors (net worth)', () => {
           },
           netWorth: {
             ...state.netWorth,
-            entries: [],
+            entries: { items: [], __optimistic: [] },
             old: [1000, 1302],
             oldOptions: [887, 193],
           },
@@ -261,59 +277,61 @@ describe('Overview selectors (net worth)', () => {
         ...state,
         netWorth: {
           ...state.netWorth,
-          categories: [
-            {
-              ...testCategory,
-              id: 'real-category-id',
-              __optimistic: RequestType.delete,
-            },
-            {
-              ...testCategory,
-              id: 'fake-category-id',
-              __optimistic: RequestType.create,
-            },
-          ],
-          subcategories: [
-            {
-              ...testSubcategory,
-              id: 'real-subcategory-id',
-              categoryId: 'real-category-id',
-              __optimistic: RequestType.update,
-            },
-            {
-              ...testSubcategory,
-              id: 'fake-subcategory-id-a',
-              categoryId: 'real-category-id',
-              __optimistic: RequestType.create,
-            },
-            {
-              ...testSubcategory,
-              id: 'fake-subcategory-id-b',
-              categoryId: 'fake-category-id',
-              __optimistic: RequestType.create,
-            },
-          ],
-          entries: [
-            {
-              id: 'real-entry-id',
-              date: new Date('2019-07-27'),
-              values: [{ id: 'some-value-id', value: 3, subcategory: 'real-subcategory-id' }],
-              currencies: [],
-              creditLimit: [],
-              __optimistic: RequestType.update,
-            },
-            {
-              id: 'fake-entry-id',
-              date: new Date('2019-07-04'),
-              values: [
-                { id: 'value-id-a', value: 4, subcategory: 'real-subcategory-id' },
-                { id: 'value-id-b', value: 5, subcategory: 'fake-subcategory-id-a' },
-              ],
-              currencies: [],
-              creditLimit: [],
-              __optimistic: RequestType.create,
-            },
-          ],
+          categories: {
+            items: [
+              {
+                ...testCategory,
+                id: 'real-category-id',
+              },
+              {
+                ...testCategory,
+                id: 'fake-category-id',
+              },
+            ],
+            __optimistic: [RequestType.delete, RequestType.create],
+          },
+          subcategories: {
+            items: [
+              {
+                ...testSubcategory,
+                id: 'real-subcategory-id',
+                categoryId: 'real-category-id',
+              },
+              {
+                ...testSubcategory,
+                id: 'fake-subcategory-id-a',
+                categoryId: 'real-category-id',
+              },
+              {
+                ...testSubcategory,
+                id: 'fake-subcategory-id-b',
+                categoryId: 'fake-category-id',
+              },
+            ],
+            __optimistic: [RequestType.update, RequestType.create, RequestType.create],
+          },
+          entries: {
+            items: [
+              {
+                id: 'real-entry-id',
+                date: new Date('2019-07-27'),
+                values: [{ id: 'some-value-id', value: 3, subcategory: 'real-subcategory-id' }],
+                currencies: [],
+                creditLimit: [],
+              },
+              {
+                id: 'fake-entry-id',
+                date: new Date('2019-07-04'),
+                values: [
+                  { id: 'value-id-a', value: 4, subcategory: 'real-subcategory-id' },
+                  { id: 'value-id-b', value: 5, subcategory: 'fake-subcategory-id-a' },
+                ],
+                currencies: [],
+                creditLimit: [],
+              },
+            ],
+            __optimistic: [RequestType.update, RequestType.create],
+          },
         },
       };
 
@@ -385,29 +403,37 @@ describe('Overview selectors (net worth)', () => {
         ...state,
         netWorth: {
           ...state.netWorth,
-          categories: [
-            {
-              ...testCategory,
-              id: 'real-category-id',
-            },
-          ],
-          subcategories: [
-            {
-              ...testSubcategory,
-              id: 'real-subcategory-id',
-              categoryId: 'real-category-id',
-            },
-          ],
-          entries: [
-            {
-              id: 'fake-entry-id',
-              date: new Date('2019-07-31'),
-              values: [{ id: 'fake-value-id', subcategory: 'real-subcategory-id', value: 2 }],
-              creditLimit: [{ subcategory: 'real-subcategory-id', value: 100 }],
-              currencies: [{ id: 'fake-currency-id', currency: 'CZK', rate: 0.031 }],
-              __optimistic: RequestType.create,
-            },
-          ],
+          categories: {
+            items: [
+              {
+                ...testCategory,
+                id: 'real-category-id',
+              },
+            ],
+            __optimistic: [undefined],
+          },
+          subcategories: {
+            items: [
+              {
+                ...testSubcategory,
+                id: 'real-subcategory-id',
+                categoryId: 'real-category-id',
+              },
+            ],
+            __optimistic: [undefined],
+          },
+          entries: {
+            items: [
+              {
+                id: 'fake-entry-id',
+                date: new Date('2019-07-31'),
+                values: [{ id: 'fake-value-id', subcategory: 'real-subcategory-id', value: 2 }],
+                creditLimit: [{ subcategory: 'real-subcategory-id', value: 100 }],
+                currencies: [{ id: 'fake-currency-id', currency: 'CZK', rate: 0.031 }],
+              },
+            ],
+            __optimistic: [RequestType.create],
+          },
         },
       };
 
@@ -434,30 +460,38 @@ describe('Overview selectors (net worth)', () => {
         ...state,
         netWorth: {
           ...state.netWorth,
-          categories: [
-            {
-              ...testCategory,
-              id: 'real-category-id',
-              isOption: true,
-            },
-          ],
-          subcategories: [
-            {
-              ...testSubcategory,
-              id: 'real-subcategory-id',
-              categoryId: 'real-category-id',
-            },
-          ],
-          entries: [
-            {
-              id: 'fake-entry-id',
-              date: new Date('2019-07-31'),
-              values: [],
-              creditLimit: [],
-              currencies: [],
-              __optimistic: RequestType.create,
-            },
-          ],
+          categories: {
+            items: [
+              {
+                ...testCategory,
+                id: 'real-category-id',
+                isOption: true,
+              },
+            ],
+            __optimistic: [undefined],
+          },
+          subcategories: {
+            items: [
+              {
+                ...testSubcategory,
+                id: 'real-subcategory-id',
+                categoryId: 'real-category-id',
+              },
+            ],
+            __optimistic: [undefined],
+          },
+          entries: {
+            items: [
+              {
+                id: 'fake-entry-id',
+                date: new Date('2019-07-31'),
+                values: [],
+                creditLimit: [],
+                currencies: [],
+              },
+            ],
+            __optimistic: [RequestType.create],
+          },
         },
       };
 
@@ -467,23 +501,26 @@ describe('Overview selectors (net worth)', () => {
           ...stateWithOptions,
           netWorth: {
             ...stateWithOptions.netWorth,
-            entries: [
-              {
-                ...stateWithOptions.netWorth.entries[0],
-                values: [
-                  {
-                    id: 'fake-value-id',
-                    subcategory: 'real-subcategory-id',
-                    value: [
-                      3,
-                      { units: 67, strikePrice: 35.27, marketPrice: 32.99 },
-                      { value: 10, currency: 'USD' },
-                      { units: 103, strikePrice: 135.27, marketPrice: 132.99 },
-                    ],
-                  },
-                ],
-              },
-            ],
+            entries: {
+              items: [
+                {
+                  ...stateWithOptions.netWorth.entries.items[0],
+                  values: [
+                    {
+                      id: 'fake-value-id',
+                      subcategory: 'real-subcategory-id',
+                      value: [
+                        3,
+                        { units: 67, strikePrice: 35.27, marketPrice: 32.99 },
+                        { value: 10, currency: 'USD' },
+                        { units: 103, strikePrice: 135.27, marketPrice: 132.99 },
+                      ],
+                    },
+                  ],
+                },
+              ],
+              __optimistic: [RequestType.create],
+            },
           },
         };
 
@@ -522,18 +559,21 @@ describe('Overview selectors (net worth)', () => {
           ...stateWithOptions,
           netWorth: {
             ...stateWithOptions.netWorth,
-            entries: [
-              {
-                ...stateWithOptions.netWorth.entries[0],
-                values: [
-                  {
-                    id: 'fake-value-id',
-                    subcategory: 'real-subcategory-id',
-                    value: [3, { value: 10, currency: 'USD' }],
-                  },
-                ],
-              },
-            ],
+            entries: {
+              items: [
+                {
+                  ...stateWithOptions.netWorth.entries.items[0],
+                  values: [
+                    {
+                      id: 'fake-value-id',
+                      subcategory: 'real-subcategory-id',
+                      value: [3, { value: 10, currency: 'USD' }],
+                    },
+                  ],
+                },
+              ],
+              __optimistic: [RequestType.create],
+            },
           },
         };
 

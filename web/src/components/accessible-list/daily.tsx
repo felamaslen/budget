@@ -77,10 +77,10 @@ const DailyHeader = <P extends string, K extends string, MK extends keyof DailyI
 };
 
 const DailyRow: React.FC<
-  { isMobile: boolean; style?: object } & Partial<DailyRecord & ExtraProps>
-> = ({ style, isMobile, dailyTotal, isFuture, children }) => {
+  { isMobile: boolean; style?: object; odd?: boolean } & Partial<DailyRecord & ExtraProps>
+> = ({ style, odd, isMobile, dailyTotal, isFuture, children }) => {
   return (
-    <StandardRow style={style} isFuture={isFuture}>
+    <StandardRow style={style} odd={odd} isFuture={isFuture}>
       {children}
       {!isMobile && !!dailyTotal && <DailyTotal>{formatCurrency(dailyTotal)}</DailyTotal>}
     </StandardRow>
@@ -115,15 +115,14 @@ export const AccessibleListDaily = <
 
     const categoryFields = {
       [category]: CategoryField,
-    } as ModalFields<DailyItem<K>> &
-      {
-        [key in K]: FieldWrapper<DailyItem<K>[K]>;
-      };
+    } as {
+      [key in K]: FieldWrapper<DailyItem<K>[K]>;
+    };
 
     return {
-      ...categoryFields,
       date: makeField('date', FormFieldDate),
       item: makeField('item', FormFieldText),
+      ...categoryFields,
       cost: makeField('cost', FormFieldCost),
       shop: makeField('shop', FormFieldText),
     } as ModalFields<DailyItem<K>>;

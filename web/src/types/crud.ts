@@ -22,8 +22,6 @@ export type Request = {
   query?: object;
 };
 
-export type WithCrud<V> = V & { __optimistic?: RequestType };
-
 export type RawDate<V> = Omit<V, 'date'> & { date: string };
 
 export type IdKey = 'id' | 'fakeId';

@@ -30,7 +30,7 @@ export const FundRow: React.FC<{ isMobile: boolean; item: Fund } & Partial<FundP
     const valueSlice = (2 * Math.PI * (gain?.value ?? 0)) / latestValue.value;
 
     return (
-      <Styled.FundRowMobile isSold={isSold}>
+      <Styled.FundRowMobile isSold={isSold} odd={true}>
         <Styled.MobilePie>
           <Pie size={16} slice={valueSlice} color={colors.shadow.mediumDark} />
         </Styled.MobilePie>
@@ -40,7 +40,7 @@ export const FundRow: React.FC<{ isMobile: boolean; item: Fund } & Partial<FundP
   }
 
   return (
-    <Styled.FundRow isSold={isSold}>
+    <Styled.FundRow isSold={isSold} odd={true}>
       {children}
       {!!prices && <GraphFundItem name={name} sold={isSold} values={prices} />}
       <FundGainInfo isSold={isSold} rowGains={gain} />

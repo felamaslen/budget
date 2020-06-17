@@ -5,7 +5,7 @@ import shortid from 'shortid';
 import { Average } from '~client/constants';
 import { PeriodObject, Period } from '~client/constants/graph';
 import { IdMap, Item } from '~client/types';
-import { RequestType, WithCrud, Create } from '~client/types/crud';
+import { Create } from '~client/types/crud';
 import { TransactionRaw as TransactionRawNew, Transaction } from '~client/types/funds';
 import { Data as Line } from '~client/types/graph';
 
@@ -268,12 +268,6 @@ export const rightPad = (array: number[], length: number, fill?: number): number
   array.concat(
     Array(Math.max(0, length - array.length)).fill(fill ?? array[array.length - 1] ?? 0),
   );
-
-export const withoutCrud = <T extends object>(items: WithCrud<T>[]): T[] =>
-  items.map(({ __optimistic, ...item }: WithCrud<T>): T => item as T);
-
-export const withoutDeleted = <T>(items: WithCrud<T>[]): WithCrud<T>[] =>
-  (items || []).filter(({ __optimistic }) => __optimistic !== RequestType.delete);
 
 export const withoutId = <T extends { id?: string }>({ id, ...rest }: T): Omit<T, 'id'> => rest;
 export const withoutIds = <T extends { id?: string }>(items: T[]): Omit<T, 'id'>[] =>

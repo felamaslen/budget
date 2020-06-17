@@ -19,9 +19,9 @@ describe('List selectors', () => {
               id: 'some-fund-id',
               item: 'some-fund-name',
               transactions: getTransactionsList([{ date: '2019-05-03', units: 103, cost: 99231 }]),
-              __optimistic: RequestType.update,
             },
           ],
+          __optimistic: [RequestType.update],
         },
         [Page.bills]: { ...state[Page.bills], items: [] },
         [Page.food]: {
@@ -34,9 +34,9 @@ describe('List selectors', () => {
               category: 'some-food-category',
               cost: 27,
               shop: 'some-food-shop',
-              __optimistic: RequestType.update,
             },
           ],
+          __optimistic: [RequestType.update],
         },
         [Page.general]: {
           ...state[Page.general],
@@ -48,9 +48,9 @@ describe('List selectors', () => {
               category: 'some-general-category',
               cost: 913,
               shop: 'some-general-shop',
-              __optimistic: RequestType.create,
             },
           ],
+          __optimistic: [RequestType.create],
         },
         [Page.holiday]: {
           ...state[Page.holiday],
@@ -62,9 +62,9 @@ describe('List selectors', () => {
               holiday: 'some-holiday-holiday',
               cost: 103,
               shop: 'some-holiday-shop',
-              __optimistic: RequestType.delete,
             },
           ],
+          __optimistic: [RequestType.delete],
         },
         [Page.social]: { ...state[Page.social], items: [] },
       };
