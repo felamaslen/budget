@@ -50,6 +50,7 @@ describe('<AccessibleListDaily />', () => {
         },
       ],
       total: 665984,
+      weekly: 6457,
     },
   };
 
@@ -124,8 +125,7 @@ describe('<AccessibleListDaily />', () => {
     const { getByTestId } = setup();
     const header = getByTestId('header');
     const { getByText } = within(header);
-    // weekly cost: (931 + 118 + 173) / (3 / 7) = 2851.3333
-    expect(getByText('Weekly: £28.51')).toBeInTheDocument();
+    expect(getByText('Weekly: £64.57')).toBeInTheDocument();
   });
 
   describe.each`
@@ -175,6 +175,7 @@ describe('<AccessibleListDaily />', () => {
         ],
         __optimistic: [undefined],
         total: 1023,
+        weekly: 951,
         olderExists: null,
       },
     };
@@ -244,7 +245,7 @@ describe('<AccessibleListDaily />', () => {
 
     it.each`
       item             | value
-      ${'weekly cost'} | ${'Weekly: £28.51'}
+      ${'weekly cost'} | ${'Weekly: £64.57'}
       ${'category'}    | ${'Category'}
       ${'shop'}        | ${'Shop'}
     `('should not render the $item header', ({ value }) => {

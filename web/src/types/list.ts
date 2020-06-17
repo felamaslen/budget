@@ -56,6 +56,7 @@ interface RawShopItem extends RawListCalcItem {
 type ReadResponseList<Item extends RawListItem> = {
   data: Item[];
   total?: number;
+  weekly?: number;
   olderExists?: boolean | null;
 };
 

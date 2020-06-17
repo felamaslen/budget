@@ -84,15 +84,39 @@ describe('Standard list routes', () => {
         return res;
       };
 
-      it('should respond with the inserted ID and total', async () => {
-        expect.assertions(2);
+      it('should respond with a 201 status', async () => {
+        expect.assertions(1);
+        const res = await setup();
+        expect(res.status).toBe(201);
+      });
+
+      it('should respond with the inserted ID', async () => {
+        expect.assertions(1);
         const res = await setup();
 
-        expect(res.status).toBe(201);
         expect(res.body).toStrictEqual(
           expect.objectContaining({
             id: expect.any(String),
+          }),
+        );
+      });
+
+      it('should respond with the total cost', async () => {
+        expect.assertions(1);
+        const res = await setup();
+        expect(res.body).toStrictEqual(
+          expect.objectContaining({
             total: expect.any(Number),
+          }),
+        );
+      });
+
+      it('should respond with the weekly cost', async () => {
+        expect.assertions(1);
+        const res = await setup();
+        expect(res.body).toStrictEqual(
+          expect.objectContaining({
+            weekly: expect.any(Number),
           }),
         );
       });
@@ -128,6 +152,7 @@ describe('Standard list routes', () => {
         expect(res.body).toStrictEqual({
           data: expect.objectContaining({
             total: expect.any(Number),
+            weekly: expect.any(Number),
             olderExists: expect.any(Boolean),
             data: expect.arrayContaining([
               expect.objectContaining({
@@ -162,14 +187,30 @@ describe('Standard list routes', () => {
         return res;
       };
 
-      it('should respond with a 200 status code and updated total', async () => {
-        expect.assertions(2);
+      it('should respond with a 200 status code', async () => {
+        expect.assertions(1);
+        const res = await setup();
+        expect(res.status).toBe(200);
+      });
+
+      it('should respond with the updated total', async () => {
+        expect.assertions(1);
         const res = await setup();
 
-        expect(res.status).toBe(200);
         expect(res.body).toStrictEqual(
           expect.objectContaining({
             total: expect.any(Number),
+          }),
+        );
+      });
+
+      it('should respond with the updated weekly cost', async () => {
+        expect.assertions(1);
+        const res = await setup();
+
+        expect(res.body).toStrictEqual(
+          expect.objectContaining({
+            weekly: expect.any(Number),
           }),
         );
       });
@@ -210,6 +251,28 @@ describe('Standard list routes', () => {
         const res = await setup();
 
         expect(res.status).toBe(200);
+      });
+
+      it('should respond with the updated total cost', async () => {
+        expect.assertions(1);
+        const res = await setup();
+
+        expect(res.body).toStrictEqual(
+          expect.objectContaining({
+            total: expect.any(Number),
+          }),
+        );
+      });
+
+      it('should respond with the updated weekly cost', async () => {
+        expect.assertions(1);
+        const res = await setup();
+
+        expect(res.body).toStrictEqual(
+          expect.objectContaining({
+            weekly: expect.any(Number),
+          }),
+        );
       });
 
       it('should not respond with the item on subsequent get requests', async () => {

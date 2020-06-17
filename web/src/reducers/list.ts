@@ -163,6 +163,7 @@ export function makeListReducer<I extends ListItem, P extends PageList, ES exten
 
 type DailyProps = {
   total: number;
+  weekly: number;
   olderExists: boolean | null;
 };
 
@@ -235,9 +236,9 @@ const makeOnReadDaily = <I extends ListCalcItem, P extends PageListCalc, ES exte
       res: { [page]: pageRes = { total: 0, olderExists: null } },
     } = action;
 
-    const { total, olderExists } = pageRes as DailyProps;
+    const { total, weekly = 0, olderExists } = pageRes as DailyProps;
 
-    return { ...state, ...onReadList(state, action), total, olderExists };
+    return { ...state, ...onReadList(state, action), total, weekly, olderExists };
   };
 };
 
@@ -254,7 +255,12 @@ const makeOnSyncReceivedDaily = <I extends ListCalcItem, P extends PageListCalc,
       state.total,
     );
 
-    return { ...state, ...onReceivedList(state, action), total };
+    return {
+      ...state,
+      ...onReceivedList(state, action),
+      total,
+      weekly: requestItems[0]?.res?.weekly ?? state.weekly,
+    };
   };
 };
 
@@ -268,6 +274,7 @@ export function makeDailyListReducer<
     items: [],
     __optimistic: [],
     total: 0,
+    weekly: 0,
     olderExists: null,
   };
 

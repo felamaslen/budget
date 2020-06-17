@@ -15,8 +15,8 @@ export type RequestWithResponse<R = never> = Request & {
   res: R;
 };
 
-export type SyncResponsePostList = { id: string; total: number };
-export type SyncResponsePutList = { total: number };
+export type SyncResponsePostList = { id: string; total: number; weekly?: number };
+export type SyncResponsePutList = { total: number; weekly?: number };
 export type SyncResponseDeleteList = SyncResponsePutList;
 
 export type SyncResponseList = SyncResponsePostList | SyncResponsePutList | SyncResponseDeleteList;

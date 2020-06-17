@@ -251,16 +251,19 @@ export const testState: State = {
     items: [],
     __optimistic: [],
     total: 0,
+    weekly: 0,
     olderExists: null,
   },
   [Page.bills]: {
     items: [],
     __optimistic: [],
     total: 0,
+    weekly: 0,
     olderExists: null,
   },
   [Page.food]: {
     total: 8755601,
+    weekly: 6451,
     olderExists: true,
     items: [
       {
@@ -302,18 +305,21 @@ export const testState: State = {
     items: [],
     __optimistic: [undefined],
     total: 0,
+    weekly: 0,
     olderExists: null,
   },
   [Page.holiday]: {
     items: [],
     __optimistic: [undefined],
     total: 0,
+    weekly: 0,
     olderExists: false,
   },
   [Page.social]: {
     items: [],
     __optimistic: [undefined],
     total: 0,
+    weekly: 0,
     olderExists: false,
   },
 };

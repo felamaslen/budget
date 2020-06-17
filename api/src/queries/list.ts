@@ -40,6 +40,24 @@ export async function getListTotalCost(
   return total;
 }
 
+export async function getListWeeklyCosts(
+  db: DatabaseTransactionConnectionType,
+  uid: string,
+  table: ListCalcCategory,
+): Promise<number[]> {
+  const results = await db.query<{ year_weekly_cost: number }>(sql`
+  SELECT SUM(cost) / MAX(week) AS year_weekly_cost
+  FROM (
+    SELECT cost, date_part('year', date) AS year, date_part('week', date) AS week
+    FROM ${sql.identifier([table])}
+    WHERE uid = ${uid}
+  ) costs
+  GROUP BY year
+  ORDER BY year
+  `);
+  return results.rows.map(({ year_weekly_cost }) => year_weekly_cost);
+}
+
 export async function validateId(
   db: DatabaseTransactionConnectionType,
   uid: string,

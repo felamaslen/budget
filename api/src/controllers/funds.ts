@@ -154,7 +154,7 @@ export async function createFund(
   db: DatabaseTransactionConnectionType,
   uid: string,
   { item, transactions }: CreateList<Fund>,
-): Promise<CreateResponse> {
+): Promise<Omit<CreateResponse, 'weekly'>> {
   const id = await insertListItem(db, uid, Page.funds, { item });
   await upsertTransactions(db, uid, id, transactions);
   const total = await getTotalCost(db, uid, Page.funds);

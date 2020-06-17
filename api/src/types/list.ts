@@ -39,6 +39,6 @@ export type UpdateList<I extends Create<ListItem>> = Partial<I> & { id: string }
 export type CreateListCalc<I extends ListCalcItem> = Create<I>;
 export type UpdateListCalc<I extends ListCalcItem> = UpdateList<CreateListCalc<I>>;
 
-export type UpdateResponse = { total: number };
+export type UpdateResponse = { total: number; weekly?: number };
 export type CreateResponse = UpdateResponse & { id: string };
 export type DeleteResponse = UpdateResponse;

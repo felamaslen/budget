@@ -42,6 +42,7 @@ describe('List reducer', () => {
     items: [],
     __optimistic: [],
     total: 0,
+    weekly: 0,
     olderExists: null,
   };
 
@@ -120,6 +121,7 @@ describe('List reducer', () => {
         ...testResponse,
         [page]: {
           total: 335,
+          weekly: 122,
           olderExists: true,
           data: [
             {
@@ -132,23 +134,17 @@ describe('List reducer', () => {
         },
       });
 
-      it('should insert the all-time total value from the response', () => {
+      it.each`
+        description                | prop        | value
+        ${'all-time total'}        | ${'total'}  | ${335}
+        ${'weekly moving average'} | ${'weekly'} | ${122}
+      `('should insert the $description value from the response', ({ prop, value }) => {
         expect.assertions(1);
         const result = dailyReducer(initialStateDaily, actionRead);
 
         expect(result).toStrictEqual(
           expect.objectContaining({
-            total: 335,
-            olderExists: true,
-            items: [
-              {
-                id: 'some-id',
-                date: new Date('2019-05-03'),
-                item: 'some-item',
-                cost: 102,
-              },
-            ],
-            __optimistic: [undefined],
+            [prop]: value,
           }),
         );
       });
@@ -332,6 +328,7 @@ describe('List reducer', () => {
       const stateDaily = {
         ...state,
         total: 5,
+        weekly: 2,
         olderExists: null,
       };
 
@@ -478,6 +475,7 @@ describe('List reducer', () => {
       const stateDaily = {
         ...state,
         total: 51,
+        weekly: 17,
         olderExists: null,
       };
 
@@ -663,6 +661,7 @@ describe('List reducer', () => {
       const stateDaily = {
         ...state,
         total: 105,
+        weekly: 31,
         olderExists: null,
       };
 
@@ -715,6 +714,7 @@ describe('List reducer', () => {
       const stateDaily = {
         ...state,
         total: 105,
+        weekly: 15,
         olderExists: null,
       };
 

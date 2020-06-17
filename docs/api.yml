@@ -1712,6 +1712,9 @@ definitions:
       total:
         type: number
         description: Total cost of all list items since the beginning of time
+      weekly:
+        type: number
+        description: Average weekly cost of list items
 
   DataResponseIncome:
     allOf:

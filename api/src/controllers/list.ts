@@ -12,6 +12,7 @@ import {
   updateListItem,
   deleteListItem,
   validateId,
+  getListWeeklyCosts,
 } from '~api/queries';
 import {
   ListCategory,
@@ -74,6 +75,36 @@ export async function getTotalCost(
   return getListTotalCost(db, uid, table);
 }
 
+export async function getWeeklyCost(
+  db: DatabaseTransactionConnectionType,
+  uid: string,
+  table: ListCategory,
+): Promise<number> {
+  if (table === Page.funds) {
+    return 0;
+  }
+  const costs = await getListWeeklyCosts(db, uid, table);
+  const decay = 0.7;
+  return Math.round(
+    costs.reduce<number>(
+      (last, cost, index) => (index === 0 ? cost : decay * cost + (1 - decay) * last),
+      0,
+    ),
+  );
+}
+
+export async function getUpdateResponse(
+  db: DatabaseTransactionConnectionType,
+  uid: string,
+  category: ListCategory,
+): Promise<UpdateResponse> {
+  const [total, weekly] = await Promise.all([
+    getTotalCost(db, uid, category),
+    getWeeklyCost(db, uid, category),
+  ]);
+  return { total, weekly };
+}
+
 export async function createListData<I extends ListCalcItem>(
   db: DatabaseTransactionConnectionType,
   uid: string,
@@ -81,8 +112,7 @@ export async function createListData<I extends ListCalcItem>(
   item: CreateList<I>,
 ): Promise<CreateResponse> {
   const id = await insertListItem(db, uid, category, item);
-  const total = await getTotalCost(db, uid, category);
-  return { id, total };
+  return { id, ...(await getUpdateResponse(db, uid, category)) };
 }
 
 const columnMapStandard: ColumnMap<ListCalcItem> = {
@@ -115,15 +145,15 @@ export async function readListData<I extends ListCalcItem>(
     offset,
   );
 
-  const [olderExists, rows, total] = await Promise.all([
+  const [olderExists, rows, updateResponse] = await Promise.all([
     getOlderExists(db, uid, category, startDate),
     getListItems<I>(db, uid, category, columns, startDate, endDate),
-    getTotalCost(db, uid, category),
+    getUpdateResponse(db, uid, category),
   ]);
 
   const data = rows.map<AbbreviatedItem<I>>(formatResults(columnMap));
 
-  return { data, total, olderExists };
+  return { data, olderExists, ...updateResponse };
 }
 
 export async function updateListData<I extends ListItem>(
@@ -136,8 +166,7 @@ export async function updateListData<I extends ListItem>(
     throw boom.notFound('Unknown id');
   }
   await updateListItem(db, uid, category, item);
-  const total = await getTotalCost(db, uid, category);
-  return { total };
+  return getUpdateResponse(db, uid, category);
 }
 
 export async function deleteListData(
@@ -150,6 +179,5 @@ export async function deleteListData(
     throw boom.notFound('Unknown id');
   }
   await deleteListItem(db, uid, category, id);
-  const total = await getTotalCost(db, uid, category);
-  return { total };
+  return getUpdateResponse(db, uid, category);
 }

@@ -1,5 +1,4 @@
 import { compose } from '@typed/compose';
-import differenceInDays from 'date-fns/differenceInDays';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
@@ -50,27 +49,7 @@ export const sortStandardItems = moize(<I extends ListCalcItem>() =>
 );
 
 export const getWeeklyCost = moize(
-  <I extends ListCalcItem, P extends string, S extends StateStandard<I, P>>(page: P) =>
-    createSelector<S, I[], number>(
-      getItems<I, P>(page, sortStandardItems<I>()),
-      (items: ListCalcItem[]): number => {
-        // note that this is calculated only based on the visible data,
-        // not past data
-        if (!items.length) {
-          return 0;
-        }
-
-        const visibleTotal = items.reduce((sum, { cost }) => sum + cost, 0);
-
-        const lastDate = items[0]?.date; // sorted descending
-        const firstDate = items[items.length - 1]?.date;
-
-        const numWeeks = differenceInDays(lastDate, firstDate) / 7;
-        if (!numWeeks) {
-          return 0;
-        }
-
-        return Math.round(visibleTotal / numWeeks);
-      },
-    ),
+  <I extends ListCalcItem, P extends string, S extends StateStandard<I, P>>(page: P) => (
+    state: S,
+  ): number => state[page].weekly,
 );
