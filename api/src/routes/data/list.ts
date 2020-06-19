@@ -1,6 +1,7 @@
 import { ObjectSchema } from '@hapi/joi';
 import { RequestHandler, Router } from 'express';
 
+import config from '~api/config';
 import { createListData, readListData, updateListData, deleteListData } from '~api/controllers';
 import { authDbRoute, validatedAuthDbRoute } from '~api/middleware/request';
 import * as ListSchema from '~api/schema';
@@ -40,7 +41,7 @@ const makeRouteGet = (category: ListCalcCategory): RequestHandler =>
       db,
       req.user.uid,
       category,
-      new Date(),
+      Number(req.query.limit) || config.data.listPageLimit,
       Number(req.params.page) || 0,
     );
     res.json({ data });

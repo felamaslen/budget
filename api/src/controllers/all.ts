@@ -31,6 +31,7 @@ type AllResponse = {
 export async function getAllData(
   db: DatabaseTransactionConnectionType,
   uid: string,
+  limit: number,
   now: Date = new Date(),
 ): Promise<AllResponse> {
   const [dataOverview, dataFunds, dataList] = await Promise.all([
@@ -45,7 +46,9 @@ export async function getAllData(
       },
       now,
     ),
-    Promise.all(config.data.listCategories.map((category) => readListData(db, uid, category, now))),
+    Promise.all(
+      config.data.listCategories.map((category) => readListData(db, uid, category, limit)),
+    ),
   ]);
 
   return dataList.reduce<AllResponse>(

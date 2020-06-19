@@ -2,7 +2,13 @@ import nock, { Scope } from 'nock';
 import { testSaga, expectSaga, TestApi, TestApiWithEffectsTesters } from 'redux-saga-test-plan';
 import { debounce, call } from 'redux-saga/effects';
 
-import crudSaga, { updateLists, updateNetWorth, updateCrud, updateCrudFromAction } from './crud';
+import crudSaga, {
+  updateLists,
+  updateNetWorth,
+  updateCrud,
+  updateCrudFromAction,
+  onFetchMoreListData,
+} from './crud';
 import {
   ListActionType,
   ActionTypeNetWorth,
@@ -13,9 +19,14 @@ import {
   syncReceived,
   syncErrorOccurred,
   syncAttempted,
+  moreListDataRequested,
+  moreListDataReceived,
+  errorOpened,
 } from '~client/actions';
 import { API_PREFIX, API_BACKOFF_TIME, TIMER_UPDATE_SERVER } from '~client/constants/data';
+import { ErrorLevel } from '~client/constants/error';
 import { withoutId } from '~client/modules/data';
+import reducer, { State } from '~client/reducers';
 import { getLocked, getApiKey, getCrudRequests, getNetWorthRequests } from '~client/selectors';
 import {
   CATEGORY_CASH,
@@ -23,6 +34,7 @@ import {
   SUBCATEGORY_CC,
   CATEGORY_MORTGAGE,
   ENTRY_BANK_HOUSE_RAW,
+  testState,
 } from '~client/test-data';
 import {
   nockNetWorthCategory,
@@ -30,7 +42,11 @@ import {
   nockNetWorthEntry,
   testApiKey,
 } from '~client/test-utils/nocks';
-import { RequestType, Request, RequestWithResponse } from '~client/types';
+import { RequestType, Request, RequestWithResponse, Page } from '~client/types';
+
+jest.mock('shortid', () => ({
+  generate: (): string => 'some-short-id',
+}));
 
 describe('Crud saga', () => {
   const listRequests: Request[] = [
@@ -401,6 +417,140 @@ describe('Crud saga', () => {
     });
   });
 
+  describe('onFetchMoreListData', () => {
+    const page = Page.food;
+    const state: State = {
+      ...testState,
+      api: {
+        ...testState.api,
+        key: 'some-api-key',
+      },
+      [page]: {
+        ...testState[page],
+        offset: 0,
+        olderExists: true,
+        loadingMore: false,
+      },
+    };
+
+    const res = {
+      data: {
+        data: [
+          {
+            I: 'id-1',
+            d: '2020-04-20',
+            i: 'some item',
+            k: 'some category',
+            c: 123,
+            s: 'some shop',
+          },
+        ],
+        olderExists: true,
+        total: 123456,
+        weekly: 8765,
+      },
+    };
+
+    it('should request more data for a page', async () => {
+      expect.assertions(1);
+
+      const requestScope = nock('http://localhost')
+        .get(`${API_PREFIX}/data/${page}/1`)
+        .matchHeader('Authorization', 'some-api-key')
+        .reply(200, res);
+
+      await expectSaga(onFetchMoreListData, moreListDataRequested(page))
+        .withReducer(reducer, state)
+        .put(moreListDataRequested(page))
+        .put(moreListDataReceived(page, res.data))
+        .run();
+
+      expect(requestScope.isDone()).toBe(true);
+    });
+
+    describe('if the offset is on another page', () => {
+      const stateWithOffset: State = {
+        ...state,
+        [page]: {
+          ...state[page],
+          offset: 23,
+        },
+      };
+
+      it('should request the next page', async () => {
+        expect.assertions(1);
+
+        const requestScope = nock('http://localhost')
+          .get(`${API_PREFIX}/data/${page}/24`)
+          .matchHeader('Authorization', 'some-api-key')
+          .reply(200, res);
+
+        await expectSaga(onFetchMoreListData, moreListDataRequested(page))
+          .withReducer(reducer, stateWithOffset)
+          .put(moreListDataReceived(page, res.data))
+          .run();
+
+        expect(requestScope.isDone()).toBe(true);
+      });
+    });
+
+    describe('if currently loading data', () => {
+      const stateLoading: State = {
+        ...state,
+        [page]: {
+          ...state[page],
+          loadingMore: true,
+        },
+      };
+
+      it('should not do anything', async () => {
+        expect.assertions(1);
+
+        const { allEffects } = await expectSaga(onFetchMoreListData, moreListDataRequested(page))
+          .withReducer(reducer, stateLoading)
+          .run();
+
+        expect(allEffects.find(({ type }) => type === 'PUT')).toBeUndefined();
+      });
+    });
+
+    describe('if no older items exist', () => {
+      const stateAtEnd: State = {
+        ...state,
+        [page]: {
+          ...state[page],
+          olderExists: false,
+        },
+      };
+
+      it('should not do anything', async () => {
+        expect.assertions(1);
+
+        const { allEffects } = await expectSaga(onFetchMoreListData, moreListDataRequested(page))
+          .withReducer(reducer, stateAtEnd)
+          .run();
+
+        expect(allEffects.find(({ type }) => type === 'PUT')).toBeUndefined();
+      });
+    });
+
+    describe('if an error occurs during the request', () => {
+      it('should alert the user', async () => {
+        expect.assertions(1);
+
+        nock('http://localhost').get(`${API_PREFIX}/data/${page}/1`).reply(500);
+
+        const { allEffects } = await expectSaga(onFetchMoreListData, moreListDataRequested(page))
+          .withReducer(reducer, state)
+          .put(moreListDataRequested(page))
+          .put(errorOpened('Error fetching more data', ErrorLevel.Err))
+          .run();
+
+        expect(allEffects.filter(({ type }) => type === 'PUT')).toHaveLength(2);
+      });
+    });
+  });
+
   it('should run a debounced sync', () => {
     expect.assertions(0);
     testSaga(crudSaga)
@@ -427,6 +577,8 @@ describe('Crud saga', () => {
       )
       .next()
       .takeLatest(ActionTypeApi.SyncAttempted, updateCrud)
+      .next()
+      .takeLatest(ListActionType.MoreRequestInitiated, onFetchMoreListData)
       .next()
       .isDone();
   });

@@ -85,6 +85,13 @@ paths:
       operationId: getAllData
       description: |
         Get all data required for app startup at once
+      parameters:
+        - in: query
+          name: limit
+          description: Number of items per page
+          type: number
+          default: 100
+          required: false
       produces:
         - application/json
       responses:
@@ -732,6 +739,12 @@ paths:
           type: number
           default: 0
           required: false
+        - in: query
+          name: limit
+          description: Number of items per page
+          type: number
+          default: 100
+          required: false
       responses:
         401:
           description: unauthorised
@@ -893,6 +906,12 @@ paths:
           description: Page of data to get (starts at 0)
           type: number
           default: 0
+          required: false
+        - in: query
+          name: limit
+          description: Number of items per page
+          type: number
+          default: 100
           required: false
       responses:
         401:
@@ -1217,6 +1236,12 @@ paths:
           type: number
           default: 0
           required: false
+        - in: query
+          name: limit
+          description: Number of items per page
+          type: number
+          default: 100
+          required: false
       responses:
         401:
           description: unauthorised
@@ -1248,6 +1273,12 @@ paths:
           description: Page of data to get (starts at 0)
           type: number
           default: 0
+          required: false
+        - in: query
+          name: limit
+          description: Number of items per page
+          type: number
+          default: 100
           required: false
       responses:
         401:
@@ -1426,6 +1457,12 @@ paths:
           type: number
           default: 0
           required: false
+        - in: query
+          name: limit
+          description: Number of items per page
+          type: number
+          default: 100
+          required: false
       responses:
         401:
           description: unauthorised
@@ -1602,6 +1639,12 @@ paths:
           description: Page of data to get (starts at 0)
           type: number
           default: 0
+          required: false
+        - in: query
+          name: limit
+          description: Number of items per page
+          type: number
+          default: 100
           required: false
       responses:
         401:

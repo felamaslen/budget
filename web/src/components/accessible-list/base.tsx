@@ -126,7 +126,12 @@ export const AccessibleList = <
           </Styled.List>
         )}
         {windowise && (
-          <InfiniteWindow isMobile={isMobile} items={itemsSorted} MemoisedItem={MemoisedItem} />
+          <InfiniteWindow
+            page={page}
+            isMobile={isMobile}
+            items={itemsSorted}
+            MemoisedItem={MemoisedItem}
+          />
         )}
         {isMobile && (
           <>

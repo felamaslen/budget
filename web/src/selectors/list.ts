@@ -1,7 +1,8 @@
 import { compose } from '@typed/compose';
+import moize from 'moize';
 import { createSelector } from 'reselect';
 
-import { PAGES_LIST } from '~client/constants/data';
+import { PAGES_LIST, isCalcPage } from '~client/constants/data';
 import { getValueForTransmit } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { State as CrudState } from '~client/reducers/crud';
@@ -16,6 +17,18 @@ type NonFilteredState<I extends Item = Item> = {
   page: PageList;
   state: CrudState<I>;
 };
+
+export const getOlderExists = moize(<P extends string>(page: P) => (state: State): boolean =>
+  isCalcPage(page) ? !!state[page].olderExists : false,
+);
+
+export const getLoadingMore = moize(<P extends string>(page: P) => (state: State):
+  | boolean
+  | undefined => (isCalcPage(page) ? state[page].loadingMore : undefined));
+
+export const getListOffset = moize(<P extends string>(page: P) => (state: State):
+  | number
+  | undefined => (isCalcPage(page) ? state[page].offset : undefined));
 
 const getAllNonFilteredItems = (state: State): NonFilteredState[] =>
   PAGES_LIST.map<NonFilteredState>((page) => ({

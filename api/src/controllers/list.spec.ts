@@ -44,23 +44,21 @@ describe('List controller', () => {
   describe('getOlderExists', () => {
     const db = {} as DatabaseTransactionConnectionType;
 
+    beforeEach(() => {
+      jest.spyOn(queries, 'countRows').mockResolvedValueOnce(882);
+    });
+
     describe('if there are older rows', () => {
       it('should return true', async () => {
         expect.assertions(1);
-        jest.spyOn(queries, 'countOldRows').mockResolvedValueOnce(882);
-        expect(await getOlderExists(db, 'some-user-id', Page.food, new Date('2020-04-20'))).toBe(
-          true,
-        );
+        expect(await getOlderExists(db, 'some-user-id', Page.food, 100, 7)).toBe(true);
       });
     });
 
     describe('if there are no older rows', () => {
       it('should return false', async () => {
         expect.assertions(1);
-        jest.spyOn(queries, 'countOldRows').mockResolvedValueOnce(0);
-        expect(await getOlderExists(db, 'some-user-id', Page.food, new Date('2020-04-20'))).toBe(
-          false,
-        );
+        expect(await getOlderExists(db, 'some-user-id', Page.food, 100, 8)).toBe(false);
       });
     });
   });

@@ -7,6 +7,7 @@ RUN apk add --no-cache \
   gcc \
   g++ \
   make \
+  postgresql-dev \
   cairo-dev \
   jpeg-dev \
   pango-dev \

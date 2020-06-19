@@ -5,15 +5,13 @@ import {
   listItemCreated,
   listItemUpdated,
   listItemDeleted,
+  moreListDataRequested,
+  moreListDataReceived,
   loggedOut,
 } from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
 import { testResponse } from '~client/test-data';
 import { Page, PageListCalc, RequestType, Bill } from '~client/types';
-
-jest.mock('shortid', () => ({
-  generate: (): string => 'some-fake-id',
-}));
 
 describe('List reducer', () => {
   type ExtraState = {
@@ -43,7 +41,9 @@ describe('List reducer', () => {
     __optimistic: [],
     total: 0,
     weekly: 0,
+    offset: 0,
     olderExists: null,
+    loadingMore: false,
   };
 
   const myListReducer = makeListReducer<Item, MyPage, ExtraState>(page, initialState);
@@ -329,7 +329,9 @@ describe('List reducer', () => {
         ...state,
         total: 5,
         weekly: 2,
+        offset: 0,
         olderExists: null,
+        loadingMore: false,
       };
 
       const actionDaily = listItemUpdated<Item, typeof page>(page)(
@@ -476,7 +478,9 @@ describe('List reducer', () => {
         ...state,
         total: 51,
         weekly: 17,
+        offset: 0,
         olderExists: null,
+        loadingMore: false,
       };
 
       it('should update the total', () => {
@@ -662,7 +666,9 @@ describe('List reducer', () => {
         ...state,
         total: 105,
         weekly: 31,
+        offset: 0,
         olderExists: null,
+        loadingMore: false,
       };
 
       it.each`
@@ -715,7 +721,9 @@ describe('List reducer', () => {
         ...state,
         total: 105,
         weekly: 15,
+        offset: 0,
         olderExists: null,
+        loadingMore: false,
       };
 
       it.each`
@@ -741,6 +749,160 @@ describe('List reducer', () => {
 
           expect(resultDaily.total).toBe(117);
         });
+      });
+    });
+  });
+
+  describe('ListActionType.MoreListDataRequested', () => {
+    const action = moreListDataRequested(page);
+
+    it('should set loadingMore to true', () => {
+      expect.assertions(1);
+      const result = dailyReducer(initialStateDaily, action);
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          loadingMore: true,
+        }),
+      );
+    });
+
+    describe('if targeted at another page', () => {
+      const actionOtherPage = moreListDataRequested(Page.social);
+
+      it('should be ignored', () => {
+        expect.assertions(1);
+        expect(dailyReducer(initialStateDaily, actionOtherPage)).toBe(initialStateDaily);
+      });
+    });
+  });
+
+  describe('ListActionType.MoreListDataReceived', () => {
+    const res = {
+      data: [
+        {
+          I: 'id-1',
+          d: '2020-04-20',
+          i: 'some item',
+          c: 123,
+        },
+      ],
+      olderExists: true,
+      total: 123456,
+      weekly: 8765,
+    };
+
+    const action = moreListDataReceived(page, res);
+
+    it('should append the data to state', () => {
+      expect.assertions(1);
+
+      const statePre = {
+        ...initialStateDaily,
+        items: [
+          {
+            id: 'id-0',
+            date: new Date('2020-04-23'),
+            item: 'existing item',
+            cost: 156,
+          },
+        ],
+        __optimistic: [RequestType.create],
+      };
+
+      const result = dailyReducer(statePre, action);
+
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          items: [
+            {
+              id: 'id-0',
+              date: new Date('2020-04-23'),
+              item: 'existing item',
+              cost: 156,
+            },
+            {
+              id: 'id-1',
+              date: new Date('2020-04-20'),
+              item: 'some item',
+              cost: 123,
+            },
+          ],
+          __optimistic: [RequestType.create, undefined],
+        }),
+      );
+    });
+
+    it('should update the total', () => {
+      expect.assertions(1);
+      const result = dailyReducer(initialStateDaily, action);
+      expect(result).toStrictEqual(expect.objectContaining({ total: 123456 }));
+    });
+
+    it('should update the weekly value', () => {
+      expect.assertions(1);
+      const result = dailyReducer(initialStateDaily, action);
+      expect(result).toStrictEqual(expect.objectContaining({ weekly: 8765 }));
+    });
+
+    it('should increment the offset value', () => {
+      expect.assertions(2);
+
+      expect(dailyReducer(initialStateDaily, action)).toStrictEqual(
+        expect.objectContaining({
+          offset: 1,
+        }),
+      );
+
+      expect(
+        dailyReducer(
+          {
+            ...initialStateDaily,
+            offset: 37,
+          },
+          action,
+        ),
+      ).toStrictEqual(
+        expect.objectContaining({
+          offset: 38,
+        }),
+      );
+    });
+
+    it('should set loadingMore to false', () => {
+      expect.assertions(1);
+      const result = dailyReducer({ ...initialStateDaily, loadingMore: true }, action);
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          loadingMore: false,
+        }),
+      );
+    });
+
+    describe('if the olderExists value changed', () => {
+      const resEnd = {
+        ...res,
+        olderExists: false,
+      };
+
+      const actionEnd = moreListDataReceived(page, resEnd);
+
+      it('should update the olderExists state value', () => {
+        expect.assertions(1);
+        const result = dailyReducer(initialStateDaily, actionEnd);
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            olderExists: false,
+          }),
+        );
+      });
+    });
+
+    describe('if targeted at another page', () => {
+      const actionOtherPage = moreListDataReceived(Page.bills, res);
+
+      it('should be ignored', () => {
+        expect.assertions(1);
+        expect(dailyReducer(initialStateDaily, actionOtherPage)).toBe(initialStateDaily);
       });
     });
   });

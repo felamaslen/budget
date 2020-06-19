@@ -4,7 +4,7 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
 import {
-  countOldRows,
+  countRows,
   getTotalFundCost,
   getListTotalCost,
   insertListItem,
@@ -47,10 +47,11 @@ export async function getOlderExists(
   db: DatabaseTransactionConnectionType,
   uid: string,
   table: ListCategory,
-  startDate: Date,
+  limit: number,
+  offset: number,
 ): Promise<boolean> {
-  const numRows = await countOldRows(db, uid, table, startDate);
-  return numRows > 0;
+  const numRows = await countRows(db, uid, table);
+  return numRows > limit * (offset + 1);
 }
 
 export const formatResults = <I extends ListItem, K extends ColumnMap<I>>(columnMap: K) => (
@@ -126,7 +127,7 @@ export async function readListData<I extends ListCalcItem>(
   db: DatabaseTransactionConnectionType,
   uid: string,
   category: ListCalcCategory,
-  now: Date,
+  limit: number,
   offset = 0,
 ): Promise<ListResponse<I>> {
   const columnMapExtra = config.data.columnMapExtra[category] as ColumnMap<
@@ -139,15 +140,9 @@ export async function readListData<I extends ListCalcItem>(
 
   const columns = Object.values(columnMap);
 
-  const { startDate, endDate } = getLimitCondition(
-    now,
-    config.data.listPageLimits[category],
-    offset,
-  );
-
   const [olderExists, rows, updateResponse] = await Promise.all([
-    getOlderExists(db, uid, category, startDate),
-    getListItems<I>(db, uid, category, columns, startDate, endDate),
+    getOlderExists(db, uid, category, limit, offset),
+    getListItems<I>(db, uid, category, columns, limit, offset),
     getUpdateResponse(db, uid, category),
   ]);
 

@@ -52,28 +52,22 @@ const onCreate = <I extends ListItem, P extends PageList, ES extends object>(
     ...onCreateOptimistic<I>(state, action.fakeId, action.delta),
   }));
 
-export const onRead = <I extends Item, P extends PageList, ES extends object>(page: P) => (
-  state: ListState<I, ES>,
-  action: Actions.ActionApiDataRead,
-): ListState<I, ES> => {
-  if (!action.res?.[page]) {
-    return state;
-  }
-  if (!action.res[page]?.data.length) {
-    return { ...state, items: [], __optimistic: [] };
+function mapReadResponse<I extends Item, P extends PageList>(res: ReadResponse[P]): I[] {
+  if (!res.data.length) {
+    return [];
   }
 
   const dataKeys = Object.entries(DataKeyAbbr).filter(([, shortKey]) =>
-    Reflect.has(action.res[page]?.data[0] ?? {}, shortKey),
+    Reflect.has(res.data[0], shortKey),
   );
 
-  type RawItem = ReadResponse[P]['data'][0];
-  const rawItems: RawItem[] = action.res[page]?.data ?? [];
+  type RawItem = typeof res['data'][0];
+  const rawItems: RawItem[] = res.data;
 
   const longKeys = dataKeys.map(([longKey]) => longKey) as (keyof I)[];
   const shortKeys = dataKeys.map(([, shortKey]) => shortKey) as (keyof RawItem)[];
 
-  const items = rawItems.map((item: RawItem) =>
+  return rawItems.map<I>((item) =>
     longKeys.reduce<I>(
       (last, longKey, index) => ({
         ...last,
@@ -82,8 +76,14 @@ export const onRead = <I extends Item, P extends PageList, ES extends object>(pa
       {} as I,
     ),
   );
+}
 
-  const __optimistic = items.map(() => undefined);
+export const onRead = <I extends Item, P extends PageList, ES extends object>(page: P) => (
+  state: ListState<I, ES>,
+  action: Actions.ActionApiDataRead,
+): ListState<I, ES> => {
+  const items = mapReadResponse<I, P>(action.res[page]);
+  const __optimistic = Array<undefined>(items.length).fill(undefined);
 
   return { ...state, items, __optimistic };
 };
@@ -164,6 +164,8 @@ export function makeListReducer<I extends ListItem, P extends PageList, ES exten
 type DailyProps = {
   total: number;
   weekly: number;
+  offset: number;
+  loadingMore: boolean;
   olderExists: boolean | null;
 };
 
@@ -242,6 +244,36 @@ const makeOnReadDaily = <I extends ListCalcItem, P extends PageListCalc, ES exte
   };
 };
 
+const makeOnRequestMore = <I extends ListCalcItem, P extends PageListCalc, ES extends object>(
+  page: P,
+): FullReducer<DailyState<I, ES>, Actions.MoreListDataRequested<PageList>> => {
+  return filterByPage<I, P, DailyState<I, ES>, Actions.MoreListDataRequested<P>>(page, (state) => ({
+    ...state,
+    loadingMore: true,
+  }));
+};
+
+const makeOnMoreReceived = <I extends ListCalcItem, P extends PageListCalc, ES extends object>(
+  page: P,
+): FullReducer<DailyState<I, ES>, Actions.MoreListDataReceived<PageList>> => {
+  return filterByPage<I, P, DailyState<I, ES>, Actions.MoreListDataReceived<P>>(
+    page,
+    (state, action) => ({
+      ...state,
+      weekly: action.res.weekly ?? state.weekly,
+      total: action.res.total ?? state.total,
+      offset: state.offset + 1,
+      olderExists: !!action.res.olderExists,
+      loadingMore: false,
+      items: [...state.items, ...mapReadResponse<I, P>(action.res)],
+      __optimistic: [
+        ...state.__optimistic,
+        ...Array<undefined>(action.res.data.length).fill(undefined),
+      ],
+    }),
+  );
+};
+
 const makeOnSyncReceivedDaily = <I extends ListCalcItem, P extends PageListCalc, ES extends object>(
   page: P,
 ): FullReducer<DailyState<I, ES>, Actions.ActionApiSyncReceived> => {
@@ -275,7 +307,9 @@ export function makeDailyListReducer<
     __optimistic: [],
     total: 0,
     weekly: 0,
+    offset: 0,
     olderExists: null,
+    loadingMore: false,
   };
 
   const onCreateDaily = withTotals<
@@ -287,6 +321,8 @@ export function makeDailyListReducer<
   >(page, onCreate, (total, _, cost) => total + cost);
 
   const onReadDaily = makeOnReadDaily<I, P, ES>(page);
+  const onRequestMore = makeOnRequestMore<I, P, ES>(page);
+  const onMoreReceived = makeOnMoreReceived<I, P, ES>(page);
 
   const onUpdateDaily = withTotals<
     I,
@@ -321,6 +357,12 @@ export function makeDailyListReducer<
 
       case Actions.ActionTypeApi.SyncReceived:
         return onSyncReceivedDaily(state, action);
+
+      case Actions.ListActionType.MoreRequested:
+        return onRequestMore(state, action);
+      case Actions.ListActionType.MoreReceived:
+        return onMoreReceived(state, action);
+
       default:
         return baseListReducer(state, action);
     }

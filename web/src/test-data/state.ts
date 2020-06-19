@@ -253,6 +253,8 @@ export const testState: State = {
     total: 0,
     weekly: 0,
     olderExists: null,
+    offset: 0,
+    loadingMore: false,
   },
   [Page.bills]: {
     items: [],
@@ -260,11 +262,15 @@ export const testState: State = {
     total: 0,
     weekly: 0,
     olderExists: null,
+    offset: 0,
+    loadingMore: false,
   },
   [Page.food]: {
     total: 8755601,
     weekly: 6451,
     olderExists: true,
+    offset: 0,
+    loadingMore: false,
     items: [
       {
         id: 'id19',
@@ -306,20 +312,26 @@ export const testState: State = {
     __optimistic: [undefined],
     total: 0,
     weekly: 0,
+    offset: 0,
     olderExists: null,
+    loadingMore: false,
   },
   [Page.holiday]: {
     items: [],
     __optimistic: [undefined],
     total: 0,
     weekly: 0,
+    offset: 0,
     olderExists: false,
+    loadingMore: false,
   },
   [Page.social]: {
     items: [],
     __optimistic: [undefined],
     total: 0,
     weekly: 0,
+    offset: 0,
     olderExists: false,
+    loadingMore: false,
   },
 };

@@ -13,10 +13,23 @@ import {
   syncUnlocked,
   syncReceived,
   syncErrorOccurred,
+  MoreListDataRequested,
+  moreListDataReceived,
+  errorOpened,
+  moreListDataRequested,
 } from '~client/actions';
 import { API_PREFIX, API_BACKOFF_TIME, TIMER_UPDATE_SERVER } from '~client/constants/data';
-import { getLocked, getApiKey, getCrudRequests, getNetWorthRequests } from '~client/selectors';
-import { Request } from '~client/types';
+import { ErrorLevel } from '~client/constants/error';
+import {
+  getLocked,
+  getApiKey,
+  getCrudRequests,
+  getNetWorthRequests,
+  getListOffset,
+  getLoadingMore,
+  getOlderExists,
+} from '~client/selectors';
+import { Request, PageListCalc } from '~client/types';
 
 const withRes = <R>(requests: Request[], res: R[]) =>
   requests.map((request, index) => ({ ...request, res: res[index] }));
@@ -112,6 +125,29 @@ export function* updateCrudFromAction() {
   yield put(syncAttempted());
 }
 
+export function* onFetchMoreListData<P extends PageListCalc>({ page }: MoreListDataRequested<P>) {
+  const isLoading = yield select(getLoadingMore(page));
+  const olderExists = yield select(getOlderExists(page));
+  if (isLoading || !olderExists) {
+    return;
+  }
+
+  yield put(moreListDataRequested(page));
+
+  const apiKey = yield select(getApiKey);
+  const offset = yield select(getListOffset(page));
+
+  try {
+    const res = yield call(axios.get, `${API_PREFIX}/data/${page}/${offset + 1}`, {
+      headers: { Authorization: apiKey },
+    });
+
+    yield put(moreListDataReceived(page, res.data.data));
+  } catch (err) {
+    yield put(errorOpened('Error fetching more data', ErrorLevel.Err));
+  }
+}
+
 export default function* crudSaga() {
   yield debounce(
     TIMER_UPDATE_SERVER,
@@ -133,4 +169,5 @@ export default function* crudSaga() {
   );
 
   yield takeLatest(ActionTypeApi.SyncAttempted, updateCrud);
+  yield takeLatest(ListActionType.MoreRequestInitiated, onFetchMoreListData);
 }

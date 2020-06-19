@@ -53,9 +53,7 @@ export type Config = {
       holiday: ColumnMap<Omit<Holiday, keyof ListCalcItem>>;
       social: ColumnMap<Omit<Social, keyof ListCalcItem>>;
     };
-    listPageLimits: {
-      [k in ListCalcCategory]: number;
-    };
+    listPageLimit: number;
     funds: {
       salt: string;
       historyResolution: number;
@@ -131,14 +129,7 @@ const config: Config = {
         s: 'shop',
       },
     },
-    listPageLimits: {
-      [Page.income]: 12,
-      [Page.bills]: 6,
-      [Page.food]: 2,
-      [Page.general]: 4,
-      [Page.holiday]: 12,
-      [Page.social]: 6,
-    },
+    listPageLimit: 100,
     funds: {
       salt: fundSalt,
       historyResolution: Math.round(Number(process.env.FUND_RESOLUTION) || 100),

@@ -1,3 +1,4 @@
+import { format, addDays } from 'date-fns';
 import MockDate from 'mockdate';
 import { Response } from 'supertest';
 
@@ -63,14 +64,14 @@ describe('Standard list routes', () => {
   const socialDelta = { item: 'Garlic bread' };
 
   describe.each`
-    page            | testItem   | delta           | readProps
-    ${Page.income}  | ${income}  | ${incomeDelta}  | ${{}}
-    ${Page.bills}   | ${bill}    | ${billDelta}    | ${{}}
-    ${Page.food}    | ${food}    | ${foodDelta}    | ${{ k: 'Fruit', s: 'Tesco' }}
-    ${Page.general} | ${general} | ${generalDelta} | ${{ k: 'Medicine', s: 'Boots' }}
-    ${Page.holiday} | ${holiday} | ${holidayDelta} | ${{ h: 'Australia', s: 'skyscanner.com' }}
-    ${Page.social}  | ${social}  | ${socialDelta}  | ${{ y: 'Remote social', s: 'Dominoes' }}
-  `('$page route', ({ page, testItem, delta, readProps }) => {
+    page            | lastPage | testItem   | delta           | readProps
+    ${Page.income}  | ${3}     | ${income}  | ${incomeDelta}  | ${{}}
+    ${Page.bills}   | ${3}     | ${bill}    | ${billDelta}    | ${{}}
+    ${Page.food}    | ${4}     | ${food}    | ${foodDelta}    | ${{ k: 'Fruit', s: 'Tesco' }}
+    ${Page.general} | ${3}     | ${general} | ${generalDelta} | ${{ k: 'Medicine', s: 'Boots' }}
+    ${Page.holiday} | ${3}     | ${holiday} | ${holidayDelta} | ${{ h: 'Australia', s: 'skyscanner.com' }}
+    ${Page.social}  | ${3}     | ${social}  | ${socialDelta}  | ${{ y: 'Remote social', s: 'Dominoes' }}
+  `('$page route', ({ page, lastPage, testItem, delta, readProps }) => {
     const clearDb = async (): Promise<void> => {
       await db(page).where({ item: testItem.item }).del();
       await db(page).where({ item: delta.item }).del();
@@ -137,7 +138,7 @@ describe('Standard list routes', () => {
       });
     });
 
-    describe(`GET /${page}`, () => {
+    describe(`GET /${page}/:page?`, () => {
       const setup = async (data: object = testItem): Promise<Response> => {
         await global.withAuth(global.agent.post(`/api/v4/data/${page}`)).send(data);
         const res = await global.withAuth(global.agent.get(`/api/v4/data/${page}`));
@@ -164,6 +165,72 @@ describe('Standard list routes', () => {
               }),
             ]),
           }),
+        });
+      });
+
+      describe('pagination', () => {
+        const baseDate = new Date('2020-04-20');
+
+        const setupForPagination = async (): Promise<void> => {
+          await Array(10)
+            .fill(0)
+            .reduce<Promise<void>>(
+              (last, _, index) =>
+                last.then(
+                  async (): Promise<void> => {
+                    await global.withAuth(global.agent.post(`/api/v4/data/${page}`)).send({
+                      ...testItem,
+                      date: format(addDays(baseDate, -index), 'yyyy-MM-dd'),
+                    });
+                  },
+                ),
+              Promise.resolve(),
+            );
+        };
+
+        it('should apply an optional limit', async () => {
+          expect.assertions(2);
+          await setupForPagination();
+          const resPage0Limit3 = await global.withAuth(
+            global.agent.get(`/api/v4/data/${page}/0?limit=3`),
+          );
+
+          expect(resPage0Limit3.body.data.data).toHaveLength(3);
+          expect(resPage0Limit3.body.data.olderExists).toBe(true);
+        });
+
+        it('should apply an optional page number', async () => {
+          expect.assertions(1);
+          await setupForPagination();
+          const resPage1Limit3 = await global.withAuth(
+            global.agent.get(`/api/v4/data/${page}/1?limit=3`),
+          );
+
+          expect(resPage1Limit3.body.data.data).toStrictEqual([
+            expect.objectContaining({
+              d: '2020-04-17',
+            }),
+            expect.objectContaining({
+              d: '2020-04-16',
+            }),
+            expect.objectContaining({
+              d: '2020-04-15',
+            }),
+          ]);
+        });
+
+        it('should set olderExists to false on the last page', async () => {
+          expect.assertions(2);
+          await setupForPagination();
+          const resPageNextFromLast = await global.withAuth(
+            global.agent.get(`/api/v4/data/${page}/${lastPage - 1}?limit=3`),
+          );
+          const resPageLast = await global.withAuth(
+            global.agent.get(`/api/v4/data/${page}/${lastPage}?limit=3`),
+          );
+
+          expect(resPageNextFromLast.body.data.olderExists).toBe(true);
+          expect(resPageLast.body.data.olderExists).toBe(false);
         });
       });
     });

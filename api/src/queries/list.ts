@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 import {
   ListCategory,
@@ -9,18 +8,17 @@ import {
   UpdateList,
 } from '~api/types';
 
-export async function countOldRows(
+export async function countRows(
   db: DatabaseTransactionConnectionType,
   uid: string,
   table: ListCategory,
-  startDate: Date,
 ): Promise<number> {
   const {
     rows: [{ count }],
   } = await db.query<{ count: number }>(sql`
   SELECT COUNT(*) AS count
   FROM ${sql.identifier([table])}
-  WHERE ${sql.join([sql`date < ${format(startDate, 'yyyy-MM-dd')}`, sql`uid = ${uid}`], sql` AND `)}
+  WHERE uid = ${uid}
   `);
   return count;
 }
@@ -106,8 +104,8 @@ export async function getListItems<I extends ListCalcItem>(
   uid: string,
   table: ListCalcCategory,
   columns: (keyof I)[],
-  startDate: Date,
-  endDate: Date | null,
+  limit: number,
+  offset: number,
 ): Promise<readonly I[]> {
   const { rows } = await db.query<I>(sql`
   SELECT ${sql.join(
@@ -115,15 +113,10 @@ export async function getListItems<I extends ListCalcItem>(
     sql`, `,
   )}
   FROM ${sql.identifier([table])}
-  WHERE ${sql.join(
-    [
-      sql`uid = ${uid}`,
-      sql`date >= ${format(startDate, 'yyyy-MM-dd')}`,
-      endDate && sql`date <= ${format(endDate, 'yyyy-MM-dd')}`,
-    ].filter(Boolean),
-    sql` AND `,
-  )}
+  WHERE uid = ${uid}
   ORDER BY date DESC, id ASC
+  LIMIT ${limit}
+  OFFSET ${offset * limit}
   `);
   return rows;
 }

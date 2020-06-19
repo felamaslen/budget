@@ -176,7 +176,9 @@ describe('<AccessibleListDaily />', () => {
         __optimistic: [undefined],
         total: 1023,
         weekly: 951,
+        offset: 0,
         olderExists: null,
+        loadingMore: false,
       },
     };
 

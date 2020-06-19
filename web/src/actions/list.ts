@@ -1,12 +1,24 @@
 import moize from 'moize';
 import shortid from 'shortid';
 
-import { PageList, Create, CreateEdit, DeltaEdit, Item, ListItem } from '~client/types';
+import {
+  PageList,
+  PageListCalc,
+  Create,
+  CreateEdit,
+  DeltaEdit,
+  Item,
+  ListItem,
+  ReadResponse,
+} from '~client/types';
 
 export const enum ListActionType {
   Created = '@@list/ITEM_CREATED',
   Updated = '@@list/ITEM_UPDATED',
   Deleted = '@@list/ITEM_DELETED',
+  MoreRequestInitiated = '@@list/MORE_REQUEST_INITIATED',
+  MoreRequested = '@@list/MORE_REQUESTED',
+  MoreReceived = '@@list/MORE_RECEIVED',
 }
 
 export type ListItemCreated<I extends Item, P extends string> = {
@@ -83,7 +95,47 @@ export const listItemDeleted = moize(
   }),
 );
 
+export type MoreListDataRequestInitiated<P extends string> = {
+  type: ListActionType.MoreRequestInitiated;
+  page: P;
+};
+
+export const moreListDataRequestInitiated = <P extends string>(
+  page: P,
+): MoreListDataRequestInitiated<P> => ({
+  type: ListActionType.MoreRequestInitiated,
+  page,
+});
+
+export type MoreListDataRequested<P extends string> = {
+  type: ListActionType.MoreRequested;
+  page: P;
+};
+
+export const moreListDataRequested = <P extends string>(page: P): MoreListDataRequested<P> => ({
+  type: ListActionType.MoreRequested,
+  page,
+});
+
+export type MoreListDataReceived<P extends string> = {
+  type: ListActionType.MoreReceived;
+  page: P;
+  res: P extends PageListCalc ? ReadResponse[P] : never;
+};
+
+export const moreListDataReceived = <P extends string>(
+  page: P,
+  res: P extends PageListCalc ? ReadResponse[P] : never,
+): MoreListDataReceived<P> => ({
+  type: ListActionType.MoreReceived,
+  page,
+  res,
+});
+
 export type ActionList<I extends ListItem, P extends string> =
   | ListItemCreated<I, P>
   | ListItemUpdated<I, P>
-  | ListItemDeleted<I, P>;
+  | ListItemDeleted<I, P>
+  | MoreListDataRequestInitiated<P>
+  | MoreListDataRequested<P>
+  | MoreListDataReceived<P>;
