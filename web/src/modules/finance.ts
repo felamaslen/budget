@@ -154,6 +154,7 @@ const removeSingletons = (a: string): string =>
   a
     .replace(/ [A-Z]($|\s)/, '')
     .replace(/([A-Z]{2}T)T/, '$1')
+    .substring(0, 4)
     .toUpperCase();
 
 function abbreviateShare(name: string): string {

@@ -1,149 +1,125 @@
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
+import { leftPad, rightPad, IDENTITY } from '~client/modules/data';
 import { separateLines } from '~client/modules/funds';
-import { Data } from '~client/types/graph';
+import { Data } from '~client/types';
 
-export type PUC = {
-  [fundId: string]: number[];
+type Return = {
+  price: number;
+  units: number;
+  cost: number;
 };
 
-type Prices = PUC;
-type Units = PUC;
-type Costs = PUC;
+export type FundsWithReturns = {
+  [id in string]: { returns: Return[]; startIndex: number };
+};
 
-export function getOverallAbsolute(prices: Prices, units: Units): number[] {
-  // get the overall absolute value for each time point
-  return Object.keys(prices).reduce((lineSum: number[], id) => {
-    const fundValues = prices[id].map((price, timeIndex) => price * units[id][timeIndex]);
-
-    const [bigLine, smallLine] =
-      fundValues.length > lineSum.length ? [fundValues, lineSum] : [lineSum, fundValues];
-
-    return bigLine
-      .slice(0, smallLine.length)
-      .map((value, timeIndex) => value + smallLine[timeIndex])
-      .concat(bigLine.slice(smallLine.length));
-  }, []);
-}
-
-export function getFundLineAbsolute(prices: Prices, units: Units, id: string): number[] {
-  // get the absolute value of a fund at each time point
-  return prices[id].map((price, timeIndex) => price * units[id][timeIndex]);
-}
-
-function getROI(values: number[], costs: number[]): number[] {
-  // convert a series of values and costs into a series of return-on-investment values
-  return values.map((value, timeIndex) => {
-    const cost = costs[timeIndex];
-    if (!(cost && value)) {
-      return 0;
-    }
-
-    return 100 * ((value - cost) / cost);
-  });
-}
-
-export function getOverallROI(prices: Prices, units: Units, costs: Costs): number[] {
-  // get the overall return on investment for each time point
-  const values = getOverallAbsolute(prices, units);
-
-  const overallCosts = values.map((_, timeIndex) =>
-    Object.keys(costs).reduce((sum, id) => {
-      if (costs[id].length < timeIndex + 1 || prices[id][timeIndex] === 0) {
-        return sum;
-      }
-
-      return sum + costs[id][timeIndex];
-    }, 0),
+const maximiseAllLines = <T>(
+  fundsWithReturns: FundsWithReturns,
+  mapReturns: (returns: Return) => T,
+  fillLeft: T,
+  fillRight: (returns: Return) => T,
+): T[][] => {
+  const funds = Object.values(fundsWithReturns);
+  const maxLength = funds.reduce(
+    (last, { returns, startIndex }) => Math.max(last, returns.length + startIndex),
+    0,
   );
 
-  return getROI(values, overallCosts);
-}
-
-type PriceUnitsCosts = {
-  prices: Prices;
-  units: Units;
-  costs: Costs;
+  return funds.map<T[]>(({ returns, startIndex }) =>
+    rightPad(
+      leftPad(returns.map(mapReturns), startIndex + returns.length, fillLeft),
+      maxLength,
+      fillRight(returns[returns.length - 1]),
+    ),
+  );
 };
 
-export function getFundLineROI({ prices, units, costs }: PriceUnitsCosts, id: string): number[] {
-  // get the return on investment of a fund at each time point
-  const values = getFundLineAbsolute(prices, units, id);
-  const fundCosts = values.map((_, timeIndex) => costs[id][timeIndex]);
-
-  return getROI(values, fundCosts);
+export function getOverallAbsolute(fundsWithReturns: FundsWithReturns): number[] {
+  const result = maximiseAllLines(
+    fundsWithReturns,
+    ({ price, units }) => price * units,
+    0,
+    () => 0,
+  ).reduce(
+    (last, values) => values.map((value, index) => Math.round(value + (last[index] ?? 0))),
+    [],
+  );
+  return result;
 }
 
-export function getOverallLine(
-  priceUnitsCosts: PriceUnitsCosts,
-  mode: Mode,
-  timeOffsets: { [fundId: string]: number },
-): number[] | null {
-  const withOffsets = (item: PUC): PUC =>
-    Object.entries(item).reduce(
-      (last: PUC, [id, values]: [string, number[]]): PUC => ({
-        ...last,
-        [id]: new Array(timeOffsets[id]).fill(0).concat(values),
-      }),
-      {},
-    );
-
-  const { prices, units, costs } = priceUnitsCosts;
-
-  const pricesWithOffsets = withOffsets(prices);
-  const unitsWithOffsets = withOffsets(units);
-  const costsWithOffsets = withOffsets(costs);
-
-  if (mode === Mode.Value) {
-    return getOverallAbsolute(pricesWithOffsets, unitsWithOffsets);
-  }
-
-  if (mode === Mode.ROI) {
-    return getOverallROI(pricesWithOffsets, unitsWithOffsets, costsWithOffsets);
-  }
-
-  return null;
+export function getFundLineAbsolute(fundsWithReturns: FundsWithReturns, id: string): number[] {
+  return fundsWithReturns[id].returns.map(({ price, units }) => price * units);
 }
 
-export function getFundLine(
-  priceUnitsCosts: PriceUnitsCosts,
-  mode: Mode,
-  id: string,
-): number[] | null {
+export function getOverallROI(fundsWithReturns: FundsWithReturns): number[] {
+  return maximiseAllLines(
+    fundsWithReturns,
+    IDENTITY,
+    {
+      price: 0,
+      units: 0,
+      cost: 0,
+    },
+    (returns) => ({
+      price: 0,
+      units: 0,
+      cost: returns.cost,
+    }),
+  )
+    .reduce<{ value: number; cost: number }[]>(
+      (last, returns) =>
+        returns.map(({ price, units, cost }, index) => ({
+          value: price * units + (last[index]?.value ?? 0),
+          cost: cost + (last[index]?.cost ?? 0),
+        })),
+      [],
+    )
+    .map<number>(({ value, cost }) => Math.round((10000 * (value - cost)) / cost) / 100);
+}
+
+export function getFundLineROI(fundsWithReturns: FundsWithReturns, id: string): number[] {
+  return fundsWithReturns[id].returns.map(({ price, units, cost }) =>
+    price && units && cost ? Math.round((10000 * (price * units - cost)) / cost) / 100 : 0,
+  );
+}
+
+export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): number[] {
   if (mode === Mode.Value) {
-    const { prices, units } = priceUnitsCosts;
-
-    return getFundLineAbsolute(prices, units, id);
+    return getOverallAbsolute(fundsWithReturns);
   }
-
   if (mode === Mode.ROI) {
-    return getFundLineROI(priceUnitsCosts, id);
+    return getOverallROI(fundsWithReturns);
   }
+  return [];
+}
 
+export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: string): number[] {
+  if (mode === Mode.Value) {
+    return getFundLineAbsolute(fundsWithReturns, id);
+  }
+  if (mode === Mode.ROI) {
+    return getFundLineROI(fundsWithReturns, id);
+  }
   if (mode === Mode.Price) {
-    return priceUnitsCosts.prices[id];
+    return fundsWithReturns[id].returns.map(({ price }) => price);
   }
 
-  return null;
+  return [];
 }
 
 export function getFundLineProcessed(
-  times: number[],
-  timeOffsets: { [fundId: string]: number },
-  priceUnitsCosts: PriceUnitsCosts,
+  fundsWithReturns: FundsWithReturns,
+  cacheTimes: number[],
   mode: Mode,
-  id: string,
-): Data[] | null {
-  const overall = id === GRAPH_FUNDS_OVERALL_ID;
+  id: string = GRAPH_FUNDS_OVERALL_ID,
+): Data[] {
+  const line =
+    id === GRAPH_FUNDS_OVERALL_ID
+      ? getOverallLine(fundsWithReturns, mode)
+      : getFundLine(fundsWithReturns, mode, id);
 
-  const line = overall
-    ? getOverallLine(priceUnitsCosts, mode, timeOffsets)
-    : getFundLine(priceUnitsCosts, mode, id);
+  const timeOffset = fundsWithReturns[id]?.startIndex ?? 0;
 
-  if (!line) {
-    return null;
-  }
-
-  const lineWithTimes: Data = line.map((value, index) => [times[index], value]);
-
+  const lineWithTimes: Data = line.map((value, index) => [cacheTimes[index + timeOffset], value]);
   return separateLines(lineWithTimes);
 }

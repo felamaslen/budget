@@ -39,7 +39,7 @@ import {
 import { graphFundsHeightMobile } from '~client/styled/variables';
 import { Padding, Line, DrawProps, FundLine, FundItem } from '~client/types';
 
-const PADDING_DESKTOP: Padding = [36, 0, 0, 0];
+const PADDING_DESKTOP: Padding = [36, 3, 0, 0];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
 
 const makeGetRanges = ({
@@ -204,6 +204,7 @@ function useGraphProps({
   height,
   isMobile,
   mode,
+  today,
   changeMode,
   toggleList,
 }: {
@@ -211,12 +212,13 @@ function useGraphProps({
   height: number;
   isMobile: boolean;
   mode: Mode;
+  today: Date;
   changeMode: () => void;
   toggleList: ToggleList;
 }): LineGraphProps {
   const fundLines: {
     [mode in Mode]: FundLine[];
-  } = useSelector(getFundLines);
+  } = useSelector(getFundLines(today));
 
   const startTime = useSelector(getStartTime);
   const cacheTimes = useSelector(getCacheTimes);
@@ -323,19 +325,27 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   const today = useContext(TodayContext);
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
-  const fundItems = useSelector(getFundItems);
+  const fundItems = useSelector(getFundItems(today));
 
   const [period, changePeriod] = usePeriod();
   const [mode, changeMode] = useMode(isMobile);
   const [toggleList, setToggleList] = useToggleList(fundItems);
-  const graphProps = useGraphProps({ width, height, isMobile, mode, changeMode, toggleList });
+  const graphProps = useGraphProps({
+    width,
+    height,
+    isMobile,
+    mode,
+    today,
+    changeMode,
+    toggleList,
+  });
 
   const portfolio = useSelector(getPortfolio(today));
 
   return (
     <Styled.Container>
       <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
-        <LineGraph {...graphProps} />
+        {graphProps.minX !== graphProps.maxX && <LineGraph {...graphProps} />}
         <AfterCanvas
           isMobile={isMobile}
           period={period}

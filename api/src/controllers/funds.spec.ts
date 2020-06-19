@@ -143,6 +143,66 @@ describe('Funds controller', () => {
         }),
       );
     });
+
+    describe('if a fund was sold and then re-bought', () => {
+      const fundsRebought = [
+        {
+          I: 'fund-never-sold',
+          i: 'A fund which was never sold',
+          tr: [],
+        },
+        {
+          I: 'fund-once-sold',
+          i: 'A fund which was sold and rebought',
+          tr: [],
+        },
+      ];
+
+      const priceRowsRebought = [
+        {
+          time: new Date('2019-12-31').getTime(),
+          id: ['fund-never-sold'],
+          price: [99.93],
+        },
+        {
+          time: new Date('2020-01-01').getTime(),
+          id: ['fund-never-sold', 'fund-once-sold'],
+          price: [100, 200],
+        },
+        {
+          time: new Date('2020-01-02').getTime(),
+          id: ['fund-never-sold'],
+          price: [100.1],
+        },
+        {
+          time: new Date('2020-01-03').getTime(),
+          id: ['fund-never-sold', 'fund-once-sold'],
+          price: [100.05, 196.54],
+        },
+      ];
+
+      it('should pad the rebought fund with zeroes', () => {
+        expect.assertions(1);
+        const result = processFundHistory(fundsRebought, new Date('2020-04-20'), priceRowsRebought);
+
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            data: expect.arrayContaining([
+              expect.objectContaining({
+                I: 'fund-never-sold',
+                pr: [99.93, 100, 100.1, 100.05],
+                prStartIndex: 0,
+              }),
+              expect.objectContaining({
+                I: 'fund-once-sold',
+                pr: [200, 0, 196.54],
+                prStartIndex: 1,
+              }),
+            ]),
+          }),
+        );
+      });
+    });
   });
 
   describe('fundHash', () => {

@@ -53,7 +53,7 @@ export function processFundHistory(
   fundHistory: readonly FundHistoryRow[],
 ): ResponseWithHistory {
   const unixTimes = fundHistory.map(({ time }) => getUnixTime(new Date(time)));
-  const cacheTimes = unixTimes.map((value) => value - unixTimes[0]);
+  const cacheTimes = unixTimes.map((time) => time - unixTimes[0]);
 
   const data = fundHistory.reduce<FundWithHistory[]>(
     (last, { id, price }, index) =>
@@ -65,7 +65,13 @@ export function processFundHistory(
             (fund: FundWithHistory) =>
               ({
                 ...fund,
-                pr: [...fund.pr, price[priceIndex]],
+                pr: [
+                  ...fund.pr,
+                  ...(fund.pr.length > 0 && fund.pr.length + fund.prStartIndex < index
+                    ? Array(index - (fund.prStartIndex + fund.pr.length)).fill(0)
+                    : []),
+                  Math.round(price[priceIndex] * 100) / 100,
+                ],
                 prStartIndex: fund.pr.length === 0 ? index : fund.prStartIndex,
               } as FundWithHistory),
           ),

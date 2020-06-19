@@ -259,14 +259,16 @@ export const sortByDate = <I extends { date: string | Date }>(items: I[]): I[] =
 export const sortByTotal = <R extends { total: number }>(items: R[]): R[] =>
   sortByKey<'total', R>({ key: 'total', order: -1 })(items);
 
-export const leftPad = (array: number[], length: number, fill = 0): number[] =>
+export const leftPad = <T>(array: T[], length: number, fill: T = (0 as unknown) as T): T[] =>
   Array(Math.max(0, length - array.length))
     .fill(fill)
     .concat(array);
 
-export const rightPad = (array: number[], length: number, fill?: number): number[] =>
+export const rightPad = <T>(array: T[], length: number, fill?: T): T[] =>
   array.concat(
-    Array(Math.max(0, length - array.length)).fill(fill ?? array[array.length - 1] ?? 0),
+    Array<T>(Math.max(0, length - array.length)).fill(
+      fill ?? array[array.length - 1] ?? ((0 as unknown) as T),
+    ),
   );
 
 export const withoutId = <T extends { id?: string }>({ id, ...rest }: T): Omit<T, 'id'> => rest;

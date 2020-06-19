@@ -5,13 +5,13 @@ import { formatCurrency } from '~client/modules/format';
 import { Data } from '~client/types';
 
 export const separateLines = (line: Data): Data[] =>
-  line.reduce(
-    ([lines, newLine]: [Data[], boolean], [xValue, yValue]): [Data[], boolean] => {
+  line.reduce<[Data[], boolean]>(
+    ([lines, newLine], [xValue, yValue]) => {
       if (yValue === 0) {
         return [lines, true];
       }
       if (newLine) {
-        return [lines.concat([[[xValue, yValue]]]), false];
+        return [[...lines, [[xValue, yValue]]], false];
       }
 
       return [

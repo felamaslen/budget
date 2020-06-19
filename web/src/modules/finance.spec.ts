@@ -17,6 +17,7 @@ describe('Finance module', () => {
       ${'BNKR'}         | ${'Bankers Investment Trust Ord 25p Share (share)'}
       ${'MNKS'}         | ${'Monks Investment Trust Ordinary 5p (share)'}
       ${'RELX'}         | ${'RELX Plc Ord 14 51116p (share)'}
+      ${'BGSN'}         | ${'Baillie Gifford Shin Nippon Ord 2p Shares (share)'}
     `('should abbreviate "$long" to "$short"', ({ short, long }) => {
       expect(abbreviateFundName(long)).toBe(short);
     });

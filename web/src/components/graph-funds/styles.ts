@@ -74,6 +74,7 @@ export const Mode = styled.span`
   position: absolute;
   top: 0.2em;
   left: 0.2em;
+  z-index: 2;
 
   ${breakpoint(breakpoints.mobile)} {
     left: initial;
