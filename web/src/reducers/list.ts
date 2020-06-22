@@ -14,6 +14,7 @@ import {
   withDeletes,
 } from '~client/reducers/crud';
 import {
+  Id,
   SyncResponseList,
   RequestWithResponse,
   Page,
@@ -186,7 +187,7 @@ const isCreate = <I extends ListItem, A extends Actions.ActionList<I, PageList>>
   action: A | Actions.ListItemCreated<I, PageList>,
 ): action is Actions.ListItemCreated<I, PageList> => Reflect.has(action, 'fakeId');
 
-const getItemCostWithId = <I extends ListCalcItem>(state: DailyState<I>, id: string): number =>
+const getItemCostWithId = <I extends ListCalcItem>(state: DailyState<I>, id: Id): number =>
   state.items.find((item) => item.id === id)?.cost ?? 0;
 
 const getPreviousItemCost = <I extends ListCalcItem, A extends Actions.ActionList<I, PageListCalc>>(

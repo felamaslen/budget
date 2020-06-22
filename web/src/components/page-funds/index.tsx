@@ -48,7 +48,7 @@ const deltaSeed = (): Delta<Fund> => ({
 });
 
 type ComposedProps = {
-  [id: string]: Pick<FundProps, 'gain' | 'prices'>;
+  [id: number]: Pick<FundProps, 'gain' | 'prices'>;
 };
 
 const nullComposedProps: ComposedProps = {};

@@ -4,7 +4,7 @@ import md5 from 'md5';
 import { fundSalt } from '~api/fund-salt.json';
 import { generateUserPin } from '~api/test-utils/generate-user-pin';
 
-async function generateFunds(uid: string, db: Knex): Promise<void> {
+async function generateFunds(uid: number, db: Knex): Promise<void> {
   const cids = await db('fund_cache_time')
     .insert([
       { time: '2017-09-30T17:01:01Z' },
@@ -55,7 +55,7 @@ async function generateFunds(uid: string, db: Knex): Promise<void> {
     .into('funds_transactions');
 }
 
-async function generateListData(uid: string, db: Knex): Promise<void> {
+async function generateListData(uid: number, db: Knex): Promise<void> {
   await db.insert([{ uid, date: '2018-03-24', item: 'Salary', cost: 433201 }]).into('income');
 
   await db
@@ -122,7 +122,7 @@ async function generateListData(uid: string, db: Knex): Promise<void> {
     .into('social');
 }
 
-async function generateNetWorth(uid: string, db: Knex): Promise<void> {
+async function generateNetWorth(uid: number, db: Knex): Promise<void> {
   const [categoryId] = await db('net_worth_categories')
     .insert([
       {

@@ -9,15 +9,15 @@ import { Entry } from '~api/types';
 
 export async function fetchById(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
+  uid: number,
+  netWorthId: number,
 ): Promise<Entry> {
   const entryRows = await selectEntry(db, uid, netWorthId);
   return combineJoinedEntryRows(entryRows);
 }
 export async function fetchAll(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   oldDateEnd: Date,
 ): Promise<Entry[]> {
   const allRows = await selectAllEntries(db, uid, formatDate(oldDateEnd));
@@ -30,7 +30,7 @@ export async function fetchAll(
 
 export async function fetchOld(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   startDate: Date,
   oldDateEnd: Date,
 ): Promise<{
@@ -47,8 +47,8 @@ export async function fetchOld(
 
 export async function readNetWorthEntry(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
+  uid: number,
+  netWorthId: number,
 ): Promise<Entry> {
   const entry = await fetchById(db, uid, netWorthId);
   return entry;
@@ -56,7 +56,7 @@ export async function readNetWorthEntry(
 
 export async function readAllNetWorthEntries(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
 ): Promise<{
   items: Entry[];
   old: number[];

@@ -1,6 +1,14 @@
 /* eslint-disable max-lines */
+import numericHash from 'string-hash';
 import reducer, { State, initialState } from './net-worth';
-import { dataRead, syncReceived, loggedOut } from '~client/actions';
+import {
+  dataRead,
+  syncReceived,
+  loggedOut,
+  ActionTypeLogin,
+  ActionTypeNetWorth,
+  ActionTypeApi,
+} from '~client/actions';
 import {
   netWorthCategoryCreated,
   netWorthCategoryUpdated,
@@ -23,7 +31,7 @@ import {
   SUBCATEGORY_CC,
   CURRENCY_CZK,
 } from '~client/test-data';
-import { RequestType, Category, Subcategory } from '~client/types';
+import { RequestType, Category, Subcategory, ValueObject, Entry } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -31,16 +39,16 @@ jest.mock('shortid', () => ({
 
 describe('Net worth reducer', () => {
   describe.each`
-    description     | action
-    ${'LOGGED_OUT'} | ${loggedOut()}
+    description                  | action
+    ${ActionTypeLogin.LoggedOut} | ${loggedOut()}
   `('$description', ({ action }) => {
     it('should return the initial state', () => {
       expect.assertions(1);
-      expect(reducer(undefined, action)).toStrictEqual(initialState);
+      expect(reducer(undefined, action)).toStrictEqual<State>(initialState);
     });
   });
 
-  describe('NET_WORTH_CATEGORY_CREATED', () => {
+  describe(ActionTypeNetWorth.CategoryCreated, () => {
     const action = netWorthCategoryCreated({
       type: 'asset',
       category: 'Cash (easy access)',
@@ -52,7 +60,7 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.categories).toStrictEqual({
+      expect(result.categories).toStrictEqual<State['categories']>({
         items: [
           {
             id: action.fakeId,
@@ -67,13 +75,13 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('NET_WORTH_CATEGORY_UPDATED', () => {
+  describe(ActionTypeNetWorth.CategoryUpdated, () => {
     const state: State = {
       ...initialState,
       categories: {
         items: [
           {
-            id: 'some-real-id',
+            id: numericHash('some-real-id'),
             type: 'asset',
             category: 'Cash (easy access)',
             color: '#00ff00',
@@ -84,7 +92,7 @@ describe('Net worth reducer', () => {
       },
     };
 
-    const action = netWorthCategoryUpdated('some-real-id', {
+    const action = netWorthCategoryUpdated(numericHash('some-real-id'), {
       type: 'liability',
       category: 'Mortgage',
       color: '#fa0000',
@@ -95,10 +103,10 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.categories).toStrictEqual({
+      expect(result.categories).toStrictEqual<State['categories']>({
         items: [
           {
-            id: 'some-real-id',
+            id: numericHash('some-real-id'),
             type: 'liability',
             category: 'Mortgage',
             color: '#fa0000',
@@ -110,13 +118,13 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('NET_WORTH_CATEGORY_DELETED', () => {
+  describe(ActionTypeNetWorth.CategoryDeleted, () => {
     const state: State = {
       ...initialState,
       categories: {
         items: [
           {
-            id: 'some-real-id',
+            id: numericHash('some-real-id'),
             type: 'asset',
             category: 'Cash (easy access)',
             color: '#00ff00',
@@ -129,18 +137,18 @@ describe('Net worth reducer', () => {
       entries: { items: [], __optimistic: [] },
     };
 
-    const action = netWorthCategoryDeleted('some-real-id');
+    const action = netWorthCategoryDeleted(numericHash('some-real-id'));
 
     it('should optimistically delete a category', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: {
             items: [
               {
-                id: 'some-real-id',
+                id: numericHash('some-real-id'),
                 type: 'asset',
                 category: 'Cash (easy access)',
                 color: '#00ff00',
@@ -158,16 +166,16 @@ describe('Net worth reducer', () => {
     it('should delete a pending category and its dependencies', () => {
       expect.assertions(1);
       const otherCategory: Category = {
-        id: 'other-cat-id',
+        id: numericHash('other-cat-id'),
         type: 'liability',
         category: 'Some liability',
         color: 'red',
         isOption: false,
       };
       const otherSubcategory: Subcategory = {
-        id: 'subcat-B',
+        id: numericHash('subcat-B'),
         subcategory: 'other-subcategory',
-        categoryId: 'other-cat-id',
+        categoryId: numericHash('other-cat-id'),
         hasCreditLimit: null,
         opacity: 1,
       };
@@ -177,7 +185,7 @@ describe('Net worth reducer', () => {
         categories: {
           items: [
             {
-              id: 'some-real-id',
+              id: numericHash('some-real-id'),
               type: 'asset',
               category: 'Cash (easy access)',
               color: '#00ff00',
@@ -190,9 +198,9 @@ describe('Net worth reducer', () => {
         subcategories: {
           items: [
             {
-              id: 'subcat-A',
+              id: numericHash('subcat-A'),
               subcategory: 'some-subcategory',
-              categoryId: 'some-real-id',
+              categoryId: numericHash('some-real-id'),
               hasCreditLimit: null,
               opacity: 1,
             },
@@ -203,11 +211,11 @@ describe('Net worth reducer', () => {
         entries: {
           items: [
             {
-              id: 'entry-A0',
+              id: numericHash('entry-A0'),
               date: new Date(),
               values: [
-                { id: 'value-id-1', subcategory: 'subcat-B', value: 3 },
-                { id: 'value-id-2', subcategory: 'subcat-A', value: 4 },
+                { id: numericHash('value-id-1'), subcategory: numericHash('subcat-B'), value: 3 },
+                { id: numericHash('value-id-2'), subcategory: numericHash('subcat-A'), value: 4 },
               ],
               currencies: [],
               creditLimit: [],
@@ -219,15 +227,17 @@ describe('Net worth reducer', () => {
 
       const result = reducer(statePendingChildren, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: { items: [otherCategory], __optimistic: [undefined] },
           subcategories: { items: [otherSubcategory], __optimistic: [undefined] },
           entries: {
             items: [
-              expect.objectContaining({
-                id: 'entry-A0',
-                values: [{ id: 'value-id-1', subcategory: 'subcat-B', value: 3 }],
+              expect.objectContaining<Partial<Entry>>({
+                id: numericHash('entry-A0'),
+                values: [
+                  { id: numericHash('value-id-1'), subcategory: numericHash('subcat-B'), value: 3 },
+                ],
               }),
             ],
             __optimistic: [RequestType.create],
@@ -237,9 +247,9 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('NET_WORTH_SUBCATEGORY_CREATED', () => {
+  describe(ActionTypeNetWorth.SubcategoryCreated, () => {
     const action = netWorthSubcategoryCreated({
-      categoryId: 'some-category-id',
+      categoryId: numericHash('some-category-id'),
       subcategory: 'My bank account',
       hasCreditLimit: null,
       opacity: 0.2,
@@ -249,11 +259,11 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.subcategories).toStrictEqual({
+      expect(result.subcategories).toStrictEqual<State['subcategories']>({
         items: [
           {
             id: action.fakeId,
-            categoryId: 'some-category-id',
+            categoryId: numericHash('some-category-id'),
             subcategory: 'My bank account',
             hasCreditLimit: null,
             opacity: 0.2,
@@ -264,14 +274,14 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('NET_WORTH_SUBCATEGORY_UPDATED', () => {
+  describe(ActionTypeNetWorth.SubcategoryUpdated, () => {
     const state: State = {
       ...initialState,
       subcategories: {
         items: [
           {
-            id: 'some-subcategory-id',
-            categoryId: 'some-category-id',
+            id: numericHash('some-subcategory-id'),
+            categoryId: numericHash('some-category-id'),
             subcategory: 'My bank account',
             hasCreditLimit: null,
             opacity: 0.2,
@@ -281,8 +291,8 @@ describe('Net worth reducer', () => {
       },
     };
 
-    const action = netWorthSubcategoryUpdated('some-subcategory-id', {
-      categoryId: 'other-category-id',
+    const action = netWorthSubcategoryUpdated(numericHash('some-subcategory-id'), {
+      categoryId: numericHash('other-category-id'),
       subcategory: 'My credit card',
       hasCreditLimit: true,
       opacity: 0.3,
@@ -292,11 +302,11 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.subcategories).toStrictEqual({
+      expect(result.subcategories).toStrictEqual<State['subcategories']>({
         items: [
           {
-            id: 'some-subcategory-id',
-            categoryId: 'other-category-id',
+            id: numericHash('some-subcategory-id'),
+            categoryId: numericHash('other-category-id'),
             subcategory: 'My credit card',
             hasCreditLimit: true,
             opacity: 0.3,
@@ -307,13 +317,13 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('NET_WORTH_SUBCATEGORY_DELETED', () => {
+  describe(ActionTypeNetWorth.SubcategoryDeleted, () => {
     const state: State = {
       ...initialState,
       categories: {
         items: [
           {
-            id: 'some-category-id',
+            id: numericHash('some-category-id'),
             category: 'some-category',
             type: 'asset',
             color: 'green',
@@ -325,8 +335,8 @@ describe('Net worth reducer', () => {
       subcategories: {
         items: [
           {
-            id: 'some-subcategory-id',
-            categoryId: 'some-category-id',
+            id: numericHash('some-subcategory-id'),
+            categoryId: numericHash('some-category-id'),
             subcategory: 'My bank account',
             hasCreditLimit: null,
             opacity: 0.2,
@@ -337,17 +347,17 @@ describe('Net worth reducer', () => {
       entries: { items: [], __optimistic: [] },
     };
 
-    const action = netWorthSubcategoryDeleted('some-subcategory-id');
+    const action = netWorthSubcategoryDeleted(numericHash('some-subcategory-id'));
 
     it('should optimistically delete a subcategory', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.subcategories).toStrictEqual({
+      expect(result.subcategories).toStrictEqual<State['subcategories']>({
         items: [
           {
-            id: 'some-subcategory-id',
-            categoryId: 'some-category-id',
+            id: numericHash('some-subcategory-id'),
+            categoryId: numericHash('some-category-id'),
             subcategory: 'My bank account',
             hasCreditLimit: null,
             opacity: 0.2,
@@ -364,24 +374,32 @@ describe('Net worth reducer', () => {
         subcategories: {
           items: [
             {
-              id: 'some-subcategory-id',
-              categoryId: 'some-category-id',
+              id: numericHash('some-subcategory-id'),
+              categoryId: numericHash('some-category-id'),
               subcategory: 'My bank account',
               hasCreditLimit: null,
               opacity: 0.2,
             },
-            { ...SUBCATEGORY_WALLET, id: 'subcat-A', categoryId: 'some-category-id' },
+            {
+              ...SUBCATEGORY_WALLET,
+              id: numericHash('subcat-A'),
+              categoryId: numericHash('some-category-id'),
+            },
           ],
           __optimistic: [RequestType.create, undefined],
         },
         entries: {
           items: [
             {
-              id: 'entry-A0',
+              id: numericHash('entry-A0'),
               date: new Date(),
               values: [
-                { id: 'value-id-a', value: 1, subcategory: 'some-subcategory-id' },
-                { id: 'value-id-b', value: 1, subcategory: 'subcat-A' },
+                {
+                  id: numericHash('value-id-a'),
+                  value: 1,
+                  subcategory: numericHash('some-subcategory-id'),
+                },
+                { id: numericHash('value-id-b'), value: 1, subcategory: numericHash('subcat-A') },
               ],
               currencies: [],
               creditLimit: [],
@@ -393,18 +411,26 @@ describe('Net worth reducer', () => {
 
       const result = reducer(statePendingChildren, action);
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
+      expect(result).toStrictEqual<State>(
+        expect.objectContaining<Partial<State>>({
           categories: statePendingChildren.categories,
           subcategories: {
-            items: [{ ...SUBCATEGORY_WALLET, id: 'subcat-A', categoryId: 'some-category-id' }],
+            items: [
+              {
+                ...SUBCATEGORY_WALLET,
+                id: numericHash('subcat-A'),
+                categoryId: numericHash('some-category-id'),
+              },
+            ],
             __optimistic: [undefined],
           },
           entries: {
             items: [
-              expect.objectContaining({
-                id: 'entry-A0',
-                values: [{ id: 'value-id-b', value: 1, subcategory: 'subcat-A' }],
+              expect.objectContaining<Partial<Entry>>({
+                id: numericHash('entry-A0'),
+                values: [
+                  { id: numericHash('value-id-b'), value: 1, subcategory: numericHash('subcat-A') },
+                ],
               }),
             ],
             __optimistic: [RequestType.create],
@@ -414,24 +440,24 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('NET_WORTH_CREATED', () => {
+  describe(ActionTypeNetWorth.EntryCreated, () => {
     const action = netWorthCreated({
       date: new Date('2019-07-12T12:36:03Z'),
       values: [
         {
-          id: 'some-fake-value-id-1',
-          subcategory: 'some-subcategory-id',
+          id: numericHash('some-fake-value-id-1'),
+          subcategory: numericHash('some-subcategory-id'),
           skip: true,
           value: -239,
         },
         {
-          id: 'some-fake-value-id-2',
-          subcategory: 'other-subcategory-id',
+          id: numericHash('some-fake-value-id-2'),
+          subcategory: numericHash('other-subcategory-id'),
           skip: null,
           value: [10, { currency: 'CZK', value: 37.34 }],
         },
       ],
-      creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+      creditLimit: [{ subcategory: numericHash('some-subcategory-id'), value: 1000 }],
       currencies: [CURRENCY_CZK],
     });
 
@@ -439,24 +465,24 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.entries).toStrictEqual({
+      expect(result.entries).toStrictEqual<State['entries']>({
         items: [
           {
             id: action.fakeId,
             date: new Date('2019-07-12T12:36:03Z'),
             values: [
-              expect.objectContaining({
-                subcategory: 'some-subcategory-id',
+              expect.objectContaining<Partial<ValueObject>>({
+                subcategory: numericHash('some-subcategory-id'),
                 skip: true,
                 value: -239,
               }),
-              expect.objectContaining({
-                subcategory: 'other-subcategory-id',
+              expect.objectContaining<Partial<ValueObject>>({
+                subcategory: numericHash('other-subcategory-id'),
                 skip: null,
                 value: [10, { currency: 'CZK', value: 37.34 }],
               }),
             ],
-            creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+            creditLimit: [{ subcategory: numericHash('some-subcategory-id'), value: 1000 }],
             currencies: [CURRENCY_CZK],
           },
         ],
@@ -465,29 +491,29 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('NET_WORTH_UPDATED', () => {
+  describe(ActionTypeNetWorth.EntryUpdated, () => {
     const state: State = {
       ...initialState,
       entries: {
         items: [
           {
-            id: 'some-entry-id',
+            id: numericHash('some-entry-id'),
             date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
-                id: 'value-id-1',
-                subcategory: 'some-subcategory-id',
+                id: numericHash('value-id-1'),
+                subcategory: numericHash('some-subcategory-id'),
                 skip: true,
                 value: -239,
               },
               {
-                id: 'value-id-2',
-                subcategory: 'other-subcategory-id',
+                id: numericHash('value-id-2'),
+                subcategory: numericHash('other-subcategory-id'),
                 skip: null,
                 value: [{ currency: 'CZK', value: 37.34 }],
               },
             ],
-            creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+            creditLimit: [{ subcategory: numericHash('some-subcategory-id'), value: 1000 }],
             currencies: [CURRENCY_CZK],
           },
         ],
@@ -495,12 +521,12 @@ describe('Net worth reducer', () => {
       },
     };
 
-    const action = netWorthUpdated('some-entry-id', {
+    const action = netWorthUpdated(numericHash('some-entry-id'), {
       date: new Date('2019-07-31T23:54:00Z'),
       values: [
         {
-          id: 'some-value-id',
-          subcategory: 'some-subcategory-id',
+          id: numericHash('some-value-id'),
+          subcategory: numericHash('some-subcategory-id'),
           skip: true,
           value: -239,
         },
@@ -513,14 +539,14 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.entries).toStrictEqual({
+      expect(result.entries).toStrictEqual<State['entries']>({
         items: [
           {
-            id: 'some-entry-id',
+            id: numericHash('some-entry-id'),
             date: new Date('2019-07-31T23:54:00Z'),
             values: [
-              expect.objectContaining({
-                subcategory: 'some-subcategory-id',
+              expect.objectContaining<Partial<ValueObject>>({
+                subcategory: numericHash('some-subcategory-id'),
                 skip: true,
                 value: -239,
               }),
@@ -534,29 +560,29 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('NET_WORTH_DELETED', () => {
+  describe(ActionTypeNetWorth.EntryDeleted, () => {
     const state: State = {
       ...initialState,
       entries: {
         items: [
           {
-            id: 'some-entry-id',
+            id: numericHash('some-entry-id'),
             date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
-                id: 'value-id-1',
-                subcategory: 'some-subcategory-id',
+                id: numericHash('value-id-1'),
+                subcategory: numericHash('some-subcategory-id'),
                 skip: true,
                 value: -239,
               },
               {
-                id: 'value-id-2',
-                subcategory: 'other-subcategory-id',
+                id: numericHash('value-id-2'),
+                subcategory: numericHash('other-subcategory-id'),
                 skip: null,
                 value: [10, { currency: 'CZK', value: 37.34 }],
               },
             ],
-            creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+            creditLimit: [{ subcategory: numericHash('some-subcategory-id'), value: 1000 }],
             currencies: [CURRENCY_CZK],
           },
         ],
@@ -564,32 +590,32 @@ describe('Net worth reducer', () => {
       },
     };
 
-    const action = netWorthDeleted('some-entry-id');
+    const action = netWorthDeleted(numericHash('some-entry-id'));
 
     it('should optimistically delete an entry', () => {
       expect.assertions(1);
       const result = reducer(state, action);
 
-      expect(result.entries).toStrictEqual({
+      expect(result.entries).toStrictEqual<State['entries']>({
         items: [
           {
-            id: 'some-entry-id',
+            id: numericHash('some-entry-id'),
             date: new Date('2019-07-12T12:36:03Z'),
             values: [
               {
-                id: 'value-id-1',
-                subcategory: 'some-subcategory-id',
+                id: numericHash('value-id-1'),
+                subcategory: numericHash('some-subcategory-id'),
                 skip: true,
                 value: -239,
               },
               {
-                id: 'value-id-2',
-                subcategory: 'other-subcategory-id',
+                id: numericHash('value-id-2'),
+                subcategory: numericHash('other-subcategory-id'),
                 skip: null,
                 value: [10, { currency: 'CZK', value: 37.34 }],
               },
             ],
-            creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+            creditLimit: [{ subcategory: numericHash('some-subcategory-id'), value: 1000 }],
             currencies: [CURRENCY_CZK],
           },
         ],
@@ -598,14 +624,14 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('DATA_READ', () => {
+  describe(ActionTypeApi.DataRead, () => {
     const action = dataRead({
       ...testResponse,
       netWorth: {
         categories: {
           data: [
             {
-              id: 'some-category-id',
+              id: numericHash('some-category-id'),
               type: 'asset',
               category: 'Cash (easy access)',
               color: '#00ff00',
@@ -616,8 +642,8 @@ describe('Net worth reducer', () => {
         subcategories: {
           data: [
             {
-              id: 'some-subcategory-id',
-              categoryId: 'some-category-id',
+              id: numericHash('some-subcategory-id'),
+              categoryId: numericHash('some-category-id'),
               subcategory: 'My bank account',
               hasCreditLimit: null,
               opacity: 0.2,
@@ -628,23 +654,23 @@ describe('Net worth reducer', () => {
           data: {
             items: [
               {
-                id: 'some-entry-id',
+                id: numericHash('some-entry-id'),
                 date: '2019-07-12',
                 values: [
                   {
-                    id: 'some-value-id-a',
-                    subcategory: 'some-subcategory-id',
+                    id: numericHash('some-value-id-a'),
+                    subcategory: numericHash('some-subcategory-id'),
                     skip: true,
                     value: -239,
                   },
                   {
-                    id: 'some-value-id-b',
-                    subcategory: 'other-subcategory-id',
+                    id: numericHash('some-value-id-b'),
+                    subcategory: numericHash('other-subcategory-id'),
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
                   },
                 ],
-                creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+                creditLimit: [{ subcategory: numericHash('some-subcategory-id'), value: 1000 }],
                 currencies: [CURRENCY_CZK],
               },
             ],
@@ -659,12 +685,12 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
+      expect(result).toStrictEqual<State>(
+        expect.objectContaining<Partial<State>>({
           categories: {
             items: [
               {
-                id: 'some-category-id',
+                id: numericHash('some-category-id'),
                 type: 'asset',
                 category: 'Cash (easy access)',
                 color: '#00ff00',
@@ -676,8 +702,8 @@ describe('Net worth reducer', () => {
           subcategories: {
             items: [
               {
-                id: 'some-subcategory-id',
-                categoryId: 'some-category-id',
+                id: numericHash('some-subcategory-id'),
+                categoryId: numericHash('some-category-id'),
                 subcategory: 'My bank account',
                 hasCreditLimit: null,
                 opacity: 0.2,
@@ -688,23 +714,23 @@ describe('Net worth reducer', () => {
           entries: {
             items: [
               {
-                id: 'some-entry-id',
+                id: numericHash('some-entry-id'),
                 date: new Date('2019-07-12'),
-                values: expect.arrayContaining([
+                values: expect.arrayContaining<ValueObject>([
                   {
-                    id: expect.any(String),
-                    subcategory: 'some-subcategory-id',
+                    id: expect.any(Number),
+                    subcategory: numericHash('some-subcategory-id'),
                     skip: true,
                     value: -239,
                   },
                   {
-                    id: expect.any(String),
-                    subcategory: 'other-subcategory-id',
+                    id: expect.any(Number),
+                    subcategory: numericHash('other-subcategory-id'),
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
                   },
                 ]),
-                creditLimit: [{ subcategory: 'some-subcategory-id', value: 1000 }],
+                creditLimit: [{ subcategory: numericHash('some-subcategory-id'), value: 1000 }],
                 currencies: [CURRENCY_CZK],
               },
             ],
@@ -731,12 +757,12 @@ describe('Net worth reducer', () => {
             data: {
               items: [
                 {
-                  id: 'some-entry-id',
+                  id: numericHash('some-entry-id'),
                   date: '2019-07-12',
                   values: [
                     {
-                      id: 'some-value-id-a',
-                      subcategory: 'some-subcategory-id',
+                      id: numericHash('some-value-id-a'),
+                      subcategory: numericHash('some-subcategory-id'),
                       skip: true,
                       value: -239,
                     },
@@ -752,19 +778,19 @@ describe('Net worth reducer', () => {
 
       const result = reducer(initialState, actionMissing);
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
+      expect(result).toStrictEqual<State>(
+        expect.objectContaining<Partial<State>>({
           categories: { items: [], __optimistic: [] },
           subcategories: { items: [], __optimistic: [] },
           entries: {
             items: [
               {
-                id: 'some-entry-id',
+                id: numericHash('some-entry-id'),
                 date: new Date('2019-07-12'),
                 values: [
                   {
-                    id: expect.any(String),
-                    subcategory: 'some-subcategory-id',
+                    id: expect.any(Number),
+                    subcategory: numericHash('some-subcategory-id'),
                     skip: true,
                     value: -239,
                   },
@@ -785,20 +811,20 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          entries: expect.objectContaining({
+      expect(result).toStrictEqual<State>(
+        expect.objectContaining<Partial<State>>({
+          entries: expect.objectContaining<Partial<State['entries']>>({
             items: [
               expect.objectContaining({
-                id: 'some-entry-id',
+                id: numericHash('some-entry-id'),
                 values: [
-                  expect.objectContaining({
-                    id: 'some-value-id-b',
-                    subcategory: 'other-subcategory-id',
+                  expect.objectContaining<Partial<ValueObject>>({
+                    id: numericHash('some-value-id-a'),
+                    subcategory: numericHash('some-subcategory-id'),
                   }),
-                  expect.objectContaining({
-                    id: 'some-value-id-a',
-                    subcategory: 'some-subcategory-id',
+                  expect.objectContaining<Partial<ValueObject>>({
+                    id: numericHash('some-value-id-b'),
+                    subcategory: numericHash('other-subcategory-id'),
                   }),
                 ],
               }),
@@ -809,7 +835,7 @@ describe('Net worth reducer', () => {
     });
   });
 
-  describe('SYNC_RECEIVED', () => {
+  describe(ActionTypeApi.SyncReceived, () => {
     it('should confirm category creates, updating any dependencies', () => {
       expect.assertions(1);
       const state: State = {
@@ -819,7 +845,7 @@ describe('Net worth reducer', () => {
             CATEGORY_CASH,
             {
               ...CATEGORY_CC,
-              id: 'some-fake-category-id',
+              id: numericHash('some-fake-category-id'),
             },
           ],
           __optimistic: [undefined, RequestType.create],
@@ -829,8 +855,8 @@ describe('Net worth reducer', () => {
             SUBCATEGORY_WALLET,
             {
               ...SUBCATEGORY_CC,
-              id: 'some-fake-subcategory-id',
-              categoryId: 'some-fake-category-id',
+              id: numericHash('some-fake-subcategory-id'),
+              categoryId: numericHash('some-fake-category-id'),
             },
           ],
           __optimistic: [undefined, RequestType.create],
@@ -838,23 +864,23 @@ describe('Net worth reducer', () => {
         entries: {
           items: [
             {
-              id: 'some-fake-entry-id',
+              id: numericHash('some-fake-entry-id'),
               date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
-                  id: 'value-id-1',
-                  subcategory: 'some-fake-subcategory-id',
+                  id: numericHash('value-id-1'),
+                  subcategory: numericHash('some-fake-subcategory-id'),
                   skip: true,
                   value: -239,
                 },
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
                 },
               ],
-              creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
+              creditLimit: [{ subcategory: numericHash('some-fake-subcategory-id'), value: 1000 }],
               currencies: [CURRENCY_CZK],
             },
           ],
@@ -867,7 +893,7 @@ describe('Net worth reducer', () => {
         netWorth: [
           {
             type: RequestType.create,
-            fakeId: 'some-fake-category-id',
+            fakeId: numericHash('some-fake-category-id'),
             method: 'post',
             route: 'net-worth/categories',
             body: {
@@ -882,8 +908,8 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
+      expect(result).toStrictEqual<State>(
+        expect.objectContaining<Partial<State>>({
           categories: { items: [CATEGORY_CASH, CATEGORY_CC], __optimistic: [undefined, undefined] },
           subcategories: {
             items: [
@@ -891,33 +917,35 @@ describe('Net worth reducer', () => {
               {
                 ...SUBCATEGORY_CC,
                 // the subcategory can only be created after its category is confirmed
-                id: 'some-fake-subcategory-id',
+                id: numericHash('some-fake-subcategory-id'),
               },
             ],
             __optimistic: [undefined, RequestType.create],
           },
           entries: {
             items: [
-              {
-                id: 'some-fake-entry-id',
+              expect.objectContaining({
+                id: numericHash('some-fake-entry-id'),
                 date: new Date('2019-07-12T12:36:03Z'),
-                values: expect.arrayContaining([
+                values: expect.arrayContaining<ValueObject>([
                   {
-                    id: 'value-id-1',
-                    subcategory: 'some-fake-subcategory-id',
+                    id: numericHash('value-id-1'),
+                    subcategory: numericHash('some-fake-subcategory-id'),
                     skip: true,
                     value: -239,
                   },
                   {
-                    id: 'value-id-2',
+                    id: numericHash('value-id-2'),
                     subcategory: SUBCATEGORY_WALLET.id,
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
                   },
                 ]),
-                creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
+                creditLimit: [
+                  { subcategory: numericHash('some-fake-subcategory-id'), value: 1000 },
+                ],
                 currencies: [CURRENCY_CZK],
-              },
+              }),
             ],
             __optimistic: [
               // the entry can only be created after its subcategories are confirmed
@@ -971,7 +999,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: {
             items: [updatedCategory],
@@ -998,17 +1026,17 @@ describe('Net worth reducer', () => {
         entries: {
           items: [
             {
-              id: 'some-entry-id',
+              id: numericHash('some-entry-id'),
               date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
-                  id: 'value-id-1',
+                  id: numericHash('value-id-1'),
                   subcategory: SUBCATEGORY_CC.id,
                   skip: true,
                   value: -239,
                 },
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1037,7 +1065,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: { items: [CATEGORY_CASH], __optimistic: [undefined] },
           // The dependencies are deleted from the database through foreign key cascading,
@@ -1046,11 +1074,11 @@ describe('Net worth reducer', () => {
           entries: {
             items: [
               {
-                id: 'some-entry-id',
+                id: numericHash('some-entry-id'),
                 date: new Date('2019-07-12T12:36:03Z'),
                 values: [
                   {
-                    id: 'value-id-2',
+                    id: numericHash('value-id-2'),
                     subcategory: SUBCATEGORY_WALLET.id,
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1080,7 +1108,7 @@ describe('Net worth reducer', () => {
             SUBCATEGORY_WALLET,
             {
               ...SUBCATEGORY_CC,
-              id: 'some-fake-subcategory-id',
+              id: numericHash('some-fake-subcategory-id'),
             },
           ],
           __optimistic: [undefined, undefined, RequestType.create],
@@ -1088,23 +1116,23 @@ describe('Net worth reducer', () => {
         entries: {
           items: [
             {
-              id: 'some-entry-id',
+              id: numericHash('some-entry-id'),
               date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
-                  id: 'value-id-1',
-                  subcategory: 'some-fake-subcategory-id',
+                  id: numericHash('value-id-1'),
+                  subcategory: numericHash('some-fake-subcategory-id'),
                   skip: true,
                   value: -239,
                 },
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
                 },
               ],
-              creditLimit: [{ subcategory: 'some-fake-subcategory-id', value: 1000 }],
+              creditLimit: [{ subcategory: numericHash('some-fake-subcategory-id'), value: 1000 }],
               currencies: [CURRENCY_CZK],
             },
           ],
@@ -1117,7 +1145,7 @@ describe('Net worth reducer', () => {
         netWorth: [
           {
             type: RequestType.create,
-            fakeId: 'some-fake-subcategory-id',
+            fakeId: numericHash('some-fake-subcategory-id'),
             method: 'post',
             route: 'net-worth/subcategories',
             body: {
@@ -1133,7 +1161,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: {
             items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
@@ -1146,17 +1174,17 @@ describe('Net worth reducer', () => {
           entries: {
             items: [
               {
-                id: 'some-entry-id',
+                id: numericHash('some-entry-id'),
                 date: new Date('2019-07-12T12:36:03Z'),
                 values: [
                   {
-                    id: 'value-id-1',
+                    id: numericHash('value-id-1'),
                     subcategory: SUBCATEGORY_CC.id,
                     skip: true,
                     value: -239,
                   },
                   {
-                    id: 'value-id-2',
+                    id: numericHash('value-id-2'),
                     subcategory: SUBCATEGORY_WALLET.id,
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1202,7 +1230,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: { items: [CATEGORY_MORTGAGE], __optimistic: [undefined] },
           subcategories: { items: [SUBCATEGORY_HOUSE], __optimistic: [undefined] },
@@ -1226,17 +1254,17 @@ describe('Net worth reducer', () => {
         entries: {
           items: [
             {
-              id: 'some-entry-id',
+              id: numericHash('some-entry-id'),
               date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
-                  id: 'value-id-1',
+                  id: numericHash('value-id-1'),
                   subcategory: SUBCATEGORY_CC.id,
                   skip: false,
                   value: -239,
                 },
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1265,7 +1293,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: {
             items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
@@ -1280,11 +1308,11 @@ describe('Net worth reducer', () => {
           entries: {
             items: [
               {
-                id: 'some-entry-id',
+                id: numericHash('some-entry-id'),
                 date: new Date('2019-07-12T12:36:03Z'),
                 values: [
                   {
-                    id: 'value-id-2',
+                    id: numericHash('value-id-2'),
                     subcategory: SUBCATEGORY_WALLET.id,
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1315,17 +1343,17 @@ describe('Net worth reducer', () => {
         entries: {
           items: [
             {
-              id: 'some-fake-entry-id',
+              id: numericHash('some-fake-entry-id'),
               date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
-                  id: 'value-id-1',
+                  id: numericHash('value-id-1'),
                   subcategory: SUBCATEGORY_HOUSE.id,
                   skip: true,
                   value: -239,
                 },
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1344,7 +1372,7 @@ describe('Net worth reducer', () => {
         netWorth: [
           {
             type: RequestType.create,
-            fakeId: 'some-fake-entry-id',
+            fakeId: numericHash('some-fake-entry-id'),
             method: 'post' as const,
             route: 'net-worth',
             body: {
@@ -1365,17 +1393,17 @@ describe('Net worth reducer', () => {
               currencies: [CURRENCY_CZK],
             },
             res: {
-              id: 'some-real-entry-id',
+              id: numericHash('some-real-entry-id'),
               date: '2019-07-12',
               values: [
                 {
-                  id: 'value-id-1',
+                  id: numericHash('value-id-1'),
                   subcategory: SUBCATEGORY_HOUSE.id,
                   skip: true,
                   value: -239,
                 },
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1390,7 +1418,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: {
             items: [CATEGORY_MORTGAGE, CATEGORY_CC, CATEGORY_CASH],
@@ -1403,22 +1431,22 @@ describe('Net worth reducer', () => {
           entries: expect.objectContaining({
             items: [
               expect.objectContaining({
-                id: 'some-real-entry-id',
+                id: numericHash('some-real-entry-id'),
                 date: new Date('2019-07-12T12:36:03Z'),
-                values: [
+                values: expect.arrayContaining([
                   {
-                    id: 'value-id-1',
+                    id: numericHash('value-id-1'),
                     subcategory: SUBCATEGORY_HOUSE.id,
                     skip: true,
                     value: -239,
                   },
                   {
-                    id: 'value-id-2',
+                    id: numericHash('value-id-2'),
                     subcategory: SUBCATEGORY_WALLET.id,
                     skip: null,
                     value: [10, { currency: 'CZK', value: 37.34 }],
                   },
-                ],
+                ]),
                 creditLimit: [{ subcategory: SUBCATEGORY_CC.id, value: 1000 }],
                 currencies: [CURRENCY_CZK],
               }),
@@ -1443,17 +1471,17 @@ describe('Net worth reducer', () => {
         entries: {
           items: [
             {
-              id: 'some-real-entry-id',
+              id: numericHash('some-real-entry-id'),
               date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
-                  id: 'value-id-1',
+                  id: numericHash('value-id-1'),
                   subcategory: SUBCATEGORY_HOUSE.id,
                   skip: true,
                   value: -239,
                 },
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1472,20 +1500,20 @@ describe('Net worth reducer', () => {
         netWorth: [
           {
             type: RequestType.update,
-            id: 'some-real-entry-id',
+            id: numericHash('some-real-entry-id'),
             method: 'put' as const,
             route: 'net-worth',
             body: {
               date: '2019-07-12',
               values: [
                 {
-                  id: 'value-id-1',
+                  id: numericHash('value-id-1'),
                   subcategory: SUBCATEGORY_HOUSE.id,
                   skip: true,
                   value: -239,
                 },
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1495,17 +1523,17 @@ describe('Net worth reducer', () => {
               currencies: [CURRENCY_CZK],
             },
             res: {
-              id: 'some-real-entry-id',
+              id: numericHash('some-real-entry-id'),
               date: '2019-07-12',
               values: [
                 {
-                  id: 'value-id-2',
+                  id: numericHash('value-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
                 },
                 {
-                  id: 'value-id-1',
+                  id: numericHash('value-id-1'),
                   subcategory: SUBCATEGORY_HOUSE.id,
                   skip: true,
                   value: -239,
@@ -1523,7 +1551,7 @@ describe('Net worth reducer', () => {
 
         const result = reducer(state, action);
 
-        expect(result).toStrictEqual(
+        expect(result).toStrictEqual<State>(
           expect.objectContaining({
             categories: {
               items: [CATEGORY_MORTGAGE, CATEGORY_CASH, CATEGORY_CC],
@@ -1536,17 +1564,17 @@ describe('Net worth reducer', () => {
             entries: {
               items: [
                 expect.objectContaining({
-                  id: 'some-real-entry-id',
+                  id: numericHash('some-real-entry-id'),
                   date: new Date('2019-07-12T12:36:03Z'),
                   values: expect.arrayContaining([
                     {
-                      id: 'value-id-1',
+                      id: numericHash('value-id-1'),
                       subcategory: SUBCATEGORY_HOUSE.id,
                       skip: true,
                       value: -239,
                     },
                     {
-                      id: 'value-id-2',
+                      id: numericHash('value-id-2'),
                       subcategory: SUBCATEGORY_WALLET.id,
                       skip: null,
                       value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1567,14 +1595,14 @@ describe('Net worth reducer', () => {
 
         const result = reducer(state, action);
 
-        expect(result).toStrictEqual(
+        expect(result).toStrictEqual<State>(
           expect.objectContaining({
             entries: expect.objectContaining({
               items: [
                 expect.objectContaining({
                   values: [
-                    expect.objectContaining({ id: 'value-id-1' }),
-                    expect.objectContaining({ id: 'value-id-2' }),
+                    expect.objectContaining({ id: numericHash('value-id-2') }),
+                    expect.objectContaining({ id: numericHash('value-id-1') }),
                   ],
                 }),
               ],
@@ -1596,17 +1624,17 @@ describe('Net worth reducer', () => {
         entries: {
           items: [
             {
-              id: 'some-real-entry-id',
+              id: numericHash('some-real-entry-id'),
               date: new Date('2019-07-12T12:36:03Z'),
               values: [
                 {
-                  id: 'subcategory-id-1',
+                  id: numericHash('subcategory-id-1'),
                   subcategory: SUBCATEGORY_CC.id,
                   skip: false,
                   value: -239,
                 },
                 {
-                  id: 'subcategory-id-2',
+                  id: numericHash('subcategory-id-2'),
                   subcategory: SUBCATEGORY_WALLET.id,
                   skip: null,
                   value: [10, { currency: 'CZK', value: 37.34 }],
@@ -1625,7 +1653,7 @@ describe('Net worth reducer', () => {
         netWorth: [
           {
             type: RequestType.delete,
-            id: 'some-real-entry-id',
+            id: numericHash('some-real-entry-id'),
             method: 'delete',
             route: 'net-worth',
             res: undefined,
@@ -1635,7 +1663,7 @@ describe('Net worth reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result).toStrictEqual(
+      expect(result).toStrictEqual<State>(
         expect.objectContaining({
           categories: { items: [CATEGORY_CC, CATEGORY_CASH], __optimistic: [undefined, undefined] },
           subcategories: {

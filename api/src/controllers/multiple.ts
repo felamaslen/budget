@@ -5,7 +5,7 @@ import { MultiTask, CreateResponse, UpdateResponse, DeleteResponse, Page } from 
 
 type AnyResponse = CreateResponse | UpdateResponse | DeleteResponse;
 
-const processSingleTask = (db: DatabaseTransactionConnectionType, uid: string) => async (
+const processSingleTask = (db: DatabaseTransactionConnectionType, uid: number) => async (
   task: MultiTask,
 ): Promise<AnyResponse> => {
   if (task.method === 'delete') {
@@ -37,7 +37,7 @@ const processSingleTask = (db: DatabaseTransactionConnectionType, uid: string) =
 
 export async function processMultipleTasks(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   list: MultiTask[],
 ): Promise<AnyResponse[]> {
   return Promise.all<AnyResponse>(list.map(processSingleTask(db, uid)));

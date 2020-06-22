@@ -10,7 +10,7 @@ import {
   TimelineRow,
 } from '~api/types';
 
-const getAnalysisConditions = (uid: string, startTime: Date, endTime: Date): ListSqlTokenType =>
+const getAnalysisConditions = (uid: number, startTime: Date, endTime: Date): ListSqlTokenType =>
   sql.join(
     [
       sql`date >= ${format(startTime, 'yyyy-MM-dd')}`,
@@ -23,7 +23,7 @@ const getAnalysisConditions = (uid: string, startTime: Date, endTime: Date): Lis
 
 export async function getIncome(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   startTime: Date,
   endTime: Date,
 ): Promise<number> {
@@ -49,7 +49,7 @@ const periodCostColumns = (categoryColumn: string | null): ListSqlTokenType =>
 
 export async function getPeriodCostForCategory(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   startTime: Date,
   endTime: Date,
   category: AnalysisCategory,
@@ -66,7 +66,7 @@ export async function getPeriodCostForCategory(
 
 export async function getPeriodCostDeep(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   category: AnalysisCategory,
   categoryColumn: string | null,
   { startTime, endTime }: PeriodCondition,
@@ -83,7 +83,7 @@ export async function getPeriodCostDeep(
 
 export async function getTimelineRows(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   startTime: Date,
   endTime: Date,
   category: AnalysisCategory,

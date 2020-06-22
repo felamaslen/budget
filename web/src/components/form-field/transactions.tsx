@@ -10,12 +10,12 @@ import { useCTA } from '~client/hooks';
 import { useField } from '~client/hooks/field';
 import { addToTransactionsList, modifyTransactionById, sortByKey } from '~client/modules/data';
 import { ButtonDelete, ButtonAdd } from '~client/styled/shared/button';
-import { Transaction } from '~client/types';
+import { Id, Transaction } from '~client/types';
 
 type PropsTransaction = {
-  id?: string;
+  id?: Id;
   item: Transaction;
-  onChange: (id: string, delta: Partial<Transaction>) => void;
+  onChange: (id: Id, delta: Partial<Transaction>) => void;
   create?: boolean;
 };
 
@@ -141,9 +141,9 @@ function useTransactionsField(
   currentValue: Transaction[];
   newItem: Transaction;
   onCreate: () => void;
-  onUpdate: (id: string, delta: Partial<Transaction>) => void;
-  onDelete: (id: string) => void;
-  onChangeAddField: (id: string, delta: Partial<Transaction>) => void;
+  onUpdate: (id: Id, delta: Partial<Transaction>) => void;
+  onDelete: (id: Id) => void;
+  onChangeAddField: (id: Id, delta: Partial<Transaction>) => void;
 } {
   const { currentValue, onChange } = useField<Transaction[], Transaction[]>({
     ...props,
@@ -152,7 +152,7 @@ function useTransactionsField(
   });
 
   const onChangeTransaction = useCallback(
-    (id: string, delta: Partial<Transaction>): void => {
+    (id: Id, delta: Partial<Transaction>): void => {
       onChange(modifyTransactionById(props.value, id, delta));
     },
     [props.value, onChange],

@@ -1,5 +1,6 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
+import numericHash from 'string-hash';
 
 import { Step } from './constants';
 import { FormContainer, Props } from './form-container';
@@ -9,7 +10,7 @@ describe('(net worth edit form) <FormContainer />', () => {
     add: false,
     step: Step.Date,
     item: {
-      id: 'some-fake-id',
+      id: numericHash('some-fake-id'),
       date: new Date('2020-04-20'),
       values: [],
       creditLimit: [],

@@ -21,7 +21,7 @@ interface MultiTaskUpdate<I extends ListItem> extends MultiTaskBase {
 
 interface MultiTaskDelete extends MultiTaskBase {
   method: 'delete';
-  body: { id: string };
+  body: { id: number };
 }
 
 type MultiTaskGeneric<I extends ListItem> =

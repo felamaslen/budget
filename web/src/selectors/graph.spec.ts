@@ -1,8 +1,9 @@
 import endOfDay from 'date-fns/endOfDay';
 import getUnixTime from 'date-fns/getUnixTime';
+import numericHash from 'string-hash';
 
 import { getTargets } from './graph';
-import { testState as state } from '~client/test-data/state';
+import { testState as state } from '~client/test-data';
 
 describe('Graph selectors', () => {
   describe('getTargets', () => {
@@ -15,63 +16,93 @@ describe('Graph selectors', () => {
           entries: {
             items: [
               {
-                id: 'entry-a',
+                id: numericHash('entry-a'),
                 date: new Date('2018-01-31'),
                 values: [
-                  { id: 'value-id-1', subcategory: 'real-wallet-subcategory-id', value: 13502 },
+                  {
+                    id: numericHash('value-id-1'),
+                    subcategory: numericHash('real-wallet-subcategory-id'),
+                    value: 13502,
+                  },
                 ],
                 creditLimit: [],
                 currencies: [],
               },
               {
-                id: 'entry-b',
+                id: numericHash('entry-b'),
                 date: new Date('2018-02-28'),
                 values: [
-                  { id: 'value-id-2', subcategory: 'real-wallet-subcategory-id', value: 19220 },
+                  {
+                    id: numericHash('value-id-2'),
+                    subcategory: numericHash('real-wallet-subcategory-id'),
+                    value: 19220,
+                  },
                 ],
                 creditLimit: [],
                 currencies: [],
               },
               {
-                id: 'entry-c',
+                id: numericHash('entry-c'),
                 date: new Date('2018-03-31'),
                 values: [
-                  { id: 'value-id-3', subcategory: 'real-wallet-subcategory-id', value: 11876 },
+                  {
+                    id: numericHash('value-id-3'),
+                    subcategory: numericHash('real-wallet-subcategory-id'),
+                    value: 11876,
+                  },
                 ],
                 creditLimit: [],
                 currencies: [],
               },
               {
-                id: 'entry-d',
+                id: numericHash('entry-d'),
                 date: new Date('2018-04-30'),
                 values: [
-                  { id: 'value-id-4', subcategory: 'real-wallet-subcategory-id', value: 14981 },
+                  {
+                    id: numericHash('value-id-4'),
+                    subcategory: numericHash('real-wallet-subcategory-id'),
+                    value: 14981,
+                  },
                 ],
                 creditLimit: [],
                 currencies: [],
               },
               {
-                id: 'entry-e',
+                id: numericHash('entry-e'),
                 date: new Date('2018-05-31'),
                 values: [
-                  { id: 'value-id-5', subcategory: 'real-wallet-subcategory-id', value: 14230 },
+                  {
+                    id: numericHash('value-id-5'),
+                    subcategory: numericHash('real-wallet-subcategory-id'),
+                    value: 14230,
+                  },
                 ],
                 creditLimit: [],
                 currencies: [],
               },
               {
-                id: 'entry-f',
+                id: numericHash('entry-f'),
                 date: new Date('2018-06-30'),
                 values: [
-                  { id: 'value-id-6', subcategory: 'real-wallet-subcategory-id', value: 12678 },
+                  {
+                    id: numericHash('value-id-6'),
+                    subcategory: numericHash('real-wallet-subcategory-id'),
+                    value: 12678,
+                  },
                 ],
                 creditLimit: [],
                 currencies: [],
               },
               {
-                id: 'entry-g',
+                id: numericHash('entry-g'),
                 date: new Date('2018-07-31'),
-                values: [{ id: 'value-id-7', subcategory: 'real-wallet-subcategory-id', value: 0 }],
+                values: [
+                  {
+                    id: numericHash('value-id-7'),
+                    subcategory: numericHash('real-wallet-subcategory-id'),
+                    value: 0,
+                  },
+                ],
                 creditLimit: [],
                 currencies: [],
               },

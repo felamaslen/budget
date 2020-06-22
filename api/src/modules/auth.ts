@@ -9,9 +9,10 @@ import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
 import { pool } from '~api/modules/db';
+import { tokenSchema } from '~api/schema';
 
 export type User = {
-  uid: string;
+  uid: number;
 };
 
 type UserInfo = User & {
@@ -33,7 +34,16 @@ export function getStrategy(): Strategy {
     passReqToCallback: true,
   };
 
-  return new Strategy(params, async (_: Request, { uid }: User, done: VerifiedCallback) => {
+  return new Strategy(params, async (_: Request, data: object, done: VerifiedCallback) => {
+    const tokenValidationResult = tokenSchema.validate(data);
+    if (tokenValidationResult.error) {
+      return done(null, false, {
+        message: `Invalid auth token: ${tokenValidationResult.error.message}`,
+      });
+    }
+
+    const { uid } = tokenValidationResult.value;
+
     const user = await pool.connect(async (db) => {
       const result = await db.query<{ name: string }>(
         sql`SELECT name FROM users WHERE uid = ${uid}`,

@@ -369,8 +369,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: string
-                  format: uuid
+                  type: integer
                   required: true
                 item:
                   type: string
@@ -416,8 +415,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: string
-                  format: uuid
+                  type: integer
                   required: true
       responses:
         401:
@@ -656,8 +654,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: string
-                  format: uuid
+                  type: integer
                   required: true
                 date:
                   type: string
@@ -824,8 +821,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: string
-                  format: uuid
+                  type: integer
                   required: true
                 date:
                   type: string
@@ -999,8 +995,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: string
-                  format: uuid
+                  type: integer
                   required: true
                 date:
                   type: string
@@ -1145,8 +1140,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: string
-                  format: uuid
+                  type: integer
                   required: true
                 date:
                   type: string
@@ -1366,8 +1360,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: string
-                  format: uuid
+                  type: integer
                   required: true
                 date:
                   type: string
@@ -1549,8 +1542,7 @@ paths:
               type: object
               properties:
                 id:
-                  type: string
-                  format: uuid
+                  type: integer
                   required: true
                 date:
                   type: string
@@ -1725,8 +1717,7 @@ definitions:
     type: object
     properties:
       I:
-        type: string
-        format: uuid
+        type: integer
         description: ID
       d:
         type: string
@@ -1850,7 +1841,7 @@ definitions:
     type: object
     properties:
       id:
-        type: uuid
+        type: integer
         description: newly-inserted ID
       total:
         type: integer
@@ -1914,7 +1905,7 @@ definitions:
               type: object
               properties:
                 I:
-                  type: uuid
+                  type: integer
                   description: ID of holding
                 i:
                   type: string

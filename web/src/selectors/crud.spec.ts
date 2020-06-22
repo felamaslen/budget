@@ -1,3 +1,4 @@
+import numericHash from 'string-hash';
 import { getRequests, withoutDeleted } from './crud';
 import { RequestType } from '~client/types';
 
@@ -8,7 +9,7 @@ describe('Crud selector', () => {
       const state = {
         items: [
           {
-            id: 'some-fake-id',
+            id: numericHash('some-fake-id'),
             foo: 'bar',
             bar: 'baz',
           },
@@ -21,7 +22,7 @@ describe('Crud selector', () => {
       expect(result).toStrictEqual([
         {
           type: RequestType.create,
-          fakeId: 'some-fake-id',
+          fakeId: numericHash('some-fake-id'),
           method: 'post',
           route: 'my/url/something',
           body: {
@@ -37,7 +38,7 @@ describe('Crud selector', () => {
       const state = {
         items: [
           {
-            id: 'some-real-id',
+            id: numericHash('some-real-id'),
             foo: 'bar',
             bar: 'baz',
           },
@@ -50,7 +51,7 @@ describe('Crud selector', () => {
       expect(result).toStrictEqual([
         {
           type: RequestType.update,
-          id: 'some-real-id',
+          id: numericHash('some-real-id'),
           method: 'put',
           route: 'my/url/something',
           body: {
@@ -66,7 +67,7 @@ describe('Crud selector', () => {
       const state = {
         items: [
           {
-            id: 'some-real-id',
+            id: numericHash('some-real-id'),
           },
         ],
         __optimistic: [RequestType.delete],
@@ -77,7 +78,7 @@ describe('Crud selector', () => {
       expect(result).toStrictEqual([
         {
           type: RequestType.delete,
-          id: 'some-real-id',
+          id: numericHash('some-real-id'),
           method: 'delete',
           route: 'my/url/something',
         },
@@ -91,17 +92,17 @@ describe('Crud selector', () => {
       expect(
         withoutDeleted({
           items: [
-            { id: '1', foo: 3 },
-            { id: '2', foo: 6 },
-            { id: '3', foo: 4 },
-            { id: '4', foo: 5 },
+            { id: numericHash('1'), foo: 3 },
+            { id: numericHash('2'), foo: 6 },
+            { id: numericHash('3'), foo: 4 },
+            { id: numericHash('4'), foo: 5 },
           ],
           __optimistic: [undefined, RequestType.delete, RequestType.create, RequestType.update],
         }),
       ).toStrictEqual([
-        { id: '1', foo: 3 },
-        { id: '3', foo: 4 },
-        { id: '4', foo: 5 },
+        { id: numericHash('1'), foo: 3 },
+        { id: numericHash('3'), foo: 4 },
+        { id: numericHash('4'), foo: 5 },
       ]);
     });
   });

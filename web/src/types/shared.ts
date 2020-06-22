@@ -3,11 +3,13 @@ import { DataKeyAbbr } from '~client/constants/api';
 export type PickUnion<T extends object, K extends keyof T> = { [P in K]: T[P] };
 export type PickRequire<T extends object, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
+export type Id = number;
+
 export type IdMap<V> = {
   [id: string]: V;
 };
 
-export type Item = { id: string };
+export type Item = { id: Id };
 
 export type FieldKey<I extends Item> = keyof Omit<I, 'id'>;
 
@@ -16,6 +18,6 @@ export interface ListItem extends Item {
 }
 
 export interface RawListItem {
-  [DataKeyAbbr.id]: string;
+  [DataKeyAbbr.id]: Id;
   [DataKeyAbbr.item]: string;
 }

@@ -1,15 +1,16 @@
+import numericHash from 'string-hash';
 import * as funds from './funds';
 import { Period as AnalysisPeriod, Grouping as AnalysisGrouping } from '~client/constants/analysis';
 import { Period as FundsPeriod } from '~client/constants/graph';
 import { State } from '~client/reducers';
-import { Page } from '~client/types/app';
+import { Page } from '~client/types';
 
 export const testState: State = {
   login: {
     loading: false,
     initialised: true,
     error: null,
-    uid: 'some-user-id',
+    uid: numericHash('some-user-id'),
     name: 'Some user',
   },
   api: {
@@ -38,28 +39,28 @@ export const testState: State = {
     categories: {
       items: [
         {
-          id: 'real-cash-category-id',
+          id: numericHash('real-cash-category-id'),
           type: 'asset',
           category: 'Cash (easy access)',
           color: '#00ff00',
           isOption: false,
         },
         {
-          id: 'real-option-category-id',
+          id: numericHash('real-option-category-id'),
           type: 'asset',
           category: 'Options',
           color: '#0a9cff',
           isOption: true,
         },
         {
-          id: 'real-mortgage-category-id',
+          id: numericHash('real-mortgage-category-id'),
           type: 'liability',
           category: 'Mortgage',
           color: '#fa0000',
           isOption: false,
         },
         {
-          id: 'real-credit-card-category-id',
+          id: numericHash('real-credit-card-category-id'),
           type: 'liability',
           category: 'Credit cards',
           color: '#fc0000',
@@ -71,36 +72,36 @@ export const testState: State = {
     subcategories: {
       items: [
         {
-          id: 'real-wallet-subcategory-id',
-          categoryId: 'real-cash-category-id',
+          id: numericHash('real-wallet-subcategory-id'),
+          categoryId: numericHash('real-cash-category-id'),
           subcategory: 'My wallet',
           hasCreditLimit: null,
           opacity: 0.2,
         },
         {
-          id: 'real-option-subcategory-id',
-          categoryId: 'real-option-category-id',
+          id: numericHash('real-option-subcategory-id'),
+          categoryId: numericHash('real-option-category-id'),
           subcategory: 'Some share',
           hasCreditLimit: null,
           opacity: 0.9,
         },
         {
-          id: 'real-bank-subcategory-id',
-          categoryId: 'real-cash-category-id',
+          id: numericHash('real-bank-subcategory-id'),
+          categoryId: numericHash('real-cash-category-id'),
           subcategory: 'My bank',
           hasCreditLimit: null,
           opacity: 0.25,
         },
         {
-          id: 'real-house-subcategory-id',
-          categoryId: 'real-mortgage-category-id',
+          id: numericHash('real-house-subcategory-id'),
+          categoryId: numericHash('real-mortgage-category-id'),
           subcategory: 'My house',
           hasCreditLimit: false,
           opacity: 0.1,
         },
         {
-          id: 'real-credit-card-subcategory-id',
-          categoryId: 'real-credit-card-category-id',
+          id: numericHash('real-credit-card-subcategory-id'),
+          categoryId: numericHash('real-credit-card-category-id'),
           subcategory: 'My credit card',
           hasCreditLimit: true,
           opacity: 0.3,
@@ -111,67 +112,67 @@ export const testState: State = {
     entries: {
       items: [
         {
-          id: 'real-entry-id-a',
+          id: numericHash('real-entry-id-a'),
           date: new Date('2018-02-28'),
           values: [
             {
-              id: 'value-id-a1',
-              subcategory: 'real-wallet-subcategory-id',
+              id: numericHash('value-id-a1'),
+              subcategory: numericHash('real-wallet-subcategory-id'),
               value: [10324, { currency: 'CZK', value: 37.5 }],
             },
             {
-              id: 'value-id-a2',
-              subcategory: 'real-house-subcategory-id',
+              id: numericHash('value-id-a2'),
+              subcategory: numericHash('real-house-subcategory-id'),
               value: -18744200,
               skip: true,
             },
             {
-              id: 'value-id-a3',
-              subcategory: 'real-bank-subcategory-id',
+              id: numericHash('value-id-a3'),
+              subcategory: numericHash('real-bank-subcategory-id'),
               value: 1296523,
             },
             {
-              id: 'value-id-a4',
-              subcategory: 'real-credit-card-subcategory-id',
+              id: numericHash('value-id-a4'),
+              subcategory: numericHash('real-credit-card-subcategory-id'),
               value: -8751,
             },
           ],
           creditLimit: [
             {
-              subcategory: 'real-credit-card-subcategory-id',
+              subcategory: numericHash('real-credit-card-subcategory-id'),
               value: 120000,
             },
           ],
-          currencies: [{ id: 'currency-id-a1', currency: 'CZK', rate: 0.035 }],
+          currencies: [{ id: numericHash('currency-id-a1'), currency: 'CZK', rate: 0.035 }],
         },
         {
-          id: 'real-entry-id-b',
+          id: numericHash('real-entry-id-b'),
           date: new Date('2018-03-31'),
           values: [
             {
-              id: 'value-id-b1',
-              subcategory: 'real-wallet-subcategory-id',
+              id: numericHash('value-id-b1'),
+              subcategory: numericHash('real-wallet-subcategory-id'),
               value: [9752],
             },
             {
-              id: 'value-id-b2',
-              subcategory: 'real-house-subcategory-id',
+              id: numericHash('value-id-b2'),
+              subcategory: numericHash('real-house-subcategory-id'),
               value: -18420900,
               skip: true,
             },
             {
-              id: 'value-id-b3',
-              subcategory: 'real-bank-subcategory-id',
+              id: numericHash('value-id-b3'),
+              subcategory: numericHash('real-bank-subcategory-id'),
               value: 1051343,
             },
             {
-              id: 'value-id-b4',
-              subcategory: 'real-credit-card-subcategory-id',
+              id: numericHash('value-id-b4'),
+              subcategory: numericHash('real-credit-card-subcategory-id'),
               value: -21939,
             },
             {
-              id: 'value-id-b5',
-              subcategory: 'real-option-subcategory-id',
+              id: numericHash('value-id-b5'),
+              subcategory: numericHash('real-option-subcategory-id'),
               value: [
                 {
                   units: 103,
@@ -183,13 +184,13 @@ export const testState: State = {
           ],
           creditLimit: [
             {
-              subcategory: 'real-credit-card-subcategory-id',
+              subcategory: numericHash('real-credit-card-subcategory-id'),
               value: 150000,
             },
           ],
           currencies: [
-            { id: 'currency-id-b1', currency: 'USD', rate: 0.865 },
-            { id: 'currency-id-b2', currency: 'CZK', rate: 0.0314 },
+            { id: numericHash('currency-id-b1'), currency: 'USD', rate: 0.865 },
+            { id: numericHash('currency-id-b2'), currency: 'CZK', rate: 0.0314 },
           ],
         },
       ],
@@ -273,7 +274,7 @@ export const testState: State = {
     loadingMore: false,
     items: [
       {
-        id: 'id19',
+        id: numericHash('id19'),
         date: new Date('2018-04-17'),
         item: 'foo3',
         category: 'bar3',
@@ -281,7 +282,7 @@ export const testState: State = {
         shop: 'bak3',
       },
       {
-        id: 'id300',
+        id: numericHash('id300'),
         date: new Date('2018-02-03'),
         item: 'foo1',
         category: 'bar1',
@@ -289,7 +290,7 @@ export const testState: State = {
         shop: 'bak2',
       },
       {
-        id: 'id29',
+        id: numericHash('id29'),
         date: new Date('2018-02-02'),
         item: 'foo3',
         category: 'bar3',
@@ -297,7 +298,7 @@ export const testState: State = {
         shop: 'bak3',
       },
       {
-        id: 'id81',
+        id: numericHash('id81'),
         date: new Date('2018-02-03'),
         item: 'foo2',
         category: 'bar2',

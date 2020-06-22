@@ -1,8 +1,9 @@
 import React, { useCallback } from 'react';
 
 import { CrudProps } from '~client/hooks/crud';
+import { Id, Item as ItemType } from '~client/types';
 
-export type ItemComponent<I extends { id: string }, E extends {}> = React.FC<
+export type ItemComponent<I extends ItemType, E extends {}> = React.FC<
   E &
     Pick<CrudProps<I>, 'onUpdate'> & {
       onDelete: (event?: React.BaseSyntheticEvent) => void;
@@ -11,20 +12,20 @@ export type ItemComponent<I extends { id: string }, E extends {}> = React.FC<
       item: I;
       active: boolean;
       noneActive: boolean;
-      setActive: (id: string | null) => void;
+      setActive: (id: Id | null) => void;
     }
 >;
 
-type Props<I extends { id: string }, E extends {} = {}> = Omit<CrudProps<I>, 'onCreate'> & {
-  activeId: string | null;
+type Props<I extends ItemType, E extends {} = {}> = Omit<CrudProps<I>, 'onCreate'> & {
+  activeId: number | null;
   item: I;
   extraProps?: E;
   Item: ItemComponent<I, E>;
   odd: boolean;
-  setActive: (id: string | null) => void;
+  setActive: (id: Id | null) => void;
 };
 
-const CrudListItem = <I extends { id: string }, E extends {} = {}>({
+const CrudListItem = <I extends ItemType, E extends {} = {}>({
   activeId,
   item,
   extraProps = {} as E,

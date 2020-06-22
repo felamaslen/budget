@@ -16,7 +16,7 @@ export const API_BACKOFF_TIME = 5000;
 
 export const LOGIN_INPUT_LENGTH = 4;
 
-export const CREATE_ID = 'CREATE_ID';
+export const CREATE_ID = -2;
 
 const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
   [Page.funds]: { name: 'Stocks' },

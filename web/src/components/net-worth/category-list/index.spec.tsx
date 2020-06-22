@@ -1,9 +1,10 @@
 /* eslint-disable max-len */
 import { render, RenderResult, within, act, fireEvent } from '@testing-library/react';
 import React from 'react';
+import numericHash from 'string-hash';
 
 import { NetWorthCategoryList, Props } from '.';
-import { Subcategory } from '~client/types/net-worth';
+import { Create, Subcategory } from '~client/types';
 
 describe('<NetWorthCategoryList />', () => {
   const onCreateCategory = jest.fn();
@@ -17,14 +18,14 @@ describe('<NetWorthCategoryList />', () => {
   const props: Props = {
     categories: [
       {
-        id: 'category-id-a',
+        id: numericHash('category-id-a'),
         type: 'asset',
         category: 'Category A',
         color: '#ccfacc',
         isOption: false,
       },
       {
-        id: 'category-id-b',
+        id: numericHash('category-id-b'),
         type: 'liability',
         category: 'Category B',
         color: '#f1cccc',
@@ -33,22 +34,22 @@ describe('<NetWorthCategoryList />', () => {
     ],
     subcategories: [
       {
-        id: 'subcategory-id-a1',
-        categoryId: 'category-id-a',
+        id: numericHash('subcategory-id-a1'),
+        categoryId: numericHash('category-id-a'),
         subcategory: 'Subcategory A1',
         hasCreditLimit: null,
         opacity: 0.876,
       },
       {
-        id: 'subcategory-id-b1',
-        categoryId: 'category-id-b',
+        id: numericHash('subcategory-id-b1'),
+        categoryId: numericHash('category-id-b'),
         subcategory: 'Subcategory B1',
         hasCreditLimit: true,
         opacity: 1,
       },
       {
-        id: 'subcategory-id-b2',
-        categoryId: 'category-id-b',
+        id: numericHash('subcategory-id-b2'),
+        categoryId: numericHash('category-id-b'),
         subcategory: 'Subcategory B2',
         hasCreditLimit: false,
         opacity: 0.659,
@@ -67,9 +68,9 @@ describe('<NetWorthCategoryList />', () => {
   const switchToOption = { isOption: true, type: 'asset' };
 
   describe.each`
-    categoryId         | category        | type           | color        | subcategories
-    ${'category-id-a'} | ${'Category A'} | ${'asset'}     | ${'#ccfacc'} | ${props.subcategories.slice(0, 1)}
-    ${'category-id-b'} | ${'Category B'} | ${'liability'} | ${'#f1cccc'} | ${props.subcategories.slice(1, 3)}
+    categoryId                      | category        | type           | color        | subcategories
+    ${numericHash('category-id-a')} | ${'Category A'} | ${'asset'}     | ${'#ccfacc'} | ${props.subcategories.slice(0, 1)}
+    ${numericHash('category-id-b')} | ${'Category B'} | ${'liability'} | ${'#f1cccc'} | ${props.subcategories.slice(1, 3)}
   `('editing category: $category', ({ categoryId, category, type, color, subcategories }) => {
     const typeDisplayValue = type === 'asset' ? 'Asset' : 'Liability';
 
@@ -499,7 +500,7 @@ describe('<NetWorthCategoryList />', () => {
                 fireEvent.click(createButton);
               });
 
-              expect(onCreateSubcategory).toHaveBeenCalledWith({
+              expect(onCreateSubcategory).toHaveBeenCalledWith<[Create<Subcategory>]>({
                 categoryId,
                 subcategory: 'Some bank account',
                 opacity: 0.8,

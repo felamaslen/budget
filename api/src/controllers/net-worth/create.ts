@@ -51,10 +51,10 @@ function getRowValue(value: ValueObject['value']): number | null {
   return simpleValues.reduce((sum, item) => sum + item, 0);
 }
 
-type WithValueId<V> = V & { valueId: string };
+type WithValueId<V> = V & { valueId: number };
 
 const filterComplexValues = <V extends Exclude<ComplexValueItem, number>>(
-  valueIds: string[],
+  valueIds: number[],
   filterItems: (value: ComplexValueItem) => value is V,
   values: ValueObject[],
 ): WithValueId<V>[] =>
@@ -74,24 +74,24 @@ const filterComplexValues = <V extends Exclude<ComplexValueItem, number>>(
 
 export async function createValues(
   db: DatabaseTransactionConnectionType,
-  netWorthId: string,
+  netWorthId: number,
   values: ValueObject[] = [],
 ): Promise<void> {
   if (!values.length) {
     return;
   }
 
-  const valuesRows = values.map<[string, boolean | null, string, number | null]>(
+  const valuesRows = values.map<[number, boolean | null, number, number | null]>(
     ({ subcategory, skip, value }) => [netWorthId, skip, subcategory, getRowValue(value)],
   );
   const valueIds = await insertValues(db, valuesRows);
 
   const fxValuesRows = filterComplexValues<FXValue>(valueIds, isFXValue, values).map<
-    [string, number, string]
+    [number, number, string]
   >(({ valueId, value, currency }) => [valueId, value, currency]);
 
   const optionValuesRows = filterComplexValues<OptionValue>(valueIds, isOptionValue, values).map<
-    [string, number, number, number]
+    [number, number, number, number]
   >(({ valueId, units, strikePrice, marketPrice }) => [valueId, units, strikePrice, marketPrice]);
 
   await Promise.all([insertFXValues(db, fxValuesRows), insertOptionValues(db, optionValuesRows)]);
@@ -100,7 +100,7 @@ export async function createValues(
 export const createCreditLimits = insertWithNetWorthId<CreditLimit>(
   'net_worth_credit_limit',
   ['subcategory', 'value'],
-  ['uuid', 'float4'],
+  ['int4', 'float4'],
 );
 
 export const createCurrencies = insertWithNetWorthId<Currency>(
@@ -165,7 +165,7 @@ export function combineJoinedEntryRows(entryRows: readonly JoinedEntryRow[]): En
 
 export async function createNetWorthEntry(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   data: CreateEntry,
 ): Promise<Entry> {
   await validateCategories(db, data);

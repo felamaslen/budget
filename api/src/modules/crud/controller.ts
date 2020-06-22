@@ -9,12 +9,12 @@ import {
   deleteCrudItem,
   getRowCount,
 } from './queries';
-import { Item, CrudOptions, ParentDependency } from './types';
+import { CrudItem, CrudOptions, ParentDependency } from './types';
 import { Create } from '~api/types';
 
 const notFoundError = (item: string): Error => boom.notFound(`${item} not found`);
 
-async function checkParentDependency<J extends Item>(
+async function checkParentDependency<J extends CrudItem>(
   db: DatabaseTransactionConnectionType,
   data: Create<J>,
   parentDependency?: ParentDependency<J>,
@@ -28,7 +28,7 @@ async function checkParentDependency<J extends Item>(
   }
 }
 
-export const makeCreateItem = <D extends Item, J extends Item>({
+export const makeCreateItem = <D extends CrudItem, J extends CrudItem>({
   table,
   jsonToDb,
   dbToJson,
@@ -43,13 +43,13 @@ export const makeCreateItem = <D extends Item, J extends Item>({
   return dbToJson(createdRow);
 };
 
-export const makeReadItem = <D extends Item, J extends Item>({
+export const makeReadItem = <D extends CrudItem, J extends CrudItem>({
   table,
   dbToJson,
   item,
 }: CrudOptions<D, J>) => async (
   db: DatabaseTransactionConnectionType,
-  id?: string,
+  id?: number,
 ): Promise<J | J[]> => {
   if (id) {
     const rowData = await selectCrudItem<D>(db, table, id);
@@ -63,7 +63,7 @@ export const makeReadItem = <D extends Item, J extends Item>({
   return rowData.map(dbToJson);
 };
 
-export const makeUpdateItem = <D extends Item, J extends Item>({
+export const makeUpdateItem = <D extends CrudItem, J extends CrudItem>({
   table,
   jsonToDb,
   dbToJson,
@@ -71,7 +71,7 @@ export const makeUpdateItem = <D extends Item, J extends Item>({
   parentDependency,
 }: CrudOptions<D, J>) => async (
   db: DatabaseTransactionConnectionType,
-  id: string,
+  id: number,
   data: Create<J>,
 ): Promise<J> => {
   await checkParentDependency(db, data, parentDependency);
@@ -83,12 +83,12 @@ export const makeUpdateItem = <D extends Item, J extends Item>({
   return dbToJson(updatedRow);
 };
 
-export const makeDeleteItem = <D extends Item, J extends Item>({
+export const makeDeleteItem = <D extends CrudItem, J extends CrudItem>({
   table,
   item,
 }: CrudOptions<D, J>) => async (
   db: DatabaseTransactionConnectionType,
-  id: string,
+  id: number,
 ): Promise<void> => {
   const numDeleted = await deleteCrudItem(db, table, id);
   if (!numDeleted) {

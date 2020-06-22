@@ -1,3 +1,4 @@
+import numericHash from 'string-hash';
 import { makeListReducer, makeDailyListReducer, ListState, DailyState } from './list';
 import {
   dataRead,
@@ -11,7 +12,7 @@ import {
 } from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
 import { testResponse } from '~client/test-data';
-import { Page, PageListCalc, RequestType, Bill } from '~client/types';
+import { Id, Page, PageListCalc, RequestType, Bill } from '~client/types';
 
 describe('List reducer', () => {
   type ExtraState = {
@@ -19,7 +20,7 @@ describe('List reducer', () => {
   };
 
   type Item = {
-    id: string;
+    id: Id;
     date: Date;
     item: string;
     cost: number;
@@ -71,13 +72,13 @@ describe('List reducer', () => {
     const response = {
       data: [
         {
-          [DataKeyAbbr.id]: 'some-id',
+          [DataKeyAbbr.id]: numericHash('some-id'),
           [DataKeyAbbr.date]: '2020-04-20',
           [DataKeyAbbr.item]: 'yes',
           [DataKeyAbbr.cost]: 123,
         },
         {
-          [DataKeyAbbr.id]: 'other-id',
+          [DataKeyAbbr.id]: numericHash('other-id'),
           [DataKeyAbbr.date]: '2020-04-21',
           [DataKeyAbbr.item]: 'no',
           [DataKeyAbbr.cost]: 456,
@@ -95,8 +96,8 @@ describe('List reducer', () => {
       const result = myListReducer(initialState, action);
 
       expect(result.items).toStrictEqual([
-        expect.objectContaining({ id: 'some-id', item: 'yes' }),
-        expect.objectContaining({ id: 'other-id', item: 'no' }),
+        expect.objectContaining({ id: numericHash('some-id'), item: 'yes' }),
+        expect.objectContaining({ id: numericHash('other-id'), item: 'no' }),
       ]);
       expect(result.__optimistic).toStrictEqual([undefined, undefined]);
     });
@@ -125,7 +126,7 @@ describe('List reducer', () => {
           olderExists: true,
           data: [
             {
-              [DataKeyAbbr.id]: 'some-id',
+              [DataKeyAbbr.id]: numericHash('some-id'),
               [DataKeyAbbr.date]: '2019-05-03',
               [DataKeyAbbr.item]: 'some-item',
               [DataKeyAbbr.cost]: 102,
@@ -224,12 +225,12 @@ describe('List reducer', () => {
   describe('ListAction.Update', () => {
     const state: State = {
       ...initialState,
-      items: [{ id: 'some-real-id', date: testDate, item: 'some-item', cost: 23 }],
+      items: [{ id: numericHash('some-real-id'), date: testDate, item: 'some-item', cost: 23 }],
       __optimistic: [undefined],
     };
 
     const action = listItemUpdated<Item, typeof page>(page)(
-      'some-real-id',
+      numericHash('some-real-id'),
       { item: 'other item' },
       {
         date: new Date('2020-04-20'),
@@ -246,7 +247,7 @@ describe('List reducer', () => {
         expect.objectContaining({
           items: [
             {
-              id: 'some-real-id',
+              id: numericHash('some-real-id'),
               date: testDate,
               item: 'other item',
               cost: 23,
@@ -264,14 +265,14 @@ describe('List reducer', () => {
         items: [
           {
             ...state.items[0],
-            id: 'some-fake-id',
+            id: numericHash('some-fake-id'),
           },
         ],
         __optimistic: [RequestType.create],
       };
 
       const actionAfterCreate = listItemUpdated<Item, typeof page>(page)(
-        'some-fake-id',
+        numericHash('some-fake-id'),
         { item: 'updated item' },
         {
           date: new Date('2020-04-20'),
@@ -286,7 +287,7 @@ describe('List reducer', () => {
         expect.objectContaining({
           items: [
             expect.objectContaining({
-              id: 'some-fake-id',
+              id: numericHash('some-fake-id'),
               item: 'updated item',
               cost: 23,
             }),
@@ -300,7 +301,7 @@ describe('List reducer', () => {
       expect.assertions(1);
       const initialStateUpdate = {
         ...initialState,
-        items: [{ id: 'some-id', date: testDate, item: 'some item', cost: 3 }],
+        items: [{ id: numericHash('some-id'), date: testDate, item: 'some item', cost: 3 }],
         __optimistic: [undefined],
       };
 
@@ -308,7 +309,7 @@ describe('List reducer', () => {
         myListReducer(
           initialStateUpdate,
           listItemUpdated<Bill, Page.bills>(Page.bills)(
-            'some-id',
+            numericHash('some-id'),
             {
               date: new Date('2020-04-20'),
               item: 'old item',
@@ -335,7 +336,7 @@ describe('List reducer', () => {
       };
 
       const actionDaily = listItemUpdated<Item, typeof page>(page)(
-        'some-real-id',
+        numericHash('some-real-id'),
         {
           cost: 41,
           item: 'different item',
@@ -357,7 +358,7 @@ describe('List reducer', () => {
       it('should not update the total if it was not updated', () => {
         expect.assertions(1);
         const actionDailyNoCost = listItemUpdated<Item, typeof page>(page)(
-          'some-real-id',
+          numericHash('some-real-id'),
           {
             item: 'different item',
           },
@@ -383,11 +384,11 @@ describe('List reducer', () => {
   describe('ListAction.Deleted', () => {
     const state: State = {
       ...initialState,
-      items: [{ id: 'some-real-id', date: testDate, item: 'some item', cost: 29 }],
+      items: [{ id: numericHash('some-real-id'), date: testDate, item: 'some item', cost: 29 }],
       __optimistic: [undefined],
     };
 
-    const action = listItemDeleted<Item, typeof page>(page)('some-real-id', {
+    const action = listItemDeleted<Item, typeof page>(page)(numericHash('some-real-id'), {
       date: new Date('2020-04-20'),
       item: 'some item',
       cost: 3,
@@ -401,7 +402,7 @@ describe('List reducer', () => {
         expect.objectContaining({
           items: [
             expect.objectContaining({
-              id: 'some-real-id',
+              id: numericHash('some-real-id'),
               item: 'some item',
               cost: 29,
             }),
@@ -443,7 +444,7 @@ describe('List reducer', () => {
         expect.objectContaining({
           items: [
             expect.objectContaining({
-              id: 'some-real-id',
+              id: numericHash('some-real-id'),
               item: 'some item',
               cost: 29,
             }),
@@ -457,14 +458,14 @@ describe('List reducer', () => {
       expect.assertions(1);
       const initialStateDelete = {
         ...initialState,
-        items: [{ id: 'some-id', date: testDate, item: 'some item', cost: 3 }],
+        items: [{ id: numericHash('some-id'), date: testDate, item: 'some item', cost: 3 }],
         __optimistic: [undefined],
       };
 
       expect(
         myListReducer(
           initialStateDelete,
-          listItemDeleted<Item, Page.bills>(Page.bills)('some-id', {
+          listItemDeleted<Item, Page.bills>(Page.bills)(numericHash('some-id'), {
             date: new Date('2020-04-20'),
             item: 'some item',
             cost: 3,
@@ -502,7 +503,7 @@ describe('List reducer', () => {
       {
         type: RequestType.create,
         method: 'post' as const,
-        fakeId: 'other-fake-id',
+        fakeId: numericHash('other-fake-id'),
         route: 'some-other-page',
         body: { some: 'data' },
       },
@@ -510,26 +511,26 @@ describe('List reducer', () => {
         type: RequestType.update,
         method: 'put' as const,
         route: page,
-        id: 'real-id-z',
+        id: numericHash('real-id-z'),
         body: { other: 'something' },
       },
       {
         type: RequestType.delete,
         method: 'delete' as const,
         route: page,
-        id: 'real-id-x',
+        id: numericHash('real-id-x'),
       },
       {
         type: RequestType.create,
         method: 'post' as const,
-        fakeId: 'some-fake-id',
+        fakeId: numericHash('some-fake-id'),
         route: page,
         body: { thisItem: true },
       },
       {
         type: RequestType.create,
         method: 'post' as const,
-        fakeId: 'different-fake-id',
+        fakeId: numericHash('different-fake-id'),
         route: 'different-route',
         body: { some: 'data' },
       },
@@ -537,7 +538,7 @@ describe('List reducer', () => {
 
     const syncResponse = [
       {
-        id: 'real-id-a',
+        id: numericHash('real-id-a'),
         total: 516,
       },
       {
@@ -547,11 +548,11 @@ describe('List reducer', () => {
         total: 1976,
       },
       {
-        id: 'real-id-b',
+        id: numericHash('real-id-b'),
         total: 117,
       },
       {
-        id: 'real-id-different',
+        id: numericHash('real-id-different'),
         total: 1856,
       },
     ];
@@ -569,7 +570,7 @@ describe('List reducer', () => {
         ...initialState,
         items: [
           {
-            id: 'some-fake-id',
+            id: numericHash('some-fake-id'),
             date: testDate,
             item: 'some item',
             cost: 3,
@@ -583,7 +584,7 @@ describe('List reducer', () => {
         total: 100,
         items: [
           {
-            id: 'some-fake-id',
+            id: numericHash('some-fake-id'),
             date: testDate,
             item: 'some item',
             cost: 3,
@@ -606,7 +607,7 @@ describe('List reducer', () => {
             expect.objectContaining({
               items: [
                 expect.objectContaining({
-                  id: 'real-id-b',
+                  id: numericHash('real-id-b'),
                   item: 'some item',
                   cost: 3,
                 }),
@@ -628,7 +629,7 @@ describe('List reducer', () => {
         describe("if there wasn't a relevant response", () => {
           const req = {
             type: RequestType.update,
-            id: 'some-real-id',
+            id: numericHash('some-real-id'),
             method: 'put' as const,
             route: `not-${page}`,
             query: {},
@@ -653,7 +654,7 @@ describe('List reducer', () => {
         ...initialState,
         items: [
           {
-            id: 'real-id-z',
+            id: numericHash('real-id-z'),
             date: testDate,
             item: 'updated item',
             cost: 10,
@@ -683,7 +684,7 @@ describe('List reducer', () => {
           expect.objectContaining({
             items: [
               expect.objectContaining({
-                id: 'real-id-z',
+                id: numericHash('real-id-z'),
                 item: 'updated item',
                 cost: 10,
               }),
@@ -708,7 +709,7 @@ describe('List reducer', () => {
         ...initialState,
         items: [
           {
-            id: 'real-id-x',
+            id: numericHash('real-id-x'),
             date: testDate,
             item: 'some item',
             cost: 3,
@@ -780,7 +781,7 @@ describe('List reducer', () => {
     const res = {
       data: [
         {
-          I: 'id-1',
+          I: numericHash('id-1'),
           d: '2020-04-20',
           i: 'some item',
           c: 123,
@@ -800,7 +801,7 @@ describe('List reducer', () => {
         ...initialStateDaily,
         items: [
           {
-            id: 'id-0',
+            id: numericHash('id-0'),
             date: new Date('2020-04-23'),
             item: 'existing item',
             cost: 156,
@@ -815,13 +816,13 @@ describe('List reducer', () => {
         expect.objectContaining({
           items: [
             {
-              id: 'id-0',
+              id: numericHash('id-0'),
               date: new Date('2020-04-23'),
               item: 'existing item',
               cost: 156,
             },
             {
-              id: 'id-1',
+              id: numericHash('id-1'),
               date: new Date('2020-04-20'),
               item: 'some item',
               cost: 123,

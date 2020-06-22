@@ -110,8 +110,8 @@ const joinEntryRows = (
 
 export async function selectEntry(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
+  uid: number,
+  netWorthId: number,
 ): Promise<readonly JoinedEntryRow[]> {
   const result = await db.query<JoinedEntryRow>(
     joinEntryRows(sql`
@@ -123,7 +123,7 @@ export async function selectEntry(
 
 export async function selectAllEntries(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   oldDateEnd: string,
 ): Promise<readonly JoinedEntryRow[]> {
   const result = await db.query<JoinedEntryRow>(
@@ -136,7 +136,7 @@ export async function selectAllEntries(
 
 export async function selectOldNetWorth(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   startDate: string,
   oldDateEnd: string,
 ): Promise<readonly OldNetWorthRow[]> {

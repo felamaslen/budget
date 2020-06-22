@@ -1,5 +1,6 @@
 import getUnixTime from 'date-fns/getUnixTime';
 import { rgb } from 'polished';
+import numericHash from 'string-hash';
 
 import { Period } from '~client/constants/graph';
 import { getTransactionsList } from '~client/modules/data';
@@ -27,14 +28,14 @@ describe('Funds selectors / gains', () => {
       viewSoldFunds: true,
       items: [
         {
-          id: 'fund1',
+          id: numericHash('fund1'),
           item: 'Some fund',
           transactions: getTransactionsList([
             { date: new Date('2019-10-09'), units: 345, cost: 1199 },
           ]),
         },
         {
-          id: 'fund2',
+          id: numericHash('fund2'),
           item: 'Other fund',
           transactions: getTransactionsList([
             { date: new Date('2019-10-01'), units: 167, cost: 98503 },
@@ -49,11 +50,11 @@ describe('Funds selectors / gains', () => {
           startTime: getUnixTime(new Date('2019-10-10')),
           cacheTimes: [0, 86400 * 5, 86400 * 32],
           prices: {
-            fund1: {
+            [numericHash('fund1')]: {
               startIndex: 1,
               values: [109, 113.2],
             },
-            fund2: {
+            [numericHash('fund2')]: {
               startIndex: 0,
               values: [56.2, 57.9, 49.3],
             },
@@ -131,7 +132,7 @@ describe('Funds selectors / gains', () => {
       const result = getRowGains(
         [
           {
-            id: '10',
+            id: 10,
             item: 'some fund',
             transactions: getTransactionsList([
               { date: '2019-04-03', units: 345, cost: 1199 },
@@ -198,7 +199,7 @@ describe('Funds selectors / gains', () => {
         expect(getGainsForRow(rowGains, id)).toBeNull();
       } else {
         expect(getGainsForRow(rowGains, id)).toStrictEqual({
-          ...rowGains[id as '10' | '3' | '1' | '5' | '6'],
+          ...rowGains[id as 10 | 3 | 1 | 5 | 6],
           color: expected,
         });
       }
@@ -206,7 +207,7 @@ describe('Funds selectors / gains', () => {
 
     it('should return null if there are no gain data for the fund', () => {
       expect.assertions(1);
-      expect(getGainsForRow(rowGains, 'some-id')).toBeNull();
+      expect(getGainsForRow(rowGains, numericHash('some-id'))).toBeNull();
     });
   });
 
@@ -235,7 +236,7 @@ describe('Funds selectors / gains', () => {
       // on the second cache item, the 2019-10-27 transaction is in the future
       const valuePrev = 345 * 109 + 167 * 57.9;
 
-      expect(getDayGain(stateWithGains)).toBe(
+      expect(getDayGain(stateWithGains)).toBeCloseTo(
         (valueLatest - valuePrev - (costLatest - costPrev)) / valuePrev,
       );
     });
@@ -252,7 +253,7 @@ describe('Funds selectors / gains', () => {
               prices: {
                 ...stateWithGains.funds.cache[Period.year1]?.prices,
                 10: {
-                  ...stateWithGains.funds.cache[Period.year1]?.prices['10'],
+                  ...stateWithGains.funds.cache[Period.year1]?.prices[10],
                   values: [427.3],
                 },
               },
@@ -280,11 +281,11 @@ describe('Funds selectors / gains', () => {
               startTime: getUnixTime(new Date('2019-10-10')),
               cacheTimes: [0, 86400 * 5, 86400 * 32],
               prices: {
-                fund1: {
+                [numericHash('fund1')]: {
                   startIndex: 1,
                   values: [109, 113.2],
                 },
-                fund2: {
+                [numericHash('fund2')]: {
                   startIndex: 0,
                   values: [56.2, 57.9, 49.3],
                 },
@@ -307,14 +308,14 @@ describe('Funds selectors / gains', () => {
           ...stateWithGains[Page.funds],
           items: [
             {
-              id: 'fund1',
+              id: numericHash('fund1'),
               item: 'Some fund',
               transactions: getTransactionsList([
                 { date: new Date('2019-10-09'), units: 345, cost: 1199 },
               ]),
             },
             {
-              id: 'fund2',
+              id: numericHash('fund2'),
               item: 'Other fund',
               transactions: getTransactionsList([
                 { date: new Date('2019-10-01'), units: 167, cost: 98503 },
@@ -340,14 +341,14 @@ describe('Funds selectors / gains', () => {
           ...stateWithGains[Page.funds],
           items: [
             {
-              id: 'fund1',
+              id: numericHash('fund1'),
               item: 'Some fund',
               transactions: getTransactionsList([
                 { date: new Date('2019-10-09'), units: 345, cost: 1199 },
               ]),
             },
             {
-              id: 'fund2',
+              id: numericHash('fund2'),
               item: 'Other fund',
               transactions: getTransactionsList([
                 { date: new Date('2019-10-01'), units: 167, cost: 98503 },
@@ -361,11 +362,11 @@ describe('Funds selectors / gains', () => {
               startTime: getUnixTime(new Date('2019-10-10')),
               cacheTimes: [10],
               prices: {
-                fund1: {
+                [numericHash('fund1')]: {
                   startIndex: 1,
                   values: [109, 113.2],
                 },
-                fund2: {
+                [numericHash('fund2')]: {
                   startIndex: 0,
                   values: [56.2, 57.9, 49.3],
                 },

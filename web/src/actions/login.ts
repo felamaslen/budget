@@ -1,4 +1,4 @@
-import { LoginResponse } from '~client/types/auth';
+import { LoginResponse } from '~client/types';
 
 export const enum ActionTypeLogin {
   Requested = '@@login/REQUESTED',

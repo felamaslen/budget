@@ -26,7 +26,7 @@ export const GRAPH_SPEND_CATEGORIES: SpendCategory[] = [
   { name: Page.social, key: 260 },
 ];
 
-export const GRAPH_FUNDS_OVERALL_ID = 'overall';
+export const GRAPH_FUNDS_OVERALL_ID = -1;
 
 export const GRAPH_FUND_ITEM_WIDTH = 100;
 export const GRAPH_FUND_ITEM_HEIGHT = 48;

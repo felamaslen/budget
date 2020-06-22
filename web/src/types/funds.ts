@@ -1,6 +1,6 @@
-import { ListItem, RawListItem } from './shared';
+import { Data } from './graph';
+import { Id, ListItem, RawListItem } from './shared';
 import { DataKeyAbbr } from '~client/constants/api';
-import { Data } from '~client/types/graph';
 
 export type TransactionRaw = {
   date: string;
@@ -9,7 +9,7 @@ export type TransactionRaw = {
 };
 
 export type Transaction = Omit<TransactionRaw, 'date'> & {
-  id: string;
+  id: Id;
   date: Date;
 };
 
@@ -22,11 +22,11 @@ export type FundPrices = {
   startIndex: number;
 };
 export type Prices = {
-  [id: string]: FundPrices;
+  [id: number]: FundPrices;
 };
 
 export type FundItem = {
-  id: string;
+  id: Id;
   item: string;
   color: string;
 };
@@ -66,7 +66,7 @@ export type ReadResponseFunds = {
 };
 
 type PortfolioItem = {
-  id: string;
+  id: Id;
   item: string;
   value: number;
 };

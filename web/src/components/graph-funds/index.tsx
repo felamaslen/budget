@@ -37,7 +37,7 @@ import {
 } from '~client/selectors';
 
 import { graphFundsHeightMobile } from '~client/styled/variables';
-import { Padding, Line, DrawProps, FundLine, FundItem } from '~client/types';
+import { Padding, Line, DrawProps, FundLine, FundItem, Id } from '~client/types';
 
 const PADDING_DESKTOP: Padding = [36, 3, 0, 0];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
@@ -155,7 +155,7 @@ function useMode(isMobile: boolean): [Mode, () => void] {
   return [mode, switchMode];
 }
 
-type FilterFunds = (filteredItems: { id: string }) => boolean;
+type FilterFunds = (filteredItems: { id: Id }) => boolean;
 
 function usePeriod(): [Period, (nextPeriod: Period) => void] {
   const period = useSelector(getPeriod);
@@ -174,7 +174,7 @@ function usePeriod(): [Period, (nextPeriod: Period) => void] {
   return [period, changePeriod];
 }
 
-type ToggleList = { [id: string]: boolean | null };
+type ToggleList = { [id: number]: boolean | null };
 
 function useToggleList(
   fundItems: FundItem[],
@@ -233,7 +233,7 @@ function useGraphProps({
   );
 
   const lines = useMemo<Line[]>(() => {
-    type Accumulator = [Line[], { [id: string]: number }];
+    type Accumulator = [Line[], { [id: number]: number }];
     const [numberedLines] = fundLines[mode].filter(filterFunds).reduce<Accumulator>(
       ([last, idCount], { id, color, data }) => [
         [

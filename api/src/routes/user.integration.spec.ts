@@ -28,7 +28,7 @@ describe('User route', () => {
         pin: 1234,
       });
 
-      const { uid } = (await db.select<{ uid: string }>('uid').from('users').first()) || {};
+      const { uid } = (await db.select<{ uid: number }>('uid').from('users').first()) || {};
 
       expect(uid).not.toBeUndefined();
 

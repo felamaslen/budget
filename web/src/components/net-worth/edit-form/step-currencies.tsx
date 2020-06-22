@@ -10,7 +10,7 @@ import { FormContainer, Props as ContainerProps } from './form-container';
 import * as Styled from './styles';
 import { FormFieldText, FormFieldNumber } from '~client/components/form-field';
 import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared';
-import { CreateEdit, Currency, Entry } from '~client/types';
+import { Id, CreateEdit, Currency, Entry } from '~client/types';
 
 const BASE = 'GBP';
 
@@ -179,7 +179,7 @@ function useRateRefresh(
 type PropsEditCurrency = {
   entry: Currency;
   onChange: (entry: Currency) => void;
-  onRemove: (id: string) => void;
+  onRemove: (id: Id) => void;
   rates: Rates;
   getRates: GetRates;
   loadingRates: boolean;

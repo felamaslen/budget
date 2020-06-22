@@ -7,7 +7,7 @@ export type Transaction = {
 };
 
 export type Fund = {
-  id: string;
+  id: number;
   item: string;
   transactions: Transaction[];
 };

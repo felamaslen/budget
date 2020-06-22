@@ -1,4 +1,5 @@
-import reducer, { initialState } from './funds';
+import numericHash from 'string-hash';
+import reducer, { State, initialState } from './funds';
 import { dataRead, fundsViewSoldToggled, fundsReceived } from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
 import { Period } from '~client/constants/graph';
@@ -47,14 +48,14 @@ describe('Funds reducer', () => {
         cacheTimes: [1, 2, 100, 183],
         data: [
           {
-            [DataKeyAbbr.id]: 'id-1',
+            [DataKeyAbbr.id]: numericHash('id-1'),
             [DataKeyAbbr.item]: 'My fund 1',
             [DataKeyAbbr.transactions]: [{ date: '2019-06-30', units: 100, cost: 9923 }],
             pr: [45, 45.6, 44.9],
             prStartIndex: 1,
           },
           {
-            [DataKeyAbbr.id]: 'id-2',
+            [DataKeyAbbr.id]: numericHash('id-2'),
             [DataKeyAbbr.item]: 'My fund 2',
             [DataKeyAbbr.transactions]: [],
             pr: [101.2, 100.94, 101.4, 102.03],
@@ -70,15 +71,15 @@ describe('Funds reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result).toStrictEqual({
+      expect(result).toStrictEqual<State>({
         ...initialState,
         items: [
           {
-            id: 'id-1',
+            id: numericHash('id-1'),
             item: 'My fund 1',
             transactions: getTransactionsList([{ date: '2019-06-30', units: 100, cost: 9923 }]),
           },
-          { id: 'id-2', item: 'My fund 2', transactions: [] },
+          { id: numericHash('id-2'), item: 'My fund 2', transactions: [] },
         ],
         __optimistic: [undefined, undefined],
         cache: {
@@ -86,8 +87,8 @@ describe('Funds reducer', () => {
             startTime: 1000,
             cacheTimes: [1, 2, 100, 183],
             prices: {
-              'id-1': { startIndex: 1, values: [45, 45.6, 44.9] },
-              'id-2': { startIndex: 0, values: [101.2, 100.94, 101.4, 102.03] },
+              [numericHash('id-1')]: { startIndex: 1, values: [45, 45.6, 44.9] },
+              [numericHash('id-2')]: { startIndex: 0, values: [101.2, 100.94, 101.4, 102.03] },
             },
           },
         },
@@ -102,14 +103,14 @@ describe('Funds reducer', () => {
         cacheTimes: [2, 100, 183],
         data: [
           {
-            [DataKeyAbbr.id]: 'id-1',
+            [DataKeyAbbr.id]: numericHash('id-1'),
             [DataKeyAbbr.item]: 'My fund 1',
             [DataKeyAbbr.transactions]: [{ date: '2019-06-30', units: 100, cost: 9923 }],
             pr: [45.6, 44.9],
             prStartIndex: 1,
           },
           {
-            [DataKeyAbbr.id]: 'id-2',
+            [DataKeyAbbr.id]: numericHash('id-2'),
             [DataKeyAbbr.item]: 'My fund 2',
             [DataKeyAbbr.transactions]: [],
             pr: [100.94, 101.4, 102.03],
@@ -137,12 +138,12 @@ describe('Funds reducer', () => {
     it('should cache the new values', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
-      expect(result.cache[Period.month3]).toStrictEqual({
+      expect(result.cache[Period.month3]).toStrictEqual<State['cache'][Period]>({
         startTime: 1430,
         cacheTimes: [2, 100, 183],
         prices: {
-          'id-1': { startIndex: 1, values: [45.6, 44.9] },
-          'id-2': { startIndex: 0, values: [100.94, 101.4, 102.03] },
+          [numericHash('id-1')]: { startIndex: 1, values: [45.6, 44.9] },
+          [numericHash('id-2')]: { startIndex: 0, values: [100.94, 101.4, 102.03] },
         },
       });
     });

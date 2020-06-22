@@ -97,7 +97,7 @@ describe('Standard list routes', () => {
 
         expect(res.body).toStrictEqual(
           expect.objectContaining({
-            id: expect.any(String),
+            id: expect.any(Number),
           }),
         );
       });
@@ -157,7 +157,7 @@ describe('Standard list routes', () => {
             olderExists: expect.any(Boolean),
             data: expect.arrayContaining([
               expect.objectContaining({
-                I: expect.any(String), // ID
+                I: expect.any(Number), // ID
                 d: testItem.date,
                 i: testItem.item,
                 c: testItem.cost,

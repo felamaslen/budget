@@ -3,6 +3,7 @@ import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
+import numericHash from 'string-hash';
 
 import { AccessibleListDaily } from './daily';
 import { listItemUpdated } from '~client/actions';
@@ -25,7 +26,7 @@ describe('<AccessibleListDaily />', () => {
       ...testState[page],
       items: [
         {
-          id: 'id-1',
+          id: numericHash('id-1'),
           date: new Date('2020-04-17'),
           item: 'item one',
           category: 'category one',
@@ -33,7 +34,7 @@ describe('<AccessibleListDaily />', () => {
           shop: 'shop one',
         },
         {
-          id: 'id-2',
+          id: numericHash('id-2'),
           date: new Date('2020-04-20'),
           item: 'item two',
           category: 'category two',
@@ -41,7 +42,7 @@ describe('<AccessibleListDaily />', () => {
           shop: 'shop two',
         },
         {
-          id: 'id-3',
+          id: numericHash('id-3'),
           date: new Date('2020-04-20'),
           item: 'item three',
           category: 'category three',
@@ -165,7 +166,7 @@ describe('<AccessibleListDaily />', () => {
       [customPage]: {
         items: [
           {
-            id: 'id-1',
+            id: numericHash('id-1'),
             date: new Date('2020-04-17'),
             item: 'item one',
             [customCategory]: 'category one',
@@ -218,12 +219,12 @@ describe('<AccessibleListDaily />', () => {
       });
 
       const expectedAction = listItemUpdated<CustomItem, typeof customPage>(customPage)(
-        'id-1',
+        numericHash('id-1'),
         {
           [customCategory]: 'updated category',
         },
         {
-          id: 'id-1',
+          id: numericHash('id-1'),
           date: new Date('2020-04-17'),
           item: 'item one',
           [customCategory]: 'category one',

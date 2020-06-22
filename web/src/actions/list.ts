@@ -1,7 +1,8 @@
 import moize from 'moize';
-import shortid from 'shortid';
 
+import { generateFakeId } from '~client/modules/data';
 import {
+  Id,
   PageList,
   PageListCalc,
   Create,
@@ -25,7 +26,7 @@ export type ListItemCreated<I extends Item, P extends string> = {
   type: ListActionType.Created;
   page: P;
   delta: Create<I>;
-  fakeId: string;
+  fakeId: number;
 };
 
 export type OnCreateList<I extends Item, P extends string, O = ListItemCreated<I, P>> = (
@@ -39,20 +40,20 @@ export const listItemCreated = moize(
     type: ListActionType.Created,
     page,
     delta,
-    fakeId: shortid.generate(),
+    fakeId: generateFakeId(),
   }),
 );
 
 export type ListItemUpdated<I extends Item, P extends string> = {
   type: ListActionType.Updated;
   page: P;
-  id: string;
+  id: Id;
   delta: DeltaEdit<I>;
   item: CreateEdit<I>;
 };
 
 export type OnUpdateList<I extends Item, P extends string, O = ListItemUpdated<I, P>> = (
-  id: string,
+  id: Id,
   delta: DeltaEdit<I>,
   item: CreateEdit<I>,
 ) => O;
@@ -74,12 +75,12 @@ export const listItemUpdated = moize(
 export type ListItemDeleted<I extends Item, P extends string> = {
   type: ListActionType.Deleted;
   page: P;
-  id: string;
+  id: Id;
   item: CreateEdit<I>;
 };
 
 export type OnDeleteList<I extends Item, P extends string, O = ListItemDeleted<I, P>> = (
-  id: string,
+  id: Id,
   item: CreateEdit<I>,
 ) => O;
 

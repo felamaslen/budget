@@ -2,8 +2,8 @@ import React, { useCallback, useState } from 'react';
 
 import * as Styled from './styles';
 import { Mode, Period, GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
-import { useCTA } from '~client/hooks/cta';
-import { FundItem } from '~client/types/funds';
+import { useCTA } from '~client/hooks';
+import { Id, FundItem } from '~client/types';
 
 type ToggleList = {
   [id: string]: boolean | null;
@@ -15,7 +15,7 @@ type ItemProps = {
   numItems: number;
   toggleList: ToggleList;
   setToggleList: SetToggleList;
-  id: string;
+  id: Id;
   color: string;
   item: string;
 };
@@ -35,10 +35,7 @@ const Item: React.FC<ItemProps> = ({ numItems, toggleList, setToggleList, id, co
     setToggleList(
       (last: ToggleList): ToggleList => {
         const next = { ...last, [id]: last[id] === false };
-        if (
-          Object.keys(next).length === numItems &&
-          Object.keys(next).every((value) => !next[value])
-        ) {
+        if (Object.keys(next).length === numItems && Object.values(next).every((value) => !value)) {
           return last;
         }
 

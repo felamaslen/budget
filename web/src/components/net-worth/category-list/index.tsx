@@ -95,8 +95,8 @@ const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
 type PropsItem = {
   item: Category;
   style?: object;
-  expanded: string | null;
-  onExpand: React.Dispatch<React.SetStateAction<string | null>>;
+  expanded: number | null;
+  onExpand: React.Dispatch<React.SetStateAction<number | null>>;
   onUpdate: OnUpdate<Category>;
   onDelete: () => void;
   categories: Category[];
@@ -208,7 +208,7 @@ type CrudProps = Pick<
   | 'onUpdateSubcategory'
   | 'onDeleteSubcategory'
 > & {
-  expanded: string | null;
+  expanded: number | null;
   onExpand: PropsItem['onExpand'];
 };
 
@@ -222,7 +222,7 @@ export const NetWorthCategoryList: React.FC<Props> = ({
   onUpdateSubcategory,
   onDeleteSubcategory,
 }) => {
-  const [expanded, onExpand] = useState<string | null>(null);
+  const [expanded, onExpand] = useState<number | null>(null);
 
   const extraProps = {
     categories,

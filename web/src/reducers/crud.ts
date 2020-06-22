@@ -1,6 +1,7 @@
 import { replaceAtIndex, removeAtIndex } from 'replace-array';
 
 import {
+  Id,
   Create,
   Delta,
   RequestType,
@@ -17,7 +18,7 @@ export type State<I extends Item> = {
 
 export const onCreateOptimistic = <I extends Item>(
   state: State<I>,
-  fakeId: string,
+  fakeId: number,
   newItem: Create<I>,
 ): State<I> => ({
   items: [
@@ -32,7 +33,7 @@ export const onCreateOptimistic = <I extends Item>(
 
 export const onUpdateOptimistic = <I extends Item>(
   state: State<I>,
-  id: string,
+  id: Id,
   updatedItem: Delta<I>,
 ): State<I> => {
   const index = state.items.findIndex(({ id: idMatch }) => idMatch === id);
@@ -55,7 +56,7 @@ export const onUpdateOptimistic = <I extends Item>(
   };
 };
 
-export const onDeleteOptimistic = <I extends Item>(state: State<I>, id: string): State<I> => {
+export const onDeleteOptimistic = <I extends Item>(state: State<I>, id: Id): State<I> => {
   const index = state.items.findIndex(({ id: idMatch }) => idMatch === id);
   const isCreating = index > -1 && state.__optimistic[index] === RequestType.create;
 
@@ -91,21 +92,21 @@ export const confirmOptimisticUpdates = <
     state.__optimistic,
   );
 
-export const withCreatedIds = <P extends string, I extends { [key in P]: string }>(
+export const withCreatedIds = <P extends string, I extends { [key in P]: number }>(
   requests: RequestWithResponse<object | undefined>[],
   parentKey: P = 'id' as P,
   items: I[],
 ): I[] =>
   items.map((item) => {
     const updatedParent = requests.find(
-      ({ type, fakeId }) => type === RequestType.create && fakeId === (item[parentKey] as string),
+      ({ type, fakeId }) => type === RequestType.create && fakeId === (item[parentKey] as number),
     ) as RequestWithResponse<Item>;
 
     return updatedParent ? { ...item, [parentKey]: updatedParent.res.id } : item;
   });
 
 export const withCreates = <
-  I extends Item & { [key in P]: string },
+  I extends Item & { [key in P]: number },
   P extends string = 'id',
   R extends RequestWithResponse<object | undefined> = RequestWithResponse<object | undefined>
 >(

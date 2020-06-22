@@ -16,8 +16,8 @@ import { CreateEntry, Entry } from '~api/types';
 
 export async function updateNetWorthEntry(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
+  uid: number,
+  netWorthId: number,
   data: CreateEntry,
 ): Promise<Entry> {
   await validateCategories(db, data);

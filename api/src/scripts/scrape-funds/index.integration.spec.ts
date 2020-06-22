@@ -3,7 +3,6 @@ import fs from 'fs-extra';
 import nock from 'nock';
 import prompts from 'prompts';
 import sinon from 'sinon';
-import uuidv4 from 'uuid/v4';
 
 import mockOpenExchangeRatesResponse from './vendor/currencies.json';
 import { run } from '.';
@@ -11,7 +10,7 @@ import config from '~api/config';
 import db from '~api/test-utils/knex';
 
 type TestFundPrice = {
-  cid: string;
+  cid: number;
   time: string;
   price: number;
 };
@@ -29,9 +28,9 @@ const testUSDGBP = 0.771546;
 describe('Fund scraper - integration tests', () => {
   const now = new Date('2020-02-22T20:35Z').toISOString();
   let clock: sinon.SinonFakeTimers;
-  const uid1 = uuidv4();
-  const uid2 = uuidv4();
-  let fundIds: string[] = [];
+  const uid1 = 12345;
+  const uid2 = 67891;
+  let fundIds: number[] = [];
 
   const clearDb = async (): Promise<void> => {
     await db('funds').select().del();
@@ -119,7 +118,7 @@ describe('Fund scraper - integration tests', () => {
   });
 
   describe('Scraping prices', () => {
-    const getTestFundPrice = async (fundId: string): Promise<TestFundPrice[]> => {
+    const getTestFundPrice = async (fundId: number): Promise<TestFundPrice[]> => {
       const result = await db
         .select<TestFundPrice[]>('fct.cid', 'fct.time', 'fc.price')
         .from('funds as f')

@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 import { getApiKey } from './api';
 import { State } from '~client/reducers';
 
-const getUid = (state: State): string | null => state.login.uid;
+const getUid = (state: State): number | null => state.login.uid;
 
 export const getLoggedIn = createSelector(getApiKey, getUid, (apiKey, uid) =>
   Boolean(apiKey && uid),

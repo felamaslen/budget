@@ -38,7 +38,7 @@ type PieRow = {
 
 async function getPieQuery(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   pieCol: PieCol,
   category: Page,
 ): Promise<readonly PieRow[]> {
@@ -107,7 +107,7 @@ export function processQueryResult(
 
 async function getPieData(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   pieCols: PieCol[],
   category: Page,
 ): Promise<Segment[]> {

@@ -9,9 +9,9 @@ import {
   updateNetWorthEntry,
   deleteNetWorthEntry,
 } from '~api/controllers';
-import { authDbRoute, validatedAuthDbRoute } from '~api/middleware/request';
-import { schemaNetWorth } from '~api/schema';
-import { CreateEntry } from '~api/types';
+import { validatedAuthDbRoute } from '~api/middleware/request';
+import { schemaNetWorth, idParamSchemaOptional, idParamSchemaRequired } from '~api/schema';
+import { CreateEntry, Item } from '~api/types';
 
 const routePost = validatedAuthDbRoute<CreateEntry>(
   {
@@ -24,29 +24,38 @@ const routePost = validatedAuthDbRoute<CreateEntry>(
   },
 );
 
-const routeGet = authDbRoute(async (db, req, res) => {
-  const response = req.params.id
-    ? await readNetWorthEntry(db, req.user.uid, req.params.id)
-    : await readAllNetWorthEntries(db, req.user.uid);
-
-  res.json(response);
-});
-
-const routePut = validatedAuthDbRoute<CreateEntry>(
+const routeGet = validatedAuthDbRoute<never, Partial<Item>>(
   {
-    data: schemaNetWorth,
+    params: idParamSchemaOptional,
   },
-  async (db, req, res, data) => {
-    const response = await updateNetWorthEntry(db, req.user.uid, req.params.id, data);
+  async (db, req, res, __, params) => {
+    const response = params.id
+      ? await readNetWorthEntry(db, req.user.uid, params.id)
+      : await readAllNetWorthEntries(db, req.user.uid);
+
     res.json(response);
   },
 );
 
-const routeDelete = authDbRoute(async (db, req, res) => {
-  await deleteNetWorthEntry(db, req.user.uid, req.params.id);
-  res.status(204);
-  res.end();
-});
+const routePut = validatedAuthDbRoute<CreateEntry, Item>(
+  {
+    data: schemaNetWorth,
+    params: idParamSchemaRequired,
+  },
+  async (db, req, res, data, params) => {
+    const response = await updateNetWorthEntry(db, req.user.uid, params.id, data);
+    res.json(response);
+  },
+);
+
+const routeDelete = validatedAuthDbRoute<never, Item>(
+  { params: idParamSchemaRequired },
+  async (db, req, res, _, params) => {
+    await deleteNetWorthEntry(db, req.user.uid, params.id);
+    res.status(204);
+    res.end();
+  },
+);
 
 export function netWorthRoute(): Router {
   const router = Router();

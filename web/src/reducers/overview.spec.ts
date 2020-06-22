@@ -1,3 +1,4 @@
+import numericHash from 'string-hash';
 import {
   dataRead,
   loggedOut,
@@ -142,7 +143,7 @@ describe('Overview reducer', () => {
 
       const result = reducer(
         state,
-        listItemUpdated<Food, Page.food>(Page.food)('some-id', delta, {
+        listItemUpdated<Food, Page.food>(Page.food)(numericHash('some-id'), delta, {
           date: new Date('2019-05-10'),
           item: 'some item',
           category: 'some category',
@@ -176,7 +177,7 @@ describe('Overview reducer', () => {
       expect.assertions(1);
       const withHoliday = reducer(
         state,
-        listItemDeleted<Holiday, Page.holiday>(Page.holiday)('some-id', {
+        listItemDeleted<Holiday, Page.holiday>(Page.holiday)(numericHash('some-id'), {
           date: new Date('2019-07-12T00:00Z'),
           item: 'some item',
           holiday: 'some holiday',

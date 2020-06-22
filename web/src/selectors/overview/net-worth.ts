@@ -396,7 +396,9 @@ const withEntryRequests = (
 ];
 
 export const getNetWorthRequests = createSelector(
-  [getNonFilteredCategories, getNonFilteredSubcategories, getNonFilteredEntries],
+  getNonFilteredCategories,
+  getNonFilteredSubcategories,
+  getNonFilteredEntries,
   (categories, subcategories, entries) =>
     compose(
       withCategoryRequests(categories),

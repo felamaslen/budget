@@ -12,7 +12,7 @@ import {
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
-import { Page } from '~client/types';
+import { Page, Portfolio } from '~client/types';
 
 describe('Funds selectors', () => {
   const testNow = new Date('2018-03-23T11:45:20Z');
@@ -26,7 +26,7 @@ describe('Funds selectors', () => {
       items: [
         {
           ...state[Page.funds].items[0],
-          id: '10',
+          id: 10,
           transactions: getTransactionsList([
             {
               ...state[Page.funds].items[0].transactions[0],
@@ -36,7 +36,7 @@ describe('Funds selectors', () => {
         },
         {
           ...state[Page.funds].items[1],
-          id: '3',
+          id: 3,
         },
       ],
     },
@@ -49,7 +49,7 @@ describe('Funds selectors', () => {
       items: [
         {
           ...state[Page.funds].items[0],
-          id: '10',
+          id: 10,
           transactions: getTransactionsList([
             ...state[Page.funds].items[0].transactions,
             {
@@ -184,24 +184,24 @@ describe('Funds selectors', () => {
 
       const result = getPortfolio(new Date('2020-04-20'))(state);
 
-      expect(result).toStrictEqual([
+      expect(result).toStrictEqual<Portfolio>([
         {
-          id: '10',
+          id: 10,
           item: 'some fund 1',
           value: 399098.2,
         },
         {
-          id: '3',
+          id: 3,
           item: 'some fund 2',
           value: 0,
         },
         {
-          id: '1',
+          id: 1,
           item: 'some fund 3',
           value: 0,
         },
         {
-          id: '5',
+          id: 5,
           item: 'test fund 4',
           value: 0,
         },
@@ -213,7 +213,7 @@ describe('Funds selectors', () => {
 
       const result = getPortfolio(testToday)(stateWithOnlyFutureTransaction);
 
-      expect(result.find(({ id }) => id === '10')).toBeUndefined();
+      expect(result.find(({ id }) => id === 10)).toBeUndefined();
     });
   });
 });

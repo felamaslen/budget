@@ -36,7 +36,7 @@ const routePut = validatedAuthDbRoute<UpdateList<Fund>>(
   },
 );
 
-const routeDelete = validatedAuthDbRoute<{ id: string }>(
+const routeDelete = validatedAuthDbRoute<{ id: number }>(
   {
     data: ListSchema.deleteRequest,
   },

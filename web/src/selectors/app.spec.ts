@@ -1,5 +1,6 @@
+import numericHash from 'string-hash';
 import { getLoggedIn } from './app';
-import { testState } from '~client/test-data/state';
+import { testState } from '~client/test-data';
 
 describe('App selectors', () => {
   describe('getLoggedIn', () => {
@@ -14,7 +15,7 @@ describe('App selectors', () => {
           },
           login: {
             ...testState.login,
-            uid: 'some-user-id',
+            uid: numericHash('some-user-id'),
           },
         }),
       ).toBe(true);
@@ -30,7 +31,7 @@ describe('App selectors', () => {
           },
           login: {
             ...testState.login,
-            uid: 'some-user-id',
+            uid: numericHash('some-user-id'),
           },
         }),
       ).toBe(false);

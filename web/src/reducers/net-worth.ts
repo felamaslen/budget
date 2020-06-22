@@ -130,7 +130,7 @@ const updateEntriesOnSubcategoryCreate = (requests: SyncRequest[]) => (
   entries: CrudState<Entry>,
 ): CrudState<Entry> => ({
   __optimistic: entries.__optimistic,
-  items: entries.items.map((entry) => ({
+  items: entries.items.map<Entry>((entry) => ({
     ...entry,
     values: withCreatedIds(requests, 'subcategory', entry.values),
     creditLimit: withCreatedIds(requests, 'subcategory', entry.creditLimit),

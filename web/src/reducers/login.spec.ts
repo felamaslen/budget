@@ -1,8 +1,15 @@
-import { loginRequested, loginErrorOccurred, loggedIn, loggedOut } from '~client/actions';
+import numericHash from 'string-hash';
+import {
+  loginRequested,
+  loginErrorOccurred,
+  loggedIn,
+  loggedOut,
+  ActionTypeLogin,
+} from '~client/actions';
 import reducer, { initialState } from '~client/reducers/login';
 
 describe('Login reducer', () => {
-  describe('LOGGED_OUT', () => {
+  describe(ActionTypeLogin.LoggedOut, () => {
     const action = loggedOut();
 
     it('should set initialised to true', () => {
@@ -11,7 +18,7 @@ describe('Login reducer', () => {
     });
   });
 
-  describe('LOGIN_REQUESTED', () => {
+  describe(ActionTypeLogin.Requested, () => {
     const action = loginRequested(1234);
 
     it('should set loading to true', () => {
@@ -22,7 +29,7 @@ describe('Login reducer', () => {
     });
   });
 
-  describe('LOGIN_ERROR_OCCURRED', () => {
+  describe(ActionTypeLogin.ErrorOccurred, () => {
     const err = new Error('bad pin or something');
     const action = loginErrorOccurred(err.message);
 
@@ -36,10 +43,10 @@ describe('Login reducer', () => {
     });
   });
 
-  describe('LOGGED_IN', () => {
+  describe(ActionTypeLogin.LoggedIn, () => {
     const action = loggedIn({
       name: 'someone',
-      uid: 'some-long-id',
+      uid: numericHash('some-long-id'),
       apiKey: 'some-api-key',
       expires: '2019-07-31T23:08:26.442+01:00',
     });
@@ -51,7 +58,7 @@ describe('Login reducer', () => {
       expect(result.loading).toBe(false);
       expect(result.error).toBeNull();
 
-      expect(result.uid).toBe('some-long-id');
+      expect(result.uid).toBe(numericHash('some-long-id'));
       expect(result.name).toBe('someone');
       expect(result.initialised).toBe(true);
     });

@@ -6,6 +6,8 @@ import { Page, ColumnMap } from '~api/types';
 jest.mock('~api/queries');
 
 describe('List controller', () => {
+  const testUserId = 1234;
+
   describe('getLimitCondition', () => {
     it('should return a valid limit condition', () => {
       expect.assertions(1);
@@ -51,14 +53,14 @@ describe('List controller', () => {
     describe('if there are older rows', () => {
       it('should return true', async () => {
         expect.assertions(1);
-        expect(await getOlderExists(db, 'some-user-id', Page.food, 100, 7)).toBe(true);
+        expect(await getOlderExists(db, testUserId, Page.food, 100, 7)).toBe(true);
       });
     });
 
     describe('if there are no older rows', () => {
       it('should return false', async () => {
         expect.assertions(1);
-        expect(await getOlderExists(db, 'some-user-id', Page.food, 100, 8)).toBe(false);
+        expect(await getOlderExists(db, testUserId, Page.food, 100, 8)).toBe(false);
       });
     });
   });
@@ -67,11 +69,11 @@ describe('List controller', () => {
     it('should abbreviate property keys given a map', () => {
       expect.assertions(1);
 
-      type MyItem = { id: string; date: string; item: string; category: string };
+      type MyItem = { id: number; date: string; item: string; category: string };
 
       const queryResult: MyItem[] = [
-        { id: 'id1', date: '2017-09-12', item: 'foo', category: 'bar' },
-        { id: 'id2', date: '2017-08-29', item: 'baz', category: 'bak' },
+        { id: 1, date: '2017-09-12', item: 'foo', category: 'bar' },
+        { id: 2, date: '2017-08-29', item: 'baz', category: 'bak' },
       ];
 
       const columnMap: ColumnMap<MyItem> = {
@@ -83,13 +85,13 @@ describe('List controller', () => {
 
       expect(queryResult.map(formatResults(columnMap))).toStrictEqual([
         {
-          I: 'id1',
+          I: 1,
           d: '2017-09-12',
           i: 'foo',
           k: 'bar',
         },
         {
-          I: 'id2',
+          I: 2,
           d: '2017-08-29',
           i: 'baz',
           k: 'bak',
@@ -110,7 +112,7 @@ describe('List controller', () => {
         expect.assertions(1);
         jest.spyOn(queries, method).mockResolvedValueOnce(1023);
 
-        expect(await getTotalCost(db, 'some-user-id', page)).toBe(1023);
+        expect(await getTotalCost(db, testUserId, page)).toBe(1023);
       });
     });
   });

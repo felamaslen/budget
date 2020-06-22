@@ -5,9 +5,9 @@ import { createSelector } from 'reselect';
 
 import { getCurrentFundsCache, getFundsRows } from './helpers';
 import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
-import * as Funds from '~client/reducers/funds';
+import { Cache } from '~client/reducers/funds';
 import { colors } from '~client/styled/variables';
-import { Fund, Transaction } from '~client/types';
+import { Id, Fund, Transaction } from '~client/types';
 
 const scoreColor = (score: number, channel: number): number =>
   Math.round(255 + score * (channel - 255));
@@ -79,7 +79,7 @@ export type RowGain = Omit<CostValue, 'cost'> & {
 
 export type RowGains = { [id: string]: RowGain | null };
 
-export const getRowGains = (rows: Fund[], cache: Funds.Cache): RowGains =>
+export const getRowGains = (rows: Fund[], cache: Cache): RowGains =>
   rows.reduce<RowGains>((items, { id, transactions }) => {
     if (!(transactions.length && cache.prices[id]?.values.length)) {
       return { ...items, [id]: null };
@@ -120,7 +120,7 @@ export type GainsForRow =
     })
   | null;
 
-export function getGainsForRow(rowGains: RowGains, id: string): GainsForRow {
+export function getGainsForRow(rowGains: RowGains, id: Id): GainsForRow {
   const rowGain = rowGains[id];
   if (!rowGainExists(rowGain)) {
     return null;

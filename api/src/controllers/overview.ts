@@ -50,7 +50,7 @@ const getNonFutureMonths = (now: Date): Date[] => mapMonths(now, minStartTime, f
 
 async function getFundValues(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   now: Date,
 ): Promise<number[]> {
   const monthEnds = getNonFutureMonths(now);
@@ -60,7 +60,7 @@ async function getFundValues(
 
 async function getMonthCost(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   now: Date,
   category: ListCategory,
 ): Promise<number[]> {
@@ -69,7 +69,7 @@ async function getMonthCost(
 
 async function getMonthlyCategoryValues(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   now: Date,
 ): Promise<OverviewResponse['cost']> {
   const [funds, income, bills, food, general, holiday, social] = await Promise.all<number[]>([
@@ -141,7 +141,7 @@ export function calculateXIRRFromTransactions(
 
 async function getAnnualisedFundReturns(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   now: Date,
 ): Promise<number> {
   const [currentFundsValue, transactions] = await Promise.all([
@@ -156,7 +156,7 @@ const getYearMonth = (date: Date): [number, number] => [getYear(date), getMonth(
 
 export async function getOverviewData(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   now: Date = new Date(),
 ): Promise<OverviewResponse> {
   const [cost, annualisedFundReturns] = await Promise.all([

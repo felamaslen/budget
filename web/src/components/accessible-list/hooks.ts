@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { getItems } from './selectors';
 import { SortItemsPre, SortItemsPost, CustomSelector } from './types';
 import { OnUpdateList, OnDeleteList } from '~client/actions';
-import { Item, Create } from '~client/types';
+import { Id, Item, Create } from '~client/types';
 
 const identitySelector = <E extends {}>(): { [id: string]: Partial<E> } => ({});
 
@@ -40,13 +40,13 @@ export function useMobileEditModal<I extends Item, P extends string>(
   actionOnDelete: OnDeleteList<I, P, void>,
 ): {
   active: boolean;
-  activate: (id: string) => void;
+  activate: (id: Id) => void;
   item: I | undefined;
   onCancel: () => void;
   onSubmit: (delta: Create<I>) => void;
   onDelete: () => void;
 } {
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<Id | null>(null);
   const item = useMemo<I | undefined>(() => itemsSorted.find(({ id }) => id === editingId), [
     editingId,
     itemsSorted,
@@ -55,7 +55,7 @@ export function useMobileEditModal<I extends Item, P extends string>(
 
   const onCancel = useCallback(() => setEditingId(null), []);
 
-  const activate = useCallback((id: string) => setEditingId(id), []);
+  const activate = useCallback((id: Id) => setEditingId(id), []);
 
   const onSubmit = useCallback(
     (delta: Create<I>): void => {

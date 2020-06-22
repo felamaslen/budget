@@ -100,6 +100,12 @@ module.exports = {
     'jest/prefer-expect-assertions': 'warn',
     'jest/prefer-strict-equal': 'warn',
     'jest/require-top-level-describe': 0,
+    'jest/valid-title': [
+      'error',
+      {
+        ignoreTypeOfDescribeName: true,
+      },
+    ],
     'max-len': ['error', 120],
     'no-bitwise': 0,
     'no-underscore-dangle': 0,

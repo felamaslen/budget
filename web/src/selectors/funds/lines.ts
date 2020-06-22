@@ -1,7 +1,7 @@
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { leftPad, rightPad, IDENTITY } from '~client/modules/data';
 import { separateLines } from '~client/modules/funds';
-import { Data } from '~client/types';
+import { Id, Data } from '~client/types';
 
 type Return = {
   price: number;
@@ -47,7 +47,7 @@ export function getOverallAbsolute(fundsWithReturns: FundsWithReturns): number[]
   return result;
 }
 
-export function getFundLineAbsolute(fundsWithReturns: FundsWithReturns, id: string): number[] {
+export function getFundLineAbsolute(fundsWithReturns: FundsWithReturns, id: Id): number[] {
   return fundsWithReturns[id].returns.map(({ price, units }) => price * units);
 }
 
@@ -77,7 +77,7 @@ export function getOverallROI(fundsWithReturns: FundsWithReturns): number[] {
     .map<number>(({ value, cost }) => Math.round((10000 * (value - cost)) / cost) / 100);
 }
 
-export function getFundLineROI(fundsWithReturns: FundsWithReturns, id: string): number[] {
+export function getFundLineROI(fundsWithReturns: FundsWithReturns, id: Id): number[] {
   return fundsWithReturns[id].returns.map(({ price, units, cost }) =>
     price && units && cost ? Math.round((10000 * (price * units - cost)) / cost) / 100 : 0,
   );
@@ -93,7 +93,7 @@ export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): 
   return [];
 }
 
-export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: string): number[] {
+export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: Id): number[] {
   if (mode === Mode.Value) {
     return getFundLineAbsolute(fundsWithReturns, id);
   }
@@ -111,7 +111,7 @@ export function getFundLineProcessed(
   fundsWithReturns: FundsWithReturns,
   cacheTimes: number[],
   mode: Mode,
-  id: string = GRAPH_FUNDS_OVERALL_ID,
+  id: Id = GRAPH_FUNDS_OVERALL_ID,
 ): Data[] {
   const line =
     id === GRAPH_FUNDS_OVERALL_ID

@@ -1,7 +1,7 @@
 import { Create } from './shared';
 
 export type Category = {
-  id: string;
+  id: number;
   type: 'asset' | 'liability';
   category: string;
   color: string;
@@ -13,7 +13,7 @@ export type CategoryRow = Pick<Category, 'id' | 'type' | 'category' | 'color'> &
 };
 
 export type Subcategory = {
-  id: string;
+  id: number;
   categoryId: Category['id'];
   subcategory: string;
   hasCreditLimit: boolean | null;
@@ -42,7 +42,7 @@ export type ComplexValue = ComplexValueItem[];
 export type Value = number | ComplexValue;
 
 export type ValueObject = {
-  id?: string;
+  id?: number;
   subcategory: Subcategory['id'];
   skip: boolean | null;
   value: Value;
@@ -54,13 +54,13 @@ export type CreditLimit = {
 };
 
 export type Currency = {
-  id?: string;
+  id?: number;
   currency: string;
   rate: number;
 };
 
 export type Entry = {
-  id: string;
+  id: number;
   date: string;
   values: ValueObject[];
   creditLimit: CreditLimit[];
@@ -74,18 +74,18 @@ export type CreateEntry = Omit<Create<Entry>, 'date' | 'values' | 'currencies'> 
 };
 
 export type JoinedEntryRow = {
-  id: string;
+  id: number;
   date: string;
 
-  currency_ids: string[] | [null];
+  currency_ids: number[] | [null];
   currencies: string[] | [null];
   currency_rates: number[] | [null];
 
-  credit_limit_subcategory: string[] | [null];
+  credit_limit_subcategory: number[] | [null];
   credit_limit_value: number[] | [null];
 
-  value_id: string;
-  value_subcategory: string;
+  value_id: number;
+  value_subcategory: number;
   value_skip: boolean | null;
   value_simple: number | null;
 
@@ -98,13 +98,13 @@ export type JoinedEntryRow = {
 };
 
 export type JoinedEntryRowWithCurrencies = JoinedEntryRow & {
-  currency_ids: string[];
+  currency_ids: number[];
   currencies: string[];
   currency_rates: number[];
 };
 
 export type JoinedEntryRowWithCreditLimit = JoinedEntryRow & {
-  credit_limit_subcategory: string[];
+  credit_limit_subcategory: number[];
   credit_limit_value: number[];
 };
 

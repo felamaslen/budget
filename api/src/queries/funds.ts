@@ -3,7 +3,7 @@ import { Transaction, Fund } from '~api/types';
 
 export async function selectTransactions(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   now: Date,
 ): Promise<readonly Transaction[]> {
   const result = await db.query<Transaction>(sql`
@@ -18,8 +18,8 @@ export async function selectTransactions(
 
 export async function upsertTransactions(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  id: string,
+  uid: number,
+  id: number,
   transactions: Transaction[],
 ): Promise<void> {
   await db.query(sql`
@@ -34,13 +34,13 @@ export async function upsertTransactions(
   INSERT INTO funds_transactions (fund_id, date, units, cost)
   SELECT * FROM ${sql.unnest(
     transactions.map(({ date, units, cost }) => [id, date, units, cost]),
-    ['uuid', 'date', 'float8', 'int4'],
+    ['int4', 'date', 'float8', 'int4'],
   )}
   `);
 }
 
 type RowWithTransactions = {
-  id: string;
+  id: number;
   item: string;
   dates: string[];
   units: number[];
@@ -49,7 +49,7 @@ type RowWithTransactions = {
 
 export async function getFundsItems(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
 ): Promise<Fund[]> {
   const result = await db.query<RowWithTransactions>(sql`
   SELECT ${sql.join(
@@ -82,7 +82,7 @@ export async function getFundsItems(
 
 export async function getFundHistoryNumResults(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   salt: string,
   minTime: Date,
 ): Promise<number> {
@@ -101,11 +101,11 @@ export async function getFundHistoryNumResults(
   return result.rows[0].count;
 }
 
-export type FundHistoryRow = { time: number; id: string[]; price: number[] };
+export type FundHistoryRow = { time: number; id: number[]; price: number[] };
 
 export async function getFundHistory(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   salt: string,
   numResults: number,
   numToDisplay: number,

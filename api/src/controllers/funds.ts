@@ -96,7 +96,7 @@ export function processFundHistory(
 
 async function getFundPriceHistory(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   now: Date,
   period: FundsParams['period'],
   length: number,
@@ -135,7 +135,7 @@ async function getFundPriceHistory(
 
 export async function getFundsData(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   { history, period, length }: FundsParams,
   now: Date = new Date(),
 ): Promise<FundsResponse> {
@@ -158,7 +158,7 @@ export async function getFundsData(
 
 export async function createFund(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   { item, transactions }: CreateList<Fund>,
 ): Promise<Omit<CreateResponse, 'weekly'>> {
   const id = await insertListItem(db, uid, Page.funds, { item });
@@ -170,7 +170,7 @@ export async function createFund(
 
 export async function updateFund(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   { id, item, transactions }: UpdateList<Fund>,
 ): Promise<UpdateResponse> {
   if (transactions) {

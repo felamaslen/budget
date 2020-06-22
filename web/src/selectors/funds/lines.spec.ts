@@ -1,3 +1,4 @@
+import numericHash from 'string-hash';
 import {
   getOverallAbsolute,
   getFundLineAbsolute,
@@ -10,9 +11,9 @@ import {
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 
 describe('Funds selectors / lines', () => {
-  const id1 = 'my-fund-id';
-  const id2 = 'my-second-fund-id';
-  const id3 = 'short-lived-fund';
+  const id1 = numericHash('my-fund-id');
+  const id2 = numericHash('my-second-fund-id');
+  const id3 = numericHash('short-lived-fund');
 
   const fundsWithReturns = {
     [id1]: {
@@ -111,7 +112,7 @@ describe('Funds selectors / lines', () => {
     });
 
     describe('for funds which were sold at a profit and re-bought', () => {
-      const idRebought = 'my-rebought-fund';
+      const idRebought = numericHash('my-rebought-fund');
       const fundsWithReturnsRebought = {
         [idRebought]: {
           startIndex: 0,

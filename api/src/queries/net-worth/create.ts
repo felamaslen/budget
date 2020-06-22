@@ -1,15 +1,15 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
-import { IDRow } from '~api/types';
+import { Item } from '~api/types';
 
 export async function insertEntry(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   date: string,
-): Promise<string> {
+): Promise<number> {
   const {
     rows: [{ id }],
-  } = await db.query<IDRow>(sql`
+  } = await db.query<Item>(sql`
     INSERT INTO net_worth (uid, date)
     VALUES (${uid}, ${date})
     RETURNING id
@@ -19,11 +19,11 @@ export async function insertEntry(
 
 export async function insertValues(
   db: DatabaseTransactionConnectionType,
-  valuesRows: [string, boolean | null, string, number | null][],
-): Promise<string[]> {
-  const { rows } = await db.query<IDRow>(sql`
+  valuesRows: [number, boolean | null, number, number | null][],
+): Promise<number[]> {
+  const { rows } = await db.query<Item>(sql`
     INSERT INTO net_worth_values (net_worth_id, skip, subcategory, value)
-    SELECT * FROM ${sql.unnest(valuesRows, ['uuid', 'bool', 'uuid', 'int4'])}
+    SELECT * FROM ${sql.unnest(valuesRows, ['int4', 'bool', 'int4', 'int4'])}
     ON CONFLICT (net_worth_id, subcategory) DO UPDATE SET ${sql.join(
       [sql`skip = excluded.skip`, sql`value = excluded.value`],
       sql`, `,
@@ -35,14 +35,14 @@ export async function insertValues(
 
 export async function insertFXValues(
   db: DatabaseTransactionConnectionType,
-  fxValuesRows: [string, number, string][],
+  fxValuesRows: [number, number, string][],
 ): Promise<void> {
   if (!fxValuesRows.length) {
     return;
   }
   await db.query(sql`
     INSERT INTO net_worth_fx_values (values_id, value, currency)
-    SELECT * FROM ${sql.unnest(fxValuesRows, ['uuid', 'float4', 'varchar'])}
+    SELECT * FROM ${sql.unnest(fxValuesRows, ['int4', 'float4', 'varchar'])}
     ON CONFLICT (values_id, currency)
       DO UPDATE SET value = excluded.value
   `);
@@ -50,14 +50,14 @@ export async function insertFXValues(
 
 export async function insertOptionValues(
   db: DatabaseTransactionConnectionType,
-  optionValuesRows: [string, number, number, number][],
+  optionValuesRows: [number, number, number, number][],
 ): Promise<void> {
   if (!optionValuesRows.length) {
     return;
   }
   await db.query(sql`
     INSERT INTO net_worth_option_values (values_id, units, strike_price, market_price)
-    SELECT * FROM ${sql.unnest(optionValuesRows, ['uuid', 'float4', 'float4', 'float4'])}
+    SELECT * FROM ${sql.unnest(optionValuesRows, ['int4', 'float4', 'float4', 'float4'])}
   `);
 }
 
@@ -67,7 +67,7 @@ export const insertWithNetWorthId = <R extends {}>(
   types: string[],
 ) => async (
   db: DatabaseTransactionConnectionType,
-  netWorthId: string,
+  netWorthId: number,
   rows: R[] = [],
 ): Promise<void> => {
   if (!rows.length) {
@@ -83,7 +83,7 @@ export const insertWithNetWorthId = <R extends {}>(
 
   await db.query(sql`
     INSERT INTO ${sql.identifier([table])} (${sql.join(columns, sql`, `)})
-    SELECT * FROM ${sql.unnest(rowsWithId, ['uuid', ...types])}
+    SELECT * FROM ${sql.unnest(rowsWithId, ['int4', ...types])}
     ON CONFLICT (net_worth_id, ${sql.identifier([keys[0] as string])})
       DO UPDATE SET
         ${sql.identifier([keys[1] as string])} =

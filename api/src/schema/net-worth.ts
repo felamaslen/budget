@@ -8,7 +8,7 @@ export const schemaNetWorth = joi
     values: joi.array().items(
       joi
         .object({
-          subcategory: joi.string().uuid().required(),
+          subcategory: joi.number().integer().min(1).required(),
           skip: joi.boolean().allow(null).default(null),
           value: joi
             .alternatives()
@@ -38,7 +38,7 @@ export const schemaNetWorth = joi
     creditLimit: joi.array().items(
       joi
         .object({
-          subcategory: joi.string().uuid().required(),
+          subcategory: joi.number().integer().min(1).required(),
           value: joi.number().integer().required(),
         })
         .unknown(false),
@@ -56,7 +56,7 @@ export const schemaNetWorth = joi
 
 export const schemaSubcategory = joi
   .object({
-    categoryId: joi.string().uuid().required(),
+    categoryId: joi.number().integer().min(1).required(),
     subcategory: joi.string().required(),
     hasCreditLimit: joi.boolean().allow(null),
     opacity: joi.number().min(0).max(1),

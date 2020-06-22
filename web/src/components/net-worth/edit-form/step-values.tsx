@@ -1,7 +1,6 @@
 import format from 'date-fns/format';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { replaceAtIndex } from 'replace-array';
-import shortid from 'shortid';
 
 import { Step } from './constants';
 import { FormContainer, Props as ContainerProps } from './form-container';
@@ -14,9 +13,10 @@ import {
 } from '~client/components/form-field';
 import { CREATE_ID } from '~client/constants/data';
 import { useCTA } from '~client/hooks';
-import { toIdMap } from '~client/modules/data';
+import { toIdMap, generateFakeId } from '~client/modules/data';
 import { ButtonAdd, ButtonDelete } from '~client/styled/shared';
 import {
+  Id,
   IdMap,
   CreateEdit,
   Category,
@@ -59,8 +59,8 @@ type PropsEditByType = {
   creditLimit: CreditLimit[];
   currencies: Currency[];
   value: ValueObject;
-  onChange: (id: string, value: Value, creditLimit: number | null, skip: boolean | null) => void;
-  onRemove: (id: string) => void;
+  onChange: (id: Id, value: Value, creditLimit: number | null, skip: boolean | null) => void;
+  onRemove: (id: Id) => void;
 };
 
 const EditByType: React.FC<PropsEditByType> = ({
@@ -103,7 +103,7 @@ const EditByType: React.FC<PropsEditByType> = ({
       <Styled.Subcategory>{subcategoryName}</Styled.Subcategory>
       <Styled.EditValue>
         <FormFieldNetWorthValue
-          id={subcategory}
+          id={String(subcategory)}
           value={value}
           isOption={isOption}
           onChange={setNewValue}
@@ -121,14 +121,14 @@ const EditByType: React.FC<PropsEditByType> = ({
   );
 };
 
-const getFirstOption = (options: SelectOptions): string => (options[0] || {}).internal;
+const getFirstOption = (options: SelectOptions<number>): number => (options[0] ?? {}).internal;
 
 type PropsAddByType = Pick<PropsEditByType, 'isLiability' | 'subcategories' | 'currencies'> & {
   categories: Category[];
   onAdd: (
     value: Value,
     creditLimit: number | null,
-    subcategory: string,
+    subcategory: number,
     skip?: boolean | null,
   ) => void;
 };
@@ -140,18 +140,18 @@ const AddByType: React.FC<PropsAddByType> = ({
   currencies,
   onAdd,
 }) => {
-  const categoryOptions = useMemo<SelectOptions>(
+  const categoryOptions = useMemo<SelectOptions<number>>(
     () =>
-      categories.map(({ id, category }: Category) => ({
+      categories.map(({ id, category }) => ({
         internal: id,
         external: category,
       })),
     [categories],
   );
 
-  const [category, setCategory] = useState<string>(getFirstOption(categoryOptions));
+  const [category, setCategory] = useState<number>(getFirstOption(categoryOptions));
 
-  const subcategoryOptions = useMemo<SelectOptions>(
+  const subcategoryOptions = useMemo<SelectOptions<number>>(
     () =>
       subcategories
         .filter(({ categoryId }) => categoryId === category)
@@ -162,7 +162,7 @@ const AddByType: React.FC<PropsAddByType> = ({
     [category, subcategories],
   );
 
-  const [subcategory, setSubcategory] = useState<string>(getFirstOption(subcategoryOptions));
+  const [subcategory, setSubcategory] = useState<number>(getFirstOption(subcategoryOptions));
 
   const [value, setValue] = useState<Value>(0);
   const [skip, setSkip] = useState<boolean | null>(null);
@@ -220,7 +220,7 @@ const AddByType: React.FC<PropsAddByType> = ({
 
 function appendCreditLimit(
   item: CreateEdit<Entry>,
-  subcategory: string,
+  subcategory: number,
   value: number,
 ): CreditLimit[] {
   const index = item.creditLimit.findIndex(
@@ -249,19 +249,20 @@ type Props = Omit<PropsStep, 'typeFilter' | 'name'>;
 function useAddValue(
   item: CreateEdit<Entry>,
   onEdit: Props['onEdit'],
-): (value: Value, creditLimit: number | null, subcategory: string, skip?: boolean | null) => void {
+): (value: Value, creditLimit: number | null, subcategory: number, skip?: boolean | null) => void {
   return useCallback(
     (newValue, creditLimit, subcategory, skip = null) => {
       const itemWithValue = {
         ...item,
-        values: item.values.concat([
+        values: [
+          ...item.values,
           {
-            id: shortid.generate(),
+            id: generateFakeId(),
             subcategory,
             skip,
             value: newValue,
           },
-        ]),
+        ],
       };
 
       if (creditLimit === null) {
@@ -280,7 +281,7 @@ function useAddValue(
 function useChangeValue(
   item: CreateEdit<Entry>,
   onEdit: Props['onEdit'],
-): (id: string, value: Value, creditLimit?: number | null, skip?: boolean | null) => void {
+): (id: Id, value: Value, creditLimit?: number | null, skip?: boolean | null) => void {
   return useCallback(
     (id, newValue, creditLimit, skip = null) => {
       const index = item.values.findIndex(({ id: valueId }) => valueId === id);
@@ -315,7 +316,7 @@ function useChangeValue(
 
 type ValueWithCategory = ValueObject & { category: Category };
 
-function useRemoveValue(item: CreateEdit<Entry>, onEdit: Props['onEdit']): (id: string) => void {
+function useRemoveValue(item: CreateEdit<Entry>, onEdit: Props['onEdit']): (id: Id) => void {
   return useCallback(
     (id) => {
       const index = item.values.findIndex(({ id: valueId }) => valueId === id);
@@ -332,7 +333,7 @@ function useRemoveValue(item: CreateEdit<Entry>, onEdit: Props['onEdit']): (id: 
 const CategoryGroup: React.FC<{
   category: Category;
   expanded: boolean;
-  setExpanded: React.Dispatch<React.SetStateAction<string | null>>;
+  setExpanded: React.Dispatch<React.SetStateAction<number | null>>;
 }> = ({ category: { id, category, color }, expanded, setExpanded, children }) => {
   const onToggle = useCallback(() => setExpanded((last) => (last === id ? null : id)), [
     id,
@@ -354,7 +355,7 @@ const CategoryGroup: React.FC<{
 const EditByCategory: React.FC<{
   item: CreateEdit<Entry>;
   expanded: boolean;
-  setExpanded: React.Dispatch<React.SetStateAction<string | null>>;
+  setExpanded: React.Dispatch<React.SetStateAction<number | null>>;
   category: Category;
   subcategories: Subcategory[];
   onEdit: Props['onEdit'];
@@ -403,7 +404,7 @@ const StepValues: React.FC<PropsStep> = ({
     [categories, typeFilter],
   );
 
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   const categoriesById = useMemo<IdMap<Category>>(() => toIdMap<Category>(categoriesByType), [
     categoriesByType,
@@ -446,8 +447,8 @@ const StepValues: React.FC<PropsStep> = ({
       subcategories.filter(
         ({ id: subcategoryId, categoryId }) =>
           categoriesByType.some(({ id }) => id === categoryId) &&
-          !Object.keys(groupedValues).some((key) =>
-            groupedValues[key].some(({ subcategory }) => subcategory === subcategoryId),
+          !Object.entries(groupedValues).some(([, group]) =>
+            group.some(({ subcategory }) => subcategory === subcategoryId),
           ),
       ),
     [subcategories, categoriesByType, groupedValues],
@@ -478,7 +479,7 @@ const StepValues: React.FC<PropsStep> = ({
             key={categoryId}
             item={item}
             category={values[0].category}
-            expanded={expanded === categoryId}
+            expanded={expanded === Number(categoryId)}
             setExpanded={setExpanded}
             subcategories={subcategories}
             values={values}

@@ -10,12 +10,13 @@ import {
   ReadResponseSocial,
 } from './list';
 import { Category, Subcategory, Entry, CreateEntry } from './net-worth';
+import { Id } from './shared';
 
 export type RequestWithResponse<R = never> = Request & {
   res: R;
 };
 
-export type SyncResponsePostList = { id: string; total: number; weekly?: number };
+export type SyncResponsePostList = { id: Id; total: number; weekly?: number };
 export type SyncResponsePutList = { total: number; weekly?: number };
 export type SyncResponseDeleteList = SyncResponsePutList;
 

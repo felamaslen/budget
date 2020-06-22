@@ -1,5 +1,9 @@
 # Budget CLI app
 
+## **Deprecated!**
+
+This project is *deprecated* and not compatible with the current API. Needs maintaining.
+
 This is a standard Python 3 app.
 
 ## Installation

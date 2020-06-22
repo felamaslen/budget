@@ -8,7 +8,7 @@ export type Cache = {
   startTime: number;
   cacheTimes: number[];
   prices: {
-    [fundId: string]: {
+    [fundId: number]: {
       startIndex: number;
       values: number[];
     };

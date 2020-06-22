@@ -1,8 +1,10 @@
 /* eslint-disable max-lines */
 import { removeAtIndex } from 'replace-array';
 import shortid from 'shortid';
+import numericHash from 'string-hash';
 
 import {
+  generateFakeId,
   getPeriodMatch,
   getTransactionsList,
   formatTransactionsList,
@@ -25,9 +27,44 @@ import {
 } from './data';
 import { Average, Period } from '~client/constants';
 import { mockRandom } from '~client/test-utils/random';
-import { Data } from '~client/types';
+import { Data, Transaction } from '~client/types';
+
+jest.mock('shortid', () => ({
+  generate: (): string => 'some-shortid',
+}));
 
 describe('data module', () => {
+  describe('generateFakeId', () => {
+    it('should be numeric', () => {
+      expect.assertions(1);
+      expect(generateFakeId()).toStrictEqual(expect.any(Number));
+    });
+
+    it('should be negative', () => {
+      expect.assertions(1);
+      expect(generateFakeId()).toBeLessThan(0);
+    });
+
+    it('should be deterministic on shortid', () => {
+      expect.assertions(2);
+
+      const id0 = 'some-short-id';
+      const id1 = 'other-short-id';
+
+      jest.spyOn(shortid, 'generate').mockReturnValueOnce(id0);
+      const firstId = generateFakeId();
+
+      jest.spyOn(shortid, 'generate').mockReturnValueOnce(id0);
+      const secondId = generateFakeId();
+
+      jest.spyOn(shortid, 'generate').mockReturnValueOnce(id1);
+      const idShortIdChanged = generateFakeId();
+
+      expect(secondId).toBe(firstId);
+      expect(idShortIdChanged).not.toBe(firstId);
+    });
+  });
+
   describe('getPeriodMatch', () => {
     const envBefore = process.env.DEFAULT_FUND_PERIOD ?? '';
     beforeEach(() => {
@@ -114,14 +151,10 @@ describe('data module', () => {
 
     it('should add fake IDs to each item', () => {
       expect.assertions(1);
-      const spy = jest.spyOn(shortid, 'generate').mockReturnValue('some-shortid');
-
       const transactionsList = getTransactionsList(transactionsData);
       expect(transactionsList).toStrictEqual(
-        transactionsData.map(() => expect.objectContaining({ id: 'some-shortid' })),
+        transactionsData.map(() => expect.objectContaining({ id: generateFakeId() })),
       );
-
-      spy.mockRestore();
     });
 
     it('should handle rounding errors', () => {
@@ -215,9 +248,9 @@ describe('data module', () => {
 
       expect(transactionsListAdded).toHaveLength(transactionsData.length + 1);
 
-      expect(transactionsListAdded[transactionsListAdded.length - 1]).toStrictEqual(
+      expect(transactionsListAdded[transactionsListAdded.length - 1]).toStrictEqual<Transaction>(
         expect.objectContaining({
-          id: expect.stringMatching(/^([^\s]{7})/),
+          id: expect.any(Number),
           date: new Date('2018-09-13T03:20Z'),
           units: 20,
           cost: 3,
@@ -255,6 +288,12 @@ describe('data module', () => {
   describe('modifyTransactionById', () => {
     it('should modify a transaction list at a specified id', () => {
       expect.assertions(6);
+      jest
+        .spyOn(shortid, 'generate')
+        .mockReturnValueOnce('short-id-1')
+        .mockReturnValueOnce('short-id-2')
+        .mockReturnValueOnce('short-id-3');
+
       const transactionsList = getTransactionsList(transactionsData);
 
       const id1 = transactionsList[1].id;
@@ -406,103 +445,42 @@ describe('data module', () => {
   });
 
   describe('getValueFromTransmit', () => {
-    it('should return "date" as a Date object', () => {
+    const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
+
+    it.each`
+      dataType          | resultDescription           | outputValue                          | inputValue
+      ${'id'}           | ${'as a number'}            | ${345}                               | ${345}
+      ${'date'}         | ${'as a Date object'}       | ${new Date('2019-06-05')}            | ${'2019-06-05'}
+      ${'item'}         | ${'as-is'}                  | ${'some-item'}                       | ${'some-item'}
+      ${'shop'}         | ${'as-is'}                  | ${'some-shop'}                       | ${'some-shop'}
+      ${'category'}     | ${'as-is'}                  | ${'some-category'}                   | ${'some-category'}
+      ${'holiday'}      | ${'as-is'}                  | ${'some-holiday'}                    | ${'some-holiday'}
+      ${'social'}       | ${'as-is'}                  | ${'some-social'}                     | ${'some-social'}
+      ${'cost'}         | ${'as an integer'}          | ${123}                               | ${123.45}
+      ${'transactions'} | ${'as a transactions list'} | ${getTransactionsList(transactions)} | ${transactions}
+    `('should return "$dataType" $resultDescription', ({ dataType, inputValue, outputValue }) => {
       expect.assertions(1);
-      expect(getValueFromTransmit('date', '2019-06-05')).toStrictEqual(new Date('2019-06-05'));
-    });
-
-    it('should return "item" as-is', () => {
-      expect.assertions(1);
-      expect(getValueFromTransmit('item', 'some-item')).toStrictEqual('some-item');
-    });
-
-    it('should return "category" as-is', () => {
-      expect.assertions(1);
-      expect(getValueFromTransmit('category', 'some-category')).toStrictEqual('some-category');
-    });
-
-    it('should return "holiday" as-is', () => {
-      expect.assertions(1);
-      expect(getValueFromTransmit('holiday', 'some-holiday')).toStrictEqual('some-holiday');
-    });
-
-    it('should return "social" as-is', () => {
-      expect.assertions(1);
-      expect(getValueFromTransmit('social', 'some-social')).toStrictEqual('some-social');
-    });
-
-    it('should return "shop" as-is', () => {
-      expect.assertions(1);
-      expect(getValueFromTransmit('shop', 'some-shop')).toStrictEqual('some-shop');
-    });
-
-    it('should return "cost" as an integer', () => {
-      expect.assertions(4);
-      expect(getValueFromTransmit('cost', 123)).toStrictEqual(123);
-      expect(getValueFromTransmit('cost', 123.45)).toStrictEqual(123);
-      expect(getValueFromTransmit('cost', '123.45')).toStrictEqual(123);
-      expect(getValueFromTransmit('cost', 'not a number')).toStrictEqual(0);
-    });
-
-    it('should return "transactions" as a transactions list', () => {
-      expect.assertions(1);
-
-      const spy = jest.spyOn(shortid, 'generate').mockReturnValue('fake-id');
-
-      const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
-
-      expect(getValueFromTransmit('transactions', transactions)).toStrictEqual(
-        getTransactionsList(transactions),
-      );
-
-      spy.mockReset();
+      expect(getValueFromTransmit(dataType, inputValue)).toStrictEqual(outputValue);
     });
   });
 
   describe('getValueForTransmit', () => {
-    it('should return date as an ISO date string', () => {
+    const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
+
+    it.each`
+      dataType          | resultDescription          | inputValue                           | outputValue
+      ${'id'}           | ${'as a number'}           | ${345}                               | ${345}
+      ${'date'}         | ${'as an ISO date string'} | ${new Date('2019-06-05')}            | ${'2019-06-05'}
+      ${'item'}         | ${'as-is'}                 | ${'some-item'}                       | ${'some-item'}
+      ${'shop'}         | ${'as-is'}                 | ${'some-shop'}                       | ${'some-shop'}
+      ${'category'}     | ${'as-is'}                 | ${'some-category'}                   | ${'some-category'}
+      ${'holiday'}      | ${'as-is'}                 | ${'some-holiday'}                    | ${'some-holiday'}
+      ${'social'}       | ${'as-is'}                 | ${'some-social'}                     | ${'some-social'}
+      ${'cost'}         | ${'as an integer'}         | ${123.45}                            | ${123}
+      ${'transactions'} | ${'as a simple array'}     | ${getTransactionsList(transactions)} | ${transactions}
+    `('should return "$dataType" $resultDescription', ({ dataType, inputValue, outputValue }) => {
       expect.assertions(1);
-      expect(getValueForTransmit('date', new Date('2019-06-05'))).toBe('2019-06-05');
-    });
-
-    it('should return "item" as-is', () => {
-      expect.assertions(1);
-      expect(getValueForTransmit('item', 'some-item')).toStrictEqual('some-item');
-    });
-
-    it('should return "category" as-is', () => {
-      expect.assertions(1);
-      expect(getValueForTransmit('category', 'some-category')).toStrictEqual('some-category');
-    });
-
-    it('should return "holiday" as-is', () => {
-      expect.assertions(1);
-      expect(getValueForTransmit('holiday', 'some-holiday')).toStrictEqual('some-holiday');
-    });
-
-    it('should return "social" as-is', () => {
-      expect.assertions(1);
-      expect(getValueForTransmit('social', 'some-social')).toStrictEqual('some-social');
-    });
-
-    it('should return "shop" as-is', () => {
-      expect.assertions(1);
-      expect(getValueForTransmit('shop', 'some-shop')).toStrictEqual('some-shop');
-    });
-
-    it('should return cost as an integer', () => {
-      expect.assertions(2);
-      expect(getValueForTransmit('cost', 123)).toStrictEqual(123);
-      expect(getValueForTransmit('cost', 123.45)).toStrictEqual(123);
-    });
-
-    it('should return transactions as a simple array', () => {
-      expect.assertions(1);
-      const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
-
-      expect(getValueForTransmit('transactions', getTransactionsList(transactions))).toStrictEqual(
-        transactions,
-      );
+      expect(getValueForTransmit(dataType, inputValue)).toStrictEqual(outputValue);
     });
   });
 
@@ -684,7 +662,7 @@ describe('data module', () => {
   describe('withoutId', () => {
     it('should remove the ID from an object', () => {
       expect.assertions(1);
-      expect(withoutId({ id: 'foo', bar: 'baz' })).toStrictEqual({ bar: 'baz' });
+      expect(withoutId({ id: numericHash('foo'), bar: 'baz' })).toStrictEqual({ bar: 'baz' });
     });
   });
 
@@ -693,8 +671,8 @@ describe('data module', () => {
       expect.assertions(1);
       expect(
         withoutIds([
-          { id: 'bak', bar: 'ban' },
-          { id: 'foo', bar: 'baz' },
+          { id: numericHash('bak'), bar: 'ban' },
+          { id: numericHash('foo'), bar: 'baz' },
         ]),
       ).toStrictEqual([{ bar: 'ban' }, { bar: 'baz' }]);
     });

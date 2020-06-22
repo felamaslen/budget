@@ -9,13 +9,14 @@ import { PropsItemCreate } from './types';
 import { FormFieldTextInline } from '~client/components/form-field';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
+import { Id } from '~client/types';
 
 describe('Accessible list create item', () => {
   type MyPage = 'my-page';
   const myPage: MyPage = 'my-page';
 
   type MyItem = {
-    id: string;
+    id: Id;
     someField: string;
     nextField: string;
   };

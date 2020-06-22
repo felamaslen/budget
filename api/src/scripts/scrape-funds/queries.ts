@@ -2,7 +2,7 @@ import { sql, DatabaseTransactionConnectionType } from 'slonik';
 import { StockCodes, Stock } from './types';
 
 type FundRow = {
-  uid: string;
+  uid: number;
   name: string;
   units: number;
   cost: number;
@@ -77,41 +77,39 @@ export async function insertStocksList(
   ]);
   await db.query(sql`
   INSERT INTO stocks (uid, name, code, weight, subweight)
-  SELECT * FROM ${sql.unnest(tuples, ['uuid', 'text', 'text', 'float8', 'float8'])}
+  SELECT * FROM ${sql.unnest(tuples, ['int4', 'text', 'text', 'float8', 'float8'])}
   `);
 }
 
-export async function upsertFundHash(
+export async function upsertFundHashes(
   db: DatabaseTransactionConnectionType,
-  hash: string,
-  broker: string,
-): Promise<string> {
-  const result = await db.query<{ fid: string }>(sql`
-  INSERT INTO fund_hash (hash, broker) VALUES (${hash}, ${broker})
+  tuples: [string, string][], // hash, broker
+): Promise<number[]> {
+  const result = await db.query<{ fid: number }>(sql`
+  INSERT INTO fund_hash (hash, broker)
+  SELECT * FROM ${sql.unnest(tuples, ['varchar', 'varchar'])}
   ON CONFLICT (hash, broker) DO UPDATE
     SET hash = excluded.hash
   RETURNING fid
   `);
-  return result.rows[0].fid;
+  return result.rows.map(({ fid }) => fid);
 }
 
-export async function insertPrice(
+export async function insertPrices(
   db: DatabaseTransactionConnectionType,
-  cid: string,
-  fid: string,
-  price: number,
+  tuples: [number, number, number][], // cid, fid, price
 ): Promise<void> {
   await db.query(sql`
   INSERT INTO fund_cache (cid, fid, price)
-  VALUES (${cid}, ${fid}, ${price})
+  SELECT * FROM ${sql.unnest(tuples, ['int4', 'int4', 'float8'])}
   `);
 }
 
 export async function insertPriceCache(
   db: DatabaseTransactionConnectionType,
   now: Date,
-): Promise<string> {
-  const result = await db.query<{ cid: string }>(sql`
+): Promise<number> {
+  const result = await db.query<{ cid: number }>(sql`
   INSERT INTO fund_cache_time (time)
   VALUES (${now.toISOString()})
   RETURNING cid

@@ -4,14 +4,14 @@ import { getShortTermQuery, getLongTermQuery, getSearchResults } from '~api/quer
 import { SearchParams, SearchResult } from '~api/types';
 
 export const getColumnResults = (
-  uid: string,
+  uid: number,
   params: SearchParams,
 ): TaggedTemplateLiteralInvocationType<{ value: string }> =>
   params.searchTerm.length < 3 ? getShortTermQuery(uid, params) : getLongTermQuery(uid, params);
 
 export const getSuggestions = async (
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   params: SearchParams,
 ): Promise<SearchResult> => {
   const { table, column } = params;

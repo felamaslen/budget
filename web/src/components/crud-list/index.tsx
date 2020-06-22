@@ -5,17 +5,18 @@ import CrudListItem, { ItemComponent } from './item';
 import * as Styled from './styles';
 import { CREATE_ID } from '~client/constants/data';
 import { CrudProps } from '~client/hooks';
+import { Id, Item as ItemType } from '~client/types';
 
-type MetaProps<I extends { id: string }, E extends {}> = E &
+type MetaProps<I extends ItemType, E extends {}> = E &
   Partial<
     CrudProps<I> & {
-      active: string | null;
-      setActive: (id: string | null) => void;
+      active: number | null;
+      setActive: (id: Id | null) => void;
       activeItem?: I;
     }
   >;
 
-type Props<I extends { id: string }, E extends {} = {}> = CrudProps<I> & {
+type Props<I extends ItemType, E extends {} = {}> = CrudProps<I> & {
   items: I[];
   Item: ItemComponent<I, E>;
   CreateItem: React.FC<
@@ -23,7 +24,7 @@ type Props<I extends { id: string }, E extends {} = {}> = CrudProps<I> & {
       Pick<CrudProps<I>, 'onCreate'> & {
         active: boolean;
         noneActive: boolean;
-        setActive: (id: string | null) => void;
+        setActive: (id: Id | null) => void;
       }
   >;
   BeforeList?: React.FC<MetaProps<I, E>>;
@@ -31,7 +32,7 @@ type Props<I extends { id: string }, E extends {} = {}> = CrudProps<I> & {
   extraProps?: E;
 };
 
-export const CrudList = <I extends { id: string }, E extends {} = {}>({
+export const CrudList = <I extends ItemType, E extends {} = {}>({
   items,
   Item,
   CreateItem,
@@ -42,7 +43,7 @@ export const CrudList = <I extends { id: string }, E extends {} = {}>({
   onDelete,
   extraProps = {} as E,
 }: Props<I, E>): React.ReactElement<Props<I, E>> => {
-  const [activeId, setActive] = useState<string | null>(null);
+  const [activeId, setActive] = useState<number | null>(null);
   const noneActive = activeId === null;
   const createActive = activeId === CREATE_ID;
   const activeItem = items.find(({ id }) => id === activeId);

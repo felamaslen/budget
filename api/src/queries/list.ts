@@ -10,7 +10,7 @@ import {
 
 export async function countRows(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCategory,
 ): Promise<number> {
   const {
@@ -25,7 +25,7 @@ export async function countRows(
 
 export async function getListTotalCost(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCalcCategory,
 ): Promise<number> {
   const {
@@ -40,7 +40,7 @@ export async function getListTotalCost(
 
 export async function getListWeeklyCosts(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCalcCategory,
 ): Promise<number[]> {
   const results = await db.query<{ year_weekly_cost: number }>(sql`
@@ -58,9 +58,9 @@ export async function getListWeeklyCosts(
 
 export async function validateId(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCategory,
-  id: string,
+  id: number,
 ): Promise<boolean> {
   const {
     rows: [{ count }],
@@ -74,13 +74,13 @@ export async function validateId(
 
 export async function insertListItem<I extends ListItem>(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCategory,
   item: CreateList<I>,
-): Promise<string> {
+): Promise<number> {
   const {
     rows: [{ id }],
-  } = await db.query<{ id: string }>(sql`
+  } = await db.query<{ id: number }>(sql`
   INSERT INTO ${sql.identifier([table])}
     (uid, ${sql.join(
       Object.keys(item).map((column) => sql.identifier([column])),
@@ -101,7 +101,7 @@ export async function insertListItem<I extends ListItem>(
 
 export async function getListItems<I extends ListCalcItem>(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCalcCategory,
   columns: (keyof I)[],
   limit: number,
@@ -123,7 +123,7 @@ export async function getListItems<I extends ListCalcItem>(
 
 export async function updateListItem<I extends ListItem>(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCategory,
   item: UpdateList<I>,
 ): Promise<void> {
@@ -144,9 +144,9 @@ export async function updateListItem<I extends ListItem>(
 
 export async function deleteListItem(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCategory,
-  id: string,
+  id: number,
 ): Promise<void> {
   await db.query(sql`
   DELETE FROM ${sql.identifier([table])}

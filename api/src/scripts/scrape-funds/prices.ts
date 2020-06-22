@@ -1,7 +1,7 @@
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getPriceFromDataHL } from './hl';
-import { upsertFundHash, insertPrice, insertPriceCache } from './queries';
+import { upsertFundHashes, insertPrices, insertPriceCache } from './queries';
 import { Fund, CurrencyPrices, Broker } from './types';
 import config from '~api/config';
 import logger from '~api/modules/logger';
@@ -25,7 +25,7 @@ function getPricesFromData(
   funds: Fund[],
   data: string[],
 ): FundWithPrice[] {
-  return funds.reduce((results: FundWithPrice[], fund, index) => {
+  return funds.reduce<FundWithPrice[]>((results, fund, index) => {
     try {
       const price = getPriceFromData(fund, currencyPrices, data[index]);
 
@@ -41,24 +41,20 @@ function getPricesFromData(
   }, []);
 }
 
-async function insertNewSinglePriceCache(
-  db: DatabaseTransactionConnectionType,
-  cid: string,
-  fund: Pick<FundWithPrice, 'hash' | 'broker' | 'price'>,
-): Promise<void> {
-  const { hash, broker, price } = fund;
-  const fid = await upsertFundHash(db, hash, broker);
-
-  await insertPrice(db, cid, fid, price);
-}
-
 async function insertNewPriceCache(
   db: DatabaseTransactionConnectionType,
   fundsWithPrices: FundWithPrice[],
   now: Date,
 ): Promise<void> {
   const cid = await insertPriceCache(db, now);
-  await Promise.all(fundsWithPrices.map((fund) => insertNewSinglePriceCache(db, cid, fund)));
+  const fids = await upsertFundHashes(
+    db,
+    fundsWithPrices.map(({ hash, broker }) => [hash, broker]),
+  );
+  await insertPrices(
+    db,
+    fundsWithPrices.map(({ price }, index) => [cid, fids[index], price]),
+  );
 }
 
 export async function scrapeFundPrices(

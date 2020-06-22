@@ -8,12 +8,12 @@ import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
-import shortid from 'shortid';
 import sinon from 'sinon';
+import numericHash from 'string-hash';
 
 import { Funds } from '.';
 import { Period } from '~client/constants/graph';
-import { getTransactionsList } from '~client/modules/data';
+import { getTransactionsList, generateFakeId } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 import { Page, Fund } from '~client/types';
@@ -25,7 +25,7 @@ describe('<PageFunds />', () => {
       ...testState[Page.funds],
       items: [
         {
-          id: 'fund-id-some-active-fund',
+          id: numericHash('fund-id-some-active-fund'),
           item: 'Fund A',
           transactions: getTransactionsList([
             {
@@ -36,7 +36,7 @@ describe('<PageFunds />', () => {
           ]),
         },
         {
-          id: 'fund-id-some-sold-fund',
+          id: numericHash('fund-id-some-sold-fund'),
           item: 'Fund B',
           transactions: getTransactionsList([
             {
@@ -62,11 +62,11 @@ describe('<PageFunds />', () => {
           startTime: getUnixTime(new Date('2019-04-10')),
           cacheTimes: [0, 86400, 86400 * 3.5],
           prices: {
-            'fund-id-some-sold-fund': {
+            [numericHash('fund-id-some-sold-fund')]: {
               values: [7992.13, 7421.97],
               startIndex: 0,
             },
-            'fund-id-some-active-fund': {
+            [numericHash('fund-id-some-active-fund')]: {
               values: [6081.9, 6213.7],
               startIndex: 1,
             },
@@ -221,7 +221,7 @@ describe('<PageFunds />', () => {
       fund: Fund;
       prices: { [id: string]: { values: number[]; startIndex: number } };
     } => {
-      const id = shortid.generate();
+      const id = generateFakeId();
 
       return {
         fund: {

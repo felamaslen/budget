@@ -1,4 +1,5 @@
 export * from './analysis';
+export * from './crud';
 export * from './funds';
 export * from './list';
 export * from './multiple';

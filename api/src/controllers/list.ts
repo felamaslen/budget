@@ -45,7 +45,7 @@ export function getLimitCondition(now: Date, numMonths: number, offset = 0): Lim
 
 export async function getOlderExists(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCategory,
   limit: number,
   offset: number,
@@ -67,7 +67,7 @@ export const formatResults = <I extends ListItem, K extends ColumnMap<I>>(column
 
 export async function getTotalCost(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCategory,
 ): Promise<number> {
   if (table === Page.funds) {
@@ -78,7 +78,7 @@ export async function getTotalCost(
 
 export async function getWeeklyCost(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   table: ListCategory,
 ): Promise<number> {
   if (table === Page.funds) {
@@ -96,7 +96,7 @@ export async function getWeeklyCost(
 
 export async function getUpdateResponse(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   category: ListCategory,
 ): Promise<UpdateResponse> {
   const [total, weekly] = await Promise.all([
@@ -108,7 +108,7 @@ export async function getUpdateResponse(
 
 export async function createListData<I extends ListCalcItem>(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   category: ListCalcCategory,
   item: CreateList<I>,
 ): Promise<CreateResponse> {
@@ -125,7 +125,7 @@ const columnMapStandard: ColumnMap<ListCalcItem> = {
 
 export async function readListData<I extends ListCalcItem>(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   category: ListCalcCategory,
   limit: number,
   offset = 0,
@@ -153,7 +153,7 @@ export async function readListData<I extends ListCalcItem>(
 
 export async function updateListData<I extends ListItem>(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   category: ListCategory,
   item: UpdateList<I>,
 ): Promise<UpdateResponse> {
@@ -166,9 +166,9 @@ export async function updateListData<I extends ListItem>(
 
 export async function deleteListData(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   category: ListCategory,
-  id: string,
+  id: number,
 ): Promise<DeleteResponse> {
   if (!(await validateId(db, uid, category, id))) {
     throw boom.notFound('Unknown id');

@@ -1,23 +1,10 @@
 import { Router } from 'express';
 
 import { makeCreateItem, makeReadItem, makeUpdateItem, makeDeleteItem } from './controller';
-import { Item, Noop, CrudOptions, CrudRouteFactory } from './types';
-import { validatedAuthDbRoute, authDbRoute } from '~api/middleware/request';
-import { PickPartial, Create } from '~api/types';
-
-// export const checkItem = (
-//   table: string,
-//   item: string,
-//   getId: GetId = (req: AuthenticatedRequest): string => req.params.id,
-// ): RequestHandler => {
-//   const getItem = makeGetItem(table, item, noop);
-//
-//   return catchAsyncErrors<Request>(async (req: Request, _: Response, next: NextFunction) => {
-//     await getItem(getId(req));
-//
-//     next();
-//   });
-// };
+import { Noop, CrudOptions, CrudRouteFactory } from './types';
+import { validatedAuthDbRoute } from '~api/middleware/request';
+import { idParamSchemaOptional, idParamSchemaRequired } from '~api/schema';
+import { PickPartial, Create, Item } from '~api/types';
 
 export function makeCrudRoute<D extends Item = Item, J extends Item = D>(
   options: PickPartial<CrudOptions<D, J>, 'jsonToDb' | 'dbToJson'>,
@@ -44,24 +31,34 @@ export function makeCrudRoute<D extends Item = Item, J extends Item = D>(
     },
   );
 
-  const routeGet = authDbRoute(async (db, req, res) => {
-    const data = await readItem(db, req.params.id);
-    res.json(data);
-  });
+  const routeGet = validatedAuthDbRoute<never, Partial<Item>>(
+    {
+      params: idParamSchemaOptional,
+    },
+    async (db, _, res, __, params) => {
+      const data = await readItem(db, params.id);
+      res.json(data);
+    },
+  );
 
-  const routePut = validatedAuthDbRoute<Create<J>>(
-    { data: options.schema },
-    async (db, req, res, data) => {
-      const response = await updateItem(db, req.params.id, data);
+  const routePut = validatedAuthDbRoute<Create<J>, Item>(
+    { data: options.schema, params: idParamSchemaRequired },
+    async (db, _, res, data, params) => {
+      const response = await updateItem(db, params.id, data);
       res.json(response);
     },
   );
 
-  const routeDelete = authDbRoute(async (db, req, res) => {
-    await deleteItem(db, req.params.id);
-    res.status(204);
-    res.end();
-  });
+  const routeDelete = validatedAuthDbRoute<never, Item>(
+    {
+      params: idParamSchemaRequired,
+    },
+    async (db, _, res, __, params) => {
+      await deleteItem(db, params.id);
+      res.status(204);
+      res.end();
+    },
+  );
 
   return (router: Router = Router(), prefix = ''): Router => {
     router.post(`${prefix}/`, routePost);

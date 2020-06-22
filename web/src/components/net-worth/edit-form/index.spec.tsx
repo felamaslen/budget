@@ -2,27 +2,28 @@ import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/
 import nock from 'nock';
 import React from 'react';
 import sinon from 'sinon';
+import numericHash from 'string-hash';
 
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
-import { Category, Subcategory, Entry } from '~client/types/net-worth';
+import { Category, Subcategory, Entry, ValueObject, Id, CreateEntry } from '~client/types';
 
 const categories: Category[] = [
   {
-    id: 'fake-category-id-my-assets',
+    id: numericHash('fake-category-id-my-assets'),
     category: 'My assets',
     type: 'asset',
     color: 'green',
     isOption: false,
   },
   {
-    id: 'fake-category-id-my-options',
+    id: numericHash('fake-category-id-my-options'),
     category: 'My options',
     type: 'asset',
     color: 'orange',
     isOption: true,
   },
   {
-    id: 'fake-category-id-my-liabilities',
+    id: numericHash('fake-category-id-my-liabilities'),
     category: 'My liabilities',
     type: 'liability',
     color: 'red',
@@ -32,22 +33,22 @@ const categories: Category[] = [
 
 const subcategories: Subcategory[] = [
   {
-    id: 'fake-subcategory-id-bank-account',
-    categoryId: 'fake-category-id-my-assets',
+    id: numericHash('fake-subcategory-id-bank-account'),
+    categoryId: numericHash('fake-category-id-my-assets'),
     subcategory: 'My bank account',
     hasCreditLimit: null,
     opacity: 1,
   },
   {
-    id: 'fake-subcategory-id-some-share',
-    categoryId: 'fake-category-id-my-options',
+    id: numericHash('fake-subcategory-id-some-share'),
+    categoryId: numericHash('fake-category-id-my-options'),
     subcategory: 'Some share',
     hasCreditLimit: null,
     opacity: 1,
   },
   {
-    id: 'fake-subcategory-id-cc',
-    categoryId: 'fake-category-id-my-liabilities',
+    id: numericHash('fake-subcategory-id-cc'),
+    categoryId: numericHash('fake-category-id-my-liabilities'),
     subcategory: 'My credit card',
     hasCreditLimit: true,
     opacity: 0.9,
@@ -74,17 +75,17 @@ describe('Net worth entry form', () => {
   };
 
   const item: Entry = {
-    id: 'some-fake-id',
+    id: numericHash('some-fake-id'),
     date: new Date(oldDate),
     values: [
       {
-        id: 'fake-value-id-bank-account',
-        subcategory: 'fake-subcategory-id-bank-account',
+        id: numericHash('fake-value-id-bank-account'),
+        subcategory: numericHash('fake-subcategory-id-bank-account'),
         value: 385610,
       },
       {
-        id: 'fake-value-id-some-share',
-        subcategory: 'fake-subcategory-id-some-share',
+        id: numericHash('fake-value-id-some-share'),
+        subcategory: numericHash('fake-subcategory-id-some-share'),
         value: [
           {
             units: 1326,
@@ -94,21 +95,21 @@ describe('Net worth entry form', () => {
         ],
       },
       {
-        id: 'fake-value-id-cc',
-        subcategory: 'fake-subcategory-id-cc',
+        id: numericHash('fake-value-id-cc'),
+        subcategory: numericHash('fake-subcategory-id-cc'),
         value: -21054,
         skip: false,
       },
     ],
     creditLimit: [
       {
-        subcategory: 'fake-subcategory-id-cc',
+        subcategory: numericHash('fake-subcategory-id-cc'),
         value: 650000,
       },
     ],
     currencies: [
       {
-        id: 'some-fake-currency-id',
+        id: numericHash('some-fake-currency-id'),
         currency: 'USD',
         rate: 0.78,
       },
@@ -414,25 +415,25 @@ describe('Net worth entry form', () => {
       it('should call onUpdate when hitting finish', async () => {
         expect.assertions(25);
         await setup();
-        expect(props.onUpdate).toHaveBeenCalledWith('some-fake-id', {
-          id: 'some-fake-id',
+        expect(props.onUpdate).toHaveBeenCalledWith<[Id, Entry]>(numericHash('some-fake-id'), {
+          id: numericHash('some-fake-id'),
           date: new Date(newDate),
-          values: expect.arrayContaining([
+          values: expect.arrayContaining<ValueObject>([
             {
-              id: 'fake-value-id-bank-account',
-              subcategory: 'fake-subcategory-id-bank-account',
+              id: numericHash('fake-value-id-bank-account'),
+              subcategory: numericHash('fake-subcategory-id-bank-account'),
               value: 400012,
               skip: null,
             },
             {
-              id: 'fake-value-id-cc',
-              subcategory: 'fake-subcategory-id-cc',
+              id: numericHash('fake-value-id-cc'),
+              subcategory: numericHash('fake-subcategory-id-cc'),
               value: -15901,
               skip: false,
             },
             {
-              id: 'fake-value-id-some-share',
-              subcategory: 'fake-subcategory-id-some-share',
+              id: numericHash('fake-value-id-some-share'),
+              subcategory: numericHash('fake-subcategory-id-some-share'),
               value: [
                 {
                   units: 1006,
@@ -445,13 +446,13 @@ describe('Net worth entry form', () => {
           ]),
           creditLimit: [
             {
-              subcategory: 'fake-subcategory-id-cc',
+              subcategory: numericHash('fake-subcategory-id-cc'),
               value: 600000,
             },
           ],
           currencies: [
             {
-              id: 'some-fake-currency-id',
+              id: numericHash('some-fake-currency-id'),
               currency: 'USD',
               rate: 1 / 1.24859,
             },
@@ -536,17 +537,17 @@ describe('Net worth entry form', () => {
       it('should call onCreate when hitting finish', async () => {
         expect.assertions(25);
         await setup();
-        expect(props.onCreate).toHaveBeenCalledWith(
-          expect.objectContaining({
+        expect(props.onCreate).toHaveBeenCalledWith<[CreateEntry]>(
+          expect.objectContaining<Partial<CreateEntry>>({
             date: new Date(newDate),
             values: expect.arrayContaining([
               expect.objectContaining({
-                subcategory: 'fake-subcategory-id-bank-account',
+                subcategory: numericHash('fake-subcategory-id-bank-account'),
                 value: 400012,
                 skip: null,
               }),
               expect.objectContaining({
-                subcategory: 'fake-subcategory-id-some-share',
+                subcategory: numericHash('fake-subcategory-id-some-share'),
                 value: [
                   {
                     units: 1006,
@@ -557,14 +558,14 @@ describe('Net worth entry form', () => {
                 skip: null,
               }),
               expect.objectContaining({
-                subcategory: 'fake-subcategory-id-cc',
+                subcategory: numericHash('fake-subcategory-id-cc'),
                 value: -15901,
                 skip: false,
               }),
             ]),
             creditLimit: [
               {
-                subcategory: 'fake-subcategory-id-cc',
+                subcategory: numericHash('fake-subcategory-id-cc'),
                 value: 600000,
               },
             ],

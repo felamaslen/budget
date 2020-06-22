@@ -83,7 +83,7 @@ async function updateHoldings(
   const stockCodes = await getStockCodes(db);
 
   const groupedByUid = groupBy(fundsWithHoldings, 'uid');
-  const totalCost: { [uid: string]: number } = Object.keys(groupedByUid).reduce(
+  const totalCost: { [uid: number]: number } = Object.keys(groupedByUid).reduce(
     (last, uid) => ({
       ...last,
       [uid]: groupedByUid[uid].reduce((sum, { cost }) => sum + Math.max(0, cost), 0),

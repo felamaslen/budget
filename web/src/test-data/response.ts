@@ -1,8 +1,9 @@
 import getUnixTime from 'date-fns/getUnixTime';
+import numericHash from 'string-hash';
 import { Page, ReadResponse, StocksListResponse, StockPrice, LoginResponse } from '~client/types';
 
 export const testLoginResponse: LoginResponse = {
-  uid: 'some-uid',
+  uid: numericHash('some-uid'),
   apiKey: 'some-api-key',
   name: 'John Doe',
   expires: new Date('2050-03-05').toISOString(),
@@ -72,7 +73,7 @@ export const testResponse: ReadResponse = {
   },
 };
 
-export const testStocksList = {
+export const testStocksList: StocksListResponse = {
   data: {
     stocks: [
       ['CD1', 'stock name 1', 965],
@@ -80,9 +81,9 @@ export const testStocksList = {
     ],
     total: 1032,
   },
-} as StocksListResponse;
+};
 
-export const testStockPrices = [
+export const testStockPrices: StockPrice[] = [
   { code: 'SMT', open: 730.2, close: 739.1 },
   { code: 'CTY', open: 338.9, close: 332.6 },
-] as StockPrice[];
+];

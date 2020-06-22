@@ -5,7 +5,7 @@ import { Fund } from '~client/types/funds';
 
 export const testRows: Fund[] = [
   {
-    id: '10',
+    id: 10,
     item: 'some fund 1',
     transactions: getTransactionsList([
       {
@@ -16,7 +16,7 @@ export const testRows: Fund[] = [
     ]),
   },
   {
-    id: '3',
+    id: 3,
     item: 'some fund 2',
     transactions: getTransactionsList([
       {
@@ -32,7 +32,7 @@ export const testRows: Fund[] = [
     ]),
   },
   {
-    id: '1',
+    id: 1,
     item: 'some fund 3',
     transactions: getTransactionsList([
       {
@@ -48,7 +48,7 @@ export const testRows: Fund[] = [
     ]),
   },
   {
-    id: '5',
+    id: 5,
     item: 'test fund 4',
     transactions: getTransactionsList([
       {

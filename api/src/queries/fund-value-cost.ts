@@ -4,7 +4,7 @@ import config from '~api/config';
 
 export async function getMonthlyTotalFundValues(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   monthEnds: Date[],
 ): Promise<number[]> {
   const results = await db.query<{ value_or_cost: number }>(sql`
@@ -75,7 +75,7 @@ export async function getMonthlyTotalFundValues(
 
 export async function getTotalFundValue(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   now: Date,
 ): Promise<number> {
   const result = await db.query<{ value: number }>(sql`
@@ -109,7 +109,7 @@ export async function getTotalFundValue(
 
 export async function getTotalFundCost(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
 ): Promise<number> {
   const {
     rows: [{ total }],

@@ -1,10 +1,11 @@
 import { ActionTypeLogin, Action } from '~client/actions';
+import { Id } from '~client/types';
 
 export type State = {
   initialised: boolean;
   loading: boolean;
   error: string | null;
-  uid: string | null;
+  uid: Id | null;
   name: string | null;
 };
 

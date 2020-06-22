@@ -1,20 +1,18 @@
-import { Create } from './crud';
+import { Create, CrudItem } from './crud';
 
-export type Category = {
-  id: string;
+export type Category = CrudItem<{
   type: 'asset' | 'liability';
   category: string;
   color: string;
   isOption: boolean;
-};
+}>;
 
-export type Subcategory = {
-  id: string;
+export type Subcategory = CrudItem<{
   categoryId: Category['id'];
   subcategory: string;
   hasCreditLimit: boolean | null;
   opacity: number;
-};
+}>;
 
 export type FXValue = {
   value: number;
@@ -38,39 +36,35 @@ export const isFX = (value: ComplexValueItem): value is FXValue =>
 export const isOption = (value: ComplexValueItem): value is OptionValue =>
   typeof value === 'object' && Reflect.has(value, 'strikePrice');
 
-export type ValueObject = {
-  id: string;
+export type ValueObject = CrudItem<{
   subcategory: Subcategory['id'];
   skip?: boolean | null;
   value: Value;
-};
+}>;
 
 export type CreditLimit = {
   subcategory: Subcategory['id'];
   value: number;
 };
 
-export type Currency = {
-  id: string;
+export type Currency = CrudItem<{
   currency: string;
   rate: number;
-};
+}>;
 
-export type Entry = {
-  id: string;
+export type Entry = CrudItem<{
   date: Date;
   values: ValueObject[];
   creditLimit: CreditLimit[];
   currencies: Currency[];
-};
+}>;
 
 export type CreateEntry = Omit<Entry, 'values' | 'currencies'> & {
   values: Create<ValueObject>[];
   currencies: Create<Currency>[];
 };
 
-export type NetWorthTableRow = {
-  id: string;
+export type NetWorthTableRow = CrudItem<{
   date: Date;
   assets: number;
   options: number;
@@ -79,7 +73,7 @@ export type NetWorthTableRow = {
   expenses: number;
   fti: number;
   pastYearAverageSpend: number;
-};
+}>;
 
 export type NetWorthTableColumn = 'date' | 'assets' | 'liabilities' | 'main' | 'expenses';
 

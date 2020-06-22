@@ -8,7 +8,7 @@ export enum Broker {
 }
 
 export type Fund = {
-  uid: string;
+  uid: number;
   name: string;
   hash: string;
   broker: Broker;
@@ -45,14 +45,14 @@ export enum ShortFundType {
 }
 
 export type WeightedHolding = {
-  uid: string;
+  uid: number;
   name: string;
   weight: number;
   subweight: number;
 };
 
 export type Stock = {
-  uid: string;
+  uid: number;
   name: string;
   code: string;
   weight: number;

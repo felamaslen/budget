@@ -5,7 +5,7 @@ import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
 import { testState, testStartTime, testCacheTimes } from '~client/test-data';
-import { Page } from '~client/types';
+import { Page, FundItem } from '~client/types';
 
 describe('Fund selectors / graph', () => {
   const today = new Date('2020-04-20');
@@ -48,12 +48,12 @@ describe('Fund selectors / graph', () => {
   describe('getFundItems', () => {
     it('should get an ordered (by value) list of available funds with an overall item', () => {
       expect.assertions(1);
-      expect(getFundItems(today)(state)).toStrictEqual([
+      expect(getFundItems(today)(state)).toStrictEqual<FundItem[]>([
         { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: colors.black },
-        { id: '10', item: 'some fund 1', color: colorKey('some fund 1') },
-        { id: '3', item: 'some fund 2', color: colorKey('some fund 2') },
-        { id: '1', item: 'some fund 3', color: colorKey('some fund 3') },
-        { id: '5', item: 'test fund 4', color: colorKey('test fund 4') },
+        { id: 10, item: 'some fund 1', color: colorKey('some fund 1') },
+        { id: 3, item: 'some fund 2', color: colorKey('some fund 2') },
+        { id: 1, item: 'some fund 3', color: colorKey('some fund 3') },
+        { id: 5, item: 'test fund 4', color: colorKey('test fund 4') },
       ]);
     });
 
@@ -67,9 +67,9 @@ describe('Fund selectors / graph', () => {
         },
       };
 
-      expect(getFundItems(today)(stateNoSold)).toStrictEqual([
+      expect(getFundItems(today)(stateNoSold)).toStrictEqual<FundItem[]>([
         { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: colors.black },
-        { id: '10', item: 'some fund 1', color: colorKey('some fund 1') },
+        { id: 10, item: 'some fund 1', color: colorKey('some fund 1') },
       ]);
     });
 
@@ -104,21 +104,21 @@ describe('Fund selectors / graph', () => {
       expect(result).toStrictEqual({
         [Mode.ROI]: expect.arrayContaining([
           expect.objectContaining({
-            id: expect.any(String),
+            id: expect.any(Number),
             color: expect.stringMatching(/^#[0-9a-f]{6}$/),
             data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
           }),
         ]),
         [Mode.Value]: expect.arrayContaining([
           expect.objectContaining({
-            id: expect.any(String),
+            id: expect.any(Number),
             color: expect.stringMatching(/^#[0-9a-f]{6}$/),
             data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
           }),
         ]),
         [Mode.Price]: expect.arrayContaining([
           expect.objectContaining({
-            id: expect.any(String),
+            id: expect.any(Number),
             color: expect.stringMatching(/^#[0-9a-f]{6}$/),
             data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
           }),
@@ -136,7 +136,7 @@ describe('Fund selectors / graph', () => {
         },
       };
 
-      const soldIds = ['3', '1', '5'];
+      const soldIds = [3, 1, 5];
 
       const result = getFundLines(today)(stateNoSold);
 

@@ -1,12 +1,12 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
-import { Item } from './types';
+import { CrudItem } from './types';
 import { Create } from '~api/types';
 
 export async function getRowCount(
   db: DatabaseTransactionConnectionType,
   table: string,
-  id: string,
+  id: number,
 ): Promise<number> {
   const result = await db.query<{ count: number }>(sql`
   SELECT COUNT(*) AS count
@@ -16,12 +16,12 @@ export async function getRowCount(
   return result.rows[0].count;
 }
 
-export async function insertCrudItem<D extends Item>(
+export async function insertCrudItem<D extends CrudItem>(
   db: DatabaseTransactionConnectionType,
   table: string,
   row: Create<D>,
 ): Promise<D> {
-  const result = await db.query<D & { id: string }>(sql`
+  const result = await db.query<D & { id: number }>(sql`
   INSERT INTO ${sql.identifier([table])}
   (${sql.join(
     Object.keys(row).map((column) => sql.identifier([column])),
@@ -36,10 +36,10 @@ export async function insertCrudItem<D extends Item>(
   return result.rows[0];
 }
 
-export async function selectCrudItem<D extends Item>(
+export async function selectCrudItem<D extends CrudItem>(
   db: DatabaseTransactionConnectionType,
   table: string,
-  id: string,
+  id: number,
 ): Promise<D | undefined> {
   const result = await db.query<D>(sql`
   SELECT * FROM ${sql.identifier([table])} WHERE id = ${id}
@@ -47,7 +47,7 @@ export async function selectCrudItem<D extends Item>(
   return result.rows[0];
 }
 
-export async function selectAllCrudItems<D extends Item>(
+export async function selectAllCrudItems<D extends CrudItem>(
   db: DatabaseTransactionConnectionType,
   table: string,
 ): Promise<readonly D[]> {
@@ -57,10 +57,10 @@ export async function selectAllCrudItems<D extends Item>(
   return result.rows;
 }
 
-export async function updateCrudItem<D extends Item>(
+export async function updateCrudItem<D extends CrudItem>(
   db: DatabaseTransactionConnectionType,
   table: string,
-  id: string,
+  id: number,
   data: Create<D>,
 ): Promise<D | undefined> {
   const result = await db.query<D>(sql`
@@ -78,7 +78,7 @@ export async function updateCrudItem<D extends Item>(
 export async function deleteCrudItem(
   db: DatabaseTransactionConnectionType,
   table: string,
-  id: string,
+  id: number,
 ): Promise<number> {
   const result = await db.query(sql`
   DELETE FROM ${sql.identifier([table])} WHERE id = ${id}

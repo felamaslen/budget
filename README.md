@@ -6,11 +6,13 @@ Personal finance app for web, cli and android [![Build Status](https://travis-ci
 
 There is a web-based API written in Node.js, which also runs a web app. The Android app connects to this API.
 
-- Node version: 10
+- Node version: 12
 
 The CLI app is written in Python 3. See `cli/README.md` for setup info.
 
 For info on building the Android app, see `android/README.md`.
+
+**Please note** that the Android and CLI apps are *deprecated* and *not compatible* with the current API. Development on them ceased a while ago.
 
 ## Instructions:
 

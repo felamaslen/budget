@@ -1,3 +1,4 @@
+import numericHash from 'string-hash';
 import {
   Create,
   RawDate,
@@ -9,7 +10,7 @@ import {
 } from '~client/types';
 
 export const CATEGORY_CASH: Category = {
-  id: 'real-cash-category-id',
+  id: numericHash('real-cash-category-id'),
   type: 'asset',
   category: 'Cash (easy access)',
   color: '#00ff00',
@@ -23,10 +24,13 @@ export const CATEGORY_MORTGAGE_RAW: Create<Category> = {
   isOption: false,
 };
 
-export const CATEGORY_MORTGAGE = { ...CATEGORY_MORTGAGE_RAW, id: 'real-mortgage-category-id' };
+export const CATEGORY_MORTGAGE = {
+  ...CATEGORY_MORTGAGE_RAW,
+  id: numericHash('real-mortgage-category-id'),
+};
 
 export const CATEGORY_CC: Category = {
-  id: 'real-credit-card-category-id',
+  id: numericHash('real-credit-card-category-id'),
   type: 'liability',
   category: 'Credit cards',
   color: '#fc0000',
@@ -34,7 +38,7 @@ export const CATEGORY_CC: Category = {
 };
 
 export const SUBCATEGORY_WALLET: Subcategory = {
-  id: 'real-wallet-subcategory-id',
+  id: numericHash('real-wallet-subcategory-id'),
   categoryId: CATEGORY_CASH.id,
   subcategory: 'My wallet',
   hasCreditLimit: null,
@@ -42,7 +46,7 @@ export const SUBCATEGORY_WALLET: Subcategory = {
 };
 
 export const SUBCATEGORY_HOUSE: Subcategory = {
-  id: 'real-house-subcategory-id',
+  id: numericHash('real-house-subcategory-id'),
   categoryId: CATEGORY_MORTGAGE.id,
   subcategory: 'My house',
   hasCreditLimit: false,
@@ -50,7 +54,7 @@ export const SUBCATEGORY_HOUSE: Subcategory = {
 };
 
 export const SUBCATEGORY_CC: Subcategory = {
-  id: 'real-credit-card-subcategory-id',
+  id: numericHash('real-credit-card-subcategory-id'),
   categoryId: CATEGORY_CC.id,
   subcategory: 'My credit card',
   hasCreditLimit: true,
@@ -64,11 +68,11 @@ export const CURRENCY_CZK_RAW: Create<Currency> = {
 
 export const CURRENCY_CZK: Currency = {
   ...CURRENCY_CZK_RAW,
-  id: 'real-currency-czk-id',
+  id: numericHash('real-currency-czk-id'),
 };
 
 export const ENTRY_BANK_HOUSE_RAW: RawDate<CreateEntry> = {
-  id: 'real-entry-id',
+  id: numericHash('real-entry-id'),
   date: '2020-04-20',
   values: [
     {
@@ -97,9 +101,9 @@ export const ENTRY_BANK_HOUSE: Entry = {
   ...ENTRY_BANK_HOUSE_RAW,
   date: new Date('2020-04-20'),
   values: [
-    { ...ENTRY_BANK_HOUSE_RAW.values[0], id: 'value-id-bank' },
-    { ...ENTRY_BANK_HOUSE_RAW.values[1], id: 'value-id-cc' },
-    { ...ENTRY_BANK_HOUSE_RAW.values[2], id: 'value-id-house' },
+    { ...ENTRY_BANK_HOUSE_RAW.values[0], id: numericHash('value-id-bank') },
+    { ...ENTRY_BANK_HOUSE_RAW.values[1], id: numericHash('value-id-cc') },
+    { ...ENTRY_BANK_HOUSE_RAW.values[2], id: numericHash('value-id-house') },
   ],
   currencies: [CURRENCY_CZK],
 };

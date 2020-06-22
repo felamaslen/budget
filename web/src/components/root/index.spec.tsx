@@ -23,7 +23,7 @@ describe('<Root />', () => {
       ...testState,
       login: {
         ...testState.login,
-        uid: '1',
+        uid: 1,
       },
       api: {
         ...testState.api,

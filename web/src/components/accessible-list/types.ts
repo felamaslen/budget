@@ -6,7 +6,7 @@ import { FieldComponent } from '~client/components/form-field';
 import { ModalFields } from '~client/components/modal-dialog';
 import { State as AppState } from '~client/reducers';
 import { ListState } from '~client/reducers/list';
-import { Delta, Item, PickUnion, FieldKey } from '~client/types';
+import { Id, Delta, Item, PickUnion, FieldKey } from '~client/types';
 
 export type State<I extends Item, P extends string> = Record<P, ListState<I>> &
   Partial<Pick<AppState, 'api'>>;
@@ -40,7 +40,7 @@ export type HeaderProps<I extends Item, P, MK extends keyof I, H extends {} = {}
 
 export type CustomSelector<I extends Item, E extends {}> = (
   items: I[],
-) => { [id: string]: Partial<E> };
+) => { [id: number]: Partial<E> };
 type ItemProcessor<I extends Item, E extends {}> = (item: I) => Partial<E>;
 
 export type PropsCrud<I extends Item, P extends string> = {
@@ -61,7 +61,7 @@ type CommonProps<I extends Item, P extends string, E extends {}> = {
 export type SortItemsPre<I extends Item> = (items: I[]) => I[];
 export type SortItemsPost<I extends Item, E extends {}> = (
   items: I[],
-  extraMap: { [id: string]: Partial<E> },
+  extraMap: { [id: number]: Partial<E> },
 ) => I[];
 
 export type Props<
@@ -83,18 +83,18 @@ export type Props<
 };
 
 export type PropsItem<I extends Item, P extends string, MK extends keyof I, E extends {} = {}> = {
-  id: string;
+  id: Id;
   isMobile: boolean;
   style?: object;
   odd: boolean;
   extraProps?: Partial<E>;
-  onActivateModal: (id: string) => void;
+  onActivateModal: (id: Id) => void;
 } & PickUnion<Props<I, P, MK, E>, 'fieldsMobile'> &
   Omit<CommonProps<I, P, E>, 'suggestionFields'> &
   Pick<PropsCrud<I, P>, 'onUpdate' | 'onDelete'>;
 
 export type PropsMemoisedItem<E extends {}> = {
-  id: string;
+  id: Id;
   style?: object;
   odd: boolean;
   extraProps?: Partial<E>;

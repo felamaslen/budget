@@ -7,7 +7,7 @@ import { IDENTITY, sortByKey } from '~client/modules/data';
 import { State as CrudState } from '~client/reducers/crud';
 import { DailyState } from '~client/reducers/list';
 import { withoutDeleted } from '~client/selectors/crud';
-import { Item, ListCalcItem } from '~client/types';
+import { Id, Item, ListCalcItem } from '~client/types';
 
 export type StateStandard<I extends ListCalcItem, P extends string> = {
   [page in P]: DailyState<I>;
@@ -40,7 +40,7 @@ export const getItems = moize(
 );
 
 export const getItem = moize(
-  <I extends Item, P extends string>(page: P, id: string) => (state: State<I, P>): I =>
+  <I extends Item, P extends string>(page: P, id: Id) => (state: State<I, P>): I =>
     state[page].items.find((item) => item.id === id) as I,
 );
 

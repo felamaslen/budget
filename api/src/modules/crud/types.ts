@@ -1,10 +1,9 @@
 import { Schema } from '@hapi/joi';
 import { Router } from 'express';
 import { AuthenticatedRequest } from '~api/modules/auth';
-import { Create } from '~api/types';
+import { Create, Item } from '~api/types';
 
-export interface Item {
-  id: string;
+export interface CrudItem extends Item {
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
@@ -16,7 +15,7 @@ export type JsonToDb<D extends Item, J extends Item> =
   | ((body: Create<J>) => Create<D>)
   | Noop<Partial<Create<J>>, Create<D>>;
 
-export type GetItem = (id: string) => Promise<object>;
+export type GetItem = (id: number) => Promise<object>;
 
 export type RequestWithBody<J extends Item = Item> = AuthenticatedRequest & {
   body: Partial<J>;

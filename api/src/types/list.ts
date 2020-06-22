@@ -1,7 +1,6 @@
-import { Create } from './shared';
+import { Create, Item } from './shared';
 
-export interface ListItem {
-  id: string;
+export interface ListItem extends Item {
   item: string;
 }
 
@@ -34,11 +33,11 @@ export type ListResponse<I extends ListItem> = {
 };
 
 export type CreateList<I extends ListItem> = Create<I>;
-export type UpdateList<I extends Create<ListItem>> = Partial<I> & { id: string };
+export type UpdateList<I extends Create<ListItem>> = Partial<I> & { id: number };
 
 export type CreateListCalc<I extends ListCalcItem> = Create<I>;
 export type UpdateListCalc<I extends ListCalcItem> = UpdateList<CreateListCalc<I>>;
 
 export type UpdateResponse = { total: number; weekly?: number };
-export type CreateResponse = UpdateResponse & { id: string };
+export type CreateResponse = UpdateResponse & { id: number };
 export type DeleteResponse = UpdateResponse;

@@ -30,7 +30,7 @@ type AllResponse = {
 
 export async function getAllData(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   limit: number,
   now: Date = new Date(),
 ): Promise<AllResponse> {

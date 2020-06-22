@@ -11,13 +11,13 @@ import {
   ListItemUpdated,
   ListItemDeleted,
 } from '~client/actions';
-import { PageList, Item, Create, CreateEdit, DeltaEdit } from '~client/types';
+import { Id, PageList, Item, Create, CreateEdit, DeltaEdit } from '~client/types';
 
 type Trigger<Args extends any[], O = void> = (...args: Args) => O;
 
 export type OnCreate<I, O = void> = (item: Create<I>) => O;
-export type OnUpdate<I, O = void> = (id: string, item: Create<I>) => O;
-export type OnDelete<I = never, O = void> = (id: string, item?: I) => O;
+export type OnUpdate<I, O = void> = (id: Id, item: Create<I>) => O;
+export type OnDelete<I = never, O = void> = (id: Id, item?: I) => O;
 
 export type CrudProps<I> = {
   onCreate: OnCreate<I>;
@@ -25,7 +25,7 @@ export type CrudProps<I> = {
   onDelete: OnDelete<I>;
 };
 
-export type SetActiveId = (id: string | null) => void;
+export type SetActiveId = (id: Id | null) => void;
 
 const useCrudFactory = <
   ArgsC extends any[],
@@ -74,8 +74,8 @@ export const useCrud = <
 ): [OnCreate<I>, OnUpdate<I>, OnDelete<I>] =>
   useCrudFactory<
     [Create<I>],
-    [string, Create<I>],
-    [string, I | undefined],
+    [number, Create<I>],
+    [number, I | undefined],
     ActionCreate,
     ActionUpdate,
     ActionDelete
@@ -88,8 +88,8 @@ export const useListCrud = <I extends Item, P extends string = PageList>(
 ): [OnCreateList<I, P, void>, OnUpdateList<I, P, void>, OnDeleteList<I, P, void>] =>
   useCrudFactory<
     [Create<I>],
-    [string, DeltaEdit<I>, CreateEdit<I>],
-    [string, CreateEdit<I>],
+    [number, DeltaEdit<I>, CreateEdit<I>],
+    [number, CreateEdit<I>],
     ListItemCreated<I, P>,
     ListItemUpdated<I, P>,
     ListItemDeleted<I, P>

@@ -9,9 +9,9 @@ import { getFundsRows, getCurrentFundsCache } from './helpers';
 import { Period } from '~client/constants/graph';
 import { getTotalUnits, getTotalCost } from '~client/modules/data';
 import { State } from '~client/reducers';
-import * as Funds from '~client/reducers/funds';
+import { Cache } from '~client/reducers/funds';
 import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
-import { Page, Data, Portfolio, CachedValue, Transaction } from '~client/types';
+import { Id, Page, Data, Portfolio, CachedValue, Transaction } from '~client/types';
 
 export * from './gains';
 export * from './graph';
@@ -40,7 +40,7 @@ export function getFundsCachedValueAgeText(
 
 const getFundCacheAge = moize(
   (now: Date): ((state: State) => string) =>
-    createSelector(getCurrentFundsCache, (cache: Funds.Cache | undefined) => {
+    createSelector(getCurrentFundsCache, (cache: Cache | undefined) => {
       if (!cache) {
         return '';
       }
@@ -115,8 +115,8 @@ export const getFundsCost = moize(
 type RowPrices = Data | null;
 
 export function getPricesForRow(
-  prices: Funds.Cache['prices'],
-  id: string,
+  prices: Cache['prices'],
+  id: Id,
   startTime: number,
   cacheTimes: number[],
 ): RowPrices {

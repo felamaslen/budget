@@ -26,32 +26,32 @@ describe('Funds controller', () => {
   describe('processFundHistory', () => {
     const funds = [
       {
-        I: '3',
+        I: 3,
         i: 'Some fund 3',
         tr: [],
       },
       {
-        I: '22',
+        I: 22,
         i: 'Some fund 22',
         tr: [],
       },
       {
-        I: '23',
+        I: 23,
         i: 'Some fund 23',
         tr: [],
       },
       {
-        I: '24',
+        I: 24,
         i: 'Some fund 24',
         tr: [],
       },
       {
-        I: '25',
+        I: 25,
         i: 'Some fund 25',
         tr: [],
       },
       {
-        I: '7',
+        I: 7,
         i: 'Some fund 7',
         tr: [],
       },
@@ -60,22 +60,22 @@ describe('Funds controller', () => {
     const priceRows = [
       {
         time: new Date('2017-04-03 14:23:49').getTime(),
-        id: ['3', '22', '23', '24'],
+        id: [3, 22, 23, 24],
         price: [96.5, 100.2, 16.29, 1.23],
       },
       {
         time: new Date('2017-04-21 09:00:01').getTime(),
-        id: ['3', '22', '23', '25'],
+        id: [3, 22, 23, 25],
         price: [97.3, 100.03, 16.35, 67.08],
       },
       {
         time: new Date('2017-05-01 10:32:43').getTime(),
-        id: ['7', '3', '22', '23', '25'],
+        id: [7, 3, 22, 23, 25],
         price: [10.21, 97.4, 100.1, 16.33, 67.22],
       },
       {
         time: new Date('2017-05-03 10:31:06').getTime(),
-        id: ['22', '25'],
+        id: [22, 25],
         price: [100.15, 66.98],
       },
     ];
@@ -110,32 +110,32 @@ describe('Funds controller', () => {
         expect.objectContaining({
           data: expect.arrayContaining([
             expect.objectContaining({
-              I: '3',
+              I: 3,
               pr: [96.5, 97.3, 97.4],
               prStartIndex: 0,
             }),
             expect.objectContaining({
-              I: '22',
+              I: 22,
               pr: [100.2, 100.03, 100.1, 100.15],
               prStartIndex: 0,
             }),
             expect.objectContaining({
-              I: '24',
+              I: 24,
               pr: [1.23],
               prStartIndex: 0,
             }),
             expect.objectContaining({
-              I: '25',
+              I: 25,
               pr: [67.08, 67.22, 66.98],
               prStartIndex: 1,
             }),
             expect.objectContaining({
-              I: '7',
+              I: 7,
               pr: [10.21],
               prStartIndex: 2,
             }),
             expect.objectContaining({
-              I: '23',
+              I: 23,
               pr: [16.29, 16.35, 16.33],
               prStartIndex: 0,
             }),
@@ -145,14 +145,17 @@ describe('Funds controller', () => {
     });
 
     describe('if a fund was sold and then re-bought', () => {
+      const idFundNeverSold = 1776;
+      const idFundOnceSold = 7619;
+
       const fundsRebought = [
         {
-          I: 'fund-never-sold',
+          I: idFundNeverSold,
           i: 'A fund which was never sold',
           tr: [],
         },
         {
-          I: 'fund-once-sold',
+          I: idFundOnceSold,
           i: 'A fund which was sold and rebought',
           tr: [],
         },
@@ -161,22 +164,22 @@ describe('Funds controller', () => {
       const priceRowsRebought = [
         {
           time: new Date('2019-12-31').getTime(),
-          id: ['fund-never-sold'],
+          id: [idFundNeverSold],
           price: [99.93],
         },
         {
           time: new Date('2020-01-01').getTime(),
-          id: ['fund-never-sold', 'fund-once-sold'],
+          id: [idFundNeverSold, idFundOnceSold],
           price: [100, 200],
         },
         {
           time: new Date('2020-01-02').getTime(),
-          id: ['fund-never-sold'],
+          id: [idFundNeverSold],
           price: [100.1],
         },
         {
           time: new Date('2020-01-03').getTime(),
-          id: ['fund-never-sold', 'fund-once-sold'],
+          id: [idFundNeverSold, idFundOnceSold],
           price: [100.05, 196.54],
         },
       ];
@@ -189,12 +192,12 @@ describe('Funds controller', () => {
           expect.objectContaining({
             data: expect.arrayContaining([
               expect.objectContaining({
-                I: 'fund-never-sold',
+                I: idFundNeverSold,
                 pr: [99.93, 100, 100.1, 100.05],
                 prStartIndex: 0,
               }),
               expect.objectContaining({
-                I: 'fund-once-sold',
+                I: idFundOnceSold,
                 pr: [200, 0, 196.54],
                 prStartIndex: 1,
               }),

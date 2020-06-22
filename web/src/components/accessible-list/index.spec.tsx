@@ -14,11 +14,13 @@ import nock from 'nock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
+import numericHash from 'string-hash';
 
 import { AccessibleList, AccessibleListStandard, Props } from '.';
 import { listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions';
+import { generateFakeId } from '~client/modules/data';
 import { ListState } from '~client/reducers/list';
-import { RequestType, Item, ListItem, ListCalcItem } from '~client/types';
+import { Id, RequestType, Item, ListItem, ListCalcItem } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -42,13 +44,13 @@ describe('<AccessibleList />', () => {
     [myPage]: {
       items: [
         {
-          id: 'real-id-b',
+          id: numericHash('real-id-b'),
           date: new Date('2020-04-13'),
           item: 'Item b',
           cost: 9881,
         },
         {
-          id: 'real-id-a',
+          id: numericHash('real-id-a'),
           date: new Date('2020-04-20'),
           item: 'Item a',
           cost: 287,
@@ -173,7 +175,7 @@ describe('<AccessibleList />', () => {
         items: [
           ...testState[myPage].items,
           {
-            id: 'real-id-c',
+            id: numericHash('real-id-c'),
             date: new Date('2020-03-01'),
             item: 'Item c',
             cost: 176,
@@ -189,9 +191,9 @@ describe('<AccessibleList />', () => {
   });
 
   describe.each`
-    listIndex | stateIndex | position    | id             | date            | item        | cost
-    ${0}      | ${1}       | ${'first'}  | ${'real-id-a'} | ${'2020-04-20'} | ${'Item a'} | ${287}
-    ${1}      | ${0}       | ${'second'} | ${'real-id-b'} | ${'2020-04-13'} | ${'Item b'} | ${9881}
+    listIndex | stateIndex | position    | id                          | date            | item        | cost
+    ${0}      | ${1}       | ${'first'}  | ${numericHash('real-id-a')} | ${'2020-04-20'} | ${'Item a'} | ${287}
+    ${1}      | ${0}       | ${'second'} | ${numericHash('real-id-b')} | ${'2020-04-13'} | ${'Item b'} | ${9881}
   `('the $position item', ({ listIndex, stateIndex, id, date, item, cost }) => {
     const dateInput = format(new Date(date), 'dd/MM/yyyy');
     const costInput = String(cost / 100);
@@ -462,7 +464,7 @@ describe('<AccessibleList />', () => {
 
         await waitFor(() => {
           expect(store.getActions()).toStrictEqual(
-            expect.arrayContaining([{ ...expectedAction, fakeId: 'some-fake-id' }]),
+            expect.arrayContaining([{ ...expectedAction, fakeId: generateFakeId() }]),
           );
         });
       });
@@ -495,7 +497,7 @@ describe('<AccessibleList />', () => {
       otherThing: boolean;
     };
 
-    type ItemWithCustomField = { id: string; myCustomField: MyCustomFieldValue };
+    type ItemWithCustomField = { id: Id; myCustomField: MyCustomFieldValue };
 
     const mockCustomFieldUpdate = {
       something: 'some new value',
@@ -517,7 +519,7 @@ describe('<AccessibleList />', () => {
     );
 
     const mockCustomFieldItem = {
-      id: 'some-id',
+      id: numericHash('some-id'),
       myCustomField: {
         something: 'custom field value',
         otherThing: false,
@@ -585,8 +587,8 @@ describe('<AccessibleList />', () => {
       selectorApplied: boolean;
     };
 
-    const customSelector = (): { [id: string]: ExtraProps } => ({
-      'real-id-b': { selectorApplied: true },
+    const customSelector = (): { [id: number]: ExtraProps } => ({
+      [numericHash('real-id-b')]: { selectorApplied: true },
     });
 
     const CustomItemField: React.FC<{
@@ -630,7 +632,7 @@ describe('<AccessibleList />', () => {
     };
 
     const itemProcessor = (item: Item): Partial<ExtraProps> => ({
-      selectorApplied: item.id === 'real-id-b',
+      selectorApplied: item.id === numericHash('real-id-b'),
     });
 
     const CustomItemField: React.FC<{

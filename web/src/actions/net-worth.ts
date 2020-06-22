@@ -1,6 +1,6 @@
-import shortid from 'shortid';
-
+import { generateFakeId } from '~client/modules/data';
 import {
+  Id,
   ActionCreated,
   ActionUpdated,
   ActionDeleted,
@@ -26,13 +26,13 @@ type CategoryCreated = ActionCreated<ActionTypeNetWorth.CategoryCreated, Categor
 
 export const netWorthCategoryCreated = (item: Create<Category>): CategoryCreated => ({
   type: ActionTypeNetWorth.CategoryCreated,
-  fakeId: shortid.generate(),
+  fakeId: generateFakeId(),
   item,
 });
 
 type CategoryUpdated = ActionUpdated<ActionTypeNetWorth.CategoryUpdated, Category>;
 
-export const netWorthCategoryUpdated = (id: string, item: Create<Category>): CategoryUpdated => ({
+export const netWorthCategoryUpdated = (id: Id, item: Create<Category>): CategoryUpdated => ({
   type: ActionTypeNetWorth.CategoryUpdated,
   id,
   item,
@@ -40,7 +40,7 @@ export const netWorthCategoryUpdated = (id: string, item: Create<Category>): Cat
 
 type CategoryDeleted = ActionDeleted<ActionTypeNetWorth.CategoryDeleted>;
 
-export const netWorthCategoryDeleted = (id: string): CategoryDeleted => ({
+export const netWorthCategoryDeleted = (id: Id): CategoryDeleted => ({
   type: ActionTypeNetWorth.CategoryDeleted,
   id,
 });
@@ -49,14 +49,14 @@ type SubcategoryCreated = ActionCreated<ActionTypeNetWorth.SubcategoryCreated, S
 
 export const netWorthSubcategoryCreated = (item: Create<Subcategory>): SubcategoryCreated => ({
   type: ActionTypeNetWorth.SubcategoryCreated,
-  fakeId: shortid.generate(),
+  fakeId: generateFakeId(),
   item,
 });
 
 type SubcategoryUpdated = ActionUpdated<ActionTypeNetWorth.SubcategoryUpdated, Subcategory>;
 
 export const netWorthSubcategoryUpdated = (
-  id: string,
+  id: Id,
   item: Create<Subcategory>,
 ): SubcategoryUpdated => ({
   type: ActionTypeNetWorth.SubcategoryUpdated,
@@ -66,7 +66,7 @@ export const netWorthSubcategoryUpdated = (
 
 type SubcategoryDeleted = ActionDeleted<ActionTypeNetWorth.SubcategoryDeleted>;
 
-export const netWorthSubcategoryDeleted = (id: string): SubcategoryDeleted => ({
+export const netWorthSubcategoryDeleted = (id: Id): SubcategoryDeleted => ({
   type: ActionTypeNetWorth.SubcategoryDeleted,
   id,
 });
@@ -75,13 +75,13 @@ type EntryCreated = ActionCreated<ActionTypeNetWorth.EntryCreated, Entry>;
 
 export const netWorthCreated = (item: Create<Entry>): EntryCreated => ({
   type: ActionTypeNetWorth.EntryCreated,
-  fakeId: shortid.generate(),
+  fakeId: generateFakeId(),
   item,
 });
 
 type EntryUpdated = ActionUpdated<ActionTypeNetWorth.EntryUpdated, Entry>;
 
-export const netWorthUpdated = (id: string, item: Create<Entry>): EntryUpdated => ({
+export const netWorthUpdated = (id: Id, item: Create<Entry>): EntryUpdated => ({
   type: ActionTypeNetWorth.EntryUpdated,
   id,
   item,
@@ -89,7 +89,7 @@ export const netWorthUpdated = (id: string, item: Create<Entry>): EntryUpdated =
 
 type EntryDeleted = ActionDeleted<ActionTypeNetWorth.EntryDeleted>;
 
-export const netWorthDeleted = (id: string): EntryDeleted => ({
+export const netWorthDeleted = (id: Id): EntryDeleted => ({
   type: ActionTypeNetWorth.EntryDeleted,
   id,
 });

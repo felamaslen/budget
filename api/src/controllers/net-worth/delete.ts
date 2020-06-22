@@ -5,8 +5,8 @@ import { deleteNetWorthEntryRow } from '~api/queries';
 
 export async function deleteNetWorthEntry(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
+  uid: number,
+  netWorthId: number,
 ): Promise<void> {
   const numRows = await deleteNetWorthEntryRow(db, uid, netWorthId);
   if (!numRows) {

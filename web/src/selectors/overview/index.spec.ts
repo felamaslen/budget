@@ -1,8 +1,9 @@
+import numericHash from 'string-hash';
 import { getNetWorthSummary } from './net-worth';
 import { getProcessedCost, getOverviewTable } from '.';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers/types';
-import { testState as state } from '~client/test-data/state';
+import { testState as state } from '~client/test-data';
 import { mockRandom } from '~client/test-utils/random';
 
 describe('Overview selectors', () => {
@@ -19,7 +20,7 @@ describe('Overview selectors', () => {
         ...state.funds,
         items: [
           {
-            id: 'fund-A',
+            id: 113,
             item: 'some fund 1',
             transactions: getTransactionsList([
               { date: new Date('2018-02-05'), units: 10, cost: 56123 },
@@ -27,7 +28,7 @@ describe('Overview selectors', () => {
             ]),
           },
           {
-            id: 'fund-B',
+            id: 114,
             item: 'some fund 2',
             transactions: getTransactionsList([
               { date: new Date('2018-03-17'), units: 51, cost: 10662 },
@@ -104,7 +105,7 @@ describe('Overview selectors', () => {
           ...testState.funds,
           items: [
             {
-              id: 'fund-A',
+              id: numericHash('fund-A'),
               item: 'some fund 1',
               transactions: getTransactionsList([
                 { date: new Date('2018-02-05'), units: 10, cost: 56123 },
@@ -112,7 +113,7 @@ describe('Overview selectors', () => {
               ]),
             },
             {
-              id: 'fund-B',
+              id: numericHash('fund-B'),
               item: 'some fund 2',
               transactions: getTransactionsList([
                 { date: new Date('2018-03-17'), units: 51, cost: 10662 },

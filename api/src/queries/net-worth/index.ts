@@ -1,19 +1,19 @@
 import { sql, DatabaseTransactionConnectionType, SqlSqlTokenType } from 'slonik';
-import { IDRow } from '~api/types';
+import { Item } from '~api/types';
 
 export * from './create';
 export * from './read';
 export * from './update';
 export * from './delete';
 
-const unionSelectIds = (categories: string[]): SqlSqlTokenType<IDRow> => sql`
+const unionSelectIds = (categories: number[]): SqlSqlTokenType<Item> => sql`
 SELECT ids.id
 FROM (
-  SELECT ${categories[0]}::uuid AS id
+  SELECT ${categories[0]}::int4 AS id
   ${
     categories.length > 1
       ? sql.join(
-          categories.slice(1).map((id) => sql`UNION SELECT ${id}::uuid`),
+          categories.slice(1).map((id) => sql`UNION SELECT ${id}::int4`),
           sql` `,
         )
       : sql``
@@ -23,12 +23,12 @@ FROM (
 
 export const getInvalidIds = async (
   db: DatabaseTransactionConnectionType,
-  subcategories: string[],
-): Promise<readonly IDRow[]> => {
+  subcategories: number[],
+): Promise<readonly Item[]> => {
   if (!subcategories.length) {
     return [];
   }
-  const invalidIds = await db.query<IDRow>(sql`
+  const invalidIds = await db.query<Item>(sql`
   ${unionSelectIds(subcategories)}
   LEFT JOIN net_worth_subcategories AS nws ON nws.id = ids.id
   WHERE nws.id IS NULL
@@ -38,12 +38,12 @@ export const getInvalidIds = async (
 
 export const getInvalidCreditCategories = async (
   db: DatabaseTransactionConnectionType,
-  creditLimitCategories: string[],
-): Promise<readonly IDRow[]> => {
+  creditLimitCategories: number[],
+): Promise<readonly Item[]> => {
   if (!creditLimitCategories.length) {
     return [];
   }
-  const invalidIds = await db.query<IDRow>(sql`
+  const invalidIds = await db.query<Item>(sql`
   ${unionSelectIds(creditLimitCategories)}
   LEFT JOIN net_worth_subcategories AS nws ON nws.id = ids.id
   LEFT JOIN net_worth_categories AS nwc ON nwc.id = nws.category_id

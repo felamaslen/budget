@@ -2,9 +2,9 @@ import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 export async function deleteOldValues(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
-  subcategories: string[],
+  uid: number,
+  netWorthId: number,
+  subcategories: number[],
 ): Promise<void> {
   await db.query(sql`
     DELETE FROM net_worth_values nwv
@@ -14,7 +14,7 @@ export async function deleteOldValues(
         sql`nw.uid = ${uid}`,
         sql`nw.id = ${netWorthId}`,
         sql`nwv.net_worth_id = nw.id`,
-        sql`nwv.subcategory = ANY(${sql.array(subcategories, 'uuid')})`,
+        sql`nwv.subcategory = ANY(${sql.array(subcategories, 'int4')})`,
       ],
       sql` AND `,
     )}
@@ -23,9 +23,9 @@ export async function deleteOldValues(
 
 export async function deleteOldCreditLimit(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
-  subcategories: string[],
+  uid: number,
+  netWorthId: number,
+  subcategories: number[],
 ): Promise<void> {
   await db.query(sql`
     DELETE FROM net_worth_credit_limit nwcl
@@ -35,7 +35,7 @@ export async function deleteOldCreditLimit(
         sql`nw.uid = ${uid}`,
         sql`nw.id = ${netWorthId}`,
         sql`nwcl.net_worth_id = nw.id`,
-        sql`nwcl.subcategory = ANY(${sql.array(subcategories, 'uuid')})`,
+        sql`nwcl.subcategory = ANY(${sql.array(subcategories, 'int4')})`,
       ],
       sql` AND `,
     )}
@@ -44,8 +44,8 @@ export async function deleteOldCreditLimit(
 
 export async function deleteOldCurrencies(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
+  uid: number,
+  netWorthId: number,
   currencies: string[],
 ): Promise<void> {
   await db.query(sql`
@@ -65,9 +65,9 @@ export async function deleteOldCurrencies(
 
 export async function deleteChangedFXValues(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
-  subcategories: string[],
+  uid: number,
+  netWorthId: number,
+  subcategories: number[],
 ): Promise<void> {
   await db.query(sql`
     DELETE FROM net_worth_fx_values nwfxv
@@ -78,7 +78,7 @@ export async function deleteChangedFXValues(
         sql`nw.id = ${netWorthId}`,
         sql`nwv.net_worth_id = nw.id`,
         sql`nwfxv.values_id = nwv.id`,
-        sql`nwv.subcategory = ANY(${sql.array(subcategories, 'uuid')})`,
+        sql`nwv.subcategory = ANY(${sql.array(subcategories, 'int4')})`,
       ],
       sql` AND `,
     )}
@@ -87,9 +87,9 @@ export async function deleteChangedFXValues(
 
 export async function deleteChangedOptionValues(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
-  subcategories: string[],
+  uid: number,
+  netWorthId: number,
+  subcategories: number[],
 ): Promise<void> {
   await db.query(sql`
     DELETE FROM net_worth_option_values nwopv
@@ -100,7 +100,7 @@ export async function deleteChangedOptionValues(
         sql`nw.id = ${netWorthId}`,
         sql`nwv.net_worth_id = nw.id`,
         sql`nwopv.values_id = nwv.id`,
-        sql`nwv.subcategory = ANY(${sql.array(subcategories, 'uuid')})`,
+        sql`nwv.subcategory = ANY(${sql.array(subcategories, 'int4')})`,
       ],
       sql` AND `,
     )}
@@ -109,8 +109,8 @@ export async function deleteChangedOptionValues(
 
 export async function deleteNetWorthEntryRow(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
+  uid: number,
+  netWorthId: number,
 ): Promise<number> {
   const result = await db.query(sql`
   DELETE FROM net_worth

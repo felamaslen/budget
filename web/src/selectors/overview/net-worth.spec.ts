@@ -1,4 +1,5 @@
 import { replaceAtIndex } from 'replace-array';
+import numericHash from 'string-hash';
 
 import { getNumMonths } from './common';
 import {
@@ -10,14 +11,21 @@ import {
   getNetWorthRequests,
 } from './net-worth';
 import { State } from '~client/reducers';
-import { testState as state } from '~client/test-data/state';
-
-import { RequestType } from '~client/types/crud';
-import { Category, Subcategory, Aggregate } from '~client/types/net-worth';
+import { testState as state } from '~client/test-data';
+import {
+  Create,
+  RequestType,
+  RawDate,
+  Category,
+  Subcategory,
+  Aggregate,
+  Request,
+  CreateEntry,
+} from '~client/types';
 
 describe('Overview selectors (net worth)', () => {
   const testCategory: Category = {
-    id: 'category-id-a',
+    id: numericHash('category-id-a'),
     type: 'asset',
     category: 'Some category',
     color: 'green',
@@ -25,8 +33,8 @@ describe('Overview selectors (net worth)', () => {
   };
 
   const testSubcategory: Subcategory = {
-    id: 'subcategory-id-a',
-    categoryId: 'category-id-a',
+    id: numericHash('subcategory-id-a'),
+    categoryId: numericHash('category-id-a'),
     subcategory: 'Some subcategory',
     hasCreditLimit: null,
     opacity: 0.8,
@@ -45,14 +53,14 @@ describe('Overview selectors (net worth)', () => {
                 testCategory,
                 {
                   ...testCategory,
-                  id: 'id-b',
+                  id: numericHash('id-b'),
                 },
               ],
               __optimistic: [RequestType.delete, undefined],
             },
           },
         }),
-      ).toStrictEqual([expect.objectContaining({ id: 'id-b' })]);
+      ).toStrictEqual([expect.objectContaining({ id: numericHash('id-b') })]);
     });
 
     it('should sort by type, then category', () => {
@@ -64,20 +72,20 @@ describe('Overview selectors (net worth)', () => {
             ...state.netWorth,
             categories: {
               items: [
-                { ...testCategory, id: 'id-a', type: 'asset', category: 'foo' },
-                { ...testCategory, id: 'id-b', type: 'liability', category: 'bar' },
-                { ...testCategory, id: 'id-c', type: 'asset', category: 'baz' },
-                { ...testCategory, id: 'id-d', type: 'asset', category: 'bak' },
+                { ...testCategory, id: numericHash('id-a'), type: 'asset', category: 'foo' },
+                { ...testCategory, id: numericHash('id-b'), type: 'liability', category: 'bar' },
+                { ...testCategory, id: numericHash('id-c'), type: 'asset', category: 'baz' },
+                { ...testCategory, id: numericHash('id-d'), type: 'asset', category: 'bak' },
               ],
               __optimistic: [undefined, undefined, undefined, undefined],
             },
           },
         }),
       ).toStrictEqual([
-        expect.objectContaining({ id: 'id-d', type: 'asset', category: 'bak' }),
-        expect.objectContaining({ id: 'id-c', type: 'asset', category: 'baz' }),
-        expect.objectContaining({ id: 'id-a', type: 'asset', category: 'foo' }),
-        expect.objectContaining({ id: 'id-b', type: 'liability', category: 'bar' }),
+        expect.objectContaining({ id: numericHash('id-d'), type: 'asset', category: 'bak' }),
+        expect.objectContaining({ id: numericHash('id-c'), type: 'asset', category: 'baz' }),
+        expect.objectContaining({ id: numericHash('id-a'), type: 'asset', category: 'foo' }),
+        expect.objectContaining({ id: numericHash('id-b'), type: 'liability', category: 'bar' }),
       ]);
     });
   });
@@ -92,14 +100,14 @@ describe('Overview selectors (net worth)', () => {
             ...state.netWorth,
             subcategories: {
               items: [
-                { ...testSubcategory, id: 'id-a' },
-                { ...testSubcategory, id: 'id-b' },
+                { ...testSubcategory, id: numericHash('id-a') },
+                { ...testSubcategory, id: numericHash('id-b') },
               ],
               __optimistic: [RequestType.delete, undefined],
             },
           },
         }),
-      ).toStrictEqual([expect.objectContaining({ id: 'id-b' })]);
+      ).toStrictEqual([expect.objectContaining({ id: numericHash('id-b') })]);
     });
 
     it('should sort by category ID and subcategory', () => {
@@ -111,18 +119,45 @@ describe('Overview selectors (net worth)', () => {
             ...state.netWorth,
             subcategories: {
               items: [
-                { ...testSubcategory, id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' },
-                { ...testSubcategory, id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' },
-                { ...testSubcategory, id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' },
+                {
+                  ...testSubcategory,
+                  id: numericHash('id-a'),
+                  categoryId: numericHash('cat-id-2'),
+                  subcategory: 'foo',
+                },
+                {
+                  ...testSubcategory,
+                  id: numericHash('id-b'),
+                  categoryId: numericHash('cat-id-1'),
+                  subcategory: 'bar',
+                },
+                {
+                  ...testSubcategory,
+                  id: numericHash('id-c'),
+                  categoryId: numericHash('cat-id-2'),
+                  subcategory: 'baz',
+                },
               ],
               __optimistic: [undefined, undefined, undefined],
             },
           },
         }),
       ).toStrictEqual([
-        expect.objectContaining({ id: 'id-b', categoryId: 'cat-id-1', subcategory: 'bar' }),
-        expect.objectContaining({ id: 'id-c', categoryId: 'cat-id-2', subcategory: 'baz' }),
-        expect.objectContaining({ id: 'id-a', categoryId: 'cat-id-2', subcategory: 'foo' }),
+        expect.objectContaining({
+          id: numericHash('id-b'),
+          categoryId: numericHash('cat-id-1'),
+          subcategory: 'bar',
+        }),
+        expect.objectContaining({
+          id: numericHash('id-c'),
+          categoryId: numericHash('cat-id-2'),
+          subcategory: 'baz',
+        }),
+        expect.objectContaining({
+          id: numericHash('id-a'),
+          categoryId: numericHash('cat-id-2'),
+          subcategory: 'foo',
+        }),
       ]);
     });
   });
@@ -216,7 +251,7 @@ describe('Overview selectors (net worth)', () => {
 
       it.each`
         prop                      | value
-        ${'id'}                   | ${'real-entry-id-a'}
+        ${'id'}                   | ${numericHash('real-entry-id-a')}
         ${'date'}                 | ${new Date('2018-02-28')}
         ${'assets'}               | ${10324 + 3750 * 0.035 + 1296523}
         ${'options'}              | ${0}
@@ -250,7 +285,7 @@ describe('Overview selectors (net worth)', () => {
 
       it.each`
         prop                      | value
-        ${'id'}                   | ${'real-entry-id-b'}
+        ${'id'}                   | ${numericHash('real-entry-id-b')}
         ${'date'}                 | ${new Date('2018-03-31')}
         ${'assets'}               | ${9752 + 1051343}
         ${'options'}              | ${103 * 95.57}
@@ -281,11 +316,11 @@ describe('Overview selectors (net worth)', () => {
             items: [
               {
                 ...testCategory,
-                id: 'real-category-id',
+                id: numericHash('real-category-id'),
               },
               {
                 ...testCategory,
-                id: 'fake-category-id',
+                id: numericHash('fake-category-id'),
               },
             ],
             __optimistic: [RequestType.delete, RequestType.create],
@@ -294,18 +329,18 @@ describe('Overview selectors (net worth)', () => {
             items: [
               {
                 ...testSubcategory,
-                id: 'real-subcategory-id',
-                categoryId: 'real-category-id',
+                id: numericHash('real-subcategory-id'),
+                categoryId: numericHash('real-category-id'),
               },
               {
                 ...testSubcategory,
-                id: 'fake-subcategory-id-a',
-                categoryId: 'real-category-id',
+                id: numericHash('fake-subcategory-id-a'),
+                categoryId: numericHash('real-category-id'),
               },
               {
                 ...testSubcategory,
-                id: 'fake-subcategory-id-b',
-                categoryId: 'fake-category-id',
+                id: numericHash('fake-subcategory-id-b'),
+                categoryId: numericHash('fake-category-id'),
               },
             ],
             __optimistic: [RequestType.update, RequestType.create, RequestType.create],
@@ -313,18 +348,32 @@ describe('Overview selectors (net worth)', () => {
           entries: {
             items: [
               {
-                id: 'real-entry-id',
+                id: numericHash('real-entry-id'),
                 date: new Date('2019-07-27'),
-                values: [{ id: 'some-value-id', value: 3, subcategory: 'real-subcategory-id' }],
+                values: [
+                  {
+                    id: numericHash('some-value-id'),
+                    value: 3,
+                    subcategory: numericHash('real-subcategory-id'),
+                  },
+                ],
                 currencies: [],
                 creditLimit: [],
               },
               {
-                id: 'fake-entry-id',
+                id: numericHash('fake-entry-id'),
                 date: new Date('2019-07-04'),
                 values: [
-                  { id: 'value-id-a', value: 4, subcategory: 'real-subcategory-id' },
-                  { id: 'value-id-b', value: 5, subcategory: 'fake-subcategory-id-a' },
+                  {
+                    id: numericHash('value-id-a'),
+                    value: 4,
+                    subcategory: numericHash('real-subcategory-id'),
+                  },
+                  {
+                    id: numericHash('value-id-b'),
+                    value: 5,
+                    subcategory: numericHash('fake-subcategory-id-a'),
+                  },
                 ],
                 currencies: [],
                 creditLimit: [],
@@ -338,10 +387,10 @@ describe('Overview selectors (net worth)', () => {
       const result = getNetWorthRequests(stateOptimistic);
 
       expect(result).toStrictEqual(
-        expect.arrayContaining([
+        expect.arrayContaining<Request>([
           {
             type: RequestType.create,
-            fakeId: 'fake-category-id',
+            fakeId: numericHash('fake-category-id'),
             method: 'post',
             route: 'data/net-worth/categories',
             body: {
@@ -353,17 +402,17 @@ describe('Overview selectors (net worth)', () => {
           },
           {
             type: RequestType.delete,
-            id: 'real-category-id',
+            id: numericHash('real-category-id'),
             method: 'delete',
             route: 'data/net-worth/categories',
           },
           {
             type: RequestType.create,
-            fakeId: 'fake-subcategory-id-a',
+            fakeId: numericHash('fake-subcategory-id-a'),
             method: 'post',
             route: 'data/net-worth/subcategories',
             body: {
-              categoryId: 'real-category-id',
+              categoryId: numericHash('real-category-id'),
               subcategory: testSubcategory.subcategory,
               hasCreditLimit: testSubcategory.hasCreditLimit,
               opacity: testSubcategory.opacity,
@@ -371,11 +420,11 @@ describe('Overview selectors (net worth)', () => {
           },
           {
             type: RequestType.update,
-            id: 'real-subcategory-id',
+            id: numericHash('real-subcategory-id'),
             method: 'put',
             route: 'data/net-worth/subcategories',
             body: {
-              categoryId: 'real-category-id',
+              categoryId: numericHash('real-category-id'),
               subcategory: testSubcategory.subcategory,
               hasCreditLimit: testSubcategory.hasCreditLimit,
               opacity: testSubcategory.opacity,
@@ -383,12 +432,12 @@ describe('Overview selectors (net worth)', () => {
           },
           {
             type: RequestType.update,
-            id: 'real-entry-id',
+            id: numericHash('real-entry-id'),
             method: 'put',
             route: 'data/net-worth',
             body: {
               date: '2019-07-27',
-              values: [{ value: 3, subcategory: 'real-subcategory-id' }],
+              values: [{ value: 3, subcategory: numericHash('real-subcategory-id') }],
               currencies: [],
               creditLimit: [],
             },
@@ -407,7 +456,7 @@ describe('Overview selectors (net worth)', () => {
             items: [
               {
                 ...testCategory,
-                id: 'real-category-id',
+                id: numericHash('real-category-id'),
               },
             ],
             __optimistic: [undefined],
@@ -416,8 +465,8 @@ describe('Overview selectors (net worth)', () => {
             items: [
               {
                 ...testSubcategory,
-                id: 'real-subcategory-id',
-                categoryId: 'real-category-id',
+                id: numericHash('real-subcategory-id'),
+                categoryId: numericHash('real-category-id'),
               },
             ],
             __optimistic: [undefined],
@@ -425,11 +474,17 @@ describe('Overview selectors (net worth)', () => {
           entries: {
             items: [
               {
-                id: 'fake-entry-id',
+                id: numericHash('fake-entry-id'),
                 date: new Date('2019-07-31'),
-                values: [{ id: 'fake-value-id', subcategory: 'real-subcategory-id', value: 2 }],
-                creditLimit: [{ subcategory: 'real-subcategory-id', value: 100 }],
-                currencies: [{ id: 'fake-currency-id', currency: 'CZK', rate: 0.031 }],
+                values: [
+                  {
+                    id: numericHash('fake-value-id'),
+                    subcategory: numericHash('real-subcategory-id'),
+                    value: 2,
+                  },
+                ],
+                creditLimit: [{ subcategory: numericHash('real-subcategory-id'), value: 100 }],
+                currencies: [{ id: numericHash('fake-currency-id'), currency: 'CZK', rate: 0.031 }],
               },
             ],
             __optimistic: [RequestType.create],
@@ -442,13 +497,13 @@ describe('Overview selectors (net worth)', () => {
       expect(result).toStrictEqual([
         {
           type: RequestType.create,
-          fakeId: 'fake-entry-id',
+          fakeId: numericHash('fake-entry-id'),
           method: 'post',
           route: 'data/net-worth',
           body: {
             date: '2019-07-31',
-            values: [expect.objectContaining({ subcategory: 'real-subcategory-id' })],
-            creditLimit: [{ subcategory: 'real-subcategory-id', value: 100 }],
+            values: [expect.objectContaining({ subcategory: numericHash('real-subcategory-id') })],
+            creditLimit: [{ subcategory: numericHash('real-subcategory-id'), value: 100 }],
             currencies: [{ currency: 'CZK', rate: 0.031 }],
           },
         },
@@ -464,7 +519,7 @@ describe('Overview selectors (net worth)', () => {
             items: [
               {
                 ...testCategory,
-                id: 'real-category-id',
+                id: numericHash('real-category-id'),
                 isOption: true,
               },
             ],
@@ -474,8 +529,8 @@ describe('Overview selectors (net worth)', () => {
             items: [
               {
                 ...testSubcategory,
-                id: 'real-subcategory-id',
-                categoryId: 'real-category-id',
+                id: numericHash('real-subcategory-id'),
+                categoryId: numericHash('real-category-id'),
               },
             ],
             __optimistic: [undefined],
@@ -483,7 +538,7 @@ describe('Overview selectors (net worth)', () => {
           entries: {
             items: [
               {
-                id: 'fake-entry-id',
+                id: numericHash('fake-entry-id'),
                 date: new Date('2019-07-31'),
                 values: [],
                 creditLimit: [],
@@ -507,8 +562,8 @@ describe('Overview selectors (net worth)', () => {
                   ...stateWithOptions.netWorth.entries.items[0],
                   values: [
                     {
-                      id: 'fake-value-id',
-                      subcategory: 'real-subcategory-id',
+                      id: numericHash('fake-value-id'),
+                      subcategory: numericHash('real-subcategory-id'),
                       value: [
                         3,
                         { units: 67, strikePrice: 35.27, marketPrice: 32.99 },
@@ -526,17 +581,17 @@ describe('Overview selectors (net worth)', () => {
 
         const result = getNetWorthRequests(stateWithEntryCreate);
 
-        expect(result).toStrictEqual([
+        expect(result).toStrictEqual<Request<Create<RawDate<CreateEntry>>>[]>([
           {
             type: RequestType.create,
-            fakeId: 'fake-entry-id',
+            fakeId: numericHash('fake-entry-id'),
             method: 'post',
             route: 'data/net-worth',
             body: {
               date: '2019-07-31',
               values: [
                 {
-                  subcategory: 'real-subcategory-id',
+                  subcategory: numericHash('real-subcategory-id'),
                   value: [
                     expect.objectContaining({
                       units: 67,
@@ -565,8 +620,8 @@ describe('Overview selectors (net worth)', () => {
                   ...stateWithOptions.netWorth.entries.items[0],
                   values: [
                     {
-                      id: 'fake-value-id',
-                      subcategory: 'real-subcategory-id',
+                      id: numericHash('fake-value-id'),
+                      subcategory: numericHash('real-subcategory-id'),
                       value: [3, { value: 10, currency: 'USD' }],
                     },
                   ],
@@ -582,7 +637,7 @@ describe('Overview selectors (net worth)', () => {
         expect(result).toStrictEqual([
           {
             type: RequestType.create,
-            fakeId: 'fake-entry-id',
+            fakeId: numericHash('fake-entry-id'),
             method: 'post',
             route: 'data/net-worth',
             body: {

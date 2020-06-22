@@ -62,7 +62,7 @@ const makeRoutePut = <I extends ListCalcItem>(
   );
 
 const makeRouteDelete = (category: ListCalcCategory): RequestHandler =>
-  validatedAuthDbRoute<{ id: string }>(
+  validatedAuthDbRoute<{ id: number }>(
     {
       data: ListSchema.deleteRequest,
     },

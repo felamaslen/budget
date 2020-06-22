@@ -2,8 +2,8 @@ import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 export async function updateEntryDate(
   db: DatabaseTransactionConnectionType,
-  uid: string,
-  netWorthId: string,
+  uid: number,
+  netWorthId: number,
   date: string,
 ): Promise<void> {
   await db.query(sql`

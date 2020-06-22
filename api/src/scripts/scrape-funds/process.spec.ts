@@ -1,5 +1,4 @@
 import { DatabaseTransactionConnectionType } from 'slonik';
-import uuidv4 from 'uuid/v4';
 
 import { getBroker, getFunds } from './process';
 import * as queries from './queries';
@@ -26,8 +25,8 @@ describe('getBroker', () => {
 });
 
 describe('getFunds', () => {
-  const uid1 = uuidv4();
-  const uid2 = uuidv4();
+  const uid1 = Math.floor(Math.random() * 10000);
+  const uid2 = Math.floor(Math.random() * 10000);
 
   const db = {} as DatabaseTransactionConnectionType;
 

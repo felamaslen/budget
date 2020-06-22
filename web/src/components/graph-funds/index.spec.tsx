@@ -5,6 +5,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import getStore from 'redux-mock-store';
 import sinon from 'sinon';
+import numericHash from 'string-hash';
 
 import { GraphFunds } from '.';
 import { Period } from '~client/constants/graph';
@@ -31,11 +32,11 @@ describe('<GraphFunds />', () => {
             ...testState[Page.funds],
             items: [
               {
-                id: 'some-fund-id',
+                id: numericHash('some-fund-id'),
                 item: 'some fund',
                 transactions: [
                   {
-                    id: 'some-transaction-id',
+                    id: numericHash('some-transaction-id'),
                     date: new Date('2020-04-10'),
                     units: 100,
                     cost: 9960,
@@ -52,7 +53,7 @@ describe('<GraphFunds />', () => {
                   getUnixTime(new Date('2020-06-16')),
                 ],
                 prices: {
-                  'some-fund-id': {
+                  [numericHash('some-fund-id')]: {
                     values: [100, 99, 101],
                     startIndex: 0,
                   },

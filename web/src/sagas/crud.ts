@@ -55,7 +55,7 @@ export function* updateLists(apiKey: string, requests: Request[]) {
   return withRes(requests, res.data.data);
 }
 
-function getUrlFromRoute(route: string, id?: string): string {
+function getUrlFromRoute(route: string, id?: number): string {
   const base = `${API_PREFIX}/${route}`;
   return id ? `${base}/${id}` : base;
 }

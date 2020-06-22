@@ -1,3 +1,4 @@
+import numericHash from 'string-hash';
 import { getTransactionsList } from '~client/modules/data';
 import { getApiKey, getLocked, getUnsaved } from '~client/selectors';
 import { testState } from '~client/test-data';
@@ -38,7 +39,7 @@ describe('API selectors', () => {
             items: [
               ...testState.funds.items,
               {
-                id: 'some-fund-id',
+                id: numericHash('some-fund-id'),
                 item: 'some-fund-name',
                 transactions: getTransactionsList([
                   { date: '2019-05-03', units: 103, cost: 99231 },
@@ -52,7 +53,7 @@ describe('API selectors', () => {
             items: [
               ...testState.food.items,
               {
-                id: 'real-id-z',
+                id: numericHash('real-id-z'),
                 date: new Date(),
                 item: 'some food item',
                 category: 'some food category',
@@ -67,7 +68,7 @@ describe('API selectors', () => {
             items: [
               ...testState.general.items,
               {
-                id: 'some-fake-id',
+                id: numericHash('some-fake-id'),
                 date: new Date(),
                 item: 'some general item',
                 category: 'some general category',
@@ -82,7 +83,7 @@ describe('API selectors', () => {
             items: [
               ...testState.holiday.items,
               {
-                id: 'real-id-x',
+                id: numericHash('real-id-x'),
                 date: new Date(),
                 item: 'some holiday item',
                 holiday: 'some holiday',
@@ -104,7 +105,7 @@ describe('API selectors', () => {
               items: [
                 ...testState.netWorth.categories.items,
                 {
-                  id: 'some-fake-id',
+                  id: numericHash('some-fake-id'),
                   type: 'asset',
                   category: 'My asset',
                   color: '#00ff00',
@@ -126,8 +127,8 @@ describe('API selectors', () => {
               items: [
                 ...testState.netWorth.subcategories.items,
                 {
-                  id: 'some-fake-id',
-                  categoryId: 'some-category-id',
+                  id: numericHash('some-fake-id'),
+                  categoryId: numericHash('some-category-id'),
                   subcategory: 'My wallet',
                   hasCreditLimit: null,
                   opacity: 0,
@@ -160,7 +161,7 @@ describe('API selectors', () => {
             items: [
               ...testState.funds.items,
               {
-                id: 'some-fund-id',
+                id: numericHash('some-fund-id'),
                 item: 'some-fund-name',
                 transactions: getTransactionsList([
                   { date: '2019-05-03', units: 103, cost: 99231 },
@@ -174,7 +175,7 @@ describe('API selectors', () => {
             items: [
               ...testState.food.items,
               {
-                id: 'real-id-z',
+                id: numericHash('real-id-z'),
                 date: new Date(),
                 item: 'some food item',
                 category: 'some food category',
@@ -189,7 +190,7 @@ describe('API selectors', () => {
             items: [
               ...testState.general.items,
               {
-                id: 'some-fake-id',
+                id: numericHash('some-fake-id'),
                 date: new Date(),
                 item: 'some general item',
                 category: 'some general category',
@@ -204,7 +205,7 @@ describe('API selectors', () => {
             items: [
               ...testState.holiday.items,
               {
-                id: 'real-id-x',
+                id: numericHash('real-id-x'),
                 date: new Date(),
                 item: 'some holiday item',
                 holiday: 'some holiday',

@@ -1,7 +1,6 @@
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
 import React, { useState, useCallback, useMemo } from 'react';
-import shortid from 'shortid';
 
 import { Step, steps } from './constants';
 import { Props as ContainerProps } from './form-container';
@@ -9,7 +8,7 @@ import { StepCurrencies } from './step-currencies';
 import { StepDate } from './step-date';
 import { StepAssets, StepLiabilities } from './step-values';
 import { SetActiveId, OnUpdate, OnCreate } from '~client/hooks';
-import { sortByDate } from '~client/modules/data';
+import { sortByDate, generateFakeId } from '~client/modules/data';
 import {
   CreateEdit,
   Create,
@@ -107,7 +106,7 @@ const NetWorthItemForm: React.FC<PropsItemForm> = ({
 };
 
 const withContrivedRowIds = <V extends Item>(row: Create<V>[]): V[] =>
-  row.map<V>((item) => ({ ...item, id: shortid.generate() } as V));
+  row.map<V>((item) => ({ ...item, id: generateFakeId() } as V));
 
 const withContrivedIds = ({ id, ...item }: Entry): Create<Entry> => ({
   ...item,

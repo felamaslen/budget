@@ -1,9 +1,10 @@
+import numericHash from 'string-hash';
 import { onCreateOptimistic, onUpdateOptimistic, onDeleteOptimistic, State } from './crud';
-import { RequestType } from '~client/types/crud';
+import { Id, RequestType } from '~client/types';
 
 describe('CRUD reducer helpers', () => {
   type Item = {
-    id: string;
+    id: Id;
     foo: string;
     bar: number;
   };
@@ -16,7 +17,7 @@ describe('CRUD reducer helpers', () => {
   const stateNormal: State<Item> = {
     items: [
       {
-        id: 'my-real-id',
+        id: numericHash('my-real-id'),
         foo: 'some foo',
         bar: 3,
       },
@@ -27,7 +28,7 @@ describe('CRUD reducer helpers', () => {
   const stateCreating: State<Item> = {
     items: [
       {
-        id: 'my-fake-id',
+        id: numericHash('my-fake-id'),
         foo: 'some foo',
         bar: 3,
       },
@@ -38,7 +39,7 @@ describe('CRUD reducer helpers', () => {
   const stateUpdating: State<Item> = {
     items: [
       {
-        id: 'my-real-id',
+        id: numericHash('my-real-id'),
         foo: 'updated foo',
         bar: 4,
       },
@@ -49,7 +50,7 @@ describe('CRUD reducer helpers', () => {
   const stateDeleting: State<Item> = {
     items: [
       {
-        id: 'my-real-id',
+        id: numericHash('my-real-id'),
         foo: 'some foo',
         bar: 3,
       },
@@ -60,15 +61,15 @@ describe('CRUD reducer helpers', () => {
   describe('onCreateOptimistic', () => {
     it('should add an optimistically created item', () => {
       expect.assertions(1);
-      const result = onCreateOptimistic<Item>(stateEmpty, 'some-fake-id', {
+      const result = onCreateOptimistic<Item>(stateEmpty, numericHash('some-fake-id'), {
         foo: 'some foo',
         bar: 3,
       });
 
-      expect(result).toStrictEqual({
+      expect(result).toStrictEqual<State<Item>>({
         items: [
           {
-            id: 'some-fake-id',
+            id: numericHash('some-fake-id'),
             foo: 'some foo',
             bar: 3,
           },
@@ -81,15 +82,15 @@ describe('CRUD reducer helpers', () => {
   describe('onUpdateOptimistic', () => {
     it('should optimistically update an item', () => {
       expect.assertions(1);
-      const result = onUpdateOptimistic<Item>(stateNormal, 'my-real-id', {
+      const result = onUpdateOptimistic<Item>(stateNormal, numericHash('my-real-id'), {
         foo: 'updated foo',
         bar: 4,
       });
 
-      expect(result).toStrictEqual({
+      expect(result).toStrictEqual<State<Item>>({
         items: [
           {
-            id: 'my-real-id',
+            id: numericHash('my-real-id'),
             foo: 'updated foo',
             bar: 4,
           },
@@ -101,14 +102,14 @@ describe('CRUD reducer helpers', () => {
     describe('when the item is pending creation', () => {
       it('should not change the request type', () => {
         expect.assertions(1);
-        const result = onUpdateOptimistic<Item>(stateCreating, 'my-fake-id', {
+        const result = onUpdateOptimistic<Item>(stateCreating, numericHash('my-fake-id'), {
           foo: 'updated foo',
         });
 
-        expect(result).toStrictEqual({
+        expect(result).toStrictEqual<State<Item>>({
           items: [
             {
-              id: 'my-fake-id',
+              id: numericHash('my-fake-id'),
               foo: 'updated foo',
               bar: 3,
             },
@@ -121,7 +122,7 @@ describe('CRUD reducer helpers', () => {
     describe('when the item is pending deletion', () => {
       it('should not alter the state', () => {
         expect.assertions(1);
-        const result = onUpdateOptimistic<Item>(stateDeleting, 'my-real-id', {
+        const result = onUpdateOptimistic<Item>(stateDeleting, numericHash('my-real-id'), {
           foo: 'updated foo',
         });
 
@@ -132,7 +133,7 @@ describe('CRUD reducer helpers', () => {
     describe('when the item has not changed', () => {
       it('should not alter the state', () => {
         expect.assertions(1);
-        const result = onUpdateOptimistic<Item>(stateNormal, 'my-real-id', {
+        const result = onUpdateOptimistic<Item>(stateNormal, numericHash('my-real-id'), {
           foo: 'some foo',
         });
 
@@ -144,12 +145,12 @@ describe('CRUD reducer helpers', () => {
   describe('onDeleteOptimistic', () => {
     it('should optimistically delete an item', () => {
       expect.assertions(1);
-      const result = onDeleteOptimistic<Item>(stateNormal, 'my-real-id');
+      const result = onDeleteOptimistic<Item>(stateNormal, numericHash('my-real-id'));
 
       expect(result).toStrictEqual({
         items: [
           {
-            id: 'my-real-id',
+            id: numericHash('my-real-id'),
             foo: 'some foo',
             bar: 3,
           },
@@ -161,7 +162,7 @@ describe('CRUD reducer helpers', () => {
     describe('when the item is pending creation', () => {
       it('should remove the item from state', () => {
         expect.assertions(1);
-        const result = onDeleteOptimistic<Item>(stateCreating, 'my-fake-id');
+        const result = onDeleteOptimistic<Item>(stateCreating, numericHash('my-fake-id'));
 
         expect(result).toStrictEqual({ items: [], __optimistic: [] });
       });
@@ -170,12 +171,12 @@ describe('CRUD reducer helpers', () => {
     describe('when the item is pending update', () => {
       it('should optimistically delete the item', () => {
         expect.assertions(1);
-        const result = onDeleteOptimistic<Item>(stateUpdating, 'my-real-id');
+        const result = onDeleteOptimistic<Item>(stateUpdating, numericHash('my-real-id'));
 
         expect(result).toStrictEqual({
           items: [
             {
-              id: 'my-real-id',
+              id: numericHash('my-real-id'),
               foo: 'updated foo',
               bar: 4,
             },

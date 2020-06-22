@@ -1,7 +1,8 @@
+import numericHash from 'string-hash';
 import { getFundsRows } from './helpers';
 
 import { testState as state } from '~client/test-data';
-import { Page, RequestType } from '~client/types';
+import { Page, RequestType, Fund } from '~client/types';
 
 describe('getFundsRows', () => {
   it('should exclude optimistically deleted items', () => {
@@ -13,16 +14,16 @@ describe('getFundsRows', () => {
           ...state[Page.funds],
           items: [
             {
-              id: 'some-id',
+              id: numericHash('some-id'),
               item: 'foo fund',
               transactions: [],
             },
-            { id: 'other-id', item: 'bar fund', transactions: [] },
+            { id: numericHash('other-id'), item: 'bar fund', transactions: [] },
           ],
           __optimistic: [RequestType.delete, undefined],
         },
       }),
-    ).toStrictEqual([{ id: 'other-id', item: 'bar fund', transactions: [] }]);
+    ).toStrictEqual<Fund[]>([{ id: numericHash('other-id'), item: 'bar fund', transactions: [] }]);
   });
 
   it('should order by item', () => {
@@ -33,15 +34,15 @@ describe('getFundsRows', () => {
         [Page.funds]: {
           ...state[Page.funds],
           items: [
-            { id: 'some-id', item: 'foo fund', transactions: [] },
-            { id: 'other-id', item: 'bar fund', transactions: [] },
+            { id: numericHash('some-id'), item: 'foo fund', transactions: [] },
+            { id: numericHash('other-id'), item: 'bar fund', transactions: [] },
           ],
           __optimistic: [undefined, undefined],
         },
       }),
     ).toStrictEqual([
-      { id: 'other-id', item: 'bar fund', transactions: [] },
-      { id: 'some-id', item: 'foo fund', transactions: [] },
+      { id: numericHash('other-id'), item: 'bar fund', transactions: [] },
+      { id: numericHash('some-id'), item: 'foo fund', transactions: [] },
     ]);
   });
 });

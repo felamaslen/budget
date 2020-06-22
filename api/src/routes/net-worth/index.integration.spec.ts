@@ -2,7 +2,6 @@ import addMonths from 'date-fns/addMonths';
 import format from 'date-fns/format';
 import sinon from 'sinon';
 import { Response } from 'supertest';
-import { v4 as uuidv4 } from 'uuid';
 
 import config from '~api/config';
 import db from '~api/test-utils/knex';
@@ -90,7 +89,7 @@ describe('Net worth route', () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toStrictEqual({
-          id: expect.any(String),
+          id: expect.any(Number),
           ...category,
         });
       });
@@ -120,7 +119,7 @@ describe('Net worth route', () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toStrictEqual({
-          id: expect.any(String),
+          id: expect.any(Number),
           ...modifiedCategory,
         });
       });
@@ -175,7 +174,7 @@ describe('Net worth route', () => {
       opacity: 0.8,
     };
 
-    const setup = async (categoryId?: string): Promise<Response> => {
+    const setup = async (categoryId?: number): Promise<Response> => {
       const resPostCategory = await global
         .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
         .send(category);
@@ -195,7 +194,7 @@ describe('Net worth route', () => {
         expect(res.status).toBe(201);
         expect(res.body).toStrictEqual(
           expect.objectContaining({
-            id: expect.any(String),
+            id: expect.any(Number),
             ...subcategory,
           }),
         );
@@ -219,7 +218,7 @@ describe('Net worth route', () => {
       describe('if the category does not exist', () => {
         it('should respond with an error', async () => {
           expect.assertions(2);
-          const nonexistentCategoryId = uuidv4();
+          const nonexistentCategoryId = 88664915;
           const res = await setup(nonexistentCategoryId);
 
           expect(res.status).toBe(404);
@@ -248,7 +247,7 @@ describe('Net worth route', () => {
         expect(res.status).toBe(200);
         expect(res.body).toStrictEqual(
           expect.objectContaining({
-            id: expect.any(String),
+            id: expect.any(Number),
             ...subcategory,
           }),
         );
@@ -304,7 +303,7 @@ describe('Net worth route', () => {
           expect.assertions(2);
           const { resPost } = await setupForPut();
 
-          const nonexistentCategoryId = uuidv4();
+          const nonexistentCategoryId = 163387;
 
           const res = await global
             .withAuth(global.agent.put(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`))
@@ -373,28 +372,28 @@ describe('Net worth route', () => {
     };
 
     const subcategoryCurrentAccount: Create<Subcategory> = {
-      categoryId: '',
+      categoryId: 0,
       subcategory: 'Current account',
       hasCreditLimit: null,
       opacity: 0.8,
     };
 
     const subcategoryOptions: Create<Subcategory> = {
-      categoryId: '',
+      categoryId: 0,
       subcategory: 'Company X Ord 5p',
       hasCreditLimit: null,
       opacity: 1,
     };
 
     const subcategoryMainCC: Create<Subcategory> = {
-      categoryId: '',
+      categoryId: 0,
       subcategory: 'Main credit card',
       hasCreditLimit: true,
       opacity: 0.5,
     };
 
     const subcategoryTravelCC: Create<Subcategory> = {
-      categoryId: '',
+      categoryId: 0,
       subcategory: 'Travel credit card',
       hasCreditLimit: true,
       opacity: 0.7,
@@ -512,7 +511,7 @@ describe('Net worth route', () => {
 
         expect(res.status).toBe(201);
         expect(res.body).toStrictEqual({
-          id: expect.any(String),
+          id: expect.any(Number),
           date: '2020-04-14',
           values: expect.arrayContaining([
             expect.objectContaining(entry.values[0]),
@@ -559,7 +558,7 @@ describe('Net worth route', () => {
           expect(res.status).toBe(201);
           expect(res.body).toStrictEqual(
             expect.objectContaining({
-              id: expect.any(String),
+              id: expect.any(Number),
               values: expect.arrayContaining([expect.objectContaining(entryWithOption.values[0])]),
             }),
           );
@@ -587,7 +586,7 @@ describe('Net worth route', () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toStrictEqual({
-          id: expect.any(String),
+          id: expect.any(Number),
           date: '2020-04-14',
           values: expect.arrayContaining(entry.values.map(expect.objectContaining)),
           creditLimit: expect.arrayContaining(entry.creditLimit.map(expect.objectContaining)),
@@ -663,6 +662,7 @@ describe('Net worth route', () => {
 
       it('should get a list of net worth entries', async () => {
         expect.assertions(2);
+
         const { entry, mods } = await setupForGet();
         const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
 
@@ -917,7 +917,7 @@ describe('Net worth route', () => {
         expect(entryAfter.values).toStrictEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              id: expect.any(String),
+              id: expect.any(Number),
               value: 20311,
             }),
             ...(resPost.body as Entry).values
@@ -929,7 +929,7 @@ describe('Net worth route', () => {
         expect(entryAfter.currencies).toStrictEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              id: expect.any(String),
+              id: expect.any(Number),
               currency: 'USD',
             }),
             ...(resPost.body as Entry).currencies.map(({ id }) => expect.objectContaining({ id })),
@@ -1024,7 +1024,7 @@ describe('Net worth route', () => {
       it('should respond with 204 no content', async () => {
         expect.assertions(2);
         const resPost = await setupForDelete();
-        expect(resPost.body.id).toStrictEqual(expect.any(String));
+        expect(resPost.body.id).toStrictEqual(expect.any(Number));
 
         const res = await global.withAuth(
           global.agent.delete(`/api/v4/data/net-worth/${resPost.body.id}`),

@@ -4,7 +4,7 @@ import { Page } from '~api/types';
 
 export async function getListCostSummary(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
   monthEnds: Date[],
   category: Page,
 ): Promise<number[]> {

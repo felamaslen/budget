@@ -1,3 +1,4 @@
+import numericHash from 'string-hash';
 import {
   dataRead,
   syncRequested,
@@ -17,7 +18,7 @@ describe('API reducer', () => {
       expect.assertions(2);
       const action = loggedIn({
         name: 'someone',
-        uid: 'some-long-id',
+        uid: numericHash('some-long-id'),
         apiKey: 'some-api-key',
         expires: '2019-07-31T23:08:26.442+01:00',
       });

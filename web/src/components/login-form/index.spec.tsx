@@ -2,10 +2,11 @@ import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
+import numericHash from 'string-hash';
 import { LoginForm } from '.';
 import { loginRequested } from '~client/actions';
 import { State } from '~client/reducers';
-import { testState } from '~client/test-data/state';
+import { testState } from '~client/test-data';
 
 describe('<LoginForm />', () => {
   const state: State = {
@@ -122,7 +123,7 @@ describe('<LoginForm />', () => {
             ...testState,
             login: {
               ...testState.login,
-              uid: 'some-uid',
+              uid: numericHash('some-uid'),
             },
             api: {
               ...testState.api,

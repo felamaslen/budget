@@ -1,9 +1,9 @@
+import numericHash from 'string-hash';
+import { getCrudRequests } from './list';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
-import { getCrudRequests } from '~client/selectors/list';
-import { testState as state } from '~client/test-data/state';
-import { Page } from '~client/types/app';
-import { RequestType } from '~client/types/crud';
+import { testState as state } from '~client/test-data';
+import { Page, RequestType } from '~client/types';
 
 describe('List selectors', () => {
   describe('getCrudRequests', () => {
@@ -16,7 +16,7 @@ describe('List selectors', () => {
           ...state[Page.funds],
           items: [
             {
-              id: 'some-fund-id',
+              id: numericHash('some-fund-id'),
               item: 'some-fund-name',
               transactions: getTransactionsList([{ date: '2019-05-03', units: 103, cost: 99231 }]),
             },
@@ -28,7 +28,7 @@ describe('List selectors', () => {
           ...state[Page.food],
           items: [
             {
-              id: 'real-id-z',
+              id: numericHash('real-id-z'),
               date: new Date('2020-04-29'),
               item: 'some-food-item',
               category: 'some-food-category',
@@ -42,7 +42,7 @@ describe('List selectors', () => {
           ...state[Page.general],
           items: [
             {
-              id: 'some-fake-id',
+              id: numericHash('some-fake-id'),
               date: new Date('2020-04-29'),
               item: 'some-general-item',
               category: 'some-general-category',
@@ -56,7 +56,7 @@ describe('List selectors', () => {
           ...state[Page.holiday],
           items: [
             {
-              id: 'real-id-x',
+              id: numericHash('real-id-x'),
               date: new Date('2020-04-29'),
               item: 'some-holiday-item',
               holiday: 'some-holiday-holiday',
@@ -72,24 +72,24 @@ describe('List selectors', () => {
       expect(getCrudRequests(stateWithUpdates)).toStrictEqual([
         {
           type: RequestType.update,
-          id: 'some-fund-id',
+          id: numericHash('some-fund-id'),
           method: 'put',
           route: 'funds',
           query: {},
           body: {
-            id: 'some-fund-id',
+            id: numericHash('some-fund-id'),
             item: 'some-fund-name',
             transactions: [{ date: '2019-05-03', units: 103, cost: 99231 }],
           },
         },
         {
           type: RequestType.update,
-          id: 'real-id-z',
+          id: numericHash('real-id-z'),
           method: 'put',
           route: 'food',
           query: {},
           body: {
-            id: 'real-id-z',
+            id: numericHash('real-id-z'),
             date: '2020-04-29',
             item: 'some-food-item',
             category: 'some-food-category',
@@ -99,7 +99,7 @@ describe('List selectors', () => {
         },
         {
           type: RequestType.create,
-          fakeId: 'some-fake-id',
+          fakeId: numericHash('some-fake-id'),
           method: 'post',
           route: 'general',
           query: {},
@@ -113,12 +113,12 @@ describe('List selectors', () => {
         },
         {
           type: RequestType.delete,
-          id: 'real-id-x',
+          id: numericHash('real-id-x'),
           method: 'delete',
           route: 'holiday',
           query: {},
           body: {
-            id: 'real-id-x',
+            id: numericHash('real-id-x'),
           },
         },
       ]);

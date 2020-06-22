@@ -1,6 +1,7 @@
 import nock, { Scope } from 'nock';
 import { testSaga, expectSaga, TestApi, TestApiWithEffectsTesters } from 'redux-saga-test-plan';
 import { debounce, call } from 'redux-saga/effects';
+import numericHash from 'string-hash';
 
 import crudSaga, {
   updateLists,
@@ -52,7 +53,7 @@ describe('Crud saga', () => {
   const listRequests: Request[] = [
     {
       type: RequestType.create,
-      fakeId: 'some-fake-id',
+      fakeId: numericHash('some-fake-id'),
       method: 'post',
       route: 'general',
       query: {},
@@ -66,7 +67,7 @@ describe('Crud saga', () => {
     },
     {
       type: RequestType.update,
-      id: 'some-real-id',
+      id: numericHash('some-real-id'),
       method: 'put',
       route: 'food',
       query: {},
@@ -77,7 +78,7 @@ describe('Crud saga', () => {
     },
     {
       type: RequestType.delete,
-      id: 'other-real-id',
+      id: numericHash('other-real-id'),
       method: 'delete',
       route: 'holiday',
       query: {},
@@ -122,7 +123,7 @@ describe('Crud saga', () => {
   const netWorthRequests: Request[] = [
     {
       type: RequestType.create,
-      fakeId: 'fake-category-id',
+      fakeId: numericHash('fake-category-id'),
       method: 'post',
       route: 'data/net-worth/categories',
       body: withoutId(CATEGORY_CASH),
@@ -135,7 +136,7 @@ describe('Crud saga', () => {
     },
     {
       type: RequestType.create,
-      fakeId: 'fake-subcategory-id-a',
+      fakeId: numericHash('fake-subcategory-id-a'),
       method: 'post',
       route: 'data/net-worth/subcategories',
       body: withoutId(SUBCATEGORY_WALLET),
@@ -437,7 +438,7 @@ describe('Crud saga', () => {
       data: {
         data: [
           {
-            I: 'id-1',
+            I: numericHash('id-1'),
             d: '2020-04-20',
             i: 'some item',
             k: 'some category',

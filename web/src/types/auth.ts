@@ -1,5 +1,7 @@
+import { Id } from './shared';
+
 export type LoginResponse = {
-  uid: string;
+  uid: Id;
   apiKey: string;
   name: string;
   expires: string;

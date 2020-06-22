@@ -1,13 +1,12 @@
 import formatDate from 'date-fns/format';
 import { replaceAtIndex } from 'replace-array';
 import shortid from 'shortid';
+import numericHash from 'string-hash';
 
 import { Average } from '~client/constants';
 import { PeriodObject, Period } from '~client/constants/graph';
-import { IdMap, Item } from '~client/types';
-import { Create } from '~client/types/crud';
+import { Id, IdMap, Item, Create, Data as Line } from '~client/types';
 import { TransactionRaw as TransactionRawNew, Transaction } from '~client/types/funds';
-import { Data as Line } from '~client/types/graph';
 
 type TransactionRaw = Omit<TransactionRawNew, 'date'> & {
   date: Date | string;
@@ -20,6 +19,8 @@ export const NULL = (): null => null;
 export const VOID = (): void => {
   // pass
 };
+
+export const generateFakeId = (): number => -Math.abs(numericHash(shortid.generate()) >>> 1);
 
 export function getPeriodMatch(
   shortPeriod: string | Period,
@@ -42,7 +43,7 @@ export function getPeriodMatch(
 export const getTransactionsList = (data: TransactionRaw[]): Transaction[] =>
   data.map(
     ({ date, units, cost }: TransactionRaw): Transaction => ({
-      id: shortid.generate(),
+      id: generateFakeId(),
       date: new Date(date),
       units: Number(units) || 0,
       cost: Number(cost) || 0,
@@ -67,7 +68,7 @@ export const addToTransactionsList = (
   ...transactionsList,
   {
     ...item,
-    id: shortid.generate(),
+    id: generateFakeId(),
   },
 ];
 
@@ -80,7 +81,7 @@ export const modifyTransaction = (
 
 export const modifyTransactionById = (
   transactionsList: Transaction[],
-  id: string,
+  id: Id,
   delta: Partial<Transaction>,
 ): Transaction[] =>
   modifyTransaction(
@@ -173,6 +174,7 @@ export const isNumber = <I extends Item, F extends keyof I>(
   value?: I[F] | number,
 ): value is number => typeof value === 'undefined' || typeof value === 'number';
 
+export function getValueFromTransmit(dataType: 'id', value: string | number): number;
 export function getValueFromTransmit(dataType: 'date', value: string): Date;
 export function getValueFromTransmit(dataType: 'cost', value: string): number;
 export function getValueFromTransmit(
@@ -185,6 +187,9 @@ export function getValueFromTransmit(dataType: string, value: any): string;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getValueFromTransmit(dataType: string, value: any): any {
+  if (dataType === 'id') {
+    return Number(value);
+  }
   if (dataType === 'date') {
     return new Date(value);
   }
@@ -198,6 +203,7 @@ export function getValueFromTransmit(dataType: string, value: any): any {
   return String(value);
 }
 
+export function getValueForTransmit(dataType: 'id', value: number): number;
 export function getValueForTransmit(dataType: 'date', value: Date): string;
 export function getValueForTransmit(
   dataType: 'transactions',
@@ -214,6 +220,9 @@ export function getValueForTransmit(dataType: string, value: string): string;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getValueForTransmit(dataType: string, value: any): any {
+  if (dataType === 'id') {
+    return value;
+  }
   if (dataType === 'date') {
     return formatDate(value, 'yyyy-MM-dd');
   }
@@ -271,11 +280,11 @@ export const rightPad = <T>(array: T[], length: number, fill?: T): T[] =>
     ),
   );
 
-export const withoutId = <T extends { id?: string }>({ id, ...rest }: T): Omit<T, 'id'> => rest;
-export const withoutIds = <T extends { id?: string }>(items: T[]): Omit<T, 'id'>[] =>
+export const withoutId = <T extends Partial<Item>>({ id, ...rest }: T): Omit<T, 'id'> => rest;
+export const withoutIds = <T extends Partial<Item>>(items: T[]): Omit<T, 'id'>[] =>
   items.map(withoutId);
 
-export const toIdMap = <V extends { id: string }>(items: V[]): IdMap<V> =>
+export const toIdMap = <V extends Item>(items: V[]): IdMap<V> =>
   items.reduce(
     (last, item) => ({
       ...last,

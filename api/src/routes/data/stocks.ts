@@ -11,7 +11,7 @@ type StockRow = {
 
 async function getStocks(
   db: DatabaseTransactionConnectionType,
-  uid: string,
+  uid: number,
 ): Promise<readonly StockRow[]> {
   const result = await db.query<StockRow>(sql`
   SELECT code, name, SUM(weight * subweight)::float AS sum_weight

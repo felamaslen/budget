@@ -2,7 +2,7 @@ import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
 import { SearchParams } from '~api/types';
 
 export const getShortTermQuery = (
-  uid: string,
+  uid: number,
   { table, column, searchTerm, numResults }: SearchParams,
 ): TaggedTemplateLiteralInvocationType<{ value: string; count: number }> =>
   sql`
@@ -27,7 +27,7 @@ export const getShortTermQuery = (
   `;
 
 export function getLongTermQuery(
-  uid: string,
+  uid: number,
   { table, column, searchTerm, numResults }: SearchParams,
 ): TaggedTemplateLiteralInvocationType<{ value: string; rank: number; length: number }> {
   const tsQuery = searchTerm
@@ -63,7 +63,7 @@ export function getLongTermQuery(
 }
 
 export const getSearchResults = (
-  uid: string,
+  uid: number,
   table: string,
   nextField: string,
   columnResults: TaggedTemplateLiteralInvocationType<{ value: string }>,

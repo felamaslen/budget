@@ -1,10 +1,11 @@
+import numericHash from 'string-hash';
 import { getItems } from './selectors';
-import { RequestType } from '~client/types';
+import { Id, RequestType } from '~client/types';
 
 describe('Accessible list selectors', () => {
   describe('getItems', () => {
     type MyItem = {
-      id: string;
+      id: Id;
       foo: number;
     };
 
@@ -21,7 +22,7 @@ describe('Accessible list selectors', () => {
       [myPage]: {
         items: [
           {
-            id: 'some-id',
+            id: numericHash('some-id'),
             foo: 3,
           },
         ],
@@ -31,9 +32,9 @@ describe('Accessible list selectors', () => {
 
     it('should retrieve items from a crud state', () => {
       expect.assertions(1);
-      expect(getItems(myPage)(myState)).toStrictEqual([
+      expect(getItems(myPage)(myState)).toStrictEqual<MyItem[]>([
         {
-          id: 'some-id',
+          id: numericHash('some-id'),
           foo: 3,
         },
       ]);

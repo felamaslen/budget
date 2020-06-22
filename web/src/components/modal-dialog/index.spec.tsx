@@ -1,14 +1,16 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import sinon from 'sinon';
+import numericHash from 'string-hash';
 
 import { ModalDialog, Props, animationTime, makeField } from '.';
 import { FormFieldText, FormFieldCost, FormFieldDate } from '~client/components/form-field';
 import { CREATE_ID } from '~client/constants/data';
+import { Id } from '~client/types';
 
 describe('<ModalDialog />', () => {
   type MyItem = {
-    id: string;
+    id: Id;
     date: Date;
     item: string;
     cost: number;
@@ -17,7 +19,7 @@ describe('<ModalDialog />', () => {
   const props: Props<MyItem> = {
     active: true,
     loading: false,
-    id: 'some-id',
+    id: numericHash('some-id'),
     item: {
       date: undefined,
       item: 'some item',
@@ -72,7 +74,7 @@ describe('<ModalDialog />', () => {
   it('should render a title', () => {
     expect.assertions(1);
     const { getByText } = render(<ModalDialog {...props} />);
-    expect(getByText('Editing id#some-id')).toBeInTheDocument();
+    expect(getByText(`Editing id#${numericHash('some-id')}`)).toBeInTheDocument();
   });
 
   describe('when adding', () => {
@@ -144,8 +146,8 @@ describe('<ModalDialog />', () => {
         fireEvent.click(submitButton);
       });
       expect(props.onSubmit).toHaveBeenCalledTimes(1);
-      expect(props.onSubmit).toHaveBeenCalledWith({
-        id: 'some-id',
+      expect(props.onSubmit).toHaveBeenCalledWith<[MyItem]>({
+        id: numericHash('some-id'),
         date: new Date('2020-04-10'),
         item: 'some item',
         cost: 342,
@@ -193,8 +195,8 @@ describe('<ModalDialog />', () => {
         fireEvent.click(submitButton);
       });
       expect(props.onSubmit).toHaveBeenCalledTimes(1);
-      expect(props.onSubmit).toHaveBeenCalledWith({
-        id: 'some-id',
+      expect(props.onSubmit).toHaveBeenCalledWith<[MyItem]>({
+        id: numericHash('some-id'),
         date: new Date('2020-04-20'),
         item: 'other item',
         cost: 108,

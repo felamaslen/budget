@@ -27,7 +27,7 @@ const enum ActionType {
 
 type PersistentStatePayload = {
   type: DialogType;
-  id?: string;
+  id?: number;
   canRemove: boolean;
 };
 
@@ -115,7 +115,7 @@ export type Props<I extends Item> = {
   active: boolean;
   loading?: boolean;
   type?: DialogType;
-  id?: string;
+  id?: number;
   item?: Delta<I>;
   fields?: ModalFields<I>;
   onCancel: () => void;

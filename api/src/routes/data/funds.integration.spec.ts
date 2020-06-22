@@ -35,7 +35,7 @@ describe('Funds route', () => {
       expect(res.status).toBe(201);
       expect(res.body).toStrictEqual(
         expect.objectContaining({
-          id: expect.any(String),
+          id: expect.any(Number),
           total: expect.any(Number),
         }),
       );
@@ -76,7 +76,7 @@ describe('Funds route', () => {
           total: expect.any(Number),
           data: expect.arrayContaining([
             expect.objectContaining({
-              I: expect.any(String), // fund ID
+              I: expect.any(Number), // fund ID
               i: 'My fund',
               tr: [{ date: '2020-04-20', units: 69, cost: 69420 }],
             }),
@@ -107,7 +107,7 @@ describe('Funds route', () => {
         const hash = md5(`${fund.item}${config.data.funds.salt}`);
         const {
           rows: [{ fid }],
-        } = await db.raw<{ rows: { fid: string }[] }>(
+        } = await db.raw<{ rows: { fid: number }[] }>(
           `
         INSERT INTO fund_hash (broker, hash)
         VALUES ('hl', ?)
@@ -119,7 +119,7 @@ describe('Funds route', () => {
 
         const cids = await db('fund_cache_time').insert(cacheTimeRows).returning('cid');
 
-        type CacheRow = { cid: string; fid: string; price: number };
+        type CacheRow = { cid: number; fid: number; price: number };
 
         const cacheRows = cids.reduce<CacheRow[]>(
           (last, cid) => [
@@ -246,7 +246,7 @@ describe('Funds route', () => {
       data: Create<Fund> = modifiedFund,
     ): Promise<{
       res: Response;
-      id: string;
+      id: number;
     }> => {
       const resPost = await global.withAuth(global.agent.post('/api/v4/data/funds')).send(fund);
       const res = await global.withAuth(

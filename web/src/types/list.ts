@@ -53,8 +53,8 @@ interface RawShopItem extends RawListCalcItem {
   [DataKeyAbbr.shop]: string;
 }
 
-type ReadResponseList<Item extends RawListItem> = {
-  data: Item[];
+type ReadResponseList<I extends RawListItem> = {
+  data: I[];
   total?: number;
   weekly?: number;
   olderExists?: boolean | null;

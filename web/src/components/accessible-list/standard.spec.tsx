@@ -5,6 +5,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
 import sinon from 'sinon';
+import numericHash from 'string-hash';
 
 import { AccessibleListStandard } from './standard';
 import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions';
@@ -36,7 +37,7 @@ describe('<AccessibleListStandard />', () => {
       ...testState[page],
       items: [
         {
-          id: 'some-id',
+          id: numericHash('some-id'),
           date: new Date('2020-04-20'),
           item: 'item one',
           cost: 931,
@@ -730,7 +731,7 @@ describe('<AccessibleListStandard />', () => {
         expect(modalDialog).toBeInTheDocument();
 
         const { queryByText: queryModalText } = within(modalDialog);
-        expect(queryModalText('Editing id#some-id')).toBeInTheDocument();
+        expect(queryModalText(`Editing id#${numericHash('some-id')}`)).toBeInTheDocument();
         expect(queryModalText('−')).toBeInTheDocument();
       });
 
@@ -777,7 +778,7 @@ describe('<AccessibleListStandard />', () => {
         expect(store.getActions()).toStrictEqual([
           expect.objectContaining(
             listItemUpdated<ListCalcItem, Page.bills>(Page.bills)(
-              'some-id',
+              numericHash('some-id'),
               expect.objectContaining({
                 date: new Date('2020-04-23'),
                 item: 'updated item',
@@ -812,8 +813,8 @@ describe('<AccessibleListStandard />', () => {
 
         expect(store.getActions()).toStrictEqual([
           expect.objectContaining(
-            listItemDeleted<ListCalcItem, Page.bills>(Page.bills)('some-id', {
-              id: 'some-id',
+            listItemDeleted<ListCalcItem, Page.bills>(Page.bills)(numericHash('some-id'), {
+              id: numericHash('some-id'),
               date: new Date('2020-04-20'),
               item: 'item one',
               cost: 931,

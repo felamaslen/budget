@@ -31,9 +31,11 @@ export type ListCategory =
 
 export type ListCalcCategory = Exclude<ListCategory, Page.funds>;
 
-export type Create<V> = Omit<V, 'id'>;
-export type Update<V> = Create<V> & { id: string };
+export interface Item {
+  id: number;
+}
 
-export type IDRow = { id: string };
+export type Create<V> = Omit<V, 'id'>;
+export type Update<V> = Create<V> & Item;
 
 export type RawDate<V> = V extends { date: Date } ? Omit<V, 'date'> & { date: string } : V;

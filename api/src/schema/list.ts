@@ -1,8 +1,10 @@
 import joi, { Schema, ObjectSchema } from '@hapi/joi';
+import { idParamSchemaRequired } from './crud';
 
 export const insert = (schema: ObjectSchema): Schema => schema.options({ presence: 'required' });
 
-export const update = (schema: ObjectSchema): Schema => schema.append({ id: joi.string() });
+export const update = (schema: ObjectSchema): Schema =>
+  schema.append({ id: joi.number().integer().min(1).required() });
 
 export const listItem = joi.object({
   item: joi.string(),
@@ -34,6 +36,4 @@ export const social = shopItem.append({
   society: joi.string(),
 });
 
-export const deleteRequest = joi.object({
-  id: joi.string().uuid().required(),
-});
+export const deleteRequest = idParamSchemaRequired;

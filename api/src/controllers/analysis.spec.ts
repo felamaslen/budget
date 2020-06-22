@@ -15,6 +15,8 @@ import { Page } from '~api/types';
 jest.mock('~api/queries');
 
 describe('Analysis controller', () => {
+  const testUserId = 1234;
+
   describe('periodCondition', () => {
     it('should get weekly periods', () => {
       expect.assertions(6);
@@ -226,7 +228,7 @@ describe('Analysis controller', () => {
       expect(
         await getDeepAnalysisData(
           {} as DatabaseTransactionConnectionType,
-          { uid: 'some-user-id' } as User,
+          { uid: testUserId } as User,
           { period: 'month', groupBy: 'category', pageIndex: 0, category: Page.food },
         ),
       ).toStrictEqual([
