@@ -8,7 +8,6 @@ import { selectFunds } from './queries';
 import { getFundUrl, downloadMultipleUrls } from './scrape';
 import { CLIOptions, Broker, Fund } from './types';
 import config from '~api/config';
-import { fundHash } from '~api/controllers';
 import logger from '~api/modules/logger';
 
 export function getBroker(name: string): Broker {
@@ -26,7 +25,6 @@ export const getFunds = async (db: DatabaseTransactionConnectionType): Promise<F
     .map(({ uid, name, units, cost }) => ({
       uid,
       name,
-      hash: fundHash(name, config.data.funds.salt),
       broker: getBroker(name),
       units,
       cost,

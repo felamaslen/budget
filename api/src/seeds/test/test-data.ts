@@ -1,7 +1,5 @@
 import Knex from 'knex';
-import md5 from 'md5';
 
-import { fundSalt } from '~api/fund-salt.json';
 import { generateUserPin } from '~api/test-utils/generate-user-pin';
 
 async function generateFunds(uid: number, db: Knex): Promise<void> {
@@ -14,11 +12,11 @@ async function generateFunds(uid: number, db: Knex): Promise<void> {
     ])
     .returning('cid');
 
-  const fids = await db('fund_hash')
+  const fids = await db('fund_scrape')
     .insert([
-      { broker: 'hl', hash: md5(`fund1${fundSalt}`) },
-      { broker: 'hl', hash: md5(`fund2${fundSalt}`) },
-      { broker: 'hl', hash: md5(`fund3${fundSalt}`) },
+      { broker: 'hl', item: 'fund1' },
+      { broker: 'hl', item: 'fund2' },
+      { broker: 'hl', item: 'fund3' },
     ])
     .returning('fid');
 
@@ -167,7 +165,7 @@ async function generateNetWorth(uid: number, db: Knex): Promise<void> {
 
 export async function seed(db: Knex): Promise<void> {
   await db('users').del();
-  await db('fund_hash').del();
+  await db('fund_scrape').del();
   await db('fund_cache_time').del();
 
   const { pinHash } = await generateUserPin(1234);

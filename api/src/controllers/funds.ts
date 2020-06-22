@@ -1,5 +1,4 @@
 import { addYears, addMonths, getUnixTime } from 'date-fns';
-import md5 from 'md5';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -42,8 +41,6 @@ export function getMaxAge(now: Date, period: FundsParams['period'], length: numb
 
   throw new Error('Unrecognised period');
 }
-
-export const fundHash = (fundName: string, salt: string): string => md5(`${fundName}${salt}`);
 
 type ResponseWithHistory = Omit<FundsResponseHistory, 'total'>;
 
@@ -103,8 +100,7 @@ async function getFundPriceHistory(
   rows: AbbreviatedItem<Fund, typeof columnMapFunds>[],
 ): Promise<ResponseWithHistory> {
   const maxAge = getMaxAge(now, period, length);
-  const salt = config.data.funds.salt;
-  const numResults = await getFundHistoryNumResults(db, uid, salt, maxAge);
+  const numResults = await getFundHistoryNumResults(db, uid, maxAge);
 
   if (numResults < 3) {
     return {
@@ -124,7 +120,6 @@ async function getFundPriceHistory(
   const fundHistory = await getFundHistory(
     db,
     uid,
-    salt,
     numResults,
     config.data.funds.historyResolution,
     maxAge,

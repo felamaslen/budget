@@ -1,5 +1,4 @@
 import { getUnixTime, addHours } from 'date-fns';
-import md5 from 'md5';
 import MockDate from 'mockdate';
 import { Response } from 'supertest';
 
@@ -104,17 +103,16 @@ describe('Funds route', () => {
         .reverse();
 
       const setupWithPrices = async (): Promise<Response> => {
-        const hash = md5(`${fund.item}${config.data.funds.salt}`);
         const {
           rows: [{ fid }],
         } = await db.raw<{ rows: { fid: number }[] }>(
           `
-        INSERT INTO fund_hash (broker, hash)
+        INSERT INTO fund_scrape (broker, item)
         VALUES ('hl', ?)
-        ON CONFLICT (broker, hash) DO UPDATE set broker = excluded.broker
+        ON CONFLICT (broker, item) DO UPDATE set broker = excluded.broker
         RETURNING fid
         `,
-          [hash],
+          [fund.item],
         );
 
         const cids = await db('fund_cache_time').insert(cacheTimeRows).returning('cid');
@@ -139,7 +137,7 @@ describe('Funds route', () => {
         const res = await setup();
         MockDate.reset();
 
-        await db('fund_hash').where({ fid }).del();
+        await db('fund_scrape').where({ fid }).del();
         await db('fund_cache_time').whereIn('cid', cids).del();
 
         return res;

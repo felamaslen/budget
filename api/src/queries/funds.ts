@@ -83,7 +83,6 @@ export async function getFundsItems(
 export async function getFundHistoryNumResults(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  salt: string,
   minTime: Date,
 ): Promise<number> {
   const result = await db.query<{ count: number }>(sql`
@@ -91,8 +90,8 @@ export async function getFundHistoryNumResults(
   FROM (
     SELECT fct.cid
     FROM funds f
-    INNER JOIN fund_hash fh ON fh.hash = md5(f.item || ${salt})
-    INNER JOIN fund_cache fc ON fc.fid = fh.fid
+    INNER JOIN fund_scrape fs ON fs.item = f.item
+    INNER JOIN fund_cache fc ON fc.fid = fs.fid
     INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
     WHERE ${sql.join([sql`f.uid = ${uid}`, sql`fct.time > ${minTime.toISOString()}`], sql` AND `)}
     GROUP BY fct.cid
@@ -106,7 +105,6 @@ export type FundHistoryRow = { time: number; id: number[]; price: number[] };
 export async function getFundHistory(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  salt: string,
   numResults: number,
   numToDisplay: number,
   minTime: Date,
@@ -142,8 +140,8 @@ export async function getFundHistory(
         WHERE f.uid = ${uid}
         GROUP BY f.id
       ) funds
-      INNER JOIN fund_hash fh ON fh.hash = md5(funds.item || ${salt})
-      INNER JOIN fund_cache fc ON fc.fid = fh.fid
+      INNER JOIN fund_scrape fs ON fs.item = funds.item
+      INNER JOIN fund_cache fc ON fc.fid = fs.fid
       INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
       WHERE fct.time > ${minTime.toISOString()}
       GROUP BY fct.cid

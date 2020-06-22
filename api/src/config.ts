@@ -1,4 +1,3 @@
-import { fundSalt } from './fund-salt.json';
 import {
   ListCalcCategory,
   Page,
@@ -55,7 +54,6 @@ export type Config = {
     };
     listPageLimit: number;
     funds: {
-      salt: string;
       historyResolution: number;
       scraper: {
         regex: RegExp;
@@ -131,7 +129,6 @@ const config: Config = {
     },
     listPageLimit: 100,
     funds: {
-      salt: fundSalt,
       historyResolution: Math.round(Number(process.env.FUND_RESOLUTION) || 100),
       scraper: {
         regex: /^(.*)\s\((accum|inc|share|accum-inc)\.?\)$/i,

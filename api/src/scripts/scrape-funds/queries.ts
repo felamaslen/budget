@@ -86,10 +86,10 @@ export async function upsertFundHashes(
   tuples: [string, string][], // hash, broker
 ): Promise<number[]> {
   const result = await db.query<{ fid: number }>(sql`
-  INSERT INTO fund_hash (hash, broker)
+  INSERT INTO fund_scrape (item, broker)
   SELECT * FROM ${sql.unnest(tuples, ['varchar', 'varchar'])}
-  ON CONFLICT (hash, broker) DO UPDATE
-    SET hash = excluded.hash
+  ON CONFLICT (item, broker) DO UPDATE
+    SET item = excluded.item
   RETURNING fid
   `);
   return result.rows.map(({ fid }) => fid);

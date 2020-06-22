@@ -1,6 +1,5 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 import { getEndOfMonthUnion } from './date-union';
-import config from '~api/config';
 
 export async function getMonthlyTotalFundValues(
   db: DatabaseTransactionConnectionType,
@@ -42,17 +41,14 @@ export async function getMonthlyTotalFundValues(
         ORDER BY b.time DESC
       ) c
       INNER JOIN fund_cache fc on fc.cid = c.cid
-      INNER JOIN fund_hash fh on fh.fid = fc.fid
+      INNER JOIN fund_scrape fs on fs.fid = fc.fid
 
-      INNER JOIN funds f on ${sql.join(
-        [sql`f.uid = ${uid}`, sql`fh.hash = md5(f.item || ${config.data.funds.salt})`],
-        sql` AND `,
-      )}
+      INNER JOIN funds f on ${sql.join([sql`f.uid = ${uid}`, sql`fs.item = f.item`], sql` AND `)}
       INNER JOIN funds_transactions ft on ${sql.join(
         [sql`ft.fund_id = f.id`, sql`ft.date <= c.time`],
         sql` AND `,
       )}
-      GROUP BY c.time, f.id, fh.fid
+      GROUP BY c.time, f.id, fs.fid
     ) d
     GROUP BY d.time
   ) scraped_values ON ${sql.join(
@@ -93,12 +89,9 @@ export async function getTotalFundValue(
     WHERE b.scrape_num = 1
   ) c
   INNER JOIN fund_cache fc on fc.cid = c.cid
-  INNER JOIN fund_hash fh on fh.fid = fc.fid
+  INNER JOIN fund_scrape fs on fs.fid = fc.fid
 
-  INNER JOIN funds f on ${sql.join(
-    [sql`f.uid = ${uid}`, sql`fh.hash = md5(f.item || ${config.data.funds.salt})`],
-    sql` AND `,
-  )}
+  INNER JOIN funds f on ${sql.join([sql`f.uid = ${uid}`, sql`fs.item = f.item`], sql` AND `)}
   INNER JOIN funds_transactions ft on ${sql.join(
     [sql`ft.fund_id = f.id`, sql`ft.date <= c.time`],
     sql` AND `,

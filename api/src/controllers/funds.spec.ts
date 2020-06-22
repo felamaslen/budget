@@ -1,7 +1,6 @@
 import { getUnixTime } from 'date-fns';
-import md5 from 'md5';
 
-import { getMaxAge, processFundHistory, fundHash } from './funds';
+import { getMaxAge, processFundHistory } from './funds';
 
 describe('Funds controller', () => {
   describe('getMaxAge', () => {
@@ -205,13 +204,6 @@ describe('Funds controller', () => {
           }),
         );
       });
-    });
-  });
-
-  describe('fundHash', () => {
-    it('should return a valid hashed value', () => {
-      expect.assertions(1);
-      expect(fundHash('foobar', 'somesalt')).toBe(md5('foobarsomesalt'));
     });
   });
 });

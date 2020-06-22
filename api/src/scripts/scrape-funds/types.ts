@@ -10,7 +10,6 @@ export enum Broker {
 export type Fund = {
   uid: number;
   name: string;
-  hash: string;
   broker: Broker;
   units: number;
   cost: number;

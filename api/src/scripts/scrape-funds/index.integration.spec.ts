@@ -34,7 +34,7 @@ describe('Fund scraper - integration tests', () => {
 
   const clearDb = async (): Promise<void> => {
     await db('funds').select().del();
-    await db('fund_hash').select().del();
+    await db('fund_scrape').select().del();
     await db('fund_cache_time').select().del();
 
     await db('users').select().del();
@@ -122,8 +122,8 @@ describe('Fund scraper - integration tests', () => {
       const result = await db
         .select<TestFundPrice[]>('fct.cid', 'fct.time', 'fc.price')
         .from('funds as f')
-        .innerJoin('fund_hash as fh', 'fh.hash', db.raw('md5(f.item || ?)', config.data.funds.salt))
-        .innerJoin('fund_cache as fc', 'fc.fid', 'fh.fid')
+        .innerJoin('fund_scrape as fs', 'fs.item', 'f.item')
+        .innerJoin('fund_cache as fc', 'fc.fid', 'fs.fid')
         .innerJoin('fund_cache_time as fct', 'fct.cid', 'fc.cid')
         .where('f.id', fundId);
 

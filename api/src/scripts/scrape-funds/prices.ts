@@ -49,7 +49,7 @@ async function insertNewPriceCache(
   const cid = await insertPriceCache(db, now);
   const fids = await upsertFundHashes(
     db,
-    fundsWithPrices.map(({ hash, broker }) => [hash, broker]),
+    fundsWithPrices.map(({ name, broker }) => [name, broker]),
   );
   await insertPrices(
     db,
