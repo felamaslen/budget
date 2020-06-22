@@ -95,6 +95,30 @@ describe('Net worth route', () => {
       });
     });
 
+    describe('GET /net-worth/categories', () => {
+      const setup = async (): Promise<Response> => {
+        await global
+          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+          .send(category);
+        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth/categories`));
+
+        return res;
+      };
+
+      it('should respond with all of the categories belonging to the user making the request', async () => {
+        expect.assertions(2);
+        const res = await setup();
+
+        expect(res.status).toBe(200);
+        expect(res.body).toStrictEqual([
+          {
+            id: expect.any(Number),
+            ...category,
+          },
+        ]);
+      });
+    });
+
     describe('PUT /net-worth/categories/:categoryId', () => {
       const modifiedCategory = {
         ...category,

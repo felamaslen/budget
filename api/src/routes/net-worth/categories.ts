@@ -16,4 +16,5 @@ export const routeCategories: () => Router = makeCrudRoute<CategoryRow, Category
   schema: schemaCategory,
   jsonToDb: mapExternalToInternal(dbMap as DJMap<Create<CategoryRow>>),
   dbToJson: mapInternalToExternal(dbMap as DJMap<CategoryRow>),
+  withUid: true,
 });

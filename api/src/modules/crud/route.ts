@@ -24,8 +24,8 @@ export function makeCrudRoute<D extends Item = Item, J extends Item = D>(
 
   const routePost = validatedAuthDbRoute<Create<J>>(
     { data: options.schema },
-    async (db, _, res, data) => {
-      const response = await createItem(db, data);
+    async (db, req, res, data) => {
+      const response = await createItem(db, req.user.uid, data);
       res.status(201);
       res.json(response);
     },
@@ -35,16 +35,16 @@ export function makeCrudRoute<D extends Item = Item, J extends Item = D>(
     {
       params: idParamSchemaOptional,
     },
-    async (db, _, res, __, params) => {
-      const data = await readItem(db, params.id);
+    async (db, req, res, __, params) => {
+      const data = await readItem(db, req.user.uid, params.id);
       res.json(data);
     },
   );
 
   const routePut = validatedAuthDbRoute<Create<J>, Item>(
     { data: options.schema, params: idParamSchemaRequired },
-    async (db, _, res, data, params) => {
-      const response = await updateItem(db, params.id, data);
+    async (db, req, res, data, params) => {
+      const response = await updateItem(db, req.user.uid, params.id, data);
       res.json(response);
     },
   );
@@ -53,8 +53,8 @@ export function makeCrudRoute<D extends Item = Item, J extends Item = D>(
     {
       params: idParamSchemaRequired,
     },
-    async (db, _, res, __, params) => {
-      await deleteItem(db, params.id);
+    async (db, req, res, __, params) => {
+      await deleteItem(db, req.user.uid, params.id);
       res.status(204);
       res.end();
     },

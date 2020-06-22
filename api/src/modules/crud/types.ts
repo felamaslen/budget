@@ -27,11 +27,13 @@ export type GetId = (req: AuthenticatedRequest) => string;
 export type ParentDependency<J extends Item> = {
   item: string;
   table: string;
+  withUid?: boolean;
   key: keyof Create<J>;
 };
 
 export type CrudOptions<D extends Item, J extends Item> = {
   table: string;
+  withUid?: boolean;
   item: string;
   schema: Schema;
   jsonToDb: JsonToDb<D, J>;

@@ -126,6 +126,7 @@ async function generateNetWorth(uid: number, db: Knex): Promise<void> {
   const [categoryId] = await db('net_worth_categories')
     .insert([
       {
+        uid,
         type: 'asset',
         category: 'Cash',
         color: '#0f0',
