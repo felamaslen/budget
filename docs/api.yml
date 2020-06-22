@@ -270,7 +270,337 @@ paths:
             application/json:
               schema:
                 $ref: "#/definitions/OverviewData"
+
+  /data/net-worth/categories:
+    post:
+      summary: Create a net worth category
+      tags:
+        - Net worth
+      operationId: createNetWorthCategory
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/NetWorthCategory'
+
+      responses:
+        201:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthCategoryResponse'
+
+    get:
+      summary: List all net worth categories
+      tags:
+        - Net worth
+      operationId: readAllNetWorthCategories
+      produces:
+        - application/json
+
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/NetWorthCategoryResponse'
+
+  /data/net-worth/categories/{categoryId}:
+    get:
+      summary: Read a single net worth category
+      tags:
+        - Net worth
+      operationId: readSingleNetWorthCategory
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: categoryId
+          schema:
+            type: integer
+          required: true
+          description: ID of category to retrieve
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthCategoryResponse'
+    put:
+      summary: Update a net worth category
+      tags:
+        - Net worth
+      operationId: updateNetWorthCategory
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: categoryId
+          schema:
+            type: integer
+          required: true
+          description: ID of category to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/NetWorthCategory'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthCategoryResponse'
+    delete:
+      summary: Delete a net worth category
+      tags:
+        - Net worth
+      operationId: deleteNetWorthCategory
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: categoryId
+          schema:
+            type: integer
+          required: true
+          description: ID of category to update
+      responses:
+        204:
+          description: successful operation
   
+  /data/net-worth/subcategories:
+    post:
+      summary: Create a net worth subcategory
+      tags:
+        - Net worth
+      operationId: createNetWorthSubcategory
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/NetWorthSubcategory'
+
+      responses:
+        201:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthSubcategoryResponse'
+
+    get:
+      summary: List all net worth subcategories
+      tags:
+        - Net worth
+      operationId: readAllNetWorthSubcategories
+      produces:
+        - application/json
+
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/NetWorthSubcategoryResponse'
+
+  /data/net-worth/subcategories/{subcategoryId}:
+    get:
+      summary: Read a single net worth subcategory
+      tags:
+        - Net worth
+      operationId: readSingleNetWorthSubcategory
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: subcategoryId
+          schema:
+            type: integer
+          required: true
+          description: ID of subcategory to retrieve
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthSubcategoryResponse'
+    put:
+      summary: Update a net worth subcategory
+      tags:
+        - Net worth
+      operationId: updateNetWorthSubcategory
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: subcategoryId
+          schema:
+            type: integer
+          required: true
+          description: ID of subcategory to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/NetWorthSubcategory'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthSubcategoryResponse'
+    delete:
+      summary: Delete a net worth subcategory
+      tags:
+        - Net worth
+      operationId: deleteNetWorthSubcategory
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: subcategoryId
+          schema:
+            type: integer
+          required: true
+          description: ID of subcategory to update
+      responses:
+        204:
+          description: successful operation
+
+  /data/net-worth:
+    post:
+      summary: Create a net worth entry
+      tags:
+        - Net worth
+      operationId: createNetWorthEntry
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/NetWorthEntry'
+
+      responses:
+        201:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthEntryResponse'
+
+    get:
+      summary: List all net worth entries
+      tags:
+        - Net worth
+      operationId: readAllNetWorthEntries
+      produces:
+        - application/json
+
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/NetWorthEntryResponse'
+
+  /data/net-worth/{entryId}:
+    get:
+      summary: Read a single net worth entry
+      tags:
+        - Net worth
+      operationId: readSingleNetWorthEntry
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: entryId
+          schema:
+            type: integer
+          required: true
+          description: ID of entry to retrieve
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthEntryResponse'
+    put:
+      summary: Update a net worth entry
+      tags:
+        - Net worth
+      operationId: updateNetWorthEntry
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: entryId
+          schema:
+            type: integer
+          required: true
+          description: ID of entry to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/NetWorthEntry'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/NetWorthEntryResponse'
+    delete:
+      summary: Delete a net worth entry
+      tags:
+        - Net worth
+      operationId: deleteNetWorthEntry
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: entryId
+          schema:
+            type: integer
+          required: true
+          description: ID of entry to update
+      responses:
+        204:
+          description: successful operation
+
   /data/funds:
     post:
       summary: Insert funds data
@@ -1712,6 +2042,138 @@ definitions:
           currentMonth:
             type: integer
             example: 9
+
+  CrudId:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 123456
+
+  NetWorthCategory:
+    type: object
+    properties:
+      type:
+        type: string
+        enum: ['asset', 'liability']
+      category:
+        type: string
+        example: Cash
+      color:
+        type: string
+        example: "#ccffcc"
+      isOption:
+        type: boolean
+        default: false
+
+  NetWorthCategoryResponse:
+    allOf:
+      - $ref: '#/definitions/NetWorthCategory'
+      - $ref: '#/definitions/CrudId'
+
+  NetWorthSubcategory:
+    type: object
+    properties:
+      categoryId:
+        type: integer
+        example: 123456
+      subcategory:
+        type: string
+        example: "My bank account"
+      hasCreditLimit:
+        type: boolean
+        default: false
+      opacity:
+        type: number
+        example: 0.8
+
+  NetWorthSubcategoryResponse:
+    allOf:
+      - $ref: '#/definitions/NetWorthSubcategory'
+      - $ref: '#/definitions/CrudId'
+
+  NetWorthValueFX:
+    type: array
+    items:
+      type: object
+      properties:
+        currency:
+          type: string
+          example: "USD"
+        value:
+          type: number
+          description: units of currency
+          example: 1230
+
+  NetWorthValueOption:
+    type: array
+    items:
+      type: object
+      properties:
+        units:
+          type: number
+          description: number of units purchasable
+        strikePrice:
+          type: number
+          description: price at which shares would be bought
+        marketPrice:
+          type: number
+          description: current price of shares on the open market
+
+  NetWorthValueObject:
+    type: object
+    properties:
+      id:
+        type: integer
+        descriptioN: value ID
+      subcategory:
+        type: integer
+        description: subcategory ID
+      value:
+        oneOf:
+          - type: number
+            description: value in GBX
+          - $ref: '#/definitions/NetWorthValueFX'
+          - $ref: '#/definitions/NetWorthValueOption'
+
+  NetWorthEntry:
+    type: object
+    properties:
+      date:
+        type: date
+        example: "2020-04-20"
+      values:
+        type: array
+        items:
+          $ref: "#/definitions/NetWorthValueObject"
+      creditLimit:
+        type: array
+        items:
+          type: object
+          properties:
+            subcategory:
+              type: number
+              description: subcategory ID
+            value:
+              type: number
+              description: credit limit in GBX
+      currencies:
+        type: array
+        items:
+          type: object
+          properties:
+            currency:
+              type: string
+              example: "USD"
+            rate:
+              type: number
+              description: number of GBP bought by one unit of currency
+              example: 0.846
+
+  NetWorthEntryResponse:
+    allOf:
+      - $ref: '#/definitions/NetWorthEntry'
+      - $ref: '#/definitions/CrudId'
 
   DataResponseItem:
     type: object

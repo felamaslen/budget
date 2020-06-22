@@ -1,8 +1,5 @@
 {
   "name": "budget",
-  "sideEffects": [
-    "*.scss"
-  ],
   "version": "4.15.1",
   "description": "Personal finance app",
   "main": "api/build/index.js",
