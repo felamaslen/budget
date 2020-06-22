@@ -60,6 +60,7 @@ export const FundRow = styled(StandardRow)<Partial<FundProps>>`
 
 export const FundRowMobile = styled(StandardRow)<{ isSold: boolean }>`
   display: flex;
+  align-items: center;
 
   ${({ isSold }): false | FlattenSimpleInterpolation =>
     isSold &&

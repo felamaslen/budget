@@ -136,8 +136,10 @@ export const DayGain = styled(BreakdownValue)`
 export const Text = styled.span.attrs(({ color }) => ({
   style: { backgroundColor: color },
 }))<{ color: string }>`
+  align-items: center;
   display: flex;
   height: 100%;
+  line-height: 100%;
   overflow: hidden;
   padding: 0;
 

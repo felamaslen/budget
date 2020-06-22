@@ -133,11 +133,16 @@ describe('<FundGainInfo />', () => {
       }
 
       .c1 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
         height: 100%;
+        line-height: 100%;
         overflow: hidden;
         padding: 0;
       }
