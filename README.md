@@ -19,7 +19,7 @@ For info on building the Android app, see `android/README.md`.
 ### Installation:
 
 - Install external dependencies
-    - PostgreSQL server with uuid-ossp extension created
+    - PostgreSQL server
 
 - Set environment variables
     - These are in `.env.example`, which you should copy to `.env` and edit with the appropriate values (see below).
