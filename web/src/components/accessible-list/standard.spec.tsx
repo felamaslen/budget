@@ -320,6 +320,7 @@ describe('<AccessibleListStandard />', () => {
           -webkit-flex: 1;
           -ms-flex: 1;
           flex: 1;
+          padding-bottom: 3rem;
         }
 
         .c12 {
@@ -460,6 +461,12 @@ describe('<AccessibleListStandard />', () => {
 
           .c6 input[type='text']:focus {
             box-shadow: inset 0 0 1px 1px #09e;
+          }
+        }
+
+        @media only screen and (min-width:500px) {
+          .c5 {
+            padding-bottom: 0;
           }
         }
 
