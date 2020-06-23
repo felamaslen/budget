@@ -45,7 +45,7 @@ export const getItem = moize(
 );
 
 export const sortStandardItems = moize(<I extends ListCalcItem>() =>
-  sortByKey<'id' | 'date', I>({ key: 'date', order: -1 }, 'id'),
+  sortByKey<'item' | 'date', I>({ key: 'date', order: -1 }, 'item'),
 );
 
 export const getWeeklyCost = moize(

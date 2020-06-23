@@ -31,6 +31,7 @@ const columnsRestricted: OverviewHeader[] = [
 const columnsFull: OverviewHeader[] = [
   Page.funds,
   Page.bills,
+  Page.food,
   Page.general,
   Page.holiday,
   Page.social,

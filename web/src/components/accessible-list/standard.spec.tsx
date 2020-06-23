@@ -43,6 +43,7 @@ describe('<AccessibleListStandard />', () => {
           cost: 931,
         },
       ],
+      __optimistic: [undefined],
       total: 1886394,
     },
   };
@@ -52,8 +53,8 @@ describe('<AccessibleListStandard />', () => {
     color: 'red',
   };
 
-  const setup = (): RenderResult & { store: MockStore<State> } => {
-    const store = createStore<State>()(state);
+  const setup = (customState: State = state): RenderResult & { store: MockStore<State> } => {
+    const store = createStore<State>()(customState);
     const renderResult = render(
       <Provider store={store}>
         <AccessibleListStandard<Page.bills> {...props} />
@@ -131,6 +132,47 @@ describe('<AccessibleListStandard />', () => {
     const header = getByTestId('header');
     const { getByText } = within(header);
     expect(getByText('Total: £18.9k')).toBeInTheDocument();
+  });
+
+  it('should sort the items first by date, then by item', () => {
+    expect.assertions(3);
+    const { getAllByRole } = setup({
+      ...testState,
+      [page]: {
+        ...testState[page],
+        items: [
+          {
+            id: numericHash('some-id'),
+            date: new Date('2020-04-20'),
+            item: 'item 1',
+            cost: 1,
+          },
+          {
+            id: numericHash('other-id'),
+            date: new Date('2020-04-21'),
+            item: 'item 2',
+            cost: 1,
+          },
+          {
+            id: numericHash('next-id'),
+            date: new Date('2020-04-20'),
+            item: 'An item',
+            cost: 1,
+          },
+        ],
+        __optimistic: [undefined, undefined, undefined],
+      },
+    });
+
+    const [firstItem, secondItem, thirdItem] = getAllByRole('listitem') as HTMLLIElement[];
+
+    const { getByDisplayValue: getFirstItem } = within(firstItem);
+    const { getByDisplayValue: getSecondItem } = within(secondItem);
+    const { getByDisplayValue: getThirdItem } = within(thirdItem);
+
+    expect(getFirstItem('item 2')).toBeInTheDocument();
+    expect(getSecondItem('An item')).toBeInTheDocument();
+    expect(getThirdItem('item 1')).toBeInTheDocument();
   });
 
   describe('when rendering on mobiles', () => {

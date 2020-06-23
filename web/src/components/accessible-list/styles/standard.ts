@@ -2,7 +2,6 @@ import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import { Row } from './shared';
 import { rem } from '~client/styled/mixins';
-import { colors } from '~client/styled/variables';
 
 export const StandardHeader = styled.div.attrs({
   role: 'heading',
@@ -17,9 +16,6 @@ export const StandardRow = styled(Row)<{
   ${({ isFuture }): false | FlattenSimpleInterpolation =>
     !!isFuture &&
     css`
-      input {
-        color: ${colors.dark.light};
-        font-style: italic;
-      }
+      opacity: 0.5;
     `}
 `;

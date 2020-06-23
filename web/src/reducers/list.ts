@@ -256,24 +256,31 @@ const makeOnRequestMore = <I extends ListCalcItem, P extends PageListCalc, ES ex
 
 const makeOnMoreReceived = <I extends ListCalcItem, P extends PageListCalc, ES extends object>(
   page: P,
-): FullReducer<DailyState<I, ES>, Actions.MoreListDataReceived<PageList>> => {
-  return filterByPage<I, P, DailyState<I, ES>, Actions.MoreListDataReceived<P>>(
-    page,
-    (state, action) => ({
+): FullReducer<DailyState<I, ES>, Actions.MoreListDataReceived<PageList>> =>
+  filterByPage<I, P, DailyState<I, ES>, Actions.MoreListDataReceived<P>>(page, (state, action) => {
+    const newItems = mapReadResponse<I, P>(action.res);
+    const existingItems = state.items.filter(
+      ({ id }) => !newItems.some((newItem) => newItem.id === id),
+    );
+
+    const existingOptimistic = state.__optimistic.filter(
+      (_, index) => !newItems.some((newItem) => newItem.id === state.items[index].id),
+    );
+
+    return {
       ...state,
       weekly: action.res.weekly ?? state.weekly,
       total: action.res.total ?? state.total,
       offset: state.offset + 1,
       olderExists: !!action.res.olderExists,
       loadingMore: false,
-      items: [...state.items, ...mapReadResponse<I, P>(action.res)],
+      items: [...existingItems, ...newItems],
       __optimistic: [
-        ...state.__optimistic,
+        ...existingOptimistic,
         ...Array<undefined>(action.res.data.length).fill(undefined),
       ],
-    }),
-  );
-};
+    };
+  });
 
 const makeOnSyncReceivedDaily = <I extends ListCalcItem, P extends PageListCalc, ES extends object>(
   page: P,

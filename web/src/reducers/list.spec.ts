@@ -9,6 +9,9 @@ import {
   moreListDataRequested,
   moreListDataReceived,
   loggedOut,
+  ListActionType,
+  ActionTypeApi,
+  ActionTypeLogin,
 } from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
 import { testResponse } from '~client/test-data';
@@ -54,8 +57,8 @@ describe('List reducer', () => {
   const testDate = new Date('2020-04-20');
 
   describe.each`
-    description     | action
-    ${'LOGGED_OUT'} | ${loggedOut()}
+    description                  | action
+    ${ActionTypeLogin.LoggedOut} | ${loggedOut()}
   `('$description', ({ action }) => {
     it('should return the initial state', () => {
       expect.assertions(1);
@@ -68,7 +71,7 @@ describe('List reducer', () => {
     });
   });
 
-  describe('DATA_READ', () => {
+  describe(ActionTypeApi.DataRead, () => {
     const response = {
       data: [
         {
@@ -152,7 +155,7 @@ describe('List reducer', () => {
     });
   });
 
-  describe('ListAction.Create', () => {
+  describe(ListActionType.Created, () => {
     const action = listItemCreated<Item, Page.income>(page)({
       date: new Date('2019-07-10'),
       item: 'some item',
@@ -222,7 +225,7 @@ describe('List reducer', () => {
     });
   });
 
-  describe('ListAction.Update', () => {
+  describe(ListActionType.Updated, () => {
     const state: State = {
       ...initialState,
       items: [{ id: numericHash('some-real-id'), date: testDate, item: 'some-item', cost: 23 }],
@@ -381,7 +384,7 @@ describe('List reducer', () => {
     });
   });
 
-  describe('ListAction.Deleted', () => {
+  describe(ListActionType.Deleted, () => {
     const state: State = {
       ...initialState,
       items: [{ id: numericHash('some-real-id'), date: testDate, item: 'some item', cost: 29 }],
@@ -498,7 +501,7 @@ describe('List reducer', () => {
     });
   });
 
-  describe('SYNC_RECEIVED', () => {
+  describe(ActionTypeApi.SyncReceived, () => {
     const syncRequests = [
       {
         type: RequestType.create,
@@ -754,7 +757,7 @@ describe('List reducer', () => {
     });
   });
 
-  describe('ListActionType.MoreListDataRequested', () => {
+  describe(ListActionType.MoreRequested, () => {
     const action = moreListDataRequested(page);
 
     it('should set loadingMore to true', () => {
@@ -777,7 +780,7 @@ describe('List reducer', () => {
     });
   });
 
-  describe('ListActionType.MoreListDataReceived', () => {
+  describe(ListActionType.MoreReceived, () => {
     const res = {
       data: [
         {
@@ -904,6 +907,100 @@ describe('List reducer', () => {
       it('should be ignored', () => {
         expect.assertions(1);
         expect(dailyReducer(initialStateDaily, actionOtherPage)).toBe(initialStateDaily);
+      });
+    });
+
+    describe('if one or more of the items already exists in the state', () => {
+      const statePre = {
+        ...initialStateDaily,
+        items: [
+          {
+            id: numericHash('id-0'),
+            date: new Date('2020-04-20'),
+            item: 'item 0',
+            cost: 1,
+          },
+          {
+            id: numericHash('id-1'),
+            date: new Date('2020-04-21'),
+            item: 'item 1',
+            cost: 2,
+          },
+          {
+            id: numericHash('id-2'),
+            date: new Date('2020-04-22'),
+            item: 'item 2',
+            cost: 3,
+          },
+        ],
+        __optimistic: [RequestType.update, undefined, undefined],
+      };
+
+      const actionWithDuplicates = moreListDataReceived(page, {
+        data: [
+          {
+            I: numericHash('id-1'),
+            d: '2020-04-28',
+            i: 'item 1 from API',
+            c: 24,
+          },
+          {
+            I: numericHash('id-2'),
+            d: '2020-04-22',
+            i: 'item 2 from API',
+            c: 25,
+          },
+          {
+            I: numericHash('id-3'),
+            d: '2020-04-23',
+            i: 'item 3 from API',
+            c: 26,
+          },
+        ],
+      });
+
+      it('should not duplicate items', () => {
+        expect.assertions(1);
+        const result = dailyReducer(statePre, actionWithDuplicates);
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            items: [
+              expect.objectContaining({
+                id: numericHash('id-0'),
+              }),
+              expect.objectContaining({
+                id: numericHash('id-1'),
+              }),
+              expect.objectContaining({
+                id: numericHash('id-2'),
+              }),
+              expect.objectContaining({
+                id: numericHash('id-3'),
+              }),
+            ],
+            __optimistic: [RequestType.update, undefined, undefined, undefined],
+          }),
+        );
+      });
+
+      it('should override the current items with the results from the API', () => {
+        expect.assertions(1);
+        const result = dailyReducer(statePre, actionWithDuplicates);
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            items: expect.arrayContaining([
+              expect.objectContaining({
+                date: new Date('2020-04-28'),
+                item: 'item 1 from API',
+                cost: 24,
+              }),
+              expect.objectContaining({
+                item: 'item 2 from API',
+                cost: 25,
+              }),
+            ]),
+          }),
+        );
       });
     });
   });
