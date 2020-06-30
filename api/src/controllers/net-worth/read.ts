@@ -65,7 +65,7 @@ export async function readAllNetWorthEntries(
   const { numLast, startYear, startMonth } = config.data.overview;
 
   const oldDateEnd = startOfMonth(addMonths(new Date(), -numLast));
-  const startDate = startOfMonth(setMonth(setYear(new Date(), startYear), startMonth));
+  const startDate = startOfMonth(setMonth(setYear(new Date(), startYear), startMonth - 1));
 
   const [items, { old, oldOptions }] = await Promise.all([
     fetchAll(db, uid, oldDateEnd),
