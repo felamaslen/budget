@@ -859,6 +859,14 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
+            d="M0.0,41.8 L77.3,89.6"
+            fill="none"
+            stroke="#999"
+            stroke-width="1"
+          />
+        </g>
+        <g>
+          <path
             d="M0,281.28500936581725 Q36,89 77.3,40.0 C93,21 144,61 163.0,87.8 C203,145 204,232 245.9,279.5 C263,299 302,279 331.5,279.5 C360,279 385,279 414.4,279.5 Q444,279 500.0,279.5"
             fill="none"
             stroke="#00348a"
@@ -915,7 +923,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="92"
             >
-              −£NaN (1y)
+              £719 (1y)
             </text>
             <text
               alignment-baseline="hanging"
@@ -925,7 +933,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="114"
             >
-              −£NaN (3y)
+              £3 (3y)
             </text>
             <text
               alignment-baseline="hanging"
@@ -935,32 +943,8 @@ describe('<GraphBalance />', () => {
               x="50"
               y="136"
             >
-              −£NaN (5y)
+              £0 (5y)
             </text>
-            <g>
-              <path
-                d="M245.85635359116023,281.28500936581725 LNaN,NaN  LNaN,NaN LNaN,NaN LNaN,NaN LNaN,NaN"
-                fill="none"
-                stroke="#333"
-                stroke-width="1"
-              />
-            </g>
-            <g>
-              <path
-                d="M0,281.28500936581725 LNaN,NaN  LNaN,NaN LNaN,NaN LNaN,NaN LNaN,NaN"
-                fill="none"
-                stroke="#333"
-                stroke-width="1"
-              />
-            </g>
-            <g>
-              <path
-                d="M77.34806629834254,41.81575750259327 LNaN,NaN  LNaN,NaN LNaN,NaN LNaN,NaN LNaN,NaN"
-                fill="none"
-                stroke="#333"
-                stroke-width="1"
-              />
-            </g>
           </g>
           <g>
             <rect

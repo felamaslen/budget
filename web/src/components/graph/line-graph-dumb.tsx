@@ -4,7 +4,7 @@ import { HoverEffect, HLPoint } from './hooks/hover';
 import { RenderedLine } from './rendered-line';
 import { Graph, GraphProps } from './shared';
 import { HighlightPoint } from '~client/components/highlight-point';
-import { Dimensions, Calc, DrawProps, Line } from '~client/types/graph';
+import { Dimensions, Calc, DrawProps, Line } from '~client/types';
 
 function useBeforeAfter(
   component: React.FC<DrawProps> | undefined,

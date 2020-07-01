@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { AfterCanvas } from './after-canvas';
 import { Key } from './key';
-import { Targets } from './targets';
+import { Targets, getTargets, TargetValue } from './targets';
 import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashflow';
 import { TodayContext } from '~client/hooks';
 import { leftPad, rightPad } from '~client/modules/data';
@@ -12,23 +12,12 @@ import {
   getStartDate,
   getFutureMonths,
   getProcessedCost,
-  getTargets,
   getNetWorthSummaryOld,
   getNetWorthTable,
   NetWorthSummaryOld,
 } from '~client/selectors';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
-import {
-  Page,
-  Point,
-  Line,
-  Data,
-  DrawProps,
-  Target,
-  CostProcessed,
-  NetWorthTableRow,
-  Aggregate,
-} from '~client/types';
+import { Page, Point, Line, Data, CostProcessed, NetWorthTableRow, Aggregate } from '~client/types';
 
 type BalanceData = {
   balance: number[];
@@ -133,7 +122,7 @@ function processData({
   netWorth,
   showAll,
   futureMonths,
-}: RawData): Line[] {
+}: RawData): { lines: Line[]; targetValues: TargetValue[] } {
   const { balance, options, optionsStartIndex, funds, oldOffset, cashOther, pension } = getData(
     netWorthCombined,
     netWorthOldMain,
@@ -158,7 +147,22 @@ function processData({
 
   const dataFunds: Data = funds.map((value, index) => [dataBalance[index][0], value]);
 
-  return [
+  const targets = getTargets(
+    startDate,
+    netWorthOldMain.concat(netWorthCombined),
+    showAll,
+    netWorthOldMain.length,
+  );
+
+  const lines = [
+    {
+      key: 'targets',
+      data: targets.line,
+      fill: false,
+      smooth: false,
+      color: colors.light.dark,
+      strokeWidth: 1,
+    },
     {
       key: 'options',
       data: dataOptions,
@@ -202,26 +206,14 @@ function processData({
       color: rgba(colors.funds.main, 0.4),
     },
   ];
+
+  return { lines, targetValues: targets.targetValues };
 }
 
-function makeAfterLines({
-  showAll,
-  targets,
-}: {
-  showAll: boolean;
-  targets: Target[];
-}): React.FC<DrawProps> {
-  const AfterLines: React.FC<DrawProps> = ({ width, minY, maxY, pixX, pixY1 }) => (
+function makeAfterLines(targetValues: TargetValue[]): React.FC {
+  const AfterLines: React.FC = () => (
     <g>
-      <Targets
-        minY={minY}
-        maxY={maxY}
-        pixX={pixX}
-        pixY1={pixY1}
-        width={width}
-        showAll={showAll}
-        targets={targets}
-      />
+      <Targets targetValues={targetValues} />
       <Key title="Balance" />
     </g>
   );
@@ -241,10 +233,9 @@ export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
   const netWorth = useSelector(getNetWorthTable);
   const futureMonths = useSelector(getFutureMonths(today));
   const cost = useSelector(getProcessedCost(today));
-  const targets = useSelector(getTargets(today));
 
   const [showAll, setShowAll] = useState(false);
-  const lines = useMemo(
+  const { lines, targetValues } = useMemo(
     () =>
       processData({
         startDate,
@@ -258,14 +249,7 @@ export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
     [startDate, cost, netWorthOld.main, netWorthOld.options, netWorth, showAll, futureMonths],
   );
 
-  const afterLines = useMemo(
-    () =>
-      makeAfterLines({
-        showAll,
-        targets,
-      }),
-    [showAll, targets],
-  );
+  const afterLines = useMemo(() => makeAfterLines(targetValues), [targetValues]);
 
   const after = useCallback(() => <AfterCanvas showAll={showAll} setShowAll={setShowAll} />, [
     showAll,

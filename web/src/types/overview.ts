@@ -53,15 +53,6 @@ export type OverviewColumn = {
 
 export type OverviewTableColumn = [OverviewHeader, OverviewColumn];
 
-export type Target = {
-  date: number;
-  from: number;
-  value: number;
-  months: number;
-  last: number;
-  tag: string;
-};
-
 export type SplitRange = {
   min: number;
   maxNegative?: number;

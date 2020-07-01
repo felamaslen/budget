@@ -1,33 +1,83 @@
 import React from 'react';
-import { Arrow } from '~client/components/arrow';
+import { getValuesWithTime } from '~client/components/graph-cashflow';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { formatCurrency } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
-import { Target, RangeY, PixPrimary, Size } from '~client/types';
+import { Data } from '~client/types';
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
-type Props = {
-  showAll: boolean;
-  targets: Target[];
-} & RangeY &
-  Pick<Size, 'width'> &
-  PixPrimary;
+const targetPeriodYears = [1, 3, 5];
 
-const monthSeconds = 2628000;
+export type TargetValue = {
+  tag: string;
+  value: number;
+};
+
+export function getTargets(
+  startDate: Date,
+  allNetWorth: number[],
+  showAll: boolean,
+  oldOffset: number,
+): {
+  line: Data;
+  targetValues: TargetValue[];
+} {
+  const logValues = allNetWorth.filter((value) => value > 0).map(Math.log);
+  if (!logValues.length) {
+    return {
+      line: [],
+      targetValues: [],
+    };
+  }
+
+  const sumXY = logValues.reduce<number>((last, value, index) => last + value * (index + 1), 0);
+  const sumX = logValues.reduce<number>((last, _, index) => last + index + 1, 0);
+  const sumY = logValues.reduce<number>((last, value) => last + value, 0);
+
+  const Sxy = sumXY - (sumX * sumY) / logValues.length;
+
+  const sumX2 = logValues.reduce<number>((last, _, index) => last + (index + 1) ** 2, 0);
+
+  const Sxx = sumX2 - sumX ** 2 / logValues.length;
+
+  const xBar = sumX / logValues.length;
+  const yBar = sumY / logValues.length;
+
+  const slope = Sxy / Sxx;
+  const intercept = yBar - slope * xBar;
+
+  const points = logValues.map((_, index) => Math.exp(slope * (index + 1) + intercept));
+
+  const targetValues = targetPeriodYears.map<TargetValue>((years) => ({
+    tag: `${years}y`,
+    value: Math.exp(slope * (logValues.length + years * 12) + intercept),
+  }));
+
+  const line = getValuesWithTime(showAll ? points : points.slice(oldOffset), {
+    startDate,
+    oldOffset: showAll ? oldOffset : 0,
+  });
+
+  return { line, targetValues };
+}
+
+type Props = {
+  targetValues: TargetValue[];
+};
 
 const yOffset = 92;
 
-export const Targets: React.FC<Props> = ({ showAll, targets, minY, maxY, pixX, pixY1, width }) => (
+export const Targets: React.FC<Props> = ({ targetValues }) => (
   <g>
     <rect
       x={48}
       y={yOffset - 4}
       width={64}
-      height={targets.length * 22 - 4}
+      height={targetValues.length * 22 - 4}
       fill={colors.translucent.light.dark}
     />
-    {targets.map(({ tag, value }, index) => (
+    {targetValues.map(({ tag, value }, index) => (
       <text
         key={tag}
         x={50}
@@ -45,32 +95,5 @@ export const Targets: React.FC<Props> = ({ showAll, targets, minY, maxY, pixX, p
         })} (${tag})`}
       </text>
     ))}
-    {minY !== maxY &&
-      targets.map(
-        ({ tag, date: startX, value, from: startY, months, last }: Target, index: number) => {
-          const angle = Math.atan2(
-            pixY1(startY) - pixY1(value),
-            (pixX(monthSeconds) - pixX(0)) * (months + last),
-          );
-
-          return (
-            <Arrow
-              key={tag}
-              startX={startX}
-              startY={startY}
-              length={Math.min(
-                100 * (1 + index) * 0.8 ** (showAll ? 1 : 0),
-                (width - pixX(startX)) / Math.cos(angle),
-              )}
-              angle={angle}
-              color={colors.dark.light}
-              strokeWidth={1}
-              arrowSize={months / 24}
-              pixX={pixX}
-              pixY={pixY1}
-            />
-          );
-        },
-      )}
   </g>
 );
