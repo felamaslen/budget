@@ -6,20 +6,15 @@ export async function getMonthlyTotalFundValues(
   uid: number,
   monthEnds: Date[],
 ): Promise<number[]> {
-  const results = await db.query<{ value_or_cost: number }>(sql`
-  SELECT
-    COALESCE(
-      scraped_values.total_value,
-      SUM(ft.cost),
-      0
-    ) AS value_or_cost
+  const results = await db.query<{ value: number | null }>(sql`
+  SELECT scraped_values.value
   FROM (
     ${getEndOfMonthUnion(monthEnds)}
   ) dates
   LEFT JOIN (
     SELECT
       d.time
-      ,SUM(d.value)::integer AS total_value
+      ,SUM(d.value)::integer AS value
     FROM (
       SELECT ${sql.join([sql`c.time`, sql`SUM(ft.units * fc.price)::integer AS value`], sql`, `)}
       FROM (
@@ -58,15 +53,13 @@ export async function getMonthlyTotalFundValues(
     ],
     sql` AND `,
   )}
-
-  LEFT JOIN funds_transactions ft ON ft.date <= dates.month_date
-  LEFT JOIN funds f ON ${sql.join([sql`f.uid = ${uid}`, sql`f.id = ft.fund_id`], sql` AND `)}
-
-  GROUP BY dates.month_date, scraped_values.total_value
   ORDER BY dates.month_date
   `);
 
-  return results.rows.map(({ value_or_cost }) => value_or_cost);
+  return results.rows.reduce<number[]>(
+    (last, { value }) => [...last, value ?? last[last.length - 1] ?? 0],
+    [],
+  );
 }
 
 export async function getTotalFundValue(
