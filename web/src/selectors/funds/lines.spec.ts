@@ -7,6 +7,7 @@ import {
   getOverallLine,
   getFundLine,
   getFundLineProcessed,
+  FundsWithReturns,
 } from './lines';
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 
@@ -15,25 +16,25 @@ describe('Funds selectors / lines', () => {
   const id2 = numericHash('my-second-fund-id');
   const id3 = numericHash('short-lived-fund');
 
-  const fundsWithReturns = {
+  const fundsWithReturns: FundsWithReturns = {
     [id1]: {
       startIndex: 0,
       returns: [
-        { price: 100, units: 34, cost: 3100 },
-        { price: 102, units: 34, cost: 3100 },
-        { price: 103, units: 18, cost: 1560 },
+        { price: 100, units: 34, cost: 3100, realised: 0 },
+        { price: 102, units: 34, cost: 3100, realised: 0 },
+        { price: 103, units: 18, cost: 1560, realised: 0 },
       ],
     },
     [id2]: {
       startIndex: 2,
       returns: [
-        { price: 954, units: 105, cost: 975400 },
-        { price: 961, units: 105, cost: 975400 },
+        { price: 954, units: 105, cost: 975400, realised: 0 },
+        { price: 961, units: 105, cost: 975400, realised: 0 },
       ],
     },
     [id3]: {
       startIndex: 1,
-      returns: [{ price: 763, units: 591, cost: 918 }],
+      returns: [{ price: 763, units: 591, cost: 918, realised: 0 }],
     },
   };
 
@@ -120,17 +121,20 @@ describe('Funds selectors / lines', () => {
             {
               price: 100,
               units: 105,
-              cost: 49,
+              cost: 490000,
+              realised: 0,
             },
             {
               price: 0,
               units: 0,
-              cost: -18,
+              cost: -180000,
+              realised: 670000,
             },
             {
               price: 103,
               units: 20,
-              cost: 25,
+              cost: 250000,
+              realised: 670000,
             },
           ],
         },
@@ -140,6 +144,12 @@ describe('Funds selectors / lines', () => {
         expect.assertions(1);
         const result = getFundLineROI(fundsWithReturnsRebought, idRebought);
         expect(result).toStrictEqual([expect.any(Number), 0, expect.any(Number)]);
+      });
+
+      it('should set the correct ROI value once re-bought', () => {
+        expect.assertions(1);
+        const result = getFundLineROI(fundsWithReturnsRebought, idRebought);
+        expect(result[2]).toBeCloseTo(((103 * 20 + 670000 - 250000) / 250000) * 100);
       });
     });
   });

@@ -3,11 +3,12 @@ import isAfter from 'date-fns/isAfter';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
+import { getRealisedValue, getBuyCost } from './gains';
 import { getViewSoldFunds, getCurrentFundsCache, getFundsRows } from './helpers';
-import { getFundLineProcessed, FundsWithReturns } from './lines';
+import { getFundLineProcessed, FundsWithReturns, Return } from './lines';
 import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
-import { getTotalUnits, getTotalCost, isSold } from '~client/modules/data';
+import { getTotalUnits, isSold } from '~client/modules/data';
 import { Cache } from '~client/reducers/funds';
 import { colors } from '~client/styled/variables';
 import { Fund, Transaction, Prices, FundLine, FundItem } from '~client/types';
@@ -101,10 +102,11 @@ const getReturnsById = moize(
             ...last,
             [id]: {
               startIndex: prices[id].startIndex,
-              returns: prices[id].values.map((price, index) => ({
+              returns: prices[id].values.map<Return>((price, index) => ({
                 price,
                 units: getTotalUnits(transactionsToDate[index]),
-                cost: getTotalCost(transactionsToDate[index]),
+                cost: getBuyCost(transactionsToDate[index]),
+                realised: getRealisedValue(transactionsToDate[index]),
               })),
             },
           }),

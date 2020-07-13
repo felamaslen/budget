@@ -77,21 +77,21 @@ describe('Funds selectors / gains', () => {
           dayGain: 0.0075,
           dayGainAbs: 2989,
         },
-        3: {
+        3: expect.objectContaining({
           value: 50300,
           gain: 0.1178,
           gainAbs: 5300,
-        },
-        1: {
+        }),
+        1: expect.objectContaining({
           value: 80760,
           gain: -0.1027,
           gainAbs: -9240,
-        },
-        5: {
+        }),
+        5: expect.objectContaining({
           value: 265622,
           gain: 0.3281,
           gainAbs: 65622,
-        },
+        }),
       };
 
       expect(result).toStrictEqual(expectedResult);
@@ -144,12 +144,42 @@ describe('Funds selectors / gains', () => {
       );
 
       expect(result).toStrictEqual({
-        10: {
+        10: expect.objectContaining({
           value: 1302,
           gainAbs: 1302 - 1199,
           gain: Number(((1302 - 1199) / 1199).toFixed(5)),
-        },
+        }),
       });
+    });
+
+    it('should use the buy cost', () => {
+      expect.assertions(3);
+      const result = getRowGains(
+        [
+          {
+            id: 103,
+            item: 'some fund',
+            transactions: getTransactionsList([
+              { date: '2020-04-20', units: 100, cost: 105 },
+              { date: '2020-05-20', units: -65, cost: -117 },
+            ]),
+          },
+        ],
+        {
+          startTime: 0,
+          cacheTimes: [10],
+          prices: {
+            103: {
+              startIndex: 0,
+              values: [1.05, 1.8],
+            },
+          },
+        },
+      );
+
+      expect(result[103]?.value).toBeCloseTo((100 - 65) * 1.8);
+      expect(result[103]?.gainAbs).toBeCloseTo((100 - 65) * 1.8 + 117 - 105);
+      expect(result[103]?.gain).toBeCloseTo(((100 - 65) * 1.8 + 117 - 105) / 105);
     });
   });
 

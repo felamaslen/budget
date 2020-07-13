@@ -1,12 +1,14 @@
+import { roundGain } from './gains';
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { leftPad, rightPad, IDENTITY } from '~client/modules/data';
 import { separateLines } from '~client/modules/funds';
 import { Id, Data } from '~client/types';
 
-type Return = {
+export type Return = {
   price: number;
   units: number;
   cost: number;
+  realised: number;
 };
 
 export type FundsWithReturns = {
@@ -59,17 +61,19 @@ export function getOverallROI(fundsWithReturns: FundsWithReturns): number[] {
       price: 0,
       units: 0,
       cost: 0,
+      realised: 0,
     },
     (returns) => ({
       price: 0,
       units: 0,
       cost: returns.cost,
+      realised: returns.realised,
     }),
   )
     .reduce<{ value: number; cost: number }[]>(
       (last, returns) =>
-        returns.map(({ price, units, cost }, index) => ({
-          value: price * units + (last[index]?.value ?? 0),
+        returns.map(({ price, units, cost, realised }, index) => ({
+          value: price * units + realised + (last[index]?.value ?? 0),
           cost: cost + (last[index]?.cost ?? 0),
         })),
       [],
@@ -78,8 +82,8 @@ export function getOverallROI(fundsWithReturns: FundsWithReturns): number[] {
 }
 
 export function getFundLineROI(fundsWithReturns: FundsWithReturns, id: Id): number[] {
-  return fundsWithReturns[id].returns.map(({ price, units, cost }) =>
-    price && units && cost ? Math.round((10000 * (price * units - cost)) / cost) / 100 : 0,
+  return fundsWithReturns[id].returns.map(({ price, units, cost, realised }) =>
+    price && units && cost ? 100 * roundGain((price * units + realised - cost) / cost) : 0,
   );
 }
 

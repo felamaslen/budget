@@ -188,7 +188,7 @@ describe('Fund selectors / graph', () => {
       expect(overallLine?.data[overallLine?.data.length - 1]).toMatchInlineSnapshot(`
         Array [
           28623600,
-          -100,
+          20.33,
         ]
       `);
     });

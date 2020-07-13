@@ -176,7 +176,7 @@ describe('<FundGainInfo />', () => {
 
       @media only screen and (min-width:500px) {
         .c4 {
-          max-width: initial;
+          max-width: 50%;
         }
       }
 

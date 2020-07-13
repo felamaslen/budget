@@ -4,7 +4,7 @@ import { rgb, parseToRgb } from 'polished';
 import { createSelector } from 'reselect';
 
 import { getCurrentFundsCache, getFundsRows } from './helpers';
-import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
+import { isSold, getTotalUnits } from '~client/modules/data';
 import { Cache } from '~client/reducers/funds';
 import { colors } from '~client/styled/variables';
 import { Id, Fund, Transaction } from '~client/types';
@@ -27,8 +27,8 @@ function getFundColor(value: number, min: number, max: number): string {
   return rgb(scoreColor(score, red), scoreColor(score, green), scoreColor(score, blue));
 }
 
-const roundGain = (value: number): number => Math.round(10000 * value) / 10000;
-const roundAbs = (value: number): number => Math.round(value);
+export const roundGain = (value: number): number => Math.round(10000 * value) / 10000;
+export const roundAbs = (value: number): number => Math.round(value);
 
 type CostValue = {
   cost: number;
@@ -37,40 +37,14 @@ type CostValue = {
   dayGainAbs?: number;
 };
 
-function getCostValue(
-  transactions: Transaction[],
-  price: number,
-  yesterdayPrice: number,
-): CostValue {
-  if (isSold(transactions) || !price) {
-    return transactions.reduce(
-      ({ cost, value }, item) => ({
-        cost: cost + Math.max(0, item.cost),
-        value: value - Math.min(0, item.cost),
-      }),
-      { cost: 0, value: 0 },
-    );
-  }
+export const getPaperValue = (transactions: Transaction[], price: number): number =>
+  price * getTotalUnits(transactions);
 
-  const units = getTotalUnits(transactions);
-  const cost = getTotalCost(transactions);
-  const value = price * units;
+export const getRealisedValue = (transactions: Transaction[]): number =>
+  transactions.filter(({ units }) => units < 0).reduce((last, { cost }) => last - cost, 0);
 
-  let dayGainAbs = 0;
-  let dayGain = 0;
-
-  if (yesterdayPrice) {
-    dayGainAbs = roundAbs((price - yesterdayPrice) * units);
-    dayGain = roundGain((price - yesterdayPrice) / yesterdayPrice);
-  }
-
-  return {
-    cost,
-    value,
-    dayGain,
-    dayGainAbs,
-  };
-}
+export const getBuyCost = (transactions: Transaction[]): number =>
+  transactions.filter(({ units }) => units > 0).reduce((last, { cost }) => last + cost, 0);
 
 export type RowGain = Omit<CostValue, 'cost'> & {
   gain: number;
@@ -91,11 +65,26 @@ export const getRowGains = (rows: Fund[], cache: Cache): RowGains =>
     const yesterdayPrice =
       rowCache.values.length > 1 ? rowCache.values[rowCache.values.length - 2] : 0;
 
-    const { cost, ...props } = getCostValue(transactions, price, yesterdayPrice);
-    const gainAbs = roundAbs(props.value - cost);
-    const gain = roundGain((props.value - cost) / cost);
+    const paperValue = getPaperValue(transactions, price);
+    const yesterdayPaperValue = getPaperValue(transactions, yesterdayPrice);
 
-    const rowGain: RowGain = { ...props, gain, gainAbs };
+    const realisedValue = getRealisedValue(transactions);
+
+    const cost = getBuyCost(transactions);
+
+    const gainAbs = realisedValue + paperValue - cost;
+    const gain = gainAbs / cost;
+
+    const dayGainAbs = paperValue - yesterdayPaperValue;
+    const dayGain = dayGainAbs / cost;
+
+    const rowGain: RowGain = {
+      value: isSold(transactions) ? paperValue + realisedValue : paperValue,
+      gain: roundGain(gain),
+      gainAbs: roundAbs(gainAbs),
+      dayGain: roundGain(dayGain),
+      dayGainAbs: roundAbs(dayGainAbs),
+    };
 
     return { ...items, [id]: rowGain };
   }, {});

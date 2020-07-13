@@ -56,13 +56,13 @@ export const Breakdown = styled(InlineFlex)<{ isRow?: boolean }>`
   }
 `;
 export const Overall = styled(Column)<SoldProps>`
-  flex: 0 0 50%;
+  flex: ${({ isSold }): string => (isSold ? '1' : '0 0 50%')};
   font-weight: bold;
   flex-flow: ${({ isSold }): 'row' | 'column' => (isSold ? 'row' : 'column')};
   max-width: 50%;
 
   ${breakpoint(breakpoints.mobile)} {
-    max-width: initial;
+    max-width: ${({ isSold }): number => (isSold ? 100 : 50)}%;
   }
 `;
 
