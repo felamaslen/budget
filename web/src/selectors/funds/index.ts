@@ -7,10 +7,16 @@ import { createSelector } from 'reselect';
 
 import { getFundsRows, getCurrentFundsCache } from './helpers';
 import { Period } from '~client/constants/graph';
-import { getTotalUnits, getTotalCost } from '~client/modules/data';
+import { getTotalCost } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { Cache } from '~client/reducers/funds';
-import { getDayGain, getDayGainAbs } from '~client/selectors/funds/gains';
+import {
+  getDayGain,
+  getDayGainAbs,
+  getPaperValue,
+  getRealisedValue,
+  getBuyCost,
+} from '~client/selectors/funds/gains';
 import { Id, Page, Data, Portfolio, CachedValue, Transaction } from '~client/types';
 
 export * from './gains';
@@ -55,36 +61,36 @@ const getFundCacheAge = moize(
 const filterPastTransactions = (today: Date, transactions: Transaction[]): Transaction[] =>
   transactions.filter(({ date }) => isBefore(startOfDay(date), today));
 
-export const getPortfolio = moize(
+const getTransactionsToTodayWithPrices = moize(
   (today: Date) =>
     createSelector(getFundsRows, getCurrentFundsCache, (rows, cache) => {
       if (!(rows && cache)) {
         return [];
       }
 
-      return rows.reduce<Portfolio>((last, { id, item, transactions }) => {
+      return rows.map(({ id, item, transactions }) => {
         const prices = cache.prices[id]?.values ?? [];
+        const price = prices[prices.length - 1] ?? 0;
         const transactionsToToday = filterPastTransactions(today, transactions);
 
-        return prices.length && transactionsToToday.length
-          ? [
-              ...last,
-              {
-                id,
-                item,
-                value: prices[prices.length - 1] * getTotalUnits(transactionsToToday),
-              },
-            ]
-          : last;
-      }, []);
+        return { id, item, transactions: transactionsToToday, price };
+      });
     }),
   { maxSize: 1 },
 );
 
-const getLatestTotalValue = moize(
+export const getPortfolio = moize(
   (today: Date) =>
-    createSelector(getPortfolio(today), (portfolio: Portfolio) =>
-      portfolio.reduce<number>((last, { value }) => last + value, 0),
+    createSelector(
+      getTransactionsToTodayWithPrices(today),
+      (funds): Portfolio =>
+        funds
+          .filter(({ price, transactions }) => price && transactions.length)
+          .map(({ id, item, transactions, price }) => ({
+            id,
+            item,
+            value: getPaperValue(transactions, price),
+          })),
     ),
   { maxSize: 1 },
 );
@@ -92,11 +98,38 @@ const getLatestTotalValue = moize(
 export const getFundsCachedValue = moize(
   (now: Date): ((state: State) => CachedValue) =>
     createSelector(
-      getLatestTotalValue(endOfDay(now)),
+      getTransactionsToTodayWithPrices(endOfDay(now)),
       getFundCacheAge(now),
       getDayGain,
       getDayGainAbs,
-      (value, ageText, dayGain, dayGainAbs) => ({ value, ageText, dayGain, dayGainAbs }),
+      (funds, ageText, dayGain, dayGainAbs) => {
+        const paperValue = funds.reduce<number>(
+          (last, { transactions, price }) => last + getPaperValue(transactions, price),
+          0,
+        );
+
+        const realisedValue = funds.reduce<number>(
+          (last, { transactions }) => last + getRealisedValue(transactions),
+          0,
+        );
+
+        const cost = funds.reduce<number>(
+          (last, { transactions }) => last + getBuyCost(transactions),
+          0,
+        );
+
+        const gainAbs = paperValue + realisedValue - cost;
+        const gain = cost ? gainAbs / cost : 0;
+
+        return {
+          value: paperValue,
+          ageText,
+          gain,
+          gainAbs,
+          dayGain,
+          dayGainAbs,
+        };
+      },
     ),
   { maxSize: 1 },
 );

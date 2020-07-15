@@ -12,7 +12,7 @@ import {
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
-import { Page, Portfolio } from '~client/types';
+import { Page, Portfolio, CachedValue } from '~client/types';
 
 describe('Funds selectors', () => {
   const testNow = new Date('2018-03-23T11:45:20Z');
@@ -84,17 +84,23 @@ describe('Funds selectors', () => {
   });
 
   describe('getFundsCachedValue', () => {
-    it('should get an age text and value', () => {
+    it.each`
+      prop            | expectedValue
+      ${'value'}      | ${399098.2}
+      ${'ageText'}    | ${'7 months ago'}
+      ${'gain'}       | ${0.0827}
+      ${'gainAbs'}    | ${60780.2}
+      ${'dayGain'}    | ${getDayGain(state)}
+      ${'dayGainAbs'} | ${getDayGainAbs(state)}
+    `('should get $prop', ({ prop, expectedValue }) => {
       expect.assertions(1);
-      const expectedValue = 399098.2;
-      const expectedAgeText = '7 months ago';
+      const result = getFundsCachedValue(testNow)(state);
 
-      expect(getFundsCachedValue(testNow)(state)).toStrictEqual({
-        value: expectedValue,
-        ageText: expectedAgeText,
-        dayGain: getDayGain(state),
-        dayGainAbs: getDayGainAbs(state),
-      });
+      if (typeof expectedValue === 'number') {
+        expect(result[prop as keyof CachedValue]).toBeCloseTo(expectedValue);
+      } else {
+        expect(result).toHaveProperty(prop, expectedValue);
+      }
     });
 
     it('should return a default value if there are no data', () => {
@@ -108,6 +114,8 @@ describe('Funds selectors', () => {
       };
 
       expect(getFundsCachedValue(testNow)(stateNoCache)).toStrictEqual({
+        gain: 0,
+        gainAbs: 0,
         dayGain: getDayGain(stateNoCache),
         dayGainAbs: getDayGainAbs(stateNoCache),
         value: 0,
@@ -154,6 +162,8 @@ describe('Funds selectors', () => {
       };
 
       expect(getFundsCachedValue(testNow)(stateNoPrice)).toStrictEqual({
+        gain: expect.any(Number),
+        gainAbs: expect.any(Number),
         dayGain: getDayGain(stateNoPrice),
         dayGainAbs: getDayGainAbs(stateNoPrice),
         value: 399098.2,

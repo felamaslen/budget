@@ -12,6 +12,8 @@ describe('<ListHeadFunds />', () => {
     cachedValue: {
       ageText: '3 hours ago',
       value: 399098,
+      gain: -0.0192,
+      gainAbs: -11273,
       dayGain: 0.0329,
       dayGainAbs: 9964.92,
     },
@@ -25,8 +27,8 @@ describe('<ListHeadFunds />', () => {
   it.each`
     thing                        | value
     ${'current value'}           | ${'£4k'}
-    ${'overall (absolute) gain'} | ${'(£9)'}
-    ${'overall (relative) gain'} | ${'(0.23%)'}
+    ${'overall (absolute) gain'} | ${'(£113)'}
+    ${'overall (relative) gain'} | ${'(1.92%)'}
     ${'daily (absolute) gain'}   | ${'£100'}
     ${'daily (relative) gain'}   | ${'3.29%'}
   `('should render the $thing', ({ value }) => {

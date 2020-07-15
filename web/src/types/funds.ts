@@ -74,6 +74,8 @@ export type Portfolio = PortfolioItem[];
 
 export type CachedValue = {
   value: number;
+  gain: number;
+  gainAbs: number;
   dayGain: number;
   dayGainAbs: number;
   ageText: string;

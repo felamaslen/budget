@@ -129,11 +129,12 @@ describe('<PageFunds />', () => {
     const { getByTestId } = setup();
     const header = getByTestId('fund-header');
     const { getByText } = within(header);
-    // overall cost is £(4200 + 9921.39 - 11030.01) = £3091.38
-    // overall value is £4287.453 (see above)
-    // => overall gain is £1196.0730 or 38.690584...%
+    // overall cost is £(4200 + 9921.39) = £14121.39
+    // paper value is £4287.453 (see above)
+    // realised value is £11030.01
+    // => overall gain is £(4287.453 + 11030.01 - 14121.39) = £1196.073 or 8.4699%
     expect(getByText('£1.2k')).toBeInTheDocument();
-    expect(getByText('38.69%')).toBeInTheDocument();
+    expect(getByText('8.47%')).toBeInTheDocument();
   });
 
   it('should show the daily gain, including percentage', () => {

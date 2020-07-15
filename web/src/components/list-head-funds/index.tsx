@@ -29,7 +29,7 @@ const sortOptions: SelectOptions<Sort> = [
 export const ListHeadFunds: React.FC<Props> = ({
   totalCost,
   viewSoldFunds,
-  cachedValue: { value, ageText, dayGain, dayGainAbs },
+  cachedValue: { value, ageText, gain, gainAbs, dayGain, dayGainAbs },
   onReloadPrices,
   onViewSoldToggle,
   sort = defaultSort,
@@ -47,12 +47,10 @@ export const ListHeadFunds: React.FC<Props> = ({
       {totalCost && (
         <Styled.Breakdown>
           <Styled.Overall>
-            <Styled.GainAbs gain={(value - totalCost) / totalCost}>
-              {formatCurrency(value - totalCost, formatOptionsAbsolute)}
+            <Styled.GainAbs gain={gain}>
+              {formatCurrency(gainAbs, formatOptionsAbsolute)}
             </Styled.GainAbs>
-            <Styled.Gain gain={value - totalCost}>
-              {formatPercent((value - totalCost) / totalCost, formatOptionsRelative)}
-            </Styled.Gain>
+            <Styled.Gain gain={gain}>{formatPercent(gain, formatOptionsRelative)}</Styled.Gain>
           </Styled.Overall>
           <Styled.DayGainOuter>
             <Styled.DayGainAbs gain={dayGain}>
