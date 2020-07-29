@@ -60,7 +60,8 @@ const separateOldFunds = (numRows: number) => (
       }
     : { ...data, fundsOld: [] };
 
-const getAnnualisedFundReturns = (state: State): number => state.overview.annualisedFundReturns;
+export const getAnnualisedFundReturns = (state: State): number =>
+  state.overview.annualisedFundReturns;
 
 const predictCompoundInterest = (annualRate: number, jitter = 0) => (last: number[]): number[] => [
   ...last,

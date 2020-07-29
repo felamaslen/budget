@@ -45,6 +45,7 @@ For info on building the Android app, see `android/README.md`.
     - All external services are created by docker-compose
 
 - This is accessible at `http://localhost:3000` by default
+    - To set the port, change the `PORT` environment variable in `.env`
 
 #### Migrations / seeds:
 

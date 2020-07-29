@@ -13,7 +13,7 @@ services:
     networks:
       - net_budget_dev
     ports:
-      - 3000:3000
+      - "${PORT}:3000"
       - 9229:9229
     env_file:
       - .env

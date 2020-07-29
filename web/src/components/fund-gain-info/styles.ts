@@ -74,7 +74,7 @@ export const DayGainOuter = styled(Column)`
   }
 `;
 
-const BreakdownValue = styled.span`
+export const BreakdownValue = styled.span`
   color: ${profitColor()};
   text-align: right;
 

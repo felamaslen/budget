@@ -73,14 +73,38 @@ export const OverallGain = styled(FlexCenter)<GainProps>`
   }
 `;
 
-export const Value = styled(GainStyles.Value)`
-  margin-left: ${rem(8)};
+export const Main = styled.div`
+  align-items: flex-start;
+  display: flex;
   flex: 1;
-  font-size: ${rem(28)};
+  flex-flow: column;
+  margin-left: ${rem(8)};
+  margin-right: ${rem(8)};
+  ${breakpoint(breakpoints.mobile)} {
+    margin-right: 0;
+  }
+`;
+
+export const Value = styled(GainStyles.Value)`
   color: ${colors.black};
+  font-size: ${rem(24)};
+  line-height: ${rem(28)};
+  margin-right: 0;
   ${breakpoint(breakpoints.mobile)} {
     flex: 0 0 auto;
     font-size: ${rem(16)};
+    line-height: ${rem(20)};
+  }
+`;
+
+export const XIRR = styled(GainStyles.BreakdownValue)`
+  font-size: ${rem(12)};
+  line-height: ${rem(12)};
+  ${breakpoint(breakpoints.mobile)} {
+    font-size: ${rem(10)};
+    font-weight: bold;
+    line-height: ${rem(12)};
+    margin: 0;
   }
 `;
 

@@ -6,7 +6,13 @@ import { HeadProps } from './types';
 import { fundsViewSoldToggled, fundsRequested } from '~client/actions';
 import { ListHeadFunds, ListHeadFundsMobile } from '~client/components/list-head-funds';
 import { TodayContext, useNow } from '~client/hooks';
-import { getFundsCost, getViewSoldFunds, getPeriod, getFundsCachedValue } from '~client/selectors';
+import {
+  getFundsCost,
+  getViewSoldFunds,
+  getPeriod,
+  getFundsCachedValue,
+  getAnnualisedFundReturns,
+} from '~client/selectors';
 
 type Props = {
   isMobile: boolean;
@@ -18,6 +24,7 @@ export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
   const totalCost = useSelector(getFundsCost(today));
   const viewSoldFunds = useSelector(getViewSoldFunds);
   const period = useSelector(getPeriod);
+  const annualisedFundReturns = useSelector(getAnnualisedFundReturns);
   const cachedValue = useSelector(getFundsCachedValue(now));
 
   const dispatch = useDispatch();
@@ -29,6 +36,7 @@ export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
       {isMobile && (
         <ListHeadFundsMobile
           totalCost={totalCost}
+          annualisedFundReturns={annualisedFundReturns}
           cachedValue={cachedValue}
           onReloadPrices={onReloadPrices}
         />
@@ -39,6 +47,7 @@ export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
           <Styled.FundHeaderColumn column="transactions">Transactions</Styled.FundHeaderColumn>
           <ListHeadFunds
             totalCost={totalCost}
+            annualisedFundReturns={annualisedFundReturns}
             period={period}
             cachedValue={cachedValue}
             viewSoldFunds={viewSoldFunds}
