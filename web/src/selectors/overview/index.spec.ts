@@ -206,15 +206,7 @@ describe('Overview selectors', () => {
                 "rgb": "#caefce",
                 "value": 740,
               },
-              "netWorth": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
               "netWorthCombined": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
-              "netWorthPredicted": Object {
                 "rgb": "#fff",
                 "value": 0,
               },
@@ -262,17 +254,9 @@ describe('Overview selectors', () => {
                 "rgb": "#NaNNaNNaN",
                 "value": -168,
               },
-              "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 1298227.25,
-              },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
                 "value": 1298227.25,
-              },
-              "netWorthPredicted": Object {
-                "rgb": "#fff",
-                "value": 512,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -318,15 +302,7 @@ describe('Overview selectors', () => {
                 "rgb": "#c9efcd",
                 "value": 751,
               },
-              "netWorth": Object {
-                "rgb": "#50cc5f",
-                "value": 1039156,
-              },
               "netWorthCombined": Object {
-                "rgb": "#92df9b",
-                "value": 1300500.25,
-              },
-              "netWorthPredicted": Object {
                 "rgb": "#92df9b",
                 "value": 1300500.25,
               },
@@ -374,15 +350,7 @@ describe('Overview selectors', () => {
                 "rgb": "#8ede98",
                 "value": 1540,
               },
-              "netWorth": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
               "netWorthCombined": Object {
-                "rgb": "#92df9b",
-                "value": 1303340.25,
-              },
-              "netWorthPredicted": Object {
                 "rgb": "#92df9b",
                 "value": 1303340.25,
               },
@@ -430,15 +398,7 @@ describe('Overview selectors', () => {
                 "rgb": "#4ecb5e",
                 "value": 1990,
               },
-              "netWorth": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
               "netWorthCombined": Object {
-                "rgb": "#6cd479",
-                "value": 1306646.25,
-              },
-              "netWorthPredicted": Object {
                 "rgb": "#6cd479",
                 "value": 1306646.25,
               },
@@ -486,15 +446,7 @@ describe('Overview selectors', () => {
                 "rgb": "#93e09d",
                 "value": 1490,
               },
-              "netWorth": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
               "netWorthCombined": Object {
-                "rgb": "#4dcb5c",
-                "value": 1309469.25,
-              },
-              "netWorthPredicted": Object {
                 "rgb": "#4dcb5c",
                 "value": 1309469.25,
               },
@@ -542,15 +494,7 @@ describe('Overview selectors', () => {
                 "rgb": "#24bf37",
                 "value": 2290,
               },
-              "netWorth": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
               "netWorthCombined": Object {
-                "rgb": "#24bf37",
-                "value": 1313109.25,
-              },
-              "netWorthPredicted": Object {
                 "rgb": "#24bf37",
                 "value": 1313109.25,
               },

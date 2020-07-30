@@ -20,13 +20,7 @@ type ColumnsProps = { columns: OverviewTableColumn[] };
 
 const columnsMobile: OverviewHeader[] = [Page.income, 'spending', 'netWorthCombined'];
 
-const columnsRestricted: OverviewHeader[] = [
-  Page.income,
-  'spending',
-  'net',
-  'netWorthPredicted',
-  'netWorth',
-];
+const columnsRestricted: OverviewHeader[] = [Page.income, 'spending', 'net', 'netWorthCombined'];
 
 const columnsFull: OverviewHeader[] = [
   Page.funds,
@@ -38,8 +32,7 @@ const columnsFull: OverviewHeader[] = [
   Page.income,
   'spending',
   'net',
-  'netWorthPredicted',
-  'netWorth',
+  'netWorthCombined',
 ];
 
 const filterColumns = (columns: OverviewHeader[]): OverviewTableColumn[] =>

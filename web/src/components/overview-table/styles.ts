@@ -1,5 +1,5 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { breakpoint, unimportant } from '~client/styled/mixins';
+import { breakpoint, unimportant, rem } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 import { Page, OverviewHeader } from '~client/types';
 
@@ -100,7 +100,7 @@ export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColo
   flex-flow: row nowrap;
   flex-grow: 1;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: ${rem(4)};
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -137,8 +137,8 @@ export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColo
     `}
 
   ${breakpoint(breakpoints.mobileSmall)} {
-      padding: 4px 10px;
-      white-space: nowrap;
+    padding: ${rem(4)};
+    white-space: nowrap;
   }
 
   ${breakpoint(breakpoints.mobile)} {
@@ -198,7 +198,6 @@ export const Header = styled(Row)`
 
 export const HeaderLink = styled(Cell)`
   align-items: center;
-  padding: 2px 0;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;

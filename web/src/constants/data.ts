@@ -28,17 +28,12 @@ const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
   [Page.income]: { name: 'Income' },
   spending: { name: 'Out' },
   net: { name: 'Net' },
-  netWorthPredicted: { name: 'Predicted' },
-  netWorth: {
+  netWorthCombined: {
     name: 'Net Worth',
     link: {
       to: '/net-worth',
       replace: true,
     },
-  },
-  netWorthCombined: {
-    name: 'Balance',
-    link: { to: '/net-worth' },
   },
 };
 

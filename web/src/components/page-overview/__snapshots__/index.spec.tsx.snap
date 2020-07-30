@@ -54,7 +54,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: 0.25rem;
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -79,7 +79,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: 0.25rem;
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -103,7 +103,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: 0.25rem;
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -127,7 +127,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: 0.25rem;
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -166,7 +166,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: 0.25rem;
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -200,7 +200,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: 0.25rem;
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -234,7 +234,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: 0.25rem;
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -268,7 +268,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-basis: 0;
   -ms-flex-preferred-size: 0;
   flex-basis: 0;
-  padding: 4px 2px;
+  padding: 0.25rem;
   position: relative;
   width: 100%;
   vertical-align: middle;
@@ -377,7 +377,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c9 {
-    padding: 4px 10px;
     white-space: nowrap;
   }
 }
@@ -402,7 +401,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c10 {
-    padding: 4px 10px;
     white-space: nowrap;
   }
 }
@@ -428,7 +426,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c15 {
-    padding: 4px 10px;
     white-space: nowrap;
   }
 }
@@ -453,7 +450,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c16 {
-    padding: 4px 10px;
     white-space: nowrap;
   }
 }
@@ -488,7 +484,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c2 {
-    padding: 4px 10px;
     white-space: nowrap;
   }
 }
@@ -516,7 +511,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c4 {
-    padding: 4px 10px;
     white-space: nowrap;
   }
 }
@@ -545,7 +539,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c5 {
-    padding: 4px 10px;
     white-space: nowrap;
   }
 }
@@ -573,7 +566,6 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c6 {
-    padding: 4px 10px;
     white-space: nowrap;
   }
 }
@@ -668,7 +660,7 @@ exports[`<PageOverview /> should render a table 1`] = `
         class="c3"
         href="/net-worth"
       >
-        Balance
+        Net Worth
       </a>
     </div>
   </div>
