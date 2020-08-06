@@ -33,7 +33,6 @@ import {
   getCacheTimes,
   getFundItems,
   getFundLines,
-  getPortfolio,
 } from '~client/selectors';
 
 import { graphFundsHeightMobile } from '~client/styled/variables';
@@ -340,8 +339,6 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
     toggleList,
   });
 
-  const portfolio = useSelector(getPortfolio(today));
-
   return (
     <Styled.Container>
       <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
@@ -358,7 +355,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
       </Styled.GraphFunds>
       {!isMobile && (
         <Styled.GraphFunds width={width} height={height}>
-          <FundWeights portfolio={portfolio} />
+          <FundWeights />
         </Styled.GraphFunds>
       )}
     </Styled.Container>

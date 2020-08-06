@@ -37,6 +37,7 @@ export const AccessibleList = <
   Row,
   Header,
   headerProps = emptyObject as H,
+  FirstItem,
 }: Props<I, P, MK, E, H>): React.ReactElement<Props<I, P, MK, E, H>> => {
   const isMobile = useIsMobile();
   const { itemsSorted, extraProps } = useSortedItems(
@@ -120,6 +121,7 @@ export const AccessibleList = <
         )}
         {!windowise && (
           <Styled.List>
+            {FirstItem && <FirstItem />}
             {itemsSorted.map(({ id }, index) => (
               <MemoisedItem key={id} id={id} odd={index % 2 === 1} extraProps={extraProps[id]} />
             ))}

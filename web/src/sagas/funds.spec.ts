@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { testSaga } from 'redux-saga-test-plan';
+import nock from 'nock';
+import { testSaga, expectSaga } from 'redux-saga-test-plan';
 import { debounce } from 'redux-saga/effects';
 import sinon from 'sinon';
 
@@ -8,6 +9,7 @@ import fundsSaga, {
   requestFundPeriodData,
   requestStocksList,
   requestStocksPrices,
+  updateCashTarget,
 } from './funds';
 import {
   ActionTypeFunds,
@@ -17,13 +19,15 @@ import {
   fundsReceived,
   stocksListReceived,
   stockPricesReceived,
+  cashTargetUpdated,
 } from '~client/actions';
 import { API_PREFIX } from '~client/constants/data';
 import { Period } from '~client/constants/graph';
 import { getStockPrices } from '~client/modules/finance';
+import reducer, { State } from '~client/reducers';
 import { Cache } from '~client/reducers/funds';
 import { getApiKey, getFundsCache, getPeriod, getStocks, getIndices } from '~client/selectors';
-import { testResponse, testStocksList, testStockPrices } from '~client/test-data';
+import { testState, testResponse, testStocksList, testStockPrices } from '~client/test-data';
 import { Page } from '~client/types';
 
 jest.mock('shortid', () => ({
@@ -230,6 +234,34 @@ describe('Funds saga', () => {
     });
   });
 
+  describe('updateCashTarget', () => {
+    it('should call the API to update the cash target', async () => {
+      expect.assertions(1);
+
+      const requestScope = nock('http://localhost')
+        .put(`${API_PREFIX}/data/funds/cash-target`, {
+          cashTarget: 1700000,
+        })
+        .matchHeader('Authorization', 'some-api-key')
+        .reply(200, { cashTarget: 1700000 });
+
+      const state: State = {
+        ...testState,
+        api: {
+          ...testState.api,
+          key: 'some-api-key',
+        },
+      };
+
+      await expectSaga(updateCashTarget, cashTargetUpdated(1700000))
+        .withReducer(reducer, state)
+        .returns(undefined)
+        .run();
+
+      expect(requestScope.isDone()).toBe(true);
+    });
+  });
+
   it('should fork other sagas', () => {
     expect.assertions(0);
     testSaga(fundsSaga)
@@ -239,6 +271,9 @@ describe('Funds saga', () => {
       .takeLatest(ActionTypeStocks.Requested, requestStocksList)
       .next()
       .is(debounce(100, ActionTypeStocks.PricesRequested, requestStocksPrices))
+      .next()
+      .is(debounce(100, ActionTypeFunds.CashTargetUpdated, updateCashTarget))
+      .next()
       .next()
       .isDone();
   });

@@ -406,3 +406,8 @@ export const getNetWorthRequests = createSelector(
       withEntryRequests(categories, subcategories, entries),
     )([]),
 );
+
+export const getLatestNetWorthAggregate = createSelector(
+  getNetWorthTable,
+  (netWorth) => netWorth[netWorth.length - 1]?.aggregate,
+);

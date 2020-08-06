@@ -26,6 +26,7 @@ describe('Funds selectors / gains', () => {
     ...testState,
     [Page.funds]: {
       viewSoldFunds: true,
+      cashTarget: 0,
       items: [
         {
           id: numericHash('fund1'),
@@ -33,6 +34,7 @@ describe('Funds selectors / gains', () => {
           transactions: getTransactionsList([
             { date: new Date('2019-10-09'), units: 345, cost: 1199 },
           ]),
+          allocationTarget: 0,
         },
         {
           id: numericHash('fund2'),
@@ -41,6 +43,7 @@ describe('Funds selectors / gains', () => {
             { date: new Date('2019-10-01'), units: 167, cost: 98503 },
             { date: new Date('2019-10-27'), units: -23, cost: -130 },
           ]),
+          allocationTarget: 0,
         },
       ],
       __optimistic: [undefined, undefined],
@@ -138,6 +141,7 @@ describe('Funds selectors / gains', () => {
               { date: '2019-04-03', units: 345, cost: 1199 },
               { date: '2019-07-01', units: -345, cost: -1302 },
             ]),
+            allocationTarget: 0,
           },
         ],
         testCache,
@@ -163,6 +167,7 @@ describe('Funds selectors / gains', () => {
               { date: '2020-04-20', units: 100, cost: 105 },
               { date: '2020-05-20', units: -65, cost: -117 },
             ]),
+            allocationTarget: 0,
           },
         ],
         {
@@ -343,6 +348,7 @@ describe('Funds selectors / gains', () => {
               transactions: getTransactionsList([
                 { date: new Date('2019-10-09'), units: 345, cost: 1199 },
               ]),
+              allocationTarget: 0,
             },
             {
               id: numericHash('fund2'),
@@ -351,6 +357,7 @@ describe('Funds selectors / gains', () => {
                 { date: new Date('2019-10-01'), units: 167, cost: 98503 },
                 { date: new Date('2019-10-27'), units: -23, cost: -130 },
               ]),
+              allocationTarget: 0,
             },
           ],
           period: Period.year1,
@@ -376,6 +383,7 @@ describe('Funds selectors / gains', () => {
               transactions: getTransactionsList([
                 { date: new Date('2019-10-09'), units: 345, cost: 1199 },
               ]),
+              allocationTarget: 0,
             },
             {
               id: numericHash('fund2'),
@@ -384,6 +392,7 @@ describe('Funds selectors / gains', () => {
                 { date: new Date('2019-10-01'), units: 167, cost: 98503 },
                 { date: new Date('2019-10-27'), units: -23, cost: -130 },
               ]),
+              allocationTarget: 0,
             },
           ],
           period: Period.year1,

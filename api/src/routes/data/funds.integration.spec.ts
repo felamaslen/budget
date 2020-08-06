@@ -7,9 +7,10 @@ import db from '~api/test-utils/knex';
 import { Create, Fund } from '~api/types';
 
 describe('Funds route', () => {
-  const fund = {
+  const fund: Create<Fund> = {
     item: 'My fund',
     transactions: [{ date: '2020-04-20', units: 69, cost: 69420 }],
+    allocationTarget: 0.2,
   };
 
   const altFundName = 'Different fund';
@@ -56,9 +57,36 @@ describe('Funds route', () => {
     });
   });
 
+  describe('PUT /funds/cash-target', () => {
+    const setup = async (cashTarget: number): Promise<Response> => {
+      const res = await global
+        .withAuth(global.agent.put('/api/v4/data/funds/cash-target'))
+        .send({ cashTarget });
+      return res;
+    };
+
+    it('should reply with the given cash target for the current user', async () => {
+      expect.assertions(1);
+      const result = await setup(4500000);
+      expect(result.body).toStrictEqual({ cashTarget: 4500000 });
+    });
+
+    it.each`
+      case                | cashTarget
+      ${'less than zero'} | ${-1}
+    `('should not accept the value if it is $case', async ({ cashTarget }) => {
+      expect.assertions(1);
+      const result = await setup(cashTarget);
+      expect(result.status).toBe(400);
+    });
+  });
+
   describe('GET /funds', () => {
-    const setup = async (data: Create<Fund> = fund): Promise<Response> => {
+    const setup = async (data: Create<Partial<Fund>> = fund): Promise<Response> => {
       await global.withAuth(global.agent.post('/api/v4/data/funds')).send(data);
+      await global.withAuth(global.agent.put('/api/v4/data/funds/cash-target')).send({
+        cashTarget: 2500000,
+      });
       const res = await global.withAuth(
         global.agent.get('/api/v4/data/funds?history&period=year&length=1'),
       );
@@ -78,8 +106,20 @@ describe('Funds route', () => {
               I: expect.any(Number), // fund ID
               i: 'My fund',
               tr: [{ date: '2020-04-20', units: 69, cost: 69420 }],
+              allocationTarget: 0.2,
             }),
           ]),
+        }),
+      });
+    });
+
+    it('should add the cash target to the response', async () => {
+      expect.assertions(1);
+      const res = await setup();
+
+      expect(res.body).toStrictEqual({
+        data: expect.objectContaining({
+          cashTarget: 2500000,
         }),
       });
     });
@@ -87,11 +127,21 @@ describe('Funds route', () => {
     it("should set transactions to an empty array, if there aren't any", async () => {
       expect.assertions(1);
 
-      const res = await setup({ item: altFundName, transactions: [] });
+      const res = await setup({ ...fund, item: altFundName, transactions: [] });
 
       expect(
         res.body.data.data.find((item: { i: string }) => item.i === altFundName),
       ).toStrictEqual(expect.objectContaining({ tr: [] }));
+    });
+
+    it("should set allocation target to null, if there isn't one", async () => {
+      expect.assertions(1);
+
+      const res = await setup({ ...fund, item: altFundName, allocationTarget: undefined });
+
+      expect(
+        res.body.data.data.find((item: { i: string }) => item.i === altFundName),
+      ).toStrictEqual(expect.objectContaining({ allocationTarget: null }));
     });
 
     describe('if there are historical price data', () => {
@@ -231,13 +281,14 @@ describe('Funds route', () => {
   });
 
   describe('PUT /funds', () => {
-    const modifiedFund = {
+    const modifiedFund: Create<Fund> = {
       ...fund,
       item: altFundName,
       transactions: [
         { date: '2020-04-20', units: 69, cost: 420 },
         { date: '2020-04-29', units: 123, cost: 456 },
       ],
+      allocationTarget: 0.15,
     };
 
     const setup = async (
@@ -278,6 +329,7 @@ describe('Funds route', () => {
           expect.objectContaining({
             i: modifiedFund.item,
             tr: expect.arrayContaining(modifiedFund.transactions),
+            allocationTarget: modifiedFund.allocationTarget,
           }),
         ]),
       );

@@ -6,6 +6,7 @@ export const enum ActionTypeFunds {
   Requested = '@@funds/REQUESTED',
   Received = '@@funds/RECEIVED',
   ViewSoldToggled = '@@funds/VIEW_SOLD_TOGGLED',
+  CashTargetUpdated = '@@funds/CASH_TARGET_UPDATED',
 }
 
 export type FundsRequested = {
@@ -45,8 +46,19 @@ export const fundsViewSoldToggled = (): ViewSoldToggled => ({
   type: ActionTypeFunds.ViewSoldToggled,
 });
 
+export type CashTargetUpdated = {
+  type: ActionTypeFunds.CashTargetUpdated;
+  cashTarget: number;
+};
+
+export const cashTargetUpdated = (cashTarget: number): CashTargetUpdated => ({
+  type: ActionTypeFunds.CashTargetUpdated,
+  cashTarget,
+});
+
 export type ActionFunds =
   | FundsRequested
   | FundsReceived
   | ViewSoldToggled
+  | CashTargetUpdated
   | ActionList<Fund, Page.funds>;

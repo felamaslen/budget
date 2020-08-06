@@ -1,5 +1,11 @@
 import { Router } from 'express';
-import { createFund, getFundsData, updateFund, deleteListData } from '~api/controllers';
+import {
+  createFund,
+  getFundsData,
+  updateFund,
+  deleteListData,
+  upsertCashTarget,
+} from '~api/controllers';
 import { validatedAuthDbRoute } from '~api/middleware/request';
 import * as FundSchema from '~api/schema/funds';
 import * as ListSchema from '~api/schema/list';
@@ -46,6 +52,14 @@ const routeDelete = validatedAuthDbRoute<{ id: number }>(
   },
 );
 
+const routePutCashTarget = validatedAuthDbRoute<{ cashTarget: number }>(
+  { data: FundSchema.cashTargetSchema },
+  async (db, req, res, { cashTarget }) => {
+    const updatedCashTarget = await upsertCashTarget(db, req.user.uid, cashTarget);
+    res.json({ cashTarget: updatedCashTarget });
+  },
+);
+
 export const handler = (): Router => {
   const router = Router();
 
@@ -53,6 +67,8 @@ export const handler = (): Router => {
   router.get('/', routeGet);
   router.put('/', routePut);
   router.delete('/', routeDelete);
+
+  router.put('/cash-target', routePutCashTarget);
 
   return router;
 };

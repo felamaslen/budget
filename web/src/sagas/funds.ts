@@ -11,8 +11,10 @@ import {
   fundsReceived,
   stocksListReceived,
   stockPricesReceived,
+  CashTargetUpdated,
 } from '~client/actions';
 import { API_PREFIX } from '~client/constants/data';
+import { ErrorLevel } from '~client/constants/error';
 import { DO_STOCKS_LIST } from '~client/constants/stocks';
 import { getPeriodMatch } from '~client/modules/data';
 import { getStockPrices } from '~client/modules/finance';
@@ -89,8 +91,27 @@ export function* requestStocksPrices() {
   }
 }
 
+export function* updateCashTarget({ cashTarget }: CashTargetUpdated) {
+  const apiKey = yield select(getApiKey);
+  try {
+    yield call(
+      axios.put,
+      `${API_PREFIX}/data/funds/cash-target`,
+      { cashTarget },
+      {
+        headers: {
+          Authorization: apiKey,
+        },
+      },
+    );
+  } catch (err) {
+    yield errorOpened(`Error updating cash target: ${err.message}`, ErrorLevel.Err);
+  }
+}
+
 export default function* fundsSaga() {
   yield takeLatest(ActionTypeFunds.Requested, requestFundPeriodData);
   yield takeLatest(ActionTypeStocks.Requested, requestStocksList);
   yield debounce(100, ActionTypeStocks.PricesRequested, requestStocksPrices);
+  yield debounce(100, ActionTypeFunds.CashTargetUpdated, updateCashTarget);
 }

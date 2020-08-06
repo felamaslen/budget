@@ -77,6 +77,7 @@ export type Props<
   deltaSeed?: () => Delta<I>;
   Header?: React.FC<HeaderProps<I, P, MK, H>> | StyledComponent<'div', HeaderProps<I, P, MK, H>>;
   headerProps?: H;
+  FirstItem?: React.FC;
   sortItems?: SortItemsPre<I>;
   sortItemsPost?: SortItemsPost<I, E>;
   customSelector?: CustomSelector<I, E>;

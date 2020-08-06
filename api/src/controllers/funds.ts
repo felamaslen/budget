@@ -12,6 +12,8 @@ import {
   getFundHistoryNumResults,
   getFundHistory,
   FundHistoryRow,
+  FundListRow,
+  selectCashTarget,
 } from '~api/queries';
 import {
   CreateResponse,
@@ -134,9 +136,10 @@ export async function getFundsData(
   { history, period, length }: FundsParams,
   now: Date = new Date(),
 ): Promise<FundsResponse> {
-  const [rows, total] = await Promise.all([
+  const [rows, total, cashTarget] = await Promise.all([
     getFundsItems(db, uid),
     getTotalCost(db, uid, Page.funds),
+    selectCashTarget(db, uid),
   ]);
 
   const data = rows.map<AbbreviatedItem<Fund, typeof columnMapFunds>>(
@@ -144,19 +147,22 @@ export async function getFundsData(
   );
 
   if (!history) {
-    return { data, total };
+    return { data, total, cashTarget };
   }
 
   const dataWithHistory = await getFundPriceHistory(db, uid, now, period, length, data);
-  return { ...dataWithHistory, total };
+  return { ...dataWithHistory, total, cashTarget };
 }
 
 export async function createFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { item, transactions }: CreateList<Fund>,
+  { item, transactions, allocationTarget }: CreateList<Fund>,
 ): Promise<Omit<CreateResponse, 'weekly'>> {
-  const id = await insertListItem(db, uid, Page.funds, { item });
+  const id = await insertListItem<FundListRow>(db, uid, Page.funds, {
+    item,
+    allocation_target: allocationTarget ?? null,
+  });
   await upsertTransactions(db, uid, id, transactions);
   const total = await getTotalCost(db, uid, Page.funds);
 
@@ -166,11 +172,17 @@ export async function createFund(
 export async function updateFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { id, item, transactions }: UpdateList<Fund>,
+  { id, item, transactions, allocationTarget }: UpdateList<Fund>,
 ): Promise<UpdateResponse> {
   if (transactions) {
     await upsertTransactions(db, uid, id, transactions);
   }
 
-  return updateListData(db, uid, Page.funds, { id, item });
+  return updateListData<FundListRow>(db, uid, Page.funds, {
+    id,
+    item,
+    allocation_target: allocationTarget ?? null,
+  });
 }
+
+export { upsertCashTarget } from '~api/queries/funds';

@@ -177,7 +177,6 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 2px 0;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;
@@ -211,7 +210,6 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 2px 0;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;
@@ -245,7 +243,6 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 2px 0;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;
@@ -279,7 +276,6 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  padding: 2px 0;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;
@@ -377,6 +373,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c9 {
+    padding: 0.25rem;
     white-space: nowrap;
   }
 }
@@ -401,6 +398,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c10 {
+    padding: 0.25rem;
     white-space: nowrap;
   }
 }
@@ -426,6 +424,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c15 {
+    padding: 0.25rem;
     white-space: nowrap;
   }
 }
@@ -450,6 +449,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c16 {
+    padding: 0.25rem;
     white-space: nowrap;
   }
 }
@@ -484,6 +484,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c2 {
+    padding: 0.25rem;
     white-space: nowrap;
   }
 }
@@ -511,6 +512,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c4 {
+    padding: 0.25rem;
     white-space: nowrap;
   }
 }
@@ -539,6 +541,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c5 {
+    padding: 0.25rem;
     white-space: nowrap;
   }
 }
@@ -566,6 +569,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:350px) {
   .c6 {
+    padding: 0.25rem;
     white-space: nowrap;
   }
 }
@@ -1161,7 +1165,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
   z-index: 2;
 }
 
-.sc-qQxXP .c2 {
+.sc-pZaHX .c2 {
   position: relative;
   height: 125px;
 }
@@ -1237,7 +1241,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .sc-qQxXP .c2 {
+  .sc-pZaHX .c2 {
     height: 100%;
   }
 }
@@ -1252,7 +1256,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
   }
 
-  .sc-fzpmMD .c2 {
+  .sc-fzqBkg .c2 {
     z-index: 10;
     width: 100px;
     height: 100%;
@@ -1452,7 +1456,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 <div
-  class="sc-oTBUA c0"
+  class="sc-qYIQh c0"
   data-testid="graph-overview"
 >
   <div

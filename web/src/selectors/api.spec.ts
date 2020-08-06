@@ -44,6 +44,7 @@ describe('API selectors', () => {
                 transactions: getTransactionsList([
                   { date: '2019-05-03', units: 103, cost: 99231 },
                 ]),
+                allocationTarget: 0,
               },
             ],
             __optimistic: [...testState.funds.__optimistic, RequestType.update],
@@ -166,6 +167,7 @@ describe('API selectors', () => {
                 transactions: getTransactionsList([
                   { date: '2019-05-03', units: 103, cost: 99231 },
                 ]),
+                allocationTarget: 0,
               },
             ],
             __optimistic: [...testState.food.__optimistic, undefined],

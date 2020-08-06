@@ -46,6 +46,7 @@ export const testResponse: ReadResponse = {
     data: [],
     startTime: getUnixTime(new Date('2017-02-03')),
     cacheTimes: [],
+    cashTarget: 20000,
   },
   [Page.income]: {
     data: [],

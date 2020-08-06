@@ -39,9 +39,13 @@ export async function upsertTransactions(
   `);
 }
 
-type RowWithTransactions = {
+export type FundListRow = {
   id: number;
   item: string;
+  allocation_target: number | null;
+};
+
+type RowWithTransactions = FundListRow & {
   dates: string[];
   units: number[];
   costs: number[];
@@ -56,6 +60,7 @@ export async function getFundsItems(
     [
       sql.identifier(['funds', 'id']),
       sql.identifier(['funds', 'item']),
+      sql.identifier(['funds', 'allocation_target']),
       sql`array_agg(transactions.date ORDER BY transactions.date DESC) as dates`,
       sql`array_agg(transactions.units ORDER BY transactions.date DESC) as units`,
       sql`array_agg(transactions.cost ORDER BY transactions.date DESC) as costs`,
@@ -69,9 +74,10 @@ export async function getFundsItems(
   ORDER BY funds.id
   `);
 
-  return result.rows.map(({ id, item, dates, units, costs }) => ({
+  return result.rows.map(({ id, item, allocation_target, dates, units, costs }) => ({
     id,
     item,
+    allocationTarget: allocation_target,
     transactions: dates.filter(Boolean).map((date, index) => ({
       date,
       units: units[index],
@@ -159,4 +165,30 @@ export async function getFundHistory(
   )}
   `);
   return results.rows.map(({ id, time, price }) => ({ id, time, price }));
+}
+
+export async function selectCashTarget(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<number> {
+  const result = await db.query<{ allocation_target: number }>(sql`
+  SELECT allocation_target
+  FROM funds_cash_target
+  WHERE uid = ${uid}
+  `);
+  return result.rows[0]?.allocation_target ?? 0;
+}
+
+export async function upsertCashTarget(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  cashTarget: number,
+): Promise<number> {
+  const result = await db.query<{ allocation_target: number }>(sql`
+  INSERT INTO funds_cash_target (uid, allocation_target)
+  VALUES (${uid}, ${cashTarget})
+  ON CONFLICT (uid) DO UPDATE SET allocation_target = excluded.allocation_target
+  RETURNING allocation_target
+  `);
+  return result.rows[0].allocation_target;
 }

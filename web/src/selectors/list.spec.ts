@@ -19,6 +19,7 @@ describe('List selectors', () => {
               id: numericHash('some-fund-id'),
               item: 'some-fund-name',
               transactions: getTransactionsList([{ date: '2019-05-03', units: 103, cost: 99231 }]),
+              allocationTarget: 0,
             },
           ],
           __optimistic: [RequestType.update],
@@ -80,6 +81,7 @@ describe('List selectors', () => {
             id: numericHash('some-fund-id'),
             item: 'some-fund-name',
             transactions: [{ date: '2019-05-03', units: 103, cost: 99231 }],
+            allocationTarget: 0,
           },
         },
         {

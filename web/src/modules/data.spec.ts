@@ -448,40 +448,49 @@ describe('data module', () => {
     const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
 
     it.each`
-      dataType          | resultDescription           | outputValue                          | inputValue
-      ${'id'}           | ${'as a number'}            | ${345}                               | ${345}
-      ${'date'}         | ${'as a Date object'}       | ${new Date('2019-06-05')}            | ${'2019-06-05'}
-      ${'item'}         | ${'as-is'}                  | ${'some-item'}                       | ${'some-item'}
-      ${'shop'}         | ${'as-is'}                  | ${'some-shop'}                       | ${'some-shop'}
-      ${'category'}     | ${'as-is'}                  | ${'some-category'}                   | ${'some-category'}
-      ${'holiday'}      | ${'as-is'}                  | ${'some-holiday'}                    | ${'some-holiday'}
-      ${'social'}       | ${'as-is'}                  | ${'some-social'}                     | ${'some-social'}
-      ${'cost'}         | ${'as an integer'}          | ${123}                               | ${123.45}
-      ${'transactions'} | ${'as a transactions list'} | ${getTransactionsList(transactions)} | ${transactions}
-    `('should return "$dataType" $resultDescription', ({ dataType, inputValue, outputValue }) => {
-      expect.assertions(1);
-      expect(getValueFromTransmit(dataType, inputValue)).toStrictEqual(outputValue);
-    });
+      dataType              | resultDescription        | outputValue                          | inputValue
+      ${'id'}               | ${'a number'}            | ${345}                               | ${345}
+      ${'date'}             | ${'a Date object'}       | ${new Date('2019-06-05')}            | ${'2019-06-05'}
+      ${'item'}             | ${'is'}                  | ${'some-item'}                       | ${'some-item'}
+      ${'shop'}             | ${'is'}                  | ${'some-shop'}                       | ${'some-shop'}
+      ${'category'}         | ${'is'}                  | ${'some-category'}                   | ${'some-category'}
+      ${'holiday'}          | ${'is'}                  | ${'some-holiday'}                    | ${'some-holiday'}
+      ${'social'}           | ${'is'}                  | ${'some-social'}                     | ${'some-social'}
+      ${'cost'}             | ${'an integer'}          | ${123}                               | ${123.45}
+      ${'transactions'}     | ${'a transactions list'} | ${getTransactionsList(transactions)} | ${transactions}
+      ${'allocationTarget'} | ${'a number'}            | ${0.65}                              | ${0.65}
+      ${'allocationTarget'} | ${'zero, if null'}       | ${0}                                 | ${null}
+    `(
+      'should return "$dataType" as $resultDescription',
+      ({ dataType, inputValue, outputValue }) => {
+        expect.assertions(1);
+        expect(getValueFromTransmit(dataType, inputValue)).toStrictEqual(outputValue);
+      },
+    );
   });
 
   describe('getValueForTransmit', () => {
     const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
 
     it.each`
-      dataType          | resultDescription          | inputValue                           | outputValue
-      ${'id'}           | ${'as a number'}           | ${345}                               | ${345}
-      ${'date'}         | ${'as an ISO date string'} | ${new Date('2019-06-05')}            | ${'2019-06-05'}
-      ${'item'}         | ${'as-is'}                 | ${'some-item'}                       | ${'some-item'}
-      ${'shop'}         | ${'as-is'}                 | ${'some-shop'}                       | ${'some-shop'}
-      ${'category'}     | ${'as-is'}                 | ${'some-category'}                   | ${'some-category'}
-      ${'holiday'}      | ${'as-is'}                 | ${'some-holiday'}                    | ${'some-holiday'}
-      ${'social'}       | ${'as-is'}                 | ${'some-social'}                     | ${'some-social'}
-      ${'cost'}         | ${'as an integer'}         | ${123.45}                            | ${123}
-      ${'transactions'} | ${'as a simple array'}     | ${getTransactionsList(transactions)} | ${transactions}
-    `('should return "$dataType" $resultDescription', ({ dataType, inputValue, outputValue }) => {
-      expect.assertions(1);
-      expect(getValueForTransmit(dataType, inputValue)).toStrictEqual(outputValue);
-    });
+      dataType              | resultDescription       | inputValue                           | outputValue
+      ${'id'}               | ${'a number'}           | ${345}                               | ${345}
+      ${'date'}             | ${'an ISO date string'} | ${new Date('2019-06-05')}            | ${'2019-06-05'}
+      ${'item'}             | ${'is'}                 | ${'some-item'}                       | ${'some-item'}
+      ${'shop'}             | ${'is'}                 | ${'some-shop'}                       | ${'some-shop'}
+      ${'category'}         | ${'is'}                 | ${'some-category'}                   | ${'some-category'}
+      ${'holiday'}          | ${'is'}                 | ${'some-holiday'}                    | ${'some-holiday'}
+      ${'social'}           | ${'is'}                 | ${'some-social'}                     | ${'some-social'}
+      ${'cost'}             | ${'an integer'}         | ${123.45}                            | ${123}
+      ${'transactions'}     | ${'a simple array'}     | ${getTransactionsList(transactions)} | ${transactions}
+      ${'allocationTarget'} | ${'a number'}           | ${0.1}                               | ${0.1}
+    `(
+      'should return "$dataType" as $resultDescription',
+      ({ dataType, inputValue, outputValue }) => {
+        expect.assertions(1);
+        expect(getValueForTransmit(dataType, inputValue)).toStrictEqual(outputValue);
+      },
+    );
   });
 
   describe('sortByKey', () => {

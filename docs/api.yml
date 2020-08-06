@@ -766,6 +766,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/definitions/ErrorResponse"
+  /data/funds/cash-target:
+    put:
+      summary: Upsert the cash target
+      tags:
+        - Funds
+      operationId: upsertCashTarget
+      produces:
+        - application/json
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cashTarget:
+                  type: float
+                  required: true
+                  example: 2000000
+        responses:
+          401:
+            description: unauthorised
+            content:
+              application/json:
+                schema:
+                  $ref: "#/definitions/ErrorResponse"
+          200:
+            description: successful operation
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    cashTarget:
+                      type: float
+                      required: true
+                      example: 2000000
+          400:
+            description: invalid body
+            content:
+              application/json:
+                schema:
+                  $ref: "#/definitions/ErrorResponse"
 
   /data/stocks:
     get:
@@ -2361,6 +2404,10 @@ definitions:
             items:
               type: number
             example: [0, 259200, 518400]
+          cashTarget:
+            type: integer
+            description: Target cash allocation value
+            example: 2000000
           data:
             type: array
             items:

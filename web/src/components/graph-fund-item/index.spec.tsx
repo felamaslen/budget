@@ -44,7 +44,7 @@ describe('<GraphFundItem />', () => {
         z-index: 2;
       }
 
-      .sc-psCJM .c2 {
+      .sc-pReKu .c2 {
         position: relative;
         height: 125px;
       }
@@ -56,10 +56,11 @@ describe('<GraphFundItem />', () => {
       @media only screen and (min-width:500px) {
         .c1 {
           height: 100%;
-          -webkit-flex: 0 0 100px;
-          -ms-flex: 0 0 100px;
-          flex: 0 0 100px;
+          -webkit-flex: 0 0 6.25rem;
+          -ms-flex: 0 0 6.25rem;
+          flex: 0 0 6.25rem;
           outline: none;
+          position: relative;
           z-index: 2;
         }
 
@@ -72,7 +73,7 @@ describe('<GraphFundItem />', () => {
           position: absolute;
           background: rgba(255,255,255,0.8);
           box-shadow: 0 3px 7px rgba(0,0,0,0.2);
-          width: 300px;
+          width: 18.75rem;
           height: 120px;
         }
 
@@ -87,7 +88,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .c0 .MGQSV {
+        .c0 .jGFrsw {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -102,7 +103,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .sc-psCJM .c2 {
+        .sc-pReKu .c2 {
           height: 100%;
         }
       }

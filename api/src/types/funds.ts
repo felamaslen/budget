@@ -10,6 +10,7 @@ export type Fund = {
   id: number;
   item: string;
   transactions: Transaction[];
+  allocationTarget: number | null;
 };
 
 export type FundsParams = {
@@ -21,12 +22,14 @@ export type FundsParams = {
 type FundsResponseBase = {
   data: AbbreviatedItem<Fund>[];
   total: number;
+  cashTarget: number;
 };
 
 export const columnMapFunds: ColumnMap<Fund> = {
   I: 'id',
   i: 'item',
   tr: 'transactions',
+  allocationTarget: 'allocationTarget',
 };
 
 export type FundWithHistory = AbbreviatedItem<Fund, typeof columnMapFunds> & {

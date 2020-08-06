@@ -13,7 +13,12 @@ import {
   AddByCategoryValue,
   AddCurrency,
 } from '~client/components/net-worth/edit-form/styles';
-import { PageFunds, fieldSizes as fundFieldSizes } from '~client/components/page-funds/styles';
+import {
+  PageFunds,
+  fieldSizes as fundFieldSizes,
+  TargetAllocation,
+  CashTarget,
+} from '~client/components/page-funds/styles';
 import { breakpoint, rem } from '~client/styled/mixins';
 import { fontFamily } from '~client/styled/reset';
 import { breakpoints, colors } from '~client/styled/variables';
@@ -51,6 +56,15 @@ export const FormField = styled.div<{
     font-size: inherit;
   }
 
+  ${CashTarget} & {
+    border-bottom: none !important;
+    flex: 0 0 auto;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    margin-left: ${rem(4)};
+    width: auto !important;
+  }
+
   ${breakpoint(breakpoints.mobile)} {
     opacity: ${({ small, active }): number => (small && !active ? 0.3 : 1)};
 
@@ -83,6 +97,11 @@ export const FormField = styled.div<{
     ${PageFunds} & {
       width: ${({ item }): string => rem(Reflect.get(fundFieldSizes, item) ?? 0)};
       border-bottom: 1px solid ${borderColor};
+    }
+
+    ${TargetAllocation} & {
+      border-bottom: none;
+      width: 100%;
     }
   }
 

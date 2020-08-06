@@ -17,13 +17,21 @@ describe('getFundsRows', () => {
               id: numericHash('some-id'),
               item: 'foo fund',
               transactions: [],
+              allocationTarget: 0,
             },
-            { id: numericHash('other-id'), item: 'bar fund', transactions: [] },
+            {
+              id: numericHash('other-id'),
+              item: 'bar fund',
+              transactions: [],
+              allocationTarget: 0,
+            },
           ],
           __optimistic: [RequestType.delete, undefined],
         },
       }),
-    ).toStrictEqual<Fund[]>([{ id: numericHash('other-id'), item: 'bar fund', transactions: [] }]);
+    ).toStrictEqual<Fund[]>([
+      { id: numericHash('other-id'), item: 'bar fund', transactions: [], allocationTarget: 0 },
+    ]);
   });
 
   it('should order by item', () => {
@@ -34,15 +42,25 @@ describe('getFundsRows', () => {
         [Page.funds]: {
           ...state[Page.funds],
           items: [
-            { id: numericHash('some-id'), item: 'foo fund', transactions: [] },
-            { id: numericHash('other-id'), item: 'bar fund', transactions: [] },
+            {
+              id: numericHash('some-id'),
+              item: 'foo fund',
+              transactions: [],
+              allocationTarget: 0,
+            },
+            {
+              id: numericHash('other-id'),
+              item: 'bar fund',
+              transactions: [],
+              allocationTarget: 0,
+            },
           ],
           __optimistic: [undefined, undefined],
         },
       }),
-    ).toStrictEqual([
-      { id: numericHash('other-id'), item: 'bar fund', transactions: [] },
-      { id: numericHash('some-id'), item: 'foo fund', transactions: [] },
+    ).toStrictEqual<Fund[]>([
+      { id: numericHash('other-id'), item: 'bar fund', transactions: [], allocationTarget: 0 },
+      { id: numericHash('some-id'), item: 'foo fund', transactions: [], allocationTarget: 0 },
     ]);
   });
 });

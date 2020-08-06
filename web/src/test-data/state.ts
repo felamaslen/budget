@@ -224,6 +224,7 @@ export const testState: State = {
     items: funds.testRows,
     __optimistic: funds.testRows.map(() => undefined),
     viewSoldFunds: false,
+    cashTarget: 15000,
     period: FundsPeriod.year1,
     cache: {
       [FundsPeriod.year1]: {

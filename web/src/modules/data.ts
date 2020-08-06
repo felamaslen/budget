@@ -177,6 +177,7 @@ export const isNumber = <I extends Item, F extends keyof I>(
 export function getValueFromTransmit(dataType: 'id', value: string | number): number;
 export function getValueFromTransmit(dataType: 'date', value: string): Date;
 export function getValueFromTransmit(dataType: 'cost', value: string): number;
+export function getValueFromTransmit(dataType: 'allocationTarget', value: number | null): number;
 export function getValueFromTransmit(
   dataType: 'transactions',
   value: TransactionRaw[],
@@ -199,6 +200,9 @@ export function getValueFromTransmit(dataType: string, value: any): any {
   if (dataType === 'transactions') {
     return getTransactionsList(value);
   }
+  if (dataType === 'allocationTarget') {
+    return value ?? 0;
+  }
 
   return String(value);
 }
@@ -215,6 +219,7 @@ export function getValueForTransmit(dataType: 'cost', value: number): number;
 export function getValueForTransmit(dataType: 'shop', value: string): string;
 export function getValueForTransmit(dataType: 'holiday', value: string): string;
 export function getValueForTransmit(dataType: 'social', value: string): string;
+export function getValueForTransmit(dataType: 'allocationTarget', value: number): number;
 
 export function getValueForTransmit(dataType: string, value: string): string;
 

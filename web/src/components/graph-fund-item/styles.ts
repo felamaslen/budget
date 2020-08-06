@@ -1,8 +1,11 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import { FundRow } from '~client/components/page-funds/styles';
-import { breakpoint } from '~client/styled/mixins';
+import { breakpoint, rem } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
+
+export const graphFundItemWidth = 100;
+export const graphFundItemWidthLarge = 300;
 
 export const FundGraph = styled.div<{
   sold: boolean;
@@ -12,8 +15,9 @@ export const FundGraph = styled.div<{
 
   ${breakpoint(breakpoints.mobile)} {
     height: 100%;
-    flex: 0 0 100px;
+    flex: 0 0 ${rem(graphFundItemWidth)};
     outline: none;
+    position: relative;
     z-index: 2;
 
     &:focus {
@@ -28,7 +32,7 @@ export const FundGraph = styled.div<{
             position: absolute;
             background: ${colors.translucent.light.mediumLight};
             box-shadow: 0 3px 7px ${colors.shadow.light};
-            width: 300px;
+            width: ${rem(graphFundItemWidthLarge)};
             height: 120px;
           }
         `};

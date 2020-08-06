@@ -41,7 +41,6 @@ export const FundRow = styled(StandardRow)<Partial<FundProps>>`
     display: flex;
     height: ${rem(48)};
     line-height: ${rem(48)};
-    position: relative;
 
     &:nth-child(2n) {
       background-color: inherit;
@@ -55,6 +54,19 @@ export const FundRow = styled(StandardRow)<Partial<FundProps>>`
         font-style: italic;
         color: ${colors.light.mediumDark};
       `};
+  }
+`;
+
+export const TargetAllocation = styled.div`
+  align-items: center;
+  display: flex;
+  height: ${rem(12)};
+  width: ${rem(48)};
+
+  input {
+    height: 100% !important;
+    font-size: ${rem(12)} !important;
+    width: 100%;
   }
 `;
 
@@ -126,5 +138,54 @@ export const FundHeaderColumn = styled(HeaderColumn)<{ column: string }>`
     &:not(:first-child) {
       padding: 0;
     }
+  }
+`;
+
+export const CashAllocation = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+
+  ${breakpoint(breakpoints.mobile)} {
+    border-right: 1px solid ${colors.light.mediumDark};
+    flex: 0 0 ${rem(fieldSizes.item / 2)};
+    flex-flow: column;
+    height: ${rem(48)};
+    width: auto;
+  }
+`;
+
+const CashAllocationSection = styled.div`
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 0 0 50%;
+    line-height: ${rem(24)};
+  }
+`;
+
+export const CashToInvest = styled(CashAllocationSection)`
+  font-weight: bold;
+`;
+export const CashTarget = styled(CashAllocationSection)`
+  align-items: center;
+  display: flex;
+  flex-flow: row;
+  font-size: ${rem(12)};
+
+  input {
+    font-size: ${rem(12)} !important;
+    line-height: inherit;
+    height: 100% !important;
+    width: ${rem(48)};
+  }
+
+  button {
+    margin-left: ${rem(4)};
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    justify-content: space-between;
+    padding: 0 ${rem(10)};
+    width: 100%;
   }
 `;

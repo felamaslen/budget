@@ -34,6 +34,7 @@ describe('<PageFunds />', () => {
               cost: 420000,
             },
           ]),
+          allocationTarget: 0,
         },
         {
           id: numericHash('fund-id-some-sold-fund'),
@@ -53,6 +54,7 @@ describe('<PageFunds />', () => {
               cost: -1103001,
             },
           ]),
+          allocationTarget: 0,
         },
       ],
       viewSoldFunds: true,
@@ -159,7 +161,7 @@ describe('<PageFunds />', () => {
     const setupItem = (): HTMLLIElement => {
       const { getAllByRole } = setup();
       const items = getAllByRole('listitem') as HTMLLIElement[];
-      return items[index];
+      return items[index + 1];
     };
 
     it('should render a graph', () => {
@@ -235,6 +237,7 @@ describe('<PageFunds />', () => {
               cost,
             },
           ]),
+          allocationTarget: 0,
         },
         prices: {
           [id]: {

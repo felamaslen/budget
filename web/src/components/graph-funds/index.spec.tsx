@@ -42,6 +42,7 @@ describe('<GraphFunds />', () => {
                     cost: 9960,
                   },
                 ],
+                allocationTarget: 0,
               },
             ],
             cache: {

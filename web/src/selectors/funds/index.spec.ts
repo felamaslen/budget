@@ -1,13 +1,17 @@
 import addDays from 'date-fns/addDays';
 import getUnixTime from 'date-fns/getUnixTime';
+import numericHash from 'string-hash';
 
 import {
   getFundsCachedValueAgeText,
   getFundsCachedValue,
   getFundsCost,
   getPortfolio,
+  getCashToInvest,
   getDayGain,
   getDayGainAbs,
+  getMaxAllocationTarget,
+  getStockValue,
 } from '.';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
@@ -199,21 +203,25 @@ describe('Funds selectors', () => {
           id: 10,
           item: 'some fund 1',
           value: 399098.2,
+          allocationTarget: 0,
         },
         {
           id: 3,
           item: 'some fund 2',
           value: 0,
+          allocationTarget: 0,
         },
         {
           id: 1,
           item: 'some fund 3',
           value: 0,
+          allocationTarget: 0,
         },
         {
           id: 5,
           item: 'test fund 4',
           value: 0,
+          allocationTarget: 0,
         },
       ]);
     });
@@ -224,6 +232,51 @@ describe('Funds selectors', () => {
       const result = getPortfolio(testToday)(stateWithOnlyFutureTransaction);
 
       expect(result.find(({ id }) => id === 10)).toBeUndefined();
+    });
+  });
+
+  describe('getStockValue', () => {
+    it('should get the current paper value of stocks', () => {
+      expect.assertions(1);
+      expect(getStockValue(testToday)(state)).toMatchInlineSnapshot(`399098.2`);
+    });
+  });
+
+  describe('getCashToInvest', () => {
+    it('should get the difference between net worth ISA value and current stocks value', () => {
+      expect.assertions(1);
+      expect(getCashToInvest(testToday)(state)).toMatchInlineSnapshot(`661996.8`);
+    });
+  });
+
+  describe('getMaxAllocationTarget', () => {
+    it('should return the remainder of the allocation after accounting for the given fund', () => {
+      expect.assertions(2);
+
+      const stateWithAllocation: State = {
+        ...state,
+        [Page.funds]: {
+          ...state[Page.funds],
+          items: [
+            {
+              id: numericHash('fund-1'),
+              item: 'Fund 1',
+              transactions: [],
+              allocationTarget: 0.3,
+            },
+            {
+              id: numericHash('fund-2'),
+              item: 'Fund 2',
+              transactions: [],
+              allocationTarget: 0.45,
+            },
+          ],
+        },
+      };
+
+      expect(getMaxAllocationTarget(numericHash('fund-1'))(stateWithAllocation)).toBe(1 - 0.45);
+
+      expect(getMaxAllocationTarget(numericHash('fund-2'))(stateWithAllocation)).toBe(1 - 0.3);
     });
   });
 });

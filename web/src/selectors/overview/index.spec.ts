@@ -26,6 +26,7 @@ describe('Overview selectors', () => {
               { date: new Date('2018-02-05'), units: 10, cost: 56123 },
               { date: new Date('2018-03-27'), units: -1.32, cost: -2382 },
             ]),
+            allocationTarget: 0,
           },
           {
             id: 114,
@@ -33,6 +34,7 @@ describe('Overview selectors', () => {
             transactions: getTransactionsList([
               { date: new Date('2018-03-17'), units: 51, cost: 10662 },
             ]),
+            allocationTarget: 0,
           },
         ],
       },
@@ -111,6 +113,7 @@ describe('Overview selectors', () => {
                 { date: new Date('2018-02-05'), units: 10, cost: 56123 },
                 { date: new Date('2018-03-27'), units: -1.32, cost: -2382 },
               ]),
+              allocationTarget: 0,
             },
             {
               id: numericHash('fund-B'),
@@ -118,6 +121,7 @@ describe('Overview selectors', () => {
               transactions: getTransactionsList([
                 { date: new Date('2018-03-17'), units: 51, cost: 10662 },
               ]),
+              allocationTarget: 0,
             },
           ],
         },

@@ -5,19 +5,14 @@ import humanizeDuration from 'humanize-duration';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
+import { getLatestNetWorthAggregate } from '../overview/net-worth';
+import { getDayGain, getDayGainAbs, getPaperValue, getRealisedValue, getBuyCost } from './gains';
 import { getFundsRows, getCurrentFundsCache } from './helpers';
 import { Period } from '~client/constants/graph';
 import { getTotalCost } from '~client/modules/data';
 import { State } from '~client/reducers';
-import { Cache } from '~client/reducers/funds';
-import {
-  getDayGain,
-  getDayGainAbs,
-  getPaperValue,
-  getRealisedValue,
-  getBuyCost,
-} from '~client/selectors/funds/gains';
-import { Id, Page, Data, Portfolio, CachedValue, Transaction } from '~client/types';
+import { Cache, getRemainingAllocation } from '~client/reducers/funds';
+import { Id, Page, Data, Portfolio, CachedValue, Transaction, Aggregate } from '~client/types';
 
 export * from './gains';
 export * from './graph';
@@ -68,12 +63,12 @@ const getTransactionsToTodayWithPrices = moize(
         return [];
       }
 
-      return rows.map(({ id, item, transactions }) => {
+      return rows.map(({ id, item, transactions, allocationTarget }) => {
         const prices = cache.prices[id]?.values ?? [];
         const price = prices[prices.length - 1] ?? 0;
         const transactionsToToday = filterPastTransactions(today, transactions);
 
-        return { id, item, transactions: transactionsToToday, price };
+        return { id, item, transactions: transactionsToToday, price, allocationTarget };
       });
     }),
   { maxSize: 1 },
@@ -86,11 +81,39 @@ export const getPortfolio = moize(
       (funds): Portfolio =>
         funds
           .filter(({ price, transactions }) => price && transactions.length)
-          .map(({ id, item, transactions, price }) => ({
+          .map(({ id, item, transactions, price, allocationTarget }) => ({
             id,
             item,
             value: getPaperValue(transactions, price),
+            allocationTarget,
           })),
+    ),
+  { maxSize: 1 },
+);
+
+export const getStockValue = moize(
+  (today: Date) =>
+    createSelector(getPortfolio(today), (portfolio) =>
+      portfolio.reduce<number>((last, { value }) => last + value, 0),
+    ),
+  { maxSize: 1 },
+);
+
+export const getCashInBank = createSelector(
+  getLatestNetWorthAggregate,
+  (netWorth): number => netWorth?.[Aggregate.cashEasyAccess] ?? 0,
+);
+
+export const getCashToInvest = moize(
+  (today: Date) =>
+    createSelector(
+      getLatestNetWorthAggregate,
+      getCashInBank,
+      getStockValue(today),
+      (netWorth, cashInBank, stockValue): number => {
+        const stocksIncludingCash = netWorth?.[Aggregate.stocks] ?? 0;
+        return cashInBank + stocksIncludingCash - stockValue;
+      },
     ),
   { maxSize: 1 },
 );
@@ -162,3 +185,9 @@ export function getPricesForRow(
     price,
   ]);
 }
+
+export const getMaxAllocationTarget = moize((fundId: number) => (state: State): number =>
+  Math.max(0, Math.min(1, getRemainingAllocation(state[Page.funds], fundId))),
+);
+
+export const getCashAllocationTarget = (state: State): number => state[Page.funds].cashTarget;

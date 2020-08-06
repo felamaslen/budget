@@ -29,7 +29,15 @@ export const setValueInline = (
   return { __split: true, fieldValue, inputValue: getInputValueFromFieldValue(fieldValue) };
 };
 
-const { Field, FieldInline } = makeInlineField<number>({
+const { Field, FieldInline } = makeInlineField<
+  number,
+  {
+    disabled?: boolean;
+    min?: number;
+    max?: number;
+    step?: number;
+  }
+>({
   hookOptions: {
     convertExternalToInputValue: String,
     convertInputToExternalValue: ({ target: { value } }): number => Number(value),

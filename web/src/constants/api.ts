@@ -8,4 +8,5 @@ export enum DataKeyAbbr {
   holiday = 'h',
   society = 'y',
   transactions = 'tr',
+  allocationTarget = 'allocationTarget',
 }

@@ -14,6 +14,7 @@ export const testRows: Fund[] = [
         date: '2017-05-09',
       },
     ]),
+    allocationTarget: 0,
   },
   {
     id: 3,
@@ -30,6 +31,7 @@ export const testRows: Fund[] = [
         date: '2017-04-27',
       },
     ]),
+    allocationTarget: 0,
   },
   {
     id: 1,
@@ -46,6 +48,7 @@ export const testRows: Fund[] = [
         date: '2017-04-27',
       },
     ]),
+    allocationTarget: 0,
   },
   {
     id: 5,
@@ -62,6 +65,7 @@ export const testRows: Fund[] = [
         date: '2017-04-27',
       },
     ]),
+    allocationTarget: 0,
   },
 ];
 

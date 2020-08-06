@@ -1,39 +1,29 @@
 import { compose } from '@typed/compose';
 import { setLightness, rgba } from 'polished';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useContext } from 'react';
 import { useSelector } from 'react-redux';
 
 import * as Styled from './styles';
 import { BlockPacker } from '~client/components/block-packer';
 import { GRAPH_WIDTH, GRAPH_HEIGHT } from '~client/constants/graph';
+import { TodayContext } from '~client/hooks';
 import { blockPacker } from '~client/modules/block-packer';
 import { colorKey } from '~client/modules/color';
 import { abbreviateFundName } from '~client/modules/finance';
 import { formatPercent } from '~client/modules/format';
-import { getNetWorthTable } from '~client/selectors';
+import { getCashToInvest, getPortfolio, getStockValue, getCashInBank } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import { Portfolio, Aggregate, BlockItem } from '~client/types';
+import { BlockItem } from '~client/types';
 
-export type Props = {
-  portfolio: Portfolio;
-};
-
-export const FundWeights: React.FC<Props> = ({ portfolio }) => {
-  const netWorth = useSelector(getNetWorthTable);
+export const FundWeights: React.FC = () => {
+  const today = useContext(TodayContext);
+  const portfolio = useSelector(getPortfolio(today));
+  const stockValue = useSelector(getStockValue(today));
+  const cashToInvest = useSelector(getCashToInvest(today));
+  const cashInBank = useSelector(getCashInBank);
 
   const blocks = useMemo(() => {
-    const latestNetWorth = netWorth[netWorth.length - 1]?.aggregate;
-
-    const stocksIncludingCash = latestNetWorth?.[Aggregate.stocks] ?? 0;
-    const otherCash =
-      (latestNetWorth?.[Aggregate.cashOther] ?? 0) +
-      (latestNetWorth?.[Aggregate.cashEasyAccess] ?? 0);
-
-    const relevantNetWorth = stocksIncludingCash + otherCash;
-
-    const stockValue = portfolio.reduce<number>((last, { value }) => last + value, 0);
-    const cashToInvest = stocksIncludingCash - stockValue;
-    const allCash = cashToInvest + otherCash;
+    const relevantNetWorth = cashToInvest + stockValue;
 
     return blockPacker<BlockItem>(GRAPH_WIDTH, GRAPH_HEIGHT, [
       {
@@ -57,28 +47,28 @@ export const FundWeights: React.FC<Props> = ({ portfolio }) => {
       },
       {
         name: 'Cash',
-        total: allCash,
+        total: cashToInvest,
         color: 'grey',
-        text: <Styled.Label small={allCash < relevantNetWorth / 20}>Cash</Styled.Label>,
+        text: <Styled.Label small={cashToInvest < relevantNetWorth / 20}>Cash</Styled.Label>,
         subTree: [
           {
-            name: `(${formatPercent(cashToInvest / relevantNetWorth, {
+            name: `(${formatPercent((cashToInvest - cashInBank) / relevantNetWorth, {
               precision: 1,
             })}) Cash to invest`,
-            total: cashToInvest,
+            total: cashToInvest - cashInBank,
             color: colors.transparent,
           },
           {
-            name: `(${formatPercent(otherCash / relevantNetWorth, {
+            name: `(${formatPercent(cashInBank / relevantNetWorth, {
               precision: 1,
             })}) Cash in bank`,
-            total: otherCash,
+            total: cashInBank,
             color: rgba(colors.green, 0.1),
           },
         ],
       },
     ]);
-  }, [portfolio, netWorth]);
+  }, [portfolio, stockValue, cashToInvest, cashInBank]);
 
   const [status, setStatus] = useState<string>('');
   const onHover = useCallback((name?: string | null, subName?: string | null): void => {

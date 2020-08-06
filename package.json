@@ -9,7 +9,7 @@
   "scripts": {
     "check-types": "tsc",
     "check-types:watch": "yarn check-types --watch",
-    "build:api": "BABEL_ENV=node babel api/src -d api/build --extensions \".ts,.js\" --copy-files",
+    "build:api": "rm -rf api/build && BABEL_ENV=node babel api/src -d api/build --extensions \".ts,.js\" --copy-files",
     "build:client": "NODE_ENV=production webpack --mode production",
     "build": "yarn check-types && yarn build:api && yarn build:client",
     "start": "node api/build",

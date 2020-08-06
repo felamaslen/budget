@@ -140,7 +140,10 @@ export function makeListReducer<I extends ListItem, P extends PageList, ES exten
 
   const handlerSyncReceived = onSyncReceived<I, P, ES>(page);
 
-  return function listReducer(state = initialState, action): ListState<I, ES> {
+  return function listReducer(
+    state: ListState<I, ES> = initialState,
+    action: Actions.Action,
+  ): ListState<I, ES> {
     switch (action.type) {
       case Actions.ListActionType.Created:
         return handlerCreate(state, action);

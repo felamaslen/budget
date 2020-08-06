@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
+import { CashRow } from './cash-row';
 import { FundHeader } from './header';
 import { FundNameMobile, FundDetailMobile } from './mobile';
 import { FundRow } from './row';
@@ -12,9 +13,10 @@ import {
   FormFieldTransactions,
   FormFieldTransactionsInline,
   FormFieldText,
+  FormFieldNumber,
 } from '~client/components/form-field';
 import { GraphFunds } from '~client/components/graph-funds';
-import { makeField } from '~client/components/modal-dialog';
+import { makeField, ModalFields } from '~client/components/modal-dialog';
 import { useIsMobile, usePersistentState } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
@@ -38,9 +40,10 @@ const fieldsMobile = {
   transactions: FundDetailMobile,
 };
 
-const modalFields = {
+const modalFields: ModalFields<Fund> = {
   item: makeField('item', FormFieldText),
   transactions: makeField('transactions', FormFieldTransactions),
+  allocationTarget: makeField('allocationTarget', FormFieldNumber),
 };
 
 const deltaSeed = (): Delta<Fund> => ({
@@ -109,6 +112,7 @@ export const Funds: React.FC = () => {
         Row={FundRow}
         Header={FundHeader}
         headerProps={{ sort, setSort }}
+        FirstItem={CashRow}
       />
       {!isMobile && <GraphFunds />}
     </Styled.PageFunds>

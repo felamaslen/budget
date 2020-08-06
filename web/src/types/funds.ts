@@ -15,6 +15,7 @@ export type Transaction = Omit<TransactionRaw, 'date'> & {
 
 export type Fund = ListItem & {
   transactions: Transaction[];
+  allocationTarget: number;
 };
 
 export type FundPrices = {
@@ -55,6 +56,7 @@ export type StockPrice = {
 
 type FundRaw = RawListItem & {
   [DataKeyAbbr.transactions]: TransactionRaw[] | null;
+  [DataKeyAbbr.allocationTarget]: number | null;
   pr: number[];
   prStartIndex: number;
 };
@@ -63,12 +65,14 @@ export type ReadResponseFunds = {
   data: FundRaw[];
   startTime: number;
   cacheTimes: number[];
+  cashTarget: number;
 };
 
-type PortfolioItem = {
+export type PortfolioItem = {
   id: Id;
   item: string;
   value: number;
+  allocationTarget: number;
 };
 export type Portfolio = PortfolioItem[];
 
