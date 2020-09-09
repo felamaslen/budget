@@ -153,6 +153,10 @@ const getTodayAndYesterdayTotalValue = createSelector(
 
       return itemsWithPrices.reduce((last, { id, transactions }) => {
         const { startIndex = 0, values = [] } = cache?.prices[id] || {};
+        if (!values.length) {
+          return last;
+        }
+
         const timeIndex =
           (cache?.cacheTimes || []).length -
           1 -
@@ -161,11 +165,7 @@ const getTodayAndYesterdayTotalValue = createSelector(
             .reverse()
             .findIndex((value) => value + (cache?.startTime || 0) <= maxDateValue);
 
-        if (timeIndex >= startIndex + values.length) {
-          return last;
-        }
-
-        const price = values[timeIndex - startIndex];
+        const price = values[timeIndex - startIndex] ?? values[values.length - 1];
 
         const filteredTransactions = transactions.filter(
           ({ date }) => Number(date) <= Number(maxDate),

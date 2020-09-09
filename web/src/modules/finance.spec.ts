@@ -5,6 +5,7 @@ describe('Finance module', () => {
     it.each`
       short             | long
       ${'SMT'}          | ${'Scottish Mortgage IT Ordinary Shares 5p (share)'}
+      ${'SMT'}          | ${'Scottish Mortgage IT PLC Ordinary Shares 5p (share)'}
       ${'FCSS'}         | ${'Fidelity China Special Situations Ord 0.01 (share)'}
       ${'CTY'}          | ${'City of London Investment Trust ORD 25p (share)'}
       ${'L&G Int. Ix'}  | ${'Legal and General International Index Trust C (accum.)'}

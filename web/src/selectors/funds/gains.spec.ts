@@ -5,6 +5,7 @@ import numericHash from 'string-hash';
 import { Period } from '~client/constants/graph';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
+import { Cache } from '~client/reducers/funds';
 import {
   getRowGains,
   getGainsForRow,
@@ -257,6 +258,41 @@ describe('Funds selectors / gains', () => {
       const costPrev = 1199 + 98503;
 
       expect(getDayGainAbs(stateWithGains)).toBe(valueLatest - valuePrev - (costLatest - costPrev));
+    });
+
+    describe('when the latest price is missing for a fund', () => {
+      const stateWithMissingLatestPrice: State = {
+        ...stateWithGains,
+        [Page.funds]: {
+          ...stateWithGains[Page.funds],
+          cache: {
+            [Period.year1]: {
+              ...stateWithGains[Page.funds].cache[Period.year1],
+              prices: {
+                ...stateWithGains[Page.funds].cache[Period.year1]?.prices,
+                [numericHash('fund1')]: {
+                  startIndex: 1,
+                  values: [109],
+                },
+              },
+            } as Cache,
+          },
+        },
+      };
+
+      it('should use the latest available price for the fund', () => {
+        expect.assertions(1);
+
+        const valueLatest = 345 * 109 + (167 - 23) * 49.3;
+        const valuePrev = 345 * 109 + 167 * 57.9;
+
+        const costLatest = 1199 + 98503 - 130;
+        const costPrev = 1199 + 98503;
+
+        expect(getDayGainAbs(stateWithMissingLatestPrice)).toBe(
+          valueLatest - valuePrev - (costLatest - costPrev),
+        );
+      });
     });
   });
 

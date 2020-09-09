@@ -143,7 +143,7 @@ const prepareBase = compose(withInt, withAnd, removeUnused);
 const isShare = (name: string): boolean =>
   /\(share\)/.test(name) && (/\s(IT|(Investment )?Trust|)/.test(name) || ordinaryShare.test(name));
 
-const removeUnusedIT = (a: string): string => a.replace(/( And| Inc)/g, '');
+const removeUnusedIT = (a: string): string => a.replace(/( And| Inc| PLC)/g, '');
 const ITToTrust = (a: string): string => a.replace(/\s(IT|Investment Trust)\s/, ' Trust ');
 
 const prepareShare = compose(ITToTrust, removeUnusedIT);
