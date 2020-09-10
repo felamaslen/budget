@@ -13,8 +13,10 @@ import {
   getMaxAllocationTarget,
   getStockValue,
 } from '.';
+import { Period } from '~client/constants';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
+import { Cache } from '~client/reducers/funds';
 import { testState as state } from '~client/test-data/state';
 import { Page, Portfolio, CachedValue } from '~client/types';
 
@@ -243,9 +245,47 @@ describe('Funds selectors', () => {
   });
 
   describe('getCashToInvest', () => {
-    it('should get the difference between net worth ISA value and current stocks value', () => {
+    const today = new Date('2017-09-07T16:32:10+0100');
+
+    it('should get the difference between net worth ISA value and start-of-month stocks value', () => {
       expect.assertions(1);
-      expect(getCashToInvest(testToday)(state)).toMatchInlineSnapshot(`661996.8`);
+      expect(getCashToInvest(today)(state)).toMatchInlineSnapshot(`664985.6`);
+    });
+
+    describe('if the stock value has deviated in the current month', () => {
+      const stateWithDeviation: State = {
+        ...state,
+        [Page.funds]: {
+          ...state[Page.funds],
+          cache: {
+            [Period.year1]: {
+              ...state[Page.funds].cache[Period.year1],
+              cacheTimes: [
+                ...(state[Page.funds].cache[Period.year1]?.cacheTimes ?? []),
+                28623600 + 86400 * 3,
+              ],
+              prices: {
+                ...state[Page.funds].cache[Period.year1]?.prices,
+                10: {
+                  ...state[Page.funds].cache[Period.year1]?.prices[10],
+                  values: [
+                    ...(state[Page.funds].cache[Period.year1]?.prices[10]?.values ?? []),
+                    400,
+                  ],
+                },
+              },
+            } as Cache,
+          },
+        },
+      };
+
+      it('should use the value of the fund at the start of the month, instead of the latest value', () => {
+        expect.assertions(1);
+
+        const cashToInvest = getCashToInvest(today)(stateWithDeviation);
+
+        expect(cashToInvest).toBe(664985.6);
+      });
     });
   });
 

@@ -1,6 +1,8 @@
 import endOfDay from 'date-fns/endOfDay';
+import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
 import startOfDay from 'date-fns/startOfDay';
+import startOfMonth from 'date-fns/startOfMonth';
 import humanizeDuration from 'humanize-duration';
 import moize from 'moize';
 import { createSelector } from 'reselect';
@@ -56,28 +58,37 @@ const getFundCacheAge = moize(
 const filterPastTransactions = (today: Date, transactions: Transaction[]): Transaction[] =>
   transactions.filter(({ date }) => isBefore(startOfDay(date), today));
 
-const getTransactionsToTodayWithPrices = moize(
-  (today: Date) =>
+const getTransactionsToDateWithPrices = moize(
+  (date: Date) =>
     createSelector(getFundsRows, getCurrentFundsCache, (rows, cache) => {
       if (!(rows && cache)) {
         return [];
       }
 
+      const unixTime = getUnixTime(date);
+      const priceIndexMax =
+        cache.cacheTimes.length -
+        cache.cacheTimes
+          .slice()
+          .reverse()
+          .findIndex((time) => time <= unixTime - cache.startTime);
+
       return rows.map(({ id, item, transactions, allocationTarget }) => {
         const prices = cache.prices[id]?.values ?? [];
-        const price = prices[prices.length - 1] ?? 0;
-        const transactionsToToday = filterPastTransactions(today, transactions);
+        const priceIndex = Math.min(prices.length, priceIndexMax - cache.prices[id]?.startIndex);
+        const price = prices[priceIndex - 1] ?? 0;
+        const transactionsToDate = filterPastTransactions(date, transactions);
 
-        return { id, item, transactions: transactionsToToday, price, allocationTarget };
+        return { id, item, transactions: transactionsToDate, price, allocationTarget };
       });
     }),
   { maxSize: 1 },
 );
 
 export const getPortfolio = moize(
-  (today: Date) =>
+  (date: Date) =>
     createSelector(
-      getTransactionsToTodayWithPrices(today),
+      getTransactionsToDateWithPrices(date),
       (funds): Portfolio =>
         funds
           .filter(({ price, transactions }) => price && transactions.length)
@@ -92,8 +103,8 @@ export const getPortfolio = moize(
 );
 
 export const getStockValue = moize(
-  (today: Date) =>
-    createSelector(getPortfolio(today), (portfolio) =>
+  (date: Date) =>
+    createSelector(getPortfolio(date), (portfolio) =>
       portfolio.reduce<number>((last, { value }) => last + value, 0),
     ),
   { maxSize: 1 },
@@ -109,7 +120,7 @@ export const getCashToInvest = moize(
     createSelector(
       getLatestNetWorthAggregate,
       getCashInBank,
-      getStockValue(today),
+      getStockValue(startOfMonth(today)),
       (netWorth, cashInBank, stockValue): number => {
         const stocksIncludingCash = netWorth?.[Aggregate.stocks] ?? 0;
         return cashInBank + stocksIncludingCash - stockValue;
@@ -121,7 +132,7 @@ export const getCashToInvest = moize(
 export const getFundsCachedValue = moize(
   (now: Date): ((state: State) => CachedValue) =>
     createSelector(
-      getTransactionsToTodayWithPrices(endOfDay(now)),
+      getTransactionsToDateWithPrices(endOfDay(now)),
       getFundCacheAge(now),
       getDayGain,
       getDayGainAbs,
