@@ -101,6 +101,7 @@ export const Actual = styled.div.attrs(({ fraction, color }: ActualProps) => ({
 
 type TargetProps = ActualProps & {
   delta: number;
+  isCash?: boolean;
 };
 
 export const Target = styled.div.attrs(({ fraction, color, delta }: TargetProps) => ({
@@ -114,7 +115,7 @@ export const Target = styled.div.attrs(({ fraction, color, delta }: TargetProps)
   cursor: col-resize;
   height: 100%;
   position: absolute;
-  width: 5px;
+  border-right-width: ${({ isCash }): number => (isCash ? 2 : 1)}px;
   top: 0;
   z-index: 10;
 `;
