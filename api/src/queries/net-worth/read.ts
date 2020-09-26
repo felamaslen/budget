@@ -29,6 +29,7 @@ const joinEntryRows = (
       sql`nwopv.units as op_units`,
       sql`nwopv.strike_price as op_strike_price`,
       sql`nwopv.market_price as op_market_price`,
+      sql`nwopv.vested as op_vested`,
     ],
     sql`, `,
   )}
@@ -103,6 +104,7 @@ const joinEntryRows = (
       sql`nwopv.units`,
       sql`nwopv.strike_price`,
       sql`nwopv.market_price`,
+      sql`nwopv.vested`,
     ],
     sql`, `,
   )}

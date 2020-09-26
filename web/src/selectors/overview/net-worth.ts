@@ -96,7 +96,7 @@ function getComplexValue(value: Value, currencies: Currency[]): number {
       return last + currencyMatch.rate * numberValue * 100;
     }
     if (isOption(part)) {
-      return last + part.units * part.marketPrice;
+      return last + part.vested * part.marketPrice;
     }
 
     return last + part;
@@ -318,6 +318,7 @@ const withSubcategoryRequests = (
 
 const baseOption: OptionValue = {
   units: 0,
+  vested: 0,
   strikePrice: 0,
   marketPrice: 0,
 };

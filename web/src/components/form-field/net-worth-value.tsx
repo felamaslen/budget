@@ -217,10 +217,11 @@ const coerceOptionValue = (value: Value): Partial<OptionValue> =>
   isComplex(value) ? value.find(isOption) ?? {} : {};
 
 const optionDeltaComplete = (delta: Partial<OptionValue> | OptionValue): delta is OptionValue =>
-  Object.keys(delta).length === 3 &&
+  Object.keys(delta).length === 4 &&
   Object.values(delta).every((value) => typeof value !== 'undefined');
 
 const unitsProps = { placeholder: 'Units' };
+const vestedProps = { placeholder: 'Vested' };
 const strikeProps = { placeholder: 'Strike price' };
 const marketProps = { placeholder: 'Market price' };
 
@@ -236,6 +237,7 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ id, value, onChange }) =>
   }, [initialDelta]);
 
   const onChangeUnits = useCallback((units = 0) => setDelta((last) => ({ ...last, units })), []);
+  const onChangeVested = useCallback((vested = 0) => setDelta((last) => ({ ...last, vested })), []);
   const onChangeStrike = useCallback(
     (strikePrice = 0) => setDelta((last) => ({ ...last, strikePrice })),
     [],
@@ -246,7 +248,7 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ id, value, onChange }) =>
   );
 
   useEffect(() => {
-    if (Object.keys(delta).length === 3 && optionDeltaComplete(delta)) {
+    if (optionDeltaComplete(delta)) {
       onChange([delta]);
     }
   }, [delta, onChange]);
@@ -260,6 +262,15 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ id, value, onChange }) =>
           inputProps={unitsProps}
           value={delta.units ?? 0}
           onChange={onChangeUnits}
+        />
+      </div>
+      <div>
+        <label htmlFor={`option-vested-${id}`}>Vested</label>
+        <FormFieldNumber
+          id={`option-vested-${id}`}
+          inputProps={vestedProps}
+          value={delta.vested ?? 0}
+          onChange={onChangeVested}
         />
       </div>
       <div>

@@ -2156,6 +2156,9 @@ definitions:
         units:
           type: number
           description: number of units purchasable
+        vested:
+          type: number
+          description: number of units vested under options scheme
         strikePrice:
           type: number
           description: price at which shares would be bought

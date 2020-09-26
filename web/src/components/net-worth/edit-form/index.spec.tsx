@@ -89,6 +89,7 @@ describe('Net worth entry form', () => {
         value: [
           {
             units: 1326,
+            vested: 0,
             strikePrice: 1350.2,
             marketPrice: 1899.19,
           },
@@ -437,6 +438,7 @@ describe('Net worth entry form', () => {
               value: [
                 {
                   units: 1006,
+                  vested: 0,
                   strikePrice: 1440.2,
                   marketPrice: 2093.7,
                 },
@@ -551,6 +553,7 @@ describe('Net worth entry form', () => {
                 value: [
                   {
                     units: 1006,
+                    vested: 0,
                     strikePrice: 1440.2,
                     marketPrice: 2093.7,
                   },

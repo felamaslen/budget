@@ -561,6 +561,7 @@ describe('Net worth route', () => {
                     units: 157,
                     strikePrice: 140.53,
                     marketPrice: 197.812,
+                    vested: 0,
                   },
                 ],
               },
@@ -663,6 +664,7 @@ describe('Net worth route', () => {
                     units: 1324,
                     strikePrice: 4.53,
                     marketPrice: 19.27,
+                    vested: 100,
                   },
                 ],
               },
@@ -865,7 +867,7 @@ describe('Net worth route', () => {
         );
       });
 
-      it('should update an option price', async () => {
+      it('should update an option price and vested number', async () => {
         expect.assertions(2);
         const {
           entry,
@@ -890,6 +892,7 @@ describe('Net worth route', () => {
                   units: 1324,
                   strikePrice: 4.53,
                   marketPrice: 19.27,
+                  vested: 140,
                 },
               ],
             },
@@ -1028,6 +1031,7 @@ describe('Net worth route', () => {
                   units: 10,
                   strikePrice: 11,
                   marketPrice: 12,
+                  vested: 0,
                 },
               ],
             }),

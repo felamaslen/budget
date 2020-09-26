@@ -176,6 +176,7 @@ export const testState: State = {
               value: [
                 {
                   units: 103,
+                  vested: 103,
                   strikePrice: 77.65,
                   marketPrice: 95.57,
                 },

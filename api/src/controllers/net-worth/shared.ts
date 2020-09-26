@@ -65,6 +65,7 @@ export function getValueFromRow(row: JoinedEntryRow): Value {
         units: row.op_units,
         strikePrice: row.op_strike_price,
         marketPrice: row.op_market_price,
+        vested: row.op_vested,
       },
     ];
   }

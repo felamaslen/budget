@@ -11,7 +11,7 @@ import {
   getNetWorthRequests,
 } from './net-worth';
 import { State } from '~client/reducers';
-import { testState as state } from '~client/test-data';
+import { testState } from '~client/test-data';
 import {
   Create,
   RequestType,
@@ -24,6 +24,39 @@ import {
 } from '~client/types';
 
 describe('Overview selectors (net worth)', () => {
+  const state: State = {
+    ...testState,
+    netWorth: {
+      ...testState.netWorth,
+      entries: {
+        ...testState.netWorth.entries,
+        items: [
+          testState.netWorth.entries.items[0],
+          {
+            ...testState.netWorth.entries.items[1],
+            values: replaceAtIndex(
+              testState.netWorth.entries.items[1].values,
+              testState.netWorth.entries.items[1].values.findIndex(
+                ({ id }) => id === numericHash('value-id-b5'),
+              ),
+              (item) => ({
+                ...item,
+                value: [
+                  {
+                    units: 103,
+                    vested: 56,
+                    strikePrice: 77.65,
+                    marketPrice: 95.57,
+                  },
+                ],
+              }),
+            ),
+          },
+        ],
+      },
+    },
+  };
+
   const testCategory: Category = {
     id: numericHash('category-id-a'),
     type: 'asset',
@@ -288,7 +321,7 @@ describe('Overview selectors (net worth)', () => {
         ${'id'}                   | ${numericHash('real-entry-id-b')}
         ${'date'}                 | ${new Date('2018-03-31')}
         ${'assets'}               | ${9752 + 1051343}
-        ${'options'}              | ${103 * 95.57}
+        ${'options'}              | ${56 * 95.57}
         ${'aggregate'}            | ${aggregate}
         ${'liabilities'}          | ${21939}
         ${'expenses'}             | ${400 + 20 + 10 + 95 + 134}
@@ -566,9 +599,9 @@ describe('Overview selectors (net worth)', () => {
                       subcategory: numericHash('real-subcategory-id'),
                       value: [
                         3,
-                        { units: 67, strikePrice: 35.27, marketPrice: 32.99 },
+                        { units: 67, vested: 10, strikePrice: 35.27, marketPrice: 32.99 },
                         { value: 10, currency: 'USD' },
-                        { units: 103, strikePrice: 135.27, marketPrice: 132.99 },
+                        { units: 103, vested: 0, strikePrice: 135.27, marketPrice: 132.99 },
                       ],
                     },
                   ],
@@ -647,6 +680,7 @@ describe('Overview selectors (net worth)', () => {
                   value: [
                     {
                       units: 0,
+                      vested: 0,
                       strikePrice: 0,
                       marketPrice: 0,
                     },

@@ -27,6 +27,7 @@ export const schemaNetWorth = joi
                     units: joi.number().required(),
                     strikePrice: joi.number().required(),
                     marketPrice: joi.number().required(),
+                    vested: joi.number().integer().min(0).optional().default(0),
                   })
                   .unknown(false),
               ),

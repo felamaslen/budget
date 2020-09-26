@@ -91,8 +91,14 @@ export async function createValues(
   >(({ valueId, value, currency }) => [valueId, value, currency]);
 
   const optionValuesRows = filterComplexValues<OptionValue>(valueIds, isOptionValue, values).map<
-    [number, number, number, number]
-  >(({ valueId, units, strikePrice, marketPrice }) => [valueId, units, strikePrice, marketPrice]);
+    [number, number, number, number, number]
+  >(({ valueId, units, strikePrice, marketPrice, vested }) => [
+    valueId,
+    units,
+    strikePrice,
+    marketPrice,
+    vested,
+  ]);
 
   await Promise.all([insertFXValues(db, fxValuesRows), insertOptionValues(db, optionValuesRows)]);
 }

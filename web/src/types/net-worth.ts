@@ -21,12 +21,13 @@ export type FXValue = {
 
 export type OptionValue = {
   units: number;
+  vested: number;
   strikePrice: number;
   marketPrice: number;
 };
 
-type ComplexValueItem = number | FXValue | OptionValue;
-type ComplexValue = ComplexValueItem[];
+export type ComplexValueItem = number | FXValue | OptionValue;
+export type ComplexValue = ComplexValueItem[];
 
 export type Value = number | ComplexValue;
 

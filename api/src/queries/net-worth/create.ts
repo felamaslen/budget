@@ -50,14 +50,14 @@ export async function insertFXValues(
 
 export async function insertOptionValues(
   db: DatabaseTransactionConnectionType,
-  optionValuesRows: [number, number, number, number][],
+  optionValuesRows: [number, number, number, number, number][],
 ): Promise<void> {
   if (!optionValuesRows.length) {
     return;
   }
   await db.query(sql`
-    INSERT INTO net_worth_option_values (values_id, units, strike_price, market_price)
-    SELECT * FROM ${sql.unnest(optionValuesRows, ['int4', 'float4', 'float4', 'float4'])}
+    INSERT INTO net_worth_option_values (values_id, units, strike_price, market_price, vested)
+    SELECT * FROM ${sql.unnest(optionValuesRows, ['int4', 'float4', 'float4', 'float4', 'int4'])}
   `);
 }
 

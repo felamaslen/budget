@@ -266,7 +266,7 @@ describe('<FormFieldNetWorthValue />', () => {
     const propsOption = {
       ...props,
       isOption: true,
-      value: [{ units: 105, strikePrice: 45.532, marketPrice: 97.113 }],
+      value: [{ units: 105, vested: 10, strikePrice: 45.532, marketPrice: 97.113 }],
     };
 
     const setup = (): RenderResult => {
@@ -276,6 +276,7 @@ describe('<FormFieldNetWorthValue />', () => {
     describe.each`
       field            | placeholder       | fieldValue  | updatedValue | delta
       ${'units'}       | ${'Units'}        | ${'105'}    | ${'187'}     | ${{ units: 187 }}
+      ${'vested'}      | ${'Vested'}       | ${'10'}     | ${'13'}      | ${{ vested: 13 }}
       ${'strikePrice'} | ${'Strike price'} | ${'45.532'} | ${'49.931'}  | ${{ strikePrice: 49.931 }}
       ${'marketPrice'} | ${'Market price'} | ${'97.113'} | ${'99.007'}  | ${{ marketPrice: 99.007 }}
     `('$field field', ({ placeholder, fieldValue, updatedValue, delta }) => {
@@ -312,6 +313,7 @@ describe('<FormFieldNetWorthValue />', () => {
             units: 105,
             strikePrice: 45.532,
             marketPrice: 97.113,
+            vested: 10,
             ...delta,
           },
         ]);
@@ -328,12 +330,12 @@ describe('<FormFieldNetWorthValue />', () => {
         render(<FormFieldNetWorthValue {...propsOption} value={erroneousValue} />);
 
       it('should render the usual option fields', () => {
-        expect.assertions(4);
+        expect.assertions(5);
         const { getAllByRole } = setupErroneous();
 
         const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
 
-        expect(inputs).toHaveLength(3);
+        expect(inputs).toHaveLength(4);
         inputs.forEach((input) => {
           expect(input.value).toBe('0');
         });
@@ -365,13 +367,19 @@ describe('<FormFieldNetWorthValue />', () => {
         expect.assertions(2);
         const { getAllByRole } = setupErroneous();
         const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
-        const [inputUnits, inputStrikePrice, inputMarketPrice] = inputs;
+        const [inputUnits, inputVested, inputStrikePrice, inputMarketPrice] = inputs;
 
         act(() => {
           fireEvent.change(inputUnits, { target: { value: '100' } });
         });
         act(() => {
           fireEvent.blur(inputUnits);
+        });
+        act(() => {
+          fireEvent.change(inputVested, { target: { value: '53' } });
+        });
+        act(() => {
+          fireEvent.blur(inputVested);
         });
         act(() => {
           fireEvent.change(inputStrikePrice, { target: { value: '45' } });
@@ -390,6 +398,7 @@ describe('<FormFieldNetWorthValue />', () => {
         expect(props.onChange).toHaveBeenCalledWith([
           {
             units: 100,
+            vested: 53,
             strikePrice: 45,
             marketPrice: 37.2,
           },

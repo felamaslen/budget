@@ -4,9 +4,12 @@ import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
+import { replaceAtIndex } from 'replace-array';
+import numericHash from 'string-hash';
 
 import { GraphBalance, Props } from '.';
 import { TodayContext } from '~client/hooks';
+import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
 
 describe('<GraphBalance />', () => {
@@ -14,9 +17,42 @@ describe('<GraphBalance />', () => {
 
   const makeStore = createStore();
 
+  const stateCustom: State = {
+    ...state,
+    netWorth: {
+      ...state.netWorth,
+      entries: {
+        ...state.netWorth.entries,
+        items: [
+          state.netWorth.entries.items[0],
+          {
+            ...state.netWorth.entries.items[1],
+            values: replaceAtIndex(
+              state.netWorth.entries.items[1].values,
+              state.netWorth.entries.items[1].values.findIndex(
+                ({ id }) => id === numericHash('value-id-b5'),
+              ),
+              (item) => ({
+                ...item,
+                value: [
+                  {
+                    units: 103,
+                    vested: 103,
+                    strikePrice: 77.65,
+                    marketPrice: 95.57,
+                  },
+                ],
+              }),
+            ),
+          },
+        ],
+      },
+    },
+  };
+
   const setup = (props: Props): RenderResult => {
     const store = makeStore({
-      ...state,
+      ...stateCustom,
       now,
     });
 

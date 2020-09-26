@@ -34,6 +34,7 @@ export type OptionValue = {
   units: number;
   strikePrice: number;
   marketPrice: number;
+  vested: number;
 };
 
 export type ComplexValueItem = number | FXValue | OptionValue;
@@ -95,6 +96,7 @@ export type JoinedEntryRow = {
   op_units: number | null;
   op_strike_price: number | null;
   op_market_price: number | null;
+  op_vested: number | null;
 };
 
 export type JoinedEntryRowWithCurrencies = JoinedEntryRow & {
@@ -117,6 +119,7 @@ export type JoinedEntryRowWithOptionValue = JoinedEntryRow & {
   op_units: number;
   op_strike_price: number;
   op_market_price: number;
+  op_vested: number;
 };
 
 export type OldNetWorthRow = { value: number; option_value: number };
