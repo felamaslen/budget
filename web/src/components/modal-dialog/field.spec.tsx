@@ -37,15 +37,19 @@ describe('<ModalDialogField />', () => {
       setup({
         field: 'transactions' as const,
         Field: FieldTransactions,
-        value: getTransactionsList([{ date: '2020-04-20', units: 130, cost: 1105 }]),
+        value: getTransactionsList([
+          { date: '2020-04-20', units: 130, price: 8.5, fees: 0, taxes: 0 },
+        ]),
       });
 
     it('should render a transactions field', () => {
-      expect.assertions(3);
+      expect.assertions(5);
       const { getAllByText } = setupTransactions();
       expect(getAllByText('Date:')).toHaveLength(2);
       expect(getAllByText('Units:')).toHaveLength(2);
-      expect(getAllByText('Cost:')).toHaveLength(2);
+      expect(getAllByText('Price:')).toHaveLength(2);
+      expect(getAllByText('Fees:')).toHaveLength(2);
+      expect(getAllByText('Taxes:')).toHaveLength(2);
     });
   });
 

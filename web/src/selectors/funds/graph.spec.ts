@@ -84,7 +84,9 @@ describe('Fund selectors / graph', () => {
             {
               ...state[Page.funds].items[0],
               item: 'Some future fund',
-              transactions: getTransactionsList([{ date: '2020-04-21', units: 23, cost: 103 }]),
+              transactions: getTransactionsList([
+                { date: '2020-04-21', units: 23, price: 4.47826, fees: 0, taxes: 0 },
+              ]),
             },
             ...state[Page.funds].items.slice(1),
           ],
@@ -171,9 +173,9 @@ describe('Fund selectors / graph', () => {
             {
               ...state[Page.funds].items[0],
               transactions: getTransactionsList([
-                { date: '2017-05-09', units: 934, cost: 400000 },
-                { date: '2017-07-10', units: -934, cost: -487762 },
-                { date: '2020-04-21', units: 1000, cost: 79015 },
+                { date: '2017-05-09', units: 934, price: 428.2655, fees: 0, taxes: 0 },
+                { date: '2017-07-10', units: -934, price: 522.229, fees: 0, taxes: 0 },
+                { date: '2020-04-21', units: 1000, price: 79.015, fees: 0, taxes: 0 },
               ]),
             },
             ...state[Page.funds].items.slice(1),

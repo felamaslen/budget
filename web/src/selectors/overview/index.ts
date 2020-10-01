@@ -15,7 +15,7 @@ import { getNetWorthSummary } from './net-worth';
 import { Average } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
-import { IDENTITY, arrayAverage, randnBm } from '~client/modules/data';
+import { IDENTITY, arrayAverage, randnBm, getTotalCost } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { getFundsRows } from '~client/selectors/funds/helpers';
 import {
@@ -155,9 +155,7 @@ const getPredictedNetWorth = <K extends keyof CostProcessed>(
   const fundCosts = dates.map((monthDate) =>
     fundsRows.reduce(
       (sum, { transactions }) =>
-        (transactions ?? [])
-          .filter(({ date }) => isSameMonth(date, monthDate))
-          .reduce((last, { cost }) => last + cost, sum),
+        sum + getTotalCost((transactions ?? []).filter(({ date }) => isSameMonth(date, monthDate))),
       0,
     ),
   );

@@ -19,7 +19,7 @@ export async function selectFunds(
         sql`f.uid`,
         sql`f.item`,
         sql`ROUND(SUM(ft.units)::decimal, 5) AS units`,
-        sql`SUM(ft.cost)::float AS cost`,
+        sql`SUM(ft.units * ft.price + ft.fees + ft.taxes)::float AS cost`,
       ],
       sql`, `,
     )}

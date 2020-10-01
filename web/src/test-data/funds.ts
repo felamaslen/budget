@@ -9,8 +9,10 @@ export const testRows: Fund[] = [
     item: 'some fund 1',
     transactions: getTransactionsList([
       {
-        cost: 400000,
+        price: 428,
         units: 934,
+        fees: 148,
+        taxes: 100,
         date: '2017-05-09',
       },
     ]),
@@ -21,13 +23,17 @@ export const testRows: Fund[] = [
     item: 'some fund 2',
     transactions: getTransactionsList([
       {
-        cost: 45000,
         units: 450,
+        price: 100,
+        fees: 0,
+        taxes: 0,
         date: '2017-03-03',
       },
       {
-        cost: -50300,
         units: -450,
+        price: 112,
+        fees: 20,
+        taxes: 80,
         date: '2017-04-27',
       },
     ]),
@@ -38,13 +44,17 @@ export const testRows: Fund[] = [
     item: 'some fund 3',
     transactions: getTransactionsList([
       {
-        cost: 90000,
         units: 1117.87,
+        price: 80.510256,
+        fees: 0,
+        taxes: 0,
         date: '2017-01-11',
       },
       {
-        cost: -80760,
         units: -1117.87,
+        price: 72.24453648,
+        fees: 0,
+        taxes: 0,
         date: '2017-04-27',
       },
     ]),
@@ -55,13 +65,17 @@ export const testRows: Fund[] = [
     item: 'test fund 4',
     transactions: getTransactionsList([
       {
-        cost: 200000,
         units: 1499.7,
+        price: 133.36,
+        fees: 0,
+        taxes: 0,
         date: '2016-09-21',
       },
       {
-        cost: -265622,
         units: -1499.7,
+        price: 177.1167567,
+        fees: 0,
+        taxes: 0,
         date: '2017-04-27',
       },
     ]),

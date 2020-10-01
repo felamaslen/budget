@@ -2383,9 +2383,15 @@ definitions:
       units:
         type: number
         example: 123.456
-      cost:
+      price:
+        type: float
+        example: 949.35
+      fees:
         type: integer
-        example: 607451
+        example: 1195
+      taxes:
+        type: integer
+        example: 2763
 
   DataResponseFunds:
     type: object

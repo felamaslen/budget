@@ -6,7 +6,9 @@ export const fund = listItem.append({
     joi.object({
       date: joi.string().isoDate().required(),
       units: joi.number().required(),
-      cost: joi.number().integer().required(),
+      price: joi.number().required(),
+      fees: joi.number().integer().optional().default(0),
+      taxes: joi.number().integer().optional().default(0),
     }),
   ),
   allocationTarget: joi.number().min(0).max(1).optional().allow(null),

@@ -10,8 +10,8 @@ import { Transaction, TransactionRaw } from '~client/types';
 
 describe('<FormFieldTransactions />', () => {
   const transactions: TransactionRaw[] = [
-    { date: '2017-11-10', units: 10.5, cost: 50 },
-    { date: '2018-09-05', units: -3, cost: -40 },
+    { date: '2017-11-10', units: 10.5, price: 9.76, fees: 10, taxes: 3 },
+    { date: '2018-09-05', units: -3, price: 1.3, fees: 4, taxes: 2 },
   ];
 
   const value: Transaction[] = getTransactionsList(transactions);
@@ -64,7 +64,7 @@ describe('<FormFieldTransactions />', () => {
       const { getByText } = setup();
       expect(getByText('Date')).toBeInTheDocument();
       expect(getByText('Units')).toBeInTheDocument();
-      expect(getByText('Cost')).toBeInTheDocument();
+      expect(getByText('Price')).toBeInTheDocument();
     });
 
     describe.each`
@@ -73,7 +73,7 @@ describe('<FormFieldTransactions />', () => {
       ${'oldest'} | ${0}       | ${1}
     `('for the $description transaction', ({ valueIndex, displayIndex }) => {
       it('should be rendered in the right order', () => {
-        expect.assertions(3);
+        expect.assertions(5);
         const { getAllByRole } = setup();
         const listItems = getAllByRole('listitem');
         const displayedItem = listItems[displayIndex + 1]; // the first one is the add form
@@ -82,8 +82,12 @@ describe('<FormFieldTransactions />', () => {
           getByDisplayValue(format(new Date(transactions[valueIndex].date), 'dd/MM/yyyy')),
         ).toBeInTheDocument();
         expect(getByDisplayValue(String(transactions[valueIndex].units))).toBeInTheDocument();
+        expect(getByDisplayValue(String(transactions[valueIndex].price))).toBeInTheDocument();
         expect(
-          getByDisplayValue((transactions[valueIndex].cost / 100).toFixed(2)),
+          getByDisplayValue((transactions[valueIndex].fees / 100).toFixed(2)),
+        ).toBeInTheDocument();
+        expect(
+          getByDisplayValue((transactions[valueIndex].taxes / 100).toFixed(2)),
         ).toBeInTheDocument();
       });
 
@@ -116,21 +120,27 @@ describe('<FormFieldTransactions />', () => {
         );
       });
 
-      it('should handle units input', () => {
+      it.each`
+        field      | inputValue  | displayValue  | oldDisplayValue
+        ${'units'} | ${34.2219}  | ${'34.2219'}  | ${String(transactions[valueIndex].units)}
+        ${'price'} | ${126.7692} | ${'126.7692'} | ${String(transactions[valueIndex].price)}
+        ${'fees'}  | ${6754}     | ${'67.54'}    | ${(transactions[valueIndex].fees / 100).toFixed(2)}
+        ${'taxes'} | ${1806}     | ${'18.06'}    | ${(transactions[valueIndex].taxes / 100).toFixed(2)}
+      `('should handle $field input', ({ field, inputValue, displayValue, oldDisplayValue }) => {
         expect.assertions(3);
         const { getByDisplayValue } = setup();
 
-        const inputUnits = getByDisplayValue(String(transactions[valueIndex].units));
-        expect(inputUnits).toBeInTheDocument();
+        const inputPrice = getByDisplayValue(oldDisplayValue);
+        expect(inputPrice).toBeInTheDocument();
 
         act(() => {
-          fireEvent.change(inputUnits, { target: { value: '34.2219' } });
+          fireEvent.change(inputPrice, { target: { value: displayValue } });
         });
 
         expect(props.onChange).not.toHaveBeenCalled();
 
         act(() => {
-          fireEvent.blur(inputUnits);
+          fireEvent.blur(inputPrice);
         });
         act(() => {
           clock.next();
@@ -138,34 +148,7 @@ describe('<FormFieldTransactions />', () => {
 
         expect(props.onChange).toHaveBeenCalledWith(
           modifyTransaction(value, valueIndex, {
-            units: 34.2219,
-          }),
-        );
-      });
-
-      it('should handle cost input', () => {
-        expect.assertions(3);
-        const { getByDisplayValue } = setup();
-
-        const inputCost = getByDisplayValue((transactions[valueIndex].cost / 100).toFixed(2));
-        expect(inputCost).toBeInTheDocument();
-
-        act(() => {
-          fireEvent.change(inputCost, { target: { value: '126.7692' } });
-        });
-
-        expect(props.onChange).not.toHaveBeenCalled();
-
-        act(() => {
-          fireEvent.blur(inputCost);
-        });
-        act(() => {
-          clock.next();
-        });
-
-        expect(props.onChange).toHaveBeenCalledWith(
-          modifyTransaction(value, valueIndex, {
-            cost: 12677,
+            [field]: inputValue,
           }),
         );
       });
@@ -178,13 +161,13 @@ describe('<FormFieldTransactions />', () => {
           format(new Date(transactions[valueIndex].date), 'dd/MM/yyyy'),
         );
         const inputUnits = getByDisplayValue(String(transactions[valueIndex].units));
-        const inputCost = getByDisplayValue((transactions[valueIndex].cost / 100).toFixed(2));
+        const inputPrice = getByDisplayValue(String(transactions[valueIndex].price));
 
         act(() => {
-          fireEvent.change(inputCost, { target: { value: '126.7692' } });
+          fireEvent.change(inputPrice, { target: { value: '126.7692' } });
         });
         act(() => {
-          fireEvent.blur(inputCost);
+          fireEvent.blur(inputPrice);
         });
 
         act(() => {
@@ -206,7 +189,7 @@ describe('<FormFieldTransactions />', () => {
           modifyTransaction(value, valueIndex, {
             date: new Date('2017-04-03'),
             units: 34.2219,
-            cost: 12677,
+            price: 126.7692,
           }),
         );
       });
@@ -237,9 +220,9 @@ describe('<FormFieldTransactions />', () => {
 
       const inputDate = inputs[0];
       const inputUnits = inputs[1];
-      const inputCost = inputs[2];
+      const inputPrice = inputs[2];
 
-      [inputDate, inputUnits, inputCost].forEach((input) => expect(input).toBeInTheDocument());
+      [inputDate, inputUnits, inputPrice].forEach((input) => expect(input).toBeInTheDocument());
 
       const buttonAdd = getByText('+');
 
@@ -260,10 +243,10 @@ describe('<FormFieldTransactions />', () => {
       expect(props.onChange).not.toHaveBeenCalled();
 
       act(() => {
-        fireEvent.change(inputCost, { target: { value: '1095.91' } });
+        fireEvent.change(inputPrice, { target: { value: '1.72' } });
       });
       act(() => {
-        fireEvent.blur(inputCost);
+        fireEvent.blur(inputPrice);
       });
 
       expect(props.onChange).not.toHaveBeenCalled();
@@ -277,7 +260,7 @@ describe('<FormFieldTransactions />', () => {
         expect.objectContaining({
           date: new Date('2019-02-11'),
           units: 562.23,
-          cost: 109591,
+          price: 1.72,
         }),
       ]);
     });
@@ -285,7 +268,7 @@ describe('<FormFieldTransactions />', () => {
     it.each`
       property
       ${'units'}
-      ${'cost'}
+      ${'price'}
     `('should not add a transaction with zero $property', ({ property }) => {
       expect.assertions(1);
 
@@ -298,7 +281,7 @@ describe('<FormFieldTransactions />', () => {
 
       const inputDate = inputs[0];
       const inputUnits = inputs[1];
-      const inputCost = inputs[2];
+      const inputPrice = inputs[2];
 
       act(() => {
         fireEvent.change(inputDate, { target: { value: '2019-02-11' } });
@@ -315,12 +298,12 @@ describe('<FormFieldTransactions />', () => {
           fireEvent.blur(inputUnits);
         });
       }
-      if (property !== 'cost') {
+      if (property !== 'price') {
         act(() => {
-          fireEvent.change(inputCost, { target: { value: '1095.91' } });
+          fireEvent.change(inputPrice, { target: { value: '1095.91' } });
         });
         act(() => {
-          fireEvent.blur(inputCost);
+          fireEvent.blur(inputPrice);
         });
       }
 
@@ -347,7 +330,9 @@ describe('<FormFieldTransactions />', () => {
       field      | label
       ${'date'}  | ${'Date:'}
       ${'units'} | ${'Units:'}
-      ${'cost'}  | ${'Cost:'}
+      ${'price'} | ${'Price:'}
+      ${'fees'}  | ${'Fees:'}
+      ${'taxes'} | ${'Taxes:'}
     `('should render labels for the $field fields', ({ label }) => {
       expect.assertions(1);
       const { queryAllByText } = setupModal();
@@ -360,7 +345,7 @@ describe('<FormFieldTransactions />', () => {
       ${'oldest'} | ${0}       | ${1}
     `('for the $description transaction', ({ valueIndex, displayIndex }) => {
       it('should be rendered in the right order', () => {
-        expect.assertions(3);
+        expect.assertions(5);
         const { getAllByRole } = setupModal();
         const listItems = getAllByRole('listitem');
         const displayedItem = listItems[displayIndex + 1]; // the first one is the add form
@@ -369,8 +354,12 @@ describe('<FormFieldTransactions />', () => {
           getByDisplayValue(format(new Date(transactions[valueIndex].date), 'yyyy-MM-dd')),
         ).toBeInTheDocument();
         expect(getByDisplayValue(String(transactions[valueIndex].units))).toBeInTheDocument();
+        expect(getByDisplayValue(String(transactions[valueIndex].price))).toBeInTheDocument();
         expect(
-          getByDisplayValue((transactions[valueIndex].cost / 100).toFixed(2)),
+          getByDisplayValue((transactions[valueIndex].fees / 100).toFixed(2)),
+        ).toBeInTheDocument();
+        expect(
+          getByDisplayValue((transactions[valueIndex].taxes / 100).toFixed(2)),
         ).toBeInTheDocument();
       });
 
@@ -426,18 +415,18 @@ describe('<FormFieldTransactions />', () => {
         );
       });
 
-      it('should handle cost input', () => {
+      it('should handle price input', () => {
         expect.assertions(3);
         const { getByDisplayValue } = setupModal();
 
-        const inputCost = getByDisplayValue((transactions[valueIndex].cost / 100).toFixed(2));
-        expect(inputCost).toBeInTheDocument();
+        const inputPrice = getByDisplayValue(String(transactions[valueIndex].price));
+        expect(inputPrice).toBeInTheDocument();
 
         act(() => {
-          fireEvent.change(inputCost, { target: { value: '126.7692' } });
+          fireEvent.change(inputPrice, { target: { value: '126.7692' } });
         });
         act(() => {
-          fireEvent.blur(inputCost);
+          fireEvent.blur(inputPrice);
         });
         act(() => {
           clock.next();
@@ -446,7 +435,7 @@ describe('<FormFieldTransactions />', () => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(props.onChange).toHaveBeenCalledWith(
           modifyTransaction(value, valueIndex, {
-            cost: 12677,
+            price: 126.7692,
           }),
         );
       });
@@ -459,13 +448,13 @@ describe('<FormFieldTransactions />', () => {
           format(new Date(transactions[valueIndex].date), 'yyyy-MM-dd'),
         );
         const inputUnits = getByDisplayValue(String(transactions[valueIndex].units));
-        const inputCost = getByDisplayValue((transactions[valueIndex].cost / 100).toFixed(2));
+        const inputPrice = getByDisplayValue(String(transactions[valueIndex].price));
 
         act(() => {
-          fireEvent.change(inputCost, { target: { value: '126.7692' } });
+          fireEvent.change(inputPrice, { target: { value: '126.7692' } });
         });
         act(() => {
-          fireEvent.blur(inputCost);
+          fireEvent.blur(inputPrice);
         });
 
         act(() => {
@@ -487,7 +476,7 @@ describe('<FormFieldTransactions />', () => {
           modifyTransaction(value, valueIndex, {
             date: new Date('2017-04-03'),
             units: 34.2219,
-            cost: 12677,
+            price: 126.7692,
           }),
         );
       });
@@ -518,9 +507,9 @@ describe('<FormFieldTransactions />', () => {
 
       const inputDate = inputs[0];
       const inputUnits = inputs[1];
-      const inputCost = inputs[2];
+      const inputPrice = inputs[2];
 
-      [inputDate, inputUnits, inputCost].forEach((input) => expect(input).toBeInTheDocument());
+      [inputDate, inputUnits, inputPrice].forEach((input) => expect(input).toBeInTheDocument());
 
       const buttonAdd = getByText('+');
 
@@ -541,10 +530,10 @@ describe('<FormFieldTransactions />', () => {
       expect(props.onChange).not.toHaveBeenCalled();
 
       act(() => {
-        fireEvent.change(inputCost, { target: { value: '1095.91' } });
+        fireEvent.change(inputPrice, { target: { value: '1095.91' } });
       });
       act(() => {
-        fireEvent.blur(inputCost);
+        fireEvent.blur(inputPrice);
       });
 
       expect(props.onChange).not.toHaveBeenCalled();
@@ -558,7 +547,7 @@ describe('<FormFieldTransactions />', () => {
         expect.objectContaining({
           date: new Date('2019-02-11'),
           units: 562.23,
-          cost: 109591,
+          price: 1095.91,
         }),
       ]);
     });

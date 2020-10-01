@@ -35,7 +35,7 @@ describe('PATCH /multiple', () => {
             query: {},
             body: {
               item: 'Some created fund',
-              transactions: [{ date: '2020-04-30', units: 231.75, cost: 18872 }],
+              transactions: [{ date: '2020-04-30', units: 231.75, price: 81.4, fees: 1195 }],
             },
           },
           {
@@ -101,7 +101,7 @@ describe('PATCH /multiple', () => {
       expect.arrayContaining([
         expect.objectContaining({
           i: 'Some created fund',
-          tr: [{ date: '2020-04-30', units: 231.75, cost: 18872 }],
+          tr: [{ date: '2020-04-30', units: 231.75, price: 81.4, fees: 1195, taxes: 0 }],
         }),
       ]),
     );

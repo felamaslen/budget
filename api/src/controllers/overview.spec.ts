@@ -9,22 +9,30 @@ describe('Funds controller', () => {
       {
         date: '2016-09-21',
         units: 105,
-        cost: 405562,
+        price: 3860.2,
+        fees: 230,
+        taxes: 11,
       },
       {
         date: '2016-10-09',
         units: -120,
-        cost: -20322,
+        price: 170.5,
+        fees: 138,
+        taxes: 0,
       },
       {
         date: '2017-04-30',
         units: 6500,
-        cost: 16775,
+        price: 2.55,
+        fees: 150,
+        taxes: 50,
       },
       {
         date: '2018-10-11',
         units: 17702,
-        cost: 6007662,
+        price: 337.5,
+        fees: 237,
+        taxes: 33000,
       },
     ];
 
@@ -38,7 +46,9 @@ describe('Funds controller', () => {
       {
         date: '2016-09-21',
         units: -102,
-        cost: -11923,
+        price: 117,
+        fees: 5,
+        taxes: 6,
       },
     ];
 
@@ -47,7 +57,7 @@ describe('Funds controller', () => {
       ${'there is no positive cash flow'} | ${undefined} | ${noPositiveCashFlow}
       ${'the current value is null'}      | ${null}      | ${undefined}
     `('if $case', ({ value = currentValue, testTransactions = transactions }) => {
-      it(`should return ${DEFAULT_INVESTMENT_RATE}`, () => {
+      it(`should return the assumed XIRR of ${DEFAULT_INVESTMENT_RATE}`, () => {
         expect.assertions(1);
 
         expect(calculateXIRRFromTransactions(now, value, testTransactions)).toBe(

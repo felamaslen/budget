@@ -27,7 +27,7 @@ import {
 } from './data';
 import { Average, Period } from '~client/constants';
 import { mockRandom } from '~client/test-utils/random';
-import { Data, Transaction } from '~client/types';
+import { Data, Transaction, TransactionRaw } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-shortid',
@@ -97,26 +97,34 @@ describe('data module', () => {
     });
   });
 
-  const transactionsData = [
+  const transactionsData: TransactionRaw[] = [
     {
       date: '2017-05-09T00:00:00.000Z',
       units: 934,
-      cost: 399924,
+      price: 428,
+      fees: 172,
+      taxes: 0,
     },
     {
       date: '2018-03-13T00:00:00.000Z',
       units: 25,
-      cost: -10512,
+      price: 421,
+      fees: 7,
+      taxes: 6,
     },
     {
       date: '2018-06-07T00:00:00.000Z',
       units: -1239,
-      cost: -539814,
+      price: 436,
+      fees: 390,
+      taxes: 0,
     },
     {
       date: '2018-04-26T00:00:00.000Z',
       units: 280,
-      cost: 119931,
+      price: 428,
+      fees: 91,
+      taxes: 0,
     },
   ];
 
@@ -129,22 +137,30 @@ describe('data module', () => {
         expect.objectContaining({
           date: new Date('2017-05-09T00:00:00.000Z'),
           units: 934,
-          cost: 399924,
+          price: 428,
+          fees: 172,
+          taxes: 0,
         }),
         expect.objectContaining({
           date: new Date('2018-03-13T00:00:00.000Z'),
           units: 25,
-          cost: -10512,
+          price: 421,
+          fees: 7,
+          taxes: 6,
         }),
         expect.objectContaining({
           date: new Date('2018-06-07T00:00:00.000Z'),
           units: -1239,
-          cost: -539814,
+          price: 436,
+          fees: 390,
+          taxes: 0,
         }),
         expect.objectContaining({
           date: new Date('2018-04-26T00:00:00.000Z'),
           units: 280,
-          cost: 119931,
+          price: 428,
+          fees: 91,
+          taxes: 0,
         }),
       ]);
     });
@@ -164,27 +180,37 @@ describe('data module', () => {
         {
           date: '2016-09-19T05:00Z',
           units: 1678.42,
-          cost: 2000,
+          price: 1.191597,
+          fees: 0,
+          taxes: 0,
         },
         {
           date: '2017-02-14T05:00Z',
           units: 846.38,
-          cost: 1000,
+          price: 0,
+          fees: 0,
+          taxes: 0,
         },
         {
           date: '2017-10-25T05:00Z',
           units: 817,
-          cost: 1000,
+          price: 1.22399,
+          fees: 0,
+          taxes: 0,
         },
         {
           date: '2018-03-14T05:00Z',
           units: 1217.43,
-          cost: 1500,
+          price: 1.232104,
+          fees: 0,
+          taxes: 0,
         },
         {
           date: '2018-09-24T05:00Z',
           units: -4559.23,
-          cost: -5595.2,
+          price: 1.227225,
+          fees: 0,
+          taxes: 0,
         },
       ]);
 
@@ -204,22 +230,30 @@ describe('data module', () => {
         {
           date: '2017-05-09',
           units: 934,
-          cost: 399924,
+          price: 428,
+          fees: 172,
+          taxes: 0,
         },
         {
           date: '2018-03-13',
           units: 25,
-          cost: -10512,
+          price: 421,
+          fees: 7,
+          taxes: 6,
         },
         {
           date: '2018-04-26',
           units: 280,
-          cost: 119931,
+          price: 428,
+          fees: 91,
+          taxes: 0,
         },
         {
           date: '2018-06-07',
           units: -1239,
-          cost: -539814,
+          price: 436,
+          fees: 390,
+          taxes: 0,
         },
       ]);
     });
@@ -243,7 +277,9 @@ describe('data module', () => {
       const transactionsListAdded = addToTransactionsList(transactionsList, {
         date: new Date('2018-09-13T03:20Z'),
         units: 20,
-        cost: 3,
+        price: 0.15,
+        fees: 0,
+        taxes: 0,
       });
 
       expect(transactionsListAdded).toHaveLength(transactionsData.length + 1);
@@ -253,72 +289,121 @@ describe('data module', () => {
           id: expect.any(Number),
           date: new Date('2018-09-13T03:20Z'),
           units: 20,
-          cost: 3,
+          price: 0.15,
+          fees: 0,
+          taxes: 0,
         }),
       );
     });
   });
 
   describe('modifyTransaction', () => {
-    it('should modify a transaction list at a specified index', () => {
-      expect.assertions(6);
-      const transactionsList = getTransactionsList(transactionsData);
+    it.each`
+      index | key        | newValue
+      ${1}  | ${'date'}  | ${new Date('2018-03-14T00:00:00.000Z')}
+      ${3}  | ${'units'} | ${281}
+      ${2}  | ${'price'} | ${400}
+      ${2}  | ${'fees'}  | ${150}
+      ${2}  | ${'taxes'} | ${10}
+    `(
+      'should modify the $key of a transactions list at a specified index',
+      ({
+        index,
+        key,
+        newValue,
+      }: {
+        index: number;
+        key: keyof Transaction;
+        newValue: Transaction[keyof Transaction];
+      }) => {
+        expect.assertions(10);
+        const transactionsList = getTransactionsList(transactionsData);
 
-      const modifiedDate = modifyTransaction(transactionsList, 1, {
-        date: new Date('2018-03-14T00:00:00.000Z'),
-      });
+        const modifiedTransactionsList = modifyTransaction(transactionsList, index, {
+          [key]: newValue,
+        });
 
-      expect(modifiedDate[1].date.getDate()).toBe(14);
+        expect(modifiedTransactionsList[index][key]).toStrictEqual(newValue);
 
-      const modifiedUnits = modifyTransaction(transactionsList, 3, { units: 281 });
+        // check that the original list wasn't mutated
+        expect(transactionsList[index][key]).not.toStrictEqual(
+          modifiedTransactionsList[index][key],
+        );
 
-      expect(modifiedUnits[3].units).toBe(281);
-
-      const modifiedCost = modifyTransaction(transactionsList, 2, { cost: -100 });
-
-      expect(modifiedCost[2].cost).toBe(-100);
-
-      // check that the original list wasn't mutated
-      expect(transactionsList[1].date.getDate()).toBe(13);
-      expect(transactionsList[3].units).toBe(280);
-      expect(transactionsList[2].cost).toBe(-539814);
-    });
+        // check that the new list was only updated where it needs to be
+        transactionsList.forEach((transaction, compareIndex) => {
+          if (compareIndex === index) {
+            (Object.keys(transaction) as (keyof Transaction)[]).forEach((compareKey) => {
+              if (compareKey !== key) {
+                expect(transaction[compareKey]).toStrictEqual(
+                  modifiedTransactionsList[compareIndex][compareKey],
+                );
+              }
+            });
+          } else {
+            expect(transaction).toStrictEqual(modifiedTransactionsList[compareIndex]);
+          }
+        });
+      },
+    );
   });
 
   describe('modifyTransactionById', () => {
-    it('should modify a transaction list at a specified id', () => {
-      expect.assertions(6);
-      jest
-        .spyOn(shortid, 'generate')
-        .mockReturnValueOnce('short-id-1')
-        .mockReturnValueOnce('short-id-2')
-        .mockReturnValueOnce('short-id-3');
+    it.each`
+      index | key        | newValue
+      ${1}  | ${'date'}  | ${new Date('2018-03-14T00:00:00.000Z')}
+      ${2}  | ${'units'} | ${281}
+      ${3}  | ${'price'} | ${400}
+      ${3}  | ${'fees'}  | ${150}
+      ${3}  | ${'taxes'} | ${10}
+    `(
+      'should modify the $key of a transactions list at a specified id',
+      ({
+        index,
+        key,
+        newValue,
+      }: {
+        index: number;
+        key: keyof Transaction;
+        newValue: Transaction[keyof Transaction];
+      }) => {
+        expect.assertions(10);
+        jest
+          .spyOn(shortid, 'generate')
+          .mockReturnValueOnce('short-id-1')
+          .mockReturnValueOnce('short-id-2')
+          .mockReturnValueOnce('short-id-3');
 
-      const transactionsList = getTransactionsList(transactionsData);
+        const transactionsList = getTransactionsList(transactionsData);
+        const id = transactionsList[index].id;
 
-      const id1 = transactionsList[1].id;
-      const id2 = transactionsList[2].id;
-      const id3 = transactionsList[3].id;
+        const modifiedTransactionsList = modifyTransactionById(transactionsList, id, {
+          [key]: newValue,
+        });
 
-      const modifiedDate = modifyTransactionById(transactionsList, id1, {
-        date: new Date('2018-03-14T00:00:00.000Z'),
-      });
+        expect(modifiedTransactionsList[index][key]).toStrictEqual(newValue);
 
-      expect(modifiedDate[1].date).toStrictEqual(new Date('2018-03-14T00:00:00.000Z'));
+        // check that the original list wasn't mutated
+        expect(transactionsList[index][key]).not.toStrictEqual(
+          modifiedTransactionsList[index][key],
+        );
 
-      const modifiedUnits = modifyTransactionById(transactionsList, id3, { units: 281 });
-
-      expect(modifiedUnits[3].units).toBe(281);
-
-      const modifiedCost = modifyTransactionById(transactionsList, id2, { cost: -100 });
-
-      expect(modifiedCost[2].cost).toBe(-100);
-
-      // check that the original list wasn't mutated
-      expect(transactionsList[1].date.getDate()).toBe(13);
-      expect(transactionsList[3].units).toBe(280);
-      expect(transactionsList[2].cost).toBe(-539814);
-    });
+        // check that the new list was only updated where it needs to be
+        transactionsList.forEach((transaction, compareIndex) => {
+          if (transaction.id === id) {
+            (Object.keys(transaction) as (keyof Transaction)[]).forEach((compareKey) => {
+              if (compareKey !== key) {
+                expect(transaction[compareKey]).toStrictEqual(
+                  modifiedTransactionsList[compareIndex][compareKey],
+                );
+              }
+            });
+          } else {
+            expect(transaction).toStrictEqual(modifiedTransactionsList[compareIndex]);
+          }
+        });
+      },
+    );
   });
 
   describe('getTotalUnits', () => {
@@ -336,7 +421,9 @@ describe('data module', () => {
       expect.assertions(1);
 
       const transactionsList = getTransactionsList(transactionsData);
-      expect(getTotalCost(transactionsList)).toBe(-30471);
+      expect(getTotalCost(transactionsList)).toBe(
+        934 * 428 + 172 + 25 * 421 + 7 + 6 - 1239 * 436 + 390 + 280 * 428 + 91,
+      );
     });
   });
 
@@ -445,7 +532,7 @@ describe('data module', () => {
   });
 
   describe('getValueFromTransmit', () => {
-    const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
+    const transactions = [{ date: '2017-09-01', units: 2.5, price: 0.4, fees: 0, taxes: 0 }];
 
     it.each`
       dataType              | resultDescription        | outputValue                          | inputValue
@@ -470,7 +557,7 @@ describe('data module', () => {
   });
 
   describe('getValueForTransmit', () => {
-    const transactions = [{ date: '2017-09-01', units: 2.5, cost: 1 }];
+    const transactions = [{ date: '2017-09-01', units: 2.5, price: 0.4, fees: 0, taxes: 0 }];
 
     it.each`
       dataType              | resultDescription       | inputValue                           | outputValue

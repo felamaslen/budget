@@ -195,8 +195,8 @@ export const FormField = styled.div<{
 `;
 
 const transactionsWidthDate = 104;
-const transactionsWidthUnits = 72;
-const transactionsWidthCost = 80;
+const transactionsWidthUnits = 84;
+const transactionsWidthPrice = 84;
 
 export const TransactionsModal = styled.div`
   ${breakpoint(breakpoints.mobile)} {
@@ -227,7 +227,7 @@ export const ModalInner = styled.div`
   ${breakpoint(breakpoints.mobile)} {
     display: flex;
     flex-flow: column;
-    max-height: ${rem(192)};
+    max-height: ${rem(304)};
   }
 `;
 
@@ -254,7 +254,7 @@ export const TransactionsList = styled.ul`
     margin: 0;
     padding: 0;
     flex-flow: column;
-    max-height: 130px;
+    max-height: ${rem(304)};
     overflow-y: auto;
   }
 `;
@@ -280,6 +280,11 @@ export const TransactionsListItem = styled.li`
     align-items: center;
     line-height: 24px;
     flex: 0 0 24px;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid ${colors.light.mediumDark};
+      padding-bottom: ${rem(2)};
+    }
 
     input {
       padding: 0 0 0 1px;
@@ -367,8 +372,29 @@ export const TransactionRowDate = styled(TransactionRow)`
 export const TransactionRowUnits = styled(TransactionRow)`
   ${transactionItem(transactionsWidthUnits)};
 `;
-export const TransactionRowCost = styled(TransactionRow)`
-  ${transactionItem(transactionsWidthCost)};
+export const TransactionRowPrice = styled(TransactionRow)`
+  ${transactionItem(transactionsWidthPrice)};
+`;
+
+export const TransactionRowFees = styled(TransactionRow)`
+  font-size: ${rem(13)};
+  ${FormField} {
+    font-size: inherit;
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    display: flex;
+    font-size: ${rem(11)};
+  }
+`;
+
+export const UnitsPriceRow = styled.div`
+  display: flex;
+`;
+
+export const FeesLabel = styled.span`
+  flex: 0 0 ${rem(32)};
+  font-weight: bold;
 `;
 
 export const ModalHeadDate = styled(ModalHeadColumn)`
@@ -377,8 +403,8 @@ export const ModalHeadDate = styled(ModalHeadColumn)`
 export const ModalHeadUnits = styled(ModalHeadColumn)`
   ${transactionItem(transactionsWidthUnits)};
 `;
-export const ModalHeadCost = styled(ModalHeadColumn)`
-  ${transactionItem(transactionsWidthCost)};
+export const ModalHeadPrice = styled(ModalHeadColumn)`
+  ${transactionItem(transactionsWidthPrice)};
 `;
 
 export const NumTransactions = styled.button<{ active?: boolean }>`

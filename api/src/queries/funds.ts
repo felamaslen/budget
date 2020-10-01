@@ -1,4 +1,6 @@
+import groupBy from 'lodash/groupBy';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
+
 import { Transaction, Fund } from '~api/types';
 
 export async function selectTransactions(
@@ -31,10 +33,17 @@ export async function upsertTransactions(
   )}
   `);
   await db.query(sql`
-  INSERT INTO funds_transactions (fund_id, date, units, cost)
+  INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes)
   SELECT * FROM ${sql.unnest(
-    transactions.map(({ date, units, cost }) => [id, date, units, cost]),
-    ['int4', 'date', 'float8', 'int4'],
+    transactions.map(({ date, units, price, fees, taxes }) => [
+      id,
+      date,
+      units,
+      price,
+      fees,
+      taxes,
+    ]),
+    ['int4', 'date', 'float8', 'float8', 'int4', 'int4'],
   )}
   `);
 }
@@ -46,9 +55,11 @@ export type FundListRow = {
 };
 
 type RowWithTransactions = FundListRow & {
-  dates: string[];
-  units: number[];
-  costs: number[];
+  date: string;
+  units: number;
+  price: number;
+  fees: number;
+  taxes: number;
 };
 
 export async function getFundsItems(
@@ -61,29 +72,42 @@ export async function getFundsItems(
       sql.identifier(['funds', 'id']),
       sql.identifier(['funds', 'item']),
       sql.identifier(['funds', 'allocation_target']),
-      sql`array_agg(transactions.date ORDER BY transactions.date DESC) as dates`,
-      sql`array_agg(transactions.units ORDER BY transactions.date DESC) as units`,
-      sql`array_agg(transactions.cost ORDER BY transactions.date DESC) as costs`,
+      sql.identifier(['transactions', 'date']),
+      sql.identifier(['transactions', 'units']),
+      sql.identifier(['transactions', 'price']),
+      sql.identifier(['transactions', 'fees']),
+      sql.identifier(['transactions', 'taxes']),
     ],
     sql`, `,
   )}
   FROM funds
   LEFT JOIN funds_transactions transactions ON transactions.fund_id = funds.id
   WHERE funds.uid = ${uid}
-  GROUP BY funds.id
-  ORDER BY funds.id
+  ORDER BY funds.id, transactions.date DESC
   `);
 
-  return result.rows.map(({ id, item, allocation_target, dates, units, costs }) => ({
-    id,
-    item,
-    allocationTarget: allocation_target,
-    transactions: dates.filter(Boolean).map((date, index) => ({
-      date,
-      units: units[index],
-      cost: costs[index],
-    })),
-  }));
+  const groups = groupBy(result.rows, 'id');
+
+  return Object.entries(groups).reduce<Fund[]>(
+    (last, [, rows]) => [
+      ...last,
+      {
+        id: rows[0].id,
+        item: rows[0].item,
+        allocationTarget: rows[0].allocation_target,
+        transactions: rows[0].date
+          ? rows.map((row) => ({
+              date: row.date,
+              units: row.units,
+              price: row.price,
+              fees: row.fees,
+              taxes: row.taxes,
+            }))
+          : [],
+      },
+    ],
+    [],
+  );
 }
 
 export async function getFundHistoryNumResults(

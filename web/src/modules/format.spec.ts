@@ -262,8 +262,8 @@ describe('formatItem', () => {
         formatItem(
           'transactions',
           getTransactionsList([
-            { date: '2019-05-03', units: 3, cost: 2 },
-            { date: '2019-05-017', units: 31, cost: 25 },
+            { date: '2019-05-03', units: 3, price: 0.666667, fees: 0, taxes: 0 },
+            { date: '2019-05-017', units: 31, price: 25 / 31, fees: 0, taxes: 0 },
           ]),
         ),
       ).toBe('2');

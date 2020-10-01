@@ -101,7 +101,10 @@ export function calculateXIRRFromTransactions(
     differenceInDays(date, transactionDates[0]),
   );
 
-  const payments = [...transactions.map(({ cost }) => -cost), currentValue];
+  const payments = [
+    ...transactions.map(({ units, price, fees, taxes }) => -(units * price + fees + taxes)),
+    currentValue,
+  ];
 
   if (!payments.some((value) => value > 0) || !payments.some((value) => value < 0)) {
     return DEFAULT_INVESTMENT_RATE;

@@ -100,7 +100,7 @@ export async function getTotalFundCost(
   const {
     rows: [{ total }],
   } = await db.query(sql`
-  SELECT SUM(cost) AS total
+  SELECT SUM(ft.units * ft.price + ft.fees + ft.taxes) AS total
   FROM funds f
   INNER JOIN funds_transactions ft ON ft.fund_id = f.id
   WHERE uid = ${uid}

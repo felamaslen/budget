@@ -42,7 +42,7 @@ describe('API selectors', () => {
                 id: numericHash('some-fund-id'),
                 item: 'some-fund-name',
                 transactions: getTransactionsList([
-                  { date: '2019-05-03', units: 103, cost: 99231 },
+                  { date: '2019-05-03', units: 103, price: 963.40776699, fees: 0, taxes: 0 },
                 ]),
                 allocationTarget: 0,
               },
@@ -165,7 +165,7 @@ describe('API selectors', () => {
                 id: numericHash('some-fund-id'),
                 item: 'some-fund-name',
                 transactions: getTransactionsList([
-                  { date: '2019-05-03', units: 103, cost: 99231 },
+                  { date: '2019-05-03', units: 103, price: 963.40776699, fees: 0, taxes: 0 },
                 ]),
                 allocationTarget: 0,
               },

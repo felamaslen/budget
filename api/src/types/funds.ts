@@ -3,7 +3,9 @@ import { AbbreviatedItem, ColumnMap } from './list';
 export type Transaction = {
   date: string;
   units: number;
-  cost: number;
+  price: number;
+  fees: number;
+  taxes: number;
 };
 
 export type Fund = {

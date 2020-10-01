@@ -9,7 +9,7 @@ import { Create, Fund } from '~api/types';
 describe('Funds route', () => {
   const fund: Create<Fund> = {
     item: 'My fund',
-    transactions: [{ date: '2020-04-20', units: 69, cost: 69420 }],
+    transactions: [{ date: '2020-04-20', units: 69, price: 949.35, fees: 1199, taxes: 1776 }],
     allocationTarget: 0.2,
   };
 
@@ -105,7 +105,7 @@ describe('Funds route', () => {
             expect.objectContaining({
               I: expect.any(Number), // fund ID
               i: 'My fund',
-              tr: [{ date: '2020-04-20', units: 69, cost: 69420 }],
+              tr: [{ date: '2020-04-20', units: 69, price: 949.35, fees: 1199, taxes: 1776 }],
               allocationTarget: 0.2,
             }),
           ]),
@@ -285,8 +285,8 @@ describe('Funds route', () => {
       ...fund,
       item: altFundName,
       transactions: [
-        { date: '2020-04-20', units: 69, cost: 420 },
-        { date: '2020-04-29', units: 123, cost: 456 },
+        { date: '2020-04-20', units: 69, price: 42.8, fees: 87, taxes: 0 },
+        { date: '2020-04-29', units: 123, price: 100.3, fees: 0, taxes: 104 },
       ],
       allocationTarget: 0.15,
     };

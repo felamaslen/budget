@@ -1,10 +1,11 @@
 import getUnixTime from 'date-fns/getUnixTime';
+import isAfter from 'date-fns/isAfter';
 import moize from 'moize';
 import { rgb, parseToRgb } from 'polished';
 import { createSelector } from 'reselect';
 
 import { getCurrentFundsCache, getFundsRows } from './helpers';
-import { isSold, getTotalUnits } from '~client/modules/data';
+import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
 import { Cache } from '~client/reducers/funds';
 import { colors } from '~client/styled/variables';
 import { Id, Fund, Transaction } from '~client/types';
@@ -41,10 +42,10 @@ export const getPaperValue = (transactions: Transaction[], price: number): numbe
   price * getTotalUnits(transactions);
 
 export const getRealisedValue = (transactions: Transaction[]): number =>
-  transactions.filter(({ units }) => units < 0).reduce((last, { cost }) => last - cost, 0);
+  -getTotalCost(transactions.filter(({ units }) => units < 0));
 
 export const getBuyCost = (transactions: Transaction[]): number =>
-  transactions.filter(({ units }) => units > 0).reduce((last, { cost }) => last + cost, 0);
+  getTotalCost(transactions.filter(({ units }) => units > 0));
 
 export type RowGain = Omit<CostValue, 'cost'> & {
   gain: number;
@@ -193,9 +194,7 @@ export const getDayGainAbs = createSelector(
     const getCost = (maxDate: Date): number =>
       itemsWithPrices.reduce(
         (last, { transactions }) =>
-          transactions
-            .filter(({ date }) => Number(date) <= Number(maxDate))
-            .reduce((sum, { cost }) => sum + cost, last),
+          last + getTotalCost(transactions.filter(({ date }) => isAfter(maxDate, date))),
         0,
       );
 

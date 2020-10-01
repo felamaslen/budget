@@ -33,7 +33,7 @@ describe('Funds selectors / gains', () => {
           id: numericHash('fund1'),
           item: 'Some fund',
           transactions: getTransactionsList([
-            { date: new Date('2019-10-09'), units: 345, cost: 1199 },
+            { date: new Date('2019-10-09'), units: 345, price: 3.475, fees: 0, taxes: 0 },
           ]),
           allocationTarget: 0,
         },
@@ -41,8 +41,8 @@ describe('Funds selectors / gains', () => {
           id: numericHash('fund2'),
           item: 'Other fund',
           transactions: getTransactionsList([
-            { date: new Date('2019-10-01'), units: 167, cost: 98503 },
-            { date: new Date('2019-10-27'), units: -23, cost: -130 },
+            { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
+            { date: new Date('2019-10-27'), units: -23, price: 5.6522, fees: 0, taxes: 0 },
           ]),
           allocationTarget: 0,
         },
@@ -70,35 +70,26 @@ describe('Funds selectors / gains', () => {
 
   describe('getRowGains', () => {
     it('should return the correct values', () => {
-      expect.assertions(1);
+      expect.assertions(14);
       const result = getRowGains(testRows, testCache);
 
-      const expectedResult = {
-        10: {
-          value: 399098.2,
-          gain: -0.0023,
-          gainAbs: -902,
-          dayGain: 0.0075,
-          dayGainAbs: 2989,
-        },
-        3: expect.objectContaining({
-          value: 50300,
-          gain: 0.1178,
-          gainAbs: 5300,
-        }),
-        1: expect.objectContaining({
-          value: 80760,
-          gain: -0.1027,
-          gainAbs: -9240,
-        }),
-        5: expect.objectContaining({
-          value: 265622,
-          gain: 0.3281,
-          gainAbs: 65622,
-        }),
-      };
+      expect(result[10]?.value).toBeCloseTo(399098.2);
+      expect(result[10]?.gain).toBeCloseTo(-0.0023);
+      expect(result[10]?.gainAbs).toBeCloseTo(-902);
+      expect(result[10]?.dayGain).toBeCloseTo(0.0075);
+      expect(result[10]?.dayGainAbs).toBeCloseTo(2989);
 
-      expect(result).toStrictEqual(expectedResult);
+      expect(result[3]?.value).toBeCloseTo(50300);
+      expect(result[3]?.gain).toBeCloseTo(0.1178);
+      expect(result[3]?.gainAbs).toBeCloseTo(5300);
+
+      expect(result[1]?.value).toBeCloseTo(80760);
+      expect(result[1]?.gain).toBeCloseTo(-0.1027);
+      expect(result[1]?.gainAbs).toBeCloseTo(-9240);
+
+      expect(result[5]?.value).toBeCloseTo(265622);
+      expect(result[5]?.gain).toBeCloseTo(0.3281);
+      expect(result[5]?.gainAbs).toBeCloseTo(65622);
     });
 
     const emptyRows = [{ id: '10', item: 'some fund', transactions: [] }];
@@ -132,15 +123,15 @@ describe('Funds selectors / gains', () => {
     });
 
     it('should set the cost and estimated value', () => {
-      expect.assertions(1);
+      expect.assertions(3);
       const result = getRowGains(
         [
           {
             id: 10,
             item: 'some fund',
             transactions: getTransactionsList([
-              { date: '2019-04-03', units: 345, cost: 1199 },
-              { date: '2019-07-01', units: -345, cost: -1302 },
+              { date: '2019-04-03', units: 345, price: 3.47536, fees: 0, taxes: 0 },
+              { date: '2019-07-01', units: -345, price: 3.7739, fees: 0, taxes: 0 },
             ]),
             allocationTarget: 0,
           },
@@ -148,13 +139,9 @@ describe('Funds selectors / gains', () => {
         testCache,
       );
 
-      expect(result).toStrictEqual({
-        10: expect.objectContaining({
-          value: 1302,
-          gainAbs: 1302 - 1199,
-          gain: Number(((1302 - 1199) / 1199).toFixed(5)),
-        }),
-      });
+      expect(result[10]?.gainAbs).toBeCloseTo(1302 - 1199);
+      expect(result[10]?.value).toBeCloseTo(1302);
+      expect(result[10]?.gain).toBeCloseTo((1302 - 1199) / 1199);
     });
 
     it('should use the buy cost', () => {
@@ -165,8 +152,8 @@ describe('Funds selectors / gains', () => {
             id: 103,
             item: 'some fund',
             transactions: getTransactionsList([
-              { date: '2020-04-20', units: 100, cost: 105 },
-              { date: '2020-05-20', units: -65, cost: -117 },
+              { date: '2020-04-20', units: 100, price: 1.05, fees: 0, taxes: 0 },
+              { date: '2020-05-20', units: -65, price: 1.8, fees: 0, taxes: 0 },
             ]),
             allocationTarget: 0,
           },
@@ -257,7 +244,9 @@ describe('Funds selectors / gains', () => {
       const costLatest = 1199 + 98503 - 130;
       const costPrev = 1199 + 98503;
 
-      expect(getDayGainAbs(stateWithGains)).toBe(valueLatest - valuePrev - (costLatest - costPrev));
+      expect(getDayGainAbs(stateWithGains)).toBeCloseTo(
+        valueLatest - valuePrev - (costLatest - costPrev),
+      );
     });
 
     describe('when the latest price is missing for a fund', () => {
@@ -289,7 +278,7 @@ describe('Funds selectors / gains', () => {
         const costLatest = 1199 + 98503 - 130;
         const costPrev = 1199 + 98503;
 
-        expect(getDayGainAbs(stateWithMissingLatestPrice)).toBe(
+        expect(getDayGainAbs(stateWithMissingLatestPrice)).toBeCloseTo(
           valueLatest - valuePrev - (costLatest - costPrev),
         );
       });
@@ -382,7 +371,7 @@ describe('Funds selectors / gains', () => {
               id: numericHash('fund1'),
               item: 'Some fund',
               transactions: getTransactionsList([
-                { date: new Date('2019-10-09'), units: 345, cost: 1199 },
+                { date: new Date('2019-10-09'), units: 345, price: 3.47536, fees: 0, taxes: 0 },
               ]),
               allocationTarget: 0,
             },
@@ -390,8 +379,8 @@ describe('Funds selectors / gains', () => {
               id: numericHash('fund2'),
               item: 'Other fund',
               transactions: getTransactionsList([
-                { date: new Date('2019-10-01'), units: 167, cost: 98503 },
-                { date: new Date('2019-10-27'), units: -23, cost: -130 },
+                { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
+                { date: new Date('2019-10-27'), units: -23, price: 5.65217, fees: 0, taxes: 0 },
               ]),
               allocationTarget: 0,
             },
@@ -417,7 +406,7 @@ describe('Funds selectors / gains', () => {
               id: numericHash('fund1'),
               item: 'Some fund',
               transactions: getTransactionsList([
-                { date: new Date('2019-10-09'), units: 345, cost: 1199 },
+                { date: new Date('2019-10-09'), units: 345, price: 3.47536, fees: 0, taxes: 0 },
               ]),
               allocationTarget: 0,
             },
@@ -425,8 +414,8 @@ describe('Funds selectors / gains', () => {
               id: numericHash('fund2'),
               item: 'Other fund',
               transactions: getTransactionsList([
-                { date: new Date('2019-10-01'), units: 167, cost: 98503 },
-                { date: new Date('2019-10-27'), units: -23, cost: -130 },
+                { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
+                { date: new Date('2019-10-27'), units: -23, price: 5.65217, fees: 0, taxes: 0 },
               ]),
               allocationTarget: 0,
             },

@@ -44,11 +44,46 @@ async function generateFunds(uid: number, db: Knex): Promise<void> {
 
   await db
     .insert([
-      { fund_id: fundIds[2], date: '2016-09-19', units: 1678.42, cost: 200000 },
-      { fund_id: fundIds[2], date: '2017-02-14', units: 846.38, cost: 100000 },
-      { fund_id: fundIds[0], date: '2016-08-24', units: 89.095, cost: 100000 },
-      { fund_id: fundIds[0], date: '2016-09-19', units: 894.134, cost: 100000 },
-      { fund_id: fundIds[0], date: '2017-04-27', units: -883.229, cost: -90000 },
+      {
+        fund_id: fundIds[2],
+        date: '2016-09-19',
+        units: 1678.42,
+        price: 119.15,
+        fees: 16,
+        taxes: 0,
+      },
+      {
+        fund_id: fundIds[2],
+        date: '2017-02-14',
+        units: 846.38,
+        price: 118.15,
+        fees: 0,
+        taxes: 0,
+      },
+      {
+        fund_id: fundIds[0],
+        date: '2016-08-24',
+        units: 89.095,
+        price: 1122.3,
+        fees: 8,
+        taxes: 0,
+      },
+      {
+        fund_id: fundIds[0],
+        date: '2016-09-19',
+        units: 894.134,
+        price: 111.84,
+        fees: 0,
+        taxes: 0,
+      },
+      {
+        fund_id: fundIds[0],
+        date: '2017-04-27',
+        units: -883.229,
+        price: 101.898,
+        fees: 0,
+        taxes: 0,
+      },
     ])
     .into('funds_transactions');
 }

@@ -44,7 +44,7 @@ describe('<GraphFundItem />', () => {
         z-index: 2;
       }
 
-      .sc-pReKu .c2 {
+      .sc-pbxSd .c2 {
         position: relative;
         height: 125px;
       }
@@ -88,7 +88,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .c0 .jGFrsw {
+        .c0 .bcEgiG {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -103,7 +103,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .sc-pReKu .c2 {
+        .sc-pbxSd .c2 {
           height: 100%;
         }
       }

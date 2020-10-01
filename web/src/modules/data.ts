@@ -5,12 +5,7 @@ import numericHash from 'string-hash';
 
 import { Average } from '~client/constants';
 import { PeriodObject, Period } from '~client/constants/graph';
-import { Id, IdMap, Item, Create, Data as Line } from '~client/types';
-import { TransactionRaw as TransactionRawNew, Transaction } from '~client/types/funds';
-
-type TransactionRaw = Omit<TransactionRawNew, 'date'> & {
-  date: Date | string;
-};
+import { Id, IdMap, Item, Create, Data as Line, TransactionRaw, Transaction } from '~client/types';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,22 +36,24 @@ export function getPeriodMatch(
 }
 
 export const getTransactionsList = (data: TransactionRaw[]): Transaction[] =>
-  data.map(
-    ({ date, units, cost }: TransactionRaw): Transaction => ({
-      id: generateFakeId(),
-      date: new Date(date),
-      units: Number(units) || 0,
-      cost: Number(cost) || 0,
-    }),
+  data.map<Transaction>(({ date, ...rest }) => ({
+    id: generateFakeId(),
+    date: new Date(date),
+    ...rest,
+  }));
+
+const roundTotal = (value: number): number => Number(value.toFixed(4));
+
+export const getTotalUnits = (transactions: Transaction[]): number =>
+  roundTotal(transactions.reduce<number>((last, { units }) => last + units, 0));
+
+export const getTotalCost = (transactions: Transaction[]): number =>
+  roundTotal(
+    transactions.reduce<number>(
+      (last, { units, price, fees, taxes }) => last + units * price + fees + taxes,
+      0,
+    ),
   );
-
-const getRoundedTotal = <K extends string, I extends {} = {}>(key: K) => (
-  array: (I & { [key in K]: number })[],
-): number =>
-  Number(array.reduce((sum: number, { [key]: value }): number => sum + value, 0).toFixed(4));
-
-export const getTotalUnits = getRoundedTotal<'units', Transaction>('units');
-export const getTotalCost = getRoundedTotal<'cost', Transaction>('cost');
 
 export const isSold = (transactionsList: Transaction[]): boolean =>
   getTotalUnits(transactionsList) === 0;
@@ -93,10 +90,9 @@ export const modifyTransactionById = (
 export const formatTransactionsList = (transactionsList: Transaction[]): TransactionRaw[] =>
   [...transactionsList]
     .sort(({ date: dateA }, { date: dateB }) => Number(dateA) - Number(dateB))
-    .map(({ date, units, cost }) => ({
+    .map(({ id, date, ...rest }) => ({
       date: formatDate(date, 'yyyy-MM-dd'),
-      units,
-      cost,
+      ...rest,
     }));
 
 export function arrayAverage(values: number[], mode: Average = Average.Mean): number {

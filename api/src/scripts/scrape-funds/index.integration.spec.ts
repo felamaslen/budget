@@ -67,19 +67,19 @@ describe('Fund scraper - integration tests', () => {
       .returning('id');
 
     await db('funds_transactions').insert([
-      { fund_id: fundIds[0], date: '2016-08-24', units: 89.095, cost: 100000 },
-      { fund_id: fundIds[0], date: '2016-09-19', units: 894.134, cost: 100000 },
-      { fund_id: fundIds[0], date: '2017-04-27', units: -883.229, cost: -90000 },
-      { fund_id: fundIds[1], date: '2016-11-10', units: 30, cost: 193 },
-      { fund_id: fundIds[1], date: '2017-04-03', units: -23, cost: -175 },
-      { fund_id: fundIds[2], date: '2017-12-10', units: 14, cost: 216704 },
-      { fund_id: fundIds[2], date: '2018-01-05', units: -13, cost: -276523 },
-      { fund_id: fundIds[3], date: '2016-08-07', units: 1032.19, cost: 560321 },
-      { fund_id: fundIds[4], date: '2016-09-19', units: 1678.42, cost: 200000 },
-      { fund_id: fundIds[4], date: '2017-02-14', units: 846.38, cost: 100000 },
-      { fund_id: fundIds[4], date: '2017-10-25', units: 817, cost: 100000 },
-      { fund_id: fundIds[4], date: '2017-03-14', units: 1217.43, cost: 150000 },
-      { fund_id: fundIds[4], date: '2017-09-24', units: -4559.23, cost: -559520 },
+      { fund_id: fundIds[0], date: '2016-08-24', units: 89.095, price: 1122.39744 },
+      { fund_id: fundIds[0], date: '2016-09-19', units: 894.134, price: 111.84 },
+      { fund_id: fundIds[0], date: '2017-04-27', units: -883.229, price: 101.8988 },
+      { fund_id: fundIds[1], date: '2016-11-10', units: 30, price: 6.43333 },
+      { fund_id: fundIds[1], date: '2017-04-03', units: -23, price: 7.608696 },
+      { fund_id: fundIds[2], date: '2017-12-10', units: 14, price: 15478.857 },
+      { fund_id: fundIds[2], date: '2018-01-05', units: -13, price: 21271 },
+      { fund_id: fundIds[3], date: '2016-08-07', units: 1032.19, price: 542.8468 },
+      { fund_id: fundIds[4], date: '2016-09-19', units: 1678.42, price: 119.16 },
+      { fund_id: fundIds[4], date: '2017-02-14', units: 846.38, price: 118.15 },
+      { fund_id: fundIds[4], date: '2017-10-25', units: 817, price: 122.399 },
+      { fund_id: fundIds[4], date: '2017-03-14', units: 1217.43, price: 123.21 },
+      { fund_id: fundIds[4], date: '2017-09-24', units: -4559.23, price: 122.722 },
     ]);
   };
 

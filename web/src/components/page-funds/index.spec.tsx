@@ -31,7 +31,9 @@ describe('<PageFunds />', () => {
             {
               date: '2019-03-20',
               units: 69,
-              cost: 420000,
+              price: 6086.9,
+              fees: 10,
+              taxes: 3,
             },
           ]),
           allocationTarget: 0,
@@ -43,7 +45,9 @@ describe('<PageFunds />', () => {
             {
               date: '2019-04-09',
               units: 130.0312,
-              cost: 992139,
+              price: 7622.5,
+              fees: 5,
+              taxes: 11,
             },
             {
               date: format(
@@ -51,7 +55,9 @@ describe('<PageFunds />', () => {
                 'yyyy-MM-dd',
               ),
               units: -130.0312,
-              cost: -1103001,
+              price: 8482.8,
+              fees: 165,
+              taxes: 143,
             },
           ]),
           allocationTarget: 0,
@@ -131,12 +137,13 @@ describe('<PageFunds />', () => {
     const { getByTestId } = setup();
     const header = getByTestId('fund-header');
     const { getByText } = within(header);
-    // overall cost is £(4200 + 9921.39) = £14121.39
+    // overall cost is £(69*60.869+.1+.03+130.0312*76.225+.05+.11)
+    //  = £(4200.091 + 9911.78822) = £14111.87922
     // paper value is £4287.453 (see above)
-    // realised value is £11030.01
-    // => overall gain is £(4287.453 + 11030.01 - 14121.39) = £1196.073 or 8.4699%
+    // realised value is £(130.0312*84.828-1.65-1.43) = 11027.2066336
+    // => overall gain is £(4287.453 + 11027.20... - 14111.87922) = £1202.780416 or 8.5231768%
     expect(getByText('£1.2k')).toBeInTheDocument();
-    expect(getByText('8.47%')).toBeInTheDocument();
+    expect(getByText('8.52%')).toBeInTheDocument();
   });
 
   it('should show the daily gain, including percentage', () => {
@@ -144,13 +151,14 @@ describe('<PageFunds />', () => {
     const { getByTestId } = setup();
     const header = getByTestId('fund-header');
     const { getByText } = within(header);
-    // previous cost was £(4200 + 9921.39) = £14121.39
+    // previous cost was £(4200.091 + 9911.78822) = £14111.87922 (see above)
     // previous value was 6081.9 * 69 + 7421.97 * 130.0312 = 1384738.765464p = £13847.38765464
-    // latest cost is £3091.38, latest value is £4287.453
-    // day gain is thus £4287.453 - £13847.38... - (3091.38 - £14121.39) = £1470.07534536
-    // in percentage terms this is £1470.07 / £13847.38 = 10.6162%
+    // latest cost is £(14111.87922 - 130.0312*84.828 + 1.65+1.43) = £3084.6725864
+    // latest value is £4287.453 (see above)
+    // day gain is thus £4287.453 - £13847.38... - (3084.67... - £14111.87...) = £1467.27197896
+    // in percentage terms this is £1467.27 / £13847.38 = 10.596%
     expect(getByText('£1.5k')).toBeInTheDocument();
-    expect(getByText('10.62%')).toBeInTheDocument();
+    expect(getByText('10.60%')).toBeInTheDocument();
   });
 
   describe.each`
@@ -215,11 +223,15 @@ describe('<PageFunds />', () => {
     const makeContrivedFund = ({
       name,
       value,
-      cost,
+      price,
+      fees = 0,
+      taxes = 0,
     }: {
       name: string;
       value: number;
-      cost: number;
+      price: number;
+      fees?: number;
+      taxes?: number;
     }): {
       fund: Fund;
       prices: { [id: string]: { values: number[]; startIndex: number } };
@@ -234,7 +246,9 @@ describe('<PageFunds />', () => {
             {
               date: addDays(new Date('2020-04-20'), -Math.floor(Math.random() * 100)),
               units: 420,
-              cost,
+              price,
+              fees,
+              taxes,
             },
           ]),
           allocationTarget: 0,
@@ -252,47 +266,47 @@ describe('<PageFunds />', () => {
       {
         name: 'FH',
         value: 150000 * 1.05,
-        cost: (150000 * 1.05) / 1.55,
+        price: (150000 * 1.05) / 1.55 / 420,
       },
       {
         name: 'FLL',
         value: 150000 * 1,
-        cost: (150000 * 1) / 0.85,
+        price: (150000 * 1) / 0.85 / 420,
       },
       {
         name: 'HLL',
         value: 100000 * 0.95,
-        cost: (100000 * 0.95) / 0.8,
+        price: (100000 * 0.95) / 0.8 / 420,
       },
       {
         name: 'HH',
         value: 100000 * 1.05,
-        cost: (100000 * 1.05) / 1.5,
+        price: (100000 * 1.05) / 1.5 / 420,
       },
       {
         name: 'TL',
         value: 50000 * 1.05,
-        cost: (50000 * 1.05) / 1.25,
+        price: (50000 * 1.05) / 1.25 / 420,
       },
       {
         name: 'FL',
         value: 150000 * 0.95,
-        cost: (150000 * 0.95) / 1.2,
+        price: (150000 * 0.95) / 1.2 / 420,
       },
       {
         name: 'HL',
         value: 100000 * 1,
-        cost: (100000 * 1) / 1.15,
+        price: (100000 * 1) / 1.15 / 420,
       },
       {
         name: 'TH',
         value: 50000 * 1,
-        cost: (50000 * 1) / 1.45,
+        price: (50000 * 1) / 1.45 / 420,
       },
       {
         name: 'TLL',
         value: 50000 * 0.95,
-        cost: (50000 * 0.95) / 0.75,
+        price: (50000 * 0.95) / 0.75 / 420,
       },
     ].map(makeContrivedFund);
 

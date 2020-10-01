@@ -9,7 +9,7 @@ import { CREATE_ID } from '~client/constants/data';
 import { useCTA } from '~client/hooks';
 import { useField } from '~client/hooks/field';
 import { addToTransactionsList, modifyTransactionById, sortByKey } from '~client/modules/data';
-import { ButtonDelete, ButtonAdd } from '~client/styled/shared/button';
+import { FlexColumn, ButtonAdd, ButtonDelete } from '~client/styled/shared';
 import { Id, Transaction } from '~client/types';
 
 type PropsTransaction = {
@@ -25,7 +25,9 @@ function useSingleTransactionField({
 }: Omit<PropsTransaction, 'create'>): {
   onChangeDate: (value: Date | undefined) => void;
   onChangeUnits: (value: number | undefined) => void;
-  onChangeCost: (value: number | undefined) => void;
+  onChangePrice: (value: number | undefined) => void;
+  onChangeFees: (value: number | undefined) => void;
+  onChangeTaxes: (value: number | undefined) => void;
 } {
   const [delta, setDelta] = useState<Partial<Transaction>>({});
   const prevDelta = useRef<Partial<Transaction>>(delta);
@@ -40,9 +42,17 @@ function useSingleTransactionField({
     (units?: number) => setDelta((last) => ({ ...last, units })),
     [],
   );
-  const onChangeCost = useCallback((cost?: number) => setDelta((last) => ({ ...last, cost })), []);
+  const onChangePrice = useCallback(
+    (price?: number) => setDelta((last) => ({ ...last, price })),
+    [],
+  );
+  const onChangeFees = useCallback((fees?: number) => setDelta((last) => ({ ...last, fees })), []);
+  const onChangeTaxes = useCallback(
+    (taxes?: number) => setDelta((last) => ({ ...last, taxes })),
+    [],
+  );
 
-  return { onChangeDate, onChangeUnits, onChangeCost };
+  return { onChangeDate, onChangeUnits, onChangePrice, onChangeFees, onChangeTaxes };
 }
 
 const FormFieldTransactionInline: React.FC<PropsTransaction> = ({
@@ -51,26 +61,52 @@ const FormFieldTransactionInline: React.FC<PropsTransaction> = ({
   ...props
 }) => {
   const {
-    item: { id, date, units, cost },
+    item: { id, date, units, price, fees, taxes },
   } = props;
-  const { onChangeDate, onChangeUnits, onChangeCost } = useSingleTransactionField(props);
+  const {
+    onChangeDate,
+    onChangeUnits,
+    onChangePrice,
+    onChangeFees,
+    onChangeTaxes,
+  } = useSingleTransactionField(props);
 
   return (
     <Styled.TransactionsListItem data-testid={create ? 'create-input' : 'edit-input'}>
       <Styled.TransactionRowDate>
         <FormFieldDateInline id={`date-${id}`} value={date} onChange={onChangeDate} />
       </Styled.TransactionRowDate>
-      <Styled.TransactionRowUnits>
-        <FormFieldNumberInline
-          id={`units-${id}`}
-          allowEmpty
-          value={units}
-          onChange={onChangeUnits}
-        />
-      </Styled.TransactionRowUnits>
-      <Styled.TransactionRowCost>
-        <FormFieldCostInline id={`cost-${id}`} allowEmpty value={cost} onChange={onChangeCost} />
-      </Styled.TransactionRowCost>
+      <FlexColumn>
+        <Styled.UnitsPriceRow>
+          <Styled.TransactionRowUnits>
+            <FormFieldNumberInline
+              id={`units-${id}`}
+              allowEmpty
+              value={units}
+              onChange={onChangeUnits}
+            />
+          </Styled.TransactionRowUnits>
+          <Styled.TransactionRowPrice>
+            <FormFieldNumberInline
+              id={`price-${id}`}
+              allowEmpty
+              value={price}
+              onChange={onChangePrice}
+            />
+          </Styled.TransactionRowPrice>
+        </Styled.UnitsPriceRow>
+        <Styled.TransactionRowFees>
+          <Styled.FeesLabel>Fees</Styled.FeesLabel>
+          <FormFieldCostInline id={`fees-${id}`} allowEmpty value={fees} onChange={onChangeFees} />
+          <Styled.FeesLabel>Taxes</Styled.FeesLabel>
+          <FormFieldCostInline
+            id={`taxes-${id}`}
+            allowEmpty
+            value={taxes}
+            onChange={onChangeTaxes}
+          />
+        </Styled.TransactionRowFees>
+      </FlexColumn>
       {children}
     </Styled.TransactionsListItem>
   );
@@ -82,9 +118,15 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
   ...props
 }) => {
   const {
-    item: { id, date, units, cost },
+    item: { id, date, units, price, fees, taxes },
   } = props;
-  const { onChangeDate, onChangeUnits, onChangeCost } = useSingleTransactionField(props);
+  const {
+    onChangeDate,
+    onChangeUnits,
+    onChangePrice,
+    onChangeFees,
+    onChangeTaxes,
+  } = useSingleTransactionField(props);
 
   return (
     <Styled.TransactionsListItem data-testid={create ? 'create-input' : 'edit-input'}>
@@ -105,14 +147,30 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
             <FormFieldNumber id={`units-${id}`} value={units} onChange={onChangeUnits} />
           </Styled.TransactionCol>
         </Styled.TransactionRowUnits>
-        <Styled.TransactionRowCost>
+        <Styled.TransactionRowPrice>
           <Styled.TransactionLabel>
-            <label htmlFor={`cost-${id}`}>Cost:</label>
+            <label htmlFor={`price-${id}`}>Price:</label>
           </Styled.TransactionLabel>
           <Styled.TransactionCol>
-            <FormFieldCost id={`cost-${id}`} value={cost} onChange={onChangeCost} />
+            <FormFieldNumber id={`price-${id}`} value={price} onChange={onChangePrice} />
           </Styled.TransactionCol>
-        </Styled.TransactionRowCost>
+        </Styled.TransactionRowPrice>
+        <Styled.TransactionRowFees>
+          <Styled.TransactionLabel>
+            <label htmlFor={`fees-${id}`}>Fees:</label>
+          </Styled.TransactionLabel>
+          <Styled.TransactionCol>
+            <FormFieldCost id={`fees-${id}`} value={fees} onChange={onChangeFees} />
+          </Styled.TransactionCol>
+        </Styled.TransactionRowFees>
+        <Styled.TransactionRowFees>
+          <Styled.TransactionLabel>
+            <label htmlFor={`taxes-${id}`}>Taxes:</label>
+          </Styled.TransactionLabel>
+          <Styled.TransactionCol>
+            <FormFieldCost id={`taxes-${id}`} value={taxes} onChange={onChangeTaxes} />
+          </Styled.TransactionCol>
+        </Styled.TransactionRowFees>
       </Styled.TransactionFields>
       {children}
     </Styled.TransactionsListItem>
@@ -123,7 +181,9 @@ const newItemInit: Transaction = {
   id: CREATE_ID,
   date: new Date(),
   units: 0,
-  cost: 0,
+  price: 0,
+  fees: 0,
+  taxes: 0,
 };
 
 const emptyValue: Transaction[] = [];
@@ -170,7 +230,7 @@ function useTransactionsField(
   }, []);
 
   const onAdd = useCallback(() => {
-    if (!(newItem.units && newItem.cost)) {
+    if (!(newItem.units && newItem.price)) {
       return;
     }
 
@@ -236,7 +296,7 @@ export const FormFieldTransactionsInline: React.FC<PropsInline> = ({
             <Styled.ModalHead>
               <Styled.ModalHeadDate>Date</Styled.ModalHeadDate>
               <Styled.ModalHeadUnits>Units</Styled.ModalHeadUnits>
-              <Styled.ModalHeadCost>Cost</Styled.ModalHeadCost>
+              <Styled.ModalHeadPrice>Price</Styled.ModalHeadPrice>
             </Styled.ModalHead>
             <Styled.TransactionsList>
               <FormFieldTransactionInline item={newItem} onChange={onChangeAddField} create>

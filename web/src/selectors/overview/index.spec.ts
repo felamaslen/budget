@@ -20,19 +20,19 @@ describe('Overview selectors', () => {
         ...state.funds,
         items: [
           {
-            id: 113,
+            id: numericHash('fund-A'),
             item: 'some fund 1',
             transactions: getTransactionsList([
-              { date: new Date('2018-02-05'), units: 10, cost: 56123 },
-              { date: new Date('2018-03-27'), units: -1.32, cost: -2382 },
+              { date: new Date('2018-02-05'), units: 10, price: 5612, fees: 3, taxes: 0 },
+              { date: new Date('2018-03-27'), units: -1.32, price: 1804, fees: 0.72, taxes: 0 },
             ]),
             allocationTarget: 0,
           },
           {
-            id: 114,
+            id: numericHash('fund-B'),
             item: 'some fund 2',
             transactions: getTransactionsList([
-              { date: new Date('2018-03-17'), units: 51, cost: 10662 },
+              { date: new Date('2018-03-17'), units: 51, price: 109, fees: 3, taxes: 0 },
             ]),
             allocationTarget: 0,
           },
@@ -51,8 +51,9 @@ describe('Overview selectors', () => {
       const netWorthSummary = getNetWorthSummary(testState);
 
       const jan = netWorthSummary[0];
-      const feb = netWorthSummary[0] + net[1] + funds[1] - funds[0] - 56123;
-      const mar = netWorthSummary[1] + net[2] + funds[2] - funds[1] + 2382 - 10662;
+      const feb = netWorthSummary[0] + net[1] + funds[1] - funds[0] - (10 * 5612 + 3);
+      const mar =
+        netWorthSummary[1] + net[2] + funds[2] - funds[1] + (1804 * 1.32 - 0.72) - (109 * 51 + 3);
 
       // We're currently in March, but not at the end of the month, so we predict the next
       // month's value based on the prediction for March
@@ -101,41 +102,17 @@ describe('Overview selectors', () => {
 
     describe('if the current day is the last of the month', () => {
       const nowEndOfMonth = new Date('2018-03-31T11:28:10Z');
-      const testStateEndOfMonth: State = {
-        ...testState,
-        funds: {
-          ...testState.funds,
-          items: [
-            {
-              id: numericHash('fund-A'),
-              item: 'some fund 1',
-              transactions: getTransactionsList([
-                { date: new Date('2018-02-05'), units: 10, cost: 56123 },
-                { date: new Date('2018-03-27'), units: -1.32, cost: -2382 },
-              ]),
-              allocationTarget: 0,
-            },
-            {
-              id: numericHash('fund-B'),
-              item: 'some fund 2',
-              transactions: getTransactionsList([
-                { date: new Date('2018-03-17'), units: 51, cost: 10662 },
-              ]),
-              allocationTarget: 0,
-            },
-          ],
-        },
-      };
 
       it('should use the actual (non-predicted) net worth value for the current month', () => {
         expect.assertions(1);
-        const netWorthSummary = getNetWorthSummary(testStateEndOfMonth);
+        const netWorthSummary = getNetWorthSummary(testState);
 
         const net = [740, -168, 841, 1580, 2030, 1530, 2330];
 
         const jan = netWorthSummary[0];
-        const feb = netWorthSummary[0] + net[1] + funds[1] - funds[0] - 56123;
-        const mar = netWorthSummary[1] + net[2] + funds[2] - funds[1] + 2382 - 10662;
+        const feb = netWorthSummary[0] + net[1] + funds[1] - funds[0] - (10 * 5612 + 3);
+        const mar =
+          netWorthSummary[1] + net[2] + funds[2] - funds[1] + (1804 * 1.32 - 0.72) - (109 * 51 + 3);
 
         // We're currently in March, at the end of the month, so we predict the next
         // month's value based on the actual value for March
@@ -158,7 +135,7 @@ describe('Overview selectors', () => {
           jul,
         ];
 
-        expect(getProcessedCost(nowEndOfMonth)(testStateEndOfMonth)).toStrictEqual(
+        expect(getProcessedCost(nowEndOfMonth)(testState)).toStrictEqual(
           expect.objectContaining({
             spending: [1260, 2068, 659, 920, 270, 270, 270],
             funds,

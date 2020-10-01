@@ -3,9 +3,11 @@ import { Id, ListItem, RawListItem } from './shared';
 import { DataKeyAbbr } from '~client/constants/api';
 
 export type TransactionRaw = {
-  date: string;
+  date: string | Date;
   units: number;
-  cost: number;
+  price: number;
+  fees: number;
+  taxes: number;
 };
 
 export type Transaction = Omit<TransactionRaw, 'date'> & {

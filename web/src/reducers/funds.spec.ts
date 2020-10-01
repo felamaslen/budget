@@ -63,7 +63,9 @@ describe('Funds reducer', () => {
           {
             [DataKeyAbbr.id]: numericHash('id-1'),
             [DataKeyAbbr.item]: 'My fund 1',
-            [DataKeyAbbr.transactions]: [{ date: '2019-06-30', units: 100, cost: 9923 }],
+            [DataKeyAbbr.transactions]: [
+              { date: '2019-06-30', units: 100, price: 99.23, fees: 0, taxes: 0 },
+            ],
             [DataKeyAbbr.allocationTarget]: 0,
             pr: [45, 45.6, 44.9],
             prStartIndex: 1,
@@ -93,7 +95,9 @@ describe('Funds reducer', () => {
           {
             id: numericHash('id-1'),
             item: 'My fund 1',
-            transactions: getTransactionsList([{ date: '2019-06-30', units: 100, cost: 9923 }]),
+            transactions: getTransactionsList([
+              { date: '2019-06-30', units: 100, price: 99.23, fees: 0, taxes: 0 },
+            ]),
             allocationTarget: 0,
           },
           { id: numericHash('id-2'), item: 'My fund 2', transactions: [], allocationTarget: 0.3 },
@@ -122,7 +126,9 @@ describe('Funds reducer', () => {
           {
             [DataKeyAbbr.id]: numericHash('id-1'),
             [DataKeyAbbr.item]: 'My fund 1',
-            [DataKeyAbbr.transactions]: [{ date: '2019-06-30', units: 100, cost: 9923 }],
+            [DataKeyAbbr.transactions]: [
+              { date: '2019-06-30', units: 100, price: 99.23, fees: 0, taxes: 0 },
+            ],
             [DataKeyAbbr.allocationTarget]: 0.12,
             pr: [45.6, 44.9],
             prStartIndex: 1,

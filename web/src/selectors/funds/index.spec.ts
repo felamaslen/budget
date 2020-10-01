@@ -103,7 +103,7 @@ describe('Funds selectors', () => {
       const result = getFundsCachedValue(testNow)(state);
 
       if (typeof expectedValue === 'number') {
-        expect(result[prop as keyof CachedValue]).toBeCloseTo(expectedValue);
+        expect(result[prop as keyof CachedValue]).toBeCloseTo(expectedValue, 1);
       } else {
         expect(result).toHaveProperty(prop, expectedValue);
       }
@@ -134,7 +134,9 @@ describe('Funds selectors', () => {
       {
         id: 'some-id',
         item: 'new fund',
-        transactions: getTransactionsList([{ date: '2019-07-23', units: 13, cost: 12 }]),
+        transactions: getTransactionsList([
+          { date: '2019-07-23', units: 13, price: 0.92308, fees: 0, taxes: 0 },
+        ]),
       },
     ];
 
@@ -146,7 +148,9 @@ describe('Funds selectors', () => {
           {
             date: addDays(testNow, 1),
             units: 1000,
-            cost: 100,
+            price: 0.1,
+            fees: 0,
+            taxes: 0,
           },
         ]),
       },
@@ -181,8 +185,9 @@ describe('Funds selectors', () => {
   describe('getFundsCost', () => {
     it('should get the all-time total fund cost', () => {
       expect.assertions(1);
-      expect(getFundsCost(testToday)(state)).toBe(
+      expect(getFundsCost(testToday)(state)).toBeCloseTo(
         400000 + 45000 - 50300 + 90000 - 80760 + 200000 - 265622,
+        1,
       );
     });
 
