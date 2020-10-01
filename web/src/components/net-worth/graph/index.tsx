@@ -11,17 +11,15 @@ export type GraphProps = {
   table: TableRow[];
 };
 
-const labelY = (value: number): string => String(value);
-
 const makeBeforeLines = (axisProps: Partial<TimeAxesProps> = {}): React.FC<DrawProps> => {
   const BeforeLines: React.FC<DrawProps> = (props) => (
-    <TimeAxes {...props} yAlign="right" hideMinorTicks dualAxis {...axisProps} />
+    <TimeAxes {...props} hideMinorTicks dualAxis {...axisProps} />
   );
 
   return BeforeLines;
 };
 
-const BeforeLinesFTI = makeBeforeLines({ labelY });
+const BeforeLinesFTI = makeBeforeLines({ labelY: String });
 const BeforeLinesNetWorth = makeBeforeLines();
 
 const dimensions = (lines: Line[]): Range => ({

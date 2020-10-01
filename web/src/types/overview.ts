@@ -11,6 +11,7 @@ export type CostProcessed = Cost & {
   netWorth: number[];
   netWorthPredicted: number[];
   netWorthCombined: number[];
+  savingsRatio: number[];
 };
 
 export type OverviewState = {
@@ -26,7 +27,7 @@ export type TableValues<T = never, K extends keyof CostProcessed = keyof CostPro
   netWorth: T;
 };
 
-export type OverviewHeader = Exclude<keyof CostProcessed, 'fundsOld'>;
+export type OverviewHeader = Exclude<keyof CostProcessed, 'fundsOld' | 'savingsRatio'>;
 
 export type OverviewCell = {
   value: number;

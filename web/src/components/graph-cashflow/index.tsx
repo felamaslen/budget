@@ -9,13 +9,14 @@ import React, { useCallback, useMemo } from 'react';
 import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
 import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
-import { formatCurrency } from '~client/modules/format';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import { PickUnion, Range, DrawProps, Line } from '~client/types';
 
 export type Props = PickUnion<LineGraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
   isMobile?: boolean;
   today: Date;
   graphHeight?: number;
+  dualAxis?: boolean;
 };
 
 function getTimeAtIndex(
@@ -47,15 +48,20 @@ export const getValuesWithTime = (
 
 function getRanges(lines: Line[]): Range {
   return lines.reduce(
-    ({ minX, maxX, minY, maxY }, { data, stack }) => {
+    ({ minX, maxX, minY, maxY, minY2, maxY2 }, { data, stack, secondary }) => {
       const dataX = data.map(([xValue]) => xValue);
       const dataY = data.map(([, yValue], index) => yValue + (stack?.[index]?.[1] ?? 0));
+
+      const dataMinY = dataY.reduce((min, value) => Math.min(min, value), Infinity);
+      const dataMaxY = dataY.reduce((max, value) => Math.max(max, value), -Infinity);
 
       return {
         minX: dataX.reduce((min, value) => Math.min(min, value), minX),
         maxX: dataX.reduce((max, value) => Math.max(max, value), maxX),
-        minY: dataY.reduce((min, value) => Math.min(min, value), minY),
-        maxY: dataY.reduce((max, value) => Math.max(max, value), maxY),
+        minY: secondary ? minY : Math.min(minY, dataMinY),
+        maxY: secondary ? maxY : Math.max(maxY, dataMaxY),
+        minY2: secondary ? Math.min(minY2, dataMinY) : minY2,
+        maxY2: secondary ? Math.max(maxY2, dataMaxY) : maxY2,
       };
     },
     {
@@ -63,14 +69,16 @@ function getRanges(lines: Line[]): Range {
       maxX: -Infinity,
       minY: 0,
       maxY: -Infinity,
+      minY2: 0,
+      maxY2: -Infinity,
     },
   );
 }
 
-function makeBeforeLines(now: Date): React.FC<DrawProps> {
+function makeBeforeLines(now: Date, dualAxis: boolean): React.FC<DrawProps> {
   const BeforeLines: React.FC<DrawProps> = (props) => (
     <g>
-      <TimeAxes {...props} />
+      <TimeAxes {...props} dualAxis={dualAxis} labelY2={formatPercent} />
       <NowLine now={now} {...props} />
     </g>
   );
@@ -86,10 +94,11 @@ export const GraphCashFlow: React.FC<Props> = ({
   lines,
   afterLines,
   after,
+  dualAxis = false,
 }) => {
   const graphWidth = useGraphWidth();
   const ranges = useMemo<Range>(() => getRanges(lines), [lines]);
-  const beforeLines = useMemo(() => makeBeforeLines(today), [today]);
+  const beforeLines = useMemo(() => makeBeforeLines(today, dualAxis), [today, dualAxis]);
 
   const labelX = useCallback(
     (value: number): string => format(fromUnixTime(value), 'MMM yyyy'),

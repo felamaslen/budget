@@ -28,23 +28,13 @@ type TicksY = {
   valueSecondary?: number;
 }[];
 
-function getTicksY({
-  minY,
-  minY2 = minY,
-  maxY,
-  maxY2 = maxY,
-  pixY1,
-  tickSizeY = 0,
-  hideMinorTicks,
-}: Props): TicksY {
+function getTicksY({ minY, maxY, pixY1, valY2, tickSizeY = 0, hideMinorTicks }: Props): TicksY {
   const minorTicks = hideMinorTicks ? 1 : 5;
   const numTicksGuide = 5 * minorTicks;
 
   const tickSize = tickSizeY || getTickSize(minY, maxY, numTicksGuide);
-  const tickSize2 = getTickSize(minY2, maxY2, numTicksGuide);
   const majorTickSize = tickSize * minorTicks;
   const tickStart = Math.floor(minY / tickSize) * tickSize;
-  const tickStart2 = Math.floor(minY2 / tickSize2) * tickSize2;
 
   const numTicks = Math.ceil((maxY - minY) / tickSize);
   if (numTicks > 50) {
@@ -53,9 +43,8 @@ function getTicksY({
 
   return new Array(numTicks + 1).fill(0).map((_, index) => {
     const value = tickStart + index * tickSize;
-    const valueSecondary = tickStart2 + index * tickSize2;
-
     const pos = Math.floor(pixY1(value)) + 0.5;
+    const valueSecondary = valY2(pixY1(value));
 
     const major = value % majorTickSize === 0;
 
@@ -164,8 +153,8 @@ const YAxis: React.FC<Props> = (props) => {
     pixX,
     yAlign,
     hideMinorTicks,
-    labelY = defaultLabelY,
     labelY2 = defaultLabelY,
+    labelY = defaultLabelY,
   } = props;
 
   const x0 = pixX(minX);
@@ -188,7 +177,7 @@ const YAxis: React.FC<Props> = (props) => {
           secondary
           ticksY={ticksY}
           labelY={labelY2}
-          align={yAlign === 'left' ? 'right' : 'left'}
+          align={yAlign === 'right' ? 'left' : 'right'}
           alignPos={alignPosSecondary}
         />
       )}

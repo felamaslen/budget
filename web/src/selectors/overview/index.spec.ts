@@ -1,3 +1,4 @@
+import { replaceAtIndex } from 'replace-array';
 import numericHash from 'string-hash';
 import { getNetWorthSummary } from './net-worth';
 import { getProcessedCost, getOverviewTable } from '.';
@@ -5,6 +6,7 @@ import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data';
 import { mockRandom } from '~client/test-utils/random';
+import { Page, Cost } from '~client/types';
 
 describe('Overview selectors', () => {
   beforeEach(() => {
@@ -75,6 +77,16 @@ describe('Overview selectors', () => {
       const social = [50, 65, 181, 65, 65, 65, 65];
       const holiday = [10, 1000, 128, 128, 128, 128, 128];
 
+      const savingsRatio = [
+        1 - (1000 + 50 + 150 + 50 + 10) / 2000,
+        0,
+        1 - (400 + 27 + 13 + 181 + 128) / 1500,
+        1 - (650 + 27 + 90 + 65 + 128) / 2500,
+        1 - (0 + 27 + 90 + 65 + 128) / 2300,
+        1 - (0 + 27 + 90 + 65 + 128) / 1800,
+        1 - (0 + 27 + 90 + 65 + 128) / 2600,
+      ];
+
       it.each`
         description                             | prop                   | value
         ${'spending data'}                      | ${'spending'}          | ${spending}
@@ -84,13 +96,14 @@ describe('Overview selectors', () => {
         ${'predicted net worth data'}           | ${'netWorthPredicted'} | ${netWorthPredicted}
         ${'combined net worth data'}            | ${'netWorthCombined'}  | ${netWorthCombined}
         ${'actual net worth data'}              | ${'netWorth'}          | ${netWorthSummary}
+        ${'savings ratio data'}                 | ${'savingsRatio'}      | ${savingsRatio}
         ${'income data'}                        | ${'income'}            | ${income}
         ${'bills data'}                         | ${'bills'}             | ${bills}
         ${'food data'}                          | ${'food'}              | ${food}
         ${'general data'}                       | ${'general'}           | ${general}
         ${'social data'}                        | ${'social'}            | ${social}
         ${'holiday data'}                       | ${'holiday'}           | ${holiday}
-      `('should add $prop', ({ prop, value }) => {
+      `('should add $description', ({ prop, value }) => {
         expect.assertions(1);
         expect(getProcessedCost(now)(testState)).toStrictEqual(
           expect.objectContaining({
@@ -143,6 +156,40 @@ describe('Overview selectors', () => {
             netWorthPredicted,
             netWorthCombined,
             netWorth: netWorthSummary,
+          }),
+        );
+      });
+    });
+
+    describe.each`
+      case                         | key            | value
+      ${'income is zero'}          | ${Page.income} | ${0}
+      ${'spending exceeds income'} | ${Page.bills}  | ${16600023}
+    `('if $case for a given month', ({ key, value }) => {
+      const testStateWithZeroIncome: State = {
+        ...testState,
+        [Page.overview]: {
+          ...testState[Page.overview],
+          cost: {
+            ...testState[Page.overview].cost,
+            [key]: replaceAtIndex(testState[Page.overview].cost[key as keyof Cost], 1, value),
+          },
+        },
+      };
+
+      it('should set the savings ratio to 0', () => {
+        expect.assertions(1);
+        expect(getProcessedCost(now)(testStateWithZeroIncome)).toStrictEqual(
+          expect.objectContaining({
+            savingsRatio: [
+              expect.any(Number),
+              0,
+              expect.any(Number),
+              expect.any(Number),
+              expect.any(Number),
+              expect.any(Number),
+              expect.any(Number),
+            ],
           }),
         );
       });

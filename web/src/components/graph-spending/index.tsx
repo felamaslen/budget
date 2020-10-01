@@ -1,3 +1,4 @@
+import { rgba } from 'polished';
 import React, { useMemo, useContext } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -13,29 +14,43 @@ import { getStartDate, getProcessedCost } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { Page, Line, DrawProps } from '~client/types';
 
-function processData(startDate: Date, net: number[], spending: number[]): Line[] {
+function processData(
+  startDate: Date,
+  net: number[],
+  spending: number[],
+  savingsRatio: number[],
+): Line[] {
   const props: TimeValuesProps = {
     oldOffset: 0,
     startDate,
   };
 
-  const dataNet = getValuesWithTime(net, props);
-  const dataSpending = getValuesWithTime(spending, props);
-
   return [
     {
       key: 'net',
-      data: dataNet,
+      data: getValuesWithTime(net, props),
       arrows: true,
       color: profitLossColor,
     },
     {
       key: 'spending',
-      data: dataSpending,
+      data: getValuesWithTime(spending, props),
       fill: false,
       smooth: true,
       color: colors[Page.overview].spending,
-      movingAverage: 6,
+    },
+    {
+      key: 'savingsRatio',
+      data: getValuesWithTime(
+        savingsRatio.map((value) => value * 1),
+        props,
+      ),
+      color: rgba(colors.green, 0.2),
+      secondary: true,
+      smooth: true,
+      fill: true,
+      strokeWidth: 1,
+      movingAverage: 12,
     },
   ];
 }
@@ -43,12 +58,13 @@ function processData(startDate: Date, net: number[], spending: number[]): Line[]
 export const GraphSpending: React.FC = () => {
   const today = useContext(TodayContext);
   const startDate = useSelector(getStartDate);
-  const { net, spending } = useSelector(getProcessedCost(today));
+  const { net, spending, savingsRatio } = useSelector(getProcessedCost(today));
 
-  const lines = useMemo<Line[]>(() => processData(startDate, net, spending), [
+  const lines = useMemo<Line[]>(() => processData(startDate, net, spending, savingsRatio), [
     startDate,
     net,
     spending,
+    savingsRatio,
   ]);
 
   const afterLines = useMemo<React.FC<DrawProps>>(() => {
@@ -69,5 +85,7 @@ export const GraphSpending: React.FC = () => {
     return AfterLines;
   }, [today]);
 
-  return <GraphCashFlow today={today} name="spend" lines={lines} afterLines={afterLines} />;
+  return (
+    <GraphCashFlow dualAxis today={today} name="spend" lines={lines} afterLines={afterLines} />
+  );
 };

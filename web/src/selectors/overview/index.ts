@@ -138,10 +138,7 @@ const getNetCashFlow = <K extends keyof CostProcessed>(dates: Date[]) => (
   data: Cost & Pick<CostProcessed, K | 'spending'>,
 ): Cost & Pick<CostProcessed, K | 'spending' | 'net'> => ({
   ...data,
-  net: dates.map((_, index) => {
-    const result = data.income[index] - data.spending[index];
-    return result;
-  }),
+  net: dates.map((_, index) => data.income[index] - data.spending[index]),
 });
 
 const getPredictedNetWorth = <K extends keyof CostProcessed>(
@@ -224,14 +221,24 @@ const withNetWorth = <K extends keyof CostProcessed>(
     ): Cost & Pick<CostProcessed, K | 'spending' | 'net' | 'netWorth'> => ({ ...data, netWorth }),
   )(cost);
 
+const withSavingsRatio = (dates: Date[]) => (
+  cost: Cost & Pick<CostProcessed, 'fundsOld' | 'spending'>,
+): Cost & Pick<CostProcessed, 'fundsOld' | 'spending' | 'savingsRatio'> => ({
+  ...cost,
+  savingsRatio: dates.map((_, index) =>
+    cost.income[index] ? Math.max(0, 1 - cost.spending[index] / cost.income[index]) : 0,
+  ),
+});
+
 const withPredictedSpending = (
   dates: Date[],
   currentDate: Date,
   futureMonths: number,
   numRows: number,
   annualisedFundReturns: number,
-) => (cost: Cost): Cost & Pick<CostProcessed, 'fundsOld' | 'spending'> =>
+) => (cost: Cost): Cost & Pick<CostProcessed, 'fundsOld' | 'spending' | 'savingsRatio'> =>
   compose(
+    withSavingsRatio(dates),
     getSpendingColumn<'fundsOld'>(dates),
     calculateFutures(numRows, currentDate, futureMonths, annualisedFundReturns),
     separateOldFunds(numRows),
@@ -249,8 +256,14 @@ export const getProcessedCost = moize(
       getCost,
       (numRows, futureMonths, dates, netWorth, fundsRows, annualisedFundReturns, costMap) =>
         compose(
-          withNetWorth<'fundsOld' | 'spending'>(dates, today, futureMonths, netWorth, fundsRows),
-          getNetCashFlow<'fundsOld'>(dates),
+          withNetWorth<'fundsOld' | 'savingsRatio' | 'spending'>(
+            dates,
+            today,
+            futureMonths,
+            netWorth,
+            fundsRows,
+          ),
+          getNetCashFlow<'fundsOld' | 'savingsRatio'>(dates),
           withPredictedSpending(dates, today, futureMonths, numRows, annualisedFundReturns),
         )(costMap),
     ),

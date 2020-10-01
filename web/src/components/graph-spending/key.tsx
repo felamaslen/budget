@@ -40,6 +40,18 @@ export const Key: React.FC<Props> = ({ now, pixX, pixY1, maxX, minY, maxY, title
         {'Spending'}
       </text>
 
+      <line x1={50} y1={58} x2={74} y2={58} stroke={colors.green} strokeWidth={2} />
+      <text
+        x={78}
+        y={58}
+        fill={colors.dark.light}
+        fontFamily={fontFamily}
+        fontSize={fontSize}
+        alignmentBaseline="middle"
+      >
+        {'Savings ratio'}
+      </text>
+
       <rect
         x={future0}
         y={future1}
