@@ -6,12 +6,20 @@ import { PAGES_LIST, isCalcPage } from '~client/constants/data';
 import { getValueForTransmit } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { State as CrudState } from '~client/reducers/crud';
+import { ListState } from '~client/reducers/list';
 import { Page, PageList, Item, RequestType, Request } from '~client/types';
 
 const getNonFilteredItems = (state: State, page: PageList): CrudState<Item> => ({
   items: state[page].items,
   __optimistic: state[page].__optimistic,
 });
+
+export type ApiListState<I extends Item, P extends string> = Record<P, ListState<I>> &
+  Partial<Pick<State, 'api'>>;
+
+export const getRawItems = <I extends Item, P extends string>(page: P) => (
+  state: ApiListState<I, P>,
+): CrudState<I> => state[page];
 
 type NonFilteredState<I extends Item = Item> = {
   page: PageList;

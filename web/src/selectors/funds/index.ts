@@ -1,3 +1,4 @@
+import addDays from 'date-fns/addDays';
 import endOfDay from 'date-fns/endOfDay';
 import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
@@ -14,6 +15,7 @@ import { Period } from '~client/constants/graph';
 import { getTotalCost } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { Cache, getRemainingAllocation } from '~client/reducers/funds';
+import { getCostForMonthSoFar } from '~client/selectors/overview';
 import { Id, Page, Data, Portfolio, CachedValue, Transaction, Aggregate } from '~client/types';
 
 export * from './gains';
@@ -110,16 +112,38 @@ export const getStockValue = moize(
   { maxSize: 1 },
 );
 
-export const getCashInBank = createSelector(
-  getLatestNetWorthAggregate,
-  (netWorth): number => netWorth?.[Aggregate.cashEasyAccess] ?? 0,
+export const getFundsCost = moize(
+  (today: Date) =>
+    createSelector(getFundsRows, (rows) =>
+      rows.reduce(
+        (sum, { transactions }) => sum + getTotalCost(filterPastTransactions(today, transactions)),
+        0,
+      ),
+    ),
+  { maxSize: 1 },
+);
+
+export const getCashInBank = moize(
+  (today: Date) =>
+    createSelector(
+      getLatestNetWorthAggregate,
+      getFundsCost(startOfDay(addDays(today, 1))),
+      getFundsCost(startOfMonth(today)),
+      getCostForMonthSoFar(today),
+      (netWorth, fundsCostToday, fundsCostPreviousMonth, purchaseCostSoFar): number => {
+        const cashTotalAtStartOfMonth = netWorth?.[Aggregate.cashEasyAccess] ?? 0;
+        const fundsCost = fundsCostToday - fundsCostPreviousMonth;
+        return cashTotalAtStartOfMonth - fundsCost - purchaseCostSoFar;
+      },
+    ),
+  { maxSize: 1 },
 );
 
 export const getCashToInvest = moize(
   (today: Date) =>
     createSelector(
       getLatestNetWorthAggregate,
-      getCashInBank,
+      getCashInBank(today),
       getStockValue(startOfMonth(today)),
       (netWorth, cashInBank, stockValue): number => {
         const stocksIncludingCash = netWorth?.[Aggregate.stocks] ?? 0;
@@ -164,17 +188,6 @@ export const getFundsCachedValue = moize(
           dayGainAbs,
         };
       },
-    ),
-  { maxSize: 1 },
-);
-
-export const getFundsCost = moize(
-  (today: Date) =>
-    createSelector(getFundsRows, (rows) =>
-      rows.reduce(
-        (sum, { transactions }) => sum + getTotalCost(filterPastTransactions(today, transactions)),
-        0,
-      ),
     ),
   { maxSize: 1 },
 );

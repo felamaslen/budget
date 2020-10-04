@@ -12,13 +12,14 @@ import {
   getDayGainAbs,
   getMaxAllocationTarget,
   getStockValue,
+  getCashInBank,
 } from '.';
 import { Period } from '~client/constants';
 import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { Cache } from '~client/reducers/funds';
 import { testState as state } from '~client/test-data/state';
-import { Page, Portfolio, CachedValue } from '~client/types';
+import { Page, Portfolio, CachedValue, RequestType } from '~client/types';
 
 describe('Funds selectors', () => {
   const testNow = new Date('2018-03-23T11:45:20Z');
@@ -246,6 +247,177 @@ describe('Funds selectors', () => {
     it('should get the current paper value of stocks', () => {
       expect.assertions(1);
       expect(getStockValue(testToday)(state)).toMatchInlineSnapshot(`399098.2`);
+    });
+  });
+
+  describe('getCashInBank', () => {
+    it('should get the easy-access cash total from the net worth data', () => {
+      expect.assertions(1);
+      const today = new Date('2017-09-30T09:32:10+0100');
+      expect(getCashInBank(today)(state)).toMatchInlineSnapshot(`1061095`);
+    });
+
+    describe('when in the middle of the month', () => {
+      const stateWithCostSoFar: State = {
+        ...state,
+        [Page.funds]: {
+          ...state[Page.funds],
+          items: [
+            {
+              id: 1000,
+              item: 'fund 1',
+              transactions: getTransactionsList([
+                {
+                  date: '2020-05-19',
+                  price: 123,
+                  units: 473,
+                  fees: 165,
+                  taxes: 9965,
+                },
+                {
+                  date: '2020-05-21',
+                  price: 125,
+                  units: 91,
+                  fees: 449,
+                  taxes: 6694,
+                },
+              ]),
+              allocationTarget: 1,
+            },
+          ],
+          __optimistic: [undefined],
+        },
+        [Page.income]: {
+          ...state[Page.income],
+          items: [
+            {
+              id: 1,
+              date: new Date('2020-05-09'),
+              item: 'Income 1',
+              cost: 325600,
+            },
+          ],
+          __optimistic: [undefined],
+        },
+        [Page.bills]: {
+          ...state[Page.bills],
+          items: [
+            {
+              id: 1,
+              date: new Date('2020-05-07'),
+              item: 'Bill 1',
+              cost: 175000,
+            },
+            {
+              id: 2,
+              date: new Date('2020-05-04'),
+              item: 'Deleted bill',
+              cost: 5644,
+            },
+          ],
+          __optimistic: [undefined, RequestType.delete],
+        },
+        [Page.food]: {
+          ...state[Page.food],
+          items: [
+            {
+              id: 1,
+              date: new Date('2020-05-02'),
+              item: 'Food 1',
+              category: 'Food category 1',
+              cost: 105,
+              shop: 'Shop 1',
+            },
+          ],
+          __optimistic: [undefined],
+        },
+        [Page.general]: {
+          ...state[Page.general],
+          items: [
+            {
+              id: 1,
+              date: new Date('2020-05-06'),
+              item: 'General 1',
+              category: 'General category 1',
+              cost: 1776,
+              shop: 'Shop 1',
+            },
+          ],
+          __optimistic: [undefined],
+        },
+        [Page.holiday]: {
+          ...state[Page.holiday],
+          items: [
+            {
+              id: 1,
+              date: new Date('2020-05-13'),
+              item: 'Some holiday item 1',
+              holiday: 'Holiday 1',
+              cost: 9994,
+              shop: 'Shop 2',
+            },
+          ],
+          __optimistic: [undefined],
+        },
+        [Page.social]: {
+          ...state[Page.social],
+          items: [
+            {
+              id: 1,
+              date: new Date('2020-05-15'),
+              item: 'Some social item 1',
+              society: 'Social 1',
+              cost: 1293,
+              shop: 'Shop 3',
+            },
+          ],
+          __optimistic: [undefined],
+        },
+      };
+
+      it.each`
+        item                | dates           | delta
+        ${'fund purchases'} | ${['20', '21']} | ${125 * 91 + 449 + 6694}
+        ${'bills'}          | ${['06', '07']} | ${175000}
+        ${'food'}           | ${['01', '02']} | ${105}
+        ${'general'}        | ${['05', '06']} | ${1776}
+        ${'holiday'}        | ${['12', '13']} | ${9994}
+        ${'social'}         | ${['14', '15']} | ${1293}
+      `('should take away the cost of $item up to the current date', ({ dates, delta }) => {
+        expect.assertions(1);
+
+        const date0 = new Date(`2020-05-${dates[0]}T09:56:10+0100`);
+        const date1 = new Date(`2020-05-${dates[1]}T09:56:10+0100`);
+
+        const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
+        const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
+
+        expect(cashOnDate1).toBe(cashOnDate0 - delta);
+      });
+
+      it('should exclude optimistically deleted items', () => {
+        expect.assertions(1);
+
+        const date0 = new Date(`2020-05-03T09:56:10+0100`);
+        const date1 = new Date(`2020-05-04T09:56:10+0100`);
+
+        const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
+        const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
+
+        expect(cashOnDate1).toBe(cashOnDate0);
+      });
+
+      it('should add the value of income up to the current date', () => {
+        expect.assertions(1);
+
+        const date0 = new Date(`2020-05-08T09:56:10+0100`);
+        const date1 = new Date(`2020-05-09T09:56:10+0100`);
+
+        const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
+        const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
+
+        expect(cashOnDate1).toBe(cashOnDate0 + 325600);
+      });
     });
   });
 

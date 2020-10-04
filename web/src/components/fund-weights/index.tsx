@@ -20,7 +20,7 @@ export const FundWeights: React.FC = () => {
   const portfolio = useSelector(getPortfolio(today));
   const stockValue = useSelector(getStockValue(today));
   const cashToInvest = useSelector(getCashToInvest(today));
-  const cashInBank = useSelector(getCashInBank);
+  const cashInBank = useSelector(getCashInBank(today));
 
   const blocks = useMemo(() => {
     const relevantNetWorth = cashToInvest + stockValue;

@@ -21,7 +21,7 @@ export const testState: State = {
     key: 'some api key',
   },
   error: [],
-  overview: {
+  [Page.overview]: {
     startDate: new Date('2018-01-31T23:59:59.999Z'),
     endDate: new Date('2018-07-31T23:59:59.999Z'),
     annualisedFundReturns: 0.143,

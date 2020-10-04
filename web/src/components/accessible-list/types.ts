@@ -4,12 +4,10 @@ import { StyledComponent } from 'styled-components';
 import { OnCreateList, OnUpdateList, OnDeleteList } from '~client/actions';
 import { FieldComponent } from '~client/components/form-field';
 import { ModalFields } from '~client/components/modal-dialog';
-import { State as AppState } from '~client/reducers';
-import { ListState } from '~client/reducers/list';
+import { ApiListState } from '~client/selectors/list';
 import { Id, Delta, Item, PickUnion, FieldKey } from '~client/types';
 
-export type State<I extends Item, P extends string> = Record<P, ListState<I>> &
-  Partial<Pick<AppState, 'api'>>;
+export type State<I extends Item, P extends string> = ApiListState<I, P>;
 
 export { FieldKey } from '~client/types';
 

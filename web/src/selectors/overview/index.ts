@@ -4,6 +4,7 @@ import endOfMonth from 'date-fns/endOfMonth';
 import format from 'date-fns/format';
 import getDate from 'date-fns/getDate';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
+import isBefore from 'date-fns/isBefore';
 import isSameDay from 'date-fns/isSameDay';
 import isSameMonth from 'date-fns/isSameMonth';
 import moize from 'moize';
@@ -17,7 +18,10 @@ import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
 import { IDENTITY, arrayAverage, randnBm, getTotalCost } from '~client/modules/data';
 import { State } from '~client/reducers';
+import { State as CrudState } from '~client/reducers/crud';
+import { withoutDeleted } from '~client/selectors/crud';
 import { getFundsRows } from '~client/selectors/funds/helpers';
+import { getRawItems } from '~client/selectors/list';
 import {
   getCost,
   getSpendingColumn,
@@ -29,6 +33,12 @@ import {
   Page,
   Cost,
   CostProcessed,
+  Income,
+  Bill,
+  Food,
+  General,
+  Social,
+  Holiday,
   TableValues,
   SplitRange,
   Median,
@@ -36,6 +46,7 @@ import {
   OverviewTableRow as TableRow,
   Fund,
   OverviewTableRow,
+  ListCalcItem,
 } from '~client/types';
 
 export * from './common';
@@ -266,6 +277,41 @@ export const getProcessedCost = moize(
           getNetCashFlow<'fundsOld' | 'savingsRatio'>(dates),
           withPredictedSpending(dates, today, futureMonths, numRows, annualisedFundReturns),
         )(costMap),
+    ),
+  { maxSize: 1 },
+);
+
+const getPageCostForMonthSoFar = <I extends ListCalcItem>(
+  today: Date,
+  items: CrudState<I>,
+): number =>
+  withoutDeleted(items)
+    .filter(({ date }) => isSameMonth(date, today) && isBefore(date, today))
+    .reduce<number>((last, { cost }) => last + cost, 0);
+
+export const getCostForMonthSoFar = moize(
+  (today: Date) =>
+    createSelector<
+      State,
+      CrudState<Income>,
+      CrudState<Bill>,
+      CrudState<Food>,
+      CrudState<General>,
+      CrudState<Holiday>,
+      CrudState<Social>,
+      number
+    >(
+      getRawItems<Income, Page.income>(Page.income),
+      getRawItems<Bill, Page.bills>(Page.bills),
+      getRawItems<Food, Page.food>(Page.food),
+      getRawItems<General, Page.general>(Page.general),
+      getRawItems<Holiday, Page.holiday>(Page.holiday),
+      getRawItems<Social, Page.social>(Page.social),
+      (income, ...args) =>
+        args.reduce(
+          (last, items) => last + getPageCostForMonthSoFar(today, items),
+          -getPageCostForMonthSoFar(today, income),
+        ),
     ),
   { maxSize: 1 },
 );

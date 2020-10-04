@@ -7,6 +7,7 @@ import { IDENTITY, sortByKey } from '~client/modules/data';
 import { State as CrudState } from '~client/reducers/crud';
 import { DailyState } from '~client/reducers/list';
 import { withoutDeleted } from '~client/selectors/crud';
+import { getRawItems } from '~client/selectors/list';
 import { Id, Item, ListCalcItem } from '~client/types';
 
 export type StateStandard<I extends ListCalcItem, P extends string> = {
@@ -18,10 +19,6 @@ export const getStandardCost = moize(
     state: S,
   ): number => state[page].total,
 );
-
-const getRawItems = <I extends Item, P extends string>(page: P) => (
-  state: State<I, P>,
-): CrudState<I> => state[page];
 
 type SortItems<I extends Item> = (items: I[]) => I[];
 export const getItems = moize(
