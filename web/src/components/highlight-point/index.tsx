@@ -1,52 +1,12 @@
+import { compose } from '@typed/compose';
+import { setLightness, setSaturation, opacify } from 'polished';
 import React from 'react';
+
+import { defaultPadding } from '~client/components/graph/helpers';
 import { HoverEffect, HLPoint } from '~client/components/graph/hooks';
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
-import { RangeY, PixPrimary, Size } from '~client/types';
-
-type LabelPosX = {
-  anchorLabelX: 'start' | 'end' | 'middle';
-  labelPosX: number;
-  rectPosX: number;
-};
-
-type LabelPosY = {
-  labelPosY: number;
-  rectPosY: number;
-};
-
-function getLabelPosX(posX: number, width: number, labelWidthX: number): LabelPosX {
-  let anchorLabelX: 'start' | 'end' | 'middle' = 'middle';
-  let labelPosX = posX;
-  let rectPosX = posX - labelWidthX / 2;
-
-  if (posX >= width - labelWidthX / 2) {
-    anchorLabelX = 'end';
-    labelPosX = width;
-    rectPosX = width - labelWidthX;
-  } else if (posX < labelWidthX / 2) {
-    anchorLabelX = 'start';
-    labelPosX = 0;
-    rectPosX = 0;
-  }
-
-  return { anchorLabelX, labelPosX, rectPosX };
-}
-
-function getLabelPosY(posY: number, height: number, labelHeight: number): LabelPosY {
-  let labelPosY = posY;
-  let rectPosY = labelPosY - labelHeight / 2;
-
-  if (posY >= height - labelHeight / 2) {
-    labelPosY = height - labelHeight / 2 + 2;
-    rectPosY = height - labelHeight;
-  } else if (posY < labelHeight / 2) {
-    labelPosY = labelHeight / 2;
-    rectPosY = 0;
-  }
-
-  return { labelPosY, rectPosY };
-}
+import { RangeY, PixPrimary, Size, Padding } from '~client/types';
 
 type Props = {
   hoverEffect: HoverEffect;
@@ -56,11 +16,29 @@ type Props = {
   Size;
 
 type TextProps = {
+  fontSize: number;
+  fontFamily: string;
+  fill: string;
   x: number;
   y: number;
   textAnchor: 'start' | 'end' | 'middle';
-  alignmentBaseline: 'middle' | 'baseline';
+  alignmentBaseline: 'hanging' | 'middle' | 'baseline';
 };
+
+const labelColor = compose(setLightness(0.8), setSaturation(0.7), opacify(0.5));
+
+const [, fontFamily] = FONT_GRAPH_TITLE;
+const fontSizeX = 10;
+const fontSizeY = 12;
+
+const isLabelAtTop = (posY: number, height: number): boolean => posY > height / 2;
+
+function getLabelPosX(posX: number, width: number, padding: Padding, labelWidth: number): number {
+  const posRight = width - padding[1] - labelWidth / 2;
+  const posLeft = padding[3] + labelWidth / 2;
+
+  return Math.max(posLeft, Math.min(posRight, posX));
+}
 
 export const HighlightPoint: React.FC<Props> = ({
   pixX,
@@ -69,47 +47,49 @@ export const HighlightPoint: React.FC<Props> = ({
   maxY,
   width,
   height,
-  hoverEffect,
+  padding = defaultPadding,
+  hoverEffect: { labelWidth = 88, labelX, labelY },
   hlPoint,
 }) => {
   if (!(hlPoint && maxY !== minY)) {
     return null;
   }
 
-  const labelWidthX = hoverEffect.labelWidthX || 88;
-  const labelWidthY = hoverEffect.labelWidthY || 50;
-
-  const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
-  const labelHeight = fontSize + 2;
-
   const { valX, valY, color } = hlPoint;
 
   const posX = Math.floor(pixX(valX)) + 0.5;
   const posY = Math.floor(pixY1(valY)) + 0.5;
 
-  const { anchorLabelX, labelPosX, rectPosX } = getLabelPosX(posX, width, labelWidthX);
-  const { labelPosY, rectPosY } = getLabelPosY(posY, height, labelHeight);
+  const labelHeight = fontSizeX + fontSizeY + 4;
 
-  const labelTextX = hoverEffect.labelX(valX);
-  const labelTextY = hoverEffect.labelY(valY);
+  const labelPosX = getLabelPosX(posX, width, padding, labelWidth);
+  const labelPosY = isLabelAtTop(posY, height) ? padding[0] : height - padding[2] - labelHeight;
 
   const pathVertical = `M${posX},0 L${posX},${height}`;
   const pathHorizontal = `M0,${posY} L${width},${posY}`;
 
   const lineProps = { stroke: color, strokeDasharray: '3,2' };
 
-  const textProps = { fontSize, fontFamily, color: colors.black };
-  const textPropsX: TextProps = {
+  const textProps: TextProps = {
     x: labelPosX,
-    y: height - 2,
-    textAnchor: anchorLabelX,
-    alignmentBaseline: 'baseline',
-  };
-  const textPropsY: TextProps = {
-    x: width,
     y: labelPosY,
-    textAnchor: 'end',
-    alignmentBaseline: 'middle',
+    fontSize: fontSizeY,
+    fontFamily,
+    fill: colors.black,
+    textAnchor: 'middle',
+    alignmentBaseline: 'hanging',
+  };
+
+  const textPropsX: TextProps = {
+    ...textProps,
+    y: labelPosY + 3,
+    fontSize: fontSizeX,
+  };
+
+  const textPropsY: TextProps = {
+    ...textProps,
+    y: labelPosY + fontSizeX + 3,
+    fontSize: fontSizeY,
   };
 
   return (
@@ -117,25 +97,14 @@ export const HighlightPoint: React.FC<Props> = ({
       <path d={pathVertical} {...lineProps} />
       <path d={pathHorizontal} {...lineProps} />
       <rect
-        x={rectPosX}
-        y={height - labelHeight}
-        width={labelWidthX}
+        x={labelPosX - labelWidth / 2}
+        y={labelPosY}
+        width={labelWidth}
         height={labelHeight}
-        fill={colors.translucent.light.mediumLight}
+        fill={labelColor(color)}
       />
-      <text {...textProps} {...textPropsX}>
-        {labelTextX}
-      </text>
-      <rect
-        x={width - labelWidthY}
-        y={rectPosY}
-        width={labelWidthY}
-        height={labelHeight}
-        fill={colors.translucent.light.mediumLight}
-      />
-      <text {...textProps} {...textPropsY}>
-        {labelTextY}
-      </text>
+      <text {...textPropsX}>{labelX(valX)}</text>
+      <text {...textPropsY}>{labelY(valY)}</text>
     </g>
   );
 };

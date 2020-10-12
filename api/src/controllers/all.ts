@@ -15,6 +15,7 @@ import {
   General,
   Holiday,
   Social,
+  FundsParams,
 } from '~api/types';
 
 type AllResponse = {
@@ -31,7 +32,10 @@ type AllResponse = {
 export async function getAllData(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  limit: number,
+  listLimit: number,
+  fundsHistory: boolean,
+  fundsPeriod: FundsParams['period'],
+  fundsLength: number,
   now: Date = new Date(),
 ): Promise<AllResponse> {
   const [dataOverview, dataFunds, dataList] = await Promise.all([
@@ -40,14 +44,14 @@ export async function getAllData(
       db,
       uid,
       {
-        history: true,
-        period: 'year',
-        length: 5,
+        history: fundsHistory,
+        period: fundsPeriod,
+        length: fundsLength,
       },
       now,
     ),
     Promise.all(
-      config.data.listCategories.map((category) => readListData(db, uid, category, limit)),
+      config.data.listCategories.map((category) => readListData(db, uid, category, listLimit)),
     ),
   ]);
 

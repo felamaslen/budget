@@ -1456,7 +1456,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 <div
-  class="sc-pRtAn c0"
+  class="sc-pJUVA c0"
   data-testid="graph-overview"
 >
   <div

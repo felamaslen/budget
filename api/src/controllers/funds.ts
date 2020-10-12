@@ -3,6 +3,7 @@ import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { updateListData, getTotalCost, formatResults } from './list';
+import { getAnnualisedFundReturns } from './overview';
 
 import config from '~api/config';
 import {
@@ -44,7 +45,7 @@ export function getMaxAge(now: Date, period: FundsParams['period'], length: numb
   throw new Error('Unrecognised period');
 }
 
-type ResponseWithHistory = Omit<FundsResponseHistory, 'total'>;
+type ResponseWithHistory = Omit<FundsResponseHistory, 'total' | 'annualisedFundReturns'>;
 
 export function processFundHistory(
   rows: AbbreviatedItem<Fund, typeof columnMapFunds>[],
@@ -150,8 +151,12 @@ export async function getFundsData(
     return { data, total, cashTarget };
   }
 
-  const dataWithHistory = await getFundPriceHistory(db, uid, now, period, length, data);
-  return { ...dataWithHistory, total, cashTarget };
+  const [dataWithHistory, annualisedFundReturns] = await Promise.all([
+    getFundPriceHistory(db, uid, now, period, length, data),
+    getAnnualisedFundReturns(db, uid, now),
+  ]);
+
+  return { ...dataWithHistory, total, cashTarget, annualisedFundReturns };
 }
 
 export async function createFund(

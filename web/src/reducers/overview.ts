@@ -16,6 +16,7 @@ import {
   ListItemUpdated,
   ListItemDeleted,
   isCalcListAction,
+  ActionTypeFunds,
 } from '~client/actions';
 import { getMonthDates } from '~client/selectors/overview/common';
 import { Page, PageList, ListCalcItem, OverviewState as State, ReadResponse } from '~client/types';
@@ -106,6 +107,13 @@ export default function overview(state: State = initialState, action: Action): S
       return isCalcListAction(action) ? onUpdate(state, action) : state;
     case ListActionType.Deleted:
       return isCalcListAction(action) ? onDelete(state, action) : state;
+
+    case ActionTypeFunds.Received:
+      return {
+        ...state,
+        annualisedFundReturns:
+          action.res?.data.annualisedFundReturns ?? state.annualisedFundReturns,
+      };
 
     case ActionTypeLogin.LoggedOut:
     default:

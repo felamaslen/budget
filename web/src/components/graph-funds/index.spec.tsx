@@ -1,10 +1,9 @@
-import { render, RenderResult, fireEvent, act } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import getUnixTime from 'date-fns/getUnixTime';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import getStore from 'redux-mock-store';
-import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { GraphFunds } from '.';
@@ -33,7 +32,7 @@ describe('<GraphFunds />', () => {
             items: [
               {
                 id: numericHash('some-fund-id'),
-                item: 'some fund',
+                item: 'Scottish Mortgage IT PLC Ordinary Shares 5p (share)',
                 transactions: [
                   {
                     id: numericHash('some-transaction-id'),
@@ -70,35 +69,22 @@ describe('<GraphFunds />', () => {
       </Provider>,
     );
 
-  it('should render differently when zooming', () => {
+  it('should render a graph', () => {
     expect.assertions(1);
-    const clock = sinon.useFakeTimers();
-    const { getByTestId } = getContainer({ isMobile: false });
+    const { getByTestId } = getContainer();
     const graph = getByTestId('graph-svg') as HTMLElement;
 
-    act(() => {
-      // wait for listener to be added in the next event loop
-      clock.tick(1);
-    });
+    expect(graph).toBeInTheDocument();
+  });
 
-    act(() => {
-      fireEvent.mouseMove(graph, { clientX: 100 });
-    });
-
-    const beforeZoom = getByTestId('graph-svg').innerHTML;
-
-    act(() => {
-      fireEvent.wheel(graph, { deltaY: -1 });
-    });
-
-    act(() => {
-      // wait for throttled wheel handler to fire at least once
-      clock.tick(11);
-    });
-
-    const afterZoom = getByTestId('graph-svg').innerHTML;
-
-    expect(afterZoom).not.toBe(beforeZoom);
-    clock.restore();
+  it.each`
+    stock    | title
+    ${'SMT'} | ${'Scottish Mortgage IT PLC Ordinary Shares 5p (share)'}
+  `('should render the abbreviated toggle for $stock', ({ stock, title }) => {
+    expect.assertions(2);
+    const { getAllByText } = getContainer();
+    const [anchor] = getAllByText(stock) as [HTMLAnchorElement];
+    expect(anchor).toBeInTheDocument();
+    expect(anchor.title).toBe(title);
   });
 });

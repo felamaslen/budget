@@ -68,6 +68,7 @@ export type ReadResponseFunds = {
   startTime: number;
   cacheTimes: number[];
   cashTarget: number;
+  annualisedFundReturns: number;
 };
 
 export type PortfolioItem = {

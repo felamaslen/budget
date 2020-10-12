@@ -88,7 +88,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .c0 .bcEgiG {
+        .c0 .bxWtuJ {
           z-index: 10;
           width: 100px;
           height: 100%;

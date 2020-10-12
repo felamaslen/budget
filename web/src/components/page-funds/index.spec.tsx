@@ -214,11 +214,13 @@ describe('<PageFunds />', () => {
   });
 
   describe.each`
-    case                            | selectValue  | order
-    ${'[default] value-descending'} | ${undefined} | ${['FH', 'FLL', 'FL', 'HH', 'HL', 'HLL', 'TL', 'TH', 'TLL']}
-    ${'value-ascending'}            | ${'Value ↑'} | ${['TLL', 'TH', 'TL', 'HLL', 'HL', 'HH', 'FL', 'FLL', 'FH']}
-    ${'gain-descending'}            | ${'Gain ↓'}  | ${['FH', 'HH', 'TH', 'TL', 'FL', 'HL', 'FLL', 'HLL', 'TLL']}
-    ${'gain-ascending'}             | ${'Gain ↑'}  | ${['TLL', 'HLL', 'FLL', 'HL', 'FL', 'TL', 'TH', 'HH', 'FH']}
+    case                            | selectValue       | order
+    ${'[default] value-descending'} | ${undefined}      | ${['FH', 'FLL', 'FL', 'HH', 'HL', 'HLL', 'TL', 'TH', 'TLL']}
+    ${'value-ascending'}            | ${'Value ↑'}      | ${['TLL', 'TH', 'TL', 'HLL', 'HL', 'HH', 'FL', 'FLL', 'FH']}
+    ${'gain-descending'}            | ${'Gain ↓'}       | ${['FH', 'HH', 'TH', 'TL', 'FL', 'HL', 'FLL', 'HLL', 'TLL']}
+    ${'gain-ascending'}             | ${'Gain ↑'}       | ${['TLL', 'HLL', 'FLL', 'HL', 'FL', 'TL', 'TH', 'HH', 'FH']}
+    ${'gain-abs-descending'}        | ${'Gain (abs) ↓'} | ${['FH', 'HH', 'FL', 'TH', 'HL', 'TL', 'TLL', 'HLL', 'FLL']}
+    ${'gain-abs-ascending'}         | ${'Gain (abs) ↑'} | ${['FLL', 'HLL', 'TLL', 'TL', 'HL', 'TH', 'FL', 'HH', 'FH']}
   `('$case sort order', ({ selectValue, order }) => {
     const makeContrivedFund = ({
       name,
@@ -264,47 +266,47 @@ describe('<PageFunds />', () => {
 
     const contrivedFunds = [
       {
-        name: 'FH',
+        name: 'FH', // gainAbs: 0.559
         value: 150000 * 1.05,
         price: (150000 * 1.05) / 1.55 / 420,
       },
       {
-        name: 'FLL',
+        name: 'FLL', // gainAbs: -0.265
         value: 150000 * 1,
         price: (150000 * 1) / 0.85 / 420,
       },
       {
-        name: 'HLL',
+        name: 'HLL', // gainAbs: -0.238
         value: 100000 * 0.95,
         price: (100000 * 0.95) / 0.8 / 420,
       },
       {
-        name: 'HH',
+        name: 'HH', // gainAbs: 0.350
         value: 100000 * 1.05,
         price: (100000 * 1.05) / 1.5 / 420,
       },
       {
-        name: 'TL',
+        name: 'TL', // gainAbs: 0.105
         value: 50000 * 1.05,
         price: (50000 * 1.05) / 1.25 / 420,
       },
       {
-        name: 'FL',
+        name: 'FL', // gainAbs: 0.238
         value: 150000 * 0.95,
         price: (150000 * 0.95) / 1.2 / 420,
       },
       {
-        name: 'HL',
+        name: 'HL', // gainAbs: 0.130
         value: 100000 * 1,
         price: (100000 * 1) / 1.15 / 420,
       },
       {
-        name: 'TH',
+        name: 'TH', // gainAbs: 0.155
         value: 50000 * 1,
         price: (50000 * 1) / 1.45 / 420,
       },
       {
-        name: 'TLL',
+        name: 'TLL', // gainAbs: -0.158
         value: 50000 * 0.95,
         price: (50000 * 0.95) / 0.75 / 420,
       },

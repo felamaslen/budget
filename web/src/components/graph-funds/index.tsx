@@ -9,12 +9,11 @@ import { FundWeights } from '~client/components/fund-weights';
 import {
   LineGraph,
   LineGraphProps,
-  ZoomedDimensions,
-  ZoomEffect,
   TimeAxes,
   LabelY,
   useGraphWidth,
 } from '~client/components/graph';
+import { HoverEffect } from '~client/components/graph/hooks';
 import {
   GRAPH_FUNDS_WIDTH,
   GRAPH_FUNDS_HEIGHT,
@@ -36,79 +35,10 @@ import {
 } from '~client/selectors';
 
 import { graphFundsHeightMobile } from '~client/styled/variables';
-import { Padding, Line, DrawProps, FundLine, FundItem, Id } from '~client/types';
+import { Padding, Line, DrawProps, FundLine, FundItem, Id, Range } from '~client/types';
 
-const PADDING_DESKTOP: Padding = [36, 3, 0, 0];
+const PADDING_DESKTOP: Padding = [3, 3, 0, 0];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
-
-const makeGetRanges = ({
-  mode,
-  zoomRange: [zoomMin, zoomMax],
-  lines,
-  cacheTimes,
-}: {
-  mode: Mode;
-  zoomRange: [number, number];
-  lines: Line[];
-  cacheTimes: number[];
-}): ZoomEffect => (zoomedLines = lines, minX = zoomMin, maxX = zoomMax): ZoomedDimensions => {
-  if (!(zoomedLines && cacheTimes.length >= 2)) {
-    return {
-      minX,
-      maxX,
-      minY: -1,
-      maxY: 1,
-    };
-  }
-
-  const valuesY = zoomedLines
-    .map(({ data }) => data.map(([, yValue]) => yValue))
-    .filter((values) => values.length);
-
-  let minY = 0;
-  if (mode !== Mode.Value) {
-    minY = valuesY.reduce(
-      (min, line) =>
-        Math.min(
-          min,
-          line.reduce((last, value) => Math.min(last, value), min),
-        ),
-      Infinity,
-    );
-  }
-  let maxY = valuesY.reduce(
-    (max, line) =>
-      Math.max(
-        max,
-        line.reduce((last, value) => Math.max(last, value), max),
-      ),
-    -Infinity,
-  );
-
-  if (minY === maxY) {
-    minY -= 0.5;
-    maxY += 0.5;
-  }
-  if (mode === Mode.ROI && minY === 0) {
-    minY = -maxY * 0.2;
-  }
-
-  // get the tick size for the new range
-  const tickSizeY = getTickSize(minY, maxY, GRAPH_FUNDS_NUM_TICKS);
-
-  if (!Number.isNaN(tickSizeY)) {
-    minY = tickSizeY * Math.floor(minY / tickSizeY);
-    maxY = tickSizeY * Math.ceil(maxY / tickSizeY);
-  }
-
-  return {
-    minX,
-    maxX,
-    minY,
-    maxY,
-    tickSizeY,
-  };
-};
 
 function makeBeforeLines({
   startTime,
@@ -135,23 +65,15 @@ function makeBeforeLines({
 
 const modeListAll: Mode[] = [Mode.ROI, Mode.Value, Mode.Price];
 
-function useMode(isMobile: boolean): [Mode, () => void] {
-  const modeList = useMemo<Mode[]>(() => {
-    if (isMobile) {
-      return modeListAll.filter((value) => value !== Mode.Price);
-    }
-
-    return modeListAll;
-  }, [isMobile]);
+function useMode(isMobile: boolean): [Mode[], Mode, (nextMode: Mode) => void] {
+  const modeList = useMemo<Mode[]>(
+    () => (isMobile ? modeListAll.filter((value) => value !== Mode.Price) : modeListAll),
+    [isMobile],
+  );
 
   const [mode, setMode] = useState<Mode>(modeList[0]);
 
-  const switchMode = useCallback(
-    () => setMode((last) => modeList[(modeList.indexOf(last) + 1) % modeList.length]),
-    [modeList],
-  );
-
-  return [mode, switchMode];
+  return [modeList, mode, setMode];
 }
 
 type FilterFunds = (filteredItems: { id: Id }) => boolean;
@@ -204,7 +126,6 @@ function useGraphProps({
   isMobile,
   mode,
   today,
-  changeMode,
   toggleList,
 }: {
   width: number;
@@ -212,7 +133,6 @@ function useGraphProps({
   isMobile: boolean;
   mode: Mode;
   today: Date;
-  changeMode: () => void;
   toggleList: ToggleList;
 }): LineGraphProps {
   const fundLines: {
@@ -221,7 +141,7 @@ function useGraphProps({
 
   const startTime = useSelector(getStartTime);
   const cacheTimes = useSelector(getCacheTimes);
-  const haveData = cacheTimes.length > 0;
+  const haveData = cacheTimes.length > 1;
 
   const filterFunds = useMemo<FilterFunds>(
     () =>
@@ -253,26 +173,73 @@ function useGraphProps({
     return numberedLines;
   }, [fundLines, mode, filterFunds]);
 
-  const getRanges = useMemo<ZoomEffect>(() => {
+  const maxX = cacheTimes[cacheTimes.length - 1];
+
+  const [ranges, tickSizeY] = useMemo<[Range, number]>(() => {
     if (!haveData) {
-      return (): ZoomedDimensions => ({
-        minX: 0,
-        maxX: 0,
-        minY: 0,
-        maxY: 0,
-        tickSizeY: 0,
-      });
+      return [
+        {
+          minX: 0,
+          maxX: 0,
+          minY: 0,
+          maxY: 0,
+        },
+        0,
+      ];
     }
 
-    return makeGetRanges({
-      mode,
-      zoomRange: [0, cacheTimes[cacheTimes.length - 1]],
-      lines,
-      cacheTimes,
-    });
-  }, [haveData, mode, cacheTimes, lines]);
+    const valuesY = lines
+      .map(({ data }) => data.map(([, yValue]) => yValue))
+      .filter((values) => values.length);
 
-  const { minX, maxX, minY, maxY, tickSizeY } = useMemo<ZoomedDimensions>(getRanges, [getRanges]);
+    let minY = 0;
+    if (mode !== Mode.Value) {
+      minY = valuesY.reduce(
+        (min, line) =>
+          Math.min(
+            min,
+            line.reduce((last, value) => Math.min(last, value), min),
+          ),
+        Infinity,
+      );
+    }
+    let maxY = valuesY.reduce(
+      (max, line) =>
+        Math.max(
+          max,
+          line.reduce((last, value) => Math.max(last, value), max),
+        ),
+      -Infinity,
+    );
+
+    if (minY === maxY) {
+      minY -= 0.5;
+      maxY += 0.5;
+    }
+    if (mode === Mode.ROI && minY === 0) {
+      minY = -maxY * 0.2;
+    }
+
+    // get the tick size for the new range
+    const tickSize = getTickSize(minY, maxY, GRAPH_FUNDS_NUM_TICKS);
+
+    if (!Number.isNaN(tickSize)) {
+      minY = tickSize * Math.floor(minY / tickSize);
+      maxY = tickSize * Math.ceil(maxY / tickSize);
+    }
+
+    return [
+      {
+        minX: 0,
+        maxX,
+        minY,
+        maxY,
+      },
+      tickSize,
+    ];
+  }, [haveData, mode, lines, maxX]);
+
+  const { minY, maxY } = ranges;
 
   const labelY = useCallback((value) => formatValue(value, mode), [mode]);
 
@@ -292,15 +259,14 @@ function useGraphProps({
     startTime,
   ]);
 
-  const hoverEffect = useMemo(
+  const hoverEffect = useMemo<HoverEffect>(
     () => ({
       labelX,
       labelY,
+      labelWidth: 72,
     }),
     [labelX, labelY],
   );
-
-  const svgProperties = useMemo(() => ({ onClick: changeMode }), [changeMode]);
 
   return {
     name: 'fund-history',
@@ -308,15 +274,13 @@ function useGraphProps({
     width,
     height,
     padding: isMobile ? PADDING_MOBILE : PADDING_DESKTOP,
-    minX,
+    minX: 0,
     maxX,
     minY,
     maxY,
     beforeLines,
     lines,
-    svgProperties,
     hoverEffect,
-    zoomEffect: getRanges,
   };
 }
 
@@ -327,7 +291,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   const fundItems = useSelector(getFundItems(today));
 
   const [period, changePeriod] = usePeriod();
-  const [mode, changeMode] = useMode(isMobile);
+  const [modeList, mode, changeMode] = useMode(isMobile);
   const [toggleList, setToggleList] = useToggleList(fundItems);
   const graphProps = useGraphProps({
     width,
@@ -335,7 +299,6 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
     isMobile,
     mode,
     today,
-    changeMode,
     toggleList,
   });
 
@@ -346,7 +309,9 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
         <AfterCanvas
           isMobile={isMobile}
           period={period}
+          modeList={modeList}
           mode={mode}
+          changeMode={changeMode}
           fundItems={fundItems}
           toggleList={toggleList}
           setToggleList={setToggleList}

@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 
 import { genPixelCompute, defaultPadding } from './helpers';
-import { useHover, useZoom, ZoomEffect } from './hooks';
+import { useHover } from './hooks';
 import { LineGraphDumb, LineGraphDumbProps } from './line-graph-dumb';
 import { getTickSize, normaliseTickSize } from '~client/modules/format';
 import { Dimensions, Calc, RangeY } from '~client/types/graph';
@@ -20,7 +20,6 @@ type Props = Pick<
 > &
   Dimensions & {
     isMobile?: boolean;
-    zoomEffect?: ZoomEffect;
   };
 export { Props as LineGraphProps };
 
@@ -73,7 +72,6 @@ export const LineGraph: React.FC<Props> = ({
   svgProperties,
   isMobile,
   hoverEffect,
-  zoomEffect,
 }) => {
   const graphRef = useRef<HTMLDivElement>(null);
 
@@ -102,16 +100,6 @@ export const LineGraph: React.FC<Props> = ({
     hoverEffect,
   });
 
-  const [, zoomedDimensions] = useZoom({
-    dimensions,
-    lines,
-    isMobile,
-    graphRef,
-    calc,
-    setCalc,
-    zoomEffect,
-  });
-
   const outerPropertiesProc = useMemo(
     () => ({
       onMouseMove,
@@ -132,7 +120,7 @@ export const LineGraph: React.FC<Props> = ({
     beforeLines,
     afterLines,
     after,
-    dimensions: zoomedDimensions,
+    dimensions,
     lines,
     calc,
     hlPoint,

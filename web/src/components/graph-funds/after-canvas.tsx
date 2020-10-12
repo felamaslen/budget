@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 
 import * as Styled from './styles';
-import { Mode, Period, GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
+import { Mode, Period, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { useCTA } from '~client/hooks';
+import { abbreviateFundName } from '~client/modules/finance';
 import { Id, FundItem } from '~client/types';
 
 type ToggleList = {
@@ -18,19 +19,30 @@ type ItemProps = {
   id: Id;
   color: string;
   item: string;
+  abbreviate?: boolean;
 };
 
-type Props = {
+export type Props = {
   isMobile: boolean;
   period: Period;
+  modeList: Mode[];
   mode: Mode;
+  changeMode: (nextMode: Mode) => void;
   fundItems: FundItem[];
   toggleList: ToggleList;
   setToggleList: SetToggleList;
   changePeriod: (nextPeriod: Period) => void;
 };
 
-const Item: React.FC<ItemProps> = ({ numItems, toggleList, setToggleList, id, color, item }) => {
+const Item: React.FC<ItemProps> = ({
+  numItems,
+  toggleList,
+  setToggleList,
+  id,
+  color,
+  item,
+  abbreviate = true,
+}) => {
   const onToggle = useCallback(() => {
     setToggleList(
       (last: ToggleList): ToggleList => {
@@ -53,8 +65,10 @@ const Item: React.FC<ItemProps> = ({ numItems, toggleList, setToggleList, id, co
           borderColor: color,
         }}
         checked={toggleList[id] !== false}
-      ></Styled.SidebarCheckbox>
-      <Styled.SidebarFund>{item}</Styled.SidebarFund>
+      />
+      <Styled.SidebarFund title={abbreviate ? item : undefined}>
+        {abbreviate ? abbreviateFundName(item) : item}
+      </Styled.SidebarFund>
     </li>
   );
 };
@@ -62,33 +76,39 @@ const Item: React.FC<ItemProps> = ({ numItems, toggleList, setToggleList, id, co
 export const AfterCanvas: React.FC<Props> = ({
   isMobile,
   period,
+  modeList,
   mode,
+  changeMode,
   fundItems,
   toggleList,
   setToggleList,
   changePeriod,
 }) => {
-  const onChange = useCallback(({ target: { value } }) => changePeriod(value), [changePeriod]);
-  const [sidebarActive, setSidebarActive] = useState<boolean>(false);
-  const onHoverSidebar = useCallback(() => setSidebarActive(true), []);
-  const onBlurSidebar = useCallback(() => setSidebarActive(false), []);
+  const onChangePeriod = useCallback(({ target: { value } }) => changePeriod(value), [
+    changePeriod,
+  ]);
+  const onChangeMode = useCallback(({ target: { value } }) => changeMode(value), [changeMode]);
 
   return (
     <>
       {!isMobile && (
-        <Styled.FundSidebar
-          tabIndex={-1}
-          isActive={sidebarActive}
-          onMouseOver={onHoverSidebar}
-          onFocus={onHoverSidebar}
-          onMouseOut={onBlurSidebar}
-          onBlur={onBlurSidebar}
-        >
+        <Styled.FundSidebar tabIndex={-1}>
           <li>
-            <select defaultValue={period} onBlur={onChange}>
+            {/* eslint-disable-next-line jsx-a11y/no-onchange */}
+            <select defaultValue={period} onChange={onChangePeriod}>
               {GRAPH_FUNDS_PERIODS.map(([key, display]: [string, Period]) => (
                 <option key={key} value={display}>
                   {display}
+                </option>
+              ))}
+            </select>
+          </li>
+          <li>
+            {/* eslint-disable-next-line jsx-a11y/no-onchange */}
+            <select defaultValue={mode} onChange={onChangeMode}>
+              {modeList.map((value) => (
+                <option key={value} value={value}>
+                  {value}
                 </option>
               ))}
             </select>
@@ -99,13 +119,13 @@ export const AfterCanvas: React.FC<Props> = ({
                 key={item.id}
                 numItems={fundItems.length}
                 {...item}
+                abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
                 toggleList={toggleList}
                 setToggleList={setToggleList}
               />
             ))}
         </Styled.FundSidebar>
       )}
-      <Styled.Mode>Mode: {mode}</Styled.Mode>
     </>
   );
 };

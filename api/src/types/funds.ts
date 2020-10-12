@@ -44,6 +44,7 @@ export type FundsResponseHistory = {
   total: number;
   startTime: number;
   cacheTimes: number[];
+  annualisedFundReturns: number;
 };
 
 export type FundsResponse = FundsResponseBase | FundsResponseHistory;

@@ -4,7 +4,7 @@ import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { formatOptionsAbsolute, formatOptionsRelative } from '~client/components/fund-gain-info';
 import { GraphFunds } from '~client/components/graph-funds';
-import { Sort, defaultSort, HeadProps } from '~client/components/page-funds/types';
+import { Sort, defaultSort, HeadProps, SortCriteria } from '~client/components/page-funds/types';
 import { Period } from '~client/constants/graph';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { CachedValue } from '~client/types';
@@ -23,10 +23,12 @@ type Props = PropsGainValues & {
 } & HeadProps;
 
 const sortOptions: SelectOptions<Sort> = [
-  { internal: { criteria: 'value', direction: 1 }, external: 'Value ↓' },
-  { internal: { criteria: 'value', direction: -1 }, external: 'Value ↑' },
-  { internal: { criteria: 'gain', direction: 1 }, external: 'Gain ↓' },
-  { internal: { criteria: 'gain', direction: -1 }, external: 'Gain ↑' },
+  { internal: { criteria: SortCriteria.Value, direction: 1 }, external: 'Value ↓' },
+  { internal: { criteria: SortCriteria.Value, direction: -1 }, external: 'Value ↑' },
+  { internal: { criteria: SortCriteria.Gain, direction: 1 }, external: 'Gain ↓' },
+  { internal: { criteria: SortCriteria.Gain, direction: -1 }, external: 'Gain ↑' },
+  { internal: { criteria: SortCriteria.GainAbs, direction: 1 }, external: 'Gain (abs) ↓' },
+  { internal: { criteria: SortCriteria.GainAbs, direction: -1 }, external: 'Gain (abs) ↑' },
 ];
 
 const formatOptionsXIRR = { brackets: false, precision: 1 };

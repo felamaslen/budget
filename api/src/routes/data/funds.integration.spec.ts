@@ -193,6 +193,16 @@ describe('Funds route', () => {
         return res;
       };
 
+      it('should return the annualised fund returns', async () => {
+        expect.assertions(1);
+        const res = await setup();
+        expect(res.body.data).toStrictEqual(
+          expect.objectContaining({
+            annualisedFundReturns: expect.any(Number),
+          }),
+        );
+      });
+
       it('should attach price lists to the fund response', async () => {
         expect.assertions(1);
         const res = await setupWithPrices();

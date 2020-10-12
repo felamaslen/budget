@@ -33,8 +33,7 @@ type Closest = {
 export type HoverEffect = {
   labelX: (value: number) => string;
   labelY: (value: number) => string;
-  labelWidthX?: number;
-  labelWidthY?: number;
+  labelWidth?: number;
 };
 
 export type HLPoint = {

@@ -2417,6 +2417,10 @@ definitions:
             type: integer
             description: Target cash allocation value
             example: 2000000
+          annualisedFundReturns:
+            type: number
+            description: Anualised rate of return on investments
+            example: 0.196
           data:
             type: array
             items:

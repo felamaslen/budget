@@ -41,15 +41,23 @@ function getTicksY({ minY, maxY, pixY1, valY2, tickSizeY = 0, hideMinorTicks }: 
     return [];
   }
 
-  return new Array(numTicks + 1).fill(0).map((_, index) => {
-    const value = tickStart + index * tickSize;
-    const pos = Math.floor(pixY1(value)) + 0.5;
-    const valueSecondary = valY2(pixY1(value));
+  return Array(numTicks + 1)
+    .fill(0)
+    .reduce<TicksY>((last, _, index) => {
+      const value = tickStart + index * tickSize;
+      const pos = Math.floor(pixY1(value)) + 0.5;
 
-    const major = value % majorTickSize === 0;
+      if (last.some((tick) => tick.pos === pos)) {
+        // this usually happens on asynchronous data recalculation or when the data constraints
+        // are in an extreme configuration
+        return last;
+      }
 
-    return { pos, major, value, valueSecondary };
-  });
+      const valueSecondary = valY2(pixY1(value));
+      const major = value % majorTickSize === 0;
+
+      return [...last, { pos, major, value, valueSecondary }];
+    }, []);
 }
 
 const defaultLabelY = (value: number): string =>

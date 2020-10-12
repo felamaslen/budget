@@ -52,7 +52,6 @@ describe('Hover hook', () => {
       hoverEffect: {
         labelX: String,
         labelY: (value): string => `y-value: ${value}`,
-        labelWidthY: 20,
       },
     });
 

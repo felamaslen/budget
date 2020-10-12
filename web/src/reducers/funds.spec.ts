@@ -59,6 +59,7 @@ describe('Funds reducer', () => {
         startTime: 1000,
         cacheTimes: [1, 2, 100, 183],
         cashTarget: 2500000,
+        annualisedFundReturns: 0.186,
         data: [
           {
             [DataKeyAbbr.id]: numericHash('id-1'),
@@ -122,6 +123,7 @@ describe('Funds reducer', () => {
       data: {
         startTime: 1430,
         cacheTimes: [2, 100, 183],
+        annualisedFundReturns: 0.674,
         data: [
           {
             [DataKeyAbbr.id]: numericHash('id-1'),

@@ -142,7 +142,7 @@ export function calculateXIRRFromTransactions(
     ).value;
 }
 
-async function getAnnualisedFundReturns(
+export async function getAnnualisedFundReturns(
   db: DatabaseTransactionConnectionType,
   uid: number,
   now: Date,

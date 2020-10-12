@@ -89,6 +89,7 @@ const LineGraphDumbWithoutRef: React.RefForwardingComponent<HTMLDivElement, Prop
           height={dimensions.height}
           hlPoint={hlPoint}
           hoverEffect={hoverEffect}
+          padding={dimensions.padding}
         />
       )}
     </Graph>

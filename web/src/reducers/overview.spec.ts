@@ -1,14 +1,19 @@
+import { AxiosResponse } from 'axios';
 import numericHash from 'string-hash';
+
 import {
   dataRead,
   loggedOut,
   listItemCreated,
   listItemUpdated,
   listItemDeleted,
+  ActionTypeFunds,
+  fundsReceived,
 } from '~client/actions';
+import { Period } from '~client/constants';
 import reducer, { initialState, State } from '~client/reducers/overview';
 import { testResponse } from '~client/test-data';
-import { Page, Food, General, Holiday } from '~client/types';
+import { Page, Food, General, Holiday, ReadResponseFunds } from '~client/types';
 
 describe('Overview reducer', () => {
   describe.each`
@@ -187,6 +192,22 @@ describe('Overview reducer', () => {
       );
 
       expect(withHoliday.cost?.holiday?.[3]).toBe(55597 - 1235);
+    });
+  });
+
+  describe(ActionTypeFunds.Received, () => {
+    const res = {
+      data: {
+        annualisedFundReturns: 0.674,
+      },
+    } as AxiosResponse<ReadResponseFunds>;
+
+    const action = fundsReceived(Period.month3, res);
+
+    it('should set the annualised fund returns value', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+      expect(result.annualisedFundReturns).toBe(0.674);
     });
   });
 });

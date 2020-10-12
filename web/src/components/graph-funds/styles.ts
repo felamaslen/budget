@@ -39,7 +39,7 @@ export const GraphFunds = styled.div<{ width: number; height: number }>`
   }
 `;
 
-export const FundSidebar = styled.ul<{ isActive: boolean }>`
+export const FundSidebar = styled.ul`
   margin: 0;
   padding: 0;
   position: absolute;
@@ -47,7 +47,7 @@ export const FundSidebar = styled.ul<{ isActive: boolean }>`
   top: 0;
   list-style: none;
   outline: none;
-  width: ${({ isActive }): string => rem(isActive ? 200 : 50)};
+  width: ${rem(75)};
   height: 100%;
   background: linear-gradient(to bottom, ${colors.translucent.dark.dark}, transparent);
   z-index: 3;
@@ -64,21 +64,12 @@ export const FundSidebar = styled.ul<{ isActive: boolean }>`
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  select {
+    max-width: 95%;
+  }
 
   ${breakpoint(breakpoints.mobile)} {
     overflow-y: auto;
-  }
-`;
-
-export const Mode = styled.span`
-  position: absolute;
-  top: 0.2em;
-  left: 0.2em;
-  z-index: 2;
-
-  ${breakpoint(breakpoints.mobile)} {
-    left: initial;
-    right: 0.2em;
   }
 `;
 
@@ -102,6 +93,6 @@ export const SidebarCheckbox = styled.span<{
     `}
 `;
 
-export const SidebarFund = styled.span`
+export const SidebarFund = styled.a`
   padding-left: 12px;
 `;
