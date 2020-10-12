@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
 import { NowLine } from '~client/components/graph-cashflow/now-line';
+import { HoverEffect } from '~client/components/graph/hooks';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { PickUnion, Range, DrawProps, Line } from '~client/types';
@@ -75,10 +76,12 @@ function getRanges(lines: Line[]): Range {
   );
 }
 
+const labelY2 = formatPercent;
+
 function makeBeforeLines(now: Date, dualAxis: boolean): React.FC<DrawProps> {
   const BeforeLines: React.FC<DrawProps> = (props) => (
     <g>
-      <TimeAxes {...props} dualAxis={dualAxis} labelY2={formatPercent} />
+      <TimeAxes {...props} dualAxis={dualAxis} labelY2={labelY2} />
       <NowLine now={now} {...props} />
     </g>
   );
@@ -107,10 +110,11 @@ export const GraphCashFlow: React.FC<Props> = ({
 
   const labelY = useCallback((value) => formatCurrency(value, { precision: 2 }), []);
 
-  const hoverEffect = useMemo(
+  const hoverEffect = useMemo<HoverEffect>(
     () => ({
       labelX,
       labelY,
+      labelY2,
       labelWidthY: 88,
     }),
     [labelX, labelY],

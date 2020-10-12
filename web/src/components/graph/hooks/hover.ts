@@ -27,18 +27,21 @@ type Closest = {
   distY: number;
   lineIndex: number;
   point: Point;
+  secondary?: boolean;
   index: number;
 };
 
 export type HoverEffect = {
   labelX: (value: number) => string;
   labelY: (value: number) => string;
+  labelY2?: (value: number) => string;
   labelWidth?: number;
 };
 
 export type HLPoint = {
   valX: number;
   valY: number;
+  secondary?: boolean;
   color: string;
 };
 
@@ -49,10 +52,10 @@ function getClosest(lines: Line[], position: Position, calc: Calc): Closest | nu
 
   const { posX, posY } = position;
 
-  return lines.reduce((red: Closest | null, line: Line, lineIndex: number) => {
+  return lines.reduce<Closest | null>((red, line, lineIndex) => {
     const pixY = getPixY(calc, line.secondary);
 
-    return line.data.reduce((last: Closest | null, point: Point, index: number): Closest => {
+    return line.data.reduce<Closest | null>((last, point, index) => {
       const distX = Math.abs(calc.pixX(point[0]) - posX);
       const distY = Math.abs(pixY(point[1]) - posY);
 
@@ -65,6 +68,7 @@ function getClosest(lines: Line[], position: Position, calc: Calc): Closest | nu
         distY,
         lineIndex,
         point,
+        secondary: line.secondary,
         index,
       };
     }, red);
@@ -100,11 +104,11 @@ export function useHover({ lines, isMobile, calc, hoverEffect }: Props): HookRes
         return;
       }
 
-      const { lineIndex, point, index } = closest;
+      const { lineIndex, point, secondary, index } = closest;
       const color = getHlColor(lines[lineIndex].color, point, index);
       const [valX, valY] = point;
 
-      setHlPoint({ valX, valY, color });
+      setHlPoint({ valX, valY, secondary, color });
     },
     [lines, isMobile, calc],
   );

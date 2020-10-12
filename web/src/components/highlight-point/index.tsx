@@ -2,17 +2,17 @@ import { compose } from '@typed/compose';
 import { setLightness, setSaturation, opacify } from 'polished';
 import React from 'react';
 
-import { defaultPadding } from '~client/components/graph/helpers';
+import { defaultPadding, getPixY } from '~client/components/graph/helpers';
 import { HoverEffect, HLPoint } from '~client/components/graph/hooks';
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
-import { RangeY, PixPrimary, Size, Padding } from '~client/types';
+import { RangeY, Size, Padding, Calc } from '~client/types';
 
 type Props = {
   hoverEffect: HoverEffect;
   hlPoint?: HLPoint;
+  calc: Calc;
 } & RangeY &
-  PixPrimary &
   Size;
 
 type TextProps = {
@@ -41,14 +41,13 @@ function getLabelPosX(posX: number, width: number, padding: Padding, labelWidth:
 }
 
 export const HighlightPoint: React.FC<Props> = ({
-  pixX,
-  pixY1,
+  calc,
   minY,
   maxY,
   width,
   height,
   padding = defaultPadding,
-  hoverEffect: { labelWidth = 88, labelX, labelY },
+  hoverEffect: { labelWidth = 88, labelX, labelY, labelY2 = labelY },
   hlPoint,
 }) => {
   if (!(hlPoint && maxY !== minY)) {
@@ -57,8 +56,8 @@ export const HighlightPoint: React.FC<Props> = ({
 
   const { valX, valY, color } = hlPoint;
 
-  const posX = Math.floor(pixX(valX)) + 0.5;
-  const posY = Math.floor(pixY1(valY)) + 0.5;
+  const posX = Math.floor(calc.pixX(valX)) + 0.5;
+  const posY = Math.floor(getPixY(calc, hlPoint.secondary)(valY)) + 0.5;
 
   const labelHeight = fontSizeX + fontSizeY + 4;
 
@@ -104,7 +103,7 @@ export const HighlightPoint: React.FC<Props> = ({
         fill={labelColor(color)}
       />
       <text {...textPropsX}>{labelX(valX)}</text>
-      <text {...textPropsY}>{labelY(valY)}</text>
+      <text {...textPropsY}>{(hlPoint.secondary ? labelY2 : labelY)(valY)}</text>
     </g>
   );
 };

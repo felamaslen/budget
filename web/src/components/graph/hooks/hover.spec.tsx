@@ -1,7 +1,7 @@
 import { render, act } from '@testing-library/react';
 import React from 'react';
 import sinon from 'sinon';
-import { useHover, HookResult } from './hover';
+import { useHover, HookResult, HLPoint } from './hover';
 import { genPixelCompute } from '~client/components/graph/helpers';
 import { Data } from '~client/types/graph';
 
@@ -37,6 +37,7 @@ describe('Hover hook', () => {
           strokeWidth: 1,
           smooth: false,
           arrows: false,
+          secondary: true,
         },
       ],
       isMobile: false,
@@ -104,11 +105,14 @@ describe('Hover hook', () => {
         });
 
         const [hlPointAfter] = hookResult;
-        expect(hlPointAfter).toStrictEqual({
-          valX: 0,
-          valY: 19,
-          color: 'blue',
-        });
+        expect(hlPointAfter).toStrictEqual(
+          expect.objectContaining<HLPoint>({
+            valX: 0,
+            valY: 19,
+            color: 'blue',
+            secondary: true,
+          }),
+        );
 
         clock.restore();
       });
@@ -138,11 +142,14 @@ describe('Hover hook', () => {
         });
 
         const [hlPointAfter] = hookResult;
-        expect(hlPointAfter).toStrictEqual({
-          valX: 0,
-          valY: 0,
-          color: 'red',
-        });
+        expect(hlPointAfter).toStrictEqual(
+          expect.objectContaining<HLPoint>({
+            valX: 0,
+            valY: 0,
+            color: 'red',
+            secondary: undefined,
+          }),
+        );
 
         clock.restore();
       });
@@ -172,11 +179,13 @@ describe('Hover hook', () => {
         });
 
         const [hlPointAfter] = hookResult;
-        expect(hlPointAfter).toStrictEqual({
-          valX: 2,
-          valY: 4,
-          color: 'red',
-        });
+        expect(hlPointAfter).toStrictEqual(
+          expect.objectContaining<HLPoint>({
+            valX: 2,
+            valY: 4,
+            color: 'red',
+          }),
+        );
 
         clock.restore();
       });

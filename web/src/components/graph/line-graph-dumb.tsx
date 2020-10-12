@@ -81,8 +81,7 @@ const LineGraphDumbWithoutRef: React.RefForwardingComponent<HTMLDivElement, Prop
       {afterLinesProc}
       {hoverEffect && (
         <HighlightPoint
-          pixX={calc.pixX}
-          pixY1={calc.pixY1}
+          calc={calc}
           minY={dimensions.minY}
           maxY={dimensions.maxY}
           width={dimensions.width}
