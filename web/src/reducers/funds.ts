@@ -7,7 +7,7 @@ import {
   ListActionType,
 } from '~client/actions';
 import { DataKeyAbbr } from '~client/constants/api';
-import { Period, DEFAULT_FUND_PERIOD } from '~client/constants/graph';
+import { Period, GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
 import { makeListReducer, onRead, ListState } from '~client/reducers/list';
 import { Page, Fund, ReadResponseFunds, RequestType } from '~client/types';
 
@@ -33,14 +33,27 @@ type ExtraState = {
 
 export type State = ListState<Fund, ExtraState>;
 
+export const periodStoreKey = 'funds_period';
+
+const getStoredFundPeriod = (): Period => {
+  const storedValue = localStorage.getItem(periodStoreKey);
+
+  return GRAPH_FUNDS_PERIODS.reduce<Period>(
+    (last, [, next]) => (next === storedValue ? next : last),
+    Period.year1,
+  );
+};
+
+const initialPeriod = getStoredFundPeriod();
+
 export const initialState: State = {
   viewSoldFunds: false,
   cashTarget: 0,
   items: [],
   __optimistic: [],
-  period: DEFAULT_FUND_PERIOD,
+  period: initialPeriod,
   cache: {
-    [DEFAULT_FUND_PERIOD]: {
+    [initialPeriod]: {
       startTime: 0,
       cacheTimes: [],
       prices: {},

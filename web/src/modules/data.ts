@@ -17,17 +17,14 @@ export const VOID = (): void => {
 
 export const generateFakeId = (): number => -Math.abs(numericHash(shortid.generate()) >>> 1);
 
-export function getPeriodMatch(
-  shortPeriod: string | Period,
-  defaultPeriod = process.env.DEFAULT_FUND_PERIOD,
-): PeriodObject {
+export function getPeriodMatch(shortPeriod: string | Period): PeriodObject {
   const matchingPeriod = Object.entries(Period).find(([, match]) => match === shortPeriod);
   if (matchingPeriod) {
     return getPeriodMatch(matchingPeriod[0]);
   }
 
   const periodRegex = /^([a-z]+)([0-9]+)$/;
-  const match = shortPeriod.match(periodRegex) || (defaultPeriod ?? '').match(periodRegex);
+  const match = shortPeriod.match(periodRegex);
   if (!match) {
     return { period: 'year', length: 1 };
   }

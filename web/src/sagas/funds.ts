@@ -18,6 +18,7 @@ import { ErrorLevel } from '~client/constants/error';
 import { DO_STOCKS_LIST } from '~client/constants/stocks';
 import { getPeriodMatch } from '~client/modules/data';
 import { getStockPrices } from '~client/modules/finance';
+import { periodStoreKey } from '~client/reducers/funds';
 import { getApiKey, getFundsCache, getPeriod, getStocks, getIndices } from '~client/selectors';
 
 export function* getFundHistoryQuery(period = null) {
@@ -29,6 +30,9 @@ export function* getFundHistoryQuery(period = null) {
 }
 
 export function* requestFundPeriodData({ period, fromCache }: FundsRequested) {
+  if (period) {
+    yield call([localStorage, 'setItem'], periodStoreKey, period);
+  }
   const nextPeriod = period || (yield select(getPeriod));
   if (fromCache) {
     const cache = yield select(getFundsCache);

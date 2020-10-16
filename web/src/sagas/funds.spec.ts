@@ -25,7 +25,7 @@ import { API_PREFIX } from '~client/constants/data';
 import { Period } from '~client/constants/graph';
 import { getStockPrices } from '~client/modules/finance';
 import reducer, { State } from '~client/reducers';
-import { Cache } from '~client/reducers/funds';
+import { Cache, periodStoreKey } from '~client/reducers/funds';
 import { getApiKey, getFundsCache, getPeriod, getStocks, getIndices } from '~client/selectors';
 import { testState, testResponse, testStocksList, testStockPrices } from '~client/test-data';
 import { Page } from '~client/types';
@@ -52,6 +52,8 @@ describe('Funds saga', () => {
       expect.assertions(0);
       testSaga(requestFundPeriodData, fundsRequested(true, Period.month3))
         .next()
+        .call([localStorage, 'setItem'], periodStoreKey, Period.month3)
+        .next()
         .select(getFundsCache)
         .next({ [Period.month3]: {} as Cache })
         .put(fundsReceived(Period.month3))
@@ -65,6 +67,8 @@ describe('Funds saga', () => {
       const res = { data: { data: testResponse[Page.funds] } };
 
       testSaga(requestFundPeriodData, fundsRequested(true, Period.month3))
+        .next()
+        .call([localStorage, 'setItem'], periodStoreKey, Period.month3)
         .next()
         .select(getFundsCache)
         .next({})
@@ -81,6 +85,8 @@ describe('Funds saga', () => {
         .isDone();
 
       testSaga(requestFundPeriodData, fundsRequested(false, Period.month1))
+        .next()
+        .call([localStorage, 'setItem'], periodStoreKey, Period.month1)
         .next()
         .call(getFundHistoryQuery, Period.month1)
         .next({ period: 'month', length: 1, history: true })
@@ -133,6 +139,8 @@ describe('Funds saga', () => {
       const err = new Error('something bad happened');
 
       testSaga(requestFundPeriodData, fundsRequested(true, Period.year1))
+        .next()
+        .call([localStorage, 'setItem'], periodStoreKey, Period.year1)
         .next()
         .select(getFundsCache)
         .next({})

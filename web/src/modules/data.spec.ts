@@ -66,17 +66,9 @@ describe('data module', () => {
   });
 
   describe('getPeriodMatch', () => {
-    const envBefore = process.env.DEFAULT_FUND_PERIOD ?? '';
-    beforeEach(() => {
-      process.env.DEFAULT_FUND_PERIOD = 'year11';
-    });
-    afterEach(() => {
-      process.env.DEFAULT_FUND_PERIOD = envBefore;
-    });
-
-    it('should return env variable by default', () => {
+    it('should return 1 year by default', () => {
       expect.assertions(1);
-      expect(getPeriodMatch('foo')).toStrictEqual({ period: 'year', length: 11 });
+      expect(getPeriodMatch('foo')).toStrictEqual({ period: 'year', length: 1 });
     });
 
     it('should return an object from a Period', () => {
@@ -88,12 +80,6 @@ describe('data module', () => {
     it('should return an object from a string', () => {
       expect.assertions(1);
       expect(getPeriodMatch('year7')).toStrictEqual({ period: 'year', length: 7 });
-    });
-
-    it('should handle the case when the env variable is not a match', () => {
-      expect.assertions(1);
-      process.env.DEFAULT_FUND_PERIOD = 'gobbledegook';
-      expect(getPeriodMatch('foo')).toStrictEqual({ period: 'year', length: 1 });
     });
   });
 
