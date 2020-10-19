@@ -125,5 +125,5 @@ export function getFundLineProcessed(
   const timeOffset = fundsWithReturns[id]?.startIndex ?? 0;
 
   const lineWithTimes: Data = line.map((value, index) => [cacheTimes[index + timeOffset], value]);
-  return separateLines(lineWithTimes);
+  return id === GRAPH_FUNDS_OVERALL_ID ? [lineWithTimes] : separateLines(lineWithTimes);
 }

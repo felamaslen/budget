@@ -219,31 +219,71 @@ describe('Funds selectors / lines', () => {
       `);
     });
 
-    it('should process an overall line', () => {
-      expect.assertions(1);
-      expect(getFundLineProcessed(fundsWithReturns, cacheTimes, Mode.ROI, GRAPH_FUNDS_OVERALL_ID))
-        .toMatchInlineSnapshot(`
-        Array [
+    describe('when processing an overall line', () => {
+      it('should return a line', () => {
+        expect.assertions(1);
+        expect(getFundLineProcessed(fundsWithReturns, cacheTimes, Mode.ROI, GRAPH_FUNDS_OVERALL_ID))
+          .toMatchInlineSnapshot(`
           Array [
             Array [
-              10000,
-              9.68,
+              Array [
+                10000,
+                9.68,
+              ],
+              Array [
+                10030,
+                11209.13,
+              ],
+              Array [
+                10632,
+                -89.57,
+              ],
+              Array [
+                undefined,
+                -89.68,
+              ],
             ],
+          ]
+        `);
+      });
+
+      it('should not separate the line', () => {
+        expect.assertions(1);
+        expect(
+          getFundLineProcessed(
+            {
+              [id1]: {
+                startIndex: 0,
+                returns: [
+                  { price: 100, units: 34, cost: 3100, realised: 0 },
+                  { price: 92, units: 34, cost: 3128, realised: 0 },
+                  { price: 103, units: 18, cost: 1560, realised: 0 },
+                ],
+              },
+            },
+            cacheTimes,
+            Mode.ROI,
+            GRAPH_FUNDS_OVERALL_ID,
+          ),
+        ).toMatchInlineSnapshot(`
+          Array [
             Array [
-              10030,
-              11209.13,
+              Array [
+                10000,
+                9.68,
+              ],
+              Array [
+                10030,
+                0,
+              ],
+              Array [
+                10632,
+                18.85,
+              ],
             ],
-            Array [
-              10632,
-              -89.57,
-            ],
-            Array [
-              undefined,
-              -89.68,
-            ],
-          ],
-        ]
-      `);
+          ]
+        `);
+      });
     });
   });
 });
