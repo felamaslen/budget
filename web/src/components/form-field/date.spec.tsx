@@ -152,6 +152,22 @@ describe('<FormFieldDate />', () => {
       expect(props.onChange).toHaveBeenCalledWith(new Date('2019-03-04'));
     });
 
+    it('should set dates based on a date, month and year', () => {
+      expect.assertions(10);
+      const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
+      const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
+      testInput(input, '29/1/21');
+
+      expect(props.onChange).not.toHaveBeenCalled();
+
+      act(() => {
+        fireEvent.blur(input);
+      });
+
+      expect(props.onChange).toHaveBeenCalledTimes(1);
+      expect(props.onChange).toHaveBeenCalledWith(new Date('2021-01-29'));
+    });
+
     it('should set the end of a month when the month length is longer than the current month', () => {
       expect.assertions(6);
 

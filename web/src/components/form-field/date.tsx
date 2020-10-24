@@ -22,7 +22,11 @@ function parseDate(value: string): Date | undefined {
   const [, , day, , month, , year] = shortMatch;
   const now = startOfDay(new Date());
 
-  return new Date(parseYear(year) || getYear(now), Number(month) - 1 || getMonth(now), Number(day));
+  return new Date(
+    parseYear(year) || getYear(now),
+    month ? Number(month) - 1 : getMonth(now),
+    Number(day),
+  );
 }
 
 const setValueString = ({
