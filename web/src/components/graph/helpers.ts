@@ -20,6 +20,7 @@ import {
   Tick,
   DynamicLineColor,
   ColorSwitcher,
+  GraphStack,
 } from '~client/types';
 
 export type SVGNumber = number | string;
@@ -148,7 +149,7 @@ type LineProps = Pix & {
   width?: number;
   height?: number;
   data: Data;
-  stack?: Data;
+  stack?: GraphStack;
   secondary?: boolean;
   smooth?: boolean;
   fill?: boolean;
@@ -197,6 +198,22 @@ function getLinePathPart(pixels: Data, smooth = false): LineDescription {
   }));
 }
 
+export const getDataX = (data: Data): number[] => data.map(([xValue]) => xValue);
+
+export const reduceStack = (stack: GraphStack): Data =>
+  stack[0].map(([xValue], index) => [
+    xValue,
+    stack.reduce<number>((last, individualStack) => last + individualStack[index][1], 0),
+  ]);
+
+export function getStackedDataY(data: Data, stack?: GraphStack): number[] {
+  if (!stack) {
+    return data.map(([, yValue]) => yValue);
+  }
+  const reducedStack = reduceStack(stack);
+  return data.map(([, yValue], index) => yValue + reducedStack[index][1]);
+}
+
 export function getLinePath({
   width = 0,
   height = 0,
@@ -211,15 +228,14 @@ export function getLinePath({
 }: LineProps): LineDescription {
   const pixY = getPixY({ pixY1, pixY2 }, secondary);
   const getPixPoint: GetPixPoint = ([xValue, yValue]: Point): Point => [pixX(xValue), pixY(yValue)];
-  const dataStacked: Data = stack
-    ? data.map(([xValue, yValue], index) => [xValue, yValue + stack[index][1]])
-    : data;
-  const pixels: Data = dataStacked.map(getPixPoint);
+  const dataX = getDataX(data);
+  const dataY = getStackedDataY(data, stack);
+  const pixels: Data = dataY.map((yValue, index) => getPixPoint([dataX[index], yValue]));
   const line = getLinePathPart(pixels, smooth);
 
   if (fill) {
     if (stack) {
-      const pixelsStack: Data = stack.map(getPixPoint);
+      const pixelsStack = reduceStack(stack).map(getPixPoint);
       const lineStack = getLinePathPart(pixelsStack.reverse(), smooth);
 
       return [

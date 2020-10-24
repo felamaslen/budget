@@ -83,6 +83,8 @@ export enum Aggregate {
   cashOther = 'Cash (other)',
   stocks = 'Stocks',
   pension = 'Pension',
+  realEstate = 'House',
+  mortgage = 'Mortgage',
 }
 
 export type AggregateSums = {

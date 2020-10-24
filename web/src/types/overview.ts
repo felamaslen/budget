@@ -18,6 +18,7 @@ export type OverviewState = {
   startDate: Date;
   endDate: Date;
   annualisedFundReturns: number;
+  homeEquityOld: number[];
   cost: Cost;
 };
 

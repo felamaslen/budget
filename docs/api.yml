@@ -2058,6 +2058,10 @@ definitions:
           annualisedFundReturns:
             type: number
             description: Anualised rate of return on investments
+          homeEquityOld:
+            type: array
+            description: Old values for home equity
+            example: [6400000, 6750000, 66955]
           income:
             type: array
             example: [180000, 200000]

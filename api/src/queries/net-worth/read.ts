@@ -1,6 +1,6 @@
 import { sql, DatabaseTransactionConnectionType, SqlSqlTokenType, QueryResultType } from 'slonik';
 
-import { JoinedEntryRow, OldNetWorthRow } from '~api/types';
+import { JoinedEntryRow, OldNetWorthRow, OldHomeEquityRow } from '~api/types';
 
 const joinEntryRows = (
   conditions: SqlSqlTokenType<QueryResultType<string>> = sql``,
@@ -175,6 +175,42 @@ export async function selectOldNetWorth(
     )}
     GROUP BY nw.date
     ORDER BY nw.date
+  `);
+  return result.rows;
+}
+
+export async function selectOldHomeEquity(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  startDate: string,
+  oldDateEnd: string,
+): Promise<readonly OldHomeEquityRow[]> {
+  const result = await db.query<OldHomeEquityRow>(sql`
+  SELECT
+    ${sql.join(
+      [
+        sql`nw.date`,
+        sql`SUM(
+          CASE
+            WHEN nwc.category IN ('Mortgage', 'House')
+            THEN COALESCE(nwv.value, 0)
+            ELSE 0
+          END
+        ) AS home_equity
+        `,
+      ],
+      sql`, `,
+    )}
+  FROM net_worth as nw
+  LEFT JOIN net_worth_values as nwv ON nwv.net_worth_id = nw.id
+  LEFT JOIN net_worth_subcategories nws ON nws.id = nwv.subcategory
+  LEFT JOIN net_worth_categories nwc ON nwc.id = nws.category_id
+  WHERE ${sql.join(
+    [sql`nw.uid = ${uid}`, sql`nw.date < ${oldDateEnd}`, sql`nw.date >= ${startDate}`],
+    sql` AND `,
+  )}
+  GROUP BY nw.date
+  ORDER BY nw.date
   `);
   return result.rows;
 }

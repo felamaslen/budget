@@ -75,10 +75,12 @@ export type LineColor = string | DynamicLineColor;
 
 export const isConstantColor = (color: LineColor): color is string => typeof color === 'string';
 
+export type GraphStack = Data[];
+
 export type Line = {
   key: string;
   data: Data;
-  stack?: Data;
+  stack?: GraphStack;
   secondary?: boolean;
   color: LineColor;
   smooth?: boolean;

@@ -47,6 +47,23 @@ describe('Overview route', () => {
       );
     });
 
+    it('should omit costs for house purchases', async () => {
+      expect.assertions(1);
+      await global.withAuth(
+        global.agent.post('/api/v4/data/general').send({
+          date: '2018-03-13',
+          item: 'Deposit',
+          category: 'House purchase',
+          cost: 5956000,
+          shop: 'Some conveyancer',
+        }),
+      );
+
+      const res = await global.withAuth(global.agent.get('/api/v4/data/overview'));
+
+      expect(res.body.data.cost.general[24]).toBe(11143);
+    });
+
     it('should return funds data', async () => {
       expect.assertions(1);
       const res = await setup();
@@ -133,12 +150,13 @@ describe('Overview route', () => {
     });
 
     it.each`
-      description        | prop                | value
-      ${'current month'} | ${'currentMonth'}   | ${4}
-      ${'current year'}  | ${'currentYear'}    | ${2018}
-      ${'end date'}      | ${'endYearMonth'}   | ${[2019, 4]}
-      ${'future months'} | ${'futureMonths'}   | ${12}
-      ${'start date'}    | ${'startYearMonth'} | ${[2016, 3]}
+      description                 | prop                | value
+      ${'current month'}          | ${'currentMonth'}   | ${4}
+      ${'current year'}           | ${'currentYear'}    | ${2018}
+      ${'end date'}               | ${'endYearMonth'}   | ${[2019, 4]}
+      ${'future months'}          | ${'futureMonths'}   | ${12}
+      ${'start date'}             | ${'startYearMonth'} | ${[2016, 3]}
+      ${'old home equity values'} | ${'homeEquityOld'}  | ${[0]}
     `('should return the $description', async ({ prop, value }) => {
       expect.assertions(1);
       const res = await setup();

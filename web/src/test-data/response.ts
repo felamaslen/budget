@@ -17,6 +17,7 @@ export const testResponse: ReadResponse = {
     currentMonth: 1,
     futureMonths: 3,
     annualisedFundReturns: 0.173,
+    homeEquityOld: [6375000, 7255000],
     cost: {
       [Page.funds]: [],
       [Page.income]: [],

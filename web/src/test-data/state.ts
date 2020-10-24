@@ -25,6 +25,7 @@ export const testState: State = {
     startDate: new Date('2018-01-31T23:59:59.999Z'),
     endDate: new Date('2018-07-31T23:59:59.999Z'),
     annualisedFundReturns: 0.143,
+    homeEquityOld: [],
     cost: {
       [Page.funds]: [94004, 105390, 110183, 100779, 101459, 102981, 103293, 0, 0, 0],
       [Page.income]: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
@@ -53,6 +54,13 @@ export const testState: State = {
           isOption: true,
         },
         {
+          id: numericHash('real-house-category-id'),
+          type: 'asset',
+          category: 'House',
+          color: '#00fa00',
+          isOption: false,
+        },
+        {
           id: numericHash('real-mortgage-category-id'),
           type: 'liability',
           category: 'Mortgage',
@@ -67,7 +75,7 @@ export const testState: State = {
           isOption: false,
         },
       ],
-      __optimistic: [undefined, undefined, undefined, undefined],
+      __optimistic: [undefined, undefined, undefined, undefined, undefined],
     },
     subcategories: {
       items: [
@@ -94,8 +102,15 @@ export const testState: State = {
         },
         {
           id: numericHash('real-house-subcategory-id'),
-          categoryId: numericHash('real-mortgage-category-id'),
+          categoryId: numericHash('real-house-category-id'),
           subcategory: 'My house',
+          hasCreditLimit: null,
+          opacity: 0.15,
+        },
+        {
+          id: numericHash('real-mortgage-subcategory-id'),
+          categoryId: numericHash('real-mortgage-category-id'),
+          subcategory: 'My mortgage',
           hasCreditLimit: false,
           opacity: 0.1,
         },
@@ -107,7 +122,7 @@ export const testState: State = {
           opacity: 0.3,
         },
       ],
-      __optimistic: [undefined, undefined, undefined, undefined, undefined],
+      __optimistic: [undefined, undefined, undefined, undefined, undefined, undefined],
     },
     entries: {
       items: [
@@ -122,9 +137,9 @@ export const testState: State = {
             },
             {
               id: numericHash('value-id-a2'),
-              subcategory: numericHash('real-house-subcategory-id'),
+              subcategory: numericHash('real-mortgage-subcategory-id'),
               value: -18744200,
-              skip: true,
+              skip: false,
             },
             {
               id: numericHash('value-id-a3'),
@@ -135,6 +150,11 @@ export const testState: State = {
               id: numericHash('value-id-a4'),
               subcategory: numericHash('real-credit-card-subcategory-id'),
               value: -8751,
+            },
+            {
+              id: numericHash('value-id-a5'),
+              subcategory: numericHash('real-house-subcategory-id'),
+              value: 21000000,
             },
           ],
           creditLimit: [
@@ -156,9 +176,9 @@ export const testState: State = {
             },
             {
               id: numericHash('value-id-b2'),
-              subcategory: numericHash('real-house-subcategory-id'),
+              subcategory: numericHash('real-mortgage-subcategory-id'),
               value: -18420900,
-              skip: true,
+              skip: false,
             },
             {
               id: numericHash('value-id-b3'),
@@ -181,6 +201,11 @@ export const testState: State = {
                   marketPrice: 95.57,
                 },
               ],
+            },
+            {
+              id: numericHash('value-id-b6'),
+              subcategory: numericHash('real-house-subcategory-id'),
+              value: 21500000,
             },
           ],
           creditLimit: [

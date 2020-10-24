@@ -12,12 +12,14 @@ import {
 } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import { formatDate } from './shared';
 import config from '~api/config';
 import {
   getMonthlyTotalFundValues,
   getListCostSummary,
   getTotalFundValue,
   selectTransactions,
+  selectOldHomeEquity,
 } from '~api/queries';
 import { OverviewResponse, ListCategory, Transaction } from '~api/types';
 
@@ -155,6 +157,24 @@ export async function getAnnualisedFundReturns(
   return calculateXIRRFromTransactions(now, currentFundsValue, transactions);
 }
 
+export function getOldDateBoundaries(now = new Date()): { startDate: Date; oldDateEnd: Date } {
+  const oldDateEnd = startOfMonth(addMonths(now, -pastMonths));
+  const startDate = startOfMonth(setMonth(setYear(now, startYear), startMonth - 1));
+
+  return { startDate, oldDateEnd };
+}
+
+async function getOldHomeEquity(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  now: Date,
+): Promise<number[]> {
+  const { oldDateEnd, startDate } = getOldDateBoundaries(now);
+  const rows = await selectOldHomeEquity(db, uid, formatDate(startDate), formatDate(oldDateEnd));
+
+  return rows.map((row) => row.home_equity);
+}
+
 const getYearMonth = (date: Date): [number, number] => [getYear(date), getMonth(date) + 1];
 
 export async function getOverviewData(
@@ -166,6 +186,7 @@ export async function getOverviewData(
     getMonthlyCategoryValues(db, uid, now),
     getAnnualisedFundReturns(db, uid, now),
   ]);
+  const homeEquityOld = await getOldHomeEquity(db, uid, now);
 
   return {
     startYearMonth: getYearMonth(getStartTime(now)),
@@ -174,6 +195,7 @@ export async function getOverviewData(
     currentMonth: getMonth(now) + 1,
     futureMonths,
     annualisedFundReturns,
+    homeEquityOld,
     cost,
   };
 }

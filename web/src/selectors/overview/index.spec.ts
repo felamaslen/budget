@@ -284,7 +284,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 1298227.25,
+                "value": 3554027.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -332,7 +332,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 1300500.25,
+                "value": 3556300.25,
               },
               "social": Object {
                 "rgb": "#bf9e24",
@@ -380,7 +380,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 1303340.25,
+                "value": 3559140.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -428,7 +428,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#6cd479",
-                "value": 1306646.25,
+                "value": 3562446.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -476,7 +476,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#4dcb5c",
-                "value": 1309469.25,
+                "value": 3565269.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -524,7 +524,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#24bf37",
-                "value": 1313109.25,
+                "value": 3568909.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",

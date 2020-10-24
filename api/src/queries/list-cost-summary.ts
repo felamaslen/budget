@@ -1,5 +1,6 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 import { getMonthRangeUnion } from './date-union';
+import config from '~api/config';
 import { Page } from '~api/types';
 
 export async function getListCostSummary(
@@ -21,6 +22,14 @@ export async function getListCostSummary(
     ],
     sql` AND `,
   )}
+    ${
+      category === Page.general
+        ? sql`AND list_data.category NOT IN (${sql.join(
+            config.data.overview.ignoreExpenseCategories,
+            sql`, `,
+          )})`
+        : sql``
+    }
   GROUP BY dates.start_date
   ORDER BY dates.start_date
   `);

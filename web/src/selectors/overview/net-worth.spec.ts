@@ -202,8 +202,8 @@ describe('Overview selectors (net worth)', () => {
 
       expect(result).toStrictEqual([
         0, // Jan 18 (no entries)
-        10324 + 0.035 * 3750 + 1296523 - 8751, // Feb 18
-        9752 + 1051343 - 21939, // Mar 18
+        10324 + 0.035 * 3750 + 1296523 + 21000000 - 8751 - 18744200, // Feb 18
+        9752 + 1051343 - 21939 + 21500000 - 18420900, // Mar 18
         0, // Apr 18
         0, // May 18
         0, // Jun 18
@@ -231,9 +231,9 @@ describe('Overview selectors (net worth)', () => {
       expect(result).toHaveLength(getNumMonths(state));
 
       expect(result[0]).toBe(0); // January 2018 doesn't have any entries
-      expect(result[1]).toBe(10324 + 0.035 * 3750 + 1296523 - 8751);
-      expect(result[2]).toBe(0);
-      expect(result[3]).toBe(0); // April 2018 doesn't have any entries
+      expect(result[1]).toBe(10324 + 0.035 * 3750 + 1296523 + 21000000 - 8751 - 18744200);
+      expect(result[2]).toBe(0); // March 2018 doesn't have any entries
+      expect(result[3]).toBe(0); // April 2018 "
       expect(result[4]).toBe(0); // May 2018 "
       expect(result[5]).toBe(0); // June 2018 "
       expect(result[6]).toBe(0); // July 2018 "
@@ -272,7 +272,7 @@ describe('Overview selectors (net worth)', () => {
   describe('getNetWorthTable', () => {
     describe('for the first row in the view', () => {
       const fti =
-        (10324 + 3750 * 0.035 + 1296523 - 8751) *
+        (10324 + 3750 * 0.035 + 1296523 + 21000000 - 8751 - 18744200) *
         ((28 + 58 / 365) / ((900 + 13 + 90 + 1000 + 65) * 12));
 
       const aggregate = {
@@ -280,16 +280,18 @@ describe('Overview selectors (net worth)', () => {
         [Aggregate.cashOther]: 0,
         [Aggregate.stocks]: 0,
         [Aggregate.pension]: 0,
+        [Aggregate.realEstate]: 21000000,
+        [Aggregate.mortgage]: -18744200,
       };
 
       it.each`
         prop                      | value
         ${'id'}                   | ${numericHash('real-entry-id-a')}
         ${'date'}                 | ${new Date('2018-02-28')}
-        ${'assets'}               | ${10324 + 3750 * 0.035 + 1296523}
+        ${'assets'}               | ${10324 + 3750 * 0.035 + 1296523 + 21000000}
         ${'options'}              | ${0}
         ${'aggregate'}            | ${aggregate}
-        ${'liabilities'}          | ${8751}
+        ${'liabilities'}          | ${8751 + 18744200}
         ${'expenses'}             | ${900 + 13 + 90 + 1000 + 65}
         ${'fti'}                  | ${fti}
         ${'pastYearAverageSpend'} | ${24816}
@@ -305,7 +307,7 @@ describe('Overview selectors (net worth)', () => {
 
     describe('for the second row in the view', () => {
       const fti =
-        (9752 + 1051343 - 21939) *
+        (9752 + 1051343 + 21500000 - 21939 - 18420900) *
         ((28 + (58 + 31) / 365) /
           ((900 + 13 + 90 + 1000 + 65 + (400 + 20 + 10 + 95 + 134)) * (12 / 2)));
 
@@ -314,16 +316,18 @@ describe('Overview selectors (net worth)', () => {
         [Aggregate.cashOther]: 0,
         [Aggregate.stocks]: 0,
         [Aggregate.pension]: 0,
+        [Aggregate.realEstate]: 21500000,
+        [Aggregate.mortgage]: -18420900,
       };
 
       it.each`
         prop                      | value
         ${'id'}                   | ${numericHash('real-entry-id-b')}
         ${'date'}                 | ${new Date('2018-03-31')}
-        ${'assets'}               | ${9752 + 1051343}
+        ${'assets'}               | ${9752 + 1051343 + 21500000}
         ${'options'}              | ${56 * 95.57}
         ${'aggregate'}            | ${aggregate}
-        ${'liabilities'}          | ${21939}
+        ${'liabilities'}          | ${21939 + 18420900}
         ${'expenses'}             | ${400 + 20 + 10 + 95 + 134}
         ${'fti'}                  | ${fti}
         ${'pastYearAverageSpend'} | ${16362}

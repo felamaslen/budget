@@ -94,6 +94,8 @@ const PAGES_LIST_CALC: PageListCalc[] = [
 ];
 export const PAGES_LIST: PageList[] = [Page.funds, ...PAGES_LIST_CALC];
 
+export const IGNORE_EXPENSE_CATEGORIES = ['House purchase'];
+
 export const isPage = <T extends string>(name?: T | Page): name is Page =>
   !!name && Reflect.has(PAGES, name);
 

@@ -52,6 +52,8 @@ import {
 export * from './common';
 export * from './net-worth';
 
+export const getHomeEquityOld = (state: State): number[] => state[Page.overview].homeEquityOld;
+
 const futureCategories: (keyof (Cost & Pick<CostProcessed, 'fundsOld'>))[] = [
   Page.funds,
   Page.food,

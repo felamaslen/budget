@@ -1,9 +1,9 @@
 import boom from '@hapi/boom';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import { formatDate } from '../shared';
 import { fetchById } from './read';
 import {
-  formatDate,
   getValueFromRow,
   entryRowHasCurrencies,
   entryRowHasCreditLimit,

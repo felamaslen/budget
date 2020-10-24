@@ -1,5 +1,4 @@
 import boom from '@hapi/boom';
-import { format } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getInvalidIds, getInvalidCreditCategories } from '~api/queries';
@@ -20,8 +19,6 @@ import {
   JoinedEntryRowWithFXValue,
   JoinedEntryRowWithOptionValue,
 } from '~api/types';
-
-export const formatDate = (date: Date): string => format(date, 'yyyy-MM-dd');
 
 export const entryRowHasCurrencies = (
   rows: readonly JoinedEntryRow[],

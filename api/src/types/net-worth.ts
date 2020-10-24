@@ -123,3 +123,4 @@ export type JoinedEntryRowWithOptionValue = JoinedEntryRow & {
 };
 
 export type OldNetWorthRow = { value: number; option_value: number };
+export type OldHomeEquityRow = { date: string; home_equity: number };

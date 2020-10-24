@@ -1,9 +1,9 @@
-import { startOfMonth, addMonths, setMonth, setYear } from 'date-fns';
 import groupBy from 'lodash/groupBy';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { formatDate, combineJoinedEntryRows } from './shared';
-import config from '~api/config';
+import { getOldDateBoundaries } from '../overview';
+import { formatDate } from '../shared';
+import { combineJoinedEntryRows } from './shared';
 import { selectEntry, selectAllEntries, selectOldNetWorth } from '~api/queries';
 import { Entry } from '~api/types';
 
@@ -62,10 +62,7 @@ export async function readAllNetWorthEntries(
   old: number[];
   oldOptions: number[];
 }> {
-  const { numLast, startYear, startMonth } = config.data.overview;
-
-  const oldDateEnd = startOfMonth(addMonths(new Date(), -numLast));
-  const startDate = startOfMonth(setMonth(setYear(new Date(), startYear), startMonth - 1));
+  const { oldDateEnd, startDate } = getOldDateBoundaries();
 
   const [items, { old, oldOptions }] = await Promise.all([
     fetchAll(db, uid, oldDateEnd),

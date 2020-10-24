@@ -66,6 +66,7 @@ export type Config = {
       numFuture: number;
       startYear: number;
       startMonth: number;
+      ignoreExpenseCategories: string[];
     };
     pie: {
       tolerance: number;
@@ -143,6 +144,7 @@ const config: Config = {
       numFuture: 12,
       startYear: 2014,
       startMonth: 9,
+      ignoreExpenseCategories: ['House purchase'],
     },
     pie: {
       tolerance: Number(process.env.PIE_TOLERANCE) || 0.075,

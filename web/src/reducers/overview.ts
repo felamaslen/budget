@@ -17,7 +17,9 @@ import {
   ListItemDeleted,
   isCalcListAction,
   ActionTypeFunds,
+  isGeneralListAction,
 } from '~client/actions';
+import { IGNORE_EXPENSE_CATEGORIES } from '~client/constants/data';
 import { getMonthDates } from '~client/selectors/overview/common';
 import { Page, PageList, ListCalcItem, OverviewState as State, ReadResponse } from '~client/types';
 
@@ -27,6 +29,7 @@ export const initialState: State = {
   startDate: endOfMonth(addYears(new Date(), -1)),
   endDate: endOfMonth(new Date()),
   annualisedFundReturns: 0.1,
+  homeEquityOld: [],
   cost: {
     [Page.funds]: [],
     [Page.income]: [],
@@ -49,6 +52,7 @@ const onRead = (_: State, res: ReadResponse): State => ({
     setMonth(setYear(new Date(), res.overview.endYearMonth[0]), res.overview.endYearMonth[1] - 1),
   ),
   annualisedFundReturns: res.overview.annualisedFundReturns,
+  homeEquityOld: res.overview.homeEquityOld,
   cost: res.overview.cost,
 });
 
@@ -60,41 +64,60 @@ const getDateIndex = (state: State, date: Date): number =>
 const setCost = (state: State, date: Date, diff: number) => (last: number[]): number[] =>
   replaceAtIndex(last, getDateIndex(state, date), (value) => value + diff);
 
-const onCreate = (
-  state: State,
-  { page, delta }: ListItemCreated<ListCalcItem, PageList>,
-): State => ({
+const onCreate = (state: State, action: ListItemCreated<ListCalcItem, PageList>): State =>
+  isGeneralListAction(action) && IGNORE_EXPENSE_CATEGORIES.includes(action.delta.category)
+    ? state
+    : {
+        ...state,
+        cost: {
+          ...state.cost,
+          [action.page]: setCost(
+            state,
+            action.delta.date,
+            action.delta.cost,
+          )(state.cost[action.page]),
+        },
+      };
+
+const onUpdate = (state: State, action: ListItemUpdated<ListCalcItem, PageList>): State => ({
   ...state,
   cost: {
     ...state.cost,
-    [page]: setCost(state, delta.date, delta.cost)(state.cost[page]),
+    [action.page]: compose(
+      setCost(
+        state,
+        action.delta.date ?? action.item.date,
+        isGeneralListAction(action) &&
+          action.delta.category &&
+          IGNORE_EXPENSE_CATEGORIES.includes(action.delta.category)
+          ? 0
+          : action.delta.cost ?? action.item.cost,
+      ),
+      setCost(
+        state,
+        action.item.date,
+        isGeneralListAction(action) && IGNORE_EXPENSE_CATEGORIES.includes(action.item.category)
+          ? 0
+          : -action.item.cost,
+      ),
+    )(state.cost[action.page]),
   },
 });
 
-const onUpdate = (
-  state: State,
-  { page, delta, item }: ListItemUpdated<ListCalcItem, PageList>,
-): State => ({
-  ...state,
-  cost: {
-    ...state.cost,
-    [page]: compose(
-      setCost(state, delta.date ?? item.date, delta.cost ?? item.cost),
-      setCost(state, item.date, -item.cost),
-    )(state.cost[page]),
-  },
-});
-
-const onDelete = (
-  state: State,
-  { page, item }: ListItemDeleted<ListCalcItem, PageList>,
-): State => ({
-  ...state,
-  cost: {
-    ...state.cost,
-    [page]: setCost(state, item.date, -item.cost)(state.cost[page]),
-  },
-});
+const onDelete = (state: State, action: ListItemDeleted<ListCalcItem, PageList>): State =>
+  isGeneralListAction(action) && IGNORE_EXPENSE_CATEGORIES.includes(action.item.category)
+    ? state
+    : {
+        ...state,
+        cost: {
+          ...state.cost,
+          [action.page]: setCost(
+            state,
+            action.item.date,
+            -action.item.cost,
+          )(state.cost[action.page]),
+        },
+      };
 
 export default function overview(state: State = initialState, action: Action): State {
   switch (action.type) {

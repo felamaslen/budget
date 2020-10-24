@@ -36,6 +36,7 @@ describe('Overview reducer', () => {
         currentMonth: 7,
         futureMonths: 12,
         annualisedFundReturns: 0.087,
+        homeEquityOld: [6375000, 7255000],
         cost: {
           [Page.funds]: [0, 0, 510000, 2160465],
           [Page.income]: [0, 30040, 229838, 196429],
@@ -64,6 +65,12 @@ describe('Overview reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
       expect(result).toHaveProperty('annualisedFundReturns', 0.087);
+    });
+
+    it('should set the old home equity values', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+      expect(result).toHaveProperty('homeEquityOld', [6375000, 7255000]);
     });
 
     it('should set the cost data', () => {
@@ -117,13 +124,31 @@ describe('Overview reducer', () => {
 
       expect(withGeneral.cost?.general?.[2]).toBe(28335 + 34);
     });
+
+    it('should omit expenses which are for a house purchase', () => {
+      expect.assertions(1);
+
+      const withGeneral = reducer(
+        state,
+        listItemCreated<General, Page.general>(Page.general)({
+          date: new Date('2019-06-02T00:00:00.000Z'),
+          item: 'Balancing payment',
+          category: 'House purchase',
+          cost: 5950000,
+          shop: 'Some conveyancers',
+        }),
+      );
+
+      expect(withGeneral.cost?.general?.[2]).toBe(28335);
+    });
   });
 
   describe('ListAction.update', () => {
-    const state = {
+    const state: State = {
       startDate: new Date('2019-04-30T23:59:59.999Z'),
       endDate: new Date('2019-07-31T23:59:59.999Z'),
       annualisedFundReturns: 0.1,
+      homeEquityOld: [],
       cost: {
         funds: [0, 0, 510000, 2160465],
         income: [0, 30040, 229838, 196429],
@@ -160,6 +185,52 @@ describe('Overview reducer', () => {
       expect(result.cost[Page.food][1]).toBe(firstCost);
       expect(result.cost[Page.food][2]).toBe(secondCost);
     });
+
+    describe("when the old item was for a house purchase but the new one isn't", () => {
+      it('should add the new cost', () => {
+        expect.assertions(1);
+
+        const result = reducer(
+          state,
+          listItemUpdated<General, Page.general>(Page.general)(
+            numericHash('some-id'),
+            { category: 'Something else', cost: 567 },
+            {
+              date: new Date('2019-05-10'),
+              item: 'some item',
+              category: 'House purchase',
+              cost: 5955500,
+              shop: 'some shop',
+            },
+          ),
+        );
+
+        expect(result.cost[Page.general][1]).toBe(9515 + 567);
+      });
+    });
+
+    describe("when the new item is for a house purchase but the old one wasn't", () => {
+      it('should remove the old cost', () => {
+        expect.assertions(1);
+
+        const result = reducer(
+          state,
+          listItemUpdated<General, Page.general>(Page.general)(
+            numericHash('some-id'),
+            { category: 'House purchase', cost: 5955500 },
+            {
+              date: new Date('2019-05-10'),
+              item: 'some item',
+              category: 'some category',
+              cost: 34,
+              shop: 'some shop',
+            },
+          ),
+        );
+
+        expect(result.cost[Page.general][1]).toBe(9515 - 34);
+      });
+    });
   });
 
   describe('ListAction.delete', () => {
@@ -167,6 +238,7 @@ describe('Overview reducer', () => {
       startDate: new Date('2019-04-30T23:59:59.999Z'),
       endDate: new Date('2019-07-31T23:59:59.999Z'),
       annualisedFundReturns: 0.1,
+      homeEquityOld: [],
       cost: {
         [Page.funds]: [0, 0, 510000, 2160465],
         [Page.income]: [0, 30040, 229838, 196429],
@@ -192,6 +264,23 @@ describe('Overview reducer', () => {
       );
 
       expect(withHoliday.cost?.holiday?.[3]).toBe(55597 - 1235);
+    });
+
+    it('should omit expenses which are for a house purchase', () => {
+      expect.assertions(1);
+
+      const withGeneral = reducer(
+        state,
+        listItemDeleted<General, Page.general>(Page.general)(numericHash('some-id'), {
+          date: new Date('2019-07-12T00:00Z'),
+          item: 'some item',
+          category: 'House purchase',
+          cost: 5920000,
+          shop: 'some shop',
+        }),
+      );
+
+      expect(withGeneral.cost?.general?.[3]).toBe(160600);
     });
   });
 

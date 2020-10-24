@@ -8,6 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
 import { NowLine } from '~client/components/graph-cashflow/now-line';
+import { getDataX, getStackedDataY } from '~client/components/graph/helpers';
 import { HoverEffect } from '~client/components/graph/hooks';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatCurrency, formatPercent } from '~client/modules/format';
@@ -50,8 +51,8 @@ export const getValuesWithTime = (
 function getRanges(lines: Line[]): Range {
   return lines.reduce(
     ({ minX, maxX, minY, maxY, minY2, maxY2 }, { data, stack, secondary }) => {
-      const dataX = data.map(([xValue]) => xValue);
-      const dataY = data.map(([, yValue], index) => yValue + (stack?.[index]?.[1] ?? 0));
+      const dataX = getDataX(data);
+      const dataY = getStackedDataY(data, stack);
 
       const dataMinY = dataY.reduce((min, value) => Math.min(min, value), Infinity);
       const dataMaxY = dataY.reduce((max, value) => Math.max(max, value), -Infinity);

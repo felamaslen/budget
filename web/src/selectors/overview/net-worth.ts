@@ -133,8 +133,8 @@ const getEntryAggregate = (
   subcategories: Subcategory[],
   entry: CreateEdit<Entry>,
 ): AggregateSums =>
-  Object.entries(Aggregate).reduce(
-    (last: AggregateSums, [, categoryName]) => ({
+  Object.entries(Aggregate).reduce<AggregateSums>(
+    (last, [, categoryName]) => ({
       ...last,
       [categoryName]: getSumByCategory(categoryName, categories, subcategories, entry),
     }),

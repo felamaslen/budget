@@ -7,6 +7,7 @@ export type OverviewResponse = {
   currentMonth: number;
   futureMonths: number;
   annualisedFundReturns: number;
+  homeEquityOld: number[];
   cost: {
     [category in ListCategory]: number[];
   };

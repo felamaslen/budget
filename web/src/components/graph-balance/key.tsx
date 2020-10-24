@@ -16,6 +16,9 @@ const keyTextX0 = keyX0 + keyLineWidth + keyMargin;
 const keyX1 = 130;
 const keyTextX1 = keyX1 + keyLineWidth + keyMargin;
 
+const keyX2 = 220;
+const keyTextX2 = keyX2 + keyLineWidth + keyMargin;
+
 const keyY0 = 40;
 const keyY1 = 56;
 const keyY2 = 72;
@@ -61,6 +64,24 @@ export const Key: React.FC<Props> = (props) => (
     </text>
 
     <rect
+      x={keyX1}
+      y={keyY2 - 3}
+      width={keyLineWidth}
+      height={6}
+      fill={rgba(colors.netWorth.homeEquity, 0.5)}
+    />
+    <text
+      x={keyTextX1}
+      y={keyY2}
+      fill={colors.dark.light}
+      fontFamily={fontFamily}
+      fontSize={fontSize}
+      alignmentBaseline="middle"
+    >
+      Home equity
+    </text>
+
+    <rect
       x={keyX0}
       y={keyY1 - 3}
       width={keyLineWidth}
@@ -97,14 +118,14 @@ export const Key: React.FC<Props> = (props) => (
     </text>
 
     <rect
-      x={keyX1}
+      x={keyX0}
       y={keyY2 - 3}
       width={keyLineWidth}
       height={6}
       fill={rgba(colors.netWorth.aggregate[Aggregate.pension], 0.5)}
     />
     <text
-      x={keyTextX1}
+      x={keyTextX0}
       y={keyY2}
       fill={colors.dark.light}
       fontFamily={fontFamily}
@@ -115,17 +136,17 @@ export const Key: React.FC<Props> = (props) => (
     </text>
 
     <line
-      x1={keyX0}
-      y1={keyY2 + 0.5}
-      x2={keyX0 + keyLineWidth}
-      y2={keyY2 + 0.5}
+      x1={keyX2}
+      y1={keyY0 + 0.5}
+      x2={keyX2 + keyLineWidth}
+      y2={keyY0 + 0.5}
       stroke={colors.netWorth.options}
       strokeDasharray="3,4"
-      strokeWidth={1}
+      strokeWidth={2}
     />
     <text
-      x={keyTextX0}
-      y={keyY2}
+      x={keyTextX2}
+      y={keyY0}
       fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}

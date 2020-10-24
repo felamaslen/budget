@@ -48,3 +48,7 @@ export type Action =
 export const isCalcListAction = (
   action: ActionList<ListItem, PageList>,
 ): action is ActionList<ListCalcItem, PageListCalc> => isCalcPage(action.page);
+
+export const isGeneralListAction = (
+  action: ActionList<ListItem, PageList>,
+): action is ActionList<General, Page.general> => action.page === Page.general;

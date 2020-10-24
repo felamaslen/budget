@@ -15,19 +15,10 @@ import {
   getNetWorthSummaryOld,
   getNetWorthTable,
   NetWorthSummaryOld,
+  getHomeEquityOld,
 } from '~client/selectors';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
 import { Page, Point, Line, Data, CostProcessed, NetWorthTableRow, Aggregate } from '~client/types';
-
-type BalanceData = {
-  balance: number[];
-  options: number[];
-  optionsStartIndex: number;
-  funds: number[];
-  oldOffset: number;
-  cashOther: number[];
-  pension: number[];
-};
 
 type CostProps = Pick<CostProcessed, Page.funds | 'fundsOld' | 'netWorthCombined'>;
 
@@ -41,52 +32,83 @@ const fillAggregate = (
   return rightFill ? rightPad(presentData, combinedLength) : presentData;
 };
 
-function getData(
-  netWorthCombined: number[],
-  netWorthOldMain: number[],
-  netWorthOldOptions: number[],
-  netWorth: NetWorthTableRow[],
-  fundsCurrent: number[],
-  fundsOld: number[],
-  showAll: boolean,
-): BalanceData {
-  const currentOptions = netWorth.map(({ options }) => options);
+type RawData = {
+  homeEquityOld: number[];
+  cost: Pick<CostProps, 'netWorthCombined' | Page.funds | 'fundsOld'>;
+  netWorthOldMain: number[];
+  netWorthOldOptions: number[];
+  netWorthTable: NetWorthTableRow[];
+  showAll: boolean;
+};
+
+type ProcessedData = {
+  netWorth: number[];
+  options: number[];
+  optionsStartIndex: number;
+  homeEquity: number[];
+  funds: number[];
+  oldOffset: number;
+  cashOther: number[];
+  pension: number[];
+};
+
+type GraphData = { lines: Line[]; targetValues: TargetValue[] };
+
+function processData({
+  homeEquityOld,
+  cost: { netWorthCombined, funds: fundsCurrent, fundsOld },
+  netWorthTable,
+  netWorthOldMain,
+  netWorthOldOptions,
+  showAll,
+}: RawData): ProcessedData {
+  const homeEquityToPresent = netWorthTable.map<number>(
+    ({ aggregate }) => aggregate[Aggregate.realEstate] + aggregate[Aggregate.mortgage],
+  );
+  // TODO: predict home equity. Need: mortgage rate, start date, term
+  // (presume house price inflation to be 5% annualised)
+  const homeEquityCurrent = rightPad(
+    homeEquityToPresent,
+    netWorthCombined.length,
+    homeEquityToPresent[homeEquityToPresent.length - 1] ?? 0,
+  );
+
+  const currentOptions = netWorthTable.map(({ options }) => options);
   const optionsStartIndex = currentOptions.findIndex((value) => value > 0);
   const options = rightPad(currentOptions, netWorthCombined.length).map(
     (value, index) => value + netWorthCombined[index],
   );
 
   // value of "stocks" section that isn't accounted for by stock value
-  const ISACash = fillAggregate(netWorthCombined.length, netWorth, Aggregate.stocks, false).map(
-    (value, index) => value - fundsCurrent[index],
-  );
+  const ISACash = fillAggregate(
+    netWorthCombined.length,
+    netWorthTable,
+    Aggregate.stocks,
+    false,
+  ).map((value, index) => value - fundsCurrent[index]);
 
   const lastISACash = ISACash[ISACash.length - 1] ?? 0;
-  const cashOther = fillAggregate(netWorthCombined.length, netWorth, Aggregate.cashOther).map(
+  const cashOther = fillAggregate(netWorthCombined.length, netWorthTable, Aggregate.cashOther).map(
     (value, index) => value + (ISACash[index] ?? lastISACash),
   );
 
-  const pension = fillAggregate(netWorthCombined.length, netWorth, Aggregate.pension);
+  const pension = fillAggregate(netWorthCombined.length, netWorthTable, Aggregate.pension);
 
   const withoutPension = netWorthCombined.map((value, index) => value - pension[index]);
 
   if (showAll) {
     const oldOffset = Math.max(fundsOld.length, netWorthOldMain.length, netWorthOldOptions.length);
     const totalLength = oldOffset + netWorthCombined.length;
-    const balance = leftPad(netWorthOldMain.concat(withoutPension), totalLength);
-
-    const fundsOldPadded = leftPad(fundsOld, oldOffset);
-
-    const optionsFull = leftPad(
-      netWorthOldOptions.map((value, index) => value + netWorthOldMain[index]),
-      oldOffset,
-    ).concat(options);
 
     return {
-      balance,
-      options: optionsFull,
+      netWorth: leftPad(netWorthOldMain.concat(withoutPension), totalLength),
+      options: leftPad(
+        netWorthOldOptions.map((value, index) => value + netWorthOldMain[index]),
+        oldOffset,
+      ).concat(options),
       optionsStartIndex: netWorthOldOptions.concat(currentOptions).findIndex((value) => value > 0),
-      funds: fundsOldPadded.concat(fundsCurrent),
+      homeEquity: leftPad(homeEquityOld.concat(homeEquityCurrent), totalLength),
+      funds: leftPad(fundsOld, oldOffset).concat(fundsCurrent),
       oldOffset,
       cashOther: leftPad(cashOther, totalLength),
       pension: leftPad(pension, totalLength),
@@ -94,9 +116,10 @@ function getData(
   }
 
   return {
-    balance: withoutPension,
+    netWorth: withoutPension,
     options,
     optionsStartIndex,
+    homeEquity: homeEquityCurrent,
     funds: fundsCurrent,
     oldOffset: 0,
     cashOther,
@@ -104,40 +127,26 @@ function getData(
   };
 }
 
-type RawData = {
-  startDate: Date;
-  cost: CostProps;
-  netWorthOldMain: number[];
-  netWorthOldOptions: number[];
-  netWorth: NetWorthTableRow[];
-  showAll: boolean;
-  futureMonths: number;
-};
-
-function processData({
-  startDate,
-  cost: { netWorthCombined, funds: fundsCurrent, fundsOld },
-  netWorthOldMain,
-  netWorthOldOptions,
-  netWorth,
-  showAll,
-  futureMonths,
-}: RawData): { lines: Line[]; targetValues: TargetValue[] } {
-  const { balance, options, optionsStartIndex, funds, oldOffset, cashOther, pension } = getData(
-    netWorthCombined,
-    netWorthOldMain,
-    netWorthOldOptions,
+function getGraphData(rawData: RawData, startDate: Date, futureMonths: number): GraphData {
+  const {
     netWorth,
-    fundsCurrent,
-    fundsOld,
-    showAll,
-  );
+    homeEquity,
+    options,
+    optionsStartIndex,
+    funds,
+    oldOffset,
+    cashOther,
+    pension,
+  } = processData(rawData);
 
-  const futureKey = oldOffset + netWorthCombined.length - futureMonths;
+  const { netWorthCombined } = rawData.cost;
+  const { netWorthOldMain, showAll } = rawData;
+  const futureIndex = oldOffset + netWorthCombined.length - futureMonths;
 
   const opts = { oldOffset, startDate };
 
-  const dataBalance = getValuesWithTime(balance, opts);
+  const dataNetWorth = getValuesWithTime(netWorth, opts);
+  const dataHomeEquity = getValuesWithTime(homeEquity, opts);
   const dataOptions =
     optionsStartIndex === -1
       ? []
@@ -145,7 +154,7 @@ function processData({
   const dataCashOther = getValuesWithTime(cashOther, opts);
   const dataPension = getValuesWithTime(pension, { oldOffset, startDate });
 
-  const dataFunds: Data = funds.map((value, index) => [dataBalance[index][0], value]);
+  const dataFunds: Data = funds.map((value, index) => [dataNetWorth[index][0], value]);
 
   const targets = getTargets(
     startDate,
@@ -164,6 +173,14 @@ function processData({
       strokeWidth: 1,
     },
     {
+      key: 'home-equity',
+      data: dataHomeEquity,
+      fill: true,
+      smooth: true,
+      color: rgba(colors.netWorth.homeEquity, 0.5),
+      strokeWidth: 2,
+    },
+    {
       key: 'options',
       data: dataOptions,
       fill: false,
@@ -175,25 +192,25 @@ function processData({
     {
       key: 'pension',
       data: dataPension,
-      stack: dataBalance,
+      stack: [dataNetWorth],
       fill: true,
       smooth: true,
       color: rgba(colors.netWorth.aggregate[Aggregate.pension], 0.5),
     },
     {
       key: 'balance',
-      data: dataBalance,
+      data: dataNetWorth,
       fill: false,
       smooth: true,
       color: (_: Point, index = 0): string =>
-        index < futureKey - 1
+        index < futureIndex - 1
           ? colors[Page.overview].balanceActual
           : colors[Page.overview].balancePredicted,
     },
     {
       key: 'cash-locked',
       data: dataCashOther,
-      stack: dataFunds,
+      stack: [dataHomeEquity, dataFunds],
       fill: true,
       smooth: true,
       color: rgba(colors.netWorth.aggregate[Aggregate.cashOther], 0.4),
@@ -201,6 +218,7 @@ function processData({
     {
       key: 'funds',
       data: dataFunds,
+      stack: [dataHomeEquity],
       fill: true,
       smooth: true,
       color: rgba(colors.funds.main, 0.4),
@@ -214,7 +232,7 @@ function makeAfterLines(targetValues: TargetValue[]): React.FC {
   const AfterLines: React.FC = () => (
     <g>
       <Targets targetValues={targetValues} />
-      <Key title="Balance" />
+      <Key title="Net worth" />
     </g>
   );
 
@@ -229,24 +247,37 @@ const isNetWorthSummaryOldEqual = (left: NetWorthSummaryOld, right: NetWorthSumm
 export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
   const today = useContext(TodayContext);
   const startDate = useSelector(getStartDate);
+  const homeEquityOld = useSelector(getHomeEquityOld);
   const netWorthOld = useSelector(getNetWorthSummaryOld, isNetWorthSummaryOldEqual);
-  const netWorth = useSelector(getNetWorthTable);
+  const netWorthTable = useSelector(getNetWorthTable);
   const futureMonths = useSelector(getFutureMonths(today));
   const cost = useSelector(getProcessedCost(today));
 
   const [showAll, setShowAll] = useState(false);
-  const { lines, targetValues } = useMemo(
+  const { lines, targetValues } = useMemo<GraphData>(
     () =>
-      processData({
+      getGraphData(
+        {
+          homeEquityOld,
+          cost,
+          netWorthOldMain: netWorthOld.main,
+          netWorthOldOptions: netWorthOld.options,
+          netWorthTable,
+          showAll,
+        },
         startDate,
-        cost,
-        netWorthOldMain: netWorthOld.main,
-        netWorthOldOptions: netWorthOld.options,
-        netWorth,
-        showAll,
         futureMonths,
-      }),
-    [startDate, cost, netWorthOld.main, netWorthOld.options, netWorth, showAll, futureMonths],
+      ),
+    [
+      startDate,
+      homeEquityOld,
+      cost,
+      netWorthOld.main,
+      netWorthOld.options,
+      netWorthTable,
+      showAll,
+      futureMonths,
+    ],
   );
 
   const afterLines = useMemo(() => makeAfterLines(targetValues), [targetValues]);

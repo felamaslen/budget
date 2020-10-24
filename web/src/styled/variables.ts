@@ -97,7 +97,7 @@ type Colors = {
   [Page.general]: PageColors;
   [Page.holiday]: PageColors;
   [Page.social]: PageColors;
-  netWorth: Record<NetWorthTableColumn | 'options', string> & {
+  netWorth: Record<NetWorthTableColumn | 'options' | 'homeEquity', string> & {
     aggregate: {
       [key in Aggregate]: string;
     };
@@ -213,11 +213,14 @@ export const colors: Colors = {
     main: rgb(178, 166, 211),
     expenses: rgb(213, 164, 187),
     options: rgb(0, 52, 138),
+    homeEquity: rgb(150, 140, 39),
     aggregate: {
-      'Cash (easy access)': rgb(180, 214, 169),
-      'Cash (other)': rgb(145, 194, 129),
-      Stocks: lighten(0.3)(colorStocks),
-      Pension: rgb(47, 123, 211),
+      [Aggregate.cashEasyAccess]: rgb(180, 214, 169),
+      [Aggregate.cashOther]: rgb(145, 194, 129),
+      [Aggregate.stocks]: lighten(0.3)(colorStocks),
+      [Aggregate.pension]: rgb(47, 123, 211),
+      [Aggregate.realEstate]: rgb(122, 180, 99),
+      [Aggregate.mortgage]: rgb(180, 99, 122),
     },
   },
   funds: {
