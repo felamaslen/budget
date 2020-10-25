@@ -1,11 +1,9 @@
-import { compose } from '@typed/compose';
-import { setLightness, setSaturation, opacify } from 'polished';
+import { readableColor } from 'polished';
 import React from 'react';
 
 import { defaultPadding, getPixY } from '~client/components/graph/helpers';
 import { HoverEffect, HLPoint } from '~client/components/graph/hooks';
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';
-import { colors } from '~client/styled/variables';
 import { RangeY, Size, Padding, Calc } from '~client/types';
 
 type Props = {
@@ -24,8 +22,6 @@ type TextProps = {
   textAnchor: 'start' | 'end' | 'middle';
   alignmentBaseline: 'hanging' | 'middle' | 'baseline';
 };
-
-const labelColor = compose(setLightness(0.8), setSaturation(0.7), opacify(0.5));
 
 const [, fontFamily] = FONT_GRAPH_TITLE;
 const fontSizeX = 10;
@@ -68,13 +64,14 @@ export const HighlightPoint: React.FC<Props> = ({
   const pathHorizontal = `M0,${posY} L${width},${posY}`;
 
   const lineProps = { stroke: color, strokeDasharray: '3,2' };
+  const textColor = readableColor(color);
 
   const textProps: TextProps = {
     x: labelPosX,
     y: labelPosY,
     fontSize: fontSizeY,
     fontFamily,
-    fill: colors.black,
+    fill: textColor,
     textAnchor: 'middle',
     alignmentBaseline: 'hanging',
   };
@@ -100,7 +97,7 @@ export const HighlightPoint: React.FC<Props> = ({
         y={labelPosY}
         width={labelWidth}
         height={labelHeight}
-        fill={labelColor(color)}
+        fill={color}
       />
       <text {...textPropsX}>{labelX(valX)}</text>
       <text {...textPropsY}>{(hlPoint.secondary ? labelY2 : labelY)(valY)}</text>

@@ -21,8 +21,9 @@ describe('<CashRow />', () => {
   };
 
   it('should render the cash value with target', () => {
-    expect.assertions(1);
-    const { getByText } = setup();
-    expect(getByText('£7k Actual / £150 Target')).toBeInTheDocument();
+    expect.assertions(2);
+    const { getByText, getByTitle } = setup();
+    expect(getByText('Cash')).toBeInTheDocument();
+    expect(getByTitle('Buy £6k of stock to adjust')).toBeInTheDocument();
   });
 });

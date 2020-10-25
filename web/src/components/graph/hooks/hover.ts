@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { throttle } from 'throttle-debounce';
 
-import { getPixY } from '../helpers';
+import { getPixY, getStackedData } from '../helpers';
 import { NULL } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
 import { Point, Line, Calc, LineColor, isConstantColor } from '~client/types';
@@ -53,12 +53,15 @@ function getClosest(lines: Line[], position: Position, calc: Calc): Closest | nu
   const { posX, posY } = position;
 
   return lines.reduce<Closest | null>((red, line, lineIndex) => {
+    if (line.hover === false) {
+      return red;
+    }
+
     const pixY = getPixY(calc, line.secondary);
 
-    return line.data.reduce<Closest | null>((last, point, index) => {
+    return getStackedData(line.data, line.stack).reduce<Closest | null>((last, point, index) => {
       const distX = Math.abs(calc.pixX(point[0]) - posX);
       const distY = Math.abs(pixY(point[1]) - posY);
-
       if (last && !(distX < last.distX || (distX === last.distX && distY < last.distY))) {
         return last;
       }

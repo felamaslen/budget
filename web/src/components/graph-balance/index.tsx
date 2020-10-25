@@ -16,6 +16,7 @@ import {
   getNetWorthTable,
   NetWorthSummaryOld,
   getHomeEquityOld,
+  getHomeEquity,
 } from '~client/selectors';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
 import { Page, Point, Line, Data, CostProcessed, NetWorthTableRow, Aggregate } from '~client/types';
@@ -34,6 +35,7 @@ const fillAggregate = (
 
 type RawData = {
   homeEquityOld: number[];
+  homeEquity: number[];
   cost: Pick<CostProps, 'netWorthCombined' | Page.funds | 'fundsOld'>;
   netWorthOldMain: number[];
   netWorthOldOptions: number[];
@@ -56,28 +58,16 @@ type GraphData = { lines: Line[]; targetValues: TargetValue[] };
 
 function processData({
   homeEquityOld,
+  homeEquity,
   cost: { netWorthCombined, funds: fundsCurrent, fundsOld },
   netWorthTable,
   netWorthOldMain,
   netWorthOldOptions,
   showAll,
 }: RawData): ProcessedData {
-  const homeEquityToPresent = netWorthTable.map<number>(
-    ({ aggregate }) => aggregate[Aggregate.realEstate] + aggregate[Aggregate.mortgage],
-  );
-  // TODO: predict home equity. Need: mortgage rate, start date, term
-  // (presume house price inflation to be 5% annualised)
-  const homeEquityCurrent = rightPad(
-    homeEquityToPresent,
-    netWorthCombined.length,
-    homeEquityToPresent[homeEquityToPresent.length - 1] ?? 0,
-  );
-
   const currentOptions = netWorthTable.map(({ options }) => options);
   const optionsStartIndex = currentOptions.findIndex((value) => value > 0);
-  const options = rightPad(currentOptions, netWorthCombined.length).map(
-    (value, index) => value + netWorthCombined[index],
-  );
+  const options = rightPad(currentOptions, netWorthCombined.length);
 
   // value of "stocks" section that isn't accounted for by stock value
   const ISACash = fillAggregate(
@@ -94,20 +84,31 @@ function processData({
 
   const pension = fillAggregate(netWorthCombined.length, netWorthTable, Aggregate.pension);
 
-  const withoutPension = netWorthCombined.map((value, index) => value - pension[index]);
+  const recordedHomeValue = fillAggregate(
+    netWorthCombined.length,
+    netWorthTable,
+    Aggregate.realEstate,
+  );
+  const recordedMortgageDebt = fillAggregate(
+    netWorthCombined.length,
+    netWorthTable,
+    Aggregate.mortgage,
+  );
+
+  const netWorthCombinedToStack = netWorthCombined.map(
+    (value, index) =>
+      value - (pension[index] + recordedHomeValue[index] + recordedMortgageDebt[index]),
+  );
 
   if (showAll) {
     const oldOffset = Math.max(fundsOld.length, netWorthOldMain.length, netWorthOldOptions.length);
     const totalLength = oldOffset + netWorthCombined.length;
 
     return {
-      netWorth: leftPad(netWorthOldMain.concat(withoutPension), totalLength),
-      options: leftPad(
-        netWorthOldOptions.map((value, index) => value + netWorthOldMain[index]),
-        oldOffset,
-      ).concat(options),
+      netWorth: leftPad(netWorthOldMain.concat(netWorthCombinedToStack), totalLength),
+      options: leftPad(netWorthOldOptions, oldOffset).concat(options),
       optionsStartIndex: netWorthOldOptions.concat(currentOptions).findIndex((value) => value > 0),
-      homeEquity: leftPad(homeEquityOld.concat(homeEquityCurrent), totalLength),
+      homeEquity: leftPad(homeEquityOld.concat(homeEquity), totalLength),
       funds: leftPad(fundsOld, oldOffset).concat(fundsCurrent),
       oldOffset,
       cashOther: leftPad(cashOther, totalLength),
@@ -116,10 +117,10 @@ function processData({
   }
 
   return {
-    netWorth: withoutPension,
+    netWorth: netWorthCombinedToStack,
     options,
     optionsStartIndex,
-    homeEquity: homeEquityCurrent,
+    homeEquity,
     funds: fundsCurrent,
     oldOffset: 0,
     cashOther,
@@ -163,10 +164,11 @@ function getGraphData(rawData: RawData, startDate: Date, futureMonths: number): 
     netWorthOldMain.length,
   );
 
-  const lines = [
+  const lines: Line[] = [
     {
       key: 'targets',
       data: targets.line,
+      hover: false,
       fill: false,
       smooth: false,
       color: colors.light.dark,
@@ -179,33 +181,6 @@ function getGraphData(rawData: RawData, startDate: Date, futureMonths: number): 
       smooth: true,
       color: rgba(colors.netWorth.homeEquity, 0.5),
       strokeWidth: 2,
-    },
-    {
-      key: 'options',
-      data: dataOptions,
-      fill: false,
-      smooth: true,
-      color: colors.netWorth.options,
-      dashed: true,
-      strokeWidth: 1,
-    },
-    {
-      key: 'pension',
-      data: dataPension,
-      stack: [dataNetWorth],
-      fill: true,
-      smooth: true,
-      color: rgba(colors.netWorth.aggregate[Aggregate.pension], 0.5),
-    },
-    {
-      key: 'balance',
-      data: dataNetWorth,
-      fill: false,
-      smooth: true,
-      color: (_: Point, index = 0): string =>
-        index < futureIndex - 1
-          ? colors[Page.overview].balanceActual
-          : colors[Page.overview].balancePredicted,
     },
     {
       key: 'cash-locked',
@@ -222,6 +197,37 @@ function getGraphData(rawData: RawData, startDate: Date, futureMonths: number): 
       fill: true,
       smooth: true,
       color: rgba(colors.funds.main, 0.4),
+    },
+    {
+      key: 'net-worth-without-pension',
+      data: dataNetWorth,
+      stack: [dataHomeEquity],
+      fill: false,
+      smooth: true,
+      color: (_: Point, index = 0): string =>
+        index < futureIndex - 1
+          ? colors[Page.overview].balanceActual
+          : colors[Page.overview].balancePredicted,
+    },
+    {
+      key: 'pension',
+      data: dataPension,
+      stack: [dataHomeEquity, dataNetWorth],
+      fill: true,
+      smooth: true,
+      color: rgba(colors.netWorth.aggregate[Aggregate.pension], 0.5),
+    },
+    {
+      key: 'options',
+      data: dataOptions,
+      stack: [dataHomeEquity, dataNetWorth, dataPension].map((group) =>
+        group.slice(optionsStartIndex - 1),
+      ),
+      fill: false,
+      smooth: true,
+      color: colors.netWorth.options,
+      dashed: true,
+      strokeWidth: 1,
     },
   ];
 
@@ -248,6 +254,7 @@ export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
   const today = useContext(TodayContext);
   const startDate = useSelector(getStartDate);
   const homeEquityOld = useSelector(getHomeEquityOld);
+  const homeEquity = useSelector(getHomeEquity(today));
   const netWorthOld = useSelector(getNetWorthSummaryOld, isNetWorthSummaryOldEqual);
   const netWorthTable = useSelector(getNetWorthTable);
   const futureMonths = useSelector(getFutureMonths(today));
@@ -259,6 +266,7 @@ export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
       getGraphData(
         {
           homeEquityOld,
+          homeEquity,
           cost,
           netWorthOldMain: netWorthOld.main,
           netWorthOldOptions: netWorthOld.options,
@@ -271,6 +279,7 @@ export const GraphBalance: React.FC<Props> = ({ isMobile }) => {
     [
       startDate,
       homeEquityOld,
+      homeEquity,
       cost,
       netWorthOld.main,
       netWorthOld.options,

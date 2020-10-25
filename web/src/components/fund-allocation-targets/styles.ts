@@ -119,15 +119,3 @@ export const Target = styled.div.attrs(({ fraction, color, delta }: TargetProps)
   top: 0;
   z-index: 10;
 `;
-
-export const CashLabel = styled.div`
-  display: block;
-  line-height: ${rem(13)};
-  ${breakpoint(breakpoints.mobile)} {
-    line-height: ${rem(18)};
-  }
-`;
-
-export const CashLabelTarget = styled(CashLabel)`
-  font-size: ${rem(10)};
-`;

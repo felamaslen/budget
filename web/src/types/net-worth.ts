@@ -29,8 +29,16 @@ export type OptionValue = {
 export type ComplexValueItem = number | FXValue | OptionValue;
 export type ComplexValue = ComplexValueItem[];
 
-export type Value = number | ComplexValue;
+export type MortgageValue = {
+  principal: number;
+  paymentsRemaining: number;
+  rate: number;
+};
 
+export type Value = number | ComplexValue | MortgageValue;
+
+export const isMortgageValue = (value: Value): value is MortgageValue =>
+  typeof value === 'object' && Reflect.has(value, 'principal');
 export const isComplex = (value: Value): value is ComplexValue => Array.isArray(value);
 export const isFX = (value: ComplexValueItem): value is FXValue =>
   typeof value === 'object' && Reflect.has(value, 'currency');

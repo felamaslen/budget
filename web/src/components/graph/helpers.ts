@@ -211,7 +211,14 @@ export function getStackedDataY(data: Data, stack?: GraphStack): number[] {
     return data.map(([, yValue]) => yValue);
   }
   const reducedStack = reduceStack(stack);
-  return data.map(([, yValue], index) => yValue + reducedStack[index][1]);
+  return data.map(
+    ([, yValue], index) => yValue + (index < reducedStack.length ? reducedStack[index][1] : 0),
+  );
+}
+
+export function getStackedData(data: Data, stack?: GraphStack): Data {
+  const dataY = getStackedDataY(data, stack);
+  return data.map(([xValue], index) => [xValue, dataY[index]]);
 }
 
 export function getLinePath({
@@ -228,25 +235,25 @@ export function getLinePath({
 }: LineProps): LineDescription {
   const pixY = getPixY({ pixY1, pixY2 }, secondary);
   const getPixPoint: GetPixPoint = ([xValue, yValue]: Point): Point => [pixX(xValue), pixY(yValue)];
-  const dataX = getDataX(data);
-  const dataY = getStackedDataY(data, stack);
-  const pixels: Data = dataY.map((yValue, index) => getPixPoint([dataX[index], yValue]));
+  const pixels = getStackedData(data, stack).map(getPixPoint);
   const line = getLinePathPart(pixels, smooth);
 
   if (fill) {
     if (stack) {
       const pixelsStack = reduceStack(stack).map(getPixPoint);
-      const lineStack = getLinePathPart(pixelsStack.reverse(), smooth);
+      const lineStack: LinePoint[] = getLinePathPart(pixelsStack.reverse(), smooth);
 
-      return [
-        ...line,
-        {
-          start: pixels[pixels.length - 1],
-          type: 'L',
-          args: [[pixelsStack[0][0].toFixed(1), pixelsStack[0][1].toFixed(1)]],
-        },
-        ...lineStack,
-      ];
+      const pixelsLinePoint: LinePoint | undefined = pixelsStack.length
+        ? {
+            start: pixels[pixels.length - 1],
+            type: 'L',
+            args: [[pixelsStack[0][0].toFixed(1), pixelsStack[0][1].toFixed(1)]],
+          }
+        : undefined;
+
+      return [...line, pixelsLinePoint, ...lineStack].filter(
+        (point: LinePoint | undefined): point is LinePoint => !!point,
+      );
     }
 
     return [
@@ -312,6 +319,7 @@ export const joinChoppedPath = (
 
 type DynamicLine<C = DynamicLineColor> = Pix & {
   data: Data;
+  stack?: GraphStack;
   secondary?: boolean;
   color: C;
   smooth?: boolean;
@@ -373,7 +381,8 @@ export function getDynamicLinePathsStop({
 }
 
 export function getDynamicLinePaths({
-  data,
+  data: dataWithoutStack,
+  stack,
   secondary,
   color,
   smooth,
@@ -381,6 +390,8 @@ export function getDynamicLinePaths({
   pixY1,
   pixY2,
 }: DynamicLine): JoinedPath {
+  const data = getStackedData(dataWithoutStack, stack);
+
   if (data.length < 2) {
     return [];
   }

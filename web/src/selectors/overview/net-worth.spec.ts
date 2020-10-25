@@ -9,6 +9,8 @@ import {
   getNetWorthSummaryOld,
   getNetWorthTable,
   getNetWorthRequests,
+  getHomeEquity,
+  assumedHousePriceInflation,
 } from './net-worth';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
@@ -697,6 +699,108 @@ describe('Overview selectors (net worth)', () => {
           },
         ]);
       });
+    });
+  });
+
+  describe('getHomeEquity', () => {
+    const now = new Date('2018-05-02');
+
+    const principal = 26755400;
+    const paymentsRemaining = 250;
+    const interestRate = 2.76; // percent
+
+    const stateWithHomeEquity: State = {
+      ...testState,
+      netWorth: {
+        ...testState.netWorth,
+        entries: {
+          ...testState.netWorth.entries,
+          items: [
+            {
+              id: numericHash('entry-id-a1'),
+              date: new Date('2018-04-30'),
+              values: [
+                {
+                  id: numericHash('entry-id-a1-value-id-1'),
+                  subcategory: numericHash('real-mortgage-subcategory-id'),
+                  value: {
+                    principal,
+                    paymentsRemaining,
+                    rate: interestRate,
+                  },
+                },
+                {
+                  id: numericHash('entry-id-a1-value-id-2'),
+                  subcategory: numericHash('real-house-subcategory-id'),
+                  value: 34500000,
+                },
+              ],
+              creditLimit: [],
+              currencies: [],
+            },
+          ],
+          __optimistic: [undefined],
+        },
+      },
+    };
+
+    it('should get the home equity values up to the present month', () => {
+      expect.assertions(3);
+
+      const expectedAprilEquity = 34500000 - 26755400;
+
+      const presentEquity = getHomeEquity(now)(stateWithHomeEquity).slice(0, 4);
+
+      expect(presentEquity).toHaveLength(4);
+      expect(presentEquity).toStrictEqual([
+        0, // Jan 18
+        0, // Feb 18
+        0, // Mar 18
+        expectedAprilEquity, // Apr 18
+      ]);
+
+      expect(presentEquity).toMatchInlineSnapshot(`
+        Array [
+          0,
+          0,
+          0,
+          7744600,
+        ]
+      `);
+    });
+
+    it('should use the latest mortgage rate/terms/principal data to predict the future equity', () => {
+      expect.assertions(5);
+
+      const monthlyDebtPaid = 140842.5536318; // PMT(0.0276/12, 250, 267554) - monthly payment
+
+      const principalMay = principal * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
+      const principalJun = principalMay * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
+      const principalJul = principalJun * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
+
+      const housePriceMay = 34500000 * (1 + assumedHousePriceInflation) ** (1 / 12);
+      const housePriceJun = housePriceMay * (1 + assumedHousePriceInflation) ** (1 / 12);
+      const housePriceJul = housePriceJun * (1 + assumedHousePriceInflation) ** (1 / 12);
+
+      const equityMay = housePriceMay - principalMay;
+      const equityJun = housePriceJun - principalJun;
+      const equityJul = housePriceJul - principalJul;
+
+      const forecastEquity = getHomeEquity(now)(stateWithHomeEquity).slice(4);
+
+      expect(forecastEquity).toHaveLength(3);
+
+      expect(forecastEquity[0] / 100).toBeCloseTo(equityMay / 100, 1);
+      expect(forecastEquity[1] / 100).toBeCloseTo(equityJun / 100, 1);
+      expect(forecastEquity[2] / 100).toBeCloseTo(equityJul / 100, 1);
+
+      expect(forecastEquity).toMatchInlineSnapshot(`
+        Array [
+          7965227.396299284,
+          8186609.312236443,
+          8408748.493954502,
+        ]
+      `);
     });
   });
 });

@@ -28,6 +28,7 @@ import {
   getNumMonths,
   getFutureMonths,
   getMonthDates,
+  currentDayIsEndOfMonth,
 } from '~client/selectors/overview/common';
 import {
   Page,
@@ -171,7 +172,7 @@ const getPredictedNetWorth = <K extends keyof CostProcessed>(
   );
 
   const endOfCurrentMonth = endOfMonth(currentDate);
-  const futureStart = isSameDay(endOfCurrentMonth, currentDate)
+  const futureStart = currentDayIsEndOfMonth(currentDate)
     ? addMonths(endOfCurrentMonth, 1)
     : endOfCurrentMonth;
 

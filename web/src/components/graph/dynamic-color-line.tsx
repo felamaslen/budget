@@ -1,10 +1,11 @@
 import React from 'react';
 import { getDynamicLinePaths } from '~client/components/graph/helpers';
-import { RangeY, Pix, Data, PathProps, DynamicLineColor } from '~client/types/graph';
+import { RangeY, Pix, Data, PathProps, DynamicLineColor, GraphStack } from '~client/types/graph';
 
 type Props = {
   fill?: boolean;
   data: Data;
+  stack?: GraphStack;
   smooth?: boolean;
   color: DynamicLineColor;
   children?: React.ReactNode;

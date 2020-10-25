@@ -37,10 +37,16 @@ export type OptionValue = {
   vested: number;
 };
 
+export type MortgageValue = {
+  principal: number;
+  paymentsRemaining: number;
+  rate: number;
+};
+
 export type ComplexValueItem = number | FXValue | OptionValue;
 export type ComplexValue = ComplexValueItem[];
 
-export type Value = number | ComplexValue;
+export type Value = number | ComplexValue | MortgageValue;
 
 export type ValueObject = {
   id?: number;
@@ -97,6 +103,9 @@ export type JoinedEntryRow = {
   op_strike_price: number | null;
   op_market_price: number | null;
   op_vested: number | null;
+
+  mortgage_payments_remaining: number | null;
+  mortgage_rate: number | null;
 };
 
 export type JoinedEntryRowWithCurrencies = JoinedEntryRow & {
@@ -120,6 +129,11 @@ export type JoinedEntryRowWithOptionValue = JoinedEntryRow & {
   op_strike_price: number;
   op_market_price: number;
   op_vested: number;
+};
+
+export type JoinedEntryRowWithMortgageValue = JoinedEntryRow & {
+  mortgage_payments_remaining: number;
+  mortgage_rate: number;
 };
 
 export type OldNetWorthRow = { value: number; option_value: number };

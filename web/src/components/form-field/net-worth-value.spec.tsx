@@ -44,8 +44,9 @@ describe('<FormFieldNetWorthValue />', () => {
   });
 
   describe.each`
-    condition      | erroneousValue
-    ${'an option'} | ${[{ units: 100, strikePrice: 30, marketPrice: 43 }]}
+    condition       | erroneousValue
+    ${'an option'}  | ${[{ units: 100, strikePrice: 30, marketPrice: 43 }]}
+    ${'a mortgage'} | ${{ principal: 15000000, paymentsRemaining: 275, rate: 0.175 }}
   `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
     const setupErroneous = (): RenderResult =>
       render(<FormFieldNetWorthValue {...props} value={erroneousValue} />);
@@ -321,9 +322,10 @@ describe('<FormFieldNetWorthValue />', () => {
     });
 
     describe.each`
-      condition   | erroneousValue
-      ${'simple'} | ${[{ value: 103, currency: 'USD' }]}
-      ${'FX'}     | ${[{ value: 103, currency: 'USD' }]}
+      condition     | erroneousValue
+      ${'simple'}   | ${[{ value: 103, currency: 'USD' }]}
+      ${'FX'}       | ${[{ value: 103, currency: 'USD' }]}
+      ${'mortgage'} | ${{ principal: 16500000, remainingPayments: 123, rate: 0.27 }}
     `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
       // this would only happen if the API was set up incorrectly
       const setupErroneous = (): RenderResult =>
@@ -403,6 +405,142 @@ describe('<FormFieldNetWorthValue />', () => {
             marketPrice: 37.2,
           },
         ]);
+      });
+    });
+  });
+
+  describe('switching to a mortgage value', () => {
+    const propsMortgage = {
+      ...props,
+      isMortgage: true,
+      value: { principal: 27500000, paymentsRemaining: 268, rate: 0.219 },
+    };
+
+    const setup = (): RenderResult => {
+      return render(<FormFieldNetWorthValue {...propsMortgage} />);
+    };
+
+    describe.each`
+      field                  | placeholder             | fieldValue     | updatedValue | delta
+      ${'principal'}         | ${'Principal'}          | ${'275000.00'} | ${'273280'}  | ${{ principal: 27328000 }}
+      ${'paymentsRemaining'} | ${'Payments remaining'} | ${'268'}       | ${'267'}     | ${{ paymentsRemaining: 267 }}
+      ${'rate'}              | ${'Interest rate'}      | ${'0.219'}     | ${'0.372'}   | ${{ rate: 0.372 }}
+    `('$field field', ({ placeholder, fieldValue, updatedValue, delta }) => {
+      it('should be rendered', () => {
+        expect.assertions(1);
+        const { getByDisplayValue } = setup();
+
+        const input = getByDisplayValue(fieldValue);
+        expect(input).toBeInTheDocument();
+      });
+
+      it('should have a placeholder', () => {
+        expect.assertions(1);
+        const { getByDisplayValue } = setup();
+
+        const input = getByDisplayValue(fieldValue) as HTMLInputElement;
+        expect(input.placeholder).toBe(placeholder);
+      });
+
+      it('should call onChange with an updated value', () => {
+        expect.assertions(1);
+        const { getByDisplayValue } = setup();
+
+        const input = getByDisplayValue(fieldValue);
+        act(() => {
+          fireEvent.change(input, { target: { value: updatedValue } });
+        });
+        act(() => {
+          fireEvent.blur(input);
+        });
+
+        expect(props.onChange).toHaveBeenCalledWith({
+          principal: 27500000,
+          paymentsRemaining: 268,
+          rate: 0.219,
+          ...delta,
+        });
+      });
+    });
+
+    describe.each`
+      condition   | erroneousValue
+      ${'simple'} | ${[{ value: 103, currency: 'USD' }]}
+      ${'FX'}     | ${[{ value: 103, currency: 'USD' }]}
+      ${'option'} | ${[{ units: 105, vested: 10, strikePrice: 45.532, marketPrice: 97.113 }]}
+    `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
+      // this would only happen if the API was set up incorrectly
+      const setupErroneous = (): RenderResult =>
+        render(<FormFieldNetWorthValue {...propsMortgage} value={erroneousValue} />);
+
+      it('should render the usual mortgage fields', () => {
+        expect.assertions(4);
+        const { getAllByRole } = setupErroneous();
+
+        const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
+
+        expect(inputs).toHaveLength(3);
+
+        const [inputPrincipal, inputPaymentsRemaining, inputRate] = inputs;
+
+        expect(inputPrincipal.value).toBe('0.00');
+        expect(inputPaymentsRemaining.value).toBe('0');
+        expect(inputRate.value).toBe('0');
+      });
+
+      it.each`
+        field                  | index
+        ${'principal'}         | ${0}
+        ${'paymentsRemaining'} | ${1}
+        ${'rate'}              | ${2}
+      `('should not call onChange with data only from $field', ({ index }) => {
+        expect.assertions(1);
+        const { getAllByRole } = setupErroneous();
+
+        const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
+        const fieldInput = inputs[index];
+
+        act(() => {
+          fireEvent.change(fieldInput, { target: { value: '100' } });
+        });
+        act(() => {
+          fireEvent.blur(fieldInput);
+        });
+
+        expect(props.onChange).not.toHaveBeenCalled();
+      });
+
+      it('should call onChange with complete data', () => {
+        expect.assertions(2);
+        const { getAllByRole } = setupErroneous();
+        const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
+        const [inputPrincipal, inputPaymentsRemaining, inputRate] = inputs;
+
+        act(() => {
+          fireEvent.change(inputPrincipal, { target: { value: '167568.44' } });
+        });
+        act(() => {
+          fireEvent.blur(inputPrincipal);
+        });
+        act(() => {
+          fireEvent.change(inputPaymentsRemaining, { target: { value: '17' } });
+        });
+        act(() => {
+          fireEvent.blur(inputPaymentsRemaining);
+        });
+        act(() => {
+          fireEvent.change(inputRate, { target: { value: '0.43' } });
+        });
+        act(() => {
+          fireEvent.blur(inputRate);
+        });
+
+        expect(props.onChange).toHaveBeenCalledTimes(1);
+        expect(props.onChange).toHaveBeenCalledWith({
+          principal: 16756844,
+          paymentsRemaining: 17,
+          rate: 0.43,
+        });
       });
     });
   });

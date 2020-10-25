@@ -2158,17 +2158,30 @@ definitions:
       type: object
       properties:
         units:
-          type: number
+          type: float
           description: number of units purchasable
         vested:
-          type: number
+          type: float
           description: number of units vested under options scheme
         strikePrice:
-          type: number
+          type: float
           description: price at which shares would be bought
         marketPrice:
-          type: number
+          type: float
           description: current price of shares on the open market
+
+  NetWorthValueMortgage:
+    type: object
+    properties:
+      principal:
+        type: integer
+        description: value of mortgage still left to pay
+      paymentsRemaining:
+        type: integer
+        description: number of payments left to make on the mortgage
+      rate:
+        type: float
+        description: current interest rate chargeable
 
   NetWorthValueObject:
     type: object
@@ -2185,6 +2198,7 @@ definitions:
             description: value in GBX
           - $ref: '#/definitions/NetWorthValueFX'
           - $ref: '#/definitions/NetWorthValueOption'
+          - $ref: '#/definitions/NetWorthValueMortgage'
 
   NetWorthEntry:
     type: object

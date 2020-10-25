@@ -4,16 +4,21 @@ import differenceInYears from 'date-fns/differenceInYears';
 import format from 'date-fns/format';
 import isSameMonth from 'date-fns/isSameMonth';
 import startOfYear from 'date-fns/startOfYear';
+import moize from 'moize';
 import { createSelector } from 'reselect';
 
-import { sortByKey, withoutIds } from '~client/modules/data';
+import {
+  getCost,
+  getSpendingColumn,
+  getMonthDates,
+  getFutureMonths,
+  currentDayIsEndOfMonth,
+} from './common';
 
+import { sortByKey, withoutIds } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { State as CrudState } from '~client/reducers/crud';
-
 import { getRequests, withoutDeleted } from '~client/selectors/crud';
-import { getCost, getSpendingColumn, getMonthDates } from '~client/selectors/overview/common';
-
 import {
   Create,
   CreateEdit,
@@ -37,6 +42,8 @@ import {
   OptionValue,
   NetWorthTableRow as TableRow,
   Cost,
+  isMortgageValue,
+  MortgageValue,
 } from '~client/types';
 
 const nullEntry = (date: Date): Create<Entry> => ({
@@ -79,6 +86,9 @@ const withoutSkipValues = (entries: Entry[]): Entry[] =>
 const getSummaryEntries = createSelector(getEntries, withoutSkipValues);
 
 function getComplexValue(value: Value, currencies: Currency[]): number {
+  if (isMortgageValue(value)) {
+    return -value.principal;
+  }
   if (!isComplex(value)) {
     return value;
   }
@@ -411,4 +421,104 @@ export const getNetWorthRequests = createSelector(
 export const getLatestNetWorthAggregate = createSelector(
   getNetWorthTable,
   (netWorth) => netWorth[netWorth.length - 1]?.aggregate,
+);
+
+export const assumedHousePriceInflation = 0.05;
+
+const houseCategory = 'House';
+
+function PMT({ principal, paymentsRemaining, rate }: MortgageValue): number {
+  if (!paymentsRemaining) {
+    return 0;
+  }
+  if (!rate) {
+    return principal / paymentsRemaining;
+  }
+  return ((rate / 1200) * principal) / (1 - (1 + rate / 1200) ** -paymentsRemaining);
+}
+
+export const getHomeEquity = moize(
+  (today: Date) =>
+    createSelector(
+      getFutureMonths(today),
+      getCategories,
+      getSubcategories,
+      getNetWorthRows,
+      (futureMonths, categories, subcategories, rows) => {
+        const startPredictionIndex = currentDayIsEndOfMonth(today)
+          ? rows.length - futureMonths
+          : rows.length - 1 - futureMonths;
+
+        if (rows.length < startPredictionIndex) {
+          return [];
+        }
+
+        const debtToPresent = rows
+          .slice(0, startPredictionIndex)
+          .map<number>((row) =>
+            row.values.reduce<number>(
+              (last, { value }) => last + (isMortgageValue(value) ? value.principal : 0),
+              0,
+            ),
+          );
+
+        const homeValueToPresent = rows.slice(0, startPredictionIndex).map<number>((row) =>
+          row.values.reduce<number>((last, { subcategory, value }) => {
+            const subcategoryCategoryId = subcategories.find(({ id }) => id === subcategory)
+              ?.categoryId;
+            const valueCategory = categories.find(({ id }) => id === subcategoryCategoryId);
+
+            return (
+              last +
+              (typeof value === 'number' && valueCategory?.category === houseCategory ? value : 0)
+            );
+          }, 0),
+        );
+
+        const homeEquityToPresent = homeValueToPresent.map<number>(
+          (value, index) => value - debtToPresent[index],
+        );
+
+        const latestDebts = rows[startPredictionIndex - 1].values
+          .map<Value>(({ value }) => value)
+          .filter(isMortgageValue)
+          .map<MortgageValue & { monthlyPayment: number }>((mortgageValue) => ({
+            ...mortgageValue,
+            monthlyPayment: PMT(mortgageValue),
+          }));
+
+        const forecastDebt = Array(rows.length - startPredictionIndex)
+          .fill(0)
+          .reduce<number[][]>(
+            (last) => [
+              ...last,
+              latestDebts.map<number>((debt, homeIndex) =>
+                Math.max(
+                  0,
+                  last[last.length - 1][homeIndex] * (1 + debt.rate / 100) ** (1 / 12) -
+                    debt.monthlyPayment,
+                ),
+              ),
+            ],
+            [latestDebts.map<number>((debt) => debt.principal)],
+          )
+          .slice(1)
+          .map<number>((debtStack) => debtStack.reduce<number>((last, debt) => last + debt, 0));
+
+        const latestHomeValue = homeValueToPresent[homeValueToPresent.length - 1];
+
+        const forecastHomeValue = Array(rows.length - startPredictionIndex)
+          .fill(0)
+          .map(
+            (_, index) => latestHomeValue * (1 + assumedHousePriceInflation) ** ((index + 1) / 12),
+          );
+
+        const forecastHomeEquity = forecastHomeValue.map<number>(
+          (value, index) => value - forecastDebt[index],
+        );
+
+        return homeEquityToPresent.concat(forecastHomeEquity);
+      },
+    ),
+  { maxSize: 1 },
 );

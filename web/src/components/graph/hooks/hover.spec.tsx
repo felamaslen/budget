@@ -3,7 +3,6 @@ import React from 'react';
 import sinon from 'sinon';
 import { useHover, HookResult, HLPoint } from './hover';
 import { genPixelCompute } from '~client/components/graph/helpers';
-import { Data } from '~client/types/graph';
 
 describe('Hover hook', () => {
   let hookResult: HookResult;
@@ -17,7 +16,7 @@ describe('Hover hook', () => {
             [1, 1],
             [2, 4],
             [3, 9],
-          ] as Data,
+          ],
           color: 'red',
           strokeWidth: 3,
           dashed: true,
@@ -27,12 +26,23 @@ describe('Hover hook', () => {
           arrows: false,
         },
         {
+          key: 'line-c',
+          data: [
+            [0, 3],
+            [1, 2],
+            [2, 14],
+            [4, 17],
+          ],
+          hover: false,
+          color: 'turquoise',
+        },
+        {
           key: 'line-b',
           data: [
             [0, 19],
             [0.5, 0.5],
             [4, 0],
-          ] as Data,
+          ],
           color: 'blue',
           strokeWidth: 1,
           smooth: false,
@@ -184,6 +194,43 @@ describe('Hover hook', () => {
             valX: 2,
             valY: 4,
             color: 'red',
+          }),
+        );
+
+        clock.restore();
+      });
+    });
+
+    describe('when a line is set not to hover', () => {
+      it('should not highlight a point on the line', () => {
+        expect.assertions(2);
+        const clock = sinon.useFakeTimers();
+
+        const [hlPointBefore, onMouseMove] = hookResult;
+        expect(hlPointBefore).toBeUndefined();
+
+        act(() => {
+          onMouseMove({
+            pageX: 0,
+            pageY: 0,
+            currentTarget,
+          });
+
+          clock.tick(11);
+
+          onMouseMove({
+            pageX: 100,
+            pageY: 0,
+            currentTarget,
+          });
+        });
+
+        const [hlPointAfter] = hookResult;
+        expect(hlPointAfter).not.toStrictEqual(
+          expect.objectContaining<HLPoint>({
+            valX: 4,
+            valY: 17,
+            color: 'turquoise',
           }),
         );
 

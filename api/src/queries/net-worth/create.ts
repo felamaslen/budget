@@ -61,6 +61,19 @@ export async function insertOptionValues(
   `);
 }
 
+export async function insertMortgageValues(
+  db: DatabaseTransactionConnectionType,
+  mortgageValuesRows: [number, number, number][],
+): Promise<void> {
+  if (!mortgageValuesRows.length) {
+    return;
+  }
+  await db.query(sql`
+    INSERT INTO net_worth_mortgage_values (values_id, payments_remaining, rate)
+    SELECT * FROM ${sql.unnest(mortgageValuesRows, ['int4', 'int4', 'float4'])}
+  `);
+}
+
 export const insertWithNetWorthId = <R extends {}>(
   table: string,
   keys: [keyof R, keyof R],

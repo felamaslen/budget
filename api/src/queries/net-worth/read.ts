@@ -30,6 +30,9 @@ const joinEntryRows = (
       sql`nwopv.strike_price as op_strike_price`,
       sql`nwopv.market_price as op_market_price`,
       sql`nwopv.vested as op_vested`,
+
+      sql`nwmv.payments_remaining as mortgage_payments_remaining`,
+      sql`nwmv.rate as mortgage_rate`,
     ],
     sql`, `,
   )}
@@ -87,6 +90,7 @@ const joinEntryRows = (
   LEFT JOIN net_worth_values nwv on nwv.net_worth_id = entries_with_credit_limit.id
   LEFT JOIN net_worth_fx_values nwfxv on nwfxv.values_id = nwv.id
   LEFT JOIN net_worth_option_values nwopv on nwopv.values_id = nwv.id
+  LEFT JOIN net_worth_mortgage_values nwmv ON nwmv.values_id = nwv.id
 
   GROUP BY ${sql.join(
     [
@@ -105,6 +109,8 @@ const joinEntryRows = (
       sql`nwopv.strike_price`,
       sql`nwopv.market_price`,
       sql`nwopv.vested`,
+      sql`nwmv.payments_remaining`,
+      sql`nwmv.rate`,
     ],
     sql`, `,
   )}

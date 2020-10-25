@@ -18,6 +18,7 @@ import {
   JoinedEntryRowWithCreditLimit,
   JoinedEntryRowWithFXValue,
   JoinedEntryRowWithOptionValue,
+  JoinedEntryRowWithMortgageValue,
 } from '~api/types';
 
 export const entryRowHasCurrencies = (
@@ -34,6 +35,10 @@ export const entryRowHasFXValue = (row: JoinedEntryRow): row is JoinedEntryRowWi
 export const entryRowHasOptionValue = (row: JoinedEntryRow): row is JoinedEntryRowWithOptionValue =>
   row.op_units !== null;
 
+export const entryRowHasMortgageValue = (
+  row: JoinedEntryRow,
+): row is JoinedEntryRowWithMortgageValue => row.mortgage_payments_remaining !== null;
+
 export const isSimpleValue = (value: ComplexValueItem): value is number =>
   typeof value === 'number';
 export const isComplexValue = (value?: Value | ComplexValue): value is ComplexValue =>
@@ -44,6 +49,13 @@ export const isOptionValue = (value: ComplexValueItem): value is OptionValue =>
   typeof value !== 'number' && Reflect.has(value, 'strikePrice');
 
 export function getValueFromRow(row: JoinedEntryRow): Value {
+  if (entryRowHasMortgageValue(row)) {
+    return {
+      principal: -(row.value_simple ?? 0),
+      paymentsRemaining: row.mortgage_payments_remaining,
+      rate: row.mortgage_rate,
+    };
+  }
   if (entryRowHasFXValue(row)) {
     return row.fx_values.reduce<FXValue[]>(
       (fxValues, fxValue, index) => [

@@ -14,6 +14,11 @@ export const schemaNetWorth = joi
             .alternatives()
             .try(
               joi.number().integer(),
+              joi.object({
+                principal: joi.number().integer().required(),
+                paymentsRemaining: joi.number().integer().required(),
+                rate: joi.number().min(0).required(),
+              }),
               joi.array().items(
                 joi.number().integer(),
                 joi

@@ -83,6 +83,7 @@ export const RenderedLine: React.FC<Props> = ({
   return (
     <DynamicColorLine
       data={data}
+      stack={stack}
       color={color}
       fill={fill}
       smooth={smooth}

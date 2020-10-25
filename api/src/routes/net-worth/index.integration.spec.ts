@@ -389,6 +389,13 @@ describe('Net worth route', () => {
       isOption: true,
     };
 
+    const categoryMortgage: Create<Category> = {
+      type: 'liability',
+      category: 'Mortgage',
+      color: '#ffcc00',
+      isOption: false,
+    };
+
     const categoryCC: Create<Category> = {
       type: 'liability',
       category: 'Credit Cards',
@@ -406,6 +413,13 @@ describe('Net worth route', () => {
       categoryId: 0,
       subcategory: 'Company X Ord 5p',
       hasCreditLimit: null,
+      opacity: 1,
+    };
+
+    const subcategoryMortgage: Create<Subcategory> = {
+      categoryId: 0,
+      subcategory: 'My house mortgage',
+      hasCreditLimit: false,
       opacity: 1,
     };
 
@@ -427,9 +441,11 @@ describe('Net worth route', () => {
       entry: RawDate<CreateEntry>;
       resPostCategoryBank: Response;
       resPostCategoryOptions: Response;
+      resPostCategoryMortgage: Response;
       resPostCategoryCC: Response;
       resPostSubcategoryCurrentAccount: Response;
       resPostSubcategoryOptions: Response;
+      resPostSubcategoryMortgage: Response;
       resPostSubcategoryMainCC: Response;
       resPostSubcategoryTravelCC: Response;
     }> => {
@@ -440,6 +456,10 @@ describe('Net worth route', () => {
       const resPostCategoryOptions = await global
         .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
         .send(categoryOptions);
+
+      const resPostCategoryMortgage = await global
+        .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+        .send(categoryMortgage);
 
       const resPostCategoryCC = await global
         .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
@@ -457,6 +477,13 @@ describe('Net worth route', () => {
         .send({
           ...subcategoryOptions,
           categoryId: resPostCategoryOptions.body.id,
+        });
+
+      const resPostSubcategoryMortgage = await global
+        .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
+        .send({
+          ...subcategoryMortgage,
+          categoryId: resPostCategoryMortgage.body.id,
         });
 
       const resPostSubcategoryMainCC = await global
@@ -519,9 +546,11 @@ describe('Net worth route', () => {
         entry,
         resPostCategoryBank,
         resPostCategoryOptions,
+        resPostCategoryMortgage,
         resPostCategoryCC,
         resPostSubcategoryCurrentAccount,
         resPostSubcategoryOptions,
+        resPostSubcategoryMortgage,
         resPostSubcategoryMainCC,
         resPostSubcategoryTravelCC,
       };
@@ -585,6 +614,48 @@ describe('Net worth route', () => {
             expect.objectContaining({
               id: expect.any(Number),
               values: expect.arrayContaining([expect.objectContaining(entryWithOption.values[0])]),
+            }),
+          );
+        });
+      });
+
+      describe('sending entry with mortgage values', () => {
+        const setupMortgage = async (): Promise<RawDate<CreateEntry>> => {
+          const { resPostSubcategoryMortgage } = await setup();
+          const entryWithMortgage: RawDate<CreateEntry> = {
+            date: '2020-04-15',
+            values: [
+              {
+                subcategory: resPostSubcategoryMortgage.body.id,
+                skip: null,
+                value: {
+                  principal: 35987623,
+                  paymentsRemaining: 25 * 12 - 3,
+                  rate: 2.74,
+                },
+              },
+            ],
+            currencies: [],
+            creditLimit: [],
+          };
+
+          return entryWithMortgage;
+        };
+
+        it('should add the mortgage value to the entry', async () => {
+          expect.assertions(2);
+          const entryWithMortgage = await setupMortgage();
+          const res = await global
+            .withAuth(global.agent.post('/api/v4/data/net-worth'))
+            .send(entryWithMortgage);
+
+          expect(res.status).toBe(201);
+          expect(res.body).toStrictEqual(
+            expect.objectContaining({
+              id: expect.any(Number),
+              values: expect.arrayContaining([
+                expect.objectContaining(entryWithMortgage.values[0]),
+              ]),
             }),
           );
         });

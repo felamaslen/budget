@@ -1,4 +1,6 @@
 import differenceInMonths from 'date-fns/differenceInMonths';
+import endOfMonth from 'date-fns/endOfMonth';
+import isSameDay from 'date-fns/isSameDay';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
@@ -34,3 +36,5 @@ export const getFutureMonths = moize(
 );
 
 export const getMonthDates = createSelector(getStartDate, getEndDate, getMonthDatesList);
+
+export const currentDayIsEndOfMonth = (today: Date): boolean => isSameDay(endOfMonth(today), today);

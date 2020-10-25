@@ -8,12 +8,6 @@ import { formatCurrency } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
 import { Portfolio, PortfolioItem, Fund } from '~client/types';
 
-const formatOptions = {
-  brackets: true,
-  abbreviate: true,
-  noPence: true,
-};
-
 const minimumAdjustmentValue = 100000;
 
 type Props = {
@@ -81,7 +75,19 @@ const Target: React.FC<TargetProps> = ({ fraction, color, onSet, isCash }) => {
   );
 };
 
-export const Adjustment: React.FC<{ title?: string; value: number; totalValue: number }> = ({
+function getAdjustmentLabel(title: string, direction: 1 | -1, formattedAdjustment: string): string {
+  if (title === 'Cash') {
+    return `${
+      direction === 1
+        ? `Raise ${formattedAdjustment} of cash`
+        : `Buy ${formattedAdjustment} of stock`
+    } to adjust`;
+  }
+
+  return `${direction === 1 ? 'Buy' : 'Sell'} ${formattedAdjustment} of ${title} to adjust`;
+}
+
+export const Adjustment: React.FC<{ title: string; value: number; totalValue: number }> = ({
   title,
   value,
   totalValue,
@@ -94,13 +100,10 @@ export const Adjustment: React.FC<{ title?: string; value: number; totalValue: n
   }
 
   const fraction = (minimumAdjustmentValue * numAdjustments) / totalValue;
+  const adjustment = numAdjustments * minimumAdjustmentValue;
+  const formattedAdjustment = formatCurrency(adjustment, { abbreviate: true, noPence: true });
 
-  const label = title
-    ? `${direction === 1 ? 'Buy' : 'Sell'} ${formatCurrency(
-        numAdjustments * minimumAdjustmentValue,
-        { abbreviate: true, noPence: true },
-      )} of ${title} to adjust`
-    : undefined;
+  const label = getAdjustmentLabel(title, direction, formattedAdjustment);
 
   return (
     <Styled.Adjustment direction={direction} fraction={fraction} title={label}>
@@ -199,12 +202,8 @@ export const FundAllocationTargets: React.FC<Props> = ({
   return (
     <Styled.Container ref={containerRef}>
       <Styled.Actual fraction={cashFractionActual} color={colors.medium.dark}>
-        <Styled.CashLabel>Cash</Styled.CashLabel>
-        <Styled.CashLabelTarget>
-          {formatCurrency(cashToInvest, formatOptions)} Actual /{' '}
-          {formatCurrency(cashTarget, formatOptions)} Target
-        </Styled.CashLabelTarget>
-        <Adjustment value={cashAdjustment} totalValue={totalValue} />
+        <span>Cash</span>
+        <Adjustment value={cashAdjustment} totalValue={totalValue} title="Cash" />
       </Styled.Actual>
       <Target
         fraction={cashFractionTarget}
@@ -231,11 +230,11 @@ export const FundAllocationTargets: React.FC<Props> = ({
               fraction={(value + cashFractionActual) / totalValue}
               color={colorKey(item)}
             >
-              <span>{abbreviateFundName(item)}</span>
+              <span title={item}>{abbreviateFundName(item)}</span>
               <Adjustment
-                title={abbreviateFundName(item)}
                 totalValue={totalValue}
                 value={allocationTarget * (totalValue - cashTarget) - value}
+                title={abbreviateFundName(item)}
               />
             </Styled.Actual>
 

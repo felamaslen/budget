@@ -12,6 +12,7 @@ import {
   deleteOldCurrencies,
   deleteChangedFXValues,
   deleteChangedOptionValues,
+  deleteChangedMortgageValues,
 } from '~api/queries';
 import { CreateEntry, Entry } from '~api/types';
 
@@ -55,6 +56,7 @@ export async function updateNetWorthEntry(
     deleteOldCurrencies(db, uid, netWorthId, deletedCurrencies),
     deleteChangedFXValues(db, uid, netWorthId, changedValues),
     deleteChangedOptionValues(db, uid, netWorthId, allSubcategories),
+    deleteChangedMortgageValues(db, uid, netWorthId, allSubcategories),
   ]);
 
   await Promise.all([

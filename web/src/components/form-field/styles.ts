@@ -553,3 +553,5 @@ export const NetWorthValueOption = styled.div`
   ${AddByCategoryValue} & {
   }
 `;
+
+export const NetWorthValueMortgage = NetWorthValueOption;

@@ -8,7 +8,17 @@ import * as Styled from './styles';
 import { FormFieldTickbox } from './tickbox';
 import { NULL } from '~client/modules/data';
 import { ButtonDelete, ButtonAdd } from '~client/styled/shared';
-import { Value, Currency, isComplex, isFX, isOption, OptionValue, FXValue } from '~client/types';
+import {
+  Value,
+  Currency,
+  isMortgageValue,
+  isComplex,
+  isFX,
+  isOption,
+  OptionValue,
+  MortgageValue,
+  FXValue,
+} from '~client/types';
 
 type FXEventAdd = { value: number; currency: string };
 type FXEventRemove = { index: number };
@@ -84,11 +94,15 @@ type Props = {
   id: string;
   value: Value;
   isOption?: boolean;
+  isMortgage?: boolean;
   onChange: (value: Value) => void;
   currencies: Omit<Currency, 'id'>[];
 };
 
 const coerceSimpleFXValue = (value: Value): number | FXValue[] => {
+  if (isMortgageValue(value)) {
+    return 0;
+  }
   if (isComplex(value) && value.every(isFX)) {
     return value as FXValue[];
   }
@@ -297,17 +311,97 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ id, value, onChange }) =>
   );
 };
 
+const coerceMortgage = (value: Value): Partial<MortgageValue> =>
+  isMortgageValue(value) ? value : {};
+
+const mortgageDeltaComplete = (
+  delta: Partial<MortgageValue> | MortgageValue,
+): delta is MortgageValue =>
+  Object.keys(delta).length === 3 &&
+  Object.values(delta).every((value) => typeof value !== 'undefined');
+
+const principalProps = { placeholder: 'Principal' };
+const paymentsRemainingProps = { placeholder: 'Payments remaining' };
+const rateProps = { placeholder: 'Interest rate' };
+
+type PropsFieldMortgage = Pick<Props, 'id' | 'value'> & {
+  onChange: (value: MortgageValue) => void;
+};
+
+export const FormFieldMortgage: React.FC<PropsFieldMortgage> = ({ id, value, onChange }) => {
+  const initialDelta = useMemo<Partial<MortgageValue>>(() => coerceMortgage(value), [value]);
+  const [delta, setDelta] = useState<Partial<MortgageValue>>(coerceMortgage(value));
+  useEffect(() => {
+    setDelta(initialDelta);
+  }, [initialDelta]);
+
+  const onChangePrincipal = useCallback(
+    (principal = 0) => setDelta((last) => ({ ...last, principal })),
+    [],
+  );
+  const onChangePaymentsRemaining = useCallback(
+    (paymentsRemaining = 0) =>
+      setDelta((last) => ({ ...last, paymentsRemaining: Math.floor(paymentsRemaining) })),
+    [],
+  );
+  const onChangeRate = useCallback((rate = 0) => setDelta((last) => ({ ...last, rate })), []);
+
+  useEffect(() => {
+    if (mortgageDeltaComplete(delta)) {
+      onChange(delta);
+    }
+  }, [delta, onChange]);
+
+  return (
+    <Styled.NetWorthValueMortgage>
+      <div>
+        <label htmlFor={`mortgage-principal-${id}`}>Principal</label>
+        <FormFieldCost
+          id={`mortgage-principal-${id}`}
+          inputProps={principalProps}
+          value={delta.principal ?? 0}
+          onChange={onChangePrincipal}
+        />
+      </div>
+      <div>
+        <label htmlFor={`mortgage-payments-remaining-${id}`}>Payments remaining</label>
+        <FormFieldNumber
+          id={`mortgage-payments-remaining-${id}`}
+          inputProps={paymentsRemainingProps}
+          value={delta.paymentsRemaining ?? 0}
+          onChange={onChangePaymentsRemaining}
+          step={1}
+          min={0}
+        />
+      </div>
+      <div>
+        <label htmlFor={`mortgage-rate-${id}`}>Interest rate</label>
+        <FormFieldNumber
+          id={`mortgage-rate-${id}`}
+          inputProps={rateProps}
+          value={delta.rate ?? 0}
+          onChange={onChangeRate}
+          min={0}
+          step={0.001}
+        />
+      </div>
+    </Styled.NetWorthValueMortgage>
+  );
+};
+
 export const FormFieldNetWorthValue: React.FC<Props> = ({
   id,
   value,
   isOption: valueIsOption = false,
+  isMortgage: valueIsMortgage = false,
   onChange,
   currencies,
 }) => {
   return (
     <Styled.NetWorthValue>
+      {valueIsMortgage && <FormFieldMortgage id={id} value={value} onChange={onChange} />}
       {valueIsOption && <FormFieldOption id={id} value={value} onChange={onChange} />}
-      {!valueIsOption && (
+      {!valueIsMortgage && !valueIsOption && (
         <FormFieldSimpleFX value={value} onChange={onChange} currencies={currencies} />
       )}
     </Styled.NetWorthValue>

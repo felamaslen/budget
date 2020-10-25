@@ -55,6 +55,7 @@ const SkipToggle: React.FC<PropsSkipToggle> = ({ skip, setSkip }) => (
 type PropsEditByType = {
   isLiability: boolean;
   isOption: boolean;
+  isMortgage: boolean;
   subcategories: Subcategory[];
   creditLimit: CreditLimit[];
   currencies: Currency[];
@@ -66,6 +67,7 @@ type PropsEditByType = {
 const EditByType: React.FC<PropsEditByType> = ({
   isLiability,
   isOption,
+  isMortgage,
   subcategories,
   creditLimit: creditLimitList,
   currencies,
@@ -106,6 +108,7 @@ const EditByType: React.FC<PropsEditByType> = ({
           id={String(subcategory)}
           value={value}
           isOption={isOption}
+          isMortgage={isMortgage}
           onChange={setNewValue}
           currencies={currencies}
         />
@@ -377,6 +380,7 @@ const EditByCategory: React.FC<{
           key={value.id}
           isLiability={isLiability}
           isOption={category.isOption}
+          isMortgage={category.category === 'Mortgage'}
           subcategories={subcategories}
           creditLimit={item.creditLimit}
           currencies={item.currencies}

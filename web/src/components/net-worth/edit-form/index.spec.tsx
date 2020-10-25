@@ -29,6 +29,13 @@ const categories: Category[] = [
     color: 'red',
     isOption: false,
   },
+  {
+    id: numericHash('fake-category-id-my-mortgage'),
+    category: 'Mortgage',
+    type: 'liability',
+    color: 'darkred',
+    isOption: false,
+  },
 ];
 
 const subcategories: Subcategory[] = [
@@ -52,6 +59,13 @@ const subcategories: Subcategory[] = [
     subcategory: 'My credit card',
     hasCreditLimit: true,
     opacity: 0.9,
+  },
+  {
+    id: numericHash('fake-subcategory-id-my-mortgage'),
+    categoryId: numericHash('fake-category-id-my-mortgage'),
+    subcategory: 'My house mortgage',
+    hasCreditLimit: false,
+    opacity: 0.78,
   },
 ];
 
@@ -99,6 +113,16 @@ describe('Net worth entry form', () => {
         id: numericHash('fake-value-id-cc'),
         subcategory: numericHash('fake-subcategory-id-cc'),
         value: -21054,
+        skip: false,
+      },
+      {
+        id: numericHash('fake-value-id-mortgage'),
+        subcategory: numericHash('fake-subcategory-id-my-mortgage'),
+        value: {
+          principal: 16877654,
+          paymentsRemaining: 176,
+          rate: 0.165,
+        },
         skip: false,
       },
     ],
@@ -238,6 +262,55 @@ describe('Net worth entry form', () => {
 
     act(() => {
       fireEvent.click(buttonNext);
+    });
+  };
+
+  const updateMortgage = ({
+    getByText,
+    queryByDisplayValue,
+    getByDisplayValue,
+  }: RenderResult): void => {
+    const sectionCategoryMyMortgage = getByText('Mortgage');
+    const inputMyMortgagePrincipalBefore = queryByDisplayValue('168776.54');
+    const inputMyMortgagePaymentsRemainingBefore = queryByDisplayValue('176');
+    const inputMyMortgageRateBefore = queryByDisplayValue('0.165');
+
+    expect(sectionCategoryMyMortgage).toBeInTheDocument();
+    expect(inputMyMortgagePrincipalBefore).not.toBeInTheDocument();
+    expect(inputMyMortgagePaymentsRemainingBefore).not.toBeInTheDocument();
+    expect(inputMyMortgageRateBefore).not.toBeInTheDocument();
+
+    act(() => {
+      fireEvent.click(sectionCategoryMyMortgage);
+    });
+
+    const inputMyMortgagePrincipal = getByDisplayValue('168776.54');
+    const inputMyMortgagePaymentsRemaining = getByDisplayValue('176');
+    const inputMyMortgageRate = getByDisplayValue('0.165');
+
+    expect(inputMyMortgagePrincipal).toBeInTheDocument();
+    expect(inputMyMortgagePaymentsRemaining).toBeInTheDocument();
+    expect(inputMyMortgageRate).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.change(inputMyMortgagePrincipal, { target: { value: '155998.23' } });
+    });
+    act(() => {
+      fireEvent.blur(inputMyMortgagePrincipal);
+    });
+
+    act(() => {
+      fireEvent.change(inputMyMortgagePaymentsRemaining, { target: { value: '175' } });
+    });
+    act(() => {
+      fireEvent.blur(inputMyMortgagePaymentsRemaining);
+    });
+
+    act(() => {
+      fireEvent.change(inputMyMortgageRate, { target: { value: '0.169' } });
+    });
+    act(() => {
+      fireEvent.blur(inputMyMortgageRate);
     });
   };
 
@@ -410,11 +483,12 @@ describe('Net worth entry form', () => {
         await updateCurrencyAutomatically(renderProps);
         updateAssets(renderProps);
         updateOptions(renderProps);
+        updateMortgage(renderProps);
         updateLiabilities(renderProps);
       };
 
       it('should call onUpdate when hitting finish', async () => {
-        expect.assertions(25);
+        expect.assertions(32);
         await setup();
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Entry]>(numericHash('some-fake-id'), {
           id: numericHash('some-fake-id'),
@@ -445,6 +519,16 @@ describe('Net worth entry form', () => {
               ],
               skip: null,
             },
+            {
+              id: numericHash('fake-value-id-mortgage'),
+              subcategory: numericHash('fake-subcategory-id-my-mortgage'),
+              value: {
+                principal: 15599823,
+                paymentsRemaining: 175,
+                rate: 0.169,
+              },
+              skip: false,
+            },
           ]),
           creditLimit: [
             {
@@ -463,7 +547,7 @@ describe('Net worth entry form', () => {
       });
 
       it('should reset the active ID', async () => {
-        expect.assertions(25);
+        expect.assertions(32);
         await setup();
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });
@@ -533,11 +617,12 @@ describe('Net worth entry form', () => {
         await updateCurrencyAutomatically(renderProps);
         updateAssets(renderProps);
         updateOptions(renderProps);
+        updateMortgage(renderProps);
         updateLiabilities(renderProps);
       };
 
       it('should call onCreate when hitting finish', async () => {
-        expect.assertions(25);
+        expect.assertions(32);
         await setup();
         expect(props.onCreate).toHaveBeenCalledWith<[CreateEntry]>(
           expect.objectContaining<Partial<CreateEntry>>({
@@ -565,6 +650,15 @@ describe('Net worth entry form', () => {
                 value: -15901,
                 skip: false,
               }),
+              expect.objectContaining({
+                subcategory: numericHash('fake-subcategory-id-my-mortgage'),
+                value: {
+                  principal: 15599823,
+                  paymentsRemaining: 175,
+                  rate: 0.169,
+                },
+                skip: false,
+              }),
             ]),
             creditLimit: [
               {
@@ -583,7 +677,7 @@ describe('Net worth entry form', () => {
       });
 
       it('should reset the active ID', async () => {
-        expect.assertions(25);
+        expect.assertions(32);
         await setup();
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });

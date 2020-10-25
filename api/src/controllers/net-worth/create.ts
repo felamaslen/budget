@@ -14,6 +14,7 @@ import {
   insertValues,
   insertFXValues,
   insertOptionValues,
+  insertMortgageValues,
   insertWithNetWorthId,
 } from '~api/queries';
 import {
@@ -28,7 +29,11 @@ import {
   FXValue,
   OptionValue,
   CreditLimit,
+  MortgageValue,
 } from '~api/types';
+
+const isMortgageValue = (value: Value): value is MortgageValue =>
+  typeof value === 'object' && Reflect.has(value, 'principal');
 
 const isSimpleValue = (value: ComplexValueItem): value is number => typeof value === 'number';
 const isComplexValue = (value?: Value | ComplexValue): value is ComplexValue =>
@@ -39,6 +44,9 @@ const isOptionValue = (value: ComplexValueItem): value is OptionValue =>
   typeof value !== 'number' && Reflect.has(value, 'strikePrice');
 
 function getRowValue(value: ValueObject['value']): number | null {
+  if (isMortgageValue(value)) {
+    return -value.principal;
+  }
   if (!(value && Array.isArray(value))) {
     return value;
   }
@@ -86,6 +94,14 @@ export async function createValues(
   );
   const valueIds = await insertValues(db, valuesRows);
 
+  const mortgageValuesRows = values.reduce<[number, number, number][]>(
+    (last, { value }, index) =>
+      isMortgageValue(value)
+        ? [...last, [valueIds[index], value.paymentsRemaining, value.rate]]
+        : last,
+    [],
+  );
+
   const fxValuesRows = filterComplexValues<FXValue>(valueIds, isFXValue, values).map<
     [number, number, string]
   >(({ valueId, value, currency }) => [valueId, value, currency]);
@@ -100,7 +116,11 @@ export async function createValues(
     vested,
   ]);
 
-  await Promise.all([insertFXValues(db, fxValuesRows), insertOptionValues(db, optionValuesRows)]);
+  await Promise.all([
+    insertFXValues(db, fxValuesRows),
+    insertOptionValues(db, optionValuesRows),
+    insertMortgageValues(db, mortgageValuesRows),
+  ]);
 }
 
 export const createCreditLimits = insertWithNetWorthId<CreditLimit>(

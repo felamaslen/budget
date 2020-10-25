@@ -81,6 +81,7 @@ export type Line = {
   key: string;
   data: Data;
   stack?: GraphStack;
+  hover?: boolean;
   secondary?: boolean;
   color: LineColor;
   smooth?: boolean;
