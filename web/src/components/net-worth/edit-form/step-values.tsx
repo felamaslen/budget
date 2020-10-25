@@ -208,6 +208,7 @@ const AddByType: React.FC<PropsAddByType> = ({
           id={`value-${CREATE_ID}`}
           value={value}
           isOption={isOption}
+          isMortgage={categories.find(({ id }) => id === category)?.category === 'Mortgage'}
           onChange={setValue}
           currencies={currencies}
         />
