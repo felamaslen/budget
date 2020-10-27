@@ -6,7 +6,7 @@ export * from './read';
 export * from './update';
 export * from './delete';
 
-const unionSelectIds = (categories: number[]): SqlSqlTokenType<Item> => sql`
+const unionSelectIds = (categories: number[]): SqlSqlTokenType => sql`
 SELECT ids.id
 FROM (
   SELECT ${categories[0]}::int4 AS id

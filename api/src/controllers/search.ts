@@ -1,12 +1,9 @@
-import { TaggedTemplateLiteralInvocationType, DatabaseTransactionConnectionType } from 'slonik';
+import { DatabaseTransactionConnectionType, SqlSqlTokenType } from 'slonik';
 
 import { getShortTermQuery, getLongTermQuery, getSearchResults } from '~api/queries/search';
 import { SearchParams, SearchResult } from '~api/types';
 
-export const getColumnResults = (
-  uid: number,
-  params: SearchParams,
-): TaggedTemplateLiteralInvocationType<{ value: string }> =>
+export const getColumnResults = (uid: number, params: SearchParams): SqlSqlTokenType =>
   params.searchTerm.length < 3 ? getShortTermQuery(uid, params) : getLongTermQuery(uid, params);
 
 export const getSuggestions = async (

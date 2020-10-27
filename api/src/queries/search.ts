@@ -1,10 +1,10 @@
-import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
+import { sql, SqlSqlTokenType } from 'slonik';
 import { SearchParams } from '~api/types';
 
 export const getShortTermQuery = (
   uid: number,
   { table, column, searchTerm, numResults }: SearchParams,
-): TaggedTemplateLiteralInvocationType<{ value: string; count: number }> =>
+): SqlSqlTokenType =>
   sql`
   select ${sql.join(
     [
@@ -29,7 +29,7 @@ export const getShortTermQuery = (
 export function getLongTermQuery(
   uid: number,
   { table, column, searchTerm, numResults }: SearchParams,
-): TaggedTemplateLiteralInvocationType<{ value: string; rank: number; length: number }> {
+): SqlSqlTokenType {
   const tsQuery = searchTerm
     .trim()
     .replace(/[^\w\s+]/g, '')
@@ -66,8 +66,8 @@ export const getSearchResults = (
   uid: number,
   table: string,
   nextField: string,
-  columnResults: TaggedTemplateLiteralInvocationType<{ value: string }>,
-): TaggedTemplateLiteralInvocationType<{ value: string; nextField: string }> =>
+  columnResults: SqlSqlTokenType,
+): SqlSqlTokenType =>
   sql`
   select ${sql.join(
     [

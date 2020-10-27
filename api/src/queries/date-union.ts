@@ -1,6 +1,6 @@
 import { startOfMonth } from 'date-fns';
 import { format } from 'date-fns-tz';
-import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
+import { sql, SqlSqlTokenType } from 'slonik';
 import config from '~api/config';
 
 const formatMonth = (date: Date): string =>
@@ -8,7 +8,7 @@ const formatMonth = (date: Date): string =>
 
 const formatMonthStart = (month: Date): string => formatMonth(startOfMonth(month));
 
-export const getEndOfMonthUnion = (monthEnds: Date[]): TaggedTemplateLiteralInvocationType =>
+export const getEndOfMonthUnion = (monthEnds: Date[]): SqlSqlTokenType =>
   sql`
   SELECT ${sql.join(
     [
@@ -19,7 +19,7 @@ export const getEndOfMonthUnion = (monthEnds: Date[]): TaggedTemplateLiteralInvo
   )}
   `;
 
-export const getMonthRangeUnion = (monthEnds: Date[]): TaggedTemplateLiteralInvocationType =>
+export const getMonthRangeUnion = (monthEnds: Date[]): SqlSqlTokenType =>
   sql`
   SELECT ${sql.join(
     [
