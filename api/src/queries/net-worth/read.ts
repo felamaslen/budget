@@ -1,8 +1,10 @@
-import { sql, DatabaseTransactionConnectionType, SqlSqlTokenType } from 'slonik';
+import { sql, DatabaseTransactionConnectionType, SqlSqlTokenType, QueryResultType } from 'slonik';
 
 import { JoinedEntryRow, OldNetWorthRow, OldHomeEquityRow } from '~api/types';
 
-const joinEntryRows = (conditions: SqlSqlTokenType): SqlSqlTokenType =>
+const joinEntryRows = (
+  conditions: SqlSqlTokenType<QueryResultType<string>> = sql``,
+): SqlSqlTokenType<JoinedEntryRow> =>
   sql`
   SELECT ${sql.join(
     [
