@@ -41,7 +41,7 @@ export const Adjustment = styled.div.attrs(({ fraction }: AdjustmentProps) => ({
       ${({ direction }): string => (direction === 1 ? colors.profit.dark : colors.loss.dark)};
     bottom: 0;
     display: flex;
-    height: ${rem(8)};
+    height: ${rem(12)};
     position: absolute;
 
     ${({ direction }): FlattenSimpleInterpolation =>
@@ -81,7 +81,6 @@ export const Actual = styled.div.attrs(({ fraction, color }: ActualProps) => ({
   flex-flow: column;
   float: left;
   font-size: ${({ fraction }): string => rem(fraction < 0.05 ? 8 : 12)};
-  font-weight: italic;
   height: 100%;
   position: relative;
   justify-content: center;
@@ -117,5 +116,23 @@ export const Target = styled.div.attrs(({ fraction, color, delta }: TargetProps)
   position: absolute;
   border-right-width: ${({ isCash }): number => (isCash ? 2 : 1)}px;
   top: 0;
-  z-index: 10;
+  z-index: ${({ isCash }): number => (isCash ? 11 : 10)};
+`;
+
+export const Preview = styled.div`
+  align-items: center;
+  display: none;
+  background: ${rgba(colors.amber, 0.8)};
+  border-radius: 0 0 ${rem(10)} 0;
+  height: ${rem(24)};
+  padding: ${rem(4)} ${rem(10)};
+  font-size: ${rem(10)};
+  left: 0;
+  position: absolute;
+  top: 0;
+  z-index: 12;
+
+  ${breakpoint(breakpoints.mobile)} {
+    display: inline-flex;
+  }
 `;

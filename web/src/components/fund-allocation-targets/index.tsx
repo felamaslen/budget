@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 
 import * as Styled from './styles';
 import { colorKey } from '~client/modules/color';
 import { VOID } from '~client/modules/data';
 import { abbreviateFundName } from '~client/modules/finance';
-import { formatCurrency } from '~client/modules/format';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
 import { Portfolio, PortfolioItem, Fund } from '~client/types';
 
@@ -19,16 +19,130 @@ type Props = {
   onSetFundTarget: (item: Fund, allocationTarget: number) => void;
 };
 
-type TargetProps = {
+type SetPreview = (preview: string | null) => void;
+
+type TargetProps = Pick<Props, 'funds' | 'onSetFundTarget' | 'onSetCashTarget'> & {
   fraction: number;
   color: string;
   isCash?: boolean;
-  onSet: (deltaPixels: number) => void;
+  setPreview: SetPreview;
+  containerWidth: number;
+  sortedPortfolio: Portfolio;
+  id?: number;
+  allocationTarget: number;
+  stockValue: number;
+  totalValue: number;
 };
 
-const Target: React.FC<TargetProps> = ({ fraction, color, onSet, isCash }) => {
+type TargetDelta = {
+  fund: Fund;
+  allocationTarget: number;
+};
+
+const formatOptions = { abbreviate: true, noPence: true };
+
+const roundAndBound = (value: number): number =>
+  Math.round(100 * Math.max(0.01, Math.min(value, 1))) / 100;
+
+const Target: React.FC<TargetProps> = ({
+  fraction,
+  color,
+  isCash,
+  onSetFundTarget,
+  onSetCashTarget,
+  setPreview,
+  containerWidth,
+  sortedPortfolio,
+  funds,
+  id,
+  allocationTarget,
+  stockValue,
+  totalValue,
+}) => {
   const [delta, setDelta] = useState<number>(0);
   const [dragPosition, setDragPosition] = useState<number | null>(null);
+
+  const getFundTargetFromDelta = useCallback(
+    (deltaPixels: number): { deltas: TargetDelta[]; reverse: boolean } => {
+      const portfolioIndex = sortedPortfolio.findIndex((item) => item.id === id);
+      const nextPortfolioItem = sortedPortfolio[portfolioIndex + 1];
+
+      const nextTargetValue =
+        allocationTarget * stockValue + (deltaPixels / containerWidth) * totalValue;
+
+      const thisFund = funds.find((item) => item.id === id);
+
+      if (!nextPortfolioItem) {
+        if (thisFund) {
+          const nextAllocationTarget = roundAndBound(nextTargetValue / stockValue);
+          return {
+            deltas: [
+              {
+                fund: thisFund,
+                allocationTarget: nextAllocationTarget,
+              },
+            ],
+            reverse: false,
+          };
+        }
+        return { deltas: [], reverse: false };
+      }
+
+      const nextAllocationTarget = roundAndBound(
+        Math.min(
+          allocationTarget + nextPortfolioItem.allocationTarget - 0.01,
+          nextTargetValue / stockValue,
+        ),
+      );
+
+      const adjacentAllocationTarget =
+        nextPortfolioItem.allocationTarget + allocationTarget - nextAllocationTarget;
+
+      const adjacentFund = funds.find((item) => item.id === nextPortfolioItem.id);
+
+      if (!(thisFund && adjacentFund)) {
+        throw new Error('Could not find fund');
+      }
+
+      // run the decrease first, to ensure it doesn't exceed the max
+      const thisDelta: TargetDelta = { fund: thisFund, allocationTarget: nextAllocationTarget };
+      const adjacentDelta: TargetDelta = {
+        fund: adjacentFund,
+        allocationTarget: adjacentAllocationTarget,
+      };
+
+      const reverse = nextAllocationTarget > allocationTarget;
+      return {
+        deltas: reverse ? [adjacentDelta, thisDelta] : [thisDelta, adjacentDelta],
+        reverse,
+      };
+    },
+    [containerWidth, funds, sortedPortfolio, id, stockValue, totalValue, allocationTarget],
+  );
+
+  const setFundTargets = useCallback(
+    (deltaPixels: number): void => {
+      const { deltas: targetDelta } = getFundTargetFromDelta(deltaPixels);
+      targetDelta.forEach((fundDelta) => {
+        onSetFundTarget(fundDelta.fund, fundDelta.allocationTarget);
+      });
+    },
+    [onSetFundTarget, getFundTargetFromDelta],
+  );
+
+  const getCashTargetFromDelta = useCallback(
+    (deltaPixels: number): number =>
+      Math.round((allocationTarget + (deltaPixels / containerWidth) * totalValue) / 100000) *
+      100000,
+    [containerWidth, allocationTarget, totalValue],
+  );
+
+  const setCashTarget = useCallback(
+    (deltaPixels: number): void => {
+      onSetCashTarget(getCashTargetFromDelta(deltaPixels));
+    },
+    [onSetCashTarget, getCashTargetFromDelta],
+  );
 
   const onActivate = useCallback((event: React.MouseEvent) => {
     setDragPosition(event.clientX);
@@ -45,14 +159,38 @@ const Target: React.FC<TargetProps> = ({ fraction, color, onSet, isCash }) => {
     }
 
     const onMouseMove = (event: MouseEvent): void => {
-      setDelta(event.clientX - dragPosition);
+      const nextDelta = event.clientX - dragPosition;
+      setDelta(nextDelta);
+      if (isCash) {
+        const nextTarget = getCashTargetFromDelta(nextDelta);
+        setPreview(`Cash target: ${formatCurrency(nextTarget, formatOptions)}`);
+      } else {
+        const { deltas, reverse } = getFundTargetFromDelta(nextDelta);
+        const nextPreview = deltas.length
+          ? (reverse ? deltas.reverse() : deltas)
+              .map(
+                (nextTarget) =>
+                  `${abbreviateFundName(nextTarget.fund.item)}: ${formatPercent(
+                    nextTarget.allocationTarget,
+                  )}`,
+              )
+              .join(' / ')
+          : null;
+
+        setPreview(nextPreview);
+      }
     };
 
     const onMouseUp = (event: MouseEvent): void => {
       const nextDelta = event.clientX - dragPosition;
       setDelta(nextDelta);
       onFinish();
-      onSet(nextDelta);
+      if (isCash) {
+        setCashTarget(nextDelta);
+      } else {
+        setFundTargets(nextDelta);
+      }
+      setPreview(null);
     };
 
     window.addEventListener('mousemove', onMouseMove);
@@ -62,7 +200,16 @@ const Target: React.FC<TargetProps> = ({ fraction, color, onSet, isCash }) => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
     };
-  }, [dragPosition, onFinish, onSet]);
+  }, [
+    isCash,
+    dragPosition,
+    onFinish,
+    setPreview,
+    getCashTargetFromDelta,
+    setCashTarget,
+    getFundTargetFromDelta,
+    setFundTargets,
+  ]);
 
   return (
     <Styled.Target
@@ -87,26 +234,39 @@ function getAdjustmentLabel(title: string, direction: 1 | -1, formattedAdjustmen
   return `${direction === 1 ? 'Buy' : 'Sell'} ${formattedAdjustment} of ${title} to adjust`;
 }
 
-export const Adjustment: React.FC<{ title: string; value: number; totalValue: number }> = ({
-  title,
-  value,
-  totalValue,
-}) => {
+type AdjustmentProps = {
+  title: string;
+  value: number;
+  totalValue: number;
+  setPreview: SetPreview;
+};
+
+export const Adjustment: React.FC<AdjustmentProps> = ({ title, value, totalValue, setPreview }) => {
   const numAdjustments = Math.floor(Math.abs(value) / minimumAdjustmentValue);
   const direction = value > 0 ? 1 : -1;
+
+  const fraction = (minimumAdjustmentValue * numAdjustments) / totalValue;
+  const adjustment = numAdjustments * minimumAdjustmentValue;
+  const formattedAdjustment = formatCurrency(adjustment, formatOptions);
+
+  const label = getAdjustmentLabel(title, direction, formattedAdjustment);
+
+  const onActivate = useCallback(() => setPreview(label), [setPreview, label]);
+  const onBlur = useCallback(() => setPreview(null), [setPreview]);
 
   if (!numAdjustments) {
     return null;
   }
 
-  const fraction = (minimumAdjustmentValue * numAdjustments) / totalValue;
-  const adjustment = numAdjustments * minimumAdjustmentValue;
-  const formattedAdjustment = formatCurrency(adjustment, { abbreviate: true, noPence: true });
-
-  const label = getAdjustmentLabel(title, direction, formattedAdjustment);
-
   return (
-    <Styled.Adjustment direction={direction} fraction={fraction} title={label}>
+    <Styled.Adjustment
+      direction={direction}
+      fraction={fraction}
+      onMouseOver={onActivate}
+      onFocus={onActivate}
+      onMouseOut={onBlur}
+      onBlur={onBlur}
+    >
       {Array(numAdjustments)
         .fill(0)
         .map((_, index) => (
@@ -132,84 +292,39 @@ export const FundAllocationTargets: React.FC<Props> = ({
   const cashAdjustment = cashTarget - cashToInvest;
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const containerWidth = containerRef.current?.offsetWidth ?? 0;
 
-  const setCashTarget = useCallback(
-    (deltaPixels: number): void => {
-      const newCashTarget =
-        Math.round(
-          (cashTarget + (deltaPixels / (containerRef.current?.offsetWidth ?? 0)) * totalValue) /
-            100000,
-        ) * 100000;
-      onSetCashTarget(newCashTarget);
-    },
-    [cashTarget, totalValue, onSetCashTarget],
+  const sortedPortfolio = useMemo(
+    () => portfolio.filter(({ value }) => value > 0).sort((a, b) => b.value - a.value),
+    [portfolio],
   );
 
-  const sortedPortfolio = portfolio
-    .filter(({ value }) => value > 0)
-    .sort((a, b) => b.value - a.value);
-
-  const roundAndBound = (value: number): number =>
-    Math.round(100 * Math.max(0.01, Math.min(value, 1))) / 100;
-
-  const setFundTargets = useCallback(
-    (id: number, previousTarget: number, deltaPixels: number): void => {
-      const portfolioIndex = sortedPortfolio.findIndex((item) => item.id === id);
-      const nextPortfolioItem = sortedPortfolio[portfolioIndex + 1];
-
-      const nextTargetValue =
-        previousTarget * stockValue +
-        (deltaPixels / (containerRef.current?.offsetWidth ?? 0)) * totalValue;
-
-      const thisFund = funds.find((item) => item.id === id);
-
-      if (!nextPortfolioItem) {
-        if (thisFund) {
-          const nextAllocationTarget = roundAndBound(nextTargetValue / stockValue);
-          onSetFundTarget(thisFund, nextAllocationTarget);
-        }
-        return;
-      }
-
-      const nextAllocationTarget = roundAndBound(
-        Math.min(
-          previousTarget + nextPortfolioItem.allocationTarget - 0.01,
-          nextTargetValue / stockValue,
-        ),
-      );
-
-      const adjacentAllocationTarget =
-        nextPortfolioItem.allocationTarget + previousTarget - nextAllocationTarget;
-
-      const adjacentFund = funds.find((item) => item.id === nextPortfolioItem.id);
-
-      if (!(thisFund && adjacentFund)) {
-        throw new Error('Could not find fund');
-      }
-
-      // run the decrease first, to ensure it doesn't exceed the max
-      if (nextAllocationTarget > previousTarget) {
-        onSetFundTarget(adjacentFund, adjacentAllocationTarget);
-        onSetFundTarget(thisFund, nextAllocationTarget);
-      } else {
-        onSetFundTarget(thisFund, nextAllocationTarget);
-        onSetFundTarget(adjacentFund, adjacentAllocationTarget);
-      }
-    },
-    [funds, sortedPortfolio, onSetFundTarget, stockValue, totalValue],
-  );
+  const [preview, setPreview] = useState<string | null>(null);
 
   return (
     <Styled.Container ref={containerRef}>
       <Styled.Actual fraction={cashFractionActual} color={colors.medium.dark}>
         <span>Cash</span>
-        <Adjustment value={cashAdjustment} totalValue={totalValue} title="Cash" />
+        <Adjustment
+          value={cashAdjustment}
+          totalValue={totalValue}
+          title="Cash"
+          setPreview={setPreview}
+        />
       </Styled.Actual>
       <Target
+        containerWidth={containerWidth}
+        funds={funds}
+        sortedPortfolio={sortedPortfolio}
+        onSetFundTarget={onSetFundTarget}
+        onSetCashTarget={onSetCashTarget}
+        stockValue={stockValue}
+        totalValue={totalValue}
+        setPreview={setPreview}
         fraction={cashFractionTarget}
         color={colors.medium.dark}
-        onSet={setCashTarget}
         isCash={true}
+        allocationTarget={cashTarget}
       />
 
       {sortedPortfolio
@@ -234,17 +349,29 @@ export const FundAllocationTargets: React.FC<Props> = ({
               <Adjustment
                 totalValue={totalValue}
                 value={allocationTarget * (totalValue - cashTarget) - value}
+                setPreview={setPreview}
                 title={abbreviateFundName(item)}
               />
             </Styled.Actual>
 
             <Target
+              containerWidth={containerWidth}
+              funds={funds}
+              sortedPortfolio={sortedPortfolio}
+              onSetFundTarget={onSetFundTarget}
+              onSetCashTarget={onSetCashTarget}
+              stockValue={stockValue}
+              totalValue={totalValue}
+              setPreview={setPreview}
+              id={id}
               fraction={(cumulativeTarget * stockValue + cashTarget) / (stockValue + cashTarget)}
               color={colorKey(item)}
-              onSet={(delta): void => setFundTargets(id, allocationTarget, delta)}
+              allocationTarget={allocationTarget}
             />
           </React.Fragment>
         ))}
+
+      {preview && <Styled.Preview>{preview}</Styled.Preview>}
     </Styled.Container>
   );
 };

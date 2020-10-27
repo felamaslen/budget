@@ -1,4 +1,4 @@
-import { render, RenderResult } from '@testing-library/react';
+import { render, fireEvent, act, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createMockStore, { MockStore } from 'redux-mock-store';
@@ -21,9 +21,36 @@ describe('<CashRow />', () => {
   };
 
   it('should render the cash value with target', () => {
-    expect.assertions(2);
-    const { getByText, getByTitle } = setup();
+    expect.assertions(1);
+    const { getByText } = setup();
     expect(getByText('Cash')).toBeInTheDocument();
-    expect(getByTitle('Buy £6k of stock to adjust')).toBeInTheDocument();
+  });
+
+  describe('when hovering over the cash value adjustment', () => {
+    it('should render a preview box', () => {
+      expect.assertions(4);
+      const previewText = 'Buy £6k of stock to adjust';
+
+      const { getByText, queryByText } = setup();
+
+      expect(queryByText(previewText)).not.toBeInTheDocument();
+
+      const cash = getByText('Cash') as HTMLDivElement;
+      const adjustment = cash.nextSibling as HTMLDivElement;
+
+      expect(adjustment).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.mouseOver(adjustment);
+      });
+
+      expect(getByText(previewText)).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.mouseOut(adjustment);
+      });
+
+      expect(queryByText(previewText)).not.toBeInTheDocument();
+    });
   });
 });
