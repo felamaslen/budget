@@ -11,4 +11,14 @@ describe('getFundUrl', () => {
 
     expect(getFundUrl(fund)).toMatch(/http:\/\/www\.hl\.co\.uk/);
   });
+
+  it('should return null for generic broker', () => {
+    expect.assertions(1);
+    expect(
+      getFundUrl({
+        broker: Broker.Generic,
+        name: 'Something (code) (stock)',
+      }),
+    ).toBeNull();
+  });
 });

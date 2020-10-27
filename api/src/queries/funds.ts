@@ -216,3 +216,44 @@ export async function upsertCashTarget(
   `);
   return result.rows[0].allocation_target;
 }
+
+type FundByName = {
+  id: number;
+  uid: number;
+  item: string;
+};
+
+export async function selectPreviousItem(
+  db: DatabaseTransactionConnectionType,
+  id: number,
+): Promise<string | undefined> {
+  const previousItem = await db.query<{ item: string }>(sql`
+  SELECT item FROM funds WHERE id = ${id}
+  `);
+  return previousItem.rows[0]?.item;
+}
+
+export async function selectFundsByName(
+  db: DatabaseTransactionConnectionType,
+  id: number,
+): Promise<readonly FundByName[]> {
+  const fundsByName = await db.query<FundByName>(sql`
+  SELECT f1.id, f1.uid, f1.item
+  FROM funds f0
+  LEFT JOIN funds f1 ON f1.item = f0.item
+  WHERE f0.id = ${id}
+  `);
+  return fundsByName.rows;
+}
+
+export async function updateFundCacheItemReference(
+  db: DatabaseTransactionConnectionType,
+  item: string,
+  previousItem: string,
+): Promise<void> {
+  await db.query(sql`
+  UPDATE fund_scrape
+  SET item = ${item}
+  WHERE item = ${previousItem}
+  `);
+}

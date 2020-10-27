@@ -1,12 +1,15 @@
-import path from 'path';
-import fs from 'fs-extra';
-import nock from 'nock';
+import nock, { Scope } from 'nock';
 import prompts from 'prompts';
 import sinon from 'sinon';
 
-import mockOpenExchangeRatesResponse from './vendor/currencies.json';
+import {
+  nockCurrencies,
+  nockHLFund,
+  nockHLShare,
+  nockHLShareFX,
+  nockGeneralShare,
+} from './__tests__/nocks';
 import { run } from '.';
-import config from '~api/config';
 import db from '~api/test-utils/knex';
 
 type TestFundPrice = {
@@ -15,15 +18,12 @@ type TestFundPrice = {
   price: number;
 };
 
-const testFileFund = path.resolve(__dirname, './vendor/fund-test-hl.html');
-const testFileShare = path.resolve(__dirname, './vendor/share-test-hl.html');
-const testFileShareFX = path.resolve(__dirname, './vendor/share-test-hl-dollar.html');
-
-// These values come from the test data - see hl.spec.ts and __tests__/*
+// These values come from the test data - see hl.spec.ts and vendor/*
 const testPriceCTY = 424.1;
 const testPriceJupiter = 130.31;
 const testPriceAppleUSD = 225.82;
 const testUSDGBP = 0.771546;
+const testPriceSMTGeneric = 1023.0; // regularMarketPrice
 
 describe('Fund scraper - integration tests', () => {
   const now = new Date('2020-02-22T20:35Z').toISOString();
@@ -63,6 +63,10 @@ describe('Fund scraper - integration tests', () => {
           uid: uid1,
           item: 'Morgan Stanley Sterling Corporate Bond Class F (accum.)',
         },
+        {
+          uid: uid1,
+          item: 'Scottish Mortgage Investment Trust (SMT.L) (stock)',
+        },
       ])
       .returning('id');
 
@@ -80,6 +84,7 @@ describe('Fund scraper - integration tests', () => {
       { fund_id: fundIds[4], date: '2017-10-25', units: 817, price: 122.399 },
       { fund_id: fundIds[4], date: '2017-03-14', units: 1217.43, price: 123.21 },
       { fund_id: fundIds[4], date: '2017-09-24', units: -4559.23, price: 122.722 },
+      { fund_id: fundIds[5], date: '2016-09-20', units: 1565, price: 385.31 },
     ]);
   };
 
@@ -91,29 +96,18 @@ describe('Fund scraper - integration tests', () => {
     await db('funds').select().whereIn('id', fundIds).del();
   });
 
-  const setupNocks = async (): Promise<void> => {
-    nock('https://openexchangerates.org')
-      .get(`/api/latest.json?app_id=${config.openExchangeRatesApiKey}`)
-      .reply(200, mockOpenExchangeRatesResponse);
-
-    nock('http://www.hl.co.uk')
-      .get(
-        '/funds/fund-discounts,-prices--and--factsheets/search-results/j/jupiter-asian-income-class-i-accumulation',
-      )
-      .reply(200, await fs.readFile(testFileFund, 'utf8'));
-
-    nock('http://www.hl.co.uk')
-      .get('/shares/shares-search-results/c/city-of-london-investment-trust-ord-25p')
-      .reply(200, await fs.readFile(testFileShare, 'utf8'));
-
-    nock('http://www.hl.co.uk')
-      .get('/shares/shares-search-results/a/apple-inc-com-stk-npv')
-      .reply(200, await fs.readFile(testFileShareFX, 'utf8'));
-  };
+  const setupNocks = async (failures: string[] = []): Promise<Record<string, Scope | Scope[]>> => ({
+    currencies: nockCurrencies(failures.includes('currencies') ? 500 : 200),
+    fund: await nockHLFund(failures.includes('fund') ? 500 : 200),
+    share: await nockHLShare(failures.includes('share') ? 500 : 200),
+    shareFX: await nockHLShareFX(failures.includes('shareFX') ? 500 : 200),
+    genericShare: await nockGeneralShare(failures.includes('genericShare') ? 500 : 200),
+  });
 
   beforeEach(async () => {
     await clearDb();
     clock = sinon.useFakeTimers(new Date(now).getTime());
+    nock.cleanAll();
     await setupNocks();
   });
 
@@ -176,33 +170,40 @@ describe('Fund scraper - integration tests', () => {
       ]);
     });
 
-    it('should skip funds where the request fails', async () => {
-      expect.assertions(3);
-      nock.cleanAll();
-
-      nock('http://www.hl.co.uk')
-        .get(
-          '/funds/fund-discounts,-prices--and--factsheets/search-results/j/jupiter-asian-income-class-i-accumulation',
-        )
-        .reply(200, await fs.readFile(testFileFund, 'utf8'));
-
-      nock('http://www.hl.co.uk')
-        .get('/shares/shares-search-results/c/city-of-london-investment-trust-ord-25p')
-        .reply(500);
-
-      nock('http://www.hl.co.uk')
-        .get('/shares/shares-search-results/a/apple-inc-com-stk-npv')
-        .reply(500);
-
+    it('should insert new prices for a generic share', async () => {
+      expect.assertions(1);
       await run();
 
-      const gbxResult = await getTestFundPrice(fundIds[0]);
-      const fundResult = await getTestFundPrice(fundIds[1]);
-      const usdResult = await getTestFundPrice(fundIds[2]);
+      const genericShareResult = await getTestFundPrice(fundIds[5]);
 
-      expect(gbxResult).toHaveLength(0);
-      expect(fundResult).toHaveLength(1);
-      expect(usdResult).toHaveLength(0);
+      expect(genericShareResult).toStrictEqual([
+        expect.objectContaining({
+          time: new Date(now),
+          price: testPriceSMTGeneric,
+        }),
+      ]);
+    });
+
+    describe('when one or more requests fail', () => {
+      const setupNocksWithFailure = async (): Promise<void> => {
+        nock.cleanAll();
+        await setupNocks(['share', 'shareFX']);
+      };
+
+      it('should skip the funds with failed requests', async () => {
+        expect.assertions(3);
+        await setupNocksWithFailure();
+
+        await run();
+
+        const gbxResult = await getTestFundPrice(fundIds[0]);
+        const fundResult = await getTestFundPrice(fundIds[1]);
+        const usdResult = await getTestFundPrice(fundIds[2]);
+
+        expect(gbxResult).toHaveLength(0);
+        expect(fundResult).toHaveLength(1);
+        expect(usdResult).toHaveLength(0);
+      });
     });
 
     it('should skip totally sold funds', async () => {

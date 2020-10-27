@@ -6,6 +6,7 @@ module.exports = {
   roots: ['./api/src'],
   testMatch: ['**/*.spec.ts'],
   testPathIgnorePatterns: ['/node_modules/', 'integration.spec.ts'],
+  setupFilesAfterEnv: ['<rootDir>/api/src/test-utils/test-after-env-unit.ts'],
   coverageDirectory: 'coverage/api/unit',
   collectCoverageFrom: [
     'api/src/**/*.ts',

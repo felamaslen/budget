@@ -4,6 +4,7 @@ export type CLIOptions = {
 };
 
 export enum Broker {
+  Generic = 'generic',
   HL = 'hl',
 }
 
@@ -13,7 +14,7 @@ export type Fund = {
   broker: Broker;
   units: number;
   cost: number;
-  url: string;
+  url: string | null;
 };
 
 export type DataByUrl = {

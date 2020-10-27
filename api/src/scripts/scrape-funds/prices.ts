@@ -4,6 +4,7 @@ import { getPriceFromDataHL } from './hl';
 import { upsertFundHashes, insertPrices, insertPriceCache } from './queries';
 import { Fund, CurrencyPrices, Broker } from './types';
 import config from '~api/config';
+import { getStockQuote } from '~api/modules/finance';
 import logger from '~api/modules/logger';
 
 type FundWithPrice = Fund & { price: number };
@@ -20,14 +21,44 @@ function getPriceFromData(fund: Fund, currencyPrices: CurrencyPrices, data: stri
   throw new Error('Unknown broker');
 }
 
+function getGenericSymbol(fund: Fund): string | null {
+  if (fund.broker !== Broker.Generic) {
+    return null;
+  }
+  const [, , symbol] = fund.name.match(config.data.funds.scraper.regexGeneric) as RegExpMatchArray;
+  return symbol;
+}
+
+export const getGenericQuotes = (funds: Fund[]): Promise<(number | null)[]> =>
+  Promise.all(
+    funds.map(async (fund) => {
+      const symbol = getGenericSymbol(fund);
+      if (!symbol) {
+        return null;
+      }
+      try {
+        logger.debug(`Downloading generic quote for symbol ${symbol}`);
+        const quote = await getStockQuote(symbol);
+        return quote;
+      } catch (err) {
+        logger.error(`Error getting generic quote ${symbol}: ${err.message}`);
+        return null;
+      }
+    }),
+  );
+
 function getPricesFromData(
   currencyPrices: CurrencyPrices,
   funds: Fund[],
-  data: string[],
+  rawData: (string | null)[],
+  genericQuotes: (number | null)[],
 ): FundWithPrice[] {
   return funds.reduce<FundWithPrice[]>((results, fund, index) => {
     try {
-      const price = getPriceFromData(fund, currencyPrices, data[index]);
+      const price =
+        fund.broker === Broker.Generic
+          ? (genericQuotes[index] as number)
+          : getPriceFromData(fund, currencyPrices, rawData[index] as string);
 
       logger.verbose(`Price update: ${price} for ${fund.name}`);
 
@@ -61,11 +92,12 @@ export async function scrapeFundPrices(
   db: DatabaseTransactionConnectionType,
   currencyPrices: CurrencyPrices,
   funds: Fund[],
-  data: string[],
+  rawData: (string | null)[],
+  genericQuotes: (number | null)[],
 ): Promise<void> {
   logger.info('Processing fund prices...');
 
-  const fundsWithPrices = getPricesFromData(currencyPrices, funds, data);
+  const fundsWithPrices = getPricesFromData(currencyPrices, funds, rawData, genericQuotes);
 
   const currentValue = (
     fundsWithPrices.reduce((value, { units, price }) => value + units * price, 0) / 100

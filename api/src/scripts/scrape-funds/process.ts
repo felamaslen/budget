@@ -3,7 +3,7 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getCurrencyPrices } from './currencies';
 import { scrapeFundHoldings } from './holdings';
-import { scrapeFundPrices } from './prices';
+import { scrapeFundPrices, getGenericQuotes } from './prices';
 import { selectFunds } from './queries';
 import { getFundUrl, downloadMultipleUrls } from './scrape';
 import { CLIOptions, Broker, Fund } from './types';
@@ -11,8 +11,10 @@ import config from '~api/config';
 import logger from '~api/modules/logger';
 
 export function getBroker(name: string): Broker {
+  if (config.data.funds.scraper.regexGeneric.test(name)) {
+    return Broker.Generic;
+  }
   if (config.data.funds.scraper.regex.test(name)) {
-    // At the moment, only Hargreaves Lansdown is supported
     return Broker.HL;
   }
 
@@ -35,6 +37,17 @@ export const getFunds = async (db: DatabaseTransactionConnectionType): Promise<F
     }));
 };
 
+function sumFundsUnitsCosts(funds: Fund[], groupKey: keyof Fund): Fund[] {
+  const groupedFunds = groupBy(funds, groupKey);
+  const uniqueFunds = Object.keys(groupedFunds).map((key) => ({
+    ...groupedFunds[key][0],
+    units: groupedFunds[key].reduce((last, { units: value }) => last + value, 0),
+    cost: groupedFunds[key].reduce((last, { cost: value }) => last + value, 0),
+  }));
+
+  return uniqueFunds;
+}
+
 export async function processScrape(
   db: DatabaseTransactionConnectionType,
   flags: CLIOptions,
@@ -56,12 +69,16 @@ export async function processScrape(
       return;
     }
 
-    const groupedFunds = groupBy(funds, 'url');
-    const uniqueFunds = Object.keys(groupedFunds).map((url) => ({
-      ...groupedFunds[url][0],
-      units: groupedFunds[url].reduce((last, { units: value }) => last + value, 0),
-      cost: groupedFunds[url].reduce((last, { cost: value }) => last + value, 0),
-    }));
+    const uniqueFunds = [
+      ...sumFundsUnitsCosts(
+        funds.filter(({ broker }) => broker === Broker.Generic),
+        'name',
+      ),
+      ...sumFundsUnitsCosts(
+        funds.filter(({ broker }) => broker !== Broker.Generic),
+        'url',
+      ),
+    ];
 
     const rawData = await downloadMultipleUrls(uniqueFunds.map(({ url }) => url));
 
@@ -69,8 +86,11 @@ export async function processScrape(
       await scrapeFundHoldings(db, funds, uniqueFunds, rawData);
     }
     if (prices) {
-      const currencyPrices = await getCurrencyPrices();
-      await scrapeFundPrices(db, currencyPrices, uniqueFunds, rawData);
+      const [currencyPrices, genericQuotes] = await Promise.all([
+        getCurrencyPrices(),
+        getGenericQuotes(uniqueFunds),
+      ]);
+      await scrapeFundPrices(db, currencyPrices, uniqueFunds, rawData, genericQuotes);
     }
 
     logger.info('Finished scraping funds');

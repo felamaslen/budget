@@ -351,6 +351,54 @@ describe('Funds route', () => {
         ]),
       );
     });
+
+    describe('when changing the name of the fund', () => {
+      it('should also update the name of the fund_cache entry', async () => {
+        expect.assertions(2);
+
+        await db('fund_scrape').whereIn('item', ['My fund 1', 'My fund with changed name']).del();
+
+        const resPost = await global.withAuth(global.agent.post('/api/v4/data/funds')).send({
+          ...fund,
+          item: 'My fund 1',
+        });
+
+        await db('fund_scrape').insert({
+          broker: 'hl',
+          fid: 12345,
+          item: 'My fund 1',
+        });
+
+        await global.withAuth(
+          global.agent.put('/api/v4/data/funds').send({
+            id: resPost.body.id,
+            item: 'My fund with changed name',
+          }),
+        );
+
+        const fundScrape = await db('fund_scrape').select();
+
+        expect(fundScrape).toStrictEqual(
+          expect.arrayContaining([
+            {
+              broker: 'hl',
+              fid: 12345,
+              item: 'My fund with changed name',
+            },
+          ]),
+        );
+
+        expect(fundScrape).not.toStrictEqual(
+          expect.arrayContaining([
+            {
+              broker: 'hl',
+              fid: 12345,
+              item: 'My fund 1',
+            },
+          ]),
+        );
+      });
+    });
   });
 
   describe('DELETE /funds', () => {

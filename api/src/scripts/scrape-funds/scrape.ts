@@ -5,15 +5,13 @@ import { Broker, Fund } from './types';
 import config from '~api/config';
 import logger from '~api/modules/logger';
 
-export function getFundUrl(fund: Pick<Fund, 'name' | 'broker'>): string {
-  if (fund.broker === Broker.HL) {
-    return getFundUrlHL(fund);
+export const getFundUrl = (fund: Pick<Fund, 'name' | 'broker'>): string | null =>
+  fund.broker === Broker.HL ? getFundUrlHL(fund) : null;
+
+export async function downloadUrl(url: string | null): Promise<string | null> {
+  if (!url) {
+    return null;
   }
-
-  return '';
-}
-
-export async function downloadUrl(url: string): Promise<string> {
   try {
     logger.verbose(`Downloading ${url}...`);
 
@@ -30,11 +28,11 @@ export async function downloadUrl(url: string): Promise<string> {
   } catch (err) {
     logger.error(`Error downloading ${url}: ${err.message}`);
 
-    return '';
+    return null;
   }
 }
 
-export async function downloadMultipleUrls(urls: string[]): Promise<string[]> {
+export async function downloadMultipleUrls(urls: (string | null)[]): Promise<(string | null)[]> {
   if (urls.length === 0) {
     return [];
   }

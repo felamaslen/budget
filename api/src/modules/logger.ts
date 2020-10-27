@@ -23,7 +23,7 @@ const logger = winston.createLogger({
         format.splat(),
         format.printf((info) => `${info.level} [${info.timestamp}] ${info.message}`),
       ),
-      silent: process.env.NODE_ENV === 'test',
+      silent: process.env.NODE_ENV === 'test' && process.env.LOG_DEBUG !== 'true',
     }),
   ],
 });

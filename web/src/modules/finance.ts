@@ -187,7 +187,20 @@ function abbreviateIndex(name: string): string {
   return name.replace(/Index( Trust)?/, 'Ix');
 }
 
+const genericRegex = /^(.*)\s\((.*?)(\..*)?\)\s\(stock\)$/;
+
+const isGenericShare = (name: string): boolean => genericRegex.test(name);
+
+function getGenericSymbol(name: string): string {
+  const [, , symbol] = name.match(genericRegex) as RegExpExecArray;
+  return symbol;
+}
+
 export const abbreviateFundName = moize((name: string): string => {
+  if (isGenericShare(name)) {
+    return getGenericSymbol(name);
+  }
+
   const base = prepareBase(name);
 
   if (isIndex(name)) {

@@ -167,7 +167,11 @@ function getFundHoldings(fund: Fund, data: string): Holding[] {
 
 function getFundsWithHoldings(funds: Fund[], data: DataByUrl): FundWithHoldings[] {
   // get the top stock holdings for a list of funds and add it to the array
-  return funds.reduce((results: FundWithHoldings[], fund) => {
+  return funds.reduce<FundWithHoldings[]>((results, fund) => {
+    if (!(fund.url && data[fund.url])) {
+      logger.debug(`Skipping fund holdings without URL/data: ${fund.name}`);
+      return results;
+    }
     try {
       const holdings = getFundHoldings(fund, data[fund.url]);
 
@@ -203,15 +207,18 @@ export async function scrapeFundHoldings(
   db: DatabaseTransactionConnectionType,
   funds: Fund[],
   uniqueFunds: Fund[],
-  data: string[],
+  data: (string | null)[],
 ): Promise<void> {
   logger.info('Processing fund holdings...');
 
-  const dataByUrl: DataByUrl = uniqueFunds.reduce(
-    (last: DataByUrl, { url }, index) => ({
-      ...last,
-      [url]: data[index],
-    }),
+  const dataByUrl: DataByUrl = uniqueFunds.reduce<DataByUrl>(
+    (last, { url }, index) =>
+      url && data[index]
+        ? {
+            ...last,
+            [url]: data[index] as string,
+          }
+        : last,
     {},
   );
 

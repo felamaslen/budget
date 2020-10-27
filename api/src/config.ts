@@ -57,6 +57,7 @@ export type Config = {
       historyResolution: number;
       scraper: {
         regex: RegExp;
+        regexGeneric: RegExp;
         userAgent: string;
       };
       stocksApiKey: string;
@@ -133,6 +134,7 @@ const config: Config = {
       historyResolution: Math.round(Number(process.env.FUND_RESOLUTION) || 100),
       scraper: {
         regex: /^(.*)\s\((accum|inc|share|accum-inc)\.?\)$/i,
+        regexGeneric: /^(.*)\s\((.*)\)\s\(stock\)$/i,
         userAgent:
           // eslint-disable-next-line max-len
           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',

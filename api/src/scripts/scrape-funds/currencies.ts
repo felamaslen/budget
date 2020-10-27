@@ -30,7 +30,7 @@ export async function getCurrencyPrices(): Promise<CurrencyPrices> {
 
     const poundRate = response.data.rates.GBP;
 
-    logger.verbose('Using current USD/GBP =', poundRate);
+    logger.verbose(`Using current USD/GBP = ${poundRate}`);
 
     return {
       GBP: poundRate,

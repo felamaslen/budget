@@ -7,15 +7,14 @@ import { Broker } from './types';
 jest.mock('./queries');
 
 describe('getBroker', () => {
-  const TEST_FUND_NAMES = [
-    'HL Multi-Manager UK Growth (accum.)',
-    'City of London Investment Trust ORD 25p (share)',
-  ];
-
-  it('returns HL for valid fund names', () => {
-    expect.assertions(2);
-    expect(getBroker(TEST_FUND_NAMES[0])).toBe(Broker.HL);
-    expect(getBroker(TEST_FUND_NAMES[1])).toBe(Broker.HL);
+  it.each`
+    nameType           | name                                                    | broker
+    ${'fund'}          | ${'HL Multi-Manager UK Growth (accum.)'}                | ${Broker.HL}
+    ${'share'}         | ${'City of London Investment Trust ORD 25p (share)'}    | ${Broker.HL}
+    ${'generic share'} | ${'Scottish Mortgage Investment Trust (SMT.L) (stock)'} | ${Broker.Generic}
+  `('should return $broker for a $nameType', ({ name, broker }) => {
+    expect.assertions(1);
+    expect(getBroker(name)).toBe(broker);
   });
 
   it('throws an error for invalid fund names', () => {

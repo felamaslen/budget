@@ -4,6 +4,7 @@ describe('Finance module', () => {
   describe('abbreviateFundName', () => {
     it.each`
       short             | long
+      ${'BIOG'}         | ${'The Biotech Growth Trust (BIOG.L) (stock)'}
       ${'SMT'}          | ${'Scottish Mortgage IT Ordinary Shares 5p (share)'}
       ${'SMT'}          | ${'Scottish Mortgage IT PLC Ordinary Shares 5p (share)'}
       ${'FCSS'}         | ${'Fidelity China Special Situations Ord 0.01 (share)'}

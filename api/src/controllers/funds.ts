@@ -15,6 +15,9 @@ import {
   FundHistoryRow,
   FundListRow,
   selectCashTarget,
+  selectPreviousItem,
+  updateFundCacheItemReference,
+  selectFundsByName,
 } from '~api/queries';
 import {
   CreateResponse,
@@ -183,11 +186,19 @@ export async function updateFund(
     await upsertTransactions(db, uid, id, transactions);
   }
 
-  return updateListData<FundListRow>(db, uid, Page.funds, {
+  const previousItem = await selectPreviousItem(db, id);
+  const updateResponse = await updateListData<FundListRow>(db, uid, Page.funds, {
     id,
     item,
     allocation_target: allocationTarget ?? null,
   });
+
+  const fundsWithSameName = await selectFundsByName(db, id);
+  if (previousItem && fundsWithSameName.length === 1 && fundsWithSameName[0].uid === uid) {
+    await updateFundCacheItemReference(db, fundsWithSameName[0].item, previousItem);
+  }
+
+  return updateResponse;
 }
 
 export { upsertCashTarget } from '~api/queries/funds';
