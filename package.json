@@ -1,6 +1,6 @@
 {
   "name": "budget",
-  "version": "4.25.1",
+  "version": "4.26.0",
   "description": "Personal finance app",
   "main": "api/build/index.js",
   "engines": {
