@@ -45,10 +45,10 @@ describe('Overview selectors', () => {
     const funds = [100779, 101459, 102981, 104281, 105597, 106930, 108280];
 
     describe('if the current day is not the last day of the month', () => {
-      const spending = [1260, 2068, 749, 960, 310, 310, 310];
+      const spending = [1260, 2068, 713, 927, 277, 277, 277];
       const fundsOld = [94004, 105390, 110183];
 
-      const net = [740, -168, 751, 1540, 1990, 1490, 2290];
+      const net = [740, -168, 787, 1573, 2023, 1523, 2323];
 
       const netWorthSummary = getNetWorthSummary(testState);
 
@@ -73,18 +73,18 @@ describe('Overview selectors', () => {
       const income = [2000, 1900, 1500, 2500, 2300, 1800, 2600];
       const bills = [1000, 900, 400, 650, 0, 0, 0];
       const food = [50, 13, 27, 27, 27, 27, 27];
-      const general = [150, 90, 13, 90, 90, 90, 90];
+      const general = [150, 90, 10, 90, 90, 90, 90];
       const social = [50, 65, 181, 65, 65, 65, 65];
-      const holiday = [10, 1000, 128, 128, 128, 128, 128];
+      const holiday = [10, 1000, 95, 95, 95, 95, 95];
 
       const savingsRatio = [
         1 - (1000 + 50 + 150 + 50 + 10) / 2000,
         0,
-        1 - (400 + 27 + 13 + 181 + 128) / 1500,
-        1 - (650 + 27 + 90 + 65 + 128) / 2500,
-        1 - (0 + 27 + 90 + 65 + 128) / 2300,
-        1 - (0 + 27 + 90 + 65 + 128) / 1800,
-        1 - (0 + 27 + 90 + 65 + 128) / 2600,
+        1 - (400 + 27 + 10 + 181 + 95) / 1500,
+        1 - (650 + 27 + 90 + 65 + 95) / 2500,
+        1 - (0 + 27 + 90 + 65 + 95) / 2300,
+        1 - (0 + 27 + 90 + 65 + 95) / 1800,
+        1 - (0 + 27 + 90 + 65 + 95) / 2600,
       ];
 
       it.each`
@@ -148,9 +148,22 @@ describe('Overview selectors', () => {
           jul,
         ];
 
+        const bills = [1000, 900, 400, 650, 0, 0, 0];
+        const food = [50, 13, 20, 20, 20, 20, 20];
+        const general = [150, 90, 10, 90, 90, 90, 90];
+        const social = [50, 65, 134, 65, 65, 65, 65];
+        const holiday = [10, 1000, 95, 95, 95, 95, 95];
+
+        const spending = [1260, 2068, 659, 920, 270, 270, 270];
+
         expect(getProcessedCost(nowEndOfMonth)(testState)).toStrictEqual(
           expect.objectContaining({
-            spending: [1260, 2068, 659, 920, 270, 270, 270],
+            spending,
+            bills,
+            food,
+            general,
+            social,
+            holiday,
             funds,
             net,
             netWorthPredicted,
@@ -231,7 +244,7 @@ describe('Overview selectors', () => {
                 "value": 2000,
               },
               "net": Object {
-                "rgb": "#caefce",
+                "rgb": "#cbf0cf",
                 "value": 740,
               },
               "netWorthCombined": Object {
@@ -243,7 +256,7 @@ describe('Overview selectors', () => {
                 "value": 50,
               },
               "spending": Object {
-                "rgb": "#d36767",
+                "rgb": "#d26565",
                 "value": 1260,
               },
             },
@@ -316,23 +329,23 @@ describe('Overview selectors', () => {
               },
               "general": Object {
                 "rgb": "#fff",
-                "value": 13,
+                "value": 10,
               },
               "holiday": Object {
                 "rgb": "#80c4bd",
-                "value": 128,
+                "value": 95,
               },
               "income": Object {
                 "rgb": "#fff",
                 "value": 1500,
               },
               "net": Object {
-                "rgb": "#c9efcd",
-                "value": 751,
+                "rgb": "#c7efcc",
+                "value": 787,
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 3556300.25,
+                "value": 3556336.25,
               },
               "social": Object {
                 "rgb": "#bf9e24",
@@ -340,7 +353,7 @@ describe('Overview selectors', () => {
               },
               "spending": Object {
                 "rgb": "#df9292",
-                "value": 749,
+                "value": 713,
               },
             },
             "future": false,
@@ -368,7 +381,7 @@ describe('Overview selectors', () => {
               },
               "holiday": Object {
                 "rgb": "#80c4bd",
-                "value": 128,
+                "value": 95,
               },
               "income": Object {
                 "rgb": "#36c448",
@@ -376,11 +389,11 @@ describe('Overview selectors', () => {
               },
               "net": Object {
                 "rgb": "#8ede98",
-                "value": 1540,
+                "value": 1573,
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 3559140.25,
+                "value": 3559209.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -388,7 +401,7 @@ describe('Overview selectors', () => {
               },
               "spending": Object {
                 "rgb": "#da8080",
-                "value": 960,
+                "value": 927,
               },
             },
             "future": true,
@@ -416,7 +429,7 @@ describe('Overview selectors', () => {
               },
               "holiday": Object {
                 "rgb": "#80c4bd",
-                "value": 128,
+                "value": 95,
               },
               "income": Object {
                 "rgb": "#5bcf69",
@@ -424,11 +437,11 @@ describe('Overview selectors', () => {
               },
               "net": Object {
                 "rgb": "#4ecb5e",
-                "value": 1990,
+                "value": 2023,
               },
               "netWorthCombined": Object {
                 "rgb": "#6cd479",
-                "value": 3562446.25,
+                "value": 3562548.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -436,7 +449,7 @@ describe('Overview selectors', () => {
               },
               "spending": Object {
                 "rgb": "#fff",
-                "value": 310,
+                "value": 277,
               },
             },
             "future": true,
@@ -464,7 +477,7 @@ describe('Overview selectors', () => {
               },
               "holiday": Object {
                 "rgb": "#80c4bd",
-                "value": 128,
+                "value": 95,
               },
               "income": Object {
                 "rgb": "#bdecc3",
@@ -472,11 +485,11 @@ describe('Overview selectors', () => {
               },
               "net": Object {
                 "rgb": "#93e09d",
-                "value": 1490,
+                "value": 1523,
               },
               "netWorthCombined": Object {
                 "rgb": "#4dcb5c",
-                "value": 3565269.25,
+                "value": 3565404.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -484,7 +497,7 @@ describe('Overview selectors', () => {
               },
               "spending": Object {
                 "rgb": "#fff",
-                "value": 310,
+                "value": 277,
               },
             },
             "future": true,
@@ -512,7 +525,7 @@ describe('Overview selectors', () => {
               },
               "holiday": Object {
                 "rgb": "#80c4bd",
-                "value": 128,
+                "value": 95,
               },
               "income": Object {
                 "rgb": "#24bf37",
@@ -520,11 +533,11 @@ describe('Overview selectors', () => {
               },
               "net": Object {
                 "rgb": "#24bf37",
-                "value": 2290,
+                "value": 2323,
               },
               "netWorthCombined": Object {
                 "rgb": "#24bf37",
-                "value": 3568909.25,
+                "value": 3569077.25,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -532,7 +545,7 @@ describe('Overview selectors', () => {
               },
               "spending": Object {
                 "rgb": "#fff",
-                "value": 310,
+                "value": 277,
               },
             },
             "future": true,

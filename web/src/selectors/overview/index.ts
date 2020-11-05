@@ -82,26 +82,33 @@ const predictCompoundInterest = (annualRate: number, jitter = 0) => (last: numbe
   Math.round(last[last.length - 1] * (1 + (annualRate + randnBm() * jitter)) ** (1 / 12)),
 ];
 
+type Category = keyof (Cost & Pick<CostProcessed, 'fundsOld'>);
+
+const extrapolateCurrentMonthColumns: Category[] = [Page.food, Page.social];
+
 function predictByPastAverages(
+  category: Category,
   cost: number[],
   futureMonths: number,
   currentMonthRatio: number,
   currentIndex: number,
 ): number[] {
-  const currentItems = replaceAtIndex(
-    cost.slice(0, -futureMonths),
-    currentIndex,
-    Math.round(cost[currentIndex] * currentMonthRatio),
-  );
+  const currentItems = extrapolateCurrentMonthColumns.includes(category)
+    ? replaceAtIndex(
+        cost.slice(0, -futureMonths),
+        currentIndex,
+        Math.round(cost[currentIndex] * currentMonthRatio),
+      )
+    : cost.slice(0, -futureMonths);
 
   const average = Math.round(arrayAverage(currentItems, Average.Median));
 
-  return currentItems.concat(new Array(futureMonths).fill(average));
+  return currentItems.concat(Array(futureMonths).fill(average));
 }
 
 function predictCategory(
   cost: number[],
-  category: keyof (Cost & Pick<CostProcessed, 'fundsOld'>),
+  category: Category,
   futureMonths: number,
   currentMonthRatio: number,
   index: number,
@@ -116,7 +123,7 @@ function predictCategory(
       .reduce(predictCompoundInterest(annualisedFundReturns, 0.01), cost.slice(0, index + 1));
   }
 
-  return predictByPastAverages(cost, futureMonths, currentMonthRatio, index);
+  return predictByPastAverages(category, cost, futureMonths, currentMonthRatio, index);
 }
 
 function calculateFutures(
