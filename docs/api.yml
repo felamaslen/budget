@@ -21,6 +21,55 @@ security:
   - BearerAuth: []
 
 paths:
+  /liveness:
+    get:
+      summary: Get liveness state
+      responses:
+        200:
+          description: App is live
+          content:
+            application/json:
+            schema:
+              type: object
+              properties:
+                ok:
+                  type: boolean
+                  example: true
+        500:
+          description: App is not live
+          content:
+            application/json:
+            schema:
+              type: object
+              properties:
+                ok:
+                  type: boolean
+                  example: false
+  /readiness:
+    get:
+      summary: Get readiness state
+      responses:
+        200:
+          description: App is ready for connections
+          content:
+            application/json:
+            schema:
+              type: object
+              properties:
+                ok:
+                  type: boolean
+                  example: true
+        500:
+          description: App is not ready for connections
+          content:
+            application/json:
+            schema:
+              type: object
+              properties:
+                ok:
+                  type: boolean
+                  example: false
+      
   /user/login:
     post:
       summary: Get an API key for logging in

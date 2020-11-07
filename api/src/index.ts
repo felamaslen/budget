@@ -10,6 +10,7 @@ import YAML from 'yamljs';
 
 import { version } from '../../package.json';
 import config from '~api/config';
+import { healthRoutes } from '~api/health';
 import { getStrategy } from '~api/modules/auth';
 import { errorHandler } from '~api/modules/error-handling';
 import { getIp } from '~api/modules/headers';
@@ -127,9 +128,7 @@ function setupApiDocs(app: express.Express): void {
 function setupApi(app: express.Express): void {
   passport.use('jwt', getStrategy());
   app.use(passport.initialize());
-  app.get('/health', (_, res) => {
-    res.json({ ok: true });
-  });
+  app.use(healthRoutes());
   app.use(API_PREFIX, routes());
   setupApiDocs(app);
 }

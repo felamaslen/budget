@@ -1,0 +1,201 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: budget
+spec:
+  type: LoadBalancer
+  selector:
+    app: budget
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: budget-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: budget
+                port:
+                  number: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: budget
+  labels:
+    app: budget
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: budget
+  template:
+    metadata:
+      labels:
+        app: budget
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: budget
+          image: docker.fela.space/budget:0
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: budget
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pass
+                  key: url
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /liveness
+              port: 80
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /readiness
+              port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: budget-database
+  labels:
+    app: budget
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: budget
+    tier: postgres
+  clusterIP: None
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+  labels:
+    app: budget
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /home/budget/pv-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pv-claim
+  labels:
+    app: budget
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: budget-database
+  labels:
+    app: budget
+spec:
+  selector:
+    matchLabels:
+      app: budget
+      tier: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: budget
+        tier: postgres
+    spec:
+      containers:
+        - image: postgres:10.4
+          name: postgres
+          env:
+            - name: POSTGRES_USER
+              value: budget
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pass
+                  key: password
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: postgres-persistent-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-persistent-storage
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: budget-scrape-funds
+spec:
+  schedule: "0 18 * * 1-6"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: budget
+              image: docker.fela.space/budget:0
+              args:
+                - node
+                - api/build/scripts/scrape-funds
+                - --prices
+              envFrom:
+                - configMapRef:
+                    name: budget
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-pass
+                      key: url
+          restartPolicy: Never
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"

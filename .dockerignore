@@ -1,4 +1,9 @@
 node_modules
 .git
 .env
+.pyenv
+.idea
+k8s
 android
+cli
+coverage

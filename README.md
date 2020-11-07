@@ -78,11 +78,10 @@ Note that the development variables are optional on a production environment.
 - `IP_BAN_TIME`: how long to ban users for if they make too many bad login attempts
 - `IP_BAN_LIMIT`: the period of time to consider when banning users
 - `IP_BAN_TRIES`: the maximum number of failed logins before banning users
-- `WEB_URL`: the URL to access the web app at, without trailing slash
 - `PIE_TOLERANCE`: minimum slice of pie charts to include on list data
 - `PIE_DETAIL`:  maximum number of pie slices to return on list data
 - `FUND_RESOLUTION`: detail to include on fund price graph
-- `SKIP_STOCKS_LIST`: boolean to toggle rendering of the fund holdings list
+- `DO_STOCKS_LIST`: boolean to toggle rendering of the fund holdings list
 - `FAKE_STOCK_PRICES`: boolean to toggle mock stock prices API
 - `STOCKS_API_KEY`: API key to access realtime stock price data (TODO)
 - `STOCK_INDICES`: extra indices to track on the stocks list
