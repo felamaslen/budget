@@ -4,6 +4,8 @@ import { sql } from 'slonik';
 import { withSlonik } from '~api/modules/db';
 import logger from '~api/modules/logger';
 
+let healthCheckPassed = false;
+
 const checkReadiness = withSlonik(async (db) => {
   const healthCheck = await db.query<{ version: string }>(sql`select version()`);
 
@@ -21,7 +23,10 @@ export function healthRoutes(): Router {
 
   router.get('/readiness', async (_, res) => {
     try {
-      await checkReadiness();
+      if (!healthCheckPassed) {
+        await checkReadiness();
+        healthCheckPassed = true;
+      }
 
       res.json({
         ok: true,
