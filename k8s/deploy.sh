@@ -9,6 +9,7 @@ image=$(./get_new_tag.sh)
 ./build-image.sh
 
 echo "Pushing image..."
+docker login docker.fela.space
 docker push $image
 
 cat ./manifest.yml \
