@@ -53,7 +53,7 @@ const nullEntry = (date: Date): Create<Entry> => ({
   creditLimit: [],
 });
 
-const FTI_START = new Date(process.env.BIRTH_DATE || '1990-01-01');
+const FTI_START = new Date(window.birthDate);
 
 const getNonFilteredCategories = (state: State): CrudState<Category> => state.netWorth.categories;
 const getNonFilteredSubcategories = (state: State): CrudState<Subcategory> =>

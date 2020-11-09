@@ -82,6 +82,7 @@ const config = {
       startYear: 2014,
       startMonth: 9,
       ignoreExpenseCategories: ['House purchase'],
+      birthDate: getenv.string('BIRTH_DATE', '1990-01-01'),
     },
     pie: {
       tolerance: getenv.float('PIE_TOLERANCE', 0.075),

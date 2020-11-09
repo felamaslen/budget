@@ -60,14 +60,13 @@ function setupWebApp(app: express.Express): void {
   setupStaticViews(app);
 
   const singlePageApp = (_: express.Request, res: express.Response): void => {
-    const pieTolerance = process.env.PIE_TOLERANCE || 0.075;
-
     res.setHeader('Cache-Control', 'no-cache');
 
     res.render('index', {
       version,
       hot,
-      pieTolerance,
+      pieTolerance: config.data.pie.tolerance,
+      birthDate: config.data.overview.birthDate,
     });
   };
 

@@ -22,9 +22,6 @@ RUN yarn install --frozen-lockfile
 
 ENV PATH="/opt/app/node_modules/.bin:${PATH}"
 
-ARG BIRTH_DATE
-ENV BIRTH_DATE=${BIRTH_DATE}
-
 ARG STOCK_INDICES
 ENV STOCK_INDICES=${STOCK_INDICES}
 
