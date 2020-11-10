@@ -2,7 +2,7 @@ import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 export type PivotTableRow = { thing: string; year: number; cost: number };
 
-export type PivotColumn = 'item' | 'category' | 'holiday' | 'society';
+export type PivotColumn = 'item' | 'category';
 
 export async function selectPivotTable(
   db: DatabaseTransactionConnectionType,

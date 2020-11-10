@@ -34,6 +34,7 @@ export type HeaderProps<I extends Item, P, MK extends keyof I, H extends {} = {}
   isMobile: boolean;
   fields: FieldKey<I>[];
   fieldsMobile: MK[];
+  categoryLabel?: string;
 };
 
 export type CustomSelector<I extends Item, E extends {}> = (

@@ -62,7 +62,7 @@ describe('List selectors', () => {
               id: numericHash('real-id-x'),
               date: new Date('2020-04-29'),
               item: 'some-holiday-item',
-              holiday: 'some-holiday-holiday',
+              category: 'some-holiday-holiday',
               cost: 103,
               shop: 'some-holiday-shop',
             },

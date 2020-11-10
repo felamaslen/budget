@@ -15,25 +15,17 @@ const standardItem = listItem.append({
   cost: joi.number().integer(),
 });
 
-const shopItem = standardItem.append({
+const extendedItem = standardItem.append({
+  category: joi.string(),
   shop: joi.string(),
 });
 
 export const income = standardItem;
 export const bill = standardItem;
 
-export const food = shopItem.append({
-  category: joi.string(),
-});
-
-export const general = food;
-
-export const holiday = shopItem.append({
-  holiday: joi.string(),
-});
-
-export const social = shopItem.append({
-  society: joi.string(),
-});
+export const food = extendedItem;
+export const general = extendedItem;
+export const holiday = extendedItem;
+export const social = extendedItem;
 
 export const deleteRequest = idParamSchemaRequired;

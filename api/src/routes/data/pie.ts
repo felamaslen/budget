@@ -18,13 +18,13 @@ export function getPieCols(category: Page): PieCol[] | null {
   if (category === Page.social) {
     return [
       ['shop', 'Shop cost'],
-      ['society', 'Society cost'],
+      ['category', 'Society cost'],
     ];
   }
   if (category === Page.holiday) {
     return [
       ['shop', 'Shop cost'],
-      ['holiday', 'Holiday cost'],
+      ['category', 'Holiday cost'],
     ];
   }
 

@@ -130,13 +130,11 @@ export async function readListData<I extends ListCalcItem>(
   limit: number,
   offset = 0,
 ): Promise<ListResponse<I>> {
-  const columnMapExtra = config.data.columnMapExtra[category] as ColumnMap<
-    Omit<I, keyof ListCalcItem>
-  >;
-  const columnMap = {
-    ...columnMapStandard,
-    ...columnMapExtra,
-  } as ColumnMap<I>;
+  const columnMapExtra = config.data.listExtendedCategories.includes(category)
+    ? { k: 'category', s: 'shop' }
+    : {};
+
+  const columnMap = { ...columnMapStandard, ...columnMapExtra } as ColumnMap<I>;
 
   const columns = Object.values(columnMap);
 

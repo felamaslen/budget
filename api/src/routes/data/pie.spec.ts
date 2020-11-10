@@ -20,12 +20,12 @@ describe('Pie route', () => {
 
       expect(getPieCols(Page.social)).toStrictEqual([
         ['shop', 'Shop cost'],
-        ['society', 'Society cost'],
+        ['category', 'Society cost'],
       ]);
 
       expect(getPieCols(Page.holiday)).toStrictEqual([
         ['shop', 'Shop cost'],
-        ['holiday', 'Holiday cost'],
+        ['category', 'Holiday cost'],
       ]);
     });
   });

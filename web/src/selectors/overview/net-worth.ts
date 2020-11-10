@@ -53,8 +53,6 @@ const nullEntry = (date: Date): Create<Entry> => ({
   creditLimit: [],
 });
 
-const FTI_START = new Date(window.birthDate);
-
 const getNonFilteredCategories = (state: State): CrudState<Category> => state.netWorth.categories;
 const getNonFilteredSubcategories = (state: State): CrudState<Subcategory> =>
   state.netWorth.subcategories;
@@ -259,7 +257,7 @@ type EntryWithFTI = EntryWithSpend & { fti: number; pastYearAverageSpend: number
 
 const withFTI = (rows: EntryWithSpend[]): EntryWithFTI[] =>
   rows.map((entry, index) => {
-    const fullYears = differenceInYears(entry.date, FTI_START);
+    const fullYears = differenceInYears(entry.date, window.birthDate);
     const days = differenceInDays(entry.date, startOfYear(entry.date));
     const years = fullYears + days / 365;
 

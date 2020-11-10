@@ -8,20 +8,18 @@ export interface ListCalcItem extends ListItem {
   cost: number;
 }
 
-export interface ShopItem extends ListCalcItem {
+export interface ExtendedCalcItem extends ListCalcItem {
+  category: string;
   shop: string;
 }
 
 export type Income = ListCalcItem;
 export type Bill = ListCalcItem;
-export type Food = ShopItem & {
-  category: string;
-};
-export type General = Food;
-export type Holiday = ShopItem & {
-  holiday: string;
-};
-export type Social = ShopItem & { society: string };
+
+export type Food = ExtendedCalcItem;
+export type General = ExtendedCalcItem;
+export type Holiday = ExtendedCalcItem;
+export type Social = ExtendedCalcItem;
 
 type PageProps<I = never> = {
   path?: string;
@@ -49,7 +47,8 @@ interface RawListCalcItem extends RawListItem {
   [DataKeyAbbr.cost]: number;
 }
 
-interface RawShopItem extends RawListCalcItem {
+interface RawExtendedItem extends RawListCalcItem {
+  [DataKeyAbbr.category]: string;
   [DataKeyAbbr.shop]: string;
 }
 
@@ -62,23 +61,7 @@ type ReadResponseList<I extends RawListItem> = {
 
 export type ReadResponseIncome = ReadResponseList<RawListCalcItem>;
 export type ReadResponseBill = ReadResponseList<RawListCalcItem>;
-export type ReadResponseFood = ReadResponseList<
-  RawShopItem & {
-    [DataKeyAbbr.category]: string;
-  }
->;
-export type ReadResponseGeneral = ReadResponseList<
-  RawShopItem & {
-    [DataKeyAbbr.category]: string;
-  }
->;
-export type ReadResponseHoliday = ReadResponseList<
-  RawShopItem & {
-    [DataKeyAbbr.holiday]: string;
-  }
->;
-export type ReadResponseSocial = ReadResponseList<
-  RawShopItem & {
-    [DataKeyAbbr.society]: string;
-  }
->;
+export type ReadResponseFood = ReadResponseList<RawExtendedItem>;
+export type ReadResponseGeneral = ReadResponseList<RawExtendedItem>;
+export type ReadResponseHoliday = ReadResponseList<RawExtendedItem>;
+export type ReadResponseSocial = ReadResponseList<RawExtendedItem>;

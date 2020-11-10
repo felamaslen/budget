@@ -77,8 +77,8 @@ describe('Analysis controller', () => {
       expect(getCategoryColumn(Page.bills)).toBe('item');
       expect(getCategoryColumn(Page.food, 'category')).toBe('category');
       expect(getCategoryColumn(Page.general, 'category')).toBe('category');
-      expect(getCategoryColumn(Page.social, 'category')).toBe('society');
-      expect(getCategoryColumn(Page.holiday, 'category')).toBe('holiday');
+      expect(getCategoryColumn(Page.social, 'category')).toBe('category');
+      expect(getCategoryColumn(Page.holiday, 'category')).toBe('category');
     });
   });
 

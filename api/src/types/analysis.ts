@@ -5,7 +5,7 @@ export type AnalysisGroupBy = 'category' | 'shop';
 
 export type AnalysisCategory = Page.bills | Page.food | Page.general | Page.holiday | Page.social;
 
-export type AnalysisGroupColumn = 'item' | 'category' | 'society' | 'holiday' | 'shop';
+export type AnalysisGroupColumn = 'item' | 'category' | 'shop';
 
 export type AnalysisParams = {
   period: AnalysisPeriod;

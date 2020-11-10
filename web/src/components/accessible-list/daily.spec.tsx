@@ -154,7 +154,7 @@ describe('<AccessibleListDaily />', () => {
     const customCategory = 'myCategory';
 
     type CustomItem = ListCalcItem & {
-      [customCategory]: string;
+      category: string;
       shop: string;
     };
 
@@ -169,7 +169,7 @@ describe('<AccessibleListDaily />', () => {
             id: numericHash('id-1'),
             date: new Date('2020-04-17'),
             item: 'item one',
-            [customCategory]: 'category one',
+            category: 'category one',
             cost: 931,
             shop: 'shop one',
           },
@@ -187,9 +187,9 @@ describe('<AccessibleListDaily />', () => {
       const store = createStore<CustomState>()(customState);
       const renderResult = render(
         <Provider store={store}>
-          <AccessibleListDaily<typeof customPage, typeof customCategory>
+          <AccessibleListDaily<typeof customPage>
             page={customPage}
-            category={customCategory}
+            categoryLabel={customCategory}
           />
         </Provider>,
       );
@@ -221,13 +221,13 @@ describe('<AccessibleListDaily />', () => {
       const expectedAction = listItemUpdated<CustomItem, typeof customPage>(customPage)(
         numericHash('id-1'),
         {
-          [customCategory]: 'updated category',
+          category: 'updated category',
         },
         {
           id: numericHash('id-1'),
           date: new Date('2020-04-17'),
           item: 'item one',
-          [customCategory]: 'category one',
+          category: 'category one',
           cost: 931,
           shop: 'shop one',
         },

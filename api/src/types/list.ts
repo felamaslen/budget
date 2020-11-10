@@ -15,10 +15,15 @@ interface ShopItem extends ListCalcItem {
 
 export type Income = ListCalcItem;
 export type Bill = ListCalcItem;
-export type Food = ShopItem & { category: string };
-export type General = ShopItem & { category: string };
-export type Holiday = ShopItem & { holiday: string };
-export type Social = ShopItem & { society: string };
+
+export interface ListCalcExtendedItem extends ShopItem {
+  category: string;
+}
+
+export type Food = ListCalcExtendedItem;
+export type General = ListCalcExtendedItem;
+export type Holiday = ListCalcExtendedItem;
+export type Social = ListCalcExtendedItem;
 
 export type ColumnMap<I extends object> = { [key: string]: keyof I };
 

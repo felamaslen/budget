@@ -17,6 +17,7 @@ import {
 import merge from 'deepmerge';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import config from '~api/config';
 import { User } from '~api/modules/auth';
 import {
   getIncome,
@@ -98,14 +99,8 @@ export function getCategoryColumn(
     return 'item';
   }
   if (groupBy === 'category') {
-    if ([Page.food, Page.general].includes(category)) {
+    if (config.data.listExtendedCategories.includes(category)) {
       return 'category';
-    }
-    if (category === Page.social) {
-      return 'society';
-    }
-    if (category === Page.holiday) {
-      return 'holiday';
     }
 
     return 'item';

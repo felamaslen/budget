@@ -6,6 +6,7 @@ import {
   OverviewHeader,
   OverviewColumn,
   OverviewTableColumn,
+  ExtendedCalcItem,
 } from '~client/types';
 
 // debounce requests to update the server by 1 second
@@ -39,6 +40,13 @@ const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
 
 export const OVERVIEW_COLUMNS = Object.entries(overviewColumns) as OverviewTableColumn[];
 
+const pageDefinitionExtended = {
+  list: true,
+  cols: ['date', 'item', 'category', 'cost', 'shop'] as (keyof ExtendedCalcItem)[],
+  daily: true,
+  suggestions: ['item', 'category', 'shop'],
+};
+
 export const PAGES: Pages = {
   [Page.overview]: {
     path: '/',
@@ -58,30 +66,10 @@ export const PAGES: Pages = {
     cols: ['date', 'item', 'cost'],
     suggestions: ['item'],
   },
-  [Page.food]: {
-    list: true,
-    cols: ['date', 'item', 'category', 'cost', 'shop'],
-    daily: true,
-    suggestions: ['item', 'category', 'shop'],
-  },
-  [Page.general]: {
-    list: true,
-    cols: ['date', 'item', 'category', 'cost', 'shop'],
-    daily: true,
-    suggestions: ['item', 'category', 'shop'],
-  },
-  [Page.holiday]: {
-    list: true,
-    cols: ['date', 'item', 'holiday', 'cost', 'shop'],
-    daily: true,
-    suggestions: ['item', 'holiday', 'shop'],
-  },
-  [Page.social]: {
-    list: true,
-    cols: ['date', 'item', 'society', 'cost', 'shop'],
-    daily: true,
-    suggestions: ['item', 'society', 'shop'],
-  },
+  [Page.food]: pageDefinitionExtended,
+  [Page.general]: pageDefinitionExtended,
+  [Page.holiday]: pageDefinitionExtended,
+  [Page.social]: pageDefinitionExtended,
 };
 
 const PAGES_LIST_CALC: PageListCalc[] = [

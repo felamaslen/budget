@@ -132,7 +132,7 @@ async function generateListData(uid: number, db: Knex): Promise<void> {
         uid,
         date: '2018-03-25',
         shop: 'Travel agents',
-        holiday: 'a country',
+        category: 'a country',
         item: 'Somewhere',
         cost: 11023,
       },
@@ -140,7 +140,7 @@ async function generateListData(uid: number, db: Knex): Promise<void> {
         uid,
         date: '2018-03-25',
         shop: 'Skyscanner',
-        holiday: 'a country',
+        category: 'a country',
         item: 'Otherplace',
         cost: 23991,
       },
@@ -149,7 +149,7 @@ async function generateListData(uid: number, db: Knex): Promise<void> {
 
   await db
     .insert([
-      { uid, date: '2018-03-25', shop: 'Some pub', society: 'Bar', item: 'Friends', cost: 61923 },
+      { uid, date: '2018-03-25', shop: 'Some pub', category: 'Bar', item: 'Friends', cost: 61923 },
     ])
     .into('social');
 }

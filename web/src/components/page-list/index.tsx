@@ -27,7 +27,7 @@ export const Holiday: React.FC = () => (
   <AccessibleListDaily
     page={Page.holiday}
     color={pageColor(colors.holiday.main)}
-    category="holiday"
+    categoryLabel="holiday"
   />
 );
 
@@ -35,6 +35,6 @@ export const Social: React.FC = () => (
   <AccessibleListDaily
     page={Page.social}
     color={pageColor(colors.social.main)}
-    category="society"
+    categoryLabel="society"
   />
 );

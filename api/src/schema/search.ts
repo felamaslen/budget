@@ -11,16 +11,8 @@ export const searchSchema = joi.object().keys({
           then: joi.string().valid('item'),
         },
         {
-          is: joi.valid('food', 'general'),
+          is: joi.valid('food', 'general', 'holiday', 'social'),
           then: joi.string().valid('item', 'category', 'shop'),
-        },
-        {
-          is: joi.valid('holiday'),
-          then: joi.string().valid('item', 'holiday', 'shop'),
-        },
-        {
-          is: joi.valid('social'),
-          then: joi.string().valid('item', 'society', 'shop'),
         },
       ],
     })

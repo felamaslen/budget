@@ -30,6 +30,7 @@ export type ListCategory =
   | Page.social;
 
 export type ListCalcCategory = Exclude<ListCategory, Page.funds>;
+export type ListCalcCategoryExtended = Exclude<ListCalcCategory, Page.income | Page.bills>;
 
 export interface Item {
   id: number;

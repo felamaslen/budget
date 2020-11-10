@@ -1,6 +1,6 @@
 import * as getenv from 'getenv';
 
-import { Page } from './types';
+import { Page, ListCalcCategory } from './types';
 
 if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
   // eslint-disable-next-line import/no-extraneous-dependencies, global-require
@@ -20,7 +20,7 @@ const config = {
   openExchangeRatesApiKey: getenv.string('OPEN_EXCHANGE_RATES_API_KEY', ''),
   scrapeTimeout: getenv.int('SCRAPE_TIMEOUT', 30000),
   user: {
-    tokenSecret: getenv.string('USER_TOKEN_SECRET'),
+    tokenSecret: getenv.string('USER_TOKEN_SECRET', 'somesupersecret'),
     banTime: getenv.int('IP_BAN_TIME', 300) * 1000,
     banLimit: getenv.int('IP_BAN_LIMIT', 60) * 1000,
     banTries: getenv.int('IP_BAN_TRIES', 5),
@@ -43,27 +43,13 @@ const config = {
       Page.holiday,
       Page.social,
     ] as const,
+    listExtendedCategories: [
+      Page.food,
+      Page.general,
+      Page.holiday,
+      Page.social,
+    ] as ListCalcCategory[],
     currencyUnit: '£',
-    columnMapExtra: {
-      [Page.income]: {},
-      [Page.bills]: {},
-      [Page.food]: {
-        k: 'category',
-        s: 'shop',
-      },
-      [Page.general]: {
-        k: 'category',
-        s: 'shop',
-      },
-      [Page.holiday]: {
-        h: 'holiday',
-        s: 'shop',
-      },
-      [Page.social]: {
-        y: 'society',
-        s: 'shop',
-      },
-    },
     listPageLimit: 100,
     funds: {
       historyResolution: getenv.int('FUND_RESOLUTION', 100),

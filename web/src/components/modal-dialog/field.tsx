@@ -11,11 +11,15 @@ export type FieldWrapper<V = never> = React.FC<{
   onChange: (value: V) => void;
 }>;
 
-export function makeField<V = never>(field: string, Field: FieldComponent<V>): FieldWrapper<V> {
+export function makeField<V = never>(
+  field: string,
+  Field: FieldComponent<V>,
+  label = field,
+): FieldWrapper<V> {
   const WrappedField: FieldWrapper<V> = ({ id, invalid, value, onChange }) => (
     <>
       <Styled.FormLabel item={field as string}>
-        <label htmlFor={id}>{field}</label>
+        <label htmlFor={id}>{label}</label>
       </Styled.FormLabel>
       <Field invalid={invalid} value={value} onChange={onChange} />
     </>

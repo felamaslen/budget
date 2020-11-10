@@ -50,6 +50,7 @@ export const StandardHeader = <I extends ListCalcItem, P extends string, MK exte
   isMobile,
   fields,
   fieldsMobile,
+  categoryLabel = 'category',
   children,
 }: React.PropsWithChildren<HeaderProps<I, P, MK>>): React.ReactElement<HeaderProps<I, P, MK>> => {
   const total = useSelector<StateStandard<I, P>, number>(getStandardCost(page));
@@ -60,7 +61,7 @@ export const StandardHeader = <I extends ListCalcItem, P extends string, MK exte
         .filter((field) => field !== 'id')
         .map((field) => (
           <HeaderColumn key={field} column={field}>
-            {capitalise(field as string)}
+            {capitalise(field === 'category' ? categoryLabel : (field as string))}
           </HeaderColumn>
         ))}
       {children}
@@ -83,6 +84,7 @@ export type PropsStandard<
   fieldsMobile?: FieldsMobile<I, MK, E>;
   suggestionFields?: FieldKey<I>[];
   customSelector?: CustomSelector<I, E>;
+  categoryLabel?: string;
   Header?: React.FC<HeaderProps<I, P, MK>>;
   Row?: PropsItem<I, P, MK, E>['Row'];
 };
@@ -100,6 +102,7 @@ export const AccessibleListStandard = <
   modalFields = standardModalFields as ModalFields<I>,
   suggestionFields,
   customSelector,
+  categoryLabel = 'category',
   Header = StandardHeader,
   Row = StandardRow,
 }: PropsStandard<I, P, MK, E & ExtraProps>): React.ReactElement<
@@ -111,6 +114,7 @@ export const AccessibleListStandard = <
     () => [...(suggestionFields ?? []), ...standardSuggestionFields] as FieldKey<I>[],
     [suggestionFields],
   );
+  const headerProps = useMemo(() => ({ categoryLabel }), [categoryLabel]);
 
   return (
     <AccessibleList<I, P, MK>
@@ -125,6 +129,7 @@ export const AccessibleListStandard = <
       deltaSeed={deltaSeed}
       customSelector={customSelector}
       itemProcessor={itemProcessor}
+      headerProps={headerProps}
       Row={Row}
       Header={Header}
     />

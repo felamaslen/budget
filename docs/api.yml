@@ -1737,7 +1737,7 @@ paths:
                   type: string
                   example: "Bowling"
                   required: true
-                society:
+                category:
                   type: string
                   example: "Work parties"
                   required: true
@@ -1793,7 +1793,7 @@ paths:
                   type: string
                   example: "Bowling"
                   required: false
-                society:
+                category:
                   type: string
                   example: "Work parties"
                   required: false
@@ -1919,7 +1919,7 @@ paths:
                   type: string
                   example: Tickets
                   required: true
-                society:
+                category:
                   type: string
                   example: "Greece 2020"
                   required: true
@@ -1975,7 +1975,7 @@ paths:
                   type: string
                   example: "Tickets"
                   required: false
-                holiday:
+                category:
                   type: string
                   example: "Greece 2020"
                   required: false
@@ -2383,7 +2383,7 @@ definitions:
                 - $ref: "#/definitions/DataResponseItem"
                 - type: object
                   properties:
-                    y:
+                    k:
                       type: string
                       description: Society
                       example: Dinner
@@ -2403,7 +2403,7 @@ definitions:
                 - $ref: "#/definitions/DataResponseItem"
                 - type: object
                   properties:
-                    h:
+                    k:
                       type: string
                       description: Holiday
                       example: Norway

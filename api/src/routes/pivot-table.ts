@@ -4,6 +4,7 @@ import { Router } from 'express';
 import levenshtein from 'fast-levenshtein';
 import { replaceAtIndex, removeAtIndex } from 'replace-array';
 
+import config from '~api/config';
 import { validatedAuthDbRoute } from '~api/middleware/request';
 import { authMiddleware } from '~api/modules/auth';
 import { selectPivotTable, PivotColumn, PivotTableRow } from '~api/queries';
@@ -101,14 +102,8 @@ function getPivotColumn(table: ListCalcCategory, deep: boolean): PivotColumn {
   if (!deep) {
     return 'item';
   }
-  if ([Page.food, Page.general].includes(table)) {
+  if (config.data.listExtendedCategories.includes(table)) {
     return 'category';
-  }
-  if (table === Page.holiday) {
-    return 'holiday';
-  }
-  if (table === Page.social) {
-    return 'society';
   }
   return 'item';
 }

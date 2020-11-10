@@ -48,16 +48,16 @@ describe('Standard list routes', () => {
   const holiday = {
     date: '2020-05-23',
     item: 'Flight',
-    holiday: 'Australia',
+    category: 'Australia',
     cost: 156543,
     shop: 'skyscanner.com',
   };
-  const holidayDelta = { item: 'Refund', holiday: 'Pandemic' };
+  const holidayDelta = { item: 'Refund', category: 'Pandemic' };
 
   const social = {
     date: '2020-04-07',
     item: 'Pizza',
-    society: 'Remote social',
+    category: 'Remote social',
     cost: 2945,
     shop: 'Dominoes',
   };
@@ -69,8 +69,8 @@ describe('Standard list routes', () => {
     ${Page.bills}   | ${3}     | ${bill}    | ${billDelta}    | ${{}}
     ${Page.food}    | ${4}     | ${food}    | ${foodDelta}    | ${{ k: 'Fruit', s: 'Tesco' }}
     ${Page.general} | ${3}     | ${general} | ${generalDelta} | ${{ k: 'Medicine', s: 'Boots' }}
-    ${Page.holiday} | ${3}     | ${holiday} | ${holidayDelta} | ${{ h: 'Australia', s: 'skyscanner.com' }}
-    ${Page.social}  | ${3}     | ${social}  | ${socialDelta}  | ${{ y: 'Remote social', s: 'Dominoes' }}
+    ${Page.holiday} | ${3}     | ${holiday} | ${holidayDelta} | ${{ k: 'Australia', s: 'skyscanner.com' }}
+    ${Page.social}  | ${3}     | ${social}  | ${socialDelta}  | ${{ k: 'Remote social', s: 'Dominoes' }}
   `('$page route', ({ page, lastPage, testItem, delta, readProps }) => {
     const clearDb = async (): Promise<void> => {
       await db(page).where({ item: testItem.item }).del();

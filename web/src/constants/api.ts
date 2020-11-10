@@ -5,8 +5,6 @@ export enum DataKeyAbbr {
   cost = 'c',
   shop = 's',
   category = 'k',
-  holiday = 'h',
-  society = 'y',
   transactions = 'tr',
   allocationTarget = 'allocationTarget',
 }

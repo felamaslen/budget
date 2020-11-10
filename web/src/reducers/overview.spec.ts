@@ -257,7 +257,7 @@ describe('Overview reducer', () => {
         listItemDeleted<Holiday, Page.holiday>(Page.holiday)(numericHash('some-id'), {
           date: new Date('2019-07-12T00:00Z'),
           item: 'some item',
-          holiday: 'some holiday',
+          category: 'some holiday',
           cost: 1235,
           shop: 'some shop',
         }),

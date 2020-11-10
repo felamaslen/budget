@@ -22,7 +22,7 @@ describe('PATCH /multiple', () => {
       const resHoliday = await global.withAuth(global.agent.post('/api/v4/data/holiday')).send({
         date: '2020-04-21',
         item: 'Old holiday',
-        holiday: 'Somewhere',
+        category: 'Somewhere',
         cost: 98672,
         shop: 'skyscanner.com',
       });
@@ -164,7 +164,7 @@ describe('PATCH /multiple', () => {
       expect.arrayContaining([
         expect.objectContaining({
           d: '2020-04-21',
-          h: 'Old holiday',
+          i: 'Old holiday',
           k: 'Flights',
           c: 98672,
           s: 'skyscanner.com',
