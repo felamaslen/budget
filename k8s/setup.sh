@@ -144,8 +144,8 @@ function init_network {
 function setup_database_secret {
   echo "Creating database secret..."
 
-  echo $POSTGRES_PASSWORD > password
-  echo "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@budget-database:5432/budget" > url
+  echo -n $POSTGRES_PASSWORD > password
+  echo -n "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@budget-database:5432/budget" > url
 
   kubectl create secret generic postgres-pass --from-file=password --from-file=url
 
