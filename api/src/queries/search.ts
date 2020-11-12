@@ -1,5 +1,10 @@
-import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
-import { SearchParams } from '~api/types';
+import {
+  sql,
+  TaggedTemplateLiteralInvocationType,
+  DatabaseTransactionConnectionType,
+} from 'slonik';
+
+import { SearchParams, ListCalcCategoryExtended, Page } from '~api/types';
 
 export const getShortTermQuery = (
   uid: number,
@@ -87,3 +92,78 @@ export const getSearchResults = (
       limit 1
     )
   `;
+
+type ReceiptItem = {
+  item: string;
+  matched_page: ListCalcCategoryExtended;
+  matched_category: string;
+};
+
+const receiptPages: ListCalcCategoryExtended[] = [Page.food, Page.general, Page.social];
+
+export async function matchReceiptItems(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  items: string[],
+): Promise<readonly ReceiptItem[]> {
+  const { rows } = await db.query<ReceiptItem>(sql`
+  SELECT item, matched_page, matched_category
+  FROM (
+    SELECT ${sql.join(
+      [
+        sql`item`,
+        sql`matched_page`,
+        sql`matched_category`,
+        sql`row_number() over (partition by item order by num_matches desc) as row_num`,
+      ],
+      sql`, `,
+    )}
+    FROM (${sql.join(
+      receiptPages.map(
+        (page) => sql`
+      SELECT item, matched_page, matched_category, count(matched_category) as num_matches
+      FROM (
+        SELECT ${sql.join(
+          [sql`item`, sql`${page} AS matched_page`, sql`category as matched_category`],
+          sql`, `,
+        )}
+        FROM ${sql.identifier([page])}
+        WHERE uid = ${uid} AND item IN (${sql.join(items, sql`, `)})
+      ) matched_results
+      GROUP BY item, matched_page, matched_category
+      `,
+      ),
+      sql` UNION `,
+    )}) matched_union
+  ) ordered_union
+  WHERE row_num = 1
+  `);
+  return rows;
+}
+
+export async function matchReceiptItemName(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  query: string,
+): Promise<string | null> {
+  const { rows } = await db.query<{ item: string }>(sql`
+  SELECT item, num_matches
+  FROM (${sql.join(
+    receiptPages.map(
+      (page) => sql`
+    SELECT item, count(item) as num_matches
+    FROM (
+      SELECT item
+      FROM ${sql.identifier([page])}
+      WHERE uid = ${uid} AND item ILIKE ${`${query}%`}
+    ) matched_results
+    GROUP BY item
+    `,
+    ),
+    sql` UNION `,
+  )}) matched_union
+  ORDER BY num_matches DESC
+  LIMIT 1
+  `);
+  return rows[0]?.item ?? null;
+}

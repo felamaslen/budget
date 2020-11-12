@@ -1,10 +1,9 @@
-import axios, { Canceler } from 'axios';
-import { useCallback, useState, useRef, useMemo, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { useDebounce } from 'use-debounce';
+import { AxiosInstance } from 'axios';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 
-import { FieldKey, State as PageState, ActiveField, ADD_BUTTON } from './types';
+import { FieldKey, ActiveField, ADD_BUTTON } from './types';
 import { API_PREFIX } from '~client/constants/data';
+import { useCancellableRequest } from '~client/hooks';
 import { isEscape } from '~client/modules/nav';
 import { Create, Item } from '~client/types';
 
@@ -45,10 +44,9 @@ type State<I extends Item> = {
   requestedField: FieldKey<I> | null;
 };
 
-const maybeGetApiKey = <I extends Item, P extends string>(state: PageState<I, P>): string | null =>
-  state.api?.key ?? null;
-
 const stateEmpty = { list: [], next: [], nextField: null, requestedField: null };
+
+type SuggestionRequest<I extends Item, F extends FieldKey<I> = FieldKey<I>> = [F, string];
 
 export function useSuggestions<I extends Item, P extends string>({
   suggestionFields,
@@ -56,8 +54,6 @@ export function useSuggestions<I extends Item, P extends string>({
   page,
   setDelta,
 }: Options<I, P>): Result<I> {
-  const apiKey = useSelector(maybeGetApiKey);
-
   const [state, setState] = useState<State<I>>({
     list: [],
     next: [],
@@ -66,63 +62,46 @@ export function useSuggestions<I extends Item, P extends string>({
     requestedField: null,
   });
 
-  const [suggestionRequest, setSuggestionRequest] = useState<[FieldKey<I>, string] | undefined>();
-  const [debouncedSuggestionRequest] = useDebounce(suggestionRequest, 100);
-  const cancelRequest = useRef<Canceler>();
-  useEffect(() => {
-    let cancelled = false;
-    const request = async (): Promise<void> => {
-      try {
-        if (cancelRequest.current) {
-          cancelRequest.current();
-        }
-        if (!debouncedSuggestionRequest) {
-          return;
-        }
+  const [suggestionRequest, setSuggestionRequest] = useState<SuggestionRequest<I> | undefined>();
 
-        const [field, value] = debouncedSuggestionRequest;
-        const res = await axios.get<SuggestionsResponse<I, typeof field>>(
-          `${API_PREFIX}/data/search/${page}/${field}/${sanitizeValue(value)}/${numToRequest}`,
-          {
-            headers: {
-              authorization: apiKey,
-            },
-            cancelToken: new axios.CancelToken((token): void => {
-              cancelRequest.current = token;
-            }),
-          },
-        );
-        if (cancelled) {
-          return;
-        }
+  const requestSuggestions = useCallback(
+    <I extends Item>(axios: AxiosInstance, [field, value]: SuggestionRequest<I>) =>
+      axios.get<SuggestionsResponse<I, typeof field>>(
+        `${API_PREFIX}/data/search/${page}/${field}/${sanitizeValue(value)}/${numToRequest}`,
+      ),
+    [page],
+  );
 
-        const list = res.data.data?.list ?? [];
-        const next = res.data.data?.nextCategory ?? [];
-        const nextField = res.data.data?.nextField ?? null;
+  const handleResponse = useCallback(
+    <F extends FieldKey<I>>(res: SuggestionsResponse<I, F>, [field]: SuggestionRequest<I, F>) => {
+      const list = res.data?.list ?? [];
+      const next = res.data?.nextCategory ?? [];
+      const nextField = res.data?.nextField ?? null;
 
-        setState((last) =>
-          last.activeField === field
-            ? {
-                ...last,
-                list,
-                next,
-                nextField,
-                requestedField: field,
-              }
-            : last,
-        );
-      } catch (err) {
-        if (!axios.isCancel(err)) {
-          throw err; // TODO: display error message
-        }
-      }
-    };
+      setState((last) =>
+        last.activeField === field
+          ? {
+              ...last,
+              list,
+              next,
+              nextField,
+              requestedField: field,
+            }
+          : last,
+      );
+    },
+    [],
+  );
 
-    request();
-    return (): void => {
-      cancelled = true;
-    };
-  }, [page, apiKey, debouncedSuggestionRequest]);
+  useCancellableRequest<
+    SuggestionRequest<I> | undefined,
+    SuggestionsResponse<I, FieldKey<I>>,
+    SuggestionRequest<I>
+  >({
+    query: suggestionRequest,
+    sendRequest: requestSuggestions,
+    handleResponse,
+  });
 
   const onType = useCallback(
     (field: FieldKey<I>, value: string): void => {

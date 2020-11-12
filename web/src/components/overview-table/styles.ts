@@ -198,6 +198,7 @@ export const Header = styled(Row)`
 
 export const HeaderLink = styled(Cell)`
   align-items: center;
+  justify-content: space-between;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;

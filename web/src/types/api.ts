@@ -1,4 +1,4 @@
-import { Page } from './app';
+import { Page, PageListCalcCategory } from './app';
 import { RawDate, Request } from './crud';
 import { ReadResponseFunds } from './funds';
 import {
@@ -79,4 +79,10 @@ export type StocksListResponse = {
     stocks: [string, string, number][];
     total: number;
   };
+};
+
+export type ReceiptCategory = {
+  item: string;
+  page: PageListCalcCategory;
+  category: string;
 };

@@ -3,7 +3,7 @@ import nock, { Scope, Interceptor } from 'nock';
 import { API_PREFIX } from '~client/constants/data';
 import { withoutId } from '~client/modules/data';
 import { CATEGORY_CASH, SUBCATEGORY_WALLET, ENTRY_BANK_HOUSE_RAW } from '~client/test-data';
-import { Item } from '~client/types';
+import { Item, ReceiptCategory } from '~client/types';
 
 export const testApiKey = 'test-api-key-19v9alkas';
 
@@ -42,3 +42,15 @@ export const nockNetWorthSubcategory = makeAuthCrudNocks(
 );
 
 export const nockNetWorthEntry = makeAuthCrudNocks('data/net-worth', ENTRY_BANK_HOUSE_RAW);
+
+export const nockSearchReceipt = (items: string, results: ReceiptCategory[] = []): Scope => {
+  return withAuthRequired(
+    nock('http://localhost').get(`${API_PREFIX}/data/search/receipt/items?q=${items}`),
+  ).reply(200, results);
+};
+
+export const nockSearchReceiptItem = (query: string, result: string | null = null): Scope => {
+  return withAuthRequired(
+    nock('http://localhost').get(`${API_PREFIX}/data/search/receipt/item-name?q=${query}`),
+  ).reply(200, { result });
+};

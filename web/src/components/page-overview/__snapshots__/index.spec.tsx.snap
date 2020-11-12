@@ -1,6 +1,140 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<PageOverview /> should render a table 1`] = `
+.c4 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  margin: 0 6px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  padding: 1em 0;
+  width: 100%;
+  background: #ffa35c;
+  font-size: 0.6em;
+  border: none;
+  border-radius: 3px;
+  outline: none;
+  text-transform: uppercase;
+  font-weight: bold;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  margin: 0;
+  padding: 0;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 18px;
+  line-height: 22px;
+  background: #c00;
+  border-radius: 100%;
+  border: none;
+  box-shadow: none;
+  color: #fff;
+  background: #009918;
+}
+
+.sc-fzpkJw .c4 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  margin: 0 0.2em;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  grid-row: 1;
+  grid-column: 4;
+}
+
+.sc-fznzOf .c4,
+.sc-fznzOf .c4:hover,
+.sc-fznzOf .c4:active {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.sc-fznzOf .c4::after {
+  display: block;
+  margin-left: 16px;
+  content: '';
+  width: 0;
+  height: 0;
+  border: solid transparent;
+  border-left-color: #111;
+  border-width: 6px 8px;
+  -webkit-transform-origin: left center;
+  -ms-transform-origin: left center;
+  transform-origin: left center;
+}
+
+.c4:disabled {
+  background: none;
+}
+
+.sc-fznLxA .c4 {
+  margin: 2px 4px;
+}
+
+.sc-fzpkqZ .c4,
+.sc-fzoydu .c4 {
+  margin: 0 5px;
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+
+.sc-pRTZB .c4 {
+  margin: 0 3px;
+  top: 0;
+  -webkit-flex: 0 0 1.375rem;
+  -ms-flex: 0 0 1.375rem;
+  flex: 0 0 1.375rem;
+}
+
+.sc-fzpkJw > .c4 {
+  grid-row: 1;
+  grid-column: 3;
+}
+
+.sc-pkhIR .c4 {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+.sc-fznLxA .c4 {
+  grid-column: 4;
+  margin: 0;
+}
+
+.sc-fzpkqZ .c4 {
+  grid-column: 4;
+}
+
 .c0 {
   margin: 0;
   padding: 0;
@@ -19,24 +153,11 @@ exports[`<PageOverview /> should render a table 1`] = `
   user-select: none;
 }
 
-.c7 {
+.c8 {
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
   overflow-y: auto;
-}
-
-.c8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-flow: row nowrap;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  width: 100%;
-  color: #333;
-  font-style: italic;
 }
 
 .c9 {
@@ -47,21 +168,9 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-flex-flow: row nowrap;
   -ms-flex-flow: row nowrap;
   flex-flow: row nowrap;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  -webkit-flex-basis: 0;
-  -ms-flex-preferred-size: 0;
-  flex-basis: 0;
-  padding: 0.25rem;
-  position: relative;
   width: 100%;
-  vertical-align: middle;
-  text-align: left;
-  height: 32px;
-  line-height: 24px;
-  background: #eaeaea;
+  color: #333;
+  font-style: italic;
 }
 
 .c10 {
@@ -86,9 +195,10 @@ exports[`<PageOverview /> should render a table 1`] = `
   text-align: left;
   height: 32px;
   line-height: 24px;
+  background: #eaeaea;
 }
 
-.c15 {
+.c11 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -113,6 +223,30 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 .c16 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  padding: 0.25rem;
+  position: relative;
+  width: 100%;
+  vertical-align: middle;
+  text-align: left;
+  height: 32px;
+  line-height: 24px;
+}
+
+.c17 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -177,44 +311,15 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;
   text-align: center;
   background: #fffca3;
-}
-
-.c4 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-flow: row nowrap;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  -webkit-flex-basis: 0;
-  -ms-flex-preferred-size: 0;
-  flex-basis: 0;
-  padding: 0.25rem;
-  position: relative;
-  width: 100%;
-  vertical-align: middle;
-  text-align: left;
-  height: 32px;
-  line-height: 24px;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  overflow: hidden;
-  white-space: nowrap;
-  height: 24px;
-  text-align: center;
-  background: #b7ffa3;
 }
 
 .c5 {
@@ -243,11 +348,15 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;
   text-align: center;
-  background: #ffa3a3;
+  background: #b7ffa3;
 }
 
 .c6 {
@@ -276,6 +385,47 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 24px;
+  text-align: center;
+  background: #ffa3a3;
+}
+
+.c7 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  padding: 0.25rem;
+  position: relative;
+  width: 100%;
+  vertical-align: middle;
+  text-align: left;
+  height: 32px;
+  line-height: 24px;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
   overflow: hidden;
   white-space: nowrap;
   height: 24px;
@@ -287,11 +437,11 @@ exports[`<PageOverview /> should render a table 1`] = `
   color: black;
 }
 
-.c14 {
+.c15 {
   display: none;
 }
 
-.c11 {
+.c12 {
   outline: none;
 }
 
@@ -301,6 +451,112 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 @media only screen and (min-width:1200px) {
 
+}
+
+@media only screen and (min-width:500px) {
+  .c4 {
+    display: inline-block;
+    margin: 0;
+    padding: 5px 12px 6px;
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+    -ms-flex-positive: 0;
+    flex-grow: 0;
+    width: auto;
+    box-shadow: inset 0px 1px 0px 0px;
+    background: linear-gradient(to bottom,#68a54b 5%,#74ad5a 100%);
+    background-color: #68a54b;
+    border: 1px solid #3b6e22;
+    border-radius: 0;
+    cursor: pointer;
+    color: #fff;
+    font-family: Arial;
+    font-size: 13px;
+    height: 24px;
+    position: relative;
+    -webkit-text-decoration: none;
+    text-decoration: none;
+    text-transform: none;
+    z-index: 4;
+  }
+
+  .c4:hover {
+    background-color: #74ad5a;
+    background-image: linear-gradient( to bottom, #74ad5a 5%, #68a54b 100% );
+  }
+
+  .c4:active {
+    top: 1px;
+    background: $color-button-active;
+  }
+
+  .c4:focus {
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+  }
+
+  .c4:disabled {
+    background: #9c9c9c;
+    cursor: default;
+    border: 1px solid #666;
+  }
+}
+
+@media only screen and (min-width:500px) {
+  .c4 {
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    font-size: 18px;
+    line-height: 22px;
+    background: #c00;
+    border-radius: 100%;
+    border: none;
+    box-shadow: none;
+    color: #fff;
+  }
+}
+
+@media only screen and (min-width:500px) {
+  .c4:focus,
+  .c4:hover {
+    background: #900;
+  }
+
+  .c4:focus:active,
+  .c4:hover:active {
+    background: #600;
+  }
+}
+
+@media only screen and (min-width:500px) {
+  .c4 {
+    background: #009918;
+  }
+}
+
+@media only screen and (min-width:500px) {
+  .c4:focus,
+  .c4:hover {
+    background: #006610;
+  }
+
+  .c4:focus:active,
+  .c4:hover:active {
+    background: #003308;
+  }
 }
 
 @media only screen and (min-width:500px) {
@@ -349,20 +605,20 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .c7 {
+  .c8 {
     overflow-y: unset;
     overflow: hidden;
   }
 }
 
 @media only screen and (min-width:1200px) {
-  .c7 {
+  .c8 {
     overflow: unset;
   }
 }
 
 @media only screen and (min-width:500px) {
-  .c8 {
+  .c9 {
     font-size: 16px;
   }
 }
@@ -372,14 +628,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c9 {
+  .c10 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:500px) {
-  .c9 {
+  .c10 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -397,14 +653,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c10 {
+  .c11 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:500px) {
-  .c10 {
+  .c11 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -423,14 +679,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c15 {
+  .c16 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:500px) {
-  .c15 {
+  .c16 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -448,14 +704,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c16 {
+  .c17 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:500px) {
-  .c16 {
+  .c17 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -511,14 +767,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:350px) {
-  .c4 {
+  .c5 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:500px) {
-  .c4 {
+  .c5 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -534,20 +790,20 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .c4 {
+  .c5 {
     padding: 2px;
   }
 }
 
 @media only screen and (min-width:350px) {
-  .c5 {
+  .c6 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:500px) {
-  .c5 {
+  .c6 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -562,20 +818,20 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .c5 {
+  .c6 {
     padding: 2px;
   }
 }
 
 @media only screen and (min-width:350px) {
-  .c6 {
+  .c7 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width:500px) {
-  .c6 {
+  .c7 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -590,7 +846,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .c6 {
+  .c7 {
     padding: 2px;
   }
 }
@@ -602,7 +858,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .c14 {
+  .c15 {
     background: rgba(255,255,255,0.8);
     position: absolute;
     left: 0;
@@ -612,13 +868,13 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .c11:hover .c12,
-  .c11:focus .c12 {
+  .c12:hover .c13,
+  .c12:focus .c13 {
     display: none;
   }
 
-  .c11:hover .c13,
-  .c11:focus .c13 {
+  .c12:hover .c14,
+  .c12:focus .c14 {
     display: block;
   }
 }
@@ -638,9 +894,14 @@ exports[`<PageOverview /> should render a table 1`] = `
       >
         Month
       </span>
+      <button
+        class="sc-psCJM sc-qQxXP sc-qYSYK c4"
+      >
+        +
+      </button>
     </div>
     <div
-      class="c4"
+      class="c5"
     >
       <span
         class="c3"
@@ -649,7 +910,7 @@ exports[`<PageOverview /> should render a table 1`] = `
       </span>
     </div>
     <div
-      class="c5"
+      class="c6"
     >
       <span
         class="c3"
@@ -658,7 +919,7 @@ exports[`<PageOverview /> should render a table 1`] = `
       </span>
     </div>
     <div
-      class="c6"
+      class="c7"
     >
       <a
         class="c3"
@@ -669,71 +930,71 @@ exports[`<PageOverview /> should render a table 1`] = `
     </div>
   </div>
   <div
-    class="c7"
+    class="c8"
   >
     <div
-      class="c8"
+      class="c9"
     >
       <div
-        class="c9"
+        class="c10"
       >
         Jan-18
       </div>
       <div
-        class="c10"
+        class="c11"
         style="background-color: rgb(146, 223, 155);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £20.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £20.00
-          </span>
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(209, 99, 99);"
-      >
-        <span
-          class="c11"
-          tabindex="0"
-        >
-          <span
-            class="c12 "
-          >
-            £12.60
-          </span>
-          <span
-            class="c13 c14"
-          >
-            £12.60
           </span>
         </span>
       </div>
       <div
         class="c16"
-        style="background-color: rgb(255, 255, 255);"
+        style="background-color: rgb(209, 99, 99);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
+          >
+            £12.60
+          </span>
+          <span
+            class="c14 c15"
+          >
+            £12.60
+          </span>
+        </span>
+      </div>
+      <div
+        class="c17"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c12"
+          tabindex="0"
+        >
+          <span
+            class="c13 "
           >
             £0.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £0.00
           </span>
@@ -741,68 +1002,68 @@ exports[`<PageOverview /> should render a table 1`] = `
       </div>
     </div>
     <div
-      class="c8"
+      class="c9"
     >
       <div
-        class="c9"
+        class="c10"
       >
         Feb-18
       </div>
       <div
-        class="c10"
+        class="c11"
         style="background-color: rgb(167, 229, 175);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £19.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £19.00
-          </span>
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(191, 36, 36);"
-      >
-        <span
-          class="c11"
-          tabindex="0"
-        >
-          <span
-            class="c12 "
-          >
-            £20.68
-          </span>
-          <span
-            class="c13 c14"
-          >
-            £20.68
           </span>
         </span>
       </div>
       <div
         class="c16"
-        style="background-color: rgb(51, 195, 69);"
+        style="background-color: rgb(191, 36, 36);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
+          >
+            £20.68
+          </span>
+          <span
+            class="c14 c15"
+          >
+            £20.68
+          </span>
+        </span>
+      </div>
+      <div
+        class="c17"
+        style="background-color: rgb(51, 195, 69);"
+      >
+        <span
+          class="c12"
+          tabindex="0"
+        >
+          <span
+            class="c13 "
           >
             £35.5k
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £35,540.27
           </span>
@@ -810,68 +1071,68 @@ exports[`<PageOverview /> should render a table 1`] = `
       </div>
     </div>
     <div
-      class="c8"
+      class="c9"
     >
       <div
-        class="c9"
+        class="c10"
       >
         Mar-18
       </div>
       <div
-        class="c10"
+        class="c11"
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £15.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £15.00
-          </span>
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(223, 146, 146);"
-      >
-        <span
-          class="c11"
-          tabindex="0"
-        >
-          <span
-            class="c12 "
-          >
-            £6.59
-          </span>
-          <span
-            class="c13 c14"
-          >
-            £6.59
           </span>
         </span>
       </div>
       <div
         class="c16"
-        style="background-color: rgb(36, 191, 55);"
+        style="background-color: rgb(223, 146, 146);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
+          >
+            £6.59
+          </span>
+          <span
+            class="c14 c15"
+          >
+            £6.59
+          </span>
+        </span>
+      </div>
+      <div
+        class="c17"
+        style="background-color: rgb(36, 191, 55);"
+      >
+        <span
+          class="c12"
+          tabindex="0"
+        >
+          <span
+            class="c13 "
           >
             £41.2k
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £41,182.56
           </span>
@@ -879,68 +1140,68 @@ exports[`<PageOverview /> should render a table 1`] = `
       </div>
     </div>
     <div
-      class="c8"
+      class="c9"
     >
       <div
-        class="c9"
+        class="c10"
       >
         Apr-18
       </div>
       <div
-        class="c10"
+        class="c11"
         style="background-color: rgb(54, 196, 72);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £25.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £25.00
-          </span>
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(221, 140, 140);"
-      >
-        <span
-          class="c11"
-          tabindex="0"
-        >
-          <span
-            class="c12 "
-          >
-            £7.27
-          </span>
-          <span
-            class="c13 c14"
-          >
-            £7.27
           </span>
         </span>
       </div>
       <div
         class="c16"
-        style="background-color: rgb(255, 255, 255);"
+        style="background-color: rgb(221, 140, 140);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
+          >
+            £7.27
+          </span>
+          <span
+            class="c14 c15"
+          >
+            £7.27
+          </span>
+        </span>
+      </div>
+      <div
+        class="c17"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c12"
+          tabindex="0"
+        >
+          <span
+            class="c13 "
           >
             £0.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £0.00
           </span>
@@ -948,50 +1209,30 @@ exports[`<PageOverview /> should render a table 1`] = `
       </div>
     </div>
     <div
-      class="c8"
+      class="c9"
     >
       <div
-        class="c9"
+        class="c10"
       >
         May-18
       </div>
       <div
-        class="c10"
+        class="c11"
         style="background-color: rgb(91, 207, 105);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £23.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £23.00
-          </span>
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(255, 255, 255);"
-      >
-        <span
-          class="c11"
-          tabindex="0"
-        >
-          <span
-            class="c12 "
-          >
-            £0.00
-          </span>
-          <span
-            class="c13 c14"
-          >
-            £0.00
           </span>
         </span>
       </div>
@@ -1000,16 +1241,36 @@ exports[`<PageOverview /> should render a table 1`] = `
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £0.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
+          >
+            £0.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c17"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c12"
+          tabindex="0"
+        >
+          <span
+            class="c13 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c14 c15"
           >
             £0.00
           </span>
@@ -1017,50 +1278,30 @@ exports[`<PageOverview /> should render a table 1`] = `
       </div>
     </div>
     <div
-      class="c8"
+      class="c9"
     >
       <div
-        class="c9"
+        class="c10"
       >
         Jun-18
       </div>
       <div
-        class="c10"
+        class="c11"
         style="background-color: rgb(189, 236, 195);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £18.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £18.00
-          </span>
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(255, 255, 255);"
-      >
-        <span
-          class="c11"
-          tabindex="0"
-        >
-          <span
-            class="c12 "
-          >
-            £0.00
-          </span>
-          <span
-            class="c13 c14"
-          >
-            £0.00
           </span>
         </span>
       </div>
@@ -1069,16 +1310,36 @@ exports[`<PageOverview /> should render a table 1`] = `
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £0.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
+          >
+            £0.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c17"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c12"
+          tabindex="0"
+        >
+          <span
+            class="c13 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c14 c15"
           >
             £0.00
           </span>
@@ -1086,50 +1347,30 @@ exports[`<PageOverview /> should render a table 1`] = `
       </div>
     </div>
     <div
-      class="c8"
+      class="c9"
     >
       <div
-        class="c9"
+        class="c10"
       >
         Jul-18
       </div>
       <div
-        class="c10"
+        class="c11"
         style="background-color: rgb(36, 191, 55);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £26.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
           >
             £26.00
-          </span>
-        </span>
-      </div>
-      <div
-        class="c15"
-        style="background-color: rgb(255, 255, 255);"
-      >
-        <span
-          class="c11"
-          tabindex="0"
-        >
-          <span
-            class="c12 "
-          >
-            £0.00
-          </span>
-          <span
-            class="c13 c14"
-          >
-            £0.00
           </span>
         </span>
       </div>
@@ -1138,16 +1379,36 @@ exports[`<PageOverview /> should render a table 1`] = `
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="c11"
+          class="c12"
           tabindex="0"
         >
           <span
-            class="c12 "
+            class="c13 "
           >
             £0.00
           </span>
           <span
-            class="c13 c14"
+            class="c14 c15"
+          >
+            £0.00
+          </span>
+        </span>
+      </div>
+      <div
+        class="c17"
+        style="background-color: rgb(255, 255, 255);"
+      >
+        <span
+          class="c12"
+          tabindex="0"
+        >
+          <span
+            class="c13 "
+          >
+            £0.00
+          </span>
+          <span
+            class="c14 c15"
           >
             £0.00
           </span>
@@ -1165,7 +1426,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
   z-index: 2;
 }
 
-.sc-pjstK .c2 {
+.sc-pciEQ .c2 {
   position: relative;
   height: 125px;
 }
@@ -1241,7 +1502,27 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .sc-pjstK .c2 {
+
+}
+
+@media only screen and (min-width:500px) {
+
+}
+
+@media only screen and (min-width:500px) {
+
+}
+
+@media only screen and (min-width:500px) {
+
+}
+
+@media only screen and (min-width:500px) {
+
+}
+
+@media only screen and (min-width:500px) {
+  .sc-pciEQ .c2 {
     height: 100%;
   }
 }
@@ -1256,7 +1537,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
   }
 
-  .sc-fzqBkg .c2 {
+  .sc-pZOBi .c2 {
     z-index: 10;
     width: 100px;
     height: 100%;
@@ -1456,7 +1737,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 <div
-  class="sc-pJUVA c0"
+  class="sc-pzMyG c0"
   data-testid="graph-overview"
 >
   <div

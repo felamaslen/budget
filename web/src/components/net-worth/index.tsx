@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { Route } from 'react-router-dom';
@@ -18,6 +18,7 @@ import {
   netWorthUpdated,
   netWorthDeleted,
 } from '~client/actions';
+import { ModalWindow } from '~client/components/modal-window';
 import { useCrud } from '~client/hooks';
 import { getCategories, getSubcategories, getEntries, getNetWorthTable } from '~client/selectors';
 import { Category, Subcategory, Entry } from '~client/types';
@@ -44,27 +45,12 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
     netWorthDeleted,
   );
 
-  const timer = useRef<number>();
-  const [visible, setVisible] = useState(false);
-  const onClose = useCallback(() => {
-    setVisible(false);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      history.replace('/');
-    }, 300);
+  const onClosed = useCallback(() => {
+    history.replace('/');
   }, [history]);
 
-  useEffect(() => {
-    setVisible(true);
-    return (): void => clearTimeout(timer.current);
-  }, []);
-
   return (
-    <Styled.NetWorth visible={visible}>
-      <Styled.Meta>
-        <Styled.Title>{'Net worth'}</Styled.Title>
-        <Styled.BackButton onClick={onClose}>&times;</Styled.BackButton>
-      </Styled.Meta>
+    <ModalWindow title="Net worth" onClosed={onClosed}>
       <Route
         exact
         path="/net-worth"
@@ -117,7 +103,7 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
           {'Entries'}
         </Styled.Tab>
       </Styled.TabBar>
-    </Styled.NetWorth>
+    </ModalWindow>
   );
 };
 const RoutedNetWorth = withRouter(NetWorth);

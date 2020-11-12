@@ -1,3 +1,4 @@
+import endOfDay from 'date-fns/endOfDay';
 import startOfDay from 'date-fns/startOfDay';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -108,7 +109,7 @@ export const AccessibleListStandard = <
 }: PropsStandard<I, P, MK, E & ExtraProps>): React.ReactElement<
   PropsStandard<I, P, MK, E & ExtraProps>
 > => {
-  const now = useMemo<Date>(() => startOfDay(new Date()), []);
+  const now = useMemo<Date>(() => endOfDay(new Date()), []);
   const itemProcessor = useMemo(() => makeItemProcessor(now), [now]);
   const allSuggestionFields = useMemo<FieldKey<I>[]>(
     () => [...(suggestionFields ?? []), ...standardSuggestionFields] as FieldKey<I>[],

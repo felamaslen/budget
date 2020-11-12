@@ -1,5 +1,6 @@
 import * as getenv from 'getenv';
 
+import { getDbUrl } from './db-url';
 import { Page, ListCalcCategory } from './types';
 
 if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
@@ -9,10 +10,7 @@ if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'tru
 
 const config = {
   db: {
-    url:
-      process.env.NODE_ENV === 'test'
-        ? getenv.string('TEST_DATABASE_URL', 'postgres://docker:docker@localhost:5440/budget_test')
-        : getenv.string('DATABASE_URL'),
+    url: getDbUrl(),
   },
   app: {
     port: getenv.int('PORT', 3000),

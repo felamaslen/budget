@@ -1,6 +1,6 @@
 import joi from '@hapi/joi';
 
-export const searchSchema = joi.object().keys({
+export const searchSchema = joi.object({
   table: joi.string().valid('income', 'bills', 'food', 'general', 'holiday', 'social').required(),
   column: joi
     .string()
@@ -19,4 +19,8 @@ export const searchSchema = joi.object().keys({
     .required(),
   searchTerm: joi.string().min(1).required(),
   numResults: joi.number().integer().min(1).max(10).default(5),
+});
+
+export const receiptSchema = joi.object({
+  q: joi.string().required(),
 });

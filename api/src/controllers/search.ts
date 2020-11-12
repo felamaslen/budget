@@ -1,7 +1,13 @@
 import { TaggedTemplateLiteralInvocationType, DatabaseTransactionConnectionType } from 'slonik';
 
-import { getShortTermQuery, getLongTermQuery, getSearchResults } from '~api/queries/search';
-import { SearchParams, SearchResult } from '~api/types';
+import {
+  getShortTermQuery,
+  getLongTermQuery,
+  getSearchResults,
+  matchReceiptItems,
+  matchReceiptItemName,
+} from '~api/queries/search';
+import { SearchParams, SearchResult, ReceiptCategory } from '~api/types';
 
 export const getColumnResults = (
   uid: number,
@@ -33,3 +39,26 @@ export const getSuggestions = async (
   const list = result.rows.map(({ value }) => value);
   return { list };
 };
+
+export async function getReceiptCategories(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  query: string,
+): Promise<ReceiptCategory[]> {
+  const items = query.split(',');
+  const results = await matchReceiptItems(db, uid, items);
+  return results.map<ReceiptCategory>((row) => ({
+    item: row.item,
+    page: row.matched_page,
+    category: row.matched_category,
+  }));
+}
+
+export async function getReceiptItem(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  query: string,
+): Promise<{ result: string | null }> {
+  const result = await matchReceiptItemName(db, uid, query);
+  return { result };
+}

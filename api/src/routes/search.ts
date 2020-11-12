@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import { getSuggestions } from '~api/controllers';
+import { getSuggestions, getReceiptCategories, getReceiptItem } from '~api/controllers';
 import { validatedAuthDbRoute } from '~api/middleware/request';
-import { searchSchema } from '~api/schema';
+import { searchSchema, receiptSchema } from '~api/schema';
 import { SearchParams } from '~api/types';
 
 const routeGet = validatedAuthDbRoute<never, SearchParams>(
@@ -15,8 +15,30 @@ const routeGet = validatedAuthDbRoute<never, SearchParams>(
   },
 );
 
+const routeMatchReceiptItems = validatedAuthDbRoute<void, void, { q: string }>(
+  {
+    query: receiptSchema,
+  },
+  async (db, req, res, _, __, query) => {
+    const result = await getReceiptCategories(db, req.user.uid, query.q);
+    res.json(result);
+  },
+);
+
+const routeMatchReceiptItemName = validatedAuthDbRoute<void, void, { q: string }>(
+  {
+    query: receiptSchema,
+  },
+  async (db, req, res, _, __, query) => {
+    const result = await getReceiptItem(db, req.user.uid, query.q);
+    res.json(result);
+  },
+);
+
 export function handler(): Router {
   const router = Router();
+  router.get('/receipt/items', routeMatchReceiptItems);
+  router.get('/receipt/item-name', routeMatchReceiptItemName);
   router.get('/:table/:column/:searchTerm/:numResults?', routeGet);
   return router;
 }

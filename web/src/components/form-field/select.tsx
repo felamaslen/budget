@@ -13,12 +13,20 @@ type Props<V> = {
   options: SelectOptions<V>;
   value: V;
   onChange: (value: V) => void;
+  inputProps?: Record<string, unknown>;
 };
 export { Props as PropsSelect };
 
 export const FormFieldSelect: <V = string>(
   props: React.PropsWithChildren<Props<V>>,
-) => React.ReactElement<Props<V>> = ({ item = '', options, value, onChange, ...props }) => {
+) => React.ReactElement<Props<V>> = ({
+  item = '',
+  options,
+  value,
+  onChange,
+  inputProps = {},
+  ...props
+}) => {
   useEffect(() => {
     if (options.length && !options.some(({ internal }) => deepEqual(internal, value))) {
       onChange(options[0].internal);
@@ -49,6 +57,7 @@ export const FormFieldSelect: <V = string>(
         onBlur={onChangeCallback}
         onChange={onChangeCallback}
         {...props}
+        {...inputProps}
       >
         {options.map(({ internal, external = String(internal) }) => (
           <option key={external} value={external}>

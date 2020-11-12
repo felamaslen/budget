@@ -8,6 +8,7 @@ import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { useMediaQuery, TodayContext } from '~client/hooks';
 import { getOverviewTable } from '~client/selectors';
 import { breakpointBase } from '~client/styled/mixins';
+import { ButtonAdd } from '~client/styled/shared';
 import { breakpoints } from '~client/styled/variables';
 import {
   OverviewTable as OverviewTableRows,
@@ -49,10 +50,15 @@ function getTableColumns(isMobile: boolean, isLarge: boolean): OverviewTableColu
   return isLarge ? tableColumnsFull : tableColumnsRestricted;
 }
 
-const Header: React.FC<ColumnsProps> = ({ columns }) => (
+type Props = {
+  addReceipt: () => void;
+};
+
+const Header: React.FC<Props & ColumnsProps> = ({ columns, addReceipt }) => (
   <Styled.Header>
     <Styled.HeaderLink column="month" key="month">
       <Styled.HeaderText>Month</Styled.HeaderText>
+      <ButtonAdd onClick={addReceipt}>+</ButtonAdd>
     </Styled.HeaderLink>
     {columns.map(([column, { name, link }]) => (
       <Styled.HeaderLink column={column} key={name}>
@@ -81,7 +87,7 @@ const Rows: React.FC<PropsRows> = ({ isMobile, columns, rows }) => (
 );
 const RowsMemo = memo(Rows);
 
-export const OverviewTable: React.FC = () => {
+export const OverviewTable: React.FC<Props> = ({ addReceipt }) => {
   const today = useContext(TodayContext);
   const rows = useSelector(getOverviewTable(today));
 
@@ -97,7 +103,7 @@ export const OverviewTable: React.FC = () => {
 
   return (
     <Styled.OverviewTable data-testid="overview-table">
-      <Header columns={tableColumns} />
+      <Header columns={tableColumns} addReceipt={addReceipt} />
       <RowsMemo isMobile={isMobile} columns={tableColumns} rows={rows} />
     </Styled.OverviewTable>
   );

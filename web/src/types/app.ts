@@ -20,3 +20,4 @@ export type PageList =
   | Page.social;
 
 export type PageListCalc = Exclude<PageList, Page.funds>;
+export type PageListCalcCategory = Exclude<PageListCalc, Page.income | Page.bills>;

@@ -1,9 +1,8 @@
-import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { breakpoint, rem } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
 
-export const NetWorth = styled.div<{ visible: boolean }>`
+export const ModalWindow = styled.div<{ visible: boolean }>`
   background: ${colors.shadow.mediumDark};
   display: flex;
   flex-flow: column;
@@ -28,31 +27,37 @@ export const NetWorth = styled.div<{ visible: boolean }>`
   }
 `;
 
-export const TabBar = styled.div`
+export const Meta = styled.div`
   display: flex;
-  padding: 0 5px;
-  flex: 0 0 22px;
-  width: 100%;
-`;
-
-export const Tab = styled(NavLink)`
-  display: inline-flex;
+  flex: 0 0 24px;
   align-items: center;
-  margin: 0 5px;
-  padding: 0 10px;
-  line-height: 22px;
+  justify-content: center;
+  position: relative;
   background: ${colors.shadow.mediumLight};
   color: ${colors.white};
-  text-decoration: none;
-  border-radius: 0 0 6px 6px;
+`;
 
-  &:hover,
-  &:active {
-    background: ${colors.black};
-  }
-  &.selected {
-    background: ${colors.shadow.light};
-    color: ${colors.light.mediumDark};
-    cursor: default;
-  }
+export const Title = styled.h2`
+  margin: 0 5px;
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+export const BackButton = styled.a.attrs({
+  role: 'link',
+  tabIndex: 0,
+})`
+  display: block;
+  position: absolute;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 25px;
+  line-height: 20px;
+  text-decoration: none;
+  color: black;
+  background: rgba(190, 10, 10, 0.8);
+  color: ${colors.white};
+  cursor: pointer;
 `;

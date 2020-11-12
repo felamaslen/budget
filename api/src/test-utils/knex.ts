@@ -1,6 +1,6 @@
 import path from 'path';
 import knex, { Config, PgConnectionConfig } from 'knex';
-import config from '~api/config';
+import { getDbUrl } from '~api/db-url';
 
 function parseConnectionURI(uri = ''): PgConnectionConfig {
   const matches = uri.match(
@@ -24,7 +24,7 @@ function parseConnectionURI(uri = ''): PgConnectionConfig {
 
 export const knexConfig: Config = {
   client: 'pg',
-  connection: parseConnectionURI(config.db.url),
+  connection: parseConnectionURI(getDbUrl()),
   seeds: {
     directory: path.resolve(
       __dirname,
