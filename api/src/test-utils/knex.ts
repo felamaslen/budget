@@ -4,7 +4,7 @@ import { getDbUrl } from '~api/db-url';
 
 function parseConnectionURI(uri = ''): PgConnectionConfig {
   const matches = uri.match(
-    /^postgres(ql)?:\/\/(\w+):(\w+)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/,
+    /^postgres(ql)?:\/\/(\w+):(.*)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/,
   );
 
   if (!matches) {
