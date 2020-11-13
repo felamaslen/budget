@@ -322,6 +322,12 @@ exports[`<PageOverview /> should render a table 1`] = `
   background: #fffca3;
 }
 
+.c2 button {
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+
 .c5 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -357,6 +363,12 @@ exports[`<PageOverview /> should render a table 1`] = `
   height: 24px;
   text-align: center;
   background: #b7ffa3;
+}
+
+.c5 button {
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 
 .c6 {
@@ -396,6 +408,12 @@ exports[`<PageOverview /> should render a table 1`] = `
   background: #ffa3a3;
 }
 
+.c6 button {
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+
 .c7 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -431,6 +449,12 @@ exports[`<PageOverview /> should render a table 1`] = `
   height: 24px;
   text-align: center;
   background: #fff;
+}
+
+.c7 button {
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 
 .c3 {
@@ -1426,7 +1450,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
   z-index: 2;
 }
 
-.sc-pciEQ .c2 {
+.sc-qQYBZ .c2 {
   position: relative;
   height: 125px;
 }
@@ -1522,7 +1546,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .sc-pciEQ .c2 {
+  .sc-qQYBZ .c2 {
     height: 100%;
   }
 }
@@ -1537,7 +1561,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
   }
 
-  .sc-pZOBi .c2 {
+  .sc-pjHjD .c2 {
     z-index: 10;
     width: 100px;
     height: 100%;
@@ -1737,7 +1761,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 <div
-  class="sc-pzMyG c0"
+  class="sc-pYA-dN c0"
   data-testid="graph-overview"
 >
   <div

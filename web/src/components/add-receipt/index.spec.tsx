@@ -41,8 +41,7 @@ describe('<AddReceipt />', () => {
   };
 
   beforeEach(() => {
-    nockSearchReceipt('Other%20general%20item', []);
-    nockSearchReceipt('Some%20food%20item', [
+    nockSearchReceipt('Some%20food%20item,Other%20general%20item', [
       {
         item: 'Some food item',
         page: Page.food,
@@ -129,7 +128,7 @@ describe('<AddReceipt />', () => {
 
       addItem(result, 'Some food item', '1.23');
 
-      const buttonAdd = result.getByText('Add') as HTMLButtonElement;
+      const buttonAdd = result.getByText('+') as HTMLButtonElement;
       await waitFor(() => {
         expect(buttonAdd.disabled).toBe(false);
       });
@@ -148,12 +147,21 @@ describe('<AddReceipt />', () => {
         fireEvent.blur(inputGeneralItem);
       });
 
-      const inputDone = result.getByText('Finish') as HTMLButtonElement;
+      const inputComplete = result.getByText('Autocomplete') as HTMLButtonElement;
+      act(() => {
+        fireEvent.click(inputComplete);
+      });
+
       await waitFor(() => {
-        expect(inputDone.disabled).toBe(false);
+        expect(result.getByText('Finish')).toBeInTheDocument();
+      });
+
+      const inputFinish = result.getByText('Finish') as HTMLButtonElement;
+      await waitFor(() => {
+        expect(inputFinish.disabled).toBe(false);
       });
       act(() => {
-        fireEvent.click(inputDone);
+        fireEvent.click(inputFinish);
       });
 
       await waitFor(() => {
@@ -213,6 +221,29 @@ describe('<AddReceipt />', () => {
       expect(inputsCategory).toHaveLength(1);
       expect(inputsPage).toHaveLength(1);
       expect(inputsCost).toHaveLength(1);
+    });
+  });
+
+  describe('when autocompleting an item field', () => {
+    it('should make the case consistent', async () => {
+      nockSearchReceiptItem('cri', 'Crisps');
+      const { getAllByPlaceholderText, getByText } = setup();
+      const inputItem = getAllByPlaceholderText('Item')[0] as HTMLInputElement;
+
+      act(() => {
+        fireEvent.change(inputItem, { target: { value: 'cri' } });
+      });
+
+      await waitFor(() => {
+        expect(getByText('Crisps')).toBeInTheDocument();
+        expect(inputItem.value).toBe('Cri');
+      });
+
+      act(() => {
+        fireEvent.blur(inputItem);
+      });
+
+      expect(inputItem.value).toBe('Cri');
     });
   });
 });

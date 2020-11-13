@@ -14,10 +14,16 @@ export const ItemSuggestion = styled.span`
 
 export const Main = styled(FlexColumn)`
   background: ${colors.white};
+  flex: 1;
+  overflow: auto;
 
   label {
     display: flex;
     margin: ${rem(2)} 0 ${rem(6)};
+  }
+
+  button {
+    flex: 0 0 auto;
   }
 
   input,
@@ -26,6 +32,7 @@ export const Main = styled(FlexColumn)`
     font-size: ${rem(14)};
     letter-spacing: 0;
     line-height: ${rem(8)};
+    text-transform: uppercase;
   }
   input {
     border: 1px solid ${colors.medium.mediumDark};
@@ -54,6 +61,14 @@ export const List = styled(FlexColumn)`
   ${breakpoint(breakpoints.mobile)} {
     flex: 1;
     overflow-y: auto;
+
+    input {
+      transition: border-color 0.2s ease;
+
+      &:not(:focus) {
+        border-color: transparent;
+      }
+    }
   }
 `;
 
@@ -61,7 +76,13 @@ export const Label = styled.span`
   flex: 0 0 ${rem(100)};
 `;
 
+export const ItemCategory = styled(FlexColumn)`
+  flex: 1;
+  height: ${rem(48)};
+`;
+
 export const ItemField = styled.div`
+  flex: 0 0 ${rem(24)};
   flex: 1;
   height: 100%;
   position: relative;
@@ -79,3 +100,16 @@ export const ItemField = styled.div`
     width: 100%;
   }
 `;
+
+export const CategoryField = styled.div`
+  flex: 0 0 ${rem(24)};
+
+  input {
+    border-style: dotted;
+    border-color: transparent;
+    border-bottom-color: ${colors.medium.light};
+    font-size: ${rem(12)};
+  }
+`;
+
+export const CostPage = styled(FlexColumn)``;

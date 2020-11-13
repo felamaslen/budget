@@ -201,4 +201,17 @@ describe('<FormFieldText />', () => {
     });
     expect(onFocus).toHaveBeenCalledTimes(1);
   });
+
+  it('should call an onBlur input prop when blurring manually', () => {
+    expect.assertions(2);
+    const onBlur = jest.fn();
+    const { getByDisplayValue } = render(<FormFieldText {...props} inputProps={{ onBlur }} />);
+
+    expect(onBlur).toHaveBeenCalledTimes(0);
+    act(() => {
+      fireEvent.focus(getByDisplayValue('foo'));
+      fireEvent.blur(getByDisplayValue('foo'));
+    });
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
 });

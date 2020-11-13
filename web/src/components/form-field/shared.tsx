@@ -85,6 +85,17 @@ export const makeInlineField = <V, P extends {} = {}>({
       ...hookOptions,
     });
 
+    const inputOnBlur = inputProps.onBlur;
+    const customOnBlur = useCallback(
+      (event: React.FocusEvent<HTMLInputElement>) => {
+        onBlur();
+        if (inputOnBlur) {
+          inputOnBlur(event);
+        }
+      },
+      [onBlur, inputOnBlur],
+    );
+
     return (
       <Wrapper item={item} active={active} invalid={invalid} small={small}>
         {Children}
@@ -96,7 +107,7 @@ export const makeInlineField = <V, P extends {} = {}>({
           {...staticInputProps}
           value={inputValue}
           onChange={onChange}
-          onBlur={onBlur}
+          onBlur={customOnBlur}
         />
         {children}
       </Wrapper>

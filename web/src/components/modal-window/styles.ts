@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { breakpoint, rem } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
 
-export const ModalWindow = styled.div<{ visible: boolean }>`
+export const ModalWindow = styled.div<{ visible: boolean; width?: number }>`
   background: ${colors.shadow.mediumDark};
   display: flex;
   flex-flow: column;
@@ -20,7 +20,7 @@ export const ModalWindow = styled.div<{ visible: boolean }>`
     left: 50%;
     height: auto;
     max-height: 90%;
-    min-width: ${rem(breakpoints.mobile)};
+    min-width: ${({ width = breakpoints.mobile }): string => rem(width)};
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
     width: auto;

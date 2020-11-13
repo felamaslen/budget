@@ -14,7 +14,14 @@ import {
 import { ModalWindow } from '~client/components/modal-window';
 import { API_PREFIX } from '~client/constants/data';
 import { useCancellableRequest } from '~client/hooks';
-import { Flex, Button } from '~client/styled/shared';
+import {
+  Flex,
+  Button,
+  ButtonDelete,
+  ButtonAdd,
+  FlexCenter,
+  FlexColumn,
+} from '~client/styled/shared';
 import {
   Food,
   General,
@@ -48,6 +55,7 @@ const pageOptions: SelectOptions<PageListCalcCategory> = [
 
 type EntryProps = {
   entry: Entry;
+  loading: boolean;
   onChange: (id: number, delta: Delta<Entry>) => void;
   onRemove: (id: number) => void;
 };
@@ -63,20 +71,30 @@ const requestCategoryPage = (
   axios.get<ReceiptCategory[]>(`${API_PREFIX}/data/search/receipt/items?q=${query}`);
 
 function useAutocompleteCategoryPage(
-  onChangeCategory: (category: string) => void,
-  onChangePage: (page: PageListCalcCategory) => void,
-): [boolean, (item: string) => void] {
+  entries: Entry[],
+  setEntries: (action: React.SetStateAction<Entry[]>) => void,
+): [boolean, () => void] {
   const [query, setQuery] = useState<string | null>(null);
+
+  const requestItemInfo = useCallback(() => {
+    setQuery(entries.length ? entries.map((entry) => entry.item).join(',') : null);
+  }, [entries]);
 
   const handleResponse = useCallback(
     (res: ReceiptCategory[]) => {
       if (!res.length) {
         return;
       }
-      onChangeCategory(res[0].category);
-      onChangePage(res[0].page);
+      setEntries((last) =>
+        last.map((entry) => {
+          const matchingResponse = res.find(({ item }) => item === entry.item);
+          return matchingResponse
+            ? { ...entry, category: matchingResponse.category, page: matchingResponse.page }
+            : entry;
+        }),
+      );
     },
-    [onChangeCategory, onChangePage],
+    [setEntries],
   );
 
   const loading = useCancellableRequest<string | null, ReceiptCategory[], string>({
@@ -85,7 +103,7 @@ function useAutocompleteCategoryPage(
     handleResponse,
   });
 
-  return [loading, setQuery];
+  return [loading, requestItemInfo];
 }
 
 type ItemResponse = { result: string | null };
@@ -95,7 +113,7 @@ const requestItem = (axios: AxiosInstance, query: string): Promise<AxiosResponse
 
 function useAutocompleteItem(
   setItemSuggestion: (item: string | null) => void,
-): [boolean, (item: string) => void] {
+): [boolean, string | null, (item: string) => void] {
   const [query, setQuery] = useState<string | null>(null);
 
   const handleResponse = useCallback(
@@ -117,22 +135,22 @@ function useAutocompleteItem(
     onClear,
   });
 
-  return [loading, setQuery];
+  return [loading, query, setQuery];
 }
 
 type PropsItem = {
   onChange: (item: string) => void;
+  suggestion: string | null;
+  setSuggestion: (suggestion: React.SetStateAction<string | null>) => void;
 } & Pick<Entry, 'item'>;
 
-const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange }) => {
-  const [itemSuggestion, setItemSuggestion] = useState<string | null>(null);
-
+const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange, suggestion, setSuggestion }) => {
   const [accepted, setAccepted] = useState<boolean>(false);
   const didAccept = useRef<boolean>();
 
-  const [, requestItemSuggestion] = useAutocompleteItem(setItemSuggestion);
+  const [, query, requestItemSuggestion] = useAutocompleteItem(setSuggestion);
 
-  const hasSuggestion = !!itemSuggestion;
+  const hasSuggestion = !!suggestion;
   useEffect(() => {
     if (hasSuggestion) {
       const listener = (event: KeyboardEvent): void => {
@@ -152,17 +170,27 @@ const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange }) => {
     };
   }, [hasSuggestion]);
 
-  useEffect(() => {
-    didAccept.current = false;
-  }, [itemSuggestion]);
+  const validSuggestion =
+    !!suggestion && !!query && suggestion.toLowerCase().startsWith(query.toLowerCase());
 
   useEffect(() => {
-    if (accepted && !didAccept.current && itemSuggestion) {
+    didAccept.current = false;
+    if (query && suggestion && validSuggestion) {
+      onChange(suggestion.substring(0, query.length));
+    }
+  }, [suggestion, validSuggestion, query, onChange]);
+
+  useEffect(() => {
+    if (accepted && !didAccept.current && suggestion) {
       didAccept.current = true;
       setAccepted(false);
-      onChange(itemSuggestion);
+      onChange(suggestion);
     }
-  }, [accepted, onChange, itemSuggestion]);
+  }, [accepted, onChange, suggestion]);
+
+  const onBlur = useCallback(() => {
+    setSuggestion(null);
+  }, [setSuggestion]);
 
   return (
     <Styled.ItemField>
@@ -170,14 +198,14 @@ const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange }) => {
         value={item}
         onChange={onChange}
         onType={requestItemSuggestion}
-        inputProps={inputPropsItem}
+        inputProps={{ ...inputPropsItem, onBlur }}
       />
-      {itemSuggestion && <Styled.ItemSuggestion>{itemSuggestion}</Styled.ItemSuggestion>}
+      {validSuggestion && <Styled.ItemSuggestion>{suggestion}</Styled.ItemSuggestion>}
     </Styled.ItemField>
   );
 };
 
-const EntryForm: React.FC<EntryProps> = ({ entry, onChange, onRemove }) => {
+const EntryForm: React.FC<EntryProps> = ({ entry, loading, onChange, onRemove }) => {
   const { id } = entry;
 
   const onChangeCategory = useCallback((category: string) => onChange(id, { category }), [
@@ -190,34 +218,41 @@ const EntryForm: React.FC<EntryProps> = ({ entry, onChange, onRemove }) => {
     onChange,
   ]);
 
-  const [loading, requestItemInfo] = useAutocompleteCategoryPage(onChangeCategory, onChangePage);
-  const onChangeItem = useCallback(
-    (item: string) => {
-      requestItemInfo(item);
-      onChange(id, { item });
-    },
-    [id, onChange, requestItemInfo],
-  );
+  const onChangeItem = useCallback((item: string) => onChange(id, { item }), [id, onChange]);
+  const [itemSuggestion, setItemSuggestion] = useState<string | null>(null);
 
   return (
-    <Flex>
-      <EntryFormItemField onChange={onChangeItem} item={entry.item} />
-      <FormFieldText
-        value={entry.category}
-        onChange={onChangeCategory}
-        inputProps={{ ...inputPropsCategory, disabled: loading }}
-      />
-      <FormFieldCost value={entry.cost} onChange={onChangeCost} />
-      <FormFieldSelect
-        options={pageOptions}
-        value={entry.page}
-        onChange={onChangePage}
-        inputProps={{ ...inputPropsPage, disabled: loading }}
-      />
-      <Button onClick={(): void => onRemove(entry.id)} tabIndex={-1}>
+    <FlexCenter>
+      <Styled.ItemCategory>
+        <Styled.ItemField>
+          <EntryFormItemField
+            onChange={onChangeItem}
+            item={entry.item}
+            suggestion={itemSuggestion}
+            setSuggestion={setItemSuggestion}
+          />
+        </Styled.ItemField>
+        <Styled.CategoryField>
+          <FormFieldText
+            value={entry.category}
+            onChange={onChangeCategory}
+            inputProps={{ ...inputPropsCategory, disabled: loading }}
+          />
+        </Styled.CategoryField>
+      </Styled.ItemCategory>
+      <Styled.CostPage>
+        <FormFieldCost value={entry.cost} onChange={onChangeCost} />
+        <FormFieldSelect
+          options={pageOptions}
+          value={entry.page}
+          onChange={onChangePage}
+          inputProps={{ ...inputPropsPage, disabled: loading }}
+        />
+      </Styled.CostPage>
+      <ButtonDelete onClick={(): void => onRemove(entry.id)} tabIndex={-1}>
         &minus;
-      </Button>
-    </Flex>
+      </ButtonDelete>
+    </FlexCenter>
   );
 };
 
@@ -243,7 +278,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
     setEntries((last) => [
       ...last,
       {
-        id: last.length,
+        id: last.reduce<number>((accum, entry) => Math.max(accum, entry.id + 1), 0),
         item: '',
         category: '',
         cost: 0,
@@ -269,56 +304,73 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
     });
   }, []);
 
+  const [loading, requestItemInfo] = useAutocompleteCategoryPage(entries, setEntries);
+
+  const canRequestFinish = !loading && !!shop.length;
+  const isValid =
+    canRequestFinish && entries.every((entry) => !!(entry.item && entry.category && entry.cost));
+
   const [finished, setFinished] = useState<boolean>(false);
   const onFinish = useCallback(() => {
-    setFinished(true);
-  }, []);
+    if (canRequestFinish) {
+      setFinished(true);
+    }
+  }, [canRequestFinish]);
 
   useEffect(() => {
     if (finished) {
       setFinished(false);
-      entries.forEach((entry) => {
-        dispatch(
-          listItemCreated(entry.page)({
-            date,
-            item: entry.item,
-            category: entry.category,
-            cost: entry.cost,
-            shop,
-          }),
-        );
-      });
-      setEntries([defaultEntry]);
-      setShop('');
+      if (isValid) {
+        entries.forEach((entry) => {
+          dispatch(
+            listItemCreated(entry.page)({
+              date,
+              item: entry.item,
+              category: entry.category,
+              cost: entry.cost,
+              shop,
+            }),
+          );
+        });
+        setEntries([defaultEntry]);
+        setShop('');
+      } else {
+        requestItemInfo();
+      }
     }
-  }, [dispatch, date, shop, entries, finished]);
-
-  const isValid =
-    !!shop.length && entries.every((entry) => !!(entry.item && entry.category && entry.cost));
+  }, [dispatch, date, shop, entries, finished, isValid, requestItemInfo]);
 
   return (
-    <ModalWindow title="Add receipt" onClosed={onClosed}>
+    <ModalWindow title="Add receipt" onClosed={onClosed} width={300}>
       <Styled.Main>
-        <Flex>
-          <label htmlFor="receipt-date">
-            <Styled.Label>Date</Styled.Label>
-            <FormFieldDate id="receipt-date" value={date} onChange={setDate} />
-          </label>
-        </Flex>
-        <Flex>
-          <label htmlFor="receipt-shop">
-            <Styled.Label>Shop</Styled.Label>
-            <FormFieldText id="receipt-shop" value={shop} onChange={setShop} />
-          </label>
-        </Flex>
+        <FlexColumn>
+          <Flex>
+            <label htmlFor="receipt-date">
+              <Styled.Label>Date</Styled.Label>
+              <FormFieldDate id="receipt-date" value={date} onChange={setDate} />
+            </label>
+          </Flex>
+          <Flex>
+            <label htmlFor="receipt-shop">
+              <Styled.Label>Shop</Styled.Label>
+              <FormFieldText id="receipt-shop" value={shop} onChange={setShop} />
+            </label>
+          </Flex>
+        </FlexColumn>
         <Styled.List>
           {entries.map((entry) => (
-            <EntryForm key={entry.id} entry={entry} onChange={onChange} onRemove={onRemove} />
+            <EntryForm
+              key={entry.id}
+              entry={entry}
+              loading={loading}
+              onChange={onChange}
+              onRemove={onRemove}
+            />
           ))}
-          <Button onClick={createNewEntry}>Add</Button>
+          <ButtonAdd onClick={createNewEntry}>+</ButtonAdd>
         </Styled.List>
-        <Button onClick={onFinish} disabled={!isValid}>
-          Finish
+        <Button onClick={onFinish} disabled={!canRequestFinish}>
+          {isValid ? 'Finish' : 'Autocomplete'}
         </Button>
       </Styled.Main>
     </ModalWindow>

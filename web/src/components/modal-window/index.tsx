@@ -6,9 +6,10 @@ import { NULL } from '~client/modules/data';
 type Props = {
   title: string;
   onClosed?: () => void;
+  width?: number;
 };
 
-export const ModalWindow: React.FC<Props> = ({ title, onClosed = NULL, children }) => {
+export const ModalWindow: React.FC<Props> = ({ title, onClosed = NULL, width, children }) => {
   const timer = useRef<number>();
   const [visible, setVisible] = useState(false);
   const onClose = useCallback(() => {
@@ -23,7 +24,7 @@ export const ModalWindow: React.FC<Props> = ({ title, onClosed = NULL, children 
   }, []);
 
   return (
-    <Styled.ModalWindow visible={visible}>
+    <Styled.ModalWindow visible={visible} width={width}>
       <Styled.Meta>
         <Styled.Title>{title}</Styled.Title>
         <Styled.BackButton onClick={onClose}>&times;</Styled.BackButton>

@@ -205,6 +205,10 @@ export const HeaderLink = styled(Cell)`
   text-align: center;
   background: ${({ column }): string => colors.overview[`${column}Mobile`] || colors.white};
 
+  button {
+    flex: 0 0 auto;
+  }
+
   ${breakpoint(breakpoints.mobile)} {
     padding: 2px;
   }
