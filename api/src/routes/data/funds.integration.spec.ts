@@ -3,6 +3,7 @@ import MockDate from 'mockdate';
 import { Response } from 'supertest';
 
 import config from '~api/config';
+import { sleep } from '~api/modules/time';
 import db from '~api/test-utils/knex';
 import { Create, Fund } from '~api/types';
 
@@ -363,6 +364,7 @@ describe('Funds route', () => {
           item: 'My fund 1',
         });
 
+        await sleep(10);
         await db('fund_scrape').insert({
           broker: 'hl',
           fid: 12345,
@@ -376,6 +378,7 @@ describe('Funds route', () => {
           }),
         );
 
+        await sleep(10);
         const fundScrape = await db('fund_scrape').select();
 
         expect(fundScrape).toStrictEqual(
