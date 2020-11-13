@@ -210,15 +210,7 @@ describe('<AddReceipt />', () => {
     });
 
     it('should clear all inputs', async () => {
-      const {
-        queryAllByPlaceholderText,
-        queryAllByDisplayValue,
-        getByLabelText,
-      } = await enterReceipt();
-
-      const inputShop = getByLabelText('Shop') as HTMLInputElement;
-
-      expect(inputShop.value).toBe('');
+      const { queryAllByPlaceholderText, queryAllByDisplayValue } = await enterReceipt();
 
       const inputsItem = queryAllByPlaceholderText('Item');
       const inputsCategory = queryAllByPlaceholderText('Category');

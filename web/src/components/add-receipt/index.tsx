@@ -348,7 +348,6 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
           );
         });
         setEntries([defaultEntry]);
-        setShop('');
         setImmediate(() => {
           resetFocus(true);
         });
