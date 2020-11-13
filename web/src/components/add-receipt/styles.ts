@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 import { FormField } from '~client/components/form-field/styles';
 import { rem, breakpoint } from '~client/styled/mixins';
-import { FlexColumn } from '~client/styled/shared';
+import { FlexColumn, Flex } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const ItemSuggestion = styled.span`
@@ -32,7 +32,6 @@ export const Main = styled(FlexColumn)`
     font-size: ${rem(14)};
     letter-spacing: 0;
     line-height: ${rem(8)};
-    text-transform: uppercase;
   }
   input {
     border: 1px solid ${colors.medium.mediumDark};
@@ -68,6 +67,10 @@ export const List = styled(FlexColumn)`
       &:not(:focus) {
         border-color: transparent;
       }
+    }
+    input,
+    ${ItemSuggestion} {
+      text-transform: uppercase;
     }
   }
 `;
@@ -113,3 +116,17 @@ export const CategoryField = styled.div`
 `;
 
 export const CostPage = styled(FlexColumn)``;
+
+export const CreateRow = styled(Flex)`
+  justify-content: flex-end;
+`;
+
+export const Overview = styled(Flex)`
+  width: 100%;
+`;
+
+export const TotalCost = styled.div`
+  flex: 1;
+  text-align: right;
+  text-transform: uppercase;
+`;

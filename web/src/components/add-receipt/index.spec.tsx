@@ -1,5 +1,6 @@
 /* eslint-disable jest/prefer-expect-assertions */
 import { render, act, fireEvent, waitFor, RenderResult } from '@testing-library/react';
+import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
@@ -40,6 +41,10 @@ describe('<AddReceipt />', () => {
     return { ...renderResult, store };
   };
 
+  let matchMedia: MatchMediaMock;
+  beforeAll(() => {
+    matchMedia = new MatchMediaMock();
+  });
   beforeEach(() => {
     nockSearchReceipt('Some%20food%20item,Other%20general%20item', [
       {
@@ -52,10 +57,13 @@ describe('<AddReceipt />', () => {
     nockSearchReceiptItem('Some%20food%20item');
     nockSearchReceiptItem('Other%20general%20item');
   });
+  afterEach(() => {
+    matchMedia.clear();
+  });
 
   it.each`
     item      | label     | type
-    ${'date'} | ${'Date'} | ${'date'}
+    ${'date'} | ${'Date'} | ${'text'}
     ${'shop'} | ${'Shop'} | ${'text'}
   `('should render an input field for the $item', ({ label, type }) => {
     expect.assertions(2);
@@ -124,7 +132,7 @@ describe('<AddReceipt />', () => {
     const enterReceipt = async (): Promise<RenderWithStore> => {
       const result = setup();
 
-      setDate(result, '2020-04-20');
+      setDate(result, '20/4/20');
 
       addItem(result, 'Some food item', '1.23');
 
@@ -221,6 +229,17 @@ describe('<AddReceipt />', () => {
       expect(inputsCategory).toHaveLength(1);
       expect(inputsPage).toHaveLength(1);
       expect(inputsCost).toHaveLength(1);
+    });
+
+    it('should indicate the total cost', () => {
+      const result = setup();
+      addItem(result, 'Some food item', '1.23');
+      act(() => {
+        fireEvent.click(result.getByText('+'));
+      });
+      addItem(result, 'Other general item', '4.56');
+
+      expect(result.getByText('Total: £5.79')).toBeInTheDocument();
     });
   });
 

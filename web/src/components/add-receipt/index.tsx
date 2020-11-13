@@ -7,13 +7,15 @@ import { listItemCreated } from '~client/actions';
 import {
   FormFieldText,
   FormFieldDate,
+  FormFieldDateInline,
   FormFieldCost,
   FormFieldSelect,
   SelectOptions,
 } from '~client/components/form-field';
 import { ModalWindow } from '~client/components/modal-window';
 import { API_PREFIX } from '~client/constants/data';
-import { useCancellableRequest } from '~client/hooks';
+import { useCancellableRequest, useIsMobile } from '~client/hooks';
+import { formatCurrency } from '~client/modules/format';
 import {
   Flex,
   Button,
@@ -56,6 +58,7 @@ const pageOptions: SelectOptions<PageListCalcCategory> = [
 type EntryProps = {
   entry: Entry;
   loading: boolean;
+  isOnly: boolean;
   onChange: (id: number, delta: Delta<Entry>) => void;
   onRemove: (id: number) => void;
 };
@@ -192,20 +195,26 @@ const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange, suggestion, s
     setSuggestion(null);
   }, [setSuggestion]);
 
+  const onTouchStart = useCallback(() => {
+    if (validSuggestion && suggestion) {
+      onChange(suggestion);
+    }
+  }, [validSuggestion, suggestion, onChange]);
+
   return (
     <Styled.ItemField>
       <FormFieldText
         value={item}
         onChange={onChange}
         onType={requestItemSuggestion}
-        inputProps={{ ...inputPropsItem, onBlur }}
+        inputProps={{ ...inputPropsItem, onBlur, onTouchStart }}
       />
       {validSuggestion && <Styled.ItemSuggestion>{suggestion}</Styled.ItemSuggestion>}
     </Styled.ItemField>
   );
 };
 
-const EntryForm: React.FC<EntryProps> = ({ entry, loading, onChange, onRemove }) => {
+const EntryForm: React.FC<EntryProps> = ({ entry, loading, isOnly, onChange, onRemove }) => {
   const { id } = entry;
 
   const onChangeCategory = useCallback((category: string) => onChange(id, { category }), [
@@ -249,9 +258,11 @@ const EntryForm: React.FC<EntryProps> = ({ entry, loading, onChange, onRemove })
           inputProps={{ ...inputPropsPage, disabled: loading }}
         />
       </Styled.CostPage>
-      <ButtonDelete onClick={(): void => onRemove(entry.id)} tabIndex={-1}>
-        &minus;
-      </ButtonDelete>
+      <FlexColumn>
+        <ButtonDelete onClick={(): void => onRemove(entry.id)} disabled={isOnly}>
+          &minus;
+        </ButtonDelete>
+      </FlexColumn>
     </FlexCenter>
   );
 };
@@ -265,11 +276,14 @@ const defaultEntry: Entry = {
 };
 
 export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
+  const isMobile = useIsMobile();
+
   const onClosed = useCallback(() => setAddingReceipt(false), [setAddingReceipt]);
 
   const dispatch = useDispatch();
 
   const [date, setDate] = useState<Date>(new Date());
+  const onChangeDate = useCallback((value?: Date) => setDate((last) => value ?? last), []);
   const [shop, setShop] = useState<string>('');
 
   const [entries, setEntries] = useState<Entry[]>([defaultEntry]);
@@ -311,6 +325,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
     canRequestFinish && entries.every((entry) => !!(entry.item && entry.category && entry.cost));
 
   const [finished, setFinished] = useState<boolean>(false);
+  const [focusReset, resetFocus] = useState<boolean>(false);
   const onFinish = useCallback(() => {
     if (canRequestFinish) {
       setFinished(true);
@@ -334,11 +349,20 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
         });
         setEntries([defaultEntry]);
         setShop('');
+        setImmediate(() => {
+          resetFocus(true);
+        });
       } else {
         requestItemInfo();
       }
     }
   }, [dispatch, date, shop, entries, finished, isValid, requestItemInfo]);
+
+  const onBlurDate = useCallback(() => {
+    resetFocus(false);
+  }, []);
+
+  const total = entries.reduce<number>((last, { cost }) => last + cost, 0);
 
   return (
     <ModalWindow title="Add receipt" onClosed={onClosed} width={300}>
@@ -347,7 +371,17 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
           <Flex>
             <label htmlFor="receipt-date">
               <Styled.Label>Date</Styled.Label>
-              <FormFieldDate id="receipt-date" value={date} onChange={setDate} />
+              {isMobile ? (
+                <FormFieldDate id="receipt-date" value={date} onChange={onChangeDate} />
+              ) : (
+                <FormFieldDateInline
+                  id="receipt-date"
+                  value={date}
+                  onChange={onChangeDate}
+                  active={focusReset}
+                  inputProps={{ onBlur: onBlurDate }}
+                />
+              )}
             </label>
           </Flex>
           <Flex>
@@ -363,15 +397,21 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
               key={entry.id}
               entry={entry}
               loading={loading}
+              isOnly={entries.length === 1}
               onChange={onChange}
               onRemove={onRemove}
             />
           ))}
-          <ButtonAdd onClick={createNewEntry}>+</ButtonAdd>
+          <Styled.CreateRow>
+            <ButtonAdd onClick={createNewEntry}>+</ButtonAdd>
+          </Styled.CreateRow>
         </Styled.List>
-        <Button onClick={onFinish} disabled={!canRequestFinish}>
-          {isValid ? 'Finish' : 'Autocomplete'}
-        </Button>
+        <Flex>
+          <Button onClick={onFinish} disabled={!canRequestFinish}>
+            {isValid ? 'Finish' : 'Autocomplete'}
+          </Button>
+          <Styled.TotalCost>Total: {formatCurrency(total)}</Styled.TotalCost>
+        </Flex>
       </Styled.Main>
     </ModalWindow>
   );
