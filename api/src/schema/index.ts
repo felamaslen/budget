@@ -4,5 +4,6 @@ export * from './funds';
 export * from './list';
 export * from './multiple';
 export * from './net-worth';
+export * from './preview';
 export * from './search';
 export * from './user';

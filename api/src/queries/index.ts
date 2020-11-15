@@ -6,3 +6,4 @@ export * from './list';
 export * from './list-cost-summary';
 export * from './net-worth';
 export * from './pivot-table';
+export * from './preview';

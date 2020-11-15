@@ -4,6 +4,8 @@ import endOfMonth from 'date-fns/endOfMonth';
 import format from 'date-fns/format';
 import getDate from 'date-fns/getDate';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
+import getMonth from 'date-fns/getMonth';
+import getYear from 'date-fns/getYear';
 import isBefore from 'date-fns/isBefore';
 import isSameDay from 'date-fns/isSameDay';
 import isSameMonth from 'date-fns/isSameMonth';
@@ -329,7 +331,12 @@ export const getCostForMonthSoFar = moize(
 const isPositive = (value: number): boolean => value >= 0;
 const isNegative = (value: number): boolean => value < 0;
 
-const getFormattedMonths = (dates: Date[]): string[] => dates.map((date) => format(date, 'LLL-yy'));
+const getFormattedMonths = (dates: Date[]): Pick<TableRow, 'year' | 'month' | 'monthText'>[] =>
+  dates.map((date) => ({
+    year: getYear(date),
+    month: getMonth(date) + 1,
+    monthText: format(date, 'LLL-yy'),
+  }));
 
 type TableNumberRows = TableValues<number[], 'netWorth'>;
 
@@ -423,20 +430,20 @@ export const getOverviewTable = moize(
 
         const getRowCells = getCells(cost, getCellColor(ranges, medians));
 
-        return months.map(
-          (month: string, index: number): TableRow => {
-            const past = dates[index] < today;
-            const future = dates[index] > endOfCurrentMonth;
+        return months.map<TableRow>(({ year, month, monthText }, index) => {
+          const past = dates[index] < today;
+          const future = dates[index] > endOfCurrentMonth;
 
-            return {
-              month,
-              cells: getRowCells(index),
-              past,
-              active: !past && !future,
-              future,
-            };
-          },
-        );
+          return {
+            year,
+            month,
+            monthText,
+            cells: getRowCells(index),
+            past,
+            active: !past && !future,
+            future,
+          };
+        });
       },
     ),
   {

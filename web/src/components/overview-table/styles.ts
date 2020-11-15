@@ -87,15 +87,17 @@ export const Row = styled.div<{ past?: boolean; active?: boolean; future?: boole
   }
 `;
 
-export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColor?: string }) => ({
-  style: backgroundColor ? { backgroundColor } : {},
-}))<{
+export type PropsCell = {
   cellColor?: string | null;
   column: 'month' | OverviewHeader;
   past?: boolean;
   active?: boolean;
   future?: boolean;
-}>`
+};
+
+export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColor?: string }) => ({
+  style: backgroundColor ? { backgroundColor } : {},
+}))<PropsCell>`
   display: flex;
   flex-flow: row nowrap;
   flex-grow: 1;

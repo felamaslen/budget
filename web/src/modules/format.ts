@@ -62,63 +62,61 @@ function getCurrencyValueRaw(
 }
 
 type FormatCurrencyOptions = {
-  abbreviate?: boolean;
-  brackets?: boolean;
-  noSymbol?: boolean;
-  noPence?: boolean;
-  suffix?: string | null;
-  raw?: boolean;
-  precision?: number;
+  abbreviate: boolean;
+  brackets: boolean;
+  noSymbol: boolean;
+  noPence: boolean;
+  suffix: string;
+  raw: boolean;
+  precision: number;
 };
 
-export function formatCurrency(value: number, customOptions: FormatCurrencyOptions = {}): string {
-  const options = {
-    abbreviate: false,
-    brackets: false,
-    noSymbol: false,
-    noPence: false,
-    suffix: null,
-    raw: false,
-    ...customOptions,
-  };
+function getPrecision(abbreviate: boolean, log: number, precision?: number): number {
+  if (abbreviate && log === 0) {
+    return 2;
+  }
+  return precision ?? (abbreviate ? 0 : 2);
+}
 
-  const sign = options.brackets || value >= 0 ? '' : '\u2212';
+export function formatCurrency(
+  value: number,
+  {
+    abbreviate = false,
+    brackets = false,
+    noSymbol = false,
+    noPence = false,
+    suffix = '',
+    raw = false,
+    ...options
+  }: Partial<FormatCurrencyOptions> = {},
+): string {
+  const sign = brackets || value >= 0 ? '' : '\u2212';
 
-  const setSymbol = options.raw ? SYMBOL_CURRENCY_RAW : SYMBOL_CURRENCY_HTML;
-
-  const symbol = options.noSymbol ? '' : setSymbol;
+  const setSymbol = raw ? SYMBOL_CURRENCY_RAW : SYMBOL_CURRENCY_HTML;
+  const symbol = noSymbol ? '' : setSymbol;
 
   const absValue = Math.abs(value) / 100;
 
-  const abbr = ['k', 'm', 'bn', 'tn'];
+  const currencyAbbreviation = ['k', 'm', 'bn', 'tn'];
 
   const log =
-    options.abbreviate && value !== 0
-      ? Math.min(Math.floor(Math.log10(absValue) / 3), abbr.length)
+    abbreviate && value !== 0
+      ? Math.min(Math.floor(Math.log10(absValue) / 3), currencyAbbreviation.length)
       : 0;
 
-  let { precision = options.abbreviate ? 0 : 2 } = options;
+  const precision = getPrecision(abbreviate, log, options.precision);
 
-  if (options.abbreviate && log === 0) {
-    precision = 2;
-  }
+  const abbreviation = log > 0 ? currencyAbbreviation[log - 1] : '';
 
-  const abbreviation = log > 0 ? abbr[log - 1] : '';
+  const formatted = numberFormat(getCurrencyValueRaw(absValue, log, precision, noPence));
 
-  const suffix = options.suffix || '';
-
-  const valueRaw = getCurrencyValueRaw(absValue, log, precision, options.noPence);
-
-  const formatted = numberFormat(valueRaw);
-
-  if (options.brackets && value < 0) {
+  if (brackets && value < 0) {
     return `(${symbol}${formatted}${abbreviation}${suffix})`;
   }
-
   return `${sign}${symbol}${formatted}${abbreviation}${suffix}`;
 }
 
-export const formatPercent = (frac: number, options: FormatCurrencyOptions = {}): string =>
+export const formatPercent = (frac: number, options: Partial<FormatCurrencyOptions> = {}): string =>
   formatCurrency(100 * 100 * frac, {
     ...options,
     suffix: '%',

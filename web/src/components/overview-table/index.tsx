@@ -1,9 +1,10 @@
-import React, { memo, useContext } from 'react';
+import React, { memo, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 
 import { OverviewTableCells as Cells } from './cells';
 import * as Styled from './styles';
+import { OverviewPreview, Query as PreviewQuery } from '~client/components/overview-preview';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { useMediaQuery, TodayContext } from '~client/hooks';
 import { getOverviewTable } from '~client/selectors';
@@ -76,12 +77,13 @@ const Header: React.FC<Props & ColumnsProps> = ({ columns, addReceipt }) => (
 type PropsRows = ColumnsProps & {
   isMobile: boolean;
   rows: OverviewTableRows;
+  setPreviewQuery: (query: React.SetStateAction<PreviewQuery | null>) => void;
 };
 
-const Rows: React.FC<PropsRows> = ({ isMobile, columns, rows }) => (
+const Rows: React.FC<PropsRows> = ({ isMobile, columns, rows, setPreviewQuery }) => (
   <Styled.Rows>
     {rows.slice(isMobile ? -19 : 0).map((row) => (
-      <Cells key={row.month} columns={columns} row={row} />
+      <Cells key={row.monthText} columns={columns} row={row} setPreviewQuery={setPreviewQuery} />
     ))}
   </Styled.Rows>
 );
@@ -101,10 +103,18 @@ export const OverviewTable: React.FC<Props> = ({ addReceipt }) => {
 
   const tableColumns = getTableColumns(isMobile, isLarge);
 
+  const [previewQuery, setPreviewQuery] = useState<PreviewQuery | null>(null);
+
   return (
     <Styled.OverviewTable data-testid="overview-table">
       <Header columns={tableColumns} addReceipt={addReceipt} />
-      <RowsMemo isMobile={isMobile} columns={tableColumns} rows={rows} />
+      <RowsMemo
+        isMobile={isMobile}
+        columns={tableColumns}
+        rows={rows}
+        setPreviewQuery={setPreviewQuery}
+      />
+      <OverviewPreview query={previewQuery} />
     </Styled.OverviewTable>
   );
 };

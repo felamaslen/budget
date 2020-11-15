@@ -36,7 +36,9 @@ export type OverviewCell = {
 };
 
 export type OverviewTableRow = {
-  month: string;
+  year: number;
+  month: number;
+  monthText: string;
   cells: { [column in OverviewHeader]: OverviewCell };
   past: boolean;
   active: boolean;

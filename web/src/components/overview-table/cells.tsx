@@ -1,25 +1,64 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import * as Styled from './styles';
 import HoverCost from '~client/components/hover-cost';
+import { Query as PreviewQuery } from '~client/components/overview-preview';
+import { isCalcPage } from '~client/constants/data';
 import { OverviewTableRow, OverviewTableColumn } from '~client/types';
 
 type Props = {
   row: OverviewTableRow;
   columns: OverviewTableColumn[];
+  setPreviewQuery: (query: React.SetStateAction<PreviewQuery | null>) => void;
+};
+
+type PropsCell = Styled.PropsCell &
+  Pick<Props, 'setPreviewQuery'> &
+  Pick<OverviewTableRow, 'year' | 'month'>;
+
+const Cell: React.FC<PropsCell> = ({ setPreviewQuery, year, month, ...props }) => {
+  const onHover = useCallback(() => {
+    setPreviewQuery((last) => {
+      if (!isCalcPage(props.column)) {
+        return null;
+      }
+      return last?.year === year && last?.month === month && last?.category === props.column
+        ? last
+        : { year, month, category: props.column };
+    });
+  }, [setPreviewQuery, year, month, props.column]);
+
+  const onBlur = useCallback(() => {
+    setPreviewQuery(null);
+  }, [setPreviewQuery]);
+
+  return (
+    <Styled.Cell
+      {...props}
+      onMouseOver={onHover}
+      onFocus={onHover}
+      onMouseMove={onHover}
+      onMouseLeave={onBlur}
+      onBlur={onBlur}
+    />
+  );
 };
 
 export const OverviewTableCells: React.FC<Props> = ({
   columns,
-  row: { month, cells, past, active, future },
+  row: { year, month, monthText, cells, past, active, future },
+  setPreviewQuery,
 }) => (
   <Styled.Row past={past} active={active} future={future}>
     <Styled.Cell key="month" column="month" past={past} active={active} future={future}>
-      {month}
+      {monthText}
     </Styled.Cell>
     {columns.map(([column]) => (
-      <Styled.Cell
+      <Cell
         key={column}
+        year={year}
+        month={month}
+        setPreviewQuery={setPreviewQuery}
         column={column}
         cellColor={cells[column].rgb}
         past={past}
@@ -27,7 +66,7 @@ export const OverviewTableCells: React.FC<Props> = ({
         future={future}
       >
         <HoverCost value={cells[column].value} />
-      </Styled.Cell>
+      </Cell>
     ))}
   </Styled.Row>
 );
