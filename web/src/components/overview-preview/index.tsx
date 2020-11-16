@@ -18,10 +18,15 @@ type Props = {
 
 const sendRequest = async (
   axios: AxiosInstance,
-  params: Query,
+  query: Query,
 ): Promise<AxiosResponse<ArrayBuffer>> =>
   axios.get<ArrayBuffer>(`${API_PREFIX}/preview`, {
-    params,
+    params: {
+      ...query,
+      width: Styled.width,
+      height: Styled.height,
+      scale: 2,
+    },
     responseType: 'arraybuffer',
   });
 
@@ -67,7 +72,7 @@ export const OverviewPreview: React.FC<Props> = ({ query }) => {
 
   return (
     <Styled.Preview left={position.left} top={position.top}>
-      {url && <img src={url} alt="Preview" />}
+      <Styled.ImageContainer>{url && <img src={url} alt="Preview" />}</Styled.ImageContainer>
     </Styled.Preview>
   );
 };

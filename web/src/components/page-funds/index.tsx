@@ -43,7 +43,7 @@ const fieldsMobile = {
 const modalFields: ModalFields<Fund> = {
   item: makeField('item', FormFieldText),
   transactions: makeField('transactions', FormFieldTransactions),
-  allocationTarget: makeField('allocationTarget', FormFieldNumber),
+  allocationTarget: makeField('allocationTarget', FormFieldNumber, 'Allocation'),
 };
 
 const deltaSeed = (): Delta<Fund> => ({

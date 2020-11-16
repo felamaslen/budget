@@ -211,3 +211,17 @@ export const abbreviateFundName = moize((name: string): string => {
   }
   return abbreviateFund(base);
 });
+
+const standardStockTest = /^(.*) (\(.*\)) \(stock\)$/;
+const brokerSpecificTest = /^(.*) \(share|fund\)$/;
+
+export function extractLongName(name: string): string {
+  const standardMatch = name.match(standardStockTest);
+  if (standardMatch) {
+    return standardMatch[1];
+  }
+  if (brokerSpecificTest.test(name)) {
+    return abbreviateFundName(name);
+  }
+  return name;
+}

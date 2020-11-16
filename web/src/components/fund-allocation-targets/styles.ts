@@ -80,7 +80,7 @@ export const Actual = styled.div.attrs(({ fraction, color }: ActualProps) => ({
   display: flex;
   flex-flow: column;
   float: left;
-  font-size: ${({ fraction }): string => rem(fraction < 0.05 ? 8 : 12)};
+  font-size: ${rem(12)};
   height: 100%;
   position: relative;
   justify-content: center;
@@ -89,12 +89,16 @@ export const Actual = styled.div.attrs(({ fraction, color }: ActualProps) => ({
     fraction < 0.1 &&
     css`
       span {
+        font-size: ${rem(8)};
         transform: rotate(-90deg);
       }
     `};
 
   ${breakpoint(breakpoints.mobile)} {
     padding-bottom: ${rem(4)};
+    span {
+      font-size: ${({ fraction }): string => rem(fraction < 0.05 ? 8 : 12)};
+    }
   }
 `;
 

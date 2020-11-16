@@ -114,7 +114,7 @@ export const OverviewTable: React.FC<Props> = ({ addReceipt }) => {
         rows={rows}
         setPreviewQuery={setPreviewQuery}
       />
-      <OverviewPreview query={previewQuery} />
+      {!isMobile && <OverviewPreview query={previewQuery} />}
     </Styled.OverviewTable>
   );
 };

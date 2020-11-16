@@ -1,25 +1,15 @@
 import { Router } from 'express';
 
-import { generateChart } from '~api/controllers/preview';
+import { generateChart, Query } from '~api/controllers/preview';
 import { validatedAuthDbRoute } from '~api/middleware/request';
 import { previewQuerySchema } from '~api/schema';
-import { ListCalcCategory } from '~api/types';
 
-const routePreviewMonth = validatedAuthDbRoute<
-  void,
-  void,
-  {
-    year: number;
-    month: number;
-    category: ListCalcCategory;
-  }
->(
+const routePreviewMonth = validatedAuthDbRoute<void, void, Query>(
   {
     query: previewQuerySchema,
   },
   async (db, req, res, _, __, query) => {
-    const { year, month, category } = query;
-    const chart = await generateChart(db, req.user.uid, year, month, category);
+    const chart = await generateChart(db, req.user.uid, query);
 
     res.setHeader('Content-type', 'image/png');
     chart.pipe(res);

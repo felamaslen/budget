@@ -1,10 +1,9 @@
-import { abbreviateFundName } from './finance';
+import { abbreviateFundName, extractLongName } from './finance';
 
 describe('Finance module', () => {
   describe('abbreviateFundName', () => {
     it.each`
       short             | long
-      ${'BIOG'}         | ${'The Biotech Growth Trust (BIOG.L) (stock)'}
       ${'SMT'}          | ${'Scottish Mortgage IT Ordinary Shares 5p (share)'}
       ${'SMT'}          | ${'Scottish Mortgage IT PLC Ordinary Shares 5p (share)'}
       ${'FCSS'}         | ${'Fidelity China Special Situations Ord 0.01 (share)'}
@@ -21,7 +20,38 @@ describe('Finance module', () => {
       ${'RELX'}         | ${'RELX Plc Ord 14 51116p (share)'}
       ${'BGSN'}         | ${'Baillie Gifford Shin Nippon Ord 2p Shares (share)'}
     `('should abbreviate "$long" to "$short"', ({ short, long }) => {
+      expect.assertions(1);
       expect(abbreviateFundName(long)).toBe(short);
+    });
+
+    it('should abbreviate a standard stock', () => {
+      expect.assertions(1);
+      expect(abbreviateFundName('The Biotech Growth Trust (BIOG.L) (stock)')).toBe('BIOG');
+    });
+  });
+
+  describe('extractLongName', () => {
+    describe('a standard stock', () => {
+      it('should drop the code and return the long name', () => {
+        expect.assertions(1);
+        expect(extractLongName('The Biotech Growth Trust (BIOG.L) (stock)')).toBe(
+          'The Biotech Growth Trust',
+        );
+      });
+    });
+
+    describe('a broker-specific holding', () => {
+      it('should be returned as a stock code', () => {
+        expect.assertions(1);
+        expect(extractLongName('Finsbury Growth And Inc Trust Ord 25p Share (share)')).toBe('FGT');
+      });
+    });
+
+    describe('an invalid fund name', () => {
+      it('should be returned as-is', () => {
+        expect.assertions(1);
+        expect(extractLongName('Some invalid fund name')).toBe('Some invalid fund name');
+      });
     });
   });
 });

@@ -207,7 +207,6 @@ export const ButtonCancel = styled(Button)`
       content: '';
       height: 100%;
       width: 0;
-      border-right: 1px solid ${colors.light.dark};
     }
   }
 

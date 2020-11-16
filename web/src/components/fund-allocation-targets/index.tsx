@@ -147,6 +147,9 @@ const Target: React.FC<TargetProps> = ({
   const onActivate = useCallback((event: React.MouseEvent) => {
     setDragPosition(event.clientX);
   }, []);
+  const onTouchStart = useCallback((event: React.TouchEvent) => {
+    setDragPosition(event.touches[0]?.clientX ?? null);
+  }, []);
 
   const onFinish = useCallback(() => {
     setDragPosition(null);
@@ -158,8 +161,8 @@ const Target: React.FC<TargetProps> = ({
       return VOID;
     }
 
-    const onMouseMove = (event: MouseEvent): void => {
-      const nextDelta = event.clientX - dragPosition;
+    const move = (clientX: number): void => {
+      const nextDelta = clientX - dragPosition;
       setDelta(nextDelta);
       if (isCash) {
         const nextTarget = getCashTargetFromDelta(nextDelta);
@@ -181,8 +184,15 @@ const Target: React.FC<TargetProps> = ({
       }
     };
 
-    const onMouseUp = (event: MouseEvent): void => {
-      const nextDelta = event.clientX - dragPosition;
+    const onMouseMove = (event: MouseEvent): void => move(event.clientX);
+    const onTouchMove = (event: TouchEvent): void => {
+      if (event.touches.length) {
+        move(event.touches[0].clientX);
+      }
+    };
+
+    const deactivate = (clientX: number): void => {
+      const nextDelta = clientX - dragPosition;
       setDelta(nextDelta);
       onFinish();
       if (isCash) {
@@ -193,12 +203,23 @@ const Target: React.FC<TargetProps> = ({
       setPreview(null);
     };
 
+    const onMouseUp = (event: MouseEvent): void => deactivate(event.clientX);
+    const onTouchEnd = (event: TouchEvent): void => {
+      if (event.changedTouches.length) {
+        deactivate(event.changedTouches[0].clientX);
+      }
+    };
+
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('touchmove', onTouchMove);
+    window.addEventListener('touchend', onTouchEnd);
 
     return (): void => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
     };
   }, [
     isCash,
@@ -217,6 +238,7 @@ const Target: React.FC<TargetProps> = ({
       delta={delta}
       color={color}
       onMouseDown={onActivate}
+      onTouchStart={onTouchStart}
       isCash={isCash}
     />
   );

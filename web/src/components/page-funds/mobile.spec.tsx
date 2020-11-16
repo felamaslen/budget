@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, act, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { FundNameMobile } from './mobile';
 
@@ -11,5 +11,26 @@ describe('<FundNameMobile />', () => {
     expect.assertions(1);
     const { getByText } = render(<FundNameMobile {...props} />);
     expect(getByText('MNKS')).toBeInTheDocument();
+  });
+
+  describe('when touching', () => {
+    it('should render the full name', () => {
+      expect.assertions(2);
+      const { getByText } = render(
+        <FundNameMobile value="The Biotech Growth Trust (BIOG.L) (stock)" />,
+      );
+
+      act(() => {
+        fireEvent.touchStart(getByText('BIOG'));
+      });
+
+      expect(getByText('The Biotech Growth Trust')).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.touchEnd(getByText('The Biotech Growth Trust'));
+      });
+
+      expect(getByText('BIOG')).toBeInTheDocument();
+    });
   });
 });

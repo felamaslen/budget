@@ -28,8 +28,16 @@ type Pix = {
   y: (value: number) => number;
 };
 
-type GraphProps = {
+export type Query = {
+  width: number;
+  height: number;
+  scale: 1 | 2 | 3;
+  year: number;
+  month: number;
   category: ListCalcCategory;
+};
+
+type GraphProps = Query & {
   startDate: Date;
   endDate: Date;
   width: number;
@@ -42,9 +50,6 @@ type GraphProps = {
   line: DataPoint[];
   pix: Pix;
 };
-
-const WIDTH = 320;
-const HEIGHT = 200;
 
 const PADDING: Padding = [0, 0, 40, 40];
 
@@ -239,6 +244,8 @@ function prepareGraph(ctx: CanvasRenderingContext2D, graph: GraphProps): void {
     weight: 'bold',
   });
 
+  ctx.scale(graph.scale, graph.scale);
+
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, graph.width, graph.height);
 }
@@ -253,10 +260,9 @@ function drawGraph(ctx: CanvasRenderingContext2D, graph: GraphProps): void {
 export async function generateChart(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  year: number,
-  month: number,
-  category: ListCalcCategory,
+  query: Query,
 ): Promise<NodeJS.ReadableStream> {
+  const { width, height, scale, year, month, category } = query;
   const startDate = startOfMonth(setMonth(setYear(new Date(), year), month - 1));
   const endDate = startOfDay(endOfMonth(setMonth(setYear(new Date(), year), month - 1)));
   const numDays = differenceInDays(endDate, startDate) + 1;
@@ -264,7 +270,7 @@ export async function generateChart(
     throw boom.badRequest('Must set end date after start date');
   }
 
-  const canvas = createCanvas(WIDTH, HEIGHT);
+  const canvas = createCanvas(width * scale, height * scale);
 
   const rows = await getPreviewRows(db, uid, category, startDate, endDate);
 
@@ -274,11 +280,9 @@ export async function generateChart(
   const maxY = line.reduce<number>((last, { y }) => Math.max(last, y), minY + 1);
 
   const baseProps: Omit<GraphProps, 'pix'> = {
-    category,
+    ...query,
     startDate,
     endDate,
-    width: WIDTH,
-    height: HEIGHT,
     padding: PADDING,
     minX: getUnixTime(startDate),
     maxX: getUnixTime(endDate),

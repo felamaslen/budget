@@ -7,6 +7,9 @@ type Props = {
   top: number;
 };
 
+export const width = 320;
+export const height = 200;
+
 export const Preview = styled.div.attrs<Props>((props) => ({
   style: {
     left: props.left,
@@ -14,7 +17,18 @@ export const Preview = styled.div.attrs<Props>((props) => ({
   },
 }))<Props>`
   box-shadow: 0 2px 6px ${colors.shadow.dark};
-  height: ${rem(200)};
+  height: ${rem(height)};
+  opacity: 0.8;
   position: fixed;
-  width: ${rem(320)};
+  width: ${rem(width)};
+`;
+
+export const ImageContainer = styled.div`
+  background: ${colors.white};
+
+  &,
+  img {
+    height: 100%;
+    width: 100%;
+  }
 `;
