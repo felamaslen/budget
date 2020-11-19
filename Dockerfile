@@ -13,4 +13,6 @@ RUN apk update && apk add --no-cache \
   cairo-dev \
   jpeg-dev \
   pango-dev \
+  vips-dev \
+  glib-dev \
   giflib-dev 

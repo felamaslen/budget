@@ -8,8 +8,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { Root } from '~client/components/root';
 import { store } from '~client/store';
 
-import './images/favicon.png';
-
 function renderApp(RootComponent = Root): void {
   render(
     <AppContainer>

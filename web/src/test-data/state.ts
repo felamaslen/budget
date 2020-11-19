@@ -19,6 +19,9 @@ export const testState: State = {
     locked: false,
     error: null,
     key: 'some api key',
+    appConfig: {
+      birthDate: new Date('1990-01-01'),
+    },
   },
   error: [],
   [Page.overview]: {

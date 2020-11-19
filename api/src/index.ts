@@ -8,7 +8,6 @@ import serveStatic from 'serve-static';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
-import { version } from '../../package.json';
 import config from '~api/config';
 import { healthRoutes } from '~api/health';
 import { getStrategy } from '~api/modules/auth';
@@ -24,6 +23,7 @@ function setupDevServer(app: express.Express): void {
   const conf = require('../../webpack.config');
   const compiler = require('webpack')(conf);
 
+  app.use(require('connect-history-api-fallback')());
   app.use(
     require('webpack-dev-middleware')(compiler, {
       publicPath: '/',
@@ -61,13 +61,7 @@ function setupWebApp(app: express.Express): void {
 
   const singlePageApp = (_: express.Request, res: express.Response): void => {
     res.setHeader('Cache-Control', 'no-cache');
-
-    res.render('index', {
-      version,
-      hot,
-      pieTolerance: config.data.pie.tolerance,
-      birthDate: config.data.overview.birthDate,
-    });
+    res.sendFile(path.resolve(__dirname, '../../web/build/index.html'));
   };
 
   // web app static files

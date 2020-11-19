@@ -18,6 +18,7 @@ import {
 import { sortByKey, withoutIds } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { State as CrudState } from '~client/reducers/crud';
+import { getAppConfig } from '~client/selectors/config';
 import { getRequests, withoutDeleted } from '~client/selectors/crud';
 import {
   Create,
@@ -44,6 +45,7 @@ import {
   Cost,
   isMortgageValue,
   MortgageValue,
+  AppConfig,
 } from '~client/types';
 
 const nullEntry = (date: Date): Create<Entry> => ({
@@ -255,9 +257,11 @@ const withSpend = (dates: Date[], spending: number[]) => (
 
 type EntryWithFTI = EntryWithSpend & { fti: number; pastYearAverageSpend: number };
 
-const withFTI = (rows: EntryWithSpend[]): EntryWithFTI[] =>
+const withFTI = (appConfig: Pick<AppConfig, 'birthDate'>) => (
+  rows: EntryWithSpend[],
+): EntryWithFTI[] =>
   rows.map((entry, index) => {
-    const fullYears = differenceInYears(entry.date, window.birthDate);
+    const fullYears = differenceInYears(entry.date, appConfig.birthDate);
     const days = differenceInDays(entry.date, startOfYear(entry.date));
     const years = fullYears + days / 365;
 
@@ -276,12 +280,14 @@ const withTableProps = (rows: EntryWithFTI[]): EntryWithTableProps[] =>
   rows.map(({ values, creditLimit, currencies, ...rest }) => rest);
 
 export const getNetWorthTable = createSelector(
+  getAppConfig,
   getCost,
   getMonthDates,
   getCategories,
   getSubcategories,
   getSummaryEntries,
   (
+    appConfig,
     costMap: Cost,
     dates: Date[],
     categories: Category[],
@@ -290,7 +296,7 @@ export const getNetWorthTable = createSelector(
   ) =>
     compose(
       withTableProps,
-      withFTI,
+      withFTI(appConfig),
       withSpend(dates, getSpendingColumn(dates)(costMap).spending),
       withTypeSplit(categories, subcategories),
       withAggregates(categories, subcategories),

@@ -10,6 +10,10 @@ export const testLoginResponse: LoginResponse = {
 };
 
 export const testResponse: ReadResponse = {
+  appConfig: {
+    birthDate: '1996-02-03',
+    pieTolerance: 0.08,
+  },
   [Page.overview]: {
     startYearMonth: [2018, 10],
     endYearMonth: [2020, 4],

@@ -46,6 +46,22 @@ describe('API reducer', () => {
 
       expect(result).toStrictEqual(expect.objectContaining({ initialLoading: false }));
     });
+
+    it.each`
+      prop            | key            | value
+      ${'birth date'} | ${'birthDate'} | ${new Date('1996-02-03')}
+    `('should set the $prop app config property', ({ key, value }) => {
+      expect.assertions(1);
+      const result = reducer(state, action);
+
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          appConfig: expect.objectContaining({
+            [key]: value,
+          }),
+        }),
+      );
+    });
   });
 
   describe('SYNC_REQUESTED', () => {

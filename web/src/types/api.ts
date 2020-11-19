@@ -32,6 +32,10 @@ export type SyncResponse = {
 };
 
 export type ReadResponse = {
+  appConfig: {
+    birthDate: string;
+    pieTolerance: number;
+  };
   [Page.overview]: {
     startYearMonth: [number, number];
     endYearMonth: [number, number];

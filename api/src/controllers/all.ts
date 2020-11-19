@@ -4,6 +4,7 @@ import { getFundsData } from './funds';
 import { readListData } from './list';
 import { getOverviewData } from './overview';
 import config from '~api/config';
+import { AppConfig, getAppConfig } from '~api/controllers/app-config';
 import {
   Page,
   OverviewResponse,
@@ -19,6 +20,7 @@ import {
 } from '~api/types';
 
 type AllResponse = {
+  appConfig: AppConfig;
   [Page.overview]: OverviewResponse;
   [Page.funds]: FundsResponse;
   [Page.income]: ListResponse<Income>;
@@ -61,6 +63,7 @@ export async function getAllData(
       [config.data.listCategories[index]]: data,
     }),
     {
+      appConfig: getAppConfig(),
       [Page.overview]: dataOverview,
       [Page.funds]: dataFunds,
     } as AllResponse,

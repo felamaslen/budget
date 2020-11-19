@@ -1,4 +1,5 @@
-import { Action, ActionTypeApi, ActionTypeLogin } from '~client/actions';
+import { Action, ActionTypeApi, ActionTypeLogin, ActionApiDataRead } from '~client/actions';
+import { AppConfig } from '~client/types';
 
 export type State = {
   loading: boolean;
@@ -6,6 +7,7 @@ export type State = {
   locked: boolean;
   error: Error | null;
   key: string | null;
+  appConfig: AppConfig;
 };
 
 export const initialState: State = {
@@ -14,12 +16,23 @@ export const initialState: State = {
   locked: false,
   error: null,
   key: null,
+  appConfig: {
+    birthDate: new Date('1990-01-01'),
+  },
 };
+
+const onDataRead = (state: State, action: ActionApiDataRead): State => ({
+  ...state,
+  initialLoading: false,
+  appConfig: {
+    birthDate: new Date(action.res.appConfig.birthDate),
+  },
+});
 
 export default function api(state: State = initialState, action: Action): State {
   switch (action.type) {
     case ActionTypeApi.DataRead:
-      return { ...state, initialLoading: false };
+      return onDataRead(state, action);
     case ActionTypeApi.SyncRequested:
       return { ...state, loading: true };
     case ActionTypeApi.SyncLocked:

@@ -23,10 +23,6 @@ node {
       }
 
       docker.image("${IMAGE}").inside("--link ${pg.id}:db") {
-        stage('Install dependencies') {
-          sh 'yarn install --frozen-lockfile'
-        }
-
         stage('Run parallel tests') {
           parallel([
             "Lint": {

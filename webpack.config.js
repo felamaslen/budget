@@ -1,4 +1,6 @@
 const path = require('path');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
+const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 const __DEV__ = process.env.NODE_ENV === 'development';
@@ -12,6 +14,15 @@ function getPlugins() {
         DO_STOCKS_LIST: JSON.stringify(process.env.DO_STOCKS_LIST || 'false'),
         FAKE_STOCK_PRICES: JSON.stringify(process.env.FAKE_STOCK_PRICES || 'false'),
       },
+    }),
+    new HTMLWebpackPlugin({
+      template: path.resolve(__dirname, './web/src/templates/index.ejs'),
+      inject: true,
+      filename: path.resolve(__dirname, './web/build/index.html'),
+    }),
+    new FaviconsWebpackPlugin({
+      logo: path.resolve(__dirname, './web/src/images/favicon.png'),
+      prefix: 'icons-[hash]/',
     }),
   ];
 
@@ -55,7 +66,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, './web/build'),
     publicPath,
-    filename: 'assets/bundle.js',
+    filename: 'assets/bundle.[hash].js',
   },
   resolve: {
     alias: {
@@ -80,26 +91,11 @@ module.exports = {
         use: 'css-loader',
       },
       {
-        test: (filename) => {
-          if (filename.match(/favicon\.png/)) {
-            return false;
-          }
-
-          return filename.match(/\.(woff2?|ttf|eot|svg|png|jpg)(\?v=[0-9]\.[0-9]\.[0-9])?$/);
-        },
+        test: /\.(woff2?|ttf|eot|svg|png|jpg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         use: {
           loader: 'file-loader',
           options: {
             name: 'assets/[hash].[ext]',
-          },
-        },
-      },
-      {
-        test: /favicon\.png/,
-        use: {
-          loader: 'file-loader',
-          options: {
-            name: 'assets/favicon.ico',
           },
         },
       },
