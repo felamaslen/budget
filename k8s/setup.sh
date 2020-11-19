@@ -3,7 +3,7 @@
 # This script should be run in a Debian/Ubuntu environment
 
 POSTGRES_USER=budget
-POSTGRES_PASSWORD=7b232b1av9a23vb8
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-supersecretdatabasepassword}
 
 DEFAULT_PIN=${DEFAULT_PIN:-1234}
 BIRTH_DATE=${BIRTH_DATE:-1990-01-01}
@@ -15,9 +15,24 @@ OPEN_EXCHANGE_RATES_API_KEY=${OPEN_EXCHANGE_RATES_API_KEY:-your_api_key}
 STOCKS_API_KEY=${STOCKS_API_KEY:-your_api_key}
 ALPHAVANTAGE_API_KEY=${ALPHAVANTAGE_API_KEY:-your_api_key}
 
-NETWORK_CIDR=10.11.0.0/16
-
 set -e
+
+cd $(dirname "$0")
+
+APP_NAMESPACE="$(cat ./namespace.yml | grep "name:" | head -n1 | awk '{print $2}' | cut -d'"' -f2)" 
+
+if [[ -z "$ADVERTISE_IFACE" ]]; then
+  echo "Must set ADVERTISE_IFACE"
+  exit 1
+fi
+
+ADVERTISE_ADDRESS="$(ip addr show dev $ADVERTISE_IFACE | grep inet | grep -v inet6 | awk '{print $2}' | cut -d'/' -f1)"
+if [[ -z "$ADVERTISE_ADDRESS" ]]; then
+  echo "$ADVERTISE_IFACE must have a valid inet4 address"
+  exit 1
+fi
+
+NETWORK_CIDR=10.11.0.0/16
 
 function setup_cluster_dependencies {
   echo "Setting up cluster dependencies..."
@@ -84,7 +99,9 @@ function init_cluster {
   sudo kubeadm reset
 
   echo "Initiating new cluster..."
-  sudo kubeadm init --pod-network-cidr=$NETWORK_CIDR
+  sudo kubeadm init \
+    --pod-network-cidr=$NETWORK_CIDR \
+    --apiserver-advertise-address=$ADVERTISE_ADDRESS
 
   echo "Copying kubernetes config"
   mkdir -p $HOME/.kube
@@ -141,13 +158,19 @@ function init_network {
   echo "Nodes are all ready"
 }
 
+function setup_namespace {
+  echo "Creating namespace $APP_NAMESPACE..."
+
+  kubectl apply -f ./namespace.yml
+}
+
 function setup_database_secret {
   echo "Creating database secret..."
 
   echo -n $POSTGRES_PASSWORD > password
   echo -n "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@budget-database:5432/budget" > url
 
-  kubectl create secret generic postgres-pass --from-file=password --from-file=url
+  kubectl -n=$APP_NAMESPACE create secret generic postgres-pass --from-file=password --from-file=url
 
   rm -f password url
 }
@@ -178,7 +201,7 @@ STOCK_INDICES=""
 SKIP_LOG_ACTIONS=""
 EOF
 
-  kubectl create configmap budget --from-env-file=./budget.env
+  kubectl -n=$APP_NAMESPACE create configmap budget --from-env-file=./budget.env
   rm -f budget.env
 }
 
@@ -187,7 +210,7 @@ function setup_container_registry {
 
   docker login docker.fela.space
 
-  kubectl create secret generic regcred \
+  kubectl -n=$APP_NAMESPACE create secret generic regcred \
     --from-file=.dockerconfigjson=$HOME/.docker/config.json \
     --type=kubernetes.io/dockerconfigjson
 }
@@ -198,13 +221,25 @@ function setup_db {
   pod_ready=0
   pod_name=""
   while [[ $pod_ready -eq 0 ]]; do
-    pod_line=$(kubectl get pods | grep budget-database)
+    pod_line=$(kubectl -n=$APP_NAMESPACE get pods | grep budget-database)
     pod_status=$(echo "$pod_line" | awk '{print $3}')
 
     if [[ ! -z "$pod_line" && "$pod_status" -eq "Running" ]]; then
       echo "Pod running"
-      pod_ready=1
+
       pod_name=$(echo "$pod_line" | awk '{print $1}')
+
+      set +e
+      log_ready="$(kubectl -n=$APP_NAMESPACE logs $pod_name 2>/dev/null | grep "ready to accept connections")"
+      set -e
+
+      if [[ -z "$log_ready" ]]; then
+        echo "Database not ready, waiting..."
+        sleep 5
+      else
+        echo "Database ready"
+        pod_ready=1
+      fi
     else 
       echo "$pod_line"
       echo "Pod not ready, waiting..."
@@ -212,7 +247,7 @@ function setup_db {
     fi
   done
 
-  kubectl exec -it $pod_name -- psql -U budget -c "alter user budget with password '$POSTGRES_PASSWORD'"
+  kubectl -n=$APP_NAMESPACE exec -it $pod_name -- psql -U budget -c "alter user budget with password '$POSTGRES_PASSWORD'"
 }
 
 function setup_ingress_controller {
@@ -233,20 +268,21 @@ function apply_manifest {
 
   sudo mkdir -p /var/local/budget-database
 
-  kubectl apply -f ./manifest.yml
+  kubectl -n=$APP_NAMESPACE apply -f ./manifest.yml
 
-  kubectl get deployments -o wide
-  kubectl get pods -o wide
+  kubectl -n=$APP_NAMESPACE get deployments -o wide
+  kubectl -n=$APP_NAMESPACE get pods -o wide
 }
 
 setup_cluster_dependencies
 init_cluster
 init_network
+setup_namespace
 setup_database_secret
 setup_configmap
 setup_container_registry
-setup_db
 setup_ingress_controller
 apply_manifest
+setup_db
 
 exit 0

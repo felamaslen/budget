@@ -82,12 +82,12 @@ kind: Service
 metadata:
   name: budget-database
   labels:
-    app: budget
+    app: budget-database
 spec:
   ports:
     - port: 5432
   selector:
-    app: budget
+    app: budget-database
     tier: postgres
   clusterIP: None
 ---
@@ -103,7 +103,7 @@ kind: PersistentVolume
 metadata:
   name: postgres-pv
   labels:
-    app: budget
+    app: budget-database
 spec:
   storageClassName: manual
   capacity:
@@ -111,14 +111,14 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /home/budget/pv-data
+    path: /var/local/budget-database
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pv-claim
   labels:
-    app: budget
+    app: budget-database
 spec:
   storageClassName: manual
   accessModes:
@@ -132,18 +132,18 @@ kind: Deployment
 metadata:
   name: budget-database
   labels:
-    app: budget
+    app: budget-database
 spec:
   selector:
     matchLabels:
-      app: budget
+      app: budget-database
       tier: postgres
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: budget
+        app: budget-database
         tier: postgres
     spec:
       containers:
