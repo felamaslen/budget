@@ -4,9 +4,6 @@ pipeline {
   environment {
     cache_dir = "/.cache/node_modules"
     cache_file = "budget.tar"
-
-    VERSION = "${BUILD_ID}"
-    IMAGE = "docker.fela.space/budget:${VERSION}"
   }
 
   stages {
@@ -19,10 +16,7 @@ pipeline {
       steps {
         script {
           docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
-            docker.build("docker.fela.space/budget_base:latest")
-
-            def prodImage = docker.build("${IMAGE}", '-f prod.Dockerfile .')
-            prodImage.push()
+            sh 'make build push'
           }
         }
       }
@@ -32,6 +26,7 @@ pipeline {
         stage('Lint') {
           steps {
             script {
+              IMAGE = sh(returnStdout: true, script: "make get_image").trim()
               docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
                 docker.image("${IMAGE}").inside {
                   sh 'yarn install --frozen-lockfile'
@@ -44,6 +39,7 @@ pipeline {
         stage('Client unit tests') {
           steps {
             script {
+              IMAGE = sh(returnStdout: true, script: "make get_image").trim()
               docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
                 docker.image("${IMAGE}").inside {
                   sh 'yarn install --frozen-lockfile'
@@ -56,6 +52,7 @@ pipeline {
         stage('API unit tests') {
           steps {
             script {
+              IMAGE = sh(returnStdout: true, script: "make get_image").trim()
               docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
                 docker.image("${IMAGE}").inside {
                   sh 'yarn install --frozen-lockfile'
@@ -70,6 +67,8 @@ pipeline {
     stage('API Integration tests') {
       steps {
         script {
+          IMAGE = sh(returnStdout: true, script: "make get_image").trim()
+
           docker.image('postgres:10.4').withRun('-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker') { pg ->
 
             docker.image('postgres:10.4').inside("--link ${pg.id}:db") {

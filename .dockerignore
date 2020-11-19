@@ -8,4 +8,5 @@ k8s
 android
 cli
 coverage
+Makefile
 Jenkinsfile

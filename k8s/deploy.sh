@@ -2,12 +2,9 @@
 
 set -e
 
-if [[ -z "$IMAGE" ]]; then
-  echo "Must set IMAGE"
-  exit 1
-fi
-
 cd $(dirname "$0")
+
+IMAGE=$(make -f ../Makefile get_image)
 
 namespace="budget"
 
