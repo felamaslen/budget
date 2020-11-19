@@ -8,6 +8,7 @@ module.exports = {
   globalSetup: '<rootDir>/api/src/test-utils/test-setup.ts',
   globalTeardown: '<rootDir>/api/src/test-utils/test-teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/api/src/test-utils/test-after-env.ts'],
+  testTimeout: 15000,
   coverageDirectory: 'coverage/api/integration',
   collectCoverageFrom: [
     'api/src/**/*.ts',
