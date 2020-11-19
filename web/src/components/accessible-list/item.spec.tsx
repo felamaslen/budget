@@ -237,14 +237,14 @@ describe('Accessible list create item', () => {
           const addButton = getByText('Add') as HTMLButtonElement;
 
           const inputNextField = inputs[1];
-          act(() => {
+          await act(async () => {
             fireEvent.change(inputNextField, {
               target: { value: 'z' },
             });
-          });
 
-          await waitFor(() => {
-            expect(getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
+            await waitFor(() => {
+              expect(getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
+            });
           });
 
           const list = getByRole('list', { hidden: true });
@@ -253,8 +253,7 @@ describe('Accessible list create item', () => {
 
           act(() => {
             fireEvent.focus(suggestionItems[1]);
-          });
-          act(() => {
+
             fireEvent.keyDown(suggestionItems[1], {
               key: 'Enter',
             });

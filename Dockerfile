@@ -1,6 +1,8 @@
+# docker.fela.space/budget_base
+
 FROM node:12-alpine
 
-RUN apk add --no-cache \
+RUN apk update && apk add --no-cache \
   python \
   git \
   build-base \
@@ -12,23 +14,3 @@ RUN apk add --no-cache \
   jpeg-dev \
   pango-dev \
   giflib-dev 
-
-WORKDIR /opt/app
-
-COPY package.json ./
-COPY yarn.lock ./
-
-RUN yarn install --frozen-lockfile
-
-ENV PATH="/opt/app/node_modules/.bin:${PATH}"
-
-ARG STOCK_INDICES
-ENV STOCK_INDICES=${STOCK_INDICES}
-
-ARG DO_STOCKS_LIST
-ENV DO_STOCKS_LIST=${DO_STOCKS_LIST}
-
-COPY . .
-RUN yarn build
-
-CMD ["yarn", "start"]

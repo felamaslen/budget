@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: dev.Dockerfile
+    depends_on:
+      - base
     volumes:
       - .:/opt/app
       - /opt/app/node_modules
@@ -25,6 +27,10 @@ services:
       PORT: 3000
       DATABASE_URL: postgres://docker:docker@db:5432/budget
       DEFAULT_PIN: 1234
+  base:
+    image: docker.fela.space/budget_base:latest
+    build:
+      context: .
   db:
     restart: always
     image: postgres:10.4

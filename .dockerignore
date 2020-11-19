@@ -3,7 +3,9 @@ node_modules
 .env
 .pyenv
 .idea
+*.log
 k8s
 android
 cli
 coverage
+Jenkinsfile

@@ -2,22 +2,21 @@
 
 set -e
 
+if [[ -z "$IMAGE" ]]; then
+  echo "Must set IMAGE"
+  exit 1
+fi
+
 cd $(dirname "$0")
 
-image=$(./get_new_tag.sh)
-
-./build-image.sh
-
-echo "Pushing image..."
-docker login docker.fela.space
-docker push $image
+namespace="budget"
 
 cat ./manifest.yml \
-  | sed -e "s/docker\.fela\.space\/budget\:0/$(echo $image | sed -e 's/\//\\\//')/g" \
+  | sed -e "s/docker\.fela\.space\/budget\:0/$(echo $IMAGE | sed -e 's/\//\\\//')/g" \
   > ./manifest_with_image.yml
 
 echo "Updating deployment..."
-kubectl apply -f ./manifest_with_image.yml
+kubectl -n=$namespace apply -f ./manifest_with_image.yml
 
 rm -f manifest_with_image.yml
 
