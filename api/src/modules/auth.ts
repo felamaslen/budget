@@ -8,7 +8,7 @@ import { Strategy, ExtractJwt, VerifiedCallback } from 'passport-jwt';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
-import { pool } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import { tokenSchema } from '~api/schema';
 
 export type User = {
@@ -27,7 +27,7 @@ export type AuthenticatedRequest = Exclude<Request, 'user'> & {
   user: User;
 };
 
-export function getStrategy(): Strategy {
+export function getStrategy(databaseName?: string): Strategy {
   const params = {
     secretOrKey: config.user.tokenSecret,
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -44,7 +44,7 @@ export function getStrategy(): Strategy {
 
     const { uid } = tokenValidationResult.value;
 
-    const user = await pool.connect(async (db) => {
+    const user = await getPool(databaseName).connect(async (db) => {
       const result = await db.query<{ name: string }>(
         sql`SELECT name FROM users WHERE uid = ${uid}`,
       );

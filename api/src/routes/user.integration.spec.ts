@@ -3,9 +3,17 @@ import sinon from 'sinon';
 import { Test } from 'supertest';
 
 import config from '~api/config';
-import db from '~api/test-utils/knex';
+import { createServer, App } from '~api/test-utils/create-server';
 
 describe('User route', () => {
+  let app: App;
+  beforeAll(async () => {
+    app = await createServer('user');
+  });
+  afterAll(async () => {
+    await app.cleanup();
+  });
+
   describe('POST /user/login', () => {
     let clock: sinon.SinonFakeTimers;
     const now = new Date('2020-03-07T23:06:23Z');
@@ -15,7 +23,7 @@ describe('User route', () => {
         now,
         toFake: ['Date'],
       });
-      await db('ip_login_req').truncate();
+      await app.db('ip_login_req').truncate();
     });
 
     afterEach(() => {
@@ -24,11 +32,11 @@ describe('User route', () => {
 
     it('should return a successful login response', async () => {
       expect.assertions(5);
-      const res = await global.agent.post('/api/v4/user/login').send({
+      const res = await app.agent.post('/api/v4/user/login').send({
         pin: 1234,
       });
 
-      const { uid } = (await db.select<{ uid: number }>('uid').from('users').first()) || {};
+      const { uid } = (await app.db.select<{ uid: number }>('uid').from('users').first()) || {};
 
       expect(uid).not.toBeUndefined();
 
@@ -47,7 +55,7 @@ describe('User route', () => {
 
     it('should return an unsuccessful login response', async () => {
       expect.assertions(5);
-      const res = await global.agent.post('/api/v4/user/login').send({
+      const res = await app.agent.post('/api/v4/user/login').send({
         pin: 1235,
       });
 
@@ -67,10 +75,10 @@ describe('User route', () => {
       const ip1 = '1.9.3.7';
 
       const badLogin = (ip = ip0): Test =>
-        global.agent.post(`/api/v4/user/login`).send({ pin: 9999 }).set('X-Forwarded-For', ip);
+        app.agent.post(`/api/v4/user/login`).send({ pin: 9999 }).set('X-Forwarded-For', ip);
 
       const goodLogin = (ip = ip0): Test =>
-        global.agent.post(`/api/v4/user/login`).send({ pin: 1234 }).set('X-Forwarded-For', ip);
+        app.agent.post(`/api/v4/user/login`).send({ pin: 1234 }).set('X-Forwarded-For', ip);
 
       const delayedBadLogins = async (
         numLogins: number,

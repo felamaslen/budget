@@ -51,8 +51,8 @@ const routeGet = authDbRoute(async (db, req, res) => {
   res.json({ data });
 });
 
-export function handler(): Router {
+export function handler(databaseName?: string): Router {
   const router = Router();
-  router.get('/', routeGet);
+  router.get('/', routeGet(databaseName));
   return router;
 }

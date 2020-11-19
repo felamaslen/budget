@@ -124,11 +124,11 @@ function setupApiDocs(app: express.Express): void {
   );
 }
 
-function setupApi(app: express.Express): void {
-  passport.use('jwt', getStrategy());
+function setupApi(app: express.Express, databaseName?: string): void {
+  passport.use('jwt', getStrategy(databaseName));
   app.use(passport.initialize());
-  app.use(healthRoutes());
-  app.use(API_PREFIX, routes());
+  app.use(healthRoutes(databaseName));
+  app.use(API_PREFIX, routes(databaseName));
   setupApiDocs(app);
 }
 
@@ -140,12 +140,12 @@ function setupErrorHandling(app: express.Express): void {
   app.use(errorHandler);
 }
 
-export function run(port: number = config.app.port): Promise<Server> {
+export function run(port = config.app.port, databaseName?: string): Promise<Server> {
   const app = express();
 
   setupLogging(app);
   setupDataInput(app);
-  setupApi(app);
+  setupApi(app, databaseName);
   setupWebApp(app);
   setupErrorHandling(app);
 

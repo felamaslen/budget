@@ -1,20 +1,24 @@
 import moize from 'moize';
 import sinon from 'sinon';
 import { Response } from 'supertest';
+import { createServer, App } from '~api/test-utils/create-server';
 
 describe('Analysis route', () => {
   let clock: sinon.SinonFakeTimers;
-  beforeAll(() => {
+  let app: App;
+  beforeAll(async () => {
     clock = sinon.useFakeTimers(new Date('2018-04-20'));
+    app = await createServer('analysis');
   });
-  afterAll(() => {
+  afterAll(async () => {
+    await app.cleanup();
     clock.restore();
   });
 
   describe('GET /data/analysis/year/category', () => {
     const setup = moize(
       async (): Promise<Response> => {
-        const res = await global.withAuth(global.agent.get(`/api/v4/data/analysis/year/category`));
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/analysis/year/category`));
 
         return res;
       },
@@ -97,9 +101,7 @@ describe('Analysis route', () => {
     describe('on leap years', () => {
       const setupLeapYear = moize(
         async (): Promise<Response> => {
-          const res = await global.withAuth(
-            global.agent.get(`/api/v4/data/analysis/year/category/2`),
-          );
+          const res = await app.withAuth(app.agent.get(`/api/v4/data/analysis/year/category/2`));
 
           return res;
         },
@@ -150,7 +152,7 @@ describe('Analysis route', () => {
   describe('GET /data/analysis/month/shop/1', () => {
     const setup = moize(
       async (): Promise<Response> => {
-        const res = await global.withAuth(global.agent.get(`/api/v4/data/analysis/month/shop/1`));
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/analysis/month/shop/1`));
 
         return res;
       },
@@ -261,9 +263,7 @@ describe('Analysis route', () => {
   describe('GET /data/analysis/week/category/0', () => {
     const setup = moize(
       async (): Promise<Response> => {
-        const res = await global.withAuth(
-          global.agent.get(`/api/v4/data/analysis/week/category/0`),
-        );
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/analysis/week/category/0`));
 
         return res;
       },
@@ -323,8 +323,8 @@ describe('Analysis route', () => {
   describe('GET /data/analysis/deep/food/month/category/1', () => {
     const setup = moize(
       async (): Promise<Response> => {
-        const res = await global.withAuth(
-          global.agent.get(`/api/v4/data/analysis/deep/food/month/category/1`),
+        const res = await app.withAuth(
+          app.agent.get(`/api/v4/data/analysis/deep/food/month/category/1`),
         );
 
         return res;

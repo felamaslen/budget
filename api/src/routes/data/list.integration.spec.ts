@@ -2,14 +2,17 @@ import { format, addDays } from 'date-fns';
 import MockDate from 'mockdate';
 import { Response } from 'supertest';
 
-import db from '~api/test-utils/knex';
+import { createServer, App } from '~api/test-utils/create-server';
 import { Page } from '~api/types';
 
 describe('Standard list routes', () => {
-  beforeAll(() => {
+  let app: App;
+  beforeAll(async () => {
     MockDate.set(new Date('2020-04-20'));
+    app = await createServer('list');
   });
-  afterAll(() => {
+  afterAll(async () => {
+    await app.cleanup();
     MockDate.reset();
   });
 
@@ -73,15 +76,15 @@ describe('Standard list routes', () => {
     ${Page.social}  | ${3}     | ${social}  | ${socialDelta}  | ${{ k: 'Remote social', s: 'Dominoes' }}
   `('$page route', ({ page, lastPage, testItem, delta, readProps }) => {
     const clearDb = async (): Promise<void> => {
-      await db(page).where({ item: testItem.item }).del();
-      await db(page).where({ item: delta.item }).del();
+      await app.db(page).where({ item: testItem.item }).del();
+      await app.db(page).where({ item: delta.item }).del();
     };
 
     beforeEach(clearDb);
 
     describe(`POST /${page}`, () => {
       const setup = async (): Promise<Response> => {
-        const res = await global.withAuth(global.agent.post(`/api/v4/data/${page}`)).send(testItem);
+        const res = await app.withAuth(app.agent.post(`/api/v4/data/${page}`)).send(testItem);
         return res;
       };
 
@@ -126,7 +129,7 @@ describe('Standard list routes', () => {
         expect.assertions(1);
         const res = await setup();
 
-        const resAfter = await global.withAuth(global.agent.get(`/api/v4/data/${page}`));
+        const resAfter = await app.withAuth(app.agent.get(`/api/v4/data/${page}`));
 
         expect(resAfter.body.data.data).toStrictEqual(
           expect.arrayContaining([
@@ -140,8 +143,8 @@ describe('Standard list routes', () => {
 
     describe(`GET /${page}/:page?`, () => {
       const setup = async (data: object = testItem): Promise<Response> => {
-        await global.withAuth(global.agent.post(`/api/v4/data/${page}`)).send(data);
-        const res = await global.withAuth(global.agent.get(`/api/v4/data/${page}`));
+        await app.withAuth(app.agent.post(`/api/v4/data/${page}`)).send(data);
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/${page}`));
         return res;
       };
 
@@ -178,7 +181,7 @@ describe('Standard list routes', () => {
               (last, _, index) =>
                 last.then(
                   async (): Promise<void> => {
-                    await global.withAuth(global.agent.post(`/api/v4/data/${page}`)).send({
+                    await app.withAuth(app.agent.post(`/api/v4/data/${page}`)).send({
                       ...testItem,
                       date: format(addDays(baseDate, -index), 'yyyy-MM-dd'),
                     });
@@ -191,8 +194,8 @@ describe('Standard list routes', () => {
         it('should apply an optional limit', async () => {
           expect.assertions(2);
           await setupForPagination();
-          const resPage0Limit3 = await global.withAuth(
-            global.agent.get(`/api/v4/data/${page}/0?limit=3`),
+          const resPage0Limit3 = await app.withAuth(
+            app.agent.get(`/api/v4/data/${page}/0?limit=3`),
           );
 
           expect(resPage0Limit3.body.data.data).toHaveLength(3);
@@ -202,8 +205,8 @@ describe('Standard list routes', () => {
         it('should apply an optional page number', async () => {
           expect.assertions(1);
           await setupForPagination();
-          const resPage1Limit3 = await global.withAuth(
-            global.agent.get(`/api/v4/data/${page}/1?limit=3`),
+          const resPage1Limit3 = await app.withAuth(
+            app.agent.get(`/api/v4/data/${page}/1?limit=3`),
           );
 
           expect(resPage1Limit3.body.data.data).toStrictEqual([
@@ -222,11 +225,11 @@ describe('Standard list routes', () => {
         it('should set olderExists to false on the last page', async () => {
           expect.assertions(2);
           await setupForPagination();
-          const resPageNextFromLast = await global.withAuth(
-            global.agent.get(`/api/v4/data/${page}/${lastPage - 1}?limit=3`),
+          const resPageNextFromLast = await app.withAuth(
+            app.agent.get(`/api/v4/data/${page}/${lastPage - 1}?limit=3`),
           );
-          const resPageLast = await global.withAuth(
-            global.agent.get(`/api/v4/data/${page}/${lastPage}?limit=3`),
+          const resPageLast = await app.withAuth(
+            app.agent.get(`/api/v4/data/${page}/${lastPage}?limit=3`),
           );
 
           expect(resPageNextFromLast.body.data.olderExists).toBe(true);
@@ -242,11 +245,9 @@ describe('Standard list routes', () => {
       };
 
       const setup = async (data: object = modifiedItem): Promise<Response> => {
-        const resPost = await global
-          .withAuth(global.agent.post(`/api/v4/data/${page}`))
-          .send(testItem);
-        const res = await global.withAuth(
-          global.agent.put(`/api/v4/data/${page}`).send({
+        const resPost = await app.withAuth(app.agent.post(`/api/v4/data/${page}`)).send(testItem);
+        const res = await app.withAuth(
+          app.agent.put(`/api/v4/data/${page}`).send({
             id: resPost.body.id,
             ...data,
           }),
@@ -286,7 +287,7 @@ describe('Standard list routes', () => {
         expect.assertions(1);
         await setup();
 
-        const resAfter = await global.withAuth(global.agent.get(`/api/v4/data/${page}`));
+        const resAfter = await app.withAuth(app.agent.get(`/api/v4/data/${page}`));
 
         expect(resAfter.body.data.data).toStrictEqual(
           expect.arrayContaining([
@@ -302,11 +303,9 @@ describe('Standard list routes', () => {
 
     describe(`DELETE /${page}`, () => {
       const setup = async (): Promise<Response> => {
-        const resPost = await global
-          .withAuth(global.agent.post(`/api/v4/data/${page}`))
-          .send(testItem);
-        const res = await global.withAuth(
-          global.agent.delete(`/api/v4/data/${page}`).send({
+        const resPost = await app.withAuth(app.agent.post(`/api/v4/data/${page}`)).send(testItem);
+        const res = await app.withAuth(
+          app.agent.delete(`/api/v4/data/${page}`).send({
             id: resPost.body.id,
           }),
         );
@@ -346,7 +345,7 @@ describe('Standard list routes', () => {
         expect.assertions(1);
         await setup();
 
-        const resAfter = await global.withAuth(global.agent.get(`/api/v4/data/${page}`));
+        const resAfter = await app.withAuth(app.agent.get(`/api/v4/data/${page}`));
 
         expect(resAfter.body.data.data).not.toStrictEqual(
           expect.arrayContaining([

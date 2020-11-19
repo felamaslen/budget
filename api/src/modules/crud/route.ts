@@ -60,11 +60,11 @@ export function makeCrudRoute<D extends Item = Item, J extends Item = D>(
     },
   );
 
-  return (router: Router = Router(), prefix = ''): Router => {
-    router.post(`${prefix}/`, routePost);
-    router.get(`${prefix}/:id?`, routeGet);
-    router.put(`${prefix}/:id`, routePut);
-    router.delete(`${prefix}/:id`, routeDelete);
+  return (databaseName?: string) => (router: Router = Router(), prefix = ''): Router => {
+    router.post(`${prefix}/`, routePost(databaseName));
+    router.get(`${prefix}/:id?`, routeGet(databaseName));
+    router.put(`${prefix}/:id`, routePut(databaseName));
+    router.delete(`${prefix}/:id`, routeDelete(databaseName));
 
     return router;
   };

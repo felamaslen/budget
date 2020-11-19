@@ -1,5 +1,3 @@
-import { Router } from 'express';
-
 import { makeCrudRoute } from '~api/modules/crud';
 import { DJMap, mapExternalToInternal, mapInternalToExternal } from '~api/modules/key-map';
 import { schemaCategory } from '~api/schema';
@@ -10,7 +8,7 @@ const item = 'Category';
 
 const dbMap = [{ external: 'isOption', internal: 'is_option' }];
 
-export const routeCategories: () => Router = makeCrudRoute<CategoryRow, Category>({
+export const routeCategories = makeCrudRoute<CategoryRow, Category>({
   table,
   item,
   schema: schemaCategory,

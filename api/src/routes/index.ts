@@ -7,14 +7,14 @@ import { handler as user } from './user';
 
 import { authMiddleware } from '~api/modules/auth';
 
-export default function handler(): Router {
+export default function handler(databaseName?: string): Router {
   const router = Router();
 
-  router.use('/user', user());
-  router.use('/data', data());
+  router.use('/user', user(databaseName));
+  router.use('/data', data(databaseName));
 
-  router.use('/pivot-table', authMiddleware(), pivotTable());
-  router.use('/preview', authMiddleware(), preview());
+  router.use('/pivot-table', authMiddleware(), pivotTable(databaseName));
+  router.use('/preview', authMiddleware(), preview(databaseName));
 
   return router;
 }

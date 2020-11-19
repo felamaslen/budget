@@ -133,8 +133,8 @@ const routeGet = authDbRoute(async (db, req, res) => {
   res.json({ data: { list } });
 });
 
-export function handler(): Router {
+export function handler(databaseName?: string): Router {
   const router = Router();
-  router.get('/:category', routeGet);
+  router.get('/:category', routeGet(databaseName));
   return router;
 }

@@ -1,17 +1,16 @@
-import db from '~api/test-utils/knex';
+import { createServer, App } from '~api/test-utils/create-server';
 
 describe('Search route', () => {
-  const cleanup = async (): Promise<void> => {
-    await db('food').truncate();
-    await db('bills').truncate();
-  };
-
+  let app: App;
   beforeAll(async () => {
-    await cleanup();
+    app = await createServer('search');
 
-    await db('food').insert([
+    await app.db('food').truncate();
+    await app.db('bills').truncate();
+
+    await app.db('food').insert([
       {
-        uid: global.uid,
+        uid: app.uid,
         date: '2020-04-20',
         item: 'Pears',
         category: 'Fruit',
@@ -19,7 +18,7 @@ describe('Search route', () => {
         shop: 'Tesco',
       },
       {
-        uid: global.uid,
+        uid: app.uid,
         date: '2020-04-20',
         item: 'Apples',
         category: 'Fruit',
@@ -27,7 +26,7 @@ describe('Search route', () => {
         shop: "Sainsbury's",
       },
       {
-        uid: global.uid,
+        uid: app.uid,
         date: '2020-04-20',
         item: 'Chocolate fondue',
         category: 'Fondue',
@@ -35,7 +34,7 @@ describe('Search route', () => {
         shop: 'Chocolate shop',
       },
       {
-        uid: global.uid,
+        uid: app.uid,
         date: '2020-04-20',
         item: 'Apple pie',
         category: 'Dessert',
@@ -44,29 +43,30 @@ describe('Search route', () => {
       },
     ]);
 
-    await db('bills').insert([
+    await app.db('bills').insert([
       {
-        uid: global.uid,
+        uid: app.uid,
         date: '2020-04-20',
         item: 'Mortgage',
         cost: 1,
       },
       {
-        uid: global.uid,
+        uid: app.uid,
         date: '2020-04-20',
         item: 'Water',
         cost: 1,
       },
       {
-        uid: global.uid,
+        uid: app.uid,
         date: '2020-04-20',
         item: 'Rent',
         cost: 1,
       },
     ]);
   });
-
-  afterAll(cleanup);
+  afterAll(async () => {
+    await app.cleanup();
+  });
 
   it.each`
     case          | page       | column        | searchTerm   | results
@@ -77,8 +77,8 @@ describe('Search route', () => {
     ${'page'}     | ${'bills'} | ${'item'}     | ${'r'}       | ${['Rent']}
   `('should return $case matches', async ({ page, column, searchTerm, results }) => {
     expect.assertions(2);
-    const res = await global.withAuth(
-      global.agent.get(`/api/v4/data/search/${page}/${column}/${searchTerm}`),
+    const res = await app.withAuth(
+      app.agent.get(`/api/v4/data/search/${page}/${column}/${searchTerm}`),
     );
 
     expect(res.status).toBe(200);
@@ -96,8 +96,8 @@ describe('Search route', () => {
     'should give next category matches $case',
     async ({ page, column, searchTerm, nextCategory }) => {
       expect.assertions(2);
-      const res = await global.withAuth(
-        global.agent.get(`/api/v4/data/search/${page}/${column}/${searchTerm}`),
+      const res = await app.withAuth(
+        app.agent.get(`/api/v4/data/search/${page}/${column}/${searchTerm}`),
       );
 
       expect(res.status).toBe(200);
@@ -117,8 +117,8 @@ describe('Search route', () => {
     'should not give next category matches for the $page page',
     async ({ page, column, searchTerm }) => {
       expect.assertions(3);
-      const res = await global.withAuth(
-        global.agent.get(`/api/v4/data/search/${page}/${column}/${searchTerm}`),
+      const res = await app.withAuth(
+        app.agent.get(`/api/v4/data/search/${page}/${column}/${searchTerm}`),
       );
 
       expect(res.status).toBe(200);
@@ -129,7 +129,7 @@ describe('Search route', () => {
 
   it('should limit the number of results', async () => {
     expect.assertions(2);
-    const res = await global.withAuth(global.agent.get('/api/v4/data/search/food/item/a/2'));
+    const res = await app.withAuth(app.agent.get('/api/v4/data/search/food/item/a/2'));
 
     expect(res.status).toBe(200);
     expect(res.body.data.list).toHaveLength(2);

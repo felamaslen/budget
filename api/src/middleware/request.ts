@@ -14,8 +14,10 @@ export const authDbRoute = (
     res: Response,
     next: NextFunction,
   ) => Promise<void>,
-): RequestHandler =>
-  catchAsyncErrors(withSlonik<void, [AuthenticatedRequest, Response, NextFunction]>(handler));
+) => (databaseName?: string): RequestHandler =>
+  catchAsyncErrors(
+    withSlonik<void, [AuthenticatedRequest, Response, NextFunction]>(handler)(databaseName),
+  );
 
 export const validatedAuthDbRoute = <
   D extends object | void = void,
@@ -35,7 +37,7 @@ export const validatedAuthDbRoute = <
     params: P,
     query: Q,
   ) => Promise<void>,
-): RequestHandler =>
+): ((databaseName?: string) => RequestHandler) =>
   authDbRoute(async (db, req, res) => {
     const dataValidation = schema.data?.validate(req.body);
     const paramsValidation = schema.params?.validate(req.params);

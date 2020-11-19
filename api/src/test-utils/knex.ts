@@ -1,8 +1,8 @@
 import path from 'path';
-import knex, { Config, PgConnectionConfig } from 'knex';
+import * as Knex from 'knex';
 import { getDbUrl } from '~api/db-url';
 
-function parseConnectionURI(uri = ''): PgConnectionConfig {
+function parseConnectionURI(uri = ''): Knex.PgConnectionConfig {
   const matches = uri.match(
     /^postgres(ql)?:\/\/(\w+):(.*)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/,
   );
@@ -22,7 +22,7 @@ function parseConnectionURI(uri = ''): PgConnectionConfig {
   };
 }
 
-export const knexConfig: Config = {
+export const knexConfig: Knex.Config = {
   client: 'pg',
   connection: parseConnectionURI(getDbUrl()),
   seeds: {
@@ -37,4 +37,24 @@ export const knexConfig: Config = {
   },
 };
 
-export default knex(knexConfig);
+const db = Knex.default(knexConfig);
+export default db;
+
+export const cleanupTestDb = async (databaseName: string): Promise<void> => {
+  await db.raw(`DROP DATABASE IF EXISTS ${databaseName}`);
+};
+
+export async function getTestDb(databaseName: string): Promise<Knex> {
+  await cleanupTestDb(databaseName);
+  await db.raw(`CREATE DATABASE ${databaseName}`);
+
+  const knexConfigTest: Knex.Config = {
+    ...knexConfig,
+    connection: {
+      ...parseConnectionURI(getDbUrl()),
+      database: databaseName,
+    },
+  };
+
+  return Knex.default(knexConfigTest);
+}

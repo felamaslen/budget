@@ -24,9 +24,9 @@ export const routeGetDeep = validatedAuthDbRoute<never, AnalysisParamsDeep>(
   },
 );
 
-export const handler = (): Router => {
+export const handler = (databaseName?: string): Router => {
   const router = Router();
-  router.get('/:period/:groupBy/:pageIndex?', routeGet);
-  router.get('/deep/:category/:period/:groupBy/:pageIndex?', routeGetDeep);
+  router.get('/:period/:groupBy/:pageIndex?', routeGet(databaseName));
+  router.get('/deep/:category/:period/:groupBy/:pageIndex?', routeGetDeep(databaseName));
   return router;
 };

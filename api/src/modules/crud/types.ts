@@ -41,4 +41,6 @@ export type CrudOptions<D extends Item, J extends Item> = {
   parentDependency?: ParentDependency<J>;
 };
 
-export type CrudRouteFactory = (router?: Router, prefix?: string) => Router;
+export type CrudRouteFactory = (
+  databaseName?: string,
+) => (router?: Router, prefix?: string) => Router;

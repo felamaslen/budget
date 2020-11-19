@@ -17,34 +17,34 @@ import { handler as routePie } from './pie';
 import { handler as routeStocks } from './stocks';
 
 import { authMiddleware } from '~api/modules/auth';
-import { netWorthRoute } from '~api/routes/net-worth';
+import { handler as routeNetWorth } from '~api/routes/net-worth';
 import { handler as routeSearch } from '~api/routes/search';
 
-export function handler(): Router {
+export function handler(databaseName?: string): Router {
   const router = Router();
 
   router.use('/*', authMiddleware());
 
-  router.patch('/multiple', routePatch);
+  router.patch('/multiple', routePatch(databaseName));
 
-  router.use('/search', routeSearch());
-  router.use('/net-worth', netWorthRoute());
-  router.use('/overview', routeOverview());
-  router.use('/analysis', routeAnalysis());
+  router.use('/search', routeSearch(databaseName));
+  router.use('/net-worth', routeNetWorth(databaseName));
+  router.use('/overview', routeOverview(databaseName));
+  router.use('/analysis', routeAnalysis(databaseName));
 
-  router.use('/funds', routeFunds());
+  router.use('/funds', routeFunds(databaseName));
 
-  router.use('/income', routeIncome);
-  router.use('/bills', routeBills);
-  router.use('/food', routeFood);
-  router.use('/general', routeGeneral);
-  router.use('/holiday', routeHoliday);
-  router.use('/social', routeSocial);
+  router.use('/income', routeIncome(databaseName));
+  router.use('/bills', routeBills(databaseName));
+  router.use('/food', routeFood(databaseName));
+  router.use('/general', routeGeneral(databaseName));
+  router.use('/holiday', routeHoliday(databaseName));
+  router.use('/social', routeSocial(databaseName));
 
-  router.get('/all', routeAll);
+  router.get('/all', routeAll(databaseName));
 
-  router.use('/pie', routePie());
-  router.use('/stocks', routeStocks());
+  router.use('/pie', routePie(databaseName));
+  router.use('/stocks', routeStocks(databaseName));
 
   return router;
 }

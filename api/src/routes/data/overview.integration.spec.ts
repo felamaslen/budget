@@ -2,18 +2,23 @@ import moize from 'moize';
 import sinon from 'sinon';
 import { Response } from 'supertest';
 
+import { createServer, App } from '~api/test-utils/create-server';
+
 describe('Overview route', () => {
   let clock: sinon.SinonFakeTimers;
-  beforeAll(() => {
+  let app: App;
+  beforeAll(async () => {
     clock = sinon.useFakeTimers(new Date('2018-04-20'));
+    app = await createServer('overview');
   });
-  afterAll(() => {
+  afterAll(async () => {
+    await app.cleanup();
     clock.restore();
   });
 
   const setup = moize(
     async (): Promise<Response> => {
-      const res = await global.withAuth(global.agent.get('/api/v4/data/overview'));
+      const res = await app.withAuth(app.agent.get('/api/v4/data/overview'));
 
       return res;
     },
@@ -49,8 +54,8 @@ describe('Overview route', () => {
 
     it('should omit costs for house purchases', async () => {
       expect.assertions(1);
-      await global.withAuth(
-        global.agent.post('/api/v4/data/general').send({
+      await app.withAuth(
+        app.agent.post('/api/v4/data/general').send({
           date: '2018-03-13',
           item: 'Deposit',
           category: 'House purchase',
@@ -59,7 +64,7 @@ describe('Overview route', () => {
         }),
       );
 
-      const res = await global.withAuth(global.agent.get('/api/v4/data/overview'));
+      const res = await app.withAuth(app.agent.get('/api/v4/data/overview'));
 
       expect(res.body.data.cost.general[24]).toBe(11143);
     });

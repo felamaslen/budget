@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import { Response } from 'supertest';
 
 import config from '~api/config';
-import db from '~api/test-utils/knex';
+import { createServer, App } from '~api/test-utils/create-server';
 import {
   RawDate,
   Create,
@@ -16,9 +16,17 @@ import {
 } from '~api/types';
 
 describe('Net worth route', () => {
+  let app: App;
+  beforeAll(async () => {
+    app = await createServer('net_worth');
+  });
+  afterAll(async () => {
+    await app.cleanup();
+  });
+
   const clearDb = async (): Promise<void> => {
-    await db('net_worth_categories').del();
-    await db('net_worth').del();
+    await app.db('net_worth_categories').del();
+    await app.db('net_worth').del();
   };
 
   beforeEach(clearDb);
@@ -33,8 +41,8 @@ describe('Net worth route', () => {
   describe('categories', () => {
     describe('POST /net-worth/categories', () => {
       const setup = async (): Promise<Response> => {
-        const res = await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+        const res = await app
+          .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
           .send(category);
         return res;
       };
@@ -51,8 +59,8 @@ describe('Net worth route', () => {
       it('should respond with the category on subsequent get requests', async () => {
         expect.assertions(1);
         const res = await setup();
-        const resAfter = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/categories/${res.body.id}`),
+        const resAfter = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/categories/${res.body.id}`),
         );
         expect(resAfter.body).toStrictEqual(expect.objectContaining(category));
       });
@@ -60,12 +68,10 @@ describe('Net worth route', () => {
       it('should accept isOption value', async () => {
         expect.assertions(1);
 
-        const res = await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
-          .send({
-            ...category,
-            isOption: true,
-          });
+        const res = await app.withAuth(app.agent.post('/api/v4/data/net-worth/categories')).send({
+          ...category,
+          isOption: true,
+        });
 
         expect(res.body).toHaveProperty('isOption', true);
       });
@@ -73,11 +79,11 @@ describe('Net worth route', () => {
 
     describe('GET /net-worth/categories/:categoryId', () => {
       const setup = async (): Promise<Response> => {
-        const resPost = await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+        const resPost = await app
+          .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
           .send(category);
-        const res = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/categories/${resPost.body.id}`),
+        const res = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/categories/${resPost.body.id}`),
         );
 
         return res;
@@ -97,10 +103,8 @@ describe('Net worth route', () => {
 
     describe('GET /net-worth/categories', () => {
       const setup = async (): Promise<Response> => {
-        await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
-          .send(category);
-        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth/categories`));
+        await app.withAuth(app.agent.post('/api/v4/data/net-worth/categories')).send(category);
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/net-worth/categories`));
 
         return res;
       };
@@ -127,12 +131,12 @@ describe('Net worth route', () => {
       };
 
       const setup = async (): Promise<Response> => {
-        const resPost = await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+        const resPost = await app
+          .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
           .send(category);
 
-        const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/categories/${resPost.body.id}`))
+        const res = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/categories/${resPost.body.id}`))
           .send(modifiedCategory);
         return res;
       };
@@ -151,8 +155,8 @@ describe('Net worth route', () => {
       it('should respond with the updated category on subsequent requests', async () => {
         expect.assertions(1);
         const res = await setup();
-        const resAfter = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/categories/${res.body.id}`),
+        const resAfter = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/categories/${res.body.id}`),
         );
 
         expect(resAfter.body).toStrictEqual(expect.objectContaining(modifiedCategory));
@@ -161,12 +165,12 @@ describe('Net worth route', () => {
 
     describe('DELETE /net-worth/categories/:categoryId', () => {
       const setup = async (): Promise<{ resPost: Response; resDelete: Response }> => {
-        const resPost = await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+        const resPost = await app
+          .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
           .send(category);
 
-        const resDelete = await global.withAuth(
-          global.agent.delete(`/api/v4/data/net-worth/categories/${resPost.body.id}`),
+        const resDelete = await app.withAuth(
+          app.agent.delete(`/api/v4/data/net-worth/categories/${resPost.body.id}`),
         );
 
         return { resPost, resDelete };
@@ -182,8 +186,8 @@ describe('Net worth route', () => {
       it('should respond with 404 on subsequent get requests', async () => {
         expect.assertions(1);
         const { resPost } = await setup();
-        const resAfter = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/categories/${resPost.body.id}`),
+        const resAfter = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/categories/${resPost.body.id}`),
         );
 
         expect(resAfter.status).toBe(404);
@@ -199,12 +203,12 @@ describe('Net worth route', () => {
     };
 
     const setup = async (categoryId?: number): Promise<Response> => {
-      const resPostCategory = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+      const resPostCategory = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
         .send(category);
 
-      const res = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
+      const res = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/subcategories'))
         .send({ categoryId: categoryId ?? resPostCategory.body.id, ...subcategory });
 
       return res;
@@ -227,8 +231,8 @@ describe('Net worth route', () => {
       it('should response with the subcategory on subsequent get requests', async () => {
         expect.assertions(1);
         const res = await setup();
-        const resAfter = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/subcategories/${res.body.id}`),
+        const resAfter = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/subcategories/${res.body.id}`),
         );
 
         expect(resAfter.body).toStrictEqual(
@@ -258,8 +262,8 @@ describe('Net worth route', () => {
     describe('GET /net-worth/subcategories/:subcategoryId', () => {
       const setupForGet = async (): Promise<Response> => {
         const resPost = await setup();
-        const res = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`),
+        const res = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`),
         );
         return res;
       };
@@ -286,8 +290,8 @@ describe('Net worth route', () => {
 
       const setupForPut = async (): Promise<{ resPost: Response; resPut: Response }> => {
         const resPost = await setup();
-        const resPut = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`))
+        const resPut = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`))
           .send({
             categoryId: resPost.body.categoryId,
             ...modifiedSubcategory,
@@ -310,8 +314,8 @@ describe('Net worth route', () => {
       it('should respond with the updated category on subsequent get requests', async () => {
         expect.assertions(1);
         const { resPut } = await setupForPut();
-        const resAfter = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/subcategories/${resPut.body.id}`),
+        const resAfter = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/subcategories/${resPut.body.id}`),
         );
 
         expect(resAfter.body).toStrictEqual(
@@ -329,8 +333,8 @@ describe('Net worth route', () => {
 
           const nonexistentCategoryId = 163387;
 
-          const res = await global
-            .withAuth(global.agent.put(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`))
+          const res = await app
+            .withAuth(app.agent.put(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`))
             .send({
               ...modifiedSubcategory,
               categoryId: nonexistentCategoryId,
@@ -349,8 +353,8 @@ describe('Net worth route', () => {
     describe('DELETE /net-worth/categories/:categoryId', () => {
       const setupForDelete = async (): Promise<{ resPost: Response; resDelete: Response }> => {
         const resPost = await setup();
-        const resDelete = await global.withAuth(
-          global.agent.delete(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`),
+        const resDelete = await app.withAuth(
+          app.agent.delete(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`),
         );
 
         return { resPost, resDelete };
@@ -366,8 +370,8 @@ describe('Net worth route', () => {
       it('should respond with 404 on subsequent get requests', async () => {
         expect.assertions(1);
         const { resPost } = await setupForDelete();
-        const resAfter = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`),
+        const resAfter = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/subcategories/${resPost.body.id}`),
         );
 
         expect(resAfter.status).toBe(404);
@@ -449,52 +453,52 @@ describe('Net worth route', () => {
       resPostSubcategoryMainCC: Response;
       resPostSubcategoryTravelCC: Response;
     }> => {
-      const resPostCategoryBank = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+      const resPostCategoryBank = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
         .send(categoryBank);
 
-      const resPostCategoryOptions = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+      const resPostCategoryOptions = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
         .send(categoryOptions);
 
-      const resPostCategoryMortgage = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+      const resPostCategoryMortgage = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
         .send(categoryMortgage);
 
-      const resPostCategoryCC = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/categories'))
+      const resPostCategoryCC = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
         .send(categoryCC);
 
-      const resPostSubcategoryCurrentAccount = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
+      const resPostSubcategoryCurrentAccount = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/subcategories'))
         .send({
           ...subcategoryCurrentAccount,
           categoryId: resPostCategoryBank.body.id,
         });
 
-      const resPostSubcategoryOptions = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
+      const resPostSubcategoryOptions = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/subcategories'))
         .send({
           ...subcategoryOptions,
           categoryId: resPostCategoryOptions.body.id,
         });
 
-      const resPostSubcategoryMortgage = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
+      const resPostSubcategoryMortgage = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/subcategories'))
         .send({
           ...subcategoryMortgage,
           categoryId: resPostCategoryMortgage.body.id,
         });
 
-      const resPostSubcategoryMainCC = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
+      const resPostSubcategoryMainCC = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/subcategories'))
         .send({
           ...subcategoryMainCC,
           categoryId: resPostCategoryCC.body.id,
         });
 
-      const resPostSubcategoryTravelCC = await global
-        .withAuth(global.agent.post('/api/v4/data/net-worth/subcategories'))
+      const resPostSubcategoryTravelCC = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/subcategories'))
         .send({
           ...subcategoryTravelCC,
           categoryId: resPostCategoryCC.body.id,
@@ -560,7 +564,7 @@ describe('Net worth route', () => {
       it('should respond with the entry', async () => {
         expect.assertions(2);
         const { entry } = await setup();
-        const res = await global.withAuth(global.agent.post('/api/v4/data/net-worth')).send(entry);
+        const res = await app.withAuth(app.agent.post('/api/v4/data/net-worth')).send(entry);
 
         expect(res.status).toBe(201);
         expect(res.body).toStrictEqual({
@@ -605,8 +609,8 @@ describe('Net worth route', () => {
         it('should add the option value to the entry', async () => {
           expect.assertions(2);
           const entryWithOption = await setupOption();
-          const res = await global
-            .withAuth(global.agent.post('/api/v4/data/net-worth'))
+          const res = await app
+            .withAuth(app.agent.post('/api/v4/data/net-worth'))
             .send(entryWithOption);
 
           expect(res.status).toBe(201);
@@ -645,8 +649,8 @@ describe('Net worth route', () => {
         it('should add the mortgage value to the entry', async () => {
           expect.assertions(2);
           const entryWithMortgage = await setupMortgage();
-          const res = await global
-            .withAuth(global.agent.post('/api/v4/data/net-worth'))
+          const res = await app
+            .withAuth(app.agent.post('/api/v4/data/net-worth'))
             .send(entryWithMortgage);
 
           expect(res.status).toBe(201);
@@ -665,13 +669,9 @@ describe('Net worth route', () => {
     describe('GET /net-worth/:entryId', () => {
       const setupForGet = async (): Promise<{ entry: RawDate<CreateEntry>; res: Response }> => {
         const { entry } = await setup();
-        const resPost = await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth'))
-          .send(entry);
+        const resPost = await app.withAuth(app.agent.post('/api/v4/data/net-worth')).send(entry);
 
-        const res = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/${resPost.body.id}`),
-        );
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/net-worth/${resPost.body.id}`));
 
         return { entry, res };
       };
@@ -747,7 +747,7 @@ describe('Net worth route', () => {
 
         const res = await Promise.all(
           mods.map((mod) =>
-            global.withAuth(global.agent.post('/api/v4/data/net-worth')).send({
+            app.withAuth(app.agent.post('/api/v4/data/net-worth')).send({
               ...entry,
               ...mod,
             }),
@@ -761,7 +761,7 @@ describe('Net worth route', () => {
         expect.assertions(2);
 
         const { entry, mods } = await setupForGet();
-        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/net-worth`));
 
         const expectedResults = mods.slice(0, 7).map(({ date }) =>
           expect.objectContaining({
@@ -783,7 +783,7 @@ describe('Net worth route', () => {
       it('should order the results by date ascending', async () => {
         expect.assertions(1);
         await setupForGet();
-        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/net-worth`));
 
         expect(res.body).toStrictEqual(
           expect.objectContaining({
@@ -803,7 +803,7 @@ describe('Net worth route', () => {
       it('should put old values in their own section', async () => {
         expect.assertions(2);
         await setupForGet();
-        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/net-worth`));
 
         const entryValueOld = 5871 + Math.round(2040.76 * 0.113 * 100) - 15000;
         const entryValueOlder = 62000 * 0.113 * 100 - 15000;
@@ -819,7 +819,7 @@ describe('Net worth route', () => {
       it('should put old option values in a separate array', async () => {
         expect.assertions(2);
         await setupForGet();
-        const res = await global.withAuth(global.agent.get(`/api/v4/data/net-worth`));
+        const res = await app.withAuth(app.agent.get(`/api/v4/data/net-worth`));
 
         const entryOptionValueOld = Math.round(1324 * 19.27);
         const entryOptionValueOlder = 0;
@@ -840,8 +840,8 @@ describe('Net worth route', () => {
         } & AsyncReturnType<typeof setup>
       > => {
         const results = await setup();
-        const resPost = await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth'))
+        const resPost = await app
+          .withAuth(app.agent.post('/api/v4/data/net-worth'))
           .send(results.entry);
 
         return { ...results, resPost };
@@ -855,8 +855,8 @@ describe('Net worth route', () => {
           date: '2020-04-15',
         };
 
-        const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
+        const res = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -877,8 +877,8 @@ describe('Net worth route', () => {
           ],
         };
 
-        const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
+        const res = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -902,8 +902,8 @@ describe('Net worth route', () => {
           ],
         };
 
-        const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
+        const res = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -927,8 +927,8 @@ describe('Net worth route', () => {
           ],
         };
 
-        const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
+        const res = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -970,8 +970,8 @@ describe('Net worth route', () => {
           ],
         };
 
-        const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
+        const res = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -1003,8 +1003,8 @@ describe('Net worth route', () => {
           ],
         };
 
-        const res = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
+        const res = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
           .send(updatedEntry);
 
         expect(res.status).toBe(200);
@@ -1081,12 +1081,12 @@ describe('Net worth route', () => {
           ],
         };
 
-        const resA = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
+        const resA = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
           .send(updateOptionA);
 
-        const resB = await global
-          .withAuth(global.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
+        const resB = await app
+          .withAuth(app.agent.put(`/api/v4/data/net-worth/${resPost.body.id}`))
           .send(updateOptionB);
 
         expect(resA.status).toBe(200);
@@ -1114,9 +1114,7 @@ describe('Net worth route', () => {
     describe('DELETE /net-worth/:entryId', () => {
       const setupForDelete = async (): Promise<Response> => {
         const { entry } = await setup();
-        const resPost = await global
-          .withAuth(global.agent.post('/api/v4/data/net-worth'))
-          .send(entry);
+        const resPost = await app.withAuth(app.agent.post('/api/v4/data/net-worth')).send(entry);
         return resPost;
       };
 
@@ -1125,8 +1123,8 @@ describe('Net worth route', () => {
         const resPost = await setupForDelete();
         expect(resPost.body.id).toStrictEqual(expect.any(Number));
 
-        const res = await global.withAuth(
-          global.agent.delete(`/api/v4/data/net-worth/${resPost.body.id}`),
+        const res = await app.withAuth(
+          app.agent.delete(`/api/v4/data/net-worth/${resPost.body.id}`),
         );
 
         expect(res.status).toBe(204);
@@ -1135,10 +1133,10 @@ describe('Net worth route', () => {
       it('should respond with 404 on subsequent get requests', async () => {
         expect.assertions(1);
         const resPost = await setupForDelete();
-        await global.withAuth(global.agent.delete(`/api/v4/data/net-worth/${resPost.body.id}`));
+        await app.withAuth(app.agent.delete(`/api/v4/data/net-worth/${resPost.body.id}`));
 
-        const resAfter = await global.withAuth(
-          global.agent.get(`/api/v4/data/net-worth/${resPost.body.id}`),
+        const resAfter = await app.withAuth(
+          app.agent.get(`/api/v4/data/net-worth/${resPost.body.id}`),
         );
 
         expect(resAfter.status).toBe(404);

@@ -3,11 +3,18 @@ import MockDate from 'mockdate';
 import { Response } from 'supertest';
 
 import config from '~api/config';
-import { sleep } from '~api/modules/time';
-import db from '~api/test-utils/knex';
+import { createServer, App } from '~api/test-utils/create-server';
 import { Create, Fund } from '~api/types';
 
 describe('Funds route', () => {
+  let app: App;
+  beforeAll(async () => {
+    app = await createServer('funds');
+  });
+  afterAll(async () => {
+    await app.cleanup();
+  });
+
   const fund: Create<Fund> = {
     item: 'My fund',
     transactions: [{ date: '2020-04-20', units: 69, price: 949.35, fees: 1199, taxes: 1776 }],
@@ -17,15 +24,15 @@ describe('Funds route', () => {
   const altFundName = 'Different fund';
 
   const clearDb = async (): Promise<void> => {
-    await db('funds').where({ item: fund.item }).del();
-    await db('funds').where({ item: altFundName }).del();
+    await app.db('funds').where({ item: fund.item }).del();
+    await app.db('funds').where({ item: altFundName }).del();
   };
 
   beforeEach(clearDb);
 
   describe('POST /funds', () => {
     const setup = async (): Promise<Response> => {
-      const res = await global.withAuth(global.agent.post('/api/v4/data/funds')).send(fund);
+      const res = await app.withAuth(app.agent.post('/api/v4/data/funds')).send(fund);
       return res;
     };
 
@@ -45,7 +52,7 @@ describe('Funds route', () => {
     it('should reply with the fund on subsequent get requests', async () => {
       expect.assertions(1);
       await setup();
-      const resAfter = await global.withAuth(global.agent.get('/api/v4/data/funds'));
+      const resAfter = await app.withAuth(app.agent.get('/api/v4/data/funds'));
 
       expect(resAfter.body.data.data).toStrictEqual(
         expect.arrayContaining([
@@ -60,8 +67,8 @@ describe('Funds route', () => {
 
   describe('PUT /funds/cash-target', () => {
     const setup = async (cashTarget: number): Promise<Response> => {
-      const res = await global
-        .withAuth(global.agent.put('/api/v4/data/funds/cash-target'))
+      const res = await app
+        .withAuth(app.agent.put('/api/v4/data/funds/cash-target'))
         .send({ cashTarget });
       return res;
     };
@@ -84,12 +91,12 @@ describe('Funds route', () => {
 
   describe('GET /funds', () => {
     const setup = async (data: Create<Partial<Fund>> = fund): Promise<Response> => {
-      await global.withAuth(global.agent.post('/api/v4/data/funds')).send(data);
-      await global.withAuth(global.agent.put('/api/v4/data/funds/cash-target')).send({
+      await app.withAuth(app.agent.post('/api/v4/data/funds')).send(data);
+      await app.withAuth(app.agent.put('/api/v4/data/funds/cash-target')).send({
         cashTarget: 2500000,
       });
-      const res = await global.withAuth(
-        global.agent.get('/api/v4/data/funds?history&period=year&length=1'),
+      const res = await app.withAuth(
+        app.agent.get('/api/v4/data/funds?history&period=year&length=1'),
       );
       return res;
     };
@@ -156,7 +163,7 @@ describe('Funds route', () => {
       const setupWithPrices = async (): Promise<Response> => {
         const {
           rows: [{ fid }],
-        } = await db.raw<{ rows: { fid: number }[] }>(
+        } = await app.db.raw<{ rows: { fid: number }[] }>(
           `
         INSERT INTO fund_scrape (broker, item)
         VALUES ('hl', ?)
@@ -166,7 +173,7 @@ describe('Funds route', () => {
           [fund.item],
         );
 
-        const cids = await db('fund_cache_time').insert(cacheTimeRows).returning('cid');
+        const cids = await app.db('fund_cache_time').insert(cacheTimeRows).returning('cid');
 
         type CacheRow = { cid: number; fid: number; price: number };
 
@@ -182,14 +189,14 @@ describe('Funds route', () => {
           [],
         );
 
-        await db('fund_cache').insert(cacheRows);
+        await app.db('fund_cache').insert(cacheRows);
 
         MockDate.set(new Date('2020-04-26T13:20:03Z'));
         const res = await setup();
         MockDate.reset();
 
-        await db('fund_scrape').where({ fid }).del();
-        await db('fund_cache_time').whereIn('cid', cids).del();
+        await app.db('fund_scrape').where({ fid }).del();
+        await app.db('fund_cache_time').whereIn('cid', cids).del();
 
         return res;
       };
@@ -308,9 +315,9 @@ describe('Funds route', () => {
       res: Response;
       id: number;
     }> => {
-      const resPost = await global.withAuth(global.agent.post('/api/v4/data/funds')).send(fund);
-      const res = await global.withAuth(
-        global.agent.put('/api/v4/data/funds').send({
+      const resPost = await app.withAuth(app.agent.post('/api/v4/data/funds')).send(fund);
+      const res = await app.withAuth(
+        app.agent.put('/api/v4/data/funds').send({
           id: resPost.body.id,
           ...data,
         }),
@@ -333,7 +340,7 @@ describe('Funds route', () => {
     it('should reply with the updated fund on subsequent get requests', async () => {
       expect.assertions(2);
       await setup();
-      const resAfter = await global.withAuth(global.agent.get('/api/v4/data/funds'));
+      const resAfter = await app.withAuth(app.agent.get('/api/v4/data/funds'));
 
       expect(resAfter.body.data.data).toStrictEqual(
         expect.arrayContaining([
@@ -357,29 +364,30 @@ describe('Funds route', () => {
       it('should also update the name of the fund_cache entry', async () => {
         expect.assertions(2);
 
-        await db('fund_scrape').whereIn('item', ['My fund 1', 'My fund with changed name']).del();
+        await app
+          .db('fund_scrape')
+          .whereIn('item', ['My fund 1', 'My fund with changed name'])
+          .del();
 
-        const resPost = await global.withAuth(global.agent.post('/api/v4/data/funds')).send({
+        const resPost = await app.withAuth(app.agent.post('/api/v4/data/funds')).send({
           ...fund,
           item: 'My fund 1',
         });
 
-        await sleep(10);
-        await db('fund_scrape').insert({
+        await app.db('fund_scrape').insert({
           broker: 'hl',
           fid: 12345,
           item: 'My fund 1',
         });
 
-        await global.withAuth(
-          global.agent.put('/api/v4/data/funds').send({
+        await app.withAuth(
+          app.agent.put('/api/v4/data/funds').send({
             id: resPost.body.id,
             item: 'My fund with changed name',
           }),
         );
 
-        await sleep(10);
-        const fundScrape = await db('fund_scrape').select();
+        const fundScrape = await app.db('fund_scrape').select();
 
         expect(fundScrape).toStrictEqual(
           expect.arrayContaining([
@@ -406,9 +414,9 @@ describe('Funds route', () => {
 
   describe('DELETE /funds', () => {
     const setup = async (): Promise<Response> => {
-      const resPost = await global.withAuth(global.agent.post('/api/v4/data/funds')).send(fund);
-      const res = await global.withAuth(
-        global.agent.delete('/api/v4/data/funds').send({
+      const resPost = await app.withAuth(app.agent.post('/api/v4/data/funds')).send(fund);
+      const res = await app.withAuth(
+        app.agent.delete('/api/v4/data/funds').send({
           id: resPost.body.id,
         }),
       );
@@ -425,7 +433,7 @@ describe('Funds route', () => {
     it('should not reply with the fund on subsequent get requests', async () => {
       expect.assertions(1);
       await setup();
-      const resAfter = await global.withAuth(global.agent.get('/api/v4/data/funds'));
+      const resAfter = await app.withAuth(app.agent.get('/api/v4/data/funds'));
 
       expect(resAfter.body.data.data).not.toStrictEqual(
         expect.arrayContaining([expect.objectContaining({ i: fund.item })]),

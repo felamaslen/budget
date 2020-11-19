@@ -8,7 +8,7 @@ if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'tru
   require('dotenv').config();
 }
 
-const config = {
+export default {
   db: {
     url: getDbUrl(),
   },
@@ -74,5 +74,3 @@ const config = {
     },
   },
 };
-
-export default config;

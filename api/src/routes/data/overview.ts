@@ -9,10 +9,10 @@ export const routeGet = authDbRoute(async (db, req, res) => {
   });
 });
 
-export const handler = (): Router => {
+export const handler = (databaseName?: string): Router => {
   const router = Router();
 
-  router.get('/', routeGet);
+  router.get('/', routeGet(databaseName));
 
   return router;
 };

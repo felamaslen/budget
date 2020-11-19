@@ -35,10 +35,10 @@ const routeMatchReceiptItemName = validatedAuthDbRoute<void, void, { q: string }
   },
 );
 
-export function handler(): Router {
+export function handler(databaseName?: string): Router {
   const router = Router();
-  router.get('/receipt/items', routeMatchReceiptItems);
-  router.get('/receipt/item-name', routeMatchReceiptItemName);
-  router.get('/:table/:column/:searchTerm/:numResults?', routeGet);
+  router.get('/receipt/items', routeMatchReceiptItems(databaseName));
+  router.get('/receipt/item-name', routeMatchReceiptItemName(databaseName));
+  router.get('/:table/:column/:searchTerm/:numResults?', routeGet(databaseName));
   return router;
 }

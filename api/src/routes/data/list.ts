@@ -20,6 +20,7 @@ import {
 } from '~api/types';
 
 const makeRoutePost = <I extends ListCalcItem>(
+  databaseName: string | undefined,
   category: ListCalcCategory,
   schema: ObjectSchema,
 ): RequestHandler =>
@@ -33,9 +34,12 @@ const makeRoutePost = <I extends ListCalcItem>(
       res.status(201);
       res.json(response);
     },
-  );
+  )(databaseName);
 
-const makeRouteGet = (category: ListCalcCategory): RequestHandler =>
+const makeRouteGet = (
+  databaseName: string | undefined,
+  category: ListCalcCategory,
+): RequestHandler =>
   authDbRoute(async (db, req, res) => {
     const data = await readListData(
       db,
@@ -45,9 +49,10 @@ const makeRouteGet = (category: ListCalcCategory): RequestHandler =>
       Number(req.params.page) || 0,
     );
     res.json({ data });
-  });
+  })(databaseName);
 
 const makeRoutePut = <I extends ListCalcItem>(
+  databaseName: string | undefined,
   category: ListCalcCategory,
   schema: ObjectSchema,
 ): RequestHandler =>
@@ -59,9 +64,12 @@ const makeRoutePut = <I extends ListCalcItem>(
       const response = await updateListData(db, req.user.uid, category, item);
       res.json(response);
     },
-  );
+  )(databaseName);
 
-const makeRouteDelete = (category: ListCalcCategory): RequestHandler =>
+const makeRouteDelete = (
+  databaseName: string | undefined,
+  category: ListCalcCategory,
+): RequestHandler =>
   validatedAuthDbRoute<{ id: number }>(
     {
       data: ListSchema.deleteRequest,
@@ -70,21 +78,21 @@ const makeRouteDelete = (category: ListCalcCategory): RequestHandler =>
       const response = await deleteListData(db, req.user.uid, category, id);
       res.json(response);
     },
-  );
+  )(databaseName);
 
-export function makeStandardListRouter<I extends ListCalcItem>(
+export const makeStandardListRouter = <I extends ListCalcItem>(
   category: ListCalcCategory,
   schema: ObjectSchema,
-): Router {
+) => (databaseName?: string): Router => {
   const router = Router();
 
-  router.post('/', makeRoutePost<I>(category, schema));
-  router.get('/:page?', makeRouteGet(category));
-  router.put('/', makeRoutePut<I>(category, schema));
-  router.delete('/', makeRouteDelete(category));
+  router.post('/', makeRoutePost<I>(databaseName, category, schema));
+  router.get('/:page?', makeRouteGet(databaseName, category));
+  router.put('/', makeRoutePut<I>(databaseName, category, schema));
+  router.delete('/', makeRouteDelete(databaseName, category));
 
   return router;
-}
+};
 
 export const routeIncome = makeStandardListRouter<Income>(Page.income, ListSchema.income);
 export const routeBills = makeStandardListRouter<Bill>(Page.bills, ListSchema.bill);

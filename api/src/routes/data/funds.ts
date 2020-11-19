@@ -60,15 +60,15 @@ const routePutCashTarget = validatedAuthDbRoute<{ cashTarget: number }>(
   },
 );
 
-export const handler = (): Router => {
+export const handler = (databaseName?: string): Router => {
   const router = Router();
 
-  router.post('/', routePost);
-  router.get('/', routeGet);
-  router.put('/', routePut);
-  router.delete('/', routeDelete);
+  router.post('/', routePost(databaseName));
+  router.get('/', routeGet(databaseName));
+  router.put('/', routePut(databaseName));
+  router.delete('/', routeDelete(databaseName));
 
-  router.put('/cash-target', routePutCashTarget);
+  router.put('/cash-target', routePutCashTarget(databaseName));
 
   return router;
 };

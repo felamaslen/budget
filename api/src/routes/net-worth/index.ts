@@ -57,16 +57,16 @@ const routeDelete = validatedAuthDbRoute<never, Item>(
   },
 );
 
-export function netWorthRoute(): Router {
+export function handler(databaseName?: string): Router {
   const router = Router();
 
-  router.use('/categories', routeCategories());
-  router.use('/subcategories', routeSubCategories());
+  router.use('/categories', routeCategories(databaseName)());
+  router.use('/subcategories', routeSubCategories(databaseName)());
 
-  router.post('/', routePost);
-  router.get('/:id?', routeGet);
-  router.put('/:id', routePut);
-  router.delete('/:id', routeDelete);
+  router.post('/', routePost(databaseName));
+  router.get('/:id?', routeGet(databaseName));
+  router.put('/:id', routePut(databaseName));
+  router.delete('/:id', routeDelete(databaseName));
 
   return router;
 }

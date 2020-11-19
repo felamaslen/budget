@@ -1,7 +1,7 @@
 import MockDate from 'mockdate';
 import moize from 'moize';
 import { Response } from 'supertest';
-import db from '~api/test-utils/knex';
+import { createServer, App } from '~api/test-utils/create-server';
 
 /**
  * This is a legacy route and should eventually be phased out,
@@ -9,9 +9,19 @@ import db from '~api/test-utils/knex';
  */
 
 describe('PATCH /multiple', () => {
+  let app: App;
+  beforeAll(async () => {
+    MockDate.set(new Date('2020-04-20'));
+    app = await createServer('multiple');
+  });
+  afterAll(async () => {
+    await app.cleanup();
+    MockDate.reset();
+  });
+
   const setup = moize(
     async (): Promise<Response> => {
-      const resGeneral = await global.withAuth(global.agent.post('/api/v4/data/general')).send({
+      const resGeneral = await app.withAuth(app.agent.post('/api/v4/data/general')).send({
         date: '2020-04-20',
         item: 'Old general item',
         category: 'Old general category',
@@ -19,7 +29,7 @@ describe('PATCH /multiple', () => {
         shop: 'Old general shop',
       });
 
-      const resHoliday = await global.withAuth(global.agent.post('/api/v4/data/holiday')).send({
+      const resHoliday = await app.withAuth(app.agent.post('/api/v4/data/holiday')).send({
         date: '2020-04-21',
         item: 'Old holiday',
         category: 'Somewhere',
@@ -27,7 +37,7 @@ describe('PATCH /multiple', () => {
         shop: 'skyscanner.com',
       });
 
-      const res = await global.withAuth(global.agent.patch('/api/v4/data/multiple')).send({
+      const res = await app.withAuth(app.agent.patch('/api/v4/data/multiple')).send({
         list: [
           {
             route: 'funds',
@@ -75,27 +85,11 @@ describe('PATCH /multiple', () => {
     { isPromise: true },
   );
 
-  const clearDb = async (): Promise<void> => {
-    await db('funds').where({ item: 'Some created fund' }).del();
-    await db('food').where({ item: 'Some created food' }).del();
-    await db('general').where({ item: 'Old general item' }).del();
-  };
-
-  beforeAll(async () => {
-    await clearDb();
-    MockDate.set(new Date('2020-04-20'));
-  });
-
-  afterAll(async () => {
-    MockDate.reset();
-    await clearDb();
-  });
-
   it('should create a fund', async () => {
     expect.assertions(3);
 
     const res = await setup();
-    const resGet = await global.withAuth(global.agent.get('/api/v4/data/funds'));
+    const resGet = await app.withAuth(app.agent.get('/api/v4/data/funds'));
 
     expect(resGet.body.data.data).toStrictEqual(
       expect.arrayContaining([
@@ -115,7 +109,7 @@ describe('PATCH /multiple', () => {
     expect.assertions(3);
 
     const res = await setup();
-    const resGet = await global.withAuth(global.agent.get('/api/v4/data/food'));
+    const resGet = await app.withAuth(app.agent.get('/api/v4/data/food'));
 
     expect(resGet.body.data.data).toStrictEqual(
       expect.arrayContaining([
@@ -138,7 +132,7 @@ describe('PATCH /multiple', () => {
     expect.assertions(1);
 
     await setup();
-    const resGet = await global.withAuth(global.agent.get('/api/v4/data/general'));
+    const resGet = await app.withAuth(app.agent.get('/api/v4/data/general'));
 
     expect(resGet.body.data.data).toStrictEqual(
       expect.arrayContaining([
@@ -158,7 +152,7 @@ describe('PATCH /multiple', () => {
 
     await setup();
 
-    const resGet = await global.withAuth(global.agent.get('/api/v4/data/holiday'));
+    const resGet = await app.withAuth(app.agent.get('/api/v4/data/holiday'));
 
     expect(resGet.body.data.data).not.toStrictEqual(
       expect.arrayContaining([

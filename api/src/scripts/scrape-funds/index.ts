@@ -1,7 +1,7 @@
 import { processScrape } from './process';
 import { CLIOptions } from './types';
 
-import { pool, withSlonik } from '~api/modules/db';
+import { getPool, withSlonik } from '~api/modules/db';
 import logger from '~api/modules/logger';
 
 const runWithDb = withSlonik<number>(async (db) => {
@@ -22,11 +22,11 @@ const runWithDb = withSlonik<number>(async (db) => {
   return status;
 });
 
-export async function run(): Promise<void> {
-  const status = await runWithDb();
+export async function run(databaseName?: string): Promise<void> {
+  const status = await runWithDb(databaseName)();
 
   if (!module.parent) {
-    pool.end();
+    getPool(databaseName).end();
     process.exit(status);
   }
 }

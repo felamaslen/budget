@@ -9,6 +9,5 @@ build:
 push:
 	docker push ${IMG}
 
-
 get_image:
 	@echo ${IMG}

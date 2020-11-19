@@ -3,7 +3,7 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
 import { checkLoggedIn, genToken, LoginResponse } from '~api/modules/auth';
-import { pool } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import { getIpLog, removeIpLog, incrementIpLog } from '~api/queries/user';
 import { IPLog } from '~api/types';
 
@@ -40,9 +40,10 @@ async function loginBanCheck(
 export const attemptLogin = async (
   ip: string,
   pin: number,
-  now: Date = new Date(),
+  now = new Date(),
+  databaseName?: string,
 ): Promise<LoginResponse | undefined> => {
-  const result = await pool.transaction(
+  const result = await getPool(databaseName).transaction(
     async (
       db,
     ): Promise<{
