@@ -8,6 +8,7 @@ node {
   stage('Build and push image') {
     script {
       docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
+        sh 'rm -rf node_modules'
         sh 'make build push'
       }
     }
@@ -22,24 +23,22 @@ node {
         sh 'psql postgres://docker:docker@db/postgres -c "create database budget_test;"'
       }
 
-      docker.image("${IMAGE}").inside("--link ${pg.id}:db") {
-        stage('Run parallel tests') {
-          parallel([
-            "Lint": {
-              sh 'yarn lint'
-            },
-            "Client unit tests": {
-              sh 'yarn test:client'
-            },
-            "API unit tests": {
-              sh 'yarn test:api:unit'
-            }
-          ])
-        }
+      stage('Run parallel tests') {
+        parallel([
+          "Lint": {
+            sh "docker run --rm ${IMAGE} sh -c 'yarn lint'"
+          },
+          "Client unit tests": {
+            sh "docker run --rm ${IMAGE} sh -c 'yarn test:client'"
+          },
+          "API unit tests": {
+            sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit'"
+          }
+        ])
+      }
 
-        stage('API integration tests') {
-          sh 'TEST_DATABASE_URL=postgres://docker:docker@db/budget_test yarn test:api:integration'
-        }
+      stage('API integration tests') {
+        sh "docker run --rm --link ${pg.id}:db -e 'TEST_DATABASE_URL=postgres://docker:docker@db/budget_test' ${IMAGE} sh -c 'yarn test:api:integration'"
       }
     }
   }
