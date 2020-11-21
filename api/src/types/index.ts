@@ -1,5 +1,6 @@
 export * from './analysis';
 export * from './funds';
+export * from './gql';
 export * from './list';
 export * from './overview';
 export * from './multiple';

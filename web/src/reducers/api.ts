@@ -4,6 +4,7 @@ import { AppConfig } from '~client/types';
 export type State = {
   loading: boolean;
   initialLoading: boolean;
+  dataLoaded: boolean; // TODO: remove this hack when converting all to GQL
   locked: boolean;
   error: Error | null;
   key: string | null;
@@ -12,7 +13,8 @@ export type State = {
 
 export const initialState: State = {
   loading: false,
-  initialLoading: false,
+  initialLoading: true,
+  dataLoaded: false,
   locked: false,
   error: null,
   key: null,
@@ -24,6 +26,7 @@ export const initialState: State = {
 const onDataRead = (state: State, action: ActionApiDataRead): State => ({
   ...state,
   initialLoading: false,
+  dataLoaded: true,
   appConfig: {
     birthDate: new Date(action.res.appConfig.birthDate),
   },
@@ -48,10 +51,10 @@ export default function api(state: State = initialState, action: Action): State 
         loading: false,
       };
 
-    case ActionTypeLogin.LoggedIn:
-      return { ...state, key: action.res.apiKey, initialLoading: true };
+    case ActionTypeLogin.ApiKeySet:
+      return { ...initialState, key: action.apiKey };
     case ActionTypeLogin.LoggedOut:
-      return initialState;
+      return { ...initialState, initialLoading: false, dataLoaded: false };
 
     default:
       return state;

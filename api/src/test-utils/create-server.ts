@@ -1,18 +1,22 @@
 import { Server } from 'http';
+import ApolloClient, { PresetConfig, gql } from 'apollo-boost';
 import * as Knex from 'knex';
+import 'cross-fetch/polyfill';
 import { DatabasePoolType } from 'slonik';
 import request, { Request } from 'supertest';
 
 import { getTestDb, cleanupTestDb } from './knex';
-import config from '~api/config';
 import { run } from '~api/index';
 import { getPool } from '~api/modules/db';
+import { Mutation, MutationLoginArgs } from '~api/types';
 
 export type App = {
   db: Knex;
   pool: DatabasePoolType;
   server: Server;
   agent: Agent;
+  gqlClient: ApolloClient<unknown>;
+  authGqlClient: ApolloClient<unknown>;
   withAuth: WithAuth;
   uid: number;
   cleanup: () => Promise<void>;
@@ -37,18 +41,57 @@ export async function prepareDatabase(
   return { db, pool, cleanup };
 }
 
+let portMemo = 4000;
+
 export async function createServer(suffix: string): Promise<App> {
   const databaseName = `budget_test_${suffix}`;
+  const port = portMemo;
+
+  portMemo += 1;
 
   const { db, pool, cleanup: cleanupDb } = await prepareDatabase(databaseName);
 
-  const server = await run(config.app.port, databaseName);
+  const server = await run(port, databaseName);
+
   const agent = request.agent(server);
 
-  const {
-    body: { uid, apiKey },
-  } = await agent.post('/api/v4/user/login').send({
-    pin: 1234,
+  const gqlClientOptions: PresetConfig = {
+    uri: `http://127.0.0.1:${port}/graphql`,
+    onError: (err): void => {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    },
+  };
+
+  const gqlClient = new ApolloClient(gqlClientOptions);
+
+  const loginRes = await gqlClient.mutate<Mutation, MutationLoginArgs>({
+    mutation: gql`
+      mutation {
+        login(pin: 1234) {
+          uid
+          apiKey
+        }
+      }
+    `,
+  });
+
+  const uid = loginRes.data?.login.uid;
+  const apiKey = loginRes.data?.login.apiKey;
+
+  if (!(uid && apiKey)) {
+    throw new Error("Couldn't log in prior to integration test");
+  }
+
+  const authGqlClient = new ApolloClient({
+    ...gqlClientOptions,
+    request: (operation): void => {
+      operation.setContext({
+        headers: {
+          Authorization: apiKey,
+        },
+      });
+    },
   });
 
   const withAuth: WithAuth = (req, token = apiKey): Request => req.set('Authorization', token);
@@ -63,6 +106,8 @@ export async function createServer(suffix: string): Promise<App> {
     pool,
     server,
     agent,
+    gqlClient,
+    authGqlClient,
     withAuth,
     uid,
     cleanup,

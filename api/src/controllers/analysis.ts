@@ -18,7 +18,7 @@ import merge from 'deepmerge';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
-import { User } from '~api/modules/auth';
+import { User } from '~api/gql';
 import {
   getIncome,
   getPeriodCostForCategory,

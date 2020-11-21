@@ -1,14 +1,18 @@
-import { render, RenderResult } from '@testing-library/react';
+import { render, act, fireEvent, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter as Router } from 'react-router-dom';
 import createStore, { MockStore } from 'redux-mock-store';
 
-import { Header } from '.';
+import { Header, Props } from '.';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 
 describe('<Header />', () => {
+  const props: Props = {
+    onLogout: jest.fn(),
+  };
+
   const setup = (
     customState: State = testState,
   ): RenderResult & {
@@ -19,7 +23,7 @@ describe('<Header />', () => {
     const utils = render(
       <Provider store={store}>
         <Router>
-          <Header />
+          <Header {...props} />
         </Router>
       </Provider>,
     );
@@ -47,9 +51,9 @@ describe('<Header />', () => {
     } =>
       setup({
         ...testState,
-        login: {
-          ...testState.login,
-          uid: null,
+        api: {
+          ...testState.api,
+          key: null,
         },
       });
 
@@ -57,6 +61,19 @@ describe('<Header />', () => {
       expect.assertions(1);
       const { queryByRole } = setupLoggedOut();
       expect(queryByRole('navigation')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when clicking the logout button', () => {
+    it('should call onLogout', () => {
+      expect.assertions(1);
+
+      const { getByText } = setup();
+      act(() => {
+        fireEvent.click(getByText('Log out'));
+      });
+
+      expect(props.onLogout).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -8,7 +8,7 @@ import {
   processTimelineData,
   getDeepAnalysisData,
 } from './analysis';
-import { User } from '~api/modules/auth';
+import { User } from '~api/gql';
 import * as queries from '~api/queries';
 import { Page } from '~api/types';
 

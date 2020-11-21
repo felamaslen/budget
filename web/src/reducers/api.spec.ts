@@ -1,4 +1,3 @@
-import numericHash from 'string-hash';
 import {
   dataRead,
   syncRequested,
@@ -6,33 +5,31 @@ import {
   syncUnlocked,
   syncReceived,
   syncErrorOccurred,
-  loggedIn,
+  ActionTypeLogin,
   loggedOut,
+  apiKeySet,
 } from '~client/actions';
 import reducer, { initialState } from '~client/reducers/api';
 import { testResponse } from '~client/test-data';
 
 describe('API reducer', () => {
-  describe('LOGGED_IN', () => {
-    it('LOGGED_IN sets user details and initial loading', () => {
-      expect.assertions(2);
-      const action = loggedIn({
-        name: 'someone',
-        uid: numericHash('some-long-id'),
-        apiKey: 'some-api-key',
-        expires: '2019-07-31T23:08:26.442+01:00',
-      });
-      const result = reducer(initialState, action);
-
-      expect(result.key).toBe('some-api-key');
-      expect(result.initialLoading).toBe(true);
+  describe(ActionTypeLogin.ApiKeySet, () => {
+    it('should set the API key in state', () => {
+      expect.assertions(1);
+      expect(reducer(initialState, apiKeySet('my-new-api-key'))).toHaveProperty(
+        'key',
+        'my-new-api-key',
+      );
     });
   });
 
-  describe('LOGGED_OUT', () => {
-    it('LOGGED_OUT resets the state', () => {
+  describe(ActionTypeLogin.LoggedOut, () => {
+    it('should reset the state while keeping initialLoading=false', () => {
       expect.assertions(1);
-      expect(reducer(undefined, loggedOut())).toStrictEqual(initialState);
+      expect(reducer(undefined, loggedOut())).toStrictEqual({
+        ...initialState,
+        initialLoading: false,
+      });
     });
   });
 
@@ -65,7 +62,7 @@ describe('API reducer', () => {
   });
 
   describe('SYNC_REQUESTED', () => {
-    it('SYNC_REQUESTED sets loading to true', () => {
+    it('should set loading to true', () => {
       expect.assertions(1);
       const action = syncRequested();
 
@@ -76,7 +73,7 @@ describe('API reducer', () => {
   });
 
   describe('SYNC_LOCKED', () => {
-    it('SYNC_LOCKED locks the state', () => {
+    it('should lock the state', () => {
       expect.assertions(2);
       const action = syncLocked();
 
@@ -90,7 +87,7 @@ describe('API reducer', () => {
   });
 
   describe('SYNC_UNLOCKED', () => {
-    it('SYNC_UNLOCKED unlocks the state', () => {
+    it('should unlock the state', () => {
       expect.assertions(2);
       const action = syncUnlocked();
 
@@ -104,7 +101,7 @@ describe('API reducer', () => {
   });
 
   describe('SYNC_RECEIVED', () => {
-    it('SYNC_RECEIVED sets loading to false', () => {
+    it('should set loading to false', () => {
       expect.assertions(2);
       const action = syncReceived({ list: [], netWorth: [] });
       const result = reducer(initialState, action);
@@ -115,7 +112,7 @@ describe('API reducer', () => {
   });
 
   describe('SYNC_ERROR_OCCURRED', () => {
-    it('SYNC_ERROR_OCCURRED sets the error', () => {
+    it('should set the error', () => {
       expect.assertions(2);
       const err = new Error('something bad happened');
       const action = syncErrorOccurred([], err);

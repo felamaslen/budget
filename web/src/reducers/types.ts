@@ -6,7 +6,6 @@ import { State as FundsState } from './funds';
 import { State as GeneralState } from './general';
 import { State as HolidayState } from './holiday';
 import { State as IncomeState } from './income';
-import { State as LoginState } from './login';
 import { State as NetWorthState } from './net-worth';
 import { State as SocialState } from './social';
 import { State as StocksState } from './stocks';
@@ -14,7 +13,6 @@ import { State as AnalysisState } from '~client/reducers/analysis';
 import { Page, OverviewState } from '~client/types';
 
 export type State = {
-  login: LoginState;
   api: ApiState;
   error: ErrorState;
   [Page.overview]: OverviewState;

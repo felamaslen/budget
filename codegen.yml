@@ -1,0 +1,17 @@
+overwrite: true
+schema: "api/src/gql/**/*.graphql"
+generates:
+  api/src/types/gql.ts:
+    config:
+      defaultMapper: any
+      contextType: ~api/gql/index#Context
+    plugins:
+      - typescript
+      - typescript-resolvers
+
+  web/src/types/gql.tsx:
+    documents: web/src/queries/*.graphql
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-urql

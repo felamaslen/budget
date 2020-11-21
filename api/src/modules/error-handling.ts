@@ -1,6 +1,6 @@
 import boom from '@hapi/boom';
 import { RequestHandler, Request, Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from '~api/modules/auth';
+import { AuthenticatedRequest } from '~api/gql';
 import logger from '~api/modules/logger';
 
 export type CustomRequestHandler<Req = AuthenticatedRequest> = (

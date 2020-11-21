@@ -1,6 +1,6 @@
 import { Schema } from '@hapi/joi';
 import { Router } from 'express';
-import { AuthenticatedRequest } from '~api/modules/auth';
+import { AuthenticatedRequest } from '~api/gql';
 import { Create, Item } from '~api/types';
 
 export interface CrudItem extends Item {

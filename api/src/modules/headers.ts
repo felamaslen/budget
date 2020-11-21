@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-const getHeader = (req: Partial<Pick<Request, 'headers'>>, key: string): string => {
+export const getHeader = (req: Partial<Pick<Request, 'headers'>>, key: string): string => {
   const keyLowerCase = key.toLowerCase();
   const headers = req.headers || {};
   const headerKey: string | undefined = Object.keys(headers).find(

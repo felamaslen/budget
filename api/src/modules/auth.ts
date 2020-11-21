@@ -8,64 +8,59 @@ import { Strategy, ExtractJwt, VerifiedCallback } from 'passport-jwt';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
+import { User } from '~api/gql';
 import { getPool } from '~api/modules/db';
 import { tokenSchema } from '~api/schema';
-
-export type User = {
-  uid: number;
-};
-
-type UserInfo = User & {
-  name: string;
-};
+import { LoginResponse, UserInfo } from '~api/types';
 
 type UserRow = UserInfo & {
   pin_hash: string;
 };
 
-export type AuthenticatedRequest = Exclude<Request, 'user'> & {
-  user: User;
-};
+export async function whoami(tokenData: object, databaseName?: string): Promise<UserInfo | null> {
+  const tokenValidationResult = tokenSchema.validate(tokenData);
+  if (tokenValidationResult.error) {
+    throw boom.badData('Invalid token');
+  }
+
+  const { uid } = tokenValidationResult.value;
+
+  const user = await getPool(databaseName).connect(async (db) => {
+    const result = await db.query<{ name: string }>(sql`SELECT name FROM users WHERE uid = ${uid}`);
+    return result.rows[0];
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return { uid, name: user.name };
+}
+
+export const jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 
 export function getStrategy(databaseName?: string): Strategy {
   const params = {
     secretOrKey: config.user.tokenSecret,
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    jwtFromRequest,
     passReqToCallback: true,
   };
 
   return new Strategy(params, async (_: Request, data: object, done: VerifiedCallback) => {
-    const tokenValidationResult = tokenSchema.validate(data);
-    if (tokenValidationResult.error) {
-      return done(null, false, {
-        message: `Invalid auth token: ${tokenValidationResult.error.message}`,
-      });
+    try {
+      const user = await whoami(data, databaseName);
+      if (!user) {
+        return done(null, false, {
+          message: 'User was deleted since last login',
+        });
+      }
+
+      return done(null, user);
+    } catch (err) {
+      return done(null, false, err);
     }
-
-    const { uid } = tokenValidationResult.value;
-
-    const user = await getPool(databaseName).connect(async (db) => {
-      const result = await db.query<{ name: string }>(
-        sql`SELECT name FROM users WHERE uid = ${uid}`,
-      );
-      return result.rows[0];
-    });
-
-    if (!user) {
-      return done(null, false, {
-        message: 'User was deleted since last login',
-      });
-    }
-
-    return done(null, { uid, name: user.name });
   });
 }
-
-export type LoginResponse = UserInfo & {
-  error: string | false;
-  apiKey: string;
-  expires: Date;
-};
 
 export function genToken({ uid }: User): Omit<LoginResponse, 'name'> {
   const expires = addDays(new Date(), 30);
@@ -78,7 +73,7 @@ export function genToken({ uid }: User): Omit<LoginResponse, 'name'> {
   );
 
   return {
-    error: false,
+    error: null,
     apiKey: `Bearer ${token}`,
     expires,
     uid,

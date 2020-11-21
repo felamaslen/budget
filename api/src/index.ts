@@ -10,6 +10,7 @@ import YAML from 'yamljs';
 
 import config from '~api/config';
 import { healthRoutes } from '~api/health';
+import { graphqlMiddleware } from '~api/middleware/gql';
 import { getStrategy } from '~api/modules/auth';
 import { errorHandler } from '~api/modules/error-handling';
 import { getIp } from '~api/modules/headers';
@@ -118,10 +119,11 @@ function setupApiDocs(app: express.Express): void {
   );
 }
 
-function setupApi(app: express.Express, databaseName?: string): void {
+async function setupApi(app: express.Express, databaseName?: string): Promise<void> {
   passport.use('jwt', getStrategy(databaseName));
   app.use(passport.initialize());
   app.use(healthRoutes(databaseName));
+  app.use('/graphql', await graphqlMiddleware(databaseName));
   app.use(API_PREFIX, routes(databaseName));
   setupApiDocs(app);
 }
@@ -134,12 +136,12 @@ function setupErrorHandling(app: express.Express): void {
   app.use(errorHandler);
 }
 
-export function run(port = config.app.port, databaseName?: string): Promise<Server> {
+export async function run(port = config.app.port, databaseName?: string): Promise<Server> {
   const app = express();
 
   setupLogging(app);
   setupDataInput(app);
-  setupApi(app, databaseName);
+  await setupApi(app, databaseName);
   setupWebApp(app);
   setupErrorHandling(app);
 

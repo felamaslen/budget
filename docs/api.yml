@@ -70,62 +70,6 @@ paths:
                   type: boolean
                   example: false
       
-  /user/login:
-    post:
-      summary: Get an API key for logging in
-      security: []
-      tags:
-        - Authentication
-      operationId: login
-      description: |
-        Log in to the app
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                pin:
-                  type: integer
-                  example: 1234
-                  description: The PIN of the user to retrieve an API key for
-                  required: true
-      responses:
-        200:
-          description: successful login
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  apiKey:
-                    type: string
-                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidG9rZW4ifQ.utPBtEhCTUy5DvSpRPSgA1cldi6v7Nj874DiRprsCQY
-                  expires:
-                    type: string
-                    format: date-time
-                  uid:
-                    type: number
-                    example: 1
-                  name:
-                    type: string
-                    example: user1
-        401:
-          description: unsuccessful login
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  err:
-                    type: string
-                    example: Bad PIN
-
   /data/all:
     get:
       summary: Get all list + cashflow data

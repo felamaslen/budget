@@ -4,10 +4,12 @@ import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import createStore, { MockStore } from 'redux-mock-store';
+import { createClient, Provider as URQLProvider, OperationResult } from 'urql';
 
 import { Root } from '.';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
+import * as gql from '~client/types/gql';
 
 describe('<Root />', () => {
   let matchMedia: MatchMediaMock;
@@ -19,15 +21,31 @@ describe('<Root />', () => {
   });
 
   const setup = (): RenderResult & { store: MockStore } => {
-    const state = {
-      ...testState,
-      login: {
-        ...testState.login,
-        uid: 1,
+    const mockRun = async (): Promise<
+      OperationResult<gql.LoginMutation, gql.LoginMutationVariables>
+    > => ({} as OperationResult<gql.LoginMutation, gql.LoginMutationVariables>);
+
+    jest.spyOn(gql, 'useLoginMutation').mockReturnValue([
+      {
+        fetching: false,
+        stale: false,
+        data: {
+          login: {
+            uid: 1,
+            name: 'Someone',
+            apiKey: 'some-api-key',
+          },
+        },
       },
+      mockRun,
+    ]);
+
+    const state: State = {
+      ...testState,
       api: {
         ...testState.api,
         initialLoading: false,
+        dataLoaded: true,
         loading: false,
       },
     };
@@ -43,9 +61,13 @@ describe('<Root />', () => {
       initialEntries: ['/'],
     });
 
+    const client = createClient({ url: '/graphql' });
+
     const utils = render(
       <Router history={history}>
-        <Root {...props} />
+        <URQLProvider value={client}>
+          <Root {...props} />
+        </URQLProvider>
       </Router>,
     );
 

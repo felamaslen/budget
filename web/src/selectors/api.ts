@@ -8,7 +8,10 @@ export const getApiKey = (state: State): string | null => state.api.key;
 export const getLocked = (state: State): boolean => state.api.locked;
 export const getApiLoading = (state: State): boolean => state.api.loading;
 export const getInitialLoading = (state: State): boolean => state.api.initialLoading;
+export const getDataLoaded = (state: State): boolean => state.api.dataLoaded;
 
 export const getUnsaved = createSelector(getCrudRequests, getNetWorthRequests, (...args) =>
   args.some((requests) => requests.length > 0),
 );
+
+export const getLoggedIn = createSelector(getApiKey, Boolean);

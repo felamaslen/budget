@@ -2,27 +2,19 @@ import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
-import numericHash from 'string-hash';
-import { LoginForm } from '.';
-import { loginRequested } from '~client/actions';
+import { LoginForm, Props } from '.';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 
 describe('<LoginForm />', () => {
-  const state: State = {
-    ...testState,
-    login: {
-      uid: null,
-      name: null,
-      initialised: true,
-      loading: false,
-      error: null,
-    },
+  const baseProps: Props = {
+    onLogin: jest.fn(),
+    loading: false,
   };
 
   const setup = (
-    customProps = {},
-    customState: State = state,
+    customProps: Partial<Props> = {},
+    customState: State = testState,
     renderOptions: Partial<Pick<RenderResult, 'container'>> = {},
   ): RenderResult & {
     store: MockStore;
@@ -31,7 +23,7 @@ describe('<LoginForm />', () => {
 
     const utils = render(
       <Provider store={store}>
-        <LoginForm {...customProps} />
+        <LoginForm {...baseProps} {...customProps} />
       </Provider>,
       renderOptions,
     );
@@ -107,82 +99,11 @@ describe('<LoginForm />', () => {
       return renderResult;
     };
 
-    it('should dispatch an action once the pin is entered', () => {
-      expect.assertions(1);
-      const { store } = setupEnterPin();
-      expect(store.getActions()).toStrictEqual([loginRequested(1735)]);
-    });
-
-    describe('if the login was successful', () => {
-      it('should not render anything', () => {
-        expect.assertions(1);
-        const { container } = setupEnterPin();
-        setup(
-          {},
-          {
-            ...testState,
-            login: {
-              ...testState.login,
-              uid: numericHash('some-uid'),
-            },
-            api: {
-              ...testState.api,
-              key: 'some-api-key',
-            },
-          },
-          { container },
-        );
-
-        expect(container).toHaveTextContent('');
-      });
-    });
-
-    describe('if the login was unsuccessful', () => {
-      // eslint-disable-next-line jest/prefer-expect-assertions
-      it('should refocus the login form', async () => {
-        const { container, getAllByRole } = setupEnterPin();
-        act(() => {
-          setup(
-            {},
-            {
-              ...testState,
-              login: {
-                ...testState.login,
-                uid: null,
-              },
-              api: {
-                ...testState.api,
-                key: null,
-              },
-            },
-            { container },
-          );
-        });
-
-        const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
-        const [pin0] = inputs;
-        await waitFor(() => {
-          expect(document.activeElement).toBe(pin0);
-        });
-      });
-    });
-  });
-
-  describe("if the state isn't initialised", () => {
-    it('should not render anything', () => {
-      expect.assertions(1);
-      const { container } = setup(
-        {},
-        {
-          ...state,
-          login: {
-            ...state.login,
-            initialised: false,
-          },
-        },
-      );
-
-      expect(container).toMatchInlineSnapshot(`<div />`);
+    it('should call onLogin once the pin is entered', () => {
+      expect.assertions(2);
+      setupEnterPin();
+      expect(baseProps.onLogin).toHaveBeenCalledTimes(1);
+      expect(baseProps.onLogin).toHaveBeenCalledWith(1735);
     });
   });
 });

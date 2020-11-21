@@ -2,10 +2,10 @@ import boom from '@hapi/boom';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
-import { checkLoggedIn, genToken, LoginResponse } from '~api/modules/auth';
+import { checkLoggedIn, genToken } from '~api/modules/auth';
 import { getPool } from '~api/modules/db';
 import { getIpLog, removeIpLog, incrementIpLog } from '~api/queries/user';
-import { IPLog } from '~api/types';
+import { LoginResponse, IPLog } from '~api/types';
 
 const nullIpLog = (now: Date): IPLog => ({ time: now, count: 0 });
 
@@ -42,12 +42,12 @@ export const attemptLogin = async (
   pin: number,
   now = new Date(),
   databaseName?: string,
-): Promise<LoginResponse | undefined> => {
+): Promise<LoginResponse> => {
   const result = await getPool(databaseName).transaction(
     async (
       db,
     ): Promise<{
-      response?: LoginResponse;
+      response: LoginResponse;
       error?: Error;
     }> => {
       const ipLog = await getIpLog(db, ip);
@@ -55,7 +55,7 @@ export const attemptLogin = async (
         throw boom.unauthorized(config.msg.errorIpBanned);
       }
 
-      let response: LoginResponse | undefined;
+      let response = {} as LoginResponse;
       let error: Error | undefined;
 
       try {

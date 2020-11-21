@@ -6,15 +6,9 @@ import { State } from '~client/reducers';
 import { Page } from '~client/types';
 
 export const testState: State = {
-  login: {
-    loading: false,
-    initialised: true,
-    error: null,
-    uid: numericHash('some-user-id'),
-    name: 'Some user',
-  },
   api: {
     initialLoading: false,
+    dataLoaded: true,
     loading: false,
     locked: false,
     error: null,

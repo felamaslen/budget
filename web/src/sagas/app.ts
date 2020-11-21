@@ -56,5 +56,5 @@ export function* fetchData() {
 }
 
 export default function* appSaga() {
-  yield takeLatest(ActionTypeLogin.LoggedIn, fetchData);
+  yield takeLatest(ActionTypeLogin.ApiKeySet, fetchData);
 }

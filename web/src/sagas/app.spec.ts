@@ -121,6 +121,6 @@ describe('App saga', () => {
 
   it('appSaga forks other sagas', () => {
     expect.assertions(0);
-    testSaga(appSaga).next().takeLatest(ActionTypeLogin.LoggedIn, fetchData).next().isDone();
+    testSaga(appSaga).next().takeLatest(ActionTypeLogin.ApiKeySet, fetchData).next().isDone();
   });
 });

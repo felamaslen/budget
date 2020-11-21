@@ -1,1 +1,3 @@
 **/lib/*.js
+api/src/types/gql.ts
+web/src/types/gql.tsx

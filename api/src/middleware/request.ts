@@ -3,7 +3,7 @@ import { Schema } from '@hapi/joi';
 import { Response, NextFunction, RequestHandler } from 'express';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { AuthenticatedRequest } from '~api/modules/auth';
+import { AuthenticatedRequest } from '~api/gql';
 import { withSlonik } from '~api/modules/db';
 import { catchAsyncErrors } from '~api/modules/error-handling';
 

@@ -1,12 +1,10 @@
 export type PickPartial<T extends object, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export type AsyncReturnType<T extends (...args: any) => any> = T extends (
-  ...args: any
+export type AsyncReturnType<T extends (...args: unknown[]) => unknown> = T extends (
+  ...args: unknown[]
 ) => Promise<infer U>
   ? U
-  : any;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+  : unknown;
 
 export const enum Page {
   overview = 'overview',

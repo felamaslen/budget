@@ -10,8 +10,9 @@ import { Header } from '~client/components/header';
 import { LoginForm } from '~client/components/login-form';
 import { Spinner } from '~client/components/spinner';
 import { ResizeContext, useDebouncedResize, TodayContext, useToday } from '~client/hooks';
+import { useLogin } from '~client/hooks/gql/login';
 import { State } from '~client/reducers';
-import { getInitialLoading, getLoggedIn } from '~client/selectors';
+import { getInitialLoading, getDataLoaded } from '~client/selectors';
 import StyleReset from '~client/styled/reset';
 import { Main } from '~client/styled/shared';
 
@@ -20,8 +21,9 @@ type Props = {
 } & RouteComponentProps;
 
 const RootProvided: React.FC = () => {
-  const loggedIn = useSelector(getLoggedIn);
+  const { login, logout, loading: loginLoading, loggedIn } = useLogin();
   const initialLoading = useSelector(getInitialLoading);
+  const dataLoaded = useSelector(getDataLoaded);
 
   const windowWidth = useDebouncedResize();
   const today = useToday();
@@ -31,10 +33,10 @@ const RootProvided: React.FC = () => {
       <TodayContext.Provider value={today}>
         <Main>
           <StyleReset />
-          <Header />
+          <Header onLogout={logout} />
           <ErrorMessages />
-          <LoginForm />
-          {loggedIn && !initialLoading && <Content />}
+          {!loggedIn && !initialLoading && <LoginForm onLogin={login} loading={loginLoading} />}
+          {loggedIn && dataLoaded && <Content />}
           <Spinner />
         </Main>
       </TodayContext.Provider>
