@@ -85,7 +85,14 @@ const withoutSkipValues = (entries: Entry[]): Entry[] =>
 
 const getSummaryEntries = createSelector(getEntries, withoutSkipValues);
 
-function getComplexValue(value: Value, currencies: Currency[]): number {
+const isSAYE = (subcategories: Subcategory[], subcategory: number): boolean =>
+  subcategories.find((compare) => compare.id === subcategory)?.isSAYE ?? false;
+
+const optionValue = (value: OptionValue): number =>
+  value.vested * Math.max(0, value.marketPrice - value.strikePrice);
+const optionSAYEResidual = (value: OptionValue): number => value.vested * value.strikePrice;
+
+function getComplexValue({ value }: ValueObject, currencies: Currency[]): number {
   if (isMortgageValue(value)) {
     return -value.principal;
   }
@@ -93,7 +100,7 @@ function getComplexValue(value: Value, currencies: Currency[]): number {
     return value;
   }
 
-  return value.reduce((last: number, part) => {
+  return value.reduce<number>((last, part) => {
     if (isFX(part)) {
       const { value: numberValue, currency } = part;
 
@@ -106,7 +113,7 @@ function getComplexValue(value: Value, currencies: Currency[]): number {
       return last + currencyMatch.rate * numberValue * 100;
     }
     if (isOption(part)) {
-      return last + part.vested * part.marketPrice;
+      return last + Math.round(optionValue(part));
     }
 
     return last + part;
@@ -114,10 +121,31 @@ function getComplexValue(value: Value, currencies: Currency[]): number {
 }
 
 const sumValues = (currencies: Currency[], values: ValueObject[]): number =>
-  values.reduce((last: number, { value }): number => last + getComplexValue(value, currencies), 0);
+  values.reduce<number>(
+    (last, valueObject): number => last + getComplexValue(valueObject, currencies),
+    0,
+  );
+
+function calculateResidualSAYEOptionsValue(
+  subcategories: Subcategory[],
+  entry: Pick<CreateEdit<Entry>, 'values'>,
+): number {
+  return Math.round(
+    entry.values
+      .filter(({ subcategory }) => isSAYE(subcategories, subcategory))
+      .reduce<number>((last, { value }) => {
+        if (!isComplex(value)) {
+          return last;
+        }
+        return value
+          .filter(isOption)
+          .reduce<number>((sum, part) => sum + optionSAYEResidual(part), last);
+      }, 0),
+  );
+}
 
 function getSumByCategory(
-  categoryName: string,
+  categoryName: Aggregate,
   categories: Category[],
   subcategories: Subcategory[],
   { values, currencies }: CreateEdit<Entry>,
@@ -138,6 +166,17 @@ function getSumByCategory(
   return sumValues(currencies, valuesFiltered);
 }
 
+function getResidual(
+  categoryName: Aggregate,
+  subcategories: Subcategory[],
+  entry: CreateEdit<Entry>,
+): number {
+  if (categoryName === Aggregate.cashOther) {
+    return calculateResidualSAYEOptionsValue(subcategories, entry);
+  }
+  return 0;
+}
+
 const getEntryAggregate = (
   categories: Category[],
   subcategories: Subcategory[],
@@ -146,7 +185,9 @@ const getEntryAggregate = (
   Object.entries(Aggregate).reduce<AggregateSums>(
     (last, [, categoryName]) => ({
       ...last,
-      [categoryName]: getSumByCategory(categoryName, categories, subcategories, entry),
+      [categoryName]:
+        getSumByCategory(categoryName, categories, subcategories, entry) +
+        getResidual(categoryName, subcategories, entry),
     }),
     {} as AggregateSums,
   );
@@ -179,15 +220,19 @@ const getNetWorthRows = createSelector(getMonthDates, getSummaryEntries, (monthD
   monthDates.map(getEntryForMonth(entries)),
 );
 
-const getValues = ({ currencies, values }: CreateEdit<Entry>): number =>
+const getValues = (subcategories: Subcategory[]) => ({
+  currencies,
+  values,
+}: CreateEdit<Entry>): number =>
   sumValues(
     currencies,
     values.filter(({ value }) => !(isComplex(value) && value.some(isOption))),
-  );
+  ) + calculateResidualSAYEOptionsValue(subcategories, { values });
 
-export const getNetWorthSummary = createSelector<State, CreateEdit<Entry>[], number[]>(
+export const getNetWorthSummary = createSelector(
+  getSubcategories,
   getNetWorthRows,
-  (rows: CreateEdit<Entry>[]): number[] => rows.map(getValues),
+  (subcategories, rows): number[] => rows.map(getValues(subcategories)),
 );
 
 export type NetWorthSummaryOld = {
@@ -231,7 +276,9 @@ const withTypeSplit = (categories: Category[], subcategories: Subcategory[]) => 
 ): EntryTypeSplit[] =>
   rows.map((entry) => ({
     ...entry,
-    assets: sumByType('asset', categories, subcategories, entry, (category) => !category.isOption),
+    assets:
+      sumByType('asset', categories, subcategories, entry, (category) => !category.isOption) +
+      calculateResidualSAYEOptionsValue(subcategories, entry),
     options: sumByType('asset', categories, subcategories, entry, (category) => category.isOption),
     liabilities: -sumByType('liability', categories, subcategories, entry),
   }));

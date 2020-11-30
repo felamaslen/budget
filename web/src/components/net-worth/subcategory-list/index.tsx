@@ -12,20 +12,25 @@ import { Create, Subcategory, Category } from '~client/types';
 const getCreditLimitDisabled = (parent: Pick<Category, 'type'>): boolean =>
   parent.type !== 'liability';
 
+const getSAYEDisabled = (parent: Pick<Category, 'isOption'>): boolean => !parent.isOption;
+
 type PropsForm = {
   buttonText: string;
   onChange: (subcategory: Create<Subcategory>) => void;
   onDelete?: () => void;
-  parent: Pick<Category, 'type'>;
-} & Partial<Omit<Create<Subcategory>, 'categoryId'>> &
-  Pick<Subcategory, 'categoryId'>;
+  parent: Pick<Category, 'type' | 'isOption'>;
+  child: Pick<Subcategory, 'categoryId'> & Partial<Omit<Create<Subcategory>, 'categoryId'>>;
+};
 
 const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
-  categoryId,
-  subcategory = 'Some bank account',
-  hasCreditLimit = null,
-  opacity = 0.8,
   parent,
+  child: {
+    categoryId,
+    subcategory = 'Some bank account',
+    hasCreditLimit = null,
+    isSAYE = null,
+    opacity = 0.8,
+  },
   onChange,
   onDelete,
   buttonText,
@@ -35,9 +40,14 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
   const creditLimitDisabled = getCreditLimitDisabled(parent);
   const initialHasCreditLimit = creditLimitDisabled ? null : !!hasCreditLimit;
 
+  const isSAYEDisabled = getSAYEDisabled(parent);
+  const initialIsSAYE = isSAYEDisabled ? null : !!isSAYE;
+
   const [tempHasCreditLimit, setTempHasCreditLimit] = useState<boolean | null>(
     initialHasCreditLimit,
   );
+
+  const [tempIsSAYE, setTempIsSAYE] = useState<boolean | null>(initialIsSAYE);
 
   const [tempOpacity, setTempOpacity] = useState<number>(opacity);
 
@@ -45,6 +55,7 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
     onDelete &&
     tempSubcategory === subcategory &&
     tempHasCreditLimit === initialHasCreditLimit &&
+    tempIsSAYE === initialIsSAYE &&
     tempOpacity === opacity
   );
 
@@ -54,9 +65,10 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
         categoryId,
         subcategory: tempSubcategory,
         hasCreditLimit: tempHasCreditLimit,
+        isSAYE: tempIsSAYE,
         opacity: tempOpacity,
       }),
-    [onChange, categoryId, tempSubcategory, tempHasCreditLimit, tempOpacity],
+    [onChange, categoryId, tempSubcategory, tempHasCreditLimit, tempIsSAYE, tempOpacity],
   );
 
   return (
@@ -88,10 +100,15 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
         <Styled.CreditLimit>
           <FormFieldTickbox
             item="credit-limit"
-            value={Boolean(tempHasCreditLimit)}
+            value={!!tempHasCreditLimit}
             onChange={setTempHasCreditLimit}
           />
         </Styled.CreditLimit>
+      )}
+      {!isSAYEDisabled && (
+        <Styled.IsSAYE>
+          <FormFieldTickbox item="is-saye" value={!!tempIsSAYE} onChange={setTempIsSAYE} />
+        </Styled.IsSAYE>
       )}
       <Styled.ButtonChange>
         <Button disabled={!touched} onClick={onChangeItem}>
@@ -114,26 +131,18 @@ type PropsItem = {
   onDelete: () => void;
 };
 
-const NetWorthSubcategoryItem: React.FC<PropsItem> = ({
-  item: { id, categoryId, subcategory, hasCreditLimit, opacity },
-  parent,
-  onUpdate,
-  onDelete,
-}) => {
+const NetWorthSubcategoryItem: React.FC<PropsItem> = ({ item, parent, onUpdate, onDelete }) => {
   const onChange = useCallback(
     (values) => {
-      onUpdate(id, values);
+      onUpdate(item.id, values);
     },
-    [onUpdate, id],
+    [onUpdate, item.id],
   );
 
   return (
     <NetWorthSubcategoryItemForm
       parent={parent}
-      categoryId={categoryId}
-      subcategory={subcategory}
-      hasCreditLimit={hasCreditLimit}
-      opacity={opacity}
+      child={item}
       onChange={onChange}
       onDelete={onDelete}
       buttonText="Update"
@@ -149,13 +158,13 @@ type PropsCreateItem = {
 const NetWorthSubcategoryCreateItem: React.FC<PropsCreateItem> = ({ parent, onCreate }) => (
   <NetWorthSubcategoryItemForm
     parent={parent}
-    categoryId={parent.id}
+    child={{ categoryId: parent.id }}
     onChange={onCreate}
     buttonText="Create"
   />
 );
 
-type Props = {
+export type Props = {
   parent: Category;
   subcategories: Subcategory[];
   onCreate: OnCreate<Subcategory>;

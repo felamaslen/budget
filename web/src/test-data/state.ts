@@ -88,6 +88,15 @@ export const testState: State = {
           categoryId: numericHash('real-option-category-id'),
           subcategory: 'Some share',
           hasCreditLimit: null,
+          isSAYE: false,
+          opacity: 0.9,
+        },
+        {
+          id: numericHash('real-saye-subcategory-id'),
+          categoryId: numericHash('real-option-category-id'),
+          subcategory: 'Some SAYE share',
+          hasCreditLimit: null,
+          isSAYE: true,
           opacity: 0.9,
         },
         {
@@ -193,9 +202,15 @@ export const testState: State = {
               value: [
                 {
                   units: 103,
-                  vested: 103,
+                  vested: 101,
                   strikePrice: 77.65,
                   marketPrice: 95.57,
+                },
+                {
+                  units: 500,
+                  vested: 104,
+                  strikePrice: 104.23,
+                  marketPrice: 93.22,
                 },
               ],
             },
@@ -203,6 +218,24 @@ export const testState: State = {
               id: numericHash('value-id-b6'),
               subcategory: numericHash('real-house-subcategory-id'),
               value: 21500000,
+            },
+            {
+              id: numericHash('value-id-b7'),
+              subcategory: numericHash('real-saye-subcategory-id'),
+              value: [
+                {
+                  units: 881,
+                  vested: 698,
+                  strikePrice: 123.6,
+                  marketPrice: 182.3,
+                },
+                {
+                  units: 120,
+                  vested: 94,
+                  strikePrice: 200.1,
+                  marketPrice: 182.3,
+                },
+              ],
             },
           ],
           creditLimit: [

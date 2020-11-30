@@ -17,12 +17,14 @@ export type Subcategory = {
   categoryId: Category['id'];
   subcategory: string;
   hasCreditLimit: boolean | null;
+  isSAYE: boolean | null;
   opacity: number;
 };
 
 export type SubcategoryRow = Pick<Subcategory, 'id' | 'subcategory' | 'opacity'> & {
   category_id: Subcategory['categoryId'];
   has_credit_limit: Subcategory['hasCreditLimit'];
+  is_saye: Subcategory['isSAYE'];
 };
 
 export type FXValue = {

@@ -11,6 +11,7 @@ export type Subcategory = CrudItem<{
   categoryId: Category['id'];
   subcategory: string;
   hasCreditLimit: boolean | null;
+  isSAYE?: boolean | null;
   opacity: number;
 }>;
 

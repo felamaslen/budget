@@ -1,17 +1,19 @@
 import { Router } from 'express';
 
 import { makeCreateItem, makeReadItem, makeUpdateItem, makeDeleteItem } from './controller';
-import { Noop, CrudOptions, CrudRouteFactory } from './types';
+import { Noop, CrudOptions, CrudRouteFactory, CrudItem } from './types';
 import { validatedAuthDbRoute } from '~api/middleware/request';
 import { idParamSchemaOptional, idParamSchemaRequired } from '~api/schema';
 import { PickPartial, Create, Item } from '~api/types';
 
-export function makeCrudRoute<D extends Item = Item, J extends Item = D>(
-  options: PickPartial<CrudOptions<D, J>, 'jsonToDb' | 'dbToJson'>,
-): CrudRouteFactory {
+export function makeCrudRoute<
+  D extends Item = Item,
+  J extends Item = D,
+  P extends CrudItem = CrudItem
+>(options: PickPartial<CrudOptions<D, J, P>, 'jsonToDb' | 'dbToJson'>): CrudRouteFactory {
   const noopD: Noop<Create<J>, D> = (value) => (value as object) as D;
   const noopJ: Noop<D, J> = (value) => (value as object) as J;
-  const optionsWithDefaults: CrudOptions<D, J> = {
+  const optionsWithDefaults: CrudOptions<D, J, P> = {
     ...options,
     jsonToDb: options.jsonToDb ?? noopD,
     dbToJson: options.dbToJson ?? noopJ,

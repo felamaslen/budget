@@ -6,21 +6,6 @@ import { Create } from '~api/types';
 const whereId = (withUid: boolean, uid: number, id: number): ListSqlTokenType =>
   sql.join([sql`id = ${id}`, withUid && sql`uid = ${uid}`].filter(Boolean), sql` AND `);
 
-export async function getRowCount(
-  withUid: boolean,
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  table: string,
-  id: number,
-): Promise<number> {
-  const result = await db.query<{ count: number }>(sql`
-  SELECT COUNT(*) AS count
-  FROM ${sql.identifier([table])}
-  WHERE ${whereId(withUid, uid, id)}
-  `);
-  return result.rows[0].count;
-}
-
 export async function insertCrudItem<D extends CrudItem>(
   withUid: boolean,
   db: DatabaseTransactionConnectionType,

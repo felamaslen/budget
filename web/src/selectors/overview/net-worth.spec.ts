@@ -26,38 +26,7 @@ import {
 } from '~client/types';
 
 describe('Overview selectors (net worth)', () => {
-  const state: State = {
-    ...testState,
-    netWorth: {
-      ...testState.netWorth,
-      entries: {
-        ...testState.netWorth.entries,
-        items: [
-          testState.netWorth.entries.items[0],
-          {
-            ...testState.netWorth.entries.items[1],
-            values: replaceAtIndex(
-              testState.netWorth.entries.items[1].values,
-              testState.netWorth.entries.items[1].values.findIndex(
-                ({ id }) => id === numericHash('value-id-b5'),
-              ),
-              (item) => ({
-                ...item,
-                value: [
-                  {
-                    units: 103,
-                    vested: 56,
-                    strikePrice: 77.65,
-                    marketPrice: 95.57,
-                  },
-                ],
-              }),
-            ),
-          },
-        ],
-      },
-    },
-  };
+  const state = testState;
 
   const testCategory: Category = {
     id: numericHash('category-id-a'),
@@ -202,10 +171,12 @@ describe('Overview selectors (net worth)', () => {
       expect.assertions(1);
       const result = getNetWorthSummary(state);
 
+      const marSavingsSAYE = Math.round(698 * 123.6) + Math.round(94 * 200.1); // check testState
+
       expect(result).toStrictEqual([
         0, // Jan 18 (no entries)
         10324 + 0.035 * 3750 + 1296523 + 21000000 - 8751 - 18744200, // Feb 18
-        9752 + 1051343 - 21939 + 21500000 - 18420900, // Mar 18
+        9752 + 1051343 - 21939 + 21500000 - 18420900 + marSavingsSAYE, // Mar 18
         0, // Apr 18
         0, // May 18
         0, // Jun 18
@@ -308,14 +279,18 @@ describe('Overview selectors (net worth)', () => {
     });
 
     describe('for the second row in the view', () => {
+      const savingsSAYE = Math.round(698 * 123.6) + Math.round(94 * 200.1);
+
       const fti =
-        (9752 + 1051343 + 21500000 - 21939 - 18420900) *
+        (9752 + 1051343 + 21500000 - 21939 - 18420900 + savingsSAYE) *
         ((28 + (58 + 31) / 365) /
           ((900 + 13 + 90 + 1000 + 65 + (400 + 20 + 10 + 95 + 134)) * (12 / 2)));
 
+      const options = Math.round(101 * (95.57 - 77.65)) + Math.round(698 * (182.3 - 123.6));
+
       const aggregate = {
         [Aggregate.cashEasyAccess]: 9752 + 1051343,
-        [Aggregate.cashOther]: 0,
+        [Aggregate.cashOther]: savingsSAYE,
         [Aggregate.stocks]: 0,
         [Aggregate.pension]: 0,
         [Aggregate.realEstate]: 21500000,
@@ -326,8 +301,8 @@ describe('Overview selectors (net worth)', () => {
         prop                      | value
         ${'id'}                   | ${numericHash('real-entry-id-b')}
         ${'date'}                 | ${new Date('2018-03-31')}
-        ${'assets'}               | ${9752 + 1051343 + 21500000}
-        ${'options'}              | ${56 * 95.57}
+        ${'assets'}               | ${9752 + 1051343 + 21500000 + savingsSAYE}
+        ${'options'}              | ${options}
         ${'aggregate'}            | ${aggregate}
         ${'liabilities'}          | ${21939 + 18420900}
         ${'expenses'}             | ${400 + 20 + 10 + 95 + 134}

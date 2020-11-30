@@ -200,6 +200,7 @@ describe('Net worth route', () => {
       subcategory: 'Current account',
       hasCreditLimit: null,
       opacity: 0.8,
+      isSAYE: null,
     };
 
     const setup = async (categoryId?: number): Promise<Response> => {
@@ -255,6 +256,40 @@ describe('Net worth route', () => {
               "err": "Category not found",
             }
           `);
+        });
+      });
+
+      describe('when the category is an option', () => {
+        it('should accept an isSAYE value', async () => {
+          expect.assertions(1);
+          const resPostCategoryOptions = await app
+            .withAuth(app.agent.post('/api/v4/data/net-worth/categories'))
+            .send({
+              type: 'asset',
+              category: 'Options',
+              color: '#00ffcc',
+              isOption: true,
+            });
+
+          const resSubcategory = await app
+            .withAuth(app.agent.post('/api/v4/data/net-worth/subcategories'))
+            .send({
+              categoryId: resPostCategoryOptions.body.id,
+              ...subcategory,
+              isSAYE: true,
+            });
+
+          const resAfter = await app.withAuth(
+            app.agent.get(`/api/v4/data/net-worth/subcategories/${resSubcategory.body.id}`),
+          );
+
+          expect(resAfter.body).toStrictEqual(
+            expect.objectContaining({
+              categoryId: resSubcategory.body.categoryId,
+              ...subcategory,
+              isSAYE: true,
+            }),
+          );
         });
       });
     });
@@ -410,6 +445,7 @@ describe('Net worth route', () => {
       categoryId: 0,
       subcategory: 'Current account',
       hasCreditLimit: null,
+      isSAYE: null,
       opacity: 0.8,
     };
 
@@ -417,6 +453,7 @@ describe('Net worth route', () => {
       categoryId: 0,
       subcategory: 'Company X Ord 5p',
       hasCreditLimit: null,
+      isSAYE: false,
       opacity: 1,
     };
 
@@ -424,6 +461,7 @@ describe('Net worth route', () => {
       categoryId: 0,
       subcategory: 'My house mortgage',
       hasCreditLimit: false,
+      isSAYE: null,
       opacity: 1,
     };
 
@@ -431,6 +469,7 @@ describe('Net worth route', () => {
       categoryId: 0,
       subcategory: 'Main credit card',
       hasCreditLimit: true,
+      isSAYE: null,
       opacity: 0.5,
     };
 
@@ -438,6 +477,7 @@ describe('Net worth route', () => {
       categoryId: 0,
       subcategory: 'Travel credit card',
       hasCreditLimit: true,
+      isSAYE: null,
       opacity: 0.7,
     };
 
@@ -449,6 +489,7 @@ describe('Net worth route', () => {
       resPostCategoryCC: Response;
       resPostSubcategoryCurrentAccount: Response;
       resPostSubcategoryOptions: Response;
+      resPostSubcategorySAYE: Response;
       resPostSubcategoryMortgage: Response;
       resPostSubcategoryMainCC: Response;
       resPostSubcategoryTravelCC: Response;
@@ -481,6 +522,16 @@ describe('Net worth route', () => {
         .send({
           ...subcategoryOptions,
           categoryId: resPostCategoryOptions.body.id,
+          isSAYE: false,
+        });
+
+      const resPostSubcategorySAYE = await app
+        .withAuth(app.agent.post('/api/v4/data/net-worth/subcategories'))
+        .send({
+          ...subcategoryOptions,
+          categoryId: resPostCategoryOptions.body.id,
+          subcategory: 'My SAYE options',
+          isSAYE: true,
         });
 
       const resPostSubcategoryMortgage = await app
@@ -554,6 +605,7 @@ describe('Net worth route', () => {
         resPostCategoryCC,
         resPostSubcategoryCurrentAccount,
         resPostSubcategoryOptions,
+        resPostSubcategorySAYE,
         resPostSubcategoryMortgage,
         resPostSubcategoryMainCC,
         resPostSubcategoryTravelCC,
@@ -708,7 +760,7 @@ describe('Net worth route', () => {
         mods: Partial<RawDate<CreateEntry>>[];
         res: Response[];
       }> => {
-        const { entry, resPostSubcategoryOptions } = await setup();
+        const { entry, resPostSubcategoryOptions, resPostSubcategorySAYE } = await setup();
         const mods = [
           {
             date: '2020-04-14',
@@ -733,16 +785,39 @@ describe('Net worth route', () => {
                   },
                   {
                     units: 1324,
+                    vested: 101,
                     strikePrice: 4.53,
                     marketPrice: 19.27,
-                    vested: 100,
                   },
                 ],
               },
               ...entry.values.slice(1),
             ],
           },
-          { date: format(addMonths(now, -(config.data.overview.numLast + 3)), 'yyyy-MM-dd') },
+          {
+            date: format(addMonths(now, -(config.data.overview.numLast + 3)), 'yyyy-MM-dd'),
+            values: [
+              ...entry.values,
+              {
+                ...entry.values[0],
+                subcategory: resPostSubcategorySAYE.body.id,
+                value: [
+                  {
+                    units: 1556,
+                    vested: 993,
+                    strikePrice: 1350.3,
+                    marketPrice: 2113.7,
+                  },
+                  {
+                    units: 165,
+                    vested: 149,
+                    strikePrice: 112.83,
+                    marketPrice: 99.39,
+                  },
+                ],
+              },
+            ],
+          },
         ];
 
         const res = await Promise.all(
@@ -806,14 +881,11 @@ describe('Net worth route', () => {
         const res = await app.withAuth(app.agent.get(`/api/v4/data/net-worth`));
 
         const entryValueOld = 5871 + Math.round(2040.76 * 0.113 * 100) - 15000;
-        const entryValueOlder = 62000 * 0.113 * 100 - 15000;
+        const entryValueOlder =
+          62000 * 0.113 * 100 - 15000 + Math.round(993 * 1350.3) + Math.round(149 * 112.83);
 
         expect(res.status).toBe(200);
-        expect(res.body).toStrictEqual(
-          expect.objectContaining({
-            old: [entryValueOlder, entryValueOld],
-          }),
-        );
+        expect(res.body.old).toStrictEqual([entryValueOlder, entryValueOld]);
       });
 
       it('should put old option values in a separate array', async () => {
@@ -821,15 +893,11 @@ describe('Net worth route', () => {
         await setupForGet();
         const res = await app.withAuth(app.agent.get(`/api/v4/data/net-worth`));
 
-        const entryOptionValueOld = Math.round(1324 * 19.27);
-        const entryOptionValueOlder = 0;
+        const entryOptionValueOld = Math.round(101 * (19.27 - 4.53));
+        const entryOptionValueOlder = Math.round(993 * (2113.7 - 1350.3));
 
         expect(res.status).toBe(200);
-        expect(res.body).toStrictEqual(
-          expect.objectContaining({
-            oldOptions: [entryOptionValueOlder, entryOptionValueOld],
-          }),
-        );
+        expect(res.body.oldOptions).toStrictEqual([entryOptionValueOlder, entryOptionValueOld]);
       });
     });
 

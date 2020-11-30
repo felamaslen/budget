@@ -155,16 +155,30 @@ export async function selectOldNetWorth(
           [
             sql`SUM(COALESCE(nwv.value, 0))`,
             sql`SUM(COALESCE(nwfx.value * nwc.rate * 100, 0))::integer`,
+            sql`SUM(
+              COALESCE(
+                CASE WHEN nwsc.is_saye THEN nwop.vested * nwop.strike_price
+                ELSE 0
+                END,
+                0
+              )
+            )::integer`,
           ],
           sql` + `,
         )}) as value`,
 
-        sql`SUM(COALESCE(nwop.units * nwop.market_price, 0))::integer as option_value`,
+        sql`SUM(
+          COALESCE(
+            nwop.vested * GREATEST(0, nwop.market_price - nwop.strike_price),
+            0
+          )
+        )::integer as option_value`,
       ],
       sql`, `,
     )}
     FROM net_worth as nw
     LEFT JOIN net_worth_values as nwv ON nwv.net_worth_id = nw.id
+    LEFT JOIN net_worth_subcategories as nwsc ON nwsc.id = nwv.subcategory
     LEFT JOIN net_worth_fx_values as nwfx ON nwfx.values_id = nwv.id
     LEFT JOIN net_worth_option_values as nwop ON nwop.values_id = nwv.id
     LEFT JOIN net_worth_currencies as nwc

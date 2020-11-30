@@ -2123,6 +2123,9 @@ definitions:
       hasCreditLimit:
         type: boolean
         default: false
+      isSAYE:
+        type: boolean
+        nullable: true
       opacity:
         type: number
         example: 0.8

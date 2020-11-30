@@ -114,6 +114,21 @@ export const CreditLimit = styled(ItemRow)`
   }
 `;
 
+export const IsSAYE = styled(ItemRow)`
+  grid-row: 3;
+
+  &::after {
+    content: 'ShareSave?';
+    font-size: ${rem(13)};
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: center;
+  }
+`;
+
 export const Opacity = styled(ItemRow)`
   grid-row: 2;
 

@@ -1,5 +1,6 @@
 import { Schema } from '@hapi/joi';
 import { Router } from 'express';
+
 import { AuthenticatedRequest } from '~api/gql';
 import { Create, Item } from '~api/types';
 
@@ -24,14 +25,19 @@ export type RequestWithBody<J extends Item = Item> = AuthenticatedRequest & {
 
 export type GetId = (req: AuthenticatedRequest) => string;
 
-export type ParentDependency<J extends Item> = {
+export type ParentDependency<J extends Item, P extends Item = Item> = {
   item: string;
   table: string;
   withUid?: boolean;
   key: keyof Create<J>;
 };
 
-export type CrudOptions<D extends Item, J extends Item> = {
+export type ValidateParentDependency<J extends Item, P extends CrudItem> = (
+  child: Create<J>,
+  parent: P,
+) => void;
+
+export type CrudOptions<D extends Item, J extends Item, P extends CrudItem = CrudItem> = {
   table: string;
   withUid?: boolean;
   item: string;
@@ -39,6 +45,7 @@ export type CrudOptions<D extends Item, J extends Item> = {
   jsonToDb: JsonToDb<D, J>;
   dbToJson: DbToJson<D, J>;
   parentDependency?: ParentDependency<J>;
+  validateParentDependency?: ValidateParentDependency<J, P>;
 };
 
 export type CrudRouteFactory = (

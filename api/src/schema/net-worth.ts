@@ -65,6 +65,7 @@ export const schemaSubcategory = joi
     categoryId: joi.number().integer().min(1).required(),
     subcategory: joi.string().required(),
     hasCreditLimit: joi.boolean().allow(null),
+    isSAYE: joi.boolean().allow(null),
     opacity: joi.number().min(0).max(1),
   })
   .unknown(false);
