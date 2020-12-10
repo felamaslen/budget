@@ -2,7 +2,7 @@ import React, { useCallback, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as Styled from './styles';
-import { cashTargetUpdated, listItemUpdated } from '~client/actions';
+import { cashTargetUpdated, allocationTargetsUpdated } from '~client/actions';
 import { FundAllocationTargets } from '~client/components/fund-allocation-targets';
 import { TodayContext } from '~client/hooks';
 import {
@@ -11,9 +11,11 @@ import {
   getPortfolio,
   getFundsRows,
 } from '~client/selectors';
-import { Fund, Page } from '~client/types';
-
-const onUpdate = listItemUpdated<Fund, Page.funds>(Page.funds);
+import {
+  TargetDelta,
+  useUpdateCashAllocationTargetMutation,
+  useUpdateFundAllocationTargetsMutation,
+} from '~client/types';
 
 export const CashRow: React.FC = () => {
   const today = useContext(TodayContext);
@@ -22,19 +24,25 @@ export const CashRow: React.FC = () => {
   const funds = useSelector(getFundsRows);
   const portfolio = useSelector(getPortfolio(today));
   const cashToInvest = useSelector(getCashToInvest(today));
+
   const cashTarget = useSelector(getCashAllocationTarget);
+
+  const [, mutateCashAllocationTarget] = useUpdateCashAllocationTargetMutation();
   const onSetCashTarget = useCallback(
     (value: number): void => {
+      mutateCashAllocationTarget({ target: value });
       dispatch(cashTargetUpdated(value));
     },
-    [dispatch],
+    [dispatch, mutateCashAllocationTarget],
   );
 
-  const onSetFundTarget = useCallback(
-    (item: Fund, allocationTarget: number): void => {
-      dispatch(onUpdate(item.id, { allocationTarget }, item));
+  const [, mutateFundAllocationTargets] = useUpdateFundAllocationTargetsMutation();
+  const onSetFundTargets = useCallback(
+    (deltas: TargetDelta[]): void => {
+      mutateFundAllocationTargets({ deltas });
+      dispatch(allocationTargetsUpdated(deltas));
     },
-    [dispatch],
+    [dispatch, mutateFundAllocationTargets],
   );
 
   return (
@@ -45,7 +53,7 @@ export const CashRow: React.FC = () => {
         funds={funds}
         portfolio={portfolio}
         onSetCashTarget={onSetCashTarget}
-        onSetFundTarget={onSetFundTarget}
+        onSetFundTargets={onSetFundTargets}
       />
     </Styled.FundRow>
   );

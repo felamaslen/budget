@@ -4,10 +4,16 @@ import React, { useState, useCallback } from 'react';
 import * as Styled from './styles';
 import { CrudList } from '~client/components/crud-list';
 import { FormFieldText, FormFieldRange, FormFieldTickbox } from '~client/components/form-field';
-import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
+import { OnCreate, OnUpdate, OnDelete } from '~client/hooks';
 import { Button, ButtonDelete } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
-import { Create, Subcategory, Category } from '~client/types';
+import {
+  Create,
+  NetWorthSubcategory as Subcategory,
+  NetWorthSubcategoryInput,
+  NetWorthCategory as Category,
+  NetWorthSubcategory,
+} from '~client/types';
 
 const getCreditLimitDisabled = (parent: Pick<Category, 'type'>): boolean =>
   parent.type !== 'liability';
@@ -16,11 +22,13 @@ const getSAYEDisabled = (parent: Pick<Category, 'isOption'>): boolean => !parent
 
 type PropsForm = {
   buttonText: string;
-  onChange: (subcategory: Create<Subcategory>) => void;
+  onChange: (subcategory: NetWorthSubcategoryInput) => void;
   onDelete?: () => void;
   parent: Pick<Category, 'type' | 'isOption'>;
   child: Pick<Subcategory, 'categoryId'> & Partial<Omit<Create<Subcategory>, 'categoryId'>>;
 };
+
+const defaultOpacity = 0.8;
 
 const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
   parent,
@@ -29,7 +37,7 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
     subcategory = 'Some bank account',
     hasCreditLimit = null,
     isSAYE = null,
-    opacity = 0.8,
+    opacity,
   },
   onChange,
   onDelete,
@@ -49,7 +57,7 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
 
   const [tempIsSAYE, setTempIsSAYE] = useState<boolean | null>(initialIsSAYE);
 
-  const [tempOpacity, setTempOpacity] = useState<number>(opacity);
+  const [tempOpacity, setTempOpacity] = useState<number>(opacity ?? defaultOpacity);
 
   const touched = !(
     onDelete &&
@@ -127,7 +135,7 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
 type PropsItem = {
   item: Subcategory;
   parent: Category;
-  onUpdate: OnUpdate<Subcategory>;
+  onUpdate: OnUpdate<NetWorthSubcategoryInput>;
   onDelete: () => void;
 };
 
@@ -152,7 +160,7 @@ const NetWorthSubcategoryItem: React.FC<PropsItem> = ({ item, parent, onUpdate, 
 
 type PropsCreateItem = {
   parent: Category;
-  onCreate: OnCreate<Subcategory>;
+  onCreate: OnCreate<NetWorthSubcategoryInput>;
 };
 
 const NetWorthSubcategoryCreateItem: React.FC<PropsCreateItem> = ({ parent, onCreate }) => (
@@ -167,9 +175,9 @@ const NetWorthSubcategoryCreateItem: React.FC<PropsCreateItem> = ({ parent, onCr
 export type Props = {
   parent: Category;
   subcategories: Subcategory[];
-  onCreate: OnCreate<Subcategory>;
-  onUpdate: OnUpdate<Subcategory>;
-  onDelete: OnDelete<Subcategory>;
+  onCreate: OnCreate<NetWorthSubcategoryInput>;
+  onUpdate: OnUpdate<NetWorthSubcategoryInput>;
+  onDelete: OnDelete;
 };
 
 type CrudProps = { parent: Category };
@@ -187,7 +195,7 @@ export const NetWorthSubcategoryList: React.FC<Props> = ({
       <Styled.Opacity>Opacity</Styled.Opacity>
       {!getCreditLimitDisabled(parent) && <Styled.CreditLimit>Credit limit</Styled.CreditLimit>}
     </Styled.ListHead>
-    <CrudList<Subcategory, CrudProps>
+    <CrudList<NetWorthSubcategoryInput, NetWorthSubcategory, CrudProps>
       items={subcategories}
       Item={NetWorthSubcategoryItem}
       CreateItem={NetWorthSubcategoryCreateItem}

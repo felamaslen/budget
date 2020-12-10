@@ -1,20 +1,31 @@
-import { AxiosInstance } from 'axios';
 import { useCallback, useState, useMemo, useEffect } from 'react';
+import { useDebounce } from 'use-debounce';
 
 import { FieldKey, ActiveField, ADD_BUTTON } from './types';
-import { API_PREFIX } from '~client/constants/data';
-import { useCancellableRequest } from '~client/hooks';
+import { isSearchPage } from '~client/constants/data';
 import { isEscape } from '~client/modules/nav';
-import { Create, Item } from '~client/types';
+import {
+  ListItemInput,
+  PageList,
+  QuerySearchArgs,
+  SearchItem,
+  useSearchSuggestionsQuery,
+} from '~client/types';
 
-type Options<I extends Item, P extends string> = {
+const searchItems: SearchItem[] = Object.values(SearchItem);
+
+const isSearchItem = <I extends ListItemInput>(
+  field: FieldKey<I> | SearchItem,
+): field is SearchItem => (searchItems as string[]).includes(field as string);
+
+type Options<I extends ListItemInput, P extends string> = {
   suggestionFields: FieldKey<I>[];
   fields: FieldKey<I>[];
   page: P;
-  setDelta: React.Dispatch<React.SetStateAction<Partial<Create<I>>>>;
+  setDelta: React.Dispatch<React.SetStateAction<Partial<I>>>;
 };
 
-export type Result<I extends Item> = {
+export type Result<I extends ListItemInput> = {
   onType: (field: FieldKey<I>, value: string) => void;
   list: string[];
   next: string[];
@@ -23,20 +34,12 @@ export type Result<I extends Item> = {
   setActiveField: (field: FieldKey<I>) => void;
 };
 
-type SuggestionsResponse<I extends Item, F extends FieldKey<I>> = {
-  data: {
-    list: string[];
-    nextCategory?: string[];
-    nextField?: F;
-  };
-};
-
 const sanitizeValue = (value: string): string =>
   value.replace(/[^A-Za-z\s]+/g, '').replace(/\s+/g, ' ');
 
 const numToRequest = 5;
 
-type State<I extends Item> = {
+type State<I extends ListItemInput> = {
   list: string[];
   next: string[];
   nextField: ActiveField<I>;
@@ -46,9 +49,12 @@ type State<I extends Item> = {
 
 const stateEmpty = { list: [], next: [], nextField: null, requestedField: null };
 
-type SuggestionRequest<I extends Item, F extends FieldKey<I> = FieldKey<I>> = [F, string];
+type SuggestionRequest = {
+  column: SearchItem;
+  searchTerm: string;
+};
 
-export function useSuggestions<I extends Item, P extends string>({
+export function useSuggestions<I extends ListItemInput, P extends PageList>({
   suggestionFields,
   fields,
   page,
@@ -62,58 +68,53 @@ export function useSuggestions<I extends Item, P extends string>({
     requestedField: null,
   });
 
-  const [suggestionRequest, setSuggestionRequest] = useState<SuggestionRequest<I> | undefined>();
+  const [suggestionRequest, setSuggestionRequest] = useState<SuggestionRequest | undefined>();
+  const [debouncedRequest] = useDebounce(suggestionRequest, 100);
 
-  const requestSuggestions = useCallback(
-    <I extends Item>(axios: AxiosInstance, [field, value]: SuggestionRequest<I>) =>
-      axios.get<SuggestionsResponse<I, typeof field>>(
-        `${API_PREFIX}/data/search/${page}/${field}/${sanitizeValue(value)}/${numToRequest}`,
-      ),
-    [page],
-  );
+  const [{ data, fetching, stale }] = useSearchSuggestionsQuery({
+    pause: !(isSearchPage(page) && debouncedRequest),
+    variables:
+      isSearchPage(page) && debouncedRequest
+        ? {
+            page,
+            column: debouncedRequest.column,
+            searchTerm: debouncedRequest.searchTerm,
+            numResults: numToRequest,
+          }
+        : ({} as QuerySearchArgs),
+  });
 
-  const handleResponse = useCallback(
-    <F extends FieldKey<I>>(res: SuggestionsResponse<I, F>, [field]: SuggestionRequest<I, F>) => {
-      const list = res.data?.list ?? [];
-      const next = res.data?.nextCategory ?? [];
-      const nextField = res.data?.nextField ?? null;
+  useEffect(() => {
+    if (data?.search && suggestionRequest && !fetching && !stale) {
+      const list = data.search.list ?? [];
+      const next = data.search.nextCategory ?? [];
+      const nextField = data.search.nextField ?? null;
 
       setState((last) =>
-        last.activeField === field
+        last.activeField === suggestionRequest.column
           ? {
               ...last,
               list,
               next,
-              nextField,
-              requestedField: field,
+              nextField: nextField as FieldKey<I>,
+              requestedField: suggestionRequest.column as FieldKey<I>,
             }
           : last,
       );
-    },
-    [],
-  );
-
-  useCancellableRequest<
-    SuggestionRequest<I> | undefined,
-    SuggestionsResponse<I, FieldKey<I>>,
-    SuggestionRequest<I>
-  >({
-    query: suggestionRequest,
-    sendRequest: requestSuggestions,
-    handleResponse,
-  });
+    }
+  }, [data, fetching, stale, suggestionRequest]);
 
   const onType = useCallback(
     (field: FieldKey<I>, value: string): void => {
       const enabled = suggestionFields.includes(field);
-      if (!enabled) {
+      if (!(enabled && isSearchItem(field))) {
         return;
       }
       setState((last) =>
         last.activeField === field ? last : { ...last, activeField: field, ...stateEmpty },
       );
       if (value) {
-        setSuggestionRequest([field, value]);
+        setSuggestionRequest({ column: field, searchTerm: sanitizeValue(value) });
       } else {
         setState((last) => ({ ...last, ...stateEmpty }));
       }
@@ -151,8 +152,8 @@ export function useSuggestions<I extends Item, P extends string>({
       const nextField = state.nextField ?? naturalNextField;
 
       setDelta(
-        (last: Partial<Create<I>>): Partial<Create<I>> => {
-          const withMain: Partial<Create<I>> = {
+        (last: Partial<I>): Partial<I> => {
+          const withMain: Partial<I> = {
             ...last,
             [state.activeField ?? '']: state.list[index],
           };

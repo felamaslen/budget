@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import * as Styled from './styles';
 import { errorClosed, errorRemoved } from '~client/actions';
 import { ERROR_CLOSE_TIME, ERROR_MESSAGE_DELAY } from '~client/constants/error';
-import { useCTA } from '~client/hooks/cta';
+import { useCTA } from '~client/hooks';
 import { VOID } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { Message } from '~client/reducers/error';

@@ -5,7 +5,6 @@ import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { BrowserRouter } from 'react-router-dom';
 
-import { GQLProvider } from '~client/components/gql-provider';
 import { Root } from '~client/components/root';
 import { store } from '~client/store';
 
@@ -13,9 +12,7 @@ function renderApp(RootComponent = Root): void {
   render(
     <AppContainer>
       <BrowserRouter>
-        <GQLProvider>
-          <RootComponent store={store} />
-        </GQLProvider>
+        <RootComponent store={store} />
       </BrowserRouter>
     </AppContainer>,
     document.getElementById('root'),
@@ -29,7 +26,7 @@ if (process.env.NODE_ENV !== 'test') {
 if (module.hot) {
   module.hot.accept(
     './components/root',
-    // eslint-disable-next-line global-require
+    // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
     () => renderApp(require('./components/root').Root),
   );
 }

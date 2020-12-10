@@ -1,4 +1,3 @@
-import { getTransactionsList } from '~client/modules/data';
 import {
   capitalise,
   numberFormat,
@@ -225,14 +224,6 @@ describe('formatItem', () => {
     });
   });
 
-  describe('dates (legacy)', () => {
-    // TODO: remove this legacy compat
-    it('should be formatted as locale strings', () => {
-      expect.assertions(1);
-      expect(formatItem('date', new Date('2019-07-14'))).toBe('14/07/2019');
-    });
-  });
-
   it('should format strings', () => {
     expect.assertions(6);
     expect(formatItem('item', 'foo')).toBe('foo');
@@ -259,13 +250,10 @@ describe('formatItem', () => {
     it('should return the number of transactions as a string', () => {
       expect.assertions(1);
       expect(
-        formatItem(
-          'transactions',
-          getTransactionsList([
-            { date: '2019-05-03', units: 3, price: 0.666667, fees: 0, taxes: 0 },
-            { date: '2019-05-017', units: 31, price: 25 / 31, fees: 0, taxes: 0 },
-          ]),
-        ),
+        formatItem('transactions', [
+          { date: new Date('2019-05-03'), units: 3, price: 0.666667, fees: 0, taxes: 0 },
+          { date: new Date('2019-05-017'), units: 31, price: 25 / 31, fees: 0, taxes: 0 },
+        ]),
       ).toBe('2');
     });
 

@@ -1,11 +1,11 @@
 import { GainsForRow } from '~client/selectors';
-import { Data } from '~client/types';
+import { RowPrices } from '~client/types';
 
 export type FundProps = {
   name: string;
   isSold: boolean;
   gain: GainsForRow;
-  prices: Data | null;
+  prices: RowPrices;
 };
 
 export enum SortCriteria {

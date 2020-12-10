@@ -1,9 +1,0 @@
-scalar DateTime
-
-type Query {
-  whoami: UserInfo
-}
-
-type Mutation {
-  login(pin: Int!): LoginResponse!
-}

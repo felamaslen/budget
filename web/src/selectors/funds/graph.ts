@@ -4,33 +4,27 @@ import moize from 'moize';
 import { createSelector } from 'reselect';
 
 import { getRealisedValue, getBuyCost } from './gains';
-import { getViewSoldFunds, getCurrentFundsCache, getFundsRows } from './helpers';
-import { getFundLineProcessed, FundsWithReturns, Return } from './lines';
+import { getViewSoldFunds, getFundsCache, getFundsRows, PriceCache } from './helpers';
+import { getFundLineProcessed, FundsWithReturns, Return, FundWithReturns } from './lines';
 import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
-import { getTotalUnits, isSold } from '~client/modules/data';
-import { Cache } from '~client/reducers/funds';
+import { getTotalUnits, isSold, lastInArray } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { Fund, Transaction, Prices, FundLine, FundItem } from '~client/types';
+import {
+  FundNative as Fund,
+  FundItem,
+  FundLine,
+  TransactionNative as Transaction,
+} from '~client/types';
 
-const getPrices = createSelector(
-  getCurrentFundsCache,
-  (cache?: Cache): Prices => cache?.prices || {},
-);
+const getPrices = createSelector(getFundsCache, (cache): PriceCache['prices'] => cache.prices);
 
-export const getStartTime = createSelector(
-  getCurrentFundsCache,
-  (cache?: Cache) => cache?.startTime ?? 0,
-);
+export const getStartTime = createSelector(getFundsCache, (cache) => cache.startTime);
+export const getCacheTimes = createSelector(getFundsCache, (cache) => cache.cacheTimes);
 
-export const getCacheTimes = createSelector(
-  getCurrentFundsCache,
-  (cache?: Cache): number[] => cache?.cacheTimes ?? [],
-);
-
-type WithInfo<V = {}> = Fund &
+type WithInfo<V = Record<string, unknown>> = Fund &
   V & {
-    transactionsToDate: Transaction[][];
+    transactionsToDate: Transaction[][][];
   };
 
 const getItemsWithInfo = moize(
@@ -47,26 +41,30 @@ const getItemsWithInfo = moize(
             ...rest,
             transactions: transactions.filter(({ date }) => !isAfter(date, today)),
           }))
-          .map<WithInfo>(({ id, transactions, ...rest }) => {
-            return {
-              id,
-              ...rest,
-              transactions,
-              transactionsToDate: prices[id].values.map((_, index) =>
-                index === prices[id].values.length - 1
+          .map<WithInfo>(({ id, transactions, ...rest }) => ({
+            id,
+            ...rest,
+            transactions,
+            transactionsToDate: prices[id].map<Transaction[][]>((group, groupIndex) =>
+              group.values.map<Transaction[]>((_, index) =>
+                groupIndex === prices[id].length - 1 && index === group.values.length - 1
                   ? transactions
                   : transactions.filter(
                       ({ date }) =>
-                        getUnixTime(date) < startTime + cacheTimes[index + prices[id].startIndex],
+                        getUnixTime(date) < startTime + cacheTimes[index + group.startIndex],
                     ),
               ),
-            };
-          })
-          .filter(({ transactionsToDate }) => transactionsToDate.some((group) => group.length > 0))
+            ),
+          }))
+          .filter(({ transactionsToDate }) =>
+            transactionsToDate.some((group) =>
+              group.some((transactions) => transactions.length > 0),
+            ),
+          )
           .map((item) => ({
             ...item,
             latestValue:
-              (prices[item.id].values[prices[item.id].values.length - 1] ?? 0) *
+              (lastInArray(lastInArray(prices[item.id])?.values ?? []) ?? 0) *
               getTotalUnits(item.transactions),
           }))
           .sort((a, b) => b.latestValue - a.latestValue),
@@ -100,15 +98,15 @@ const getReturnsById = moize(
         items.reduce<FundsWithReturns>(
           (last, { id, transactionsToDate }) => ({
             ...last,
-            [id]: {
-              startIndex: prices[id].startIndex,
-              returns: prices[id].values.map<Return>((price, index) => ({
+            [id]: prices[id].map<FundWithReturns>(({ startIndex, values }, groupIndex) => ({
+              startIndex,
+              values: values.map<Return>((price, index) => ({
                 price,
-                units: getTotalUnits(transactionsToDate[index]),
-                cost: getBuyCost(transactionsToDate[index]),
-                realised: getRealisedValue(transactionsToDate[index]),
+                units: getTotalUnits(transactionsToDate[groupIndex][index]),
+                cost: getBuyCost(transactionsToDate[groupIndex][index]),
+                realised: getRealisedValue(transactionsToDate[groupIndex][index]),
               })),
-            },
+            })),
           }),
           {},
         ),

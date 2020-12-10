@@ -1,7 +1,43 @@
 import groupBy from 'lodash/groupBy';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
-import { Transaction, Fund } from '~api/types';
+import { formatDate } from '~api/controllers/shared';
+import {
+  Transaction,
+  Fund,
+  PageNonStandard as Page,
+  RawDate,
+  Create,
+  TargetDelta,
+} from '~api/types';
+
+export type FundMain = Omit<Fund, 'transactions'>;
+
+export async function insertFund(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  fund: RawDate<Create<FundMain>>,
+): Promise<number> {
+  const { rows } = await db.query<{ id: number }>(sql`
+  INSERT INTO ${sql.identifier([Page.Funds])} (uid, item, allocation_target)
+  VALUES (${uid}, ${fund.item}, ${fund.allocationTarget ?? null})
+  RETURNING id
+  `);
+  return rows[0].id;
+}
+
+export async function updateFund(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  id: number,
+  fund: RawDate<Create<FundMain>>,
+): Promise<void> {
+  await db.query(sql`
+  UPDATE ${sql.identifier([Page.Funds])}
+  SET item = ${fund.item}, allocation_target = ${fund.allocationTarget ?? null}
+  WHERE uid = ${uid} and id = ${id}
+  `);
+}
 
 export async function selectTransactions(
   db: DatabaseTransactionConnectionType,
@@ -9,7 +45,7 @@ export async function selectTransactions(
   now: Date,
 ): Promise<readonly Transaction[]> {
   const result = await db.query<Transaction>(sql`
-  SELECT ft.*
+  SELECT date, units, price, fees, taxes
   FROM funds f
   INNER JOIN funds_transactions ft ON ft.fund_id = f.id
   WHERE f.uid = ${uid} AND ft.date <= ${now.toISOString()}
@@ -32,12 +68,15 @@ export async function upsertTransactions(
     sql` AND `,
   )}
   `);
+  if (!transactions.length) {
+    return;
+  }
   await db.query(sql`
   INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes)
   SELECT * FROM ${sql.unnest(
     transactions.map(({ date, units, price, fees, taxes }) => [
       id,
-      date,
+      formatDate(date),
       units,
       price,
       fees,
@@ -62,7 +101,7 @@ type RowWithTransactions = FundListRow & {
   taxes: number;
 };
 
-export async function getFundsItems(
+export async function selectFundsItems(
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<Fund[]> {
@@ -97,7 +136,7 @@ export async function getFundsItems(
         allocationTarget: rows[0].allocation_target,
         transactions: rows[0].date
           ? rows.map((row) => ({
-              date: row.date,
+              date: new Date(row.date),
               units: row.units,
               price: row.price,
               fees: row.fees,
@@ -110,7 +149,7 @@ export async function getFundsItems(
   );
 }
 
-export async function getFundHistoryNumResults(
+export async function selectFundHistoryNumResults(
   db: DatabaseTransactionConnectionType,
   uid: number,
   minTime: Date,
@@ -132,7 +171,7 @@ export async function getFundHistoryNumResults(
 
 export type FundHistoryRow = { time: number; id: number[]; price: number[] };
 
-export async function getFundHistory(
+export async function selectFundHistory(
   db: DatabaseTransactionConnectionType,
   uid: number,
   numResults: number,
@@ -215,6 +254,31 @@ export async function upsertCashTarget(
   RETURNING allocation_target
   `);
   return result.rows[0].allocation_target;
+}
+
+export async function selectAllocationTargetSum(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  excludeIds: number[] = [],
+): Promise<number> {
+  const result = await db.query<{ sum: number }>(sql`
+  SELECT SUM(COALESCE(allocation_target, 0)) AS sum FROM funds
+  WHERE uid = ${uid} AND NOT (id = ANY(${sql.array(excludeIds, 'int4')}))
+  `);
+  return result.rows[0].sum;
+}
+
+export async function updateAllocationTarget(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  { id, allocationTarget }: TargetDelta,
+): Promise<{ id: number; allocation_target: number } | undefined> {
+  const result = await db.query<{ id: number; allocation_target: number }>(sql`
+  UPDATE funds SET allocation_target = ${allocationTarget}
+  WHERE uid = ${uid} AND id = ${id}
+  RETURNING id, allocation_target
+  `);
+  return result.rows[0];
 }
 
 type FundByName = {

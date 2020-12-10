@@ -2,10 +2,15 @@ import React, { memo, useMemo } from 'react';
 import * as Styled from './styles';
 import { averageColor, scoreColor } from '~client/modules/color';
 import { colors } from '~client/styled/variables';
+import { AnalysisPage } from '~client/types';
 
-import { Page } from '~client/types/app';
-
-const categories: Page[] = [Page.bills, Page.food, Page.general, Page.holiday, Page.social];
+const categories: AnalysisPage[] = [
+  AnalysisPage.Bills,
+  AnalysisPage.Food,
+  AnalysisPage.General,
+  AnalysisPage.Holiday,
+  AnalysisPage.Social,
+];
 
 const rB = 0.1;
 

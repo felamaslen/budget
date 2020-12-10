@@ -4,7 +4,9 @@ import { useDispatch } from 'react-redux';
 import { NumberInputPad } from './number-input-pad';
 import { PinDisplay } from './pin-display';
 import * as Styled from './styles';
+
 import { errorOpened } from '~client/actions';
+import { Spinner } from '~client/components/spinner';
 import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 import { ErrorLevel } from '~client/constants/error';
 
@@ -21,18 +23,24 @@ export const LoginForm: React.FC<Props> = ({ onLogin, loading }) => {
   ]);
 
   const [pin, setPin] = useState<number[]>([]);
-  const onInput = useCallback((value: number, index?: number): void => {
-    setPin((last) => {
-      const pinIndex = index ?? last.length;
-      return pinIndex > last.length ? last : [...last.slice(0, pinIndex), value];
-    });
-  }, []);
+  const onInput = useCallback(
+    (value: number, index?: number): void => {
+      if (loading) {
+        return;
+      }
+      setPin((last) => {
+        const pinIndex = index ?? last.length;
+        return pinIndex > last.length ? last : [...last.slice(0, pinIndex), value];
+      });
+    },
+    [loading],
+  );
 
   const inputStep = pin.length;
   const hasFullPin = pin.length >= LOGIN_INPUT_LENGTH;
 
   useEffect(() => {
-    if (!loading && hasFullPin) {
+    if (hasFullPin && !loading) {
       const pinAsNumber = pin.reduce(
         (last, value, index) => last + value * 10 ** (pin.length - 1 - index),
         0,
@@ -44,7 +52,7 @@ export const LoginForm: React.FC<Props> = ({ onLogin, loading }) => {
       }
       setPin([]);
     }
-  }, [loading, hasFullPin, onLogin, onWarn, pin]);
+  }, [hasFullPin, loading, onLogin, onWarn, pin]);
 
   const onFocus = useCallback((index: number) => {
     setPin((last) => last.slice(0, index));
@@ -53,7 +61,12 @@ export const LoginForm: React.FC<Props> = ({ onLogin, loading }) => {
   return (
     <Styled.Form>
       <Styled.FormInner>
-        <Styled.Title>Enter your PIN:</Styled.Title>
+        <Styled.TitleContainer>
+          <Styled.Title>Enter your PIN:</Styled.Title>
+          <Styled.SpinnerSpace>
+            {loading && <Spinner size={0.5} color="white" />}
+          </Styled.SpinnerSpace>
+        </Styled.TitleContainer>
         <PinDisplay inputStep={inputStep} onFocus={onFocus} onInput={onInput} />
         <NumberInputPad onInput={onInput} />
       </Styled.FormInner>

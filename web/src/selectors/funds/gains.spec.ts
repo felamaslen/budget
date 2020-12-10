@@ -2,22 +2,16 @@ import getUnixTime from 'date-fns/getUnixTime';
 import { rgb } from 'polished';
 import numericHash from 'string-hash';
 
-import { Period } from '~client/constants/graph';
-import { getTransactionsList } from '~client/modules/data';
+import { getRowGains, getGainsForRow, getDayGain, getDayGainAbs, RowGains } from './gains';
+import { PriceCache } from './helpers';
+
+import { fundPeriods } from '~client/constants';
 import { State } from '~client/reducers';
-import { Cache } from '~client/reducers/funds';
-import {
-  getRowGains,
-  getGainsForRow,
-  getDayGain,
-  getDayGainAbs,
-  RowGains,
-} from '~client/selectors/funds/gains';
 import { testState, testRows, testPrices, testStartTime, testCacheTimes } from '~client/test-data';
-import { Page } from '~client/types';
+import { PageNonStandard } from '~client/types';
 
 describe('Funds selectors / gains', () => {
-  const testCache = {
+  const testCache: PriceCache = {
     startTime: testStartTime,
     cacheTimes: testCacheTimes,
     prices: testPrices,
@@ -25,45 +19,45 @@ describe('Funds selectors / gains', () => {
 
   const stateWithGains: State = {
     ...testState,
-    [Page.funds]: {
+    [PageNonStandard.Funds]: {
       viewSoldFunds: true,
       cashTarget: 0,
       items: [
         {
           id: numericHash('fund1'),
           item: 'Some fund',
-          transactions: getTransactionsList([
+          transactions: [
             { date: new Date('2019-10-09'), units: 345, price: 3.475, fees: 0, taxes: 0 },
-          ]),
+          ],
           allocationTarget: 0,
         },
         {
           id: numericHash('fund2'),
           item: 'Other fund',
-          transactions: getTransactionsList([
+          transactions: [
             { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
             { date: new Date('2019-10-27'), units: -23, price: 5.6522, fees: 0, taxes: 0 },
-          ]),
+          ],
           allocationTarget: 0,
         },
       ],
       __optimistic: [undefined, undefined],
-      period: Period.year1,
-      cache: {
-        [Period.year1]: {
-          startTime: getUnixTime(new Date('2019-10-10')),
-          cacheTimes: [0, 86400 * 5, 86400 * 32],
-          prices: {
-            [numericHash('fund1')]: {
-              startIndex: 1,
-              values: [109, 113.2],
-            },
-            [numericHash('fund2')]: {
-              startIndex: 0,
-              values: [56.2, 57.9, 49.3],
-            },
+      historyOptions: fundPeriods.year1.query,
+      startTime: getUnixTime(new Date('2019-10-10')),
+      cacheTimes: [0, 86400 * 5, 86400 * 32],
+      prices: {
+        [numericHash('fund1')]: [
+          {
+            startIndex: 1,
+            values: [109, 113.2],
           },
-        },
+        ],
+        [numericHash('fund2')]: [
+          {
+            startIndex: 0,
+            values: [56.2, 57.9, 49.3],
+          },
+        ],
       },
     },
   };
@@ -129,10 +123,10 @@ describe('Funds selectors / gains', () => {
           {
             id: 10,
             item: 'some fund',
-            transactions: getTransactionsList([
-              { date: '2019-04-03', units: 345, price: 3.47536, fees: 0, taxes: 0 },
-              { date: '2019-07-01', units: -345, price: 3.7739, fees: 0, taxes: 0 },
-            ]),
+            transactions: [
+              { date: new Date('2019-04-03'), units: 345, price: 3.47536, fees: 0, taxes: 0 },
+              { date: new Date('2019-07-01'), units: -345, price: 3.7739, fees: 0, taxes: 0 },
+            ],
             allocationTarget: 0,
           },
         ],
@@ -151,10 +145,10 @@ describe('Funds selectors / gains', () => {
           {
             id: 103,
             item: 'some fund',
-            transactions: getTransactionsList([
-              { date: '2020-04-20', units: 100, price: 1.05, fees: 0, taxes: 0 },
-              { date: '2020-05-20', units: -65, price: 1.8, fees: 0, taxes: 0 },
-            ]),
+            transactions: [
+              { date: new Date('2020-04-20'), units: 100, price: 1.05, fees: 0, taxes: 0 },
+              { date: new Date('2020-05-20'), units: -65, price: 1.8, fees: 0, taxes: 0 },
+            ],
             allocationTarget: 0,
           },
         ],
@@ -162,10 +156,12 @@ describe('Funds selectors / gains', () => {
           startTime: 0,
           cacheTimes: [10],
           prices: {
-            103: {
-              startIndex: 0,
-              values: [1.05, 1.8],
-            },
+            103: [
+              {
+                startIndex: 0,
+                values: [1.05, 1.8],
+              },
+            ],
           },
         },
       );
@@ -252,19 +248,16 @@ describe('Funds selectors / gains', () => {
     describe('when the latest price is missing for a fund', () => {
       const stateWithMissingLatestPrice: State = {
         ...stateWithGains,
-        [Page.funds]: {
-          ...stateWithGains[Page.funds],
-          cache: {
-            [Period.year1]: {
-              ...stateWithGains[Page.funds].cache[Period.year1],
-              prices: {
-                ...stateWithGains[Page.funds].cache[Period.year1]?.prices,
-                [numericHash('fund1')]: {
-                  startIndex: 1,
-                  values: [109],
-                },
+        [PageNonStandard.Funds]: {
+          ...stateWithGains[PageNonStandard.Funds],
+          prices: {
+            ...stateWithGains[PageNonStandard.Funds].prices,
+            [numericHash('fund1')]: [
+              {
+                startIndex: 1,
+                values: [109],
               },
-            } as Cache,
+            ],
           },
         },
       };
@@ -304,53 +297,50 @@ describe('Funds selectors / gains', () => {
     describe('when a fund has only one scraped price', () => {
       const stateOne = {
         ...stateWithGains,
-        [Page.funds]: {
+        [PageNonStandard.Funds]: {
           ...stateWithGains.funds,
-          cache: {
-            ...stateWithGains.funds.cache,
-            period1: {
-              ...stateWithGains.funds.cache[Period.year1],
-              prices: {
-                ...stateWithGains.funds.cache[Period.year1]?.prices,
-                10: {
-                  ...stateWithGains.funds.cache[Period.year1]?.prices[10],
-                  values: [427.3],
-                },
+          prices: {
+            ...stateWithGains.funds.prices,
+            [numericHash('fund1')]: [
+              {
+                ...stateWithGains.funds.prices[numericHash('fund1')][0],
+                values: [427.3],
               },
-            },
+            ],
           },
         },
       };
 
       it('should not be NaN', () => {
         expect.assertions(1);
-        expect(getDayGain(stateOne)).not.toBeNaN();
+        const result = getDayGain(stateOne);
+        expect(result).not.toBeNaN();
       });
     });
 
     describe('when there are no items', () => {
       const stateNone: State = {
         ...stateWithGains,
-        [Page.funds]: {
-          ...stateWithGains[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...stateWithGains[PageNonStandard.Funds],
           items: [],
           __optimistic: [],
-          period: Period.year5,
-          cache: {
-            [Period.year5]: {
-              startTime: getUnixTime(new Date('2019-10-10')),
-              cacheTimes: [0, 86400 * 5, 86400 * 32],
-              prices: {
-                [numericHash('fund1')]: {
-                  startIndex: 1,
-                  values: [109, 113.2],
-                },
-                [numericHash('fund2')]: {
-                  startIndex: 0,
-                  values: [56.2, 57.9, 49.3],
-                },
+          historyOptions: fundPeriods.year5.query,
+          startTime: getUnixTime(new Date('2019-10-10')),
+          cacheTimes: [0, 86400 * 5, 86400 * 32],
+          prices: {
+            [numericHash('fund1')]: [
+              {
+                startIndex: 1,
+                values: [109, 113.2],
               },
-            },
+            ],
+            [numericHash('fund2')]: [
+              {
+                startIndex: 0,
+                values: [56.2, 57.9, 49.3],
+              },
+            ],
           },
         },
       };
@@ -364,29 +354,29 @@ describe('Funds selectors / gains', () => {
     describe('when there is no cache', () => {
       const stateNoCache: State = {
         ...stateWithGains,
-        [Page.funds]: {
-          ...stateWithGains[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...stateWithGains[PageNonStandard.Funds],
           items: [
             {
               id: numericHash('fund1'),
               item: 'Some fund',
-              transactions: getTransactionsList([
+              transactions: [
                 { date: new Date('2019-10-09'), units: 345, price: 3.47536, fees: 0, taxes: 0 },
-              ]),
+              ],
               allocationTarget: 0,
             },
             {
               id: numericHash('fund2'),
               item: 'Other fund',
-              transactions: getTransactionsList([
+              transactions: [
                 { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
                 { date: new Date('2019-10-27'), units: -23, price: 5.65217, fees: 0, taxes: 0 },
-              ]),
+              ],
               allocationTarget: 0,
             },
           ],
-          period: Period.year1,
-          cache: {},
+          historyOptions: fundPeriods.year1.query,
+          prices: {},
         },
       };
 
@@ -399,43 +389,43 @@ describe('Funds selectors / gains', () => {
     describe('when the cache contains only one item', () => {
       const stateOneItem: State = {
         ...stateWithGains,
-        [Page.funds]: {
-          ...stateWithGains[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...stateWithGains[PageNonStandard.Funds],
           items: [
             {
               id: numericHash('fund1'),
               item: 'Some fund',
-              transactions: getTransactionsList([
+              transactions: [
                 { date: new Date('2019-10-09'), units: 345, price: 3.47536, fees: 0, taxes: 0 },
-              ]),
+              ],
               allocationTarget: 0,
             },
             {
               id: numericHash('fund2'),
               item: 'Other fund',
-              transactions: getTransactionsList([
+              transactions: [
                 { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
                 { date: new Date('2019-10-27'), units: -23, price: 5.65217, fees: 0, taxes: 0 },
-              ]),
+              ],
               allocationTarget: 0,
             },
           ],
-          period: Period.year1,
-          cache: {
-            [Period.year1]: {
-              startTime: getUnixTime(new Date('2019-10-10')),
-              cacheTimes: [10],
-              prices: {
-                [numericHash('fund1')]: {
-                  startIndex: 1,
-                  values: [109, 113.2],
-                },
-                [numericHash('fund2')]: {
-                  startIndex: 0,
-                  values: [56.2, 57.9, 49.3],
-                },
+          historyOptions: fundPeriods.year1.query,
+          startTime: getUnixTime(new Date('2019-10-10')),
+          cacheTimes: [10],
+          prices: {
+            [numericHash('fund1')]: [
+              {
+                startIndex: 1,
+                values: [109, 113.2],
               },
-            },
+            ],
+            [numericHash('fund2')]: [
+              {
+                startIndex: 0,
+                values: [56.2, 57.9, 49.3],
+              },
+            ],
           },
         },
       };

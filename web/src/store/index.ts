@@ -1,8 +1,8 @@
+/* eslint-disable global-require, @typescript-eslint/no-var-requires */
 import { Store } from 'redux';
 import { Action } from '~client/actions';
 import { State } from '~client/reducers';
 
-/* eslint-disable global-require */
 let configStore = null;
 if (process.env.NODE_ENV === 'development') {
   configStore = require('./configureStore.dev').createStore;

@@ -6,7 +6,7 @@ import logger from '~api/modules/logger';
 
 let healthCheckPassed = false;
 
-const makeCheckReadiness = withSlonik(async (db) => {
+const checkReadiness = withSlonik(async (db) => {
   const healthCheck = await db.query<{ version: string }>(sql`select version()`);
 
   if (!healthCheck.rows.length) {
@@ -14,9 +14,7 @@ const makeCheckReadiness = withSlonik(async (db) => {
   }
 });
 
-export function healthRoutes(databaseName?: string): Router {
-  const checkReadiness = makeCheckReadiness(databaseName);
-
+export function healthRoutes(): Router {
   const router = Router();
 
   router.get('/liveness', (_, res) => {

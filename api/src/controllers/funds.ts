@@ -2,98 +2,117 @@ import { addYears, addMonths, getUnixTime } from 'date-fns';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { updateListData, getTotalCost, formatResults } from './list';
-import { getAnnualisedFundReturns } from './overview';
+import { getAnnualisedFundReturns, getFundValues } from './overview';
 
 import config from '~api/config';
+import { makeCrudController } from '~api/modules/crud';
+import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
+import { DJMap, mapExternalToInternal, mapInternalToExternal } from '~api/modules/key-map';
 import {
-  upsertTransactions,
-  insertListItem,
-  getFundsItems,
-  getFundHistoryNumResults,
-  getFundHistory,
   FundHistoryRow,
   FundListRow,
-  selectCashTarget,
+  FundMain,
   selectPreviousItem,
-  updateFundCacheItemReference,
+  selectFundHistoryNumResults,
+  selectFundHistory,
   selectFundsByName,
+  selectFundsItems,
+  updateFundCacheItemReference,
+  upsertCashTarget,
+  upsertTransactions,
+  updateAllocationTarget,
+  selectAllocationTargetSum,
 } from '~api/queries';
 import {
-  CreateResponse,
-  UpdateResponse,
-  Page,
-  CreateList,
-  UpdateList,
-  Fund,
-  FundsParams,
-  FundsResponse,
-  AbbreviatedItem,
-  FundsResponseHistory,
-  FundWithHistory,
-  columnMapFunds,
+  CrudResponseCreate,
+  CrudResponseUpdate,
+  FundHistory,
+  FundPeriod,
+  FundPrices,
+  Maybe,
+  MutationUpdateCashAllocationTargetArgs,
+  MutationCreateFundArgs,
+  MutationUpdateFundArgs,
+  PageNonStandard as Page,
+  QueryFundHistoryArgs,
+  ReadFundsResponse,
+  MutationDeleteFundArgs,
+  CrudResponseDelete,
+  MutationUpdateFundAllocationTargetsArgs,
+  TargetDeltaResponse,
+  AsyncReturnType,
+  UpdatedFundAllocationTargets,
 } from '~api/types';
 
-export function getMaxAge(now: Date, period: FundsParams['period'], length: number): Date {
+const dbMap: DJMap<FundListRow> = [{ external: 'allocationTarget', internal: 'allocation_target' }];
+
+const baseController = makeCrudController<FundListRow, FundMain>({
+  table: Page.Funds,
+  item: 'Funds',
+  jsonToDb: mapExternalToInternal(dbMap),
+  dbToJson: mapInternalToExternal(dbMap),
+  withUid: true,
+});
+
+export { baseController as fundsControllerBase };
+
+export function getMaxAge(now: Date, period?: Maybe<FundPeriod>, length?: Maybe<number>): Date {
   if (!length) {
     return new Date(0);
   }
-  if (period === 'year') {
-    return addYears(now, -length);
-  }
-  if (period === 'month') {
+  if (period === FundPeriod.Month) {
     return addMonths(now, -length);
   }
-
-  throw new Error('Unrecognised period');
+  return addYears(now, -length);
 }
 
-type ResponseWithHistory = Omit<FundsResponseHistory, 'total' | 'annualisedFundReturns'>;
-
 export function processFundHistory(
-  rows: AbbreviatedItem<Fund, typeof columnMapFunds>[],
   maxAge: Date,
   fundHistory: readonly FundHistoryRow[],
-): ResponseWithHistory {
+): Pick<FundHistory, 'startTime' | 'cacheTimes' | 'prices'> {
   const unixTimes = fundHistory.map(({ time }) => getUnixTime(new Date(time)));
-  const cacheTimes = unixTimes.map((time) => time - unixTimes[0]);
 
-  const data = fundHistory.reduce<FundWithHistory[]>(
-    (last, { id, price }, index) =>
-      id.reduce<FundWithHistory[]>(
-        (next, fundId, priceIndex) =>
-          replaceAtIndex(
-            next,
-            next.findIndex((fund) => fund.I === fundId),
-            (fund: FundWithHistory) =>
-              ({
-                ...fund,
-                pr: [
-                  ...fund.pr,
-                  ...(fund.pr.length > 0 && fund.pr.length + fund.prStartIndex < index
-                    ? Array(index - (fund.prStartIndex + fund.pr.length)).fill(0)
-                    : []),
-                  Math.round(price[priceIndex] * 100) / 100,
-                ],
-                prStartIndex: fund.pr.length === 0 ? index : fund.prStartIndex,
-              } as FundWithHistory),
-          ),
-        last,
-      ),
-    rows.map(
-      (row) =>
-        ({
-          ...row,
-          pr: [] as number[],
-          prStartIndex: 0,
-        } as FundWithHistory),
-    ),
-  );
+  const prices = fundHistory.reduce<FundPrices[]>((parent, { id, price }, timeIndex) => {
+    return id.reduce<FundPrices[]>((child, fundId, priceIndex) => {
+      const fundIndex = child.findIndex((compare) => compare.fundId === fundId);
+
+      const fundPrice = price[priceIndex];
+
+      if (fundIndex === -1) {
+        return [
+          ...child,
+          {
+            fundId,
+            groups: [
+              {
+                startIndex: timeIndex,
+                values: [fundPrice],
+              },
+            ],
+          },
+        ];
+      }
+
+      const { groups } = child[fundIndex];
+
+      const currentGroup = groups[groups.length - 1];
+      const groupIsCurrent = currentGroup.values.length + currentGroup.startIndex === timeIndex;
+
+      const newGroups = groupIsCurrent
+        ? replaceAtIndex(groups, groups.length - 1, (group) => ({
+            ...group,
+            values: [...group.values, fundPrice],
+          }))
+        : [...groups, { startIndex: timeIndex, values: [fundPrice] }];
+
+      return replaceAtIndex(child, fundIndex, (last) => ({ ...last, groups: newGroups }));
+    }, parent);
+  }, []);
 
   return {
-    data,
     startTime: unixTimes[0] ?? getUnixTime(maxAge),
-    cacheTimes,
+    cacheTimes: unixTimes.map((time) => time - unixTimes[0]),
+    prices,
   };
 }
 
@@ -101,29 +120,20 @@ async function getFundPriceHistory(
   db: DatabaseTransactionConnectionType,
   uid: number,
   now: Date,
-  period: FundsParams['period'],
-  length: number,
-  rows: AbbreviatedItem<Fund, typeof columnMapFunds>[],
-): Promise<ResponseWithHistory> {
+  period: Maybe<FundPeriod> | undefined,
+  length: Maybe<number> | undefined,
+): Promise<Pick<FundHistory, 'startTime' | 'cacheTimes' | 'prices'>> {
   const maxAge = getMaxAge(now, period, length);
-  const numResults = await getFundHistoryNumResults(db, uid, maxAge);
-
+  const numResults = await selectFundHistoryNumResults(db, uid, maxAge);
   if (numResults < 3) {
     return {
-      data: rows.map(
-        (fund) =>
-          ({
-            ...fund,
-            pr: [] as number[],
-            prStartIndex: 0,
-          } as FundWithHistory),
-      ),
       startTime: getUnixTime(maxAge),
       cacheTimes: [],
+      prices: [],
     };
   }
 
-  const fundHistory = await getFundHistory(
+  const fundHistory = await selectFundHistory(
     db,
     uid,
     numResults,
@@ -131,66 +141,78 @@ async function getFundPriceHistory(
     maxAge,
   );
 
-  return processFundHistory(rows, maxAge, fundHistory);
+  return processFundHistory(maxAge, fundHistory);
 }
 
-export async function getFundsData(
+export async function readFundHistory(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { history, period, length }: FundsParams,
-  now: Date = new Date(),
-): Promise<FundsResponse> {
-  const [rows, total, cashTarget] = await Promise.all([
-    getFundsItems(db, uid),
-    getTotalCost(db, uid, Page.funds),
-    selectCashTarget(db, uid),
-  ]);
+  { period, length }: QueryFundHistoryArgs,
+): Promise<FundHistory> {
+  const now = new Date();
 
-  const data = rows.map<AbbreviatedItem<Fund, typeof columnMapFunds>>(
-    formatResults(columnMapFunds),
-  );
-
-  if (!history) {
-    return { data, total, cashTarget };
-  }
-
-  const [dataWithHistory, annualisedFundReturns] = await Promise.all([
-    getFundPriceHistory(db, uid, now, period, length, data),
+  const [dataWithHistory, annualisedFundReturns, overviewCost] = await Promise.all([
+    getFundPriceHistory(db, uid, now, period, length),
     getAnnualisedFundReturns(db, uid, now),
+    getFundValues(db, uid, now),
   ]);
 
-  return { ...dataWithHistory, total, cashTarget, annualisedFundReturns };
+  return {
+    ...dataWithHistory,
+    annualisedFundReturns,
+    overviewCost,
+  };
 }
 
 export async function createFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { item, transactions, allocationTarget }: CreateList<Fund>,
-): Promise<Omit<CreateResponse, 'weekly'>> {
-  const id = await insertListItem<FundListRow>(db, uid, Page.funds, {
+  { fakeId, input: { item, transactions, allocationTarget } }: MutationCreateFundArgs,
+): Promise<CrudResponseCreate> {
+  const { id } = await baseController.create(db, uid, {
     item,
-    allocation_target: allocationTarget ?? null,
+    allocationTarget,
   });
   await upsertTransactions(db, uid, id, transactions);
-  const total = await getTotalCost(db, uid, Page.funds);
 
-  return { id, total };
+  const overviewCost = await getFundValues(db, uid, new Date());
+
+  await pubsub.publish(`${PubSubTopic.FundCreated}.${uid}`, {
+    id,
+    fakeId,
+    item: {
+      item,
+      allocationTarget,
+      transactions,
+    },
+    overviewCost,
+  });
+
+  return { id };
 }
+
+export async function readFunds(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<ReadFundsResponse> {
+  const items = await selectFundsItems(db, uid);
+  return { items };
+}
+
+export { selectCashTarget as readCashTarget } from '~api/queries';
 
 export async function updateFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { id, item, transactions, allocationTarget }: UpdateList<Fund>,
-): Promise<UpdateResponse> {
-  if (transactions) {
-    await upsertTransactions(db, uid, id, transactions);
-  }
+  { id, input: { item, allocationTarget, transactions } }: MutationUpdateFundArgs,
+): Promise<CrudResponseUpdate> {
+  await upsertTransactions(db, uid, id, transactions);
 
   const previousItem = await selectPreviousItem(db, id);
-  const updateResponse = await updateListData<FundListRow>(db, uid, Page.funds, {
-    id,
+
+  await baseController.update(db, uid, id, {
     item,
-    allocation_target: allocationTarget ?? null,
+    allocationTarget,
   });
 
   const fundsWithSameName = await selectFundsByName(db, id);
@@ -198,7 +220,81 @@ export async function updateFund(
     await updateFundCacheItemReference(db, fundsWithSameName[0].item, previousItem);
   }
 
-  return updateResponse;
+  const overviewCost = await getFundValues(db, uid, new Date());
+
+  await pubsub.publish(`${PubSubTopic.FundUpdated}.${uid}`, {
+    id,
+    fakeId: null,
+    item: {
+      item,
+      allocationTarget,
+      transactions,
+    },
+    overviewCost,
+  });
+
+  return { error: null };
 }
 
-export { upsertCashTarget } from '~api/queries/funds';
+export async function deleteFund(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  { id }: MutationDeleteFundArgs,
+): Promise<CrudResponseDelete> {
+  await baseController.delete(db, uid, id);
+
+  const overviewCost = await getFundValues(db, uid, new Date());
+  await pubsub.publish(`${PubSubTopic.FundDeleted}.${uid}`, { id, overviewCost });
+
+  return { error: null };
+}
+
+export async function updateCashTarget(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  args: MutationUpdateCashAllocationTargetArgs,
+): Promise<CrudResponseCreate> {
+  await upsertCashTarget(db, uid, args.target);
+  await pubsub.publish(`${PubSubTopic.CashAllocationTargetUpdated}.${uid}`, args.target);
+  return { error: null };
+}
+
+export async function updateFundAllocationTargets(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  args: MutationUpdateFundAllocationTargetsArgs,
+): Promise<UpdatedFundAllocationTargets> {
+  const ids = args.deltas.map(({ id }) => id);
+  if (!ids.length) {
+    return { deltas: [] };
+  }
+
+  const alreadyAllocated = await selectAllocationTargetSum(db, uid, ids);
+  const remainingAllocation = 100 - alreadyAllocated;
+
+  const deltaAllocation = args.deltas.reduce<number>(
+    (last, { allocationTarget }) => last + allocationTarget,
+    0,
+  );
+
+  const rebaseRatio = Math.max(0, Math.min(1, remainingAllocation / deltaAllocation));
+
+  const rebasedDeltas = args.deltas.map((delta) => ({
+    ...delta,
+    allocationTarget: Math.round(delta.allocationTarget * rebaseRatio),
+  }));
+
+  const rows = await Promise.all(
+    rebasedDeltas.map((delta) => updateAllocationTarget(db, uid, delta)),
+  );
+
+  const deltas = rows
+    .filter((row): row is NonNullable<AsyncReturnType<typeof updateAllocationTarget>> => !!row)
+    .map<TargetDeltaResponse>((row) => ({
+      id: row.id,
+      allocationTarget: row.allocation_target,
+    }));
+
+  await pubsub.publish(`${PubSubTopic.FundAllocationTargetsUpdated}.${uid}`, { deltas });
+  return { deltas };
+}

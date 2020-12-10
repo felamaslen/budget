@@ -1,4 +1,5 @@
 import startOfDay from 'date-fns/startOfDay';
+import omit from 'lodash/omit';
 import React, { useRef, useState, useReducer, useEffect, useCallback } from 'react';
 
 import { ModalDialogField, ModalFields } from './field';
@@ -6,7 +7,7 @@ import * as Styled from './styles';
 
 import { CREATE_ID } from '~client/constants/data';
 import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared';
-import { Item, Delta, Create, FieldKey } from '~client/types';
+import { Delta, FieldKey, Id, ListItemInput } from '~client/types';
 
 export { makeField } from './field';
 export type { ModalFields, FieldWrapper } from './field';
@@ -56,12 +57,15 @@ function getTitle({ type, id }: Pick<PersistentStatePayload, 'type' | 'id'>): st
 
 export const animationTime = 350;
 
-function initField<I extends Item>(field: 'date', item: Delta<I>): Date;
-function initField<I extends Item>(field: 'cost', item: Delta<I>): number;
-function initField<I extends Item, K extends keyof I>(field: keyof I, item: Delta<I>): I[K];
+function initField<I extends ListItemInput>(field: 'date', item: Delta<I>): Date;
+function initField<I extends ListItemInput>(field: 'cost', item: Delta<I>): number;
+function initField<I extends ListItemInput, K extends keyof I>(
+  field: keyof I,
+  item: Delta<I>,
+): I[K];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function initField<I extends Item>(field: FieldKey<I>, item: Delta<I>): any {
+function initField<I extends ListItemInput>(field: FieldKey<I>, item: Partial<I>): any {
   if (field === 'date' && !Reflect.get(item, field)) {
     return startOfDay(new Date());
   }
@@ -71,14 +75,14 @@ function initField<I extends Item>(field: FieldKey<I>, item: Delta<I>): any {
   return item[field] ?? '';
 }
 
-const initFields = <I extends Item>(item: Delta<I>, fields: ModalFields<I>): Create<I> =>
-  (Object.keys(fields) as FieldKey<I>[]).reduce<Create<I>>(
+const initFields = <I extends ListItemInput>(item: Partial<I>, fields: ModalFields<I>): I =>
+  (Object.keys(fields) as FieldKey<I>[]).reduce<Partial<I>>(
     (last, field) => ({
       ...last,
       [field]: initField(field, item),
     }),
-    item as Create<I>,
-  );
+    omit(item, '__typename', 'id') as Partial<I>,
+  ) as I;
 
 const updatePersistentState = (
   state: State,
@@ -111,21 +115,21 @@ const reducer: Reducer = (state, action): State => {
   return state;
 };
 
-export type Props<I extends Item> = {
+export type Props<I extends ListItemInput> = {
   active: boolean;
   loading?: boolean;
   type?: DialogType;
-  id?: number;
-  item?: Delta<I>;
+  id?: Id;
+  item?: Partial<I>;
   fields?: ModalFields<I>;
   onCancel: () => void;
-  onSubmit: (item: I) => void;
+  onSubmit: (id: Id, item: I) => void;
   onRemove?: () => void;
 };
 
 const empty = {};
 
-export const ModalDialog = <I extends Item>({
+export const ModalDialog = <I extends ListItemInput>({
   active,
   loading = false,
   id = CREATE_ID,
@@ -135,7 +139,7 @@ export const ModalDialog = <I extends Item>({
   onCancel,
   onSubmit,
   onRemove,
-}: Props<I>): null | React.ReactElement<I> => {
+}: Props<I>): null | React.ReactElement => {
   const canRemove = !!onRemove;
   const [state, dispatch] = useReducer<Reducer>(reducer, {
     title: getTitle({ type, id }),
@@ -159,7 +163,7 @@ export const ModalDialog = <I extends Item>({
 
   useEffect((): (() => void) => (): void => clearTimeout(timer.current), []);
 
-  const [tempFields, setTempFields] = useState<Create<I>>(initFields(item, fields));
+  const [tempFields, setTempFields] = useState<I>(initFields(item, fields));
   useEffect(() => {
     setTempFields(initFields(item, fields));
   }, [item, fields]);
@@ -168,7 +172,7 @@ export const ModalDialog = <I extends Item>({
   const isInvalid = invalid.length > 0;
 
   const onChangeField = useCallback(
-    <F extends FieldKey<I>>(field: string, value: I[F]): void =>
+    <F extends FieldKey<I>>(field: string, value: I[F] | undefined): void =>
       setTempFields((last) => ({
         ...last,
         [field]: value,
@@ -185,7 +189,7 @@ export const ModalDialog = <I extends Item>({
     setInvalid(nextInvalid);
 
     if (!nextInvalid.length) {
-      onSubmit({ id, ...tempFields } as I);
+      onSubmit(id, tempFields);
     }
   }, [fields, onSubmit, tempFields, id]);
 

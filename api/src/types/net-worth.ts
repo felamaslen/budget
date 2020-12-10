@@ -1,90 +1,27 @@
-import { Create } from './shared';
+import { NetWorthCategory, NetWorthSubcategory } from './gql';
 
-export type Category = {
-  id: number;
-  type: 'asset' | 'liability';
-  category: string;
-  color: string;
-  isOption?: boolean;
+export type CategoryRow = Omit<NetWorthCategory, 'isOption'> & {
+  is_option: NetWorthCategory['isOption'];
 };
 
-export type CategoryRow = Pick<Category, 'id' | 'type' | 'category' | 'color'> & {
-  is_option: Category['isOption'];
+export type SubcategoryRow = Omit<
+  NetWorthSubcategory,
+  'categoryId' | 'hasCreditLimit' | 'isSAYE'
+> & {
+  category_id: NetWorthSubcategory['categoryId'];
+  has_credit_limit: NetWorthSubcategory['hasCreditLimit'];
+  is_saye: NetWorthSubcategory['isSAYE'];
 };
 
-export type Subcategory = {
-  id: number;
-  categoryId: Category['id'];
-  subcategory: string;
-  hasCreditLimit: boolean | null;
-  isSAYE: boolean | null;
-  opacity: number;
-};
-
-export type SubcategoryRow = Pick<Subcategory, 'id' | 'subcategory' | 'opacity'> & {
-  category_id: Subcategory['categoryId'];
-  has_credit_limit: Subcategory['hasCreditLimit'];
-  is_saye: Subcategory['isSAYE'];
-};
-
-export type FXValue = {
-  value: number;
-  currency: string;
-};
-
-export type OptionValue = {
-  units: number;
-  strikePrice: number;
-  marketPrice: number;
-  vested: number;
-};
-
-export type MortgageValue = {
-  principal: number;
-  paymentsRemaining: number;
-  rate: number;
-};
-
-export type ComplexValueItem = number | FXValue | OptionValue;
-export type ComplexValue = ComplexValueItem[];
-
-export type Value = number | ComplexValue | MortgageValue;
-
-export type ValueObject = {
-  id?: number;
-  subcategory: Subcategory['id'];
-  skip: boolean | null;
-  value: Value;
-};
-
-export type CreditLimit = {
-  subcategory: Subcategory['id'];
-  value: number;
-};
-
-export type Currency = {
-  id?: number;
-  currency: string;
-  rate: number;
-};
-
-export type Entry = {
-  id: number;
-  date: string;
-  values: ValueObject[];
-  creditLimit: CreditLimit[];
-  currencies: Currency[];
-};
-
-export type CreateEntry = Omit<Create<Entry>, 'date' | 'values' | 'currencies'> & {
-  date: Date;
-  values: Create<ValueObject>[];
-  currencies: Create<Currency>[];
-};
+export type ValueRow = [number, boolean | null, number, number | null];
+export type FXValueRow = [number, number, string];
+export type OptionValueRow = [number, number, number, number, number];
+export type MortgageValueRow = [number, number, number];
 
 export type JoinedEntryRow = {
   id: number;
   date: string;
+  is_saye: boolean | null;
 
   currency_ids: number[] | [null];
   currencies: string[] | [null];
@@ -134,6 +71,7 @@ export type JoinedEntryRowWithOptionValue = JoinedEntryRow & {
 };
 
 export type JoinedEntryRowWithMortgageValue = JoinedEntryRow & {
+  value_simple: number;
   mortgage_payments_remaining: number;
   mortgage_rate: number;
 };

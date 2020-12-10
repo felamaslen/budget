@@ -5,16 +5,16 @@ import { removeAtIndex } from 'replace-array';
 import sinon from 'sinon';
 
 import { FormFieldTransactions, FormFieldTransactionsInline } from './transactions';
-import { getTransactionsList, modifyTransaction } from '~client/modules/data';
-import { Transaction, TransactionRaw } from '~client/types';
+import { modifyTransaction } from '~client/modules/data';
+import { TransactionNative as Transaction } from '~client/types';
 
 describe('<FormFieldTransactions />', () => {
-  const transactions: TransactionRaw[] = [
-    { date: '2017-11-10', units: 10.5, price: 9.76, fees: 10, taxes: 3 },
-    { date: '2018-09-05', units: -3, price: 1.3, fees: 4, taxes: 2 },
+  const transactions: Transaction[] = [
+    { date: new Date('2017-11-10'), units: 10.5, price: 9.76, fees: 10, taxes: 3 },
+    { date: new Date('2018-09-05'), units: -3, price: 1.3, fees: 4, taxes: 2 },
   ];
 
-  const value: Transaction[] = getTransactionsList(transactions);
+  const value = transactions;
 
   const props = {
     value,
@@ -114,9 +114,11 @@ describe('<FormFieldTransactions />', () => {
         });
 
         expect(props.onChange).toHaveBeenCalledWith(
-          modifyTransaction(value, valueIndex, {
-            date: new Date('2017-04-03'),
-          }),
+          expect.arrayContaining(
+            modifyTransaction(value, valueIndex, {
+              date: new Date('2017-04-03'),
+            }),
+          ),
         );
       });
 
@@ -147,9 +149,11 @@ describe('<FormFieldTransactions />', () => {
         });
 
         expect(props.onChange).toHaveBeenCalledWith(
-          modifyTransaction(value, valueIndex, {
-            [field]: inputValue,
-          }),
+          expect.arrayContaining(
+            modifyTransaction(value, valueIndex, {
+              [field]: inputValue,
+            }),
+          ),
         );
       });
 
@@ -186,11 +190,13 @@ describe('<FormFieldTransactions />', () => {
 
         expect(props.onChange).toHaveBeenCalledTimes(3);
         expect(props.onChange).toHaveBeenCalledWith(
-          modifyTransaction(value, valueIndex, {
-            date: new Date('2017-04-03'),
-            units: 34.2219,
-            price: 126.7692,
-          }),
+          expect.arrayContaining(
+            modifyTransaction(value, valueIndex, {
+              date: new Date('2017-04-03'),
+              units: 34.2219,
+              price: 126.7692,
+            }),
+          ),
         );
       });
 
@@ -384,9 +390,11 @@ describe('<FormFieldTransactions />', () => {
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(props.onChange).toHaveBeenCalledWith(
-          modifyTransaction(value, valueIndex, {
-            date: new Date('2017-04-03'),
-          }),
+          expect.arrayContaining(
+            modifyTransaction(value, valueIndex, {
+              date: new Date('2017-04-03'),
+            }),
+          ),
         );
       });
 
@@ -409,9 +417,11 @@ describe('<FormFieldTransactions />', () => {
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(props.onChange).toHaveBeenCalledWith(
-          modifyTransaction(value, valueIndex, {
-            units: 34.2219,
-          }),
+          expect.arrayContaining(
+            modifyTransaction(value, valueIndex, {
+              units: 34.2219,
+            }),
+          ),
         );
       });
 
@@ -434,9 +444,11 @@ describe('<FormFieldTransactions />', () => {
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(props.onChange).toHaveBeenCalledWith(
-          modifyTransaction(value, valueIndex, {
-            price: 126.7692,
-          }),
+          expect.arrayContaining(
+            modifyTransaction(value, valueIndex, {
+              price: 126.7692,
+            }),
+          ),
         );
       });
 
@@ -473,11 +485,13 @@ describe('<FormFieldTransactions />', () => {
 
         expect(props.onChange).toHaveBeenCalledTimes(3);
         expect(props.onChange).toHaveBeenCalledWith(
-          modifyTransaction(value, valueIndex, {
-            date: new Date('2017-04-03'),
-            units: 34.2219,
-            price: 126.7692,
-          }),
+          expect.arrayContaining(
+            modifyTransaction(value, valueIndex, {
+              date: new Date('2017-04-03'),
+              units: 34.2219,
+              price: 126.7692,
+            }),
+          ),
         );
       });
 

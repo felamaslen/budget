@@ -1,6 +1,9 @@
 import { InlineField, makeInlineField } from './shared';
 
-export function makeInlineTextField<V extends string = string>(): InlineField<V, {}> {
+export function makeInlineTextField<V extends string = string>(): InlineField<
+  V,
+  Record<string, unknown>
+> {
   const { Field, FieldInline } = makeInlineField<V>({
     inputProps: {
       type: 'text',

@@ -1,11 +1,26 @@
-import formatDate from 'date-fns/format';
+import { compose } from '@typed/compose';
+import omit from 'lodash/omit';
 import { replaceAtIndex } from 'replace-array';
 import shortid from 'shortid';
 import numericHash from 'string-hash';
 
+import { toISO } from './format';
+
 import { Average } from '~client/constants';
-import { PeriodObject, Period } from '~client/constants/graph';
-import { Id, IdMap, Item, Create, Data as Line, TransactionRaw, Transaction } from '~client/types';
+import {
+  Create,
+  Data as Line,
+  FundInput,
+  FundInputNative,
+  Item,
+  ListItem,
+  NativeDate,
+  NativeFund,
+  NetWorthEntryInput,
+  NetWorthEntryNative,
+  RawDate,
+  TransactionNative as Transaction,
+} from '~client/types';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,27 +32,9 @@ export const VOID = (): void => {
 
 export const generateFakeId = (): number => -Math.abs(numericHash(shortid.generate()) >>> 1);
 
-export function getPeriodMatch(shortPeriod: string | Period): PeriodObject {
-  const matchingPeriod = Object.entries(Period).find(([, match]) => match === shortPeriod);
-  if (matchingPeriod) {
-    return getPeriodMatch(matchingPeriod[0]);
-  }
-
-  const periodRegex = /^([a-z]+)([0-9]+)$/;
-  const match = shortPeriod.match(periodRegex);
-  if (!match) {
-    return { period: 'year', length: 1 };
-  }
-
-  return { period: match[1], length: Number(match[2]) };
+export function lastInArray<T>(array: T[]): T | undefined {
+  return array[array.length - 1];
 }
-
-export const getTransactionsList = (data: TransactionRaw[]): Transaction[] =>
-  data.map<Transaction>(({ date, ...rest }) => ({
-    id: generateFakeId(),
-    date: new Date(date),
-    ...rest,
-  }));
 
 const roundTotal = (value: number): number => Number(value.toFixed(4));
 
@@ -57,14 +54,8 @@ export const isSold = (transactionsList: Transaction[]): boolean =>
 
 export const addToTransactionsList = (
   transactionsList: Transaction[],
-  item: Create<Transaction>,
-): Transaction[] => [
-  ...transactionsList,
-  {
-    ...item,
-    id: generateFakeId(),
-  },
-];
+  item: Transaction,
+): Transaction[] => [...transactionsList, item];
 
 export const modifyTransaction = (
   transactionsList: Transaction[],
@@ -72,25 +63,6 @@ export const modifyTransaction = (
   delta: Partial<Transaction>,
 ): Transaction[] =>
   replaceAtIndex(transactionsList, index, (oldItem) => ({ ...oldItem, ...delta }));
-
-export const modifyTransactionById = (
-  transactionsList: Transaction[],
-  id: Id,
-  delta: Partial<Transaction>,
-): Transaction[] =>
-  modifyTransaction(
-    transactionsList,
-    transactionsList.findIndex(({ id: itemId }) => itemId === id),
-    delta,
-  );
-
-export const formatTransactionsList = (transactionsList: Transaction[]): TransactionRaw[] =>
-  [...transactionsList]
-    .sort(({ date: dateA }, { date: dateB }) => Number(dateA) - Number(dateB))
-    .map(({ id, date, ...rest }) => ({
-      date: formatDate(date, 'yyyy-MM-dd'),
-      ...rest,
-    }));
 
 export function arrayAverage(values: number[], mode: Average = Average.Mean): number {
   if (!values.length) {
@@ -156,81 +128,6 @@ export const limitTimeSeriesLength = (timeSeries: Line, limit: number): Line =>
 export const randnBm = (): number =>
   Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
 
-export const isDate = <I extends Item, F extends keyof I>(value?: I[F] | Date): value is Date =>
-  typeof value === 'undefined' || value instanceof Date;
-
-export const isTransactions = <I extends Item, F extends keyof I>(
-  value?: I[F] | Transaction[],
-): value is Transaction[] => value === null || Array.isArray(value);
-
-export const isNumber = <I extends Item, F extends keyof I>(
-  value?: I[F] | number,
-): value is number => typeof value === 'undefined' || typeof value === 'number';
-
-export function getValueFromTransmit(dataType: 'id', value: string | number): number;
-export function getValueFromTransmit(dataType: 'date', value: string): Date;
-export function getValueFromTransmit(dataType: 'cost', value: string): number;
-export function getValueFromTransmit(dataType: 'allocationTarget', value: number | null): number;
-export function getValueFromTransmit(
-  dataType: 'transactions',
-  value: TransactionRaw[],
-): Transaction[];
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getValueFromTransmit(dataType: string, value: any): string;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getValueFromTransmit(dataType: string, value: any): any {
-  if (dataType === 'id') {
-    return Number(value);
-  }
-  if (dataType === 'date') {
-    return new Date(value);
-  }
-  if (dataType === 'cost') {
-    return parseInt(value, 10) || 0;
-  }
-  if (dataType === 'transactions') {
-    return getTransactionsList(value);
-  }
-  if (dataType === 'allocationTarget') {
-    return value ?? 0;
-  }
-
-  return String(value);
-}
-
-export function getValueForTransmit(dataType: 'id', value: number): number;
-export function getValueForTransmit(dataType: 'date', value: Date): string;
-export function getValueForTransmit(
-  dataType: 'transactions',
-  value: Transaction[],
-): TransactionRaw[];
-export function getValueForTransmit(dataType: 'item', value: string): string;
-export function getValueForTransmit(dataType: 'category', value: string): string;
-export function getValueForTransmit(dataType: 'cost', value: number): number;
-export function getValueForTransmit(dataType: 'shop', value: string): string;
-export function getValueForTransmit(dataType: 'holiday', value: string): string;
-export function getValueForTransmit(dataType: 'social', value: string): string;
-export function getValueForTransmit(dataType: 'allocationTarget', value: number): number;
-
-export function getValueForTransmit(dataType: string, value: string): string;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getValueForTransmit(dataType: string, value: any): any {
-  if (dataType === 'id') {
-    return value;
-  }
-  if (dataType === 'date') {
-    return formatDate(value, 'yyyy-MM-dd');
-  }
-  if (dataType === 'transactions') {
-    return formatTransactionsList(value);
-  }
-
-  return getValueFromTransmit(dataType, value);
-}
-
 type SortKey<K extends string> = K | { key: K; order: -1 | 1 };
 function sortKey<K extends string, I extends { [key in K]?: number | string | Date }>(
   criteria: SortKey<K>,
@@ -274,19 +171,53 @@ export const leftPad = <T>(array: T[], length: number, fill: T = (0 as unknown) 
 export const rightPad = <T>(array: T[], length: number, fill?: T): T[] =>
   array.concat(
     Array<T>(Math.max(0, length - array.length)).fill(
-      fill ?? array[array.length - 1] ?? ((0 as unknown) as T),
+      fill ?? lastInArray(array) ?? ((0 as unknown) as T),
     ),
   );
 
 export const withoutId = <T extends Partial<Item>>({ id, ...rest }: T): Omit<T, 'id'> => rest;
-export const withoutIds = <T extends Partial<Item>>(items: T[]): Omit<T, 'id'>[] =>
+export const withoutIds = <T extends Partial<ListItem>>(items: T[]): Omit<T, 'id'>[] =>
   items.map(withoutId);
 
-export const toIdMap = <V extends Item>(items: V[]): IdMap<V> =>
-  items.reduce(
-    (last, item) => ({
-      ...last,
-      [item.id]: item,
-    }),
-    {},
+export const withNativeDate = <K extends string, T extends Record<K, string>>(...keys: K[]) => (
+  item: T,
+): NativeDate<T, K> =>
+  keys.reduce<NativeDate<T, K>>(
+    (last, key) => ({ ...last, [key]: new Date(item[key]) }),
+    item as NativeDate<T, K>,
   );
+
+export const withRawDate = <K extends string, T extends Record<K, Date>>(...keys: K[]) => (
+  item: T,
+): RawDate<T, K> =>
+  keys.reduce<RawDate<T, K>>(
+    (last, key) => ({ ...last, [key]: toISO(item[key]) }),
+    item as RawDate<T, K>,
+  );
+
+export const withRawDateTime = <K extends string, T extends Record<K, Date>>(...keys: K[]) => (
+  item: T,
+): RawDate<T, K> =>
+  keys.reduce<RawDate<T, K>>(
+    (last, key) => ({ ...last, [key]: item[key].toISOString() }),
+    item as RawDate<T, K>,
+  );
+
+export const omitTypeName = <T extends Record<string, unknown>>(item: T): Omit<T, '__typename'> =>
+  omit(item, '__typename');
+
+export const toNativeFund = <F extends FundInput>(input: F): NativeFund<F> => ({
+  ...omitTypeName(input),
+  transactions: input.transactions.map(compose(omitTypeName, withNativeDate('date'))),
+});
+
+export const toRawFund = (input: FundInputNative): FundInput => ({
+  ...input,
+  transactions: input.transactions.map(withRawDate('date')),
+});
+
+export const toRawNetWorthEntry = (input: Create<NetWorthEntryNative>): NetWorthEntryInput => ({
+  ...input,
+  date: toISO(input.date),
+  values: input.values.map((valueObject) => omit(valueObject, 'value')),
+});

@@ -3,16 +3,17 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
 
-import { ListHeadFunds, ListHeadFundsMobile } from '.';
-import { Period } from '~client/constants/graph';
+import { ListHeadFunds, ListHeadFundsMobile, Props } from '.';
+import { fundPeriods } from '~client/constants';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 
 describe('<ListHeadFunds />', () => {
-  const props = {
+  const props: Props = {
     totalCost: 400000,
     viewSoldFunds: false,
-    period: Period.year1,
+    historyOptions: fundPeriods.year1.query,
     annualisedFundReturns: 0.233,
     cachedValue: {
       ageText: '3 hours ago',
@@ -23,11 +24,19 @@ describe('<ListHeadFunds />', () => {
       dayGainAbs: 9964.92,
     },
     onViewSoldToggle: jest.fn(),
-    onReloadPrices: jest.fn(),
     setSort: jest.fn(),
   };
 
-  const setup = (): RenderResult => render(<ListHeadFunds {...props} />);
+  const setup = (
+    customProps: Partial<Props> = {},
+    options: Partial<RenderResult> = {},
+  ): RenderResult =>
+    render(
+      <GQLProviderMock>
+        <ListHeadFunds {...props} {...customProps} />
+      </GQLProviderMock>,
+      options,
+    );
 
   it.each`
     thing                        | value
@@ -41,18 +50,6 @@ describe('<ListHeadFunds />', () => {
     expect.assertions(1);
     const { getByText } = setup();
     expect(getByText(value)).toBeInTheDocument();
-  });
-
-  it('should reload fund prices on click', () => {
-    expect.assertions(1);
-    const { getByRole } = setup();
-    const button = getByRole('button');
-
-    act(() => {
-      fireEvent.click(button);
-    });
-
-    expect(props.onReloadPrices).toHaveBeenCalledTimes(1);
   });
 
   it('should call an onViewSoldToggle function when a tickbox is toggled', () => {
@@ -69,7 +66,7 @@ describe('<ListHeadFunds />', () => {
     expect(props.onViewSoldToggle).toHaveBeenCalledTimes(1);
 
     act(() => {
-      render(<ListHeadFunds {...props} viewSoldFunds />, { container });
+      setup({ viewSoldFunds: true }, { container });
     });
 
     expect(tickbox.checked).toBe(true);
@@ -88,13 +85,14 @@ describe('<ListHeadFundsMobile />', () => {
       dayGain: 0.0329,
       dayGainAbs: 9964.92,
     },
-    onReloadPrices: jest.fn(),
   };
 
   const setup = (): RenderResult =>
     render(
       <Provider store={createStore<State>()(testState)}>
-        <ListHeadFundsMobile {...props} />
+        <GQLProviderMock>
+          <ListHeadFundsMobile {...props} />
+        </GQLProviderMock>
       </Provider>,
     );
 
@@ -116,15 +114,5 @@ describe('<ListHeadFundsMobile />', () => {
     expect.assertions(1);
     const { getByText } = setup();
     expect(getByText(value)).toBeInTheDocument();
-  });
-
-  it('should call onReloadPrices when clicked', () => {
-    expect.assertions(1);
-    const { getByRole } = setup();
-    const button = getByRole('button');
-    act(() => {
-      fireEvent.click(button);
-    });
-    expect(props.onReloadPrices).toHaveBeenCalledTimes(1);
   });
 });

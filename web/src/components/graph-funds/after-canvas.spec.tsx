@@ -2,19 +2,22 @@ import { render, act, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { AfterCanvas, Props } from './after-canvas';
-import { Period, Mode } from '~client/constants/graph';
+import { fundPeriods, Mode } from '~client/constants/graph';
 
 describe('<AfterCanvas /> (funds graph)', () => {
+  const changePeriod = jest.fn();
+  const changeMode = jest.fn();
+
   const props: Props = {
     isMobile: false,
-    period: Period.month1,
+    historyOptions: fundPeriods.month1.query,
     modeList: [Mode.Price, Mode.Value],
     mode: Mode.Price,
-    changeMode: jest.fn(),
+    changeMode,
     fundItems: [],
     toggleList: {},
     setToggleList: jest.fn(),
-    changePeriod: jest.fn(),
+    changePeriod,
   };
 
   describe('Period list', () => {
@@ -27,23 +30,23 @@ describe('<AfterCanvas /> (funds graph)', () => {
     });
 
     it.each`
-      period           | description
-      ${Period.year5}  | ${'year5'}
-      ${Period.year1}  | ${'year1'}
-      ${Period.month3} | ${'month3'}
-    `('should fire an event for the $description period', ({ period }) => {
+      historyOptions              | description
+      ${fundPeriods.year5.query}  | ${'5 years'}
+      ${fundPeriods.year1.query}  | ${'1 year'}
+      ${fundPeriods.month3.query} | ${'3 months'}
+    `('should fire an event for the "$description" period', ({ historyOptions, description }) => {
       expect.assertions(1);
       const { getByDisplayValue } = render(<AfterCanvas {...props} />);
       const periodSelector = getByDisplayValue('1 month') as HTMLSelectElement;
 
       act(() => {
-        fireEvent.change(periodSelector, { target: { value: period } });
+        fireEvent.change(periodSelector, { target: { value: description } });
       });
       act(() => {
         fireEvent.blur(periodSelector);
       });
 
-      expect(props.changePeriod).toHaveBeenCalledWith(period);
+      expect(changePeriod).toHaveBeenCalledWith(historyOptions);
     });
   });
 
@@ -71,7 +74,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
         fireEvent.blur(modeSelector);
       });
 
-      expect(props.changeMode).toHaveBeenCalledWith(mode);
+      expect(changeMode).toHaveBeenCalledWith(mode);
     });
   });
 });

@@ -5,6 +5,7 @@ import { upsertFundHashes, insertPrices, insertPriceCache } from './queries';
 import { Fund, CurrencyPrices, Broker } from './types';
 import config from '~api/config';
 import { getStockQuote } from '~api/modules/finance';
+import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
 import logger from '~api/modules/logger';
 
 type FundWithPrice = Fund & { price: number };
@@ -38,8 +39,7 @@ export const getGenericQuotes = (funds: Fund[]): Promise<(number | null)[]> =>
       }
       try {
         logger.debug(`Downloading generic quote for symbol ${symbol}`);
-        const quote = await getStockQuote(symbol);
-        return quote;
+        return await getStockQuote(symbol);
       } catch (err) {
         logger.error(`Error getting generic quote ${symbol}: ${err.message}`);
         return null;
@@ -108,4 +108,7 @@ export async function scrapeFundPrices(
   logger.debug('Inserting prices into database');
 
   await insertNewPriceCache(db, fundsWithPrices, new Date());
+
+  logger.info('Sending update to pubsub queue');
+  await pubsub.publish(PubSubTopic.FundPricesUpdated, true);
 }

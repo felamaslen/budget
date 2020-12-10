@@ -1,13 +1,13 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 import { getMonthRangeUnion } from './date-union';
 import config from '~api/config';
-import { Page } from '~api/types';
+import { PageListStandard } from '~api/types';
 
 export async function getListCostSummary(
   db: DatabaseTransactionConnectionType,
   uid: number,
   monthEnds: Date[],
-  category: Page,
+  category: PageListStandard,
 ): Promise<number[]> {
   const results = await db.query<{
     month_cost: number;
@@ -23,7 +23,7 @@ export async function getListCostSummary(
     sql` AND `,
   )}
     ${
-      category === Page.general
+      category === PageListStandard.General
         ? sql`AND list_data.category NOT IN (${sql.join(
             config.data.overview.ignoreExpenseCategories,
             sql`, `,

@@ -1,3 +1,4 @@
+import { flatten } from 'array-flatten';
 import React, { useMemo, useCallback, useState } from 'react';
 
 import { Axes } from './axes';
@@ -9,13 +10,12 @@ import {
   GRAPH_FUND_ITEM_HEIGHT,
   GRAPH_FUND_ITEM_HEIGHT_LARGE,
 } from '~client/constants/graph';
-import { separateLines } from '~client/modules/funds';
 import { colors } from '~client/styled/variables';
-import { Size, Range, DrawProps, Data, Line } from '~client/types';
+import { Data, DrawProps, Line, Range, RowPrices, Size } from '~client/types';
 
-type Props = {
+export type Props = {
   sold: boolean;
-  values: Data;
+  values: RowPrices;
 } & Pick<LineGraphProps, 'name'>;
 
 function getDimensions(popout: boolean, sold: boolean): Size {
@@ -47,21 +47,20 @@ const getRange = (data: number[]): { min: number; max: number } =>
 const valuesColor = [colors.funds.loss, colors.funds.profit];
 
 function processData(
-  data: Data,
+  data: Data[],
   popout: boolean,
 ): {
   lines: Line[];
 } & Range {
-  const validData = data.filter(([, yValue]) => yValue !== 0);
-  const dataX = validData.map(([xValue]) => xValue);
-  const dataY = validData.map(([, yValue]) => yValue);
+  const dataX = flatten(data.map((line) => line.map(([xValue]) => xValue)));
+  const dataY = flatten(data.map((line) => line.map(([, yValue]) => yValue)));
 
   let minX = 0;
   let maxX = 0;
   let minY = 0;
   let maxY = 0;
 
-  if (validData.length) {
+  if (data.length) {
     ({ min: minX, max: maxX } = getRange(dataX));
     ({ min: minY, max: maxY } = getRange(dataY));
 
@@ -73,9 +72,7 @@ function processData(
     }
   }
 
-  // split up the line into multiple sections, if there are gaps in the data
-  // (this can happen if the fund is sold and then re-bought at a later date)
-  const lines = separateLines(data).map((line: Data, index: number) => ({
+  const lines = data.map<Line>((line, index) => ({
     key: String(index),
     data: line,
     strokeWidth: popout ? 1.5 : 1,
@@ -109,7 +106,7 @@ export const GraphFundItem: React.FC<Props> = ({ name, sold, values }) => {
 
   const beforeLines = useMemo(() => makeBeforeLines(popout), [popout]);
 
-  if (!values.length) {
+  if (!values?.length) {
     return null;
   }
 

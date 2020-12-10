@@ -1,15 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Dispatch, SetStateAction, useMemo, useEffect, useState, useRef } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
-export type PersistentStateValidator<S> = (value: any | S) => value is S;
+import { useUpdateEffect } from './effect';
+
+export type PersistentStateValidator<S> = (value: unknown | S) => value is S;
 
 const validateAnything = (): boolean => true;
+
+export function usePersistentStateStoreEffect<S>(state: S, key: string): void {
+  useUpdateEffect(() => {
+    localStorage.setItem(key, JSON.stringify(state));
+  }, [state, key]);
+}
 
 export function usePersistentState<S>(
   defaultState: S,
   key: string,
-  validator: PersistentStateValidator<S> | ((value: any) => boolean) = validateAnything,
+  validator: PersistentStateValidator<S> | ((value: unknown) => boolean) | null = validateAnything,
 ): [S, Dispatch<SetStateAction<S>>] {
   const initialState = useMemo<S>(() => {
     try {
@@ -18,7 +25,7 @@ export function usePersistentState<S>(
         return defaultState;
       }
       const parsedValue = JSON.parse(stringValue);
-      return validator(parsedValue) ? parsedValue : defaultState;
+      return validator?.(parsedValue) ? parsedValue : defaultState;
     } catch (err) {
       return defaultState;
     }
@@ -28,14 +35,7 @@ export function usePersistentState<S>(
 
   const [persistentState] = useDebounce<S>(state, 1000);
 
-  const stateHasChanged = useRef<boolean>(false);
-  useEffect(() => {
-    if (!stateHasChanged.current) {
-      stateHasChanged.current = true;
-      return;
-    }
-    localStorage.setItem(key, JSON.stringify(persistentState));
-  }, [persistentState, key]);
+  usePersistentStateStoreEffect(persistentState, key);
 
   return [state, setState];
 }

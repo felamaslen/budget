@@ -1,26 +1,27 @@
 import { replaceAtIndex } from 'replace-array';
 
 import { GRAPH_CURVINESS } from '~client/constants/graph';
+import { lastInArray } from '~client/modules/data';
 import { timeSeriesTicks } from '~client/modules/date';
 import { colors } from '~client/styled/variables';
 import {
-  Page,
-  Dimensions,
-  Padding,
   Calc,
+  ColorSwitcher,
+  Data,
+  Dimensions,
+  DynamicLineColor,
+  GraphStack,
+  Padding,
+  PageNonStandard,
+  PathProps,
+  Pix,
   PixX,
   PixY,
-  Pix,
-  ValY,
-  RangeX,
   Point,
-  Data,
-  PathProps,
+  RangeX,
   SVGPathProps,
   Tick,
-  DynamicLineColor,
-  ColorSwitcher,
-  GraphStack,
+  ValY,
 } from '~client/types';
 
 export type SVGNumber = number | string;
@@ -245,7 +246,7 @@ export function getLinePath({
 
       const pixelsLinePoint: LinePoint | undefined = pixelsStack.length
         ? {
-            start: pixels[pixels.length - 1],
+            start: lastInArray(pixels),
             type: 'L',
             args: [[pixelsStack[0][0].toFixed(1), pixelsStack[0][1].toFixed(1)]],
           }
@@ -259,7 +260,7 @@ export function getLinePath({
     return [
       ...line,
       {
-        start: pixels[pixels.length - 1],
+        start: lastInArray(pixels),
         type: 'L',
         args: [[width, height]],
       },
@@ -439,4 +440,4 @@ export const pointVisible = (valX: number, minX: number, maxX: number): boolean 
   valX >= minX && valX <= maxX;
 
 export const profitLossColor = ([, value]: Point): string =>
-  value < 0 ? colors[Page.funds].loss : colors[Page.funds].profit;
+  value < 0 ? colors[PageNonStandard.Funds].loss : colors[PageNonStandard.Funds].profit;

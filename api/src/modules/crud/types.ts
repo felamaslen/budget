@@ -1,14 +1,16 @@
-import { Schema } from '@hapi/joi';
-import { Router } from 'express';
+import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { AuthenticatedRequest } from '~api/gql';
 import { Create, Item } from '~api/types';
+import { AuthenticatedRequest } from '~api/types/resolver';
 
 export interface CrudItem extends Item {
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export type Noop<I extends object = object, O extends object = I> = (value: I) => O;
+export type Noop<
+  I extends Record<string, unknown> = Record<string, unknown>,
+  O extends Record<string, unknown> = I
+> = (value: I) => O;
 
 export type DbToJson<D extends Item, J extends Item> = ((value: D) => J) | Noop<D, J>;
 
@@ -16,7 +18,7 @@ export type JsonToDb<D extends Item, J extends Item> =
   | ((body: Create<J>) => Create<D>)
   | Noop<Partial<Create<J>>, Create<D>>;
 
-export type GetItem = (id: number) => Promise<object>;
+export type GetItem = (id: number) => Promise<Record<string, unknown>>;
 
 export type RequestWithBody<J extends Item = Item> = AuthenticatedRequest & {
   body: Partial<J>;
@@ -25,7 +27,7 @@ export type RequestWithBody<J extends Item = Item> = AuthenticatedRequest & {
 
 export type GetId = (req: AuthenticatedRequest) => string;
 
-export type ParentDependency<J extends Item, P extends Item = Item> = {
+export type ParentDependency<J extends Item> = {
   item: string;
   table: string;
   withUid?: boolean;
@@ -41,13 +43,47 @@ export type CrudOptions<D extends Item, J extends Item, P extends CrudItem = Cru
   table: string;
   withUid?: boolean;
   item: string;
-  schema: Schema;
   jsonToDb: JsonToDb<D, J>;
   dbToJson: DbToJson<D, J>;
   parentDependency?: ParentDependency<J>;
   validateParentDependency?: ValidateParentDependency<J, P>;
+  createTopic?: string;
+  updateTopic?: string;
+  deleteTopic?: string;
 };
 
-export type CrudRouteFactory = (
-  databaseName?: string,
-) => (router?: Router, prefix?: string) => Router;
+export type CreateItem<J extends CrudItem> = (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  data: Create<J>,
+  table?: string,
+) => Promise<J>;
+
+export type ReadItem<J extends CrudItem> = (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  id?: number,
+  table?: string,
+) => Promise<J[]>;
+
+export type UpdateItem<J extends CrudItem> = (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  id: number,
+  data: Create<J>,
+  table?: string,
+) => Promise<J>;
+
+export type DeleteItem = (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  id: number,
+  table?: string,
+) => Promise<void>;
+
+export type CrudControllerFactory<J extends CrudItem> = {
+  create: CreateItem<J>;
+  read: ReadItem<J>;
+  update: UpdateItem<J>;
+  delete: DeleteItem;
+};

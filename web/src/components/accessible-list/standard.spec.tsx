@@ -8,18 +8,31 @@ import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { AccessibleListStandard } from './standard';
-import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions';
+import * as listMutationHooks from '~client/hooks/mutations/list';
 import { State } from '~client/reducers';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
-import { Page, ListCalcItem } from '~client/types';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { PageListStandard } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
 }));
 
 describe('<AccessibleListStandard />', () => {
-  const page: Page.bills = Page.bills;
+  const onCreate = jest.fn();
+  const onUpdate = jest.fn();
+  const onDelete = jest.fn();
+
+  beforeEach(() => {
+    jest.spyOn(listMutationHooks, 'useListCrudStandard').mockReturnValue({
+      onCreate,
+      onUpdate,
+      onDelete,
+    });
+  });
+
+  const page: PageListStandard.Bills = PageListStandard.Bills;
 
   let matchMedia: MatchMediaMock;
 
@@ -57,7 +70,9 @@ describe('<AccessibleListStandard />', () => {
     const store = createStore<State>()(customState);
     const renderResult = render(
       <Provider store={store}>
-        <AccessibleListStandard<Page.bills> {...props} />
+        <GQLProviderMock>
+          <AccessibleListStandard<PageListStandard.Bills> {...props} />
+        </GQLProviderMock>
       </Provider>,
     );
 
@@ -78,9 +93,9 @@ describe('<AccessibleListStandard />', () => {
   });
 
   it('should automatically fill the date field with the current date', () => {
-    expect.assertions(2);
+    expect.assertions(3);
     const clock = sinon.useFakeTimers(new Date('2020-04-18'));
-    const { getByTestId, store } = setup();
+    const { getByTestId } = setup();
     const createForm = getByTestId('create-form');
     const { getAllByRole, getByText } = within(createForm);
 
@@ -115,13 +130,12 @@ describe('<AccessibleListStandard />', () => {
       fireEvent.click(addButton);
     });
 
-    const expectedAction = listItemCreated<ListCalcItem, Page.bills>(page)({
+    expect(onCreate).toHaveBeenCalledTimes(1);
+    expect(onCreate).toHaveBeenCalledWith({
       date: new Date('2020-04-18'),
       item: 'some new item',
       cost: 18993,
     });
-
-    expect(store.getActions()).toStrictEqual(expect.arrayContaining([expectedAction]));
 
     clock.restore();
   });
@@ -390,7 +404,7 @@ describe('<AccessibleListStandard />', () => {
           font-weight: bold;
         }
 
-        .sc-fzqPZZ .c12 {
+        .sc-fznzOf .c12 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -408,15 +422,15 @@ describe('<AccessibleListStandard />', () => {
           grid-column: 4;
         }
 
-        .sc-fzoxKX .c12,
-        .sc-fzoxKX .c12:hover,
-        .sc-fzoxKX .c12:active {
+        .sc-fznMnq .c12,
+        .sc-fznMnq .c12:hover,
+        .sc-fznMnq .c12:active {
           background: none;
           border: none;
           box-shadow: none;
         }
 
-        .sc-fzoxKX .c12::after {
+        .sc-fznMnq .c12::after {
           display: block;
           margin-left: 16px;
           content: '';
@@ -434,7 +448,7 @@ describe('<AccessibleListStandard />', () => {
           background: none;
         }
 
-        .sc-fzoJus .c12 {
+        .sc-fznXWL .c12 {
           margin: 2px 4px;
         }
 
@@ -522,9 +536,8 @@ describe('<AccessibleListStandard />', () => {
             -ms-flex-positive: 0;
             flex-grow: 0;
             width: auto;
-            box-shadow: inset 0px 1px 0px 0px;
-            background: linear-gradient(to bottom,#68a54b 5%,#74ad5a 100%);
-            background-color: #68a54b;
+            box-shadow: inset 0px 1px 0px 0px rgba(0,0,0,0.2);
+            background: #74ad5a;
             border: 1px solid #3b6e22;
             border-radius: 0;
             cursor: pointer;
@@ -539,18 +552,13 @@ describe('<AccessibleListStandard />', () => {
             z-index: 4;
           }
 
-          .c12:hover {
-            background-color: #74ad5a;
-            background-image: linear-gradient( to bottom, #74ad5a 5%, #68a54b 100% );
+          .c12:hover,
+          .c12:focus {
+            background: #80be69;
           }
 
           .c12:active {
-            top: 1px;
-            background: $color-button-active;
-          }
-
-          .c12:focus {
-            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+            background: #638c4d;
           }
 
           .c12:disabled {
@@ -704,9 +712,9 @@ describe('<AccessibleListStandard />', () => {
       });
 
       it('should create an item', async () => {
-        expect.assertions(2);
+        expect.assertions(3);
         const clock = sinon.useFakeTimers(new Date('2020-04-14'));
-        const { getByText, getByTestId, queryByTestId, store } = setupMobile();
+        const { getByText, getByTestId, queryByTestId } = setupMobile();
         const addButton = getByText('Add');
         act(() => {
           fireEvent.click(addButton);
@@ -742,17 +750,14 @@ describe('<AccessibleListStandard />', () => {
           fireEvent.click(buttonConfirm);
         });
 
-        expect(store.getActions()).toStrictEqual([
-          expect.objectContaining(
-            listItemCreated<ListCalcItem, Page.bills>(page)(
-              expect.objectContaining({
-                date: new Date('2020-04-20'),
-                item: 'some new item',
-                cost: 2365,
-              }),
-            ),
-          ),
-        ]);
+        expect(onCreate).toHaveBeenCalledTimes(1);
+        expect(onCreate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            date: new Date('2020-04-20'),
+            item: 'some new item',
+            cost: 2365,
+          }),
+        );
 
         act(() => {
           clock.runAll();
@@ -785,10 +790,10 @@ describe('<AccessibleListStandard />', () => {
       });
 
       it('should update an item', () => {
-        expect.assertions(1);
+        expect.assertions(2);
         const clock = sinon.useFakeTimers(new Date('2020-04-29'));
 
-        const { getByText, getByTestId, store } = setupMobile();
+        const { getByText, getByTestId } = setupMobile();
         const itemField = getByText('item one');
         act(() => {
           fireEvent.click(itemField);
@@ -824,30 +829,27 @@ describe('<AccessibleListStandard />', () => {
           fireEvent.click(buttonConfirm);
         });
 
-        expect(store.getActions()).toStrictEqual([
-          expect.objectContaining(
-            listItemUpdated<ListCalcItem, Page.bills>(Page.bills)(
-              numericHash('some-id'),
-              expect.objectContaining({
-                date: new Date('2020-04-23'),
-                item: 'updated item',
-                cost: 99831,
-              }),
-              expect.objectContaining({
-                date: new Date('2020-04-20'),
-                item: 'item one',
-                cost: 931,
-              }),
-            ),
-          ),
-        ]);
+        expect(onUpdate).toHaveBeenCalledTimes(1);
+        expect(onUpdate).toHaveBeenCalledWith(
+          numericHash('some-id'),
+          expect.objectContaining({
+            date: new Date('2020-04-23'),
+            item: 'updated item',
+            cost: 99831,
+          }),
+          expect.objectContaining({
+            date: new Date('2020-04-20'),
+            item: 'item one',
+            cost: 931,
+          }),
+        );
 
         clock.restore();
       });
 
       it('should delete an item', () => {
-        expect.assertions(1);
-        const { getByText, getByTestId, store } = setupMobile();
+        expect.assertions(2);
+        const { getByText, getByTestId } = setupMobile();
         const itemField = getByText('item one');
         act(() => {
           fireEvent.click(itemField);
@@ -860,16 +862,13 @@ describe('<AccessibleListStandard />', () => {
           fireEvent.click(buttonDelete);
         });
 
-        expect(store.getActions()).toStrictEqual([
-          expect.objectContaining(
-            listItemDeleted<ListCalcItem, Page.bills>(Page.bills)(numericHash('some-id'), {
-              id: numericHash('some-id'),
-              date: new Date('2020-04-20'),
-              item: 'item one',
-              cost: 931,
-            }),
-          ),
-        ]);
+        expect(onDelete).toHaveBeenCalledTimes(1);
+        expect(onDelete).toHaveBeenCalledWith(numericHash('some-id'), {
+          id: numericHash('some-id'),
+          date: new Date('2020-04-20'),
+          item: 'item one',
+          cost: 931,
+        });
       });
     });
   });

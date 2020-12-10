@@ -279,5 +279,5 @@ declare module 'yahoo-finance' {
   export function quote<M extends QuoteModule = QuoteModule>(
     symbol: string,
     modules: M[],
-  ): Promise<Quote<M>>;
+  ): Promise<Quote<M> | null | undefined>;
 }

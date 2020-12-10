@@ -1,81 +1,77 @@
 import getUnixTime from 'date-fns/getUnixTime';
-import numericHash from 'string-hash';
-import { Page, ReadResponse, StocksListResponse, StockPrice, LoginResponse } from '~client/types';
 
-export const testLoginResponse: LoginResponse = {
-  uid: numericHash('some-uid'),
-  apiKey: 'some-api-key',
-  name: 'John Doe',
-  expires: new Date('2050-03-05').toISOString(),
-};
+import {
+  InitialQuery,
+  PageListStandard,
+  PageNonStandard,
+  StocksListResponse,
+  StockPrice,
+} from '~client/types';
 
-export const testResponse: ReadResponse = {
-  appConfig: {
+export const testResponse: InitialQuery = {
+  config: {
     birthDate: '1996-02-03',
-    pieTolerance: 0.08,
+    futureMonths: 12,
   },
-  [Page.overview]: {
-    startYearMonth: [2018, 10],
-    endYearMonth: [2020, 4],
-    currentYear: 2020,
-    currentMonth: 1,
-    futureMonths: 3,
+
+  overview: {
+    startDate: '2018-10-31T23:59:59.999Z',
+    endDate: '2020-04-30T23:59:59.999+0100',
     annualisedFundReturns: 0.173,
     homeEquityOld: [6375000, 7255000],
     cost: {
-      [Page.funds]: [],
-      [Page.income]: [],
-      [Page.bills]: [],
-      [Page.food]: [],
-      [Page.general]: [],
-      [Page.holiday]: [],
-      [Page.social]: [],
+      funds: [],
+      [PageListStandard.Income]: [],
+      [PageListStandard.Bills]: [],
+      [PageListStandard.Food]: [],
+      [PageListStandard.General]: [],
+      [PageListStandard.Holiday]: [],
+      [PageListStandard.Social]: [],
     },
   },
-  netWorth: {
-    categories: {
-      data: [],
-    },
-    subcategories: {
-      data: [],
-    },
-    entries: {
-      data: {
-        items: [],
-        old: [],
-        oldOptions: [],
-      },
-    },
+
+  netWorthCategories: [],
+  netWorthSubcategories: [],
+  netWorthEntries: {
+    current: [],
+    old: [],
+    oldOptions: [],
   },
-  [Page.funds]: {
-    data: [],
+
+  [PageNonStandard.Funds]: { items: [] },
+
+  cashAllocationTarget: 20000,
+
+  fundHistory: {
     startTime: getUnixTime(new Date('2017-02-03')),
     cacheTimes: [],
-    cashTarget: 20000,
+    prices: [],
     annualisedFundReturns: 0.653,
+    overviewCost: [],
   },
-  [Page.income]: {
-    data: [],
+
+  [PageListStandard.Income]: {
+    items: [],
     total: 0,
   },
-  [Page.bills]: {
-    data: [],
+  [PageListStandard.Bills]: {
+    items: [],
     total: 0,
   },
-  [Page.food]: {
-    data: [],
+  [PageListStandard.Food]: {
+    items: [],
     total: 0,
   },
-  [Page.general]: {
-    data: [],
+  [PageListStandard.General]: {
+    items: [],
     total: 0,
   },
-  [Page.holiday]: {
-    data: [],
+  [PageListStandard.Holiday]: {
+    items: [],
     total: 0,
   },
-  [Page.social]: {
-    data: [],
+  [PageListStandard.Social]: {
+    items: [],
     total: 0,
   },
 };

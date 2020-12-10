@@ -10,21 +10,29 @@ import { createSelector } from 'reselect';
 
 import { getLatestNetWorthAggregate } from '../overview/net-worth';
 import { getDayGain, getDayGainAbs, getPaperValue, getRealisedValue, getBuyCost } from './gains';
-import { getFundsRows, getCurrentFundsCache } from './helpers';
-import { Period } from '~client/constants/graph';
-import { getTotalCost } from '~client/modules/data';
+import { getFundsRows, getFundsCache, PriceCache } from './helpers';
+import { getTotalCost, lastInArray } from '~client/modules/data';
 import { State } from '~client/reducers';
-import { Cache, getRemainingAllocation } from '~client/reducers/funds';
 import { getCostForMonthSoFar } from '~client/selectors/overview';
-import { Id, Page, Data, Portfolio, CachedValue, Transaction, Aggregate } from '~client/types';
+import {
+  Aggregate,
+  CachedValue,
+  Data,
+  HistoryOptions,
+  Id,
+  TransactionNative as Transaction,
+  PageNonStandard,
+  Portfolio,
+  RowPrices,
+} from '~client/types';
 
 export * from './gains';
 export * from './graph';
 export * from './helpers';
 export * from './lines';
-export * from './stocks';
 
-export const getPeriod = (state: Pick<State, Page.funds>): Period => state.funds.period;
+export const getHistoryOptions = (state: Pick<State, PageNonStandard.Funds>): HistoryOptions =>
+  state.funds.historyOptions;
 
 export function getFundsCachedValueAgeText(
   startTime: number,
@@ -45,7 +53,7 @@ export function getFundsCachedValueAgeText(
 
 const getFundCacheAge = moize(
   (now: Date): ((state: State) => string) =>
-    createSelector(getCurrentFundsCache, (cache: Cache | undefined) => {
+    createSelector(getFundsCache, (cache: PriceCache | undefined) => {
       if (!cache) {
         return '';
       }
@@ -62,11 +70,7 @@ const filterPastTransactions = (today: Date, transactions: Transaction[]): Trans
 
 const getTransactionsToDateWithPrices = moize(
   (date: Date) =>
-    createSelector(getFundsRows, getCurrentFundsCache, (rows, cache) => {
-      if (!(rows && cache)) {
-        return [];
-      }
-
+    createSelector(getFundsRows, getFundsCache, (rows, cache) => {
       const unixTime = getUnixTime(date);
       const priceIndexMax =
         cache.cacheTimes.length -
@@ -76,9 +80,13 @@ const getTransactionsToDateWithPrices = moize(
           .findIndex((time) => time <= unixTime - cache.startTime);
 
       return rows.map(({ id, item, transactions, allocationTarget }) => {
-        const prices = cache.prices[id]?.values ?? [];
-        const priceIndex = Math.min(prices.length, priceIndexMax - cache.prices[id]?.startIndex);
-        const price = prices[priceIndex - 1] ?? 0;
+        const price =
+          cache.prices[id]?.reduceRight<number | undefined>(
+            (last, { startIndex, values }) =>
+              last ?? lastInArray(values.slice(0, Math.max(0, priceIndexMax - startIndex))),
+            undefined,
+          ) ?? 0;
+
         const transactionsToDate = filterPastTransactions(date, transactions);
 
         return { id, item, transactions: transactionsToDate, price, allocationTarget };
@@ -98,7 +106,7 @@ export const getPortfolio = moize(
             id,
             item,
             value: getPaperValue(transactions, price),
-            allocationTarget,
+            allocationTarget: allocationTarget ?? 0,
           })),
     ),
   { maxSize: 1 },
@@ -192,10 +200,8 @@ export const getFundsCachedValue = moize(
   { maxSize: 1 },
 );
 
-type RowPrices = Data | null;
-
 export function getPricesForRow(
-  prices: Cache['prices'],
+  prices: PriceCache['prices'],
   id: Id,
   startTime: number,
   cacheTimes: number[],
@@ -204,14 +210,24 @@ export function getPricesForRow(
     return null;
   }
 
-  return prices[id].values.map((price, index) => [
-    startTime + cacheTimes[index + prices[id].startIndex],
-    price,
-  ]);
+  return prices[id].map<Data>(({ startIndex, values }) =>
+    values.map((price, index) => [startTime + cacheTimes[index + startIndex], price]),
+  );
 }
 
-export const getMaxAllocationTarget = moize((fundId: number) => (state: State): number =>
-  Math.max(0, Math.min(1, getRemainingAllocation(state[Page.funds], fundId))),
+export const getMaxAllocationTarget = moize((fundId: number) =>
+  createSelector(getFundsRows, (rows): number =>
+    Math.max(
+      0,
+      Math.min(
+        100,
+        rows
+          .filter((fund) => fund.id !== fundId)
+          .reduce<number>((last, fund) => last - (fund.allocationTarget ?? 0), 100),
+      ),
+    ),
+  ),
 );
 
-export const getCashAllocationTarget = (state: State): number => state[Page.funds].cashTarget;
+export const getCashAllocationTarget = (state: State): number =>
+  state[PageNonStandard.Funds].cashTarget;

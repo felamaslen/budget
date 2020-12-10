@@ -2,7 +2,7 @@ import { compose } from '@typed/compose';
 import { rgb, rgba, lighten, desaturate } from 'polished';
 
 import { ErrorLevel } from '~client/constants/error';
-import { Page, Aggregate, NetWorthTableColumn } from '~client/types';
+import { Aggregate } from '~client/types';
 
 export const breakpoints = {
   mobileSmall: 350,
@@ -23,90 +23,7 @@ export const upArrowStrong = "'\\2b08'";
 
 const colorStocks = rgb(84, 110, 122);
 
-type ColorsBase = {
-  [key: string]: string;
-};
-
-type PageColors = ColorsBase & {
-  main: string;
-};
-
-type Shade = {
-  light: string;
-  mediumLight: string;
-  mediumDark: string;
-  dark: string;
-};
-
-type LightDark = {
-  light: string;
-  dark: string;
-  translucent?: string;
-};
-
-type Colors = {
-  primary: string;
-  primaryDark: string;
-  primaryMobile: string;
-  primaryDarkMobile: string;
-  accent: string;
-  highlight: LightDark;
-  error: string;
-  white: string;
-  light: Shade;
-  medium: Shade;
-  dark: Shade;
-  black: string;
-  shadow: Shade;
-  translucent: {
-    light: Shade;
-    dark: Shade;
-  };
-  transparent: string;
-  green: string;
-  blue: string;
-  amber: string;
-  button: ColorsBase;
-  create: string;
-  delete: string;
-  profit: LightDark;
-  loss: LightDark;
-  'bg-up': string;
-  'bg-up-hl': string;
-  'bg-up-rev': string;
-  'bg-down': string;
-  'bg-down-hl': string;
-  'bg-down-rev': string;
-  messages: {
-    [e in ErrorLevel]: string;
-  };
-  [Page.overview]: PageColors & {
-    income: string;
-    spending: string;
-  };
-  [Page.analysis]: PageColors;
-  [Page.funds]: PageColors & {
-    profit: string;
-    loss: string;
-    fundUp: string;
-    fundDown: string;
-  };
-  [Page.income]: PageColors;
-  [Page.bills]: PageColors;
-  [Page.food]: PageColors;
-  [Page.general]: PageColors;
-  [Page.holiday]: PageColors;
-  [Page.social]: PageColors;
-  netWorth: Record<NetWorthTableColumn | 'options' | 'homeEquity', string> & {
-    aggregate: {
-      [key in Aggregate]: string;
-    };
-  };
-  blockIndex: string[];
-  blockColor: ColorsBase;
-};
-
-export const colors: Colors = {
+export const colors = {
   primary: rgb(216, 77, 77),
   primaryDark: rgb(159, 48, 48),
   primaryMobile: rgb(255, 254, 247),
@@ -186,14 +103,14 @@ export const colors: Colors = {
     [ErrorLevel.Fatal]: rgba(128, 0, 0, 0.7),
   },
   button: {
-    bg1: rgb(116, 173, 90),
-    bg2: rgb(104, 165, 75),
+    main: rgb(116, 173, 90),
+    focus: rgb(128, 190, 105),
     border: rgb(59, 110, 34),
-    active: rgb(105, 154, 83),
+    active: rgb(99, 140, 77),
     mobile: rgb(255, 163, 92),
     disabled: rgb(156, 156, 156),
   },
-  [Page.overview]: {
+  overview: {
     main: rgb(66, 66, 66),
     income: rgb(36, 191, 55),
     incomeMobile: rgb(183, 255, 163),

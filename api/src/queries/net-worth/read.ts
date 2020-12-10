@@ -1,10 +1,14 @@
-import { sql, DatabaseTransactionConnectionType, SqlSqlTokenType, QueryResultType } from 'slonik';
+import {
+  sql,
+  DatabaseTransactionConnectionType,
+  TaggedTemplateLiteralInvocationType,
+} from 'slonik';
 
 import { JoinedEntryRow, OldNetWorthRow, OldHomeEquityRow } from '~api/types';
 
 const joinEntryRows = (
-  conditions: SqlSqlTokenType<QueryResultType<string>> = sql``,
-): SqlSqlTokenType<JoinedEntryRow> =>
+  conditions: TaggedTemplateLiteralInvocationType = sql``,
+): TaggedTemplateLiteralInvocationType<JoinedEntryRow> =>
   sql`
   SELECT ${sql.join(
     [
@@ -22,6 +26,7 @@ const joinEntryRows = (
       sql`nwv.subcategory as value_subcategory`,
       sql`nwv.skip as value_skip`,
       sql`nwv.value as value_simple`,
+      sql`nws.is_saye`,
 
       sql`array_agg(nwfxv.value order by nwfxv.currency) as fx_values`,
       sql`array_agg(nwfxv.currency order by nwfxv.currency) as fx_currencies`,
@@ -88,6 +93,7 @@ const joinEntryRows = (
   ) entries_with_credit_limit
 
   LEFT JOIN net_worth_values nwv on nwv.net_worth_id = entries_with_credit_limit.id
+  LEFT JOIN net_worth_subcategories nws ON nws.id = nwv.subcategory
   LEFT JOIN net_worth_fx_values nwfxv on nwfxv.values_id = nwv.id
   LEFT JOIN net_worth_option_values nwopv on nwopv.values_id = nwv.id
   LEFT JOIN net_worth_mortgage_values nwmv ON nwmv.values_id = nwv.id
@@ -105,6 +111,7 @@ const joinEntryRows = (
       sql`nwv.subcategory`,
       sql`nwv.skip`,
       sql`nwv.value`,
+      sql`nws.is_saye`,
       sql`nwopv.units`,
       sql`nwopv.strike_price`,
       sql`nwopv.market_price`,

@@ -3,5 +3,5 @@ import { createContext, Context } from 'react';
 import { ItemExtraPropsMap } from './hooks';
 
 export const createListContext = moize(
-  <E extends {}>(): Context<ItemExtraPropsMap<E>> => createContext({}),
+  <E extends Record<string, unknown>>(): Context<ItemExtraPropsMap<E>> => createContext({}),
 );

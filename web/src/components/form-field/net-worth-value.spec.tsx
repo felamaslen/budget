@@ -1,12 +1,26 @@
 import { render, act, fireEvent, RenderResult } from '@testing-library/react';
 import React from 'react';
+import numericHash from 'string-hash';
 
-import { FormFieldNetWorthValue } from './net-worth-value';
+import { FormFieldNetWorthValue, Props } from './net-worth-value';
+import { NetWorthValueInput } from '~client/types';
 
 describe('<FormFieldNetWorthValue />', () => {
-  const props = {
-    id: 'some-subcategory-id',
-    value: 156,
+  type Setter<T extends unknown = unknown> = (last: T) => T;
+
+  let setterResult: Record<string, unknown> = { base: 'kept' };
+  beforeEach(() => {
+    setterResult = { base: 'kept' };
+  });
+
+  const props: Props = {
+    value: {
+      subcategory: numericHash('some-subcategory-id'),
+      simple: 156,
+      fx: null,
+      option: null,
+      mortgage: null,
+    },
     currencies: [
       {
         currency: 'USD',
@@ -17,7 +31,13 @@ describe('<FormFieldNetWorthValue />', () => {
         rate: 0.95,
       },
     ],
-    onChange: jest.fn(),
+    onChange: jest
+      .fn()
+      .mockImplementation(
+        (setter: Setter<Record<string, unknown> | Record<string, unknown>>): void => {
+          setterResult = typeof setter === 'function' ? setter(setterResult) : setter;
+        },
+      ),
   };
 
   it('should render a cost form field', () => {
@@ -40,16 +60,24 @@ describe('<FormFieldNetWorthValue />', () => {
       fireEvent.blur(input);
     });
 
-    expect(props.onChange).toHaveBeenCalledWith(10632);
+    expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
+      ...props.value,
+      simple: 10632,
+    });
   });
 
   describe.each`
     condition       | erroneousValue
-    ${'an option'}  | ${[{ units: 100, strikePrice: 30, marketPrice: 43 }]}
-    ${'a mortgage'} | ${{ principal: 15000000, paymentsRemaining: 275, rate: 0.175 }}
+    ${'an option'}  | ${{ option: [{ units: 100, strikePrice: 30, marketPrice: 43 }] }}
+    ${'a mortgage'} | ${{ mortgage: { principal: 15000000, paymentsRemaining: 275, rate: 0.175 } }}
   `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
     const setupErroneous = (): RenderResult =>
-      render(<FormFieldNetWorthValue {...props} value={erroneousValue} />);
+      render(
+        <FormFieldNetWorthValue
+          {...props}
+          value={{ ...props.value, simple: null, ...erroneousValue }}
+        />,
+      );
 
     it('should render a blank simple input', () => {
       expect.assertions(2);
@@ -73,7 +101,10 @@ describe('<FormFieldNetWorthValue />', () => {
       });
 
       expect(props.onChange).toHaveBeenCalledTimes(1);
-      expect(props.onChange).toHaveBeenCalledWith(12345);
+      expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
+        ...props.value,
+        simple: 12345,
+      });
     });
   });
 
@@ -119,12 +150,18 @@ describe('<FormFieldNetWorthValue />', () => {
           fireEvent.click(addButton);
         });
 
-        expect(props.onChange).toHaveBeenCalledWith([
-          {
-            value: 156.23,
-            currency: 'USD',
-          },
-        ]);
+        expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
+          ...props.value,
+          simple: null,
+          fx: [
+            {
+              value: 156.23,
+              currency: 'USD',
+            },
+          ],
+          option: null,
+          mortgage: null,
+        });
       });
     });
 
@@ -133,12 +170,16 @@ describe('<FormFieldNetWorthValue />', () => {
         render(
           <FormFieldNetWorthValue
             {...props}
-            value={[
-              {
-                value: 156.23,
-                currency: 'USD',
-              },
-            ]}
+            value={{
+              ...props.value,
+              simple: null,
+              fx: [
+                {
+                  value: 156.23,
+                  currency: 'USD',
+                },
+              ],
+            }}
           />,
         );
 
@@ -156,12 +197,18 @@ describe('<FormFieldNetWorthValue />', () => {
           fireEvent.blur(modifyInput);
         });
 
-        expect(props.onChange).toHaveBeenCalledWith([
-          {
-            value: 887.3,
-            currency: 'USD',
-          },
-        ]);
+        expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
+          ...props.value,
+          simple: null,
+          fx: [
+            {
+              value: 887.3,
+              currency: 'USD',
+            },
+          ],
+          option: null,
+          mortgage: null,
+        });
       });
 
       it('should call onChange with a modified currency', () => {
@@ -175,12 +222,18 @@ describe('<FormFieldNetWorthValue />', () => {
           fireEvent.change(modifyCurrency, { target: { value: 'EUR' } });
         });
 
-        expect(props.onChange).toHaveBeenCalledWith([
-          {
-            value: 156.23,
-            currency: 'EUR',
-          },
-        ]);
+        expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
+          ...props.value,
+          simple: null,
+          fx: [
+            {
+              value: 156.23,
+              currency: 'EUR',
+            },
+          ],
+          option: null,
+          mortgage: null,
+        });
       });
     });
 
@@ -189,16 +242,20 @@ describe('<FormFieldNetWorthValue />', () => {
         render(
           <FormFieldNetWorthValue
             {...props}
-            value={[
-              {
-                value: 156.23,
-                currency: 'USD',
-              },
-              {
-                value: 918,
-                currency: 'EUR',
-              },
-            ]}
+            value={{
+              ...props.value,
+              simple: null,
+              fx: [
+                {
+                  value: 156.23,
+                  currency: 'USD',
+                },
+                {
+                  value: 918,
+                  currency: 'EUR',
+                },
+              ],
+            }}
           />,
         );
 
@@ -217,13 +274,20 @@ describe('<FormFieldNetWorthValue />', () => {
           fireEvent.click(deleteButtons[index]);
         });
 
-        expect(props.onChange).toHaveBeenCalledWith(newValue);
+        expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
+          ...props.value,
+          simple: null,
+          fx: newValue,
+        });
       });
 
       it('should not call onChange if there is only one value left', () => {
         expect.assertions(2);
         const { getAllByText } = render(
-          <FormFieldNetWorthValue {...props} value={[{ value: 100, currency: 'USD' }]} />,
+          <FormFieldNetWorthValue
+            {...props}
+            value={{ ...props.value, simple: null, fx: [{ value: 100, currency: 'USD' }] }}
+          />,
         );
 
         const deleteButtons = getAllByText('−') as HTMLButtonElement[];
@@ -259,15 +323,25 @@ describe('<FormFieldNetWorthValue />', () => {
         fireEvent.blur(simpleInput);
       });
 
-      expect(props.onChange).toHaveBeenCalledWith(6723);
+      expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
+        ...props.value,
+        simple: 6723,
+        fx: null,
+        option: null,
+        mortgage: null,
+      });
     });
   });
 
   describe('switching to an option value', () => {
-    const propsOption = {
+    const propsOption: Props = {
       ...props,
       isOption: true,
-      value: [{ units: 105, vested: 10, strikePrice: 45.532, marketPrice: 97.113 }],
+      value: {
+        ...props.value,
+        simple: null,
+        option: { units: 105, vested: 10, strikePrice: 45.532, marketPrice: 97.113 },
+      },
     };
 
     const setup = (): RenderResult => {
@@ -298,7 +372,9 @@ describe('<FormFieldNetWorthValue />', () => {
       });
 
       it('should call onChange with an updated value', () => {
-        expect.assertions(1);
+        expect.assertions(2);
+        expect(setterResult).toStrictEqual({ base: 'kept' });
+
         const { getByDisplayValue } = setup();
 
         const input = getByDisplayValue(fieldValue);
@@ -309,27 +385,36 @@ describe('<FormFieldNetWorthValue />', () => {
           fireEvent.blur(input);
         });
 
-        expect(props.onChange).toHaveBeenCalledWith([
-          {
+        expect(setterResult).toStrictEqual({
+          base: 'kept',
+          simple: null,
+          fx: null,
+          mortgage: null,
+          option: {
             units: 105,
             strikePrice: 45.532,
             marketPrice: 97.113,
             vested: 10,
             ...delta,
           },
-        ]);
+        });
       });
     });
 
     describe.each`
       condition     | erroneousValue
-      ${'simple'}   | ${[{ value: 103, currency: 'USD' }]}
-      ${'FX'}       | ${[{ value: 103, currency: 'USD' }]}
-      ${'mortgage'} | ${{ principal: 16500000, remainingPayments: 123, rate: 0.27 }}
+      ${'simple'}   | ${{ simple: 103 }}
+      ${'FX'}       | ${{ fx: [{ value: 103, currency: 'USD' }] }}
+      ${'mortgage'} | ${{ mortgage: { principal: 16500000, remainingPayments: 123, rate: 0.27 } }}
     `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
       // this would only happen if the API was set up incorrectly
       const setupErroneous = (): RenderResult =>
-        render(<FormFieldNetWorthValue {...propsOption} value={erroneousValue} />);
+        render(
+          <FormFieldNetWorthValue
+            {...propsOption}
+            value={{ ...propsOption.value, option: null, ...erroneousValue }}
+          />,
+        );
 
       it('should render the usual option fields', () => {
         expect.assertions(5);
@@ -397,23 +482,31 @@ describe('<FormFieldNetWorthValue />', () => {
         });
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
-        expect(props.onChange).toHaveBeenCalledWith([
-          {
+        expect(setterResult).toStrictEqual({
+          base: 'kept',
+          simple: null,
+          fx: null,
+          mortgage: null,
+          option: {
             units: 100,
             vested: 53,
             strikePrice: 45,
             marketPrice: 37.2,
           },
-        ]);
+        });
       });
     });
   });
 
   describe('switching to a mortgage value', () => {
-    const propsMortgage = {
+    const propsMortgage: Props = {
       ...props,
       isMortgage: true,
-      value: { principal: 27500000, paymentsRemaining: 268, rate: 0.219 },
+      value: {
+        ...props.value,
+        simple: null,
+        mortgage: { principal: 27500000, paymentsRemaining: 268, rate: 0.219 },
+      },
     };
 
     const setup = (): RenderResult => {
@@ -454,24 +547,35 @@ describe('<FormFieldNetWorthValue />', () => {
           fireEvent.blur(input);
         });
 
-        expect(props.onChange).toHaveBeenCalledWith({
-          principal: 27500000,
-          paymentsRemaining: 268,
-          rate: 0.219,
-          ...delta,
+        expect(setterResult).toStrictEqual({
+          base: 'kept',
+          simple: null,
+          fx: null,
+          option: null,
+          mortgage: {
+            principal: 27500000,
+            paymentsRemaining: 268,
+            rate: 0.219,
+            ...delta,
+          },
         });
       });
     });
 
     describe.each`
       condition   | erroneousValue
-      ${'simple'} | ${[{ value: 103, currency: 'USD' }]}
-      ${'FX'}     | ${[{ value: 103, currency: 'USD' }]}
-      ${'option'} | ${[{ units: 105, vested: 10, strikePrice: 45.532, marketPrice: 97.113 }]}
+      ${'simple'} | ${{ simple: 103 }}
+      ${'FX'}     | ${{ fx: [{ value: 103, currency: 'USD' }] }}
+      ${'option'} | ${{ option: { units: 105, vested: 10, strikePrice: 45.532, marketPrice: 97.113 } }}
     `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
       // this would only happen if the API was set up incorrectly
       const setupErroneous = (): RenderResult =>
-        render(<FormFieldNetWorthValue {...propsMortgage} value={erroneousValue} />);
+        render(
+          <FormFieldNetWorthValue
+            {...propsMortgage}
+            value={{ ...props.value, simple: null, ...erroneousValue }}
+          />,
+        );
 
       it('should render the usual mortgage fields', () => {
         expect.assertions(4);
@@ -536,10 +640,16 @@ describe('<FormFieldNetWorthValue />', () => {
         });
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
-        expect(props.onChange).toHaveBeenCalledWith({
-          principal: 16756844,
-          paymentsRemaining: 17,
-          rate: 0.43,
+        expect(setterResult).toStrictEqual({
+          base: 'kept',
+          simple: null,
+          fx: null,
+          option: null,
+          mortgage: {
+            principal: 16756844,
+            paymentsRemaining: 17,
+            rate: 0.43,
+          },
         });
       });
     });

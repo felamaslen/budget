@@ -19,9 +19,9 @@ node {
     }
 
     docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
-      docker.image('postgres:10.4').withRun('-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker') { pg ->
+      docker.image('postgres:10-alpine').withRun('-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker') { pg ->
 
-        docker.image('postgres:10.4').inside("--link ${pg.id}:db") {
+        docker.image('postgres:10-alpine').inside("--link ${pg.id}:db") {
           sh 'while ! psql postgres://docker:docker@db/postgres -c "select 1" > /dev/null 2>&1; do sleep 1; done'
 
           sh 'psql postgres://docker:docker@db/postgres -c "create database budget_test;"'
@@ -42,7 +42,7 @@ node {
         }
 
         stage('API integration tests') {
-          sh "docker run --rm --link ${pg.id}:db -e 'TEST_DATABASE_URL=postgres://docker:docker@db/budget_test' ${IMAGE} sh -c 'yarn test:api:integration'"
+          sh "docker run --rm --link ${pg.id}:db -e 'DATABASE_URL=postgres://docker:docker@db/budget_test' ${IMAGE} sh -c 'yarn test:api:integration'"
         }
       }
     }

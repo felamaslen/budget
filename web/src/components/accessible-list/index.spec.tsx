@@ -10,17 +10,24 @@ import {
 import format from 'date-fns/format';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import MockDate from 'mockdate';
-import nock from 'nock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 
 import { AccessibleList, AccessibleListStandard, Props } from '.';
-import { listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions';
-import { generateFakeId } from '~client/modules/data';
+import { FieldComponent, FormFieldTextInline } from '~client/components/form-field';
+import * as listMutationHooks from '~client/hooks/mutations/list';
 import { ListState } from '~client/reducers/list';
-import { Id, RequestType, Item, ListItem, ListCalcItem } from '~client/types';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import {
+  GQL,
+  ListItemInput,
+  ListItemStandardNative as ListItemStandard,
+  PageListStandard,
+  RequestType,
+  WithIds,
+} from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -33,14 +40,14 @@ describe('<AccessibleList />', () => {
    * version for daily totals calculation, and extensible for things like the funds page.
    */
 
-  type MyPage = 'myPage';
-  const myPage: MyPage = 'myPage';
+  const myPage = PageListStandard.Income as const;
+  type MyPage = typeof myPage;
 
-  type MyState<I extends Item = ListItem> = {
-    [myPage]: ListState<I>;
+  type MyState<I extends GQL<ListItemInput> = GQL<ListItemInput>> = {
+    [myPage]: ListState<WithIds<I>>;
   };
 
-  const testState: MyState<ListCalcItem> = {
+  const testState: MyState<GQL<ListItemStandard>> = {
     [myPage]: {
       items: [
         {
@@ -70,40 +77,58 @@ describe('<AccessibleList />', () => {
     MockDate.reset();
   });
 
+  const onCreate = jest.fn();
+  const onUpdate = jest.fn();
+  const onDelete = jest.fn();
+
   beforeEach(() => {
-    nock('http://localhost')
-      .get('/api/v4/data/search/myPage/item/Different%20item%20innit/5')
-      .reply(200, { data: { list: [] } });
+    jest.spyOn(listMutationHooks, 'useListCrudStandard').mockReturnValue({
+      onCreate,
+      onUpdate,
+      onDelete,
+    });
   });
 
   afterEach(async () => {
     matchMedia.clear();
   });
 
-  const getContainerBase = <I extends Item, E extends {} = {}>(
+  const getContainerBase = <
+    I extends ListItemInput,
+    E extends Record<string, unknown> = Record<string, unknown>
+  >(
     state: MyState<I>,
-    props: Props<I, MyPage, never, E>,
+    props: Omit<Props<I, MyPage, never, E>, 'onCreate' | 'onUpdate' | 'onDelete'>,
     existingStore?: MockStore<MyState<I>>,
   ): RenderResult & { store: MockStore<MyState<I>> } => {
     const store = existingStore ?? createStore<MyState<I>>()(state);
     const utils = render(
-      <Provider store={store}>
-        <AccessibleList<I, MyPage, never, E> {...props} />
-      </Provider>,
+      <GQLProviderMock>
+        <Provider store={store}>
+          <AccessibleList<I, MyPage, never, E>
+            {...props}
+            onCreate={onCreate}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+          />
+        </Provider>
+      </GQLProviderMock>,
     );
     return { ...utils, store };
   };
 
-  const getContainerStandard = <I extends ListCalcItem = ListCalcItem>(
+  const getContainerStandard = <I extends ListItemStandard = ListItemStandard>(
     state: MyState<I> = testState as MyState<I>,
     existingStore?: MockStore<MyState>,
     renderOptions: RenderOptions = {},
   ): RenderResult & { store: MockStore<MyState> } => {
     const store = existingStore ?? createStore<MyState>()(state);
     const utils = render(
-      <Provider store={store}>
-        <AccessibleListStandard<MyPage> page={myPage} />
-      </Provider>,
+      <GQLProviderMock>
+        <Provider store={store}>
+          <AccessibleListStandard<MyPage> page={myPage} />
+        </Provider>
+      </GQLProviderMock>,
       renderOptions,
     );
     return { ...utils, store };
@@ -129,13 +154,15 @@ describe('<AccessibleList />', () => {
     const MyCustomHeader: React.FC = () => <div role="heading">This is a custom header</div>;
 
     const setup = (): RenderResult =>
-      getContainerBase(
+      getContainerBase<ListItemInput>(
         {
           [myPage]: { items: [], __optimistic: [] },
         },
         {
           page: myPage,
-          fields: {},
+          fields: {
+            item: FormFieldTextInline,
+          },
           Header: MyCustomHeader,
         },
       );
@@ -213,29 +240,27 @@ describe('<AccessibleList />', () => {
         expect(input.type).toBe('text'); // all inline fields
       });
 
-      it('should dispatch an action when changed', () => {
-        expect.assertions(2);
-        const { store, getByDisplayValue } = getContainerStandard();
+      it('should call onUpdate when changed', () => {
+        expect.assertions(3);
+        const { getByDisplayValue } = getContainerStandard();
         const input = getByDisplayValue(inputValue) as HTMLInputElement;
-        const expectedAction = listItemUpdated<ListItem, MyPage>(myPage)(
-          id,
-          {
-            [field]: newValue ?? valueUpdate,
-          },
-          testState[myPage].items[stateIndex],
-        );
 
         act(() => {
           fireEvent.change(input, { target: { value: valueUpdate } });
         });
 
-        expect(store.getActions()).toHaveLength(0);
+        expect(onUpdate).not.toHaveBeenCalled();
 
         act(() => {
           fireEvent.blur(input);
         });
 
-        expect(store.getActions()).toStrictEqual(expect.arrayContaining([expectedAction]));
+        expect(onUpdate).toHaveBeenCalledTimes(1);
+        expect(onUpdate).toHaveBeenCalledWith(
+          id,
+          { [field]: newValue ?? valueUpdate },
+          testState[myPage].items[stateIndex],
+        );
       });
 
       describe('when the value is set to empty', () => {
@@ -252,13 +277,13 @@ describe('<AccessibleList />', () => {
           return { input, ...renderResult };
         };
 
-        it('should not dispatch an action', () => {
+        it('should not call onUpdate', () => {
           expect.assertions(1);
-          const { input, store } = setup();
+          const { input } = setup();
           act(() => {
             fireEvent.blur(input);
           });
-          expect(store.getActions()).toHaveLength(0);
+          expect(onUpdate).not.toHaveBeenCalled();
         });
 
         it('should reset the input value on blur', () => {
@@ -296,19 +321,16 @@ describe('<AccessibleList />', () => {
           expect(button).toBeInTheDocument();
         });
 
-        it('should dispatch an action when clicked', () => {
-          expect.assertions(1);
-          const { button, store } = getDeleteButton();
-          const expectedAction = listItemDeleted<ListItem, MyPage>(myPage)(
-            id,
-            testState[myPage].items[stateIndex],
-          );
+        it('should call onDelete when clicked', () => {
+          expect.assertions(2);
+          const { button } = getDeleteButton();
 
           act(() => {
             fireEvent.click(button);
           });
 
-          expect(store.getActions()).toStrictEqual(expect.arrayContaining([expectedAction]));
+          expect(onDelete).toHaveBeenCalledTimes(1);
+          expect(onDelete).toHaveBeenCalledWith(id, testState[myPage].items[stateIndex]);
         });
       });
     });
@@ -355,18 +377,19 @@ describe('<AccessibleList />', () => {
 
         it('should not call onCreate immediately on change', async () => {
           expect.assertions(2);
-          const { input, renderResult } = getCreateInput();
+          const { input } = getCreateInput();
           act(() => {
             fireEvent.focus(input);
           });
           act(() => {
             fireEvent.change(input, { target: { value: valueInsert } });
           });
+
           act(() => {
             fireEvent.blur(input);
           });
           expect(input.value).toBe(inputValueAfter);
-          expect(renderResult.store.getActions()).toHaveLength(0);
+          expect(onCreate).not.toHaveBeenCalled();
         });
 
         describe('when the value is set to empty', () => {
@@ -452,20 +475,16 @@ describe('<AccessibleList />', () => {
 
       // eslint-disable-next-line jest/prefer-expect-assertions
       it('should call onCreate after pressing the add button', async () => {
-        const {
-          renderResult: { store },
-        } = await setup();
-
-        const expectedAction = listItemCreated<ListCalcItem, MyPage>(myPage)({
-          date: new Date('2020-06-05'),
-          item: 'Different item innit',
-          cost: 1065,
-        });
+        expect(onCreate).not.toHaveBeenCalled();
+        await setup();
 
         await waitFor(() => {
-          expect(store.getActions()).toStrictEqual(
-            expect.arrayContaining([{ ...expectedAction, fakeId: generateFakeId() }]),
-          );
+          expect(onCreate).toHaveBeenCalledTimes(1);
+          expect(onCreate).toHaveBeenCalledWith({
+            date: new Date('2020-06-05'),
+            item: 'Different item innit',
+            cost: 1065,
+          });
         });
       });
 
@@ -497,17 +516,14 @@ describe('<AccessibleList />', () => {
       otherThing: boolean;
     };
 
-    type ItemWithCustomField = { id: Id; myCustomField: MyCustomFieldValue };
+    type ItemWithCustomField = { item: string; myCustomField: MyCustomFieldValue };
 
     const mockCustomFieldUpdate = {
       something: 'some new value',
       otherThing: true,
     };
 
-    const MyCustomField: React.FC<{
-      value: MyCustomFieldValue | undefined;
-      onChange: (value: MyCustomFieldValue | undefined) => void;
-    }> = ({ value, onChange }) => (
+    const MyCustomField: FieldComponent<MyCustomFieldValue | undefined> = ({ value, onChange }) => (
       <>
         <span data-testid="custom-field-title">my custom interactive field</span>
         <span data-testid="custom-field-value">{JSON.stringify(value)}</span>
@@ -520,6 +536,7 @@ describe('<AccessibleList />', () => {
 
     const mockCustomFieldItem = {
       id: numericHash('some-id'),
+      item: 'Some item',
       myCustomField: {
         something: 'custom field value',
         otherThing: false,
@@ -534,9 +551,13 @@ describe('<AccessibleList />', () => {
       },
     };
 
-    const propsWithCustomField: Props<ItemWithCustomField, MyPage> = {
+    const propsWithCustomField: Omit<
+      Props<ItemWithCustomField, MyPage>,
+      'onCreate' | 'onUpdate' | 'onDelete'
+    > = {
       page: myPage,
       fields: {
+        item: FormFieldTextInline,
         myCustomField: MyCustomField,
       },
     };
@@ -560,24 +581,19 @@ describe('<AccessibleList />', () => {
     });
 
     it('should accept onChange', () => {
-      expect.assertions(1);
-      const { store, getByRole } = getContainerBase(stateWithCustomField, propsWithCustomField);
+      expect.assertions(2);
+      const { getByRole } = getContainerBase(stateWithCustomField, propsWithCustomField);
       const listItem = getByRole('listitem');
       const { getByTestId } = within(listItem);
       const button = getByTestId('custom-field-change') as HTMLButtonElement;
       act(() => {
         fireEvent.click(button);
       });
-      expect(store.getActions()).toStrictEqual(
-        expect.arrayContaining([
-          listItemUpdated<ItemWithCustomField, MyPage>(myPage)(
-            mockCustomFieldItem.id,
-            {
-              myCustomField: mockCustomFieldUpdate,
-            },
-            stateWithCustomField[myPage].items[0],
-          ),
-        ]),
+      expect(onUpdate).toHaveBeenCalledTimes(1);
+      expect(onUpdate).toHaveBeenCalledWith(
+        mockCustomFieldItem.id,
+        { myCustomField: mockCustomFieldUpdate },
+        stateWithCustomField[myPage].items[0],
       );
     });
   });
@@ -591,11 +607,11 @@ describe('<AccessibleList />', () => {
       [numericHash('real-id-b')]: { selectorApplied: true },
     });
 
-    const CustomItemField: React.FC<{
-      value: string | undefined;
-      onChange: (value: string | undefined) => void;
-      extraProps?: ExtraProps;
-    }> = ({ value, onChange, extraProps }) => (
+    const CustomItemField: FieldComponent<string | undefined, ExtraProps> = ({
+      value,
+      onChange,
+      extraProps,
+    }) => (
       <>
         <input
           value={value}
@@ -605,8 +621,8 @@ describe('<AccessibleList />', () => {
       </>
     );
 
-    const setupWithSelector = (): RenderResult & { store: MockStore<MyState<Item>> } =>
-      getContainerBase<Item, ExtraProps>(testState, {
+    const setupWithSelector = (): RenderResult & { store: MockStore<MyState<ListItemInput>> } =>
+      getContainerBase<ListItemInput, ExtraProps>(testState, {
         page: myPage,
         fields: {
           item: CustomItemField,
@@ -631,15 +647,15 @@ describe('<AccessibleList />', () => {
       selectorApplied: boolean;
     };
 
-    const itemProcessor = (item: Item): Partial<ExtraProps> => ({
-      selectorApplied: item.id === numericHash('real-id-b'),
+    const itemProcessor = (item: ListItemInput): Partial<ExtraProps> => ({
+      selectorApplied: item.item === 'Item b',
     });
 
-    const CustomItemField: React.FC<{
-      value: string | undefined;
-      onChange: (value: string | undefined) => void;
-      extraProps?: ExtraProps;
-    }> = ({ value, onChange, extraProps }) => (
+    const CustomItemField: FieldComponent<string | undefined, ExtraProps> = ({
+      value,
+      onChange,
+      extraProps,
+    }) => (
       <>
         <input
           value={value}
@@ -649,8 +665,8 @@ describe('<AccessibleList />', () => {
       </>
     );
 
-    const setupWithSelector = (): RenderResult & { store: MockStore<MyState<Item>> } =>
-      getContainerBase<Item, ExtraProps>(testState, {
+    const setupWithSelector = (): RenderResult & { store: MockStore<MyState<ListItemInput>> } =>
+      getContainerBase<ListItemInput, ExtraProps>(testState, {
         page: myPage,
         fields: {
           item: CustomItemField,

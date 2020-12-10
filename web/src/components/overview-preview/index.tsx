@@ -4,12 +4,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import * as Styled from './styles';
 import { API_PREFIX } from '~client/constants/data';
 import { useCancellableRequest } from '~client/hooks';
-import { PageListCalc } from '~client/types';
+import { PageListCost } from '~client/types';
 
 export type Query = {
   year: number;
   month: number;
-  category: PageListCalc;
+  category: PageListCost;
 };
 
 type Props = {

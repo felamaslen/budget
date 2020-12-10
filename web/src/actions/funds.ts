@@ -1,41 +1,39 @@
 import { ActionList } from './list';
-import { Period } from '~client/constants/graph';
-import { ReadResponseFunds, Fund, Page } from '~client/types';
+import {
+  FundHistory,
+  FundInput,
+  GQL,
+  HistoryOptions,
+  PageNonStandard,
+  TargetDelta,
+} from '~client/types';
 
 export const enum ActionTypeFunds {
-  Requested = '@@funds/REQUESTED',
-  Received = '@@funds/RECEIVED',
+  QueryUpdated = '@@funds/QUERY_UPDATED',
+  PricesUpdated = '@@funds/PRICES_UPDATED',
   ViewSoldToggled = '@@funds/VIEW_SOLD_TOGGLED',
   CashTargetUpdated = '@@funds/CASH_TARGET_UPDATED',
+  AllocationTargetsUpdated = '@@funds/ALLOCATIONS_UPDATED',
 }
 
-export type FundsRequested = {
-  type: ActionTypeFunds.Requested;
-  fromCache: boolean;
-  period: Period | null;
+export type FundQueryUpdated = {
+  type: ActionTypeFunds.QueryUpdated;
+  historyOptions: HistoryOptions;
 };
 
-export const fundsRequested = (fromCache = true, period: Period | null = null): FundsRequested => ({
-  type: ActionTypeFunds.Requested,
-  fromCache,
-  period,
+export const fundQueryUpdated = (historyOptions: HistoryOptions): FundQueryUpdated => ({
+  type: ActionTypeFunds.QueryUpdated,
+  historyOptions,
 });
 
-export type FundsReceived = {
-  type: ActionTypeFunds.Received;
-  period: Period;
-  res: {
-    data: ReadResponseFunds;
-  } | null;
+export type FundPricesUpdated = {
+  type: ActionTypeFunds.PricesUpdated;
+  res: GQL<FundHistory>;
 };
 
-export const fundsReceived = (
-  period: Period,
-  res: { data: ReadResponseFunds } | null = null,
-): FundsReceived => ({
-  type: ActionTypeFunds.Received,
+export const fundPricesUpdated = (res: GQL<FundHistory>): FundPricesUpdated => ({
+  type: ActionTypeFunds.PricesUpdated,
   res,
-  period,
 });
 
 type ViewSoldToggled = {
@@ -56,9 +54,20 @@ export const cashTargetUpdated = (cashTarget: number): CashTargetUpdated => ({
   cashTarget,
 });
 
+export type AllocationTargetsUpdated = {
+  type: ActionTypeFunds.AllocationTargetsUpdated;
+  deltas: TargetDelta[];
+};
+
+export const allocationTargetsUpdated = (deltas: TargetDelta[]): AllocationTargetsUpdated => ({
+  type: ActionTypeFunds.AllocationTargetsUpdated,
+  deltas,
+});
+
 export type ActionFunds =
-  | FundsRequested
-  | FundsReceived
+  | FundQueryUpdated
+  | FundPricesUpdated
   | ViewSoldToggled
   | CashTargetUpdated
-  | ActionList<Fund, Page.funds>;
+  | AllocationTargetsUpdated
+  | ActionList<GQL<FundInput>, PageNonStandard.Funds>;

@@ -8,21 +8,24 @@ import * as Styled from './styles';
 import { Props, FieldKey, PropsMemoisedItem } from './types';
 import { InfiniteWindow } from './window';
 
-import { listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions';
 import { ModalDialog } from '~client/components/modal-dialog';
-import { useListCrud, useIsMobile } from '~client/hooks';
-import { Item } from '~client/types';
+import { isStandardListPage } from '~client/constants/data';
+import { useIsMobile } from '~client/hooks';
+import { ListItemInput, PageList } from '~client/types';
 
 const emptyObject = {};
 
 export const AccessibleList = <
-  I extends Item,
-  P extends string,
+  I extends ListItemInput,
+  P extends PageList,
   MK extends keyof I = never,
-  E extends {} = {},
-  H extends {} = {}
+  E extends Record<string, unknown> = never,
+  H extends Record<string, unknown> = Record<string, unknown>
 >({
   page,
+  onCreate,
+  onUpdate,
+  onDelete,
   windowise = false,
   color,
   fields,
@@ -48,12 +51,6 @@ export const AccessibleList = <
   );
 
   const ListContext = createListContext<E>();
-
-  const [onCreate, onUpdate, onDelete] = useListCrud<I, P>(
-    listItemCreated<I, P>(page),
-    listItemUpdated<I, P>(page),
-    listItemDeleted<I, P>(page),
-  );
 
   const fieldKeys = useMemo(() => Object.keys(fields) as FieldKey<I>[], [fields]);
   const fieldKeysMobile = useMemo(() => Object.keys(fieldsMobile ?? {}) as MK[], [fieldsMobile]);
@@ -127,7 +124,7 @@ export const AccessibleList = <
             ))}
           </Styled.List>
         )}
-        {windowise && (
+        {windowise && isStandardListPage(page) && (
           <InfiniteWindow
             page={page}
             isMobile={isMobile}

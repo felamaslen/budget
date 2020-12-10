@@ -4,24 +4,12 @@ import { AccessibleListItemField } from '../field';
 import * as Styled from '../styles';
 import { useSuggestions, Result as Suggestions } from '../suggestions';
 import { Fields, FieldKey, PropsItemCreate, ADD_BUTTON } from '../types';
-import { useCTA } from '~client/hooks/cta';
+import { useCTA } from '~client/hooks';
 import { Button } from '~client/styled/shared';
-import { Create, Delta, Item } from '~client/types';
+import { ListItemInput, PageList } from '~client/types';
 
-const deltaIsComplete = <I extends Item>(delta: Delta<I> | Create<I>): delta is Create<I> =>
+const deltaIsComplete = <I extends ListItemInput>(delta: Partial<I> | I): delta is I =>
   Object.keys(delta).every((key) => typeof Reflect.get(delta, key) !== 'undefined');
-
-const getInitialDelta = <I extends Item, E extends {}>(
-  fields: Fields<I, E>,
-  deltaSeed?: () => Delta<I>,
-) => (): Delta<I> =>
-  Object.keys(fields).reduce(
-    (last, key) => ({
-      [key]: undefined,
-      ...last,
-    }),
-    deltaSeed ? deltaSeed() : {},
-  );
 
 const Suggestion: React.FC<{
   suggestion: string;
@@ -43,17 +31,17 @@ const Suggestion: React.FC<{
   );
 };
 
-type FieldProps<I extends Item, E extends {}> = {
+type FieldProps<I extends ListItemInput, E extends Record<string, unknown>> = {
   fields: Fields<I, E>;
   field: FieldKey<I>;
-  delta: Delta<I>;
-  setDelta: React.Dispatch<React.SetStateAction<Delta<I>>>;
+  delta: Partial<I>;
+  setDelta: React.Dispatch<React.SetStateAction<Partial<I>>>;
   active: boolean;
   suggestions?: string[];
   activateSuggestion: Suggestions<I>['activateSuggestion'];
 } & Omit<Suggestions<I>, 'list' | 'next' | 'activate' | 'activeField'>;
 
-const CreateField = <I extends Item, E extends {}>({
+const CreateField = <I extends ListItemInput, E extends Record<string, unknown>>({
   fields,
   field,
   delta,
@@ -108,15 +96,29 @@ const CreateField = <I extends Item, E extends {}>({
   );
 };
 
-export const AccessibleListCreateItem = <I extends Item, P extends string, E extends {} = {}>({
+export const AccessibleListCreateItem = <
+  I extends ListItemInput,
+  P extends PageList,
+  E extends Record<string, unknown> = never
+>({
   page,
   fields,
   onCreate,
   suggestionFields = [],
   deltaSeed,
 }: PropsItemCreate<I, P, E>): React.ReactElement<PropsItemCreate<I, P, E>> => {
-  const initialDelta = useMemo<Delta<I>>(getInitialDelta(fields, deltaSeed), [fields, deltaSeed]);
-  const [delta, setDelta] = useState<Delta<I>>(initialDelta);
+  const initialDelta = useMemo<Partial<I>>(
+    (): Partial<I> =>
+      Object.keys(fields).reduce(
+        (last, key) => ({
+          [key]: undefined,
+          ...last,
+        }),
+        deltaSeed?.() ?? {},
+      ),
+    [fields, deltaSeed],
+  );
+  const [delta, setDelta] = useState<Partial<I>>(initialDelta);
 
   const fieldKeys = Object.keys(fields) as FieldKey<I>[];
   const {

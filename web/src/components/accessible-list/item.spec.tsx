@@ -1,40 +1,60 @@
-import { render, RenderResult, fireEvent, within, waitFor, act } from '@testing-library/react';
-import nock from 'nock';
+import { render, RenderResult, fireEvent, within, act } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
+import sinon from 'sinon';
+import { Client } from 'urql';
+import { fromValue } from 'wonka';
 
 import { AccessibleListCreateItem } from './item';
 import { PropsItemCreate } from './types';
 import { FormFieldTextInline } from '~client/components/form-field';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
-import { Id } from '~client/types';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { PageListStandard, SearchResult } from '~client/types';
 
 describe('Accessible list create item', () => {
-  type MyPage = 'my-page';
-  const myPage: MyPage = 'my-page';
+  let clock: sinon.SinonFakeTimers;
+  beforeAll(() => {
+    clock = sinon.useFakeTimers();
+  });
+  afterAll(() => {
+    clock.restore();
+  });
+
+  const myPage = PageListStandard.Income as const;
 
   type MyItem = {
-    id: Id;
-    someField: string;
-    nextField: string;
+    item: string;
+    category: string;
   };
 
-  const props: PropsItemCreate<MyItem, MyPage> = {
+  const props: PropsItemCreate<MyItem, typeof myPage> = {
     fields: {
-      someField: FormFieldTextInline,
-      nextField: FormFieldTextInline,
+      item: FormFieldTextInline,
+      category: FormFieldTextInline,
     },
     onCreate: jest.fn(),
     page: myPage,
-    suggestionFields: ['someField'],
+    suggestionFields: ['item'],
   };
 
-  const setup = (customProps = {}): RenderResult =>
+  const setup = (customProps = {}, searchResult: Partial<SearchResult> = {}): RenderResult =>
     render(
       <Provider store={createStore<State>()(testState)}>
-        <AccessibleListCreateItem<MyItem, MyPage> {...props} {...customProps} />
+        <GQLProviderMock
+          client={
+            ({
+              executeQuery: () =>
+                fromValue({
+                  data: { search: searchResult },
+                }),
+            } as unknown) as Client
+          }
+        >
+          <AccessibleListCreateItem<MyItem, typeof myPage> {...props} {...customProps} />
+        </GQLProviderMock>
       </Provider>,
     );
 
@@ -44,27 +64,15 @@ describe('Accessible list create item', () => {
     ): RenderResult & {
       inputs: HTMLInputElement[];
     } => {
-      nock('http://localhost')
-        .get('/api/v4/data/search/my-page/someField/c/5')
-        .matchHeader('authorization', 'some api key')
-        .reply(200, {
-          data: {
-            list: ['Crockery', 'Caster sugar', 'Abacus'],
-            nextCategory: withNext ? ['Kitchen', 'Sugar', 'Household'] : undefined,
-            nextField: withNext ? 'nextField' : undefined,
-          },
-        });
-
-      const renderResult = setup();
+      const renderResult = setup(
+        {},
+        {
+          list: ['Crockery', 'Caster sugar', 'Abacus'],
+          nextCategory: withNext ? ['Kitchen', 'Sugar', 'Household'] : null,
+          nextField: withNext ? 'category' : null,
+        },
+      );
       const inputs = renderResult.getAllByRole('textbox', { hidden: true }) as HTMLInputElement[];
-
-      const inputSomeField = inputs[0];
-
-      act(() => {
-        fireEvent.change(inputSomeField, {
-          target: { value: 'c' },
-        });
-      });
 
       return { ...renderResult, inputs };
     };
@@ -79,8 +87,14 @@ describe('Accessible list create item', () => {
     > => {
       const renderResult = setupToSuggestions(withNext);
 
-      await waitFor(() => {
-        expect(renderResult.getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
+      const [inputSomeField] = renderResult.inputs;
+
+      act(() => {
+        fireEvent.change(inputSomeField, {
+          target: { value: 'c' },
+        });
+
+        clock.runAll();
       });
 
       const list = renderResult.getByRole('list', { hidden: true });
@@ -91,26 +105,36 @@ describe('Accessible list create item', () => {
     };
 
     it('should request and render a suggestions list when typing', async () => {
-      expect.assertions(5);
+      expect.assertions(4);
+
       const { suggestionItems } = await setupWithSuggestions();
 
-      await waitFor(() => {
-        expect(suggestionItems).toHaveLength(3);
-        expect(suggestionItems[0]).toHaveTextContent('Crockery');
-        expect(suggestionItems[1]).toHaveTextContent('Caster sugar');
-        expect(suggestionItems[2]).toHaveTextContent('Abacus');
-      });
+      expect(suggestionItems).toHaveLength(3);
+
+      expect(suggestionItems[0]).toHaveTextContent('Crockery');
+      expect(suggestionItems[1]).toHaveTextContent('Caster sugar');
+      expect(suggestionItems[2]).toHaveTextContent('Abacus');
     });
 
     it('should not render the suggestions list until the suggestions are loaded', async () => {
       expect.assertions(2);
 
-      const { queryByRole } = setupToSuggestions();
+      const { queryByRole, inputs } = setupToSuggestions();
+      const [inputSomeField] = inputs;
+
       expect(queryByRole('list', { hidden: true })).not.toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(queryByRole('list', { hidden: true })).toBeInTheDocument();
+      act(() => {
+        fireEvent.change(inputSomeField, {
+          target: { value: 'c' },
+        });
       });
+
+      act(() => {
+        clock.runAll();
+      });
+
+      expect(queryByRole('list', { hidden: true })).toBeInTheDocument();
     });
 
     it('should not request or render the suggestions list for non-suggestion fields', () => {
@@ -158,32 +182,41 @@ describe('Accessible list create item', () => {
     };
 
     describe('when selecting a suggestion', () => {
-      /* eslint-disable jest/prefer-expect-assertions */
       it('should change the value of the current input', async () => {
+        expect.assertions(1);
+
         const { inputSomeField } = await setupWithSelection();
 
-        await waitFor(() => {
-          expect(inputSomeField.value).toBe('Caster sugar');
+        act(() => {
+          clock.runAll();
         });
+
+        expect(inputSomeField.value).toBe('Caster sugar');
       });
 
       it('should focus the next input', async () => {
+        expect.assertions(3);
+
         const { inputSomeField, inputNextField } = await setupWithSelection();
 
-        await waitFor(() => {
-          expect(document.activeElement).toBe(inputSomeField);
+        act(() => {
+          clock.runToLast();
         });
-        await waitFor(() => {
-          expect(inputSomeField.value).toBe('Caster sugar');
+        expect(document.activeElement).toBe(inputSomeField);
+
+        act(() => {
+          clock.runToLast();
         });
-        await waitFor(() => {
-          expect(document.activeElement).toBe(inputNextField);
+        expect(inputSomeField.value).toBe('Caster sugar');
+
+        act(() => {
+          clock.runToLast();
         });
+        expect(document.activeElement).toBe(inputNextField);
       });
-      /* eslint-enable jest/prefer-expect-assertions */
 
       it('should add the suggested values to the created item', async () => {
-        expect.assertions(4);
+        expect.assertions(3);
         const { inputSomeField, inputNextField, getByText } = await setupWithSelection();
 
         expect(inputSomeField.value).toBe('Caster sugar');
@@ -205,47 +238,49 @@ describe('Accessible list create item', () => {
           fireEvent.click(addButton);
         });
 
-        await waitFor(() => {
-          expect(props.onCreate).toHaveBeenCalledTimes(1);
+        act(() => {
+          clock.runToLast();
         });
 
-        await waitFor(() => {
-          expect(props.onCreate).toHaveBeenCalledWith({
-            someField: 'Caster sugar',
-            nextField: 'Manual value',
-          });
+        expect(props.onCreate).toHaveBeenCalledTimes(1);
+        expect(props.onCreate).toHaveBeenCalledWith({
+          item: 'Caster sugar',
+          category: 'Manual value',
         });
       });
 
       describe('if on the last field of the create form', () => {
-        /* eslint-disable jest/prefer-expect-assertions */
         it('should focus the add button', async () => {
-          nock('http://localhost')
-            .get('/api/v4/data/search/my-page/nextField/z/5')
-            .matchHeader('authorization', 'some api key')
-            .reply(200, {
-              data: {
-                list: ['Zappa', 'Zenith'],
-              },
-            });
+          expect.assertions(3);
 
-          const { getAllByRole, getByRole, getByText } = setup({
-            suggestionFields: ['someField', 'nextField'],
-          });
+          const { getAllByRole, getByRole, getByText } = setup(
+            {
+              suggestionFields: ['item', 'category'],
+            },
+            {
+              list: ['Zappa', 'Zenith'],
+              nextCategory: null,
+              nextField: null,
+            },
+          );
 
-          const inputs = getAllByRole('textbox', { hidden: true }) as HTMLInputElement[];
+          const [, inputNextField] = getAllByRole('textbox', {
+            hidden: true,
+          }) as HTMLInputElement[];
+
           const addButton = getByText('Add') as HTMLButtonElement;
 
-          const inputNextField = inputs[1];
-          await act(async () => {
+          act(() => {
             fireEvent.change(inputNextField, {
               target: { value: 'z' },
             });
-
-            await waitFor(() => {
-              expect(getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
-            });
           });
+
+          act(() => {
+            clock.runToLast();
+          });
+
+          expect(getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
 
           const list = getByRole('list', { hidden: true });
           const { getAllByRole: getSuggestions } = within(list);
@@ -261,38 +296,44 @@ describe('Accessible list create item', () => {
 
           expect(inputNextField.value).toBe('Zenith');
 
-          await waitFor(() => {
-            expect(document.activeElement).toBe(addButton);
+          act(() => {
+            clock.runAll();
           });
+
+          expect(document.activeElement).toBe(addButton);
         });
       });
     });
 
     describe('if there is a next column value', () => {
       it('should add the next column from suggestions', async () => {
+        expect.assertions(2);
+
         const { inputSomeField, inputNextField } = await setupWithSelection(true, 0);
 
-        await waitFor(() => {
-          expect(inputSomeField.value).toBe('Crockery');
+        act(() => {
+          clock.runAll();
         });
-        await waitFor(() => {
-          expect(inputNextField.value).toBe('Kitchen');
-        });
+
+        expect(inputSomeField.value).toBe('Crockery');
+        expect(inputNextField.value).toBe('Kitchen');
       });
 
       it('should focus the next input', async () => {
+        expect.assertions(4);
+
         const { inputNextField } = await setupWithSelection(true, 0);
 
-        await waitFor(() => {
-          expect(inputNextField.value).toBe('Kitchen');
+        act(() => {
+          clock.runAll();
         });
-        await waitFor(() => {
-          expect(document.activeElement).toBe(inputNextField);
-          expect(inputNextField.selectionStart).toBe(0);
-          expect(inputNextField.selectionEnd).toBe('Kitchen'.length);
-        });
+
+        expect(inputNextField.value).toBe('Kitchen');
+
+        expect(document.activeElement).toBe(inputNextField);
+        expect(inputNextField.selectionStart).toBe(0);
+        expect(inputNextField.selectionEnd).toBe('Kitchen'.length);
       });
-      /* eslint-enable jest/prefer-expect-assertions */
     });
   });
 });

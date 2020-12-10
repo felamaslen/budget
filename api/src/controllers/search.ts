@@ -7,26 +7,37 @@ import {
   matchReceiptItems,
   matchReceiptItemName,
 } from '~api/queries/search';
-import { SearchParams, SearchResult, ReceiptCategory } from '~api/types';
+import { searchSchema } from '~api/schema';
+import {
+  SearchResult,
+  ReceiptCategory,
+  QuerySearchArgs,
+  QueryReceiptItemArgs,
+  QueryReceiptItemsArgs,
+} from '~api/types';
 
 export const getColumnResults = (
   uid: number,
-  params: SearchParams,
+  params: QuerySearchArgs,
 ): TaggedTemplateLiteralInvocationType<{ value: string }> =>
   params.searchTerm.length < 3 ? getShortTermQuery(uid, params) : getLongTermQuery(uid, params);
 
 export const getSuggestions = async (
   db: DatabaseTransactionConnectionType,
   uid: number,
-  params: SearchParams,
+  args: QuerySearchArgs,
 ): Promise<SearchResult> => {
-  const { table, column } = params;
+  const validationResult = searchSchema.validate(args);
+  if (validationResult.error) {
+    return { error: validationResult.error.message, list: [] };
+  }
 
-  if (['food', 'general'].includes(table) && column === 'item') {
+  const { page, column } = args;
+  if (['food', 'general'].includes(page) && column === 'item') {
     const nextField = 'category'; // TODO: make this dynamic / define it somewhere
 
     const result = await db.query<{ value: string; nextField: string }>(
-      getSearchResults(uid, params.table, nextField, getColumnResults(uid, params)),
+      getSearchResults(uid, page, nextField, getColumnResults(uid, args)),
     );
 
     const list = result.rows.map(({ value }) => value);
@@ -35,30 +46,28 @@ export const getSuggestions = async (
     return { list, nextCategory, nextField };
   }
 
-  const result = await db.query<{ value: string }>(getColumnResults(uid, params));
+  const result = await db.query<{ value: string }>(getColumnResults(uid, args));
   const list = result.rows.map(({ value }) => value);
   return { list };
 };
 
+export async function getReceiptItem(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  args: QueryReceiptItemArgs,
+): Promise<string | null> {
+  return matchReceiptItemName(db, uid, args.item);
+}
+
 export async function getReceiptCategories(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  query: string,
+  { items }: QueryReceiptItemsArgs,
 ): Promise<ReceiptCategory[]> {
-  const items = query.split(',');
   const results = await matchReceiptItems(db, uid, items);
   return results.map<ReceiptCategory>((row) => ({
     item: row.item,
     page: row.matched_page,
     category: row.matched_category,
   }));
-}
-
-export async function getReceiptItem(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  query: string,
-): Promise<{ result: string | null }> {
-  const result = await matchReceiptItemName(db, uid, query);
-  return { result };
 }

@@ -32,6 +32,7 @@ describe('<PageAnalysis /> / <Timeline />', () => {
         -webkit-flex: 0 0 1em;
         -ms-flex: 0 0 1em;
         flex: 0 0 1em;
+        overflow: hidden;
       }
 
       .c1 {

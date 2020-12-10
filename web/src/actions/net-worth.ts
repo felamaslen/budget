@@ -1,14 +1,4 @@
-import { generateFakeId } from '~client/modules/data';
-import {
-  Id,
-  ActionCreated,
-  ActionUpdated,
-  ActionDeleted,
-  Create,
-  Category,
-  Subcategory,
-  Entry,
-} from '~client/types';
+import { Id, NetWorthCategory, NetWorthSubcategory, NetWorthEntryRead } from '~client/types';
 
 export const enum ActionTypeNetWorth {
   CategoryCreated = '@@net-worth/CATEGORY_CREATED',
@@ -22,74 +12,77 @@ export const enum ActionTypeNetWorth {
   EntryDeleted = '@@net-worth/DELETED',
 }
 
-type CategoryCreated = ActionCreated<ActionTypeNetWorth.CategoryCreated, Category>;
+type CategoryCreated = { type: ActionTypeNetWorth.CategoryCreated; item: NetWorthCategory };
 
-export const netWorthCategoryCreated = (item: Create<Category>): CategoryCreated => ({
+export const netWorthCategoryCreated = (item: NetWorthCategory): CategoryCreated => ({
   type: ActionTypeNetWorth.CategoryCreated,
-  fakeId: generateFakeId(),
   item,
 });
 
-type CategoryUpdated = ActionUpdated<ActionTypeNetWorth.CategoryUpdated, Category>;
+type CategoryUpdated = {
+  type: ActionTypeNetWorth.CategoryUpdated;
+  item: NetWorthCategory;
+};
 
-export const netWorthCategoryUpdated = (id: Id, item: Create<Category>): CategoryUpdated => ({
+export const netWorthCategoryUpdated = (item: NetWorthCategory): CategoryUpdated => ({
   type: ActionTypeNetWorth.CategoryUpdated,
-  id,
   item,
 });
 
-type CategoryDeleted = ActionDeleted<ActionTypeNetWorth.CategoryDeleted>;
+type CategoryDeleted = { type: ActionTypeNetWorth.CategoryDeleted; id: Id };
 
 export const netWorthCategoryDeleted = (id: Id): CategoryDeleted => ({
   type: ActionTypeNetWorth.CategoryDeleted,
   id,
 });
 
-type SubcategoryCreated = ActionCreated<ActionTypeNetWorth.SubcategoryCreated, Subcategory>;
+type SubcategoryCreated = {
+  type: ActionTypeNetWorth.SubcategoryCreated;
+  item: NetWorthSubcategory;
+};
 
-export const netWorthSubcategoryCreated = (item: Create<Subcategory>): SubcategoryCreated => ({
+export const netWorthSubcategoryCreated = (item: NetWorthSubcategory): SubcategoryCreated => ({
   type: ActionTypeNetWorth.SubcategoryCreated,
-  fakeId: generateFakeId(),
   item,
 });
 
-type SubcategoryUpdated = ActionUpdated<ActionTypeNetWorth.SubcategoryUpdated, Subcategory>;
+type SubcategoryUpdated = {
+  type: ActionTypeNetWorth.SubcategoryUpdated;
+  item: NetWorthSubcategory;
+};
 
-export const netWorthSubcategoryUpdated = (
-  id: Id,
-  item: Create<Subcategory>,
-): SubcategoryUpdated => ({
+export const netWorthSubcategoryUpdated = (item: NetWorthSubcategory): SubcategoryUpdated => ({
   type: ActionTypeNetWorth.SubcategoryUpdated,
-  id,
   item,
 });
 
-type SubcategoryDeleted = ActionDeleted<ActionTypeNetWorth.SubcategoryDeleted>;
+type SubcategoryDeleted = { type: ActionTypeNetWorth.SubcategoryDeleted; id: Id };
 
 export const netWorthSubcategoryDeleted = (id: Id): SubcategoryDeleted => ({
   type: ActionTypeNetWorth.SubcategoryDeleted,
   id,
 });
 
-type EntryCreated = ActionCreated<ActionTypeNetWorth.EntryCreated, Entry>;
+type EntryCreated = { type: ActionTypeNetWorth.EntryCreated; item: NetWorthEntryRead };
 
-export const netWorthCreated = (item: Create<Entry>): EntryCreated => ({
+export const netWorthEntryCreated = (item: NetWorthEntryRead): EntryCreated => ({
   type: ActionTypeNetWorth.EntryCreated,
-  fakeId: generateFakeId(),
   item,
 });
 
-type EntryUpdated = ActionUpdated<ActionTypeNetWorth.EntryUpdated, Entry>;
+type EntryUpdated = {
+  type: ActionTypeNetWorth.EntryUpdated;
+  item: NetWorthEntryRead;
+};
 
-export const netWorthUpdated = (id: Id, item: Create<Entry>): EntryUpdated => ({
+export const netWorthEntryUpdated = (item: NetWorthEntryRead): EntryUpdated => ({
   type: ActionTypeNetWorth.EntryUpdated,
-  id,
   item,
 });
 
-type EntryDeleted = ActionDeleted<ActionTypeNetWorth.EntryDeleted>;
+type EntryDeleted = { type: ActionTypeNetWorth.EntryDeleted; id: Id };
 
-export const netWorthDeleted = (id: Id): EntryDeleted => ({
+export const netWorthEntryDeleted = (id: Id): EntryDeleted => ({
   type: ActionTypeNetWorth.EntryDeleted,
   id,
 });

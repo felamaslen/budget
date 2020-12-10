@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import * as Styled from './styles';
 import HoverCost from '~client/components/hover-cost';
 import { Query as PreviewQuery } from '~client/components/overview-preview';
-import { isCalcPage } from '~client/constants/data';
+import { isStandardListPage } from '~client/constants/data';
 import { OverviewTableRow, OverviewTableColumn } from '~client/types';
 
 type Props = {
@@ -19,7 +19,7 @@ type PropsCell = Styled.PropsCell &
 const Cell: React.FC<PropsCell> = ({ setPreviewQuery, year, month, ...props }) => {
   const onHover = useCallback(() => {
     setPreviewQuery((last) => {
-      if (!isCalcPage(props.column)) {
+      if (!isStandardListPage(props.column)) {
         return null;
       }
       return last?.year === year && last?.month === month && last?.category === props.column

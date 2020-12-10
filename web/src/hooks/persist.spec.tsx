@@ -34,13 +34,15 @@ describe('usePersistentState', () => {
     complex: ['yes', { it: 'is' | 'is not' }];
   };
 
-  const TestComponent: React.FC<{ validator?: Validator<MyState> }> = ({ validator }) => {
+  const defaultState: MyState = {
+    some: 'foo',
+    thing: 3,
+    complex: ['yes', { it: 'is' }],
+  };
+
+  const TestComponent: React.FC<{ validator?: Validator<MyState> | null }> = ({ validator }) => {
     const [state, setState] = usePersistentState<MyState>(
-      {
-        some: 'foo',
-        thing: 3,
-        complex: ['yes', { it: 'is' }],
-      },
+      defaultState,
       'my-persistent-state-key',
       validator,
     );
@@ -75,7 +77,7 @@ describe('usePersistentState', () => {
     );
   };
 
-  const setup = (validator?: Validator<MyState>): RenderResult =>
+  const setup = (validator?: Validator<MyState> | null): RenderResult =>
     render(<TestComponent validator={validator} />);
 
   it('should return the current state', () => {
@@ -208,8 +210,8 @@ describe('usePersistentState', () => {
       foo: ['never gonna parse'],
     };
 
-    const validator = (value: object | object[] | MyState): value is MyState =>
-      Reflect.has(value ?? {}, 'some');
+    const validator = (value: unknown | MyState): value is MyState =>
+      Reflect.has((value as Record<string, unknown>) ?? {}, 'some');
 
     getItemSpy.mockReturnValueOnce(JSON.stringify(customValue));
 
@@ -219,6 +221,24 @@ describe('usePersistentState', () => {
       some: 'foo',
       thing: 3,
       complex: ['yes', { it: 'is' }],
+    });
+  });
+
+  describe('when the validator is explicitly omitted', () => {
+    it('should treat the default state as the initial state', () => {
+      expect.assertions(1);
+
+      const customValue = {
+        some: 'valid',
+        thing: 23,
+        complex: ['yes', { it: 'is not' }],
+      };
+
+      getItemSpy.mockReturnValueOnce(JSON.stringify(customValue));
+
+      const { getByTestId } = setup(null);
+
+      expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual(defaultState);
     });
   });
 });

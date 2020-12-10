@@ -10,7 +10,6 @@ import { Id } from '~client/types';
 
 describe('<ModalDialog />', () => {
   type MyItem = {
-    id: Id;
     date: Date;
     item: string;
     cost: number;
@@ -146,8 +145,7 @@ describe('<ModalDialog />', () => {
         fireEvent.click(submitButton);
       });
       expect(props.onSubmit).toHaveBeenCalledTimes(1);
-      expect(props.onSubmit).toHaveBeenCalledWith<[MyItem]>({
-        id: numericHash('some-id'),
+      expect(props.onSubmit).toHaveBeenCalledWith<[Id, MyItem]>(numericHash('some-id'), {
         date: new Date('2020-04-10'),
         item: 'some item',
         cost: 342,
@@ -195,8 +193,7 @@ describe('<ModalDialog />', () => {
         fireEvent.click(submitButton);
       });
       expect(props.onSubmit).toHaveBeenCalledTimes(1);
-      expect(props.onSubmit).toHaveBeenCalledWith<[MyItem]>({
-        id: numericHash('some-id'),
+      expect(props.onSubmit).toHaveBeenCalledWith<[Id, MyItem]>(numericHash('some-id'), {
         date: new Date('2020-04-20'),
         item: 'other item',
         cost: 108,

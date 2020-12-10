@@ -10,11 +10,13 @@ import { testState } from '~client/test-data/state';
 
 describe('<Header />', () => {
   const props: Props = {
+    loggedIn: true,
     onLogout: jest.fn(),
   };
 
   const setup = (
     customState: State = testState,
+    customProps: Partial<Props> = {},
   ): RenderResult & {
     store: MockStore<State>;
   } => {
@@ -23,7 +25,7 @@ describe('<Header />', () => {
     const utils = render(
       <Provider store={store}>
         <Router>
-          <Header {...props} />
+          <Header {...props} {...customProps} />
         </Router>
       </Provider>,
     );
@@ -48,14 +50,7 @@ describe('<Header />', () => {
   describe('when logged out', () => {
     const setupLoggedOut = (): RenderResult & {
       store: MockStore<State>;
-    } =>
-      setup({
-        ...testState,
-        api: {
-          ...testState.api,
-          key: null,
-        },
-      });
+    } => setup(testState, { loggedIn: false });
 
     it('should not render a nav', () => {
       expect.assertions(1);

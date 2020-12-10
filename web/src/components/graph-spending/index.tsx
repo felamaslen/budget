@@ -9,10 +9,10 @@ import {
   TimeValuesProps,
 } from '~client/components/graph-cashflow';
 import { profitLossColor } from '~client/components/graph/helpers';
-import { TodayContext } from '~client/hooks/time';
+import { TodayContext } from '~client/hooks';
 import { getStartDate, getProcessedCost } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import { Page, Line, DrawProps } from '~client/types';
+import { DrawProps, Line, PageNonStandard } from '~client/types';
 
 function processData(
   startDate: Date,
@@ -37,7 +37,7 @@ function processData(
       data: getValuesWithTime(spending, props),
       fill: false,
       smooth: true,
-      color: colors[Page.overview].spending,
+      color: colors[PageNonStandard.Overview].spending,
     },
     {
       key: 'savingsRatio',

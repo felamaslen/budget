@@ -92,18 +92,3 @@ export async function getTotalFundValue(
   `);
   return result.rows[0]?.value;
 }
-
-export async function getTotalFundCost(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-): Promise<number> {
-  const {
-    rows: [{ total }],
-  } = await db.query(sql`
-  SELECT SUM(ft.units * ft.price + ft.fees + ft.taxes) AS total
-  FROM funds f
-  INNER JOIN funds_transactions ft ON ft.fund_id = f.id
-  WHERE uid = ${uid}
-  `);
-  return total;
-}

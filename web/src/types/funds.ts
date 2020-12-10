@@ -1,32 +1,15 @@
+import { NativeDate } from './crud';
+import { Fund, FundInput, FundPeriod, Transaction } from './gql';
 import { Data } from './graph';
-import { Id, ListItem, RawListItem } from './shared';
-import { DataKeyAbbr } from '~client/constants/api';
+import { GQL, Id } from './shared';
 
-export type TransactionRaw = {
-  date: string | Date;
-  units: number;
-  price: number;
-  fees: number;
-  taxes: number;
+export type TransactionNative = NativeDate<GQL<Transaction>, 'date'>;
+export type NativeFund<F extends FundInput> = Omit<GQL<F>, 'transactions'> & {
+  transactions: TransactionNative[];
 };
 
-export type Transaction = Omit<TransactionRaw, 'date'> & {
-  id: Id;
-  date: Date;
-};
-
-export type Fund = ListItem & {
-  transactions: Transaction[];
-  allocationTarget: number;
-};
-
-export type FundPrices = {
-  values: number[];
-  startIndex: number;
-};
-export type Prices = {
-  [id: number]: FundPrices;
-};
+export type FundNative = NativeFund<Fund>;
+export type FundInputNative = NativeFund<FundInput>;
 
 export type FundItem = {
   id: Id;
@@ -56,21 +39,6 @@ export type StockPrice = {
   close: number;
 };
 
-type FundRaw = RawListItem & {
-  [DataKeyAbbr.transactions]: TransactionRaw[] | null;
-  [DataKeyAbbr.allocationTarget]: number | null;
-  pr: number[];
-  prStartIndex: number;
-};
-
-export type ReadResponseFunds = {
-  data: FundRaw[];
-  startTime: number;
-  cacheTimes: number[];
-  cashTarget: number;
-  annualisedFundReturns: number;
-};
-
 export type PortfolioItem = {
   id: Id;
   item: string;
@@ -86,4 +54,16 @@ export type CachedValue = {
   dayGain: number;
   dayGainAbs: number;
   ageText: string;
+};
+
+export type RowPrices = Data[] | null;
+
+export type PeriodOption = {
+  name: string;
+  query: HistoryOptions;
+};
+
+export type HistoryOptions = {
+  period: FundPeriod;
+  length: number;
 };

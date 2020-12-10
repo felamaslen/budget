@@ -1,12 +1,8 @@
 import axios, { Canceler, AxiosInstance, AxiosResponse } from 'axios';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 
-import { State } from '~client/reducers';
-
-export const maybeGetApiKey = <S extends Partial<Pick<State, 'api'>>>(state: S): string | null =>
-  state.api?.key ?? null;
+import { ApiContext } from './api';
 
 type ShouldSendRequest<Query, ValidQuery extends Query> = (
   query: Query | ValidQuery,
@@ -20,6 +16,7 @@ type Options<Query, Response, ValidQuery extends Query> = {
   ) => Promise<AxiosResponse<Response>>;
   shouldSendRequest?: ShouldSendRequest<Query, ValidQuery>;
   handleResponse: (res: Response, query: ValidQuery) => void;
+  onError?: (err: Error) => void;
   onClear?: () => void;
   debounceDelay?: number;
 };
@@ -33,13 +30,14 @@ export function useCancellableRequest<Query, Response = void, ValidQuery extends
   sendRequest,
   shouldSendRequest = isRequestTruthy as ShouldSendRequest<Query, ValidQuery>,
   handleResponse,
+  onError,
   onClear,
   debounceDelay = 100,
 }: Options<Query, Response, ValidQuery>): boolean {
   const [debouncedQuery] = useDebounce(query, debounceDelay);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const apiKey = useSelector<State>(maybeGetApiKey);
+  const apiKey = useContext(ApiContext);
 
   const cancelRequest = useRef<Canceler>();
   const axiosWithToken = useCallback(
@@ -78,7 +76,7 @@ export function useCancellableRequest<Query, Response = void, ValidQuery extends
         handleResponse(res.data, debouncedQuery);
       } catch (err) {
         if (!axios.isCancel(err)) {
-          throw err;
+          onError?.(err);
         }
       } finally {
         if (!cancelled) {
@@ -95,7 +93,7 @@ export function useCancellableRequest<Query, Response = void, ValidQuery extends
         cancelRequest.current();
       }
     };
-  }, [axiosWithToken, sendRequest, handleResponse, shouldSendRequest, debouncedQuery]);
+  }, [axiosWithToken, sendRequest, handleResponse, onError, shouldSendRequest, debouncedQuery]);
 
   return loading;
 }

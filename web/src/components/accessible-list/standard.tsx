@@ -10,20 +10,27 @@ import { StandardRow, StandardHeader as StyledStandardHeader, HeaderColumn } fro
 import {
   FieldKey,
   HeaderProps,
-  Fields,
   PropsItem,
   FieldsMobile,
   CustomSelector,
   Props,
+  ItemProcessor,
 } from './types';
 import {
   FormFieldTextInline,
   FormFieldCostInline,
   FormFieldDateInline,
 } from '~client/components/form-field';
-import { ModalFields } from '~client/components/modal-dialog';
+import { useListCrudStandard } from '~client/hooks';
 import { formatCurrency, capitalise } from '~client/modules/format';
-import { Delta, ListItem, ListCalcItem, PickUnion } from '~client/types';
+import {
+  ListItem,
+  PageListCost,
+  PageListStandard,
+  PickUnion,
+  StandardInput,
+  WithIds,
+} from '~client/types';
 
 export const standardFields = {
   date: FormFieldDateInline,
@@ -33,20 +40,27 @@ export const standardFields = {
 
 const standardSuggestionFields: FieldKey<ListItem>[] = ['item'];
 
-const deltaSeed = <I extends ListCalcItem>(): Delta<I> =>
+const deltaSeed = <I extends StandardInput>(): Partial<I> =>
   ({
     date: startOfDay(new Date()),
-  } as Delta<I>);
+  } as Partial<I>);
 
 export type ExtraProps = {
   isFuture: boolean;
 };
 
-const makeItemProcessor = (now: Date) => (item: ListCalcItem): Pick<ExtraProps, 'isFuture'> => ({
-  isFuture: item.date > now,
-});
+const makeItemProcessor = <I extends StandardInput, E extends ExtraProps>(
+  now: Date,
+): ItemProcessor<I, E> => (item): Partial<E> =>
+  ({
+    isFuture: item.date > now,
+  } as Partial<E>);
 
-export const StandardHeader = <I extends ListCalcItem, P extends string, MK extends keyof I>({
+export const StandardHeader = <
+  I extends StandardInput,
+  P extends PageListCost,
+  MK extends keyof I
+>({
   page,
   isMobile,
   fields,
@@ -54,7 +68,7 @@ export const StandardHeader = <I extends ListCalcItem, P extends string, MK exte
   categoryLabel = 'category',
   children,
 }: React.PropsWithChildren<HeaderProps<I, P, MK>>): React.ReactElement<HeaderProps<I, P, MK>> => {
-  const total = useSelector<StateStandard<I, P>, number>(getStandardCost(page));
+  const total = useSelector<StateStandard<WithIds<I>, P>, number>(getStandardCost(page));
   const fieldKeys = (isMobile ? fieldsMobile : fields) as string[];
   return (
     <StyledStandardHeader data-testid="header">
@@ -76,56 +90,64 @@ export const StandardHeader = <I extends ListCalcItem, P extends string, MK exte
 };
 
 export type PropsStandard<
-  I extends ListCalcItem,
-  P extends string,
+  I extends StandardInput,
+  P extends PageListCost,
   MK extends keyof I = DefaultMobileKeys,
-  E extends {} = {}
-> = PickUnion<Props<I, P, MK, E>, 'page' | 'color' | 'modalFields'> & {
-  fields?: Props<I, P, MK, E>['fields'];
-  fieldsMobile?: FieldsMobile<I, MK, E>;
+  E extends Record<string, unknown> = never
+> = PickUnion<Props<I, P, MK, E & ExtraProps>, 'page' | 'color' | 'modalFields'> & {
+  fields?: Props<I, P, MK, E & ExtraProps>['fields'];
+  fieldsMobile?: FieldsMobile<I, MK, E & ExtraProps>;
   suggestionFields?: FieldKey<I>[];
   customSelector?: CustomSelector<I, E>;
   categoryLabel?: string;
   Header?: React.FC<HeaderProps<I, P, MK>>;
-  Row?: PropsItem<I, P, MK, E>['Row'];
+  Row?: PropsItem<I, P, MK, E & ExtraProps>['Row'];
 };
 
 export const AccessibleListStandard = <
-  P extends string = string,
-  I extends ListCalcItem = ListCalcItem,
+  P extends PageListCost = PageListCost,
+  I extends StandardInput = StandardInput,
   MK extends keyof I = DefaultMobileKeys,
-  E extends {} = {}
+  E extends Record<string, unknown> = Record<string, unknown>
 >({
   page,
   color,
-  fields = standardFields as Fields<I>,
+  fields = standardFields as Props<I, P, MK, E & ExtraProps>['fields'],
   fieldsMobile = standardFieldsMobile as FieldsMobile<I, MK, E & ExtraProps>,
-  modalFields = standardModalFields as ModalFields<I>,
+  modalFields = (standardModalFields as unknown) as Props<I, P, MK, E & ExtraProps>['modalFields'],
   suggestionFields,
   customSelector,
   categoryLabel = 'category',
-  Header = StandardHeader,
+  Header = StandardHeader as Props<I, P, MK>['Header'],
   Row = StandardRow,
 }: PropsStandard<I, P, MK, E & ExtraProps>): React.ReactElement<
   PropsStandard<I, P, MK, E & ExtraProps>
 > => {
   const now = useMemo<Date>(() => endOfDay(new Date()), []);
-  const itemProcessor = useMemo(() => makeItemProcessor(now), [now]);
+  const itemProcessor = useMemo<Props<I, P, MK, E & ExtraProps>['itemProcessor']>(
+    () => makeItemProcessor(now),
+    [now],
+  );
   const allSuggestionFields = useMemo<FieldKey<I>[]>(
     () => [...(suggestionFields ?? []), ...standardSuggestionFields] as FieldKey<I>[],
     [suggestionFields],
   );
   const headerProps = useMemo(() => ({ categoryLabel }), [categoryLabel]);
 
+  const { onCreate, onUpdate, onDelete } = useListCrudStandard(page as PageListStandard);
+
   return (
-    <AccessibleList<I, P, MK>
+    <AccessibleList<I, P, MK, E & ExtraProps>
       windowise
       page={page}
+      onCreate={onCreate}
+      onUpdate={onUpdate}
+      onDelete={onDelete}
       color={color}
       fields={fields}
       fieldsMobile={fieldsMobile}
       modalFields={modalFields}
-      sortItems={sortStandardItems<I>()}
+      sortItems={sortStandardItems<WithIds<I>>()}
       suggestionFields={allSuggestionFields}
       deltaSeed={deltaSeed}
       customSelector={customSelector}

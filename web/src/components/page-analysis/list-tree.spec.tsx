@@ -2,29 +2,29 @@ import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
 
 import ListTree, { Props } from './list-tree';
-import { Page } from '~client/types';
+import { AnalysisPage } from '~client/types';
 
 describe('<PageAnalysis /> / <ListTree />', () => {
   const treeVisible = {
-    [Page.food]: true,
-    [Page.general]: false,
-    [Page.bills]: true,
+    [AnalysisPage.Food]: true,
+    [AnalysisPage.General]: false,
+    [AnalysisPage.Bills]: true,
   };
 
   const treeOpen = {
-    [Page.food]: true,
-    [Page.general]: false,
-    [Page.bills]: false,
-    [Page.holiday]: true,
+    [AnalysisPage.Food]: true,
+    [AnalysisPage.General]: false,
+    [AnalysisPage.Bills]: false,
+    [AnalysisPage.Holiday]: true,
   };
 
   const props: Props = {
     cost: [
-      { name: Page.food, total: 1, subTree: [{ name: 'bar1', total: 1 }] },
-      { name: Page.general, total: 4, subTree: [{ name: 'bar2', total: 2 }] },
-      { name: Page.bills, total: 3, subTree: [{ name: 'bar3', total: 2 }] },
-      { name: Page.holiday, total: 6, subTree: [{ name: 'bar4', total: 2 }] },
-      { name: Page.social, total: 10, subTree: [{ name: 'bar5', total: 3 }] },
+      { name: AnalysisPage.Food, total: 1, subTree: [{ name: 'bar1', total: 1 }] },
+      { name: AnalysisPage.General, total: 4, subTree: [{ name: 'bar2', total: 2 }] },
+      { name: AnalysisPage.Bills, total: 3, subTree: [{ name: 'bar3', total: 2 }] },
+      { name: AnalysisPage.Holiday, total: 6, subTree: [{ name: 'bar4', total: 2 }] },
+      { name: AnalysisPage.Social, total: 10, subTree: [{ name: 'bar5', total: 3 }] },
     ],
     treeVisible,
     treeOpen,
@@ -37,12 +37,12 @@ describe('<PageAnalysis /> / <ListTree />', () => {
     render(<ListTree {...props} {...customProps} />);
 
   describe.each`
-    index | name            | visible  | open     | cost      | percent   | subItem
-    ${1}  | ${Page.food}    | ${true}  | ${true}  | ${'0.01'} | ${'4.2'}  | ${'bar1'}
-    ${2}  | ${Page.general} | ${false} | ${false} | ${'0.04'} | ${'16.7'} | ${'bar2'}
-    ${3}  | ${Page.bills}   | ${true}  | ${false} | ${'0.03'} | ${'12.5'} | ${'bar3'}
-    ${4}  | ${Page.holiday} | ${true}  | ${true}  | ${'0.06'} | ${'25.0'} | ${'bar4'}
-    ${5}  | ${Page.social}  | ${true}  | ${false} | ${'0.10'} | ${'41.7'} | ${'bar5'}
+    index | name                    | visible  | open     | cost      | percent   | subItem
+    ${1}  | ${AnalysisPage.Food}    | ${true}  | ${true}  | ${'0.01'} | ${'4.2'}  | ${'bar1'}
+    ${2}  | ${AnalysisPage.General} | ${false} | ${false} | ${'0.04'} | ${'16.7'} | ${'bar2'}
+    ${3}  | ${AnalysisPage.Bills}   | ${true}  | ${false} | ${'0.03'} | ${'12.5'} | ${'bar3'}
+    ${4}  | ${AnalysisPage.Holiday} | ${true}  | ${true}  | ${'0.06'} | ${'25.0'} | ${'bar4'}
+    ${5}  | ${AnalysisPage.Social}  | ${true}  | ${false} | ${'0.10'} | ${'41.7'} | ${'bar5'}
   `('for the "$name" test case', ({ index, name, visible, open, cost, percent, subItem }) => {
     it('should render the name', () => {
       expect.assertions(1);

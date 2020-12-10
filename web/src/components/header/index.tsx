@@ -5,20 +5,19 @@ import { withRouter, RouteComponentProps } from 'react-router';
 import * as Styled from './styles';
 import { AppLogo } from '~client/components/app-logo';
 import { Navbar } from '~client/components/nav-bar';
-import { getLoggedIn, getUnsaved, getApiLoading } from '~client/selectors';
+import { getApiLoading } from '~client/selectors';
 
 export type Props = {
+  loggedIn: boolean;
   onLogout: () => void;
 };
 
-const Header: React.FC<RouteComponentProps & Props> = ({ onLogout }) => {
-  const loggedIn = useSelector(getLoggedIn);
+const Header: React.FC<RouteComponentProps & Props> = ({ loggedIn, onLogout }) => {
   const loadingApi = useSelector(getApiLoading);
-  const unsavedApi = useSelector(getUnsaved);
 
   return (
     <Styled.Header role="heading">
-      <AppLogo loading={loadingApi} unsaved={unsavedApi} />
+      <AppLogo loading={loadingApi} />
       {loggedIn && <Navbar onLogout={onLogout} />}
     </Styled.Header>
   );

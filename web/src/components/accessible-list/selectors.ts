@@ -8,21 +8,28 @@ import { State as CrudState } from '~client/reducers/crud';
 import { DailyState } from '~client/reducers/list';
 import { withoutDeleted } from '~client/selectors/crud';
 import { getRawItems } from '~client/selectors/list';
-import { Id, Item, ListCalcItem } from '~client/types';
+import {
+  Id,
+  ListItem,
+  ListItemInput,
+  ListItemStandardNative as ListItemStandard,
+  PageList,
+} from '~client/types';
 
-export type StateStandard<I extends ListCalcItem, P extends string> = {
+export type StateStandard<I extends ListItemStandard, P extends string> = {
   [page in P]: DailyState<I>;
 };
 
 export const getStandardCost = moize(
-  <I extends ListCalcItem, P extends string, S extends StateStandard<I, P>>(page: P) => (
+  <I extends ListItemStandard, P extends string, S extends StateStandard<I, P>>(page: P) => (
     state: S,
   ): number => state[page].total,
 );
 
-type SortItems<I extends Item> = (items: I[]) => I[];
+type SortItems<I extends ListItemInput> = (items: I[]) => I[];
+
 export const getItems = moize(
-  <I extends Item, P extends string>(page: P, sortItems: SortItems<I> = IDENTITY) =>
+  <I extends ListItem, P extends string>(page: P, sortItems: SortItems<I> = IDENTITY) =>
     createSelector(
       getRawItems<I, P>(page),
       compose<CrudState<I>, I[], I[], I[]>(
@@ -37,16 +44,16 @@ export const getItems = moize(
 );
 
 export const getItem = moize(
-  <I extends Item, P extends string>(page: P, id: Id) => (state: State<I, P>): I =>
+  <I extends ListItem, P extends PageList>(page: P, id: Id) => (state: State<I, P>): I =>
     state[page].items.find((item) => item.id === id) as I,
 );
 
-export const sortStandardItems = moize(<I extends ListCalcItem>() =>
+export const sortStandardItems = moize(<I extends ListItemStandard>() =>
   sortByKey<'item' | 'date', I>({ key: 'date', order: -1 }, 'item'),
 );
 
 export const getWeeklyCost = moize(
-  <I extends ListCalcItem, P extends string, S extends StateStandard<I, P>>(page: P) => (
+  <I extends ListItemStandard, P extends string, S extends StateStandard<I, P>>(page: P) => (
     state: S,
   ): number => state[page].weekly,
 );

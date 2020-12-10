@@ -10,7 +10,8 @@ import {
   nockGeneralShare,
 } from './__tests__/nocks';
 import { run } from '.';
-import { prepareDatabase, App } from '~api/test-utils/create-server';
+import * as pubsub from '~api/modules/graphql/pubsub';
+import { db } from '~api/test-utils/knex';
 
 type TestFundPrice = {
   cid: number;
@@ -25,6 +26,8 @@ const testPriceAppleUSD = 225.82;
 const testUSDGBP = 0.771546;
 const testPriceSMTGeneric = 1023.0; // regularMarketPrice
 
+jest.mock('~api/modules/graphql/pubsub');
+
 describe('Fund scraper - integration tests', () => {
   const now = new Date('2020-02-22T20:35Z');
   let clock: sinon.SinonFakeTimers;
@@ -32,32 +35,23 @@ describe('Fund scraper - integration tests', () => {
   const uid2 = 67891;
   let fundIds: number[] = [];
 
-  const databaseName = 'budget_test_scrape_funds';
-  let app: Pick<App, 'db' | 'pool' | 'cleanup'>;
   beforeAll(async () => {
     clock = sinon.useFakeTimers(now);
-    app = await prepareDatabase(databaseName);
   });
   afterAll(async () => {
-    await app.cleanup();
     clock.restore();
   });
 
   const clearDb = async (): Promise<void> => {
-    await app.db('funds').select().del();
-    await app.db('fund_scrape').select().del();
-    await app.db('fund_cache_time').select().del();
+    await db('funds').select().del();
+    await db('fund_scrape').select().del();
+    await db('fund_cache_time').select().del();
 
-    await app.db('users').select().del();
-    await app
-      .db('users')
-      .insert({ uid: uid1, name: 'test-user-funds-1', pin_hash: 'some-pin-hash' });
-    await app
-      .db('users')
-      .insert({ uid: uid2, name: 'test-user-funds-2', pin_hash: 'other-pin-hash' });
+    await db('users').select().del();
+    await db('users').insert({ uid: uid1, name: 'test-user-funds-1', pin_hash: 'some-pin-hash' });
+    await db('users').insert({ uid: uid2, name: 'test-user-funds-2', pin_hash: 'other-pin-hash' });
 
-    fundIds = await app
-      .db('funds')
+    fundIds = await db('funds')
       .insert([
         {
           uid: uid1,
@@ -86,7 +80,7 @@ describe('Fund scraper - integration tests', () => {
       ])
       .returning('id');
 
-    await app.db('funds_transactions').insert([
+    await db('funds_transactions').insert([
       { fund_id: fundIds[0], date: '2016-08-24', units: 89.095, price: 1122.39744 },
       { fund_id: fundIds[0], date: '2016-09-19', units: 894.134, price: 111.84 },
       { fund_id: fundIds[0], date: '2017-04-27', units: -883.229, price: 101.8988 },
@@ -121,7 +115,7 @@ describe('Fund scraper - integration tests', () => {
 
   describe('Scraping prices', () => {
     const getTestFundPrice = async (fundId: number): Promise<TestFundPrice[]> => {
-      const result = await app.db
+      const result = await db
         .select<TestFundPrice[]>('fct.cid', 'fct.time', 'fc.price')
         .from('funds as f')
         .innerJoin('fund_scrape as fs', 'fs.item', 'f.item')
@@ -138,7 +132,7 @@ describe('Fund scraper - integration tests', () => {
 
     it('should insert new prices for a GBX share', async () => {
       expect.assertions(1);
-      await run(databaseName);
+      await run();
 
       const gbxResult = await getTestFundPrice(fundIds[0]);
 
@@ -152,7 +146,7 @@ describe('Fund scraper - integration tests', () => {
 
     it('should insert new prices for a fund', async () => {
       expect.assertions(1);
-      await run(databaseName);
+      await run();
 
       const fundResult = await getTestFundPrice(fundIds[1]);
 
@@ -166,7 +160,7 @@ describe('Fund scraper - integration tests', () => {
 
     it('should insert new prices for a foreign share', async () => {
       expect.assertions(1);
-      await run(databaseName);
+      await run();
 
       const usdResult = await getTestFundPrice(fundIds[2]);
 
@@ -180,7 +174,7 @@ describe('Fund scraper - integration tests', () => {
 
     it('should insert new prices for a generic share', async () => {
       expect.assertions(1);
-      await run(databaseName);
+      await run();
 
       const genericShareResult = await getTestFundPrice(fundIds[5]);
 
@@ -190,6 +184,15 @@ describe('Fund scraper - integration tests', () => {
           price: testPriceSMTGeneric,
         }),
       ]);
+    });
+
+    it('should issue an update to the pubsub topic', async () => {
+      expect.assertions(1);
+      const publishSpy = jest.spyOn(pubsub.pubsub, 'publish');
+
+      await run();
+
+      expect(publishSpy).toHaveBeenCalledTimes(1);
     });
 
     describe('when one or more requests fail', () => {
@@ -202,7 +205,7 @@ describe('Fund scraper - integration tests', () => {
         expect.assertions(3);
         await setupNocksWithFailure();
 
-        await run(databaseName);
+        await run();
 
         const gbxResult = await getTestFundPrice(fundIds[0]);
         const fundResult = await getTestFundPrice(fundIds[1]);
@@ -216,7 +219,7 @@ describe('Fund scraper - integration tests', () => {
 
     it('should skip totally sold funds', async () => {
       expect.assertions(1);
-      await run(databaseName);
+      await run();
       const soldResult = await getTestFundPrice(fundIds[4]);
       expect(soldResult).toHaveLength(0);
     });
@@ -225,10 +228,10 @@ describe('Fund scraper - integration tests', () => {
       it('should not throw an error', async () => {
         expect.assertions(1);
 
-        await run(databaseName);
+        await run();
         clock.tick(86400);
         await setupNocks();
-        await run(databaseName);
+        await run();
 
         const gbxResult = await getTestFundPrice(fundIds[0]);
 
@@ -273,10 +276,10 @@ describe('Fund scraper - integration tests', () => {
     beforeEach(async () => {
       process.argv = ['script', '--holdings'];
 
-      await app.db('stocks').truncate();
-      await app.db('stock_codes').truncate();
+      await db('stocks').truncate();
+      await db('stock_codes').truncate();
 
-      await app.db('stock_codes').insert(testPreExistingCodes);
+      await db('stock_codes').insert(testPreExistingCodes);
 
       // This is mocking what a user might input, expecting the prompts to happen in
       // alphabetical order, per-fund
@@ -302,10 +305,9 @@ describe('Fund scraper - integration tests', () => {
 
     it('should keep the already existing stock code cache', async () => {
       expect.assertions(1);
-      await run(databaseName);
+      await run();
 
-      const stockCodes = await app
-        .db('stock_codes')
+      const stockCodes = await db('stock_codes')
         .select()
         .whereIn(
           'name',
@@ -335,10 +337,9 @@ describe('Fund scraper - integration tests', () => {
 
     it('should add to the stock code cache where possible', async () => {
       expect.assertions(1);
-      await run(databaseName);
+      await run();
 
-      const stockCodes = await app
-        .db('stock_codes')
+      const stockCodes = await db('stock_codes')
         .select()
         .whereNotIn(
           'name',
@@ -378,10 +379,9 @@ describe('Fund scraper - integration tests', () => {
     it("should cache null codes, so they don't have to be asked again", async () => {
       expect.assertions(1);
 
-      await run(databaseName);
+      await run();
 
-      const stockCodes = await app
-        .db('stock_codes')
+      const stockCodes = await db('stock_codes')
         .select()
         .whereNotIn(
           'name',
@@ -441,9 +441,9 @@ describe('Fund scraper - integration tests', () => {
     `('should update the list of weighted stocks for user $position', async ({ userId }) => {
       expect.assertions(2);
 
-      await run(databaseName);
+      await run();
 
-      const stocks = await app.db('stocks').select().where({ uid: userId }).orderBy('name');
+      const stocks = await db('stocks').select().where({ uid: userId }).orderBy('name');
 
       expect(stocks).toHaveLength(10);
 

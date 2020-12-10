@@ -4,37 +4,34 @@ import shortid from 'shortid';
 import numericHash from 'string-hash';
 
 import {
-  generateFakeId,
-  getPeriodMatch,
-  getTransactionsList,
-  formatTransactionsList,
   addToTransactionsList,
-  modifyTransaction,
-  modifyTransactionById,
-  getTotalUnits,
-  getTotalCost,
-  isSold,
   arrayAverage,
-  sortByTotal,
+  generateFakeId,
+  getTotalCost,
+  getTotalUnits,
+  isSold,
+  lastInArray,
   limitTimeSeriesLength,
+  modifyTransaction,
   randnBm,
-  getValueFromTransmit,
-  getValueForTransmit,
   sortByDate,
   sortByKey,
+  sortByTotal,
+  toNativeFund,
+  toRawFund,
   withoutId,
   withoutIds,
 } from './data';
-import { Average, Period } from '~client/constants';
+import { Average } from '~client/constants';
 import { mockRandom } from '~client/test-utils/random';
-import { Data, Transaction, TransactionRaw } from '~client/types';
+import { Data, FundInput, FundNative, TransactionNative as Transaction } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-shortid',
 }));
 
 describe('data module', () => {
-  describe('generateFakeId', () => {
+  describe(generateFakeId.name, () => {
     it('should be numeric', () => {
       expect.assertions(1);
       expect(generateFakeId()).toStrictEqual(expect.any(Number));
@@ -65,48 +62,44 @@ describe('data module', () => {
     });
   });
 
-  describe('getPeriodMatch', () => {
-    it('should return 1 year by default', () => {
+  describe(lastInArray.name, () => {
+    it('should get the last item in an array', () => {
       expect.assertions(1);
-      expect(getPeriodMatch('foo')).toStrictEqual({ period: 'year', length: 1 });
+      expect(lastInArray([1, 2, 7, 3])).toBe(3);
     });
 
-    it('should return an object from a Period', () => {
-      expect.assertions(2);
-      expect(getPeriodMatch(Period.year5)).toStrictEqual({ period: 'year', length: 5 });
-      expect(getPeriodMatch(Period.month3)).toStrictEqual({ period: 'month', length: 3 });
-    });
-
-    it('should return an object from a string', () => {
-      expect.assertions(1);
-      expect(getPeriodMatch('year7')).toStrictEqual({ period: 'year', length: 7 });
+    describe('when the array is empty', () => {
+      it('should return undefined', () => {
+        expect.assertions(1);
+        expect(lastInArray([])).toBeUndefined();
+      });
     });
   });
 
-  const transactionsData: TransactionRaw[] = [
+  const transactionsList: Transaction[] = [
     {
-      date: '2017-05-09T00:00:00.000Z',
+      date: new Date('2017-05-09T00:00:00.000Z'),
       units: 934,
       price: 428,
       fees: 172,
       taxes: 0,
     },
     {
-      date: '2018-03-13T00:00:00.000Z',
+      date: new Date('2018-03-13T00:00:00.000Z'),
       units: 25,
       price: 421,
       fees: 7,
       taxes: 6,
     },
     {
-      date: '2018-06-07T00:00:00.000Z',
+      date: new Date('2018-06-07T00:00:00.000Z'),
       units: -1239,
       price: 436,
       fees: 390,
       taxes: 0,
     },
     {
-      date: '2018-04-26T00:00:00.000Z',
+      date: new Date('2018-04-26T00:00:00.000Z'),
       units: 280,
       price: 428,
       fees: 91,
@@ -114,151 +107,9 @@ describe('data module', () => {
     },
   ];
 
-  describe('getTransactionsList', () => {
-    it('should make a list from API response data', () => {
-      expect.assertions(1);
-      const transactionsList = getTransactionsList(transactionsData);
-
-      expect(transactionsList).toStrictEqual([
-        expect.objectContaining({
-          date: new Date('2017-05-09T00:00:00.000Z'),
-          units: 934,
-          price: 428,
-          fees: 172,
-          taxes: 0,
-        }),
-        expect.objectContaining({
-          date: new Date('2018-03-13T00:00:00.000Z'),
-          units: 25,
-          price: 421,
-          fees: 7,
-          taxes: 6,
-        }),
-        expect.objectContaining({
-          date: new Date('2018-06-07T00:00:00.000Z'),
-          units: -1239,
-          price: 436,
-          fees: 390,
-          taxes: 0,
-        }),
-        expect.objectContaining({
-          date: new Date('2018-04-26T00:00:00.000Z'),
-          units: 280,
-          price: 428,
-          fees: 91,
-          taxes: 0,
-        }),
-      ]);
-    });
-
-    it('should add fake IDs to each item', () => {
-      expect.assertions(1);
-      const transactionsList = getTransactionsList(transactionsData);
-      expect(transactionsList).toStrictEqual(
-        transactionsData.map(() => expect.objectContaining({ id: generateFakeId() })),
-      );
-    });
-
-    it('should handle rounding errors', () => {
-      expect.assertions(2);
-      // this example is a real world example which presented rounding errors
-      const listWithErrors = getTransactionsList([
-        {
-          date: '2016-09-19T05:00Z',
-          units: 1678.42,
-          price: 1.191597,
-          fees: 0,
-          taxes: 0,
-        },
-        {
-          date: '2017-02-14T05:00Z',
-          units: 846.38,
-          price: 0,
-          fees: 0,
-          taxes: 0,
-        },
-        {
-          date: '2017-10-25T05:00Z',
-          units: 817,
-          price: 1.22399,
-          fees: 0,
-          taxes: 0,
-        },
-        {
-          date: '2018-03-14T05:00Z',
-          units: 1217.43,
-          price: 1.232104,
-          fees: 0,
-          taxes: 0,
-        },
-        {
-          date: '2018-09-24T05:00Z',
-          units: -4559.23,
-          price: 1.227225,
-          fees: 0,
-          taxes: 0,
-        },
-      ]);
-
-      expect(getTotalUnits(listWithErrors)).toBe(0);
-
-      expect(isSold(listWithErrors)).toBe(true);
-    });
-  });
-
-  describe('formatTransactionsList', () => {
-    it('should return the array without IDs, ordered by date', () => {
-      expect.assertions(1);
-      const transactionsList = getTransactionsList(transactionsData);
-      const transactionsListFormatted = formatTransactionsList(transactionsList);
-
-      expect(transactionsListFormatted).toStrictEqual([
-        {
-          date: '2017-05-09',
-          units: 934,
-          price: 428,
-          fees: 172,
-          taxes: 0,
-        },
-        {
-          date: '2018-03-13',
-          units: 25,
-          price: 421,
-          fees: 7,
-          taxes: 6,
-        },
-        {
-          date: '2018-04-26',
-          units: 280,
-          price: 428,
-          fees: 91,
-          taxes: 0,
-        },
-        {
-          date: '2018-06-07',
-          units: -1239,
-          price: 436,
-          fees: 390,
-          taxes: 0,
-        },
-      ]);
-    });
-
-    it('should not mutate the original value', () => {
-      expect.assertions(1);
-      const transactionsList = getTransactionsList(transactionsData);
-      const copy = transactionsList.slice();
-      formatTransactionsList(transactionsList);
-
-      expect(transactionsList).toStrictEqual(copy);
-    });
-  });
-
-  describe('addToTransactionsList', () => {
+  describe(addToTransactionsList.name, () => {
     it('should add a list item from API-like data', () => {
       expect.assertions(2);
-
-      const transactionsList = getTransactionsList(transactionsData);
 
       const transactionsListAdded = addToTransactionsList(transactionsList, {
         date: new Date('2018-09-13T03:20Z'),
@@ -268,11 +119,10 @@ describe('data module', () => {
         taxes: 0,
       });
 
-      expect(transactionsListAdded).toHaveLength(transactionsData.length + 1);
+      expect(transactionsListAdded).toHaveLength(transactionsList.length + 1);
 
       expect(transactionsListAdded[transactionsListAdded.length - 1]).toStrictEqual<Transaction>(
         expect.objectContaining({
-          id: expect.any(Number),
           date: new Date('2018-09-13T03:20Z'),
           units: 20,
           price: 0.15,
@@ -283,7 +133,7 @@ describe('data module', () => {
     });
   });
 
-  describe('modifyTransaction', () => {
+  describe(modifyTransaction.name, () => {
     it.each`
       index | key        | newValue
       ${1}  | ${'date'}  | ${new Date('2018-03-14T00:00:00.000Z')}
@@ -302,8 +152,7 @@ describe('data module', () => {
         key: keyof Transaction;
         newValue: Transaction[keyof Transaction];
       }) => {
-        expect.assertions(10);
-        const transactionsList = getTransactionsList(transactionsData);
+        expect.assertions(9);
 
         const modifiedTransactionsList = modifyTransaction(transactionsList, index, {
           [key]: newValue,
@@ -321,110 +170,48 @@ describe('data module', () => {
           if (compareIndex === index) {
             (Object.keys(transaction) as (keyof Transaction)[]).forEach((compareKey) => {
               if (compareKey !== key) {
-                expect(transaction[compareKey]).toStrictEqual(
-                  modifiedTransactionsList[compareIndex][compareKey],
+                expect(modifiedTransactionsList[compareIndex][compareKey]).toStrictEqual(
+                  transaction[compareKey],
                 );
               }
             });
           } else {
-            expect(transaction).toStrictEqual(modifiedTransactionsList[compareIndex]);
+            expect(modifiedTransactionsList[compareIndex]).toBe(transaction);
           }
         });
       },
     );
   });
 
-  describe('modifyTransactionById', () => {
-    it.each`
-      index | key        | newValue
-      ${1}  | ${'date'}  | ${new Date('2018-03-14T00:00:00.000Z')}
-      ${2}  | ${'units'} | ${281}
-      ${3}  | ${'price'} | ${400}
-      ${3}  | ${'fees'}  | ${150}
-      ${3}  | ${'taxes'} | ${10}
-    `(
-      'should modify the $key of a transactions list at a specified id',
-      ({
-        index,
-        key,
-        newValue,
-      }: {
-        index: number;
-        key: keyof Transaction;
-        newValue: Transaction[keyof Transaction];
-      }) => {
-        expect.assertions(10);
-        jest
-          .spyOn(shortid, 'generate')
-          .mockReturnValueOnce('short-id-1')
-          .mockReturnValueOnce('short-id-2')
-          .mockReturnValueOnce('short-id-3');
-
-        const transactionsList = getTransactionsList(transactionsData);
-        const id = transactionsList[index].id;
-
-        const modifiedTransactionsList = modifyTransactionById(transactionsList, id, {
-          [key]: newValue,
-        });
-
-        expect(modifiedTransactionsList[index][key]).toStrictEqual(newValue);
-
-        // check that the original list wasn't mutated
-        expect(transactionsList[index][key]).not.toStrictEqual(
-          modifiedTransactionsList[index][key],
-        );
-
-        // check that the new list was only updated where it needs to be
-        transactionsList.forEach((transaction, compareIndex) => {
-          if (transaction.id === id) {
-            (Object.keys(transaction) as (keyof Transaction)[]).forEach((compareKey) => {
-              if (compareKey !== key) {
-                expect(transaction[compareKey]).toStrictEqual(
-                  modifiedTransactionsList[compareIndex][compareKey],
-                );
-              }
-            });
-          } else {
-            expect(transaction).toStrictEqual(modifiedTransactionsList[compareIndex]);
-          }
-        });
-      },
-    );
-  });
-
-  describe('getTotalUnits', () => {
+  describe(getTotalUnits.name, () => {
     it('should get the sum of units in a transactions list', () => {
       expect.assertions(2);
 
-      const transactionsList = getTransactionsList(transactionsData);
       expect(getTotalUnits(transactionsList)).toBe(0);
       expect(getTotalUnits(removeAtIndex(transactionsList, 2))).toBe(1239);
     });
   });
 
-  describe('getTotalCost', () => {
+  describe(getTotalCost.name, () => {
     it('should get the sum of cost in a transactions list', () => {
       expect.assertions(1);
 
-      const transactionsList = getTransactionsList(transactionsData);
       expect(getTotalCost(transactionsList)).toBe(
         934 * 428 + 172 + 25 * 421 + 7 + 6 - 1239 * 436 + 390 + 280 * 428 + 91,
       );
     });
   });
 
-  describe('getSold', () => {
+  describe(isSold.name, () => {
     it('should determine if a transactions list represents a holding which is fully sold', () => {
       expect.assertions(2);
-
-      const transactionsList = getTransactionsList(transactionsData);
 
       expect(isSold(transactionsList)).toBe(true);
       expect(isSold(modifyTransaction(transactionsList, 3, { units: -1238 }))).toBe(false);
     });
   });
 
-  describe('sortByTotal', () => {
+  describe(sortByTotal.name, () => {
     it('should sort items by the total attribute (descending)', () => {
       expect.assertions(1);
       expect(sortByTotal([{ total: 1, foo: 'bar' }, { total: 3 }])).toStrictEqual([
@@ -434,7 +221,7 @@ describe('data module', () => {
     });
   });
 
-  describe('arrayAverage', () => {
+  describe(arrayAverage.name, () => {
     it('should get the median of a list of data', () => {
       expect.assertions(2);
       expect(arrayAverage([1, 2, 5, 10, 10, 11, 9, 3, 20], Average.Median)).toBe(9);
@@ -471,7 +258,7 @@ describe('data module', () => {
     });
   });
 
-  describe('limitTimeSeriesLength', () => {
+  describe(limitTimeSeriesLength.name, () => {
     it('should filter time series according to a least-distance algorithm', () => {
       expect.assertions(2);
 
@@ -509,7 +296,7 @@ describe('data module', () => {
     });
   });
 
-  describe('randnBm', () => {
+  describe(randnBm.name, () => {
     it('should return a Gaussian-incremented value from two random numbers', () => {
       expect.assertions(1);
       mockRandom();
@@ -517,56 +304,7 @@ describe('data module', () => {
     });
   });
 
-  describe('getValueFromTransmit', () => {
-    const transactions = [{ date: '2017-09-01', units: 2.5, price: 0.4, fees: 0, taxes: 0 }];
-
-    it.each`
-      dataType              | resultDescription        | outputValue                          | inputValue
-      ${'id'}               | ${'a number'}            | ${345}                               | ${345}
-      ${'date'}             | ${'a Date object'}       | ${new Date('2019-06-05')}            | ${'2019-06-05'}
-      ${'item'}             | ${'is'}                  | ${'some-item'}                       | ${'some-item'}
-      ${'shop'}             | ${'is'}                  | ${'some-shop'}                       | ${'some-shop'}
-      ${'category'}         | ${'is'}                  | ${'some-category'}                   | ${'some-category'}
-      ${'holiday'}          | ${'is'}                  | ${'some-holiday'}                    | ${'some-holiday'}
-      ${'social'}           | ${'is'}                  | ${'some-social'}                     | ${'some-social'}
-      ${'cost'}             | ${'an integer'}          | ${123}                               | ${123.45}
-      ${'transactions'}     | ${'a transactions list'} | ${getTransactionsList(transactions)} | ${transactions}
-      ${'allocationTarget'} | ${'a number'}            | ${0.65}                              | ${0.65}
-      ${'allocationTarget'} | ${'zero, if null'}       | ${0}                                 | ${null}
-    `(
-      'should return "$dataType" as $resultDescription',
-      ({ dataType, inputValue, outputValue }) => {
-        expect.assertions(1);
-        expect(getValueFromTransmit(dataType, inputValue)).toStrictEqual(outputValue);
-      },
-    );
-  });
-
-  describe('getValueForTransmit', () => {
-    const transactions = [{ date: '2017-09-01', units: 2.5, price: 0.4, fees: 0, taxes: 0 }];
-
-    it.each`
-      dataType              | resultDescription       | inputValue                           | outputValue
-      ${'id'}               | ${'a number'}           | ${345}                               | ${345}
-      ${'date'}             | ${'an ISO date string'} | ${new Date('2019-06-05')}            | ${'2019-06-05'}
-      ${'item'}             | ${'is'}                 | ${'some-item'}                       | ${'some-item'}
-      ${'shop'}             | ${'is'}                 | ${'some-shop'}                       | ${'some-shop'}
-      ${'category'}         | ${'is'}                 | ${'some-category'}                   | ${'some-category'}
-      ${'holiday'}          | ${'is'}                 | ${'some-holiday'}                    | ${'some-holiday'}
-      ${'social'}           | ${'is'}                 | ${'some-social'}                     | ${'some-social'}
-      ${'cost'}             | ${'an integer'}         | ${123.45}                            | ${123}
-      ${'transactions'}     | ${'a simple array'}     | ${getTransactionsList(transactions)} | ${transactions}
-      ${'allocationTarget'} | ${'a number'}           | ${0.1}                               | ${0.1}
-    `(
-      'should return "$dataType" as $resultDescription',
-      ({ dataType, inputValue, outputValue }) => {
-        expect.assertions(1);
-        expect(getValueForTransmit(dataType, inputValue)).toStrictEqual(outputValue);
-      },
-    );
-  });
-
-  describe('sortByKey', () => {
+  describe(sortByKey.name, () => {
     const items: { foo: number; bar?: string }[] = [
       {
         foo: 1,
@@ -684,7 +422,7 @@ describe('data module', () => {
     });
   });
 
-  describe('sortByDate', () => {
+  describe(sortByDate.name, () => {
     const items = [
       {
         date: new Date('2020-04-20'),
@@ -741,14 +479,14 @@ describe('data module', () => {
     });
   });
 
-  describe('withoutId', () => {
+  describe(withoutId.name, () => {
     it('should remove the ID from an object', () => {
       expect.assertions(1);
       expect(withoutId({ id: numericHash('foo'), bar: 'baz' })).toStrictEqual({ bar: 'baz' });
     });
   });
 
-  describe('withoutIds', () => {
+  describe(withoutIds.name, () => {
     it('should remove IDs from an array of objects', () => {
       expect.assertions(1);
       expect(
@@ -757,6 +495,76 @@ describe('data module', () => {
           { id: numericHash('foo'), bar: 'baz' },
         ]),
       ).toStrictEqual([{ bar: 'ban' }, { bar: 'baz' }]);
+    });
+  });
+
+  describe('toNativeFund', () => {
+    it('should replace transaction date strings with native dates, and remove __typename', () => {
+      expect.assertions(1);
+      expect(
+        toNativeFund({
+          __typename: 'Fund',
+          id: 123,
+          item: 'Some fund',
+          allocationTarget: 0.11,
+          transactions: [
+            {
+              __typename: 'Transaction',
+              date: '2020-04-20',
+              units: 913,
+              price: 327.59,
+              fees: 99,
+              taxes: 771,
+            },
+          ],
+        }),
+      ).toStrictEqual<FundNative>({
+        id: 123,
+        item: 'Some fund',
+        allocationTarget: 0.11,
+        transactions: [
+          {
+            date: new Date('2020-04-20'),
+            units: 913,
+            price: 327.59,
+            fees: 99,
+            taxes: 771,
+          },
+        ],
+      });
+    });
+  });
+
+  describe('toRawFund', () => {
+    it('should replace transaction Date objects with strings', () => {
+      expect.assertions(1);
+      expect(
+        toRawFund({
+          item: 'Some fund',
+          allocationTarget: 0.11,
+          transactions: [
+            {
+              date: new Date('2020-04-20'),
+              units: 913,
+              price: 327.59,
+              fees: 99,
+              taxes: 771,
+            },
+          ],
+        }),
+      ).toStrictEqual<FundInput>({
+        item: 'Some fund',
+        allocationTarget: 0.11,
+        transactions: [
+          {
+            date: '2020-04-20',
+            units: 913,
+            price: 327.59,
+            fees: 99,
+            taxes: 771,
+          },
+        ],
+      });
     });
   });
 });

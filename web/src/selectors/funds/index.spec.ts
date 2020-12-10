@@ -14,12 +14,16 @@ import {
   getStockValue,
   getCashInBank,
 } from '.';
-import { Period } from '~client/constants';
-import { getTransactionsList } from '~client/modules/data';
+
 import { State } from '~client/reducers';
-import { Cache } from '~client/reducers/funds';
 import { testState as state } from '~client/test-data/state';
-import { Page, Portfolio, CachedValue, RequestType } from '~client/types';
+import {
+  CachedValue,
+  PageListStandard,
+  PageNonStandard,
+  Portfolio,
+  RequestType,
+} from '~client/types';
 
 describe('Funds selectors', () => {
   const testNow = new Date('2018-03-23T11:45:20Z');
@@ -28,21 +32,21 @@ describe('Funds selectors', () => {
 
   const stateWithOnlyFutureTransaction: State = {
     ...state,
-    [Page.funds]: {
-      ...state[Page.funds],
+    [PageNonStandard.Funds]: {
+      ...state[PageNonStandard.Funds],
       items: [
         {
-          ...state[Page.funds].items[0],
+          ...state[PageNonStandard.Funds].items[0],
           id: 10,
-          transactions: getTransactionsList([
+          transactions: [
             {
-              ...state[Page.funds].items[0].transactions[0],
+              ...state[PageNonStandard.Funds].items[0].transactions[0],
               date: addDays(testToday, 1),
             },
-          ]),
+          ],
         },
         {
-          ...state[Page.funds].items[1],
+          ...state[PageNonStandard.Funds].items[1],
           id: 3,
         },
       ],
@@ -51,21 +55,21 @@ describe('Funds selectors', () => {
 
   const stateWithFutureTransaction: State = {
     ...state,
-    [Page.funds]: {
-      ...state[Page.funds],
+    [PageNonStandard.Funds]: {
+      ...state[PageNonStandard.Funds],
       items: [
         {
-          ...state[Page.funds].items[0],
+          ...state[PageNonStandard.Funds].items[0],
           id: 10,
-          transactions: getTransactionsList([
-            ...state[Page.funds].items[0].transactions,
+          transactions: [
+            ...state[PageNonStandard.Funds].items[0].transactions,
             {
-              ...state[Page.funds].items[0].transactions[0],
+              ...state[PageNonStandard.Funds].items[0].transactions[0],
               date: addDays(testToday, 1),
             },
-          ]),
+          ],
         },
-        ...state[Page.funds].items.slice(1),
+        ...state[PageNonStandard.Funds].items.slice(1),
       ],
     },
   };
@@ -110,42 +114,22 @@ describe('Funds selectors', () => {
       }
     });
 
-    it('should return a default value if there are no data', () => {
-      expect.assertions(1);
-      const stateNoCache: State = {
-        ...state,
-        funds: {
-          ...state.funds,
-          cache: {},
-        },
-      };
-
-      expect(getFundsCachedValue(testNow)(stateNoCache)).toStrictEqual({
-        gain: 0,
-        gainAbs: 0,
-        dayGain: getDayGain(stateNoCache),
-        dayGainAbs: getDayGainAbs(stateNoCache),
-        value: 0,
-        ageText: '',
-      });
-    });
-
     const itemsWithoutPriceData = [
-      ...state[Page.funds].items,
+      ...state[PageNonStandard.Funds].items,
       {
         id: 'some-id',
         item: 'new fund',
-        transactions: getTransactionsList([
-          { date: '2019-07-23', units: 13, price: 0.92308, fees: 0, taxes: 0 },
-        ]),
+        transactions: [
+          { date: new Date('2019-07-23'), units: 13, price: 0.92308, fees: 0, taxes: 0 },
+        ],
       },
     ];
 
     const itemsWithFutureTransaction = [
       {
-        ...state[Page.funds].items[0],
-        transactions: getTransactionsList([
-          ...state[Page.funds].items[0].transactions,
+        ...state[PageNonStandard.Funds].items[0],
+        transactions: [
+          ...state[PageNonStandard.Funds].items[0].transactions,
           {
             date: addDays(testNow, 1),
             units: 1000,
@@ -153,9 +137,9 @@ describe('Funds selectors', () => {
             fees: 0,
             taxes: 0,
           },
-        ]),
+        ],
       },
-      ...state[Page.funds].items.slice(1),
+      ...state[PageNonStandard.Funds].items.slice(1),
     ];
 
     it.each`
@@ -166,8 +150,8 @@ describe('Funds selectors', () => {
       expect.assertions(1);
       const stateNoPrice = {
         ...state,
-        [Page.funds]: {
-          ...state[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
           items,
         },
       };
@@ -260,35 +244,35 @@ describe('Funds selectors', () => {
     describe('when in the middle of the month', () => {
       const stateWithCostSoFar: State = {
         ...state,
-        [Page.funds]: {
-          ...state[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
           items: [
             {
               id: 1000,
               item: 'fund 1',
-              transactions: getTransactionsList([
+              transactions: [
                 {
-                  date: '2020-05-19',
+                  date: new Date('2020-05-19'),
                   price: 123,
                   units: 473,
                   fees: 165,
                   taxes: 9965,
                 },
                 {
-                  date: '2020-05-21',
+                  date: new Date('2020-05-21'),
                   price: 125,
                   units: 91,
                   fees: 449,
                   taxes: 6694,
                 },
-              ]),
-              allocationTarget: 1,
+              ],
+              allocationTarget: 100,
             },
           ],
           __optimistic: [undefined],
         },
-        [Page.income]: {
-          ...state[Page.income],
+        [PageListStandard.Income]: {
+          ...state[PageListStandard.Income],
           items: [
             {
               id: 1,
@@ -299,8 +283,8 @@ describe('Funds selectors', () => {
           ],
           __optimistic: [undefined],
         },
-        [Page.bills]: {
-          ...state[Page.bills],
+        [PageListStandard.Bills]: {
+          ...state[PageListStandard.Bills],
           items: [
             {
               id: 1,
@@ -317,8 +301,8 @@ describe('Funds selectors', () => {
           ],
           __optimistic: [undefined, RequestType.delete],
         },
-        [Page.food]: {
-          ...state[Page.food],
+        [PageListStandard.Food]: {
+          ...state[PageListStandard.Food],
           items: [
             {
               id: 1,
@@ -331,8 +315,8 @@ describe('Funds selectors', () => {
           ],
           __optimistic: [undefined],
         },
-        [Page.general]: {
-          ...state[Page.general],
+        [PageListStandard.General]: {
+          ...state[PageListStandard.General],
           items: [
             {
               id: 1,
@@ -345,8 +329,8 @@ describe('Funds selectors', () => {
           ],
           __optimistic: [undefined],
         },
-        [Page.holiday]: {
-          ...state[Page.holiday],
+        [PageListStandard.Holiday]: {
+          ...state[PageListStandard.Holiday],
           items: [
             {
               id: 1,
@@ -359,8 +343,8 @@ describe('Funds selectors', () => {
           ],
           __optimistic: [undefined],
         },
-        [Page.social]: {
-          ...state[Page.social],
+        [PageListStandard.Social]: {
+          ...state[PageListStandard.Social],
           items: [
             {
               id: 1,
@@ -432,26 +416,17 @@ describe('Funds selectors', () => {
     describe('if the stock value has deviated in the current month', () => {
       const stateWithDeviation: State = {
         ...state,
-        [Page.funds]: {
-          ...state[Page.funds],
-          cache: {
-            [Period.year1]: {
-              ...state[Page.funds].cache[Period.year1],
-              cacheTimes: [
-                ...(state[Page.funds].cache[Period.year1]?.cacheTimes ?? []),
-                28623600 + 86400 * 3,
-              ],
-              prices: {
-                ...state[Page.funds].cache[Period.year1]?.prices,
-                10: {
-                  ...state[Page.funds].cache[Period.year1]?.prices[10],
-                  values: [
-                    ...(state[Page.funds].cache[Period.year1]?.prices[10]?.values ?? []),
-                    400,
-                  ],
-                },
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
+          startTime: state[PageNonStandard.Funds].startTime,
+          cacheTimes: [...state[PageNonStandard.Funds].cacheTimes, 28623600 + 86400 * 3],
+          prices: {
+            10: [
+              {
+                startIndex: state[PageNonStandard.Funds].prices[10]?.[0]?.startIndex ?? 0,
+                values: [...(state[PageNonStandard.Funds].prices[10]?.[0]?.values ?? []), 400],
               },
-            } as Cache,
+            ],
           },
         },
       };
@@ -472,28 +447,28 @@ describe('Funds selectors', () => {
 
       const stateWithAllocation: State = {
         ...state,
-        [Page.funds]: {
-          ...state[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
           items: [
             {
               id: numericHash('fund-1'),
               item: 'Fund 1',
               transactions: [],
-              allocationTarget: 0.3,
+              allocationTarget: 30,
             },
             {
               id: numericHash('fund-2'),
               item: 'Fund 2',
               transactions: [],
-              allocationTarget: 0.45,
+              allocationTarget: 45,
             },
           ],
         },
       };
 
-      expect(getMaxAllocationTarget(numericHash('fund-1'))(stateWithAllocation)).toBe(1 - 0.45);
+      expect(getMaxAllocationTarget(numericHash('fund-1'))(stateWithAllocation)).toBe(100 - 45);
 
-      expect(getMaxAllocationTarget(numericHash('fund-2'))(stateWithAllocation)).toBe(1 - 0.3);
+      expect(getMaxAllocationTarget(numericHash('fund-2'))(stateWithAllocation)).toBe(100 - 30);
     });
   });
 });

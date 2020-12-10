@@ -1,22 +1,25 @@
 import React from 'react';
 
+import { Query } from './hooks';
 import * as Styled from './styles';
-import { Period, Grouping } from '~client/constants/analysis';
-import { AnalysisRequest } from '~client/types';
 
-type Props = {
-  period: Period;
-  grouping: Grouping;
+import { Spinner } from '~client/components/spinner';
+import { AnalysisPeriod, AnalysisGroupBy } from '~client/types';
+
+export type Props = {
+  period: AnalysisPeriod;
+  groupBy: AnalysisGroupBy;
   page: number;
   description: string;
-  onRequest: (request: AnalysisRequest) => void;
+  loading: boolean;
+  onRequest: (request: Partial<Query>) => void;
 };
 
-const Upper: React.FC<Props> = ({ period, grouping, page, description, onRequest }) => (
+const Upper: React.FC<Props> = ({ period, groupBy, page, description, loading, onRequest }) => (
   <Styled.Upper>
     <Styled.Input>
       <span>{'Period:'}</span>
-      {(Object.keys(Period) as Period[]).map((value) => (
+      {Object.values(AnalysisPeriod).map((value) => (
         <span key={value}>
           <input
             type="radio"
@@ -29,14 +32,14 @@ const Upper: React.FC<Props> = ({ period, grouping, page, description, onRequest
       ))}
     </Styled.Input>
     <Styled.Input>
-      <span>{'Grouping:'}</span>
-      {(Object.keys(Grouping) as Grouping[]).map((value) => (
+      <span>{'Group by:'}</span>
+      {Object.values(AnalysisGroupBy).map((value) => (
         <span key={value}>
           <input
             type="radio"
-            checked={value === grouping}
-            onChange={(): void => onRequest({ grouping: value })}
-            data-testid={`input-grouping-${value}`}
+            checked={value === groupBy}
+            onChange={(): void => onRequest({ groupBy: value })}
+            data-testid={`input-groupby-${value}`}
           />
           <span>{value}</span>
         </span>
@@ -48,6 +51,7 @@ const Upper: React.FC<Props> = ({ period, grouping, page, description, onRequest
         Next
       </Styled.Button>
     </Styled.Buttons>
+    {loading && <Spinner size={0.5} />}
     <Styled.PeriodTitle>{description}</Styled.PeriodTitle>
   </Styled.Upper>
 );

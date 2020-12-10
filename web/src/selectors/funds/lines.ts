@@ -1,8 +1,8 @@
-import { roundGain } from './gains';
+import { replaceAtIndex } from 'replace-array';
+
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
-import { leftPad, rightPad, IDENTITY } from '~client/modules/data';
-import { separateLines } from '~client/modules/funds';
-import { Id, Data } from '~client/types';
+import { IDENTITY, lastInArray, rightPad } from '~client/modules/data';
+import { Data, FundPriceGroup, GQL, Id, Point } from '~client/types';
 
 export type Return = {
   price: number;
@@ -11,83 +11,151 @@ export type Return = {
   realised: number;
 };
 
+export type FundWithReturns = { values: Return[]; startIndex: number };
+
 export type FundsWithReturns = {
-  [id in string]: { returns: Return[]; startIndex: number };
+  [fundId in string]: FundWithReturns[];
 };
 
-const maximiseAllLines = <T>(
-  fundsWithReturns: FundsWithReturns,
-  mapReturns: (returns: Return) => T,
-  fillLeft: T,
-  fillRight: (returns: Return) => T,
-): T[][] => {
-  const funds = Object.values(fundsWithReturns);
-  const maxLength = funds.reduce(
-    (last, { returns, startIndex }) => Math.max(last, returns.length + startIndex),
+type FundGroup = GQL<FundPriceGroup>;
+
+type ReturnMapper = (value: Return) => number;
+
+type ReturnComposer = (prev: number, next: number) => number;
+
+type ReduceReturnsAtDate = (funds: FundWithReturns[][], prev: number, timeIndex: number) => number;
+
+function reduceReturnsAtDate(
+  mapper: ReturnMapper,
+  composer: ReturnComposer = (_, next): number => next,
+): ReduceReturnsAtDate {
+  return (funds, prevValue, timeIndex): number =>
+    composer(
+      prevValue,
+      funds.reduce<number>(
+        (last, fund) =>
+          fund
+            .filter(
+              ({ startIndex, values }) =>
+                timeIndex >= startIndex && values.length > timeIndex - startIndex,
+            )
+            .reduce<number>(
+              (fundLast, { startIndex, values }) =>
+                fundLast + mapper(values[timeIndex - startIndex]),
+              last,
+            ),
+        0,
+      ),
+    );
+}
+
+function extendCosts(funds: FundWithReturns[][]): FundWithReturns[][] {
+  const maxLength = funds.reduce<number>(
+    (last, groups) =>
+      groups.reduce<number>(
+        (groupLast, group) => Math.max(groupLast, group.startIndex + group.values.length),
+        last,
+      ),
     0,
   );
 
-  return funds.map<T[]>(({ returns, startIndex }) =>
-    rightPad(
-      leftPad(returns.map(mapReturns), startIndex + returns.length, fillLeft),
-      maxLength,
-      fillRight(returns[returns.length - 1]),
-    ),
-  );
-};
+  return funds.map<FundWithReturns[]>((group) => {
+    const lastReturn = lastInArray(group);
+    if (!lastReturn) {
+      return group;
+    }
 
-export function getOverallAbsolute(fundsWithReturns: FundsWithReturns): number[] {
-  const result = maximiseAllLines(
-    fundsWithReturns,
-    ({ price, units }) => price * units,
-    0,
-    () => 0,
-  ).reduce(
-    (last, values) => values.map((value, index) => Math.round(value + (last[index] ?? 0))),
-    [],
-  );
-  return result;
-}
+    const lastValue = lastInArray(lastReturn.values);
+    if (!lastValue) {
+      return group;
+    }
 
-export function getFundLineAbsolute(fundsWithReturns: FundsWithReturns, id: Id): number[] {
-  return fundsWithReturns[id].returns.map(({ price, units }) => price * units);
-}
-
-export function getOverallROI(fundsWithReturns: FundsWithReturns): number[] {
-  return maximiseAllLines(
-    fundsWithReturns,
-    IDENTITY,
-    {
+    const continueValue: Return = {
+      cost: lastValue.cost,
+      realised: lastValue.realised,
       price: 0,
       units: 0,
-      cost: 0,
-      realised: 0,
-    },
-    (returns) => ({
-      price: 0,
-      units: 0,
-      cost: returns.cost,
-      realised: returns.realised,
-    }),
-  )
-    .reduce<{ value: number; cost: number }[]>(
-      (last, returns) =>
-        returns.map(({ price, units, cost, realised }, index) => ({
-          value: price * units + realised + (last[index]?.value ?? 0),
-          cost: cost + (last[index]?.cost ?? 0),
-        })),
-      [],
-    )
-    .map<number>(({ value, cost }) => Math.round((10000 * (value - cost)) / cost) / 100);
+    };
+
+    return replaceAtIndex(group, group.length - 1, (last) => ({
+      ...last,
+      values: rightPad(last.values, maxLength - last.startIndex, continueValue),
+    }));
+  });
 }
 
-export function getFundLineROI(fundsWithReturns: FundsWithReturns, id: Id): number[] {
-  return fundsWithReturns[id].returns.map(({ price, units, cost, realised }) =>
-    price && units && cost ? 100 * roundGain((price * units + realised - cost) / cost) : 0,
-  );
+function reduceOverallLine(
+  reducers: ReduceReturnsAtDate[],
+  composer: (value: number) => number = IDENTITY,
+): (fundsWithReturns: FundsWithReturns) => FundGroup[] {
+  return (fundsWithReturns): FundGroup[] => {
+    const funds = extendCosts(Object.values(fundsWithReturns));
+
+    const groupLength = funds.reduce<number>(
+      (last, groups) =>
+        groups.reduce<number>(
+          (groupLast, group) => Math.max(groupLast, group.startIndex + group.values.length),
+          last,
+        ),
+      0,
+    );
+
+    const minStartIndex = funds.reduce<number>(
+      (last, groups) =>
+        groups.reduce<number>((groupLast, group) => Math.min(groupLast, group.startIndex), last),
+      Infinity,
+    );
+
+    if (minStartIndex === Infinity) {
+      return [{ startIndex: 0, values: [] }];
+    }
+
+    const values = reducers
+      .reduce<number[]>(
+        (last, reducer) => last.map((prevValue, timeIndex) => reducer(funds, prevValue, timeIndex)),
+        Array(groupLength).fill(0),
+      )
+      .map(composer);
+
+    return [{ values, startIndex: 0 }];
+  };
 }
 
-export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): number[] {
+function reduceSingleLine(
+  mapper: ReturnMapper,
+): (fundsWithReturns: FundsWithReturns, id: Id) => FundGroup[] {
+  return (fundsWithReturns, id): FundGroup[] => {
+    return fundsWithReturns[id].map(({ values, startIndex }) => ({
+      startIndex,
+      values: values.map(mapper),
+    }));
+  };
+}
+
+const getValue = ({ units, price }: Return): number => units * price;
+const getRealisedValue = ({ units, price, realised }: Return): number => units * price + realised;
+const getCost = ({ cost }: Return): number => cost;
+
+const getROI = (cost: number, value: number): number => (100 * (value - cost)) / cost;
+const roundROI = (value: number): number => Math.round(100 * value) / 100;
+
+const reduceCost = reduceReturnsAtDate(getCost);
+const reduceValue = reduceReturnsAtDate(getValue);
+const reduceROI = reduceReturnsAtDate(getRealisedValue, getROI);
+
+export const getOverallAbsolute = reduceOverallLine([reduceValue], Math.round);
+
+export const getOverallROI = reduceOverallLine([reduceCost, reduceROI], roundROI);
+
+export const getFundLineAbsolute = reduceSingleLine(getValue);
+
+export const getFundLineROI = reduceSingleLine((returns) =>
+  roundROI(getROI(getCost(returns), getRealisedValue(returns))),
+);
+
+export const getFundLinePrice = reduceSingleLine((returns) => returns.price);
+
+export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): FundGroup[] {
   if (mode === Mode.Value) {
     return getOverallAbsolute(fundsWithReturns);
   }
@@ -97,7 +165,7 @@ export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): 
   return [];
 }
 
-export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: Id): number[] {
+export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: Id): FundGroup[] {
   if (mode === Mode.Value) {
     return getFundLineAbsolute(fundsWithReturns, id);
   }
@@ -105,7 +173,7 @@ export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: 
     return getFundLineROI(fundsWithReturns, id);
   }
   if (mode === Mode.Price) {
-    return fundsWithReturns[id].returns.map(({ price }) => price);
+    return getFundLinePrice(fundsWithReturns, id);
   }
 
   return [];
@@ -117,13 +185,12 @@ export function getFundLineProcessed(
   mode: Mode,
   id: Id = GRAPH_FUNDS_OVERALL_ID,
 ): Data[] {
-  const line =
+  const groups =
     id === GRAPH_FUNDS_OVERALL_ID
       ? getOverallLine(fundsWithReturns, mode)
       : getFundLine(fundsWithReturns, mode, id);
 
-  const timeOffset = fundsWithReturns[id]?.startIndex ?? 0;
-
-  const lineWithTimes: Data = line.map((value, index) => [cacheTimes[index + timeOffset], value]);
-  return id === GRAPH_FUNDS_OVERALL_ID ? [lineWithTimes] : separateLines(lineWithTimes);
+  return groups.map<Data>(({ startIndex, values }) =>
+    values.map<Point>((value, index) => [cacheTimes[startIndex + index], value]),
+  );
 }

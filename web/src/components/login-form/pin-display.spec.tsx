@@ -31,7 +31,7 @@ describe('<PinDisplay />', () => {
         -webkit-flex: 1 0 0;
         -ms-flex: 1 0 0;
         flex: 1 0 0;
-        font-size: 64px;
+        font-size: 4rem;
         height: 3.75rem;
         margin: 0 0.375rem;
         position: relative;
@@ -109,7 +109,7 @@ describe('<PinDisplay />', () => {
         -webkit-flex: 1 0 0;
         -ms-flex: 1 0 0;
         flex: 1 0 0;
-        font-size: 64px;
+        font-size: 4rem;
         height: 3.75rem;
         margin: 0 0.375rem;
         position: relative;
@@ -180,7 +180,7 @@ describe('<PinDisplay />', () => {
 
       @media only screen and (min-width:500px) {
         .c0 {
-          margin: 0 12px 16px 12px;
+          margin: 0 0.75rem 1rem 0.75rem;
         }
       }
 

@@ -113,7 +113,7 @@ const InfiniteChild: React.FC<
     >
       {text}
       {subTree && (
-        <InfiniteBox
+        <InfiniteBox // eslint-disable-line @typescript-eslint/no-use-before-define
           flex={1}
           flow={flow}
           activeMain={activeSub}

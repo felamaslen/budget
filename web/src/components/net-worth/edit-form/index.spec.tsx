@@ -5,40 +5,48 @@ import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
-import { Category, Subcategory, Entry, ValueObject, Id, CreateEntry } from '~client/types';
+import {
+  Create,
+  Id,
+  NetWorthCategory,
+  NetWorthCategoryType,
+  NetWorthEntryNative as NetWorthEntry,
+  NetWorthSubcategory,
+  NetWorthValueInput,
+} from '~client/types';
 
-const categories: Category[] = [
+const categories: NetWorthCategory[] = [
   {
     id: numericHash('fake-category-id-my-assets'),
     category: 'My assets',
-    type: 'asset',
+    type: NetWorthCategoryType.Asset,
     color: 'green',
     isOption: false,
   },
   {
     id: numericHash('fake-category-id-my-options'),
     category: 'My options',
-    type: 'asset',
+    type: NetWorthCategoryType.Asset,
     color: 'orange',
     isOption: true,
   },
   {
     id: numericHash('fake-category-id-my-liabilities'),
     category: 'My liabilities',
-    type: 'liability',
+    type: NetWorthCategoryType.Liability,
     color: 'red',
     isOption: false,
   },
   {
     id: numericHash('fake-category-id-my-mortgage'),
     category: 'Mortgage',
-    type: 'liability',
+    type: NetWorthCategoryType.Liability,
     color: 'darkred',
     isOption: false,
   },
 ];
 
-const subcategories: Subcategory[] = [
+const subcategories: NetWorthSubcategory[] = [
   {
     id: numericHash('fake-subcategory-id-bank-account'),
     categoryId: numericHash('fake-category-id-my-assets'),
@@ -88,37 +96,31 @@ describe('Net worth entry form', () => {
     setActiveId: jest.fn(),
   };
 
-  const item: Entry = {
+  const item: NetWorthEntry = {
     id: numericHash('some-fake-id'),
     date: new Date(oldDate),
     values: [
       {
-        id: numericHash('fake-value-id-bank-account'),
         subcategory: numericHash('fake-subcategory-id-bank-account'),
-        value: 385610,
+        simple: 385610,
       },
       {
-        id: numericHash('fake-value-id-some-share'),
         subcategory: numericHash('fake-subcategory-id-some-share'),
-        value: [
-          {
-            units: 1326,
-            vested: 0,
-            strikePrice: 1350.2,
-            marketPrice: 1899.19,
-          },
-        ],
+        option: {
+          units: 1326,
+          vested: 0,
+          strikePrice: 1350.2,
+          marketPrice: 1899.19,
+        },
       },
       {
-        id: numericHash('fake-value-id-cc'),
         subcategory: numericHash('fake-subcategory-id-cc'),
-        value: -21054,
+        simple: -21054,
         skip: false,
       },
       {
-        id: numericHash('fake-value-id-mortgage'),
         subcategory: numericHash('fake-subcategory-id-my-mortgage'),
-        value: {
+        mortgage: {
           principal: 16877654,
           paymentsRemaining: 176,
           rate: 0.165,
@@ -134,7 +136,6 @@ describe('Net worth entry form', () => {
     ],
     currencies: [
       {
-        id: numericHash('some-fake-currency-id'),
         currency: 'USD',
         rate: 0.78,
       },
@@ -490,60 +491,67 @@ describe('Net worth entry form', () => {
       it('should call onUpdate when hitting finish', async () => {
         expect.assertions(32);
         await setup();
-        expect(props.onUpdate).toHaveBeenCalledWith<[Id, Entry]>(numericHash('some-fake-id'), {
-          id: numericHash('some-fake-id'),
-          date: new Date(newDate),
-          values: expect.arrayContaining<ValueObject>([
-            {
-              id: numericHash('fake-value-id-bank-account'),
-              subcategory: numericHash('fake-subcategory-id-bank-account'),
-              value: 400012,
-              skip: null,
-            },
-            {
-              id: numericHash('fake-value-id-cc'),
-              subcategory: numericHash('fake-subcategory-id-cc'),
-              value: -15901,
-              skip: false,
-            },
-            {
-              id: numericHash('fake-value-id-some-share'),
-              subcategory: numericHash('fake-subcategory-id-some-share'),
-              value: [
-                {
+        expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
+          numericHash('some-fake-id'),
+          {
+            date: new Date(newDate),
+            values: expect.arrayContaining<NetWorthValueInput>([
+              {
+                subcategory: numericHash('fake-subcategory-id-bank-account'),
+                simple: 400012,
+                skip: null,
+                fx: null,
+                option: null,
+                mortgage: null,
+              },
+              {
+                subcategory: numericHash('fake-subcategory-id-cc'),
+                simple: -15901,
+                skip: false,
+                fx: null,
+                option: null,
+                mortgage: null,
+              },
+              {
+                subcategory: numericHash('fake-subcategory-id-some-share'),
+                option: {
                   units: 1006,
                   vested: 0,
                   strikePrice: 1440.2,
                   marketPrice: 2093.7,
                 },
-              ],
-              skip: null,
-            },
-            {
-              id: numericHash('fake-value-id-mortgage'),
-              subcategory: numericHash('fake-subcategory-id-my-mortgage'),
-              value: {
-                principal: 15599823,
-                paymentsRemaining: 175,
-                rate: 0.169,
+                skip: null,
+                simple: null,
+                fx: null,
+                mortgage: null,
               },
-              skip: false,
-            },
-          ]),
-          creditLimit: [
-            {
-              subcategory: numericHash('fake-subcategory-id-cc'),
-              value: 600000,
-            },
-          ],
-          currencies: [
-            {
-              id: numericHash('some-fake-currency-id'),
-              currency: 'USD',
-              rate: 1 / 1.24859,
-            },
-          ],
-        });
+              {
+                subcategory: numericHash('fake-subcategory-id-my-mortgage'),
+                mortgage: {
+                  principal: 15599823,
+                  paymentsRemaining: 175,
+                  rate: 0.169,
+                },
+                skip: false,
+                simple: null,
+                fx: null,
+                option: null,
+              },
+            ]),
+            creditLimit: [
+              {
+                subcategory: numericHash('fake-subcategory-id-cc'),
+                value: 600000,
+              },
+            ],
+            currencies: [
+              {
+                currency: 'USD',
+                rate: 1 / 1.24859,
+              },
+            ],
+          },
+        );
       });
 
       it('should reset the active ID', async () => {
@@ -624,35 +632,33 @@ describe('Net worth entry form', () => {
       it('should call onCreate when hitting finish', async () => {
         expect.assertions(32);
         await setup();
-        expect(props.onCreate).toHaveBeenCalledWith<[CreateEntry]>(
-          expect.objectContaining<Partial<CreateEntry>>({
+        expect(props.onCreate).toHaveBeenCalledWith<[Create<NetWorthEntry>]>(
+          expect.objectContaining<Partial<Create<NetWorthEntry>>>({
             date: new Date(newDate),
             values: expect.arrayContaining([
               expect.objectContaining({
                 subcategory: numericHash('fake-subcategory-id-bank-account'),
-                value: 400012,
+                simple: 400012,
                 skip: null,
               }),
               expect.objectContaining({
                 subcategory: numericHash('fake-subcategory-id-some-share'),
-                value: [
-                  {
-                    units: 1006,
-                    vested: 0,
-                    strikePrice: 1440.2,
-                    marketPrice: 2093.7,
-                  },
-                ],
+                option: {
+                  units: 1006,
+                  vested: 0,
+                  strikePrice: 1440.2,
+                  marketPrice: 2093.7,
+                },
                 skip: null,
               }),
               expect.objectContaining({
                 subcategory: numericHash('fake-subcategory-id-cc'),
-                value: -15901,
+                simple: -15901,
                 skip: false,
               }),
               expect.objectContaining({
                 subcategory: numericHash('fake-subcategory-id-my-mortgage'),
-                value: {
+                mortgage: {
                   principal: 15599823,
                   paymentsRemaining: 175,
                   rate: 0.169,

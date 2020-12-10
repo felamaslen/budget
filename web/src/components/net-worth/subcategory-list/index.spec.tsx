@@ -3,6 +3,7 @@ import React from 'react';
 import numericHash from 'string-hash';
 
 import { NetWorthSubcategoryList, Props } from './index';
+import { NetWorthCategoryType } from '~client/types';
 
 describe('NetWorthSubcategoryList', () => {
   const onCreate = jest.fn();
@@ -12,7 +13,7 @@ describe('NetWorthSubcategoryList', () => {
   const props: Props = {
     parent: {
       id: numericHash('my-category'),
-      type: 'asset',
+      type: NetWorthCategoryType.Asset,
       category: 'Cash',
       color: 'green',
       isOption: false,
@@ -70,7 +71,7 @@ describe('NetWorthSubcategoryList', () => {
         ...props,
         parent: {
           ...props.parent,
-          type: 'liability',
+          type: NetWorthCategoryType.Liability,
           category: 'CC',
         },
         subcategories: [
@@ -118,7 +119,7 @@ describe('NetWorthSubcategoryList', () => {
         ...props,
         parent: {
           ...props.parent,
-          type: 'asset',
+          type: NetWorthCategoryType.Asset,
           category: 'Options',
           isOption: true,
         },

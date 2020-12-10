@@ -1,16 +1,36 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { getItems } from './selectors';
 import { SortItemsPre, SortItemsPost, CustomSelector } from './types';
-import { OnUpdateList, OnDeleteList } from '~client/actions';
-import { Id, Item, Create } from '~client/types';
 
-const identitySelector = <E extends {}>(): { [id: string]: Partial<E> } => ({});
+import { moreListDataReceived } from '~client/actions';
+import { isExtendedListPage, PAGE_LIST_LIMIT } from '~client/constants/data';
+import { OnDeleteList, OnUpdateList } from '~client/hooks';
+import { getListOffset } from '~client/selectors';
+import {
+  Id,
+  ListItem,
+  ListItemInput,
+  PageListCost,
+  PageListExtended,
+  PageListStandard,
+  useMoreListDataExtendedQuery,
+  useMoreListDataStandardQuery,
+  WithIds,
+} from '~client/types';
 
-export type ItemExtraPropsMap<E extends {}> = { [id: string]: Partial<E> };
+const identitySelector = <E extends Record<string, unknown>>(): {
+  [id: string]: Partial<E>;
+} => ({});
 
-export function useSortedItems<I extends Item, P extends string, E extends {}>(
+export type ItemExtraPropsMap<E extends Record<string, unknown>> = { [id: string]: Partial<E> };
+
+export function useSortedItems<
+  I extends ListItem,
+  P extends string,
+  E extends Record<string, unknown>
+>(
   page: P,
   sortItemsPre?: SortItemsPre<I>,
   sortItemsPost?: SortItemsPost<I, E>,
@@ -34,23 +54,23 @@ export function useSortedItems<I extends Item, P extends string, E extends {}>(
   return { itemsSorted, extraProps };
 }
 
-export function useMobileEditModal<I extends Item, P extends string>(
-  itemsSorted: I[],
-  actionOnUpdate: OnUpdateList<I, P, void>,
-  actionOnDelete: OnDeleteList<I, P, void>,
+export function useMobileEditModal<I extends ListItemInput>(
+  itemsSorted: WithIds<I>[],
+  actionOnUpdate: OnUpdateList<I>,
+  actionOnDelete: OnDeleteList<I>,
 ): {
   active: boolean;
   activate: (id: Id) => void;
-  item: I | undefined;
+  item: WithIds<I> | undefined;
   onCancel: () => void;
-  onSubmit: (delta: Create<I>) => void;
+  onSubmit: (id: Id, delta: I) => void;
   onDelete: () => void;
 } {
   const [editingId, setEditingId] = useState<Id | null>(null);
-  const item = useMemo<I | undefined>(() => itemsSorted.find(({ id }) => id === editingId), [
-    editingId,
-    itemsSorted,
-  ]);
+  const item = useMemo<WithIds<I> | undefined>(
+    () => itemsSorted.find(({ id }) => id === editingId),
+    [editingId, itemsSorted],
+  );
   const active = !!editingId;
 
   const onCancel = useCallback(() => setEditingId(null), []);
@@ -58,12 +78,12 @@ export function useMobileEditModal<I extends Item, P extends string>(
   const activate = useCallback((id: Id) => setEditingId(id), []);
 
   const onSubmit = useCallback(
-    (delta: Create<I>): void => {
+    (id: Id, delta: I): void => {
       if (!item) {
         return;
       }
       setEditingId(null);
-      actionOnUpdate(item.id, delta, item);
+      actionOnUpdate(id, delta, item);
     },
     [item, actionOnUpdate],
   );
@@ -77,4 +97,70 @@ export function useMobileEditModal<I extends Item, P extends string>(
   }, [item, actionOnDelete]);
 
   return { active, activate, onCancel, onSubmit, onDelete, item };
+}
+
+function useMoreArgs<P extends PageListCost>(page: P): { page: P; offset: number; limit: number } {
+  const offset = useSelector(getListOffset(page));
+  return { page, offset: (offset ?? 0) + 1, limit: PAGE_LIST_LIMIT };
+}
+
+type LoadMore = () => Promise<void>;
+
+function useMoreItemsStandard(page: PageListStandard): LoadMore {
+  const dispatch = useDispatch();
+  const args = useMoreArgs(page);
+
+  const [{ data, fetching, stale }, fetchMore] = useMoreListDataStandardQuery({
+    pause: true,
+    variables: args,
+  });
+
+  useEffect(() => {
+    if (data?.readListStandard?.items && !fetching && !stale) {
+      dispatch(
+        moreListDataReceived(page, {
+          items: data.readListStandard.items,
+          olderExists: data.readListStandard.olderExists,
+        }),
+      );
+    }
+  }, [page, dispatch, data, fetching, stale]);
+
+  return useCallback(async (): Promise<void> => {
+    fetchMore();
+  }, [fetchMore]);
+}
+
+function useMoreItemsExtended(page: PageListExtended): LoadMore {
+  const dispatch = useDispatch();
+  const args = useMoreArgs(page);
+
+  const [{ data, fetching, stale }, fetchMore] = useMoreListDataExtendedQuery({
+    pause: true,
+    variables: args,
+  });
+
+  useEffect(() => {
+    if (data?.readListExtended?.items && !fetching && !stale) {
+      dispatch(
+        moreListDataReceived(page, {
+          items: data.readListExtended.items,
+          olderExists: data.readListExtended.olderExists,
+        }),
+      );
+    }
+  }, [page, dispatch, data, fetching, stale]);
+
+  return useCallback(async (): Promise<void> => {
+    fetchMore();
+  }, [fetchMore]);
+}
+
+export function useMoreItems(page: PageListCost): LoadMore {
+  const useMoreItemsHook = useMemo(
+    () => (isExtendedListPage(page) ? useMoreItemsExtended : useMoreItemsStandard),
+    [page],
+  );
+
+  return useMoreItemsHook(page as never);
 }

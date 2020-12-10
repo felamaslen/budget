@@ -5,13 +5,13 @@ import Navigation, { Props as NavigationProps } from './navigation';
 
 import * as Styled from './styles';
 import { ButtonCancel } from '~client/styled/shared/button';
-import { CreateEdit } from '~client/types/crud';
-import { Entry } from '~client/types/net-worth';
+import { Id, NetWorthEntryInputNative as NetWorthEntryInput } from '~client/types';
 
 export type Props = NavigationProps & {
   add?: boolean;
-  step?: Step;
-  item: CreateEdit<Entry>;
+  step: Step;
+  id?: Id;
+  item: NetWorthEntryInput;
   onComplete: (event: React.MouseEvent) => void;
 };
 

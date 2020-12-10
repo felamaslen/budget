@@ -17,30 +17,35 @@ import {
 } from '~client/components/form-field';
 import { GraphFunds } from '~client/components/graph-funds';
 import { makeField, ModalFields } from '~client/components/modal-dialog';
-import { useIsMobile, usePersistentState } from '~client/hooks';
+import { useIsMobile, useListCrudFunds, usePersistentState } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
-import { Cache } from '~client/reducers/funds';
 import {
-  getCurrentFundsCache,
+  getFundsCache,
   getGainsForRow,
   getPricesForRow,
   getRowGains,
+  PriceCache,
 } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import { Page, Fund, Delta } from '~client/types';
+import {
+  Delta,
+  FundInputNative as FundInput,
+  FundNative as Fund,
+  PageNonStandard,
+} from '~client/types';
 
 const fields = {
   item: FormFieldTextInline,
   transactions: FormFieldTransactionsInline,
-} as Fields<Fund>;
+} as Fields<FundInput>;
 
 const fieldsMobile = {
   item: FundNameMobile,
   transactions: FundDetailMobile,
 };
 
-const modalFields: ModalFields<Fund> = {
+const modalFields: ModalFields<FundInput> = {
   item: makeField('item', FormFieldText),
   transactions: makeField('transactions', FormFieldTransactions),
   allocationTarget: makeField('allocationTarget', FormFieldNumber, 'Allocation'),
@@ -54,14 +59,8 @@ type ComposedProps = {
   [id: number]: Pick<FundProps, 'gain' | 'prices'>;
 };
 
-const nullComposedProps: ComposedProps = {};
-const makeComposedSelector = (cache?: Cache): ((items: Fund[]) => ComposedProps) => {
-  if (!cache) {
-    return (): ComposedProps => nullComposedProps;
-  }
-
+const makeComposedSelector = (cache: PriceCache): ((items: Fund[]) => ComposedProps) => {
   const { startTime, cacheTimes, prices } = cache;
-
   return (items: Fund[]): ComposedProps => {
     const rowGains = getRowGains(items, cache);
     return items.reduce<ComposedProps>(
@@ -77,7 +76,7 @@ const makeComposedSelector = (cache?: Cache): ((items: Fund[]) => ComposedProps)
   };
 };
 
-const itemProcessor = (fund: Fund): Pick<FundProps, 'name' | 'isSold'> => ({
+const itemProcessor = (fund: FundInput): Pick<FundProps, 'name' | 'isSold'> => ({
   name: fund.item,
   isSold: isSold(fund.transactions),
 });
@@ -92,15 +91,26 @@ const makeSortItems = ({ criteria, direction }: Sort): SortItems => (funds, prop
 
 export const Funds: React.FC = () => {
   const isMobile = useIsMobile();
-  const cache = useSelector(getCurrentFundsCache);
+  const cache = useSelector(getFundsCache);
   const composedSelector = useMemo(() => makeComposedSelector(cache), [cache]);
   const [sort, setSort] = usePersistentState<Sort>(defaultSort, 'funds_sort', isSort);
   const sortItems = useMemo(() => makeSortItems(sort), [sort]);
 
+  const { onCreate, onUpdate, onDelete } = useListCrudFunds();
+
   return (
     <Styled.PageFunds>
-      <AccessibleList<Fund, Page.funds, 'item' | 'transactions', FundProps, HeadProps>
-        page={Page.funds}
+      <AccessibleList<
+        FundInput,
+        PageNonStandard.Funds,
+        'item' | 'transactions',
+        FundProps,
+        HeadProps
+      >
+        page={PageNonStandard.Funds}
+        onCreate={onCreate}
+        onUpdate={onUpdate}
+        onDelete={onDelete}
         color={pageColor(colors.funds.main)}
         fields={fields}
         fieldsMobile={fieldsMobile}

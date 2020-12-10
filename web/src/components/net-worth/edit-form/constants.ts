@@ -1,7 +1,6 @@
 export const enum Step {
   Date,
   Currencies,
-  Values,
   Assets,
   Liabilities,
 }

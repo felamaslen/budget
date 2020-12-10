@@ -1,15 +1,20 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import Upper from './upper';
-import { Period, Grouping } from '~client/constants/analysis';
+
+import Upper, { Props } from './upper';
+
+import { AnalysisGroupBy, AnalysisPeriod } from '~client/types';
 
 describe('PageAnalysis / <Upper />', () => {
-  const props = {
-    period: Period.year,
-    grouping: Grouping.category,
+  const onRequest = jest.fn();
+
+  const props: Props = {
+    period: AnalysisPeriod.Year,
+    groupBy: AnalysisGroupBy.Category,
     page: 0,
     description: 'foo',
-    onRequest: jest.fn(),
+    loading: false,
+    onRequest,
   };
 
   describe('period switcher', () => {
@@ -21,9 +26,9 @@ describe('PageAnalysis / <Upper />', () => {
 
     describe.each`
       group      | period
-      ${'month'} | ${Period.month}
-      ${'week'}  | ${Period.week}
-    `('when the selected period is $group', ({ period }: { period: Period }) => {
+      ${'month'} | ${AnalysisPeriod.Month}
+      ${'week'}  | ${AnalysisPeriod.Week}
+    `('when the selected period is $group', ({ period }: { period: AnalysisPeriod }) => {
       it('should render the group name', () => {
         expect.assertions(1);
         const { getByText } = render(<Upper {...props} />);
@@ -52,7 +57,7 @@ describe('PageAnalysis / <Upper />', () => {
             fireEvent.click(radio);
           });
 
-          expect(props.onRequest).not.toHaveBeenCalled();
+          expect(onRequest).not.toHaveBeenCalled();
         });
       } else {
         it('should not be checked', () => {
@@ -70,73 +75,73 @@ describe('PageAnalysis / <Upper />', () => {
             fireEvent.click(radio);
           });
 
-          expect(props.onRequest).toHaveBeenCalledTimes(1);
-          expect(props.onRequest).toHaveBeenCalledWith({ period });
+          expect(onRequest).toHaveBeenCalledTimes(1);
+          expect(onRequest).toHaveBeenCalledWith({ period });
         });
       }
     });
   });
 
-  describe('grouping switcher', () => {
+  describe('groupBy switcher', () => {
     it('should be rendered', () => {
       expect.assertions(1);
       const { getByText } = render(<Upper {...props} />);
-      expect(getByText('Grouping:')).toBeInTheDocument();
+      expect(getByText('Group by:')).toBeInTheDocument();
     });
 
     describe.each`
-      group         | grouping
-      ${'category'} | ${Grouping.category}
-      ${'shop'}     | ${Grouping.shop}
-    `('when the selected group is $group', ({ grouping }: { grouping: Grouping }) => {
+      group         | groupBy
+      ${'category'} | ${AnalysisGroupBy.Category}
+      ${'shop'}     | ${AnalysisGroupBy.Shop}
+    `('when the selected group is $group', ({ groupBy }: { groupBy: AnalysisGroupBy }) => {
       it('should render the group name', () => {
         expect.assertions(1);
         const { getByText } = render(<Upper {...props} />);
-        expect(getByText(grouping)).toBeInTheDocument();
+        expect(getByText(groupBy)).toBeInTheDocument();
       });
       it('should render a radio button', () => {
         expect.assertions(1);
         const { getByTestId } = render(<Upper {...props} />);
-        const radio = getByTestId(`input-grouping-${grouping}`) as HTMLInputElement;
+        const radio = getByTestId(`input-groupby-${groupBy}`) as HTMLInputElement;
         expect(radio).toBeInTheDocument();
       });
 
-      if (grouping === props.grouping) {
+      if (groupBy === props.groupBy) {
         it('should be checked', () => {
           expect.assertions(1);
           const { getByTestId } = render(<Upper {...props} />);
-          const radio = getByTestId(`input-grouping-${grouping}`) as HTMLInputElement;
+          const radio = getByTestId(`input-groupby-${groupBy}`) as HTMLInputElement;
           expect(radio.checked).toBe(true);
         });
 
-        it('should not change the grouping on click', () => {
+        it('should not change the groupBy on click', () => {
           expect.assertions(1);
           const { getByTestId } = render(<Upper {...props} />);
-          const radio = getByTestId(`input-grouping-${grouping}`) as HTMLInputElement;
+          const radio = getByTestId(`input-groupby-${groupBy}`) as HTMLInputElement;
           act(() => {
             fireEvent.click(radio);
           });
 
-          expect(props.onRequest).not.toHaveBeenCalled();
+          expect(onRequest).not.toHaveBeenCalled();
         });
       } else {
         it('should not be checked', () => {
           expect.assertions(1);
           const { getByTestId } = render(<Upper {...props} />);
-          const radio = getByTestId(`input-grouping-${grouping}`) as HTMLInputElement;
+          const radio = getByTestId(`input-groupby-${groupBy}`) as HTMLInputElement;
           expect(radio.checked).toBe(false);
         });
 
-        it('should change the grouping on click', () => {
+        it('should change the groupBy on click', () => {
           expect.assertions(2);
           const { getByTestId } = render(<Upper {...props} />);
-          const radio = getByTestId(`input-grouping-${grouping}`) as HTMLInputElement;
+          const radio = getByTestId(`input-groupby-${groupBy}`) as HTMLInputElement;
           act(() => {
             fireEvent.click(radio);
           });
 
-          expect(props.onRequest).toHaveBeenCalledTimes(1);
-          expect(props.onRequest).toHaveBeenCalledWith({ grouping });
+          expect(onRequest).toHaveBeenCalledTimes(1);
+          expect(onRequest).toHaveBeenCalledWith({ groupBy });
         });
       }
     });
@@ -167,17 +172,17 @@ describe('PageAnalysis / <Upper />', () => {
       fireEvent.click(previous);
     });
 
-    expect(props.onRequest).toHaveBeenCalledTimes(1);
-    expect(props.onRequest).toHaveBeenCalledWith({ page: 2 });
+    expect(onRequest).toHaveBeenCalledTimes(1);
+    expect(onRequest).toHaveBeenCalledWith({ page: 2 });
 
-    props.onRequest.mockClear();
+    onRequest.mockClear();
 
     act(() => {
       fireEvent.click(next);
     });
 
-    expect(props.onRequest).toHaveBeenCalledTimes(1);
-    expect(props.onRequest).toHaveBeenCalledWith({ page: 0 });
+    expect(onRequest).toHaveBeenCalledTimes(1);
+    expect(onRequest).toHaveBeenCalledWith({ page: 0 });
   });
 
   it('should render a description', () => {

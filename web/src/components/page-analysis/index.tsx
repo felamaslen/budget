@@ -1,150 +1,58 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef, useContext } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useCallback, useMemo } from 'react';
 
-import ListTree, { Props as PropsListTree } from './list-tree';
+import {
+  getBlocks,
+  getForest,
+  getDeepBlocks,
+  getDeepForest,
+  useAnalysisData,
+  useAnalysisDeepBlock,
+  useBlockDimensions,
+  useTreeToggle,
+} from './hooks';
+import ListTree from './list-tree';
 import * as Styled from './styles';
 import Timeline from './timeline';
 import Upper from './upper';
 
-import { analysisRequested, blockRequested, blockReceived } from '~client/actions';
-import { BlockPacker, statusHeight } from '~client/components/block-packer';
-import {
-  ANALYSIS_VIEW_WIDTH,
-  ANALYSIS_VIEW_HEIGHT,
-  Period,
-  Grouping,
-} from '~client/constants/analysis';
-import { usePersistentState, ResizeContext, useMediaQuery } from '~client/hooks';
+import { BlockPacker } from '~client/components/block-packer';
+import { isAnalysisPage } from '~client/constants/data';
 import { formatCurrency, capitalise } from '~client/modules/format';
 import {
-  getAnalysisPeriod,
-  getAnalysisGrouping,
-  getAnalysisPage,
-  getCostAnalysis,
-  getDeepCost,
-  getBlocks,
-  getDeepBlocks,
-  getAnalysisTimeline,
-  getAnalysisDescription,
-} from '~client/selectors';
-import { breakpointBase } from '~client/styled/mixins';
-import { breakpoints } from '~client/styled/variables';
-import { Page, MainBlockName, AnalysisTreeVisible, FlexBlocks, BlockItem } from '~client/types';
-
-const keyTreeVisible = 'analysis_treeVisible';
-const keyState = 'analysis_state';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const validateTreeVisible = (value: any | AnalysisTreeVisible): value is AnalysisTreeVisible =>
-  value !== null &&
-  typeof value === 'object' &&
-  Object.entries(value).every(
-    ([key, keyValue]) => typeof key === 'string' && typeof keyValue === 'boolean',
-  );
-
-const defaultTreeVisible: AnalysisTreeVisible = { [Page.bills]: false };
-
-function useTreeToggle(): [AnalysisTreeVisible, PropsListTree['toggleTreeItem']] {
-  const [treeVisible, setTreeVisible] = usePersistentState<AnalysisTreeVisible>(
-    defaultTreeVisible,
-    keyTreeVisible,
-    validateTreeVisible,
-  );
-
-  const toggleTreeItem = useCallback(
-    (name: MainBlockName) =>
-      setTreeVisible((last) => ({
-        ...last,
-        [name]: last[name] === false,
-      })),
-    [setTreeVisible],
-  );
-
-  return [treeVisible, toggleTreeItem];
-}
-
-function useBlockDimensions(): { width: number; height: number } {
-  const windowWidth = useContext(ResizeContext);
-  const largerThanSmallMobile = useMediaQuery(breakpointBase(breakpoints.mobileSmall));
-  const isDesktop = useMediaQuery(breakpointBase(breakpoints.tablet));
-
-  if (!isDesktop) {
-    return {
-      width: windowWidth,
-      height:
-        (largerThanSmallMobile ? Styled.blocksHeightMobile : breakpoints.mobileSmall) -
-        statusHeight,
-    };
-  }
-
-  return { width: ANALYSIS_VIEW_WIDTH, height: ANALYSIS_VIEW_HEIGHT - statusHeight };
-}
-
-type AnalysisState = { period: Period; grouping: Grouping; page: number };
-const defaultState: AnalysisState = { period: Period.year, grouping: Grouping.category, page: 0 };
-
-function usePersistentAnalysisState(
-  onRequest: (nextState: Partial<AnalysisState>) => void,
-): AnalysisState {
-  const period = useSelector(getAnalysisPeriod);
-  const grouping = useSelector(getAnalysisGrouping);
-  const page = useSelector(getAnalysisPage);
-
-  const [persistentState, setPersistentState] = usePersistentState<AnalysisState>(
-    defaultState,
-    keyState,
-  );
-  const loadedFromPersistent = useRef<boolean>(false);
-  useEffect(() => {
-    if (!loadedFromPersistent.current) {
-      loadedFromPersistent.current = true;
-      onRequest(persistentState);
-    }
-  }, [persistentState, onRequest]);
-
-  useEffect(() => {
-    setPersistentState({ period, grouping, page });
-  }, [setPersistentState, period, grouping, page]);
-
-  return { period, grouping, page };
-}
+  CategoryCostTree,
+  CategoryCostTreeDeep,
+  GQL,
+  MainBlockName,
+  PageNonStandard,
+} from '~client/types';
 
 export const PageAnalysis: React.FC = () => {
-  const timeline = useSelector(getAnalysisTimeline);
-  const cost = useSelector(getCostAnalysis);
-  const costDeep = useSelector(getDeepCost);
+  const [query, onRequest, { cost, saved, description, timeline }, loading] = useAnalysisData();
+
   const [treeVisible, toggleTreeItem] = useTreeToggle();
+
   const { width, height } = useBlockDimensions();
-  const getFilteredBlocks = useMemo(() => getBlocks(width, height, treeVisible), [
+
+  const forest = useMemo(() => getForest(cost, saved), [cost, saved]);
+  const blocks = useMemo(() => getBlocks(forest, width, height, treeVisible), [
+    forest,
+    treeVisible,
     width,
     height,
-    treeVisible,
   ]);
-  const blocks: FlexBlocks<BlockItem> = useSelector(getFilteredBlocks);
 
-  const getSizedDeepBlocks = useMemo(() => getDeepBlocks(width, height), [width, height]);
-  const blocksDeep: FlexBlocks<BlockItem> | undefined = useSelector(getSizedDeepBlocks);
-  const description = useSelector(getAnalysisDescription);
-
-  const dispatch = useDispatch();
+  const [, setCategoryDeep, costDeep, loadingDeep] = useAnalysisDeepBlock(query);
   const onBlockClick = useCallback(
     (name: string | null): void => {
-      if (name) {
-        dispatch(blockRequested(name));
-      } else {
-        dispatch(blockReceived(undefined));
-      }
+      setCategoryDeep(name && isAnalysisPage(name) ? name : null);
     },
-    [dispatch],
-  );
-  const onRequest = useCallback(
-    (request?: Partial<AnalysisState>): void => {
-      dispatch(analysisRequested(request));
-    },
-    [dispatch],
+    [setCategoryDeep],
   );
 
-  const { period, grouping, page } = usePersistentAnalysisState(onRequest);
+  const blocksDeep = useMemo(
+    () => (costDeep ? getDeepBlocks(getDeepForest(costDeep), width, height) : undefined),
+    [costDeep, width, height],
+  );
 
   const [activeBlock, setActiveBlock] = useState<[MainBlockName | null, string | null]>([
     null,
@@ -156,43 +64,42 @@ export const PageAnalysis: React.FC = () => {
   const [treeOpen, setTreeOpen] = useState({});
 
   const status = useMemo(() => {
-    const activeCost = costDeep || cost;
+    const activeCost: (GQL<CategoryCostTree> | GQL<CategoryCostTreeDeep>)[] = costDeep ?? cost;
     if (!(activeCost && activeMain)) {
       return '';
     }
 
-    const main = activeCost.find(({ name }) => name === activeMain);
+    const main = activeCost.find(({ item }) => item === activeMain);
     if (!main) {
       return '';
     }
     if (activeSub) {
-      const { total } = main?.subTree?.find(({ name }) => name === activeSub) ?? { total: 0 };
+      const total = main?.tree?.find(({ category }) => category === activeSub)?.sum ?? 0;
 
       return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(total, { raw: true })})`;
     }
 
-    return `${capitalise(activeMain)} (${formatCurrency(main.total, {
+    const total = main.tree.reduce<number>((last, { sum }) => last + sum, 0);
+
+    return `${capitalise(activeMain)} (${formatCurrency(total, {
       raw: true,
     })})`;
   }, [cost, costDeep, activeMain, activeSub]);
 
-  if (!cost) {
-    return null;
-  }
-
   return (
-    <Styled.Page page={Page.analysis}>
+    <Styled.Page page={PageNonStandard.Analysis}>
       <Upper
-        period={period}
-        grouping={grouping}
-        page={page}
+        period={query.period}
+        groupBy={query.groupBy}
+        page={query.page ?? 0}
         description={description ?? ''}
+        loading={loading || loadingDeep}
         onRequest={onRequest}
       />
       <Styled.Outer>
         {timeline && <Timeline data={timeline} />}
         <ListTree
-          cost={cost}
+          cost={forest}
           treeVisible={treeVisible}
           toggleTreeItem={toggleTreeItem}
           treeOpen={treeOpen}

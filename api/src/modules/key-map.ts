@@ -13,15 +13,15 @@ export type DJMap<D extends Row> = {
 export function mapInternalToExternal<D extends Row = Row, J extends Row = Row>(map: DJMap<D>) {
   return (dbResult: D): J =>
     unflatten(
-      map.reduce<Partial<J>>((items, { internal, external }) => {
+      map.reduce<J>((items, { internal, external }) => {
         if (internal in items) {
           const { [internal]: value, ...rest } = items;
 
-          return { ...rest, [external]: value };
+          return { ...rest, [external]: value } as J;
         }
 
         return items;
-      }, dbResult),
+      }, (dbResult as unknown) as J),
     );
 }
 

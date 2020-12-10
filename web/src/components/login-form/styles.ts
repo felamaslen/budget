@@ -1,7 +1,17 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 import { rem, breakpoint } from '~client/styled/mixins';
-import { Button } from '~client/styled/shared';
+import { Button, FlexCenter } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
+
+export const TitleContainer = styled(FlexCenter)`
+  display: flex;
+  justify-content: space-between;
+  margin: 0 ${rem(4)};
+
+  ${breakpoint(breakpoints.mobile)} {
+    margin: 0 ${rem(8)} 0 ${rem(18)};
+  }
+`;
 
 export const Title = styled.h3`
   margin: 0;
@@ -10,11 +20,16 @@ export const Title = styled.h3`
   font-size: 24px;
   text-align: center;
   color: ${colors.light.light};
+  white-space: nowrap;
 
   ${breakpoint(breakpoints.mobile)} {
     height: 60px;
     line-height: 60px;
   }
+`;
+
+export const SpinnerSpace = styled.div`
+  flex: 0 0 ${rem(50)};
 `;
 
 export const Form = styled.div`
@@ -39,10 +54,10 @@ export const FormInner = styled.div`
 
 export const NumberInputPad = styled.div`
   display: grid;
-  padding: 0 6px 12px 6px;
+  padding: 0 ${rem(6)} ${rem(12)} ${rem(6)};
   grid-template-rows: auto auto auto auto;
   grid-template-columns: repeat(3, 1fr);
-  grid-gap: 12px;
+  grid-gap: ${rem(12)};
   height: 170px;
   background: ${colors.translucent.dark.mediumDark};
   box-shadow: inset 0 0 13px ${colors.shadow.mediumLight};
@@ -116,14 +131,14 @@ export const PinDisplay = styled.div`
   flex-flow: row nowrap;
   margin-bottom: 10px;
   ${breakpoint(breakpoints.mobile)} {
-    margin: 0 12px 16px 12px;
+    margin: 0 ${rem(12)} ${rem(16)} ${rem(12)};
   }
 `;
 
 export const InputPin = styled.div<{ done: boolean }>`
   background-color: ${colors.dark.light};
   flex: 1 0 0;
-  font-size: 64px;
+  font-size: ${rem(64)};
   height: ${rem(60)};
   margin: 0 ${rem(6)};
   position: relative;

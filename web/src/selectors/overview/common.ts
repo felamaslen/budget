@@ -7,7 +7,7 @@ import { createSelector } from 'reselect';
 import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import { getMonthDatesList, inclusiveMonthDifference } from '~client/modules/date';
 import { State } from '~client/reducers/types';
-import { Page, Cost, CostProcessed } from '~client/types';
+import { PageNonStandard, Cost, CostProcessed } from '~client/types';
 
 export const getCost = (state: State): Cost => state.overview.cost;
 
@@ -15,15 +15,17 @@ const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
 
 export const getSpendingColumn = <K extends keyof CostProcessed = never>(dates: Date[]) => (
   data: Cost & Pick<CostProcessed, K>,
-): Cost & Pick<CostProcessed, K | 'spending'> => ({
+): Cost & Pick<CostProcessed, K> & Pick<CostProcessed, 'spending'> => ({
   ...data,
   spending: dates.map((_: Date, index) =>
     spendingCategories.reduce((sum, category) => sum + (data[category]?.[index] ?? 0), 0),
   ),
 });
 
-export const getStartDate = (state: Pick<State, Page.overview>): Date => state.overview.startDate;
-export const getEndDate = (state: Pick<State, Page.overview>): Date => state.overview.endDate;
+export const getStartDate = (state: Pick<State, PageNonStandard.Overview>): Date =>
+  state.overview.startDate;
+export const getEndDate = (state: Pick<State, PageNonStandard.Overview>): Date =>
+  state.overview.endDate;
 
 export const getNumMonths = createSelector(getStartDate, getEndDate, inclusiveMonthDifference);
 

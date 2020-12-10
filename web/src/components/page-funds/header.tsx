@@ -3,15 +3,15 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import * as Styled from './styles';
 import { HeadProps } from './types';
-import { fundsViewSoldToggled, fundsRequested } from '~client/actions';
+import { fundsViewSoldToggled } from '~client/actions';
 import { ListHeadFunds, ListHeadFundsMobile } from '~client/components/list-head-funds';
 import { TodayContext, useNow } from '~client/hooks';
 import {
-  getFundsCost,
-  getViewSoldFunds,
-  getPeriod,
-  getFundsCachedValue,
   getAnnualisedFundReturns,
+  getFundsCachedValue,
+  getFundsCost,
+  getHistoryOptions,
+  getViewSoldFunds,
 } from '~client/selectors';
 
 type Props = {
@@ -23,13 +23,12 @@ export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
   const now = useNow();
   const totalCost = useSelector(getFundsCost(today));
   const viewSoldFunds = useSelector(getViewSoldFunds);
-  const period = useSelector(getPeriod);
+  const historyOptions = useSelector(getHistoryOptions);
   const annualisedFundReturns = useSelector(getAnnualisedFundReturns);
   const cachedValue = useSelector(getFundsCachedValue(now));
 
   const dispatch = useDispatch();
   const onViewSoldToggle = useCallback(() => dispatch(fundsViewSoldToggled()), [dispatch]);
-  const onReloadPrices = useCallback(() => dispatch(fundsRequested(false)), [dispatch]);
 
   return (
     <>
@@ -38,7 +37,6 @@ export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
           totalCost={totalCost}
           annualisedFundReturns={annualisedFundReturns}
           cachedValue={cachedValue}
-          onReloadPrices={onReloadPrices}
         />
       )}
       {!isMobile && (
@@ -48,11 +46,10 @@ export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
           <ListHeadFunds
             totalCost={totalCost}
             annualisedFundReturns={annualisedFundReturns}
-            period={period}
+            historyOptions={historyOptions}
             cachedValue={cachedValue}
             viewSoldFunds={viewSoldFunds}
             onViewSoldToggle={onViewSoldToggle}
-            onReloadPrices={onReloadPrices}
             sort={sort}
             setSort={setSort}
           />

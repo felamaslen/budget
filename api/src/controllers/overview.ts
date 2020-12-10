@@ -1,14 +1,12 @@
 import {
   addMonths,
-  setYear,
-  setMonth,
-  getYear,
-  getMonth,
-  isAfter,
+  differenceInDays,
   differenceInMonths,
   endOfMonth,
+  isAfter,
+  setMonth,
+  setYear,
   startOfMonth,
-  differenceInDays,
 } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -21,7 +19,7 @@ import {
   selectTransactions,
   selectOldHomeEquity,
 } from '~api/queries';
-import { OverviewResponse, ListCategory, Transaction } from '~api/types';
+import { Transaction, Overview, QueryOverviewArgs, PageListStandard } from '~api/types';
 
 const {
   startYear,
@@ -29,6 +27,14 @@ const {
   numLast: pastMonths,
   numFuture: futureMonths,
 } = config.data.overview;
+
+const getNumMonths = (now: Date, start: Date, withFuture: boolean): number =>
+  (withFuture ? futureMonths : 0) + 1 + differenceInMonths(endOfMonth(now), startOfMonth(start));
+
+const mapMonths = (now: Date, start: Date, withFuture = false): Date[] =>
+  Array(getNumMonths(now, start, withFuture))
+    .fill(0)
+    .map((_, index) => endOfMonth(addMonths(start, index)));
 
 const minStartTime = endOfMonth(setYear(setMonth(new Date(), startMonth - 1), startYear));
 
@@ -39,18 +45,10 @@ const getStartTime = (now: Date): Date => {
 
 const getEndTime = (now: Date): Date => endOfMonth(addMonths(endOfMonth(now), futureMonths));
 
-const getNumMonths = (now: Date, start: Date, withFuture: boolean): number =>
-  (withFuture ? futureMonths : 0) + 1 + differenceInMonths(endOfMonth(now), startOfMonth(start));
-
-const mapMonths = (now: Date, start: Date, withFuture = false): Date[] =>
-  Array(getNumMonths(now, start, withFuture))
-    .fill(0)
-    .map((_, index) => endOfMonth(addMonths(start, index)));
-
 const getDisplayedMonths = (now: Date): Date[] => mapMonths(now, getStartTime(now), true);
 const getNonFutureMonths = (now: Date): Date[] => mapMonths(now, minStartTime, false);
 
-async function getFundValues(
+export async function getFundValues(
   db: DatabaseTransactionConnectionType,
   uid: number,
   now: Date,
@@ -60,11 +58,11 @@ async function getFundValues(
   return [...monthlyValues, ...Array(futureMonths).fill(monthlyValues[monthlyValues.length - 1])];
 }
 
-async function getMonthCost(
+export async function getMonthCost(
   db: DatabaseTransactionConnectionType,
   uid: number,
   now: Date,
-  category: ListCategory,
+  category: PageListStandard,
 ): Promise<number[]> {
   return getListCostSummary(db, uid, getDisplayedMonths(now), category);
 }
@@ -73,10 +71,12 @@ async function getMonthlyCategoryValues(
   db: DatabaseTransactionConnectionType,
   uid: number,
   now: Date,
-): Promise<OverviewResponse['cost']> {
+): Promise<
+  Pick<Overview['cost'], 'funds' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
+> {
   const [funds, income, bills, food, general, holiday, social] = await Promise.all<number[]>([
     getFundValues(db, uid, now),
-    ...config.data.listCategories.map((category) => getMonthCost(db, uid, now, category)),
+    ...Object.values(PageListStandard).map((category) => getMonthCost(db, uid, now, category)),
   ]);
 
   return { funds, income, bills, food, general, holiday, social };
@@ -137,6 +137,9 @@ export function calculateXIRRFromTransactions(
         }
 
         const next = previous.value - xnpv(previous.value) / xnpvDerivative(previous.value);
+        if (Number.isNaN(next)) {
+          return { done: true, value: DEFAULT_INVESTMENT_RATE };
+        }
 
         return { done: Math.abs(next) < tolerance, value: next };
       },
@@ -175,27 +178,26 @@ async function getOldHomeEquity(
   return rows.map((row) => row.home_equity);
 }
 
-const getYearMonth = (date: Date): [number, number] => [getYear(date), getMonth(date) + 1];
-
 export async function getOverviewData(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  now: Date = new Date(),
-): Promise<OverviewResponse> {
+  args: QueryOverviewArgs,
+): Promise<Overview> {
+  const now = args.now ?? new Date();
   const [cost, annualisedFundReturns] = await Promise.all([
     getMonthlyCategoryValues(db, uid, now),
     getAnnualisedFundReturns(db, uid, now),
   ]);
   const homeEquityOld = await getOldHomeEquity(db, uid, now);
 
+  const startTime = getStartTime(now);
+  const endTime = getEndTime(now);
+
   return {
-    startYearMonth: getYearMonth(getStartTime(now)),
-    endYearMonth: getYearMonth(getEndTime(now)),
-    currentYear: getYear(now),
-    currentMonth: getMonth(now) + 1,
-    futureMonths,
     annualisedFundReturns,
     homeEquityOld,
+    startDate: endOfMonth(startTime),
+    endDate: endOfMonth(endTime),
     cost,
   };
 }

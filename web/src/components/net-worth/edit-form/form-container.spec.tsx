@@ -9,8 +9,8 @@ describe('(net worth edit form) <FormContainer />', () => {
   const props: Props = {
     add: false,
     step: Step.Date,
+    id: numericHash('some-fake-id'),
     item: {
-      id: numericHash('some-fake-id'),
       date: new Date('2020-04-20'),
       values: [],
       creditLimit: [],

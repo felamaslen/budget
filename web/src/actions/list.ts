@@ -1,142 +1,147 @@
-import moize from 'moize';
-
 import { generateFakeId } from '~client/modules/data';
 import {
+  GQL,
   Id,
+  ListItemExtended,
+  ListItemInput,
+  ListReadResponse,
+  ListReadResponseExtended,
+  ListItemStandard,
+  Maybe,
   PageList,
-  PageListCalc,
-  Create,
-  CreateEdit,
-  DeltaEdit,
-  Item,
-  ListItem,
-  ReadResponse,
+  WithIds,
+  ReceiptItem,
 } from '~client/types';
 
 export const enum ListActionType {
   Created = '@@list/ITEM_CREATED',
   Updated = '@@list/ITEM_UPDATED',
   Deleted = '@@list/ITEM_DELETED',
-  MoreRequestInitiated = '@@list/MORE_REQUEST_INITIATED',
-  MoreRequested = '@@list/MORE_REQUESTED',
+  ReceiptCreated = '@@list/RECEIPT_CREATED',
+  OverviewUpdated = '@@list/OVERVIEW_UPDATED',
   MoreReceived = '@@list/MORE_RECEIVED',
 }
 
-export type ListItemCreated<I extends Item, P extends string> = {
+export type ListItemCreated<I extends ListItemInput, P extends PageList> = {
   type: ListActionType.Created;
   page: P;
-  delta: Create<I>;
-  fakeId: number;
+  delta: I;
+  fromServer: boolean;
+  id: Id;
+  originalFakeId?: Id;
 };
 
-export type OnCreateList<I extends Item, P extends string, O = ListItemCreated<I, P>> = (
-  delta: Create<I>,
-) => O;
+export const listItemCreated = <I extends ListItemInput, P extends PageList>(
+  page: P,
+  delta: I,
+  fromServer: boolean,
+  id?: Id,
+  originalFakeId?: Id,
+): ListItemCreated<I, P> => ({
+  type: ListActionType.Created,
+  page,
+  delta,
+  fromServer,
+  id: id ?? generateFakeId(),
+  originalFakeId,
+});
 
-export const listItemCreated = moize(
-  <I extends Item, P extends string = PageList>(page: P): OnCreateList<I, P> => (
-    delta,
-  ): ListItemCreated<I, P> => ({
-    type: ListActionType.Created,
-    page,
-    delta,
-    fakeId: generateFakeId(),
-  }),
-);
+export type ActionReceiptCreated = {
+  type: ListActionType.ReceiptCreated;
+  items: ReceiptItem[];
+};
 
-export type ListItemUpdated<I extends Item, P extends string> = {
+export const receiptCreated = (items: ReceiptItem[]): ActionReceiptCreated => ({
+  type: ListActionType.ReceiptCreated,
+  items,
+});
+
+export type ListItemUpdated<I extends ListItemInput, P extends PageList> = {
   type: ListActionType.Updated;
   page: P;
   id: Id;
-  delta: DeltaEdit<I>;
-  item: CreateEdit<I>;
+  delta: Partial<I>;
+  item: WithIds<I> | null;
+  fromServer: boolean;
 };
 
-export type OnUpdateList<I extends Item, P extends string, O = ListItemUpdated<I, P>> = (
+export const listItemUpdated = <I extends ListItemInput, P extends PageList = PageList>(
+  page: P,
   id: Id,
-  delta: DeltaEdit<I>,
-  item: CreateEdit<I>,
-) => O;
+  delta: Partial<I>,
+  item: WithIds<I> | null,
+  fromServer: boolean,
+): ListItemUpdated<I, P> => ({
+  page,
+  type: ListActionType.Updated,
+  id,
+  delta,
+  item,
+  fromServer,
+});
 
-export const listItemUpdated = moize(
-  <I extends Item, P extends string = PageList>(page: P): OnUpdateList<I, P> => (
-    id,
-    delta,
-    item,
-  ): ListItemUpdated<I, P> => ({
-    page,
-    type: ListActionType.Updated,
-    id,
-    delta,
-    item,
-  }),
-);
-
-export type ListItemDeleted<I extends Item, P extends string> = {
+export type ListItemDeleted<I extends ListItemInput, P extends PageList> = {
   type: ListActionType.Deleted;
   page: P;
   id: Id;
-  item: CreateEdit<I>;
+  item: I;
+  fromServer: boolean;
 };
 
-export type OnDeleteList<I extends Item, P extends string, O = ListItemDeleted<I, P>> = (
-  id: Id,
-  item: CreateEdit<I>,
-) => O;
-
-export const listItemDeleted = moize(
-  <I extends Item, P extends string = PageList>(page: P): OnDeleteList<I, P> => (
-    id,
-    item,
-  ): ListItemDeleted<I, P> => ({
-    page,
-    type: ListActionType.Deleted,
-    id,
-    item,
-  }),
-);
-
-export type MoreListDataRequestInitiated<P extends string> = {
-  type: ListActionType.MoreRequestInitiated;
-  page: P;
-};
-
-export const moreListDataRequestInitiated = <P extends string>(
+export const listItemDeleted = <I extends ListItemInput, P extends PageList = PageList>(
   page: P,
-): MoreListDataRequestInitiated<P> => ({
-  type: ListActionType.MoreRequestInitiated,
+  id: Id,
+  item: I,
+  fromServer: boolean,
+): ListItemDeleted<I, P> => ({
   page,
+  type: ListActionType.Deleted,
+  id,
+  item,
+  fromServer,
 });
 
-export type MoreListDataRequested<P extends string> = {
-  type: ListActionType.MoreRequested;
+export type ListOverviewUpdated<P extends PageList> = {
+  type: ListActionType.OverviewUpdated;
   page: P;
+  overviewCost: number[];
+  total?: Maybe<number>;
+  weekly?: Maybe<number>;
 };
 
-export const moreListDataRequested = <P extends string>(page: P): MoreListDataRequested<P> => ({
-  type: ListActionType.MoreRequested,
+export const listOverviewUpdated = <P extends PageList>(
+  page: P,
+  overviewCost: number[],
+  total?: Maybe<number>,
+  weekly?: Maybe<number>,
+): ListOverviewUpdated<P> => ({
+  type: ListActionType.OverviewUpdated,
   page,
+  overviewCost,
+  total,
+  weekly,
 });
 
 export type MoreListDataReceived<P extends string> = {
   type: ListActionType.MoreReceived;
   page: P;
-  res: P extends PageListCalc ? ReadResponse[P] : never;
+  res: Omit<GQL<ListReadResponse>, 'items'> & {
+    items: (ListItemStandard | ListItemExtended)[];
+  };
 };
 
-export const moreListDataReceived = <P extends string>(
+export const moreListDataReceived = <P extends PageList>(
   page: P,
-  res: P extends PageListCalc ? ReadResponse[P] : never,
+  res: P extends PageList ? ListReadResponse | ListReadResponseExtended : never,
 ): MoreListDataReceived<P> => ({
   type: ListActionType.MoreReceived,
   page,
   res,
 });
 
-export type ActionList<I extends ListItem, P extends string> =
+export type ActionList<I extends ListItemInput, P extends PageList> =
   | ListItemCreated<I, P>
   | ListItemUpdated<I, P>
   | ListItemDeleted<I, P>
-  | MoreListDataRequestInitiated<P>
-  | MoreListDataRequested<P>
+  | ListOverviewUpdated<P>
   | MoreListDataReceived<P>;

@@ -1,9 +1,6 @@
-import { AxiosInstance, AxiosResponse } from 'axios';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { replaceAtIndex } from 'replace-array';
 import * as Styled from './styles';
-import { listItemCreated } from '~client/actions';
 import {
   FormFieldText,
   FormFieldDate,
@@ -13,9 +10,8 @@ import {
   SelectOptions,
 } from '~client/components/form-field';
 import { ModalWindow } from '~client/components/modal-window';
-import { API_PREFIX } from '~client/constants/data';
-import { useCancellableRequest, useIsMobile } from '~client/hooks';
-import { formatCurrency } from '~client/modules/format';
+import { useIsMobile } from '~client/hooks';
+import { formatCurrency, toISO } from '~client/modules/format';
 import {
   Flex,
   Button,
@@ -25,34 +21,26 @@ import {
   FlexColumn,
 } from '~client/styled/shared';
 import {
-  Food,
-  General,
-  Social,
-  Page,
-  PageListCalcCategory,
   Delta,
-  ReceiptCategory,
+  GQL,
+  ListItemExtended,
+  ReceiptInput,
+  ReceiptPage,
+  useCreateReceiptMutation,
+  useReceiptItemQuery,
+  useReceiptItemsQuery,
 } from '~client/types';
 
 export type Props = {
   setAddingReceipt: (enabled: boolean) => void;
 };
 
-type Entry = Omit<Food | General | Social, 'date' | 'shop'> & { page: PageListCalcCategory };
+type Entry = Omit<GQL<ListItemExtended>, 'date' | 'shop'> & { page: ReceiptPage };
 
-const pageOptions: SelectOptions<PageListCalcCategory> = [
-  {
-    internal: Page.food,
-    external: 'Food',
-  },
-  {
-    internal: Page.general,
-    external: 'General',
-  },
-  {
-    internal: Page.social,
-    external: 'Social',
-  },
+const pageOptions: SelectOptions<ReceiptPage> = [
+  { internal: ReceiptPage.Food, external: 'Food' },
+  { internal: ReceiptPage.General, external: 'General' },
+  { internal: ReceiptPage.Social, external: 'Social' },
 ];
 
 type EntryProps = {
@@ -67,78 +55,69 @@ const inputPropsItem = { placeholder: 'Item' };
 const inputPropsCategory = { placeholder: 'Category', tabIndex: -1 };
 const inputPropsPage = { tabIndex: -1 };
 
-const requestCategoryPage = (
-  axios: AxiosInstance,
-  query: string,
-): Promise<AxiosResponse<ReceiptCategory[]>> =>
-  axios.get<ReceiptCategory[]>(`${API_PREFIX}/data/search/receipt/items?q=${query}`);
-
 function useAutocompleteCategoryPage(
   entries: Entry[],
   setEntries: (action: React.SetStateAction<Entry[]>) => void,
 ): [boolean, () => void] {
-  const [query, setQuery] = useState<string | null>(null);
+  const [query, setQuery] = useState<string[]>([]);
+
+  const [{ data, stale, fetching }] = useReceiptItemsQuery({
+    pause: !query.length,
+    variables: {
+      items: query,
+    },
+  });
 
   const requestItemInfo = useCallback(() => {
-    setQuery(entries.length ? entries.map((entry) => entry.item).join(',') : null);
+    setQuery(entries.map((entry) => entry.item));
   }, [entries]);
 
-  const handleResponse = useCallback(
-    (res: ReceiptCategory[]) => {
-      if (!res.length) {
-        return;
-      }
+  useEffect(() => {
+    if (!fetching && !stale && data?.receiptItems?.length) {
       setEntries((last) =>
-        last.map((entry) => {
-          const matchingResponse = res.find(({ item }) => item === entry.item);
+        last.map<Entry>((entry) => {
+          const matchingResponse = data?.receiptItems?.find(({ item }) => item === entry.item);
           return matchingResponse
-            ? { ...entry, category: matchingResponse.category, page: matchingResponse.page }
+            ? {
+                ...entry,
+                category: matchingResponse.category,
+                page: matchingResponse.page,
+              }
             : entry;
         }),
       );
-    },
-    [setEntries],
-  );
+    }
+  }, [fetching, stale, data, setEntries]);
 
-  const loading = useCancellableRequest<string | null, ReceiptCategory[], string>({
-    query,
-    sendRequest: requestCategoryPage,
-    handleResponse,
-  });
-
-  return [loading, requestItemInfo];
+  return [fetching, requestItemInfo];
 }
-
-type ItemResponse = { result: string | null };
-
-const requestItem = (axios: AxiosInstance, query: string): Promise<AxiosResponse<ItemResponse>> =>
-  axios.get<ItemResponse>(`${API_PREFIX}/data/search/receipt/item-name?q=${query}`);
 
 function useAutocompleteItem(
   setItemSuggestion: (item: string | null) => void,
 ): [boolean, string | null, (item: string) => void] {
   const [query, setQuery] = useState<string | null>(null);
 
-  const handleResponse = useCallback(
-    ({ result }: ItemResponse) => {
-      setItemSuggestion(result);
+  const [{ data, stale, fetching }] = useReceiptItemQuery({
+    pause: !query,
+    variables: {
+      item: query ?? '',
     },
-    [setItemSuggestion],
-  );
-
-  const onClear = useCallback(() => {
-    setItemSuggestion(null);
-    setQuery(null);
-  }, [setItemSuggestion]);
-
-  const loading = useCancellableRequest<string | null, ItemResponse, string>({
-    query,
-    sendRequest: requestItem,
-    handleResponse,
-    onClear,
   });
 
-  return [loading, query, setQuery];
+  useEffect(() => {
+    if (!fetching && !stale && data?.receiptItem) {
+      setItemSuggestion(data.receiptItem);
+    }
+  }, [data, stale, fetching, setItemSuggestion]);
+
+  const noQuery = !query;
+  useEffect(() => {
+    if (noQuery) {
+      setItemSuggestion(null);
+    }
+  }, [noQuery, setItemSuggestion]);
+
+  return [fetching, query, setQuery];
 }
 
 type PropsItem = {
@@ -222,10 +201,7 @@ const EntryForm: React.FC<EntryProps> = ({ entry, loading, isOnly, onChange, onR
     onChange,
   ]);
   const onChangeCost = useCallback((cost: number) => onChange(id, { cost }), [id, onChange]);
-  const onChangePage = useCallback((page: PageListCalcCategory) => onChange(id, { page }), [
-    id,
-    onChange,
-  ]);
+  const onChangePage = useCallback((page: ReceiptPage) => onChange(id, { page }), [id, onChange]);
 
   const onChangeItem = useCallback((item: string) => onChange(id, { item }), [id, onChange]);
   const [itemSuggestion, setItemSuggestion] = useState<string | null>(null);
@@ -272,15 +248,13 @@ const defaultEntry: Entry = {
   item: '',
   category: '',
   cost: 0,
-  page: Page.food,
+  page: ReceiptPage.Food,
 };
 
 export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
   const isMobile = useIsMobile();
 
   const onClosed = useCallback(() => setAddingReceipt(false), [setAddingReceipt]);
-
-  const dispatch = useDispatch();
 
   const [date, setDate] = useState<Date>(new Date());
   const onChangeDate = useCallback((value?: Date) => setDate((last) => value ?? last), []);
@@ -296,7 +270,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
         item: '',
         category: '',
         cost: 0,
-        page: Page.food,
+        page: ReceiptPage.Food,
       },
     ]);
   }, []);
@@ -332,20 +306,21 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
     }
   }, [canRequestFinish]);
 
+  const [, mutateCreateReceipt] = useCreateReceiptMutation();
+
   useEffect(() => {
     if (finished) {
       setFinished(false);
       if (isValid) {
-        entries.forEach((entry) => {
-          dispatch(
-            listItemCreated(entry.page)({
-              date,
-              item: entry.item,
-              category: entry.category,
-              cost: entry.cost,
-              shop,
-            }),
-          );
+        mutateCreateReceipt({
+          date: toISO(date),
+          shop,
+          items: entries.map<ReceiptInput>((entry) => ({
+            page: entry.page,
+            item: entry.item,
+            category: entry.category,
+            cost: entry.cost,
+          })),
         });
         setEntries([defaultEntry]);
         setImmediate(() => {
@@ -355,7 +330,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
         requestItemInfo();
       }
     }
-  }, [dispatch, date, shop, entries, finished, isValid, requestItemInfo]);
+  }, [date, shop, entries, finished, isValid, requestItemInfo, mutateCreateReceipt]);
 
   const onBlurDate = useCallback(() => {
     resetFocus(false);

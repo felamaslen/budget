@@ -1,10 +1,7 @@
-import { PageList } from './app';
+import { Cost } from './gql';
+import { GQL } from './shared';
 
-export type Cost = {
-  [page in PageList]: number[];
-};
-
-export type CostProcessed = Cost & {
+export type CostProcessed = GQL<Cost> & {
   fundsOld: number[];
   spending: number[];
   net: number[];
@@ -12,14 +9,6 @@ export type CostProcessed = Cost & {
   netWorthPredicted: number[];
   netWorthCombined: number[];
   savingsRatio: number[];
-};
-
-export type OverviewState = {
-  startDate: Date;
-  endDate: Date;
-  annualisedFundReturns: number;
-  homeEquityOld: number[];
-  cost: Cost;
 };
 
 export type TableValues<T = never, K extends keyof CostProcessed = keyof CostProcessed> = {

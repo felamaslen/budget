@@ -5,7 +5,6 @@ import { AppLogo } from '.';
 describe('<AppLogo />', () => {
   const props = {
     loading: false,
-    unsaved: false,
   };
 
   const setup = (customProps = {}): RenderResult => render(<AppLogo {...props} {...customProps} />);
@@ -103,19 +102,6 @@ describe('<AppLogo />', () => {
     expect.assertions(1);
     const { getByText } = setup();
     expect(getByText('Budget')).toBeInTheDocument();
-  });
-
-  describe('if the queue is not saved', () => {
-    const propsUnsaved = {
-      ...props,
-      unsaved: true,
-    };
-
-    it('should render a message', () => {
-      expect.assertions(1);
-      const { getByText } = setup(propsUnsaved);
-      expect(getByText('Unsaved changes!')).toBeInTheDocument();
-    });
   });
 
   describe('if loading a request', () => {

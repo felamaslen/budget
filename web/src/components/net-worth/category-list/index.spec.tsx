@@ -4,6 +4,7 @@ import React from 'react';
 import numericHash from 'string-hash';
 
 import { NetWorthCategoryList, Props } from '.';
+import { NetWorthCategoryType } from '~client/types';
 
 describe('<NetWorthCategoryList />', () => {
   const onCreateCategory = jest.fn();
@@ -18,14 +19,14 @@ describe('<NetWorthCategoryList />', () => {
     categories: [
       {
         id: numericHash('category-id-a'),
-        type: 'asset',
+        type: NetWorthCategoryType.Asset,
         category: 'Category A',
         color: '#ccfacc',
         isOption: false,
       },
       {
         id: numericHash('category-id-b'),
-        type: 'liability',
+        type: NetWorthCategoryType.Liability,
         category: 'Category B',
         color: '#f1cccc',
         isOption: false,
@@ -241,17 +242,13 @@ describe('<NetWorthCategoryList />', () => {
       });
 
       it('should call onDeleteCategory on click', () => {
-        expect.assertions(3);
+        expect.assertions(2);
         const { button } = getDeleteButton();
         act(() => {
           fireEvent.click(button);
         });
-        // TODO: refactor <CrudList /> so that onDelete is only called with the ID
-        // (this will happen in feature/accessible-list)
         expect(onDeleteCategory).toHaveBeenCalledTimes(1);
-        const args = onDeleteCategory.mock.calls[0];
-        expect(args.length).toBeGreaterThan(0);
-        expect(args[0]).toBe(categoryId);
+        expect(onDeleteCategory).toHaveBeenCalledWith(categoryId);
       });
     });
   });

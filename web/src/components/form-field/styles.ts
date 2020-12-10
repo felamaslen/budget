@@ -5,6 +5,7 @@ import {
   fieldSizes,
   borderColor,
 } from '~client/components/accessible-list/styles';
+import { FundSidebar } from '~client/components/graph-funds/styles';
 import { ModalDialog, FormRowInner } from '~client/components/modal-dialog/styles';
 import { CategoryItemForm as NetWorthCategoryItemForm } from '~client/components/net-worth/category-list/styles';
 import {
@@ -97,6 +98,9 @@ export const FormField = styled.div<{
     ${PageFunds} & {
       width: ${({ item }): string => rem(Reflect.get(fundFieldSizes, item) ?? 0)};
       border-bottom: 1px solid ${borderColor};
+    }
+    ${FundSidebar} & {
+      width: 100%;
     }
 
     ${TargetAllocation} & {

@@ -2,10 +2,9 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import nav from '../../images/nav.png';
-import { PAGES } from '~client/constants/data';
 import { breakpoint } from '~client/styled/mixins';
 import { sizes, colors, breakpoints } from '~client/styled/variables';
-import { Page } from '~client/types/app';
+import { PageListStandard, PageNonStandard } from '~client/types';
 
 export const NavList = styled.nav`
   display: flex;
@@ -26,10 +25,42 @@ export const NavList = styled.nav`
   }
 `;
 
-export const Link = styled(NavLink)<{
-  page: Page | 'logout' | 'netWorth';
+export type NavPage = PageNonStandard | PageListStandard | 'logout';
+
+type LinkProps = {
+  page: NavPage;
   to: string;
-}>`
+};
+
+type PageBackgroundPosition = Record<NavPage, string>;
+
+const pageBackgroundPositionMobile: PageBackgroundPosition = {
+  logout: '-256px -28px',
+  [PageNonStandard.Overview]: '-200px 0px',
+  [PageNonStandard.Analysis]: '-228px 0px',
+  [PageNonStandard.Funds]: '-256px 0px',
+  [PageListStandard.Income]: '-284px 0px',
+  [PageListStandard.Bills]: '-312px 0px',
+  [PageListStandard.Food]: '-340px 0px',
+  [PageListStandard.General]: '-368px 0px',
+  [PageListStandard.Holiday]: '-200px -28px',
+  [PageListStandard.Social]: '-228px -28px',
+};
+
+const pageBackgroundPositionDesktop: PageBackgroundPosition = {
+  logout: '-56px -28px',
+  [PageNonStandard.Overview]: '0px 0px',
+  [PageNonStandard.Analysis]: '-28px 0px',
+  [PageNonStandard.Funds]: '-56px 0px',
+  [PageListStandard.Income]: '-84px 0px',
+  [PageListStandard.Bills]: '-112px 0px',
+  [PageListStandard.Food]: '-140px 0px',
+  [PageListStandard.General]: '-168px 0px',
+  [PageListStandard.Holiday]: '0px -28px',
+  [PageListStandard.Social]: '-28px -28px',
+};
+
+export const Link = styled(NavLink)<LinkProps>`
   flex: 1 0 0;
   height: ${sizes.heightNavMobile - 3}px;
   line-height: 30px;
@@ -50,18 +81,7 @@ export const Link = styled(NavLink)<{
     background-image: url(${nav});
     width: 28px;
     height: 28px;
-
-    background-position: ${({ page }): string => {
-      if (page === 'logout') {
-        return '-256px -28px';
-      }
-      const index = Object.keys(PAGES).indexOf(page);
-      if (index === -1) {
-        return '0 0';
-      }
-
-      return `-${200 + 28 * (index % 7)}px ${-(28 * Math.floor(index / 7))}px`;
-    }};
+    background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
   }
 
   ${breakpoint(breakpoints.mobile)} {
@@ -79,14 +99,7 @@ export const Link = styled(NavLink)<{
       if (page === 'logout') {
         return colors.light.mediumLight;
       }
-      if (page === 'netWorth') {
-        return 'transparent';
-      }
-      if (colors[page]) {
-        return colors[page].main;
-      }
-
-      return 'transparent';
+      return colors[page].main;
     }};
     &.active {
       border-bottom-color: ${colors.black};
@@ -99,17 +112,7 @@ export const Link = styled(NavLink)<{
     }
 
     &::before {
-      background-position: ${({ page }): string => {
-        if (page === 'logout') {
-          return '-56px -28px';
-        }
-        const index = Object.keys(PAGES).indexOf(page);
-        if (index === -1) {
-          return '0 0';
-        }
-
-        return `-${28 * (index % 7)}px ${-(28 * Math.floor(index / 7))}px`;
-      }};
+      background-position: ${({ page }): string => pageBackgroundPositionDesktop[page]};
     }
 
     &:hover {

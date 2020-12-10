@@ -102,7 +102,7 @@ export type Split<V> = {
 };
 
 const valueIsSplit = <V>(value: V | Split<V>): value is Split<V> =>
-  typeof value === 'object' && Reflect.has(value as {}, '__split');
+  typeof value === 'object' && Reflect.has(value as Record<string, unknown>, '__split');
 
 export type FieldOptions<V, E = React.ChangeEvent<HTMLInputElement>> = {
   value: V;

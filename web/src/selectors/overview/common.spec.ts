@@ -10,7 +10,7 @@ import {
   getMonthDates,
 } from '~client/selectors/overview/common';
 import { testState as state } from '~client/test-data/state';
-import { Page } from '~client/types';
+import { PageNonStandard } from '~client/types';
 
 describe('Overview selectors (common)', () => {
   describe('getStartDate', () => {
@@ -57,8 +57,8 @@ describe('Overview selectors (common)', () => {
 
         const stateWithStartEndTime: State = {
           ...state,
-          [Page.overview]: {
-            ...state[Page.overview],
+          [PageNonStandard.Overview]: {
+            ...state[PageNonStandard.Overview],
             startDate: endOfDay(new Date(startTime)),
             endDate: endOfDay(new Date(endTime)),
           },

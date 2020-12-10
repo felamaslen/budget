@@ -1,4 +1,8 @@
-import { sql, DatabaseTransactionConnectionType, SqlSqlTokenType } from 'slonik';
+import {
+  sql,
+  DatabaseTransactionConnectionType,
+  TaggedTemplateLiteralInvocationType,
+} from 'slonik';
 import { Item } from '~api/types';
 
 export * from './create';
@@ -6,7 +10,9 @@ export * from './read';
 export * from './update';
 export * from './delete';
 
-const unionSelectIds = (categories: number[]): SqlSqlTokenType<Item> => sql`
+const unionSelectIds = (
+  categories: number[],
+): TaggedTemplateLiteralInvocationType<{ id: number }> => sql`
 SELECT ids.id
 FROM (
   SELECT ${categories[0]}::int4 AS id

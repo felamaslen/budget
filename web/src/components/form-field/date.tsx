@@ -1,4 +1,3 @@
-import format from 'date-fns/format';
 import getMonth from 'date-fns/getMonth';
 import getYear from 'date-fns/getYear';
 import parseISO from 'date-fns/parseISO';
@@ -6,6 +5,7 @@ import startOfDay from 'date-fns/startOfDay';
 
 import { makeInlineField } from './shared';
 import { Split } from '~client/hooks';
+import { toISO, toLocal } from '~client/modules/format';
 
 const setValueDate: (event: React.ChangeEvent<HTMLInputElement>) => Date = (event): Date =>
   event.target.value ? parseISO(event.target.value ?? '') : new Date();
@@ -36,9 +36,6 @@ const setValueString = ({
   fieldValue: parseDate(value),
   inputValue: value,
 });
-
-const toISO = (value: Date): string => format(value, 'yyyy-MM-dd');
-const toLocal = (value: Date | undefined): string => format(value ?? new Date(), 'dd/MM/yyyy');
 
 const { Field, FieldInline } = makeInlineField<Date>({
   hookOptions: {

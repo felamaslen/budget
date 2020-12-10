@@ -1,6 +1,6 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
-import { Item } from '~api/types';
+import { Item, ValueRow, FXValueRow, OptionValueRow, MortgageValueRow } from '~api/types';
 
 export async function insertEntry(
   db: DatabaseTransactionConnectionType,
@@ -19,7 +19,7 @@ export async function insertEntry(
 
 export async function insertValues(
   db: DatabaseTransactionConnectionType,
-  valuesRows: [number, boolean | null, number, number | null][],
+  valuesRows: ValueRow[],
 ): Promise<number[]> {
   const { rows } = await db.query<Item>(sql`
     INSERT INTO net_worth_values (net_worth_id, skip, subcategory, value)
@@ -35,7 +35,7 @@ export async function insertValues(
 
 export async function insertFXValues(
   db: DatabaseTransactionConnectionType,
-  fxValuesRows: [number, number, string][],
+  fxValuesRows: FXValueRow[],
 ): Promise<void> {
   if (!fxValuesRows.length) {
     return;
@@ -50,7 +50,7 @@ export async function insertFXValues(
 
 export async function insertOptionValues(
   db: DatabaseTransactionConnectionType,
-  optionValuesRows: [number, number, number, number, number][],
+  optionValuesRows: OptionValueRow[],
 ): Promise<void> {
   if (!optionValuesRows.length) {
     return;
@@ -63,7 +63,7 @@ export async function insertOptionValues(
 
 export async function insertMortgageValues(
   db: DatabaseTransactionConnectionType,
-  mortgageValuesRows: [number, number, number][],
+  mortgageValuesRows: MortgageValueRow[],
 ): Promise<void> {
   if (!mortgageValuesRows.length) {
     return;
@@ -74,15 +74,14 @@ export async function insertMortgageValues(
   `);
 }
 
-export const insertWithNetWorthId = <R extends {}>(
+export async function insertWithNetWorthId<R extends Record<string, unknown>>(
+  db: DatabaseTransactionConnectionType,
   table: string,
   keys: [keyof R, keyof R],
   types: string[],
-) => async (
-  db: DatabaseTransactionConnectionType,
   netWorthId: number,
   rows: R[] = [],
-): Promise<void> => {
+): Promise<void> {
   if (!rows.length) {
     return;
   }
@@ -102,4 +101,4 @@ export const insertWithNetWorthId = <R extends {}>(
         ${sql.identifier([keys[1] as string])} =
         ${sql.identifier(['excluded', keys[1] as string])}
   `);
-};
+}

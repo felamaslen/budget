@@ -20,7 +20,7 @@ export type InlineField<V, P> = {
   FieldInline: FormField<V | undefined, P>;
 };
 
-export type FieldComponent<V, E extends {} = {}> = React.FC<
+export type FieldComponent<V, E extends Record<string, unknown> = never> = React.FC<
   CommonProps<V> & {
     extraProps?: Partial<E>;
   }
@@ -56,7 +56,7 @@ type InlineFieldHookKeys =
   | 'convertInputToExternalValue'
   | 'immediate';
 
-export const makeInlineField = <V, P extends {} = {}>({
+export const makeInlineField = <V, P extends Record<string, unknown> = Record<string, unknown>>({
   hookOptions = {},
   hookOptionsInline = {},
   inputProps: staticInputProps = {},
@@ -76,10 +76,14 @@ export const makeInlineField = <V, P extends {} = {}>({
     label,
     id,
     inputProps = {},
+    value,
+    onChange: onChangeInput,
     ...props
   }) => {
     const { inputValue, onChange, inputRef, onBlur } = useField<V>({
       ...props,
+      value,
+      onChange: onChangeInput,
       active,
       inline: false,
       ...hookOptions,
@@ -121,12 +125,16 @@ export const makeInlineField = <V, P extends {} = {}>({
     small,
     label,
     inputProps = {},
+    value,
+    onChange: onChangeInput,
     ...props
   }) => {
     const { inputValue, currentValue, onChange, inputRef, onBlur, onCancel } = useField<
       V | undefined
     >({
       ...props,
+      value,
+      onChange: onChangeInput,
       inline: true,
       ...hookOptionsInline,
     });
@@ -140,7 +148,7 @@ export const makeInlineField = <V, P extends {} = {}>({
     }, [inputIsEmpty, onCancel, onBlur]);
 
     return (
-      <Wrapper item={item} active={props.active} invalid={invalid} small={small}>
+      <Wrapper item={item} active={!!props.active} invalid={invalid} small={small}>
         {Children}
         <input
           ref={inputRef}

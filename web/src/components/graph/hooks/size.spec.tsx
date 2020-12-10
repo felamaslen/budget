@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useGraphWidth } from './size';
 import { GRAPH_WIDTH } from '~client/constants/graph';
-import { ResizeContext } from '~client/hooks/resize';
+import { ResizeContext } from '~client/hooks';
 
 describe('Graph width hook', () => {
   const mockWindowWidth = 1039;

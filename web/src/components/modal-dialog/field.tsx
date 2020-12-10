@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 
 import * as Styled from './styles';
 import { FieldComponent, FormFieldTransactions } from '~client/components/form-field';
-import { Transaction, Item, FieldKey } from '~client/types';
+import { TransactionNative as Transaction, FieldKey, ListItemInput } from '~client/types';
 
 export type FieldWrapper<V = never> = React.FC<{
   id: string;
@@ -35,13 +35,13 @@ export const FieldTransactions: FieldWrapper<Transaction[]> = ({ invalid, value,
   </Styled.FormRowInner>
 );
 
-export type ModalFields<I extends Item> = {
-  [K in FieldKey<I>]: FieldWrapper<I[K]>;
+export type ModalFields<I extends ListItemInput> = {
+  [K in FieldKey<I>]: FieldWrapper<Exclude<I[K], null | undefined>>;
 };
 
 type PropsModalField<V> = {
   id: string;
-  Field: FieldWrapper<V>;
+  Field: FieldWrapper<Exclude<V, null | undefined>>;
   field: string | number | symbol;
   value: V;
   onChange: (field: string, value: V) => void;
@@ -63,7 +63,12 @@ export function ModalDialogField<V = never>({
 
   return (
     <Styled.FormRow field={field as string}>
-      <Field id={id} value={value} onChange={onChangeCallback} invalid={invalid} />
+      <Field
+        id={id}
+        value={value as Exclude<V, null | undefined>}
+        onChange={onChangeCallback}
+        invalid={invalid}
+      />
     </Styled.FormRow>
   );
 }

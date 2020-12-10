@@ -2,7 +2,6 @@ import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
 import { ModalDialogField, makeField, FieldTransactions } from './field';
 import { FormFieldText } from '~client/components/form-field';
-import { getTransactionsList } from '~client/modules/data';
 
 describe('<ModalDialogField />', () => {
   const props = {
@@ -37,9 +36,7 @@ describe('<ModalDialogField />', () => {
       setup({
         field: 'transactions' as const,
         Field: FieldTransactions,
-        value: getTransactionsList([
-          { date: '2020-04-20', units: 130, price: 8.5, fees: 0, taxes: 0 },
-        ]),
+        value: [{ date: new Date('2020-04-20'), units: 130, price: 8.5, fees: 0, taxes: 0 }],
       });
 
     it('should render a transactions field', () => {

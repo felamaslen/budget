@@ -4,8 +4,8 @@ import * as Styled from './styles';
 import { Size } from '~client/types/graph';
 
 export type GraphProps = {
-  outerProperties?: object;
-  svgProperties?: object;
+  outerProperties?: Record<string, unknown>;
+  svgProperties?: Record<string, unknown>;
   before?: React.FC;
   after?: React.FC;
   children?: React.ReactNode;
@@ -13,7 +13,7 @@ export type GraphProps = {
 
 export type Props = Size & GraphProps;
 
-const GraphWithoutRef: React.RefForwardingComponent<HTMLDivElement, Props> = (
+const GraphWithoutRef: React.ForwardRefRenderFunction<HTMLDivElement, Props> = (
   {
     width,
     height,

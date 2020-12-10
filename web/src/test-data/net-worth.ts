@@ -1,24 +1,24 @@
 import numericHash from 'string-hash';
 import {
   Create,
-  RawDate,
-  Category,
-  Subcategory,
   Currency,
-  Entry,
-  CreateEntry,
+  NetWorthCategory as Category,
+  NetWorthCategoryType,
+  NetWorthSubcategory as Subcategory,
+  NetWorthEntry as Entry,
+  NativeDate,
 } from '~client/types';
 
 export const CATEGORY_CASH: Category = {
   id: numericHash('real-cash-category-id'),
-  type: 'asset',
+  type: NetWorthCategoryType.Asset,
   category: 'Cash (easy access)',
   color: '#00ff00',
   isOption: false,
 };
 
 export const CATEGORY_MORTGAGE_RAW: Create<Category> = {
-  type: 'liability',
+  type: NetWorthCategoryType.Liability,
   category: 'Mortgage',
   color: '#fa0000',
   isOption: false,
@@ -31,7 +31,7 @@ export const CATEGORY_MORTGAGE = {
 
 export const CATEGORY_CC: Category = {
   id: numericHash('real-credit-card-category-id'),
-  type: 'liability',
+  type: NetWorthCategoryType.Liability,
   category: 'Credit cards',
   color: '#fc0000',
   isOption: false,
@@ -61,19 +61,14 @@ export const SUBCATEGORY_CC: Subcategory = {
   opacity: 0.3,
 };
 
-export const CURRENCY_CZK_RAW: Create<Currency> = {
+export const CURRENCY_CZK: Currency = {
   currency: 'CZK',
   rate: 0.035,
 };
 
-export const CURRENCY_CZK: Currency = {
-  ...CURRENCY_CZK_RAW,
-  id: numericHash('real-currency-czk-id'),
-};
-
-export const ENTRY_BANK_HOUSE_RAW: RawDate<CreateEntry> = {
+export const ENTRY_BANK_HOUSE_RAW: NativeDate<Entry, 'date'> = {
   id: numericHash('real-entry-id'),
-  date: '2020-04-20',
+  date: new Date('2020-04-20'),
   values: [
     {
       subcategory: SUBCATEGORY_WALLET.id,
@@ -94,16 +89,12 @@ export const ENTRY_BANK_HOUSE_RAW: RawDate<CreateEntry> = {
       value: 150000,
     },
   ],
-  currencies: [CURRENCY_CZK_RAW],
+  currencies: [CURRENCY_CZK],
 };
 
-export const ENTRY_BANK_HOUSE: Entry = {
+export const ENTRY_BANK_HOUSE: NativeDate<Entry, 'date'> = {
   ...ENTRY_BANK_HOUSE_RAW,
   date: new Date('2020-04-20'),
-  values: [
-    { ...ENTRY_BANK_HOUSE_RAW.values[0], id: numericHash('value-id-bank') },
-    { ...ENTRY_BANK_HOUSE_RAW.values[1], id: numericHash('value-id-cc') },
-    { ...ENTRY_BANK_HOUSE_RAW.values[2], id: numericHash('value-id-house') },
-  ],
+  values: ENTRY_BANK_HOUSE_RAW.values.slice(0, 3),
   currencies: [CURRENCY_CZK],
 };

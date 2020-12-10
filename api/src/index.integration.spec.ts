@@ -1,12 +1,9 @@
-import { createServer, App } from '~api/test-utils/create-server';
+import { App, getTestApp } from '~api/test-utils/create-server';
 
 describe('Health route', () => {
   let app: App;
   beforeAll(async () => {
-    app = await createServer('health');
-  });
-  afterAll(async () => {
-    await app.cleanup();
+    app = await getTestApp();
   });
 
   it.each`

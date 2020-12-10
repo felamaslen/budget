@@ -7,7 +7,7 @@ import { Key } from './key';
 import { Targets, getTargets, TargetValue } from './targets';
 import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashflow';
 import { TodayContext } from '~client/hooks';
-import { leftPad, rightPad } from '~client/modules/data';
+import { lastInArray, leftPad, rightPad } from '~client/modules/data';
 import {
   getStartDate,
   getFutureMonths,
@@ -19,9 +19,17 @@ import {
   getHomeEquity,
 } from '~client/selectors';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
-import { Page, Point, Line, Data, CostProcessed, NetWorthTableRow, Aggregate } from '~client/types';
+import {
+  Aggregate,
+  CostProcessed,
+  Data,
+  Line,
+  NetWorthTableRow,
+  PageNonStandard,
+  Point,
+} from '~client/types';
 
-type CostProps = Pick<CostProcessed, Page.funds | 'fundsOld' | 'netWorthCombined'>;
+type CostProps = Pick<CostProcessed, PageNonStandard.Funds | 'fundsOld' | 'netWorthCombined'>;
 
 const fillAggregate = (
   combinedLength: number,
@@ -36,7 +44,7 @@ const fillAggregate = (
 type RawData = {
   homeEquityOld: number[];
   homeEquity: number[];
-  cost: Pick<CostProps, 'netWorthCombined' | Page.funds | 'fundsOld'>;
+  cost: Pick<CostProps, 'netWorthCombined' | PageNonStandard.Funds | 'fundsOld'>;
   netWorthOldMain: number[];
   netWorthOldOptions: number[];
   netWorthTable: NetWorthTableRow[];
@@ -77,7 +85,7 @@ function processData({
     false,
   ).map((value, index) => value - fundsCurrent[index]);
 
-  const lastISACash = ISACash[ISACash.length - 1] ?? 0;
+  const lastISACash = lastInArray(ISACash) ?? 0;
   const cashOther = fillAggregate(netWorthCombined.length, netWorthTable, Aggregate.cashOther).map(
     (value, index) => value + (ISACash[index] ?? lastISACash),
   );
@@ -206,8 +214,8 @@ function getGraphData(rawData: RawData, startDate: Date, futureMonths: number): 
       smooth: true,
       color: (_: Point, index = 0): string =>
         index < futureIndex - 1
-          ? colors[Page.overview].balanceActual
-          : colors[Page.overview].balancePredicted,
+          ? colors[PageNonStandard.Overview].balanceActual
+          : colors[PageNonStandard.Overview].balancePredicted,
     },
     {
       key: 'pension',

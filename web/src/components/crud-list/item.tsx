@@ -1,31 +1,43 @@
 import React, { useCallback } from 'react';
 
-import { CrudProps } from '~client/hooks/crud';
-import { Id, Item as ItemType } from '~client/types';
+import { CrudProps } from '~client/hooks';
+import { Id, SetActiveId, WithIds } from '~client/types';
 
-export type ItemComponent<I extends ItemType, E extends {}> = React.FC<
+export type ItemComponent<
+  I extends Record<string, unknown>,
+  J extends WithIds<I>,
+  E extends Record<string, unknown>
+> = React.FC<
   E &
     Pick<CrudProps<I>, 'onUpdate'> & {
       onDelete: (event?: React.BaseSyntheticEvent) => void;
-      style?: object;
+      style?: Record<string, unknown>;
       odd: boolean;
-      item: I;
+      item: J;
       active: boolean;
       noneActive: boolean;
       setActive: (id: Id | null) => void;
     }
 >;
 
-type Props<I extends ItemType, E extends {} = {}> = Omit<CrudProps<I>, 'onCreate'> & {
+export type Props<
+  I extends Record<string, unknown>,
+  J extends WithIds<I> = WithIds<I>,
+  E extends Record<string, unknown> = Record<string, unknown>
+> = Omit<CrudProps<I>, 'onCreate'> & {
   activeId: number | null;
-  item: I;
+  item: J;
   extraProps?: E;
-  Item: ItemComponent<I, E>;
+  Item: ItemComponent<I, J, E>;
   odd: boolean;
-  setActive: (id: Id | null) => void;
+  setActive: SetActiveId;
 };
 
-const CrudListItem = <I extends ItemType, E extends {} = {}>({
+const CrudListItem = <
+  I extends Record<string, unknown>,
+  J extends WithIds<I>,
+  E extends Record<string, unknown> = Record<string, unknown>
+>({
   activeId,
   item,
   extraProps = {} as E,
@@ -34,7 +46,7 @@ const CrudListItem = <I extends ItemType, E extends {} = {}>({
   onUpdate,
   onDelete,
   odd,
-}: Props<I, E>): React.ReactElement<Props<I, E>> => {
+}: Props<I, J, E>): React.ReactElement => {
   const active = activeId === item.id;
   const noneActive = activeId === null;
 
@@ -43,7 +55,7 @@ const CrudListItem = <I extends ItemType, E extends {} = {}>({
       if (event) {
         event.stopPropagation();
       }
-      onDelete(item.id, item);
+      onDelete(item.id);
       setActive(null);
     },
     [item, setActive, onDelete],

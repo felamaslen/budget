@@ -50,7 +50,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   background: #009918;
 }
 
-.sc-fzpkJw .c4 {
+.sc-fzqAbL .c4 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -68,15 +68,15 @@ exports[`<PageOverview /> should render a table 1`] = `
   grid-column: 4;
 }
 
-.sc-fznzOf .c4,
-.sc-fznzOf .c4:hover,
-.sc-fznzOf .c4:active {
+.sc-fzqMAW .c4,
+.sc-fzqMAW .c4:hover,
+.sc-fzqMAW .c4:active {
   background: none;
   border: none;
   box-shadow: none;
 }
 
-.sc-fznzOf .c4::after {
+.sc-fzqMAW .c4::after {
   display: block;
   margin-left: 16px;
   content: '';
@@ -94,19 +94,19 @@ exports[`<PageOverview /> should render a table 1`] = `
   background: none;
 }
 
-.sc-fznLxA .c4 {
+.sc-fzoxnE .c4 {
   margin: 2px 4px;
 }
 
-.sc-fzpkqZ .c4,
-.sc-fzoydu .c4 {
+.sc-fzqAui .c4,
+.sc-fznLPX .c4 {
   margin: 0 5px;
   -webkit-flex: 0 0 auto;
   -ms-flex: 0 0 auto;
   flex: 0 0 auto;
 }
 
-.sc-pRTZB .c4 {
+.sc-psCJM .c4 {
   margin: 0 3px;
   top: 0;
   -webkit-flex: 0 0 1.375rem;
@@ -114,24 +114,24 @@ exports[`<PageOverview /> should render a table 1`] = `
   flex: 0 0 1.375rem;
 }
 
-.sc-fzpkJw > .c4 {
+.sc-fzqAbL > .c4 {
   grid-row: 1;
   grid-column: 3;
 }
 
-.sc-pkhIR .c4 {
+.sc-pJkiN .c4 {
   width: 16px;
   height: 16px;
   font-size: 16px;
   line-height: 16px;
 }
 
-.sc-fznLxA .c4 {
+.sc-fzoxnE .c4 {
   grid-column: 4;
   margin: 0;
 }
 
-.sc-fzpkqZ .c4 {
+.sc-fzqAui .c4 {
   grid-column: 4;
 }
 
@@ -487,9 +487,8 @@ exports[`<PageOverview /> should render a table 1`] = `
     -ms-flex-positive: 0;
     flex-grow: 0;
     width: auto;
-    box-shadow: inset 0px 1px 0px 0px;
-    background: linear-gradient(to bottom,#68a54b 5%,#74ad5a 100%);
-    background-color: #68a54b;
+    box-shadow: inset 0px 1px 0px 0px rgba(0,0,0,0.2);
+    background: #74ad5a;
     border: 1px solid #3b6e22;
     border-radius: 0;
     cursor: pointer;
@@ -504,18 +503,13 @@ exports[`<PageOverview /> should render a table 1`] = `
     z-index: 4;
   }
 
-  .c4:hover {
-    background-color: #74ad5a;
-    background-image: linear-gradient( to bottom, #74ad5a 5%, #68a54b 100% );
+  .c4:hover,
+  .c4:focus {
+    background: #80be69;
   }
 
   .c4:active {
-    top: 1px;
-    background: $color-button-active;
-  }
-
-  .c4:focus {
-    box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+    background: #638c4d;
   }
 
   .c4:disabled {
@@ -919,7 +913,7 @@ exports[`<PageOverview /> should render a table 1`] = `
         Month
       </span>
       <button
-        class="sc-psCJM sc-qQxXP sc-qYSYK c4"
+        class="sc-pReKu sc-pZaHX sc-oTBUA c4"
       >
         +
       </button>
@@ -1450,7 +1444,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
   z-index: 2;
 }
 
-.sc-pHIBf .c2 {
+.sc-fzqARJ .c2 {
   position: relative;
   height: 125px;
 }
@@ -1546,7 +1540,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 @media only screen and (min-width:500px) {
-  .sc-pHIBf .c2 {
+  .sc-fzqARJ .c2 {
     height: 100%;
   }
 }
@@ -1561,7 +1555,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
   }
 
-  .sc-qZtCU .c2 {
+  .sc-oUcyK .c2 {
     z-index: 10;
     width: 100px;
     height: 100%;

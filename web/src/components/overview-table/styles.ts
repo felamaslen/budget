@@ -1,16 +1,16 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 import { breakpoint, unimportant, rem } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
-import { Page, OverviewHeader } from '~client/types';
+import { OverviewHeader, PageListStandard, PageNonStandard } from '~client/types';
 
 const colSizeSmall = [
-  Page.funds,
-  Page.bills,
-  Page.food,
-  Page.general,
-  Page.holiday,
-  Page.social,
-  Page.income,
+  PageNonStandard.Funds,
+  PageListStandard.Bills,
+  PageListStandard.Food,
+  PageListStandard.General,
+  PageListStandard.Holiday,
+  PageListStandard.Social,
+  PageListStandard.Income,
   'spending',
 ];
 
@@ -176,7 +176,9 @@ export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColo
       `}
 
     ${({ column }): false | FlattenSimpleInterpolation =>
-      ([Page.income, Page.funds] as (OverviewHeader | 'month')[]).includes(column) &&
+      ([PageListStandard.Income, PageNonStandard.Funds] as (OverviewHeader | 'month')[]).includes(
+        column,
+      ) &&
       css`
         border-left: 3px solid ${colors.dark.mediumLight};
       `}
@@ -205,7 +207,8 @@ export const HeaderLink = styled(Cell)`
   white-space: nowrap;
   height: 24px;
   text-align: center;
-  background: ${({ column }): string => colors.overview[`${column}Mobile`] || colors.white};
+  background: ${({ column }): string =>
+    colors.overview[`${column}Mobile` as keyof typeof colors.overview] ?? colors.white};
 
   button {
     flex: 0 0 auto;

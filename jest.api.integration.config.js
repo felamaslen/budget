@@ -5,9 +5,7 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['./api/src'],
   testMatch: ['**/*.integration.spec.ts'],
-  globalSetup: '<rootDir>/api/src/test-utils/test-setup.ts',
-  globalTeardown: '<rootDir>/api/src/test-utils/test-teardown.ts',
-  setupFilesAfterEnv: ['<rootDir>/api/src/test-utils/test-after-env.ts'],
+  setupFilesAfterEnv: ['<rootDir>/api/src/test-utils/after-env.integration.ts'],
   testTimeout: 15000,
   coverageDirectory: 'coverage/api/integration',
   collectCoverageFrom: [

@@ -10,9 +10,6 @@ function getPlugins() {
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        STOCK_INDICES: JSON.stringify(process.env.STOCK_INDICES || ''),
-        DO_STOCKS_LIST: JSON.stringify(process.env.DO_STOCKS_LIST || 'false'),
-        FAKE_STOCK_PRICES: JSON.stringify(process.env.FAKE_STOCK_PRICES || 'false'),
       },
     }),
     new HTMLWebpackPlugin({

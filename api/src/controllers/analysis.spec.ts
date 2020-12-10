@@ -8,9 +8,8 @@ import {
   processTimelineData,
   getDeepAnalysisData,
 } from './analysis';
-import { User } from '~api/gql';
 import * as queries from '~api/queries';
-import { Page } from '~api/types';
+import { AnalysisGroupBy, AnalysisPage, AnalysisPeriod } from '~api/types';
 
 jest.mock('~api/queries');
 
@@ -22,13 +21,13 @@ describe('Analysis controller', () => {
       expect.assertions(6);
       const now = new Date('2017-09-04');
 
-      const result = periodCondition(now, 'week');
+      const result = periodCondition(now, AnalysisPeriod.Week);
 
       expect(result.startTime).toStrictEqual(new Date('2017-09-04'));
       expect(result.endTime).toStrictEqual(endOfDay(new Date('2017-09-10')));
       expect(result.description).toBe('Week beginning September 4, 2017');
 
-      const result3 = periodCondition(now, 'week', 3);
+      const result3 = periodCondition(now, AnalysisPeriod.Week, 3);
 
       expect(result3.startTime).toStrictEqual(new Date('2017-08-14'));
       expect(result3.endTime).toStrictEqual(endOfDay(new Date('2017-08-20')));
@@ -39,13 +38,13 @@ describe('Analysis controller', () => {
       expect.assertions(6);
       const now = new Date('2017-09-04');
 
-      const result = periodCondition(now, 'month');
+      const result = periodCondition(now, AnalysisPeriod.Month);
 
       expect(result.startTime).toStrictEqual(new Date('2017-09-01'));
       expect(result.endTime).toStrictEqual(endOfDay(new Date('2017-09-30')));
       expect(result.description).toBe('September 2017');
 
-      const result10 = periodCondition(now, 'month', 10);
+      const result10 = periodCondition(now, AnalysisPeriod.Month, 10);
 
       expect(result10.startTime).toStrictEqual(new Date('2016-11-01'));
       expect(result10.endTime).toStrictEqual(endOfDay(new Date('2016-11-30')));
@@ -56,13 +55,13 @@ describe('Analysis controller', () => {
       expect.assertions(6);
       const now = new Date('2017-09-04');
 
-      const result = periodCondition(now, 'year');
+      const result = periodCondition(now, AnalysisPeriod.Year);
 
       expect(result.startTime).toStrictEqual(new Date('2017-01-01'));
       expect(result.endTime).toStrictEqual(endOfDay(new Date('2017-12-31')));
       expect(result.description).toBe('2017');
 
-      const result10 = periodCondition(now, 'year', 5);
+      const result10 = periodCondition(now, AnalysisPeriod.Year, 5);
 
       expect(result10.startTime).toStrictEqual(new Date('2012-01-01'));
       expect(result10.endTime).toStrictEqual(endOfDay(new Date('2012-12-31')));
@@ -70,15 +69,15 @@ describe('Analysis controller', () => {
     });
   });
 
-  describe('getCategoryColumn', () => {
+  describe(getCategoryColumn.name, () => {
     it('should return a group as expected', () => {
       expect.assertions(5);
 
-      expect(getCategoryColumn(Page.bills)).toBe('item');
-      expect(getCategoryColumn(Page.food, 'category')).toBe('category');
-      expect(getCategoryColumn(Page.general, 'category')).toBe('category');
-      expect(getCategoryColumn(Page.social, 'category')).toBe('category');
-      expect(getCategoryColumn(Page.holiday, 'category')).toBe('category');
+      expect(getCategoryColumn(AnalysisPage.Bills)).toBe('item');
+      expect(getCategoryColumn(AnalysisPage.Food, AnalysisGroupBy.Category)).toBe('category');
+      expect(getCategoryColumn(AnalysisPage.General, AnalysisGroupBy.Category)).toBe('category');
+      expect(getCategoryColumn(AnalysisPage.Social, AnalysisGroupBy.Category)).toBe('category');
+      expect(getCategoryColumn(AnalysisPage.Holiday, AnalysisGroupBy.Category)).toBe('category');
     });
   });
 
@@ -167,7 +166,9 @@ describe('Analysis controller', () => {
           ...new Array(11).fill([]),
         ];
 
-        expect(processTimelineData(data, 'year', condition)).toStrictEqual(expectedResult);
+        expect(processTimelineData(data, AnalysisPeriod.Year, condition)).toStrictEqual(
+          expectedResult,
+        );
       });
     });
 
@@ -203,14 +204,18 @@ describe('Analysis controller', () => {
           ...new Array(11).fill([]),
         ];
 
-        expect(processTimelineData(data, 'month', condition)).toStrictEqual(expectedResult);
+        expect(processTimelineData(data, AnalysisPeriod.Month, condition)).toStrictEqual(
+          expectedResult,
+        );
       });
     });
 
     describe('for weekly data', () => {
       it('should return null', () => {
         expect.assertions(1);
-        expect(processTimelineData([], 'week', { startTime: new Date('2020-04-20') })).toBeNull();
+        expect(
+          processTimelineData([], AnalysisPeriod.Week, { startTime: new Date('2020-04-20') }),
+        ).toBeNull();
       });
     });
   });
@@ -226,20 +231,24 @@ describe('Analysis controller', () => {
       ]);
 
       expect(
-        await getDeepAnalysisData(
-          {} as DatabaseTransactionConnectionType,
-          { uid: testUserId } as User,
-          { period: 'month', groupBy: 'category', pageIndex: 0, category: Page.food },
-        ),
+        await getDeepAnalysisData({} as DatabaseTransactionConnectionType, testUserId, {
+          period: AnalysisPeriod.Month,
+          groupBy: AnalysisGroupBy.Category,
+          page: 0,
+          category: AnalysisPage.Food,
+        }),
       ).toStrictEqual([
-        ['Bread', [['Flour', 80]]],
-        [
-          'Dairy',
-          [
-            ['Milk', 95],
-            ['Eggs', 130],
+        {
+          item: 'Bread',
+          tree: [{ category: 'Flour', sum: 80 }],
+        },
+        {
+          item: 'Dairy',
+          tree: [
+            { category: 'Milk', sum: 95 },
+            { category: 'Eggs', sum: 130 },
           ],
-        ],
+        },
       ]);
     });
   });

@@ -16,7 +16,7 @@ const isColorRange = (color: OverviewBaseColor): color is OverviewColorRange =>
 
 function getOverviewCategoryKeyColor(key: string): OverviewBaseColor {
   if (Reflect.has(colors.overview, key)) {
-    return colors.overview[key];
+    return colors.overview[key as keyof typeof colors.overview];
   }
   if (isPage(key)) {
     return colors[key].main;

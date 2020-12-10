@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas } from './after-canvas';
 import * as Styled from './styles';
-import { fundsRequested } from '~client/actions';
+
+import { errorOpened, fundPricesUpdated, fundQueryUpdated } from '~client/actions';
 import { FundWeights } from '~client/components/fund-weights';
 import {
   LineGraph,
@@ -14,28 +15,38 @@ import {
   useGraphWidth,
 } from '~client/components/graph';
 import { HoverEffect } from '~client/components/graph/hooks';
+import { ErrorLevel } from '~client/constants/error';
 import {
   GRAPH_FUNDS_WIDTH,
   GRAPH_FUNDS_HEIGHT,
   GRAPH_FUNDS_OVERALL_ID,
-  Mode,
-  Period,
   GRAPH_FUNDS_NUM_TICKS,
+  Mode,
 } from '~client/constants/graph';
-import { TodayContext } from '~client/hooks';
+import { TodayContext, usePersistentStateStoreEffect, useUpdateEffect } from '~client/hooks';
+import { lastInArray } from '~client/modules/data';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
-
+import { periodStoreKey } from '~client/reducers/funds';
 import {
-  getPeriod,
-  getStartTime,
   getCacheTimes,
   getFundItems,
   getFundLines,
+  getHistoryOptions,
+  getStartTime,
 } from '~client/selectors';
-
 import { graphFundsHeightMobile } from '~client/styled/variables';
-import { Padding, Line, DrawProps, FundLine, FundItem, Id, Range } from '~client/types';
+import {
+  DrawProps,
+  FundItem,
+  FundLine,
+  HistoryOptions,
+  Id,
+  Line,
+  Padding,
+  Range,
+  useFundPricesUpdateQuery,
+} from '~client/types';
 
 const PADDING_DESKTOP: Padding = [3, 3, 0, 0];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
@@ -78,21 +89,41 @@ function useMode(isMobile: boolean): [Mode[], Mode, (nextMode: Mode) => void] {
 
 type FilterFunds = (filteredItems: { id: Id }) => boolean;
 
-function usePeriod(): [Period, (nextPeriod: Period) => void] {
-  const period = useSelector(getPeriod);
+function useDynamicPrices(): [HistoryOptions, (nextQuery: HistoryOptions) => void] {
+  const query = useSelector(getHistoryOptions);
+  usePersistentStateStoreEffect(query, periodStoreKey);
+
   const dispatch = useDispatch();
-  const onFundsRequested = useCallback(
-    (fromCache: boolean, newPeriod: Period): void => {
-      dispatch(fundsRequested(fromCache, newPeriod));
+
+  const setQuery = useCallback(
+    (nextQuery: HistoryOptions): void => {
+      dispatch(fundQueryUpdated(nextQuery));
     },
     [dispatch],
   );
 
-  const changePeriod = useCallback((nextPeriod) => onFundsRequested(true, nextPeriod), [
-    onFundsRequested,
-  ]);
+  const [res, refresh] = useFundPricesUpdateQuery({
+    variables: query,
+    pause: true,
+  });
 
-  return [period, changePeriod];
+  useUpdateEffect(() => {
+    refresh();
+  }, [query, refresh]);
+
+  useEffect(() => {
+    if (res.error) {
+      dispatch(errorOpened(`Error fetching fund prices: ${res.error.message}`, ErrorLevel.Err));
+    }
+  }, [dispatch, res.error]);
+
+  useEffect(() => {
+    if (res.data?.fundHistory && !res.stale) {
+      dispatch(fundPricesUpdated(res.data.fundHistory));
+    }
+  }, [dispatch, res.data, res.stale]);
+
+  return [query, setQuery];
 }
 
 type ToggleList = { [id: number]: boolean | null };
@@ -173,9 +204,9 @@ function useGraphProps({
     return numberedLines;
   }, [fundLines, mode, filterFunds]);
 
-  const maxX = cacheTimes[cacheTimes.length - 1];
+  const maxX = lastInArray(cacheTimes) ?? 0;
 
-  const [ranges, tickSizeY] = useMemo<[Range, number]>(() => {
+  const [ranges, tickSizeY] = useMemo((): [Range, number] => {
     if (!haveData) {
       return [
         {
@@ -290,7 +321,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
   const fundItems = useSelector(getFundItems(today));
 
-  const [period, changePeriod] = usePeriod();
+  const [historyOptions, setHistoryOptions] = useDynamicPrices();
   const [modeList, mode, changeMode] = useMode(isMobile);
   const [toggleList, setToggleList] = useToggleList(fundItems);
   const graphProps = useGraphProps({
@@ -308,14 +339,14 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
         {graphProps.minX !== graphProps.maxX && <LineGraph {...graphProps} />}
         <AfterCanvas
           isMobile={isMobile}
-          period={period}
+          historyOptions={historyOptions}
           modeList={modeList}
           mode={mode}
           changeMode={changeMode}
           fundItems={fundItems}
           toggleList={toggleList}
           setToggleList={setToggleList}
-          changePeriod={changePeriod}
+          changePeriod={setHistoryOptions}
         />
       </Styled.GraphFunds>
       {!isMobile && (

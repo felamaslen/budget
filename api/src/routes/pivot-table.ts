@@ -4,13 +4,10 @@ import { Router } from 'express';
 import levenshtein from 'fast-levenshtein';
 import { replaceAtIndex, removeAtIndex } from 'replace-array';
 
-import config from '~api/config';
 import { validatedAuthDbRoute } from '~api/middleware/request';
 import { authMiddleware } from '~api/modules/auth';
 import { selectPivotTable, PivotColumn, PivotTableRow } from '~api/queries';
-import { ListCalcCategory, Page } from '~api/types';
-
-const tables: ListCalcCategory[] = [Page.food, Page.general, Page.holiday, Page.social];
+import { PageListExtended, isExtendedPage, PageListStandard } from '~api/types';
 
 enum SortAlgorithm {
   similarity = 'similarity',
@@ -77,7 +74,7 @@ function withSort<I extends Thing>(algorithm: SortAlgorithm): (items: I[]) => I[
 }
 
 type Query = {
-  table: ListCalcCategory;
+  table: PageListStandard;
   sort: SortAlgorithm;
   year: number;
   deep: boolean;
@@ -87,7 +84,7 @@ type Query = {
 const querySchema = joi.object({
   table: joi
     .string()
-    .valid(...tables)
+    .valid(...Object.values(PageListExtended))
     .required(),
   sort: joi
     .string()
@@ -98,11 +95,11 @@ const querySchema = joi.object({
   csv: joi.bool().default(false).truthy(''),
 });
 
-function getPivotColumn(table: ListCalcCategory, deep: boolean): PivotColumn {
+function getPivotColumn(table: PageListStandard, deep: boolean): PivotColumn {
   if (!deep) {
     return 'item';
   }
-  if (config.data.listExtendedCategories.includes(table)) {
+  if (isExtendedPage(table)) {
     return 'category';
   }
   return 'item';
@@ -184,8 +181,8 @@ const routeGet = validatedAuthDbRoute<void, void, Query>(
   },
 );
 
-export function handler(databaseName?: string): Router {
+export function handler(): Router {
   const router = Router();
-  router.get('/', authMiddleware(), routeGet(databaseName));
+  router.get('/', authMiddleware(), routeGet);
   return router;
 }

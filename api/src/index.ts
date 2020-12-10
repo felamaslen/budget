@@ -1,4 +1,4 @@
-import { Server } from 'http';
+import http, { Server } from 'http';
 import path from 'path';
 import bodyParser from 'body-parser';
 import express from 'express';
@@ -10,9 +10,9 @@ import YAML from 'yamljs';
 
 import config from '~api/config';
 import { healthRoutes } from '~api/health';
-import { graphqlMiddleware } from '~api/middleware/gql';
 import { getStrategy } from '~api/modules/auth';
 import { errorHandler } from '~api/modules/error-handling';
+import { setupGraphQL } from '~api/modules/graphql';
 import { getIp } from '~api/modules/headers';
 import logger from '~api/modules/logger';
 import routes from '~api/routes';
@@ -119,12 +119,11 @@ function setupApiDocs(app: express.Express): void {
   );
 }
 
-async function setupApi(app: express.Express, databaseName?: string): Promise<void> {
-  passport.use('jwt', getStrategy(databaseName));
+function setupRestApi(app: express.Express): void {
+  passport.use('jwt', getStrategy());
   app.use(passport.initialize());
-  app.use(healthRoutes(databaseName));
-  app.use('/graphql', await graphqlMiddleware(databaseName));
-  app.use(API_PREFIX, routes(databaseName));
+  app.use(healthRoutes());
+  app.use(API_PREFIX, routes());
   setupApiDocs(app);
 }
 
@@ -136,22 +135,28 @@ function setupErrorHandling(app: express.Express): void {
   app.use(errorHandler);
 }
 
-export async function run(port = config.app.port, databaseName?: string): Promise<Server> {
+export async function run(port = config.app.port): Promise<Server> {
   const app = express();
+  const server = http.createServer(app);
 
   setupLogging(app);
   setupDataInput(app);
-  await setupApi(app, databaseName);
+
+  setupRestApi(app);
+  const onListen = await setupGraphQL(app, server);
+
   setupWebApp(app);
   setupErrorHandling(app);
 
   return new Promise((resolve, reject) => {
-    const server = app.listen(port, (err?: Error) => {
+    server.listen(port, (err?: Error) => {
       if (err) {
         logger.error('Error starting server: %s', err.stack);
         reject(err);
       } else {
+        onListen();
         logger.info('Server listening on port %s', port);
+
         resolve(server);
       }
     });

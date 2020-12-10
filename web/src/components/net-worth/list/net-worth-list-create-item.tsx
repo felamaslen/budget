@@ -3,8 +3,14 @@ import React, { useCallback } from 'react';
 import { NetWorthAddForm } from '../edit-form';
 import * as Styled from './styles';
 import { CREATE_ID } from '~client/constants/data';
-import { OnCreate, SetActiveId } from '~client/hooks/crud';
-import { Category, Subcategory, Entry } from '~client/types/net-worth';
+import { OnCreate } from '~client/hooks';
+import {
+  Create,
+  NetWorthCategory as Category,
+  NetWorthEntryNative as Entry,
+  NetWorthSubcategory as Subcategory,
+  SetActiveId,
+} from '~client/types';
 
 type Props = {
   data: Entry[];
@@ -13,7 +19,7 @@ type Props = {
   active: boolean;
   setActive: SetActiveId;
   noneActive: boolean;
-  onCreate: OnCreate<Entry>;
+  onCreate: OnCreate<Create<Entry>>;
 };
 
 export const NetWorthListCreateItem: React.FC<Props> = ({

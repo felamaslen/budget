@@ -17,30 +17,36 @@ describe('Funds selectors / lines', () => {
   const id3 = numericHash('short-lived-fund');
 
   const fundsWithReturns: FundsWithReturns = {
-    [id1]: {
-      startIndex: 0,
-      returns: [
-        { price: 100, units: 34, cost: 3100, realised: 0 },
-        { price: 102, units: 34, cost: 3100, realised: 0 },
-        { price: 103, units: 18, cost: 1560, realised: 0 },
-      ],
-    },
-    [id2]: {
-      startIndex: 2,
-      returns: [
-        { price: 954, units: 105, cost: 975400, realised: 0 },
-        { price: 961, units: 105, cost: 975400, realised: 0 },
-      ],
-    },
-    [id3]: {
-      startIndex: 1,
-      returns: [{ price: 763, units: 591, cost: 918, realised: 0 }],
-    },
+    [id1]: [
+      {
+        startIndex: 0,
+        values: [
+          { price: 100, units: 34, cost: 3100, realised: 0 },
+          { price: 102, units: 34, cost: 3100, realised: 0 },
+          { price: 103, units: 18, cost: 1560, realised: 0 },
+        ],
+      },
+    ],
+    [id2]: [
+      {
+        startIndex: 2,
+        values: [
+          { price: 954, units: 105, cost: 975400, realised: 0 },
+          { price: 961, units: 105, cost: 975400, realised: 0 },
+        ],
+      },
+    ],
+    [id3]: [
+      {
+        startIndex: 1,
+        values: [{ price: 763, units: 591, cost: 918, realised: 0 }],
+      },
+    ],
   };
 
   const cacheTimes = [10000, 10030, 10632];
 
-  describe('getOverallAbsolute', () => {
+  describe(getOverallAbsolute.name, () => {
     it('should sum values and return a line', () => {
       expect.assertions(1);
       const result = getOverallAbsolute(fundsWithReturns);
@@ -52,28 +58,28 @@ describe('Funds selectors / lines', () => {
         961 * 105,
       ];
 
-      expect(result).toStrictEqual(expectedResult);
+      expect(result).toStrictEqual([{ startIndex: 0, values: expectedResult }]);
     });
   });
 
-  describe('getFundLineAbsolute', () => {
+  describe(getFundLineAbsolute.name, () => {
     it.each`
-      id     | expectedResult
-      ${id1} | ${[100 * 34, 102 * 34, 103 * 18]}
-      ${id2} | ${[954 * 105, 961 * 105]}
-      ${id3} | ${[763 * 591]}
-    `('should get a list of values for id $id', ({ id, expectedResult }) => {
+      id     | startIndex | expectedResult
+      ${id1} | ${0}       | ${[100 * 34, 102 * 34, 103 * 18]}
+      ${id2} | ${2}       | ${[954 * 105, 961 * 105]}
+      ${id3} | ${1}       | ${[763 * 591]}
+    `('should get a list of values for id $id', ({ id, startIndex, expectedResult }) => {
       expect.assertions(1);
 
       const result = getFundLineAbsolute(fundsWithReturns, id);
 
-      expect(result).toStrictEqual(expectedResult);
+      expect(result).toStrictEqual([{ startIndex, values: expectedResult }]);
     });
   });
 
-  describe('getOverallROI', () => {
+  describe(getOverallROI.name, () => {
     it('should average ROIs and return a line', () => {
-      expect.assertions(5);
+      expect.assertions(7);
 
       const result = getOverallROI(fundsWithReturns);
 
@@ -84,12 +90,16 @@ describe('Funds selectors / lines', () => {
         (100 * (961 * 105 - 975400)) / 975400,
       ];
 
-      expect(result).toHaveLength(expectedResult.length);
-      result.forEach((value, index) => expect(value).toBeCloseTo(expectedResult[index], 1));
+      expect(result).toHaveLength(1);
+      expect(result[0].startIndex).toBe(0);
+      expect(result[0].values).toHaveLength(expectedResult.length);
+      result[0].values.forEach((value, index) =>
+        expect(value).toBeCloseTo(expectedResult[index], 1),
+      );
     });
   });
 
-  describe('getFundLineROI', () => {
+  describe(getFundLineROI.name, () => {
     const roiId1 = [
       (100 * (100 * 34 - 3100)) / 3100,
       (100 * (102 * 34 - 3100)) / 3100,
@@ -104,57 +114,72 @@ describe('Funds selectors / lines', () => {
       ${id2} | ${roiId2}
       ${id3} | ${roiId3}
     `('should get a list of ROIs for id $id', ({ id, expectedResult }) => {
-      expect.assertions(expectedResult.length + 1);
+      expect.assertions(expectedResult.length + 2);
 
       const result = getFundLineROI(fundsWithReturns, id);
 
-      expect(result).toHaveLength(expectedResult.length);
-      result.forEach((value, index) => expect(value).toBeCloseTo(expectedResult[index]));
+      expect(result).toHaveLength(1);
+      expect(result[0].values).toHaveLength(expectedResult.length);
+      result[0].values.forEach((value, index) => expect(value).toBeCloseTo(expectedResult[index]));
     });
 
     describe('for funds which were sold at a profit and re-bought', () => {
       const idRebought = numericHash('my-rebought-fund');
-      const fundsWithReturnsRebought = {
-        [idRebought]: {
-          startIndex: 0,
-          returns: [
-            {
-              price: 100,
-              units: 105,
-              cost: 490000,
-              realised: 0,
-            },
-            {
-              price: 0,
-              units: 0,
-              cost: -180000,
-              realised: 670000,
-            },
-            {
-              price: 103,
-              units: 20,
-              cost: 250000,
-              realised: 670000,
-            },
-          ],
-        },
+      const fundsWithReturnsRebought: FundsWithReturns = {
+        [idRebought]: [
+          {
+            startIndex: 0,
+            values: [
+              {
+                price: 100,
+                units: 105,
+                cost: 490000,
+                realised: 0,
+              },
+            ],
+          },
+          {
+            startIndex: 2,
+            values: [
+              {
+                price: 103,
+                units: 20,
+                cost: 250000,
+                realised: 670000,
+              },
+            ],
+          },
+        ],
       };
 
-      it('should set the values while fully sold to zero', () => {
-        expect.assertions(1);
+      it('should return multiple lines', () => {
+        expect.assertions(2);
         const result = getFundLineROI(fundsWithReturnsRebought, idRebought);
-        expect(result).toStrictEqual([expect.any(Number), 0, expect.any(Number)]);
-      });
-
-      it('should set the correct ROI value once re-bought', () => {
-        expect.assertions(1);
-        const result = getFundLineROI(fundsWithReturnsRebought, idRebought);
-        expect(result[2]).toBeCloseTo(((103 * 20 + 670000 - 250000) / 250000) * 100);
+        expect(result).toStrictEqual([
+          { startIndex: 0, values: [expect.any(Number)] },
+          { startIndex: 2, values: [expect.any(Number)] },
+        ]);
+        expect(result).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "startIndex": 0,
+              "values": Array [
+                -97.86,
+              ],
+            },
+            Object {
+              "startIndex": 2,
+              "values": Array [
+                168.82,
+              ],
+            },
+          ]
+        `);
       });
     });
   });
 
-  describe('getOverallLine', () => {
+  describe(getOverallLine.name, () => {
     const overallAbsolute = getOverallAbsolute(fundsWithReturns);
     const overallROI = getOverallROI(fundsWithReturns);
     const overallPrice: number[] = [];
@@ -172,12 +197,12 @@ describe('Funds selectors / lines', () => {
     });
   });
 
-  describe('getFundLine', () => {
+  describe(getFundLine.name, () => {
     describe.each`
       id     | priceLine
-      ${id1} | ${[100, 102, 103]}
-      ${id2} | ${[954, 961]}
-      ${id3} | ${[763]}
+      ${id1} | ${[{ startIndex: 0, values: [100, 102, 103] }]}
+      ${id2} | ${[{ startIndex: 2, values: [954, 961] }]}
+      ${id3} | ${[{ startIndex: 1, values: [763] }]}
     `('for id $id', ({ id, priceLine }) => {
       describe.each`
         description   | mode          | resultDescription     | getExpectedResult
@@ -195,7 +220,7 @@ describe('Funds selectors / lines', () => {
     });
   });
 
-  describe('getFundLineProcessed', () => {
+  describe(getFundLineProcessed.name, () => {
     it('should process a normal fund line', () => {
       expect.assertions(1);
       expect(getFundLineProcessed(fundsWithReturns, cacheTimes, Mode.ROI, id1))
@@ -252,14 +277,16 @@ describe('Funds selectors / lines', () => {
         expect(
           getFundLineProcessed(
             {
-              [id1]: {
-                startIndex: 0,
-                returns: [
-                  { price: 100, units: 34, cost: 3100, realised: 0 },
-                  { price: 92, units: 34, cost: 3128, realised: 0 },
-                  { price: 103, units: 18, cost: 1560, realised: 0 },
-                ],
-              },
+              [id1]: [
+                {
+                  startIndex: 0,
+                  values: [
+                    { price: 100, units: 34, cost: 3100, realised: 0 },
+                    { price: 92, units: 34, cost: 3128, realised: 0 },
+                    { price: 103, units: 18, cost: 1560, realised: 0 },
+                  ],
+                },
+              ],
             },
             cacheTimes,
             Mode.ROI,

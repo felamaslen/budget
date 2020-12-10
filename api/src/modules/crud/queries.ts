@@ -1,10 +1,22 @@
-import { sql, DatabaseTransactionConnectionType, ListSqlTokenType } from 'slonik';
+import {
+  sql,
+  DatabaseTransactionConnectionType,
+  ListSqlTokenType,
+  UnnestSqlTokenType,
+} from 'slonik';
 
 import { CrudItem } from './types';
 import { Create } from '~api/types';
 
 const whereId = (withUid: boolean, uid: number, id: number): ListSqlTokenType =>
   sql.join([sql`id = ${id}`, withUid && sql`uid = ${uid}`].filter(Boolean), sql` AND `);
+
+const filterRowProps = <R extends Record<string, UnnestSqlTokenType | undefined>>(
+  row: R,
+): [string, UnnestSqlTokenType][] =>
+  Object.entries(row).filter(
+    (entry): entry is [string, UnnestSqlTokenType] => typeof entry[1] !== 'undefined',
+  );
 
 export async function insertCrudItem<D extends CrudItem>(
   withUid: boolean,
@@ -16,16 +28,16 @@ export async function insertCrudItem<D extends CrudItem>(
   const result = await db.query<D & { id: number }>(sql`
   INSERT INTO ${sql.identifier([table])}
   (${sql.join(
-    Object.keys(row).reduce(
-      (last, column) => [...last, sql.identifier([column])],
+    filterRowProps(row).reduce(
+      (last, [column]) => [...last, sql.identifier([column])],
       withUid ? [sql.identifier(['uid'])] : [],
     ),
     sql`, `,
   )})
   VALUES (
     ${sql.join(
-      Object.values(row as object).reduce(
-        (last, value) => [...last, sql`${value}`],
+      filterRowProps(row).reduce(
+        (last, [, value]) => [...last, sql`${value}`],
         withUid ? [sql`${uid}`] : [],
       ),
       sql`, `,
@@ -73,7 +85,7 @@ export async function updateCrudItem<D extends CrudItem>(
   const result = await db.query<D>(sql`
   UPDATE ${sql.identifier([table])}
   SET ${sql.join(
-    Object.entries(data as object).map(([key, value]) => sql`${sql.identifier([key])} = ${value}`),
+    filterRowProps(data).map(([key, value]) => sql`${sql.identifier([key])} = ${value}`),
     sql`, `,
   )}
   WHERE ${whereId(withUid, uid, id)}

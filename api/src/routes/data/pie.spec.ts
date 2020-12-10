@@ -1,29 +1,31 @@
 import { getPieCols, processQueryResult } from './pie';
-import { Page } from '~api/types';
+import { PageNonStandard, PageListStandard } from '~api/types';
 
 describe('Pie route', () => {
   describe('getPieCols', () => {
     it('should return the expected category list', () => {
       expect.assertions(5);
 
-      expect(() => getPieCols(Page.funds)).toThrowErrorMatchingInlineSnapshot(`"Invalid category"`);
+      expect(() =>
+        getPieCols((PageNonStandard.Funds as unknown) as PageListStandard),
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid category"`);
 
-      expect(getPieCols(Page.food)).toStrictEqual([
+      expect(getPieCols(PageListStandard.Food)).toStrictEqual([
         ['shop', 'Shop cost'],
         ['category', 'Category cost'],
       ]);
 
-      expect(getPieCols(Page.general)).toStrictEqual([
+      expect(getPieCols(PageListStandard.General)).toStrictEqual([
         ['shop', 'Shop cost'],
         ['category', 'Category cost'],
       ]);
 
-      expect(getPieCols(Page.social)).toStrictEqual([
+      expect(getPieCols(PageListStandard.Social)).toStrictEqual([
         ['shop', 'Shop cost'],
         ['category', 'Society cost'],
       ]);
 
-      expect(getPieCols(Page.holiday)).toStrictEqual([
+      expect(getPieCols(PageListStandard.Holiday)).toStrictEqual([
         ['shop', 'Shop cost'],
         ['category', 'Holiday cost'],
       ]);

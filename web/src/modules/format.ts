@@ -1,7 +1,7 @@
 import format from 'date-fns/format';
 
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
-import { Transaction } from '~client/types/funds';
+import { Transaction } from '~client/types';
 
 export function capitalise(value: string): string {
   return `${value.substring(0, 1).toUpperCase()}${value.substring(1).toLowerCase()}`;
@@ -148,13 +148,17 @@ export function getTickSize(min: number, max: number, numTicks: number): number 
   return normaliseTickSize(minimum);
 }
 
+export const toISO = (value: Date): string => format(value, 'yyyy-MM-dd');
+export const toLocal = (value: Date | undefined): string =>
+  format(value ?? new Date(), 'dd/MM/yyyy');
+
 export function formatItem(item: 'transactions', value: Transaction[]): string;
 export function formatItem(item: 'date', value?: Date): string;
 export function formatItem(item: 'cost', value?: number): string;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatItem(item: string, value?: any): string;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types
 export function formatItem(item: string, value?: any): string {
   if (item === 'transactions') {
     return String(Array.isArray(value) ? value.length : 0);
@@ -163,7 +167,7 @@ export function formatItem(item: string, value?: any): string {
     return '';
   }
   if (value instanceof Date) {
-    return format(value, 'dd/MM/yyyy');
+    return toLocal(value);
   }
   if (item === 'cost') {
     return formatCurrency(Number(value));

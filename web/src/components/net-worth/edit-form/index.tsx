@@ -7,27 +7,28 @@ import { Props as ContainerProps } from './form-container';
 import { StepCurrencies } from './step-currencies';
 import { StepDate } from './step-date';
 import { StepAssets, StepLiabilities } from './step-values';
-import { SetActiveId, OnUpdate, OnCreate } from '~client/hooks';
-import { sortByDate, generateFakeId } from '~client/modules/data';
+
+import { CREATE_ID } from '~client/constants/data';
+import { OnUpdate, OnCreate } from '~client/hooks';
+import { sortByDate, withoutId } from '~client/modules/data';
 import {
-  CreateEdit,
   Create,
-  Category,
-  Subcategory,
-  Entry,
-  ValueObject,
-  Currency,
-  Item,
+  Id,
+  NetWorthCategory,
+  NetWorthSubcategory,
+  NetWorthEntryNative as NetWorthEntry,
+  SetActiveId,
 } from '~client/types';
 
 type PropsItemForm = {
   add?: boolean;
-  item: CreateEdit<Entry>;
-  categories: Category[];
-  subcategories: Subcategory[];
+  item: NetWorthEntry;
+  categories: NetWorthCategory[];
+  subcategories: NetWorthSubcategory[];
   setActiveId: SetActiveId;
   onEdit: (
-    item: CreateEdit<Entry>,
+    id: Id,
+    item: Create<NetWorthEntry>,
     onComplete: React.EventHandler<React.MouseEvent | React.KeyboardEvent | React.TouchEvent>,
   ) => void;
 };
@@ -50,7 +51,7 @@ const NetWorthItemForm: React.FC<PropsItemForm> = ({
     [setActiveId],
   );
 
-  const [tempItem, setTempItem] = useState<CreateEdit<Entry>>(item);
+  const [tempItem, setTempItem] = useState<Create<NetWorthEntry>>(withoutId<NetWorthEntry>(item));
   const [step, setStep] = useState<Step>(steps[0]);
 
   const onPrevStep = useCallback(() => {
@@ -65,16 +66,17 @@ const NetWorthItemForm: React.FC<PropsItemForm> = ({
     if (stepIndex < steps.length - 1) {
       setStep(steps[stepIndex + 1]);
     } else {
-      onEdit(tempItem, onComplete);
+      onEdit(item.id, tempItem, onComplete);
     }
-  }, [onComplete, step, tempItem, onEdit]);
+  }, [onComplete, step, item.id, tempItem, onEdit]);
 
   const onFirstStep = steps.indexOf(step) === 0;
   const onLastStep = steps.indexOf(step) === steps.length - 1;
 
-  const containerProps: ContainerProps = {
+  const containerProps: Omit<ContainerProps, 'step'> = {
     add,
     onComplete,
+    id: item.id,
     item,
     onPrevStep,
     onNextStep,
@@ -105,25 +107,16 @@ const NetWorthItemForm: React.FC<PropsItemForm> = ({
   throw new Error('Invalid step set for <NetWorthEditForm />');
 };
 
-const withContrivedRowIds = <V extends Item>(row: Create<V>[]): V[] =>
-  row.map<V>((item) => ({ ...item, id: generateFakeId() } as V));
-
-const withContrivedIds = ({ id, ...item }: Entry): Create<Entry> => ({
-  ...item,
-  values: withContrivedRowIds<ValueObject>(item.values),
-  currencies: withContrivedRowIds<Currency>(item.currencies),
-});
-
 type PropsBase = Omit<PropsItemForm, 'add' | 'onEdit'>;
 
 export type PropsEdit = PropsBase & {
-  onUpdate: OnUpdate<Entry>;
+  onUpdate: OnUpdate<Create<NetWorthEntry>>;
 };
 
 export const NetWorthEditForm: React.FC<PropsEdit> = ({ onUpdate, ...props }) => {
   const onEdit = useCallback(
-    (tempItem, onComplete) => {
-      onUpdate(tempItem.id, tempItem);
+    (id: Id, tempItem: Create<NetWorthEntry>, onComplete) => {
+      onUpdate(id, tempItem);
       onComplete();
     },
     [onUpdate],
@@ -132,24 +125,26 @@ export const NetWorthEditForm: React.FC<PropsEdit> = ({ onUpdate, ...props }) =>
   return <NetWorthItemForm {...props} onEdit={onEdit} />;
 };
 
-export type PropsAdd = Omit<PropsBase, 'item'> & {
-  data: Entry[];
-  onCreate: OnCreate<Entry>;
+export type PropsAdd = Omit<PropsBase, 'id' | 'item'> & {
+  data: NetWorthEntry[];
+  onCreate: OnCreate<Create<NetWorthEntry>>;
 };
 
 export const NetWorthAddForm: React.FC<PropsAdd> = ({ data, onCreate, ...props }) => {
-  const item = useMemo<Create<Entry>>(() => {
+  const item = useMemo<NetWorthEntry>(() => {
     if (data.length) {
       const itemsSorted = sortByDate(data);
-      const lastItemWithIds: Create<Entry> = withContrivedIds(itemsSorted[itemsSorted.length - 1]);
+      const lastItem: NetWorthEntry = itemsSorted[itemsSorted.length - 1];
 
       return {
-        ...lastItemWithIds,
-        date: endOfMonth(addMonths(lastItemWithIds.date, 1)),
+        ...lastItem,
+        date: endOfMonth(addMonths(lastItem.date, 1)),
+        id: CREATE_ID,
       };
     }
 
     return {
+      id: CREATE_ID,
       date: new Date(),
       creditLimit: [],
       currencies: [],
@@ -158,7 +153,7 @@ export const NetWorthAddForm: React.FC<PropsAdd> = ({ data, onCreate, ...props }
   }, [data]);
 
   const onEdit = useCallback(
-    (tempItem, onComplete) => {
+    (_: Id, tempItem: Create<NetWorthEntry>, onComplete) => {
       onCreate(tempItem);
       onComplete();
     },

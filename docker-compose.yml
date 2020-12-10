@@ -23,9 +23,10 @@ services:
       NODE_ENV: development
       DEBUG: ${DEBUG}
       SKIP_APP: ${SKIP_APP}
-      FAKE_STOCK_PRICES: "true"
       PORT: 3000
       DATABASE_URL: postgres://docker:docker@db:5432/budget
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       DEFAULT_PIN: 1234
   base:
     image: docker.fela.space/budget_base:latest
@@ -33,7 +34,7 @@ services:
       context: .
   db:
     restart: always
-    image: postgres:10.4
+    image: postgres:10-alpine
     networks:
       - net_budget_dev
     ports:
@@ -43,6 +44,15 @@ services:
       POSTGRES_PASSWORD: docker
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    restart: always
+    image: redis:6-alpine
+    networks:
+      - net_budget_dev
+    ports:
+      - 6380:6379
+
 networks:
   net_budget_dev:
     driver: bridge

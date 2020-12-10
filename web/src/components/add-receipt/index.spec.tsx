@@ -1,16 +1,16 @@
 /* eslint-disable jest/prefer-expect-assertions */
 import { render, act, fireEvent, waitFor, RenderResult } from '@testing-library/react';
+import { DocumentNode } from 'graphql';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore, { MockStore } from 'redux-mock-store';
+import { Client } from 'urql';
+import { fromValue } from 'wonka';
 
 import { AddReceipt, Props } from '.';
-import { listItemCreated } from '~client/actions';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data';
-import { testApiKey, nockSearchReceipt, nockSearchReceiptItem } from '~client/test-utils/nocks';
-import { Page } from '~client/types';
+import * as ListMutations from '~client/gql/mutations/list';
+import * as SearchQueries from '~client/gql/queries/search';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { QueryReceiptItemArgs, QueryReceiptItemsArgs, ReceiptPage } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-short-id',
@@ -21,44 +21,81 @@ describe('<AddReceipt />', () => {
     setAddingReceipt: jest.fn(),
   };
 
-  type RenderWithStore = RenderResult & { store: MockStore };
+  const mockClient = ({
+    executeQuery: ({
+      variables,
+      query,
+    }: {
+      variables: Record<string, unknown>;
+      query: DocumentNode;
+    }) => {
+      if (
+        query === SearchQueries.ReceiptItem &&
+        (variables as QueryReceiptItemArgs).item === 'cri'
+      ) {
+        return fromValue({
+          data: {
+            receiptItem: 'Crisps',
+          },
+        });
+      }
+      if (
+        query === SearchQueries.ReceiptItems &&
+        (variables as QueryReceiptItemsArgs).items[0] === 'Some food item' &&
+        (variables as QueryReceiptItemsArgs).items[1] === 'Other general item'
+      ) {
+        return fromValue({
+          data: {
+            receiptItems: [
+              {
+                item: 'Some food item',
+                page: ReceiptPage.Food,
+                category: 'Fruit',
+              },
+            ],
+          },
+        });
+      }
 
-  const setup = (): RenderWithStore => {
-    const store = createStore<State>()({
-      ...testState,
-      api: {
-        ...testState.api,
-        key: testApiKey,
-      },
-    });
+      return fromValue({
+        data: null,
+      });
+    },
+    executeMutation: ({ query }: { variables: Record<string, unknown>; query: DocumentNode }) => {
+      if (query === ListMutations.CreateReceipt) {
+        return fromValue({
+          data: {
+            createReceipt: {
+              error: null,
+            },
+          },
+        });
+      }
+      return fromValue({
+        data: null,
+      });
+    },
+  } as unknown) as Client;
 
-    const renderResult = render(
-      <Provider store={store}>
+  const setup = (): RenderResult =>
+    render(
+      <GQLProviderMock client={mockClient}>
         <AddReceipt {...props} />
-      </Provider>,
+      </GQLProviderMock>,
     );
 
-    return { ...renderResult, store };
-  };
+  let mutateSpy: jest.SpyInstance;
+  beforeEach(() => {
+    mutateSpy = jest.spyOn(mockClient, 'executeMutation');
+  });
 
   let matchMedia: MatchMediaMock;
   beforeAll(() => {
     matchMedia = new MatchMediaMock();
   });
-  beforeEach(() => {
-    nockSearchReceipt('Some%20food%20item,Other%20general%20item', [
-      {
-        item: 'Some food item',
-        page: Page.food,
-        category: 'Fruit',
-      },
-    ]);
-
-    nockSearchReceiptItem('Some%20food%20item');
-    nockSearchReceiptItem('Other%20general%20item');
-  });
   afterEach(() => {
     matchMedia.clear();
+    mutateSpy.mockRestore();
   });
 
   it.each`
@@ -75,7 +112,7 @@ describe('<AddReceipt />', () => {
   });
 
   describe('when entering receipt information', () => {
-    const setDate = (result: RenderWithStore, date: string): void => {
+    const setDate = (result: RenderResult, date: string): void => {
       const inputDate = result.getByLabelText('Date');
       act(() => {
         fireEvent.change(inputDate, { target: { value: date } });
@@ -85,7 +122,7 @@ describe('<AddReceipt />', () => {
       });
     };
 
-    const setShop = (result: RenderWithStore, shop: string): void => {
+    const setShop = (result: RenderResult, shop: string): void => {
       const inputShop = result.getByLabelText('Shop');
       act(() => {
         fireEvent.change(inputShop, { target: { value: shop } });
@@ -96,7 +133,7 @@ describe('<AddReceipt />', () => {
     };
 
     const addItem = (
-      result: RenderWithStore,
+      result: RenderResult,
       item: string,
       cost: string,
       page?: string,
@@ -129,7 +166,7 @@ describe('<AddReceipt />', () => {
       });
     };
 
-    const enterReceipt = async (): Promise<RenderWithStore> => {
+    const enterReceipt = async (): Promise<RenderResult> => {
       const result = setup();
 
       setDate(result, '20/4/20');
@@ -173,40 +210,40 @@ describe('<AddReceipt />', () => {
       });
 
       await waitFor(() => {
-        expect(result.store.getActions().length).toBeGreaterThan(0);
+        expect(mutateSpy).toHaveBeenCalledTimes(1);
       });
 
       return result;
     };
 
-    const action1 = listItemCreated(Page.food)({
-      date: new Date('2020-04-20'),
-      item: 'Some food item',
-      category: 'Fruit', // from search results
-      cost: 123,
-      shop: "Sainsbury's",
-    });
-
-    const action2 = listItemCreated(Page.general)({
-      date: new Date('2020-04-20'),
-      item: 'Other general item',
-      category: 'Some general category', // from manual input
-      cost: 456,
-      shop: "Sainsbury's",
-    });
-
-    it.each`
-      description      | action
-      ${'first item'}  | ${action1}
-      ${'second item'} | ${action2}
-    `('should dispatch an action for the $description', async ({ action }) => {
-      const { store } = await enterReceipt();
-      expect(store.getActions()).toStrictEqual(expect.arrayContaining([action]));
-    });
-
-    it('should not dispatch any other actions', async () => {
-      const { store } = await enterReceipt();
-      expect(store.getActions()).toHaveLength(2);
+    it('should run a mutation to create a receipt', async () => {
+      await enterReceipt();
+      expect(mutateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: ListMutations.CreateReceipt,
+          variables: expect.objectContaining({
+            date: '2020-04-20',
+            shop: "Sainsbury's",
+            items: expect.arrayContaining(
+              [
+                {
+                  page: ReceiptPage.Food,
+                  item: 'Some food item',
+                  category: 'Fruit',
+                  cost: 123,
+                },
+                {
+                  page: ReceiptPage.General,
+                  item: 'Other general item',
+                  category: 'Some general category', // from manual input
+                  cost: 456,
+                },
+              ].map(expect.objectContaining),
+            ),
+          }),
+        }),
+        {},
+      );
     });
 
     it('should clear all inputs', async () => {
@@ -237,7 +274,6 @@ describe('<AddReceipt />', () => {
 
   describe('when autocompleting an item field', () => {
     it('should make the case consistent', async () => {
-      nockSearchReceiptItem('cri', 'Crisps');
       const { getAllByPlaceholderText, getByText } = setup();
       const inputItem = getAllByPlaceholderText('Item')[0] as HTMLInputElement;
 

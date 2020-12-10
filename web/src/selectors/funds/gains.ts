@@ -1,14 +1,14 @@
+import { flatten } from 'array-flatten';
 import getUnixTime from 'date-fns/getUnixTime';
 import isAfter from 'date-fns/isAfter';
 import moize from 'moize';
 import { rgb, parseToRgb } from 'polished';
 import { createSelector } from 'reselect';
 
-import { getCurrentFundsCache, getFundsRows } from './helpers';
-import { isSold, getTotalUnits, getTotalCost } from '~client/modules/data';
-import { Cache } from '~client/reducers/funds';
+import { getFundsCache, getFundsRows, PriceCache } from './helpers';
+import { isSold, getTotalUnits, getTotalCost, lastInArray } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { Id, Fund, Transaction } from '~client/types';
+import { FundNative as Fund, Id, TransactionNative as Transaction } from '~client/types';
 
 const scoreColor = (score: number, channel: number): number =>
   Math.round(255 + score * (channel - 255));
@@ -54,19 +54,24 @@ export type RowGain = Omit<CostValue, 'cost'> & {
 
 export type RowGains = { [id: string]: RowGain | null };
 
-export const getRowGains = (rows: Fund[], cache: Cache): RowGains =>
+export const getRowGains = (rows: Fund[], cache: PriceCache): RowGains =>
   rows.reduce<RowGains>((items, { id, transactions }) => {
-    if (!(transactions.length && cache.prices[id]?.values.length)) {
+    if (
+      !(
+        transactions.length &&
+        cache.prices[id]?.length &&
+        cache.prices[id].every(({ values }) => values.length)
+      )
+    ) {
       return { ...items, [id]: null };
     }
 
-    const rowCache = cache.prices[id] ?? { values: [] };
+    const flatPriceValues = flatten(cache.prices[id].map(({ values }) => values));
 
-    const price = rowCache.values.length ? rowCache.values[rowCache.values.length - 1] : 0;
-    const yesterdayPrice =
-      rowCache.values.length > 1 ? rowCache.values[rowCache.values.length - 2] : 0;
+    const latestPrice = lastInArray(flatPriceValues) as number;
+    const yesterdayPrice = flatPriceValues[flatPriceValues.length - 2] ?? latestPrice;
 
-    const paperValue = getPaperValue(transactions, price);
+    const paperValue = getPaperValue(transactions, latestPrice);
     const yesterdayPaperValue = getPaperValue(transactions, yesterdayPrice);
 
     const realisedValue = getRealisedValue(transactions);
@@ -123,16 +128,16 @@ export function getGainsForRow(rowGains: RowGains, id: Id): GainsForRow {
   } as GainsForRow;
 }
 
-const getItemsWithPrices = createSelector(getCurrentFundsCache, getFundsRows, (cache, items) => {
-  if (!(cache && cache.cacheTimes && cache.cacheTimes.length > 1 && items && items.length)) {
+const getItemsWithPrices = createSelector(getFundsCache, getFundsRows, (cache, items) => {
+  if (!(cache.cacheTimes.length > 1 && items.length > 0)) {
     return [];
   }
 
   return items.filter(({ id, transactions }) => cache.prices[id] && transactions);
 });
 
-const getLatestTimes = createSelector(getCurrentFundsCache, (cache) => {
-  if (!(cache && cache.cacheTimes && cache.cacheTimes.length > 1)) {
+const getLatestTimes = createSelector(getFundsCache, (cache) => {
+  if (cache.cacheTimes.length <= 1) {
     return { timeLatest: new Date(), timePrev: new Date() };
   }
 
@@ -147,24 +152,31 @@ const getLatestTimes = createSelector(getCurrentFundsCache, (cache) => {
 const getTodayAndYesterdayTotalValue = createSelector(
   getItemsWithPrices,
   getLatestTimes,
-  getCurrentFundsCache,
+  getFundsCache,
   (itemsWithPrices, { timeLatest, timePrev }, cache) => {
     const getValue = (maxDate: Date): number => {
       const maxDateValue = getUnixTime(maxDate);
+      const startTime = cache.startTime ?? 0;
+      const cacheTimes = cache.cacheTimes ?? [];
 
       return itemsWithPrices.reduce((last, { id, transactions }) => {
-        const { startIndex = 0, values = [] } = cache?.prices[id] || {};
-        if (!values.length) {
+        const cacheForFund = cache?.prices[id];
+        if (!cacheForFund) {
           return last;
         }
+        const latestGroup = cacheForFund[cacheForFund.length - 1];
+        if (!(latestGroup && latestGroup.values.length)) {
+          return last;
+        }
+        const { startIndex, values } = latestGroup;
 
         const timeIndex =
-          (cache?.cacheTimes || []).length -
+          cacheTimes.length -
           1 -
-          (cache?.cacheTimes || [])
+          cacheTimes
             .slice()
             .reverse()
-            .findIndex((value) => value + (cache?.startTime || 0) <= maxDateValue);
+            .findIndex((value) => value + startTime <= maxDateValue);
 
         const price = values[timeIndex - startIndex] ?? values[values.length - 1];
 

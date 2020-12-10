@@ -1,18 +1,18 @@
 import moize from 'moize';
-import React, { useContext, useMemo, useCallback } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useContext, useMemo, CSSProperties } from 'react';
+import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 
 import { createListContext } from './context';
+import { useMoreItems } from './hooks';
 import * as Styled from './styles';
 import { PropsMemoisedItem } from './types';
-import { moreListDataRequestInitiated } from '~client/actions';
 import { getOlderExists } from '~client/selectors';
-import { Item } from '~client/types';
+import { Item, PageListCost } from '~client/types';
 
-type Props<I extends Item, P extends string, E extends {}> = {
+type Props<I extends Item, P extends string, E extends Record<string, unknown>> = {
   page: P;
   isMobile: boolean;
   items: I[];
@@ -27,7 +27,7 @@ type ItemData<I extends Item> = {
 type PropsRow<I extends Item> = {
   data: ItemData<I>;
   index: number;
-  style: object;
+  style: CSSProperties;
 };
 
 const isItemLoaded = moize(
@@ -36,7 +36,7 @@ const isItemLoaded = moize(
   { maxSize: 1 },
 );
 
-const makeRow = <I extends Item, E extends {}>(
+const makeRow = <I extends Item, E extends Record<string, unknown>>(
   MemoisedItem: React.FC<PropsMemoisedItem<E>>,
 ): React.FC<PropsRow<I>> => {
   const InfiniteItem: React.FC<PropsRow<I>> = ({ data, index, style }) => {
@@ -59,18 +59,20 @@ const makeRow = <I extends Item, E extends {}>(
   return InfiniteItem;
 };
 
-export const InfiniteWindow = <I extends Item, P extends string, E extends {}>({
+export const InfiniteWindow = <
+  I extends Item,
+  P extends PageListCost,
+  E extends Record<string, unknown>
+>({
   page,
   isMobile,
   items,
   MemoisedItem,
-}: Props<I, P, E>): React.ReactElement<Props<I, P, E>> => {
-  const dispatch = useDispatch();
+}: Props<I, P, E>): React.ReactElement => {
   const olderExists = useSelector(getOlderExists(page));
   const itemCount = olderExists ? items.length + 1 : items.length;
-  const loadMore = useCallback(async (): Promise<void> => {
-    dispatch(moreListDataRequestInitiated(page));
-  }, [dispatch, page]);
+
+  const loadMore = useMoreItems(page);
 
   const itemData = useMemo<ItemData<I>>(() => ({ items, olderExists }), [items, olderExists]);
 

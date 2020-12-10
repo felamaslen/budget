@@ -2,16 +2,16 @@ import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
 
 import { SubTree } from './sub-tree';
-import { Page, MainBlockName } from '~client/types';
+import { AnalysisPage, MainBlockName } from '~client/types';
 
 describe('<PageAnalysis /> / <SubTree />', () => {
   const props = {
     open: true,
     subTree: [
-      { name: Page.food, total: 2 },
-      { name: Page.general, total: 4 },
+      { name: AnalysisPage.Food, total: 2 },
+      { name: AnalysisPage.General, total: 4 },
     ],
-    name: Page.food as MainBlockName,
+    name: AnalysisPage.Food as MainBlockName,
     itemCost: 6,
     onHover: jest.fn(),
   };
@@ -20,9 +20,9 @@ describe('<PageAnalysis /> / <SubTree />', () => {
     render(<SubTree {...props} {...customProps} />);
 
   it.each`
-    position    | name            | cost    | percent
-    ${'first'}  | ${Page.food}    | ${0.02} | ${33.3}
-    ${'second'} | ${Page.general} | ${0.04} | ${66.7}
+    position    | name                    | cost    | percent
+    ${'first'}  | ${AnalysisPage.Food}    | ${0.02} | ${33.3}
+    ${'second'} | ${AnalysisPage.General} | ${0.04} | ${66.7}
   `('should render the $position item', ({ name, cost, percent }) => {
     expect.assertions(3);
     const { queryByText } = getContainer();
@@ -34,8 +34,8 @@ describe('<PageAnalysis /> / <SubTree />', () => {
 
   it.each`
     position    | index | name
-    ${'first'}  | ${0}  | ${Page.food}
-    ${'second'} | ${1}  | ${Page.general}
+    ${'first'}  | ${0}  | ${AnalysisPage.Food}
+    ${'second'} | ${1}  | ${AnalysisPage.General}
   `('should call onHover on mouse over of the $position item', ({ index, name }) => {
     const { container } = getContainer();
 
@@ -44,7 +44,7 @@ describe('<PageAnalysis /> / <SubTree />', () => {
     });
 
     expect(props.onHover).toHaveBeenCalledTimes(1);
-    expect(props.onHover).toHaveBeenCalledWith(Page.food, name);
+    expect(props.onHover).toHaveBeenCalledWith(AnalysisPage.Food, name);
   });
 
   it.each`

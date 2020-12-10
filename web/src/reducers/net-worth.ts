@@ -1,4 +1,5 @@
 import { compose } from '@typed/compose';
+import { replaceAtIndex } from 'replace-array';
 
 import {
   Action,
@@ -6,26 +7,17 @@ import {
   ActionTypeLogin,
   ActionTypeApi,
   ActionApiDataRead,
-  ActionApiSyncReceived,
 } from '~client/actions';
-import { sortByKey } from '~client/modules/data';
+import { omitTypeName, sortByKey } from '~client/modules/data';
 import {
-  onCreateOptimistic,
-  onUpdateOptimistic,
-  onDeleteOptimistic,
-  State as CrudState,
-  withCreatedIds,
-  withCreates,
-  withUpdates,
-  withDeletes,
-} from '~client/reducers/crud';
-import {
-  Category,
-  Subcategory,
-  Entry,
-  CreditLimit,
-  ValueObject,
-  SyncRequestNetWorth as SyncRequest,
+  GQL,
+  Id,
+  NetWorthCategory as Category,
+  NetWorthEntryNative as Entry,
+  NetWorthEntryRead,
+  NetWorthSubcategory as Subcategory,
+  NetWorthValueObjectNative,
+  NetWorthValueObjectRead,
 } from '~client/types';
 
 type ExtraState = {
@@ -34,189 +26,137 @@ type ExtraState = {
 };
 
 export type State = {
-  categories: CrudState<Category>;
-  subcategories: CrudState<Subcategory>;
-  entries: CrudState<Entry>;
+  categories: GQL<Category>[];
+  subcategories: GQL<Subcategory>[];
+  entries: GQL<Entry>[];
 } & ExtraState;
 
 export const initialState: State = {
-  categories: { items: [], __optimistic: [] },
-  subcategories: { items: [], __optimistic: [] },
-  entries: { items: [], __optimistic: [] },
+  categories: [],
+  subcategories: [],
+  entries: [],
   old: [],
   oldOptions: [],
 };
 
 const removeDeletedSubcategories = (state: State): State => ({
   ...state,
-  subcategories: state.subcategories.items.reduce<CrudState<Subcategory>>(
-    (last, subcategory, index) =>
-      state.categories.items.some(({ id }) => id === subcategory.categoryId)
-        ? {
-            items: [...last.items, subcategory],
-            __optimistic: [...last.__optimistic, state.subcategories.__optimistic[index]],
-          }
-        : last,
-    initialState.subcategories,
+  subcategories: state.subcategories.filter(({ categoryId }) =>
+    state.categories.some(({ id }) => id === categoryId),
   ),
 });
 
 const removeDeletedEntries = (state: State): State => ({
   ...state,
-  entries: {
-    __optimistic: state.entries.__optimistic,
-    items: state.entries.items.map<Entry>(({ values, creditLimit, ...rest }) => ({
-      ...rest,
-      values: values.filter(({ subcategory }) =>
-        state.subcategories.items.some(({ id }) => id === subcategory),
-      ),
-      creditLimit: creditLimit.filter(({ subcategory }: CreditLimit) =>
-        state.subcategories.items.some(({ id }) => id === subcategory),
-      ),
-    })),
-  },
+  entries: state.entries.map<Entry>((entry) => ({
+    ...entry,
+    values: entry.values.filter(({ subcategory }) =>
+      state.subcategories.some(({ id }) => id === subcategory),
+    ),
+    creditLimit: entry.creditLimit.filter(({ subcategory }) =>
+      state.subcategories.some(({ id }) => id === subcategory),
+    ),
+  })),
 });
 
-const removeDependencies = (state: State): State =>
-  compose(removeDeletedEntries, removeDeletedSubcategories)(state);
+const removeDependencies = compose(removeDeletedEntries, removeDeletedSubcategories);
 
-const sortIndividualEntryValues = sortByKey<'subcategory', ValueObject>({
+const sortIndividualEntryValues = sortByKey<'subcategory', Entry['values'][0]>({
   key: 'subcategory',
   order: 1,
 });
 
-const sortEntryValues = (entries: CrudState<Entry>): CrudState<Entry> => ({
-  __optimistic: entries.__optimistic,
-  items: entries.items.map((entry) => ({
+const sortEntryValues = (entries: Entry[]): Entry[] =>
+  entries.map<Entry>((entry) => ({
     ...entry,
     values: sortIndividualEntryValues(entry.values),
-  })),
+  }));
+
+const omitComplexValueTypeNames = (value: NetWorthValueObjectRead): NetWorthValueObjectNative => ({
+  ...value,
+  fx: value.fx?.map(omitTypeName) ?? null,
+  option: value.option ? omitTypeName(value.option) : null,
+  mortgage: value.mortgage ? omitTypeName(value.mortgage) : null,
+});
+
+const mapEntry = (entry: NetWorthEntryRead): Entry => ({
+  id: entry.id,
+  date: new Date(entry.date),
+  values: entry.values.map(compose(omitComplexValueTypeNames, omitTypeName)),
+  creditLimit: entry.creditLimit.map(omitTypeName),
+  currencies: entry.currencies.map(omitTypeName),
 });
 
 const onRead = (
   state: State,
   {
     res: {
-      netWorth: { categories, subcategories, entries },
+      netWorthCategories: categories,
+      netWorthSubcategories: subcategories,
+      netWorthEntries: entries,
     },
   }: ActionApiDataRead,
 ): State => ({
   ...state,
-  categories: {
-    items: categories.data,
-    __optimistic: categories.data.map(() => undefined),
-  },
-  subcategories: {
-    items: subcategories.data,
-    __optimistic: subcategories.data.map(() => undefined),
-  },
-  entries: sortEntryValues({
-    items: entries.data.items.map<Entry>(
-      ({ date, values = [], creditLimit = [], currencies = [], ...rest }) => ({
-        date: new Date(date),
-        values: sortByKey<'id', ValueObject>('id')(values),
-        creditLimit,
-        currencies,
-        ...rest,
-      }),
-    ),
-    __optimistic: entries.data.items.map(() => undefined),
-  }),
-  old: entries.data.old ?? [],
-  oldOptions: entries.data.oldOptions ?? [],
+  categories: (categories ?? []).map(omitTypeName),
+  subcategories: (subcategories ?? []).map(omitTypeName),
+  entries: sortEntryValues(entries?.current.map<Entry>(mapEntry) ?? []),
+  old: entries?.old ?? [],
+  oldOptions: entries?.oldOptions ?? [],
 });
 
-const updateEntriesOnSubcategoryCreate = (requests: SyncRequest[]) => (
-  entries: CrudState<Entry>,
-): CrudState<Entry> => ({
-  __optimistic: entries.__optimistic,
-  items: entries.items.map<Entry>((entry) => ({
-    ...entry,
-    values: withCreatedIds(requests, 'subcategory', entry.values),
-    creditLimit: withCreatedIds(requests, 'subcategory', entry.creditLimit),
-  })),
-});
-
-const confirmCreates = (requests: SyncRequest[]) => (state: State): State => ({
-  ...state,
-  categories: withCreates<Category>(requests)(state.categories),
-  subcategories: compose<CrudState<Subcategory>, CrudState<Subcategory>, CrudState<Subcategory>>(
-    withCreates(requests, 'categoryId', false),
-    withCreates<Subcategory>(requests),
-  )(state.subcategories),
-  entries: compose<CrudState<Entry>, CrudState<Entry>, CrudState<Entry>, CrudState<Entry>>(
-    sortEntryValues,
-    updateEntriesOnSubcategoryCreate(requests),
-    withCreates<Entry>(requests),
-  )(state.entries),
-});
-
-const confirmUpdates = (requests: SyncRequest[]) => (state: State): State => ({
-  ...state,
-  categories: withUpdates<Category>(requests)(state.categories),
-  subcategories: withUpdates<Subcategory>(requests)(state.subcategories),
-  entries: withUpdates<Entry>(requests)(state.entries),
-});
-
-const confirmDeletes = (requests: SyncRequest[]) => (state: State): State =>
-  removeDependencies({
+function simpleUpdate<
+  K extends 'categories' | 'subcategories' | 'entries',
+  A extends { item: State[K][0] }
+>(key: K, state: State, action: A): State {
+  return {
     ...state,
-    categories: withDeletes<Category>(requests)(state.categories),
-    subcategories: withDeletes<Subcategory>(requests)(state.subcategories),
-    entries: withDeletes<Entry>(requests)(state.entries),
-  });
-
-const onSyncReceived = (
-  state: State,
-  { res: { netWorth: requests = [] } }: ActionApiSyncReceived,
-): State =>
-  compose(confirmCreates(requests), confirmUpdates(requests), confirmDeletes(requests))(state);
+    [key]: replaceAtIndex<State[K][0]>(
+      state[key],
+      state[key].findIndex(({ id }: { id: Id }) => id === action.item.id),
+      action.item,
+    ),
+  };
+}
 
 export default function netWorth(state: State = initialState, action: Action): State {
   switch (action.type) {
     case ActionTypeNetWorth.CategoryCreated:
-      return {
-        ...state,
-        categories: onCreateOptimistic(state.categories, action.fakeId, action.item),
-      };
+      return { ...state, categories: [...state.categories, action.item] };
     case ActionTypeNetWorth.CategoryUpdated:
-      return { ...state, categories: onUpdateOptimistic(state.categories, action.id, action.item) };
+      return simpleUpdate('categories', state, action);
     case ActionTypeNetWorth.CategoryDeleted:
       return removeDependencies({
         ...state,
-        categories: onDeleteOptimistic(state.categories, action.id),
+        categories: state.categories.filter(({ id }) => id !== action.id),
       });
 
     case ActionTypeNetWorth.SubcategoryCreated:
-      return {
-        ...state,
-        subcategories: onCreateOptimistic(state.subcategories, action.fakeId, action.item),
-      };
+      return { ...state, subcategories: [...state.subcategories, action.item] };
     case ActionTypeNetWorth.SubcategoryUpdated:
-      return {
-        ...state,
-        subcategories: onUpdateOptimistic(state.subcategories, action.id, action.item),
-      };
+      return simpleUpdate('subcategories', state, action);
     case ActionTypeNetWorth.SubcategoryDeleted:
       return removeDependencies({
         ...state,
-        subcategories: onDeleteOptimistic(state.subcategories, action.id),
+        subcategories: state.subcategories.filter(({ id }) => id !== action.id),
       });
 
     case ActionTypeNetWorth.EntryCreated:
-      return { ...state, entries: onCreateOptimistic(state.entries, action.fakeId, action.item) };
+      return { ...state, entries: [...state.entries, mapEntry(action.item)] };
     case ActionTypeNetWorth.EntryUpdated:
       return {
         ...state,
-        entries: onUpdateOptimistic(state.entries, action.id, action.item),
+        entries: replaceAtIndex<Entry>(
+          state.entries,
+          state.entries.findIndex(({ id }) => id === action.item.id),
+          mapEntry(action.item),
+        ),
       };
     case ActionTypeNetWorth.EntryDeleted:
-      return { ...state, entries: onDeleteOptimistic(state.entries, action.id) };
+      return { ...state, entries: state.entries.filter(({ id }) => id !== action.id) };
 
     case ActionTypeApi.DataRead:
       return onRead(state, action);
-    case ActionTypeApi.SyncReceived:
-      return action.res.netWorth.length ? onSyncReceived(state, action) : state;
 
     case ActionTypeLogin.LoggedOut:
       return initialState;

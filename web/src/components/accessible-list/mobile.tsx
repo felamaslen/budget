@@ -2,22 +2,24 @@ import React, { useState, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { FieldsMobile, ComponentType } from './types';
-import { OnCreateList } from '~client/actions';
 import { FormFieldText, FormFieldCost, FormFieldDate } from '~client/components/form-field';
 import { ModalDialog, ModalFields, makeField } from '~client/components/modal-dialog';
-import { useCTA } from '~client/hooks/cta';
+import { useCTA } from '~client/hooks';
 import { formatItem } from '~client/modules/format';
 import { Button } from '~client/styled/shared';
-import { Item, ListCalcItem } from '~client/types';
+import { Id, ListItemInput, ListItemStandard, PageList, StandardInput } from '~client/types';
 
 export type DefaultMobileKeys = 'date' | 'item' | 'cost';
 
-type StandardFieldPropsMobile<V, E extends {} = {}> = Partial<E> & {
+type StandardFieldPropsMobile<
+  V,
+  E extends Record<string, unknown> = Record<string, unknown>
+> = Partial<E> & {
   field: string;
   value: V;
 };
 
-const StandardFieldMobile = <V, E extends {} = {}>({
+const StandardFieldMobile = <V, E extends Record<string, unknown> = Record<string, unknown>>({
   field,
   value,
 }: StandardFieldPropsMobile<V, E>): React.ReactElement<StandardFieldPropsMobile<V, E>> => (
@@ -26,26 +28,34 @@ const StandardFieldMobile = <V, E extends {} = {}>({
   </Styled.StandardFieldMobile>
 );
 
-export const standardFieldsMobile: FieldsMobile<ListCalcItem, DefaultMobileKeys> = {
+export const standardFieldsMobile: FieldsMobile<ListItemStandard, DefaultMobileKeys> = {
   date: StandardFieldMobile,
   item: StandardFieldMobile,
   cost: StandardFieldMobile,
 };
 
-export const standardModalFields: ModalFields<ListCalcItem> = {
+export const standardModalFields: ModalFields<StandardInput> = {
   date: makeField('date', FormFieldDate),
   item: makeField('item', FormFieldText),
   cost: makeField('cost', FormFieldCost),
 };
 
-type FieldPropsMobile<I extends Item, F extends keyof I, E extends {}> = {
+type FieldPropsMobile<
+  I extends ListItemInput,
+  F extends keyof I,
+  E extends Record<string, unknown> = never
+> = {
   fieldsMobile: FieldsMobile<I, F, E>;
   field: F;
   item: I;
   extraProps?: Partial<E>;
 };
 
-export const ListFieldMobile = <I extends Item, F extends keyof I, E extends {}>({
+export const ListFieldMobile = <
+  I extends ListItemInput,
+  F extends keyof I,
+  E extends Record<string, unknown>
+>({
   fieldsMobile,
   field,
   item,
@@ -61,14 +71,14 @@ export const ListFieldMobile = <I extends Item, F extends keyof I, E extends {}>
   return <Field field={field} value={item[field]} {...extraProps} />;
 };
 
-type PropsCreateForm<I extends Item, P extends string> = {
+type PropsCreateForm<I extends ListItemInput, P extends PageList> = {
   page: P;
   color?: string;
   fields?: ModalFields<I>;
-  onCreate: OnCreateList<I, P, void>;
+  onCreate: (item: I) => void;
 };
 
-export const MobileCreateForm = <I extends Item, P extends string>({
+export const MobileCreateForm = <I extends ListItemInput, P extends PageList>({
   color,
   fields,
   onCreate,
@@ -78,7 +88,7 @@ export const MobileCreateForm = <I extends Item, P extends string>({
   const activateModal = useCallback(() => setModalActive(true), []);
 
   const onSubmit = useCallback(
-    (newItem: I): void => {
+    (_: Id | undefined, newItem: I): void => {
       onCreate(newItem);
       setModalActive(false);
     },

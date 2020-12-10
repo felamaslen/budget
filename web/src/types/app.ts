@@ -1,27 +1,13 @@
-export const enum Page {
-  overview = 'overview',
-  analysis = 'analysis',
-  funds = 'funds',
-  income = 'income',
-  bills = 'bills',
-  food = 'food',
-  general = 'general',
-  holiday = 'holiday',
-  social = 'social',
+import { PageListExtended, PageListStandard } from './gql';
+
+export enum PageNonStandard {
+  Overview = 'overview',
+  Analysis = 'analysis',
+  Funds = 'funds',
 }
 
-export type PageList =
-  | Page.funds
-  | Page.income
-  | Page.bills
-  | Page.food
-  | Page.general
-  | Page.holiday
-  | Page.social;
+export type PageListCost = PageListStandard | PageListExtended;
 
-export type PageListCalc = Exclude<PageList, Page.funds>;
-export type PageListCalcCategory = Exclude<PageListCalc, Page.income | Page.bills>;
+export type Page = PageNonStandard | PageListStandard | PageListExtended;
 
-export type AppConfig = {
-  birthDate: Date;
-};
+export type PageList = PageNonStandard.Funds | PageListCost;

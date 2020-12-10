@@ -1,11 +1,10 @@
 import React from 'react';
 import * as Styled from './styles';
 
-type Props = { loading: boolean; unsaved: boolean };
+type Props = { loading: boolean };
 
-export const AppLogo: React.FC<Props> = ({ loading, unsaved }) => (
+export const AppLogo: React.FC<Props> = ({ loading }) => (
   <Styled.AppLogo>
-    {unsaved && <Styled.QueueNotSaved>{'Unsaved changes!'}</Styled.QueueNotSaved>}
     <Styled.Logo>
       <span>{'Budget'}</span>
       {loading && <Styled.LoadingApi />}

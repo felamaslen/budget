@@ -1,80 +1,16 @@
-import { Create, CrudItem } from './crud';
+import { NativeDate } from './crud';
+import {
+  CreditLimit,
+  Currency,
+  InitialQuery,
+  NetWorthEntryInput,
+  NetWorthValueInput,
+  NetWorthValueObject,
+} from './gql';
+import { GQL } from './shared';
 
-export type Category = CrudItem<{
-  type: 'asset' | 'liability';
-  category: string;
-  color: string;
-  isOption: boolean;
-}>;
-
-export type Subcategory = CrudItem<{
-  categoryId: Category['id'];
-  subcategory: string;
-  hasCreditLimit: boolean | null;
-  isSAYE?: boolean | null;
-  opacity: number;
-}>;
-
-export type FXValue = {
-  value: number;
-  currency: string;
-};
-
-export type OptionValue = {
-  units: number;
-  vested: number;
-  strikePrice: number;
-  marketPrice: number;
-};
-
-export type ComplexValueItem = number | FXValue | OptionValue;
-export type ComplexValue = ComplexValueItem[];
-
-export type MortgageValue = {
-  principal: number;
-  paymentsRemaining: number;
-  rate: number;
-};
-
-export type Value = number | ComplexValue | MortgageValue;
-
-export const isMortgageValue = (value: Value): value is MortgageValue =>
-  typeof value === 'object' && Reflect.has(value, 'principal');
-export const isComplex = (value: Value): value is ComplexValue => Array.isArray(value);
-export const isFX = (value: ComplexValueItem): value is FXValue =>
-  typeof value === 'object' && Reflect.has(value, 'currency');
-export const isOption = (value: ComplexValueItem): value is OptionValue =>
-  typeof value === 'object' && Reflect.has(value, 'strikePrice');
-
-export type ValueObject = CrudItem<{
-  subcategory: Subcategory['id'];
-  skip?: boolean | null;
-  value: Value;
-}>;
-
-export type CreditLimit = {
-  subcategory: Subcategory['id'];
-  value: number;
-};
-
-export type Currency = CrudItem<{
-  currency: string;
-  rate: number;
-}>;
-
-export type Entry = CrudItem<{
-  date: Date;
-  values: ValueObject[];
-  creditLimit: CreditLimit[];
-  currencies: Currency[];
-}>;
-
-export type CreateEntry = Omit<Entry, 'values' | 'currencies'> & {
-  values: Create<ValueObject>[];
-  currencies: Create<Currency>[];
-};
-
-export type NetWorthTableRow = CrudItem<{
+export type NetWorthTableRow = {
+  id: number;
   date: Date;
   assets: number;
   options: number;
@@ -83,7 +19,7 @@ export type NetWorthTableRow = CrudItem<{
   expenses: number;
   fti: number;
   pastYearAverageSpend: number;
-}>;
+};
 
 export type NetWorthTableColumn = 'date' | 'assets' | 'liabilities' | 'main' | 'expenses';
 
@@ -99,3 +35,25 @@ export enum Aggregate {
 export type AggregateSums = {
   [key in Aggregate]: number;
 };
+
+export type NetWorthEntryRead = NonNullable<InitialQuery['netWorthEntries']>['current'][0];
+export type NetWorthValueObjectRead = NetWorthEntryRead['values'][0];
+
+export type NetWorthValueObjectNative = Omit<
+  GQL<NonNullable<NetWorthValueObjectRead>>,
+  'fx' | 'option' | 'mortgage'
+> & {
+  fx?: GQL<NonNullable<NetWorthValueObjectRead['fx']>[0]>[] | null;
+  option?: GQL<NonNullable<NetWorthValueObjectRead['option']>> | null;
+  mortgage?: GQL<NonNullable<NetWorthValueObjectRead['mortgage']>> | null;
+};
+
+export type NetWorthEntryNative = Pick<NativeDate<NetWorthEntryRead, 'date'>, 'id' | 'date'> & {
+  values: GQL<NetWorthValueObjectNative>[];
+  creditLimit: GQL<CreditLimit>[];
+  currencies: GQL<Currency>[];
+};
+
+export type NetWorthEntryInputNative = NativeDate<NetWorthEntryInput, 'date'>;
+
+export type NetWorthValue = NetWorthValueInput | NetWorthValueObject;

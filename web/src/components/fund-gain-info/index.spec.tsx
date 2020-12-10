@@ -325,32 +325,32 @@ describe('<FundGainInfo />', () => {
               £5.6k
             </span>
             <span
-              class="sc-fznWqX c3"
+              class="sc-fzqBZW c3"
             >
               <span
-                class="sc-pZaHX c4"
+                class="sc-qQMSE c4"
               >
                 <span
-                  class="sc-qQMSE sc-qYIQh c5"
+                  class="sc-pZOBi sc-oTNDV c5"
                 >
                   £40
                 </span>
                 <span
-                  class="sc-qQMSE c6"
+                  class="sc-pZOBi c6"
                 >
                   30.00%
                 </span>
               </span>
               <span
-                class="sc-pZaHX c7"
+                class="sc-qQMSE c7"
               >
                 <span
-                  class="sc-qQMSE sc-qYIQh c8"
+                  class="sc-pZOBi sc-oTNDV c8"
                 >
                   (£3)
                 </span>
                 <span
-                  class="sc-qQMSE c9"
+                  class="sc-pZOBi c9"
                 >
                   (2.00%)
                 </span>

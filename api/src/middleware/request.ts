@@ -3,9 +3,9 @@ import { Schema } from '@hapi/joi';
 import { Response, NextFunction, RequestHandler } from 'express';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { AuthenticatedRequest } from '~api/gql';
 import { withSlonik } from '~api/modules/db';
 import { catchAsyncErrors } from '~api/modules/error-handling';
+import { AuthenticatedRequest } from '~api/types/resolver';
 
 export const authDbRoute = (
   handler: (
@@ -14,15 +14,13 @@ export const authDbRoute = (
     res: Response,
     next: NextFunction,
   ) => Promise<void>,
-) => (databaseName?: string): RequestHandler =>
-  catchAsyncErrors(
-    withSlonik<void, [AuthenticatedRequest, Response, NextFunction]>(handler)(databaseName),
-  );
+): RequestHandler =>
+  catchAsyncErrors(withSlonik<void, [AuthenticatedRequest, Response, NextFunction]>(handler));
 
 export const validatedAuthDbRoute = <
-  D extends object | void = void,
-  P extends object | void = void,
-  Q extends object | void = void
+  D extends Record<string, unknown> | void = void,
+  P extends Record<string, unknown> | void = void,
+  Q extends Record<string, unknown> | void = void
 >(
   schema: Partial<{
     data: Schema;
@@ -37,7 +35,7 @@ export const validatedAuthDbRoute = <
     params: P,
     query: Q,
   ) => Promise<void>,
-): ((databaseName?: string) => RequestHandler) =>
+): RequestHandler =>
   authDbRoute(async (db, req, res) => {
     const dataValidation = schema.data?.validate(req.body);
     const paramsValidation = schema.params?.validate(req.params);

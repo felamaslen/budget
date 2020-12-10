@@ -1,7 +1,6 @@
 import { compose } from '@typed/compose';
 import differenceInDays from 'date-fns/differenceInDays';
 import differenceInYears from 'date-fns/differenceInYears';
-import format from 'date-fns/format';
 import isSameMonth from 'date-fns/isSameMonth';
 import startOfYear from 'date-fns/startOfYear';
 import moize from 'moize';
@@ -15,69 +14,53 @@ import {
   currentDayIsEndOfMonth,
 } from './common';
 
-import { sortByKey, withoutIds } from '~client/modules/data';
+import { lastInArray, sortByKey } from '~client/modules/data';
 import { State } from '~client/reducers';
-import { State as CrudState } from '~client/reducers/crud';
 import { getAppConfig } from '~client/selectors/config';
-import { getRequests, withoutDeleted } from '~client/selectors/crud';
 import {
-  Create,
-  CreateEdit,
-  RequestType,
-  Request,
-  Category,
-  Subcategory,
-  Entry,
-  CreateEntry,
-  RawDate,
-  Value,
-  ValueObject,
-  Currency,
-  CreditLimit,
-  isComplex,
-  isFX,
-  SyncPayloadNetWorth,
   Aggregate,
   AggregateSums,
-  isOption,
-  OptionValue,
-  NetWorthTableRow as TableRow,
   Cost,
-  isMortgageValue,
+  Currency,
+  GQL,
   MortgageValue,
-  AppConfig,
+  NetWorthCategory,
+  NetWorthCategoryType,
+  NetWorthEntryNative,
+  NetWorthSubcategory,
+  NetWorthTableRow as TableRow,
+  NetWorthValueObjectNative,
+  NetWorthValueObjectRead,
+  OptionValue,
 } from '~client/types';
 
-const nullEntry = (date: Date): Create<Entry> => ({
+const nullEntry = (date: Date): NetWorthEntryNative => ({
+  id: -date.getTime(),
   date,
   values: [],
   currencies: [],
   creditLimit: [],
 });
 
-const getNonFilteredCategories = (state: State): CrudState<Category> => state.netWorth.categories;
-const getNonFilteredSubcategories = (state: State): CrudState<Subcategory> =>
+const getNonFilteredCategories = (state: State): NetWorthCategory[] => state.netWorth.categories;
+const getNonFilteredSubcategories = (state: State): NetWorthSubcategory[] =>
   state.netWorth.subcategories;
-const getNonFilteredEntries = (state: State): CrudState<Entry> => state.netWorth.entries;
 
-export const getEntries = createSelector(getNonFilteredEntries, withoutDeleted);
+export const getEntries = (state: State): NetWorthEntryNative[] => state.netWorth.entries;
+
 export const getCategories = createSelector(
   getNonFilteredCategories,
-  compose<CrudState<Category>, Category[], Category[]>(
-    sortByKey('type', 'category'),
-    withoutDeleted,
-  ),
+  sortByKey('type', 'category'),
 );
 export const getSubcategories = createSelector(
   getNonFilteredSubcategories,
-  compose<CrudState<Subcategory>, Subcategory[], Subcategory[], Subcategory[]>(
+  compose<NetWorthSubcategory[], NetWorthSubcategory[], NetWorthSubcategory[]>(
     sortByKey('subcategory'),
     sortByKey('categoryId'),
-    withoutDeleted,
   ),
 );
 
-const withoutSkipValues = (entries: Entry[]): Entry[] =>
+const withoutSkipValues = (entries: NetWorthEntryNative[]): NetWorthEntryNative[] =>
   entries.map(({ values, ...rest }) => ({
     ...rest,
     values: values.filter(({ skip }) => !skip),
@@ -85,91 +68,88 @@ const withoutSkipValues = (entries: Entry[]): Entry[] =>
 
 const getSummaryEntries = createSelector(getEntries, withoutSkipValues);
 
-const isSAYE = (subcategories: Subcategory[], subcategory: number): boolean =>
-  subcategories.find((compare) => compare.id === subcategory)?.isSAYE ?? false;
+type FilterPredicate<T> = (value: T) => boolean;
 
-const optionValue = (value: OptionValue): number =>
+const filterValuesByCategory = (predicate: FilterPredicate<NetWorthCategory>) => (
+  categories: NetWorthCategory[],
+  subcategories: NetWorthSubcategory[],
+) => (value: NetWorthValueObjectNative): boolean =>
+  categories
+    .filter(predicate)
+    .some((category) =>
+      subcategories.some(
+        (subcategory) =>
+          subcategory.id === value.subcategory && subcategory.categoryId === category.id,
+      ),
+    );
+
+const filterValuesBySubcategory = (predicate: FilterPredicate<NetWorthSubcategory>) => (
+  subcategories: NetWorthSubcategory[],
+) => (value: NetWorthValueObjectNative): boolean =>
+  subcategories.filter(predicate).some((subcategory) => subcategory.id === value.subcategory);
+
+const isValueSAYE = filterValuesBySubcategory(({ isSAYE }) => !!isSAYE);
+
+const optionValue = (value: GQL<OptionValue>): number =>
   value.vested * Math.max(0, value.marketPrice - value.strikePrice);
-const optionSAYEResidual = (value: OptionValue): number => value.vested * value.strikePrice;
 
-function getComplexValue({ value }: ValueObject, currencies: Currency[]): number {
-  if (isMortgageValue(value)) {
-    return -value.principal;
-  }
-  if (!isComplex(value)) {
-    return value;
-  }
-
-  return value.reduce<number>((last, part) => {
-    if (isFX(part)) {
-      const { value: numberValue, currency } = part;
-
-      const currencyMatch = currencies.find(({ currency: name }) => name === currency);
-      if (!currencyMatch) {
-        return last;
-      }
-
-      // converting from currency to GBX, but rate is against GBP
-      return last + currencyMatch.rate * numberValue * 100;
-    }
-    if (isOption(part)) {
-      return last + Math.round(optionValue(part));
-    }
-
-    return last + part;
-  }, 0);
+function sumComplexValue(value: NetWorthValueObjectNative, currencies: Currency[]): number {
+  return Math.round(
+    (value.simple ?? 0) +
+      (value.fx?.reduce<number>(
+        (last, part) =>
+          last +
+          part.value *
+            100 *
+            (currencies.find((compare) => compare.currency === part.currency)?.rate ?? 0),
+        0,
+      ) ?? 0) +
+      (value.option ? optionValue(value.option) : 0) +
+      -(value.mortgage?.principal ?? 0),
+  );
 }
 
-const sumValues = (currencies: Currency[], values: ValueObject[]): number =>
+const sumValues = (currencies: Currency[], values: NetWorthValueObjectNative[]): number =>
   values.reduce<number>(
-    (last, valueObject): number => last + getComplexValue(valueObject, currencies),
+    (last, valueObject): number => last + sumComplexValue(valueObject, currencies),
     0,
   );
 
 function calculateResidualSAYEOptionsValue(
-  subcategories: Subcategory[],
-  entry: Pick<CreateEdit<Entry>, 'values'>,
+  subcategories: NetWorthSubcategory[],
+  entry: Pick<NetWorthEntryNative, 'values'>,
 ): number {
   return Math.round(
     entry.values
-      .filter(({ subcategory }) => isSAYE(subcategories, subcategory))
-      .reduce<number>((last, { value }) => {
-        if (!isComplex(value)) {
-          return last;
-        }
-        return value
-          .filter(isOption)
-          .reduce<number>((sum, part) => sum + optionSAYEResidual(part), last);
-      }, 0),
+      .filter(isValueSAYE(subcategories))
+      .reduce<number>(
+        (last, { option }) => last + (option ? option.vested * option.strikePrice : 0),
+        0,
+      ),
   );
 }
 
 function getSumByCategory(
   categoryName: Aggregate,
-  categories: Category[],
-  subcategories: Subcategory[],
-  { values, currencies }: CreateEdit<Entry>,
+  categories: NetWorthCategory[],
+  subcategories: NetWorthSubcategory[],
+  { values, currencies }: NetWorthEntryNative,
 ): number {
   if (!(categories.length && subcategories.length)) {
     return 0;
   }
 
-  const category = categories.find(({ category: name }) => name === categoryName);
-  if (!category) {
-    return 0;
-  }
+  const filterToCategory = filterValuesByCategory(({ category }) => category === categoryName);
 
-  const valuesFiltered = values.filter(({ subcategory }) =>
-    subcategories.some(({ id, categoryId }) => id === subcategory && categoryId === category.id),
-  );
+  const valuesFiltered = values.filter(filterToCategory(categories, subcategories));
 
   return sumValues(currencies, valuesFiltered);
 }
 
-function getResidual(
+function getAggregateExtra(
   categoryName: Aggregate,
-  subcategories: Subcategory[],
-  entry: CreateEdit<Entry>,
+  subcategories: NetWorthSubcategory[],
+  entry: NetWorthEntryNative,
 ): number {
   if (categoryName === Aggregate.cashOther) {
     return calculateResidualSAYEOptionsValue(subcategories, entry);
@@ -178,55 +158,51 @@ function getResidual(
 }
 
 const getEntryAggregate = (
-  categories: Category[],
-  subcategories: Subcategory[],
-  entry: CreateEdit<Entry>,
+  categories: NetWorthCategory[],
+  subcategories: NetWorthSubcategory[],
+  entry: NetWorthEntryNative,
 ): AggregateSums =>
   Object.entries(Aggregate).reduce<AggregateSums>(
     (last, [, categoryName]) => ({
       ...last,
       [categoryName]:
         getSumByCategory(categoryName, categories, subcategories, entry) +
-        getResidual(categoryName, subcategories, entry),
+        getAggregateExtra(categoryName, subcategories, entry),
     }),
     {} as AggregateSums,
   );
 
-type EntryWithAggregates = Entry & {
+type EntryWithAggregates = NetWorthEntryNative & {
   aggregate: AggregateSums;
 };
 
-const withAggregates = (categories: Category[], subcategories: Subcategory[]) => (
-  rows: Entry[],
+const withAggregates = (categories: NetWorthCategory[], subcategories: NetWorthSubcategory[]) => (
+  rows: NetWorthEntryNative[],
 ): EntryWithAggregates[] =>
   rows.map((entry) => ({
     ...entry,
     aggregate: getEntryAggregate(categories, subcategories, entry),
   }));
 
-const getEntryForMonth = (entries: CreateEdit<Entry>[]) => (date: Date): CreateEdit<Entry> => {
+const getEntryForMonth = (entries: NetWorthEntryNative[]) => (date: Date): NetWorthEntryNative => {
   const matchingEntries = entries
     .filter(({ date: entryDate }) => isSameMonth(entryDate, date))
     .sort(({ date: dateA }, { date: dateB }) => Number(dateB) - Number(dateA));
 
-  if (!matchingEntries.length) {
-    return nullEntry(date);
-  }
-
-  return matchingEntries[matchingEntries.length - 1];
+  return lastInArray(matchingEntries) ?? nullEntry(date);
 };
 
 const getNetWorthRows = createSelector(getMonthDates, getSummaryEntries, (monthDates, entries) =>
   monthDates.map(getEntryForMonth(entries)),
 );
 
-const getValues = (subcategories: Subcategory[]) => ({
+const getValues = (subcategories: NetWorthSubcategory[]) => ({
   currencies,
   values,
-}: CreateEdit<Entry>): number =>
+}: NetWorthEntryNative): number =>
   sumValues(
     currencies,
-    values.filter(({ value }) => !(isComplex(value) && value.some(isOption))),
+    values.filter((value) => !value.option),
   ) + calculateResidualSAYEOptionsValue(subcategories, { values });
 
 export const getNetWorthSummary = createSelector(
@@ -246,22 +222,18 @@ export const getNetWorthSummaryOld = (state: State): NetWorthSummaryOld => ({
 });
 
 const sumByType = (
-  categoryType: string,
-  categories: Category[],
-  subcategories: Subcategory[],
-  { currencies, values }: CreateEdit<Entry>,
-  categoryPredicate: (category: Category) => boolean = (): true => true,
+  categoryType: NetWorthCategoryType,
+  categories: NetWorthCategory[],
+  subcategories: NetWorthSubcategory[],
+  { currencies, values }: NetWorthEntryNative,
+  categoryPredicate: (category: NetWorthCategory) => boolean = (): true => true,
 ): number =>
   sumValues(
     currencies,
-    values.filter(({ subcategory }) =>
-      subcategories.some(
-        ({ id, categoryId }) =>
-          id === subcategory &&
-          categories
-            .filter(categoryPredicate)
-            .some(({ id: compare, type }) => compare === categoryId && type === categoryType),
-      ),
+    values.filter(
+      filterValuesByCategory(
+        (category) => category.type === categoryType && categoryPredicate(category),
+      )(categories, subcategories),
     ),
   );
 
@@ -271,16 +243,27 @@ type EntryTypeSplit = EntryWithAggregates & {
   liabilities: number;
 };
 
-const withTypeSplit = (categories: Category[], subcategories: Subcategory[]) => (
+const withTypeSplit = (categories: NetWorthCategory[], subcategories: NetWorthSubcategory[]) => (
   rows: EntryWithAggregates[],
 ): EntryTypeSplit[] =>
   rows.map((entry) => ({
     ...entry,
     assets:
-      sumByType('asset', categories, subcategories, entry, (category) => !category.isOption) +
-      calculateResidualSAYEOptionsValue(subcategories, entry),
-    options: sumByType('asset', categories, subcategories, entry, (category) => category.isOption),
-    liabilities: -sumByType('liability', categories, subcategories, entry),
+      sumByType(
+        NetWorthCategoryType.Asset,
+        categories,
+        subcategories,
+        entry,
+        (category) => !category.isOption,
+      ) + calculateResidualSAYEOptionsValue(subcategories, entry),
+    options: sumByType(
+      NetWorthCategoryType.Asset,
+      categories,
+      subcategories,
+      entry,
+      (category) => !!category.isOption,
+    ),
+    liabilities: -sumByType(NetWorthCategoryType.Liability, categories, subcategories, entry),
   }));
 
 function getSpendingByDate(spending: number[], dates: Date[], date: Date): number {
@@ -304,11 +287,9 @@ const withSpend = (dates: Date[], spending: number[]) => (
 
 type EntryWithFTI = EntryWithSpend & { fti: number; pastYearAverageSpend: number };
 
-const withFTI = (appConfig: Pick<AppConfig, 'birthDate'>) => (
-  rows: EntryWithSpend[],
-): EntryWithFTI[] =>
+const withFTI = (birthDate: Date) => (rows: EntryWithSpend[]): EntryWithFTI[] =>
   rows.map((entry, index) => {
-    const fullYears = differenceInYears(entry.date, appConfig.birthDate);
+    const fullYears = differenceInYears(entry.date, birthDate);
     const days = differenceInDays(entry.date, startOfYear(entry.date));
     const years = fullYears + days / 365;
 
@@ -316,7 +297,7 @@ const withFTI = (appConfig: Pick<AppConfig, 'birthDate'>) => (
     const pastYearSpend = pastYear.reduce((sum, { expenses }) => sum + expenses, 0);
     const pastYearAverageSpend = (pastYearSpend * 12) / pastYear.length;
 
-    const fti = (entry.assets - entry.liabilities) * (years / pastYearAverageSpend);
+    const fti = Math.round((entry.assets - entry.liabilities) * (years / pastYearAverageSpend));
 
     return { ...entry, fti, pastYearAverageSpend };
   });
@@ -337,136 +318,17 @@ export const getNetWorthTable = createSelector(
     appConfig,
     costMap: Cost,
     dates: Date[],
-    categories: Category[],
-    subcategories: Subcategory[],
-    entries: Entry[],
+    categories: NetWorthCategory[],
+    subcategories: NetWorthSubcategory[],
+    entries: NetWorthEntryNative[],
   ) =>
     compose(
       withTableProps,
-      withFTI(appConfig),
+      withFTI(appConfig.birthDate),
       withSpend(dates, getSpendingColumn(dates)(costMap).spending),
       withTypeSplit(categories, subcategories),
       withAggregates(categories, subcategories),
     )(entries),
-);
-
-const withCategoryRequests = (categories: CrudState<Category>) => (
-  requests: Request[],
-): Request[] => [...requests, ...getRequests('data/net-worth/categories')(categories)];
-
-const withSubcategoryRequests = (
-  categories: CrudState<Category>,
-  subcategories: CrudState<Subcategory>,
-) => (requests: Request[]): Request[] => [
-  ...requests,
-  ...getRequests('data/net-worth/subcategories')(
-    categories.items
-      .filter((_, index) => categories.__optimistic[index] === RequestType.create)
-      .reduce<CrudState<Subcategory>>((last, category) => {
-        const pendingIndexes = last.items.reduce<number[]>(
-          (lastIndexes, { categoryId }, index) =>
-            categoryId === category.id ? [...lastIndexes, index] : lastIndexes,
-          [],
-        );
-
-        return {
-          items: last.items.filter((_, index) => !pendingIndexes.includes(index)),
-          __optimistic: last.__optimistic.filter((_, index) => !pendingIndexes.includes(index)),
-        };
-      }, subcategories),
-  ),
-];
-
-const baseOption: OptionValue = {
-  units: 0,
-  vested: 0,
-  strikePrice: 0,
-  marketPrice: 0,
-};
-
-const groupPending = (categories: CrudState<Category>, subcategories: CrudState<Subcategory>) => ({
-  subcategory,
-}: ValueObject | CreditLimit): boolean =>
-  subcategories.items.some(
-    ({ id, categoryId }, index) =>
-      id === subcategory &&
-      (subcategories.__optimistic[index] === RequestType.create ||
-        categories.items.some(
-          (category, categoryIndex) =>
-            category.id === categoryId &&
-            categories.__optimistic[categoryIndex] === RequestType.create,
-        )),
-  );
-
-const withSingleOptionValues = (categories: Category[], subcategories: Subcategory[]) => (
-  values: Omit<ValueObject, 'id'>[],
-): Omit<ValueObject, 'id'>[] =>
-  values.map((valueObject: Omit<ValueObject, 'id'>) => {
-    const categoryId = subcategories.find(({ id }) => id === valueObject.subcategory)?.categoryId;
-    if (categories.find(({ id }) => id === categoryId)?.isOption) {
-      return {
-        ...valueObject,
-        value: isComplex(valueObject.value)
-          ? [valueObject.value.find(isOption) ?? baseOption]
-          : [baseOption],
-      };
-    }
-
-    return valueObject;
-  });
-
-const withEntryRequests = (
-  categories: CrudState<Category>,
-  subcategories: CrudState<Subcategory>,
-  entries: CrudState<Entry>,
-) => (requests: Request[]): Request[] => [
-  ...requests,
-  ...getRequests<SyncPayloadNetWorth>('data/net-worth')(
-    entries.items
-      .map<Entry & { __optimistic: RequestType | undefined }>((entry, index) => ({
-        ...entry,
-        __optimistic: entries.__optimistic[index],
-      }))
-      .filter(({ values, creditLimit }) =>
-        [values, creditLimit].every(
-          (group) => !group.some(groupPending(categories, subcategories)),
-        ),
-      )
-      .reduce<CrudState<RawDate<CreateEntry>>>(
-        (last, { __optimistic, ...entry }) => ({
-          items: [
-            ...last.items,
-            {
-              id: entry.id,
-              date: format(entry.date, 'yyyy-MM-dd'),
-              values: compose<ValueObject[], Create<ValueObject>[], Create<ValueObject>[]>(
-                withSingleOptionValues(categories.items, subcategories.items),
-                withoutIds,
-              )(entry.values),
-              creditLimit: entry.creditLimit,
-              currencies: withoutIds(entry.currencies),
-            },
-          ],
-          __optimistic: [...last.__optimistic, __optimistic],
-        }),
-        {
-          items: [],
-          __optimistic: [],
-        },
-      ),
-  ),
-];
-
-export const getNetWorthRequests = createSelector(
-  getNonFilteredCategories,
-  getNonFilteredSubcategories,
-  getNonFilteredEntries,
-  (categories, subcategories, entries) =>
-    compose(
-      withCategoryRequests(categories),
-      withSubcategoryRequests(categories, subcategories),
-      withEntryRequests(categories, subcategories, entries),
-    )([]),
 );
 
 export const getLatestNetWorthAggregate = createSelector(
@@ -507,35 +369,33 @@ export const getHomeEquity = moize(
         const debtToPresent = rows
           .slice(0, startPredictionIndex)
           .map<number>((row) =>
-            row.values.reduce<number>(
-              (last, { value }) => last + (isMortgageValue(value) ? value.principal : 0),
-              0,
-            ),
+            row.values.reduce<number>((last, { mortgage }) => last + (mortgage?.principal ?? 0), 0),
           );
 
-        const homeValueToPresent = rows.slice(0, startPredictionIndex).map<number>((row) =>
-          row.values.reduce<number>((last, { subcategory, value }) => {
-            const subcategoryCategoryId = subcategories.find(({ id }) => id === subcategory)
-              ?.categoryId;
-            const valueCategory = categories.find(({ id }) => id === subcategoryCategoryId);
+        const filterValuesByHouse = filterValuesByCategory(
+          ({ category }) => category === houseCategory,
+        )(categories, subcategories);
 
-            return (
-              last +
-              (typeof value === 'number' && valueCategory?.category === houseCategory ? value : 0)
-            );
-          }, 0),
-        );
+        const homeValueToPresent = rows
+          .slice(0, startPredictionIndex)
+          .map<number>((row) =>
+            row.values
+              .filter(filterValuesByHouse)
+              .reduce<number>((last, { simple }) => last + (simple ?? 0), 0),
+          );
 
         const homeEquityToPresent = homeValueToPresent.map<number>(
           (value, index) => value - debtToPresent[index],
         );
 
         const latestDebts = rows[startPredictionIndex - 1].values
-          .map<Value>(({ value }) => value)
-          .filter(isMortgageValue)
-          .map<MortgageValue & { monthlyPayment: number }>((mortgageValue) => ({
-            ...mortgageValue,
-            monthlyPayment: PMT(mortgageValue),
+          .filter(
+            (value): value is NetWorthValueObjectRead & { mortgage: MortgageValue } =>
+              !!value.mortgage,
+          )
+          .map<MortgageValue & { monthlyPayment: number }>(({ mortgage }) => ({
+            ...mortgage,
+            monthlyPayment: PMT(mortgage),
           }));
 
         const forecastDebt = Array(rows.length - startPredictionIndex)

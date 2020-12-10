@@ -1,11 +1,10 @@
 import { getStartTime, getCacheTimes, getFundItems, getFundLines } from './graph';
-import { Period, Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { Mode, fundPeriods, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
-import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
 import { testState, testStartTime, testCacheTimes } from '~client/test-data';
-import { Page, FundItem } from '~client/types';
+import { FundItem, PageNonStandard } from '~client/types';
 
 describe('Fund selectors / graph', () => {
   const today = new Date('2020-04-20');
@@ -14,7 +13,7 @@ describe('Fund selectors / graph', () => {
     funds: {
       ...testState.funds,
       viewSoldFunds: true,
-      period: Period.year1,
+      historyOptions: fundPeriods.year1.query,
     },
   };
 
@@ -22,19 +21,6 @@ describe('Fund selectors / graph', () => {
     it('should get the current funds cache start time', () => {
       expect.assertions(1);
       expect(getStartTime(state)).toBe(testStartTime);
-    });
-
-    it('should default to zero', () => {
-      expect.assertions(1);
-      expect(
-        getStartTime({
-          ...state,
-          [Page.funds]: {
-            ...state[Page.funds],
-            period: Period.year5,
-          },
-        }),
-      ).toBe(0);
     });
   });
 
@@ -78,17 +64,17 @@ describe('Fund selectors / graph', () => {
 
       const stateWithFutureFund = {
         ...state,
-        [Page.funds]: {
-          ...state[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
           items: [
             {
-              ...state[Page.funds].items[0],
+              ...state[PageNonStandard.Funds].items[0],
               item: 'Some future fund',
-              transactions: getTransactionsList([
-                { date: '2020-04-21', units: 23, price: 4.47826, fees: 0, taxes: 0 },
-              ]),
+              transactions: [
+                { date: new Date('2020-04-21'), units: 23, price: 4.47826, fees: 0, taxes: 0 },
+              ],
             },
-            ...state[Page.funds].items.slice(1),
+            ...state[PageNonStandard.Funds].items.slice(1),
           ],
         },
       };
@@ -167,18 +153,18 @@ describe('Fund selectors / graph', () => {
       expect.assertions(1);
       const stateWithSold = {
         ...state,
-        [Page.funds]: {
-          ...state[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
           items: [
             {
-              ...state[Page.funds].items[0],
-              transactions: getTransactionsList([
-                { date: '2017-05-09', units: 934, price: 428.2655, fees: 0, taxes: 0 },
-                { date: '2017-07-10', units: -934, price: 522.229, fees: 0, taxes: 0 },
-                { date: '2020-04-21', units: 1000, price: 79.015, fees: 0, taxes: 0 },
-              ]),
+              ...state[PageNonStandard.Funds].items[0],
+              transactions: [
+                { date: new Date('2017-05-09'), units: 934, price: 428.2655, fees: 0, taxes: 0 },
+                { date: new Date('2017-07-10'), units: -934, price: 522.229, fees: 0, taxes: 0 },
+                { date: new Date('2020-04-21'), units: 1000, price: 79.015, fees: 0, taxes: 0 },
+              ],
             },
-            ...state[Page.funds].items.slice(1),
+            ...state[PageNonStandard.Funds].items.slice(1),
           ],
         },
       };

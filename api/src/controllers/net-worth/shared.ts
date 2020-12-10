@@ -3,14 +3,9 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getInvalidIds, getInvalidCreditCategories } from '~api/queries';
 import {
-  Entry,
-  CreateEntry,
-  ValueObject,
-  Value,
-  ComplexValueItem,
-  ComplexValue,
+  FxValue,
+  MortgageValue,
   OptionValue,
-  FXValue,
   CreditLimit,
   Currency,
   JoinedEntryRow,
@@ -19,79 +14,89 @@ import {
   JoinedEntryRowWithFXValue,
   JoinedEntryRowWithOptionValue,
   JoinedEntryRowWithMortgageValue,
+  NetWorthEntryInput,
+  NetWorthValueObject,
+  NetWorthEntry,
 } from '~api/types';
 
-export const entryRowHasCurrencies = (
+const entryRowHasCurrencies = (
   rows: readonly JoinedEntryRow[],
 ): rows is JoinedEntryRowWithCurrencies[] => !!rows[0].currency_ids[0];
 
-export const entryRowHasCreditLimit = (
+const entryRowHasCreditLimit = (
   rows: readonly JoinedEntryRow[],
 ): rows is JoinedEntryRowWithCreditLimit[] => !!rows[0].credit_limit_subcategory[0];
 
-export const entryRowHasFXValue = (row: JoinedEntryRow): row is JoinedEntryRowWithFXValue =>
+const entryRowHasFXValue = (row: JoinedEntryRow): row is JoinedEntryRowWithFXValue =>
   !!row.fx_currencies[0];
 
-export const entryRowHasOptionValue = (row: JoinedEntryRow): row is JoinedEntryRowWithOptionValue =>
+const entryRowHasOptionValue = (row: JoinedEntryRow): row is JoinedEntryRowWithOptionValue =>
   row.op_units !== null;
 
-export const entryRowHasMortgageValue = (
-  row: JoinedEntryRow,
-): row is JoinedEntryRowWithMortgageValue => row.mortgage_payments_remaining !== null;
+const entryRowHasMortgageValue = (row: JoinedEntryRow): row is JoinedEntryRowWithMortgageValue =>
+  row.mortgage_payments_remaining !== null;
 
-export const isSimpleValue = (value: ComplexValueItem): value is number =>
-  typeof value === 'number';
-export const isComplexValue = (value?: Value | ComplexValue): value is ComplexValue =>
-  !!value && Array.isArray(value);
-export const isFXValue = (value: ComplexValueItem): value is FXValue =>
-  typeof value !== 'number' && Reflect.has(value, 'currency');
-export const isOptionValue = (value: ComplexValueItem): value is OptionValue =>
-  typeof value !== 'number' && Reflect.has(value, 'strikePrice');
-
-export function getValueFromRow(row: JoinedEntryRow): Value {
-  if (entryRowHasMortgageValue(row)) {
-    return {
-      principal: -(row.value_simple ?? 0),
-      paymentsRemaining: row.mortgage_payments_remaining,
-      rate: row.mortgage_rate,
-    };
+function sumFXValues(row: JoinedEntryRow): number {
+  if (!entryRowHasFXValue(row)) {
+    return 0;
   }
-  if (entryRowHasFXValue(row)) {
-    return row.fx_values.reduce<FXValue[]>(
-      (fxValues, fxValue, index) => [
-        ...fxValues,
-        {
-          value: fxValue,
-          currency: row.fx_currencies[index],
-        },
-      ],
-      [],
+  return row.fx_values.reduce<number>((last, value, index) => {
+    const currency = row.fx_currencies[index];
+    const currencyIndex = row.currencies.findIndex(
+      (compare: string | null) => compare === currency,
     );
-  }
-  if (entryRowHasOptionValue(row)) {
-    return [
-      {
-        units: row.op_units,
-        strikePrice: row.op_strike_price,
-        marketPrice: row.op_market_price,
-        vested: row.op_vested,
-      },
-    ];
-  }
-  return row.value_simple ?? 0;
+    const currencyRate = row.currency_rates[currencyIndex];
+
+    return last + value * 100 * (currencyRate ?? 0);
+  }, 0);
 }
 
-export function combineJoinedEntryRows(entryRows: readonly JoinedEntryRow[]): Entry {
+function sumOptionValues(row: JoinedEntryRow): number {
+  if (!entryRowHasOptionValue(row)) {
+    return 0;
+  }
+  if (row.is_saye) {
+    return row.op_vested * Math.max(row.op_market_price, row.op_strike_price);
+  }
+  return row.op_vested * Math.max(0, row.op_market_price - row.op_strike_price);
+}
+
+function sumValueFromRow(row: JoinedEntryRow): number {
+  return Math.round((row.value_simple ?? 0) + sumFXValues(row) + sumOptionValues(row));
+}
+
+const getRowSimple = (row: JoinedEntryRow): number | null =>
+  entryRowHasMortgageValue(row) ? null : row.value_simple ?? null;
+
+const getRowFX = (row: JoinedEntryRowWithFXValue): FxValue[] =>
+  row.fx_values.map<FxValue>((value, index) => ({
+    value,
+    currency: row.fx_currencies[index],
+  }));
+
+const getRowOption = (row: JoinedEntryRowWithOptionValue): OptionValue => ({
+  units: row.op_units,
+  vested: row.op_vested,
+  strikePrice: row.op_strike_price,
+  marketPrice: row.op_market_price,
+});
+
+const getRowMortgage = (row: JoinedEntryRowWithMortgageValue): MortgageValue => ({
+  principal: -row.value_simple,
+  rate: row.mortgage_rate,
+  paymentsRemaining: row.mortgage_payments_remaining,
+});
+
+export function combineJoinedEntryRows(entryRows: readonly JoinedEntryRow[]): NetWorthEntry {
   if (!entryRows.length) {
     throw boom.notFound('Net worth entry not found');
   }
 
   const currencies = entryRowHasCurrencies(entryRows)
     ? entryRows[0].currency_ids.reduce<Currency[]>(
-        (last, currencyId, index) => [
+        (last, _, index) => [
           ...last,
           {
-            id: currencyId,
             currency: entryRows[0].currencies[index],
             rate: entryRows[0].currency_rates[index],
           },
@@ -100,14 +105,15 @@ export function combineJoinedEntryRows(entryRows: readonly JoinedEntryRow[]): En
       )
     : [];
 
-  const values = entryRows.reduce<ValueObject[]>((last, row) => {
-    const value = getValueFromRow(row);
-
-    const valueObject: ValueObject = {
-      id: row.value_id,
+  const values = entryRows.reduce<NetWorthValueObject[]>((last, row) => {
+    const valueObject: NetWorthValueObject = {
       subcategory: row.value_subcategory,
       skip: row.value_skip,
-      value,
+      value: sumValueFromRow(row),
+      simple: getRowSimple(row),
+      fx: entryRowHasFXValue(row) ? getRowFX(row) : null,
+      option: entryRowHasOptionValue(row) ? getRowOption(row) : null,
+      mortgage: entryRowHasMortgageValue(row) ? getRowMortgage(row) : null,
     };
 
     return [...last, valueObject];
@@ -128,7 +134,7 @@ export function combineJoinedEntryRows(entryRows: readonly JoinedEntryRow[]): En
 
   return {
     id: entryRows[0].id,
-    date: entryRows[0].date,
+    date: new Date(entryRows[0].date),
     currencies,
     values,
     creditLimit,
@@ -137,7 +143,7 @@ export function combineJoinedEntryRows(entryRows: readonly JoinedEntryRow[]): En
 
 export async function validateCategories(
   db: DatabaseTransactionConnectionType,
-  data: CreateEntry,
+  data: NetWorthEntryInput,
 ): Promise<void> {
   const valuesCategories = data.values.map(({ subcategory }) => subcategory);
   const creditLimitCategories = data.creditLimit.map(({ subcategory }) => subcategory);

@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
-import { ListCalcCategory, Page } from '~api/types';
+import { PageListStandard } from '~api/types';
 
 export type PreviewRow = {
   date: string;
@@ -12,7 +12,7 @@ export type PreviewRow = {
 export async function getPreviewRows(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: ListCalcCategory,
+  table: PageListStandard,
   startDate: Date,
   endDate: Date,
 ): Promise<readonly PreviewRow[]> {
@@ -28,7 +28,7 @@ export async function getPreviewRows(
     sql` AND `,
   )}
   ${
-    table === Page.general
+    table === PageListStandard.General
       ? sql`AND category NOT IN (${sql.join(
           config.data.overview.ignoreExpenseCategories,
           sql`, `,

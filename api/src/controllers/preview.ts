@@ -15,9 +15,10 @@ import {
 } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import config from '~api/config';
 import { capitalise } from '~api/modules/capitalise';
 import { getPreviewRows, PreviewRow } from '~api/queries';
-import { ListCalcCategory } from '~api/types';
+import { PageListStandard } from '~api/types';
 
 type Padding = [number, number, number, number];
 
@@ -34,7 +35,7 @@ export type Query = {
   scale: 1 | 2 | 3;
   year: number;
   month: number;
-  category: ListCalcCategory;
+  category: PageListStandard;
 };
 
 type GraphProps = Query & {
@@ -189,7 +190,9 @@ function formatCurrency(value: number): string {
   const log = value !== 0 ? Math.min(Math.floor(Math.log10(absValue) / 3), abbr.length) : 0;
   const abbreviation = log > 0 ? abbr[log - 1] : '';
   const valueRaw = getCurrencyValueRaw(absValue, log);
-  return value < 0 ? `(£${valueRaw}${abbreviation})` : `£${valueRaw}${abbreviation}`;
+  return value < 0
+    ? `(${config.data.currencyUnit}${valueRaw}${abbreviation})`
+    : `${config.data.currencyUnit}${valueRaw}${abbreviation}`;
 }
 
 function drawValueAxis(ctx: CanvasRenderingContext2D, graph: GraphProps): void {

@@ -1,6 +1,6 @@
 import isSameDay from 'date-fns/isSameDay';
 import moize from 'moize';
-import React, { useMemo } from 'react';
+import React, { CSSProperties, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { getWeeklyCost } from './selectors';
@@ -21,11 +21,22 @@ import {
 } from '~client/components/form-field';
 import { ModalFields, makeField } from '~client/components/modal-dialog';
 import { formatCurrency } from '~client/modules/format';
-import { ExtendedCalcItem, Create } from '~client/types';
+import {
+  GQL,
+  ListItemExtendedNative as ListItemExtended,
+  ListItemStandardInput,
+  PageListCost,
+  StandardInput,
+} from '~client/types';
 
-type DailyFields = Fields<ExtendedCalcItem>;
+type ListItemExtendedInput = Omit<ListItemExtended, 'id'>;
 
-type PropsDaily<P extends string> = Pick<PropsStandard<ExtendedCalcItem, P>, 'page' | 'color'> & {
+type DailyFields = Fields<ListItemExtendedInput>;
+
+type PropsDaily<P extends PageListCost> = Pick<
+  PropsStandard<StandardInput, P>,
+  'page' | 'color'
+> & {
   categoryLabel?: string;
 };
 
@@ -34,7 +45,7 @@ type DailyRecord = {
 };
 
 const dailySelector = moize(
-  (sortedItems: ExtendedCalcItem[]): Record<string, DailyRecord> =>
+  (sortedItems: ListItemExtended[]): Record<string, DailyRecord> =>
     sortedItems.reduce<{ dailySum: number; record: Record<string, DailyRecord> }>(
       (last, { id, date, cost }, index) => {
         if (index === sortedItems.length - 1 || !isSameDay(date, sortedItems[index + 1].date)) {
@@ -56,20 +67,20 @@ const dailySelector = moize(
   },
 );
 
-const DailyHeader = <P extends string, MK extends keyof ExtendedCalcItem>(
-  props: HeaderProps<ExtendedCalcItem, P, MK>,
-): React.ReactElement<HeaderProps<ExtendedCalcItem, P, MK>> => {
+const DailyHeader = <P extends PageListCost, MK extends keyof ListItemExtended>(
+  props: HeaderProps<ListItemExtended, P, MK>,
+): React.ReactElement<HeaderProps<ListItemExtended, P, MK>> => {
   const weeklyValue = useSelector(getWeeklyCost(props.page));
 
   return (
-    <StandardHeader<ExtendedCalcItem, P, MK> {...props}>
+    <StandardHeader<ListItemExtended, P, MK> {...props}>
       {!props.isMobile && <WeeklyHeader>Weekly: {formatCurrency(weeklyValue)}</WeeklyHeader>}
     </StandardHeader>
   );
 };
 
 const DailyRow: React.FC<
-  { isMobile: boolean; style?: object; odd?: boolean } & Partial<DailyRecord & ExtraProps>
+  { isMobile: boolean; style?: CSSProperties; odd?: boolean } & Partial<DailyRecord & ExtraProps>
 > = ({ style, odd, isMobile, dailyTotal, isFuture, children }) => {
   return (
     <StandardRow style={style} odd={odd} isFuture={isFuture}>
@@ -87,14 +98,18 @@ const fields: DailyFields = {
   shop: FormFieldTextInline,
 };
 
-const suggestionFields = ['item', 'category', 'shop'] as (keyof Create<ExtendedCalcItem>)[];
+const suggestionFields: Exclude<keyof GQL<ListItemStandardInput>, 'fakeId'>[] = [
+  'item',
+  'category',
+  'shop',
+];
 
-export const AccessibleListDaily = <P extends string = string>({
+export const AccessibleListDaily = <P extends PageListCost = PageListCost>({
   page,
   color,
   categoryLabel = 'category',
 }: PropsDaily<P>): React.ReactElement<PropsDaily<P>> => {
-  const modalFields = useMemo<ModalFields<ExtendedCalcItem>>(
+  const modalFields = useMemo<ModalFields<ListItemExtendedInput>>(
     () => ({
       date: makeField('date', FormFieldDate),
       item: makeField('item', FormFieldText),
@@ -106,7 +121,7 @@ export const AccessibleListDaily = <P extends string = string>({
   );
 
   return (
-    <AccessibleListStandard<P, ExtendedCalcItem, never, DailyRecord>
+    <AccessibleListStandard<P, ListItemExtendedInput, never, DailyRecord>
       page={page}
       color={color}
       fields={fields}

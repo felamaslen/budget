@@ -1,11 +1,10 @@
 import config from '~api/config';
+import { AppConfig } from '~api/types';
 
-export type AppConfig = {
-  birthDate: string;
-  pieTolerance: number;
-};
-
-export const getAppConfig = (): AppConfig => ({
-  birthDate: config.data.overview.birthDate,
-  pieTolerance: config.data.pie.tolerance,
-});
+export function getAppConfig(): AppConfig {
+  return {
+    birthDate: new Date(config.data.overview.birthDate),
+    pieTolerance: config.data.pie.tolerance,
+    futureMonths: config.data.overview.numFuture,
+  };
+}

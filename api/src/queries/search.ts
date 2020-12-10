@@ -4,36 +4,37 @@ import {
   DatabaseTransactionConnectionType,
 } from 'slonik';
 
-import { SearchParams, ListCalcCategoryExtended, Page } from '~api/types';
+import { defaultSearchNumResults } from '~api/schema';
+import { QuerySearchArgs, ReceiptPage } from '~api/types';
 
 export const getShortTermQuery = (
   uid: number,
-  { table, column, searchTerm, numResults }: SearchParams,
+  { page, column, searchTerm, numResults = defaultSearchNumResults }: QuerySearchArgs,
 ): TaggedTemplateLiteralInvocationType<{ value: string; count: number }> =>
   sql`
   select ${sql.join(
     [
-      sql`distinct(${sql.identifier([table, column])}) as "value"`,
-      sql`count(${sql.identifier([table, column])}) as "count"`,
+      sql`distinct(${sql.identifier([page, column])}) as "value"`,
+      sql`count(${sql.identifier([page, column])}) as "count"`,
     ],
     sql`, `,
   )}
-  from ${sql.identifier([table])}
+  from ${sql.identifier([page])}
   where ${sql.join(
     [
-      sql`${sql.identifier([table, column])} ilike ${`${searchTerm}%`}`,
-      sql`${sql.identifier([table, 'uid'])} = ${uid}`,
+      sql`${sql.identifier([page, column])} ilike ${`${searchTerm}%`}`,
+      sql`${sql.identifier([page, 'uid'])} = ${uid}`,
     ],
     sql` and `,
   )}
-  group by ${sql.identifier([table, column])}
+  group by ${sql.identifier([page, column])}
   order by "count" desc
   limit ${numResults}
   `;
 
 export function getLongTermQuery(
   uid: number,
-  { table, column, searchTerm, numResults }: SearchParams,
+  { page, column, searchTerm, numResults = defaultSearchNumResults }: QuerySearchArgs,
 ): TaggedTemplateLiteralInvocationType<{ value: string; rank: number; length: number }> {
   const tsQuery = searchTerm
     .trim()
@@ -45,20 +46,20 @@ export function getLongTermQuery(
   return sql`
     select distinct ${sql.join(
       [
-        sql`${sql.identifier([table, column])} as "value"`,
+        sql`${sql.identifier([page, column])} as "value"`,
         sql`ts_rank_cd(
-          ${sql.identifier([table, `${column}_search`])},
+          ${sql.identifier([page, `${column}_search`])},
           to_tsquery(${tsQuery})
         ) as "rank"`,
-        sql`char_length(${sql.identifier([table, column])}) as "length"`,
+        sql`char_length(${sql.identifier([page, column])}) as "length"`,
       ],
       sql`, `,
     )}
-    from ${sql.identifier([table])}
+    from ${sql.identifier([page])}
     where ${sql.join(
       [
-        sql`${sql.identifier([table, 'uid'])} = ${uid}`,
-        sql`${sql.identifier([table, `${column}_search`])} @@ to_tsquery(${tsQuery})`,
+        sql`${sql.identifier([page, 'uid'])} = ${uid}`,
+        sql`${sql.identifier([page, `${column}_search`])} @@ to_tsquery(${tsQuery})`,
       ],
       sql` and `,
     )}
@@ -69,7 +70,7 @@ export function getLongTermQuery(
 
 export const getSearchResults = (
   uid: number,
-  table: string,
+  page: string,
   nextField: string,
   columnResults: TaggedTemplateLiteralInvocationType<{ value: string }>,
 ): TaggedTemplateLiteralInvocationType<{ value: string; nextField: string }> =>
@@ -84,10 +85,10 @@ export const getSearchResults = (
   from (
     ${columnResults}
   ) as items
-  left join ${sql.identifier([table])} as "next_values"
+  left join ${sql.identifier([page])} as "next_values"
     on ${sql.identifier(['next_values', 'id'])} = (
       select "id"
-      from ${sql.identifier([table])}
+      from ${sql.identifier([page])}
       where ${sql.join([sql`"uid" = ${uid}`, sql`"item" = "items"."value"`], sql` and `)}
       limit 1
     )
@@ -95,11 +96,11 @@ export const getSearchResults = (
 
 type ReceiptItem = {
   item: string;
-  matched_page: ListCalcCategoryExtended;
+  matched_page: ReceiptPage;
   matched_category: string;
 };
 
-const receiptPages: ListCalcCategoryExtended[] = [Page.food, Page.general, Page.social];
+const receiptPages: ReceiptPage[] = Object.values(ReceiptPage);
 
 export async function matchReceiptItems(
   db: DatabaseTransactionConnectionType,

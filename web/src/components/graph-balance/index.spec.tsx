@@ -21,32 +21,29 @@ describe('<GraphBalance />', () => {
     ...state,
     netWorth: {
       ...state.netWorth,
-      entries: {
-        ...state.netWorth.entries,
-        items: [
-          state.netWorth.entries.items[0],
-          {
-            ...state.netWorth.entries.items[1],
-            values: replaceAtIndex(
-              state.netWorth.entries.items[1].values,
-              state.netWorth.entries.items[1].values.findIndex(
-                ({ id }) => id === numericHash('value-id-b5'),
-              ),
-              (item) => ({
-                ...item,
-                value: [
-                  {
-                    units: 103,
-                    vested: 103,
-                    strikePrice: 77.65,
-                    marketPrice: 95.57,
-                  },
-                ],
-              }),
+      entries: [
+        state.netWorth.entries[0],
+        {
+          ...state.netWorth.entries[1],
+          values: replaceAtIndex(
+            state.netWorth.entries[1].values,
+            state.netWorth.entries[1].values.findIndex(
+              ({ subcategory }) => subcategory === numericHash('real-option-subcategory-id'),
             ),
-          },
-        ],
-      },
+            (item) => ({
+              ...item,
+              value: [
+                {
+                  units: 103,
+                  vested: 103,
+                  strikePrice: 77.65,
+                  marketPrice: 95.57,
+                },
+              ],
+            }),
+          ),
+        },
+      ],
     },
   };
 

@@ -3,7 +3,7 @@ import React from 'react';
 import { BaseKey } from '~client/components/graph-cashflow/base-key';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
-import { Page, Range, PixPrimary } from '~client/types';
+import { PageNonStandard, PixPrimary, Range } from '~client/types';
 
 type Props = PixPrimary &
   Omit<Range, 'minX'> & {
@@ -26,7 +26,7 @@ export const Key: React.FC<Props> = ({ now, pixX, pixY1, maxX, minY, maxY, title
         y1={40}
         x2={74}
         y2={40}
-        stroke={colors[Page.overview].spending}
+        stroke={colors[PageNonStandard.Overview].spending}
         strokeWidth={2}
       />
       <text

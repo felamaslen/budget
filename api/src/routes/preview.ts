@@ -16,8 +16,8 @@ const routePreviewMonth = validatedAuthDbRoute<void, void, Query>(
   },
 );
 
-export function handler(databaseName?: string): Router {
+export function handler(): Router {
   const router = Router();
-  router.get('/', routePreviewMonth(databaseName));
+  router.get('/', routePreviewMonth);
   return router;
 }

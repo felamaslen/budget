@@ -1,7 +1,6 @@
 import { RenderResult, render, within, fireEvent, act } from '@testing-library/react';
 import addDays from 'date-fns/addDays';
 import addSeconds from 'date-fns/addSeconds';
-import format from 'date-fns/format';
 import getUnixTime from 'date-fns/getUnixTime';
 import startOfDay from 'date-fns/startOfDay';
 import MatchMediaMock from 'jest-matchmedia-mock';
@@ -12,74 +11,73 @@ import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { Funds } from '.';
-import { Period } from '~client/constants/graph';
-import { getTransactionsList, generateFakeId } from '~client/modules/data';
+import { fundPeriods } from '~client/constants';
+import { generateFakeId } from '~client/modules/data';
 import { State } from '~client/reducers';
+import { PriceCache } from '~client/selectors';
 import { testState } from '~client/test-data/state';
-import { Page, Fund } from '~client/types';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { FundNative as Fund, PageNonStandard } from '~client/types';
 
 describe('<PageFunds />', () => {
   const state: State = {
     ...testState,
-    [Page.funds]: {
-      ...testState[Page.funds],
+    [PageNonStandard.Funds]: {
+      ...testState[PageNonStandard.Funds],
       items: [
         {
           id: numericHash('fund-id-some-active-fund'),
           item: 'Fund A',
-          transactions: getTransactionsList([
+          transactions: [
             {
-              date: '2019-03-20',
+              date: new Date('2019-03-20'),
               units: 69,
               price: 6086.9,
               fees: 10,
               taxes: 3,
             },
-          ]),
+          ],
           allocationTarget: 0,
         },
         {
           id: numericHash('fund-id-some-sold-fund'),
           item: 'Fund B',
-          transactions: getTransactionsList([
+          transactions: [
             {
-              date: '2019-04-09',
+              date: new Date('2019-04-09'),
               units: 130.0312,
               price: 7622.5,
               fees: 5,
               taxes: 11,
             },
             {
-              date: format(
-                startOfDay(addSeconds(new Date('2019-04-10'), 86400 * 3.4)),
-                'yyyy-MM-dd',
-              ),
+              date: startOfDay(addSeconds(new Date('2019-04-10'), 86400 * 3.4)),
               units: -130.0312,
               price: 8482.8,
               fees: 165,
               taxes: 143,
             },
-          ]),
+          ],
           allocationTarget: 0,
         },
       ],
       viewSoldFunds: true,
-      period: Period.month1,
-      cache: {
-        [Period.month1]: {
-          startTime: getUnixTime(new Date('2019-04-10')),
-          cacheTimes: [0, 86400, 86400 * 3.5],
-          prices: {
-            [numericHash('fund-id-some-sold-fund')]: {
-              values: [7992.13, 7421.97],
-              startIndex: 0,
-            },
-            [numericHash('fund-id-some-active-fund')]: {
-              values: [6081.9, 6213.7],
-              startIndex: 1,
-            },
+      historyOptions: fundPeriods.month3.query,
+      startTime: getUnixTime(new Date('2019-04-10')),
+      cacheTimes: [0, 86400, 86400 * 3.5],
+      prices: {
+        [numericHash('fund-id-some-sold-fund')]: [
+          {
+            values: [7992.13, 7421.97],
+            startIndex: 0,
           },
-        },
+        ],
+        [numericHash('fund-id-some-active-fund')]: [
+          {
+            values: [6081.9, 6213.7],
+            startIndex: 1,
+          },
+        ],
       },
     },
   };
@@ -89,7 +87,9 @@ describe('<PageFunds />', () => {
     const store = getStore(customState);
     const renderResult = render(
       <Provider store={store}>
-        <Funds />
+        <GQLProviderMock>
+          <Funds />
+        </GQLProviderMock>
       </Provider>,
     );
     return { store, ...renderResult };
@@ -200,8 +200,8 @@ describe('<PageFunds />', () => {
     const setupSoldHidden = (): RenderResult & { store: MockStore<State> } =>
       setup({
         ...state,
-        [Page.funds]: {
-          ...state[Page.funds],
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
           viewSoldFunds: false,
         },
       });
@@ -236,7 +236,7 @@ describe('<PageFunds />', () => {
       taxes?: number;
     }): {
       fund: Fund;
-      prices: { [id: string]: { values: number[]; startIndex: number } };
+      prices: { [id: string]: { values: number[]; startIndex: number }[] };
     } => {
       const id = generateFakeId();
 
@@ -244,7 +244,7 @@ describe('<PageFunds />', () => {
         fund: {
           id,
           item: name,
-          transactions: getTransactionsList([
+          transactions: [
             {
               date: addDays(new Date('2020-04-20'), -Math.floor(Math.random() * 100)),
               units: 420,
@@ -252,14 +252,16 @@ describe('<PageFunds />', () => {
               fees,
               taxes,
             },
-          ]),
+          ],
           allocationTarget: 0,
         },
         prices: {
-          [id]: {
-            values: [value / 420],
-            startIndex: 0,
-          },
+          [id]: [
+            {
+              values: [value / 420],
+              startIndex: 0,
+            },
+          ],
         },
       };
     };
@@ -313,23 +315,20 @@ describe('<PageFunds />', () => {
     ].map(makeContrivedFund);
 
     const items = contrivedFunds.map(({ fund }) => fund);
-    const prices = contrivedFunds.reduce<{
-      [id: string]: { values: number[]; startIndex: number };
-    }>((last, next) => ({ ...last, ...next.prices }), {});
+    const prices = contrivedFunds.reduce<PriceCache['prices']>(
+      (last, next) => ({ ...last, ...next.prices }),
+      {},
+    );
 
     const testStateWithMany: State = {
       ...testState,
-      [Page.funds]: {
-        ...testState[Page.funds],
+      [PageNonStandard.Funds]: {
+        ...testState[PageNonStandard.Funds],
         items,
-        period: Period.month1,
-        cache: {
-          [Period.month1]: {
-            startTime: getUnixTime(new Date('2020-05-01')),
-            cacheTimes: [0],
-            prices,
-          },
-        },
+        historyOptions: fundPeriods.month1.query,
+        startTime: getUnixTime(new Date('2020-05-01')),
+        cacheTimes: [0],
+        prices,
       },
     };
 

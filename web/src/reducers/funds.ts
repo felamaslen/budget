@@ -4,148 +4,130 @@ import {
   ActionTypeApi,
   ActionTypeFunds,
   ActionApiDataRead,
-  ListActionType,
+  AllocationTargetsUpdated,
 } from '~client/actions';
-import { DataKeyAbbr } from '~client/constants/api';
-import { Period, GRAPH_FUNDS_PERIODS } from '~client/constants/graph';
+import {
+  defaultFundLength,
+  defaultFundPeriod,
+  fundHistoryMatch,
+  fundPeriods,
+} from '~client/constants';
+import { toNativeFund } from '~client/modules/data';
 import { makeListReducer, onRead, ListState } from '~client/reducers/list';
-import { Page, Fund, ReadResponseFunds, RequestType } from '~client/types';
-
-export type Cache = {
-  startTime: number;
-  cacheTimes: number[];
-  prices: {
-    [fundId: number]: {
-      startIndex: number;
-      values: number[];
-    };
-  };
-};
+import {
+  Fund,
+  FundHistory,
+  FundInput,
+  FundNative,
+  FundPriceGroup,
+  GQL,
+  HistoryOptions,
+  PageNonStandard,
+  QueryFundHistoryArgs,
+} from '~client/types';
 
 type ExtraState = {
   viewSoldFunds: boolean;
   cashTarget: number;
-  period: Period;
-  cache: {
-    [period in Period]?: Cache;
+  historyOptions: HistoryOptions;
+  startTime: number;
+  cacheTimes: number[];
+  prices: {
+    [fundId: number]: FundPriceGroup[];
   };
 };
 
-export type State = ListState<Fund, ExtraState>;
+export type State = ListState<GQL<FundNative>, ExtraState>;
 
 export const periodStoreKey = 'funds_period';
 
-const getStoredFundPeriod = (): Period => {
-  const storedValue = localStorage.getItem(periodStoreKey);
+const getStoredFundPeriod = (): HistoryOptions => {
+  const defaultArgs: HistoryOptions = {
+    period: defaultFundPeriod,
+    length: defaultFundLength,
+  };
 
-  return GRAPH_FUNDS_PERIODS.reduce<Period>(
-    (last, [, next]) => (next === storedValue ? next : last),
-    Period.year1,
-  );
+  const storedValue = localStorage.getItem(periodStoreKey);
+  if (!storedValue) {
+    return defaultArgs;
+  }
+
+  try {
+    const matcher = fundHistoryMatch(JSON.parse(storedValue) as QueryFundHistoryArgs);
+    const match = Object.entries(fundPeriods).find(([, { query }]) => matcher(query))?.[0] ?? null;
+
+    return match ? fundPeriods[match].query : defaultArgs;
+  } catch {
+    localStorage.removeItem(periodStoreKey);
+    return defaultArgs;
+  }
 };
 
-const initialPeriod = getStoredFundPeriod();
+const initialHistoryOptions = getStoredFundPeriod();
 
 export const initialState: State = {
   viewSoldFunds: false,
   cashTarget: 0,
   items: [],
   __optimistic: [],
-  period: initialPeriod,
-  cache: {
-    [initialPeriod]: {
-      startTime: 0,
-      cacheTimes: [],
-      prices: {},
-    },
-  },
+  historyOptions: initialHistoryOptions,
+  startTime: 0,
+  cacheTimes: [],
+  prices: [],
 };
 
-function getPriceCache({ data, startTime, cacheTimes }: ReadResponseFunds): Cache {
-  const prices = data.reduce(
-    (last, { [DataKeyAbbr.id]: id, pr, prStartIndex }) => ({
+const getPriceCache = ({
+  startTime,
+  cacheTimes,
+  prices,
+}: FundHistory): Pick<State, 'startTime' | 'cacheTimes' | 'prices'> => ({
+  startTime,
+  cacheTimes,
+  prices: prices.reduce<Record<number, FundPriceGroup[]>>(
+    (last, { fundId, groups }) => ({
       ...last,
-      [id]: { startIndex: prStartIndex, values: pr },
+      [fundId]: groups,
     }),
     {},
-  );
-
-  return {
-    startTime,
-    cacheTimes,
-    prices,
-  };
-}
-
-const onReadRows = onRead<Fund, Page.funds, ExtraState>(Page.funds);
-
-const onPeriodLoad = (
-  state: State,
-  res?: ReadResponseFunds,
-  period: Period = state.period,
-): State => ({
-  ...state,
-  period,
-  cashTarget: res?.cashTarget ?? state.cashTarget,
-  cache: res
-    ? {
-        ...state.cache,
-        [period]: getPriceCache(res),
-      }
-    : state.cache,
-});
-
-const onReadFunds = (state: State, action: ActionApiDataRead): State =>
-  action.res.funds
-    ? onPeriodLoad(
-        {
-          ...state,
-          ...onReadRows(state, action),
-        },
-        action.res.funds,
-      )
-    : state;
-
-const fundsListReducer = makeListReducer<Fund, Page.funds, ExtraState>(Page.funds, initialState);
-
-export const getRemainingAllocation = (state: State, id: number): number =>
-  state.items
-    .filter((fund) => fund.id !== id)
-    .reduce<number>(
-      (last, { allocationTarget }) => last - Number((allocationTarget * 100).toFixed()),
-      100,
-    ) / 100;
-
-const replaceAllocationTarget = (
-  state: State,
-  id: number,
-  nextAllocationTarget: number,
-): State => ({
-  ...state,
-  items: replaceAtIndex(
-    state.items,
-    state.items.findIndex((fund) => fund.id === id),
-    (fund) => ({
-      ...fund,
-      allocationTarget: nextAllocationTarget,
-    }),
   ),
 });
 
-const fillAllocationTargets = (state: State, createdId: number): State =>
-  replaceAllocationTarget(state, createdId, getRemainingAllocation(state, createdId));
+const onReadRows = onRead<PageNonStandard.Funds, GQL<Fund>, FundNative, State>(
+  PageNonStandard.Funds,
+  toNativeFund,
+);
 
-function updateAllocationTargets(state: State, changedId: number): State {
-  const updatedAllocationTarget =
-    state.items.find(
-      ({ id }, index) => state.__optimistic[index] !== RequestType.delete && id === changedId,
-    )?.allocationTarget ?? 0;
+const onPeriodLoad = (state: State, res: FundHistory | null | undefined): State =>
+  res ? { ...state, ...getPriceCache(res) } : state;
 
-  const remainingAllocation = getRemainingAllocation(state, changedId);
-  const nextAllocationTarget = Math.min(remainingAllocation, updatedAllocationTarget);
+const onReadFunds = (state: State, action: ActionApiDataRead): State =>
+  onPeriodLoad(
+    { ...onReadRows(state, action), cashTarget: action.res.cashAllocationTarget ?? 0 },
+    action.res.fundHistory,
+  );
 
-  return replaceAllocationTarget(state, changedId, nextAllocationTarget);
-}
+const fundsListReducer = makeListReducer<
+  GQL<FundInput>,
+  GQL<FundNative>,
+  PageNonStandard.Funds,
+  ExtraState
+>(PageNonStandard.Funds, initialState);
+
+const updateAllocationTargets = (state: State, action: AllocationTargetsUpdated): State => ({
+  ...state,
+  items: action.deltas.reduce<State['items']>(
+    (last, { id, allocationTarget }) =>
+      replaceAtIndex(
+        last,
+        last.findIndex((compare) => compare.id === id),
+        (fund) => ({
+          ...fund,
+          allocationTarget,
+        }),
+      ),
+    state.items,
+  ),
+});
 
 export default function funds(state: State = initialState, action: Action): State {
   switch (action.type) {
@@ -153,17 +135,14 @@ export default function funds(state: State = initialState, action: Action): Stat
       return { ...state, viewSoldFunds: !state.viewSoldFunds };
     case ActionTypeFunds.CashTargetUpdated:
       return { ...state, cashTarget: action.cashTarget };
-    case ActionTypeFunds.Requested:
-      return state;
-    case ActionTypeFunds.Received:
-      return onPeriodLoad(state, action.res?.data, action.period);
+    case ActionTypeFunds.AllocationTargetsUpdated:
+      return updateAllocationTargets(state, action);
+    case ActionTypeFunds.QueryUpdated:
+      return { ...state, historyOptions: action.historyOptions };
+    case ActionTypeFunds.PricesUpdated:
+      return onPeriodLoad(state, action.res);
     case ActionTypeApi.DataRead:
       return onReadFunds(state, action);
-    case ListActionType.Created:
-      return fillAllocationTargets(fundsListReducer(state, action), action.fakeId);
-    case ListActionType.Updated:
-    case ListActionType.Deleted:
-      return updateAllocationTargets(fundsListReducer(state, action), action.id);
     default:
       return fundsListReducer(state, action);
   }

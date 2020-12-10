@@ -18,7 +18,7 @@ import { getNetWorthSummary } from './net-worth';
 import { Average } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
-import { IDENTITY, arrayAverage, randnBm, getTotalCost } from '~client/modules/data';
+import { IDENTITY, arrayAverage, randnBm, getTotalCost, lastInArray } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { State as CrudState } from '~client/reducers/crud';
 import { withoutDeleted } from '~client/selectors/crud';
@@ -33,46 +33,44 @@ import {
   currentDayIsEndOfMonth,
 } from '~client/selectors/overview/common';
 import {
-  Page,
   Cost,
   CostProcessed,
-  Income,
-  Bill,
-  Food,
-  General,
-  Social,
-  Holiday,
-  TableValues,
-  SplitRange,
+  ListItemExtendedNative,
+  ListItemStandard,
+  ListItemStandardNative,
   Median,
-  OverviewTable as Table,
-  OverviewTableRow as TableRow,
-  Fund,
+  NativeDate,
+  FundNative as Fund,
+  OverviewTable,
   OverviewTableRow,
-  ListCalcItem,
+  PageListStandard,
+  PageNonStandard,
+  SplitRange,
+  TableValues,
 } from '~client/types';
 
 export * from './common';
 export * from './net-worth';
 
-export const getHomeEquityOld = (state: State): number[] => state[Page.overview].homeEquityOld;
+export const getHomeEquityOld = (state: State): number[] =>
+  state[PageNonStandard.Overview].homeEquityOld;
 
 const futureCategories: (keyof (Cost & Pick<CostProcessed, 'fundsOld'>))[] = [
-  Page.funds,
-  Page.food,
-  Page.general,
-  Page.holiday,
-  Page.social,
+  PageNonStandard.Funds,
+  PageListStandard.Food,
+  PageListStandard.General,
+  PageListStandard.Holiday,
+  PageListStandard.Social,
 ];
 
 const separateOldFunds = (numRows: number) => (
   data: Cost,
 ): Cost & Pick<CostProcessed, 'fundsOld'> =>
-  data[Page.funds].length > numRows
+  data[PageNonStandard.Funds].length > numRows
     ? {
         ...data,
-        [Page.funds]: data[Page.funds].slice(-numRows),
-        fundsOld: data[Page.funds].slice(0, -numRows),
+        [PageNonStandard.Funds]: data[PageNonStandard.Funds].slice(-numRows),
+        fundsOld: data[PageNonStandard.Funds].slice(0, -numRows),
       }
     : { ...data, fundsOld: [] };
 
@@ -81,12 +79,12 @@ export const getAnnualisedFundReturns = (state: State): number =>
 
 const predictCompoundInterest = (annualRate: number, jitter = 0) => (last: number[]): number[] => [
   ...last,
-  Math.round(last[last.length - 1] * (1 + (annualRate + randnBm() * jitter)) ** (1 / 12)),
+  Math.round((lastInArray(last) as number) * (1 + (annualRate + randnBm() * jitter)) ** (1 / 12)),
 ];
 
 type Category = keyof (Cost & Pick<CostProcessed, 'fundsOld'>);
 
-const extrapolateCurrentMonthColumns: Category[] = [Page.food, Page.social];
+const extrapolateCurrentMonthColumns: Category[] = [PageListStandard.Food, PageListStandard.Social];
 
 function predictByPastAverages(
   category: Category,
@@ -119,7 +117,7 @@ function predictCategory(
   if (!futureCategories.includes(category)) {
     return cost;
   }
-  if (category === Page.funds) {
+  if (category === PageNonStandard.Funds) {
     return cost
       .slice(index + 1)
       .reduce(predictCompoundInterest(annualisedFundReturns, 0.01), cost.slice(0, index + 1));
@@ -141,7 +139,10 @@ function calculateFutures(
   const currentMonthRatio = getDaysInMonth(currentDate) / getDate(currentDate);
 
   return (cost): Cost & Pick<CostProcessed, 'fundsOld'> =>
-    (Object.keys(cost) as (keyof (Cost & Pick<CostProcessed, 'fundsOld'>))[]).reduce(
+    (Object.keys(cost) as Exclude<
+      keyof (Cost & Pick<CostProcessed, 'fundsOld'>),
+      '__typename'
+    >[]).reduce(
       (last, category) => ({
         ...last,
         [category]: predictCategory(
@@ -158,8 +159,8 @@ function calculateFutures(
 }
 
 const getNetCashFlow = <K extends keyof CostProcessed>(dates: Date[]) => (
-  data: Cost & Pick<CostProcessed, K | 'spending'>,
-): Cost & Pick<CostProcessed, K | 'spending' | 'net'> => ({
+  data: Cost & Pick<CostProcessed, K> & Pick<CostProcessed, 'spending'>,
+): Cost & Pick<CostProcessed, K> & Pick<CostProcessed, 'spending' | 'net'> => ({
   ...data,
   net: dates.map((_, index) => data.income[index] - data.spending[index]),
 });
@@ -170,8 +171,10 @@ const getPredictedNetWorth = <K extends keyof CostProcessed>(
   netWorth: number[],
   fundsRows: Fund[],
 ) => (
-  data: Cost & Pick<CostProcessed, K | 'net' | 'netWorth'>,
-): Cost & Pick<CostProcessed, K | 'net' | 'netWorth' | 'netWorthPredicted'> => {
+  data: Cost & Pick<CostProcessed, K> & Pick<CostProcessed, 'net' | 'netWorth'>,
+): Cost &
+  Pick<CostProcessed, K> &
+  Pick<CostProcessed, 'net' | 'netWorth' | 'netWorthPredicted'> => {
   const fundCosts = dates.map((monthDate) =>
     fundsRows.reduce(
       (sum, { transactions }) =>
@@ -211,8 +214,10 @@ const getCombinedNetWorth = <K extends keyof CostProcessed>(
   futureMonths: number,
   netWorth: number[],
 ) => (
-  table: Cost & Pick<CostProcessed, K | 'netWorth' | 'netWorthPredicted'>,
-): Cost & Pick<CostProcessed, K | 'netWorth' | 'netWorthPredicted' | 'netWorthCombined'> => {
+  table: Cost & Pick<CostProcessed, K> & Pick<CostProcessed, 'netWorth' | 'netWorthPredicted'>,
+): Cost &
+  Pick<CostProcessed, K> &
+  Pick<CostProcessed, 'netWorth' | 'netWorthPredicted' | 'netWorthCombined'> => {
   const includeThisMonth = isSameDay(endOfMonth(currentDate), currentDate) ? 0 : 1;
 
   const slice = -(futureMonths + includeThisMonth);
@@ -232,16 +237,12 @@ const withNetWorth = <K extends keyof CostProcessed>(
 ) => (
   cost: Cost & Pick<CostProcessed, K | 'spending' | 'net'>,
 ): Cost &
-  Pick<
-    CostProcessed,
-    K | 'spending' | 'net' | 'netWorth' | 'netWorthPredicted' | 'netWorthCombined'
-  > =>
+  Pick<CostProcessed, K> &
+  Pick<CostProcessed, 'spending' | 'net' | 'netWorth' | 'netWorthPredicted' | 'netWorthCombined'> =>
   compose(
     getCombinedNetWorth<K | 'spending' | 'net'>(currentDate, futureMonths, netWorth),
-    getPredictedNetWorth<K | 'spending'>(dates, currentDate, netWorth, fundsRows),
-    (
-      data: Cost & Pick<CostProcessed, K | 'spending' | 'net'>,
-    ): Cost & Pick<CostProcessed, K | 'spending' | 'net' | 'netWorth'> => ({ ...data, netWorth }),
+    getPredictedNetWorth<K | 'spending' | 'net'>(dates, currentDate, netWorth, fundsRows),
+    (data: typeof cost) => ({ ...data, netWorth }),
   )(cost);
 
 const withSavingsRatio = (dates: Date[]) => (
@@ -293,7 +294,7 @@ export const getProcessedCost = moize(
   { maxSize: 1 },
 );
 
-const getPageCostForMonthSoFar = <I extends ListCalcItem>(
+const getPageCostForMonthSoFar = <I extends NativeDate<ListItemStandard, 'date'>>(
   today: Date,
   items: CrudState<I>,
 ): number =>
@@ -305,20 +306,20 @@ export const getCostForMonthSoFar = moize(
   (today: Date) =>
     createSelector<
       State,
-      CrudState<Income>,
-      CrudState<Bill>,
-      CrudState<Food>,
-      CrudState<General>,
-      CrudState<Holiday>,
-      CrudState<Social>,
+      CrudState<ListItemStandardNative>,
+      CrudState<ListItemStandardNative>,
+      CrudState<ListItemStandardNative>,
+      CrudState<ListItemStandardNative>,
+      CrudState<ListItemStandardNative>,
+      CrudState<ListItemStandardNative>,
       number
     >(
-      getRawItems<Income, Page.income>(Page.income),
-      getRawItems<Bill, Page.bills>(Page.bills),
-      getRawItems<Food, Page.food>(Page.food),
-      getRawItems<General, Page.general>(Page.general),
-      getRawItems<Holiday, Page.holiday>(Page.holiday),
-      getRawItems<Social, Page.social>(Page.social),
+      getRawItems<ListItemStandardNative, PageListStandard.Income>(PageListStandard.Income),
+      getRawItems<ListItemStandardNative, PageListStandard.Bills>(PageListStandard.Bills),
+      getRawItems<ListItemExtendedNative, PageListStandard.Food>(PageListStandard.Food),
+      getRawItems<ListItemExtendedNative, PageListStandard.General>(PageListStandard.General),
+      getRawItems<ListItemExtendedNative, PageListStandard.Holiday>(PageListStandard.Holiday),
+      getRawItems<ListItemExtendedNative, PageListStandard.Social>(PageListStandard.Social),
       (income, ...args) =>
         args.reduce(
           (last, items) => last + getPageCostForMonthSoFar(today, items),
@@ -331,7 +332,9 @@ export const getCostForMonthSoFar = moize(
 const isPositive = (value: number): boolean => value >= 0;
 const isNegative = (value: number): boolean => value < 0;
 
-const getFormattedMonths = (dates: Date[]): Pick<TableRow, 'year' | 'month' | 'monthText'>[] =>
+const getFormattedMonths = (
+  dates: Date[],
+): Pick<OverviewTableRow, 'year' | 'month' | 'monthText'>[] =>
   dates.map((date) => ({
     year: getYear(date),
     month: getMonth(date) + 1,
@@ -414,13 +417,13 @@ const getCells = (cost: CostProcessed, getColor: ReturnType<typeof getCellColor>
   );
 
 export const getOverviewTable = moize(
-  (today: Date): ((state: State) => Table) =>
+  (today: Date): ((state: State) => OverviewTable) =>
     createSelector(
       getMonthDates,
       getFutureMonths(today),
       getProcessedCost(today),
       getNetWorthSummary,
-      (dates, futureMonths, cost, netWorth): Table => {
+      (dates, futureMonths, cost, netWorth): OverviewTable => {
         const months = getFormattedMonths(dates);
         const values = getTableValues(cost, netWorth);
         const scoreValues = getScoreValues(values, futureMonths);
@@ -430,7 +433,7 @@ export const getOverviewTable = moize(
 
         const getRowCells = getCells(cost, getCellColor(ranges, medians));
 
-        return months.map<TableRow>(({ year, month, monthText }, index) => {
+        return months.map<OverviewTableRow>(({ year, month, monthText }, index) => {
           const past = dates[index] < today;
           const future = dates[index] > endOfCurrentMonth;
 

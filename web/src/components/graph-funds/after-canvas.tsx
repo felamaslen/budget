@@ -1,10 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import * as Styled from './styles';
-import { Mode, Period, GRAPH_FUNDS_PERIODS, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
+import { fundPeriods, GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { useCTA } from '~client/hooks';
 import { abbreviateFundName } from '~client/modules/finance';
-import { Id, FundItem } from '~client/types';
+import { Id, FundItem, HistoryOptions } from '~client/types';
 
 type ToggleList = {
   [id: string]: boolean | null;
@@ -24,14 +25,14 @@ type ItemProps = {
 
 export type Props = {
   isMobile: boolean;
-  period: Period;
+  historyOptions: HistoryOptions;
   modeList: Mode[];
   mode: Mode;
   changeMode: (nextMode: Mode) => void;
   fundItems: FundItem[];
   toggleList: ToggleList;
   setToggleList: SetToggleList;
-  changePeriod: (nextPeriod: Period) => void;
+  changePeriod: (query: HistoryOptions) => void;
 };
 
 const Item: React.FC<ItemProps> = ({
@@ -73,9 +74,16 @@ const Item: React.FC<ItemProps> = ({
   );
 };
 
+const periodSelectOptions: SelectOptions<HistoryOptions> = Object.values(fundPeriods).map(
+  ({ name, query }) => ({
+    internal: query,
+    external: name,
+  }),
+);
+
 export const AfterCanvas: React.FC<Props> = ({
   isMobile,
-  period,
+  historyOptions,
   modeList,
   mode,
   changeMode,
@@ -84,34 +92,24 @@ export const AfterCanvas: React.FC<Props> = ({
   setToggleList,
   changePeriod,
 }) => {
-  const onChangePeriod = useCallback(({ target: { value } }) => changePeriod(value), [
-    changePeriod,
-  ]);
-  const onChangeMode = useCallback(({ target: { value } }) => changeMode(value), [changeMode]);
+  const modeSelectOptions = useMemo<SelectOptions<Mode>>(
+    () => modeList.map((internal) => ({ internal })),
+    [modeList],
+  );
 
   return (
     <>
       {!isMobile && (
         <Styled.FundSidebar tabIndex={-1}>
           <li>
-            {/* eslint-disable-next-line jsx-a11y/no-onchange */}
-            <select defaultValue={period} onChange={onChangePeriod}>
-              {GRAPH_FUNDS_PERIODS.map(([key, display]: [string, Period]) => (
-                <option key={key} value={display}>
-                  {display}
-                </option>
-              ))}
-            </select>
+            <FormFieldSelect
+              options={periodSelectOptions}
+              value={historyOptions}
+              onChange={changePeriod}
+            />
           </li>
           <li>
-            {/* eslint-disable-next-line jsx-a11y/no-onchange */}
-            <select defaultValue={mode} onChange={onChangeMode}>
-              {modeList.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
+            <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
           </li>
           {fundItems &&
             fundItems.map((item: FundItem) => (

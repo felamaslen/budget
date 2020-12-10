@@ -47,7 +47,7 @@ export const FormContainer = styled.div<{ add: boolean }>`
 `;
 
 function stepStyles({ step }: { step?: Step }): FlattenSimpleInterpolation | null {
-  if (step === Step.Values) {
+  if (step && [Step.Assets, Step.Liabilities].includes(step)) {
     return css`
       min-height: 0;
       overflow-y: initial;

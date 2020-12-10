@@ -9,15 +9,13 @@ import { FormFieldTickbox } from './tickbox';
 import { NULL } from '~client/modules/data';
 import { ButtonDelete, ButtonAdd } from '~client/styled/shared';
 import {
-  Value,
   Currency,
-  isMortgageValue,
-  isComplex,
-  isFX,
-  isOption,
+  FxValue,
   OptionValue,
   MortgageValue,
-  FXValue,
+  MortgageValueInput,
+  NetWorthValueObjectRead as NetWorthValue,
+  NetWorthValueObjectRead,
 } from '~client/types';
 
 type FXEventAdd = { value: number; currency: string };
@@ -90,34 +88,26 @@ const FormFieldWithCurrency: React.FC<PropsWithCurrency> = ({
   );
 };
 
-type Props = {
-  id: string;
-  value: Value;
+export type Props = {
+  value: NetWorthValueObjectRead;
+  onChange: React.Dispatch<React.SetStateAction<NetWorthValueObjectRead>>;
+  currencies: Omit<Currency, 'id'>[];
   isOption?: boolean;
   isMortgage?: boolean;
-  onChange: (value: Value) => void;
-  currencies: Omit<Currency, 'id'>[];
 };
 
-const coerceSimpleFXValue = (value: Value): number | FXValue[] => {
-  if (isMortgageValue(value)) {
-    return 0;
-  }
-  if (isComplex(value) && value.every(isFX)) {
-    return value as FXValue[];
-  }
-  return isComplex(value) ? 0 : value;
-};
+const coerceSimpleFXValue = (value: NetWorthValue): number | FxValue[] =>
+  value.fx ?? value.simple ?? 0;
+
+const isFX = (value: number | FxValue[]): value is FxValue[] => Array.isArray(value);
 
 type State = {
   simpleValue: number;
-  fxValue: FXValue[];
+  fxValue: FxValue[];
   selected: 'simpleValue' | 'fxValue';
 };
 
-type PropsFieldSimpleFX = Pick<Props, 'value' | 'currencies'> & {
-  onChange: (value: number | FXValue[]) => void;
-};
+type PropsFieldSimpleFX = Pick<Props, 'value' | 'currencies' | 'onChange'>;
 
 const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
   value: initialValue,
@@ -127,9 +117,9 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
   const initialValueCoerced = useMemo(() => coerceSimpleFXValue(initialValue), [initialValue]);
 
   const [{ simpleValue, fxValue, selected }, setState] = useState<State>({
-    simpleValue: isComplex(initialValueCoerced) ? 0 : initialValueCoerced,
-    fxValue: isComplex(initialValueCoerced) ? initialValueCoerced : [],
-    selected: isComplex(initialValueCoerced) ? 'fxValue' : 'simpleValue',
+    simpleValue: isFX(initialValueCoerced) ? 0 : initialValueCoerced,
+    fxValue: isFX(initialValueCoerced) ? initialValueCoerced : [],
+    selected: isFX(initialValueCoerced) ? 'fxValue' : 'simpleValue',
   });
 
   const toggleFX = useCallback(
@@ -144,9 +134,9 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
   useEffect(() => {
     setState((last) => ({
       ...last,
-      simpleValue: isComplex(initialValueCoerced) ? last.simpleValue : initialValueCoerced,
-      fxValue: isComplex(initialValueCoerced) ? initialValueCoerced : last.fxValue,
-      selected: isComplex(initialValueCoerced) ? 'fxValue' : 'simpleValue',
+      simpleValue: isFX(initialValueCoerced) ? last.simpleValue : initialValueCoerced,
+      fxValue: isFX(initialValueCoerced) ? initialValueCoerced : last.fxValue,
+      selected: isFX(initialValueCoerced) ? 'fxValue' : 'simpleValue',
     }));
   }, [initialValueCoerced]);
 
@@ -160,7 +150,7 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
     return currencyOptions.filter((option) => !fxValue.some(({ currency }) => currency === option));
   }, [currencyOptions, selected, fxValue]);
 
-  const onChangeComplexValue = useCallback(
+  const onChangeFXValue = useCallback(
     ({ index, value, currency }: FXEventChange) => {
       const fxValueUnchanged =
         value === fxValue[index]?.value && currency === fxValue[index]?.currency;
@@ -168,24 +158,47 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
         return;
       }
 
-      onChange(replaceAtIndex(fxValue, index, { value, currency }));
+      onChange({
+        ...initialValue,
+        simple: null,
+        fx: replaceAtIndex(fxValue, index, { value, currency }),
+      });
     },
-    [onChange, fxValue],
+    [onChange, fxValue, initialValue],
   );
 
-  const onRemoveComplexValue = useCallback(
+  const onRemoveFXValue = useCallback(
     ({ index }: FXEventRemove) => {
       if (fxValue.length < 2) {
         return;
       }
-      onChange(removeAtIndex(fxValue, index));
+      onChange({
+        ...initialValue,
+        simple: null,
+        fx: removeAtIndex(fxValue, index),
+        option: null,
+        mortgage: null,
+      });
     },
-    [onChange, fxValue],
+    [onChange, fxValue, initialValue],
   );
 
-  const onAddComplexValue = useCallback(
-    ({ value, currency }: FXEventAdd) => onChange([...fxValue, { value, currency }]),
-    [onChange, fxValue],
+  const onAddFXValue = useCallback(
+    ({ value, currency }: FXEventAdd) =>
+      onChange({
+        ...initialValue,
+        simple: null,
+        fx: [...fxValue, { value, currency }],
+        option: null,
+        mortgage: null,
+      }),
+    [onChange, fxValue, initialValue],
+  );
+
+  const onChangeSimpleValue = useCallback(
+    (value?: number) =>
+      onChange({ ...initialValue, simple: value ?? 0, fx: null, option: null, mortgage: null }),
+    [onChange, initialValue],
   );
 
   return (
@@ -195,7 +208,7 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
         {'FX'}
       </Styled.NetWorthValueFXToggle>
       {selected === 'simpleValue' && (
-        <FormFieldCost value={simpleValue} onChange={(value = 0): void => onChange(value)} />
+        <FormFieldCost value={simpleValue} onChange={onChangeSimpleValue} />
       )}
       {selected === 'fxValue' && (
         <Styled.NetWorthValueList>
@@ -206,8 +219,8 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
               value={value}
               currency={currency}
               currencyOptions={otherCurrencyOptions}
-              onChange={onChangeComplexValue}
-              onRemove={onRemoveComplexValue}
+              onChange={onChangeFXValue}
+              onRemove={onRemoveFXValue}
             />
           ))}
           {otherCurrencyOptions.length > 0 && (
@@ -218,7 +231,7 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
               currency={otherCurrencyOptions[0]}
               currencyOptions={otherCurrencyOptions}
               add
-              onAdd={onAddComplexValue}
+              onAdd={onAddFXValue}
             />
           )}
         </Styled.NetWorthValueList>
@@ -227,8 +240,8 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
   );
 };
 
-const coerceOptionValue = (value: Value): Partial<OptionValue> =>
-  isComplex(value) ? value.find(isOption) ?? {} : {};
+const coerceOptionValue = <V extends NetWorthValue>(value: V): Partial<OptionValue> =>
+  value.option ?? {};
 
 const optionDeltaComplete = (delta: Partial<OptionValue> | OptionValue): delta is OptionValue =>
   Object.keys(delta).length === 4 &&
@@ -239,13 +252,12 @@ const vestedProps = { placeholder: 'Vested' };
 const strikeProps = { placeholder: 'Strike price' };
 const marketProps = { placeholder: 'Market price' };
 
-type PropsFieldOption = Pick<Props, 'id' | 'value'> & {
-  onChange: (value: OptionValue[]) => void;
-};
+type PropsFieldOption = Pick<Props, 'value' | 'onChange'>;
 
-const FormFieldOption: React.FC<PropsFieldOption> = ({ id, value, onChange }) => {
-  const initialDelta = useMemo<Partial<OptionValue>>(() => coerceOptionValue(value), [value]);
-  const [delta, setDelta] = useState<Partial<OptionValue>>(coerceOptionValue(value));
+const FormFieldOption: React.FC<PropsFieldOption> = ({ value, onChange }) => {
+  const id = value.subcategory;
+  const initialDelta = useMemo(() => coerceOptionValue(value), [value]);
+  const [delta, setDelta] = useState(coerceOptionValue(value));
   useEffect(() => {
     setDelta(initialDelta);
   }, [initialDelta]);
@@ -263,9 +275,9 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ id, value, onChange }) =>
 
   useEffect(() => {
     if (optionDeltaComplete(delta)) {
-      onChange([delta]);
+      onChange((last) => ({ ...last, simple: null, fx: null, mortgage: null, option: delta }));
     }
-  }, [delta, onChange]);
+  }, [delta, onChange, value.option]);
 
   return (
     <Styled.NetWorthValueOption>
@@ -311,8 +323,9 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ id, value, onChange }) =>
   );
 };
 
-const coerceMortgage = (value: Value): Partial<MortgageValue> =>
-  isMortgageValue(value) ? value : {};
+const coerceMortgage = <V extends NetWorthValue>(
+  value: V,
+): Partial<MortgageValue | MortgageValueInput> => value.mortgage ?? {};
 
 const mortgageDeltaComplete = (
   delta: Partial<MortgageValue> | MortgageValue,
@@ -324,11 +337,10 @@ const principalProps = { placeholder: 'Principal' };
 const paymentsRemainingProps = { placeholder: 'Payments remaining' };
 const rateProps = { placeholder: 'Interest rate' };
 
-type PropsFieldMortgage = Pick<Props, 'id' | 'value'> & {
-  onChange: (value: MortgageValue) => void;
-};
+type PropsFieldMortgage = Pick<Props, 'value' | 'onChange'>;
 
-export const FormFieldMortgage: React.FC<PropsFieldMortgage> = ({ id, value, onChange }) => {
+export const FormFieldMortgage: React.FC<PropsFieldMortgage> = ({ value, onChange }) => {
+  const id = value.subcategory;
   const initialDelta = useMemo<Partial<MortgageValue>>(() => coerceMortgage(value), [value]);
   const [delta, setDelta] = useState<Partial<MortgageValue>>(coerceMortgage(value));
   useEffect(() => {
@@ -348,9 +360,9 @@ export const FormFieldMortgage: React.FC<PropsFieldMortgage> = ({ id, value, onC
 
   useEffect(() => {
     if (mortgageDeltaComplete(delta)) {
-      onChange(delta);
+      onChange((last) => ({ ...last, simple: null, fx: null, option: null, mortgage: delta }));
     }
-  }, [delta, onChange]);
+  }, [delta, onChange, value.mortgage]);
 
   return (
     <Styled.NetWorthValueMortgage>
@@ -390,7 +402,6 @@ export const FormFieldMortgage: React.FC<PropsFieldMortgage> = ({ id, value, onC
 };
 
 export const FormFieldNetWorthValue: React.FC<Props> = ({
-  id,
   value,
   isOption: valueIsOption = false,
   isMortgage: valueIsMortgage = false,
@@ -399,8 +410,8 @@ export const FormFieldNetWorthValue: React.FC<Props> = ({
 }) => {
   return (
     <Styled.NetWorthValue>
-      {valueIsMortgage && <FormFieldMortgage id={id} value={value} onChange={onChange} />}
-      {valueIsOption && <FormFieldOption id={id} value={value} onChange={onChange} />}
+      {valueIsMortgage && <FormFieldMortgage value={value} onChange={onChange} />}
+      {valueIsOption && <FormFieldOption value={value} onChange={onChange} />}
       {!valueIsMortgage && !valueIsOption && (
         <FormFieldSimpleFX value={value} onChange={onChange} currencies={currencies} />
       )}

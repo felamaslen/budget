@@ -4,17 +4,33 @@ import { Provider } from 'react-redux';
 import createMockStore, { MockStore } from 'redux-mock-store';
 
 import { CashRow } from './cash-row';
+import * as listMutationHooks from '~client/hooks/mutations/list';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 
 describe('<CashRow />', () => {
   const getStore = createMockStore<State>();
+
+  const onCreate = jest.fn();
+  const onUpdate = jest.fn();
+  const onDelete = jest.fn();
+
+  beforeEach(() => {
+    jest.spyOn(listMutationHooks, 'useListCrudFunds').mockReturnValue({
+      onCreate,
+      onUpdate,
+      onDelete,
+    });
+  });
 
   const setup = (): RenderResult & { store: MockStore<State> } => {
     const store = getStore(testState);
     const renderResult = render(
       <Provider store={store}>
-        <CashRow />
+        <GQLProviderMock>
+          <CashRow />
+        </GQLProviderMock>
       </Provider>,
     );
     return { ...renderResult, store };

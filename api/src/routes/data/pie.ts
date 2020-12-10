@@ -4,24 +4,24 @@ import { DatabaseTransactionConnectionType, sql } from 'slonik';
 
 import config from '~api/config';
 import { authDbRoute } from '~api/middleware/request';
-import { Page } from '~api/types';
+import { PageListStandard as Page } from '~api/types';
 
 type PieCol = [string, string];
 
 export function getPieCols(category: Page): PieCol[] | null {
-  if ([Page.food, Page.general].includes(category)) {
+  if ([Page.Food, Page.General].includes(category)) {
     return [
       ['shop', 'Shop cost'],
       ['category', 'Category cost'],
     ];
   }
-  if (category === Page.social) {
+  if (category === Page.Social) {
     return [
       ['shop', 'Shop cost'],
       ['category', 'Society cost'],
     ];
   }
-  if (category === Page.holiday) {
+  if (category === Page.Holiday) {
     return [
       ['shop', 'Shop cost'],
       ['category', 'Holiday cost'],
@@ -133,8 +133,8 @@ const routeGet = authDbRoute(async (db, req, res) => {
   res.json({ data: { list } });
 });
 
-export function handler(databaseName?: string): Router {
+export function handler(): Router {
   const router = Router();
-  router.get('/:category', routeGet(databaseName));
+  router.get('/:category', routeGet);
   return router;
 }

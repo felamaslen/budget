@@ -1,13 +1,14 @@
 import { render, RenderResult, act, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore from 'redux-mock-store';
 import sinon from 'sinon';
 
 import { standardFields } from '../standard';
+import { PropsItemCreate } from '../types';
+
 import { AccessibleListCreateItem } from './create';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data/state';
+
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { ListItemInput, PageListStandard } from '~client/types';
 
 describe('Accessible list create form', () => {
   let clock: sinon.SinonFakeTimers;
@@ -18,21 +19,21 @@ describe('Accessible list create form', () => {
     clock.restore();
   });
 
-  const page = 'myPage';
+  const page = PageListStandard.Income as const;
 
-  const props = {
+  const onCreate = jest.fn();
+
+  const props: PropsItemCreate<ListItemInput, typeof page> = {
     page,
     fields: standardFields,
-    onCreate: jest.fn(),
+    onCreate,
   };
-
-  const store = createStore<State>()(testState);
 
   const setup = (): RenderResult =>
     render(
-      <Provider store={store}>
+      <GQLProviderMock>
         <AccessibleListCreateItem {...props} />
-      </Provider>,
+      </GQLProviderMock>,
     );
 
   const enterItem = (
@@ -110,8 +111,8 @@ describe('Accessible list create form', () => {
 
     enterItem(renderResult, firstDateExternal, firstItem, firstCostExternal);
 
-    expect(props.onCreate).toHaveBeenCalledTimes(1);
-    expect(props.onCreate).toHaveBeenCalledWith({
+    expect(onCreate).toHaveBeenCalledTimes(1);
+    expect(onCreate).toHaveBeenCalledWith({
       date: firstDateInternal,
       item: firstItem,
       cost: firstCostInternal,
@@ -123,11 +124,11 @@ describe('Accessible list create form', () => {
     const nextCostExternal = fieldToKeepSame === 'cost' ? firstCostExternal : secondCostExternal;
     const nextCostInternal = fieldToKeepSame === 'cost' ? firstCostInternal : secondCostInternal;
 
-    props.onCreate.mockClear();
+    onCreate.mockClear();
 
     enterItem(renderResult, nextDateExternal, nextItem, nextCostExternal);
-    expect(props.onCreate).toHaveBeenCalledTimes(1);
-    expect(props.onCreate).toHaveBeenCalledWith({
+    expect(onCreate).toHaveBeenCalledTimes(1);
+    expect(onCreate).toHaveBeenCalledWith({
       date: nextDateInternal,
       item: nextItem,
       cost: nextCostInternal,

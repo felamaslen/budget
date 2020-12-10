@@ -1,5 +1,6 @@
 import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
 
+import * as SpinnerStyles from '~client/components/spinner/styles';
 import { rem, breakpoint } from '~client/styled/mixins';
 import { Page as PageBase, Button as ButtonBase } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
@@ -69,6 +70,7 @@ export const PeriodTitle = styled.h3`
 export const Upper = styled.div`
   display: flex;
   flex-wrap: wrap;
+  position: relative;
 
   ${breakpoint(breakpoints.mobile)} {
     flex-flow: row wrap;
@@ -77,6 +79,13 @@ export const Upper = styled.div`
   ${breakpoint(breakpoints.tablet)} {
     display: block;
     margin: 4px 0;
+    padding-right: ${rem(50)};
+  }
+
+  ${SpinnerStyles.Outer} {
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 `;
 
@@ -248,6 +257,7 @@ export const Timeline = styled.div`
   width: 100%;
   display: flex;
   flex: 0 0 1em;
+  overflow: hidden;
 
   ${breakpoint(breakpoints.tablet)} {
     display: flex;

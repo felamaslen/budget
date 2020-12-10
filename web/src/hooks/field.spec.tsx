@@ -364,7 +364,7 @@ describe('Field hook', () => {
           fireEvent.click(activateButton);
         });
 
-        await new Promise((resolve) =>
+        await new Promise<void>((resolve) =>
           setImmediate(() => {
             render(<TestComponent {...props} inline value="new-value" />, {
               container: renderProps.container,

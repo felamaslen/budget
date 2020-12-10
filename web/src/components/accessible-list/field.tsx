@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { FieldComponent } from '~client/components/form-field';
 
-type PropsField<V, E extends {}> = {
+type PropsField<V, E extends Record<string, unknown>> = {
   Field: FieldComponent<V, E>;
   field: string | number | symbol;
   value: V;
@@ -14,7 +14,7 @@ type PropsField<V, E extends {}> = {
   extraProps?: Partial<E>;
 };
 
-export function AccessibleListItemField<V = never, E extends {} = {}>({
+export function AccessibleListItemField<V = never, E extends Record<string, unknown> = never>({
   Field,
   field,
   value,

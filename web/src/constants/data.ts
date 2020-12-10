@@ -1,12 +1,14 @@
 import {
-  Page,
-  PageList,
-  PageListCalc,
-  Pages,
   OverviewHeader,
   OverviewColumn,
   OverviewTableColumn,
-  ExtendedCalcItem,
+  Page,
+  PageListStandard,
+  PageNonStandard,
+  PageList,
+  PageListExtended,
+  SearchPage,
+  AnalysisPage,
 } from '~client/types';
 
 // debounce requests to update the server by 1 second
@@ -20,13 +22,13 @@ export const LOGIN_INPUT_LENGTH = 4;
 export const CREATE_ID = -2;
 
 const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
-  [Page.funds]: { name: 'Stocks' },
-  [Page.bills]: { name: 'Bills' },
-  [Page.food]: { name: 'Food' },
-  [Page.general]: { name: 'General' },
-  [Page.holiday]: { name: 'Holiday' },
-  [Page.social]: { name: 'Social' },
-  [Page.income]: { name: 'Income' },
+  funds: { name: 'Stocks' },
+  [PageListStandard.Bills]: { name: 'Bills' },
+  [PageListStandard.Food]: { name: 'Food' },
+  [PageListStandard.General]: { name: 'General' },
+  [PageListStandard.Holiday]: { name: 'Holiday' },
+  [PageListStandard.Social]: { name: 'Social' },
+  [PageListStandard.Income]: { name: 'Income' },
   spending: { name: 'Out' },
   net: { name: 'Net' },
   netWorthCombined: {
@@ -40,52 +42,31 @@ const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
 
 export const OVERVIEW_COLUMNS = Object.entries(overviewColumns) as OverviewTableColumn[];
 
-const pageDefinitionExtended = {
-  list: true,
-  cols: ['date', 'item', 'category', 'cost', 'shop'] as (keyof ExtendedCalcItem)[],
-  daily: true,
-  suggestions: ['item', 'category', 'shop'],
-};
+const PAGES_NON_STANDARD: PageNonStandard[] = Object.values(PageNonStandard);
+const PAGES_LIST_STANDARD: PageListStandard[] = Object.values(PageListStandard);
+const PAGES_LIST_EXTENDED: PageListExtended[] = Object.values(PageListExtended);
+const PAGES_SEARCH: SearchPage[] = Object.values(SearchPage);
+const PAGES_ANALYSIS: AnalysisPage[] = Object.values(AnalysisPage);
 
-export const PAGES: Pages = {
-  [Page.overview]: {
-    path: '/',
-    cols: ['balance'],
-  },
-  [Page.analysis]: {},
-  [Page.funds]: {
-    list: true,
-    cols: ['item', 'transactions'],
-  },
-  [Page.income]: {
-    list: true,
-    cols: ['date', 'item', 'cost'],
-  },
-  [Page.bills]: {
-    list: true,
-    cols: ['date', 'item', 'cost'],
-    suggestions: ['item'],
-  },
-  [Page.food]: pageDefinitionExtended,
-  [Page.general]: pageDefinitionExtended,
-  [Page.holiday]: pageDefinitionExtended,
-  [Page.social]: pageDefinitionExtended,
-};
+export const PAGES_LIST: PageList[] = [PageNonStandard.Funds, ...PAGES_LIST_STANDARD];
 
-const PAGES_LIST_CALC: PageListCalc[] = [
-  Page.income,
-  Page.bills,
-  Page.food,
-  Page.general,
-  Page.holiday,
-  Page.social,
-];
-export const PAGES_LIST: PageList[] = [Page.funds, ...PAGES_LIST_CALC];
+export const PAGE_LIST_LIMIT = 100;
 
 export const IGNORE_EXPENSE_CATEGORIES = ['House purchase'];
 
 export const isPage = <T extends string>(name?: T | Page): name is Page =>
-  !!name && Reflect.has(PAGES, name);
+  !!name &&
+  ((PAGES_NON_STANDARD as string[]).includes(name) ||
+    (PAGES_LIST_STANDARD as string[]).includes(name));
 
-export const isCalcPage = <T extends string>(name?: T | Page): name is PageListCalc =>
-  !!name && (PAGES_LIST_CALC as string[]).includes(name);
+export const isStandardListPage = <T extends string>(name?: T | Page): name is PageListStandard =>
+  !!name && (PAGES_LIST_STANDARD as string[]).includes(name);
+
+export const isExtendedListPage = <T extends string>(name?: T | Page): name is PageListExtended =>
+  !!name && (PAGES_LIST_EXTENDED as string[]).includes(name);
+
+export const isSearchPage = <T extends string>(name?: T | SearchPage): name is SearchPage =>
+  !!name && (PAGES_SEARCH as string[]).includes(name);
+
+export const isAnalysisPage = <T extends string>(name?: T | AnalysisPage): name is AnalysisPage =>
+  !!name && (PAGES_ANALYSIS as string[]).includes(name);

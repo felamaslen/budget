@@ -1,20 +1,31 @@
 import React from 'react';
 
 import * as Styled from './styles';
-import { PAGES } from '~client/constants/data';
-import { Page } from '~client/types/app';
+import { PageListStandard, PageNonStandard } from '~client/types';
 
 type Props = {
   onLogout: () => void;
 };
 
+const pages: { page: Styled.NavPage; path?: string }[] = [
+  { page: PageNonStandard.Overview, path: '/' },
+  { page: PageNonStandard.Analysis },
+  { page: PageNonStandard.Funds },
+  { page: PageListStandard.Income },
+  { page: PageListStandard.Bills },
+  { page: PageListStandard.Food },
+  { page: PageListStandard.General },
+  { page: PageListStandard.Holiday },
+  { page: PageListStandard.Social },
+];
+
 export const Navbar: React.FC<Props> = ({ onLogout }) => (
   <Styled.NavList>
-    {(Object.keys(PAGES) as Page[]).map((page) => (
+    {pages.map(({ page, path }) => (
       <Styled.Link
         key={page}
         exact
-        to={PAGES[page].path ?? `/${page}`}
+        to={path ?? `/${page}`}
         tabIndex={-1}
         activeClassName="active"
         page={page}

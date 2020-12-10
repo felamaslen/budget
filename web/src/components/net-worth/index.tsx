@@ -7,21 +7,13 @@ import { NetWorthCategoryList } from './category-list';
 import { NetWorthList } from './list';
 import * as Styled from './styles';
 import { NetWorthView } from './view';
-import {
-  netWorthCategoryCreated,
-  netWorthCategoryUpdated,
-  netWorthCategoryDeleted,
-  netWorthSubcategoryCreated,
-  netWorthSubcategoryUpdated,
-  netWorthSubcategoryDeleted,
-  netWorthCreated,
-  netWorthUpdated,
-  netWorthDeleted,
-} from '~client/actions';
 import { ModalWindow } from '~client/components/modal-window';
-import { useCrud } from '~client/hooks';
+import {
+  useNetWorthCategoryCrud,
+  useNetWorthEntryCrud,
+  useNetWorthSubcategoryCrud,
+} from '~client/hooks';
 import { getCategories, getSubcategories, getEntries, getNetWorthTable } from '~client/selectors';
-import { Category, Subcategory, Entry } from '~client/types';
 
 const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
   const categories = useSelector(getCategories);
@@ -29,21 +21,9 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
   const entries = useSelector(getEntries);
   const table = useSelector(getNetWorthTable);
 
-  const [onCreateCategory, onUpdateCategory, onDeleteCategory] = useCrud<Category>(
-    netWorthCategoryCreated,
-    netWorthCategoryUpdated,
-    netWorthCategoryDeleted,
-  );
-  const [onCreateSubcategory, onUpdateSubcategory, onDeleteSubcategory] = useCrud<Subcategory>(
-    netWorthSubcategoryCreated,
-    netWorthSubcategoryUpdated,
-    netWorthSubcategoryDeleted,
-  );
-  const [onCreateEntry, onUpdateEntry, onDeleteEntry] = useCrud<Entry>(
-    netWorthCreated,
-    netWorthUpdated,
-    netWorthDeleted,
-  );
+  const crudCategory = useNetWorthCategoryCrud();
+  const crudSubcategory = useNetWorthSubcategoryCrud();
+  const crudEntry = useNetWorthEntryCrud();
 
   const onClosed = useCallback(() => {
     history.replace('/');
@@ -69,12 +49,12 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
             {...routeProps}
             categories={categories}
             subcategories={subcategories}
-            onCreateCategory={onCreateCategory}
-            onUpdateCategory={onUpdateCategory}
-            onDeleteCategory={onDeleteCategory}
-            onCreateSubcategory={onCreateSubcategory}
-            onUpdateSubcategory={onUpdateSubcategory}
-            onDeleteSubcategory={onDeleteSubcategory}
+            onCreateCategory={crudCategory.onCreate}
+            onUpdateCategory={crudCategory.onUpdate}
+            onDeleteCategory={crudCategory.onDelete}
+            onCreateSubcategory={crudSubcategory.onCreate}
+            onUpdateSubcategory={crudSubcategory.onUpdate}
+            onDeleteSubcategory={crudSubcategory.onDelete}
           />
         )}
       />
@@ -86,9 +66,9 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
             data={entries}
             categories={categories}
             subcategories={subcategories}
-            onCreate={onCreateEntry}
-            onUpdate={onUpdateEntry}
-            onDelete={onDeleteEntry}
+            onCreate={crudEntry.onCreate}
+            onUpdate={crudEntry.onUpdate}
+            onDelete={crudEntry.onDelete}
           />
         )}
       />

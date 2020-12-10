@@ -6,36 +6,38 @@ import { ListFieldMobile } from '../mobile';
 import { getItem } from '../selectors';
 import * as Styled from '../styles';
 import { Fields, FieldKey, PropsItem, PropsCrud } from '../types';
-import { useCTA } from '~client/hooks/cta';
+import { useCTA } from '~client/hooks';
 import { ButtonDelete } from '~client/styled/shared/button';
-import { DeltaEdit, Item } from '~client/types';
+import { Id, ListItemInput, PageList, WithIds } from '~client/types';
 
-const identityProcessor = <E extends {}>(): Partial<E> => ({});
+const identityProcessor = <E extends Record<string, unknown>>(): Partial<E> => ({});
 
-type FieldProps<I extends Item, P extends string, E extends {}> = Pick<
-  PropsCrud<I, P>,
+type FieldProps<I extends ListItemInput, E extends Record<string, unknown>> = Pick<
+  PropsCrud<I>,
   'onUpdate'
 > & {
   fields: Fields<I, E>;
   field: FieldKey<I>;
-  item: I;
+  id: Id;
+  item: WithIds<I>;
   extraProps?: Partial<E>;
 };
 
-const ListField = <I extends Item, P extends string, E extends {}>({
+const ListField = <I extends ListItemInput, E extends Record<string, unknown>>({
   fields,
   field,
+  id,
   item,
   onUpdate,
   extraProps,
-}: FieldProps<I, P, E>): React.ReactElement<FieldProps<I, P, E>> => {
+}: FieldProps<I, E>): React.ReactElement => {
   const onChange = useCallback(
     (newValue): void => {
       if (newValue) {
-        onUpdate(item.id, { [field]: newValue } as DeltaEdit<I>, item);
+        onUpdate(id, { [field]: newValue } as Partial<I>, item);
       }
     },
-    [field, item, onUpdate],
+    [field, id, item, onUpdate],
   );
 
   return (
@@ -50,10 +52,10 @@ const ListField = <I extends Item, P extends string, E extends {}>({
 };
 
 const AccessibleListItem = <
-  I extends Item,
-  P extends string,
+  I extends ListItemInput,
+  P extends PageList,
   MK extends keyof I,
-  E extends {} = {}
+  E extends Record<string, unknown> = never
 >({
   fields,
   fieldsMobile = {},
@@ -68,8 +70,8 @@ const AccessibleListItem = <
   onActivateModal,
   itemProcessor = identityProcessor,
   Row = Styled.Row,
-}: PropsItem<I, P, MK, E>): React.ReactElement<PropsItem<I, P, MK, E>> => {
-  const item: I = useSelector(getItem<I, P>(page, id));
+}: PropsItem<I, P, MK, E>): React.ReactElement => {
+  const item: WithIds<I> = useSelector(getItem<WithIds<I>, P>(page, id));
   const onDeleteItem = useCallback((): void => onDelete(item.id, item), [onDelete, item]);
   const deleteEvents = useCTA(onDeleteItem);
   const specificExtraProps = useMemo<Partial<E>>(() => itemProcessor(item), [item, itemProcessor]);
@@ -106,10 +108,11 @@ const AccessibleListItem = <
   return (
     <Row isMobile={false} item={item} style={style} odd={odd} {...itemExtraProps}>
       {fieldKeys.map((field: FieldKey<I>) => (
-        <ListField<I, P, E>
+        <ListField<I, E>
           key={field as string}
           fields={fields}
           field={field}
+          id={item.id}
           item={item}
           onUpdate={onUpdate}
           extraProps={itemExtraProps}

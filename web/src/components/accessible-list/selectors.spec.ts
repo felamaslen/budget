@@ -1,28 +1,25 @@
 import numericHash from 'string-hash';
+
 import { getItems } from './selectors';
+import { ApiListState } from '~client/selectors';
 import { Id, RequestType } from '~client/types';
 
 describe('Accessible list selectors', () => {
   describe('getItems', () => {
     type MyItem = {
       id: Id;
+      item: string;
       foo: number;
     };
 
-    const myPage = 'mypage' as const;
+    const myPage = 'myPage';
 
-    type MyState = {
-      mypage: {
-        items: MyItem[];
-        __optimistic: (RequestType | undefined)[];
-      };
-    };
-
-    const myState: MyState = {
+    const myState: ApiListState<MyItem, typeof myPage> = {
       [myPage]: {
         items: [
           {
             id: numericHash('some-id'),
+            item: 'yes',
             foo: 3,
           },
         ],
@@ -30,11 +27,14 @@ describe('Accessible list selectors', () => {
       },
     };
 
+    type MyState = typeof myState;
+
     it('should retrieve items from a crud state', () => {
       expect.assertions(1);
       expect(getItems(myPage)(myState)).toStrictEqual<MyItem[]>([
         {
           id: numericHash('some-id'),
+          item: 'yes',
           foo: 3,
         },
       ]);

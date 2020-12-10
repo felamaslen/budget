@@ -3,9 +3,15 @@ import React, { memo, useCallback } from 'react';
 
 import { NetWorthEditForm } from '../edit-form';
 import * as Styled from './styles';
-import { OnUpdate, SetActiveId } from '~client/hooks/crud';
+import { OnUpdate } from '~client/hooks';
 import { ButtonDelete } from '~client/styled/shared';
-import { Category, Subcategory, Entry } from '~client/types';
+import {
+  NetWorthCategory as Category,
+  NetWorthSubcategory as Subcategory,
+  NetWorthEntryNative as Entry,
+  SetActiveId,
+  Create,
+} from '~client/types';
 
 type Props = {
   item: Entry;
@@ -14,7 +20,7 @@ type Props = {
   active: boolean;
   setActive: SetActiveId;
   noneActive: boolean;
-  onUpdate: OnUpdate<Entry>;
+  onUpdate: OnUpdate<Create<Entry>>;
   onDelete: () => void;
 };
 

@@ -2,11 +2,11 @@ import { format } from 'date-fns';
 import { sql, DatabaseTransactionConnectionType, ListSqlTokenType } from 'slonik';
 
 import {
-  AnalysisCategory,
+  AnalysisPage,
+  CategoryTimelineRows,
   PeriodCost,
   PeriodCondition,
   PeriodCostDeep,
-  CategoryTimelineRows,
   TimelineRow,
 } from '~api/types';
 
@@ -52,7 +52,7 @@ export async function getPeriodCostForCategory(
   uid: number,
   startTime: Date,
   endTime: Date,
-  category: AnalysisCategory,
+  category: AnalysisPage,
   categoryColumn: string | null,
 ): Promise<readonly PeriodCost[]> {
   const result = await db.query<PeriodCost>(sql`
@@ -67,7 +67,7 @@ export async function getPeriodCostForCategory(
 export async function getPeriodCostDeep(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  category: AnalysisCategory,
+  category: AnalysisPage,
   categoryColumn: string | null,
   { startTime, endTime }: PeriodCondition,
 ): Promise<readonly PeriodCostDeep[]> {
@@ -86,7 +86,7 @@ export async function getTimelineRows(
   uid: number,
   startTime: Date,
   endTime: Date,
-  category: AnalysisCategory,
+  category: AnalysisPage,
 ): Promise<CategoryTimelineRows> {
   const result = await db.query<TimelineRow>(sql`
   SELECT date, SUM(cost) AS cost

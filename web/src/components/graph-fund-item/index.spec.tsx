@@ -1,29 +1,28 @@
 import { render, act, fireEvent, RenderResult } from '@testing-library/react';
 import React from 'react';
 
-import { GraphFundItem } from '.';
-import { Data } from '~client/types';
+import { GraphFundItem, Props } from '.';
 
 describe('<GraphFundItem />', () => {
-  const props = {
-    id: '3',
+  const props: Props = {
     name: 'some-fund-graph',
     values: [
-      [100, 42.3],
-      [101, 41.2],
-      [102, 45.9],
-      [102.5, 46.9],
-      [103, 0],
-      [104, 47.1],
-      [105, 46.9],
-      [106, 42.5],
-    ] as Data,
+      [
+        [100, 42.3],
+        [101, 41.2],
+        [102, 45.9],
+        [102.5, 46.9],
+      ],
+      [
+        [104, 47.1],
+        [105, 46.9],
+        [106, 42.5],
+      ],
+    ],
     sold: false,
-    popout: true,
-    onToggle: jest.fn(),
   };
 
-  const setup = (customProps = {}): RenderResult =>
+  const setup = (customProps: Partial<Props> = {}): RenderResult =>
     render(<GraphFundItem {...props} {...customProps} />);
 
   it('should render a graph', () => {
@@ -44,7 +43,7 @@ describe('<GraphFundItem />', () => {
         z-index: 2;
       }
 
-      .sc-pbxSd .c2 {
+      .sc-fznzOf .c2 {
         position: relative;
         height: 125px;
       }
@@ -88,7 +87,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .c0 .bxWtuJ {
+        .c0 .ehfNKL {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -103,7 +102,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width:500px) {
-        .sc-pbxSd .c2 {
+        .sc-fznzOf .c2 {
           height: 100%;
         }
       }
@@ -221,8 +220,14 @@ describe('<GraphFundItem />', () => {
     `);
   });
 
-  it('should not render anything if there are no values', () => {
-    expect.assertions(1);
-    expect(setup({ values: [] }).container).toMatchInlineSnapshot(`<div />`);
+  describe.each`
+    case                           | values
+    ${'the values array is empty'} | ${[]}
+    ${'there are no values'}       | ${null}
+  `('when $case', ({ values }) => {
+    it('should not render anything', () => {
+      expect.assertions(1);
+      expect(setup({ values }).container).toMatchInlineSnapshot(`<div />`);
+    });
   });
 });

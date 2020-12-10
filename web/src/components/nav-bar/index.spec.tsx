@@ -3,7 +3,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { Navbar } from '.';
-import { Page } from '~client/types/app';
+import { PageListStandard, PageNonStandard } from '~client/types';
 
 describe('<Navbar />', () => {
   const props = {
@@ -19,16 +19,16 @@ describe('<Navbar />', () => {
   };
 
   it.each`
-    page             | path
-    ${Page.overview} | ${'/'}
-    ${Page.analysis} | ${'/analysis'}
-    ${Page.funds}    | ${'/funds'}
-    ${Page.income}   | ${'/income'}
-    ${Page.bills}    | ${'/bills'}
-    ${Page.food}     | ${'/food'}
-    ${Page.general}  | ${'/general'}
-    ${Page.holiday}  | ${'/holiday'}
-    ${Page.social}   | ${'/social'}
+    page                        | path
+    ${PageNonStandard.Overview} | ${'/'}
+    ${PageNonStandard.Analysis} | ${'/analysis'}
+    ${PageNonStandard.Funds}    | ${'/funds'}
+    ${PageListStandard.Income}  | ${'/income'}
+    ${PageListStandard.Bills}   | ${'/bills'}
+    ${PageListStandard.Food}    | ${'/food'}
+    ${PageListStandard.General} | ${'/general'}
+    ${PageListStandard.Holiday} | ${'/holiday'}
+    ${PageListStandard.Social}  | ${'/social'}
   `('should render a button for the $page page', async ({ page, path }) => {
     expect.assertions(3);
     const { findByText } = getContainer();

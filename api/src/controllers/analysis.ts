@@ -15,10 +15,9 @@ import {
   getDate,
 } from 'date-fns';
 import merge from 'deepmerge';
+import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import config from '~api/config';
-import { User } from '~api/gql';
 import {
   getIncome,
   getPeriodCostForCategory,
@@ -26,29 +25,24 @@ import {
   getTimelineRows,
 } from '~api/queries';
 import {
-  Page,
-  AnalysisParams,
-  CategoryCostTree,
-  AnalysisCategory,
-  AnalysisTimeline,
+  isExtendedPage,
+  AnalysisPage,
   AnalysisPeriod,
-  PeriodCondition,
-  GetPeriodCondition,
-  PeriodCost,
-  CategoryTimelineRows,
-  AnalysisGroupColumn,
   AnalysisGroupBy,
+  AnalysisGroupColumn,
+  AnalysisResponse,
+  CategoryCostTree,
+  CategoryCostTreeDeep,
+  CategoryTimelineRows,
   CostsByDate,
-  AnalysisParamsDeep,
+  GetPeriodCondition,
+  PeriodCondition,
+  PeriodCost,
+  QueryAnalysisArgs,
+  QueryAnalysisDeepArgs,
 } from '~api/types';
 
-const CATEGORIES: AnalysisCategory[] = [
-  Page.bills,
-  Page.food,
-  Page.general,
-  Page.holiday,
-  Page.social,
-];
+const CATEGORIES: AnalysisPage[] = Object.values(AnalysisPage);
 
 const periodConditionWeekly: GetPeriodCondition = (now, pageIndex = 0) => {
   const startTime = addWeeks(startOfWeek(now, { weekStartsOn: 1 }), -pageIndex);
@@ -92,14 +86,14 @@ export function periodCondition(now: Date, period: AnalysisPeriod, pageIndex = 0
 }
 
 export function getCategoryColumn(
-  category: AnalysisCategory,
+  category: AnalysisPage,
   groupBy?: AnalysisGroupBy,
 ): AnalysisGroupColumn | null {
-  if (category === Page.bills) {
+  if (category === AnalysisPage.Bills) {
     return 'item';
   }
-  if (groupBy === 'category') {
-    if (config.data.listExtendedCategories.includes(category)) {
+  if (groupBy === AnalysisGroupBy.Category) {
+    if (isExtendedPage(category)) {
       return 'category';
     }
 
@@ -136,11 +130,13 @@ export const getCostsByDate = (results: CategoryTimelineRows[]): CostsByDate =>
     {},
   );
 
+type Timeline = Exclude<AnalysisResponse['timeline'], null | undefined>;
+
 export function processTimelineData(
   timelineRows: CategoryTimelineRows[],
   period: AnalysisPeriod,
   { startTime }: Pick<PeriodCondition, 'startTime'>,
-): AnalysisTimeline | null {
+): Timeline | null {
   const costsByDate = getCostsByDate(timelineRows);
 
   const year = getYear(startTime);
@@ -148,7 +144,7 @@ export function processTimelineData(
   if (period === 'year') {
     return Array(12)
       .fill(0)
-      .reduce<AnalysisTimeline>((items, _, index) => {
+      .reduce<Timeline>((items, _, index) => {
         const date = addMonths(startTime, index);
         const month = getMonth(date);
         const daysInMonth = getDaysInMonth(date);
@@ -175,16 +171,11 @@ export function processTimelineData(
 
 export async function getAnalysisData(
   db: DatabaseTransactionConnectionType,
-  user: User,
-  { period = 'year', groupBy = 'category', pageIndex = 0 }: Partial<AnalysisParams>,
+  uid: number,
+  { period, groupBy, page: pageIndex }: QueryAnalysisArgs,
   now: Date = new Date(),
-): Promise<{
-  timeline: AnalysisTimeline | null;
-  cost: CategoryCostTree<AnalysisCategory>[];
-  saved: number;
-  description: string;
-}> {
-  const condition = periodCondition(now, period, pageIndex);
+): Promise<AnalysisResponse> {
+  const condition = periodCondition(now, period, pageIndex ?? 0);
 
   const { startTime, endTime, description } = condition;
 
@@ -192,28 +183,30 @@ export async function getAnalysisData(
     CATEGORIES.map((category) =>
       getPeriodCostForCategory(
         db,
-        user.uid,
+        uid,
         startTime,
         endTime,
         category,
-        getCategoryColumn(category as AnalysisCategory, groupBy),
+        getCategoryColumn(category, groupBy),
       ),
     ),
   );
 
   const [income, timelineRows] = await Promise.all<number, CategoryTimelineRows[]>([
-    getIncome(db, user.uid, startTime, endTime),
+    getIncome(db, uid, startTime, endTime),
 
     Promise.all<CategoryTimelineRows>(
-      CATEGORIES.map(async (category) =>
-        getTimelineRows(db, user.uid, startTime, endTime, category),
-      ),
+      CATEGORIES.map(async (category) => getTimelineRows(db, uid, startTime, endTime, category)),
     ),
   ]);
 
-  const categoryCostTree = periodCostByCategory.map<CategoryCostTree<AnalysisCategory>>(
-    (rows, index) => [CATEGORIES[index], rows.map(({ itemCol, cost }) => [itemCol, cost])],
-  );
+  const categoryCostTree = periodCostByCategory.map<CategoryCostTree>((rows, index) => ({
+    item: CATEGORIES[index],
+    tree: rows.map((row) => ({
+      category: row.itemCol,
+      sum: row.cost,
+    })),
+  }));
 
   const totalCost = periodCostByCategory.reduce<number>(
     (sum, result) => result.reduce<number>((resultSum, { cost }) => resultSum + cost, sum),
@@ -234,26 +227,34 @@ export async function getAnalysisData(
 
 export async function getDeepAnalysisData(
   db: DatabaseTransactionConnectionType,
-  user: User,
-  { period, groupBy, pageIndex, category }: AnalysisParamsDeep,
+  uid: number,
+  { period, groupBy, page: pageIndex, category }: QueryAnalysisDeepArgs,
   now: Date = new Date(),
-): Promise<CategoryCostTree[]> {
+): Promise<CategoryCostTreeDeep[]> {
   const rows = await getPeriodCostDeep(
     db,
-    user.uid,
+    uid,
     category,
     getCategoryColumn(category, groupBy),
-    periodCondition(now, period, pageIndex),
+    periodCondition(now, period, pageIndex ?? 0),
   );
 
-  return rows.reduce<CategoryCostTree[]>(
-    (last, { itemCol, item, cost }) =>
-      itemCol === last[last.length - 1]?.[0]
-        ? [
-            ...last.slice(0, last.length - 1),
-            [itemCol, [...last[last.length - 1][1], [item, cost]]],
-          ]
-        : [...last, [itemCol, [[item, cost]]]],
-    [],
-  );
+  return rows.reduce<CategoryCostTreeDeep[]>((last, row) => {
+    const treeItem = { category: row.item, sum: row.cost };
+
+    if (row.itemCol === last[last.length - 1]?.item) {
+      return replaceAtIndex(last, last.length - 1, (prev) => ({
+        ...prev,
+        tree: [...prev.tree, treeItem],
+      }));
+    }
+
+    return [
+      ...last,
+      {
+        item: row.itemCol,
+        tree: [treeItem],
+      },
+    ];
+  }, []);
 }

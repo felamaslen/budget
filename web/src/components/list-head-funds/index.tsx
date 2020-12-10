@@ -5,20 +5,18 @@ import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { formatOptionsAbsolute, formatOptionsRelative } from '~client/components/fund-gain-info';
 import { GraphFunds } from '~client/components/graph-funds';
 import { Sort, defaultSort, HeadProps, SortCriteria } from '~client/components/page-funds/types';
-import { Period } from '~client/constants/graph';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { CachedValue } from '~client/types';
+import { CachedValue, HistoryOptions } from '~client/types';
 
 type PropsGainValues = {
   totalCost: number;
   annualisedFundReturns: number;
   cachedValue: CachedValue;
-  onReloadPrices: () => void;
 };
 
-type Props = PropsGainValues & {
+export type Props = PropsGainValues & {
   viewSoldFunds: boolean;
-  period: Period;
+  historyOptions: HistoryOptions;
   onViewSoldToggle: () => void;
 } & HeadProps;
 
@@ -38,15 +36,8 @@ const GainValues: React.FC<PropsGainValues & { isMobile: boolean }> = ({
   totalCost,
   annualisedFundReturns,
   cachedValue: { value, gain, dayGain, gainAbs, dayGainAbs },
-  onReloadPrices,
 }) => (
-  <Styled.OverallGain
-    as="a"
-    role="button"
-    profit={value > totalCost}
-    loss={value < totalCost}
-    onClick={onReloadPrices}
-  >
+  <Styled.OverallGain as="a" role="button" profit={value > totalCost} loss={value < totalCost}>
     <Styled.Main>
       <Styled.Value>{formatCurrency(value, isMobile ? {} : formatOptionsAbsolute)}</Styled.Value>
       <Styled.XIRR gain={annualisedFundReturns}>
@@ -79,7 +70,6 @@ export const ListHeadFunds: React.FC<Props> = ({
   viewSoldFunds,
   annualisedFundReturns,
   cachedValue,
-  onReloadPrices,
   onViewSoldToggle,
   sort = defaultSort,
   setSort,
@@ -90,7 +80,6 @@ export const ListHeadFunds: React.FC<Props> = ({
       totalCost={totalCost}
       annualisedFundReturns={annualisedFundReturns}
       cachedValue={cachedValue}
-      onReloadPrices={onReloadPrices}
     />
     <FormFieldSelect options={sortOptions} value={sort} onChange={setSort} />
     <Styled.ViewSold>
@@ -104,7 +93,6 @@ export const ListHeadFundsMobile: React.FC<PropsGainValues> = ({
   totalCost,
   annualisedFundReturns,
   cachedValue,
-  onReloadPrices,
 }) => (
   <Styled.ListHeadFunds>
     <GainValues
@@ -112,7 +100,6 @@ export const ListHeadFundsMobile: React.FC<PropsGainValues> = ({
       totalCost={totalCost}
       annualisedFundReturns={annualisedFundReturns}
       cachedValue={cachedValue}
-      onReloadPrices={onReloadPrices}
     />
     <GraphFunds isMobile />
   </Styled.ListHeadFunds>

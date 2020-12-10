@@ -1,7 +1,7 @@
 import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
 
 import { breakpoint, rem } from '~client/styled/mixins';
-import { FlexColumn } from '~client/styled/shared';
+import { FlexColumn } from '~client/styled/shared/layout';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const Container = styled(FlexColumn)`

@@ -2,7 +2,6 @@ import axios, { CancelTokenSource } from 'axios';
 import format from 'date-fns/format';
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { replaceAtIndex } from 'replace-array';
-import shortid from 'shortid';
 import { debounce } from 'throttle-debounce';
 
 import { Step } from './constants';
@@ -10,7 +9,7 @@ import { FormContainer, Props as ContainerProps } from './form-container';
 import * as Styled from './styles';
 import { FormFieldText, FormFieldNumber } from '~client/components/form-field';
 import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared';
-import { Id, CreateEdit, Currency, Entry } from '~client/types';
+import { Create, CurrencyInput as Currency, NetWorthEntryNative as Entry } from '~client/types';
 
 const BASE = 'GBP';
 
@@ -179,7 +178,7 @@ function useRateRefresh(
 type PropsEditCurrency = {
   entry: Currency;
   onChange: (entry: Currency) => void;
-  onRemove: (id: Id) => void;
+  onRemove: (currency: string) => void;
   rates: Rates;
   getRates: GetRates;
   loadingRates: boolean;
@@ -218,8 +217,8 @@ const EditCurrency: React.FC<PropsEditCurrency> = ({
   }, [tempRate, entry, onChange]);
 
   const onRemoveCallback = useCallback(() => {
-    onRemove(entry.id);
-  }, [onRemove, entry.id]);
+    onRemove(entry.currency);
+  }, [onRemove, entry.currency]);
 
   return (
     <Styled.EditCurrency>
@@ -302,39 +301,32 @@ const AddCurrency: React.FC<PropsAddCurrency> = ({
 };
 
 type Props = {
-  containerProps: ContainerProps;
-  item: CreateEdit<Entry>;
-  onEdit: (item: CreateEdit<Entry>) => void;
+  containerProps: Omit<ContainerProps, 'step'>;
+  item: Create<Entry>;
+  onEdit: (item: Create<Entry>) => void;
 };
 
 export const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }) => {
   const onAddValue = useCallback(
-    (currency) => {
-      const newCurrencies = item.currencies.concat([
-        {
-          id: shortid.generate(),
-          ...currency,
-        },
-      ]);
+    (entry: Currency) => {
+      const newCurrencies = [...item.currencies, entry];
       onEdit({ ...item, currencies: newCurrencies });
     },
     [onEdit, item],
   );
 
   const onChangeValue = useCallback(
-    (currency) => {
-      const index = item.currencies.findIndex(({ id }: Currency): boolean => id === currency.id);
-      const newCurrencies = replaceAtIndex(item.currencies, index, currency);
+    (entry: Currency) => {
+      const index = item.currencies.findIndex((compare) => compare.currency === entry.currency);
+      const newCurrencies = replaceAtIndex(item.currencies, index, entry);
       onEdit({ ...item, currencies: newCurrencies });
     },
     [onEdit, item],
   );
 
   const onRemoveValue = useCallback(
-    (id) => {
-      const newCurrencies = item.currencies.filter(
-        ({ id: currencyId }: Currency): boolean => currencyId !== id,
-      );
+    (currency: string) => {
+      const newCurrencies = item.currencies.filter((compare) => compare.currency !== currency);
       onEdit({ ...item, currencies: newCurrencies });
     },
     [onEdit, item],
@@ -358,7 +350,7 @@ export const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }
       <Styled.CurrencyForm>
         {item.currencies.map((currency) => (
           <EditCurrency
-            key={currency.id}
+            key={currency.currency}
             entry={currency}
             onChange={onChangeValue}
             onRemove={onRemoveValue}

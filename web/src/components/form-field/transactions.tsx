@@ -1,26 +1,29 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { removeAtIndex } from 'replace-array';
+import shortid from 'shortid';
 
 import { FormFieldCost, FormFieldCostInline } from './cost';
 import { FormFieldDate, FormFieldDateInline } from './date';
 import { FormFieldNumber, FormFieldNumberInline } from './number';
 import { Wrapper, WrapperProps } from './shared';
 import * as Styled from './styles';
-import { CREATE_ID } from '~client/constants/data';
-import { useCTA } from '~client/hooks';
-import { useField } from '~client/hooks/field';
-import { addToTransactionsList, modifyTransactionById, sortByKey } from '~client/modules/data';
+import { useCTA, useField } from '~client/hooks';
+import { addToTransactionsList, modifyTransaction, sortByKey } from '~client/modules/data';
 import { FlexColumn, ButtonAdd, ButtonDelete } from '~client/styled/shared';
-import { Id, Transaction } from '~client/types';
+import { Id, TransactionNative as Transaction } from '~client/types';
 
 type PropsTransaction = {
-  id?: Id;
   item: Transaction;
-  onChange: (id: Id, delta: Partial<Transaction>) => void;
+  index?: number;
+  onChange: (index: number, delta: Partial<Transaction>) => void;
   create?: boolean;
 };
 
+const getKey = (transaction: Transaction, index: number): string =>
+  `${transaction.date.toISOString()}-${index}`;
+
 function useSingleTransactionField({
-  item,
+  index = -1,
   onChange,
 }: Omit<PropsTransaction, 'create'>): {
   onChangeDate: (value: Date | undefined) => void;
@@ -34,9 +37,9 @@ function useSingleTransactionField({
   useEffect(() => {
     if (delta !== prevDelta.current && Object.keys(delta).length) {
       prevDelta.current = delta;
-      onChange(item.id, delta);
+      onChange(index, delta);
     }
-  }, [delta, onChange, item.id]);
+  }, [delta, onChange, index]);
   const onChangeDate = useCallback((date?: Date) => setDelta((last) => ({ ...last, date })), []);
   const onChangeUnits = useCallback(
     (units?: number) => setDelta((last) => ({ ...last, units })),
@@ -61,7 +64,7 @@ const FormFieldTransactionInline: React.FC<PropsTransaction> = ({
   ...props
 }) => {
   const {
-    item: { id, date, units, price, fees, taxes },
+    item: { date, units, price, fees, taxes },
   } = props;
   const {
     onChangeDate,
@@ -74,37 +77,22 @@ const FormFieldTransactionInline: React.FC<PropsTransaction> = ({
   return (
     <Styled.TransactionsListItem data-testid={create ? 'create-input' : 'edit-input'}>
       <Styled.TransactionRowDate>
-        <FormFieldDateInline id={`date-${id}`} value={date} onChange={onChangeDate} />
+        <FormFieldDateInline value={date} onChange={onChangeDate} />
       </Styled.TransactionRowDate>
       <FlexColumn>
         <Styled.UnitsPriceRow>
           <Styled.TransactionRowUnits>
-            <FormFieldNumberInline
-              id={`units-${id}`}
-              allowEmpty
-              value={units}
-              onChange={onChangeUnits}
-            />
+            <FormFieldNumberInline allowEmpty value={units} onChange={onChangeUnits} />
           </Styled.TransactionRowUnits>
           <Styled.TransactionRowPrice>
-            <FormFieldNumberInline
-              id={`price-${id}`}
-              allowEmpty
-              value={price}
-              onChange={onChangePrice}
-            />
+            <FormFieldNumberInline allowEmpty value={price} onChange={onChangePrice} />
           </Styled.TransactionRowPrice>
         </Styled.UnitsPriceRow>
         <Styled.TransactionRowFees>
           <Styled.FeesLabel>Fees</Styled.FeesLabel>
-          <FormFieldCostInline id={`fees-${id}`} allowEmpty value={fees} onChange={onChangeFees} />
+          <FormFieldCostInline allowEmpty value={fees} onChange={onChangeFees} />
           <Styled.FeesLabel>Taxes</Styled.FeesLabel>
-          <FormFieldCostInline
-            id={`taxes-${id}`}
-            allowEmpty
-            value={taxes}
-            onChange={onChangeTaxes}
-          />
+          <FormFieldCostInline allowEmpty value={taxes} onChange={onChangeTaxes} />
         </Styled.TransactionRowFees>
       </FlexColumn>
       {children}
@@ -118,7 +106,7 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
   ...props
 }) => {
   const {
-    item: { id, date, units, price, fees, taxes },
+    item: { date, units, price, fees, taxes },
   } = props;
   const {
     onChangeDate,
@@ -127,6 +115,8 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
     onChangeFees,
     onChangeTaxes,
   } = useSingleTransactionField(props);
+
+  const id = useMemo(() => shortid.generate(), []);
 
   return (
     <Styled.TransactionsListItem data-testid={create ? 'create-input' : 'edit-input'}>
@@ -177,14 +167,13 @@ const FormFieldTransaction: React.FC<PropsTransaction> = ({
   );
 };
 
-const newItemInit: Transaction = {
-  id: CREATE_ID,
+const newItemInit = (): Transaction => ({
   date: new Date(),
   units: 0,
   price: 0,
   fees: 0,
   taxes: 0,
-};
+});
 
 const emptyValue: Transaction[] = [];
 
@@ -198,11 +187,11 @@ type HookProps = {
 function useTransactionsField(
   props: HookProps,
 ): {
-  currentValue: Transaction[];
+  items: Transaction[];
   newItem: Transaction;
   onCreate: () => void;
-  onUpdate: (id: Id, delta: Partial<Transaction>) => void;
-  onDelete: (id: Id) => void;
+  onUpdate: (index: number, delta: Partial<Transaction>) => void;
+  onDelete: (index: number) => void;
   onChangeAddField: (id: Id, delta: Partial<Transaction>) => void;
 } {
   const { currentValue, onChange } = useField<Transaction[], Transaction[]>({
@@ -211,19 +200,21 @@ function useTransactionsField(
     immediate: true,
   });
 
+  const items = useMemo(() => sortTransactions(currentValue), [currentValue]);
+
   const onChangeTransaction = useCallback(
-    (id: Id, delta: Partial<Transaction>): void => {
-      onChange(modifyTransactionById(props.value, id, delta));
+    (index: number, delta: Partial<Transaction>): void => {
+      onChange(modifyTransaction(items, index, delta));
     },
-    [props.value, onChange],
+    [items, onChange],
   );
 
   const onRemoveTransaction = useCallback(
-    (id) => onChange(currentValue.filter(({ id: valueId }) => valueId !== id)),
-    [currentValue, onChange],
+    (index: number) => onChange(removeAtIndex(items, index)),
+    [items, onChange],
   );
 
-  const [newItem, setNewItem] = useState<Transaction>(newItemInit);
+  const [newItem, setNewItem] = useState<Transaction>(newItemInit());
 
   const onChangeAddField = useCallback((_, delta: Partial<Transaction>): void => {
     setNewItem((last) => ({ ...last, ...delta }));
@@ -234,12 +225,12 @@ function useTransactionsField(
       return;
     }
 
-    setNewItem(newItemInit);
+    setNewItem(newItemInit());
     onChange(addToTransactionsList(currentValue, newItem));
   }, [newItem, currentValue, onChange]);
 
   return {
-    currentValue,
+    items,
     newItem,
     onCreate: onAdd,
     onUpdate: onChangeTransaction,
@@ -257,14 +248,7 @@ export const FormFieldTransactionsInline: React.FC<PropsInline> = ({
   value = emptyValue,
   ...props
 }) => {
-  const {
-    currentValue,
-    newItem,
-    onChangeAddField,
-    onCreate,
-    onUpdate,
-    onDelete,
-  } = useTransactionsField({
+  const { items, newItem, onChangeAddField, onCreate, onUpdate, onDelete } = useTransactionsField({
     ...props,
     value,
   });
@@ -304,15 +288,15 @@ export const FormFieldTransactionsInline: React.FC<PropsInline> = ({
                   <ButtonAdd onClick={onCreate}>+</ButtonAdd>
                 </Styled.TransactionRowButton>
               </FormFieldTransactionInline>
-              {sortTransactions(currentValue).map((item) => (
+              {items.map((item, index) => (
                 <FormFieldTransactionInline
-                  key={item.id}
-                  id={item.id}
+                  key={getKey(item, index)}
+                  index={index}
                   item={item}
                   onChange={onUpdate}
                 >
                   <span>
-                    <ButtonDelete onClick={(): void => onDelete(item.id)}>&minus;</ButtonDelete>
+                    <ButtonDelete onClick={(): void => onDelete(index)}>&minus;</ButtonDelete>
                   </span>
                 </FormFieldTransactionInline>
               ))}
@@ -330,14 +314,9 @@ type Props = WrapperProps & {
 };
 
 export const FormFieldTransactions: React.FC<Props> = ({ invalid = false, ...props }) => {
-  const {
-    currentValue,
-    newItem,
-    onChangeAddField,
-    onCreate,
-    onUpdate,
-    onDelete,
-  } = useTransactionsField(props);
+  const { items, newItem, onChangeAddField, onCreate, onUpdate, onDelete } = useTransactionsField(
+    props,
+  );
 
   return (
     <Wrapper item="transactions" invalid={invalid}>
@@ -347,10 +326,15 @@ export const FormFieldTransactions: React.FC<Props> = ({ invalid = false, ...pro
             <ButtonAdd onClick={onCreate}>+</ButtonAdd>
           </Styled.TransactionRowButton>
         </FormFieldTransaction>
-        {sortTransactions(currentValue).map((item) => (
-          <FormFieldTransaction key={item.id} id={item.id} item={item} onChange={onUpdate}>
+        {items.map((item, index) => (
+          <FormFieldTransaction
+            key={getKey(item, index)}
+            item={item}
+            index={index}
+            onChange={onUpdate}
+          >
             <Styled.TransactionRowButton>
-              <ButtonDelete onClick={(): void => onDelete(item.id)}>&minus;</ButtonDelete>
+              <ButtonDelete onClick={(): void => onDelete(index)}>&minus;</ButtonDelete>
             </Styled.TransactionRowButton>
           </FormFieldTransaction>
         ))}

@@ -5,6 +5,8 @@ import { formatDate } from '../shared';
 import { createValues, createCreditLimits, createCurrencies } from './create';
 import { fetchById } from './read';
 import { validateCategories } from './shared';
+
+import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
 import {
   updateEntryDate,
   deleteOldValues,
@@ -14,16 +16,15 @@ import {
   deleteChangedOptionValues,
   deleteChangedMortgageValues,
 } from '~api/queries';
-import { CreateEntry, Entry } from '~api/types';
+import { MutationUpdateNetWorthEntryArgs, CrudResponseUpdate } from '~api/types';
 
 export async function updateNetWorthEntry(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  netWorthId: number,
-  data: CreateEntry,
-): Promise<Entry> {
-  await validateCategories(db, data);
-  const { date, values, creditLimit, currencies } = data;
+  { id: netWorthId, input }: MutationUpdateNetWorthEntryArgs,
+): Promise<CrudResponseUpdate> {
+  await validateCategories(db, input);
+  const { date, values, creditLimit, currencies } = input;
   const entryBefore = await fetchById(db, uid, netWorthId);
 
   const deletedValues = entryBefore.values
@@ -41,10 +42,7 @@ export async function updateNetWorthEntry(
     .map(({ currency }) => currency);
 
   const changedValues = values
-    .filter(
-      (newValue) =>
-        !entryBefore.values.some(({ id: oldId, ...oldValue }) => deepEqual(oldValue, newValue)),
-    )
+    .filter((newValue) => !entryBefore.values.some((oldValue) => deepEqual(oldValue, newValue)))
     .map(({ subcategory }) => subcategory);
 
   const allSubcategories = values.map(({ subcategory }) => subcategory);
@@ -65,6 +63,8 @@ export async function updateNetWorthEntry(
     createCurrencies(db, netWorthId, currencies),
   ]);
 
-  const entry = await fetchById(db, uid, netWorthId);
-  return entry;
+  const item = await fetchById(db, uid, netWorthId);
+  await pubsub.publish(`${PubSubTopic.NetWorthEntryUpdated}.${uid}`, { item });
+
+  return { error: null };
 }

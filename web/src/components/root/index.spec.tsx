@@ -1,14 +1,15 @@
-import { render, RenderResult } from '@testing-library/react';
+import { render, RenderResult, waitFor } from '@testing-library/react';
+import 'cross-fetch/polyfill';
 import { createMemoryHistory } from 'history';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import createStore, { MockStore } from 'redux-mock-store';
-import { createClient, Provider as URQLProvider, OperationResult } from 'urql';
+import { OperationResult } from 'urql';
 
 import { Root } from '.';
 import { State } from '~client/reducers';
-import { testState } from '~client/test-data/state';
+import { testState as state } from '~client/test-data/state';
 import * as gql from '~client/types/gql';
 
 describe('<Root />', () => {
@@ -40,16 +41,6 @@ describe('<Root />', () => {
       mockRun,
     ]);
 
-    const state: State = {
-      ...testState,
-      api: {
-        ...testState.api,
-        initialLoading: false,
-        dataLoaded: true,
-        loading: false,
-      },
-    };
-
     const store = createStore<State>()(state);
 
     const props = {
@@ -61,22 +52,20 @@ describe('<Root />', () => {
       initialEntries: ['/'],
     });
 
-    const client = createClient({ url: '/graphql' });
-
     const utils = render(
       <Router history={history}>
-        <URQLProvider value={client}>
-          <Root {...props} />
-        </URQLProvider>
+        <Root {...props} />
       </Router>,
     );
 
     return { store, ...utils };
   };
 
-  it('should render a header', () => {
+  it('should render a header', async () => {
     expect.assertions(1);
     const { getByRole } = setup();
-    expect(getByRole('heading')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByRole('heading')).toBeInTheDocument();
+    });
   });
 });

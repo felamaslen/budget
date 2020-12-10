@@ -1,21 +1,31 @@
 import numericHash from 'string-hash';
 import { makeListReducer, makeDailyListReducer, ListState, DailyState } from './list';
 import {
+  ActionTypeApi,
+  ActionTypeLogin,
   dataRead,
-  syncReceived,
+  ListActionType,
   listItemCreated,
   listItemUpdated,
   listItemDeleted,
-  moreListDataRequested,
-  moreListDataReceived,
+  listOverviewUpdated,
   loggedOut,
-  ListActionType,
-  ActionTypeApi,
-  ActionTypeLogin,
+  moreListDataReceived,
+  receiptCreated,
 } from '~client/actions';
-import { DataKeyAbbr } from '~client/constants/api';
 import { testResponse } from '~client/test-data';
-import { Id, Page, PageListCalc, RequestType, Bill } from '~client/types';
+import {
+  Id,
+  InitialQuery,
+  ListReadResponse,
+  PageListExtended,
+  PageListStandard,
+  RawDate,
+  ReceiptPage,
+  RequestType,
+  StandardInput,
+  WithIds,
+} from '~client/types';
 
 describe('List reducer', () => {
   type ExtraState = {
@@ -31,8 +41,7 @@ describe('List reducer', () => {
 
   type State = ListState<Item, ExtraState>;
 
-  const page: PageListCalc = Page.income;
-  type MyPage = Page.income;
+  const page = PageListStandard.Income;
 
   const initialState: State = {
     items: [],
@@ -47,12 +56,20 @@ describe('List reducer', () => {
     weekly: 0,
     offset: 0,
     olderExists: null,
-    loadingMore: false,
   };
 
-  const myListReducer = makeListReducer<Item, MyPage, ExtraState>(page, initialState);
+  const myListReducer = makeListReducer<Item, WithIds<Item>, typeof page, ExtraState>(
+    page,
+    initialState,
+  );
 
-  const dailyReducer = makeDailyListReducer<Item, MyPage, Omit<State, 'baz'>>(page);
+  const pageDaily = PageListExtended.Food;
+
+  const dailyReducer = makeDailyListReducer<
+    RawDate<Item, 'date'>,
+    typeof pageDaily,
+    Omit<State, 'baz'>
+  >(pageDaily);
 
   const testDate = new Date('2020-04-20');
 
@@ -72,19 +89,19 @@ describe('List reducer', () => {
   });
 
   describe(ActionTypeApi.DataRead, () => {
-    const response = {
-      data: [
+    const response: InitialQuery[typeof page] = {
+      items: [
         {
-          [DataKeyAbbr.id]: numericHash('some-id'),
-          [DataKeyAbbr.date]: '2020-04-20',
-          [DataKeyAbbr.item]: 'yes',
-          [DataKeyAbbr.cost]: 123,
+          id: numericHash('some-id'),
+          date: '2020-04-20',
+          item: 'yes',
+          cost: 123,
         },
         {
-          [DataKeyAbbr.id]: numericHash('other-id'),
-          [DataKeyAbbr.date]: '2020-04-21',
-          [DataKeyAbbr.item]: 'no',
-          [DataKeyAbbr.cost]: 456,
+          id: numericHash('other-id'),
+          date: '2020-04-21',
+          item: 'no',
+          cost: 456,
         },
       ],
     };
@@ -113,7 +130,7 @@ describe('List reducer', () => {
           dataRead({
             ...testResponse,
             [page]: {
-              data: [],
+              items: [],
             },
           }),
         ),
@@ -123,16 +140,18 @@ describe('List reducer', () => {
     describe('for daily lists', () => {
       const actionRead = dataRead({
         ...testResponse,
-        [page]: {
+        [pageDaily]: {
           total: 335,
           weekly: 122,
           olderExists: true,
-          data: [
+          items: [
             {
-              [DataKeyAbbr.id]: numericHash('some-id'),
-              [DataKeyAbbr.date]: '2019-05-03',
-              [DataKeyAbbr.item]: 'some-item',
-              [DataKeyAbbr.cost]: 102,
+              id: numericHash('some-id'),
+              date: '2019-05-03',
+              item: 'some-item',
+              category: 'some-category',
+              cost: 102,
+              shop: 'some-shop',
             },
           ],
         },
@@ -156,48 +175,120 @@ describe('List reducer', () => {
   });
 
   describe(ListActionType.Created, () => {
-    const action = listItemCreated<Item, Page.income>(page)({
-      date: new Date('2019-07-10'),
-      item: 'some item',
-      cost: 3,
-    });
+    const actionFromLocal = listItemCreated<StandardInput, PageListStandard.Income>(
+      page,
+      {
+        date: new Date('2019-07-10'),
+        item: 'some item',
+        cost: 3,
+      },
+      false,
+      numericHash('some-fake-id'),
+    );
 
-    it('should optimistically create a list item', () => {
-      expect.assertions(1);
-      const result = myListReducer(initialState, action);
+    const actionFromServer = listItemCreated<StandardInput, PageListStandard.Income>(
+      page,
+      {
+        date: new Date('2019-07-10'),
+        item: 'some item',
+        cost: 3,
+      },
+      true,
+      numericHash('some-real-id'),
+      actionFromLocal.id,
+    );
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          items: [
-            {
-              id: action.fakeId,
-              date: new Date('2019-07-10'),
-              item: 'some item',
-              cost: 3,
-            },
-          ],
-          __optimistic: [RequestType.create],
-        }),
-      );
-    });
+    describe('when the action was initiated locally', () => {
+      it('should optimistically create a list item', () => {
+        expect.assertions(1);
+        const result = myListReducer(initialState, actionFromLocal);
 
-    it('should ignore actions intended for other pages', () => {
-      expect.assertions(1);
-      const initialStateCreate: State = {
-        ...initialState,
-        items: [],
-      };
-
-      expect(
-        myListReducer(
-          initialStateCreate,
-          listItemCreated<Bill, Page.bills>(Page.bills)({
-            date: new Date('2020-04-20'),
-            item: 'some item',
-            cost: 1023,
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            items: [
+              {
+                id: actionFromLocal.id,
+                date: new Date('2019-07-10'),
+                item: 'some item',
+                cost: 3,
+              },
+            ],
+            __optimistic: [RequestType.create],
           }),
-        ),
-      ).toBe(initialStateCreate);
+        );
+      });
+    });
+
+    describe('when the action came from the server', () => {
+      describe('when the item was not present in the state', () => {
+        it('should create the list item (non-optimistically)', () => {
+          expect.assertions(1);
+          const result = myListReducer(initialState, actionFromServer);
+
+          expect(result).toStrictEqual(
+            expect.objectContaining({
+              items: [
+                {
+                  id: actionFromServer.id,
+                  date: new Date('2019-07-10'),
+                  item: 'some item',
+                  cost: 3,
+                },
+              ],
+              __optimistic: [undefined],
+            }),
+          );
+        });
+      });
+
+      describe('when the original fake ID was optimistically created', () => {
+        const stateWithOptimisticCreate = myListReducer(initialState, actionFromLocal);
+
+        it('should update with the real ID and remove the optimistic status', () => {
+          expect.assertions(1);
+
+          const result = myListReducer(stateWithOptimisticCreate, actionFromServer);
+
+          expect(result).toStrictEqual(
+            expect.objectContaining({
+              items: [
+                {
+                  id: actionFromServer.id,
+                  date: new Date('2019-07-10'),
+                  item: 'some item',
+                  cost: 3,
+                },
+              ],
+              __optimistic: [undefined],
+            }),
+          );
+        });
+      });
+    });
+
+    describe('when the action is for another page', () => {
+      it('should do nothing', () => {
+        expect.assertions(1);
+        const initialStateCreate: State = {
+          ...initialState,
+          items: [],
+        };
+
+        expect(
+          myListReducer(
+            initialStateCreate,
+            listItemCreated<StandardInput, PageListStandard.Bills>(
+              PageListStandard.Bills,
+              {
+                date: new Date('2020-04-20'),
+                item: 'some item',
+                cost: 1023,
+              },
+              false,
+            ),
+          ),
+        ).toBe(initialStateCreate);
+      });
     });
 
     describe('for daily lists', () => {
@@ -206,21 +297,60 @@ describe('List reducer', () => {
         total: 3,
       };
 
-      const actionDaily = listItemCreated<Item, typeof page>(page)({
-        date: new Date('2019-07-12'),
-        item: 'some item',
-        cost: 34,
-      });
+      const actionDailyFromLocal = listItemCreated<StandardInput, typeof pageDaily>(
+        pageDaily,
+        {
+          date: new Date('2019-07-12'),
+          item: 'some item',
+          cost: 34,
+        },
+        false,
+        numericHash('some-fake-id'),
+      );
 
       it('should update the total', () => {
         expect.assertions(1);
-        const result = dailyReducer(stateDaily, actionDaily);
+        const result = dailyReducer(stateDaily, actionDailyFromLocal);
         expect(result.total).toBe(3 + 34);
       });
 
       it('should ignore actions intended for other pages', () => {
         expect.assertions(1);
-        expect(dailyReducer(stateDaily, { ...actionDaily, page: Page.bills })).toBe(stateDaily);
+        expect(
+          dailyReducer(stateDaily, { ...actionDailyFromLocal, page: PageListStandard.Bills }),
+        ).toBe(stateDaily);
+      });
+
+      describe('when the action was from the server', () => {
+        const actionDailyFromServer = listItemCreated<StandardInput, typeof pageDaily>(
+          pageDaily,
+          {
+            date: new Date('2019-07-12'),
+            item: 'some item',
+            cost: 34,
+          },
+          true,
+          numericHash('some-real-id'),
+          numericHash('some-fake-id'),
+        );
+
+        describe('and the item was optimistically created', () => {
+          const stateDailyWithOptimisticCreate = dailyReducer(stateDaily, actionDailyFromLocal);
+
+          it('should not update the total', () => {
+            expect.assertions(1);
+            const result = dailyReducer(stateDailyWithOptimisticCreate, actionDailyFromServer);
+            expect(result.total).toBe(stateDailyWithOptimisticCreate.total);
+          });
+        });
+
+        describe('and the item was not already in the state', () => {
+          it('should update the total', () => {
+            expect.assertions(1);
+            const result = dailyReducer(stateDaily, actionDailyFromServer);
+            expect(result.total).toBe(3 + 34);
+          });
+        });
       });
     });
   });
@@ -232,100 +362,201 @@ describe('List reducer', () => {
       __optimistic: [undefined],
     };
 
-    const action = listItemUpdated<Item, typeof page>(page)(
+    const actionFromLocal = listItemUpdated<StandardInput, typeof page>(
+      page,
       numericHash('some-real-id'),
       { item: 'other item' },
       {
+        id: 1234,
         date: new Date('2020-04-20'),
         item: 'some item',
         cost: 20,
       },
+      false,
     );
 
-    it('should optimistically update a list item', () => {
-      expect.assertions(1);
-      const result = myListReducer(state, action);
+    const actionFromServer = listItemUpdated<StandardInput, typeof page>(
+      page,
+      numericHash('some-real-id'),
+      { item: 'other item' },
+      {
+        id: 1235,
+        date: new Date('2020-04-20'),
+        item: 'some item',
+        cost: 20,
+      },
+      true,
+    );
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
+    describe('when the action was initiated locally', () => {
+      it('should optimistically update a list item', () => {
+        expect.assertions(1);
+        const result = myListReducer(state, actionFromLocal);
+
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            items: [
+              {
+                id: numericHash('some-real-id'),
+                date: testDate,
+                item: 'other item',
+                cost: 23,
+              },
+            ],
+            __optimistic: [RequestType.update],
+          }),
+        );
+      });
+
+      it('should not alter the status of optimistically created items', () => {
+        expect.assertions(1);
+        const stateCreate = {
+          ...state,
           items: [
             {
-              id: numericHash('some-real-id'),
-              date: testDate,
-              item: 'other item',
-              cost: 23,
-            },
-          ],
-          __optimistic: [RequestType.update],
-        }),
-      );
-    });
-
-    it('should not alter the status of optimistically created items', () => {
-      expect.assertions(1);
-      const stateCreate = {
-        ...state,
-        items: [
-          {
-            ...state.items[0],
-            id: numericHash('some-fake-id'),
-          },
-        ],
-        __optimistic: [RequestType.create],
-      };
-
-      const actionAfterCreate = listItemUpdated<Item, typeof page>(page)(
-        numericHash('some-fake-id'),
-        { item: 'updated item' },
-        {
-          date: new Date('2020-04-20'),
-          item: 'some item',
-          cost: 20,
-        },
-      );
-
-      const result = myListReducer(stateCreate, actionAfterCreate);
-
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          items: [
-            expect.objectContaining({
+              ...state.items[0],
               id: numericHash('some-fake-id'),
-              item: 'updated item',
-              cost: 23,
-            }),
+            },
           ],
           __optimistic: [RequestType.create],
-        }),
-      );
+        };
+
+        const actionAfterCreate = listItemUpdated<StandardInput, typeof page>(
+          page,
+          numericHash('some-fake-id'),
+          { item: 'updated item' },
+          {
+            id: 1236,
+            date: new Date('2020-04-20'),
+            item: 'some item',
+            cost: 20,
+          },
+          false,
+        );
+
+        const result = myListReducer(stateCreate, actionAfterCreate);
+
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            items: [
+              expect.objectContaining({
+                id: numericHash('some-fake-id'),
+                item: 'updated item',
+                cost: 23,
+              }),
+            ],
+            __optimistic: [RequestType.create],
+          }),
+        );
+      });
     });
 
-    it('should ignore actions intended for other pages', () => {
-      expect.assertions(1);
-      const initialStateUpdate = {
-        ...initialState,
-        items: [{ id: numericHash('some-id'), date: testDate, item: 'some item', cost: 3 }],
-        __optimistic: [undefined],
-      };
+    describe('when the action came from the server', () => {
+      describe('when the item was not updated in the state', () => {
+        it('should create the list item (non-optimistically)', () => {
+          expect.assertions(1);
+          const result = myListReducer(
+            {
+              ...initialState,
+              items: [
+                {
+                  id: numericHash('some-real-id'),
+                  date: new Date('2020-04-20'),
+                  item: 'some item',
+                  cost: 20,
+                },
+              ],
+              __optimistic: [undefined],
+            },
+            actionFromServer,
+          );
 
-      expect(
-        myListReducer(
-          initialStateUpdate,
-          listItemUpdated<Bill, Page.bills>(Page.bills)(
-            numericHash('some-id'),
-            {
-              date: new Date('2020-04-20'),
-              item: 'old item',
-              cost: 2931,
-            },
-            {
-              date: new Date('2020-04-21'),
-              item: 'new item',
-              cost: 2934,
-            },
+          expect(result).toStrictEqual(
+            expect.objectContaining({
+              items: [
+                {
+                  id: actionFromServer.id,
+                  date: new Date('2020-04-20'),
+                  item: 'other item',
+                  cost: 20,
+                },
+              ],
+              __optimistic: [undefined],
+            }),
+          );
+        });
+      });
+
+      describe('when the item was optimistically updated', () => {
+        const stateWithOptimisticUpdate = myListReducer(
+          {
+            ...initialState,
+            items: [
+              {
+                id: numericHash('some-real-id'),
+                date: new Date('2020-04-20'),
+                item: 'some item',
+                cost: 20,
+              },
+            ],
+            __optimistic: [undefined],
+          },
+          actionFromLocal,
+        );
+
+        it('should remove the optimistic status', () => {
+          expect.assertions(1);
+
+          const result = myListReducer(stateWithOptimisticUpdate, actionFromServer);
+
+          expect(result).toStrictEqual(
+            expect.objectContaining({
+              items: [
+                {
+                  id: numericHash('some-real-id'),
+                  date: new Date('2020-04-20'),
+                  item: 'other item',
+                  cost: 20,
+                },
+              ],
+              __optimistic: [undefined],
+            }),
+          );
+        });
+      });
+    });
+
+    describe('when the action was for another page', () => {
+      it('should do nothing', () => {
+        expect.assertions(1);
+        const initialStateUpdate = {
+          ...initialState,
+          items: [{ id: numericHash('some-id'), date: testDate, item: 'some item', cost: 3 }],
+          __optimistic: [undefined],
+        };
+
+        expect(
+          myListReducer(
+            initialStateUpdate,
+            listItemUpdated<StandardInput, PageListStandard.Bills>(
+              PageListStandard.Bills,
+              numericHash('some-id'),
+              {
+                date: new Date('2020-04-20'),
+                item: 'old item',
+                cost: 2931,
+              },
+              {
+                id: 1237,
+                date: new Date('2020-04-21'),
+                item: 'new item',
+                cost: 2934,
+              },
+              false,
+            ),
           ),
-        ),
-      ).toBe(initialStateUpdate);
+        ).toBe(initialStateUpdate);
+      });
     });
 
     describe('for daily lists', () => {
@@ -335,20 +566,22 @@ describe('List reducer', () => {
         weekly: 2,
         offset: 0,
         olderExists: null,
-        loadingMore: false,
       };
 
-      const actionDaily = listItemUpdated<Item, typeof page>(page)(
+      const actionDaily = listItemUpdated<StandardInput, typeof pageDaily>(
+        pageDaily,
         numericHash('some-real-id'),
         {
           cost: 41,
           item: 'different item',
         },
         {
+          id: 1238,
           date: new Date('2020-04-20'),
           item: 'some item',
           cost: 5,
         },
+        false,
       );
 
       it('should update the total', () => {
@@ -360,16 +593,19 @@ describe('List reducer', () => {
 
       it('should not update the total if it was not updated', () => {
         expect.assertions(1);
-        const actionDailyNoCost = listItemUpdated<Item, typeof page>(page)(
+        const actionDailyNoCost = listItemUpdated<StandardInput, typeof page>(
+          page,
           numericHash('some-real-id'),
           {
             item: 'different item',
           },
           {
+            id: 1239,
             date: new Date('2020-04-20'),
             item: 'some item',
             cost: 5,
           },
+          false,
         );
 
         const result = dailyReducer(stateDaily, actionDailyNoCost);
@@ -379,7 +615,9 @@ describe('List reducer', () => {
 
       it('should ignore actions intended for other pages', () => {
         expect.assertions(1);
-        expect(dailyReducer(stateDaily, { ...actionDaily, page: Page.bills })).toBe(stateDaily);
+        expect(dailyReducer(stateDaily, { ...actionDaily, page: PageListStandard.Bills })).toBe(
+          stateDaily,
+        );
       });
     });
   });
@@ -391,352 +629,61 @@ describe('List reducer', () => {
       __optimistic: [undefined],
     };
 
-    const action = listItemDeleted<Item, typeof page>(page)(numericHash('some-real-id'), {
+    const deletedItem = {
       date: new Date('2020-04-20'),
       item: 'some item',
       cost: 3,
-    });
+    };
 
-    it('should optimistically delete a list item', () => {
-      expect.assertions(1);
-      const result = myListReducer(state, action);
+    const actionFromLocal = listItemDeleted<StandardInput, typeof page>(
+      page,
+      numericHash('some-real-id'),
+      deletedItem,
+      false,
+    );
 
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          items: [
-            expect.objectContaining({
-              id: numericHash('some-real-id'),
-              item: 'some item',
-              cost: 29,
-            }),
-          ],
-          __optimistic: [RequestType.delete],
-        }),
-      );
-    });
+    const actionFromServer = listItemDeleted<StandardInput, typeof page>(
+      page,
+      numericHash('some-real-id'),
+      {} as StandardInput,
+      true,
+    );
 
-    it('should simply remove the item from state, if it was already in an optimistic creation state', () => {
-      expect.assertions(1);
-      const stateCreating = {
-        ...state,
-        items: [state.items[0]],
-        __optimistic: [RequestType.create],
-      };
+    const actionDaily = listItemDeleted<StandardInput, typeof pageDaily>(
+      pageDaily,
+      numericHash('some-real-id'),
+      deletedItem,
+      false,
+    );
 
-      const result = myListReducer(stateCreating, action);
-
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          items: [],
-          __optimistic: [],
-        }),
-      );
-    });
-
-    it('should update the optimistic state to delete, if it was in an optimistic update status', () => {
-      expect.assertions(1);
-      const stateUpdating = {
-        ...state,
-        items: [state.items[0]],
-        __optimistic: [RequestType.update],
-      };
-
-      const result = myListReducer(stateUpdating, action);
-
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          items: [
-            expect.objectContaining({
-              id: numericHash('some-real-id'),
-              item: 'some item',
-              cost: 29,
-            }),
-          ],
-          __optimistic: [RequestType.delete],
-        }),
-      );
-    });
-
-    it('should ignore actions intended for other pages', () => {
-      expect.assertions(1);
-      const initialStateDelete = {
-        ...initialState,
-        items: [{ id: numericHash('some-id'), date: testDate, item: 'some item', cost: 3 }],
-        __optimistic: [undefined],
-      };
-
-      expect(
-        myListReducer(
-          initialStateDelete,
-          listItemDeleted<Item, Page.bills>(Page.bills)(numericHash('some-id'), {
-            date: new Date('2020-04-20'),
-            item: 'some item',
-            cost: 3,
-          }),
-        ),
-      ).toBe(initialStateDelete);
-    });
-
-    describe('for daily lists', () => {
-      const stateDaily = {
-        ...state,
-        total: 51,
-        weekly: 17,
-        offset: 0,
-        olderExists: null,
-        loadingMore: false,
-      };
-
-      it('should update the total', () => {
+    describe('when the action was initiated locally', () => {
+      it('should optimistically delete a list item', () => {
         expect.assertions(1);
-        const result = dailyReducer(stateDaily, action);
-
-        expect(result.total).toBe(51 - 29);
-      });
-
-      it('should ignore actions intended for other pages', () => {
-        expect.assertions(1);
-        expect(dailyReducer(stateDaily, { ...action, page: Page.bills })).toBe(stateDaily);
-      });
-    });
-  });
-
-  describe(ActionTypeApi.SyncReceived, () => {
-    const syncRequests = [
-      {
-        type: RequestType.create,
-        method: 'post' as const,
-        fakeId: numericHash('other-fake-id'),
-        route: 'some-other-page',
-        body: { some: 'data' },
-      },
-      {
-        type: RequestType.update,
-        method: 'put' as const,
-        route: page,
-        id: numericHash('real-id-z'),
-        body: { other: 'something' },
-      },
-      {
-        type: RequestType.delete,
-        method: 'delete' as const,
-        route: page,
-        id: numericHash('real-id-x'),
-      },
-      {
-        type: RequestType.create,
-        method: 'post' as const,
-        fakeId: numericHash('some-fake-id'),
-        route: page,
-        body: { thisItem: true },
-      },
-      {
-        type: RequestType.create,
-        method: 'post' as const,
-        fakeId: numericHash('different-fake-id'),
-        route: 'different-route',
-        body: { some: 'data' },
-      },
-    ];
-
-    const syncResponse = [
-      {
-        id: numericHash('real-id-a'),
-        total: 516,
-      },
-      {
-        total: 2354,
-      },
-      {
-        total: 1976,
-      },
-      {
-        id: numericHash('real-id-b'),
-        total: 117,
-      },
-      {
-        id: numericHash('real-id-different'),
-        total: 1856,
-      },
-    ];
-
-    const syncReceivedAction = syncReceived({
-      list: syncRequests.map((request, index) => ({
-        ...request,
-        res: syncResponse[index],
-      })),
-      netWorth: [],
-    });
-
-    describe('when confirming an optimistically created item', () => {
-      const state: State = {
-        ...initialState,
-        items: [
-          {
-            id: numericHash('some-fake-id'),
-            date: testDate,
-            item: 'some item',
-            cost: 3,
-          },
-        ],
-        __optimistic: [RequestType.create],
-      };
-
-      const stateDaily = {
-        ...initialStateDaily,
-        total: 100,
-        items: [
-          {
-            id: numericHash('some-fake-id'),
-            date: testDate,
-            item: 'some item',
-            cost: 3,
-          },
-        ],
-        __optimistic: [RequestType.create],
-      };
-
-      it.each`
-        reducer          | testState
-        ${myListReducer} | ${state}
-        ${dailyReducer}  | ${stateDaily}
-      `(
-        'should update with the real IDs and remove the optimistic status',
-        ({ reducer, testState }) => {
-          expect.assertions(1);
-          const result = reducer(testState, syncReceivedAction);
-
-          expect(result).toStrictEqual(
-            expect.objectContaining({
-              items: [
-                expect.objectContaining({
-                  id: numericHash('real-id-b'),
-                  item: 'some item',
-                  cost: 3,
-                }),
-              ],
-              __optimistic: [undefined],
-            }),
-          );
-        },
-      );
-
-      describe('for daily lists', () => {
-        it('should update the list total from the last response', () => {
-          expect.assertions(1);
-          const result = dailyReducer(stateDaily, syncReceivedAction);
-
-          expect(result.total).toBe(117);
-        });
-
-        describe("if there wasn't a relevant response", () => {
-          const req = {
-            type: RequestType.update,
-            id: numericHash('some-real-id'),
-            method: 'put' as const,
-            route: `not-${page}`,
-            query: {},
-            body: { some: 'body' },
-          };
-
-          const res = [{ total: 8743 }];
-
-          it("shouldn't update the list total", () => {
-            expect.assertions(1);
-
-            const action = syncReceived({ list: [{ ...req, res: res[0] }], netWorth: [] });
-            const result = dailyReducer(stateDaily, action);
-            expect(result.total).toBe(100); // not 8743
-          });
-        });
-      });
-    });
-
-    describe('when confirming an optimistically updated item', () => {
-      const state: State = {
-        ...initialState,
-        items: [
-          {
-            id: numericHash('real-id-z'),
-            date: testDate,
-            item: 'updated item',
-            cost: 10,
-          },
-        ],
-        __optimistic: [RequestType.update],
-      };
-
-      const stateDaily = {
-        ...state,
-        total: 105,
-        weekly: 31,
-        offset: 0,
-        olderExists: null,
-        loadingMore: false,
-      };
-
-      it.each`
-        reducer          | testState
-        ${myListReducer} | ${state}
-        ${dailyReducer}  | ${stateDaily}
-      `('should remove the optimistic status', ({ reducer, testState }) => {
-        expect.assertions(1);
-        const result = reducer(testState, syncReceivedAction);
+        const result = myListReducer(state, actionFromLocal);
 
         expect(result).toStrictEqual(
           expect.objectContaining({
             items: [
               expect.objectContaining({
-                id: numericHash('real-id-z'),
-                item: 'updated item',
-                cost: 10,
+                id: numericHash('some-real-id'),
+                item: 'some item',
+                cost: 29,
               }),
             ],
-            __optimistic: [undefined],
+            __optimistic: [RequestType.delete],
           }),
         );
       });
 
-      describe('for daily lists', () => {
-        it('should update the total from the response', () => {
-          expect.assertions(1);
-          const resultDaily = dailyReducer(stateDaily, syncReceivedAction);
-
-          expect(resultDaily.total).toBe(117);
-        });
-      });
-    });
-
-    describe('when confirming optimistically deleted items', () => {
-      const state: State = {
-        ...initialState,
-        items: [
-          {
-            id: numericHash('real-id-x'),
-            date: testDate,
-            item: 'some item',
-            cost: 3,
-          },
-        ],
-        __optimistic: [RequestType.delete],
-      };
-
-      const stateDaily = {
-        ...state,
-        total: 105,
-        weekly: 15,
-        offset: 0,
-        olderExists: null,
-        loadingMore: false,
-      };
-
-      it.each`
-        reducer          | testState
-        ${myListReducer} | ${state}
-        ${dailyReducer}  | ${stateDaily}
-      `('should remove the item from the state', ({ reducer, testState }) => {
+      it('should simply remove the item from state, if it was already in an optimistic creation state', () => {
         expect.assertions(1);
-        const result = reducer(testState, syncReceivedAction);
+        const stateCreating = {
+          ...state,
+          items: [state.items[0]],
+          __optimistic: [RequestType.create],
+        };
+
+        const result = myListReducer(stateCreating, actionFromLocal);
 
         expect(result).toStrictEqual(
           expect.objectContaining({
@@ -746,48 +693,155 @@ describe('List reducer', () => {
         );
       });
 
-      describe('for daily lists', () => {
-        it('should update the total from the response', () => {
-          expect.assertions(1);
-          const resultDaily = dailyReducer(stateDaily, syncReceivedAction);
+      it('should update the optimistic state to delete, if it was in an optimistic update status', () => {
+        expect.assertions(1);
+        const stateUpdating = {
+          ...state,
+          items: [state.items[0]],
+          __optimistic: [RequestType.update],
+        };
 
-          expect(resultDaily.total).toBe(117);
+        const result = myListReducer(stateUpdating, actionFromLocal);
+
+        expect(result).toStrictEqual(
+          expect.objectContaining({
+            items: [
+              expect.objectContaining({
+                id: numericHash('some-real-id'),
+                item: 'some item',
+                cost: 29,
+              }),
+            ],
+            __optimistic: [RequestType.delete],
+          }),
+        );
+      });
+    });
+
+    describe('when the action came from the server', () => {
+      describe('when the item was not deleted in the state', () => {
+        it('should delete the list item (non-optimistically)', () => {
+          expect.assertions(1);
+          const result = myListReducer(
+            {
+              ...initialState,
+              items: [
+                {
+                  id: numericHash('some-real-id'),
+                  date: new Date('2020-04-20'),
+                  item: 'some item',
+                  cost: 3,
+                },
+              ],
+              __optimistic: [undefined],
+            },
+            actionFromServer,
+          );
+
+          expect(result).toStrictEqual(
+            expect.objectContaining({
+              items: [],
+              __optimistic: [],
+            }),
+          );
         });
+      });
+
+      describe('when the item was optimistically deleted', () => {
+        const stateWithOptimisticDelete = myListReducer(initialState, actionFromLocal);
+
+        it('should remove the item and optimistic status', () => {
+          expect.assertions(1);
+
+          const result = myListReducer(stateWithOptimisticDelete, actionFromServer);
+
+          expect(result).toStrictEqual(
+            expect.objectContaining({
+              items: [],
+              __optimistic: [],
+            }),
+          );
+        });
+      });
+    });
+
+    describe('when the action was for another page', () => {
+      it('should do nothing', () => {
+        expect.assertions(1);
+        const initialStateDelete = {
+          ...initialState,
+          items: [{ id: numericHash('some-id'), date: testDate, item: 'some item', cost: 3 }],
+          __optimistic: [undefined],
+        };
+
+        expect(
+          myListReducer(
+            initialStateDelete,
+            listItemDeleted<StandardInput, PageListStandard.Bills>(
+              PageListStandard.Bills,
+              numericHash('some-id'),
+              {
+                date: new Date('2020-04-20'),
+                item: 'some item',
+                cost: 3,
+              },
+              false,
+            ),
+          ),
+        ).toBe(initialStateDelete);
+      });
+    });
+
+    describe('for daily lists', () => {
+      const stateDaily = {
+        ...state,
+        total: 51,
+        weekly: 17,
+        offset: 0,
+        olderExists: null,
+      };
+
+      it('should update the total', () => {
+        expect.assertions(1);
+        const result = dailyReducer(stateDaily, actionDaily);
+
+        expect(result.total).toBe(51 - 29);
+      });
+
+      it('should ignore actions intended for other pages', () => {
+        expect.assertions(1);
+        expect(dailyReducer(stateDaily, { ...actionDaily, page: PageListStandard.Bills })).toBe(
+          stateDaily,
+        );
       });
     });
   });
 
-  describe(ListActionType.MoreRequested, () => {
-    const action = moreListDataRequested(page);
-
-    it('should set loadingMore to true', () => {
-      expect.assertions(1);
-      const result = dailyReducer(initialStateDaily, action);
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          loadingMore: true,
-        }),
-      );
-    });
-
-    describe('if targeted at another page', () => {
-      const actionOtherPage = moreListDataRequested(Page.social);
-
-      it('should be ignored', () => {
+  describe(ListActionType.OverviewUpdated, () => {
+    describe('for daily lists', () => {
+      it.each`
+        prop        | newValue
+        ${'total'}  | ${123876112}
+        ${'weekly'} | ${7691}
+      `('should update the $prop value', ({ prop, newValue }) => {
         expect.assertions(1);
-        expect(dailyReducer(initialStateDaily, actionOtherPage)).toBe(initialStateDaily);
+
+        const action = listOverviewUpdated(pageDaily, [], 123876112, 7691);
+        const result = dailyReducer(initialStateDaily, action);
+
+        expect(result[prop as 'total' | 'weekly']).toBe(newValue);
       });
     });
   });
 
   describe(ListActionType.MoreReceived, () => {
-    const res = {
-      data: [
+    const res: ListReadResponse = {
+      items: [
         {
-          I: numericHash('id-1'),
-          d: '2020-04-20',
-          i: 'some item',
-          c: 123,
+          id: numericHash('id-1'),
+          date: '2020-04-20',
+          item: 'some item',
+          cost: 123,
         },
       ],
       olderExists: true,
@@ -795,7 +849,7 @@ describe('List reducer', () => {
       weekly: 8765,
     };
 
-    const action = moreListDataReceived(page, res);
+    const action = moreListDataReceived(pageDaily, res);
 
     it('should append the data to state', () => {
       expect.assertions(1);
@@ -872,23 +926,13 @@ describe('List reducer', () => {
       );
     });
 
-    it('should set loadingMore to false', () => {
-      expect.assertions(1);
-      const result = dailyReducer({ ...initialStateDaily, loadingMore: true }, action);
-      expect(result).toStrictEqual(
-        expect.objectContaining({
-          loadingMore: false,
-        }),
-      );
-    });
-
     describe('if the olderExists value changed', () => {
       const resEnd = {
         ...res,
         olderExists: false,
       };
 
-      const actionEnd = moreListDataReceived(page, resEnd);
+      const actionEnd = moreListDataReceived(pageDaily, resEnd);
 
       it('should update the olderExists state value', () => {
         expect.assertions(1);
@@ -902,7 +946,7 @@ describe('List reducer', () => {
     });
 
     describe('if targeted at another page', () => {
-      const actionOtherPage = moreListDataReceived(Page.bills, res);
+      const actionOtherPage = moreListDataReceived(PageListStandard.Bills, res);
 
       it('should be ignored', () => {
         expect.assertions(1);
@@ -936,25 +980,25 @@ describe('List reducer', () => {
         __optimistic: [RequestType.update, undefined, undefined],
       };
 
-      const actionWithDuplicates = moreListDataReceived(page, {
-        data: [
+      const actionWithDuplicates = moreListDataReceived(pageDaily, {
+        items: [
           {
-            I: numericHash('id-1'),
-            d: '2020-04-28',
-            i: 'item 1 from API',
-            c: 24,
+            id: numericHash('id-1'),
+            date: '2020-04-28',
+            item: 'item 1 from API',
+            cost: 24,
           },
           {
-            I: numericHash('id-2'),
-            d: '2020-04-22',
-            i: 'item 2 from API',
-            c: 25,
+            id: numericHash('id-2'),
+            date: '2020-04-22',
+            item: 'item 2 from API',
+            cost: 25,
           },
           {
-            I: numericHash('id-3'),
-            d: '2020-04-23',
-            i: 'item 3 from API',
-            c: 26,
+            id: numericHash('id-3'),
+            date: '2020-04-23',
+            item: 'item 3 from API',
+            cost: 26,
           },
         ],
       });
@@ -1002,6 +1046,93 @@ describe('List reducer', () => {
           }),
         );
       });
+    });
+  });
+
+  describe(ListActionType.ReceiptCreated, () => {
+    it('should add those receipt items belonging to the page to the state', () => {
+      expect.assertions(2);
+      expect(pageDaily).toBe(ReceiptPage.Food);
+
+      const action = receiptCreated([
+        {
+          page: ReceiptPage.Food,
+          id: 123,
+          date: '2020-04-20',
+          item: 'Some food item',
+          category: 'Some food category',
+          cost: 776,
+          shop: 'Some shop',
+        },
+        {
+          page: ReceiptPage.General,
+          id: 124,
+          date: '2020-04-20',
+          item: 'Some general item',
+          category: 'Some general category',
+          cost: 913,
+          shop: 'Some shop',
+        },
+        {
+          page: ReceiptPage.Food,
+          id: 125,
+          date: '2020-04-20',
+          item: 'Other food item',
+          category: 'Other food category',
+          cost: 729,
+          shop: 'Some shop',
+        },
+      ]);
+
+      const result = dailyReducer(
+        {
+          ...initialStateDaily,
+          items: [
+            {
+              id: 184,
+              date: new Date('2020-04-13'),
+              item: 'Existing food item',
+              category: 'Existing food category',
+              cost: 710,
+              shop: 'Other shop',
+            },
+          ],
+          __optimistic: [RequestType.create],
+        },
+        action,
+      );
+
+      expect(result).toStrictEqual(
+        expect.objectContaining({
+          items: [
+            {
+              id: 184,
+              date: new Date('2020-04-13'),
+              item: 'Existing food item',
+              category: 'Existing food category',
+              cost: 710,
+              shop: 'Other shop',
+            },
+            {
+              id: 123,
+              date: new Date('2020-04-20'),
+              item: 'Some food item',
+              category: 'Some food category',
+              cost: 776,
+              shop: 'Some shop',
+            },
+            {
+              id: 125,
+              date: new Date('2020-04-20'),
+              item: 'Other food item',
+              category: 'Other food category',
+              cost: 729,
+              shop: 'Some shop',
+            },
+          ],
+          __optimistic: [RequestType.create, undefined, undefined],
+        }),
+      );
     });
   });
 });

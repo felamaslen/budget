@@ -168,6 +168,46 @@ spec:
           persistentVolumeClaim:
             claimName: postgres-pv-claim
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: budget-redis
+  labels:
+    app: budget-redis
+spec:
+  ports:
+    - port: 6379
+  selector:
+    app: budget-redis
+    tier: redis
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: budget-redis
+  labels:
+    app: budget-redis
+spec:
+  selector:
+    matchLabels:
+      app: budget-redis
+      tier: redis
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: budget-redis
+        tier: redis
+    spec:
+      containers:
+        - image: redis:6-alpine
+          name: redis
+          ports:
+            - containerPort: 6379
+              name: redis
+---
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -194,6 +234,8 @@ spec:
                     secretKeyRef:
                       name: postgres-pass
                       key: url
+                - name: REDIS_HOST
+                  value: budget-redis
           restartPolicy: Never
           dnsConfig:
             options:

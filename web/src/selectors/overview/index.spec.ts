@@ -2,11 +2,10 @@ import { replaceAtIndex } from 'replace-array';
 import numericHash from 'string-hash';
 import { getNetWorthSummary } from './net-worth';
 import { getProcessedCost, getOverviewTable } from '.';
-import { getTransactionsList } from '~client/modules/data';
 import { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data';
 import { mockRandom } from '~client/test-utils/random';
-import { Page, Cost } from '~client/types';
+import { Cost, PageListStandard, PageNonStandard } from '~client/types';
 
 describe('Overview selectors', () => {
   beforeEach(() => {
@@ -24,18 +23,18 @@ describe('Overview selectors', () => {
           {
             id: numericHash('fund-A'),
             item: 'some fund 1',
-            transactions: getTransactionsList([
+            transactions: [
               { date: new Date('2018-02-05'), units: 10, price: 5612, fees: 3, taxes: 0 },
               { date: new Date('2018-03-27'), units: -1.32, price: 1804, fees: 0.72, taxes: 0 },
-            ]),
+            ],
             allocationTarget: 0,
           },
           {
             id: numericHash('fund-B'),
             item: 'some fund 2',
-            transactions: getTransactionsList([
+            transactions: [
               { date: new Date('2018-03-17'), units: 51, price: 109, fees: 3, taxes: 0 },
-            ]),
+            ],
             allocationTarget: 0,
           },
         ],
@@ -175,17 +174,21 @@ describe('Overview selectors', () => {
     });
 
     describe.each`
-      case                         | key            | value
-      ${'income is zero'}          | ${Page.income} | ${0}
-      ${'spending exceeds income'} | ${Page.bills}  | ${16600023}
+      case                         | key                        | value
+      ${'income is zero'}          | ${PageListStandard.Income} | ${0}
+      ${'spending exceeds income'} | ${PageListStandard.Bills}  | ${16600023}
     `('if $case for a given month', ({ key, value }) => {
       const testStateWithZeroIncome: State = {
         ...testState,
-        [Page.overview]: {
-          ...testState[Page.overview],
+        [PageNonStandard.Overview]: {
+          ...testState[PageNonStandard.Overview],
           cost: {
-            ...testState[Page.overview].cost,
-            [key]: replaceAtIndex(testState[Page.overview].cost[key as keyof Cost], 1, value),
+            ...testState[PageNonStandard.Overview].cost,
+            [key]: replaceAtIndex(
+              testState[PageNonStandard.Overview].cost[key as Exclude<keyof Cost, '__typename'>],
+              1,
+              value,
+            ),
           },
         },
       };
@@ -299,7 +302,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 3554027.25,
+                "value": 3554027,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -349,7 +352,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 3556336.25,
+                "value": 3556336,
               },
               "social": Object {
                 "rgb": "#bf9e24",
@@ -399,7 +402,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 3559209.25,
+                "value": 3559209,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -449,7 +452,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#6cd479",
-                "value": 3562548.25,
+                "value": 3562548,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -499,7 +502,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#4dcb5c",
-                "value": 3565404.25,
+                "value": 3565404,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -549,7 +552,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#24bf37",
-                "value": 3569077.25,
+                "value": 3569077,
               },
               "social": Object {
                 "rgb": "#dfcf92",

@@ -10,13 +10,21 @@ import {
   FormFieldText,
 } from '~client/components/form-field';
 import { CREATE_ID } from '~client/constants/data';
-import { OnCreate, OnUpdate, OnDelete } from '~client/hooks/crud';
+import { OnCreate, OnUpdate, OnDelete } from '~client/hooks';
 import { Button, ButtonDelete } from '~client/styled/shared';
-import { Create, Category, Subcategory } from '~client/types';
+import {
+  Create,
+  NetWorthCategory as Category,
+  NetWorthCategory,
+  NetWorthCategoryInput,
+  NetWorthCategoryType,
+  NetWorthSubcategory as Subcategory,
+  NetWorthSubcategoryInput,
+} from '~client/types';
 
 const typeOptions: SelectOptions<Category['type'] | 'option'> = [
-  { internal: 'asset', external: 'Asset' },
-  { internal: 'liability', external: 'Liability' },
+  { internal: NetWorthCategoryType.Asset, external: 'Asset' },
+  { internal: NetWorthCategoryType.Liability, external: 'Liability' },
   { internal: 'option', external: 'Option' },
 ];
 
@@ -29,7 +37,7 @@ type PropsForm = {
 const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
   item: { id, type, category, color, isOption } = {
     id: CREATE_ID,
-    type: 'asset',
+    type: NetWorthCategoryType.Asset,
     category: 'Cash',
     color: '#ccffcc',
     isOption: false,
@@ -64,7 +72,7 @@ const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
 
   const onChangeType = useCallback((value: Category['type'] | 'option') => {
     setTempIsOption(value === 'option');
-    setTempType(value === 'option' ? 'asset' : value);
+    setTempType(value === 'option' ? NetWorthCategoryType.Asset : value);
   }, []);
 
   return (
@@ -94,16 +102,16 @@ const NetWorthCategoryItemForm: React.FC<PropsForm> = ({
 
 type PropsItem = {
   item: Category;
-  style?: object;
+  style?: Record<string, unknown>;
   expanded: number | null;
   onExpand: React.Dispatch<React.SetStateAction<number | null>>;
-  onUpdate: OnUpdate<Category>;
+  onUpdate: OnUpdate<NetWorthCategoryInput>;
   onDelete: () => void;
   categories: Category[];
   subcategories: Subcategory[];
-  onCreateSubcategory: OnCreate<Subcategory>;
-  onUpdateSubcategory: OnUpdate<Subcategory>;
-  onDeleteSubcategory: OnDelete<Subcategory>;
+  onCreateSubcategory: OnCreate<NetWorthSubcategoryInput>;
+  onUpdateSubcategory: OnUpdate<NetWorthSubcategoryInput>;
+  onDeleteSubcategory: OnDelete;
 };
 
 const NetWorthCategoryItem: React.FC<PropsItem> = ({
@@ -180,7 +188,7 @@ const NetWorthCategoryItem: React.FC<PropsItem> = ({
 };
 
 type PropsCreate = {
-  onCreate: OnCreate<Category>;
+  onCreate: OnCreate<NetWorthCategoryInput>;
 };
 
 const NetWorthCategoryCreateItem: React.FC<PropsCreate> = ({ onCreate }) => (
@@ -192,12 +200,12 @@ const NetWorthCategoryCreateItem: React.FC<PropsCreate> = ({ onCreate }) => (
 export type Props = {
   categories: Category[];
   subcategories: Subcategory[];
-  onCreateCategory: OnCreate<Category>;
-  onUpdateCategory: OnUpdate<Category>;
-  onDeleteCategory: OnDelete<Category>;
-  onCreateSubcategory: OnCreate<Subcategory>;
-  onUpdateSubcategory: OnUpdate<Subcategory>;
-  onDeleteSubcategory: OnDelete<Subcategory>;
+  onCreateCategory: OnCreate<NetWorthCategoryInput>;
+  onUpdateCategory: OnUpdate<NetWorthCategoryInput>;
+  onDeleteCategory: OnDelete;
+  onCreateSubcategory: OnCreate<NetWorthSubcategoryInput>;
+  onUpdateSubcategory: OnUpdate<NetWorthSubcategoryInput>;
+  onDeleteSubcategory: OnDelete;
 };
 
 type CrudProps = Pick<
@@ -240,7 +248,7 @@ export const NetWorthCategoryList: React.FC<Props> = ({
 
   return (
     <Styled.CategoryList>
-      <CrudList<Category, CrudProps>
+      <CrudList<NetWorthCategoryInput, NetWorthCategory, CrudProps>
         items={categories}
         Item={NetWorthCategoryItem}
         CreateItem={NetWorthCategoryCreateItem}

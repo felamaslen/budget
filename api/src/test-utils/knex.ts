@@ -1,32 +1,41 @@
 import path from 'path';
-import * as Knex from 'knex';
-import { getDbUrl } from '~api/db-url';
+import url from 'url';
+
+import Knex from 'knex';
+
+import config from '~api/config';
 
 function parseConnectionURI(uri = ''): Knex.PgConnectionConfig {
-  const matches = uri.match(
-    /^postgres(ql)?:\/\/(\w+):(.*)@([\w-]+(\.[\w-]+)*)(:([0-9]+))?\/(\w+)$/,
-  );
+  const parsedUrl = url.parse(uri);
 
-  if (!matches) {
-    throw new Error('invalid database string');
+  if (!parsedUrl.protocol || !['postgres:', 'postgresql:'].includes(parsedUrl.protocol)) {
+    throw new Error('Invalid database protocol');
   }
 
-  const [, , user, password, host, , , port, database] = matches;
+  const [user, password] = parsedUrl.auth?.split(':') ?? [undefined, undefined];
+
+  const host = parsedUrl.hostname;
+  const port = parsedUrl.port ?? '5432';
+  const database = parsedUrl.path?.substring(1);
+
+  if (!(host && database)) {
+    throw new Error('Must set database host and name');
+  }
 
   return {
     user,
     password,
     host,
-    port: Number(port) || 5432,
+    port: Number(port),
     database,
   };
 }
 
 export const knexConfig: Knex.Config = {
   client: 'pg',
-  connection: parseConnectionURI(getDbUrl()),
+  connection: parseConnectionURI(config.db.url),
   seeds: {
-    directory: path.resolve(
+    directory: path.join(
       __dirname,
       '../seeds',
       process.env.NODE_ENV === 'test' ? 'test' : 'production',
@@ -37,24 +46,4 @@ export const knexConfig: Knex.Config = {
   },
 };
 
-const db = Knex.default(knexConfig);
-export default db;
-
-export const cleanupTestDb = async (databaseName: string): Promise<void> => {
-  await db.raw(`DROP DATABASE IF EXISTS ${databaseName}`);
-};
-
-export async function getTestDb(databaseName: string): Promise<Knex> {
-  await cleanupTestDb(databaseName);
-  await db.raw(`CREATE DATABASE ${databaseName}`);
-
-  const knexConfigTest: Knex.Config = {
-    ...knexConfig,
-    connection: {
-      ...parseConnectionURI(getDbUrl()),
-      database: databaseName,
-    },
-  };
-
-  return Knex.default(knexConfigTest);
-}
+export const db = Knex(knexConfig);

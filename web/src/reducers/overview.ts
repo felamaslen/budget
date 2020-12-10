@@ -2,12 +2,11 @@ import { compose } from '@typed/compose';
 import addYears from 'date-fns/addYears';
 import endOfMonth from 'date-fns/endOfMonth';
 import isSameMonth from 'date-fns/isSameMonth';
-import setMonth from 'date-fns/setMonth';
-import setYear from 'date-fns/setYear';
 import moize from 'moize';
 import { replaceAtIndex } from 'replace-array';
 
 import {
+  isStandardListAction,
   Action,
   ActionTypeApi,
   ActionTypeLogin,
@@ -15,15 +14,18 @@ import {
   ListItemCreated,
   ListItemUpdated,
   ListItemDeleted,
-  isCalcListAction,
   ActionTypeFunds,
-  isGeneralListAction,
+  FundPricesUpdated,
+  ActionReceiptCreated,
 } from '~client/actions';
 import { IGNORE_EXPENSE_CATEGORIES } from '~client/constants/data';
-import { getMonthDates } from '~client/selectors/overview/common';
-import { Page, PageList, ListCalcItem, OverviewState as State, ReadResponse } from '~client/types';
+import { getMonthDatesList } from '~client/modules/date';
+import { GQL, InitialQuery, NativeDate, PageListStandard, StandardInput } from '~client/types';
 
-export { State };
+export type State = NativeDate<
+  GQL<Exclude<InitialQuery['overview'], null | undefined>>,
+  'startDate' | 'endDate'
+>;
 
 export const initialState: State = {
   startDate: endOfMonth(addYears(new Date(), -1)),
@@ -31,32 +33,29 @@ export const initialState: State = {
   annualisedFundReturns: 0.1,
   homeEquityOld: [],
   cost: {
-    [Page.funds]: [],
-    [Page.income]: [],
-    [Page.bills]: [],
-    [Page.food]: [],
-    [Page.general]: [],
-    [Page.holiday]: [],
-    [Page.social]: [],
+    funds: [],
+    [PageListStandard.Income]: [],
+    [PageListStandard.Bills]: [],
+    [PageListStandard.Food]: [],
+    [PageListStandard.General]: [],
+    [PageListStandard.Holiday]: [],
+    [PageListStandard.Social]: [],
   },
 };
 
-const onRead = (_: State, res: ReadResponse): State => ({
-  startDate: endOfMonth(
-    setMonth(
-      setYear(new Date(), res.overview.startYearMonth[0]),
-      res.overview.startYearMonth[1] - 1,
-    ),
-  ),
-  endDate: endOfMonth(
-    setMonth(setYear(new Date(), res.overview.endYearMonth[0]), res.overview.endYearMonth[1] - 1),
-  ),
-  annualisedFundReturns: res.overview.annualisedFundReturns,
-  homeEquityOld: res.overview.homeEquityOld,
-  cost: res.overview.cost,
-});
+const onRead = (state: State, res: InitialQuery): State =>
+  res.overview
+    ? {
+        ...res.overview,
+        startDate: new Date(res.overview?.startDate),
+        endDate: new Date(res.overview?.endDate),
+      }
+    : state;
 
-const getStateRowDates = moize((state: State): Date[] => getMonthDates({ overview: state }));
+const getStateRowDates = moize(
+  ({ startDate, endDate }: State): Date[] => getMonthDatesList(startDate, endDate),
+  { maxSize: 1 },
+);
 
 const getDateIndex = (state: State, date: Date): number =>
   getStateRowDates(state).findIndex((item) => isSameMonth(date, item));
@@ -64,8 +63,8 @@ const getDateIndex = (state: State, date: Date): number =>
 const setCost = (state: State, date: Date, diff: number) => (last: number[]): number[] =>
   replaceAtIndex(last, getDateIndex(state, date), (value) => value + diff);
 
-const onCreate = (state: State, action: ListItemCreated<ListCalcItem, PageList>): State =>
-  isGeneralListAction(action) && IGNORE_EXPENSE_CATEGORIES.includes(action.delta.category)
+const onCreate = (state: State, action: ListItemCreated<StandardInput, PageListStandard>): State =>
+  action.delta.category && IGNORE_EXPENSE_CATEGORIES.includes(action.delta.category)
     ? state
     : {
         ...state,
@@ -79,33 +78,36 @@ const onCreate = (state: State, action: ListItemCreated<ListCalcItem, PageList>)
         },
       };
 
-const onUpdate = (state: State, action: ListItemUpdated<ListCalcItem, PageList>): State => ({
+const onUpdate = (
+  state: State,
+  action: ListItemUpdated<StandardInput, PageListStandard>,
+): State => ({
   ...state,
   cost: {
     ...state.cost,
     [action.page]: compose(
       setCost(
         state,
-        action.delta.date ?? action.item.date,
-        isGeneralListAction(action) &&
-          action.delta.category &&
-          IGNORE_EXPENSE_CATEGORIES.includes(action.delta.category)
+        action.delta.date ?? action.item?.date ?? new Date(),
+        action.delta.category && IGNORE_EXPENSE_CATEGORIES.includes(action.delta.category)
           ? 0
-          : action.delta.cost ?? action.item.cost,
+          : action.delta.cost ?? action.item?.cost ?? 0,
       ),
       setCost(
         state,
-        action.item.date,
-        isGeneralListAction(action) && IGNORE_EXPENSE_CATEGORIES.includes(action.item.category)
+        action.item?.date ?? new Date(),
+        isStandardListAction(action) &&
+          action.item?.category &&
+          IGNORE_EXPENSE_CATEGORIES.includes(action.item.category)
           ? 0
-          : -action.item.cost,
+          : -(action.item?.cost ?? 0),
       ),
     )(state.cost[action.page]),
   },
 });
 
-const onDelete = (state: State, action: ListItemDeleted<ListCalcItem, PageList>): State =>
-  isGeneralListAction(action) && IGNORE_EXPENSE_CATEGORIES.includes(action.item.category)
+const onDelete = (state: State, action: ListItemDeleted<StandardInput, PageListStandard>): State =>
+  action.item.category && IGNORE_EXPENSE_CATEGORIES.includes(action.item.category)
     ? state
     : {
         ...state,
@@ -119,24 +121,45 @@ const onDelete = (state: State, action: ListItemDeleted<ListCalcItem, PageList>)
         },
       };
 
+const onFundPricesUpdated = (state: State, action: FundPricesUpdated): State => ({
+  ...state,
+  annualisedFundReturns: action.res.annualisedFundReturns,
+  cost: {
+    ...state.cost,
+    funds: action.res.overviewCost,
+  },
+});
+
+const onReceiptCreated = (state: State, action: ActionReceiptCreated): State => ({
+  ...state,
+  cost: action.items.reduce<State['cost']>(
+    (last, item) => ({
+      ...last,
+      [item.page]: setCost(state, new Date(item.date), item.cost)(last[item.page]),
+    }),
+    state.cost,
+  ),
+});
+
 export default function overview(state: State = initialState, action: Action): State {
   switch (action.type) {
     case ActionTypeApi.DataRead:
       return action.res ? onRead(state, action.res) : state;
 
     case ListActionType.Created:
-      return isCalcListAction(action) ? onCreate(state, action) : state;
+      return isStandardListAction(action) && !action.fromServer ? onCreate(state, action) : state;
     case ListActionType.Updated:
-      return isCalcListAction(action) ? onUpdate(state, action) : state;
+      return isStandardListAction(action) && !action.fromServer ? onUpdate(state, action) : state;
     case ListActionType.Deleted:
-      return isCalcListAction(action) ? onDelete(state, action) : state;
+      return isStandardListAction(action) && !action.fromServer ? onDelete(state, action) : state;
 
-    case ActionTypeFunds.Received:
-      return {
-        ...state,
-        annualisedFundReturns:
-          action.res?.data.annualisedFundReturns ?? state.annualisedFundReturns,
-      };
+    case ListActionType.OverviewUpdated:
+      return { ...state, cost: { ...state.cost, [action.page]: action.overviewCost } };
+    case ListActionType.ReceiptCreated:
+      return onReceiptCreated(state, action);
+
+    case ActionTypeFunds.PricesUpdated:
+      return onFundPricesUpdated(state, action);
 
     case ActionTypeLogin.LoggedOut:
     default:

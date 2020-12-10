@@ -1,19 +1,29 @@
+import path from 'path';
 import * as getenv from 'getenv';
 
-import { getDbUrl } from './db-url';
-import { Page, ListCalcCategory } from './types';
-
-if (process.env.NODE_ENV === 'development' || process.env.DOTENV_INJECT === 'true') {
-  // eslint-disable-next-line import/no-extraneous-dependencies, global-require
-  require('dotenv').config();
+if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+  // eslint-disable-next-line
+  require('dotenv').config({
+    path: process.env.NODE_ENV === 'test' ? path.resolve(__dirname, '../../.env.test') : undefined,
+  });
 }
 
 export default {
   db: {
-    url: getDbUrl(),
+    url:
+      process.env.NODE_ENV === 'test'
+        ? getenv.string('DATABASE_URL', 'postgres://docker:docker@localhost:5440/budget_test')
+        : getenv.string('DATABASE_URL'),
+  },
+  redis: {
+    host: getenv.string('REDIS_HOST', 'localhost'),
+    port: getenv.int('REDIS_PORT', 6379),
+    user: getenv.string('REDIS_USERNAME', ''),
+    password: getenv.string('REDIS_PASSWORD', ''),
   },
   app: {
     port: getenv.int('PORT', 3000),
+    heartbeatInterval: getenv.int('HEARTBEAT_INTERVAL', 5000),
   },
   openExchangeRatesApiKey: getenv.string('OPEN_EXCHANGE_RATES_API_KEY', ''),
   scrapeTimeout: getenv.int('SCRAPE_TIMEOUT', 30000),
@@ -33,20 +43,6 @@ export default {
   },
   timeZone: 'Europe/London',
   data: {
-    listCategories: [
-      Page.income,
-      Page.bills,
-      Page.food,
-      Page.general,
-      Page.holiday,
-      Page.social,
-    ] as const,
-    listExtendedCategories: [
-      Page.food,
-      Page.general,
-      Page.holiday,
-      Page.social,
-    ] as ListCalcCategory[],
     currencyUnit: '£',
     listPageLimit: 100,
     funds: {
@@ -58,7 +54,6 @@ export default {
           // eslint-disable-next-line max-len
           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
       },
-      stocksApiKey: getenv.string('STOCKS_API_KEY', ''),
     },
     overview: {
       numLast: 25,

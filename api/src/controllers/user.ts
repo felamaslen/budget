@@ -41,9 +41,8 @@ export const attemptLogin = async (
   ip: string,
   pin: number,
   now = new Date(),
-  databaseName?: string,
 ): Promise<LoginResponse> => {
-  const result = await getPool(databaseName).transaction(
+  const result = await getPool().transaction(
     async (
       db,
     ): Promise<{

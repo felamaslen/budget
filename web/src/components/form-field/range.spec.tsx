@@ -11,8 +11,8 @@ describe('<FormFieldRange />', () => {
 
   it('should render a range input with the value', () => {
     expect.assertions(2);
-    const { getByDisplayValue } = render(<FormFieldRange {...props} />);
-    const input = getByDisplayValue('103.45') as HTMLInputElement;
+    const { getByRole } = render(<FormFieldRange {...props} />);
+    const input = getByRole('slider') as HTMLInputElement;
 
     expect(input).toBeInTheDocument();
     expect(input.type).toBe('range');
@@ -20,8 +20,8 @@ describe('<FormFieldRange />', () => {
 
   it('should call onChange when changing the value', () => {
     expect.assertions(2);
-    const { getByDisplayValue } = render(<FormFieldRange {...props} />);
-    const input = getByDisplayValue('103.45') as HTMLInputElement;
+    const { getByRole } = render(<FormFieldRange {...props} />);
+    const input = getByRole('slider') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: '10.93' } });
 

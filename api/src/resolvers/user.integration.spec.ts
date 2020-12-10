@@ -3,16 +3,13 @@ import addDays from 'date-fns/addDays';
 import sinon from 'sinon';
 
 import config from '~api/config';
-import { createServer, App } from '~api/test-utils/create-server';
+import { App, getTestApp } from '~api/test-utils/create-server';
 import { Mutation, MutationLoginArgs, Query } from '~api/types';
 
 describe('User resolver', () => {
   let app: App;
   beforeAll(async () => {
-    app = await createServer('user');
-  });
-  afterAll(async () => {
-    await app.cleanup();
+    app = await getTestApp();
   });
 
   describe('query WhoAmI', () => {
@@ -35,7 +32,7 @@ describe('User resolver', () => {
 
         expect(res.data?.whoami).toStrictEqual(
           expect.objectContaining({
-            uid: 1,
+            uid: app.uid,
             name: 'test-user',
           }),
         );

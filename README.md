@@ -73,6 +73,8 @@ Note that the development variables are optional on a production environment.
 
 - `PORT`: the port to listen on
 - `DATABASE_URL`: URI for connecting to the database
+- `REDIS_HOST`: hostname for redis
+- `REDIS_PORT`: custom port for redis (defaults to 6379)
 - `DEFAULT_PIN`: the PIN for the first generated user
 - `BIRTH_DATE`: the (ISO) date of birth (for use in FTI calculation)
 - `IP_BAN_TIME`: how long to ban users for if they make too many bad login attempts
@@ -81,7 +83,3 @@ Note that the development variables are optional on a production environment.
 - `PIE_TOLERANCE`: minimum slice of pie charts to include on list data
 - `PIE_DETAIL`:  maximum number of pie slices to return on list data
 - `FUND_RESOLUTION`: detail to include on fund price graph
-- `DO_STOCKS_LIST`: boolean to toggle rendering of the fund holdings list
-- `FAKE_STOCK_PRICES`: boolean to toggle mock stock prices API
-- `STOCKS_API_KEY`: API key to access realtime stock price data (TODO)
-- `STOCK_INDICES`: extra indices to track on the stocks list

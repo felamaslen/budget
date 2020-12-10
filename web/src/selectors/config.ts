@@ -1,4 +1,3 @@
 import { State } from '~client/reducers';
-import { AppConfig } from '~client/types';
 
-export const getAppConfig = (state: State): AppConfig => state.api.appConfig;
+export const getAppConfig = (state: State): State['api']['appConfig'] => state.api.appConfig;

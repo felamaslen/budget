@@ -75,9 +75,8 @@ export const Button = styled.button<{
     padding: 5px 12px 6px;
     flex-grow: 0;
     width: auto;
-    box-shadow: inset 0px 1px 0px 0px ${colors.button.shadow};
-    background: linear-gradient(to bottom, ${colors.button.bg2} 5%, ${colors.button.bg1} 100%);
-    background-color: ${colors.button.bg2};
+    box-shadow: inset 0px 1px 0px 0px ${colors.shadow.light};
+    background: ${colors.button.main};
     border: 1px solid ${colors.button.border};
     border-radius: 0;
     cursor: pointer;
@@ -90,20 +89,12 @@ export const Button = styled.button<{
     text-transform: none;
     z-index: 4;
 
-    &:hover {
-      background-color: ${colors.button.bg1};
-      background-image: linear-gradient(
-        to bottom,
-        ${colors.button.bg1} 5%,
-        ${colors.button.bg2} 100%
-      );
+    &:hover,
+    &:focus {
+      background: ${colors.button.focus};
     }
     &:active {
-      top: 1px;
-      background: $color-button-active;
-    }
-    &:focus {
-      box-shadow: 0 2px 3px ${colors.shadow.light};
+      background: ${colors.button.active};
     }
     &:disabled {
       background: ${colors.button.disabled};

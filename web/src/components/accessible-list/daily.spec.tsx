@@ -6,19 +6,32 @@ import createStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 
 import { AccessibleListDaily } from './daily';
-import { listItemUpdated } from '~client/actions';
+import * as listMutationHooks from '~client/hooks/mutations/list';
 import { State } from '~client/reducers';
 import { DailyState } from '~client/reducers/list';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
-import { Page, ListCalcItem } from '~client/types';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { ListItemStandardNative as ListItemStandard, PageListExtended } from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
 }));
 
 describe('<AccessibleListDaily />', () => {
-  const page = Page.food;
+  const onCreate = jest.fn();
+  const onUpdate = jest.fn();
+  const onDelete = jest.fn();
+
+  beforeEach(() => {
+    jest.spyOn(listMutationHooks, 'useListCrudStandard').mockReturnValue({
+      onCreate,
+      onUpdate,
+      onDelete,
+    });
+  });
+
+  const page = PageListExtended.Food;
 
   const state: State = {
     ...testState,
@@ -69,7 +82,9 @@ describe('<AccessibleListDaily />', () => {
     const store = createStore<State>()(state);
     const renderResult = render(
       <Provider store={store}>
-        <AccessibleListDaily page={page} />
+        <GQLProviderMock>
+          <AccessibleListDaily page={page} />
+        </GQLProviderMock>
       </Provider>,
     );
 
@@ -150,10 +165,10 @@ describe('<AccessibleListDaily />', () => {
   });
 
   describe('if a custom category field name is given', () => {
-    const customPage = 'myPage';
+    const customPage = PageListExtended.General;
     const customCategory = 'myCategory';
 
-    type CustomItem = ListCalcItem & {
+    type CustomItem = ListItemStandard & {
       category: string;
       shop: string;
     };
@@ -187,10 +202,12 @@ describe('<AccessibleListDaily />', () => {
       const store = createStore<CustomState>()(customState);
       const renderResult = render(
         <Provider store={store}>
-          <AccessibleListDaily<typeof customPage>
-            page={customPage}
-            categoryLabel={customCategory}
-          />
+          <GQLProviderMock>
+            <AccessibleListDaily<typeof customPage>
+              page={customPage}
+              categoryLabel={customCategory}
+            />
+          </GQLProviderMock>
         </Provider>,
       );
 
@@ -203,9 +220,9 @@ describe('<AccessibleListDaily />', () => {
       expect(getByDisplayValue('category one')).toBeInTheDocument();
     });
 
-    it('should dispatch the right update action', () => {
-      expect.assertions(1);
-      const { store, getByDisplayValue } = setupCustom();
+    it('should call onUpdate with the right values', () => {
+      expect.assertions(2);
+      const { getByDisplayValue } = setupCustom();
       const input = getByDisplayValue('category one') as HTMLInputElement;
 
       act(() => {
@@ -218,11 +235,10 @@ describe('<AccessibleListDaily />', () => {
         fireEvent.blur(input);
       });
 
-      const expectedAction = listItemUpdated<CustomItem, typeof customPage>(customPage)(
+      expect(onUpdate).toHaveBeenCalledTimes(1);
+      expect(onUpdate).toHaveBeenCalledWith(
         numericHash('id-1'),
-        {
-          category: 'updated category',
-        },
+        { category: 'updated category' },
         {
           id: numericHash('id-1'),
           date: new Date('2020-04-17'),
@@ -232,8 +248,6 @@ describe('<AccessibleListDaily />', () => {
           shop: 'shop one',
         },
       );
-
-      expect(store.getActions()).toStrictEqual([expect.objectContaining(expectedAction)]);
     });
   });
 

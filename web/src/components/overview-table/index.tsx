@@ -12,26 +12,32 @@ import { breakpointBase } from '~client/styled/mixins';
 import { ButtonAdd } from '~client/styled/shared';
 import { breakpoints } from '~client/styled/variables';
 import {
-  OverviewTable as OverviewTableRows,
   OverviewHeader,
+  OverviewTable as OverviewTableRows,
   OverviewTableColumn,
-  Page,
+  PageListStandard,
+  PageNonStandard,
 } from '~client/types';
 
 type ColumnsProps = { columns: OverviewTableColumn[] };
 
-const columnsMobile: OverviewHeader[] = [Page.income, 'spending', 'netWorthCombined'];
+const columnsMobile: OverviewHeader[] = [PageListStandard.Income, 'spending', 'netWorthCombined'];
 
-const columnsRestricted: OverviewHeader[] = [Page.income, 'spending', 'net', 'netWorthCombined'];
+const columnsRestricted: OverviewHeader[] = [
+  PageListStandard.Income,
+  'spending',
+  'net',
+  'netWorthCombined',
+];
 
 const columnsFull: OverviewHeader[] = [
-  Page.funds,
-  Page.bills,
-  Page.food,
-  Page.general,
-  Page.holiday,
-  Page.social,
-  Page.income,
+  PageNonStandard.Funds,
+  PageListStandard.Bills,
+  PageListStandard.Food,
+  PageListStandard.General,
+  PageListStandard.Holiday,
+  PageListStandard.Social,
+  PageListStandard.Income,
   'spending',
   'net',
   'netWorthCombined',
