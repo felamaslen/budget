@@ -17,9 +17,10 @@ if (require.main === module) {
   run()
     .then(() => {
       getPool().end();
-      process.exit(1);
+      process.exit();
     })
     .catch((err: Error) => {
       logger.error(err.stack);
+      process.exit(1);
     });
 }
