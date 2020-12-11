@@ -165,8 +165,17 @@ const defaultState: State = {
   description: '',
 };
 
+const validateQuery = (query: unknown | Query): query is Query =>
+  typeof query === 'object' &&
+  query !== null &&
+  Object.keys(query).length === 3 &&
+  Object.values(AnalysisPeriod).includes(Reflect.get(query, 'period')) &&
+  Object.values(AnalysisGroupBy).includes(Reflect.get(query, 'groupBy')) &&
+  typeof Reflect.get(query, 'page') === 'number' &&
+  (Reflect.get(query, 'page') as number) >= 0;
+
 export function useAnalysisData(): [Query, (query: Partial<Query>) => void, State, boolean] {
-  const [query, setQuery] = usePersistentState<Query>(defaultQuery, keyQuery);
+  const [query, setQuery] = usePersistentState<Query>(defaultQuery, keyQuery, validateQuery);
   const onRequest = useCallback(
     (delta: Partial<Query>): void => {
       setQuery((last: Query) => ({ ...last, ...delta }));
