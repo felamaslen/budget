@@ -1,5 +1,20 @@
 version: "2"
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: budget_nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certificates:/etc/certificates
+    links:
+      - budget:budget
+    networks:
+      - net_budget_dev
+    ports:
+      - ${PORT}:80
+      - ${PORT_SECURE}:443
+    env_file:
+      - .env
   budget:
     container_name: budget
     build:
@@ -14,8 +29,9 @@ services:
       - db:db
     networks:
       - net_budget_dev
+    expose:
+      - 3000
     ports:
-      - "${PORT}:3000"
       - 9229:9229
     env_file:
       - .env
