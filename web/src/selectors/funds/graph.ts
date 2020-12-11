@@ -144,20 +144,12 @@ export const getFundLines = moize(
       getCacheTimes,
       getHiddenBecauseSold(today),
       getReturnsById(today),
-      (
-        fundItems,
-        cacheTimes,
-        hiddenBecauseSold,
-        fundsWithReturns,
-      ): {
-        [mode in Mode]: FundLine[];
-      } => {
+      (fundItems, cacheTimes, hiddenBecauseSold, fundsWithReturns): Record<Mode, FundLine[]> => {
         const getFundLinesByMode = (mode: Mode): FundLine[] =>
           fundItems
             .filter(({ id }) => !hiddenBecauseSold[id])
             .reduce<FundLine[]>((last, { id, color }) => {
               const lines = getFundLineProcessed(fundsWithReturns, cacheTimes, mode, id);
-
               return [...last, ...lines.map((data) => ({ id, color, data }))];
             }, []);
 
@@ -165,6 +157,7 @@ export const getFundLines = moize(
           [Mode.ROI]: getFundLinesByMode(Mode.ROI),
           [Mode.Value]: getFundLinesByMode(Mode.Value),
           [Mode.Price]: getFundLinesByMode(Mode.Price),
+          [Mode.PriceNormalised]: getFundLinesByMode(Mode.PriceNormalised),
         };
       },
     ),

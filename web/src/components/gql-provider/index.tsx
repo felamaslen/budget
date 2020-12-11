@@ -7,7 +7,7 @@ import { Spinner } from '~client/components/spinner';
 import { ApiContext } from '~client/hooks';
 
 const isSecure = window.location.protocol === 'https:';
-const wsUrl = `${isSecure ? 'wss' : 'ws'}://${window.location.host}/graphql`;
+const wsUrl = `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
 
 type LoggedInProps = { apiKey: string };
 

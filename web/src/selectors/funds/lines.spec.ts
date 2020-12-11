@@ -8,6 +8,7 @@ import {
   getFundLine,
   getFundLineProcessed,
   FundsWithReturns,
+  getFundLinePriceNormalised,
 } from './lines';
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 
@@ -99,7 +100,7 @@ describe('Funds selectors / lines', () => {
     });
   });
 
-  describe(getFundLineROI.name, () => {
+  describe('getFundLineROI', () => {
     const roiId1 = [
       (100 * (100 * 34 - 3100)) / 3100,
       (100 * (102 * 34 - 3100)) / 3100,
@@ -179,6 +180,89 @@ describe('Funds selectors / lines', () => {
     });
   });
 
+  describe('getFundLinePriceNormalised', () => {
+    const priceId1 = [100, 102, 103];
+    const priceId2 = [100, (961 / 954) * 100];
+    const priceId3 = [100];
+
+    it.each`
+      id     | expectedResult
+      ${id1} | ${priceId1}
+      ${id2} | ${priceId2}
+      ${id3} | ${priceId3}
+    `('should get a normalised list of prices for id $id', ({ id, expectedResult }) => {
+      expect.assertions(expectedResult.length + 2);
+
+      const result = getFundLinePriceNormalised(fundsWithReturns, id);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].values).toHaveLength(expectedResult.length);
+      result[0].values.forEach((value, index) => expect(value).toBeCloseTo(expectedResult[index]));
+    });
+
+    describe('for funds which were sold at a profit and re-bought', () => {
+      const idRebought = numericHash('my-rebought-fund');
+      const fundsWithReturnsRebought: FundsWithReturns = {
+        [idRebought]: [
+          {
+            startIndex: 0,
+            values: [
+              {
+                price: 90,
+                units: 105,
+                cost: 490000,
+                realised: 0,
+              },
+            ],
+          },
+          {
+            startIndex: 2,
+            values: [
+              {
+                price: 107,
+                units: 20,
+                cost: 250000,
+                realised: 670000,
+              },
+              {
+                price: 83,
+                units: 20,
+                cost: 250000,
+                realised: 670000,
+              },
+            ],
+          },
+        ],
+      };
+
+      it('should return multiple lines', () => {
+        expect.assertions(2);
+        const result = getFundLinePriceNormalised(fundsWithReturnsRebought, idRebought);
+        expect(result).toStrictEqual([
+          { startIndex: 0, values: [expect.any(Number)] },
+          { startIndex: 2, values: [expect.any(Number), expect.any(Number)] },
+        ]);
+        expect(result).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "startIndex": 0,
+              "values": Array [
+                100,
+              ],
+            },
+            Object {
+              "startIndex": 2,
+              "values": Array [
+                118.88888888888889,
+                92.22222222222223,
+              ],
+            },
+          ]
+        `);
+      });
+    });
+  });
+
   describe(getOverallLine.name, () => {
     const overallAbsolute = getOverallAbsolute(fundsWithReturns);
     const overallROI = getOverallROI(fundsWithReturns);
@@ -198,6 +282,13 @@ describe('Funds selectors / lines', () => {
   });
 
   describe(getFundLine.name, () => {
+    const normalisedLine = expect.arrayContaining([
+      {
+        startIndex: expect.any(Number),
+        values: expect.arrayContaining([expect.any(Number)]),
+      },
+    ]);
+
     describe.each`
       id     | priceLine
       ${id1} | ${[{ startIndex: 0, values: [100, 102, 103] }]}
@@ -205,12 +296,16 @@ describe('Funds selectors / lines', () => {
       ${id3} | ${[{ startIndex: 1, values: [763] }]}
     `('for id $id', ({ id, priceLine }) => {
       describe.each`
-        description   | mode          | resultDescription     | getExpectedResult
-        ${'absolute'} | ${Mode.Value} | ${'an absolute line'} | ${getFundLineAbsolute}
-        ${'ROI'}      | ${Mode.ROI}   | ${'an ROI line'}      | ${getFundLineROI}
-        ${'price'}    | ${Mode.Price} | ${'a list of prices'} | ${(): number[] => priceLine}
+        description     | mode                    | resultDescription     | getExpectedResult
+        ${'absolute'}   | ${Mode.Value}           | ${'an absolute line'} | ${getFundLineAbsolute}
+        ${'ROI'}        | ${Mode.ROI}             | ${'an ROI line'}      | ${getFundLineROI}
+        ${'price'}      | ${Mode.Price}           | ${'a list of prices'} | ${priceLine}
+        ${'normalised'} | ${Mode.PriceNormalised} | ${'a list of values'} | ${normalisedLine}
       `('if the mode is $description', ({ mode, resultDescription, getExpectedResult }) => {
-        const expectedResult = getExpectedResult(fundsWithReturns, id);
+        const expectedResult =
+          typeof getExpectedResult === 'function'
+            ? getExpectedResult(fundsWithReturns, id)
+            : getExpectedResult;
 
         it(`should return ${resultDescription}`, () => {
           expect.assertions(1);

@@ -23,7 +23,12 @@ import {
   GRAPH_FUNDS_NUM_TICKS,
   Mode,
 } from '~client/constants/graph';
-import { TodayContext, usePersistentStateStoreEffect, useUpdateEffect } from '~client/hooks';
+import {
+  TodayContext,
+  usePersistentState,
+  usePersistentStateStoreEffect,
+  useUpdateEffect,
+} from '~client/hooks';
 import { lastInArray } from '~client/modules/data';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
@@ -74,7 +79,7 @@ function makeBeforeLines({
   return BeforeLines;
 }
 
-const modeListAll: Mode[] = [Mode.ROI, Mode.Value, Mode.Price];
+const modeListAll: Mode[] = [Mode.ROI, Mode.Value, Mode.Price, Mode.PriceNormalised];
 
 function useMode(isMobile: boolean): [Mode[], Mode, (nextMode: Mode) => void] {
   const modeList = useMemo<Mode[]>(
@@ -82,7 +87,7 @@ function useMode(isMobile: boolean): [Mode[], Mode, (nextMode: Mode) => void] {
     [isMobile],
   );
 
-  const [mode, setMode] = useState<Mode>(modeList[0]);
+  const [mode, setMode] = usePersistentState<Mode>(modeList[0], 'graph_funds_mode');
 
   return [modeList, mode, setMode];
 }

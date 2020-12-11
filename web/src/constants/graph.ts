@@ -48,6 +48,7 @@ export const enum Mode {
   ROI = 'ROI',
   Value = 'Value',
   Price = 'Price',
+  PriceNormalised = 'Price (normalised)',
 }
 
 export const fundPeriods: Record<string, PeriodOption> = {

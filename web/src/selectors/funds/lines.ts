@@ -121,15 +121,14 @@ function reduceOverallLine(
   };
 }
 
-function reduceSingleLine(
+function mapSingleLine(
   mapper: ReturnMapper,
 ): (fundsWithReturns: FundsWithReturns, id: Id) => FundGroup[] {
-  return (fundsWithReturns, id): FundGroup[] => {
-    return fundsWithReturns[id].map(({ values, startIndex }) => ({
+  return (fundsWithReturns, id): FundGroup[] =>
+    fundsWithReturns[id].map(({ values, startIndex }) => ({
       startIndex,
       values: values.map(mapper),
     }));
-  };
 }
 
 const getValue = ({ units, price }: Return): number => units * price;
@@ -147,13 +146,22 @@ export const getOverallAbsolute = reduceOverallLine([reduceValue], Math.round);
 
 export const getOverallROI = reduceOverallLine([reduceCost, reduceROI], roundROI);
 
-export const getFundLineAbsolute = reduceSingleLine(getValue);
+export const getFundLineAbsolute = mapSingleLine(getValue);
 
-export const getFundLineROI = reduceSingleLine((returns) =>
+export const getFundLineROI = mapSingleLine((returns) =>
   roundROI(getROI(getCost(returns), getRealisedValue(returns))),
 );
 
-export const getFundLinePrice = reduceSingleLine((returns) => returns.price);
+export const getFundLinePrice = mapSingleLine((returns) => returns.price);
+
+export const getFundLinePriceNormalised = (
+  fundsWithReturns: FundsWithReturns,
+  id: Id,
+): FundGroup[] =>
+  fundsWithReturns[id].map(({ values, startIndex }) => ({
+    startIndex,
+    values: values.map(({ price }) => (price * 100) / fundsWithReturns[id][0].values[0].price),
+  }));
 
 export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): FundGroup[] {
   if (mode === Mode.Value) {
@@ -166,17 +174,18 @@ export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): 
 }
 
 export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: Id): FundGroup[] {
-  if (mode === Mode.Value) {
-    return getFundLineAbsolute(fundsWithReturns, id);
+  switch (mode) {
+    case Mode.Value:
+      return getFundLineAbsolute(fundsWithReturns, id);
+    case Mode.ROI:
+      return getFundLineROI(fundsWithReturns, id);
+    case Mode.Price:
+      return getFundLinePrice(fundsWithReturns, id);
+    case Mode.PriceNormalised:
+      return getFundLinePriceNormalised(fundsWithReturns, id);
+    default:
+      return [];
   }
-  if (mode === Mode.ROI) {
-    return getFundLineROI(fundsWithReturns, id);
-  }
-  if (mode === Mode.Price) {
-    return getFundLinePrice(fundsWithReturns, id);
-  }
-
-  return [];
 }
 
 export function getFundLineProcessed(

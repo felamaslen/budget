@@ -3,13 +3,13 @@ import path from 'path';
 
 import { getUnixTime } from 'date-fns';
 import { Express, Request } from 'express';
+import { graphqlHTTP } from 'express-graphql';
 import fs from 'fs-extra';
 import { execute, subscribe } from 'graphql';
 import { Context } from 'graphql-ws/lib/server';
 import { useServer, Extra } from 'graphql-ws/lib/use/ws';
 import ws from 'ws';
 
-import { graphqlMiddleware } from './middleware';
 import { pubsub, PubSubTopic } from './pubsub';
 import { getSchema } from './schema';
 import config from '~api/config';
@@ -47,15 +47,21 @@ function getWSContext(ctx: Context<Extra>): ExecutionContext {
 export async function setupGraphQL(app: Express, server: Server): Promise<() => void> {
   const schema = await fs.readFile(path.resolve(__dirname, '../../introspection.json'));
 
-  app.use('/graphql', graphqlMiddleware());
+  app.use(
+    '/graphql',
+    graphqlHTTP({
+      schema: getSchema(),
+      graphiql: process.env.NODE_ENV !== 'production',
+    }),
+  );
 
-  app.get('/graphql-introspection', authMiddleware(), (_, res) => {
+  app.get('/introspection', authMiddleware(), (_, res) => {
     res.send(schema);
   });
 
   const wsServer = new ws.Server({
     server,
-    path: '/graphql',
+    path: '/subscriptions',
   });
 
   return (): void => {
