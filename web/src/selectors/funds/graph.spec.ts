@@ -111,6 +111,13 @@ describe('Fund selectors / graph', () => {
             data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
           }),
         ]),
+        [Mode.PriceNormalised]: expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            color: expect.stringMatching(/^#[0-9a-f]{6}$/),
+            data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
+          }),
+        ]),
       });
     });
 
