@@ -10,7 +10,7 @@ spec:
     - name: http
       protocol: TCP
       port: 8080
-      targetPort: 80
+      targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,7 +34,7 @@ spec:
         - name: budget
           image: docker.fela.space/budget:0
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: budget
@@ -51,13 +51,13 @@ spec:
             periodSeconds: 5
             httpGet:
               path: /liveness
-              port: 80
+              port: 8080
           readinessProbe:
             initialDelaySeconds: 5
             periodSeconds: 5
             httpGet:
               path: /readiness
-              port: 80
+              port: 8080
 ---
 apiVersion: v1
 kind: Service

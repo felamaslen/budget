@@ -178,7 +178,7 @@ function setup_configmap {
   echo "Creating main configmap..."
 
   cat <<EOF > budget.env
-PORT=80
+PORT=8080
 ROARR_LOG=false
 DEFAULT_PIN=$DEFAULT_PIN
 DEFAULT_FUND_PERIOD=year5
