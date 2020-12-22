@@ -1,7 +1,7 @@
 import http, { Server } from 'http';
 import path from 'path';
 import bodyParser from 'body-parser';
-import express from 'express';
+import express, { Request } from 'express';
 import webLogger from 'morgan';
 import passport from 'passport';
 import serveStatic from 'serve-static';
@@ -95,7 +95,10 @@ function setupLogging(app: express.Express): void {
 
     app.use(
       webLogger('common', {
-        skip: (_: unknown, res: express.Response) => res.statusCode >= 400,
+        skip: (req: Request, res: express.Response) =>
+          req.url.startsWith('/liveness') ||
+          req.url.startsWith('/readiness') ||
+          res.statusCode >= 400,
         stream: process.stdout,
       }),
     );

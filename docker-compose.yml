@@ -23,8 +23,8 @@ services:
     depends_on:
       - base
     volumes:
-      - .:/opt/app
-      - /opt/app/node_modules
+      - .:/app
+      - /app/node_modules
     links:
       - db:db
     networks:
