@@ -12,24 +12,6 @@ spec:
       port: 8080
       targetPort: 80
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: budget-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-spec:
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: budget
-                port:
-                  number: 80
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
