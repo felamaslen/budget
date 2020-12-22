@@ -222,9 +222,8 @@ spec:
             - name: budget
               image: docker.fela.space/budget:0
               args:
-                - node
-                - api/build/scripts/scrape-funds
-                - --prices
+                - yarn
+                - scrape_funds
               envFrom:
                 - configMapRef:
                     name: budget

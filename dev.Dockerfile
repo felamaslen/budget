@@ -1,12 +1,15 @@
 FROM docker.fela.space/budget_base:latest
 
-WORKDIR /opt/app
+RUN mkdir /app
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown appuser:appgroup /app
+USER appuser
+WORKDIR /app
 
-COPY package.json ./
-COPY yarn.lock ./
+COPY --chown=appuser:appgroup package.json ./
+COPY --chown=appuser:appgroup yarn.lock ./
 
 ENV NODE_ENV=development
-ENV PATH="/opt/app/node_modules/.bin:${PATH}"
+ENV PATH="/app/node_modules/.bin:${PATH}"
 
 RUN yarn install --frozen-lockfile
 
