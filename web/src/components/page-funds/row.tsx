@@ -18,14 +18,13 @@ export const FundRow: React.FC<Props> = ({
   isMobile,
   item,
   children,
-  name = 'missing-name',
   isSold = false,
   prices,
   gain,
 }) => {
   const today = useContext(TodayContext);
   const viewSoldFunds = useSelector(getViewSoldFunds);
-  const latestValue = useSelector(getFundsCachedValue(today));
+  const latestValue = useSelector(getFundsCachedValue.today(today));
 
   const { onUpdate } = useListCrudFunds();
 
@@ -60,7 +59,7 @@ export const FundRow: React.FC<Props> = ({
   return (
     <Styled.FundRow isSold={isSold} odd={true}>
       {children}
-      {!!prices && <GraphFundItem name={name} sold={isSold} values={prices} />}
+      {!!prices && <GraphFundItem name={item.item} sold={isSold} values={prices} />}
       <FundGainInfo isSold={isSold} rowGains={gain} />
       <Styled.TargetAllocation>
         <FormFieldNumber

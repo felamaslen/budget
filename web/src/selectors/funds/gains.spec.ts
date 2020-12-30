@@ -17,6 +17,8 @@ describe('Funds selectors / gains', () => {
     prices: testPrices,
   };
 
+  const testNow = new Date();
+
   const stateWithGains: State = {
     ...testState,
     [PageNonStandard.Funds]: {
@@ -59,6 +61,7 @@ describe('Funds selectors / gains', () => {
           },
         ],
       },
+      todayPrices: {},
     },
   };
 
@@ -240,7 +243,7 @@ describe('Funds selectors / gains', () => {
       const costLatest = 1199 + 98503 - 130;
       const costPrev = 1199 + 98503;
 
-      expect(getDayGainAbs(stateWithGains)).toBeCloseTo(
+      expect(getDayGainAbs.now(testNow)(stateWithGains)).toBeCloseTo(
         valueLatest - valuePrev - (costLatest - costPrev),
       );
     });
@@ -271,7 +274,7 @@ describe('Funds selectors / gains', () => {
         const costLatest = 1199 + 98503 - 130;
         const costPrev = 1199 + 98503;
 
-        expect(getDayGainAbs(stateWithMissingLatestPrice)).toBeCloseTo(
+        expect(getDayGainAbs.now(testNow)(stateWithMissingLatestPrice)).toBeCloseTo(
           valueLatest - valuePrev - (costLatest - costPrev),
         );
       });
@@ -289,7 +292,7 @@ describe('Funds selectors / gains', () => {
       // on the second cache item, the 2019-10-27 transaction is in the future
       const valuePrev = 345 * 109 + 167 * 57.9;
 
-      expect(getDayGain(stateWithGains)).toBeCloseTo(
+      expect(getDayGain.now(testNow)(stateWithGains)).toBeCloseTo(
         (valueLatest - valuePrev - (costLatest - costPrev)) / valuePrev,
       );
     });
@@ -313,7 +316,7 @@ describe('Funds selectors / gains', () => {
 
       it('should not be NaN', () => {
         expect.assertions(1);
-        const result = getDayGain(stateOne);
+        const result = getDayGain.now(testNow)(stateOne);
         expect(result).not.toBeNaN();
       });
     });
@@ -347,7 +350,7 @@ describe('Funds selectors / gains', () => {
 
       it('should return 0', () => {
         expect.assertions(1);
-        expect(getDayGain(stateNone)).toBe(0);
+        expect(getDayGain.now(testNow)(stateNone)).toBe(0);
       });
     });
 
@@ -382,7 +385,7 @@ describe('Funds selectors / gains', () => {
 
       it('should return 0', () => {
         expect.assertions(1);
-        expect(getDayGain(stateNoCache)).toBe(0);
+        expect(getDayGain.now(testNow)(stateNoCache)).toBe(0);
       });
     });
 
@@ -432,7 +435,7 @@ describe('Funds selectors / gains', () => {
 
       it('should return 0', () => {
         expect.assertions(1);
-        expect(getDayGain(stateOneItem)).toBe(0);
+        expect(getDayGain.now(testNow)(stateOneItem)).toBe(0);
       });
     });
   });

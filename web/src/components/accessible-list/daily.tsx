@@ -81,14 +81,12 @@ const DailyHeader = <P extends PageListCost, MK extends keyof ListItemExtended>(
 
 const DailyRow: React.FC<
   { isMobile: boolean; style?: CSSProperties; odd?: boolean } & Partial<DailyRecord & ExtraProps>
-> = ({ style, odd, isMobile, dailyTotal, isFuture, children }) => {
-  return (
-    <StandardRow style={style} odd={odd} isFuture={isFuture}>
-      {children}
-      {!isMobile && !!dailyTotal && <DailyTotal>{formatCurrency(dailyTotal)}</DailyTotal>}
-    </StandardRow>
-  );
-};
+> = ({ style, odd, isMobile, dailyTotal, isFuture, children }) => (
+  <StandardRow style={style} odd={odd} isFuture={isFuture}>
+    {children}
+    {!isMobile && !!dailyTotal && <DailyTotal>{formatCurrency(dailyTotal)}</DailyTotal>}
+  </StandardRow>
+);
 
 const fields: DailyFields = {
   date: standardFields.date,

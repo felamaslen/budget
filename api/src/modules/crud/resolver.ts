@@ -67,8 +67,8 @@ type ReadArgs = { id?: Maybe<number> };
 
 export const readResolver = <J extends Item>(
   controller: Pick<CrudControllerFactory<J>, 'read'>,
-): Resolver<ReadArgs, J[]> => {
-  return genericAuthDbResolver<ReadArgs, J[]>(async (db, uid, args) => {
+): Resolver<ReadArgs, J[]> =>
+  genericAuthDbResolver<ReadArgs, J[]>(async (db, uid, args) => {
     try {
       const results = await controller.read(db, uid, args.id ?? undefined);
       return results;
@@ -79,7 +79,6 @@ export const readResolver = <J extends Item>(
       throw err;
     }
   });
-};
 
 type UpdateArgs<J> = { id: number; input: Create<J> };
 

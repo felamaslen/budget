@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 import { useField } from './field';
 
-describe('Field hook', () => {
+describe(useField.name, () => {
   type Props = {
     value: string;
     onChange: (value: string) => void;

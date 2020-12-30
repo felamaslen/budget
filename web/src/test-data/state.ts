@@ -263,6 +263,7 @@ export const testState: State = {
     startTime: funds.testStartTime,
     cacheTimes: funds.testCacheTimes,
     prices: funds.testPrices,
+    todayPrices: {},
   },
   [PageListStandard.Income]: {
     items: [],

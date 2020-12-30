@@ -124,6 +124,7 @@ export const makeInlineField = <V, P extends Record<string, unknown> = Record<st
     invalid,
     small,
     label,
+    id,
     inputProps = {},
     value,
     onChange: onChangeInput,
@@ -153,6 +154,7 @@ export const makeInlineField = <V, P extends Record<string, unknown> = Record<st
         <input
           ref={inputRef}
           aria-label={label}
+          id={id}
           {...inputProps}
           type="text"
           value={inputValue ?? ''}

@@ -76,10 +76,22 @@ export const fundsSchema = gql`
     deltas: [TargetDeltaResponse!]
   }
 
+  type StockPrice {
+    code: String!
+    price: NonNegativeFloat
+  }
+
+  type StockPricesResponse {
+    error: String
+    prices: [StockPrice!]!
+  }
+
   extend type Query {
     readFunds: ReadFundsResponse
     cashAllocationTarget: NonNegativeInt
     fundHistory(period: FundPeriod, length: NonNegativeInt): FundHistory
+
+    stockPrices(codes: [String!]!): StockPricesResponse
   }
 
   extend type Mutation {

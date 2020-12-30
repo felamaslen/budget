@@ -1,7 +1,7 @@
 import { compose } from '@typed/compose';
-import ColorHash from 'color-hash';
 import moize from 'moize';
 import { parseToRgb, rgb, setLightness, setSaturation } from 'polished';
+import numericHash from 'string-hash';
 
 import { OVERVIEW_COLUMNS, isPage } from '~client/constants/data';
 import { arrayAverage } from '~client/modules/data';
@@ -91,14 +91,31 @@ export const pageColor = moize((color: string): string =>
   compose(setLightness(0.9), setSaturation(0.8))(color),
 );
 
-const colorHash = new ColorHash({
-  lightness: 0.3,
-  saturation: 1,
-});
+const hashColors = [
+  rgb(216, 27, 96),
+  rgb(142, 36, 170),
+  rgb(57, 73, 171),
+  rgb(3, 155, 229),
+  rgb(0, 172, 193),
+  rgb(251, 140, 0),
+  rgb(0, 137, 123),
+  rgb(30, 136, 229),
+  rgb(67, 160, 71),
+  rgb(124, 179, 66),
+  rgb(192, 202, 51),
+  rgb(255, 87, 51),
+  rgb(255, 179, 0),
+  rgb(94, 53, 177),
+  rgb(244, 81, 30),
+  rgb(253, 216, 53),
+  rgb(109, 76, 65),
+];
 
 export const colorKey = moize((item: string): string => {
-  const [red, green, blue] = colorHash.rgb(item);
-  return rgb(red, green, blue);
+  const hash = numericHash(item);
+  const color = hashColors[hash % hashColors.length];
+  const lightness = 0.2 + (hash % 3) / 10;
+  return setLightness(lightness)(color);
 });
 
 export function averageColor(values: string[]): string {

@@ -99,7 +99,7 @@ describe('color module', () => {
   describe('colorKey', () => {
     it('should return a colour from a string', () => {
       expect.assertions(1);
-      expect(colorKey('foo')).toMatchInlineSnapshot(`"#429900"`);
+      expect(colorKey('foo')).toMatchInlineSnapshot(`"#922807"`);
     });
 
     it('should return different colours for different strings', () => {

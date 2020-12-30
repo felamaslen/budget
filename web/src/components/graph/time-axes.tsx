@@ -222,23 +222,21 @@ const TicksXBackground: React.FC<TicksXBackgroundProps> = ({ timeScale, y0, hide
 
 type TicksXForegroundProps = TicksXProps;
 
-const TicksXForeground: React.FC<TicksXForegroundProps> = ({ timeScale, y0 }) => {
-  return (
-    <g>
-      {timeScale.map(({ pix, major }) => (
-        <line
-          key={`${pix}-${major}`}
-          x1={pix}
-          y1={y0}
-          x2={pix}
-          y2={y0 - timeTickSize(major)}
-          stroke={timeTickColor(major)}
-          strokeWidth={1}
-        />
-      ))}
-    </g>
-  );
-};
+const TicksXForeground: React.FC<TicksXForegroundProps> = ({ timeScale, y0 }) => (
+  <g>
+    {timeScale.map(({ pix, major }) => (
+      <line
+        key={`${pix}-${major}`}
+        x1={pix}
+        y1={y0}
+        x2={pix}
+        y2={y0 - timeTickSize(major)}
+        stroke={timeTickColor(major)}
+        strokeWidth={1}
+      />
+    ))}
+  </g>
+);
 
 type TicksXTextProps = TicksXProps;
 

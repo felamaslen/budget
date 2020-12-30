@@ -1,4 +1,4 @@
-import { abbreviateFundName, extractLongName } from './finance';
+import { abbreviateFundName, extractLongName, getGenericFullSymbol } from './finance';
 
 describe('Finance module', () => {
   describe('abbreviateFundName', () => {
@@ -27,6 +27,18 @@ describe('Finance module', () => {
     it('should abbreviate a standard stock', () => {
       expect.assertions(1);
       expect(abbreviateFundName('The Biotech Growth Trust (BIOG.L) (stock)')).toBe('BIOG');
+    });
+  });
+
+  describe(getGenericFullSymbol.name, () => {
+    it.each`
+      long                                               | short
+      ${'Scottish Mortgage Trust innit (SMT.L) (stock)'} | ${'SMT.L'}
+      ${'L&G Int. Ix'}                                   | ${null}
+      ${'Threadneedle UK Equity Income Trust (accum)'}   | ${null}
+    `('should abbrevate $long to $short', ({ long, short }) => {
+      expect.assertions(1);
+      expect(getGenericFullSymbol(long)).toBe(short);
     });
   });
 

@@ -75,6 +75,7 @@ export type Query = {
   receiptItem?: Maybe<Scalars['String']>;
   receiptItems?: Maybe<Array<ReceiptCategory>>;
   search?: Maybe<SearchResult>;
+  stockPrices?: Maybe<StockPricesResponse>;
   whoami?: Maybe<UserInfo>;
 };
 
@@ -149,6 +150,11 @@ export type QuerySearchArgs = {
   column: SearchItem;
   searchTerm: Scalars['String'];
   numResults?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryStockPricesArgs = {
+  codes: Array<Scalars['String']>;
 };
 
 export type AppConfig = {
@@ -232,6 +238,16 @@ export type TargetDeltaResponse = {
 export type UpdatedFundAllocationTargets = {
   error?: Maybe<Scalars['String']>;
   deltas?: Maybe<Array<TargetDeltaResponse>>;
+};
+
+export type StockPrice = {
+  code: Scalars['String'];
+  price?: Maybe<Scalars['NonNegativeFloat']>;
+};
+
+export type StockPricesResponse = {
+  error?: Maybe<Scalars['String']>;
+  prices: Array<StockPrice>;
 };
 
 export type Mutation = {
@@ -901,6 +917,8 @@ export type ResolversTypes = {
   TargetDelta: TargetDelta;
   TargetDeltaResponse: ResolverTypeWrapper<TargetDeltaResponse>;
   UpdatedFundAllocationTargets: ResolverTypeWrapper<UpdatedFundAllocationTargets>;
+  StockPrice: ResolverTypeWrapper<StockPrice>;
+  StockPricesResponse: ResolverTypeWrapper<StockPricesResponse>;
   Mutation: ResolverTypeWrapper<{}>;
   FundCreateUpdate: ResolverTypeWrapper<FundCreateUpdate>;
   FundDelete: ResolverTypeWrapper<FundDelete>;
@@ -994,6 +1012,8 @@ export type ResolversParentTypes = {
   TargetDelta: TargetDelta;
   TargetDeltaResponse: TargetDeltaResponse;
   UpdatedFundAllocationTargets: UpdatedFundAllocationTargets;
+  StockPrice: StockPrice;
+  StockPricesResponse: StockPricesResponse;
   Mutation: {};
   FundCreateUpdate: FundCreateUpdate;
   FundDelete: FundDelete;
@@ -1101,6 +1121,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   receiptItem?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QueryReceiptItemArgs, 'item'>>;
   receiptItems?: Resolver<Maybe<Array<ResolversTypes['ReceiptCategory']>>, ParentType, ContextType, RequireFields<QueryReceiptItemsArgs, 'items'>>;
   search?: Resolver<Maybe<ResolversTypes['SearchResult']>, ParentType, ContextType, RequireFields<QuerySearchArgs, 'page' | 'column' | 'searchTerm'>>;
+  stockPrices?: Resolver<Maybe<ResolversTypes['StockPricesResponse']>, ParentType, ContextType, RequireFields<QueryStockPricesArgs, 'codes'>>;
   whoami?: Resolver<Maybe<ResolversTypes['UserInfo']>, ParentType, ContextType>;
 };
 
@@ -1170,6 +1191,18 @@ export type TargetDeltaResponseResolvers<ContextType = Context, ParentType exten
 export type UpdatedFundAllocationTargetsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['UpdatedFundAllocationTargets'] = ResolversParentTypes['UpdatedFundAllocationTargets']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   deltas?: Resolver<Maybe<Array<ResolversTypes['TargetDeltaResponse']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type StockPriceResolvers<ContextType = Context, ParentType extends ResolversParentTypes['StockPrice'] = ResolversParentTypes['StockPrice']> = {
+  code?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  price?: Resolver<Maybe<ResolversTypes['NonNegativeFloat']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type StockPricesResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['StockPricesResponse'] = ResolversParentTypes['StockPricesResponse']> = {
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  prices?: Resolver<Array<ResolversTypes['StockPrice']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1566,6 +1599,8 @@ export type Resolvers<ContextType = Context> = {
   FundHistory?: FundHistoryResolvers<ContextType>;
   TargetDeltaResponse?: TargetDeltaResponseResolvers<ContextType>;
   UpdatedFundAllocationTargets?: UpdatedFundAllocationTargetsResolvers<ContextType>;
+  StockPrice?: StockPriceResolvers<ContextType>;
+  StockPricesResponse?: StockPricesResponseResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   FundCreateUpdate?: FundCreateUpdateResolvers<ContextType>;
   FundDelete?: FundDeleteResolvers<ContextType>;

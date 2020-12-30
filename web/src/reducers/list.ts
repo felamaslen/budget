@@ -235,17 +235,15 @@ const withTotals = <
   const listHandler = makeListHandler(page);
   return filterByPage<I, J, P, DailyState<J, ES>, ActionParticular, ActionGeneral>(
     page,
-    (state, action) => {
-      return {
-        ...state,
-        ...listHandler(state, action),
-        total: getNewTotal(
-          state.total,
-          getPreviousItemCost(state, action),
-          getNextItemCost(state, action),
-        ),
-      };
-    },
+    (state, action) => ({
+      ...state,
+      ...listHandler(state, action),
+      total: getNewTotal(
+        state.total,
+        getPreviousItemCost(state, action),
+        getNextItemCost(state, action),
+      ),
+    }),
   );
 };
 

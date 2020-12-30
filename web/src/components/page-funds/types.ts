@@ -2,7 +2,6 @@ import { GainsForRow } from '~client/selectors';
 import { RowPrices } from '~client/types';
 
 export type FundProps = {
-  name: string;
   isSold: boolean;
   gain: GainsForRow;
   prices: RowPrices;

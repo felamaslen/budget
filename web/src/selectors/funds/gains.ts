@@ -7,6 +7,7 @@ import { createSelector } from 'reselect';
 
 import { getFundsCache, getFundsRows, PriceCache } from './helpers';
 import { isSold, getTotalUnits, getTotalCost, lastInArray } from '~client/modules/data';
+import { memoiseNowAndToday } from '~client/modules/time';
 import { colors } from '~client/styled/variables';
 import { FundNative as Fund, Id, TransactionNative as Transaction } from '~client/types';
 
@@ -128,99 +129,109 @@ export function getGainsForRow(rowGains: RowGains, id: Id): GainsForRow {
   } as GainsForRow;
 }
 
-const getItemsWithPrices = createSelector(getFundsCache, getFundsRows, (cache, items) => {
-  if (!(cache.cacheTimes.length > 1 && items.length > 0)) {
-    return [];
-  }
-
-  return items.filter(({ id, transactions }) => cache.prices[id] && transactions);
-});
-
-const getLatestTimes = createSelector(getFundsCache, (cache) => {
-  if (cache.cacheTimes.length <= 1) {
-    return { timeLatest: new Date(), timePrev: new Date() };
-  }
-
-  const { cacheTimes, startTime } = cache;
-
-  const timeLatest = new Date(1000 * (startTime + cacheTimes[cacheTimes.length - 1]));
-  const timePrev = new Date(1000 * (startTime + cacheTimes[cacheTimes.length - 2]));
-
-  return { timeLatest, timePrev };
-});
-
-const getTodayAndYesterdayTotalValue = createSelector(
-  getItemsWithPrices,
-  getLatestTimes,
-  getFundsCache,
-  (itemsWithPrices, { timeLatest, timePrev }, cache) => {
-    const getValue = (maxDate: Date): number => {
-      const maxDateValue = getUnixTime(maxDate);
-      const startTime = cache.startTime ?? 0;
-      const cacheTimes = cache.cacheTimes ?? [];
-
-      return itemsWithPrices.reduce((last, { id, transactions }) => {
-        const cacheForFund = cache?.prices[id];
-        if (!cacheForFund) {
-          return last;
-        }
-        const latestGroup = cacheForFund[cacheForFund.length - 1];
-        if (!(latestGroup && latestGroup.values.length)) {
-          return last;
-        }
-        const { startIndex, values } = latestGroup;
-
-        const timeIndex =
-          cacheTimes.length -
-          1 -
-          cacheTimes
-            .slice()
-            .reverse()
-            .findIndex((value) => value + startTime <= maxDateValue);
-
-        const price = values[timeIndex - startIndex] ?? values[values.length - 1];
-
-        const filteredTransactions = transactions.filter(
-          ({ date }) => Number(date) <= Number(maxDate),
-        );
-
-        const units = filteredTransactions.reduce((sum, { units: value }) => sum + value, 0);
-
-        return last + price * units;
-      }, 0);
-    };
-
-    return { latest: getValue(timeLatest), prev: getValue(timePrev) };
-  },
-);
-
-export const getDayGainAbs = createSelector(
-  getItemsWithPrices,
-  getLatestTimes,
-  getTodayAndYesterdayTotalValue,
-  (itemsWithPrices, { timeLatest, timePrev }, values) => {
-    if (!(values.latest && values.prev)) {
-      return 0;
+const getItemsWithPrices = memoiseNowAndToday((time, key) =>
+  createSelector(getFundsCache[key](time), getFundsRows, (cache, items) => {
+    if (!(cache.cacheTimes.length > 1 && items.length > 0)) {
+      return [];
     }
 
-    const getCost = (maxDate: Date): number =>
-      itemsWithPrices.reduce(
-        (last, { transactions }) =>
-          last + getTotalCost(transactions.filter(({ date }) => isAfter(maxDate, date))),
-        0,
-      );
-
-    const costLatest = getCost(timeLatest);
-    const costPrev = getCost(timePrev);
-
-    const dayGain = values.latest - values.prev - (costLatest - costPrev);
-
-    return dayGain;
-  },
+    return items.filter(({ id, transactions }) => cache.prices[id] && transactions);
+  }),
 );
 
-export const getDayGain = createSelector(
-  getDayGainAbs,
-  getTodayAndYesterdayTotalValue,
-  (dayGainAbs, { prev }) => (prev ? dayGainAbs / prev : 0),
+const getLatestTimes = memoiseNowAndToday((time, key) =>
+  createSelector(getFundsCache[key](time), (cache) => {
+    if (cache.cacheTimes.length <= 1) {
+      return { timeLatest: new Date(), timePrev: new Date() };
+    }
+
+    const { cacheTimes, startTime } = cache;
+
+    const timeLatest = new Date(1000 * (startTime + cacheTimes[cacheTimes.length - 1]));
+    const timePrev = new Date(1000 * (startTime + cacheTimes[cacheTimes.length - 2]));
+
+    return { timeLatest, timePrev };
+  }),
+);
+
+const getTodayAndYesterdayTotalValue = memoiseNowAndToday((time, key) =>
+  createSelector(
+    getItemsWithPrices[key](time),
+    getLatestTimes[key](time),
+    getFundsCache[key](time),
+    (itemsWithPrices, { timeLatest, timePrev }, cache) => {
+      const getValue = (maxDate: Date): number => {
+        const maxDateValue = getUnixTime(maxDate);
+        const startTime = cache.startTime ?? 0;
+        const cacheTimes = cache.cacheTimes ?? [];
+
+        return itemsWithPrices.reduce((last, { id, transactions }) => {
+          const cacheForFund = cache?.prices[id];
+          if (!cacheForFund) {
+            return last;
+          }
+          const latestGroup = cacheForFund[cacheForFund.length - 1];
+          if (!(latestGroup && latestGroup.values.length)) {
+            return last;
+          }
+          const { startIndex, values } = latestGroup;
+
+          const timeIndex =
+            cacheTimes.length -
+            1 -
+            cacheTimes
+              .slice()
+              .reverse()
+              .findIndex((value) => value + startTime <= maxDateValue);
+
+          const price = values[timeIndex - startIndex] ?? values[values.length - 1];
+
+          const filteredTransactions = transactions.filter(
+            ({ date }) => Number(date) <= Number(maxDate),
+          );
+
+          const units = filteredTransactions.reduce((sum, { units: value }) => sum + value, 0);
+
+          return last + price * units;
+        }, 0);
+      };
+
+      return { latest: getValue(timeLatest), prev: getValue(timePrev) };
+    },
+  ),
+);
+
+export const getDayGainAbs = memoiseNowAndToday((time, key) =>
+  createSelector(
+    getItemsWithPrices[key](time),
+    getLatestTimes[key](time),
+    getTodayAndYesterdayTotalValue[key](time),
+    (itemsWithPrices, { timeLatest, timePrev }, values) => {
+      if (!(values.latest && values.prev)) {
+        return 0;
+      }
+
+      const getCost = (maxDate: Date): number =>
+        itemsWithPrices.reduce(
+          (last, { transactions }) =>
+            last + getTotalCost(transactions.filter(({ date }) => isAfter(maxDate, date))),
+          0,
+        );
+
+      const costLatest = getCost(timeLatest);
+      const costPrev = getCost(timePrev);
+
+      const dayGain = values.latest - values.prev - (costLatest - costPrev);
+
+      return dayGain;
+    },
+  ),
+);
+
+export const getDayGain = memoiseNowAndToday((time, key) =>
+  createSelector(
+    getDayGainAbs[key](time),
+    getTodayAndYesterdayTotalValue[key](time),
+    (dayGainAbs, { prev }) => (prev ? dayGainAbs / prev : 0),
+  ),
 );

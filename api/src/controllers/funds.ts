@@ -72,42 +72,44 @@ export function processFundHistory(
 ): Pick<FundHistory, 'startTime' | 'cacheTimes' | 'prices'> {
   const unixTimes = fundHistory.map(({ time }) => getUnixTime(new Date(time)));
 
-  const prices = fundHistory.reduce<FundPrices[]>((parent, { id, price }, timeIndex) => {
-    return id.reduce<FundPrices[]>((child, fundId, priceIndex) => {
-      const fundIndex = child.findIndex((compare) => compare.fundId === fundId);
+  const prices = fundHistory.reduce<FundPrices[]>(
+    (parent, { id, price }, timeIndex) =>
+      id.reduce<FundPrices[]>((child, fundId, priceIndex) => {
+        const fundIndex = child.findIndex((compare) => compare.fundId === fundId);
 
-      const fundPrice = price[priceIndex];
+        const fundPrice = price[priceIndex];
 
-      if (fundIndex === -1) {
-        return [
-          ...child,
-          {
-            fundId,
-            groups: [
-              {
-                startIndex: timeIndex,
-                values: [fundPrice],
-              },
-            ],
-          },
-        ];
-      }
+        if (fundIndex === -1) {
+          return [
+            ...child,
+            {
+              fundId,
+              groups: [
+                {
+                  startIndex: timeIndex,
+                  values: [fundPrice],
+                },
+              ],
+            },
+          ];
+        }
 
-      const { groups } = child[fundIndex];
+        const { groups } = child[fundIndex];
 
-      const currentGroup = groups[groups.length - 1];
-      const groupIsCurrent = currentGroup.values.length + currentGroup.startIndex === timeIndex;
+        const currentGroup = groups[groups.length - 1];
+        const groupIsCurrent = currentGroup.values.length + currentGroup.startIndex === timeIndex;
 
-      const newGroups = groupIsCurrent
-        ? replaceAtIndex(groups, groups.length - 1, (group) => ({
-            ...group,
-            values: [...group.values, fundPrice],
-          }))
-        : [...groups, { startIndex: timeIndex, values: [fundPrice] }];
+        const newGroups = groupIsCurrent
+          ? replaceAtIndex(groups, groups.length - 1, (group) => ({
+              ...group,
+              values: [...group.values, fundPrice],
+            }))
+          : [...groups, { startIndex: timeIndex, values: [fundPrice] }];
 
-      return replaceAtIndex(child, fundIndex, (last) => ({ ...last, groups: newGroups }));
-    }, parent);
-  }, []);
+        return replaceAtIndex(child, fundIndex, (last) => ({ ...last, groups: newGroups }));
+      }, parent),
+    [],
+  );
 
   return {
     startTime: unixTimes[0] ?? getUnixTime(maxAge),

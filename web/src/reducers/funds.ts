@@ -20,6 +20,7 @@ import {
   FundInput,
   FundNative,
   FundPriceGroup,
+  FundQuotes,
   GQL,
   HistoryOptions,
   PageNonStandard,
@@ -35,6 +36,7 @@ type ExtraState = {
   prices: {
     [fundId: number]: FundPriceGroup[];
   };
+  todayPrices: FundQuotes;
 };
 
 export type State = ListState<GQL<FundNative>, ExtraState>;
@@ -74,6 +76,7 @@ export const initialState: State = {
   startTime: 0,
   cacheTimes: [],
   prices: [],
+  todayPrices: {},
 };
 
 const getPriceCache = ({
@@ -141,6 +144,8 @@ export default function funds(state: State = initialState, action: Action): Stat
       return { ...state, historyOptions: action.historyOptions };
     case ActionTypeFunds.PricesUpdated:
       return onPeriodLoad(state, action.res);
+    case ActionTypeFunds.TodayPricesFetched:
+      return { ...state, todayPrices: { ...state.todayPrices, ...action.quotes } };
     case ActionTypeApi.DataRead:
       return onReadFunds(state, action);
     default:

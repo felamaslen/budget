@@ -7,9 +7,8 @@ describe('<HoverCost />', () => {
     value: 123456.78,
   };
 
-  const getContainer = (customProps = {}): RenderResult => {
-    return render(<HoverCost {...props} {...customProps} />);
-  };
+  const getContainer = (customProps = {}): RenderResult =>
+    render(<HoverCost {...props} {...customProps} />);
 
   describe.each`
     type        | value

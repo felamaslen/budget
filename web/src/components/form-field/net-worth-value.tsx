@@ -407,14 +407,12 @@ export const FormFieldNetWorthValue: React.FC<Props> = ({
   isMortgage: valueIsMortgage = false,
   onChange,
   currencies,
-}) => {
-  return (
-    <Styled.NetWorthValue>
-      {valueIsMortgage && <FormFieldMortgage value={value} onChange={onChange} />}
-      {valueIsOption && <FormFieldOption value={value} onChange={onChange} />}
-      {!valueIsMortgage && !valueIsOption && (
-        <FormFieldSimpleFX value={value} onChange={onChange} currencies={currencies} />
-      )}
-    </Styled.NetWorthValue>
-  );
-};
+}) => (
+  <Styled.NetWorthValue>
+    {valueIsMortgage && <FormFieldMortgage value={value} onChange={onChange} />}
+    {valueIsOption && <FormFieldOption value={value} onChange={onChange} />}
+    {!valueIsMortgage && !valueIsOption && (
+      <FormFieldSimpleFX value={value} onChange={onChange} currencies={currencies} />
+    )}
+  </Styled.NetWorthValue>
+);

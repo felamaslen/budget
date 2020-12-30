@@ -55,8 +55,15 @@ declare module 'yahoo-finance' {
     | 'financialData';
 
   export type QuoteOptions<M extends QuoteModule> = {
-    symbol: string;
     modules: M[];
+    symbol: string;
+  };
+
+  export type QuoteOptionsMultiple<M extends QuoteModule, S extends string> = Omit<
+    QuoteOptions<M>,
+    'symbol'
+  > & {
+    symbols: S[];
   };
 
   type QuoteBase = {
@@ -274,7 +281,13 @@ declare module 'yahoo-finance' {
 
   export function quote<M extends QuoteModule = QuoteModule>(
     options: QuoteOptions<M>,
-  ): Promise<Quote<M>>;
+    optionalHttpRequestOptions?: Partial<HttpRequestOptions>,
+  ): Promise<Quote<M> | null | undefined>;
+
+  export function quote<M extends QuoteModule, S extends string>(
+    options: QuoteOptionsMultiple<M, S>,
+    optionalHttpRequestOptions?: Partial<HttpRequestOptions>,
+  ): Promise<Record<S, Quote<M> | null | undefined>>;
 
   export function quote<M extends QuoteModule = QuoteModule>(
     symbol: string,

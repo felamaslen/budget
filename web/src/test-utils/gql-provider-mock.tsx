@@ -14,6 +14,4 @@ export const mockClient = ({
 export const GQLProviderMock: React.FC<{ client?: Client }> = ({
   client = mockClient,
   children,
-}) => {
-  return <Provider value={client}>{children}</Provider>;
-};
+}) => <Provider value={client}>{children}</Provider>;

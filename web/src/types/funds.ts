@@ -33,12 +33,6 @@ export type Stock = {
 
 export type Index = Omit<Stock, 'price' | 'weight'> & Partial<Pick<Stock, 'price'>>;
 
-export type StockPrice = {
-  code: string;
-  open: number;
-  close: number;
-};
-
 export type PortfolioItem = {
   id: Id;
   item: string;
@@ -67,3 +61,5 @@ export type HistoryOptions = {
   period: FundPeriod;
   length: number;
 };
+
+export type FundQuotes = Record<number, number | null>;

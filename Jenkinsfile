@@ -30,7 +30,7 @@ node {
         stage('Run parallel tests') {
           parallel([
             "Lint": {
-              sh "docker run --rm ${IMAGE} sh -c 'yarn lint'"
+              sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
             },
             "Client unit tests": {
               sh "docker run --rm ${IMAGE} sh -c 'yarn test:client'"

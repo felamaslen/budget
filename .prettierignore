@@ -1,0 +1,4 @@
+web/src/types/gql.tsx
+api/src/types/gql.ts
+api/src/introspection.json
+api/src/scripts/scrape-funds/vendor

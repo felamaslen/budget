@@ -80,6 +80,7 @@ export type Query = {
   receiptItem?: Maybe<Scalars['String']>;
   receiptItems?: Maybe<Array<ReceiptCategory>>;
   search?: Maybe<SearchResult>;
+  stockPrices?: Maybe<StockPricesResponse>;
   whoami?: Maybe<UserInfo>;
 };
 
@@ -154,6 +155,11 @@ export type QuerySearchArgs = {
   column: SearchItem;
   searchTerm: Scalars['String'];
   numResults?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryStockPricesArgs = {
+  codes: Array<Scalars['String']>;
 };
 
 export type AppConfig = {
@@ -247,6 +253,18 @@ export type UpdatedFundAllocationTargets = {
   __typename?: 'UpdatedFundAllocationTargets';
   error?: Maybe<Scalars['String']>;
   deltas?: Maybe<Array<TargetDeltaResponse>>;
+};
+
+export type StockPrice = {
+  __typename?: 'StockPrice';
+  code: Scalars['String'];
+  price?: Maybe<Scalars['NonNegativeFloat']>;
+};
+
+export type StockPricesResponse = {
+  __typename?: 'StockPricesResponse';
+  error?: Maybe<Scalars['String']>;
+  prices: Array<StockPrice>;
 };
 
 export type Mutation = {
@@ -1225,6 +1243,22 @@ export type FundPricesUpdateQuery = (
   )> }
 );
 
+export type StockPricesQueryVariables = Exact<{
+  codes: Array<Scalars['String']>;
+}>;
+
+
+export type StockPricesQuery = (
+  { __typename?: 'Query' }
+  & { stockPrices?: Maybe<(
+    { __typename?: 'StockPricesResponse' }
+    & { prices: Array<(
+      { __typename?: 'StockPrice' }
+      & Pick<StockPrice, 'code' | 'price'>
+    )> }
+  )> }
+);
+
 export type InitialQueryVariables = Exact<{
   fundPeriod?: Maybe<FundPeriod>;
   fundLength?: Maybe<Scalars['NonNegativeInt']>;
@@ -2025,6 +2059,20 @@ export const FundPricesUpdateDocument = gql`
 
 export function useFundPricesUpdateQuery(options: Omit<Urql.UseQueryArgs<FundPricesUpdateQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<FundPricesUpdateQuery>({ query: FundPricesUpdateDocument, ...options });
+};
+export const StockPricesDocument = gql`
+    query StockPrices($codes: [String!]!) {
+  stockPrices(codes: $codes) {
+    prices {
+      code
+      price
+    }
+  }
+}
+    `;
+
+export function useStockPricesQuery(options: Omit<Urql.UseQueryArgs<StockPricesQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<StockPricesQuery>({ query: StockPricesDocument, ...options });
 };
 export const InitialDocument = gql`
     query Initial($fundPeriod: FundPeriod, $fundLength: NonNegativeInt) {

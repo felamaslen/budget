@@ -151,7 +151,11 @@ describe('<AccessibleList />', () => {
   });
 
   describe('custom header', () => {
-    const MyCustomHeader: React.FC = () => <div role="heading">This is a custom header</div>;
+    const MyCustomHeader: React.FC = () => (
+      <div role="heading" aria-level={1}>
+        This is a custom header
+      </div>
+    );
 
     const setup = (): RenderResult =>
       getContainerBase<ListItemInput>(

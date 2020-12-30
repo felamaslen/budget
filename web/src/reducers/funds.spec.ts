@@ -1,4 +1,5 @@
 import numericHash from 'string-hash';
+
 import reducer, { State, initialState } from './funds';
 import {
   ActionTypeApi,
@@ -9,9 +10,17 @@ import {
   fundPricesUpdated,
   fundQueryUpdated,
   fundsViewSoldToggled,
+  todayPricesFetched,
 } from '~client/actions';
 import { testResponse, testState } from '~client/test-data';
-import { FundHistory, FundPeriod, GQL, InitialQuery, PageNonStandard } from '~client/types';
+import {
+  FundHistory,
+  FundPeriod,
+  FundQuotes,
+  GQL,
+  InitialQuery,
+  PageNonStandard,
+} from '~client/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -193,6 +202,30 @@ describe('Funds reducer', () => {
           },
         }),
       );
+    });
+  });
+
+  describe(ActionTypeFunds.TodayPricesFetched, () => {
+    const quotes: FundQuotes = {
+      17: 1185.32,
+    };
+    const action = todayPricesFetched(quotes);
+
+    it("should set today's prices", () => {
+      expect.assertions(1);
+      const result = reducer(
+        {
+          ...initialState,
+          todayPrices: {
+            13: 652.49,
+          },
+        },
+        action,
+      );
+      expect(result.todayPrices).toStrictEqual({
+        13: 652.49,
+        17: 1185.32,
+      });
     });
   });
 

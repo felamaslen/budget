@@ -101,11 +101,11 @@ describe('Funds selectors', () => {
       ${'ageText'}    | ${'7 months ago'}
       ${'gain'}       | ${0.0827}
       ${'gainAbs'}    | ${60780.2}
-      ${'dayGain'}    | ${getDayGain(state)}
-      ${'dayGainAbs'} | ${getDayGainAbs(state)}
+      ${'dayGain'}    | ${getDayGain.now(testNow)(state)}
+      ${'dayGainAbs'} | ${getDayGainAbs.now(testNow)(state)}
     `('should get $prop', ({ prop, expectedValue }) => {
       expect.assertions(1);
-      const result = getFundsCachedValue(testNow)(state);
+      const result = getFundsCachedValue.now(testNow)(state);
 
       if (typeof expectedValue === 'number') {
         expect(result[prop as keyof CachedValue]).toBeCloseTo(expectedValue, 1);
@@ -156,11 +156,11 @@ describe('Funds selectors', () => {
         },
       };
 
-      expect(getFundsCachedValue(testNow)(stateNoPrice)).toStrictEqual({
+      expect(getFundsCachedValue.now(testNow)(stateNoPrice)).toStrictEqual({
         gain: expect.any(Number),
         gainAbs: expect.any(Number),
-        dayGain: getDayGain(stateNoPrice),
-        dayGainAbs: getDayGainAbs(stateNoPrice),
+        dayGain: getDayGain.now(testNow)(stateNoPrice),
+        dayGainAbs: getDayGainAbs.now(testNow)(stateNoPrice),
         value: 399098.2,
         ageText: '7 months ago',
       });

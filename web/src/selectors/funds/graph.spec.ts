@@ -1,9 +1,10 @@
-import { getStartTime, getCacheTimes, getFundItems, getFundLines } from './graph';
+import { getFundItems, getFundLines } from './graph';
 import { Mode, fundPeriods, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
+import { abbreviateFundName } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
-import { testState, testStartTime, testCacheTimes } from '~client/test-data';
+import { testState } from '~client/test-data';
 import { FundItem, PageNonStandard } from '~client/types';
 
 describe('Fund selectors / graph', () => {
@@ -17,29 +18,15 @@ describe('Fund selectors / graph', () => {
     },
   };
 
-  describe('getStartTime', () => {
-    it('should get the current funds cache start time', () => {
-      expect.assertions(1);
-      expect(getStartTime(state)).toBe(testStartTime);
-    });
-  });
-
-  describe('getCacheTimes', () => {
-    it('should get the current funds cache times list', () => {
-      expect.assertions(1);
-      expect(getCacheTimes(state)).toBe(testCacheTimes);
-    });
-  });
-
   describe('getFundItems', () => {
     it('should get an ordered (by value) list of available funds with an overall item', () => {
       expect.assertions(1);
-      expect(getFundItems(today)(state)).toStrictEqual<FundItem[]>([
+      expect(getFundItems.today(today)(state)).toStrictEqual<FundItem[]>([
         { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: colors.black },
-        { id: 10, item: 'some fund 1', color: colorKey('some fund 1') },
-        { id: 3, item: 'some fund 2', color: colorKey('some fund 2') },
-        { id: 1, item: 'some fund 3', color: colorKey('some fund 3') },
-        { id: 5, item: 'test fund 4', color: colorKey('test fund 4') },
+        { id: 10, item: 'some fund 1', color: colorKey(abbreviateFundName('some fund 1')) },
+        { id: 3, item: 'some fund 2', color: colorKey(abbreviateFundName('some fund 2')) },
+        { id: 1, item: 'some fund 3', color: colorKey(abbreviateFundName('some fund 3')) },
+        { id: 5, item: 'test fund 4', color: colorKey(abbreviateFundName('test fund 4')) },
       ]);
     });
 
@@ -53,9 +40,9 @@ describe('Fund selectors / graph', () => {
         },
       };
 
-      expect(getFundItems(today)(stateNoSold)).toStrictEqual<FundItem[]>([
+      expect(getFundItems.today(today)(stateNoSold)).toStrictEqual<FundItem[]>([
         { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: colors.black },
-        { id: 10, item: 'some fund 1', color: colorKey('some fund 1') },
+        { id: 10, item: 'some fund 1', color: colorKey(abbreviateFundName('some fund 1')) },
       ]);
     });
 
@@ -79,7 +66,7 @@ describe('Fund selectors / graph', () => {
         },
       };
 
-      expect(getFundItems(today)(stateWithFutureFund)).not.toStrictEqual(
+      expect(getFundItems.today(today)(stateWithFutureFund)).not.toStrictEqual(
         expect.arrayContaining([expect.objectContaining({ item: 'Some future fund' })]),
       );
     });
@@ -88,7 +75,7 @@ describe('Fund selectors / graph', () => {
   describe('getFundLines', () => {
     it('should get a list (by mode) of graphed, split fund lines', () => {
       expect.assertions(1);
-      const result = getFundLines(today)(state);
+      const result = getFundLines.today(today)(state);
       expect(result).toStrictEqual({
         [Mode.ROI]: expect.arrayContaining([
           expect.objectContaining({
@@ -133,7 +120,7 @@ describe('Fund selectors / graph', () => {
 
       const soldIds = [3, 1, 5];
 
-      const result = getFundLines(today)(stateNoSold);
+      const result = getFundLines.today(today)(stateNoSold);
 
       soldIds.forEach((soldId) => {
         expect(result[Mode.ROI]).not.toStrictEqual(
@@ -176,7 +163,7 @@ describe('Fund selectors / graph', () => {
         },
       };
 
-      const result = getFundLines(today)(stateWithSold);
+      const result = getFundLines.today(today)(stateWithSold);
 
       const overallLine = result[Mode.ROI].find(({ id }) => id === GRAPH_FUNDS_OVERALL_ID);
 

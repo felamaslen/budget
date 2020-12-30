@@ -1,5 +1,5 @@
 import moize from 'moize';
-import React, { useContext, useMemo, CSSProperties } from 'react';
+import React, { CSSProperties, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList } from 'react-window';

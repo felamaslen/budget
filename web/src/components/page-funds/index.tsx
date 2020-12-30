@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { CashRow } from './cash-row';
 import { FundHeader } from './header';
+import { useTodayPrices } from './hooks';
 import { FundNameMobile, FundDetailMobile } from './mobile';
 import { FundRow } from './row';
 import * as Styled from './styles';
@@ -17,16 +18,10 @@ import {
 } from '~client/components/form-field';
 import { GraphFunds } from '~client/components/graph-funds';
 import { makeField, ModalFields } from '~client/components/modal-dialog';
-import { useIsMobile, useListCrudFunds, usePersistentState } from '~client/hooks';
+import { TodayContext, useIsMobile, useListCrudFunds, usePersistentState } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
-import {
-  getFundsCache,
-  getGainsForRow,
-  getPricesForRow,
-  getRowGains,
-  PriceCache,
-} from '~client/selectors';
+import { getFundsCache, getGainsForRow, getPricesForRow, getRowGains } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import {
   Delta,
@@ -59,25 +54,7 @@ type ComposedProps = {
   [id: number]: Pick<FundProps, 'gain' | 'prices'>;
 };
 
-const makeComposedSelector = (cache: PriceCache): ((items: Fund[]) => ComposedProps) => {
-  const { startTime, cacheTimes, prices } = cache;
-  return (items: Fund[]): ComposedProps => {
-    const rowGains = getRowGains(items, cache);
-    return items.reduce<ComposedProps>(
-      (last, item) => ({
-        ...last,
-        [item.id]: {
-          gain: getGainsForRow(rowGains, item.id),
-          prices: getPricesForRow(prices, item.id, startTime, cacheTimes),
-        },
-      }),
-      {},
-    );
-  };
-};
-
-const itemProcessor = (fund: FundInput): Pick<FundProps, 'name' | 'isSold'> => ({
-  name: fund.item,
+const itemProcessor = (fund: FundInput): Pick<FundProps, 'isSold'> => ({
   isSold: isSold(fund.transactions),
 });
 
@@ -91,8 +68,26 @@ const makeSortItems = ({ criteria, direction }: Sort): SortItems => (funds, prop
 
 export const Funds: React.FC = () => {
   const isMobile = useIsMobile();
-  const cache = useSelector(getFundsCache);
-  const composedSelector = useMemo(() => makeComposedSelector(cache), [cache]);
+  useTodayPrices();
+  const today = useContext(TodayContext);
+  const cache = useSelector(getFundsCache.today(today));
+  const composedSelector = useCallback(
+    (items: Fund[]): ComposedProps => {
+      const { startTime, cacheTimes, prices } = cache;
+      const rowGains = getRowGains(items, cache);
+      return items.reduce<ComposedProps>(
+        (last, item) => ({
+          ...last,
+          [item.id]: {
+            gain: getGainsForRow(rowGains, item.id),
+            prices: getPricesForRow(prices, item.id, startTime, cacheTimes),
+          },
+        }),
+        {},
+      );
+    },
+    [cache],
+  );
   const [sort, setSort] = usePersistentState<Sort>(defaultSort, 'funds_sort', isSort);
   const sortItems = useMemo(() => makeSortItems(sort), [sort]);
 

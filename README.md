@@ -83,3 +83,4 @@ Note that the development variables are optional on a production environment.
 - `PIE_TOLERANCE`: minimum slice of pie charts to include on list data
 - `PIE_DETAIL`:  maximum number of pie slices to return on list data
 - `FUND_RESOLUTION`: detail to include on fund price graph
+- `OPEN_EXCHANGE_RATES_API_KEY`: API key for exchange rate data (used in fund scraping and net worth calculation)

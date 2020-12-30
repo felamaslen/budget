@@ -25,7 +25,7 @@ export const FundHeader: React.FC<Props> = ({ isMobile, sort, setSort }) => {
   const viewSoldFunds = useSelector(getViewSoldFunds);
   const historyOptions = useSelector(getHistoryOptions);
   const annualisedFundReturns = useSelector(getAnnualisedFundReturns);
-  const cachedValue = useSelector(getFundsCachedValue(now));
+  const cachedValue = useSelector(getFundsCachedValue.now(now));
 
   const dispatch = useDispatch();
   const onViewSoldToggle = useCallback(() => dispatch(fundsViewSoldToggled()), [dispatch]);

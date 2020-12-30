@@ -8,6 +8,7 @@ import {
   updateFund,
   updateFundAllocationTargets,
 } from '~api/controllers/funds';
+import { getStockPrices } from '~api/controllers/stocks';
 import {
   genericAuthDbResolver,
   genericMutationResolver,
@@ -24,6 +25,8 @@ export const fundsResolvers: Resolvers = {
 
     cashAllocationTarget: genericAuthDbResolver(readCashTarget),
     fundHistory: genericAuthDbResolver(readFundHistory),
+
+    stockPrices: genericAuthDbResolver(getStockPrices),
   },
 
   Mutation: {

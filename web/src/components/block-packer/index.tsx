@@ -269,27 +269,23 @@ function useClickDive(
     if (haveDeepBlocks) {
       // hide preview after loading deep blocks
       setImmediate(() => {
-        dispatch((last) => {
-          return {
-            ...last,
-            preview: {
-              ...last.preview,
-              color: rgba(last.preview.color, 0),
-            },
-          };
-        });
+        dispatch((last) => ({
+          ...last,
+          preview: {
+            ...last.preview,
+            color: rgba(last.preview.color, 0),
+          },
+        }));
 
         clearTimeout(fadeTimer.current);
         fadeTimer.current = setTimeout(() => {
-          dispatch((last) => {
-            return {
-              ...last,
-              preview: {
-                ...last.preview,
-                open: false,
-              },
-            };
-          });
+          dispatch((last) => ({
+            ...last,
+            preview: {
+              ...last.preview,
+              open: false,
+            },
+          }));
         }, Styled.fadeTime);
       });
     }

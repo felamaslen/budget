@@ -2,6 +2,7 @@ import { ActionList } from './list';
 import {
   FundHistory,
   FundInput,
+  FundQuotes,
   GQL,
   HistoryOptions,
   PageNonStandard,
@@ -14,6 +15,7 @@ export const enum ActionTypeFunds {
   ViewSoldToggled = '@@funds/VIEW_SOLD_TOGGLED',
   CashTargetUpdated = '@@funds/CASH_TARGET_UPDATED',
   AllocationTargetsUpdated = '@@funds/ALLOCATIONS_UPDATED',
+  TodayPricesFetched = '@@funds/TODAY_PRICES_FETCHED',
 }
 
 export type FundQueryUpdated = {
@@ -64,10 +66,18 @@ export const allocationTargetsUpdated = (deltas: TargetDelta[]): AllocationTarge
   deltas,
 });
 
+export type TodayPricesFetched = { type: ActionTypeFunds.TodayPricesFetched; quotes: FundQuotes };
+
+export const todayPricesFetched = (quotes: FundQuotes): TodayPricesFetched => ({
+  type: ActionTypeFunds.TodayPricesFetched,
+  quotes,
+});
+
 export type ActionFunds =
   | FundQueryUpdated
   | FundPricesUpdated
   | ViewSoldToggled
   | CashTargetUpdated
   | AllocationTargetsUpdated
+  | TodayPricesFetched
   | ActionList<GQL<FundInput>, PageNonStandard.Funds>;

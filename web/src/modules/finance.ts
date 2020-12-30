@@ -82,6 +82,15 @@ function getGenericSymbol(name: string): string {
   return symbol;
 }
 
+export function getGenericFullSymbol(name: string): string | null {
+  const matched = name.match(genericRegex);
+  if (!matched) {
+    return null;
+  }
+  const [, , symbol, extra] = matched;
+  return `${symbol}${extra}`;
+}
+
 export const abbreviateFundName = moize((name: string): string => {
   if (isGenericShare(name)) {
     return getGenericSymbol(name);

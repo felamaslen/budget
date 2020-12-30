@@ -24,17 +24,15 @@ export const FormContainer: React.FC<Props> = ({
   onNextStep,
   onFirstStep,
   onLastStep,
-}) => {
-  return (
-    <Styled.FormContainer add={add}>
-      <ButtonCancel onClick={onComplete}>{'Cancel'}</ButtonCancel>
-      <Styled.FormSection step={step}>{children}</Styled.FormSection>
-      <Navigation
-        onPrevStep={onPrevStep}
-        onNextStep={onNextStep}
-        onFirstStep={onFirstStep}
-        onLastStep={onLastStep}
-      />
-    </Styled.FormContainer>
-  );
-};
+}) => (
+  <Styled.FormContainer add={add}>
+    <ButtonCancel onClick={onComplete}>{'Cancel'}</ButtonCancel>
+    <Styled.FormSection step={step}>{children}</Styled.FormSection>
+    <Navigation
+      onPrevStep={onPrevStep}
+      onNextStep={onNextStep}
+      onFirstStep={onFirstStep}
+      onLastStep={onLastStep}
+    />
+  </Styled.FormContainer>
+);

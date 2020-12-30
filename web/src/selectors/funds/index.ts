@@ -12,11 +12,11 @@ import { getLatestNetWorthAggregate } from '../overview/net-worth';
 import { getDayGain, getDayGainAbs, getPaperValue, getRealisedValue, getBuyCost } from './gains';
 import { getFundsRows, getFundsCache, PriceCache } from './helpers';
 import { getTotalCost, lastInArray } from '~client/modules/data';
+import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { getCostForMonthSoFar } from '~client/selectors/overview';
 import {
   Aggregate,
-  CachedValue,
   Data,
   HistoryOptions,
   Id,
@@ -51,65 +51,59 @@ export function getFundsCachedValueAgeText(
   return `${humanizeDuration(age, { round: true, largest: 1 })} ago`;
 }
 
-const getFundCacheAge = moize(
-  (now: Date): ((state: State) => string) =>
-    createSelector(getFundsCache, (cache: PriceCache | undefined) => {
-      if (!cache) {
-        return '';
-      }
+const getFundCacheAge = memoiseNowAndToday((time, key) =>
+  createSelector(getFundsCache[key](time), (cache: PriceCache | undefined) => {
+    if (!cache) {
+      return '';
+    }
 
-      const { startTime, cacheTimes } = cache;
+    const { startTime, cacheTimes } = cache;
 
-      return getFundsCachedValueAgeText(startTime, cacheTimes, now);
-    }),
-  { maxSize: 1 },
+    return getFundsCachedValueAgeText(startTime, cacheTimes, time);
+  }),
 );
 
 const filterPastTransactions = (today: Date, transactions: Transaction[]): Transaction[] =>
   transactions.filter(({ date }) => isBefore(startOfDay(date), today));
 
-const getTransactionsToDateWithPrices = moize(
-  (date: Date) =>
-    createSelector(getFundsRows, getFundsCache, (rows, cache) => {
-      const unixTime = getUnixTime(date);
-      const priceIndexMax =
-        cache.cacheTimes.length -
-        cache.cacheTimes
-          .slice()
-          .reverse()
-          .findIndex((time) => time <= unixTime - cache.startTime);
+const getTransactionsToDateWithPrices = memoiseNowAndToday((time, key) =>
+  createSelector(getFundsRows, getFundsCache[key](time), (rows, cache) => {
+    const unixTime = getUnixTime(time);
+    const priceIndexMax =
+      cache.cacheTimes.length -
+      cache.cacheTimes
+        .slice()
+        .reverse()
+        .findIndex((compare) => compare <= unixTime - cache.startTime);
 
-      return rows.map(({ id, item, transactions, allocationTarget }) => {
-        const price =
-          cache.prices[id]?.reduceRight<number | undefined>(
-            (last, { startIndex, values }) =>
-              last ?? lastInArray(values.slice(0, Math.max(0, priceIndexMax - startIndex))),
-            undefined,
-          ) ?? 0;
+    return rows.map(({ id, item, transactions, allocationTarget }) => {
+      const price =
+        cache.prices[id]?.reduceRight<number | undefined>(
+          (last, { startIndex, values }) =>
+            last ?? lastInArray(values.slice(0, Math.max(0, priceIndexMax - startIndex))),
+          undefined,
+        ) ?? 0;
 
-        const transactionsToDate = filterPastTransactions(date, transactions);
+      const transactionsToDate = filterPastTransactions(time, transactions);
 
-        return { id, item, transactions: transactionsToDate, price, allocationTarget };
-      });
-    }),
-  { maxSize: 1 },
+      return { id, item, transactions: transactionsToDate, price, allocationTarget };
+    });
+  }),
 );
 
-export const getPortfolio = moize(
-  (date: Date) =>
-    createSelector(
-      getTransactionsToDateWithPrices(date),
-      (funds): Portfolio =>
-        funds
-          .filter(({ price, transactions }) => price && transactions.length)
-          .map(({ id, item, transactions, price, allocationTarget }) => ({
-            id,
-            item,
-            value: getPaperValue(transactions, price),
-            allocationTarget: allocationTarget ?? 0,
-          })),
-    ),
-  { maxSize: 1 },
+export const getPortfolio = moize((date: Date) =>
+  createSelector(
+    getTransactionsToDateWithPrices.month(date),
+    (funds): Portfolio =>
+      funds
+        .filter(({ price, transactions }) => price && transactions.length)
+        .map(({ id, item, transactions, price, allocationTarget }) => ({
+          id,
+          item,
+          value: getPaperValue(transactions, price),
+          allocationTarget: allocationTarget ?? 0,
+        })),
+  ),
 );
 
 export const getStockValue = moize(
@@ -161,43 +155,41 @@ export const getCashToInvest = moize(
   { maxSize: 1 },
 );
 
-export const getFundsCachedValue = moize(
-  (now: Date): ((state: State) => CachedValue) =>
-    createSelector(
-      getTransactionsToDateWithPrices(endOfDay(now)),
-      getFundCacheAge(now),
-      getDayGain,
-      getDayGainAbs,
-      (funds, ageText, dayGain, dayGainAbs) => {
-        const paperValue = funds.reduce<number>(
-          (last, { transactions, price }) => last + getPaperValue(transactions, price),
-          0,
-        );
+export const getFundsCachedValue = memoiseNowAndToday((time, key) =>
+  createSelector(
+    getTransactionsToDateWithPrices[key](endOfDay(time)),
+    getFundCacheAge[key](time),
+    getDayGain[key](time),
+    getDayGainAbs[key](time),
+    (funds, ageText, dayGain, dayGainAbs) => {
+      const paperValue = funds.reduce<number>(
+        (last, { transactions, price }) => last + getPaperValue(transactions, price),
+        0,
+      );
 
-        const realisedValue = funds.reduce<number>(
-          (last, { transactions }) => last + getRealisedValue(transactions),
-          0,
-        );
+      const realisedValue = funds.reduce<number>(
+        (last, { transactions }) => last + getRealisedValue(transactions),
+        0,
+      );
 
-        const cost = funds.reduce<number>(
-          (last, { transactions }) => last + getBuyCost(transactions),
-          0,
-        );
+      const cost = funds.reduce<number>(
+        (last, { transactions }) => last + getBuyCost(transactions),
+        0,
+      );
 
-        const gainAbs = paperValue + realisedValue - cost;
-        const gain = cost ? gainAbs / cost : 0;
+      const gainAbs = paperValue + realisedValue - cost;
+      const gain = cost ? gainAbs / cost : 0;
 
-        return {
-          value: paperValue,
-          ageText,
-          gain,
-          gainAbs,
-          dayGain,
-          dayGainAbs,
-        };
-      },
-    ),
-  { maxSize: 1 },
+      return {
+        value: paperValue,
+        ageText,
+        gain,
+        gainAbs,
+        dayGain,
+        dayGainAbs,
+      };
+    },
+  ),
 );
 
 export function getPricesForRow(

@@ -358,7 +358,7 @@ export const FundAllocationTargets: React.FC<Props> = ({
           <React.Fragment key={id}>
             <Styled.Actual
               fraction={(value + cashFractionActual) / totalValue}
-              color={colorKey(item)}
+              color={colorKey(abbreviateFundName(item))}
             >
               <span title={item}>{abbreviateFundName(item)}</span>
               <Adjustment
@@ -380,7 +380,7 @@ export const FundAllocationTargets: React.FC<Props> = ({
               setPreview={setPreview}
               id={id}
               fraction={(cumulativeTarget * stockValue + cashTarget) / (stockValue + cashTarget)}
-              color={colorKey(item)}
+              color={colorKey(abbreviateFundName(item))}
               cashTarget={cashTarget}
               allocationTarget={allocationTarget}
             />

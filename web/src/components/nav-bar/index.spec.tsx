@@ -10,13 +10,12 @@ describe('<Navbar />', () => {
     onLogout: jest.fn(),
   };
 
-  const getContainer = (customProps = {}): RenderResult => {
-    return render(
+  const getContainer = (customProps = {}): RenderResult =>
+    render(
       <MemoryRouter>
         <Navbar {...props} {...customProps} />
       </MemoryRouter>,
     );
-  };
 
   it.each`
     page                        | path

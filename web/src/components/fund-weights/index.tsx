@@ -1,5 +1,4 @@
-import { compose } from '@typed/compose';
-import { setLightness, rgba } from 'polished';
+import { rgba } from 'polished';
 import React, { useState, useCallback, useMemo, useContext } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -36,7 +35,7 @@ export const FundWeights: React.FC = () => {
           return {
             name: `(${formatPercent(value / relevantNetWorth, { precision: 1 })}) ${item}`,
             total: value,
-            color: compose(setLightness(0.3))(colorKey(item)),
+            color: colorKey(nameAbbreviated),
             text: (
               <Styled.Label small={nameAbbreviated.length > 5 || value < stockValue / 40}>
                 {nameAbbreviated}

@@ -343,8 +343,8 @@ describe('<BlockPacker />', () => {
 
       expect(preview.style.left).toBe('0px');
       expect(preview.style.top).toBe('0px');
-      expect(preview.style.width).toBe(`${container.offsetWidth}px`);
-      expect(preview.style.height).toBe(`${container.offsetHeight}px`);
+      expect(preview.style.width).toBe(`${(container as HTMLDivElement).offsetWidth}px`);
+      expect(preview.style.height).toBe(`${(container as HTMLDivElement).offsetHeight}px`);
     });
   });
 

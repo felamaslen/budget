@@ -344,9 +344,7 @@ describe('<FormFieldNetWorthValue />', () => {
       },
     };
 
-    const setup = (): RenderResult => {
-      return render(<FormFieldNetWorthValue {...propsOption} />);
-    };
+    const setup = (): RenderResult => render(<FormFieldNetWorthValue {...propsOption} />);
 
     describe.each`
       field            | placeholder       | fieldValue  | updatedValue | delta
@@ -509,9 +507,7 @@ describe('<FormFieldNetWorthValue />', () => {
       },
     };
 
-    const setup = (): RenderResult => {
-      return render(<FormFieldNetWorthValue {...propsMortgage} />);
-    };
+    const setup = (): RenderResult => render(<FormFieldNetWorthValue {...propsMortgage} />);
 
     describe.each`
       field                  | placeholder             | fieldValue     | updatedValue | delta

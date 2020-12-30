@@ -1,12 +1,6 @@
 import getUnixTime from 'date-fns/getUnixTime';
 
-import {
-  InitialQuery,
-  PageListStandard,
-  PageNonStandard,
-  StocksListResponse,
-  StockPrice,
-} from '~client/types';
+import { InitialQuery, PageListStandard, PageNonStandard, StocksListResponse } from '~client/types';
 
 export const testResponse: InitialQuery = {
   config: {
@@ -85,8 +79,3 @@ export const testStocksList: StocksListResponse = {
     total: 1032,
   },
 };
-
-export const testStockPrices: StockPrice[] = [
-  { code: 'SMT', open: 730.2, close: 739.1 },
-  { code: 'CTY', open: 338.9, close: 332.6 },
-];

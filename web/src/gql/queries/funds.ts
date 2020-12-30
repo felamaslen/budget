@@ -7,3 +7,14 @@ export const FundPricesUpdate = gql`
     }
   }
 `;
+
+export const StockPrices = gql`
+  query StockPrices($codes: [String!]!) {
+    stockPrices(codes: $codes) {
+      prices {
+        code
+        price
+      }
+    }
+  }
+`;

@@ -33,13 +33,7 @@ import { lastInArray } from '~client/modules/data';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { periodStoreKey } from '~client/reducers/funds';
-import {
-  getCacheTimes,
-  getFundItems,
-  getFundLines,
-  getHistoryOptions,
-  getStartTime,
-} from '~client/selectors';
+import { getFundItems, getFundLines, getFundsCache, getHistoryOptions } from '~client/selectors';
 import { graphFundsHeightMobile } from '~client/styled/variables';
 import {
   DrawProps,
@@ -173,10 +167,9 @@ function useGraphProps({
 }): LineGraphProps {
   const fundLines: {
     [mode in Mode]: FundLine[];
-  } = useSelector(getFundLines(today));
+  } = useSelector(getFundLines.today(today));
 
-  const startTime = useSelector(getStartTime);
-  const cacheTimes = useSelector(getCacheTimes);
+  const { startTime, cacheTimes } = useSelector(getFundsCache.today(today));
   const haveData = cacheTimes.length > 1;
 
   const filterFunds = useMemo<FilterFunds>(
@@ -324,7 +317,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   const today = useContext(TodayContext);
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
-  const fundItems = useSelector(getFundItems(today));
+  const fundItems = useSelector(getFundItems.today(today));
 
   const [historyOptions, setHistoryOptions] = useDynamicPrices();
   const [modeList, mode, changeMode] = useMode(isMobile);
