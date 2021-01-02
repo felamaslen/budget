@@ -11,7 +11,7 @@ function timeHookFactory(roundFn: (date: Date) => Date = IDENTITY): [() => Date,
     const timer = useRef<number>(0);
     useEffect(() => {
       clearInterval(timer.current);
-      timer.current = setInterval(() => {
+      timer.current = window.setInterval(() => {
         setTime((last) => {
           const nextTime = roundFn(new Date());
           return isSameSecond(nextTime, last) ? last : nextTime;

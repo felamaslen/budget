@@ -1,5 +1,6 @@
-import { darken } from 'polished';
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { css, SerializedStyles } from '@emotion/react';
+import styled from '@emotion/styled';
+import { darken, rem } from 'polished';
 import { centerGridOne, NetWorthValueFX } from '~client/components/form-field/styles';
 import { ModalDialog } from '~client/components/modal-dialog/styles';
 import {
@@ -13,12 +14,13 @@ import {
   FormContainer as NetWorthEditForm,
 } from '~client/components/net-worth/edit-form/styles';
 import { ButtonDelete as NetWorthEntryDelete } from '~client/components/net-worth/list/styles';
-import { rem, breakpoint } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
-export const Button = styled.button<{
+type ButtonProps = {
   expanded?: boolean;
-}>`
+};
+const buttonStyles = ({ expanded = false }: ButtonProps): SerializedStyles => css`
   display: flex;
   margin: 0 6px;
   flex-grow: 1;
@@ -57,11 +59,10 @@ export const Button = styled.button<{
       border-left-color: ${colors.dark.dark};
       border-width: 6px 8px;
       transform-origin: left center;
-      ${({ expanded = false }): false | FlattenSimpleInterpolation =>
-        expanded &&
-        css`
-          transform: rotate(90deg);
-        `};
+      ${expanded &&
+      css`
+        transform: rotate(90deg);
+      `};
     }
   }
 
@@ -107,6 +108,8 @@ export const Button = styled.button<{
     margin: 2px 4px;
   }
 `;
+
+export const Button = styled.button<ButtonProps>(buttonStyles);
 
 const ButtonCrud = styled(Button)`
   ${AddByCategoryValue} &,

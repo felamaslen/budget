@@ -36,103 +36,31 @@ describe('<FundGainInfo />', () => {
     expect.assertions(1);
     const { container } = setup();
     expect(container).toMatchInlineSnapshot(`
-      .c2 {
-        color: #333;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-        font-weight: bold;
-        margin-right: 0.25rem;
-        text-align: right;
-      }
-
-      .c3 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-flex: 2;
-        -ms-flex: 2;
-        flex: 2;
-      }
-
-      .c4 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex: 1 0 0;
-        -ms-flex: 1 0 0;
-        flex: 1 0 0;
-        -webkit-flex-flow: column;
-        -ms-flex-flow: column;
-        flex-flow: column;
-        overflow: visible;
-        text-overflow: unset;
-        -webkit-flex: 0 0 50%;
-        -ms-flex: 0 0 50%;
-        flex: 0 0 50%;
-        font-weight: bold;
-        -webkit-flex-flow: column;
-        -ms-flex-flow: column;
-        flex-flow: column;
-        max-width: 50%;
-      }
-
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex: 1 0 0;
-        -ms-flex: 1 0 0;
-        flex: 1 0 0;
-        -webkit-flex-flow: column;
-        -ms-flex-flow: column;
-        flex-flow: column;
-        overflow: visible;
-        text-overflow: unset;
-        -webkit-flex: 0 0 50%;
-        -ms-flex: 0 0 50%;
-        flex: 0 0 50%;
-      }
-
-      .c5 {
+      .emotion-0 {
         color: #483be4;
-        text-align: right;
+        width: 11.25rem;
       }
 
-      .c5::before {
-        content: '\\2b08';
-        font-style: normal;
-        margin-right: 0.2em;
+      @media only screen and (min-width: 350px) {
+        .emotion-0 {
+          width: 13.5rem;
+        }
       }
 
-      .c6 {
-        color: #483be4;
-        text-align: right;
-        display: none;
-        margin-right: 0.25rem;
+      @media only screen and (min-width: 500px) {
+        .emotion-0 {
+          display: -webkit-box;
+          display: -webkit-flex;
+          display: -ms-flexbox;
+          display: flex;
+          -webkit-flex: 0 0 12.5rem;
+          -ms-flex: 0 0 12.5rem;
+          flex: 0 0 12.5rem;
+          z-index: 1;
+        }
       }
 
-      .c8 {
-        color: #ff2c2c;
-        text-align: right;
-      }
-
-      .c8::before {
-        content: '\\2198';
-        font-style: normal;
-        margin-right: 0.2em;
-      }
-
-      .c9 {
-        color: #ff2c2c;
-        text-align: right;
-        display: none;
-      }
-
-      .c1 {
+      .emotion-2 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -147,136 +75,25 @@ describe('<FundGainInfo />', () => {
         padding: 0;
       }
 
-      .c0 {
-        color: #483be4;
-        width: 11.25rem;
-      }
-
-      @media only screen and (min-width:500px) {
-        .c2 {
-          width: 68px;
-          text-align: left;
-          -webkit-flex: 1 1 0;
-          -ms-flex: 1 1 0;
-          flex: 1 1 0;
-          font-size: 1.125rem;
-          margin-right: 0rem;
-          overflow: visible !important;
+      @media only screen and (max-width: 500px) {
+        .emotion-2 {
+          background-color: transparent!important;
         }
       }
 
-      @media only screen and (min-width:500px) {
-        .c3 {
-          background: rgba(255,255,255,0.6);
-          -webkit-flex: 2 1 0;
-          -ms-flex: 2 1 0;
-          flex: 2 1 0;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c4 {
-          max-width: 50%;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c7 {
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          padding-right: 0.5rem;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c5 {
-          -webkit-flex: 1 0 0;
-          -ms-flex: 1 0 0;
-          flex: 1 0 0;
-          font-size: 0.8125rem;
-          line-height: 24px;
-          height: 24px;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c6 {
-          -webkit-flex: 1 0 0;
-          -ms-flex: 1 0 0;
-          flex: 1 0 0;
-          font-size: 0.8125rem;
-          line-height: 24px;
-          height: 24px;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c6 {
-          display: block;
-          margin-right: 0rem;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c8 {
-          -webkit-flex: 1 0 0;
-          -ms-flex: 1 0 0;
-          flex: 1 0 0;
-          font-size: 0.8125rem;
-          line-height: 24px;
-          height: 24px;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c8 {
-          color: #ca6161;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c9 {
-          -webkit-flex: 1 0 0;
-          -ms-flex: 1 0 0;
-          flex: 1 0 0;
-          font-size: 0.8125rem;
-          line-height: 24px;
-          height: 24px;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c9 {
-          color: #ca6161;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c9 {
-          display: block;
-        }
-      }
-
-      @media only screen and (max-width:500px) {
-        .c1 {
-          background-color: transparent !important;
-        }
-      }
-
-      @media only screen and (min-width:500px) {
-        .c1 {
+      @media only screen and (min-width: 500px) {
+        .emotion-2 {
           background: #666;
           display: block;
         }
 
-        .c1 > span {
+        .emotion-2>span {
           padding: 0 1px;
           text-overflow: ellipsis;
           text-align: center;
         }
 
-        .sc-fznyAO .c1 {
+        .e1e47zb315 .emotion-2 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -286,71 +103,256 @@ describe('<FundGainInfo />', () => {
           width: 100%;
         }
 
-        .sc-fznyAO .c1 > span {
+        .e1e47zb315 .emotion-2>span {
           padding: 0;
         }
       }
 
-      @media only screen and (min-width:350px) {
-        .c0 {
-          width: 13.5rem;
+      .emotion-4 {
+        color: #333;
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        font-weight: bold;
+        margin-right: 0.25rem;
+        text-align: right;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-4 {
+          width: 68px;
+          text-align: left;
+          -webkit-flex: 1 1 0;
+          -ms-flex: 1 1 0;
+          flex: 1 1 0;
+          font-size: 1.125rem;
+          margin-right: 0rem;
+          overflow: visible!important;
         }
       }
 
-      @media only screen and (min-width:500px) {
-        .c0 {
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          -webkit-flex: 0 0 12.5rem;
-          -ms-flex: 0 0 12.5rem;
-          flex: 0 0 12.5rem;
-          z-index: 1;
+      .emotion-6 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-flex: 2;
+        -ms-flex: 2;
+        flex: 2;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-6 {
+          background: rgba(255,255,255,0.6);
+          -webkit-flex: 2 1 0;
+          -ms-flex: 2 1 0;
+          flex: 2 1 0;
+        }
+      }
+
+      .emotion-8 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex: 1 0 0;
+        -ms-flex: 1 0 0;
+        flex: 1 0 0;
+        -webkit-box-flex-flow: column;
+        -webkit-flex-flow: column;
+        -ms-flex-flow: column;
+        flex-flow: column;
+        overflow: visible;
+        text-overflow: unset;
+        -webkit-flex: 0 0 50%;
+        -ms-flex: 0 0 50%;
+        flex: 0 0 50%;
+        font-weight: bold;
+        -webkit-box-flex-flow: column;
+        -webkit-flex-flow: column;
+        -ms-flex-flow: column;
+        flex-flow: column;
+        max-width: 50%;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-8 {
+          max-width: 50%;
+        }
+      }
+
+      .emotion-10 {
+        color: #483be4;
+        text-align: right;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-10 {
+          -webkit-flex: 1 0 0;
+          -ms-flex: 1 0 0;
+          flex: 1 0 0;
+          font-size: 0.8125rem;
+          line-height: 24px;
+          height: 24px;
+        }
+      }
+
+      .emotion-10::before {
+        content: '\\2b08';
+        font-style: normal;
+        margin-right: 0.2em;
+      }
+
+      .emotion-12 {
+        color: #483be4;
+        text-align: right;
+        display: none;
+        margin-right: 0.25rem;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-12 {
+          -webkit-flex: 1 0 0;
+          -ms-flex: 1 0 0;
+          flex: 1 0 0;
+          font-size: 0.8125rem;
+          line-height: 24px;
+          height: 24px;
+        }
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-12 {
+          display: block;
+          margin-right: 0rem;
+        }
+      }
+
+      .emotion-14 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex: 1 0 0;
+        -ms-flex: 1 0 0;
+        flex: 1 0 0;
+        -webkit-box-flex-flow: column;
+        -webkit-flex-flow: column;
+        -ms-flex-flow: column;
+        flex-flow: column;
+        overflow: visible;
+        text-overflow: unset;
+        -webkit-flex: 0 0 50%;
+        -ms-flex: 0 0 50%;
+        flex: 0 0 50%;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-14 {
+          -webkit-flex: 1;
+          -ms-flex: 1;
+          flex: 1;
+          padding-right: 0.5rem;
+        }
+      }
+
+      .emotion-16 {
+        color: #ff2c2c;
+        text-align: right;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-16 {
+          -webkit-flex: 1 0 0;
+          -ms-flex: 1 0 0;
+          flex: 1 0 0;
+          font-size: 0.8125rem;
+          line-height: 24px;
+          height: 24px;
+        }
+      }
+
+      .emotion-16::before {
+        content: '\\2198';
+        font-style: normal;
+        margin-right: 0.2em;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-16 {
+          color: #ca6161;
+        }
+      }
+
+      .emotion-18 {
+        color: #ff2c2c;
+        text-align: right;
+        display: none;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-18 {
+          -webkit-flex: 1 0 0;
+          -ms-flex: 1 0 0;
+          flex: 1 0 0;
+          font-size: 0.8125rem;
+          line-height: 24px;
+          height: 24px;
+        }
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-18 {
+          color: #ca6161;
+        }
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-18 {
+          display: block;
         }
       }
 
       <div>
         <span
-          class="c0"
+          class="emotion-0 emotion-1"
         >
           <span
-            class="c1"
-            color="#ff801e"
+            class="emotion-2 emotion-3"
             style="background-color: rgb(255, 128, 30);"
           >
             <span
-              class="c2"
+              class="emotion-4 emotion-31"
             >
               £5.6k
             </span>
             <span
-              class="sc-fzqBZW c3"
+              class="emotion-6 emotion-30"
             >
               <span
-                class="sc-qQMSE c4"
+                class="emotion-8 emotion-9"
               >
                 <span
-                  class="sc-pZOBi sc-oTNDV c5"
+                  class="emotion-10 emotion-11"
                 >
                   £40
                 </span>
                 <span
-                  class="sc-pZOBi c6"
+                  class="emotion-12 emotion-13"
                 >
                   30.00%
                 </span>
               </span>
               <span
-                class="sc-qQMSE c7"
+                class="emotion-14 emotion-15"
               >
                 <span
-                  class="sc-pZOBi sc-oTNDV c8"
+                  class="emotion-16 emotion-17"
                 >
                   (£3)
                 </span>
                 <span
-                  class="sc-pZOBi c9"
+                  class="emotion-18 emotion-19"
                 >
                   (2.00%)
                 </span>

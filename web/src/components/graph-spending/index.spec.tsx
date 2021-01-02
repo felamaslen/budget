@@ -29,18 +29,6 @@ describe('<GraphSpending />', () => {
     expect.assertions(1);
     const { getByTestId } = setup();
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
-      @media only screen and (min-width:500px) {
-
-      }
-
-      @media only screen and (min-width:500px) {
-
-      }
-
-      @media only screen and (min-width:1200px) {
-
-      }
-
       <svg
         data-testid="graph-svg"
         height="300"

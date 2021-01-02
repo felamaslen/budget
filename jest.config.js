@@ -2,7 +2,6 @@ const mapPaths = require('tsconfig-paths-jest');
 const tsconfig = require('./tsconfig.json');
 
 module.exports = {
-  preset: 'ts-jest',
   clearMocks: true,
   globals: {
     'ts-jest': {

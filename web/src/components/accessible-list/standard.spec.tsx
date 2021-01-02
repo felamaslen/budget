@@ -203,87 +203,156 @@ describe('<AccessibleListStandard />', () => {
       const { container } = setupMobile();
 
       expect(container).toMatchInlineSnapshot(`
-        .c8 {
-          -webkit-flex: 0 0 6.5rem;
-          -ms-flex: 0 0 6.5rem;
-          flex: 0 0 6.5rem;
-          overflow: hidden;
-          padding-right: 0.25rem;
-          text-align: left;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .c9 {
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          overflow: hidden;
-          padding-right: 0.25rem;
-          text-align: left;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .c10 {
-          -webkit-flex: 0 0 5rem;
-          -ms-flex: 0 0 5rem;
-          flex: 0 0 5rem;
-          overflow: hidden;
-          padding-right: 0.25rem;
-          text-align: left;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .c11 {
-          -webkit-align-items: center;
-          -webkit-box-align: center;
-          -ms-flex-align: center;
-          align-items: center;
-          background: rgba(255,255,255,0.8);
-          bottom: 0;
+        .emotion-0 {
+          background-color: red;
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
           display: flex;
+          -webkit-box-flex-flow: column;
           -webkit-flex-flow: column;
           -ms-flex-flow: column;
           flex-flow: column;
-          height: 3rem;
-          -webkit-box-pack: center;
-          -webkit-justify-content: center;
-          -ms-flex-pack: center;
-          justify-content: center;
-          position: absolute;
-          width: 100%;
+          -webkit-flex: 1 1 0;
+          -ms-flex: 1 1 0;
+          flex: 1 1 0;
+          min-height: 0;
         }
 
-        .c11 button {
-          -webkit-align-items: center;
-          -webkit-box-align: center;
-          -ms-flex-align: center;
-          align-items: center;
-          background: #000;
-          border: none;
-          border-radius: 0.125rem;
-          color: #fff;
-          font-size: 0.875rem;
-          -webkit-flex: 0 0 2.625rem;
-          -ms-flex: 0 0 2.625rem;
-          flex: 0 0 2.625rem;
-          -webkit-box-pack: center;
-          -webkit-justify-content: center;
-          -ms-flex-pack: center;
-          justify-content: center;
-          line-height: 2.5rem;
-          padding: 0;
-          margin: 0;
-          text-transform: uppercase;
-          width: 8rem;
+        @media only screen and (min-width: 500px) {
+          .emotion-0 {
+            background-color: #fff;
+          }
         }
 
-        .c7 {
+        .emotion-2 {
+          display: -webkit-box;
+          display: -webkit-flex;
+          display: -ms-flexbox;
+          display: flex;
+          font-size: 1rem;
+        }
+
+        .emotion-4 {
+          -webkit-flex: 0 0 6.5rem;
+          -ms-flex: 0 0 6.5rem;
+          flex: 0 0 6.5rem;
+          font-weight: bold;
+          height: 1.75rem;
+          line-height: 1.75rem;
+          padding: 0 0.25rem;
+          text-align: center;
+          white-space: nowrap;
+        }
+
+        @media only screen and (min-width: 500px) {
+          .emotion-4 {
+            -webkit-flex: 0 0 6.25rem;
+            -ms-flex: 0 0 6.25rem;
+            flex: 0 0 6.25rem;
+            border-right: 1px solid #ccc;
+            height: 1.5rem;
+            line-height: 1.5rem;
+            text-align: left;
+          }
+        }
+
+        .emotion-6 {
+          -webkit-flex: 1;
+          -ms-flex: 1;
+          flex: 1;
+          font-weight: bold;
+          height: 1.75rem;
+          line-height: 1.75rem;
+          padding: 0 0.25rem;
+          text-align: center;
+          white-space: nowrap;
+        }
+
+        @media only screen and (min-width: 500px) {
+          .emotion-6 {
+            -webkit-flex: 0 0 11.25rem;
+            -ms-flex: 0 0 11.25rem;
+            flex: 0 0 11.25rem;
+            border-right: 1px solid #ccc;
+            height: 1.5rem;
+            line-height: 1.5rem;
+            text-align: left;
+          }
+        }
+
+        .emotion-8 {
+          -webkit-flex: 0 0 5rem;
+          -ms-flex: 0 0 5rem;
+          flex: 0 0 5rem;
+          font-weight: bold;
+          height: 1.75rem;
+          line-height: 1.75rem;
+          padding: 0 0.25rem;
+          text-align: center;
+          white-space: nowrap;
+        }
+
+        @media only screen and (min-width: 500px) {
+          .emotion-8 {
+            -webkit-flex: 0 0 6rem;
+            -ms-flex: 0 0 6rem;
+            flex: 0 0 6rem;
+            border-right: 1px solid #ccc;
+            height: 1.5rem;
+            line-height: 1.5rem;
+            text-align: left;
+          }
+        }
+
+        .emotion-10 {
+          -webkit-flex: 1;
+          -ms-flex: 1;
+          flex: 1;
+          padding-bottom: 3rem;
+        }
+
+        @media only screen and (min-width: 500px) {
+          .emotion-10 {
+            padding-bottom: 0;
+          }
+        }
+
+        .emotion-12 {
+          display: -webkit-box;
+          display: -webkit-flex;
+          display: -ms-flexbox;
+          display: flex;
+          height: 1.875rem;
+        }
+
+        @media only screen and (min-width: 500px) {
+          .emotion-12 {
+            background-color: #eaeaea;
+            border-right: 1px solid #ccc;
+            height: 1.5rem;
+          }
+
+          .emotion-12 input[type='text'] {
+            background-color: transparent;
+            border: none;
+            border-right: 1px solid #ccc;
+            height: 1.5rem;
+            margin: 0;
+            outline: none;
+            padding: 0 0.125rem;
+            width: 0;
+            -webkit-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+          }
+
+          .emotion-12 input[type='text']:focus {
+            box-shadow: inset 0 0 1px 1px #09e;
+          }
+        }
+
+        .emotion-14 {
           -webkit-align-items: center;
           -webkit-box-align: center;
           -ms-flex-align: center;
@@ -305,81 +374,88 @@ describe('<AccessibleListStandard />', () => {
           padding: 0;
         }
 
-        .c0 {
-          background-color: red;
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          -webkit-flex-flow: column;
-          -ms-flex-flow: column;
-          flex-flow: column;
-          -webkit-flex: 1 1 0;
-          -ms-flex: 1 1 0;
-          flex: 1 1 0;
-          min-height: 0;
-        }
-
-        .c2 {
+        .emotion-16 {
           -webkit-flex: 0 0 6.5rem;
           -ms-flex: 0 0 6.5rem;
           flex: 0 0 6.5rem;
-          font-weight: bold;
-          height: 1.75rem;
-          line-height: 1.75rem;
-          padding: 0 0.25rem;
-          text-align: center;
+          overflow: hidden;
+          padding-right: 0.25rem;
+          text-align: left;
+          text-overflow: ellipsis;
           white-space: nowrap;
         }
 
-        .c3 {
+        .emotion-18 {
           -webkit-flex: 1;
           -ms-flex: 1;
           flex: 1;
-          font-weight: bold;
-          height: 1.75rem;
-          line-height: 1.75rem;
-          padding: 0 0.25rem;
-          text-align: center;
+          overflow: hidden;
+          padding-right: 0.25rem;
+          text-align: left;
+          text-overflow: ellipsis;
           white-space: nowrap;
         }
 
-        .c4 {
+        .emotion-20 {
           -webkit-flex: 0 0 5rem;
           -ms-flex: 0 0 5rem;
           flex: 0 0 5rem;
-          font-weight: bold;
-          height: 1.75rem;
-          line-height: 1.75rem;
-          padding: 0 0.25rem;
-          text-align: center;
+          overflow: hidden;
+          padding-right: 0.25rem;
+          text-align: left;
+          text-overflow: ellipsis;
           white-space: nowrap;
         }
 
-        .c1 {
+        .emotion-22 {
+          -webkit-align-items: center;
+          -webkit-box-align: center;
+          -ms-flex-align: center;
+          align-items: center;
+          background: rgba(255,255,255,0.8);
+          bottom: 0;
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
           display: flex;
-          font-size: 1rem;
+          -webkit-box-flex-flow: column;
+          -webkit-flex-flow: column;
+          -ms-flex-flow: column;
+          flex-flow: column;
+          height: 3rem;
+          -webkit-box-pack: center;
+          -ms-flex-pack: center;
+          -webkit-justify-content: center;
+          justify-content: center;
+          position: absolute;
+          width: 100%;
         }
 
-        .c6 {
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          height: 1.875rem;
+        .emotion-22 button {
+          -webkit-align-items: center;
+          -webkit-box-align: center;
+          -ms-flex-align: center;
+          align-items: center;
+          background: #000;
+          border: none;
+          border-radius: 0.125rem;
+          color: #fff;
+          font-size: 0.875rem;
+          -webkit-flex: 0 0 2.625rem;
+          -ms-flex: 0 0 2.625rem;
+          flex: 0 0 2.625rem;
+          -webkit-box-pack: center;
+          -ms-flex-pack: center;
+          -webkit-justify-content: center;
+          justify-content: center;
+          line-height: 2.5rem;
+          padding: 0;
+          margin: 0;
+          text-transform: uppercase;
+          width: 8rem;
         }
 
-        .c5 {
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          padding-bottom: 3rem;
-        }
-
-        .c12 {
+        .emotion-24 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -390,8 +466,8 @@ describe('<AccessibleListStandard />', () => {
           -ms-flex-positive: 1;
           flex-grow: 1;
           -webkit-box-pack: center;
-          -webkit-justify-content: center;
           -ms-flex-pack: center;
+          -webkit-justify-content: center;
           justify-content: center;
           padding: 1em 0;
           width: 100%;
@@ -404,7 +480,7 @@ describe('<AccessibleListStandard />', () => {
           font-weight: bold;
         }
 
-        .sc-fznzOf .c12 {
+        .e1rvg2k52 .emotion-24 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -415,22 +491,22 @@ describe('<AccessibleListStandard />', () => {
           -ms-flex-align: center;
           align-items: center;
           -webkit-box-pack: center;
-          -webkit-justify-content: center;
           -ms-flex-pack: center;
+          -webkit-justify-content: center;
           justify-content: center;
           grid-row: 1;
           grid-column: 4;
         }
 
-        .sc-fznMnq .c12,
-        .sc-fznMnq .c12:hover,
-        .sc-fznMnq .c12:active {
+        .e1rvg2k51 .emotion-24,
+        .e1rvg2k51 .emotion-24:hover,
+        .e1rvg2k51 .emotion-24:active {
           background: none;
           border: none;
           box-shadow: none;
         }
 
-        .sc-fznMnq .c12::after {
+        .e1rvg2k51 .emotion-24::after {
           display: block;
           margin-left: 16px;
           content: '';
@@ -439,95 +515,15 @@ describe('<AccessibleListStandard />', () => {
           border: solid transparent;
           border-left-color: #111;
           border-width: 6px 8px;
-          -webkit-transform-origin: left center;
-          -ms-transform-origin: left center;
           transform-origin: left center;
         }
 
-        .c12:disabled {
+        .emotion-24:disabled {
           background: none;
         }
 
-        .sc-fznXWL .c12 {
-          margin: 2px 4px;
-        }
-
-        @media only screen and (min-width:500px) {
-          .c0 {
-            background-color: #fff;
-          }
-        }
-
-        @media only screen and (min-width:500px) {
-          .c2 {
-            -webkit-flex: 0 0 6.25rem;
-            -ms-flex: 0 0 6.25rem;
-            flex: 0 0 6.25rem;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: left;
-          }
-        }
-
-        @media only screen and (min-width:500px) {
-          .c3 {
-            -webkit-flex: 0 0 11.25rem;
-            -ms-flex: 0 0 11.25rem;
-            flex: 0 0 11.25rem;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: left;
-          }
-        }
-
-        @media only screen and (min-width:500px) {
-          .c4 {
-            -webkit-flex: 0 0 6rem;
-            -ms-flex: 0 0 6rem;
-            flex: 0 0 6rem;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: left;
-          }
-        }
-
-        @media only screen and (min-width:500px) {
-          .c6 {
-            background-color: #eaeaea;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-          }
-
-          .c6 input[type='text'] {
-            background-color: transparent;
-            border: none;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-            margin: 0;
-            outline: none;
-            padding: 0 0.125rem;
-            width: 0;
-            -webkit-flex: 1;
-            -ms-flex: 1;
-            flex: 1;
-          }
-
-          .c6 input[type='text']:focus {
-            box-shadow: inset 0 0 1px 1px #09e;
-          }
-        }
-
-        @media only screen and (min-width:500px) {
-          .c5 {
-            padding-bottom: 0;
-          }
-        }
-
-        @media only screen and (min-width:500px) {
-          .c12 {
+        @media only screen and (min-width: 500px) {
+          .emotion-24 {
             display: inline-block;
             margin: 0;
             padding: 5px 12px 6px;
@@ -552,50 +548,54 @@ describe('<AccessibleListStandard />', () => {
             z-index: 4;
           }
 
-          .c12:hover,
-          .c12:focus {
+          .emotion-24:hover,
+          .emotion-24:focus {
             background: #80be69;
           }
 
-          .c12:active {
+          .emotion-24:active {
             background: #638c4d;
           }
 
-          .c12:disabled {
+          .emotion-24:disabled {
             background: #9c9c9c;
             cursor: default;
             border: 1px solid #666;
           }
         }
 
+        .e1ppss2j5 .emotion-24 {
+          margin: 2px 4px;
+        }
+
         <div>
           <div
-            class="c0"
+            class="emotion-0 emotion-1"
             color="red"
           >
             <div
-              class="c1"
+              class="emotion-2 emotion-3"
               data-testid="header"
               role="heading"
             >
               <div
-                class="c2"
+                class="emotion-4 emotion-5"
               >
                 Date
               </div>
               <div
-                class="c3"
+                class="emotion-6 emotion-5"
               >
                 Item
               </div>
               <div
-                class="c4"
+                class="emotion-8 emotion-5"
               >
                 Cost
               </div>
             </div>
             <div
-              class="c5"
+              class="emotion-10 emotion-11"
               role="list"
             >
               <div>
@@ -606,25 +606,25 @@ describe('<AccessibleListStandard />', () => {
                     style="height: 30px; width: 100%;"
                   >
                     <li
-                      class="sc-Axmtr c6"
+                      class="emotion-12 emotion-13"
                       role="button"
                       style="position: absolute; left: 0px; top: 0px; height: 30px; width: 100%;"
                     >
                       <button
-                        class="c7"
+                        class="emotion-14 emotion-15"
                       >
                         <span
-                          class="c8"
+                          class="emotion-16 emotion-17"
                         >
                           20/04/2020
                         </span>
                         <span
-                          class="c9"
+                          class="emotion-18 emotion-17"
                         >
                           item one
                         </span>
                         <span
-                          class="c10"
+                          class="emotion-20 emotion-17"
                         >
                           £9.31
                         </span>
@@ -635,10 +635,10 @@ describe('<AccessibleListStandard />', () => {
               </div>
             </div>
             <div
-              class="c11"
+              class="emotion-22 emotion-23"
             >
               <button
-                class="c12"
+                class="emotion-24 emotion-25"
               >
                 Add
               </button>

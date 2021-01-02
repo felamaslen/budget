@@ -1,4 +1,7 @@
-import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
+import { rem, rgba } from 'polished';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import * as Styled from './styles';
 import { colorKey } from '~client/modules/color';
@@ -10,7 +13,7 @@ import { Portfolio, PortfolioItem, FundNative as Fund, TargetDelta } from '~clie
 
 const minimumAdjustmentValue = 100000;
 
-type Props = {
+export type Props = {
   funds: Fund[];
   portfolio: Portfolio;
   cashTarget: number;
@@ -33,6 +36,8 @@ type TargetProps = Pick<Props, 'funds' | 'onSetFundTargets' | 'onSetCashTarget'>
   allocationTarget: number;
   stockValue: number;
   totalValue: number;
+  touchX: number | null;
+  setTouchX: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
 const formatOptions = { abbreviate: true, noPence: true };
@@ -41,6 +46,8 @@ const roundAndBound = (value: number): number => Math.round(Math.max(1, Math.min
 
 const labelDelta = (item: string, target: number): string =>
   `${abbreviateFundName(item)}: ${formatPercent(target / 100, { precision: 0 })}`;
+
+type TargetState = { delta: number; dragPosition: number | null };
 
 const Target: React.FC<TargetProps> = ({
   fraction,
@@ -57,9 +64,10 @@ const Target: React.FC<TargetProps> = ({
   allocationTarget,
   stockValue,
   totalValue,
+  touchX,
+  setTouchX,
 }) => {
-  const [delta, setDelta] = useState<number>(0);
-  const [dragPosition, setDragPosition] = useState<number | null>(null);
+  const [state, setState] = useState<TargetState>({ delta: 0, dragPosition: null });
 
   const getFundTargetFromDelta = useCallback(
     (deltaPixels: number): { deltas: TargetDelta[]; description: string | null } => {
@@ -147,26 +155,13 @@ const Target: React.FC<TargetProps> = ({
     [onSetCashTarget, getCashTargetFromDelta],
   );
 
-  const onActivate = useCallback((event: React.MouseEvent) => {
-    setDragPosition(event.clientX);
-  }, []);
-  const onTouchStart = useCallback((event: React.TouchEvent) => {
-    setDragPosition(event.touches[0]?.clientX ?? null);
-  }, []);
-
-  const onFinish = useCallback(() => {
-    setDragPosition(null);
-  }, []);
-
-  useEffect(() => {
-    if (dragPosition === null) {
-      setDelta(0);
-      return VOID;
-    }
-
-    const move = (clientX: number): void => {
-      const nextDelta = clientX - dragPosition;
-      setDelta(nextDelta);
+  const onMove = useCallback(
+    (clientX: number | null): void => {
+      if (clientX === null) {
+        return;
+      }
+      const nextDelta = clientX - (state.dragPosition ?? clientX);
+      setState((last) => ({ ...last, delta: nextDelta }));
       if (isCash) {
         const nextTarget = getCashTargetFromDelta(nextDelta);
         setPreview(`Cash target: ${formatCurrency(nextTarget, formatOptions)}`);
@@ -174,33 +169,62 @@ const Target: React.FC<TargetProps> = ({
         const { description } = getFundTargetFromDelta(nextDelta);
         setPreview(description);
       }
-    };
+    },
+    [state.dragPosition, getCashTargetFromDelta, getFundTargetFromDelta, isCash, setPreview],
+  );
 
-    const onMouseMove = (event: MouseEvent): void => move(event.clientX);
-    const onTouchMove = (event: TouchEvent): void => {
-      if (event.touches.length) {
-        move(event.touches[0].clientX);
+  const activate = useCallback(
+    (clientX: number | null): void => {
+      setState((last) => ({ ...last, dragPosition: clientX }));
+      setImmediate(() => onMove(clientX));
+    },
+    [onMove],
+  );
+
+  const deactivate = useCallback(
+    (clientX: number): void => {
+      const nextDelta = clientX - (state.dragPosition ?? 0);
+      setState({ delta: nextDelta, dragPosition: null });
+      setPreview(null);
+      setTouchX(null);
+      if (!nextDelta) {
+        return;
       }
-    };
-
-    const deactivate = (clientX: number): void => {
-      const nextDelta = clientX - dragPosition;
-      setDelta(nextDelta);
-      onFinish();
       if (isCash) {
         setCashTarget(nextDelta);
       } else {
         setFundTargets(nextDelta);
       }
-      setPreview(null);
-    };
+    },
+    [state.dragPosition, setCashTarget, setFundTargets, isCash, setPreview, setTouchX],
+  );
+
+  const onMouseDown = useCallback((event: React.MouseEvent) => activate(event.clientX), [activate]);
+  const prevTouchX = useRef<number | null>(null);
+  useEffect(() => {
+    if (touchX === prevTouchX.current) {
+      return;
+    }
+    prevTouchX.current = touchX;
+    if (touchX === null) {
+      deactivate(state.dragPosition ?? 0);
+    } else {
+      activate(touchX);
+    }
+  }, [touchX, activate, deactivate, state.dragPosition]);
+
+  useEffect(() => {
+    if (state.dragPosition === null) {
+      setState((last) => ({ ...last, delta: 0 }));
+      return VOID;
+    }
+
+    const onMouseMove = (event: MouseEvent): void => onMove(event.clientX);
+    const onTouchMove = (event: TouchEvent): void => onMove(event.touches[0]?.clientX ?? null);
 
     const onMouseUp = (event: MouseEvent): void => deactivate(event.clientX);
-    const onTouchEnd = (event: TouchEvent): void => {
-      if (event.changedTouches.length) {
-        deactivate(event.changedTouches[0].clientX);
-      }
-    };
+    const onTouchEnd = (event: TouchEvent): void =>
+      deactivate(event.changedTouches[0]?.clientX ?? null);
 
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
@@ -213,24 +237,17 @@ const Target: React.FC<TargetProps> = ({
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, [
-    isCash,
-    dragPosition,
-    onFinish,
-    setPreview,
-    getCashTargetFromDelta,
-    setCashTarget,
-    getFundTargetFromDelta,
-    setFundTargets,
-  ]);
+  }, [onMove, deactivate, state.dragPosition]);
 
   return (
     <Styled.Target
-      fraction={Math.min(1, fraction)}
-      delta={delta}
-      color={color}
-      onMouseDown={onActivate}
-      onTouchStart={onTouchStart}
+      data-testid={`target-${id ?? 'cash'}`}
+      style={{
+        borderColor: color,
+        left: `${Math.min(1, fraction) * 100}%`,
+        marginLeft: state.delta - 4,
+      }}
+      onMouseDown={onMouseDown}
       isCash={isCash}
     />
   );
@@ -274,8 +291,10 @@ export const Adjustment: React.FC<AdjustmentProps> = ({ title, value, totalValue
 
   return (
     <Styled.Adjustment
+      style={{
+        width: rem(fraction * Styled.containerWidth),
+      }}
       direction={direction}
-      fraction={fraction}
       onMouseOver={onActivate}
       onFocus={onActivate}
       onMouseOut={onBlur}
@@ -289,6 +308,22 @@ export const Adjustment: React.FC<AdjustmentProps> = ({ title, value, totalValue
     </Styled.Adjustment>
   );
 };
+
+type ActualProps = Styled.FractionProps & {
+  color: string;
+};
+
+const Actual: React.FC<ActualProps> = ({ color, fraction, children }) => (
+  <Styled.Actual
+    style={{
+      backgroundColor: rgba(color, 0.2),
+      width: `${fraction * 100}%`,
+    }}
+    fraction={fraction}
+  >
+    {children}
+  </Styled.Actual>
+);
 
 export const FundAllocationTargets: React.FC<Props> = ({
   funds,
@@ -315,9 +350,34 @@ export const FundAllocationTargets: React.FC<Props> = ({
 
   const [preview, setPreview] = useState<string | null>(null);
 
+  const [touchX, setTouchX] = useState<number | null>(null);
+  const onTouchStart = useCallback(
+    (event: React.TouchEvent) => setTouchX(event.touches[0]?.clientX ?? null),
+    [],
+  );
+
+  const touchNearestId = useMemo<number | 'cash' | null>(() => {
+    if (touchX === null) {
+      return null;
+    }
+    const touchOffset = touchX - (containerRef.current?.offsetLeft ?? 0);
+    const cashDelta = Math.abs(touchOffset - (cashTarget / totalValue) * containerWidth);
+    const nearest = sortedPortfolio.reduce<{ delta: number; sum: number; id: number | 'cash' }>(
+      (last, { id, allocationTarget }) => {
+        const nextSum = last.sum + (allocationTarget / 100) * (totalValue - cashTarget);
+        const fundDelta = Math.abs(touchOffset - (nextSum / totalValue) * containerWidth);
+        const nextDelta = Math.min(last.delta, fundDelta);
+        const nextId = fundDelta < last.delta ? id : last.id;
+        return { delta: nextDelta, sum: nextSum, id: nextId };
+      },
+      { delta: cashDelta, sum: cashTarget, id: 'cash' },
+    );
+    return nearest.id;
+  }, [containerWidth, sortedPortfolio, touchX, cashTarget, totalValue]);
+
   return (
-    <Styled.Container ref={containerRef}>
-      <Styled.Actual fraction={cashFractionActual} color={colors.medium.dark}>
+    <Styled.Container ref={containerRef} onTouchStart={onTouchStart}>
+      <Actual fraction={cashFractionActual} color={colors.medium.dark}>
         <span>Cash</span>
         <Adjustment
           value={cashAdjustment}
@@ -325,7 +385,7 @@ export const FundAllocationTargets: React.FC<Props> = ({
           title="Cash"
           setPreview={setPreview}
         />
-      </Styled.Actual>
+      </Actual>
       <Target
         containerWidth={containerWidth}
         funds={funds}
@@ -340,6 +400,8 @@ export const FundAllocationTargets: React.FC<Props> = ({
         isCash={true}
         cashTarget={cashTarget}
         allocationTarget={cashTarget}
+        touchX={touchNearestId === 'cash' ? touchX : null}
+        setTouchX={setTouchX}
       />
 
       {sortedPortfolio
@@ -355,8 +417,8 @@ export const FundAllocationTargets: React.FC<Props> = ({
           [],
         )
         .map(({ id, item, value, cumulativeTarget, allocationTarget }) => (
-          <React.Fragment key={id}>
-            <Styled.Actual
+          <Fragment key={id}>
+            <Actual
               fraction={(value + cashFractionActual) / totalValue}
               color={colorKey(abbreviateFundName(item))}
             >
@@ -367,7 +429,7 @@ export const FundAllocationTargets: React.FC<Props> = ({
                 setPreview={setPreview}
                 title={abbreviateFundName(item)}
               />
-            </Styled.Actual>
+            </Actual>
 
             <Target
               containerWidth={containerWidth}
@@ -383,8 +445,10 @@ export const FundAllocationTargets: React.FC<Props> = ({
               color={colorKey(abbreviateFundName(item))}
               cashTarget={cashTarget}
               allocationTarget={allocationTarget}
+              touchX={touchNearestId === id ? touchX : null}
+              setTouchX={setTouchX}
             />
-          </React.Fragment>
+          </Fragment>
         ))}
 
       {preview && <Styled.Preview>{preview}</Styled.Preview>}

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { breakpoint } from '~client/styled/mixins';
 import { Page as PageBase } from '~client/styled/shared/page';
 import { breakpoints } from '~client/styled/variables';

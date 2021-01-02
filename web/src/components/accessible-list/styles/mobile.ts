@@ -1,6 +1,5 @@
-import { darken } from 'polished';
-import styled from 'styled-components';
-import { rem } from '~client/styled/mixins';
+import styled from '@emotion/styled';
+import { darken, rem } from 'polished';
 import { colors } from '~client/styled/variables';
 
 export const fieldSizesMobile = {

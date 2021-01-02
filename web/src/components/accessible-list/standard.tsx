@@ -119,7 +119,7 @@ export const AccessibleListStandard = <
   customSelector,
   categoryLabel = 'category',
   Header = StandardHeader as Props<I, P, MK>['Header'],
-  Row = StandardRow,
+  Row = StandardRow as PropsStandard<I, P, MK, E>['Row'],
 }: PropsStandard<I, P, MK, E & ExtraProps>): React.ReactElement<
   PropsStandard<I, P, MK, E & ExtraProps>
 > => {

@@ -1,5 +1,8 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { rem, breakpoint } from '~client/styled/mixins';
+import { css, SerializedStyles } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
+import { breakpoint } from '~client/styled/mixins';
+import { asButton } from '~client/styled/shared/role';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const NetWorthList = styled.div`
@@ -16,10 +19,9 @@ export const NetWorthList = styled.div`
   }
 `;
 
-export const ItemSummary = styled.div.attrs({
-  role: 'button',
-  tabIndex: 0,
-})<{ add?: boolean }>`
+export type ItemSummaryProps = { add?: boolean };
+
+const itemSummaryStyles = ({ add }: ItemSummaryProps): SerializedStyles => css`
   background: ${colors.translucent.light.light};
   display: flex;
   flex-flow: column;
@@ -32,13 +34,12 @@ export const ItemSummary = styled.div.attrs({
   border-radius: 2px;
   outline: none;
 
-  ${({ add }): false | FlattenSimpleInterpolation =>
-    !!add &&
-    css`
-      margin: ${rem(4)} auto;
-      padding: ${rem(4)} ${rem(8)};
-      width: auto;
-    `};
+  ${!!add &&
+  css`
+    margin: ${rem(4)} auto;
+    padding: ${rem(4)} ${rem(8)};
+    width: auto;
+  `};
 
   ${breakpoint(breakpoints.mobile)} {
     background: ${colors.light.mediumLight};
@@ -53,25 +54,26 @@ export const ItemSummary = styled.div.attrs({
       box-shadow: 0 1px 3px ${colors.shadow.dark};
     }
 
-    ${({ add }): FlattenSimpleInterpolation =>
-      add
-        ? css`
-            margin: 0 auto ${rem(4)};
-            padding: 0;
-            width: ${rem(160)};
-            grid-row: 2;
-            flex: 0 0 ${rem(32)};
-            line-height: ${rem(32)};
-          `
-        : css`
-            &:last-child {
-              grid-row: 6;
-              grid-column: 3;
-              z-index: 3;
-            }
-          `};
+    ${add
+      ? css`
+          margin: 0 auto ${rem(4)};
+          padding: 0;
+          width: ${rem(160)};
+          grid-row: 2;
+          flex: 0 0 ${rem(32)};
+          line-height: ${rem(32)};
+        `
+      : css`
+          &:last-child {
+            grid-row: 6;
+            grid-column: 3;
+            z-index: 3;
+          }
+        `};
   }
 `;
+
+export const ItemSummary = asButton(styled.div<ItemSummaryProps>(itemSummaryStyles));
 
 export const ButtonDelete = styled.div`
   display: inline-flex;

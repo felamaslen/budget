@@ -1,3 +1,4 @@
+import { Global } from '@emotion/react';
 import React from 'react';
 import { Provider, useDispatch } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -17,7 +18,7 @@ import {
   useToday,
 } from '~client/hooks';
 import { State } from '~client/reducers';
-import StyleReset from '~client/styled/reset';
+import { reset } from '~client/styled/reset';
 import { Main } from '~client/styled/shared';
 
 type Props = {
@@ -32,7 +33,7 @@ const RootContainer: React.FC<HeaderProps> = ({ children, ...props }) => {
     <ResizeContext.Provider value={windowWidth}>
       <TodayContext.Provider value={today}>
         <Main>
-          <StyleReset />
+          <Global styles={reset} />
           <Header {...props} />
           <ErrorMessages />
           {children}

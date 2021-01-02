@@ -1,6 +1,8 @@
 import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
 import { DocumentNode } from 'graphql';
 import React from 'react';
+import { Provider } from 'react-redux';
+import createMockStore from 'redux-mock-store';
 import { CombinedError } from 'urql';
 import { fromValue } from 'wonka';
 
@@ -199,6 +201,8 @@ describe('Generic crud hooks', () => {
 
   const onError = jest.fn();
 
+  const store = createMockStore()({});
+
   describe.each`
     name                               | testCase
     ${useNetWorthCategoryCrud.name}    | ${testCaseNetWorthCategory}
@@ -222,7 +226,9 @@ describe('Generic crud hooks', () => {
     const setup = (): RenderResult =>
       render(
         <GQLProviderMock>
-          <TestComponent />
+          <Provider store={store}>
+            <TestComponent />
+          </Provider>
         </GQLProviderMock>,
       );
 

@@ -1,7 +1,7 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
 import { ListWithoutMargin } from './shared';
-import { rem } from '~client/styled/mixins';
 import { colors } from '~client/styled/variables';
 
 export const SuggestionList = styled(ListWithoutMargin)`

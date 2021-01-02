@@ -9,10 +9,16 @@ import { TodayContext } from '~client/hooks';
 import { blockPacker } from '~client/modules/block-packer';
 import { colorKey } from '~client/modules/color';
 import { abbreviateFundName } from '~client/modules/finance';
-import { formatPercent } from '~client/modules/format';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getCashToInvest, getPortfolio, getStockValue, getCashInBank } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { BlockItem } from '~client/types';
+
+const formatLabel = (value: number, total: number, suffix: string): string =>
+  `(${formatPercent(value / total, { precision: 1 })}) [${formatCurrency(value, {
+    abbreviate: true,
+    precision: 1,
+  })}] ${suffix}`;
 
 export const FundWeights: React.FC = () => {
   const today = useContext(TodayContext);
@@ -33,7 +39,7 @@ export const FundWeights: React.FC = () => {
           const nameAbbreviated = abbreviateFundName(item);
 
           return {
-            name: `(${formatPercent(value / relevantNetWorth, { precision: 1 })}) ${item}`,
+            name: formatLabel(value, relevantNetWorth, item),
             total: value,
             color: colorKey(nameAbbreviated),
             text: (
@@ -51,16 +57,12 @@ export const FundWeights: React.FC = () => {
         text: <Styled.Label small={cashToInvest < relevantNetWorth / 20}>Cash</Styled.Label>,
         subTree: [
           {
-            name: `(${formatPercent((cashToInvest - cashInBank) / relevantNetWorth, {
-              precision: 1,
-            })}) Cash to invest`,
+            name: formatLabel(cashToInvest - cashInBank, relevantNetWorth, 'Cash to invest'),
             total: cashToInvest - cashInBank,
             color: colors.transparent,
           },
           {
-            name: `(${formatPercent(cashInBank / relevantNetWorth, {
-              precision: 1,
-            })}) Cash in bank`,
+            name: formatLabel(cashInBank, relevantNetWorth, 'Cash in bank'),
             total: cashInBank,
             color: rgba(colors.green, 0.1),
           },

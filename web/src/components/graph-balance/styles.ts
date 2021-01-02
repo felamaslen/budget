@@ -1,4 +1,5 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { colors } from '~client/styled/variables';
 
 export const ShowAll = styled.span`
@@ -16,33 +17,34 @@ export const ShowAll = styled.span`
   }
 `;
 
-export const CheckBox = styled.a<{ enabled: boolean }>`
-  width: 20px;
-  height: 20px;
-  float: left;
-  position: relative;
-  &:before {
-    left: 4px;
-    top: 4px;
-    width: 12px;
-    height: 12px;
-    box-shadow: 0 0 0 1px black;
-  }
-  &:after {
-    left: 7px;
-    top: 7px;
-    width: 6px;
-    height: 6px;
-    ${({ enabled }): false | FlattenSimpleInterpolation =>
-      enabled &&
+export const CheckBox = styled.a<{ enabled: boolean }>(
+  ({ enabled }) => css`
+    width: 20px;
+    height: 20px;
+    float: left;
+    position: relative;
+    &:before {
+      left: 4px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      box-shadow: 0 0 0 1px black;
+    }
+    &:after {
+      left: 7px;
+      top: 7px;
+      width: 6px;
+      height: 6px;
+      ${enabled &&
       css`
         background: black;
       `}
-  }
-  &:before,
-  &:after {
-    content: '';
-    position: absolute;
-    border-radius: 100%;
-  }
-`;
+    }
+    &:before,
+    &:after {
+      content: '';
+      position: absolute;
+      border-radius: 100%;
+    }
+  `,
+);

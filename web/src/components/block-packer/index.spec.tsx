@@ -51,7 +51,7 @@ describe('<BlockPacker />', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer();
     expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
-      .c0 {
+      .emotion-0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -62,14 +62,14 @@ describe('<BlockPacker />', () => {
         position: relative;
       }
 
-      .c1 {
+      .emotion-2 {
         float: left;
         height: 100%;
         width: 100%;
       }
 
-      .c2 {
-        background-image: linear-gradient(to bottom right,rgba(255,255,255,0.6),rgba(0,0,0,0.2));
+      .emotion-6 {
+        background-image: linear-gradient(to bottom right, rgba(255,255,255,0.6), rgba(0,0,0,0.2));
         box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
         cursor: default;
         float: left;
@@ -80,8 +80,8 @@ describe('<BlockPacker />', () => {
         width: 100%;
       }
 
-      .c2:hover::after,
-      .c2:focus::after {
+      .emotion-6:hover::after,
+      .emotion-6:focus::after {
         content: '';
         display: block;
         height: 100%;
@@ -89,7 +89,7 @@ describe('<BlockPacker />', () => {
         background-color: rgba(255,255,0,0.4);
       }
 
-      .c3 {
+      .emotion-12 {
         background-image: none;
         box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
         cursor: default;
@@ -101,24 +101,20 @@ describe('<BlockPacker />', () => {
         width: 100%;
       }
 
-      @media only screen and (min-width:350px) {
-
-      }
-
       <div
-        class="c0"
+        class="emotion-0 emotion-1"
         data-testid="block-tree"
       >
         <div
-          class="c1"
+          class="emotion-2 emotion-3"
           style="height: 100%; width: 100%;"
         >
           <div
-            class="c1"
+            class="emotion-2 emotion-3"
             style="height: 100%; width: 60%;"
           >
             <div
-              class="c2"
+              class="emotion-6 emotion-7"
               data-testid="parent block 2"
               name="parent block 2"
               role="button"
@@ -127,15 +123,15 @@ describe('<BlockPacker />', () => {
             />
           </div>
           <div
-            class="c1"
+            class="emotion-2 emotion-3"
             style="height: 100%; width: 40%;"
           >
             <div
-              class="c1"
+              class="emotion-2 emotion-3"
               style="height: 100%; width: 100%;"
             >
               <div
-                class="c3"
+                class="emotion-12 emotion-7"
                 data-testid="parent block 1"
                 name="parent block 1"
                 role="container"
@@ -143,15 +139,15 @@ describe('<BlockPacker />', () => {
                 tabindex="0"
               >
                 <div
-                  class="c1"
+                  class="emotion-2 emotion-3"
                   style="height: 100%; width: 100%;"
                 >
                   <div
-                    class="c1"
+                    class="emotion-2 emotion-3"
                     style="height: 58.333333333333336%; width: 100%;"
                   >
                     <div
-                      class="c2"
+                      class="emotion-6 emotion-7"
                       data-testid="child block B"
                       name="child block B"
                       role="container"
@@ -160,15 +156,15 @@ describe('<BlockPacker />', () => {
                     />
                   </div>
                   <div
-                    class="c1"
+                    class="emotion-2 emotion-3"
                     style="height: 41.66666666666667%; width: 100%;"
                   >
                     <div
-                      class="c1"
+                      class="emotion-2 emotion-3"
                       style="height: 100%; width: 80%;"
                     >
                       <div
-                        class="c2"
+                        class="emotion-6 emotion-7"
                         data-testid="child block A"
                         name="child block A"
                         role="container"
@@ -177,15 +173,15 @@ describe('<BlockPacker />', () => {
                       />
                     </div>
                     <div
-                      class="c1"
+                      class="emotion-2 emotion-3"
                       style="height: 100%; width: 19.999999999999996%;"
                     >
                       <div
-                        class="c1"
+                        class="emotion-2 emotion-3"
                         style="height: 100.00000000000003%; width: 100%;"
                       >
                         <div
-                          class="c2"
+                          class="emotion-6 emotion-7"
                           data-testid="child block C"
                           name="child block C"
                           role="container"
@@ -214,7 +210,7 @@ describe('<BlockPacker />', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer({ blocks: null });
     expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
-      .c0 {
+      .emotion-0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -225,12 +221,8 @@ describe('<BlockPacker />', () => {
         position: relative;
       }
 
-      @media only screen and (min-width:350px) {
-
-      }
-
       <div
-        class="c0"
+        class="emotion-0 emotion-1"
         data-testid="block-tree"
       />
     `);

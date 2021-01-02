@@ -63,9 +63,9 @@ describe('<Root />', () => {
 
   it('should render a header', async () => {
     expect.assertions(1);
-    const { getByRole } = setup();
+    const { getAllByRole } = setup();
     await waitFor(() => {
-      expect(getByRole('heading')).toBeInTheDocument();
+      expect(getAllByRole('heading')).toHaveLength(2);
     });
   });
 });

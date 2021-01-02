@@ -37,7 +37,7 @@ const Timeline: React.FC<Props> = ({ data }) => {
             .map((value, index) => scoreColor(colors[categories[index]].main, value)),
         );
 
-        return <Styled.DataItem key={timeIndex} color={backgroundColor} />;
+        return <Styled.DataItem key={timeIndex} style={{ backgroundColor }} />;
       })}
     </Styled.Timeline>
   );

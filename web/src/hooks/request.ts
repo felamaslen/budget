@@ -1,8 +1,8 @@
 import axios, { Canceler, AxiosInstance, AxiosResponse } from 'axios';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { useDebounce } from 'use-debounce';
 
 import { ApiContext } from './api';
+import { useDebouncedState } from './debounce';
 
 type ShouldSendRequest<Query, ValidQuery extends Query> = (
   query: Query | ValidQuery,
@@ -34,7 +34,10 @@ export function useCancellableRequest<Query, Response = void, ValidQuery extends
   onClear,
   debounceDelay = 100,
 }: Options<Query, Response, ValidQuery>): boolean {
-  const [debouncedQuery] = useDebounce(query, debounceDelay);
+  const [, debouncedQuery, setDebouncedQuery] = useDebouncedState<Query>(query, debounceDelay);
+  useEffect(() => {
+    setDebouncedQuery(query);
+  }, [query, setDebouncedQuery]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const apiKey = useContext(ApiContext);

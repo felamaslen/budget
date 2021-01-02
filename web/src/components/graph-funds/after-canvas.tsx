@@ -97,33 +97,33 @@ export const AfterCanvas: React.FC<Props> = ({
     [modeList],
   );
 
+  if (isMobile) {
+    return null;
+  }
+
   return (
     <>
-      {!isMobile && (
-        <Styled.FundSidebar tabIndex={-1}>
-          <li>
-            <FormFieldSelect
-              options={periodSelectOptions}
-              value={historyOptions}
-              onChange={changePeriod}
+      <Styled.FundModeSwitch>
+        <FormFieldSelect
+          options={periodSelectOptions}
+          value={historyOptions}
+          onChange={changePeriod}
+        />
+        <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
+      </Styled.FundModeSwitch>
+      <Styled.FundSidebar tabIndex={-1}>
+        {fundItems &&
+          fundItems.map((item: FundItem) => (
+            <Item
+              key={item.id}
+              numItems={fundItems.length}
+              {...item}
+              abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
+              toggleList={toggleList}
+              setToggleList={setToggleList}
             />
-          </li>
-          <li>
-            <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
-          </li>
-          {fundItems &&
-            fundItems.map((item: FundItem) => (
-              <Item
-                key={item.id}
-                numItems={fundItems.length}
-                {...item}
-                abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
-                toggleList={toggleList}
-                setToggleList={setToggleList}
-              />
-            ))}
-        </Styled.FundSidebar>
-      )}
+          ))}
+      </Styled.FundSidebar>
     </>
   );
 };

@@ -1,11 +1,12 @@
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { compose } from '@typed/compose';
-import { desaturate, lighten } from 'polished';
-import styled, { css } from 'styled-components';
+import { desaturate, lighten, rem } from 'polished';
 
 import { FormField } from '~client/components/form-field/styles';
 import * as GainStyles from '~client/components/fund-gain-info/styles';
-import { rem, breakpoint } from '~client/styled/mixins';
-import { FlexCenter, Flex } from '~client/styled/shared';
+import { breakpoint } from '~client/styled/mixins';
+import { FlexCenter, Flex, FlexColumn } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
 type GainProps = { profit: boolean; loss: boolean };
@@ -112,9 +113,7 @@ export const Breakdown = styled(GainStyles.Breakdown)`
   flex: 0 0 auto;
 `;
 
-export const Overall = styled(GainStyles.Overall).attrs({
-  isSold: false,
-})`
+export const Overall = styled(GainStyles.Overall)`
   flex: 0 0 auto;
 `;
 
@@ -152,6 +151,8 @@ export const DayGainAbs = styled(GainStyles.DayGainAbs)`
 export const DayGain = styled(GainStyles.DayGain)`
   ${breakdownStyleDay};
 `;
+
+export const ViewOptions = styled(FlexColumn)``;
 
 export const CacheAge = styled.span``;
 

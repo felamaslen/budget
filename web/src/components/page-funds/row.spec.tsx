@@ -1,4 +1,4 @@
-import { RenderResult, render, act, fireEvent } from '@testing-library/react';
+import { RenderResult, render, act, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createMockStore, { MockStore } from 'redux-mock-store';
@@ -75,76 +75,59 @@ describe('<FundRow />', () => {
   };
 
   describe('target allocation adjustment', () => {
-    it('should render a form element', () => {
+    it('should render the value', () => {
       expect.assertions(1);
-      const { getByDisplayValue } = setup();
-      const input = getByDisplayValue('35') as HTMLInputElement;
+      const { getByText } = setup();
+      const input = getByText('35%') as HTMLInputElement;
       expect(input).toBeInTheDocument();
     });
 
-    it('should call onUpdate when changed', () => {
-      expect.assertions(2);
-      const { getByDisplayValue } = setup();
-      const input = getByDisplayValue('35');
+    it('should call onUpdate when changed', async () => {
+      expect.hasAssertions();
+      jest.useFakeTimers();
+      const { getByText } = setup();
+      const input = getByText('35%');
 
       act(() => {
-        fireEvent.change(input, { target: { value: '25' } });
+        fireEvent.wheel(input.parentNode as HTMLDivElement, { deltaY: -43 });
       });
       act(() => {
-        fireEvent.blur(input);
+        jest.runAllTimers();
       });
 
-      expect(onUpdate).toHaveBeenCalledTimes(1);
-      expect(onUpdate).toHaveBeenCalledWith(numericHash('fund-1'), { allocationTarget: 25 }, fund);
+      await waitFor(() => {
+        expect(onUpdate).toHaveBeenCalledTimes(1);
+      });
+      expect(onUpdate).toHaveBeenCalledWith(numericHash('fund-1'), { allocationTarget: 36 }, fund);
+      jest.useRealTimers();
     });
 
-    it('should respond to updates from the store', () => {
-      expect.assertions(1);
-      const { getByDisplayValue, container } = setup();
-      setup(
-        {
-          item: {
-            ...fund,
-            allocationTarget: 45,
-          },
-        },
-        state,
-        { container },
-      );
-
-      expect(getByDisplayValue('45')).toBeInTheDocument();
-    });
-
-    describe('if the max allocation is zero', () => {
-      it('should render a disabled field', () => {
-        expect.assertions(1);
-        const { getByDisplayValue } = setup(
-          {},
+    it('should respond to updates from the store', async () => {
+      expect.hasAssertions();
+      jest.useFakeTimers();
+      const { getByText, container } = setup();
+      act(() => {
+        setup(
           {
-            ...state,
-            [PageNonStandard.Funds]: {
-              ...state[PageNonStandard.Funds],
-              items: [
-                {
-                  id: numericHash('fund-1'),
-                  item: 'Fund 1',
-                  transactions: [],
-                  allocationTarget: 0,
-                },
-                {
-                  id: numericHash('fund-2'),
-                  item: 'Fund 2',
-                  transactions: [],
-                  allocationTarget: 100,
-                },
-              ],
+            item: {
+              ...fund,
+              allocationTarget: 45,
             },
           },
+          state,
+          { container },
         );
-
-        const input = getByDisplayValue('35') as HTMLInputElement;
-        expect(input.disabled).toBe(true);
       });
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      await waitFor(() => {
+        expect(getByText('45%')).toBeInTheDocument();
+      });
+
+      jest.useRealTimers();
     });
   });
 });

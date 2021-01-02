@@ -1,5 +1,6 @@
-import styled from 'styled-components';
-import { rem, breakpoint } from '~client/styled/mixins';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
+import { breakpoint } from '~client/styled/mixins';
 import { breakpoints } from '~client/styled/variables';
 
 export const InfiniteWindow = styled.div`

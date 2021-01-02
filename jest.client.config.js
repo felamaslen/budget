@@ -17,4 +17,5 @@ module.exports = {
     '!web/src/test-data/**',
     '!web/src/test-utils/**',
   ],
+  snapshotSerializers: ['@emotion/jest/serializer'],
 };

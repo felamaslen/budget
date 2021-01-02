@@ -15,193 +15,196 @@ describe('<PinDisplay />', () => {
     expect.assertions(1);
     const { container } = setup();
     expect(container).toMatchInlineSnapshot(`
-      .c0 {
+      .emotion-0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        -webkit-box-flex-flow: row nowrap;
         -webkit-flex-flow: row nowrap;
         -ms-flex-flow: row nowrap;
         flex-flow: row nowrap;
         margin-bottom: 10px;
       }
 
-      .c1 {
-        background-color: #333;
-        -webkit-flex: 1 0 0;
-        -ms-flex: 1 0 0;
-        flex: 1 0 0;
-        font-size: 4rem;
-        height: 3.75rem;
-        margin: 0 0.375rem;
-        position: relative;
-      }
-
-      .c1 input {
-        background-color: transparent;
-        border: none;
-        border-radius: 4px;
-        color: rgba(255,255,255,0);
-        text-align: center;
-        -webkit-transition: background-color linear 0.1s;
-        transition: background-color linear 0.1s;
-        z-index: 2;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        -moz-appearance: textfield;
-      }
-
-      .c1 input:focus {
-        background-color: #fefefe;
-      }
-
-      .c1 input,
-      .c1 input:focus,
-      .c1 input:active {
-        outline: none;
-      }
-
-      .c1 input::-webkit-inner-spin-button,
-      .c1 input::-webkit-outer-spin-button {
-        -webkit-apperance: none;
-        display: none;
-        margin: 0;
-      }
-
-      .c1::after {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        background-color: transparent;
-        content: '•';
-        color: #fefefe;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        opacity: 0;
-        -webkit-transition: opacity linear 0.1s;
-        transition: opacity linear 0.1s;
-        z-index: 1;
-      }
-
-      .c1 input,
-      .c1::after {
-        font: inherit;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        width: 100%;
-      }
-
-      .c1::after {
-        opacity: 1;
-      }
-
-      .c2 {
-        background-color: #333;
-        -webkit-flex: 1 0 0;
-        -ms-flex: 1 0 0;
-        flex: 1 0 0;
-        font-size: 4rem;
-        height: 3.75rem;
-        margin: 0 0.375rem;
-        position: relative;
-      }
-
-      .c2 input {
-        background-color: transparent;
-        border: none;
-        border-radius: 4px;
-        color: rgba(255,255,255,0);
-        text-align: center;
-        -webkit-transition: background-color linear 0.1s;
-        transition: background-color linear 0.1s;
-        z-index: 2;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        -moz-appearance: textfield;
-      }
-
-      .c2 input:focus {
-        background-color: #fefefe;
-      }
-
-      .c2 input,
-      .c2 input:focus,
-      .c2 input:active {
-        outline: none;
-      }
-
-      .c2 input::-webkit-inner-spin-button,
-      .c2 input::-webkit-outer-spin-button {
-        -webkit-apperance: none;
-        display: none;
-        margin: 0;
-      }
-
-      .c2::after {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        background-color: transparent;
-        content: '•';
-        color: #fefefe;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-        opacity: 0;
-        -webkit-transition: opacity linear 0.1s;
-        transition: opacity linear 0.1s;
-        z-index: 1;
-      }
-
-      .c2 input,
-      .c2::after {
-        font: inherit;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        width: 100%;
-      }
-
-      @media only screen and (min-width:500px) {
-        .c0 {
+      @media only screen and (min-width: 500px) {
+        .emotion-0 {
           margin: 0 0.75rem 1rem 0.75rem;
         }
       }
 
-      @media only screen and (min-width:500px) {
-        .c1 {
+      .emotion-2 {
+        background-color: #333;
+        -webkit-flex: 1 0 0;
+        -ms-flex: 1 0 0;
+        flex: 1 0 0;
+        font-size: 4rem;
+        height: 3.75rem;
+        margin: 0 0.375rem;
+        position: relative;
+      }
+
+      .emotion-2 input {
+        background-color: transparent;
+        border: none;
+        border-radius: 4px;
+        color: rgba(255,255,255,0);
+        text-align: center;
+        -webkit-transition: background-color linear 0.1s;
+        transition: background-color linear 0.1s;
+        z-index: 2;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -ms-appearance: none;
+        appearance: none;
+        -moz-appearance: textfield;
+      }
+
+      .emotion-2 input:focus {
+        background-color: #fefefe;
+      }
+
+      .emotion-2 input,
+      .emotion-2 input:focus,
+      .emotion-2 input:active {
+        outline: none;
+      }
+
+      .emotion-2 input::-webkit-inner-spin-button,
+      .emotion-2 input::-webkit-outer-spin-button {
+        -webkit-apperance: none;
+        display: none;
+        margin: 0;
+      }
+
+      .emotion-2::after {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        background-color: transparent;
+        content: '•';
+        color: #fefefe;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        opacity: 0;
+        -webkit-transition: opacity linear 0.1s;
+        transition: opacity linear 0.1s;
+        z-index: 1;
+      }
+
+      .emotion-2 input,
+      .emotion-2::after {
+        font: inherit;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        width: 100%;
+      }
+
+      .emotion-2::after {
+        opacity: 1;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-2 {
           height: 5rem;
         }
       }
 
-      @media only screen and (min-width:500px) {
-        .c2 {
+      .emotion-6 {
+        background-color: #333;
+        -webkit-flex: 1 0 0;
+        -ms-flex: 1 0 0;
+        flex: 1 0 0;
+        font-size: 4rem;
+        height: 3.75rem;
+        margin: 0 0.375rem;
+        position: relative;
+      }
+
+      .emotion-6 input {
+        background-color: transparent;
+        border: none;
+        border-radius: 4px;
+        color: rgba(255,255,255,0);
+        text-align: center;
+        -webkit-transition: background-color linear 0.1s;
+        transition: background-color linear 0.1s;
+        z-index: 2;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        -ms-appearance: none;
+        appearance: none;
+        -moz-appearance: textfield;
+      }
+
+      .emotion-6 input:focus {
+        background-color: #fefefe;
+      }
+
+      .emotion-6 input,
+      .emotion-6 input:focus,
+      .emotion-6 input:active {
+        outline: none;
+      }
+
+      .emotion-6 input::-webkit-inner-spin-button,
+      .emotion-6 input::-webkit-outer-spin-button {
+        -webkit-apperance: none;
+        display: none;
+        margin: 0;
+      }
+
+      .emotion-6::after {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        background-color: transparent;
+        content: '•';
+        color: #fefefe;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        opacity: 0;
+        -webkit-transition: opacity linear 0.1s;
+        transition: opacity linear 0.1s;
+        z-index: 1;
+      }
+
+      .emotion-6 input,
+      .emotion-6::after {
+        font: inherit;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        width: 100%;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-6 {
           height: 5rem;
         }
       }
 
       <div>
         <div
-          class="c0"
+          class="emotion-0 emotion-1"
         >
           <div
-            class="c1"
+            class="emotion-2 emotion-3"
           >
             <input
               max="9"
@@ -213,7 +216,7 @@ describe('<PinDisplay />', () => {
             />
           </div>
           <div
-            class="c1"
+            class="emotion-2 emotion-3"
           >
             <input
               max="9"
@@ -225,7 +228,7 @@ describe('<PinDisplay />', () => {
             />
           </div>
           <div
-            class="c2"
+            class="emotion-6 emotion-3"
           >
             <input
               max="9"
@@ -237,7 +240,7 @@ describe('<PinDisplay />', () => {
             />
           </div>
           <div
-            class="c2"
+            class="emotion-6 emotion-3"
           >
             <input
               disabled=""

@@ -1,4 +1,6 @@
-import React, { useCallback } from 'react';
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
+import { useCallback } from 'react';
 
 import * as Styled from './styles';
 import HoverCost from '~client/components/hover-cost';
@@ -16,7 +18,7 @@ type PropsCell = Styled.PropsCell &
   Pick<Props, 'setPreviewQuery'> &
   Pick<OverviewTableRow, 'year' | 'month'>;
 
-const Cell: React.FC<PropsCell> = ({ setPreviewQuery, year, month, ...props }) => {
+const Cell: React.FC<PropsCell> = ({ setPreviewQuery, year, month, cellColor, ...props }) => {
   const onHover = useCallback(() => {
     setPreviewQuery((last) => {
       if (!isStandardListPage(props.column)) {
@@ -34,6 +36,7 @@ const Cell: React.FC<PropsCell> = ({ setPreviewQuery, year, month, ...props }) =
 
   return (
     <Styled.Cell
+      style={{ backgroundColor: cellColor ?? undefined }}
       {...props}
       onMouseOver={onHover}
       onFocus={onHover}

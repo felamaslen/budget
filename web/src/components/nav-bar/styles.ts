@@ -1,7 +1,8 @@
+import styled from '@emotion/styled';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
 
-import nav from '../../images/nav.png';
+import nav1x from '../../images/nav.png';
+import nav2x from '../../images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
 import { sizes, colors, breakpoints } from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types';
@@ -35,20 +36,7 @@ type LinkProps = {
 type PageBackgroundPosition = Record<NavPage, string>;
 
 const pageBackgroundPositionMobile: PageBackgroundPosition = {
-  logout: '-256px -28px',
-  [PageNonStandard.Overview]: '-200px 0px',
-  [PageNonStandard.Analysis]: '-228px 0px',
-  [PageNonStandard.Funds]: '-256px 0px',
-  [PageListStandard.Income]: '-284px 0px',
-  [PageListStandard.Bills]: '-312px 0px',
-  [PageListStandard.Food]: '-340px 0px',
-  [PageListStandard.General]: '-368px 0px',
-  [PageListStandard.Holiday]: '-200px -28px',
-  [PageListStandard.Social]: '-228px -28px',
-};
-
-const pageBackgroundPositionDesktop: PageBackgroundPosition = {
-  logout: '-56px -28px',
+  logout: '-28px -56px',
   [PageNonStandard.Overview]: '0px 0px',
   [PageNonStandard.Analysis]: '-28px 0px',
   [PageNonStandard.Funds]: '-56px 0px',
@@ -56,8 +44,21 @@ const pageBackgroundPositionDesktop: PageBackgroundPosition = {
   [PageListStandard.Bills]: '-112px 0px',
   [PageListStandard.Food]: '-140px 0px',
   [PageListStandard.General]: '-168px 0px',
-  [PageListStandard.Holiday]: '0px -28px',
-  [PageListStandard.Social]: '-28px -28px',
+  [PageListStandard.Holiday]: '-196px 0px',
+  [PageListStandard.Social]: '-224px 0px',
+};
+
+const pageBackgroundPositionDesktop: PageBackgroundPosition = {
+  logout: '-56px -56px',
+  [PageNonStandard.Overview]: '0px -28px',
+  [PageNonStandard.Analysis]: '-28px -28px',
+  [PageNonStandard.Funds]: '-56px -28px',
+  [PageListStandard.Income]: '-84px -28px',
+  [PageListStandard.Bills]: '-112px -28px',
+  [PageListStandard.Food]: '-140px -28px',
+  [PageListStandard.General]: '-168px -28px',
+  [PageListStandard.Holiday]: '-196px -28px',
+  [PageListStandard.Social]: '-224px -28px',
 };
 
 export const Link = styled(NavLink)<LinkProps>`
@@ -75,13 +76,18 @@ export const Link = styled(NavLink)<LinkProps>`
     outline: none;
   }
   &::before {
+    background-image: url(${nav1x});
+    background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
+    content: '';
     display: block;
     margin: 0 auto;
-    content: '';
-    background-image: url(${nav});
-    width: 28px;
     height: 28px;
-    background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
+    width: 28px;
+
+    @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      background-image: url(${nav2x});
+      background-size: 252px 84px;
+    }
   }
 
   ${breakpoint(breakpoints.mobile)} {
@@ -113,6 +119,7 @@ export const Link = styled(NavLink)<LinkProps>`
 
     &::before {
       background-position: ${({ page }): string => pageBackgroundPositionDesktop[page]};
+      transform: scale(0.85);
     }
 
     &:hover {

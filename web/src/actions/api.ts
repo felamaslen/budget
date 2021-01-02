@@ -2,6 +2,8 @@ import { InitialQuery } from '~client/types';
 
 export const enum ActionTypeApi {
   DataRead = '@@api/DATA_READ',
+  Loading = '@@api/LOADING',
+  Loaded = '@@api/LOADED',
 }
 
 export type ActionApiDataRead = {
@@ -14,4 +16,10 @@ export const dataRead = (res: InitialQuery): ActionApiDataRead => ({
   res,
 });
 
-export type ActionApi = ActionApiDataRead;
+export type ActionApiLoading = { type: ActionTypeApi.Loading };
+export type ActionApiLoaded = { type: ActionTypeApi.Loaded };
+
+export const apiLoading: ActionApiLoading = { type: ActionTypeApi.Loading };
+export const apiLoaded: ActionApiLoaded = { type: ActionTypeApi.Loaded };
+
+export type ActionApi = ActionApiDataRead | ActionApiLoading | ActionApiLoaded;

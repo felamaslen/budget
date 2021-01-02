@@ -1,9 +1,11 @@
+import { css } from '@emotion/react';
+import { rem } from 'polished';
 import React from 'react';
+import DotLoader from 'react-spinners/DotLoader';
 
 import { Query } from './hooks';
 import * as Styled from './styles';
 
-import { Spinner } from '~client/components/spinner';
 import { AnalysisPeriod, AnalysisGroupBy } from '~client/types';
 
 export type Props = {
@@ -14,6 +16,12 @@ export type Props = {
   loading: boolean;
   onRequest: (request: Partial<Query>) => void;
 };
+
+const spinnerOverride = css`
+  position: absolute;
+  right: ${rem(4)};
+  top: ${rem(4)};
+`;
 
 const Upper: React.FC<Props> = ({ period, groupBy, page, description, loading, onRequest }) => (
   <Styled.Upper>
@@ -51,7 +59,7 @@ const Upper: React.FC<Props> = ({ period, groupBy, page, description, loading, o
         Next
       </Styled.Button>
     </Styled.Buttons>
-    {loading && <Spinner size={0.5} />}
+    <DotLoader loading={loading} size={22} css={spinnerOverride} />
     <Styled.PeriodTitle>{description}</Styled.PeriodTitle>
   </Styled.Upper>
 );

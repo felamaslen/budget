@@ -36,7 +36,7 @@ export const NetWorthListCreateItem: React.FC<Props> = ({
   if (noneActive) {
     return (
       <Styled.ItemSummary add onClick={onActivate}>
-        {'Add a new entry'}
+        Add a new entry
       </Styled.ItemSummary>
     );
   }

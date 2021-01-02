@@ -1,10 +1,11 @@
-import { css, createGlobalStyle } from 'styled-components';
-import { breakpoint, rem } from '~client/styled/mixins';
+import { css } from '@emotion/react';
+import { rem } from 'polished';
+import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const fontFamily = `'Noto sans', Ubuntu, Arial, Helvetica, sans-serif`;
 
-const reset = css`
+export const reset = css`
   html {
     box-sizing: border-box;
   }
@@ -67,5 +68,3 @@ const reset = css`
     }
   }
 `;
-
-export default createGlobalStyle`${reset}`;

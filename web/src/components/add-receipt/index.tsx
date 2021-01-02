@@ -10,7 +10,7 @@ import {
   SelectOptions,
 } from '~client/components/form-field';
 import { ModalWindow } from '~client/components/modal-window';
-import { useIsMobile } from '~client/hooks';
+import { useFetchingState, useIsMobile } from '~client/hooks';
 import { formatCurrency, toISO } from '~client/modules/format';
 import {
   Flex,
@@ -306,7 +306,8 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
     }
   }, [canRequestFinish]);
 
-  const [, mutateCreateReceipt] = useCreateReceiptMutation();
+  const [mutationResult, mutateCreateReceipt] = useCreateReceiptMutation();
+  useFetchingState(mutationResult);
 
   useEffect(() => {
     if (finished) {

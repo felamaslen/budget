@@ -1,5 +1,7 @@
-import styled from 'styled-components';
-import { breakpoint, rem } from '~client/styled/mixins';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
+import { breakpoint } from '~client/styled/mixins';
+import { asLink } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const ModalWindow = styled.div<{ visible: boolean; width?: number }>`
@@ -43,10 +45,7 @@ export const Title = styled.h2`
   font-weight: bold;
 `;
 
-export const BackButton = styled.a.attrs({
-  role: 'link',
-  tabIndex: 0,
-})`
+export const BackButton = asLink(styled.a`
   display: block;
   position: absolute;
   right: 4px;
@@ -60,4 +59,4 @@ export const BackButton = styled.a.attrs({
   background: rgba(190, 10, 10, 0.8);
   color: ${colors.white};
   cursor: pointer;
-`;
+`);

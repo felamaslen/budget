@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
-import { useDebounce } from 'use-debounce';
+import { Dispatch, SetStateAction, useMemo } from 'react';
 
+import { useDebouncedState } from './debounce';
 import { useUpdateEffect } from './effect';
 
 export type PersistentStateValidator<S> = (value: unknown | S) => value is S;
@@ -31,11 +31,8 @@ export function usePersistentState<S>(
     }
   }, [defaultState, key, validator]);
 
-  const [state, setState] = useState<S>(initialState);
-
-  const [persistentState] = useDebounce<S>(state, 1000);
-
-  usePersistentStateStoreEffect(persistentState, key);
+  const [state, debouncedState, setState] = useDebouncedState<S>(initialState, 1000);
+  usePersistentStateStoreEffect(debouncedState, key);
 
   return [state, setState];
 }

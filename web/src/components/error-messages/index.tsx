@@ -17,9 +17,9 @@ const ErrorMessage: React.FC<Message> = ({ id, closed, message: { text, level } 
   const onClose = useCallback((): void => {
     dispatch(errorClosed(id));
     clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => {
+    closeTimer.current = window.setTimeout(() => {
       dispatch(errorRemoved(id));
-    }, [ERROR_CLOSE_TIME]);
+    }, ERROR_CLOSE_TIME);
   }, [dispatch, id]);
 
   const [focused, setFocused] = useState<boolean>(false);
@@ -28,7 +28,7 @@ const ErrorMessage: React.FC<Message> = ({ id, closed, message: { text, level } 
   useEffect(() => {
     clearTimeout(closeTimer.current);
     if (!focused) {
-      closeTimer.current = setTimeout(onClose, ERROR_MESSAGE_DELAY);
+      closeTimer.current = window.setTimeout(onClose, ERROR_MESSAGE_DELAY);
     }
   }, [focused, onClose]);
 

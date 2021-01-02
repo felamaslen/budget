@@ -4,7 +4,14 @@ import React from 'react';
 import * as Styled from './styles';
 import { LineGraph, TimeAxes, TimeAxesProps, useGraphWidth } from '~client/components/graph';
 import { breakpoints } from '~client/styled/variables';
-import { NetWorthTableRow as TableRow, Range, DrawProps, Line } from '~client/types';
+import {
+  NetWorthTableRow as TableRow,
+  Range,
+  DrawProps,
+  Line,
+  NetWorthTableRow,
+  Data,
+} from '~client/types';
 
 export type GraphProps = {
   isMobile: boolean;
@@ -41,10 +48,13 @@ const dimensions = (lines: Line[]): Range => ({
   ),
 });
 
+export const getFTISeries = (table: NetWorthTableRow[]): Data =>
+  table.map(({ date, fti }) => [getUnixTime(date), fti]);
+
 const getDataFti = (table: GraphProps['table']): Line[] => [
   {
     key: 'fti',
-    data: table.map(({ date, fti }) => [getUnixTime(date), fti]),
+    data: getFTISeries(table),
     color: '#000',
     smooth: true,
   },

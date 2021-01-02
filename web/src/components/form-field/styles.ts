@@ -1,11 +1,15 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { css, SerializedStyles } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
 import {
   Row as AccessibleRow,
   fieldSizes,
   borderColor,
+  CreateRow,
+  StandardRow,
 } from '~client/components/accessible-list/styles';
-import { FundSidebar } from '~client/components/graph-funds/styles';
+import { FundModeSwitch } from '~client/components/graph-funds/styles';
 import { ModalDialog, FormRowInner } from '~client/components/modal-dialog/styles';
 import { CategoryItemForm as NetWorthCategoryItemForm } from '~client/components/net-worth/category-list/styles';
 import {
@@ -19,8 +23,9 @@ import {
   fieldSizes as fundFieldSizes,
   TargetAllocation,
   CashTarget,
+  FundRow,
 } from '~client/components/page-funds/styles';
-import { breakpoint, rem } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
 import { fontFamily } from '~client/styled/reset';
 import { breakpoints, colors } from '~client/styled/variables';
 
@@ -32,13 +37,31 @@ export const centerGridOne = css`
   grid-row: 1;
 `;
 
-export const FormField = styled.div<{
+type FormFieldProps = {
   name?: string;
   item: string;
   small: boolean;
   active: boolean;
   invalid: boolean;
-}>`
+};
+
+function formFieldWidth(item: FormFieldProps['item']): string {
+  if (item === 'date') {
+    return rem(fieldSizes.date);
+  }
+  if (item === 'cost') {
+    return rem(fieldSizes.cost);
+  }
+  return rem(fieldSizes.default);
+}
+
+const formFieldStyles = ({
+  active,
+  invalid,
+  item,
+  name,
+  small,
+}: FormFieldProps): SerializedStyles => css`
   display: flex;
   position: relative;
   align-items: center;
@@ -67,21 +90,13 @@ export const FormField = styled.div<{
   }
 
   ${breakpoint(breakpoints.mobile)} {
-    opacity: ${({ small, active }): number => (small && !active ? 0.3 : 1)};
+    opacity: ${small && !active ? 0.3 : 1};
 
-    ${AccessibleRow} & {
+    ${AccessibleRow} &, ${StandardRow} &, ${CreateRow} &, ${FundRow} & {
       display: inline-flex;
       font-family: ${fontFamily};
       font-size: ${rem(16)};
-      width: ${({ item }): string => {
-        if (item === 'date') {
-          return rem(fieldSizes.date);
-        }
-        if (item === 'cost') {
-          return rem(fieldSizes.cost);
-        }
-        return rem(fieldSizes.default);
-      }};
+      width: ${formFieldWidth(item)};
 
       & > span {
         position: static;
@@ -91,16 +106,17 @@ export const FormField = styled.div<{
       input {
         font: inherit;
         color: inherit;
-        height: inherit;
+        height: inherit !important;
       }
     }
 
     ${PageFunds} & {
-      width: ${({ item }): string => rem(Reflect.get(fundFieldSizes, item) ?? 0)};
+      width: ${rem(Reflect.get(fundFieldSizes, item) ?? 0)};
       border-bottom: 1px solid ${borderColor};
     }
-    ${FundSidebar} & {
-      width: 100%;
+    ${FundModeSwitch} & {
+      margin-right: ${rem(4)};
+      width: auto;
     }
 
     ${TargetAllocation} & {
@@ -109,47 +125,49 @@ export const FormField = styled.div<{
     }
   }
 
-  ${({ small }): false | FlattenSimpleInterpolation =>
-    small &&
-    css`
-      &,
-      input {
-        width: 100px;
-      }
-    `}
-
-  ${({ item }): false | FlattenSimpleInterpolation =>
-    item === 'text' &&
-    css`
-      ${AddCurrency} & {
-        margin: 0 5px;
-        input {
-          margin: 0;
-          padding-left: 0;
-          padding-right: 0;
-        }
-      }
-    `}
-
-  ${NetWorthCategoryItemForm} & {
-    ${({ item }): false | FlattenSimpleInterpolation =>
-      ['type', 'category', 'color'].includes(item) && centerGridOne};
-    ${({ item }): false | FlattenSimpleInterpolation =>
-      item === 'category' &&
+    ${
+      small &&
       css`
-        ${breakpoint(breakpoints.mobile)} {
-          padding: 0 ${rem(4)};
-          border: none;
-          outline: none;
-          font-size: ${rem(18)};
-          width: 100%;
+        &,
+        input {
+          width: 100px;
+        }
+      `
+    }
 
+    ${
+      item === 'text' &&
+      css`
+        ${AddCurrency} & {
+          margin: 0 5px;
           input {
-            width: 100%;
-            font-size: ${rem(16)};
+            margin: 0;
+            padding-left: 0;
+            padding-right: 0;
           }
         }
-      `};
+      `
+    }
+
+  ${NetWorthCategoryItemForm} & {
+      ${['type', 'category', 'color'].includes(item) && centerGridOne};
+      ${
+        item === 'category' &&
+        css`
+          ${breakpoint(breakpoints.mobile)} {
+            padding: 0 ${rem(4)};
+            border: none;
+            outline: none;
+            font-size: ${rem(18)};
+            width: 100%;
+
+            input {
+              width: 100%;
+              font-size: ${rem(16)};
+            }
+          }
+        `
+      };
   }
 
   ${ModalDialog} & {
@@ -161,34 +179,36 @@ export const FormField = styled.div<{
     font-size: ${rem(16)};
     position: relative;
 
-    ${({ name, invalid }): false | FlattenSimpleInterpolation =>
-      name !== 'transactions' &&
-      css`
-        & > input {
-          border: none;
-          line-height: 28px;
-          outline: none;
-          width: 100%;
-        }
+      ${
+        name !== 'transactions' &&
+        css`
+          & > input {
+            border: none;
+            line-height: 28px;
+            outline: none;
+            width: 100%;
+          }
 
-        &::after {
-          border: 1px solid ${invalid ? colors.error : colors.light.mediumDark};
-          border-top: none;
-          content: '';
-          display: block;
-          height: ${rem(4)};
-          margin-top: ${rem(-4)};
-          position: absolute;
-          top: 100%;
-          width: 100%;
-        }
-      `};
+          &::after {
+            border: 1px solid ${invalid ? colors.error : colors.light.mediumDark};
+            border-top: none;
+            content: '';
+            display: block;
+            height: ${rem(4)};
+            margin-top: ${rem(-4)};
+            position: absolute;
+            top: 100%;
+            width: 100%;
+          }
+        `
+      };
 
-    ${({ name }): false | FlattenSimpleInterpolation =>
-      name === 'transactions' &&
-      css`
-        flex-basis: auto;
-      `};
+      ${
+        name === 'transactions' &&
+        css`
+          flex-basis: auto;
+        `
+      };
   }
 
   ${FormRowInner} > & {
@@ -197,6 +217,8 @@ export const FormField = styled.div<{
     }
   }
 `;
+
+export const FormField = styled.div<FormFieldProps>(formFieldStyles);
 
 const transactionsWidthDate = 104;
 const transactionsWidthUnits = 84;
@@ -325,7 +347,7 @@ export const ModalHeadColumn = styled.span`
   }
 `;
 
-const transactionItem = (width: number): FlattenSimpleInterpolation => css`
+const transactionItem = (width: number): SerializedStyles => css`
   ${breakpoint(breakpoints.mobile)} {
     flex: 0 0 ${width}px;
 
@@ -411,34 +433,32 @@ export const ModalHeadPrice = styled(ModalHeadColumn)`
   ${transactionItem(transactionsWidthPrice)};
 `;
 
-export const NumTransactions = styled.button<{ active?: boolean }>`
-  display: none;
+export const NumTransactions = styled.button<{ active?: boolean }>(
+  ({ active }) => css`
+    display: none;
 
-  ${breakpoint(breakpoints.mobile)} {
-    background: none;
-    border: none;
-    border-right: 1px solid ${colors.light.mediumDark};
-    color: inherit;
-    display: block;
-    font: inherit;
-    height: 100%;
-    margin: 0;
-    outline: none;
-    padding: 0;
-    text-align: center;
-    width: 100%;
+    ${breakpoint(breakpoints.mobile)} {
+      background: none;
+      border: none;
+      border-right: 1px solid ${colors.light.mediumDark};
+      color: inherit;
+      display: block;
+      font: inherit;
+      height: 100%;
+      margin: 0;
+      outline: none;
+      padding: 0;
+      text-align: center;
+      width: 100%;
 
-    &:focus {
-      box-shadow: inset 0 0 1px 1px ${colors.blue};
+      &:focus {
+        box-shadow: inset 0 0 1px 1px ${colors.blue};
+      }
+
+      ${active && `z-index: 1;`}
     }
-
-    ${({ active }): undefined | false | FlattenSimpleInterpolation =>
-      active &&
-      css`
-        z-index: 1;
-      `}
-  }
-`;
+  `,
+);
 
 export const NetWorthValue = styled.div`
   display: flex;
@@ -492,33 +512,34 @@ export const NetWorthValueList = styled.ul`
   list-style: none;
 `;
 
-export const NetWorthValueFX = styled.li<{ add: boolean }>`
-  display: flex;
-  select {
-    width: 100%;
-  }
+export const NetWorthValueFX = styled.li<{ add: boolean }>(
+  ({ add }) => css`
+    display: flex;
+    select {
+      width: 100%;
+    }
 
-  ${({ add }): false | FlattenSimpleInterpolation =>
-    add &&
+    ${add &&
     css`
       margin-top: 3px;
       padding: 3px 0;
       background: ${colors.translucent.dark.light};
     `}
 
-  ${FormField} {
-    flex: 0 0 ${rem(40)};
-    input {
-      width: ${rem(40)};
-    }
-  }
-
-  ${breakpoint(breakpoints.mobile)} {
     ${FormField} {
-      flex: 0 0 ${rem(60)};
+      flex: 0 0 ${rem(40)};
+      input {
+        width: ${rem(40)};
+      }
     }
-  }
-`;
+
+    ${breakpoint(breakpoints.mobile)} {
+      ${FormField} {
+        flex: 0 0 ${rem(60)};
+      }
+    }
+  `,
+);
 
 export const NetWorthValueOption = styled.div`
   display: flex;

@@ -13,14 +13,15 @@ describe('<AppLogo />', () => {
     expect.assertions(1);
     const { container } = setup();
     expect(container).toMatchInlineSnapshot(`
-      .c0 {
+      .emotion-0 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex: 0 0 55px;
-        -ms-flex: 0 0 55px;
-        flex: 0 0 55px;
+        -webkit-flex: 0 0 3.4375rem;
+        -ms-flex: 0 0 3.4375rem;
+        flex: 0 0 3.4375rem;
+        -webkit-box-flex-flow: row-reverse;
         -webkit-flex-flow: row-reverse;
         -ms-flex-flow: row-reverse;
         flex-flow: row-reverse;
@@ -29,15 +30,34 @@ describe('<AppLogo />', () => {
         -ms-flex-align: center;
         align-items: center;
         -webkit-box-pack: end;
-        -webkit-justify-content: flex-end;
         -ms-flex-pack: end;
+        -webkit-justify-content: flex-end;
         justify-content: flex-end;
-        padding: 0 0.5em;
+        padding: 0 0.5rem;
         width: 100%;
         background: #9f3030;
       }
 
-      .c1 {
+      @media only screen and (min-width: 500px) {
+        .emotion-0 {
+          -webkit-flex: 0 0 auto;
+          -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+          -webkit-box-flex-flow: row;
+          -webkit-flex-flow: row;
+          -ms-flex-flow: row;
+          flex-flow: row;
+          width: auto;
+          height: 3.0625rem;
+          background: none;
+        }
+      }
+
+      .emotion-2 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -45,53 +65,77 @@ describe('<AppLogo />', () => {
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
+        -webkit-box-flex-flow: row;
+        -webkit-flex-flow: row;
+        -ms-flex-flow: row;
+        flex-flow: row;
+        height: 100%;
+        line-height: 55px;
+        font-family: Ubuntu,Georgia,serif;
+        font-weight: bold;
         position: relative;
+      }
+
+      .emotion-2::before {
+        background-image: url(path/to/test/file);
+        -webkit-background-position: 0 -56px;
+        background-position: 0 -56px;
+        content: '';
+        display: inline-block;
+        -webkit-flex: 0 0 28px;
+        -ms-flex: 0 0 28px;
+        flex: 0 0 28px;
+        height: 28px;
+        margin-right: 0.5rem;
+        width: 28px;
+      }
+
+      @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        .emotion-2::before {
+          background-image: url(path/to/test/file);
+          -webkit-background-size: 252px 84px;
+          background-size: 252px 84px;
+        }
+      }
+
+      .emotion-4 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-        line-height: 55px;
-        font-family: Ubuntu,Georgia,serif;
-        font-weight: bold;
-        font-size: 22px;
+        height: 100%;
+        padding-right: 2.25rem;
       }
 
-      .c1::before {
-        display: inline-block;
-        -webkit-flex: 0 0 38px;
-        -ms-flex: 0 0 38px;
-        flex: 0 0 38px;
-        content: '';
-        width: 30px;
-        height: 30px;
-        background: url(path/to/test/file) 0 -56px;
-      }
-
-      @media only screen and (min-width:500px) {
-        .c0 {
-          -webkit-flex: 0 0 auto;
-          -ms-flex: 0 0 auto;
-          flex: 0 0 auto;
-          -webkit-flex-flow: row;
-          -ms-flex-flow: row;
-          flex-flow: row;
-          margin: 0 1em 0 0.5em;
-          width: auto;
-          height: 49;
-          background: none;
-        }
+      .emotion-6 {
+        -webkit-flex: 0 0 2.6875rem;
+        -ms-flex: 0 0 2.6875rem;
+        flex: 0 0 2.6875rem;
+        font-size: 1.375rem;
+        line-height: 2.6875rem;
+        margin: 0;
       }
 
       <div>
         <div
-          class="c0"
+          class="emotion-0 emotion-1"
         >
           <a
-            class="c1"
+            class="emotion-2 emotion-3"
           >
-            <span>
-              Budget
-            </span>
+            <div
+              class="emotion-4 emotion-5"
+            >
+              <h1
+                class="emotion-6 emotion-7"
+              >
+                Budget
+              </h1>
+            </div>
           </a>
         </div>
       </div>
@@ -114,14 +158,51 @@ describe('<AppLogo />', () => {
       expect.assertions(1);
       const { container } = setup(propsLoading);
       expect(container).toMatchInlineSnapshot(`
-        .c0 {
+        @keyframes animation-0 {
+          100% {
+            -webkit-transform: rotate(360deg);
+            -ms-transform: rotate(360deg);
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes animation-1 {
+          0%, 100% {
+            -webkit-transform: scale(0);
+            -ms-transform: scale(0);
+            transform: scale(0);
+          }
+
+          50% {
+            -webkit-transform: scale(1.0);
+            -ms-transform: scale(1.0);
+            transform: scale(1.0);
+          }
+        }
+
+        @keyframes animation-1 {
+          0%, 100% {
+            -webkit-transform: scale(0);
+            -ms-transform: scale(0);
+            transform: scale(0);
+          }
+
+          50% {
+            -webkit-transform: scale(1.0);
+            -ms-transform: scale(1.0);
+            transform: scale(1.0);
+          }
+        }
+
+        .emotion-0 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
           display: flex;
-          -webkit-flex: 0 0 55px;
-          -ms-flex: 0 0 55px;
-          flex: 0 0 55px;
+          -webkit-flex: 0 0 3.4375rem;
+          -ms-flex: 0 0 3.4375rem;
+          flex: 0 0 3.4375rem;
+          -webkit-box-flex-flow: row-reverse;
           -webkit-flex-flow: row-reverse;
           -ms-flex-flow: row-reverse;
           flex-flow: row-reverse;
@@ -130,15 +211,34 @@ describe('<AppLogo />', () => {
           -ms-flex-align: center;
           align-items: center;
           -webkit-box-pack: end;
-          -webkit-justify-content: flex-end;
           -ms-flex-pack: end;
+          -webkit-justify-content: flex-end;
           justify-content: flex-end;
-          padding: 0 0.5em;
+          padding: 0 0.5rem;
           width: 100%;
           background: #9f3030;
         }
 
-        .c1 {
+        @media only screen and (min-width: 500px) {
+          .emotion-0 {
+            -webkit-flex: 0 0 auto;
+            -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
+            -webkit-box-flex-flow: row;
+            -webkit-flex-flow: row;
+            -ms-flex-flow: row;
+            flex-flow: row;
+            width: auto;
+            height: 3.0625rem;
+            background: none;
+          }
+        }
+
+        .emotion-2 {
+          -webkit-align-items: center;
+          -webkit-box-align: center;
+          -ms-flex-align: center;
+          align-items: center;
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -146,68 +246,134 @@ describe('<AppLogo />', () => {
           -webkit-flex: 1;
           -ms-flex: 1;
           flex: 1;
+          -webkit-box-flex-flow: row;
+          -webkit-flex-flow: row;
+          -ms-flex-flow: row;
+          flex-flow: row;
+          height: 100%;
+          line-height: 55px;
+          font-family: Ubuntu,Georgia,serif;
+          font-weight: bold;
           position: relative;
+        }
+
+        .emotion-2::before {
+          background-image: url(path/to/test/file);
+          -webkit-background-position: 0 -56px;
+          background-position: 0 -56px;
+          content: '';
+          display: inline-block;
+          -webkit-flex: 0 0 28px;
+          -ms-flex: 0 0 28px;
+          flex: 0 0 28px;
+          height: 28px;
+          margin-right: 0.5rem;
+          width: 28px;
+        }
+
+        @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+          .emotion-2::before {
+            background-image: url(path/to/test/file);
+            -webkit-background-size: 252px 84px;
+            background-size: 252px 84px;
+          }
+        }
+
+        .emotion-4 {
+          display: -webkit-box;
+          display: -webkit-flex;
+          display: -ms-flexbox;
+          display: flex;
           -webkit-align-items: center;
           -webkit-box-align: center;
           -ms-flex-align: center;
           align-items: center;
-          line-height: 55px;
-          font-family: Ubuntu,Georgia,serif;
-          font-weight: bold;
-          font-size: 22px;
+          height: 100%;
+          padding-right: 2.25rem;
         }
 
-        .c1::before {
-          display: inline-block;
-          -webkit-flex: 0 0 38px;
-          -ms-flex: 0 0 38px;
-          flex: 0 0 38px;
-          content: '';
-          width: 30px;
-          height: 30px;
-          background: url(path/to/test/file) 0 -56px;
+        .emotion-6 {
+          -webkit-flex: 0 0 2.6875rem;
+          -ms-flex: 0 0 2.6875rem;
+          flex: 0 0 2.6875rem;
+          font-size: 1.375rem;
+          line-height: 2.6875rem;
+          margin: 0;
         }
 
-        .c2 {
-          width: 34px;
-          height: 34px;
+        .emotion-8 {
+          position: relative;
+          width: 22px;
+          height: 22px;
+          -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+          -webkit-animation: animation-0 2s 0s infinite linear;
+          animation: animation-0 2s 0s infinite linear;
+          -webkit-flex: 0 0 auto;
+          -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+          margin-left: 0.5rem;
+          opacity: 1;
           position: absolute;
-          left: -2px;
-          border-radius: 100%;
-          border: 4px solid transparent;
-          border-top: 4px solid #fbe07f;
-          -webkit-animation: spin 1s infinite ease;
-          animation: spin 1s infinite ease;
+          right: 0;
+          -webkit-transition: opacity 0.5s ease;
+          transition: opacity 0.5s ease;
         }
 
-        @media only screen and (min-width:500px) {
-          .c0 {
-            -webkit-flex: 0 0 auto;
-            -ms-flex: 0 0 auto;
-            flex: 0 0 auto;
-            -webkit-flex-flow: row;
-            -ms-flex-flow: row;
-            flex-flow: row;
-            margin: 0 1em 0 0.5em;
-            width: auto;
-            height: 49;
-            background: none;
-          }
+        .emotion-9 {
+          position: absolute;
+          top: 0;
+          bottom: auto;
+          height: 11px;
+          width: 11px;
+          background-color: #fbe07f;
+          border-radius: 100%;
+          -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+          -webkit-animation: animation-1 2s 0s infinite linear;
+          animation: animation-1 2s 0s infinite linear;
+        }
+
+        .emotion-10 {
+          position: absolute;
+          top: auto;
+          bottom: 0;
+          height: 11px;
+          width: 11px;
+          background-color: #fbe07f;
+          border-radius: 100%;
+          -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+          -webkit-animation: animation-1 2s -1s infinite linear;
+          animation: animation-1 2s -1s infinite linear;
         }
 
         <div>
           <div
-            class="c0"
+            class="emotion-0 emotion-1"
           >
             <a
-              class="c1"
+              class="emotion-2 emotion-3"
             >
-              <span>
-                Budget
-              </span>
-              <span
-                class="c2"
-              />
+              <div
+                class="emotion-4 emotion-5"
+              >
+                <h1
+                  class="emotion-6 emotion-7"
+                >
+                  Budget
+                </h1>
+                <span
+                  class="emotion-8"
+                >
+                  <span
+                    class="emotion-9"
+                  />
+                  <span
+                    class="emotion-10"
+                  />
+                </span>
+              </div>
             </a>
           </div>
         </div>

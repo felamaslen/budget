@@ -1,4 +1,6 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
 import { FundProps } from './types';
 import {
@@ -7,12 +9,13 @@ import {
   HeaderColumn,
   Base,
 } from '~client/components/accessible-list/styles';
-import { rem, breakpoint } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
+import { FlexColumn } from '~client/styled/shared/layout';
 import { Page } from '~client/styled/shared/page';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const fieldSizes = {
-  item: 380,
+  item: 356,
   transactions: 104,
 };
 
@@ -22,11 +25,11 @@ export const PageFunds = styled(Page)`
   height: 100%;
 
   ${breakpoint(breakpoints.mobile)} {
-    flex-direction: column;
+    flex-direction: column-reverse;
     overflow-y: auto;
 
     ${Base} {
-      flex: 0 1 800px;
+      flex: 1;
     }
   }
   ${breakpoint(breakpoints.desktop)} {
@@ -34,52 +37,62 @@ export const PageFunds = styled(Page)`
   }
 `;
 
-export const FundRow = styled(StandardRow)<Partial<FundProps>>`
-  ${breakpoint(breakpoints.mobile)} {
-    align-items: center;
-    border: none;
-    display: flex;
-    height: ${rem(48)};
-    line-height: ${rem(48)};
+export const FundRow = styled(StandardRow)<Partial<FundProps>>(
+  ({ isSold = false }) => css`
+    ${breakpoint(breakpoints.mobile)} {
+      align-items: center;
+      border: none;
+      display: flex;
+      height: ${rem(48)};
+      line-height: ${rem(48)};
 
-    &:nth-child(2n) {
-      background-color: inherit;
-    }
+      &:nth-of-type(2n) {
+        background-color: inherit;
+      }
 
-    ${({ isSold = false }): false | FlattenSimpleInterpolation =>
-      isSold &&
+      ${isSold &&
       css`
         height: ${rem(24)};
         line-height: ${rem(24)};
         font-style: italic;
         color: ${colors.light.mediumDark};
       `};
+    }
+  `,
+);
+
+export const CashRow = styled(FundRow)`
+  height: ${rem(72)};
+`;
+
+export const TargetAllocation = styled(FlexColumn)`
+  align-items: center;
+  height: 100%;
+  margin: 0 ${rem(2)};
+  width: ${rem(20)};
+
+  svg {
+    flex: 0 0 auto;
+    margin: ${rem(6)} 0;
+  }
+  span {
+    font-size: ${rem(10)};
+    font-weight: bold;
+    line-height: ${rem(16)};
   }
 `;
 
-export const TargetAllocation = styled.div`
-  align-items: center;
-  display: flex;
-  height: ${rem(12)};
-  width: ${rem(48)};
+export const FundRowMobile = styled(StandardRow)<{ isSold: boolean }>(
+  ({ isSold }) => css`
+    display: flex;
+    align-items: center;
 
-  input {
-    height: 100% !important;
-    font-size: ${rem(12)} !important;
-    width: 100%;
-  }
-`;
-
-export const FundRowMobile = styled(StandardRow)<{ isSold: boolean }>`
-  display: flex;
-  align-items: center;
-
-  ${({ isSold }): false | FlattenSimpleInterpolation =>
-    isSold &&
+    ${isSold &&
     css`
       color: ${colors.medium.light};
     `};
-`;
+  `,
+);
 
 export const MobilePie = styled.div`
   align-items: center;
@@ -135,7 +148,7 @@ export const FundHeaderColumn = styled(HeaderColumn)<{ column: string }>`
     min-width: ${({ column }): string => rem(Reflect.get(fieldSizes, column))};
     overflow: visible;
 
-    &:not(:first-child) {
+    &:not(:first-of-type) {
       padding: 0;
     }
   }

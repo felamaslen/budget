@@ -1,7 +1,8 @@
-import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
-import * as SpinnerStyles from '~client/components/spinner/styles';
-import { rem, breakpoint } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
 import { Page as PageBase, Button as ButtonBase } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
 import { Page as PageType, MainBlockName } from '~client/types';
@@ -81,12 +82,6 @@ export const Upper = styled.div`
     margin: 4px 0;
     padding-right: ${rem(50)};
   }
-
-  ${SpinnerStyles.Outer} {
-    position: absolute;
-    right: 0;
-    top: 0;
-  }
 `;
 
 const indicatorColors: Record<MainBlockName, string> = {
@@ -98,25 +93,28 @@ const indicatorColors: Record<MainBlockName, string> = {
   saved: colors.blockColor.saved,
 };
 
-export const TreeMain = styled.div<{ open?: boolean }>`
-  &::before {
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 5px 0 5px 8.7px;
-    border-color: transparent;
-    border-left-color: black;
+type TreeProps = { open?: boolean };
 
-    ${({ open }): false | FlattenSimpleInterpolation =>
-      !!open &&
+export const TreeMain = styled.div<TreeProps>(
+  ({ open }) => css`
+    &::before {
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 5px 0 5px 8.7px;
+      border-color: transparent;
+      border-left-color: black;
+
+      ${!!open &&
       css`
         border-left-color: transparent;
         border-top-color: black;
         border-width: 8.7px 5px 0 5px;
       `}
-  }
-`;
+    }
+  `,
+);
 
 export const TreeIndicator = styled.span<{ name?: MainBlockName }>`
   display: flex;
@@ -139,25 +137,26 @@ export const TreeValue = styled.span`
 
 export const TreeListItemInner = styled.div``;
 
-export const TreeListItem = styled.li<{ open?: boolean }>`
-  display: flex;
-  flex-flow: column;
-
-  line-height: 1.5em;
-  white-space: nowrap;
-  cursor: pointer;
-  span {
+export const TreeListItem = styled.li<TreeProps>(
+  ({ open }) => css`
     display: flex;
-    flex-basis: 0;
-  }
+    flex-flow: column;
 
-  ${({ open }): false | FlattenSimpleInterpolation =>
-    !!open &&
+    line-height: 1.5em;
+    white-space: nowrap;
+    cursor: pointer;
+    span {
+      display: flex;
+      flex-basis: 0;
+    }
+
+    ${!!open &&
     css`
       & > ${TreeMain}::before {
       }
     `}
-`;
+  `,
+);
 
 export const TreeListSelected = styled.div`
   &:before {
@@ -217,7 +216,7 @@ export const TreeList = styled.ul`
   list-style: none;
   & > ${TreeListItem} {
     position: relative;
-    &:nth-child(2n + 1) > ${TreeMain} {
+    &:nth-of-type(2n + 1) > ${TreeMain} {
       background: ${colors.light.mediumLight};
     }
     & > ${TreeMain} {
@@ -266,11 +265,7 @@ export const Timeline = styled.div`
   }
 `;
 
-export const DataItem = styled.span.attrs(({ color }) => ({
-  style: { backgroundColor: color },
-}))<{
-  color: string;
-}>`
+export const DataItem = styled.span`
   display: block;
   flex-grow: 1;
   height: 100%;

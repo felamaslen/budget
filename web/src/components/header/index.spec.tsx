@@ -35,9 +35,9 @@ describe('<Header />', () => {
 
   it('should render a header', () => {
     expect.assertions(1);
-    const { getByRole } = setup();
-    const header = getByRole('heading');
-    expect(header).toBeInTheDocument();
+    const { getAllByRole } = setup();
+    const headers = getAllByRole('heading');
+    expect(headers).toHaveLength(2);
   });
 
   it('should render a nav', () => {

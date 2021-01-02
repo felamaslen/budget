@@ -1,7 +1,7 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
 import { HeaderColumn } from './shared';
-import { rem } from '~client/styled/mixins';
 
 export const DailyTotal = styled.span`
   margin-left: ${rem(4)};

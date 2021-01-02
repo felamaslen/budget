@@ -15,7 +15,7 @@ export const ModalWindow: React.FC<Props> = ({ title, onClosed = NULL, width, ch
   const onClose = useCallback(() => {
     setVisible(false);
     clearTimeout(timer.current);
-    timer.current = setTimeout(onClosed, 300);
+    timer.current = window.setTimeout(onClosed, 300);
   }, [onClosed]);
 
   useEffect(() => {

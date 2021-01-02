@@ -1,5 +1,7 @@
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
 import { rgba } from 'polished';
-import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import { useRef, useState, useEffect, useMemo, useCallback, memo } from 'react';
 
 import * as Styled from './styles';
 import { Preview } from './types';
@@ -97,13 +99,14 @@ const InfiniteChild: React.FC<
   return (
     <Styled.InfiniteChild
       ref={childRef}
+      style={{
+        ...Styled.getBoxStyle({ flex, flow }),
+        backgroundColor: color,
+      }}
       data-testid={name}
       role={canDive ? 'button' : 'container'}
       name={name}
-      flex={flex}
-      flow={flow}
       active={active}
-      bgColor={color}
       tabIndex={0}
       onFocus={onActivate}
       onMouseOver={onActivate}
@@ -128,7 +131,7 @@ const InfiniteChild: React.FC<
   );
 };
 
-const InfiniteChildMemo = React.memo(InfiniteChild);
+const InfiniteChildMemo = memo(InfiniteChild);
 
 const InfiniteBox: React.FC<
   CommonProps & {
@@ -152,9 +155,11 @@ const InfiniteBox: React.FC<
   const items = blocks.items;
 
   return (
-    <Styled.InfiniteBox flex={blocks.box.flex} flow={flow}>
+    <Styled.InfiniteBox style={Styled.getBoxStyle({ flex: blocks.box.flex, flow })}>
       {items && (
-        <Styled.InfiniteBox flex={items.box.flex} flow={blocks.box.flow}>
+        <Styled.InfiniteBox
+          style={Styled.getBoxStyle({ flex: items.box.flex, flow: blocks.box.flow })}
+        >
           {items.blocks.map((item, index) => (
             <InfiniteChildMemo
               key={item.name}
@@ -257,7 +262,7 @@ function useClickDive(
         }));
 
         clearTimeout(fadeTimer.current);
-        fadeTimer.current = setTimeout(() => {
+        fadeTimer.current = window.setTimeout(() => {
           onDive(preview.name);
         }, Styled.fadeTime);
       });
@@ -278,7 +283,7 @@ function useClickDive(
         }));
 
         clearTimeout(fadeTimer.current);
-        fadeTimer.current = setTimeout(() => {
+        fadeTimer.current = window.setTimeout(() => {
           dispatch((last) => ({
             ...last,
             preview: {
@@ -317,7 +322,7 @@ function useClickDive(
         },
       }));
       clearTimeout(fadeTimer.current);
-      fadeTimer.current = setTimeout(() => {
+      fadeTimer.current = window.setTimeout(() => {
         dispatch(initialDiveState);
       }, Styled.fadeTime);
     });
@@ -349,7 +354,18 @@ const Blocks: React.FC<Omit<Props, 'status'>> = ({
       onTouchEnd={onDeactivate}
       onBlur={onDeactivate}
     >
-      {preview.open && <Styled.Expander data-testid="preview" {...preview} />}
+      {preview.open && (
+        <Styled.Expander
+          data-testid="preview"
+          style={{
+            backgroundColor: preview.color,
+            left: preview.left,
+            top: preview.top,
+            height: preview.height,
+            width: preview.width,
+          }}
+        />
+      )}
       {blocks && !blocksDeep && (
         <InfiniteBox
           flex={1}
@@ -376,7 +392,7 @@ const Blocks: React.FC<Omit<Props, 'status'>> = ({
   );
 };
 
-const BlocksMemo = React.memo(Blocks);
+const BlocksMemo = memo(Blocks);
 
 export const BlockPacker: React.FC<Props> = ({ status, ...props }) => (
   <Styled.Container>

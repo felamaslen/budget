@@ -1,5 +1,7 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { breakpoint, unimportant, rem } from '~client/styled/mixins';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
+import { breakpoint, unimportant } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 import { OverviewHeader, PageListStandard, PageNonStandard } from '~client/types';
 
@@ -50,42 +52,33 @@ export const Rows = styled.div`
   }
 `;
 
-export const Row = styled.div<{ past?: boolean; active?: boolean; future?: boolean }>`
+export const Row = styled.div<{ past?: boolean; active?: boolean; future?: boolean }>(
+  ({ past, active, future }) => css`
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
 
-  ${({ active }): false | FlattenSimpleInterpolation =>
+  ${
     !!active &&
     css`
       font-weight: bold;
-    `}
+    `
+  }
 
-  ${({ past }): false | FlattenSimpleInterpolation => !!past && unimportant}
+  ${!!past && unimportant}
 
   ${breakpoint(breakpoints.mobile)} {
-    font-size: 16px;
+    font-size: ${rem(16)};
 
-    ${({ active }): false | FlattenSimpleInterpolation =>
-      !!active &&
-      css`
-        font-weight: bold;
-      `}
-    ${({ active, future }): false | FlattenSimpleInterpolation =>
-      !!(active || future) &&
-      css`
-        font-size: 14px;
-      `}
+    ${!!active && 'font-weight: bold;'};
+    ${!!(active || future) && `font-size: ${rem(14)};`}
   }
 
   ${breakpoint(breakpoints.tablet)} {
-    ${({ active, future }): false | FlattenSimpleInterpolation =>
-      !!(active || future) &&
-      css`
-        font-size: 16px;
-      `}
+    ${!!(active || future) && `font-size: ${rem(16)};`}
   }
-`;
+`,
+);
 
 export type PropsCell = {
   cellColor?: string | null;
@@ -95,9 +88,21 @@ export type PropsCell = {
   future?: boolean;
 };
 
-export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColor?: string }) => ({
-  style: backgroundColor ? { backgroundColor } : {},
-}))<PropsCell>`
+function cellWidthDesktop(column: PropsCell['column']): number {
+  if (colSizeSmall.includes(column)) {
+    return 7;
+  }
+  if (column === 'netWorthPredicted') {
+    return 9;
+  }
+  if (column === 'netWorth') {
+    return 12;
+  }
+  return 10;
+}
+
+export const Cell = styled.div<PropsCell>(
+  ({ active, column, future, past }) => css`
   display: flex;
   flex-flow: row nowrap;
   flex-grow: 1;
@@ -107,36 +112,23 @@ export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColo
   width: 100%;
   vertical-align: middle;
   text-align: left;
-  height: 32px;
-  line-height: 24px;
+  height: ${rem(32)};
+  line-height: ${rem(24)};
 
-  ${({ active }): false | FlattenSimpleInterpolation =>
-    !!active &&
-    css`
-      font-weight: bold;
-    `}}
+  ${!!active && `font-weight: bold;`}
 
-  ${({ past, column }): false | FlattenSimpleInterpolation =>
-    !!past &&
-    column === 'month' &&
-    css`
-      background: ${colors.light.mediumLight};
-    `}
+  ${!!past && column === 'month' && `background: ${colors.light.mediumLight};`}
 
-  ${({ active, column }): false | FlattenSimpleInterpolation =>
+  ${
     !!active &&
     column === 'month' &&
     css`
       background: ${colors.green};
       color: ${colors.white};
-    `}
+    `
+  }
 
-  ${({ future, column }): false | FlattenSimpleInterpolation =>
-    !!future &&
-    column === 'month' &&
-    css`
-      background: ${colors.amber};
-    `}
+  ${!!future && column === 'month' && `background: ${colors.amber}`}
 
   ${breakpoint(breakpoints.mobileSmall)} {
     padding: ${rem(4)};
@@ -145,55 +137,33 @@ export const Cell = styled.div.attrs(({ cellColor: backgroundColor }: { cellColo
 
   ${breakpoint(breakpoints.mobile)} {
     display: flex;
-    padding: 0 2px;
-    flex-grow: ${({ column }): number => {
-      if (colSizeSmall.includes(column)) {
-        return 7;
-      }
-      if (column === 'netWorthPredicted') {
-        return 9;
-      }
-      if (column === 'netWorth') {
-        return 12;
-      }
+    padding: 0 ${rem(2)};
+    flex-grow: ${cellWidthDesktop(column)};
+    height: ${rem(24)};
 
-      return 10;
-    }};
-    height: 24px;
-
-    ${({ past }): false | FlattenSimpleInterpolation =>
+    ${
       !!past &&
       css`
-        height: 16px;
-        line-height: 18px;
-        font-size: 13px;
-      `}
+        height: ${rem(16)};
+        line-height: ${rem(18)};
+        font-size: ${rem(13)};
+      `
+    }
 
-    ${({ active, future }): false | FlattenSimpleInterpolation =>
-      !!(active || future) &&
-      css`
-        line-height: 26px;
-      `}
+    ${!!(active || future) && `line-height: ${rem(26)};`}
 
-    ${({ column }): false | FlattenSimpleInterpolation =>
+    ${
       ([PageListStandard.Income, PageNonStandard.Funds] as (OverviewHeader | 'month')[]).includes(
         column,
-      ) &&
-      css`
-        border-left: 3px solid ${colors.dark.mediumLight};
-      `}
-    ${({ column }): false | FlattenSimpleInterpolation =>
-      column === 'net' &&
-      css`
-        border-right: 3px solid ${colors.light.mediumLight};
-      `}
-    ${({ column }): false | FlattenSimpleInterpolation =>
-      column === 'netWorthPredicted' &&
-      css`
-        font-style: italic;
-      `}
+      ) && `border-left: 3px solid ${colors.dark.mediumLight};`
+    };
+
+    ${column === 'net' && `border-right: 3px solid ${colors.light.mediumLight};`};
+
+    ${column === 'netWorthPredicted' && `font-style: italic`};
   }
-`;
+`,
+);
 
 export const Header = styled(Row)`
   flex: 0 0 auto;
@@ -205,7 +175,7 @@ export const HeaderLink = styled(Cell)`
   justify-content: space-between;
   overflow: hidden;
   white-space: nowrap;
-  height: 24px;
+  height: ${rem(24)};
   text-align: center;
   background: ${({ column }): string =>
     colors.overview[`${column}Mobile` as keyof typeof colors.overview] ?? colors.white};
@@ -215,7 +185,7 @@ export const HeaderLink = styled(Cell)`
   }
 
   ${breakpoint(breakpoints.mobile)} {
-    padding: 2px;
+    padding: ${rem(2)};
   }
 `;
 
@@ -223,6 +193,6 @@ export const HeaderText = styled.span`
   color: black;
 
   ${breakpoint(breakpoints.mobile)} {
-    padding: 0 2px;
+    padding: 0 ${rem(2)};
   }
 `;

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, RenderResult } from '@testing-library/react';
+import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createMockStore, { MockStore } from 'redux-mock-store';
@@ -6,7 +6,14 @@ import numericHash from 'string-hash';
 import { fromValue } from 'wonka';
 
 import { useListCrudStandard, useListCrudFunds } from './list';
-import { errorOpened, listItemCreated, listItemUpdated, listItemDeleted } from '~client/actions';
+import {
+  errorOpened,
+  listItemCreated,
+  listItemUpdated,
+  listItemDeleted,
+  apiLoaded,
+  apiLoading,
+} from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import * as dataModule from '~client/modules/data';
 import { State } from '~client/reducers';
@@ -82,7 +89,7 @@ describe('List mutations', () => {
   describe(useListCrudStandard.name, () => {
     describe('onCreate', () => {
       it('should dispatch an optimistic create action', async () => {
-        expect.assertions(2);
+        expect.hasAssertions();
 
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
           fromValue({
@@ -96,24 +103,22 @@ describe('List mutations', () => {
 
         const { store, getByText } = setup();
         expect(store.getActions()).toHaveLength(0);
-        await act(async () => {
+        act(() => {
           fireEvent.click(getByText('Create!'));
+        });
 
-          await new Promise<void>((resolve) => {
-            setImmediate(() => {
-              expect(store.getActions()).toStrictEqual([
-                listItemCreated(page, testItem, false, numericHash('some-fake-id')),
-              ]);
-
-              resolve();
-            });
-          });
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemCreated(page, testItem, false, numericHash('some-fake-id')),
+            apiLoading,
+            apiLoaded,
+          ]);
         });
       });
 
       describe('when an error occurs', () => {
         it('should dispatch an error action', async () => {
-          expect.assertions(2);
+          expect.hasAssertions();
 
           (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
             fromValue({
@@ -127,23 +132,17 @@ describe('List mutations', () => {
 
           const { store, getByText } = setup();
           expect(store.getActions()).toHaveLength(0);
-          await act(async () => {
+
+          act(() => {
             fireEvent.click(getByText('Create!'));
+          });
 
-            await new Promise<void>((resolve) => {
-              setImmediate(() => {
-                expect(store.getActions()).toStrictEqual(
-                  expect.arrayContaining([
-                    errorOpened(
-                      `Error creating list item: Something bad happened`,
-                      ErrorLevel.Warn,
-                    ),
-                  ]),
-                );
-
-                resolve();
-              });
-            });
+          await waitFor(() => {
+            expect(store.getActions()).toStrictEqual(
+              expect.arrayContaining([
+                errorOpened(`Error creating list item: Something bad happened`, ErrorLevel.Warn),
+              ]),
+            );
           });
         });
       });
@@ -151,7 +150,7 @@ describe('List mutations', () => {
 
     describe('onUpdate', () => {
       it('should dispatch an optimistic update action', async () => {
-        expect.assertions(2);
+        expect.hasAssertions();
 
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
           fromValue({
@@ -165,18 +164,16 @@ describe('List mutations', () => {
 
         const { store, getByText } = setup();
         expect(store.getActions()).toHaveLength(0);
-        await act(async () => {
+        act(() => {
           fireEvent.click(getByText('Update!'));
+        });
 
-          await new Promise<void>((resolve) => {
-            setImmediate(() => {
-              expect(store.getActions()).toStrictEqual([
-                listItemUpdated(page, numericHash('some-real-id'), testDelta, testItem, false),
-              ]);
-
-              resolve();
-            });
-          });
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemUpdated(page, numericHash('some-real-id'), testDelta, testItem, false),
+            apiLoading,
+            apiLoaded,
+          ]);
         });
       });
 
@@ -220,7 +217,7 @@ describe('List mutations', () => {
 
     describe('onDelete', () => {
       it('should dispatch an optimistic delete action', async () => {
-        expect.assertions(2);
+        expect.hasAssertions();
 
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
           fromValue({
@@ -234,18 +231,16 @@ describe('List mutations', () => {
 
         const { store, getByText } = setup();
         expect(store.getActions()).toHaveLength(0);
-        await act(async () => {
+        act(() => {
           fireEvent.click(getByText('Delete!'));
+        });
 
-          await new Promise<void>((resolve) => {
-            setImmediate(() => {
-              expect(store.getActions()).toStrictEqual([
-                listItemDeleted(page, numericHash('some-real-id'), testItem, false),
-              ]);
-
-              resolve();
-            });
-          });
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemDeleted(page, numericHash('some-real-id'), testItem, false),
+            apiLoading,
+            apiLoaded,
+          ]);
         });
       });
 
@@ -325,7 +320,7 @@ describe('List mutations', () => {
 
     describe('onCreate', () => {
       it('should dispatch an optimistic create action', async () => {
-        expect.assertions(2);
+        expect.hasAssertions();
 
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
           fromValue({
@@ -339,30 +334,23 @@ describe('List mutations', () => {
 
         const { store, getByText } = setup(TestComponentFunds);
         expect(store.getActions()).toHaveLength(0);
-        await act(async () => {
+        act(() => {
           fireEvent.click(getByText('Create!'));
+        });
 
-          await new Promise<void>((resolve) => {
-            setImmediate(() => {
-              expect(store.getActions()).toStrictEqual([
-                listItemCreated(
-                  PageNonStandard.Funds,
-                  testFund,
-                  false,
-                  numericHash('some-fake-id'),
-                ),
-              ]);
-
-              resolve();
-            });
-          });
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemCreated(PageNonStandard.Funds, testFund, false, numericHash('some-fake-id')),
+            apiLoading,
+            apiLoaded,
+          ]);
         });
       });
     });
 
     describe('onUpdate', () => {
       it('should dispatch an optimistic update action', async () => {
-        expect.assertions(2);
+        expect.hasAssertions();
 
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
           fromValue({
@@ -376,25 +364,23 @@ describe('List mutations', () => {
 
         const { store, getByText } = setup(TestComponentFunds);
         expect(store.getActions()).toHaveLength(0);
-        await act(async () => {
+        act(() => {
           fireEvent.click(getByText('Update!'));
+        });
 
-          await new Promise<void>((resolve) => {
-            setImmediate(() => {
-              expect(store.getActions()).toStrictEqual([
-                listItemUpdated(PageNonStandard.Funds, testId, testFundDelta, testFund, false),
-              ]);
-
-              resolve();
-            });
-          });
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemUpdated(PageNonStandard.Funds, testId, testFundDelta, testFund, false),
+            apiLoading,
+            apiLoaded,
+          ]);
         });
       });
     });
 
     describe('onDelete', () => {
       it('should dispatch an optimistic delete action', async () => {
-        expect.assertions(2);
+        expect.hasAssertions();
 
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
           fromValue({
@@ -408,18 +394,16 @@ describe('List mutations', () => {
 
         const { store, getByText } = setup(TestComponentFunds);
         expect(store.getActions()).toHaveLength(0);
-        await act(async () => {
+        act(() => {
           fireEvent.click(getByText('Delete!'));
+        });
 
-          await new Promise<void>((resolve) => {
-            setImmediate(() => {
-              expect(store.getActions()).toStrictEqual([
-                listItemDeleted(PageNonStandard.Funds, testId, testFund, false),
-              ]);
-
-              resolve();
-            });
-          });
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemDeleted(PageNonStandard.Funds, testId, testFund, false),
+            apiLoading,
+            apiLoaded,
+          ]);
         });
       });
     });

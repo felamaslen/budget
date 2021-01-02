@@ -160,7 +160,7 @@ export const AccessibleListCreateItem = <
   const createEvents = useCTA(onCreateIfPossible);
 
   return (
-    <Styled.CreateRow data-testid="create-form">
+    <Styled.CreateRow data-testid="create-form" as="div">
       {fieldKeys.map((field: FieldKey<I>) => (
         <CreateField
           key={String(field)}

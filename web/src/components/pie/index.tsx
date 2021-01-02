@@ -29,6 +29,7 @@ function getSectorPath(r: number, startAngle: number, slice: number): string {
 type Props = {
   size: number;
   startAngle?: number;
+  isAnimated?: boolean;
   slice: number;
   color: string;
 };
@@ -39,29 +40,44 @@ const ANIMATION_FPS = 60;
 const stepTime = 1000 / ANIMATION_FPS;
 const numSteps = ANIMATION_DURATION / stepTime;
 
-export const Pie: React.FC<Props> = ({ size, startAngle = 0, slice, color }) => {
-  const offsetAngle = startAngle - Math.PI / 2; // start from the top of the circle
+type SVGProps = Pick<Props, 'color' | 'size' | 'slice' | 'startAngle'>;
+
+const PieSVG: React.FC<SVGProps> = ({ color, size, slice, startAngle = 0 }) => (
+  <svg width={size} height={size}>
+    <g>
+      <circle cx={size / 2} cy={size / 2} r={size / 2} stroke={color} fill="none" />
+      <path
+        d={getSectorPath(size / 2, startAngle - Math.PI / 2, slice)}
+        stroke="none"
+        fill={color}
+      />
+    </g>
+  </svg>
+);
+
+const PieAnimated: React.FC<Omit<Props, 'isAnimated'>> = (props) => {
+  const { startAngle = 0, slice } = props;
   const [state, setState] = useState<{ start: number; slice: number }>({
-    start: offsetAngle,
+    start: startAngle,
     slice: 0,
   });
 
   const timer = useRef<number>(0);
 
-  const lastStart = useRef<number>(offsetAngle);
+  const lastStart = useRef<number>(startAngle);
   const lastSlice = useRef<number>(0);
 
   useEffect(() => {
     clearTimeout(timer.current);
 
-    const stepDiffStart = (offsetAngle - lastStart.current) / numSteps;
+    const stepDiffStart = (startAngle - lastStart.current) / numSteps;
     const stepDiffSlice = (slice - lastSlice.current) / numSteps;
 
-    lastStart.current = offsetAngle;
+    lastStart.current = startAngle;
     lastSlice.current = slice;
 
     const animate = (step = 0): void => {
-      timer.current = setTimeout(() => {
+      timer.current = window.setTimeout(() => {
         setState((last) => ({
           start: last.start + stepDiffStart,
           slice: last.slice + stepDiffSlice,
@@ -70,16 +86,17 @@ export const Pie: React.FC<Props> = ({ size, startAngle = 0, slice, color }) => 
         if (step < numSteps - 1) {
           animate(step + 1);
         } else {
-          setState({ start: offsetAngle, slice });
+          setState({ start: startAngle, slice });
         }
       }, stepTime);
     };
 
     animate();
+
     return (): void => {
       clearTimeout(timer.current);
     };
-  }, [offsetAngle, slice]);
+  }, [startAngle, slice]);
 
   useEffect(
     () => (): void => {
@@ -88,12 +105,12 @@ export const Pie: React.FC<Props> = ({ size, startAngle = 0, slice, color }) => 
     [],
   );
 
-  return (
-    <svg width={size} height={size}>
-      <g>
-        <circle cx={size / 2} cy={size / 2} r={size / 2} stroke={color} fill="none" />
-        <path d={getSectorPath(size / 2, state.start, state.slice)} stroke="none" fill={color} />
-      </g>
-    </svg>
-  );
+  return <PieSVG {...props} slice={state.slice} startAngle={state.start} />;
+};
+
+export const Pie: React.FC<Props> = ({ isAnimated = true, ...props }) => {
+  if (isAnimated) {
+    return <PieAnimated {...props} />;
+  }
+  return <PieSVG {...props} />;
 };

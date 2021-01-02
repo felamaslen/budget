@@ -1,5 +1,7 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { rem, breakpoint } from '~client/styled/mixins';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
+import { breakpoint } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
 import { Aggregate, NetWorthTableColumn } from '~client/types';
 
@@ -73,20 +75,20 @@ export const RowCategories = styled(Row)``;
 
 export const RowSubtitle = styled(Row)``;
 
-export const Column = styled.td<{ item: string }>`
-  ${({ item }): false | FlattenSimpleInterpolation =>
-    item === 'date-short' &&
+export const Column = styled.td<{ item: string }>(
+  ({ item }) => css`
+    ${item === 'date-short' &&
     css`
       font-style: italic;
     `};
-  ${({ item }): false | FlattenSimpleInterpolation =>
-    item !== 'date-short' &&
+    ${item !== 'date-short' &&
     css`
       text-align: right;
       padding: 0 4px 0 10px;
       font-weight: bold;
     `};
-`;
+  `,
+);
 
 export const DateQuarter = styled.span`
   font-weight: bold;
@@ -101,7 +103,7 @@ export const HeaderRetirement = styled(Header)`
   white-space: nowrap;
 
   ${breakpoint(breakpoints.mobile)} {
-    font-size: ${rem(14)};
+    font-size: ${rem(12)};
     width: ${rem(180)};
   }
 `;

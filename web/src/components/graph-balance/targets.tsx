@@ -1,6 +1,7 @@
 import React from 'react';
 import { getValuesWithTime } from '~client/components/graph-cashflow';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
+import { exponentialRegression } from '~client/modules/data';
 import { formatCurrency } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
 import { Data } from '~client/types';
@@ -23,31 +24,10 @@ export function getTargets(
   line: Data;
   targetValues: TargetValue[];
 } {
-  const logValues = allNetWorth.filter((value) => value > 0).map(Math.log);
-  if (!logValues.length) {
-    return {
-      line: [],
-      targetValues: [],
-    };
+  const { slope, intercept, logValues, points } = exponentialRegression(allNetWorth);
+  if (!points.length) {
+    return { line: [], targetValues: [] };
   }
-
-  const sumXY = logValues.reduce<number>((last, value, index) => last + value * (index + 1), 0);
-  const sumX = logValues.reduce<number>((last, _, index) => last + index + 1, 0);
-  const sumY = logValues.reduce<number>((last, value) => last + value, 0);
-
-  const Sxy = sumXY - (sumX * sumY) / logValues.length;
-
-  const sumX2 = logValues.reduce<number>((last, _, index) => last + (index + 1) ** 2, 0);
-
-  const Sxx = sumX2 - sumX ** 2 / logValues.length;
-
-  const xBar = sumX / logValues.length;
-  const yBar = sumY / logValues.length;
-
-  const slope = Sxy / Sxx;
-  const intercept = yBar - slope * xBar;
-
-  const points = logValues.map((_, index) => Math.exp(slope * (index + 1) + intercept));
 
   const targetValues = targetPeriodYears.map<TargetValue>((years) => ({
     tag: `${years}y`,

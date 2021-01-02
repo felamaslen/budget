@@ -1,6 +1,9 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { css, SerializedStyles } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 import { Step } from './constants';
-import { rem, breakpoint } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
+import { asButton } from '~client/styled/shared/role';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const FormNavigation = styled.div`
@@ -24,15 +27,15 @@ export const FormNavigation = styled.div`
   }
 `;
 
-export const FormContainer = styled.div<{ add: boolean }>`
-  background: ${colors.white};
-  display: flex;
-  flex-flow: column;
-  flex: 1;
-  min-height: 0;
+export const FormContainer = styled.div<{ add: boolean }>(
+  ({ add }) => css`
+    background: ${colors.white};
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+    min-height: 0;
 
-  ${({ add }): false | FlattenSimpleInterpolation =>
-    add &&
+    ${add &&
     css`
       flex: 1 1 0;
       min-height: 0;
@@ -41,12 +44,13 @@ export const FormContainer = styled.div<{ add: boolean }>`
       background: ${colors.white as string};
     `};
 
-  ${breakpoint(breakpoints.mobile)} {
-    align-items: center;
-  }
-`;
+    ${breakpoint(breakpoints.mobile)} {
+      align-items: center;
+    }
+  `,
+);
 
-function stepStyles({ step }: { step?: Step }): FlattenSimpleInterpolation | null {
+function stepStyles({ step }: { step?: Step }): SerializedStyles | null {
   if (step && [Step.Assets, Step.Liabilities].includes(step)) {
     return css`
       min-height: 0;
@@ -184,10 +188,7 @@ export const SectionTitle = styled.h5`
   font-size: 16px;
 `;
 
-export const SectionSubtitle = styled.h6.attrs({
-  role: 'button',
-  tabIndex: 0,
-})`
+export const SectionSubtitle = asButton(styled.h6`
   margin: 0;
   font-size: 14px;
   line-height: 24px;
@@ -234,7 +235,7 @@ export const SectionSubtitle = styled.h6.attrs({
       transform: rotate(${({ hidden }): number => (hidden ? 225 : 45)}deg);
     }
   }
-`;
+`);
 
 export const Subcategory = styled.h6`
   ${EditByCategoryGroup} & {

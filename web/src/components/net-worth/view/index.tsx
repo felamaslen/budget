@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { NetWorthViewRow } from './net-worth-view-row';
+import { Retirement } from './retirement';
 import * as Styled from './styles';
 import SumByCategory, { Props as SumProps } from './sum-by-category';
-import { NetWorthGraph, GraphProps } from '~client/components/net-worth/graph';
+import { NetWorthGraph, GraphProps, getFTISeries } from '~client/components/net-worth/graph';
 import { useIsMobile } from '~client/hooks';
 import { Aggregate } from '~client/types';
 
@@ -11,6 +12,7 @@ type Props = Pick<SumProps, 'aggregate'> & Pick<GraphProps, 'table'>;
 
 export const NetWorthView: React.FC<Props> = ({ table, aggregate }) => {
   const isMobile = useIsMobile();
+  const ftiSeries = useMemo(() => getFTISeries(table), [table]);
 
   return (
     <Styled.NetWorthView>
@@ -34,7 +36,7 @@ export const NetWorthView: React.FC<Props> = ({ table, aggregate }) => {
               <Styled.Header item="assets">{'Total (£)'}</Styled.Header>
               <Styled.Header item="liabilities">{'Total (£)'}</Styled.Header>
               <Styled.HeaderRetirement colSpan={2} item="date">
-                {'Retire when > 1000'}
+                <Retirement ftiSeries={ftiSeries} />
               </Styled.HeaderRetirement>
             </Styled.RowSubtitle>
           </thead>

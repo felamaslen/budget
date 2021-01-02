@@ -1,13 +1,12 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import { Pie } from '../pie';
 import * as Styled from './styles';
 import { FundProps } from './types';
-import { FormFieldNumber } from '~client/components/form-field';
 import { FundGainInfo } from '~client/components/fund-gain-info';
 import { GraphFundItem } from '~client/components/graph-fund-item';
-import { TodayContext, useListCrudFunds } from '~client/hooks';
+import { TodayContext, useDebouncedState, useListCrudFunds } from '~client/hooks';
 import { getViewSoldFunds, getFundsCachedValue, getMaxAllocationTarget } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { FundNative as Fund } from '~client/types';
@@ -29,14 +28,46 @@ export const FundRow: React.FC<Props> = ({
   const { onUpdate } = useListCrudFunds();
 
   const maxAllocationTarget = useSelector(getMaxAllocationTarget(item.id));
+
+  const [
+    tempAllocationTarget,
+    debouncedAllocationTarget,
+    setTempAllocationTarget,
+  ] = useDebouncedState<number | null | undefined>(item.allocationTarget, 500);
+
   const setAllocationTarget = useCallback(
     (value) => {
       const allocationTarget = Math.min(maxAllocationTarget, Math.max(0, value));
+      setTempAllocationTarget(allocationTarget);
       if (allocationTarget !== item.allocationTarget) {
         onUpdate(item.id, { allocationTarget }, item);
       }
     },
-    [item, onUpdate, maxAllocationTarget],
+    [item, onUpdate, maxAllocationTarget, setTempAllocationTarget],
+  );
+
+  const lastScrolled = useRef<number | null | undefined>(debouncedAllocationTarget);
+  useEffect(() => {
+    if (debouncedAllocationTarget !== null && debouncedAllocationTarget !== lastScrolled.current) {
+      lastScrolled.current = debouncedAllocationTarget ?? 0;
+      setAllocationTarget(debouncedAllocationTarget);
+    } else if (debouncedAllocationTarget !== item.allocationTarget) {
+      setTempAllocationTarget(item.allocationTarget);
+    }
+  }, [
+    debouncedAllocationTarget,
+    item.allocationTarget,
+    setTempAllocationTarget,
+    setAllocationTarget,
+  ]);
+
+  const scrollAllocationTarget = useCallback(
+    (event: React.WheelEvent) => {
+      setTempAllocationTarget((last) =>
+        Math.min(maxAllocationTarget, Math.max(0, (last ?? 0) + (event.deltaY > 0 ? -1 : 1))),
+      );
+    },
+    [setTempAllocationTarget, maxAllocationTarget],
   );
 
   if (!viewSoldFunds && isSold) {
@@ -44,7 +75,8 @@ export const FundRow: React.FC<Props> = ({
   }
 
   if (isMobile) {
-    const valueSlice = (2 * Math.PI * (gain?.value ?? 0)) / latestValue.value;
+    const valueFrac = (gain?.value ?? 0) / latestValue.value;
+    const valueSlice = 2 * Math.PI * valueFrac;
 
     return (
       <Styled.FundRowMobile isSold={isSold} odd={true}>
@@ -59,20 +91,17 @@ export const FundRow: React.FC<Props> = ({
   return (
     <Styled.FundRow isSold={isSold} odd={true}>
       {children}
+      <Styled.TargetAllocation onWheel={scrollAllocationTarget}>
+        <Pie
+          size={18}
+          slice={(2 * Math.PI * (tempAllocationTarget ?? 0)) / 100}
+          color={colors.shadow.mediumDark}
+          isAnimated={false}
+        />
+        <span>{tempAllocationTarget ?? 0}%</span>
+      </Styled.TargetAllocation>
       {!!prices && <GraphFundItem name={item.item} sold={isSold} values={prices} />}
       <FundGainInfo isSold={isSold} rowGains={gain} />
-      <Styled.TargetAllocation>
-        <FormFieldNumber
-          value={item.allocationTarget ?? 0}
-          onChange={setAllocationTarget}
-          inputProps={{
-            min: 0,
-            max: maxAllocationTarget,
-            step: 1,
-            disabled: maxAllocationTarget === 0,
-          }}
-        />
-      </Styled.TargetAllocation>
     </Styled.FundRow>
   );
 };

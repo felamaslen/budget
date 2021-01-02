@@ -1,4 +1,5 @@
-import styled, { css, keyframes, FlattenSimpleInterpolation } from 'styled-components';
+import { css, keyframes, SerializedStyles } from '@emotion/react';
+import styled from '@emotion/styled';
 import { colors } from '~client/styled/variables';
 
 const modalEnterState = css`
@@ -42,7 +43,9 @@ export const ModalDialog = styled.div`
   background: ${colors.shadow.light};
 `;
 
-export const ModalInner = styled.div<{ active: boolean; isLoading: boolean }>`
+type ModalInnerProps = { active: boolean; isLoading: boolean };
+
+const modalInnerStyles = ({ active, isLoading }: ModalInnerProps): SerializedStyles => css`
   display: flex;
   flex-flow: column nowrap;
   width: 360px;
@@ -58,19 +61,19 @@ export const ModalInner = styled.div<{ active: boolean; isLoading: boolean }>`
   animation: ${intoView} 0.3s ease-out;
   transform-origin: bottom;
 
-  ${({ active }): false | FlattenSimpleInterpolation =>
-    !active &&
-    css`
-      opacity: 0;
-      animation: ${outOfView} 0.3s ease-out;
-    `};
+  ${!active &&
+  css`
+    opacity: 0;
+    animation: ${outOfView} 0.3s ease-out;
+  `};
 
-  ${({ isLoading }): false | FlattenSimpleInterpolation =>
-    isLoading &&
-    css`
-      filter: grayscale(1) contrast(0.7);
-    `};
+  ${isLoading &&
+  css`
+    filter: grayscale(1) contrast(0.7);
+  `};
 `;
+
+export const ModalInner = styled.div<ModalInnerProps>(modalInnerStyles);
 
 export const Title = styled.span`
   font-size: 1.2em;
@@ -101,20 +104,21 @@ export const FormRow = styled.li<{ field: string }>`
     nowrap;
 `;
 
-export const FormLabel = styled.span<{ item: string }>`
-  flex-basis: 0;
-  flex-grow: 1;
-  text-transform: capitalize;
-  &::after {
-    content: ':';
-  }
+export const FormLabel = styled.span<{ item: string }>(
+  ({ item }) => css`
+    flex-basis: 0;
+    flex-grow: 1;
+    text-transform: capitalize;
+    &::after {
+      content: ':';
+    }
 
-  ${({ item }): false | FlattenSimpleInterpolation =>
-    item === 'transactions' &&
+    ${item === 'transactions' &&
     css`
       flex-basis: auto;
     `};
-`;
+  `,
+);
 
 export const FormRowInner = styled.div`
   display: flex;

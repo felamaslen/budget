@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, sizes, colors } from '~client/styled/variables';
 

@@ -155,7 +155,7 @@ export const ModalDialog = <I extends ListItemInput>({
       dispatch({ type: ActionType.Shown, payload: { type, id, canRemove } });
     } else if (!active && visible) {
       clearTimeout(timer.current);
-      timer.current = setTimeout(() => dispatch({ type: ActionType.Hidden }), animationTime);
+      timer.current = window.setTimeout(() => dispatch({ type: ActionType.Hidden }), animationTime);
     } else {
       dispatch({ type: ActionType.ChangedId, payload: { type, id, canRemove } });
     }

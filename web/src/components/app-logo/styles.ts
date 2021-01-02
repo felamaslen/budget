@@ -1,25 +1,27 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
-import nav from '~client/images/nav.png';
+import nav1x from '~client/images/nav.png';
+import nav2x from '~client/images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
+import { Flex } from '~client/styled/shared';
 import { breakpoints, sizes, colors } from '~client/styled/variables';
 
 export const AppLogo = styled.div`
   display: flex;
-  flex: 0 0 ${sizes.heightHeaderMobile}px;
+  flex: 0 0 ${rem(sizes.heightHeaderMobile)};
   flex-flow: row-reverse;
   align-items: center;
   justify-content: flex-end;
-  padding: 0 0.5em;
+  padding: 0 ${rem(8)};
   width: 100%;
   background: ${colors.primaryDarkMobile};
 
   ${breakpoint(breakpoints.mobile)} {
     flex: 0 0 auto;
     flex-flow: row;
-    margin: 0 1em 0 0.5em;
     width: auto;
-    height: ${sizes.navbarHeight};
+    height: ${rem(sizes.navbarHeight)};
     background: none;
   }
 `;
@@ -39,31 +41,44 @@ export const QueueNotSaved = styled.span`
 `;
 
 export const Logo = styled.a`
+  align-items: center;
   display: flex;
   flex: 1;
-  position: relative;
-  align-items: center;
+  flex-flow: row;
+  height: 100%;
   line-height: 55px;
   font-family: Ubuntu, Georgia, serif;
   font-weight: bold;
-  font-size: 22px;
+  position: relative;
   &::before {
-    display: inline-block;
-    flex: 0 0 ${sizes.logo + 8}px;
+    background-image: url(${nav1x});
+    background-position: 0 -56px;
     content: '';
-    width: ${sizes.logo}px;
+    display: inline-block;
+    flex: 0 0 ${sizes.logo}px;
     height: ${sizes.logo}px;
-    background: url(${nav}) 0 -56px;
+    margin-right: ${rem(8)};
+    width: ${sizes.logo}px;
+    @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      background-image: url(${nav2x});
+      background-size: 252px 84px;
+    }
   }
 `;
 
-export const LoadingApi = styled.span`
-  width: ${sizes.logo + 4}px;
-  height: ${sizes.logo + 4}px;
-  position: absolute;
-  left: -2px;
-  border-radius: 100%;
-  border: 4px solid transparent;
-  border-top: 4px solid ${colors.amber};
-  animation: spin 1s infinite ease;
+export const TitleContainer = styled(Flex)`
+  align-items: center;
+  height: 100%;
+  padding-right: ${rem(36)};
+`;
+
+export const Title = styled.h1`
+  flex: 0 0 ${rem(sizes.navbarHeight - 6)};
+  font-size: ${rem(22)};
+  line-height: ${rem(sizes.navbarHeight - 6)};
+  margin: 0;
+`;
+
+export const Spinner = styled.div`
+  flex: 0 0 ${rem(8)};
 `;

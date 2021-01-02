@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { GraphOuter } from '~client/components/graph/styles';
 import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors, graphOverviewHeightMobile } from '~client/styled/variables';

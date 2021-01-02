@@ -33,7 +33,14 @@ export const Navbar: React.FC<Props> = ({ onLogout }) => (
         {page}
       </Styled.Link>
     ))}
-    <Styled.Link to="/" as="a" tabIndex={-1} page="logout" onClick={onLogout}>
+    <Styled.Link
+      to="/"
+      as="a"
+      tabIndex={-1}
+      page="logout"
+      onClick={onLogout}
+      activeClassName="not-active"
+    >
       Log out
     </Styled.Link>
   </Styled.NavList>

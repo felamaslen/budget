@@ -1,6 +1,8 @@
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 import { CategoryList } from '../category-list/styles';
-import { breakpoint, rem } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
 import { InlineFlexCenter } from '~client/styled/shared/layout';
 import { breakpoints } from '~client/styled/variables';
 

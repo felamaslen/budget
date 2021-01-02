@@ -1,8 +1,8 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
-import { useDebounce } from 'use-debounce';
 
 import { FieldKey, ActiveField, ADD_BUTTON } from './types';
 import { isSearchPage } from '~client/constants/data';
+import { useDebouncedState } from '~client/hooks';
 import { isEscape } from '~client/modules/nav';
 import {
   ListItemInput,
@@ -68,8 +68,9 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
     requestedField: null,
   });
 
-  const [suggestionRequest, setSuggestionRequest] = useState<SuggestionRequest | undefined>();
-  const [debouncedRequest] = useDebounce(suggestionRequest, 100);
+  const [suggestionRequest, debouncedRequest, setSuggestionRequest] = useDebouncedState<
+    SuggestionRequest | undefined
+  >(undefined, 100);
 
   const [{ data, fetching, stale }] = useSearchSuggestionsQuery({
     pause: !(isSearchPage(page) && debouncedRequest),
@@ -119,7 +120,7 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
         setState((last) => ({ ...last, ...stateEmpty }));
       }
     },
-    [suggestionFields],
+    [suggestionFields, setSuggestionRequest],
   );
 
   useEffect(() => {

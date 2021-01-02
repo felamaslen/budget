@@ -1,5 +1,7 @@
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
 import { AxiosInstance, AxiosResponse } from 'axios';
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { API_PREFIX } from '~client/constants/data';
@@ -71,7 +73,7 @@ export const OverviewPreview: React.FC<Props> = ({ query }) => {
   }
 
   return (
-    <Styled.Preview left={position.left} top={position.top}>
+    <Styled.Preview style={position}>
       <Styled.ImageContainer>{url && <img src={url} alt="Preview" />}</Styled.ImageContainer>
     </Styled.Preview>
   );

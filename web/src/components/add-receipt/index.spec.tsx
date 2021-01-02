@@ -3,6 +3,8 @@ import { render, act, fireEvent, waitFor, RenderResult } from '@testing-library/
 import { DocumentNode } from 'graphql';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
+import { Provider } from 'react-redux';
+import createMockStore from 'redux-mock-store';
 import { Client } from 'urql';
 import { fromValue } from 'wonka';
 
@@ -77,10 +79,13 @@ describe('<AddReceipt />', () => {
     },
   } as unknown) as Client;
 
+  const store = createMockStore()({});
   const setup = (): RenderResult =>
     render(
       <GQLProviderMock client={mockClient}>
-        <AddReceipt {...props} />
+        <Provider store={store}>
+          <AddReceipt {...props} />
+        </Provider>
       </GQLProviderMock>,
     );
 

@@ -68,6 +68,9 @@ export const PageAnalysis: React.FC = () => {
     if (!(activeCost && activeMain)) {
       return '';
     }
+    if (activeMain === 'saved') {
+      return `Saved: ${formatCurrency(saved, { raw: true })}`;
+    }
 
     const main = activeCost.find(({ item }) => item === activeMain);
     if (!main) {
@@ -84,7 +87,7 @@ export const PageAnalysis: React.FC = () => {
     return `${capitalise(activeMain)} (${formatCurrency(total, {
       raw: true,
     })})`;
-  }, [cost, costDeep, activeMain, activeSub]);
+  }, [cost, costDeep, saved, activeMain, activeSub]);
 
   return (
     <Styled.Page page={PageNonStandard.Analysis}>

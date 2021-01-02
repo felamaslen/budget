@@ -1,12 +1,13 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
-import { breakpoint, rem } from '~client/styled/mixins';
-import { FlexColumn } from '~client/styled/shared/layout';
+import { breakpoint } from '~client/styled/mixins';
+import { Flex } from '~client/styled/shared/layout';
 import { breakpoints, colors } from '~client/styled/variables';
 
-export const Container = styled(FlexColumn)`
-  display: flex;
-  flex: 1 0 auto;
+export const Container = styled(Flex)`
+  flex: 0 0 auto;
   flex-flow: row;
   overflow-x: auto;
 
@@ -19,13 +20,14 @@ export const Container = styled(FlexColumn)`
 export const GraphFunds = styled.div<{ width: number; height: number }>`
   background-color: ${colors.white};
   position: relative;
+  user-select: none;
 
   ${breakpoint(breakpoints.mobile)} {
     background-color: ${colors.translucent.dark.light};
     border: 1px solid ${colors.medium.light};
     flex: 0 0 ${({ height }): number => height}px;
     height: ${({ height }): number => height}px;
-    margin: ${rem(10)} 0 0 ${rem(10)};
+    margin: ${rem(10)} 0 ${rem(10)} ${rem(10)};
     overflow: hidden;
   }
 
@@ -39,15 +41,24 @@ export const GraphFunds = styled.div<{ width: number; height: number }>`
   }
 `;
 
+export const FundModeSwitch = styled(Flex)`
+  height: ${rem(20)};
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 3;
+`;
+
 export const FundSidebar = styled.ul`
   margin: 0;
   padding: 0;
   position: absolute;
   left: 0;
-  top: 0;
+  top: ${rem(20)};
   list-style: none;
   outline: none;
-  width: ${rem(75)};
+  width: ${rem(60)};
   height: 100%;
   background: linear-gradient(to bottom, ${colors.translucent.dark.dark}, transparent);
   z-index: 3;
@@ -75,23 +86,24 @@ export const FundSidebar = styled.ul`
 
 export const SidebarCheckbox = styled.span<{
   checked: boolean;
-}>`
-  display: inline-block;
-  position: absolute;
-  top: 5px;
-  left: 1px;
-  width: 0;
-  height: 0;
-  border: 5px solid black;
+}>(
+  ({ checked }) => css`
+    display: inline-block;
+    position: absolute;
+    top: 5px;
+    left: 1px;
+    width: 0;
+    height: 0;
+    border: 5px solid black;
 
-  ${({ checked }): false | FlattenSimpleInterpolation =>
-    !checked &&
+    ${!checked &&
     css`
       border-width: 2px;
       width: 10px;
       height: 10px;
     `}
-`;
+  `,
+);
 
 export const SidebarFund = styled.a`
   padding-left: 12px;

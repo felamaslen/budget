@@ -11,7 +11,7 @@ const redisClient = new Redis(config.redis);
 const codeKey = (code: string): string => `stockPrice_${code}`;
 const lockKey = 'stockPriceLock';
 
-const cacheExpirySeconds = 60 * 5;
+const cacheExpirySeconds = process.env.NODE_ENV === 'development' ? 86400 : 60 * 5;
 
 async function getStockPricesFromApi(codes: string[]): Promise<(number | null)[]> {
   if (!codes.length) {

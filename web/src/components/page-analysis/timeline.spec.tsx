@@ -23,7 +23,7 @@ describe('<PageAnalysis /> / <Timeline />', () => {
     expect.assertions(1);
     const { container } = getContainer();
     expect(container).toMatchInlineSnapshot(`
-      .c0 {
+      .emotion-0 {
         width: 100%;
         display: -webkit-box;
         display: -webkit-flex;
@@ -35,17 +35,8 @@ describe('<PageAnalysis /> / <Timeline />', () => {
         overflow: hidden;
       }
 
-      .c1 {
-        display: block;
-        -webkit-box-flex: 1;
-        -webkit-flex-grow: 1;
-        -ms-flex-positive: 1;
-        flex-grow: 1;
-        height: 100%;
-      }
-
-      @media only screen and (min-width:1200px) {
-        .c0 {
+      @media only screen and (min-width: 1200px) {
+        .emotion-0 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -55,29 +46,33 @@ describe('<PageAnalysis /> / <Timeline />', () => {
         }
       }
 
+      .emotion-2 {
+        display: block;
+        -webkit-box-flex: 1;
+        -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+        flex-grow: 1;
+        height: 100%;
+      }
+
       <div>
         <div
-          class="c0"
+          class="emotion-0 emotion-1"
         >
           <span
-            class="c1"
-            color="#d3e6.4e2.8"
+            class="emotion-2 emotion-3"
           />
           <span
-            class="c1"
-            color="#d9.cd1d1.4"
+            class="emotion-2 emotion-3"
           />
           <span
-            class="c1"
-            color="#d7.4d5.8d6.8"
+            class="emotion-2 emotion-3"
           />
           <span
-            class="c1"
-            color="#cc.8db.8df.4"
+            class="emotion-2 emotion-3"
           />
           <span
-            class="c1"
-            color="#df.cd5.4d3.8"
+            class="emotion-2 emotion-3"
           />
         </div>
       </div>

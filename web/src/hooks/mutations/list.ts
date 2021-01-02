@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import * as Urql from 'urql';
 
+import { useFetchingState } from './crud';
 import { errorOpened, listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import { omitTypeName, toRawFund, withRawDate } from '~client/modules/data';
@@ -103,6 +104,8 @@ function useListCrudGeneric<
   const [resultCreate, createItem] = mutations.useCreate();
   const [resultUpdate, updateItem] = mutations.useUpdate();
   const [resultDelete, deleteItem] = mutations.useDelete();
+
+  useFetchingState(resultCreate, resultUpdate, resultDelete);
 
   useServerError(resultCreate, 'Error creating list item', dispatch);
   useServerError(resultUpdate, 'Error updating list item', dispatch);

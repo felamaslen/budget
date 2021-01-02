@@ -33,27 +33,12 @@ describe('<GraphFundItem />', () => {
       fireEvent.focus(button);
     });
     expect(container).toMatchInlineSnapshot(`
-      .c1 {
+      .emotion-0 {
         display: inline-block;
       }
 
-      .c2 {
-        width: 100%;
-        position: relative;
-        z-index: 2;
-      }
-
-      .sc-fznzOf .c2 {
-        position: relative;
-        height: 125px;
-      }
-
-      @media only screen and (min-width:500px) {
-
-      }
-
-      @media only screen and (min-width:500px) {
-        .c1 {
+      @media only screen and (min-width: 500px) {
+        .emotion-0 {
           height: 100%;
           -webkit-flex: 0 0 6.25rem;
           -ms-flex: 0 0 6.25rem;
@@ -63,12 +48,12 @@ describe('<GraphFundItem />', () => {
           z-index: 2;
         }
 
-        .c1:focus {
+        .emotion-0:focus {
           box-shadow: inset 0 0 1px 1px #09e;
           z-index: 5;
         }
 
-        .c1:focus svg {
+        .emotion-0:focus svg {
           position: absolute;
           background: rgba(255,255,255,0.8);
           box-shadow: 0 3px 7px rgba(0,0,0,0.2);
@@ -76,18 +61,23 @@ describe('<GraphFundItem />', () => {
           height: 120px;
         }
 
-        .sc-fzoXzr:nth-last-child(-n + 3) .c1 svg {
+        .e1e47zb315:nth-last-of-type(-n + 3) .emotion-0 svg {
           top: initial;
           bottom: 0;
         }
       }
 
-      @media only screen and (min-width:500px) {
+      @media only screen and (min-width: 500px) {
+        .css-4vueu3-Graph {
+          display: inline-block;
+          position: static;
+          width: 100px;
+          height: 48px;
+          background: rgba(255,255,255,0.95);
+          box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
 
-      }
-
-      @media only screen and (min-width:500px) {
-        .c0 .ehfNKL {
+        .emotion-1 .css-4vueu3-Graph {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -97,18 +87,25 @@ describe('<GraphFundItem />', () => {
         }
       }
 
-      @media only screen and (min-width:1200px) {
-
+      .emotion-2 {
+        width: 100%;
+        position: relative;
+        z-index: 2;
       }
 
-      @media only screen and (min-width:500px) {
-        .sc-fznzOf .c2 {
+      .ea98hsw4 .emotion-2 {
+        position: relative;
+        height: 125px;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .ea98hsw4 .emotion-2 {
           height: 100%;
         }
       }
 
-      @media only screen and (min-width:500px) {
-        .c2 {
+      @media only screen and (min-width: 500px) {
+        .emotion-2 {
           display: inline-block;
           position: static;
           width: 300px;
@@ -117,7 +114,7 @@ describe('<GraphFundItem />', () => {
           box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
 
-        .c0 .c2 {
+        .emotion-1 .emotion-2 {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -127,21 +124,21 @@ describe('<GraphFundItem />', () => {
         }
       }
 
-      @media only screen and (min-width:1200px) {
-        .c2 {
+      @media only screen and (min-width: 1200px) {
+        .emotion-2 {
           display: block;
         }
       }
 
       <div>
         <div
-          class="c0 c1"
+          class="emotion-0 emotion-1"
           data-testid="fund-graph"
           role="button"
           tabindex="0"
         >
           <div
-            class="c2"
+            class="emotion-2 emotion-3"
             height="120"
             width="300"
           >

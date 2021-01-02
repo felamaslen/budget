@@ -199,5 +199,5 @@ export const sizes = {
   heightNavMobile,
   navbarHeight: 49,
   navbarHeightMobile: heightHeaderMobile + heightNavMobile,
-  logo: 30,
+  logo: 28,
 };

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { FundGraph } from '~client/components/graph-fund-item/styles';
 import { GraphFunds } from '~client/components/graph-funds/styles';

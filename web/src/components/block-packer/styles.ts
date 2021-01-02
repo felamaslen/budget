@@ -1,9 +1,9 @@
-import { CSSProperties } from 'react';
-import styled, { FlattenSimpleInterpolation, css } from 'styled-components';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
-import { Preview } from './types';
 import { Page as PageAnalysis, blocksHeightMobile } from '~client/components/page-analysis/styles';
-import { rem, diagonalBg, breakpoint } from '~client/styled/mixins';
+import { diagonalBg, breakpoint } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
 import { Box as BoxProps } from '~client/types';
 
@@ -29,30 +29,19 @@ export const BoxContainer = styled.div`
   position: relative;
 `;
 
-type ExpanderProps = Omit<Preview, 'open' | 'name'>;
-export const Expander = styled.div.attrs(({ left, top, height, width, color }: ExpanderProps) => ({
-  style: {
-    backgroundColor: color,
-    left,
-    top,
-    height,
-    width,
-  },
-}))<ExpanderProps>`
+export const Expander = styled.div`
   display: block;
   position: absolute;
   z-index: 5;
   transition: all ${fadeTime}ms ease-in-out;
 `;
 
-const getBoxStyle = ({ flex, flow }: BoxProps): CSSProperties => ({
+export const getBoxStyle = ({ flex, flow }: BoxProps): { width: string; height: string } => ({
   height: `${(flow === 'row' ? 1 : flex) * 100}%`,
   width: `${(flow === 'row' ? flex : 1) * 100}%`,
 });
 
-export const InfiniteBox = styled.div.attrs(({ flex, flow }: BoxProps) => ({
-  style: getBoxStyle({ flex, flow }),
-}))<BoxProps>`
+export const InfiniteBox = styled.div`
   float: left;
   height: 100%;
   width: 100%;
@@ -68,28 +57,17 @@ const activeStyle = css`
   }
 `;
 
-export const InfiniteChild = styled.div.attrs(
-  ({ flex, flow, bgColor }: BoxProps & { bgColor?: string }) => ({
-    style: {
-      ...getBoxStyle({ flex, flow }),
-      backgroundColor: bgColor,
-    },
-  }),
-)<
-  BoxProps & {
-    name: string;
-    active?: boolean;
-    bgColor?: string;
-    hasSubTree: boolean;
-  }
->`
-  background-image: ${({ hasSubTree }): string =>
-    hasSubTree
+export const InfiniteChild = styled.div<{
+  name: string;
+  active?: boolean;
+  hasSubTree: boolean;
+}>(
+  ({ active, hasSubTree, name }) => css`
+    background-image: ${hasSubTree
       ? 'none'
       : `linear-gradient(to bottom right, ${colors.translucent.light.dark}, ${colors.shadow.light})`};
 
-  ${({ name }): false | FlattenSimpleInterpolation =>
-    name === 'saved' &&
+    ${name === 'saved' &&
     css`
       background-image: none;
 
@@ -104,17 +82,16 @@ export const InfiniteChild = styled.div.attrs(
       }
     `};
 
-  box-shadow: inset -1px -1px 13px ${colors.shadow.mediumLight};
-  cursor: default;
-  float: left;
-  height: 100%;
-  outline: none;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
+    box-shadow: inset -1px -1px 13px ${colors.shadow.mediumLight};
+    cursor: default;
+    float: left;
+    height: 100%;
+    outline: none;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
 
-  ${({ hasSubTree, active }): false | FlattenSimpleInterpolation =>
-    !hasSubTree &&
+    ${!hasSubTree &&
     css`
       ${active ? activeStyle : ''};
 
@@ -123,7 +100,8 @@ export const InfiniteChild = styled.div.attrs(
         ${activeStyle};
       }
     `}
-`;
+  `,
+);
 
 export const statusHeight = 21;
 

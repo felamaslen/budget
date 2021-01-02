@@ -1,6 +1,6 @@
-import { darken } from 'polished';
-import styled from 'styled-components';
-import { rem, breakpoint } from '~client/styled/mixins';
+import styled from '@emotion/styled';
+import { darken, rem } from 'polished';
+import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const keyColors = {

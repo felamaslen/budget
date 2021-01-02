@@ -1,5 +1,7 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
-import { rem, breakpoint } from '~client/styled/mixins';
+import { css, SerializedStyles } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
+import { breakpoint } from '~client/styled/mixins';
 import { Button, FlexCenter } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
 
@@ -73,16 +75,16 @@ export const NumberInputRow = styled.div`
   grid-template-columns: inherit;
   grid-column: 1 / span 3;
   grid-gap: 6px;
-  &:nth-child(1) {
+  &:nth-of-type(1) {
     grid-row: 1;
   }
-  &:nth-child(2) {
+  &:nth-of-type(2) {
     grid-row: 2;
   }
-  &:nth-child(3) {
+  &:nth-of-type(3) {
     grid-row: 3;
   }
-  &:nth-child(4) {
+  &:nth-of-type(4) {
     grid-row: 4;
   }
 `;
@@ -135,7 +137,8 @@ export const PinDisplay = styled.div`
   }
 `;
 
-export const InputPin = styled.div<{ done: boolean }>`
+type InputPinProps = { done: boolean };
+const inputPinStyles = ({ done }: InputPinProps): SerializedStyles => css`
   background-color: ${colors.dark.light};
   flex: 1 0 0;
   font-size: ${rem(64)};
@@ -193,15 +196,16 @@ export const InputPin = styled.div<{ done: boolean }>`
     width: 100%;
   }
 
-  ${({ done }): false | FlattenSimpleInterpolation =>
-    done &&
-    css`
-      &::after {
-        opacity: 1;
-      }
-    `}
+  ${done &&
+  css`
+    &::after {
+      opacity: 1;
+    }
+  `}
 
   ${breakpoint(breakpoints.mobile)} {
     height: ${rem(80)};
   }
 `;
+
+export const InputPin = styled.div<InputPinProps>(inputPinStyles);

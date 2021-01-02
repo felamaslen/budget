@@ -44,7 +44,7 @@ export const GRAPH_FUND_ITEM_HEIGHT_LARGE = 120;
 export const GRAPH_FUNDS_WIDTH = 500;
 export const GRAPH_FUNDS_HEIGHT = 300;
 
-export const enum Mode {
+export enum Mode {
   ROI = 'ROI',
   Value = 'Value',
   Price = 'Price',

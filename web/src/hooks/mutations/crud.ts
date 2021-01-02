@@ -1,5 +1,8 @@
 import { useCallback, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { UseMutationResponse } from 'urql';
+import { apiLoaded, apiLoading } from '~client/actions';
+import { useUpdateEffect } from '~client/hooks/effect';
 import { IDENTITY, toRawNetWorthEntry } from '~client/modules/data';
 
 import {
@@ -45,6 +48,18 @@ export type HookCallOptions = {
   onError: (message: string, operationType: RequestType) => void;
 };
 
+export function useFetchingState(...mutationResults: { fetching: boolean }[]): void {
+  const dispatch = useDispatch();
+  const isFetching = mutationResults.some(({ fetching }) => fetching);
+  useUpdateEffect(() => {
+    if (isFetching) {
+      dispatch(apiLoading);
+    } else {
+      dispatch(apiLoaded);
+    }
+  }, [isFetching, dispatch]);
+}
+
 function useCrud<I extends Record<string, unknown>, J extends Record<string, unknown>>(
   { mutations, transformToInput = IDENTITY }: HookOptions<I, J>,
   callOptions?: Partial<HookCallOptions>,
@@ -52,6 +67,8 @@ function useCrud<I extends Record<string, unknown>, J extends Record<string, unk
   const [resultCreate, createItem] = mutations.useCreate();
   const [resultUpdate, updateItem] = mutations.useUpdate();
   const [resultDelete, deleteItem] = mutations.useDelete();
+
+  useFetchingState(resultCreate, resultUpdate, resultDelete);
 
   const onCreate = useCallback(
     (item: J): void => {

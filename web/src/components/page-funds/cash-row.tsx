@@ -46,7 +46,7 @@ export const CashRow: React.FC = () => {
   );
 
   return (
-    <Styled.FundRow isSold={false} odd={true}>
+    <Styled.CashRow isSold={false} odd={true}>
       <FundAllocationTargets
         cashToInvest={cashToInvest}
         cashTarget={cashTarget}
@@ -55,6 +55,6 @@ export const CashRow: React.FC = () => {
         onSetCashTarget={onSetCashTarget}
         onSetFundTargets={onSetFundTargets}
       />
-    </Styled.FundRow>
+    </Styled.CashRow>
   );
 };

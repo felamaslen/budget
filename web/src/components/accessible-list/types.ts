@@ -1,8 +1,8 @@
+import { StyledComponent } from '@emotion/styled';
 import React, { CSSProperties } from 'react';
-import { StyledComponent } from 'styled-components';
 
 import { FieldComponent } from '~client/components/form-field';
-import { ModalFields } from '~client/components/modal-dialog';
+import { ModalFields } from '~client/components/modal-dialog/field';
 import { ListCrud, OnCreateList, OnDeleteList, OnUpdateList } from '~client/hooks';
 import { ApiListState } from '~client/selectors/list';
 import {
@@ -27,15 +27,14 @@ export type Fields<
   [K in FieldKey<I>]: FieldComponent<I[K] | undefined, E>;
 };
 
-export type ComponentType<
-  P extends Record<string, unknown>,
-  C extends keyof JSX.IntrinsicElements | React.ComponentType<P> = 'div'
-> = React.FC<P> | StyledComponent<C, P>;
+export type ComponentType<P extends Record<string, unknown>> =
+  | React.FC<P>
+  | StyledComponent<Partial<P>>;
 
-type RowComponent<I extends ListItemInput, E extends Record<string, unknown>> = ComponentType<
-  Partial<E> & { isMobile: boolean; item: WithIds<I>; odd?: boolean },
-  'li'
->;
+export type RowComponent<
+  I extends ListItemInput,
+  E extends Record<string, unknown>
+> = ComponentType<Partial<E> & { isMobile: boolean; item: WithIds<I>; odd?: boolean }>;
 
 export type FieldsMobile<
   I extends ListItemInput,
@@ -98,7 +97,7 @@ export type Props<
   color?: string;
   fieldsMobile?: FieldsMobile<I, MK, E>;
   deltaSeed?: () => Partial<I>;
-  Header?: React.FC<HeaderProps<I, P, MK, H>> | StyledComponent<'div', HeaderProps<I, P, MK, H>>;
+  Header?: React.FC<HeaderProps<I, P, MK, H>> | StyledComponent<HeaderProps<I, P, MK, H>>;
   headerProps?: H;
   FirstItem?: React.FC;
   sortItems?: SortItemsPre<WithIds<I>>;

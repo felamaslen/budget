@@ -8,8 +8,7 @@ export const testNow = new Date('2018-03-13T11:23:01Z');
 
 export const testState: State = {
   api: {
-    loading: false,
-    locked: false,
+    loading: 0,
     error: null,
     appConfig: {
       birthDate: new Date('1990-01-01'),

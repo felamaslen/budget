@@ -1,4 +1,11 @@
-import { dataRead, loggedOut, ActionTypeApi, ActionTypeLogin } from '~client/actions';
+import {
+  dataRead,
+  loggedOut,
+  ActionTypeApi,
+  ActionTypeLogin,
+  apiLoaded,
+  apiLoading,
+} from '~client/actions';
 import reducer, { initialState } from '~client/reducers/api';
 import { testResponse } from '~client/test-data';
 
@@ -28,6 +35,22 @@ describe('API reducer', () => {
           }),
         }),
       );
+    });
+  });
+
+  describe(ActionTypeApi.Loading, () => {
+    it('should increment the loading counter', () => {
+      expect.assertions(1);
+      const result = reducer({ ...initialState, loading: 3 }, apiLoading);
+      expect(result.loading).toBe(4);
+    });
+  });
+
+  describe(ActionTypeApi.Loaded, () => {
+    it('should decrement the loading counter', () => {
+      expect.assertions(1);
+      const result = reducer({ ...initialState, loading: 3 }, apiLoaded);
+      expect(result.loading).toBe(2);
     });
   });
 });

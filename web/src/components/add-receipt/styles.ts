@@ -1,7 +1,8 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
 import { FormField } from '~client/components/form-field/styles';
-import { rem, breakpoint } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
 import { FlexColumn, Flex } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 

@@ -5,7 +5,7 @@ import { AccessibleListItemField } from '../field';
 import { ListFieldMobile } from '../mobile';
 import { getItem } from '../selectors';
 import * as Styled from '../styles';
-import { Fields, FieldKey, PropsItem, PropsCrud } from '../types';
+import { Fields, FieldKey, PropsItem, PropsCrud, RowComponent } from '../types';
 import { useCTA } from '~client/hooks';
 import { ButtonDelete } from '~client/styled/shared/button';
 import { Id, ListItemInput, PageList, WithIds } from '~client/types';
@@ -69,7 +69,7 @@ const AccessibleListItem = <
   onDelete,
   onActivateModal,
   itemProcessor = identityProcessor,
-  Row = Styled.Row,
+  Row = Styled.Row as RowComponent<I, E>,
 }: PropsItem<I, P, MK, E>): React.ReactElement => {
   const item: WithIds<I> = useSelector(getItem<WithIds<I>, P>(page, id));
   const onDeleteItem = useCallback((): void => onDelete(item.id, item), [onDelete, item]);

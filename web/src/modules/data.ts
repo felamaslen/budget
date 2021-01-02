@@ -100,6 +100,38 @@ export function arrayAverage(values: number[], mode: Average = Average.Mean): nu
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+export function linearRegression(line: number[]): { slope: number; intercept: number } {
+  const sumX = line.reduce<number>((last, _, index) => last + index + 1, 0);
+  const sumX2 = line.reduce<number>((last, _, index) => last + (index + 1) ** 2, 0);
+  const sumXY = line.reduce<number>((last, value, index) => last + value * (index + 1), 0);
+  const sumY = line.reduce<number>((last, value) => last + value, 0);
+
+  const Sxy = sumXY - (sumX * sumY) / line.length;
+  const Sxx = sumX2 - sumX ** 2 / line.length;
+
+  const xBar = sumX / line.length;
+  const yBar = sumY / line.length;
+
+  const slope = Sxy / Sxx;
+  const intercept = yBar - slope * xBar;
+  return { slope, intercept };
+}
+
+export function exponentialRegression(
+  line: number[],
+): { slope: number; intercept: number; logValues: number[]; points: number[] } {
+  const logValues = line.filter((value) => value > 0).map(Math.log);
+  if (!logValues.length) {
+    return { slope: 0, intercept: 0, logValues: [], points: [] };
+  }
+
+  const { slope, intercept } = linearRegression(logValues);
+
+  const points = line.map((_, index) => Math.exp(slope * (index + 1) + intercept));
+
+  return { slope, intercept, logValues, points };
+}
+
 export const limitTimeSeriesLength = (timeSeries: Line, limit: number): Line =>
   new Array(timeSeries.length).fill(0).reduce((last) => {
     if (last.length <= limit) {

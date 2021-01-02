@@ -1,5 +1,5 @@
 module.exports = {
-  plugins: ['jsx-a11y', 'react', 'react-hooks', 'import', 'jest'],
+  plugins: ['@emotion', 'jsx-a11y', 'react', 'react-hooks', 'import', 'jest'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 8,

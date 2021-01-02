@@ -1,9 +1,10 @@
-import { desaturate } from 'polished';
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { css, SerializedStyles } from '@emotion/react';
+import styled from '@emotion/styled';
+import { desaturate, rem } from 'polished';
 
-import { StandardRow } from '~client/components/accessible-list/styles';
+import { FundRow } from '~client/components/page-funds/styles';
 import { IDENTITY } from '~client/modules/data';
-import { breakpoint, rem } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
 import { InlineFlex } from '~client/styled/shared';
 import {
   breakpoints,
@@ -15,11 +16,12 @@ import {
 } from '~client/styled/variables';
 
 type ProfitProps = { gain: number };
-type SoldProps = { isSold: boolean };
+type SoldProps = { isSold?: boolean };
 
-const profitColor = (postProcess: (value: string) => string = IDENTITY) => ({
-  gain,
-}: ProfitProps): string => postProcess(gain >= 0 ? colors.profit.dark : colors.loss.dark);
+const profitColor = (
+  gain: ProfitProps['gain'],
+  postProcess: (value: string) => string = IDENTITY,
+): string => postProcess(gain >= 0 ? colors.profit.dark : colors.loss.dark);
 
 const Column = styled.span`
   display: flex;
@@ -55,16 +57,18 @@ export const Breakdown = styled(InlineFlex)<{ isRow?: boolean }>`
     flex: 2 1 0;
   }
 `;
-export const Overall = styled(Column)<SoldProps>`
-  flex: ${({ isSold }): string => (isSold ? '1' : '0 0 50%')};
+
+const overallStyles = ({ isSold }: SoldProps): SerializedStyles => css`
+  flex: ${isSold ? '1' : '0 0 50%'};
   font-weight: bold;
-  flex-flow: ${({ isSold }): 'row' | 'column' => (isSold ? 'row' : 'column')};
+  flex-flow: ${isSold ? 'row' : 'column'};
   max-width: 50%;
 
   ${breakpoint(breakpoints.mobile)} {
-    max-width: ${({ isSold }): number => (isSold ? 100 : 50)}%;
+    max-width: ${isSold ? 100 : 50}%;
   }
 `;
+export const Overall = styled(Column)<SoldProps>(overallStyles);
 
 export const DayGainOuter = styled(Column)`
   flex: 0 0 50%;
@@ -74,19 +78,21 @@ export const DayGainOuter = styled(Column)`
   }
 `;
 
-export const BreakdownValue = styled.span`
-  color: ${profitColor()};
-  text-align: right;
+export const BreakdownValue = styled.span<ProfitProps>(
+  ({ gain }) => css`
+    color: ${profitColor(gain)};
+    text-align: right;
 
-  ${breakpoint(breakpoints.mobile)} {
-    flex: 1 0 0;
-    font-size: ${rem(13)};
-    line-height: 24px;
-    height: 24px;
-  }
-`;
+    ${breakpoint(breakpoints.mobile)} {
+      flex: 1 0 0;
+      font-size: ${rem(13)};
+      line-height: 24px;
+      height: 24px;
+    }
+  `,
+);
 
-const BreakdownAbs = styled(BreakdownValue)<ProfitProps>`
+const BreakdownAbs = styled(BreakdownValue)`
   &::before {
     content: ${({ gain }): string => {
       if (gain >= 0.1) {
@@ -116,26 +122,31 @@ export const Gain = styled(BreakdownValue)<{ isRow?: boolean }>`
   }
 `;
 
-const breakdownDay = css<ProfitProps & { isRow?: boolean }>`
+const breakdownDay = (gain: ProfitProps['gain']): SerializedStyles => css`
   ${breakpoint(breakpoints.mobile)} {
-    color: ${profitColor(desaturate(0.5))};
+    color: ${profitColor(gain, desaturate(0.5))};
   }
 `;
 
-export const DayGainAbs = styled(BreakdownAbs)`
-  ${breakdownDay};
-`;
-export const DayGain = styled(BreakdownValue)`
-  ${breakdownDay};
-  display: ${({ isRow }): 'block' | 'none' => (isRow ? 'none' : 'block')};
-  ${breakpoint(breakpoints.mobile)} {
-    display: block;
-  }
-`;
+type DayGainProps = ProfitProps & { isRow?: boolean };
 
-export const Text = styled.span.attrs(({ color }) => ({
-  style: { backgroundColor: color },
-}))<{ color: string }>`
+export const DayGainAbs = styled(BreakdownAbs)<DayGainProps>(
+  ({ gain }) => css`
+    ${breakdownDay(gain)};
+  `,
+);
+
+export const DayGain = styled(BreakdownValue)<DayGainProps>(
+  ({ isRow, gain }) => css`
+    ${breakdownDay(gain)};
+    display: ${isRow ? 'none' : 'block'};
+    ${breakpoint(breakpoints.mobile)} {
+      display: block;
+    }
+  `,
+);
+
+export const Text = styled.span`
   align-items: center;
   display: flex;
   height: 100%;
@@ -157,7 +168,7 @@ export const Text = styled.span.attrs(({ color }) => ({
       text-align: center;
     }
 
-    ${StandardRow} & {
+    ${FundRow} & {
       display: flex;
       margin-right: 0;
       padding: 0;
@@ -169,21 +180,21 @@ export const Text = styled.span.attrs(({ color }) => ({
   }
 `;
 
-export const FundGainInfo = styled.span<ProfitProps & SoldProps & { isRow?: boolean }>`
-  color: ${profitColor()};
-  width: ${({ isRow }): string => (isRow ? rem(180) : 'auto')};
+export const FundGainInfo = styled.span<ProfitProps & SoldProps & { isRow?: boolean }>(
+  ({ isRow, gain, isSold }) => css`
+    color: ${profitColor(gain)};
+    width: ${isRow ? rem(180) : 'auto'};
 
-  ${breakpoint(breakpoints.mobileSmall)} {
-    width: ${({ isRow }): string => (isRow ? rem(216) : 'auto')};
-  }
+    ${breakpoint(breakpoints.mobileSmall)} {
+      width: ${isRow ? rem(216) : 'auto'};
+    }
 
-  ${breakpoint(breakpoints.mobile)} {
-    display: flex;
-    flex: 0 0 ${rem(200)};
-    z-index: 1;
+    ${breakpoint(breakpoints.mobile)} {
+      display: flex;
+      flex: 0 0 ${rem(200)};
+      z-index: 1;
 
-    ${({ isSold }): false | FlattenSimpleInterpolation =>
-      isSold &&
+      ${isSold &&
       css`
         opacity: 0.5;
         font-style: italic;
@@ -194,5 +205,5 @@ export const FundGainInfo = styled.span<ProfitProps & SoldProps & { isRow?: bool
         }
       `}
     }
-  }
-`;
+  `,
+);

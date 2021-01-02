@@ -1,5 +1,6 @@
 export * from './api';
 export * from './cta';
+export * from './debounce';
 export * from './effect';
 export * from './field';
 export * from './media';

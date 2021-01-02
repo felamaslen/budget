@@ -40,14 +40,13 @@ import {
   FundItem,
   FundLine,
   HistoryOptions,
-  Id,
   Line,
   Padding,
   Range,
   useFundPricesUpdateQuery,
 } from '~client/types';
 
-const PADDING_DESKTOP: Padding = [3, 3, 0, 0];
+const PADDING_DESKTOP: Padding = [20, 3, 0, 60];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
 
 function makeBeforeLines({
@@ -73,20 +72,7 @@ function makeBeforeLines({
   return BeforeLines;
 }
 
-const modeListAll: Mode[] = [Mode.ROI, Mode.Value, Mode.Price, Mode.PriceNormalised];
-
-function useMode(isMobile: boolean): [Mode[], Mode, (nextMode: Mode) => void] {
-  const modeList = useMemo<Mode[]>(
-    () => (isMobile ? modeListAll.filter((value) => value !== Mode.Price) : modeListAll),
-    [isMobile],
-  );
-
-  const [mode, setMode] = usePersistentState<Mode>(modeList[0], 'graph_funds_mode');
-
-  return [modeList, mode, setMode];
-}
-
-type FilterFunds = (filteredItems: { id: Id }) => boolean;
+const modeList = Object.values(Mode);
 
 function useDynamicPrices(): [HistoryOptions, (nextQuery: HistoryOptions) => void] {
   const query = useSelector(getHistoryOptions);
@@ -169,20 +155,19 @@ function useGraphProps({
     [mode in Mode]: FundLine[];
   } = useSelector(getFundLines.today(today));
 
+  const selectedMode = isMobile ? Mode.ROI : mode;
+
   const { startTime, cacheTimes } = useSelector(getFundsCache.today(today));
   const haveData = cacheTimes.length > 1;
 
-  const filterFunds = useMemo<FilterFunds>(
-    () =>
-      isMobile
-        ? ({ id }): boolean => id === GRAPH_FUNDS_OVERALL_ID
-        : ({ id }): boolean => toggleList[id] !== false,
-    [isMobile, toggleList],
+  const filterFunds = useCallback(
+    ({ id }): boolean => (isMobile ? id === GRAPH_FUNDS_OVERALL_ID : toggleList[id] !== false),
+    [toggleList, isMobile],
   );
 
   const lines = useMemo<Line[]>(() => {
     type Accumulator = [Line[], { [id: number]: number }];
-    const [numberedLines] = fundLines[mode].filter(filterFunds).reduce<Accumulator>(
+    const [numberedLines] = fundLines[selectedMode].filter(filterFunds).reduce<Accumulator>(
       ([last, idCount], { id, color, data }) => [
         [
           ...last,
@@ -191,7 +176,7 @@ function useGraphProps({
             data,
             color,
             strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
-            smooth: mode !== Mode.Value,
+            smooth: selectedMode !== Mode.Value,
           },
         ],
         { ...idCount, [id]: (idCount[id] || 0) + 1 },
@@ -200,7 +185,7 @@ function useGraphProps({
     );
 
     return numberedLines;
-  }, [fundLines, mode, filterFunds]);
+  }, [fundLines, selectedMode, filterFunds]);
 
   const maxX = lastInArray(cacheTimes) ?? 0;
 
@@ -222,7 +207,7 @@ function useGraphProps({
       .filter((values) => values.length);
 
     let minY = 0;
-    if (mode !== Mode.Value) {
+    if (selectedMode !== Mode.Value) {
       minY = valuesY.reduce(
         (min, line) =>
           Math.min(
@@ -245,7 +230,7 @@ function useGraphProps({
       minY -= 0.5;
       maxY += 0.5;
     }
-    if (mode === Mode.ROI && minY === 0) {
+    if (selectedMode === Mode.ROI && minY === 0) {
       minY = -maxY * 0.2;
     }
 
@@ -266,11 +251,11 @@ function useGraphProps({
       },
       tickSize,
     ];
-  }, [haveData, mode, lines, maxX]);
+  }, [haveData, selectedMode, lines, maxX]);
 
   const { minY, maxY } = ranges;
 
-  const labelY = useCallback((value) => formatValue(value, mode), [mode]);
+  const labelY = useCallback((value) => formatValue(value, selectedMode), [selectedMode]);
 
   const beforeLines = useMemo<React.FC<DrawProps>>(
     () =>
@@ -320,7 +305,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   const fundItems = useSelector(getFundItems.today(today));
 
   const [historyOptions, setHistoryOptions] = useDynamicPrices();
-  const [modeList, mode, changeMode] = useMode(isMobile);
+  const [mode, changeMode] = usePersistentState<Mode>(modeList[0], 'graph_funds_mode');
   const [toggleList, setToggleList] = useToggleList(fundItems);
   const graphProps = useGraphProps({
     width,

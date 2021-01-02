@@ -6,6 +6,7 @@ import numericHash from 'string-hash';
 import {
   addToTransactionsList,
   arrayAverage,
+  exponentialRegression,
   generateFakeId,
   getTotalCost,
   getTotalUnits,
@@ -255,6 +256,28 @@ describe('data module', () => {
     it('should handle the case when the array is empty', () => {
       expect.assertions(1);
       expect(arrayAverage([])).toBeNaN();
+    });
+  });
+
+  describe(exponentialRegression.name, () => {
+    it('should return the exponential regresson slope and intercept', () => {
+      expect.assertions(3);
+      const line = [1, 77, 23, 103, 130];
+
+      const { slope, intercept, points } = exponentialRegression(line);
+
+      expect(slope).toMatchInlineSnapshot(`1.0025992467287117`);
+      expect(intercept).toMatchInlineSnapshot(`0.3885148751074756`);
+
+      expect(points).toMatchInlineSnapshot(`
+        Array [
+          4.019325577784265,
+          10.95409510526857,
+          29.85381434101613,
+          81.36228708469008,
+          221.74123828982772,
+        ]
+      `);
     });
   });
 

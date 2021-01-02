@@ -1,8 +1,9 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
 import { fieldSizes, rowHeightDesktop, rowHeightMobile } from './constants';
 import { fieldSizesMobile } from './mobile';
-import { breakpoint, rem } from '~client/styled/mixins';
+import { breakpoint } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const borderColor = colors.light.mediumDark;
@@ -85,9 +86,7 @@ export const Row = styled.li<{ odd?: boolean }>`
   }
 `;
 
-export const CreateRow = styled(Row).attrs({
-  as: 'div',
-})`
+export const CreateRow = styled(Row)`
   display: none;
 
   ${breakpoint(breakpoints.mobile)} {

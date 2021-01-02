@@ -1,21 +1,19 @@
-import styled, { css, FlattenSimpleInterpolation } from 'styled-components';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
 
 import { Row } from './shared';
-import { rem } from '~client/styled/mixins';
+import { asHeading } from '~client/styled/shared/role';
 
-export const StandardHeader = styled.div.attrs({
-  role: 'heading',
-})`
+export const StandardHeader = asHeading(styled.div`
   display: flex;
   font-size: ${rem(16)};
-`;
+`);
 
 export const StandardRow = styled(Row)<{
   isFuture?: boolean;
-}>`
-  ${({ isFuture }): false | FlattenSimpleInterpolation =>
-    !!isFuture &&
-    css`
-      opacity: 0.5;
-    `}
-`;
+}>(
+  ({ isFuture }) => css`
+    ${!!isFuture && `opacity: 0.5;`}
+  `,
+);

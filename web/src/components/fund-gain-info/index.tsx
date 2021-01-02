@@ -1,4 +1,6 @@
-import React from 'react';
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
+import { FC } from 'react';
 
 import * as Styled from './styles';
 import { formatCurrency, formatPercent } from '~client/modules/format';
@@ -18,14 +20,14 @@ type Props = {
   isSold: boolean;
 };
 
-export const FundGainInfo: React.FC<Props> = ({ rowGains, isSold }) => {
+export const FundGainInfo: FC<Props> = ({ rowGains, isSold }) => {
   if (!rowGains) {
     return null;
   }
   const { value, gain, gainAbs, dayGain, dayGainAbs, color } = rowGains;
   return (
     <Styled.FundGainInfo gain={gain} isSold={isSold} isRow>
-      <Styled.Text color={color}>
+      <Styled.Text style={{ backgroundColor: color }}>
         <Styled.Value isRow>{formatCurrency(value, formatOptionsAbsolute)}</Styled.Value>
         <Styled.Breakdown isRow>
           <Styled.Overall isSold={isSold}>
