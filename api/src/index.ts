@@ -148,9 +148,10 @@ function setupMiddleware(app: express.Express): void {
           ? false
           : {
               directives: {
-                defaultSrc: ["'self'"],
-                styleSrc: ["'self'", "'unsafe-inline'"],
-                scriptSrc: ["'self'", "'unsafe-inline'"],
+                defaultSrc: [`'self'`],
+                imgSrc: [`'self'`, 'data:'],
+                styleSrc: [`'self'`, `'unsafe-inline'`],
+                scriptSrc: [`'self'`, `'unsafe-inline'`],
               },
             },
     }),
