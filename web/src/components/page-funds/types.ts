@@ -1,5 +1,5 @@
 import { GainsForRow } from '~client/selectors';
-import { RowPrices } from '~client/types';
+import type { RowPrices } from '~client/types';
 
 export type FundProps = {
   isSold: boolean;
@@ -19,16 +19,6 @@ export type Sort = {
 };
 
 export const defaultSort: Sort = { criteria: SortCriteria.Value, direction: 1 };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isSort = (value: any | Sort): value is Sort =>
-  value !== null &&
-  typeof value === 'object' &&
-  Object.keys(value).length === 2 &&
-  Reflect.has(value, 'criteria') &&
-  Object.values(SortCriteria).includes(value.criteria) &&
-  Reflect.has(value, 'direction') &&
-  [-1, 1].includes(value.direction);
 
 export type HeadProps = {
   sort?: Sort;

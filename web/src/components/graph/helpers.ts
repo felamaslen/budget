@@ -4,15 +4,15 @@ import { GRAPH_CURVINESS } from '~client/constants/graph';
 import { lastInArray } from '~client/modules/data';
 import { timeSeriesTicks } from '~client/modules/date';
 import { colors } from '~client/styled/variables';
-import {
+import type {
   Calc,
   ColorSwitcher,
   Data,
   Dimensions,
   DynamicLineColor,
   GraphStack,
+  LineColor,
   Padding,
-  PageNonStandard,
   PathProps,
   Pix,
   PixX,
@@ -23,6 +23,9 @@ import {
   Tick,
   ValY,
 } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
+
+export const isConstantColor = (color: LineColor): color is string => typeof color === 'string';
 
 export type SVGNumber = number | string;
 export type SVGPoint = [SVGNumber, SVGNumber];

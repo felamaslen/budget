@@ -9,7 +9,7 @@ import { getFundsCache, getFundsRows, PriceCache } from './helpers';
 import { isSold, getTotalUnits, getTotalCost, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { colors } from '~client/styled/variables';
-import { FundNative as Fund, Id, TransactionNative as Transaction } from '~client/types';
+import type { FundNative as Fund, Id, TransactionNative as Transaction } from '~client/types';
 
 const scoreColor = (score: number, channel: number): number =>
   Math.round(255 + score * (channel - 255));

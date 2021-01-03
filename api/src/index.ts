@@ -1,7 +1,9 @@
 import http, { Server } from 'http';
 import path from 'path';
 import bodyParser from 'body-parser';
+import compression from 'compression';
 import express, { Request } from 'express';
+import helmet from 'helmet';
 import webLogger from 'morgan';
 import passport from 'passport';
 import serveStatic from 'serve-static';
@@ -138,6 +140,27 @@ function setupErrorHandling(app: express.Express): void {
   app.use(errorHandler);
 }
 
+function setupMiddleware(app: express.Express): void {
+  app.use(
+    helmet({
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'development'
+          ? false
+          : {
+              directives: {
+                defaultSrc: ["'self'"],
+                styleSrc: ["'self'", "'unsafe-inline'"],
+                scriptSrc: ["'self'", "'unsafe-inline'"],
+              },
+            },
+    }),
+  );
+  app.get('/robots.txt', (_, res) => {
+    res.send('User-agent: *\nDisallow: /\n');
+  });
+  app.use(compression());
+}
+
 export async function run(port = config.app.port): Promise<Server> {
   const app = express();
   const server = http.createServer(app);
@@ -145,6 +168,7 @@ export async function run(port = config.app.port): Promise<Server> {
   setupLogging(app);
   setupDataInput(app);
 
+  setupMiddleware(app);
   setupRestApi(app);
   const onListen = await setupGraphQL(app, server);
 

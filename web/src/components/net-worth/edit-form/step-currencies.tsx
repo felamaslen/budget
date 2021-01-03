@@ -1,4 +1,3 @@
-import axios, { CancelTokenSource } from 'axios';
 import format from 'date-fns/format';
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { replaceAtIndex } from 'replace-array';
@@ -9,7 +8,8 @@ import { FormContainer, Props as ContainerProps } from './form-container';
 import * as Styled from './styles';
 import { FormFieldText, FormFieldNumber } from '~client/components/form-field';
 import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared';
-import { Create, CurrencyInput as Currency, NetWorthEntryNative as Entry } from '~client/types';
+import type { Create, NetWorthEntryNative as Entry } from '~client/types';
+import type { CurrencyInput as Currency } from '~client/types/gql';
 
 const BASE = 'GBP';
 
@@ -47,24 +47,23 @@ const getCurrencies = debounce(
   100,
   async (
     symbols: string[],
-    source: React.MutableRefObject<CancelTokenSource | undefined>,
+    { signal }: AbortController,
     onSuccess: OnSuccess,
     onError: (err: Error) => void,
     onComplete: () => void,
   ): Promise<void> => {
     try {
-      const res = await axios.get<{ rates: Rates }>('https://api.exchangeratesapi.io/latest', {
-        params: {
-          _timestamp: Date.now(),
-          base: BASE,
-          symbols: symbols.join(','),
-        },
-        cancelToken: (source.current && source.current.token) || undefined,
-      });
-
-      onSuccess(res.data?.rates);
+      const url = new URL('https://api.exchangeratesapi.io/latest');
+      url.search = new URLSearchParams({
+        _timestamp: String(Date.now()),
+        base: BASE,
+        symbols: symbols.join(','),
+      }).toString();
+      const res = await fetch(url.toString(), { signal });
+      const { rates } = await res.json();
+      onSuccess(rates);
     } catch (err) {
-      if (!axios.isCancel(err)) {
+      if (err.name !== 'AbortError') {
         onError(err);
       }
     } finally {
@@ -78,7 +77,7 @@ type GetRates = (extraSymbol?: string) => void;
 function useCurrencyApi(symbols: string[]): [Rates, GetRates, boolean, Error | null] {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-  const source = useRef<CancelTokenSource>();
+  const abortController = useRef<AbortController>();
   const [rates, setRates] = useState<Rates>({});
   const [cacheTime, setCacheTime] = useState<number>(0);
 
@@ -115,22 +114,19 @@ function useCurrencyApi(symbols: string[]): [Rates, GetRates, boolean, Error | n
         return;
       }
 
-      if (source.current) {
-        source.current.cancel('New request made');
-      }
-      source.current = axios.CancelToken.source();
+      abortController.current?.abort();
+      const controller = new AbortController();
+      abortController.current = controller;
       setLoading(true);
 
-      getCurrencies(allSymbols, source, onSuccess, setError, onComplete);
+      getCurrencies(allSymbols, controller, onSuccess, setError, onComplete);
     },
     [rates, cacheTime, symbols, onSuccess, onComplete],
   );
 
   useEffect(
     (): (() => void) => (): void => {
-      if (source.current) {
-        source.current.cancel('Component unmounted');
-      }
+      abortController.current?.abort();
     },
     [],
   );

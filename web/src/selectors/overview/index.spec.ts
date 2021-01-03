@@ -2,10 +2,11 @@ import { replaceAtIndex } from 'replace-array';
 import numericHash from 'string-hash';
 import { getNetWorthSummary } from './net-worth';
 import { getProcessedCost, getOverviewTable } from '.';
-import { State } from '~client/reducers/types';
+import type { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data';
 import { mockRandom } from '~client/test-utils/random';
-import { Cost, PageListStandard, PageNonStandard } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
+import type { Cost } from '~client/types/gql';
 
 describe('Overview selectors', () => {
   beforeEach(() => {

@@ -11,13 +11,12 @@ import { getOverviewTable } from '~client/selectors';
 import { breakpointBase } from '~client/styled/mixins';
 import { ButtonAdd } from '~client/styled/shared';
 import { breakpoints } from '~client/styled/variables';
-import {
+import type {
   OverviewHeader,
   OverviewTable as OverviewTableRows,
   OverviewTableColumn,
-  PageListStandard,
-  PageNonStandard,
 } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 type ColumnsProps = { columns: OverviewTableColumn[] };
 

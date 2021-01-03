@@ -5,7 +5,7 @@ import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
 import { Page as PageBase, Button as ButtonBase } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
-import { Page as PageType, MainBlockName } from '~client/types';
+import type { Page as PageType, MainBlockName } from '~client/types';
 
 export const blocksHeightMobile = 360;
 

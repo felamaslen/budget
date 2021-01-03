@@ -13,7 +13,7 @@ import { State } from '~client/reducers';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { PageListStandard } from '~client/types';
+import { PageListStandard } from '~client/types/enum';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',

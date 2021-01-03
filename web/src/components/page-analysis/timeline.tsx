@@ -1,16 +1,8 @@
 import React, { memo, useMemo } from 'react';
 import * as Styled from './styles';
+import { PAGES_ANALYSIS } from '~client/constants/data';
 import { averageColor, scoreColor } from '~client/modules/color';
 import { colors } from '~client/styled/variables';
-import { AnalysisPage } from '~client/types';
-
-const categories: AnalysisPage[] = [
-  AnalysisPage.Bills,
-  AnalysisPage.Food,
-  AnalysisPage.General,
-  AnalysisPage.Holiday,
-  AnalysisPage.Social,
-];
 
 const rB = 0.1;
 
@@ -34,7 +26,7 @@ const Timeline: React.FC<Props> = ({ data }) => {
         const backgroundColor = averageColor(
           row
             .map((value) => score * (value / sums[timeIndex]) || 0)
-            .map((value, index) => scoreColor(colors[categories[index]].main, value)),
+            .map((value, index) => scoreColor(colors[PAGES_ANALYSIS[index]].main, value)),
         );
 
         return <Styled.DataItem key={timeIndex} style={{ backgroundColor }} />;

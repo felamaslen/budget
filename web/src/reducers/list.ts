@@ -9,23 +9,18 @@ import {
   onDeleteOptimistic,
   State as CrudState,
 } from '~client/reducers/crud';
-import {
+import type {
   GQL,
   Id,
-  InitialQuery,
-  ListItem,
-  ListItemInput,
   ListItemStandardNative,
-  ListItemStandard,
   NativeDate,
   PageList,
   PageListCost,
-  PageListExtended,
-  PageListStandard,
   StandardInput,
   WithIds,
-  ReceiptPage,
 } from '~client/types';
+import { PageListExtended, PageListStandard, ReceiptPage } from '~client/types/enum';
+import type { InitialQuery, ListItem, ListItemInput, ListItemStandard } from '~client/types/gql';
 
 type FullReducer<S, A> = (state: S, action: A) => S;
 

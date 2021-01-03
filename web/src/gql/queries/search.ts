@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from 'urql';
 
 export const SearchSuggestions = gql`
   query SearchSuggestions(
@@ -9,6 +9,7 @@ export const SearchSuggestions = gql`
   ) {
     search(page: $page, column: $column, searchTerm: $searchTerm, numResults: $numResults) {
       error
+      searchTerm
       list
       nextCategory
       nextField

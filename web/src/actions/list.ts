@@ -1,17 +1,14 @@
 import { generateFakeId } from '~client/modules/data';
-import {
-  GQL,
-  Id,
+import type { GQL, Id, PageList, WithIds } from '~client/types';
+import type {
   ListItemExtended,
   ListItemInput,
   ListReadResponse,
   ListReadResponseExtended,
   ListItemStandard,
   Maybe,
-  PageList,
-  WithIds,
   ReceiptItem,
-} from '~client/types';
+} from '~client/types/gql';
 
 export const enum ListActionType {
   Created = '@@list/ITEM_CREATED',

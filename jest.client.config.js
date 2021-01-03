@@ -10,6 +10,7 @@ module.exports = {
   },
   testMatch: ['**/*.spec.ts?(x)'],
   setupFilesAfterEnv: ['<rootDir>/web/src/test-utils/after-env.ts'],
+  setupFiles: ['<rootDir>/web/src/test-utils/fetch.ts'],
   coverageDirectory: 'coverage/web',
   collectCoverageFrom: [
     'web/src/**/*.{ts,tsx}',

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import * as Styled from './styles';
-import { PageListStandard, PageNonStandard } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 type Props = {
   onLogout: () => void;

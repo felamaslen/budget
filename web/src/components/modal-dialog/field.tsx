@@ -2,7 +2,8 @@ import React, { useCallback } from 'react';
 
 import * as Styled from './styles';
 import { FieldComponent, FormFieldTransactions } from '~client/components/form-field';
-import { TransactionNative as Transaction, FieldKey, ListItemInput } from '~client/types';
+import type { TransactionNative as Transaction, FieldKey } from '~client/types';
+import type { ListItemInput } from '~client/types/gql';
 
 export type FieldWrapper<V = never> = React.FC<{
   id: string;

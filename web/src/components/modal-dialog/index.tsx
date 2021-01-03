@@ -7,7 +7,8 @@ import * as Styled from './styles';
 
 import { CREATE_ID } from '~client/constants/data';
 import { Button, ButtonSubmit, ButtonCancel } from '~client/styled/shared';
-import { Delta, FieldKey, Id, ListItemInput } from '~client/types';
+import type { Delta, FieldKey, Id } from '~client/types';
+import type { ListItemInput } from '~client/types/gql';
 
 export { makeField } from './field';
 export type { ModalFields, FieldWrapper } from './field';

@@ -4,7 +4,7 @@ import React from 'react';
 import { defaultPadding, getPixY } from '~client/components/graph/helpers';
 import { HoverEffect, HLPoint } from '~client/components/graph/hooks';
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';
-import { RangeY, Size, Padding, Calc } from '~client/types';
+import type { RangeY, Size, Padding, Calc } from '~client/types';
 
 type Props = {
   hoverEffect: HoverEffect;

@@ -19,15 +19,8 @@ import {
   getHomeEquity,
 } from '~client/selectors';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
-import {
-  Aggregate,
-  CostProcessed,
-  Data,
-  Line,
-  NetWorthTableRow,
-  PageNonStandard,
-  Point,
-} from '~client/types';
+import type { CostProcessed, Data, Line, NetWorthTableRow, Point } from '~client/types';
+import { Aggregate, PageNonStandard } from '~client/types/enum';
 
 type CostProps = Pick<CostProcessed, PageNonStandard.Funds | 'fundsOld' | 'netWorthCombined'>;
 

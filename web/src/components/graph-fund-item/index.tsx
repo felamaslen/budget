@@ -11,7 +11,7 @@ import {
   GRAPH_FUND_ITEM_HEIGHT_LARGE,
 } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
-import { Data, DrawProps, Line, Range, RowPrices, Size } from '~client/types';
+import type { Data, DrawProps, Line, Range, RowPrices, Size } from '~client/types';
 
 export type Props = {
   sold: boolean;

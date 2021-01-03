@@ -4,7 +4,7 @@ import { State as FundsState } from './funds';
 import { Income, Bills, Food, General, Holiday, Social } from './list-standard';
 import { State as NetWorthState } from './net-worth';
 import { State as OverviewState } from './overview';
-import { PageListStandard, PageNonStandard } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 export type State = {
   api: ApiState;

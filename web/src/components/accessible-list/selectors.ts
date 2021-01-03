@@ -2,19 +2,14 @@ import { compose } from '@typed/compose';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
-import { State } from './types';
+import type { State } from './types';
 import { IDENTITY, sortByKey } from '~client/modules/data';
 import { State as CrudState } from '~client/reducers/crud';
 import { DailyState } from '~client/reducers/list';
 import { withoutDeleted } from '~client/selectors/crud';
 import { getRawItems } from '~client/selectors/list';
-import {
-  Id,
-  ListItem,
-  ListItemInput,
-  ListItemStandardNative as ListItemStandard,
-  PageList,
-} from '~client/types';
+import type { Id, ListItemStandardNative as ListItemStandard, PageList } from '~client/types';
+import type { ListItem, ListItemInput } from '~client/types/gql';
 
 export type StateStandard<I extends ListItemStandard, P extends string> = {
   [page in P]: DailyState<I>;

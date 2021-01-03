@@ -17,22 +17,23 @@ import {
 import { lastInArray, sortByKey } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/config';
-import {
-  Aggregate,
+import type {
   AggregateSums,
-  Cost,
-  Currency,
   GQL,
-  MortgageValue,
-  NetWorthCategory,
-  NetWorthCategoryType,
   NetWorthEntryNative,
-  NetWorthSubcategory,
   NetWorthTableRow as TableRow,
   NetWorthValueObjectNative,
   NetWorthValueObjectRead,
-  OptionValue,
 } from '~client/types';
+import { Aggregate, NetWorthCategoryType } from '~client/types/enum';
+import type {
+  Cost,
+  Currency,
+  MortgageValue,
+  NetWorthCategory,
+  NetWorthSubcategory,
+  OptionValue,
+} from '~client/types/gql';
 
 const nullEntry = (date: Date): NetWorthEntryNative => ({
   id: -date.getTime(),

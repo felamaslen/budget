@@ -3,6 +3,13 @@
   <head>
     <title>Budget</title>
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+    <% if (process.env.NODE_ENV === 'production') { %>
+    <script>
+    if(typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === 'object'){
+      window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function(){};
+    }
+    </script>
+    <% } %>
   </head>
   <body>
     <div id="root"></div>

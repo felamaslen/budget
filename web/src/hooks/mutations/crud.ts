@@ -3,27 +3,16 @@ import { useDispatch } from 'react-redux';
 import { UseMutationResponse } from 'urql';
 import { apiLoaded, apiLoading } from '~client/actions';
 import { useUpdateEffect } from '~client/hooks/effect';
+import * as gql from '~client/hooks/gql';
 import { IDENTITY, toRawNetWorthEntry } from '~client/modules/data';
-
-import {
-  Create,
-  Id,
+import type { Create, Id, NetWorthEntryNative } from '~client/types';
+import { RequestType } from '~client/types/enum';
+import type {
   Mutation,
   NetWorthCategoryInput,
   NetWorthEntryInput,
-  NetWorthEntryNative,
   NetWorthSubcategoryInput,
-  RequestType,
-  useCreateNetWorthCategoryMutation,
-  useCreateNetWorthEntryMutation,
-  useCreateNetWorthSubcategoryMutation,
-  useDeleteNetWorthCategoryMutation,
-  useDeleteNetWorthEntryMutation,
-  useDeleteNetWorthSubcategoryMutation,
-  useUpdateNetWorthCategoryMutation,
-  useUpdateNetWorthEntryMutation,
-  useUpdateNetWorthSubcategoryMutation,
-} from '~client/types';
+} from '~client/types/gql';
 
 export type OnCreate<I> = (item: I) => void;
 export type OnUpdate<I> = (id: Id, item: I) => void;
@@ -116,9 +105,9 @@ function useCrud<I extends Record<string, unknown>, J extends Record<string, unk
 
 const optionsNetWorthCategory: HookOptions<NetWorthCategoryInput, NetWorthCategoryInput> = {
   mutations: {
-    useCreate: useCreateNetWorthCategoryMutation,
-    useUpdate: useUpdateNetWorthCategoryMutation,
-    useDelete: useDeleteNetWorthCategoryMutation,
+    useCreate: gql.useCreateNetWorthCategoryMutation,
+    useUpdate: gql.useUpdateNetWorthCategoryMutation,
+    useDelete: gql.useDeleteNetWorthCategoryMutation,
   },
 };
 
@@ -133,9 +122,9 @@ const optionsNetWorthSubcategory: HookOptions<
   NetWorthSubcategoryInput
 > = {
   mutations: {
-    useCreate: useCreateNetWorthSubcategoryMutation,
-    useUpdate: useUpdateNetWorthSubcategoryMutation,
-    useDelete: useDeleteNetWorthSubcategoryMutation,
+    useCreate: gql.useCreateNetWorthSubcategoryMutation,
+    useUpdate: gql.useUpdateNetWorthSubcategoryMutation,
+    useDelete: gql.useDeleteNetWorthSubcategoryMutation,
   },
 };
 
@@ -150,9 +139,9 @@ export function useNetWorthSubcategoryCrud(
 
 const optionsNetWorthEntry: HookOptions<NetWorthEntryInput, Create<NetWorthEntryNative>> = {
   mutations: {
-    useCreate: useCreateNetWorthEntryMutation,
-    useUpdate: useUpdateNetWorthEntryMutation,
-    useDelete: useDeleteNetWorthEntryMutation,
+    useCreate: gql.useCreateNetWorthEntryMutation,
+    useUpdate: gql.useUpdateNetWorthEntryMutation,
+    useDelete: gql.useDeleteNetWorthEntryMutation,
   },
   transformToInput: toRawNetWorthEntry,
 };

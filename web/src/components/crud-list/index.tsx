@@ -5,7 +5,7 @@ import CrudListItem, { Props as ItemProps } from './item';
 import * as Styled from './styles';
 import { CREATE_ID } from '~client/constants/data';
 import { CrudProps } from '~client/hooks';
-import { SetActiveId, WithIds } from '~client/types';
+import type { SetActiveId, WithIds } from '~client/types';
 
 type MetaProps<
   I extends Record<string, unknown>,

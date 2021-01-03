@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { getPixY } from './helpers';
+import { getPixY, isConstantColor } from './helpers';
 import { Arrow } from '~client/components/arrow';
-import { UnkeyedLine, RangeY, Pix, Point, isConstantColor } from '~client/types/graph';
+import type { UnkeyedLine, RangeY, Pix, Point } from '~client/types';
 
 type Props = UnkeyedLine & RangeY & Pix;
 

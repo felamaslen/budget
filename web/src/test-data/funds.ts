@@ -1,7 +1,7 @@
 import getUnixTime from 'date-fns/getUnixTime';
 
 import { State } from '~client/reducers/funds';
-import { FundNative } from '~client/types';
+import type { FundNative } from '~client/types';
 
 export const testRows: FundNative[] = [
   {

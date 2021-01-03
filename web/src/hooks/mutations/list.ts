@@ -8,12 +8,13 @@ import * as Urql from 'urql';
 import { useFetchingState } from './crud';
 import { errorOpened, listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
+import * as gql from '~client/hooks/gql';
 import { omitTypeName, toRawFund, withRawDate } from '~client/modules/data';
 
-import {
+import type { FundInputNative, Id, PageList, StandardInput, WithIds } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
+import type {
   FundInput,
-  FundInputNative,
-  Id,
   ListItemInput,
   ListItemStandardInput,
   Mutation,
@@ -23,18 +24,7 @@ import {
   MutationDeleteListItemArgs,
   MutationUpdateFundArgs,
   MutationUpdateListItemArgs,
-  PageList,
-  PageListStandard,
-  PageNonStandard,
-  StandardInput,
-  useCreateFundMutation,
-  useCreateListItemMutation,
-  useDeleteFundMutation,
-  useDeleteListItemMutation,
-  useUpdateFundMutation,
-  useUpdateListItemMutation,
-  WithIds,
-} from '~client/types';
+} from '~client/types/gql';
 
 export type OnCreateList<I extends ListItemInput> = (item: I) => void;
 export type OnUpdateList<I extends ListItemInput> = (
@@ -185,9 +175,9 @@ const standardOptions = moize(
       delete: 'deleteListItem',
     },
     mutations: {
-      useCreate: useCreateListItemMutation,
-      useUpdate: useUpdateListItemMutation,
-      useDelete: useDeleteListItemMutation,
+      useCreate: gql.useCreateListItemMutation,
+      useUpdate: gql.useUpdateListItemMutation,
+      useDelete: gql.useDeleteListItemMutation,
     },
     getArgs: {
       create: (input, fakeId): MutationCreateListItemArgs => ({
@@ -227,9 +217,9 @@ const fundOptions: GenericHookOptions<
     delete: 'deleteFund',
   },
   mutations: {
-    useCreate: useCreateFundMutation,
-    useUpdate: useUpdateFundMutation,
-    useDelete: useDeleteFundMutation,
+    useCreate: gql.useCreateFundMutation,
+    useUpdate: gql.useUpdateFundMutation,
+    useDelete: gql.useDeleteFundMutation,
   },
   getArgs: {
     create: (input, fakeId): MutationCreateFundArgs => ({

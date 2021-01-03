@@ -11,12 +11,8 @@ import {
 } from './net-worth';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
-import {
-  Aggregate,
-  NetWorthCategory,
-  NetWorthCategoryType,
-  NetWorthSubcategory,
-} from '~client/types';
+import { Aggregate, NetWorthCategoryType } from '~client/types/enum';
+import type { NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
 
 describe('Overview selectors (net worth)', () => {
   const state = testState;

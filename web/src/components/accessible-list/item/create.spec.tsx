@@ -3,12 +3,13 @@ import React from 'react';
 import sinon from 'sinon';
 
 import { standardFields } from '../standard';
-import { PropsItemCreate } from '../types';
+import type { PropsItemCreate } from '../types';
 
 import { AccessibleListCreateItem } from './create';
 
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { ListItemInput, PageListStandard } from '~client/types';
+import { PageListStandard } from '~client/types/enum';
+import type { ListItemInput } from '~client/types/gql';
 
 describe('Accessible list create form', () => {
   let clock: sinon.SinonFakeTimers;

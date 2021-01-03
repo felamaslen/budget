@@ -6,7 +6,7 @@ import { formatOptionsAbsolute, formatOptionsRelative } from '~client/components
 import { GraphFunds } from '~client/components/graph-funds';
 import { Sort, defaultSort, HeadProps, SortCriteria } from '~client/components/page-funds/types';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { CachedValue, HistoryOptions } from '~client/types';
+import type { CachedValue, HistoryOptions } from '~client/types';
 
 type PropsGainValues = {
   totalCost: number;

@@ -2,7 +2,8 @@ import numericHash from 'string-hash';
 
 import { getItems } from './selectors';
 import { ApiListState } from '~client/selectors';
-import { Id, RequestType } from '~client/types';
+import type { Id } from '~client/types';
+import { RequestType } from '~client/types/enum';
 
 describe('Accessible list selectors', () => {
   describe('getItems', () => {

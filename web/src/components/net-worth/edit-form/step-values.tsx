@@ -13,19 +13,21 @@ import {
 } from '~client/components/form-field';
 import { useCTA } from '~client/hooks';
 import { ButtonAdd, ButtonDelete } from '~client/styled/shared';
-import {
+import type {
   Create,
-  CreditLimit,
-  Currency,
   Id,
-  Maybe,
-  NetWorthCategory,
-  NetWorthCategoryType,
   NetWorthEntryNative as NetWorthEntry,
-  NetWorthSubcategory,
-  NetWorthValueObject,
   NetWorthValueObjectRead,
 } from '~client/types';
+import { NetWorthCategoryType } from '~client/types/enum';
+import type {
+  CreditLimit,
+  Currency,
+  Maybe,
+  NetWorthCategory,
+  NetWorthSubcategory,
+  NetWorthValueObject,
+} from '~client/types/gql';
 
 type PropsCreditLimitEditor = {
   creditLimit: number;

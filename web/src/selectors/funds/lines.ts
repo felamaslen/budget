@@ -2,7 +2,8 @@ import { replaceAtIndex } from 'replace-array';
 
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { IDENTITY, lastInArray, rightPad } from '~client/modules/data';
-import { Data, FundPriceGroup, GQL, Id, Point } from '~client/types';
+import type { Data, GQL, Id, Point } from '~client/types';
+import type { FundPriceGroup } from '~client/types/gql';
 
 export type Return = {
   price: number;

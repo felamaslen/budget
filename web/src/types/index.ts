@@ -4,7 +4,6 @@ export * from './app';
 export * from './block-packer';
 export * from './crud';
 export * from './funds';
-export * from './gql';
 export * from './graph';
 export * from './list';
 export * from './net-worth';

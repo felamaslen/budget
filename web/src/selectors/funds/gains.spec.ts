@@ -8,7 +8,7 @@ import { PriceCache } from './helpers';
 import { fundPeriods } from '~client/constants';
 import { State } from '~client/reducers';
 import { testState, testRows, testPrices, testStartTime, testCacheTimes } from '~client/test-data';
-import { PageNonStandard } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
 
 describe('Funds selectors / gains', () => {
   const testCache: PriceCache = {

@@ -6,7 +6,7 @@ import numericHash from 'string-hash';
 import { ModalDialog, Props, animationTime, makeField } from '.';
 import { FormFieldText, FormFieldCost, FormFieldDate } from '~client/components/form-field';
 import { CREATE_ID } from '~client/constants/data';
-import { Id } from '~client/types';
+import type { Id } from '~client/types';
 
 describe('<ModalDialog />', () => {
   type MyItem = {

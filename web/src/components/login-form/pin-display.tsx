@@ -19,11 +19,11 @@ const InputPin: React.FC<{
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (active) {
-      setImmediate(() => {
+      setTimeout(() => {
         if (inputRef.current) {
           inputRef.current.focus();
         }
-      });
+      }, 0);
     }
   }, [active]);
 

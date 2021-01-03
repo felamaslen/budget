@@ -4,7 +4,7 @@ import { isStandardListPage } from '~client/constants/data';
 import { State } from '~client/reducers';
 import { State as CrudState } from '~client/reducers/crud';
 import { ListState } from '~client/reducers/list';
-import { ListItem } from '~client/types';
+import type { ListItem } from '~client/types/gql';
 
 export type ApiListState<I extends ListItem, P extends string> = Record<P, ListState<I>> &
   Partial<Pick<State, 'api'>>;

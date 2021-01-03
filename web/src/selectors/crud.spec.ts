@@ -1,6 +1,6 @@
 import numericHash from 'string-hash';
 import { withoutDeleted } from './crud';
-import { RequestType } from '~client/types';
+import { RequestType } from '~client/types/enum';
 
 describe('Crud selector', () => {
   describe('withoutDeleted', () => {

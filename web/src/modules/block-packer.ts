@@ -1,4 +1,4 @@
-import { FlexFlow, FlexBlocks, WithArea, WithSubTree } from '~client/types';
+import type { FlexFlow, FlexBlocks, WithArea, WithSubTree } from '~client/types';
 
 type NodeRoot = {
   width: number;

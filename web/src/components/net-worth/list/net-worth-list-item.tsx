@@ -5,13 +5,11 @@ import { NetWorthEditForm } from '../edit-form';
 import * as Styled from './styles';
 import { OnUpdate } from '~client/hooks';
 import { ButtonDelete } from '~client/styled/shared';
-import {
+import type { NetWorthEntryNative as Entry, SetActiveId, Create } from '~client/types';
+import type {
   NetWorthCategory as Category,
   NetWorthSubcategory as Subcategory,
-  NetWorthEntryNative as Entry,
-  SetActiveId,
-  Create,
-} from '~client/types';
+} from '~client/types/gql';
 
 type Props = {
   item: Entry;

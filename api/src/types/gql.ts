@@ -780,6 +780,7 @@ export enum SearchItem {
 
 export type SearchResult = {
   error?: Maybe<Scalars['String']>;
+  searchTerm?: Maybe<Scalars['String']>;
   list: Array<Scalars['String']>;
   nextCategory?: Maybe<Array<Scalars['String']>>;
   nextField?: Maybe<Scalars['String']>;
@@ -1550,6 +1551,7 @@ export type OverviewResolvers<ContextType = Context, ParentType extends Resolver
 
 export type SearchResultResolvers<ContextType = Context, ParentType extends ResolversParentTypes['SearchResult'] = ResolversParentTypes['SearchResult']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  searchTerm?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   list?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   nextCategory?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   nextField?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

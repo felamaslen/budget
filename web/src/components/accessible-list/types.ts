@@ -1,20 +1,12 @@
-import { StyledComponent } from '@emotion/styled';
-import React, { CSSProperties } from 'react';
+import type { StyledComponent } from '@emotion/styled';
+import type { CSSProperties, FC } from 'react';
 
-import { FieldComponent } from '~client/components/form-field';
-import { ModalFields } from '~client/components/modal-dialog/field';
-import { ListCrud, OnCreateList, OnDeleteList, OnUpdateList } from '~client/hooks';
-import { ApiListState } from '~client/selectors/list';
-import {
-  Delta,
-  FieldKey,
-  Id,
-  ListItem,
-  ListItemInput,
-  PageList,
-  PickUnion,
-  WithIds,
-} from '~client/types';
+import type { FieldComponent } from '~client/components/form-field';
+import type { ModalFields } from '~client/components/modal-dialog/field';
+import type { ListCrud, OnCreateList, OnDeleteList, OnUpdateList } from '~client/hooks';
+import type { ApiListState } from '~client/selectors/list';
+import type { Delta, FieldKey, Id, PageList, PickUnion, WithIds } from '~client/types';
+import type { ListItem, ListItemInput } from '~client/types/gql';
 
 export type State<I extends ListItem, P extends string> = ApiListState<I, P>;
 
@@ -27,9 +19,7 @@ export type Fields<
   [K in FieldKey<I>]: FieldComponent<I[K] | undefined, E>;
 };
 
-export type ComponentType<P extends Record<string, unknown>> =
-  | React.FC<P>
-  | StyledComponent<Partial<P>>;
+export type ComponentType<P extends Record<string, unknown>> = FC<P> | StyledComponent<Partial<P>>;
 
 export type RowComponent<
   I extends ListItemInput,
@@ -97,9 +87,9 @@ export type Props<
   color?: string;
   fieldsMobile?: FieldsMobile<I, MK, E>;
   deltaSeed?: () => Partial<I>;
-  Header?: React.FC<HeaderProps<I, P, MK, H>> | StyledComponent<HeaderProps<I, P, MK, H>>;
+  Header?: FC<HeaderProps<I, P, MK, H>> | StyledComponent<HeaderProps<I, P, MK, H>>;
   headerProps?: H;
-  FirstItem?: React.FC;
+  FirstItem?: FC;
   sortItems?: SortItemsPre<WithIds<I>>;
   sortItemsPost?: SortItemsPost<WithIds<I>, E>;
   customSelector?: CustomSelector<I, E>;
@@ -137,6 +127,4 @@ export type PropsItemCreate<
 } & PickUnion<CommonProps<I, P, E>, 'page' | 'fields' | 'modalFields' | 'suggestionFields'> &
   Pick<PropsCrud<I>, 'onCreate'>;
 
-export const ADD_BUTTON = '__add-button' as const;
-
-export type ActiveField<I extends ListItemInput> = FieldKey<I> | null | typeof ADD_BUTTON;
+export type ActiveField<I extends ListItemInput> = FieldKey<I> | null | '__add-button';

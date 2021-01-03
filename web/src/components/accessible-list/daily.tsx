@@ -12,7 +12,7 @@ import {
   ExtraProps,
 } from './standard';
 import { WeeklyHeader, StandardRow, DailyTotal } from './styles';
-import { Fields, HeaderProps } from './types';
+import type { Fields, HeaderProps } from './types';
 import {
   FormFieldText,
   FormFieldTextInline,
@@ -21,13 +21,13 @@ import {
 } from '~client/components/form-field';
 import { ModalFields, makeField } from '~client/components/modal-dialog';
 import { formatCurrency } from '~client/modules/format';
-import {
+import type {
   GQL,
   ListItemExtendedNative as ListItemExtended,
-  ListItemStandardInput,
   PageListCost,
   StandardInput,
 } from '~client/types';
+import type { ListItemStandardInput } from '~client/types/gql';
 
 type ListItemExtendedInput = Omit<ListItemExtended, 'id'>;
 

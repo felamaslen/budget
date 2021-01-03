@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { LoginForm } from '~client/components/login-form';
+import { Spinner } from '~client/components/spinner';
 import { useLogin } from '~client/hooks';
 
 type Props = {
@@ -17,7 +18,7 @@ export const Anonymous: React.FC<Props> = ({ onLogin }) => {
   }, [loading, loggedIn, apiKey, onLogin]);
 
   if (initialLoading || apiKey) {
-    return null;
+    return <Spinner />;
   }
 
   return <LoginForm onLogin={login} loading={loading} />;

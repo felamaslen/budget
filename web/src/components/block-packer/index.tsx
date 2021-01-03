@@ -4,11 +4,11 @@ import { rgba } from 'polished';
 import { useRef, useState, useEffect, useMemo, useCallback, memo } from 'react';
 
 import * as Styled from './styles';
-import { Preview } from './types';
+import type { Preview } from './types';
 import { useCTA } from '~client/hooks';
 import { VOID } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { PickUnion, BlockItem, FlexBlocks, Box } from '~client/types';
+import type { PickUnion, BlockItem, FlexBlocks, Box } from '~client/types';
 
 export { statusHeight } from './styles';
 
@@ -244,7 +244,7 @@ function useClickDive(
   useEffect(() => {
     // trigger expand animation when diving
     if (preview.name && preview.open && !hadPreview.current) {
-      setImmediate(() => {
+      setTimeout(() => {
         dispatch((last) => ({
           preview: {
             name: last.preview.name,
@@ -265,7 +265,7 @@ function useClickDive(
         fadeTimer.current = window.setTimeout(() => {
           onDive(preview.name);
         }, Styled.fadeTime);
-      });
+      }, 0);
     }
     hadPreview.current = preview.open;
   }, [preview, onDive]);
@@ -273,7 +273,7 @@ function useClickDive(
   useEffect(() => {
     if (haveDeepBlocks) {
       // hide preview after loading deep blocks
-      setImmediate(() => {
+      setTimeout(() => {
         dispatch((last) => ({
           ...last,
           preview: {
@@ -292,7 +292,7 @@ function useClickDive(
             },
           }));
         }, Styled.fadeTime);
-      });
+      }, 0);
     }
   }, [haveDeepBlocks]);
 
@@ -313,7 +313,7 @@ function useClickDive(
 
     onDive(null);
 
-    setImmediate(() => {
+    setTimeout(() => {
       dispatch((last) => ({
         ...last,
         preview: {
@@ -325,7 +325,7 @@ function useClickDive(
       fadeTimer.current = window.setTimeout(() => {
         dispatch(initialDiveState);
       }, Styled.fadeTime);
-    });
+    }, 0);
   }, [onDive]);
 
   useEffect(() => (): void => clearTimeout(fadeTimer.current), []);

@@ -3,8 +3,8 @@ import React, { useMemo } from 'react';
 import { ArrowLine } from './arrow-line';
 import { AverageLine } from './average-line';
 import { DynamicColorLine } from './dynamic-color-line';
-import { getPathProps, getSingleLinePath } from './helpers';
-import { UnkeyedLine, RangeY, Calc, isConstantColor, PathProps } from '~client/types';
+import { getPathProps, getSingleLinePath, isConstantColor } from './helpers';
+import type { UnkeyedLine, RangeY, Calc, PathProps } from '~client/types';
 
 function getStyleProps(
   fill: boolean,

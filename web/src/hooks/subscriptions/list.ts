@@ -11,35 +11,22 @@ import {
   receiptCreated,
 } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
+import * as gql from '~client/hooks/gql';
 import { toNativeFund, withNativeDate } from '~client/modules/data';
-import {
+import type { FundInputNative, Id, Item, PageList, StandardInput } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
+import type {
   Exact,
   FundCreateUpdate,
   FundDelete,
   FundInput,
-  FundInputNative,
-  Id,
-  Item,
   ListItemCreateUpdate,
   ListItemDelete,
   ListItemInput,
   ListItemStandardInput,
   Maybe,
-  PageList,
-  PageListStandard,
-  PageNonStandard,
   ReceiptCreatedSubscription,
-  StandardInput,
-  useFundCreatedSubscription,
-  useFundDeletedSubscription,
-  useFundUpdatedSubscription,
-  useListItemDeletedSubscription,
-  useListItemExtendedCreatedSubscription,
-  useListItemExtendedUpdatedSubscription,
-  useListItemStandardCreatedSubscription,
-  useListItemStandardUpdatedSubscription,
-  useReceiptCreatedSubscription,
-} from '~client/types';
+} from '~client/types/gql';
 
 type ResponseKeys = {
   created: 'listItemStandardCreated' | 'listItemExtendedCreated' | 'fundCreated';
@@ -187,9 +174,9 @@ const standardOptions: GenericHookOptions<
     deleted: 'listItemDeleted',
   },
   subscriptions: {
-    useOnCreate: useListItemStandardCreatedSubscription,
-    useOnUpdate: useListItemStandardUpdatedSubscription,
-    useOnDelete: useListItemDeletedSubscription,
+    useOnCreate: gql.useListItemStandardCreatedSubscription,
+    useOnUpdate: gql.useListItemStandardUpdatedSubscription,
+    useOnDelete: gql.useListItemDeletedSubscription,
   },
   getPage: (res) => res.page,
   toNative: withNativeDate('date'),
@@ -209,8 +196,8 @@ const extendedOptions: GenericHookOptions<
     deleted: 'listItemDeleted',
   },
   subscriptions: {
-    useOnCreate: useListItemExtendedCreatedSubscription,
-    useOnUpdate: useListItemExtendedUpdatedSubscription,
+    useOnCreate: gql.useListItemExtendedCreatedSubscription,
+    useOnUpdate: gql.useListItemExtendedUpdatedSubscription,
   },
 };
 
@@ -227,9 +214,9 @@ const fundOptions: GenericHookOptions<
     deleted: 'fundDeleted',
   },
   subscriptions: {
-    useOnCreate: useFundCreatedSubscription,
-    useOnUpdate: useFundUpdatedSubscription,
-    useOnDelete: useFundDeletedSubscription,
+    useOnCreate: gql.useFundCreatedSubscription,
+    useOnUpdate: gql.useFundUpdatedSubscription,
+    useOnDelete: gql.useFundDeletedSubscription,
   },
   getPage: () => PageNonStandard.Funds,
   toNative: toNativeFund,
@@ -247,7 +234,7 @@ function useReceiptSubscription(): void {
     [dispatch],
   );
 
-  useReceiptCreatedSubscription({}, onReceiptCreated);
+  gql.useReceiptCreatedSubscription({}, onReceiptCreated);
 }
 
 export function useListSubscriptions(): void {

@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
-import { Aggregate, NetWorthTableColumn } from '~client/types';
+import type { Aggregate, NetWorthTableColumn } from '~client/types';
 
 export const NetWorthView = styled.div`
   background: ${colors.translucent.light.light};

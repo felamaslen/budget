@@ -17,13 +17,9 @@ import {
 } from '~client/actions';
 import reducer, { initialState, State } from '~client/reducers/overview';
 import { testResponse } from '~client/test-data';
-import {
-  FundHistory,
-  PageListCost,
-  PageListStandard,
-  ReceiptPage,
-  StandardInput,
-} from '~client/types';
+import type { PageListCost, StandardInput } from '~client/types';
+import { PageListStandard, ReceiptPage } from '~client/types/enum';
+import type { FundHistory } from '~client/types/gql';
 
 describe('Overview reducer', () => {
   const now = new Date('2019-07-13T11:43:10+0100');

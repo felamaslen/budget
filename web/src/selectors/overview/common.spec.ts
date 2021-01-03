@@ -10,7 +10,7 @@ import {
   getMonthDates,
 } from '~client/selectors/overview/common';
 import { testState as state } from '~client/test-data/state';
-import { PageNonStandard } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
 
 describe('Overview selectors (common)', () => {
   describe('getStartDate', () => {

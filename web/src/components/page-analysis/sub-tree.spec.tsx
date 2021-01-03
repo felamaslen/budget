@@ -2,7 +2,7 @@ import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
 
 import { SubTree } from './sub-tree';
-import { AnalysisPage, MainBlockName } from '~client/types';
+import { AnalysisPage, MainBlockName } from '~client/types/enum';
 
 describe('<PageAnalysis /> / <SubTree />', () => {
   const props = {

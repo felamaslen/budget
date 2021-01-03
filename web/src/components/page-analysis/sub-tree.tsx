@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 
 import * as Styled from './styles';
 import { formatCurrency } from '~client/modules/format';
-import { MainBlockName } from '~client/types';
+import type { MainBlockName } from '~client/types';
 
 export type Props = {
   open: boolean;

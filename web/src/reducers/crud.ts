@@ -1,6 +1,7 @@
 import { replaceAtIndex, removeAtIndex } from 'replace-array';
 
-import { Id, Item, RequestType } from '~client/types';
+import type { Id, Item } from '~client/types';
+import { RequestType } from '~client/types/enum';
 
 export type State<I extends Item> = {
   items: I[];

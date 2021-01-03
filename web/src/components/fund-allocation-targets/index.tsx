@@ -9,7 +9,8 @@ import { lastInArray, VOID } from '~client/modules/data';
 import { abbreviateFundName } from '~client/modules/finance';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
-import { Portfolio, PortfolioItem, FundNative as Fund, TargetDelta } from '~client/types';
+import type { Portfolio, PortfolioItem, FundNative as Fund } from '~client/types';
+import type { TargetDelta } from '~client/types/gql';
 
 const minimumAdjustmentValue = 100000;
 
@@ -176,7 +177,7 @@ const Target: React.FC<TargetProps> = ({
   const activate = useCallback(
     (clientX: number | null): void => {
       setState((last) => ({ ...last, dragPosition: clientX }));
-      setImmediate(() => onMove(clientX));
+      setTimeout(() => onMove(clientX), 0);
     },
     [onMove],
   );

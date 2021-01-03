@@ -5,6 +5,7 @@ export * from './effect';
 export * from './field';
 export * from './media';
 export * from './mutations';
+export * from './offline';
 export * from './persist';
 export * from './queries';
 export * from './request';

@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from 'urql';
 
 export const MoreListDataStandard = gql`
   query MoreListDataStandard($page: PageListStandard!, $offset: Int!, $limit: Int!) {

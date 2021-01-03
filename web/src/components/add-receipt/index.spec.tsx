@@ -1,6 +1,5 @@
-/* eslint-disable jest/prefer-expect-assertions */
 import { render, act, fireEvent, waitFor, RenderResult } from '@testing-library/react';
-import { DocumentNode } from 'graphql';
+import type { DocumentNode } from 'graphql';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -12,7 +11,8 @@ import { AddReceipt, Props } from '.';
 import * as ListMutations from '~client/gql/mutations/list';
 import * as SearchQueries from '~client/gql/queries/search';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { QueryReceiptItemArgs, QueryReceiptItemsArgs, ReceiptPage } from '~client/types';
+import { ReceiptPage } from '~client/types/enum';
+import type { QueryReceiptItemArgs, QueryReceiptItemsArgs } from '~client/types/gql';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-short-id',
@@ -222,6 +222,7 @@ describe('<AddReceipt />', () => {
     };
 
     it('should run a mutation to create a receipt', async () => {
+      expect.hasAssertions();
       await enterReceipt();
       expect(mutateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -252,6 +253,7 @@ describe('<AddReceipt />', () => {
     });
 
     it('should clear all inputs', async () => {
+      expect.hasAssertions();
       const { queryAllByPlaceholderText, queryAllByDisplayValue } = await enterReceipt();
 
       const inputsItem = queryAllByPlaceholderText('Item');
@@ -266,6 +268,7 @@ describe('<AddReceipt />', () => {
     });
 
     it('should indicate the total cost', () => {
+      expect.hasAssertions();
       const result = setup();
       addItem(result, 'Some food item', '1.23');
       act(() => {
@@ -279,6 +282,7 @@ describe('<AddReceipt />', () => {
 
   describe('when autocompleting an item field', () => {
     it('should make the case consistent', async () => {
+      expect.hasAssertions();
       const { getAllByPlaceholderText, getByText } = setup();
       const inputItem = getAllByPlaceholderText('Item')[0] as HTMLInputElement;
 

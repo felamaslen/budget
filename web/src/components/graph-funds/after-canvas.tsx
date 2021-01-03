@@ -5,7 +5,7 @@ import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { fundPeriods, GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { useCTA } from '~client/hooks';
 import { abbreviateFundName } from '~client/modules/finance';
-import { Id, FundItem, HistoryOptions } from '~client/types';
+import type { Id, FundItem, HistoryOptions } from '~client/types';
 
 type ToggleList = {
   [id: string]: boolean | null;

@@ -16,23 +16,9 @@ import {
   netWorthSubcategoryDeleted,
   netWorthSubcategoryUpdated,
 } from '~client/actions';
-import {
-  Id,
-  Item,
-  Maybe,
-  NetWorthCategory,
-  NetWorthEntryRead,
-  NetWorthSubcategory,
-  useNetWorthCategoryCreatedSubscription,
-  useNetWorthCategoryDeletedSubscription,
-  useNetWorthCategoryUpdatedSubscription,
-  useNetWorthEntryCreatedSubscription,
-  useNetWorthEntryDeletedSubscription,
-  useNetWorthEntryUpdatedSubscription,
-  useNetWorthSubcategoryCreatedSubscription,
-  useNetWorthSubcategoryDeletedSubscription,
-  useNetWorthSubcategoryUpdatedSubscription,
-} from '~client/types';
+import * as gql from '~client/hooks/gql';
+import type { Id, Item, NetWorthEntryRead } from '~client/types';
+import type { Maybe, NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
 
 type ResponseKeys = {
   created: 'netWorthCategoryCreated' | 'netWorthSubcategoryCreated' | 'netWorthEntryCreated';
@@ -121,9 +107,9 @@ const optionsCategory: CrudOptions<NetWorthCategory> = {
     deleted: 'netWorthCategoryDeleted',
   },
   subscriptions: {
-    useOnCreate: useNetWorthCategoryCreatedSubscription,
-    useOnUpdate: useNetWorthCategoryUpdatedSubscription,
-    useOnDelete: useNetWorthCategoryDeletedSubscription,
+    useOnCreate: gql.useNetWorthCategoryCreatedSubscription,
+    useOnUpdate: gql.useNetWorthCategoryUpdatedSubscription,
+    useOnDelete: gql.useNetWorthCategoryDeletedSubscription,
   },
   actions: {
     onCreate: netWorthCategoryCreated,
@@ -139,9 +125,9 @@ const optionsSubcategory: CrudOptions<NetWorthSubcategory> = {
     deleted: 'netWorthSubcategoryDeleted',
   },
   subscriptions: {
-    useOnCreate: useNetWorthSubcategoryCreatedSubscription,
-    useOnUpdate: useNetWorthSubcategoryUpdatedSubscription,
-    useOnDelete: useNetWorthSubcategoryDeletedSubscription,
+    useOnCreate: gql.useNetWorthSubcategoryCreatedSubscription,
+    useOnUpdate: gql.useNetWorthSubcategoryUpdatedSubscription,
+    useOnDelete: gql.useNetWorthSubcategoryDeletedSubscription,
   },
   actions: {
     onCreate: netWorthSubcategoryCreated,
@@ -157,9 +143,9 @@ const optionsEntry: CrudOptions<NetWorthEntryRead> = {
     deleted: 'netWorthEntryDeleted',
   },
   subscriptions: {
-    useOnCreate: useNetWorthEntryCreatedSubscription,
-    useOnUpdate: useNetWorthEntryUpdatedSubscription,
-    useOnDelete: useNetWorthEntryDeletedSubscription,
+    useOnCreate: gql.useNetWorthEntryCreatedSubscription,
+    useOnUpdate: gql.useNetWorthEntryUpdatedSubscription,
+    useOnDelete: gql.useNetWorthEntryDeletedSubscription,
   },
   actions: {
     onCreate: netWorthEntryCreated,

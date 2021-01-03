@@ -11,14 +11,8 @@ import { StepAssets, StepLiabilities } from './step-values';
 import { CREATE_ID } from '~client/constants/data';
 import { OnUpdate, OnCreate } from '~client/hooks';
 import { sortByDate, withoutId } from '~client/modules/data';
-import {
-  Create,
-  Id,
-  NetWorthCategory,
-  NetWorthSubcategory,
-  NetWorthEntryNative as NetWorthEntry,
-  SetActiveId,
-} from '~client/types';
+import type { Create, Id, NetWorthEntryNative as NetWorthEntry, SetActiveId } from '~client/types';
+import type { NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
 
 type PropsItemForm = {
   add?: boolean;

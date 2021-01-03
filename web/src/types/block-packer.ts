@@ -1,4 +1,4 @@
-import React from 'react';
+import { ReactElement, ReactText } from 'react';
 
 export type FlexFlow = 'row' | 'column';
 
@@ -30,5 +30,5 @@ export type BlockItem = {
   color?: string;
   childCount?: number;
   hasBreakdown?: boolean;
-  text?: React.ReactElement | React.ReactText;
+  text?: ReactElement | ReactText;
 };

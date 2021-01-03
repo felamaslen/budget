@@ -2,7 +2,7 @@ import numericHash from 'string-hash';
 import * as funds from './funds';
 
 import { State } from '~client/reducers';
-import { FundPeriod, NetWorthCategoryType, PageListStandard } from '~client/types';
+import { FundPeriod, NetWorthCategoryType, PageListStandard } from '~client/types/enum';
 
 export const testNow = new Date('2018-03-13T11:23:01Z');
 

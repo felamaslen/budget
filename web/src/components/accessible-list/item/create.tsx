@@ -1,15 +1,18 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 
+import { ADD_BUTTON } from '../constants';
 import { AccessibleListItemField } from '../field';
 import * as Styled from '../styles';
 import { useSuggestions, Result as Suggestions } from '../suggestions';
-import { Fields, FieldKey, PropsItemCreate, ADD_BUTTON } from '../types';
+import type { Fields, FieldKey, PropsItemCreate } from '../types';
 import { useCTA } from '~client/hooks';
 import { Button } from '~client/styled/shared';
-import { ListItemInput, PageList } from '~client/types';
+import type { PageList } from '~client/types';
+import type { ListItemInput } from '~client/types/gql';
 
-const deltaIsComplete = <I extends ListItemInput>(delta: Partial<I> | I): delta is I =>
-  Object.keys(delta).every((key) => typeof Reflect.get(delta, key) !== 'undefined');
+function deltaIsComplete<I extends ListItemInput>(delta: Partial<I> | I): delta is I {
+  return Object.keys(delta).every((key) => typeof Reflect.get(delta, key) !== 'undefined');
+}
 
 const Suggestion: React.FC<{
   suggestion: string;
@@ -39,7 +42,7 @@ type FieldProps<I extends ListItemInput, E extends Record<string, unknown>> = {
   active: boolean;
   suggestions?: string[];
   activateSuggestion: Suggestions<I>['activateSuggestion'];
-} & Omit<Suggestions<I>, 'list' | 'next' | 'activate' | 'activeField'>;
+} & Omit<Suggestions<I>, 'list' | 'next' | 'activate' | 'clear' | 'activeField'>;
 
 const CreateField = <I extends ListItemInput, E extends Record<string, unknown>>({
   fields,
@@ -51,7 +54,7 @@ const CreateField = <I extends ListItemInput, E extends Record<string, unknown>>
   activateSuggestion,
   active,
   setActiveField,
-}: FieldProps<I, E>): React.ReactElement<FieldProps<I, E>> => {
+}: FieldProps<I, E>): React.ReactElement => {
   const onChange = useCallback(
     (newValue): void => {
       setDelta((last) => ({
@@ -106,7 +109,7 @@ export const AccessibleListCreateItem = <
   onCreate,
   suggestionFields = [],
   deltaSeed,
-}: PropsItemCreate<I, P, E>): React.ReactElement<PropsItemCreate<I, P, E>> => {
+}: PropsItemCreate<I, P, E>): React.ReactElement => {
   const initialDelta = useMemo<Partial<I>>(
     (): Partial<I> =>
       Object.keys(fields).reduce(
@@ -127,6 +130,7 @@ export const AccessibleListCreateItem = <
     onType,
     activateSuggestion,
     list: suggestions,
+    clear: clearSuggestions,
   } = useSuggestions<I, P>({
     suggestionFields,
     page,
@@ -138,11 +142,11 @@ export const AccessibleListCreateItem = <
   const addButtonFocused = activeField === ADD_BUTTON;
   useEffect(() => {
     if (addButtonFocused) {
-      setImmediate(() => {
+      setTimeout(() => {
         if (addButton.current) {
           addButton.current.focus();
         }
-      });
+      }, 0);
     }
   }, [addButtonFocused]);
 
@@ -150,14 +154,18 @@ export const AccessibleListCreateItem = <
   const onCreateIfPossible = useCallback((): void => {
     if (deltaIsComplete(delta)) {
       onCreate(delta);
-      setDelta(initialDelta);
-      setImmediate(() => {
+      setTimeout(() => {
         setActiveField(firstField);
-      });
+        setDelta(initialDelta);
+      }, 0);
     }
   }, [onCreate, delta, initialDelta, setActiveField, firstField]);
 
   const createEvents = useCTA(onCreateIfPossible);
+
+  useEffect(() => {
+    clearSuggestions();
+  }, [activeField, clearSuggestions]);
 
   return (
     <Styled.CreateRow data-testid="create-form" as="div">

@@ -11,7 +11,7 @@ import { getTotalUnits, isSold, lastInArray } from '~client/modules/data';
 import { abbreviateFundName } from '~client/modules/finance';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { colors } from '~client/styled/variables';
-import {
+import type {
   FundNative as Fund,
   FundItem,
   FundLine,

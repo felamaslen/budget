@@ -10,7 +10,7 @@ import * as Styled from './styles';
 import { useCTA, useField } from '~client/hooks';
 import { addToTransactionsList, modifyTransaction, sortByKey } from '~client/modules/data';
 import { FlexColumn, ButtonAdd, ButtonDelete } from '~client/styled/shared';
-import { Id, TransactionNative as Transaction } from '~client/types';
+import type { Id, TransactionNative as Transaction } from '~client/types';
 
 type PropsTransaction = {
   item: Transaction;
@@ -257,11 +257,11 @@ export const FormFieldTransactionsInline: React.FC<PropsInline> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const onToggleModal = useCallback(() => setFocused((last) => !last), []);
   const onBlurModal = useCallback((): void => {
-    setImmediate(() => {
+    setTimeout(() => {
       if (!modalRef.current?.contains(document.activeElement)) {
         setFocused(false);
       }
-    });
+    }, 0);
   }, []);
   useEffect(() => {
     setFocused(!!props.active);

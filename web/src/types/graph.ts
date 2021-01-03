@@ -73,8 +73,6 @@ export type DynamicLineColor = ColorSwitcher | ColorFunction;
 
 export type LineColor = string | DynamicLineColor;
 
-export const isConstantColor = (color: LineColor): color is string => typeof color === 'string';
-
 export type GraphStack = Data[];
 
 export type Line = {

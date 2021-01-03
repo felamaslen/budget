@@ -5,17 +5,14 @@ import * as Styled from './styles';
 import { cashTargetUpdated, allocationTargetsUpdated } from '~client/actions';
 import { FundAllocationTargets } from '~client/components/fund-allocation-targets';
 import { TodayContext } from '~client/hooks';
+import * as gql from '~client/hooks/gql';
 import {
   getCashToInvest,
   getCashAllocationTarget,
   getPortfolio,
   getFundsRows,
 } from '~client/selectors';
-import {
-  TargetDelta,
-  useUpdateCashAllocationTargetMutation,
-  useUpdateFundAllocationTargetsMutation,
-} from '~client/types';
+import type { TargetDelta } from '~client/types/gql';
 
 export const CashRow: React.FC = () => {
   const today = useContext(TodayContext);
@@ -27,7 +24,7 @@ export const CashRow: React.FC = () => {
 
   const cashTarget = useSelector(getCashAllocationTarget);
 
-  const [, mutateCashAllocationTarget] = useUpdateCashAllocationTargetMutation();
+  const [, mutateCashAllocationTarget] = gql.useUpdateCashAllocationTargetMutation();
   const onSetCashTarget = useCallback(
     (value: number): void => {
       mutateCashAllocationTarget({ target: value });
@@ -36,7 +33,7 @@ export const CashRow: React.FC = () => {
     [dispatch, mutateCashAllocationTarget],
   );
 
-  const [, mutateFundAllocationTargets] = useUpdateFundAllocationTargetsMutation();
+  const [, mutateFundAllocationTargets] = gql.useUpdateFundAllocationTargetsMutation();
   const onSetFundTargets = useCallback(
     (deltas: TargetDelta[]): void => {
       mutateFundAllocationTargets({ deltas });

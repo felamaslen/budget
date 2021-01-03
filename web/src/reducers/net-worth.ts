@@ -9,16 +9,18 @@ import {
   ActionApiDataRead,
 } from '~client/actions';
 import { omitTypeName, sortByKey } from '~client/modules/data';
-import {
+import type {
   GQL,
   Id,
-  NetWorthCategory as Category,
   NetWorthEntryNative as Entry,
   NetWorthEntryRead,
-  NetWorthSubcategory as Subcategory,
   NetWorthValueObjectNative,
   NetWorthValueObjectRead,
 } from '~client/types';
+import type {
+  NetWorthCategory as Category,
+  NetWorthSubcategory as Subcategory,
+} from '~client/types/gql';
 
 type ExtraState = {
   old: number[];

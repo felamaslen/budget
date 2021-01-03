@@ -2,9 +2,11 @@ import { getUnixTime } from 'date-fns';
 import numericHash from 'string-hash';
 
 import { getFundsCache, getFundsRows } from './helpers';
-import { State } from '~client/reducers/types';
+import type { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data';
-import { Fund, FundQuotes, PageNonStandard, RequestType } from '~client/types';
+import type { FundQuotes } from '~client/types';
+import { PageNonStandard, RequestType } from '~client/types/enum';
+import type { Fund } from '~client/types/gql';
 
 describe('getFundsRows', () => {
   it('should exclude optimistically deleted items', () => {

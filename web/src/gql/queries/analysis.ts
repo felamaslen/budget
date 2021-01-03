@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from 'urql';
 
 export const Analysis = gql`
   query Analysis($period: AnalysisPeriod!, $groupBy: AnalysisGroupBy!, $page: Int) {

@@ -3,7 +3,7 @@ import { getApiLoading } from './api';
 import { generateFakeId } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
-import { PageListStandard, RequestType } from '~client/types';
+import { PageListStandard, RequestType } from '~client/types/enum';
 
 describe(getApiLoading.name, () => {
   describe.each`

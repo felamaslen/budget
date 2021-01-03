@@ -3,13 +3,13 @@ import { useSelector } from 'react-redux';
 
 import { Pie } from '../pie';
 import * as Styled from './styles';
-import { FundProps } from './types';
+import type { FundProps } from './types';
 import { FundGainInfo } from '~client/components/fund-gain-info';
 import { GraphFundItem } from '~client/components/graph-fund-item';
 import { TodayContext, useDebouncedState, useListCrudFunds } from '~client/hooks';
 import { getViewSoldFunds, getFundsCachedValue, getMaxAllocationTarget } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import { FundNative as Fund } from '~client/types';
+import type { FundNative as Fund } from '~client/types';
 
 export type Props = { isMobile: boolean; item: Fund } & Partial<FundProps>;
 

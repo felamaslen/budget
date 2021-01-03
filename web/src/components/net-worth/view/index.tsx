@@ -6,7 +6,7 @@ import * as Styled from './styles';
 import SumByCategory, { Props as SumProps } from './sum-by-category';
 import { NetWorthGraph, GraphProps, getFTISeries } from '~client/components/net-worth/graph';
 import { useIsMobile } from '~client/hooks';
-import { Aggregate } from '~client/types';
+import { Aggregate } from '~client/types/enum';
 
 type Props = Pick<SumProps, 'aggregate'> & Pick<GraphProps, 'table'>;
 

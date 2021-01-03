@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from 'urql';
 
 export const Initial = gql`
   query Initial($fundPeriod: FundPeriod, $fundLength: NonNegativeInt) {

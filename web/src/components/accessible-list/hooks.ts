@@ -2,23 +2,20 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { getItems } from './selectors';
-import { SortItemsPre, SortItemsPost, CustomSelector } from './types';
+import type { SortItemsPre, SortItemsPost, CustomSelector } from './types';
 
 import { moreListDataReceived } from '~client/actions';
 import { isExtendedListPage, PAGE_LIST_LIMIT } from '~client/constants/data';
 import { OnDeleteList, OnUpdateList } from '~client/hooks';
+import * as gql from '~client/hooks/gql';
 import { getListOffset } from '~client/selectors';
-import {
-  Id,
+import type { Id, PageListCost, WithIds } from '~client/types';
+import type {
   ListItem,
   ListItemInput,
-  PageListCost,
   PageListExtended,
   PageListStandard,
-  useMoreListDataExtendedQuery,
-  useMoreListDataStandardQuery,
-  WithIds,
-} from '~client/types';
+} from '~client/types/gql';
 
 const identitySelector = <E extends Record<string, unknown>>(): {
   [id: string]: Partial<E>;
@@ -110,7 +107,7 @@ function useMoreItemsStandard(page: PageListStandard): LoadMore {
   const dispatch = useDispatch();
   const args = useMoreArgs(page);
 
-  const [{ data, fetching, stale }, fetchMore] = useMoreListDataStandardQuery({
+  const [{ data, fetching, stale }, fetchMore] = gql.useMoreListDataStandardQuery({
     pause: true,
     variables: args,
   });
@@ -135,7 +132,7 @@ function useMoreItemsExtended(page: PageListExtended): LoadMore {
   const dispatch = useDispatch();
   const args = useMoreArgs(page);
 
-  const [{ data, fetching, stale }, fetchMore] = useMoreListDataExtendedQuery({
+  const [{ data, fetching, stale }, fetchMore] = gql.useMoreListDataExtendedQuery({
     pause: true,
     variables: args,
   });

@@ -23,14 +23,8 @@ import {
 } from '~client/components/form-field';
 import { useListCrudStandard } from '~client/hooks';
 import { formatCurrency, capitalise } from '~client/modules/format';
-import {
-  ListItem,
-  PageListCost,
-  PageListStandard,
-  PickUnion,
-  StandardInput,
-  WithIds,
-} from '~client/types';
+import type { PageListCost, PickUnion, StandardInput, WithIds } from '~client/types';
+import type { ListItem, PageListStandard } from '~client/types/gql';
 
 export const standardFields = {
   date: FormFieldDateInline,

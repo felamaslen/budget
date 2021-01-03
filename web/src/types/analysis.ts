@@ -1,4 +1,4 @@
-import { AnalysisPage } from './gql';
+import type { AnalysisPage } from './gql';
 
 export type MainBlockName = AnalysisPage | 'saved';
 

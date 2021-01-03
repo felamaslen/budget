@@ -5,13 +5,14 @@ import { useSortedItems, useMobileEditModal } from './hooks';
 import { AccessibleListItem, AccessibleListCreateItem } from './item';
 import { MobileCreateForm } from './mobile';
 import * as Styled from './styles';
-import { Props, FieldKey, PropsMemoisedItem } from './types';
+import type { Props, FieldKey, PropsMemoisedItem } from './types';
 import { InfiniteWindow } from './window';
 
 import { ModalDialog } from '~client/components/modal-dialog';
 import { isStandardListPage } from '~client/constants/data';
 import { useIsMobile } from '~client/hooks';
-import { ListItemInput, PageList } from '~client/types';
+import type { PageList } from '~client/types';
+import type { ListItemInput } from '~client/types/gql';
 
 const emptyObject = {};
 

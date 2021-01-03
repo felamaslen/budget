@@ -1,10 +1,10 @@
 import { useState, useCallback, useMemo } from 'react';
 import { throttle } from 'throttle-debounce';
 
-import { getPixY, getStackedData } from '../helpers';
+import { getPixY, getStackedData, isConstantColor } from '../helpers';
 import { NULL } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { Point, Line, Calc, LineColor, isConstantColor } from '~client/types';
+import type { Point, Line, Calc, LineColor } from '~client/types';
 
 function getHlColor(color: LineColor, point: Point, index: number): string {
   if (isConstantColor(color)) {

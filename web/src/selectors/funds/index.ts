@@ -15,16 +15,15 @@ import { getTotalCost, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { getCostForMonthSoFar } from '~client/selectors/overview';
-import {
-  Aggregate,
+import type {
   Data,
   HistoryOptions,
   Id,
   TransactionNative as Transaction,
-  PageNonStandard,
   Portfolio,
   RowPrices,
 } from '~client/types';
+import { Aggregate, PageNonStandard } from '~client/types/enum';
 
 export * from './gains';
 export * from './graph';

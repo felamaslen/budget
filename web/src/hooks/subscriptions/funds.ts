@@ -9,15 +9,11 @@ import {
   fundPricesUpdated,
 } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
+import * as gql from '~client/hooks/gql';
 import { getHistoryOptions } from '~client/selectors';
-import {
-  useCashAllocationTargetUpdatedSubscription,
-  useFundAllocationTargetsUpdatedSubscription,
-  useFundPricesUpdatedSubscription,
-} from '~client/types';
 
 function useCashTargetSubscription(dispatch: Dispatch): void {
-  const [updatedCashTarget] = useCashAllocationTargetUpdatedSubscription();
+  const [updatedCashTarget] = gql.useCashAllocationTargetUpdatedSubscription();
   useEffect(() => {
     if (updatedCashTarget.data) {
       dispatch(cashTargetUpdated(updatedCashTarget.data.cashAllocationTargetUpdated));
@@ -26,7 +22,7 @@ function useCashTargetSubscription(dispatch: Dispatch): void {
 }
 
 function useFundAllocationTargetsSubscription(dispatch: Dispatch): void {
-  const [updatedFundTargets] = useFundAllocationTargetsUpdatedSubscription();
+  const [updatedFundTargets] = gql.useFundAllocationTargetsUpdatedSubscription();
   useEffect(() => {
     if (updatedFundTargets.data?.fundAllocationTargetsUpdated.deltas) {
       dispatch(
@@ -39,7 +35,7 @@ function useFundAllocationTargetsSubscription(dispatch: Dispatch): void {
 export function useFundsSubscriptions(): void {
   const query = useSelector(getHistoryOptions);
   const dispatch = useDispatch();
-  const [res] = useFundPricesUpdatedSubscription({
+  const [res] = gql.useFundPricesUpdatedSubscription({
     variables: query,
   });
 

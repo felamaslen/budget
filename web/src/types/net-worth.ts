@@ -1,5 +1,5 @@
-import { NativeDate } from './crud';
-import {
+import type { NativeDate } from './crud';
+import type {
   CreditLimit,
   Currency,
   InitialQuery,
@@ -7,7 +7,7 @@ import {
   NetWorthValueInput,
   NetWorthValueObject,
 } from './gql';
-import { GQL } from './shared';
+import type { GQL } from './shared';
 
 export type NetWorthTableRow = {
   id: number;

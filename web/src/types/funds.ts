@@ -1,7 +1,7 @@
-import { NativeDate } from './crud';
-import { Fund, FundInput, FundPeriod, Transaction } from './gql';
-import { Data } from './graph';
-import { GQL, Id } from './shared';
+import type { NativeDate } from './crud';
+import type { Fund, FundInput, FundPeriod, Transaction } from './gql';
+import type { Data } from './graph';
+import type { GQL, Id } from './shared';
 
 export type TransactionNative = NativeDate<GQL<Transaction>, 'date'>;
 export type NativeFund<F extends FundInput> = Omit<GQL<F>, 'transactions'> & {

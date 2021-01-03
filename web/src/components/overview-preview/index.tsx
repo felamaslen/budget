@@ -1,12 +1,11 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
-import { AxiosInstance, AxiosResponse } from 'axios';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import * as Styled from './styles';
 import { API_PREFIX } from '~client/constants/data';
-import { useCancellableRequest } from '~client/hooks';
-import { PageListCost } from '~client/types';
+import { SendRequest, useCancellableRequest } from '~client/hooks';
+import type { PageListCost } from '~client/types';
 
 export type Query = {
   year: number;
@@ -18,35 +17,45 @@ type Props = {
   query: Query | null;
 };
 
-const sendRequest = async (
-  axios: AxiosInstance,
-  query: Query,
-): Promise<AxiosResponse<ArrayBuffer>> =>
-  axios.get<ArrayBuffer>(`${API_PREFIX}/preview`, {
-    params: {
-      ...query,
-      width: Styled.width,
-      height: Styled.height,
-      scale: 2,
-    },
-    responseType: 'arraybuffer',
-  });
+const sendRequest: SendRequest<Query> = (query: Query) => {
+  const url = new URL(`${window.location.protocol}//${window.location.host}${API_PREFIX}/preview`);
+  url.search = new URLSearchParams({
+    year: String(query.year),
+    month: String(query.month),
+    category: query.category,
+    width: String(Styled.width),
+    height: String(Styled.height),
+    scale: '2',
+  }).toString();
+  return { info: url.toString() };
+};
 
 export const OverviewPreview: React.FC<Props> = ({ query }) => {
   const [url, setUrl] = useState<string | null>(null);
 
-  const handleResponse = useCallback((res: ArrayBuffer): void => {
+  const cancelled = useRef<boolean>(false);
+  const handleResponse = useCallback(async (res: Response) => {
+    const data = await res.arrayBuffer();
+    if (cancelled.current) {
+      return;
+    }
     const image = btoa(
-      new Uint8Array(res).reduce((data, byte) => data + String.fromCharCode(byte), ''),
+      new Uint8Array(data).reduce((last, byte) => last + String.fromCharCode(byte), ''),
     );
     setUrl(`data:image/png;base64,${image}`);
   }, []);
+  useEffect(
+    () => (): void => {
+      cancelled.current = true;
+    },
+    [],
+  );
 
   const onClear = useCallback(() => {
     setUrl(null);
   }, []);
 
-  const loading = useCancellableRequest<Query | null, ArrayBuffer, Query>({
+  const loading = useCancellableRequest<Query | null, Query>({
     query,
     sendRequest,
     handleResponse,

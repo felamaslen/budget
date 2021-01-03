@@ -837,6 +837,7 @@ export enum SearchItem {
 export type SearchResult = {
   __typename?: 'SearchResult';
   error?: Maybe<Scalars['String']>;
+  searchTerm?: Maybe<Scalars['String']>;
   list: Array<Scalars['String']>;
   nextCategory?: Maybe<Array<Scalars['String']>>;
   nextField?: Maybe<Scalars['String']>;
@@ -978,7 +979,7 @@ export type UpdateCashAllocationTargetMutation = (
 );
 
 export type UpdateFundAllocationTargetsMutationVariables = Exact<{
-  deltas: Array<TargetDelta>;
+  deltas: Array<TargetDelta> | TargetDelta;
 }>;
 
 
@@ -1041,7 +1042,7 @@ export type DeleteListItemMutation = (
 export type CreateReceiptMutationVariables = Exact<{
   date: Scalars['Date'];
   shop: Scalars['String'];
-  items: Array<ReceiptInput>;
+  items: Array<ReceiptInput> | ReceiptInput;
 }>;
 
 
@@ -1244,7 +1245,7 @@ export type FundPricesUpdateQuery = (
 );
 
 export type StockPricesQueryVariables = Exact<{
-  codes: Array<Scalars['String']>;
+  codes: Array<Scalars['String']> | Scalars['String'];
 }>;
 
 
@@ -1402,7 +1403,7 @@ export type SearchSuggestionsQuery = (
   { __typename?: 'Query' }
   & { search?: Maybe<(
     { __typename?: 'SearchResult' }
-    & Pick<SearchResult, 'error' | 'list' | 'nextCategory' | 'nextField'>
+    & Pick<SearchResult, 'error' | 'searchTerm' | 'list' | 'nextCategory' | 'nextField'>
   )> }
 );
 
@@ -1417,7 +1418,7 @@ export type ReceiptItemQuery = (
 );
 
 export type ReceiptItemsQueryVariables = Exact<{
-  items: Array<Scalars['String']>;
+  items: Array<Scalars['String']> | Scalars['String'];
 }>;
 
 
@@ -2261,6 +2262,7 @@ export const SearchSuggestionsDocument = gql`
     numResults: $numResults
   ) {
     error
+    searchTerm
     list
     nextCategory
     nextField

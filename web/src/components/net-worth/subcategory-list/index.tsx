@@ -7,13 +7,13 @@ import { FormFieldText, FormFieldRange, FormFieldTickbox } from '~client/compone
 import { OnCreate, OnUpdate, OnDelete } from '~client/hooks';
 import { Button, ButtonDelete } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
-import {
-  Create,
+import type { Create } from '~client/types';
+import type {
   NetWorthSubcategory as Subcategory,
   NetWorthSubcategoryInput,
   NetWorthCategory as Category,
   NetWorthSubcategory,
-} from '~client/types';
+} from '~client/types/gql';
 
 const getCreditLimitDisabled = (parent: Pick<Category, 'type'>): boolean =>
   parent.type !== 'liability';

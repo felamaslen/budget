@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { useInitialQuery } from '../gql';
 import { dataRead, errorOpened } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
-
 import { getHistoryOptions } from '~client/selectors';
-import { useInitialQuery } from '~client/types/gql';
 
 export function useInitialData(): boolean {
   const dispatch = useDispatch();

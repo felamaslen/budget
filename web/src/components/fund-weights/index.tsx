@@ -12,7 +12,7 @@ import { abbreviateFundName } from '~client/modules/finance';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getCashToInvest, getPortfolio, getStockValue, getCashInBank } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import { BlockItem } from '~client/types';
+import type { BlockItem } from '~client/types';
 
 const formatLabel = (value: number, total: number, suffix: string): string =>
   `(${formatPercent(value / total, { precision: 1 })}) [${formatCurrency(value, {

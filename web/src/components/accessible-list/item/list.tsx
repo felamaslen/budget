@@ -5,10 +5,11 @@ import { AccessibleListItemField } from '../field';
 import { ListFieldMobile } from '../mobile';
 import { getItem } from '../selectors';
 import * as Styled from '../styles';
-import { Fields, FieldKey, PropsItem, PropsCrud, RowComponent } from '../types';
+import type { Fields, FieldKey, PropsItem, PropsCrud, RowComponent } from '../types';
 import { useCTA } from '~client/hooks';
 import { ButtonDelete } from '~client/styled/shared/button';
-import { Id, ListItemInput, PageList, WithIds } from '~client/types';
+import type { Id, PageList, WithIds } from '~client/types';
+import type { ListItemInput } from '~client/types/gql';
 
 const identityProcessor = <E extends Record<string, unknown>>(): Partial<E> => ({});
 

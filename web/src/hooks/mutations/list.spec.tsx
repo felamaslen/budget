@@ -19,13 +19,8 @@ import * as dataModule from '~client/modules/data';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
-import {
-  FundInputNative as FundInput,
-  PageListStandard,
-  PageNonStandard,
-  StandardInput,
-  WithIds,
-} from '~client/types';
+import type { FundInputNative as FundInput, StandardInput, WithIds } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'my-short-id',

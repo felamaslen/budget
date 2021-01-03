@@ -1,6 +1,7 @@
 import numericHash from 'string-hash';
 import { onCreateOptimistic, onUpdateOptimistic, onDeleteOptimistic, State } from './crud';
-import { Id, RequestType } from '~client/types';
+import type { Id } from '~client/types';
+import { RequestType } from '~client/types/enum';
 
 describe('CRUD reducer helpers', () => {
   type ReadItem = {

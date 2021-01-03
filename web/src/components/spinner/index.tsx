@@ -1,14 +1,15 @@
-import React from 'react';
-import * as Spinners from 'react-spinners';
+/* @jsx jsx */
+import { jsx } from '@emotion/react';
+import { useRef } from 'react';
+import PuffLoader from 'react-spinners/PuffLoader';
 
 import * as Styled from './styles';
 
-export const Spinner: React.FC<Partial<Styled.OuterProps>> = ({
-  color,
-  cover = false,
-  size = 2,
-}) => (
-  <Styled.Outer cover={cover} size={size} color={color}>
-    <Spinners.PuffLoader loading={true} size={size * 50} />
-  </Styled.Outer>
-);
+export const Spinner: React.FC = () => {
+  const mountTime = useRef<number>(Date.now());
+  return (
+    <Styled.Outer>
+      <PuffLoader loading={true} size={100} animationDelay={-(mountTime.current % 2000) / 1000} />
+    </Styled.Outer>
+  );
+};

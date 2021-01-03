@@ -10,7 +10,7 @@ import { GraphFunds } from '.';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { PageNonStandard } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
 
 describe('<GraphFunds />', () => {
   let matchMedia: MatchMediaMock;

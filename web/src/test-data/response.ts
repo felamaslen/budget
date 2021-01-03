@@ -1,6 +1,7 @@
 import getUnixTime from 'date-fns/getUnixTime';
 
-import { InitialQuery, PageListStandard, PageNonStandard, StocksListResponse } from '~client/types';
+import { PageNonStandard, PageListStandard } from '~client/types/enum';
+import type { InitialQuery } from '~client/types/gql';
 
 export const testResponse: InitialQuery = {
   config: {
@@ -67,15 +68,5 @@ export const testResponse: InitialQuery = {
   [PageListStandard.Social]: {
     items: [],
     total: 0,
-  },
-};
-
-export const testStocksList: StocksListResponse = {
-  data: {
-    stocks: [
-      ['CD1', 'stock name 1', 965],
-      ['CD2', 'stock name 2', 193],
-    ],
-    total: 1032,
   },
 };

@@ -20,14 +20,9 @@ import { FieldComponent, FormFieldTextInline } from '~client/components/form-fie
 import * as listMutationHooks from '~client/hooks/mutations/list';
 import { ListState } from '~client/reducers/list';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import {
-  GQL,
-  ListItemInput,
-  ListItemStandardNative as ListItemStandard,
-  PageListStandard,
-  RequestType,
-  WithIds,
-} from '~client/types';
+import { GQL, ListItemStandardNative as ListItemStandard, WithIds } from '~client/types';
+import { PageListStandard, RequestType } from '~client/types/enum';
+import type { ListItemInput } from '~client/types/gql';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -93,14 +88,14 @@ describe('<AccessibleList />', () => {
     matchMedia.clear();
   });
 
-  const getContainerBase = <
+  function getContainerBase<
     I extends ListItemInput,
     E extends Record<string, unknown> = Record<string, unknown>
   >(
     state: MyState<I>,
     props: Omit<Props<I, MyPage, never, E>, 'onCreate' | 'onUpdate' | 'onDelete'>,
     existingStore?: MockStore<MyState<I>>,
-  ): RenderResult & { store: MockStore<MyState<I>> } => {
+  ): RenderResult & { store: MockStore<MyState<I>> } {
     const store = existingStore ?? createStore<MyState<I>>()(state);
     const utils = render(
       <GQLProviderMock>
@@ -115,13 +110,13 @@ describe('<AccessibleList />', () => {
       </GQLProviderMock>,
     );
     return { ...utils, store };
-  };
+  }
 
-  const getContainerStandard = <I extends ListItemStandard = ListItemStandard>(
+  function getContainerStandard<I extends ListItemStandard = ListItemStandard>(
     state: MyState<I> = testState as MyState<I>,
     existingStore?: MockStore<MyState>,
     renderOptions: RenderOptions = {},
-  ): RenderResult & { store: MockStore<MyState> } => {
+  ): RenderResult & { store: MockStore<MyState> } {
     const store = existingStore ?? createStore<MyState>()(state);
     const utils = render(
       <GQLProviderMock>
@@ -132,7 +127,7 @@ describe('<AccessibleList />', () => {
       renderOptions,
     );
     return { ...utils, store };
-  };
+  }
 
   describe('standard header', () => {
     it('should be rendered', () => {
@@ -477,8 +472,9 @@ describe('<AccessibleList />', () => {
         return { renderResult, dateInput, itemInput, costInput, addButton };
       };
 
-      // eslint-disable-next-line jest/prefer-expect-assertions
       it('should call onCreate after pressing the add button', async () => {
+        expect.hasAssertions();
+        jest.useFakeTimers();
         expect(onCreate).not.toHaveBeenCalled();
         await setup();
 
@@ -490,10 +486,16 @@ describe('<AccessibleList />', () => {
             cost: 1065,
           });
         });
+
+        act(() => {
+          jest.runAllTimers();
+        });
+        jest.useRealTimers();
       });
 
-      // eslint-disable-next-line jest/prefer-expect-assertions
       it('should reset the input values after creating an item', async () => {
+        expect.hasAssertions();
+        jest.useFakeTimers();
         const { dateInput, itemInput, costInput } = await setup();
 
         await waitFor(() => {
@@ -501,15 +503,26 @@ describe('<AccessibleList />', () => {
           expect(itemInput.value).toBe('');
           expect(costInput.value).toBe('');
         });
+
+        act(() => {
+          jest.runAllTimers();
+        });
+        jest.useRealTimers();
       });
 
-      // eslint-disable-next-line jest/prefer-expect-assertions
       it('should focus the first input field so that another item can be created quickly', async () => {
+        expect.hasAssertions();
         const { dateInput } = await setup();
 
         await waitFor(() => {
           expect(document.activeElement).toBe(dateInput);
         });
+
+        jest.useFakeTimers();
+        act(() => {
+          jest.runAllTimers();
+        });
+        jest.useRealTimers();
       });
     });
   });

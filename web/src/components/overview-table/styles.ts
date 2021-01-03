@@ -3,7 +3,8 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint, unimportant } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
-import { OverviewHeader, PageListStandard, PageNonStandard } from '~client/types';
+import type { OverviewHeader } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 const colSizeSmall = [
   PageNonStandard.Funds,
@@ -54,30 +55,28 @@ export const Rows = styled.div`
 
 export const Row = styled.div<{ past?: boolean; active?: boolean; future?: boolean }>(
   ({ past, active, future }) => css`
-  display: flex;
-  flex-flow: row nowrap;
-  width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    width: 100%;
 
-  ${
-    !!active &&
+    ${!!active &&
     css`
       font-weight: bold;
-    `
-  }
+    `}
 
-  ${!!past && unimportant}
+    ${!!past && unimportant}
 
   ${breakpoint(breakpoints.mobile)} {
-    font-size: ${rem(16)};
+      font-size: ${rem(16)};
 
-    ${!!active && 'font-weight: bold;'};
-    ${!!(active || future) && `font-size: ${rem(14)};`}
-  }
+      ${!!active && 'font-weight: bold;'};
+      ${!!(active || future) && `font-size: ${rem(14)};`}
+    }
 
-  ${breakpoint(breakpoints.tablet)} {
-    ${!!(active || future) && `font-size: ${rem(16)};`}
-  }
-`,
+    ${breakpoint(breakpoints.tablet)} {
+      ${!!(active || future) && `font-size: ${rem(16)};`}
+    }
+  `,
 );
 
 export type PropsCell = {
@@ -103,66 +102,60 @@ function cellWidthDesktop(column: PropsCell['column']): number {
 
 export const Cell = styled.div<PropsCell>(
   ({ active, column, future, past }) => css`
-  display: flex;
-  flex-flow: row nowrap;
-  flex-grow: 1;
-  flex-basis: 0;
-  padding: ${rem(4)};
-  position: relative;
-  width: 100%;
-  vertical-align: middle;
-  text-align: left;
-  height: ${rem(32)};
-  line-height: ${rem(24)};
+    display: flex;
+    flex-flow: row nowrap;
+    flex-grow: 1;
+    flex-basis: 0;
+    padding: ${rem(4)};
+    position: relative;
+    width: 100%;
+    vertical-align: middle;
+    text-align: left;
+    height: ${rem(32)};
+    line-height: ${rem(24)};
 
-  ${!!active && `font-weight: bold;`}
+    ${!!active && `font-weight: bold;`}
 
-  ${!!past && column === 'month' && `background: ${colors.light.mediumLight};`}
+    ${!!past && column === 'month' && `background: ${colors.light.mediumLight};`}
 
-  ${
-    !!active &&
+  ${!!active &&
     column === 'month' &&
     css`
       background: ${colors.green};
       color: ${colors.white};
-    `
-  }
+    `}
 
   ${!!future && column === 'month' && `background: ${colors.amber}`}
 
   ${breakpoint(breakpoints.mobileSmall)} {
-    padding: ${rem(4)};
-    white-space: nowrap;
-  }
+      padding: ${rem(4)};
+      white-space: nowrap;
+    }
 
-  ${breakpoint(breakpoints.mobile)} {
-    display: flex;
-    padding: 0 ${rem(2)};
-    flex-grow: ${cellWidthDesktop(column)};
-    height: ${rem(24)};
+    ${breakpoint(breakpoints.mobile)} {
+      display: flex;
+      padding: 0 ${rem(2)};
+      flex-grow: ${cellWidthDesktop(column)};
+      height: ${rem(24)};
 
-    ${
-      !!past &&
+      ${!!past &&
       css`
         height: ${rem(16)};
         line-height: ${rem(18)};
         font-size: ${rem(13)};
-      `
-    }
+      `}
 
-    ${!!(active || future) && `line-height: ${rem(26)};`}
+      ${!!(active || future) && `line-height: ${rem(26)};`}
 
-    ${
-      ([PageListStandard.Income, PageNonStandard.Funds] as (OverviewHeader | 'month')[]).includes(
+    ${([PageListStandard.Income, PageNonStandard.Funds] as (OverviewHeader | 'month')[]).includes(
         column,
-      ) && `border-left: 3px solid ${colors.dark.mediumLight};`
-    };
+      ) && `border-left: 3px solid ${colors.dark.mediumLight};`};
 
-    ${column === 'net' && `border-right: 3px solid ${colors.light.mediumLight};`};
+      ${column === 'net' && `border-right: 3px solid ${colors.light.mediumLight};`};
 
-    ${column === 'netWorthPredicted' && `font-style: italic`};
-  }
-`,
+      ${column === 'netWorthPredicted' && `font-style: italic`};
+    }
+  `,
 );
 
 export const Header = styled(Row)`

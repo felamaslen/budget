@@ -3,7 +3,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { Navbar } from '.';
-import { PageListStandard, PageNonStandard } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 describe('<Navbar />', () => {
   const props = {

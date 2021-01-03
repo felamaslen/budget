@@ -8,13 +8,9 @@ import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { State as CrudState } from '~client/reducers/crud';
 import { withoutDeleted } from '~client/selectors/crud';
-import {
-  FundNative as Fund,
-  FundPriceGroup,
-  FundQuotes,
-  PageNonStandard,
-  RequestType,
-} from '~client/types';
+import type { FundNative as Fund, FundQuotes } from '~client/types';
+import { PageNonStandard, RequestType } from '~client/types/enum';
+import type { FundPriceGroup } from '~client/types/gql';
 
 type StateSliced = Pick<State, PageNonStandard.Funds>;
 export type PriceCache = Pick<State[PageNonStandard.Funds], 'startTime' | 'cacheTimes' | 'prices'>;

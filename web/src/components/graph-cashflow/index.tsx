@@ -12,7 +12,7 @@ import { getDataX, getStackedDataY } from '~client/components/graph/helpers';
 import { HoverEffect } from '~client/components/graph/hooks';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { PickUnion, Range, DrawProps, Line } from '~client/types';
+import type { PickUnion, Range, DrawProps, Line } from '~client/types';
 
 export type Props = PickUnion<LineGraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
   isMobile?: boolean;

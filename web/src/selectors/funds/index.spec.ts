@@ -17,13 +17,8 @@ import {
 
 import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
-import {
-  CachedValue,
-  PageListStandard,
-  PageNonStandard,
-  Portfolio,
-  RequestType,
-} from '~client/types';
+import type { CachedValue, Portfolio } from '~client/types';
+import { PageListStandard, PageNonStandard, RequestType } from '~client/types/enum';
 
 describe('Funds selectors', () => {
   const testNow = new Date('2018-03-23T11:45:20Z');

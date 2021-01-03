@@ -6427,6 +6427,18 @@
             "deprecationReason": null
           },
           {
+            "name": "searchTerm",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "list",
             "description": null,
             "args": [],

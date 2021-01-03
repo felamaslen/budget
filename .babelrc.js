@@ -9,24 +9,12 @@ module.exports = {
           {
             modules: false,
             targets: {
-              browsers: ['last 2 versions', 'ie >= 10'],
+              browsers: ['>0.25%', 'not dead'],
             },
           },
         ],
       ],
       plugins: ['babel-plugin-react-remove-properties'],
-    },
-    development: {
-      sourceMaps: 'inline',
-      presets: [
-        [
-          '@babel/preset-env',
-          {
-            modules: false,
-          },
-        ],
-      ],
-      plugins: ['react-hot-loader/babel'],
     },
     node: {
       plugins: ['babel-plugin-webpack-alias-7'],

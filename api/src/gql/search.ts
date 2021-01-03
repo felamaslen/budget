@@ -18,6 +18,7 @@ export const searchSchema = gql`
 
   type SearchResult {
     error: String
+    searchTerm: String
     list: [String!]!
     nextCategory: [String!]
     nextField: String

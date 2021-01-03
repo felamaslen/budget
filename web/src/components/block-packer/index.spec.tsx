@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 import { BlockPacker, Props } from '.';
 import { blockPacker } from '~client/modules/block-packer';
-import { BlockItem } from '~client/types';
+import type { BlockItem } from '~client/types';
 
 describe('<BlockPacker />', () => {
   const blocks = blockPacker<BlockItem>(10, 6, [

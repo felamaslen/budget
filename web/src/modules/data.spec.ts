@@ -25,7 +25,8 @@ import {
 } from './data';
 import { Average } from '~client/constants';
 import { mockRandom } from '~client/test-utils/random';
-import { Data, FundInput, FundNative, TransactionNative as Transaction } from '~client/types';
+import type { Data, FundNative, TransactionNative as Transaction } from '~client/types';
+import type { FundInput } from '~client/types/gql';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-shortid',

@@ -3,7 +3,8 @@ import React from 'react';
 import { BaseKey } from '~client/components/graph-cashflow/base-key';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
-import { PageNonStandard, PixPrimary, Range } from '~client/types';
+import type { PixPrimary, Range } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
 
 type Props = PixPrimary &
   Omit<Range, 'minX'> & {

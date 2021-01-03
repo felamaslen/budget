@@ -7,12 +7,13 @@ import { Client } from 'urql';
 import { fromValue } from 'wonka';
 
 import { AccessibleListCreateItem } from './item';
-import { PropsItemCreate } from './types';
+import type { PropsItemCreate } from './types';
 import { FormFieldTextInline } from '~client/components/form-field';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { PageListStandard, SearchResult } from '~client/types';
+import { PageListStandard } from '~client/types/enum';
+import type { SearchResult } from '~client/types/gql';
 
 describe('Accessible list create item', () => {
   let clock: sinon.SinonFakeTimers;
@@ -70,6 +71,7 @@ describe('Accessible list create item', () => {
           list: ['Crockery', 'Caster sugar', 'Abacus'],
           nextCategory: withNext ? ['Kitchen', 'Sugar', 'Household'] : null,
           nextField: withNext ? 'category' : null,
+          searchTerm: 'c',
         },
       );
       const inputs = renderResult.getAllByRole('textbox', { hidden: true }) as HTMLInputElement[];
@@ -261,6 +263,7 @@ describe('Accessible list create item', () => {
               list: ['Zappa', 'Zenith'],
               nextCategory: null,
               nextField: null,
+              searchTerm: 'z',
             },
           );
 

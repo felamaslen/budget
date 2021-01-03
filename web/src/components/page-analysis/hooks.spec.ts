@@ -3,7 +3,9 @@ import { getForest, getBlocks, getDeepBlocks, getDeepForest, State } from './hoo
 import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '~client/constants/analysis';
 import { blockPacker } from '~client/modules/block-packer';
 import { colors } from '~client/styled/variables';
-import { AnalysisPage, BlockItem, CategoryCostTreeDeep, PageListStandard } from '~client/types';
+import type { BlockItem } from '~client/types';
+import { AnalysisPage, PageListStandard } from '~client/types/enum';
+import type { CategoryCostTreeDeep } from '~client/types/gql';
 
 describe('Analysis hooks', () => {
   const state: State = {

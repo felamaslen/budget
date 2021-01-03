@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useCallback, useContext, useState } from 'react';
 
-import { Props as PropsListTree } from './list-tree';
+import type { Props as PropsListTree } from './list-tree';
 import * as Styled from './styles';
 
 import { statusHeight } from '~client/components/block-packer';
@@ -12,29 +12,32 @@ import {
   useMediaQuery,
   usePersistentState,
 } from '~client/hooks';
+import * as gql from '~client/hooks/gql';
 import { blockPacker } from '~client/modules/block-packer';
 import { sortByTotal } from '~client/modules/data';
 import { breakpointBase } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
-import {
-  AnalysisDeepQuery,
-  AnalysisGroupBy,
-  AnalysisPage,
-  AnalysisPeriod,
-  AnalysisQuery,
-  AnalysisQueryVariables,
+import type {
   AnalysisSortedTree,
   AnalysisTreeVisible,
   BlockItem,
-  CategoryCostTree,
-  CategoryCostTreeDeep,
   FlexBlocks,
   GQL,
   MainBlockName,
-  PageListStandard,
-  useAnalysisDeepQuery,
-  useAnalysisQuery,
 } from '~client/types';
+import {
+  AnalysisPage,
+  AnalysisPeriod,
+  AnalysisGroupBy,
+  PageListStandard,
+} from '~client/types/enum';
+import type {
+  AnalysisDeepQuery,
+  AnalysisQuery,
+  AnalysisQueryVariables,
+  CategoryCostTree,
+  CategoryCostTreeDeep,
+} from '~client/types/gql';
 
 const getTreeColor = (name: string): string | undefined => {
   if (isStandardListPage(name)) {
@@ -183,7 +186,7 @@ export function useAnalysisData(): [Query, (query: Partial<Query>) => void, Stat
     [setQuery],
   );
 
-  const [{ data, fetching }] = useAnalysisQuery({
+  const [{ data, fetching }] = gql.useAnalysisQuery({
     variables: query,
   });
 
@@ -199,7 +202,7 @@ export function useAnalysisDeepBlock(
   boolean,
 ] {
   const [category, setCategory] = useState<AnalysisPage | null>(null);
-  const [{ data, fetching }] = useAnalysisDeepQuery({
+  const [{ data, fetching }] = gql.useAnalysisDeepQuery({
     variables: { ...mainQuery, category: category as AnalysisPage },
     pause: !category,
   });

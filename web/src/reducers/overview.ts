@@ -20,7 +20,9 @@ import {
 } from '~client/actions';
 import { IGNORE_EXPENSE_CATEGORIES } from '~client/constants/data';
 import { getMonthDatesList } from '~client/modules/date';
-import { GQL, InitialQuery, NativeDate, PageListStandard, StandardInput } from '~client/types';
+import type { GQL, NativeDate, StandardInput } from '~client/types';
+import { PageListStandard } from '~client/types/enum';
+import type { InitialQuery } from '~client/types/gql';
 
 export type State = NativeDate<
   GQL<Exclude<InitialQuery['overview'], null | undefined>>,

@@ -83,6 +83,7 @@ describe('Search resolvers', () => {
     ) {
       search(page: $page, column: $column, searchTerm: $searchTerm, numResults: $numResults) {
         error
+        searchTerm
         list
         nextCategory
         nextField
@@ -127,6 +128,7 @@ describe('Search resolvers', () => {
     expect(res.data.search).toStrictEqual(
       expect.objectContaining({
         error: null,
+        searchTerm,
         list: results,
       }),
     );

@@ -1,15 +1,17 @@
-import {
+import type {
   OverviewHeader,
   OverviewColumn,
   OverviewTableColumn,
   Page,
+  PageList,
+} from '~client/types';
+import {
+  AnalysisPage,
+  PageListExtended,
   PageListStandard,
   PageNonStandard,
-  PageList,
-  PageListExtended,
   SearchPage,
-  AnalysisPage,
-} from '~client/types';
+} from '~client/types/enum';
 
 // debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;
@@ -42,11 +44,11 @@ const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
 
 export const OVERVIEW_COLUMNS = Object.entries(overviewColumns) as OverviewTableColumn[];
 
-const PAGES_NON_STANDARD: PageNonStandard[] = Object.values(PageNonStandard);
-const PAGES_LIST_STANDARD: PageListStandard[] = Object.values(PageListStandard);
-const PAGES_LIST_EXTENDED: PageListExtended[] = Object.values(PageListExtended);
-const PAGES_SEARCH: SearchPage[] = Object.values(SearchPage);
-const PAGES_ANALYSIS: AnalysisPage[] = Object.values(AnalysisPage);
+const PAGES_NON_STANDARD = Object.values(PageNonStandard);
+const PAGES_LIST_STANDARD = Object.values(PageListStandard);
+const PAGES_LIST_EXTENDED = Object.values(PageListExtended);
+const PAGES_SEARCH = Object.values(SearchPage);
+export const PAGES_ANALYSIS = Object.values(AnalysisPage);
 
 export const PAGES_LIST: PageList[] = [PageNonStandard.Funds, ...PAGES_LIST_STANDARD];
 

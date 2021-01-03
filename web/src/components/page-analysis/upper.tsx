@@ -6,7 +6,7 @@ import DotLoader from 'react-spinners/DotLoader';
 import { Query } from './hooks';
 import * as Styled from './styles';
 
-import { AnalysisPeriod, AnalysisGroupBy } from '~client/types';
+import { AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
 
 export type Props = {
   period: AnalysisPeriod;

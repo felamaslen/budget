@@ -1,19 +1,14 @@
 import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/react';
+import fetchMock from 'jest-fetch-mock';
 import nock from 'nock';
 import React from 'react';
 import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
-import {
-  Create,
-  Id,
-  NetWorthCategory,
-  NetWorthCategoryType,
-  NetWorthEntryNative as NetWorthEntry,
-  NetWorthSubcategory,
-  NetWorthValueInput,
-} from '~client/types';
+import type { Create, Id, NetWorthEntryNative as NetWorthEntry } from '~client/types';
+import { NetWorthCategoryType } from '~client/types/enum';
+import type { NetWorthCategory, NetWorthSubcategory, NetWorthValueInput } from '~client/types/gql';
 
 const categories: NetWorthCategory[] = [
   {
@@ -340,6 +335,10 @@ describe('Net worth entry form', () => {
         },
         base: 'GBP',
       });
+
+    fetchMock.mockIf(
+      `https://api.exchangerates.io/latest?_timestamp=${now.getTime() + 100}&base=GBP&symbols=USD`,
+    );
 
     act(() => {
       fireEvent.click(refreshButtons[0]);

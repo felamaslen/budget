@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
-import { FundProps } from './types';
+import type { FundProps } from './types';
 import {
   StandardRow,
   StandardHeader,

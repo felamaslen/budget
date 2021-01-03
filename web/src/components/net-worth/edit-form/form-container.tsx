@@ -5,7 +5,7 @@ import Navigation, { Props as NavigationProps } from './navigation';
 
 import * as Styled from './styles';
 import { ButtonCancel } from '~client/styled/shared/button';
-import { Id, NetWorthEntryInputNative as NetWorthEntryInput } from '~client/types';
+import type { Id, NetWorthEntryInputNative as NetWorthEntryInput } from '~client/types';
 
 export type Props = NavigationProps & {
   add?: boolean;

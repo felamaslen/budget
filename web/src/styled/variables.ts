@@ -2,7 +2,7 @@ import { compose } from '@typed/compose';
 import { rgb, rgba, lighten, desaturate } from 'polished';
 
 import { ErrorLevel } from '~client/constants/error';
-import { Aggregate } from '~client/types';
+import { Aggregate } from '~client/types/enum';
 
 export const breakpoints = {
   mobileSmall: 350,

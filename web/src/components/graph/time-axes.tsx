@@ -4,7 +4,7 @@ import { getTimeScale } from '~client/components/graph/helpers';
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { getTickSize, formatCurrency } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
-import { DrawProps, Tick } from '~client/types';
+import type { DrawProps, Tick } from '~client/types';
 
 const [fontSize, fontFamily] = FONT_AXIS_LABEL;
 

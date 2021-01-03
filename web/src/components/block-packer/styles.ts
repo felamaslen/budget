@@ -5,7 +5,7 @@ import { rem } from 'polished';
 import { Page as PageAnalysis, blocksHeightMobile } from '~client/components/page-analysis/styles';
 import { diagonalBg, breakpoint } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
-import { Box as BoxProps } from '~client/types';
+import type { Box as BoxProps } from '~client/types';
 
 export const fadeTime = 250;
 

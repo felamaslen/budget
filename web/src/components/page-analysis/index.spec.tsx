@@ -1,5 +1,5 @@
 import { render, RenderResult } from '@testing-library/react';
-import { DocumentNode } from 'graphql';
+import type { DocumentNode } from 'graphql';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Client } from 'urql';
@@ -9,7 +9,8 @@ import { PageAnalysis } from '.';
 
 import * as AnalysisQueries from '~client/gql/queries/analysis';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { AnalysisGroupBy, AnalysisPage, AnalysisPeriod, AnalysisQuery } from '~client/types';
+import { AnalysisGroupBy, AnalysisPage, AnalysisPeriod } from '~client/types/enum';
+import type { AnalysisQuery } from '~client/types/gql';
 
 describe('<PageAnalysis />', () => {
   type Overrides = Partial<AnalysisQuery['analysis']>;

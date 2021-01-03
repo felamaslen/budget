@@ -20,14 +20,13 @@ import {
   netWorthEntryDeleted,
 } from '~client/actions/net-worth';
 import { testResponse, CURRENCY_CZK, SUBCATEGORY_WALLET } from '~client/test-data';
-import {
+import type { NetWorthEntryNative as Entry, NetWorthValueObjectRead } from '~client/types';
+import { NetWorthCategoryType } from '~client/types/enum';
+import type {
   NetWorthCategory as Category,
-  NetWorthCategoryType,
-  NetWorthEntryNative as Entry,
   NetWorthSubcategory as Subcategory,
   NetWorthValueObject,
-  NetWorthValueObjectRead,
-} from '~client/types';
+} from '~client/types/gql';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',

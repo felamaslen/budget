@@ -1,4 +1,5 @@
-import { Id, NetWorthCategory, NetWorthSubcategory, NetWorthEntryRead } from '~client/types';
+import type { Id, NetWorthEntryRead } from '~client/types';
+import type { NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
 
 export const enum ActionTypeNetWorth {
   CategoryCreated = '@@net-worth/CATEGORY_CREATED',

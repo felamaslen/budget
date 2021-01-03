@@ -6,8 +6,8 @@ import funds from './funds';
 import { income, bills, food, general, holiday, social } from './list-standard';
 import netWorth from './net-worth';
 import overview from './overview';
-import { State } from './types';
-import { Action } from '~client/actions';
+import type { State } from './types';
+import type { Action } from '~client/actions';
 
 export type { State } from './types';
 

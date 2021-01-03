@@ -1,14 +1,15 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import GridLoader from 'react-spinners/GridLoader';
 
 import { NumberInputPad } from './number-input-pad';
 import { PinDisplay } from './pin-display';
 import * as Styled from './styles';
 
 import { errorOpened } from '~client/actions';
-import { Spinner } from '~client/components/spinner';
 import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 import { ErrorLevel } from '~client/constants/error';
+import { colors } from '~client/styled/variables';
 
 export type Props = {
   onLogin: (pin: number) => void;
@@ -64,7 +65,7 @@ export const LoginForm: React.FC<Props> = ({ onLogin, loading }) => {
         <Styled.TitleContainer>
           <Styled.Title>Enter your PIN:</Styled.Title>
           <Styled.SpinnerSpace>
-            {loading && <Spinner size={0.5} color="white" />}
+            {loading && <GridLoader color={colors.white} size={8} />}
           </Styled.SpinnerSpace>
         </Styled.TitleContainer>
         <PinDisplay inputStep={inputStep} onFocus={onFocus} onInput={onInput} />

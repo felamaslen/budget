@@ -1,19 +1,17 @@
-import { ActionApi } from './api';
-import { ActionError } from './error';
-import { ActionFunds } from './funds';
-import { ActionList, ActionReceiptCreated } from './list';
-import { ActionLogin } from './login';
-import { ActionNetWorth } from './net-worth';
-import { ActionStocks } from './stocks';
+import type { ActionApi } from './api';
+import type { ActionError } from './error';
+import type { ActionFunds } from './funds';
+import type { ActionList, ActionReceiptCreated } from './list';
+import type { ActionLogin } from './login';
+import type { ActionNetWorth } from './net-worth';
 import { isStandardListPage } from '~client/constants/data';
-import {
+import type { PageList, StandardInput } from '~client/types';
+import type {
   ListItemInput,
   ListItemStandardInput,
-  PageList,
   PageListExtended,
   PageListStandard,
-  StandardInput,
-} from '~client/types';
+} from '~client/types/gql';
 
 export * from './api';
 export * from './error';
@@ -21,7 +19,6 @@ export * from './funds';
 export * from './list';
 export * from './login';
 export * from './net-worth';
-export * from './stocks';
 
 export type Action =
   | ActionApi
@@ -31,8 +28,7 @@ export type Action =
   | ActionList<ListItemInput, PageList>
   | ActionList<ListItemStandardInput, PageListExtended>
   | ActionLogin
-  | ActionNetWorth
-  | ActionStocks;
+  | ActionNetWorth;
 
 export const isStandardListAction = (
   action: ActionList<ListItemInput, PageList> | ActionList<StandardInput, PageListStandard>,

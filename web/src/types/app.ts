@@ -1,4 +1,4 @@
-import { PageListExtended, PageListStandard } from './gql';
+import type { PageListExtended, PageListStandard } from './gql';
 
 export enum PageNonStandard {
   Overview = 'overview',

@@ -43,12 +43,12 @@ export const getSuggestions = async (
     const list = result.rows.map(({ value }) => value);
     const nextCategory = result.rows.map(({ nextField: value }) => value);
 
-    return { list, nextCategory, nextField };
+    return { searchTerm: args.searchTerm, list, nextCategory, nextField };
   }
 
   const result = await db.query<{ value: string }>(getColumnResults(uid, args));
   const list = result.rows.map(({ value }) => value);
-  return { list };
+  return { searchTerm: args.searchTerm, list };
 };
 
 export async function getReceiptItem(

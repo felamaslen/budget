@@ -1,18 +1,23 @@
+import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
 import { asLink } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
-export const ModalWindow = styled.div<{ visible: boolean; width?: number }>`
+type ModalWindowProps = { visible: boolean; width?: number };
+const modalWindowStyles = ({
+  visible,
+  width = breakpoints.mobile,
+}: ModalWindowProps): SerializedStyles => css`
   background: ${colors.shadow.mediumDark};
   display: flex;
   flex-flow: column;
   height: 100%;
-  opacity: ${({ visible }): number => (visible ? 1 : 0)};
-  position: absolute;
+  opacity: ${visible ? 1 : 0};
+  position: absolute !important;
   transition: opacity 0.3s ease-out;
-  width: 100%;
+  width: 100% !important;
   z-index: 100;
 
   ${breakpoint(breakpoints.mobile)} {
@@ -22,12 +27,13 @@ export const ModalWindow = styled.div<{ visible: boolean; width?: number }>`
     left: 50%;
     height: auto;
     max-height: 90%;
-    min-width: ${({ width = breakpoints.mobile }): string => rem(width)};
+    min-width: ${rem(width)};
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
-    width: auto;
+    width: auto !important;
   }
 `;
+export const ModalWindow = styled.div<ModalWindowProps>(modalWindowStyles);
 
 export const Meta = styled.div`
   display: flex;

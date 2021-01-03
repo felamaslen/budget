@@ -5,7 +5,7 @@ import nav1x from '../../images/nav.png';
 import nav2x from '../../images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
 import { sizes, colors, breakpoints } from '~client/styled/variables';
-import { PageListStandard, PageNonStandard } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 export const NavList = styled.nav`
   display: flex;

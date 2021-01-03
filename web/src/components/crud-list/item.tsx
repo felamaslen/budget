@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 
 import { CrudProps } from '~client/hooks';
-import { Id, SetActiveId, WithIds } from '~client/types';
+import type { Id, SetActiveId, WithIds } from '~client/types';
 
 export type ItemComponent<
   I extends Record<string, unknown>,

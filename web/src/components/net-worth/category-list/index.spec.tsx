@@ -4,7 +4,7 @@ import React from 'react';
 import numericHash from 'string-hash';
 
 import { NetWorthCategoryList, Props } from '.';
-import { NetWorthCategoryType } from '~client/types';
+import { NetWorthCategoryType } from '~client/types/enum';
 
 describe('<NetWorthCategoryList />', () => {
   const onCreateCategory = jest.fn();

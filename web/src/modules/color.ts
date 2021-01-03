@@ -6,7 +6,7 @@ import numericHash from 'string-hash';
 import { OVERVIEW_COLUMNS, isPage } from '~client/constants/data';
 import { arrayAverage } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { TableValues, SplitRange, Median } from '~client/types';
+import type { TableValues, SplitRange, Median } from '~client/types';
 
 type OverviewColorRange = { negative: string; positive: string };
 type OverviewBaseColor = string | OverviewColorRange;

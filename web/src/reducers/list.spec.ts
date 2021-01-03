@@ -14,18 +14,9 @@ import {
   receiptCreated,
 } from '~client/actions';
 import { testResponse } from '~client/test-data';
-import {
-  Id,
-  InitialQuery,
-  ListReadResponse,
-  PageListExtended,
-  PageListStandard,
-  RawDate,
-  ReceiptPage,
-  RequestType,
-  StandardInput,
-  WithIds,
-} from '~client/types';
+import type { Id, RawDate, StandardInput, WithIds } from '~client/types';
+import { PageListExtended, PageListStandard, ReceiptPage, RequestType } from '~client/types/enum';
+import type { InitialQuery, ListReadResponse } from '~client/types/gql';
 
 describe('List reducer', () => {
   type ExtraState = {

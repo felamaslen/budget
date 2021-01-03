@@ -3,7 +3,7 @@ import React from 'react';
 import { AccessibleListStandard, AccessibleListDaily } from '~client/components/accessible-list';
 import { pageColor } from '~client/modules/color';
 import { colors } from '~client/styled/variables';
-import { PageListStandard, PageListExtended } from '~client/types';
+import { PageListStandard, PageListExtended } from '~client/types/enum';
 
 export * from '~client/components/page-funds';
 

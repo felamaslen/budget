@@ -4,7 +4,7 @@ import ListTreeHead from './list-tree-head';
 import * as Styled from './styles';
 import { SubTree, Props as SubTreeProps } from './sub-tree';
 import { formatCurrency } from '~client/modules/format';
-import { AnalysisSortedTree, AnalysisTreeVisible, MainBlockName } from '~client/types';
+import type { AnalysisSortedTree, AnalysisTreeVisible, MainBlockName } from '~client/types';
 
 type PropsItem = {
   item: Pick<SubTreeProps, 'name' | 'itemCost' | 'subTree'> & {

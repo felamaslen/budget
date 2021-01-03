@@ -1,5 +1,5 @@
 import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
-import { DocumentNode } from 'graphql';
+import type { DocumentNode } from 'graphql';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createMockStore from 'redux-mock-store';
@@ -16,13 +16,9 @@ import {
 
 import * as NetWorthMutations from '~client/gql/mutations/net-worth';
 import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
-import {
-  NetWorthCategoryInput,
-  NetWorthCategoryType,
-  NetWorthEntryNative,
-  NetWorthSubcategoryInput,
-  RequestType,
-} from '~client/types';
+import type { NetWorthEntryNative } from '~client/types';
+import { NetWorthCategoryType, RequestType } from '~client/types/enum';
+import type { NetWorthCategoryInput, NetWorthSubcategoryInput } from '~client/types/gql';
 
 describe('Generic crud hooks', () => {
   const mutateSpy = mockClient.executeMutation as jest.Mock;
@@ -253,8 +249,8 @@ describe('Generic crud hooks', () => {
       });
 
       describe('when an error occurs', () => {
-        // eslint-disable-next-line jest/prefer-expect-assertions
         it('should call onError', async () => {
+          expect.hasAssertions();
           const testError = new CombinedError({
             networkError: new Error('something bad happened!'),
           });
@@ -299,8 +295,8 @@ describe('Generic crud hooks', () => {
       });
 
       describe('when an error occurs', () => {
-        // eslint-disable-next-line jest/prefer-expect-assertions
         it('should call onError', async () => {
+          expect.hasAssertions();
           const testError = new CombinedError({
             networkError: new Error('something nasty happened!'),
           });
@@ -347,8 +343,8 @@ describe('Generic crud hooks', () => {
       });
 
       describe('when an error occurs', () => {
-        // eslint-disable-next-line jest/prefer-expect-assertions
         it('should call onError', async () => {
+          expect.hasAssertions();
           const testError = new CombinedError({
             networkError: new Error('something ugly happened!'),
           });

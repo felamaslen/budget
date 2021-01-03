@@ -12,7 +12,8 @@ import { profitLossColor } from '~client/components/graph/helpers';
 import { TodayContext } from '~client/hooks';
 import { getStartDate, getProcessedCost } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import { DrawProps, Line, PageNonStandard } from '~client/types';
+import type { DrawProps, Line } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
 
 function processData(
   startDate: Date,

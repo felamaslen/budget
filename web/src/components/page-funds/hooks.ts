@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { todayPricesFetched } from '~client/actions';
+import { useStockPricesQuery } from '~client/hooks/gql';
 import { getGenericFullSymbol } from '~client/modules/finance';
 import { getFundsRows } from '~client/selectors';
-import { FundQuotes, useStockPricesQuery } from '~client/types';
+import type { FundQuotes } from '~client/types';
 
 const fetchIntervalMs = 30000;
 

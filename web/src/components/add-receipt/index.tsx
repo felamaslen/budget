@@ -11,6 +11,11 @@ import {
 } from '~client/components/form-field';
 import { ModalWindow } from '~client/components/modal-window';
 import { useFetchingState, useIsMobile } from '~client/hooks';
+import {
+  useCreateReceiptMutation,
+  useReceiptItemQuery,
+  useReceiptItemsQuery,
+} from '~client/hooks/gql';
 import { formatCurrency, toISO } from '~client/modules/format';
 import {
   Flex,
@@ -20,16 +25,9 @@ import {
   FlexCenter,
   FlexColumn,
 } from '~client/styled/shared';
-import {
-  Delta,
-  GQL,
-  ListItemExtended,
-  ReceiptInput,
-  ReceiptPage,
-  useCreateReceiptMutation,
-  useReceiptItemQuery,
-  useReceiptItemsQuery,
-} from '~client/types';
+import type { Delta, GQL } from '~client/types';
+import { ReceiptPage } from '~client/types/enum';
+import type { ListItemExtended, ReceiptInput } from '~client/types/gql';
 
 export type Props = {
   setAddingReceipt: (enabled: boolean) => void;
@@ -324,9 +322,9 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
           })),
         });
         setEntries([defaultEntry]);
-        setImmediate(() => {
+        setTimeout(() => {
           resetFocus(true);
-        });
+        }, 0);
       } else {
         requestItemInfo();
       }

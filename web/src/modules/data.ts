@@ -7,20 +7,18 @@ import numericHash from 'string-hash';
 import { toISO } from './format';
 
 import { Average } from '~client/constants';
-import {
+import type {
   Create,
   Data as Line,
-  FundInput,
   FundInputNative,
   Item,
-  ListItem,
   NativeDate,
   NativeFund,
-  NetWorthEntryInput,
   NetWorthEntryNative,
   RawDate,
   TransactionNative as Transaction,
 } from '~client/types';
+import type { FundInput, ListItem, NetWorthEntryInput } from '~client/types/gql';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

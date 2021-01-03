@@ -1,5 +1,6 @@
 import { Action, ActionTypeApi, ActionTypeLogin, ActionApiDataRead } from '~client/actions';
-import { AppConfig, NativeDate } from '~client/types';
+import type { NativeDate } from '~client/types';
+import type { AppConfig } from '~client/types/gql';
 
 export type State = {
   loading: number;

@@ -6,7 +6,7 @@ import * as Styled from './styles';
 import HoverCost from '~client/components/hover-cost';
 import { Query as PreviewQuery } from '~client/components/overview-preview';
 import { isStandardListPage } from '~client/constants/data';
-import { OverviewTableRow, OverviewTableColumn } from '~client/types';
+import type { OverviewTableRow, OverviewTableColumn } from '~client/types';
 
 type Props = {
   row: OverviewTableRow;

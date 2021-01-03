@@ -6,7 +6,7 @@ import sinon from 'sinon';
 
 import { FormFieldTransactions, FormFieldTransactionsInline } from './transactions';
 import { modifyTransaction } from '~client/modules/data';
-import { TransactionNative as Transaction } from '~client/types';
+import type { TransactionNative as Transaction } from '~client/types';
 
 describe('<FormFieldTransactions />', () => {
   const transactions: Transaction[] = [

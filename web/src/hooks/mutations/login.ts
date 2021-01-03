@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useLoginMutation } from '../gql';
 import { errorOpened } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
-import { useLoginMutation } from '~client/types/gql';
 
 type State = {
   pin: number | null;

@@ -32,22 +32,20 @@ import {
   getMonthDates,
   currentDayIsEndOfMonth,
 } from '~client/selectors/overview/common';
-import {
-  Cost,
+import type {
   CostProcessed,
   ListItemExtendedNative,
-  ListItemStandard,
   ListItemStandardNative,
   Median,
   NativeDate,
   FundNative as Fund,
   OverviewTable,
   OverviewTableRow,
-  PageListStandard,
-  PageNonStandard,
   SplitRange,
   TableValues,
 } from '~client/types';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
+import type { Cost, ListItemStandard } from '~client/types/gql';
 
 export * from './common';
 export * from './net-worth';

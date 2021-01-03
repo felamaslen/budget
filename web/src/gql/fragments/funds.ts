@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from 'urql';
 
 export const FundHistoryParts = gql`
   fragment FundHistoryParts on FundHistory {

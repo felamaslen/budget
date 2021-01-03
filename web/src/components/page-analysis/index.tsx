@@ -18,13 +18,9 @@ import Upper from './upper';
 import { BlockPacker } from '~client/components/block-packer';
 import { isAnalysisPage } from '~client/constants/data';
 import { formatCurrency, capitalise } from '~client/modules/format';
-import {
-  CategoryCostTree,
-  CategoryCostTreeDeep,
-  GQL,
-  MainBlockName,
-  PageNonStandard,
-} from '~client/types';
+import type { GQL, MainBlockName } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
+import type { CategoryCostTree, CategoryCostTreeDeep } from '~client/types/gql';
 
 export const PageAnalysis: React.FC = () => {
   const [query, onRequest, { cost, saved, description, timeline }, loading] = useAnalysisData();
@@ -122,3 +118,4 @@ export const PageAnalysis: React.FC = () => {
     </Styled.Page>
   );
 };
+export default PageAnalysis;

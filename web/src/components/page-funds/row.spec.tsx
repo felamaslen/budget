@@ -8,7 +8,8 @@ import { FundRow, Props } from './row';
 import * as listMutationHooks from '~client/hooks/mutations/list';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
-import { FundNative as Fund, PageNonStandard } from '~client/types';
+import type { FundNative as Fund } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
 
 describe('<FundRow />', () => {
   const onCreate = jest.fn();

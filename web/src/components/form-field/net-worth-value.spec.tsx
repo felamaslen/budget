@@ -3,7 +3,7 @@ import React from 'react';
 import numericHash from 'string-hash';
 
 import { FormFieldNetWorthValue, Props } from './net-worth-value';
-import { NetWorthValueInput } from '~client/types';
+import type { NetWorthValueInput } from '~client/types/gql';
 
 describe('<FormFieldNetWorthValue />', () => {
   type Setter<T extends unknown = unknown> = (last: T) => T;

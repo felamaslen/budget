@@ -3,7 +3,7 @@ import React from 'react';
 
 import Upper, { Props } from './upper';
 
-import { AnalysisGroupBy, AnalysisPeriod } from '~client/types';
+import { AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
 
 describe('PageAnalysis / <Upper />', () => {
   const onRequest = jest.fn();

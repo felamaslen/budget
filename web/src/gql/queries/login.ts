@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from 'urql';
 
 export const Login = gql`
   mutation Login($pin: Int!) {

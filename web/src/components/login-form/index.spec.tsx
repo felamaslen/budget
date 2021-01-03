@@ -38,8 +38,8 @@ describe('<LoginForm />', () => {
   });
 
   describe('when entering a pin', () => {
-    // eslint-disable-next-line jest/prefer-expect-assertions
     it('should focus each pin element when entering an item', async () => {
+      expect.hasAssertions();
       const { getAllByRole } = setup();
       const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
       const [pin0, pin1, pin2, pin3] = inputs;

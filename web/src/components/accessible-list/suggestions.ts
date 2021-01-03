@@ -1,16 +1,14 @@
+import { useDebounceCallback } from '@react-hook/debounce';
 import { useCallback, useState, useMemo, useEffect } from 'react';
 
-import { FieldKey, ActiveField, ADD_BUTTON } from './types';
+import { ADD_BUTTON } from './constants';
+import type { FieldKey, ActiveField } from './types';
 import { isSearchPage } from '~client/constants/data';
-import { useDebouncedState } from '~client/hooks';
+import { useSearchSuggestionsQuery } from '~client/hooks/gql';
 import { isEscape } from '~client/modules/nav';
-import {
-  ListItemInput,
-  PageList,
-  QuerySearchArgs,
-  SearchItem,
-  useSearchSuggestionsQuery,
-} from '~client/types';
+import type { PageList } from '~client/types';
+import { SearchItem } from '~client/types/enum';
+import type { ListItemInput, QuerySearchArgs, SearchPage } from '~client/types/gql';
 
 const searchItems: SearchItem[] = Object.values(SearchItem);
 
@@ -32,6 +30,7 @@ export type Result<I extends ListItemInput> = {
   activateSuggestion: (index: number) => void;
   activeField: ActiveField<I>;
   setActiveField: (field: FieldKey<I>) => void;
+  clear: () => void;
 };
 
 const sanitizeValue = (value: string): string =>
@@ -39,19 +38,15 @@ const sanitizeValue = (value: string): string =>
 
 const numToRequest = 5;
 
+type Query = Pick<QuerySearchArgs, 'column' | 'searchTerm'>;
+
 type State<I extends ListItemInput> = {
+  query: Query | null;
   list: string[];
   next: string[];
   nextField: ActiveField<I>;
   activeField: ActiveField<I>;
   requestedField: FieldKey<I> | null;
-};
-
-const stateEmpty = { list: [], next: [], nextField: null, requestedField: null };
-
-type SuggestionRequest = {
-  column: SearchItem;
-  searchTerm: string;
 };
 
 export function useSuggestions<I extends ListItemInput, P extends PageList>({
@@ -61,6 +56,7 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
   setDelta,
 }: Options<I, P>): Result<I> {
   const [state, setState] = useState<State<I>>({
+    query: null,
     list: [],
     next: [],
     nextField: null,
@@ -68,42 +64,57 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
     requestedField: null,
   });
 
-  const [suggestionRequest, debouncedRequest, setSuggestionRequest] = useDebouncedState<
-    SuggestionRequest | undefined
-  >(undefined, 100);
-
-  const [{ data, fetching, stale }] = useSearchSuggestionsQuery({
-    pause: !(isSearchPage(page) && debouncedRequest),
-    variables:
-      isSearchPage(page) && debouncedRequest
-        ? {
-            page,
-            column: debouncedRequest.column,
-            searchTerm: debouncedRequest.searchTerm,
-            numResults: numToRequest,
-          }
-        : ({} as QuerySearchArgs),
+  const [{ data, fetching, stale }, fetchSuggestions] = useSearchSuggestionsQuery({
+    pause: true,
+    requestPolicy: 'network-only',
+    variables: state.query
+      ? {
+          ...state.query,
+          page: (page as string) as SearchPage,
+          numResults: numToRequest,
+        }
+      : ({} as QuerySearchArgs),
   });
 
-  useEffect(() => {
-    if (data?.search && suggestionRequest && !fetching && !stale) {
-      const list = data.search.list ?? [];
-      const next = data.search.nextCategory ?? [];
-      const nextField = data.search.nextField ?? null;
+  const debouncedFetch = useDebounceCallback(fetchSuggestions, 100);
+  const isEnabled = isSearchPage(page) && !!state.query;
 
-      setState((last) =>
-        last.activeField === suggestionRequest.column
-          ? {
-              ...last,
-              list,
-              next,
-              nextField: nextField as FieldKey<I>,
-              requestedField: suggestionRequest.column as FieldKey<I>,
-            }
-          : last,
-      );
+  const clear = useCallback(() => {
+    setState((last) => ({ ...last, list: [], next: [] }));
+  }, []);
+
+  useEffect(() => {
+    if (isEnabled) {
+      debouncedFetch();
+    } else {
+      clear();
     }
-  }, [data, fetching, stale, suggestionRequest]);
+  }, [debouncedFetch, isEnabled, clear, state.query?.searchTerm]);
+
+  useEffect(() => {
+    setState((last) => {
+      if (
+        state.query &&
+        last.activeField === state.query.column &&
+        data?.search &&
+        (state.query.searchTerm === data?.search.searchTerm || last.list.length > 0) &&
+        !fetching &&
+        !stale
+      ) {
+        const list = data.search.list ?? [];
+        const next = data.search.nextCategory ?? [];
+        const nextField = data.search.nextField ?? null;
+
+        return {
+          ...last,
+          list,
+          next,
+          nextField: nextField as FieldKey<I>,
+        };
+      }
+      return last;
+    });
+  }, [state.query, data, fetching, stale]);
 
   const onType = useCallback(
     (field: FieldKey<I>, value: string): void => {
@@ -111,16 +122,13 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
       if (!(enabled && isSearchItem(field))) {
         return;
       }
-      setState((last) =>
-        last.activeField === field ? last : { ...last, activeField: field, ...stateEmpty },
-      );
-      if (value) {
-        setSuggestionRequest({ column: field, searchTerm: sanitizeValue(value) });
-      } else {
-        setState((last) => ({ ...last, ...stateEmpty }));
-      }
+      setState((last) => ({
+        ...last,
+        activeField: field,
+        query: value ? { column: field, searchTerm: sanitizeValue(value) } : null,
+      }));
     },
-    [suggestionFields, setSuggestionRequest],
+    [suggestionFields],
   );
 
   useEffect(() => {
@@ -131,6 +139,7 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
         next: [],
         nextField: null,
         requestedField: null,
+        query: null,
       }));
     }
   }, [state.activeField, state.requestedField]);
@@ -162,23 +171,25 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
           return nextValue && nextField ? { ...withMain, [nextField]: nextValue } : withMain;
         },
       );
-      setImmediate(() => {
+      setTimeout(() => {
         setState((last) => ({
           ...last,
           activeField: nextField === ADD_BUTTON ? ADD_BUTTON : null,
           list: [],
           next: [],
+          query: null,
+          requestedField: null,
         }));
         if (nextField !== ADD_BUTTON) {
-          setImmediate(() => {
+          setTimeout(() => {
             setState((last) => ({
               ...last,
               activeField: nextField,
               nextField: null,
             }));
-          });
+          }, 0);
         }
-      });
+      }, 0);
     },
     [state.list, state.next, state.nextField, naturalNextField, state.activeField, setDelta],
   );
@@ -211,5 +222,6 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
     activateSuggestion,
     activeField: state.activeField,
     setActiveField,
+    clear,
   };
 }

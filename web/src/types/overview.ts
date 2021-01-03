@@ -1,5 +1,5 @@
-import { Cost } from './gql';
-import { GQL } from './shared';
+import type { Cost } from './gql';
+import type { GQL } from './shared';
 
 export type CostProcessed = GQL<Cost> & {
   fundsOld: number[];

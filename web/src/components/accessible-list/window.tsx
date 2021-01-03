@@ -8,9 +8,9 @@ import InfiniteLoader from 'react-window-infinite-loader';
 import { createListContext } from './context';
 import { useMoreItems } from './hooks';
 import * as Styled from './styles';
-import { PropsMemoisedItem } from './types';
+import type { PropsMemoisedItem } from './types';
 import { getOlderExists } from '~client/selectors';
-import { Item, PageListCost } from '~client/types';
+import type { Item, PageListCost } from '~client/types';
 
 type Props<I extends Item, P extends string, E extends Record<string, unknown>> = {
   page: P;

@@ -1,4 +1,4 @@
-import { InitialQuery } from '~client/types';
+import type { InitialQuery } from '~client/types/gql';
 
 export const enum ActionTypeApi {
   DataRead = '@@api/DATA_READ',

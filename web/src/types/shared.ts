@@ -1,4 +1,4 @@
-import { ListItemInput } from './gql';
+import type { ListItemInput } from './gql';
 
 export type PickUnion<T extends Record<string, unknown>, K extends keyof T> = { [P in K]: T[P] };
 export type PickRequire<T extends Record<string, unknown>, K extends keyof T> = Omit<T, K> &

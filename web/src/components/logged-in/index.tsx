@@ -1,29 +1,62 @@
-import React from 'react';
-import Route, { CacheSwitch as Switch } from 'react-router-cache-route';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+/* @jsx jsx */
+import { jsx } from '@emotion/react';
+import { FC, lazy, LazyExoticComponent, ReactNode, Suspense } from 'react';
+import { hot } from 'react-hot-loader/root';
+import { RouteComponentProps, Route, Switch, withRouter } from 'react-router-dom';
 
-import { PageAnalysis } from '~client/components/page-analysis';
-import * as PageList from '~client/components/page-list';
-import { PageOverview } from '~client/components/page-overview';
 import { Spinner } from '~client/components/spinner';
 import { useInitialData, useSubscriptions } from '~client/hooks';
-
 import { PageWrapper } from '~client/styled/shared';
 
-const routes = [
-  { key: 'analysis', component: PageAnalysis },
-  { key: 'funds', component: PageList.Funds },
-  { key: 'income', component: PageList.Income },
-  { key: 'bills', component: PageList.Bills },
-  { key: 'food', component: PageList.Food },
-  { key: 'general', component: PageList.General },
-  { key: 'holiday', component: PageList.Holiday },
-  { key: 'social', component: PageList.Social },
+type RouteObject = {
+  key: string;
+  Component: LazyExoticComponent<FC>;
+  path?: string | string[];
+  exact?: boolean;
+};
+
+const PageOverview = lazy(
+  () => import(/* webpackChunkName: "overview" */ '~client/components/page-overview'),
+);
+const PageAnalysis = lazy(
+  () => import(/* webpackChunkName: "analysis" */ '~client/components/page-analysis'),
+);
+const PageFunds = lazy(
+  () => import(/* webpackChunkName: "funds" */ '~client/components/page-funds'),
+);
+const PageIncome = lazy(
+  () => import(/* webpackChunkName: "income" */ '~client/components/page-list/income'),
+);
+const PageBills = lazy(
+  () => import(/* webpackChunkName: "bills" */ '~client/components/page-list/bills'),
+);
+const PageFood = lazy(
+  () => import(/* webpackChunkName: "food" */ '~client/components/page-list/food'),
+);
+const PageGeneral = lazy(
+  () => import(/* webpackChunkName: "general" */ '~client/components/page-list/general'),
+);
+const PageHoliday = lazy(
+  () => import(/* webpackChunkName: "holiday" */ '~client/components/page-list/holiday'),
+);
+const PageSocial = lazy(
+  () => import(/* webpackChunkName: "social" */ '~client/components/page-list/social'),
+);
+
+const routes: RouteObject[] = [
+  { key: 'analysis', Component: hot(PageAnalysis) },
+  { key: 'funds', Component: hot(PageFunds) },
+  { key: 'income', Component: hot(PageIncome) },
+  { key: 'bills', Component: hot(PageBills) },
+  { key: 'food', Component: hot(PageFood) },
+  { key: 'general', Component: hot(PageGeneral) },
+  { key: 'holiday', Component: hot(PageHoliday) },
+  { key: 'social', Component: hot(PageSocial) },
   {
     key: 'overview',
     path: ['/', '/net-worth', '/net-worth/*'],
     exact: true,
-    component: PageOverview,
+    Component: hot(PageOverview),
   },
 ];
 
@@ -35,23 +68,30 @@ const NotFound: React.FC = () => (
 
 const Content: React.FC<RouteComponentProps> = () => {
   const loading = useInitialData();
-
   useSubscriptions();
 
   if (loading) {
-    return <Spinner cover />;
+    return <Spinner />;
   }
 
   return (
-    <PageWrapper>
-      <Switch>
-        {routes.map(({ key, path = `/${key}`, ...rest }) => (
-          <Route key={key} path={path} {...rest} />
-        ))}
-        <Route path="/" component={NotFound} />
-      </Switch>
-    </PageWrapper>
+    <Suspense fallback={<Spinner />}>
+      <PageWrapper>
+        <Switch>
+          {routes.map(({ key, Component, ...options }) => (
+            <Route
+              key={key}
+              path={options.path ?? `/${key}`}
+              {...options}
+              render={(): ReactNode => <Component />}
+            />
+          ))}
+          <Route path="/" component={NotFound} />
+        </Switch>
+      </PageWrapper>
+    </Suspense>
   );
 };
 
 export const LoggedIn = withRouter(Content);
+export default LoggedIn;

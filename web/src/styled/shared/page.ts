@@ -10,7 +10,6 @@ export const PageWrapper = styled.div`
 
   & > div {
     display: flex;
-    flex-flow: column;
     width: 100%;
     position: relative;
   }

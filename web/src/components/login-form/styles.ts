@@ -30,8 +30,9 @@ export const Title = styled.h3`
   }
 `;
 
-export const SpinnerSpace = styled.div`
-  flex: 0 0 ${rem(50)};
+export const SpinnerSpace = styled(FlexCenter)`
+  flex: 0 0 ${rem(48)};
+  justify-content: center;
 `;
 
 export const Form = styled.div`

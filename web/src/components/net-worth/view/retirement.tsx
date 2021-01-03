@@ -3,7 +3,7 @@ import pluralize from 'pluralize';
 import React from 'react';
 
 import { exponentialRegression } from '~client/modules/data';
-import { Data } from '~client/types';
+import type { Data } from '~client/types';
 
 export type Props = {
   ftiSeries: Data;

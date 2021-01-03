@@ -29,13 +29,14 @@ import {
   usePersistentStateStoreEffect,
   useUpdateEffect,
 } from '~client/hooks';
+import { useFundPricesUpdateQuery } from '~client/hooks/gql';
 import { lastInArray } from '~client/modules/data';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { periodStoreKey } from '~client/reducers/funds';
 import { getFundItems, getFundLines, getFundsCache, getHistoryOptions } from '~client/selectors';
 import { graphFundsHeightMobile } from '~client/styled/variables';
-import {
+import type {
   DrawProps,
   FundItem,
   FundLine,
@@ -43,7 +44,6 @@ import {
   Line,
   Padding,
   Range,
-  useFundPricesUpdateQuery,
 } from '~client/types';
 
 const PADDING_DESKTOP: Padding = [20, 3, 0, 60];

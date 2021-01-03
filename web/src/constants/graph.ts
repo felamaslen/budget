@@ -1,12 +1,6 @@
-import {
-  Padding,
-  PageListStandard,
-  PageListCost,
-  FundPeriod,
-  PeriodOption,
-  QueryFundHistoryArgs,
-  HistoryOptions,
-} from '~client/types';
+import type { Padding, PageListCost, PeriodOption, HistoryOptions } from '~client/types';
+import { FundPeriod, PageListStandard } from '~client/types/enum';
+import type { QueryFundHistoryArgs } from '~client/types/gql';
 
 const defaultFont = 'Arial, Helvetica, sans-serif';
 

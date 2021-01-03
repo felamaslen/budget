@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import { gql } from 'urql';
 
 export const CreateFund = gql`
   mutation CreateFund($fakeId: Int!, $input: FundInput!) {

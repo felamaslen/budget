@@ -2,7 +2,7 @@ import React, { useCallback, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import * as Styled from './styles';
-import { HeadProps } from './types';
+import type { HeadProps } from './types';
 import { fundsViewSoldToggled } from '~client/actions';
 import { ListHeadFunds, ListHeadFundsMobile } from '~client/components/list-head-funds';
 import { TodayContext, useNow } from '~client/hooks';

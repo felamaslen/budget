@@ -22,3 +22,4 @@ export const PageOverview: React.FC = () => {
     </>
   );
 };
+export default PageOverview;

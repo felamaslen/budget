@@ -4,7 +4,7 @@ import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { exponentialRegression } from '~client/modules/data';
 import { formatCurrency } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
-import { Data } from '~client/types';
+import type { Data } from '~client/types';
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 

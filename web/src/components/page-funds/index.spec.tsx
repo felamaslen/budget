@@ -17,7 +17,8 @@ import { State } from '~client/reducers';
 import { PriceCache } from '~client/selectors';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { FundNative as Fund, PageNonStandard } from '~client/types';
+import type { FundNative as Fund } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
 
 describe('<PageFunds />', () => {
   const state: State = {

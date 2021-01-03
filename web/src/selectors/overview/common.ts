@@ -6,8 +6,9 @@ import { createSelector } from 'reselect';
 
 import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import { getMonthDatesList, inclusiveMonthDifference } from '~client/modules/date';
-import { State } from '~client/reducers/types';
-import { PageNonStandard, Cost, CostProcessed } from '~client/types';
+import type { State } from '~client/reducers/types';
+import type { PageNonStandard, CostProcessed } from '~client/types';
+import type { Cost } from '~client/types/gql';
 
 export const getCost = (state: State): Cost => state.overview.cost;
 

@@ -12,7 +12,8 @@ import { DailyState } from '~client/reducers/list';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { ListItemStandardNative as ListItemStandard, PageListExtended } from '~client/types';
+import type { ListItemStandardNative as ListItemStandard } from '~client/types';
+import { PageListExtended } from '~client/types/enum';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',

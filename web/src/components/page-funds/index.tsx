@@ -7,7 +7,7 @@ import { useTodayPrices } from './hooks';
 import { FundNameMobile, FundDetailMobile } from './mobile';
 import { FundRow } from './row';
 import * as Styled from './styles';
-import { FundProps, Sort, defaultSort, HeadProps, isSort } from './types';
+import { FundProps, Sort, defaultSort, HeadProps, SortCriteria } from './types';
 import { AccessibleList, Fields } from '~client/components/accessible-list';
 import {
   FormFieldTextInline,
@@ -29,6 +29,16 @@ import {
   FundNative as Fund,
   PageNonStandard,
 } from '~client/types';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isSort = (value: any | Sort): value is Sort =>
+  value !== null &&
+  typeof value === 'object' &&
+  Object.keys(value).length === 2 &&
+  Reflect.has(value, 'criteria') &&
+  Object.values(SortCriteria).includes(value.criteria) &&
+  Reflect.has(value, 'direction') &&
+  [-1, 1].includes(value.direction);
 
 const fields = {
   item: FormFieldTextInline,
@@ -123,3 +133,4 @@ export const Funds: React.FC = () => {
     </Styled.PageFunds>
   );
 };
+export default Funds;

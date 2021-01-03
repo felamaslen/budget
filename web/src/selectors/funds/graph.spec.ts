@@ -5,7 +5,8 @@ import { abbreviateFundName } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
 import { testState } from '~client/test-data';
-import { FundItem, PageNonStandard } from '~client/types';
+import type { FundItem } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
 
 describe('Fund selectors / graph', () => {
   const today = new Date('2020-04-20');

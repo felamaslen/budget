@@ -8,15 +8,17 @@ import * as Styled from './styles';
 import { FormFieldTickbox } from './tickbox';
 import { NULL } from '~client/modules/data';
 import { ButtonDelete, ButtonAdd } from '~client/styled/shared';
-import {
+import type {
+  NetWorthValueObjectRead as NetWorthValue,
+  NetWorthValueObjectRead,
+} from '~client/types';
+import type {
   Currency,
   FxValue,
   OptionValue,
   MortgageValue,
   MortgageValueInput,
-  NetWorthValueObjectRead as NetWorthValue,
-  NetWorthValueObjectRead,
-} from '~client/types';
+} from '~client/types/gql';
 
 type FXEventAdd = { value: number; currency: string };
 type FXEventRemove = { index: number };

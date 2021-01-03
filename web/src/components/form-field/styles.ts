@@ -125,49 +125,43 @@ const formFieldStyles = ({
     }
   }
 
-    ${
-      small &&
-      css`
-        &,
-        input {
-          width: 100px;
-        }
-      `
+  ${small &&
+  css`
+    &,
+    input {
+      width: 100px;
     }
+  `}
 
-    ${
-      item === 'text' &&
-      css`
-        ${AddCurrency} & {
-          margin: 0 5px;
-          input {
-            margin: 0;
-            padding-left: 0;
-            padding-right: 0;
-          }
-        }
-      `
+  ${item === 'text' &&
+  css`
+    ${AddCurrency} & {
+      margin: 0 5px;
+      input {
+        margin: 0;
+        padding-left: 0;
+        padding-right: 0;
+      }
     }
+  `}
 
   ${NetWorthCategoryItemForm} & {
-      ${['type', 'category', 'color'].includes(item) && centerGridOne};
-      ${
-        item === 'category' &&
-        css`
-          ${breakpoint(breakpoints.mobile)} {
-            padding: 0 ${rem(4)};
-            border: none;
-            outline: none;
-            font-size: ${rem(18)};
-            width: 100%;
+    ${['type', 'category', 'color'].includes(item) && centerGridOne};
+    ${item === 'category' &&
+    css`
+      ${breakpoint(breakpoints.mobile)} {
+        padding: 0 ${rem(4)};
+        border: none;
+        outline: none;
+        font-size: ${rem(18)};
+        width: 100%;
 
-            input {
-              width: 100%;
-              font-size: ${rem(16)};
-            }
-          }
-        `
-      };
+        input {
+          width: 100%;
+          font-size: ${rem(16)};
+        }
+      }
+    `};
   }
 
   ${ModalDialog} & {
@@ -179,36 +173,32 @@ const formFieldStyles = ({
     font-size: ${rem(16)};
     position: relative;
 
-      ${
-        name !== 'transactions' &&
-        css`
-          & > input {
-            border: none;
-            line-height: 28px;
-            outline: none;
-            width: 100%;
-          }
+    ${name !== 'transactions' &&
+    css`
+      & > input {
+        border: none;
+        line-height: 28px;
+        outline: none;
+        width: 100%;
+      }
 
-          &::after {
-            border: 1px solid ${invalid ? colors.error : colors.light.mediumDark};
-            border-top: none;
-            content: '';
-            display: block;
-            height: ${rem(4)};
-            margin-top: ${rem(-4)};
-            position: absolute;
-            top: 100%;
-            width: 100%;
-          }
-        `
-      };
+      &::after {
+        border: 1px solid ${invalid ? colors.error : colors.light.mediumDark};
+        border-top: none;
+        content: '';
+        display: block;
+        height: ${rem(4)};
+        margin-top: ${rem(-4)};
+        position: absolute;
+        top: 100%;
+        width: 100%;
+      }
+    `};
 
-      ${
-        name === 'transactions' &&
-        css`
-          flex-basis: auto;
-        `
-      };
+    ${name === 'transactions' &&
+    css`
+      flex-basis: auto;
+    `};
   }
 
   ${FormRowInner} > & {
@@ -469,12 +459,12 @@ export const NetWorthValue = styled.div`
   ${AddByCategoryValue} & {
     display: grid;
 
-    input[type="number"] {
+    input[type='number'] {
       width: 100%;
     }
 
     ${breakpoint(breakpoints.mobile)} {
-      input[type="number"] {
+      input[type='number'] {
         width: ${rem(96)};
       }
     }
@@ -567,7 +557,7 @@ export const NetWorthValueOption = styled.div`
     grid-column: 2 !important;
     grid-row: 1 / span 3;
 
-    input[type="number"] {
+    input[type='number'] {
       width: ${rem(96)};
     }
   }

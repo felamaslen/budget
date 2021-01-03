@@ -2,7 +2,7 @@ import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
 
 import ListTree, { Props } from './list-tree';
-import { AnalysisPage } from '~client/types';
+import { AnalysisPage } from '~client/types/enum';
 
 describe('<PageAnalysis /> / <ListTree />', () => {
   const treeVisible = {

@@ -14,18 +14,15 @@ import {
 } from '~client/constants';
 import { toNativeFund } from '~client/modules/data';
 import { makeListReducer, onRead, ListState } from '~client/reducers/list';
-import {
+import type { FundNative, FundQuotes, GQL, HistoryOptions } from '~client/types';
+import { PageNonStandard } from '~client/types/enum';
+import type {
   Fund,
   FundHistory,
   FundInput,
-  FundNative,
   FundPriceGroup,
-  FundQuotes,
-  GQL,
-  HistoryOptions,
-  PageNonStandard,
   QueryFundHistoryArgs,
-} from '~client/types';
+} from '~client/types/gql';
 
 type ExtraState = {
   viewSoldFunds: boolean;

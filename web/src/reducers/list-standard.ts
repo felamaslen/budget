@@ -1,11 +1,7 @@
 import { makeDailyListReducer, DailyState } from '~client/reducers/list';
-import {
-  ListItemExtended,
-  ListItemExtendedNative,
-  ListItemStandardNative,
-  PageListExtended,
-  PageListStandard,
-} from '~client/types';
+import type { ListItemExtendedNative, ListItemStandardNative } from '~client/types';
+import { PageListExtended, PageListStandard } from '~client/types/enum';
+import type { ListItemExtended } from '~client/types/gql';
 
 type StateStandard = DailyState<ListItemStandardNative>;
 type StateExtended = DailyState<ListItemExtendedNative>;
