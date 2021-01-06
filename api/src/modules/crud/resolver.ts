@@ -1,4 +1,5 @@
-import { isBoom } from '@hapi/boom';
+import Boom, { isBoom } from '@hapi/boom';
+import { Request } from 'express';
 import { withFilter } from 'graphql-subscriptions';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -19,7 +20,7 @@ import {
   SubscriptionResolverObject,
   ResolversParentTypes,
 } from '~api/types';
-import { AuthenticatedRequest, Context, Resolver } from '~api/types/resolver';
+import { Context, isUserDefined, Resolver } from '~api/types/resolver';
 
 type AuthDbResolverHandler<A, R> = (
   db: DatabaseTransactionConnectionType,
@@ -31,9 +32,12 @@ export function genericAuthDbResolver<Args, Response>(
   handler: AuthDbResolverHandler<Args, Response>,
 ): Resolver<Args, Response> {
   return withResolverAuth(
-    withSlonik<Response, [unknown, Args, AuthenticatedRequest]>(async (db, _, args, ctx) =>
-      handler(db, ctx.user.uid, args),
-    ),
+    withSlonik<Response, [unknown, Args, Request]>(async (db, _, args, ctx) => {
+      if (!isUserDefined(ctx.user)) {
+        throw Boom.unauthorized();
+      }
+      return handler(db, ctx.user.uid, args);
+    }),
   );
 }
 

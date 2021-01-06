@@ -82,9 +82,9 @@ export async function insertListItems<I extends ListItemInput>(
   db: DatabaseTransactionConnectionType,
   uid: number,
   table: PageListCost,
-  typeMap: TypeMap<RawDate<I>>,
-  items: RawDate<I>[],
-  columnMap?: TypeMap<RawDate<I>>,
+  typeMap: TypeMap<RawDate<I, 'date'>>,
+  items: RawDate<I, 'date'>[],
+  columnMap?: TypeMap<RawDate<I, 'date'>>,
 ): Promise<number[]> {
   const types = getTypes(typeMap);
   const columnList = getColumnList(types, columnMap);
@@ -105,7 +105,7 @@ export async function selectListItems<I extends ListItem>(
   db: DatabaseTransactionConnectionType,
   uid: number,
   table: PageListCost,
-  typeMap: TypeMap<RawDate<I>>,
+  typeMap: TypeMap<RawDate<I, 'date'>>,
   limit: number,
   offset: number,
 ): Promise<readonly I[]> {

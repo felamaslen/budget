@@ -2,10 +2,8 @@ import { createStore, Store } from 'redux';
 
 import rootReducer, { State } from '~client/reducers';
 
-const createProdStore = (): Store<State> => {
-  const store = createStore(rootReducer);
+const createProdStore = (preloadedState?: State): Store<State> =>
+  createStore(rootReducer, preloadedState);
 
-  return store;
-};
 // ts-prune-ignore-next
 export { createProdStore as createStore };

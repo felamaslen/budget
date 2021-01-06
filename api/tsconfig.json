@@ -4,6 +4,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "jsx": "react",
     "allowJs": true,
     "noEmit": true,
     "strict": true,
@@ -22,10 +23,15 @@
       }
     ],
     "paths": {
-      "~api/*": ["./src/*"]
+      "~api/*": ["./src/*"],
+      "~client/*": ["../web/src/*"]
     }
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "../ssr/bundle.js",
+    "../ssr/bundle.js.map"
   ]
 }

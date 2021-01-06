@@ -1,5 +1,9 @@
 import { PAGES_LIST } from '~client/constants/data';
-import { State } from '~client/reducers';
+import type { State } from '~client/reducers';
+import type { LocalAppConfig } from '~client/reducers/api';
 
 export const getApiLoading = (state: State): boolean =>
   state.api.loading > 0 || PAGES_LIST.some((page) => state[page].__optimistic.some(Boolean));
+
+export const getAppConfig = (state: State): LocalAppConfig => state.api.appConfig;
+export const getAppConfigSerial = (state: State): number => state.api.appConfigSerial;

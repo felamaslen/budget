@@ -12,10 +12,16 @@ describe('Fund selectors / graph', () => {
   const today = new Date('2020-04-20');
   const state: State = {
     ...testState,
+    api: {
+      ...testState.api,
+      appConfig: {
+        ...testState.api.appConfig,
+        historyOptions: fundPeriods.year1.query,
+      },
+    },
     funds: {
       ...testState.funds,
       viewSoldFunds: true,
-      historyOptions: fundPeriods.year1.query,
     },
   };
 

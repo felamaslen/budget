@@ -16,7 +16,7 @@ export type FundMain = Omit<Fund, 'transactions'>;
 export async function insertFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  fund: RawDate<Create<FundMain>>,
+  fund: RawDate<Create<FundMain>, 'date'>,
 ): Promise<number> {
   const { rows } = await db.query<{ id: number }>(sql`
   INSERT INTO ${sql.identifier([Page.Funds])} (uid, item, allocation_target)
@@ -30,7 +30,7 @@ export async function updateFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
   id: number,
-  fund: RawDate<Create<FundMain>>,
+  fund: RawDate<Create<FundMain>, 'date'>,
 ): Promise<void> {
   await db.query(sql`
   UPDATE ${sql.identifier([Page.Funds])}

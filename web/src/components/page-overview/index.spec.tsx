@@ -6,7 +6,7 @@ import { MemoryRouter } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 
 import { PageOverview } from '.';
-import { TodayContext } from '~client/hooks';
+import { ResizeContext, TodayContext } from '~client/hooks';
 import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
 import '~client/test-utils/match-media';
@@ -25,7 +25,9 @@ describe('<PageOverview />', () => {
       <MemoryRouter>
         <Provider store={mockStore(state)}>
           <TodayContext.Provider value={today}>
-            <PageOverview />
+            <ResizeContext.Provider value={1020}>
+              <PageOverview />
+            </ResizeContext.Provider>
           </TodayContext.Provider>
         </Provider>
       </MemoryRouter>,

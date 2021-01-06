@@ -1,12 +1,9 @@
-import Redis from 'ioredis';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import config from '~api/config';
 import { getMultipleStockQuotes } from '~api/modules/finance';
 import logger from '~api/modules/logger';
+import { redisClient } from '~api/modules/redis';
 import { QueryStockPricesArgs, StockPrice, StockPricesResponse } from '~api/types';
-
-const redisClient = new Redis(config.redis);
 
 const codeKey = (code: string): string => `stockPrice_${code}`;
 const lockKey = 'stockPriceLock';

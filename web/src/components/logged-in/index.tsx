@@ -1,62 +1,50 @@
 /* @jsx jsx */
 import { jsx } from '@emotion/react';
-import { FC, lazy, LazyExoticComponent, ReactNode, Suspense } from 'react';
+import loadable, { LoadableComponent } from '@loadable/component';
 import { hot } from 'react-hot-loader/root';
 import { RouteComponentProps, Route, Switch, withRouter } from 'react-router-dom';
 
 import { Spinner } from '~client/components/spinner';
 import { useInitialData, useSubscriptions } from '~client/hooks';
+import { useAppConfig } from '~client/hooks/config';
 import { PageWrapper } from '~client/styled/shared';
 
 type RouteObject = {
   key: string;
-  Component: LazyExoticComponent<FC>;
+  component: LoadableComponent<Record<string, unknown>>;
   path?: string | string[];
   exact?: boolean;
 };
 
-const PageOverview = lazy(
-  () => import(/* webpackChunkName: "overview" */ '~client/components/page-overview'),
+const lazyOptions = { fallback: <Spinner /> };
+
+const PageOverview = loadable(
+  () => import(/* webpackPrefetch: true */ '~client/components/page-overview'),
+  lazyOptions,
 );
-const PageAnalysis = lazy(
-  () => import(/* webpackChunkName: "analysis" */ '~client/components/page-analysis'),
-);
-const PageFunds = lazy(
-  () => import(/* webpackChunkName: "funds" */ '~client/components/page-funds'),
-);
-const PageIncome = lazy(
-  () => import(/* webpackChunkName: "income" */ '~client/components/page-list/income'),
-);
-const PageBills = lazy(
-  () => import(/* webpackChunkName: "bills" */ '~client/components/page-list/bills'),
-);
-const PageFood = lazy(
-  () => import(/* webpackChunkName: "food" */ '~client/components/page-list/food'),
-);
-const PageGeneral = lazy(
-  () => import(/* webpackChunkName: "general" */ '~client/components/page-list/general'),
-);
-const PageHoliday = lazy(
-  () => import(/* webpackChunkName: "holiday" */ '~client/components/page-list/holiday'),
-);
-const PageSocial = lazy(
-  () => import(/* webpackChunkName: "social" */ '~client/components/page-list/social'),
-);
+const PageAnalysis = loadable(() => import('~client/components/page-analysis'), lazyOptions);
+const PageFunds = loadable(() => import('~client/components/page-funds'), lazyOptions);
+const PageIncome = loadable(() => import('~client/components/page-list/income'), lazyOptions);
+const PageBills = loadable(() => import('~client/components/page-list/bills'), lazyOptions);
+const PageFood = loadable(() => import('~client/components/page-list/food'), lazyOptions);
+const PageGeneral = loadable(() => import('~client/components/page-list/general'), lazyOptions);
+const PageHoliday = loadable(() => import('~client/components/page-list/holiday'), lazyOptions);
+const PageSocial = loadable(() => import('~client/components/page-list/social'), lazyOptions);
 
 const routes: RouteObject[] = [
-  { key: 'analysis', Component: hot(PageAnalysis) },
-  { key: 'funds', Component: hot(PageFunds) },
-  { key: 'income', Component: hot(PageIncome) },
-  { key: 'bills', Component: hot(PageBills) },
-  { key: 'food', Component: hot(PageFood) },
-  { key: 'general', Component: hot(PageGeneral) },
-  { key: 'holiday', Component: hot(PageHoliday) },
-  { key: 'social', Component: hot(PageSocial) },
+  { key: 'analysis', component: hot(PageAnalysis) },
+  { key: 'funds', component: hot(PageFunds) },
+  { key: 'income', component: hot(PageIncome) },
+  { key: 'bills', component: hot(PageBills) },
+  { key: 'food', component: hot(PageFood) },
+  { key: 'general', component: hot(PageGeneral) },
+  { key: 'holiday', component: hot(PageHoliday) },
+  { key: 'social', component: hot(PageSocial) },
   {
     key: 'overview',
     path: ['/', '/net-worth', '/net-worth/*'],
     exact: true,
-    Component: hot(PageOverview),
+    component: hot(PageOverview),
   },
 ];
 
@@ -66,30 +54,36 @@ const NotFound: React.FC = () => (
   </div>
 );
 
-const Content: React.FC<RouteComponentProps> = () => {
-  const loading = useInitialData();
+const Subscriptions: React.FC = () => {
+  useAppConfig();
   useSubscriptions();
+  return null;
+};
+
+const Content: React.FC<RouteComponentProps> = () => {
+  const { loading, error } = useInitialData();
 
   if (loading) {
-    return <Spinner />;
+    return (
+      <PageWrapper>
+        <Spinner />
+      </PageWrapper>
+    );
+  }
+  if (error) {
+    return null;
   }
 
   return (
-    <Suspense fallback={<Spinner />}>
-      <PageWrapper>
-        <Switch>
-          {routes.map(({ key, Component, ...options }) => (
-            <Route
-              key={key}
-              path={options.path ?? `/${key}`}
-              {...options}
-              render={(): ReactNode => <Component />}
-            />
-          ))}
-          <Route path="/" component={NotFound} />
-        </Switch>
-      </PageWrapper>
-    </Suspense>
+    <PageWrapper>
+      <Subscriptions />
+      <Switch>
+        {routes.map(({ key, ...options }) => (
+          <Route key={key} path={options.path ?? `/${key}`} {...options} />
+        ))}
+        <Route path="/" component={NotFound} />
+      </Switch>
+    </PageWrapper>
   );
 };
 

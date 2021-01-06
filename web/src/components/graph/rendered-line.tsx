@@ -65,7 +65,7 @@ export const RenderedLine: React.FC<Props> = ({
     [arrows, data, fill, color],
   );
 
-  if (!(data.length && props.minY !== props.maxY)) {
+  if (!data.length || props.minY === props.maxY) {
     return null;
   }
   if (arrows || !pathProps) {

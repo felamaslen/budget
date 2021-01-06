@@ -11,8 +11,13 @@ export const testState: State = {
     loading: 0,
     error: null,
     appConfig: {
-      birthDate: new Date('1990-01-01'),
+      birthDate: '1990-01-01',
+      historyOptions: {
+        period: FundPeriod.Year,
+        length: 1,
+      },
     },
+    appConfigSerial: 0,
   },
   error: [],
   overview: {
@@ -255,10 +260,6 @@ export const testState: State = {
     __optimistic: funds.testRows.map(() => undefined),
     viewSoldFunds: false,
     cashTarget: 15000,
-    historyOptions: {
-      period: FundPeriod.Year,
-      length: 1,
-    },
     startTime: funds.testStartTime,
     cacheTimes: funds.testCacheTimes,
     prices: funds.testPrices,

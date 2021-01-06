@@ -37,7 +37,7 @@ function getTicksY({ minY, maxY, pixY1, valY2, tickSizeY = 0, hideMinorTicks }: 
   const tickStart = Math.floor(minY / tickSize) * tickSize;
 
   const numTicks = Math.ceil((maxY - minY) / tickSize);
-  if (numTicks > 50) {
+  if (numTicks > 50 || Number.isNaN(numTicks)) {
     return [];
   }
 
@@ -274,11 +274,11 @@ export const TimeAxes: React.FC<Props> = (props) => {
     hideMinorTicks = false,
   } = props;
 
-  if (minY === maxY || minY2 === maxY2) {
+  const y0 = pixY1(minY);
+
+  if (Number.isNaN(y0) || y0 === Infinity || y0 === -Infinity || minY === maxY || minY2 === maxY2) {
     return null;
   }
-
-  const y0 = pixY1(minY);
 
   const timeScale: Tick[] = getTimeScale({ minX, maxX, pixX })(offset);
 

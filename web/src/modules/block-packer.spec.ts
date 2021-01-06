@@ -624,4 +624,15 @@ describe('Flex block packer', () => {
       perm = permutations.next();
     }
   });
+
+  describe.each`
+    prop        | width  | height
+    ${'width'}  | ${0}   | ${100}
+    ${'height'} | ${100} | ${0}
+  `('when $prop is zero', ({ width, height }) => {
+    it('should throw an error', () => {
+      expect.assertions(1);
+      expect(() => blockPacker(width, height, [])).toThrow('Width and height must be positive');
+    });
+  });
 });

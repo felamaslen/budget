@@ -8,6 +8,7 @@ import { fromValue } from 'wonka';
 import { PageAnalysis } from '.';
 
 import * as AnalysisQueries from '~client/gql/queries/analysis';
+import { ResizeContext } from '~client/hooks';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import { AnalysisGroupBy, AnalysisPage, AnalysisPeriod } from '~client/types/enum';
 import type { AnalysisQuery } from '~client/types/gql';
@@ -64,7 +65,9 @@ describe('<PageAnalysis />', () => {
 
     return render(
       <GQLProviderMock client={mockClient}>
-        <PageAnalysis />
+        <ResizeContext.Provider value={854}>
+          <PageAnalysis />
+        </ResizeContext.Provider>
       </GQLProviderMock>,
     );
   };

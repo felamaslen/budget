@@ -1,54 +1,61 @@
 /* @jsx jsx */
 import { Global, jsx } from '@emotion/react';
-import { lazy, Suspense, useCallback, useState } from 'react';
+import loadable from '@loadable/component';
+import { useCallback, useState } from 'react';
 import { hot } from 'react-hot-loader/root';
-import { Provider, useDispatch } from 'react-redux';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import BarLoader from 'react-spinners/BarLoader';
-import { Store } from 'redux';
+import { compose } from 'redux';
 
-import { Action, loggedOut } from '~client/actions';
-import { Anonymous } from '~client/components/anonymous';
+import { loggedOut } from '~client/actions';
+import { Anonymous, Props as AnonymousProps } from '~client/components/anonymous';
 import { ErrorMessages } from '~client/components/error-messages';
-import { GQLProviderAnonymous, GQLProviderLoggedIn } from '~client/components/gql-provider';
+import { GQLProvider } from '~client/components/gql-provider';
 import { Header, Props as HeaderProps } from '~client/components/header';
 import { Spinner } from '~client/components/spinner';
 import { Outer } from '~client/components/spinner/styles';
 import {
-  persistentLoginKey,
   ResizeContext,
   TodayContext,
   useDebouncedResize,
   useOffline,
   useToday,
 } from '~client/hooks';
-import { State } from '~client/reducers';
+import { VOID } from '~client/modules/data';
 import { reset } from '~client/styled/reset';
 import { Main } from '~client/styled/shared';
+import { useLogoutMutation } from '~client/types/gql';
 
 const LoggedIn = hot(
-  lazy(
-    () =>
-      import(
-        /* webpackPrefetch: true, webpackChunkName: "logged-in" */ '~client/components/logged-in'
-      ),
-  ),
+  loadable(() => import(/* webpackPrefetch: true */ '~client/components/logged-in'), {
+    fallback: <Spinner />,
+  }),
 );
 
-type Props = {
-  store: Store<State, Action>;
-} & RouteComponentProps;
+export type Props = {
+  loggedIn: boolean;
+  onLogin?: AnonymousProps['onLogin'];
+  onLogout?: () => void;
+  offline?: boolean;
+};
 
-const RootContainer: React.FC<HeaderProps> = ({ children, ...props }) => {
+const RootContainer: React.FC<HeaderProps> = ({ onLogout, children, ...props }) => {
   const windowWidth = useDebouncedResize();
   const today = useToday();
+
+  const [, logoutFromServer] = useLogoutMutation();
+  const logout = useCallback(() => {
+    logoutFromServer();
+    onLogout();
+  }, [onLogout, logoutFromServer]);
 
   return (
     <ResizeContext.Provider value={windowWidth}>
       <TodayContext.Provider value={today}>
         <Main>
           <Global styles={reset} />
-          <Header {...props} />
+          <Header {...props} onLogout={logout} />
           <ErrorMessages />
           {children}
         </Main>
@@ -65,50 +72,32 @@ const Offline: React.FC = () => (
   </Outer>
 );
 
-const RootProvided: React.FC = () => {
+const App: React.FC<Props> = ({ loggedIn, onLogin = VOID, onLogout = VOID, offline = false }) => (
+  <RootContainer loggedIn={loggedIn} onLogout={onLogout}>
+    {offline && <Offline />}
+    {!offline && (loggedIn ? <LoggedIn /> : <Anonymous onLogin={onLogin} />)}
+  </RootContainer>
+);
+
+export default App;
+
+export const ClientApp = compose(
+  hot,
+  withRouter,
+)(() => {
+  const offline = useOffline();
+
   const dispatch = useDispatch();
-  const [apiKey, onLogin] = useState<string | null>(null);
+  const [apiKey, onLogin] = useState<string | null>(window.__API_KEY__ ?? null);
 
   const onLogout = useCallback(() => {
     onLogin(null);
     dispatch(loggedOut());
-    localStorage.removeItem(persistentLoginKey);
   }, [dispatch]);
 
-  const offline = useOffline();
-  if (offline) {
-    return (
-      <RootContainer loggedIn={false} onLogout={onLogout}>
-        <Offline />
-      </RootContainer>
-    );
-  }
-
-  if (apiKey) {
-    return (
-      <RootContainer loggedIn={true} onLogout={onLogout}>
-        <GQLProviderLoggedIn apiKey={apiKey}>
-          <Suspense fallback={<Spinner />}>
-            <LoggedIn />
-          </Suspense>
-        </GQLProviderLoggedIn>
-      </RootContainer>
-    );
-  }
-
   return (
-    <RootContainer loggedIn={false} onLogout={onLogout}>
-      <GQLProviderAnonymous>
-        <Anonymous onLogin={onLogin} />
-      </GQLProviderAnonymous>
-    </RootContainer>
+    <GQLProvider apiKey={apiKey}>
+      <App loggedIn={!!apiKey} onLogin={onLogin} onLogout={onLogout} offline={offline} />
+    </GQLProvider>
   );
-};
-
-const Root: React.FC<Props> = ({ store }) => (
-  <Provider store={store}>
-    <RootProvided />
-  </Provider>
-);
-const RoutedRoot = hot(withRouter(Root));
-export { RoutedRoot as Root };
+});

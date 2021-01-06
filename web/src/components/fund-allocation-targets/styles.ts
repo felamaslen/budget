@@ -12,15 +12,12 @@ export const containerWidth =
 
 export const Container = styled.div`
   display: block;
-  height: ${rem(72)};
+  height: ${rem(48)};
   overflow-x: hidden;
-  padding-bottom: ${rem(24)};
   position: relative;
   user-select: none;
   width: 100%;
   ${breakpoint(breakpoints.tabletSmall)} {
-    height: ${rem(48)};
-    padding-bottom: 0;
     white-space: nowrap;
     width: ${rem(containerWidth)};
   }
@@ -107,17 +104,18 @@ export const Target = styled.div<TargetProps>(
 export const Preview = styled.div`
   align-items: center;
   background: ${rgba(colors.amber, 0.8)};
-  border-radius: 0 0 ${rem(10)} 0;
+  border-radius: 0 ${rem(10)} 0 0;
   display: inline-flex;
   height: ${rem(24)};
   padding: ${rem(4)} ${rem(10)};
   font-size: ${rem(10)};
   left: 0;
-  position: absolute;
-  top: ${rem(48)};
+  margin-top: ${rem(-24)};
+  position: fixed;
   z-index: 12;
 
   ${breakpoint(breakpoints.mobile)} {
-    top: 0;
+    border-radius: 0 0 ${rem(10)} 0;
+    margin-top: 0;
   }
 `;

@@ -17,4 +17,9 @@ export const userSchema = gql`
     apiKey: String
     expires: DateTime
   }
+
+  type LogoutResponse {
+    error: String
+    ok: Boolean
+  }
 `;

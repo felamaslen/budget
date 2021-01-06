@@ -1,82 +1,82 @@
+/* eslint-disable @typescript-eslint/no-var-requires, global-require, import/no-extraneous-dependencies, no-console */
+
 import http, { Server } from 'http';
 import path from 'path';
 import bodyParser from 'body-parser';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import express, { Request } from 'express';
 import helmet from 'helmet';
 import webLogger from 'morgan';
-import passport from 'passport';
+import favicon from 'serve-favicon';
 import serveStatic from 'serve-static';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
 import config from '~api/config';
 import { healthRoutes } from '~api/health';
-import { getStrategy } from '~api/modules/auth';
+import { setupAuth } from '~api/modules/auth';
 import { errorHandler } from '~api/modules/error-handling';
 import { setupGraphQL } from '~api/modules/graphql';
 import { getIp } from '~api/modules/headers';
 import logger from '~api/modules/logger';
+import { makeSinglePageApp } from '~api/modules/ssr';
 import routes from '~api/routes';
 
 const API_PREFIX = '/api/v4';
 
-function setupDevServer(app: express.Express): void {
-  /* eslint-disable */
-  const conf = require('../../webpack.config');
-  const compiler = require('webpack')(conf);
+const hot = process.env.SKIP_APP !== 'true' && process.env.NODE_ENV === 'development';
 
-  app.use(require('connect-history-api-fallback')());
-  app.use(
-    require('webpack-dev-middleware')(compiler, {
-      publicPath: '/',
-      stats: {
-        colors: true,
-        modules: false,
-        chunks: false,
-        reasons: false,
-      },
-      hot: true,
-      quiet: false,
-    }),
-  );
-
-  app.use(
-    require('webpack-hot-middleware')(compiler, {
-      log: console.log, // eslint-disable-line no-console
-    }),
-  );
-  /* eslint-enable */
-}
-
-function setupStaticViews(app: express.Express): void {
-  app.set('views', path.join(__dirname, '../../web/src/templates'));
-  app.set('view engine', 'ejs');
-}
-
-function setupWebApp(app: express.Express): void {
-  const hot = process.env.SKIP_APP !== 'true' && process.env.NODE_ENV === 'development';
-  if (hot) {
-    setupDevServer(app);
-  }
-
-  setupStaticViews(app);
-
-  const singlePageApp = (_: express.Request, res: express.Response): void => {
-    res.setHeader('Cache-Control', 'no-cache');
-    res.sendFile(path.resolve(__dirname, '../../web/build/index.html'));
-  };
-
-  // web app static files
+function setupProdAssets(app: express.Express): void {
   app.use(
     '/',
     serveStatic(path.resolve(__dirname, '../../web/build'), {
       maxAge: 3600 * 24 * 100 * 1000,
     }),
   );
+}
 
-  app.get('/:pageName?', singlePageApp);
-  app.get('/:pageName/*', singlePageApp);
+function setupDevAssets(app: express.Express): void {
+  const conf = require('../../webpack.config');
+  const compiler = require('webpack')(conf);
+
+  app.use(
+    require('webpack-dev-middleware')(compiler, {
+      publicPath: '/',
+      serverSideRender: true,
+      index: false,
+    }),
+  );
+
+  app.use(
+    require('webpack-hot-middleware')(compiler, {
+      log: console.log,
+    }),
+  );
+}
+
+function setupWebApp(app: express.Express): void {
+  app.set('views', path.join(__dirname, '../../web/src/templates'));
+  app.set('view engine', 'ejs');
+  app.locals.delimiter = '?'; // eslint-disable-line no-param-reassign
+
+  app.use(favicon(path.resolve(__dirname, '../../web/src/images/favicon.png')));
+
+  const singlePageApp = makeSinglePageApp(hot);
+
+  app.get('/', singlePageApp);
+  app.get('/net-worth', singlePageApp);
+  app.get('/net-worth/*', singlePageApp);
+  app.get('/analysis', singlePageApp);
+  app.get('/funds', singlePageApp);
+  app.get('/income', singlePageApp);
+  app.get('/bills', singlePageApp);
+  app.get('/food', singlePageApp);
+  app.get('/general', singlePageApp);
+  app.get('/holiday', singlePageApp);
+  app.get('/social', singlePageApp);
+
+  app.get('/index.html', (_, res) => res.redirect(301, '/'));
 }
 
 function setupLogging(app: express.Express): void {
@@ -125,8 +125,6 @@ function setupApiDocs(app: express.Express): void {
 }
 
 function setupRestApi(app: express.Express): void {
-  passport.use('jwt', getStrategy());
-  app.use(passport.initialize());
   app.use(healthRoutes());
   app.use(API_PREFIX, routes());
   setupApiDocs(app);
@@ -160,6 +158,7 @@ function setupMiddleware(app: express.Express): void {
     res.send('User-agent: *\nDisallow: /\n');
   });
   app.use(compression());
+  app.use(cookieParser(config.user.tokenSecret));
 }
 
 export async function run(port = config.app.port): Promise<Server> {
@@ -170,10 +169,20 @@ export async function run(port = config.app.port): Promise<Server> {
   setupDataInput(app);
 
   setupMiddleware(app);
+  setupAuth(app);
   setupRestApi(app);
   const onListen = await setupGraphQL(app, server);
 
+  if (hot) {
+    setupDevAssets(app);
+  }
+
   setupWebApp(app);
+
+  if (!hot) {
+    setupProdAssets(app);
+  }
+
   setupErrorHandling(app);
 
   return new Promise((resolve, reject) => {
@@ -191,6 +200,6 @@ export async function run(port = config.app.port): Promise<Server> {
   });
 }
 
-if (!module.parent) {
+if (require.main === module) {
   run();
 }

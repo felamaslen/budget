@@ -1,23 +1,26 @@
 import boom from '@hapi/boom';
 import joi from '@hapi/joi';
 import bcrypt from 'bcrypt';
-import addDays from 'date-fns/addDays';
-import { Request, Response, NextFunction } from 'express';
+import connectRedis from 'connect-redis';
+import { addDays, fromUnixTime, getUnixTime, isAfter } from 'date-fns';
+import { Express, NextFunction, Request, Response } from 'express';
+import session, { MemoryStore } from 'express-session';
 import jwt from 'jsonwebtoken';
-import passport from 'passport';
-import { Strategy, ExtractJwt, VerifiedCallback } from 'passport-jwt';
+import { ExtractJwt } from 'passport-jwt';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
+
+import { redisClient } from './redis';
 
 import config from '~api/config';
 import { getPool } from '~api/modules/db';
 import { LoginResponse, UserInfo } from '~api/types';
-import { User, Resolver, AuthenticatedRequest } from '~api/types/resolver';
+import { User, Resolver } from '~api/types/resolver';
 
 type UserRow = UserInfo & {
   pin_hash: string;
 };
 
-export async function whoami({ uid }: User): Promise<UserInfo | null> {
+export async function whoami({ uid }: Required<User>): Promise<UserInfo | null> {
   const user = await getPool().connect(async (db) => {
     const result = await db.query<{ name: string }>(sql`SELECT name FROM users WHERE uid = ${uid}`);
     return result.rows[0];
@@ -40,12 +43,12 @@ const tokenSchema = joi
 export function validateToken<T extends unknown>(
   tokenData: T,
   checkExpiry = false,
-): User & { exp: number } {
+): Required<User> & { exp: number } {
   const tokenValidationResult = tokenSchema.validate(tokenData);
   if (tokenValidationResult.error) {
     throw boom.badData('Invalid token');
   }
-  if (checkExpiry && 1000 * tokenValidationResult.value.exp < new Date().getTime()) {
+  if (checkExpiry && isAfter(new Date(), fromUnixTime(tokenValidationResult.value.exp))) {
     throw boom.badData('Expired token');
   }
 
@@ -63,53 +66,27 @@ export function getUidFromToken(token?: string | null): number | null {
     return null;
   }
   const { uid } = validateToken(tokenData, true);
-  return uid;
+  return uid ?? null;
 }
 
-export const withResolverAuth = <A, T>(
-  resolver: Resolver<A, T, AuthenticatedRequest>,
-): Resolver<A, T> => async (root, args, ctx): Promise<T | null> => {
-  const token = jwtFromRequest(ctx as Request);
-  const uid = getUidFromToken(token);
-  if (!uid) {
+export const withResolverAuth = <A, T>(resolver: Resolver<A, T, Request>): Resolver<A, T> => async (
+  root,
+  args,
+  ctx,
+): Promise<T | null> => {
+  const token = jwtFromRequest(ctx);
+  ctx.user = { uid: token ? getUidFromToken(token) ?? 0 : ctx.session.uid ?? 0 };
+  if (!ctx.user?.uid) {
     return null;
   }
-  ctx.user = { uid };
-  return resolver(root, args, ctx as AuthenticatedRequest);
+  return resolver(root, args, ctx);
 };
 
-export function getStrategy(): Strategy {
-  const params = {
-    secretOrKey: config.user.tokenSecret,
-    jwtFromRequest,
-    passReqToCallback: true,
-  };
-
-  return new Strategy(
-    params,
-    async (_: Request, data: Record<string, unknown>, done: VerifiedCallback) => {
-      try {
-        const tokenData = validateToken(data, false);
-        const user = await whoami(tokenData);
-        if (!user) {
-          return done(null, false, {
-            message: 'User was deleted since last login',
-          });
-        }
-
-        return done(null, user);
-      } catch (err) {
-        return done(null, false, err);
-      }
-    },
-  );
-}
-
 export function genToken({ uid }: User): Omit<LoginResponse, 'name'> {
-  const expires = addDays(new Date(), 30);
+  const expires = addDays(new Date(), config.user.sessionExpiryDays);
   const token = jwt.sign(
     {
-      exp: expires.getTime() / 1000,
+      exp: getUnixTime(expires),
       uid,
     },
     config.user.tokenSecret,
@@ -154,31 +131,33 @@ export async function checkLoggedIn(
   return validUser;
 }
 
-export function authMiddleware(): (req: Request, res: Response, next: NextFunction) => void {
-  return (req, res, next): void => {
-    passport.authenticate(
-      'jwt',
-      {
-        session: false,
-        failWithError: true,
-      },
-      (err: Error, user: User, info?: Error): void => {
-        if (err) {
-          next(err);
-          return;
-        }
+const RedisStore = connectRedis(session);
 
-        if (!user) {
-          if (info?.name === 'TokenExpiredError') {
-            res.status(401).json({ errorMessage: 'Token expired' });
-          } else {
-            res.status(401).json({ errorMessage: info?.message });
-          }
-        } else {
-          req.user = user;
-          next();
-        }
+export function setupAuth(app: Express): void {
+  app.use(
+    session({
+      store:
+        process.env.NODE_ENV === 'test'
+          ? new MemoryStore()
+          : new RedisStore({ client: redisClient }),
+      cookie: {
+        expires:
+          process.env.NODE_ENV === 'test'
+            ? undefined
+            : addDays(new Date(), config.user.sessionExpiryDays),
       },
-    )(req, res, next);
-  };
+      secret: config.user.tokenSecret,
+      resave: false,
+      saveUninitialized: false,
+    }),
+  );
 }
+
+export const authMiddleware = (req: Request, _: Response, next: NextFunction): void => {
+  if (!req.session.uid) {
+    throw boom.unauthorized();
+  }
+
+  req.user = { uid: req.session.uid };
+  next();
+};

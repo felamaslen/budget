@@ -1,13 +1,15 @@
 import {
-  dataRead,
-  loggedOut,
   ActionTypeApi,
+  ActionTypeFunds,
   ActionTypeLogin,
   apiLoaded,
   apiLoading,
+  configUpdated,
+  fundQueryUpdated,
+  loggedOut,
 } from '~client/actions';
 import reducer, { initialState } from '~client/reducers/api';
-import { testResponse } from '~client/test-data';
+import { FundPeriod } from '~client/types/enum';
 
 describe('API reducer', () => {
   describe(ActionTypeLogin.LoggedOut, () => {
@@ -17,24 +19,22 @@ describe('API reducer', () => {
     });
   });
 
-  describe(ActionTypeApi.DataRead, () => {
-    const action = dataRead(testResponse);
-    const state = { ...initialState, initialLoading: true };
+  describe(ActionTypeApi.ConfigUpdated, () => {
+    const action = configUpdated({ birthDate: '1992-03-01' });
+    const result = reducer(initialState, action);
 
-    it.each`
-      prop            | key            | value
-      ${'birth date'} | ${'birthDate'} | ${new Date('1996-02-03')}
-    `('should set the $prop app config property', ({ key, value }) => {
+    it('should set the updated config', () => {
       expect.assertions(1);
-      const result = reducer(state, action);
-
-      expect(result).toStrictEqual(
+      expect(result.appConfig).toStrictEqual(
         expect.objectContaining({
-          appConfig: expect.objectContaining({
-            [key]: value,
-          }),
+          birthDate: '1992-03-01',
         }),
       );
+    });
+
+    it('should not update the serial', () => {
+      expect.assertions(1);
+      expect(result.appConfigSerial).toBe(0);
     });
   });
 
@@ -51,6 +51,30 @@ describe('API reducer', () => {
       expect.assertions(1);
       const result = reducer({ ...initialState, loading: 3 }, apiLoaded);
       expect(result.loading).toBe(2);
+    });
+  });
+
+  describe(ActionTypeFunds.QueryUpdated, () => {
+    const action = fundQueryUpdated({
+      period: FundPeriod.Year,
+      length: 7,
+    });
+
+    it('should set the query', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+
+      expect(result.appConfig).toStrictEqual(
+        expect.objectContaining({
+          historyOptions: { period: FundPeriod.Year, length: 7 },
+        }),
+      );
+    });
+
+    it('should update the config serial', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+      expect(result.appConfigSerial).toBe(1);
     });
   });
 });

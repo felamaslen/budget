@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import gql from 'graphql-tag';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   Query,

@@ -1,8 +1,22 @@
 module.exports = {
-  plugins: ['const-enum', '@emotion'],
+  plugins: [
+    'const-enum',
+    ['@emotion', { sourceMap: false }],
+    '@loadable/babel-plugin',
+    [
+      'module-resolver',
+      {
+        alias: {
+          '~api': './api/src',
+          '~client': './web/src',
+        },
+      },
+    ],
+  ],
   presets: ['@babel/preset-typescript', '@babel/preset-react'],
   env: {
     production: {
+      plugins: ['babel-plugin-react-remove-properties'],
       presets: [
         [
           '@babel/preset-env',
@@ -14,10 +28,8 @@ module.exports = {
           },
         ],
       ],
-      plugins: ['babel-plugin-react-remove-properties'],
     },
     node: {
-      plugins: ['babel-plugin-webpack-alias-7'],
       presets: [
         '@babel/preset-typescript',
         '@babel/preset-react',

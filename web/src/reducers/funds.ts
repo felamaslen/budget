@@ -6,28 +6,15 @@ import {
   ActionApiDataRead,
   AllocationTargetsUpdated,
 } from '~client/actions';
-import {
-  defaultFundLength,
-  defaultFundPeriod,
-  fundHistoryMatch,
-  fundPeriods,
-} from '~client/constants';
 import { toNativeFund } from '~client/modules/data';
 import { makeListReducer, onRead, ListState } from '~client/reducers/list';
-import type { FundNative, FundQuotes, GQL, HistoryOptions } from '~client/types';
+import type { FundNative, FundQuotes, GQL } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
-import type {
-  Fund,
-  FundHistory,
-  FundInput,
-  FundPriceGroup,
-  QueryFundHistoryArgs,
-} from '~client/types/gql';
+import type { Fund, FundHistory, FundInput, FundPriceGroup } from '~client/types/gql';
 
 type ExtraState = {
   viewSoldFunds: boolean;
   cashTarget: number;
-  historyOptions: HistoryOptions;
   startTime: number;
   cacheTimes: number[];
   prices: {
@@ -38,38 +25,11 @@ type ExtraState = {
 
 export type State = ListState<GQL<FundNative>, ExtraState>;
 
-export const periodStoreKey = 'funds_period';
-
-const getStoredFundPeriod = (): HistoryOptions => {
-  const defaultArgs: HistoryOptions = {
-    period: defaultFundPeriod,
-    length: defaultFundLength,
-  };
-
-  const storedValue = localStorage.getItem(periodStoreKey);
-  if (!storedValue) {
-    return defaultArgs;
-  }
-
-  try {
-    const matcher = fundHistoryMatch(JSON.parse(storedValue) as QueryFundHistoryArgs);
-    const match = Object.entries(fundPeriods).find(([, { query }]) => matcher(query))?.[0] ?? null;
-
-    return match ? fundPeriods[match].query : defaultArgs;
-  } catch {
-    localStorage.removeItem(periodStoreKey);
-    return defaultArgs;
-  }
-};
-
-const initialHistoryOptions = getStoredFundPeriod();
-
 export const initialState: State = {
   viewSoldFunds: false,
   cashTarget: 0,
   items: [],
   __optimistic: [],
-  historyOptions: initialHistoryOptions,
   startTime: 0,
   cacheTimes: [],
   prices: [],
@@ -137,8 +97,6 @@ export default function funds(state: State = initialState, action: Action): Stat
       return { ...state, cashTarget: action.cashTarget };
     case ActionTypeFunds.AllocationTargetsUpdated:
       return updateAllocationTargets(state, action);
-    case ActionTypeFunds.QueryUpdated:
-      return { ...state, historyOptions: action.historyOptions };
     case ActionTypeFunds.PricesUpdated:
       return onPeriodLoad(state, action.res);
     case ActionTypeFunds.TodayPricesFetched:

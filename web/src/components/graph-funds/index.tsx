@@ -23,17 +23,11 @@ import {
   GRAPH_FUNDS_NUM_TICKS,
   Mode,
 } from '~client/constants/graph';
-import {
-  TodayContext,
-  usePersistentState,
-  usePersistentStateStoreEffect,
-  useUpdateEffect,
-} from '~client/hooks';
+import { TodayContext, usePersistentState, useUpdateEffect } from '~client/hooks';
 import { useFundPricesUpdateQuery } from '~client/hooks/gql';
 import { lastInArray } from '~client/modules/data';
 import { getTickSize, formatItem } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
-import { periodStoreKey } from '~client/reducers/funds';
 import { getFundItems, getFundLines, getFundsCache, getHistoryOptions } from '~client/selectors';
 import { graphFundsHeightMobile } from '~client/styled/variables';
 import type {
@@ -76,7 +70,6 @@ const modeList = Object.values(Mode);
 
 function useDynamicPrices(): [HistoryOptions, (nextQuery: HistoryOptions) => void] {
   const query = useSelector(getHistoryOptions);
-  usePersistentStateStoreEffect(query, periodStoreKey);
 
   const dispatch = useDispatch();
 

@@ -22,6 +22,7 @@ export const pubsub = new RedisPubSub({
 
 export enum PubSubTopic {
   CashAllocationTargetUpdated = 'CashAllocationTargetUpdated',
+  ConfigUpdated = 'ConfigUpdated',
   FundAllocationTargetsUpdated = 'FundAllocationTargetsUpdated',
   FundCreated = 'FundCreated',
   FundUpdated = 'FundUpdated',

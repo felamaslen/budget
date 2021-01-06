@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useLoginMutation } from '../gql';
@@ -10,20 +10,15 @@ type State = {
   apiKey: string | null;
 };
 
-export const persistentLoginKey = 'pin';
-
 export function useLogin(): {
   login: (pin: number) => void;
   loading: boolean;
-  initialLoading: boolean;
   loggedIn: boolean;
   apiKey: string | null;
 } {
   const dispatch = useDispatch();
 
   const [{ data, fetching, error }, request] = useLoginMutation();
-
-  const [initialLoading, setInitialLoading] = useState<boolean>(true);
 
   const apiKeyResult = data?.login.apiKey ?? null;
 
@@ -32,17 +27,10 @@ export function useLogin(): {
   const login = useCallback((newPin: number) => setState((last) => ({ ...last, pin: newPin })), []);
 
   const loggedIn = !!apiKey;
-  const attemptedLogin = useRef<boolean>(false);
 
   useEffect(() => {
     setState((last) => ({ ...last, apiKey: apiKeyResult }));
   }, [apiKeyResult]);
-
-  useEffect(() => {
-    if (apiKey && pin) {
-      localStorage.setItem(persistentLoginKey, JSON.stringify(pin));
-    }
-  }, [apiKey, pin]);
 
   useEffect(() => {
     if (error) {
@@ -63,32 +51,9 @@ export function useLogin(): {
     }
   }, [pin, request]);
 
-  useEffect(() => {
-    if (loggedIn || attemptedLogin.current) {
-      attemptedLogin.current = true;
-      return;
-    }
-
-    try {
-      const pinFromStorage = localStorage.getItem(persistentLoginKey);
-      const validPin = (pinFromStorage && Number(JSON.parse(pinFromStorage))) || 0;
-
-      if (validPin) {
-        login(validPin);
-        attemptedLogin.current = true;
-      } else {
-        setInitialLoading(false);
-      }
-    } catch {
-      localStorage.removeItem(persistentLoginKey);
-      setInitialLoading(false);
-    }
-  }, [loggedIn, login, dispatch]);
-
   return {
     login,
     loading: fetching,
-    initialLoading,
     loggedIn,
     apiKey: data?.login?.apiKey ?? null,
   };

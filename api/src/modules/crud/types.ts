@@ -1,7 +1,7 @@
+import { Request } from 'express';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { Create, Item } from '~api/types';
-import { AuthenticatedRequest } from '~api/types/resolver';
 
 export interface CrudItem extends Item {
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -20,12 +20,12 @@ export type JsonToDb<D extends Item, J extends Item> =
 
 export type GetItem = (id: number) => Promise<Record<string, unknown>>;
 
-export type RequestWithBody<J extends Item = Item> = AuthenticatedRequest & {
+export type RequestWithBody<J extends Item = Item> = Request & {
   body: Partial<J>;
   params: Partial<J>;
 };
 
-export type GetId = (req: AuthenticatedRequest) => string;
+export type GetId = (req: Request) => string;
 
 export type ParentDependency<J extends Item> = {
   item: string;

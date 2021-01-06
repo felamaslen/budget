@@ -1,4 +1,6 @@
+import { SSRData } from '@urql/core';
 import { factory } from 'redux-devtools';
+import { State } from './reducers';
 
 declare global {
   declare module '*.png' {
@@ -13,5 +15,9 @@ declare global {
 
   interface Window {
     __REDUX_DEVTOOLS_EXTENSION__?: factory;
+    __MOUNT_TIME__?: number;
+    __URQL_DATA__?: SSRData;
+    __API_KEY__?: string | null;
+    __PRELOADED_STATE__?: State;
   }
 }

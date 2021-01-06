@@ -62,7 +62,7 @@ export const FundRow = styled(StandardRow)<Partial<FundProps>>(
 );
 
 export const CashRow = styled(FundRow)`
-  height: ${rem(72)};
+  height: ${rem(48)};
 `;
 
 export const TargetAllocation = styled(FlexColumn)`

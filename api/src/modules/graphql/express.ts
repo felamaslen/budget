@@ -16,9 +16,10 @@ import config from '~api/config';
 import { authMiddleware, getUidFromToken, jwtFromRequest } from '~api/modules/auth';
 import { Context as ExecutionContext } from '~api/types/resolver';
 
-const anonymousContext: ExecutionContext = {
+const anonymousContext = {
   user: undefined,
-};
+  session: {},
+} as ExecutionContext;
 
 function getWSContext(ctx: Context<Extra>): ExecutionContext {
   const apiKey = ctx.connectionParams?.apiKey ?? null;
@@ -38,7 +39,7 @@ function getWSContext(ctx: Context<Extra>): ExecutionContext {
       return anonymousContext;
     }
 
-    return { user: { uid } };
+    return { user: { uid }, session: {} } as ExecutionContext;
   } catch {
     return anonymousContext;
   }
@@ -55,7 +56,7 @@ export async function setupGraphQL(app: Express, server: Server): Promise<() => 
     }),
   );
 
-  app.get('/introspection', authMiddleware(), (_, res) => {
+  app.get('/introspection', authMiddleware, (_, res) => {
     res.send(schema);
   });
 

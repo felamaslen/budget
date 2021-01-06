@@ -4,21 +4,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useInitialQuery } from '../gql';
 import { dataRead, errorOpened } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
-import { getHistoryOptions } from '~client/selectors';
+import { isServerSide } from '~client/modules/ssr';
+import type { LocalAppConfig } from '~client/reducers/api';
+import { getAppConfig } from '~client/selectors';
+import { InitialQueryVariables } from '~client/types/gql';
 
-export function useInitialData(): boolean {
+export const getInitialQueryVariables = (appConfig: LocalAppConfig): InitialQueryVariables => ({
+  fundPeriod: appConfig.historyOptions.period,
+  fundLength: appConfig.historyOptions.length,
+});
+
+export function useInitialData(): { loading: boolean; error: string | undefined } {
   const dispatch = useDispatch();
-
-  const historyOptions = useSelector(getHistoryOptions);
+  const appConfig = useSelector(getAppConfig);
 
   const [hasLoaded, setHasLoaded] = useState<boolean>(false);
 
   const [{ data, fetching, error }] = useInitialQuery({
-    variables: {
-      fundPeriod: historyOptions.period,
-      fundLength: historyOptions.length,
-    },
-    pause: hasLoaded,
+    variables: getInitialQueryVariables(appConfig),
+    pause: hasLoaded || isServerSide,
   });
 
   const errorMessage = error?.message;
@@ -29,7 +33,7 @@ export function useInitialData(): boolean {
   }, [dispatch, errorMessage]);
 
   useEffect(() => {
-    if (data && !fetching) {
+    if (!isServerSide && data && !fetching) {
       dispatch(dataRead(data));
       setHasLoaded(true);
     } else {
@@ -37,5 +41,5 @@ export function useInitialData(): boolean {
     }
   }, [dispatch, data, fetching]);
 
-  return fetching || !hasLoaded;
+  return { loading: fetching || !hasLoaded, error: errorMessage };
 }

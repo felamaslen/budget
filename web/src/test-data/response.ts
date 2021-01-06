@@ -1,14 +1,9 @@
 import getUnixTime from 'date-fns/getUnixTime';
 
 import { PageNonStandard, PageListStandard } from '~client/types/enum';
-import type { InitialQuery } from '~client/types/gql';
+import { InitialQuery } from '~client/types/gql';
 
 export const testResponse: InitialQuery = {
-  config: {
-    birthDate: '1996-02-03',
-    futureMonths: 12,
-  },
-
   overview: {
     startDate: '2018-10-31T23:59:59.999Z',
     endDate: '2020-04-30T23:59:59.999+0100',

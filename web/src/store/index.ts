@@ -10,4 +10,4 @@ if (process.env.NODE_ENV === 'development') {
   configStore = require('./configureStore.prod').createStore;
 }
 
-export const store: Store<State, Action> = configStore();
+export const store: Store<State, Action> = configStore(window.__PRELOADED_STATE__);

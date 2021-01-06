@@ -11,3 +11,12 @@ export const login = gql`
     }
   }
 `;
+
+export const logout = gql`
+  mutation Logout {
+    logout {
+      error
+      ok
+    }
+  }
+`;

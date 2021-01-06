@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
 
 import { GraphSpending } from '.';
-import { TodayContext } from '~client/hooks';
+import { ResizeContext, TodayContext } from '~client/hooks';
 import { testState as state } from '~client/test-data/state';
 
 describe('<GraphSpending />', () => {
@@ -19,7 +19,9 @@ describe('<GraphSpending />', () => {
     return render(
       <Provider store={store}>
         <TodayContext.Provider value={today}>
-          <GraphSpending />
+          <ResizeContext.Provider value={1032}>
+            <GraphSpending />
+          </ResizeContext.Provider>
         </TodayContext.Provider>
       </Provider>,
     );

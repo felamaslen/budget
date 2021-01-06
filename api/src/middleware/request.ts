@@ -1,21 +1,19 @@
 import boom from '@hapi/boom';
 import { Schema } from '@hapi/joi';
-import { Response, NextFunction, RequestHandler } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { withSlonik } from '~api/modules/db';
 import { catchAsyncErrors } from '~api/modules/error-handling';
-import { AuthenticatedRequest } from '~api/types/resolver';
 
 export const authDbRoute = (
   handler: (
     db: DatabaseTransactionConnectionType,
-    req: AuthenticatedRequest,
+    req: Request,
     res: Response,
     next: NextFunction,
   ) => Promise<void>,
-): RequestHandler =>
-  catchAsyncErrors(withSlonik<void, [AuthenticatedRequest, Response, NextFunction]>(handler));
+): RequestHandler => catchAsyncErrors(withSlonik<void, [Request, Response, NextFunction]>(handler));
 
 export const validatedAuthDbRoute = <
   D extends Record<string, unknown> | void = void,
@@ -29,7 +27,7 @@ export const validatedAuthDbRoute = <
   }>,
   handler: (
     db: DatabaseTransactionConnectionType,
-    req: AuthenticatedRequest,
+    req: Request,
     res: Response,
     data: D,
     params: P,

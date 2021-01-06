@@ -14,10 +14,10 @@ import { getFundsRows, getFundsCache, PriceCache } from './helpers';
 import { getTotalCost, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
+import { getAppConfig } from '~client/selectors/api';
 import { getCostForMonthSoFar } from '~client/selectors/overview';
 import type {
   Data,
-  HistoryOptions,
   Id,
   TransactionNative as Transaction,
   Portfolio,
@@ -30,8 +30,7 @@ export * from './graph';
 export * from './helpers';
 export * from './lines';
 
-export const getHistoryOptions = (state: Pick<State, PageNonStandard.Funds>): HistoryOptions =>
-  state.funds.historyOptions;
+export const getHistoryOptions = createSelector(getAppConfig, (config) => config.historyOptions);
 
 export function getFundsCachedValueAgeText(
   startTime: number,

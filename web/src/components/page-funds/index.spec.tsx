@@ -23,6 +23,13 @@ import { PageNonStandard } from '~client/types/enum';
 describe('<PageFunds />', () => {
   const state: State = {
     ...testState,
+    api: {
+      ...testState.api,
+      appConfig: {
+        ...testState.api.appConfig,
+        historyOptions: fundPeriods.month3.query,
+      },
+    },
     [PageNonStandard.Funds]: {
       ...testState[PageNonStandard.Funds],
       items: [
@@ -63,7 +70,6 @@ describe('<PageFunds />', () => {
         },
       ],
       viewSoldFunds: true,
-      historyOptions: fundPeriods.month3.query,
       startTime: getUnixTime(new Date('2019-04-10')),
       cacheTimes: [0, 86400, 86400 * 3.5],
       prices: {
@@ -323,10 +329,16 @@ describe('<PageFunds />', () => {
 
     const testStateWithMany: State = {
       ...testState,
+      api: {
+        ...testState.api,
+        appConfig: {
+          ...testState.api.appConfig,
+          historyOptions: fundPeriods.month1.query,
+        },
+      },
       [PageNonStandard.Funds]: {
         ...testState[PageNonStandard.Funds],
         items,
-        historyOptions: fundPeriods.month1.query,
         startTime: getUnixTime(new Date('2020-05-01')),
         cacheTimes: [0],
         prices,

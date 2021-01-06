@@ -128,6 +128,9 @@ const routeGet = authDbRoute(async (db, req, res) => {
   if (!pieCols) {
     throw boom.badRequest('unknown category');
   }
+  if (!req.user?.uid) {
+    throw boom.unauthorized();
+  }
 
   const list = await getPieData(db, req.user.uid, pieCols, category as Page);
   res.json({ data: { list } });

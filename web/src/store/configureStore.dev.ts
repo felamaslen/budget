@@ -12,13 +12,16 @@ const logger = createLogger({
   predicate: (_, action: Action) => SKIP_LOG_ACTIONS.indexOf(action.type) === -1,
 });
 
-const createDevStore = (): Store<State> => {
-  const store = compose(applyMiddleware(logger))(createStore)<State, Action>(
+const createDevStore = (preloadedState?: State): Store<State> => {
+  const store = createStore<State, Action, unknown, unknown>(
     rootReducer,
-    window.__REDUX_DEVTOOLS_EXTENSION__ &&
-      window.__REDUX_DEVTOOLS_EXTENSION__({
+    preloadedState,
+    compose(
+      applyMiddleware(logger),
+      window.__REDUX_DEVTOOLS_EXTENSION__?.({
         actionsBlacklist: SKIP_LOG_ACTIONS,
       }),
+    ),
   );
 
   if (module.hot) {

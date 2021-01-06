@@ -12,7 +12,7 @@ import { ErrorLevel } from '~client/constants/error';
 import { colors } from '~client/styled/variables';
 
 export type Props = {
-  onLogin: (pin: number) => void;
+  onLogin?: (pin: number) => void;
   loading: boolean;
 };
 
@@ -47,7 +47,7 @@ export const LoginForm: React.FC<Props> = ({ onLogin, loading }) => {
         0,
       );
       if (pinAsNumber > 999) {
-        onLogin(pinAsNumber);
+        onLogin?.(pinAsNumber);
       } else {
         onWarn('Pin must not start with zero');
       }

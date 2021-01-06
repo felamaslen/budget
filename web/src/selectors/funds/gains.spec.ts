@@ -21,6 +21,13 @@ describe('Funds selectors / gains', () => {
 
   const stateWithGains: State = {
     ...testState,
+    api: {
+      ...testState.api,
+      appConfig: {
+        ...testState.api.appConfig,
+        historyOptions: fundPeriods.year1.query,
+      },
+    },
     [PageNonStandard.Funds]: {
       viewSoldFunds: true,
       cashTarget: 0,
@@ -44,7 +51,6 @@ describe('Funds selectors / gains', () => {
         },
       ],
       __optimistic: [undefined, undefined],
-      historyOptions: fundPeriods.year1.query,
       startTime: getUnixTime(new Date('2019-10-10')),
       cacheTimes: [0, 86400 * 5, 86400 * 32],
       prices: {
@@ -324,11 +330,17 @@ describe('Funds selectors / gains', () => {
     describe('when there are no items', () => {
       const stateNone: State = {
         ...stateWithGains,
+        api: {
+          ...testState.api,
+          appConfig: {
+            ...testState.api.appConfig,
+            historyOptions: fundPeriods.year5.query,
+          },
+        },
         [PageNonStandard.Funds]: {
           ...stateWithGains[PageNonStandard.Funds],
           items: [],
           __optimistic: [],
-          historyOptions: fundPeriods.year5.query,
           startTime: getUnixTime(new Date('2019-10-10')),
           cacheTimes: [0, 86400 * 5, 86400 * 32],
           prices: {
@@ -378,7 +390,6 @@ describe('Funds selectors / gains', () => {
               allocationTarget: 0,
             },
           ],
-          historyOptions: fundPeriods.year1.query,
           prices: {},
         },
       };
@@ -413,7 +424,6 @@ describe('Funds selectors / gains', () => {
               allocationTarget: 0,
             },
           ],
-          historyOptions: fundPeriods.year1.query,
           startTime: getUnixTime(new Date('2019-10-10')),
           cacheTimes: [10],
           prices: {

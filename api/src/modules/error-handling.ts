@@ -1,15 +1,14 @@
 import boom from '@hapi/boom';
 import { RequestHandler, Request, Response, NextFunction } from 'express';
 import logger from '~api/modules/logger';
-import { AuthenticatedRequest } from '~api/types/resolver';
 
-export type CustomRequestHandler<Req = AuthenticatedRequest> = (
+export type CustomRequestHandler<Req = Request> = (
   req: Req,
   res: Response,
   next: NextFunction,
 ) => void | Promise<void>;
 
-export function catchAsyncErrors<Req extends Exclude<Request, 'user'> = AuthenticatedRequest>(
+export function catchAsyncErrors<Req extends Exclude<Request, 'user'> = Request>(
   handler: CustomRequestHandler<Req>,
 ): RequestHandler {
   return async (req, res, next): Promise<void> => {

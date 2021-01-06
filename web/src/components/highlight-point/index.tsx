@@ -46,7 +46,7 @@ export const HighlightPoint: React.FC<Props> = ({
   hoverEffect: { labelWidth = 88, labelX, labelY, labelY2 = labelY },
   hlPoint,
 }) => {
-  if (!(hlPoint && maxY !== minY)) {
+  if (!hlPoint || maxY === minY) {
     return null;
   }
 
@@ -54,6 +54,9 @@ export const HighlightPoint: React.FC<Props> = ({
 
   const posX = Math.floor(calc.pixX(valX)) + 0.5;
   const posY = Math.floor(getPixY(calc, hlPoint.secondary)(valY)) + 0.5;
+  if (Number.isNaN(posX) || Number.isNaN(posY)) {
+    return null;
+  }
 
   const labelHeight = fontSizeX + fontSizeY + 4;
 

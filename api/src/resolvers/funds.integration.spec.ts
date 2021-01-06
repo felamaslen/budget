@@ -1,5 +1,5 @@
-import { gql } from 'apollo-boost';
 import { addHours, getUnixTime } from 'date-fns';
+import gql from 'graphql-tag';
 import sinon from 'sinon';
 
 import config from '~api/config';
@@ -33,7 +33,7 @@ describe('Funds resolver', () => {
 
   type RawDateFund = Omit<FundInput, 'transactions'> & {
     id: number;
-    transactions: RawDate<Transaction>[];
+    transactions: RawDate<Transaction, 'date'>[];
   };
 
   const fundInput: Create<RawDateFund> = {

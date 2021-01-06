@@ -6,10 +6,6 @@ import { authMiddleware } from '~api/modules/auth';
 
 export function handler(): Router {
   const router = Router();
-
-  router.use('/*', authMiddleware());
-
-  router.use('/pie', routePie());
-
+  router.use('/pie', authMiddleware, routePie());
   return router;
 }

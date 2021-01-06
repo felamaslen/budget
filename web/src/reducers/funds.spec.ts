@@ -8,13 +8,12 @@ import {
   cashTargetUpdated,
   dataRead,
   fundPricesUpdated,
-  fundQueryUpdated,
   fundsViewSoldToggled,
   todayPricesFetched,
 } from '~client/actions';
 import { testResponse, testState } from '~client/test-data';
 import type { FundQuotes, GQL } from '~client/types';
-import { FundPeriod, PageNonStandard } from '~client/types/enum';
+import { PageNonStandard } from '~client/types/enum';
 import type { FundHistory, InitialQuery } from '~client/types/gql';
 
 jest.mock('shortid', () => ({
@@ -125,24 +124,6 @@ describe('Funds reducer', () => {
           [numericHash('id-1')]: [{ startIndex: 1, values: [45, 45.6, 44.9] }],
           [numericHash('id-2')]: [{ startIndex: 0, values: [101.2, 100.94, 101.4, 102.03] }],
         },
-      });
-    });
-  });
-
-  describe(ActionTypeFunds.QueryUpdated, () => {
-    it('should set the query', () => {
-      expect.assertions(1);
-      const result = reducer(
-        initialState,
-        fundQueryUpdated({
-          period: FundPeriod.Year,
-          length: 7,
-        }),
-      );
-
-      expect(result.historyOptions).toStrictEqual({
-        period: FundPeriod.Year,
-        length: 7,
       });
     });
   });

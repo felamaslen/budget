@@ -3,16 +3,23 @@
   <head>
     <title>Budget</title>
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-    <% if (process.env.NODE_ENV === 'production') { %>
+    <? if (process.env.NODE_ENV === 'production') { ?>
     <script>
     if(typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ === 'object'){
       window.__REACT_DEVTOOLS_GLOBAL_HOOK__.inject = function(){};
     }
     </script>
-    <% } %>
+    <? } ?>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><?- html ?></div>
+    <script>
+      window.__MOUNT_TIME__ = <?- mountTime ?>;
+      window.__URQL_DATA__ = JSON.parse(<?- ssrData ?>);
+      window.__API_KEY__ = <?- apiKey ?>;
+      window.__PRELOADED_STATE__ = <?- JSON.parse(initialState) ?>;
+    </script>
+    <?- scriptTags ?>
   </body>
 </html>
 

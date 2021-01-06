@@ -1,5 +1,7 @@
-import { gql, FetchResult } from 'apollo-boost';
+import { FetchResult } from 'apollo-boost';
+
 import addDays from 'date-fns/addDays';
+import gql from 'graphql-tag';
 import sinon from 'sinon';
 
 import config from '~api/config';

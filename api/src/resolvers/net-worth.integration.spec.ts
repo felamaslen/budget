@@ -1,6 +1,6 @@
-import { gql } from 'apollo-boost';
 import addMonths from 'date-fns/addMonths';
 import format from 'date-fns/format';
+import gql from 'graphql-tag';
 import sinon from 'sinon';
 
 import config from '~api/config';
@@ -77,6 +77,9 @@ describe('Net worth resolver', () => {
         }),
       ),
     );
+    if (!results.every((res) => res.data?.createNetWorthCategory?.id)) {
+      throw new Error('Error creating categories for test');
+    }
     return results.map((res) => res.data?.createNetWorthCategory?.id as number);
   };
 
@@ -741,7 +744,7 @@ describe('Net worth resolver', () => {
 
     const setupParents = async (): Promise<{
       parents: Parents;
-      entryInput: RawDate<NetWorthEntryInput>;
+      entryInput: RawDate<NetWorthEntryInput, 'date'>;
     }> => {
       const [
         categoryIdBank,
@@ -799,7 +802,7 @@ describe('Net worth resolver', () => {
         },
       };
 
-      const entryInput: RawDate<NetWorthEntryInput> = {
+      const entryInput: RawDate<NetWorthEntryInput, 'date'> = {
         date: '2020-04-14',
         values: [
           {
@@ -1015,10 +1018,10 @@ describe('Net worth resolver', () => {
       describe('sending entry with option values', () => {
         const setupOption = async (): Promise<{
           parents: Parents;
-          entryWithOption: RawDate<NetWorthEntryInput>;
+          entryWithOption: RawDate<NetWorthEntryInput, 'date'>;
         }> => {
           const { parents } = await setupParents();
-          const entryWithOption: RawDate<NetWorthEntryInput> = {
+          const entryWithOption: RawDate<NetWorthEntryInput, 'date'> = {
             date: '2020-04-15',
             values: [
               {
@@ -1095,10 +1098,10 @@ describe('Net worth resolver', () => {
       describe('sending entry with mortgage values', () => {
         const setupMortgage = async (): Promise<{
           parents: Parents;
-          entryWithMortgage: RawDate<NetWorthEntryInput>;
+          entryWithMortgage: RawDate<NetWorthEntryInput, 'date'>;
         }> => {
           const { parents } = await setupParents();
-          const entryWithMortgage: RawDate<NetWorthEntryInput> = {
+          const entryWithMortgage: RawDate<NetWorthEntryInput, 'date'> = {
             date: '2020-04-15',
             values: [
               {
@@ -1229,11 +1232,11 @@ describe('Net worth resolver', () => {
       const setup = async (): Promise<{
         ids: number[];
         res: Maybe<NetWorthEntryOverview>;
-        expectedEntryTemplate: Create<RawDate<NetWorthEntry>>;
+        expectedEntryTemplate: Create<RawDate<NetWorthEntry, 'date'>>;
       }> => {
         const { parents, entryInput } = await setupParents();
 
-        const expectedEntryTemplate: Create<RawDate<NetWorthEntry>> = {
+        const expectedEntryTemplate: Create<RawDate<NetWorthEntry, 'date'>> = {
           date: entryInput.date,
           values: expect.arrayContaining<NetWorthValueObject>([
             expect.objectContaining({
@@ -1296,7 +1299,7 @@ describe('Net worth resolver', () => {
           ],
         };
 
-        const mods: Partial<RawDate<NetWorthEntryInput>>[] = [
+        const mods: Partial<RawDate<NetWorthEntryInput, 'date'>>[] = [
           { date: '2020-04-14' },
           { date: '2020-01-31' },
           {
@@ -1400,7 +1403,7 @@ describe('Net worth resolver', () => {
 
         expect(res?.current).toHaveLength(7);
         expect(res?.current).toStrictEqual(
-          expect.arrayContaining<RawDate<NetWorthEntry>>(
+          expect.arrayContaining<RawDate<NetWorthEntry, 'date'>>(
             [
               {
                 ...expectedEntryTemplate,
@@ -1561,7 +1564,7 @@ describe('Net worth resolver', () => {
         expect.assertions(2);
         const { id, entryInput } = await setup();
 
-        const updatedEntry: Create<RawDate<NetWorthEntryInput>> = {
+        const updatedEntry: Create<RawDate<NetWorthEntryInput, 'date'>> = {
           ...entryInput,
           date: '2020-04-15',
         };
@@ -1587,7 +1590,7 @@ describe('Net worth resolver', () => {
       it('should update a value', async () => {
         expect.assertions(2);
         const { id, entryInput, parents } = await setup();
-        const updatedEntry: Create<RawDate<NetWorthEntryInput>> = {
+        const updatedEntry: Create<RawDate<NetWorthEntryInput, 'date'>> = {
           ...entryInput,
           values: [
             {
@@ -1623,7 +1626,7 @@ describe('Net worth resolver', () => {
       it('should update a credit limit', async () => {
         expect.assertions(2);
         const { id, entryInput, parents } = await setup();
-        const updatedEntry: Create<RawDate<NetWorthEntryInput>> = {
+        const updatedEntry: Create<RawDate<NetWorthEntryInput, 'date'>> = {
           ...entryInput,
           creditLimit: [
             {
@@ -1662,7 +1665,7 @@ describe('Net worth resolver', () => {
       it('should update a currency', async () => {
         expect.assertions(2);
         const { id, entryInput } = await setup();
-        const updatedEntry: Create<RawDate<NetWorthEntryInput>> = {
+        const updatedEntry: Create<RawDate<NetWorthEntryInput, 'date'>> = {
           ...entryInput,
           currencies: [
             {
@@ -1701,7 +1704,7 @@ describe('Net worth resolver', () => {
       it('should update an option price and vested number', async () => {
         expect.assertions(4);
         const { id, entryInput, parents } = await setup();
-        const updatedEntry: Create<RawDate<NetWorthEntryInput>> = {
+        const updatedEntry: Create<RawDate<NetWorthEntryInput, 'date'>> = {
           ...entryInput,
           values: [
             {
@@ -1776,7 +1779,7 @@ describe('Net worth resolver', () => {
         expect.assertions(3);
         const { id, entryInput, parents } = await setup();
 
-        const updateOptionA: Create<RawDate<NetWorthEntryInput>> = {
+        const updateOptionA: Create<RawDate<NetWorthEntryInput, 'date'>> = {
           ...entryInput,
           values: [
             ...entryInput.values,
@@ -1792,7 +1795,7 @@ describe('Net worth resolver', () => {
           ],
         };
 
-        const updateOptionB: Create<RawDate<NetWorthEntryInput>> = {
+        const updateOptionB: Create<RawDate<NetWorthEntryInput, 'date'>> = {
           ...entryInput,
           values: [
             {

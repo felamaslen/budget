@@ -8,7 +8,7 @@ import { replaceAtIndex } from 'replace-array';
 import numericHash from 'string-hash';
 
 import { GraphBalance, Props } from '.';
-import { TodayContext } from '~client/hooks';
+import { ResizeContext, TodayContext } from '~client/hooks';
 import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
 
@@ -56,7 +56,9 @@ describe('<GraphBalance />', () => {
     return render(
       <Provider store={store}>
         <TodayContext.Provider value={now}>
-          <GraphBalance {...props} />
+          <ResizeContext.Provider value={894}>
+            <GraphBalance {...props} />
+          </ResizeContext.Provider>
         </TodayContext.Provider>
       </Provider>,
     );

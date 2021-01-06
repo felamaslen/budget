@@ -46,7 +46,7 @@ const ErrorMessage: React.FC<Message> = ({ id, closed, message: { text, level } 
       closed={closed}
       {...closeEvents}
     >
-      <span>{text}</span>
+      {text}
     </Styled.Message>
   );
 };

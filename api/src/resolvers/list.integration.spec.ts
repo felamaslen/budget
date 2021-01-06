@@ -1,5 +1,5 @@
-import { gql } from 'apollo-boost';
 import { format, addDays } from 'date-fns';
+import gql from 'graphql-tag';
 import sinon from 'sinon';
 
 import { App, getTestApp } from '~api/test-utils/create-server';
@@ -182,8 +182,8 @@ describe('Standard list resolvers', () => {
     }: {
       page: PageList;
       extended: boolean;
-      testItem: RawDate<ListItemStandardInput>;
-      delta: Partial<RawDate<ListItemStandardInput>>;
+      testItem: RawDate<ListItemStandardInput, 'date'>;
+      delta: Partial<RawDate<ListItemStandardInput, 'date'>>;
     }) => {
       const clearDb = async (): Promise<void> => {
         await app.db(page).where({ item: testItem.item }).del();
@@ -204,7 +204,7 @@ describe('Standard list resolvers', () => {
               fakeId: 0,
               input: {
                 ...testItem,
-              } as RawDate<ListItemStandardInput>,
+              } as RawDate<ListItemStandardInput, 'date'>,
             },
           });
           return res.data?.createListItem ?? null;
@@ -535,7 +535,10 @@ describe('Standard list resolvers', () => {
       await app.db('general').where({ uid: app.uid, item: 'Bin liners' }).del();
       await app.db('holiday').where({ uid: app.uid, item: 'Gift card' }).del();
 
-      const res = await app.authGqlClient.mutate<Mutation, RawDate<MutationCreateReceiptArgs>>({
+      const res = await app.authGqlClient.mutate<
+        Mutation,
+        RawDate<MutationCreateReceiptArgs, 'date'>
+      >({
         mutation,
         variables: {
           date,

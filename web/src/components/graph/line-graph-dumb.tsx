@@ -1,6 +1,6 @@
 import React, { useMemo, forwardRef } from 'react';
 
-import { HoverEffect, HLPoint } from './hooks';
+import type { HoverEffect, HLPoint } from './hooks';
 import { RenderedLine } from './rendered-line';
 import { Graph, GraphProps } from './shared';
 import { HighlightPoint } from '~client/components/highlight-point';

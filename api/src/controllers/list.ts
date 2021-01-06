@@ -48,8 +48,8 @@ const hasDate = <I extends Record<string, unknown>>(
   item: I | (I & { date: Date }),
 ): item is I & { date: Date } => Reflect.has(item, 'date');
 
-function withFormattedDate<I extends ListItemStandard | ListItemInput>(item: I): RawDate<I>;
-function withFormattedDate<I extends ListItem | ListItemInput>(item: I): RawDate<I>;
+function withFormattedDate<I extends ListItemStandard | ListItemInput>(item: I): RawDate<I, 'date'>;
+function withFormattedDate<I extends ListItem | ListItemInput>(item: I): RawDate<I, 'date'>;
 function withFormattedDate<I extends Record<string, unknown>>(item: I): Record<string, unknown> {
   if (hasDate(item)) {
     return { ...item, date: formatDate(item.date) };
@@ -118,7 +118,7 @@ async function readListData<I extends ListItemStandard>(
   db: DatabaseTransactionConnectionType,
   uid: number,
   args: QueryReadListArgs | QueryReadListExtendedArgs,
-  typeMap: TypeMap<RawDate<I>>,
+  typeMap: TypeMap<RawDate<I, 'date'>>,
 ): Promise<{
   items: I[];
   total: number;
@@ -200,7 +200,7 @@ export async function createReceipt(
           category: 'varchar',
           shop: 'varchar',
         },
-        group.map<RawDate<ListItemStandardInput>>((item) => ({
+        group.map<RawDate<ListItemStandardInput, 'date'>>((item) => ({
           date: formatDate(args.date),
           item: item.item,
           cost: item.cost,

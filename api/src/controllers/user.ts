@@ -4,8 +4,10 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 import config from '~api/config';
 import { checkLoggedIn, genToken } from '~api/modules/auth';
 import { getPool } from '~api/modules/db';
+import { getIp } from '~api/modules/headers';
 import { getIpLog, removeIpLog, incrementIpLog } from '~api/queries/user';
-import { LoginResponse, IPLog } from '~api/types';
+import type { LoginResponse, LogoutResponse, IPLog } from '~api/types';
+import { Context } from '~api/types/resolver';
 
 const nullIpLog = (now: Date): IPLog => ({ time: now, count: 0 });
 
@@ -38,10 +40,11 @@ async function loginBanCheck(
 }
 
 export const attemptLogin = async (
-  ip: string,
+  ctx: Context,
   pin: number,
   now = new Date(),
 ): Promise<LoginResponse> => {
+  const ip = getIp(ctx);
   const result = await getPool().transaction(
     async (
       db,
@@ -77,6 +80,24 @@ export const attemptLogin = async (
     // If this error is thrown inside the transaction, the whole transaction will be rolled back
     throw result.error;
   }
+  if (!result.response.uid) {
+    throw boom.unauthorized();
+  }
+
+  ctx.session.uid = result.response.uid;
+  ctx.session.apiKey = result.response.apiKey;
+  ctx.session.save();
 
   return result.response;
 };
+
+export const logout = (ctx: Context): Promise<LogoutResponse> =>
+  new Promise((resolve, reject) => {
+    ctx.session.destroy((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve({ ok: true });
+      }
+    });
+  });

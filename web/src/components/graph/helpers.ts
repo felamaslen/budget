@@ -204,11 +204,16 @@ function getLinePathPart(pixels: Data, smooth = false): LineDescription {
 
 export const getDataX = (data: Data): number[] => data.map(([xValue]) => xValue);
 
-export const reduceStack = (stack: GraphStack): Data =>
-  stack[0].map(([xValue], index) => [
+export function reduceStack(stack: GraphStack): Data {
+  if (!stack.length) {
+    return [];
+  }
+  const filledStacks = stack.filter((values) => values.length === stack[0].length);
+  return stack[0].map(([xValue], index) => [
     xValue,
-    stack.reduce<number>((last, individualStack) => last + individualStack[index][1], 0),
+    filledStacks.reduce<number>((last, individualStack) => last + individualStack[index][1], 0),
   ]);
+}
 
 export function getStackedDataY(data: Data, stack?: GraphStack): number[] {
   if (!stack) {
@@ -238,6 +243,9 @@ export function getLinePath({
   pixY2,
 }: LineProps): LineDescription {
   const pixY = getPixY({ pixY1, pixY2 }, secondary);
+  if (Number.isNaN(pixX(0)) || Number.isNaN(pixY(0))) {
+    return [];
+  }
   const getPixPoint: GetPixPoint = ([xValue, yValue]: Point): Point => [pixX(xValue), pixY(yValue)];
   const pixels = getStackedData(data, stack).map(getPixPoint);
   const line = getLinePathPart(pixels, smooth);
@@ -341,13 +349,10 @@ export function getDynamicLinePathsStop({
   const { changes, values } = color;
 
   const getColorIndex = (value: number): number =>
-    changes.reduce((last: number, change: number, index: number): number => {
-      if (value >= change) {
-        return index + 1;
-      }
-
-      return last;
-    }, 0);
+    changes.reduce(
+      (last: number, change: number, index: number): number => (value >= change ? index + 1 : last),
+      0,
+    );
 
   const [items, ends] = data.slice(1).reduce(
     ([lastItems, lastEnds, lastColorIndex], point, index) => {
@@ -381,7 +386,7 @@ export function getDynamicLinePathsStop({
     pixY2,
   });
 
-  return joinChoppedPath(linePath, ends, (end) => values[getColorIndex(items[end - 1][1])]);
+  return joinChoppedPath(linePath, ends, (end) => values[getColorIndex(items[end - 1]?.[1] ?? 0)]);
 }
 
 export function getDynamicLinePaths({

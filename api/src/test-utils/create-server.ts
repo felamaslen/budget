@@ -1,5 +1,6 @@
 import { Server } from 'http';
-import ApolloClient, { PresetConfig, gql } from 'apollo-boost';
+import ApolloClient, { PresetConfig } from 'apollo-boost';
+import axios from 'axios';
 import 'cross-fetch/polyfill';
 import * as Knex from 'knex';
 import moize from 'moize';
@@ -7,7 +8,6 @@ import request, { SuperTest, Test } from 'supertest';
 
 import { db } from './knex';
 import { run } from '~api/index';
-import { Mutation, MutationLoginArgs } from '~api/types';
 
 export type App = {
   db: Knex;
@@ -29,8 +29,10 @@ export const getTestApp = moize.promise(
 
     const agent = request.agent(global.server);
 
+    const graphqlUrl = `http://127.0.0.1:${testPort}/graphql`;
+
     const gqlClientOptions: PresetConfig = {
-      uri: `http://127.0.0.1:${testPort}/graphql`,
+      uri: graphqlUrl,
       onError: (err): void => {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -39,34 +41,36 @@ export const getTestApp = moize.promise(
 
     const gqlClient = new ApolloClient(gqlClientOptions);
 
-    const loginRes = await gqlClient.mutate<Mutation, MutationLoginArgs>({
-      mutation: gql`
-        mutation {
-          login(pin: 1234) {
-            uid
-            apiKey
-          }
-        }
-      `,
-    });
-
-    const uid = loginRes.data?.login.uid;
-    const apiKey = loginRes.data?.login.apiKey;
-
-    if (!(uid && apiKey)) {
-      throw new Error("Couldn't log in prior to integration test");
-    }
+    let cookie = '';
 
     const authGqlClient = new ApolloClient({
       ...gqlClientOptions,
       request: (operation): void => {
         operation.setContext({
           headers: {
-            Authorization: apiKey,
+            Cookie: cookie,
           },
         });
       },
     });
+
+    const loginRes = await axios.post(graphqlUrl, {
+      query: `
+        mutation {
+          login(pin: 1234) {
+            uid
+          }
+        }
+      `,
+    });
+
+    cookie = loginRes.headers['set-cookie']?.[0] ?? '';
+
+    const uid = loginRes.data.data?.login.uid;
+
+    if (!uid) {
+      throw new Error("Couldn't log in prior to integration test");
+    }
 
     return {
       db,

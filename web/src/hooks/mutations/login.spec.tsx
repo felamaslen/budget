@@ -1,4 +1,3 @@
-/* eslint-disable no-proto */
 import { render, fireEvent, act, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -19,7 +18,7 @@ describe('Login hook', () => {
   const createStore = getStore<State>();
 
   const TestComponent: React.FC = () => {
-    const { login, loading, initialLoading, loggedIn, apiKey } = useLogin();
+    const { login, loading, loggedIn, apiKey } = useLogin();
 
     return (
       <div>
@@ -29,7 +28,6 @@ describe('Login hook', () => {
         <span data-testid="hook-result">
           {JSON.stringify({
             loading,
-            initialLoading,
             loggedIn,
             apiKey,
           })}
@@ -135,18 +133,6 @@ describe('Login hook', () => {
         const secondResult = setupLogin();
         assertProp(secondResult, 'loggedIn', true);
       });
-
-      it('should save the pin', () => {
-        expect.assertions(2);
-
-        const setItemSpy = jest.spyOn(window.localStorage.__proto__, 'setItem');
-        setItemSpy.mockClear();
-
-        setupLogin();
-
-        expect(setItemSpy).toHaveBeenCalledTimes(1);
-        expect(setItemSpy).toHaveBeenCalledWith('pin', '1235');
-      });
     });
   });
 
@@ -170,23 +156,5 @@ describe('Login hook', () => {
 
     const result = setup();
     assertProp(result, 'apiKey', 'some-api-key');
-  });
-
-  describe('the initialLoading value', () => {
-    describe('when there is a PIN set in storage', () => {
-      it('should be true', () => {
-        expect.assertions(1);
-        jest.spyOn(window.localStorage.__proto__, 'getItem').mockReturnValueOnce('1234');
-        assertProp(setup(), 'initialLoading', true);
-      });
-    });
-
-    describe('when there is no PIN set in storage', () => {
-      it('should be set to false', async () => {
-        expect.assertions(1);
-        jest.spyOn(window.localStorage.__proto__, 'getItem').mockReturnValueOnce(null);
-        assertProp(setup(), 'initialLoading', false);
-      });
-    });
   });
 });

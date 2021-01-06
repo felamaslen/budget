@@ -183,6 +183,6 @@ const routeGet = validatedAuthDbRoute<void, void, Query>(
 
 export function handler(): Router {
   const router = Router();
-  router.get('/', authMiddleware(), routeGet);
+  router.get('/', authMiddleware, routeGet);
   return router;
 }

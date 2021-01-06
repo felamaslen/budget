@@ -218,6 +218,10 @@ export function blockPacker<T extends Item>(
   height: number,
   items: WithSubTree<T>[],
 ): FlexBlocks<T> {
+  if (width <= 0 || height <= 0) {
+    throw new Error('Width and height must be positive');
+  }
+
   const totalArea = width * height;
 
   const withoutNegative = items

@@ -41,6 +41,7 @@ export const mainSchema = gql`
 
   type Mutation {
     login(pin: Int!): LoginResponse!
+    logout: LogoutResponse!
   }
 
   type Subscription {

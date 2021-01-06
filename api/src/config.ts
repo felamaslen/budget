@@ -29,6 +29,7 @@ export default {
   scrapeTimeout: getenv.int('SCRAPE_TIMEOUT', 30000),
   user: {
     tokenSecret: getenv.string('USER_TOKEN_SECRET', 'somesupersecret'),
+    sessionExpiryDays: getenv.int('SESSION_EXPIRY_DAYS', 30),
     banTime: getenv.int('IP_BAN_TIME', 300) * 1000,
     banLimit: getenv.int('IP_BAN_LIMIT', 60) * 1000,
     banTries: getenv.int('IP_BAN_TRIES', 5),

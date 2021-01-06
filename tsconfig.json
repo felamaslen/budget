@@ -31,6 +31,8 @@
     "migrations"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "ssr/bundle.js",
+    "ssr/bundle.js.map"
   ]
 }

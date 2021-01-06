@@ -1,18 +1,35 @@
+import { createClient, dedupExchange, cacheExchange, fetchExchange, ssrExchange } from '@urql/core';
 import { createClient as createWSClient } from 'graphql-ws';
-import moize from 'moize';
-import React from 'react';
-import { Client, createClient, defaultExchanges, Provider, subscriptionExchange } from 'urql';
+import React, { useMemo } from 'react';
+import { Client, Provider, subscriptionExchange } from 'urql';
 
-import { Spinner } from '~client/components/spinner';
-import { ApiContext } from '~client/hooks';
+import { isServerSide } from '~client/modules/ssr';
 
-const isSecure = window.location.protocol === 'https:';
-const wsUrl = `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
+const isSecure = isServerSide ? null : window.location.protocol === 'https:';
+const wsUrl = isServerSide
+  ? ''
+  : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
 
-type LoggedInProps = { apiKey: string };
+export type SSRExchange = ReturnType<typeof ssrExchange>;
 
-const getClient = moize(
-  (apiKey: string): Client => {
+type ClientProps = { apiKey: string | null };
+
+export const ssr = isServerSide
+  ? undefined
+  : ssrExchange({
+      isClient: true,
+      initialState: window.__URQL_DATA__,
+    });
+
+export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children }) => {
+  const client = useMemo<Client>(() => {
+    if (!apiKey) {
+      return createClient({
+        url: '/graphql',
+        exchanges: [dedupExchange, cacheExchange, ssr as SSRExchange, fetchExchange],
+      });
+    }
+
     const wsClient = createWSClient({
       url: wsUrl,
       retryAttempts: Infinity,
@@ -31,7 +48,10 @@ const getClient = moize(
         },
       },
       exchanges: [
-        ...defaultExchanges,
+        dedupExchange,
+        cacheExchange,
+        ssr as SSRExchange,
+        fetchExchange,
         subscriptionExchange({
           forwardSubscription: (operation) => ({
             subscribe: (sink): { unsubscribe: () => void } => {
@@ -44,28 +64,7 @@ const getClient = moize(
         }),
       ],
     });
-  },
-  { maxSize: 1 },
-);
+  }, [apiKey]);
 
-export const GQLProviderLoggedIn: React.FC<LoggedInProps> = ({ apiKey, children }) => {
-  const client = getClient(apiKey);
-
-  if (!client) {
-    return <Spinner />;
-  }
-
-  return (
-    <ApiContext.Provider value={apiKey}>
-      <Provider value={client}>{children}</Provider>
-    </ApiContext.Provider>
-  );
+  return <Provider value={client}>{children}</Provider>;
 };
-
-const anonymousClient = createClient({
-  url: '/graphql',
-});
-
-export const GQLProviderAnonymous: React.FC = ({ children }) => (
-  <Provider value={anonymousClient}>{children}</Provider>
-);

@@ -325,7 +325,7 @@ export const getNetWorthTable = createSelector(
   ) =>
     compose(
       withTableProps,
-      withFTI(appConfig.birthDate),
+      withFTI(new Date(appConfig.birthDate)),
       withSpend(dates, getSpendingColumn(dates)(costMap).spending),
       withTypeSplit(categories, subcategories),
       withAggregates(categories, subcategories),

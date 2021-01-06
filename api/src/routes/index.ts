@@ -11,8 +11,8 @@ export default function handler(): Router {
 
   router.use('/data', data());
 
-  router.use('/pivot-table', authMiddleware(), pivotTable());
-  router.use('/preview', authMiddleware(), preview());
+  router.use('/pivot-table', authMiddleware, pivotTable());
+  router.use('/preview', authMiddleware, preview());
 
   return router;
 }

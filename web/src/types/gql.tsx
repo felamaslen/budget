@@ -164,9 +164,197 @@ export type QueryStockPricesArgs = {
 
 export type AppConfig = {
   __typename?: 'AppConfig';
-  birthDate: Scalars['Date'];
+  birthDate: Scalars['String'];
   pieTolerance: Scalars['Float'];
   futureMonths: Scalars['Int'];
+  fundPeriod?: Maybe<FundPeriod>;
+  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type AppConfigInput = {
+  birthDate?: Maybe<Scalars['Date']>;
+  pieTolerance?: Maybe<Scalars['Float']>;
+  futureMonths?: Maybe<Scalars['Int']>;
+  fundPeriod?: Maybe<FundPeriod>;
+  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  createFund?: Maybe<CrudResponseCreate>;
+  createListItem?: Maybe<CrudResponseCreate>;
+  createNetWorthCategory?: Maybe<CrudResponseCreate>;
+  createNetWorthEntry?: Maybe<CrudResponseCreate>;
+  createNetWorthSubcategory?: Maybe<CrudResponseCreate>;
+  createReceipt?: Maybe<ReceiptCreated>;
+  deleteFund?: Maybe<CrudResponseDelete>;
+  deleteListItem?: Maybe<CrudResponseDelete>;
+  deleteNetWorthCategory?: Maybe<CrudResponseDelete>;
+  deleteNetWorthEntry?: Maybe<CrudResponseDelete>;
+  deleteNetWorthSubcategory?: Maybe<CrudResponseDelete>;
+  login: LoginResponse;
+  logout: LogoutResponse;
+  setConfig?: Maybe<AppConfig>;
+  updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
+  updateFund?: Maybe<CrudResponseUpdate>;
+  updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
+  updateListItem?: Maybe<CrudResponseUpdate>;
+  updateNetWorthCategory?: Maybe<CrudResponseUpdate>;
+  updateNetWorthEntry?: Maybe<CrudResponseUpdate>;
+  updateNetWorthSubcategory?: Maybe<CrudResponseUpdate>;
+};
+
+
+export type MutationCreateFundArgs = {
+  fakeId: Scalars['Int'];
+  input: FundInput;
+};
+
+
+export type MutationCreateListItemArgs = {
+  page: PageListStandard;
+  fakeId: Scalars['Int'];
+  input: ListItemStandardInput;
+};
+
+
+export type MutationCreateNetWorthCategoryArgs = {
+  input: NetWorthCategoryInput;
+};
+
+
+export type MutationCreateNetWorthEntryArgs = {
+  input: NetWorthEntryInput;
+};
+
+
+export type MutationCreateNetWorthSubcategoryArgs = {
+  input: NetWorthSubcategoryInput;
+};
+
+
+export type MutationCreateReceiptArgs = {
+  date: Scalars['Date'];
+  shop: Scalars['String'];
+  items: Array<ReceiptInput>;
+};
+
+
+export type MutationDeleteFundArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteListItemArgs = {
+  page: PageListStandard;
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteNetWorthCategoryArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteNetWorthEntryArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteNetWorthSubcategoryArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationLoginArgs = {
+  pin: Scalars['Int'];
+};
+
+
+export type MutationSetConfigArgs = {
+  config: AppConfigInput;
+};
+
+
+export type MutationUpdateCashAllocationTargetArgs = {
+  target: Scalars['NonNegativeInt'];
+};
+
+
+export type MutationUpdateFundArgs = {
+  id: Scalars['Int'];
+  input: FundInput;
+};
+
+
+export type MutationUpdateFundAllocationTargetsArgs = {
+  deltas: Array<TargetDelta>;
+};
+
+
+export type MutationUpdateListItemArgs = {
+  page: PageListStandard;
+  id: Scalars['Int'];
+  input: ListItemStandardInput;
+};
+
+
+export type MutationUpdateNetWorthCategoryArgs = {
+  id: Scalars['Int'];
+  input: NetWorthCategoryInput;
+};
+
+
+export type MutationUpdateNetWorthEntryArgs = {
+  id: Scalars['Int'];
+  input: NetWorthEntryInput;
+};
+
+
+export type MutationUpdateNetWorthSubcategoryArgs = {
+  id: Scalars['Int'];
+  input: NetWorthSubcategoryInput;
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  cashAllocationTargetUpdated: Scalars['NonNegativeInt'];
+  configUpdated: AppConfig;
+  fundAllocationTargetsUpdated: UpdatedFundAllocationTargets;
+  fundCreated: FundCreateUpdate;
+  fundDeleted: FundDelete;
+  fundPricesUpdated?: Maybe<FundHistory>;
+  fundUpdated: FundCreateUpdate;
+  heartbeat: Heartbeat;
+  listItemCreated: ListItemCreateUpdate;
+  listItemDeleted: ListItemDelete;
+  listItemUpdated: ListItemCreateUpdate;
+  netWorthCategoryCreated: NetWorthCategoryCreated;
+  netWorthCategoryDeleted: NetWorthDeleted;
+  netWorthCategoryUpdated: NetWorthCategoryUpdated;
+  netWorthEntryCreated: NetWorthEntryCreated;
+  netWorthEntryDeleted: NetWorthDeleted;
+  netWorthEntryUpdated: NetWorthEntryUpdated;
+  netWorthSubcategoryCreated: NetWorthSubcategoryCreated;
+  netWorthSubcategoryDeleted: NetWorthDeleted;
+  netWorthSubcategoryUpdated: NetWorthSubcategoryUpdated;
+  receiptCreated: ReceiptCreated;
+};
+
+
+export type SubscriptionFundPricesUpdatedArgs = {
+  period?: Maybe<FundPeriod>;
+  length?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+
+export type SubscriptionListItemCreatedArgs = {
+  pages: Array<PageListStandard>;
+};
+
+
+export type SubscriptionListItemUpdatedArgs = {
+  pages: Array<PageListStandard>;
 };
 
 export type Transaction = {
@@ -267,136 +455,6 @@ export type StockPricesResponse = {
   prices: Array<StockPrice>;
 };
 
-export type Mutation = {
-  __typename?: 'Mutation';
-  createFund?: Maybe<CrudResponseCreate>;
-  createListItem?: Maybe<CrudResponseCreate>;
-  createNetWorthCategory?: Maybe<CrudResponseCreate>;
-  createNetWorthEntry?: Maybe<CrudResponseCreate>;
-  createNetWorthSubcategory?: Maybe<CrudResponseCreate>;
-  createReceipt?: Maybe<ReceiptCreated>;
-  deleteFund?: Maybe<CrudResponseDelete>;
-  deleteListItem?: Maybe<CrudResponseDelete>;
-  deleteNetWorthCategory?: Maybe<CrudResponseDelete>;
-  deleteNetWorthEntry?: Maybe<CrudResponseDelete>;
-  deleteNetWorthSubcategory?: Maybe<CrudResponseDelete>;
-  login: LoginResponse;
-  updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
-  updateFund?: Maybe<CrudResponseUpdate>;
-  updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
-  updateListItem?: Maybe<CrudResponseUpdate>;
-  updateNetWorthCategory?: Maybe<CrudResponseUpdate>;
-  updateNetWorthEntry?: Maybe<CrudResponseUpdate>;
-  updateNetWorthSubcategory?: Maybe<CrudResponseUpdate>;
-};
-
-
-export type MutationCreateFundArgs = {
-  fakeId: Scalars['Int'];
-  input: FundInput;
-};
-
-
-export type MutationCreateListItemArgs = {
-  page: PageListStandard;
-  fakeId: Scalars['Int'];
-  input: ListItemStandardInput;
-};
-
-
-export type MutationCreateNetWorthCategoryArgs = {
-  input: NetWorthCategoryInput;
-};
-
-
-export type MutationCreateNetWorthEntryArgs = {
-  input: NetWorthEntryInput;
-};
-
-
-export type MutationCreateNetWorthSubcategoryArgs = {
-  input: NetWorthSubcategoryInput;
-};
-
-
-export type MutationCreateReceiptArgs = {
-  date: Scalars['Date'];
-  shop: Scalars['String'];
-  items: Array<ReceiptInput>;
-};
-
-
-export type MutationDeleteFundArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type MutationDeleteListItemArgs = {
-  page: PageListStandard;
-  id: Scalars['Int'];
-};
-
-
-export type MutationDeleteNetWorthCategoryArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type MutationDeleteNetWorthEntryArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type MutationDeleteNetWorthSubcategoryArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type MutationLoginArgs = {
-  pin: Scalars['Int'];
-};
-
-
-export type MutationUpdateCashAllocationTargetArgs = {
-  target: Scalars['NonNegativeInt'];
-};
-
-
-export type MutationUpdateFundArgs = {
-  id: Scalars['Int'];
-  input: FundInput;
-};
-
-
-export type MutationUpdateFundAllocationTargetsArgs = {
-  deltas: Array<TargetDelta>;
-};
-
-
-export type MutationUpdateListItemArgs = {
-  page: PageListStandard;
-  id: Scalars['Int'];
-  input: ListItemStandardInput;
-};
-
-
-export type MutationUpdateNetWorthCategoryArgs = {
-  id: Scalars['Int'];
-  input: NetWorthCategoryInput;
-};
-
-
-export type MutationUpdateNetWorthEntryArgs = {
-  id: Scalars['Int'];
-  input: NetWorthEntryInput;
-};
-
-
-export type MutationUpdateNetWorthSubcategoryArgs = {
-  id: Scalars['Int'];
-  input: NetWorthSubcategoryInput;
-};
-
 export type FundCreateUpdate = {
   __typename?: 'FundCreateUpdate';
   id: Scalars['Int'];
@@ -409,46 +467,6 @@ export type FundDelete = {
   __typename?: 'FundDelete';
   id: Scalars['Int'];
   overviewCost: Array<Scalars['Int']>;
-};
-
-export type Subscription = {
-  __typename?: 'Subscription';
-  cashAllocationTargetUpdated: Scalars['NonNegativeInt'];
-  fundAllocationTargetsUpdated: UpdatedFundAllocationTargets;
-  fundCreated: FundCreateUpdate;
-  fundDeleted: FundDelete;
-  fundPricesUpdated?: Maybe<FundHistory>;
-  fundUpdated: FundCreateUpdate;
-  heartbeat: Heartbeat;
-  listItemCreated: ListItemCreateUpdate;
-  listItemDeleted: ListItemDelete;
-  listItemUpdated: ListItemCreateUpdate;
-  netWorthCategoryCreated: NetWorthCategoryCreated;
-  netWorthCategoryDeleted: NetWorthDeleted;
-  netWorthCategoryUpdated: NetWorthCategoryUpdated;
-  netWorthEntryCreated: NetWorthEntryCreated;
-  netWorthEntryDeleted: NetWorthDeleted;
-  netWorthEntryUpdated: NetWorthEntryUpdated;
-  netWorthSubcategoryCreated: NetWorthSubcategoryCreated;
-  netWorthSubcategoryDeleted: NetWorthDeleted;
-  netWorthSubcategoryUpdated: NetWorthSubcategoryUpdated;
-  receiptCreated: ReceiptCreated;
-};
-
-
-export type SubscriptionFundPricesUpdatedArgs = {
-  period?: Maybe<FundPeriod>;
-  length?: Maybe<Scalars['NonNegativeInt']>;
-};
-
-
-export type SubscriptionListItemCreatedArgs = {
-  pages: Array<PageListStandard>;
-};
-
-
-export type SubscriptionListItemUpdatedArgs = {
-  pages: Array<PageListStandard>;
 };
 
 
@@ -876,6 +894,12 @@ export type LoginResponse = {
   expires?: Maybe<Scalars['DateTime']>;
 };
 
+export type LogoutResponse = {
+  __typename?: 'LogoutResponse';
+  error?: Maybe<Scalars['String']>;
+  ok?: Maybe<Scalars['Boolean']>;
+};
+
 export type FundHistoryPartsFragment = (
   { __typename?: 'FundHistory' }
   & Pick<FundHistory, 'startTime' | 'cacheTimes' | 'annualisedFundReturns' | 'overviewCost'>
@@ -921,6 +945,19 @@ export type NetWorthEntryPartsFragment = (
   )>, currencies: Array<(
     { __typename?: 'Currency' }
     & Pick<Currency, 'currency' | 'rate'>
+  )> }
+);
+
+export type SetConfigMutationVariables = Exact<{
+  config: AppConfigInput;
+}>;
+
+
+export type SetConfigMutation = (
+  { __typename?: 'Mutation' }
+  & { setConfig?: Maybe<(
+    { __typename?: 'AppConfig' }
+    & Pick<AppConfig, 'birthDate' | 'pieTolerance' | 'futureMonths' | 'fundPeriod' | 'fundLength'>
   )> }
 );
 
@@ -1064,6 +1101,17 @@ export type LoginMutation = (
   & { login: (
     { __typename?: 'LoginResponse' }
     & Pick<LoginResponse, 'error' | 'uid' | 'name' | 'apiKey' | 'expires'>
+  ) }
+);
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = (
+  { __typename?: 'Mutation' }
+  & { logout: (
+    { __typename?: 'LogoutResponse' }
+    & Pick<LogoutResponse, 'error' | 'ok'>
   ) }
 );
 
@@ -1269,10 +1317,7 @@ export type InitialQueryVariables = Exact<{
 export type InitialQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'cashAllocationTarget'>
-  & { config?: Maybe<(
-    { __typename?: 'AppConfig' }
-    & Pick<AppConfig, 'birthDate' | 'futureMonths'>
-  )>, overview?: Maybe<(
+  & { overview?: Maybe<(
     { __typename?: 'Overview' }
     & Pick<Overview, 'startDate' | 'endDate' | 'annualisedFundReturns' | 'homeEquityOld'>
     & { cost: (
@@ -1428,6 +1473,17 @@ export type ReceiptItemsQuery = (
     { __typename?: 'ReceiptCategory' }
     & Pick<ReceiptCategory, 'page' | 'item' | 'category'>
   )>> }
+);
+
+export type ConfigUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ConfigUpdatedSubscription = (
+  { __typename?: 'Subscription' }
+  & { configUpdated: (
+    { __typename?: 'AppConfig' }
+    & Pick<AppConfig, 'birthDate' | 'fundPeriod' | 'fundLength'>
+  ) }
 );
 
 export type FundCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
@@ -1788,6 +1844,22 @@ export const NetWorthEntryPartsFragmentDoc = gql`
   }
 }
     `;
+export const SetConfigDocument = gql`
+    mutation SetConfig($config: AppConfigInput!) {
+  setConfig(config: $config) {
+    birthDate
+    pieTolerance
+    futureMonths
+    futureMonths
+    fundPeriod
+    fundLength
+  }
+}
+    `;
+
+export function useSetConfigMutation() {
+  return Urql.useMutation<SetConfigMutation, SetConfigMutationVariables>(SetConfigDocument);
+};
 export const CreateFundDocument = gql`
     mutation CreateFund($fakeId: Int!, $input: FundInput!) {
   createFund(fakeId: $fakeId, input: $input) {
@@ -1907,6 +1979,18 @@ export const LoginDocument = gql`
 
 export function useLoginMutation() {
   return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+};
+export const LogoutDocument = gql`
+    mutation Logout {
+  logout {
+    error
+    ok
+  }
+}
+    `;
+
+export function useLogoutMutation() {
+  return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const CreateNetWorthCategoryDocument = gql`
     mutation CreateNetWorthCategory($input: NetWorthCategoryInput!) {
@@ -2077,10 +2161,6 @@ export function useStockPricesQuery(options: Omit<Urql.UseQueryArgs<StockPricesQ
 };
 export const InitialDocument = gql`
     query Initial($fundPeriod: FundPeriod, $fundLength: NonNegativeInt) {
-  config {
-    birthDate
-    futureMonths
-  }
   overview {
     startDate
     endDate
@@ -2294,6 +2374,19 @@ export const ReceiptItemsDocument = gql`
 
 export function useReceiptItemsQuery(options: Omit<Urql.UseQueryArgs<ReceiptItemsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<ReceiptItemsQuery>({ query: ReceiptItemsDocument, ...options });
+};
+export const ConfigUpdatedDocument = gql`
+    subscription ConfigUpdated {
+  configUpdated {
+    birthDate
+    fundPeriod
+    fundLength
+  }
+}
+    `;
+
+export function useConfigUpdatedSubscription<TData = ConfigUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ConfigUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ConfigUpdatedSubscription, TData>) {
+  return Urql.useSubscription<ConfigUpdatedSubscription, TData, ConfigUpdatedSubscriptionVariables>({ query: ConfigUpdatedDocument, ...options }, handler);
 };
 export const FundCreatedDocument = gql`
     subscription FundCreated {
