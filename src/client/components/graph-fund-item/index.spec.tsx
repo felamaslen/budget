@@ -61,14 +61,14 @@ describe('<GraphFundItem />', () => {
           height: 120px;
         }
 
-        .e1e47zb315:nth-last-of-type(-n + 3) .emotion-0 svg {
+        .ejr3omo15:nth-last-of-type(-n + 3) .emotion-0 svg {
           top: initial;
           bottom: 0;
         }
       }
 
       @media only screen and (min-width: 500px) {
-        .css-4vueu3-Graph {
+        .css-90x6gl-Graph {
           display: inline-block;
           position: static;
           width: 100px;
@@ -77,7 +77,7 @@ describe('<GraphFundItem />', () => {
           box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
 
-        .emotion-1 .css-4vueu3-Graph {
+        .emotion-1 .css-90x6gl-Graph {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -93,13 +93,13 @@ describe('<GraphFundItem />', () => {
         z-index: 2;
       }
 
-      .ea98hsw4 .emotion-2 {
+      .enskbpv4 .emotion-2 {
         position: relative;
         height: 125px;
       }
 
       @media only screen and (min-width: 500px) {
-        .ea98hsw4 .emotion-2 {
+        .enskbpv4 .emotion-2 {
           height: 100%;
         }
       }

@@ -93,7 +93,7 @@ describe('<FundGainInfo />', () => {
           text-align: center;
         }
 
-        .e1e47zb315 .emotion-2 {
+        .ejr3omo15 .emotion-2 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -103,7 +103,7 @@ describe('<FundGainInfo />', () => {
           width: 100%;
         }
 
-        .e1e47zb315 .emotion-2>span {
+        .ejr3omo15 .emotion-2>span {
           padding: 0;
         }
       }

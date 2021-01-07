@@ -1,7 +1,7 @@
 overwrite: true
-schema: "api/src/gql/**/*.ts"
+schema: "src/api/gql/**/*.ts"
 generates:
-  api/src/types/gql.ts:
+  src/api/types/gql.ts:
     config:
       contextType: ~api/types/resolver#Context
       skipTypename: true
@@ -15,8 +15,8 @@ generates:
       - typescript
       - typescript-resolvers
 
-  web/src/types/gql.tsx:
-    documents: web/src/gql/**/*.ts
+  src/client/types/gql.tsx:
+    documents: src/client/gql/**/*.ts
     config:
       scalars:
         Date: string
@@ -29,7 +29,7 @@ generates:
       - typescript-operations
       - typescript-urql
 
-  api/src/introspection.json:
+  src/api/introspection.json:
     plugins:
       - introspection
     config:

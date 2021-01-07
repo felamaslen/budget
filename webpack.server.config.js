@@ -9,13 +9,13 @@ const baseConfig = getBaseConfig(__DEV__);
 
 module.exports = {
   ...baseConfig,
-  entry: './web/src/components/root/index.tsx',
+  entry: './src/client/components/root/index.tsx',
   target: 'node',
   externals: [nodeExternals()],
   devtool: 'source-map',
   output: {
     ...baseConfig.output,
-    path: path.resolve(__dirname, './api/build/ssr'),
+    path: path.resolve(__dirname, './lib/ssr'),
     filename: 'bundle.js',
     library: '[name]',
     libraryExport: 'default',
@@ -25,8 +25,8 @@ module.exports = {
   resolve: {
     ...baseConfig.resolve,
     alias: {
-      '~client': path.resolve(__dirname, './web/src'),
-      '~api': path.resolve(__dirname, './api/src'),
+      '~client': path.resolve(__dirname, './src/client'),
+      '~api': path.resolve(__dirname, './src/api'),
     },
   },
   optimization: {

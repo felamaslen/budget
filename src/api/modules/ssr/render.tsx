@@ -29,11 +29,11 @@ import rootReducer, { State } from '~client/reducers';
 import { InitialDocument, InitialQuery, InitialQueryVariables } from '~client/types/gql';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-unresolved
-const App = require('../../../build/ssr/bundle.js');
+const App = require('../../../../lib/ssr/bundle.js');
 
-const statsFileLegacy = path.resolve(__dirname, '../../../../web/build/loadable-stats-es5.json');
-const statsFileModule = path.resolve(__dirname, '../../../../web/build/loadable-stats-module.json');
-const statsFileDev = path.resolve(__dirname, '../../../../web/build/loadable-stats-dev.json');
+const statsFileLegacy = path.resolve(__dirname, '../../../../static/loadable-stats-es5.json');
+const statsFileModule = path.resolve(__dirname, '../../../../static/loadable-stats-module.json');
+const statsFileDev = path.resolve(__dirname, '../../../../static/loadable-stats-dev.json');
 
 global.window = {
   __MOUNT_TIME__: 0,

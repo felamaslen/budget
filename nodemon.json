@@ -1,6 +1,6 @@
 {
-  "watch": ["api/src"],
+  "watch": ["src/api"],
   "ext": "ts,tsx,js",
-  "ignore": ["api/src/**/*.spec.ts", "web/src/**"],
-  "exec": "NODE_ENV=development BABEL_ENV=node TS_NODE_PROJECT=api/tsconfig.json node --inspect=0.0.0.0 ./api/src/pre-index.js"
+  "ignore": ["src/api/**/*.spec.ts"],
+  "exec": "NODE_ENV=development BABEL_ENV=node node --inspect=0.0.0.0 ./src/api/pre-index.js"
 }

@@ -193,7 +193,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   background: #009918;
 }
 
-.e1rvg2k52 .emotion-8 {
+.e4ltp6k2 .emotion-8 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -211,15 +211,15 @@ exports[`<PageOverview /> should render a table 1`] = `
   grid-column: 4;
 }
 
-.e1rvg2k51 .emotion-8,
-.e1rvg2k51 .emotion-8:hover,
-.e1rvg2k51 .emotion-8:active {
+.e4ltp6k1 .emotion-8,
+.e4ltp6k1 .emotion-8:hover,
+.e4ltp6k1 .emotion-8:active {
   background: none;
   border: none;
   box-shadow: none;
 }
 
-.e1rvg2k51 .emotion-8::after {
+.e4ltp6k1 .emotion-8::after {
   display: block;
   margin-left: 16px;
   content: '';
@@ -277,19 +277,19 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.e1ppss2j5 .emotion-8 {
+.e1w7s03s5 .emotion-8 {
   margin: 2px 4px;
 }
 
-.e1ppss2j17 .emotion-8,
-.e1ppss2j20 .emotion-8 {
+.e1w7s03s17 .emotion-8,
+.e1w7s03s20 .emotion-8 {
   margin: 0 5px;
   -webkit-flex: 0 0 auto;
   -ms-flex: 0 0 auto;
   flex: 0 0 auto;
 }
 
-.e1kq7td41 .emotion-8 {
+.e18ot30j1 .emotion-8 {
   margin: 0 3px;
   top: 0;
   -webkit-flex: 0 0 1.375rem;
@@ -337,24 +337,24 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.e1rvg2k52>.emotion-8 {
+.e4ltp6k2>.emotion-8 {
   grid-row: 1;
   grid-column: 3;
 }
 
-.e658w1i0 .emotion-8 {
+.ekbie0b0 .emotion-8 {
   width: 16px;
   height: 16px;
   font-size: 16px;
   line-height: 16px;
 }
 
-.e1ppss2j5 .emotion-8 {
+.e1w7s03s5 .emotion-8 {
   grid-column: 4;
   margin: 0;
 }
 
-.e1ppss2j17 .emotion-8 {
+.e1w7s03s17 .emotion-8 {
   grid-column: 4;
 }
 
@@ -1483,13 +1483,13 @@ exports[`<PageOverview /> should render graphs 1`] = `
   z-index: 2;
 }
 
-.ea98hsw4 .emotion-2 {
+.enskbpv4 .emotion-2 {
   position: relative;
   height: 125px;
 }
 
 @media only screen and (min-width: 500px) {
-  .ea98hsw4 .emotion-2 {
+  .enskbpv4 .emotion-2 {
     height: 100%;
   }
 }
@@ -1504,7 +1504,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
     box-shadow: 0 3px 10px rgba(0,0,0,0.2);
   }
 
-  .ea3hhp90 .emotion-2 {
+  .ebevqek0 .emotion-2 {
     z-index: 10;
     width: 100px;
     height: 100%;

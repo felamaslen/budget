@@ -5,7 +5,7 @@ set -e
 echo "Checking types..."
 yarn check-types
 
-rm -rf api/build web/build
+rm -rf lib static
 
 export BABEL_ENV=node
 export NODE_ENV=production

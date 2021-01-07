@@ -480,7 +480,7 @@ describe('<AccessibleListStandard />', () => {
           font-weight: bold;
         }
 
-        .e1rvg2k52 .emotion-24 {
+        .e4ltp6k2 .emotion-24 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -498,15 +498,15 @@ describe('<AccessibleListStandard />', () => {
           grid-column: 4;
         }
 
-        .e1rvg2k51 .emotion-24,
-        .e1rvg2k51 .emotion-24:hover,
-        .e1rvg2k51 .emotion-24:active {
+        .e4ltp6k1 .emotion-24,
+        .e4ltp6k1 .emotion-24:hover,
+        .e4ltp6k1 .emotion-24:active {
           background: none;
           border: none;
           box-shadow: none;
         }
 
-        .e1rvg2k51 .emotion-24::after {
+        .e4ltp6k1 .emotion-24::after {
           display: block;
           margin-left: 16px;
           content: '';
@@ -564,7 +564,7 @@ describe('<AccessibleListStandard />', () => {
           }
         }
 
-        .e1ppss2j5 .emotion-24 {
+        .e1w7s03s5 .emotion-24 {
           margin: 2px 4px;
         }
 

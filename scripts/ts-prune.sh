@@ -1,6 +1,6 @@
 #!/bin/bash
 
-output=$(ts-prune -p web/tsconfig.json \
+output=$(ts-prune -p tsconfig.json \
   | grep -v test-data \
   | grep -v types\/index.ts \
   | grep -v selectors\/index.ts \

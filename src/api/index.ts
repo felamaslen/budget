@@ -30,7 +30,7 @@ const hot = process.env.SKIP_APP !== 'true' && process.env.NODE_ENV === 'develop
 function setupProdAssets(app: express.Express): void {
   app.use(
     '/',
-    serveStatic(path.resolve(__dirname, '../../web/build'), {
+    serveStatic(path.resolve(__dirname, '../../static'), {
       maxAge: 3600 * 24 * 100 * 1000,
     }),
   );
@@ -56,11 +56,11 @@ function setupDevAssets(app: express.Express): void {
 }
 
 function setupWebApp(app: express.Express): void {
-  app.set('views', path.join(__dirname, '../../web/src/templates'));
+  app.set('views', path.join(__dirname, '../client/templates'));
   app.set('view engine', 'ejs');
   app.locals.delimiter = '?'; // eslint-disable-line no-param-reassign
 
-  app.use(favicon(path.resolve(__dirname, '../../web/src/images/favicon.png')));
+  app.use(favicon(path.resolve(__dirname, '../client/images/favicon.png')));
 
   const singlePageApp = makeSinglePageApp(hot);
 

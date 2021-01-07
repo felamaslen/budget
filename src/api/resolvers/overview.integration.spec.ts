@@ -94,7 +94,7 @@ describe('Overview resolver', () => {
       expect.assertions(1);
       const res = await setup();
 
-      // see api/src/seeds/test/test-data.ts
+      // see src/api/seeds/test/test-data.ts
       const aug2017ScrapedValue = Math.round(
         123 * (89.095 + 894.134 - 883.229) + 100 * 0 + 50.97 * (1678.42 + 846.38),
       );

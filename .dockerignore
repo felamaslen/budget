@@ -10,5 +10,5 @@ cli
 coverage
 Makefile
 Jenkinsfile
-api/build
-web/build
+lib
+static

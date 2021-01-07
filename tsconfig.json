@@ -16,23 +16,23 @@
     "lib": ["es2015", "dom"],
     "baseUrl": ".",
     "typeRoots": ["./types", "./node_modules/@types"],
+    "outDir": "./lib",
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths"
+      }
+    ],
     "paths": {
-      "~api/*": ["./api/src/*"],
-      "~client/*": ["./web/src/*"]
+      "~api/*": ["./src/api/*"],
+      "~client/*": ["./src/client/*"]
     }
   },
   "include": [
     "types",
-    "web/src",
-    "api/src",
-    "api/migrations",
-    "scripts",
-    "seeds",
-    "migrations"
+    "src"
   ],
   "exclude": [
     "node_modules",
-    "ssr/bundle.js",
-    "ssr/bundle.js.map"
+    "lib"
   ]
 }

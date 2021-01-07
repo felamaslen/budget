@@ -36,8 +36,8 @@ function getPlugins(__DEV__, suffix) {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, './web/src/templates/index.html'),
-          to: path.resolve(__dirname, './web/build'),
+          from: path.resolve(__dirname, './src/client/templates/index.html'),
+          to: path.resolve(__dirname, './static'),
         },
       ],
     }),
@@ -64,7 +64,7 @@ function getPlugins(__DEV__, suffix) {
   return [
     ...common,
     new WorkboxWebpackPlugin.InjectManifest({
-      swSrc: path.resolve(__dirname, './web/src/service-worker.ts'),
+      swSrc: path.resolve(__dirname, './src/client/service-worker.ts'),
       dontCacheBustURLsMatching: /\.[0-9a-f]{8}\./,
       exclude: [/\.map$/, /asset-manifest\.json$/, /LICENSE/],
       maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
@@ -73,7 +73,7 @@ function getPlugins(__DEV__, suffix) {
 }
 
 function getEntry(__DEV__) {
-  const common = ['./web/src/index.tsx'];
+  const common = ['./src/client/index.tsx'];
 
   if (__DEV__) {
     return [
@@ -94,15 +94,15 @@ const getBaseConfig = (__DEV__) => ({
   devtool: __DEV__ ? 'eval-source-map' : false,
   mode: __DEV__ ? 'development' : 'production',
   output: {
-    path: path.resolve(__dirname, './web/build'),
+    path: path.resolve(__dirname, './static'),
     publicPath,
     assetModuleFilename: 'assets/[hash][ext][query]',
   },
   resolve: {
     alias: {
       'react-dom': '@hot-loader/react-dom',
-      '~client': path.resolve(__dirname, './web/src'),
-      '~api': path.resolve(__dirname, './api/src'),
+      '~client': path.resolve(__dirname, './src/client'),
+      '~api': path.resolve(__dirname, './src/api'),
     },
     extensions: ['.ts', '.tsx', '.js'],
   },

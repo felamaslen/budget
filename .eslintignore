@@ -1,4 +1,4 @@
 **/lib/*.js
-api/src/types/gql.ts
-web/src/types/gql.tsx
-web/src/service-worker-registration.ts
+src/api/types/gql.ts
+src/client/types/gql.tsx
+src/client/service-worker-registration.ts
