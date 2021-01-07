@@ -65,7 +65,7 @@ const RootContainer: React.FC<HeaderProps> = ({ onLogout, children, ...props }) 
 };
 
 const Offline: React.FC = () => (
-  <Outer css={{ flexFlow: 'column' }}>
+  <Outer>
     <h2>Offline</h2>
     <BarLoader />
     <h3>Trying to reconnect...</h3>

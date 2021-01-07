@@ -8,12 +8,6 @@ export const PageWrapper = styled.div`
   width: 100%;
   min-height: 0;
 
-  & > div {
-    display: flex;
-    width: 100%;
-    position: relative;
-  }
-
   ${breakpoint(breakpoints.mobile)} {
     margin: 0 auto;
     position: relative;

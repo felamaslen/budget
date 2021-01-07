@@ -17,7 +17,7 @@
       window.__MOUNT_TIME__ = <?- mountTime ?>;
       window.__URQL_DATA__ = JSON.parse(<?- ssrData ?>);
       window.__API_KEY__ = <?- apiKey ?>;
-      window.__PRELOADED_STATE__ = <?- JSON.parse(initialState) ?>;
+      window.__PRELOADED_STATE__ = JSON.parse(<?- initialState ?>);
     </script>
     <?- scriptTags ?>
   </body>

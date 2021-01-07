@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
-import { FlexCenter } from '~client/styled/shared';
 
 import { colors, sizes } from '~client/styled/variables';
 
-export const Outer = styled(FlexCenter)`
+export const Outer = styled.div`
+  align-items: center;
   background: ${colors.translucent.light.mediumLight};
+  display: flex;
   flex-flow: column;
   height: 100%;
   justify-content: center;

@@ -13,15 +13,17 @@ const logger = createLogger({
 });
 
 const createDevStore = (preloadedState?: State): Store<State> => {
+  const enhancers = [
+    applyMiddleware(logger),
+    window.__REDUX_DEVTOOLS_EXTENSION__?.({
+      actionsBlacklist: SKIP_LOG_ACTIONS,
+    }),
+  ].filter(Boolean);
+
   const store = createStore<State, Action, unknown, unknown>(
     rootReducer,
     preloadedState,
-    compose(
-      applyMiddleware(logger),
-      window.__REDUX_DEVTOOLS_EXTENSION__?.({
-        actionsBlacklist: SKIP_LOG_ACTIONS,
-      }),
-    ),
+    compose(...enhancers),
   );
 
   if (module.hot) {

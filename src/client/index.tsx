@@ -1,6 +1,6 @@
 import { loadableReady } from '@loadable/component';
 import React from 'react';
-import { hydrate } from 'react-dom';
+import { hydrate, render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
@@ -11,17 +11,24 @@ import { ClientApp } from '~client/components/root';
 import { store } from '~client/store';
 
 if (process.env.NODE_ENV !== 'test') {
+  const app = (
+    <AppContainer>
+      <Provider store={store}>
+        <BrowserRouter>
+          <ClientApp />
+        </BrowserRouter>
+      </Provider>
+    </AppContainer>
+  );
+
   loadableReady(() => {
-    hydrate(
-      <AppContainer>
-        <Provider store={store}>
-          <BrowserRouter>
-            <ClientApp />
-          </BrowserRouter>
-        </Provider>
-      </AppContainer>,
-      document.getElementById('root'),
-    );
+    const root = document.getElementById('root');
+
+    if (root?.childNodes.length === 0) {
+      render(app, root);
+    } else {
+      hydrate(app, root);
+    }
   });
 }
 

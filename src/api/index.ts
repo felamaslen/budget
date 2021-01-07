@@ -76,7 +76,7 @@ function setupWebApp(app: express.Express): void {
   app.get('/holiday', singlePageApp);
   app.get('/social', singlePageApp);
 
-  app.get('/index.html', (_, res) => res.redirect(301, '/'));
+  app.get('/index.html', makeSinglePageApp(false, true));
 }
 
 function setupLogging(app: express.Express): void {

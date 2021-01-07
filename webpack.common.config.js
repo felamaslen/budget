@@ -115,7 +115,25 @@ const getBaseConfig = (__DEV__) => ({
       {
         test: /service-worker\.ts$/,
         exclude: /node_modules/,
-        use: 'babel-loader',
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  modules: false,
+                  useBuiltIns: 'entry',
+                  corejs: '3',
+                  targets: {
+                    browsers: ['>0.25%', 'not dead'],
+                  },
+                },
+              ],
+            ],
+            plugins: ['@babel/plugin-transform-runtime'],
+          },
+        },
       },
       {
         test: /\.css$/,

@@ -133,12 +133,13 @@ function extractJSX(
   apiKey: string | null,
   client: Client,
   store: Store<State>,
+  offline = false,
 ): JSX.Element[] {
   const RenderedApp = (
     <ReduxProvider store={store}>
       <GQLProvider value={client}>
         <StaticRouter location={req.url}>
-          <App loggedIn={!!apiKey} />
+          <App loggedIn={!!apiKey} offline={offline} />
         </StaticRouter>
       </GQLProvider>
     </ReduxProvider>
@@ -163,7 +164,7 @@ async function preloadData(client: Client, store: Store<State>, jsx: JSX.Element
   ]);
 }
 
-export async function renderApp(req: Request, hot: boolean): Promise<RenderedApp> {
+export async function renderApp(req: Request, hot: boolean, offline = false): Promise<RenderedApp> {
   const statsFiles = hot ? [statsFileDev] : [statsFileLegacy, statsFileModule];
   const extractors = statsFiles.map((statsFile) => new ChunkExtractor({ statsFile }));
 
@@ -174,7 +175,7 @@ export async function renderApp(req: Request, hot: boolean): Promise<RenderedApp
   const { ssr, client } = setupPreloaderClient(apiKey);
   const store = setupStore(req, apiKey);
 
-  const jsx = extractJSX(extractors, req, apiKey, client, store);
+  const jsx = extractJSX(extractors, req, apiKey, client, store, offline);
 
   if (apiKey) {
     await preloadData(client, store, jsx);

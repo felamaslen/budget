@@ -33,10 +33,10 @@ node {
               sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
             },
             "Client unit tests": {
-              sh "docker run --rm ${IMAGE} sh -c 'yarn test:client'"
+              sh "docker run --rm ${IMAGE} sh -c 'yarn test:client:ci'"
             },
             "API unit tests": {
-              sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit'"
+              sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
             }
           ])
         }

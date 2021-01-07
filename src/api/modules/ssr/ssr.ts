@@ -30,15 +30,14 @@ function renderDevApp(req: Request, res: Response, renderedApp: RenderedApp): vo
   res.render('index', { ...renderedApp, scriptTags });
 }
 
-export const makeSinglePageApp = (hot: boolean): RequestHandler =>
-  catchAsyncErrors(
-    async (req: Request, res: Response): Promise<void> => {
-      const renderedApp = await renderApp(req, hot);
+export const makeSinglePageApp = (hot: boolean, offline = false): RequestHandler =>
+  catchAsyncErrors(async (req, res) => {
+    const renderedApp = await renderApp(req, hot, offline);
 
-      if (hot) {
-        renderDevApp(req, res, renderedApp);
-      } else {
-        res.render('index', renderedApp);
-      }
-    },
-  );
+    if (hot) {
+      renderDevApp(req, res, renderedApp);
+    } else {
+      res.set('Cache-control', 'no-store');
+      res.render('index', renderedApp);
+    }
+  });
