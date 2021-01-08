@@ -1,13 +1,14 @@
 import numericHash from 'string-hash';
 
 import {
+  assumedHousePriceInflation,
   getCategories,
-  getSubcategories,
+  getHomeEquity,
+  getNetWorthBreakdown,
   getNetWorthSummary,
   getNetWorthSummaryOld,
   getNetWorthTable,
-  getHomeEquity,
-  assumedHousePriceInflation,
+  getSubcategories,
 } from './net-worth';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
@@ -366,6 +367,15 @@ describe('Overview selectors (net worth)', () => {
           8408748.493954502,
         ]
       `);
+    });
+  });
+
+  describe('getNetWorthBreakdown', () => {
+    it('should return blocks', () => {
+      expect.assertions(1);
+      expect(
+        getNetWorthBreakdown(numericHash('real-entry-id-a'), 100, 100)(state),
+      ).toMatchSnapshot(); // eslint-disable-line jest/prefer-inline-snapshots
     });
   });
 });

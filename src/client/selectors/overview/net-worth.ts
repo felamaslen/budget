@@ -4,6 +4,7 @@ import differenceInYears from 'date-fns/differenceInYears';
 import isSameMonth from 'date-fns/isSameMonth';
 import startOfYear from 'date-fns/startOfYear';
 import moize from 'moize';
+import { darken, saturate } from 'polished';
 import { createSelector } from 'reselect';
 
 import {
@@ -14,12 +15,17 @@ import {
   currentDayIsEndOfMonth,
 } from './common';
 
+import { blockPacker } from '~client/modules/block-packer';
 import { lastInArray, sortByKey } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/config';
+import { colors } from '~client/styled/variables';
 import type {
   AggregateSums,
+  BlockItem,
+  FlexBlocks,
   GQL,
+  Id,
   NetWorthEntryNative,
   NetWorthTableRow as TableRow,
   NetWorthValueObjectNative,
@@ -430,6 +436,48 @@ export const getHomeEquity = moize(
         );
 
         return homeEquityToPresent.concat(forecastHomeEquity);
+      },
+    ),
+  { maxSize: 1 },
+);
+
+export const getNetWorthBreakdown = moize(
+  (id: Id, width: number, height: number) =>
+    createSelector(
+      getEntries,
+      getCategories,
+      getSubcategories,
+      (entries, categories, subcategories): FlexBlocks<BlockItem> | null => {
+        const selectedEntry = entries.find((entry) => entry.id === id);
+        if (!(width && height && selectedEntry)) {
+          return null;
+        }
+
+        const { values, currencies } = selectedEntry;
+
+        const assets = values.filter(
+          filterValuesByCategory(({ type }) => type === NetWorthCategoryType.Asset)(
+            categories,
+            subcategories,
+          ),
+        );
+
+        return blockPacker(width, height, [
+          {
+            name: 'Assets',
+            total: assets.reduce<number>(
+              (last, value) => last + sumComplexValue(value, currencies),
+              0,
+            ),
+            color: compose(darken(0.5), saturate(0.4))(colors.netWorth.assets),
+            subTree: assets.map<BlockItem>((value) => ({
+              name:
+                subcategories.find((compare) => compare.id === value.subcategory)?.subcategory ??
+                'Unknown',
+              total: sumComplexValue(value, currencies),
+            })),
+          },
+        ]);
       },
     ),
   { maxSize: 1 },
