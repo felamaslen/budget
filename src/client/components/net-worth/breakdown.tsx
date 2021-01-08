@@ -57,7 +57,7 @@ export const NetWorthBreakdown: FC<Props> = ({ entry, switchEntry }) => {
       <Styled.TitleContainer>
         <Button onClick={exit}>Back</Button>
         <Button onClick={prevEntry}>Previous</Button>
-        <Styled.Title>{`Net worth breakdown - ${toISO(entry.date)}`}</Styled.Title>
+        <Styled.Title>{`Breakdown - ${toISO(entry.date)}`}</Styled.Title>
         <Button onClick={nextEntry}>Next</Button>
       </Styled.TitleContainer>
       {blocks && <BlockPacker blocks={blocks} status={status} onHover={onHover} />}
