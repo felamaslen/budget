@@ -78,6 +78,8 @@ export const RowSubtitle = styled(Row)``;
 
 export const Column = styled.td<{ item: string }>(
   ({ item }) => css`
+    white-space: nowrap;
+
     ${item === 'date-short' &&
     css`
       font-style: italic;
@@ -90,6 +92,13 @@ export const Column = styled.td<{ item: string }>(
     `};
   `,
 );
+
+export const RowLink = styled.a`
+  cursor: pointer;
+  &::after {
+    content: ' ☛';
+  }
+`;
 
 export const DateQuarter = styled.span`
   font-weight: bold;

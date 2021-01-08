@@ -1,5 +1,7 @@
 import styled from '@emotion/styled';
-import { FlexColumn } from '~client/styled/shared';
+import { rem } from 'polished';
+
+import { Flex, FlexColumn } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
 
 export const BreakdownContainer = styled(FlexColumn)`
@@ -11,11 +13,14 @@ export const BreakdownContainer = styled(FlexColumn)`
   width: 100%;
 `;
 
-export const TitleContainer = styled.div`
+export const TitleContainer = styled(Flex)`
   flex: 0 0 auto;
+  width: 100%;
 `;
 
 export const Title = styled.h3`
+  flex: 1;
+  font-size: ${rem(14)};
   margin: 0;
   text-align: center;
 `;
