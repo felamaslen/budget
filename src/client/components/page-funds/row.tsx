@@ -40,19 +40,28 @@ export const FundRow: React.FC<Props> = ({
   const today = useContext(TodayContext);
   const viewSoldFunds = useSelector(getViewSoldFunds);
   const latestValue = useSelector(getFundsCachedValue.today(today));
+
   const scrapedPrice = gain?.price ?? 0;
   const todayPrice = useSelector(getTodayPrices)[item.id] ?? 0;
+
   const [highlight, setHighlight] = useState<-1 | 1 | 0>(0);
   const highlightTimer = useRef<number>(0);
+  const highlightComparePrice = useRef<number>(scrapedPrice);
+
   useEffect(() => {
-    setHighlight(getHighlight(scrapedPrice, todayPrice));
+    highlightComparePrice.current = scrapedPrice;
+  }, [scrapedPrice]);
+
+  useEffect(() => {
+    setHighlight(getHighlight(highlightComparePrice.current, todayPrice));
+    highlightComparePrice.current = todayPrice;
     highlightTimer.current = window.setTimeout(() => {
       setHighlight(0);
     }, highlightTimeMs + 100);
     return (): void => {
       clearTimeout(highlightTimer.current);
     };
-  }, [scrapedPrice, todayPrice]);
+  }, [todayPrice]);
 
   const { onUpdate } = useListCrudFunds();
 

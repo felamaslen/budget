@@ -1,4 +1,4 @@
-const { getBaseConfig, getPlugins } = require('./webpack.common.config');
+const { getBaseConfig, getPlugins, babelOptionsProd, babelOptionsDev } = require('./webpack.common.config');
 
 const __DEV__ = process.env.NODE_ENV === 'development';
 const baseConfig = getBaseConfig(__DEV__);
@@ -55,27 +55,7 @@ const moduleConfig = {
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  modules: false,
-                  useBuiltIns: 'entry',
-                  corejs: '3',
-                  targets: {
-                    browsers: [
-                      'Chrome >= 60',
-                      'Safari >= 10.1',
-                      'iOS >= 10.3',
-                      'Firefox >= 54',
-                      'Edge >= 15',
-                    ],
-                  },
-                },
-              ],
-            ],
-          },
+          options: babelOptionsProd,
         },
       },
     ],
@@ -98,29 +78,7 @@ const devConfig = {
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: {
-            sourceMaps: 'inline',
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  modules: false,
-                  useBuiltIns: 'entry',
-                  corejs: '3',
-                  targets: {
-                    browsers: [
-                      'Chrome >= 60',
-                      'Safari >= 10.1',
-                      'iOS >= 10.3',
-                      'Firefox >= 54',
-                      'Edge >= 15',
-                    ],
-                  },
-                },
-              ],
-            ],
-            plugins: ['react-hot-loader/babel'],
-          },
+          options: babelOptionsDev,
         },
       },
     ],

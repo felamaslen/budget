@@ -7,9 +7,6 @@ yarn check-types
 
 rm -rf lib static
 
-export BABEL_ENV=node
-export NODE_ENV=production
-
 echo "Building API..."
 yarn build:api:main
 

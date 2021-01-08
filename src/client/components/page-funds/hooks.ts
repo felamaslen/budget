@@ -1,8 +1,6 @@
-// eslint-disable-next-line import/no-unresolved
-import pricesWorker from 'file-loader?name=[name].js!../../workers/prices';
-
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import PricesWorker from 'worker-loader!../../workers/prices'; // eslint-disable-line import/no-unresolved
 
 import { todayPricesFetched } from '~client/actions';
 import { ApiContext } from '~client/hooks';
@@ -12,7 +10,7 @@ import { getFundsRows } from '~client/selectors';
 import type { FundQuotes } from '~client/types';
 import type { StockPricesQuery } from '~client/types/gql';
 
-const worker = isServerSide ? undefined : new Worker(pricesWorker);
+const worker = isServerSide ? undefined : new PricesWorker();
 
 export function useTodayPrices(): void {
   const dispatch = useDispatch();
@@ -57,7 +55,7 @@ export function useTodayPrices(): void {
             ?.price ?? null;
         return price === null ? last : { ...last, [id]: price };
       }, {});
-      dispatch(todayPricesFetched(quotes));
+      dispatch(todayPricesFetched(quotes, prices.stockPrices?.refreshTime ?? null));
     }
   }, [dispatch, funds, prices]);
 }

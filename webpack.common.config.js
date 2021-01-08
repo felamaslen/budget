@@ -89,6 +89,47 @@ function getEntry(__DEV__) {
 
 const publicPath = '/';
 
+const babelOptionsProd = {
+  presets: [
+    [
+      '@babel/preset-env',
+      {
+        modules: false,
+        useBuiltIns: 'entry',
+        corejs: '3',
+        targets: {
+          browsers: ['>0.25%', 'not dead'],
+        },
+      },
+    ],
+  ],
+  plugins: ['@babel/plugin-transform-runtime'],
+};
+
+const babelOptionsDev = {
+  sourceMaps: 'inline',
+  presets: [
+    [
+      '@babel/preset-env',
+      {
+        modules: false,
+        useBuiltIns: 'entry',
+        corejs: '3',
+        targets: {
+          browsers: [
+            'Chrome >= 60',
+            'Safari >= 10.1',
+            'iOS >= 10.3',
+            'Firefox >= 54',
+            'Edge >= 15',
+          ],
+        },
+      },
+    ],
+  ],
+  plugins: ['react-hot-loader/babel'],
+};
+
 const getBaseConfig = (__DEV__) => ({
   entry: getEntry(__DEV__),
   devtool: __DEV__ ? 'eval-source-map' : false,
@@ -117,22 +158,7 @@ const getBaseConfig = (__DEV__) => ({
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  modules: false,
-                  useBuiltIns: 'entry',
-                  corejs: '3',
-                  targets: {
-                    browsers: ['>0.25%', 'not dead'],
-                  },
-                },
-              ],
-            ],
-            plugins: ['@babel/plugin-transform-runtime'],
-          },
+          options: babelOptionsProd,
         },
       },
       {
@@ -155,4 +181,6 @@ const getBaseConfig = (__DEV__) => ({
 module.exports = {
   getPlugins,
   getBaseConfig,
+  babelOptionsProd,
+  babelOptionsDev,
 };
