@@ -1,10 +1,8 @@
 import { compose } from '@typed/compose';
-import getUnixTime from 'date-fns/getUnixTime';
 import { replaceAtIndex } from 'replace-array';
 import { createSelector } from 'reselect';
 
 import { sortByKey } from '~client/modules/data';
-import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { State as CrudState } from '~client/reducers/crud';
 import { withoutDeleted } from '~client/selectors/crud';
@@ -39,52 +37,53 @@ const getFundsScrapedCache = (state: StateSliced): PriceCache => ({
   prices: state.funds.prices,
 });
 
-const getTodayPrices = (state: StateSliced): FundQuotes => state[PageNonStandard.Funds].todayPrices;
+export const getTodayPrices = (state: StateSliced): FundQuotes =>
+  state[PageNonStandard.Funds].todayPrices;
+const getTodayPriceTime = (state: StateSliced): number =>
+  state[PageNonStandard.Funds].todayPriceFetchTime ?? 0;
 
-export const getFundsCache = memoiseNowAndToday((time) =>
-  createSelector(
-    getFundsScrapedCache,
-    getTodayPrices,
-    (cache, quotes): PriceCache => {
-      const latestTime = getUnixTime(time) - cache.startTime;
-      const latestTimeStartIndex = cache.cacheTimes.length - 1;
-      if (!Object.keys(quotes).length) {
-        return cache;
-      }
+export const getFundsCache = createSelector(
+  getFundsScrapedCache,
+  getTodayPrices,
+  getTodayPriceTime,
+  (cache, quotes, latestTime): PriceCache => {
+    const latestTimeStartIndex = cache.cacheTimes.length - 1;
+    if (!Object.keys(quotes).length) {
+      return cache;
+    }
 
-      const allIds = Array.from(new Set([...Object.keys(cache.prices), ...Object.keys(quotes)]));
-      const prices = allIds.reduce<Record<number, FundPriceGroup[]>>((last, id) => {
-        const existingCache: FundPriceGroup[] | undefined = Reflect.get(cache.prices, id);
-        const realTimeQuote: number | null | undefined = Reflect.get(quotes, id);
-        if (existingCache && existingCache.length > 0) {
-          return {
-            ...last,
-            [id]: replaceAtIndex(existingCache, existingCache.length - 1, (prev) => ({
-              ...prev,
-              values: [...prev.values, realTimeQuote ?? prev.values[prev.values.length - 1]],
-            })),
-          };
-        }
-        if (!realTimeQuote) {
-          return last;
-        }
-
+    const allIds = Array.from(new Set([...Object.keys(cache.prices), ...Object.keys(quotes)]));
+    const prices = allIds.reduce<Record<number, FundPriceGroup[]>>((last, id) => {
+      const existingCache: FundPriceGroup[] | undefined = Reflect.get(cache.prices, id);
+      const realTimeQuote: number | null | undefined = Reflect.get(quotes, id);
+      if (existingCache && existingCache.length > 0) {
         return {
           ...last,
-          [id]: [
-            {
-              startIndex: latestTimeStartIndex,
-              values: [realTimeQuote],
-            },
-          ],
+          [id]: replaceAtIndex(existingCache, existingCache.length - 1, (prev) => ({
+            ...prev,
+            values: [...prev.values, realTimeQuote ?? prev.values[prev.values.length - 1]],
+          })),
         };
-      }, {});
+      }
+      if (!realTimeQuote) {
+        return last;
+      }
 
       return {
-        startTime: cache.startTime,
-        cacheTimes: [...cache.cacheTimes, latestTime],
-        prices,
+        ...last,
+        [id]: [
+          {
+            startIndex: latestTimeStartIndex,
+            values: [realTimeQuote],
+          },
+        ],
       };
-    },
-  ),
+    }, {});
+
+    return {
+      startTime: cache.startTime,
+      cacheTimes: [...cache.cacheTimes, latestTime - cache.startTime],
+      prices,
+    };
+  },
 );

@@ -20,6 +20,7 @@ export function getTargets(
   allNetWorth: number[],
   showAll: boolean,
   oldOffset: number,
+  futureMonths: number,
 ): {
   line: Data;
   targetValues: TargetValue[];
@@ -31,7 +32,7 @@ export function getTargets(
 
   const targetValues = targetPeriodYears.map<TargetValue>((years) => ({
     tag: `${years}y`,
-    value: Math.exp(slope * (logValues.length + years * 12) + intercept),
+    value: Math.exp(slope * (logValues.length - futureMonths - 1 + years * 12) + intercept),
   }));
 
   const line = getValuesWithTime(showAll ? points : points.slice(oldOffset), {

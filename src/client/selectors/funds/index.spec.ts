@@ -96,8 +96,8 @@ describe('Funds selectors', () => {
       ${'ageText'}    | ${'7 months ago'}
       ${'gain'}       | ${0.0827}
       ${'gainAbs'}    | ${60780.2}
-      ${'dayGain'}    | ${getDayGain.now(testNow)(state)}
-      ${'dayGainAbs'} | ${getDayGainAbs.now(testNow)(state)}
+      ${'dayGain'}    | ${getDayGain(state)}
+      ${'dayGainAbs'} | ${getDayGainAbs(state)}
     `('should get $prop', ({ prop, expectedValue }) => {
       expect.assertions(1);
       const result = getFundsCachedValue.now(testNow)(state);
@@ -154,8 +154,8 @@ describe('Funds selectors', () => {
       expect(getFundsCachedValue.now(testNow)(stateNoPrice)).toStrictEqual({
         gain: expect.any(Number),
         gainAbs: expect.any(Number),
-        dayGain: getDayGain.now(testNow)(stateNoPrice),
-        dayGainAbs: getDayGainAbs.now(testNow)(stateNoPrice),
+        dayGain: getDayGain(stateNoPrice),
+        dayGainAbs: getDayGainAbs(stateNoPrice),
         value: 399098.2,
         ageText: '7 months ago',
       });

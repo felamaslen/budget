@@ -59,11 +59,19 @@ export const allocationTargetsUpdated = (deltas: TargetDelta[]): AllocationTarge
   deltas,
 });
 
-export type TodayPricesFetched = { type: ActionTypeFunds.TodayPricesFetched; quotes: FundQuotes };
+export type TodayPricesFetched = {
+  type: ActionTypeFunds.TodayPricesFetched;
+  quotes: FundQuotes;
+  refreshTime: string | null;
+};
 
-export const todayPricesFetched = (quotes: FundQuotes): TodayPricesFetched => ({
+export const todayPricesFetched = (
+  quotes: FundQuotes,
+  refreshTime: string | null = null,
+): TodayPricesFetched => ({
   type: ActionTypeFunds.TodayPricesFetched,
   quotes,
+  refreshTime,
 });
 
 export type ActionFunds =

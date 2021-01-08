@@ -1006,7 +1006,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="92"
             >
-              £335k (1y)
+              £9m (1y)
             </text>
             <text
               alignment-baseline="hanging"
@@ -1016,7 +1016,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="114"
             >
-              £21m (3y)
+              £559m (3y)
             </text>
             <text
               alignment-baseline="hanging"
@@ -1026,7 +1026,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="136"
             >
-              £1bn (5y)
+              £35bn (5y)
             </text>
           </g>
           <g>

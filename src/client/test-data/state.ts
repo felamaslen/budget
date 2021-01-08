@@ -264,6 +264,7 @@ export const testState: State = {
     cacheTimes: funds.testCacheTimes,
     prices: funds.testPrices,
     todayPrices: {},
+    todayPriceFetchTime: null,
   },
   [PageListStandard.Income]: {
     items: [],

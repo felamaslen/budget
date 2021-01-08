@@ -24,7 +24,7 @@ import {
 } from '~client/hooks';
 import { VOID } from '~client/modules/data';
 import { reset } from '~client/styled/reset';
-import { Main } from '~client/styled/shared';
+import { Main, PageWrapper } from '~client/styled/shared';
 import { useLogoutMutation } from '~client/types/gql';
 
 const LoggedIn = hot(
@@ -57,7 +57,7 @@ const RootContainer: React.FC<HeaderProps> = ({ onLogout, children, ...props }) 
           <Global styles={reset} />
           <Header {...props} onLogout={logout} />
           <ErrorMessages />
-          {children}
+          <PageWrapper>{children}</PageWrapper>
         </Main>
       </TodayContext.Provider>
     </ResizeContext.Provider>

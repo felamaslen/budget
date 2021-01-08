@@ -1,19 +1,14 @@
 import fromUnixTime from 'date-fns/fromUnixTime';
+import moize from 'moize';
 import React, { useContext, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { AfterCanvas } from './after-canvas';
+import { AfterCanvas, ToggleList } from './after-canvas';
 import * as Styled from './styles';
 
 import { errorOpened, fundPricesUpdated, fundQueryUpdated } from '~client/actions';
 import { FundWeights } from '~client/components/fund-weights';
-import {
-  LineGraph,
-  LineGraphProps,
-  TimeAxes,
-  LabelY,
-  useGraphWidth,
-} from '~client/components/graph';
+import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
 import { HoverEffect } from '~client/components/graph/hooks';
 import { ErrorLevel } from '~client/constants/error';
 import {
@@ -40,31 +35,9 @@ import type {
   Range,
 } from '~client/types';
 
-const PADDING_DESKTOP: Padding = [20, 3, 0, 60];
+const PADDING_DESKTOP: Padding = [20, 3, 0, 12];
+const PADDING_DESKTOP_WITH_SIDEBAR: Padding = [20, 3, 0, 60];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
-
-function makeBeforeLines({
-  startTime,
-  tickSizeY,
-  labelY,
-}: {
-  startTime: number;
-  tickSizeY?: number;
-  labelY: LabelY;
-}): React.FC<DrawProps> {
-  const BeforeLines: React.FC<DrawProps> = (props) => (
-    <TimeAxes
-      {...props}
-      hideMinorTicks
-      yAlign="right"
-      tickSizeY={tickSizeY}
-      labelY={labelY}
-      offset={startTime}
-    />
-  );
-
-  return BeforeLines;
-}
 
 const modeList = Object.values(Mode);
 
@@ -104,8 +77,6 @@ function useDynamicPrices(): [HistoryOptions, (nextQuery: HistoryOptions) => voi
   return [query, setQuery];
 }
 
-type ToggleList = { [id: number]: boolean | null };
-
 function useToggleList(
   fundItems: FundItem[],
 ): [ToggleList, React.Dispatch<React.SetStateAction<ToggleList>>] {
@@ -129,61 +100,41 @@ function useToggleList(
   return [toggleList, setToggleList];
 }
 
-function useGraphProps({
-  width,
-  height,
-  isMobile,
-  mode,
-  today,
-  toggleList,
-}: {
-  width: number;
-  height: number;
-  isMobile: boolean;
-  mode: Mode;
-  today: Date;
-  toggleList: ToggleList;
-}): LineGraphProps {
-  const fundLines: {
-    [mode in Mode]: FundLine[];
-  } = useSelector(getFundLines.today(today));
-
-  const selectedMode = isMobile ? Mode.ROI : mode;
-
-  const { startTime, cacheTimes } = useSelector(getFundsCache.today(today));
-  const haveData = cacheTimes.length > 1;
-
-  const filterFunds = useCallback(
-    ({ id }): boolean => (isMobile ? id === GRAPH_FUNDS_OVERALL_ID : toggleList[id] !== false),
-    [toggleList, isMobile],
-  );
-
-  const lines = useMemo<Line[]>(() => {
-    type Accumulator = [Line[], { [id: number]: number }];
-    const [numberedLines] = fundLines[selectedMode].filter(filterFunds).reduce<Accumulator>(
-      ([last, idCount], { id, color, data }) => [
-        [
-          ...last,
-          {
-            key: `${id}-${idCount[id] || 0}`,
-            data,
-            color,
-            strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
-            smooth: selectedMode !== Mode.Value,
-          },
+const filterLines = moize(
+  (
+    isMobile: boolean,
+    fundLines: Record<Mode, FundLine[]>,
+    mode: Mode,
+    toggleList: ToggleList,
+  ): Line[] => {
+    type Accumulator = [Line[], Record<number, number>];
+    const [numberedLines] = fundLines[mode]
+      .filter(({ id }) => (isMobile ? id === GRAPH_FUNDS_OVERALL_ID : toggleList[id] !== false))
+      .reduce<Accumulator>(
+        ([last, idCount], { id, color, data }) => [
+          [
+            ...last,
+            {
+              key: `${id}-${idCount[id] || 0}`,
+              data,
+              color,
+              strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
+              smooth: mode !== Mode.Value,
+            },
+          ],
+          { ...idCount, [id]: (idCount[id] || 0) + 1 },
         ],
-        { ...idCount, [id]: (idCount[id] || 0) + 1 },
-      ],
-      [[], {}],
-    );
+        [[], {}],
+      );
 
     return numberedLines;
-  }, [fundLines, selectedMode, filterFunds]);
+  },
+  { maxSize: 1 },
+);
 
-  const maxX = lastInArray(cacheTimes) ?? 0;
-
-  const [ranges, tickSizeY] = useMemo((): [Range, number] => {
-    if (!haveData) {
+const getRanges = moize(
+  (lines: Line[], times: number[], mode: Mode): [Range, number] => {
+    if (times.length <= 1) {
       return [
         {
           minX: 0,
@@ -195,12 +146,14 @@ function useGraphProps({
       ];
     }
 
+    const maxX = lastInArray(times) ?? 0;
+
     const valuesY = lines
       .map(({ data }) => data.map(([, yValue]) => yValue))
       .filter((values) => values.length);
 
     let minY = 0;
-    if (selectedMode !== Mode.Value) {
+    if (mode !== Mode.Value) {
       minY = valuesY.reduce(
         (min, line) =>
           Math.min(
@@ -223,7 +176,7 @@ function useGraphProps({
       minY -= 0.5;
       maxY += 0.5;
     }
-    if (selectedMode === Mode.ROI && minY === 0) {
+    if (mode === Mode.ROI && minY === 0) {
       minY = -maxY * 0.2;
     }
 
@@ -244,23 +197,58 @@ function useGraphProps({
       },
       tickSize,
     ];
-  }, [haveData, selectedMode, lines, maxX]);
+  },
+  { maxSize: 1 },
+);
 
-  const { minY, maxY } = ranges;
+const getPadding = moize(
+  (isMobile: boolean, sidebarOpen: boolean): Padding => {
+    if (isMobile) {
+      return PADDING_MOBILE;
+    }
+    return sidebarOpen ? PADDING_DESKTOP_WITH_SIDEBAR : PADDING_DESKTOP;
+  },
+  { maxSize: 1 },
+);
+
+function useGraphProps({
+  width,
+  height,
+  isMobile,
+  mode,
+  today,
+  toggleList,
+}: {
+  width: number;
+  height: number;
+  isMobile: boolean;
+  mode: Mode;
+  today: Date;
+  toggleList: ToggleList;
+}): LineGraphProps {
+  const fundLines = useSelector(getFundLines.today(today));
+  const { startTime, cacheTimes } = useSelector(getFundsCache);
+
+  const selectedMode = isMobile ? Mode.ROI : mode;
+  const lines = filterLines(isMobile, fundLines, selectedMode, toggleList);
+
+  const [ranges, tickSizeY] = getRanges(lines, cacheTimes, selectedMode);
 
   const labelY = useCallback((value) => formatValue(value, selectedMode), [selectedMode]);
 
-  const beforeLines = useMemo<React.FC<DrawProps>>(
-    () =>
-      haveData
-        ? makeBeforeLines({
-            startTime,
-            tickSizeY,
-            labelY,
-          })
-        : (): null => null,
-    [haveData, startTime, tickSizeY, labelY],
-  );
+  const beforeLines = useMemo(() => {
+    const BeforeLines: React.FC<DrawProps> = (props) => (
+      <TimeAxes
+        {...props}
+        hideMinorTicks
+        yAlign="right"
+        tickSizeY={tickSizeY}
+        labelY={labelY}
+        offset={startTime}
+      />
+    );
+    return BeforeLines;
+  }, [startTime, tickSizeY, labelY]);
 
   const labelX = useCallback((value) => formatItem('date', fromUnixTime(value + startTime)), [
     startTime,
@@ -280,11 +268,7 @@ function useGraphProps({
     isMobile,
     width,
     height,
-    padding: isMobile ? PADDING_MOBILE : PADDING_DESKTOP,
-    minX: 0,
-    maxX,
-    minY,
-    maxY,
+    ...ranges,
     beforeLines,
     lines,
     hoverEffect,
@@ -299,6 +283,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
 
   const [historyOptions, setHistoryOptions] = useDynamicPrices();
   const [mode, changeMode] = usePersistentState<Mode>(modeList[0], 'graph_funds_mode');
+  const [sidebarOpen, setSidebarOpen] = usePersistentState<boolean>(false, 'funds_sidebar_open');
   const [toggleList, setToggleList] = useToggleList(fundItems);
   const graphProps = useGraphProps({
     width,
@@ -312,18 +297,23 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   return (
     <Styled.Container>
       <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
-        {graphProps.minX !== graphProps.maxX && <LineGraph {...graphProps} />}
-        <AfterCanvas
-          isMobile={isMobile}
-          historyOptions={historyOptions}
-          modeList={modeList}
-          mode={mode}
-          changeMode={changeMode}
-          fundItems={fundItems}
-          toggleList={toggleList}
-          setToggleList={setToggleList}
-          changePeriod={setHistoryOptions}
-        />
+        {graphProps.minX !== graphProps.maxX && (
+          <LineGraph {...graphProps} padding={getPadding(isMobile, sidebarOpen)} />
+        )}
+        {!isMobile && (
+          <AfterCanvas
+            historyOptions={historyOptions}
+            modeList={modeList}
+            mode={mode}
+            changeMode={changeMode}
+            fundItems={fundItems}
+            toggleList={toggleList}
+            setToggleList={setToggleList}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            changePeriod={setHistoryOptions}
+          />
+        )}
       </Styled.GraphFunds>
       {!isMobile && (
         <Styled.GraphFunds width={width} height={height}>

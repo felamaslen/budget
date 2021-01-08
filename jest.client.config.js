@@ -6,6 +6,7 @@ module.exports = {
   roots: ['./src/client'],
   moduleNameMapper: {
     '\\.(jpg|png)': '<rootDir>/src/client/test-utils/file-loader.js',
+    '^file-loader': '<rootDir>/src/client/__mocks__/file-mock.js',
     ...baseConfig.moduleNameMapper,
   },
   testMatch: ['**/*.spec.ts?(x)'],

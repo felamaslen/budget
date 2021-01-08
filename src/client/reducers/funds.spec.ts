@@ -1,3 +1,4 @@
+import { getUnixTime } from 'date-fns';
 import numericHash from 'string-hash';
 
 import reducer, { State, initialState } from './funds';
@@ -185,22 +186,53 @@ describe('Funds reducer', () => {
     const quotes: FundQuotes = {
       17: 1185.32,
     };
-    const action = todayPricesFetched(quotes);
+    const action = todayPricesFetched(quotes, '2020-04-20T13:11:20Z');
+
+    const stateWithExistingTodayPrices: State = {
+      ...initialState,
+      todayPrices: {
+        13: 652.49,
+      },
+    };
 
     it("should set today's prices", () => {
       expect.assertions(1);
-      const result = reducer(
-        {
-          ...initialState,
-          todayPrices: {
-            13: 652.49,
-          },
-        },
-        action,
-      );
+      const result = reducer(stateWithExistingTodayPrices, action);
       expect(result.todayPrices).toStrictEqual({
         13: 652.49,
         17: 1185.32,
+      });
+    });
+
+    it('should set the fetch time', () => {
+      expect.assertions(1);
+      const result = reducer(stateWithExistingTodayPrices, action);
+      expect(result.todayPriceFetchTime).toBe(getUnixTime(new Date('2020-04-20T13:11:20Z')));
+    });
+
+    describe('when every price is the same as the latest existing price', () => {
+      const stateWithScrapedPrices: State = {
+        ...initialState,
+        prices: {
+          11: [{ startIndex: 1, values: [671, 693.2] }],
+          19: [
+            { startIndex: 10, values: [106] },
+            { startIndex: 3, values: [109] },
+          ],
+          21: [{ startIndex: 13, values: [97] }],
+        },
+      };
+
+      const actionNoUpdate = todayPricesFetched({
+        11: 693.2,
+        19: 109,
+      });
+
+      it('should not update the state', () => {
+        expect.assertions(2);
+        const result = reducer(stateWithScrapedPrices, actionNoUpdate);
+        expect(result.todayPrices).toStrictEqual({});
+        expect(result.todayPriceFetchTime).toBeNull();
       });
     });
   });

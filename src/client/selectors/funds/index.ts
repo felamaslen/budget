@@ -49,8 +49,8 @@ export function getFundsCachedValueAgeText(
   return `${humanizeDuration(age, { round: true, largest: 1 })} ago`;
 }
 
-const getFundCacheAge = memoiseNowAndToday((time, key) =>
-  createSelector(getFundsCache[key](time), (cache: PriceCache | undefined) => {
+const getFundCacheAge = memoiseNowAndToday((time) =>
+  createSelector(getFundsCache, (cache: PriceCache | undefined) => {
     if (!cache) {
       return '';
     }
@@ -64,8 +64,8 @@ const getFundCacheAge = memoiseNowAndToday((time, key) =>
 const filterPastTransactions = (today: Date, transactions: Transaction[]): Transaction[] =>
   transactions.filter(({ date }) => isBefore(startOfDay(date), today));
 
-const getTransactionsToDateWithPrices = memoiseNowAndToday((time, key) =>
-  createSelector(getFundsRows, getFundsCache[key](time), (rows, cache) => {
+const getTransactionsToDateWithPrices = memoiseNowAndToday((time) =>
+  createSelector(getFundsRows, getFundsCache, (rows, cache) => {
     const unixTime = getUnixTime(time);
     const priceIndexMax =
       cache.cacheTimes.length -
@@ -157,8 +157,8 @@ export const getFundsCachedValue = memoiseNowAndToday((time, key) =>
   createSelector(
     getTransactionsToDateWithPrices[key](endOfDay(time)),
     getFundCacheAge[key](time),
-    getDayGain[key](time),
-    getDayGainAbs[key](time),
+    getDayGain,
+    getDayGainAbs,
     (funds, ageText, dayGain, dayGainAbs) => {
       const paperValue = funds.reduce<number>(
         (last, { transactions, price }) => last + getPaperValue(transactions, price),

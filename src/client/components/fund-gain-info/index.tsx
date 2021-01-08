@@ -18,15 +18,15 @@ export const formatOptionsRelative = { brackets: true, precision: 2 };
 type Props = {
   rowGains?: GainsForRow;
   isSold: boolean;
-};
+} & Pick<Styled.FundGainInfoProps, 'highlight'>;
 
-export const FundGainInfo: FC<Props> = ({ rowGains, isSold }) => {
+export const FundGainInfo: FC<Props> = ({ rowGains, isSold, highlight }) => {
   if (!rowGains) {
     return null;
   }
   const { value, gain, gainAbs, dayGain, dayGainAbs, color } = rowGains;
   return (
-    <Styled.FundGainInfo gain={gain} isSold={isSold} isRow>
+    <Styled.FundGainInfo gain={gain} isSold={isSold} isRow highlight={highlight}>
       <Styled.Text style={{ backgroundColor: color }}>
         <Styled.Value isRow>{formatCurrency(value, formatOptionsAbsolute)}</Styled.Value>
         <Styled.Breakdown isRow>

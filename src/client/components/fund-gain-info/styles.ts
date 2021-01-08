@@ -1,4 +1,4 @@
-import { css, SerializedStyles } from '@emotion/react';
+import { css, keyframes, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { desaturate, rem } from 'polished';
 
@@ -180,8 +180,24 @@ export const Text = styled.span`
   }
 `;
 
-export const FundGainInfo = styled.span<ProfitProps & SoldProps & { isRow?: boolean }>(
-  ({ isRow, gain, isSold }) => css`
+const priceChangePulse = keyframes`
+from {
+  opacity: 0.8;
+}
+to {
+  opacity: 0;
+}
+`;
+
+export type FundGainInfoProps = {
+  isRow?: boolean;
+  highlight?: -1 | 1 | 0;
+};
+
+export const highlightTimeMs = 10000;
+
+export const FundGainInfo = styled.span<ProfitProps & SoldProps & FundGainInfoProps>(
+  ({ isRow, gain, isSold, highlight = 0 }) => css`
     color: ${profitColor(gain)};
     width: ${isRow ? rem(180) : 'auto'};
 
@@ -192,6 +208,7 @@ export const FundGainInfo = styled.span<ProfitProps & SoldProps & { isRow?: bool
     ${breakpoint(breakpoints.mobile)} {
       display: flex;
       flex: 0 0 ${rem(200)};
+      position: relative;
       z-index: 1;
 
       ${isSold &&
@@ -204,6 +221,17 @@ export const FundGainInfo = styled.span<ProfitProps & SoldProps & { isRow?: bool
           font-weight: normal;
         }
       `}
+
+      &::after {
+        animation: ${priceChangePulse} ${highlightTimeMs}ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
+        background: ${profitColor(highlight)};
+        content: '';
+        display: ${highlight === 0 ? 'none' : 'block'};
+        height: 100%;
+        opacity: 0;
+        position: absolute;
+        width: 100%;
+      }
     }
   `,
 );

@@ -1,17 +1,33 @@
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { Pie } from '../pie';
 import * as Styled from './styles';
 import type { FundProps } from './types';
 import { FundGainInfo } from '~client/components/fund-gain-info';
+import { highlightTimeMs } from '~client/components/fund-gain-info/styles';
 import { GraphFundItem } from '~client/components/graph-fund-item';
 import { TodayContext, useDebouncedState, useListCrudFunds } from '~client/hooks';
-import { getViewSoldFunds, getFundsCachedValue, getMaxAllocationTarget } from '~client/selectors';
+import {
+  getViewSoldFunds,
+  getFundsCachedValue,
+  getMaxAllocationTarget,
+  getTodayPrices,
+} from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import type { FundNative as Fund } from '~client/types';
 
 export type Props = { isMobile: boolean; item: Fund } & Partial<FundProps>;
+
+function getHighlight(yesterdayPrice: number, todayPrice: number): -1 | 1 | 0 {
+  if (!(todayPrice && yesterdayPrice)) {
+    return 0;
+  }
+  if (todayPrice > yesterdayPrice) {
+    return 1;
+  }
+  return todayPrice < yesterdayPrice ? -1 : 0;
+}
 
 export const FundRow: React.FC<Props> = ({
   isMobile,
@@ -24,6 +40,19 @@ export const FundRow: React.FC<Props> = ({
   const today = useContext(TodayContext);
   const viewSoldFunds = useSelector(getViewSoldFunds);
   const latestValue = useSelector(getFundsCachedValue.today(today));
+  const scrapedPrice = gain?.price ?? 0;
+  const todayPrice = useSelector(getTodayPrices)[item.id] ?? 0;
+  const [highlight, setHighlight] = useState<-1 | 1 | 0>(0);
+  const highlightTimer = useRef<number>(0);
+  useEffect(() => {
+    setHighlight(getHighlight(scrapedPrice, todayPrice));
+    highlightTimer.current = window.setTimeout(() => {
+      setHighlight(0);
+    }, highlightTimeMs + 100);
+    return (): void => {
+      clearTimeout(highlightTimer.current);
+    };
+  }, [scrapedPrice, todayPrice]);
 
   const { onUpdate } = useListCrudFunds();
 
@@ -101,7 +130,7 @@ export const FundRow: React.FC<Props> = ({
         <span>{tempAllocationTarget ?? 0}%</span>
       </Styled.TargetAllocation>
       {!!prices && <GraphFundItem name={item.item} sold={isSold} values={prices} />}
-      <FundGainInfo isSold={isSold} rowGains={gain} />
+      <FundGainInfo isSold={isSold} rowGains={gain} highlight={highlight} />
     </Styled.FundRow>
   );
 };

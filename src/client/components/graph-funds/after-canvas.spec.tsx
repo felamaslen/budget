@@ -9,7 +9,6 @@ describe('<AfterCanvas /> (funds graph)', () => {
   const changeMode = jest.fn();
 
   const props: Props = {
-    isMobile: false,
     historyOptions: fundPeriods.month1.query,
     modeList: [Mode.Price, Mode.Value],
     mode: Mode.Price,
@@ -17,6 +16,8 @@ describe('<AfterCanvas /> (funds graph)', () => {
     fundItems: [],
     toggleList: {},
     setToggleList: jest.fn(),
+    sidebarOpen: false,
+    setSidebarOpen: jest.fn(),
     changePeriod,
   };
 

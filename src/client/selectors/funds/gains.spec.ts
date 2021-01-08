@@ -17,8 +17,6 @@ describe('Funds selectors / gains', () => {
     prices: testPrices,
   };
 
-  const testNow = new Date();
-
   const stateWithGains: State = {
     ...testState,
     api: {
@@ -68,6 +66,7 @@ describe('Funds selectors / gains', () => {
         ],
       },
       todayPrices: {},
+      todayPriceFetchTime: null,
     },
   };
 
@@ -125,8 +124,8 @@ describe('Funds selectors / gains', () => {
       });
     });
 
-    it('should set the cost and estimated value', () => {
-      expect.assertions(3);
+    it('should set the cost, price and estimated value', () => {
+      expect.assertions(4);
       const result = getRowGains(
         [
           {
@@ -142,6 +141,7 @@ describe('Funds selectors / gains', () => {
         testCache,
       );
 
+      expect(result[10]?.price).toBeCloseTo(424.1); // see test data
       expect(result[10]?.gainAbs).toBeCloseTo(1302 - 1199);
       expect(result[10]?.value).toBeCloseTo(1302);
       expect(result[10]?.gain).toBeCloseTo((1302 - 1199) / 1199);
@@ -184,6 +184,7 @@ describe('Funds selectors / gains', () => {
   describe('getGainsForRow', () => {
     const rowGains: RowGains = {
       10: {
+        price: 452,
         value: 399098.2,
         gain: -0.0023,
         gainAbs: -902,
@@ -191,21 +192,25 @@ describe('Funds selectors / gains', () => {
         dayGainAbs: 2989,
       },
       3: {
+        price: 193,
         value: 50300,
         gain: 0.1178,
         gainAbs: 5300,
       },
       1: {
+        price: 671,
         value: 80760,
         gain: -0.1027,
         gainAbs: -9240,
       },
       5: {
+        price: 172,
         value: 265622,
         gain: 0.3281,
         gainAbs: 65622,
       },
       6: {
+        price: 88,
         value: 2600,
         gain: 0,
         gainAbs: 0,
@@ -249,7 +254,7 @@ describe('Funds selectors / gains', () => {
       const costLatest = 1199 + 98503 - 130;
       const costPrev = 1199 + 98503;
 
-      expect(getDayGainAbs.now(testNow)(stateWithGains)).toBeCloseTo(
+      expect(getDayGainAbs(stateWithGains)).toBeCloseTo(
         valueLatest - valuePrev - (costLatest - costPrev),
       );
     });
@@ -280,7 +285,7 @@ describe('Funds selectors / gains', () => {
         const costLatest = 1199 + 98503 - 130;
         const costPrev = 1199 + 98503;
 
-        expect(getDayGainAbs.now(testNow)(stateWithMissingLatestPrice)).toBeCloseTo(
+        expect(getDayGainAbs(stateWithMissingLatestPrice)).toBeCloseTo(
           valueLatest - valuePrev - (costLatest - costPrev),
         );
       });
@@ -298,7 +303,7 @@ describe('Funds selectors / gains', () => {
       // on the second cache item, the 2019-10-27 transaction is in the future
       const valuePrev = 345 * 109 + 167 * 57.9;
 
-      expect(getDayGain.now(testNow)(stateWithGains)).toBeCloseTo(
+      expect(getDayGain(stateWithGains)).toBeCloseTo(
         (valueLatest - valuePrev - (costLatest - costPrev)) / valuePrev,
       );
     });
@@ -322,7 +327,7 @@ describe('Funds selectors / gains', () => {
 
       it('should not be NaN', () => {
         expect.assertions(1);
-        const result = getDayGain.now(testNow)(stateOne);
+        const result = getDayGain(stateOne);
         expect(result).not.toBeNaN();
       });
     });
@@ -362,7 +367,7 @@ describe('Funds selectors / gains', () => {
 
       it('should return 0', () => {
         expect.assertions(1);
-        expect(getDayGain.now(testNow)(stateNone)).toBe(0);
+        expect(getDayGain(stateNone)).toBe(0);
       });
     });
 
@@ -396,7 +401,7 @@ describe('Funds selectors / gains', () => {
 
       it('should return 0', () => {
         expect.assertions(1);
-        expect(getDayGain.now(testNow)(stateNoCache)).toBe(0);
+        expect(getDayGain(stateNoCache)).toBe(0);
       });
     });
 
@@ -445,7 +450,7 @@ describe('Funds selectors / gains', () => {
 
       it('should return 0', () => {
         expect.assertions(1);
-        expect(getDayGain.now(testNow)(stateOneItem)).toBe(0);
+        expect(getDayGain(stateOneItem)).toBe(0);
       });
     });
   });

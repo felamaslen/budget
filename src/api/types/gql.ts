@@ -434,6 +434,7 @@ export type StockPrice = {
 export type StockPricesResponse = {
   error?: Maybe<Scalars['String']>;
   prices: Array<StockPrice>;
+  refreshTime?: Maybe<Scalars['DateTime']>;
 };
 
 export type FundCreateUpdate = {
@@ -1281,6 +1282,7 @@ export type StockPriceResolvers<ContextType = Context, ParentType extends Resolv
 export type StockPricesResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['StockPricesResponse'] = ResolversParentTypes['StockPricesResponse']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   prices?: Resolver<Array<ResolversTypes['StockPrice']>, ParentType, ContextType>;
+  refreshTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

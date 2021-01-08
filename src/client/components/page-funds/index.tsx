@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { CashRow } from './cash-row';
@@ -18,7 +18,7 @@ import {
 } from '~client/components/form-field';
 import { GraphFunds } from '~client/components/graph-funds';
 import { makeField, ModalFields } from '~client/components/modal-dialog';
-import { TodayContext, useIsMobile, useListCrudFunds, usePersistentState } from '~client/hooks';
+import { useIsMobile, useListCrudFunds, usePersistentState } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
 import { getFundsCache, getGainsForRow, getPricesForRow, getRowGains } from '~client/selectors';
@@ -79,8 +79,7 @@ const makeSortItems = ({ criteria, direction }: Sort): SortItems => (funds, prop
 export const Funds: React.FC = () => {
   const isMobile = useIsMobile();
   useTodayPrices();
-  const today = useContext(TodayContext);
-  const cache = useSelector(getFundsCache.today(today));
+  const cache = useSelector(getFundsCache);
   const composedSelector = useCallback(
     (items: Fund[]): ComposedProps => {
       const { startTime, cacheTimes, prices } = cache;

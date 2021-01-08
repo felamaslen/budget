@@ -1,4 +1,3 @@
-import { getUnixTime } from 'date-fns';
 import numericHash from 'string-hash';
 
 import { getFundsCache, getFundsRows } from './helpers';
@@ -83,16 +82,16 @@ describe('getFundsCache', () => {
         17: [{ startIndex: 1, values: [989, 1054] }],
       },
       todayPrices: quotes,
+      todayPriceFetchTime: 8876,
     },
   };
 
   it('should combine the scraped cache with the latest values', () => {
     expect.assertions(3);
-    const now = new Date('2020-04-20');
-    const result = getFundsCache.now(now)(stateWithQuotes);
+    const result = getFundsCache(stateWithQuotes);
 
     expect(result.startTime).toBe(123);
-    expect(result.cacheTimes).toStrictEqual([456, 789, getUnixTime(now) - 123]);
+    expect(result.cacheTimes).toStrictEqual([456, 789, 8876 - 123]);
     expect(result.prices).toStrictEqual({
       17: [{ startIndex: 1, values: [989, 1054, 1185.32] }],
     });

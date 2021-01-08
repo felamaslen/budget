@@ -1,13 +1,13 @@
 /* @jsx jsx */
 import { jsx } from '@emotion/react';
 import loadable, { LoadableComponent } from '@loadable/component';
+import { Fragment } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { RouteComponentProps, Route, Switch, withRouter } from 'react-router-dom';
 
 import { Spinner } from '~client/components/spinner';
 import { useInitialData, useSubscriptions } from '~client/hooks';
 import { useAppConfig } from '~client/hooks/config';
-import { PageWrapper } from '~client/styled/shared';
 
 type RouteObject = {
   key: string;
@@ -64,18 +64,14 @@ const Content: React.FC<RouteComponentProps> = () => {
   const { loading, error } = useInitialData();
 
   if (loading) {
-    return (
-      <PageWrapper>
-        <Spinner />
-      </PageWrapper>
-    );
+    return <Spinner />;
   }
   if (error) {
     return null;
   }
 
   return (
-    <PageWrapper>
+    <Fragment>
       <Subscriptions />
       <Switch>
         {routes.map(({ key, ...options }) => (
@@ -83,7 +79,7 @@ const Content: React.FC<RouteComponentProps> = () => {
         ))}
         <Route path="/" component={NotFound} />
       </Switch>
-    </PageWrapper>
+    </Fragment>
   );
 };
 

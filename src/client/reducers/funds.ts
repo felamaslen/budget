@@ -1,3 +1,4 @@
+import getUnixTime from 'date-fns/getUnixTime';
 import { replaceAtIndex } from 'replace-array';
 import {
   Action,
@@ -5,8 +6,9 @@ import {
   ActionTypeFunds,
   ActionApiDataRead,
   AllocationTargetsUpdated,
+  TodayPricesFetched,
 } from '~client/actions';
-import { toNativeFund } from '~client/modules/data';
+import { lastInArray, toNativeFund } from '~client/modules/data';
 import { makeListReducer, onRead, ListState } from '~client/reducers/list';
 import type { FundNative, FundQuotes, GQL } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
@@ -21,6 +23,7 @@ type ExtraState = {
     [fundId: number]: FundPriceGroup[];
   };
   todayPrices: FundQuotes;
+  todayPriceFetchTime: number | null;
 };
 
 export type State = ListState<GQL<FundNative>, ExtraState>;
@@ -34,6 +37,7 @@ export const initialState: State = {
   cacheTimes: [],
   prices: [],
   todayPrices: {},
+  todayPriceFetchTime: null,
 };
 
 const getPriceCache = ({
@@ -89,6 +93,25 @@ const updateAllocationTargets = (state: State, action: AllocationTargetsUpdated)
   ),
 });
 
+function onTodayPricesFetched(state: State, action: TodayPricesFetched): State {
+  const noPricesUpdated = Object.entries(action.quotes).every(([id, latestPrice]) => {
+    const scrapedPrices = state.prices[Number(id)] ?? [];
+    return lastInArray(lastInArray(scrapedPrices)?.values ?? []) === latestPrice;
+  });
+
+  if (noPricesUpdated) {
+    return { ...state, todayPrices: {}, todayPriceFetchTime: null };
+  }
+
+  return {
+    ...state,
+    todayPrices: { ...state.todayPrices, ...action.quotes },
+    todayPriceFetchTime: getUnixTime(
+      action.refreshTime ? new Date(action.refreshTime) : new Date(),
+    ),
+  };
+}
+
 export default function funds(state: State = initialState, action: Action): State {
   switch (action.type) {
     case ActionTypeFunds.ViewSoldToggled:
@@ -100,7 +123,7 @@ export default function funds(state: State = initialState, action: Action): Stat
     case ActionTypeFunds.PricesUpdated:
       return onPeriodLoad(state, action.res);
     case ActionTypeFunds.TodayPricesFetched:
-      return { ...state, todayPrices: { ...state.todayPrices, ...action.quotes } };
+      return onTodayPricesFetched(state, action);
     case ActionTypeApi.DataRead:
       return onReadFunds(state, action);
     default:

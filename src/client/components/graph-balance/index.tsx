@@ -163,6 +163,7 @@ function getGraphData(rawData: RawData, startDate: Date, futureMonths: number): 
     netWorthOldMain.concat(netWorthCombined),
     showAll,
     netWorthOldMain.length,
+    futureMonths,
   );
 
   const lines: Line[] = [

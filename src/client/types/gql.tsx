@@ -453,6 +453,7 @@ export type StockPricesResponse = {
   __typename?: 'StockPricesResponse';
   error?: Maybe<Scalars['String']>;
   prices: Array<StockPrice>;
+  refreshTime?: Maybe<Scalars['DateTime']>;
 };
 
 export type FundCreateUpdate = {
@@ -1301,6 +1302,7 @@ export type StockPricesQuery = (
   { __typename?: 'Query' }
   & { stockPrices?: Maybe<(
     { __typename?: 'StockPricesResponse' }
+    & Pick<StockPricesResponse, 'refreshTime'>
     & { prices: Array<(
       { __typename?: 'StockPrice' }
       & Pick<StockPrice, 'code' | 'price'>
@@ -2152,6 +2154,7 @@ export const StockPricesDocument = gql`
       code
       price
     }
+    refreshTime
   }
 }
     `;

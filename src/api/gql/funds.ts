@@ -84,6 +84,7 @@ export const fundsSchema = gql`
   type StockPricesResponse {
     error: String
     prices: [StockPrice!]!
+    refreshTime: DateTime
   }
 
   extend type Query {

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useMemo } from 'react';
 
 import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
@@ -7,32 +7,27 @@ import { useCTA } from '~client/hooks';
 import { abbreviateFundName } from '~client/modules/finance';
 import type { Id, FundItem, HistoryOptions } from '~client/types';
 
-type ToggleList = {
-  [id: string]: boolean | null;
-};
+export type ToggleList = Record<string, boolean | null>;
 
-type SetToggleList = (getNextToggleList: (prevToggleList: ToggleList) => ToggleList) => void;
+export type Props = Pick<ItemProps, 'toggleList' | 'setToggleList'> & {
+  historyOptions: HistoryOptions;
+  modeList: Mode[];
+  mode: Mode;
+  changeMode: Dispatch<SetStateAction<Mode>>;
+  fundItems: FundItem[];
+  sidebarOpen: boolean;
+  setSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  changePeriod: (query: HistoryOptions) => void;
+};
 
 type ItemProps = {
   numItems: number;
   toggleList: ToggleList;
-  setToggleList: SetToggleList;
+  setToggleList: Dispatch<SetStateAction<ToggleList>>;
   id: Id;
   color: string;
   item: string;
   abbreviate?: boolean;
-};
-
-export type Props = {
-  isMobile: boolean;
-  historyOptions: HistoryOptions;
-  modeList: Mode[];
-  mode: Mode;
-  changeMode: (nextMode: Mode) => void;
-  fundItems: FundItem[];
-  toggleList: ToggleList;
-  setToggleList: SetToggleList;
-  changePeriod: (query: HistoryOptions) => void;
 };
 
 const Item: React.FC<ItemProps> = ({
@@ -57,7 +52,7 @@ const Item: React.FC<ItemProps> = ({
     );
   }, [id, setToggleList, numItems]);
 
-  const events = useCTA(onToggle);
+  const events = useCTA(onToggle, { stopPropagation: true });
 
   return (
     <li {...events}>
@@ -82,7 +77,6 @@ const periodSelectOptions: SelectOptions<HistoryOptions> = Object.values(fundPer
 );
 
 export const AfterCanvas: React.FC<Props> = ({
-  isMobile,
   historyOptions,
   modeList,
   mode,
@@ -90,16 +84,14 @@ export const AfterCanvas: React.FC<Props> = ({
   fundItems,
   toggleList,
   setToggleList,
+  sidebarOpen,
+  setSidebarOpen,
   changePeriod,
 }) => {
   const modeSelectOptions = useMemo<SelectOptions<Mode>>(
     () => modeList.map((internal) => ({ internal })),
     [modeList],
   );
-
-  if (isMobile) {
-    return null;
-  }
 
   return (
     <>
@@ -111,7 +103,11 @@ export const AfterCanvas: React.FC<Props> = ({
         />
         <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
       </Styled.FundModeSwitch>
-      <Styled.FundSidebar tabIndex={-1}>
+      <Styled.FundSidebar
+        tabIndex={-1}
+        isOpen={sidebarOpen}
+        onClick={(): void => setSidebarOpen((last) => !last)}
+      >
         {fundItems &&
           fundItems.map((item: FundItem) => (
             <Item

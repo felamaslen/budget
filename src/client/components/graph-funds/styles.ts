@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
@@ -50,20 +50,27 @@ export const FundModeSwitch = styled(Flex)`
   z-index: 3;
 `;
 
-export const FundSidebar = styled.ul`
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  left: 0;
-  top: ${rem(20)};
-  list-style: none;
-  outline: none;
-  width: ${rem(60)};
-  height: 100%;
+type FundSidebarProps = { isOpen: boolean };
+const fundSidebarStyles = ({ isOpen }: FundSidebarProps): SerializedStyles => css`
   background: linear-gradient(to bottom, ${colors.translucent.dark.dark}, transparent);
-  z-index: 3;
+  height: 100%;
+  left: 0;
+  list-style: none;
+  margin: 0;
+  outline: none;
+  overflow-y: auto;
+  padding: ${rem(4)} 0;
+  position: absolute;
+  top: ${rem(20)};
   transition: 0.3s width ease-in-out;
   user-select: none;
+  width: ${rem(isOpen ? 60 : 12)};
+  z-index: 3;
+
+  &:hover {
+    width: ${rem(60)};
+  }
+
   li {
     line-height: 20px;
     height: 20px;
@@ -75,14 +82,12 @@ export const FundSidebar = styled.ul`
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
   select {
     max-width: 95%;
   }
-
-  ${breakpoint(breakpoints.mobile)} {
-    overflow-y: auto;
-  }
 `;
+export const FundSidebar = styled.ul<FundSidebarProps>(fundSidebarStyles);
 
 export const SidebarCheckbox = styled.span<{
   checked: boolean;

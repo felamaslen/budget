@@ -15,6 +15,7 @@ export const StockPrices = gql`
         code
         price
       }
+      refreshTime
     }
   }
 `;

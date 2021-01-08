@@ -1,19 +1,24 @@
-import { useEffect, useMemo, useRef } from 'react';
+// eslint-disable-next-line import/no-unresolved
+import pricesWorker from 'file-loader?name=[name].js!../../workers/prices';
+
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { todayPricesFetched } from '~client/actions';
-import { useStockPricesQuery } from '~client/hooks/gql';
+import { ApiContext } from '~client/hooks';
 import { getGenericFullSymbol } from '~client/modules/finance';
+import { isServerSide } from '~client/modules/ssr';
 import { getFundsRows } from '~client/selectors';
 import type { FundQuotes } from '~client/types';
+import type { StockPricesQuery } from '~client/types/gql';
 
-const fetchIntervalMs = 30000;
+const worker = isServerSide ? undefined : new Worker(pricesWorker);
 
 export function useTodayPrices(): void {
   const dispatch = useDispatch();
+  const apiKey = useContext(ApiContext);
 
   const funds = useSelector(getFundsRows);
-  const timer = useRef<number>(0);
 
   const codes = useMemo<string[]>(
     () =>
@@ -23,15 +28,29 @@ export function useTodayPrices(): void {
     [funds],
   );
 
-  const [{ data: prices, fetching, stale }, fetchPrices] = useStockPricesQuery({
-    variables: { codes },
-    pause: true,
-  });
+  useEffect(() => {
+    worker?.postMessage({ type: 'start', payload: { apiKey, codes } });
+    return (): void => {
+      worker?.postMessage({ type: 'stop' });
+    };
+  }, [apiKey, codes]);
 
-  const hasCodes = codes.length > 0;
+  const [prices, setPrices] = useState<StockPricesQuery | undefined>();
 
   useEffect(() => {
-    if (prices && !fetching && !stale) {
+    if (worker) {
+      worker.onmessage = (event: MessageEvent<StockPricesQuery>): void => setPrices(event.data);
+    }
+
+    return (): void => {
+      if (worker) {
+        worker.onmessage = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (prices) {
       const quotes = funds.reduce<FundQuotes>((last, { id, item }) => {
         const price =
           prices.stockPrices?.prices.find(({ code }) => code === getGenericFullSymbol(item))
@@ -40,13 +59,5 @@ export function useTodayPrices(): void {
       }, {});
       dispatch(todayPricesFetched(quotes));
     }
-  }, [dispatch, funds, prices, fetching, stale]);
-
-  useEffect(() => {
-    if (hasCodes) {
-      fetchPrices();
-      timer.current = setInterval(fetchPrices, fetchIntervalMs);
-    }
-    return (): void => clearInterval(timer.current);
-  }, [hasCodes, fetchPrices]);
+  }, [dispatch, funds, prices]);
 }

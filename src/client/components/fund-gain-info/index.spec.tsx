@@ -6,6 +6,7 @@ import { FundGainInfo } from '.';
 describe('<FundGainInfo />', () => {
   const props = {
     rowGains: {
+      price: 1023,
       value: 561932,
       gain: 0.3,
       gainAbs: 4030,
@@ -36,6 +37,16 @@ describe('<FundGainInfo />', () => {
     expect.assertions(1);
     const { container } = setup();
     expect(container).toMatchInlineSnapshot(`
+      @keyframes animation-0 {
+        from {
+          opacity: 0.8;
+        }
+
+        to {
+          opacity: 0;
+        }
+      }
+
       .emotion-0 {
         color: #483be4;
         width: 11.25rem;
@@ -56,7 +67,20 @@ describe('<FundGainInfo />', () => {
           -webkit-flex: 0 0 12.5rem;
           -ms-flex: 0 0 12.5rem;
           flex: 0 0 12.5rem;
+          position: relative;
           z-index: 1;
+        }
+
+        .emotion-0::after {
+          -webkit-animation: animation-0 10000ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
+          animation: animation-0 10000ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
+          background: #483be4;
+          content: '';
+          display: none;
+          height: 100%;
+          opacity: 0;
+          position: absolute;
+          width: 100%;
         }
       }
 

@@ -23,42 +23,39 @@ type WithInfo<V = Record<string, unknown>> = Fund &
     transactionsToDate: Transaction[][][];
   };
 
-const getItemsWithInfo = memoiseNowAndToday((time, key) =>
-  createSelector(
-    getFundsRows,
-    getFundsCache[key](time),
-    (items, { prices, startTime, cacheTimes }) =>
-      items
-        .filter(({ id }) => prices[id])
-        .map(({ transactions, ...rest }) => ({
-          ...rest,
-          transactions: transactions.filter(({ date }) => !isAfter(date, time)),
-        }))
-        .map<WithInfo>(({ id, transactions, ...rest }) => ({
-          id,
-          ...rest,
-          transactions,
-          transactionsToDate: prices[id].map<Transaction[][]>((group, groupIndex) =>
-            group.values.map<Transaction[]>((_, index) =>
-              groupIndex === prices[id].length - 1 && index === group.values.length - 1
-                ? transactions
-                : transactions.filter(
-                    ({ date }) =>
-                      getUnixTime(date) < startTime + cacheTimes[index + group.startIndex],
-                  ),
-            ),
+const getItemsWithInfo = memoiseNowAndToday((time) =>
+  createSelector(getFundsRows, getFundsCache, (items, { prices, startTime, cacheTimes }) =>
+    items
+      .filter(({ id }) => prices[id])
+      .map(({ transactions, ...rest }) => ({
+        ...rest,
+        transactions: transactions.filter(({ date }) => !isAfter(date, time)),
+      }))
+      .map<WithInfo>(({ id, transactions, ...rest }) => ({
+        id,
+        ...rest,
+        transactions,
+        transactionsToDate: prices[id].map<Transaction[][]>((group, groupIndex) =>
+          group.values.map<Transaction[]>((_, index) =>
+            groupIndex === prices[id].length - 1 && index === group.values.length - 1
+              ? transactions
+              : transactions.filter(
+                  ({ date }) =>
+                    getUnixTime(date) < startTime + cacheTimes[index + group.startIndex],
+                ),
           ),
-        }))
-        .filter(({ transactionsToDate }) =>
-          transactionsToDate.some((group) => group.some((transactions) => transactions.length > 0)),
-        )
-        .map((item) => ({
-          ...item,
-          latestValue:
-            (lastInArray(lastInArray(prices[item.id])?.values ?? []) ?? 0) *
-            getTotalUnits(item.transactions),
-        }))
-        .sort((a, b) => b.latestValue - a.latestValue),
+        ),
+      }))
+      .filter(({ transactionsToDate }) =>
+        transactionsToDate.some((group) => group.some((transactions) => transactions.length > 0)),
+      )
+      .map((item) => ({
+        ...item,
+        latestValue:
+          (lastInArray(lastInArray(prices[item.id])?.values ?? []) ?? 0) *
+          getTotalUnits(item.transactions),
+      }))
+      .sort((a, b) => b.latestValue - a.latestValue),
   ),
 );
 
@@ -79,7 +76,7 @@ const getHiddenBecauseSold = memoiseNowAndToday((time, key) =>
 
 const getReturnsById = memoiseNowAndToday((time, key) =>
   createSelector(
-    getFundsCache[key](time),
+    getFundsCache,
     getItemsWithInfo[key](time),
     ({ prices }, items): FundsWithReturns =>
       items.reduce<FundsWithReturns>(
@@ -124,7 +121,7 @@ export const getFundItems = memoiseNowAndToday((time, key) =>
 export const getFundLines = memoiseNowAndToday((time, key) =>
   createSelector(
     getFundItems[key](time),
-    getFundsCache[key](time),
+    getFundsCache,
     getHiddenBecauseSold[key](time),
     getReturnsById[key](time),
     (fundItems, { cacheTimes }, hiddenBecauseSold, fundsWithReturns): Record<Mode, FundLine[]> => {
