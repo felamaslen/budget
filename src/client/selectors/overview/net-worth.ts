@@ -15,6 +15,7 @@ import {
   currentDayIsEndOfMonth,
 } from './common';
 
+import { getText } from '~client/components/net-worth/breakdown.blocks';
 import { blockPacker } from '~client/modules/block-packer';
 import { lastInArray, sortByKey } from '~client/modules/data';
 import { State } from '~client/reducers';
@@ -25,7 +26,6 @@ import type {
   BlockItem,
   FlexBlocks,
   GQL,
-  Id,
   NetWorthEntryNative,
   NetWorthTableRow as TableRow,
   NetWorthValueObjectNative,
@@ -461,6 +461,7 @@ export const getNetWorthBreakdown = moize(
         return blockPacker(width, height, [
           {
             name: 'Assets',
+            text: getText('Assets'),
             total: assets.reduce<number>(
               (last, value) => last + sumComplexValue(value, currencies),
               0,
