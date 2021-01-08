@@ -18,6 +18,7 @@ import {
 import { getText } from '~client/components/net-worth/breakdown.blocks';
 import { blockPacker } from '~client/modules/block-packer';
 import { lastInArray, sortByKey } from '~client/modules/data';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/config';
 import { colors } from '~client/styled/variables';
@@ -458,21 +459,33 @@ export const getNetWorthBreakdown = moize(
           ),
         );
 
+        const totalAssets = assets.reduce(
+          (last, value) => last + sumComplexValue(value, currencies),
+          0,
+        );
+
         return blockPacker(width, height, [
           {
-            name: 'Assets',
+            name: `Assets (${formatCurrency(totalAssets, { abbreviate: true })})`,
             text: getText('Assets'),
-            total: assets.reduce<number>(
-              (last, value) => last + sumComplexValue(value, currencies),
-              0,
-            ),
+            total: totalAssets,
             color: compose(darken(0.5), saturate(0.4))(colors.netWorth.assets),
-            subTree: assets.map<BlockItem>((value) => ({
-              name:
+            subTree: assets.map<BlockItem>((value) => {
+              const name =
                 subcategories.find((compare) => compare.id === value.subcategory)?.subcategory ??
-                'Unknown',
-              total: sumComplexValue(value, currencies),
-            })),
+                'Unknown';
+
+              const total = sumComplexValue(value, currencies);
+              const ratio = total / totalAssets;
+
+              return {
+                name: `(${formatCurrency(total, { abbreviate: true })}) [${formatPercent(
+                  ratio,
+                )}] ${name}`,
+                text: ratio > 0.01 ? getText(name, true) : '',
+                total,
+              };
+            }),
           },
         ]);
       },

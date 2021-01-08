@@ -1,7 +1,9 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
-import { breakpoint } from '~client/styled/mixins';
 
+import { Label as LabelBase } from '~client/components/fund-weights/styles';
+import { breakpoint } from '~client/styled/mixins';
 import { Button, Flex, FlexColumn } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
 
@@ -41,3 +43,11 @@ export const Title = styled.h3`
   margin: 0;
   text-align: center;
 `;
+
+export const Label = styled(LabelBase)<{ subBlock?: boolean }>(
+  ({ subBlock }) => css`
+    color: ${subBlock ? colors.shadow.dark : colors.white};
+    font-size: ${rem(subBlock ? 12 : 22)};
+    font-weight: ${subBlock ? 'light' : 'bold'};
+  `,
+);
