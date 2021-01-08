@@ -373,9 +373,8 @@ describe('Overview selectors (net worth)', () => {
   describe('getNetWorthBreakdown', () => {
     it('should return blocks', () => {
       expect.assertions(1);
-      expect(
-        getNetWorthBreakdown(numericHash('real-entry-id-a'), 100, 100)(state),
-      ).toMatchSnapshot(); // eslint-disable-line jest/prefer-inline-snapshots
+      // eslint-disable-next-line jest/prefer-inline-snapshots
+      expect(getNetWorthBreakdown(state.netWorth.entries[0], 100, 100)(state)).toMatchSnapshot();
     });
   });
 });

@@ -37,6 +37,7 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
         render={(routeProps): React.ReactElement => (
           <NetWorthView
             {...routeProps}
+            entries={entries}
             table={table}
             aggregate={table[table.length - 1]?.aggregate}
           />

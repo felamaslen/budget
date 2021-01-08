@@ -442,18 +442,14 @@ export const getHomeEquity = moize(
 );
 
 export const getNetWorthBreakdown = moize(
-  (id: Id, width: number, height: number) =>
+  ({ values, currencies }: NetWorthEntryNative, width: number, height: number) =>
     createSelector(
-      getEntries,
       getCategories,
       getSubcategories,
-      (entries, categories, subcategories): FlexBlocks<BlockItem> | null => {
-        const selectedEntry = entries.find((entry) => entry.id === id);
-        if (!(width && height && selectedEntry)) {
+      (categories, subcategories): FlexBlocks<BlockItem> | null => {
+        if (!(width && height)) {
           return null;
         }
-
-        const { values, currencies } = selectedEntry;
 
         const assets = values.filter(
           filterValuesByCategory(({ type }) => type === NetWorthCategoryType.Asset)(

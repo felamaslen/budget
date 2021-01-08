@@ -1,9 +1,9 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
 import {
-  Dispatch,
   FC,
-  SetStateAction,
+  forwardRef,
+  PropsWithChildren,
   useCallback,
   useContext,
   useEffect,
@@ -16,15 +16,30 @@ import * as Styled from './breakdown.styles';
 
 import { BlockPacker } from '~client/components/block-packer';
 import { ResizeContext } from '~client/hooks';
+import { toISO } from '~client/modules/format';
 import { getNetWorthBreakdown } from '~client/selectors';
-import type { Id } from '~client/types';
+import type { NetWorthEntryNative } from '~client/types';
 
 export type Props = {
-  id: Id;
-  setId: Dispatch<SetStateAction<Id | null>>;
+  entry: NetWorthEntryNative;
 };
 
-export const NetWorthBreakdown: FC<Props> = ({ id }) => {
+type ContainerProps = {
+  title: string;
+};
+
+const BreakdownContainer = forwardRef<HTMLDivElement, PropsWithChildren<ContainerProps>>(
+  ({ children, title }, ref) => (
+    <Styled.BreakdownContainer ref={ref}>
+      <Styled.TitleContainer>
+        <Styled.Title>{title}</Styled.Title>
+      </Styled.TitleContainer>
+      {children}
+    </Styled.BreakdownContainer>
+  ),
+);
+
+export const NetWorthBreakdown: FC<Props> = ({ entry }) => {
   const container = useRef<HTMLDivElement>(null);
 
   const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
@@ -40,7 +55,7 @@ export const NetWorthBreakdown: FC<Props> = ({ id }) => {
     });
   }, [windowWidth]);
 
-  const blocks = useSelector(getNetWorthBreakdown(id, dimensions.width, dimensions.height));
+  const blocks = useSelector(getNetWorthBreakdown(entry, dimensions.width, dimensions.height));
 
   const [status, setStatus] = useState<string>('');
   const onHover = useCallback((name?: string | null, subName?: string | null): void => {
@@ -55,13 +70,9 @@ export const NetWorthBreakdown: FC<Props> = ({ id }) => {
     }
   }, []);
 
-  if (!blocks) {
-    return null;
-  }
-
   return (
-    <Styled.BreakdownContainer ref={container}>
-      <BlockPacker blocks={blocks} status={status} onHover={onHover} />
-    </Styled.BreakdownContainer>
+    <BreakdownContainer ref={container} title={`Net worth breakdown - ${toISO(entry.date)}`}>
+      {blocks && <BlockPacker blocks={blocks} status={status} onHover={onHover} />}
+    </BreakdownContainer>
   );
 };
