@@ -6,7 +6,6 @@ import getDate from 'date-fns/getDate';
 import getDaysInMonth from 'date-fns/getDaysInMonth';
 import getMonth from 'date-fns/getMonth';
 import getYear from 'date-fns/getYear';
-import isBefore from 'date-fns/isBefore';
 import isSameDay from 'date-fns/isSameDay';
 import isSameMonth from 'date-fns/isSameMonth';
 import moize from 'moize';
@@ -20,10 +19,8 @@ import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
 import { IDENTITY, arrayAverage, randnBm, getTotalCost, lastInArray } from '~client/modules/data';
 import { State } from '~client/reducers';
-import { State as CrudState } from '~client/reducers/crud';
-import { withoutDeleted } from '~client/selectors/crud';
+import { getFundsCachedValue } from '~client/selectors/funds';
 import { getFundsRows } from '~client/selectors/funds/helpers';
-import { getRawItems } from '~client/selectors/list';
 import {
   getCost,
   getSpendingColumn,
@@ -34,10 +31,7 @@ import {
 } from '~client/selectors/overview/common';
 import type {
   CostProcessed,
-  ListItemExtendedNative,
-  ListItemStandardNative,
   Median,
-  NativeDate,
   FundNative as Fund,
   OverviewTable,
   OverviewTableRow,
@@ -45,7 +39,7 @@ import type {
   TableValues,
 } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
-import type { Cost, ListItemStandard } from '~client/types/gql';
+import type { Cost } from '~client/types/gql';
 
 export * from './common';
 export * from './net-worth';
@@ -232,6 +226,7 @@ const withNetWorth = <K extends keyof CostProcessed>(
   futureMonths: number,
   netWorth: number[],
   fundsRows: Fund[],
+  currentFundsValue: number,
 ) => (
   cost: Cost & Pick<CostProcessed, K | 'spending' | 'net'>,
 ): Cost &
@@ -240,7 +235,11 @@ const withNetWorth = <K extends keyof CostProcessed>(
   compose(
     getCombinedNetWorth<K | 'spending' | 'net'>(currentDate, futureMonths, netWorth),
     getPredictedNetWorth<K | 'spending' | 'net'>(dates, currentDate, netWorth, fundsRows),
-    (data: typeof cost) => ({ ...data, netWorth }),
+    (data: typeof cost) => ({
+      ...data,
+      netWorth,
+      funds: replaceAtIndex(data.funds, data.funds.length - 1 - futureMonths, currentFundsValue),
+    }),
   )(cost);
 
 const withSavingsRatio = (dates: Date[]) => (
@@ -274,9 +273,19 @@ export const getProcessedCost = moize(
       getMonthDates,
       getNetWorthSummary,
       getFundsRows,
+      getFundsCachedValue.today(today),
       getAnnualisedFundReturns,
       getCost,
-      (numRows, futureMonths, dates, netWorth, fundsRows, annualisedFundReturns, costMap) =>
+      (
+        numRows,
+        futureMonths,
+        dates,
+        netWorth,
+        fundsRows,
+        fundsCachedValue,
+        annualisedFundReturns,
+        costMap,
+      ) =>
         compose(
           withNetWorth<'fundsOld' | 'savingsRatio' | 'spending'>(
             dates,
@@ -284,45 +293,11 @@ export const getProcessedCost = moize(
             futureMonths,
             netWorth,
             fundsRows,
+            fundsCachedValue.value,
           ),
           getNetCashFlow<'fundsOld' | 'savingsRatio'>(dates),
           withPredictedSpending(dates, today, futureMonths, numRows, annualisedFundReturns),
         )(costMap),
-    ),
-  { maxSize: 1 },
-);
-
-const getPageCostForMonthSoFar = <I extends NativeDate<ListItemStandard, 'date'>>(
-  today: Date,
-  items: CrudState<I>,
-): number =>
-  withoutDeleted(items)
-    .filter(({ date }) => isSameMonth(date, today) && isBefore(date, today))
-    .reduce<number>((last, { cost }) => last + cost, 0);
-
-export const getCostForMonthSoFar = moize(
-  (today: Date) =>
-    createSelector<
-      State,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      number
-    >(
-      getRawItems<ListItemStandardNative, PageListStandard.Income>(PageListStandard.Income),
-      getRawItems<ListItemStandardNative, PageListStandard.Bills>(PageListStandard.Bills),
-      getRawItems<ListItemExtendedNative, PageListStandard.Food>(PageListStandard.Food),
-      getRawItems<ListItemExtendedNative, PageListStandard.General>(PageListStandard.General),
-      getRawItems<ListItemExtendedNative, PageListStandard.Holiday>(PageListStandard.Holiday),
-      getRawItems<ListItemExtendedNative, PageListStandard.Social>(PageListStandard.Social),
-      (income, ...args) =>
-        args.reduce(
-          (last, items) => last + getPageCostForMonthSoFar(today, items),
-          -getPageCostForMonthSoFar(today, income),
-        ),
     ),
   { maxSize: 1 },
 );

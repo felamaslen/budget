@@ -15,7 +15,7 @@ import { getTotalCost, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/api';
-import { getCostForMonthSoFar } from '~client/selectors/overview';
+import { getCostForMonthSoFar } from '~client/selectors/overview/common';
 import type {
   Data,
   Id,
