@@ -12,6 +12,7 @@ export const NetWorthView = styled.div`
   flex-flow: column;
   margin: 0 3px;
   min-height: 0;
+  position: relative;
 
   ${breakpoint(breakpoints.mobile)} {
     flex: 1;

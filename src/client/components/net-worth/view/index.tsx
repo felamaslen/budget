@@ -1,11 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
+import { NetWorthBreakdown } from '../breakdown';
 import { NetWorthViewRow } from './net-worth-view-row';
 import { Retirement } from './retirement';
 import * as Styled from './styles';
 import SumByCategory, { Props as SumProps } from './sum-by-category';
 import { NetWorthGraph, GraphProps, getFTISeries } from '~client/components/net-worth/graph';
 import { useIsMobile } from '~client/hooks';
+import type { Id } from '~client/types';
 import { Aggregate } from '~client/types/enum';
 
 type Props = Pick<SumProps, 'aggregate'> & Pick<GraphProps, 'table'>;
@@ -13,6 +15,8 @@ type Props = Pick<SumProps, 'aggregate'> & Pick<GraphProps, 'table'>;
 export const NetWorthView: React.FC<Props> = ({ table, aggregate }) => {
   const isMobile = useIsMobile();
   const ftiSeries = useMemo(() => getFTISeries(table), [table]);
+
+  const [selectedId, setSelectedId] = useState<Id | null>(table[0].id);
 
   return (
     <Styled.NetWorthView>
@@ -50,6 +54,7 @@ export const NetWorthView: React.FC<Props> = ({ table, aggregate }) => {
       <Styled.Graphs>
         <NetWorthGraph isMobile={isMobile} table={table} />
       </Styled.Graphs>
+      {selectedId && <NetWorthBreakdown id={selectedId} setId={setSelectedId} />}
     </Styled.NetWorthView>
   );
 };

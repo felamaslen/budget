@@ -35,7 +35,7 @@ export const FundWeights: React.FC = () => {
         name: 'Stocks',
         total: stockValue,
         color: colors.transparent,
-        subTree: portfolio.map(({ item, value }) => {
+        subTree: portfolio.map<BlockItem>(({ item, value }) => {
           const nameAbbreviated = abbreviateFundName(item);
 
           return {
