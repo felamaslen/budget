@@ -78,7 +78,7 @@
     "@typed/compose": "^1.0.0",
     "@urql/core": "^1.16.1",
     "array-flatten": "^3.0.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.17.2",
     "canvas": "^2.6.1",
