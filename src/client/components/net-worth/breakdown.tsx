@@ -1,11 +1,21 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
-import { FC, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { rem } from 'polished';
+import {
+  FC,
+  Fragment,
+  ReactElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 
 import * as Styled from './breakdown.styles';
 
-import { BlockPacker } from '~client/components/block-packer';
+import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { ResizeContext } from '~client/hooks';
 import { toISO } from '~client/modules/format';
 import { getNetWorthBreakdown } from '~client/selectors';
@@ -39,17 +49,20 @@ export const NetWorthBreakdown: FC<Props> = ({ entry, switchEntry }) => {
   const prevEntry = useCallback(() => switchEntry(-1), [switchEntry]);
   const exit = useCallback(() => switchEntry(0), [switchEntry]);
 
-  const [status, setStatus] = useState<string>('');
-  const onHover = useCallback((name?: string | null, subName?: string | null): void => {
-    if (name) {
-      if (subName) {
-        setStatus(`${name} - ${subName}`);
-      } else {
-        setStatus(name);
-      }
-    } else {
-      setStatus('');
-    }
+  const [status, setStatus] = useState<ReactElement | null>(null);
+  const onHover = useCallback((...names: BlockName[]): void => {
+    setStatus(
+      <Fragment>
+        {names
+          .filter((part: BlockName): part is string => !!part)
+          .map((part, index) => (
+            <span css={{ fontSize: rem(16 - index) }} key={part}>
+              {index > 0 ? ' - ' : ''}
+              {part}
+            </span>
+          ))}
+      </Fragment>,
+    );
   }, []);
 
   return (

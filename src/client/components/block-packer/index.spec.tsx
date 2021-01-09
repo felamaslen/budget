@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 import { BlockPacker, Props } from '.';
 import { blockPacker } from '~client/modules/block-packer';
-import type { BlockItem } from '~client/types';
+import type { BlockItem, WithSubTree } from '~client/types';
 
 describe('<BlockPacker />', () => {
   const blocks = blockPacker<BlockItem>(10, 6, [
@@ -37,8 +37,7 @@ describe('<BlockPacker />', () => {
 
   const props: Props = {
     blocks,
-    activeMain: 'not_foo',
-    activeSub: 'not_bar',
+    activeBlocks: ['not_foo', 'not_bar'],
     status: 'some-status bar',
     onClick: jest.fn(),
     onHover: jest.fn(),
@@ -290,6 +289,56 @@ describe('<BlockPacker />', () => {
       interact(handler, id);
       expect(props.onHover).toHaveBeenCalledTimes(1);
       expect(props.onHover).toHaveBeenCalledWith(parent, id);
+    });
+  });
+
+  describe('focusing an arbitrary-depth subtree child', () => {
+    const propsArbitraryDepth: Props = {
+      blocks: blockPacker<WithSubTree<BlockItem>>(10, 6, [
+        {
+          name: 'A1',
+          total: 100,
+          subTree: [
+            {
+              name: 'A2',
+              total: 100,
+              subTree: [
+                {
+                  name: 'A3',
+                  total: 100,
+                  subTree: [
+                    {
+                      name: 'A4',
+                      total: 100,
+                      subTree: [
+                        {
+                          name: 'A5',
+                          total: 100,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+      activeBlocks: [],
+      status: '',
+      onHover: jest.fn(),
+      onClick: jest.fn(),
+    };
+
+    it('should call onHover with the full list of names', () => {
+      expect.assertions(2);
+      const { getByTestId } = render(<BlockPacker {...propsArbitraryDepth} />);
+      act(() => {
+        fireEvent.mouseOver(getByTestId('A5'));
+      });
+
+      expect(propsArbitraryDepth.onHover).toHaveBeenCalledTimes(1);
+      expect(propsArbitraryDepth.onHover).toHaveBeenCalledWith('A1', 'A2', 'A3', 'A4', 'A5');
     });
   });
 

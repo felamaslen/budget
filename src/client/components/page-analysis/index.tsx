@@ -15,10 +15,10 @@ import * as Styled from './styles';
 import Timeline from './timeline';
 import Upper from './upper';
 
-import { BlockPacker } from '~client/components/block-packer';
+import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { isAnalysisPage } from '~client/constants/data';
 import { formatCurrency, capitalise } from '~client/modules/format';
-import type { GQL, MainBlockName } from '~client/types';
+import type { GQL } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 import type { CategoryCostTree, CategoryCostTreeDeep } from '~client/types/gql';
 
@@ -50,14 +50,13 @@ export const PageAnalysis: React.FC = () => {
     [costDeep, width, height],
   );
 
-  const [activeBlock, setActiveBlock] = useState<[MainBlockName | null, string | null]>([
-    null,
-    null,
-  ]);
-  const onHover = useCallback((main, sub = null) => setActiveBlock([main, sub]), []);
-  const [activeMain, activeSub] = activeBlock;
+  const [activeBlocks, setActiveBlocks] = useState<BlockName[]>([]);
+  const onHover = useCallback((...names: BlockName[]) => setActiveBlocks(names), []);
 
   const [treeOpen, setTreeOpen] = useState({});
+
+  const activeMain = activeBlocks?.[0];
+  const activeSub = activeBlocks?.[1];
 
   const status = useMemo(() => {
     const activeCost: (GQL<CategoryCostTree> | GQL<CategoryCostTreeDeep>)[] = costDeep ?? cost;
@@ -108,8 +107,7 @@ export const PageAnalysis: React.FC = () => {
         <BlockPacker
           blocks={blocks}
           blocksDeep={blocksDeep}
-          activeMain={activeMain}
-          activeSub={activeSub}
+          activeBlocks={activeBlocks}
           onHover={onHover}
           onClick={onBlockClick}
           status={status}

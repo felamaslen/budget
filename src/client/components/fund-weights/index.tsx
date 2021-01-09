@@ -3,7 +3,7 @@ import React, { useState, useCallback, useMemo, useContext } from 'react';
 import { useSelector } from 'react-redux';
 
 import * as Styled from './styles';
-import { BlockPacker } from '~client/components/block-packer';
+import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { GRAPH_WIDTH, GRAPH_HEIGHT } from '~client/constants/graph';
 import { TodayContext } from '~client/hooks';
 import { blockPacker } from '~client/modules/block-packer';
@@ -72,8 +72,8 @@ export const FundWeights: React.FC = () => {
   }, [portfolio, stockValue, cashToInvest, cashInBank]);
 
   const [status, setStatus] = useState<string>('');
-  const onHover = useCallback((name?: string | null, subName?: string | null): void => {
-    setStatus(subName ?? name ?? '');
+  const onHover = useCallback((main?: BlockName, sub?: BlockName) => {
+    setStatus(sub ?? main ?? '');
   }, []);
 
   if (!portfolio.length) {
