@@ -119,14 +119,15 @@ function appendItems<T extends Item>(
     ...child,
     childCount: childCount + index,
     flex: itemFlexesRelativeToBox[index],
-    subTree: child.subTree
-      ? // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        blockPacker<T>(
-          getChildWidth(itemsNode, (1 - itemFlexesRelativeToBox[index]) * itemsWidth),
-          getChildHeight(itemsNode, (1 - itemFlexesRelativeToBox[index]) * itemsHeight),
-          child.subTree,
-        )
-      : undefined,
+    subTree:
+      child.subTree && child.subTree.length > 0
+        ? // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          blockPacker<T>(
+            getChildWidth(itemsNode, (1 - itemFlexesRelativeToBox[index]) * itemsWidth),
+            getChildHeight(itemsNode, (1 - itemFlexesRelativeToBox[index]) * itemsHeight),
+            child.subTree,
+          )
+        : undefined,
   }));
 
   const itemsFlow = getFlow(itemsWidth, itemsHeight);
@@ -196,6 +197,10 @@ function squarify<T extends Item>(
 
   const { areasToFill, itemsAtThisLevel, itemsToRecurse } = optimalReduction;
 
+  if (!areasToFill.length) {
+    return container;
+  }
+
   const nextChild = getChildNode<T>(node, areasToFill);
 
   return {
@@ -217,7 +222,7 @@ export function blockPacker<T extends Item>(
   width: number,
   height: number,
   items: WithSubTree<T>[],
-): FlexBlocks<T> {
+): FlexBlocks<T> | null {
   if (width <= 0 || height <= 0) {
     throw new Error('Width and height must be positive');
   }
@@ -234,6 +239,10 @@ export function blockPacker<T extends Item>(
       ...item,
       total: item.subTree?.reduce<number>((last, subItem) => last + subItem.total, 0) ?? item.total,
     }));
+
+  if (!withoutNegative.length) {
+    return null;
+  }
 
   const totalValue = withoutNegative.reduce<number>((sum, { total }) => sum + total, 0);
 

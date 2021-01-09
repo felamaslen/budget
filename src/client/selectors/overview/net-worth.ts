@@ -100,10 +100,20 @@ const filterValuesBySubcategory = (predicate: FilterPredicate<NetWorthSubcategor
 
 const isValueSAYE = filterValuesBySubcategory(({ isSAYE }) => !!isSAYE);
 
-const optionValue = (value: GQL<OptionValue>): number =>
-  value.vested * Math.max(0, value.marketPrice - value.strikePrice);
+const residualSAYEValue = (option: GQL<OptionValue>): number => option.vested * option.strikePrice;
 
-function sumComplexValue(value: NetWorthValueObjectNative, currencies: Currency[]): number {
+const optionValue = (option: GQL<OptionValue>, isSAYE: boolean, withSAYEResidual = false): number =>
+  option.vested * Math.max(0, option.marketPrice - option.strikePrice) +
+  (withSAYEResidual && isSAYE ? residualSAYEValue(option) : 0);
+
+function sumComplexValue(
+  value: NetWorthValueObjectNative,
+  currencies: Currency[],
+  subcategories: NetWorthSubcategory[],
+  withSAYEResidual = false,
+): number {
+  const isSAYE = isValueSAYE(subcategories);
+
   return Math.round(
     (value.simple ?? 0) +
       (value.fx?.reduce<number>(
@@ -114,14 +124,20 @@ function sumComplexValue(value: NetWorthValueObjectNative, currencies: Currency[
             (currencies.find((compare) => compare.currency === part.currency)?.rate ?? 0),
         0,
       ) ?? 0) +
-      (value.option ? optionValue(value.option) : 0) +
+      (value.option ? optionValue(value.option, isSAYE(value), withSAYEResidual) : 0) +
       -(value.mortgage?.principal ?? 0),
   );
 }
 
-const sumValues = (currencies: Currency[], values: NetWorthValueObjectNative[]): number =>
+const sumValues = (
+  currencies: Currency[],
+  subcategories: NetWorthSubcategory[],
+  values: NetWorthValueObjectNative[],
+  withSAYEResidual = false,
+): number =>
   values.reduce<number>(
-    (last, valueObject): number => last + sumComplexValue(valueObject, currencies),
+    (last, valueObject): number =>
+      last + sumComplexValue(valueObject, currencies, subcategories, withSAYEResidual),
     0,
   );
 
@@ -132,10 +148,7 @@ function calculateResidualSAYEOptionsValue(
   return Math.round(
     entry.values
       .filter(isValueSAYE(subcategories))
-      .reduce<number>(
-        (last, { option }) => last + (option ? option.vested * option.strikePrice : 0),
-        0,
-      ),
+      .reduce<number>((last, { option }) => last + (option ? residualSAYEValue(option) : 0), 0),
   );
 }
 
@@ -153,7 +166,7 @@ function getSumByCategory(
 
   const valuesFiltered = values.filter(filterToCategory(categories, subcategories));
 
-  return sumValues(currencies, valuesFiltered);
+  return sumValues(currencies, subcategories, valuesFiltered, false);
 }
 
 function getAggregateExtra(
@@ -212,6 +225,7 @@ const getValues = (subcategories: NetWorthSubcategory[]) => ({
 }: NetWorthEntryNative): number =>
   sumValues(
     currencies,
+    subcategories,
     values.filter((value) => !value.option),
   ) + calculateResidualSAYEOptionsValue(subcategories, { values });
 
@@ -240,6 +254,7 @@ const sumByType = (
 ): number =>
   sumValues(
     currencies,
+    subcategories,
     values.filter(
       filterValuesByCategory(
         (category) => category.type === categoryType && categoryPredicate(category),
@@ -502,7 +517,7 @@ const categoryTreeBuilder = (
     );
 
     const groups = groupBy(filteredValues, 'info.category.category');
-    const sumTotal = options.factor * sumValues(currencies, filteredValues);
+    const sumTotal = options.factor * sumValues(currencies, subcategories, filteredValues, true);
 
     return { ...options, groups, sumTotal };
   });
@@ -516,23 +531,27 @@ const categoryTreeBuilder = (
       total: normalise ? maxSumTotal : sumTotal,
       color,
       subTree: Object.entries(groups).map<WithSubTree<BlockItem>>(([category, group]) => {
-        const subTotal = factor * sumValues(currencies, group);
+        const subTotal = factor * sumValues(currencies, subcategories, group, true);
         const ratio = subTotal / sumTotal;
 
         return {
-          name: `${category} (${formatCurrency(factor * sumValues(currencies, group), {
+          name: `${category} (${formatCurrency(subTotal, {
             abbreviate: true,
-          })}) [${formatPercent(ratio)}]`,
+          })}) [${formatPercent(ratio, { precision: 1 })}]`,
           text: getText(category, 1),
           total: subTotal * (normalise ? maxSumTotal / sumTotal : 1),
           color: group[0]?.info.category.color ?? colors.white,
-          subTree: group.map<BlockItem>((value) => ({
-            name: value.info.subcategory.subcategory,
-            total:
-              factor * sumValues(currencies, [value]) * (normalise ? maxSumTotal / sumTotal : 1),
-            text: getText(value.info.subcategory.subcategory, 2),
-            color: rgba(colors.white, (value.info.subcategory.opacity ?? 1) / 2),
-          })),
+          subTree: group.map<BlockItem>((value) => {
+            const itemValue = factor * sumValues(currencies, subcategories, [value], true);
+            return {
+              name: `${value.info.subcategory.subcategory} (${formatCurrency(itemValue, {
+                abbreviate: true,
+              })})`,
+              total: itemValue * (normalise ? maxSumTotal / sumTotal : 1),
+              text: getText(value.info.subcategory.subcategory, 2),
+              color: rgba(colors.white, (value.info.subcategory.opacity ?? 1) / 2),
+            };
+          }),
         };
       }),
     }),

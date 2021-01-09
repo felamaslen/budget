@@ -1,3 +1,4 @@
+import React from 'react';
 import numericHash from 'string-hash';
 
 import {
@@ -10,6 +11,7 @@ import {
   getNetWorthTable,
   getSubcategories,
 } from './net-worth';
+import * as breakdownBlocks from '~client/components/net-worth/breakdown.blocks';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 import { Aggregate, NetWorthCategoryType } from '~client/types/enum';
@@ -373,6 +375,12 @@ describe('Overview selectors (net worth)', () => {
   describe('getNetWorthBreakdown', () => {
     it('should return blocks', () => {
       expect.assertions(1);
+      jest.spyOn(breakdownBlocks, 'getText').mockImplementation((name, level) => (
+        <span>
+          {name} - {level}
+        </span>
+      ));
+
       // eslint-disable-next-line jest/prefer-inline-snapshots
       expect(getNetWorthBreakdown(state.netWorth.entries[0], 100, 100)(state)).toMatchSnapshot();
     });

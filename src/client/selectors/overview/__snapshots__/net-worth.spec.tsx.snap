@@ -40,7 +40,7 @@ Object {
                     "childCount": 1,
                     "color": "#fc0000",
                     "flex": 1,
-                    "name": "Credit cards (£87.51) [0.05%]",
+                    "name": "Credit cards (£87.51) [0.0%]",
                     "subTree": Object {
                       "box": Object {
                         "flex": 1,
@@ -54,14 +54,13 @@ Object {
                             "childCount": 0,
                             "color": "rgba(255,255,255,0.15)",
                             "flex": 1,
-                            "name": "My credit card",
+                            "name": "My credit card (£87.51)",
                             "subTree": undefined,
-                            "text": <Label
-                              level={2}
-                              small={false}
-                            >
+                            "text": <span>
                               My credit card
-                            </Label>,
+                               - 
+                              2
+                            </span>,
                             "total": 8751,
                           },
                         ],
@@ -71,12 +70,11 @@ Object {
                         },
                       },
                     },
-                    "text": <Label
-                      level={1}
-                      small={false}
-                    >
+                    "text": <span>
                       Credit cards
-                    </Label>,
+                       - 
+                      1
+                    </span>,
                     "total": 8751,
                   },
                 ],
@@ -93,7 +91,7 @@ Object {
                   "childCount": 0,
                   "color": "#fa0000",
                   "flex": 1,
-                  "name": "Mortgage (£187k) [99.95%]",
+                  "name": "Mortgage (£187k) [100.0%]",
                   "subTree": Object {
                     "box": Object {
                       "flex": 1,
@@ -107,14 +105,13 @@ Object {
                           "childCount": 0,
                           "color": "rgba(255,255,255,0.05)",
                           "flex": 1,
-                          "name": "My mortgage",
+                          "name": "My mortgage (£187k)",
                           "subTree": undefined,
-                          "text": <Label
-                            level={2}
-                            small={false}
-                          >
+                          "text": <span>
                             My mortgage
-                          </Label>,
+                             - 
+                            2
+                          </span>,
                           "total": 18744200,
                         },
                       ],
@@ -124,12 +121,11 @@ Object {
                       },
                     },
                   },
-                  "text": <Label
-                    level={1}
-                    small={false}
-                  >
+                  "text": <span>
                     Mortgage
-                  </Label>,
+                     - 
+                    1
+                  </span>,
                   "total": 18744200,
                 },
               ],
@@ -139,12 +135,11 @@ Object {
               },
             },
           },
-          "text": <Label
-            level={0}
-            small={false}
-          >
+          "text": <span>
             Liabilities
-          </Label>,
+             - 
+            0
+          </span>,
           "total": 18752951,
         },
       ],
@@ -181,7 +176,7 @@ Object {
                   "childCount": 1,
                   "color": "#00ff00",
                   "flex": 1,
-                  "name": "Cash (easy access) (£13k) [5.86%]",
+                  "name": "Cash (easy access) (£13k) [5.9%]",
                   "subTree": Object {
                     "box": Object {
                       "flex": 1,
@@ -201,14 +196,13 @@ Object {
                             "childCount": 1,
                             "color": "rgba(255,255,255,0.1)",
                             "flex": 1,
-                            "name": "My wallet",
+                            "name": "My wallet (£104.55)",
                             "subTree": undefined,
-                            "text": <Label
-                              level={2}
-                              small={false}
-                            >
+                            "text": <span>
                               My wallet
-                            </Label>,
+                               - 
+                              2
+                            </span>,
                             "total": 10455,
                           },
                         ],
@@ -225,14 +219,13 @@ Object {
                           "childCount": 0,
                           "color": "rgba(255,255,255,0.125)",
                           "flex": 1,
-                          "name": "My bank",
+                          "name": "My bank (£13k)",
                           "subTree": undefined,
-                          "text": <Label
-                            level={2}
-                            small={false}
-                          >
+                          "text": <span>
                             My bank
-                          </Label>,
+                             - 
+                            2
+                          </span>,
                           "total": 1296523,
                         },
                       ],
@@ -242,12 +235,11 @@ Object {
                       },
                     },
                   },
-                  "text": <Label
-                    level={1}
-                    small={false}
-                  >
+                  "text": <span>
                     Cash (easy access)
-                  </Label>,
+                     - 
+                    1
+                  </span>,
                   "total": 1306978,
                 },
               ],
@@ -264,7 +256,7 @@ Object {
                 "childCount": 0,
                 "color": "#00fa00",
                 "flex": 1,
-                "name": "House (£210k) [94.14%]",
+                "name": "House (£210k) [94.1%]",
                 "subTree": Object {
                   "box": Object {
                     "flex": 1,
@@ -278,14 +270,13 @@ Object {
                         "childCount": 0,
                         "color": "rgba(255,255,255,0.075)",
                         "flex": 1,
-                        "name": "My house",
+                        "name": "My house (£210k)",
                         "subTree": undefined,
-                        "text": <Label
-                          level={2}
-                          small={false}
-                        >
+                        "text": <span>
                           My house
-                        </Label>,
+                           - 
+                          2
+                        </span>,
                         "total": 21000000,
                       },
                     ],
@@ -295,12 +286,11 @@ Object {
                     },
                   },
                 },
-                "text": <Label
-                  level={1}
-                  small={false}
-                >
+                "text": <span>
                   House
-                </Label>,
+                   - 
+                  1
+                </span>,
                 "total": 21000000,
               },
             ],
@@ -310,12 +300,11 @@ Object {
             },
           },
         },
-        "text": <Label
-          level={0}
-          small={false}
-        >
+        "text": <span>
           Assets
-        </Label>,
+           - 
+          0
+        </span>,
         "total": 22306978,
       },
     ],
