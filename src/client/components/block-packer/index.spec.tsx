@@ -58,6 +58,7 @@ describe('<BlockPacker />', () => {
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
+        overflow: hidden;
         position: relative;
       }
 
@@ -88,7 +89,7 @@ describe('<BlockPacker />', () => {
         background-color: rgba(255,255,0,0.4);
       }
 
-      .e1ubqewq3 .emotion-6 {
+      .e1ubqewq7 .emotion-6 {
         background-image: none;
         box-shadow: 1px 1px 3px -1px inset rgba(0,0,0,0.8);
         overflow: hidden;
@@ -96,7 +97,7 @@ describe('<BlockPacker />', () => {
         box-shadow: 0 0 1px inset rgba(0,0,0,0.6);
       }
 
-      .e1ubqewq3 .emotion-6::after {
+      .e1ubqewq7 .emotion-6::after {
         box-sizing: content-box;
         margin-top: -1rem;
         padding-bottom: 1rem;
@@ -114,14 +115,14 @@ describe('<BlockPacker />', () => {
         width: 100%;
       }
 
-      .e1ubqewq3 .emotion-12 {
+      .e1ubqewq7 .emotion-12 {
         background-image: none;
         box-shadow: 1px 1px 3px -1px inset rgba(0,0,0,0.8);
         overflow: hidden;
         padding-top: 1rem;
       }
 
-      .e1ubqewq3 .emotion-12::after {
+      .e1ubqewq7 .emotion-12::after {
         box-sizing: content-box;
         margin-top: -1rem;
         padding-bottom: 1rem;
@@ -244,6 +245,7 @@ describe('<BlockPacker />', () => {
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
+        overflow: hidden;
         position: relative;
       }
 

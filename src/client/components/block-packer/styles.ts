@@ -27,6 +27,7 @@ export const Container = styled.div`
 export const BoxContainer = styled.div`
   display: flex;
   flex: 1;
+  overflow: hidden;
   position: relative;
 `;
 

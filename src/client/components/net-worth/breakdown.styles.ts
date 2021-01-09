@@ -19,22 +19,47 @@ export const BreakdownContainer = styled(FlexColumn)`
 
 export const TitleContainer = styled(Flex)`
   align-items: center;
+  background: ${colors.shadow.dark};
+  color: ${colors.white};
   flex: 0 0 auto;
   width: 100%;
 
   ${Button} {
     align-items: center;
+    background: none;
+    border: none;
     display: inline-flex;
-    flex: 1 1 0;
+    flex: 0 0 ${rem(22)};
     height: ${rem(22)};
+    justify-content: center;
     padding: 0;
+    width: ${rem(22)};
 
     ${breakpoint(breakpoints.mobile)} {
-      flex: 0 0 ${rem(100)};
-      height: ${rem(18)};
       margin: 0 ${rem(4)};
     }
   }
+`;
+
+const arrowColor = colors.light.mediumLight;
+
+const NavButton = styled.div`
+  border: solid transparent;
+  border-width: ${rem(6)} ${rem(10)};
+`;
+
+export const NavBack = styled(NavButton)`
+  border-right-color: ${arrowColor};
+`;
+
+export const NavExit = styled(NavButton)`
+  border-bottom-color: ${arrowColor};
+  border-width: 0 ${rem(6)} ${rem(11)} ${rem(6)};
+  width: ${rem(12)};
+`;
+
+export const NavNext = styled(NavButton)`
+  border-left-color: ${arrowColor};
 `;
 
 export const Title = styled.h3`

@@ -68,10 +68,16 @@ export const NetWorthBreakdown: FC<Props> = ({ entry, switchEntry }) => {
   return (
     <Styled.BreakdownContainer ref={container}>
       <Styled.TitleContainer>
-        <Button onClick={exit}>Back</Button>
-        <Button onClick={prevEntry}>Previous</Button>
+        <Button onClick={prevEntry}>
+          <Styled.NavBack />
+        </Button>
+        <Button onClick={exit}>
+          <Styled.NavExit />
+        </Button>
         <Styled.Title>{`Breakdown - ${toISO(entry.date)}`}</Styled.Title>
-        <Button onClick={nextEntry}>Next</Button>
+        <Button onClick={nextEntry}>
+          <Styled.NavNext />
+        </Button>
       </Styled.TitleContainer>
       {blocks && <BlockPacker blocks={blocks} status={status} onHover={onHover} />}
     </Styled.BreakdownContainer>
