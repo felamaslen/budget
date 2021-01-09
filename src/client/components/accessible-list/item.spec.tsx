@@ -201,9 +201,6 @@ describe('Accessible list create item', () => {
 
         const { inputSomeField, inputNextField } = await setupWithSelection();
 
-        act(() => {
-          clock.runToLast();
-        });
         expect(document.activeElement).toBe(inputSomeField);
 
         act(() => {

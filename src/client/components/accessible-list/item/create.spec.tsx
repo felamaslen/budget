@@ -17,6 +17,9 @@ describe('Accessible list create form', () => {
     clock = sinon.useFakeTimers();
   });
   afterEach(() => {
+    act(() => {
+      clock.runAll();
+    });
     clock.restore();
   });
 

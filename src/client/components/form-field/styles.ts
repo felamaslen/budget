@@ -96,6 +96,7 @@ const formFieldStyles = ({
       display: inline-flex;
       font-family: ${fontFamily};
       font-size: ${rem(16)};
+      height: 100%;
       width: ${formFieldWidth(item)};
 
       & > span {

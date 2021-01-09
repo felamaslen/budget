@@ -147,7 +147,10 @@ function setupMiddleware(app: express.Express): void {
           connectSrc: [`'self'`, `https://api.exchangeratesapi.io`],
           imgSrc: [`'self'`, 'data:'],
           styleSrc: [`'self'`, `'unsafe-inline'`],
-          scriptSrc: [`'self'`, `'unsafe-inline'`],
+          scriptSrc:
+            process.env.NODE_ENV === 'development'
+              ? [`'self'`, `'unsafe-inline'`, `'unsafe-eval'`]
+              : [`'self'`, `'unsafe-inline'`],
         },
       },
     }),
