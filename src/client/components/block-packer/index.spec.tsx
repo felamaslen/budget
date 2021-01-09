@@ -88,6 +88,20 @@ describe('<BlockPacker />', () => {
         background-color: rgba(255,255,0,0.4);
       }
 
+      .e1ubqewq3 .emotion-6 {
+        background-image: none;
+        box-shadow: 1px 1px 3px -1px inset rgba(0,0,0,0.8);
+        overflow: hidden;
+        padding-top: 1rem;
+        box-shadow: 0 0 1px inset rgba(0,0,0,0.6);
+      }
+
+      .e1ubqewq3 .emotion-6::after {
+        box-sizing: content-box;
+        margin-top: -1rem;
+        padding-bottom: 1rem;
+      }
+
       .emotion-12 {
         background-image: none;
         box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
@@ -98,6 +112,19 @@ describe('<BlockPacker />', () => {
         overflow: hidden;
         position: relative;
         width: 100%;
+      }
+
+      .e1ubqewq3 .emotion-12 {
+        background-image: none;
+        box-shadow: 1px 1px 3px -1px inset rgba(0,0,0,0.8);
+        overflow: hidden;
+        padding-top: 1rem;
+      }
+
+      .e1ubqewq3 .emotion-12::after {
+        box-sizing: content-box;
+        margin-top: -1rem;
+        padding-bottom: 1rem;
       }
 
       <div
