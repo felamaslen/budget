@@ -23,7 +23,7 @@ function getShortDate(date: Date): string | React.ReactElement {
   return format(date, 'MMM');
 }
 
-type Props = {
+export type Props = {
   id: Id;
   isMobile: boolean;
   date: Date;

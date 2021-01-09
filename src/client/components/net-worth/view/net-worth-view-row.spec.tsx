@@ -1,16 +1,18 @@
 import { render, RenderResult } from '@testing-library/react';
 import React from 'react';
 
-import { NetWorthViewRow } from './net-worth-view-row';
+import { NetWorthViewRow, Props } from './net-worth-view-row';
 
 describe('<NetWorthViewRow />', () => {
-  const props = {
+  const props: Props = {
     isMobile: false,
     date: new Date('2020-04-20'),
     assets: 8156429,
     liabilities: 287130,
     expenses: 318715,
     fti: 98.18,
+    id: 1,
+    onSelect: jest.fn(),
   };
 
   const setup = (customProps = {}): RenderResult =>
