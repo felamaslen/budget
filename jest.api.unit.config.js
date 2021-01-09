@@ -3,7 +3,6 @@ const baseConfig = require('./jest.config');
 module.exports = {
   ...baseConfig,
   testEnvironment: 'node',
-  preset: 'ts-jest',
   roots: ['./src/api'],
   testMatch: ['**/*.spec.ts'],
   testPathIgnorePatterns: ['/node_modules/', 'integration.spec.ts'],
