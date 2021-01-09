@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 
 import * as Styled from './styles';
+import type { Props as BlockPackerProps } from '~client/components/block-packer';
 import { formatCurrency } from '~client/modules/format';
 import type { MainBlockName } from '~client/types';
 
@@ -12,8 +13,7 @@ export type Props = {
     name: string;
     total: number;
   }[];
-  onHover: (name: MainBlockName | null, subItemName?: string) => void;
-};
+} & Required<Pick<BlockPackerProps, 'onHover'>>;
 
 const SubTreeItem: React.FC<
   Pick<Props, 'name' | 'onHover' | 'itemCost'> & {

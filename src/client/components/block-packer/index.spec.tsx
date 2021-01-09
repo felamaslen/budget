@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 import { BlockPacker, Props } from '.';
 import { blockPacker } from '~client/modules/block-packer';
-import type { BlockItem } from '~client/types';
+import type { BlockItem, WithSubTree } from '~client/types';
 
 describe('<BlockPacker />', () => {
   const blocks = blockPacker<BlockItem>(10, 6, [
@@ -37,8 +37,7 @@ describe('<BlockPacker />', () => {
 
   const props: Props = {
     blocks,
-    activeMain: 'not_foo',
-    activeSub: 'not_bar',
+    activeBlocks: ['not_foo', 'not_bar'],
     status: 'some-status bar',
     onClick: jest.fn(),
     onHover: jest.fn(),
@@ -59,6 +58,7 @@ describe('<BlockPacker />', () => {
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
+        overflow: hidden;
         position: relative;
       }
 
@@ -89,6 +89,20 @@ describe('<BlockPacker />', () => {
         background-color: rgba(255,255,0,0.4);
       }
 
+      .e1ubqewq7 .emotion-6 {
+        background-image: none;
+        box-shadow: 1px 1px 3px -1px inset rgba(0,0,0,0.8);
+        overflow: hidden;
+        padding-top: 1rem;
+        box-shadow: 0 0 1px inset rgba(0,0,0,0.6);
+      }
+
+      .e1ubqewq7 .emotion-6::after {
+        box-sizing: content-box;
+        margin-top: -1rem;
+        padding-bottom: 1rem;
+      }
+
       .emotion-12 {
         background-image: none;
         box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
@@ -99,6 +113,19 @@ describe('<BlockPacker />', () => {
         overflow: hidden;
         position: relative;
         width: 100%;
+      }
+
+      .e1ubqewq7 .emotion-12 {
+        background-image: none;
+        box-shadow: 1px 1px 3px -1px inset rgba(0,0,0,0.8);
+        overflow: hidden;
+        padding-top: 1rem;
+      }
+
+      .e1ubqewq7 .emotion-12::after {
+        box-sizing: content-box;
+        margin-top: -1rem;
+        padding-bottom: 1rem;
       }
 
       <div
@@ -218,6 +245,7 @@ describe('<BlockPacker />', () => {
         -webkit-flex: 1;
         -ms-flex: 1;
         flex: 1;
+        overflow: hidden;
         position: relative;
       }
 
@@ -290,6 +318,56 @@ describe('<BlockPacker />', () => {
       interact(handler, id);
       expect(props.onHover).toHaveBeenCalledTimes(1);
       expect(props.onHover).toHaveBeenCalledWith(parent, id);
+    });
+  });
+
+  describe('focusing an arbitrary-depth subtree child', () => {
+    const propsArbitraryDepth: Props = {
+      blocks: blockPacker<WithSubTree<BlockItem>>(10, 6, [
+        {
+          name: 'A1',
+          total: 100,
+          subTree: [
+            {
+              name: 'A2',
+              total: 100,
+              subTree: [
+                {
+                  name: 'A3',
+                  total: 100,
+                  subTree: [
+                    {
+                      name: 'A4',
+                      total: 100,
+                      subTree: [
+                        {
+                          name: 'A5',
+                          total: 100,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+      activeBlocks: [],
+      status: '',
+      onHover: jest.fn(),
+      onClick: jest.fn(),
+    };
+
+    it('should call onHover with the full list of names', () => {
+      expect.assertions(2);
+      const { getByTestId } = render(<BlockPacker {...propsArbitraryDepth} />);
+      act(() => {
+        fireEvent.mouseOver(getByTestId('A5'));
+      });
+
+      expect(propsArbitraryDepth.onHover).toHaveBeenCalledTimes(1);
+      expect(propsArbitraryDepth.onHover).toHaveBeenCalledWith('A1', 'A2', 'A3', 'A4', 'A5');
     });
   });
 

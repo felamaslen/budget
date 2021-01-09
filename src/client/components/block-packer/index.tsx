@@ -1,7 +1,7 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
 import { rgba } from 'polished';
-import { useRef, useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useRef, useState, useEffect, useMemo, useCallback, memo, ReactElement } from 'react';
 
 import * as Styled from './styles';
 import type { Preview } from './types';
@@ -12,49 +12,57 @@ import type { PickUnion, BlockItem, FlexBlocks, Box } from '~client/types';
 
 export { statusHeight } from './styles';
 
-type BlockName = string | null;
+export type BlockName = string | null;
 type SetPreview = React.Dispatch<React.SetStateAction<Preview>>;
+
+const emptyBlocks: BlockName[] = [];
 
 export type Props = {
   blocks: FlexBlocks<BlockItem> | null;
-  blocksDeep?: FlexBlocks<BlockItem>;
-  onHover?: (name: BlockName, subName?: BlockName) => void;
+  blocksDeep?: FlexBlocks<BlockItem> | null;
+  onHover?: (...names: BlockName[]) => void;
   onClick?: (name: string | null) => void;
-  activeMain?: string | null;
-  activeSub?: string | null;
-  status: string;
+  activeBlocks?: BlockName[] | null;
+  status: string | ReactElement | null;
 };
 
-type CommonProps = Box & {
-  isSubTree?: boolean;
-  isDeep: boolean;
-  onHover?: Props['onHover'];
-  setPreview: SetPreview;
-};
+type CommonProps = Box &
+  Pick<Props, 'activeBlocks'> & {
+    isSubTree?: boolean;
+    isDeep: boolean;
+    childIndex: number;
+    names: BlockName[];
+    onHover?: Props['onHover'];
+    setPreview: SetPreview;
+  };
 
-const InfiniteChild: React.FC<
-  CommonProps &
-    PickUnion<BlockItem, 'name' | 'color' | 'childCount' | 'text' | 'hasBreakdown'> & {
-      active?: boolean;
-      activeSub?: string | null;
-      subTree?: FlexBlocks<BlockItem>;
-    }
-> = ({
-  name,
-  flex,
-  flow,
-  color,
-  active,
-  activeSub,
-  subTree,
-  text,
-  hasBreakdown,
-  isSubTree,
-  isDeep,
-  onHover,
-  setPreview,
-}) => {
+type InfiniteChildProps = CommonProps &
+  PickUnion<BlockItem, 'name' | 'color' | 'childCount' | 'text' | 'hasBreakdown'> & {
+    active?: boolean;
+    subTree?: FlexBlocks<BlockItem>;
+  };
+
+const InfiniteChild = memo<InfiniteChildProps>((props) => {
+  const {
+    name,
+    names,
+    flex,
+    flow,
+    color,
+    active,
+    activeBlocks,
+    childIndex,
+    subTree,
+    text,
+    hasBreakdown,
+    isSubTree,
+    isDeep,
+    onHover,
+    setPreview,
+  } = props;
+
   const childRef = useRef<HTMLDivElement>(null);
+  const namesConcat = useMemo<BlockName[]>(() => [...names, name], [names, name]);
 
   const onActivate = useMemo(
     () =>
@@ -64,15 +72,10 @@ const InfiniteChild: React.FC<
               event.stopPropagation();
             }
 
-            onHover(name);
+            onHover(...namesConcat);
           }
         : VOID,
-    [isSubTree, onHover, name],
-  );
-
-  const onActivateChild = useMemo(
-    () => (onHover ? (subName: BlockName): void => onHover(name, subName) : VOID),
-    [onHover, name],
+    [isSubTree, onHover, namesConcat],
   );
 
   const canDive = isDeep || hasBreakdown;
@@ -119,9 +122,11 @@ const InfiniteChild: React.FC<
         <InfiniteBox // eslint-disable-line @typescript-eslint/no-use-before-define
           flex={1}
           flow={flow}
-          activeMain={activeSub}
+          activeBlocks={activeBlocks}
+          childIndex={childIndex}
           blocks={subTree}
-          onHover={onActivateChild}
+          names={namesConcat}
+          onHover={onHover}
           setPreview={setPreview}
           isSubTree
           isDeep={isDeep}
@@ -129,29 +134,14 @@ const InfiniteChild: React.FC<
       )}
     </Styled.InfiniteChild>
   );
-};
-
-const InfiniteChildMemo = memo(InfiniteChild);
+});
+InfiniteChild.displayName = 'InfiniteChild';
 
 const InfiniteBox: React.FC<
   CommonProps & {
     blocks: FlexBlocks<BlockItem>;
-    activeMain?: string | null;
-    activeSub?: string | null;
   }
-> = ({ flow, blocks, activeMain, activeSub, isSubTree, isDeep, onHover, setPreview }) => {
-  const activeItemIndex = useMemo<number>(
-    () =>
-      activeMain
-        ? blocks.items?.blocks.findIndex(
-            (item) =>
-              item.name === activeMain ||
-              (!!activeSub &&
-                item.subTree?.items?.blocks.some((subItem) => subItem.name === activeSub)),
-          ) ?? -1
-        : -1,
-    [activeMain, activeSub, blocks],
-  );
+> = ({ flow, blocks, names, childIndex, activeBlocks, isSubTree, isDeep, onHover, setPreview }) => {
   const items = blocks.items;
 
   return (
@@ -160,12 +150,14 @@ const InfiniteBox: React.FC<
         <Styled.InfiniteBox
           style={Styled.getBoxStyle({ flex: items.box.flex, flow: blocks.box.flow })}
         >
-          {items.blocks.map((item, index) => (
-            <InfiniteChildMemo
+          {items.blocks.map((item) => (
+            <InfiniteChild
               key={item.name}
               name={item.name}
-              active={!activeSub && index === activeItemIndex}
-              activeSub={activeItemIndex === -1 ? null : activeSub}
+              names={names}
+              active={item.name === activeBlocks?.[childIndex]}
+              activeBlocks={item.name === activeBlocks?.[childIndex] ? activeBlocks : null}
+              childIndex={childIndex + 1}
               flex={item.flex}
               flow={items.box.flow}
               color={item.color}
@@ -187,8 +179,9 @@ const InfiniteBox: React.FC<
           flex={1}
           flow={blocks.box.flow}
           blocks={blocks.children}
-          activeMain={activeItemIndex === -1 ? activeMain : null}
-          activeSub={activeItemIndex === -1 ? activeSub : null}
+          names={names}
+          activeBlocks={activeBlocks}
+          childIndex={childIndex}
           isSubTree={isSubTree}
           isDeep={isDeep}
           onHover={onHover}
@@ -333,14 +326,11 @@ function useClickDive(
   return [container, state.preview, setPreview, surface];
 }
 
-const Blocks: React.FC<Omit<Props, 'status'>> = ({
-  blocks,
-  blocksDeep,
-  activeMain = null,
-  activeSub = null,
-  onHover,
-  onClick,
-}) => {
+type BlocksProps = Omit<Props, 'status'>;
+
+const Blocks = memo<BlocksProps>((props) => {
+  const { blocks, blocksDeep, activeBlocks = null, onHover, onClick } = props;
+
   const onDeactivate = useMemo(() => (onHover ? (): void => onHover(null) : VOID), [onHover]);
 
   const haveDeepBlocks = !!blocksDeep;
@@ -371,9 +361,10 @@ const Blocks: React.FC<Omit<Props, 'status'>> = ({
           flex={1}
           flow={blocks.box.flow}
           blocks={blocks}
+          childIndex={0}
+          names={emptyBlocks}
+          activeBlocks={activeBlocks}
           isDeep={false}
-          activeMain={activeMain}
-          activeSub={activeSub}
           onHover={onHover}
           setPreview={setPreview}
         />
@@ -384,19 +375,21 @@ const Blocks: React.FC<Omit<Props, 'status'>> = ({
           flow={blocksDeep.box.flow}
           isDeep={true}
           blocks={blocksDeep}
+          childIndex={0}
+          names={emptyBlocks}
+          activeBlocks={activeBlocks}
           onHover={onHover}
           setPreview={surface}
         />
       )}
     </Styled.BoxContainer>
   );
-};
-
-const BlocksMemo = memo(Blocks);
+});
+Blocks.displayName = 'Blocks';
 
 export const BlockPacker: React.FC<Props> = ({ status, ...props }) => (
   <Styled.Container>
-    <BlocksMemo {...props} />
+    <Blocks {...props} />
     <Styled.StatusBar data-testid="status-bar">{status}</Styled.StatusBar>
   </Styled.Container>
 );

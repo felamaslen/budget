@@ -133,7 +133,7 @@ describe('<PageAnalysis /> / <ListTree />', () => {
       });
 
       expect(props.onHover).toHaveBeenCalledTimes(1);
-      expect(props.onHover).toHaveBeenCalledWith(null);
+      expect(props.onHover).toHaveBeenCalledWith();
     });
 
     it('should handle toggling items by the tick box', () => {

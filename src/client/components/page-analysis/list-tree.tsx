@@ -24,7 +24,7 @@ const ListTreeItem: React.FC<PropsItem> = ({
   onToggleExpand,
 }) => {
   const onMouseOver = useCallback(() => onHover(name), [name, onHover]);
-  const onMouseOut = useCallback(() => onHover(null), [onHover]);
+  const onMouseOut = useCallback(() => onHover(), [onHover]);
 
   const onToggleCallback = useCallback(
     (event) => {

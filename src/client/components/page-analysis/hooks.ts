@@ -81,7 +81,7 @@ export function getBlocks(
   width = ANALYSIS_VIEW_WIDTH,
   height = ANALYSIS_VIEW_HEIGHT,
   treeVisible: AnalysisTreeVisible = {},
-): FlexBlocks<BlockItem> {
+): FlexBlocks<BlockItem> | null {
   return blockPacker<BlockItem>(
     width,
     height,
@@ -104,7 +104,7 @@ export function getDeepBlocks(
   forestDeep: AnalysisSortedTree<string>[],
   width = ANALYSIS_VIEW_HEIGHT,
   height = ANALYSIS_VIEW_HEIGHT,
-): FlexBlocks<BlockItem> | undefined {
+): FlexBlocks<BlockItem> | null {
   return forestDeep
     ? blockPacker<BlockItem>(
         width,
@@ -114,7 +114,7 @@ export function getDeepBlocks(
           color: colors.blockIndex[index % colors.blockIndex.length],
         })),
       )
-    : undefined;
+    : null;
 }
 
 const validateTreeVisible: PersistentStateValidator<AnalysisTreeVisible> = (

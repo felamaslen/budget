@@ -3,7 +3,9 @@ import differenceInDays from 'date-fns/differenceInDays';
 import differenceInYears from 'date-fns/differenceInYears';
 import isSameMonth from 'date-fns/isSameMonth';
 import startOfYear from 'date-fns/startOfYear';
+import groupBy from 'lodash/groupBy';
 import moize from 'moize';
+import { rgba } from 'polished';
 import { createSelector } from 'reselect';
 
 import {
@@ -14,16 +16,23 @@ import {
   currentDayIsEndOfMonth,
 } from './common';
 
+import { getText } from '~client/components/net-worth/breakdown.blocks';
+import { blockPacker } from '~client/modules/block-packer';
 import { lastInArray, sortByKey } from '~client/modules/data';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/config';
+import { colors } from '~client/styled/variables';
 import type {
   AggregateSums,
+  BlockItem,
+  FlexBlocks,
   GQL,
   NetWorthEntryNative,
   NetWorthTableRow as TableRow,
   NetWorthValueObjectNative,
   NetWorthValueObjectRead,
+  WithSubTree,
 } from '~client/types';
 import { Aggregate, NetWorthCategoryType } from '~client/types/enum';
 import type {
@@ -91,10 +100,20 @@ const filterValuesBySubcategory = (predicate: FilterPredicate<NetWorthSubcategor
 
 const isValueSAYE = filterValuesBySubcategory(({ isSAYE }) => !!isSAYE);
 
-const optionValue = (value: GQL<OptionValue>): number =>
-  value.vested * Math.max(0, value.marketPrice - value.strikePrice);
+const residualSAYEValue = (option: GQL<OptionValue>): number => option.vested * option.strikePrice;
 
-function sumComplexValue(value: NetWorthValueObjectNative, currencies: Currency[]): number {
+const optionValue = (option: GQL<OptionValue>, isSAYE: boolean, withSAYEResidual = false): number =>
+  option.vested * Math.max(0, option.marketPrice - option.strikePrice) +
+  (withSAYEResidual && isSAYE ? residualSAYEValue(option) : 0);
+
+function sumComplexValue(
+  value: NetWorthValueObjectNative,
+  currencies: Currency[],
+  subcategories: NetWorthSubcategory[],
+  withSAYEResidual = false,
+): number {
+  const isSAYE = isValueSAYE(subcategories);
+
   return Math.round(
     (value.simple ?? 0) +
       (value.fx?.reduce<number>(
@@ -105,14 +124,20 @@ function sumComplexValue(value: NetWorthValueObjectNative, currencies: Currency[
             (currencies.find((compare) => compare.currency === part.currency)?.rate ?? 0),
         0,
       ) ?? 0) +
-      (value.option ? optionValue(value.option) : 0) +
+      (value.option ? optionValue(value.option, isSAYE(value), withSAYEResidual) : 0) +
       -(value.mortgage?.principal ?? 0),
   );
 }
 
-const sumValues = (currencies: Currency[], values: NetWorthValueObjectNative[]): number =>
+const sumValues = (
+  currencies: Currency[],
+  subcategories: NetWorthSubcategory[],
+  values: NetWorthValueObjectNative[],
+  withSAYEResidual = false,
+): number =>
   values.reduce<number>(
-    (last, valueObject): number => last + sumComplexValue(valueObject, currencies),
+    (last, valueObject): number =>
+      last + sumComplexValue(valueObject, currencies, subcategories, withSAYEResidual),
     0,
   );
 
@@ -123,10 +148,7 @@ function calculateResidualSAYEOptionsValue(
   return Math.round(
     entry.values
       .filter(isValueSAYE(subcategories))
-      .reduce<number>(
-        (last, { option }) => last + (option ? option.vested * option.strikePrice : 0),
-        0,
-      ),
+      .reduce<number>((last, { option }) => last + (option ? residualSAYEValue(option) : 0), 0),
   );
 }
 
@@ -144,7 +166,7 @@ function getSumByCategory(
 
   const valuesFiltered = values.filter(filterToCategory(categories, subcategories));
 
-  return sumValues(currencies, valuesFiltered);
+  return sumValues(currencies, subcategories, valuesFiltered, false);
 }
 
 function getAggregateExtra(
@@ -203,6 +225,7 @@ const getValues = (subcategories: NetWorthSubcategory[]) => ({
 }: NetWorthEntryNative): number =>
   sumValues(
     currencies,
+    subcategories,
     values.filter((value) => !value.option),
   ) + calculateResidualSAYEOptionsValue(subcategories, { values });
 
@@ -231,6 +254,7 @@ const sumByType = (
 ): number =>
   sumValues(
     currencies,
+    subcategories,
     values.filter(
       filterValuesByCategory(
         (category) => category.type === categoryType && categoryPredicate(category),
@@ -430,6 +454,151 @@ export const getHomeEquity = moize(
         );
 
         return homeEquityToPresent.concat(forecastHomeEquity);
+      },
+    ),
+  { maxSize: 1 },
+);
+
+type ValueInfo = {
+  category: NetWorthCategory;
+  subcategory: NetWorthSubcategory;
+};
+
+type ValueWithInfo = NetWorthValueObjectNative & { info: ValueInfo };
+
+function addInfoToValues(
+  categories: NetWorthCategory[],
+  subcategories: NetWorthSubcategory[],
+  values: NetWorthValueObjectNative[],
+): ValueWithInfo[] {
+  return values.map<
+    NetWorthValueObjectNative & {
+      info: { category: NetWorthCategory; subcategory: NetWorthSubcategory };
+    }
+  >((value) => {
+    const subcategory = subcategories.find(
+      (compare) => compare.id === value.subcategory,
+    ) as NetWorthSubcategory;
+    const category = categories.find(
+      (compare) => compare.id === subcategory?.categoryId,
+    ) as NetWorthCategory;
+
+    return {
+      ...value,
+      info: { category, subcategory },
+    };
+  });
+}
+
+type CategoryTreeOptions = {
+  name: string;
+  categoryType: NetWorthCategoryType;
+  color: string;
+  factor: -1 | 1;
+};
+
+const categoryTreeBuilder = (
+  currencies: Currency[],
+  categories: NetWorthCategory[],
+  subcategories: NetWorthSubcategory[],
+  values: ValueWithInfo[],
+) => (trees: CategoryTreeOptions[], normalise = false): WithSubTree<BlockItem>[] => {
+  const treeValues = trees.map<
+    CategoryTreeOptions & {
+      groups: Record<string, ValueWithInfo[]>;
+      sumTotal: number;
+    }
+  >((options) => {
+    const filteredValues = values.filter(
+      filterValuesByCategory(({ type }) => type === options.categoryType)(
+        categories,
+        subcategories,
+      ),
+    );
+
+    const groups = groupBy(filteredValues, 'info.category.category');
+    const sumTotal = options.factor * sumValues(currencies, subcategories, filteredValues, true);
+
+    return { ...options, groups, sumTotal };
+  });
+
+  const maxSumTotal = treeValues.reduce((last, { sumTotal }) => Math.max(last, sumTotal), 0);
+
+  const normalisedTrees = treeValues.map<WithSubTree<BlockItem>>(
+    ({ name, color, factor, groups, sumTotal }) => ({
+      name: `${name} (${formatCurrency(sumTotal, { abbreviate: true })})`,
+      text: getText(name, 0),
+      total: normalise ? maxSumTotal : sumTotal,
+      color,
+      subTree: Object.entries(groups).map<WithSubTree<BlockItem>>(([category, group]) => {
+        const subTotal = factor * sumValues(currencies, subcategories, group, true);
+        const ratio = subTotal / sumTotal;
+
+        return {
+          name: `${category} (${formatCurrency(subTotal, {
+            abbreviate: true,
+          })}) [${formatPercent(ratio, { precision: 1 })}]`,
+          text: getText(category, 1),
+          total: subTotal * (normalise ? maxSumTotal / sumTotal : 1),
+          color: group[0]?.info.category.color ?? colors.white,
+          subTree: group.map<BlockItem>((value) => {
+            const itemValue = factor * sumValues(currencies, subcategories, [value], true);
+            return {
+              name: `${value.info.subcategory.subcategory} (${formatCurrency(itemValue, {
+                abbreviate: true,
+              })})`,
+              total: itemValue * (normalise ? maxSumTotal / sumTotal : 1),
+              text: getText(value.info.subcategory.subcategory, 2),
+              color: rgba(colors.white, (value.info.subcategory.opacity ?? 1) / 2),
+            };
+          }),
+        };
+      }),
+    }),
+  );
+
+  return normalisedTrees;
+};
+
+export const getNetWorthBreakdown = moize(
+  ({ values, currencies }: NetWorthEntryNative, width: number, height: number) =>
+    createSelector(
+      getCategories,
+      getSubcategories,
+      (categories, subcategories): FlexBlocks<BlockItem> | null => {
+        if (!(width && height)) {
+          return null;
+        }
+
+        const valuesWithInfo = addInfoToValues(
+          categories,
+          subcategories,
+          values.filter(({ skip }) => !skip),
+        );
+
+        const buildCategoryTree = categoryTreeBuilder(
+          currencies,
+          categories,
+          subcategories,
+          valuesWithInfo,
+        );
+
+        const tree: WithSubTree<BlockItem>[] = buildCategoryTree([
+          {
+            name: 'Assets',
+            categoryType: NetWorthCategoryType.Asset,
+            color: colors.netWorth.assets,
+            factor: 1,
+          },
+          {
+            name: 'Liabilities',
+            categoryType: NetWorthCategoryType.Liability,
+            color: colors.netWorth.liabilities,
+            factor: -1,
+          },
+        ]);
+
+        return blockPacker(width, height, tree);
       },
     ),
   { maxSize: 1 },

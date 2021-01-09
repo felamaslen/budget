@@ -1,0 +1,317 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview selectors (net worth) getNetWorthBreakdown should return blocks 1`] = `
+Object {
+  "box": Object {
+    "flex": 1,
+    "flow": "column",
+  },
+  "childIndex": 0,
+  "children": Object {
+    "box": Object {
+      "flex": 0.45672146681013503,
+      "flow": "row",
+    },
+    "childIndex": 1,
+    "items": Object {
+      "blocks": Array [
+        Object {
+          "area": 4567.21466810135,
+          "childCount": 1,
+          "color": "#f5cacb",
+          "flex": 1,
+          "name": "Liabilities (£188k)",
+          "subTree": Object {
+            "box": Object {
+              "flex": 1,
+              "flow": "row",
+            },
+            "childIndex": 0,
+            "children": Object {
+              "box": Object {
+                "flex": 0.0004666465560539734,
+                "flow": "column",
+              },
+              "childIndex": 1,
+              "items": Object {
+                "blocks": Array [
+                  Object {
+                    "area": 2.1312749956289503,
+                    "childCount": 1,
+                    "color": "#fc0000",
+                    "flex": 1,
+                    "name": "Credit cards (£87.51) [0.0%]",
+                    "subTree": Object {
+                      "box": Object {
+                        "flex": 1,
+                        "flow": "column",
+                      },
+                      "childIndex": 0,
+                      "items": Object {
+                        "blocks": Array [
+                          Object {
+                            "area": 2.13127499562895,
+                            "childCount": 0,
+                            "color": "rgba(255,255,255,0.15)",
+                            "flex": 1,
+                            "name": "My credit card (£87.51)",
+                            "subTree": undefined,
+                            "text": <span>
+                              My credit card
+                               - 
+                              2
+                            </span>,
+                            "total": 8751,
+                          },
+                        ],
+                        "box": Object {
+                          "flex": 1,
+                          "flow": "column",
+                        },
+                      },
+                    },
+                    "text": <span>
+                      Credit cards
+                       - 
+                      1
+                    </span>,
+                    "total": 8751,
+                  },
+                ],
+                "box": Object {
+                  "flex": 1.0000000000001237,
+                  "flow": "column",
+                },
+              },
+            },
+            "items": Object {
+              "blocks": Array [
+                Object {
+                  "area": 4565.083393105721,
+                  "childCount": 0,
+                  "color": "#fa0000",
+                  "flex": 1,
+                  "name": "Mortgage (£187k) [100.0%]",
+                  "subTree": Object {
+                    "box": Object {
+                      "flex": 1,
+                      "flow": "row",
+                    },
+                    "childIndex": 0,
+                    "items": Object {
+                      "blocks": Array [
+                        Object {
+                          "area": 4565.083393105721,
+                          "childCount": 0,
+                          "color": "rgba(255,255,255,0.05)",
+                          "flex": 1,
+                          "name": "My mortgage (£187k)",
+                          "subTree": undefined,
+                          "text": <span>
+                            My mortgage
+                             - 
+                            2
+                          </span>,
+                          "total": 18744200,
+                        },
+                      ],
+                      "box": Object {
+                        "flex": 1,
+                        "flow": "row",
+                      },
+                    },
+                  },
+                  "text": <span>
+                    Mortgage
+                     - 
+                    1
+                  </span>,
+                  "total": 18744200,
+                },
+              ],
+              "box": Object {
+                "flex": 0.999533353443946,
+                "flow": "row",
+              },
+            },
+          },
+          "text": <span>
+            Liabilities
+             - 
+            0
+          </span>,
+          "total": 18752951,
+        },
+      ],
+      "box": Object {
+        "flex": 1,
+        "flow": "row",
+      },
+    },
+  },
+  "items": Object {
+    "blocks": Array [
+      Object {
+        "area": 5432.78533189865,
+        "childCount": 0,
+        "color": "#d8e9d3",
+        "flex": 1,
+        "name": "Assets (£223k)",
+        "subTree": Object {
+          "box": Object {
+            "flex": 1,
+            "flow": "row",
+          },
+          "childIndex": 0,
+          "children": Object {
+            "box": Object {
+              "flex": 0.05859054507517783,
+              "flow": "column",
+            },
+            "childIndex": 1,
+            "items": Object {
+              "blocks": Array [
+                Object {
+                  "area": 318.30985387237274,
+                  "childCount": 1,
+                  "color": "#00ff00",
+                  "flex": 1,
+                  "name": "Cash (easy access) (£13k) [5.9%]",
+                  "subTree": Object {
+                    "box": Object {
+                      "flex": 1,
+                      "flow": "column",
+                    },
+                    "childIndex": 0,
+                    "children": Object {
+                      "box": Object {
+                        "flex": 0.007999369537972471,
+                        "flow": "row",
+                      },
+                      "childIndex": 1,
+                      "items": Object {
+                        "blocks": Array [
+                          Object {
+                            "area": 2.546278148703082,
+                            "childCount": 1,
+                            "color": "rgba(255,255,255,0.1)",
+                            "flex": 1,
+                            "name": "My wallet (£104.55)",
+                            "subTree": undefined,
+                            "text": <span>
+                              My wallet
+                               - 
+                              2
+                            </span>,
+                            "total": 10455,
+                          },
+                        ],
+                        "box": Object {
+                          "flex": 0.9999999999999822,
+                          "flow": "row",
+                        },
+                      },
+                    },
+                    "items": Object {
+                      "blocks": Array [
+                        Object {
+                          "area": 315.7635757236696,
+                          "childCount": 0,
+                          "color": "rgba(255,255,255,0.125)",
+                          "flex": 1,
+                          "name": "My bank (£13k)",
+                          "subTree": undefined,
+                          "text": <span>
+                            My bank
+                             - 
+                            2
+                          </span>,
+                          "total": 1296523,
+                        },
+                      ],
+                      "box": Object {
+                        "flex": 0.9920006304620276,
+                        "flow": "column",
+                      },
+                    },
+                  },
+                  "text": <span>
+                    Cash (easy access)
+                     - 
+                    1
+                  </span>,
+                  "total": 1306978,
+                },
+              ],
+              "box": Object {
+                "flex": 0.9999999999999998,
+                "flow": "column",
+              },
+            },
+          },
+          "items": Object {
+            "blocks": Array [
+              Object {
+                "area": 5114.475478026277,
+                "childCount": 0,
+                "color": "#00fa00",
+                "flex": 1,
+                "name": "House (£210k) [94.1%]",
+                "subTree": Object {
+                  "box": Object {
+                    "flex": 1,
+                    "flow": "row",
+                  },
+                  "childIndex": 0,
+                  "items": Object {
+                    "blocks": Array [
+                      Object {
+                        "area": 5114.475478026277,
+                        "childCount": 0,
+                        "color": "rgba(255,255,255,0.075)",
+                        "flex": 1,
+                        "name": "My house (£210k)",
+                        "subTree": undefined,
+                        "text": <span>
+                          My house
+                           - 
+                          2
+                        </span>,
+                        "total": 21000000,
+                      },
+                    ],
+                    "box": Object {
+                      "flex": 1,
+                      "flow": "row",
+                    },
+                  },
+                },
+                "text": <span>
+                  House
+                   - 
+                  1
+                </span>,
+                "total": 21000000,
+              },
+            ],
+            "box": Object {
+              "flex": 0.9414094549248222,
+              "flow": "row",
+            },
+          },
+        },
+        "text": <span>
+          Assets
+           - 
+          0
+        </span>,
+        "total": 22306978,
+      },
+    ],
+    "box": Object {
+      "flex": 0.543278533189865,
+      "flow": "row",
+    },
+  },
+}
+`;

@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
+import { BreakdownContainer } from '~client/components/net-worth/breakdown.styles';
 import { Page as PageAnalysis, blocksHeightMobile } from '~client/components/page-analysis/styles';
 import { diagonalBg, breakpoint } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
@@ -26,6 +27,7 @@ export const Container = styled.div`
 export const BoxContainer = styled.div`
   display: flex;
   flex: 1;
+  overflow: hidden;
   position: relative;
 `;
 
@@ -100,6 +102,24 @@ export const InfiniteChild = styled.div<{
         ${activeStyle};
       }
     `}
+
+    ${BreakdownContainer} & {
+      background-image: none;
+      box-shadow: 1px 1px 3px -1px inset ${colors.shadow.dark};
+      overflow: hidden;
+      padding-top: ${rem(16)};
+
+      ${!hasSubTree &&
+      css`
+        box-shadow: 0 0 1px inset ${colors.shadow.mediumDark};
+      `}
+
+      &::after {
+        box-sizing: content-box;
+        margin-top: ${rem(-16)};
+        padding-bottom: ${rem(16)};
+      }
+    }
   `,
 );
 
