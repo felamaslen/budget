@@ -93,7 +93,7 @@ Object {
                   "childCount": 0,
                   "color": "#fa0000",
                   "flex": 1,
-                  "name": "Mortgage (£187,442.00) [99.95%]",
+                  "name": "Mortgage (£187k) [99.95%]",
                   "subTree": Object {
                     "box": Object {
                       "flex": 1,
@@ -181,7 +181,7 @@ Object {
                   "childCount": 1,
                   "color": "#00ff00",
                   "flex": 1,
-                  "name": "Cash (easy access) (£13,069.78) [5.86%]",
+                  "name": "Cash (easy access) (£13k) [5.86%]",
                   "subTree": Object {
                     "box": Object {
                       "flex": 1,
@@ -264,7 +264,7 @@ Object {
                 "childCount": 0,
                 "color": "#00fa00",
                 "flex": 1,
-                "name": "House (£210,000.00) [94.14%]",
+                "name": "House (£210k) [94.14%]",
                 "subTree": Object {
                   "box": Object {
                     "flex": 1,

@@ -475,52 +475,70 @@ function addInfoToValues(
   });
 }
 
+type CategoryTreeOptions = {
+  name: string;
+  categoryType: NetWorthCategoryType;
+  color: string;
+  factor: -1 | 1;
+};
+
 const categoryTreeBuilder = (
   currencies: Currency[],
   categories: NetWorthCategory[],
   subcategories: NetWorthSubcategory[],
   values: ValueWithInfo[],
-) => (
-  name: string,
-  categoryType: NetWorthCategoryType,
-  color: string,
-  factor: -1 | 1 = 1,
-): WithSubTree<BlockItem> => {
-  const filteredValues = values.filter(
-    filterValuesByCategory(({ type }) => type === categoryType)(categories, subcategories),
-  );
+) => (trees: CategoryTreeOptions[], normalise = false): WithSubTree<BlockItem>[] => {
+  const treeValues = trees.map<
+    CategoryTreeOptions & {
+      groups: Record<string, ValueWithInfo[]>;
+      sumTotal: number;
+    }
+  >((options) => {
+    const filteredValues = values.filter(
+      filterValuesByCategory(({ type }) => type === options.categoryType)(
+        categories,
+        subcategories,
+      ),
+    );
 
-  const valuesGroupedByCategory = groupBy(filteredValues, 'info.category.category');
+    const groups = groupBy(filteredValues, 'info.category.category');
+    const sumTotal = options.factor * sumValues(currencies, filteredValues);
 
-  const sumTotal = factor * sumValues(currencies, filteredValues);
+    return { ...options, groups, sumTotal };
+  });
 
-  return {
-    name: `${name} (${formatCurrency(sumTotal, { abbreviate: true })})`,
-    text: getText(name, 0),
-    total: sumTotal,
-    color,
-    subTree: Object.entries(valuesGroupedByCategory).map<WithSubTree<BlockItem>>(
-      ([category, group]) => {
+  const maxSumTotal = treeValues.reduce((last, { sumTotal }) => Math.max(last, sumTotal), 0);
+
+  const normalisedTrees = treeValues.map<WithSubTree<BlockItem>>(
+    ({ name, color, factor, groups, sumTotal }) => ({
+      name: `${name} (${formatCurrency(sumTotal, { abbreviate: true })})`,
+      text: getText(name, 0),
+      total: normalise ? maxSumTotal : sumTotal,
+      color,
+      subTree: Object.entries(groups).map<WithSubTree<BlockItem>>(([category, group]) => {
         const subTotal = factor * sumValues(currencies, group);
         const ratio = subTotal / sumTotal;
 
         return {
-          name: `${category} (${formatCurrency(
-            factor * sumValues(currencies, group),
-          )}) [${formatPercent(ratio)}]`,
+          name: `${category} (${formatCurrency(factor * sumValues(currencies, group), {
+            abbreviate: true,
+          })}) [${formatPercent(ratio)}]`,
           text: getText(category, 1),
-          total: subTotal,
+          total: subTotal * (normalise ? maxSumTotal / sumTotal : 1),
           color: group[0]?.info.category.color ?? colors.white,
           subTree: group.map<BlockItem>((value) => ({
             name: value.info.subcategory.subcategory,
-            total: factor * sumValues(currencies, [value]),
+            total:
+              factor * sumValues(currencies, [value]) * (normalise ? maxSumTotal / sumTotal : 1),
             text: getText(value.info.subcategory.subcategory, 2),
             color: rgba(colors.white, (value.info.subcategory.opacity ?? 1) / 2),
           })),
         };
-      },
-    ),
-  };
+      }),
+    }),
+  );
+
+  return normalisedTrees;
 };
 
 export const getNetWorthBreakdown = moize(
@@ -546,15 +564,20 @@ export const getNetWorthBreakdown = moize(
           valuesWithInfo,
         );
 
-        const tree: WithSubTree<BlockItem>[] = [
-          buildCategoryTree('Assets', NetWorthCategoryType.Asset, colors.netWorth.assets),
-          buildCategoryTree(
-            'Liabilities',
-            NetWorthCategoryType.Liability,
-            colors.netWorth.liabilities,
-            -1,
-          ),
-        ];
+        const tree: WithSubTree<BlockItem>[] = buildCategoryTree([
+          {
+            name: 'Assets',
+            categoryType: NetWorthCategoryType.Asset,
+            color: colors.netWorth.assets,
+            factor: 1,
+          },
+          {
+            name: 'Liabilities',
+            categoryType: NetWorthCategoryType.Liability,
+            color: colors.netWorth.liabilities,
+            factor: -1,
+          },
+        ]);
 
         return blockPacker(width, height, tree);
       },
