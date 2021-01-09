@@ -141,17 +141,15 @@ function setupErrorHandling(app: express.Express): void {
 function setupMiddleware(app: express.Express): void {
   app.use(
     helmet({
-      contentSecurityPolicy:
-        process.env.NODE_ENV === 'development'
-          ? false
-          : {
-              directives: {
-                defaultSrc: [`'self'`],
-                imgSrc: [`'self'`, 'data:'],
-                styleSrc: [`'self'`, `'unsafe-inline'`],
-                scriptSrc: [`'self'`, `'unsafe-inline'`],
-              },
-            },
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: [`'self'`],
+          connectSrc: [`'self'`, `https://api.exchangeratesapi.io`],
+          imgSrc: [`'self'`, 'data:'],
+          styleSrc: [`'self'`, `'unsafe-inline'`],
+          scriptSrc: [`'self'`, `'unsafe-inline'`],
+        },
+      },
     }),
   );
   app.get('/robots.txt', (_, res) => {
