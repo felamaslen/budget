@@ -5,7 +5,7 @@ import { Fragment } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { RouteComponentProps, Route, Switch, withRouter } from 'react-router-dom';
 
-import { Spinner } from '~client/components/spinner';
+import { SpinnerInit } from '~client/components/spinner';
 import { useInitialData, useSubscriptions } from '~client/hooks';
 import { useAppConfig } from '~client/hooks/config';
 
@@ -16,7 +16,7 @@ type RouteObject = {
   exact?: boolean;
 };
 
-const lazyOptions = { fallback: <Spinner /> };
+const lazyOptions = { fallback: <SpinnerInit /> };
 
 const PageOverview = loadable(
   () => import(/* webpackPrefetch: true */ '~client/components/page-overview'),
@@ -64,7 +64,7 @@ const Content: React.FC<RouteComponentProps> = () => {
   const { loading, error } = useInitialData();
 
   if (loading) {
-    return <Spinner />;
+    return <SpinnerInit />;
   }
   if (error) {
     return null;

@@ -13,7 +13,7 @@ import { Anonymous, Props as AnonymousProps } from '~client/components/anonymous
 import { ErrorMessages } from '~client/components/error-messages';
 import { GQLProvider } from '~client/components/gql-provider';
 import { Header, Props as HeaderProps } from '~client/components/header';
-import { Spinner } from '~client/components/spinner';
+import { Spinner, SpinnerInit, SpinnerContext } from '~client/components/spinner';
 import { Outer } from '~client/components/spinner/styles';
 import {
   ResizeContext,
@@ -29,7 +29,7 @@ import { useLogoutMutation } from '~client/types/gql';
 
 const LoggedIn = hot(
   loadable(() => import(/* webpackPrefetch: true */ '~client/components/logged-in'), {
-    fallback: <Spinner />,
+    fallback: <SpinnerInit />,
   }),
 );
 
@@ -72,12 +72,18 @@ const Offline: React.FC = () => (
   </Outer>
 );
 
-const App: React.FC<Props> = ({ loggedIn, onLogin = VOID, onLogout = VOID, offline = false }) => (
-  <RootContainer loggedIn={loggedIn} onLogout={onLogout}>
-    {offline && <Offline />}
-    {!offline && (loggedIn ? <LoggedIn /> : <Anonymous onLogin={onLogin} />)}
-  </RootContainer>
-);
+const App: React.FC<Props> = ({ loggedIn, onLogin = VOID, onLogout = VOID, offline = false }) => {
+  const [spinner, setSpinner] = useState<number>(0);
+  return (
+    <RootContainer loggedIn={loggedIn} onLogout={onLogout}>
+      {offline && <Offline />}
+      {spinner > 0 && <Spinner />}
+      <SpinnerContext.Provider value={setSpinner}>
+        {!offline && (loggedIn ? <LoggedIn /> : <Anonymous onLogin={onLogin} />)}
+      </SpinnerContext.Provider>
+    </RootContainer>
+  );
+};
 
 export default App;
 

@@ -6,8 +6,4 @@ declare global {
       server: Server;
     }
   }
-
-  interface Window {
-    __MOUNT_TIME__: number;
-  }
 }
