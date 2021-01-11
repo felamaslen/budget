@@ -35,9 +35,7 @@ const statsFileLegacy = path.resolve(__dirname, '../../../../static/loadable-sta
 const statsFileModule = path.resolve(__dirname, '../../../../static/loadable-stats-module.json');
 const statsFileDev = path.resolve(__dirname, '../../../../static/loadable-stats-dev.json');
 
-global.window = {
-  __MOUNT_TIME__: 0,
-} as Window & typeof globalThis;
+global.window = {} as Window & typeof globalThis;
 
 function getApiKeyFromRequest(req: Request): string | null {
   try {
@@ -60,7 +58,6 @@ export type RenderedApp = {
   html: string;
   scriptTags: string;
   apiKey: string | null;
-  mountTime: number;
   ssrData: string;
   initialState: string;
 };
@@ -168,9 +165,6 @@ export async function renderApp(req: Request, hot: boolean, offline = false): Pr
   const statsFiles = hot ? [statsFileDev] : [statsFileLegacy, statsFileModule];
   const extractors = statsFiles.map((statsFile) => new ChunkExtractor({ statsFile }));
 
-  const mountTime = Date.now();
-  global.window.__MOUNT_TIME__ = mountTime;
-
   const apiKey = getApiKeyFromRequest(req);
   const { ssr, client } = setupPreloaderClient(apiKey);
   const store = setupStore(req, apiKey);
@@ -191,7 +185,6 @@ export async function renderApp(req: Request, hot: boolean, offline = false): Pr
     html,
     scriptTags,
     apiKey: JSON.stringify(apiKey),
-    mountTime,
     ssrData: JSON.stringify(ssrData),
     initialState: JSON.stringify(initialState),
   };

@@ -7,7 +7,7 @@ import type { FundProps } from './types';
 import { FundGainInfo } from '~client/components/fund-gain-info';
 import { highlightTimeMs } from '~client/components/fund-gain-info/styles';
 import { GraphFundItem } from '~client/components/graph-fund-item';
-import { TodayContext, useDebouncedState, useListCrudFunds } from '~client/hooks';
+import { TodayContext, useDebouncedState, useListCrudFunds, useUpdateEffect } from '~client/hooks';
 import {
   getViewSoldFunds,
   getFundsCachedValue,
@@ -52,7 +52,7 @@ export const FundRow: React.FC<Props> = ({
     highlightComparePrice.current = scrapedPrice;
   }, [scrapedPrice]);
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     setHighlight(getHighlight(highlightComparePrice.current, todayPrice));
     highlightComparePrice.current = todayPrice;
     highlightTimer.current = window.setTimeout(() => {

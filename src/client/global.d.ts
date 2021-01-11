@@ -15,7 +15,6 @@ declare global {
 
   interface Window {
     __REDUX_DEVTOOLS_EXTENSION__?: factory;
-    __MOUNT_TIME__?: number;
     __URQL_DATA__?: SSRData;
     __API_KEY__?: string | null;
     __PRELOADED_STATE__?: State;
