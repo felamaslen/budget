@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { replaceAtIndex } from 'replace-array';
 import * as Styled from './styles';
 import {
-  FormFieldText,
+  FormFieldTextInline,
   FormFieldDate,
   FormFieldDateInline,
   FormFieldCost,
@@ -47,11 +47,17 @@ type EntryProps = {
   isOnly: boolean;
   onChange: (id: number, delta: Delta<Entry>) => void;
   onRemove: (id: number) => void;
+  focus: Focus | null;
+  setFocus: React.Dispatch<React.SetStateAction<Focus | null>>;
 };
 
+enum Focus {
+  date = 'date',
+  newItem = 'newItem',
+}
+
 const inputPropsItem = { placeholder: 'Item' };
-const inputPropsCategory = { placeholder: 'Category', tabIndex: -1 };
-const inputPropsPage = { tabIndex: -1 };
+const inputPropsCategory = { placeholder: 'Category' };
 
 function useAutocompleteCategoryPage(
   entries: Entry[],
@@ -91,9 +97,9 @@ function useAutocompleteCategoryPage(
 }
 
 function useAutocompleteItem(
-  setItemSuggestion: (item: string | null) => void,
-): [boolean, string | null, (item: string) => void] {
-  const [query, setQuery] = useState<string | null>(null);
+  setItemSuggestion: React.Dispatch<React.SetStateAction<string | null>>,
+): [boolean, string | null, (item: string | undefined) => void] {
+  const [query, setQuery] = useState<string | null | undefined>(null);
 
   const [{ data, stale, fetching }] = useReceiptItemQuery({
     pause: !query,
@@ -115,16 +121,24 @@ function useAutocompleteItem(
     }
   }, [noQuery, setItemSuggestion]);
 
-  return [fetching, query, setQuery];
+  return [fetching, query ?? null, setQuery];
 }
 
 type PropsItem = {
-  onChange: (item: string) => void;
+  onChange: (item: string | undefined) => void;
   suggestion: string | null;
-  setSuggestion: (suggestion: React.SetStateAction<string | null>) => void;
-} & Pick<Entry, 'item'>;
+  setSuggestion: React.Dispatch<React.SetStateAction<string | null>>;
+} & Pick<Entry, 'item'> &
+  Pick<EntryProps, 'focus' | 'setFocus'>;
 
-const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange, suggestion, setSuggestion }) => {
+const EntryFormItemField: React.FC<PropsItem> = ({
+  item,
+  onChange,
+  suggestion,
+  setSuggestion,
+  focus,
+  setFocus,
+}) => {
   const [accepted, setAccepted] = useState<boolean>(false);
   const didAccept = useRef<boolean>();
 
@@ -170,7 +184,8 @@ const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange, suggestion, s
 
   const onBlur = useCallback(() => {
     setSuggestion(null);
-  }, [setSuggestion]);
+    setFocus(null);
+  }, [setSuggestion, setFocus]);
 
   const onTouchStart = useCallback(() => {
     if (validSuggestion && suggestion) {
@@ -180,10 +195,11 @@ const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange, suggestion, s
 
   return (
     <Styled.ItemField>
-      <FormFieldText
+      <FormFieldTextInline
         value={item}
         onChange={onChange}
         onType={requestItemSuggestion}
+        active={focus === Focus.newItem}
         inputProps={{ ...inputPropsItem, onBlur, onTouchStart }}
       />
       {validSuggestion && <Styled.ItemSuggestion>{suggestion}</Styled.ItemSuggestion>}
@@ -191,17 +207,28 @@ const EntryFormItemField: React.FC<PropsItem> = ({ item, onChange, suggestion, s
   );
 };
 
-const EntryForm: React.FC<EntryProps> = ({ entry, loading, isOnly, onChange, onRemove }) => {
+const EntryForm: React.FC<EntryProps> = ({
+  entry,
+  loading,
+  isOnly,
+  onChange,
+  onRemove,
+  focus,
+  setFocus,
+}) => {
   const { id } = entry;
 
-  const onChangeCategory = useCallback((category: string) => onChange(id, { category }), [
-    id,
-    onChange,
-  ]);
+  const onChangeCategory = useCallback(
+    (category: string | undefined) => onChange(id, { category }),
+    [id, onChange],
+  );
   const onChangeCost = useCallback((cost: number) => onChange(id, { cost }), [id, onChange]);
   const onChangePage = useCallback((page: ReceiptPage) => onChange(id, { page }), [id, onChange]);
 
-  const onChangeItem = useCallback((item: string) => onChange(id, { item }), [id, onChange]);
+  const onChangeItem = useCallback((item: string | undefined) => onChange(id, { item }), [
+    id,
+    onChange,
+  ]);
   const [itemSuggestion, setItemSuggestion] = useState<string | null>(null);
 
   return (
@@ -213,10 +240,12 @@ const EntryForm: React.FC<EntryProps> = ({ entry, loading, isOnly, onChange, onR
             item={entry.item}
             suggestion={itemSuggestion}
             setSuggestion={setItemSuggestion}
+            focus={focus}
+            setFocus={setFocus}
           />
         </Styled.ItemField>
         <Styled.CategoryField>
-          <FormFieldText
+          <FormFieldTextInline
             value={entry.category}
             onChange={onChangeCategory}
             inputProps={{ ...inputPropsCategory, disabled: loading }}
@@ -229,7 +258,7 @@ const EntryForm: React.FC<EntryProps> = ({ entry, loading, isOnly, onChange, onR
           options={pageOptions}
           value={entry.page}
           onChange={onChangePage}
-          inputProps={{ ...inputPropsPage, disabled: loading }}
+          inputProps={{ disabled: loading }}
         />
       </Styled.CostPage>
       <FlexColumn>
@@ -254,23 +283,31 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
 
   const onClosed = useCallback(() => setAddingReceipt(false), [setAddingReceipt]);
 
+  const [focus, setFocus] = useState<Focus | null>(null);
+
   const [date, setDate] = useState<Date>(new Date());
   const onChangeDate = useCallback((value?: Date) => setDate((last) => value ?? last), []);
-  const [shop, setShop] = useState<string>('');
+  const [shop, setShop] = useState<string | undefined>('');
 
   const [entries, setEntries] = useState<Entry[]>([defaultEntry]);
 
   const createNewEntry = useCallback(() => {
-    setEntries((last) => [
-      ...last,
-      {
-        id: last.reduce<number>((accum, entry) => Math.max(accum, entry.id + 1), 0),
-        item: '',
-        category: '',
-        cost: 0,
-        page: ReceiptPage.Food,
-      },
-    ]);
+    setEntries((last) => {
+      const nextId = last.reduce<number>((accum, entry) => Math.max(accum, entry.id + 1), 0);
+      return [
+        ...last,
+        {
+          id: nextId,
+          item: '',
+          category: '',
+          cost: 0,
+          page: ReceiptPage.Food,
+        },
+      ];
+    });
+    setTimeout(() => {
+      setFocus(Focus.newItem);
+    }, 0);
   }, []);
 
   const onChange = useCallback((id: number, delta: Delta<Entry>) => {
@@ -292,12 +329,11 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
 
   const [loading, requestItemInfo] = useAutocompleteCategoryPage(entries, setEntries);
 
-  const canRequestFinish = !loading && !!shop.length;
+  const canRequestFinish = !loading && !!shop?.length;
   const isValid =
     canRequestFinish && entries.every((entry) => !!(entry.item && entry.category && entry.cost));
 
   const [finished, setFinished] = useState<boolean>(false);
-  const [focusReset, resetFocus] = useState<boolean>(false);
   const onFinish = useCallback(() => {
     if (canRequestFinish) {
       setFinished(true);
@@ -313,7 +349,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
       if (isValid) {
         mutateCreateReceipt({
           date: toISO(date),
-          shop,
+          shop: shop ?? '',
           items: entries.map<ReceiptInput>((entry) => ({
             page: entry.page,
             item: entry.item,
@@ -323,7 +359,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
         });
         setEntries([defaultEntry]);
         setTimeout(() => {
-          resetFocus(true);
+          setFocus(Focus.date);
         }, 0);
       } else {
         requestItemInfo();
@@ -332,7 +368,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
   }, [date, shop, entries, finished, isValid, requestItemInfo, mutateCreateReceipt]);
 
   const onBlurDate = useCallback(() => {
-    resetFocus(false);
+    setFocus(null);
   }, []);
 
   const total = entries.reduce<number>((last, { cost }) => last + cost, 0);
@@ -351,7 +387,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
                   id="receipt-date"
                   value={date}
                   onChange={onChangeDate}
-                  active={focusReset}
+                  active={focus === Focus.date}
                   inputProps={{ onBlur: onBlurDate }}
                 />
               )}
@@ -360,12 +396,12 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
           <Flex>
             <label htmlFor="receipt-shop">
               <Styled.Label>Shop</Styled.Label>
-              <FormFieldText id="receipt-shop" value={shop} onChange={setShop} />
+              <FormFieldTextInline id="receipt-shop" value={shop} onChange={setShop} />
             </label>
           </Flex>
         </FlexColumn>
         <Styled.List>
-          {entries.map((entry) => (
+          {entries.map((entry, index) => (
             <EntryForm
               key={entry.id}
               entry={entry}
@@ -373,6 +409,8 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
               isOnly={entries.length === 1}
               onChange={onChange}
               onRemove={onRemove}
+              focus={index === entries.length - 1 ? focus : null}
+              setFocus={setFocus}
             />
           ))}
           <Styled.CreateRow>

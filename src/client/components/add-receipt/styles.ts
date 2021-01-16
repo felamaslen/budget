@@ -7,9 +7,11 @@ import { FlexColumn, Flex } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const ItemSuggestion = styled.span`
+  align-items: center;
+  border: 1px solid transparent;
   color: ${colors.light.dark};
-  display: block;
-  padding: ${rem(8)} ${rem(4)};
+  display: inline-flex;
+  padding: 0 ${rem(6)};
   z-index: 1;
 `;
 
@@ -28,22 +30,30 @@ export const Main = styled(FlexColumn)`
   }
 
   input,
+  input::placeholder,
   ${ItemSuggestion} {
     font-family: sans-serif;
-    font-size: ${rem(14)};
+    font-size: ${rem(12)} !important;
     letter-spacing: 0;
-    line-height: ${rem(8)};
+    line-height: ${rem(12)};
+    margin: 0;
+  }
+  input,
+  ${ItemSuggestion} {
+    flex: 1;
+    margin: 0;
   }
   input {
     border: 1px solid ${colors.medium.mediumDark};
     border-radius: 2px;
-    margin: 0 ${rem(1)};
-    padding: ${rem(1)} ${rem(2)};
+    padding: ${rem(1)} ${rem(4)};
+    margin: 0 ${rem(2)};
     z-index: 2;
   }
 
   ${FormField} {
     flex: 0 0 auto;
+    margin: 0;
   }
 
   ${breakpoint(breakpoints.mobile)} {
@@ -63,6 +73,7 @@ export const List = styled(FlexColumn)`
     overflow-y: auto;
 
     input {
+      outline: none;
       transition: border-color 0.2s ease;
 
       &:not(:focus) {
@@ -86,6 +97,8 @@ export const ItemCategory = styled(FlexColumn)`
 `;
 
 export const ItemField = styled.div`
+  align-items: center;
+  display: inline-flex;
   flex: 0 0 ${rem(24)};
   flex: 1;
   height: 100%;
@@ -93,7 +106,6 @@ export const ItemField = styled.div`
 
   input {
     background: transparent;
-    width: 100%;
   }
 
   ${FormField}, ${ItemSuggestion} {

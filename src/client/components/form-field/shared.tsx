@@ -93,9 +93,7 @@ export const makeInlineField = <V, P extends Record<string, unknown> = Record<st
     const customOnBlur = useCallback(
       (event: React.FocusEvent<HTMLInputElement>) => {
         onBlur();
-        if (inputOnBlur) {
-          inputOnBlur(event);
-        }
+        inputOnBlur?.(event);
       },
       [onBlur, inputOnBlur],
     );
@@ -141,12 +139,17 @@ export const makeInlineField = <V, P extends Record<string, unknown> = Record<st
     });
 
     const inputIsEmpty = typeof currentValue === 'undefined';
-    const onBlurInput = useCallback((): void => {
-      if (inputIsEmpty) {
-        onCancel();
-      }
-      onBlur();
-    }, [inputIsEmpty, onCancel, onBlur]);
+    const inputOnBlur = inputProps.onBlur;
+    const customOnBlur = useCallback(
+      (event: React.FocusEvent<HTMLInputElement>) => {
+        if (inputIsEmpty) {
+          onCancel();
+        }
+        onBlur();
+        inputOnBlur?.(event);
+      },
+      [inputIsEmpty, onCancel, onBlur, inputOnBlur],
+    );
 
     return (
       <Wrapper item={item} active={!!props.active} invalid={invalid} small={small}>
@@ -159,7 +162,7 @@ export const makeInlineField = <V, P extends Record<string, unknown> = Record<st
           type="text"
           value={inputValue ?? ''}
           onChange={onChange}
-          onBlur={onBlurInput}
+          onBlur={customOnBlur}
         />
         {children}
       </Wrapper>

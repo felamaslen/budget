@@ -92,6 +92,7 @@ describe('<AddReceipt />', () => {
   let mutateSpy: jest.SpyInstance;
   beforeEach(() => {
     mutateSpy = jest.spyOn(mockClient, 'executeMutation');
+    jest.useFakeTimers();
   });
 
   let matchMedia: MatchMediaMock;
@@ -99,6 +100,12 @@ describe('<AddReceipt />', () => {
     matchMedia = new MatchMediaMock();
   });
   afterEach(() => {
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    jest.useRealTimers();
+
     matchMedia.clear();
     mutateSpy.mockRestore();
   });
