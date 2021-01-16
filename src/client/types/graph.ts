@@ -75,17 +75,21 @@ export type LineColor = string | DynamicLineColor;
 
 export type GraphStack = Data[];
 
-export type Line = {
+export type LineAppearance = PathProps & {
+  color: LineColor;
+  smooth?: boolean;
+  fill?: boolean;
+};
+
+export type Line = LineAppearance & {
   key: string;
   data: Data;
   stack?: GraphStack;
   hover?: boolean;
   secondary?: boolean;
-  color: LineColor;
-  smooth?: boolean;
-  fill?: boolean;
-  dashed?: boolean;
-  movingAverage?: number;
+  movingAverage?: LineAppearance & {
+    period: number;
+  };
   arrows?: boolean;
 } & PathProps;
 

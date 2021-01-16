@@ -22,7 +22,7 @@ describe('Hover hook', () => {
           dashed: true,
           fill: true,
           smooth: true,
-          movingAverage: 2,
+          movingAverage: { period: 2, color: 'darkred' },
           arrows: false,
         },
         {

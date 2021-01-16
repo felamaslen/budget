@@ -46,12 +46,18 @@ function processData(
         savingsRatio.map((value) => value * 1),
         props,
       ),
-      color: rgba(colors.green, 0.2),
       secondary: true,
+      color: rgba(colors.green, 0.5),
+      fill: false,
+      dashed: true,
       smooth: true,
-      fill: true,
       strokeWidth: 1,
-      movingAverage: 12,
+      movingAverage: {
+        color: colors.green,
+        period: 12,
+        smooth: true,
+        strokeWidth: 2,
+      },
     },
   ];
 }

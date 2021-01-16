@@ -8,7 +8,6 @@ type Props = {
   stack?: GraphStack;
   smooth?: boolean;
   color: DynamicLineColor;
-  children?: React.ReactNode;
   pathProps: PathProps;
 } & RangeY &
   Pix;
@@ -18,7 +17,6 @@ export const DynamicColorLine: React.FC<Props> = ({
   data,
   smooth,
   color,
-  children,
   pathProps,
   ...props
 }) => {
@@ -30,8 +28,7 @@ export const DynamicColorLine: React.FC<Props> = ({
   }
 
   return (
-    <g>
-      {children}
+    <>
       {getDynamicLinePaths({
         data,
         smooth,
@@ -40,6 +37,6 @@ export const DynamicColorLine: React.FC<Props> = ({
       }).map(({ path, stroke }, key) => (
         <path key={key} d={path} stroke={stroke} {...pathProps} fill="none" />
       ))}
-    </g>
+    </>
   );
 };
