@@ -157,20 +157,92 @@ export type QueryStockPricesArgs = {
   codes: Array<Scalars['String']>;
 };
 
-export type AppConfig = {
-  birthDate: Scalars['String'];
-  pieTolerance: Scalars['Float'];
-  futureMonths: Scalars['Int'];
-  fundPeriod?: Maybe<FundPeriod>;
-  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+export type Transaction = {
+  date: Scalars['Date'];
+  units: Scalars['Float'];
+  price: Scalars['NonNegativeFloat'];
+  fees: Scalars['Int'];
+  taxes: Scalars['Int'];
 };
 
-export type AppConfigInput = {
-  birthDate?: Maybe<Scalars['Date']>;
-  pieTolerance?: Maybe<Scalars['Float']>;
-  futureMonths?: Maybe<Scalars['Int']>;
-  fundPeriod?: Maybe<FundPeriod>;
-  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+export type TransactionInput = {
+  date: Scalars['Date'];
+  units: Scalars['Float'];
+  price: Scalars['NonNegativeFloat'];
+  fees: Scalars['Int'];
+  taxes: Scalars['Int'];
+};
+
+export type Fund = {
+  id: Scalars['Int'];
+  item: Scalars['String'];
+  transactions: Array<Transaction>;
+  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type FundData = {
+  item: Scalars['String'];
+  transactions: Array<Transaction>;
+  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type FundInput = {
+  item: Scalars['String'];
+  transactions: Array<TransactionInput>;
+  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type FundPriceGroup = {
+  startIndex: Scalars['Int'];
+  values: Array<Scalars['NonNegativeFloat']>;
+};
+
+export type FundPrices = {
+  fundId: Scalars['Int'];
+  groups: Array<FundPriceGroup>;
+};
+
+export enum FundPeriod {
+  Year = 'year',
+  Month = 'month'
+}
+
+export type ReadFundsResponse = {
+  items: Array<Fund>;
+};
+
+export type FundHistory = {
+  startTime: Scalars['Int'];
+  cacheTimes: Array<Scalars['Int']>;
+  prices: Array<FundPrices>;
+  annualisedFundReturns: Scalars['Float'];
+  overviewCost: Array<Scalars['Int']>;
+};
+
+export type TargetDelta = {
+  id: Scalars['Int'];
+  allocationTarget: Scalars['NonNegativeInt'];
+};
+
+export type TargetDeltaResponse = {
+  id: Scalars['Int'];
+  allocationTarget: Scalars['NonNegativeInt'];
+};
+
+export type UpdatedFundAllocationTargets = {
+  error?: Maybe<Scalars['String']>;
+  deltas?: Maybe<Array<TargetDeltaResponse>>;
+};
+
+export type StockPrice = {
+  code: Scalars['String'];
+  price?: Maybe<Scalars['NonNegativeFloat']>;
+};
+
+export type StockPricesResponse = {
+  error?: Maybe<Scalars['String']>;
+  prices: Array<StockPrice>;
+  refreshTime?: Maybe<Scalars['DateTime']>;
 };
 
 export type Mutation = {
@@ -309,6 +381,18 @@ export type MutationUpdateNetWorthSubcategoryArgs = {
   input: NetWorthSubcategoryInput;
 };
 
+export type FundCreateUpdate = {
+  id: Scalars['Int'];
+  fakeId?: Maybe<Scalars['Int']>;
+  item: FundData;
+  overviewCost: Array<Scalars['Int']>;
+};
+
+export type FundDelete = {
+  id: Scalars['Int'];
+  overviewCost: Array<Scalars['Int']>;
+};
+
 export type Subscription = {
   cashAllocationTargetUpdated: Scalars['NonNegativeInt'];
   configUpdated: AppConfig;
@@ -317,7 +401,6 @@ export type Subscription = {
   fundDeleted: FundDelete;
   fundPricesUpdated?: Maybe<FundHistory>;
   fundUpdated: FundCreateUpdate;
-  heartbeat: Heartbeat;
   listItemCreated: ListItemCreateUpdate;
   listItemDeleted: ListItemDelete;
   listItemUpdated: ListItemCreateUpdate;
@@ -349,106 +432,6 @@ export type SubscriptionListItemUpdatedArgs = {
   pages: Array<PageListStandard>;
 };
 
-export type Transaction = {
-  date: Scalars['Date'];
-  units: Scalars['Float'];
-  price: Scalars['NonNegativeFloat'];
-  fees: Scalars['Int'];
-  taxes: Scalars['Int'];
-};
-
-export type TransactionInput = {
-  date: Scalars['Date'];
-  units: Scalars['Float'];
-  price: Scalars['NonNegativeFloat'];
-  fees: Scalars['Int'];
-  taxes: Scalars['Int'];
-};
-
-export type Fund = {
-  id: Scalars['Int'];
-  item: Scalars['String'];
-  transactions: Array<Transaction>;
-  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
-};
-
-export type FundData = {
-  item: Scalars['String'];
-  transactions: Array<Transaction>;
-  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
-};
-
-export type FundInput = {
-  item: Scalars['String'];
-  transactions: Array<TransactionInput>;
-  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
-};
-
-export type FundPriceGroup = {
-  startIndex: Scalars['Int'];
-  values: Array<Scalars['NonNegativeFloat']>;
-};
-
-export type FundPrices = {
-  fundId: Scalars['Int'];
-  groups: Array<FundPriceGroup>;
-};
-
-export enum FundPeriod {
-  Year = 'year',
-  Month = 'month'
-}
-
-export type ReadFundsResponse = {
-  items: Array<Fund>;
-};
-
-export type FundHistory = {
-  startTime: Scalars['Int'];
-  cacheTimes: Array<Scalars['Int']>;
-  prices: Array<FundPrices>;
-  annualisedFundReturns: Scalars['Float'];
-  overviewCost: Array<Scalars['Int']>;
-};
-
-export type TargetDelta = {
-  id: Scalars['Int'];
-  allocationTarget: Scalars['NonNegativeInt'];
-};
-
-export type TargetDeltaResponse = {
-  id: Scalars['Int'];
-  allocationTarget: Scalars['NonNegativeInt'];
-};
-
-export type UpdatedFundAllocationTargets = {
-  error?: Maybe<Scalars['String']>;
-  deltas?: Maybe<Array<TargetDeltaResponse>>;
-};
-
-export type StockPrice = {
-  code: Scalars['String'];
-  price?: Maybe<Scalars['NonNegativeFloat']>;
-};
-
-export type StockPricesResponse = {
-  error?: Maybe<Scalars['String']>;
-  prices: Array<StockPrice>;
-  refreshTime?: Maybe<Scalars['DateTime']>;
-};
-
-export type FundCreateUpdate = {
-  id: Scalars['Int'];
-  fakeId?: Maybe<Scalars['Int']>;
-  item: FundData;
-  overviewCost: Array<Scalars['Int']>;
-};
-
-export type FundDelete = {
-  id: Scalars['Int'];
-  overviewCost: Array<Scalars['Int']>;
-};
-
 
 
 
@@ -467,9 +450,20 @@ export type CrudResponseDelete = {
   error?: Maybe<Scalars['String']>;
 };
 
-export type Heartbeat = {
-  uid?: Maybe<Scalars['Int']>;
-  timestamp: Scalars['Int'];
+export type AppConfig = {
+  birthDate: Scalars['String'];
+  pieTolerance: Scalars['Float'];
+  futureMonths: Scalars['Int'];
+  fundPeriod?: Maybe<FundPeriod>;
+  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type AppConfigInput = {
+  birthDate?: Maybe<Scalars['Date']>;
+  pieTolerance?: Maybe<Scalars['Float']>;
+  futureMonths?: Maybe<Scalars['Int']>;
+  fundPeriod?: Maybe<FundPeriod>;
+  fundLength?: Maybe<Scalars['NonNegativeInt']>;
 };
 
 export enum PageListStandard {
@@ -927,12 +921,8 @@ export type ResolversTypes = {
   CategoryCostTreeDeep: ResolverTypeWrapper<CategoryCostTreeDeep>;
   AnalysisResponse: ResolverTypeWrapper<AnalysisResponse>;
   Query: ResolverTypeWrapper<{}>;
-  AppConfig: ResolverTypeWrapper<AppConfig>;
-  Float: ResolverTypeWrapper<Scalars['Float']>;
-  AppConfigInput: AppConfigInput;
-  Mutation: ResolverTypeWrapper<{}>;
-  Subscription: ResolverTypeWrapper<{}>;
   Transaction: ResolverTypeWrapper<Transaction>;
+  Float: ResolverTypeWrapper<Scalars['Float']>;
   TransactionInput: TransactionInput;
   Fund: ResolverTypeWrapper<Fund>;
   FundData: ResolverTypeWrapper<FundData>;
@@ -947,8 +937,10 @@ export type ResolversTypes = {
   UpdatedFundAllocationTargets: ResolverTypeWrapper<UpdatedFundAllocationTargets>;
   StockPrice: ResolverTypeWrapper<StockPrice>;
   StockPricesResponse: ResolverTypeWrapper<StockPricesResponse>;
+  Mutation: ResolverTypeWrapper<{}>;
   FundCreateUpdate: ResolverTypeWrapper<FundCreateUpdate>;
   FundDelete: ResolverTypeWrapper<FundDelete>;
+  Subscription: ResolverTypeWrapper<{}>;
   Date: ResolverTypeWrapper<Scalars['Date']>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   NonNegativeInt: ResolverTypeWrapper<Scalars['NonNegativeInt']>;
@@ -957,7 +949,8 @@ export type ResolversTypes = {
   CrudResponseCreate: ResolverTypeWrapper<CrudResponseCreate>;
   CrudResponseUpdate: ResolverTypeWrapper<CrudResponseUpdate>;
   CrudResponseDelete: ResolverTypeWrapper<CrudResponseDelete>;
-  Heartbeat: ResolverTypeWrapper<Heartbeat>;
+  AppConfig: ResolverTypeWrapper<AppConfig>;
+  AppConfigInput: AppConfigInput;
   PageListStandard: PageListStandard;
   PageListExtended: PageListExtended;
   ListItem: ResolverTypeWrapper<ListItem>;
@@ -1025,12 +1018,8 @@ export type ResolversParentTypes = {
   CategoryCostTreeDeep: CategoryCostTreeDeep;
   AnalysisResponse: AnalysisResponse;
   Query: {};
-  AppConfig: AppConfig;
-  Float: Scalars['Float'];
-  AppConfigInput: AppConfigInput;
-  Mutation: {};
-  Subscription: {};
   Transaction: Transaction;
+  Float: Scalars['Float'];
   TransactionInput: TransactionInput;
   Fund: Fund;
   FundData: FundData;
@@ -1044,8 +1033,10 @@ export type ResolversParentTypes = {
   UpdatedFundAllocationTargets: UpdatedFundAllocationTargets;
   StockPrice: StockPrice;
   StockPricesResponse: StockPricesResponse;
+  Mutation: {};
   FundCreateUpdate: FundCreateUpdate;
   FundDelete: FundDelete;
+  Subscription: {};
   Date: Scalars['Date'];
   DateTime: Scalars['DateTime'];
   NonNegativeInt: Scalars['NonNegativeInt'];
@@ -1054,7 +1045,8 @@ export type ResolversParentTypes = {
   CrudResponseCreate: CrudResponseCreate;
   CrudResponseUpdate: CrudResponseUpdate;
   CrudResponseDelete: CrudResponseDelete;
-  Heartbeat: Heartbeat;
+  AppConfig: AppConfig;
+  AppConfigInput: AppConfigInput;
   ListItem: ListItem;
   ListItemStandard: ListItemStandard;
   ListItemExtended: ListItemExtended;
@@ -1154,63 +1146,6 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   whoami?: Resolver<Maybe<ResolversTypes['UserInfo']>, ParentType, ContextType>;
 };
 
-export type AppConfigResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AppConfig'] = ResolversParentTypes['AppConfig']> = {
-  birthDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  pieTolerance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  futureMonths?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  fundPeriod?: Resolver<Maybe<ResolversTypes['FundPeriod']>, ParentType, ContextType>;
-  fundLength?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  createFund?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateFundArgs, 'fakeId' | 'input'>>;
-  createListItem?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateListItemArgs, 'page' | 'fakeId' | 'input'>>;
-  createNetWorthCategory?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateNetWorthCategoryArgs, 'input'>>;
-  createNetWorthEntry?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateNetWorthEntryArgs, 'input'>>;
-  createNetWorthSubcategory?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateNetWorthSubcategoryArgs, 'input'>>;
-  createReceipt?: Resolver<Maybe<ResolversTypes['ReceiptCreated']>, ParentType, ContextType, RequireFields<MutationCreateReceiptArgs, 'date' | 'shop' | 'items'>>;
-  deleteFund?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteFundArgs, 'id'>>;
-  deleteListItem?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteListItemArgs, 'page' | 'id'>>;
-  deleteNetWorthCategory?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteNetWorthCategoryArgs, 'id'>>;
-  deleteNetWorthEntry?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteNetWorthEntryArgs, 'id'>>;
-  deleteNetWorthSubcategory?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteNetWorthSubcategoryArgs, 'id'>>;
-  login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'pin'>>;
-  logout?: Resolver<ResolversTypes['LogoutResponse'], ParentType, ContextType>;
-  setConfig?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType, RequireFields<MutationSetConfigArgs, 'config'>>;
-  updateCashAllocationTarget?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateCashAllocationTargetArgs, 'target'>>;
-  updateFund?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateFundArgs, 'id' | 'input'>>;
-  updateFundAllocationTargets?: Resolver<Maybe<ResolversTypes['UpdatedFundAllocationTargets']>, ParentType, ContextType, RequireFields<MutationUpdateFundAllocationTargetsArgs, 'deltas'>>;
-  updateListItem?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateListItemArgs, 'page' | 'id' | 'input'>>;
-  updateNetWorthCategory?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthCategoryArgs, 'id' | 'input'>>;
-  updateNetWorthEntry?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthEntryArgs, 'id' | 'input'>>;
-  updateNetWorthSubcategory?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthSubcategoryArgs, 'id' | 'input'>>;
-};
-
-export type SubscriptionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
-  cashAllocationTargetUpdated?: SubscriptionResolver<ResolversTypes['NonNegativeInt'], "cashAllocationTargetUpdated", ParentType, ContextType>;
-  configUpdated?: SubscriptionResolver<ResolversTypes['AppConfig'], "configUpdated", ParentType, ContextType>;
-  fundAllocationTargetsUpdated?: SubscriptionResolver<ResolversTypes['UpdatedFundAllocationTargets'], "fundAllocationTargetsUpdated", ParentType, ContextType>;
-  fundCreated?: SubscriptionResolver<ResolversTypes['FundCreateUpdate'], "fundCreated", ParentType, ContextType>;
-  fundDeleted?: SubscriptionResolver<ResolversTypes['FundDelete'], "fundDeleted", ParentType, ContextType>;
-  fundPricesUpdated?: SubscriptionResolver<Maybe<ResolversTypes['FundHistory']>, "fundPricesUpdated", ParentType, ContextType, RequireFields<SubscriptionFundPricesUpdatedArgs, never>>;
-  fundUpdated?: SubscriptionResolver<ResolversTypes['FundCreateUpdate'], "fundUpdated", ParentType, ContextType>;
-  heartbeat?: SubscriptionResolver<ResolversTypes['Heartbeat'], "heartbeat", ParentType, ContextType>;
-  listItemCreated?: SubscriptionResolver<ResolversTypes['ListItemCreateUpdate'], "listItemCreated", ParentType, ContextType, RequireFields<SubscriptionListItemCreatedArgs, 'pages'>>;
-  listItemDeleted?: SubscriptionResolver<ResolversTypes['ListItemDelete'], "listItemDeleted", ParentType, ContextType>;
-  listItemUpdated?: SubscriptionResolver<ResolversTypes['ListItemCreateUpdate'], "listItemUpdated", ParentType, ContextType, RequireFields<SubscriptionListItemUpdatedArgs, 'pages'>>;
-  netWorthCategoryCreated?: SubscriptionResolver<ResolversTypes['NetWorthCategoryCreated'], "netWorthCategoryCreated", ParentType, ContextType>;
-  netWorthCategoryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthCategoryDeleted", ParentType, ContextType>;
-  netWorthCategoryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthCategoryUpdated'], "netWorthCategoryUpdated", ParentType, ContextType>;
-  netWorthEntryCreated?: SubscriptionResolver<ResolversTypes['NetWorthEntryCreated'], "netWorthEntryCreated", ParentType, ContextType>;
-  netWorthEntryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthEntryDeleted", ParentType, ContextType>;
-  netWorthEntryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthEntryUpdated'], "netWorthEntryUpdated", ParentType, ContextType>;
-  netWorthSubcategoryCreated?: SubscriptionResolver<ResolversTypes['NetWorthSubcategoryCreated'], "netWorthSubcategoryCreated", ParentType, ContextType>;
-  netWorthSubcategoryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthSubcategoryDeleted", ParentType, ContextType>;
-  netWorthSubcategoryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthSubcategoryUpdated'], "netWorthSubcategoryUpdated", ParentType, ContextType>;
-  receiptCreated?: SubscriptionResolver<ResolversTypes['ReceiptCreated'], "receiptCreated", ParentType, ContextType>;
-};
-
 export type TransactionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Transaction'] = ResolversParentTypes['Transaction']> = {
   date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   units?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
@@ -1286,6 +1221,30 @@ export type StockPricesResponseResolvers<ContextType = Context, ParentType exten
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type MutationResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  createFund?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateFundArgs, 'fakeId' | 'input'>>;
+  createListItem?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateListItemArgs, 'page' | 'fakeId' | 'input'>>;
+  createNetWorthCategory?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateNetWorthCategoryArgs, 'input'>>;
+  createNetWorthEntry?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateNetWorthEntryArgs, 'input'>>;
+  createNetWorthSubcategory?: Resolver<Maybe<ResolversTypes['CrudResponseCreate']>, ParentType, ContextType, RequireFields<MutationCreateNetWorthSubcategoryArgs, 'input'>>;
+  createReceipt?: Resolver<Maybe<ResolversTypes['ReceiptCreated']>, ParentType, ContextType, RequireFields<MutationCreateReceiptArgs, 'date' | 'shop' | 'items'>>;
+  deleteFund?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteFundArgs, 'id'>>;
+  deleteListItem?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteListItemArgs, 'page' | 'id'>>;
+  deleteNetWorthCategory?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteNetWorthCategoryArgs, 'id'>>;
+  deleteNetWorthEntry?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteNetWorthEntryArgs, 'id'>>;
+  deleteNetWorthSubcategory?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteNetWorthSubcategoryArgs, 'id'>>;
+  login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'pin'>>;
+  logout?: Resolver<ResolversTypes['LogoutResponse'], ParentType, ContextType>;
+  setConfig?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType, RequireFields<MutationSetConfigArgs, 'config'>>;
+  updateCashAllocationTarget?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateCashAllocationTargetArgs, 'target'>>;
+  updateFund?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateFundArgs, 'id' | 'input'>>;
+  updateFundAllocationTargets?: Resolver<Maybe<ResolversTypes['UpdatedFundAllocationTargets']>, ParentType, ContextType, RequireFields<MutationUpdateFundAllocationTargetsArgs, 'deltas'>>;
+  updateListItem?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateListItemArgs, 'page' | 'id' | 'input'>>;
+  updateNetWorthCategory?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthCategoryArgs, 'id' | 'input'>>;
+  updateNetWorthEntry?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthEntryArgs, 'id' | 'input'>>;
+  updateNetWorthSubcategory?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthSubcategoryArgs, 'id' | 'input'>>;
+};
+
 export type FundCreateUpdateResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundCreateUpdate'] = ResolversParentTypes['FundCreateUpdate']> = {
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   fakeId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1298,6 +1257,29 @@ export type FundDeleteResolvers<ContextType = Context, ParentType extends Resolv
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   overviewCost?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SubscriptionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
+  cashAllocationTargetUpdated?: SubscriptionResolver<ResolversTypes['NonNegativeInt'], "cashAllocationTargetUpdated", ParentType, ContextType>;
+  configUpdated?: SubscriptionResolver<ResolversTypes['AppConfig'], "configUpdated", ParentType, ContextType>;
+  fundAllocationTargetsUpdated?: SubscriptionResolver<ResolversTypes['UpdatedFundAllocationTargets'], "fundAllocationTargetsUpdated", ParentType, ContextType>;
+  fundCreated?: SubscriptionResolver<ResolversTypes['FundCreateUpdate'], "fundCreated", ParentType, ContextType>;
+  fundDeleted?: SubscriptionResolver<ResolversTypes['FundDelete'], "fundDeleted", ParentType, ContextType>;
+  fundPricesUpdated?: SubscriptionResolver<Maybe<ResolversTypes['FundHistory']>, "fundPricesUpdated", ParentType, ContextType, RequireFields<SubscriptionFundPricesUpdatedArgs, never>>;
+  fundUpdated?: SubscriptionResolver<ResolversTypes['FundCreateUpdate'], "fundUpdated", ParentType, ContextType>;
+  listItemCreated?: SubscriptionResolver<ResolversTypes['ListItemCreateUpdate'], "listItemCreated", ParentType, ContextType, RequireFields<SubscriptionListItemCreatedArgs, 'pages'>>;
+  listItemDeleted?: SubscriptionResolver<ResolversTypes['ListItemDelete'], "listItemDeleted", ParentType, ContextType>;
+  listItemUpdated?: SubscriptionResolver<ResolversTypes['ListItemCreateUpdate'], "listItemUpdated", ParentType, ContextType, RequireFields<SubscriptionListItemUpdatedArgs, 'pages'>>;
+  netWorthCategoryCreated?: SubscriptionResolver<ResolversTypes['NetWorthCategoryCreated'], "netWorthCategoryCreated", ParentType, ContextType>;
+  netWorthCategoryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthCategoryDeleted", ParentType, ContextType>;
+  netWorthCategoryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthCategoryUpdated'], "netWorthCategoryUpdated", ParentType, ContextType>;
+  netWorthEntryCreated?: SubscriptionResolver<ResolversTypes['NetWorthEntryCreated'], "netWorthEntryCreated", ParentType, ContextType>;
+  netWorthEntryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthEntryDeleted", ParentType, ContextType>;
+  netWorthEntryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthEntryUpdated'], "netWorthEntryUpdated", ParentType, ContextType>;
+  netWorthSubcategoryCreated?: SubscriptionResolver<ResolversTypes['NetWorthSubcategoryCreated'], "netWorthSubcategoryCreated", ParentType, ContextType>;
+  netWorthSubcategoryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthSubcategoryDeleted", ParentType, ContextType>;
+  netWorthSubcategoryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthSubcategoryUpdated'], "netWorthSubcategoryUpdated", ParentType, ContextType>;
+  receiptCreated?: SubscriptionResolver<ResolversTypes['ReceiptCreated'], "receiptCreated", ParentType, ContextType>;
 };
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -1336,9 +1318,12 @@ export type CrudResponseDeleteResolvers<ContextType = Context, ParentType extend
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type HeartbeatResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Heartbeat'] = ResolversParentTypes['Heartbeat']> = {
-  uid?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  timestamp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+export type AppConfigResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AppConfig'] = ResolversParentTypes['AppConfig']> = {
+  birthDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  pieTolerance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  futureMonths?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  fundPeriod?: Resolver<Maybe<ResolversTypes['FundPeriod']>, ParentType, ContextType>;
+  fundLength?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1631,9 +1616,6 @@ export type Resolvers<ContextType = Context> = {
   CategoryCostTreeDeep?: CategoryCostTreeDeepResolvers<ContextType>;
   AnalysisResponse?: AnalysisResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
-  AppConfig?: AppConfigResolvers<ContextType>;
-  Mutation?: MutationResolvers<ContextType>;
-  Subscription?: SubscriptionResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
   Fund?: FundResolvers<ContextType>;
   FundData?: FundDataResolvers<ContextType>;
@@ -1645,8 +1627,10 @@ export type Resolvers<ContextType = Context> = {
   UpdatedFundAllocationTargets?: UpdatedFundAllocationTargetsResolvers<ContextType>;
   StockPrice?: StockPriceResolvers<ContextType>;
   StockPricesResponse?: StockPricesResponseResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
   FundCreateUpdate?: FundCreateUpdateResolvers<ContextType>;
   FundDelete?: FundDeleteResolvers<ContextType>;
+  Subscription?: SubscriptionResolvers<ContextType>;
   Date?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   NonNegativeInt?: GraphQLScalarType;
@@ -1655,7 +1639,7 @@ export type Resolvers<ContextType = Context> = {
   CrudResponseCreate?: CrudResponseCreateResolvers<ContextType>;
   CrudResponseUpdate?: CrudResponseUpdateResolvers<ContextType>;
   CrudResponseDelete?: CrudResponseDeleteResolvers<ContextType>;
-  Heartbeat?: HeartbeatResolvers<ContextType>;
+  AppConfig?: AppConfigResolvers<ContextType>;
   ListItem?: ListItemResolvers<ContextType>;
   ListItemStandard?: ListItemStandardResolvers<ContextType>;
   ListItemExtended?: ListItemExtendedResolvers<ContextType>;

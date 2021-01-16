@@ -1,7 +1,6 @@
 import gql from 'graphql-tag';
 
 export * from './analysis';
-export * from './config';
 export * from './funds';
 export * from './list';
 export * from './net-worth';
@@ -30,21 +29,31 @@ export const mainSchema = gql`
     error: String
   }
 
-  type Heartbeat {
-    uid: Int
-    timestamp: Int!
+  type AppConfig {
+    birthDate: String!
+    pieTolerance: Float!
+    futureMonths: Int!
+    fundPeriod: FundPeriod
+    fundLength: NonNegativeInt
+  }
+
+  input AppConfigInput {
+    birthDate: Date
+    pieTolerance: Float
+    futureMonths: Int
+    fundPeriod: FundPeriod
+    fundLength: NonNegativeInt
   }
 
   type Query {
-    whoami: UserInfo
+    config: AppConfig
   }
 
   type Mutation {
-    login(pin: Int!): LoginResponse!
-    logout: LogoutResponse!
+    setConfig(config: AppConfigInput!): AppConfig
   }
 
   type Subscription {
-    heartbeat: Heartbeat!
+    configUpdated: AppConfig!
   }
 `;

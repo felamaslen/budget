@@ -6,9 +6,7 @@ import {
   PositiveIntResolver,
 } from 'graphql-scalars';
 
-import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
-import { Heartbeat, Resolvers } from '~api/types';
-import { Context } from '~api/types/resolver';
+import { Resolvers } from '~api/types';
 
 export * from './analysis';
 export * from './config';
@@ -25,16 +23,4 @@ export const mainResolvers: Resolvers = {
   NonNegativeInt: NonNegativeIntResolver,
   NonNegativeFloat: NonNegativeFloatResolver,
   PositiveInt: PositiveIntResolver,
-
-  Subscription: {
-    heartbeat: {
-      subscribe: (): ReturnType<typeof pubsub.asyncIterator> =>
-        pubsub.asyncIterator(PubSubTopic.Heartbeat),
-
-      resolve: (timestamp: number, _: unknown, context: Context): Heartbeat => ({
-        uid: context.user?.uid ?? null,
-        timestamp,
-      }),
-    },
-  },
 };

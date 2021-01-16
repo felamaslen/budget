@@ -22,4 +22,13 @@ export const userSchema = gql`
     error: String
     ok: Boolean
   }
+
+  extend type Query {
+    whoami: UserInfo
+  }
+
+  extend type Mutation {
+    login(pin: Int!): LoginResponse!
+    logout: LogoutResponse!
+  }
 `;

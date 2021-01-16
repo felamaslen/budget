@@ -28,7 +28,6 @@ export enum PubSubTopic {
   FundUpdated = 'FundUpdated',
   FundDeleted = 'FundDeleted',
   FundPricesUpdated = 'FundPricesUpdated',
-  Heartbeat = 'Heartbeat',
   ListItemCreated = 'ListItemCreated',
   ListItemUpdated = 'ListItemUpdated',
   ListItemDeleted = 'ListItemDeleted',

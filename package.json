@@ -13,7 +13,7 @@
     "gen-gql-types": "graphql-codegen --config codegen.yml",
     "minify-introspection": "mkdir -p lib/api && python -c 'import json,sys; json.dump(json.load(sys.stdin), fp=sys.stdout, separators=(\",\",\":\"))' < src/api/introspection.json > lib/api/introspection.json",
     "build:api:ssr": "BABEL_ENV=node webpack -c webpack.server.config.js",
-    "build:api:main": "BABEL_ENV=node babel src -d lib --extensions \".ts,.tsx,.js\" --copy-files",
+    "build:api:main": "BABEL_ENV=node babel src -d lib --extensions \".ts,.tsx,.js\" --source-maps --copy-files",
     "build:client": "NODE_ENV=production webpack --mode production",
     "build": "sh ./scripts/build.sh",
     "start": "node lib/api",

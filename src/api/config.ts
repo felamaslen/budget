@@ -23,7 +23,6 @@ export default {
   },
   app: {
     port: getenv.int('PORT', 3000),
-    heartbeatInterval: getenv.int('HEARTBEAT_INTERVAL', 5000),
   },
   openExchangeRatesApiKey: getenv.string('OPEN_EXCHANGE_RATES_API_KEY', ''),
   scrapeTimeout: getenv.int('SCRAPE_TIMEOUT', 30000),

@@ -162,21 +162,103 @@ export type QueryStockPricesArgs = {
   codes: Array<Scalars['String']>;
 };
 
-export type AppConfig = {
-  __typename?: 'AppConfig';
-  birthDate: Scalars['String'];
-  pieTolerance: Scalars['Float'];
-  futureMonths: Scalars['Int'];
-  fundPeriod?: Maybe<FundPeriod>;
-  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+export type Transaction = {
+  __typename?: 'Transaction';
+  date: Scalars['Date'];
+  units: Scalars['Float'];
+  price: Scalars['NonNegativeFloat'];
+  fees: Scalars['Int'];
+  taxes: Scalars['Int'];
 };
 
-export type AppConfigInput = {
-  birthDate?: Maybe<Scalars['Date']>;
-  pieTolerance?: Maybe<Scalars['Float']>;
-  futureMonths?: Maybe<Scalars['Int']>;
-  fundPeriod?: Maybe<FundPeriod>;
-  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+export type TransactionInput = {
+  date: Scalars['Date'];
+  units: Scalars['Float'];
+  price: Scalars['NonNegativeFloat'];
+  fees: Scalars['Int'];
+  taxes: Scalars['Int'];
+};
+
+export type Fund = {
+  __typename?: 'Fund';
+  id: Scalars['Int'];
+  item: Scalars['String'];
+  transactions: Array<Transaction>;
+  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type FundData = {
+  __typename?: 'FundData';
+  item: Scalars['String'];
+  transactions: Array<Transaction>;
+  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type FundInput = {
+  item: Scalars['String'];
+  transactions: Array<TransactionInput>;
+  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type FundPriceGroup = {
+  __typename?: 'FundPriceGroup';
+  startIndex: Scalars['Int'];
+  values: Array<Scalars['NonNegativeFloat']>;
+};
+
+export type FundPrices = {
+  __typename?: 'FundPrices';
+  fundId: Scalars['Int'];
+  groups: Array<FundPriceGroup>;
+};
+
+export enum FundPeriod {
+  Year = 'year',
+  Month = 'month'
+}
+
+export type ReadFundsResponse = {
+  __typename?: 'ReadFundsResponse';
+  items: Array<Fund>;
+};
+
+export type FundHistory = {
+  __typename?: 'FundHistory';
+  startTime: Scalars['Int'];
+  cacheTimes: Array<Scalars['Int']>;
+  prices: Array<FundPrices>;
+  annualisedFundReturns: Scalars['Float'];
+  overviewCost: Array<Scalars['Int']>;
+};
+
+export type TargetDelta = {
+  id: Scalars['Int'];
+  allocationTarget: Scalars['NonNegativeInt'];
+};
+
+export type TargetDeltaResponse = {
+  __typename?: 'TargetDeltaResponse';
+  id: Scalars['Int'];
+  allocationTarget: Scalars['NonNegativeInt'];
+};
+
+export type UpdatedFundAllocationTargets = {
+  __typename?: 'UpdatedFundAllocationTargets';
+  error?: Maybe<Scalars['String']>;
+  deltas?: Maybe<Array<TargetDeltaResponse>>;
+};
+
+export type StockPrice = {
+  __typename?: 'StockPrice';
+  code: Scalars['String'];
+  price?: Maybe<Scalars['NonNegativeFloat']>;
+};
+
+export type StockPricesResponse = {
+  __typename?: 'StockPricesResponse';
+  error?: Maybe<Scalars['String']>;
+  prices: Array<StockPrice>;
+  refreshTime?: Maybe<Scalars['DateTime']>;
 };
 
 export type Mutation = {
@@ -316,6 +398,20 @@ export type MutationUpdateNetWorthSubcategoryArgs = {
   input: NetWorthSubcategoryInput;
 };
 
+export type FundCreateUpdate = {
+  __typename?: 'FundCreateUpdate';
+  id: Scalars['Int'];
+  fakeId?: Maybe<Scalars['Int']>;
+  item: FundData;
+  overviewCost: Array<Scalars['Int']>;
+};
+
+export type FundDelete = {
+  __typename?: 'FundDelete';
+  id: Scalars['Int'];
+  overviewCost: Array<Scalars['Int']>;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   cashAllocationTargetUpdated: Scalars['NonNegativeInt'];
@@ -325,7 +421,6 @@ export type Subscription = {
   fundDeleted: FundDelete;
   fundPricesUpdated?: Maybe<FundHistory>;
   fundUpdated: FundCreateUpdate;
-  heartbeat: Heartbeat;
   listItemCreated: ListItemCreateUpdate;
   listItemDeleted: ListItemDelete;
   listItemUpdated: ListItemCreateUpdate;
@@ -357,119 +452,6 @@ export type SubscriptionListItemUpdatedArgs = {
   pages: Array<PageListStandard>;
 };
 
-export type Transaction = {
-  __typename?: 'Transaction';
-  date: Scalars['Date'];
-  units: Scalars['Float'];
-  price: Scalars['NonNegativeFloat'];
-  fees: Scalars['Int'];
-  taxes: Scalars['Int'];
-};
-
-export type TransactionInput = {
-  date: Scalars['Date'];
-  units: Scalars['Float'];
-  price: Scalars['NonNegativeFloat'];
-  fees: Scalars['Int'];
-  taxes: Scalars['Int'];
-};
-
-export type Fund = {
-  __typename?: 'Fund';
-  id: Scalars['Int'];
-  item: Scalars['String'];
-  transactions: Array<Transaction>;
-  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
-};
-
-export type FundData = {
-  __typename?: 'FundData';
-  item: Scalars['String'];
-  transactions: Array<Transaction>;
-  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
-};
-
-export type FundInput = {
-  item: Scalars['String'];
-  transactions: Array<TransactionInput>;
-  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
-};
-
-export type FundPriceGroup = {
-  __typename?: 'FundPriceGroup';
-  startIndex: Scalars['Int'];
-  values: Array<Scalars['NonNegativeFloat']>;
-};
-
-export type FundPrices = {
-  __typename?: 'FundPrices';
-  fundId: Scalars['Int'];
-  groups: Array<FundPriceGroup>;
-};
-
-export enum FundPeriod {
-  Year = 'year',
-  Month = 'month'
-}
-
-export type ReadFundsResponse = {
-  __typename?: 'ReadFundsResponse';
-  items: Array<Fund>;
-};
-
-export type FundHistory = {
-  __typename?: 'FundHistory';
-  startTime: Scalars['Int'];
-  cacheTimes: Array<Scalars['Int']>;
-  prices: Array<FundPrices>;
-  annualisedFundReturns: Scalars['Float'];
-  overviewCost: Array<Scalars['Int']>;
-};
-
-export type TargetDelta = {
-  id: Scalars['Int'];
-  allocationTarget: Scalars['NonNegativeInt'];
-};
-
-export type TargetDeltaResponse = {
-  __typename?: 'TargetDeltaResponse';
-  id: Scalars['Int'];
-  allocationTarget: Scalars['NonNegativeInt'];
-};
-
-export type UpdatedFundAllocationTargets = {
-  __typename?: 'UpdatedFundAllocationTargets';
-  error?: Maybe<Scalars['String']>;
-  deltas?: Maybe<Array<TargetDeltaResponse>>;
-};
-
-export type StockPrice = {
-  __typename?: 'StockPrice';
-  code: Scalars['String'];
-  price?: Maybe<Scalars['NonNegativeFloat']>;
-};
-
-export type StockPricesResponse = {
-  __typename?: 'StockPricesResponse';
-  error?: Maybe<Scalars['String']>;
-  prices: Array<StockPrice>;
-  refreshTime?: Maybe<Scalars['DateTime']>;
-};
-
-export type FundCreateUpdate = {
-  __typename?: 'FundCreateUpdate';
-  id: Scalars['Int'];
-  fakeId?: Maybe<Scalars['Int']>;
-  item: FundData;
-  overviewCost: Array<Scalars['Int']>;
-};
-
-export type FundDelete = {
-  __typename?: 'FundDelete';
-  id: Scalars['Int'];
-  overviewCost: Array<Scalars['Int']>;
-};
-
 
 
 
@@ -491,10 +473,21 @@ export type CrudResponseDelete = {
   error?: Maybe<Scalars['String']>;
 };
 
-export type Heartbeat = {
-  __typename?: 'Heartbeat';
-  uid?: Maybe<Scalars['Int']>;
-  timestamp: Scalars['Int'];
+export type AppConfig = {
+  __typename?: 'AppConfig';
+  birthDate: Scalars['String'];
+  pieTolerance: Scalars['Float'];
+  futureMonths: Scalars['Int'];
+  fundPeriod?: Maybe<FundPeriod>;
+  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type AppConfigInput = {
+  birthDate?: Maybe<Scalars['Date']>;
+  pieTolerance?: Maybe<Scalars['Float']>;
+  futureMonths?: Maybe<Scalars['Int']>;
+  fundPeriod?: Maybe<FundPeriod>;
+  fundLength?: Maybe<Scalars['NonNegativeInt']>;
 };
 
 export enum PageListStandard {

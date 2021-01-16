@@ -1,7 +1,6 @@
 import { Server } from 'http';
 import path from 'path';
 
-import { getUnixTime } from 'date-fns';
 import { Express, Request } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import fs from 'fs-extra';
@@ -10,9 +9,7 @@ import { Context } from 'graphql-ws/lib/server';
 import { useServer, Extra } from 'graphql-ws/lib/use/ws';
 import ws from 'ws';
 
-import { pubsub, PubSubTopic } from './pubsub';
 import { getSchema } from './schema';
-import config from '~api/config';
 import { authMiddleware, getUidFromToken, jwtFromRequest } from '~api/modules/auth';
 import { Context as ExecutionContext } from '~api/types/resolver';
 
@@ -75,9 +72,5 @@ export async function setupGraphQL(app: Express, server: Server): Promise<() => 
       },
       wsServer,
     );
-
-    setInterval(() => {
-      pubsub.publish(PubSubTopic.Heartbeat, getUnixTime(new Date()));
-    }, config.app.heartbeatInterval);
   };
 }
