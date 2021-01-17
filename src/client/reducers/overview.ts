@@ -33,9 +33,8 @@ export const initialState: State = {
   startDate: endOfMonth(addYears(new Date(), -1)),
   endDate: endOfMonth(new Date()),
   annualisedFundReturns: 0.1,
-  homeEquityOld: [],
-  cost: {
-    funds: [],
+  monthly: {
+    stocks: [],
     [PageListStandard.Income]: [],
     [PageListStandard.Bills]: [],
     [PageListStandard.Food]: [],
@@ -70,13 +69,13 @@ const onCreate = (state: State, action: ListItemCreated<StandardInput, PageListS
     ? state
     : {
         ...state,
-        cost: {
-          ...state.cost,
+        monthly: {
+          ...state.monthly,
           [action.page]: setCost(
             state,
             action.delta.date,
             action.delta.cost,
-          )(state.cost[action.page]),
+          )(state.monthly[action.page]),
         },
       };
 
@@ -85,8 +84,8 @@ const onUpdate = (
   action: ListItemUpdated<StandardInput, PageListStandard>,
 ): State => ({
   ...state,
-  cost: {
-    ...state.cost,
+  monthly: {
+    ...state.monthly,
     [action.page]: compose(
       setCost(
         state,
@@ -104,7 +103,7 @@ const onUpdate = (
           ? 0
           : -(action.item?.cost ?? 0),
       ),
-    )(state.cost[action.page]),
+    )(state.monthly[action.page]),
   },
 });
 
@@ -113,33 +112,33 @@ const onDelete = (state: State, action: ListItemDeleted<StandardInput, PageListS
     ? state
     : {
         ...state,
-        cost: {
-          ...state.cost,
+        monthly: {
+          ...state.monthly,
           [action.page]: setCost(
             state,
             action.item.date,
             -action.item.cost,
-          )(state.cost[action.page]),
+          )(state.monthly[action.page]),
         },
       };
 
 const onFundPricesUpdated = (state: State, action: FundPricesUpdated): State => ({
   ...state,
   annualisedFundReturns: action.res.annualisedFundReturns,
-  cost: {
-    ...state.cost,
-    funds: action.res.overviewCost,
+  monthly: {
+    ...state.monthly,
+    stocks: action.res.overviewCost,
   },
 });
 
 const onReceiptCreated = (state: State, action: ActionReceiptCreated): State => ({
   ...state,
-  cost: action.items.reduce<State['cost']>(
+  monthly: action.items.reduce<State['monthly']>(
     (last, item) => ({
       ...last,
       [item.page]: setCost(state, new Date(item.date), item.cost)(last[item.page]),
     }),
-    state.cost,
+    state.monthly,
   ),
 });
 
@@ -156,7 +155,7 @@ export default function overview(state: State = initialState, action: Action): S
       return isStandardListAction(action) && !action.fromServer ? onDelete(state, action) : state;
 
     case ListActionType.OverviewUpdated:
-      return { ...state, cost: { ...state.cost, [action.page]: action.overviewCost } };
+      return { ...state, monthly: { ...state.monthly, [action.page]: action.overviewCost } };
     case ListActionType.ReceiptCreated:
       return onReceiptCreated(state, action);
 
