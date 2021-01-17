@@ -121,7 +121,7 @@ function predictByPastAverages(
 
   const average = Math.round(arrayAverage(currentItems, Average.Median));
 
-  return currentItems.concat(Array(futureMonths).fill(average));
+  return futureMonths > 0 ? currentItems.concat(Array(futureMonths).fill(average)) : currentItems;
 }
 
 function calculateFutures<K extends MonthlyProcessedKey>(
@@ -174,16 +174,18 @@ const withPredictedSpending = <K extends MonthlyProcessedKey>(
 const predictStockReturns = (futureMonths: number, annualisedFundReturns: number) => (
   stocks: number[],
 ): number[] =>
-  Array(futureMonths)
-    .fill(0)
-    .reduce<number[]>(
-      (last) => [
-        ...last,
-        last[last.length - 1] * (1 + (annualisedFundReturns + randnBm() * 0.01)) ** (1 / 12),
-      ],
-      stocks,
-    )
-    .map(Math.round);
+  futureMonths > 0
+    ? Array(futureMonths)
+        .fill(0)
+        .reduce<number[]>(
+          (last) => [
+            ...last,
+            last[last.length - 1] * (1 + (annualisedFundReturns + randnBm() * 0.01)) ** (1 / 12),
+          ],
+          stocks,
+        )
+        .map(Math.round)
+    : stocks;
 
 const withCurrentStockValue = (futureMonths: number, currentStockValue: number) => (
   stocks: number[],
@@ -294,7 +296,7 @@ const getTableValues = (monthly: MonthlyProcessed): TableNumberRows =>
       ...last,
     }),
     {
-      netWorth: monthly.netWorth.map((value, index) => value - monthly.options[index]),
+      netWorth: monthly.netWorth,
       net: monthly.income.map((value, index) => value - monthly.spending[index]),
     },
   );

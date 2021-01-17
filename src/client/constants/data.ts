@@ -36,7 +36,6 @@ const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
   netWorth: {
     name: 'Net Worth',
     include: ['netWorth'],
-    exclude: ['options'],
     link: {
       to: '/net-worth',
       replace: true,
