@@ -26,7 +26,7 @@ export const testState: State = {
     annualisedFundReturns: 0.143,
     homeEquityOld: [],
     cost: {
-      funds: [94004, 105390, 110183, 100779, 101459, 102981, 103293, 0, 0, 0],
+      funds: [100779, 101459, 102981, 103293, 0, 0, 0],
       [PageListStandard.Income]: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
       [PageListStandard.Bills]: [1000, 900, 400, 650, 0, 0, 0],
       [PageListStandard.Food]: [50, 13, 20, 19, 0, 0, 0],
@@ -45,6 +45,13 @@ export const testState: State = {
         isOption: false,
       },
       {
+        id: numericHash('real-locked-cash-category-id'),
+        type: NetWorthCategoryType.Asset,
+        category: 'Cash (other)',
+        color: 'darkgreen',
+        isOption: false,
+      },
+      {
         id: numericHash('real-option-category-id'),
         type: NetWorthCategoryType.Asset,
         category: 'Options',
@@ -56,6 +63,13 @@ export const testState: State = {
         type: NetWorthCategoryType.Asset,
         category: 'House',
         color: '#00fa00',
+        isOption: false,
+      },
+      {
+        id: numericHash('real-pension-category-id'),
+        type: NetWorthCategoryType.Asset,
+        category: 'Pension',
+        color: 'darkblue',
         isOption: false,
       },
       {
@@ -80,6 +94,13 @@ export const testState: State = {
         subcategory: 'My wallet',
         hasCreditLimit: null,
         opacity: 0.2,
+      },
+      {
+        id: numericHash('real-locked-cash-subcategory-id'),
+        categoryId: numericHash('real-locked-cash-category-id'),
+        subcategory: 'My money market fund',
+        hasCreditLimit: null,
+        opacity: 0.4,
       },
       {
         id: numericHash('real-option-subcategory-id'),
@@ -128,6 +149,13 @@ export const testState: State = {
         opacity: 0.15,
       },
       {
+        id: numericHash('real-pension-subcategory-id'),
+        categoryId: numericHash('real-pension-category-id'),
+        subcategory: 'My pension',
+        hasCreditLimit: null,
+        opacity: 0.65,
+      },
+      {
         id: numericHash('real-mortgage-subcategory-id'),
         categoryId: numericHash('real-mortgage-category-id'),
         subcategory: 'My mortgage',
@@ -144,6 +172,27 @@ export const testState: State = {
     ],
     entries: [
       {
+        id: numericHash('real-entry-id-z'),
+        date: new Date('2018-01-30'),
+        values: [
+          {
+            subcategory: numericHash('real-mortgage-subcategory-id'),
+            mortgage: {
+              principal: 19319500,
+              paymentsRemaining: 360,
+              rate: 2.82,
+            },
+            skip: false,
+          },
+          {
+            subcategory: numericHash('real-house-subcategory-id'),
+            simple: 21000000,
+          },
+        ],
+        creditLimit: [],
+        currencies: [],
+      },
+      {
         id: numericHash('real-entry-id-a'),
         date: new Date('2018-02-28'),
         values: [
@@ -153,8 +202,16 @@ export const testState: State = {
             fx: [{ currency: 'CZK', value: 37.5 }],
           },
           {
+            subcategory: numericHash('real-locked-cash-subcategory-id'),
+            simple: 855912,
+          },
+          {
             subcategory: numericHash('real-mortgage-subcategory-id'),
-            simple: -18744200,
+            mortgage: {
+              principal: 18744200,
+              paymentsRemaining: 359,
+              rate: 2.74,
+            },
             skip: false,
           },
           {
@@ -168,6 +225,10 @@ export const testState: State = {
           {
             subcategory: numericHash('real-house-subcategory-id'),
             simple: 21000000,
+          },
+          {
+            subcategory: numericHash('real-pension-subcategory-id'),
+            simple: 10654,
           },
         ],
         creditLimit: [
@@ -187,13 +248,25 @@ export const testState: State = {
             simple: 9752,
           },
           {
+            subcategory: numericHash('real-pension-subcategory-id'),
+            simple: 11237,
+          },
+          {
             subcategory: numericHash('real-mortgage-subcategory-id'),
-            simple: -18420900,
+            mortgage: {
+              principal: 18420900,
+              paymentsRemaining: 358,
+              rate: 2.79,
+            },
             skip: false,
           },
           {
             subcategory: numericHash('real-bank-subcategory-id'),
             simple: 1051343,
+          },
+          {
+            subcategory: numericHash('real-locked-cash-subcategory-id'),
+            fx: [{ currency: 'USD', value: 165 }],
           },
           {
             subcategory: numericHash('real-credit-card-subcategory-id'),

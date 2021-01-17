@@ -299,7 +299,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#fff",
-                "value": 0,
+                "value": 1680500,
               },
               "social": Object {
                 "rgb": "#fff",
@@ -349,7 +349,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 3554027,
+                "value": 4420593,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -399,7 +399,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#24bf37",
-                "value": 3852453.2,
+                "value": 4719019.2,
               },
               "social": Object {
                 "rgb": "#bf9e24",
@@ -449,7 +449,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 3559209,
+                "value": 4425775,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -499,7 +499,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#92df9b",
-                "value": 3562548,
+                "value": 4429114,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -549,7 +549,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#90df9a",
-                "value": 3565404,
+                "value": 4431970,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -599,7 +599,7 @@ describe('Overview selectors', () => {
               },
               "netWorthCombined": Object {
                 "rgb": "#8fde99",
-                "value": 3569077,
+                "value": 4435643,
               },
               "social": Object {
                 "rgb": "#dfcf92",

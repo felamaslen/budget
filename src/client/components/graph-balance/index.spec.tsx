@@ -81,14 +81,6 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="300.5"
-                y2="300.5"
-              />
-              <line
-                stroke="#999"
-                stroke-width="1"
-                x1="0"
-                x2="500"
                 y1="235.5"
                 y2="235.5"
               />
@@ -97,11 +89,101 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
+                y1="153.5"
+                y2="153.5"
+              />
+              <line
+                stroke="#999"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="72.5"
+                y2="72.5"
+              />
+            </g>
+            <g>
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="300.5"
+                y2="300.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="283.5"
+                y2="283.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="267.5"
+                y2="267.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="251.5"
+                y2="251.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="218.5"
+                y2="218.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="202.5"
+                y2="202.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="186.5"
+                y2="186.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
                 y1="170.5"
                 y2="170.5"
               />
               <line
-                stroke="#999"
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="137.5"
+                y2="137.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="121.5"
+                y2="121.5"
+              />
+              <line
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -109,7 +191,23 @@ describe('<GraphBalance />', () => {
                 y2="105.5"
               />
               <line
-                stroke="#999"
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="88.5"
+                y2="88.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="56.5"
+                y2="56.5"
+              />
+              <line
+                stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
@@ -118,146 +216,6 @@ describe('<GraphBalance />', () => {
               />
             </g>
             <g>
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="287.5"
-                y2="287.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="274.5"
-                y2="274.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="261.5"
-                y2="261.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="248.5"
-                y2="248.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="222.5"
-                y2="222.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="209.5"
-                y2="209.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="196.5"
-                y2="196.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="183.5"
-                y2="183.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="157.5"
-                y2="157.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="144.5"
-                y2="144.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="131.5"
-                y2="131.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="118.5"
-                y2="118.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="92.5"
-                y2="92.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="79.5"
-                y2="79.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="66.5"
-                y2="66.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="53.5"
-                y2="53.5"
-              />
-            </g>
-            <g>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                text-anchor="start"
-                x="0"
-                y="298.5"
-              >
-                −£50k
-              </text>
               <text
                 alignment-baseline="baseline"
                 font-family="Arial, Helvetica, sans-serif"
@@ -274,9 +232,9 @@ describe('<GraphBalance />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="168.5"
+                y="151.5"
               >
-                £50k
+                £2.5m
               </text>
               <text
                 alignment-baseline="baseline"
@@ -284,19 +242,9 @@ describe('<GraphBalance />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="103.5"
+                y="70.5"
               >
-                £100k
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                text-anchor="start"
-                x="0"
-                y="38.5"
-              >
-                £150k
+                £5m
               </text>
             </g>
             <g>
@@ -942,7 +890,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0.0,188.8 L77.3,180.1 L163.0,169.8 L245.9,157.5 L331.5,142.9 L414.4,125.5 L500.0,104.9"
+            d="M0.0,234.5 L77.3,233.6 L163.0,231.2 L245.9,225.1 L331.5,208.8 L414.4,166.2 L500.0,54.0"
             fill="none"
             stroke="#999"
             stroke-width="1"
@@ -950,7 +898,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,236.310127 Q50,235 77.3,235.0 C107,235 133,235 163.0,235.0 C192,235 217,235 245.9,235.0 C276,235 302,235 331.5,235.0 C360,235 385,235 414.4,235.0 Q444,235 500.0,235.0"
+            d="M0,235.03275317499998 Q50,235 77.3,234.8 C107,235 133,235 163.0,234.8 C192,235 217,235 245.9,234.8 C276,235 302,235 331.5,234.8 C360,235 385,235 414.4,234.8 Q444,235 500.0,234.8"
             fill="rgba(145,194,129,0.4)"
             stroke="none"
             stroke-width="2"
@@ -958,7 +906,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,233.689873 Q50,234 77.3,233.7 C107,234 133,234 163.0,233.7 C192,234 217,233 245.9,233.7 C276,234 302,235 331.5,235.0 C360,235 385,235 414.4,235.0 Q444,235 500.0,235.0"
+            d="M0,234.96724682500002 Q50,235 77.3,235.0 C107,235 133,235 163.0,235.0 C192,235 217,235 245.9,235.0 C276,235 302,235 331.5,235.0 C360,235 385,235 414.4,235.0 Q444,235 500.0,235.0"
             fill="rgba(84,110,122,0.4)"
             stroke="none"
             stroke-width="2"
@@ -966,7 +914,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,264.3254 Q49,237 77.3,228.8 C106,221 136,213 163.0,220.1 C195,229 214,265 245.9,275.0 C273,284 302,275 331.5,275.0 C360,275 385,275 414.4,275.0 Q444,275 500.0,275.0"
+            d="M0,235 Q50,234 77.3,234.3 C107,234 133,235 163.0,235.7 C192,236 217,236 245.9,235.7 C276,236 302,236 331.5,235.7 C360,236 385,236 414.4,235.7 Q444,236 500.0,235.7"
             fill="none"
             stroke="#039"
             stroke-width="2"
@@ -978,15 +926,6 @@ describe('<GraphBalance />', () => {
             fill="rgba(47,123,211,0.5)"
             stroke="none"
             stroke-width="2"
-          />
-        </g>
-        <g>
-          <path
-            d="M0,235 Q50,235 77.3,234.4 C107,234 133,234 163.0,234.4 C192,234 217,234 245.9,234.4 C276,234 302,234 331.5,234.4 C360,234 385,234 414.4,234.4 Q444,234 500.0,234.4"
-            fill="none"
-            stroke="#00348a"
-            stroke-dasharray="3,5"
-            stroke-width="1"
           />
         </g>
         <g>
@@ -1006,7 +945,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="92"
             >
-              £9m (1y)
+              £464,283tn (1y)
             </text>
             <text
               alignment-baseline="hanging"
@@ -1016,7 +955,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="114"
             >
-              £559m (3y)
+              £5,594,887,365,670,840tn (3y)
             </text>
             <text
               alignment-baseline="hanging"
@@ -1026,7 +965,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="136"
             >
-              £35bn (5y)
+              £6.742,170,081,531,781e+25tn (5y)
             </text>
           </g>
           <g>
