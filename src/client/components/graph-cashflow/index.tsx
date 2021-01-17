@@ -23,30 +23,25 @@ export type Props = PickUnion<LineGraphProps, 'name' | 'lines' | 'afterLines' | 
 
 function getTimeAtIndex(
   index: number,
-  offset: number,
   startDate: Date,
   now?: Date,
   breakAtToday?: boolean,
 ): number {
-  const date = endOfMonth(addMonths(startDate, index - offset));
+  const date = endOfMonth(addMonths(startDate, index));
   return getUnixTime(breakAtToday && now && isSameMonth(now, date) ? now : date);
 }
 
 export type TimeValuesProps = {
   now?: Date;
-  oldOffset: number;
   breakAtToday?: boolean;
   startDate: Date;
 };
 
 export const getValuesWithTime = (
   data: number[],
-  { now, oldOffset, breakAtToday, startDate }: TimeValuesProps,
+  { now, breakAtToday, startDate }: TimeValuesProps,
 ): [number, number][] =>
-  data.map((value, index) => [
-    getTimeAtIndex(index, oldOffset, startDate, now, breakAtToday),
-    value,
-  ]);
+  data.map((value, index) => [getTimeAtIndex(index, startDate, now, breakAtToday), value]);
 
 function getRanges(lines: Line[]): Range {
   return lines.reduce(

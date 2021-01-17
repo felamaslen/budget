@@ -10,41 +10,35 @@ import {
 } from '~client/components/graph-cashflow';
 import { profitLossColor } from '~client/components/graph/helpers';
 import { TodayContext } from '~client/hooks';
-import { getStartDate, getProcessedCost } from '~client/selectors';
+import { getProcessedMonthlyValues, getStartDate } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import type { DrawProps, Line } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
-function processData(
-  startDate: Date,
-  net: number[],
-  spending: number[],
-  savingsRatio: number[],
-): Line[] {
-  const props: TimeValuesProps = {
-    oldOffset: 0,
-    startDate,
-  };
+function processData(startDate: Date, net: number[], income: number[], spending: number[]): Line[] {
+  const opts: TimeValuesProps = { startDate };
 
   return [
     {
       key: 'net',
-      data: getValuesWithTime(net, props),
+      data: getValuesWithTime(net, opts),
       arrows: true,
       color: profitLossColor,
     },
     {
       key: 'spending',
-      data: getValuesWithTime(spending, props),
+      data: getValuesWithTime(spending, opts),
       fill: false,
       smooth: true,
       color: colors[PageNonStandard.Overview].spending,
     },
     {
-      key: 'savingsRatio',
+      key: 'savings-ratio',
       data: getValuesWithTime(
-        savingsRatio.map((value) => value * 1),
-        props,
+        income.map((value, index) =>
+          value > 0 ? Math.min(1, Math.max(0, 1 - spending[index] / value)) : 0,
+        ),
+        opts,
       ),
       secondary: true,
       color: rgba(colors.green, 0.5),
@@ -65,13 +59,13 @@ function processData(
 export const GraphSpending: React.FC = () => {
   const today = useContext(TodayContext);
   const startDate = useSelector(getStartDate);
-  const { net, spending, savingsRatio } = useSelector(getProcessedCost(today));
+  const { net, income, spending } = useSelector(getProcessedMonthlyValues(today));
 
-  const lines = useMemo<Line[]>(() => processData(startDate, net, spending, savingsRatio), [
+  const lines = useMemo<Line[]>(() => processData(startDate, net, income, spending), [
     startDate,
     net,
+    income,
     spending,
-    savingsRatio,
   ]);
 
   const afterLines = useMemo<React.FC<DrawProps>>(() => {
