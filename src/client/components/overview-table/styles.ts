@@ -91,9 +91,6 @@ function cellWidthDesktop(column: PropsCell['column']): number {
   if (colSizeSmall.includes(column)) {
     return 7;
   }
-  if (column === 'netWorthPredicted') {
-    return 9;
-  }
   if (column === 'netWorth') {
     return 12;
   }
@@ -152,8 +149,6 @@ export const Cell = styled.div<PropsCell>(
       ) && `border-left: 3px solid ${colors.dark.mediumLight};`};
 
       ${column === 'net' && `border-right: 3px solid ${colors.light.mediumLight};`};
-
-      ${column === 'netWorthPredicted' && `font-style: italic`};
     }
   `,
 );
