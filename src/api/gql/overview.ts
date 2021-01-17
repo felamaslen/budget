@@ -20,12 +20,13 @@ export const overviewSchema = gql`
 
   type OverviewOld {
     startDate: DateTime!
+    netWorth: [Int!]!
     stocks: [Int!]!
     pension: [Int!]!
-    lockedCash: [Int!]!
+    cashOther: [Int!]!
+    investments: [Int!]!
     homeEquity: [Int!]!
     options: [Int!]!
-    netWorth: [Int!]!
     income: [Int!]!
     spending: [Int!]!
   }

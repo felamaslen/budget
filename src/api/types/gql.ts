@@ -781,12 +781,13 @@ export type Overview = {
 
 export type OverviewOld = {
   startDate: Scalars['DateTime'];
+  netWorth: Array<Scalars['Int']>;
   stocks: Array<Scalars['Int']>;
   pension: Array<Scalars['Int']>;
-  lockedCash: Array<Scalars['Int']>;
+  cashOther: Array<Scalars['Int']>;
+  investments: Array<Scalars['Int']>;
   homeEquity: Array<Scalars['Int']>;
   options: Array<Scalars['Int']>;
-  netWorth: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   spending: Array<Scalars['Int']>;
 };
@@ -1585,12 +1586,13 @@ export type OverviewResolvers<ContextType = Context, ParentType extends Resolver
 
 export type OverviewOldResolvers<ContextType = Context, ParentType extends ResolversParentTypes['OverviewOld'] = ResolversParentTypes['OverviewOld']> = {
   startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  netWorth?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   pension?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
-  lockedCash?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  cashOther?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  investments?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   homeEquity?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   options?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
-  netWorth?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   income?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   spending?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

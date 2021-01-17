@@ -123,18 +123,6 @@ describe('Overview resolver', () => {
         /* Feb-18 */ aug2017ScrapedValue,
         /* Mar-18 */ aug2017ScrapedValue,
         /* Apr-18 */ aug2017ScrapedValue,
-        /* May-18 */ aug2017ScrapedValue,
-        /* Jun-18 */ aug2017ScrapedValue,
-        /* Jul-18 */ aug2017ScrapedValue,
-        /* Aug-18 */ aug2017ScrapedValue,
-        /* Sep-18 */ aug2017ScrapedValue,
-        /* Oct-18 */ aug2017ScrapedValue,
-        /* Nov-18 */ aug2017ScrapedValue,
-        /* Dec-18 */ aug2017ScrapedValue,
-        /* Jan-19 */ aug2017ScrapedValue,
-        /* Feb-19 */ aug2017ScrapedValue,
-        /* Mar-19 */ aug2017ScrapedValue,
-        /* Apr-19 */ aug2017ScrapedValue,
       ]);
     });
 
@@ -161,7 +149,8 @@ describe('Overview resolver', () => {
           startDate
           stocks
           pension
-          lockedCash
+          cashOther
+          investments
           homeEquity
           options
           netWorth
@@ -223,7 +212,7 @@ describe('Overview resolver', () => {
       /* Feb-16 */ 0,
     ];
 
-    const expectedLockedCash = [
+    const expectedCashOther = [
       /* Sep-14 */ 0,
       /* Oct-14 */ 0,
       /* Nov-14 */ 0,
@@ -233,6 +222,27 @@ describe('Overview resolver', () => {
       /* Mar-15 */ 1667500,
       /* Apr-15 */ 0,
       /* May-15 */ 0,
+      /* Jun-15 */ 0,
+      /* Jul-15 */ 0,
+      /* Aug-15 */ 0,
+      /* Sep-15 */ 0,
+      /* Oct-15 */ 0,
+      /* Nov-15 */ 0,
+      /* Dec-15 */ 0,
+      /* Jan-16 */ 0,
+      /* Feb-16 */ 0,
+    ];
+
+    const expectedInvestments = [
+      /* Sep-14 */ 0,
+      /* Oct-14 */ 0,
+      /* Nov-14 */ 0,
+      /* Dec-14 */ 0,
+      /* Jan-15 */ 0,
+      /* Feb-15 */ 0,
+      /* Mar-15 */ 0,
+      /* Apr-15 */ 0,
+      /* May-15 */ 6354004,
       /* Jun-15 */ 0,
       /* Jul-15 */ 0,
       /* Aug-15 */ 0,
@@ -306,6 +316,7 @@ describe('Overview resolver', () => {
       /* May-15 */ Math.round(
         /* bank */ 996542 +
           /* locked cash */ 0 +
+          /* ISA */ 6354004 +
           /* fx */ Math.round(105 * 0.783 * 100) +
           Math.round(57451 * 0.116 * 100) +
           /* house */ 43500000 +
@@ -367,16 +378,17 @@ describe('Overview resolver', () => {
     ];
 
     it.each`
-      description      | prop            | value
-      ${'start date'}  | ${'startDate'}  | ${'2014-09-30T23:59:59.999Z'}
-      ${'stocks'}      | ${'stocks'}     | ${expectedStocks}
-      ${'pension'}     | ${'pension'}    | ${expectedPension}
-      ${'locked cash'} | ${'lockedCash'} | ${expectedLockedCash}
-      ${'home equity'} | ${'homeEquity'} | ${expectedHomeEquity}
-      ${'options'}     | ${'options'}    | ${expectedOptions}
-      ${'net worth'}   | ${'netWorth'}   | ${expectedNetWorth}
-      ${'income'}      | ${'income'}     | ${expectedIncome}
-      ${'spending'}    | ${'spending'}   | ${expectedSpending}
+      description                      | prop             | value
+      ${'start date'}                  | ${'startDate'}   | ${'2014-09-30T23:59:59.999Z'}
+      ${'stocks'}                      | ${'stocks'}      | ${expectedStocks}
+      ${'pension'}                     | ${'pension'}     | ${expectedPension}
+      ${'other cash'}                  | ${'cashOther'}   | ${expectedCashOther}
+      ${'investments (stocks + cash)'} | ${'investments'} | ${expectedInvestments}
+      ${'home equity'}                 | ${'homeEquity'}  | ${expectedHomeEquity}
+      ${'options'}                     | ${'options'}     | ${expectedOptions}
+      ${'net worth'}                   | ${'netWorth'}    | ${expectedNetWorth}
+      ${'income'}                      | ${'income'}      | ${expectedIncome}
+      ${'spending'}                    | ${'spending'}    | ${expectedSpending}
     `('should return the historical $description', async ({ prop, value }) => {
       expect.assertions(1);
 

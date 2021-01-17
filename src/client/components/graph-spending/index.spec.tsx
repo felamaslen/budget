@@ -2,28 +2,29 @@
 import { render, RenderResult } from '@testing-library/react';
 import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore from 'redux-mock-store';
 
-import { GraphSpending } from '.';
+import { GraphSpending, Props } from '.';
 import { ResizeContext, TodayContext } from '~client/hooks';
-import { testState as state } from '~client/test-data/state';
+import { getFutureMonths, getProcessedMonthlyValues, getStartDate } from '~client/selectors';
+import { testNow, testState as state } from '~client/test-data/state';
 
 describe('<GraphSpending />', () => {
-  const makeStore = createStore();
-  const today = endOfDay(new Date('2020-04-20T16:29Z'));
+  const today = endOfDay(testNow);
 
   const setup = (): RenderResult => {
-    const store = makeStore(state);
+    const props: Props = {
+      showAll: false,
+      startDate: getStartDate(state),
+      futureMonths: getFutureMonths(today)(state),
+      monthly: getProcessedMonthlyValues(today)(state),
+    };
 
     return render(
-      <Provider store={store}>
-        <TodayContext.Provider value={today}>
-          <ResizeContext.Provider value={1032}>
-            <GraphSpending />
-          </ResizeContext.Provider>
-        </TodayContext.Provider>
-      </Provider>,
+      <TodayContext.Provider value={today}>
+        <ResizeContext.Provider value={1032}>
+          <GraphSpending {...props} />
+        </ResizeContext.Provider>
+      </TodayContext.Provider>,
     );
   };
 
@@ -44,16 +45,8 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="300.5"
-                y2="300.5"
-              />
-              <line
-                stroke="#999"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="235.5"
-                y2="235.5"
+                y1="256.5"
+                y2="256.5"
               />
               <line
                 stroke="#999"
@@ -68,16 +61,8 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="105.5"
-                y2="105.5"
-              />
-              <line
-                stroke="#999"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="40.5"
-                y2="40.5"
+                y1="83.5"
+                y2="83.5"
               />
             </g>
             <g>
@@ -86,8 +71,16 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="287.5"
-                y2="287.5"
+                y1="308.5"
+                y2="308.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="291.5"
+                y2="291.5"
               />
               <line
                 stroke="#eaeaea"
@@ -102,16 +95,8 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="261.5"
-                y2="261.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="248.5"
-                y2="248.5"
+                y1="239.5"
+                y2="239.5"
               />
               <line
                 stroke="#eaeaea"
@@ -126,48 +111,32 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="209.5"
-                y2="209.5"
+                y1="204.5"
+                y2="204.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="196.5"
-                y2="196.5"
+                y1="187.5"
+                y2="187.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="183.5"
-                y2="183.5"
+                y1="152.5"
+                y2="152.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="157.5"
-                y2="157.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="144.5"
-                y2="144.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="131.5"
-                y2="131.5"
+                y1="135.5"
+                y2="135.5"
               />
               <line
                 stroke="#eaeaea"
@@ -182,16 +151,8 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="92.5"
-                y2="92.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="79.5"
-                y2="79.5"
+                y1="100.5"
+                y2="100.5"
               />
               <line
                 stroke="#eaeaea"
@@ -206,8 +167,8 @@ describe('<GraphSpending />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="53.5"
-                y2="53.5"
+                y1="48.5"
+                y2="48.5"
               />
             </g>
             <g>
@@ -217,17 +178,7 @@ describe('<GraphSpending />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="298.5"
-              >
-                −£10
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                text-anchor="start"
-                x="0"
-                y="233.5"
+                y="254.5"
               >
                 £0
               </text>
@@ -247,19 +198,9 @@ describe('<GraphSpending />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="103.5"
+                y="81.5"
               >
                 £20
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                text-anchor="start"
-                x="0"
-                y="38.5"
-              >
-                £30
               </text>
             </g>
             <g>
@@ -269,19 +210,9 @@ describe('<GraphSpending />', () => {
                 font-size="11"
                 text-anchor="end"
                 x="500"
-                y="298.5"
+                y="254.5"
               >
-                0.00%
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                text-anchor="end"
-                x="500"
-                y="233.5"
-              >
-                50.00%
+                20.00%
               </text>
               <text
                 alignment-baseline="baseline"
@@ -291,27 +222,17 @@ describe('<GraphSpending />', () => {
                 x="500"
                 y="168.5"
               >
+                60.00%
+              </text>
+              <text
+                alignment-baseline="baseline"
+                font-family="Arial, Helvetica, sans-serif"
+                font-size="11"
+                text-anchor="end"
+                x="500"
+                y="81.5"
+              >
                 100.00%
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                text-anchor="end"
-                x="500"
-                y="103.5"
-              >
-                150.00%
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                text-anchor="end"
-                x="500"
-                y="38.5"
-              >
-                200.00%
               </text>
             </g>
             <g>
@@ -939,8 +860,8 @@ describe('<GraphSpending />', () => {
             <line
               stroke="#333"
               stroke-width="1"
-              x1="2237.5"
-              x2="2237.5"
+              x1="113.5"
+              x2="113.5"
               y1="300"
               y2="40"
             />
@@ -948,7 +869,7 @@ describe('<GraphSpending />', () => {
               color="#000"
               font-family="Arial, Helvetica, sans-serif"
               font-size="11"
-              x="2237.5"
+              x="113.5"
               y="40"
             >
               Now
@@ -958,64 +879,64 @@ describe('<GraphSpending />', () => {
         <g>
           <g>
             <path
-              d="M0,235 L2.6573610894698413e-15,191.602  L-4.1,193.6 L0.0,187.6 L4.1,193.6 L0.0,191.6"
+              d="M0,256.6666666666667 L3.618276118264817e-15,197.57573333333335  L-4.3,199.7 L0.0,193.3 L4.3,199.7 L0.0,197.6"
               fill="#0c3"
               stroke="#0c3"
-              stroke-width="0.74"
+              stroke-width="0.8879999999999999"
             />
           </g>
           <g>
             <path
-              d="M77.34806629834254,235 L77.34806629834254,241.76080000000002  L81.1,239.9 L77.3,245.5 L73.6,239.9 L77.3,241.8"
+              d="M77.34806629834254,256.6666666666667 L77.34806629834254,265.9082666666667  L81.9,263.7 L77.3,270.3 L72.8,263.7 L77.3,265.9"
               fill="#c30"
               stroke="#c30"
-              stroke-width="0.504"
+              stroke-width="1.008"
             />
           </g>
           <g>
             <path
-              d="M162.98342541436463,235 L162.98342541436463,185.26930000000002  L158.7,187.4 L163.0,181.1 L167.2,187.4 L163.0,185.3"
+              d="M162.98342541436463,256.6666666666667 L162.98342541436463,207.05718666666667  L158.9,209.1 L163.0,203.0 L167.1,209.1 L163.0,207.1"
               fill="#0c3"
               stroke="#0c3"
-              stroke-width="0.841"
+              stroke-width="0.7524000000000001"
             />
           </g>
           <g>
             <path
-              d="M245.85635359116023,235 L245.85635359116023,126.8329  L240.2,129.6 L245.9,121.4 L251.5,129.6 L245.9,126.8"
+              d="M245.85635359116023,256.6666666666667 L245.85635359116023,129.44351999999998  L240.1,132.2 L245.9,123.8 L251.6,132.2 L245.9,129.4"
               fill="#0c3"
               stroke="#0c3"
-              stroke-width="1.773"
+              stroke-width="1.8624"
             />
           </g>
           <g>
             <path
-              d="M331.49171270718233,235 L331.49171270718233,93.78999999999999  L325.0,96.9 L331.5,87.6 L337.9,96.9 L331.5,93.8"
+              d="M331.49171270718233,256.6666666666667 L331.49171270718233,91.68552  L324.9,94.9 L331.5,85.3 L338.1,94.9 L331.5,91.7"
               fill="#0c3"
               stroke="#0c3"
-              stroke-width="2.3000000000000003"
+              stroke-width="2.4024"
             />
           </g>
           <g>
             <path
-              d="M414.36464088397787,235 L414.36464088397787,125.14  L408.7,127.9 L414.4,119.6 L420.1,127.9 L414.4,125.1"
+              d="M414.36464088397787,256.6666666666667 L414.36464088397787,133.63885333333334  L408.7,136.4 L414.4,128.1 L420.1,136.4 L414.4,133.6"
               fill="#0c3"
               stroke="#0c3"
-              stroke-width="1.7999999999999998"
+              stroke-width="1.8024"
             />
           </g>
           <g>
             <path
-              d="M500,235 L500,74.97999999999999  L493.1,78.3 L500.0,68.3 L506.9,78.3 L500.0,75.0"
+              d="M500,256.6666666666667 L500,66.51352  L492.9,69.9 L500.0,59.6 L507.1,69.9 L500.0,66.5"
               fill="#0c3"
               stroke="#0c3"
-              stroke-width="2.6"
+              stroke-width="2.7624"
             />
           </g>
         </g>
         <g>
           <path
-            d="M0,153.10000000000002 Q53,95 77.3,100.6 C110,108 127,174 163.0,192.2 C186,204 219,181 245.9,187.7 C278,196 300,226 331.5,235.0 C359,243 385,235 414.4,235.0 Q444,235 500.0,235.0"
+            d="M0,147.46666666666667 Q52,72 77.3,77.4 C109,84 127,160 163.0,181.0 C186,194 219,167 245.9,174.5 C278,184 299,220 331.5,230.8 C358,240 385,231 414.4,230.8 Q444,231 500.0,230.8"
             fill="none"
             stroke="#bf2424"
             stroke-width="2"
@@ -1023,14 +944,14 @@ describe('<GraphSpending />', () => {
         </g>
         <g>
           <path
-            d="M0,251.9 Q52,304 77.3,300.0 C109,295 129,245 163.0,227.1 C188,213 218,217 245.9,207.8 C277,197 300,177 331.5,170.0 C359,164 385,170 414.4,170.0 Q444,170 500.0,170.0"
+            d="M0,219.83333333333334 Q50,302 77.3,300.0 C107,298 129,236 163.0,209.4 C188,189 217,182 245.9,165.5 C276,148 299,120 331.5,111.4 C358,104 385,120 414.4,119.2 Q444,119 500.0,108.2"
             fill="none"
             stroke="rgba(0,153,51,0.5)"
             stroke-dasharray="3,5"
             stroke-width="1"
           />
           <path
-            d="M0,251.9 Q50,275 77.3,275.9 C107,277 133,265 163.0,259.7 C192,255 217,252 245.9,246.7 C276,242 301,236 331.5,231.4 C360,227 385,224 414.4,221.1 Q444,218 500.0,213.8"
+            d="M0,219.83333333333334 Q49,256 77.3,259.9 C106,264 133,250 163.0,243.1 C192,237 217,231 245.9,223.7 C276,216 301,208 331.5,201.2 C360,195 385,192 414.4,187.6 Q444,183 500.0,176.2"
             fill="none"
             stroke="#093"
             stroke-width="2"
@@ -1094,8 +1015,8 @@ describe('<GraphSpending />', () => {
             <rect
               fill="rgba(255,255,255,0.6)"
               height="260"
-              width="-1737.5690607734805"
-              x="2237.5690607734805"
+              width="386.7403314917127"
+              x="113.25966850828729"
               y="40"
             />
           </g>

@@ -1,3 +1,4 @@
+import lcm from 'compute-lcm';
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 
 import { genPixelCompute, defaultPadding } from './helpers';
@@ -29,7 +30,17 @@ function normaliseSecondAxis(minY: number, maxY: number, minY2: number, maxY2: n
     return { minY2, maxY2, minY, maxY };
   }
 
-  const tickSizePrimary = getTickSize(minY, maxY, 5);
+  const tickSizePrimaryIdeal = getTickSize(minY, maxY, 5);
+  const tickSizeSecondaryIdeal = getTickSize(minY2, maxY2, 5);
+  const numTicksPrimaryIdeal = Math.ceil((maxY - minY) / tickSizePrimaryIdeal);
+  const numTicksSecondaryIdeal = Math.ceil((maxY2 - minY2) / tickSizeSecondaryIdeal);
+
+  const numTicksToGenerate =
+    Number.isNaN(numTicksPrimaryIdeal) || Number.isNaN(numTicksSecondaryIdeal)
+      ? 5
+      : lcm([numTicksPrimaryIdeal, numTicksSecondaryIdeal]);
+  const tickSizePrimary = getTickSize(minY, maxY, numTicksToGenerate);
+
   const minYNext = Math.floor(minY / tickSizePrimary) * tickSizePrimary;
   const maxYNext = Math.ceil(maxY / tickSizePrimary) * tickSizePrimary;
 

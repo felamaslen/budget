@@ -6,7 +6,8 @@ export const overviewOld = gql`
       startDate
       stocks
       pension
-      lockedCash
+      cashOther
+      investments
       homeEquity
       options
       netWorth

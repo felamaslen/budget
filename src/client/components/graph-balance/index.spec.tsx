@@ -1,12 +1,11 @@
 /* eslint-disable max-len */
 import { render, RenderResult } from '@testing-library/react';
+import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore from 'redux-mock-store';
 
 import { GraphBalance, Props } from '.';
 import { ResizeContext, TodayContext } from '~client/hooks';
-import type { State } from '~client/reducers';
+import { getFutureMonths, getProcessedMonthlyValues, getStartDate } from '~client/selectors';
 import { testNow, testState as state } from '~client/test-data/state';
 
 describe('<GraphBalance />', () => {
@@ -25,31 +24,31 @@ describe('<GraphBalance />', () => {
     randomSpy.mockRestore();
   });
 
-  const makeStore = createStore<State>();
+  const today = endOfDay(testNow);
 
-  const setup = (props: Props): RenderResult => {
-    const store = makeStore(state);
+  const setup = (): RenderResult => {
+    const props: Props = {
+      isMobile: false,
+      showAll: false,
+      setShowAll: jest.fn(),
+      isLoading: false,
+      startDate: getStartDate(state),
+      futureMonths: getFutureMonths(today)(state),
+      monthly: getProcessedMonthlyValues(today)(state),
+    };
 
     return render(
-      <Provider store={store}>
-        <TodayContext.Provider value={testNow}>
-          <ResizeContext.Provider value={894}>
-            <GraphBalance {...props} />
-          </ResizeContext.Provider>
-        </TodayContext.Provider>
-      </Provider>,
+      <TodayContext.Provider value={today}>
+        <ResizeContext.Provider value={894}>
+          <GraphBalance {...props} />
+        </ResizeContext.Provider>
+      </TodayContext.Provider>,
     );
-  };
-
-  const props: Props = {
-    isMobile: false,
-    showAll: false,
-    setShowAll: jest.fn(),
   };
 
   it('should render a graph', async () => {
     expect.assertions(1);
-    const { getByTestId } = setup(props);
+    const { getByTestId } = setup();
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
       <svg
         data-testid="graph-svg"
@@ -823,8 +822,8 @@ describe('<GraphBalance />', () => {
             <line
               stroke="#333"
               stroke-width="1"
-              x1="111.5"
-              x2="111.5"
+              x1="113.5"
+              x2="113.5"
               y1="300"
               y2="40"
             />
@@ -832,7 +831,7 @@ describe('<GraphBalance />', () => {
               color="#000"
               font-family="Arial, Helvetica, sans-serif"
               font-size="11"
-              x="111.5"
+              x="113.5"
               y="40"
             >
               Now

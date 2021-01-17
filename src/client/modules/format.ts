@@ -142,7 +142,7 @@ export const normaliseTickSize = (tickSize: number): number => {
   return magnitude;
 };
 
-export function getTickSize(min: number, max: number, numTicks: number): number {
+export function getTickSize(min: number, max: number, numTicks = 5): number {
   const minimum = (max - min) / numTicks;
 
   return normaliseTickSize(minimum);

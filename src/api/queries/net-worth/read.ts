@@ -255,6 +255,14 @@ export async function selectOldNetWorth(
           FROM values v
           GROUP BY v.id
         )`,
+
+        sql`values_investments AS (
+          SELECT
+            v.id
+            ,SUM(CASE WHEN v.category = ${'Stocks'} THEN ${valueSimpleFxSaye} ELSE 0 END) AS value
+          FROM values v
+          GROUP BY v.id
+        )`,
       ],
       sql`, `,
     )}
@@ -267,6 +275,7 @@ export async function selectOldNetWorth(
         sql`values_options.value AS options`,
         sql`values_home_equity.value AS home_equity`,
         sql`values_locked_cash.value AS locked_cash`,
+        sql`values_investments.value AS investments`,
       ],
       sql`, `,
     )}
@@ -276,6 +285,7 @@ export async function selectOldNetWorth(
     LEFT JOIN values_options ON values_options.id = v.id
     LEFT JOIN values_home_equity ON values_home_equity.id = v.id
     LEFT JOIN values_locked_cash ON values_locked_cash.id = v.id
+    LEFT JOIN values_investments ON values_investments.id = v.id
     ORDER BY v.date DESC
   `);
   return result.rows;

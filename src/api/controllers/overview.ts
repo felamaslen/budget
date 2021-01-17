@@ -231,7 +231,8 @@ export async function getOldOverviewData(
     );
 
   const pension = mapNetWorth('pension');
-  const lockedCash = mapNetWorth('locked_cash');
+  const cashOther = mapNetWorth('locked_cash');
+  const investments = mapNetWorth('investments'); // stocks + cash
   const options = mapNetWorth('options');
   const homeEquity = mapNetWorth('home_equity');
   const netWorth = mapNetWorth('net_worth'); // this excludes pension
@@ -240,7 +241,8 @@ export async function getOldOverviewData(
     startDate: endOfMonth(startDate),
     stocks,
     pension,
-    lockedCash,
+    cashOther,
+    investments,
     homeEquity,
     options,
     netWorth,

@@ -201,6 +201,7 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
   const [
     categoryIdCash,
     categoryIdLockedCash,
+    categoryIdInvestments,
     categoryIdHouse,
     categoryIdOptions,
     categoryIdPension,
@@ -219,6 +220,13 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
         uid,
         type: 'asset',
         category: 'Cash (other)',
+        color: 'teal',
+        is_option: false,
+      },
+      {
+        uid,
+        type: 'asset',
+        category: 'Stocks',
         color: 'teal',
         is_option: false,
       },
@@ -264,6 +272,7 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
     subcategoryIdBank,
     subcategoryIdLockedCash,
     subcategoryIdForeignCash,
+    subcategoryIdISA,
     subcategoryIdMyHouse,
     subcategoryIdMyOption,
     subcategoryIdMyPension,
@@ -287,6 +296,12 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
       {
         category_id: categoryIdCash,
         subcategory: 'Foreign cash',
+        has_credit_limit: null,
+        opacity: 1,
+      },
+      {
+        category_id: categoryIdInvestments,
+        subcategory: 'My ISA',
         has_credit_limit: null,
         opacity: 1,
       },
@@ -382,6 +397,7 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
     ,
     valueIdOldOption,
     ,
+    ,
     valueIdOldMortgage,
   ] = await db('net_worth_values')
     .insert([
@@ -461,6 +477,12 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
         net_worth_id: entryIdOld,
         subcategory: subcategoryIdMyOption,
         value: null,
+        skip: null,
+      },
+      {
+        net_worth_id: entryIdOld,
+        subcategory: subcategoryIdISA,
+        value: 6354004,
         skip: null,
       },
       {

@@ -83,6 +83,7 @@
     "body-parser": "^1.17.2",
     "canvas": "^2.6.1",
     "compression": "^1.7.4",
+    "compute-lcm": "^1.1.2",
     "connect-redis": "^5.0.0",
     "cookie-parser": "^1.4.5",
     "date-fns": "^2.9.0",

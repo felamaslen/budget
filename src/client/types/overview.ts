@@ -4,9 +4,9 @@ import type { GQL } from './shared';
 export type MonthlyProcessed = GQL<Monthly> & {
   netWorth: number[]; // excludes options, includes pension
   stocks: number[]; // this excludes cash and is dynamic on current prices
-  investments: number[]; // this includes cash and is based on the recorded value
   pension: number[];
   cashOther: number[]; // e.g. savings accounts, foreign accounts
+  investments: number[]; // this includes cash and is based on the recorded value
   homeEquity: number[];
   options: number[]; // excludes SAYE savings (but includes the profit if any at current prices)
   income: number[];
@@ -19,6 +19,8 @@ export type MonthlyProcessedKey = keyof Omit<MonthlyProcessed, keyof Monthly>;
 export type MonthlyWithPartialProcess = GQL<Monthly> &
   Partial<Omit<MonthlyProcessed, keyof Monthly>>;
 export type MonthlyWithProcess<K extends MonthlyProcessedKey> = Monthly & Pick<MonthlyProcessed, K>;
+
+export type MergedMonthly = Omit<MonthlyProcessed, Exclude<keyof Monthly, 'stocks' | 'income'>>;
 
 export type TableValues<T = never, K extends keyof MonthlyProcessed = keyof MonthlyProcessed> = {
   [key in K]: T;

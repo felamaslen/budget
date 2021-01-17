@@ -837,12 +837,13 @@ export type Overview = {
 export type OverviewOld = {
   __typename?: 'OverviewOld';
   startDate: Scalars['DateTime'];
+  netWorth: Array<Scalars['Int']>;
   stocks: Array<Scalars['Int']>;
   pension: Array<Scalars['Int']>;
-  lockedCash: Array<Scalars['Int']>;
+  cashOther: Array<Scalars['Int']>;
+  investments: Array<Scalars['Int']>;
   homeEquity: Array<Scalars['Int']>;
   options: Array<Scalars['Int']>;
-  netWorth: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   spending: Array<Scalars['Int']>;
 };
@@ -1455,7 +1456,7 @@ export type OverviewOldQuery = (
   { __typename?: 'Query' }
   & { overviewOld?: Maybe<(
     { __typename?: 'OverviewOld' }
-    & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'lockedCash' | 'homeEquity' | 'options' | 'netWorth' | 'income' | 'spending'>
+    & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'cashOther' | 'investments' | 'homeEquity' | 'options' | 'netWorth' | 'income' | 'spending'>
   )> }
 );
 
@@ -2360,7 +2361,8 @@ export const OverviewOldDocument = gql`
     startDate
     stocks
     pension
-    lockedCash
+    cashOther
+    investments
     homeEquity
     options
     netWorth

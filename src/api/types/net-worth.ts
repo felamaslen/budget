@@ -83,4 +83,5 @@ export type OldNetWorthRow = {
   options: number;
   home_equity: number;
   locked_cash: number;
+  investments: number;
 };

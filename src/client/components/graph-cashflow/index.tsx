@@ -19,6 +19,8 @@ export type Props = PickUnion<LineGraphProps, 'name' | 'lines' | 'afterLines' | 
   today: Date;
   graphHeight?: number;
   dualAxis?: boolean;
+  minY2?: number;
+  maxY2?: number;
 };
 
 function getTimeAtIndex(
@@ -43,7 +45,7 @@ export const getValuesWithTime = (
 ): [number, number][] =>
   data.map((value, index) => [getTimeAtIndex(index, startDate, now, breakAtToday), value]);
 
-function getRanges(lines: Line[]): Range {
+function getRanges(lines: Line[], minY2Initial = 0, maxY2Initial = -Infinity): Range {
   return lines.reduce(
     ({ minX, maxX, minY, maxY, minY2, maxY2 }, { data, stack, secondary }) => {
       const dataX = getDataX(data);
@@ -66,8 +68,8 @@ function getRanges(lines: Line[]): Range {
       maxX: -Infinity,
       minY: 0,
       maxY: -Infinity,
-      minY2: 0,
-      maxY2: -Infinity,
+      minY2: minY2Initial,
+      maxY2: maxY2Initial,
     },
   );
 }
@@ -94,9 +96,11 @@ export const GraphCashFlow: React.FC<Props> = ({
   afterLines,
   after,
   dualAxis = false,
+  minY2,
+  maxY2,
 }) => {
   const graphWidth = useGraphWidth();
-  const ranges = useMemo<Range>(() => getRanges(lines), [lines]);
+  const ranges = useMemo<Range>(() => getRanges(lines, minY2, maxY2), [lines]);
   const beforeLines = useMemo(() => makeBeforeLines(today, dualAxis), [today, dualAxis]);
 
   const labelX = useCallback(

@@ -1,6 +1,5 @@
 import { rgba } from 'polished';
 import React, { useMemo, useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
 
 import { AfterCanvas } from './after-canvas';
 import { Key } from './key';
@@ -11,15 +10,14 @@ import {
   TimeValuesProps,
 } from '~client/components/graph-cashflow';
 import { TodayContext } from '~client/hooks';
-import { getStartDate, getFutureMonths, getProcessedMonthlyValues } from '~client/selectors';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
-import type { Line, MonthlyProcessed } from '~client/types';
+import type { Line, MergedMonthly } from '~client/types';
 import { Aggregate, PageNonStandard } from '~client/types/enum';
 
 type GraphData = { lines: Line[]; targetValues: TargetValue[] };
 
 function getGraphData(
-  { netWorth, pension, homeEquity, stocks, investments, cashOther, options }: MonthlyProcessed,
+  { netWorth, pension, homeEquity, stocks, investments, cashOther, options }: MergedMonthly,
   startDate: Date,
   futureMonths: number,
 ): GraphData {
@@ -126,13 +124,22 @@ export type Props = {
   isMobile: boolean;
   showAll: boolean;
   setShowAll: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoading: boolean;
+  startDate: Date;
+  futureMonths: number;
+  monthly: MergedMonthly;
 };
 
-export const GraphBalance: React.FC<Props> = ({ isMobile, showAll, setShowAll }) => {
+export const GraphBalance: React.FC<Props> = ({
+  isMobile,
+  showAll,
+  setShowAll,
+  isLoading,
+  startDate,
+  futureMonths,
+  monthly,
+}) => {
   const today = useContext(TodayContext);
-  const startDate = useSelector(getStartDate);
-  const futureMonths = useSelector(getFutureMonths(today));
-  const monthly = useSelector(getProcessedMonthlyValues(today));
 
   const { lines, targetValues } = useMemo<GraphData>(
     () => getGraphData(monthly, startDate, futureMonths),
@@ -141,10 +148,10 @@ export const GraphBalance: React.FC<Props> = ({ isMobile, showAll, setShowAll })
 
   const afterLines = useMemo(() => makeAfterLines(targetValues), [targetValues]);
 
-  const after = useCallback(() => <AfterCanvas showAll={showAll} setShowAll={setShowAll} />, [
-    showAll,
-    setShowAll,
-  ]);
+  const after = useCallback(
+    () => <AfterCanvas showAll={showAll} setShowAll={setShowAll} isLoading={isLoading} />,
+    [showAll, setShowAll, isLoading],
+  );
 
   return (
     <GraphCashFlow

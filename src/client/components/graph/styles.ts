@@ -11,6 +11,7 @@ export const Graph = styled.div<{
 }>`
   width: 100%;
   position: relative;
+  user-select: none;
   z-index: 2;
 
   ${GraphFunds} & {
