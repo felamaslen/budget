@@ -2,12 +2,13 @@ import type { Monthly } from './gql';
 import type { GQL } from './shared';
 
 export type MonthlyProcessed = GQL<Monthly> & {
-  stocks: number[];
+  netWorth: number[]; // excludes options, includes pension
+  stocks: number[]; // this excludes cash and is dynamic on current prices
+  investments: number[]; // this includes cash and is based on the recorded value
   pension: number[];
-  lockedCash: number[];
+  cashOther: number[]; // e.g. savings accounts, foreign accounts
   homeEquity: number[];
-  options: number[];
-  netWorth: number[];
+  options: number[]; // excludes SAYE savings (but includes the profit if any at current prices)
   income: number[];
   spending: number[];
   net: number[];

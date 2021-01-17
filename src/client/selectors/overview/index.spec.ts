@@ -94,7 +94,7 @@ describe('Overview selectors', () => {
         /* Jul-18 */ 10654,
       ];
 
-      const lockedCash = [
+      const cashOther = [
         /* Jan-18 */ 0,
         /* Feb-18 */ 855912,
         /* Mar-18 */ 855912,
@@ -223,20 +223,20 @@ describe('Overview selectors', () => {
       ].map(Math.round);
 
       it.each`
-        description                                  | prop            | value
-        ${'stocks'}                                  | ${'stocks'}     | ${stocks}
-        ${'pension'}                                 | ${'pension'}    | ${pension}
-        ${'locked cash'}                             | ${'lockedCash'} | ${lockedCash}
-        ${'home equity'}                             | ${'homeEquity'} | ${homeEquity}
-        ${'options'}                                 | ${'options'}    | ${options}
-        ${'net worth (excluding pension & options)'} | ${'netWorth'}   | ${netWorth}
-        ${'income'}                                  | ${'income'}     | ${income}
-        ${'bills'}                                   | ${'bills'}      | ${bills}
-        ${'food'}                                    | ${'food'}       | ${food}
-        ${'general'}                                 | ${'general'}    | ${general}
-        ${'social'}                                  | ${'social'}     | ${social}
-        ${'holiday'}                                 | ${'holiday'}    | ${holiday}
-        ${'spending'}                                | ${'spending'}   | ${spending}
+        description                        | prop            | value
+        ${'net worth (excluding options)'} | ${'netWorth'}   | ${netWorth}
+        ${'investments (excluding cash)'}  | ${'stocks'}     | ${stocks}
+        ${'pension'}                       | ${'pension'}    | ${pension}
+        ${'other cash'}                    | ${'cashOther'}  | ${cashOther}
+        ${'home equity'}                   | ${'homeEquity'} | ${homeEquity}
+        ${'options'}                       | ${'options'}    | ${options}
+        ${'income'}                        | ${'income'}     | ${income}
+        ${'bills'}                         | ${'bills'}      | ${bills}
+        ${'food'}                          | ${'food'}       | ${food}
+        ${'general'}                       | ${'general'}    | ${general}
+        ${'social'}                        | ${'social'}     | ${social}
+        ${'holiday'}                       | ${'holiday'}    | ${holiday}
+        ${'spending'}                      | ${'spending'}   | ${spending}
       `('should add values for $description', ({ prop, value }) => {
         expect.assertions(1);
         const result = getProcessedMonthlyValues(dateInMiddleOfMonth)(testState);
@@ -269,7 +269,7 @@ describe('Overview selectors', () => {
         /* Jul-18 */ 11237,
       ];
 
-      const lockedCash = [
+      const cashOther = [
         /* Jan-18 */ 0,
         /* Feb-18 */ 855912,
         /* Mar-18 */ Math.round(165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1),
@@ -379,20 +379,20 @@ describe('Overview selectors', () => {
       ].map(Math.round);
 
       it.each`
-        description                                  | prop            | value
-        ${'stocks'}                                  | ${'stocks'}     | ${stocks}
-        ${'pension'}                                 | ${'pension'}    | ${pension}
-        ${'locked cash'}                             | ${'lockedCash'} | ${lockedCash}
-        ${'home equity'}                             | ${'homeEquity'} | ${homeEquity}
-        ${'options'}                                 | ${'options'}    | ${options}
-        ${'net worth (excluding pension & options)'} | ${'netWorth'}   | ${netWorth}
-        ${'income'}                                  | ${'income'}     | ${income}
-        ${'bills'}                                   | ${'bills'}      | ${bills}
-        ${'food'}                                    | ${'food'}       | ${food}
-        ${'general'}                                 | ${'general'}    | ${general}
-        ${'social'}                                  | ${'social'}     | ${social}
-        ${'holiday'}                                 | ${'holiday'}    | ${holiday}
-        ${'spending'}                                | ${'spending'}   | ${spending}
+        description                        | prop            | value
+        ${'net worth (excluding options)'} | ${'netWorth'}   | ${netWorth}
+        ${'stocks'}                        | ${'stocks'}     | ${stocks}
+        ${'pension'}                       | ${'pension'}    | ${pension}
+        ${'other cash'}                    | ${'cashOther'}  | ${cashOther}
+        ${'home equity'}                   | ${'homeEquity'} | ${homeEquity}
+        ${'options'}                       | ${'options'}    | ${options}
+        ${'income'}                        | ${'income'}     | ${income}
+        ${'bills'}                         | ${'bills'}      | ${bills}
+        ${'food'}                          | ${'food'}       | ${food}
+        ${'general'}                       | ${'general'}    | ${general}
+        ${'social'}                        | ${'social'}     | ${social}
+        ${'holiday'}                       | ${'holiday'}    | ${holiday}
+        ${'spending'}                      | ${'spending'}   | ${spending}
       `('should use the actual $description value for the current month', ({ prop, value }) => {
         expect.assertions(1);
         const result = getProcessedMonthlyValues(dateAtEndOfMonth)(testState);

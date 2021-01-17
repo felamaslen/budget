@@ -174,14 +174,14 @@ const withPredictedSpending = <K extends MonthlyProcessedKey>(
 const predictStockReturns = (futureMonths: number, annualisedFundReturns: number) => (
   stocks: number[],
 ): number[] =>
-  stocks
-    .slice(stocks.length - futureMonths)
+  Array(futureMonths)
+    .fill(0)
     .reduce<number[]>(
       (last) => [
         ...last,
         last[last.length - 1] * (1 + (annualisedFundReturns + randnBm() * 0.01)) ** (1 / 12),
       ],
-      stocks.slice(0, stocks.length - futureMonths),
+      stocks,
     )
     .map(Math.round);
 
@@ -201,7 +201,7 @@ const withStocks = <K extends MonthlyProcessedKey>(
   )(monthly.stocks),
 });
 
-type AggregateKey = 'pension' | 'lockedCash' | 'options';
+type AggregateKey = 'pension' | 'cashOther' | 'options' | 'investments';
 
 function withAggregateNetWorth<K extends MonthlyProcessedKey>(
   today: Date,
@@ -220,7 +220,8 @@ function withAggregateNetWorth<K extends MonthlyProcessedKey>(
   ): MonthlyWithProcess<K> & Pick<MonthlyProcessed, AggregateKey> => ({
     ...monthly,
     pension: fillAggregate(Aggregate.pension),
-    lockedCash: fillAggregate(Aggregate.cashOther),
+    cashOther: fillAggregate(Aggregate.cashOther),
+    investments: fillAggregate(Aggregate.stocks),
     options: fillCurrent(currentEntries.map(({ options }) => options)),
   });
 }
