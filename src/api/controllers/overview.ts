@@ -58,6 +58,7 @@ const getEndTime = (now: Date): Date => endOfMonth(addMonths(endOfMonth(now), fu
 
 const getDisplayedMonths = (now: Date, withFuture = true): Date[] =>
   mapMonths(now, getStartTime(now), withFuture);
+
 const getOldMonths = (now: Date): Date[] =>
   mapMonths(subMonths(getStartTime(now), 1), minStartTime, false);
 
@@ -74,6 +75,12 @@ export async function getFundValues(
   return [...monthlyValues, ...Array(futureMonths).fill(monthlyValues[monthlyValues.length - 1])];
 }
 
+export const getDisplayedFundValues = (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  now: Date,
+): Promise<number[]> => getFundValues(db, uid, getDisplayedMonths(now, false));
+
 async function getMonthlyCategoryValues(
   db: DatabaseTransactionConnectionType,
   uid: number,
@@ -85,7 +92,7 @@ async function getMonthlyCategoryValues(
   >
 > {
   const [stocks, income, bills, food, general, holiday, social] = await Promise.all<number[]>([
-    getFundValues(db, uid, getDisplayedMonths(now, false), true),
+    getDisplayedFundValues(db, uid, now),
     ...Object.values(PageListStandard).map((category) =>
       getListCostSummary(db, uid, getDisplayedMonths(now, true), category),
     ),

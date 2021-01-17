@@ -8,7 +8,7 @@ import {
   ssrExchange,
   Client,
 } from '@urql/core';
-import { Request } from 'express';
+import type { Request } from 'express';
 import 'isomorphic-unfetch';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
