@@ -6,9 +6,8 @@ export const Initial = gql`
       startDate
       endDate
       annualisedFundReturns
-      homeEquityOld
-      cost {
-        funds
+      monthly {
+        stocks
         income
         bills
         food
@@ -32,8 +31,6 @@ export const Initial = gql`
         id
         ...NetWorthEntryParts
       }
-      old
-      oldOptions
     }
 
     cashAllocationTarget

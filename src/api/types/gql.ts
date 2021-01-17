@@ -65,6 +65,7 @@ export type Query = {
   config?: Maybe<AppConfig>;
   fundHistory?: Maybe<FundHistory>;
   overview?: Maybe<Overview>;
+  overviewOld?: Maybe<OverviewOld>;
   readFunds?: Maybe<ReadFundsResponse>;
   readList?: Maybe<ListReadResponse>;
   readListExtended?: Maybe<ListReadResponseExtended>;
@@ -102,6 +103,11 @@ export type QueryFundHistoryArgs = {
 
 
 export type QueryOverviewArgs = {
+  now?: Maybe<Scalars['Date']>;
+};
+
+
+export type QueryOverviewOldArgs = {
   now?: Maybe<Scalars['Date']>;
 };
 
@@ -413,6 +419,7 @@ export type Subscription = {
   netWorthSubcategoryCreated: NetWorthSubcategoryCreated;
   netWorthSubcategoryDeleted: NetWorthDeleted;
   netWorthSubcategoryUpdated: NetWorthSubcategoryUpdated;
+  overviewOld: OverviewOld;
   receiptCreated: ReceiptCreated;
 };
 
@@ -430,6 +437,11 @@ export type SubscriptionListItemCreatedArgs = {
 
 export type SubscriptionListItemUpdatedArgs = {
   pages: Array<PageListStandard>;
+};
+
+
+export type SubscriptionOverviewOldArgs = {
+  now?: Maybe<Scalars['Date']>;
 };
 
 
@@ -719,8 +731,6 @@ export type NetWorthEntryInput = {
 
 export type NetWorthEntryOverview = {
   current: Array<NetWorthEntry>;
-  old: Array<Scalars['Int']>;
-  oldOptions: Array<Scalars['Int']>;
 };
 
 export type NetWorthCategoryCreated = {
@@ -758,8 +768,8 @@ export type NetWorthDeleted = {
   id: Scalars['Int'];
 };
 
-export type Cost = {
-  funds: Array<Scalars['Int']>;
+export type Monthly = {
+  stocks: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   bills: Array<Scalars['Int']>;
   food: Array<Scalars['Int']>;
@@ -772,8 +782,19 @@ export type Overview = {
   startDate: Scalars['DateTime'];
   endDate: Scalars['DateTime'];
   annualisedFundReturns: Scalars['Float'];
-  homeEquityOld: Array<Scalars['Int']>;
-  cost: Cost;
+  monthly: Monthly;
+};
+
+export type OverviewOld = {
+  startDate: Scalars['DateTime'];
+  stocks: Array<Scalars['Int']>;
+  pension: Array<Scalars['Int']>;
+  lockedCash: Array<Scalars['Int']>;
+  homeEquity: Array<Scalars['Int']>;
+  options: Array<Scalars['Int']>;
+  netWorth: Array<Scalars['Int']>;
+  income: Array<Scalars['Int']>;
+  spending: Array<Scalars['Int']>;
 };
 
 export enum SearchPage {
@@ -996,8 +1017,9 @@ export type ResolversTypes = {
   NetWorthEntryCreated: ResolverTypeWrapper<NetWorthEntryCreated>;
   NetWorthEntryUpdated: ResolverTypeWrapper<NetWorthEntryUpdated>;
   NetWorthDeleted: ResolverTypeWrapper<NetWorthDeleted>;
-  Cost: ResolverTypeWrapper<Cost>;
+  Monthly: ResolverTypeWrapper<Monthly>;
   Overview: ResolverTypeWrapper<Overview>;
+  OverviewOld: ResolverTypeWrapper<OverviewOld>;
   SearchPage: SearchPage;
   SearchItem: SearchItem;
   SearchResult: ResolverTypeWrapper<SearchResult>;
@@ -1089,8 +1111,9 @@ export type ResolversParentTypes = {
   NetWorthEntryCreated: NetWorthEntryCreated;
   NetWorthEntryUpdated: NetWorthEntryUpdated;
   NetWorthDeleted: NetWorthDeleted;
-  Cost: Cost;
+  Monthly: Monthly;
   Overview: Overview;
+  OverviewOld: OverviewOld;
   SearchResult: SearchResult;
   ReceiptCategory: ReceiptCategory;
   User: User;
@@ -1132,6 +1155,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   config?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType>;
   fundHistory?: Resolver<Maybe<ResolversTypes['FundHistory']>, ParentType, ContextType, RequireFields<QueryFundHistoryArgs, never>>;
   overview?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType, RequireFields<QueryOverviewArgs, never>>;
+  overviewOld?: Resolver<Maybe<ResolversTypes['OverviewOld']>, ParentType, ContextType, RequireFields<QueryOverviewOldArgs, never>>;
   readFunds?: Resolver<Maybe<ResolversTypes['ReadFundsResponse']>, ParentType, ContextType>;
   readList?: Resolver<Maybe<ResolversTypes['ListReadResponse']>, ParentType, ContextType, RequireFields<QueryReadListArgs, 'page'>>;
   readListExtended?: Resolver<Maybe<ResolversTypes['ListReadResponseExtended']>, ParentType, ContextType, RequireFields<QueryReadListExtendedArgs, 'page'>>;
@@ -1279,6 +1303,7 @@ export type SubscriptionResolvers<ContextType = Context, ParentType extends Reso
   netWorthSubcategoryCreated?: SubscriptionResolver<ResolversTypes['NetWorthSubcategoryCreated'], "netWorthSubcategoryCreated", ParentType, ContextType>;
   netWorthSubcategoryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthSubcategoryDeleted", ParentType, ContextType>;
   netWorthSubcategoryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthSubcategoryUpdated'], "netWorthSubcategoryUpdated", ParentType, ContextType>;
+  overviewOld?: SubscriptionResolver<ResolversTypes['OverviewOld'], "overviewOld", ParentType, ContextType, RequireFields<SubscriptionOverviewOldArgs, never>>;
   receiptCreated?: SubscriptionResolver<ResolversTypes['ReceiptCreated'], "receiptCreated", ParentType, ContextType>;
 };
 
@@ -1501,8 +1526,6 @@ export type NetWorthEntryResolvers<ContextType = Context, ParentType extends Res
 
 export type NetWorthEntryOverviewResolvers<ContextType = Context, ParentType extends ResolversParentTypes['NetWorthEntryOverview'] = ResolversParentTypes['NetWorthEntryOverview']> = {
   current?: Resolver<Array<ResolversTypes['NetWorthEntry']>, ParentType, ContextType>;
-  old?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
-  oldOptions?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1548,8 +1571,8 @@ export type NetWorthDeletedResolvers<ContextType = Context, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type CostResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Cost'] = ResolversParentTypes['Cost']> = {
-  funds?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+export type MonthlyResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Monthly'] = ResolversParentTypes['Monthly']> = {
+  stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   income?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   bills?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   food?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1563,8 +1586,20 @@ export type OverviewResolvers<ContextType = Context, ParentType extends Resolver
   startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   annualisedFundReturns?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  homeEquityOld?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
-  cost?: Resolver<ResolversTypes['Cost'], ParentType, ContextType>;
+  monthly?: Resolver<ResolversTypes['Monthly'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OverviewOldResolvers<ContextType = Context, ParentType extends ResolversParentTypes['OverviewOld'] = ResolversParentTypes['OverviewOld']> = {
+  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  pension?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  lockedCash?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  homeEquity?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  options?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  netWorth?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  income?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  spending?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1669,8 +1704,9 @@ export type Resolvers<ContextType = Context> = {
   NetWorthEntryCreated?: NetWorthEntryCreatedResolvers<ContextType>;
   NetWorthEntryUpdated?: NetWorthEntryUpdatedResolvers<ContextType>;
   NetWorthDeleted?: NetWorthDeletedResolvers<ContextType>;
-  Cost?: CostResolvers<ContextType>;
+  Monthly?: MonthlyResolvers<ContextType>;
   Overview?: OverviewResolvers<ContextType>;
+  OverviewOld?: OverviewOldResolvers<ContextType>;
   SearchResult?: SearchResultResolvers<ContextType>;
   ReceiptCategory?: ReceiptCategoryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;

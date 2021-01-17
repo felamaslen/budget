@@ -70,6 +70,7 @@ export type Query = {
   config?: Maybe<AppConfig>;
   fundHistory?: Maybe<FundHistory>;
   overview?: Maybe<Overview>;
+  overviewOld?: Maybe<OverviewOld>;
   readFunds?: Maybe<ReadFundsResponse>;
   readList?: Maybe<ListReadResponse>;
   readListExtended?: Maybe<ListReadResponseExtended>;
@@ -107,6 +108,11 @@ export type QueryFundHistoryArgs = {
 
 
 export type QueryOverviewArgs = {
+  now?: Maybe<Scalars['Date']>;
+};
+
+
+export type QueryOverviewOldArgs = {
   now?: Maybe<Scalars['Date']>;
 };
 
@@ -433,6 +439,7 @@ export type Subscription = {
   netWorthSubcategoryCreated: NetWorthSubcategoryCreated;
   netWorthSubcategoryDeleted: NetWorthDeleted;
   netWorthSubcategoryUpdated: NetWorthSubcategoryUpdated;
+  overviewOld: OverviewOld;
   receiptCreated: ReceiptCreated;
 };
 
@@ -450,6 +457,11 @@ export type SubscriptionListItemCreatedArgs = {
 
 export type SubscriptionListItemUpdatedArgs = {
   pages: Array<PageListStandard>;
+};
+
+
+export type SubscriptionOverviewOldArgs = {
+  now?: Maybe<Scalars['Date']>;
 };
 
 
@@ -765,8 +777,6 @@ export type NetWorthEntryInput = {
 export type NetWorthEntryOverview = {
   __typename?: 'NetWorthEntryOverview';
   current: Array<NetWorthEntry>;
-  old: Array<Scalars['Int']>;
-  oldOptions: Array<Scalars['Int']>;
 };
 
 export type NetWorthCategoryCreated = {
@@ -811,9 +821,9 @@ export type NetWorthDeleted = {
   id: Scalars['Int'];
 };
 
-export type Cost = {
-  __typename?: 'Cost';
-  funds: Array<Scalars['Int']>;
+export type Monthly = {
+  __typename?: 'Monthly';
+  stocks: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   bills: Array<Scalars['Int']>;
   food: Array<Scalars['Int']>;
@@ -827,8 +837,20 @@ export type Overview = {
   startDate: Scalars['DateTime'];
   endDate: Scalars['DateTime'];
   annualisedFundReturns: Scalars['Float'];
-  homeEquityOld: Array<Scalars['Int']>;
-  cost: Cost;
+  monthly: Monthly;
+};
+
+export type OverviewOld = {
+  __typename?: 'OverviewOld';
+  startDate: Scalars['DateTime'];
+  stocks: Array<Scalars['Int']>;
+  pension: Array<Scalars['Int']>;
+  lockedCash: Array<Scalars['Int']>;
+  homeEquity: Array<Scalars['Int']>;
+  options: Array<Scalars['Int']>;
+  netWorth: Array<Scalars['Int']>;
+  income: Array<Scalars['Int']>;
+  spending: Array<Scalars['Int']>;
 };
 
 export enum SearchPage {
@@ -1314,10 +1336,10 @@ export type InitialQuery = (
   & Pick<Query, 'cashAllocationTarget'>
   & { overview?: Maybe<(
     { __typename?: 'Overview' }
-    & Pick<Overview, 'startDate' | 'endDate' | 'annualisedFundReturns' | 'homeEquityOld'>
-    & { cost: (
-      { __typename?: 'Cost' }
-      & Pick<Cost, 'funds' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
+    & Pick<Overview, 'startDate' | 'endDate' | 'annualisedFundReturns'>
+    & { monthly: (
+      { __typename?: 'Monthly' }
+      & Pick<Monthly, 'stocks' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
     ) }
   )>, netWorthCategories?: Maybe<Array<(
     { __typename?: 'NetWorthCategory' }
@@ -1329,7 +1351,6 @@ export type InitialQuery = (
     & NetWorthSubcategoryPartsFragment
   )>>, netWorthEntries?: Maybe<(
     { __typename?: 'NetWorthEntryOverview' }
-    & Pick<NetWorthEntryOverview, 'old' | 'oldOptions'>
     & { current: Array<(
       { __typename?: 'NetWorthEntry' }
       & Pick<NetWorthEntry, 'id'>
@@ -1428,6 +1449,19 @@ export type MoreListDataExtendedQuery = (
       { __typename?: 'ListItemExtended' }
       & Pick<ListItemExtended, 'id' | 'date' | 'item' | 'cost' | 'category' | 'shop'>
     )> }
+  )> }
+);
+
+export type OverviewOldQueryVariables = Exact<{
+  now?: Maybe<Scalars['Date']>;
+}>;
+
+
+export type OverviewOldQuery = (
+  { __typename?: 'Query' }
+  & { overviewOld?: Maybe<(
+    { __typename?: 'OverviewOld' }
+    & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'lockedCash' | 'homeEquity' | 'options' | 'netWorth' | 'income' | 'spending'>
   )> }
 );
 
@@ -1771,6 +1805,17 @@ export type NetWorthEntryDeletedSubscription = (
   & { netWorthEntryDeleted: (
     { __typename?: 'NetWorthDeleted' }
     & Pick<NetWorthDeleted, 'id'>
+  ) }
+);
+
+export type OverviewOldUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type OverviewOldUpdatedSubscription = (
+  { __typename?: 'Subscription' }
+  & { overviewOld: (
+    { __typename?: 'OverviewOld' }
+    & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'lockedCash' | 'homeEquity' | 'options' | 'netWorth' | 'income' | 'spending'>
   ) }
 );
 
@@ -2161,9 +2206,8 @@ export const InitialDocument = gql`
     startDate
     endDate
     annualisedFundReturns
-    homeEquityOld
-    cost {
-      funds
+    monthly {
+      stocks
       income
       bills
       food
@@ -2185,8 +2229,6 @@ export const InitialDocument = gql`
       id
       ...NetWorthEntryParts
     }
-    old
-    oldOptions
   }
   cashAllocationTarget
   funds: readFunds {
@@ -2328,6 +2370,25 @@ export const MoreListDataExtendedDocument = gql`
 
 export function useMoreListDataExtendedQuery(options: Omit<Urql.UseQueryArgs<MoreListDataExtendedQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<MoreListDataExtendedQuery>({ query: MoreListDataExtendedDocument, ...options });
+};
+export const OverviewOldDocument = gql`
+    query OverviewOld($now: Date) {
+  overviewOld(now: $now) {
+    startDate
+    stocks
+    pension
+    lockedCash
+    homeEquity
+    options
+    netWorth
+    income
+    spending
+  }
+}
+    `;
+
+export function useOverviewOldQuery(options: Omit<Urql.UseQueryArgs<OverviewOldQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<OverviewOldQuery>({ query: OverviewOldDocument, ...options });
 };
 export const SearchSuggestionsDocument = gql`
     query SearchSuggestions($page: SearchPage!, $column: SearchItem!, $searchTerm: String!, $numResults: Int) {
@@ -2713,4 +2774,23 @@ export const NetWorthEntryDeletedDocument = gql`
 
 export function useNetWorthEntryDeletedSubscription<TData = NetWorthEntryDeletedSubscription>(options: Omit<Urql.UseSubscriptionArgs<NetWorthEntryDeletedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<NetWorthEntryDeletedSubscription, TData>) {
   return Urql.useSubscription<NetWorthEntryDeletedSubscription, TData, NetWorthEntryDeletedSubscriptionVariables>({ query: NetWorthEntryDeletedDocument, ...options }, handler);
+};
+export const OverviewOldUpdatedDocument = gql`
+    subscription OverviewOldUpdated {
+  overviewOld {
+    startDate
+    stocks
+    pension
+    lockedCash
+    homeEquity
+    options
+    netWorth
+    income
+    spending
+  }
+}
+    `;
+
+export function useOverviewOldUpdatedSubscription<TData = OverviewOldUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<OverviewOldUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<OverviewOldUpdatedSubscription, TData>) {
+  return Urql.useSubscription<OverviewOldUpdatedSubscription, TData, OverviewOldUpdatedSubscriptionVariables>({ query: OverviewOldUpdatedDocument, ...options }, handler);
 };

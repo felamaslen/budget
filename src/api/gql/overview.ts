@@ -1,8 +1,8 @@
 import gql from 'graphql-tag';
 
 export const overviewSchema = gql`
-  type Cost {
-    funds: [Int!]!
+  type Monthly {
+    stocks: [Int!]!
     income: [Int!]!
     bills: [Int!]!
     food: [Int!]!
@@ -15,11 +15,27 @@ export const overviewSchema = gql`
     startDate: DateTime!
     endDate: DateTime!
     annualisedFundReturns: Float!
-    homeEquityOld: [Int!]!
-    cost: Cost!
+    monthly: Monthly!
+  }
+
+  type OverviewOld {
+    startDate: DateTime!
+    stocks: [Int!]!
+    pension: [Int!]!
+    lockedCash: [Int!]!
+    homeEquity: [Int!]!
+    options: [Int!]!
+    netWorth: [Int!]!
+    income: [Int!]!
+    spending: [Int!]!
   }
 
   extend type Query {
     overview(now: Date): Overview
+    overviewOld(now: Date): OverviewOld
+  }
+
+  extend type Subscription {
+    overviewOld(now: Date): OverviewOld!
   }
 `;

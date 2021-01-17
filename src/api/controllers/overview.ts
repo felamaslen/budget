@@ -4,9 +4,11 @@ import {
   differenceInMonths,
   endOfMonth,
   isAfter,
+  isSameMonth,
   setMonth,
   setYear,
   startOfMonth,
+  subMonths,
 } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -17,9 +19,18 @@ import {
   getListCostSummary,
   getTotalFundValue,
   selectTransactions,
-  selectOldHomeEquity,
+  selectOldNetWorth,
+  getSpendingSummary,
 } from '~api/queries';
-import { Transaction, Overview, QueryOverviewArgs, PageListStandard } from '~api/types';
+import {
+  Transaction,
+  Overview,
+  QueryOverviewArgs,
+  PageListStandard,
+  QueryOverviewOldArgs,
+  OverviewOld,
+  OldNetWorthRow,
+} from '~api/types';
 
 const {
   startYear,
@@ -45,26 +56,22 @@ const getStartTime = (now: Date): Date => {
 
 const getEndTime = (now: Date): Date => endOfMonth(addMonths(endOfMonth(now), futureMonths));
 
-const getDisplayedMonths = (now: Date): Date[] => mapMonths(now, getStartTime(now), true);
-const getNonFutureMonths = (now: Date): Date[] => mapMonths(now, minStartTime, false);
+const getDisplayedMonths = (now: Date, withFuture = true): Date[] =>
+  mapMonths(now, getStartTime(now), withFuture);
+const getOldMonths = (now: Date): Date[] =>
+  mapMonths(subMonths(getStartTime(now), 1), minStartTime, false);
 
 export async function getFundValues(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  now: Date,
+  monthEnds: Date[],
+  withFuture = false,
 ): Promise<number[]> {
-  const monthEnds = getNonFutureMonths(now);
   const monthlyValues = await getMonthlyTotalFundValues(db, uid, monthEnds);
+  if (!withFuture) {
+    return monthlyValues;
+  }
   return [...monthlyValues, ...Array(futureMonths).fill(monthlyValues[monthlyValues.length - 1])];
-}
-
-export async function getMonthCost(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  now: Date,
-  category: PageListStandard,
-): Promise<number[]> {
-  return getListCostSummary(db, uid, getDisplayedMonths(now), category);
 }
 
 async function getMonthlyCategoryValues(
@@ -72,14 +79,19 @@ async function getMonthlyCategoryValues(
   uid: number,
   now: Date,
 ): Promise<
-  Pick<Overview['cost'], 'funds' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
+  Pick<
+    Overview['monthly'],
+    'stocks' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'
+  >
 > {
-  const [funds, income, bills, food, general, holiday, social] = await Promise.all<number[]>([
-    getFundValues(db, uid, now),
-    ...Object.values(PageListStandard).map((category) => getMonthCost(db, uid, now, category)),
+  const [stocks, income, bills, food, general, holiday, social] = await Promise.all<number[]>([
+    getFundValues(db, uid, getDisplayedMonths(now, false), true),
+    ...Object.values(PageListStandard).map((category) =>
+      getListCostSummary(db, uid, getDisplayedMonths(now, true), category),
+    ),
   ]);
 
-  return { funds, income, bills, food, general, holiday, social };
+  return { stocks, income, bills, food, general, holiday, social };
 }
 
 export const DEFAULT_INVESTMENT_RATE = 0.07;
@@ -167,37 +179,65 @@ export function getOldDateBoundaries(now = new Date()): { startDate: Date; oldDa
   return { startDate, oldDateEnd };
 }
 
-async function getOldHomeEquity(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  now: Date,
-): Promise<number[]> {
-  const { oldDateEnd, startDate } = getOldDateBoundaries(now);
-  const rows = await selectOldHomeEquity(db, uid, formatDate(startDate), formatDate(oldDateEnd));
-
-  return rows.map((row) => row.home_equity);
-}
-
 export async function getOverviewData(
   db: DatabaseTransactionConnectionType,
   uid: number,
   args: QueryOverviewArgs,
 ): Promise<Overview> {
   const now = args.now ?? new Date();
-  const [cost, annualisedFundReturns] = await Promise.all([
+
+  const [monthly, annualisedFundReturns] = await Promise.all([
     getMonthlyCategoryValues(db, uid, now),
     getAnnualisedFundReturns(db, uid, now),
   ]);
-  const homeEquityOld = await getOldHomeEquity(db, uid, now);
-
   const startTime = getStartTime(now);
   const endTime = getEndTime(now);
 
   return {
     annualisedFundReturns,
-    homeEquityOld,
     startDate: endOfMonth(startTime),
     endDate: endOfMonth(endTime),
-    cost,
+    monthly,
+  };
+}
+
+export async function getOldOverviewData(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  args: QueryOverviewOldArgs,
+): Promise<OverviewOld> {
+  const now = args.now ?? new Date();
+  const { oldDateEnd, startDate } = getOldDateBoundaries(now);
+
+  const monthEnds = getOldMonths(now);
+
+  const [stocks, oldNetWorth, income, spending] = await Promise.all([
+    getFundValues(db, uid, monthEnds),
+    selectOldNetWorth(db, uid, formatDate(startDate), formatDate(oldDateEnd)),
+    getListCostSummary(db, uid, monthEnds, PageListStandard.Income),
+    getSpendingSummary(db, uid, monthEnds),
+  ]);
+
+  const mapNetWorth = (key: Exclude<keyof OldNetWorthRow, 'date'>): number[] =>
+    monthEnds.map<number>(
+      (date) => oldNetWorth.find((row) => isSameMonth(new Date(row.date), date))?.[key] ?? 0,
+    );
+
+  const pension = mapNetWorth('pension');
+  const lockedCash = mapNetWorth('locked_cash');
+  const options = mapNetWorth('options');
+  const homeEquity = mapNetWorth('home_equity');
+  const netWorth = mapNetWorth('net_worth'); // this excludes pension
+
+  return {
+    startDate: endOfMonth(startDate),
+    stocks,
+    pension,
+    lockedCash,
+    homeEquity,
+    options,
+    netWorth,
+    income,
+    spending,
   };
 }

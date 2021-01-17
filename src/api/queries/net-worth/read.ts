@@ -4,7 +4,7 @@ import {
   TaggedTemplateLiteralInvocationType,
 } from 'slonik';
 
-import { JoinedEntryRow, OldNetWorthRow, OldHomeEquityRow } from '~api/types';
+import type { JoinedEntryRow, OldNetWorthRow } from '~api/types';
 
 const joinEntryRows = (
   conditions: TaggedTemplateLiteralInvocationType = sql``,
@@ -149,6 +149,18 @@ export async function selectAllEntries(
   return result.rows;
 }
 
+const valueSimpleFxSaye = sql.join(
+  [
+    sql`COALESCE(v.value_simple, 0)`,
+    sql`COALESCE(v.value_fx * v.fx_rate * 100, 0)::integer`,
+    sql`COALESCE(
+      CASE WHEN v.is_saye THEN v.value_op_vested * v.value_op_strike_price ELSE 0 END,
+      0
+    )::integer`,
+  ],
+  sql` + `,
+);
+
 export async function selectOldNetWorth(
   db: DatabaseTransactionConnectionType,
   uid: number,
@@ -156,88 +168,115 @@ export async function selectOldNetWorth(
   oldDateEnd: string,
 ): Promise<readonly OldNetWorthRow[]> {
   const result = await db.query<OldNetWorthRow>(sql`
+    WITH ${sql.join(
+      [
+        sql`values AS (
+          SELECT ${sql.join(
+            [
+              sql`nw.id`,
+              sql`nw.date`,
+              sql`nwv.value AS value_simple`,
+              sql`nwcat.category`,
+              sql`nwsc.is_saye`,
+              sql`nwfx.value AS value_fx`,
+              sql`nwfx.currency AS value_fx_currency`,
+              sql`nwop.vested AS value_op_vested`,
+              sql`nwop.strike_price AS value_op_strike_price`,
+              sql`nwop.market_price AS value_op_market_price`,
+              sql`nwc.rate AS fx_rate`,
+            ],
+            sql`, `,
+          )}
+          FROM net_worth nw
+          LEFT JOIN net_worth_values nwv ON nwv.net_worth_id = nw.id
+          LEFT JOIN net_worth_subcategories nwsc ON nwsc.id = nwv.subcategory
+          LEFT JOIN net_worth_categories nwcat ON nwcat.id = nwsc.category_id
+          LEFT JOIN net_worth_fx_values nwfx ON nwfx.values_id = nwv.id
+          LEFT JOIN net_worth_option_values nwop ON nwop.values_id = nwv.id
+          LEFT JOIN net_worth_currencies nwc
+            ON nwc.net_worth_id = nw.id
+            AND nwc.currency = nwfx.currency
+          WHERE ${sql.join(
+            [
+              sql`nw.uid = ${uid}`,
+              sql`nw.date < ${oldDateEnd}`,
+              sql`nw.date >= ${startDate}`,
+              sql`(nwv.skip = FALSE OR nwv.skip IS NULL)`,
+            ],
+            sql` AND `,
+          )}
+        )`,
+
+        sql`values_net_worth AS (
+          SELECT
+            v.id
+            ,SUM(CASE WHEN v.category = ${'Pension'} THEN 0 ELSE ${valueSimpleFxSaye} END) AS value
+          FROM values v
+          GROUP BY v.id
+        )`,
+
+        sql`values_pension AS (
+          SELECT
+            v.id
+            ,SUM(CASE WHEN v.category = ${'Pension'} THEN ${valueSimpleFxSaye} ELSE 0 END) AS value
+          FROM values v
+          GROUP BY v.id
+        )`,
+
+        sql`values_options AS (
+          SELECT
+            v.id
+            ,SUM(
+              COALESCE(v.value_op_vested *
+                GREATEST(0, v.value_op_market_price - v.value_op_strike_price)
+              )
+            )::integer AS value
+          FROM values v
+          GROUP BY v.id
+        )`,
+
+        sql`values_home_equity AS (
+          SELECT
+            v.id
+            ,SUM(
+              CASE WHEN v.category IN (${'Mortgage'}, ${'House'})
+              THEN COALESCE(v.value_simple, 0)
+              ELSE 0
+              END
+            ) AS value
+          FROM values v
+          GROUP BY v.id
+        )`,
+
+        sql`values_locked_cash AS (
+          SELECT
+            v.id
+            ,SUM(CASE WHEN v.category = ${'Cash (other)'} THEN ${valueSimpleFxSaye} ELSE 0 END) AS value
+          FROM values v
+          GROUP BY v.id
+        )`,
+      ],
+      sql`, `,
+    )}
+
     SELECT ${sql.join(
       [
-        sql`(${sql.join(
-          [
-            sql`SUM(COALESCE(nwv.value, 0))`,
-            sql`SUM(COALESCE(nwfx.value * nwc.rate * 100, 0))::integer`,
-            sql`SUM(
-              COALESCE(
-                CASE WHEN nwsc.is_saye THEN nwop.vested * nwop.strike_price
-                ELSE 0
-                END,
-                0
-              )
-            )::integer`,
-          ],
-          sql` + `,
-        )}) as value`,
-
-        sql`SUM(
-          COALESCE(
-            nwop.vested * GREATEST(0, nwop.market_price - nwop.strike_price),
-            0
-          )
-        )::integer as option_value`,
+        sql`v.date`,
+        sql`values_net_worth.value AS net_worth`,
+        sql`values_pension.value AS pension`,
+        sql`values_options.value AS options`,
+        sql`values_home_equity.value AS home_equity`,
+        sql`values_locked_cash.value AS locked_cash`,
       ],
       sql`, `,
     )}
-    FROM net_worth as nw
-    LEFT JOIN net_worth_values as nwv ON nwv.net_worth_id = nw.id
-    LEFT JOIN net_worth_subcategories as nwsc ON nwsc.id = nwv.subcategory
-    LEFT JOIN net_worth_fx_values as nwfx ON nwfx.values_id = nwv.id
-    LEFT JOIN net_worth_option_values as nwop ON nwop.values_id = nwv.id
-    LEFT JOIN net_worth_currencies as nwc
-      ON nwc.net_worth_id = nw.id
-      AND nwc.currency = nwfx.currency
-    WHERE ${sql.join(
-      [
-        sql`nw.uid = ${uid}`,
-        sql`nw.date < ${oldDateEnd}`,
-        sql`nw.date >= ${startDate}`,
-        sql`(${sql.join([sql`nwv.skip = FALSE`, sql`nwv.skip IS NULL`], sql` OR `)})`,
-      ],
-      sql` AND `,
-    )}
-    GROUP BY nw.date
-    ORDER BY nw.date
-  `);
-  return result.rows;
-}
-
-export async function selectOldHomeEquity(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  startDate: string,
-  oldDateEnd: string,
-): Promise<readonly OldHomeEquityRow[]> {
-  const result = await db.query<OldHomeEquityRow>(sql`
-  SELECT
-    ${sql.join(
-      [
-        sql`nw.date`,
-        sql`SUM(
-          CASE
-            WHEN nwc.category IN ('Mortgage', 'House')
-            THEN COALESCE(nwv.value, 0)
-            ELSE 0
-          END
-        ) AS home_equity
-        `,
-      ],
-      sql`, `,
-    )}
-  FROM net_worth as nw
-  LEFT JOIN net_worth_values as nwv ON nwv.net_worth_id = nw.id
-  LEFT JOIN net_worth_subcategories nws ON nws.id = nwv.subcategory
-  LEFT JOIN net_worth_categories nwc ON nwc.id = nws.category_id
-  WHERE ${sql.join(
-    [sql`nw.uid = ${uid}`, sql`nw.date < ${oldDateEnd}`, sql`nw.date >= ${startDate}`],
-    sql` AND `,
-  )}
-  GROUP BY nw.date
-  ORDER BY nw.date
+    FROM (SELECT distinct id, date FROM values) v
+    LEFT JOIN values_net_worth ON values_net_worth.id = v.id
+    LEFT JOIN values_pension ON values_pension.id = v.id
+    LEFT JOIN values_options ON values_options.id = v.id
+    LEFT JOIN values_home_equity ON values_home_equity.id = v.id
+    LEFT JOIN values_locked_cash ON values_locked_cash.id = v.id
+    ORDER BY v.date DESC
   `);
   return result.rows;
 }

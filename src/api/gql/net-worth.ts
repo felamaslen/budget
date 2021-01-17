@@ -168,8 +168,6 @@ const Entry = gql`
 
   type NetWorthEntryOverview {
     current: [NetWorthEntry!]!
-    old: [Int!]!
-    oldOptions: [Int!]!
   }
 
   type NetWorthCategoryCreated {
