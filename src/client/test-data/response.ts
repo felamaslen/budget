@@ -8,9 +8,8 @@ export const testResponse: InitialQuery = {
     startDate: '2018-10-31T23:59:59.999Z',
     endDate: '2020-04-30T23:59:59.999+0100',
     annualisedFundReturns: 0.173,
-    homeEquityOld: [6375000, 7255000],
-    cost: {
-      funds: [],
+    monthly: {
+      stocks: [],
       [PageListStandard.Income]: [],
       [PageListStandard.Bills]: [],
       [PageListStandard.Food]: [],
@@ -24,8 +23,6 @@ export const testResponse: InitialQuery = {
   netWorthSubcategories: [],
   netWorthEntries: {
     current: [],
-    old: [],
-    oldOptions: [],
   },
 
   [PageNonStandard.Funds]: { items: [] },

@@ -1,23 +1,31 @@
-import type { Cost } from './gql';
+import type { Monthly } from './gql';
 import type { GQL } from './shared';
 
-export type CostProcessed = GQL<Cost> & {
-  fundsOld: number[];
+export type MonthlyProcessed = GQL<Monthly> & {
+  stocks: number[];
+  pension: number[];
+  lockedCash: number[];
+  homeEquity: number[];
+  options: number[];
+  netWorth: number[];
+  income: number[];
   spending: number[];
   net: number[];
-  netWorth: number[];
-  netWorthPredicted: number[];
-  netWorthCombined: number[];
-  savingsRatio: number[];
 };
 
-export type TableValues<T = never, K extends keyof CostProcessed = keyof CostProcessed> = {
+export type MonthlyProcessedKey = keyof Omit<MonthlyProcessed, keyof Monthly>;
+
+export type MonthlyWithPartialProcess = GQL<Monthly> &
+  Partial<Omit<MonthlyProcessed, keyof Monthly>>;
+export type MonthlyWithProcess<K extends MonthlyProcessedKey> = Monthly & Pick<MonthlyProcessed, K>;
+
+export type TableValues<T = never, K extends keyof MonthlyProcessed = keyof MonthlyProcessed> = {
   [key in K]: T;
 } & {
   netWorth: T;
 };
 
-export type OverviewHeader = Exclude<keyof CostProcessed, 'fundsOld' | 'savingsRatio'>;
+export type OverviewHeader = keyof GQL<Monthly> | 'stocks' | 'netWorth' | 'spending' | 'net';
 
 export type OverviewCell = {
   value: number;
@@ -42,6 +50,8 @@ export type OverviewColumn = {
     to: string;
     replace?: boolean;
   };
+  include?: (keyof MonthlyProcessed)[];
+  exclude?: (keyof MonthlyProcessed)[];
 };
 
 export type OverviewTableColumn = [OverviewHeader, OverviewColumn];

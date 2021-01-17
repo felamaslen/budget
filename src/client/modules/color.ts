@@ -18,6 +18,9 @@ function getOverviewCategoryKeyColor(key: string): OverviewBaseColor {
   if (Reflect.has(colors.overview, key)) {
     return colors.overview[key as keyof typeof colors.overview];
   }
+  if (key === 'stocks') {
+    return colors.funds.main;
+  }
   if (isPage(key)) {
     return colors[key].main;
   }

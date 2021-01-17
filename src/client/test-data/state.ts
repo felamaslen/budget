@@ -24,9 +24,8 @@ export const testState: State = {
     startDate: new Date('2018-01-31T23:59:59.999Z'),
     endDate: new Date('2018-07-31T23:59:59.999Z'),
     annualisedFundReturns: 0.143,
-    homeEquityOld: [],
-    cost: {
-      funds: [100779, 101459, 102981, 103293, 0, 0, 0],
+    monthly: {
+      stocks: [100779, 101459, 102981, 103293, 0, 0, 0],
       [PageListStandard.Income]: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
       [PageListStandard.Bills]: [1000, 900, 400, 650, 0, 0, 0],
       [PageListStandard.Food]: [50, 13, 20, 19, 0, 0, 0],
@@ -325,8 +324,6 @@ export const testState: State = {
         ],
       },
     ],
-    old: [],
-    oldOptions: [],
   },
   funds: {
     items: funds.testRows,
