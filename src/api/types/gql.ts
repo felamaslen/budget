@@ -419,7 +419,6 @@ export type Subscription = {
   netWorthSubcategoryCreated: NetWorthSubcategoryCreated;
   netWorthSubcategoryDeleted: NetWorthDeleted;
   netWorthSubcategoryUpdated: NetWorthSubcategoryUpdated;
-  overviewOld: OverviewOld;
   receiptCreated: ReceiptCreated;
 };
 
@@ -437,11 +436,6 @@ export type SubscriptionListItemCreatedArgs = {
 
 export type SubscriptionListItemUpdatedArgs = {
   pages: Array<PageListStandard>;
-};
-
-
-export type SubscriptionOverviewOldArgs = {
-  now?: Maybe<Scalars['Date']>;
 };
 
 
@@ -1303,7 +1297,6 @@ export type SubscriptionResolvers<ContextType = Context, ParentType extends Reso
   netWorthSubcategoryCreated?: SubscriptionResolver<ResolversTypes['NetWorthSubcategoryCreated'], "netWorthSubcategoryCreated", ParentType, ContextType>;
   netWorthSubcategoryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthSubcategoryDeleted", ParentType, ContextType>;
   netWorthSubcategoryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthSubcategoryUpdated'], "netWorthSubcategoryUpdated", ParentType, ContextType>;
-  overviewOld?: SubscriptionResolver<ResolversTypes['OverviewOld'], "overviewOld", ParentType, ContextType, RequireFields<SubscriptionOverviewOldArgs, never>>;
   receiptCreated?: SubscriptionResolver<ResolversTypes['ReceiptCreated'], "receiptCreated", ParentType, ContextType>;
 };
 

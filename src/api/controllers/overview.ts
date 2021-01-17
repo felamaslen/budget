@@ -56,7 +56,7 @@ const getStartTime = (now: Date): Date => {
 
 const getEndTime = (now: Date): Date => endOfMonth(addMonths(endOfMonth(now), futureMonths));
 
-const getDisplayedMonths = (now: Date, withFuture = true): Date[] =>
+export const getDisplayedMonths = (now: Date, withFuture = true): Date[] =>
   mapMonths(now, getStartTime(now), withFuture);
 
 const getOldMonths = (now: Date): Date[] =>

@@ -34,8 +34,4 @@ export const overviewSchema = gql`
     overview(now: Date): Overview
     overviewOld(now: Date): OverviewOld
   }
-
-  extend type Subscription {
-    overviewOld(now: Date): OverviewOld!
-  }
 `;

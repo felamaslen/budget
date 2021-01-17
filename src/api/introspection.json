@@ -3127,33 +3127,6 @@
             "deprecationReason": null
           },
           {
-            "name": "overviewOld",
-            "description": null,
-            "args": [
-              {
-                "name": "now",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Date",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "OverviewOld",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "receiptCreated",
             "description": null,
             "args": [],

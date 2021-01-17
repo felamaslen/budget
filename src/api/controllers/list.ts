@@ -2,7 +2,7 @@ import { flatten } from 'array-flatten';
 import groupBy from 'lodash/groupBy';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { getMonthCost } from './overview';
+import { getDisplayedMonths } from './overview';
 import { formatDate } from './shared';
 
 import config from '~api/config';
@@ -10,6 +10,7 @@ import { makeCrudController } from '~api/modules/crud';
 import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
 import {
   countRows,
+  getListCostSummary,
   insertListItems,
   selectListItems,
   selectListTotalCost,
@@ -108,7 +109,7 @@ async function getPublishedProperties(
   page: PageListStandard,
 ): Promise<PublishedProperties> {
   const [overviewCost, listTotals] = await Promise.all([
-    getMonthCost(db, uid, new Date(), page),
+    getListCostSummary(db, uid, getDisplayedMonths(new Date()), page),
     getListTotals(db, uid, page),
   ]);
   return { overviewCost, ...listTotals };

@@ -1,7 +1,6 @@
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { createList, createReceipt, deleteList, getOlderExists, updateList } from './list';
-import * as overviewController from './overview';
 import * as crudQueries from '~api/modules/crud/queries';
 import * as pubsub from '~api/modules/graphql/pubsub';
 import * as queries from '~api/queries';
@@ -46,7 +45,7 @@ describe('List controller', () => {
       jest.spyOn(crudQueries, 'insertCrudItem').mockResolvedValueOnce(testItem);
       jest.spyOn(queries, 'selectListTotalCost').mockResolvedValueOnce(1776912);
       jest.spyOn(queries, 'selectListWeeklyCosts').mockResolvedValueOnce([7659, 12932, 8154]);
-      jest.spyOn(overviewController, 'getMonthCost').mockResolvedValueOnce(overviewCost);
+      jest.spyOn(queries, 'getListCostSummary').mockResolvedValueOnce(overviewCost);
 
       await createList({} as DatabaseTransactionConnectionType, testUserId, args);
 
@@ -171,7 +170,7 @@ describe('List controller', () => {
       });
       jest.spyOn(queries, 'selectListTotalCost').mockResolvedValueOnce(1776912);
       jest.spyOn(queries, 'selectListWeeklyCosts').mockResolvedValueOnce([7659, 12932, 8154]);
-      jest.spyOn(overviewController, 'getMonthCost').mockResolvedValueOnce(overviewCost);
+      jest.spyOn(queries, 'getListCostSummary').mockResolvedValueOnce(overviewCost);
 
       await updateList({} as DatabaseTransactionConnectionType, testUserId, args);
 
@@ -206,7 +205,7 @@ describe('List controller', () => {
       jest.spyOn(crudQueries, 'deleteCrudItem').mockResolvedValueOnce(1);
       jest.spyOn(queries, 'selectListTotalCost').mockResolvedValueOnce(1776912);
       jest.spyOn(queries, 'selectListWeeklyCosts').mockResolvedValueOnce([7659, 12932, 8154]);
-      jest.spyOn(overviewController, 'getMonthCost').mockResolvedValueOnce(overviewCost);
+      jest.spyOn(queries, 'getListCostSummary').mockResolvedValueOnce(overviewCost);
 
       await deleteList({} as DatabaseTransactionConnectionType, testUserId, args);
 

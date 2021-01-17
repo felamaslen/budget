@@ -439,7 +439,6 @@ export type Subscription = {
   netWorthSubcategoryCreated: NetWorthSubcategoryCreated;
   netWorthSubcategoryDeleted: NetWorthDeleted;
   netWorthSubcategoryUpdated: NetWorthSubcategoryUpdated;
-  overviewOld: OverviewOld;
   receiptCreated: ReceiptCreated;
 };
 
@@ -457,11 +456,6 @@ export type SubscriptionListItemCreatedArgs = {
 
 export type SubscriptionListItemUpdatedArgs = {
   pages: Array<PageListStandard>;
-};
-
-
-export type SubscriptionOverviewOldArgs = {
-  now?: Maybe<Scalars['Date']>;
 };
 
 
@@ -1808,17 +1802,6 @@ export type NetWorthEntryDeletedSubscription = (
   ) }
 );
 
-export type OverviewOldUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type OverviewOldUpdatedSubscription = (
-  { __typename?: 'Subscription' }
-  & { overviewOld: (
-    { __typename?: 'OverviewOld' }
-    & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'lockedCash' | 'homeEquity' | 'options' | 'netWorth' | 'income' | 'spending'>
-  ) }
-);
-
 export const FundHistoryPartsFragmentDoc = gql`
     fragment FundHistoryParts on FundHistory {
   startTime
@@ -2774,23 +2757,4 @@ export const NetWorthEntryDeletedDocument = gql`
 
 export function useNetWorthEntryDeletedSubscription<TData = NetWorthEntryDeletedSubscription>(options: Omit<Urql.UseSubscriptionArgs<NetWorthEntryDeletedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<NetWorthEntryDeletedSubscription, TData>) {
   return Urql.useSubscription<NetWorthEntryDeletedSubscription, TData, NetWorthEntryDeletedSubscriptionVariables>({ query: NetWorthEntryDeletedDocument, ...options }, handler);
-};
-export const OverviewOldUpdatedDocument = gql`
-    subscription OverviewOldUpdated {
-  overviewOld {
-    startDate
-    stocks
-    pension
-    lockedCash
-    homeEquity
-    options
-    netWorth
-    income
-    spending
-  }
-}
-    `;
-
-export function useOverviewOldUpdatedSubscription<TData = OverviewOldUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<OverviewOldUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<OverviewOldUpdatedSubscription, TData>) {
-  return Urql.useSubscription<OverviewOldUpdatedSubscription, TData, OverviewOldUpdatedSubscriptionVariables>({ query: OverviewOldUpdatedDocument, ...options }, handler);
 };
