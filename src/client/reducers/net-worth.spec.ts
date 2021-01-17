@@ -589,8 +589,6 @@ describe('Net worth reducer', () => {
             currencies: [{ ...CURRENCY_CZK, __typename: 'Currency' }],
           },
         ],
-        old: [145, 210],
-        oldOptions: [1330, 19],
       },
     });
 
@@ -644,8 +642,6 @@ describe('Net worth reducer', () => {
               currencies: [CURRENCY_CZK],
             },
           ],
-          old: [145, 210],
-          oldOptions: [1330, 19],
         }),
       );
     });
@@ -670,8 +666,6 @@ describe('Net worth reducer', () => {
               currencies: [],
             },
           ],
-          old: [],
-          oldOptions: [],
         },
       });
 
@@ -699,8 +693,6 @@ describe('Net worth reducer', () => {
               currencies: [],
             },
           ],
-          old: [],
-          oldOptions: [],
         }),
       );
     });

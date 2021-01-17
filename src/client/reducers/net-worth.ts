@@ -22,23 +22,16 @@ import type {
   NetWorthSubcategory as Subcategory,
 } from '~client/types/gql';
 
-type ExtraState = {
-  old: number[];
-  oldOptions: number[];
-};
-
 export type State = {
   categories: GQL<Category>[];
   subcategories: GQL<Subcategory>[];
   entries: GQL<Entry>[];
-} & ExtraState;
+};
 
 export const initialState: State = {
   categories: [],
   subcategories: [],
   entries: [],
-  old: [],
-  oldOptions: [],
 };
 
 const removeDeletedSubcategories = (state: State): State => ({
@@ -103,8 +96,6 @@ const onRead = (
   categories: (categories ?? []).map(omitTypeName),
   subcategories: (subcategories ?? []).map(omitTypeName),
   entries: sortEntryValues(entries?.current.map<Entry>(mapEntry) ?? []),
-  old: entries?.old ?? [],
-  oldOptions: entries?.oldOptions ?? [],
 });
 
 function simpleUpdate<
