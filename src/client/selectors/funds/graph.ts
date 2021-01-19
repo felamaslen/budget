@@ -128,9 +128,9 @@ export const getFundLines = memoiseNowAndToday((time, key) =>
       const getFundLinesByMode = (mode: Mode): FundLine[] =>
         fundItems
           .filter(({ id }) => !hiddenBecauseSold[id])
-          .reduce<FundLine[]>((last, { id, color }) => {
-            const lines = getFundLineProcessed(fundsWithReturns, cacheTimes, mode, id);
-            return [...last, ...lines.map((data) => ({ id, color, data }))];
+          .reduce<FundLine[]>((last, fund) => {
+            const lines = getFundLineProcessed(fundsWithReturns, cacheTimes, mode, fund.id);
+            return [...last, ...lines.map((data) => ({ ...fund, data }))];
           }, []);
 
       return {

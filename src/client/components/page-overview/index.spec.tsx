@@ -8,13 +8,14 @@ import configureStore from 'redux-mock-store';
 import { PageOverview } from '.';
 import { ResizeContext, TodayContext } from '~client/hooks';
 import { State } from '~client/reducers';
-import { testState as state } from '~client/test-data/state';
+import { testNow, testState as state } from '~client/test-data/state';
 import '~client/test-utils/match-media';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import { mockRandom } from '~client/test-utils/random';
 
 describe('<PageOverview />', () => {
   const mockStore = configureStore<State>();
-  const today = endOfDay(new Date('2020-04-20T16:29Z'));
+  const today = endOfDay(testNow);
 
   beforeEach(() => {
     mockRandom();
@@ -24,11 +25,13 @@ describe('<PageOverview />', () => {
     render(
       <MemoryRouter>
         <Provider store={mockStore(state)}>
-          <TodayContext.Provider value={today}>
-            <ResizeContext.Provider value={1020}>
-              <PageOverview />
-            </ResizeContext.Provider>
-          </TodayContext.Provider>
+          <GQLProviderMock>
+            <TodayContext.Provider value={today}>
+              <ResizeContext.Provider value={1020}>
+                <PageOverview />
+              </ResizeContext.Provider>
+            </TodayContext.Provider>
+          </GQLProviderMock>
         </Provider>
       </MemoryRouter>,
     );

@@ -17,15 +17,13 @@ export type TargetValue = {
 
 export function getTargets(
   startDate: Date,
-  allNetWorth: number[],
-  showAll: boolean,
-  oldOffset: number,
+  netWorth: number[],
   futureMonths: number,
 ): {
   line: Data;
   targetValues: TargetValue[];
 } {
-  const { slope, intercept, logValues, points } = exponentialRegression(allNetWorth);
+  const { slope, intercept, logValues, points } = exponentialRegression(netWorth);
   if (!points.length) {
     return { line: [], targetValues: [] };
   }
@@ -35,9 +33,8 @@ export function getTargets(
     value: Math.exp(slope * (logValues.length - futureMonths - 1 + years * 12) + intercept),
   }));
 
-  const line = getValuesWithTime(showAll ? points : points.slice(oldOffset), {
+  const line = getValuesWithTime(points, {
     startDate,
-    oldOffset: showAll ? oldOffset : 0,
   });
 
   return { line, targetValues };

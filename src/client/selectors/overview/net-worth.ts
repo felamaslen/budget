@@ -9,7 +9,7 @@ import { rgba } from 'polished';
 import { createSelector } from 'reselect';
 
 import {
-  getCost,
+  getMonthlyValues,
   getSpendingColumn,
   getMonthDates,
   getFutureMonths,
@@ -20,7 +20,7 @@ import { getText } from '~client/components/net-worth/breakdown.blocks';
 import { blockPacker } from '~client/modules/block-packer';
 import { lastInArray, sortByKey } from '~client/modules/data';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { State } from '~client/reducers';
+import type { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/config';
 import { colors } from '~client/styled/variables';
 import type {
@@ -36,7 +36,6 @@ import type {
 } from '~client/types';
 import { Aggregate, NetWorthCategoryType } from '~client/types/enum';
 import type {
-  Cost,
   Currency,
   MortgageValue,
   NetWorthCategory,
@@ -195,13 +194,14 @@ const getEntryAggregate = (
     {} as AggregateSums,
   );
 
-type EntryWithAggregates = NetWorthEntryNative & {
+export type EntryWithAggregates = NetWorthEntryNative & {
   aggregate: AggregateSums;
 };
 
-const withAggregates = (categories: NetWorthCategory[], subcategories: NetWorthSubcategory[]) => (
-  rows: NetWorthEntryNative[],
-): EntryWithAggregates[] =>
+export const withAggregates = (
+  categories: NetWorthCategory[],
+  subcategories: NetWorthSubcategory[],
+) => (rows: NetWorthEntryNative[]): EntryWithAggregates[] =>
   rows.map((entry) => ({
     ...entry,
     aggregate: getEntryAggregate(categories, subcategories, entry),
@@ -215,35 +215,11 @@ const getEntryForMonth = (entries: NetWorthEntryNative[]) => (date: Date): NetWo
   return lastInArray(matchingEntries) ?? nullEntry(date);
 };
 
-const getNetWorthRows = createSelector(getMonthDates, getSummaryEntries, (monthDates, entries) =>
-  monthDates.map(getEntryForMonth(entries)),
+export const getNetWorthRows = createSelector(
+  getMonthDates,
+  getSummaryEntries,
+  (monthDates, entries) => monthDates.map(getEntryForMonth(entries)),
 );
-
-const getValues = (subcategories: NetWorthSubcategory[]) => ({
-  currencies,
-  values,
-}: NetWorthEntryNative): number =>
-  sumValues(
-    currencies,
-    subcategories,
-    values.filter((value) => !value.option),
-  ) + calculateResidualSAYEOptionsValue(subcategories, { values });
-
-export const getNetWorthSummary = createSelector(
-  getSubcategories,
-  getNetWorthRows,
-  (subcategories, rows): number[] => rows.map(getValues(subcategories)),
-);
-
-export type NetWorthSummaryOld = {
-  main: number[];
-  options: number[];
-};
-
-export const getNetWorthSummaryOld = (state: State): NetWorthSummaryOld => ({
-  main: state.netWorth.old,
-  options: state.netWorth.oldOptions,
-});
 
 const sumByType = (
   categoryType: NetWorthCategoryType,
@@ -310,7 +286,7 @@ const withSpend = (dates: Date[], spending: number[]) => (
     expenses: getSpendingByDate(spending, dates, entry.date),
   }));
 
-type EntryWithFTI = EntryWithSpend & { fti: number; pastYearAverageSpend: number };
+export type EntryWithFTI = EntryWithSpend & { fti: number; pastYearAverageSpend: number };
 
 const withFTI = (birthDate: Date) => (rows: EntryWithSpend[]): EntryWithFTI[] =>
   rows.map((entry, index) => {
@@ -332,28 +308,31 @@ type EntryWithTableProps = TableRow;
 const withTableProps = (rows: EntryWithFTI[]): EntryWithTableProps[] =>
   rows.map(({ values, creditLimit, currencies, ...rest }) => rest);
 
-export const getNetWorthTable = createSelector(
+const getNetWorthPropsDeriver = createSelector(
   getAppConfig,
-  getCost,
+  getMonthlyValues,
   getMonthDates,
   getCategories,
   getSubcategories,
-  getSummaryEntries,
-  (
-    appConfig,
-    costMap: Cost,
-    dates: Date[],
-    categories: NetWorthCategory[],
-    subcategories: NetWorthSubcategory[],
-    entries: NetWorthEntryNative[],
-  ) =>
+  (appConfig, monthly, dates, categories, subcategories) =>
     compose(
-      withTableProps,
       withFTI(new Date(appConfig.birthDate)),
-      withSpend(dates, getSpendingColumn(dates)(costMap).spending),
+      withSpend(dates, getSpendingColumn(dates)(monthly).spending),
       withTypeSplit(categories, subcategories),
       withAggregates(categories, subcategories),
-    )(entries),
+    ),
+);
+
+export const getDerivedNetWorthEntries = createSelector(
+  getNetWorthPropsDeriver,
+  getNetWorthRows,
+  (deriver, entries) => deriver(entries),
+);
+
+export const getNetWorthTable = createSelector(
+  getNetWorthPropsDeriver,
+  getSummaryEntries,
+  (deriver, entries) => compose(withTableProps, deriver)(entries),
 );
 
 export const getLatestNetWorthAggregate = createSelector(
@@ -453,7 +432,7 @@ export const getHomeEquity = moize(
           (value, index) => value - forecastDebt[index],
         );
 
-        return homeEquityToPresent.concat(forecastHomeEquity);
+        return homeEquityToPresent.concat(forecastHomeEquity).map(Math.round);
       },
     ),
   { maxSize: 1 },

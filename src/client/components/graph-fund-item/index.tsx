@@ -1,9 +1,9 @@
 import { flatten } from 'array-flatten';
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { Axes } from './axes';
 import * as Styled from './styles';
-import { LineGraph, LineGraphProps } from '~client/components/graph';
+import { LineGraph } from '~client/components/graph';
 import {
   GRAPH_FUND_ITEM_WIDTH,
   GRAPH_FUND_ITEM_WIDTH_LARGE,
@@ -14,9 +14,10 @@ import { colors } from '~client/styled/variables';
 import type { Data, DrawProps, Line, Range, RowPrices, Size } from '~client/types';
 
 export type Props = {
+  item: string;
   sold: boolean;
   values: RowPrices;
-} & Pick<LineGraphProps, 'name'>;
+};
 
 function getDimensions(popout: boolean, sold: boolean): Size {
   if (popout) {
@@ -47,6 +48,7 @@ const getRange = (data: number[]): { min: number; max: number } =>
 const valuesColor = [colors.funds.loss, colors.funds.profit];
 
 function processData(
+  item: string,
   data: Data[],
   popout: boolean,
 ): {
@@ -74,6 +76,7 @@ function processData(
 
   const lines = data.map<Line>((line, index) => ({
     key: String(index),
+    name: item,
     data: line,
     strokeWidth: popout ? 1.5 : 1,
     smooth: true,
@@ -92,31 +95,20 @@ function processData(
   };
 }
 
-function makeBeforeLines(popout: boolean): React.FC<DrawProps> {
-  const BeforeLines: React.FC<DrawProps> = (props) => <Axes popout={popout} {...props} />;
-
-  return BeforeLines;
-}
-
-export const GraphFundItem: React.FC<Props> = ({ name, sold, values }) => {
+export const GraphFundItem: React.FC<Props> = ({ item, sold, values }) => {
   const [popout, setPopout] = useState<boolean>(false);
   const onFocus = useCallback(() => setPopout(!sold), [sold]);
   const onBlur = useCallback(() => setPopout(false), []);
   const { width, height } = getDimensions(popout, sold);
 
-  const beforeLines = useMemo(() => makeBeforeLines(popout), [popout]);
+  const BeforeLines = useCallback<React.FC<DrawProps>>(
+    (props) => <Axes popout={popout} {...props} />,
+    [popout],
+  );
 
   if (!values?.length) {
     return null;
   }
-
-  const graphProps = {
-    name,
-    beforeLines,
-    width,
-    height,
-    ...processData(values, popout),
-  };
 
   return (
     <Styled.FundGraph
@@ -128,7 +120,12 @@ export const GraphFundItem: React.FC<Props> = ({ name, sold, values }) => {
       sold={sold}
       popout={popout}
     >
-      <LineGraph {...graphProps} />
+      <LineGraph
+        width={width}
+        height={height}
+        {...processData(item, values, popout)}
+        BeforeLines={BeforeLines}
+      />
     </Styled.FundGraph>
   );
 };

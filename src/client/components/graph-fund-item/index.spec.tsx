@@ -5,7 +5,7 @@ import { GraphFundItem, Props } from '.';
 
 describe('<GraphFundItem />', () => {
   const props: Props = {
-    name: 'some-fund-graph',
+    item: 'My fund',
     values: [
       [
         [100, 42.3],
@@ -68,7 +68,7 @@ describe('<GraphFundItem />', () => {
       }
 
       @media only screen and (min-width: 500px) {
-        .css-90x6gl-Graph {
+        .css-b39tn7-Graph {
           display: inline-block;
           position: static;
           width: 100px;
@@ -77,7 +77,7 @@ describe('<GraphFundItem />', () => {
           box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
 
-        .emotion-1 .css-90x6gl-Graph {
+        .emotion-1 .css-b39tn7-Graph {
           z-index: 10;
           width: 100px;
           height: 100%;
@@ -90,6 +90,10 @@ describe('<GraphFundItem />', () => {
       .emotion-2 {
         width: 100%;
         position: relative;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
         z-index: 2;
       }
 

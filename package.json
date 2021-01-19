@@ -86,7 +86,7 @@
     "connect-redis": "^5.0.0",
     "cookie-parser": "^1.4.5",
     "date-fns": "^2.9.0",
-    "date-fns-tz": "^1.0.10",
+    "date-fns-tz": "^1.0.12",
     "deepmerge": "^2.0.1",
     "ejs": "^3.1.5",
     "express": "^4.17.1",

@@ -129,7 +129,7 @@ export const colors = {
     liabilities: rgb(245, 202, 203),
     main: rgb(178, 166, 211),
     expenses: rgb(213, 164, 187),
-    options: rgb(0, 52, 138),
+    options: rgb(90, 168, 190),
     homeEquity: rgb(150, 140, 39),
     aggregate: {
       [Aggregate.cashEasyAccess]: rgb(180, 214, 169),

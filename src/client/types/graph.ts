@@ -8,6 +8,7 @@ export type RangeY = {
   maxY: number;
   minY2?: number;
   maxY2?: number;
+  y2Capped?: boolean;
 };
 
 export type Range = RangeX & RangeY;
@@ -75,17 +76,23 @@ export type LineColor = string | DynamicLineColor;
 
 export type GraphStack = Data[];
 
-export type Line = {
-  key: string;
-  data: Data;
-  stack?: GraphStack;
-  hover?: boolean;
-  secondary?: boolean;
+export type LineAppearance = PathProps & {
   color: LineColor;
   smooth?: boolean;
   fill?: boolean;
-  dashed?: boolean;
-  movingAverage?: number;
+};
+
+export type Line = LineAppearance & {
+  key: string;
+  name: string;
+  data: Data;
+  stack?: GraphStack;
+  sliceAtFirstPositive?: number;
+  hover?: boolean;
+  secondary?: boolean;
+  movingAverage?: LineAppearance & {
+    period: number;
+  };
   arrows?: boolean;
 } & PathProps;
 

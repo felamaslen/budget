@@ -16,21 +16,21 @@ import type {
   OverviewTable as OverviewTableRows,
   OverviewTableColumn,
 } from '~client/types';
-import { PageListStandard, PageNonStandard } from '~client/types/enum';
+import { PageListStandard } from '~client/types/enum';
 
 type ColumnsProps = { columns: OverviewTableColumn[] };
 
-const columnsMobile: OverviewHeader[] = [PageListStandard.Income, 'spending', 'netWorthCombined'];
+const columnsMobile: OverviewHeader[] = [PageListStandard.Income, 'spending', 'netWorth'];
 
 const columnsRestricted: OverviewHeader[] = [
   PageListStandard.Income,
   'spending',
   'net',
-  'netWorthCombined',
+  'netWorth',
 ];
 
 const columnsFull: OverviewHeader[] = [
-  PageNonStandard.Funds,
+  'stocks',
   PageListStandard.Bills,
   PageListStandard.Food,
   PageListStandard.General,
@@ -39,7 +39,7 @@ const columnsFull: OverviewHeader[] = [
   PageListStandard.Income,
   'spending',
   'net',
-  'netWorthCombined',
+  'netWorth',
 ];
 
 const filterColumns = (columns: OverviewHeader[]): OverviewTableColumn[] =>

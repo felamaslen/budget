@@ -1,7 +1,7 @@
 import { replaceAtIndex } from 'replace-array';
 
 import { GRAPH_CURVINESS } from '~client/constants/graph';
-import { lastInArray } from '~client/modules/data';
+import { arrayAverage, lastInArray } from '~client/modules/data';
 import { timeSeriesTicks } from '~client/modules/date';
 import { colors } from '~client/styled/variables';
 import type {
@@ -449,3 +449,17 @@ export const pointVisible = (valX: number, minX: number, maxX: number): boolean 
 
 export const profitLossColor = ([, value]: Point): string =>
   value < 0 ? colors[PageNonStandard.Funds].loss : colors[PageNonStandard.Funds].profit;
+
+export function transformToMovingAverage(data: Data, period: number): Data {
+  if (!period) {
+    return [];
+  }
+  const [points] = data.reduce<[Data, number[]]>(
+    ([lastPoints, compareData], [xValue, yValue]) => {
+      const nextCompareData = compareData.slice(1 - period).concat([yValue]);
+      return [lastPoints.concat([[xValue, arrayAverage(nextCompareData)]]), nextCompareData];
+    },
+    [[], []],
+  );
+  return points;
+}

@@ -5,7 +5,6 @@ import { LineGraphDumb, LineGraphDumbProps } from './line-graph-dumb';
 describe('<LineGraphDumb />', () => {
   const getContainer = (customProps = {}): RenderResult => {
     const props: LineGraphDumbProps = {
-      name: 'some-dumb-graph',
       dimensions: {
         width: 200,
         height: 100,
@@ -20,6 +19,7 @@ describe('<LineGraphDumb />', () => {
       lines: [
         {
           key: 'line1',
+          name: 'Line One',
           data: [
             [100, 1],
             [101, 2],
@@ -31,6 +31,7 @@ describe('<LineGraphDumb />', () => {
         },
         {
           key: 'line2',
+          name: 'Line Two',
           data: [
             [100, 1],
             [101, 2],
@@ -43,18 +44,21 @@ describe('<LineGraphDumb />', () => {
         },
         {
           key: 'line3',
+          name: 'Line Three',
           data: [[100, 1]],
           smooth: false,
           color: 'black',
         },
         {
           key: 'line4',
+          name: 'Line Four',
           data: [[100, 1]],
           smooth: false,
           color: 'black',
         },
         {
           key: 'line5',
+          name: 'Line Five',
           data: [
             [100, 1],
             [102, 2],

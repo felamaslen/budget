@@ -81,3 +81,4 @@ export const NetWorthView: React.FC<Props> = ({ entries, table, aggregate }) => 
     </Styled.NetWorthView>
   );
 };
+export default NetWorthView;

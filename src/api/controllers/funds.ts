@@ -2,7 +2,7 @@ import { addYears, addMonths, getUnixTime } from 'date-fns';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { getAnnualisedFundReturns, getFundValues } from './overview';
+import { getAnnualisedFundReturns, getDisplayedFundValues } from './overview';
 
 import config from '~api/config';
 import { makeCrudController } from '~api/modules/crud';
@@ -156,7 +156,7 @@ export async function readFundHistory(
   const [dataWithHistory, annualisedFundReturns, overviewCost] = await Promise.all([
     getFundPriceHistory(db, uid, now, period, length),
     getAnnualisedFundReturns(db, uid, now),
-    getFundValues(db, uid, now),
+    getDisplayedFundValues(db, uid, now),
   ]);
 
   return {
@@ -177,7 +177,7 @@ export async function createFund(
   });
   await upsertTransactions(db, uid, id, transactions);
 
-  const overviewCost = await getFundValues(db, uid, new Date());
+  const overviewCost = await getDisplayedFundValues(db, uid, new Date());
 
   await pubsub.publish(`${PubSubTopic.FundCreated}.${uid}`, {
     id,
@@ -222,7 +222,7 @@ export async function updateFund(
     await updateFundCacheItemReference(db, fundsWithSameName[0].item, previousItem);
   }
 
-  const overviewCost = await getFundValues(db, uid, new Date());
+  const overviewCost = await getDisplayedFundValues(db, uid, new Date());
 
   await pubsub.publish(`${PubSubTopic.FundUpdated}.${uid}`, {
     id,
@@ -245,7 +245,7 @@ export async function deleteFund(
 ): Promise<CrudResponseDelete> {
   await baseController.delete(db, uid, id);
 
-  const overviewCost = await getFundValues(db, uid, new Date());
+  const overviewCost = await getDisplayedFundValues(db, uid, new Date());
   await pubsub.publish(`${PubSubTopic.FundDeleted}.${uid}`, { id, overviewCost });
 
   return { error: null };

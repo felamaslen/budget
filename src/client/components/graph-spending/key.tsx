@@ -38,7 +38,7 @@ export const Key: React.FC<Props> = ({ now, pixX, pixY1, maxX, minY, maxY, title
         fontSize={fontSize}
         alignmentBaseline="middle"
       >
-        {'Spending'}
+        Spending (quarterly avg.)
       </text>
 
       <line x1={50} y1={58} x2={74} y2={58} stroke={colors.green} strokeWidth={2} />
@@ -50,7 +50,7 @@ export const Key: React.FC<Props> = ({ now, pixX, pixY1, maxX, minY, maxY, title
         fontSize={fontSize}
         alignmentBaseline="middle"
       >
-        {'Savings ratio'}
+        Savings ratio (yearly avg.)
       </text>
 
       <rect

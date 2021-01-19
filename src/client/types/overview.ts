@@ -1,23 +1,34 @@
-import type { Cost } from './gql';
+import type { Monthly } from './gql';
 import type { GQL } from './shared';
 
-export type CostProcessed = GQL<Cost> & {
-  fundsOld: number[];
+export type MonthlyProcessed = GQL<Monthly> & {
+  netWorth: number[]; // excludes options, includes pension
+  stocks: number[]; // this excludes cash and is dynamic on current prices
+  pension: number[];
+  cashOther: number[]; // e.g. savings accounts, foreign accounts
+  investments: number[]; // this includes cash and is based on the recorded value
+  homeEquity: number[];
+  options: number[]; // excludes SAYE savings (but includes the profit if any at current prices)
+  income: number[];
   spending: number[];
   net: number[];
-  netWorth: number[];
-  netWorthPredicted: number[];
-  netWorthCombined: number[];
-  savingsRatio: number[];
 };
 
-export type TableValues<T = never, K extends keyof CostProcessed = keyof CostProcessed> = {
+export type MonthlyProcessedKey = keyof Omit<MonthlyProcessed, keyof Monthly>;
+
+export type MonthlyWithPartialProcess = GQL<Monthly> &
+  Partial<Omit<MonthlyProcessed, keyof Monthly>>;
+export type MonthlyWithProcess<K extends MonthlyProcessedKey> = Monthly & Pick<MonthlyProcessed, K>;
+
+export type MergedMonthly = Omit<MonthlyProcessed, Exclude<keyof Monthly, 'stocks' | 'income'>>;
+
+export type TableValues<T = never, K extends keyof MonthlyProcessed = keyof MonthlyProcessed> = {
   [key in K]: T;
 } & {
   netWorth: T;
 };
 
-export type OverviewHeader = Exclude<keyof CostProcessed, 'fundsOld' | 'savingsRatio'>;
+export type OverviewHeader = keyof GQL<Monthly> | 'stocks' | 'netWorth' | 'spending' | 'net';
 
 export type OverviewCell = {
   value: number;
@@ -42,6 +53,8 @@ export type OverviewColumn = {
     to: string;
     replace?: boolean;
   };
+  include?: (keyof MonthlyProcessed)[];
+  exclude?: (keyof MonthlyProcessed)[];
 };
 
 export type OverviewTableColumn = [OverviewHeader, OverviewColumn];

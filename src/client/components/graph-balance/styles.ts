@@ -1,40 +1,48 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { rem } from 'polished';
+
+import { FlexCenter } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
 
-export const ShowAll = styled.span`
-  position: absolute;
-  right: 0;
-  top: 0;
-  font-size: 0.9em;
-  line-height: 20px;
-  padding: 0.1em 0.2em;
-  background: ${colors.translucent.light.dark};
-  cursor: pointer;
-  user-select: none;
-  span {
-    vertical-align: middle;
-  }
-`;
+export const ShowAll = styled(FlexCenter)<{ isLoading?: boolean }>(
+  ({ isLoading }) => css`
+    background: ${colors.translucent.light.dark};
+    cursor: pointer;
+    font-size: ${rem(14)};
+    height: ${rem(20)};
+    line-height: 100%;
+    padding: ${rem(2)} ${rem(4)};
+    position: absolute;
+    right: 0;
+    top: 0;
+    user-select: none;
+
+    ${isLoading &&
+    css`
+      opacity: 0.7;
+    `}
+  `,
+);
 
 export const CheckBox = styled.a<{ enabled: boolean }>(
   ({ enabled }) => css`
-    width: 20px;
-    height: 20px;
-    float: left;
+    height: ${rem(20)};
+    margin-left: ${rem(4)};
     position: relative;
+    width: ${rem(20)};
     &:before {
-      left: 4px;
-      top: 4px;
-      width: 12px;
-      height: 12px;
+      left: ${rem(4)};
+      top: ${rem(4)};
+      width: ${rem(12)};
+      height: ${rem(12)};
       box-shadow: 0 0 0 1px black;
     }
     &:after {
-      left: 7px;
-      top: 7px;
-      width: 6px;
-      height: 6px;
+      left: ${rem(7)};
+      top: ${rem(7)};
+      width: ${rem(6)};
+      height: ${rem(6)};
       ${enabled &&
       css`
         background: black;

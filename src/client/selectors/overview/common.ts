@@ -5,7 +5,6 @@ import isSameDay from 'date-fns/isSameDay';
 import isSameMonth from 'date-fns/isSameMonth';
 import moize from 'moize';
 import { createSelector } from 'reselect';
-import { ListItemStandard } from '~api/types';
 
 import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import { getMonthDatesList, inclusiveMonthDifference } from '~client/modules/date';
@@ -14,22 +13,24 @@ import type { State } from '~client/reducers/types';
 import { withoutDeleted } from '~client/selectors/crud';
 import { getRawItems } from '~client/selectors/list';
 import type {
-  PageNonStandard,
-  CostProcessed,
   ListItemStandardNative,
   ListItemExtendedNative,
   NativeDate,
+  PageNonStandard,
+  MonthlyProcessed,
+  MonthlyProcessedKey,
+  MonthlyWithProcess,
 } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
-import type { Cost } from '~client/types/gql';
+import type { ListItemStandard, Monthly } from '~client/types/gql';
 
-export const getCost = (state: State): Cost => state.overview.cost;
+export const getMonthlyValues = (state: State): Monthly => state.overview.monthly;
 
 const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
 
-export const getSpendingColumn = <K extends keyof CostProcessed = never>(dates: Date[]) => (
-  data: Cost & Pick<CostProcessed, K>,
-): Cost & Pick<CostProcessed, K> & Pick<CostProcessed, 'spending'> => ({
+export const getSpendingColumn = <K extends MonthlyProcessedKey = never>(dates: Date[]) => (
+  data: MonthlyWithProcess<K>,
+): MonthlyWithProcess<K> & Pick<MonthlyProcessed, 'spending'> => ({
   ...data,
   spending: dates.map((_: Date, index) =>
     spendingCategories.reduce((sum, category) => sum + (data[category]?.[index] ?? 0), 0),

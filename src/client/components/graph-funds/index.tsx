@@ -1,15 +1,14 @@
-import fromUnixTime from 'date-fns/fromUnixTime';
 import moize from 'moize';
-import React, { useContext, useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas, ToggleList } from './after-canvas';
+import { hoverEffectByMode } from './labels';
 import * as Styled from './styles';
 
 import { errorOpened, fundPricesUpdated, fundQueryUpdated } from '~client/actions';
 import { FundWeights } from '~client/components/fund-weights';
 import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
-import { HoverEffect } from '~client/components/graph/hooks';
 import { ErrorLevel } from '~client/constants/error';
 import {
   GRAPH_FUNDS_WIDTH,
@@ -21,7 +20,8 @@ import {
 import { TodayContext, usePersistentState, useUpdateEffect } from '~client/hooks';
 import { useFundPricesUpdateQuery } from '~client/hooks/gql';
 import { lastInArray } from '~client/modules/data';
-import { getTickSize, formatItem } from '~client/modules/format';
+import { abbreviateFundName } from '~client/modules/finance';
+import { getTickSize } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { getFundItems, getFundLines, getFundsCache, getHistoryOptions } from '~client/selectors';
 import { graphFundsHeightMobile } from '~client/styled/variables';
@@ -111,11 +111,12 @@ const filterLines = moize(
     const [numberedLines] = fundLines[mode]
       .filter(({ id }) => (isMobile ? id === GRAPH_FUNDS_OVERALL_ID : toggleList[id] !== false))
       .reduce<Accumulator>(
-        ([last, idCount], { id, color, data }) => [
+        ([last, idCount], { id, item, color, data }) => [
           [
             ...last,
             {
               key: `${id}-${idCount[id] || 0}`,
+              name: id === GRAPH_FUNDS_OVERALL_ID ? 'Overall' : abbreviateFundName(item),
               data,
               color,
               strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
@@ -236,8 +237,8 @@ function useGraphProps({
 
   const labelY = useCallback((value) => formatValue(value, selectedMode), [selectedMode]);
 
-  const beforeLines = useMemo(() => {
-    const BeforeLines: React.FC<DrawProps> = (props) => (
+  const BeforeLines = useCallback<React.FC<DrawProps>>(
+    (props) => (
       <TimeAxes
         {...props}
         hideMinorTicks
@@ -246,30 +247,18 @@ function useGraphProps({
         labelY={labelY}
         offset={startTime}
       />
-    );
-    return BeforeLines;
-  }, [startTime, tickSizeY, labelY]);
-
-  const labelX = useCallback((value) => formatItem('date', fromUnixTime(value + startTime)), [
-    startTime,
-  ]);
-
-  const hoverEffect = useMemo<HoverEffect>(
-    () => ({
-      labelX,
-      labelY,
-      labelWidth: 72,
-    }),
-    [labelX, labelY],
+    ),
+    [startTime, tickSizeY, labelY],
   );
 
+  const hoverEffect = hoverEffectByMode[selectedMode];
+
   return {
-    name: 'fund-history',
     isMobile,
     width,
     height,
     ...ranges,
-    beforeLines,
+    BeforeLines,
     lines,
     hoverEffect,
   };

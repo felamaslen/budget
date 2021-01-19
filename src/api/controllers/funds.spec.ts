@@ -233,7 +233,7 @@ describe('Funds controller', () => {
       const publishSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
       jest.spyOn(crudQueries, 'insertCrudItem').mockResolvedValueOnce({ id: 781 });
-      jest.spyOn(overview, 'getFundValues').mockResolvedValueOnce([1, 7, 23]);
+      jest.spyOn(overview, 'getDisplayedFundValues').mockResolvedValueOnce([1, 7, 23]);
 
       const args: MutationCreateFundArgs = {
         fakeId: -8813,
@@ -271,7 +271,7 @@ describe('Funds controller', () => {
       const publishSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
       jest.spyOn(crudQueries, 'updateCrudItem').mockResolvedValueOnce({ ...input, id: 792 });
-      jest.spyOn(overview, 'getFundValues').mockResolvedValueOnce([1, 7, 23]);
+      jest.spyOn(overview, 'getDisplayedFundValues').mockResolvedValueOnce([1, 7, 23]);
 
       const args: MutationUpdateFundArgs = {
         id: 792,
@@ -297,7 +297,7 @@ describe('Funds controller', () => {
       expect.assertions(2);
 
       jest.spyOn(crudQueries, 'deleteCrudItem').mockResolvedValueOnce(1);
-      jest.spyOn(overview, 'getFundValues').mockResolvedValueOnce([1, 7, 23]);
+      jest.spyOn(overview, 'getDisplayedFundValues').mockResolvedValueOnce([1, 7, 23]);
 
       const publishSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 

@@ -2,7 +2,7 @@ import getUnixTime from 'date-fns/getUnixTime';
 import React from 'react';
 
 import * as Styled from './styles';
-import { LineGraph, TimeAxes, TimeAxesProps, useGraphWidth } from '~client/components/graph';
+import { LineGraph, TimeAxes, useGraphWidth } from '~client/components/graph';
 import { breakpoints } from '~client/styled/variables';
 import {
   NetWorthTableRow as TableRow,
@@ -18,16 +18,13 @@ export type GraphProps = {
   table: TableRow[];
 };
 
-const makeBeforeLines = (axisProps: Partial<TimeAxesProps> = {}): React.FC<DrawProps> => {
-  const BeforeLines: React.FC<DrawProps> = (props) => (
-    <TimeAxes {...props} hideMinorTicks dualAxis {...axisProps} />
-  );
+const BeforeLinesFTI: React.FC<DrawProps> = (props) => (
+  <TimeAxes {...props} hideMinorTicks dualAxis labelY={String} />
+);
 
-  return BeforeLines;
-};
-
-const BeforeLinesFTI = makeBeforeLines({ labelY: String });
-const BeforeLinesNetWorth = makeBeforeLines();
+const BeforeLinesNetWorth: React.FC<DrawProps> = (props) => (
+  <TimeAxes {...props} hideMinorTicks dualAxis />
+);
 
 const dimensions = (lines: Line[]): Range => ({
   minX: lines.reduce(
@@ -54,12 +51,14 @@ export const getFTISeries = (table: NetWorthTableRow[]): Data =>
 const getDataFti = (table: GraphProps['table']): Line[] => [
   {
     key: 'fti',
+    name: 'FTI',
     data: getFTISeries(table),
     color: '#000',
     smooth: true,
   },
   {
     key: 'net-worth',
+    name: 'Net worth (ex. options)',
     data: table.map(({ date, assets, liabilities }) => [getUnixTime(date), assets - liabilities]),
     color: Styled.keyColors.assets,
     smooth: true,
@@ -68,6 +67,7 @@ const getDataFti = (table: GraphProps['table']): Line[] => [
   },
   {
     key: 'spending',
+    name: 'Expenses',
     data: table.map(({ date, pastYearAverageSpend }) => [getUnixTime(date), pastYearAverageSpend]),
     color: 'red',
     smooth: true,
@@ -79,6 +79,7 @@ const getDataFti = (table: GraphProps['table']): Line[] => [
 const getDataNetWorth = (table: GraphProps['table']): Line[] => [
   {
     key: 'options',
+    name: 'Options',
     data: table.map(({ date, assets, options }) => [getUnixTime(date), assets + options]),
     color: Styled.keyColors.options,
     smooth: true,
@@ -87,12 +88,14 @@ const getDataNetWorth = (table: GraphProps['table']): Line[] => [
   },
   {
     key: 'assets',
+    name: 'Assets (ex. options)',
     data: table.map(({ date, assets }) => [getUnixTime(date), assets]),
     color: Styled.keyColors.assets,
     smooth: true,
   },
   {
     key: 'liabilities',
+    name: 'Liabilities',
     data: table.map(({ date, liabilities }) => [getUnixTime(date), -liabilities]),
     color: Styled.keyColors.liabilities,
     smooth: true,
@@ -101,6 +104,7 @@ const getDataNetWorth = (table: GraphProps['table']): Line[] => [
   },
   {
     key: 'expenses',
+    name: 'Expenses',
     data: table.map(({ date, expenses }) => [getUnixTime(date), -expenses]),
     color: Styled.keyColors.expenses,
     smooth: true,
@@ -137,7 +141,6 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ isMobile, table }) => {
           </ul>
         </Styled.GraphKey>
         <LineGraph
-          name="net-worth"
           lines={dataNetWorth}
           width={graphWidthWithMargin}
           height={graphHeightNetWorth}
@@ -145,7 +148,7 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ isMobile, table }) => {
           minY={0}
           minY2={dimensionsNetWorthLeft.minY}
           maxY2={dimensionsNetWorthLeft.maxY}
-          beforeLines={BeforeLinesNetWorth}
+          BeforeLines={BeforeLinesNetWorth}
         />
       </Styled.GraphSection>
       <Styled.GraphSection>
@@ -162,7 +165,6 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ isMobile, table }) => {
           </Styled.FTILabel>
         </Styled.GraphKey>
         <LineGraph
-          name="fti"
           lines={dataFti}
           width={graphWidthWithMargin}
           height={graphHeightFTI}
@@ -170,7 +172,7 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ isMobile, table }) => {
           minY={0}
           minY2={0}
           maxY2={dimensionsFtiBackground.maxY}
-          beforeLines={BeforeLinesFTI}
+          BeforeLines={BeforeLinesFTI}
         />
       </Styled.GraphSection>
     </>

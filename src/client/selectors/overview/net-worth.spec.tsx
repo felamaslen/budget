@@ -6,8 +6,6 @@ import {
   getCategories,
   getHomeEquity,
   getNetWorthBreakdown,
-  getNetWorthSummary,
-  getNetWorthSummaryOld,
   getNetWorthTable,
   getSubcategories,
 } from './net-worth';
@@ -147,68 +145,22 @@ describe('Overview selectors (net worth)', () => {
     });
   });
 
-  describe('getNetWorthSummary', () => {
-    it('should get a list of net worth values by month', () => {
-      expect.assertions(1);
-      const result = getNetWorthSummary(state);
-
-      const marSavingsSAYE = Math.round(698 * 123.6) + Math.round(94 * 200.1); // check testState
-
-      expect(result).toStrictEqual(
-        [
-          0, // Jan 18 (no entries)
-          10324 + 0.035 * 3750 + 1296523 + 21000000 - 8751 - 18744200, // Feb 18
-          9752 + 1051343 - 21939 + 21500000 - 18420900 + marSavingsSAYE, // Mar 18
-          0, // Apr 18
-          0, // May 18
-          0, // Jun 18
-          0, // Jul 18
-        ].map(Math.round),
-      );
-    });
-  });
-
-  describe('getNetWorthSummaryOld', () => {
-    it.each`
-      description        | prop         | values
-      ${'values'}        | ${'main'}    | ${[1000, 1302]}
-      ${'option values'} | ${'options'} | ${[887, 193]}
-    `(
-      'should get the old net worth entry $description, as provided by the API',
-      ({ prop, values }) => {
-        expect.assertions(1);
-        const result = getNetWorthSummaryOld({
-          ...state,
-          overview: {
-            ...state.overview,
-            startDate: new Date('2018-03-31'),
-            endDate: new Date('2018-05-31'),
-          },
-          netWorth: {
-            ...state.netWorth,
-            entries: [],
-            old: [1000, 1302],
-            oldOptions: [887, 193],
-          },
-        });
-
-        expect(result).toStrictEqual(expect.objectContaining({ [prop]: values }));
-      },
-    );
-  });
-
   describe('getNetWorthTable', () => {
-    describe('for the first row in the view', () => {
-      const fti = Math.round(
-        (10324 + 3750 * 0.035 + 1296523 + 21000000 - 8751 - 18744200) *
-          ((28 + 58 / 365) / ((900 + 13 + 90 + 1000 + 65) * 12)),
-      );
+    describe('for the second row in the view', () => {
+      const assets = 10324 + 3750 * 0.035 + 855912 + 1296523 + 21000000 + 10654;
+      const liabilities = 8751 + 18744200;
+      const pastExpenses = 1000 + 50 + 150 + 10 + 50;
+      const expenses = 900 + 13 + 90 + 1000 + 65;
+
+      const pastYearAverageSpend = (pastExpenses + expenses) * (12 / 2);
+
+      const fti = Math.round(((assets - liabilities) * (28 + 58 / 365)) / pastYearAverageSpend);
 
       const aggregate = {
         [Aggregate.cashEasyAccess]: Math.round(10324 + 37.5 * 100 * 0.035 + 1296523),
-        [Aggregate.cashOther]: 0,
+        [Aggregate.cashOther]: Math.round(855912),
         [Aggregate.stocks]: 0,
-        [Aggregate.pension]: 0,
+        [Aggregate.pension]: 10654,
         [Aggregate.realEstate]: 21000000,
         [Aggregate.mortgage]: -18744200,
       };
@@ -217,16 +169,16 @@ describe('Overview selectors (net worth)', () => {
         prop                      | value
         ${'id'}                   | ${numericHash('real-entry-id-a')}
         ${'date'}                 | ${new Date('2018-02-28')}
-        ${'assets'}               | ${Math.round(10324 + 3750 * 0.035 + 1296523 + 21000000)}
+        ${'assets'}               | ${Math.round(assets)}
         ${'options'}              | ${0}
         ${'aggregate'}            | ${aggregate}
-        ${'liabilities'}          | ${8751 + 18744200}
-        ${'expenses'}             | ${900 + 13 + 90 + 1000 + 65}
+        ${'liabilities'}          | ${liabilities}
+        ${'expenses'}             | ${expenses}
         ${'fti'}                  | ${fti}
-        ${'pastYearAverageSpend'} | ${24816}
+        ${'pastYearAverageSpend'} | ${pastYearAverageSpend}
       `('should return the correct $prop value', ({ prop, value }) => {
         expect.assertions(1);
-        expect(getNetWorthTable(state)[0]).toStrictEqual(
+        expect(getNetWorthTable(state)[1]).toStrictEqual(
           expect.objectContaining({
             [prop]: value,
           }),
@@ -234,22 +186,28 @@ describe('Overview selectors (net worth)', () => {
       });
     });
 
-    describe('for the second row in the view', () => {
+    describe('for the third row in the view', () => {
       const savingsSAYE = Math.round(698 * 123.6) + Math.round(94 * 200.1);
 
+      const assets = 9752 + 11237 + 1051343 + 165 * 0.865 * 100 + 21500000 + savingsSAYE;
+      const liabilities = 21939 + 18420900;
+
+      const pastExpenses = 1000 + 50 + 150 + 10 + 50 + 900 + 13 + 90 + 1000 + 65;
+      const expenses = 400 + 20 + 10 + 95 + 134;
+
+      const pastYearAverageSpend = (pastExpenses + expenses) * (12 / 3);
+
       const fti = Math.round(
-        (9752 + 1051343 + 21500000 - 21939 - 18420900 + savingsSAYE) *
-          ((28 + (58 + 31) / 365) /
-            ((900 + 13 + 90 + 1000 + 65 + (400 + 20 + 10 + 95 + 134)) * (12 / 2))),
+        (assets - liabilities) * ((28 + (58 + 31) / 365) / pastYearAverageSpend),
       );
 
       const options = Math.round(101 * (95.57 - 77.65)) + Math.round(698 * (182.3 - 123.6));
 
       const aggregate = {
         [Aggregate.cashEasyAccess]: Math.round(9752 + 1051343),
-        [Aggregate.cashOther]: savingsSAYE,
+        [Aggregate.cashOther]: Math.round(165 * 0.865 * 100 + savingsSAYE),
         [Aggregate.stocks]: 0,
-        [Aggregate.pension]: 0,
+        [Aggregate.pension]: 11237,
         [Aggregate.realEstate]: 21500000,
         [Aggregate.mortgage]: -18420900,
       };
@@ -258,16 +216,16 @@ describe('Overview selectors (net worth)', () => {
         prop                      | value
         ${'id'}                   | ${numericHash('real-entry-id-b')}
         ${'date'}                 | ${new Date('2018-03-31')}
-        ${'assets'}               | ${Math.round(9752 + 1051343 + 21500000 + savingsSAYE)}
+        ${'assets'}               | ${Math.round(assets)}
         ${'options'}              | ${options}
         ${'aggregate'}            | ${aggregate}
-        ${'liabilities'}          | ${21939 + 18420900}
-        ${'expenses'}             | ${400 + 20 + 10 + 95 + 134}
+        ${'liabilities'}          | ${liabilities}
+        ${'expenses'}             | ${expenses}
         ${'fti'}                  | ${fti}
-        ${'pastYearAverageSpend'} | ${16362}
+        ${'pastYearAverageSpend'} | ${pastYearAverageSpend}
       `('should return the correct $prop value', ({ prop, value }) => {
         expect.assertions(1);
-        expect(getNetWorthTable(state)[1]).toStrictEqual(
+        expect(getNetWorthTable(state)[2]).toStrictEqual(
           expect.objectContaining({
             [prop]: value,
           }),
@@ -364,9 +322,9 @@ describe('Overview selectors (net worth)', () => {
 
       expect(forecastEquity).toMatchInlineSnapshot(`
         Array [
-          7965227.396299284,
-          8186609.312236443,
-          8408748.493954502,
+          7965227,
+          8186609,
+          8408748,
         ]
       `);
     });

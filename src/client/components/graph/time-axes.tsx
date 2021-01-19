@@ -29,22 +29,20 @@ type TicksY = {
 }[];
 
 function getTicksY({ minY, maxY, pixY1, valY2, tickSizeY = 0, hideMinorTicks }: Props): TicksY {
-  const minorTicks = hideMinorTicks ? 1 : 5;
-  const numTicksGuide = 5 * minorTicks;
+  const tickSize = tickSizeY || getTickSize(minY, maxY);
+  const majorPeriod = hideMinorTicks ? 1 : 5;
+  const minorTickSize = tickSize / majorPeriod;
+  const tickStart = Math.floor(minY / minorTickSize) * minorTickSize;
 
-  const tickSize = tickSizeY || getTickSize(minY, maxY, numTicksGuide);
-  const majorTickSize = tickSize * minorTicks;
-  const tickStart = Math.floor(minY / tickSize) * tickSize;
-
-  const numTicks = Math.ceil((maxY - minY) / tickSize);
-  if (numTicks > 50 || Number.isNaN(numTicks)) {
+  const numTicks = Math.ceil((maxY - minY) / minorTickSize);
+  if (numTicks < 0 || numTicks > 50 || Number.isNaN(numTicks)) {
     return [];
   }
 
   return Array(numTicks + 1)
     .fill(0)
     .reduce<TicksY>((last, _, index) => {
-      const value = tickStart + index * tickSize;
+      const value = tickStart + index * minorTickSize;
       const pos = Math.floor(pixY1(value)) + 0.5;
 
       if (last.some((tick) => tick.pos === pos)) {
@@ -54,7 +52,7 @@ function getTicksY({ minY, maxY, pixY1, valY2, tickSizeY = 0, hideMinorTicks }: 
       }
 
       const valueSecondary = valY2(pixY1(value));
-      const major = value % majorTickSize === 0;
+      const major = index % majorPeriod === 0;
 
       return [...last, { pos, major, value, valueSecondary }];
     }, []);

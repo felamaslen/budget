@@ -26,7 +26,7 @@ export type NetWorthTableColumn = 'date' | 'assets' | 'liabilities' | 'main' | '
 export enum Aggregate {
   cashEasyAccess = 'Cash (easy access)',
   cashOther = 'Cash (other)',
-  stocks = 'Stocks',
+  stocks = 'Stocks', // this is actually stock+cash investments
   pension = 'Pension',
   realEstate = 'House',
   mortgage = 'Mortgage',

@@ -1,36 +1,28 @@
 import React from 'react';
 
 import * as Styled from './styles';
-import { Size } from '~client/types/graph';
+import type { Size } from '~client/types';
 
 export type GraphProps = {
-  outerProperties?: Record<string, unknown>;
-  svgProperties?: Record<string, unknown>;
-  before?: React.FC;
-  after?: React.FC;
+  outerProperties?: React.HTMLAttributes<HTMLDivElement>;
+  svgProperties?: React.HTMLAttributes<SVGElement>;
+  Before?: React.ReactElement;
+  After?: React.ReactElement;
   children?: React.ReactNode;
 };
 
 export type Props = Size & GraphProps;
 
 const GraphWithoutRef: React.ForwardRefRenderFunction<HTMLDivElement, Props> = (
-  {
-    width,
-    height,
-    svgProperties,
-    outerProperties,
-    before: Before = null,
-    after: After = null,
-    children,
-  },
+  { width, height, svgProperties, outerProperties, Before, After, children },
   ref,
 ) => (
   <Styled.Graph ref={ref} {...outerProperties} width={width} height={height}>
-    {Before && <Before />}
+    {Before}
     <svg data-testid="graph-svg" width={width} height={height} {...svgProperties}>
       {children}
     </svg>
-    {After && <After />}
+    {After}
   </Styled.Graph>
 );
 

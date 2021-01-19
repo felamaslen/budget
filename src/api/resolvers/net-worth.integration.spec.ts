@@ -1,9 +1,6 @@
-import addMonths from 'date-fns/addMonths';
-import format from 'date-fns/format';
 import gql from 'graphql-tag';
 import sinon from 'sinon';
 
-import config from '~api/config';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   Maybe,
@@ -1212,8 +1209,6 @@ describe('Net worth resolver', () => {
                 rate
               }
             }
-            old
-            oldOptions
           }
         }
       `;
@@ -1319,66 +1314,6 @@ describe('Net worth resolver', () => {
           { date: '2019-12-31' },
           { date: '2019-12-18' },
           { date: '2020-02-28' },
-          {
-            date: format(addMonths(now, -(config.data.overview.numLast + 1)), 'yyyy-MM-dd'),
-            values: [
-              {
-                subcategory: parents.subcategoryId.mainCC,
-                simple: -15000,
-                skip: null,
-              },
-              {
-                subcategory: parents.subcategoryId.options,
-                option: {
-                  units: 1324,
-                  vested: 101,
-                  strikePrice: 4.53,
-                  marketPrice: 19.27,
-                },
-              },
-              {
-                subcategory: parents.subcategoryId.currentAccount,
-                simple: 5871,
-              },
-              {
-                subcategory: parents.subcategoryId.foreignCash,
-                fx: [
-                  {
-                    value: 2040.76,
-                    currency: 'CNY',
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            date: format(addMonths(now, -(config.data.overview.numLast + 3)), 'yyyy-MM-dd'),
-            values: [
-              ...entryInput.values,
-              {
-                ...entryInput.values[0],
-                subcategory: parents.subcategoryId.SAYE,
-                simple: 0,
-                option: {
-                  units: 1556,
-                  vested: 993,
-                  strikePrice: 1350.3,
-                  marketPrice: 2113.7,
-                },
-              },
-              {
-                ...entryInput.values[0],
-                subcategory: parents.subcategoryId.SAYE2,
-                simple: 0,
-                option: {
-                  units: 165,
-                  vested: 149,
-                  strikePrice: 112.83,
-                  marketPrice: 99.39,
-                },
-              },
-            ],
-          },
         ];
 
         const ids = await createEntries(
@@ -1515,33 +1450,6 @@ describe('Net worth resolver', () => {
           '2020-03-30',
           '2020-04-14',
         ]);
-      });
-
-      it('should return the summed (£) non-option values of all old entries', async () => {
-        expect.assertions(1);
-
-        const { res } = await setup();
-
-        const entryValueOld = 5871 + Math.round(2040.76 * 0.113 * 100) - 15000;
-        const entryValueOlder =
-          166523 +
-          62000 * 0.113 * 100 -
-          15000 +
-          Math.round(993 * 1350.3) +
-          Math.round(149 * 112.83);
-
-        expect(res?.old).toStrictEqual([entryValueOlder, entryValueOld]);
-      });
-
-      it('should return the summed (£) option values of all old entries', async () => {
-        expect.assertions(1);
-
-        const { res } = await setup();
-
-        const entryOptionValueOld = Math.round(101 * (19.27 - 4.53));
-        const entryOptionValueOlder = Math.round(993 * (2113.7 - 1350.3));
-
-        expect(res?.oldOptions).toStrictEqual([entryOptionValueOlder, entryOptionValueOld]);
       });
     });
 

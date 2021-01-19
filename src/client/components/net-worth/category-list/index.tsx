@@ -260,3 +260,4 @@ export const NetWorthCategoryList: React.FC<Props> = ({
     </Styled.CategoryList>
   );
 };
+export default NetWorthCategoryList;

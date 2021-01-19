@@ -1,12 +1,11 @@
 import { render, RenderResult } from '@testing-library/react';
 import React from 'react';
-import { Graph } from '.';
+import { Graph, Props } from '.';
 import { Padding } from '~client/types/graph';
 
 describe('<Graph />', () => {
-  const getGraph = (customProps = {}): RenderResult => {
-    const props = {
-      name: 'foo',
+  const getGraph = (customProps: Partial<Props> = {}): RenderResult => {
+    const props: Props = {
       width: 200,
       height: 100,
       padding: [10, 10, 10, 10] as Padding,
@@ -28,30 +27,25 @@ describe('<Graph />', () => {
 
   it('should accept a chlid before the SVG', () => {
     expect.assertions(1);
-    const Before: React.FC = () => <span>{'before1'}</span>;
     const { getByText } = getGraph({
-      before: Before,
+      Before: <span>before1</span>,
     });
     expect(getByText('before1')).toBeInTheDocument();
   });
 
   it('should accept a child after the SVG', () => {
     expect.assertions(1);
-    const After: React.FC = () => <span>{'after1'}</span>;
     const { getByText } = getGraph({
-      after: After,
+      After: <span>after1</span>,
     });
     expect(getByText('after1')).toBeInTheDocument();
   });
 
   it('should accept children before and after the SVG', () => {
     expect.assertions(2);
-    const Before: React.FC = () => <span>{'before1'}</span>;
-    const After: React.FC = () => <span>{'after1'}</span>;
-
     const { getByText } = getGraph({
-      before: Before,
-      after: After,
+      Before: <span>before1</span>,
+      After: <span>after1</span>,
     });
 
     expect(getByText('before1')).toBeInTheDocument();

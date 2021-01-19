@@ -36,9 +36,9 @@ describe('Overview reducer', () => {
     startDate: new Date('2019-04-30T23:59:59.999Z'),
     endDate: new Date('2019-07-31T23:59:59.999Z'),
     annualisedFundReturns: 0.1,
-    cost: {
-      ...initialState.cost,
-      funds: [0, 0, 510000, 2160465],
+    monthly: {
+      ...initialState.monthly,
+      stocks: [0, 0, 510000, 2160465],
       [PageListStandard.Income]: [0, 30040, 229838, 196429],
       [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
       [PageListStandard.Food]: [11907, 24108, 28123, 38352],
@@ -65,9 +65,8 @@ describe('Overview reducer', () => {
         startDate: '2019-04-30T23:59:59.999Z',
         endDate: '2019-07-31T22:59:59.999Z',
         annualisedFundReturns: 0.087,
-        homeEquityOld: [6375000, 7255000],
-        cost: {
-          funds: [0, 0, 510000, 2160465],
+        monthly: {
+          stocks: [0, 0, 510000, 2160465],
           [PageListStandard.Income]: [0, 30040, 229838, 196429],
           [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
           [PageListStandard.Food]: [11907, 24108, 28123, 38352],
@@ -96,19 +95,13 @@ describe('Overview reducer', () => {
       expect(result).toHaveProperty('annualisedFundReturns', 0.087);
     });
 
-    it('should set the old home equity values', () => {
-      expect.assertions(1);
-      const result = reducer(initialState, action);
-      expect(result).toHaveProperty('homeEquityOld', [6375000, 7255000]);
-    });
-
     it('should set the cost data', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.cost).toStrictEqual(
-        expect.objectContaining({
-          funds: [0, 0, 510000, 2160465],
+      expect(result.monthly).toStrictEqual(
+        expect.objectContaining<State['monthly']>({
+          stocks: [0, 0, 510000, 2160465],
           [PageListStandard.Income]: [0, 30040, 229838, 196429],
           [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
           [PageListStandard.Food]: [11907, 24108, 28123, 38352],
@@ -138,7 +131,7 @@ describe('Overview reducer', () => {
         ),
       );
 
-      expect(withGeneral.cost?.general?.[2]).toBe(28335 + 34);
+      expect(withGeneral.monthly?.general?.[2]).toBe(28335 + 34);
     });
 
     it('should omit expenses which are for a house purchase', () => {
@@ -159,7 +152,7 @@ describe('Overview reducer', () => {
         ),
       );
 
-      expect(withGeneral.cost?.general?.[2]).toBe(28335);
+      expect(withGeneral.monthly?.general?.[2]).toBe(28335);
     });
 
     describe('when the action came from the server', () => {
@@ -214,8 +207,8 @@ describe('Overview reducer', () => {
         ),
       );
 
-      expect(result.cost[PageListStandard.Food][1]).toBe(firstCost);
-      expect(result.cost[PageListStandard.Food][2]).toBe(secondCost);
+      expect(result.monthly[PageListStandard.Food][1]).toBe(firstCost);
+      expect(result.monthly[PageListStandard.Food][2]).toBe(secondCost);
     });
 
     describe('when the action came from the server', () => {
@@ -262,7 +255,7 @@ describe('Overview reducer', () => {
           ),
         );
 
-        expect(result.cost[PageListStandard.General][1]).toBe(9515 + 567);
+        expect(result.monthly[PageListStandard.General][1]).toBe(9515 + 567);
       });
     });
 
@@ -288,7 +281,7 @@ describe('Overview reducer', () => {
           ),
         );
 
-        expect(result.cost[PageListStandard.General][1]).toBe(9515 - 34);
+        expect(result.monthly[PageListStandard.General][1]).toBe(9515 - 34);
       });
     });
   });
@@ -312,7 +305,7 @@ describe('Overview reducer', () => {
         ),
       );
 
-      expect(withHoliday.cost?.holiday?.[3]).toBe(55597 - 1235);
+      expect(withHoliday.monthly?.holiday?.[3]).toBe(55597 - 1235);
     });
 
     describe('when the action came from the server', () => {
@@ -354,7 +347,7 @@ describe('Overview reducer', () => {
         ),
       );
 
-      expect(withGeneral.cost?.general?.[3]).toBe(160600);
+      expect(withGeneral.monthly?.general?.[3]).toBe(160600);
     });
   });
 
@@ -368,7 +361,7 @@ describe('Overview reducer', () => {
       const action = listOverviewUpdated(page, overviewCost);
       const result = reducer(initialState, action);
 
-      expect(result.cost[page as PageListCost]).toStrictEqual(overviewCost);
+      expect(result.monthly[page as PageListCost]).toStrictEqual(overviewCost);
     });
   });
 
@@ -389,7 +382,7 @@ describe('Overview reducer', () => {
     it('should set the overview funds cost', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
-      expect(result.cost.funds).toStrictEqual([1, 2, 303]);
+      expect(result.monthly.stocks).toStrictEqual([1, 2, 303]);
     });
   });
 
@@ -429,9 +422,9 @@ describe('Overview reducer', () => {
 
       const result = reducer(state, action);
 
-      expect(result.cost.food[2]).toBe(28123 + 776);
-      expect(result.cost.general[3]).toBe(160600 + 913);
-      expect(result.cost.social[0]).toBe(13275 + 729);
+      expect(result.monthly.food[2]).toBe(28123 + 776);
+      expect(result.monthly.general[3]).toBe(160600 + 913);
+      expect(result.monthly.social[0]).toBe(13275 + 729);
     });
   });
 });

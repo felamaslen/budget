@@ -17,9 +17,7 @@ export type FundItem = {
   color: string;
 };
 
-export type FundLine = Pick<FundItem, 'id' | 'color'> & {
-  data: Data;
-};
+export type FundLine = FundItem & { data: Data };
 
 export type Stock = {
   code: string;

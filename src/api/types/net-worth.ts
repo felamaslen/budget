@@ -76,5 +76,12 @@ export type JoinedEntryRowWithMortgageValue = JoinedEntryRow & {
   mortgage_rate: number;
 };
 
-export type OldNetWorthRow = { value: number; option_value: number };
-export type OldHomeEquityRow = { date: string; home_equity: number };
+export type OldNetWorthRow = {
+  date: string;
+  net_worth: number;
+  pension: number;
+  options: number;
+  home_equity: number;
+  locked_cash: number;
+  investments: number;
+};

@@ -20,6 +20,8 @@ type Props = {
   onDelete: OnDelete;
 };
 
+type CrudProps = Pick<Props, 'data' | 'categories' | 'subcategories'>;
+
 export const NetWorthList: React.FC<Props> = ({
   data,
   categories,
@@ -29,7 +31,7 @@ export const NetWorthList: React.FC<Props> = ({
   onDelete,
 }) => (
   <Styled.NetWorthList>
-    <CrudList<Create<Entry>, Entry, Pick<Props, 'data' | 'categories' | 'subcategories'>>
+    <CrudList<Create<Entry>, Entry, CrudProps>
       items={data}
       Item={NetWorthListItem}
       CreateItem={NetWorthListCreateItem}
@@ -40,3 +42,4 @@ export const NetWorthList: React.FC<Props> = ({
     />
   </Styled.NetWorthList>
 );
+export default NetWorthList;

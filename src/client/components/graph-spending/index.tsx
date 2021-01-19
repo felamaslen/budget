@@ -1,6 +1,4 @@
-import { rgba } from 'polished';
-import React, { useMemo, useContext } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useMemo, useContext, useCallback } from 'react';
 
 import { Key } from './key';
 import {
@@ -8,85 +6,91 @@ import {
   getValuesWithTime,
   TimeValuesProps,
 } from '~client/components/graph-cashflow';
-import { profitLossColor } from '~client/components/graph/helpers';
+import { profitLossColor, transformToMovingAverage } from '~client/components/graph/helpers';
 import { TodayContext } from '~client/hooks';
-import { getStartDate, getProcessedCost } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import type { DrawProps, Line } from '~client/types';
+import type { DrawProps, Line, MergedMonthly } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
+
+export type Props = {
+  showAll: boolean;
+  startDate: Date;
+  futureMonths: number;
+  monthly: Pick<MergedMonthly, 'income' | 'spending' | 'net'>;
+};
 
 function processData(
   startDate: Date,
-  net: number[],
-  spending: number[],
-  savingsRatio: number[],
+  showAll: boolean,
+  { net, income, spending }: Props['monthly'],
 ): Line[] {
-  const props: TimeValuesProps = {
-    oldOffset: 0,
-    startDate,
+  const opts: TimeValuesProps = { startDate };
+
+  const arrows: Line = {
+    key: 'net',
+    name: 'Cash flow',
+    data: getValuesWithTime(net, opts),
+    arrows: true,
+    color: profitLossColor,
   };
 
-  return [
-    {
-      key: 'net',
-      data: getValuesWithTime(net, props),
-      arrows: true,
-      color: profitLossColor,
-    },
-    {
-      key: 'spending',
-      data: getValuesWithTime(spending, props),
-      fill: false,
-      smooth: true,
-      color: colors[PageNonStandard.Overview].spending,
-    },
-    {
-      key: 'savingsRatio',
-      data: getValuesWithTime(
-        savingsRatio.map((value) => value * 1),
-        props,
+  const spendingLine: Line = {
+    key: 'spending',
+    name: 'Expenses',
+    data: transformToMovingAverage(getValuesWithTime(spending, opts), 3),
+    fill: false,
+    smooth: true,
+    color: colors[PageNonStandard.Overview].spending,
+    strokeWidth: 2,
+  };
+
+  const savingsRatio: Line = {
+    key: 'savings-ratio',
+    name: 'Savings ratio',
+    data: transformToMovingAverage(
+      getValuesWithTime(
+        income.map((value, index) =>
+          value > 0 ? Math.min(1, Math.max(0, 1 - spending[index] / value)) : 0,
+        ),
+        opts,
       ),
-      color: rgba(colors.green, 0.2),
-      secondary: true,
-      smooth: true,
-      fill: true,
-      strokeWidth: 1,
-      movingAverage: 12,
-    },
-  ];
+      12,
+    ),
+    secondary: true,
+    color: colors.green,
+    smooth: true,
+    strokeWidth: 2,
+  };
+
+  if (showAll) {
+    return [spendingLine, savingsRatio];
+  }
+
+  return [arrows, spendingLine, savingsRatio];
 }
 
-export const GraphSpending: React.FC = () => {
+export const GraphSpending: React.FC<Props> = ({ startDate, monthly, showAll }) => {
   const today = useContext(TodayContext);
-  const startDate = useSelector(getStartDate);
-  const { net, spending, savingsRatio } = useSelector(getProcessedCost(today));
 
-  const lines = useMemo<Line[]>(() => processData(startDate, net, spending, savingsRatio), [
+  const lines = useMemo<Line[]>(() => processData(startDate, showAll, monthly), [
     startDate,
-    net,
-    spending,
-    savingsRatio,
+    showAll,
+    monthly,
   ]);
 
-  const afterLines = useMemo<React.FC<DrawProps>>(() => {
-    const AfterLines: React.FC<DrawProps> = ({ pixX, pixY1, maxX, minY, maxY }) => (
-      <g>
-        <Key
-          now={today}
-          title="Cash flow"
-          pixX={pixX}
-          pixY1={pixY1}
-          maxX={maxX}
-          minY={minY}
-          maxY={maxY}
-        />
-      </g>
-    );
-
-    return AfterLines;
-  }, [today]);
+  const AfterLines = useCallback<React.FC<DrawProps>>(
+    (props) => <Key now={today} title="Cash flow" {...props} />,
+    [today],
+  );
 
   return (
-    <GraphCashFlow dualAxis today={today} name="spend" lines={lines} afterLines={afterLines} />
+    <GraphCashFlow
+      dualAxis
+      minY2={0}
+      maxY2={1}
+      today={today}
+      lines={lines}
+      AfterLines={AfterLines}
+    />
   );
 };

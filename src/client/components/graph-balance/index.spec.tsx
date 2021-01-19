@@ -2,71 +2,53 @@
 import { render, RenderResult } from '@testing-library/react';
 import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore from 'redux-mock-store';
-import { replaceAtIndex } from 'replace-array';
-import numericHash from 'string-hash';
 
 import { GraphBalance, Props } from '.';
 import { ResizeContext, TodayContext } from '~client/hooks';
-import { State } from '~client/reducers';
-import { testState as state } from '~client/test-data/state';
+import { getFutureMonths, getProcessedMonthlyValues, getStartDate } from '~client/selectors';
+import { testNow, testState as state } from '~client/test-data/state';
 
 describe('<GraphBalance />', () => {
-  const now = endOfDay(new Date('2020-04-20T16:29Z'));
+  let randomSpy: jest.SpyInstance;
 
-  const makeStore = createStore();
-
-  const stateCustom: State = {
-    ...state,
-    netWorth: {
-      ...state.netWorth,
-      entries: [
-        state.netWorth.entries[0],
-        {
-          ...state.netWorth.entries[1],
-          values: replaceAtIndex(
-            state.netWorth.entries[1].values,
-            state.netWorth.entries[1].values.findIndex(
-              ({ subcategory }) => subcategory === numericHash('real-option-subcategory-id'),
-            ),
-            (item) => ({
-              ...item,
-              value: [
-                {
-                  units: 103,
-                  vested: 103,
-                  strikePrice: 77.65,
-                  marketPrice: 95.57,
-                },
-              ],
-            }),
-          ),
-        },
-      ],
-    },
-  };
-
-  const setup = (props: Props): RenderResult => {
-    const store = makeStore({
-      ...stateCustom,
-      now,
+  beforeEach(() => {
+    jest.useFakeTimers();
+    let randomIndex = 0;
+    randomSpy = jest.spyOn(Math, 'random').mockImplementation((): number => {
+      randomIndex += 1;
+      return randomIndex % 2 === 0 ? 0.32 : 0.81;
     });
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+    randomSpy.mockRestore();
+  });
+
+  const today = endOfDay(testNow);
+
+  const setup = (): RenderResult => {
+    const props: Props = {
+      isMobile: false,
+      showAll: false,
+      setShowAll: jest.fn(),
+      isLoading: false,
+      startDate: getStartDate(state),
+      futureMonths: getFutureMonths(today)(state),
+      monthly: getProcessedMonthlyValues(today)(state),
+    };
 
     return render(
-      <Provider store={store}>
-        <TodayContext.Provider value={now}>
-          <ResizeContext.Provider value={894}>
-            <GraphBalance {...props} />
-          </ResizeContext.Provider>
-        </TodayContext.Provider>
-      </Provider>,
+      <TodayContext.Provider value={today}>
+        <ResizeContext.Provider value={894}>
+          <GraphBalance {...props} />
+        </ResizeContext.Provider>
+      </TodayContext.Provider>,
     );
   };
 
   it('should render a graph', async () => {
     expect.assertions(1);
-    const { getByTestId } = setup({ isMobile: false });
+    const { getByTestId } = setup();
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
       <svg
         data-testid="graph-svg"
@@ -89,24 +71,16 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="235.5"
-                y2="235.5"
+                y1="213.5"
+                y2="213.5"
               />
               <line
                 stroke="#999"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="170.5"
-                y2="170.5"
-              />
-              <line
-                stroke="#999"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="105.5"
-                y2="105.5"
+                y1="126.5"
+                y2="126.5"
               />
               <line
                 stroke="#999"
@@ -123,24 +97,16 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="287.5"
-                y2="287.5"
+                y1="282.5"
+                y2="282.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="274.5"
-                y2="274.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="261.5"
-                y2="261.5"
+                y1="265.5"
+                y2="265.5"
               />
               <line
                 stroke="#eaeaea"
@@ -155,16 +121,8 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="222.5"
-                y2="222.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="209.5"
-                y2="209.5"
+                y1="230.5"
+                y2="230.5"
               />
               <line
                 stroke="#eaeaea"
@@ -179,16 +137,16 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="183.5"
-                y2="183.5"
+                y1="178.5"
+                y2="178.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="157.5"
-                y2="157.5"
+                y1="161.5"
+                y2="161.5"
               />
               <line
                 stroke="#eaeaea"
@@ -203,16 +161,8 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="131.5"
-                y2="131.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="118.5"
-                y2="118.5"
+                y1="109.5"
+                y2="109.5"
               />
               <line
                 stroke="#eaeaea"
@@ -227,24 +177,16 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="79.5"
-                y2="79.5"
+                y1="74.5"
+                y2="74.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="66.5"
-                y2="66.5"
-              />
-              <line
-                stroke="#eaeaea"
-                stroke-width="1"
-                x1="0"
-                x2="500"
-                y1="53.5"
-                y2="53.5"
+                y1="57.5"
+                y2="57.5"
               />
             </g>
             <g>
@@ -256,16 +198,6 @@ describe('<GraphBalance />', () => {
                 x="0"
                 y="298.5"
               >
-                −£50k
-              </text>
-              <text
-                alignment-baseline="baseline"
-                font-family="Arial, Helvetica, sans-serif"
-                font-size="11"
-                text-anchor="start"
-                x="0"
-                y="233.5"
-              >
                 £0
               </text>
               <text
@@ -274,9 +206,9 @@ describe('<GraphBalance />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="168.5"
+                y="211.5"
               >
-                £50k
+                £20k
               </text>
               <text
                 alignment-baseline="baseline"
@@ -284,9 +216,9 @@ describe('<GraphBalance />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="103.5"
+                y="124.5"
               >
-                £100k
+                £40k
               </text>
               <text
                 alignment-baseline="baseline"
@@ -296,7 +228,7 @@ describe('<GraphBalance />', () => {
                 x="0"
                 y="38.5"
               >
-                £150k
+                £60k
               </text>
             </g>
             <g>
@@ -924,8 +856,8 @@ describe('<GraphBalance />', () => {
             <line
               stroke="#333"
               stroke-width="1"
-              x1="2237.5"
-              x2="2237.5"
+              x1="113.5"
+              x2="113.5"
               y1="300"
               y2="40"
             />
@@ -933,7 +865,7 @@ describe('<GraphBalance />', () => {
               color="#000"
               font-family="Arial, Helvetica, sans-serif"
               font-size="11"
-              x="2237.5"
+              x="113.5"
               y="40"
             >
               Now
@@ -942,7 +874,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0.0,188.8 L77.3,180.1 L163.0,169.8 L245.9,157.5 L331.5,142.9 L414.4,125.5 L500.0,104.9"
+            d="M0.0,177.5 L77.3,161.2 L163.0,142.7 L245.9,121.8 L331.5,98.1 L414.4,71.3 L500.0,40.9"
             fill="none"
             stroke="#999"
             stroke-width="1"
@@ -950,15 +882,15 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,236.310127 Q50,235 77.3,235.0 C107,235 133,235 163.0,235.0 C192,235 217,235 245.9,235.0 C276,235 302,235 331.5,235.0 C360,235 385,235 414.4,235.0 Q444,235 500.0,235.0"
-            fill="rgba(145,194,129,0.4)"
+            d="M0,227.17833333333334 Q50,207 77.3,202.2 C107,197 133,199 163.0,197.1 C192,195 217,194 245.9,191.8 C276,190 302,188 331.5,186.6 C360,185 385,183 414.4,181.4 Q444,179 500.0,176.1 L500,300 L0,300"
+            fill="rgba(150,140,39,0.5)"
             stroke="none"
             stroke-width="2"
           />
         </g>
         <g>
           <path
-            d="M0,233.689873 Q50,234 77.3,233.7 C107,234 133,234 163.0,233.7 C192,234 217,233 245.9,233.7 C276,234 302,235 331.5,235.0 C360,235 385,235 414.4,235.0 Q444,235 500.0,235.0"
+            d="M0,222.81124333333332 Q50,205 77.3,197.9 C107,190 133,182 163.0,179.8 C192,178 217,187 245.9,187.3 C276,188 302,184 331.5,182.1 C360,180 385,179 414.4,176.8 Q444,175 500.0,171.4 L500.0,176.1 Q444,179 414.4,181.4 C385,183 360,185 331.5,186.6 C302,188 276,190 245.9,191.8 C217,194 192,195 163.0,197.1 C133,199 107,197 77.3,202.2 Q50,207 0.0,227.2"
             fill="rgba(84,110,122,0.4)"
             stroke="none"
             stroke-width="2"
@@ -966,15 +898,29 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,264.3254 Q49,237 77.3,228.8 C106,221 136,213 163.0,220.1 C195,229 214,265 245.9,275.0 C273,284 302,275 331.5,275.0 C360,275 385,275 414.4,275.0 Q444,275 500.0,275.0"
-            fill="none"
-            stroke="#039"
+            d="M0,222.81124333333332 Q47,176 77.3,160.8 C104,148 133,145 163.0,142.7 C192,141 217,150 245.9,150.2 C276,151 302,147 331.5,145.0 C360,143 385,141 414.4,139.7 Q444,138 500.0,134.3 L500.0,171.4 Q444,175 414.4,176.8 C385,179 360,180 331.5,182.1 C302,184 276,188 245.9,187.3 C217,187 192,178 163.0,179.8 C133,182 107,190 77.3,197.9 Q50,205 0.0,222.8"
+            fill="rgba(145,194,129,0.4)"
+            stroke="none"
             stroke-width="2"
           />
         </g>
         <g>
           <path
-            d="M0,235 Q50,235 77.3,235.0 C107,235 133,235 163.0,235.0 C192,235 217,235 245.9,235.0 C276,235 302,235 331.5,235.0 C360,235 385,235 414.4,235.0 Q444,235 500.0,235.0"
+            d="M0,227.17833333333334 Q42,138 77.3,108.9 C99,91 133,93 163.0,90.8 C192,89 217,98 245.9,98.3"
+            fill="none"
+            stroke="#039"
+            stroke-width="2"
+          />
+          <path
+            d="M245.85635359116023,98.28818666666666 C276,99 302,95 331.5,92.9 C360,91 385,89 414.4,87.6 Q444,86 500.0,82.1"
+            fill="none"
+            stroke="#808080"
+            stroke-width="2"
+          />
+        </g>
+        <g>
+          <path
+            d="M0,227.17833333333334 Q42,138 77.3,108.4 C99,90 133,92 163.0,90.3 C192,89 217,97 245.9,97.8 C276,98 302,94 331.5,92.5 C360,91 385,89 414.4,87.1 Q444,85 500.0,81.7 L500.0,82.1 Q444,86 414.4,87.6 C385,89 360,91 331.5,92.9 C302,95 276,99 245.9,98.3 C217,98 192,89 163.0,90.8 C133,93 99,91 77.3,108.9 Q42,138 0.0,227.2"
             fill="rgba(47,123,211,0.5)"
             stroke="none"
             stroke-width="2"
@@ -982,9 +928,9 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,235 Q50,235 77.3,234.4 C107,234 133,234 163.0,234.4 C192,234 217,234 245.9,234.4 C276,234 302,234 331.5,234.4 C360,234 385,234 414.4,234.4 Q444,234 500.0,234.4"
+            d="M0,227.17833333333334 Q42,138 77.3,108.4 C99,90 133,92 163.0,90.3 C192,89 217,97 245.9,97.8 C276,98 302,94 331.5,92.5 C360,91 385,89 414.4,87.1 Q444,85 500.0,81.7"
             fill="none"
-            stroke="#00348a"
+            stroke="#5aa8be"
             stroke-dasharray="3,5"
             stroke-width="1"
           />
@@ -1006,7 +952,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="92"
             >
-              £9m (1y)
+              £143k (1y)
             </text>
             <text
               alignment-baseline="hanging"
@@ -1016,7 +962,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="114"
             >
-              £559m (3y)
+              £3m (3y)
             </text>
             <text
               alignment-baseline="hanging"
@@ -1026,7 +972,7 @@ describe('<GraphBalance />', () => {
               x="50"
               y="136"
             >
-              £35bn (5y)
+              £57m (5y)
             </text>
           </g>
           <g>
@@ -1152,7 +1098,7 @@ describe('<GraphBalance />', () => {
               Pension
             </text>
             <line
-              stroke="#00348a"
+              stroke="#5aa8be"
               stroke-dasharray="3,4"
               stroke-width="2"
               x1="220"

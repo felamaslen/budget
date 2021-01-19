@@ -1,12 +1,14 @@
-import React, { useCallback } from 'react';
+/* @jsx jsx */
+import { css, jsx } from '@emotion/react';
+import loadable from '@loadable/component';
+import { rem } from 'polished';
+import { FC, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { Route } from 'react-router-dom';
+import PuffLoader from 'react-spinners/PuffLoader';
 
-import { NetWorthCategoryList } from './category-list';
-import { NetWorthList } from './list';
 import * as Styled from './styles';
-import { NetWorthView } from './view';
 import { ModalWindow } from '~client/components/modal-window';
 import {
   useNetWorthCategoryCrud,
@@ -14,6 +16,32 @@ import {
   useNetWorthSubcategoryCrud,
 } from '~client/hooks';
 import { getCategories, getSubcategories, getEntries, getNetWorthTable } from '~client/selectors';
+import { breakpoint } from '~client/styled/mixins';
+import { FlexCenter } from '~client/styled/shared';
+import { breakpoints, colors } from '~client/styled/variables';
+
+const LoadingFallback: FC = () => (
+  <FlexCenter
+    css={css`
+      background: ${colors.translucent.dark.light};
+      flex: 1;
+      justify-content: center;
+      width: 100%;
+
+      ${breakpoint(breakpoints.mobile)} {
+        flex: 0 0 ${rem(480)};
+      }
+    `}
+  >
+    <PuffLoader />
+  </FlexCenter>
+);
+
+const lazyOptions = { fallback: <LoadingFallback /> };
+
+const NetWorthCategoryList = loadable(() => import('./category-list'), lazyOptions);
+const NetWorthList = loadable(() => import('./list'), lazyOptions);
+const NetWorthView = loadable(() => import('./view'), lazyOptions);
 
 const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
   const categories = useSelector(getCategories);

@@ -3,7 +3,7 @@ import { getPixY, isConstantColor } from './helpers';
 import { Arrow } from '~client/components/arrow';
 import type { UnkeyedLine, RangeY, Pix, Point } from '~client/types';
 
-type Props = UnkeyedLine & RangeY & Pix;
+type Props = Omit<UnkeyedLine, 'name'> & RangeY & Pix;
 
 export const ArrowLine: React.FC<Props> = ({ data, color, pixY1, pixY2, secondary, ...props }) => {
   const pixY = getPixY({ pixY1, pixY2 }, secondary);

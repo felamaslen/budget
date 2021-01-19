@@ -1,16 +1,25 @@
 import { render, act } from '@testing-library/react';
-import React from 'react';
+import React, { RefObject, useRef } from 'react';
 import sinon from 'sinon';
-import { useHover, HookResult, HLPoint } from './hover';
+import { useHover, HookResult, HLPoint, HoverEffect } from './hover';
 import { genPixelCompute } from '~client/components/graph/helpers';
 
 describe('Hover hook', () => {
-  let hookResult: HookResult;
+  const MyLabel: HoverEffect['Label'] = ({ main: { point } }) => (
+    <span>
+      {point[0].toFixed(2)},{point[1].toFixed(2)}
+    </span>
+  );
+
+  let hookResult: HookResult | null;
+  let graphRef: RefObject<HTMLDivElement>;
   const TestHook: React.FC = () => {
+    graphRef = useRef<HTMLDivElement>(null);
     hookResult = useHover({
       lines: [
         {
           key: 'line-a',
+          name: 'Line A',
           data: [
             [0, 0],
             [1, 1],
@@ -22,11 +31,12 @@ describe('Hover hook', () => {
           dashed: true,
           fill: true,
           smooth: true,
-          movingAverage: 2,
+          movingAverage: { period: 2, color: 'darkred' },
           arrows: false,
         },
         {
           key: 'line-c',
+          name: 'Line C',
           data: [
             [0, 3],
             [1, 2],
@@ -38,6 +48,7 @@ describe('Hover hook', () => {
         },
         {
           key: 'line-b',
+          name: 'Line B',
           data: [
             [0, 19],
             [0.5, 0.5],
@@ -51,6 +62,7 @@ describe('Hover hook', () => {
         },
       ],
       isMobile: false,
+      graphRef,
       calc: genPixelCompute({
         minX: 0,
         maxX: 4,
@@ -61,31 +73,27 @@ describe('Hover hook', () => {
         padding: [1, 5, 2, 3],
       }),
       hoverEffect: {
-        labelX: String,
-        labelY: (value): string => `y-value: ${value}`,
+        Label: MyLabel,
       },
     });
 
-    return null;
+    return <div ref={graphRef} />;
   };
-
-  const currentTarget = {
-    getBoundingClientRect: (): { left: number; top: number } => ({
-      left: 13,
-      top: 25,
-    }),
-  } as HTMLElement;
 
   beforeEach(() => {
     render(<TestHook />);
+    if (graphRef.current) {
+      jest.spyOn(graphRef.current, 'getBoundingClientRect').mockReturnValueOnce({
+        left: 13,
+        top: 25,
+      } as DOMRect);
+    }
   });
 
   describe('hlPoint', () => {
     it('should initially be undefined', () => {
       expect.assertions(1);
-      const [hlPoint] = hookResult;
-
-      expect(hlPoint).toBeUndefined();
+      expect(hookResult?.hlPoint).toBeUndefined();
     });
   });
 
@@ -95,30 +103,27 @@ describe('Hover hook', () => {
         expect.assertions(2);
         const clock = sinon.useFakeTimers();
 
-        const [hlPointBefore, onMouseMove] = hookResult;
+        const hlPointBefore = hookResult?.hlPoint;
         expect(hlPointBefore).toBeUndefined();
 
         act(() => {
-          onMouseMove({
+          hookResult?.events.onMouseMove?.({
             pageX: 0,
             pageY: 0,
-            currentTarget,
-          });
+          } as React.MouseEvent<HTMLDivElement>);
 
           clock.tick(11);
 
-          onMouseMove({
+          hookResult?.events.onMouseMove?.({
             pageX: 13 + 3,
             pageY: 25 + 1,
-            currentTarget,
-          });
+          } as React.MouseEvent<HTMLDivElement>);
         });
 
-        const [hlPointAfter] = hookResult;
+        const hlPointAfter = hookResult?.hlPoint;
         expect(hlPointAfter).toStrictEqual(
-          expect.objectContaining<HLPoint>({
-            valX: 0,
-            valY: 19,
+          expect.objectContaining<Partial<HLPoint>>({
+            main: { point: [0, 19], unstackedPoint: [0, 19] },
             color: 'blue',
             secondary: true,
           }),
@@ -133,29 +138,24 @@ describe('Hover hook', () => {
         expect.assertions(1);
         const clock = sinon.useFakeTimers();
 
-        const [, onMouseMove] = hookResult;
-
         act(() => {
-          onMouseMove({
+          hookResult?.events.onMouseMove?.({
             pageX: 0,
             pageY: 0,
-            currentTarget,
-          });
+          } as React.MouseEvent<HTMLDivElement>);
 
           clock.tick(11);
 
-          onMouseMove({
+          hookResult?.events.onMouseMove?.({
             pageX: 13 + 3,
             pageY: 25 + 90 - 2,
-            currentTarget,
-          });
+          } as React.MouseEvent<HTMLDivElement>);
         });
 
-        const [hlPointAfter] = hookResult;
+        const hlPointAfter = hookResult?.hlPoint;
         expect(hlPointAfter).toStrictEqual(
-          expect.objectContaining<HLPoint>({
-            valX: 0,
-            valY: 0,
+          expect.objectContaining<Partial<HLPoint>>({
+            main: { point: [0, 0], unstackedPoint: [0, 0] },
             color: 'red',
             secondary: undefined,
           }),
@@ -170,29 +170,24 @@ describe('Hover hook', () => {
         expect.assertions(1);
         const clock = sinon.useFakeTimers();
 
-        const [, onMouseMove] = hookResult;
-
         act(() => {
-          onMouseMove({
+          hookResult?.events.onMouseMove?.({
             pageX: 0,
             pageY: 0,
-            currentTarget,
-          });
+          } as React.MouseEvent<HTMLDivElement>);
 
           clock.tick(11);
 
-          onMouseMove({
+          hookResult?.events.onMouseMove?.({
             pageX: 13 + 43,
             pageY: 25 + 37,
-            currentTarget,
-          });
+          } as React.MouseEvent<HTMLDivElement>);
         });
 
-        const [hlPointAfter] = hookResult;
+        const hlPointAfter = hookResult?.hlPoint;
         expect(hlPointAfter).toStrictEqual(
-          expect.objectContaining<HLPoint>({
-            valX: 2,
-            valY: 4,
+          expect.objectContaining<Partial<HLPoint>>({
+            main: { point: [2, 4], unstackedPoint: [2, 4] },
             color: 'red',
           }),
         );
@@ -206,30 +201,27 @@ describe('Hover hook', () => {
         expect.assertions(2);
         const clock = sinon.useFakeTimers();
 
-        const [hlPointBefore, onMouseMove] = hookResult;
+        const hlPointBefore = hookResult?.hlPoint;
         expect(hlPointBefore).toBeUndefined();
 
         act(() => {
-          onMouseMove({
+          hookResult?.events.onMouseMove?.({
             pageX: 0,
             pageY: 0,
-            currentTarget,
-          });
+          } as React.MouseEvent<HTMLDivElement>);
 
           clock.tick(11);
 
-          onMouseMove({
+          hookResult?.events.onMouseMove?.({
             pageX: 100,
             pageY: 0,
-            currentTarget,
-          });
+          } as React.MouseEvent<HTMLDivElement>);
         });
 
-        const [hlPointAfter] = hookResult;
+        const hlPointAfter = hookResult?.hlPoint;
         expect(hlPointAfter).not.toStrictEqual(
-          expect.objectContaining<HLPoint>({
-            valX: 4,
-            valY: 17,
+          expect.objectContaining<Partial<HLPoint>>({
+            main: { point: [4, 17], unstackedPoint: [4, 17] },
             color: 'turquoise',
           }),
         );
@@ -244,35 +236,31 @@ describe('Hover hook', () => {
       expect.assertions(2);
       const clock = sinon.useFakeTimers();
 
-      const [, onMouseMove, onMouseLeave] = hookResult;
-
       act(() => {
-        onMouseMove({
+        hookResult?.events.onMouseMove?.({
           pageX: 0,
           pageY: 0,
-          currentTarget,
-        });
+        } as React.MouseEvent<HTMLDivElement>);
 
         clock.tick(11);
 
-        onMouseMove({
+        hookResult?.events.onMouseMove?.({
           pageX: 13 + 43,
           pageY: 25 + 37,
-          currentTarget,
-        });
+        } as React.MouseEvent<HTMLDivElement>);
         clock.tick(3);
       });
 
-      const [hlPointBefore] = hookResult;
+      const hlPointBefore = hookResult?.hlPoint;
       expect(hlPointBefore).not.toBeUndefined();
 
       act(() => {
-        onMouseLeave();
+        hookResult?.events.onMouseLeave?.({} as React.MouseEvent<HTMLDivElement>);
 
         clock.tick(8);
       });
 
-      const [hlPointAfter] = hookResult;
+      const hlPointAfter = hookResult?.hlPoint;
 
       expect(hlPointAfter).toBeUndefined();
     });

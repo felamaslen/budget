@@ -1,54 +1,49 @@
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
-import format from 'date-fns/format';
-import fromUnixTime from 'date-fns/fromUnixTime';
 import getUnixTime from 'date-fns/getUnixTime';
 import isSameMonth from 'date-fns/isSameMonth';
 import React, { useCallback, useMemo } from 'react';
 
+import { hoverEffect } from './labels';
 import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
 import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { getDataX, getStackedDataY } from '~client/components/graph/helpers';
-import { HoverEffect } from '~client/components/graph/hooks';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
-import { formatCurrency, formatPercent } from '~client/modules/format';
+import { formatPercent } from '~client/modules/format';
 import type { PickUnion, Range, DrawProps, Line } from '~client/types';
 
-export type Props = PickUnion<LineGraphProps, 'name' | 'lines' | 'afterLines' | 'after'> & {
+export type Props = PickUnion<LineGraphProps, 'lines' | 'AfterLines' | 'After'> & {
   isMobile?: boolean;
   today: Date;
   graphHeight?: number;
   dualAxis?: boolean;
+  minY2?: number;
+  maxY2?: number;
 };
 
 function getTimeAtIndex(
   index: number,
-  offset: number,
   startDate: Date,
   now?: Date,
   breakAtToday?: boolean,
 ): number {
-  const date = endOfMonth(addMonths(startDate, index - offset));
+  const date = endOfMonth(addMonths(startDate, index));
   return getUnixTime(breakAtToday && now && isSameMonth(now, date) ? now : date);
 }
 
 export type TimeValuesProps = {
   now?: Date;
-  oldOffset: number;
   breakAtToday?: boolean;
   startDate: Date;
 };
 
 export const getValuesWithTime = (
   data: number[],
-  { now, oldOffset, breakAtToday, startDate }: TimeValuesProps,
+  { now, breakAtToday, startDate }: TimeValuesProps,
 ): [number, number][] =>
-  data.map((value, index) => [
-    getTimeAtIndex(index, oldOffset, startDate, now, breakAtToday),
-    value,
-  ]);
+  data.map((value, index) => [getTimeAtIndex(index, startDate, now, breakAtToday), value]);
 
-function getRanges(lines: Line[]): Range {
+function getRanges(lines: Line[], minY2Initial = 0, maxY2Initial = -Infinity): Range {
   return lines.reduce(
     ({ minX, maxX, minY, maxY, minY2, maxY2 }, { data, stack, secondary }) => {
       const dataX = getDataX(data);
@@ -71,69 +66,51 @@ function getRanges(lines: Line[]): Range {
       maxX: -Infinity,
       minY: 0,
       maxY: -Infinity,
-      minY2: 0,
-      maxY2: -Infinity,
+      minY2: minY2Initial,
+      maxY2: maxY2Initial,
     },
   );
 }
 
 const labelY2 = formatPercent;
 
-function makeBeforeLines(now: Date, dualAxis: boolean): React.FC<DrawProps> {
-  const BeforeLines: React.FC<DrawProps> = (props) => (
-    <g>
-      <TimeAxes {...props} dualAxis={dualAxis} labelY2={labelY2} />
-      <NowLine now={now} {...props} />
-    </g>
-  );
-
-  return BeforeLines;
-}
-
 export const GraphCashFlow: React.FC<Props> = ({
-  name,
   isMobile = false,
   today,
   graphHeight = GRAPH_HEIGHT,
   lines,
-  afterLines,
-  after,
+  AfterLines,
+  After,
   dualAxis = false,
+  minY2,
+  maxY2,
 }) => {
   const graphWidth = useGraphWidth();
-  const ranges = useMemo<Range>(() => getRanges(lines), [lines]);
-  const beforeLines = useMemo(() => makeBeforeLines(today, dualAxis), [today, dualAxis]);
+  const ranges = useMemo<Range>(() => getRanges(lines, minY2, maxY2), [lines, minY2, maxY2]);
 
-  const labelX = useCallback(
-    (value: number): string => format(fromUnixTime(value), 'MMM yyyy'),
-    [],
+  const BeforeLines = useCallback<React.FC<DrawProps>>(
+    (props) => (
+      <g>
+        <TimeAxes {...props} dualAxis={dualAxis} labelY2={labelY2} />
+        <NowLine now={today} {...props} />
+      </g>
+    ),
+    [dualAxis, today],
   );
 
-  const labelY = useCallback((value) => formatCurrency(value, { precision: 2 }), []);
-
-  const hoverEffect = useMemo<HoverEffect>(
-    () => ({
-      labelX,
-      labelY,
-      labelY2,
-      labelWidthY: 88,
-    }),
-    [labelX, labelY],
+  return (
+    <LineGraph
+      isMobile={isMobile}
+      BeforeLines={BeforeLines}
+      AfterLines={AfterLines}
+      After={After}
+      lines={lines}
+      hoverEffect={hoverEffect}
+      width={graphWidth}
+      height={graphHeight}
+      padding={GRAPH_CASHFLOW_PADDING}
+      y2Capped={true}
+      {...ranges}
+    />
   );
-
-  const graphProps = {
-    name,
-    isMobile,
-    beforeLines,
-    afterLines,
-    after,
-    lines,
-    hoverEffect,
-    width: graphWidth,
-    height: graphHeight,
-    padding: GRAPH_CASHFLOW_PADDING,
-    ...ranges,
-  };
-
-  return <LineGraph {...graphProps} />;
 };

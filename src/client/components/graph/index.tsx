@@ -1,5 +1,4 @@
 export * from './arrow-line';
-export * from './average-line';
 export * from './helpers';
 export * from './hooks';
 export * from './line-graph';

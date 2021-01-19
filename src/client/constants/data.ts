@@ -24,7 +24,7 @@ export const LOGIN_INPUT_LENGTH = 4;
 export const CREATE_ID = -2;
 
 const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
-  funds: { name: 'Stocks' },
+  stocks: { name: 'Stocks' },
   [PageListStandard.Bills]: { name: 'Bills' },
   [PageListStandard.Food]: { name: 'Food' },
   [PageListStandard.General]: { name: 'General' },
@@ -32,9 +32,10 @@ const overviewColumns: { [header in OverviewHeader]?: OverviewColumn } = {
   [PageListStandard.Social]: { name: 'Social' },
   [PageListStandard.Income]: { name: 'Income' },
   spending: { name: 'Out' },
-  net: { name: 'Net' },
-  netWorthCombined: {
+  net: { name: 'Net', include: ['income'], exclude: ['spending'] },
+  netWorth: {
     name: 'Net Worth',
+    include: ['netWorth'],
     link: {
       to: '/net-worth',
       replace: true,
