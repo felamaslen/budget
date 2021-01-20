@@ -5,6 +5,7 @@ import {
   assumedHousePriceInflation,
   getCategories,
   getHomeEquity,
+  getLatestNetWorthAggregate,
   getNetWorthBreakdown,
   getNetWorthTable,
   getSubcategories,
@@ -142,6 +143,30 @@ describe('Overview selectors (net worth)', () => {
           subcategory: 'foo',
         }),
       ]);
+    });
+  });
+
+  describe('getLatestNetWorthAggregate', () => {
+    it('should aggregate the latest net worth value for the current month', () => {
+      expect.assertions(2);
+
+      expect(getLatestNetWorthAggregate(new Date('2018-02-28'))(testState)).toStrictEqual({
+        [Aggregate.cashEasyAccess]: Math.round(10324 + 37.5 * 0.035 * 100 + 1296523),
+        [Aggregate.cashOther]: 855912,
+        [Aggregate.stocks]: 0,
+        [Aggregate.pension]: 10654,
+        [Aggregate.realEstate]: 21000000,
+        [Aggregate.mortgage]: -18744200,
+      });
+
+      expect(getLatestNetWorthAggregate(new Date('2018-03-01'))(testState)).toStrictEqual({
+        [Aggregate.cashEasyAccess]: 9752 + 1051343,
+        [Aggregate.cashOther]: Math.round(165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1),
+        [Aggregate.stocks]: 0,
+        [Aggregate.pension]: 11237,
+        [Aggregate.realEstate]: 21500000,
+        [Aggregate.mortgage]: -18420900,
+      });
     });
   });
 

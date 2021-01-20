@@ -54,7 +54,7 @@ services:
     networks:
       - net_budget_dev
     ports:
-      - 5440:5432
+      - ${DB_PORT_BUDGET_DEV:-5432}:5432
     environment:
       POSTGRES_USER: docker
       POSTGRES_PASSWORD: docker

@@ -3,7 +3,9 @@ import React from 'react';
 import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { formatOptionsAbsolute, formatOptionsRelative } from '~client/components/fund-gain-info';
+import { HighlightProps } from '~client/components/fund-gain-info/styles';
 import { GraphFunds } from '~client/components/graph-funds';
+import { usePriceChangeHighlight } from '~client/components/page-funds/hooks';
 import { Sort, defaultSort, HeadProps, SortCriteria } from '~client/components/page-funds/types';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import type { CachedValue, HistoryOptions } from '~client/types';
@@ -31,13 +33,14 @@ const sortOptions: SelectOptions<Sort> = [
 
 const formatOptionsXIRR = { brackets: false, precision: 1 };
 
-const GainValues: React.FC<PropsGainValues & { isMobile: boolean }> = ({
+const GainValues: React.FC<PropsGainValues & HighlightProps & { isMobile: boolean }> = ({
   isMobile,
   totalCost,
   annualisedFundReturns,
   cachedValue: { value, gain, dayGain, gainAbs, dayGainAbs },
+  highlight,
 }) => (
-  <Styled.OverallGain as="a" role="button" profit={value > totalCost} loss={value < totalCost}>
+  <Styled.OverallGain profit={value > totalCost} loss={value < totalCost} highlight={highlight}>
     <Styled.Main>
       <Styled.Value>{formatCurrency(value, isMobile ? {} : formatOptionsAbsolute)}</Styled.Value>
       <Styled.XIRR gain={annualisedFundReturns}>
@@ -73,23 +76,27 @@ export const ListHeadFunds: React.FC<Props> = ({
   onViewSoldToggle,
   sort = defaultSort,
   setSort,
-}) => (
-  <Styled.ListHeadFunds title={cachedValue.ageText}>
-    <GainValues
-      isMobile={false}
-      totalCost={totalCost}
-      annualisedFundReturns={annualisedFundReturns}
-      cachedValue={cachedValue}
-    />
-    <Styled.ViewOptions>
-      <FormFieldSelect options={sortOptions} value={sort} onChange={setSort} />
-      <Styled.ViewSold>
-        <input type="checkbox" checked={viewSoldFunds} onChange={onViewSoldToggle} />
-        <span>View sold</span>
-      </Styled.ViewSold>
-    </Styled.ViewOptions>
-  </Styled.ListHeadFunds>
-);
+}) => {
+  const highlight = usePriceChangeHighlight(cachedValue.value);
+  return (
+    <Styled.ListHeadFunds title={cachedValue.ageText}>
+      <GainValues
+        isMobile={false}
+        totalCost={totalCost}
+        annualisedFundReturns={annualisedFundReturns}
+        cachedValue={cachedValue}
+        highlight={highlight}
+      />
+      <Styled.ViewOptions>
+        <FormFieldSelect options={sortOptions} value={sort} onChange={setSort} />
+        <Styled.ViewSold>
+          <input type="checkbox" checked={viewSoldFunds} onChange={onViewSoldToggle} />
+          <span>View sold</span>
+        </Styled.ViewSold>
+      </Styled.ViewOptions>
+    </Styled.ListHeadFunds>
+  );
+};
 
 export const ListHeadFundsMobile: React.FC<PropsGainValues> = ({
   totalCost,

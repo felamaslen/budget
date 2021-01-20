@@ -51,7 +51,9 @@ const getGainColor = (isMobile: boolean) => ({ profit, loss }: GainProps): strin
 const getGainColorLight = (isMobile: boolean) => ({ profit, loss }: GainProps): string =>
   compose(desaturate(0.6), lighten(0.1))(getGainColor(isMobile)({ profit, loss }));
 
-export const OverallGain = styled(FlexCenter)<GainProps>`
+export const OverallGain = styled(GainStyles.PriceChangeHighlight)<GainProps>`
+  align-items: center;
+  display: flex;
   width: 100%;
   height: ${rem(42)};
   text-transform: none;

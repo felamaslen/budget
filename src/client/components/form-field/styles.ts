@@ -46,13 +46,7 @@ type FormFieldProps = {
 };
 
 function formFieldWidth(item: FormFieldProps['item']): string {
-  if (item === 'date') {
-    return rem(fieldSizes.date);
-  }
-  if (item === 'cost') {
-    return rem(fieldSizes.cost);
-  }
-  return rem(fieldSizes.default);
+  return rem(fieldSizes[item] ?? fieldSizes.default);
 }
 
 const formFieldStyles = ({

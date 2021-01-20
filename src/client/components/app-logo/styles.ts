@@ -46,22 +46,21 @@ export const Logo = styled.a`
   flex: 1;
   flex-flow: row;
   height: 100%;
-  line-height: 55px;
-  font-family: Ubuntu, Georgia, serif;
+  line-height: 100%;
   font-weight: bold;
   position: relative;
   &::before {
     background-image: url(${nav1x});
-    background-position: 0 -56px;
+    background-position: -1px -59px;
     content: '';
     display: inline-block;
-    flex: 0 0 ${sizes.logo}px;
-    height: ${sizes.logo}px;
+    flex: 0 0 ${rem(sizes.logo)};
+    height: ${rem(sizes.logo)};
     margin-right: ${rem(8)};
-    width: ${sizes.logo}px;
+    width: ${rem(sizes.logo)};
     @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
       background-image: url(${nav2x});
-      background-size: 252px 84px;
+      background-size: 262px 88px;
     }
   }
 `;
@@ -73,10 +72,13 @@ export const TitleContainer = styled(Flex)`
 `;
 
 export const Title = styled.h1`
-  flex: 0 0 ${rem(sizes.navbarHeight - 6)};
   font-size: ${rem(22)};
-  line-height: ${rem(sizes.navbarHeight - 6)};
   margin: 0;
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 0 0 ${rem(sizes.navbarHeight - 6)};
+    line-height: ${rem(sizes.navbarHeight - 6)};
+  }
 `;
 
 export const Spinner = styled.div`

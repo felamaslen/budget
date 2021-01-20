@@ -191,7 +191,7 @@ export const colors = {
   },
 };
 
-const heightHeaderMobile = 55;
+const heightHeaderMobile = 32;
 const heightNavMobile = 36;
 
 export const sizes = {

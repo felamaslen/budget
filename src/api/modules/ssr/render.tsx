@@ -175,7 +175,7 @@ export async function renderApp(req: Request, hot: boolean, offline = false): Pr
     await preloadData(client, store, jsx);
   }
 
-  const html = renderToString(jsx[0]);
+  const html = process.env.NODE_ENV === 'development' ? '' : renderToString(jsx[0]);
   const scriptTags = getScriptTags(extractors, hot);
 
   const ssrData = JSON.stringify(ssr.extractData());

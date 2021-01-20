@@ -1,12 +1,14 @@
 import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { endOfDay } from 'date-fns';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createMockStore, { MockStore } from 'redux-mock-store';
 
 import { CashRow } from './cash-row';
+import { TodayContext } from '~client/hooks';
 import * as listMutationHooks from '~client/hooks/mutations/list';
 import { State } from '~client/reducers';
-import { testState } from '~client/test-data';
+import { testNow, testState } from '~client/test-data';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 
 describe('<CashRow />', () => {
@@ -29,7 +31,9 @@ describe('<CashRow />', () => {
     const renderResult = render(
       <Provider store={store}>
         <GQLProviderMock>
-          <CashRow />
+          <TodayContext.Provider value={endOfDay(testNow)}>
+            <CashRow />
+          </TodayContext.Provider>
         </GQLProviderMock>
       </Provider>,
     );

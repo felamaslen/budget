@@ -1,13 +1,14 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Pie } from '../pie';
+import { usePriceChangeHighlight } from './hooks';
 import * as Styled from './styles';
 import type { FundProps } from './types';
+
 import { FundGainInfo } from '~client/components/fund-gain-info';
-import { highlightTimeMs } from '~client/components/fund-gain-info/styles';
 import { GraphFundItem } from '~client/components/graph-fund-item';
-import { TodayContext, useDebouncedState, useListCrudFunds, useUpdateEffect } from '~client/hooks';
+import { Pie } from '~client/components/pie';
+import { TodayContext, useDebouncedState, useListCrudFunds } from '~client/hooks';
 import {
   getViewSoldFunds,
   getFundsCachedValue,
@@ -18,16 +19,6 @@ import { colors } from '~client/styled/variables';
 import type { FundNative as Fund } from '~client/types';
 
 export type Props = { isMobile: boolean; item: Fund } & Partial<FundProps>;
-
-function getHighlight(yesterdayPrice: number, todayPrice: number): -1 | 1 | 0 {
-  if (!(todayPrice && yesterdayPrice)) {
-    return 0;
-  }
-  if (todayPrice > yesterdayPrice) {
-    return 1;
-  }
-  return todayPrice < yesterdayPrice ? -1 : 0;
-}
 
 export const FundRow: React.FC<Props> = ({
   isMobile,
@@ -42,26 +33,9 @@ export const FundRow: React.FC<Props> = ({
   const latestValue = useSelector(getFundsCachedValue.today(today));
 
   const scrapedPrice = gain?.price ?? 0;
-  const todayPrice = useSelector(getTodayPrices)[item.id] ?? 0;
+  const latestPrice = useSelector(getTodayPrices)[item.id] ?? 0;
 
-  const [highlight, setHighlight] = useState<-1 | 1 | 0>(0);
-  const highlightTimer = useRef<number>(0);
-  const highlightComparePrice = useRef<number>(scrapedPrice);
-
-  useEffect(() => {
-    highlightComparePrice.current = scrapedPrice;
-  }, [scrapedPrice]);
-
-  useUpdateEffect(() => {
-    setHighlight(getHighlight(highlightComparePrice.current, todayPrice));
-    highlightComparePrice.current = todayPrice;
-    highlightTimer.current = window.setTimeout(() => {
-      setHighlight(0);
-    }, highlightTimeMs + 100);
-    return (): void => {
-      clearTimeout(highlightTimer.current);
-    };
-  }, [todayPrice]);
+  const highlight = usePriceChangeHighlight(latestPrice, scrapedPrice);
 
   const { onUpdate } = useListCrudFunds();
 

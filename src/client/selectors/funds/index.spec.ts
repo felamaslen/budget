@@ -232,7 +232,7 @@ describe('Funds selectors', () => {
   describe('getCashInBank', () => {
     it('should get the easy-access cash total from the net worth data', () => {
       expect.assertions(1);
-      const today = new Date('2017-09-30T09:32:10+0100');
+      const today = new Date('2018-03-30T09:32:10+0100');
       expect(getCashInBank(today)(state)).toMatchInlineSnapshot(`1061095`);
     });
 
@@ -247,14 +247,14 @@ describe('Funds selectors', () => {
               item: 'fund 1',
               transactions: [
                 {
-                  date: new Date('2020-05-19'),
+                  date: new Date('2018-03-19'),
                   price: 123,
                   units: 473,
                   fees: 165,
                   taxes: 9965,
                 },
                 {
-                  date: new Date('2020-05-21'),
+                  date: new Date('2018-03-21'),
                   price: 125,
                   units: 91,
                   fees: 449,
@@ -271,7 +271,7 @@ describe('Funds selectors', () => {
           items: [
             {
               id: 1,
-              date: new Date('2020-05-09'),
+              date: new Date('2018-03-09'),
               item: 'Income 1',
               cost: 325600,
             },
@@ -283,13 +283,13 @@ describe('Funds selectors', () => {
           items: [
             {
               id: 1,
-              date: new Date('2020-05-07'),
+              date: new Date('2018-03-07'),
               item: 'Bill 1',
               cost: 175000,
             },
             {
               id: 2,
-              date: new Date('2020-05-04'),
+              date: new Date('2018-03-04'),
               item: 'Deleted bill',
               cost: 5644,
             },
@@ -301,7 +301,7 @@ describe('Funds selectors', () => {
           items: [
             {
               id: 1,
-              date: new Date('2020-05-02'),
+              date: new Date('2018-03-02'),
               item: 'Food 1',
               category: 'Food category 1',
               cost: 105,
@@ -315,7 +315,7 @@ describe('Funds selectors', () => {
           items: [
             {
               id: 1,
-              date: new Date('2020-05-06'),
+              date: new Date('2018-03-06'),
               item: 'General 1',
               category: 'General category 1',
               cost: 1776,
@@ -329,7 +329,7 @@ describe('Funds selectors', () => {
           items: [
             {
               id: 1,
-              date: new Date('2020-05-13'),
+              date: new Date('2018-03-13'),
               item: 'Some holiday item 1',
               category: 'Holiday 1',
               cost: 9994,
@@ -343,7 +343,7 @@ describe('Funds selectors', () => {
           items: [
             {
               id: 1,
-              date: new Date('2020-05-15'),
+              date: new Date('2018-03-15'),
               item: 'Some social item 1',
               category: 'Social 1',
               cost: 1293,
@@ -365,8 +365,8 @@ describe('Funds selectors', () => {
       `('should take away the cost of $item up to the current date', ({ dates, delta }) => {
         expect.assertions(1);
 
-        const date0 = new Date(`2020-05-${dates[0]}T09:56:10+0100`);
-        const date1 = new Date(`2020-05-${dates[1]}T09:56:10+0100`);
+        const date0 = new Date(`2018-03-${dates[0]}T09:56:10+0100`);
+        const date1 = new Date(`2018-03-${dates[1]}T09:56:10+0100`);
 
         const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
         const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
@@ -389,8 +389,8 @@ describe('Funds selectors', () => {
       it('should add the value of income up to the current date', () => {
         expect.assertions(1);
 
-        const date0 = new Date(`2020-05-08T09:56:10+0100`);
-        const date1 = new Date(`2020-05-09T09:56:10+0100`);
+        const date0 = new Date(`2018-03-08T09:56:10+0100`);
+        const date1 = new Date(`2018-03-09T09:56:10+0100`);
 
         const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
         const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
@@ -401,11 +401,11 @@ describe('Funds selectors', () => {
   });
 
   describe('getCashToInvest', () => {
-    const today = new Date('2017-09-07T16:32:10+0100');
+    const today = new Date('2018-03-07T16:32:10+0100');
 
     it('should get the difference between net worth ISA value and start-of-month stocks value', () => {
       expect.assertions(1);
-      expect(getCashToInvest(today)(state)).toMatchInlineSnapshot(`664985.6`);
+      expect(getCashToInvest(today)(state)).toMatchInlineSnapshot(`661996.8`);
     });
 
     describe('if the stock value has deviated in the current month', () => {
@@ -414,7 +414,7 @@ describe('Funds selectors', () => {
         [PageNonStandard.Funds]: {
           ...state[PageNonStandard.Funds],
           startTime: state[PageNonStandard.Funds].startTime,
-          cacheTimes: [...state[PageNonStandard.Funds].cacheTimes, 28623600 + 86400 * 3],
+          cacheTimes: [...state[PageNonStandard.Funds].cacheTimes, 44236920 + 86400 * 3],
           prices: {
             10: [
               {
@@ -431,7 +431,7 @@ describe('Funds selectors', () => {
 
         const cashToInvest = getCashToInvest(today)(stateWithDeviation);
 
-        expect(cashToInvest).toBe(664985.6);
+        expect(cashToInvest).toBe(661996.8);
       });
     });
   });

@@ -191,13 +191,37 @@ to {
 
 export type FundGainInfoProps = {
   isRow?: boolean;
+};
+
+export type HighlightProps = {
   highlight?: -1 | 1 | 0;
 };
 
 export const highlightTimeMs = 10000;
 
-export const FundGainInfo = styled.span<ProfitProps & SoldProps & FundGainInfoProps>(
-  ({ isRow, gain, isSold, highlight = 0 }) => css`
+export const PriceChangeHighlight = styled.div<HighlightProps>(
+  ({ highlight = 0 }) => css`
+    ${breakpoint(breakpoints.mobile)} {
+      position: relative;
+
+      &::after {
+        animation: ${priceChangePulse} ${highlightTimeMs}ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
+        background: ${profitColor(highlight)};
+        content: '';
+        display: ${highlight === 0 ? 'none' : 'block'};
+        height: 100%;
+        opacity: 0;
+        position: absolute;
+        width: 100%;
+      }
+    }
+  `,
+);
+
+export const FundGainInfo = styled(PriceChangeHighlight)<
+  ProfitProps & SoldProps & FundGainInfoProps
+>(
+  ({ isRow, gain, isSold }) => css`
     color: ${profitColor(gain)};
     width: ${isRow ? rem(180) : 'auto'};
 
@@ -208,7 +232,6 @@ export const FundGainInfo = styled.span<ProfitProps & SoldProps & FundGainInfoPr
     ${breakpoint(breakpoints.mobile)} {
       display: flex;
       flex: 0 0 ${rem(200)};
-      position: relative;
       z-index: 1;
 
       ${isSold &&
@@ -221,17 +244,6 @@ export const FundGainInfo = styled.span<ProfitProps & SoldProps & FundGainInfoPr
           font-weight: normal;
         }
       `}
-
-      &::after {
-        animation: ${priceChangePulse} ${highlightTimeMs}ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
-        background: ${profitColor(highlight)};
-        content: '';
-        display: ${highlight === 0 ? 'none' : 'block'};
-        height: 100%;
-        opacity: 0;
-        position: absolute;
-        width: 100%;
-      }
     }
   `,
 );

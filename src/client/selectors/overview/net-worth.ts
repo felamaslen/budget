@@ -335,9 +335,17 @@ export const getNetWorthTable = createSelector(
   (deriver, entries) => compose(withTableProps, deriver)(entries),
 );
 
-export const getLatestNetWorthAggregate = createSelector(
-  getNetWorthTable,
-  (netWorth) => netWorth[netWorth.length - 1]?.aggregate,
+export const getLatestNetWorthAggregate = moize(
+  (today: Date) =>
+    createSelector(
+      getNetWorthTable,
+      (netWorth) =>
+        netWorth
+          .slice()
+          .reverse()
+          .find(({ date }) => isSameMonth(date, today))?.aggregate,
+    ),
+  { maxSize: 1 },
 );
 
 export const assumedHousePriceInflation = 0.05;

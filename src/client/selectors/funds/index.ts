@@ -126,14 +126,14 @@ export const getFundsCost = moize(
 export const getCashInBank = moize(
   (today: Date) =>
     createSelector(
-      getLatestNetWorthAggregate,
+      getLatestNetWorthAggregate(today),
       getFundsCost(startOfDay(addDays(today, 1))),
       getFundsCost(startOfMonth(today)),
       getCostForMonthSoFar(today),
       (netWorth, fundsCostToday, fundsCostPreviousMonth, purchaseCostSoFar): number => {
         const cashTotalAtStartOfMonth = netWorth?.[Aggregate.cashEasyAccess] ?? 0;
         const fundsCost = fundsCostToday - fundsCostPreviousMonth;
-        return cashTotalAtStartOfMonth - fundsCost - purchaseCostSoFar;
+        return Math.max(0, cashTotalAtStartOfMonth - fundsCost - purchaseCostSoFar);
       },
     ),
   { maxSize: 1 },
@@ -142,12 +142,12 @@ export const getCashInBank = moize(
 export const getCashToInvest = moize(
   (today: Date) =>
     createSelector(
-      getLatestNetWorthAggregate,
+      getLatestNetWorthAggregate(today),
       getCashInBank(today),
       getStockValue(startOfMonth(today)),
       (netWorth, cashInBank, stockValue): number => {
         const stocksIncludingCash = netWorth?.[Aggregate.stocks] ?? 0;
-        return cashInBank + stocksIncludingCash - stockValue;
+        return Math.max(0, cashInBank + stocksIncludingCash - stockValue);
       },
     ),
   { maxSize: 1 },

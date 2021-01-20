@@ -4,6 +4,7 @@ import { rem } from 'polished';
 import { HeaderColumn } from './shared';
 
 export const DailyTotal = styled.span`
+  line-height: inherit;
   margin-left: ${rem(4)};
 `;
 

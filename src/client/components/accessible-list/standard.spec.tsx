@@ -271,9 +271,9 @@ describe('<AccessibleListStandard />', () => {
 
         @media only screen and (min-width: 500px) {
           .emotion-6 {
-            -webkit-flex: 0 0 11.25rem;
-            -ms-flex: 0 0 11.25rem;
-            flex: 0 0 11.25rem;
+            -webkit-flex: 0 0 9.375rem;
+            -ms-flex: 0 0 9.375rem;
+            flex: 0 0 9.375rem;
             border-right: 1px solid #ccc;
             height: 1.5rem;
             line-height: 1.5rem;
@@ -324,6 +324,7 @@ describe('<AccessibleListStandard />', () => {
           display: -ms-flexbox;
           display: flex;
           height: 1.875rem;
+          line-height: 1.5rem;
         }
 
         @media only screen and (min-width: 500px) {

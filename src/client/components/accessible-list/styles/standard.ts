@@ -14,6 +14,7 @@ export const StandardRow = styled(Row)<{
   isFuture?: boolean;
 }>(
   ({ isFuture }) => css`
+    line-height: ${rem(24)};
     ${!!isFuture && `opacity: 0.5;`}
   `,
 );

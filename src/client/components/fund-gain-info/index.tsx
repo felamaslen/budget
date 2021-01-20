@@ -18,7 +18,7 @@ export const formatOptionsRelative = { brackets: true, precision: 2 };
 type Props = {
   rowGains?: GainsForRow;
   isSold: boolean;
-} & Pick<Styled.FundGainInfoProps, 'highlight'>;
+} & Styled.HighlightProps;
 
 export const FundGainInfo: FC<Props> = ({ rowGains, isSold, highlight }) => {
   if (!rowGains) {

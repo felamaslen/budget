@@ -18,9 +18,9 @@ describe('<AppLogo />', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex: 0 0 3.4375rem;
-        -ms-flex: 0 0 3.4375rem;
-        flex: 0 0 3.4375rem;
+        -webkit-flex: 0 0 2rem;
+        -ms-flex: 0 0 2rem;
+        flex: 0 0 2rem;
         -webkit-box-flex-flow: row-reverse;
         -webkit-flex-flow: row-reverse;
         -ms-flex-flow: row-reverse;
@@ -70,31 +70,30 @@ describe('<AppLogo />', () => {
         -ms-flex-flow: row;
         flex-flow: row;
         height: 100%;
-        line-height: 55px;
-        font-family: Ubuntu,Georgia,serif;
+        line-height: 100%;
         font-weight: bold;
         position: relative;
       }
 
       .emotion-2::before {
         background-image: url(path/to/test/file);
-        -webkit-background-position: 0 -56px;
-        background-position: 0 -56px;
+        -webkit-background-position: -1px -59px;
+        background-position: -1px -59px;
         content: '';
         display: inline-block;
-        -webkit-flex: 0 0 28px;
-        -ms-flex: 0 0 28px;
-        flex: 0 0 28px;
-        height: 28px;
+        -webkit-flex: 0 0 1.75rem;
+        -ms-flex: 0 0 1.75rem;
+        flex: 0 0 1.75rem;
+        height: 1.75rem;
         margin-right: 0.5rem;
-        width: 28px;
+        width: 1.75rem;
       }
 
       @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
         .emotion-2::before {
           background-image: url(path/to/test/file);
-          -webkit-background-size: 252px 84px;
-          background-size: 252px 84px;
+          -webkit-background-size: 262px 88px;
+          background-size: 262px 88px;
         }
       }
 
@@ -112,12 +111,17 @@ describe('<AppLogo />', () => {
       }
 
       .emotion-6 {
-        -webkit-flex: 0 0 2.6875rem;
-        -ms-flex: 0 0 2.6875rem;
-        flex: 0 0 2.6875rem;
         font-size: 1.375rem;
-        line-height: 2.6875rem;
         margin: 0;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-6 {
+          -webkit-flex: 0 0 2.6875rem;
+          -ms-flex: 0 0 2.6875rem;
+          flex: 0 0 2.6875rem;
+          line-height: 2.6875rem;
+        }
       }
 
       <div>
@@ -199,9 +203,9 @@ describe('<AppLogo />', () => {
           display: -webkit-flex;
           display: -ms-flexbox;
           display: flex;
-          -webkit-flex: 0 0 3.4375rem;
-          -ms-flex: 0 0 3.4375rem;
-          flex: 0 0 3.4375rem;
+          -webkit-flex: 0 0 2rem;
+          -ms-flex: 0 0 2rem;
+          flex: 0 0 2rem;
           -webkit-box-flex-flow: row-reverse;
           -webkit-flex-flow: row-reverse;
           -ms-flex-flow: row-reverse;
@@ -251,31 +255,30 @@ describe('<AppLogo />', () => {
           -ms-flex-flow: row;
           flex-flow: row;
           height: 100%;
-          line-height: 55px;
-          font-family: Ubuntu,Georgia,serif;
+          line-height: 100%;
           font-weight: bold;
           position: relative;
         }
 
         .emotion-2::before {
           background-image: url(path/to/test/file);
-          -webkit-background-position: 0 -56px;
-          background-position: 0 -56px;
+          -webkit-background-position: -1px -59px;
+          background-position: -1px -59px;
           content: '';
           display: inline-block;
-          -webkit-flex: 0 0 28px;
-          -ms-flex: 0 0 28px;
-          flex: 0 0 28px;
-          height: 28px;
+          -webkit-flex: 0 0 1.75rem;
+          -ms-flex: 0 0 1.75rem;
+          flex: 0 0 1.75rem;
+          height: 1.75rem;
           margin-right: 0.5rem;
-          width: 28px;
+          width: 1.75rem;
         }
 
         @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
           .emotion-2::before {
             background-image: url(path/to/test/file);
-            -webkit-background-size: 252px 84px;
-            background-size: 252px 84px;
+            -webkit-background-size: 262px 88px;
+            background-size: 262px 88px;
           }
         }
 
@@ -293,12 +296,17 @@ describe('<AppLogo />', () => {
         }
 
         .emotion-6 {
-          -webkit-flex: 0 0 2.6875rem;
-          -ms-flex: 0 0 2.6875rem;
-          flex: 0 0 2.6875rem;
           font-size: 1.375rem;
-          line-height: 2.6875rem;
           margin: 0;
+        }
+
+        @media only screen and (min-width: 500px) {
+          .emotion-6 {
+            -webkit-flex: 0 0 2.6875rem;
+            -ms-flex: 0 0 2.6875rem;
+            flex: 0 0 2.6875rem;
+            line-height: 2.6875rem;
+          }
         }
 
         .emotion-8 {

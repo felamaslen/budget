@@ -52,6 +52,24 @@ describe('<FundGainInfo />', () => {
         width: 11.25rem;
       }
 
+      @media only screen and (min-width: 500px) {
+        .emotion-0 {
+          position: relative;
+        }
+
+        .emotion-0::after {
+          -webkit-animation: animation-0 10000ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
+          animation: animation-0 10000ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
+          background: #483be4;
+          content: '';
+          display: none;
+          height: 100%;
+          opacity: 0;
+          position: absolute;
+          width: 100%;
+        }
+      }
+
       @media only screen and (min-width: 350px) {
         .emotion-0 {
           width: 13.5rem;
@@ -67,20 +85,7 @@ describe('<FundGainInfo />', () => {
           -webkit-flex: 0 0 12.5rem;
           -ms-flex: 0 0 12.5rem;
           flex: 0 0 12.5rem;
-          position: relative;
           z-index: 1;
-        }
-
-        .emotion-0::after {
-          -webkit-animation: animation-0 10000ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
-          animation: animation-0 10000ms cubic-bezier(0.08, 0.89, 0.99, 0.71);
-          background: #483be4;
-          content: '';
-          display: none;
-          height: 100%;
-          opacity: 0;
-          position: absolute;
-          width: 100%;
         }
       }
 
@@ -338,7 +343,7 @@ describe('<FundGainInfo />', () => {
       }
 
       <div>
-        <span
+        <div
           class="emotion-0 emotion-1"
         >
           <span
@@ -346,12 +351,12 @@ describe('<FundGainInfo />', () => {
             style="background-color: rgb(255, 128, 30);"
           >
             <span
-              class="emotion-4 emotion-31"
+              class="emotion-4 emotion-5"
             >
               £5.6k
             </span>
             <span
-              class="emotion-6 emotion-30"
+              class="emotion-6 emotion-7"
             >
               <span
                 class="emotion-8 emotion-9"
@@ -383,7 +388,7 @@ describe('<FundGainInfo />', () => {
               </span>
             </span>
           </span>
-        </span>
+        </div>
       </div>
     `);
   });
