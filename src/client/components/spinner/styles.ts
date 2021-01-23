@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
+import { rem } from 'polished';
+import { breakpoint } from '~client/styled/mixins';
 
-import { colors, sizes } from '~client/styled/variables';
+import { breakpoints, colors, sizes } from '~client/styled/variables';
 
 export const Outer = styled.div`
   align-items: center;
@@ -11,7 +13,11 @@ export const Outer = styled.div`
   justify-content: center;
   left: 0;
   position: fixed;
-  top: ${sizes.navbarHeight}px;
+  top: ${rem(sizes.navbarHeightMobile)};
   width: 100%;
   z-index: 500;
+
+  ${breakpoint(breakpoints.mobile)} {
+    top: ${rem(sizes.navbarHeight)};
+  }
 `;

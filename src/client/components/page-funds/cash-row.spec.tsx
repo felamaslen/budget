@@ -49,7 +49,7 @@ describe('<CashRow />', () => {
   describe('when hovering over the cash value adjustment', () => {
     it('should render a preview box', () => {
       expect.assertions(4);
-      const previewText = 'Buy £6k of stock to adjust';
+      const previewText = 'Buy £8k of stock to adjust';
 
       const { getByText, queryByText } = setup();
 

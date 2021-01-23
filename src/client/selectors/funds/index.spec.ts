@@ -230,10 +230,10 @@ describe('Funds selectors', () => {
   });
 
   describe('getCashInBank', () => {
-    it('should get the easy-access cash total from the net worth data', () => {
+    it('should get the easy-access cash total from the previous month net worth data', () => {
       expect.assertions(1);
       const today = new Date('2018-03-30T09:32:10+0100');
-      expect(getCashInBank(today)(state)).toMatchInlineSnapshot(`1061095`);
+      expect(getCashInBank(today)(state)).toBe(Math.round(10324 + 37.5 * 0.035 * 100 + 1296523));
     });
 
     describe('when in the middle of the month', () => {
@@ -377,8 +377,8 @@ describe('Funds selectors', () => {
       it('should exclude optimistically deleted items', () => {
         expect.assertions(1);
 
-        const date0 = new Date(`2020-05-03T09:56:10+0100`);
-        const date1 = new Date(`2020-05-04T09:56:10+0100`);
+        const date0 = new Date(`2020-03-03T09:56:10+0100`);
+        const date1 = new Date(`2020-03-04T09:56:10+0100`);
 
         const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
         const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
@@ -401,7 +401,7 @@ describe('Funds selectors', () => {
   });
 
   describe('getCashToInvest', () => {
-    const today = new Date('2018-03-07T16:32:10+0100');
+    const today = new Date('2018-04-07T16:32:10+0100');
 
     it('should get the difference between net worth ISA value and start-of-month stocks value', () => {
       expect.assertions(1);
@@ -414,7 +414,10 @@ describe('Funds selectors', () => {
         [PageNonStandard.Funds]: {
           ...state[PageNonStandard.Funds],
           startTime: state[PageNonStandard.Funds].startTime,
-          cacheTimes: [...state[PageNonStandard.Funds].cacheTimes, 44236920 + 86400 * 3],
+          cacheTimes: [
+            ...state[PageNonStandard.Funds].cacheTimes,
+            getUnixTime(new Date('2018-04-03')) - state[PageNonStandard.Funds].startTime,
+          ],
           prices: {
             10: [
               {

@@ -1,9 +1,11 @@
 import addDays from 'date-fns/addDays';
 import endOfDay from 'date-fns/endOfDay';
+import endOfMonth from 'date-fns/endOfMonth';
 import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
 import startOfDay from 'date-fns/startOfDay';
 import startOfMonth from 'date-fns/startOfMonth';
+import subMonths from 'date-fns/subMonths';
 import humanizeDuration from 'humanize-duration';
 import moize from 'moize';
 import { createSelector } from 'reselect';
@@ -126,7 +128,7 @@ export const getFundsCost = moize(
 export const getCashInBank = moize(
   (today: Date) =>
     createSelector(
-      getLatestNetWorthAggregate(today),
+      getLatestNetWorthAggregate(subMonths(endOfMonth(today), 1)),
       getFundsCost(startOfDay(addDays(today, 1))),
       getFundsCost(startOfMonth(today)),
       getCostForMonthSoFar(today),
