@@ -81,7 +81,6 @@
     "axios": "^0.21.1",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.17.2",
-    "canvas": "^2.6.1",
     "compression": "^1.7.4",
     "connect-redis": "^5.0.0",
     "cookie-parser": "^1.4.5",

@@ -66,6 +66,7 @@ export type Query = {
   fundHistory?: Maybe<FundHistory>;
   overview?: Maybe<Overview>;
   overviewOld?: Maybe<OverviewOld>;
+  overviewPreview?: Maybe<OverviewPreview>;
   readFunds?: Maybe<ReadFundsResponse>;
   readList?: Maybe<ListReadResponse>;
   readListExtended?: Maybe<ListReadResponseExtended>;
@@ -109,6 +110,12 @@ export type QueryOverviewArgs = {
 
 export type QueryOverviewOldArgs = {
   now?: Maybe<Scalars['Date']>;
+};
+
+
+export type QueryOverviewPreviewArgs = {
+  category: MonthlyCategory;
+  date: Scalars['Date'];
 };
 
 
@@ -762,6 +769,16 @@ export type NetWorthDeleted = {
   id: Scalars['Int'];
 };
 
+export enum MonthlyCategory {
+  Stocks = 'stocks',
+  Income = 'income',
+  Bills = 'bills',
+  Food = 'food',
+  General = 'general',
+  Holiday = 'holiday',
+  Social = 'social'
+}
+
 export type Monthly = {
   stocks: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
@@ -790,6 +807,11 @@ export type OverviewOld = {
   options: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   spending: Array<Scalars['Int']>;
+};
+
+export type OverviewPreview = {
+  startDate: Scalars['Date'];
+  values: Array<Scalars['Int']>;
 };
 
 export enum SearchPage {
@@ -1012,9 +1034,11 @@ export type ResolversTypes = {
   NetWorthEntryCreated: ResolverTypeWrapper<NetWorthEntryCreated>;
   NetWorthEntryUpdated: ResolverTypeWrapper<NetWorthEntryUpdated>;
   NetWorthDeleted: ResolverTypeWrapper<NetWorthDeleted>;
+  MonthlyCategory: MonthlyCategory;
   Monthly: ResolverTypeWrapper<Monthly>;
   Overview: ResolverTypeWrapper<Overview>;
   OverviewOld: ResolverTypeWrapper<OverviewOld>;
+  OverviewPreview: ResolverTypeWrapper<OverviewPreview>;
   SearchPage: SearchPage;
   SearchItem: SearchItem;
   SearchResult: ResolverTypeWrapper<SearchResult>;
@@ -1109,6 +1133,7 @@ export type ResolversParentTypes = {
   Monthly: Monthly;
   Overview: Overview;
   OverviewOld: OverviewOld;
+  OverviewPreview: OverviewPreview;
   SearchResult: SearchResult;
   ReceiptCategory: ReceiptCategory;
   User: User;
@@ -1151,6 +1176,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   fundHistory?: Resolver<Maybe<ResolversTypes['FundHistory']>, ParentType, ContextType, RequireFields<QueryFundHistoryArgs, never>>;
   overview?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType, RequireFields<QueryOverviewArgs, never>>;
   overviewOld?: Resolver<Maybe<ResolversTypes['OverviewOld']>, ParentType, ContextType, RequireFields<QueryOverviewOldArgs, never>>;
+  overviewPreview?: Resolver<Maybe<ResolversTypes['OverviewPreview']>, ParentType, ContextType, RequireFields<QueryOverviewPreviewArgs, 'category' | 'date'>>;
   readFunds?: Resolver<Maybe<ResolversTypes['ReadFundsResponse']>, ParentType, ContextType>;
   readList?: Resolver<Maybe<ResolversTypes['ListReadResponse']>, ParentType, ContextType, RequireFields<QueryReadListArgs, 'page'>>;
   readListExtended?: Resolver<Maybe<ResolversTypes['ListReadResponseExtended']>, ParentType, ContextType, RequireFields<QueryReadListExtendedArgs, 'page'>>;
@@ -1598,6 +1624,12 @@ export type OverviewOldResolvers<ContextType = Context, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type OverviewPreviewResolvers<ContextType = Context, ParentType extends ResolversParentTypes['OverviewPreview'] = ResolversParentTypes['OverviewPreview']> = {
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  values?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type SearchResultResolvers<ContextType = Context, ParentType extends ResolversParentTypes['SearchResult'] = ResolversParentTypes['SearchResult']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   searchTerm?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1702,6 +1734,7 @@ export type Resolvers<ContextType = Context> = {
   Monthly?: MonthlyResolvers<ContextType>;
   Overview?: OverviewResolvers<ContextType>;
   OverviewOld?: OverviewOldResolvers<ContextType>;
+  OverviewPreview?: OverviewPreviewResolvers<ContextType>;
   SearchResult?: SearchResultResolvers<ContextType>;
   ReceiptCategory?: ReceiptCategoryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;

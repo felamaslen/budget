@@ -1,56 +1,51 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as Styled from './styles';
 import HoverCost from '~client/components/hover-cost';
-import { Query as PreviewQuery } from '~client/components/overview-preview';
-import { isStandardListPage } from '~client/constants/data';
+import { isMonthlyCategory, OverviewPreview } from '~client/components/overview-preview';
 import type { OverviewTableRow, OverviewTableColumn } from '~client/types';
 
 type Props = {
   row: OverviewTableRow;
   columns: OverviewTableColumn[];
-  setPreviewQuery: (query: React.SetStateAction<PreviewQuery | null>) => void;
 };
 
-type PropsCell = Styled.PropsCell &
-  Pick<Props, 'setPreviewQuery'> &
-  Pick<OverviewTableRow, 'year' | 'month'>;
+type PropsCell = Styled.PropsCell & Pick<OverviewTableRow, 'year' | 'month'>;
 
-const Cell: React.FC<PropsCell> = ({ setPreviewQuery, year, month, cellColor, ...props }) => {
+const Cell: React.FC<PropsCell> = ({ year, month, cellColor, children, ...props }) => {
+  const [showPreview, setShowPreview] = useState<boolean>(false);
+  const timer = useRef<number>(0);
   const onHover = useCallback(() => {
-    setPreviewQuery((last) => {
-      if (!isStandardListPage(props.column)) {
-        return null;
-      }
-      return last?.year === year && last?.month === month && last?.category === props.column
-        ? last
-        : { year, month, category: props.column };
-    });
-  }, [setPreviewQuery, year, month, props.column]);
+    timer.current = window.setTimeout(() => setShowPreview(true), 100);
+  }, []);
 
   const onBlur = useCallback(() => {
-    setPreviewQuery(null);
-  }, [setPreviewQuery]);
+    clearTimeout(timer.current);
+    setShowPreview(false);
+  }, []);
+
+  useEffect(() => (): void => clearTimeout(timer.current), []);
 
   return (
     <Styled.Cell
       style={{ backgroundColor: cellColor ?? undefined }}
       {...props}
-      onMouseOver={onHover}
       onFocus={onHover}
-      onMouseMove={onHover}
-      onMouseLeave={onBlur}
       onBlur={onBlur}
-    />
+    >
+      {children}
+      {showPreview && isMonthlyCategory(props.column) && (
+        <OverviewPreview category={props.column} year={year} month={month} />
+      )}
+    </Styled.Cell>
   );
 };
 
 export const OverviewTableCells: React.FC<Props> = ({
   columns,
   row: { year, month, monthText, cells, past, active, future },
-  setPreviewQuery,
 }) => (
   <Styled.Row past={past} active={active} future={future}>
     <Styled.Cell key="month" column="month" past={past} active={active} future={future}>
@@ -61,7 +56,6 @@ export const OverviewTableCells: React.FC<Props> = ({
         key={column}
         year={year}
         month={month}
-        setPreviewQuery={setPreviewQuery}
         column={column}
         cellColor={cells[column].rgb}
         past={past}

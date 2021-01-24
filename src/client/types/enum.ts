@@ -8,6 +8,7 @@ export {
   FundPeriod,
   PageListStandard,
   PageListExtended,
+  MonthlyCategory,
   NetWorthCategoryType,
   SearchPage,
   SearchItem,

@@ -8,7 +8,6 @@ export * from './mutations';
 export * from './offline';
 export * from './persist';
 export * from './queries';
-export * from './request';
 export * from './resize';
 export * from './subscriptions';
 export * from './time';

@@ -1,6 +1,16 @@
 import gql from 'graphql-tag';
 
 export const overviewSchema = gql`
+  enum MonthlyCategory {
+    stocks
+    income
+    bills
+    food
+    general
+    holiday
+    social
+  }
+
   type Monthly {
     stocks: [Int!]!
     income: [Int!]!
@@ -31,8 +41,15 @@ export const overviewSchema = gql`
     spending: [Int!]!
   }
 
+  type OverviewPreview {
+    startDate: Date!
+    values: [Int!]!
+  }
+
   extend type Query {
     overview(now: Date): Overview
     overviewOld(now: Date): OverviewOld
+
+    overviewPreview(category: MonthlyCategory!, date: Date!): OverviewPreview
   }
 `;

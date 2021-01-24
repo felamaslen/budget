@@ -1,89 +1,81 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import addDays from 'date-fns/addDays';
+import endOfMonth from 'date-fns/endOfMonth';
+import getUnixTime from 'date-fns/getUnixTime';
+import startOfDay from 'date-fns/startOfDay';
+import { useCallback, useMemo } from 'react';
 
 import * as Styled from './styles';
-import { API_PREFIX } from '~client/constants/data';
-import { SendRequest, useCancellableRequest } from '~client/hooks';
-import type { PageListCost } from '~client/types';
+import { LineGraph, TimeAxes } from '~client/components/graph';
+import type { PropsCell } from '~client/components/overview-table/styles';
+import { useOverviewPreviewQuery } from '~client/hooks/gql';
+import { toISO } from '~client/modules/format';
+import { colors } from '~client/styled/variables';
+import { DrawProps, Line, Point, Range } from '~client/types';
+import { MonthlyCategory } from '~client/types/enum';
 
-export type Query = {
-  year: number;
-  month: number;
-  category: PageListCost;
-};
+export const isMonthlyCategory = (
+  category: PropsCell['column'] | MonthlyCategory,
+): category is MonthlyCategory =>
+  (Object.values(MonthlyCategory) as string[]).includes(category as string);
 
 type Props = {
-  query: Query | null;
+  category: MonthlyCategory;
+  year: number;
+  month: number;
 };
 
-const sendRequest: SendRequest<Query> = (query: Query) => {
-  const url = new URL(`${window.location.protocol}//${window.location.host}${API_PREFIX}/preview`);
-  url.search = new URLSearchParams({
-    year: String(query.year),
-    month: String(query.month),
-    category: query.category,
-    width: String(Styled.width),
-    height: String(Styled.height),
-    scale: '2',
-  }).toString();
-  return { info: url.toString() };
-};
+function getRanges(startDate: Date, line: Line): Range {
+  const minY = line.data.reduce<number>((last, [, value]) => Math.min(last, value), Infinity);
+  const maxY = line.data.reduce<number>((last, [, value]) => Math.max(last, value), -Infinity);
 
-export const OverviewPreview: React.FC<Props> = ({ query }) => {
-  const [url, setUrl] = useState<string | null>(null);
+  const minX = getUnixTime(startDate);
+  const maxX = getUnixTime(startOfDay(endOfMonth(startDate)));
 
-  const cancelled = useRef<boolean>(false);
-  const handleResponse = useCallback(async (res: Response) => {
-    const data = await res.arrayBuffer();
-    if (cancelled.current) {
-      return;
-    }
-    const image = btoa(
-      new Uint8Array(data).reduce((last, byte) => last + String.fromCharCode(byte), ''),
-    );
-    setUrl(`data:image/png;base64,${image}`);
-  }, []);
-  useEffect(
-    () => (): void => {
-      cancelled.current = true;
-    },
-    [],
-  );
+  return { minX, maxX, minY, maxY };
+}
 
-  const onClear = useCallback(() => {
-    setUrl(null);
-  }, []);
-
-  const loading = useCancellableRequest<Query | null, Query>({
-    query,
-    sendRequest,
-    handleResponse,
-    onClear,
+export const OverviewPreview: React.FC<Props> = ({ category, year, month }) => {
+  const [{ data }] = useOverviewPreviewQuery({
+    variables: { category, date: toISO(new Date(year, month - 1)) },
   });
 
-  const [position, setPosition] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
-  const hasQuery = !!query;
-  useEffect(() => {
-    const listener = (event: MouseEvent): void => {
-      setPosition({ left: event.pageX, top: event.pageY + 24 });
-    };
-    if (hasQuery) {
-      window.addEventListener('mousemove', listener);
-      return (): void => window.removeEventListener('mousemove', listener);
-    }
-    return (): void => {
-      // pass
-    };
-  }, [hasQuery]);
+  const startDate = useMemo(() => new Date(data?.overviewPreview?.startDate ?? new Date()), [data]);
 
-  if (!url && !loading) {
+  const lines = useMemo<Line[]>(
+    () => [
+      {
+        key: `overview-preview-${category}-${startDate.toISOString()}`,
+        name: 'Overview preview',
+        data: (data?.overviewPreview?.values ?? []).map<Point>((value, index) => [
+          getUnixTime(addDays(startDate, index)),
+          value,
+        ]),
+        color: colors.black,
+        smooth: false,
+        strokeWidth: 2,
+      },
+    ],
+    [data, category, startDate],
+  );
+
+  const ranges = useMemo<Range>(() => getRanges(startDate, lines[0]), [lines, startDate]);
+
+  const BeforeLines = useCallback<React.FC<DrawProps>>((props) => <TimeAxes {...props} />, []);
+
+  if (ranges.minY === ranges.maxY || ranges.maxY < 0) {
     return null;
   }
-
   return (
-    <Styled.Preview style={position}>
-      <Styled.ImageContainer>{url && <img src={url} alt="Preview" />}</Styled.ImageContainer>
+    <Styled.Preview>
+      <LineGraph
+        lines={lines}
+        {...ranges}
+        width={Styled.width}
+        height={Styled.height}
+        BeforeLines={BeforeLines}
+      />
     </Styled.Preview>
   );
 };

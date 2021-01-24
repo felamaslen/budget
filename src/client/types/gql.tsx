@@ -71,6 +71,7 @@ export type Query = {
   fundHistory?: Maybe<FundHistory>;
   overview?: Maybe<Overview>;
   overviewOld?: Maybe<OverviewOld>;
+  overviewPreview?: Maybe<OverviewPreview>;
   readFunds?: Maybe<ReadFundsResponse>;
   readList?: Maybe<ListReadResponse>;
   readListExtended?: Maybe<ListReadResponseExtended>;
@@ -114,6 +115,12 @@ export type QueryOverviewArgs = {
 
 export type QueryOverviewOldArgs = {
   now?: Maybe<Scalars['Date']>;
+};
+
+
+export type QueryOverviewPreviewArgs = {
+  category: MonthlyCategory;
+  date: Scalars['Date'];
 };
 
 
@@ -815,6 +822,16 @@ export type NetWorthDeleted = {
   id: Scalars['Int'];
 };
 
+export enum MonthlyCategory {
+  Stocks = 'stocks',
+  Income = 'income',
+  Bills = 'bills',
+  Food = 'food',
+  General = 'general',
+  Holiday = 'holiday',
+  Social = 'social'
+}
+
 export type Monthly = {
   __typename?: 'Monthly';
   stocks: Array<Scalars['Int']>;
@@ -846,6 +863,12 @@ export type OverviewOld = {
   options: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   spending: Array<Scalars['Int']>;
+};
+
+export type OverviewPreview = {
+  __typename?: 'OverviewPreview';
+  startDate: Scalars['Date'];
+  values: Array<Scalars['Int']>;
 };
 
 export enum SearchPage {
@@ -1457,6 +1480,20 @@ export type OverviewOldQuery = (
   & { overviewOld?: Maybe<(
     { __typename?: 'OverviewOld' }
     & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'cashOther' | 'investments' | 'homeEquity' | 'options' | 'netWorth' | 'income' | 'spending'>
+  )> }
+);
+
+export type OverviewPreviewQueryVariables = Exact<{
+  category: MonthlyCategory;
+  date: Scalars['Date'];
+}>;
+
+
+export type OverviewPreviewQuery = (
+  { __typename?: 'Query' }
+  & { overviewPreview?: Maybe<(
+    { __typename?: 'OverviewPreview' }
+    & Pick<OverviewPreview, 'startDate' | 'values'>
   )> }
 );
 
@@ -2374,6 +2411,18 @@ export const OverviewOldDocument = gql`
 
 export function useOverviewOldQuery(options: Omit<Urql.UseQueryArgs<OverviewOldQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<OverviewOldQuery>({ query: OverviewOldDocument, ...options });
+};
+export const OverviewPreviewDocument = gql`
+    query OverviewPreview($category: MonthlyCategory!, $date: Date!) {
+  overviewPreview(category: $category, date: $date) {
+    startDate
+    values
+  }
+}
+    `;
+
+export function useOverviewPreviewQuery(options: Omit<Urql.UseQueryArgs<OverviewPreviewQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<OverviewPreviewQuery>({ query: OverviewPreviewDocument, ...options });
 };
 export const SearchSuggestionsDocument = gql`
     query SearchSuggestions($page: SearchPage!, $column: SearchItem!, $searchTerm: String!, $numResults: Int) {

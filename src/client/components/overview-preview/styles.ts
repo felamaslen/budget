@@ -2,23 +2,17 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { colors } from '~client/styled/variables';
 
-export const width = 320;
-export const height = 200;
+export const width = 204;
+export const height = 104;
 
 export const Preview = styled.div`
   box-shadow: 0 2px 6px ${colors.shadow.dark};
+  font-weight: normal;
   height: ${rem(height)};
+  left: 0;
   opacity: 0.8;
-  position: fixed;
+  position: absolute;
+  top: 100%;
   width: ${rem(width)};
-`;
-
-export const ImageContainer = styled.div`
-  background: ${colors.white};
-
-  &,
-  img {
-    height: 100%;
-    width: 100%;
-  }
+  z-index: 2;
 `;
