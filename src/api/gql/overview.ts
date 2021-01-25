@@ -4,6 +4,7 @@ export const overviewSchema = gql`
   enum MonthlyCategory {
     stocks
     income
+    spending
     bills
     food
     general

@@ -197,7 +197,7 @@ export async function selectFundHistory(
           sql`fct.cid`,
           sql`fct.time`,
           sql`array_agg(funds.id ORDER BY funds.date DESC) AS id`,
-          sql`array_agg(fc.price ORDER BY funds.date DESC) AS price`,
+          sql`array_agg(COALESCE(fc.price, 0) ORDER BY funds.date DESC) AS price`,
           sql`row_number() OVER (ORDER BY time) AS row_num`,
         ],
         sql`, `,
@@ -228,6 +228,25 @@ export async function selectFundHistory(
   )}
   `);
   return results.rows.map(({ id, time, price }) => ({ id, time, price }));
+}
+
+export type FundHistoryIndividualRow = { date: Date; price: number };
+
+export async function selectIndividualFullFundHistory(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  id: number,
+): Promise<readonly FundHistoryIndividualRow[]> {
+  const results = await db.query<FundHistoryIndividualRow>(sql`
+  SELECT fct.time AS date, fc.price
+  FROM funds f
+  INNER JOIN fund_scrape fs ON fs.item = f.item
+  INNER JOIN fund_cache fc ON fc.fid = fs.fid
+  INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
+  WHERE f.id = ${id} AND f.uid = ${uid}
+  ORDER BY fct.time
+  `);
+  return results.rows;
 }
 
 export async function selectCashTarget(

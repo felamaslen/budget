@@ -5,11 +5,12 @@ import PricesWorker from 'worker-loader!../../workers/prices'; // eslint-disable
 import { todayPricesFetched } from '~client/actions';
 import { highlightTimeMs } from '~client/components/fund-gain-info/styles';
 import { ApiContext, useUpdateEffect } from '~client/hooks';
+import { isSold } from '~client/modules/data';
 import { getGenericFullSymbol } from '~client/modules/finance';
 import { isServerSide } from '~client/modules/ssr';
 import { getFundsRows } from '~client/selectors';
 import type { FundQuotes } from '~client/types';
-import type { StockPricesQuery } from '~client/types/gql';
+import { useStockPricesQuery } from '~client/types/gql';
 
 const worker = isServerSide ? undefined : new PricesWorker();
 
@@ -22,6 +23,7 @@ export function useTodayPrices(): void {
   const codes = useMemo<string[]>(
     () =>
       funds
+        .filter(({ transactions }) => !isSold(transactions))
         .map(({ item }) => getGenericFullSymbol(item))
         .filter((code: string | null): code is string => code !== null),
     [funds],
@@ -34,11 +36,20 @@ export function useTodayPrices(): void {
     };
   }, [apiKey, codes]);
 
-  const [prices, setPrices] = useState<StockPricesQuery | undefined>();
+  const [{ data: prices }, fetchPrices] = useStockPricesQuery({
+    variables: { codes },
+    pause: true,
+    requestPolicy: 'network-only',
+  });
 
+  const haveCodes = codes.length > 0;
   useEffect(() => {
     if (worker) {
-      worker.onmessage = (event: MessageEvent<StockPricesQuery>): void => setPrices(event.data);
+      worker.onmessage = (): void => {
+        if (haveCodes) {
+          fetchPrices();
+        }
+      };
     }
 
     return (): void => {
@@ -46,7 +57,7 @@ export function useTodayPrices(): void {
         worker.onmessage = null;
       }
     };
-  }, []);
+  }, [fetchPrices, haveCodes]);
 
   useEffect(() => {
     if (prices) {

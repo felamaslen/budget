@@ -88,7 +88,7 @@ export function getGenericFullSymbol(name: string): string | null {
     return null;
   }
   const [, , symbol, extra] = matched;
-  return `${symbol}${extra}`;
+  return `${symbol}${extra || ''}`;
 }
 
 export const abbreviateFundName = moize((name: string): string => {

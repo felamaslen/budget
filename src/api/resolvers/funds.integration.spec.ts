@@ -11,6 +11,7 @@ import {
   CrudResponseUpdate,
   Fund,
   FundHistory,
+  FundHistoryIndividual,
   FundInput,
   FundPrices,
   Maybe,
@@ -20,6 +21,7 @@ import {
   MutationDeleteFundArgs,
   Query,
   QueryFundHistoryArgs,
+  QueryFundHistoryIndividualArgs,
   RawDate,
   Transaction,
   UpdatedFundAllocationTargets,
@@ -594,6 +596,63 @@ describe('Funds resolver', () => {
             ],
           }),
         ]),
+      );
+    });
+  });
+
+  describe('fundHistoryIndividual', () => {
+    const query = gql`
+      query FundHistoryIndividual($id: NonNegativeInt!) {
+        fundHistoryIndividual(id: $id) {
+          values {
+            date
+            price
+          }
+        }
+      }
+    `;
+
+    const setup = async (): Promise<Maybe<FundHistoryIndividual>> => {
+      const [fundId] = await createFunds([fundInput]);
+      const {
+        rows: [{ fid }],
+      } = await app.db.raw<{ rows: { fid: number }[] }>(
+        `
+        INSERT INTO fund_scrape (broker, item) VALUES ('generic', ?)
+        ON CONFLICT (broker, item) DO UPDATE set broker = excluded.broker
+        RETURNING fid
+        `,
+        [fundInput.item],
+      );
+
+      const [cid1, cid2] = await app
+        .db('fund_cache_time')
+        .insert([{ time: new Date('2020-04-20T11:20:31Z') }, { time: new Date('2020-04-21') }])
+        .returning('cid');
+
+      await app.db('fund_cache').insert([
+        { fid, cid: cid1, price: 441.52 },
+        { fid, cid: cid2, price: 436.81 },
+      ]);
+
+      const res = await app.authGqlClient.query<Query, QueryFundHistoryIndividualArgs>({
+        query,
+        variables: { id: fundId },
+      });
+      return res.data.fundHistoryIndividual ?? null;
+    };
+
+    it('should return the full list of prices with UNIX timestamps', async () => {
+      expect.assertions(1);
+      const res = await setup();
+
+      expect(res).toStrictEqual(
+        expect.objectContaining<FundHistoryIndividual>({
+          values: [
+            { date: getUnixTime(new Date('2020-04-20T11:20:31Z')), price: 441.52 },
+            { date: getUnixTime(new Date('2020-04-21')), price: 436.81 },
+          ].map(expect.objectContaining),
+        }),
       );
     });
   });

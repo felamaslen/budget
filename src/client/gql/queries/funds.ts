@@ -19,3 +19,14 @@ export const StockPrices = gql`
     }
   }
 `;
+
+export const FundHistoryIndividual = gql`
+  query FundHistoryIndividual($id: NonNegativeInt!) {
+    fundHistoryIndividual(id: $id) {
+      values {
+        date
+        price
+      }
+    }
+  }
+`;

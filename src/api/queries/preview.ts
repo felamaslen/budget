@@ -59,10 +59,10 @@ export async function selectPreviewRowsStocks(
         SELECT ${sql.join(
           [
             sql`fct.cid`,
-            sql`dates.date`,
+            sql`dates.start_date AS date`,
             sql`
             row_number() OVER (
-              PARTITION BY dates.date
+              PARTITION BY dates.start_date
               ORDER BY fct.time DESC
             ) AS scrape_num_by_day
             `,
@@ -73,7 +73,7 @@ export async function selectPreviewRowsStocks(
         INNER JOIN (
           SELECT cid, time
           FROM fund_cache_time fct
-        ) fct ON fct.time::date <= dates.date
+        ) fct ON fct.time::date <= dates.start_date
       ) b
       WHERE b.scrape_num_by_day = 1
       ORDER BY b.date DESC

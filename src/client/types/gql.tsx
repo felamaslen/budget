@@ -69,6 +69,7 @@ export type Query = {
   cashAllocationTarget?: Maybe<Scalars['NonNegativeInt']>;
   config?: Maybe<AppConfig>;
   fundHistory?: Maybe<FundHistory>;
+  fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
   overview?: Maybe<Overview>;
   overviewOld?: Maybe<OverviewOld>;
   overviewPreview?: Maybe<OverviewPreview>;
@@ -105,6 +106,11 @@ export type QueryAnalysisDeepArgs = {
 export type QueryFundHistoryArgs = {
   period?: Maybe<FundPeriod>;
   length?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+
+export type QueryFundHistoryIndividualArgs = {
+  id: Scalars['NonNegativeInt'];
 };
 
 
@@ -242,6 +248,17 @@ export type FundHistory = {
   prices: Array<FundPrices>;
   annualisedFundReturns: Scalars['Float'];
   overviewCost: Array<Scalars['Int']>;
+};
+
+export type FundValueIndividual = {
+  __typename?: 'FundValueIndividual';
+  date: Scalars['Int'];
+  price: Scalars['NonNegativeFloat'];
+};
+
+export type FundHistoryIndividual = {
+  __typename?: 'FundHistoryIndividual';
+  values: Array<FundValueIndividual>;
 };
 
 export type TargetDelta = {
@@ -825,6 +842,7 @@ export type NetWorthDeleted = {
 export enum MonthlyCategory {
   Stocks = 'stocks',
   Income = 'income',
+  Spending = 'spending',
   Bills = 'bills',
   Food = 'food',
   General = 'general',
@@ -1339,6 +1357,22 @@ export type StockPricesQuery = (
     & { prices: Array<(
       { __typename?: 'StockPrice' }
       & Pick<StockPrice, 'code' | 'price'>
+    )> }
+  )> }
+);
+
+export type FundHistoryIndividualQueryVariables = Exact<{
+  id: Scalars['NonNegativeInt'];
+}>;
+
+
+export type FundHistoryIndividualQuery = (
+  { __typename?: 'Query' }
+  & { fundHistoryIndividual?: Maybe<(
+    { __typename?: 'FundHistoryIndividual' }
+    & { values: Array<(
+      { __typename?: 'FundValueIndividual' }
+      & Pick<FundValueIndividual, 'date' | 'price'>
     )> }
   )> }
 );
@@ -2220,6 +2254,20 @@ export const StockPricesDocument = gql`
 
 export function useStockPricesQuery(options: Omit<Urql.UseQueryArgs<StockPricesQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<StockPricesQuery>({ query: StockPricesDocument, ...options });
+};
+export const FundHistoryIndividualDocument = gql`
+    query FundHistoryIndividual($id: NonNegativeInt!) {
+  fundHistoryIndividual(id: $id) {
+    values {
+      date
+      price
+    }
+  }
+}
+    `;
+
+export function useFundHistoryIndividualQuery(options: Omit<Urql.UseQueryArgs<FundHistoryIndividualQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<FundHistoryIndividualQuery>({ query: FundHistoryIndividualDocument, ...options });
 };
 export const InitialDocument = gql`
     query Initial($fundPeriod: FundPeriod, $fundLength: NonNegativeInt) {

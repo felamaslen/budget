@@ -4,65 +4,19 @@ const initialFetchDelayMs = 5000;
 // eslint-disable-next-line no-restricted-globals
 const ctx: Worker = (self as unknown) as Worker;
 
-type ActionStart = {
-  type: 'start';
-  payload: {
-    apiKey: string;
-    codes: string[];
-  };
-};
-
-type ActionStop = {
-  type: 'stop';
-};
-
-type Action = ActionStart | ActionStop;
-
-async function fetchPrices({ apiKey, codes }: ActionStart['payload']): Promise<void> {
-  if (codes.length <= 0) {
-    return;
-  }
-
-  try {
-    const result = await fetch('/graphql', {
-      cache: 'no-cache',
-      method: 'POST',
-      body: JSON.stringify({
-        query: `
-          query StockPrices($codes: [String!]!) {
-            stockPrices(codes: $codes) {
-              prices {
-                code
-                price
-              }
-              refreshTime
-            }
-          }
-        `,
-        variables: { codes },
-      }),
-      headers: {
-        Authorization: apiKey,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const body = await result.json();
-    ctx.postMessage(body.data);
-  } catch (err) {
-    ctx.onerror?.(err);
-  }
+function fetchPrices(): void {
+  ctx.postMessage('Fetch!');
 }
 
 let timer: NodeJS.Timeout;
 let interval: NodeJS.Timeout;
 
-function startFetching(payload: ActionStart['payload']): void {
+function startFetching(): void {
   clearTimeout(timer);
-  timer = setTimeout(async () => {
-    await fetchPrices(payload);
-    interval = setInterval(async () => {
-      await fetchPrices(payload);
+  timer = setTimeout(() => {
+    fetchPrices();
+    interval = setInterval(() => {
+      fetchPrices();
     }, fetchIntervalMs);
   }, initialFetchDelayMs);
 }
@@ -72,13 +26,21 @@ function stopFetching(): void {
   clearInterval(interval);
 }
 
+type ActionStart = {
+  type: 'start';
+};
+type ActionStop = {
+  type: 'stop';
+};
+type Action = ActionStart | ActionStop;
+
 ctx.addEventListener(
   'message',
   async (event: MessageEvent<Action>): Promise<void> => {
     const action = event.data;
     switch (action.type) {
       case 'start':
-        startFetching(action.payload);
+        startFetching();
         break;
       case 'stop':
         stopFetching();

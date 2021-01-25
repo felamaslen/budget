@@ -50,12 +50,12 @@ export async function getListCostSummary(
 export async function getSpendingSummary(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  monthEnds: Date[],
+  dates: TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }[]>,
 ): Promise<number[]> {
   const results = await db.query<{ month_cost: number }>(sql`
   WITH ${sql.join(
     [
-      sql`dates AS (${getMonthRangeUnion(monthEnds)})`,
+      sql`dates AS (${dates})`,
 
       sql`sum_bills AS (
         SELECT dates.start_date, COALESCE(SUM(bills.cost), 0) AS cost

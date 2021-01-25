@@ -17,6 +17,7 @@ export {
   useFundAllocationTargetsUpdatedSubscription,
   useFundCreatedSubscription,
   useFundDeletedSubscription,
+  useFundHistoryIndividualQuery,
   useFundPricesUpdatedSubscription,
   useFundPricesUpdateQuery,
   useFundUpdatedSubscription,

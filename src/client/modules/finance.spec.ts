@@ -36,6 +36,7 @@ describe('Finance module', () => {
       ${'Scottish Mortgage Trust innit (SMT.L) (stock)'} | ${'SMT.L'}
       ${'L&G Int. Ix'}                                   | ${null}
       ${'Threadneedle UK Equity Income Trust (accum)'}   | ${null}
+      ${'Apple Inc (AAPL) (stock)'}                      | ${'AAPL'}
     `('should abbrevate $long to $short', ({ long, short }) => {
       expect.assertions(1);
       expect(getGenericFullSymbol(long)).toBe(short);

@@ -22,6 +22,7 @@ import {
   upsertTransactions,
   updateAllocationTarget,
   selectAllocationTargetSum,
+  selectIndividualFullFundHistory,
 } from '~api/queries';
 import {
   CrudResponseCreate,
@@ -42,6 +43,8 @@ import {
   TargetDeltaResponse,
   AsyncReturnType,
   UpdatedFundAllocationTargets,
+  QueryFundHistoryIndividualArgs,
+  FundHistoryIndividual,
 } from '~api/types';
 
 const dbMap: DJMap<FundListRow> = [{ external: 'allocationTarget', internal: 'allocation_target' }];
@@ -164,6 +167,16 @@ export async function readFundHistory(
     annualisedFundReturns,
     overviewCost,
   };
+}
+
+export async function readFundHistoryIndividual(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  { id }: QueryFundHistoryIndividualArgs,
+): Promise<FundHistoryIndividual> {
+  const rows = await selectIndividualFullFundHistory(db, uid, id);
+  const values = rows.map(({ date, price }) => ({ date: getUnixTime(date), price }));
+  return { values };
 }
 
 export async function createFund(

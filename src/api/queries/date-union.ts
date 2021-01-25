@@ -1,4 +1,4 @@
-import { startOfDay, startOfMonth } from 'date-fns';
+import { startOfMonth } from 'date-fns';
 import { format } from 'date-fns-tz';
 import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
 import config from '~api/config';
@@ -8,7 +8,9 @@ const toLocalISO = (date: Date): string =>
 
 const formatMonthStart = (month: Date): string => toLocalISO(startOfMonth(month));
 
-export const getEndOfMonthUnion = (monthEnds: Date[]): TaggedTemplateLiteralInvocationType =>
+export const getEndOfMonthUnion = (
+  monthEnds: Date[],
+): TaggedTemplateLiteralInvocationType<{ month_date: string }[]> =>
   sql`
   SELECT ${sql.join(
     [
@@ -19,7 +21,9 @@ export const getEndOfMonthUnion = (monthEnds: Date[]): TaggedTemplateLiteralInvo
   )}
   `;
 
-export const getMonthRangeUnion = (monthEnds: Date[]): TaggedTemplateLiteralInvocationType =>
+export const getMonthRangeUnion = (
+  monthEnds: Date[],
+): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }[]> =>
   sql`
   SELECT ${sql.join(
     [
@@ -36,12 +40,21 @@ export const getMonthRangeUnion = (monthEnds: Date[]): TaggedTemplateLiteralInvo
   )}
   `;
 
-const formatDayStart = (date: Date): string => toLocalISO(startOfDay(date));
-
-export const getDateRangeUnion = (dayEnds: Date[]): TaggedTemplateLiteralInvocationType =>
+export const getDateRangeUnion = (
+  dayEnds: Date[],
+): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }[]> =>
   sql`
   SELECT ${sql.join(
-    dayEnds.map((date) => sql`${formatDayStart(date)}::date AS date`),
+    [
+      sql`${toLocalISO(dayEnds[0])}::date AS start_date, ${toLocalISO(
+        dayEnds[1],
+      )}::date AS end_date`,
+      ...dayEnds
+        .slice(1)
+        .map((date) =>
+          sql.join([sql`${toLocalISO(date)}::date`, sql`${toLocalISO(date)}::date`], sql`, `),
+        ),
+    ],
     sql` UNION SELECT `,
   )}
   `;

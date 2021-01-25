@@ -1,13 +1,24 @@
 import { startOfMonth, endOfMonth, differenceInDays, isSameDay, addDays } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { selectPreviewRowsStocks, selectPreviewRowsStandard } from '~api/queries';
+import {
+  selectPreviewRowsStocks,
+  selectPreviewRowsStandard,
+  getSpendingSummary,
+  getDateRangeUnion,
+} from '~api/queries';
 import {
   MonthlyCategory,
   OverviewPreview,
   PageListStandard,
   QueryOverviewPreviewArgs,
 } from '~api/types';
+
+const cumulativeFill = (values: number[]): number[] =>
+  values.reduce<number[]>(
+    (last, value, index) => (index > 0 ? [...last, last[last.length - 1] + value] : [value]),
+    [],
+  );
 
 async function getOverviewPreviewStandard(
   db: DatabaseTransactionConnectionType,
@@ -25,12 +36,9 @@ async function getOverviewPreviewStandard(
     endDate,
   );
 
-  return dayEnds
-    .map((date) => rows.find((row) => isSameDay(new Date(row.date), date))?.value ?? 0)
-    .reduce<number[]>(
-      (last, value, index) => (index > 0 ? [...last, last[last.length - 1] + value] : [value]),
-      [],
-    );
+  return cumulativeFill(
+    dayEnds.map((date) => rows.find((row) => isSameDay(new Date(row.date), date))?.value ?? 0),
+  );
 }
 
 async function getOverviewPreviewStocks(
@@ -48,6 +56,24 @@ async function getOverviewPreviewStocks(
   );
 }
 
+async function getOverviewPreviewValues(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  category: MonthlyCategory,
+  dayEnds: Date[],
+  startDate: Date,
+  endDate: Date,
+): Promise<number[]> {
+  switch (category) {
+    case MonthlyCategory.Stocks:
+      return getOverviewPreviewStocks(db, uid, dayEnds);
+    case MonthlyCategory.Spending:
+      return cumulativeFill(await getSpendingSummary(db, uid, getDateRangeUnion(dayEnds)));
+    default:
+      return getOverviewPreviewStandard(db, uid, dayEnds, category, startDate, endDate);
+  }
+}
+
 export async function getOverviewPreview(
   db: DatabaseTransactionConnectionType,
   uid: number,
@@ -61,9 +87,14 @@ export async function getOverviewPreview(
     .fill(0)
     .map((_, index) => addDays(startDate, index));
 
-  const values = await (query.category === MonthlyCategory.Stocks
-    ? getOverviewPreviewStocks(db, uid, dayEnds)
-    : getOverviewPreviewStandard(db, uid, dayEnds, query.category, startDate, endDate));
+  const values = await getOverviewPreviewValues(
+    db,
+    uid,
+    query.category,
+    dayEnds,
+    startDate,
+    endDate,
+  );
 
   return { startDate, values };
 }

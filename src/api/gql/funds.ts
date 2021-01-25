@@ -61,6 +61,15 @@ export const fundsSchema = gql`
     overviewCost: [Int!]!
   }
 
+  type FundValueIndividual {
+    date: Int!
+    price: NonNegativeFloat!
+  }
+
+  type FundHistoryIndividual {
+    values: [FundValueIndividual!]!
+  }
+
   input TargetDelta {
     id: Int!
     allocationTarget: NonNegativeInt!
@@ -91,6 +100,7 @@ export const fundsSchema = gql`
     readFunds: ReadFundsResponse
     cashAllocationTarget: NonNegativeInt
     fundHistory(period: FundPeriod, length: NonNegativeInt): FundHistory
+    fundHistoryIndividual(id: NonNegativeInt!): FundHistoryIndividual
 
     stockPrices(codes: [String!]!): StockPricesResponse
   }

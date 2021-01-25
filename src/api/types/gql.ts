@@ -64,6 +64,7 @@ export type Query = {
   cashAllocationTarget?: Maybe<Scalars['NonNegativeInt']>;
   config?: Maybe<AppConfig>;
   fundHistory?: Maybe<FundHistory>;
+  fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
   overview?: Maybe<Overview>;
   overviewOld?: Maybe<OverviewOld>;
   overviewPreview?: Maybe<OverviewPreview>;
@@ -100,6 +101,11 @@ export type QueryAnalysisDeepArgs = {
 export type QueryFundHistoryArgs = {
   period?: Maybe<FundPeriod>;
   length?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+
+export type QueryFundHistoryIndividualArgs = {
+  id: Scalars['NonNegativeInt'];
 };
 
 
@@ -230,6 +236,15 @@ export type FundHistory = {
   prices: Array<FundPrices>;
   annualisedFundReturns: Scalars['Float'];
   overviewCost: Array<Scalars['Int']>;
+};
+
+export type FundValueIndividual = {
+  date: Scalars['Int'];
+  price: Scalars['NonNegativeFloat'];
+};
+
+export type FundHistoryIndividual = {
+  values: Array<FundValueIndividual>;
 };
 
 export type TargetDelta = {
@@ -772,6 +787,7 @@ export type NetWorthDeleted = {
 export enum MonthlyCategory {
   Stocks = 'stocks',
   Income = 'income',
+  Spending = 'spending',
   Bills = 'bills',
   Food = 'food',
   General = 'general',
@@ -970,6 +986,8 @@ export type ResolversTypes = {
   FundPeriod: FundPeriod;
   ReadFundsResponse: ResolverTypeWrapper<ReadFundsResponse>;
   FundHistory: ResolverTypeWrapper<FundHistory>;
+  FundValueIndividual: ResolverTypeWrapper<FundValueIndividual>;
+  FundHistoryIndividual: ResolverTypeWrapper<FundHistoryIndividual>;
   TargetDelta: TargetDelta;
   TargetDeltaResponse: ResolverTypeWrapper<TargetDeltaResponse>;
   UpdatedFundAllocationTargets: ResolverTypeWrapper<UpdatedFundAllocationTargets>;
@@ -1069,6 +1087,8 @@ export type ResolversParentTypes = {
   FundPrices: FundPrices;
   ReadFundsResponse: ReadFundsResponse;
   FundHistory: FundHistory;
+  FundValueIndividual: FundValueIndividual;
+  FundHistoryIndividual: FundHistoryIndividual;
   TargetDelta: TargetDelta;
   TargetDeltaResponse: TargetDeltaResponse;
   UpdatedFundAllocationTargets: UpdatedFundAllocationTargets;
@@ -1174,6 +1194,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   cashAllocationTarget?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   config?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType>;
   fundHistory?: Resolver<Maybe<ResolversTypes['FundHistory']>, ParentType, ContextType, RequireFields<QueryFundHistoryArgs, never>>;
+  fundHistoryIndividual?: Resolver<Maybe<ResolversTypes['FundHistoryIndividual']>, ParentType, ContextType, RequireFields<QueryFundHistoryIndividualArgs, 'id'>>;
   overview?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType, RequireFields<QueryOverviewArgs, never>>;
   overviewOld?: Resolver<Maybe<ResolversTypes['OverviewOld']>, ParentType, ContextType, RequireFields<QueryOverviewOldArgs, never>>;
   overviewPreview?: Resolver<Maybe<ResolversTypes['OverviewPreview']>, ParentType, ContextType, RequireFields<QueryOverviewPreviewArgs, 'category' | 'date'>>;
@@ -1238,6 +1259,17 @@ export type FundHistoryResolvers<ContextType = Context, ParentType extends Resol
   prices?: Resolver<Array<ResolversTypes['FundPrices']>, ParentType, ContextType>;
   annualisedFundReturns?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   overviewCost?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FundValueIndividualResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundValueIndividual'] = ResolversParentTypes['FundValueIndividual']> = {
+  date?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  price?: Resolver<ResolversTypes['NonNegativeFloat'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FundHistoryIndividualResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundHistoryIndividual'] = ResolversParentTypes['FundHistoryIndividual']> = {
+  values?: Resolver<Array<ResolversTypes['FundValueIndividual']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1685,6 +1717,8 @@ export type Resolvers<ContextType = Context> = {
   FundPrices?: FundPricesResolvers<ContextType>;
   ReadFundsResponse?: ReadFundsResponseResolvers<ContextType>;
   FundHistory?: FundHistoryResolvers<ContextType>;
+  FundValueIndividual?: FundValueIndividualResolvers<ContextType>;
+  FundHistoryIndividual?: FundHistoryIndividualResolvers<ContextType>;
   TargetDeltaResponse?: TargetDeltaResponseResolvers<ContextType>;
   UpdatedFundAllocationTargets?: UpdatedFundAllocationTargetsResolvers<ContextType>;
   StockPrice?: StockPriceResolvers<ContextType>;

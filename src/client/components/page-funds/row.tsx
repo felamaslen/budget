@@ -112,7 +112,7 @@ export const FundRow: React.FC<Props> = ({
         />
         <span>{tempAllocationTarget ?? 0}%</span>
       </Styled.TargetAllocation>
-      {!!prices && <GraphFundItem item={item.item} sold={isSold} values={prices} />}
+      {!!prices && <GraphFundItem id={item.id} item={item.item} sold={isSold} values={prices} />}
       <FundGainInfo isSold={isSold} rowGains={gain} highlight={highlight} />
     </Styled.FundRow>
   );

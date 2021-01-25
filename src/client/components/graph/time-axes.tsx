@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { getTimeScale } from '~client/components/graph/helpers';
+import { defaultPadding, getTimeScale } from '~client/components/graph/helpers';
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { getTickSize, formatCurrency } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
@@ -15,6 +15,8 @@ type Props = {
   offset?: number;
   tickSizeY?: number;
   hideMinorTicks?: boolean;
+  hideLines?: boolean;
+  outerTicks?: boolean;
   yAlign?: 'left' | 'right';
   labelY?: LabelY;
   labelY2?: LabelY;
@@ -122,32 +124,57 @@ const TicksYMinor: React.FC<YAxisTicksProps> = ({ x0, xMax, ticksY }) => (
   </g>
 );
 
-type YAxisTextProps = YAxisPartProps & {
-  secondary?: boolean;
-  align: 'left' | 'right';
-  alignPos: number;
-  labelY: LabelY;
-};
+type YAxisTextProps = YAxisPartProps &
+  Pick<Props, 'outerTicks' | 'width'> & {
+    secondary?: boolean;
+    align: 'left' | 'right';
+    alignPos: number;
+    labelY: LabelY;
+  };
 
-const TicksYText: React.FC<YAxisTextProps> = ({ secondary, ticksY, labelY, align, alignPos }) => (
-  <g>
-    {ticksY
-      .filter(({ major }) => major)
-      .map(({ value, valueSecondary = value, pos }) => (
-        <text
-          key={pos}
-          x={alignPos}
-          textAnchor={align === 'left' ? 'start' : 'end'}
-          y={pos - 2}
-          fontFamily={fontFamily}
-          fontSize={fontSize}
-          alignmentBaseline="baseline"
-        >
-          {labelY(secondary ? valueSecondary : value)}
-        </text>
-      ))}
-  </g>
-);
+function getYTextPosition(
+  axisAlign: 'left' | 'right',
+  alignPos: number,
+  outerTicks: boolean,
+  width: number,
+): number {
+  if (!outerTicks) {
+    return alignPos;
+  }
+  return axisAlign === 'left' ? 0 : width;
+}
+
+const TicksYText: React.FC<YAxisTextProps> = ({
+  secondary,
+  ticksY,
+  labelY,
+  align,
+  alignPos,
+  outerTicks = false,
+  width,
+}) => {
+  const textAnchor = align === 'left' ? 'start' : 'end';
+  const xPos = getYTextPosition(align, alignPos, outerTicks, width);
+  return (
+    <g>
+      {ticksY
+        .filter(({ major }) => major)
+        .map(({ value, valueSecondary = value, pos }) => (
+          <text
+            key={pos}
+            x={xPos}
+            textAnchor={textAnchor}
+            y={pos - 2}
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            alignmentBaseline="baseline"
+          >
+            {labelY(secondary ? valueSecondary : value)}
+          </text>
+        ))}
+    </g>
+  );
+};
 
 const YAxis: React.FC<Props> = (props) => {
   const ticksY = getTicksY(props);
@@ -158,7 +185,9 @@ const YAxis: React.FC<Props> = (props) => {
     maxX,
     pixX,
     yAlign,
+    hideLines,
     hideMinorTicks,
+    outerTicks = false,
     labelY2 = defaultLabelY,
     labelY = defaultLabelY,
   } = props;
@@ -170,13 +199,19 @@ const YAxis: React.FC<Props> = (props) => {
 
   return (
     <>
-      <TicksYMajor x0={x0} xMax={xMax} ticksY={ticksY} />
-      {!hideMinorTicks && <TicksYMinor x0={x0} xMax={xMax} ticksY={ticksY} />}
+      {!hideLines && (
+        <>
+          <TicksYMajor x0={x0} xMax={xMax} ticksY={ticksY} />
+          {!hideMinorTicks && <TicksYMinor x0={x0} xMax={xMax} ticksY={ticksY} />}
+        </>
+      )}
       <TicksYText
         ticksY={ticksY}
         labelY={labelY}
         align={yAlign ?? 'left'}
         alignPos={alignPosPrimary}
+        outerTicks={outerTicks}
+        width={props.width}
       />
       {dualAxis && (
         <TicksYText
@@ -185,6 +220,8 @@ const YAxis: React.FC<Props> = (props) => {
           labelY={labelY2}
           align={yAlign === 'right' ? 'left' : 'right'}
           alignPos={alignPosSecondary}
+          outerTicks={outerTicks}
+          width={props.width}
         />
       )}
     </>
@@ -236,27 +273,38 @@ const TicksXForeground: React.FC<TicksXForegroundProps> = ({ timeScale, y0 }) =>
   </g>
 );
 
-type TicksXTextProps = TicksXProps;
+type TicksXTextProps = TicksXProps & Pick<Props, 'outerTicks' | 'padding'>;
 
-const TicksXText: React.FC<TicksXTextProps> = ({ timeScale, y0 }) => (
-  <g>
-    {timeScale
-      .filter(({ text }) => text)
-      .map(({ text, pix, major }) => (
-        <text
-          key={pix}
-          x={pix}
-          y={y0 - timeTickSize(major)}
-          fontFamily={fontFamily}
-          fontSize={fontSize}
-          alignmentBaseline="baseline"
-          transform={transformText(pix, y0 - timeTickSize(major))}
-        >
-          {text}
-        </text>
-      ))}
-  </g>
-);
+const TicksXText: React.FC<TicksXTextProps> = ({
+  timeScale,
+  y0,
+  padding = defaultPadding,
+  outerTicks = false,
+}) => {
+  const tickYPos = outerTicks
+    ? (): number => y0 + padding[2]
+    : (major: 0 | 1 | 2): number => y0 - timeTickSize(major);
+
+  return (
+    <g>
+      {timeScale
+        .filter(({ text }) => text)
+        .map(({ text, pix, major }) => (
+          <text
+            key={pix}
+            x={pix}
+            y={tickYPos(major)}
+            fontFamily={fontFamily}
+            fontSize={fontSize}
+            alignmentBaseline={outerTicks ? 'middle' : 'baseline'}
+            transform={transformText(pix, y0 - timeTickSize(major))}
+          >
+            {text}
+          </text>
+        ))}
+    </g>
+  );
+};
 
 export const TimeAxes: React.FC<Props> = (props) => {
   const {
@@ -266,10 +314,13 @@ export const TimeAxes: React.FC<Props> = (props) => {
     maxX,
     maxY,
     maxY2 = maxY,
+    padding,
     pixX,
     pixY1,
     offset = 0,
+    hideLines = false,
     hideMinorTicks = false,
+    outerTicks = false,
   } = props;
 
   const y0 = pixY1(minY);
@@ -283,9 +334,13 @@ export const TimeAxes: React.FC<Props> = (props) => {
   return (
     <g>
       <YAxis {...props} />
-      <TicksXBackground y0={y0} timeScale={timeScale} hideMinorTicks={hideMinorTicks} />
-      <TicksXForeground y0={y0} timeScale={timeScale} />
-      <TicksXText y0={y0} timeScale={timeScale} />
+      {!hideLines && (
+        <>
+          <TicksXBackground y0={y0} timeScale={timeScale} hideMinorTicks={hideMinorTicks} />
+          <TicksXForeground y0={y0} timeScale={timeScale} />
+        </>
+      )}
+      <TicksXText y0={y0} padding={padding} timeScale={timeScale} outerTicks={outerTicks} />
     </g>
   );
 };

@@ -3,6 +3,7 @@ import {
   deleteFund,
   readCashTarget,
   readFundHistory,
+  readFundHistoryIndividual,
   readFunds,
   updateCashTarget,
   updateFund,
@@ -25,6 +26,7 @@ export const fundsResolvers: Resolvers = {
 
     cashAllocationTarget: genericAuthDbResolver(readCashTarget),
     fundHistory: genericAuthDbResolver(readFundHistory),
+    fundHistoryIndividual: genericAuthDbResolver(readFundHistoryIndividual),
 
     stockPrices: genericAuthDbResolver(getStockPrices),
   },

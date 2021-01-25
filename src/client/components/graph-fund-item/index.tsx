@@ -1,38 +1,28 @@
+import loadable from '@loadable/component';
 import { flatten } from 'array-flatten';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import Loader from 'react-spinners/PuffLoader';
 
-import { Axes } from './axes';
+import { graphColor } from './color';
 import * as Styled from './styles';
 import { LineGraph } from '~client/components/graph';
-import {
-  GRAPH_FUND_ITEM_WIDTH,
-  GRAPH_FUND_ITEM_WIDTH_LARGE,
-  GRAPH_FUND_ITEM_HEIGHT,
-  GRAPH_FUND_ITEM_HEIGHT_LARGE,
-} from '~client/constants/graph';
-import { colors } from '~client/styled/variables';
-import type { Data, DrawProps, Line, Range, RowPrices, Size } from '~client/types';
+import type { LineGraphProps } from '~client/components/graph/line-graph';
+import { GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_HEIGHT } from '~client/constants/graph';
+import type { Data, Id, Line, Range, RowPrices, Size } from '~client/types';
 
 export type Props = {
+  id: Id;
   item: string;
   sold: boolean;
   values: RowPrices;
 };
 
-function getDimensions(popout: boolean, sold: boolean): Size {
-  if (popout) {
-    return {
-      width: GRAPH_FUND_ITEM_WIDTH_LARGE,
-      height: GRAPH_FUND_ITEM_HEIGHT_LARGE,
-    };
-  }
-  if (sold) {
-    return {
-      width: GRAPH_FUND_ITEM_WIDTH,
-      height: GRAPH_FUND_ITEM_HEIGHT / 2,
-    };
-  }
+export const Popout = loadable(() => import('./popout'), { fallback: <Loader size={24} /> });
 
+function getDimensions(sold: boolean): Size {
+  if (sold) {
+    return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT / 2 };
+  }
   return { width: GRAPH_FUND_ITEM_WIDTH, height: GRAPH_FUND_ITEM_HEIGHT };
 }
 
@@ -45,15 +35,7 @@ const getRange = (data: number[]): { min: number; max: number } =>
     { min: Infinity, max: -Infinity },
   );
 
-const valuesColor = [colors.funds.loss, colors.funds.profit];
-
-function processData(
-  item: string,
-  data: Data[],
-  popout: boolean,
-): {
-  lines: Line[];
-} & Range {
+function processData(item: string, data: Data[]): Range & Pick<LineGraphProps, 'lines'> {
   const dataX = flatten(data.map((line) => line.map(([xValue]) => xValue)));
   const dataY = flatten(data.map((line) => line.map(([, yValue]) => yValue)));
 
@@ -74,16 +56,13 @@ function processData(
     }
   }
 
-  const lines = data.map<Line>((line, index) => ({
+  const lines = data.map<Line>((points, index) => ({
     key: String(index),
     name: item,
-    data: line,
-    strokeWidth: popout ? 1.5 : 1,
+    data: points,
+    strokeWidth: 1,
     smooth: true,
-    color: {
-      changes: [line[0][1]],
-      values: valuesColor,
-    },
+    color: graphColor(points),
   }));
 
   return {
@@ -95,16 +74,11 @@ function processData(
   };
 }
 
-export const GraphFundItem: React.FC<Props> = ({ item, sold, values }) => {
+export const GraphFundItem: React.FC<Props> = ({ id, item, sold, values }) => {
   const [popout, setPopout] = useState<boolean>(false);
   const onFocus = useCallback(() => setPopout(!sold), [sold]);
   const onBlur = useCallback(() => setPopout(false), []);
-  const { width, height } = getDimensions(popout, sold);
-
-  const BeforeLines = useCallback<React.FC<DrawProps>>(
-    (props) => <Axes popout={popout} {...props} />,
-    [popout],
-  );
+  const processedData = useMemo(() => processData(item, values ?? []), [item, values]);
 
   if (!values?.length) {
     return null;
@@ -120,12 +94,8 @@ export const GraphFundItem: React.FC<Props> = ({ item, sold, values }) => {
       sold={sold}
       popout={popout}
     >
-      <LineGraph
-        width={width}
-        height={height}
-        {...processData(item, values, popout)}
-        BeforeLines={BeforeLines}
-      />
+      {popout && <Popout id={id} />}
+      {!popout && <LineGraph {...processedData} {...getDimensions(sold)} />}
     </Styled.FundGraph>
   );
 };

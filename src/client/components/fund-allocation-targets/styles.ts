@@ -2,13 +2,13 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem, rgba } from 'polished';
 
-import { graphFundItemWidth } from '~client/components/graph-fund-item/styles';
 import { fieldSizes } from '~client/components/page-funds/styles';
+import { GRAPH_FUND_ITEM_WIDTH } from '~client/constants';
 import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const containerWidth =
-  fieldSizes.item + fieldSizes.transactions + 22 + 24 + graphFundItemWidth + 200;
+  fieldSizes.item + fieldSizes.transactions + 22 + 24 + GRAPH_FUND_ITEM_WIDTH + 200;
 
 export const Container = styled.div`
   display: block;

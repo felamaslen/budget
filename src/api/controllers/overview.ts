@@ -22,6 +22,7 @@ import {
   selectTransactions,
   selectOldNetWorth,
   getSpendingSummary,
+  getMonthRangeUnion,
 } from '~api/queries';
 import {
   Transaction,
@@ -223,7 +224,7 @@ export async function getOldOverviewData(
     getFundValues(db, uid, monthEnds),
     selectOldNetWorth(db, uid, formatDate(startDate), formatDate(oldDateEnd)),
     getListCostSummary(db, uid, monthEnds, PageListStandard.Income),
-    getSpendingSummary(db, uid, monthEnds),
+    getSpendingSummary(db, uid, getMonthRangeUnion(monthEnds)),
   ]);
 
   const mapNetWorth = (key: Exclude<keyof OldNetWorthRow, 'date'>): number[] =>

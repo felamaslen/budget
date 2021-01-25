@@ -6,6 +6,7 @@ export const width = 204;
 export const height = 104;
 
 export const Preview = styled.div`
+  background: ${colors.translucent.light.mediumLight};
   box-shadow: 0 2px 6px ${colors.shadow.dark};
   font-weight: normal;
   height: ${rem(height)};
