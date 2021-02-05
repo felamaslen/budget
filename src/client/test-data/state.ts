@@ -229,6 +229,15 @@ export const testState: State = {
             subcategory: numericHash('real-pension-subcategory-id'),
             simple: 10654,
           },
+          {
+            subcategory: numericHash('real-saye-subcategory-id'),
+            option: {
+              units: 881,
+              vested: 657,
+              strikePrice: 123.6,
+              marketPrice: 176.28,
+            },
+          },
         ],
         creditLimit: [
           {

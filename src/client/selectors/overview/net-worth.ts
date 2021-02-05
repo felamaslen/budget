@@ -1,7 +1,11 @@
 import { compose } from '@typed/compose';
 import differenceInDays from 'date-fns/differenceInDays';
+import differenceInMonths from 'date-fns/differenceInMonths';
 import differenceInYears from 'date-fns/differenceInYears';
+import endOfMonth from 'date-fns/endOfMonth';
+import isBefore from 'date-fns/isBefore';
 import isSameMonth from 'date-fns/isSameMonth';
+import startOfDay from 'date-fns/startOfDay';
 import startOfYear from 'date-fns/startOfYear';
 import groupBy from 'lodash/groupBy';
 import moize from 'moize';
@@ -14,6 +18,7 @@ import {
   getMonthDates,
   getFutureMonths,
   currentDayIsEndOfMonth,
+  roundedNumbers,
 } from './common';
 
 import { getText } from '~client/components/net-worth/breakdown.blocks';
@@ -113,18 +118,18 @@ function sumComplexValue(
 ): number {
   const isSAYE = isValueSAYE(subcategories);
 
-  return Math.round(
+  return (
     (value.simple ?? 0) +
-      (value.fx?.reduce<number>(
-        (last, part) =>
-          last +
-          part.value *
-            100 *
-            (currencies.find((compare) => compare.currency === part.currency)?.rate ?? 0),
-        0,
-      ) ?? 0) +
-      (value.option ? optionValue(value.option, isSAYE(value), withSAYEResidual) : 0) +
-      -(value.mortgage?.principal ?? 0),
+    (value.fx?.reduce<number>(
+      (last, part) =>
+        last +
+        part.value *
+          100 *
+          (currencies.find((compare) => compare.currency === part.currency)?.rate ?? 0),
+      0,
+    ) ?? 0) +
+    (value.option ? optionValue(value.option, isSAYE(value), withSAYEResidual) : 0) +
+    -(value.mortgage?.principal ?? 0)
   );
 }
 
@@ -144,11 +149,54 @@ function calculateResidualSAYEOptionsValue(
   subcategories: NetWorthSubcategory[],
   entry: Pick<NetWorthEntryNative, 'values'>,
 ): number {
-  return Math.round(
-    entry.values
-      .filter(isValueSAYE(subcategories))
-      .reduce<number>((last, { option }) => last + (option ? residualSAYEValue(option) : 0), 0),
-  );
+  return entry.values
+    .filter(isValueSAYE(subcategories))
+    .reduce<number>((last, { option }) => last + (option ? residualSAYEValue(option) : 0), 0);
+}
+
+type MonthlyDeposit = { deposit: number; profit: number };
+
+export function calculatePredictedSAYEMonthlyDeposit(
+  subcategories: NetWorthSubcategory[],
+  entries: NetWorthEntryNative[],
+  startPredictionIndex: number,
+): MonthlyDeposit {
+  const zeroDeposit: MonthlyDeposit = { deposit: 0, profit: 0 };
+  if (startPredictionIndex === -1) {
+    return zeroDeposit;
+  }
+  const currentEntry = entries[startPredictionIndex - 1];
+  const previousEntries = entries.slice(0, startPredictionIndex - 1).reverse();
+  if (!(currentEntry && previousEntries.length > 0)) {
+    return zeroDeposit;
+  }
+  return currentEntry.values
+    .filter(isValueSAYE(subcategories))
+    .reduce<MonthlyDeposit>((last, value) => {
+      const vested = value.option?.vested ?? 0;
+      if (vested >= (value.option?.units ?? 0)) {
+        return last;
+      }
+      const previousEntryWithOption = previousEntries.find((entry) =>
+        entry.values.some((compare) => compare.subcategory === value.subcategory),
+      );
+      if (!previousEntryWithOption) {
+        return last;
+      }
+      const previousVestedUnits =
+        previousEntryWithOption.values.find((compare) => compare.subcategory === value.subcategory)
+          ?.option?.vested ?? 0;
+
+      const vestRateUnits =
+        (vested - previousVestedUnits) /
+          differenceInMonths(currentEntry.date, previousEntryWithOption.date) || 0;
+
+      const monthlyDeposit = vestRateUnits * (value.option?.strikePrice ?? 0);
+      const monthlyProfit =
+        vestRateUnits * ((value.option?.marketPrice ?? 0) - (value.option?.strikePrice ?? 0));
+
+      return { deposit: last.deposit + monthlyDeposit, profit: last.profit + monthlyProfit };
+    }, zeroDeposit);
 }
 
 function getSumByCategory(
@@ -168,28 +216,18 @@ function getSumByCategory(
   return sumValues(currencies, subcategories, valuesFiltered, false);
 }
 
-function getAggregateExtra(
-  categoryName: Aggregate,
-  subcategories: NetWorthSubcategory[],
-  entry: NetWorthEntryNative,
-): number {
-  if (categoryName === Aggregate.cashOther) {
-    return calculateResidualSAYEOptionsValue(subcategories, entry);
-  }
-  return 0;
-}
-
 const getEntryAggregate = (
   categories: NetWorthCategory[],
   subcategories: NetWorthSubcategory[],
   entry: NetWorthEntryNative,
+  extra: Partial<Record<Aggregate, number>> = {},
 ): AggregateSums =>
   Object.entries(Aggregate).reduce<AggregateSums>(
     (last, [, categoryName]) => ({
       ...last,
       [categoryName]:
         getSumByCategory(categoryName, categories, subcategories, entry) +
-        getAggregateExtra(categoryName, subcategories, entry),
+        (extra[categoryName] ?? 0),
     }),
     {} as AggregateSums,
   );
@@ -204,7 +242,9 @@ export const withAggregates = (
 ) => (rows: NetWorthEntryNative[]): EntryWithAggregates[] =>
   rows.map((entry) => ({
     ...entry,
-    aggregate: getEntryAggregate(categories, subcategories, entry),
+    aggregate: getEntryAggregate(categories, subcategories, entry, {
+      [Aggregate.cashOther]: calculateResidualSAYEOptionsValue(subcategories, entry),
+    }),
   }));
 
 const getEntryForMonth = (entries: NetWorthEntryNative[]) => (date: Date): NetWorthEntryNative => {
@@ -306,7 +346,12 @@ const withFTI = (birthDate: Date) => (rows: EntryWithSpend[]): EntryWithFTI[] =>
 type EntryWithTableProps = TableRow;
 
 const withTableProps = (rows: EntryWithFTI[]): EntryWithTableProps[] =>
-  rows.map(({ values, creditLimit, currencies, ...rest }) => rest);
+  rows.map(({ values, creditLimit, currencies, ...rest }) =>
+    roundedNumbers<EntryWithTableProps>({
+      ...rest,
+      aggregate: roundedNumbers(rest.aggregate),
+    }),
+  );
 
 const getNetWorthPropsDeriver = createSelector(
   getAppConfig,
@@ -343,7 +388,7 @@ export const getLatestNetWorthAggregate = moize(
         netWorth
           .slice()
           .reverse()
-          .find(({ date }) => isSameMonth(date, today))?.aggregate,
+          .find(({ date }) => isBefore(startOfDay(date), endOfMonth(today)))?.aggregate,
     ),
   { maxSize: 1 },
 );
@@ -359,8 +404,11 @@ function PMT({ principal, paymentsRemaining, rate }: MortgageValue): number {
   if (!rate) {
     return principal / paymentsRemaining;
   }
-  return ((rate / 1200) * principal) / (1 - (1 + rate / 1200) ** -paymentsRemaining);
+  const monthlyRate = (1 + rate / 100) ** (1 / 12) - 1;
+  return (monthlyRate * principal) / (1 - (1 + monthlyRate) ** -paymentsRemaining);
 }
+
+export type HomeEquity = { value: number; debt: number };
 
 export const getHomeEquity = moize(
   (today: Date) =>
@@ -396,9 +444,10 @@ export const getHomeEquity = moize(
               .reduce<number>((last, { simple }) => last + (simple ?? 0), 0),
           );
 
-        const homeEquityToPresent = homeValueToPresent.map<number>(
-          (value, index) => value - debtToPresent[index],
-        );
+        const homeEquityToPresent = homeValueToPresent.map<HomeEquity>((value, index) => ({
+          value,
+          debt: -debtToPresent[index],
+        }));
 
         const latestDebts = rows[startPredictionIndex - 1].values
           .filter(
@@ -436,11 +485,12 @@ export const getHomeEquity = moize(
             (_, index) => latestHomeValue * (1 + assumedHousePriceInflation) ** ((index + 1) / 12),
           );
 
-        const forecastHomeEquity = forecastHomeValue.map<number>(
-          (value, index) => value - forecastDebt[index],
-        );
+        const forecastHomeEquity = forecastHomeValue.map<HomeEquity>((value, index) => ({
+          value,
+          debt: -forecastDebt[index],
+        }));
 
-        return homeEquityToPresent.concat(forecastHomeEquity).map(Math.round);
+        return homeEquityToPresent.concat(forecastHomeEquity);
       },
     ),
   { maxSize: 1 },

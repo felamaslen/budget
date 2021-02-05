@@ -9,7 +9,7 @@ import {
   getValuesWithTime,
   TimeValuesProps,
 } from '~client/components/graph-cashflow';
-import { TodayContext } from '~client/hooks';
+import { TodayContext, usePersistentState } from '~client/hooks';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
 import type { Line, MergedMonthly } from '~client/types';
 import { Aggregate, PageNonStandard } from '~client/types/enum';
@@ -17,30 +17,33 @@ import { Aggregate, PageNonStandard } from '~client/types/enum';
 type GraphData = { lines: Line[]; targetValues: TargetValue[] };
 
 function getGraphData(
-  { netWorth, pension, homeEquity, stocks, investments, cashOther, options }: MergedMonthly,
+  monthly: MergedMonthly,
   startDate: Date,
   futureMonths: number,
+  showLiabilities: boolean,
 ): GraphData {
-  const futureIndex = netWorth.length - futureMonths;
+  const investmentCash = monthly.investments.map((value, index) =>
+    Math.max(0, value - monthly.stocks[index]),
+  );
+  const lockedCash = monthly.cashOther.map((value, index) => value + investmentCash[index]);
 
-  const investmentCash = investments.map((value, index) => Math.max(0, value - stocks[index]));
-  const lockedCash = cashOther.map((value, index) => value + investmentCash[index]);
-
-  const withoutPension = netWorth.map((value, index) => value - pension[index]);
+  const withoutPension = monthly.netWorth.map((value, index) => value - monthly.pension[index]);
 
   const opts: TimeValuesProps = { startDate };
 
+  const dataAssets = getValuesWithTime(monthly.assets, opts);
+  const dataLiabilities = getValuesWithTime(monthly.liabilities, opts);
   const dataNetWorth = getValuesWithTime(withoutPension, opts);
-  const dataPension = getValuesWithTime(pension, opts);
-  const dataOptions = getValuesWithTime(options, opts);
+  const dataPension = getValuesWithTime(monthly.pension, opts);
+  const dataOptions = getValuesWithTime(monthly.options, opts);
 
-  const dataHomeEquity = getValuesWithTime(homeEquity, opts);
-  const dataStocks = getValuesWithTime(stocks, opts);
+  const dataHomeEquity = getValuesWithTime(monthly.homeEquity, opts);
+  const dataStocks = getValuesWithTime(monthly.stocks, opts);
   const dataLockedCash = getValuesWithTime(lockedCash, opts);
 
-  const targets = getTargets(startDate, netWorth, futureMonths);
+  const targets = getTargets(startDate, monthly.netWorth, futureMonths);
 
-  const lines: Line[] = [
+  const linesCommon: Line[] = [
     {
       key: 'targets',
       name: 'Targets',
@@ -87,8 +90,8 @@ function getGraphData(
       data: dataNetWorth,
       fill: false,
       smooth: true,
-      color: (_, index = 0): string =>
-        index < futureIndex
+      color: (_: unknown, index = 0): string =>
+        index < monthly.startPredictionIndex - 1
           ? colors[PageNonStandard.Overview].balanceActual
           : colors[PageNonStandard.Overview].balancePredicted,
     },
@@ -115,7 +118,31 @@ function getGraphData(
     },
   ];
 
-  return { lines, targetValues: targets.targetValues };
+  const lines: Line[] = showLiabilities
+    ? [
+        ...linesCommon,
+        {
+          key: 'assets',
+          name: 'Assets',
+          data: dataAssets,
+          fill: false,
+          strokeWidth: 1,
+          smooth: true,
+          color: colors.green,
+        },
+        {
+          key: 'liabilities',
+          name: 'Liabilities',
+          data: dataLiabilities.map(([x, y]) => [x, Math.max(0, -y)]),
+          fill: false,
+          strokeWidth: 1,
+          smooth: true,
+          color: colors.overview.spending,
+        },
+      ]
+    : linesCommon;
+
+  return { lines: lines as Line[], targetValues: targets.targetValues };
 }
 
 export type Props = {
@@ -138,10 +165,14 @@ export const GraphBalance: React.FC<Props> = ({
   monthly,
 }) => {
   const today = useContext(TodayContext);
+  const [showLiabilities, setShowLiabilities] = usePersistentState<boolean>(
+    false,
+    'split_net_worth_graph',
+  );
 
   const { lines, targetValues } = useMemo<GraphData>(
-    () => getGraphData(monthly, startDate, futureMonths),
-    [monthly, startDate, futureMonths],
+    () => getGraphData(monthly, startDate, futureMonths, showLiabilities),
+    [monthly, startDate, futureMonths, showLiabilities],
   );
 
   return (
@@ -156,7 +187,15 @@ export const GraphBalance: React.FC<Props> = ({
           <Key title="Net worth" />
         </g>
       }
-      After={<AfterCanvas showAll={showAll} setShowAll={setShowAll} isLoading={isLoading} />}
+      After={
+        <AfterCanvas
+          showAll={showAll}
+          setShowAll={setShowAll}
+          isLoading={isLoading}
+          showLiabilities={showLiabilities}
+          setShowLiabilities={setShowLiabilities}
+        />
+      }
     />
   );
 };

@@ -237,7 +237,9 @@ export async function getOldOverviewData(
   const investments = mapNetWorth('investments'); // stocks + cash
   const options = mapNetWorth('options');
   const homeEquity = mapNetWorth('home_equity');
-  const netWorth = mapNetWorth('net_worth'); // this excludes pension
+  const assets = mapNetWorth('assets'); // this includes pension but excludes options
+  const liabilities = mapNetWorth('liabilities');
+  const netWorth = assets.map((value, index) => value + liabilities[index]);
 
   return {
     startDate: zonedTimeToUtc(endOfMonth(startDate), config.timeZone),
@@ -246,6 +248,8 @@ export async function getOldOverviewData(
     cashOther,
     investments,
     homeEquity,
+    assets,
+    liabilities,
     options,
     netWorth,
     income,

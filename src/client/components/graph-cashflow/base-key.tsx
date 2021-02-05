@@ -5,14 +5,15 @@ import { colors } from '~client/styled/variables';
 export type Props = {
   title: string;
   height?: number;
+  width?: number;
   children?: React.ReactNode;
 };
 
 const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
 
-export const BaseKey: React.FC<Props> = ({ title, children, height = 60 }) => (
+export const BaseKey: React.FC<Props> = ({ title, children, height = 60, width = 200 }) => (
   <g>
-    <rect x={45} y={8} width={200} height={height} fill={colors.translucent.light.dark} />
+    <rect x={45} y={8} width={width} height={height} fill={colors.translucent.light.dark} />
 
     <text
       x={65}

@@ -9,6 +9,8 @@ export const overviewOld = gql`
       cashOther
       investments
       homeEquity
+      assets
+      liabilities
       options
       netWorth
       income

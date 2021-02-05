@@ -10,7 +10,22 @@ import moize from 'moize';
 import { replaceAtIndex } from 'replace-array';
 import { createSelector } from 'reselect';
 
-import { EntryWithFTI, getDerivedNetWorthEntries, getHomeEquity } from './net-worth';
+import {
+  getMonthlyValues,
+  getSpendingColumn,
+  getFutureMonths,
+  getMonthDates,
+  currentDayIsEndOfMonth,
+  roundedArrays,
+} from './common';
+import {
+  calculatePredictedSAYEMonthlyDeposit,
+  EntryWithFTI,
+  getDerivedNetWorthEntries,
+  getHomeEquity,
+  getSubcategories,
+  HomeEquity,
+} from './net-worth';
 
 import { Average } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
@@ -19,13 +34,6 @@ import { arrayAverage, getTotalCost, IDENTITY, randnBm, rightPad } from '~client
 import { State } from '~client/reducers';
 import { getFundsCachedValue } from '~client/selectors/funds';
 import { getFundsRows } from '~client/selectors/funds/helpers';
-import {
-  getMonthlyValues,
-  getSpendingColumn,
-  getFutureMonths,
-  getMonthDates,
-  currentDayIsEndOfMonth,
-} from '~client/selectors/overview/common';
 import {
   MonthlyProcessed,
   Median,
@@ -40,7 +48,7 @@ import {
   GQL,
 } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
-import type { Monthly } from '~client/types/gql';
+import type { Monthly, NetWorthSubcategory } from '~client/types/gql';
 import type {} from '~client/types/overview';
 
 export * from './common';
@@ -67,42 +75,58 @@ const withNetWorth = <K extends MonthlyProcessedKey>(
   startPredictionIndex: number,
   isEndOfMonth: boolean,
   netWorth: EntryWithFTI[],
+  homeEquity: HomeEquity[],
   funds: Fund[],
 ) => (
-  monthly: MonthlyWithProcess<K | 'spending' | 'homeEquity'>,
-): MonthlyWithProcess<K | 'spending' | 'homeEquity'> & Pick<MonthlyProcessed, 'netWorth'> => ({
-  ...monthly,
-  netWorth: netWorth
-    .map(({ assets, liabilities }) => assets - liabilities)
-    .reduce<number[]>((last, value, index) => {
-      if (index < startPredictionIndex) {
-        return [...last, value];
-      }
+  monthly: MonthlyWithProcess<K | 'spending' | 'cashOther'>,
+): MonthlyWithProcess<K | 'spending' | 'cashOther'> &
+  Pick<MonthlyProcessed, 'netWorth' | 'assets' | 'liabilities' | 'homeEquity'> => {
+  const assets = netWorth.reduce<number[]>((last, entry, index) => {
+    if (index < startPredictionIndex) {
+      return [...last, entry.assets];
+    }
 
-      const income = monthly.income[index];
-      const spending = monthly.spending[index];
-      const stockReturn = monthly.stocks[index] - monthly.stocks[index - 1];
+    const income = monthly.income[index];
+    const spending = monthly.spending[index];
+    const stockReturn = monthly.stocks[index] - monthly.stocks[index - 1];
 
-      const stockTransactionCost =
-        !isEndOfMonth && index === startPredictionIndex
-          ? funds.reduce<number>(
-              (sum, { transactions }) =>
-                sum +
-                getTotalCost(
-                  transactions.filter(({ date }) => isSameMonth(date, netWorth[index].date)),
-                ),
-              0,
-            )
-          : 0;
+    const stockTransactionCost =
+      !isEndOfMonth && index === startPredictionIndex
+        ? funds.reduce<number>(
+            (sum, { transactions }) =>
+              sum +
+              getTotalCost(
+                transactions.filter(({ date }) => isSameMonth(date, netWorth[index].date)),
+              ),
+            0,
+          )
+        : 0;
 
-      const homeEquityChange = monthly.homeEquity[index] - monthly.homeEquity[index - 1];
+    const homeValueChange = homeEquity[index].value - homeEquity[index - 1].value;
+    const otherCashChange = monthly.cashOther[index] - monthly.cashOther[index - 1];
 
-      const netChange = income - spending + stockReturn - stockTransactionCost + homeEquityChange;
+    const netChange =
+      income - spending + stockReturn - stockTransactionCost + homeValueChange + otherCashChange;
 
-      return [...last, last[last.length - 1] + netChange];
-    }, [])
-    .map(Math.round),
-});
+    return [...last, last[last.length - 1] + netChange];
+  }, []);
+
+  const liabilities = netWorth.reduce<number[]>((last, entry, index) => {
+    if (index < startPredictionIndex) {
+      return [...last, -entry.liabilities];
+    }
+    const homeDebtChange = homeEquity[index].debt - homeEquity[index - 1].debt;
+    return [...last, last[last.length - 1] + homeDebtChange];
+  }, []);
+
+  return {
+    ...monthly,
+    assets,
+    liabilities,
+    netWorth: assets.map((value, index) => value + liabilities[index]),
+    homeEquity: homeEquity.map(({ value, debt }) => value + debt),
+  };
+};
 
 function predictByPastAverages(
   category: Category,
@@ -198,41 +222,49 @@ const withStocks = <K extends MonthlyProcessedKey>(
 ) => (monthly: MonthlyWithProcess<K>): MonthlyWithProcess<K> => ({
   ...monthly,
   stocks: compose(
-    withCurrentStockValue(futureMonths, currentStockValue),
+    withCurrentStockValue(futureMonths, Math.round(currentStockValue)),
     predictStockReturns(futureMonths, annualisedFundReturns),
   )(monthly.stocks),
 });
 
 type AggregateKey = 'pension' | 'cashOther' | 'options' | 'investments';
 
-function withAggregateNetWorth<K extends MonthlyProcessedKey>(
+function withAggregateNetWorth(
   today: Date,
   startPredictionIndex: number,
+  subcategories: NetWorthSubcategory[],
   aggregatedNetWorth: EntryWithFTI[],
-): (
-  monthly: MonthlyWithProcess<K>,
-) => MonthlyWithProcess<K> & Pick<MonthlyProcessed, AggregateKey> {
+): (monthly: Monthly) => MonthlyWithProcess<AggregateKey> {
   const currentEntries = aggregatedNetWorth.slice(0, startPredictionIndex);
   const fillCurrent = (values: number[]): number[] => rightPad(values, aggregatedNetWorth.length);
   const fillAggregate = (key: Aggregate): number[] =>
     fillCurrent(currentEntries.map(({ aggregate }) => aggregate[key]));
 
-  return (
-    monthly: MonthlyWithProcess<K>,
-  ): MonthlyWithProcess<K> & Pick<MonthlyProcessed, AggregateKey> => ({
+  const { deposit: sayeDeposit, profit: sayeProfit } = calculatePredictedSAYEMonthlyDeposit(
+    subcategories,
+    aggregatedNetWorth,
+    startPredictionIndex,
+  );
+
+  return (monthly: Monthly): MonthlyWithProcess<AggregateKey> => ({
     ...monthly,
     pension: fillAggregate(Aggregate.pension),
-    cashOther: fillAggregate(Aggregate.cashOther),
+    cashOther: fillAggregate(Aggregate.cashOther).map(
+      (value, index) => value + sayeDeposit * Math.max(0, index - (startPredictionIndex - 1)),
+    ),
     investments: fillAggregate(Aggregate.stocks),
-    options: fillCurrent(currentEntries.map(({ options }) => options)),
+    options: fillCurrent(currentEntries.map(({ options }) => options)).map(
+      (value, index) => value + sayeProfit * Math.max(0, index - (startPredictionIndex - 1)),
+    ),
   });
 }
 
 export const getProcessedMonthlyValues = moize(
-  (today: Date): ((state: State) => MonthlyProcessed) =>
+  (today: Date): ((state: State) => { values: MonthlyProcessed; startPredictionIndex: number }) =>
     createSelector(
       getFutureMonths(today),
       getMonthDates,
+      getSubcategories,
       getDerivedNetWorthEntries,
       getFundsRows,
       getFundsCachedValue.today(today),
@@ -242,6 +274,7 @@ export const getProcessedMonthlyValues = moize(
       (
         futureMonths,
         dates,
+        subcategories,
         netWorth,
         funds,
         fundsCachedValue,
@@ -255,21 +288,19 @@ export const getProcessedMonthlyValues = moize(
           netWorth.length - futureMonths - (isEndOfMonth ? 0 : 1),
         );
 
-        return compose(
-          withNetWorth<'homeEquity' | AggregateKey | 'spending' | 'net'>(
+        const values = compose(
+          withNetWorth<AggregateKey | 'spending' | 'net'>(
             startPredictionIndex,
             isEndOfMonth,
             netWorth,
+            homeEquity,
             funds,
           ),
-          withPredictedSpending<'homeEquity' | AggregateKey>(dates, today, futureMonths),
-          withStocks<'homeEquity' | AggregateKey>(
-            futureMonths,
-            fundsCachedValue.value,
-            annualisedFundReturns,
-          ),
-          withAggregateNetWorth<'homeEquity'>(today, startPredictionIndex, netWorth),
-        )({ ...monthly, homeEquity });
+          withPredictedSpending<AggregateKey>(dates, today, futureMonths),
+          withStocks<AggregateKey>(futureMonths, fundsCachedValue.value, annualisedFundReturns),
+          withAggregateNetWorth(today, startPredictionIndex, subcategories, netWorth),
+        )(monthly);
+        return { values: roundedArrays<MonthlyProcessed>(values), startPredictionIndex };
       },
     ),
   { maxSize: 1 },
@@ -349,11 +380,18 @@ const getCellColor = (ranges: Ranges, medians: Medians) => (
   key: keyof TableValues,
 ): string => getOverviewScoreColor(value, ranges[key], medians[key], overviewCategoryColor[key]);
 
-const getCells = (monthly: MonthlyProcessed, getColor: ReturnType<typeof getCellColor>) => (
-  index: number,
-): OverviewTableRow['cells'] =>
+const getCells = (
+  monthly: Omit<MonthlyProcessed, 'startPredictionIndex'>,
+  getColor: ReturnType<typeof getCellColor>,
+) => (index: number): OverviewTableRow['cells'] =>
   OVERVIEW_COLUMNS.reduce<OverviewTableRow['cells']>(
-    (last, [key, { include = [key as keyof MonthlyProcessed], exclude = [] }]) => {
+    (
+      last,
+      [
+        key,
+        { include = [key as keyof Omit<MonthlyProcessed, 'startPredictionIndex'>], exclude = [] },
+      ],
+    ) => {
       const value =
         include.reduce<number>((sum, column) => sum + monthly[column][index], 0) -
         exclude.reduce<number>((sum, column) => sum + monthly[column][index], 0);
@@ -371,13 +409,13 @@ export const getOverviewTable = moize(
       getProcessedMonthlyValues(today),
       (dates, futureMonths, monthly): OverviewTable => {
         const months = getFormattedMonths(dates);
-        const values = getTableValues(monthly);
+        const values = getTableValues(monthly.values);
         const scoreValues = getScoreValues(values, futureMonths);
         const ranges = getRanges(values, scoreValues);
         const medians = getMedians(values, scoreValues);
         const endOfCurrentMonth = endOfMonth(today);
 
-        const getRowCells = getCells(monthly, getCellColor(ranges, medians));
+        const getRowCells = getCells(monthly.values, getCellColor(ranges, medians));
 
         return months.map<OverviewTableRow>(({ year, month, monthText }, index) => {
           const past = dates[index] < today;

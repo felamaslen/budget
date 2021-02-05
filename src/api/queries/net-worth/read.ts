@@ -177,6 +177,7 @@ export async function selectOldNetWorth(
               sql`nw.date`,
               sql`nwv.value AS value_simple`,
               sql`nwcat.category`,
+              sql`nwcat.type = 'asset' as is_asset`,
               sql`nwsc.is_saye`,
               sql`nwfx.value AS value_fx`,
               sql`nwfx.currency AS value_fx_currency`,
@@ -207,10 +208,18 @@ export async function selectOldNetWorth(
           )}
         )`,
 
-        sql`values_net_worth AS (
+        sql`values_assets AS (
           SELECT
             v.id
-            ,SUM(CASE WHEN v.category = ${'Pension'} THEN 0 ELSE ${valueSimpleFxSaye} END) AS value
+            ,SUM(CASE WHEN (not v.is_asset) THEN 0 ELSE ${valueSimpleFxSaye} END) AS value
+          FROM values v
+          GROUP BY v.id
+        )`,
+
+        sql`values_liabilities AS (
+          SELECT
+            v.id
+            ,SUM(CASE WHEN v.is_asset THEN 0 ELSE ${valueSimpleFxSaye} END) AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -270,7 +279,8 @@ export async function selectOldNetWorth(
     SELECT ${sql.join(
       [
         sql`v.date`,
-        sql`values_net_worth.value AS net_worth`,
+        sql`values_assets.value AS assets`,
+        sql`-1 * values_liabilities.value AS liabilities`,
         sql`values_pension.value AS pension`,
         sql`values_options.value AS options`,
         sql`values_home_equity.value AS home_equity`,
@@ -280,7 +290,8 @@ export async function selectOldNetWorth(
       sql`, `,
     )}
     FROM (SELECT distinct id, date FROM values) v
-    LEFT JOIN values_net_worth ON values_net_worth.id = v.id
+    LEFT JOIN values_assets ON values_assets.id = v.id
+    LEFT JOIN values_liabilities ON values_liabilities.id = v.id
     LEFT JOIN values_pension ON values_pension.id = v.id
     LEFT JOIN values_options ON values_options.id = v.id
     LEFT JOIN values_home_equity ON values_home_equity.id = v.id

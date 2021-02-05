@@ -814,6 +814,8 @@ export type Overview = {
 
 export type OverviewOld = {
   startDate: Scalars['DateTime'];
+  assets: Array<Scalars['Int']>;
+  liabilities: Array<Scalars['Int']>;
   netWorth: Array<Scalars['Int']>;
   stocks: Array<Scalars['Int']>;
   pension: Array<Scalars['Int']>;
@@ -1644,6 +1646,8 @@ export type OverviewResolvers<ContextType = Context, ParentType extends Resolver
 
 export type OverviewOldResolvers<ContextType = Context, ParentType extends ResolversParentTypes['OverviewOld'] = ResolversParentTypes['OverviewOld']> = {
   startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  assets?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  liabilities?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   netWorth?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   pension?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;

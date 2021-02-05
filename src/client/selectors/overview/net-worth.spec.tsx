@@ -152,7 +152,7 @@ describe('Overview selectors (net worth)', () => {
 
       expect(getLatestNetWorthAggregate(new Date('2018-02-28'))(testState)).toStrictEqual({
         [Aggregate.cashEasyAccess]: Math.round(10324 + 37.5 * 0.035 * 100 + 1296523),
-        [Aggregate.cashOther]: 855912,
+        [Aggregate.cashOther]: 855912 + Math.round(657 * 123.6),
         [Aggregate.stocks]: 0,
         [Aggregate.pension]: 10654,
         [Aggregate.realEstate]: 21000000,
@@ -168,11 +168,22 @@ describe('Overview selectors (net worth)', () => {
         [Aggregate.mortgage]: -18420900,
       });
     });
+
+    describe('when the current month is not yet filled in', () => {
+      it('should use the latest value', () => {
+        expect.assertions(1);
+        expect(getLatestNetWorthAggregate(new Date('2018-04-04'))(testState)).toStrictEqual(
+          getLatestNetWorthAggregate(new Date('2018-03-01'))(testState),
+        );
+      });
+    });
   });
 
   describe('getNetWorthTable', () => {
     describe('for the second row in the view', () => {
-      const assets = 10324 + 3750 * 0.035 + 855912 + 1296523 + 21000000 + 10654;
+      const assets =
+        10324 + 3750 * 0.035 + 855912 + Math.round(657 * 123.6) + 1296523 + 21000000 + 10654;
+      const options = 657 * (176.28 - 123.6);
       const liabilities = 8751 + 18744200;
       const pastExpenses = 1000 + 50 + 150 + 10 + 50;
       const expenses = 900 + 13 + 90 + 1000 + 65;
@@ -183,7 +194,7 @@ describe('Overview selectors (net worth)', () => {
 
       const aggregate = {
         [Aggregate.cashEasyAccess]: Math.round(10324 + 37.5 * 100 * 0.035 + 1296523),
-        [Aggregate.cashOther]: Math.round(855912),
+        [Aggregate.cashOther]: 855912 + Math.round(657 * 123.6),
         [Aggregate.stocks]: 0,
         [Aggregate.pension]: 10654,
         [Aggregate.realEstate]: 21000000,
@@ -195,7 +206,7 @@ describe('Overview selectors (net worth)', () => {
         ${'id'}                   | ${numericHash('real-entry-id-a')}
         ${'date'}                 | ${new Date('2018-02-28')}
         ${'assets'}               | ${Math.round(assets)}
-        ${'options'}              | ${0}
+        ${'options'}              | ${Math.round(options)}
         ${'aggregate'}            | ${aggregate}
         ${'liabilities'}          | ${liabilities}
         ${'expenses'}             | ${expenses}
@@ -298,32 +309,45 @@ describe('Overview selectors (net worth)', () => {
     it('should get the home equity values up to the present month', () => {
       expect.assertions(3);
 
-      const expectedAprilEquity = 34500000 - 26755400;
+      const expectedAprilValue = 34500000;
+      const expectedAprilDebt = -26755400;
 
       const presentEquity = getHomeEquity(now)(stateWithHomeEquity).slice(0, 4);
 
       expect(presentEquity).toHaveLength(4);
       expect(presentEquity).toStrictEqual([
-        0, // Jan 18
-        0, // Feb 18
-        0, // Mar 18
-        expectedAprilEquity, // Apr 18
+        { value: 0, debt: -0 }, // Jan 18
+        { value: 0, debt: -0 }, // Feb 18
+        { value: 0, debt: -0 }, // Mar 18
+        { value: expectedAprilValue, debt: expectedAprilDebt }, // Apr 18
       ]);
 
       expect(presentEquity).toMatchInlineSnapshot(`
         Array [
-          0,
-          0,
-          0,
-          7744600,
+          Object {
+            "debt": -0,
+            "value": 0,
+          },
+          Object {
+            "debt": -0,
+            "value": 0,
+          },
+          Object {
+            "debt": -0,
+            "value": 0,
+          },
+          Object {
+            "debt": -26755400,
+            "value": 34500000,
+          },
         ]
       `);
     });
 
     it('should use the latest mortgage rate/terms/principal data to predict the future equity', () => {
-      expect.assertions(5);
+      expect.assertions(8);
 
-      const monthlyDebtPaid = 140842.5536318; // PMT(0.0276/12, 250, 267554) - monthly payment
+      const monthlyDebtPaid = 140386.57786325; // PMT(0.0276^(1/12), 250, 267554) - monthly payment
 
       const principalMay = principal * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
       const principalJun = principalMay * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
@@ -333,23 +357,32 @@ describe('Overview selectors (net worth)', () => {
       const housePriceJun = housePriceMay * (1 + assumedHousePriceInflation) ** (1 / 12);
       const housePriceJul = housePriceJun * (1 + assumedHousePriceInflation) ** (1 / 12);
 
-      const equityMay = housePriceMay - principalMay;
-      const equityJun = housePriceJun - principalJun;
-      const equityJul = housePriceJul - principalJul;
-
       const forecastEquity = getHomeEquity(now)(stateWithHomeEquity).slice(4);
 
       expect(forecastEquity).toHaveLength(3);
 
-      expect(forecastEquity[0] / 100).toBeCloseTo(equityMay / 100, 1);
-      expect(forecastEquity[1] / 100).toBeCloseTo(equityJun / 100, 1);
-      expect(forecastEquity[2] / 100).toBeCloseTo(equityJul / 100, 1);
+      expect(forecastEquity[0].value / 100).toBeCloseTo(housePriceMay / 100, 1);
+      expect(forecastEquity[1].value / 100).toBeCloseTo(housePriceJun / 100, 1);
+      expect(forecastEquity[2].value / 100).toBeCloseTo(housePriceJul / 100, 1);
+
+      expect(forecastEquity[0].debt / 100).toBeCloseTo(-principalMay / 100, 1);
+      expect(forecastEquity[1].debt / 100).toBeCloseTo(-principalJun / 100, 1);
+      expect(forecastEquity[2].debt / 100).toBeCloseTo(-principalJul / 100, 1);
 
       expect(forecastEquity).toMatchInlineSnapshot(`
         Array [
-          7965227,
-          8186609,
-          8408748,
+          Object {
+            "debt": -26675785.850005087,
+            "value": 34640557.27053587,
+          },
+          Object {
+            "debt": -26595990.863798123,
+            "value": 34781687.18879059,
+          },
+          Object {
+            "debt": -26516014.630626306,
+            "value": 34923392.08780186,
+          },
         ]
       `);
     });

@@ -44,25 +44,20 @@ describe('Overview selectors', () => {
       },
     };
 
-    const netWorthActual = [
-      /* Jan-18 */ 21000000 - 19319500,
-      /* Feb-18 */ 10324 +
-        37.5 * 0.035 * 100 +
-        855912 -
-        18744200 +
-        1296523 -
-        8751 +
-        21000000 +
-        10654,
-      /* Mar-18 */ 9752 +
-        11237 -
-        18420900 +
-        1051343 +
-        165 * 0.865 * 100 -
-        21939 +
-        21500000 +
-        698 * 123.6 +
-        94 * 200.1,
+    const assetsActual = [
+      /* Jan-18 */ 21000000,
+      /* Feb-18 */ 10324 + 37.5 * 0.035 * 100 + 855912 + 1296523 + 21000000 + 10654 + 657 * 123.6,
+      /* Mar-18 */ 9752 + 11237 + 1051343 + 165 * 0.865 * 100 + 21500000 + 698 * 123.6 + 94 * 200.1,
+      /* Apr-18 */ 0,
+      /* May-18 */ 0,
+      /* Jun-18 */ 0,
+      /* Jul-18 */ 0,
+    ];
+
+    const liabilitiesActual = [
+      /* Jan-18 */ -19319500,
+      /* Feb-18 */ -(18744200 + 8751),
+      /* Mar-18 */ -(18420900 + 21939),
       /* Apr-18 */ 0,
       /* May-18 */ 0,
       /* Jun-18 */ 0,
@@ -96,55 +91,79 @@ describe('Overview selectors', () => {
 
       const cashOther = [
         /* Jan-18 */ 0,
-        /* Feb-18 */ 855912,
-        /* Mar-18 */ 855912,
-        /* Apr-18 */ 855912,
-        /* May-18 */ 855912,
-        /* Jun-18 */ 855912,
-        /* Jul-18 */ 855912,
+        /* Feb-18 */ 855912 + Math.round(657 * 123.6),
+        /* Mar-18 */ 855912 + Math.round(657 * 123.6),
+        /* Apr-18 */ 855912 + Math.round(657 * 123.6),
+        /* May-18 */ 855912 + Math.round(657 * 123.6),
+        /* Jun-18 */ 855912 + Math.round(657 * 123.6),
+        /* Jul-18 */ 855912 + Math.round(657 * 123.6),
       ];
 
-      const monthlyMortgagePayment = ((2.74 / 1200) * 18744200) / (1 - (1 + 2.74 / 1200) ** -359);
+      const monthlyMortgagePayment =
+        ((1.0274 ** (1 / 12) - 1) * 18744200) / (1 - (1.0274 ** (1 / 12)) ** -359);
 
-      const homeEquity = [
-        /* Jan-18 */ 21000000 - 19319500,
-        /* Feb-18 */ 21000000 - 18744200,
-        /* Mar-18 */ 21000000 * 1.05 ** (1 / 12) -
-          (18744200 * 1.0274 ** (1 / 12) - monthlyMortgagePayment),
-        /* Apr-18 */ 21000000 * 1.05 ** (2 / 12) -
+      const homeValue = [
+        /* Jan-18 */ 21000000,
+        /* Feb-18 */ 21000000,
+        /* Mar-18 */ 21000000 * 1.05 ** (1 / 12),
+        /* Apr-18 */ 21000000 * 1.05 ** (2 / 12),
+        /* May-18 */ 21000000 * 1.05 ** (3 / 12),
+        /* Jun-18 */ 21000000 * 1.05 ** (4 / 12),
+        /* Jul-18 */ 21000000 * 1.05 ** (5 / 12),
+      ];
+
+      const homeDebt = [
+        /* Jan-18 */ -19319500,
+        /* Feb-18 */ -18744200,
+        /* Mar-18 */ -(18744200 * 1.0274 ** (1 / 12) - monthlyMortgagePayment),
+        /* Apr-18 */ -(
+          (18744200 * 1.0274 ** (1 / 12) - monthlyMortgagePayment) * 1.0274 ** (1 / 12) -
+          monthlyMortgagePayment
+        ),
+        /* May-18 */ -(
           ((18744200 * 1.0274 ** (1 / 12) - monthlyMortgagePayment) * 1.0274 ** (1 / 12) -
-            monthlyMortgagePayment),
-        /* May-18 */ 21000000 * 1.05 ** (3 / 12) -
+            monthlyMortgagePayment) *
+            1.0274 ** (1 / 12) -
+          monthlyMortgagePayment
+        ),
+        /* Jun-18 */ -(
           (((18744200 * 1.0274 ** (1 / 12) - monthlyMortgagePayment) * 1.0274 ** (1 / 12) -
             monthlyMortgagePayment) *
             1.0274 ** (1 / 12) -
-            monthlyMortgagePayment),
-        /* Jun-18 */ 21000000 * 1.05 ** (4 / 12) -
+            monthlyMortgagePayment) *
+            1.0274 ** (1 / 12) -
+          monthlyMortgagePayment
+        ),
+        /* Jul-18 */ -(
           ((((18744200 * 1.0274 ** (1 / 12) - monthlyMortgagePayment) * 1.0274 ** (1 / 12) -
             monthlyMortgagePayment) *
             1.0274 ** (1 / 12) -
             monthlyMortgagePayment) *
             1.0274 ** (1 / 12) -
-            monthlyMortgagePayment),
-        /* Jul-18 */ 21000000 * 1.05 ** (5 / 12) -
-          (((((18744200 * 1.0274 ** (1 / 12) - monthlyMortgagePayment) * 1.0274 ** (1 / 12) -
             monthlyMortgagePayment) *
             1.0274 ** (1 / 12) -
-            monthlyMortgagePayment) *
-            1.0274 ** (1 / 12) -
-            monthlyMortgagePayment) *
-            1.0274 ** (1 / 12) -
-            monthlyMortgagePayment),
-      ].map(Math.round);
+          monthlyMortgagePayment
+        ),
+      ];
+
+      const homeEquity = [
+        /* Jan-18 */ homeValue[0] + homeDebt[0],
+        /* Feb-18 */ homeValue[1] + homeDebt[1],
+        /* Mar-18 */ homeValue[2] + homeDebt[2],
+        /* Apr-18 */ homeValue[3] + homeDebt[3],
+        /* May-18 */ homeValue[4] + homeDebt[4],
+        /* Jun-18 */ homeValue[5] + homeDebt[5],
+        /* Jul-18 */ homeValue[6] + homeDebt[6],
+      ];
 
       const options = [
         /* Jan-18 */ 0,
-        /* Feb-18 */ 0,
-        /* Mar-18 */ 0, // predict current month; there are no options in Feb
-        /* Apr-18 */ 0,
-        /* May-18 */ 0,
-        /* Jun-18 */ 0,
-        /* Jul-18 */ 0,
+        /* Feb-18 */ 657 * (176.28 - 123.6),
+        /* Mar-18 */ 657 * (176.28 - 123.6), // predict current month
+        /* Apr-18 */ 657 * (176.28 - 123.6),
+        /* May-18 */ 657 * (176.28 - 123.6),
+        /* Jun-18 */ 657 * (176.28 - 123.6),
+        /* Jul-18 */ 657 * (176.28 - 123.6),
       ];
 
       const income = [2000, 1900, 1500, 2500, 2300, 1800, 2600];
@@ -164,83 +183,128 @@ describe('Overview selectors', () => {
         /* Jul-18 */ 277,
       ];
 
-      const netWorthPredictedMar18 =
-        netWorthActual[1] +
+      const assetsPredictedMar18 =
+        assetsActual[1] +
         income[2] -
         spending[2] +
         stocks[2] -
         stocks[1] +
         /* fund-A Mar-27 transaction */ (1804 * 1.32 - 0.72) -
         /* fund-B Mar-17 transaction */ (109 * 51 + 3) +
-        homeEquity[2] -
-        homeEquity[1];
+        homeValue[2] -
+        homeValue[1] +
+        cashOther[2] -
+        cashOther[1];
 
       // We're currently in March, but not at the end of the month, so we predict the next
       // month's value based on the prediction for March
-      const netWorthPredictedApr18 =
-        netWorthPredictedMar18 +
+      const assetsPredictedApr18 =
+        assetsPredictedMar18 +
         income[3] -
         spending[3] +
         stocks[3] -
         stocks[2] +
-        homeEquity[3] -
-        homeEquity[2];
-      const netWorthPredictedMay18 =
-        netWorthPredictedApr18 +
+        homeValue[3] -
+        homeValue[2] +
+        cashOther[3] -
+        cashOther[2];
+      const assetsPredictedMay18 =
+        assetsPredictedApr18 +
         income[4] -
         spending[4] +
         stocks[4] -
         stocks[3] +
-        homeEquity[4] -
-        homeEquity[3];
-      const netWorthPredictedJun18 =
-        netWorthPredictedMay18 +
+        homeValue[4] -
+        homeValue[3] +
+        cashOther[4] -
+        cashOther[3];
+      const assetsPredictedJun18 =
+        assetsPredictedMay18 +
         income[5] -
         spending[5] +
         stocks[5] -
         stocks[4] +
-        homeEquity[5] -
-        homeEquity[4];
-      const netWorthPredictedJul18 =
-        netWorthPredictedJun18 +
+        homeValue[5] -
+        homeValue[4] +
+        cashOther[5] -
+        cashOther[4];
+      const assetsPredictedJul18 =
+        assetsPredictedJun18 +
         income[6] -
         spending[6] +
         stocks[6] -
         stocks[5] +
-        homeEquity[6] -
-        homeEquity[5];
+        homeValue[6] -
+        homeValue[5] +
+        cashOther[6] -
+        cashOther[5];
+
+      const liabilitiesPredictedMar18 = liabilitiesActual[1] + homeDebt[2] - homeDebt[1];
+      const liabilitiesPredictedApr18 = liabilitiesPredictedMar18 + homeDebt[3] - homeDebt[2];
+      const liabilitiesPredictedMay18 = liabilitiesPredictedApr18 + homeDebt[4] - homeDebt[3];
+      const liabilitiesPredictedJun18 = liabilitiesPredictedMay18 + homeDebt[5] - homeDebt[4];
+      const liabilitiesPredictedJul18 = liabilitiesPredictedJun18 + homeDebt[6] - homeDebt[5];
+
+      const assets = [
+        /* Jan-18 */ assetsActual[0],
+        /* Feb-18 */ assetsActual[1],
+        /* Mar-18 */ assetsPredictedMar18,
+        /* Apr-18 */ assetsPredictedApr18,
+        /* May-18 */ assetsPredictedMay18,
+        /* Jun-18 */ assetsPredictedJun18,
+        /* Jul-18 */ assetsPredictedJul18,
+      ];
+
+      const liabilities = [
+        /* Jan-18 */ liabilitiesActual[0],
+        /* Feb-18 */ liabilitiesActual[1],
+        /* Mar-18 */ liabilitiesPredictedMar18,
+        /* Apr-18 */ liabilitiesPredictedApr18,
+        /* May-18 */ liabilitiesPredictedMay18,
+        /* Jun-18 */ liabilitiesPredictedJun18,
+        /* Jul-18 */ liabilitiesPredictedJul18,
+      ];
 
       // We include the current month's prediction in the combined list,
       // because we're not yet at the end of the month
       const netWorth = [
-        /* Jan-18 */ netWorthActual[0],
-        /* Feb-18 */ netWorthActual[1],
-        /* Mar-18 */ netWorthPredictedMar18,
-        /* Apr-18 */ netWorthPredictedApr18,
-        /* May-18 */ netWorthPredictedMay18,
-        /* Jun-18 */ netWorthPredictedJun18,
-        /* Jul-18 */ netWorthPredictedJul18,
-      ].map(Math.round);
+        /* Jan-18 */ assets[0] + liabilities[0],
+        /* Feb-18 */ assets[1] + liabilities[1],
+        /* Mar-18 */ assets[2] + liabilities[2],
+        /* Apr-18 */ assets[3] + liabilities[3],
+        /* May-18 */ assets[4] + liabilities[4],
+        /* Jun-18 */ assets[5] + liabilities[5],
+        /* Jul-18 */ assets[6] + liabilities[6],
+      ];
 
       it.each`
-        description                        | prop            | value
-        ${'net worth (excluding options)'} | ${'netWorth'}   | ${netWorth}
-        ${'investments (excluding cash)'}  | ${'stocks'}     | ${stocks}
-        ${'pension'}                       | ${'pension'}    | ${pension}
-        ${'other cash'}                    | ${'cashOther'}  | ${cashOther}
-        ${'home equity'}                   | ${'homeEquity'} | ${homeEquity}
-        ${'options'}                       | ${'options'}    | ${options}
-        ${'income'}                        | ${'income'}     | ${income}
-        ${'bills'}                         | ${'bills'}      | ${bills}
-        ${'food'}                          | ${'food'}       | ${food}
-        ${'general'}                       | ${'general'}    | ${general}
-        ${'social'}                        | ${'social'}     | ${social}
-        ${'holiday'}                       | ${'holiday'}    | ${holiday}
-        ${'spending'}                      | ${'spending'}   | ${spending}
+        description                        | prop             | value
+        ${'net worth (excluding options)'} | ${'netWorth'}    | ${netWorth}
+        ${'assets'}                        | ${'assets'}      | ${assets}
+        ${'liabilities'}                   | ${'liabilities'} | ${liabilities}
+        ${'investments (excluding cash)'}  | ${'stocks'}      | ${stocks}
+        ${'pension'}                       | ${'pension'}     | ${pension}
+        ${'other cash'}                    | ${'cashOther'}   | ${cashOther}
+        ${'home equity'}                   | ${'homeEquity'}  | ${homeEquity}
+        ${'options'}                       | ${'options'}     | ${options}
+        ${'income'}                        | ${'income'}      | ${income}
+        ${'bills'}                         | ${'bills'}       | ${bills}
+        ${'food'}                          | ${'food'}        | ${food}
+        ${'general'}                       | ${'general'}     | ${general}
+        ${'social'}                        | ${'social'}      | ${social}
+        ${'holiday'}                       | ${'holiday'}     | ${holiday}
+        ${'spending'}                      | ${'spending'}    | ${spending}
       `('should add values for $description', ({ prop, value }) => {
         expect.assertions(1);
-        const result = getProcessedMonthlyValues(dateInMiddleOfMonth)(testState);
-        expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value);
+        const { values: result } = getProcessedMonthlyValues(dateInMiddleOfMonth)(testState);
+        expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value.map(Math.round));
+      });
+
+      it('should return the start prediction index', () => {
+        expect.assertions(1);
+        expect(getProcessedMonthlyValues(dateInMiddleOfMonth)(testState).startPredictionIndex).toBe(
+          2,
+        );
       });
     });
 
@@ -252,7 +316,7 @@ describe('Overview selectors', () => {
       const stocks = [
         /* Jan-18 */ 100779,
         /* Feb-18 */ 101459,
-        /* Mar-18 */ currentFundsValue,
+        /* Mar-18 */ Math.round(currentFundsValue),
         /* Apr-18 */ 104281,
         /* May-18 */ 105597,
         /* Jun-18 */ 106930,
@@ -271,50 +335,82 @@ describe('Overview selectors', () => {
 
       const cashOther = [
         /* Jan-18 */ 0,
-        /* Feb-18 */ 855912,
-        /* Mar-18 */ Math.round(165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1),
-        /* Apr-18 */ Math.round(165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1),
-        /* May-18 */ Math.round(165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1),
-        /* Jun-18 */ Math.round(165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1),
-        /* Jul-18 */ Math.round(165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1),
+        /* Feb-18 */ 855912 + 657 * 123.6,
+        /* Mar-18 */ 165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1,
+        /* Apr-18 */ 165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1 + 41 * 1 * 123.6,
+        /* May-18 */ 165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1 + 41 * 2 * 123.6,
+        /* Jun-18 */ 165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1 + 41 * 3 * 123.6,
+        /* Jul-18 */ 165 * 0.865 * 100 + 698 * 123.6 + 94 * 200.1 + 41 * 4 * 123.6,
       ];
 
-      const monthlyMortgagePayment = ((2.79 / 1200) * 18420900) / (1 - (1 + 2.79 / 1200) ** -358);
+      const monthlyMortgagePayment =
+        ((1.0279 ** (1 / 12) - 1) * 18420900) / (1 - (1.0279 ** (1 / 12)) ** -358);
 
-      const homeEquity = [
-        /* Jan-18 */ 21000000 - 19319500,
-        /* Feb-18 */ 21000000 - 18744200,
-        /* Mar-18 */ 21500000 - 18420900,
-        /* Apr-18 */ 21500000 * 1.05 ** (1 / 12) -
-          (18420900 * 1.0279 ** (1 / 12) - monthlyMortgagePayment),
-        /* May-18 */ 21500000 * 1.05 ** (2 / 12) -
+      const homeValue = [
+        /* Jan-18 */ 21000000,
+        /* Feb-18 */ 21000000,
+        /* Mar-18 */ 21500000,
+        /* Apr-18 */ 21500000 * 1.05 ** (1 / 12),
+        /* May-18 */ 21500000 * 1.05 ** (2 / 12),
+        /* Jun-18 */ 21500000 * 1.05 ** (3 / 12),
+        /* Jul-18 */ 21500000 * 1.05 ** (4 / 12),
+      ];
+
+      const homeDebt = [
+        /* Jan-18 */ -19319500,
+        /* Feb-18 */ -18744200,
+        /* Mar-18 */ -18420900,
+        /* Apr-18 */ -(18420900 * 1.0279 ** (1 / 12) - monthlyMortgagePayment),
+        /* May-18 */ -(
+          (18420900 * 1.0279 ** (1 / 12) - monthlyMortgagePayment) * 1.0279 ** (1 / 12) -
+          monthlyMortgagePayment
+        ),
+        /* Jun-18 */ -(
           ((18420900 * 1.0279 ** (1 / 12) - monthlyMortgagePayment) * 1.0279 ** (1 / 12) -
-            monthlyMortgagePayment),
-        /* Jun-18 */ 21500000 * 1.05 ** (3 / 12) -
+            monthlyMortgagePayment) *
+            1.0279 ** (1 / 12) -
+          monthlyMortgagePayment
+        ),
+        /* Jul-18 */ -(
           (((18420900 * 1.0279 ** (1 / 12) - monthlyMortgagePayment) * 1.0279 ** (1 / 12) -
             monthlyMortgagePayment) *
             1.0279 ** (1 / 12) -
-            monthlyMortgagePayment),
-        /* Jul-18 */ 21500000 * 1.05 ** (4 / 12) -
-          ((((18420900 * 1.0279 ** (1 / 12) - monthlyMortgagePayment) * 1.0279 ** (1 / 12) -
             monthlyMortgagePayment) *
             1.0279 ** (1 / 12) -
-            monthlyMortgagePayment) *
-            1.0279 ** (1 / 12) -
-            monthlyMortgagePayment),
-      ].map(Math.round);
+          monthlyMortgagePayment
+        ),
+      ];
 
+      const homeEquity = [
+        /* Jan-18 */ homeValue[0] + homeDebt[0],
+        /* Feb-18 */ homeValue[1] + homeDebt[1],
+        /* Mar-18 */ homeValue[2] + homeDebt[2],
+        /* Apr-18 */ homeValue[3] + homeDebt[3],
+        /* May-18 */ homeValue[4] + homeDebt[4],
+        /* Jun-18 */ homeValue[5] + homeDebt[5],
+        /* Jul-18 */ homeValue[6] + homeDebt[6],
+      ];
+
+      const feb18OptionValue = 657 * (176.28 - 123.6);
       const mar18OptionValue = 698 * (182.3 - 123.6) + 101 * (95.57 - 77.65);
+      const apr18OptionValue =
+        698 * (182.3 - 123.6) + 101 * (95.57 - 77.65) + 41 * 1 * (182.3 - 123.6);
+      const may18OptionValue =
+        698 * (182.3 - 123.6) + 101 * (95.57 - 77.65) + 41 * 2 * (182.3 - 123.6);
+      const jun18OptionValue =
+        698 * (182.3 - 123.6) + 101 * (95.57 - 77.65) + 41 * 3 * (182.3 - 123.6);
+      const jul18OptionValue =
+        698 * (182.3 - 123.6) + 101 * (95.57 - 77.65) + 41 * 4 * (182.3 - 123.6);
 
       const options = [
         /* Jan-18 */ 0,
-        /* Feb-18 */ 0,
+        /* Feb-18 */ feb18OptionValue,
         /* Mar-18 */ mar18OptionValue,
-        /* Apr-18 */ mar18OptionValue,
-        /* May-18 */ mar18OptionValue,
-        /* Jun-18 */ mar18OptionValue,
-        /* Jul-18 */ mar18OptionValue,
-      ].map(Math.round);
+        /* Apr-18 */ apr18OptionValue,
+        /* May-18 */ may18OptionValue,
+        /* Jun-18 */ jun18OptionValue,
+        /* Jul-18 */ jul18OptionValue,
+      ];
 
       const income = [2000, 1900, 1500, 2500, 2300, 1800, 2600];
       const bills = [1000, 900, 400, 650, 0, 0, 0];
@@ -335,68 +431,108 @@ describe('Overview selectors', () => {
 
       // We're currently in March, at the end of the month, so we
       // start predicting from April onwards
-      const netWorthPredictedApr18 =
-        netWorthActual[2] +
+      const assetsPredictedApr18 =
+        assetsActual[2] +
         income[3] -
         spending[3] +
         stocks[3] -
         stocks[2] +
-        homeEquity[3] -
-        homeEquity[2];
-      const netWorthPredictedMay18 =
-        netWorthPredictedApr18 +
+        homeValue[3] -
+        homeValue[2] +
+        cashOther[3] -
+        cashOther[2];
+      const assetsPredictedMay18 =
+        assetsPredictedApr18 +
         income[4] -
         spending[4] +
         stocks[4] -
         stocks[3] +
-        homeEquity[4] -
-        homeEquity[3];
-      const netWorthPredictedJun18 =
-        netWorthPredictedMay18 +
+        homeValue[4] -
+        homeValue[3] +
+        cashOther[4] -
+        cashOther[3];
+      const assetsPredictedJun18 =
+        assetsPredictedMay18 +
         income[5] -
         spending[5] +
         stocks[5] -
         stocks[4] +
-        homeEquity[5] -
-        homeEquity[4];
-      const netWorthPredictedJul18 =
-        netWorthPredictedJun18 +
+        homeValue[5] -
+        homeValue[4] +
+        cashOther[5] -
+        cashOther[4];
+      const assetsPredictedJul18 =
+        assetsPredictedJun18 +
         income[6] -
         spending[6] +
         stocks[6] -
         stocks[5] +
-        homeEquity[6] -
-        homeEquity[5];
+        homeValue[6] -
+        homeValue[5] +
+        cashOther[6] -
+        cashOther[5];
+
+      const liabilitiesPredictedApr18 = liabilitiesActual[2] + homeDebt[3] - homeDebt[2];
+      const liabilitiesPredictedMay18 = liabilitiesPredictedApr18 + homeDebt[4] - homeDebt[3];
+      const liabilitiesPredictedJun18 = liabilitiesPredictedMay18 + homeDebt[5] - homeDebt[4];
+      const liabilitiesPredictedJul18 = liabilitiesPredictedJun18 + homeDebt[6] - homeDebt[5];
+
+      const assets = [
+        /* Jan-18 */ assetsActual[0],
+        /* Feb-18 */ assetsActual[1],
+        /* Mar-18 */ assetsActual[2],
+        /* Apr-18 */ assetsPredictedApr18,
+        /* May-18 */ assetsPredictedMay18,
+        /* Jun-18 */ assetsPredictedJun18,
+        /* Jul-18 */ assetsPredictedJul18,
+      ];
+
+      const liabilities = [
+        /* Jan-18 */ liabilitiesActual[0],
+        /* Feb-18 */ liabilitiesActual[1],
+        /* Mar-18 */ liabilitiesActual[2],
+        /* Apr-18 */ liabilitiesPredictedApr18,
+        /* May-18 */ liabilitiesPredictedMay18,
+        /* Jun-18 */ liabilitiesPredictedJun18,
+        /* Jul-18 */ liabilitiesPredictedJul18,
+      ];
 
       const netWorth = [
-        /* Jan-18 */ netWorthActual[0],
-        /* Feb-18 */ netWorthActual[1],
-        /* Mar-18 */ netWorthActual[2],
-        /* Apr-18 */ netWorthPredictedApr18,
-        /* May-18 */ netWorthPredictedMay18,
-        /* Jun-18 */ netWorthPredictedJun18,
-        /* Jul-18 */ netWorthPredictedJul18,
-      ].map(Math.round);
+        /* Jan-18 */ assets[0] + liabilities[0],
+        /* Feb-18 */ assets[1] + liabilities[1],
+        /* Mar-18 */ assets[2] + liabilities[2],
+        /* Apr-18 */ assets[3] + liabilities[3],
+        /* May-18 */ assets[4] + liabilities[4],
+        /* Jun-18 */ assets[5] + liabilities[5],
+        /* Jul-18 */ assets[6] + liabilities[6],
+      ];
 
       it.each`
-        description                        | prop            | value
-        ${'net worth (excluding options)'} | ${'netWorth'}   | ${netWorth}
-        ${'stocks'}                        | ${'stocks'}     | ${stocks}
-        ${'pension'}                       | ${'pension'}    | ${pension}
-        ${'other cash'}                    | ${'cashOther'}  | ${cashOther}
-        ${'home equity'}                   | ${'homeEquity'} | ${homeEquity}
-        ${'options'}                       | ${'options'}    | ${options}
-        ${'income'}                        | ${'income'}     | ${income}
-        ${'bills'}                         | ${'bills'}      | ${bills}
-        ${'food'}                          | ${'food'}       | ${food}
-        ${'general'}                       | ${'general'}    | ${general}
-        ${'social'}                        | ${'social'}     | ${social}
-        ${'holiday'}                       | ${'holiday'}    | ${holiday}
-        ${'spending'}                      | ${'spending'}   | ${spending}
+        description                        | prop             | value
+        ${'assets'}                        | ${'assets'}      | ${assets}
+        ${'liabilities'}                   | ${'liabilities'} | ${liabilities}
+        ${'net worth (excluding options)'} | ${'netWorth'}    | ${netWorth}
+        ${'stocks'}                        | ${'stocks'}      | ${stocks}
+        ${'pension'}                       | ${'pension'}     | ${pension}
+        ${'other cash'}                    | ${'cashOther'}   | ${cashOther}
+        ${'home equity'}                   | ${'homeEquity'}  | ${homeEquity}
+        ${'options'}                       | ${'options'}     | ${options}
+        ${'income'}                        | ${'income'}      | ${income}
+        ${'bills'}                         | ${'bills'}       | ${bills}
+        ${'food'}                          | ${'food'}        | ${food}
+        ${'general'}                       | ${'general'}     | ${general}
+        ${'social'}                        | ${'social'}      | ${social}
+        ${'holiday'}                       | ${'holiday'}     | ${holiday}
+        ${'spending'}                      | ${'spending'}    | ${spending}
       `('should use the actual $description value for the current month', ({ prop, value }) => {
         expect.assertions(1);
-        const result = getProcessedMonthlyValues(dateAtEndOfMonth)(testState);
-        expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value);
+        const { values: result } = getProcessedMonthlyValues(dateAtEndOfMonth)(testState);
+        expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value.map(Math.round));
+      });
+
+      it('should return the start prediction index', () => {
+        expect.assertions(1);
+        expect(getProcessedMonthlyValues(dateAtEndOfMonth)(testState).startPredictionIndex).toBe(3);
       });
     });
 
@@ -422,8 +558,8 @@ describe('Overview selectors', () => {
 
       it('should recalculate the current month fund value', () => {
         expect.assertions(1);
-        const result = getProcessedMonthlyValues(now)(testStateWithFundPrices);
-        expect(result.stocks[2]).toBeCloseTo(101 * 67.93);
+        const { values: result } = getProcessedMonthlyValues(now)(testStateWithFundPrices);
+        expect(result.stocks[2]).toBe(Math.round(101 * 67.93));
       });
     });
   });
@@ -514,7 +650,7 @@ describe('Overview selectors', () => {
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4420593,
+                "value": 4501798,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -564,7 +700,7 @@ describe('Overview selectors', () => {
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4838864,
+                "value": 4919735,
               },
               "social": Object {
                 "rgb": "#bf9e24",
@@ -576,7 +712,7 @@ describe('Overview selectors', () => {
               },
               "stocks": Object {
                 "rgb": "#546e7a",
-                "value": 399098.2,
+                "value": 399098,
               },
             },
             "future": false,
@@ -614,7 +750,7 @@ describe('Overview selectors', () => {
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4665891,
+                "value": 4746426,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -664,7 +800,7 @@ describe('Overview selectors', () => {
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4789929,
+                "value": 4870127,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -714,7 +850,7 @@ describe('Overview selectors', () => {
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4913913,
+                "value": 4993774,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -764,7 +900,7 @@ describe('Overview selectors', () => {
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 5039144,
+                "value": 5118667,
               },
               "social": Object {
                 "rgb": "#dfcf92",

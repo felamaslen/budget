@@ -232,7 +232,6 @@ export function getStackedData(data: Data, stack?: GraphStack): Data {
 
 export function getLinePath({
   width = 0,
-  height = 0,
   data,
   stack,
   secondary,
@@ -273,12 +272,12 @@ export function getLinePath({
       {
         start: lastInArray(pixels),
         type: 'L',
-        args: [[width, height]],
+        args: [[width, pixY(0)]],
       },
       {
-        start: [width, height],
+        start: [width, pixY(0)],
         type: 'L',
-        args: [[pixels[0][0], height]],
+        args: [[pixels[0][0], pixY(0)]],
       },
     ];
   }

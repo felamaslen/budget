@@ -24,7 +24,7 @@ const keyY1 = 56;
 const keyY2 = 72;
 
 export const Key: React.FC<Props> = (props) => (
-  <BaseKey {...props} height={80}>
+  <BaseKey {...props} height={80} width={250}>
     <line
       x1={keyX0}
       y1={keyY0}

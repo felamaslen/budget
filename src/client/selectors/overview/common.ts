@@ -24,6 +24,20 @@ import type {
 import { PageListStandard } from '~client/types/enum';
 import type { ListItemStandard, Monthly } from '~client/types/gql';
 
+export const roundedArrays = <T extends Record<string, unknown[]>>(items: T): T =>
+  Object.entries(items).reduce<T>(
+    (last, [key, values]) =>
+      Array.isArray(values) ? { ...last, [key]: values.map(Math.round) } : last,
+    items,
+  );
+
+export const roundedNumbers = <T extends Record<string, unknown>>(items: T): T =>
+  Object.entries(items).reduce<T>(
+    (last, [key, value]) =>
+      typeof value === 'number' ? { ...last, [key]: Math.round(value) } : last,
+    items,
+  );
+
 export const getMonthlyValues = (state: State): Monthly => state.overview.monthly;
 
 const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);

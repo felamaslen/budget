@@ -36,19 +36,22 @@ export const GraphOverview: React.FC = () => {
   const mergedMonthly = useMemo<MergedMonthly>(() => {
     const overviewOld = showAllAndReady ? oldData?.overviewOld : undefined;
     if (!overviewOld) {
-      return monthly;
+      return { ...monthly.values, startPredictionIndex: monthly.startPredictionIndex };
     }
 
     const mergedData: Omit<MergedMonthly, 'net'> = {
-      netWorth: [...overviewOld.netWorth, ...monthly.netWorth],
-      stocks: [...overviewOld.stocks, ...monthly.stocks],
-      pension: [...overviewOld.pension, ...monthly.pension],
-      cashOther: [...overviewOld.cashOther, ...monthly.cashOther],
-      investments: [...overviewOld.investments, ...monthly.investments],
-      homeEquity: [...overviewOld.homeEquity, ...monthly.homeEquity],
-      options: [...overviewOld.options, ...monthly.options],
-      income: [...overviewOld.income, ...monthly.income],
-      spending: [...overviewOld.spending, ...monthly.spending],
+      startPredictionIndex: monthly.startPredictionIndex + overviewOld.netWorth.length,
+      assets: [...overviewOld.assets, ...monthly.values.assets],
+      liabilities: [...overviewOld.liabilities, ...monthly.values.liabilities],
+      netWorth: [...overviewOld.netWorth, ...monthly.values.netWorth],
+      stocks: [...overviewOld.stocks, ...monthly.values.stocks],
+      pension: [...overviewOld.pension, ...monthly.values.pension],
+      cashOther: [...overviewOld.cashOther, ...monthly.values.cashOther],
+      investments: [...overviewOld.investments, ...monthly.values.investments],
+      homeEquity: [...overviewOld.homeEquity, ...monthly.values.homeEquity],
+      options: [...overviewOld.options, ...monthly.values.options],
+      income: [...overviewOld.income, ...monthly.values.income],
+      spending: [...overviewOld.spending, ...monthly.values.spending],
     };
 
     const mergedNet = mergedData.income.map((value, index) => value - mergedData.spending[index]);

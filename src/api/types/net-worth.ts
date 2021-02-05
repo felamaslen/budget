@@ -78,7 +78,8 @@ export type JoinedEntryRowWithMortgageValue = JoinedEntryRow & {
 
 export type OldNetWorthRow = {
   date: string;
-  net_worth: number;
+  assets: number;
+  liabilities: number;
   pension: number;
   options: number;
   home_equity: number;

@@ -5,29 +5,36 @@ import * as Styled from './styles';
 type Props = {
   isLoading?: boolean;
   showAll: boolean;
-  setShowAll: (next: (last: boolean) => boolean) => void;
+  setShowAll: React.Dispatch<React.SetStateAction<boolean>>;
+  showLiabilities: boolean;
+  setShowLiabilities: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export const AfterCanvas: React.FC<Props> = ({ isLoading, showAll, setShowAll }) => {
-  const skip = useCallback((event) => {
+const ToggleContainer: React.FC<
+  Styled.PropsToggleContainer & {
+    value: boolean;
+    setValue: React.Dispatch<React.SetStateAction<boolean>>;
+  }
+> = ({ value, setValue, isLoading, children }) => {
+  const skip = useCallback((event: React.MouseEvent | React.TouchEvent | React.FocusEvent) => {
     event.stopPropagation();
   }, []);
 
   const onToggle = useCallback(
-    (event) => {
+    (event: React.MouseEvent) => {
       if (isLoading) {
         return;
       }
       skip(event);
-      setShowAll((last: boolean): boolean => !last);
+      setValue((last) => !last);
     },
-    [isLoading, setShowAll, skip],
+    [setValue, isLoading, skip],
   );
 
   return (
-    <Styled.ShowAll
-      isLoading={isLoading}
+    <Styled.ToggleContainer
       onClick={onToggle}
+      isLoading={isLoading}
       onMouseMove={skip}
       onMouseOver={skip}
       onFocus={skip}
@@ -37,8 +44,25 @@ export const AfterCanvas: React.FC<Props> = ({ isLoading, showAll, setShowAll })
       onTouchMove={skip}
       onTouchEnd={skip}
     >
-      <Styled.CheckBox enabled={showAll} />
-      <span>Show all</span>
-    </Styled.ShowAll>
+      <Styled.CheckBox enabled={value} />
+      <span>{children}</span>
+    </Styled.ToggleContainer>
   );
 };
+
+export const AfterCanvas: React.FC<Props> = ({
+  isLoading,
+  showAll,
+  setShowAll,
+  showLiabilities,
+  setShowLiabilities,
+}) => (
+  <Styled.Toggles>
+    <ToggleContainer value={showLiabilities} setValue={setShowLiabilities}>
+      Split
+    </ToggleContainer>
+    <ToggleContainer value={showAll} setValue={setShowAll} isLoading={isLoading}>
+      Show all
+    </ToggleContainer>
+  </Styled.Toggles>
+);

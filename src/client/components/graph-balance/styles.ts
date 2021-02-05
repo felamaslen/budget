@@ -5,18 +5,23 @@ import { rem } from 'polished';
 import { FlexCenter } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
 
-export const ShowAll = styled(FlexCenter)<{ isLoading?: boolean }>(
+export const Toggles = styled(FlexCenter)`
+  height: ${rem(20)};
+  position: absolute;
+  right: 0;
+  top: 0;
+  user-select: none;
+`;
+
+export type PropsToggleContainer = { isLoading?: boolean };
+
+export const ToggleContainer = styled(FlexCenter)<PropsToggleContainer>(
   ({ isLoading }) => css`
     background: ${colors.translucent.light.dark};
     cursor: pointer;
     font-size: ${rem(14)};
-    height: ${rem(20)};
     line-height: 100%;
     padding: ${rem(2)} ${rem(4)};
-    position: absolute;
-    right: 0;
-    top: 0;
-    user-select: none;
 
     ${isLoading &&
     css`

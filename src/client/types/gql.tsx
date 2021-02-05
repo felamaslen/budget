@@ -872,6 +872,8 @@ export type Overview = {
 export type OverviewOld = {
   __typename?: 'OverviewOld';
   startDate: Scalars['DateTime'];
+  assets: Array<Scalars['Int']>;
+  liabilities: Array<Scalars['Int']>;
   netWorth: Array<Scalars['Int']>;
   stocks: Array<Scalars['Int']>;
   pension: Array<Scalars['Int']>;
@@ -1513,7 +1515,7 @@ export type OverviewOldQuery = (
   { __typename?: 'Query' }
   & { overviewOld?: Maybe<(
     { __typename?: 'OverviewOld' }
-    & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'cashOther' | 'investments' | 'homeEquity' | 'options' | 'netWorth' | 'income' | 'spending'>
+    & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'cashOther' | 'investments' | 'homeEquity' | 'assets' | 'liabilities' | 'options' | 'netWorth' | 'income' | 'spending'>
   )> }
 );
 
@@ -2449,6 +2451,8 @@ export const OverviewOldDocument = gql`
     cashOther
     investments
     homeEquity
+    assets
+    liabilities
     options
     netWorth
     income
