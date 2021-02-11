@@ -23,7 +23,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  global.server.close();
+  global.server?.close();
 
   nock.enableNetConnect();
 });

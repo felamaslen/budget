@@ -201,19 +201,32 @@ describe('Fund scraper - integration tests', () => {
         await setupNocks(['share', 'shareFX']);
       };
 
-      it('should skip the funds with failed requests', async () => {
+      it('should re-throw the error', async () => {
+        expect.assertions(1);
+        await setupNocksWithFailure();
+
+        await expect(run()).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Request failed with status code 500"`,
+        );
+      });
+
+      it('should not add any items to the database', async () => {
         expect.assertions(3);
         await setupNocksWithFailure();
 
-        await run();
+        try {
+          await run();
+        } catch (err) {
+          // pass
+        } finally {
+          const gbxResult = await getTestFundPrice(fundIds[0]);
+          const fundResult = await getTestFundPrice(fundIds[1]);
+          const usdResult = await getTestFundPrice(fundIds[2]);
 
-        const gbxResult = await getTestFundPrice(fundIds[0]);
-        const fundResult = await getTestFundPrice(fundIds[1]);
-        const usdResult = await getTestFundPrice(fundIds[2]);
-
-        expect(gbxResult).toHaveLength(0);
-        expect(fundResult).toHaveLength(1);
-        expect(usdResult).toHaveLength(0);
+          expect(gbxResult).toHaveLength(0);
+          expect(fundResult).toHaveLength(0);
+          expect(usdResult).toHaveLength(0);
+        }
       });
     });
 

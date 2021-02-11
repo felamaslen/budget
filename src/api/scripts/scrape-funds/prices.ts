@@ -42,7 +42,7 @@ export const getGenericQuotes = (funds: Fund[]): Promise<(number | null)[]> =>
         return await getStockQuote(symbol);
       } catch (err) {
         logger.error(`Error getting generic quote ${symbol}: ${err.message}`);
-        return null;
+        throw err;
       }
     }),
   );

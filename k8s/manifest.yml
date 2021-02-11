@@ -221,7 +221,7 @@ spec:
                       key: url
                 - name: REDIS_HOST
                   value: budget-redis
-          restartPolicy: Never
+          restartPolicy: OnFailure
           dnsConfig:
             options:
               - name: ndots
