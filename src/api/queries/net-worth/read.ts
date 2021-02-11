@@ -280,7 +280,7 @@ export async function selectOldNetWorth(
       [
         sql`v.date`,
         sql`values_assets.value AS assets`,
-        sql`-1 * values_liabilities.value AS liabilities`,
+        sql`values_liabilities.value AS liabilities`,
         sql`values_pension.value AS pension`,
         sql`values_options.value AS options`,
         sql`values_home_equity.value AS home_equity`,

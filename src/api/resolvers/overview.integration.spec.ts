@@ -14,6 +14,7 @@ describe('Overview resolver', () => {
     clock = sinon.useFakeTimers(now);
     app = await getTestApp();
 
+    await app.db('net_worth').del();
     await seedData(app.uid, app.db);
   });
   afterAll(async () => {
@@ -308,7 +309,8 @@ describe('Overview resolver', () => {
           /* locked cash */ 1667500 +
           /* fx */ 62000 * 0.113 * 100 +
           /* house */ 42500000 +
-          /* SAYE */ 993 * 1350.3 +
+          /* pension */ 1054200 +
+          /* SAYE */ Math.round(993 * 1350.3) +
           /* mortgage */ -36125000 +
           /* cc */ -16532,
       ),
@@ -320,6 +322,7 @@ describe('Overview resolver', () => {
           /* fx */ Math.round(105 * 0.783 * 100) +
           Math.round(57451 * 0.116 * 100) +
           /* house */ 43500000 +
+          /* pension */ 1117503 +
           /* SAYE */ 0 +
           /* mortgage */ -34713229 +
           /* cc */ -12322,
