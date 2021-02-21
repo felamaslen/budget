@@ -1,0 +1,100 @@
+date,item,category,cost,shop
+-18+03,Bus ticket,Transport,1900,thetrainline.com
+-18+03,ACCA F6 Study text,Study,3150,Amazon
+-18+18,Washing up Liquid,Kitchen,170,Sainsbury's
+-18+21,Tube,Transport,650,TfL
+-18+28,Highlighters,Household,225,Wilko
+-17+03,Port secret santa,Gifts,525,Tesco
+-17+03,Gloves,Kitchen,50,Wilko
+-17+18,Toothbrush,Bathroom,165,Sainsbury's
+-17+21,Ticket,Transport,3685,thetrainline.com
+-16+28,Gym membership,Membership,1699,Gym
+-16+03,Shower Gel,Bathroom,90,Sainsbury's
+-16+03,Cat Shampoo,Cat,479,Amazon
+-16+18,Books,Gifts,1398,WHSmiths
+-16+21,Tube,Transport,240,TfL
+-16+28,Train ticket saving refund,Transport,-1500,CompleteSaving
+-15+03,Wooden spoon,Kitchen,400,Sainsbury's
+-15+03,PSU,Computing,6331,Amazon
+-15+18,Postcards,Gifts,140,Museum
+-15+21,Chopping board,Camping,399,TK Max
+-15+28,Sanitary towels,Bathroom,470,Lidl
+-14+03,Bio oil,Bathroom,1000,Sainsbury's
+-14+03,Replacement laptop charger,Electronics,449,eBay
+-14+18,Bus ticket,Transport,400,Station
+-14+21,Aftersun Cream,Household,440,Sainsbury's
+-14+28,Ticket,Transport,3380,thetrainline.com
+-13+03,Soap,Bathroom,120,Sainsbury's
+-13+03,Toothpaste,Bathroom,200,Tesco
+-13+18,Oyster card,Transport,1500,TfL
+-13+21,Kitten Litter,Pets,523,Pets at Home
+-13+28,Tube,Transport,1350,TfL
+-12+03,Bowls,Camping,600,Blacks
+-12+03,Toilet paper,Bathroom,330,Sainsbury's
+-12+18,Ticket,Transport,1265,GreaterAnglia
+-12+21,Plastic Handled …,Household,85,Wilko
+-12+28,Oyster top-up,Transport,2500,TfL
+-11+03,Hair Dye,Hair,532,Boots
+-11+03,Toilet paper,Bathroom,385,Sainsbury's
+-11+18,Temple Run,App,65,Google Play
+-11+21,Netflix,Subscriptions,799,Netflix
+-11+28,Ticket,Transport,4240,Greater Anglia
+-10+03,Valentines chocolate,Presents,1750,Hotel Chocolat
+-10+03,Waterproof Trousers,Clothes,2500,Blacks
+-10+18,Carrier bag,Shopping,5,Sainsbury's
+-10+21,Black large,Gifts,1899,Waterstones
+-10+28,Train to Home,Transport,460,TfL
+-09+03,Light bulb,Household,800,Tesco
+-09+03,East by Sodha Meera,Gifts,1321,Amazon
+-09+18,Toothpaste,Household,100,Sainsbury's
+-09+21,Vinyl Record,Music,1599,Sister Ray
+-09+28,Shampoo,Bathroom,149,Boots
+-08+03,Roasting tin,Kitchen,300,Wilko
+-08+03,Clock,Living Room,990,Oxfam
+-08+18,Toothpaste,Bathroom,150,Superdrug
+-08+21,Tube,Transport,430,TfL
+-08+28,T-shirt,Clothes,1499,TK Max
+-07+03,DVD,Media,1899,Amazon
+-07+03,Keys,Household,1300,E1 Key Cutting
+-07+18,Cinema,Cinema,840,Showcase Cinema
+-07+21,Netflix,Subscriptions,599,Netflix
+-07+28,Tube,Transport,280,TfL
+-06+03,Piano,Electronics,11987,Amazon
+-06+03,Hand Cream,Health,50,Sainsbury's
+-06+18,Router,Computing,17999,Amazon
+-06+21,Bra,Clothes,250,Primark
+-06+28,Passport photos,Visa,600,Photo me
+-05+03,Book,Book,300,Last Bookshop
+-05+03,"Shampoo, Conditioner & Shower gel",Bathroom,169,Boots
+-05+18,Uber,Transport,769,Uber
+-05+21,Ticket,Transport,8134,GWR
+-05+28,Tube,Transport,1190,TfL
+-04+03,Bin liners,Kitchen,199,Lidl
+-04+03,Cloths,Kitchen,125,Lidl
+-04+18,Shelf,Furniture,2999,Amazon
+-04+21,Ticket,Transport,260,GWR
+-04+28,End of tenant cleaning,House,5000,Some Company
+-03+03,Bus,Transport,150,TfL
+-03+03,Light bulbs,Household,1230,eBay
+-03+18,Pliers,Tools,95,Wilko
+-03+21,Socks,Presents,650,St Nicks Market
+-03+28,Sellotape,Household,150,Sainsbury's
+-02+03,Giffgaff,Phone,800,Giffgaff
+-02+03,Socket timer,Pets,399,Amazon
+-02+18,Tube,Transport,770,TfL
+-02+21,Tape Measure,Household,70,Wilko
+-02+28,Hyper 212 Evo,Computing,2850,Amazon
+-01+03,Hair Clips,Hair,2800,Amazon
+-01+03,Train Ticket,Transport,580,TfL
+-01+18,Tube,Transport,650,TfL
+-01+21,Books,Gifts,399,Amazon
+-01+28,Tube,Transport,440,TfL
++00+03,Room,Travel,1502,Airbnb
++00+03,Kitchen towels,Kitchen,130,Sainsbury's
++00+18,Ticket,Transport,4485,FGW
++00+21,Glasses,Household,100,Wilko
++00+28,Ticket,Transport,1880,thetrainline.com
++00+28,Palette knife,Kitchen,400,Sainsbury's
++00+28,Domain name,Web,1499,fasthosts.co.uk
++00+28,Cable ties,Household,75,Wilko
++00+28,ACCA Annaul Sub,Study,11200,ACCA

@@ -1,0 +1,1001 @@
+date,item,category,cost,shop
+-18+01,Mushrooms,Fungus,100,Tesco
+-18+01,Pistachios,Nuts,439,Lidl
+-18+01,Biscuits,Snacks,205,Sainsbury's
+-18+03,Dinner,Takeaways,1400,Tuk Tuck
+-18+03,Mushrooms,Fungus,100,Tesco
+-18+03,Sandwich,Restaurants,500,Subway
+-18+03,Sultanas,Fruit,170,Sainsbury's
+-18+03,Jam,Spreads,109,Lidl
+-18+03,Avocados,Fruit,135,Lidl
+-18+03,Rocket,Salad,49,Lidl
+-18+03,Oriental snack,Snacks,300,Sainsbury's
+-18+05,Black Peppercorn,Spices,400,Sainsbury's
+-18+05,Crisps,Snacks,99,Tesco
+-18+05,Eggs,Dairy,110,Sainsbury's
+-18+05,Sausage Rolls,Lunch,63,Tesco
+-18+05,Blueberry muffins,Snacks,125,Sainsbury's
+-18+06,Plaintain chips,Snacks,80,Sainsbury's
+-18+07,Bread,Bread,75,Sainsbury's
+-18+08,Mixed Chillies,Spices,65,Sainsbury's
+-18+08,Apples,Fruit,260,Sainsbury's
+-18+08,Frozen Peas,Vegetables,79,Lidl
+-18+09,Biscuits,Confectionery,249,Tesco
+-18+12,Custard creams,Confectionery,50,Sainsbury's
+-18+12,Vanilla Crown,Confectionery,110,Sainsbury's
+-18+12,Snickers,Confectionery,70,Boots
+-18+12,Carrots,Vegetables,59,Sainsbury's
+-18+12,Fruit juice,Drinks,74,Tesco
+-18+12,Potatoes,Vegetables,149,Lidl
+-18+13,Mushrooms,Fungus,95,Sainsbury's
+-18+13,Crackers,Snacks,160,M&S
+-18+15,Rice wine,Drinks,300,Sainsbury's
+-18+17,Ice cream,Dessert,400,Sainsbury's
+-18+17,Sausages,Meat,775,Sainsbury's
+-18+17,Choco Liebniz,Confectionery,200,Sainsbury's
+-18+23,Chocolate Twist,Snacks,70,Sainsbury's
+-18+23,Chocolate Mousse,Dessert,110,Sainsbury's
+-18+23,Samosas,Snacks,140,Sainsbury's
+-18+23,Celery,Vegetables,100,Sainsbury's
+-18+23,Crisps,Snacks,100,Sainsbury's
+-18+23,Cabbage,Vegetables,79,Sainsbury's
+-18+23,Wine,Drinks,600,Sainsbury's
+-18+23,Prawn sandwiches,Lunch,235,Sainsbury's
+-18+23,Peppercorns,Spices,220,Tesco
+-18+25,Raspberries,Fruit,109,Lidl
+-18+26,Mango,Fruit,98,Tesco
+-18+26,Bananas,Fruit,65,Tesco
+-18+26,Almond Croissant,Pastry,80,Tesco
+-18+28,Grapes,Fruit,99,Lidl
+-17+01,Apples,Fruit,64,Sainsbury's
+-17+01,Chopped tomatoes,Fruit,80,Sainsbury's
+-17+01,Croissants,Pastry,163,Tesco
+-17+02,Pistachios,Nuts,356,Lidl
+-17+02,Custard tarts,Snacks,75,Co-op
+-17+02,Chicken Jalfrezi,Ready Meals,199,Sainsbury's
+-17+03,Pasty,Snacks,449,The Pasty Shop
+-17+03,Pesto,Sauce,110,Sainsbury's
+-17+03,Tomato Puree,Condiments,33,Lidl
+-17+03,Meal deal,Lunch,300,Tesco
+-17+03,Pizza,Pizza,250,Sainsbury's
+-17+05,Chocolate biscuits,Confectionery,100,Co-op
+-17+05,Biscuits,Snacks,36,Tesco
+-17+06,Cake,Dessert,225,Friska
+-17+06,Crisps,Snacks,99,Sainsbury's
+-17+06,Milk Chocolate,Baking,200,Sainsbury's
+-17+06,Cucumber,Salad,42,Tesco
+-17+07,Pastries,Snacks,352,Tesco
+-17+08,Peking Duck,Snacks,300,Sainsbury's
+-17+08,Onions,Vegetables,75,Sainsbury's
+-17+08,Pineapple,Fruit,80,Sainsbury's
+-17+09,Eggs,Dairy,89,Tesco
+-17+11,Pringles,Snacks,150,Sainsbury's
+-17+11,Frozen Mochi,Confectionery,875,Japan Centre
+-17+11,Thyme,Herbs,75,Sainsbury's
+-17+11,Basmati Rice,Rice,285,Sainsbury's
+-17+12,Choux Buns,Confectionery,94,Sainsbury's
+-17+12,Parsnips,Vegetables,100,Sainsbury's
+-17+13,Chick Peas,Pulses,45,Sainsbury's
+-17+13,Chicken thighs,Meat,315,Sainsbury's
+-17+15,Spring onions,Vegetables,49,Tesco
+-17+16,Cookies,Snacks,50,Sainsbury's
+-17+16,Raspberries,Fruit,87,Sainsbury's
+-17+16,Sultanas,Fruit,162,Tesco
+-17+16,Sausage roll,Snacks,100,Tesco
+-17+16,Roasted peppers,Fruit,170,Lidl
+-17+16,Bread,Bread,200,Sainsbury's
+-17+22,Meat 2 for £6,Discount,-85,Tesco
+-17+22,Ham,Meat,189,Tesco
+-17+22,Beef pasties,Snacks,44,Sainsbury's
+-17+23,Tangerines,Fruit,85,Lidl
+-17+23,Milk Chocolate,Confectionery,150,Sainsbury's
+-17+23,Crisps,Snacks,255,Lidl
+-17+25,Peppers,Fruit,91,Lidl
+-17+26,Basmati Rice,Rice,550,Sainsbury's
+-17+28,Juice,Drinks,245,Tesco
+-17+28,Wetherspoons lunch,Restaurants,1014,Wetherspoons
+-17+28,Lunch,Lunch,479,Subway
+-16+01,Nectarines,Fruit,300,Sainsbury's
+-16+01,Bourbons,Snacks,45,Sainsbury's
+-16+01,Ice cream,Dessert,600,Tesco
+-16+02,"Vine leaves, Falafels, Olives",Snacks,700,M&S
+-16+02,Croissants,Breakfast,160,Sainsbury's
+-16+02,Cumin,Spices,90,Lidl
+-16+03,Parsley,Herbs,29,Lidl
+-16+03,Meal deal,Lunch,300,Sainsbury's
+-16+03,Snacks,Snacks,124,Tesco
+-16+03,Chocolate bars,Confectionery,44,Tesco
+-16+03,Conchiglie,Pasta,95,Sainsbury's
+-16+05,Chicken Salad,Ready Meals,200,Sainsbury's
+-16+05,Chorizo,Meat,100,Sainsbury's
+-16+06,Lunch,Lunch,200,Sainsbury's
+-16+06,Penne,Pasta,120,Sainsbury's
+-16+06,Lunch,Lunch,379,Subway
+-16+06,Pulled Pork,Snacks,100,Tesco
+-16+07,Bread,Bread,258,Lidl
+-16+08,Chips,Snacks,250,Donervans
+-16+08,Pizza,Pizza,262,Sainsbury's
+-16+08,Sausages,Meat,350,Sainsbury's
+-16+09,Okra,Vegetables,160,Sainsbury's
+-16+11,Nutmeg,Spices,85,Tesco
+-16+11,Spring onions,Vegetables,60,Sainsbury's
+-16+11,Crepes,Breakfast,114,Sainsbury's
+-16+11,Office Lunch,Office,550,EAT
+-16+12,Red Chilli,Fruit,65,Sainsbury's
+-16+12,Pork loin,Meat,450,Sainsbury's
+-16+13,Broccoli,Vegetables,50,Sainsbury's
+-16+13,Snickers,Confectionery,65,Sainsbury's
+-16+15,Scotch Egg,Snacks,100,Sainsbury's
+-16+16,Muffin,Snacks,150,Sainsbury's
+-16+16,Crisps,Snacks,100,Tesco
+-16+16,Carrots,Vegetables,60,Sainsbury's
+-16+16,Pork Mince,Meat,225,Sainsbury's
+-16+16,Trifle,Dessert,200,Co-op
+-16+16,Courgette,Fruit,105,Sainsbury's
+-16+22,Frozen Peas,Vegetables,79,Lidl
+-16+22,Carrot cake,Confectionery,75,Sainsbury's
+-16+22,Crisps,Snacks,175,M&S
+-16+23,Carrots,Vegetables,60,Sainsbury's
+-16+23,Avocados,Fruit,155,Lidl
+-16+23,Crisps,Snacks,100,Tesco
+-16+25,Chopped tomatoes,Fruit,196,Lidl
+-16+26,Peas,Vegetables,79,Lidl
+-16+28,Onions,Vegetables,60,Tesco
+-16+28,Pastel de Nata,Breakfast,98,Lidl
+-16+28,Chicken drumsticks,Meat,350,Sainsbury's
+-15+01,ilk,Dairy,150,Co-op
+-15+01,hocolate Mousse,Dessert,79,Lidl
+-15+01,herry Jam,Spreads,109,Lidl
+-15+02,ak choi,Vegetables,198,Lidl
+-15+02,oisin wraps,Ready Meals,230,Sainsbury's
+-15+02,ork Pies,Lunch,260,Sainsbury's
+-15+03,ggs,Dairy,189,Lidl
+-15+03,lueberries,Fruit,200,Sainsbury's
+-15+03,andwich,Restaurants,590,Subway
+-15+03,herry tomatoes,Fruit,85,Sainsbury's
+-15+03,Sausages,Meat,345,Tesco
+-15+05,Sausage Rolls,Snacks,190,Tesco
+-15+05,Onions,Vegetables,59,Lidl
+-15+06,Peas,Vegetables,79,Lidl
+-15+06,Unsalted Butter,Dairy,165,Tesco
+-15+06,Crisps,Snacks,200,Sainsbury's
+-15+06,Crisps,Snacks,100,Tesco
+-15+07,Croissants,Pastry,125,Tesco
+-15+08,Chopped tomatoes,Fruit,45,Sainsbury's
+-15+08,Chocolate Buttons,Snacks,100,Sainsbury's
+-15+08,Sweets,Confectionery,100,Tesco
+-15+09,Pepper,Fruit,106,Lidl
+-15+11,Chopped tomatoes,Fruit,56,Lidl
+-15+11,Sausages,Meat,275,Sainsbury's
+-15+11,Coriander,Herbs,100,Tesco
+-15+11,Parsley,Herbs,65,Sainsbury's
+-15+12,Salmon,Fish,555,Lidl
+-15+12,Pork Pies,Lunch,221,Tesco
+-15+13,Meal deal,Lunch,339,Boots
+-15+13,Chicken bites,Snacks,150,Tesco
+-15+15,Croissant,Snacks,70,Tesco
+-15+16,Kalamata olives,Fruit,190,Sainsbury's
+-15+16,Chopped tomatoes,Fruit,168,Lidl
+-15+16,Tomato Puree,Condiments,55,Sainsbury's
+-15+16,Onions,Vegetables,200,Tesco
+-15+16,Milk,Dairy,50,Sainsbury's
+-15+16,Vegetable stock,Stock,159,Tesco
+-15+22,Anchovies,Fish,340,Sainsbury's
+-15+22,Bean salad,Salad,125,Sainsbury's
+-15+22,Cake,Dessert,134,Sainsbury's
+-15+23,Peanut Butter,Spreads,109,Lidl
+-15+23,Kidney Beans,Pulses,30,Lidl
+-15+23,Onions,Vegetables,25,Sainsbury's
+-15+25,Crisps,Snacks,197,Tesco
+-15+26,Peanut Butter,Spreads,109,Lidl
+-15+28,Raspberries,Fruit,220,Sainsbury's
+-15+28,Eggs,Dairy,89,Tesco
+-15+28,Breakfast,Restaurants,75,Tesco
+-14+01,Figs,Fruit,149,Lidl
+-14+01,Biscuits,Confectionery,300,Tesco
+-14+01,Yoghurt,Dairy,200,Tesco
+-14+02,Coriander,Herbs,50,Tesco
+-14+02,Dinner,Ready Meals,300,Tesco
+-14+02,Bombay mix,Snacks,120,Waitrose
+-14+03,Spinach & Rocket,Salad,100,Tesco
+-14+03,Plain flour,Baking,60,Sainsbury's
+-14+03,Earl grey teabags,Drinks,188,Sainsbury's
+-14+03,Chickpeas,Pulses,100,Sainsbury's
+-14+03,Pastel de Nata,Breakfast,98,Lidl
+-14+05,Carrots,Vegetables,12,Tesco
+-14+05,Soba noodles,Noodles,679,Japan Centre
+-14+06,Stock cubes,Stock,165,Sainsbury's
+-14+06,Dark chocolate,Baking,290,Sainsbury's
+-14+06,Potato wedges,Snacks,120,Sainsbury's
+-14+06,Lunch,Restaurants,390,Refectory
+-14+07,Ginger,Spices,99,Tesco
+-14+08,Ginger Beer,Drinks,65,Sainsbury's
+-14+08,Bananas,Fruit,46,Sainsbury's
+-14+08,Moon Cake,Dessert,1540,Wah Yan Hong
+-14+09,Bread,Bread,129,Lidl
+-14+11,Garlic,Vegetables,62,Lidl
+-14+11,Lemons,Fruit,80,Tesco
+-14+11,Crisps,Snacks,125,Sainsbury's
+-14+11,Paid back,Discount,-300,Tesco
+-14+12,Tomato Puree,Fruit,50,Sainsbury's
+-14+12,Onions,Vegetables,175,Sainsbury's
+-14+13,Sesame marshmallow,Confectionery,150,Wai Yee Hong
+-14+13,Bananas,Fruit,95,Sainsbury's
+-14+15,Crisps,Snacks,200,Sainsbury's
+-14+16,Lunch,Lunch,615,Wasabi 
+-14+16,Red onions,Vegetables,65,Lidl
+-14+16,Breakfast,Pastry,80,Tesco
+-14+16,Chocolate,Confectionery,120,Lidl
+-14+16,Bounty,Confectionery,70,Vending Machine
+-14+16,Bread,Bread,268,Lidl
+-14+22,Pasta,Pasta,55,Sainsbury's
+-14+22,Leeks,Vegetables,105,Tesco
+-14+22,Lunch,Restaurants,460,Refectory
+-14+23,Pears,Fruit,66,Lidl
+-14+23,Raisins,Fruit,160,Sainsbury's
+-14+23,Celery,Vegetables,65,Sainsbury's
+-14+25,Bread,Bread,105,Sainsbury's
+-14+26,Lentils,Pulses,180,Sainsbury's
+-14+27,Milkshakes,Drinks,200,Tesco
+-14+27,NUS saving,Discount,-86,Co-op
+-14+28,Tadka Dahl,Dinner,185,Sainsbury's
+-14+28,Potato,Vegetables,32,Tesco
+-14+28,Bananas,Fruit,74,Sainsbury's
+-14+28,Custard tarts,Dessert,70,Tesco
+-14+28,Whole Poussin,Meat,350,Sainsbury's
+-14+28,Meal deal,Lunch,339,Boots
+-14+28,Onions,Vegetables,73,Sainsbury's
+-13+01,Clementines,Fruit,180,Tesco
+-13+01,Milk,Dairy,75,Tesco
+-13+01,Pain Au Chocolat,Pastry,131,Tesco
+-13+02,Sausage Roll,Snacks,80,Sainsbury's
+-13+02,Cookies,Confectionery,120,Co-op
+-13+02,Kidney Beans,Pulses,60,Sainsbury's
+-13+03,Chocolate,Confectionery,529,Lidl
+-13+03,Falafel salad,Salad,295,Co-op
+-13+03,Crisps,Snacks,124,Tesco
+-13+03,Garlic,Vegetables,65,Sainsbury's
+-13+03,Potatoes,Vegetables,149,Lidl
+-13+05,Chicken Salad,Ready Meals,260,Sainsbury's
+-13+05,Pasta,Pasta,220,Tesco
+-13+06,Bacon,Meat,150,Tesco
+-13+06,Wrap,Lunch,220,Sainsbury's
+-13+06,Pringles,Snacks,125,Sainsbury's
+-13+06,Cookies,Restaurants,100,Subway
+-13+07,Onions,Vegetables,160,Sainsbury's
+-13+08,Apples,Fruit,250,Sainsbury's
+-13+08,Olives,Fruit,55,Lidl
+-13+08,Coco Pops,Cereal,360,Sainsbury's
+-13+09,Eggs,Dairy,190,Sainsbury's
+-13+11,Tangerines,Fruit,80,Tesco
+-13+11,Salmon,Fish,585,Lidl
+-13+11,Cherry Jam,Spreads,160,Sainsbury's
+-13+11,Fusilli,Pasta,84,Lidl
+-13+12,Cornflour,Flour,165,Sainsbury's
+-13+12,Apple lattice,Confectionery,110,Sainsbury's
+-13+13,Dessert,Dessert,148,Sainsbury's
+-13+13,Cookies,Confectionery,130,Sainsbury's
+-13+15,Bananas,Fruit,33,Sainsbury's
+-13+16,Olives,Fruit,50,Lidl
+-13+16,Ground ginger,Bread,100,Sainsbury's
+-13+16,Mackerel,Fish,280,Tesco
+-13+16,Meal deal,Office,300,Tesco
+-13+16,Kiwis,Fruit,80,Sainsbury's
+-13+16,Biscuits,Snacks,100,Sainsbury's
+-13+22,Bread,Bread,75,Co-op
+-13+22,Sausages,Meat,500,Co-op
+-13+22,Nori Sushi Sheets,Sushi,469,Wild Oats
+-13+23,Coriander,Herbs,50,Lidl
+-13+23,Eggs,Dairy,115,Sainsbury's
+-13+23,Coconut Milk,Curry,150,Lidl
+-13+25,Cookies,Snacks,65,Sainsbury's
+-13+26,Melon,Fruit,179,Lidl
+-13+27,Strawberry,Fruit,169,Lidl
+-13+27,Doritos,Snacks,100,Co-op
+-13+28,Olives,Fruit,200,Sainsbury's
+-13+28,Parsley,Herbs,33,Lidl
+-13+28,Chocolate chip cookies,Confectionery,160,Sainsbury's
+-13+28,Bananas,Fruit,80,Sainsbury's
+-13+28,Sausages,Meat,225,Sainsbury's
+-13+28,Lemons,Fruit,70,Sainsbury's
+-13+28,Raspberry crown,Confectionery,110,Sainsbury's
+-12+01,Chorizo,Meat,210,Tesco
+-12+01,Chips,Snacks,250,Robin Hood
+-12+01,Fig rolls,Confectionery,49,Tesco
+-12+02,Tiger loaf,Bread,75,Tesco
+-12+02,Egg tart,Confectionery,98,Lidl
+-12+02,Radish,Vegetables,59,Tesco
+-12+03,Cinnamon Whirl,Confectionery,78,Tesco
+-12+03,Apples,Fruit,235,Lidl
+-12+03,Meal deal,Lunch,339,Boots
+-12+03,Peppers,Fruit,96,Lidl
+-12+03,Cockles,Fish,300,Hastings
+-12+05,Flapjack,Confectionery,100,Vending Machine
+-12+05,Pasta,Pasta,62,Tesco
+-12+06,Cauliflower,Vegetables,95,Lidl
+-12+06,Mushrooms,Fungus,100,Tesco
+-12+06,Mint,Herbs,70,Tesco
+-12+06,Spring onions,Vegetables,55,Tesco
+-12+07,Peppers,Vegetables,95,Sainsbury's
+-12+08,Rocket,Salad,100,Sainsbury's
+-12+08,Plums,Fruit,100,Sainsbury's
+-12+08,Onions,Vegetables,72,Lidl
+-12+09,Butter,Dairy,100,Sainsbury's
+-12+11,Chocolate sundae,Confectionery,165,Sainsbury's
+-12+11,Stock cubes,Meat,65,Tesco
+-12+11,Falafel wrap,Lunch,220,Sainsbury's
+-12+11,Cookies,Confectionery,100,Sainsbury's
+-12+12,Apples,Fruit,210,Sainsbury's
+-12+12,Cocktail sausages,Snacks,199,Co-op
+-12+13,Bananas,Fruit,80,Tesco
+-12+13,Black Pudding,Meat,125,Sainsbury's
+-12+15,Chocolate,Confectionery,100,Co-op
+-12+16,Bread,Bread,180,Tesco
+-12+16,Coriander,Herbs,50,Tesco
+-12+16,Coriander,Herbs,29,Lidl
+-12+16,Tiramisu,Dessert,200,Sainsbury's
+-12+16,Samosas,Snacks,100,Sainsbury's
+-12+16,Food,Food,900,Sainsbury's
+-12+22,Smoothie,Drinks,104,Tesco
+-12+22,Salmon,Fish,555,Lidl
+-12+22,Kiwis,Fruit,74,Sainsbury's
+-12+23,Milk,Dairy,50,Sainsbury's
+-12+23,Onions,Vegetables,66,Sainsbury's
+-12+23,Dessert,Dessert,128,Tesco
+-12+25,Truffle crisps,Snacks,249,Waitrose
+-12+26,Lunch,Lunch,360,Refectory
+-12+27,Chicken wings,Meat,230,Sainsbury's
+-12+27,Mushrooms,Fungus,85,Lidl
+-12+28,Mango,Fruit,69,Tesco
+-12+28,Croissant,Breakfast,70,Sainsbury's
+-12+28,Onions,Vegetables,75,Sainsbury's
+-12+28,Chinese Leaf,Vegetables,100,Sainsbury's
+-12+28,Fusilli,Pasta,120,Sainsbury's
+-12+28,Yoghurt,Dairy,129,Lidl
+-12+28,Porridge Oats,Cereal,160,Sainsbury's
+-11+01,Subway,Lunch,400,Subway
+-11+01,Milk,Dairy,55,Sainsbury's
+-11+01,Lemons,Fruit,40,Sainsbury's
+-11+02,Chocolate Twist,Snacks,100,Sainsbury's
+-11+02,Cereal,Cereal,395,Sainsbury's
+-11+02,Breakfast,Breakfast,254,Tesco
+-11+03,Lemons,Fruit,109,Lidl
+-11+03,Pastrami,Meat,200,Sainsbury's
+-11+03,Pringles,Snacks,150,Co-op
+-11+03,Office Lunch,Lunch,499,Itsu
+-11+03,Milk,Dairy,89,Sainsbury's
+-11+05,Yoghurt,Dairy,150,Sainsbury's
+-11+05,Pasta sauce,Sauce,119,Co-op
+-11+06,Onions,Vegetables,140,Tesco
+-11+06,Spaghetti,Pasta,120,Tesco
+-11+06,Chopped tomatoes,Fruit,140,Sainsbury's
+-11+06,Ginger,Spices,99,Tesco
+-11+07,Sakura Senbei,Snacks,300,Minamoto Kitchoan
+-11+08,Hula hoops,Snacks,70,Vending Machine
+-11+08,Bacon bap,Breakfast,165,Sainsbury's
+-11+08,Blueberries,Fruit,139,Lidl
+-11+09,Scotch Eggs,Snacks,100,Sainsbury's
+-11+11,Rice Snacks,Snacks,99,Lidl
+-11+11,Falafel wrap,Ready Meals,235,Tesco
+-11+11,Chocolate Milk,Drinks,63,Tesco
+-11+11,Ginger,Spices,44,Sainsbury's
+-11+12,Cucumber,Fruit,60,Sainsbury's
+-11+12,Tangerines,Fruit,150,Sainsbury's
+-11+13,Bananas,Fruit,100,Sainsbury's
+-11+13,Crisps,Snacks,336,Waitrose
+-11+15,Frozen Peas,Vegetables,150,Tesco
+-11+16,Cinnamon bark,Spices,75,Wah Yan Hong
+-11+16,Onions,Vegetables,65,Lidl
+-11+16,Popcorns,Snacks,151,Sainsbury's
+-11+16,Spring onions,Vegetables,53,Lidl
+-11+16,Tangerines,Fruit,89,Lidl
+-11+16,Parsley,Herbs,70,Tesco
+-11+22,Yoghurt,Dairy,100,Sainsbury's
+-11+22,Crisps,Snacks,99,Tesco
+-11+22,Sausage roll,Snacks,80,Sainsbury's
+-11+23,Onions,Vegetables,100,Tesco
+-11+23,Potato wedges,Snacks,120,Sainsbury's
+-11+23,Indian Snacks,Snacks,230,Sainsbury's
+-11+25,Salted Caramel Dessert,Dessert,132,Tesco
+-11+26,Milk,Dairy,75,Tesco
+-11+27,Carrots,Vegetables,89,Lidl
+-11+27,Plums,Fruit,99,Sainsbury's
+-11+28,Mushrooms,Fungus,87,Lidl
+-11+28,Snickers,Confectionery,50,Sainsbury's
+-11+28,Sweets,Confectionery,200,Mubaloo
+-11+28,Courgettes,Vegetables,270,Lidl
+-11+28,Bread,Bread,60,Sainsbury's
+-11+28,Cornish Pasty,Lunch,650,Galleries
+-11+28,Allspice,Spices,100,Sainsbury's
+-10+01,Mushrooms,Fungus,90,Sainsbury's
+-10+01,Trifles,Dessert,105,Tesco
+-10+01,Crisps,Snacks,199,Tesco
+-10+02,Meal deal,Lunch,300,Sainsbury's
+-10+02,Smoothie,Drinks,104,Tesco
+-10+02,Double cream,Dairy,89,Lidl
+-10+03,Jaffa cakes,Dessert,88,Tesco
+-10+03,Ham,Meat,150,Sainsbury's
+-10+03,Trifles,Dessert,105,Tesco
+-10+03,Meal deal,Lunch,300,Sainsbury's
+-10+03,Sandwich,Sandwich,280,Treats South Ken
+-10+05,Porridge Oats,Breakfast,120,Sainsbury's
+-10+05,Sausage Rolls,Snacks,75,Sainsbury's
+-10+06,Crisps,Snacks,80,Vending Machine
+-10+06,Spaghetti,Pasta,62,Tesco
+-10+06,Bread,Bread,125,Tesco
+-10+06,Chocolate Cookies,Confectionery,109,Lidl
+-10+07,Chorizo,Meat,250,Sainsbury's
+-10+08,Danish pastry,Confectionery,80,Sainsbury's
+-10+08,Ham,Meat,160,Tesco
+-10+08,Plum Tomatoes,Fruit,39,Tesco
+-10+09,Peppers,Vegetables,250,Sainsbury's
+-10+11,Bread,Bread,200,Sainsbury's
+-10+11,Sandwich,Lunch,235,Sainsbury's
+-10+11,Carrots,Vegetables,19,Lidl
+-10+11,Cashews,Nuts,437,Lidl
+-10+12,Tangerines,Fruit,170,Sainsbury's
+-10+12,Cherry Jam,Spreads,280,Sainsbury's
+-10+13,Vanilla Crown,Snacks,89,Tesco
+-10+13,Meal deal,Lunch,339,Boots
+-10+15,Milk,Dairy,50,Sainsbury's
+-10+16,Peanut Butter,Spreads,680,Sainsbury's
+-10+16,Butter Beans,Pulses,66,Lidl
+-10+16,Coriander,Herbs,80,Sainsbury's
+-10+16,Ham,Meat,189,Tesco
+-10+16,Cherry tomatoes,Fruit,150,Sainsbury's
+-10+16,Bean salad,Salad,109,Sainsbury's
+-10+22,Milk,Dairy,100,Tesco
+-10+22,Raspberry Jam,Spreads,172,Tesco
+-10+22,Bread,Bread,129,Lidl
+-10+23,Bacon,Meat,179,Lidl
+-10+23,Tangerines,Fruit,150,Sainsbury's
+-10+23,Savoy cabbage,Vegetables,57,Lidl
+-10+25,Meal Deal,Lunch,678,Boots
+-10+26,Milk,Dairy,50,Sainsbury's
+-10+27,Snacks,Snacks,160,Co-op
+-10+27,Sweet potatoes,Vegetables,107,Sainsbury's
+-10+28,Parsley,Herbs,125,Sainsbury's
+-10+28,Chocolate Mousse,Dessert,75,Lidl
+-10+28,Broccoli,Vegetables,72,Lidl
+-10+28,Cornish Pasty,Lunch,85,Sainsbury's
+-10+28,Rocket,Salad,125,Tesco
+-10+28,Pesto,Sauce,110,Sainsbury's
+-10+28,Spaghetti,Pasta,435,Sainsbury's
+-09+01,Chicken,Meat,225,Tesco
+-09+01,Onions,Vegetables,107,Lidl
+-09+01,Chips,Lunch,450,Weston super-mare
+-09+02,Nuts,Snacks,300,Sainsbury's
+-09+02,Chips,Restaurants,250,Nandos
+-09+02,Fig rolls,Snacks,45,Tesco
+-09+03,Salted Caramel Dessert,Dessert,200,Sainsbury's
+-09+03,Coriander,Herbs,75,Sainsbury's
+-09+03,Coriander,Herbs,50,Tesco
+-09+03,Tagliatelle,Pasta,95,Sainsbury's
+-09+03,Crisps,Snacks,167,Tesco
+-09+05,Parsley,Herbs,37,Lidl
+-09+05,Chillies,Spices,75,Sainsbury's
+-09+06,Passion Fruit,Fruit,100,Sainsbury's
+-09+06,Sausage,Meat,265,Sainsbury's
+-09+06,Mandarin Jelly,Dessert,140,Sainsbury's
+-09+06,Chocolate dessert,Dessert,79,Tesco
+-09+07,Lemons,Fruit,70,Sainsbury's
+-09+08,Cookies,Confectionery,39,Lidl
+-09+08,Chickpeas,Pulses,0,Lidl
+-09+08,Cherry bakewell,Confectionery,100,Sainsbury's
+-09+09,Red onions,Vegetables,63,Waitrose
+-09+11,Subway,Lunch,360,Subway
+-09+11,Scotch Eggs,Snacks,200,Tesco
+-09+11,Chicken wings,Restaurants,299,Wetherspoons
+-09+11,Chicken Dip,Snacks,170,Sainsbury's
+-09+12,Rosemary chips,Snacks,100,Sainsbury's
+-09+12,Raspberry Jam,Spreads,150,Tesco
+-09+13,Tangerines,Fruit,135,Sainsbury's
+-09+13,Baguette,Bread,85,Sainsbury's
+-09+15,Espresso,Drinks,169,Tesco
+-09+16,Flapjack,Confectionery,100,ASS Library
+-09+16,Profiteroles,Dessert,236,Tesco
+-09+16,Flour,Bread,45,Lidl
+-09+16,Tomato Ketchup,Sauce,240,Tesco
+-09+16,Chips,Snacks,350,The Kings Arms
+-09+16,Lunch,Lunch,425,Refectory
+-09+22,Crackers,Snacks,200,Sainsbury's
+-09+22,Sausage Rolls,Snacks,100,Sainsbury's
+-09+22,Dinner,Restaurants,400,Wetherspoons
+-09+23,Meal deal,Lunch,-155,Sainsbury's
+-09+23,Pop chips,Snacks,150,Sainsbury's
+-09+23,Star anise,Spices,100,Sainsbury's
+-09+25,Breakfast,Office,110,Tesco
+-09+26,Scotch Eggs,Snacks,115,Co-op
+-09+27,Nectarines,Fruit,80,Sainsbury's
+-09+27,Lemons,Fruit,150,Sainsbury's
+-09+28,Lemon,Fruit,35,Sainsbury's
+-09+28,Chicken Tikka Biryani,Ready Meals,325,Sainsbury's
+-09+28,Kalamata olives,Fruit,190,Sainsbury's
+-09+28,Cupcakes,Confectionery,200,LexisNexis
+-09+28,Scotch Eggs,Snacks,110,Sainsbury's
+-09+28,Crisps,Snacks,125,Sainsbury's
+-09+28,Plums,Fruit,200,Sainsbury's
+-08+01,Coffee cake,Confectionery,130,Sainsbury's
+-08+01,Gherkins,Vegetables,110,Sainsbury's
+-08+01,Crisps,Snacks,68,Tesco
+-08+02,Chocolate Twist,Breakfast,75,Tesco
+-08+02,Crisps,Snacks,248,Tesco
+-08+02,Chicken thighs,Meat,195,Sainsbury's
+-08+03,Bread,Bread,200,Lidl
+-08+03,Apples,Fruit,175,Sainsbury's
+-08+03,Crisps,Snacks,125,Sainsbury's
+-08+03,Carrots,Vegetables,14,Sainsbury's
+-08+03,Bananas,Fruit,125,Sainsbury's
+-08+05,Lindt egg,Confectionery,40,Sainsbury's
+-08+05,Bay leaves,Herbs,98,Tesco
+-08+06,Parsley,Herbs,29,Lidl
+-08+06,Eggs,Dairy,110,Sainsbury's
+-08+06,Almond Croissant,Breakfast,70,Sainsbury's
+-08+06,Coriander,Herbs,125,Sainsbury's
+-08+07,Curly wurlys,Confectionery,100,Sainsbury's
+-08+08,Mushrooms,Fungus,90,Sainsbury's
+-08+08,Salami,Meat,300,Co-op
+-08+08,Gherkins,Vegetables,77,Lidl
+-08+09,Melon,Fruit,150,Tesco
+-08+11,Spring onions,Vegetables,49,Tesco
+-08+11,Chopped tomatoes,Fruit,160,Sainsbury's
+-08+11,Eggs,Dairy,255,Sainsbury's
+-08+11,Prawns,Meat,275,Sainsbury's
+-08+12,Black Beans,Pulses,104,Wild Oats
+-08+12,Beef Mince,Meat,250,Tesco
+-08+13,Fruits,Fruit,70,Sainsbury's
+-08+13,Eggs,Dairy,175,Tesco
+-08+15,Spinach & Rocket,Salad,125,Sainsbury's
+-08+16,Tiramisu,Dessert,160,Sainsbury's
+-08+16,Thyme,Herbs,75,Sainsbury's
+-08+16,Lemon,Fruit,150,Sainsbury's
+-08+16,Coco Pops,Cereal,289,Co-op
+-08+16,Ketchup,Sauce,45,Lidl
+-08+16,Crisps,Snacks,84,Tesco
+-08+22,Parsley,Herbs,55,Lidl
+-08+22,Pineapple,Fruit,75,Lidl
+-08+22,Raspberry jam,Spreads,90,Sainsbury's
+-08+23,Bread,Bread,80,Sainsbury's
+-08+23,Lunch,Restaurants,340,Refectory
+-08+23,Trifles,Dessert,105,Tesco
+-08+25,Plums,Fruit,100,Sainsbury's
+-08+26,Doughnuts,Snacks,65,Sainsbury's
+-08+27,Coffee,Drinks,179,Co-op
+-08+27,Something,Food,100,Tesco
+-08+28,Frijj,Drinks,110,Sainsbury's
+-08+28,Coriander,Herbs,125,Sainsbury's
+-08+28,Grapes,Fruit,149,Lidl
+-08+28,Food,Food,580,Sainsbury's
+-08+28,Bananas,Fruit,108,Tesco
+-08+28,Bread,Bread,175,Sainsbury's
+-08+28,Sushi,Snacks,250,Sainsbury's
+-07+01,Beijing duck,Snacks,300,Sainsbury's
+-07+01,Jam,Spreads,240,Tesco
+-07+01,Chicken drumsticks,Meat,170,Sainsbury's
+-07+02,Apples,Fruit,160,Sainsbury's
+-07+02,White Cabbage,Vegetables,53,Lidl
+-07+02,Meal deal,Lunch,339,Boots
+-07+03,Onions,Vegetables,175,Sainsbury's
+-07+03,Chicken Salad,Ready Meals,260,Sainsbury's
+-07+03,Bananas,Fruit,100,Sainsbury's
+-07+03,Kalamata olives,Fruit,200,Sainsbury's
+-07+03,Chopped tomatoes,Fruit,148,Tesco
+-07+05,Spicy thai crackers,Snacks,140,Sainsbury's
+-07+05,Milk,Dairy,75,Tesco
+-07+06,Whole Poussin,Meat,350,Sainsbury's
+-07+06,ISB Baton,Bread,50,Tesco
+-07+06,Bombay mix,Snacks,100,Poundland
+-07+06,Coriander,Herbs,70,Sainsbury's
+-07+07,Cauliflower,Vegetables,97,Lidl
+-07+08,Coriander,Herbs,45,Lidl
+-07+08,Falafel wrap,Lunch,220,Sainsbury's
+-07+08,Milk,Dairy,85,Sainsbury's
+-07+09,Coconut Milk,Drinks,90,Wai Yee Hong
+-07+11,Chopped tomatoes,Fruit,450,Sainsbury's
+-07+11,Onions,Vegetables,69,Lidl
+-07+11,Meal deal,Lunch,600,Sainsbury's
+-07+11,Honey nut,Cereal,300,Sainsbury's
+-07+12,Rose acacia honey,Spreads,250,Sainsbury's
+-07+12,Bounty Chocolate Bar,Snacks,65,Sainsbury's
+-07+13,Rice crackers,Snacks,105,Sainsbury's
+-07+13,Courgette,Vegetables,72,Lidl
+-07+15,Lemons,Fruit,30,Sainsbury's
+-07+16,Penne,Pasta,340,Sainsbury's
+-07+16,Milk,Dairy,115,Sainsbury's
+-07+16,Houmous wrap,Ready Meals,235,Tesco
+-07+16,Stuffed vine leaves,Lunch,245,Sainsbury's
+-07+16,Aero,Confectionery,100,Weymouth
+-07+16,Crisps,Snacks,80,Vending Machine
+-07+22,Unsalted Butter,Dairy,160,Sainsbury's
+-07+22,Chicken thighs,Dinner,195,Sainsbury's
+-07+22,Chocolate Eclairs,Confectionery,100,Tesco
+-07+23,Broccoli,Vegetables,48,Sainsbury's
+-07+23,Stock cubes,Stock,129,Lidl
+-07+23,Salad,Salad,200,Sainsbury's
+-07+25,Lunch,Restaurants,350,Refectory
+-07+26,Tomatoes,Fruit,180,Sainsbury's
+-07+27,Sunbites,Snacks,70,Tesco
+-07+27,Jaffa Cakes,Confectionery,50,Sainsbury's
+-07+28,Ice Cream,Snacks,190,Tesco
+-07+28,Food,Food,830,Tesco
+-07+28,Snacks,Snacks,109,Tesco
+-07+28,Bourbons,Confectionery,50,Sainsbury's
+-07+28,Chocolate Eclairs,Confectionery,94,Sainsbury's
+-07+28,Chewing gum,Gum,55,Sainsbury's
+-07+28,Blackcurrent,Spreads,165,Sainsbury's
+-06+01,Biscuits,Snacks,149,Lidl
+-06+01,Eggs,Dairy,155,Lidl
+-06+01,Conchiglie,Pasta,60,Sainsbury's
+-06+02,Chillies,Spices,63,Tesco
+-06+02,Basil,Herbs,90,Sainsbury's
+-06+02,Croissants,Snacks,140,Sainsbury's
+-06+03,Tangerines,Fruit,175,Sainsbury's
+-06+03,Lentils,Pulses,121,Tesco
+-06+03,Chocolate Mousse,Dessert,110,Sainsbury's
+-06+03,Mango,Fruit,200,Tesco
+-06+03,Lemon,Fruit,95,Lidl
+-06+05,Watermelon,Fruit,210,Tesco
+-06+05,Apples,Fruit,210,Sainsbury's
+-06+06,Smoked Salmon,Fish,299,Lidl
+-06+06,Meal deal,Lunch,339,Boots
+-06+06,Mixed herbs,Herbs,150,Tesco
+-06+06,Juice,Drinks,180,Sainsbury's
+-06+07,Cider vinegar,Condiments,260,Sainsbury's
+-06+08,Bag charge,Bag,5,Tesco
+-06+08,Finger Chillies,Spices,90,Tesco
+-06+08,Frozen Peas,Vegetables,130,Sainsbury's
+-06+09,Starburst,Confectionery,70,ASS Library
+-06+11,Sausages,Meat,150,Tesco
+-06+11,Hoisin wrap,Lunch,220,Sainsbury's
+-06+11,Sausages,Meat,250,Sainsbury's
+-06+11,Salad,Salad,169,Co-op
+-06+12,Salmon,Fish,355,Sainsbury's
+-06+12,Dessert,Dessert,125,Sainsbury's
+-06+13,Eggs,Dairy,250,Tesco
+-06+13,Coriander,Herbs,29,Lidl
+-06+15,Melon,Fruit,100,Sainsbury's
+-06+16,Lemon Grass,Herbs,75,Sainsbury's
+-06+16,Prawn crackers,Snacks,125,Sainsbury's
+-06+16,Custard tart,Snacks,100,Sainsbury's
+-06+16,Lunch,Lunch,410,Subway
+-06+16,Ginger Beer,Drinks,130,M&S
+-06+16,Rice Snacks,Snacks,99,Lidl
+-06+22,Grapes,Fruit,200,Tesco
+-06+22,Tagliatelle,Pasta,70,Sainsbury's
+-06+22,Red onions,Vegetables,62,Lidl
+-06+23,Courgettes,Vegetables,40,Lidl
+-06+23,Bacon,Meat,150,Tesco
+-06+23,Black Pudding,Meat,125,Tesco
+-06+25,Prawns,Meat,600,Tesco
+-06+26,Prawns,Meat,500,Sainsbury's
+-06+27,Croissant,Pastry,80,Tesco
+-06+27,Coriander,Herbs,125,Sainsbury's
+-06+28,Cornish Pasty,Snacks,200,MyLocal
+-06+28,Southern Fried Chicken sandwich,Sandwich,295,Co-op
+-06+28,Peking Duck,Snacks,375,Sainsbury's
+-06+28,Kit Kat,Confectionery,65,Sainsbury's
+-06+28,Potatoes,Vegetables,210,Tesco
+-06+28,Chopped tomatoes,Fruit,70,Sainsbury's
+-06+28,Red cabbage,Vegetables,75,Lidl
+-05+01,Crisps,Snacks,112,Tesco
+-05+01,Bananas,Fruit,88,Lidl
+-05+01,Flour,Bread,181,Tesco
+-05+02,Chocolate Sponge,Dessert,300,Tesco
+-05+02,Apple puffs,Snacks,100,Co-op
+-05+02,Food,Food,1673,Tesco
+-05+03,Revels,Confectionery,100,Tesco
+-05+03,Frijj,Drinks,125,Sainsbury's
+-05+03,Pringles,Snacks,124,Tesco
+-05+03,Southern Fried Chicken sandwich,Sandwich,295,Co-op
+-05+03,Snickers,Confectionery,100,Sainsbury's
+-05+05,Blueberries,Fruit,300,Sainsbury's
+-05+05,Subway,Lunch,400,Subway
+-05+06,Black Grapes,Fruit,160,Sainsbury's
+-05+06,Falafels,Snacks,200,Sainsbury's
+-05+06,Granola,Cereal,209,Tesco
+-05+06,Lunch,Lunch,375,Sainsbury's
+-05+07,Breakfast,Breakfast,260,Refectory
+-05+08,Apples,Fruit,150,Sainsbury's
+-05+08,Tangerines,Fruit,69,Lidl
+-05+08,Ready Meal,Ready Meals,300,Sainsbury's
+-05+09,Butter Beans,Pulses,33,Lidl
+-05+11,Lunch,Restaurants,640,Wasabi 
+-05+11,Bread,Bread,130,Tesco
+-05+11,Frozen Peas,Vegetables,79,Lidl
+-05+11,Pasta,Pasta,62,Tesco
+-05+12,Spring onions,Vegetables,55,Sainsbury's
+-05+12,Tofu,Dinner,150,SeeWoo
+-05+13,Milk,Dairy,89,Sainsbury's
+-05+13,Cabbage,Vegetables,136,Lidl
+-05+15,Onions,Vegetables,73,Sainsbury's
+-05+16,Black Olives,Fruit,55,Lidl
+-05+16,Red pepper,Vegetables,50,Sainsbury's
+-05+16,Vegetable oil,Oil,139,Co-op
+-05+16,Chopped tomatoes,Fruit,200,Sainsbury's
+-05+16,Lunch,Restaurants,550,Zucla
+-05+16,Sushi,Lunch,159,Sainsbury's
+-05+22,Chocolate Orange,Dessert,100,Sainsbury's
+-05+22,Beef Mince,Meat,183,Tesco
+-05+22,Thyme,Herbs,65,Lidl
+-05+23,Meal deal,Lunch,339,Boots
+-05+23,Carrots,Vegetables,20,Sainsbury's
+-05+23,Plaintain chips,Snacks,100,Sainsbury's
+-05+25,Spinach,Vegetables,140,Sainsbury's
+-05+26,Coffee,Drinks,250,Sainsbury's
+-05+27,Muffins,Snacks,39,Sainsbury's
+-05+27,Carrots,Vegetables,95,Lidl
+-05+28,Bananas,Fruit,88,Sainsbury's
+-05+28,Business Lunch,Lunch,733,Pret a Manger
+-05+28,Pork Pies,Snacks,190,Sainsbury's
+-05+28,Dessert,Dessert,185,Wasabi 
+-05+28,Salmon,Fish,400,Sainsbury's
+-05+28,Paprika,Spices,49,Lidl
+-05+28,Business Lunch,Lunch,775,Clerkenwell
+-04+01,Chicken Bun,Snacks,185,Sainsbury's
+-04+01,Courgettes,Vegetables,51,Lidl
+-04+01,Crisps,Snacks,175,M&S
+-04+02,Rice noodles,Noodles,80,Lidl
+-04+02,Croissants,Breakfast,170,Sainsbury's
+-04+02,Truffles,Confectionery,299,Lidl
+-04+03,Wetherspoons,Restaurants,1580,Wetherspoons
+-04+03,Tomatoes,Fruit,500,Sainsbury's
+-04+03,Croissant,Pastry,320,Sainsbury's
+-04+03,Sandwich,Lunch,350,Subway
+-04+03,Lemon,Fruit,35,Sainsbury's
+-04+05,Duck,Meat,775,Sainsbury's
+-04+05,Custard tarts,Confectionery,118,Sainsbury's
+-04+06,Meal deal,Lunch,300,Sainsbury's
+-04+06,Lunch,Lunch,600,Tesco
+-04+06,Cookies,Confectionery,120,Subway
+-04+06,Courgettes,Vegetables,123,Lidl
+-04+07,Rosemary,Herbs,75,M&S
+-04+08,Pizza,Restaurants,750,The White Rabbit
+-04+08,Fudge,Confectionery,219,Co-op
+-04+08,Naan bread,Bread,60,Sainsbury's
+-04+09,Pringles,Snacks,125,Sainsbury's
+-04+11,Croissant,Pastry,166,Tesco
+-04+11,Milk,Dairy,52,Co-op
+-04+11,Chocolate bars,Confectionery,120,Tesco
+-04+11,Burger,Restaurants,500,Apple
+-04+12,Garlic,Spices,55,Sainsbury's
+-04+12,Waffles,Breakfast,120,Tesco
+-04+13,Spring onions,Vegetables,39,Sainsbury's
+-04+13,Turkish,Lunch,590,EFES
+-04+15,Cashews,Nuts,453,Lidl
+-04+16,Rainbow trout,Fish,312,Waitrose
+-04+16,Bombay mix,Snacks,100,Sainsbury's
+-04+16,Digestives,Confectionery,200,Sainsbury's
+-04+16,Meal deal,Lunch,339,Boots
+-04+16,Onions,Vegetables,75,Sainsbury's
+-04+16,Ginger,Spices,108,Sainsbury's
+-04+22,Mozarella,Dairy,105,Tesco
+-04+22,All spice,Spices,175,Co-op
+-04+22,Pepper,Fruit,60,Sainsbury's
+-04+23,Chillies,Spices,70,Sainsbury's
+-04+23,Hoisin wraps,Ready Meals,290,Sainsbury's
+-04+23,Buffet,Restaurants,699,Cosmo
+-04+25,Cakes,Snacks,275,Tesco
+-04+26,Eggs,Dairy,100,Sainsbury's
+-04+27,Biscuits,Confectionery,177,Tesco
+-04+27,Pub,Drinks,1150,Pub
+-04+28,Broccoli,Vegetables,60,Sainsbury's
+-04+28,Mushrooms,Fungus,75,Lidl
+-04+28,Carrots,Vegetables,60,Sainsbury's
+-04+28,Scotch Egg,Lunch,135,Sainsbury's
+-04+28,Potatoes,Vegetables,90,Sainsbury's
+-04+28,Croissant,Pastry,85,Tesco
+-04+28,Chocolate Milk,Lunch,100,Sainsbury's
+-03+01,Pastry,Ready Meals,165,Lidl
+-03+01,Milk,Dairy,85,Sainsbury's
+-03+01,Potatoes,Vegetables,33,Lidl
+-03+02,Lemon Curd,Spreads,53,Tesco
+-03+02,Food,Food,940,Tesco
+-03+02,Southern fried chicken,Lunch,295,Co-op
+-03+03,Rice,Rice,74,Tesco
+-03+03,Wild rocket,Salad,48,Lidl
+-03+03,Oranges,Fruit,128,Sainsbury's
+-03+03,Tiramisu,Dessert,100,Sainsbury's
+-03+03,Tofu,Dinner,250,Sainsbury's
+-03+05,Rice Bran Oil,Oil,250,Sainsbury's
+-03+05,Eggs,Staples,85,Sainsbury's
+-03+06,Rice,Rice,65,Sainsbury's
+-03+06,Cranberry juice,Drinks,100,Sainsbury's
+-03+06,Sundaes,Confectionery,180,Tesco
+-03+06,Lunch,Office,300,Tesco
+-03+07,Vanilla Extract,Baking,220,Sainsbury's
+-03+08,Croissant,Pastry,83,Tesco
+-03+08,Drinking Chocolate,Drinks,200,Sainsbury's
+-03+08,Ice cream,Dessert,200,Ice cream van
+-03+09,Houmous wrap,Ready Meals,235,Tesco
+-03+11,Blueberries,Fruit,199,Lidl
+-03+11,Grapes,Fruit,124,Lidl
+-03+11,Bread,Bread,149,Tesco
+-03+11,Cod Fillets,Fish,750,Sainsbury's
+-03+12,Custard tarts,Confectionery,85,Sainsbury's
+-03+12,Meal deal,Lunch,339,Boots
+-03+13,Onions,Vegetables,144,Lidl
+-03+13,Bean salad,Salad,165,Sainsbury's
+-03+15,Onions,Vegetables,43,Sainsbury's
+-03+16,Creme Egg,Confectionery,60,Sainsbury's
+-03+16,Muffins,Confectionery,175,Co-op
+-03+16,Mushrooms,Fungus,90,Sainsbury's
+-03+16,Pasta,Pasta,130,Sainsbury's
+-03+16,Chopped tomatoes,Fruit,320,Sainsbury's
+-03+16,Lunch,Lunch,595,Wasabi
+-03+22,Milk,Dairy,90,Sainsbury's
+-03+22,Nectarines,Fruit,150,Sainsbury's
+-03+22,Potatoes,Vegetables,104,Sainsbury's
+-03+23,Breakfast,Breakfast,270,Sainsbury's
+-03+23,Biscuits,Confectionery,100,Tesco
+-03+23,Cereal,Breakfast,199,Tesco
+-03+25,Parsley,Herbs,125,Sainsbury's
+-03+26,Eggs,Dairy,200,Sainsbury's
+-03+27,Oreos,Confectionery,100,Sainsbury's
+-03+27,Chickpeas,Pulses,55,Sainsbury's
+-03+28,Burger and hotdog,Lunch,700,Glasgow
+-03+28,Green Lentils,Pulses,225,Sainsbury's
+-03+28,Bananas,Fruit,100,Tesco
+-03+28,Mango,Salad,200,Tesco
+-03+28,Carrots,Vegetables,34,Lidl
+-03+28,Bread,Bread,110,Sainsbury's
+-03+28,Chocolate Cookies,Confectionery,100,Sainsbury's
+-02+01,Caster sugar,Baking,100,Sainsbury's
+-02+01,Naan bread,Bread,100,MyLocal
+-02+01,Onions,Vegetables,90,Sainsbury's
+-02+02,Chocolate Almonds,Confectionery,99,Lidl
+-02+02,Carrots,Vegetables,45,Sainsbury's
+-02+02,Smoked Mackerel,Fish,200,Sainsbury's
+-02+03,Lemon,Fruit,40,Sainsbury's
+-02+03,Frozen Peas,Cereal,79,Lidl
+-02+03,Lunch,Takeaways,967,KFC
+-02+03,Cherries,Fruit,450,Sainsbury's
+-02+03,Crisps,Food,145,Tesco
+-02+05,Chana Dal,Vegetables,129,Tesco
+-02+05,Plum,Fruit,49,Tesco
+-02+06,Chipolatas,Meat,200,Sainsbury's
+-02+06,Onions,Vegetables,103,Sainsbury's
+-02+06,Bread,Bread,130,Sainsbury's
+-02+06,Courgettes,Vegetables,198,Lidl
+-02+07,Snickers,Snacks,75,Co-op
+-02+08,Mozarella,Dairy,210,Sainsbury's
+-02+08,Tangerines,Fruit,160,Sainsbury's
+-02+08,Baguette,Bread,85,Sainsbury's
+-02+09,Coriander,Herbs,70,Tesco
+-02+11,Pizza,Pizza,425,M&S
+-02+11,Chocolate crepes,Breakfast,120,Sainsbury's
+-02+11,Chocolate Orange,Confectionery,100,Tesco
+-02+11,Food,Food,1029,Sainsbury's
+-02+12,Magnum,Dessert,200,Sainsbury's
+-02+12,Lunch,Lunch,375,Sainsbury's
+-02+13,Custard creams,Confectionery,50,Sainsbury's
+-02+13,Crisps,Snacks,100,Tesco
+-02+15,Cinnamon,Spices,175,Tesco
+-02+16,Meal deal,Lunch,-133,Tesco
+-02+16,Cashews,Nuts,387,Lidl
+-02+16,Nutella,Spreads,249,Co-op
+-02+16,Broccoli,Vegetables,65,Sainsbury's
+-02+16,Cake stuff,Dessert,650,Tesco
+-02+16,Strawberry,Fruit,100,Sainsbury's
+-02+22,Grapes,Fruit,135,Sainsbury's
+-02+22,Chopped tomatoes,Fruit,135,Sainsbury's
+-02+22,Onions,Vegetables,100,Tesco
+-02+23,Pringles,Snacks,130,Sainsbury's
+-02+23,Chopped tomatoes,Fruit,56,Lidl
+-02+23,Lettuce,Salad,62,Lidl
+-02+25,Sweet potato chips,Snacks,200,Glasgow Science Centre
+-02+26,Beef stock,Stock,125,Lidl
+-02+27,Bread,Bread,129,Lidl
+-02+27,Mushrooms,Fungus,115,Sainsbury's
+-02+28,Peanut Butter,Spreads,160,Sainsbury's
+-02+28,Parsnips,Vegetables,33,Sainsbury's
+-02+28,Blueberries,Fruit,200,Tesco
+-02+28,Peas,Vegetables,158,Tesco
+-02+28,Cherry tomatoes,Fruit,85,Sainsbury's
+-02+28,Bread,Bread,130,Tesco
+-02+28,Mushrooms,Fungus,85,Sainsbury's
+-01+01,Potatoes,Vegetables,100,Sainsbury's
+-01+01,Lamb steaks,Meat,329,Lidl
+-01+01,Crisps,Snacks,628,Tesco
+-01+02,Peas,Vegetables,100,Tesco
+-01+02,Apple turnovers,Confectionery,49,Lidl
+-01+02,Chicken,Meat,195,Sainsbury's
+-01+03,Marshmallow Fluff,Spreads,175,Sainsbury's
+-01+03,Milk,Dairy,75,Sainsbury's
+-01+03,Finest Yogurt,Dairy,32,Tesco
+-01+03,Peanut cookies,Confectionery,110,Sainsbury's
+-01+03,Tiramisu,Dessert,100,Sainsbury's
+-01+05,Stuffed vine leaves,Lunch,119,Lidl
+-01+05,Pesto,Condiments,100,Sainsbury's
+-01+06,Onions,Vegetables,82,Lidl
+-01+06,Garlic,Vegetables,95,Sainsbury's
+-01+06,Lemon,Fruit,45,Sainsbury's
+-01+06,Eggs,Dairy,95,Tesco
+-01+07,Frozen Peas,Vegetables,79,Lidl
+-01+08,Chicken Salad,Lunch,200,Sainsbury's
+-01+08,Oranges,Fruit,35,Tesco
+-01+08,Baguette,Bread,80,Tesco
+-01+09,Potatoes,Vegetables,179,Lidl
+-01+11,Walnut cake,Dessert,121,Tesco
+-01+11,Meal deal,Lunch,339,Boots
+-01+11,Cauliflower,Vegetables,75,Lidl
+-01+11,Burger,Restaurants,709,Burger King
+-01+12,Apples,Fruit,80,Tesco
+-01+12,Rice,Rice,190,Sainsbury's
+-01+13,Crisps,Snacks,120,Victoria
+-01+13,Lettuce,Salad,62,Lidl
+-01+15,Sandwich,Restaurants,300,Subway
+-01+16,Kalamata olives,Fruit,190,Sainsbury's
+-01+16,Mango,Fruit,85,Sainsbury's
+-01+16,Twirl bites,Confectionery,100,Sainsbury's
+-01+16,Sausages,Meat,398,Lidl
+-01+16,Chopped tomatoes,Fruit,112,Sainsbury's
+-01+16,Rocket,Salad,89,Tesco
+-01+22,Veggie pizza,Dinner,360,Sainsbury's
+-01+22,Chickpeas,Pulses,120,Sainsbury's
+-01+22,Onions,Vegetables,55,Lidl
+-01+23,Cafe,Drinks,285,Caffe Nero
+-01+23,Almond Milk,Dairy,120,Tesco
+-01+23,Mushrooms,Fungus,95,Tesco
+-01+25,Raspberries,Fruit,165,Lidl
+-01+26,Pain Au Chocolat,Pastry,70,Sainsbury's
+-01+27,Chillies,Spices,90,Sainsbury's
+-01+27,Magnums,Dessert,100,Sainsbury's
+-01+28,Milk,Dairy,115,Sainsbury's
+-01+28,Lunch,Lunch,500,Subway
+-01+28,Conchiglie,Pasta,42,Lidl
+-01+28,Biscuits,Snacks,80,Co-op
+-01+28,Bread,Bread,129,Lidl
+-01+28,Soba noodles,Snacks,300,Sainsbury's
+-01+28,Pineapple,Fruit,93,Lidl
++00+01,Biscuits,Confectionery,100,Sainsbury's
++00+01,Coriander,Herbs,100,Co-op
++00+01,coffee bean,Drinks,370,Sainsbury's
++00+02,Lentils,Pulses,180,Sainsbury's
++00+02,Scotch Egg,Snacks,75,Tesco
++00+02,Lardy cake,Confectionery,100,Parsons
++00+03,Chickpeas,Pulses,33,Lidl
++00+03,Vegetable crisps,Snacks,115,Sainsbury's
++00+03,Sausage Rolls,Snacks,200,Tesco
++00+03,Raspberry jam,Spreads,165,Sainsbury's
++00+03,Hoisin wraps,Ready Meals,600,Boots
++00+05,Nuts,Nuts,250,Tesco
++00+05,Salmon,Fish,585,Lidl
++00+06,Olive Oil,Oil,175,Sainsbury's
++00+06,Chocolate Twist,Bread,75,Sainsbury's
++00+06,Breakfast,Restaurants,199,Pret a Manger
++00+06,Meal deal,Lunch,339,Boots
++00+07,Milk,Dairy,125,Tesco
++00+08,Eggs,Dairy,180,Sainsbury's
++00+08,Frozen Peas,Vegetables,79,Lidl
++00+08,Walnut cake,Dessert,125,Sainsbury's
++00+09,Whole Poussin,Meat,350,Sainsbury's
++00+11,Meal deal,Lunch,404,Boots
++00+11,Chocolate bars,Confectionery,50,Sainsbury's
++00+11,Apple & Raspberry Juice,Drinks,120,Sainsbury's
++00+11,Milk,Dairy,80,Tesco
++00+12,Eggs,Dairy,115,Sainsbury's
++00+12,Onions,Vegetables,70,Sainsbury's
++00+13,Tomatoes,Fruit,111,Tesco
++00+13,Bread,Bread,134,Tesco
++00+15,Lunch,Restaurants,300,Refectory
++00+16,Parsley,Herbs,50,Lidl
++00+16,Chocolate,Baking,145,Sainsbury's
++00+16,Melon,Fruit,181,Co-op
++00+16,Wine,Drinks,409,Lidl
++00+16,Snickers,Confectionery,65,Tesco
++00+16,Tiramisu cake,Dessert,375,Sainsbury's
++00+22,Tomatoes,Fruit,350,Sainsbury's
++00+22,Oregano,Herbs,110,Sainsbury's
++00+22,Salmon,Fish,539,Lidl
++00+23,Brown rice,Rice,189,Co-op
++00+23,Bagels,Sandwich,100,Tesco
++00+23,Bread,Bread,130,Sainsbury's
++00+25,Broccoli,Vegetables,55,Tesco
++00+26,Leeks,Vegetables,160,Sainsbury's
++00+27,Muffins,Snacks,100,Sainsbury's
++00+27,Broccoli,Vegetables,95,Lidl
++00+28,Lettuce,Salad,62,Lidl
++00+28,Butter Beans,Pulses,33,Lidl
++00+28,Cookies,Confectionery,85,Sainsbury's
++00+28,Bombay Mix,Snacks,100,Tesco
++00+28,Lemons,Fruit,99,Lidl

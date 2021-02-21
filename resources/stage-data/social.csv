@@ -1,0 +1,101 @@
+date,item,category,cost,shop
+-18+01,Cinema,Person A,775,Online
+-18+03,Mooncakes,Person A & Person B,1530,chinatown Bakery
+-18+05,Drinks,Friends,1090,Bar
+-18+05,Pool tournament,Work,200,Work
+-18+11,Office Pub,Work 2,1125,Albion
+-17+01,Duck wrap,Work 3,795,The Duck Truck
+-17+03,Pizza,Friends,4000,White Rabbit
+-17+05,Pub quiz,Pub quiz,100,Pub quiz
+-17+05,Drinks,NYE,3855,Highbury Vaults
+-17+11,Bath Sake Tasting event,Japanese group,2500,Various
+-17+15,Restaurant,Person A,2910,Wagamama
+-16+01,Burger,Work,1250,Byron
+-16+03,Airbnb,Person B & Person A,4500,York
+-16+05,Cinema,Friends,1350,Watershed
+-16+05,Dinner,Person A,3370,Wagamama
+-15+01,Dinner,Person B & Person A,3000,Nepalese
+-15+03,Lunch,Person B & Person A,568,McDonalds
+-15+05,Team Lunch,Work 2,1700,India India
+-15+05,Restaurant,Person A,2700,Cosmo
+-15+09,Botham Burger,Work,645,AllStars
+-14+01,Fish and Chips,Person A,1240,Fishers
+-14+03,Climbing membership,UBES,1000,Redpoint
+-14+05,Cake,Person B & Person A,199,EAT
+-14+05,Cinema,Person A,3330,Everyman Cinema
+-14+09,Whisky,Friends,1000,Tesco
+-13+19,Buffet,Person A,2867,Cosmo
+-13+25,Burger,Friends,910,GBK
+-13+28,Lunch,Person A,1490,Cafe
+-12+03,Food Street,Person A & Person B,1500,Cutty Srak
+-12+07,Restaurant,Person B & Person A,2040,Taro 
+-12+14,Christmas Dinner,Matrix,1000,Online
+-12+14,Sunflowers,Person A,400,Sainsburys
+-11+09,Juice,Person B & Person A,630,COSTA Coffee
+-11+19,Christmas pub,Work 2,1000,Bishops Finger
+-11+19,Crazy golf,Person A,1400,Cabot Circus
+-11+20,London Transport Museum,Person A & Person B,3600,London Transport Museum
+-11+23,Hand Cream,Present for Mum,479,Boots
+-10+01,Drinks,Friends,970,Some pub
+-10+01,Whisky,House Party,1300,Tesco
+-10+03,Dinner,Person B & Person A,1970,Wagamama
+-10+04,Gliding log book,Gliding,350,Nympsfield
+-10+16,Work party,Work,2036,Wahaca
+-10+16,Ticket to Newport,Hiking,750,Bus station
+-10+24,Office Pub,Work 2,280,Harrild & Sons
+-09+20,All Stars lunch,Friends,555,All Stars
+-09+20,Restaurant,Person A & Person B,2965,Byron
+-09+20,The Monument,Person B & Person A,1000,The Monument
+-09+21,Refreshers Bar crawl,Matrix,600,14cr.co.uk
+-09+23,Guinness,Pub quiz,400,White Rabbit
+-08+14,Burrito,Work,645,Mission Burrito
+-08+16,Cinema,Friends,700,Odeon
+-08+16,Laser tag,Gliding,1100,Laser Fusion
+-07+09,Drinks,Friends,415,Highbury Vaults
+-07+24,Car,Brunel,240,N/A
+-07+24,Just Eat,Person A & Person B,2165,Mountain View
+-07+27,Fish and Chips,Person A,1340,Aldeburgh Fish & Chip shop
+-06+04,Secret Santa,Friends,500,Sainsburys
+-06+04,Valentine's Dinner,Person B & Person A,2470,Greenwich so called restaurant
+-06+07,Ticket to Bath,Person A,1040,Bristol Temple Meads
+-05+13,Restaurant,Work 2,1500,The Fat Bear
+-05+14,Alstroemeria flowers,Person A,500,Sainsburys
+-05+14,Drinks,Friends,519,Wetherspoons
+-05+17,Matcha Mochi,Family,1800,Minamoto Kitchoan
+-05+20,Cinema,Person A,2500,London cinema
+-04+04,Promotion dinner,Person A & Person B,3803,Pho
+-04+04,Burger,Web Team,1250,Byron
+-04+07,Tea set,Gift for Uncle/Aunt/Cousins,5700,Whittard
+-04+07,Drinks,Office,1000,Pub quiz
+-04+17,Merry Christmas Signature,Present for relative,1500,Hotel Chocolat
+-04+19,Gliding trial,Gliding,4300,Nympsfield
+-04+19,Visa celebration,Person A,3198,Cosmo
+-03+02,Cinema,Person A,3340,Cinema de Lux
+-03+03,Lunch,Work,690,Wetherspoons
+-03+03,Aquarium,Person A,2500,Bristol Aquarium
+-03+04,Food for hike,Hiking,662,Shops
+-03+15,Royal London Observatory,Person A,1500,Royal London Observatory
+-03+20,Leaving lunch,Work,650,Bare Grills
+-03+20,Pizza,Person B & Person A,2299,Dominos
+-02+01,Restaurant,Person A,5560,Tokyo Diner
+-02+01,Dinner,Person B,800,Barburrito PAD
+-02+01,Lunch,Work,1100,Racks
+-02+01,Ticket to Caerphilly,Hiking,10,Temple Meads
+-02+01,Beer,Friends,400,The Kings Arms
+-02+01,Lunch,Work,700,Asian Restaurant
+-02+01,Celebration Lunch,Person A,2446,Toomai square
+-02+01,Drinks,Friends,410,Highbury Vaults
+-02+01,Fish and Chips,Person A,1200,Fishermans Inn
+-02+01,1917,Cinema,2350,Odeon Greenwich
+-02+03,Letter,Person A,220,Post office
+-02+05,Kew Gardens,Person A & Person B,3300,Kew Gardens
+-02+05,Secret Santa,Work,1000,Sainsburys
+-02+13,Train ticket,Person A,3120,thetrainline.com
+-02+13,Cinema,Person A,775,Cinema de Lux
+-01+18,Team Lunch,Work 2,2000,Tas Restaurant
+-01+20,Cinema,Film,1110,Cinema de Lux
+-01+20,Pool tournament,Work,200,Work
++00+01,Jurassic World 3D,Person A,3000,Cinema de Lux
++00+02,Cola,House Party 2.0,99,Tesco
++00+02,dx donuts,Bulb,500,Petticoat Lane market
++00+03,Dinner,Person A,1144,Itsu

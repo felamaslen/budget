@@ -84,6 +84,7 @@
     "compression": "^1.7.4",
     "connect-redis": "^5.0.0",
     "cookie-parser": "^1.4.5",
+    "csv-parse": "^4.15.1",
     "date-fns": "^2.9.0",
     "date-fns-tz": "^1.0.12",
     "deepmerge": "^2.0.1",

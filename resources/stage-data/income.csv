@@ -1,0 +1,27 @@
+date,item,cost
+-18+14,Salary (my job),225810
+-17+11,Salary (my job),225810
+-16+12,Salary (my job),225811
+-15+15,Salary (my job),225810
+-14+15,Salary (my job),271103
+-13+24,Salary (my job),271112
+-12+01,Salary (my job),270993
+-12+11,Salary (other job),186650
+-11+28,Salary (my job),322305
+-10+17,Salary (my job),322305
+-09+20,Salary (my job),322305
+-08+19,Salary (my job),322305
+-07+15,Salary (my job),322305
+-06+27,Salary (my job),322305
+-05+13,Salary (my job),322306
+-04+05,Salary (my job),322305
+-03+22,Salary (my job),322352
+-02+10,Salary (my job),322305
+-01+16,Salary (my job),322305
++00+14,Salary (new job),339217
++01+13,Salary (new job),339217
++02+20,Salary (new job),339218
++03+21,Salary (new job),339217
++04+19,Salary (new job),330229
++06+23,Salary (new job),331108
++07+22,Salary (new job),331026

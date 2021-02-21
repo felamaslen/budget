@@ -35,6 +35,7 @@ export default {
   user: {
     tokenSecret: getenv.string('USER_TOKEN_SECRET', 'somesupersecret'),
     sessionExpiryDays: getenv.int('SESSION_EXPIRY_DAYS', 30),
+    defaultPin: Number(process.env.DEFAULT_PIN) || undefined,
     banTime: getenv.int('IP_BAN_TIME', 300) * 1000,
     banLimit: getenv.int('IP_BAN_LIMIT', 60) * 1000,
     banTries: getenv.int('IP_BAN_TRIES', 5),
@@ -62,10 +63,10 @@ export default {
       },
     },
     overview: {
-      numLast: 25,
-      numFuture: 12,
-      startYear: 2014,
-      startMonth: 9,
+      numLast: getenv.int('OVERVIEW_PAST_MONTHS', 25),
+      numFuture: getenv.int('OVERVIEW_FUTURE_MONTHS', 12),
+      startYear: getenv.int('START_YEAR', 2014),
+      startMonth: getenv.int('START_MONTH', 9),
       ignoreExpenseCategories: ['House purchase'],
       birthDate: getenv.string('BIRTH_DATE', '1990-01-01'),
     },

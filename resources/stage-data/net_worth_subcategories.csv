@@ -1,0 +1,12 @@
+id,subcategory,has_credit_limit,is_saye,opacity,category_id
+1,My wallet,null,null,0.2,1
+2,My money market fund,null,null,0.4,2
+3,Some share,null,false,0.9,3
+4,Other share,null,false,0.9,3
+5,Some SAYE share,null,true,0.9,3
+6,Other SAYE share,null,true,0.9,3
+7,My bank,null,null,0.25,1
+8,My house,null,null,0.15,4
+9,My pension,null,null,0.65,5
+10,My mortgage,null,null,0.1,6
+11,My credit card,true,null,0.3,7

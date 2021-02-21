@@ -8,9 +8,9 @@ There is a web-based API written in Node.js, which also runs a web app. The Andr
 
 - Node version: 14
 
-The CLI app is written in Python 3. See `cli/README.md` for setup info.
+~~The CLI app is written in Python 3. See `cli/README.md` for setup info.~~
 
-For info on building the Android app, see `android/README.md`.
+~~For info on building the Android app, see `android/README.md`.~~
 
 **Please note** that the Android and CLI apps are *deprecated* and *not compatible* with the current API. Development on them ceased a while ago.
 
@@ -57,13 +57,9 @@ To run database migrations and seeds on the development environment:
 
 - The admin user PIN is 1234
 
-#### Notes: 
-
-When making changes, please update the version number in `package.json` before submitting a pull request to master. This way, updates are pushed to clients, which may cache resources.
-
 ## Documentation:
 
-Upon running the server, API documentation is available at `/docs/api`.
+Upon running the server, API documentation is available at `/docs/api` and `/graphql`.
 
 ## Environment variables:
 

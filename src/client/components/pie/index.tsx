@@ -17,7 +17,7 @@ function getSectorPath(r: number, startAngle: number, slice: number): string {
     },
     {
       type: 'A',
-      args: [[r, r], [0, 0, 1], arcEnd],
+      args: [[r, r], [0, slice > Math.PI ? 1 : 0, 1], arcEnd],
     },
     {
       type: 'L',

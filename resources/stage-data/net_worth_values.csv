@@ -1,0 +1,22 @@
+id,net_worth_id,subcategory,value,skip,comment
+1,1,10,-19319500,false,Mortgage
+2,1,8,21000000,null,House
+3,2,1,null,null,Wallet
+4,2,2,855912,null,Money market fund
+5,2,10,-18744200,false,Mortgage
+6,2,7,1296523,null,Bank
+7,2,11,-8751,false,Credit card
+8,2,8,21000000,null,House
+9,2,9,10654,null,Pension
+10,2,5,null,null,Some SAYE
+11,3,1,9752,null,Wallet
+12,3,9,11237,null,Pension
+13,3,10,-18420900,false,Mortgage
+14,3,7,1051343,null,Bank
+15,3,2,null,null,Money market fund
+16,3,11,-21939,null,Credit card
+17,3,3,null,null,Option
+18,3,4,null,null,Other option
+19,3,8,21500000,null,House
+20,3,5,null,null,Some SAYE
+21,3,6,null,null,Other SAYE

@@ -1,0 +1,8 @@
+id,type,category,color,is_option
+1,asset,Cash (easy access),#00ff00,false
+2,asset,Cash (other),darkgreen,false
+3,asset,Options,#0a9cff,true
+4,asset,House,#00fa00,false
+5,asset,Pension,darkblue,false
+6,liability,Mortgage,#fa0000,false
+7,liability,Credit cards,#fc0000,false
