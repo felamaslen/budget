@@ -1,6 +1,6 @@
 import { compose } from '@typed/compose';
+import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths';
 import differenceInDays from 'date-fns/differenceInDays';
-import differenceInMonths from 'date-fns/differenceInMonths';
 import differenceInYears from 'date-fns/differenceInYears';
 import endOfMonth from 'date-fns/endOfMonth';
 import isBefore from 'date-fns/isBefore';
@@ -17,8 +17,9 @@ import {
   getSpendingColumn,
   getMonthDates,
   getFutureMonths,
-  currentDayIsEndOfMonth,
   roundedNumbers,
+  getNumMonths,
+  currentDayIsEndOfMonth,
 } from './common';
 
 import { getText } from '~client/components/net-worth/breakdown.blocks';
@@ -189,7 +190,10 @@ export function calculatePredictedSAYEMonthlyDeposit(
 
       const vestRateUnits =
         (vested - previousVestedUnits) /
-          differenceInMonths(currentEntry.date, previousEntryWithOption.date) || 0;
+          Math.max(
+            1,
+            differenceInCalendarMonths(currentEntry.date, previousEntryWithOption.date),
+          ) || 0;
 
       const monthlyDeposit = vestRateUnits * (value.option?.strikePrice ?? 0);
       const monthlyProfit =
@@ -393,6 +397,22 @@ export const getLatestNetWorthAggregate = moize(
   { maxSize: 1 },
 );
 
+export const getStartPredictionIndex = moize(
+  (today: Date) =>
+    createSelector(
+      getNumMonths,
+      getFutureMonths(today),
+      getEntries,
+      (numMonths, futureMonths, entries) => {
+        const isEndOfMonth = currentDayIsEndOfMonth(today);
+        const predictCurrentMonth =
+          !isEndOfMonth && !entries.some((entry) => isSameMonth(entry.date, today));
+        return Math.max(1, numMonths - futureMonths - (predictCurrentMonth ? 1 : 0));
+      },
+    ),
+  { maxSize: 1 },
+);
+
 export const assumedHousePriceInflation = 0.05;
 
 const houseCategory = 'House';
@@ -413,15 +433,11 @@ export type HomeEquity = { value: number; debt: number };
 export const getHomeEquity = moize(
   (today: Date) =>
     createSelector(
-      getFutureMonths(today),
+      getStartPredictionIndex(today),
       getCategories,
       getSubcategories,
       getNetWorthRows,
-      (futureMonths, categories, subcategories, rows) => {
-        const startPredictionIndex = currentDayIsEndOfMonth(today)
-          ? rows.length - futureMonths
-          : rows.length - 1 - futureMonths;
-
+      (startPredictionIndex, categories, subcategories, rows) => {
         if (rows.length < startPredictionIndex) {
           return [];
         }

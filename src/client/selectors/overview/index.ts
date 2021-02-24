@@ -16,7 +16,6 @@ import {
   getSpendingColumn,
   getFutureMonths,
   getMonthDates,
-  currentDayIsEndOfMonth,
   roundedArrays,
 } from './common';
 import {
@@ -24,6 +23,7 @@ import {
   EntryWithFTI,
   getDerivedNetWorthEntries,
   getHomeEquity,
+  getStartPredictionIndex,
   getSubcategories,
   HomeEquity,
 } from './net-worth';
@@ -74,7 +74,6 @@ export const getAnnualisedFundReturns = (state: State): number =>
 
 const withNetWorth = <K extends MonthlyProcessedKey>(
   startPredictionIndex: number,
-  isEndOfMonth: boolean,
   netWorth: EntryWithFTI[],
   homeEquity: HomeEquity[],
   funds: Fund[],
@@ -92,7 +91,7 @@ const withNetWorth = <K extends MonthlyProcessedKey>(
     const stockReturn = monthly.stocks[index] - monthly.stocks[index - 1];
 
     const stockTransactionCost =
-      !isEndOfMonth && index === startPredictionIndex
+      index === startPredictionIndex
         ? funds.reduce<number>(
             (sum, { transactions }) =>
               sum +
@@ -280,6 +279,7 @@ export const getProcessedMonthlyValues = moize(
     numOldMonths: number,
   ): ((state: State) => { values: MonthlyProcessed; startPredictionIndex: number }) =>
     createSelector(
+      getStartPredictionIndex(today),
       getFutureMonths(today),
       getMonthDates,
       getSubcategories,
@@ -290,6 +290,7 @@ export const getProcessedMonthlyValues = moize(
       getMonthlyValues,
       getHomeEquity(today),
       (
+        startPredictionIndex,
         futureMonths,
         dates,
         subcategories,
@@ -300,16 +301,9 @@ export const getProcessedMonthlyValues = moize(
         monthly,
         homeEquity,
       ) => {
-        const isEndOfMonth = currentDayIsEndOfMonth(today);
-        const startPredictionIndex = Math.max(
-          1,
-          netWorth.length - futureMonths - (isEndOfMonth ? 0 : 1),
-        );
-
         const values = compose(
           withNetWorth<AggregateKey | 'stockCostBasis' | 'spending' | 'net'>(
             startPredictionIndex,
-            isEndOfMonth,
             netWorth,
             homeEquity,
             funds,

@@ -1,4 +1,6 @@
+import { endOfMonth, isSameMonth } from 'date-fns';
 import numericHash from 'string-hash';
+
 import { getProcessedMonthlyValues, getOverviewTable } from '.';
 import type { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data';
@@ -64,8 +66,14 @@ describe('Overview selectors', () => {
       /* Jul-18 */ 0,
     ];
 
-    describe('when the current day is not the last day of the month', () => {
-      const dateInMiddleOfMonth = new Date('2018-03-23T10:03:20Z');
+    describe('when there is no net worth entry for the current month', () => {
+      const stateWithoutCurrentMonth: State = {
+        ...testState,
+        netWorth: {
+          ...testState.netWorth,
+          entries: testState.netWorth.entries.filter((entry) => !isSameMonth(entry.date, now)),
+        },
+      };
 
       // Check the test data at src/client/test-data/state.ts to verify these assertions
       const currentFundsValue = 10 * 4973 + 51 * 113;
@@ -307,21 +315,21 @@ describe('Overview selectors', () => {
         ${'spending'}                      | ${'spending'}       | ${spending}
       `('should add values for $description', ({ prop, value }) => {
         expect.assertions(1);
-        const { values: result } = getProcessedMonthlyValues(dateInMiddleOfMonth, 0)(testState);
+        const { values: result } = getProcessedMonthlyValues(now, 0)(stateWithoutCurrentMonth);
         expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value.map(Math.round));
       });
 
       it('should return the start prediction index', () => {
         expect.assertions(1);
         expect(
-          getProcessedMonthlyValues(dateInMiddleOfMonth, 0)(testState).startPredictionIndex,
+          getProcessedMonthlyValues(now, 0)(stateWithoutCurrentMonth).startPredictionIndex,
         ).toBe(2);
       });
 
       describe('when showing old months', () => {
         it('should calculate the cost basis for the old months too', () => {
           expect.assertions(1);
-          const processedWithOldMonths = getProcessedMonthlyValues(dateInMiddleOfMonth, 11)(state);
+          const processedWithOldMonths = getProcessedMonthlyValues(now, 11)(state);
 
           const costBasisMay17 =
             1117.87 * 80.510256 -
@@ -359,9 +367,7 @@ describe('Overview selectors', () => {
       });
     });
 
-    describe('when the current day is the last of the month', () => {
-      const dateAtEndOfMonth = new Date('2018-03-31T11:28:10Z');
-
+    describe('when there is a net worth entry for the current month', () => {
       // Check the test data at src/client/test-data/state.ts to verify these assertions
       const currentFundsValue = (10 - 1.32) * 4973 + 51 * 113;
       const stocks = [
@@ -577,15 +583,13 @@ describe('Overview selectors', () => {
         ${'spending'}                      | ${'spending'}    | ${spending}
       `('should use the actual $description value for the current month', ({ prop, value }) => {
         expect.assertions(1);
-        const { values: result } = getProcessedMonthlyValues(dateAtEndOfMonth, 0)(testState);
+        const { values: result } = getProcessedMonthlyValues(endOfMonth(now), 0)(testState);
         expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value.map(Math.round));
       });
 
       it('should return the start prediction index', () => {
         expect.assertions(1);
-        expect(getProcessedMonthlyValues(dateAtEndOfMonth, 0)(testState).startPredictionIndex).toBe(
-          3,
-        );
+        expect(getProcessedMonthlyValues(now, 0)(testState).startPredictionIndex).toBe(3);
       });
     });
 
@@ -752,8 +756,8 @@ describe('Overview selectors', () => {
                 "value": 787,
               },
               "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 4919735,
+                "rgb": "#38c549",
+                "value": 4248848,
               },
               "social": Object {
                 "rgb": "#bf9e24",
@@ -802,8 +806,8 @@ describe('Overview selectors', () => {
                 "value": 1573,
               },
               "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 4746426,
+                "rgb": "#45c955",
+                "value": 4081495,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -852,8 +856,8 @@ describe('Overview selectors', () => {
                 "value": 2023,
               },
               "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 4870127,
+                "rgb": "#3bc64c",
+                "value": 4211158,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -902,8 +906,8 @@ describe('Overview selectors', () => {
                 "value": 1523,
               },
               "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 4993774,
+                "rgb": "#30c342",
+                "value": 4340774,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -952,8 +956,8 @@ describe('Overview selectors', () => {
                 "value": 2323,
               },
               "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 5118667,
+                "rgb": "#26c039",
+                "value": 4471642,
               },
               "social": Object {
                 "rgb": "#dfcf92",
