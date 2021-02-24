@@ -6,6 +6,7 @@ export type MonthlyProcessed = GQL<Monthly> & {
   liabilities: number[];
   netWorth: number[];
   stocks: number[]; // this excludes cash and is dynamic on current prices
+  stockCostBasis: number[]; // illustrates the difference between paper value and cost basis
   pension: number[];
   cashOther: number[]; // e.g. savings accounts, foreign accounts
   investments: number[]; // this includes cash and is based on the recorded value

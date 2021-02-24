@@ -39,6 +39,7 @@ function getGraphData(
 
   const dataHomeEquity = getValuesWithTime(monthly.homeEquity, opts);
   const dataStocks = getValuesWithTime(monthly.stocks, opts);
+  const dataStockCostBasis = getValuesWithTime(monthly.stockCostBasis, opts);
   const dataLockedCash = getValuesWithTime(lockedCash, opts);
 
   const targets = getTargets(startDate, monthly.netWorth, futureMonths);
@@ -73,6 +74,18 @@ function getGraphData(
       fill: true,
       smooth: true,
       color: rgba(colors.funds.main, 0.4),
+    },
+    {
+      key: 'stock-cost-basis',
+      name: 'Stock cost basis',
+      data: dataStockCostBasis,
+      stack: [dataHomeEquity],
+      sliceAtFirstPositive: 1,
+      fill: false,
+      strokeWidth: 1,
+      smooth: false,
+      dashed: true,
+      color: rgba(colors.funds.main, 0.5),
     },
     {
       key: 'locked-cash',

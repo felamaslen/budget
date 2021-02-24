@@ -15,7 +15,6 @@ export const GraphOverview: React.FC = () => {
   const dispatch = useDispatch();
   const today = useContext(TodayContext);
 
-  const monthly = useSelector(getProcessedMonthlyValues(today));
   const startDateCurrent = useSelector(getStartDate);
   const futureMonths = useSelector(getFutureMonths(today));
 
@@ -26,6 +25,13 @@ export const GraphOverview: React.FC = () => {
   });
 
   const showAllAndReady = showAll && !!oldData?.overviewOld;
+
+  const monthly = useSelector(
+    getProcessedMonthlyValues(
+      today,
+      showAllAndReady ? oldData?.overviewOld?.stocks.length ?? 0 : 0,
+    ),
+  );
 
   useEffect(() => {
     if (error) {
@@ -45,6 +51,7 @@ export const GraphOverview: React.FC = () => {
       liabilities: [...overviewOld.liabilities, ...monthly.values.liabilities],
       netWorth: [...overviewOld.netWorth, ...monthly.values.netWorth],
       stocks: [...overviewOld.stocks, ...monthly.values.stocks],
+      stockCostBasis: monthly.values.stockCostBasis,
       pension: [...overviewOld.pension, ...monthly.values.pension],
       cashOther: [...overviewOld.cashOther, ...monthly.values.cashOther],
       investments: [...overviewOld.investments, ...monthly.values.investments],

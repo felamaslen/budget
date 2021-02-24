@@ -16,7 +16,7 @@ describe('<GraphSpending />', () => {
       showAll: false,
       startDate: getStartDate(state),
       futureMonths: getFutureMonths(today)(state),
-      monthly: getProcessedMonthlyValues(today)(state).values,
+      monthly: getProcessedMonthlyValues(today, 0)(state).values,
     };
 
     return render(

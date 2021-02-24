@@ -63,7 +63,7 @@ const getFundCacheAge = memoiseNowAndToday((time) =>
   }),
 );
 
-const filterPastTransactions = (today: Date, transactions: Transaction[]): Transaction[] =>
+export const filterPastTransactions = (today: Date, transactions: Transaction[]): Transaction[] =>
   transactions.filter(({ date }) => isBefore(startOfDay(date), today));
 
 const getTransactionsToDateWithPrices = memoiseNowAndToday((time) =>

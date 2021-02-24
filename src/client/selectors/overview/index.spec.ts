@@ -79,6 +79,16 @@ describe('Overview selectors', () => {
         /* Jul-18 */ 108280,
       ];
 
+      const stockCostBasis = [
+        /* Jan-18 */ 0,
+        /* Feb-18 */ 10 * 5612 + 3,
+        /* Mar-18 */ 10 * 5612 + 3 - 1.32 * 1804 + 0.72 + (51 * 109 + 3),
+        /* Apr-18 */ 10 * 5612 + 3 - 1.32 * 1804 + 0.72 + (51 * 109 + 3),
+        /* May-18 */ 10 * 5612 + 3 - 1.32 * 1804 + 0.72 + (51 * 109 + 3),
+        /* Jun-18 */ 10 * 5612 + 3 - 1.32 * 1804 + 0.72 + (51 * 109 + 3),
+        /* Jul-18 */ 10 * 5612 + 3 - 1.32 * 1804 + 0.72 + (51 * 109 + 3),
+      ];
+
       const pension = [
         /* Jan-18 */ 0,
         /* Feb-18 */ 10654,
@@ -278,33 +288,74 @@ describe('Overview selectors', () => {
       ];
 
       it.each`
-        description                        | prop             | value
-        ${'net worth (excluding options)'} | ${'netWorth'}    | ${netWorth}
-        ${'assets'}                        | ${'assets'}      | ${assets}
-        ${'liabilities'}                   | ${'liabilities'} | ${liabilities}
-        ${'investments (excluding cash)'}  | ${'stocks'}      | ${stocks}
-        ${'pension'}                       | ${'pension'}     | ${pension}
-        ${'other cash'}                    | ${'cashOther'}   | ${cashOther}
-        ${'home equity'}                   | ${'homeEquity'}  | ${homeEquity}
-        ${'options'}                       | ${'options'}     | ${options}
-        ${'income'}                        | ${'income'}      | ${income}
-        ${'bills'}                         | ${'bills'}       | ${bills}
-        ${'food'}                          | ${'food'}        | ${food}
-        ${'general'}                       | ${'general'}     | ${general}
-        ${'social'}                        | ${'social'}      | ${social}
-        ${'holiday'}                       | ${'holiday'}     | ${holiday}
-        ${'spending'}                      | ${'spending'}    | ${spending}
+        description                        | prop                | value
+        ${'net worth (excluding options)'} | ${'netWorth'}       | ${netWorth}
+        ${'assets'}                        | ${'assets'}         | ${assets}
+        ${'liabilities'}                   | ${'liabilities'}    | ${liabilities}
+        ${'investments (excluding cash)'}  | ${'stocks'}         | ${stocks}
+        ${'investment cost basis'}         | ${'stockCostBasis'} | ${stockCostBasis}
+        ${'pension'}                       | ${'pension'}        | ${pension}
+        ${'other cash'}                    | ${'cashOther'}      | ${cashOther}
+        ${'home equity'}                   | ${'homeEquity'}     | ${homeEquity}
+        ${'options'}                       | ${'options'}        | ${options}
+        ${'income'}                        | ${'income'}         | ${income}
+        ${'bills'}                         | ${'bills'}          | ${bills}
+        ${'food'}                          | ${'food'}           | ${food}
+        ${'general'}                       | ${'general'}        | ${general}
+        ${'social'}                        | ${'social'}         | ${social}
+        ${'holiday'}                       | ${'holiday'}        | ${holiday}
+        ${'spending'}                      | ${'spending'}       | ${spending}
       `('should add values for $description', ({ prop, value }) => {
         expect.assertions(1);
-        const { values: result } = getProcessedMonthlyValues(dateInMiddleOfMonth)(testState);
+        const { values: result } = getProcessedMonthlyValues(dateInMiddleOfMonth, 0)(testState);
         expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value.map(Math.round));
       });
 
       it('should return the start prediction index', () => {
         expect.assertions(1);
-        expect(getProcessedMonthlyValues(dateInMiddleOfMonth)(testState).startPredictionIndex).toBe(
-          2,
-        );
+        expect(
+          getProcessedMonthlyValues(dateInMiddleOfMonth, 0)(testState).startPredictionIndex,
+        ).toBe(2);
+      });
+
+      describe('when showing old months', () => {
+        it('should calculate the cost basis for the old months too', () => {
+          expect.assertions(1);
+          const processedWithOldMonths = getProcessedMonthlyValues(dateInMiddleOfMonth, 11)(state);
+
+          const costBasisMay17 =
+            1117.87 * 80.510256 -
+            1117.87 * 72.24453648 +
+            (1499.7 * 133.36 - 1499.7 * 177.1167567) +
+            (450 * 100 - 450 * 112 + 20 + 80) +
+            (428 * 934 + 148 + 100);
+
+          expect(processedWithOldMonths.values.stockCostBasis).toStrictEqual(
+            [
+              /* Feb-17 */ 1117.87 * 80.510256 + 1499.7 * 133.36,
+              /* Mar-17 */ 1117.87 * 80.510256 + 1499.7 * 133.36 + 450 * 100,
+              /* Apr-17 */ 1117.87 * 80.510256 -
+                1117.87 * 72.24453648 +
+                (1499.7 * 133.36 - 1499.7 * 177.1167567) +
+                (450 * 100 - 450 * 112 + 20 + 80),
+              /* May-17 */ costBasisMay17,
+              /* Jun-17 */ costBasisMay17,
+              /* Jul-17 */ costBasisMay17,
+              /* Aug-17 */ costBasisMay17,
+              /* Sep-17 */ costBasisMay17,
+              /* Oct-17 */ costBasisMay17,
+              /* Nov-17 */ costBasisMay17,
+              /* Dec-17 */ costBasisMay17,
+              /* Jan-18 */ costBasisMay17,
+              /* Feb-18 */ costBasisMay17,
+              /* Mar-18 */ costBasisMay17,
+              /* Apr-18 */ costBasisMay17,
+              /* May-18 */ costBasisMay17,
+              /* Jun-18 */ costBasisMay17,
+              /* Jul-18 */ costBasisMay17,
+            ].map(Math.round),
+          );
+        });
       });
     });
 
@@ -526,13 +577,15 @@ describe('Overview selectors', () => {
         ${'spending'}                      | ${'spending'}    | ${spending}
       `('should use the actual $description value for the current month', ({ prop, value }) => {
         expect.assertions(1);
-        const { values: result } = getProcessedMonthlyValues(dateAtEndOfMonth)(testState);
+        const { values: result } = getProcessedMonthlyValues(dateAtEndOfMonth, 0)(testState);
         expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value.map(Math.round));
       });
 
       it('should return the start prediction index', () => {
         expect.assertions(1);
-        expect(getProcessedMonthlyValues(dateAtEndOfMonth)(testState).startPredictionIndex).toBe(3);
+        expect(getProcessedMonthlyValues(dateAtEndOfMonth, 0)(testState).startPredictionIndex).toBe(
+          3,
+        );
       });
     });
 
@@ -558,7 +611,7 @@ describe('Overview selectors', () => {
 
       it('should recalculate the current month fund value', () => {
         expect.assertions(1);
-        const { values: result } = getProcessedMonthlyValues(now)(testStateWithFundPrices);
+        const { values: result } = getProcessedMonthlyValues(now, 0)(testStateWithFundPrices);
         expect(result.stocks[2]).toBe(Math.round(101 * 67.93));
       });
     });

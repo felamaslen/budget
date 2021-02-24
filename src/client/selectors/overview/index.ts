@@ -1,4 +1,5 @@
 import { compose } from '@typed/compose';
+import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
 import format from 'date-fns/format';
 import getDate from 'date-fns/getDate';
@@ -32,7 +33,7 @@ import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
 import { arrayAverage, getTotalCost, IDENTITY, randnBm, rightPad } from '~client/modules/data';
 import { State } from '~client/reducers';
-import { getFundsCachedValue } from '~client/selectors/funds';
+import { filterPastTransactions, getFundsCachedValue } from '~client/selectors/funds';
 import { getFundsRows } from '~client/selectors/funds/helpers';
 import {
   MonthlyProcessed,
@@ -216,15 +217,29 @@ const withCurrentStockValue = (futureMonths: number, currentStockValue: number) 
 ): number[] => replaceAtIndex(stocks, stocks.length - 1 - futureMonths, currentStockValue);
 
 const withStocks = <K extends MonthlyProcessedKey>(
+  dates: Date[],
+  funds: Fund[],
+  numOldMonths: number,
   futureMonths: number,
   currentStockValue: number,
   annualisedFundReturns: number,
-) => (monthly: MonthlyWithProcess<K>): MonthlyWithProcess<K> => ({
+) => (
+  monthly: MonthlyWithProcess<K>,
+): MonthlyWithProcess<K> & Pick<MonthlyProcessed, 'stockCostBasis'> => ({
   ...monthly,
   stocks: compose(
     withCurrentStockValue(futureMonths, Math.round(currentStockValue)),
     predictStockReturns(futureMonths, annualisedFundReturns),
   )(monthly.stocks),
+  stockCostBasis: Array(numOldMonths + dates.length)
+    .fill(0)
+    .map<Date>((_, index) => endOfMonth(addMonths(dates[0], index - numOldMonths)))
+    .map<number>((monthDate) =>
+      funds.reduce<number>(
+        (last, fund) => last + getTotalCost(filterPastTransactions(monthDate, fund.transactions)),
+        0,
+      ),
+    ),
 });
 
 type AggregateKey = 'pension' | 'cashOther' | 'options' | 'investments';
@@ -260,7 +275,10 @@ function withAggregateNetWorth(
 }
 
 export const getProcessedMonthlyValues = moize(
-  (today: Date): ((state: State) => { values: MonthlyProcessed; startPredictionIndex: number }) =>
+  (
+    today: Date,
+    numOldMonths: number,
+  ): ((state: State) => { values: MonthlyProcessed; startPredictionIndex: number }) =>
     createSelector(
       getFutureMonths(today),
       getMonthDates,
@@ -289,15 +307,22 @@ export const getProcessedMonthlyValues = moize(
         );
 
         const values = compose(
-          withNetWorth<AggregateKey | 'spending' | 'net'>(
+          withNetWorth<AggregateKey | 'stockCostBasis' | 'spending' | 'net'>(
             startPredictionIndex,
             isEndOfMonth,
             netWorth,
             homeEquity,
             funds,
           ),
-          withPredictedSpending<AggregateKey>(dates, today, futureMonths),
-          withStocks<AggregateKey>(futureMonths, fundsCachedValue.value, annualisedFundReturns),
+          withPredictedSpending<AggregateKey | 'stockCostBasis'>(dates, today, futureMonths),
+          withStocks<AggregateKey>(
+            dates,
+            funds,
+            numOldMonths,
+            futureMonths,
+            fundsCachedValue.value,
+            annualisedFundReturns,
+          ),
           withAggregateNetWorth(today, startPredictionIndex, subcategories, netWorth),
         )(monthly);
         return { values: roundedArrays<MonthlyProcessed>(values), startPredictionIndex };
@@ -406,7 +431,7 @@ export const getOverviewTable = moize(
     createSelector(
       getMonthDates,
       getFutureMonths(today),
-      getProcessedMonthlyValues(today),
+      getProcessedMonthlyValues(today, 0),
       (dates, futureMonths, monthly): OverviewTable => {
         const months = getFormattedMonths(dates);
         const values = getTableValues(monthly.values);

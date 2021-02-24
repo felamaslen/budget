@@ -27,7 +27,7 @@ describe('<GraphBalance />', () => {
   const today = endOfDay(testNow);
 
   const setup = (): RenderResult => {
-    const processedMonthly = getProcessedMonthlyValues(today)(state);
+    const processedMonthly = getProcessedMonthlyValues(today, 0)(state);
     const props: Props = {
       isMobile: false,
       showAll: false,
@@ -948,6 +948,15 @@ describe('<GraphBalance />', () => {
             fill="rgba(84,110,122,0.4)"
             stroke="none"
             stroke-width="2"
+          />
+        </g>
+        <g>
+          <path
+            d="M0.0,234.4 L77.3,215.7 L163.0,211.8 L245.9,207.9 L331.5,204.0 L414.4,200.1 L500.0,196.1"
+            fill="none"
+            stroke="rgba(84,110,122,0.5)"
+            stroke-dasharray="3,5"
+            stroke-width="1"
           />
         </g>
         <g>
