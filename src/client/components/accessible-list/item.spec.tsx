@@ -1,29 +1,22 @@
-import { render, RenderResult, fireEvent, within, act } from '@testing-library/react';
+import { render, RenderResult, fireEvent, within, act, waitFor } from '@testing-library/react';
+import type { DocumentNode } from 'graphql';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
-import sinon from 'sinon';
 import { Client } from 'urql';
 import { fromValue } from 'wonka';
 
 import { AccessibleListCreateItem } from './item';
 import type { PropsItemCreate } from './types';
 import { FormFieldTextInline } from '~client/components/form-field';
+import * as SearchQueries from '~client/gql/queries/search';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import { PageListStandard } from '~client/types/enum';
-import type { SearchResult } from '~client/types/gql';
+import { Query, QuerySearchArgs } from '~client/types/gql';
 
 describe('Accessible list create item', () => {
-  let clock: sinon.SinonFakeTimers;
-  beforeAll(() => {
-    clock = sinon.useFakeTimers();
-  });
-  afterAll(() => {
-    clock.restore();
-  });
-
   const myPage = PageListStandard.Income as const;
 
   type MyItem = {
@@ -41,53 +34,80 @@ describe('Accessible list create item', () => {
     suggestionFields: ['item'],
   };
 
-  const setup = (customProps = {}, searchResult: Partial<SearchResult> = {}): RenderResult =>
+  const mockClient = ({
+    executeQuery: ({
+      query,
+      variables,
+    }: {
+      variables: Record<string, unknown>;
+      query: DocumentNode;
+    }) => {
+      if (query === SearchQueries.SearchSuggestions) {
+        const hasNext = (variables as QuerySearchArgs).column === 'item';
+        const nextField = hasNext ? 'category' : null;
+
+        switch ((variables as QuerySearchArgs).searchTerm) {
+          case 'c':
+            return fromValue<{ data: Query }>({
+              data: {
+                search: {
+                  list: ['Crockery', 'Caster sugar', 'Abacus'],
+                  nextCategory: hasNext ? ['Kitchen', 'Sugar', 'Household'] : null,
+                  nextField,
+                  searchTerm: 'c',
+                },
+              },
+            });
+
+          case 'z':
+            return fromValue<{ data: Query }>({
+              data: {
+                search: {
+                  list: ['Zappa', 'Zenith'],
+                  nextCategory: hasNext ? [] : null,
+                  nextField,
+                  searchTerm: 'z',
+                },
+              },
+            });
+
+          default:
+            return fromValue({ data: null });
+        }
+      }
+
+      return fromValue({
+        data: null,
+      });
+    },
+  } as unknown) as Client;
+
+  const setup = (customProps: Partial<typeof props> = {}): RenderResult =>
     render(
       <Provider store={createStore<State>()(testState)}>
-        <GQLProviderMock
-          client={
-            ({
-              executeQuery: () =>
-                fromValue({
-                  data: { search: searchResult },
-                }),
-            } as unknown) as Client
-          }
-        >
+        <GQLProviderMock client={mockClient}>
           <AccessibleListCreateItem<MyItem, typeof myPage> {...props} {...customProps} />
         </GQLProviderMock>
       </Provider>,
     );
 
   describe('when suggestions are available', () => {
-    const setupToSuggestions = (
-      withNext = false,
-    ): RenderResult & {
+    const setupToSuggestions = (): RenderResult & {
       inputs: HTMLInputElement[];
     } => {
-      const renderResult = setup(
-        {},
-        {
-          list: ['Crockery', 'Caster sugar', 'Abacus'],
-          nextCategory: withNext ? ['Kitchen', 'Sugar', 'Household'] : null,
-          nextField: withNext ? 'category' : null,
-          searchTerm: 'c',
-        },
-      );
+      const renderResult = setup();
       const inputs = renderResult.getAllByRole('textbox', { hidden: true }) as HTMLInputElement[];
 
       return { ...renderResult, inputs };
     };
 
-    const setupWithSuggestions = async (
-      withNext = false,
-    ): Promise<
+    const setupWithSuggestions = async (): Promise<
       RenderResult & {
         inputs: HTMLInputElement[];
         suggestionItems: HTMLButtonElement[];
       }
     > => {
-      const renderResult = setupToSuggestions(withNext);
+      const renderResult = setupToSuggestions();
 
       const [inputSomeField] = renderResult.inputs;
 
@@ -95,8 +115,10 @@ describe('Accessible list create item', () => {
         fireEvent.change(inputSomeField, {
           target: { value: 'c' },
         });
+      });
 
-        clock.runAll();
+      await waitFor(() => {
+        expect(renderResult.getByRole('list', { hidden: true })).toBeInTheDocument();
       });
 
       const list = renderResult.getByRole('list', { hidden: true });
@@ -107,7 +129,7 @@ describe('Accessible list create item', () => {
     };
 
     it('should request and render a suggestions list when typing', async () => {
-      expect.assertions(4);
+      expect.hasAssertions();
 
       const { suggestionItems } = await setupWithSuggestions();
 
@@ -119,7 +141,7 @@ describe('Accessible list create item', () => {
     });
 
     it('should not render the suggestions list until the suggestions are loaded', async () => {
-      expect.assertions(2);
+      expect.hasAssertions();
 
       const { queryByRole, inputs } = setupToSuggestions();
       const [inputSomeField] = inputs;
@@ -132,11 +154,9 @@ describe('Accessible list create item', () => {
         });
       });
 
-      act(() => {
-        clock.runAll();
+      await waitFor(() => {
+        expect(queryByRole('list', { hidden: true })).toBeInTheDocument();
       });
-
-      expect(queryByRole('list', { hidden: true })).toBeInTheDocument();
     });
 
     it('should not request or render the suggestions list for non-suggestion fields', () => {
@@ -157,7 +177,6 @@ describe('Accessible list create item', () => {
     });
 
     const setupWithSelection = async (
-      withNext = false,
       index = 1,
     ): Promise<
       RenderResult & {
@@ -165,7 +184,7 @@ describe('Accessible list create item', () => {
         inputNextField: HTMLInputElement;
       }
     > => {
-      const renderResult = await setupWithSuggestions(withNext);
+      const renderResult = await setupWithSuggestions();
       const { inputs, suggestionItems } = renderResult;
 
       const inputSomeField = inputs[0];
@@ -185,37 +204,26 @@ describe('Accessible list create item', () => {
 
     describe('when selecting a suggestion', () => {
       it('should change the value of the current input', async () => {
-        expect.assertions(1);
-
+        expect.hasAssertions();
         const { inputSomeField } = await setupWithSelection();
-
-        act(() => {
-          clock.runAll();
-        });
 
         expect(inputSomeField.value).toBe('Caster sugar');
       });
 
       it('should focus the next input', async () => {
-        expect.assertions(3);
-
+        expect.hasAssertions();
         const { inputSomeField, inputNextField } = await setupWithSelection();
 
-        expect(document.activeElement).toBe(inputSomeField);
-
-        act(() => {
-          clock.runToLast();
-        });
         expect(inputSomeField.value).toBe('Caster sugar');
 
-        act(() => {
-          clock.runToLast();
+        expect(document.activeElement).toBe(inputSomeField);
+        await waitFor(() => {
+          expect(document.activeElement).toBe(inputNextField);
         });
-        expect(document.activeElement).toBe(inputNextField);
       });
 
       it('should add the suggested values to the created item', async () => {
-        expect.assertions(3);
+        expect.hasAssertions();
         const { inputSomeField, inputNextField, getByText } = await setupWithSelection();
 
         expect(inputSomeField.value).toBe('Caster sugar');
@@ -237,10 +245,6 @@ describe('Accessible list create item', () => {
           fireEvent.click(addButton);
         });
 
-        act(() => {
-          clock.runToLast();
-        });
-
         expect(props.onCreate).toHaveBeenCalledTimes(1);
         expect(props.onCreate).toHaveBeenCalledWith({
           item: 'Caster sugar',
@@ -250,19 +254,11 @@ describe('Accessible list create item', () => {
 
       describe('if on the last field of the create form', () => {
         it('should focus the add button', async () => {
-          expect.assertions(3);
+          expect.hasAssertions();
 
-          const { getAllByRole, getByRole, getByText } = setup(
-            {
-              suggestionFields: ['item', 'category'],
-            },
-            {
-              list: ['Zappa', 'Zenith'],
-              nextCategory: null,
-              nextField: null,
-              searchTerm: 'z',
-            },
-          );
+          const { getAllByRole, getByRole, getByText } = setup({
+            suggestionFields: ['item', 'category'],
+          });
 
           const [, inputNextField] = getAllByRole('textbox', {
             hidden: true,
@@ -276,11 +272,9 @@ describe('Accessible list create item', () => {
             });
           });
 
-          act(() => {
-            clock.runToLast();
+          await waitFor(() => {
+            expect(getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
           });
-
-          expect(getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);
 
           const list = getByRole('list', { hidden: true });
           const { getAllByRole: getSuggestions } = within(list);
@@ -296,41 +290,33 @@ describe('Accessible list create item', () => {
 
           expect(inputNextField.value).toBe('Zenith');
 
-          act(() => {
-            clock.runAll();
+          await waitFor(() => {
+            expect(document.activeElement).toBe(addButton);
           });
-
-          expect(document.activeElement).toBe(addButton);
         });
       });
     });
 
     describe('if there is a next column value', () => {
       it('should add the next column from suggestions', async () => {
-        expect.assertions(2);
+        expect.hasAssertions();
 
-        const { inputSomeField, inputNextField } = await setupWithSelection(true, 0);
-
-        act(() => {
-          clock.runAll();
-        });
+        const { inputSomeField, inputNextField } = await setupWithSelection(0);
 
         expect(inputSomeField.value).toBe('Crockery');
         expect(inputNextField.value).toBe('Kitchen');
       });
 
       it('should focus the next input', async () => {
-        expect.assertions(4);
+        expect.hasAssertions();
 
-        const { inputNextField } = await setupWithSelection(true, 0);
-
-        act(() => {
-          clock.runAll();
-        });
+        const { inputNextField } = await setupWithSelection(0);
 
         expect(inputNextField.value).toBe('Kitchen');
 
-        expect(document.activeElement).toBe(inputNextField);
+        await waitFor(() => {
+          expect(document.activeElement).toBe(inputNextField);
+        });
         expect(inputNextField.selectionStart).toBe(0);
         expect(inputNextField.selectionEnd).toBe('Kitchen'.length);
       });

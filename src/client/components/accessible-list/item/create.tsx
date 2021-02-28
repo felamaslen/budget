@@ -138,11 +138,19 @@ export const AccessibleListCreateItem = <
     setDelta,
   });
 
+  const timer = useRef<number>();
+  useEffect(
+    () => (): void => {
+      clearTimeout(timer.current);
+    },
+    [],
+  );
+
   const addButton = useRef<HTMLButtonElement>(null);
   const addButtonFocused = activeField === ADD_BUTTON;
   useEffect(() => {
     if (addButtonFocused) {
-      setTimeout(() => {
+      timer.current = window.setTimeout(() => {
         if (addButton.current) {
           addButton.current.focus();
         }
@@ -154,7 +162,7 @@ export const AccessibleListCreateItem = <
   const onCreateIfPossible = useCallback((): void => {
     if (deltaIsComplete(delta)) {
       onCreate(delta);
-      setTimeout(() => {
+      timer.current = window.setTimeout(() => {
         setActiveField(firstField);
         setDelta(initialDelta);
       }, 0);

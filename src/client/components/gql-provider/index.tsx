@@ -32,6 +32,7 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children }) => {
 
     const wsClient = createWSClient({
       url: wsUrl,
+      lazy: false,
       retryAttempts: Infinity,
       retryWait: (retries): Promise<void> =>
         new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** Math.min(retries, 4))),

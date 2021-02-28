@@ -2900,10 +2900,10 @@
     "@typescript-eslint/types" "4.11.1"
     eslint-visitor-keys "^2.0.0"
 
-"@urql/core@^1.16.0", "@urql/core@^1.16.1":
-  version "1.16.1"
-  resolved "https://registry.yarnpkg.com/@urql/core/-/core-1.16.1.tgz#a41487dd4436cbdc92fce714c6c1fc04315761d3"
-  integrity sha512-lcEMCS/rB+ug7jKSRDVZIsqNhZxRooTNa1kHfvSjJT2k4SXDyPmjNSfXBUJF2pDJmvv9EIKl9Tk0AF1CvG3Q/g==
+"@urql/core@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@urql/core/-/core-2.0.0.tgz#b4936dd51fe84cb570506d9ee2579149689f7535"
+  integrity sha512-Qj24CG8ullqZZsYmjrSH0JhH+nY7kj8GbVbA9si3KUjlYs75A/MBQU3i97j6oWyGldDBapyis2CfaQeXKbv8rA==
   dependencies:
     "@graphql-typed-document-node/core" "^3.1.0"
     wonka "^4.0.14"
@@ -6397,10 +6397,10 @@ graphql-ws@3.1.0:
   resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-3.1.0.tgz#cd09d385a21ab88af4c226da79c19351df9b27e8"
   integrity sha512-zbex3FSiFz0iRgfkzDNWpOY/sYWoX+iZ5XUhakaDwOh99HSuk8rPt5suuxdXUVzEg5TGQ9rwzNaz/+mTPtS0yg==
 
-graphql-ws@^4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-4.1.2.tgz#e2653b9e65505e484eda5e00496783caffd0041d"
-  integrity sha512-c/iOE4kGW6J5h9hmHWaYvgsjAQacioae3ZXvq3JDuVw8uXo3Tbmky71Fzn0+emSKRaRNL1jQuzYtRqFKge2PIw==
+graphql-ws@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-4.2.0.tgz#dfb8e355d3a226672ec682ea517b64e9e7e006a3"
+  integrity sha512-tPdRAFfl9Ypx+evsSYFa3nTGVcSKKaOMhTlOD7eEbiMpsb2hi6XJeSyenrH/hgf5+Q3v3GV6aZ9R/UEjakl7eQ==
 
 graphql@*, graphql@^15.4.0:
   version "15.4.0"
@@ -12083,12 +12083,12 @@ url-parse@^1.4.3:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
 
-urql@^1.11.4:
-  version "1.11.4"
-  resolved "https://registry.yarnpkg.com/urql/-/urql-1.11.4.tgz#f4eb430d7756baf61f2906779d5a1914e9eeef0d"
-  integrity sha512-VtX8xuzwxDtVXRCf/uvy1LcAnBIfiDrKlkblq6ENVJtI3eNsq7mTTxk3F1kZCxE29GWBayQpO4kcLzhEE0OojQ==
+urql@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/urql/-/urql-2.0.1.tgz#16c024ab0340328001b0c400ebe1368887af3823"
+  integrity sha512-UTYLaMMw/N2iM2nHbcZ1XvN+opZxtWKwJaczV+MAco8buFpR3JR9CFrgKvx9p4uz+EayqQ69LZTWreJx+c196w==
   dependencies:
-    "@urql/core" "^1.16.0"
+    "@urql/core" "^2.0.0"
     wonka "^4.0.14"
 
 use@^3.1.0:

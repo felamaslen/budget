@@ -1,5 +1,5 @@
 import { useDebounceCallback } from '@react-hook/debounce';
-import { useCallback, useState, useMemo, useEffect } from 'react';
+import { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 
 import { ADD_BUTTON } from './constants';
 import type { FieldKey, ActiveField } from './types';
@@ -64,16 +64,18 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
     requestedField: null,
   });
 
+  const pause = !(page && state.query);
+
   const [{ data, fetching, stale }, fetchSuggestions] = useSearchSuggestionsQuery({
-    pause: true,
+    pause,
     requestPolicy: 'network-only',
-    variables: state.query
-      ? {
+    variables: pause
+      ? ({} as QuerySearchArgs)
+      : ({
           ...state.query,
           page: (page as string) as SearchPage,
           numResults: numToRequest,
-        }
-      : ({} as QuerySearchArgs),
+        } as QuerySearchArgs),
   });
 
   const debouncedFetch = useDebounceCallback(fetchSuggestions, 100);
@@ -152,6 +154,14 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
     return fieldIndex === fields.length - 1 ? ADD_BUTTON : fields[fieldIndex + 1];
   }, [fields, state.activeField]);
 
+  const focusTimer = useRef<number>();
+  useEffect(
+    () => (): void => {
+      clearTimeout(focusTimer.current);
+    },
+    [],
+  );
+
   const activateSuggestion = useCallback(
     (index: number): void => {
       if (index < 0 || index > state.list.length - 1 || !state.activeField) {
@@ -171,7 +181,7 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
           return nextValue && nextField ? { ...withMain, [nextField]: nextValue } : withMain;
         },
       );
-      setTimeout(() => {
+      focusTimer.current = window.setTimeout(() => {
         setState((last) => ({
           ...last,
           activeField: nextField === ADD_BUTTON ? ADD_BUTTON : null,
@@ -181,7 +191,7 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
           requestedField: null,
         }));
         if (nextField !== ADD_BUTTON) {
-          setTimeout(() => {
+          focusTimer.current = window.setTimeout(() => {
             setState((last) => ({
               ...last,
               activeField: nextField,

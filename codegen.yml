@@ -24,6 +24,7 @@ generates:
         NonNegativeInt: number
         NonNegativeFloat: number
         PositiveInt: number
+      gqlImport: urql#gql
     plugins:
       - typescript
       - typescript-operations

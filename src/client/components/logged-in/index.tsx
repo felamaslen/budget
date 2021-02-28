@@ -7,7 +7,6 @@ import { RouteComponentProps, Route, Switch, withRouter } from 'react-router-dom
 
 import { SpinnerInit } from '~client/components/spinner';
 import { useInitialData, useSubscriptions } from '~client/hooks';
-import { useAppConfig } from '~client/hooks/config';
 
 type RouteObject = {
   key: string;
@@ -54,10 +53,19 @@ const NotFound: React.FC = () => (
   </div>
 );
 
-const Subscriptions: React.FC = () => {
-  useAppConfig();
+const ContentWithData: React.FC = () => {
   useSubscriptions();
-  return null;
+
+  return (
+    <Fragment>
+      <Switch>
+        {routes.map(({ key, ...options }) => (
+          <Route key={key} path={options.path ?? `/${key}`} {...options} />
+        ))}
+        <Route path="/" component={NotFound} />
+      </Switch>
+    </Fragment>
+  );
 };
 
 const Content: React.FC<RouteComponentProps> = () => {
@@ -70,17 +78,7 @@ const Content: React.FC<RouteComponentProps> = () => {
     return null;
   }
 
-  return (
-    <Fragment>
-      <Subscriptions />
-      <Switch>
-        {routes.map(({ key, ...options }) => (
-          <Route key={key} path={options.path ?? `/${key}`} {...options} />
-        ))}
-        <Route path="/" component={NotFound} />
-      </Switch>
-    </Fragment>
-  );
+  return <ContentWithData />;
 };
 
 export const LoggedIn = withRouter(Content);

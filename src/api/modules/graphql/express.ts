@@ -5,7 +5,7 @@ import { Express, Request } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import fs from 'fs-extra';
 import { execute, subscribe } from 'graphql';
-import { Context } from 'graphql-ws/lib/server';
+import { Context } from 'graphql-ws';
 import { useServer, Extra } from 'graphql-ws/lib/use/ws';
 import ws from 'ws';
 
