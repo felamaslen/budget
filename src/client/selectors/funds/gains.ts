@@ -173,7 +173,7 @@ const getTodayAndYesterdayTotalValue = createSelector(
       const startTime = cache.startTime ?? 0;
       const cacheTimes = cache.cacheTimes ?? [];
 
-      return itemsWithPrices.reduce((last, { id, transactions }) => {
+      return itemsWithPrices.reduce((last, { id, transactions, stockSplits }) => {
         const cacheForFund = cache?.prices[id];
         if (!cacheForFund) {
           return last;
@@ -182,7 +182,7 @@ const getTodayAndYesterdayTotalValue = createSelector(
         if (!(latestGroup && latestGroup.values.length)) {
           return last;
         }
-        const { startIndex, values } = latestGroup;
+        const { startIndex, values, rebasePriceRatio } = latestGroup;
 
         const timeIndex =
           cacheTimes.length -
@@ -193,14 +193,15 @@ const getTodayAndYesterdayTotalValue = createSelector(
             .findIndex((value) => value + startTime <= maxDateValue);
 
         const price = values[timeIndex - startIndex] ?? values[values.length - 1];
+        const unitRebase = rebasePriceRatio[timeIndex - startIndex] ?? 1;
 
         const filteredTransactions = transactions.filter(
           ({ date }) => Number(date) <= Number(maxDate),
         );
 
-        const units = filteredTransactions.reduce((sum, { units: value }) => sum + value, 0);
+        const units = getTotalUnits(filteredTransactions, stockSplits);
 
-        return last + price * units;
+        return last + (price / unitRebase) * units;
       }, 0);
     };
 
