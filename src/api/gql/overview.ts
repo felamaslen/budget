@@ -23,14 +23,14 @@ export const overviewSchema = gql`
   }
 
   type Overview {
-    startDate: DateTime!
-    endDate: DateTime!
+    startDate: Date!
+    endDate: Date!
     annualisedFundReturns: Float!
     monthly: Monthly!
   }
 
   type OverviewOld {
-    startDate: DateTime!
+    startDate: Date!
     assets: [Int!]!
     liabilities: [Int!]!
     netWorth: [Int!]!

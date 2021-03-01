@@ -813,8 +813,8 @@ export type Monthly = {
 };
 
 export type Overview = {
-  startDate: Scalars['DateTime'];
-  endDate: Scalars['DateTime'];
+  startDate: Scalars['Date'];
+  endDate: Scalars['Date'];
   annualisedFundReturns: Scalars['Float'];
   monthly: Monthly;
 };
@@ -1654,8 +1654,8 @@ export type MonthlyResolvers<ContextType = Context, ParentType extends Resolvers
 };
 
 export type OverviewResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Overview'] = ResolversParentTypes['Overview']> = {
-  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   annualisedFundReturns?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   monthly?: Resolver<ResolversTypes['Monthly'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

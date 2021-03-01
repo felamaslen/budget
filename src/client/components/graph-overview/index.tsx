@@ -1,3 +1,4 @@
+import endOfDay from 'date-fns/endOfDay';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -69,7 +70,7 @@ export const GraphOverview: React.FC = () => {
   const startDate = useMemo<Date>(
     () =>
       showAllAndReady
-        ? new Date(oldData?.overviewOld?.startDate ?? startDateCurrent)
+        ? endOfDay(new Date(oldData?.overviewOld?.startDate ?? startDateCurrent))
         : startDateCurrent,
     [startDateCurrent, showAllAndReady, oldData],
   );

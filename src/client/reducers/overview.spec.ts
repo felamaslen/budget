@@ -86,7 +86,7 @@ describe('Overview reducer', () => {
     it('should set the end date', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
-      expect(result).toHaveProperty('endDate', new Date('2019-07-31T22:59:59.999Z'));
+      expect(result).toHaveProperty('endDate', new Date('2019-07-31T23:59:59.999Z'));
     });
 
     it('should set the annualised fund returns', () => {

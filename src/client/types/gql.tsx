@@ -871,8 +871,8 @@ export type Monthly = {
 
 export type Overview = {
   __typename?: 'Overview';
-  startDate: Scalars['DateTime'];
-  endDate: Scalars['DateTime'];
+  startDate: Scalars['Date'];
+  endDate: Scalars['Date'];
   annualisedFundReturns: Scalars['Float'];
   monthly: Monthly;
 };

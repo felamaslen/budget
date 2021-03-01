@@ -129,8 +129,8 @@ describe('Overview resolver', () => {
 
     it.each`
       description                  | prop                       | value
-      ${'start date'}              | ${'startDate'}             | ${'2016-03-31T23:59:59.999Z'}
-      ${'end date'}                | ${'endDate'}               | ${'2019-04-30T23:59:59.999Z'}
+      ${'start date'}              | ${'startDate'}             | ${'2016-03-31'}
+      ${'end date'}                | ${'endDate'}               | ${'2019-04-30'}
       ${'annualised fund returns'} | ${'annualisedFundReturns'} | ${0.07}
     `('should return the $description', async ({ prop, value }) => {
       expect.assertions(1);
@@ -382,7 +382,7 @@ describe('Overview resolver', () => {
 
     it.each`
       description                      | prop             | value
-      ${'start date'}                  | ${'startDate'}   | ${'2014-09-30T22:59:59.999Z'}
+      ${'start date'}                  | ${'startDate'}   | ${'2014-09-30'}
       ${'stocks'}                      | ${'stocks'}      | ${expectedStocks}
       ${'pension'}                     | ${'pension'}     | ${expectedPension}
       ${'other cash'}                  | ${'cashOther'}   | ${expectedCashOther}

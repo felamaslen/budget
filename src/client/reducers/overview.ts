@@ -1,5 +1,6 @@
 import { compose } from '@typed/compose';
 import addYears from 'date-fns/addYears';
+import endOfDay from 'date-fns/endOfDay';
 import endOfMonth from 'date-fns/endOfMonth';
 import isSameMonth from 'date-fns/isSameMonth';
 import moize from 'moize';
@@ -48,8 +49,8 @@ const onRead = (state: State, res: InitialQuery): State =>
   res.overview
     ? {
         ...res.overview,
-        startDate: new Date(res.overview?.startDate),
-        endDate: new Date(res.overview?.endDate),
+        startDate: endOfDay(new Date(res.overview?.startDate)),
+        endDate: endOfDay(new Date(res.overview?.endDate)),
       }
     : state;
 
