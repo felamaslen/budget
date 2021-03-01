@@ -16,6 +16,7 @@ export const testRows: FundNative[] = [
         date: new Date('2017-05-09'),
       },
     ],
+    stockSplits: [],
     allocationTarget: 0,
   },
   {
@@ -37,6 +38,7 @@ export const testRows: FundNative[] = [
         date: new Date('2017-04-27'),
       },
     ],
+    stockSplits: [],
     allocationTarget: 0,
   },
   {
@@ -58,6 +60,7 @@ export const testRows: FundNative[] = [
         date: new Date('2017-04-27'),
       },
     ],
+    stockSplits: [],
     allocationTarget: 0,
   },
   {
@@ -79,6 +82,7 @@ export const testRows: FundNative[] = [
         date: new Date('2017-04-27'),
       },
     ],
+    stockSplits: [],
     allocationTarget: 0,
   },
 ];
@@ -346,11 +350,11 @@ export const testCacheTimes = [
   22489200,
   22921201,
   23094000,
-  23526000,
+  23526000, // 2017-07-04
   23785201,
   24130800,
   24390000,
-  24822000,
+  24822000, // 2017-07-19
   24994800,
   25426800,
   25858801,

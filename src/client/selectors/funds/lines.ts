@@ -7,6 +7,7 @@ import type { FundPriceGroup } from '~client/types/gql';
 
 export type Return = {
   price: number;
+  priceRebased: number;
   units: number;
   cost: number;
   realised: number;
@@ -75,6 +76,7 @@ function extendCosts(funds: FundWithReturns[][]): FundWithReturns[][] {
       cost: lastValue.cost,
       realised: lastValue.realised,
       price: 0,
+      priceRebased: 0,
       units: 0,
     };
 
@@ -132,8 +134,9 @@ function mapSingleLine(
     }));
 }
 
-const getValue = ({ units, price }: Return): number => units * price;
-const getRealisedValue = ({ units, price, realised }: Return): number => units * price + realised;
+const getValue = ({ units, priceRebased }: Return): number => units * priceRebased;
+const getRealisedValue = ({ units, priceRebased, realised }: Return): number =>
+  units * priceRebased + realised;
 const getCost = ({ cost }: Return): number => cost;
 
 const getROI = (cost: number, value: number): number => (100 * (value - cost)) / cost;
@@ -153,7 +156,7 @@ export const getFundLineROI = mapSingleLine((returns) =>
   roundROI(getROI(getCost(returns), getRealisedValue(returns))),
 );
 
-export const getFundLinePrice = mapSingleLine((returns) => returns.price);
+export const getFundLinePrice = mapSingleLine((returns) => returns.priceRebased);
 
 export const getFundLinePriceNormalised = (
   fundsWithReturns: FundsWithReturns,

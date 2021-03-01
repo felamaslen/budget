@@ -5,10 +5,15 @@ import moize from 'moize';
 import { rgb, parseToRgb } from 'polished';
 import { createSelector } from 'reselect';
 
-import { getFundsCache, getFundsRows, PriceCache } from './helpers';
+import { getFundsCache, getFundsRows, PriceCacheRebased } from './helpers';
 import { isSold, getTotalUnits, getTotalCost, lastInArray } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import type { FundNative as Fund, Id, TransactionNative as Transaction } from '~client/types';
+import type {
+  FundNative as Fund,
+  Id,
+  StockSplitNative,
+  TransactionNative as Transaction,
+} from '~client/types';
 
 const scoreColor = (score: number, channel: number): number =>
   Math.round(255 + score * (channel - 255));
@@ -38,8 +43,11 @@ type CostValue = {
   dayGainAbs?: number;
 };
 
-export const getPaperValue = (transactions: Transaction[], price: number): number =>
-  price * getTotalUnits(transactions);
+export const getPaperValue = (
+  transactions: Transaction[],
+  stockSplits: StockSplitNative[],
+  price: number,
+): number => price * getTotalUnits(transactions, stockSplits);
 
 export const getRealisedValue = (transactions: Transaction[]): number =>
   -getTotalCost(transactions.filter(({ units }) => units < 0));
@@ -55,8 +63,8 @@ export type RowGain = Omit<CostValue, 'cost'> & {
 
 export type RowGains = { [id: string]: RowGain | null };
 
-export const getRowGains = (rows: Fund[], cache: PriceCache): RowGains =>
-  rows.reduce<RowGains>((items, { id, transactions }) => {
+export const getRowGains = (rows: Fund[], cache: PriceCacheRebased): RowGains =>
+  rows.reduce<RowGains>((items, { id, transactions, stockSplits }) => {
     if (
       !(
         transactions.length &&
@@ -67,13 +75,17 @@ export const getRowGains = (rows: Fund[], cache: PriceCache): RowGains =>
       return { ...items, [id]: null };
     }
 
-    const flatPriceValues = flatten(cache.prices[id].map(({ values }) => values));
+    const flatPriceValues = flatten(
+      cache.prices[id].map(({ values, rebasePriceRatio }) =>
+        values.map((price, index) => price / rebasePriceRatio[index]),
+      ),
+    );
 
     const latestPrice = lastInArray(flatPriceValues) as number;
     const yesterdayPrice = flatPriceValues[flatPriceValues.length - 2] ?? latestPrice;
 
-    const paperValue = getPaperValue(transactions, latestPrice);
-    const yesterdayPaperValue = getPaperValue(transactions, yesterdayPrice);
+    const paperValue = getPaperValue(transactions, stockSplits, latestPrice);
+    const yesterdayPaperValue = getPaperValue(transactions, stockSplits, yesterdayPrice);
 
     const realisedValue = getRealisedValue(transactions);
 

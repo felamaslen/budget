@@ -12,7 +12,7 @@ import { createSelector } from 'reselect';
 
 import { getLatestNetWorthAggregate } from '../overview/net-worth';
 import { getDayGain, getDayGainAbs, getPaperValue, getRealisedValue, getBuyCost } from './gains';
-import { getFundsRows, getFundsCache, PriceCache } from './helpers';
+import { getFundsRows, getFundsCache, PriceCache, PriceCacheRebased } from './helpers';
 import { getTotalCost, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
@@ -76,17 +76,21 @@ const getTransactionsToDateWithPrices = memoiseNowAndToday((time) =>
         .reverse()
         .findIndex((compare) => compare <= unixTime - cache.startTime);
 
-    return rows.map(({ id, item, transactions, allocationTarget }) => {
+    return rows.map(({ id, item, transactions, stockSplits, allocationTarget }) => {
       const price =
-        cache.prices[id]?.reduceRight<number | undefined>(
-          (last, { startIndex, values }) =>
-            last ?? lastInArray(values.slice(0, Math.max(0, priceIndexMax - startIndex))),
-          undefined,
-        ) ?? 0;
+        cache.prices[id]?.reduceRight<number>((last, { startIndex, values, rebasePriceRatio }) => {
+          if (last) {
+            return last;
+          }
+          const groupSlice = Math.max(0, priceIndexMax - startIndex);
+          const splitRatio = lastInArray(rebasePriceRatio.slice(0, groupSlice)) ?? 1;
+          const value = lastInArray(values.slice(0, groupSlice)) ?? 0;
+          return value / splitRatio;
+        }, 0) ?? 0;
 
       const transactionsToDate = filterPastTransactions(time, transactions);
 
-      return { id, item, transactions: transactionsToDate, price, allocationTarget };
+      return { id, item, transactions: transactionsToDate, stockSplits, price, allocationTarget };
     });
   }),
 );
@@ -97,10 +101,10 @@ export const getPortfolio = moize((date: Date) =>
     (funds): Portfolio =>
       funds
         .filter(({ price, transactions }) => price && transactions.length)
-        .map(({ id, item, transactions, price, allocationTarget }) => ({
+        .map(({ id, item, transactions, stockSplits, price, allocationTarget }) => ({
           id,
           item,
-          value: getPaperValue(transactions, price),
+          value: getPaperValue(transactions, stockSplits, price),
           allocationTarget: allocationTarget ?? 0,
         })),
   ),
@@ -163,7 +167,8 @@ export const getFundsCachedValue = memoiseNowAndToday((time, key) =>
     getDayGainAbs,
     (funds, ageText, dayGain, dayGainAbs) => {
       const paperValue = funds.reduce<number>(
-        (last, { transactions, price }) => last + getPaperValue(transactions, price),
+        (last, { transactions, stockSplits, price }) =>
+          last + getPaperValue(transactions, stockSplits, price),
         0,
       );
 
@@ -193,7 +198,7 @@ export const getFundsCachedValue = memoiseNowAndToday((time, key) =>
 );
 
 export function getPricesForRow(
-  prices: PriceCache['prices'],
+  prices: PriceCacheRebased['prices'],
   id: Id,
   startTime: number,
   cacheTimes: number[],
@@ -202,8 +207,11 @@ export function getPricesForRow(
     return null;
   }
 
-  return prices[id].map<Data>(({ startIndex, values }) =>
-    values.map((price, index) => [startTime + cacheTimes[index + startIndex], price]),
+  return prices[id].map<Data>(({ startIndex, values, rebasePriceRatio }) =>
+    values.map((price, index) => [
+      startTime + cacheTimes[index + startIndex],
+      price / rebasePriceRatio[index],
+    ]),
   );
 }
 

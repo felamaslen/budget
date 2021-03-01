@@ -45,6 +45,7 @@ describe('<PageFunds />', () => {
               taxes: 3,
             },
           ],
+          stockSplits: [],
           allocationTarget: 0,
         },
         {
@@ -66,6 +67,7 @@ describe('<PageFunds />', () => {
               taxes: 143,
             },
           ],
+          stockSplits: [],
           allocationTarget: 0,
         },
       ],
@@ -260,6 +262,7 @@ describe('<PageFunds />', () => {
               taxes,
             },
           ],
+          stockSplits: [],
           allocationTarget: 0,
         },
         prices: {

@@ -284,6 +284,7 @@ describe('List mutations', () => {
       item: 'Some fund',
       allocationTarget: 40,
       transactions: [],
+      stockSplits: [],
     };
 
     const testFundDelta: Partial<FundInput> = {

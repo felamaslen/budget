@@ -37,12 +37,12 @@ export const FieldTransactions: FieldWrapper<Transaction[]> = ({ invalid, value,
 );
 
 export type ModalFields<I extends ListItemInput> = {
-  [K in FieldKey<I>]: FieldWrapper<Exclude<I[K], null | undefined>>;
+  [K in FieldKey<I>]?: FieldWrapper<Exclude<I[K], null | undefined>>;
 };
 
 type PropsModalField<V> = {
   id: string;
-  Field: FieldWrapper<Exclude<V, null | undefined>>;
+  Field?: FieldWrapper<Exclude<V, null | undefined>>;
   field: string | number | symbol;
   value: V;
   onChange: (field: string, value: V) => void;
@@ -56,11 +56,15 @@ export function ModalDialogField<V = never>({
   value,
   onChange,
   invalid,
-}: PropsModalField<V>): React.ReactElement<PropsModalField<V>> {
+}: PropsModalField<V>): React.ReactElement | null {
   const onChangeCallback = useCallback((newValue: V) => onChange(field as string, newValue), [
     onChange,
     field,
   ]);
+
+  if (!Field) {
+    return null;
+  }
 
   return (
     <Styled.FormRow field={field as string}>

@@ -234,6 +234,7 @@ describe('Funds controller', () => {
 
       jest.spyOn(crudQueries, 'insertCrudItem').mockResolvedValueOnce({ id: 781 });
       jest.spyOn(overview, 'getDisplayedFundValues').mockResolvedValueOnce([1, 7, 23]);
+      jest.spyOn(queries, 'selectStockSplits').mockResolvedValueOnce([]);
 
       const args: MutationCreateFundArgs = {
         fakeId: -8813,
@@ -250,7 +251,7 @@ describe('Funds controller', () => {
       expect(publishSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.FundCreated}.${uid}`, {
         id: 781,
         fakeId: -8813,
-        item: args.input,
+        item: { ...args.input, stockSplits: [] },
         overviewCost: [1, 7, 23],
       });
     });
@@ -272,6 +273,9 @@ describe('Funds controller', () => {
 
       jest.spyOn(crudQueries, 'updateCrudItem').mockResolvedValueOnce({ ...input, id: 792 });
       jest.spyOn(overview, 'getDisplayedFundValues').mockResolvedValueOnce([1, 7, 23]);
+      jest
+        .spyOn(queries, 'selectStockSplits')
+        .mockResolvedValueOnce([{ date: '2020-05-10', ratio: 6 }]);
 
       const args: MutationUpdateFundArgs = {
         id: 792,
@@ -284,7 +288,7 @@ describe('Funds controller', () => {
       expect(publishSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.FundUpdated}.${uid}`, {
         id: 792,
         fakeId: null,
-        item: args.input,
+        item: { ...args.input, stockSplits: [{ date: '2020-05-10', ratio: 6 }] },
         overviewCost: [1, 7, 23],
       });
     });

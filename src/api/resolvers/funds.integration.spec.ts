@@ -23,6 +23,7 @@ import {
   QueryFundHistoryArgs,
   QueryFundHistoryIndividualArgs,
   RawDate,
+  StockSplit,
   Transaction,
   UpdatedFundAllocationTargets,
 } from '~api/types';
@@ -36,9 +37,12 @@ describe('Funds resolver', () => {
   type RawDateFund = Omit<FundInput, 'transactions'> & {
     id: number;
     transactions: RawDate<Transaction, 'date'>[];
+    stockSplits: RawDate<StockSplit, 'date'>[];
   };
 
-  const fundInput: Create<RawDateFund> = {
+  type RawDateFundInput = Create<Omit<RawDateFund, 'stockSplits'>>;
+
+  const fundInput: RawDateFundInput = {
     item: 'My fund',
     transactions: [{ date: '2020-04-20', units: 69, price: 949.35, fees: 1199, taxes: 1776 }],
     allocationTarget: 20,
@@ -68,7 +72,7 @@ describe('Funds resolver', () => {
     const setup = async (): Promise<Maybe<CrudResponseCreate>> => {
       const res = await app.authGqlClient.mutate<
         Mutation,
-        { fakeId: number; input: Create<RawDateFund> }
+        { fakeId: number; input: RawDateFundInput }
       >({
         mutation,
         variables: {
@@ -325,10 +329,10 @@ describe('Funds resolver', () => {
     });
   });
 
-  const createFunds = async (fundInputs: Create<RawDateFund>[]): Promise<number[]> => {
+  const createFunds = async (fundInputs: RawDateFundInput[]): Promise<number[]> => {
     const res = await Promise.all(
       fundInputs.map((input) =>
-        app.authGqlClient.mutate<Mutation, { fakeId: number; input: Create<RawDateFund> }>({
+        app.authGqlClient.mutate<Mutation, { fakeId: number; input: RawDateFundInput }>({
           mutation: gql`
             mutation CreateFund($fakeId: Int!, $input: FundInput!) {
               createFund(fakeId: $fakeId, input: $input) {
@@ -362,18 +366,30 @@ describe('Funds resolver', () => {
               fees
               taxes
             }
+            stockSplits {
+              date
+              ratio
+            }
           }
         }
       }
     `;
 
     const setup = async (
-      fund: Create<RawDateFund> = fundInput,
+      fund: RawDateFundInput = fundInput,
     ): Promise<{
       id: number;
       res: Maybe<Fund[]>;
     }> => {
       const [id] = await createFunds([fund]);
+
+      await app.db('funds_stock_splits').insert([
+        {
+          fund_id: id,
+          date: '2020-04-20',
+          ratio: 10,
+        },
+      ]);
 
       await app.authGqlClient.clearStore();
       const res = await app.authGqlClient.query<Query>({
@@ -383,7 +399,7 @@ describe('Funds resolver', () => {
       return { res: res.data.readFunds?.items ?? null, id };
     };
 
-    it('should get a list of funds with their transactions', async () => {
+    it('should get a list of funds with their transactions and splits', async () => {
       expect.assertions(1);
       const { id, res } = await setup();
 
@@ -401,6 +417,7 @@ describe('Funds resolver', () => {
               taxes: 1776,
             }),
           ],
+          stockSplits: [expect.objectContaining({ date: '2020-04-20', ratio: 10 })],
         }),
       );
     });
@@ -666,7 +683,7 @@ describe('Funds resolver', () => {
       }
     `;
 
-    const modifiedFund: Create<RawDateFund> = {
+    const modifiedFund: RawDateFundInput = {
       ...fundInput,
       item: altFundName,
       transactions: [
@@ -677,7 +694,7 @@ describe('Funds resolver', () => {
     };
 
     const setup = async (
-      data: Create<RawDateFund> = modifiedFund,
+      data: RawDateFundInput = modifiedFund,
       id?: number,
     ): Promise<{
       res: Maybe<CrudResponseUpdate>;
@@ -685,16 +702,15 @@ describe('Funds resolver', () => {
     }> => {
       const [fundId] = id ? [id] : await createFunds([data]);
 
-      const res = await app.authGqlClient.mutate<
-        Mutation,
-        { id: number; input: Create<RawDateFund> }
-      >({
-        mutation,
-        variables: {
-          id: fundId,
-          input: data,
+      const res = await app.authGqlClient.mutate<Mutation, { id: number; input: RawDateFundInput }>(
+        {
+          mutation,
+          variables: {
+            id: fundId,
+            input: data,
+          },
         },
-      });
+      );
 
       return {
         id: fundId,

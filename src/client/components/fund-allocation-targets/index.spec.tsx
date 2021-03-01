@@ -11,12 +11,14 @@ describe('<FundAllocationTargets />', () => {
         item: 'Fund A',
         allocationTarget: 0.3,
         transactions: [],
+        stockSplits: [],
       },
       {
         id: 2,
         item: 'Fund B',
         allocationTarget: 0.4,
         transactions: [],
+        stockSplits: [],
       },
     ],
     portfolio: [

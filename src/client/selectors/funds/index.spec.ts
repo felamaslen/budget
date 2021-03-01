@@ -17,7 +17,7 @@ import {
 
 import { State } from '~client/reducers';
 import { testState as state } from '~client/test-data/state';
-import type { CachedValue, Portfolio } from '~client/types';
+import type { CachedValue, FundNative, Portfolio } from '~client/types';
 import { PageListStandard, PageNonStandard, RequestType } from '~client/types/enum';
 
 describe('Funds selectors', () => {
@@ -109,18 +109,19 @@ describe('Funds selectors', () => {
       }
     });
 
-    const itemsWithoutPriceData = [
+    const itemsWithoutPriceData: FundNative[] = [
       ...state[PageNonStandard.Funds].items,
       {
-        id: 'some-id',
+        id: numericHash('some-id'),
         item: 'new fund',
         transactions: [
           { date: new Date('2019-07-23'), units: 13, price: 0.92308, fees: 0, taxes: 0 },
         ],
+        stockSplits: [],
       },
     ];
 
-    const itemsWithFutureTransaction = [
+    const itemsWithFutureTransaction: FundNative[] = [
       {
         ...state[PageNonStandard.Funds].items[0],
         transactions: [
@@ -133,6 +134,7 @@ describe('Funds selectors', () => {
             taxes: 0,
           },
         ],
+        stockSplits: [],
       },
       ...state[PageNonStandard.Funds].items.slice(1),
     ];
@@ -143,7 +145,7 @@ describe('Funds selectors', () => {
       ${'transactions in the future'} | ${itemsWithFutureTransaction}
     `('should skip $condition', ({ items }) => {
       expect.assertions(1);
-      const stateNoPrice = {
+      const stateNoPrice: State = {
         ...state,
         [PageNonStandard.Funds]: {
           ...state[PageNonStandard.Funds],
@@ -261,6 +263,7 @@ describe('Funds selectors', () => {
                   taxes: 6694,
                 },
               ],
+              stockSplits: [],
               allocationTarget: 100,
             },
           ],
@@ -452,12 +455,14 @@ describe('Funds selectors', () => {
               id: numericHash('fund-1'),
               item: 'Fund 1',
               transactions: [],
+              stockSplits: [],
               allocationTarget: 30,
             },
             {
               id: numericHash('fund-2'),
               item: 'Fund 2',
               transactions: [],
+              stockSplits: [],
               allocationTarget: 45,
             },
           ],

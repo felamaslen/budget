@@ -33,12 +33,14 @@ describe('<FundRow />', () => {
           id: numericHash('fund-1'),
           item: 'Fund 1',
           transactions: [],
+          stockSplits: [],
           allocationTarget: 30,
         },
         {
           id: numericHash('fund-2'),
           item: 'Fund 2',
           transactions: [],
+          stockSplits: [],
           allocationTarget: 45,
         },
       ],
@@ -51,6 +53,7 @@ describe('<FundRow />', () => {
     id: numericHash('fund-1'),
     item: 'My fund',
     transactions: [],
+    stockSplits: [],
     allocationTarget: 35,
   };
 

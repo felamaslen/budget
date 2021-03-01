@@ -16,6 +16,7 @@ import type {
   FundItem,
   FundLine,
   TransactionNative as Transaction,
+  StockSplitNative,
 } from '~client/types';
 
 type WithInfo<V = Record<string, unknown>> = Fund &
@@ -76,21 +77,29 @@ const getHiddenBecauseSold = memoiseNowAndToday((time, key) =>
 
 const getReturnsById = memoiseNowAndToday((time, key) =>
   createSelector(
+    getFundsRows,
     getFundsCache,
     getItemsWithInfo[key](time),
-    ({ prices }, items): FundsWithReturns =>
+    (funds, { prices }, items): FundsWithReturns =>
       items.reduce<FundsWithReturns>(
         (last, { id, transactionsToDate }) => ({
           ...last,
-          [id]: prices[id].map<FundWithReturns>(({ startIndex, values }, groupIndex) => ({
-            startIndex,
-            values: values.map<Return>((price, index) => ({
-              price,
-              units: getTotalUnits(transactionsToDate[groupIndex][index]),
-              cost: getBuyCost(transactionsToDate[groupIndex][index]),
-              realised: getRealisedValue(transactionsToDate[groupIndex][index]),
-            })),
-          })),
+          [id]: prices[id].map<FundWithReturns>(
+            ({ startIndex, values, rebasePriceRatio }, groupIndex) => {
+              const stockSplits: StockSplitNative[] =
+                funds.find((fund) => fund.id === id)?.stockSplits ?? [];
+              return {
+                startIndex,
+                values: values.map<Return>((price, index) => ({
+                  price,
+                  priceRebased: price / rebasePriceRatio[index],
+                  units: getTotalUnits(transactionsToDate[groupIndex][index], stockSplits),
+                  cost: getBuyCost(transactionsToDate[groupIndex][index]),
+                  realised: getRealisedValue(transactionsToDate[groupIndex][index]),
+                })),
+              };
+            },
+          ),
         }),
         {},
       ),

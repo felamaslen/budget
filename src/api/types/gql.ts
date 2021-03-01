@@ -192,16 +192,23 @@ export type TransactionInput = {
   taxes: Scalars['Int'];
 };
 
+export type StockSplit = {
+  date: Scalars['Date'];
+  ratio: Scalars['NonNegativeFloat'];
+};
+
 export type Fund = {
   id: Scalars['Int'];
   item: Scalars['String'];
   transactions: Array<Transaction>;
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+  stockSplits: Array<StockSplit>;
 };
 
 export type FundData = {
   item: Scalars['String'];
   transactions: Array<Transaction>;
+  stockSplits: Array<StockSplit>;
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
 };
 
@@ -980,6 +987,7 @@ export type ResolversTypes = {
   Transaction: ResolverTypeWrapper<Transaction>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   TransactionInput: TransactionInput;
+  StockSplit: ResolverTypeWrapper<StockSplit>;
   Fund: ResolverTypeWrapper<Fund>;
   FundData: ResolverTypeWrapper<FundData>;
   FundInput: FundInput;
@@ -1082,6 +1090,7 @@ export type ResolversParentTypes = {
   Transaction: Transaction;
   Float: Scalars['Float'];
   TransactionInput: TransactionInput;
+  StockSplit: StockSplit;
   Fund: Fund;
   FundData: FundData;
   FundInput: FundInput;
@@ -1223,17 +1232,25 @@ export type TransactionResolvers<ContextType = Context, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type StockSplitResolvers<ContextType = Context, ParentType extends ResolversParentTypes['StockSplit'] = ResolversParentTypes['StockSplit']> = {
+  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  ratio?: Resolver<ResolversTypes['NonNegativeFloat'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type FundResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Fund'] = ResolversParentTypes['Fund']> = {
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   item?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   transactions?: Resolver<Array<ResolversTypes['Transaction']>, ParentType, ContextType>;
   allocationTarget?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
+  stockSplits?: Resolver<Array<ResolversTypes['StockSplit']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type FundDataResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundData'] = ResolversParentTypes['FundData']> = {
   item?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   transactions?: Resolver<Array<ResolversTypes['Transaction']>, ParentType, ContextType>;
+  stockSplits?: Resolver<Array<ResolversTypes['StockSplit']>, ParentType, ContextType>;
   allocationTarget?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1715,6 +1732,7 @@ export type Resolvers<ContextType = Context> = {
   AnalysisResponse?: AnalysisResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
+  StockSplit?: StockSplitResolvers<ContextType>;
   Fund?: FundResolvers<ContextType>;
   FundData?: FundDataResolvers<ContextType>;
   FundPriceGroup?: FundPriceGroupResolvers<ContextType>;

@@ -192,6 +192,26 @@ describe('data module', () => {
       expect(getTotalUnits(transactionsList)).toBe(0);
       expect(getTotalUnits(removeAtIndex(transactionsList, 2))).toBe(1239);
     });
+
+    describe('when there are stock splits', () => {
+      it('should return the rebased number', () => {
+        expect.assertions(1);
+
+        expect(
+          getTotalUnits(
+            [
+              { date: new Date('2020-04-10'), units: 110, price: 100, fees: 0, taxes: 0 },
+              { date: new Date('2020-04-13'), units: 143, price: 56, fees: 0, taxes: 0 },
+              { date: new Date('2020-04-20'), units: 95, price: 20, fees: 0, taxes: 0 },
+            ],
+            [
+              { date: new Date('2020-04-13'), ratio: 2 },
+              { date: new Date('2020-04-17'), ratio: 3 },
+            ],
+          ),
+        ).toBe(110 * (2 * 3) + 143 * 3 + 95);
+      });
+    });
   });
 
   describe(getTotalCost.name, () => {
@@ -541,6 +561,7 @@ describe('data module', () => {
               taxes: 771,
             },
           ],
+          stockSplits: [{ date: '2020-04-03', ratio: 5 }],
         }),
       ).toStrictEqual<FundNative>({
         id: 123,
@@ -555,6 +576,7 @@ describe('data module', () => {
             taxes: 771,
           },
         ],
+        stockSplits: [{ date: new Date('2020-04-03'), ratio: 5 }],
       });
     });
   });
@@ -575,6 +597,7 @@ describe('data module', () => {
               taxes: 771,
             },
           ],
+          stockSplits: [],
         }),
       ).toStrictEqual<FundInput>({
         item: 'Some fund',

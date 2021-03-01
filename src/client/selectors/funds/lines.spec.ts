@@ -9,6 +9,7 @@ import {
   getFundLineProcessed,
   FundsWithReturns,
   getFundLinePriceNormalised,
+  getFundLinePrice,
 } from './lines';
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 
@@ -22,9 +23,9 @@ describe('Funds selectors / lines', () => {
       {
         startIndex: 0,
         values: [
-          { price: 100, units: 34, cost: 3100, realised: 0 },
-          { price: 102, units: 34, cost: 3100, realised: 0 },
-          { price: 103, units: 18, cost: 1560, realised: 0 },
+          { price: 100, priceRebased: 100, units: 34, cost: 3100, realised: 0 },
+          { price: 102, priceRebased: 102, units: 34, cost: 3100, realised: 0 },
+          { price: 103, priceRebased: 103, units: 18, cost: 1560, realised: 0 },
         ],
       },
     ],
@@ -32,15 +33,15 @@ describe('Funds selectors / lines', () => {
       {
         startIndex: 2,
         values: [
-          { price: 954, units: 105, cost: 975400, realised: 0 },
-          { price: 961, units: 105, cost: 975400, realised: 0 },
+          { price: 954, priceRebased: 954, units: 105, cost: 975400, realised: 0 },
+          { price: 961, priceRebased: 961, units: 105, cost: 975400, realised: 0 },
         ],
       },
     ],
     [id3]: [
       {
         startIndex: 1,
-        values: [{ price: 763, units: 591, cost: 918, realised: 0 }],
+        values: [{ price: 763, priceRebased: 763, units: 591, cost: 918, realised: 0 }],
       },
     ],
   };
@@ -133,6 +134,7 @@ describe('Funds selectors / lines', () => {
             values: [
               {
                 price: 100,
+                priceRebased: 100,
                 units: 105,
                 cost: 490000,
                 realised: 0,
@@ -144,6 +146,7 @@ describe('Funds selectors / lines', () => {
             values: [
               {
                 price: 103,
+                priceRebased: 103,
                 units: 20,
                 cost: 250000,
                 realised: 670000,
@@ -180,6 +183,27 @@ describe('Funds selectors / lines', () => {
     });
   });
 
+  describe('getFundLinePrice', () => {
+    const priceId1 = [100, 102, 103];
+    const priceId2 = [954, 961];
+    const priceId3 = [763];
+
+    it.each`
+      id     | expectedResult
+      ${id1} | ${priceId1}
+      ${id2} | ${priceId2}
+      ${id3} | ${priceId3}
+    `('should get an absolute list of prices for id $id', ({ id, expectedResult }) => {
+      expect.assertions(expectedResult.length + 2);
+
+      const result = getFundLinePrice(fundsWithReturns, id);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].values).toHaveLength(expectedResult.length);
+      result[0].values.forEach((value, index) => expect(value).toBeCloseTo(expectedResult[index]));
+    });
+  });
+
   describe('getFundLinePriceNormalised', () => {
     const priceId1 = [100, 102, 103];
     const priceId2 = [100, (961 / 954) * 100];
@@ -209,6 +233,7 @@ describe('Funds selectors / lines', () => {
             values: [
               {
                 price: 90,
+                priceRebased: 90,
                 units: 105,
                 cost: 490000,
                 realised: 0,
@@ -220,12 +245,14 @@ describe('Funds selectors / lines', () => {
             values: [
               {
                 price: 107,
+                priceRebased: 107,
                 units: 20,
                 cost: 250000,
                 realised: 670000,
               },
               {
                 price: 83,
+                priceRebased: 83,
                 units: 20,
                 cost: 250000,
                 realised: 670000,
@@ -376,9 +403,9 @@ describe('Funds selectors / lines', () => {
                 {
                   startIndex: 0,
                   values: [
-                    { price: 100, units: 34, cost: 3100, realised: 0 },
-                    { price: 92, units: 34, cost: 3128, realised: 0 },
-                    { price: 103, units: 18, cost: 1560, realised: 0 },
+                    { price: 100, priceRebased: 100, units: 34, cost: 3100, realised: 0 },
+                    { price: 92, priceRebased: 92, units: 34, cost: 3128, realised: 0 },
+                    { price: 103, priceRebased: 103, units: 18, cost: 1560, realised: 0 },
                   ],
                 },
               ],

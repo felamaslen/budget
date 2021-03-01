@@ -28,6 +28,7 @@ describe('Overview selectors', () => {
               { date: new Date('2018-02-05'), units: 10, price: 5612, fees: 3, taxes: 0 },
               { date: new Date('2018-03-27'), units: -1.32, price: 1804, fees: 0.72, taxes: 0 },
             ],
+            stockSplits: [],
             allocationTarget: 0,
           },
           {
@@ -36,6 +37,7 @@ describe('Overview selectors', () => {
             transactions: [
               { date: new Date('2018-03-17'), units: 51, price: 109, fees: 3, taxes: 0 },
             ],
+            stockSplits: [],
             allocationTarget: 0,
           },
         ],
@@ -605,6 +607,7 @@ describe('Overview selectors', () => {
               transactions: [
                 { date: new Date('2018-01-03'), units: 101, price: 56.23, fees: 10, taxes: 11 },
               ],
+              stockSplits: [],
             },
           ],
           todayPrices: {

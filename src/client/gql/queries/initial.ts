@@ -47,6 +47,10 @@ export const Initial = gql`
           fees
           taxes
         }
+        stockSplits {
+          date
+          ratio
+        }
       }
     }
 

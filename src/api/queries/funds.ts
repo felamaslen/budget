@@ -1,17 +1,17 @@
-import groupBy from 'lodash/groupBy';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import { formatDate } from '~api/controllers/shared';
 import {
-  Transaction,
+  Create,
   Fund,
   PageNonStandard as Page,
   RawDate,
-  Create,
+  StockSplit,
   TargetDelta,
+  Transaction,
 } from '~api/types';
 
-export type FundMain = Omit<Fund, 'transactions'>;
+export type FundMain = Omit<Fund, 'transactions' | 'stockSplits'>;
 
 export async function insertFund(
   db: DatabaseTransactionConnectionType,
@@ -50,6 +50,21 @@ export async function selectTransactions(
   INNER JOIN funds_transactions ft ON ft.fund_id = f.id
   WHERE f.uid = ${uid} AND ft.date <= ${now.toISOString()}
   ORDER BY ft.date
+  `);
+  return result.rows;
+}
+
+export async function selectStockSplits(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  id: number,
+): Promise<readonly RawDate<StockSplit, 'date'>[]> {
+  const result = await db.query<RawDate<StockSplit, 'date'>>(sql`
+  SELECT date, ratio
+  FROM funds f
+  INNER JOIN funds_stock_splits ss ON ss.fund_id = f.id
+  WHERE f.uid = ${uid} AND f.id = ${id}
+  ORDER BY ss.date
   `);
   return result.rows;
 }
@@ -93,60 +108,85 @@ export type FundListRow = {
   allocation_target: number | null;
 };
 
-type RowWithTransactions = FundListRow & {
-  date: string;
-  units: number;
-  price: number;
-  fees: number;
-  taxes: number;
+type JoinedFundRow = FundListRow & {
+  transaction_dates: string[] | [null];
+  transaction_units: number[] | [null];
+  transaction_prices: number[] | [null];
+  transaction_fees: number[] | [null];
+  transaction_taxes: number[] | [null];
+  stock_split_dates: string[] | [null];
+  stock_split_ratios: number[] | [null];
 };
+
+type JoinedFundRowWithTransactions = JoinedFundRow & {
+  transaction_dates: string[];
+  transaction_units: number[];
+  transaction_prices: number[];
+  transaction_fees: number[];
+  transaction_taxes: number[];
+};
+
+type JoinedFundRowWithStockSplits = JoinedFundRow & {
+  stock_split_dates: string[];
+  stock_split_ratios: number[];
+};
+
+const hasTransactions = (row: JoinedFundRow): row is JoinedFundRowWithTransactions =>
+  !!row.transaction_dates[0];
+
+const hasStockSplits = (row: JoinedFundRow): row is JoinedFundRowWithStockSplits =>
+  !!row.stock_split_dates[0];
 
 export async function selectFundsItems(
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<Fund[]> {
-  const result = await db.query<RowWithTransactions>(sql`
-  SELECT ${sql.join(
-    [
-      sql.identifier(['funds', 'id']),
-      sql.identifier(['funds', 'item']),
-      sql.identifier(['funds', 'allocation_target']),
-      sql.identifier(['transactions', 'date']),
-      sql.identifier(['transactions', 'units']),
-      sql.identifier(['transactions', 'price']),
-      sql.identifier(['transactions', 'fees']),
-      sql.identifier(['transactions', 'taxes']),
-    ],
-    sql`, `,
-  )}
-  FROM funds
-  LEFT JOIN funds_transactions transactions ON transactions.fund_id = funds.id
-  WHERE funds.uid = ${uid}
-  ORDER BY funds.id, transactions.date DESC
+  const result = await db.query<JoinedFundRow>(sql`
+  SELECT matching_funds.*, funds.item, funds.allocation_target
+  FROM (
+    SELECT ${sql.join(
+      [
+        sql`funds.id`,
+        sql`array_agg(transactions.date ORDER BY transactions.date DESC) as transaction_dates`,
+        sql`array_agg(transactions.units ORDER BY transactions.date DESC) as transaction_units`,
+        sql`array_agg(transactions.price ORDER BY transactions.date DESC) as transaction_prices`,
+        sql`array_agg(transactions.fees ORDER BY transactions.date DESC) as transaction_fees`,
+        sql`array_agg(transactions.taxes ORDER BY transactions.date DESC) as transaction_taxes`,
+        sql`array_agg(stock_splits.date ORDER BY stock_splits.date ASC) as stock_split_dates`,
+        sql`array_agg(stock_splits.ratio ORDER BY stock_splits.date ASC) as stock_split_ratios`,
+      ],
+      sql`, `,
+    )}
+    FROM funds
+    LEFT JOIN funds_transactions transactions ON transactions.fund_id = funds.id
+    LEFT JOIN funds_stock_splits stock_splits ON stock_splits.fund_id = funds.id
+    WHERE funds.uid = ${uid}
+    GROUP BY funds.id
+  ) matching_funds
+  INNER JOIN funds ON funds.id = matching_funds.id
+  ORDER BY matching_funds.id
   `);
 
-  const groups = groupBy(result.rows, 'id');
-
-  return Object.entries(groups).reduce<Fund[]>(
-    (last, [, rows]) => [
-      ...last,
-      {
-        id: rows[0].id,
-        item: rows[0].item,
-        allocationTarget: rows[0].allocation_target,
-        transactions: rows[0].date
-          ? rows.map((row) => ({
-              date: new Date(row.date),
-              units: row.units,
-              price: row.price,
-              fees: row.fees,
-              taxes: row.taxes,
-            }))
-          : [],
-      },
-    ],
-    [],
-  );
+  return result.rows.map<Fund>((row) => ({
+    id: row.id,
+    item: row.item,
+    allocationTarget: row.allocation_target,
+    transactions: hasTransactions(row)
+      ? row.transaction_dates.map<Transaction>((date, index) => ({
+          date: new Date(date),
+          units: row.transaction_units[index],
+          price: row.transaction_prices[index],
+          fees: row.transaction_fees[index],
+          taxes: row.transaction_taxes[index],
+        }))
+      : [],
+    stockSplits: hasStockSplits(row)
+      ? row.stock_split_dates.map<StockSplit>((date, index) => ({
+          date: new Date(date),
+          ratio: row.stock_split_ratios[index],
+        }))
+      : [],
+  }));
 }
 
 export async function selectFundHistoryNumResults(

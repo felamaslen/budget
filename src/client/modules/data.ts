@@ -1,4 +1,5 @@
 import { compose } from '@typed/compose';
+import isAfter from 'date-fns/isAfter';
 import omit from 'lodash/omit';
 import { replaceAtIndex } from 'replace-array';
 import shortid from 'shortid';
@@ -11,14 +12,16 @@ import type {
   Create,
   Data as Line,
   FundInputNative,
+  GQL,
   Item,
   NativeDate,
   NativeFund,
   NetWorthEntryNative,
   RawDate,
+  StockSplitNative,
   TransactionNative as Transaction,
 } from '~client/types';
-import type { FundInput, ListItem, NetWorthEntryInput } from '~client/types/gql';
+import type { FundData, FundInput, ListItem, NetWorthEntryInput } from '~client/types/gql';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,8 +39,24 @@ export function lastInArray<T>(array: T[]): T | undefined {
 
 const roundTotal = (value: number): number => Number(value.toFixed(4));
 
-export const getTotalUnits = (transactions: Transaction[]): number =>
-  roundTotal(transactions.reduce<number>((last, { units }) => last + units, 0));
+export const combineStockSplits = (stockSplits: Pick<StockSplitNative, 'ratio'>[]): number =>
+  stockSplits.reduce<number>((product, { ratio }) => product * ratio, 1);
+
+export function getUnitRebase(stockSplits: StockSplitNative[], transactionDate: Date): number {
+  return combineStockSplits(stockSplits.filter((split) => isAfter(split.date, transactionDate)));
+}
+
+export function getTotalUnits(
+  transactions: Transaction[],
+  stockSplits: StockSplitNative[] = [],
+): number {
+  return roundTotal(
+    transactions.reduce<number>(
+      (last, { date, units }) => last + units * getUnitRebase(stockSplits, date),
+      0,
+    ),
+  );
+}
 
 export const getTotalCost = (transactions: Transaction[]): number =>
   roundTotal(
@@ -236,12 +255,13 @@ export const withRawDateTime = <K extends string, T extends Record<K, Date>>(...
 export const omitTypeName = <T extends Record<string, unknown>>(item: T): Omit<T, '__typename'> =>
   omit(item, '__typename');
 
-export const toNativeFund = <F extends FundInput>(input: F): NativeFund<F> => ({
+export const toNativeFund = <F extends GQL<FundData>>(input: F): NativeFund<F> => ({
   ...omitTypeName(input),
   transactions: input.transactions.map(compose(omitTypeName, withNativeDate('date'))),
+  stockSplits: input.stockSplits.map(compose(omitTypeName, withNativeDate('date'))),
 });
 
-export const toRawFund = (input: FundInputNative): FundInput => ({
+export const toRawFund = ({ stockSplits, ...input }: FundInputNative): FundInput => ({
   ...input,
   transactions: input.transactions.map(withRawDate('date')),
 });

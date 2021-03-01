@@ -198,18 +198,26 @@ export type TransactionInput = {
   taxes: Scalars['Int'];
 };
 
+export type StockSplit = {
+  __typename?: 'StockSplit';
+  date: Scalars['Date'];
+  ratio: Scalars['NonNegativeFloat'];
+};
+
 export type Fund = {
   __typename?: 'Fund';
   id: Scalars['Int'];
   item: Scalars['String'];
   transactions: Array<Transaction>;
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+  stockSplits: Array<StockSplit>;
 };
 
 export type FundData = {
   __typename?: 'FundData';
   item: Scalars['String'];
   transactions: Array<Transaction>;
+  stockSplits: Array<StockSplit>;
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
 };
 
@@ -1418,6 +1426,9 @@ export type InitialQuery = (
       & { transactions: Array<(
         { __typename?: 'Transaction' }
         & Pick<Transaction, 'date' | 'units' | 'price' | 'fees' | 'taxes'>
+      )>, stockSplits: Array<(
+        { __typename?: 'StockSplit' }
+        & Pick<StockSplit, 'date' | 'ratio'>
       )> }
     )> }
   )>, fundHistory?: Maybe<(
@@ -1597,6 +1608,9 @@ export type FundCreatedSubscription = (
       & { transactions: Array<(
         { __typename?: 'Transaction' }
         & Pick<Transaction, 'date' | 'units' | 'price' | 'taxes' | 'fees'>
+      )>, stockSplits: Array<(
+        { __typename?: 'StockSplit' }
+        & Pick<StockSplit, 'date' | 'ratio'>
       )> }
     ) }
   ) }
@@ -1616,6 +1630,9 @@ export type FundUpdatedSubscription = (
       & { transactions: Array<(
         { __typename?: 'Transaction' }
         & Pick<Transaction, 'date' | 'units' | 'price' | 'taxes' | 'fees'>
+      )>, stockSplits: Array<(
+        { __typename?: 'StockSplit' }
+        & Pick<StockSplit, 'date' | 'ratio'>
       )> }
     ) }
   ) }
@@ -2314,6 +2331,10 @@ export const InitialDocument = gql`
         fees
         taxes
       }
+      stockSplits {
+        date
+        ratio
+      }
     }
   }
   fundHistory(period: $fundPeriod, length: $fundLength) {
@@ -2545,6 +2566,10 @@ export const FundCreatedDocument = gql`
         taxes
         fees
       }
+      stockSplits {
+        date
+        ratio
+      }
       allocationTarget
     }
     overviewCost
@@ -2567,6 +2592,10 @@ export const FundUpdatedDocument = gql`
         price
         taxes
         fees
+      }
+      stockSplits {
+        date
+        ratio
       }
       allocationTarget
     }

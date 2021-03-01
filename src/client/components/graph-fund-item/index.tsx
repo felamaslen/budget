@@ -8,13 +8,14 @@ import * as Styled from './styles';
 import { LineGraph } from '~client/components/graph';
 import type { LineGraphProps } from '~client/components/graph/line-graph';
 import { GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_HEIGHT } from '~client/constants/graph';
-import type { Data, Id, Line, Range, RowPrices, Size } from '~client/types';
+import type { Data, Id, Line, Range, RowPrices, Size, StockSplitNative } from '~client/types';
 
 export type Props = {
   id: Id;
   item: string;
   sold: boolean;
   values: RowPrices;
+  stockSplits: StockSplitNative[];
 };
 
 export const Popout = loadable(() => import('./popout'), { fallback: <Loader size={24} /> });
@@ -74,7 +75,7 @@ function processData(item: string, data: Data[]): Range & Pick<LineGraphProps, '
   };
 }
 
-export const GraphFundItem: React.FC<Props> = ({ id, item, sold, values }) => {
+export const GraphFundItem: React.FC<Props> = ({ id, item, sold, values, stockSplits }) => {
   const [popout, setPopout] = useState<boolean>(false);
   const onFocus = useCallback(() => setPopout(!sold), [sold]);
   const onBlur = useCallback(() => setPopout(false), []);
@@ -94,7 +95,7 @@ export const GraphFundItem: React.FC<Props> = ({ id, item, sold, values }) => {
       sold={sold}
       popout={popout}
     >
-      {popout && <Popout id={id} />}
+      {popout && <Popout id={id} stockSplits={stockSplits} />}
       {!popout && <LineGraph {...processedData} {...getDimensions(sold)} />}
     </Styled.FundGraph>
   );

@@ -18,8 +18,8 @@ import { PageListStandard, PageNonStandard } from '~client/types/enum';
 import type {
   Exact,
   FundCreateUpdate,
+  FundData,
   FundDelete,
-  FundInput,
   ListItemCreateUpdate,
   ListItemDelete,
   ListItemInput,
@@ -202,7 +202,7 @@ const extendedOptions: GenericHookOptions<
 };
 
 const fundOptions: GenericHookOptions<
-  FundInput,
+  FundData,
   FundInputNative,
   PageNonStandard.Funds,
   FundCreateUpdate,

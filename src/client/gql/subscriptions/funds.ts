@@ -14,6 +14,10 @@ export const FundCreated = gql`
           taxes
           fees
         }
+        stockSplits {
+          date
+          ratio
+        }
         allocationTarget
       }
       overviewCost
@@ -33,6 +37,10 @@ export const FundUpdated = gql`
           price
           taxes
           fees
+        }
+        stockSplits {
+          date
+          ratio
         }
         allocationTarget
       }

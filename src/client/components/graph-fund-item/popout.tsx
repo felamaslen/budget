@@ -1,5 +1,6 @@
 /* @jsx jsx */
 import { jsx } from '@emotion/react';
+import fromUnixTime from 'date-fns/fromUnixTime';
 import { FC, useCallback, useMemo } from 'react';
 
 import { graphColor } from './color';
@@ -9,21 +10,29 @@ import { LineGraph, LineGraphProps } from '~client/components/graph/line-graph';
 import { TimeAxes } from '~client/components/graph/time-axes';
 import { GRAPH_FUND_ITEM_HEIGHT_LARGE, GRAPH_FUND_ITEM_WIDTH_LARGE } from '~client/constants';
 import { useFundHistoryIndividualQuery } from '~client/hooks/gql';
-import { lastInArray } from '~client/modules/data';
+import { getUnitRebase, lastInArray } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { DrawProps, Id, Line, Padding, Point, Range } from '~client/types';
+import type { DrawProps, Id, Line, Padding, Point, Range, StockSplitNative } from '~client/types';
 import type { FundHistoryIndividual } from '~client/types/gql';
 
 export type Props = {
   id: Id;
+  stockSplits: StockSplitNative[];
 };
 
-function processData(id: Id, data: FundHistoryIndividual): Range & Pick<LineGraphProps, 'lines'> {
-  const points = data.values.map<Point>(({ date, price }) => [date, price]);
+function processData(
+  id: Id,
+  data: FundHistoryIndividual,
+  stockSplits: StockSplitNative[],
+): Range & Pick<LineGraphProps, 'lines'> {
+  const points = data.values.map<Point>(({ date, price }) => {
+    const unitRebase = getUnitRebase(stockSplits, fromUnixTime(date));
+    return [date, price / unitRebase];
+  });
   const minX = data.values[0]?.date ?? 0;
   const maxX = lastInArray(data.values)?.date ?? minX;
-  const minY = data.values.reduce<number>((last, { price }) => Math.min(last, price), Infinity);
-  const maxY = data.values.reduce<number>((last, { price }) => Math.max(last, price), 0);
+  const minY = points.reduce<number>((last, [, price]) => Math.min(last, price), Infinity);
+  const maxY = points.reduce<number>((last, [, price]) => Math.max(last, price), 0);
 
   const lines: Line[] = [
     {
@@ -49,7 +58,7 @@ const labelY = (value: number): string => `${value.toFixed(1)}p`;
 
 const padding: Padding = [0, 0, 24, 24];
 
-export const GraphFundItemPopout: FC<Props> = ({ id }) => {
+export const GraphFundItemPopout: FC<Props> = ({ id, stockSplits }) => {
   const [{ data, fetching, error }] = useFundHistoryIndividualQuery({ variables: { id } });
 
   const BeforeLines = useCallback<FC<DrawProps>>(
@@ -58,8 +67,8 @@ export const GraphFundItemPopout: FC<Props> = ({ id }) => {
   );
 
   const processedData = useMemo(
-    () => processData(id, data?.fundHistoryIndividual ?? { values: [] }),
-    [id, data],
+    () => processData(id, data?.fundHistoryIndividual ?? { values: [] }, stockSplits),
+    [id, data, stockSplits],
   );
 
   return (

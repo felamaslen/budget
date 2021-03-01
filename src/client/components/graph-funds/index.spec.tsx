@@ -42,6 +42,7 @@ describe('<GraphFunds />', () => {
                     taxes: 0,
                   },
                 ],
+                stockSplits: [],
                 allocationTarget: 0,
               },
             ],

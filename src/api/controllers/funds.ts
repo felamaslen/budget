@@ -23,6 +23,7 @@ import {
   updateAllocationTarget,
   selectAllocationTargetSum,
   selectIndividualFullFundHistory,
+  selectStockSplits,
 } from '~api/queries';
 import {
   CrudResponseCreate,
@@ -190,7 +191,10 @@ export async function createFund(
   });
   await upsertTransactions(db, uid, id, transactions);
 
-  const overviewCost = await getDisplayedFundValues(db, uid, new Date());
+  const [overviewCost, stockSplits] = await Promise.all([
+    getDisplayedFundValues(db, uid, new Date()),
+    selectStockSplits(db, uid, id),
+  ]);
 
   await pubsub.publish(`${PubSubTopic.FundCreated}.${uid}`, {
     id,
@@ -199,6 +203,7 @@ export async function createFund(
       item,
       allocationTarget,
       transactions,
+      stockSplits,
     },
     overviewCost,
   });
@@ -235,7 +240,10 @@ export async function updateFund(
     await updateFundCacheItemReference(db, fundsWithSameName[0].item, previousItem);
   }
 
-  const overviewCost = await getDisplayedFundValues(db, uid, new Date());
+  const [overviewCost, stockSplits] = await Promise.all([
+    getDisplayedFundValues(db, uid, new Date()),
+    selectStockSplits(db, uid, id),
+  ]);
 
   await pubsub.publish(`${PubSubTopic.FundUpdated}.${uid}`, {
     id,
@@ -244,6 +252,7 @@ export async function updateFund(
       item,
       allocationTarget,
       transactions,
+      stockSplits,
     },
     overviewCost,
   });

@@ -3,7 +3,7 @@ import { rgb } from 'polished';
 import numericHash from 'string-hash';
 
 import { getRowGains, getGainsForRow, getDayGain, getDayGainAbs, RowGains } from './gains';
-import { PriceCache } from './helpers';
+import { getFundsCache, PriceCache } from './helpers';
 
 import { fundPeriods } from '~client/constants';
 import { State } from '~client/reducers';
@@ -36,6 +36,7 @@ describe('Funds selectors / gains', () => {
           transactions: [
             { date: new Date('2019-10-09'), units: 345, price: 3.475, fees: 0, taxes: 0 },
           ],
+          stockSplits: [],
           allocationTarget: 0,
         },
         {
@@ -45,6 +46,7 @@ describe('Funds selectors / gains', () => {
             { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
             { date: new Date('2019-10-27'), units: -23, price: 5.6522, fees: 0, taxes: 0 },
           ],
+          stockSplits: [],
           allocationTarget: 0,
         },
       ],
@@ -73,7 +75,7 @@ describe('Funds selectors / gains', () => {
   describe('getRowGains', () => {
     it('should return the correct values', () => {
       expect.assertions(14);
-      const result = getRowGains(testRows, testCache);
+      const result = getRowGains(testRows, getFundsCache(testState));
 
       expect(result[10]?.value).toBeCloseTo(399098.2);
       expect(result[10]?.gain).toBeCloseTo(-0.0023);
@@ -124,27 +126,113 @@ describe('Funds selectors / gains', () => {
       });
     });
 
-    it('should set the cost, price and estimated value', () => {
-      expect.assertions(4);
+    it('should set the split-rebased cost, price and estimated value', () => {
+      expect.assertions(1);
       const result = getRowGains(
         [
           {
             id: 10,
             item: 'some fund',
             transactions: [
-              { date: new Date('2019-04-03'), units: 345, price: 3.47536, fees: 0, taxes: 0 },
-              { date: new Date('2019-07-01'), units: -345, price: 3.7739, fees: 0, taxes: 0 },
+              {
+                price: 428,
+                units: 934,
+                fees: 148,
+                taxes: 100,
+                date: new Date('2017-07-09'),
+              },
+              {
+                price: 495 / 5,
+                units: 117,
+                fees: 176,
+                taxes: 85,
+                date: new Date('2017-07-13'),
+              },
+              {
+                price: 476 / 5 / 2,
+                units: 220,
+                fees: 82,
+                taxes: 19,
+                date: new Date('2017-07-20'),
+              },
+            ],
+            stockSplits: [
+              {
+                date: new Date('2017-07-10'),
+                ratio: 5,
+              },
+              {
+                date: new Date('2017-07-19'),
+                ratio: 2,
+              },
             ],
             allocationTarget: 0,
           },
         ],
-        testCache,
+        {
+          startTime: getUnixTime(new Date('2017-07-08')),
+          cacheTimes: [
+            86400 * 0, // 2017-07-08
+            86400 * 1, // 2017-07-09
+            86400 * 2, // 2017-07-10
+            86400 * 3, // 2017-07-11
+            86400 * 4, // 2017-07-12
+            86400 * 5, // 2017-07-13
+            86400 * 6, // 2017-07-14
+            86400 * 7, // 2017-07-15
+            86400 * 8, // 2017-07-16
+            86400 * 9, // 2017-07-17
+            86400 * 10, // 2017-07-18
+            86400 * 11, // 2017-07-19
+            86400 * 12, // 2017-07-20
+            86400 * 13, // 2017-07-21
+          ],
+          prices: {
+            10: [
+              {
+                startIndex: 0,
+                values: [
+                  423.0, // 8 Jul
+                  427.5, // 9 Jul
+                  430.3 / 5, // 10 Jul (first stock split - x5)
+                  475.9 / 5, // 11 Jul
+                  483.0 / 5, // 12 Jul
+                  492.4 / 5, // 13 Jul
+                  499.1 / 5, // 14 Jul
+                  491.0 / 5, // 15 Jul
+                  485.0 / 5, // 16 Jul
+                  469.0 / 5, // 17 Jul
+                  472.0 / 5, // 18 Jul
+                  483.0 / 5 / 2, // 19 Jul (second stock split - x2)
+                  476.4 / 5 / 2, // 20 Jul
+                ],
+                rebasePriceRatio: [5 * 2, 5 * 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1],
+              },
+            ],
+          },
+        },
       );
 
-      expect(result[10]?.price).toBeCloseTo(424.1); // see test data
-      expect(result[10]?.gainAbs).toBeCloseTo(1302 - 1199);
-      expect(result[10]?.value).toBeCloseTo(1302);
-      expect(result[10]?.gain).toBeCloseTo((1302 - 1199) / 1199);
+      const expectedPrice = 483.0 / 5 / 2;
+      const expectedValue = (476.4 / 5 / 2) * (220 + 117 * 2 + 934 * 5 * 2);
+      const expectedCost =
+        428 * 934 +
+        148 +
+        100 + // 9 Jul
+        ((495 / 5) * 117 + 176 + 85) + // 13 Jul
+        ((476 / 5 / 2) * 220 + 82 + 19); // 20 Jul
+
+      const expectedGainAbs = Math.round(expectedValue - expectedCost);
+      const expectedGain = Number((expectedGainAbs / expectedCost).toFixed(4));
+
+      expect(result).toStrictEqual({
+        10: expect.objectContaining({
+          price: expectedPrice,
+          gainAbs: expectedGainAbs,
+          value: expectedValue,
+          gain: expectedGain,
+        }),
+      });
     });
 
     it('should use the buy cost', () => {
@@ -158,6 +246,7 @@ describe('Funds selectors / gains', () => {
               { date: new Date('2020-04-20'), units: 100, price: 1.05, fees: 0, taxes: 0 },
               { date: new Date('2020-05-20'), units: -65, price: 1.8, fees: 0, taxes: 0 },
             ],
+            stockSplits: [],
             allocationTarget: 0,
           },
         ],
@@ -169,6 +258,7 @@ describe('Funds selectors / gains', () => {
               {
                 startIndex: 0,
                 values: [1.05, 1.8],
+                rebasePriceRatio: [1, 1],
               },
             ],
           },
@@ -383,6 +473,7 @@ describe('Funds selectors / gains', () => {
               transactions: [
                 { date: new Date('2019-10-09'), units: 345, price: 3.47536, fees: 0, taxes: 0 },
               ],
+              stockSplits: [],
               allocationTarget: 0,
             },
             {
@@ -392,6 +483,7 @@ describe('Funds selectors / gains', () => {
                 { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
                 { date: new Date('2019-10-27'), units: -23, price: 5.65217, fees: 0, taxes: 0 },
               ],
+              stockSplits: [],
               allocationTarget: 0,
             },
           ],
@@ -417,6 +509,7 @@ describe('Funds selectors / gains', () => {
               transactions: [
                 { date: new Date('2019-10-09'), units: 345, price: 3.47536, fees: 0, taxes: 0 },
               ],
+              stockSplits: [],
               allocationTarget: 0,
             },
             {
@@ -426,6 +519,7 @@ describe('Funds selectors / gains', () => {
                 { date: new Date('2019-10-01'), units: 167, price: 589.838, fees: 0, taxes: 0 },
                 { date: new Date('2019-10-27'), units: -23, price: 5.65217, fees: 0, taxes: 0 },
               ],
+              stockSplits: [],
               allocationTarget: 0,
             },
           ],
