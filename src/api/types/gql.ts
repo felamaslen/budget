@@ -54,6 +54,8 @@ export type CategoryCostTreeDeep = {
 export type AnalysisResponse = {
   cost: Array<CategoryCostTree>;
   description: Scalars['String'];
+  startDate: Scalars['Date'];
+  endDate: Scalars['Date'];
   saved: Scalars['Int'];
   timeline?: Maybe<Array<Array<Scalars['Int']>>>;
 };
@@ -820,7 +822,7 @@ export type Overview = {
 };
 
 export type OverviewOld = {
-  startDate: Scalars['DateTime'];
+  startDate: Scalars['Date'];
   assets: Array<Scalars['Int']>;
   liabilities: Array<Scalars['Int']>;
   netWorth: Array<Scalars['Int']>;
@@ -1194,6 +1196,8 @@ export type CategoryCostTreeDeepResolvers<ContextType = Context, ParentType exte
 export type AnalysisResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AnalysisResponse'] = ResolversParentTypes['AnalysisResponse']> = {
   cost?: Resolver<Array<ResolversTypes['CategoryCostTree']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   saved?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   timeline?: Resolver<Maybe<Array<Array<ResolversTypes['Int']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1662,7 +1666,7 @@ export type OverviewResolvers<ContextType = Context, ParentType extends Resolver
 };
 
 export type OverviewOldResolvers<ContextType = Context, ParentType extends ResolversParentTypes['OverviewOld'] = ResolversParentTypes['OverviewOld']> = {
-  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   assets?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   liabilities?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   netWorth?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;

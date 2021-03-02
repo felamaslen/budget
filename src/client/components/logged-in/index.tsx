@@ -10,7 +10,7 @@ import { useInitialData, useSubscriptions } from '~client/hooks';
 
 type RouteObject = {
   key: string;
-  component: LoadableComponent<Record<string, unknown>>;
+  component: LoadableComponent<RouteComponentProps>;
   path?: string | string[];
   exact?: boolean;
 };
@@ -31,7 +31,11 @@ const PageHoliday = loadable(() => import('~client/components/page-list/holiday'
 const PageSocial = loadable(() => import('~client/components/page-list/social'), lazyOptions);
 
 const routes: RouteObject[] = [
-  { key: 'analysis', component: hot(PageAnalysis) },
+  {
+    key: 'analysis',
+    path: '/analysis/:groupBy?/:period?/:page?',
+    component: hot(PageAnalysis),
+  },
   { key: 'funds', component: hot(PageFunds) },
   { key: 'income', component: hot(PageIncome) },
   { key: 'bills', component: hot(PageBills) },

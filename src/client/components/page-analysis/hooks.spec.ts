@@ -10,6 +10,8 @@ import type { CategoryCostTreeDeep } from '~client/types/gql';
 describe('Analysis hooks', () => {
   const state: State = {
     description: 'Some description',
+    startDate: new Date('2018-04-01'),
+    endDate: new Date('2018-04-07'),
     cost: [
       {
         item: AnalysisPage.Food,
@@ -26,6 +28,8 @@ describe('Analysis hooks', () => {
     saved: 67123,
     timeline: [[1, 2, 3]],
   };
+
+  const invested = 191332;
 
   describe(getForest.name, () => {
     it('should return the cost data, ordered and mapped into subtrees', () => {
@@ -51,9 +55,14 @@ describe('Analysis hooks', () => {
           color: colors.blockColor.saved,
           total: state.saved,
         },
+        {
+          name: 'invested',
+          color: colors.overview.balanceStocks,
+          total: invested,
+        },
       ];
 
-      const result = getForest(state.cost, state.saved);
+      const result = getForest(state.cost, state.saved, invested);
 
       expect(result).toStrictEqual(expectedResult);
     });
@@ -61,13 +70,13 @@ describe('Analysis hooks', () => {
     describe('when the cost is empty', () => {
       it('should not throw an error', () => {
         expect.assertions(1);
-        expect(() => getForest([], 0)).not.toThrow();
+        expect(() => getForest([], 0, 0)).not.toThrow();
       });
     });
   });
 
   describe(getBlocks.name, () => {
-    const forest = getForest(state.cost, state.saved);
+    const forest = getForest(state.cost, state.saved, invested);
 
     it('should get a block-packed map of the state', () => {
       expect.assertions(1);

@@ -222,6 +222,8 @@ export async function getAnalysisData(
     cost: categoryCostTree,
     saved,
     description,
+    startDate: startTime,
+    endDate: endTime,
   };
 }
 

@@ -32,6 +32,8 @@ describe('Analysis resolvers', () => {
     query Analysis($period: AnalysisPeriod!, $groupBy: AnalysisGroupBy!, $page: Int) {
       analysis(period: $period, groupBy: $groupBy, page: $page) {
         description
+        startDate
+        endDate
         cost {
           item
           tree {
@@ -106,6 +108,17 @@ describe('Analysis resolvers', () => {
       expect.assertions(1);
       const res = await setup();
       expect(res?.description).toMatchInlineSnapshot(`"2018"`);
+    });
+
+    it('should return a start and end date', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res).toStrictEqual(
+        expect.objectContaining({
+          startDate: '2018-01-01',
+          endDate: '2018-12-31',
+        }),
+      );
     });
 
     it('should return a saved number', async () => {
@@ -265,6 +278,17 @@ describe('Analysis resolvers', () => {
       expect(res?.description).toMatchInlineSnapshot(`"March 2018"`);
     });
 
+    it('should return a start and end date', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res).toStrictEqual(
+        expect.objectContaining({
+          startDate: '2018-03-01',
+          endDate: '2018-03-31',
+        }),
+      );
+    });
+
     it('should return a saved number for the month', async () => {
       expect.assertions(1);
       const res = await setup();
@@ -372,6 +396,17 @@ describe('Analysis resolvers', () => {
       expect.assertions(1);
       const res = await setup();
       expect(res?.description).toMatchInlineSnapshot(`"Week beginning April 16, 2018"`);
+    });
+
+    it('should return a start and end date', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res).toStrictEqual(
+        expect.objectContaining({
+          startDate: '2018-04-16',
+          endDate: '2018-04-22',
+        }),
+      );
     });
 
     it('should return a saved number for the week', async () => {

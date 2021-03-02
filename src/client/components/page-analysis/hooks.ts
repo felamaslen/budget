@@ -1,3 +1,5 @@
+import endOfDay from 'date-fns/endOfDay';
+import startOfDay from 'date-fns/startOfDay';
 import { Dispatch, SetStateAction, useCallback, useContext, useState } from 'react';
 
 import type { Props as PropsListTree } from './list-tree';
@@ -24,6 +26,7 @@ import type {
   FlexBlocks,
   GQL,
   MainBlockName,
+  NativeDate,
 } from '~client/types';
 import {
   AnalysisPage,
@@ -69,10 +72,12 @@ export function getSortedTree<
 export function getForest(
   cost: CategoryCostTree[],
   saved: number,
+  invested: number,
 ): AnalysisSortedTree<MainBlockName>[] {
   return [
     ...sortByTotal(getSortedTree<CategoryCostTree, MainBlockName>(cost)),
     { name: 'saved', color: colors.blockColor.saved, total: saved },
+    { name: 'invested', color: colors.overview.balanceStocks, total: invested },
   ];
 }
 
@@ -86,7 +91,7 @@ export function getBlocks(
     width,
     height,
     forest
-      .filter(({ name }) => treeVisible[name] !== false)
+      .filter(({ name }) => treeVisible[name] !== false && name !== 'invested')
       .map((block) => ({
         name: block.name,
         total: block.total,
@@ -151,46 +156,56 @@ export function useTreeToggle(): [AnalysisTreeVisible, PropsListTree['toggleTree
 
 export type Query = GQL<AnalysisQueryVariables>;
 
-const keyQuery = 'analysis_state';
-
 const defaultQuery: Query = {
   period: AnalysisPeriod.Year,
   groupBy: AnalysisGroupBy.Category,
   page: 0,
 };
 
-export type State = NonNullable<AnalysisQuery['analysis']>;
+export type State = NativeDate<NonNullable<AnalysisQuery['analysis']>, 'startDate' | 'endDate'>;
 
 const defaultState: State = {
   timeline: [],
   cost: [],
   saved: 0,
   description: '',
+  startDate: new Date(),
+  endDate: new Date(),
 };
 
-const validateQuery = (query: unknown | Query): query is Query =>
-  typeof query === 'object' &&
-  query !== null &&
-  Object.keys(query).length === 3 &&
-  Object.values(AnalysisPeriod).includes(Reflect.get(query, 'period')) &&
-  Object.values(AnalysisGroupBy).includes(Reflect.get(query, 'groupBy')) &&
-  typeof Reflect.get(query, 'page') === 'number' &&
-  (Reflect.get(query, 'page') as number) >= 0;
+function validateQuery(query: unknown | Query): Query {
+  if (typeof query !== 'object' || query === null) {
+    return defaultQuery;
+  }
 
-export function useAnalysisData(): [Query, (query: Partial<Query>) => void, State, boolean] {
-  const [query, setQuery] = usePersistentState<Query>(defaultQuery, keyQuery, validateQuery);
-  const onRequest = useCallback(
-    (delta: Partial<Query>): void => {
-      setQuery((last: Query) => ({ ...last, ...delta }));
-    },
-    [setQuery],
-  );
+  const period = Object.values(AnalysisPeriod).includes(Reflect.get(query, 'period'))
+    ? Reflect.get(query, 'period')
+    : defaultQuery.period;
+  const groupBy = Object.values(AnalysisGroupBy).includes(Reflect.get(query, 'groupBy'))
+    ? Reflect.get(query, 'groupBy')
+    : defaultQuery.groupBy;
+  const page =
+    Number(Reflect.get(query, 'page')) >= 0 ? parseInt(Reflect.get(query, 'page'), 10) : 0;
 
+  return { period, groupBy, page };
+}
+
+export function useAnalysisData(params: unknown): [Query, State, boolean] {
+  const query = validateQuery(params);
   const [{ data, fetching }] = gql.useAnalysisQuery({
     variables: query,
+    requestPolicy: 'cache-and-network',
   });
 
-  return [query, onRequest, data?.analysis ?? defaultState, fetching];
+  const state: Omit<State, 'invested'> = data?.analysis
+    ? {
+        ...data.analysis,
+        startDate: startOfDay(new Date(data.analysis.startDate)),
+        endDate: endOfDay(new Date(data.analysis.endDate)),
+      }
+    : defaultState;
+
+  return [query, state, fetching];
 }
 
 export function useAnalysisDeepBlock(

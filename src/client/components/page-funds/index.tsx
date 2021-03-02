@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import type { RouteComponentProps } from 'react-router';
 
 import { CashRow } from './cash-row';
 import { FundHeader } from './header';
@@ -76,7 +77,7 @@ const makeSortItems = ({ criteria, direction }: Sort): SortItems => (funds, prop
       direction * ((props[idB]?.gain?.[criteria] ?? 0) - (props[idA]?.gain?.[criteria] ?? 0)),
   );
 
-export const Funds: React.FC = () => {
+export const Funds: React.FC<RouteComponentProps> = () => {
   const isMobile = useIsMobile();
   useTodayPrices();
   const cache = useSelector(getFundsCache);

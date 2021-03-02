@@ -1,6 +1,6 @@
 import type { AnalysisPage } from './gql';
 
-export type MainBlockName = AnalysisPage | 'saved';
+export type MainBlockName = AnalysisPage | 'saved' | 'invested';
 
 export type AnalysisTreeVisible = { [key in MainBlockName]?: boolean };
 

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, RouteComponentProps } from 'react-router-dom';
 
 import * as Styled from './styles';
 import { AddReceipt } from '~client/components/add-receipt';
@@ -7,7 +7,7 @@ import { GraphOverview } from '~client/components/graph-overview';
 import { NetWorth } from '~client/components/net-worth';
 import { OverviewTable } from '~client/components/overview-table';
 
-export const PageOverview: React.FC = () => {
+export const PageOverview: React.FC<RouteComponentProps> = () => {
   const [addingReceipt, setAddingReceipt] = useState<boolean>(false);
   const addReceipt = useCallback(() => setAddingReceipt(true), []);
 

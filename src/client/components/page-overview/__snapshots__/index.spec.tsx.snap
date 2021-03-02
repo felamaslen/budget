@@ -1630,7 +1630,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-128 emotion-27"
-        style="background-color: rgb(69, 201, 85);"
+        style="background-color: rgb(45, 194, 64);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1639,12 +1639,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £40.8k
+            £43.8k
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £40,813.15
+            £43,811.71
           </span>
         </span>
       </div>
@@ -1699,7 +1699,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-128 emotion-27"
-        style="background-color: rgb(59, 198, 76);"
+        style="background-color: rgb(36, 191, 55);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1708,12 +1708,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £42.1k
+            £45.1k
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £42,107.95
+            £45,144.37
           </span>
         </span>
       </div>
@@ -1768,7 +1768,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-128 emotion-27"
-        style="background-color: rgb(49, 195, 66);"
+        style="background-color: rgb(36, 191, 55);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1777,12 +1777,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £43.4k
+            £46.5k
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £43,402.24
+            £46,476.98
           </span>
         </span>
       </div>
@@ -1837,7 +1837,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-128 emotion-27"
-        style="background-color: rgb(38, 192, 57);"
+        style="background-color: rgb(36, 191, 55);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1846,12 +1846,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £44.7k
+            £47.8k
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £44,709.00
+            £47,822.57
           </span>
         </span>
       </div>
@@ -2879,7 +2879,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0.0,179.8 L77.3,166.9 L163.0,152.7 L245.9,136.9 L331.5,119.4 L414.4,100.0 L500.0,78.5"
+          d="M0.0,180.3 L77.3,165.6 L163.0,149.0 L245.9,130.3 L331.5,109.3 L414.4,85.8 L500.0,59.3"
           fill="none"
           stroke="#999"
           stroke-width="1"
@@ -2895,7 +2895,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,222.81124333333332 Q52,209 77.3,197.9 C109,184 131,157 163.0,149.3 C190,143 217,156 245.9,156.8 C276,157 302,153 331.5,151.5 C360,150 385,148 414.4,146.2 Q444,144 500.0,140.9 L500.0,145.5 Q444,149 414.4,150.8 C385,153 360,154 331.5,156.1 C302,158 276,159 245.9,161.3 C217,163 191,160 163.0,166.6 C132,174 108,191 77.3,202.2 Q51,212 0.0,227.2"
+          d="M0,222.81124333333332 Q52,209 77.3,197.9 C109,184 131,160 163.0,149.3 C190,141 217,146 245.9,143.8 C276,142 302,140 331.5,138.4 C360,136 385,135 414.4,132.9 Q444,131 500.0,127.4 L500.0,145.5 Q444,149 414.4,150.8 C385,153 360,154 331.5,156.1 C302,158 276,159 245.9,161.3 C217,163 191,160 163.0,166.6 C132,174 108,191 77.3,202.2 Q51,212 0.0,227.2"
           fill="rgba(84,110,122,0.4)"
           stroke="none"
           stroke-width="2"
@@ -2912,7 +2912,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,222.81124333333332 Q47,172 77.3,157.2 C104,145 133,145 163.0,144.1 C192,143 217,151 245.9,151.4 C276,152 302,148 331.5,145.9 C360,144 385,142 414.4,140.4 Q444,138 500.0,134.8 L500.0,140.9 Q444,144 414.4,146.2 C385,148 360,150 331.5,151.5 C302,153 276,157 245.9,156.8 C217,156 190,143 163.0,149.3 C131,157 109,184 77.3,197.9 Q52,209 0.0,222.8"
+          d="M0,222.81124333333332 Q47,172 77.3,157.2 C104,145 133,147 163.0,144.1 C192,141 217,140 245.9,138.4 C276,136 302,135 331.5,132.8 C360,131 385,129 414.4,127.0 Q444,125 500.0,121.3 L500.0,127.4 Q444,131 414.4,132.9 C385,135 360,136 331.5,138.4 C302,140 276,142 245.9,143.8 C217,146 190,141 163.0,149.3 C131,160 109,184 77.3,197.9 Q52,209 0.0,222.8"
           fill="rgba(145,194,129,0.4)"
           stroke="none"
           stroke-width="2"
@@ -2920,13 +2920,13 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,227.17833333333334 Q42,130 77.3,105.4 C99,91 133,113 163.0,116.4"
+          d="M0,227.17833333333334 Q42,130 77.3,105.4 C99,91 133,115 163.0,116.4"
           fill="none"
           stroke="#039"
           stroke-width="2"
         />
         <path
-          d="M162.98342541436463,116.37019000000001 C192,120 217,123 245.9,123.6 C276,124 302,120 331.5,118.0 C360,116 385,114 414.4,112.4 Q444,110 500.0,106.7"
+          d="M162.98342541436463,116.37019000000001 C192,117 217,113 245.9,110.6 C276,109 302,107 331.5,104.9 C360,103 385,101 414.4,99.1 Q444,97 500.0,93.3"
           fill="none"
           stroke="#808080"
           stroke-width="2"
@@ -2934,7 +2934,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,227.17833333333334 Q42,129 77.3,104.9 C99,90 133,113 163.0,115.9 C192,119 217,123 245.9,123.1 C276,123 302,120 331.5,117.5 C360,116 385,114 414.4,111.9 Q444,110 500.0,106.3 L500.0,106.7 Q444,110 414.4,112.4 C385,114 360,116 331.5,118.0 C302,120 276,124 245.9,123.6 C217,123 192,120 163.0,116.4 C133,113 99,91 77.3,105.4 Q42,130 0.0,227.2"
+          d="M0,227.17833333333334 Q42,129 77.3,104.9 C99,90 133,115 163.0,115.9 C192,117 217,112 245.9,110.1 C276,108 302,106 331.5,104.4 C360,102 385,101 414.4,98.6 Q444,97 500.0,92.8 L500.0,93.3 Q444,97 414.4,99.1 C385,101 360,103 331.5,104.9 C302,107 276,109 245.9,110.6 C217,113 192,117 163.0,116.4 C133,115 99,91 77.3,105.4 Q42,130 0.0,227.2"
           fill="rgba(47,123,211,0.5)"
           stroke="none"
           stroke-width="2"
@@ -2942,7 +2942,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,227.17833333333334 Q41,128 77.3,103.4 C99,89 133,111 163.0,114.0 C192,117 217,121 245.9,121.2 C276,121 302,118 331.5,115.5 C360,114 385,112 414.4,109.8 Q444,108 500.0,104.0"
+          d="M0,227.17833333333334 Q41,128 77.3,103.4 C99,89 133,113 163.0,114.0 C192,115 217,110 245.9,108.2 C276,106 302,104 331.5,102.3 C360,100 385,98 414.4,96.4 Q444,94 500.0,90.5"
           fill="none"
           stroke="#5aa8be"
           stroke-dasharray="3,5"
@@ -2966,7 +2966,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
             x="50"
             y="92"
           >
-            £104k (1y)
+            £126k (1y)
           </text>
           <text
             alignment-baseline="hanging"
@@ -2976,7 +2976,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
             x="50"
             y="114"
           >
-            £1m (3y)
+            £2m (3y)
           </text>
           <text
             alignment-baseline="hanging"
@@ -2986,7 +2986,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
             x="50"
             y="136"
           >
-            £14m (5y)
+            £34m (5y)
           </text>
         </g>
         <g>

@@ -6,6 +6,7 @@ import startOfDay from 'date-fns/startOfDay';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { MemoryRouter, Route } from 'react-router';
 import createStore, { MockStore } from 'redux-mock-store';
 import sinon from 'sinon';
 import numericHash from 'string-hash';
@@ -97,7 +98,9 @@ describe('<PageFunds />', () => {
     const renderResult = render(
       <Provider store={store}>
         <GQLProviderMock>
-          <Funds />
+          <MemoryRouter initialEntries={['/funds']}>
+            <Route path="/funds" component={Funds} />
+          </MemoryRouter>
         </GQLProviderMock>
       </Provider>,
     );

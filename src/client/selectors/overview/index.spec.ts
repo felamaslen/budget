@@ -1,4 +1,4 @@
-import { endOfMonth, isSameMonth } from 'date-fns';
+import { endOfMonth, getUnixTime, isSameMonth } from 'date-fns';
 import numericHash from 'string-hash';
 
 import { getProcessedMonthlyValues, getOverviewTable } from '.';
@@ -13,6 +13,8 @@ describe('Overview selectors', () => {
     mockRandom([0.15, 0.99]);
   });
 
+  const randnBm0 = Math.sqrt(-2 * Math.log(0.15)) * Math.cos(2 * Math.PI * 0.99);
+
   const now = new Date('2018-03-23T11:54:23.127Z');
 
   describe('getProcessedMonthlyValues', () => {
@@ -26,7 +28,13 @@ describe('Overview selectors', () => {
             item: 'some fund 1',
             transactions: [
               { date: new Date('2018-02-05'), units: 10, price: 5612, fees: 3, taxes: 0 },
-              { date: new Date('2018-03-27'), units: -1.32, price: 1804, fees: 0.72, taxes: 0 },
+              {
+                date: new Date('2018-03-27'),
+                units: -1.32,
+                price: 1804,
+                fees: 0.72,
+                taxes: 0,
+              },
             ],
             stockSplits: [],
             allocationTarget: 0,
@@ -41,8 +49,22 @@ describe('Overview selectors', () => {
             allocationTarget: 0,
           },
         ],
+        startTime: getUnixTime(new Date('2018-02-04')),
+        cacheTimes: [
+          86400 * 0,
+          86400 * 1,
+          86400 * 2,
+          86400 * 3,
+          86400 * 4,
+          86400 * 5,
+          86400 * 6,
+          86400 * 7,
+          86400 * 8,
+          86400 * 9,
+          86400 * 10,
+        ],
         prices: {
-          [numericHash('fund-A')]: [{ startIndex: 0, values: [4973] }],
+          [numericHash('fund-A')]: [{ startIndex: 0, values: [4973 * 2, 4973 * 2, 4973] }],
           [numericHash('fund-B')]: [{ startIndex: 0, values: [113] }],
         },
       },
@@ -79,14 +101,26 @@ describe('Overview selectors', () => {
 
       // Check the test data at src/client/test-data/state.ts to verify these assertions
       const currentFundsValue = 10 * 4973 + 51 * 113;
+
+      const { annualisedFundReturns } = stateWithoutCurrentMonth[PageNonStandard.Overview];
+
+      const stocksJan18 = 100779;
+      const stocksFeb18 = 101459;
+      const stocksMar18 = currentFundsValue;
+      const stocksApr18 =
+        currentFundsValue * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+      const stocksMay18 = stocksApr18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+      const stocksJun18 = stocksMay18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+      const stocksJul18 = stocksJun18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+
       const stocks = [
-        /* Jan-18 */ 100779,
-        /* Feb-18 */ 101459,
-        /* Mar-18 */ currentFundsValue,
-        /* Apr-18 */ 104281,
-        /* May-18 */ 105597,
-        /* Jun-18 */ 106930,
-        /* Jul-18 */ 108280,
+        /* Jan-18 */ stocksJan18,
+        /* Feb-18 */ stocksFeb18,
+        /* Mar-18 */ stocksMar18,
+        /* Apr-18 */ stocksApr18,
+        /* May-18 */ stocksMay18,
+        /* Jun-18 */ stocksJun18,
+        /* Jul-18 */ stocksJul18,
       ];
 
       const stockCostBasis = [
@@ -372,15 +406,26 @@ describe('Overview selectors', () => {
     describe('when there is a net worth entry for the current month', () => {
       // Check the test data at src/client/test-data/state.ts to verify these assertions
       const currentFundsValue = (10 - 1.32) * 4973 + 51 * 113;
+
+      const { annualisedFundReturns } = testState[PageNonStandard.Overview];
+
+      const stocksJan18 = 100779;
+      const stocksFeb18 = 101459;
+      const stocksMar18 = Math.round(currentFundsValue);
+      const stocksApr18 = stocksMar18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+      const stocksMay18 = stocksApr18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+      const stocksJun18 = stocksMay18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+      const stocksJul18 = stocksJun18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+
       const stocks = [
-        /* Jan-18 */ 100779,
-        /* Feb-18 */ 101459,
-        /* Mar-18 */ Math.round(currentFundsValue),
-        /* Apr-18 */ 104281,
-        /* May-18 */ 105597,
-        /* Jun-18 */ 106930,
-        /* Jul-18 */ 108280,
-      ];
+        /* Jan-18 */ stocksJan18,
+        /* Feb-18 */ stocksFeb18,
+        /* Mar-18 */ stocksMar18,
+        /* Apr-18 */ stocksApr18,
+        /* May-18 */ stocksMay18,
+        /* Jun-18 */ stocksJun18,
+        /* Jul-18 */ stocksJul18,
+      ].map(Math.round);
 
       const pension = [
         /* Jan-18 */ 0,
@@ -721,7 +766,7 @@ describe('Overview selectors', () => {
                 "value": 2068,
               },
               "stocks": Object {
-                "rgb": "#f3f5f6",
+                "rgb": "#fff",
                 "value": 101459,
               },
             },
@@ -771,7 +816,7 @@ describe('Overview selectors', () => {
                 "value": 713,
               },
               "stocks": Object {
-                "rgb": "#546e7a",
+                "rgb": "#abb8be",
                 "value": 399098,
               },
             },
@@ -809,8 +854,8 @@ describe('Overview selectors', () => {
                 "value": 1573,
               },
               "netWorth": Object {
-                "rgb": "#45c955",
-                "value": 4081495,
+                "rgb": "#2dc240",
+                "value": 4381350,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -821,8 +866,8 @@ describe('Overview selectors', () => {
                 "value": 927,
               },
               "stocks": Object {
-                "rgb": "#c1cacf",
-                "value": 104281,
+                "rgb": "#aab7bd",
+                "value": 404136,
               },
             },
             "future": true,
@@ -859,8 +904,8 @@ describe('Overview selectors', () => {
                 "value": 2023,
               },
               "netWorth": Object {
-                "rgb": "#3bc64c",
-                "value": 4211158,
+                "rgb": "#24bf37",
+                "value": 4514798,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -871,8 +916,8 @@ describe('Overview selectors', () => {
                 "value": 277,
               },
               "stocks": Object {
-                "rgb": "#aab7bd",
-                "value": 105597,
+                "rgb": "#8d9fa7",
+                "value": 409237,
               },
             },
             "future": true,
@@ -909,8 +954,8 @@ describe('Overview selectors', () => {
                 "value": 1523,
               },
               "netWorth": Object {
-                "rgb": "#30c342",
-                "value": 4340774,
+                "rgb": "#24bf37",
+                "value": 4648246,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -921,8 +966,8 @@ describe('Overview selectors', () => {
                 "value": 277,
               },
               "stocks": Object {
-                "rgb": "#a9b6bc",
-                "value": 106930,
+                "rgb": "#718690",
+                "value": 414402,
               },
             },
             "future": true,
@@ -959,8 +1004,8 @@ describe('Overview selectors', () => {
                 "value": 2323,
               },
               "netWorth": Object {
-                "rgb": "#26c039",
-                "value": 4471642,
+                "rgb": "#24bf37",
+                "value": 4782995,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -971,8 +1016,8 @@ describe('Overview selectors', () => {
                 "value": 277,
               },
               "stocks": Object {
-                "rgb": "#a9b6bc",
-                "value": 108280,
+                "rgb": "#546e7a",
+                "value": 419633,
               },
             },
             "future": true,

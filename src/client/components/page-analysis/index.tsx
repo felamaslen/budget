@@ -1,10 +1,13 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import type { RouteComponentProps } from 'react-router';
 
 import {
   getBlocks,
   getForest,
   getDeepBlocks,
   getDeepForest,
+  Query,
   useAnalysisData,
   useAnalysisDeepBlock,
   useBlockDimensions,
@@ -18,18 +21,45 @@ import Upper from './upper';
 import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { isAnalysisPage } from '~client/constants/data';
 import { formatCurrency, capitalise } from '~client/modules/format';
+import { getInvestmentsBetweenDates } from '~client/selectors';
 import type { GQL } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
-import type { CategoryCostTree, CategoryCostTreeDeep } from '~client/types/gql';
+import { CategoryCostTree, CategoryCostTreeDeep } from '~client/types/gql';
 
-export const PageAnalysis: React.FC = () => {
-  const [query, onRequest, { cost, saved, description, timeline }, loading] = useAnalysisData();
+export type RouteParams = {
+  groupBy?: string;
+  period?: string;
+  page?: string;
+};
+
+export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match, history }) => {
+  const [
+    query,
+    { cost, saved, description, startDate, endDate, timeline },
+    loading,
+  ] = useAnalysisData(match.params);
+
+  const onRequest = useCallback(
+    (delta: Partial<Query>) => {
+      const nextQuery = { ...query, ...delta };
+      history.replace(`/analysis/${nextQuery.groupBy}/${nextQuery.period}/${nextQuery.page ?? 0}`);
+    },
+    [query, history],
+  );
+
+  useEffect(() => {
+    if (!Object.keys(match.params).length) {
+      onRequest({});
+    }
+  }, [match.params, onRequest]);
+
+  const invested = useSelector(getInvestmentsBetweenDates(startDate, endDate));
 
   const [treeVisible, toggleTreeItem] = useTreeToggle();
 
   const { width, height } = useBlockDimensions();
 
-  const forest = useMemo(() => getForest(cost, saved), [cost, saved]);
+  const forest = useMemo(() => getForest(cost, saved, invested), [cost, saved, invested]);
   const blocks = useMemo(() => getBlocks(forest, width, height, treeVisible), [
     forest,
     treeVisible,

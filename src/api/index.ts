@@ -67,7 +67,7 @@ function setupWebApp(app: express.Express): void {
   app.get('/', singlePageApp);
   app.get('/net-worth', singlePageApp);
   app.get('/net-worth/*', singlePageApp);
-  app.get('/analysis', singlePageApp);
+  app.get('/analysis/:groupBy?/:period?/:page?', singlePageApp);
   app.get('/funds', singlePageApp);
   app.get('/income', singlePageApp);
   app.get('/bills', singlePageApp);

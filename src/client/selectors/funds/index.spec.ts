@@ -13,6 +13,7 @@ import {
   getMaxAllocationTarget,
   getStockValue,
   getCashInBank,
+  getInvestmentsBetweenDates,
 } from '.';
 
 import { State } from '~client/reducers';
@@ -178,6 +179,20 @@ describe('Funds selectors', () => {
       expect(getFundsCost(testToday)(stateWithFutureTransaction)).toBe(
         getFundsCost(testToday)(state),
       );
+    });
+  });
+
+  describe('getInvestmentsBetweenDates', () => {
+    it('should get the amount invested between two given dates, excluding sell orders', () => {
+      expect.assertions(2);
+
+      expect(
+        getInvestmentsBetweenDates(new Date('2017-03-02'), new Date('2017-04-28'))(state),
+      ).toBeCloseTo(450 * 100);
+
+      expect(
+        getInvestmentsBetweenDates(new Date('2017-03-02'), new Date('2017-05-10'))(state),
+      ).toBeCloseTo(450 * 100 + 428 * 934 + 148 + 100);
     });
   });
 

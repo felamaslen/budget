@@ -380,6 +380,40 @@ describe('Funds selectors / gains', () => {
         );
       });
     });
+
+    describe('when a fund had its stock split', () => {
+      const stateWithStockSplit: State = {
+        ...stateWithGains,
+        [PageNonStandard.Funds]: {
+          ...stateWithGains[PageNonStandard.Funds],
+          items: [
+            {
+              ...stateWithGains[PageNonStandard.Funds].items[0],
+              stockSplits: [
+                {
+                  date: new Date('2019-11-05'),
+                  ratio: 3,
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      it('should use the rebased price to calculate the gain', () => {
+        expect.assertions(1);
+
+        const valueLatest = 345 * 113.2 * 3;
+        const valuePrev = 345 * 109;
+
+        const costLatest = 345 * 3.475;
+        const costPrev = 345 * 3.475;
+
+        expect(getDayGainAbs(stateWithStockSplit)).toBeCloseTo(
+          valueLatest - valuePrev - (costLatest - costPrev),
+        );
+      });
+    });
   });
 
   describe('getDayGain', () => {

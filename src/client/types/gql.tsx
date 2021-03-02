@@ -58,6 +58,8 @@ export type AnalysisResponse = {
   __typename?: 'AnalysisResponse';
   cost: Array<CategoryCostTree>;
   description: Scalars['String'];
+  startDate: Scalars['Date'];
+  endDate: Scalars['Date'];
   saved: Scalars['Int'];
   timeline?: Maybe<Array<Array<Scalars['Int']>>>;
 };
@@ -879,7 +881,7 @@ export type Overview = {
 
 export type OverviewOld = {
   __typename?: 'OverviewOld';
-  startDate: Scalars['DateTime'];
+  startDate: Scalars['Date'];
   assets: Array<Scalars['Int']>;
   liabilities: Array<Scalars['Int']>;
   netWorth: Array<Scalars['Int']>;
@@ -1308,7 +1310,7 @@ export type AnalysisQuery = (
   { __typename?: 'Query' }
   & { analysis?: Maybe<(
     { __typename?: 'AnalysisResponse' }
-    & Pick<AnalysisResponse, 'description' | 'saved' | 'timeline'>
+    & Pick<AnalysisResponse, 'description' | 'startDate' | 'endDate' | 'saved' | 'timeline'>
     & { cost: Array<(
       { __typename?: 'CategoryCostTree' }
       & Pick<CategoryCostTree, 'item'>
@@ -2212,6 +2214,8 @@ export const AnalysisDocument = gql`
     query Analysis($period: AnalysisPeriod!, $groupBy: AnalysisGroupBy!, $page: Int) {
   analysis(period: $period, groupBy: $groupBy, page: $page) {
     description
+    startDate
+    endDate
     saved
     cost {
       item

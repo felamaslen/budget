@@ -2,7 +2,7 @@ import { render, RenderResult } from '@testing-library/react';
 import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 
 import { PageOverview } from '.';
@@ -28,7 +28,9 @@ describe('<PageOverview />', () => {
           <GQLProviderMock>
             <TodayContext.Provider value={today}>
               <ResizeContext.Provider value={1020}>
-                <PageOverview />
+                <MemoryRouter initialEntries={['/']}>
+                  <Route path="/" component={PageOverview} />
+                </MemoryRouter>
               </ResizeContext.Provider>
             </TodayContext.Provider>
           </GQLProviderMock>

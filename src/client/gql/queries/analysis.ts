@@ -4,6 +4,8 @@ export const Analysis = gql`
   query Analysis($period: AnalysisPeriod!, $groupBy: AnalysisGroupBy!, $page: Int) {
     analysis(period: $period, groupBy: $groupBy, page: $page) {
       description
+      startDate
+      endDate
       saved
       cost {
         item

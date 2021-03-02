@@ -38,6 +38,8 @@ export const analysisSchema = gql`
   type AnalysisResponse {
     cost: [CategoryCostTree!]!
     description: String!
+    startDate: Date!
+    endDate: Date!
     saved: Int!
     timeline: [[Int!]!]
   }

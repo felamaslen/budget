@@ -5,6 +5,7 @@ import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
 import startOfDay from 'date-fns/startOfDay';
 import startOfMonth from 'date-fns/startOfMonth';
+import subDays from 'date-fns/subDays';
 import subMonths from 'date-fns/subMonths';
 import humanizeDuration from 'humanize-duration';
 import moize from 'moize';
@@ -24,6 +25,7 @@ import type {
   TransactionNative as Transaction,
   Portfolio,
   RowPrices,
+  FundNative,
 } from '~client/types';
 import { Aggregate, PageNonStandard } from '~client/types/enum';
 
@@ -118,14 +120,28 @@ export const getStockValue = moize(
   { maxSize: 1 },
 );
 
+const getFundsCostToDate = (date: Date, rows: FundNative[]): number =>
+  rows.reduce(
+    (sum, { transactions }) => sum + getTotalCost(filterPastTransactions(date, transactions)),
+    0,
+  );
+
 export const getFundsCost = moize(
-  (today: Date) =>
-    createSelector(getFundsRows, (rows) =>
-      rows.reduce(
-        (sum, { transactions }) => sum + getTotalCost(filterPastTransactions(today, transactions)),
-        0,
-      ),
-    ),
+  (today: Date) => createSelector(getFundsRows, (rows) => getFundsCostToDate(today, rows)),
+  { maxSize: 1 },
+);
+
+export const getInvestmentsBetweenDates = moize(
+  (left: Date, right: Date) =>
+    createSelector(getFundsRows, (rows) => {
+      const investments = rows.map<FundNative>(({ transactions, ...rest }) => ({
+        ...rest,
+        transactions: transactions.filter(({ units }) => units > 0),
+      }));
+      return (
+        getFundsCostToDate(right, investments) - getFundsCostToDate(subDays(left, 1), investments)
+      );
+    }),
   { maxSize: 1 },
 );
 

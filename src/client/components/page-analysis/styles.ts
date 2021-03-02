@@ -91,6 +91,7 @@ const indicatorColors: Record<MainBlockName, string> = {
   holiday: colors.holiday.main,
   social: colors.social.main,
   saved: colors.blockColor.saved,
+  invested: colors.overview.balanceStocks,
 };
 
 type TreeProps = { open?: boolean };

@@ -213,7 +213,7 @@ const predictStockReturns = (futureMonths: number, annualisedFundReturns: number
 
 const withCurrentStockValue = (futureMonths: number, currentStockValue: number) => (
   stocks: number[],
-): number[] => replaceAtIndex(stocks, stocks.length - 1 - futureMonths, currentStockValue);
+): number[] => replaceAtIndex(stocks, stocks.length - 1, currentStockValue);
 
 const withStocks = <K extends MonthlyProcessedKey>(
   dates: Date[],
@@ -227,8 +227,8 @@ const withStocks = <K extends MonthlyProcessedKey>(
 ): MonthlyWithProcess<K> & Pick<MonthlyProcessed, 'stockCostBasis'> => ({
   ...monthly,
   stocks: compose(
-    withCurrentStockValue(futureMonths, Math.round(currentStockValue)),
     predictStockReturns(futureMonths, annualisedFundReturns),
+    withCurrentStockValue(futureMonths, Math.round(currentStockValue)),
   )(monthly.stocks),
   stockCostBasis: Array(numOldMonths + dates.length)
     .fill(0)
