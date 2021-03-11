@@ -288,6 +288,50 @@ describe('Funds selectors / lines', () => {
         `);
       });
     });
+
+    describe('when stocks were split', () => {
+      it('should return the rebased price', () => {
+        expect.assertions(1);
+
+        expect(
+          getFundLinePriceNormalised(
+            {
+              3: [
+                {
+                  startIndex: 0,
+                  values: [
+                    {
+                      price: 1030,
+                      priceRebased: 103,
+                      units: 10,
+                      cost: 10,
+                      realised: 10,
+                    },
+                    {
+                      price: 520,
+                      priceRebased: 105,
+                      units: 10,
+                      cost: 10,
+                      realised: 10,
+                    },
+                    {
+                      price: 93,
+                      priceRebased: 93,
+                      units: 10,
+                      cost: 10,
+                      realised: 10,
+                    },
+                  ],
+                },
+              ],
+            },
+            3,
+          ),
+        ).toStrictEqual([
+          { startIndex: 0, values: [(103 * 100) / 103, (105 * 100) / 103, (93 * 100) / 103] },
+        ]);
+      });
+    });
   });
 
   describe(getOverallLine.name, () => {

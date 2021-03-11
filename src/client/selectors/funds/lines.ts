@@ -164,7 +164,9 @@ export const getFundLinePriceNormalised = (
 ): FundGroup[] =>
   fundsWithReturns[id].map(({ values, startIndex }) => ({
     startIndex,
-    values: values.map(({ price }) => (price * 100) / fundsWithReturns[id][0].values[0].price),
+    values: values.map(
+      ({ priceRebased }) => (priceRebased * 100) / fundsWithReturns[id][0].values[0].priceRebased,
+    ),
   }));
 
 export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): FundGroup[] {
