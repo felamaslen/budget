@@ -1,3 +1,5 @@
+import { getUnixTime } from 'date-fns';
+
 import { getFundItems, getFundLines } from './graph';
 import { Mode, fundPeriods, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
@@ -29,11 +31,53 @@ describe('Fund selectors / graph', () => {
     it('should get an ordered (by value) list of available funds with an overall item', () => {
       expect.assertions(1);
       expect(getFundItems.today(today)(state)).toStrictEqual<FundItem[]>([
-        { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: colors.black },
-        { id: 10, item: 'some fund 1', color: colorKey(abbreviateFundName('some fund 1')) },
-        { id: 3, item: 'some fund 2', color: colorKey(abbreviateFundName('some fund 2')) },
-        { id: 1, item: 'some fund 3', color: colorKey(abbreviateFundName('some fund 3')) },
-        { id: 5, item: 'test fund 4', color: colorKey(abbreviateFundName('test fund 4')) },
+        {
+          id: GRAPH_FUNDS_OVERALL_ID,
+          item: 'Overall',
+          color: colors.black,
+          orders: [
+            { time: getUnixTime(new Date('2016-09-21')), isSell: false, isReinvestment: false },
+            { time: getUnixTime(new Date('2017-01-11')), isSell: false, isReinvestment: false },
+            { time: getUnixTime(new Date('2017-03-03')), isSell: false, isReinvestment: false },
+            { time: getUnixTime(new Date('2017-04-27')), isSell: true, isReinvestment: false },
+            { time: getUnixTime(new Date('2017-05-09')), isSell: false, isReinvestment: false },
+          ],
+        },
+        {
+          id: 10,
+          item: 'some fund 1',
+          color: colorKey(abbreviateFundName('some fund 1')),
+          orders: [
+            { time: getUnixTime(new Date('2017-05-09')), isSell: false, isReinvestment: false },
+          ],
+        },
+        {
+          id: 3,
+          item: 'some fund 2',
+          color: colorKey(abbreviateFundName('some fund 2')),
+          orders: [
+            { time: getUnixTime(new Date('2017-03-03')), isSell: false, isReinvestment: false },
+            { time: getUnixTime(new Date('2017-04-27')), isSell: true, isReinvestment: false },
+          ],
+        },
+        {
+          id: 1,
+          item: 'some fund 3',
+          color: colorKey(abbreviateFundName('some fund 3')),
+          orders: [
+            { time: getUnixTime(new Date('2017-01-11')), isSell: false, isReinvestment: false },
+            { time: getUnixTime(new Date('2017-04-27')), isSell: true, isReinvestment: false },
+          ],
+        },
+        {
+          id: 5,
+          item: 'test fund 4',
+          color: colorKey(abbreviateFundName('test fund 4')),
+          orders: [
+            { time: getUnixTime(new Date('2016-09-21')), isSell: false, isReinvestment: false },
+            { time: getUnixTime(new Date('2017-04-27')), isSell: true, isReinvestment: false },
+          ],
+        },
       ]);
     });
 
@@ -47,9 +91,17 @@ describe('Fund selectors / graph', () => {
         },
       };
 
-      expect(getFundItems.today(today)(stateNoSold)).toStrictEqual<FundItem[]>([
-        { id: GRAPH_FUNDS_OVERALL_ID, item: 'Overall', color: colors.black },
-        { id: 10, item: 'some fund 1', color: colorKey(abbreviateFundName('some fund 1')) },
+      expect(getFundItems.today(today)(stateNoSold)).toStrictEqual<Partial<FundItem>[]>([
+        expect.objectContaining({
+          id: GRAPH_FUNDS_OVERALL_ID,
+          item: 'Overall',
+          color: colors.black,
+        }),
+        expect.objectContaining({
+          id: 10,
+          item: 'some fund 1',
+          color: colorKey(abbreviateFundName('some fund 1')),
+        }),
       ]);
     });
 

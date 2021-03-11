@@ -1,14 +1,22 @@
 import moize from 'moize';
-import React, { useContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas, ToggleList } from './after-canvas';
+import { BuySellDots } from './buy-sell-dots';
 import { hoverEffectByMode } from './labels';
+import { getFundLineName } from './name';
 import * as Styled from './styles';
 
 import { errorOpened, fundPricesUpdated, fundQueryUpdated } from '~client/actions';
 import { FundWeights } from '~client/components/fund-weights';
-import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';
+import {
+  LineGraph,
+  LineGraphProps,
+  SiblingProps,
+  TimeAxes,
+  useGraphWidth,
+} from '~client/components/graph';
 import { ErrorLevel } from '~client/constants/error';
 import {
   GRAPH_FUNDS_WIDTH,
@@ -20,7 +28,6 @@ import {
 import { TodayContext, usePersistentState, useUpdateEffect } from '~client/hooks';
 import { useFundPricesUpdateQuery } from '~client/hooks/gql';
 import { lastInArray } from '~client/modules/data';
-import { abbreviateFundName } from '~client/modules/finance';
 import { getTickSize } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { getFundItems, getFundLines, getFundsCache, getHistoryOptions } from '~client/selectors';
@@ -101,32 +108,25 @@ function useToggleList(
 }
 
 const filterLines = moize(
-  (
-    isMobile: boolean,
-    fundLines: Record<Mode, FundLine[]>,
-    mode: Mode,
-    toggleList: ToggleList,
-  ): Line[] => {
+  (isMobile: boolean, filteredFundLines: FundLine[], mode: Mode): Line[] => {
     type Accumulator = [Line[], Record<number, number>];
-    const [numberedLines] = fundLines[mode]
-      .filter(({ id }) => (isMobile ? id === GRAPH_FUNDS_OVERALL_ID : toggleList[id] !== false))
-      .reduce<Accumulator>(
-        ([last, idCount], { id, item, color, data }) => [
-          [
-            ...last,
-            {
-              key: `${id}-${idCount[id] || 0}`,
-              name: id === GRAPH_FUNDS_OVERALL_ID ? 'Overall' : abbreviateFundName(item),
-              data,
-              color,
-              strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
-              smooth: mode !== Mode.Value,
-            },
-          ],
-          { ...idCount, [id]: (idCount[id] || 0) + 1 },
+    const [numberedLines] = filteredFundLines.reduce<Accumulator>(
+      ([last, idCount], { id, item, color, data }) => [
+        [
+          ...last,
+          {
+            key: `${id}-${idCount[id] || 0}`,
+            name: getFundLineName(id, item),
+            data,
+            color,
+            strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
+            smooth: mode !== Mode.Value,
+          },
         ],
-        [[], {}],
-      );
+        { ...idCount, [id]: (idCount[id] || 0) + 1 },
+      ],
+      [[], {}],
+    );
 
     return numberedLines;
   },
@@ -231,7 +231,14 @@ function useGraphProps({
   const { startTime, cacheTimes } = useSelector(getFundsCache);
 
   const selectedMode = isMobile ? Mode.ROI : mode;
-  const lines = filterLines(isMobile, fundLines, selectedMode, toggleList);
+  const filteredFundLines = useMemo<FundLine[]>(
+    () =>
+      fundLines[selectedMode].filter(({ id }) =>
+        isMobile ? id === GRAPH_FUNDS_OVERALL_ID : toggleList[id] !== false,
+      ),
+    [fundLines, selectedMode, isMobile, toggleList],
+  );
+  const lines = filterLines(isMobile, filteredFundLines, selectedMode);
 
   const [ranges, tickSizeY] = getRanges(lines, cacheTimes, selectedMode);
 
@@ -251,6 +258,14 @@ function useGraphProps({
     [startTime, tickSizeY, labelY],
   );
 
+  const AfterLines = useCallback<React.FC<SiblingProps>>(
+    (props) =>
+      [Mode.ROI, Mode.Value].includes(selectedMode) ? (
+        <BuySellDots {...props} fundLines={filteredFundLines} startTime={startTime} />
+      ) : null,
+    [filteredFundLines, startTime, selectedMode],
+  );
+
   const hoverEffect = hoverEffectByMode[selectedMode];
 
   return {
@@ -259,6 +274,7 @@ function useGraphProps({
     height,
     ...ranges,
     BeforeLines,
+    AfterLines,
     lines,
     hoverEffect,
   };

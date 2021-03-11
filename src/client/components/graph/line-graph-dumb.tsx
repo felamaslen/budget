@@ -6,7 +6,9 @@ import { Graph, GraphProps, Props as SizedGraphProps } from './shared';
 import { HighlightPoint } from '~client/components/highlight-point';
 import type { Dimensions, Calc, DrawProps, Line } from '~client/types';
 
-type SiblingType = React.ReactElement | React.FC<DrawProps>;
+export type SiblingProps = DrawProps & Pick<Props, 'hlPoint'>;
+
+type SiblingType = React.ReactElement | React.FC<SiblingProps>;
 
 type Props = GraphProps & {
   dimensions: Dimensions;
@@ -19,18 +21,18 @@ type Props = GraphProps & {
 };
 export type { Props as LineGraphDumbProps };
 
-type SiblingProps = {
+type SiblingWrapperProps = {
   Sibling?: SiblingType;
-} & Pick<Props, 'dimensions' | 'calc'>;
+} & Pick<Props, 'dimensions' | 'calc' | 'hlPoint'>;
 
-const LineSibling: React.FC<SiblingProps> = ({ Sibling, dimensions, calc }) => {
+const LineSibling: React.FC<SiblingWrapperProps> = ({ Sibling, dimensions, calc, hlPoint }) => {
   if (!Sibling) {
     return null;
   }
   if (typeof Sibling !== 'function') {
     return Sibling;
   }
-  return <Sibling {...dimensions} {...calc} />;
+  return <Sibling {...dimensions} {...calc} hlPoint={hlPoint} />;
 };
 
 const LineGraphDumbWithoutRef: React.RefForwardingComponent<HTMLDivElement, Props> = (
@@ -82,9 +84,9 @@ const LineGraphDumbWithoutRef: React.RefForwardingComponent<HTMLDivElement, Prop
 
   return (
     <Graph ref={graphRef} {...graphProps}>
-      <LineSibling Sibling={BeforeLines} dimensions={dimensions} calc={calc} />
+      <LineSibling Sibling={BeforeLines} dimensions={dimensions} calc={calc} hlPoint={hlPoint} />
       <RenderedLineGroup lines={lines} {...dimensions} {...calc} />
-      <LineSibling Sibling={AfterLines} dimensions={dimensions} calc={calc} />
+      <LineSibling Sibling={AfterLines} dimensions={dimensions} calc={calc} hlPoint={hlPoint} />
     </Graph>
   );
 };

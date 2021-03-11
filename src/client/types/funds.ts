@@ -13,10 +13,13 @@ export type NativeFund<F extends FundInput> = Omit<GQL<F>, 'transactions' | 'sto
 export type FundNative = NativeFund<Fund>;
 export type FundInputNative = NativeFund<FundInput>;
 
+export type FundOrder = { time: number; isSell: boolean; isReinvestment: boolean };
+
 export type FundItem = {
   id: Id;
   item: string;
   color: string;
+  orders: FundOrder[];
 };
 
 export type FundLine = FundItem & { data: Data };

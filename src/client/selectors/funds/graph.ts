@@ -12,11 +12,12 @@ import { abbreviateFundName } from '~client/modules/finance';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { colors } from '~client/styled/variables';
 import type {
-  FundNative as Fund,
   FundItem,
   FundLine,
-  TransactionNative as Transaction,
+  FundNative as Fund,
+  FundOrder,
   StockSplitNative,
+  TransactionNative as Transaction,
 } from '~client/types';
 
 type WithInfo<V = Record<string, unknown>> = Fund &
@@ -106,6 +107,22 @@ const getReturnsById = memoiseNowAndToday((time, key) =>
   ),
 );
 
+const mapFundOrder = ({ date, fees, units }: Transaction): FundOrder => ({
+  time: getUnixTime(date),
+  isSell: units < 0,
+  isReinvestment: fees < 0,
+});
+
+const sortFundOrders = (orders: FundOrder[]): FundOrder[] =>
+  orders
+    .slice()
+    .sort((a, b) => a.time - b.time)
+    .reduce<FundOrder[]>(
+      (last, order) =>
+        last.some((compare) => compare.time === order.time) ? last : [...last, order],
+      [],
+    );
+
 export const getFundItems = memoiseNowAndToday((time, key) =>
   createSelector(
     getItemsWithInfo[key](time),
@@ -115,13 +132,20 @@ export const getFundItems = memoiseNowAndToday((time, key) =>
         id: GRAPH_FUNDS_OVERALL_ID,
         item: 'Overall',
         color: colors.black,
+        orders: sortFundOrders(
+          items.reduce<FundOrder[]>(
+            (last, { transactions }) => [...last, ...transactions.map(mapFundOrder)],
+            [],
+          ),
+        ),
       },
       ...items
         .filter(({ id }) => !hiddenBecauseSold[id])
-        .map(({ id, item }) => ({
+        .map(({ id, item, transactions }) => ({
           id,
           item,
           color: colorKey(abbreviateFundName(item)),
+          orders: sortFundOrders(transactions.map(mapFundOrder)),
         })),
     ],
   ),
