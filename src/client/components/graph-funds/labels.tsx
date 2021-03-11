@@ -63,12 +63,17 @@ const LabelBaseFunds: React.FC<LabelBaseFundsProps> = ({
 
   const [ref, style] = useSelfAdjustingLabel(props);
   const valueLabel = compare
-    ? `${formatValue(main.point[1], mode)} → ${formatValue(compare.point[1], mode)}`
-    : formatValue(main.point[1], mode);
+    ? `${formatValue(main.unstackedPoint[1], mode)} → ${formatValue(
+        compare.unstackedPoint[1],
+        mode,
+      )}`
+    : formatValue(main.unstackedPoint[1], mode);
 
   const valueLabelChange =
     compare && showChange
-      ? ` (${formatPercent((compare.point[1] - main.point[1]) / main.point[1])})`
+      ? ` (${formatPercent(
+          (compare.unstackedPoint[1] - main.unstackedPoint[1]) / main.unstackedPoint[1],
+        )})`
       : '';
 
   const dateLabel = compare
@@ -104,6 +109,7 @@ const LabelPriceNormalised: React.FC<LabelProps> = (props) => (
 export const hoverEffectByMode: Record<Mode, HoverEffect> = {
   [Mode.ROI]: { Label: LabelROI },
   [Mode.Value]: { Label: LabelValue },
+  [Mode.Stacked]: { Label: LabelValue },
   [Mode.Price]: { Label: LabelPrice },
   [Mode.PriceNormalised]: { Label: LabelPriceNormalised },
 };

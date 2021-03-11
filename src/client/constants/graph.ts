@@ -41,6 +41,7 @@ export const GRAPH_FUNDS_HEIGHT = 300;
 export enum Mode {
   ROI = 'ROI',
   Value = 'Value',
+  Stacked = 'Value (stacked)',
   Price = 'Price',
   PriceNormalised = 'Price (normalised)',
 }

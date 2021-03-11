@@ -170,18 +170,21 @@ export const getFundLinePriceNormalised = (
   }));
 
 export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): FundGroup[] {
-  if (mode === Mode.Value) {
-    return getOverallAbsolute(fundsWithReturns);
+  switch (mode) {
+    case Mode.Value:
+    case Mode.Stacked:
+      return getOverallAbsolute(fundsWithReturns);
+    case Mode.ROI:
+      return getOverallROI(fundsWithReturns);
+    default:
+      return [];
   }
-  if (mode === Mode.ROI) {
-    return getOverallROI(fundsWithReturns);
-  }
-  return [];
 }
 
 export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: Id): FundGroup[] {
   switch (mode) {
     case Mode.Value:
+    case Mode.Stacked:
       return getFundLineAbsolute(fundsWithReturns, id);
     case Mode.ROI:
       return getFundLineROI(fundsWithReturns, id);

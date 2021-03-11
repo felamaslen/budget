@@ -4,18 +4,32 @@ import { getFundLineName } from './name';
 
 import { Arrow } from '~client/components/arrow';
 import type { SiblingProps } from '~client/components/graph';
+import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
 import type { FundLine } from '~client/types';
 
 export type Props = SiblingProps & {
   fundLines: FundLine[];
   startTime: number;
+  mode: Mode;
 };
 
-export const BuySellDots: React.FC<Props> = ({ fundLines, hlPoint, pixX, pixY1, startTime }) => (
+export const BuySellDots: React.FC<Props> = ({
+  fundLines,
+  hlPoint,
+  mode,
+  pixX,
+  pixY1,
+  startTime,
+}) => (
   <g>
     {fundLines
-      .filter((fund) => hlPoint && getFundLineName(fund.id, fund.item) === hlPoint.group)
+      .filter(
+        (fund) =>
+          (mode !== Mode.Value || fund.id === GRAPH_FUNDS_OVERALL_ID) &&
+          hlPoint &&
+          getFundLineName(fund.id, fund.item) === hlPoint.group,
+      )
       .reduce<Pick<FundLine, 'id' | 'orders' | 'data'>[]>(
         (last, next) =>
           next.id === last[last.length - 1]?.id
