@@ -183,16 +183,27 @@ describe('Funds selectors', () => {
   });
 
   describe('getInvestmentsBetweenDates', () => {
-    it('should get the amount invested between two given dates, excluding sell orders', () => {
+    it('should get the amount invested between two given dates, including sell orders', () => {
       expect.assertions(2);
 
       expect(
         getInvestmentsBetweenDates(new Date('2017-03-02'), new Date('2017-04-28'))(state),
-      ).toBeCloseTo(450 * 100);
+      ).toBeCloseTo(
+        450 * 100 - 450 * 112 + (20 + 80) - 1117.87 * 72.24453648 - 1499.7 * 177.1167567,
+      );
 
       expect(
         getInvestmentsBetweenDates(new Date('2017-03-02'), new Date('2017-05-10'))(state),
-      ).toBeCloseTo(450 * 100 + 428 * 934 + 148 + 100);
+      ).toBeCloseTo(
+        450 * 100 +
+          428 * 934 +
+          148 +
+          100 -
+          450 * 112 +
+          (20 + 80) -
+          1117.87 * 72.24453648 -
+          1499.7 * 177.1167567,
+      );
     });
   });
 

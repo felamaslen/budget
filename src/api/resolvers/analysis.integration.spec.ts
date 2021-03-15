@@ -41,7 +41,7 @@ describe('Analysis resolvers', () => {
             sum
           }
         }
-        saved
+        income
         timeline
       }
     }
@@ -121,10 +121,10 @@ describe('Analysis resolvers', () => {
       );
     });
 
-    it('should return a saved number', async () => {
+    it('should return an income number', async () => {
       expect.assertions(1);
       const res = await setup();
-      expect(res?.saved).toMatchInlineSnapshot(`135318`);
+      expect(res?.income).toMatchInlineSnapshot(`433201`);
     });
 
     it('should return timeline data', async () => {
@@ -174,7 +174,7 @@ describe('Analysis resolvers', () => {
         expect.assertions(3);
         const res = await setupLeapYear();
         expect(res?.description).toMatchInlineSnapshot(`"2016"`);
-        expect(res?.saved).toMatchInlineSnapshot(`0`);
+        expect(res?.income).toMatchInlineSnapshot(`0`);
         expect(res?.cost).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -211,6 +211,46 @@ describe('Analysis resolvers', () => {
         const res = await setupLeapYear();
         expect(res?.timeline).toHaveLength(366);
       });
+    });
+
+    it('should ignore certain expense categories', async () => {
+      expect.assertions(2);
+
+      await app.db('general').insert({
+        uid: app.uid,
+        date: '2018-03-11',
+        item: 'Down payment',
+        category: 'House purchase',
+        cost: 1700000,
+        shop: 'Solicitors',
+      });
+
+      const res = await setup();
+      expect(res).toStrictEqual(
+        expect.objectContaining({
+          cost: expect.arrayContaining([
+            expect.objectContaining({
+              item: 'general',
+              tree: expect.arrayContaining([
+                expect.objectContaining({ category: 'Foo', sum: 9912 + 1231 }),
+              ]),
+            }),
+          ]),
+        }),
+      );
+
+      expect(res).not.toStrictEqual(
+        expect.objectContaining({
+          cost: expect.arrayContaining([
+            expect.objectContaining({
+              item: 'general',
+              tree: expect.arrayContaining([
+                expect.objectContaining({ category: 'House purchase' }),
+              ]),
+            }),
+          ]),
+        }),
+      );
     });
   });
 
@@ -289,10 +329,10 @@ describe('Analysis resolvers', () => {
       );
     });
 
-    it('should return a saved number for the month', async () => {
+    it('should return an income number for the month', async () => {
       expect.assertions(1);
       const res = await setup();
-      expect(res?.saved).toMatchInlineSnapshot(`135318`);
+      expect(res?.income).toMatchInlineSnapshot(`433201`);
     });
 
     it('should return timeline data', async () => {
@@ -409,10 +449,10 @@ describe('Analysis resolvers', () => {
       );
     });
 
-    it('should return a saved number for the week', async () => {
+    it('should return an income number for the week', async () => {
       expect.assertions(1);
       const res = await setup();
-      expect(res?.saved).toMatchInlineSnapshot(`0`);
+      expect(res?.income).toMatchInlineSnapshot(`0`);
     });
 
     it('should not return timeline data', async () => {

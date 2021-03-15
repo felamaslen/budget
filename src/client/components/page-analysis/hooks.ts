@@ -55,9 +55,10 @@ const getTreeColor = (name: string): string | undefined => {
 export function getSortedTree<
   K extends CategoryCostTree | CategoryCostTreeDeep,
   B extends string = string
->(forest: K[]): AnalysisSortedTree<B>[] {
+>(forest: K[], derived = false): AnalysisSortedTree<B>[] {
   return forest.map<AnalysisSortedTree<B>>(({ item, tree }) => ({
     name: item as B,
+    derived,
     color: getTreeColor(item),
     subTree: sortByTotal(
       tree.map(({ category, sum }) => ({
@@ -76,8 +77,8 @@ export function getForest(
 ): AnalysisSortedTree<MainBlockName>[] {
   return [
     ...sortByTotal(getSortedTree<CategoryCostTree, MainBlockName>(cost)),
-    { name: 'saved', color: colors.blockColor.saved, total: saved },
-    { name: 'invested', color: colors.overview.balanceStocks, total: invested },
+    { name: 'saved', derived: true, color: colors.blockColor.saved, total: saved },
+    { name: 'invested', derived: true, color: colors.overview.balanceStocks, total: invested },
   ];
 }
 
@@ -162,11 +163,14 @@ const defaultQuery: Query = {
   page: 0,
 };
 
-export type State = NativeDate<NonNullable<AnalysisQuery['analysis']>, 'startDate' | 'endDate'>;
+export type State = NativeDate<NonNullable<AnalysisQuery['analysis']>, 'startDate' | 'endDate'> & {
+  saved: number;
+};
 
 const defaultState: State = {
   timeline: [],
   cost: [],
+  income: 0,
   saved: 0,
   description: '',
   startDate: new Date(),
@@ -197,13 +201,25 @@ export function useAnalysisData(params: unknown): [Query, State, boolean] {
     requestPolicy: 'cache-and-network',
   });
 
-  const state: Omit<State, 'invested'> = data?.analysis
+  const stateWithoutSaved: Omit<State, 'saved'> = data?.analysis
     ? {
         ...data.analysis,
         startDate: startOfDay(new Date(data.analysis.startDate)),
         endDate: endOfDay(new Date(data.analysis.endDate)),
       }
     : defaultState;
+
+  const totalCost = stateWithoutSaved.cost.reduce<number>(
+    (prev, next) => next.tree.reduce<number>((last, { sum }) => last + sum, prev),
+    0,
+  );
+
+  const saved = Math.max(0, stateWithoutSaved.income - totalCost);
+
+  const state: State = {
+    ...stateWithoutSaved,
+    saved,
+  };
 
   return [query, state, fetching];
 }

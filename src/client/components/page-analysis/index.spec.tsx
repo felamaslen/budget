@@ -107,7 +107,7 @@ describe('<PageAnalysis />', () => {
   describe('when the cost forest is empty', () => {
     it('should not render anything', () => {
       expect.assertions(1);
-      const { container } = setup({ cost: [], saved: 0 });
+      const { container } = setup({ cost: [], income: 0 });
 
       expect(container).not.toHaveTextContent('NaN');
     });

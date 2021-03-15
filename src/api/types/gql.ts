@@ -56,7 +56,7 @@ export type AnalysisResponse = {
   description: Scalars['String'];
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  saved: Scalars['Int'];
+  income: Scalars['Int'];
   timeline?: Maybe<Array<Array<Scalars['Int']>>>;
 };
 
@@ -1198,7 +1198,7 @@ export type AnalysisResponseResolvers<ContextType = Context, ParentType extends 
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  saved?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  income?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   timeline?: Resolver<Maybe<Array<Array<ResolversTypes['Int']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

@@ -20,12 +20,28 @@ describe('<PageAnalysis /> / <ListTree />', () => {
 
   const props: Props = {
     cost: [
-      { name: AnalysisPage.Food, total: 1, subTree: [{ name: 'bar1', total: 1 }] },
-      { name: AnalysisPage.General, total: 4, subTree: [{ name: 'bar2', total: 2 }] },
-      { name: AnalysisPage.Bills, total: 3, subTree: [{ name: 'bar3', total: 2 }] },
-      { name: AnalysisPage.Holiday, total: 6, subTree: [{ name: 'bar4', total: 2 }] },
-      { name: AnalysisPage.Social, total: 10, subTree: [{ name: 'bar5', total: 3 }] },
+      { name: AnalysisPage.Food, derived: false, total: 1, subTree: [{ name: 'bar1', total: 1 }] },
+      {
+        name: AnalysisPage.General,
+        derived: false,
+        total: 4,
+        subTree: [{ name: 'bar2', total: 2 }],
+      },
+      { name: AnalysisPage.Bills, derived: false, total: 3, subTree: [{ name: 'bar3', total: 2 }] },
+      {
+        name: AnalysisPage.Holiday,
+        derived: false,
+        total: 6,
+        subTree: [{ name: 'bar4', total: 2 }],
+      },
+      {
+        name: AnalysisPage.Social,
+        derived: false,
+        total: 10,
+        subTree: [{ name: 'bar5', total: 3 }],
+      },
     ],
+    income: 30,
     treeVisible,
     treeOpen,
     toggleTreeItem: jest.fn(),
@@ -37,12 +53,12 @@ describe('<PageAnalysis /> / <ListTree />', () => {
     render(<ListTree {...props} {...customProps} />);
 
   describe.each`
-    index | name                    | visible  | open     | cost      | percent   | subItem
-    ${1}  | ${AnalysisPage.Food}    | ${true}  | ${true}  | ${'0.01'} | ${'4.2'}  | ${'bar1'}
-    ${2}  | ${AnalysisPage.General} | ${false} | ${false} | ${'0.04'} | ${'16.7'} | ${'bar2'}
-    ${3}  | ${AnalysisPage.Bills}   | ${true}  | ${false} | ${'0.03'} | ${'12.5'} | ${'bar3'}
-    ${4}  | ${AnalysisPage.Holiday} | ${true}  | ${true}  | ${'0.06'} | ${'25.0'} | ${'bar4'}
-    ${5}  | ${AnalysisPage.Social}  | ${true}  | ${false} | ${'0.10'} | ${'41.7'} | ${'bar5'}
+    index | name                    | visible  | open     | cost       | percent      | subItem
+    ${1}  | ${AnalysisPage.Food}    | ${true}  | ${true}  | ${'£0.01'} | ${'(3.3%)'}  | ${'bar1'}
+    ${2}  | ${AnalysisPage.General} | ${false} | ${false} | ${'£0.04'} | ${'(13.3%)'} | ${'bar2'}
+    ${3}  | ${AnalysisPage.Bills}   | ${true}  | ${false} | ${'£0.03'} | ${'(10.0%)'} | ${'bar3'}
+    ${4}  | ${AnalysisPage.Holiday} | ${true}  | ${true}  | ${'£0.06'} | ${'(20.0%)'} | ${'bar4'}
+    ${5}  | ${AnalysisPage.Social}  | ${true}  | ${false} | ${'£0.10'} | ${'(33.3%)'} | ${'bar5'}
   `('for the "$name" test case', ({ index, name, visible, open, cost, percent, subItem }) => {
     it('should render the name', () => {
       expect.assertions(1);
@@ -65,13 +81,13 @@ describe('<PageAnalysis /> / <ListTree />', () => {
     it('should render the cost', () => {
       expect.assertions(1);
       const { getAllByText } = getContainer();
-      expect(getAllByText(`£${cost}`).length).toBeGreaterThan(0);
+      expect(getAllByText(cost).length).toBeGreaterThan(0);
     });
 
     it('should render the percentage', () => {
       expect.assertions(1);
-      const { getByText } = getContainer();
-      expect(getByText(`(${percent}%)`)).toBeInTheDocument();
+      const { getAllByText } = getContainer();
+      expect(getAllByText(percent).length).toBeGreaterThan(0);
     });
 
     if (open) {

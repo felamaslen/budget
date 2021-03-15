@@ -35,7 +35,7 @@ export type RouteParams = {
 export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match, history }) => {
   const [
     query,
-    { cost, saved, description, startDate, endDate, timeline },
+    { cost, income, saved, description, startDate, endDate, timeline },
     loading,
   ] = useAnalysisData(match.params);
 
@@ -127,6 +127,7 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
       <Styled.Outer>
         {timeline && <Timeline data={timeline} />}
         <ListTree
+          income={income}
           cost={forest}
           treeVisible={treeVisible}
           toggleTreeItem={toggleTreeItem}

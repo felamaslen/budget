@@ -60,7 +60,7 @@ export type AnalysisResponse = {
   description: Scalars['String'];
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  saved: Scalars['Int'];
+  income: Scalars['Int'];
   timeline?: Maybe<Array<Array<Scalars['Int']>>>;
 };
 
@@ -1310,7 +1310,7 @@ export type AnalysisQuery = (
   { __typename?: 'Query' }
   & { analysis?: Maybe<(
     { __typename?: 'AnalysisResponse' }
-    & Pick<AnalysisResponse, 'description' | 'startDate' | 'endDate' | 'saved' | 'timeline'>
+    & Pick<AnalysisResponse, 'description' | 'startDate' | 'endDate' | 'income' | 'timeline'>
     & { cost: Array<(
       { __typename?: 'CategoryCostTree' }
       & Pick<CategoryCostTree, 'item'>
@@ -2216,7 +2216,7 @@ export const AnalysisDocument = gql`
     description
     startDate
     endDate
-    saved
+    income
     cost {
       item
       tree {

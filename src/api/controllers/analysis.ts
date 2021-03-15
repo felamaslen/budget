@@ -208,19 +208,12 @@ export async function getAnalysisData(
     })),
   }));
 
-  const totalCost = periodCostByCategory.reduce<number>(
-    (sum, result) => result.reduce<number>((resultSum, { cost }) => resultSum + cost, sum),
-    0,
-  );
-
-  const saved = Math.max(0, income - totalCost);
-
   const timeline = processTimelineData(timelineRows, period, condition);
 
   return {
     timeline,
     cost: categoryCostTree,
-    saved,
+    income,
     description,
     startDate: startTime,
     endDate: endTime,

@@ -133,15 +133,11 @@ export const getFundsCost = moize(
 
 export const getInvestmentsBetweenDates = moize(
   (left: Date, right: Date) =>
-    createSelector(getFundsRows, (rows) => {
-      const investments = rows.map<FundNative>(({ transactions, ...rest }) => ({
-        ...rest,
-        transactions: transactions.filter(({ units }) => units > 0),
-      }));
-      return (
-        getFundsCostToDate(right, investments) - getFundsCostToDate(subDays(left, 1), investments)
-      );
-    }),
+    createSelector(
+      getFundsRows,
+      (investments) =>
+        getFundsCostToDate(right, investments) - getFundsCostToDate(subDays(left, 1), investments),
+    ),
   { maxSize: 1 },
 );
 

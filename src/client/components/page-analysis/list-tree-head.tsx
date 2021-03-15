@@ -1,45 +1,46 @@
 import React from 'react';
 
 import * as Styled from './styles';
-import { formatCurrency } from '~client/modules/format';
+import { Props as SubTreeProps } from './sub-tree';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 
-type ListTreeHeadItem = {
-  itemCost: number;
-  pct: number;
+export type ListTreeHeadItem = Pick<SubTreeProps, 'name' | 'itemCost' | 'subTree'> & {
+  ratio: number;
   visible: boolean;
+  open: boolean;
 };
 
-type Props = {
+export type Props = {
+  income: number;
   items: ListTreeHeadItem[];
 };
 
-const getCost = (itemList: ListTreeHeadItem[]): string =>
-  formatCurrency(itemList.reduce((last, { itemCost }) => last + itemCost, 0));
+const getCost = (itemList: ListTreeHeadItem[]): number =>
+  itemList.reduce((last, { itemCost }) => last + itemCost, 0);
 
-const getPct = (itemList: ListTreeHeadItem[]): string =>
-  itemList.reduce((last, { pct }) => last + pct, 0).toFixed(1);
-
-const ListTreeHead: React.FC<Props> = ({ items }) => {
-  const itemsSelected = items.filter(({ visible }) => visible);
-
+const ListTreeHead: React.FC<Props> = ({ income, items }) => {
   const costTotal = getCost(items);
-  const pctTotal = getPct(items);
-
-  const costSelected = getCost(itemsSelected);
-  const pctSelected = getPct(itemsSelected);
 
   return (
     <Styled.TreeListHeadItem>
       <Styled.TreeListItemInner>
         <Styled.TreeIndicator />
-        <Styled.TreeTitle>{'Total:'}</Styled.TreeTitle>
+        <Styled.TreeTitle>Income:</Styled.TreeTitle>
         <Styled.TreeValue>
-          <div>{costTotal}</div>
-          <Styled.TreeListSelected>{costSelected}</Styled.TreeListSelected>
+          <div>{formatCurrency(income)}</div>
         </Styled.TreeValue>
         <Styled.TreeValue>
-          <div>{pctTotal}%</div>
-          <Styled.TreeListSelected>{pctSelected}%</Styled.TreeListSelected>
+          <div>(100%)</div>
+        </Styled.TreeValue>
+      </Styled.TreeListItemInner>
+      <Styled.TreeListItemInner>
+        <Styled.TreeIndicator />
+        <Styled.TreeTitle>Expenses:</Styled.TreeTitle>
+        <Styled.TreeValue>
+          <div>{formatCurrency(costTotal)}</div>
+        </Styled.TreeValue>
+        <Styled.TreeValue>
+          <div>({formatPercent(income ? costTotal / income : 0, { precision: 1 })})</div>
         </Styled.TreeValue>
       </Styled.TreeListItemInner>
     </Styled.TreeListHeadItem>

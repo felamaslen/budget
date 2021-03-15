@@ -3,7 +3,7 @@ import { getForest, getBlocks, getDeepBlocks, getDeepForest, State } from './hoo
 import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '~client/constants/analysis';
 import { blockPacker } from '~client/modules/block-packer';
 import { colors } from '~client/styled/variables';
-import type { BlockItem } from '~client/types';
+import type { AnalysisSortedTree, BlockItem, MainBlockName } from '~client/types';
 import { AnalysisPage, PageListStandard } from '~client/types/enum';
 import type { CategoryCostTreeDeep } from '~client/types/gql';
 
@@ -26,6 +26,7 @@ describe('Analysis hooks', () => {
       },
     ],
     saved: 67123,
+    income: 2003898,
     timeline: [[1, 2, 3]],
   };
 
@@ -34,15 +35,17 @@ describe('Analysis hooks', () => {
   describe(getForest.name, () => {
     it('should return the cost data, ordered and mapped into subtrees', () => {
       expect.assertions(1);
-      const expectedResult = [
+      const expectedResult: AnalysisSortedTree<MainBlockName>[] = [
         {
-          name: PageListStandard.General,
+          name: (PageListStandard.General as string) as MainBlockName,
+          derived: false,
           color: colors[PageListStandard.General].main,
           subTree: [{ name: 'foo1_bar1', total: 1642283 }],
           total: 1642283,
         },
         {
-          name: PageListStandard.Food,
+          name: (PageListStandard.Food as string) as MainBlockName,
+          derived: false,
           color: colors[PageListStandard.Food].main,
           subTree: [
             { name: 'foo2_bar1', total: 156842 },
@@ -52,11 +55,13 @@ describe('Analysis hooks', () => {
         },
         {
           name: 'saved',
+          derived: true,
           color: colors.blockColor.saved,
           total: state.saved,
         },
         {
           name: 'invested',
+          derived: true,
           color: colors.overview.balanceStocks,
           total: invested,
         },
@@ -414,9 +419,10 @@ describe('Analysis hooks', () => {
 
     const forestDeep = getDeepForest(costDeep);
 
-    const forestDeepProcessed = [
+    const forestDeepProcessed: AnalysisSortedTree<MainBlockName>[] = [
       {
-        name: 'Category 1',
+        name: 'Category 1' as MainBlockName,
+        derived: false,
         total: 100 + 130 + 93,
         color: colors.blockIndex[0],
         subTree: [
@@ -426,7 +432,8 @@ describe('Analysis hooks', () => {
         ],
       },
       {
-        name: 'Category 2',
+        name: 'Category 2' as MainBlockName,
+        derived: false,
         total: 30 + 992,
         color: colors.blockIndex[1],
         subTree: [

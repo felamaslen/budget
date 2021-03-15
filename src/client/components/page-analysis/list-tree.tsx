@@ -1,24 +1,20 @@
 import React, { useCallback } from 'react';
 
-import ListTreeHead from './list-tree-head';
+import ListTreeHead, { ListTreeHeadItem } from './list-tree-head';
 import * as Styled from './styles';
 import { SubTree, Props as SubTreeProps } from './sub-tree';
-import { formatCurrency } from '~client/modules/format';
+import { formatCurrency, formatPercent } from '~client/modules/format';
 import type { AnalysisSortedTree, AnalysisTreeVisible, MainBlockName } from '~client/types';
 
 type PropsItem = {
-  item: Pick<SubTreeProps, 'name' | 'itemCost' | 'subTree'> & {
-    pct: number;
-    visible: boolean;
-    open: boolean;
-  };
+  item: ListTreeHeadItem;
   onHover: SubTreeProps['onHover'];
   onToggle: (name: MainBlockName) => void;
   onToggleExpand: (name: MainBlockName) => void;
 };
 
 const ListTreeItem: React.FC<PropsItem> = ({
-  item: { name, itemCost, subTree, pct, visible, open },
+  item: { name, itemCost, subTree, ratio, visible, open },
   onHover,
   onToggle,
   onToggleExpand,
@@ -50,11 +46,7 @@ const ListTreeItem: React.FC<PropsItem> = ({
         <input type="checkbox" defaultChecked={visible} onClick={onToggleCallback} />
         <Styled.TreeTitle>{name}</Styled.TreeTitle>
         <Styled.TreeValue>{formatCurrency(itemCost)}</Styled.TreeValue>
-        <Styled.TreeValue>
-          {' ('}
-          {pct.toFixed(1)}
-          {'%)'}
-        </Styled.TreeValue>
+        <Styled.TreeValue>({formatPercent(ratio, { precision: 1 })})</Styled.TreeValue>
       </Styled.TreeMain>
       <SubTree name={name} itemCost={itemCost} subTree={subTree} open={open} onHover={onHover} />
     </Styled.TreeListItem>
@@ -76,6 +68,7 @@ const useToggle = (onToggle: Toggler): ((name: MainBlockName) => void) =>
   );
 
 export type Props = {
+  income: number;
   cost: AnalysisSortedTree<MainBlockName>[];
   treeVisible: AnalysisTreeVisible;
   treeOpen: AnalysisTreeVisible;
@@ -85,6 +78,7 @@ export type Props = {
 };
 
 const ListTree: React.FC<Props> = ({
+  income,
   cost,
   treeVisible,
   treeOpen,
@@ -92,13 +86,16 @@ const ListTree: React.FC<Props> = ({
   toggleTreeItem,
   setTreeOpen,
 }) => {
-  const costTotal = cost.reduce((sum, { total }) => sum + total, 0);
+  const nonDerivedTree = cost.filter((tree) => !tree.derived);
 
-  const costPct = cost.map(({ name, total, subTree }) => ({
+  const costTotal = nonDerivedTree.reduce((sum, { total }) => sum + total, 0);
+
+  const costPct = cost.map(({ name, derived, total, subTree }) => ({
     name,
+    derived,
     itemCost: total,
     subTree,
-    pct: 100 * (costTotal === 0 ? 0 : total / costTotal),
+    ratio: costTotal === 0 ? 0 : total / income,
     visible: !(treeVisible[name] === false),
     open: Boolean(treeOpen[name]),
   }));
@@ -108,7 +105,7 @@ const ListTree: React.FC<Props> = ({
   return (
     <Styled.Tree>
       <Styled.TreeList>
-        <ListTreeHead items={costPct} />
+        <ListTreeHead income={income} items={costPct.filter(({ derived }) => !derived)} />
         {costPct.map((item) => (
           <ListTreeItem
             key={item.name}

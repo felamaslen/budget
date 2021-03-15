@@ -6,7 +6,7 @@ export const Analysis = gql`
       description
       startDate
       endDate
-      saved
+      income
       cost {
         item
         tree {

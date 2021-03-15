@@ -40,7 +40,7 @@ export const analysisSchema = gql`
     description: String!
     startDate: Date!
     endDate: Date!
-    saved: Int!
+    income: Int!
     timeline: [[Int!]!]
   }
 

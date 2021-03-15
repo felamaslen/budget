@@ -346,7 +346,7 @@
             "deprecationReason": null
           },
           {
-            "name": "saved",
+            "name": "income",
             "description": null,
             "args": [],
             "type": {
