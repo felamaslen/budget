@@ -432,39 +432,9 @@ describe('Funds selectors', () => {
   describe('getCashToInvest', () => {
     const today = new Date('2018-04-07T16:32:10+0100');
 
-    it('should get the difference between net worth ISA value and start-of-month stocks value', () => {
+    it('should get the difference between net worth ISA value and current stocks value', () => {
       expect.assertions(1);
-      expect(getCashToInvest(today)(state)).toMatchInlineSnapshot(`661996.8`);
-    });
-
-    describe('if the stock value has deviated in the current month', () => {
-      const stateWithDeviation: State = {
-        ...state,
-        [PageNonStandard.Funds]: {
-          ...state[PageNonStandard.Funds],
-          startTime: state[PageNonStandard.Funds].startTime,
-          cacheTimes: [
-            ...state[PageNonStandard.Funds].cacheTimes,
-            getUnixTime(new Date('2018-04-03')) - state[PageNonStandard.Funds].startTime,
-          ],
-          prices: {
-            10: [
-              {
-                startIndex: state[PageNonStandard.Funds].prices[10]?.[0]?.startIndex ?? 0,
-                values: [...(state[PageNonStandard.Funds].prices[10]?.[0]?.values ?? []), 400],
-              },
-            ],
-          },
-        },
-      };
-
-      it('should use the value of the fund at the start of the month, instead of the latest value', () => {
-        expect.assertions(1);
-
-        const cashToInvest = getCashToInvest(today)(stateWithDeviation);
-
-        expect(cashToInvest).toBe(661996.8);
-      });
+      expect(getCashToInvest(today)(state)).toMatchInlineSnapshot(`1061095`);
     });
   });
 

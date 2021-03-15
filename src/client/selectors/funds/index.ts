@@ -162,10 +162,10 @@ export const getCashToInvest = moize(
     createSelector(
       getLatestNetWorthAggregate(today),
       getCashInBank(today),
-      getStockValue(startOfMonth(today)),
+      getStockValue(today),
       (netWorth, cashInBank, stockValue): number => {
         const stocksIncludingCash = netWorth?.[Aggregate.stocks] ?? 0;
-        return Math.max(0, cashInBank + stocksIncludingCash - stockValue);
+        return Math.max(0, cashInBank + Math.max(0, stocksIncludingCash - stockValue));
       },
     ),
   { maxSize: 1 },
