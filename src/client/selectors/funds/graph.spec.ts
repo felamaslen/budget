@@ -1,14 +1,14 @@
 import { getUnixTime } from 'date-fns';
 
 import { getFundItems, getFundLines } from './graph';
-import { Mode, fundPeriods, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
 import { abbreviateFundName } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
 import { testState } from '~client/test-data';
 import type { FundItem } from '~client/types';
-import { PageNonStandard } from '~client/types/enum';
+import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
 describe('Fund selectors / graph', () => {
   const today = new Date('2020-04-20');
@@ -18,7 +18,7 @@ describe('Fund selectors / graph', () => {
       ...testState.api,
       appConfig: {
         ...testState.api.appConfig,
-        historyOptions: fundPeriods.year1.query,
+        historyOptions: { period: FundPeriod.Year, length: 1 },
       },
     },
     funds: {

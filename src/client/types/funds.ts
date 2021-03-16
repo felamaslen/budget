@@ -55,11 +55,6 @@ export type CachedValue = {
 
 export type RowPrices = Data[] | null;
 
-export type PeriodOption = {
-  name: string;
-  query: HistoryOptions;
-};
-
 export type HistoryOptions = {
   period: FundPeriod;
   length: number;

@@ -1,11 +1,12 @@
 import React, { Dispatch, SetStateAction, useCallback, useMemo } from 'react';
 
 import * as Styled from './styles';
-import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
-import { fundPeriods, GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
-import { useCTA } from '~client/hooks';
+import { FormFieldRange, FormFieldSelect, SelectOptions } from '~client/components/form-field';
+import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
+import { useCTA, useDebouncedState, useUpdateEffect } from '~client/hooks';
 import { abbreviateFundName } from '~client/modules/finance';
 import type { Id, FundItem, HistoryOptions } from '~client/types';
+import { FundPeriod } from '~client/types/gql';
 
 export type ToggleList = Record<string, boolean | null>;
 
@@ -69,12 +70,15 @@ const Item: React.FC<ItemProps> = ({
   );
 };
 
-const periodSelectOptions: SelectOptions<HistoryOptions> = Object.values(fundPeriods).map(
-  ({ name, query }) => ({
-    internal: query,
-    external: name,
-  }),
-);
+const periodSelectOptions: SelectOptions<FundPeriod> = [
+  { internal: FundPeriod.Year, external: 'Year' },
+  { internal: FundPeriod.Month, external: 'Month' },
+];
+
+type TempQueryState = {
+  lengths: Record<FundPeriod, number>;
+  denominator: FundPeriod;
+};
 
 export const AfterCanvas: React.FC<Props> = ({
   historyOptions,
@@ -93,13 +97,58 @@ export const AfterCanvas: React.FC<Props> = ({
     [modeList],
   );
 
+  const [tempQuery, debouncedQuery, setTempQuery] = useDebouncedState<TempQueryState>(
+    {
+      lengths: {
+        [FundPeriod.Year]: 1,
+        [FundPeriod.Month]: 6,
+        [historyOptions.period]: historyOptions.length,
+      },
+      denominator: historyOptions.period,
+    },
+    100,
+  );
+
+  const changePeriodDenominator = useCallback(
+    (denominator: FundPeriod) => setTempQuery((last) => ({ ...last, denominator })),
+    [setTempQuery],
+  );
+
+  const changePeriodLength = useCallback(
+    (length: number) =>
+      setTempQuery((last) => ({
+        ...last,
+        lengths: { ...last.lengths, [last.denominator]: length },
+      })),
+    [setTempQuery],
+  );
+
+  useUpdateEffect(() => {
+    changePeriod({
+      period: debouncedQuery.denominator,
+      length: debouncedQuery.lengths[debouncedQuery.denominator],
+    });
+  }, [debouncedQuery, changePeriod]);
+
+  const maxLength = tempQuery.denominator === FundPeriod.Year ? 10 : 18;
+
   return (
     <>
       <Styled.FundModeSwitch>
+        <Styled.PeriodLengthIndicator>
+          {tempQuery.lengths[tempQuery.denominator]}
+        </Styled.PeriodLengthIndicator>
         <FormFieldSelect
           options={periodSelectOptions}
-          value={historyOptions}
-          onChange={changePeriod}
+          value={tempQuery.denominator}
+          onChange={changePeriodDenominator}
+        />
+        <FormFieldRange
+          value={tempQuery.lengths[tempQuery.denominator]}
+          onChange={changePeriodLength}
+          min={0}
+          max={maxLength}
+          step={1}
         />
         <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
       </Styled.FundModeSwitch>

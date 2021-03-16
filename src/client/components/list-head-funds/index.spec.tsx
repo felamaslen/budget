@@ -4,16 +4,19 @@ import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
 
 import { ListHeadFunds, ListHeadFundsMobile, Props } from '.';
-import { fundPeriods } from '~client/constants';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { FundPeriod } from '~client/types/enum';
 
 describe('<ListHeadFunds />', () => {
   const props: Props = {
     totalCost: 400000,
     viewSoldFunds: false,
-    historyOptions: fundPeriods.year1.query,
+    historyOptions: {
+      period: FundPeriod.Year,
+      length: 1,
+    },
     annualisedFundReturns: 0.233,
     cachedValue: {
       ageText: '3 hours ago',

@@ -1,4 +1,4 @@
-import type { Padding, PageListCost, PeriodOption, HistoryOptions } from '~client/types';
+import type { Padding, PageListCost, HistoryOptions } from '~client/types';
 import { FundPeriod, PageListStandard } from '~client/types/enum';
 import type { QueryFundHistoryArgs } from '~client/types/gql';
 
@@ -45,25 +45,6 @@ export enum Mode {
   Price = 'Price',
   PriceNormalised = 'Price (normalised)',
 }
-
-export const fundPeriods: Record<string, PeriodOption> = {
-  year1: {
-    name: '1 year',
-    query: { period: FundPeriod.Year, length: 1 },
-  },
-  year5: {
-    name: '5 years',
-    query: { period: FundPeriod.Year, length: 5 },
-  },
-  month1: {
-    name: '1 month',
-    query: { period: FundPeriod.Month, length: 1 },
-  },
-  month3: {
-    name: '3 months',
-    query: { period: FundPeriod.Month, length: 3 },
-  },
-};
 
 export const isHistoryOptionsEqual = (a: QueryFundHistoryArgs, b: QueryFundHistoryArgs): boolean =>
   a.period === b.period && a.length === b.length;

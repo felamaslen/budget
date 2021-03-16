@@ -5,10 +5,9 @@ import numericHash from 'string-hash';
 import { getRowGains, getGainsForRow, getDayGain, getDayGainAbs, RowGains } from './gains';
 import { getFundsCache, PriceCache } from './helpers';
 
-import { fundPeriods } from '~client/constants';
 import { State } from '~client/reducers';
 import { testState, testRows, testPrices, testStartTime, testCacheTimes } from '~client/test-data';
-import { PageNonStandard } from '~client/types/enum';
+import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
 describe('Funds selectors / gains', () => {
   const testCache: PriceCache = {
@@ -23,7 +22,7 @@ describe('Funds selectors / gains', () => {
       ...testState.api,
       appConfig: {
         ...testState.api.appConfig,
-        historyOptions: fundPeriods.year1.query,
+        historyOptions: { period: FundPeriod.Year, length: 1 },
       },
     },
     [PageNonStandard.Funds]: {
@@ -463,7 +462,7 @@ describe('Funds selectors / gains', () => {
           ...testState.api,
           appConfig: {
             ...testState.api.appConfig,
-            historyOptions: fundPeriods.year5.query,
+            historyOptions: { period: FundPeriod.Year, length: 5 },
           },
         },
         [PageNonStandard.Funds]: {

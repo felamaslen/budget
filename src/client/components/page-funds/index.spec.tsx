@@ -12,14 +12,13 @@ import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { Funds } from '.';
-import { fundPeriods } from '~client/constants';
 import { generateFakeId } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { PriceCache } from '~client/selectors';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import type { FundNative as Fund } from '~client/types';
-import { PageNonStandard } from '~client/types/enum';
+import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
 describe('<PageFunds />', () => {
   const state: State = {
@@ -28,7 +27,7 @@ describe('<PageFunds />', () => {
       ...testState.api,
       appConfig: {
         ...testState.api.appConfig,
-        historyOptions: fundPeriods.month3.query,
+        historyOptions: { period: FundPeriod.Month, length: 3 },
       },
     },
     [PageNonStandard.Funds]: {
@@ -339,7 +338,7 @@ describe('<PageFunds />', () => {
         ...testState.api,
         appConfig: {
           ...testState.api.appConfig,
-          historyOptions: fundPeriods.month1.query,
+          historyOptions: { period: FundPeriod.Month, length: 3 },
         },
       },
       [PageNonStandard.Funds]: {

@@ -113,3 +113,9 @@ export const SidebarCheckbox = styled.span<{
 export const SidebarFund = styled.a`
   padding-left: 12px;
 `;
+
+export const PeriodLengthIndicator = styled.span`
+  font-size: ${rem(14)};
+  line-height: ${rem(18)};
+  padding: 0 ${rem(4)};
+`;

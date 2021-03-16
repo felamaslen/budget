@@ -1,15 +1,21 @@
-import { render, act, fireEvent } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { AfterCanvas, Props } from './after-canvas';
-import { fundPeriods, Mode } from '~client/constants/graph';
+
+import { Mode } from '~client/constants/graph';
+import type { HistoryOptions } from '~client/types';
+import { FundPeriod } from '~client/types/enum';
 
 describe('<AfterCanvas /> (funds graph)', () => {
   const changePeriod = jest.fn();
   const changeMode = jest.fn();
 
   const props: Props = {
-    historyOptions: fundPeriods.month1.query,
+    historyOptions: {
+      period: FundPeriod.Year,
+      length: 1,
+    },
     modeList: [Mode.Price, Mode.Value],
     mode: Mode.Price,
     changeMode,
@@ -21,33 +27,131 @@ describe('<AfterCanvas /> (funds graph)', () => {
     changePeriod,
   };
 
-  describe('Period list', () => {
-    it('should be rendered', () => {
-      expect.assertions(1);
+  describe('Changing resolution', () => {
+    it('should change the length', async () => {
+      expect.hasAssertions();
+
       const { getByDisplayValue } = render(<AfterCanvas {...props} />);
 
-      const periodSelector = getByDisplayValue('1 month') as HTMLSelectElement;
-      expect(periodSelector).toBeInTheDocument();
+      const inputLength = getByDisplayValue('1');
+
+      act(() => {
+        fireEvent.change(inputLength, { target: { value: '2' } });
+      });
+
+      await waitFor(() => {
+        expect(changePeriod).toHaveBeenCalledTimes(1);
+      });
+
+      expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
+        period: FundPeriod.Year,
+        length: 2,
+      });
     });
 
-    it.each`
-      historyOptions              | description
-      ${fundPeriods.year5.query}  | ${'5 years'}
-      ${fundPeriods.year1.query}  | ${'1 year'}
-      ${fundPeriods.month3.query} | ${'3 months'}
-    `('should fire an event for the "$description" period', ({ historyOptions, description }) => {
-      expect.assertions(1);
+    it('should change the period', async () => {
+      expect.hasAssertions();
+
       const { getByDisplayValue } = render(<AfterCanvas {...props} />);
-      const periodSelector = getByDisplayValue('1 month') as HTMLSelectElement;
+
+      const inputPeriod = getByDisplayValue('Year');
 
       act(() => {
-        fireEvent.change(periodSelector, { target: { value: description } });
-      });
-      act(() => {
-        fireEvent.blur(periodSelector);
+        fireEvent.change(inputPeriod, { target: { value: 'Month' } });
       });
 
-      expect(changePeriod).toHaveBeenCalledWith(historyOptions);
+      await waitFor(() => {
+        expect(changePeriod).toHaveBeenCalledTimes(1);
+      });
+
+      expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
+        period: FundPeriod.Month,
+        length: 6,
+      });
+    });
+
+    describe('when switching periods', () => {
+      it('should remember the last length for the given period', async () => {
+        expect.hasAssertions();
+
+        const { getByDisplayValue } = render(<AfterCanvas {...props} />);
+
+        const inputPeriod = getByDisplayValue('Year');
+        const inputLength = getByDisplayValue('1');
+
+        act(() => {
+          fireEvent.change(inputLength, { target: { value: '7' } });
+        });
+
+        await waitFor(() => {
+          expect(changePeriod).toHaveBeenCalledTimes(1);
+        });
+
+        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
+          period: FundPeriod.Year,
+          length: 7,
+        });
+
+        changePeriod.mockClear();
+
+        act(() => {
+          fireEvent.change(inputPeriod, { target: { value: 'Month' } });
+        });
+
+        await waitFor(() => {
+          expect(changePeriod).toHaveBeenCalledTimes(1);
+        });
+
+        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
+          period: FundPeriod.Month,
+          length: 6,
+        });
+
+        changePeriod.mockClear();
+
+        act(() => {
+          fireEvent.change(inputLength, { target: { value: '17' } });
+        });
+
+        await waitFor(() => {
+          expect(changePeriod).toHaveBeenCalledTimes(1);
+        });
+
+        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
+          period: FundPeriod.Month,
+          length: 17,
+        });
+
+        changePeriod.mockClear();
+
+        act(() => {
+          fireEvent.change(inputPeriod, { target: { value: 'Year' } });
+        });
+
+        await waitFor(() => {
+          expect(changePeriod).toHaveBeenCalledTimes(1);
+        });
+
+        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
+          period: FundPeriod.Year,
+          length: 7,
+        });
+
+        changePeriod.mockClear();
+
+        act(() => {
+          fireEvent.change(inputPeriod, { target: { value: 'Month' } });
+        });
+
+        await waitFor(() => {
+          expect(changePeriod).toHaveBeenCalledTimes(1);
+        });
+
+        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
+          period: FundPeriod.Month,
+          length: 17,
+        });
+      });
     });
   });
 
