@@ -257,7 +257,7 @@ function useClickDive(
         clearTimeout(fadeTimer.current);
         fadeTimer.current = window.setTimeout(() => {
           onDive(preview.name);
-        }, Styled.fadeTime);
+        }, Styled.fadeTime + 50);
       }, 0);
     }
     hadPreview.current = preview.open;
