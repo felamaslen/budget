@@ -9,21 +9,11 @@ import {
   startOfYear,
   addYears,
   endOfYear,
-  getDaysInMonth,
-  getYear,
-  getMonth,
-  getDate,
 } from 'date-fns';
-import merge from 'deepmerge';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import {
-  getIncome,
-  getPeriodCostForCategory,
-  getPeriodCostDeep,
-  getTimelineRows,
-} from '~api/queries';
+import { getPeriodCostForCategory, getPeriodCostDeep } from '~api/queries';
 import {
   isExtendedPage,
   AnalysisPage,
@@ -33,8 +23,6 @@ import {
   AnalysisResponse,
   CategoryCostTree,
   CategoryCostTreeDeep,
-  CategoryTimelineRows,
-  CostsByDate,
   GetPeriodCondition,
   PeriodCondition,
   PeriodCost,
@@ -89,7 +77,7 @@ export function getCategoryColumn(
   category: AnalysisPage,
   groupBy?: AnalysisGroupBy,
 ): AnalysisGroupColumn | null {
-  if (category === AnalysisPage.Bills) {
+  if ([AnalysisPage.Income, AnalysisPage.Bills].includes(category)) {
     return 'item';
   }
   if (groupBy === AnalysisGroupBy.Category) {
@@ -102,68 +90,6 @@ export function getCategoryColumn(
 
   if (groupBy === 'shop') {
     return 'shop';
-  }
-
-  return null;
-}
-
-export const getCostsByDate = (results: CategoryTimelineRows[]): CostsByDate =>
-  results.reduce<CostsByDate>(
-    (timeline, categoryRows, categoryIndex) =>
-      categoryRows.reduce<CostsByDate>((timelineByDate, { date: dateString, cost }) => {
-        const date = new Date(dateString);
-
-        const year = getYear(date);
-        const month = getMonth(date);
-        const day = getDate(date);
-
-        const preceding = timelineByDate[year]?.[month]?.[day] ? [] : Array(categoryIndex).fill(0);
-
-        return merge(timelineByDate, {
-          [year]: {
-            [month]: {
-              [day]: [...preceding, cost],
-            },
-          },
-        });
-      }, timeline),
-    {},
-  );
-
-type Timeline = Exclude<AnalysisResponse['timeline'], null | undefined>;
-
-export function processTimelineData(
-  timelineRows: CategoryTimelineRows[],
-  period: AnalysisPeriod,
-  { startTime }: Pick<PeriodCondition, 'startTime'>,
-): Timeline | null {
-  const costsByDate = getCostsByDate(timelineRows);
-
-  const year = getYear(startTime);
-
-  if (period === 'year') {
-    return Array(12)
-      .fill(0)
-      .reduce<Timeline>((items, _, index) => {
-        const date = addMonths(startTime, index);
-        const month = getMonth(date);
-        const daysInMonth = getDaysInMonth(date);
-
-        return items.concat(
-          Array(daysInMonth)
-            .fill(0)
-            .map<number[]>((__, dayIndex) => costsByDate[year]?.[month]?.[dayIndex + 1] ?? []),
-        );
-      }, []);
-  }
-
-  if (period === 'month') {
-    const month = getMonth(startTime);
-    const daysInMonth = getDaysInMonth(startTime);
-
-    return Array(daysInMonth)
-      .fill(0)
-      .map<number[]>((_, dayIndex) => costsByDate[year]?.[month]?.[dayIndex + 1] ?? []);
   }
 
   return null;
@@ -192,14 +118,6 @@ export async function getAnalysisData(
     ),
   );
 
-  const [income, timelineRows] = await Promise.all<number, CategoryTimelineRows[]>([
-    getIncome(db, uid, startTime, endTime),
-
-    Promise.all<CategoryTimelineRows>(
-      CATEGORIES.map(async (category) => getTimelineRows(db, uid, startTime, endTime, category)),
-    ),
-  ]);
-
   const categoryCostTree = periodCostByCategory.map<CategoryCostTree>((rows, index) => ({
     item: CATEGORIES[index],
     tree: rows.map((row) => ({
@@ -208,12 +126,8 @@ export async function getAnalysisData(
     })),
   }));
 
-  const timeline = processTimelineData(timelineRows, period, condition);
-
   return {
-    timeline,
     cost: categoryCostTree,
-    income,
     description,
     startDate: startTime,
     endDate: endTime,

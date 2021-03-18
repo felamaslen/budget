@@ -15,7 +15,6 @@ import {
 } from './hooks';
 import ListTree from './list-tree';
 import * as Styled from './styles';
-import Timeline from './timeline';
 import Upper from './upper';
 
 import { BlockName, BlockPacker } from '~client/components/block-packer';
@@ -35,7 +34,7 @@ export type RouteParams = {
 export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match, history }) => {
   const [
     query,
-    { cost, income, saved, description, startDate, endDate, timeline },
+    { cost, income, saved, description, startDate, endDate },
     loading,
   ] = useAnalysisData(match.params);
 
@@ -125,7 +124,6 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
         onRequest={onRequest}
       />
       <Styled.Outer>
-        {timeline && <Timeline data={timeline} />}
         <ListTree
           income={income}
           cost={forest}

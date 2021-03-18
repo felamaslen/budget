@@ -41,8 +41,6 @@ describe('Analysis resolvers', () => {
             sum
           }
         }
-        income
-        timeline
       }
     }
   `;
@@ -67,6 +65,12 @@ describe('Analysis resolvers', () => {
       expect(res).toStrictEqual(
         expect.objectContaining({
           cost: expect.arrayContaining([
+            expect.objectContaining({
+              item: 'income',
+              tree: expect.arrayContaining([
+                expect.objectContaining({ category: 'Salary', sum: 433201 }),
+              ]),
+            }),
             expect.objectContaining({
               item: 'bills',
               tree: expect.arrayContaining([
@@ -121,39 +125,6 @@ describe('Analysis resolvers', () => {
       );
     });
 
-    it('should return an income number', async () => {
-      expect.assertions(1);
-      const res = await setup();
-      expect(res?.income).toMatchInlineSnapshot(`433201`);
-    });
-
-    it('should return timeline data', async () => {
-      expect.assertions(3);
-      const res = await setup();
-      expect(res?.timeline).toBeInstanceOf(Array);
-      expect(res?.timeline).toHaveLength(365);
-      expect(res?.timeline?.slice(80, 90)).toMatchInlineSnapshot(`
-        Array [
-          Array [],
-          Array [],
-          Array [],
-          Array [
-            76402,
-            113401,
-            11143,
-            35014,
-            61923,
-          ],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-        ]
-      `);
-    });
-
     describe('on leap years', () => {
       const setupLeapYear = moize.promise(
         async (): Promise<Maybe<AnalysisResponse>> => {
@@ -171,12 +142,16 @@ describe('Analysis resolvers', () => {
       );
 
       it('should return data from the given year', async () => {
-        expect.assertions(3);
+        expect.assertions(2);
         const res = await setupLeapYear();
         expect(res?.description).toMatchInlineSnapshot(`"2016"`);
-        expect(res?.income).toMatchInlineSnapshot(`0`);
         expect(res?.cost).toMatchInlineSnapshot(`
           Array [
+            Object {
+              "__typename": "CategoryCostTree",
+              "item": "income",
+              "tree": Array [],
+            },
             Object {
               "__typename": "CategoryCostTree",
               "item": "bills",
@@ -204,12 +179,6 @@ describe('Analysis resolvers', () => {
             },
           ]
         `);
-      });
-
-      it('should return 366 items in the timeline', async () => {
-        expect.assertions(1);
-        const res = await setupLeapYear();
-        expect(res?.timeline).toHaveLength(366);
       });
     });
 
@@ -275,6 +244,12 @@ describe('Analysis resolvers', () => {
       expect(res?.cost).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({
+            item: 'income',
+            tree: expect.arrayContaining([
+              expect.objectContaining({ category: 'Salary', sum: 433201 }),
+            ]),
+          }),
+          expect.objectContaining({
             item: 'bills',
             tree: expect.arrayContaining([
               expect.objectContaining({ category: 'Rent', sum: 72500 }),
@@ -328,60 +303,6 @@ describe('Analysis resolvers', () => {
         }),
       );
     });
-
-    it('should return an income number for the month', async () => {
-      expect.assertions(1);
-      const res = await setup();
-      expect(res?.income).toMatchInlineSnapshot(`433201`);
-    });
-
-    it('should return timeline data', async () => {
-      expect.assertions(3);
-      const res = await setup();
-      expect(res?.timeline).toBeInstanceOf(Array);
-      expect(res?.timeline).toHaveLength(31); // 31 days in March
-      expect(res?.timeline).toMatchInlineSnapshot(`
-        Array [
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [
-            76402,
-            113401,
-            11143,
-            35014,
-            61923,
-          ],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-          Array [],
-        ]
-      `);
-    });
   });
 
   describe('Grouping by week / category', () => {
@@ -403,6 +324,11 @@ describe('Analysis resolvers', () => {
       const res = await setup();
       expect(res?.cost).toMatchInlineSnapshot(`
         Array [
+          Object {
+            "__typename": "CategoryCostTree",
+            "item": "income",
+            "tree": Array [],
+          },
           Object {
             "__typename": "CategoryCostTree",
             "item": "bills",
@@ -447,18 +373,6 @@ describe('Analysis resolvers', () => {
           endDate: '2018-04-22',
         }),
       );
-    });
-
-    it('should return an income number for the week', async () => {
-      expect.assertions(1);
-      const res = await setup();
-      expect(res?.income).toMatchInlineSnapshot(`0`);
-    });
-
-    it('should not return timeline data', async () => {
-      expect.assertions(1);
-      const res = await setup();
-      expect(res?.timeline).toBeNull();
     });
   });
 

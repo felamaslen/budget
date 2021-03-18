@@ -148,7 +148,7 @@ export const colors = {
     fundDown: rgb(255, 44, 44),
   },
   income: {
-    main: rgb(216, 67, 21),
+    main: rgb(67, 216, 21),
   },
   bills: {
     main: rgb(183, 28, 28),

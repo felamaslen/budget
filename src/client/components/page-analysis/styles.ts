@@ -85,6 +85,7 @@ export const Upper = styled.div`
 `;
 
 const indicatorColors: Record<MainBlockName, string> = {
+  income: colors.income.main,
   bills: colors.bills.main,
   general: colors.general.main,
   food: colors.food.main,
@@ -94,41 +95,52 @@ const indicatorColors: Record<MainBlockName, string> = {
   invested: colors.overview.balanceStocks,
 };
 
-type TreeProps = { open?: boolean };
+export type TreeProps = { open?: boolean; bold?: boolean; hasSubTree?: boolean; indent?: number };
 
-export const TreeMain = styled.div<TreeProps>(
-  ({ open }) => css`
-    &::before {
-      position: absolute;
-      width: 0;
-      height: 0;
-      border-style: solid;
-      border-width: 5px 0 5px 8.7px;
-      border-color: transparent;
-      border-left-color: black;
+export const TreeMain = styled.div<Pick<TreeProps, 'open' | 'hasSubTree'>>(
+  ({ open, hasSubTree = true }) =>
+    hasSubTree
+      ? css`
+          &::before {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: ${rem(5)} 0 ${rem(5)} ${rem(9)};
+            border-color: transparent;
+            border-left-color: black;
 
-      ${!!open &&
-      css`
-        border-left-color: transparent;
-        border-top-color: black;
-        border-width: 8.7px 5px 0 5px;
-      `}
-    }
-  `,
+            ${!!open &&
+            css`
+              border-left-color: transparent;
+              border-top-color: black;
+              border-width: 8.7px 5px 0 5px;
+            `}
+          }
+        `
+      : css``,
 );
 
 export const TreeIndicator = styled.span<{ name?: MainBlockName }>`
   display: flex;
-  flex-basis: 16px !important;
-  width: 16px;
-  height: 16px;
-  margin-left: 14px;
+  flex-basis: ${rem(16)} !important;
+  width: ${rem(16)};
+  height: ${rem(16)};
+  margin-left: ${rem(14)};
   background: ${({ name }): string => (name ? indicatorColors[name] : 'white')};
+`;
+
+export const TreeToggle = styled.span`
+  flex-basis: ${rem(16)};
 `;
 
 export const TreeTitle = styled.span`
   flex-grow: 2;
   text-transform: capitalize;
+`;
+
+export const TreeTitleFilled = styled(TreeTitle)`
+  padding-left: ${rem(14 + 16 + 20)};
 `;
 
 export const TreeValue = styled.span`
@@ -139,11 +151,12 @@ export const TreeValue = styled.span`
 export const TreeListItemInner = styled.div``;
 
 export const TreeListItem = styled.li<TreeProps>(
-  ({ open }) => css`
+  ({ bold, indent = 0 }) => css`
     display: flex;
     flex-flow: column;
-
-    line-height: 1.5em;
+    font-size: ${rem(16 - indent * 2)};
+    font-weight: ${bold ? 'bold' : 'normal'};
+    line-height: ${rem(24)};
     white-space: nowrap;
     cursor: pointer;
     span {
@@ -151,11 +164,9 @@ export const TreeListItem = styled.li<TreeProps>(
       flex-basis: 0;
     }
 
-    ${!!open &&
-    css`
-      & > ${TreeMain}::before {
-      }
-    `}
+    ${TreeTitle}, ${TreeTitleFilled} {
+      margin-left: ${rem(indent * 8)};
+    }
   `,
 );
 
@@ -170,7 +181,6 @@ export const TreeListSelected = styled.div`
 
 export const TreeListHeadItem = styled(TreeListItem)`
   font-weight: bold;
-  height: 3em;
 
   ${TreeListItemInner} {
     display: flex;
@@ -246,23 +256,10 @@ export const Outer = styled.div`
 
   ${breakpoint(breakpoints.tablet)} {
     display: grid;
-    grid-template-rows: 1em 500px auto;
-    grid-template-columns: auto 500px;
+    grid-template-rows: ${rem(500)} auto;
+    grid-template-columns: auto ${rem(500)};
     flex: 1 1 0;
     min-height: 0;
-  }
-`;
-
-export const Timeline = styled.div`
-  width: 100%;
-  display: flex;
-  flex: 0 0 1em;
-  overflow: hidden;
-
-  ${breakpoint(breakpoints.tablet)} {
-    display: flex;
-    grid-row: 1;
-    grid-column: span 2;
   }
 `;
 
@@ -286,7 +283,7 @@ export const Page = styled(PageBase)<{ page: PageType }>`
 
     ${Tree} {
       display: flex;
-      grid-row: 2 / span 2;
+      grid-row: 1 / span 2;
       grid-column: 1;
       flex-flow: column;
       padding: 0;

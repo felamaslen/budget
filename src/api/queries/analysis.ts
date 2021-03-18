@@ -4,12 +4,10 @@ import { sql, DatabaseTransactionConnectionType, ListSqlTokenType } from 'slonik
 import config from '~api/config';
 import {
   AnalysisPage,
-  CategoryTimelineRows,
   PageListStandard,
-  PeriodCost,
   PeriodCondition,
+  PeriodCost,
   PeriodCostDeep,
-  TimelineRow,
 } from '~api/types';
 
 const getAnalysisConditions = (
@@ -30,21 +28,6 @@ const getAnalysisConditions = (
     ],
     sql` AND `,
   );
-
-export async function getIncome(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  startTime: Date,
-  endTime: Date,
-): Promise<number> {
-  const result = await db.query<{ cost: number | null }>(sql`
-  SELECT SUM(cost) AS cost
-  FROM income
-  WHERE ${getAnalysisConditions(uid, startTime, endTime, PageListStandard.Income)}
-  `);
-
-  return result.rows[0].cost ?? 0;
-}
 
 const periodCostColumns = (categoryColumn: string | null): ListSqlTokenType =>
   sql.join(
@@ -87,22 +70,6 @@ export async function getPeriodCostDeep(
   WHERE ${getAnalysisConditions(uid, startTime, endTime, category)}
   GROUP BY item, ${sql.identifier(['itemCol'])}
   ORDER BY ${sql.identifier(['itemCol'])}
-  `);
-  return result.rows;
-}
-
-export async function getTimelineRows(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  startTime: Date,
-  endTime: Date,
-  category: AnalysisPage,
-): Promise<CategoryTimelineRows> {
-  const result = await db.query<TimelineRow>(sql`
-  SELECT date, SUM(cost) AS cost
-  FROM ${sql.identifier([category])}
-  WHERE ${getAnalysisConditions(uid, startTime, endTime, category)}
-  GROUP BY date
   `);
   return result.rows;
 }

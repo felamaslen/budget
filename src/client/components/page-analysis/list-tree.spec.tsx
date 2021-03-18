@@ -54,11 +54,11 @@ describe('<PageAnalysis /> / <ListTree />', () => {
 
   describe.each`
     index | name                    | visible  | open     | cost       | percent      | subItem
-    ${1}  | ${AnalysisPage.Food}    | ${true}  | ${true}  | ${'£0.01'} | ${'(3.3%)'}  | ${'bar1'}
-    ${2}  | ${AnalysisPage.General} | ${false} | ${false} | ${'£0.04'} | ${'(13.3%)'} | ${'bar2'}
-    ${3}  | ${AnalysisPage.Bills}   | ${true}  | ${false} | ${'£0.03'} | ${'(10.0%)'} | ${'bar3'}
-    ${4}  | ${AnalysisPage.Holiday} | ${true}  | ${true}  | ${'£0.06'} | ${'(20.0%)'} | ${'bar4'}
-    ${5}  | ${AnalysisPage.Social}  | ${true}  | ${false} | ${'£0.10'} | ${'(33.3%)'} | ${'bar5'}
+    ${1}  | ${AnalysisPage.Food}    | ${true}  | ${true}  | ${'£0.01'} | ${'(4.2%)'}  | ${'bar1'}
+    ${2}  | ${AnalysisPage.General} | ${false} | ${false} | ${'£0.04'} | ${'(16.7%)'} | ${'bar2'}
+    ${3}  | ${AnalysisPage.Bills}   | ${true}  | ${false} | ${'£0.03'} | ${'(12.5%)'} | ${'bar3'}
+    ${4}  | ${AnalysisPage.Holiday} | ${true}  | ${true}  | ${'£0.06'} | ${'(25.0%)'} | ${'bar4'}
+    ${5}  | ${AnalysisPage.Social}  | ${true}  | ${false} | ${'£0.10'} | ${'(41.7%)'} | ${'bar5'}
   `('for the "$name" test case', ({ index, name, visible, open, cost, percent, subItem }) => {
     it('should render the name', () => {
       expect.assertions(1);
@@ -73,7 +73,7 @@ describe('<PageAnalysis /> / <ListTree />', () => {
       const ul = div.childNodes[0];
       const child = ul.childNodes[index];
       const main = child.childNodes[0] as HTMLDivElement;
-      const input = main.childNodes[1] as HTMLInputElement;
+      const input = main.childNodes[1].childNodes[0] as HTMLInputElement;
       expect(input).toBeInTheDocument();
       expect(input.checked).toBe(visible);
     });
@@ -159,7 +159,7 @@ describe('<PageAnalysis /> / <ListTree />', () => {
       const ul = div.childNodes[0];
       const child = ul.childNodes[index];
       const main = child.childNodes[0];
-      const input = main.childNodes[1] as HTMLInputElement;
+      const input = main.childNodes[1].childNodes[0] as HTMLInputElement;
 
       act(() => {
         fireEvent.click(input);

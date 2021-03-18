@@ -93,12 +93,15 @@ export function getBlocks(
     height,
     forest
       .filter(({ name }) => treeVisible[name] !== false && name !== 'invested')
+      .filter(({ name }) => !(treeVisible[AnalysisPage.Income] && name === 'saved'))
       .map((block) => ({
         name: block.name,
         total: block.total,
         color: getTreeColor(block.name),
         subTree: block.subTree,
-        hasBreakdown: isStandardListPage(block.name) && block.name !== PageListStandard.Bills,
+        hasBreakdown:
+          isStandardListPage(block.name) &&
+          ![PageListStandard.Income, PageListStandard.Bills].includes(block.name),
       })),
   );
 }
@@ -132,7 +135,7 @@ const validateTreeVisible: PersistentStateValidator<AnalysisTreeVisible> = (
     ([key, keyValue]) => typeof key === 'string' && typeof keyValue === 'boolean',
   );
 
-const defaultTreeVisible: AnalysisTreeVisible = { [AnalysisPage.Bills]: false };
+const defaultTreeVisible: AnalysisTreeVisible = { [AnalysisPage.Income]: false };
 
 const keyTreeVisible = 'analysis_treeVisible';
 
@@ -164,11 +167,11 @@ const defaultQuery: Query = {
 };
 
 export type State = NativeDate<NonNullable<AnalysisQuery['analysis']>, 'startDate' | 'endDate'> & {
+  income: number;
   saved: number;
 };
 
 const defaultState: State = {
-  timeline: [],
   cost: [],
   income: 0,
   saved: 0,
@@ -201,7 +204,7 @@ export function useAnalysisData(params: unknown): [Query, State, boolean] {
     requestPolicy: 'cache-and-network',
   });
 
-  const stateWithoutSaved: Omit<State, 'saved'> = data?.analysis
+  const stateWithoutSaved: Omit<State, 'income' | 'saved'> = data?.analysis
     ? {
         ...data.analysis,
         startDate: startOfDay(new Date(data.analysis.startDate)),
@@ -210,14 +213,23 @@ export function useAnalysisData(params: unknown): [Query, State, boolean] {
     : defaultState;
 
   const totalCost = stateWithoutSaved.cost.reduce<number>(
-    (prev, next) => next.tree.reduce<number>((last, { sum }) => last + sum, prev),
+    (prev, next) =>
+      next.item === AnalysisPage.Income
+        ? prev
+        : next.tree.reduce<number>((last, { sum }) => last + sum, prev),
     0,
   );
 
-  const saved = Math.max(0, stateWithoutSaved.income - totalCost);
+  const income =
+    stateWithoutSaved.cost
+      .find(({ item }) => item === AnalysisPage.Income)
+      ?.tree.reduce<number>((last, { sum }) => last + sum, 0) ?? 0;
+
+  const saved = Math.max(0, income - totalCost);
 
   const state: State = {
     ...stateWithoutSaved,
+    income,
     saved,
   };
 

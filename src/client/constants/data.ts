@@ -50,6 +50,7 @@ const PAGES_LIST_STANDARD = Object.values(PageListStandard);
 const PAGES_LIST_EXTENDED = Object.values(PageListExtended);
 const PAGES_SEARCH = Object.values(SearchPage);
 export const PAGES_ANALYSIS = Object.values(AnalysisPage);
+export const PAGES_ANALYSIS_COST = PAGES_ANALYSIS.filter((page) => page !== AnalysisPage.Income);
 
 export const PAGES_LIST: PageList[] = [PageNonStandard.Funds, ...PAGES_LIST_STANDARD];
 

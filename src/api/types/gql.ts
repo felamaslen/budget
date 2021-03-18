@@ -18,6 +18,7 @@ export type Scalars = {
 };
 
 export enum AnalysisPage {
+  Income = 'income',
   Bills = 'bills',
   Food = 'food',
   General = 'general',
@@ -56,8 +57,6 @@ export type AnalysisResponse = {
   description: Scalars['String'];
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  income: Scalars['Int'];
-  timeline?: Maybe<Array<Array<Scalars['Int']>>>;
 };
 
 export type Query = {
@@ -1198,8 +1197,6 @@ export type AnalysisResponseResolvers<ContextType = Context, ParentType extends 
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  income?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  timeline?: Resolver<Maybe<Array<Array<ResolversTypes['Int']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

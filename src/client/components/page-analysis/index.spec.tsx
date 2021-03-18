@@ -38,7 +38,6 @@ describe('<PageAnalysis />', () => {
                     ],
                   },
                 ],
-                timeline: [[1, 2, 3]],
                 ...overrides,
               },
             },
@@ -97,17 +96,10 @@ describe('<PageAnalysis />', () => {
     );
   });
 
-  it('should not render a timeline if there is not one present', () => {
-    expect.assertions(1);
-    const { container } = setup({ timeline: null });
-
-    expect(container.childNodes[0].childNodes).toHaveLength(2);
-  });
-
   describe('when the cost forest is empty', () => {
     it('should not render anything', () => {
       expect.assertions(1);
-      const { container } = setup({ cost: [], income: 0 });
+      const { container } = setup({ cost: [] });
 
       expect(container).not.toHaveTextContent('NaN');
     });

@@ -6,7 +6,6 @@ export const Analysis = gql`
       description
       startDate
       endDate
-      income
       cost {
         item
         tree {
@@ -14,7 +13,6 @@ export const Analysis = gql`
           sum
         }
       }
-      timeline
     }
   }
 `;

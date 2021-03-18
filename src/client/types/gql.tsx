@@ -18,6 +18,7 @@ export type Scalars = {
 };
 
 export enum AnalysisPage {
+  Income = 'income',
   Bills = 'bills',
   Food = 'food',
   General = 'general',
@@ -60,8 +61,6 @@ export type AnalysisResponse = {
   description: Scalars['String'];
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  income: Scalars['Int'];
-  timeline?: Maybe<Array<Array<Scalars['Int']>>>;
 };
 
 export type Query = {
@@ -1310,7 +1309,7 @@ export type AnalysisQuery = (
   { __typename?: 'Query' }
   & { analysis?: Maybe<(
     { __typename?: 'AnalysisResponse' }
-    & Pick<AnalysisResponse, 'description' | 'startDate' | 'endDate' | 'income' | 'timeline'>
+    & Pick<AnalysisResponse, 'description' | 'startDate' | 'endDate'>
     & { cost: Array<(
       { __typename?: 'CategoryCostTree' }
       & Pick<CategoryCostTree, 'item'>
@@ -2216,7 +2215,6 @@ export const AnalysisDocument = gql`
     description
     startDate
     endDate
-    income
     cost {
       item
       tree {
@@ -2224,7 +2222,6 @@ export const AnalysisDocument = gql`
         sum
       }
     }
-    timeline
   }
 }
     `;

@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 
 export const analysisSchema = gql`
   enum AnalysisPage {
+    income
     bills
     food
     general
@@ -40,8 +41,6 @@ export const analysisSchema = gql`
     description: String!
     startDate: Date!
     endDate: Date!
-    income: Int!
-    timeline: [[Int!]!]
   }
 
   extend type Query {

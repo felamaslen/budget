@@ -27,7 +27,6 @@ describe('Analysis hooks', () => {
     ],
     saved: 67123,
     income: 2003898,
-    timeline: [[1, 2, 3]],
   };
 
   const invested = 191332;
