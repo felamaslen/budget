@@ -1,3 +1,4 @@
+import { omit, uniqBy } from 'lodash';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import { formatDate } from '~api/controllers/shared';
@@ -109,16 +110,19 @@ export type FundListRow = {
 };
 
 type JoinedFundRow = FundListRow & {
+  transaction_ids: number[] | [null];
   transaction_dates: string[] | [null];
   transaction_units: number[] | [null];
   transaction_prices: number[] | [null];
   transaction_fees: number[] | [null];
   transaction_taxes: number[] | [null];
+  stock_split_ids: number[] | [null];
   stock_split_dates: string[] | [null];
   stock_split_ratios: number[] | [null];
 };
 
 type JoinedFundRowWithTransactions = JoinedFundRow & {
+  transaction_ids: number[];
   transaction_dates: string[];
   transaction_units: number[];
   transaction_prices: number[];
@@ -127,15 +131,16 @@ type JoinedFundRowWithTransactions = JoinedFundRow & {
 };
 
 type JoinedFundRowWithStockSplits = JoinedFundRow & {
+  stock_split_ids: number[];
   stock_split_dates: string[];
   stock_split_ratios: number[];
 };
 
 const hasTransactions = (row: JoinedFundRow): row is JoinedFundRowWithTransactions =>
-  !!row.transaction_dates[0];
+  !!row.transaction_ids[0];
 
 const hasStockSplits = (row: JoinedFundRow): row is JoinedFundRowWithStockSplits =>
-  !!row.stock_split_dates[0];
+  !!row.stock_split_ids[0];
 
 export async function selectFundsItems(
   db: DatabaseTransactionConnectionType,
@@ -147,11 +152,13 @@ export async function selectFundsItems(
     SELECT ${sql.join(
       [
         sql`funds.id`,
+        sql`array_agg(transactions.id ORDER BY transactions.date DESC) as transaction_ids`,
         sql`array_agg(transactions.date ORDER BY transactions.date DESC) as transaction_dates`,
         sql`array_agg(transactions.units ORDER BY transactions.date DESC) as transaction_units`,
         sql`array_agg(transactions.price ORDER BY transactions.date DESC) as transaction_prices`,
         sql`array_agg(transactions.fees ORDER BY transactions.date DESC) as transaction_fees`,
         sql`array_agg(transactions.taxes ORDER BY transactions.date DESC) as transaction_taxes`,
+        sql`array_agg(stock_splits.id ORDER BY stock_splits.date ASC) as stock_split_ids`,
         sql`array_agg(stock_splits.date ORDER BY stock_splits.date ASC) as stock_split_dates`,
         sql`array_agg(stock_splits.ratio ORDER BY stock_splits.date ASC) as stock_split_ratios`,
       ],
@@ -172,19 +179,27 @@ export async function selectFundsItems(
     item: row.item,
     allocationTarget: row.allocation_target,
     transactions: hasTransactions(row)
-      ? row.transaction_dates.map<Transaction>((date, index) => ({
-          date: new Date(date),
-          units: row.transaction_units[index],
-          price: row.transaction_prices[index],
-          fees: row.transaction_fees[index],
-          taxes: row.transaction_taxes[index],
-        }))
+      ? uniqBy(
+          row.transaction_ids.map<Transaction & { id: number }>((id, index) => ({
+            id,
+            date: new Date(row.transaction_dates[index]),
+            units: row.transaction_units[index],
+            price: row.transaction_prices[index],
+            fees: row.transaction_fees[index],
+            taxes: row.transaction_taxes[index],
+          })),
+          'id',
+        ).map((tr) => omit(tr, 'id'))
       : [],
     stockSplits: hasStockSplits(row)
-      ? row.stock_split_dates.map<StockSplit>((date, index) => ({
-          date: new Date(date),
-          ratio: row.stock_split_ratios[index],
-        }))
+      ? uniqBy(
+          row.stock_split_ids.map<StockSplit & { id: number }>((id, index) => ({
+            id,
+            date: new Date(row.stock_split_dates[index]),
+            ratio: row.stock_split_ratios[index],
+          })),
+          'id',
+        ).map((tr) => omit(tr, 'id'))
       : [],
   }));
 }
