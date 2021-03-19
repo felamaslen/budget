@@ -4095,17 +4095,17 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,203.8 Q48,247 77.3,251.9 C105,257 133,239 163.0,231.7 C192,224 217,217 245.9,208.4 C276,199 301,189 331.5,181.5 C360,174 385,170 414.4,165.1 Q444,160 500.0,151.5"
+          d="M0,300 Q50,300 77.3,300.0 C107,300 133,300 163.0,300.0 C192,300 217,300 245.9,300.0 C276,300 302,300 331.5,300.0 C360,300 385,300 414.4,300.0 Q444,300 500.0,300.0"
           fill="none"
-          stroke="#093"
+          stroke="#546e7a"
           stroke-width="2"
         />
       </g>
       <g>
         <path
-          d="M0,300 Q50,300 77.3,300.0 C107,300 133,300 163.0,300.0 C192,300 217,300 245.9,300.0 C276,300 302,300 331.5,300.0 C360,300 385,300 414.4,300.0 Q444,300 500.0,300.0"
+          d="M0,203.8 Q48,247 77.3,251.9 C105,257 133,239 163.0,231.7 C192,224 217,217 245.9,208.4 C276,199 301,189 331.5,181.5 C360,174 385,170 414.4,165.1 Q444,160 500.0,151.5"
           fill="none"
-          stroke="#546e7a"
+          stroke="#093"
           stroke-width="2"
         />
       </g>
@@ -4163,13 +4163,6 @@ exports[`<PageOverview /> should render graphs 1`] = `
         >
           Savings ratio (yearly avg.)
         </text>
-        <rect
-          fill="rgba(255,255,255,0.6)"
-          height="260"
-          width="386.7403314917127"
-          x="113.25966850828729"
-          y="40"
-        />
         <line
           stroke="#546e7a"
           stroke-width="2"
@@ -4186,7 +4179,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
           x="78"
           y="76"
         >
-          Investment ratio (cumulative)
+          Investment ratio
         </text>
         <rect
           fill="rgba(255,255,255,0.6)"
@@ -4197,6 +4190,20 @@ exports[`<PageOverview /> should render graphs 1`] = `
         />
       </g>
     </svg>
+    <div
+      class="emotion-4 emotion-5"
+    >
+      <div
+        class="emotion-6 emotion-7"
+      >
+        <a
+          class="emotion-8 emotion-9"
+        />
+        <span>
+          Cumulative
+        </span>
+      </div>
+    </div>
   </div>
 </div>
 `;

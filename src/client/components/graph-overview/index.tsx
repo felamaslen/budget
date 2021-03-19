@@ -11,7 +11,6 @@ import { GraphSpending } from '~client/components/graph-spending';
 import { ErrorLevel } from '~client/constants/error';
 import { TodayContext, useIsMobile } from '~client/hooks';
 import { useOverviewOldQuery } from '~client/hooks/gql';
-import { cumulativeSum } from '~client/modules/data';
 import {
   getFundsCostToDate,
   getFundsRows,
@@ -89,23 +88,17 @@ export const GraphOverview: React.FC = () => {
     [startDateCurrent, showAllAndReady, oldData],
   );
 
-  const investmentRatio = useMemo<number[]>(() => {
-    const initialStockInvestment = getFundsCostToDate(endOfMonth(addMonths(startDate, -1)), funds);
-    const cumulativeIncome = cumulativeSum(mergedMonthly.income);
-    const cumulativeInvestmentPurchase = cumulativeSum(mergedMonthly.investmentPurchases);
-
-    return cumulativeIncome.map<number>((income, index) => {
-      if (!income) {
-        return 0;
-      }
-      const stockInvestments = getFundsCostToDate(endOfMonth(addMonths(startDate, index)), funds);
-      const investmentPurchases = cumulativeInvestmentPurchase[index];
-      return Math.max(
-        0,
-        Math.min(1, (stockInvestments - initialStockInvestment + investmentPurchases) / income),
-      );
-    });
-  }, [startDate, funds, mergedMonthly.income, mergedMonthly.investmentPurchases]);
+  const investments = useMemo<number[]>(
+    () =>
+      mergedMonthly.income.map<number>((_, index) => {
+        const stockInvestments =
+          getFundsCostToDate(endOfMonth(addMonths(startDate, index)), funds) -
+          getFundsCostToDate(endOfMonth(addMonths(startDate, index - 1)), funds);
+        const investmentPurchases = mergedMonthly.investmentPurchases[index];
+        return stockInvestments + investmentPurchases;
+      }),
+    [startDate, funds, mergedMonthly.income, mergedMonthly.investmentPurchases],
+  );
 
   useEffect(() => {
     if (showAll) {
@@ -129,7 +122,7 @@ export const GraphOverview: React.FC = () => {
           startDate={startDate}
           futureMonths={futureMonths}
           monthly={mergedMonthly}
-          investmentRatio={investmentRatio}
+          investments={investments}
           showAll={showAllAndReady}
         />
       )}
