@@ -23,7 +23,10 @@ const getAnalysisConditions = (
       sql`uid = ${uid}`,
       sql`cost > 0`,
       category === AnalysisPage.General
-        ? sql`category NOT IN (${sql.join(config.data.overview.ignoreExpenseCategories, sql`, `)})`
+        ? sql`category NOT IN (${sql.join(
+            config.data.overview.investmentPurchaseCategories,
+            sql`, `,
+          )})`
         : sql`1=1`,
     ],
     sql` AND `,

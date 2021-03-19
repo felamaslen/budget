@@ -37,6 +37,12 @@ export function lastInArray<T>(array: T[]): T | undefined {
   return array[array.length - 1];
 }
 
+export const cumulativeSum = (array: number[]): number[] =>
+  array.reduce<number[]>(
+    (last, value, index) => [...last, value + (index > 0 ? last[last.length - 1] : 0)],
+    [],
+  );
+
 const roundTotal = (value: number): number => Number(value.toFixed(4));
 
 export const combineStockSplits = (stockSplits: Pick<StockSplitNative, 'ratio'>[]): number =>

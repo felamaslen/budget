@@ -14,6 +14,7 @@ export const overviewSchema = gql`
 
   type Monthly {
     stocks: [Int!]!
+    investmentPurchases: [Int!]!
     income: [Int!]!
     bills: [Int!]!
     food: [Int!]!
@@ -35,6 +36,7 @@ export const overviewSchema = gql`
     liabilities: [Int!]!
     netWorth: [Int!]!
     stocks: [Int!]!
+    investmentPurchases: [Int!]!
     pension: [Int!]!
     cashOther: [Int!]!
     investments: [Int!]!

@@ -10,6 +10,7 @@ export const testResponse: InitialQuery = {
     annualisedFundReturns: 0.173,
     monthly: {
       stocks: [],
+      investmentPurchases: [],
       [PageListStandard.Income]: [],
       [PageListStandard.Bills]: [],
       [PageListStandard.Food]: [],

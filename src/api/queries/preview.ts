@@ -32,7 +32,7 @@ export async function selectPreviewRowsStandard(
   ${
     table === PageListStandard.General
       ? sql`AND category NOT IN (${sql.join(
-          config.data.overview.ignoreExpenseCategories,
+          config.data.overview.investmentPurchaseCategories,
           sql`, `,
         )})`
       : sql``

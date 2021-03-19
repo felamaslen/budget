@@ -5,6 +5,7 @@ export const overviewOld = gql`
     overviewOld(now: $now) {
       startDate
       stocks
+      investmentPurchases
       pension
       cashOther
       investments

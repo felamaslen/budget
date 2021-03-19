@@ -23,7 +23,10 @@ export type MonthlyWithPartialProcess = GQL<Monthly> &
   Partial<Omit<MonthlyProcessed, keyof Monthly>>;
 export type MonthlyWithProcess<K extends MonthlyProcessedKey> = Monthly & Pick<MonthlyProcessed, K>;
 
-export type MergedMonthly = Omit<MonthlyProcessed, Exclude<keyof Monthly, 'stocks' | 'income'>> & {
+export type MergedMonthly = Omit<
+  MonthlyProcessed,
+  Exclude<keyof Monthly, 'stocks' | 'income' | 'investmentPurchases'>
+> & {
   startPredictionIndex: number;
 };
 

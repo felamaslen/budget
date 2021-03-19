@@ -120,7 +120,7 @@ export const getStockValue = moize(
   { maxSize: 1 },
 );
 
-const getFundsCostToDate = (date: Date, rows: FundNative[]): number =>
+export const getFundsCostToDate = (date: Date, rows: FundNative[]): number =>
   rows.reduce(
     (sum, { transactions }) => sum + getTotalCost(filterPastTransactions(date, transactions)),
     0,

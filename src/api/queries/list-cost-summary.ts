@@ -35,11 +35,40 @@ export async function getListCostSummary(
   ${
     category === PageListStandard.General
       ? sql`AND list_data.category NOT IN (${sql.join(
-          config.data.overview.ignoreExpenseCategories,
+          config.data.overview.investmentPurchaseCategories,
           sql`, `,
         )})`
       : sql``
   }
+  GROUP BY dates.start_date
+  ORDER BY dates.start_date
+  `);
+
+  return results.rows.map(({ month_cost }) => month_cost);
+}
+
+export async function getInvestmentPurchasesSummary(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  monthEnds: Date[],
+): Promise<number[]> {
+  const results = await db.query<{ month_cost: number }>(sql`
+  SELECT COALESCE(SUM(cost), 0) AS month_cost
+  FROM (${getMonthRangeUnion(monthEnds)}) dates
+  LEFT JOIN ${sql.identifier([PageListStandard.General])} AS ${sql.identifier([
+    'general',
+  ])} ON ${sql.join(
+    [
+      sql`${sql.identifier(['general', 'category'])} IN (${sql.join(
+        config.data.overview.investmentPurchaseCategories,
+        sql`, `,
+      )})`,
+      sql`${sql.identifier(['general', 'uid'])} = ${uid}`,
+      sql`${sql.identifier(['general', 'date'])} >= dates.start_date`,
+      sql`${sql.identifier(['general', 'date'])} <= dates.end_date`,
+    ],
+    sql` AND `,
+  )}
   GROUP BY dates.start_date
   ORDER BY dates.start_date
   `);
@@ -73,7 +102,7 @@ export async function getSpendingSummary(
         SELECT dates.start_date, COALESCE(SUM(
           CASE
             WHEN general.category IN (${sql.join(
-              config.data.overview.ignoreExpenseCategories,
+              config.data.overview.investmentPurchaseCategories,
               sql`, `,
             )})
             THEN 0

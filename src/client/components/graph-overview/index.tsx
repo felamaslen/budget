@@ -1,4 +1,6 @@
+import addMonths from 'date-fns/addMonths';
 import endOfDay from 'date-fns/endOfDay';
+import endOfMonth from 'date-fns/endOfMonth';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -9,7 +11,14 @@ import { GraphSpending } from '~client/components/graph-spending';
 import { ErrorLevel } from '~client/constants/error';
 import { TodayContext, useIsMobile } from '~client/hooks';
 import { useOverviewOldQuery } from '~client/hooks/gql';
-import { getFutureMonths, getProcessedMonthlyValues, getStartDate } from '~client/selectors';
+import { cumulativeSum } from '~client/modules/data';
+import {
+  getFundsCostToDate,
+  getFundsRows,
+  getFutureMonths,
+  getProcessedMonthlyValues,
+  getStartDate,
+} from '~client/selectors';
 import type { MergedMonthly } from '~client/types';
 
 export const GraphOverview: React.FC = () => {
@@ -18,6 +27,7 @@ export const GraphOverview: React.FC = () => {
 
   const startDateCurrent = useSelector(getStartDate);
   const futureMonths = useSelector(getFutureMonths(today));
+  const funds = useSelector(getFundsRows);
 
   const isMobile = useIsMobile();
   const [showAll, setShowAll] = useState<boolean>(false);
@@ -56,6 +66,10 @@ export const GraphOverview: React.FC = () => {
       pension: [...overviewOld.pension, ...monthly.values.pension],
       cashOther: [...overviewOld.cashOther, ...monthly.values.cashOther],
       investments: [...overviewOld.investments, ...monthly.values.investments],
+      investmentPurchases: [
+        ...overviewOld.investmentPurchases,
+        ...monthly.values.investmentPurchases,
+      ],
       homeEquity: [...overviewOld.homeEquity, ...monthly.values.homeEquity],
       options: [...overviewOld.options, ...monthly.values.options],
       income: [...overviewOld.income, ...monthly.values.income],
@@ -74,6 +88,24 @@ export const GraphOverview: React.FC = () => {
         : startDateCurrent,
     [startDateCurrent, showAllAndReady, oldData],
   );
+
+  const investmentRatio = useMemo<number[]>(() => {
+    const initialStockInvestment = getFundsCostToDate(endOfMonth(addMonths(startDate, -1)), funds);
+    const cumulativeIncome = cumulativeSum(mergedMonthly.income);
+    const cumulativeInvestmentPurchase = cumulativeSum(mergedMonthly.investmentPurchases);
+
+    return cumulativeIncome.map<number>((income, index) => {
+      if (!income) {
+        return 0;
+      }
+      const stockInvestments = getFundsCostToDate(endOfMonth(addMonths(startDate, index)), funds);
+      const investmentPurchases = cumulativeInvestmentPurchase[index];
+      return Math.max(
+        0,
+        Math.min(1, (stockInvestments - initialStockInvestment + investmentPurchases) / income),
+      );
+    });
+  }, [startDate, funds, mergedMonthly.income, mergedMonthly.investmentPurchases]);
 
   useEffect(() => {
     if (showAll) {
@@ -97,6 +129,7 @@ export const GraphOverview: React.FC = () => {
           startDate={startDate}
           futureMonths={futureMonths}
           monthly={mergedMonthly}
+          investmentRatio={investmentRatio}
           showAll={showAllAndReady}
         />
       )}

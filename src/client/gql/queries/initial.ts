@@ -8,6 +8,7 @@ export const Initial = gql`
       annualisedFundReturns
       monthly {
         stocks
+        investmentPurchases
         income
         bills
         food

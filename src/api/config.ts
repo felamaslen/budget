@@ -67,7 +67,7 @@ export default {
       numFuture: getenv.int('OVERVIEW_FUTURE_MONTHS', 12),
       startYear: getenv.int('START_YEAR', 2014),
       startMonth: getenv.int('START_MONTH', 9),
-      ignoreExpenseCategories: ['House purchase'],
+      investmentPurchaseCategories: ['House purchase'],
       birthDate: getenv.string('BIRTH_DATE', '1990-01-01'),
     },
     pie: {

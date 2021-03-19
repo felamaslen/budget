@@ -23,6 +23,7 @@ import {
   selectOldNetWorth,
   getSpendingSummary,
   getMonthRangeUnion,
+  getInvestmentPurchasesSummary,
 } from '~api/queries';
 import {
   Transaction,
@@ -90,17 +91,34 @@ async function getMonthlyCategoryValues(
 ): Promise<
   Pick<
     Overview['monthly'],
-    'stocks' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'
+    | 'stocks'
+    | 'investmentPurchases'
+    | 'income'
+    | 'bills'
+    | 'food'
+    | 'general'
+    | 'holiday'
+    | 'social'
   >
 > {
-  const [stocks, income, bills, food, general, holiday, social] = await Promise.all<number[]>([
+  const [
+    stocks,
+    investmentPurchases,
+    income,
+    bills,
+    food,
+    general,
+    holiday,
+    social,
+  ] = await Promise.all<number[]>([
     getDisplayedFundValues(db, uid, now),
+    getInvestmentPurchasesSummary(db, uid, getDisplayedMonths(now, true)),
     ...Object.values(PageListStandard).map((category) =>
       getListCostSummary(db, uid, getDisplayedMonths(now, true), category),
     ),
   ]);
 
-  return { stocks, income, bills, food, general, holiday, social };
+  return { stocks, investmentPurchases, income, bills, food, general, holiday, social };
 }
 
 export const DEFAULT_INVESTMENT_RATE = 0.07;
@@ -220,8 +238,9 @@ export async function getOldOverviewData(
 
   const monthEnds = getOldMonths(now);
 
-  const [stocks, oldNetWorth, income, spending] = await Promise.all([
+  const [stocks, investmentPurchases, oldNetWorth, income, spending] = await Promise.all([
     getFundValues(db, uid, monthEnds),
+    getInvestmentPurchasesSummary(db, uid, monthEnds),
     selectOldNetWorth(db, uid, formatDate(startDate), formatDate(oldDateEnd)),
     getListCostSummary(db, uid, monthEnds, PageListStandard.Income),
     getSpendingSummary(db, uid, getMonthRangeUnion(monthEnds)),
@@ -244,6 +263,7 @@ export async function getOldOverviewData(
   return {
     startDate: zonedTimeToUtc(endOfMonth(startDate), config.timeZone),
     stocks,
+    investmentPurchases,
     pension,
     cashOther,
     investments,

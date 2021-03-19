@@ -17,12 +17,14 @@ export type Props = {
   startDate: Date;
   futureMonths: number;
   monthly: Pick<MergedMonthly, 'income' | 'spending' | 'net'>;
+  investmentRatio: number[];
 };
 
 function processData(
   startDate: Date,
   showAll: boolean,
   { net, income, spending }: Props['monthly'],
+  investments: number[],
 ): Line[] {
   const opts: TimeValuesProps = { startDate };
 
@@ -62,20 +64,36 @@ function processData(
     strokeWidth: 2,
   };
 
+  const investmentRatio: Line = {
+    key: 'investment-ratio',
+    name: 'Investment ratio',
+    data: getValuesWithTime(investments, opts),
+    secondary: true,
+    color: colors.funds.main,
+    smooth: true,
+    strokeWidth: 2,
+  };
+
   if (showAll) {
-    return [spendingLine, savingsRatio];
+    return [spendingLine, savingsRatio, investmentRatio];
   }
 
-  return [arrows, spendingLine, savingsRatio];
+  return [arrows, spendingLine, savingsRatio, investmentRatio];
 }
 
-export const GraphSpending: React.FC<Props> = ({ startDate, monthly, showAll }) => {
+export const GraphSpending: React.FC<Props> = ({
+  startDate,
+  monthly,
+  investmentRatio,
+  showAll,
+}) => {
   const today = useContext(TodayContext);
 
-  const lines = useMemo<Line[]>(() => processData(startDate, showAll, monthly), [
+  const lines = useMemo<Line[]>(() => processData(startDate, showAll, monthly, investmentRatio), [
     startDate,
     showAll,
     monthly,
+    investmentRatio,
   ]);
 
   const AfterLines = useCallback<React.FC<DrawProps>>(

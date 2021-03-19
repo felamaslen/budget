@@ -12,11 +12,13 @@ describe('<GraphSpending />', () => {
   const today = endOfDay(testNow);
 
   const setup = (): RenderResult => {
+    const monthly = getProcessedMonthlyValues(today, 0)(state).values;
     const props: Props = {
       showAll: false,
       startDate: getStartDate(state),
       futureMonths: getFutureMonths(today)(state),
-      monthly: getProcessedMonthlyValues(today, 0)(state).values,
+      investmentRatio: Array(monthly.income.length).fill(0),
+      monthly,
     };
 
     return render(
@@ -971,6 +973,14 @@ describe('<GraphSpending />', () => {
           />
         </g>
         <g>
+          <path
+            d="M0,300 Q50,300 77.3,300.0 C107,300 133,300 163.0,300.0 C192,300 217,300 245.9,300.0 C276,300 302,300 331.5,300.0 C360,300 385,300 414.4,300.0 Q444,300 500.0,300.0"
+            fill="none"
+            stroke="#546e7a"
+            stroke-width="2"
+          />
+        </g>
+        <g>
           <rect
             fill="rgba(255,255,255,0.6)"
             height="60"
@@ -1023,6 +1033,31 @@ describe('<GraphSpending />', () => {
             y="58"
           >
             Savings ratio (yearly avg.)
+          </text>
+          <rect
+            fill="rgba(255,255,255,0.6)"
+            height="260"
+            width="386.7403314917127"
+            x="113.25966850828729"
+            y="40"
+          />
+          <line
+            stroke="#546e7a"
+            stroke-width="2"
+            x1="50"
+            x2="74"
+            y1="76"
+            y2="76"
+          />
+          <text
+            alignment-baseline="middle"
+            fill="#333"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="11"
+            x="78"
+            y="76"
+          >
+            Investment ratio (cumulative)
           </text>
           <rect
             fill="rgba(255,255,255,0.6)"

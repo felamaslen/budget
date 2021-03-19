@@ -166,6 +166,22 @@ export async function generateListData(uid: number, db: Knex): Promise<void> {
         item: 'Household',
         cost: 9912,
       },
+      {
+        uid,
+        date: new Date('2018-03-13'),
+        item: 'Deposit',
+        category: 'House purchase',
+        cost: 5956000,
+        shop: 'Some conveyancer',
+      },
+      {
+        uid,
+        date: new Date('2015-05-20'),
+        item: 'Old Deposit',
+        category: 'House purchase',
+        cost: 12300000,
+        shop: 'Other conveyancer',
+      },
     ])
     .into('general');
 

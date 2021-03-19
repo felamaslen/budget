@@ -805,6 +805,7 @@ export enum MonthlyCategory {
 
 export type Monthly = {
   stocks: Array<Scalars['Int']>;
+  investmentPurchases: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   bills: Array<Scalars['Int']>;
   food: Array<Scalars['Int']>;
@@ -826,6 +827,7 @@ export type OverviewOld = {
   liabilities: Array<Scalars['Int']>;
   netWorth: Array<Scalars['Int']>;
   stocks: Array<Scalars['Int']>;
+  investmentPurchases: Array<Scalars['Int']>;
   pension: Array<Scalars['Int']>;
   cashOther: Array<Scalars['Int']>;
   investments: Array<Scalars['Int']>;
@@ -1645,6 +1647,7 @@ export type NetWorthDeletedResolvers<ContextType = Context, ParentType extends R
 
 export type MonthlyResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Monthly'] = ResolversParentTypes['Monthly']> = {
   stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  investmentPurchases?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   income?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   bills?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   food?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1668,6 +1671,7 @@ export type OverviewOldResolvers<ContextType = Context, ParentType extends Resol
   liabilities?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   netWorth?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  investmentPurchases?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   pension?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   cashOther?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   investments?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;

@@ -19,7 +19,7 @@ import {
   FundPricesUpdated,
   ActionReceiptCreated,
 } from '~client/actions';
-import { IGNORE_EXPENSE_CATEGORIES } from '~client/constants/data';
+import { EXPENSE_INVESTMENT_CATEGORIES } from '~client/constants/data';
 import { getMonthDatesList } from '~client/modules/date';
 import type { GQL, NativeDate, StandardInput } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
@@ -36,6 +36,7 @@ export const initialState: State = {
   annualisedFundReturns: 0.1,
   monthly: {
     stocks: [],
+    investmentPurchases: [],
     [PageListStandard.Income]: [],
     [PageListStandard.Bills]: [],
     [PageListStandard.Food]: [],
@@ -65,63 +66,96 @@ const getDateIndex = (state: State, date: Date): number =>
 const setCost = (state: State, date: Date, diff: number) => (last: number[]): number[] =>
   replaceAtIndex(last, getDateIndex(state, date), (value) => value + diff);
 
-const onCreate = (state: State, action: ListItemCreated<StandardInput, PageListStandard>): State =>
-  action.delta.category && IGNORE_EXPENSE_CATEGORIES.includes(action.delta.category)
-    ? state
-    : {
-        ...state,
-        monthly: {
-          ...state.monthly,
-          [action.page]: setCost(
-            state,
-            action.delta.date,
-            action.delta.cost,
-          )(state.monthly[action.page]),
-        },
-      };
-
-const onUpdate = (
+const withInvestments = (delta: Partial<StandardInput> | null, item?: StandardInput | null) => (
   state: State,
-  action: ListItemUpdated<StandardInput, PageListStandard>,
 ): State => ({
   ...state,
   monthly: {
     ...state.monthly,
-    [action.page]: compose(
+    investmentPurchases: compose(
       setCost(
         state,
-        action.delta.date ?? action.item?.date ?? new Date(),
-        action.delta.category && IGNORE_EXPENSE_CATEGORIES.includes(action.delta.category)
-          ? 0
-          : action.delta.cost ?? action.item?.cost ?? 0,
+        delta?.date ?? item?.date ?? new Date(),
+        delta?.category && EXPENSE_INVESTMENT_CATEGORIES.includes(delta.category)
+          ? delta.cost ?? item?.cost ?? 0
+          : 0,
       ),
       setCost(
         state,
-        action.item?.date ?? new Date(),
-        isStandardListAction(action) &&
-          action.item?.category &&
-          IGNORE_EXPENSE_CATEGORIES.includes(action.item.category)
-          ? 0
-          : -(action.item?.cost ?? 0),
+        item?.date ?? new Date(),
+        item?.category && EXPENSE_INVESTMENT_CATEGORIES.includes(item.category)
+          ? -(item?.cost ?? 0)
+          : 0,
       ),
-    )(state.monthly[action.page]),
+    )(state.monthly.investmentPurchases),
   },
 });
 
-const onDelete = (state: State, action: ListItemDeleted<StandardInput, PageListStandard>): State =>
-  action.item.category && IGNORE_EXPENSE_CATEGORIES.includes(action.item.category)
-    ? state
-    : {
-        ...state,
-        monthly: {
-          ...state.monthly,
-          [action.page]: setCost(
-            state,
-            action.item.date,
-            -action.item.cost,
-          )(state.monthly[action.page]),
+const onCreate = (state: State, action: ListItemCreated<StandardInput, PageListStandard>): State =>
+  withInvestments(action.delta)(
+    action.delta.category && EXPENSE_INVESTMENT_CATEGORIES.includes(action.delta.category)
+      ? state
+      : {
+          ...state,
+          monthly: {
+            ...state.monthly,
+            [action.page]: setCost(
+              state,
+              action.delta.date,
+              action.delta.cost,
+            )(state.monthly[action.page]),
+          },
         },
-      };
+  );
+
+const onUpdate = (state: State, action: ListItemUpdated<StandardInput, PageListStandard>): State =>
+  withInvestments(
+    action.delta,
+    action.item,
+  )({
+    ...state,
+    monthly: {
+      ...state.monthly,
+      [action.page]: compose(
+        setCost(
+          state,
+          action.delta.date ?? action.item?.date ?? new Date(),
+          action.delta.category && EXPENSE_INVESTMENT_CATEGORIES.includes(action.delta.category)
+            ? 0
+            : action.delta.cost ?? action.item?.cost ?? 0,
+        ),
+        setCost(
+          state,
+          action.item?.date ?? new Date(),
+          isStandardListAction(action) &&
+            action.item?.category &&
+            EXPENSE_INVESTMENT_CATEGORIES.includes(action.item.category)
+            ? 0
+            : -(action.item?.cost ?? 0),
+        ),
+      )(state.monthly[action.page]),
+    },
+  });
+
+const onDelete = (state: State, action: ListItemDeleted<StandardInput, PageListStandard>): State =>
+  withInvestments(
+    null,
+    action.item,
+  )(
+    action.item.category && EXPENSE_INVESTMENT_CATEGORIES.includes(action.item.category)
+      ? state
+      : {
+          ...state,
+          monthly: {
+            ...state.monthly,
+            [action.page]: setCost(
+              state,
+              action.item.date,
+              -action.item.cost,
+            )(state.monthly[action.page]),
+          },
+        },
+  );
 
 const onFundPricesUpdated = (state: State, action: FundPricesUpdated): State => ({
   ...state,

@@ -56,7 +56,8 @@ export const PAGES_LIST: PageList[] = [PageNonStandard.Funds, ...PAGES_LIST_STAN
 
 export const PAGE_LIST_LIMIT = 100;
 
-export const IGNORE_EXPENSE_CATEGORIES = ['House purchase'];
+// List of cost categories which should count as investments, rather than pure expense
+export const EXPENSE_INVESTMENT_CATEGORIES = ['House purchase'];
 
 export const isPage = <T extends string>(name?: T | Page): name is Page =>
   !!name &&

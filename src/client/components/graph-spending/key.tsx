@@ -60,6 +60,26 @@ export const Key: React.FC<Props> = ({ now, pixX, pixY1, maxX, minY, maxY, title
         height={futureH}
         fill={colors.translucent.light.dark}
       />
+
+      <line x1={50} y1={76} x2={74} y2={76} stroke={colors.funds.main} strokeWidth={2} />
+      <text
+        x={78}
+        y={76}
+        fill={colors.dark.light}
+        fontFamily={fontFamily}
+        fontSize={fontSize}
+        alignmentBaseline="middle"
+      >
+        Investment ratio (cumulative)
+      </text>
+
+      <rect
+        x={future0}
+        y={future1}
+        width={futureW}
+        height={futureH}
+        fill={colors.translucent.light.dark}
+      />
     </BaseKey>
   );
 };

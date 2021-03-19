@@ -26,6 +26,7 @@ export const testState: State = {
     annualisedFundReturns: 0.143,
     monthly: {
       stocks: [100779, 101459, 102981],
+      investmentPurchases: [0, 0, 0, 0, 0, 0, 0],
       [PageListStandard.Income]: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
       [PageListStandard.Bills]: [1000, 900, 400, 650, 0, 0, 0],
       [PageListStandard.Food]: [50, 13, 20, 19, 0, 0, 0],
@@ -404,7 +405,7 @@ export const testState: State = {
   },
   [PageListStandard.General]: {
     items: [],
-    __optimistic: [undefined],
+    __optimistic: [],
     total: 0,
     weekly: 0,
     offset: 0,
@@ -412,7 +413,7 @@ export const testState: State = {
   },
   [PageListStandard.Holiday]: {
     items: [],
-    __optimistic: [undefined],
+    __optimistic: [],
     total: 0,
     weekly: 0,
     offset: 0,
@@ -420,7 +421,7 @@ export const testState: State = {
   },
   [PageListStandard.Social]: {
     items: [],
-    __optimistic: [undefined],
+    __optimistic: [],
     total: 0,
     weekly: 0,
     offset: 0,

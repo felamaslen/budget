@@ -15,6 +15,7 @@ import {
   loggedOut,
   receiptCreated,
 } from '~client/actions';
+import { EXPENSE_INVESTMENT_CATEGORIES } from '~client/constants/data';
 import reducer, { initialState, State } from '~client/reducers/overview';
 import { testResponse } from '~client/test-data';
 import type { PageListCost, StandardInput } from '~client/types';
@@ -39,6 +40,7 @@ describe('Overview reducer', () => {
     monthly: {
       ...initialState.monthly,
       stocks: [0, 0, 510000, 2160465],
+      investmentPurchases: [0, 0, 0, 0],
       [PageListStandard.Income]: [0, 30040, 229838, 196429],
       [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
       [PageListStandard.Food]: [11907, 24108, 28123, 38352],
@@ -67,6 +69,7 @@ describe('Overview reducer', () => {
         annualisedFundReturns: 0.087,
         monthly: {
           stocks: [0, 0, 510000, 2160465],
+          investmentPurchases: [0, 0, 1884, 0],
           [PageListStandard.Income]: [0, 30040, 229838, 196429],
           [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
           [PageListStandard.Food]: [11907, 24108, 28123, 38352],
@@ -102,6 +105,7 @@ describe('Overview reducer', () => {
       expect(result.monthly).toStrictEqual(
         expect.objectContaining<State['monthly']>({
           stocks: [0, 0, 510000, 2160465],
+          investmentPurchases: [0, 0, 1884, 0],
           [PageListStandard.Income]: [0, 30040, 229838, 196429],
           [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
           [PageListStandard.Food]: [11907, 24108, 28123, 38352],
@@ -134,26 +138,32 @@ describe('Overview reducer', () => {
       expect(withGeneral.monthly?.general?.[2]).toBe(28335 + 34);
     });
 
-    it('should omit expenses which are for a house purchase', () => {
-      expect.assertions(1);
+    describe.each(EXPENSE_INVESTMENT_CATEGORIES)(
+      'when the expense is for an investment purchase',
+      (category) => {
+        it('should add the cost to investment purchases instead of the page data', () => {
+          expect.assertions(2);
 
-      const withGeneral = reducer(
-        state,
-        listItemCreated<StandardInput, PageListStandard>(
-          PageListStandard.General,
-          {
-            date: new Date('2019-06-02T00:00:00.000Z'),
-            item: 'Balancing payment',
-            category: 'House purchase',
-            cost: 5950000,
-            shop: 'Some conveyancers',
-          },
-          false,
-        ),
-      );
+          const withGeneral = reducer(
+            state,
+            listItemCreated<StandardInput, PageListStandard>(
+              PageListStandard.General,
+              {
+                date: new Date('2019-06-02T00:00:00.000Z'),
+                item: 'Balancing payment',
+                category,
+                cost: 5950000,
+                shop: 'Some conveyancers',
+              },
+              false,
+            ),
+          );
 
-      expect(withGeneral.monthly?.general?.[2]).toBe(28335);
-    });
+          expect(withGeneral.monthly?.general?.[2]).toBe(28335);
+          expect(withGeneral.monthly?.investmentPurchases?.[2]).toBe(5950000);
+        });
+      },
+    );
 
     describe('when the action came from the server', () => {
       const actionFromServer = listItemCreated<StandardInput, PageListStandard>(
@@ -233,57 +243,65 @@ describe('Overview reducer', () => {
       });
     });
 
-    describe("when the old item was for a house purchase but the new one isn't", () => {
-      it('should add the new cost', () => {
-        expect.assertions(1);
+    describe.each(EXPENSE_INVESTMENT_CATEGORIES)(
+      "when the old item was for an investment purchase but the new one isn't",
+      (oldCategory) => {
+        it('should add the new cost and remove from investment purchases', () => {
+          expect.assertions(2);
 
-        const result = reducer(
-          state,
-          listItemUpdated<StandardInput, PageListStandard>(
-            PageListStandard.General,
-            numericHash('some-id'),
-            { category: 'Something else', cost: 567 },
-            {
-              id: 1237,
-              date: new Date('2019-05-10'),
-              item: 'some item',
-              category: 'House purchase',
-              cost: 5955500,
-              shop: 'some shop',
-            },
-            false,
-          ),
-        );
+          const result = reducer(
+            { ...state, monthly: { ...state.monthly, investmentPurchases: [0, 1006692, 0] } },
+            listItemUpdated<StandardInput, PageListStandard>(
+              PageListStandard.General,
+              numericHash('some-id'),
+              { category: 'Something else', cost: 567 },
+              {
+                id: 1237,
+                date: new Date('2019-05-10'),
+                item: 'some item',
+                category: oldCategory,
+                cost: 5955500,
+                shop: 'some shop',
+              },
+              false,
+            ),
+          );
 
-        expect(result.monthly[PageListStandard.General][1]).toBe(9515 + 567);
-      });
-    });
+          expect(result.monthly[PageListStandard.General][1]).toBe(9515 + 567);
+          expect(result.monthly.investmentPurchases[1]).toBe(1006692 - 5955500);
+        });
+      },
+    );
 
-    describe("when the new item is for a house purchase but the old one wasn't", () => {
-      it('should remove the old cost', () => {
-        expect.assertions(1);
+    describe.each(EXPENSE_INVESTMENT_CATEGORIES)(
+      "when the new item is for an investment purchase but the old one wasn't",
+      (newCategory) => {
+        it('should remove the old cost and add to investment purchases', () => {
+          expect.assertions(2);
 
-        const result = reducer(
-          state,
-          listItemUpdated<StandardInput, PageListStandard>(
-            PageListStandard.General,
-            numericHash('some-id'),
-            { category: 'House purchase', cost: 5955500 },
-            {
-              id: 1238,
-              date: new Date('2019-05-10'),
-              item: 'some item',
-              category: 'some category',
-              cost: 34,
-              shop: 'some shop',
-            },
-            false,
-          ),
-        );
+          const result = reducer(
+            { ...state, monthly: { ...state.monthly, investmentPurchases: [0, 66701, 0] } },
+            listItemUpdated<StandardInput, PageListStandard>(
+              PageListStandard.General,
+              numericHash('some-id'),
+              { category: newCategory, cost: 5955500 },
+              {
+                id: 1238,
+                date: new Date('2019-05-10'),
+                item: 'some item',
+                category: 'some category',
+                cost: 34,
+                shop: 'some shop',
+              },
+              false,
+            ),
+          );
 
-        expect(result.monthly[PageListStandard.General][1]).toBe(9515 - 34);
-      });
-    });
+          expect(result.monthly[PageListStandard.General][1]).toBe(9515 - 34);
+          expect(result.monthly.investmentPurchases[1]).toBe(66701 + 5955500);
+        });
+      },
+    );
   });
 
   describe(ListActionType.Deleted, () => {
@@ -328,27 +346,33 @@ describe('Overview reducer', () => {
       });
     });
 
-    it('should omit expenses which are for a house purchase', () => {
-      expect.assertions(1);
+    describe.each(EXPENSE_INVESTMENT_CATEGORIES)(
+      'when the expense is for an investment purchase',
+      (category) => {
+        it('should omit the expense from the page data and add to investment purchases instead', () => {
+          expect.assertions(2);
 
-      const withGeneral = reducer(
-        state,
-        listItemDeleted<StandardInput, PageListStandard>(
-          PageListStandard.General,
-          numericHash('some-id'),
-          {
-            date: new Date('2019-07-12T00:00Z'),
-            item: 'some item',
-            category: 'House purchase',
-            cost: 5920000,
-            shop: 'some shop',
-          },
-          false,
-        ),
-      );
+          const withGeneral = reducer(
+            { ...state, monthly: { ...state.monthly, investmentPurchases: [0, 0, 0, 1006692] } },
+            listItemDeleted<StandardInput, PageListStandard>(
+              PageListStandard.General,
+              numericHash('some-id'),
+              {
+                date: new Date('2019-07-12T00:00Z'),
+                item: 'some item',
+                category,
+                cost: 5920000,
+                shop: 'some shop',
+              },
+              false,
+            ),
+          );
 
-      expect(withGeneral.monthly?.general?.[3]).toBe(160600);
-    });
+          expect(withGeneral.monthly?.general?.[3]).toBe(160600);
+          expect(withGeneral.monthly?.investmentPurchases?.[3]).toBe(1006692 - 5920000);
+        });
+      },
+    );
   });
 
   describe(ListActionType.OverviewUpdated, () => {

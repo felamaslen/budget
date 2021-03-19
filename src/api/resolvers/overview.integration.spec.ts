@@ -30,6 +30,7 @@ describe('Overview resolver', () => {
           annualisedFundReturns
           monthly {
             stocks
+            investmentPurchases
             income
             bills
             food
@@ -57,13 +58,14 @@ describe('Overview resolver', () => {
     );
 
     it.each`
-      page         | value
-      ${'income'}  | ${433201}
-      ${'bills'}   | ${76402}
-      ${'food'}    | ${113401}
-      ${'general'} | ${11143}
-      ${'holiday'} | ${35014}
-      ${'social'}  | ${61923}
+      page                     | value
+      ${'income'}              | ${433201}
+      ${'bills'}               | ${76402}
+      ${'food'}                | ${113401}
+      ${'general'}             | ${11143}
+      ${'holiday'}             | ${35014}
+      ${'social'}              | ${61923}
+      ${'investmentPurchases'} | ${5956000}
     `('should return $page data', async ({ page, value }) => {
       expect.assertions(1);
       const res = await setup();
@@ -72,20 +74,6 @@ describe('Overview resolver', () => {
           [page]: [...Array(24).fill(0), value, ...Array(13).fill(0)],
         }),
       );
-    });
-
-    it('should omit costs for house purchases', async () => {
-      expect.assertions(1);
-      await app.db('general').insert({
-        date: new Date('2018-03-13'),
-        item: 'Deposit',
-        category: 'House purchase',
-        cost: 5956000,
-        shop: 'Some conveyancer',
-      });
-
-      const res = await app.authGqlClient.query<Query>({ query });
-      expect(res.data?.overview?.monthly.general[24]).toBe(11143);
     });
 
     it('should return funds data', async () => {
@@ -152,6 +140,7 @@ describe('Overview resolver', () => {
           pension
           cashOther
           investments
+          investmentPurchases
           homeEquity
           options
           netWorth
@@ -244,6 +233,27 @@ describe('Overview resolver', () => {
       /* Mar-15 */ 0,
       /* Apr-15 */ 0,
       /* May-15 */ 6354004,
+      /* Jun-15 */ 0,
+      /* Jul-15 */ 0,
+      /* Aug-15 */ 0,
+      /* Sep-15 */ 0,
+      /* Oct-15 */ 0,
+      /* Nov-15 */ 0,
+      /* Dec-15 */ 0,
+      /* Jan-16 */ 0,
+      /* Feb-16 */ 0,
+    ];
+
+    const expectedInvestmentPurchases = [
+      /* Sep-14 */ 0,
+      /* Oct-14 */ 0,
+      /* Nov-14 */ 0,
+      /* Dec-14 */ 0,
+      /* Jan-15 */ 0,
+      /* Feb-15 */ 0,
+      /* Mar-15 */ 0,
+      /* Apr-15 */ 0,
+      /* May-15 */ 12300000,
       /* Jun-15 */ 0,
       /* Jul-15 */ 0,
       /* Aug-15 */ 0,
@@ -381,17 +391,18 @@ describe('Overview resolver', () => {
     ];
 
     it.each`
-      description                      | prop             | value
-      ${'start date'}                  | ${'startDate'}   | ${'2014-09-30'}
-      ${'stocks'}                      | ${'stocks'}      | ${expectedStocks}
-      ${'pension'}                     | ${'pension'}     | ${expectedPension}
-      ${'other cash'}                  | ${'cashOther'}   | ${expectedCashOther}
-      ${'investments (stocks + cash)'} | ${'investments'} | ${expectedInvestments}
-      ${'home equity'}                 | ${'homeEquity'}  | ${expectedHomeEquity}
-      ${'options'}                     | ${'options'}     | ${expectedOptions}
-      ${'net worth'}                   | ${'netWorth'}    | ${expectedNetWorth}
-      ${'income'}                      | ${'income'}      | ${expectedIncome}
-      ${'spending'}                    | ${'spending'}    | ${expectedSpending}
+      description                      | prop                     | value
+      ${'start date'}                  | ${'startDate'}           | ${'2014-09-30'}
+      ${'stocks'}                      | ${'stocks'}              | ${expectedStocks}
+      ${'pension'}                     | ${'pension'}             | ${expectedPension}
+      ${'other cash'}                  | ${'cashOther'}           | ${expectedCashOther}
+      ${'investments (stocks + cash)'} | ${'investments'}         | ${expectedInvestments}
+      ${'investment purchases'}        | ${'investmentPurchases'} | ${expectedInvestmentPurchases}
+      ${'home equity'}                 | ${'homeEquity'}          | ${expectedHomeEquity}
+      ${'options'}                     | ${'options'}             | ${expectedOptions}
+      ${'net worth'}                   | ${'netWorth'}            | ${expectedNetWorth}
+      ${'income'}                      | ${'income'}              | ${expectedIncome}
+      ${'spending'}                    | ${'spending'}            | ${expectedSpending}
     `('should return the historical $description', async ({ prop, value }) => {
       expect.assertions(1);
 

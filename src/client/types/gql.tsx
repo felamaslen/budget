@@ -862,6 +862,7 @@ export enum MonthlyCategory {
 export type Monthly = {
   __typename?: 'Monthly';
   stocks: Array<Scalars['Int']>;
+  investmentPurchases: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   bills: Array<Scalars['Int']>;
   food: Array<Scalars['Int']>;
@@ -885,6 +886,7 @@ export type OverviewOld = {
   liabilities: Array<Scalars['Int']>;
   netWorth: Array<Scalars['Int']>;
   stocks: Array<Scalars['Int']>;
+  investmentPurchases: Array<Scalars['Int']>;
   pension: Array<Scalars['Int']>;
   cashOther: Array<Scalars['Int']>;
   investments: Array<Scalars['Int']>;
@@ -1402,7 +1404,7 @@ export type InitialQuery = (
     & Pick<Overview, 'startDate' | 'endDate' | 'annualisedFundReturns'>
     & { monthly: (
       { __typename?: 'Monthly' }
-      & Pick<Monthly, 'stocks' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
+      & Pick<Monthly, 'stocks' | 'investmentPurchases' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
     ) }
   )>, netWorthCategories?: Maybe<Array<(
     { __typename?: 'NetWorthCategory' }
@@ -1527,7 +1529,7 @@ export type OverviewOldQuery = (
   { __typename?: 'Query' }
   & { overviewOld?: Maybe<(
     { __typename?: 'OverviewOld' }
-    & Pick<OverviewOld, 'startDate' | 'stocks' | 'pension' | 'cashOther' | 'investments' | 'homeEquity' | 'assets' | 'liabilities' | 'options' | 'netWorth' | 'income' | 'spending'>
+    & Pick<OverviewOld, 'startDate' | 'stocks' | 'investmentPurchases' | 'pension' | 'cashOther' | 'investments' | 'homeEquity' | 'assets' | 'liabilities' | 'options' | 'netWorth' | 'income' | 'spending'>
   )> }
 );
 
@@ -2297,6 +2299,7 @@ export const InitialDocument = gql`
     annualisedFundReturns
     monthly {
       stocks
+      investmentPurchases
       income
       bills
       food
@@ -2469,6 +2472,7 @@ export const OverviewOldDocument = gql`
   overviewOld(now: $now) {
     startDate
     stocks
+    investmentPurchases
     pension
     cashOther
     investments
