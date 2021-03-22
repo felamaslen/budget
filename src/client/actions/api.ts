@@ -1,4 +1,4 @@
-import type { GQL } from '~client/types';
+import type { GQL, GQLDeep } from '~client/types';
 import type { AppConfig, InitialQuery } from '~client/types/gql';
 
 export const enum ActionTypeApi {
@@ -22,10 +22,10 @@ export const configUpdated = (
 
 export type ActionApiDataRead = {
   type: ActionTypeApi.DataRead;
-  res: InitialQuery;
+  res: GQLDeep<InitialQuery>;
 };
 
-export const dataRead = (res: InitialQuery): ActionApiDataRead => ({
+export const dataRead = (res: GQLDeep<InitialQuery>): ActionApiDataRead => ({
   type: ActionTypeApi.DataRead,
   res,
 });

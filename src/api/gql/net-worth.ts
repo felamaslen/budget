@@ -199,8 +199,15 @@ const Entry = gql`
     id: Int!
   }
 
+  type NetWorthCashTotal {
+    cashInBank: Int!
+    cashToInvest: Int!
+    date: Date
+  }
+
   extend type Query {
     readNetWorthEntries: NetWorthEntryOverview
+    netWorthCashTotal: NetWorthCashTotal
   }
 
   extend type Mutation {
@@ -221,6 +228,8 @@ const Entry = gql`
     netWorthEntryCreated: NetWorthEntryCreated!
     netWorthEntryUpdated: NetWorthEntryUpdated!
     netWorthEntryDeleted: NetWorthDeleted!
+
+    netWorthCashTotalUpdated: NetWorthCashTotal!
   }
 `;
 

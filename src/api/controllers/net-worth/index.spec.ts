@@ -21,8 +21,8 @@ describe('Net worth controller', () => {
   };
 
   describe(createNetWorthEntry.name, () => {
-    it('should publish to a pubsub topic', async () => {
-      expect.assertions(2);
+    it('should publish the created item and cash total', async () => {
+      expect.assertions(3);
 
       jest.spyOn(queries, 'getInvalidIds').mockResolvedValueOnce([]);
       jest.spyOn(queries, 'getInvalidCreditCategories').mockResolvedValueOnce([]);
@@ -60,7 +60,7 @@ describe('Net worth controller', () => {
         input: testEntryInput,
       });
 
-      expect(pubsubSpy).toHaveBeenCalledTimes(1);
+      expect(pubsubSpy).toHaveBeenCalledTimes(2);
       expect(pubsubSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.NetWorthEntryCreated}.${uid}`, {
         item: {
           id: 65,
@@ -80,12 +80,21 @@ describe('Net worth controller', () => {
           currencies: [],
         },
       });
+
+      expect(pubsubSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
+        {
+          cashInBank: expect.any(Number),
+          cashToInvest: expect.any(Number),
+          date: null,
+        },
+      );
     });
   });
 
   describe(updateNetWorthEntry.name, () => {
-    it('should publish to a pubsub topic', async () => {
-      expect.assertions(2);
+    it('should publish the updated item and cash total', async () => {
+      expect.assertions(3);
 
       jest.spyOn(queries, 'getInvalidIds').mockResolvedValueOnce([]);
       jest.spyOn(queries, 'getInvalidCreditCategories').mockResolvedValueOnce([]);
@@ -149,7 +158,7 @@ describe('Net worth controller', () => {
         input: testEntryInput,
       });
 
-      expect(pubsubSpy).toHaveBeenCalledTimes(1);
+      expect(pubsubSpy).toHaveBeenCalledTimes(2);
       expect(pubsubSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.NetWorthEntryUpdated}.${uid}`, {
         item: {
           id: 65,
@@ -175,12 +184,21 @@ describe('Net worth controller', () => {
           ],
         },
       });
+
+      expect(pubsubSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
+        {
+          cashInBank: expect.any(Number),
+          cashToInvest: expect.any(Number),
+          date: null,
+        },
+      );
     });
   });
 
   describe(deleteNetWorthEntry.name, () => {
-    it('should publish to a pubsub topic', async () => {
-      expect.assertions(2);
+    it('should publish the deleted item and cash total', async () => {
+      expect.assertions(3);
 
       jest.spyOn(queries, 'deleteNetWorthEntryRow').mockResolvedValueOnce(1);
 
@@ -190,10 +208,19 @@ describe('Net worth controller', () => {
         id: 65,
       });
 
-      expect(pubsubSpy).toHaveBeenCalledTimes(1);
+      expect(pubsubSpy).toHaveBeenCalledTimes(2);
       expect(pubsubSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.NetWorthEntryDeleted}.${uid}`, {
         id: 65,
       });
+
+      expect(pubsubSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
+        {
+          cashInBank: expect.any(Number),
+          cashToInvest: expect.any(Number),
+          date: null,
+        },
+      );
     });
   });
 });

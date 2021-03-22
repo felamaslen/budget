@@ -590,6 +590,11 @@ describe('Net worth reducer', () => {
           },
         ],
       },
+      netWorthCashTotal: {
+        cashInBank: 123,
+        cashToInvest: 456,
+        date: '2020-04-20',
+      },
     });
 
     it('should insert data into the state', () => {
@@ -718,6 +723,17 @@ describe('Net worth reducer', () => {
           ]),
         }),
       );
+    });
+
+    it('should set the cash totals', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+
+      expect(result.cashTotal).toStrictEqual({
+        cashInBank: 123,
+        cashToInvest: 456,
+        date: new Date('2020-04-20'),
+      });
     });
   });
 });

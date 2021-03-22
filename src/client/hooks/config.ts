@@ -6,13 +6,13 @@ import { configUpdated } from '~client/actions';
 import { useConfigUpdatedSubscription, useSetConfigMutation } from '~client/hooks/gql';
 import { getAppConfig, getAppConfigSerial } from '~client/selectors';
 
-export function useAppConfig(): void {
+export function useAppConfig(): () => void {
   const dispatch = useDispatch();
 
   const [, setRemoteConfig] = useSetConfigMutation();
   const debouncedRemoteUpdate = useDebounceCallback(setRemoteConfig, 500);
 
-  const [updatedConfigResult] = useConfigUpdatedSubscription();
+  const [updatedConfigResult, onReconnect] = useConfigUpdatedSubscription();
   const updatedConfig = updatedConfigResult.data?.configUpdated;
   useEffect(() => {
     if (updatedConfig) {
@@ -35,4 +35,5 @@ export function useAppConfig(): void {
       });
     }
   }, [appConfig, appConfigSerial, debouncedRemoteUpdate]);
+  return onReconnect;
 }

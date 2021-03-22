@@ -12,7 +12,8 @@ import {
 } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import * as gql from '~client/hooks/gql';
-import { toNativeFund, withNativeDate } from '~client/modules/data';
+import { composeWithoutArgs } from '~client/modules/compose-without-args';
+import { toNativeFund, VOID, withNativeDate } from '~client/modules/data';
 import type { FundInputNative, Id, Item, PageList, StandardInput } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 import type {
@@ -103,7 +104,7 @@ function useListSubscriptionsGeneric<
   subscriptions,
   toNative,
   getPage,
-}: GenericHookOptions<I, J, P, ResponseCreateUpdate, ResponseDelete>): void {
+}: GenericHookOptions<I, J, P, ResponseCreateUpdate, ResponseDelete>): () => void {
   const dispatch = useDispatch();
 
   const onListItemCreated = useCallback<
@@ -148,9 +149,11 @@ function useListSubscriptionsGeneric<
     [dispatch, responseKeys.deleted, getPage],
   );
 
-  const [resultItemCreated] = subscriptions.useOnCreate({}, onListItemCreated);
-  const [resultItemUpdated] = subscriptions.useOnUpdate({}, onListItemUpdated);
+  const [resultItemCreated, onReconnectCreate] = subscriptions.useOnCreate({}, onListItemCreated);
+  const [resultItemUpdated, onReconnectUpdate] = subscriptions.useOnUpdate({}, onListItemUpdated);
   const resultItemDeleted = subscriptions.useOnDelete?.({}, onListItemDeleted);
+
+  const onReconnectDelete = resultItemDeleted?.[1] ?? VOID;
 
   const error = resultItemCreated.error ?? resultItemUpdated.error ?? resultItemDeleted?.[0].error;
 
@@ -159,6 +162,8 @@ function useListSubscriptionsGeneric<
       dispatch(errorOpened(`Error subscribing to list: ${error.message}`, ErrorLevel.Err));
     }
   }, [dispatch, error]);
+
+  return composeWithoutArgs(onReconnectCreate, onReconnectUpdate, onReconnectDelete);
 }
 
 const standardOptions: GenericHookOptions<
@@ -222,7 +227,7 @@ const fundOptions: GenericHookOptions<
   toNative: toNativeFund,
 };
 
-function useReceiptSubscription(): void {
+function useReceiptSubscription(): () => void {
   const dispatch = useDispatch();
 
   const onReceiptCreated = useCallback(
@@ -234,13 +239,21 @@ function useReceiptSubscription(): void {
     [dispatch],
   );
 
-  gql.useReceiptCreatedSubscription({}, onReceiptCreated);
+  const [, onReconnect] = gql.useReceiptCreatedSubscription({}, onReceiptCreated);
+  return onReconnect;
 }
 
-export function useListSubscriptions(): void {
-  useListSubscriptionsGeneric(standardOptions);
-  useListSubscriptionsGeneric(extendedOptions);
-  useListSubscriptionsGeneric(fundOptions);
+export function useListSubscriptions(): () => void {
+  const onReconnectStandard = useListSubscriptionsGeneric(standardOptions);
+  const onReconnectExtended = useListSubscriptionsGeneric(extendedOptions);
+  const onReconnectFunds = useListSubscriptionsGeneric(fundOptions);
 
-  useReceiptSubscription();
+  const onReconnectReceipt = useReceiptSubscription();
+
+  return composeWithoutArgs(
+    onReconnectStandard,
+    onReconnectExtended,
+    onReconnectFunds,
+    onReconnectReceipt,
+  );
 }

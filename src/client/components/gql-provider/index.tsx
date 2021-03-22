@@ -1,6 +1,6 @@
 import { createClient, dedupExchange, cacheExchange, fetchExchange, ssrExchange } from '@urql/core';
 import { createClient as createWSClient } from 'graphql-ws';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Client, Provider, subscriptionExchange } from 'urql';
 
 import { isServerSide } from '~client/modules/ssr';
@@ -12,7 +12,7 @@ const wsUrl = isServerSide
 
 export type SSRExchange = ReturnType<typeof ssrExchange>;
 
-type ClientProps = { apiKey: string | null };
+type ClientProps = { apiKey: string | null; onReconnected?: () => void };
 
 export const ssr = isServerSide
   ? undefined
@@ -21,7 +21,9 @@ export const ssr = isServerSide
       initialState: window.__URQL_DATA__,
     });
 
-export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children }) => {
+export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconnected }) => {
+  const hasConnected = useRef<boolean>(false);
+
   const client = useMemo<Client>(() => {
     if (!apiKey) {
       return createClient({
@@ -38,6 +40,14 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children }) => {
         new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** Math.min(retries, 4))),
       connectionParams: {
         apiKey,
+      },
+      on: {
+        connected: (): void => {
+          if (hasConnected.current) {
+            onReconnected?.();
+          }
+          hasConnected.current = true;
+        },
       },
     });
 
@@ -65,7 +75,7 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children }) => {
         }),
       ],
     });
-  }, [apiKey]);
+  }, [apiKey, onReconnected]);
 
   return <Provider value={client}>{children}</Provider>;
 };

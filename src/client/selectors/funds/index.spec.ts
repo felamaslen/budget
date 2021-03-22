@@ -3,16 +3,15 @@ import getUnixTime from 'date-fns/getUnixTime';
 import numericHash from 'string-hash';
 
 import {
+  getCashBreakdown,
   getFundsCachedValueAgeText,
   getFundsCachedValue,
   getFundsCost,
   getPortfolio,
-  getCashToInvest,
   getDayGain,
   getDayGainAbs,
   getMaxAllocationTarget,
   getStockValue,
-  getCashInBank,
   getInvestmentsBetweenDates,
 } from '.';
 
@@ -257,44 +256,34 @@ describe('Funds selectors', () => {
     });
   });
 
-  describe('getCashInBank', () => {
-    it('should get the easy-access cash total from the previous month net worth data', () => {
+  describe('getCashBreakdown', () => {
+    const today = new Date('2018-03-30T09:32:10+0100');
+
+    const stateWithCashTotal: State = {
+      ...state,
+      netWorth: {
+        ...state.netWorth,
+        cashTotal: {
+          cashInBank: 1886691,
+          cashToInvest: 2996287,
+          date: new Date('2018-02-27'),
+        },
+      },
+    };
+
+    it('should return the cashInBank value from the state', () => {
       expect.assertions(1);
-      const today = new Date('2018-03-30T09:32:10+0100');
-      expect(getCashInBank(today)(state)).toBe(Math.round(10324 + 37.5 * 0.035 * 100 + 1296523));
+      expect(getCashBreakdown(today)(stateWithCashTotal).cashInBank).toBe(1886691);
     });
 
-    describe('when in the middle of the month', () => {
-      const stateWithCostSoFar: State = {
-        ...state,
-        [PageNonStandard.Funds]: {
-          ...state[PageNonStandard.Funds],
-          items: [
-            {
-              id: 1000,
-              item: 'fund 1',
-              transactions: [
-                {
-                  date: new Date('2018-03-19'),
-                  price: 123,
-                  units: 473,
-                  fees: 165,
-                  taxes: 9965,
-                },
-                {
-                  date: new Date('2018-03-21'),
-                  price: 125,
-                  units: 91,
-                  fees: 449,
-                  taxes: 6694,
-                },
-              ],
-              stockSplits: [],
-              allocationTarget: 100,
-            },
-          ],
-          __optimistic: [undefined],
-        },
+    it('should return the cashToInvest value from the state', () => {
+      expect.assertions(1);
+      expect(getCashBreakdown(today)(stateWithCashTotal).cashToInvest).toBe(2996287);
+    });
+
+    describe('when there has been income since the last net worth date', () => {
+      const stateWithIncome: State = {
+        ...stateWithCashTotal,
         [PageListStandard.Income]: {
           ...state[PageListStandard.Income],
           items: [
@@ -304,15 +293,33 @@ describe('Funds selectors', () => {
               item: 'Income 1',
               cost: 325600,
             },
+            {
+              id: 2,
+              date: new Date('2018-02-27'),
+              item: 'Old income',
+              cost: 198823,
+            },
           ],
-          __optimistic: [undefined],
+          __optimistic: [undefined, undefined],
         },
+      };
+
+      it('should add the income value to the bank cash', () => {
+        expect.assertions(1);
+        expect(getCashBreakdown(today)(stateWithIncome).cashInBank).toBe(1886691 + 325600);
+      });
+    });
+
+    describe('when there are purchase transactions since the last net worth date', () => {
+      const stateWithPurchases: State = {
+        ...stateWithCashTotal,
         [PageListStandard.Bills]: {
           ...state[PageListStandard.Bills],
           items: [
             {
               id: 1,
-              date: new Date('2018-03-07'),
+              // this is the previous month, but after the net worth date so should be included
+              date: new Date('2018-02-28'),
               item: 'Bill 1',
               cost: 175000,
             },
@@ -322,8 +329,14 @@ describe('Funds selectors', () => {
               item: 'Deleted bill',
               cost: 5644,
             },
+            {
+              id: 3,
+              date: new Date('2018-02-26'),
+              item: 'Old bill',
+              cost: 81022,
+            },
           ],
-          __optimistic: [undefined, RequestType.delete],
+          __optimistic: [undefined, RequestType.delete, undefined],
         },
         [PageListStandard.Food]: {
           ...state[PageListStandard.Food],
@@ -336,8 +349,16 @@ describe('Funds selectors', () => {
               cost: 105,
               shop: 'Shop 1',
             },
+            {
+              id: 2,
+              date: new Date('2018-02-23'),
+              item: 'Old food',
+              category: 'Food category 2',
+              cost: 558,
+              shop: 'Shop 1',
+            },
           ],
-          __optimistic: [undefined],
+          __optimistic: [undefined, undefined],
         },
         [PageListStandard.General]: {
           ...state[PageListStandard.General],
@@ -383,58 +404,85 @@ describe('Funds selectors', () => {
         },
       };
 
-      it.each`
-        item                | dates           | delta
-        ${'fund purchases'} | ${['20', '21']} | ${125 * 91 + 449 + 6694}
-        ${'bills'}          | ${['06', '07']} | ${175000}
-        ${'food'}           | ${['01', '02']} | ${105}
-        ${'general'}        | ${['05', '06']} | ${1776}
-        ${'holiday'}        | ${['12', '13']} | ${9994}
-        ${'social'}         | ${['14', '15']} | ${1293}
-      `('should take away the cost of $item up to the current date', ({ dates, delta }) => {
+      it('should remove the purchase costs from the bank cash', () => {
         expect.assertions(1);
-
-        const date0 = new Date(`2018-03-${dates[0]}T09:56:10+0100`);
-        const date1 = new Date(`2018-03-${dates[1]}T09:56:10+0100`);
-
-        const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
-        const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
-
-        expect(cashOnDate1).toBe(cashOnDate0 - delta);
-      });
-
-      it('should exclude optimistically deleted items', () => {
-        expect.assertions(1);
-
-        const date0 = new Date(`2020-03-03T09:56:10+0100`);
-        const date1 = new Date(`2020-03-04T09:56:10+0100`);
-
-        const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
-        const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
-
-        expect(cashOnDate1).toBe(cashOnDate0);
-      });
-
-      it('should add the value of income up to the current date', () => {
-        expect.assertions(1);
-
-        const date0 = new Date(`2018-03-08T09:56:10+0100`);
-        const date1 = new Date(`2018-03-09T09:56:10+0100`);
-
-        const cashOnDate0 = getCashInBank(date0)(stateWithCostSoFar);
-        const cashOnDate1 = getCashInBank(date1)(stateWithCostSoFar);
-
-        expect(cashOnDate1).toBe(cashOnDate0 + 325600);
+        expect(getCashBreakdown(today)(stateWithPurchases).cashInBank).toBe(
+          1886691 - (175000 + 105 + 1776 + 9994 + 1293),
+        );
       });
     });
-  });
 
-  describe('getCashToInvest', () => {
-    const today = new Date('2018-04-07T16:32:10+0100');
+    describe('when there are fund transactions since the last net worth date', () => {
+      const stateWithTransactions: State = {
+        ...stateWithCashTotal,
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
+          items: [
+            {
+              id: 1000,
+              item: 'fund 1',
+              transactions: [
+                {
+                  date: new Date('2018-02-27'), // not counted as on same date as net worth value
+                  price: 127.2,
+                  units: 1887,
+                  fees: 652,
+                  taxes: 4763,
+                },
+                {
+                  date: new Date('2018-02-28'),
+                  price: 123,
+                  units: 473,
+                  fees: 165,
+                  taxes: 9965,
+                },
+                {
+                  date: new Date('2018-03-21'),
+                  price: 125,
+                  units: 91,
+                  fees: 449,
+                  taxes: 6694,
+                },
+              ],
+              stockSplits: [],
+              allocationTarget: 100,
+            },
+          ],
+          __optimistic: [undefined],
+        },
+      };
 
-    it('should get the difference between net worth ISA value and current stocks value', () => {
-      expect.assertions(1);
-      expect(getCashToInvest(today)(state)).toMatchInlineSnapshot(`1061095`);
+      it('should remove the cost of the transactions from the cash to invest', () => {
+        expect.assertions(2);
+        const result = getCashBreakdown(today)(stateWithTransactions);
+
+        expect(result.cashToInvest).toBe(
+          2996287 - (123 * 473 + 165 + 9965 + 125 * 91 + 449 + 6694),
+        );
+        expect(result.cashInBank).toBe(1886691);
+      });
+
+      describe('when the investable cash is smaller than the transaction cost', () => {
+        const stateWithSmallInvestableCash: State = {
+          ...stateWithTransactions,
+          netWorth: {
+            ...stateWithTransactions.netWorth,
+            cashTotal: {
+              ...stateWithTransactions.netWorth.cashTotal,
+              cashInBank: 100667,
+              cashToInvest: 123 * 473 + 165 + 9965 + 125 * 91 + 449 + 6694 - 8455,
+            },
+          },
+        };
+
+        it('should take from the bank cash value', () => {
+          expect.assertions(2);
+          const result = getCashBreakdown(today)(stateWithSmallInvestableCash);
+
+          expect(result.cashToInvest).toBe(0);
+          expect(result.cashInBank).toBe(100667 - 8455);
+        });
+      });
     });
   });
 

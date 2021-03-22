@@ -30,6 +30,7 @@ export {
   useLoginMutation,
   useMoreListDataExtendedQuery,
   useMoreListDataStandardQuery,
+  useNetWorthCashTotalUpdatedSubscription,
   useNetWorthCategoryCreatedSubscription,
   useNetWorthCategoryDeletedSubscription,
   useNetWorthCategoryUpdatedSubscription,

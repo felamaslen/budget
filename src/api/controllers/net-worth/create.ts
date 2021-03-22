@@ -2,7 +2,7 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { formatDate } from '../shared';
 
-import { fetchById } from './read';
+import { fetchById, readNetWorthCashTotal } from './read';
 import { validateCategories } from './shared';
 
 import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
@@ -159,8 +159,12 @@ export async function createNetWorthEntry(
     createCurrencies(db, netWorthId, currencies),
   ]);
 
-  const item = await fetchById(db, uid, netWorthId);
+  const [item, cashTotal] = await Promise.all([
+    fetchById(db, uid, netWorthId),
+    readNetWorthCashTotal(db, uid),
+  ]);
   await pubsub.publish(`${PubSubTopic.NetWorthEntryCreated}.${uid}`, { item });
+  await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { id: netWorthId };
 }

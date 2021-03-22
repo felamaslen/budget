@@ -1,6 +1,8 @@
 import path from 'path';
 import * as getenv from 'getenv';
 
+import { investmentPurchaseCategories } from '~shared/constants';
+
 if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
   // eslint-disable-next-line
   require('dotenv').config({
@@ -67,7 +69,7 @@ export default {
       numFuture: getenv.int('OVERVIEW_FUTURE_MONTHS', 12),
       startYear: getenv.int('START_YEAR', 2014),
       startMonth: getenv.int('START_MONTH', 9),
-      investmentPurchaseCategories: ['House purchase'],
+      investmentPurchaseCategories,
       birthDate: getenv.string('BIRTH_DATE', '1990-01-01'),
     },
     pie: {

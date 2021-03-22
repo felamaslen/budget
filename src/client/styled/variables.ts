@@ -2,7 +2,7 @@ import { compose } from '@typed/compose';
 import { rgb, rgba, lighten, desaturate } from 'polished';
 
 import { ErrorLevel } from '~client/constants/error';
-import { Aggregate } from '~client/types/enum';
+import { NetWorthAggregate } from '~shared/constants';
 
 export const breakpoints = {
   mobileSmall: 350,
@@ -132,12 +132,12 @@ export const colors = {
     options: rgb(90, 168, 190),
     homeEquity: rgb(150, 140, 39),
     aggregate: {
-      [Aggregate.cashEasyAccess]: rgb(180, 214, 169),
-      [Aggregate.cashOther]: rgb(145, 194, 129),
-      [Aggregate.stocks]: lighten(0.3)(colorStocks),
-      [Aggregate.pension]: rgb(47, 123, 211),
-      [Aggregate.realEstate]: rgb(122, 180, 99),
-      [Aggregate.mortgage]: rgb(180, 99, 122),
+      [NetWorthAggregate.cashEasyAccess]: rgb(180, 214, 169),
+      [NetWorthAggregate.cashOther]: rgb(145, 194, 129),
+      [NetWorthAggregate.stocks]: lighten(0.3)(colorStocks),
+      [NetWorthAggregate.pension]: rgb(47, 123, 211),
+      [NetWorthAggregate.realEstate]: rgb(122, 180, 99),
+      [NetWorthAggregate.mortgage]: rgb(180, 99, 122),
     },
   },
   funds: {

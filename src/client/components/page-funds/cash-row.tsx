@@ -7,7 +7,7 @@ import { FundAllocationTargets } from '~client/components/fund-allocation-target
 import { TodayContext } from '~client/hooks';
 import * as gql from '~client/hooks/gql';
 import {
-  getCashToInvest,
+  getCashBreakdown,
   getCashAllocationTarget,
   getPortfolio,
   getFundsRows,
@@ -20,7 +20,7 @@ export const CashRow: React.FC = () => {
   const dispatch = useDispatch();
   const funds = useSelector(getFundsRows);
   const portfolio = useSelector(getPortfolio(today));
-  const cashToInvest = useSelector(getCashToInvest(today));
+  const { cashInBank, cashToInvest } = useSelector(getCashBreakdown(today));
 
   const cashTarget = useSelector(getCashAllocationTarget);
 
@@ -45,7 +45,7 @@ export const CashRow: React.FC = () => {
   return (
     <Styled.CashRow isSold={false} odd={true}>
       <FundAllocationTargets
-        cashToInvest={cashToInvest}
+        cashToInvest={cashInBank + cashToInvest}
         cashTarget={cashTarget}
         funds={funds}
         portfolio={portfolio}

@@ -10,7 +10,7 @@ import { blockPacker } from '~client/modules/block-packer';
 import { colorKey } from '~client/modules/color';
 import { abbreviateFundName } from '~client/modules/finance';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { getCashToInvest, getPortfolio, getStockValue, getCashInBank } from '~client/selectors';
+import { getCashBreakdown, getPortfolio, getStockValue } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import type { BlockItem } from '~client/types';
 
@@ -24,11 +24,10 @@ export const FundWeights: React.FC = () => {
   const today = useContext(TodayContext);
   const portfolio = useSelector(getPortfolio(today));
   const stockValue = useSelector(getStockValue(today));
-  const cashToInvest = useSelector(getCashToInvest(today));
-  const cashInBank = useSelector(getCashInBank(today));
+  const { cashInBank, cashToInvest } = useSelector(getCashBreakdown(today));
 
   const blocks = useMemo(() => {
-    const relevantNetWorth = cashToInvest + stockValue;
+    const relevantNetWorth = cashInBank + cashToInvest + stockValue;
 
     return blockPacker<BlockItem>(GRAPH_WIDTH, GRAPH_HEIGHT, [
       {
@@ -52,13 +51,13 @@ export const FundWeights: React.FC = () => {
       },
       {
         name: 'Cash',
-        total: cashToInvest,
+        total: cashInBank + cashToInvest,
         color: 'grey',
         text: <Styled.Label small={cashToInvest < relevantNetWorth / 20}>Cash</Styled.Label>,
         subTree: [
           {
-            name: formatLabel(cashToInvest - cashInBank, relevantNetWorth, 'Cash to invest'),
-            total: cashToInvest - cashInBank,
+            name: formatLabel(cashToInvest, relevantNetWorth, 'Cash to invest'),
+            total: cashToInvest,
             color: colors.transparent,
           },
           {

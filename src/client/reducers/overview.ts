@@ -19,11 +19,11 @@ import {
   FundPricesUpdated,
   ActionReceiptCreated,
 } from '~client/actions';
-import { EXPENSE_INVESTMENT_CATEGORIES } from '~client/constants/data';
 import { getMonthDatesList } from '~client/modules/date';
 import type { GQL, NativeDate, StandardInput } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
 import type { InitialQuery } from '~client/types/gql';
+import { investmentPurchaseCategories } from '~shared/constants';
 
 export type State = NativeDate<
   GQL<Exclude<InitialQuery['overview'], null | undefined>>,
@@ -76,14 +76,14 @@ const withInvestments = (delta: Partial<StandardInput> | null, item?: StandardIn
       setCost(
         state,
         delta?.date ?? item?.date ?? new Date(),
-        delta?.category && EXPENSE_INVESTMENT_CATEGORIES.includes(delta.category)
+        delta?.category && investmentPurchaseCategories.includes(delta.category)
           ? delta.cost ?? item?.cost ?? 0
           : 0,
       ),
       setCost(
         state,
         item?.date ?? new Date(),
-        item?.category && EXPENSE_INVESTMENT_CATEGORIES.includes(item.category)
+        item?.category && investmentPurchaseCategories.includes(item.category)
           ? -(item?.cost ?? 0)
           : 0,
       ),
@@ -93,7 +93,7 @@ const withInvestments = (delta: Partial<StandardInput> | null, item?: StandardIn
 
 const onCreate = (state: State, action: ListItemCreated<StandardInput, PageListStandard>): State =>
   withInvestments(action.delta)(
-    action.delta.category && EXPENSE_INVESTMENT_CATEGORIES.includes(action.delta.category)
+    action.delta.category && investmentPurchaseCategories.includes(action.delta.category)
       ? state
       : {
           ...state,
@@ -120,7 +120,7 @@ const onUpdate = (state: State, action: ListItemUpdated<StandardInput, PageListS
         setCost(
           state,
           action.delta.date ?? action.item?.date ?? new Date(),
-          action.delta.category && EXPENSE_INVESTMENT_CATEGORIES.includes(action.delta.category)
+          action.delta.category && investmentPurchaseCategories.includes(action.delta.category)
             ? 0
             : action.delta.cost ?? action.item?.cost ?? 0,
         ),
@@ -129,7 +129,7 @@ const onUpdate = (state: State, action: ListItemUpdated<StandardInput, PageListS
           action.item?.date ?? new Date(),
           isStandardListAction(action) &&
             action.item?.category &&
-            EXPENSE_INVESTMENT_CATEGORIES.includes(action.item.category)
+            investmentPurchaseCategories.includes(action.item.category)
             ? 0
             : -(action.item?.cost ?? 0),
         ),
@@ -142,7 +142,7 @@ const onDelete = (state: State, action: ListItemDeleted<StandardInput, PageListS
     null,
     action.item,
   )(
-    action.item.category && EXPENSE_INVESTMENT_CATEGORIES.includes(action.item.category)
+    action.item.category && investmentPurchaseCategories.includes(action.item.category)
       ? state
       : {
           ...state,

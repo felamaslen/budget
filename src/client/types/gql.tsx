@@ -71,6 +71,7 @@ export type Query = {
   config?: Maybe<AppConfig>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
+  netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   overview?: Maybe<Overview>;
   overviewOld?: Maybe<OverviewOld>;
   overviewPreview?: Maybe<OverviewPreview>;
@@ -463,6 +464,7 @@ export type Subscription = {
   listItemCreated: ListItemCreateUpdate;
   listItemDeleted: ListItemDelete;
   listItemUpdated: ListItemCreateUpdate;
+  netWorthCashTotalUpdated: NetWorthCashTotal;
   netWorthCategoryCreated: NetWorthCategoryCreated;
   netWorthCategoryDeleted: NetWorthDeleted;
   netWorthCategoryUpdated: NetWorthCategoryUpdated;
@@ -846,6 +848,13 @@ export type NetWorthDeleted = {
   __typename?: 'NetWorthDeleted';
   error?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
+};
+
+export type NetWorthCashTotal = {
+  __typename?: 'NetWorthCashTotal';
+  cashInBank: Scalars['Int'];
+  cashToInvest: Scalars['Int'];
+  date?: Maybe<Scalars['Date']>;
 };
 
 export enum MonthlyCategory {
@@ -1421,6 +1430,9 @@ export type InitialQuery = (
       & Pick<NetWorthEntry, 'id'>
       & NetWorthEntryPartsFragment
     )> }
+  )>, netWorthCashTotal?: Maybe<(
+    { __typename?: 'NetWorthCashTotal' }
+    & Pick<NetWorthCashTotal, 'cashInBank' | 'cashToInvest' | 'date'>
   )>, funds?: Maybe<(
     { __typename?: 'ReadFundsResponse' }
     & { items: Array<(
@@ -1896,6 +1908,17 @@ export type NetWorthEntryDeletedSubscription = (
   ) }
 );
 
+export type NetWorthCashTotalUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type NetWorthCashTotalUpdatedSubscription = (
+  { __typename?: 'Subscription' }
+  & { netWorthCashTotalUpdated: (
+    { __typename?: 'NetWorthCashTotal' }
+    & Pick<NetWorthCashTotal, 'cashInBank' | 'cashToInvest' | 'date'>
+  ) }
+);
+
 export const FundHistoryPartsFragmentDoc = gql`
     fragment FundHistoryParts on FundHistory {
   startTime
@@ -2321,6 +2344,11 @@ export const InitialDocument = gql`
       id
       ...NetWorthEntryParts
     }
+  }
+  netWorthCashTotal {
+    cashInBank
+    cashToInvest
+    date
   }
   cashAllocationTarget
   funds: readFunds {
@@ -2894,4 +2922,17 @@ export const NetWorthEntryDeletedDocument = gql`
 
 export function useNetWorthEntryDeletedSubscription<TData = NetWorthEntryDeletedSubscription>(options: Omit<Urql.UseSubscriptionArgs<NetWorthEntryDeletedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<NetWorthEntryDeletedSubscription, TData>) {
   return Urql.useSubscription<NetWorthEntryDeletedSubscription, TData, NetWorthEntryDeletedSubscriptionVariables>({ query: NetWorthEntryDeletedDocument, ...options }, handler);
+};
+export const NetWorthCashTotalUpdatedDocument = gql`
+    subscription NetWorthCashTotalUpdated {
+  netWorthCashTotalUpdated {
+    cashInBank
+    cashToInvest
+    date
+  }
+}
+    `;
+
+export function useNetWorthCashTotalUpdatedSubscription<TData = NetWorthCashTotalUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<NetWorthCashTotalUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<NetWorthCashTotalUpdatedSubscription, TData>) {
+  return Urql.useSubscription<NetWorthCashTotalUpdatedSubscription, TData, NetWorthCashTotalUpdatedSubscriptionVariables>({ query: NetWorthCashTotalUpdatedDocument, ...options }, handler);
 };

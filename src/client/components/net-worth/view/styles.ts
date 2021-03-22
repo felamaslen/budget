@@ -3,7 +3,8 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
 import { colors, breakpoints } from '~client/styled/variables';
-import type { Aggregate, NetWorthTableColumn } from '~client/types';
+import type { NetWorthTableColumn } from '~client/types';
+import { NetWorthAggregate } from '~shared/constants';
 
 export const NetWorthView = styled.div`
   background: ${colors.translucent.light.light};
@@ -120,7 +121,7 @@ export const HeaderRetirement = styled(Header)`
 
 export const Sum = styled.th``;
 
-export const SumValue = styled(Sum)<{ item: Aggregate }>`
+export const SumValue = styled(Sum)<{ item: NetWorthAggregate }>`
   padding: 0 5px;
   background: ${({ item }): string => colors.netWorth.aggregate[item]};
 `;

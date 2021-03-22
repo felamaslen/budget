@@ -14,4 +14,3 @@ export {
   SearchItem,
   ReceiptPage,
 } from './gql';
-export { Aggregate } from './net-worth';

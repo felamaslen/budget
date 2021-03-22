@@ -34,6 +34,12 @@ export const Initial = gql`
       }
     }
 
+    netWorthCashTotal {
+      cashInBank
+      cashToInvest
+      date
+    }
+
     cashAllocationTarget
 
     funds: readFunds {

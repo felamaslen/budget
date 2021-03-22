@@ -45,12 +45,12 @@ import {
   TableValues,
   MonthlyProcessedKey,
   MonthlyWithProcess,
-  Aggregate,
   GQL,
 } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
 import type { Monthly, NetWorthSubcategory } from '~client/types/gql';
 import type {} from '~client/types/overview';
+import { NetWorthAggregate } from '~shared/constants';
 
 export * from './common';
 export * from './net-worth';
@@ -251,7 +251,7 @@ function withAggregateNetWorth(
 ): (monthly: Monthly) => MonthlyWithProcess<AggregateKey> {
   const currentEntries = aggregatedNetWorth.slice(0, startPredictionIndex);
   const fillCurrent = (values: number[]): number[] => rightPad(values, aggregatedNetWorth.length);
-  const fillAggregate = (key: Aggregate): number[] =>
+  const fillAggregate = (key: NetWorthAggregate): number[] =>
     fillCurrent(currentEntries.map(({ aggregate }) => aggregate[key]));
 
   const { deposit: sayeDeposit, profit: sayeProfit } = calculatePredictedSAYEMonthlyDeposit(
@@ -262,11 +262,11 @@ function withAggregateNetWorth(
 
   return (monthly: Monthly): MonthlyWithProcess<AggregateKey> => ({
     ...monthly,
-    pension: fillAggregate(Aggregate.pension),
-    cashOther: fillAggregate(Aggregate.cashOther).map(
+    pension: fillAggregate(NetWorthAggregate.pension),
+    cashOther: fillAggregate(NetWorthAggregate.cashOther).map(
       (value, index) => value + sayeDeposit * Math.max(0, index - (startPredictionIndex - 1)),
     ),
-    investments: fillAggregate(Aggregate.stocks),
+    investments: fillAggregate(NetWorthAggregate.stocks),
     options: fillCurrent(currentEntries.map(({ options }) => options)).map(
       (value, index) => value + sayeProfit * Math.max(0, index - (startPredictionIndex - 1)),
     ),

@@ -40,6 +40,7 @@ export enum PubSubTopic {
   NetWorthEntryCreated = 'NetWorthEntryCreated',
   NetWorthEntryUpdated = 'NetWorthEntryUpdated',
   NetWorthEntryDeleted = 'NetWorthEntryDeleted',
+  NetWorthCashTotalUpdated = 'NetWorthCashTotalUpdated',
   OverviewCostUpdated = 'OverviewCostUpdated',
   ReceiptCreated = 'ReceiptCreated',
 }

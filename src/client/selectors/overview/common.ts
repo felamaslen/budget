@@ -2,7 +2,6 @@ import differenceInMonths from 'date-fns/differenceInMonths';
 import endOfMonth from 'date-fns/endOfMonth';
 import isBefore from 'date-fns/isBefore';
 import isSameDay from 'date-fns/isSameDay';
-import isSameMonth from 'date-fns/isSameMonth';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
@@ -12,7 +11,7 @@ import type { State as CrudState } from '~client/reducers/crud';
 import type { State } from '~client/reducers/types';
 import { withoutDeleted } from '~client/selectors/crud';
 import { getRawItems } from '~client/selectors/list';
-import type {
+import {
   ListItemStandardNative,
   ListItemExtendedNative,
   NativeDate,
@@ -20,9 +19,12 @@ import type {
   MonthlyProcessed,
   MonthlyProcessedKey,
   MonthlyWithProcess,
+  CashTotalNative,
 } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
 import type { ListItemStandard, Monthly } from '~client/types/gql';
+
+export const getCashTotal = (state: State): CashTotalNative => state.netWorth.cashTotal;
 
 export const roundedArrays = <T extends Record<string, unknown[]>>(items: T): T =>
   Object.entries(items).reduce<T>(
@@ -70,18 +72,20 @@ export const getMonthDates = createSelector(getStartDate, getEndDate, getMonthDa
 
 export const currentDayIsEndOfMonth = (today: Date): boolean => isSameDay(endOfMonth(today), today);
 
-const getPageCostForMonthSoFar = <I extends NativeDate<ListItemStandard, 'date'>>(
+const getPageCostSinceDate = <I extends NativeDate<ListItemStandard, 'date'>>(
   today: Date,
+  since: Date,
   items: CrudState<I>,
 ): number =>
   withoutDeleted(items)
-    .filter(({ date }) => isSameMonth(date, today) && isBefore(date, today))
+    .filter(({ date }) => isBefore(since, date) && isBefore(date, today))
     .reduce<number>((last, { cost }) => last + cost, 0);
 
-export const getCostForMonthSoFar = moize(
+export const getCostSinceCashTotals = moize(
   (today: Date) =>
     createSelector<
       State,
+      CashTotalNative,
       CrudState<ListItemStandardNative>,
       CrudState<ListItemStandardNative>,
       CrudState<ListItemStandardNative>,
@@ -90,17 +94,20 @@ export const getCostForMonthSoFar = moize(
       CrudState<ListItemStandardNative>,
       number
     >(
+      getCashTotal,
       getRawItems<ListItemStandardNative, PageListStandard.Income>(PageListStandard.Income),
       getRawItems<ListItemStandardNative, PageListStandard.Bills>(PageListStandard.Bills),
       getRawItems<ListItemExtendedNative, PageListStandard.Food>(PageListStandard.Food),
       getRawItems<ListItemExtendedNative, PageListStandard.General>(PageListStandard.General),
       getRawItems<ListItemExtendedNative, PageListStandard.Holiday>(PageListStandard.Holiday),
       getRawItems<ListItemExtendedNative, PageListStandard.Social>(PageListStandard.Social),
-      (income, ...args) =>
-        args.reduce(
-          (last, items) => last + getPageCostForMonthSoFar(today, items),
-          -getPageCostForMonthSoFar(today, income),
-        ),
+      ({ date: cashTotalDate }, income, ...args) =>
+        cashTotalDate
+          ? args.reduce(
+              (last, items) => last + getPageCostSinceDate(today, cashTotalDate, items),
+              -getPageCostSinceDate(today, cashTotalDate, income),
+            )
+          : 0,
     ),
   { maxSize: 1 },
 );

@@ -227,8 +227,8 @@ describe('Funds controller', () => {
   describe(createFund.name, () => {
     const uid = 1823;
 
-    it('should publish to the pubsub topic', async () => {
-      expect.assertions(2);
+    it('should publish the created fund and updated cash total', async () => {
+      expect.assertions(3);
 
       const publishSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
@@ -247,13 +247,21 @@ describe('Funds controller', () => {
 
       await createFund({} as DatabaseTransactionConnectionType, uid, args);
 
-      expect(publishSpy).toHaveBeenCalledTimes(1);
+      expect(publishSpy).toHaveBeenCalledTimes(2);
       expect(publishSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.FundCreated}.${uid}`, {
         id: 781,
         fakeId: -8813,
         item: { ...args.input, stockSplits: [] },
         overviewCost: [1, 7, 23],
       });
+      expect(publishSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
+        {
+          cashInBank: expect.any(Number),
+          cashToInvest: expect.any(Number),
+          date: null,
+        },
+      );
     });
   });
 
@@ -261,7 +269,7 @@ describe('Funds controller', () => {
     const uid = 71;
 
     it('should publish to the pubsub topic', async () => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       const input: FundInput = {
         item: 'Some fund',
@@ -284,13 +292,21 @@ describe('Funds controller', () => {
 
       await updateFund({} as DatabaseTransactionConnectionType, uid, args);
 
-      expect(publishSpy).toHaveBeenCalledTimes(1);
+      expect(publishSpy).toHaveBeenCalledTimes(2);
       expect(publishSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.FundUpdated}.${uid}`, {
         id: 792,
         fakeId: null,
         item: { ...args.input, stockSplits: [{ date: '2020-05-10', ratio: 6 }] },
         overviewCost: [1, 7, 23],
       });
+      expect(publishSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
+        {
+          cashInBank: expect.any(Number),
+          cashToInvest: expect.any(Number),
+          date: null,
+        },
+      );
     });
   });
 
@@ -298,7 +314,7 @@ describe('Funds controller', () => {
     const uid = 71;
 
     it('should publish to the pubsub topic', async () => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       jest.spyOn(crudQueries, 'deleteCrudItem').mockResolvedValueOnce(1);
       jest.spyOn(overview, 'getDisplayedFundValues').mockResolvedValueOnce([1, 7, 23]);
@@ -311,11 +327,19 @@ describe('Funds controller', () => {
 
       await deleteFund({} as DatabaseTransactionConnectionType, uid, args);
 
-      expect(publishSpy).toHaveBeenCalledTimes(1);
+      expect(publishSpy).toHaveBeenCalledTimes(2);
       expect(publishSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.FundDeleted}.${uid}`, {
         id: 118,
         overviewCost: [1, 7, 23],
       });
+      expect(publishSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
+        {
+          cashInBank: expect.any(Number),
+          cashToInvest: expect.any(Number),
+          date: null,
+        },
+      );
     });
   });
 

@@ -3,11 +3,13 @@ import type {
   CreditLimit,
   Currency,
   InitialQuery,
+  NetWorthCashTotal,
   NetWorthEntryInput,
   NetWorthValueInput,
   NetWorthValueObject,
 } from './gql';
 import type { GQL } from './shared';
+import type { NetWorthAggregate } from '~shared/constants';
 
 export type NetWorthTableRow = {
   id: number;
@@ -15,7 +17,7 @@ export type NetWorthTableRow = {
   assets: number;
   options: number;
   liabilities: number;
-  aggregate: AggregateSums;
+  aggregate: NetWorthAggregateSums;
   expenses: number;
   fti: number;
   pastYearAverageSpend: number;
@@ -23,17 +25,8 @@ export type NetWorthTableRow = {
 
 export type NetWorthTableColumn = 'date' | 'assets' | 'liabilities' | 'main' | 'expenses';
 
-export enum Aggregate {
-  cashEasyAccess = 'Cash (easy access)',
-  cashOther = 'Cash (other)',
-  stocks = 'Stocks', // this is actually stock+cash investments
-  pension = 'Pension',
-  realEstate = 'House',
-  mortgage = 'Mortgage',
-}
-
-export type AggregateSums = {
-  [key in Aggregate]: number;
+export type NetWorthAggregateSums = {
+  [key in NetWorthAggregate]: number;
 };
 
 export type NetWorthEntryRead = NonNullable<InitialQuery['netWorthEntries']>['current'][0];
@@ -57,3 +50,7 @@ export type NetWorthEntryNative = Pick<NativeDate<NetWorthEntryRead, 'date'>, 'i
 export type NetWorthEntryInputNative = NativeDate<NetWorthEntryInput, 'date'>;
 
 export type NetWorthValue = NetWorthValueInput | NetWorthValueObject;
+
+export type CashTotalNative = Omit<GQL<NetWorthCashTotal>, 'date'> & {
+  date: Date | null;
+};

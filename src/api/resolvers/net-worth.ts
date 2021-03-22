@@ -5,6 +5,7 @@ import {
   readNetWorthEntries,
   updateNetWorthEntry,
   deleteNetWorthEntry,
+  readNetWorthCashTotal,
 } from '~api/controllers';
 import {
   genericMutationResolver,
@@ -22,8 +23,9 @@ export const netWorthResolvers: Resolvers = {
   Query: {
     readNetWorthCategories: readResolver(netWorthCategory),
     readNetWorthSubcategories: readResolver(netWorthSubcategory),
-
     readNetWorthEntries: genericAuthDbResolver(readNetWorthEntries),
+
+    netWorthCashTotal: genericAuthDbResolver(readNetWorthCashTotal),
   },
 
   Mutation: {
@@ -66,5 +68,9 @@ export const netWorthResolvers: Resolvers = {
       PubSubTopic.NetWorthEntryUpdated,
     ),
     netWorthEntryDeleted: createSubscription<'NetWorthDeleted'>(PubSubTopic.NetWorthEntryDeleted),
+
+    netWorthCashTotalUpdated: createSubscription<'NetWorthCashTotal'>(
+      PubSubTopic.NetWorthCashTotalUpdated,
+    ),
   },
 };

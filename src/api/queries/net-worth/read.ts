@@ -1,3 +1,4 @@
+import { formatISO } from 'date-fns';
 import {
   sql,
   DatabaseTransactionConnectionType,
@@ -5,6 +6,7 @@ import {
 } from 'slonik';
 
 import type { JoinedEntryRow, OldNetWorthRow } from '~api/types';
+import { NetWorthAggregate } from '~shared/constants';
 
 const joinEntryRows = (
   conditions: TaggedTemplateLiteralInvocationType = sql``,
@@ -300,4 +302,82 @@ export async function selectOldNetWorth(
     ORDER BY v.date DESC
   `);
   return result.rows;
+}
+
+type LatestCashTotalRow = {
+  date: string;
+  value_type: 'cash_in_bank' | 'stocks_including_cash';
+  value: number;
+};
+
+export async function selectLatestCashTotal(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  now: Date,
+): Promise<{
+  date: Date;
+  cashInBank: number;
+  stocksIncludingCash: number;
+} | null> {
+  const result = await db.query<LatestCashTotalRow>(sql`
+  WITH ${sql.join(
+    [
+      sql`net_worth_latest AS (
+      SELECT id, date
+      FROM net_worth nw
+      WHERE nw.uid = ${uid} AND nw.date <= ${formatISO(now, { format: 'basic' })}
+      ORDER BY nw.date DESC
+      LIMIT 1
+    )`,
+
+      sql`net_worth_latest_values AS (
+      SELECT ${sql.join(
+        [
+          sql`nwcat.category`,
+          sql`nwl.date`,
+          sql`nwv.value AS value_simple`,
+          sql`nwfxv.value AS value_fx`,
+          sql`nwc.rate AS fx_rate`,
+          sql`false AS is_saye`, // SAYE / options would never count as cash
+          sql`0 as value_op_vested`,
+          sql`0 as value_op_strike_price`,
+        ],
+        sql`, `,
+      )}
+      FROM net_worth_latest nwl
+      INNER JOIN net_worth_values nwv ON nwv.net_worth_id = nwl.id
+      INNER JOIN net_worth_subcategories nwsubcat ON nwsubcat.id = nwv.subcategory
+      INNER JOIN net_worth_categories nwcat ON nwcat.id = nwsubcat.category_id
+      LEFT JOIN net_worth_fx_values nwfxv ON nwfxv.values_id = nwv.id
+      LEFT JOIN net_worth_currencies nwc ON nwc.net_worth_id = nwv.id AND nwc.currency = nwfxv.currency
+    )`,
+    ],
+    sql`, `,
+  )}
+
+  SELECT 'cash_in_bank' AS value_type, v.date, SUM(${valueSimpleFxSaye}) AS value
+  FROM net_worth_latest_values v
+  WHERE v.category = ${NetWorthAggregate.cashEasyAccess}
+  GROUP BY v.date
+
+  UNION SELECT 'stocks_including_cash' AS value_type, v.date, SUM(${valueSimpleFxSaye}) AS value
+  FROM net_worth_latest_values v
+  WHERE v.category = ${NetWorthAggregate.stocks}
+  GROUP BY v.date
+  `);
+
+  const cashInBankRow = result.rows.find((row) => row.value_type === 'cash_in_bank');
+  const stocksIncludingCashRow = result.rows.find(
+    (row) => row.value_type === 'stocks_including_cash',
+  );
+
+  if (!(cashInBankRow && stocksIncludingCashRow)) {
+    return null;
+  }
+
+  return {
+    date: new Date(cashInBankRow.date),
+    cashInBank: cashInBankRow.value,
+    stocksIncludingCash: stocksIncludingCashRow.value,
+  };
 }

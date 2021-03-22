@@ -6,6 +6,7 @@ import { SubscriptionHandler, UseSubscriptionResponse } from 'urql';
 import { SubscriptionArgs } from './list';
 
 import {
+  dataRead,
   netWorthCategoryCreated,
   netWorthCategoryDeleted,
   netWorthCategoryUpdated,
@@ -17,6 +18,7 @@ import {
   netWorthSubcategoryUpdated,
 } from '~client/actions';
 import * as gql from '~client/hooks/gql';
+import { composeWithoutArgs } from '~client/modules/compose-without-args';
 import type { Id, Item, NetWorthEntryRead } from '~client/types';
 import type { Maybe, NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
 
@@ -73,12 +75,12 @@ function useNetWorthCrud<
   responseKeys,
   subscriptions,
   actions,
-}: CrudOptions<T, ActionCreate, ActionUpdate, ActionDelete>): void {
+}: CrudOptions<T, ActionCreate, ActionUpdate, ActionDelete>): () => void {
   const dispatch = useDispatch();
 
-  const [created] = subscriptions.useOnCreate();
-  const [updated] = subscriptions.useOnUpdate();
-  const [deleted] = subscriptions.useOnDelete();
+  const [created, onReconnectCreate] = subscriptions.useOnCreate();
+  const [updated, onReconnectUpdate] = subscriptions.useOnUpdate();
+  const [deleted, onReconnectDelete] = subscriptions.useOnDelete();
 
   useEffect(() => {
     const item = created.data?.[responseKeys.created]?.item;
@@ -98,6 +100,8 @@ function useNetWorthCrud<
       dispatch(actions.onDelete(id));
     }
   }, [deleted, dispatch, responseKeys.deleted, actions]);
+
+  return composeWithoutArgs(onReconnectCreate, onReconnectUpdate, onReconnectDelete);
 }
 
 const optionsCategory: CrudOptions<NetWorthCategory> = {
@@ -154,8 +158,24 @@ const optionsEntry: CrudOptions<NetWorthEntryRead> = {
   },
 };
 
-export function useNetWorthSubscriptions(): void {
-  useNetWorthCrud(optionsCategory);
-  useNetWorthCrud(optionsSubcategory);
-  useNetWorthCrud(optionsEntry);
+export function useNetWorthSubscriptions(): () => void {
+  const dispatch = useDispatch();
+
+  const onReconnectCategory = useNetWorthCrud(optionsCategory);
+  const onReconnectSubcategory = useNetWorthCrud(optionsSubcategory);
+  const onReconnectEntry = useNetWorthCrud(optionsEntry);
+
+  const [cashTotal, onReconnectCashTotal] = gql.useNetWorthCashTotalUpdatedSubscription();
+  useEffect(() => {
+    if (cashTotal.data) {
+      dispatch(dataRead({ netWorthCashTotal: cashTotal.data.netWorthCashTotalUpdated }));
+    }
+  }, [cashTotal, dispatch]);
+
+  return composeWithoutArgs(
+    onReconnectCategory,
+    onReconnectSubcategory,
+    onReconnectEntry,
+    onReconnectCashTotal,
+  );
 }

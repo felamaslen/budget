@@ -1,11 +1,17 @@
+import { endOfMonth } from 'date-fns';
 import groupBy from 'lodash/groupBy';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { formatDate } from '../shared';
 import { combineJoinedEntryRows } from './shared';
 import { getOldDateBoundaries } from '~api/controllers/overview';
-import { selectEntry, selectAllEntries } from '~api/queries';
-import type { NetWorthEntry, NetWorthEntryOverview } from '~api/types';
+import {
+  selectEntry,
+  selectAllEntries,
+  selectLatestCashTotal,
+  getTotalFundValue,
+} from '~api/queries';
+import type { NetWorthCashTotal, NetWorthEntry, NetWorthEntryOverview } from '~api/types';
 
 export async function fetchById(
   db: DatabaseTransactionConnectionType,
@@ -36,4 +42,26 @@ export async function readNetWorthEntries(
   const { oldDateEnd } = getOldDateBoundaries();
   const current = await fetchAll(db, uid, oldDateEnd);
   return { current };
+}
+
+export async function readNetWorthCashTotal(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<NetWorthCashTotal> {
+  const now = new Date();
+  const netWorth = await selectLatestCashTotal(db, uid, endOfMonth(now));
+
+  if (!netWorth) {
+    return { cashInBank: 0, cashToInvest: 0, date: null };
+  }
+
+  const stockValueAtNetWorthDate = await getTotalFundValue(db, uid, netWorth.date);
+
+  const cashToInvestAtNetWorthDate = netWorth.stocksIncludingCash - stockValueAtNetWorthDate;
+
+  return {
+    cashInBank: netWorth.cashInBank,
+    cashToInvest: cashToInvestAtNetWorthDate,
+    date: netWorth.date,
+  };
 }

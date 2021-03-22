@@ -20,6 +20,7 @@ export async function generateFunds(uid: number, db: Knex): Promise<void> {
       { time: '2014-10-14T17:01:01Z' },
       { time: '2015-02-03T15:30:01Z' },
       { time: '2015-08-29T15:30:01Z' },
+      { time: '2020-03-30T17:01:01Z' },
     ])
     .returning('cid');
 
@@ -43,6 +44,7 @@ export async function generateFunds(uid: number, db: Knex): Promise<void> {
       { cid: cids[4], fid: fids[0], price: 117.93 },
       { cid: cids[5], fid: fids[0], price: 119.27 },
       { cid: cids[6], fid: fids[0], price: 120.05 },
+      { cid: cids[7], fid: fids[0], price: 127.39 },
     ])
     .into('fund_cache');
 
@@ -228,7 +230,7 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
       {
         uid,
         type: 'asset',
-        category: 'Cash',
+        category: 'Cash (easy access)',
         color: 'green',
         is_option: false,
       },
@@ -361,7 +363,7 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
     ])
     .returning('id');
 
-  const [entryIdOldest, entryIdOld] = await db('net_worth')
+  const [entryIdOldest, entryIdOld, entryIdLastMonth] = await db('net_worth')
     .insert([
       {
         uid,
@@ -370,6 +372,10 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
       {
         uid,
         date: new Date('2015-05-31'),
+      },
+      {
+        uid,
+        date: new Date('2020-03-31'),
       },
     ])
     .returning('id');
@@ -521,6 +527,21 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
       },
     ])
     .returning('id');
+
+  await db('net_worth_values').insert([
+    {
+      net_worth_id: entryIdLastMonth,
+      subcategory: subcategoryIdISA,
+      value: 6449962,
+      skip: null,
+    },
+    {
+      net_worth_id: entryIdLastMonth,
+      subcategory: subcategoryIdBank,
+      value: 1288520,
+      skip: null,
+    },
+  ]);
 
   await db('net_worth_fx_values').insert([
     {

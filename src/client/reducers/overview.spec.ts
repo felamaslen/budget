@@ -15,12 +15,12 @@ import {
   loggedOut,
   receiptCreated,
 } from '~client/actions';
-import { EXPENSE_INVESTMENT_CATEGORIES } from '~client/constants/data';
 import reducer, { initialState, State } from '~client/reducers/overview';
 import { testResponse } from '~client/test-data';
 import type { PageListCost, StandardInput } from '~client/types';
 import { PageListStandard, ReceiptPage } from '~client/types/enum';
 import type { FundHistory } from '~client/types/gql';
+import { investmentPurchaseCategories } from '~shared/constants';
 
 describe('Overview reducer', () => {
   const now = new Date('2019-07-13T11:43:10+0100');
@@ -138,7 +138,7 @@ describe('Overview reducer', () => {
       expect(withGeneral.monthly?.general?.[2]).toBe(28335 + 34);
     });
 
-    describe.each(EXPENSE_INVESTMENT_CATEGORIES)(
+    describe.each(investmentPurchaseCategories)(
       'when the expense is for an investment purchase',
       (category) => {
         it('should add the cost to investment purchases instead of the page data', () => {
@@ -243,7 +243,7 @@ describe('Overview reducer', () => {
       });
     });
 
-    describe.each(EXPENSE_INVESTMENT_CATEGORIES)(
+    describe.each(investmentPurchaseCategories)(
       "when the old item was for an investment purchase but the new one isn't",
       (oldCategory) => {
         it('should add the new cost and remove from investment purchases', () => {
@@ -273,7 +273,7 @@ describe('Overview reducer', () => {
       },
     );
 
-    describe.each(EXPENSE_INVESTMENT_CATEGORIES)(
+    describe.each(investmentPurchaseCategories)(
       "when the new item is for an investment purchase but the old one wasn't",
       (newCategory) => {
         it('should remove the old cost and add to investment purchases', () => {
@@ -346,7 +346,7 @@ describe('Overview reducer', () => {
       });
     });
 
-    describe.each(EXPENSE_INVESTMENT_CATEGORIES)(
+    describe.each(investmentPurchaseCategories)(
       'when the expense is for an investment purchase',
       (category) => {
         it('should omit the expense from the page data and add to investment purchases instead', () => {

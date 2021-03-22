@@ -142,6 +142,7 @@ const getBaseConfig = (__DEV__) => ({
   resolve: {
     alias: {
       'react-dom': '@hot-loader/react-dom',
+      '~shared': path.resolve(__dirname, './src/shared'),
       '~client': path.resolve(__dirname, './src/client'),
       '~api': path.resolve(__dirname, './src/api'),
     },

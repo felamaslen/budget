@@ -30,17 +30,17 @@ import type { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/config';
 import { colors } from '~client/styled/variables';
 import type {
-  AggregateSums,
   BlockItem,
   FlexBlocks,
   GQL,
+  NetWorthAggregateSums as AggregateSums,
   NetWorthEntryNative,
   NetWorthTableRow as TableRow,
   NetWorthValueObjectNative,
   NetWorthValueObjectRead,
   WithSubTree,
 } from '~client/types';
-import { Aggregate, NetWorthCategoryType } from '~client/types/enum';
+import { NetWorthCategoryType } from '~client/types/enum';
 import type {
   Currency,
   MortgageValue,
@@ -48,6 +48,7 @@ import type {
   NetWorthSubcategory,
   OptionValue,
 } from '~client/types/gql';
+import { NetWorthAggregate as Aggregate } from '~shared/constants';
 
 const nullEntry = (date: Date): NetWorthEntryNative => ({
   id: -date.getTime(),

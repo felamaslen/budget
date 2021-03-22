@@ -10,19 +10,21 @@ import {
 } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import * as gql from '~client/hooks/gql';
+import { composeWithoutArgs } from '~client/modules/compose-without-args';
 import { getHistoryOptions } from '~client/selectors';
 
-function useCashTargetSubscription(dispatch: Dispatch): void {
-  const [updatedCashTarget] = gql.useCashAllocationTargetUpdatedSubscription();
+function useCashTargetSubscription(dispatch: Dispatch): () => void {
+  const [updatedCashTarget, onReconnect] = gql.useCashAllocationTargetUpdatedSubscription();
   useEffect(() => {
     if (updatedCashTarget.data) {
       dispatch(cashTargetUpdated(updatedCashTarget.data.cashAllocationTargetUpdated));
     }
   }, [dispatch, updatedCashTarget.data]);
+  return onReconnect;
 }
 
-function useFundAllocationTargetsSubscription(dispatch: Dispatch): void {
-  const [updatedFundTargets] = gql.useFundAllocationTargetsUpdatedSubscription();
+function useFundAllocationTargetsSubscription(dispatch: Dispatch): () => void {
+  const [updatedFundTargets, onReconnect] = gql.useFundAllocationTargetsUpdatedSubscription();
   useEffect(() => {
     if (updatedFundTargets.data?.fundAllocationTargetsUpdated.deltas) {
       dispatch(
@@ -30,12 +32,13 @@ function useFundAllocationTargetsSubscription(dispatch: Dispatch): void {
       );
     }
   }, [dispatch, updatedFundTargets.data]);
+  return onReconnect;
 }
 
-export function useFundsSubscriptions(): void {
+export function useFundsSubscriptions(): () => void {
   const query = useSelector(getHistoryOptions);
   const dispatch = useDispatch();
-  const [res] = gql.useFundPricesUpdatedSubscription({
+  const [res, onReconnectPrices] = gql.useFundPricesUpdatedSubscription({
     variables: query,
   });
 
@@ -53,6 +56,7 @@ export function useFundsSubscriptions(): void {
     }
   }, [dispatch, query, res.data]);
 
-  useCashTargetSubscription(dispatch);
-  useFundAllocationTargetsSubscription(dispatch);
+  const onReconnectCashTarget = useCashTargetSubscription(dispatch);
+  const onReconnectAllocation = useFundAllocationTargetsSubscription(dispatch);
+  return composeWithoutArgs(onReconnectPrices, onReconnectCashTarget, onReconnectAllocation);
 }

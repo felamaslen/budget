@@ -23,6 +23,7 @@
       }
     ],
     "paths": {
+      "~shared/*": ["./src/shared/*"],
       "~api/*": ["./src/api/*"],
       "~client/*": ["./src/client/*"]
     }

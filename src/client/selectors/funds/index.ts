@@ -1,24 +1,19 @@
-import addDays from 'date-fns/addDays';
 import endOfDay from 'date-fns/endOfDay';
-import endOfMonth from 'date-fns/endOfMonth';
 import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
 import startOfDay from 'date-fns/startOfDay';
-import startOfMonth from 'date-fns/startOfMonth';
 import subDays from 'date-fns/subDays';
-import subMonths from 'date-fns/subMonths';
 import humanizeDuration from 'humanize-duration';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
-import { getLatestNetWorthAggregate } from '../overview/net-worth';
 import { getDayGain, getDayGainAbs, getPaperValue, getRealisedValue, getBuyCost } from './gains';
 import { getFundsRows, getFundsCache, PriceCache, PriceCacheRebased } from './helpers';
 import { getTotalCost, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/api';
-import { getCostForMonthSoFar } from '~client/selectors/overview/common';
+import { getCashTotal, getCostSinceCashTotals } from '~client/selectors/overview/common';
 import type {
   Data,
   Id,
@@ -27,7 +22,7 @@ import type {
   RowPrices,
   FundNative,
 } from '~client/types';
-import { Aggregate, PageNonStandard } from '~client/types/enum';
+import { PageNonStandard } from '~client/types/enum';
 
 export * from './gains';
 export * from './graph';
@@ -141,32 +136,29 @@ export const getInvestmentsBetweenDates = moize(
   { maxSize: 1 },
 );
 
-export const getCashInBank = moize(
+const getInvestmentsSinceCashTotal = moize(
   (today: Date) =>
-    createSelector(
-      getLatestNetWorthAggregate(subMonths(endOfMonth(today), 1)),
-      getFundsCost(startOfDay(addDays(today, 1))),
-      getFundsCost(startOfMonth(today)),
-      getCostForMonthSoFar(today),
-      (netWorth, fundsCostToday, fundsCostPreviousMonth, purchaseCostSoFar): number => {
-        const cashTotalAtStartOfMonth = netWorth?.[Aggregate.cashEasyAccess] ?? 0;
-        const fundsCost = fundsCostToday - fundsCostPreviousMonth;
-        return Math.max(0, cashTotalAtStartOfMonth - fundsCost - purchaseCostSoFar);
-      },
+    createSelector(getCashTotal, getFundsRows, ({ date: cashTotalDate }, funds) =>
+      cashTotalDate
+        ? getFundsCostToDate(endOfDay(today), funds) -
+          getFundsCostToDate(endOfDay(cashTotalDate), funds)
+        : 0,
     ),
   { maxSize: 1 },
 );
 
-export const getCashToInvest = moize(
+export const getCashBreakdown = moize(
   (today: Date) =>
     createSelector(
-      getLatestNetWorthAggregate(today),
-      getCashInBank(today),
-      getStockValue(today),
-      (netWorth, cashInBank, stockValue): number => {
-        const stocksIncludingCash = netWorth?.[Aggregate.stocks] ?? 0;
-        return Math.max(0, cashInBank + Math.max(0, stocksIncludingCash - stockValue));
-      },
+      getCashTotal,
+      getCostSinceCashTotals(today),
+      getInvestmentsSinceCashTotal(today),
+      (cashTotal, purchaseCosts, investments) => ({
+        cashInBank: Math.round(
+          cashTotal.cashInBank - purchaseCosts - Math.max(0, investments - cashTotal.cashToInvest),
+        ),
+        cashToInvest: Math.round(Math.max(0, cashTotal.cashToInvest - investments)),
+      }),
     ),
   { maxSize: 1 },
 );

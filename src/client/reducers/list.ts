@@ -75,6 +75,9 @@ export const onRead = <
   processItem: (item: R) => J = IDENTITY,
 ) => (state: S, action: Actions.ActionApiDataRead): S => {
   const res = action.res[page];
+  if (!res) {
+    return state;
+  }
 
   const items: J[] = (((res?.items ?? []) as ListItem[]) as R[]).map(processItem);
 

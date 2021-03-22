@@ -1,7 +1,7 @@
 /* @jsx jsx */
 import { jsx } from '@emotion/react';
 import loadable, { LoadableComponent } from '@loadable/component';
-import { Fragment } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { RouteComponentProps, Route, Switch, withRouter } from 'react-router-dom';
 
@@ -57,8 +57,17 @@ const NotFound: React.FC = () => (
   </div>
 );
 
-const ContentWithData: React.FC = () => {
-  useSubscriptions();
+export type ContentProps = { connectionAttempt: number };
+
+const ContentWithData: React.FC<ContentProps> = ({ connectionAttempt }) => {
+  const onReconnect = useSubscriptions();
+  const lastConnectionAttempt = useRef<number>(0);
+  useEffect(() => {
+    if (connectionAttempt > lastConnectionAttempt.current) {
+      onReconnect();
+      lastConnectionAttempt.current = connectionAttempt;
+    }
+  }, [connectionAttempt, onReconnect]);
 
   return (
     <Fragment>
@@ -72,7 +81,7 @@ const ContentWithData: React.FC = () => {
   );
 };
 
-const Content: React.FC<RouteComponentProps> = () => {
+const Content: React.FC<RouteComponentProps & ContentProps> = ({ connectionAttempt }) => {
   const { loading, error } = useInitialData();
 
   if (loading) {
@@ -82,7 +91,7 @@ const Content: React.FC<RouteComponentProps> = () => {
     return null;
   }
 
-  return <ContentWithData />;
+  return <ContentWithData connectionAttempt={connectionAttempt} />;
 };
 
 export const LoggedIn = withRouter(Content);

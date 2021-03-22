@@ -25,6 +25,7 @@ module.exports = {
   resolve: {
     ...baseConfig.resolve,
     alias: {
+      '~shared': path.resolve(__dirname, './src/shared'),
       '~client': path.resolve(__dirname, './src/client'),
       '~api': path.resolve(__dirname, './src/api'),
     },

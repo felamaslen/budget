@@ -66,7 +66,10 @@ const onPeriodLoad = (state: State, res: FundHistory | null | undefined): State 
 
 const onReadFunds = (state: State, action: ActionApiDataRead): State =>
   onPeriodLoad(
-    { ...onReadRows(state, action), cashTarget: action.res.cashAllocationTarget ?? 0 },
+    {
+      ...onReadRows(state, action),
+      cashTarget: action.res.cashAllocationTarget ?? state.cashTarget,
+    },
     action.res.fundHistory,
   );
 

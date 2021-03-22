@@ -66,6 +66,7 @@ export type Query = {
   config?: Maybe<AppConfig>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
+  netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   overview?: Maybe<Overview>;
   overviewOld?: Maybe<OverviewOld>;
   overviewPreview?: Maybe<OverviewPreview>;
@@ -440,6 +441,7 @@ export type Subscription = {
   listItemCreated: ListItemCreateUpdate;
   listItemDeleted: ListItemDelete;
   listItemUpdated: ListItemCreateUpdate;
+  netWorthCashTotalUpdated: NetWorthCashTotal;
   netWorthCategoryCreated: NetWorthCategoryCreated;
   netWorthCategoryDeleted: NetWorthDeleted;
   netWorthCategoryUpdated: NetWorthCategoryUpdated;
@@ -792,6 +794,12 @@ export type NetWorthDeleted = {
   id: Scalars['Int'];
 };
 
+export type NetWorthCashTotal = {
+  cashInBank: Scalars['Int'];
+  cashToInvest: Scalars['Int'];
+  date?: Maybe<Scalars['Date']>;
+};
+
 export enum MonthlyCategory {
   Stocks = 'stocks',
   Income = 'income',
@@ -1065,6 +1073,7 @@ export type ResolversTypes = {
   NetWorthEntryCreated: ResolverTypeWrapper<NetWorthEntryCreated>;
   NetWorthEntryUpdated: ResolverTypeWrapper<NetWorthEntryUpdated>;
   NetWorthDeleted: ResolverTypeWrapper<NetWorthDeleted>;
+  NetWorthCashTotal: ResolverTypeWrapper<NetWorthCashTotal>;
   MonthlyCategory: MonthlyCategory;
   Monthly: ResolverTypeWrapper<Monthly>;
   Overview: ResolverTypeWrapper<Overview>;
@@ -1164,6 +1173,7 @@ export type ResolversParentTypes = {
   NetWorthEntryCreated: NetWorthEntryCreated;
   NetWorthEntryUpdated: NetWorthEntryUpdated;
   NetWorthDeleted: NetWorthDeleted;
+  NetWorthCashTotal: NetWorthCashTotal;
   Monthly: Monthly;
   Overview: Overview;
   OverviewOld: OverviewOld;
@@ -1209,6 +1219,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   config?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType>;
   fundHistory?: Resolver<Maybe<ResolversTypes['FundHistory']>, ParentType, ContextType, RequireFields<QueryFundHistoryArgs, never>>;
   fundHistoryIndividual?: Resolver<Maybe<ResolversTypes['FundHistoryIndividual']>, ParentType, ContextType, RequireFields<QueryFundHistoryIndividualArgs, 'id'>>;
+  netWorthCashTotal?: Resolver<Maybe<ResolversTypes['NetWorthCashTotal']>, ParentType, ContextType>;
   overview?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType, RequireFields<QueryOverviewArgs, never>>;
   overviewOld?: Resolver<Maybe<ResolversTypes['OverviewOld']>, ParentType, ContextType, RequireFields<QueryOverviewOldArgs, never>>;
   overviewPreview?: Resolver<Maybe<ResolversTypes['OverviewPreview']>, ParentType, ContextType, RequireFields<QueryOverviewPreviewArgs, 'category' | 'date'>>;
@@ -1369,6 +1380,7 @@ export type SubscriptionResolvers<ContextType = Context, ParentType extends Reso
   listItemCreated?: SubscriptionResolver<ResolversTypes['ListItemCreateUpdate'], "listItemCreated", ParentType, ContextType, RequireFields<SubscriptionListItemCreatedArgs, 'pages'>>;
   listItemDeleted?: SubscriptionResolver<ResolversTypes['ListItemDelete'], "listItemDeleted", ParentType, ContextType>;
   listItemUpdated?: SubscriptionResolver<ResolversTypes['ListItemCreateUpdate'], "listItemUpdated", ParentType, ContextType, RequireFields<SubscriptionListItemUpdatedArgs, 'pages'>>;
+  netWorthCashTotalUpdated?: SubscriptionResolver<ResolversTypes['NetWorthCashTotal'], "netWorthCashTotalUpdated", ParentType, ContextType>;
   netWorthCategoryCreated?: SubscriptionResolver<ResolversTypes['NetWorthCategoryCreated'], "netWorthCategoryCreated", ParentType, ContextType>;
   netWorthCategoryDeleted?: SubscriptionResolver<ResolversTypes['NetWorthDeleted'], "netWorthCategoryDeleted", ParentType, ContextType>;
   netWorthCategoryUpdated?: SubscriptionResolver<ResolversTypes['NetWorthCategoryUpdated'], "netWorthCategoryUpdated", ParentType, ContextType>;
@@ -1645,6 +1657,13 @@ export type NetWorthDeletedResolvers<ContextType = Context, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type NetWorthCashTotalResolvers<ContextType = Context, ParentType extends ResolversParentTypes['NetWorthCashTotal'] = ResolversParentTypes['NetWorthCashTotal']> = {
+  cashInBank?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  cashToInvest?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  date?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MonthlyResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Monthly'] = ResolversParentTypes['Monthly']> = {
   stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   investmentPurchases?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1792,6 +1811,7 @@ export type Resolvers<ContextType = Context> = {
   NetWorthEntryCreated?: NetWorthEntryCreatedResolvers<ContextType>;
   NetWorthEntryUpdated?: NetWorthEntryUpdatedResolvers<ContextType>;
   NetWorthDeleted?: NetWorthDeletedResolvers<ContextType>;
+  NetWorthCashTotal?: NetWorthCashTotalResolvers<ContextType>;
   Monthly?: MonthlyResolvers<ContextType>;
   Overview?: OverviewResolvers<ContextType>;
   OverviewOld?: OverviewOldResolvers<ContextType>;

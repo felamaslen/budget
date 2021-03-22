@@ -47,6 +47,7 @@ describe('<Root />', () => {
 
     const props: Props = {
       loggedIn: true,
+      connectionAttempt: 0,
     };
 
     const history = createMemoryHistory({

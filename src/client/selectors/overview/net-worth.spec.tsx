@@ -13,8 +13,9 @@ import {
 import * as breakdownBlocks from '~client/components/net-worth/breakdown.blocks';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
-import { Aggregate, NetWorthCategoryType } from '~client/types/enum';
+import { NetWorthCategoryType } from '~client/types/enum';
 import type { NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
+import { NetWorthAggregate as Aggregate } from '~shared/constants';
 
 describe('Overview selectors (net worth)', () => {
   const state = testState;

@@ -1,7 +1,7 @@
 /* @jsx jsx */
 import { Global, jsx } from '@emotion/react';
 import loadable from '@loadable/component';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { Anonymous, Props as AnonymousProps } from '~client/components/anonymous
 import { ErrorMessages } from '~client/components/error-messages';
 import { GQLProvider } from '~client/components/gql-provider';
 import { Header, Props as HeaderProps } from '~client/components/header';
+import type { ContentProps } from '~client/components/logged-in';
 import { Spinner, SpinnerInit, SpinnerContext } from '~client/components/spinner';
 import { Outer } from '~client/components/spinner/styles';
 import {
@@ -38,7 +39,7 @@ export type Props = {
   onLogin?: AnonymousProps['onLogin'];
   onLogout?: () => void;
   offline?: boolean;
-};
+} & ContentProps;
 
 const RootContainer: React.FC<HeaderProps> = ({ onLogout, children, ...props }) => {
   const windowWidth = useDebouncedResize();
@@ -72,14 +73,25 @@ const Offline: React.FC = () => (
   </Outer>
 );
 
-const App: React.FC<Props> = ({ loggedIn, onLogin = VOID, onLogout = VOID, offline = false }) => {
+const App: React.FC<Props> = ({
+  loggedIn,
+  onLogin = VOID,
+  onLogout = VOID,
+  offline = false,
+  connectionAttempt,
+}) => {
   const [spinner, setSpinner] = useState<number>(0);
   return (
     <RootContainer loggedIn={loggedIn} onLogout={onLogout}>
       {offline && <Offline />}
       {spinner > 0 && <Spinner />}
       <SpinnerContext.Provider value={setSpinner}>
-        {!offline && (loggedIn ? <LoggedIn /> : <Anonymous onLogin={onLogin} />)}
+        {!offline &&
+          (loggedIn ? (
+            <LoggedIn connectionAttempt={connectionAttempt} />
+          ) : (
+            <Anonymous onLogin={onLogin} />
+          ))}
       </SpinnerContext.Provider>
     </RootContainer>
   );
@@ -91,7 +103,14 @@ export const ClientApp = compose(
   hot,
   withRouter,
 )(() => {
-  const offline = useOffline();
+  const [offline, wasOffline] = useOffline();
+  const [connectionAttempt, setConnectionAttempt] = useState<number>(0);
+  const onReconnect = useCallback((): void => setConnectionAttempt((last) => last + 1), []);
+  useEffect(() => {
+    if (wasOffline && !offline) {
+      onReconnect();
+    }
+  }, [wasOffline, offline, onReconnect]);
 
   const dispatch = useDispatch();
   const [apiKey, onLogin] = useState<string | null>(window.__API_KEY__ ?? null);
@@ -102,8 +121,14 @@ export const ClientApp = compose(
   }, [dispatch]);
 
   return (
-    <GQLProvider apiKey={apiKey}>
-      <App loggedIn={!!apiKey} onLogin={onLogin} onLogout={onLogout} offline={offline} />
+    <GQLProvider apiKey={apiKey} onReconnected={onReconnect}>
+      <App
+        loggedIn={!!apiKey}
+        onLogin={onLogin}
+        onLogout={onLogout}
+        offline={offline}
+        connectionAttempt={connectionAttempt}
+      />
     </GQLProvider>
   );
 });

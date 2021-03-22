@@ -334,6 +334,11 @@ export const testState: State = {
         ],
       },
     ],
+    cashTotal: {
+      cashInBank: 1500000,
+      cashToInvest: 200000,
+      date: null,
+    },
   },
   funds: {
     items: funds.testRows,

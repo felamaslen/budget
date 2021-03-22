@@ -10,6 +10,7 @@ import {
 } from '~client/actions';
 import { omitTypeName, sortByKey } from '~client/modules/data';
 import type {
+  CashTotalNative,
   GQL,
   Id,
   NetWorthEntryNative as Entry,
@@ -18,6 +19,7 @@ import type {
   NetWorthValueObjectRead,
 } from '~client/types';
 import type {
+  NetWorthCashTotal,
   NetWorthCategory as Category,
   NetWorthSubcategory as Subcategory,
 } from '~client/types/gql';
@@ -26,12 +28,18 @@ export type State = {
   categories: GQL<Category>[];
   subcategories: GQL<Subcategory>[];
   entries: GQL<Entry>[];
+  cashTotal: CashTotalNative;
 };
 
 export const initialState: State = {
   categories: [],
   subcategories: [],
   entries: [],
+  cashTotal: {
+    cashInBank: 0,
+    cashToInvest: 0,
+    date: null,
+  },
 };
 
 const removeDeletedSubcategories = (state: State): State => ({
@@ -82,6 +90,18 @@ const mapEntry = (entry: NetWorthEntryRead): Entry => ({
   currencies: entry.currencies.map(omitTypeName),
 });
 
+const withCashTotals = (state: State, cashTotals?: GQL<NetWorthCashTotal> | null): State =>
+  cashTotals
+    ? {
+        ...state,
+        cashTotal: {
+          cashInBank: cashTotals.cashInBank,
+          cashToInvest: cashTotals.cashToInvest,
+          date: cashTotals.date ? new Date(cashTotals.date) : null,
+        },
+      }
+    : state;
+
 const onRead = (
   state: State,
   {
@@ -89,13 +109,14 @@ const onRead = (
       netWorthCategories: categories,
       netWorthSubcategories: subcategories,
       netWorthEntries: entries,
+      netWorthCashTotal,
     },
   }: ActionApiDataRead,
 ): State => ({
-  ...state,
-  categories: (categories ?? []).map(omitTypeName),
-  subcategories: (subcategories ?? []).map(omitTypeName),
-  entries: sortEntryValues(entries?.current.map<Entry>(mapEntry) ?? []),
+  ...withCashTotals(state, netWorthCashTotal),
+  categories: categories ? categories.map(omitTypeName) : state.categories,
+  subcategories: subcategories ? subcategories.map(omitTypeName) : state.subcategories,
+  entries: entries ? sortEntryValues(entries.current.map<Entry>(mapEntry)) : state.entries,
 });
 
 function simpleUpdate<

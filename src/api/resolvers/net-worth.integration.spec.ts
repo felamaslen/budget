@@ -1,6 +1,7 @@
 import gql from 'graphql-tag';
 import sinon from 'sinon';
 
+import { seedData } from '~api/__tests__/fixtures';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   Maybe,
@@ -865,7 +866,6 @@ describe('Net worth resolver', () => {
       );
       return results.map((res) => res.data?.createNetWorthEntry?.id as number);
     };
-
     describe('createNetWorthEntry', () => {
       const mutation = gql`
         mutation CreateNetWorthEntry($input: NetWorthEntryInput!) {
@@ -1785,6 +1785,43 @@ describe('Net worth resolver', () => {
         const rowAfter = await app.db('net_worth').where({ id }).first();
         expect(rowAfter).toBeUndefined();
       });
+    });
+  });
+
+  describe('netWorthCashTotal', () => {
+    const query = gql`
+      query NetWorthCashTotal {
+        netWorthCashTotal {
+          cashInBank
+          cashToInvest
+          date
+        }
+      }
+    `;
+
+    beforeEach(async () => {
+      await seedData(app.uid, app.db);
+    });
+
+    it('should return the split cash to invest and cash in bank values', async () => {
+      expect.assertions(3);
+
+      const res = await app.authGqlClient.query<Query>({ query });
+
+      const cashInBank = res.data.netWorthCashTotal?.cashInBank;
+      const cashToInvest = res.data.netWorthCashTotal?.cashToInvest;
+
+      const expectedCashInBank = 1288520; // check seed data
+      const expectedISAValue = 6449962;
+
+      const expectedFundValueClosest = 127.39 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229);
+
+      const expectedCashToInvest = expectedISAValue - expectedFundValueClosest;
+
+      expect(cashInBank).toBeCloseTo(expectedCashInBank);
+      expect(cashToInvest).toBeCloseTo(expectedCashToInvest);
+
+      expect(res.data.netWorthCashTotal?.date).toBe('2020-03-31');
     });
   });
 });

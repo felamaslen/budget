@@ -2,6 +2,7 @@ import { addYears, addMonths, getUnixTime } from 'date-fns';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import { readNetWorthCashTotal } from './net-worth';
 import { getAnnualisedFundReturns, getDisplayedFundValues } from './overview';
 
 import config from '~api/config';
@@ -191,9 +192,10 @@ export async function createFund(
   });
   await upsertTransactions(db, uid, id, transactions);
 
-  const [overviewCost, stockSplits] = await Promise.all([
+  const [overviewCost, stockSplits, cashTotal] = await Promise.all([
     getDisplayedFundValues(db, uid, new Date()),
     selectStockSplits(db, uid, id),
+    readNetWorthCashTotal(db, uid),
   ]);
 
   await pubsub.publish(`${PubSubTopic.FundCreated}.${uid}`, {
@@ -207,6 +209,7 @@ export async function createFund(
     },
     overviewCost,
   });
+  await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { id };
 }
@@ -240,9 +243,10 @@ export async function updateFund(
     await updateFundCacheItemReference(db, fundsWithSameName[0].item, previousItem);
   }
 
-  const [overviewCost, stockSplits] = await Promise.all([
+  const [overviewCost, stockSplits, cashTotal] = await Promise.all([
     getDisplayedFundValues(db, uid, new Date()),
     selectStockSplits(db, uid, id),
+    readNetWorthCashTotal(db, uid),
   ]);
 
   await pubsub.publish(`${PubSubTopic.FundUpdated}.${uid}`, {
@@ -256,6 +260,7 @@ export async function updateFund(
     },
     overviewCost,
   });
+  await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { error: null };
 }
@@ -267,8 +272,12 @@ export async function deleteFund(
 ): Promise<CrudResponseDelete> {
   await baseController.delete(db, uid, id);
 
-  const overviewCost = await getDisplayedFundValues(db, uid, new Date());
+  const [overviewCost, cashTotal] = await Promise.all([
+    getDisplayedFundValues(db, uid, new Date()),
+    readNetWorthCashTotal(db, uid),
+  ]);
   await pubsub.publish(`${PubSubTopic.FundDeleted}.${uid}`, { id, overviewCost });
+  await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { error: null };
 }

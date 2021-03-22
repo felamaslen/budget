@@ -2,11 +2,12 @@ import React from 'react';
 
 import * as Styled from './styles';
 import { formatCurrency } from '~client/modules/format';
-import { Aggregate, AggregateSums } from '~client/types/net-worth';
+import type { NetWorthAggregateSums } from '~client/types';
+import { NetWorthAggregate } from '~shared/constants';
 
 export type Props = {
-  item: Aggregate;
-  aggregate?: Partial<AggregateSums>;
+  item: NetWorthAggregate;
+  aggregate?: Partial<NetWorthAggregateSums>;
 };
 
 const SumByCategory: React.FC<Props> = ({ item, aggregate }) => (

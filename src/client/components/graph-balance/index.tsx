@@ -12,7 +12,8 @@ import {
 import { TodayContext, usePersistentState } from '~client/hooks';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
 import type { Line, MergedMonthly } from '~client/types';
-import { Aggregate, PageNonStandard } from '~client/types/enum';
+import { PageNonStandard } from '~client/types/enum';
+import { NetWorthAggregate } from '~shared/constants';
 
 type GraphData = { lines: Line[]; targetValues: TargetValue[] };
 
@@ -95,7 +96,7 @@ function getGraphData(
       sliceAtFirstPositive: 1,
       fill: true,
       smooth: true,
-      color: rgba(colors.netWorth.aggregate[Aggregate.cashOther], 0.4),
+      color: rgba(colors.netWorth.aggregate[NetWorthAggregate.cashOther], 0.4),
     },
     {
       key: 'net-worth-without-pension',
@@ -115,7 +116,7 @@ function getGraphData(
       stack: [dataNetWorth],
       fill: true,
       smooth: true,
-      color: rgba(colors.netWorth.aggregate[Aggregate.pension], 0.5),
+      color: rgba(colors.netWorth.aggregate[NetWorthAggregate.pension], 0.5),
     },
     {
       key: 'options',

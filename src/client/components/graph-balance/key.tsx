@@ -3,7 +3,7 @@ import React from 'react';
 import { BaseKey, Props } from '~client/components/graph-cashflow/base-key';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
-import { Aggregate } from '~client/types/net-worth';
+import { NetWorthAggregate } from '~shared/constants';
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
@@ -104,7 +104,7 @@ export const Key: React.FC<Props> = (props) => (
       y={keyY1 - 3}
       width={keyLineWidth}
       height={6}
-      fill={colors.netWorth.aggregate[Aggregate.cashOther]}
+      fill={colors.netWorth.aggregate[NetWorthAggregate.cashOther]}
     />
     <text
       x={keyTextX1}
@@ -122,7 +122,7 @@ export const Key: React.FC<Props> = (props) => (
       y={keyY2 - 3}
       width={keyLineWidth}
       height={6}
-      fill={rgba(colors.netWorth.aggregate[Aggregate.pension], 0.5)}
+      fill={rgba(colors.netWorth.aggregate[NetWorthAggregate.pension], 0.5)}
     />
     <text
       x={keyTextX0}

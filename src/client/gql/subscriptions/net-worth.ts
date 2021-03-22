@@ -89,3 +89,13 @@ export const NetWorthEntryDeleted = gql`
     }
   }
 `;
+
+export const NetWorthCashTotalUpdated = gql`
+  subscription NetWorthCashTotalUpdated {
+    netWorthCashTotalUpdated {
+      cashInBank
+      cashToInvest
+      date
+    }
+  }
+`;
