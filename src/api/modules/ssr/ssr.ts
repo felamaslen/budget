@@ -11,7 +11,7 @@ function normalizeAssets(assets: Record<string, string> | string[] | string): st
   return Array.isArray(assets) ? assets : [assets];
 }
 
-function renderDevApp(req: Request, res: Response, renderedApp: RenderedApp): void {
+function renderDevApp(_: Request, res: Response, renderedApp: RenderedApp): void {
   const { devMiddleware } = res.locals.webpack;
   const jsonWebpackStats = devMiddleware.stats.toJson();
   const { assetsByChunkName } = jsonWebpackStats;
