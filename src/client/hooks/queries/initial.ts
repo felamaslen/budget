@@ -29,8 +29,9 @@ export function useInitialData(): { loading: boolean; error: string | undefined 
   useEffect(() => {
     if (errorMessage) {
       dispatch(errorOpened(`Error loading data: ${errorMessage}`, ErrorLevel.Fatal));
+      console.error('Error loading data', error);
     }
-  }, [dispatch, errorMessage]);
+  }, [dispatch, errorMessage, error]);
 
   useEffect(() => {
     if (!isServerSide && data && !fetching) {
