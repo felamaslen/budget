@@ -60,8 +60,8 @@ export async function readNetWorthCashTotal(
   const cashToInvestAtNetWorthDate = netWorth.stocksIncludingCash - stockValueAtNetWorthDate;
 
   return {
-    cashInBank: netWorth.cashInBank,
-    cashToInvest: cashToInvestAtNetWorthDate,
+    cashInBank: Math.max(0, netWorth.cashInBank),
+    cashToInvest: Math.max(0, cashToInvestAtNetWorthDate),
     date: netWorth.date,
   };
 }
