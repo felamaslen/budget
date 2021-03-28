@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 
 import { Wrapper } from './shared';
 
-type Props = {
+export type Props = {
   item?: string;
   value?: number;
   onChange: (value: number) => void;

@@ -11,15 +11,10 @@ import { State } from '~client/reducers';
 import { testNow, testState as state } from '~client/test-data/state';
 import '~client/test-utils/match-media';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { mockRandom } from '~client/test-utils/random';
 
 describe('<PageOverview />', () => {
   const mockStore = configureStore<State>();
   const today = endOfDay(testNow);
-
-  beforeEach(() => {
-    mockRandom();
-  });
 
   const getContainer = (): RenderResult =>
     render(

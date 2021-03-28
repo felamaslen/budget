@@ -2,7 +2,9 @@ import addHours from 'date-fns/addHours';
 import addMonths from 'date-fns/addMonths';
 import addSeconds from 'date-fns/addSeconds';
 import addWeeks from 'date-fns/addWeeks';
+import addYears from 'date-fns/addYears';
 import differenceInMonths from 'date-fns/differenceInMonths';
+import differenceInYears from 'date-fns/differenceInYears';
 import endOfMonth from 'date-fns/endOfMonth';
 import format from 'date-fns/format';
 import fromUnixTime from 'date-fns/fromUnixTime';
@@ -12,6 +14,7 @@ import getMinutes from 'date-fns/getMinutes';
 import getMonth from 'date-fns/getMonth';
 import getSeconds from 'date-fns/getSeconds';
 import getUnixTime from 'date-fns/getUnixTime';
+import getYear from 'date-fns/getYear';
 import isSameMonth from 'date-fns/isSameMonth';
 import startOfDay from 'date-fns/startOfDay';
 import startOfHour from 'date-fns/startOfHour';
@@ -30,24 +33,21 @@ type Tick = {
   label: Label;
 };
 
+type TimeTickOptions = {
+  start: Date;
+  tickSize: number | ((start: Date, index: number) => Date);
+  numTicks?: number;
+  getMajor: (time: Date) => Major;
+  label?: (time: Date) => Label;
+  extra?: (time: Date) => Tick | null;
+};
+
+type TimeTickFn = (t0: number, t1: number) => Tick[];
+
 function timeTick(
   t0: number,
   t1: number,
-  {
-    start,
-    tickSize,
-    numTicks,
-    getMajor,
-    label = NULL,
-    extra = NULL,
-  }: {
-    start: Date;
-    tickSize: number | ((start: Date, index: number) => Date);
-    numTicks?: number;
-    getMajor: (time: Date) => Major;
-    label?: (time: Date) => Label;
-    extra?: (time: Date) => Tick | null;
-  },
+  { start, tickSize, numTicks, getMajor, label = NULL, extra = NULL }: TimeTickOptions,
 ): Tick[] {
   const actualNumTicks =
     typeof tickSize === 'number' && !numTicks ? Math.ceil((t1 - t0) / tickSize) + 1 : numTicks;
@@ -57,24 +57,53 @@ function timeTick(
       ? (index: number): Date => tickSize(start, index)
       : (index: number): Date => addSeconds(start, index * tickSize);
 
-  return new Array(actualNumTicks).fill(0).reduce((ticks: Tick[], _, index): Tick[] => {
-    const tickTime = getTickTime(index);
-    const major = getMajor(tickTime);
+  return Array(actualNumTicks)
+    .fill(0)
+    .reduce((ticks: Tick[], _, index): Tick[] => {
+      const tickTime = getTickTime(index);
+      const major = getMajor(tickTime);
 
-    const mainTick = {
-      time: getUnixTime(tickTime),
-      major,
-      label: major > 0 ? label(tickTime) : null,
-    };
+      const mainTick = {
+        time: getUnixTime(tickTime),
+        major,
+        label: major > 0 ? label(tickTime) : null,
+      };
 
-    const extraTick = extra(tickTime);
-    if (extraTick) {
-      return [...ticks, mainTick, extraTick];
-    }
+      const extraTick = extra(tickTime);
+      if (extraTick) {
+        return [...ticks, mainTick, extraTick];
+      }
 
-    return [...ticks, mainTick];
-  }, []);
+      return [...ticks, mainTick];
+    }, []);
 }
+
+const timeTickLifetime: TimeTickFn = (t0, t1) => {
+  const t0Date = fromUnixTime(t0);
+  const numTicks = differenceInYears(fromUnixTime(t1), t0Date) + 1;
+
+  return timeTick(t0, t1, {
+    start: startOfMonth(t0Date),
+    tickSize: (start, index) => addYears(start, index),
+    getMajor: (time): Major => {
+      const year = getYear(time);
+      if (year % 10 === 0) {
+        return 2;
+      }
+      if (year % 5 === 0) {
+        return 1;
+      }
+      return 0;
+    },
+    numTicks,
+    label: (time) => {
+      if (getYear(time) % 10 === 0) {
+        return format(time, 'yyyy');
+      }
+      return null;
+    },
+  });
+};
 
 function timeTickMonthYear(t0: number, t1: number): Tick[] {
   const t0Date = fromUnixTime(t0);
@@ -181,29 +210,39 @@ const timeTickSecondMinuteSmall = (t0: number, t1: number): Tick[] =>
     label: (time) => format(time, 'HH:mm'),
   });
 
+const tenMinutes = 60 * 10;
+const oneHour = 60 * 60;
+const overOneDay = 86400 * 0.6;
+const overOneWeek = 86400 * 8;
+const overOneMonth = 86400 * 35;
+const overOneYear = 86400 * 35 * 12;
+const overOneDecade = 86400 * 365 * 10.1;
+
 export function timeSeriesTicks(t0: number, t1: number): Tick[] {
   const range = t1 - t0;
 
-  if (range < 600) {
+  if (range < tenMinutes) {
     return timeTickSecondMinuteSmall(t0, t1);
   }
-  if (range < 3600) {
+  if (range < oneHour) {
     return timeTickSecondMinuteLarge(t0, t1);
   }
-  if (range < 86400 * 0.6) {
+  if (range < overOneDay) {
     return timeTickMinuteHour(t0, t1);
   }
-  if (range < 86400 * 8) {
+  if (range < overOneWeek) {
     return timeTickHourDay(t0, t1);
   }
-  if (range < 86400 * 35) {
+  if (range < overOneMonth) {
     return timeTickDayWeek(t0, t1);
   }
-  if (range < 86400 * 35 * 12) {
+  if (range < overOneYear) {
     return timeTickWeekMonth(t0, t1);
   }
-
-  return timeTickMonthYear(t0, t1);
+  if (range < overOneDecade) {
+    return timeTickMonthYear(t0, t1);
+  }
+  return timeTickLifetime(t0, t1);
 }
 
 export const inclusiveMonthDifference = (startDate: Date, endDate: Date): number =>

@@ -1383,7 +1383,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-28 emotion-27"
-        style="background-color: rgb(146, 223, 155);"
+        style="background-color: rgb(36, 191, 55);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1452,7 +1452,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-28 emotion-27"
-        style="background-color: rgb(167, 229, 175);"
+        style="background-color: rgb(71, 201, 87);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1590,7 +1590,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-112 emotion-27"
-        style="background-color: rgb(54, 196, 72);"
+        style="background-color: rgb(146, 223, 155);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1599,12 +1599,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £25.00
+            £16.86
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £25.00
+            £16.86
           </span>
         </span>
       </div>
@@ -1630,7 +1630,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-128 emotion-27"
-        style="background-color: rgb(45, 194, 64);"
+        style="background-color: rgb(45, 194, 63);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1639,12 +1639,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £43.8k
+            £43.9k
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £43,811.71
+            £43,898.48
           </span>
         </span>
       </div>
@@ -1659,7 +1659,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-112 emotion-27"
-        style="background-color: rgb(91, 207, 105);"
+        style="background-color: rgb(146, 223, 155);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1668,12 +1668,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £23.00
+            £16.86
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £23.00
+            £16.86
           </span>
         </span>
       </div>
@@ -1708,12 +1708,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £45.1k
+            £45.3k
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £45,144.37
+            £45,320.78
           </span>
         </span>
       </div>
@@ -1728,7 +1728,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-112 emotion-27"
-        style="background-color: rgb(189, 236, 195);"
+        style="background-color: rgb(146, 223, 155);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1737,12 +1737,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £18.00
+            £16.86
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £18.00
+            £16.86
           </span>
         </span>
       </div>
@@ -1777,12 +1777,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £46.5k
+            £46.7k
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £46,476.98
+            £46,748.93
           </span>
         </span>
       </div>
@@ -1797,7 +1797,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
       <div
         class="emotion-112 emotion-27"
-        style="background-color: rgb(36, 191, 55);"
+        style="background-color: rgb(146, 223, 155);"
       >
         <span
           class="emotion-30 emotion-31"
@@ -1806,12 +1806,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £26.00
+            £16.86
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £26.00
+            £16.86
           </span>
         </span>
       </div>
@@ -1846,12 +1846,12 @@ background:#fbe07f@media only screen and (min-width: 350px) {
           <span
             class="emotion-32 emotion-33"
           >
-            £47.8k
+            £48.2k
           </span>
           <span
             class="emotion-34 emotion-35"
           >
-            £47,822.57
+            £48,182.94
           </span>
         </span>
       </div>
@@ -1983,25 +1983,81 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 .emotion-4 {
+  background: rgba(255,255,255,0.2);
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-flex-flow: column;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
+  height: 100%;
+  right: -8rem;
+  position: absolute;
+  top: 0;
+  -webkit-transition: 0.1s right ease;
+  transition: 0.1s right ease;
+  width: 8rem;
+  z-index: 10;
+}
+
+.emotion-6 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  height: 1.25rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex-flow: column;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  height: 1.5rem;
+  left: -1.5rem;
+  outline: none;
+  padding: 0;
   position: absolute;
-  right: 0;
   top: 0;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  width: 1.5rem;
 }
 
-.emotion-6 {
+.emotion-8,
+.emotion-8::before,
+.emotion-8::after {
+  background: #000;
+  height: 0.125rem;
+  width: 1rem;
+}
+
+.emotion-8::before,
+.emotion-8::after {
+  content: '';
+  display: block;
+}
+
+.emotion-8::before {
+  margin-top: -0.375rem;
+}
+
+.emotion-8::after {
+  margin-top: 0.625rem;
+}
+
+.emotion-10 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -2017,14 +2073,14 @@ exports[`<PageOverview /> should render graphs 1`] = `
   padding: 0.125rem 0.25rem;
 }
 
-.emotion-8 {
+.emotion-12 {
   height: 1.25rem;
   margin-left: 0.25rem;
   position: relative;
   width: 1.25rem;
 }
 
-.emotion-8:before {
+.emotion-12:before {
   left: 0.25rem;
   top: 0.25rem;
   width: 0.75rem;
@@ -2032,15 +2088,15 @@ exports[`<PageOverview /> should render graphs 1`] = `
   box-shadow: 0 0 0 1px black;
 }
 
-.emotion-8:after {
+.emotion-12:after {
   left: 0.4375rem;
   top: 0.4375rem;
   width: 0.375rem;
   height: 0.375rem;
 }
 
-.emotion-8:before,
-.emotion-8:after {
+.emotion-12:before,
+.emotion-12:after {
   content: '';
   position: absolute;
   border-radius: 100%;
@@ -2076,16 +2132,32 @@ exports[`<PageOverview /> should render graphs 1`] = `
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="213.5"
-              y2="213.5"
+              y1="248.5"
+              y2="248.5"
             />
             <line
               stroke="#999"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="126.5"
-              y2="126.5"
+              y1="196.5"
+              y2="196.5"
+            />
+            <line
+              stroke="#999"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="144.5"
+              y2="144.5"
+            />
+            <line
+              stroke="#999"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="92.5"
+              y2="92.5"
             />
             <line
               stroke="#999"
@@ -2102,96 +2174,160 @@ exports[`<PageOverview /> should render graphs 1`] = `
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="282.5"
-              y2="282.5"
+              y1="289.5"
+              y2="289.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="265.5"
-              y2="265.5"
+              y1="279.5"
+              y2="279.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="248.5"
-              y2="248.5"
+              y1="268.5"
+              y2="268.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="230.5"
-              y2="230.5"
+              y1="258.5"
+              y2="258.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="196.5"
-              y2="196.5"
+              y1="237.5"
+              y2="237.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="178.5"
-              y2="178.5"
+              y1="227.5"
+              y2="227.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="161.5"
-              y2="161.5"
+              y1="216.5"
+              y2="216.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="144.5"
-              y2="144.5"
+              y1="206.5"
+              y2="206.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="109.5"
-              y2="109.5"
+              y1="185.5"
+              y2="185.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="92.5"
-              y2="92.5"
+              y1="175.5"
+              y2="175.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="74.5"
-              y2="74.5"
+              y1="164.5"
+              y2="164.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="57.5"
-              y2="57.5"
+              y1="154.5"
+              y2="154.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="133.5"
+              y2="133.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="123.5"
+              y2="123.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="112.5"
+              y2="112.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="102.5"
+              y2="102.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="81.5"
+              y2="81.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="71.5"
+              y2="71.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="60.5"
+              y2="60.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="50.5"
+              y2="50.5"
             />
           </g>
           <g>
@@ -2211,7 +2347,17 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="start"
               x="0"
-              y="211.5"
+              y="246.5"
+            >
+              £10k
+            </text>
+            <text
+              alignment-baseline="baseline"
+              font-family="Arial, Helvetica, sans-serif"
+              font-size="11"
+              text-anchor="start"
+              x="0"
+              y="194.5"
             >
               £20k
             </text>
@@ -2221,7 +2367,17 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="start"
               x="0"
-              y="124.5"
+              y="142.5"
+            >
+              £30k
+            </text>
+            <text
+              alignment-baseline="baseline"
+              font-family="Arial, Helvetica, sans-serif"
+              font-size="11"
+              text-anchor="start"
+              x="0"
+              y="90.5"
             >
               £40k
             </text>
@@ -2233,7 +2389,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
               x="0"
               y="38.5"
             >
-              £60k
+              £50k
             </text>
           </g>
           <g>
@@ -2879,15 +3035,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0.0,180.3 L77.3,165.6 L163.0,149.0 L245.9,130.3 L331.5,109.3 L414.4,85.8 L500.0,59.3"
-          fill="none"
-          stroke="#999"
-          stroke-width="1"
-        />
-      </g>
-      <g>
-        <path
-          d="M0,227.17833333333334 Q51,212 77.3,202.2 C108,191 132,174 163.0,166.6 C191,160 217,163 245.9,161.3 C276,159 302,158 331.5,156.1 C360,154 385,153 414.4,150.8 Q444,149 500.0,145.5 L500,300 L0,300"
+          d="M0,212.614 Q51,195 77.3,182.7 C108,169 131,149 163.0,139.9 C190,132 217,135 245.9,133.1 C276,131 302,129 331.5,126.3 C361,124 385,122 414.4,119.4 Q444,117 500.0,112.6 L500,300 L0,300"
           fill="rgba(150,140,39,0.5)"
           stroke="none"
           stroke-width="2"
@@ -2895,7 +3043,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,222.81124333333332 Q52,209 77.3,197.9 C109,184 131,160 163.0,149.3 C190,141 217,146 245.9,143.8 C276,142 302,140 331.5,138.4 C360,136 385,135 414.4,132.9 Q444,131 500.0,127.4 L500.0,145.5 Q444,149 414.4,150.8 C385,153 360,154 331.5,156.1 C302,158 276,159 245.9,161.3 C217,163 191,160 163.0,166.6 C132,174 108,191 77.3,202.2 Q51,212 0.0,227.2"
+          d="M0,207.373492 Q52,191 77.3,177.4 C109,160 130,132 163.0,119.1 C189,109 217,114 245.9,111.8 C276,109 302,107 331.5,104.3 C361,102 385,99 414.4,96.9 Q444,94 500.0,89.4 L500.0,112.6 Q444,117 414.4,119.4 C385,122 361,124 331.5,126.3 C302,129 276,131 245.9,133.1 C217,135 190,132 163.0,139.9 C131,149 108,169 77.3,182.7 Q51,195 0.0,212.6"
           fill="rgba(84,110,122,0.4)"
           stroke="none"
           stroke-width="2"
@@ -2903,7 +3051,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0.0,212.5 L77.3,187.6 L163.0,151.9 L245.9,146.7 L331.5,141.4 L414.4,136.1 L500.0,130.9"
+          d="M0.0,195.0 L77.3,165.1 L163.0,122.3 L245.9,115.1 L331.5,108.0 L414.4,100.8 L500.0,93.6"
           fill="none"
           stroke="rgba(84,110,122,0.5)"
           stroke-dasharray="3,5"
@@ -2912,7 +3060,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,222.81124333333332 Q47,172 77.3,157.2 C104,145 133,147 163.0,144.1 C192,141 217,140 245.9,138.4 C276,136 302,135 331.5,132.8 C360,131 385,129 414.4,127.0 Q444,125 500.0,121.3 L500.0,127.4 Q444,131 414.4,132.9 C385,135 360,136 331.5,138.4 C302,140 276,142 245.9,143.8 C217,146 190,141 163.0,149.3 C131,160 109,184 77.3,197.9 Q52,209 0.0,222.8"
+          d="M0,207.373492 Q45,147 77.3,128.7 C103,114 133,117 163.0,112.9 C192,109 217,108 245.9,105.3 C276,103 302,100 331.5,97.6 C361,95 385,93 414.4,89.9 Q444,87 500.0,82.2 L500.0,89.4 Q444,94 414.4,96.9 C385,99 361,102 331.5,104.3 C302,107 276,109 245.9,111.8 C217,114 189,109 163.0,119.1 C130,132 109,160 77.3,177.4 Q52,191 0.0,207.4"
           fill="rgba(145,194,129,0.4)"
           stroke="none"
           stroke-width="2"
@@ -2920,13 +3068,13 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,227.17833333333334 Q42,130 77.3,105.4 C99,91 133,115 163.0,116.4"
+          d="M0,212.614 Q40,97 77.3,66.5 C97,50 133,79 163.0,79.6"
           fill="none"
           stroke="#039"
           stroke-width="2"
         />
         <path
-          d="M162.98342541436463,116.37019000000001 C192,117 217,113 245.9,110.6 C276,109 302,107 331.5,104.9 C360,103 385,101 414.4,99.1 Q444,97 500.0,93.3"
+          d="M162.98342541436463,79.644228 C192,81 217,75 245.9,72.3 C276,70 302,68 331.5,64.9 C361,62 385,60 414.4,57.5 Q444,55 500.0,50.0"
           fill="none"
           stroke="#808080"
           stroke-width="2"
@@ -2934,7 +3082,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,227.17833333333334 Q42,129 77.3,104.9 C99,90 133,115 163.0,115.9 C192,117 217,112 245.9,110.1 C276,108 302,106 331.5,104.4 C360,102 385,101 414.4,98.6 Q444,97 500.0,92.8 L500.0,93.3 Q444,97 414.4,99.1 C385,101 360,103 331.5,104.9 C302,107 276,109 245.9,110.6 C217,113 192,117 163.0,116.4 C133,115 99,91 77.3,105.4 Q42,130 0.0,227.2"
+          d="M0,212.614 Q40,97 77.3,65.9 C97,50 133,78 163.0,79.1 C192,80 217,74 245.9,71.7 C276,69 302,67 331.5,64.3 C361,62 385,59 414.4,56.9 Q444,54 500.0,49.4 L500.0,50.0 Q444,55 414.4,57.5 C385,60 361,62 331.5,64.9 C302,68 276,70 245.9,72.3 C217,75 192,81 163.0,79.6 C133,79 97,50 77.3,66.5 Q40,97 0.0,212.6"
           fill="rgba(47,123,211,0.5)"
           stroke="none"
           stroke-width="2"
@@ -2942,7 +3090,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,227.17833333333334 Q41,128 77.3,103.4 C99,89 133,113 163.0,114.0 C192,115 217,110 245.9,108.2 C276,106 302,104 331.5,102.3 C360,100 385,98 414.4,96.4 Q444,94 500.0,90.5"
+          d="M0,212.614 Q40,95 77.3,64.1 C97,48 133,76 163.0,76.8 C192,78 217,72 245.9,69.4 C276,67 302,65 331.5,61.9 C361,59 385,57 414.4,54.3 Q444,52 500.0,46.7"
           fill="none"
           stroke="#5aa8be"
           stroke-dasharray="3,5"
@@ -2950,210 +3098,186 @@ exports[`<PageOverview /> should render graphs 1`] = `
         />
       </g>
       <g>
-        <g>
-          <rect
-            fill="rgba(255,255,255,0.6)"
-            height="62"
-            width="64"
-            x="48"
-            y="88"
-          />
-          <text
-            alignment-baseline="hanging"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="50"
-            y="92"
-          >
-            £126k (1y)
-          </text>
-          <text
-            alignment-baseline="hanging"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="50"
-            y="114"
-          >
-            £2m (3y)
-          </text>
-          <text
-            alignment-baseline="hanging"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="50"
-            y="136"
-          >
-            £34m (5y)
-          </text>
-        </g>
-        <g>
-          <rect
-            fill="rgba(255,255,255,0.6)"
-            height="80"
-            width="250"
-            x="45"
-            y="8"
-          />
-          <text
-            alignment-baseline="hanging"
-            color="#000"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="16"
-            x="65"
-            y="10"
-          >
-            Net worth
-          </text>
-          <line
-            stroke="#039"
-            stroke-width="2"
-            x1="50"
-            x2="74"
-            y1="40"
-            y2="40"
-          />
-          <text
-            alignment-baseline="middle"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="78"
-            y="40"
-          >
-            Actual
-          </text>
-          <line
-            stroke="#808080"
-            stroke-width="2"
-            x1="130"
-            x2="154"
-            y1="40"
-            y2="40"
-          />
-          <text
-            alignment-baseline="middle"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="158"
-            y="40"
-          >
-            Predicted
-          </text>
-          <rect
-            fill="rgba(150,140,39,0.5)"
-            height="6"
-            width="24"
-            x="130"
-            y="69"
-          />
-          <text
-            alignment-baseline="middle"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="158"
-            y="72"
-          >
-            Home equity
-          </text>
-          <rect
-            fill="rgba(84,110,122,0.5)"
-            height="6"
-            width="24"
-            x="50"
-            y="53"
-          />
-          <text
-            alignment-baseline="middle"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="78"
-            y="56"
-          >
-            Stocks
-          </text>
-          <rect
-            fill="#91c281"
-            height="6"
-            width="24"
-            x="130"
-            y="53"
-          />
-          <text
-            alignment-baseline="middle"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="158"
-            y="56"
-          >
-            Locked cash
-          </text>
-          <rect
-            fill="rgba(47,123,211,0.5)"
-            height="6"
-            width="24"
-            x="50"
-            y="69"
-          />
-          <text
-            alignment-baseline="middle"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="78"
-            y="72"
-          >
-            Pension
-          </text>
-          <line
-            stroke="#5aa8be"
-            stroke-dasharray="3,4"
-            stroke-width="2"
-            x1="220"
-            x2="244"
-            y1="40.5"
-            y2="40.5"
-          />
-          <text
-            alignment-baseline="middle"
-            fill="#333"
-            font-family="Arial, Helvetica, sans-serif"
-            font-size="11"
-            x="248"
-            y="40"
-          >
-            Options
-          </text>
-        </g>
+        <rect
+          fill="rgba(255,255,255,0.6)"
+          height="80"
+          width="250"
+          x="45"
+          y="8"
+        />
+        <text
+          alignment-baseline="hanging"
+          color="#000"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="16"
+          x="65"
+          y="10"
+        >
+          Net worth
+        </text>
+        <line
+          stroke="#039"
+          stroke-width="2"
+          x1="50"
+          x2="74"
+          y1="40"
+          y2="40"
+        />
+        <text
+          alignment-baseline="middle"
+          fill="#333"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="11"
+          x="78"
+          y="40"
+        >
+          Actual
+        </text>
+        <line
+          stroke="#808080"
+          stroke-width="2"
+          x1="130"
+          x2="154"
+          y1="40"
+          y2="40"
+        />
+        <text
+          alignment-baseline="middle"
+          fill="#333"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="11"
+          x="158"
+          y="40"
+        >
+          Predicted
+        </text>
+        <rect
+          fill="rgba(150,140,39,0.5)"
+          height="6"
+          width="24"
+          x="130"
+          y="69"
+        />
+        <text
+          alignment-baseline="middle"
+          fill="#333"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="11"
+          x="158"
+          y="72"
+        >
+          Home equity
+        </text>
+        <rect
+          fill="rgba(84,110,122,0.5)"
+          height="6"
+          width="24"
+          x="50"
+          y="53"
+        />
+        <text
+          alignment-baseline="middle"
+          fill="#333"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="11"
+          x="78"
+          y="56"
+        >
+          Stocks
+        </text>
+        <rect
+          fill="#91c281"
+          height="6"
+          width="24"
+          x="130"
+          y="53"
+        />
+        <text
+          alignment-baseline="middle"
+          fill="#333"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="11"
+          x="158"
+          y="56"
+        >
+          Locked cash
+        </text>
+        <rect
+          fill="rgba(47,123,211,0.5)"
+          height="6"
+          width="24"
+          x="50"
+          y="69"
+        />
+        <text
+          alignment-baseline="middle"
+          fill="#333"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="11"
+          x="78"
+          y="72"
+        >
+          Pension
+        </text>
+        <line
+          stroke="#5aa8be"
+          stroke-dasharray="3,4"
+          stroke-width="2"
+          x1="220"
+          x2="244"
+          y1="40.5"
+          y2="40.5"
+        />
+        <text
+          alignment-baseline="middle"
+          fill="#333"
+          font-family="Arial, Helvetica, sans-serif"
+          font-size="11"
+          x="248"
+          y="40"
+        >
+          Options
+        </text>
       </g>
     </svg>
     <div
       class="emotion-4 emotion-5"
     >
-      <div
+      <button
         class="emotion-6 emotion-7"
       >
-        <a
+        <span
           class="emotion-8 emotion-9"
+        />
+      </button>
+      <div
+        class="emotion-10 emotion-11"
+      >
+        <a
+          class="emotion-12 emotion-13"
         />
         <span>
           Split
         </span>
       </div>
       <div
-        class="emotion-6 emotion-7"
+        class="emotion-10 emotion-11"
       >
         <a
-          class="emotion-8 emotion-9"
+          class="emotion-12 emotion-13"
         />
         <span>
           Show all
+        </span>
+      </div>
+      <div
+        class="emotion-10 emotion-11"
+      >
+        <a
+          class="emotion-12 emotion-13"
+        />
+        <span>
+          Long term
         </span>
       </div>
     </div>
@@ -3176,32 +3300,48 @@ exports[`<PageOverview /> should render graphs 1`] = `
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="308.5"
-              y2="308.5"
+              y1="300.5"
+              y2="300.5"
             />
             <line
               stroke="#999"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="222.5"
-              y2="222.5"
+              y1="248.5"
+              y2="248.5"
             />
             <line
               stroke="#999"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="135.5"
-              y2="135.5"
+              y1="196.5"
+              y2="196.5"
             />
             <line
               stroke="#999"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="48.5"
-              y2="48.5"
+              y1="144.5"
+              y2="144.5"
+            />
+            <line
+              stroke="#999"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="92.5"
+              y2="92.5"
+            />
+            <line
+              stroke="#999"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="40.5"
+              y2="40.5"
             />
           </g>
           <g>
@@ -3210,96 +3350,160 @@ exports[`<PageOverview /> should render graphs 1`] = `
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="291.5"
-              y2="291.5"
+              y1="289.5"
+              y2="289.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="274.5"
-              y2="274.5"
+              y1="279.5"
+              y2="279.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="256.5"
-              y2="256.5"
+              y1="268.5"
+              y2="268.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="239.5"
-              y2="239.5"
+              y1="258.5"
+              y2="258.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="204.5"
-              y2="204.5"
+              y1="237.5"
+              y2="237.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="187.5"
-              y2="187.5"
+              y1="227.5"
+              y2="227.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="170.5"
-              y2="170.5"
+              y1="216.5"
+              y2="216.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="152.5"
-              y2="152.5"
+              y1="206.5"
+              y2="206.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="118.5"
-              y2="118.5"
+              y1="185.5"
+              y2="185.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="100.5"
-              y2="100.5"
+              y1="175.5"
+              y2="175.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="83.5"
-              y2="83.5"
+              y1="164.5"
+              y2="164.5"
             />
             <line
               stroke="#eaeaea"
               stroke-width="1"
               x1="0"
               x2="500"
-              y1="66.5"
-              y2="66.5"
+              y1="154.5"
+              y2="154.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="133.5"
+              y2="133.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="123.5"
+              y2="123.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="112.5"
+              y2="112.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="102.5"
+              y2="102.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="81.5"
+              y2="81.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="71.5"
+              y2="71.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="60.5"
+              y2="60.5"
+            />
+            <line
+              stroke="#eaeaea"
+              stroke-width="1"
+              x1="0"
+              x2="500"
+              y1="50.5"
+              y2="50.5"
             />
           </g>
           <g>
@@ -3309,9 +3513,9 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="start"
               x="0"
-              y="306.5"
+              y="298.5"
             >
-              −£6
+              −£5
             </text>
             <text
               alignment-baseline="baseline"
@@ -3319,9 +3523,9 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="start"
               x="0"
-              y="220.5"
+              y="246.5"
             >
-              £4
+              £0
             </text>
             <text
               alignment-baseline="baseline"
@@ -3329,9 +3533,9 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="start"
               x="0"
-              y="133.5"
+              y="194.5"
             >
-              £14
+              £5
             </text>
             <text
               alignment-baseline="baseline"
@@ -3339,9 +3543,29 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="start"
               x="0"
-              y="46.5"
+              y="142.5"
             >
-              £24
+              £10
+            </text>
+            <text
+              alignment-baseline="baseline"
+              font-family="Arial, Helvetica, sans-serif"
+              font-size="11"
+              text-anchor="start"
+              x="0"
+              y="90.5"
+            >
+              £15
+            </text>
+            <text
+              alignment-baseline="baseline"
+              font-family="Arial, Helvetica, sans-serif"
+              font-size="11"
+              text-anchor="start"
+              x="0"
+              y="38.5"
+            >
+              £20
             </text>
           </g>
           <g>
@@ -3351,9 +3575,9 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="end"
               x="500"
-              y="306.5"
+              y="298.5"
             >
-              −3.33%
+              0.00%
             </text>
             <text
               alignment-baseline="baseline"
@@ -3361,9 +3585,9 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="end"
               x="500"
-              y="220.5"
+              y="246.5"
             >
-              30.00%
+              20.00%
             </text>
             <text
               alignment-baseline="baseline"
@@ -3371,9 +3595,9 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="end"
               x="500"
-              y="133.5"
+              y="194.5"
             >
-              63.33%
+              40.00%
             </text>
             <text
               alignment-baseline="baseline"
@@ -3381,9 +3605,29 @@ exports[`<PageOverview /> should render graphs 1`] = `
               font-size="11"
               text-anchor="end"
               x="500"
-              y="46.5"
+              y="142.5"
             >
-              96.67%
+              60.00%
+            </text>
+            <text
+              alignment-baseline="baseline"
+              font-family="Arial, Helvetica, sans-serif"
+              font-size="11"
+              text-anchor="end"
+              x="500"
+              y="90.5"
+            >
+              80.00%
+            </text>
+            <text
+              alignment-baseline="baseline"
+              font-family="Arial, Helvetica, sans-serif"
+              font-size="11"
+              text-anchor="end"
+              x="500"
+              y="38.5"
+            >
+              100.00%
             </text>
           </g>
           <g>
@@ -4030,15 +4274,15 @@ exports[`<PageOverview /> should render graphs 1`] = `
       <g>
         <g>
           <path
-            d="M0,256.6666666666667 L3.618276118264817e-15,197.57573333333335  L-4.3,199.7 L0.0,193.3 L4.3,199.7 L0.0,197.6"
+            d="M0,248 L4.372417699335753e-15,176.593  L-4.7,178.9 L0.0,172.0 L4.7,178.9 L0.0,176.6"
             fill="#0c3"
             stroke="#0c3"
-            stroke-width="0.8879999999999999"
+            stroke-width="1.1099999999999999"
           />
         </g>
         <g>
           <path
-            d="M77.34806629834254,256.6666666666667 L77.34806629834254,265.9082666666667  L81.9,263.7 L77.3,270.3 L72.8,263.7 L77.3,265.9"
+            d="M77.34806629834254,248 L77.34806629834254,260.1536  L81.9,257.9 L77.3,264.6 L72.8,257.9 L77.3,260.2"
             fill="#c30"
             stroke="#c30"
             stroke-width="1.008"
@@ -4046,48 +4290,48 @@ exports[`<PageOverview /> should render graphs 1`] = `
         </g>
         <g>
           <path
-            d="M162.98342541436463,256.6666666666667 L162.98342541436463,207.05718666666667  L158.9,209.1 L163.0,203.0 L167.1,209.1 L163.0,207.1"
+            d="M162.98342541436463,248 L162.98342541436463,187.95515  L158.6,190.1 L163.0,183.6 L167.4,190.1 L163.0,188.0"
             fill="#0c3"
             stroke="#0c3"
-            stroke-width="0.7524000000000001"
+            stroke-width="0.9405"
           />
         </g>
         <g>
           <path
-            d="M245.85635359116023,256.6666666666667 L245.85635359116023,129.44351999999998  L240.1,132.2 L245.9,123.8 L251.6,132.2 L245.9,129.4"
+            d="M245.85635359116023,248 L245.85635359116023,176.79410000000001  L241.2,179.1 L245.9,172.2 L250.5,179.1 L245.9,176.8"
             fill="#0c3"
             stroke="#0c3"
-            stroke-width="1.8624"
+            stroke-width="1.107"
           />
         </g>
         <g>
           <path
-            d="M331.49171270718233,256.6666666666667 L331.49171270718233,91.68552  L324.9,94.9 L331.5,85.3 L338.1,94.9 L331.5,91.7"
+            d="M331.49171270718233,248 L331.49171270718233,111.4366  L325.4,114.4 L331.5,105.5 L337.6,114.4 L331.5,111.4"
             fill="#0c3"
             stroke="#0c3"
-            stroke-width="2.4024"
+            stroke-width="2.082"
           />
         </g>
         <g>
           <path
-            d="M414.36464088397787,256.6666666666667 L414.36464088397787,133.63885333333334  L408.7,136.4 L414.4,128.1 L420.1,136.4 L414.4,133.6"
+            d="M414.36464088397787,248 L414.36464088397787,111.4366  L408.2,114.4 L414.4,105.5 L420.5,114.4 L414.4,111.4"
             fill="#0c3"
             stroke="#0c3"
-            stroke-width="1.8024"
+            stroke-width="2.082"
           />
         </g>
         <g>
           <path
-            d="M500,256.6666666666667 L500,66.51352  L492.9,69.9 L500.0,59.6 L507.1,69.9 L500.0,66.5"
+            d="M500,248 L500,111.4366  L493.9,114.4 L500.0,105.5 L506.1,114.4 L500.0,111.4"
             fill="#0c3"
             stroke="#0c3"
-            stroke-width="2.7624"
+            stroke-width="2.082"
           />
         </g>
       </g>
       <g>
         <path
-          d="M0,147.46666666666667 Q49,115 77.3,112.5 C106,110 133,130 163.0,135.3 C192,141 219,135 245.9,144.3 C278,156 300,183 331.5,195.5 C359,206 385,206 414.4,212.1 Q444,218 500.0,230.8"
+          d="M0,116.96000000000001 Q49,77 77.3,74.9 C106,72 132,95 163.0,102.4 C191,109 220,102 245.9,113.2 C279,127 299,159 331.5,174.5 C358,187 385,187 414.4,194.5 Q444,202 500.0,217.0"
           fill="none"
           stroke="#bf2424"
           stroke-width="2"
@@ -4095,7 +4339,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,300 Q50,300 77.3,300.0 C107,300 133,300 163.0,300.0 C192,300 217,300 245.9,300.0 C276,300 302,300 331.5,300.0 C360,300 385,300 414.4,300.0 Q444,300 500.0,300.0"
+          d="M0,40 Q50,40 77.3,40.0 C107,40 133,40 163.0,40.0 C192,40 217,40 245.9,40.0 C276,40 302,40 331.5,40.0 C360,40 385,40 414.4,40.0 Q444,40 500.0,40.0"
           fill="none"
           stroke="#546e7a"
           stroke-width="2"
@@ -4103,7 +4347,7 @@ exports[`<PageOverview /> should render graphs 1`] = `
       </g>
       <g>
         <path
-          d="M0,203.8 Q48,247 77.3,251.9 C105,257 133,239 163.0,231.7 C192,224 217,217 245.9,208.4 C276,199 301,189 331.5,181.5 C360,174 385,170 414.4,165.1 Q444,160 500.0,151.5"
+          d="M0,203.8 Q48,247 77.3,251.9 C105,257 133,237 163.0,231.7 C192,226 217,227 245.9,220.3 C276,213 301,202 331.5,193.5 C360,186 385,181 414.4,175.5 Q444,170 500.0,162.7"
           fill="none"
           stroke="#093"
           stroke-width="2"
@@ -4181,23 +4425,23 @@ exports[`<PageOverview /> should render graphs 1`] = `
         >
           Investment ratio
         </text>
-        <rect
-          fill="rgba(255,255,255,0.6)"
-          height="260"
-          width="386.7403314917127"
-          x="113.25966850828729"
-          y="40"
-        />
       </g>
     </svg>
     <div
       class="emotion-4 emotion-5"
     >
-      <div
+      <button
         class="emotion-6 emotion-7"
       >
-        <a
+        <span
           class="emotion-8 emotion-9"
+        />
+      </button>
+      <div
+        class="emotion-10 emotion-11"
+      >
+        <a
+          class="emotion-12 emotion-13"
         />
         <span>
           Cumulative

@@ -12,27 +12,27 @@ import moize from 'moize';
 import { rgba } from 'polished';
 import { createSelector } from 'reselect';
 
+import { getMonthDates, getGraphDates, getStartPredictionIndex } from './common';
+import { getCategories, getEntries, getMonthlyValues, getSubcategories } from './direct';
 import {
-  getMonthlyValues,
+  forecastCompoundedReturns,
   getSpendingColumn,
-  getMonthDates,
-  getFutureMonths,
+  longTermOptionsDisabled,
   roundedNumbers,
-  getNumMonths,
-  currentDayIsEndOfMonth,
-} from './common';
+} from './utils';
 
 import { getText } from '~client/components/net-worth/breakdown.blocks';
+import { HOUSE_PRICE_INFLATION } from '~client/constants';
 import { blockPacker } from '~client/modules/block-packer';
-import { lastInArray, sortByKey } from '~client/modules/data';
+import { lastInArray } from '~client/modules/data';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import type { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/config';
 import { colors } from '~client/styled/variables';
 import type {
   BlockItem,
   FlexBlocks,
   GQL,
+  LongTermOptions,
   NetWorthAggregateSums as AggregateSums,
   NetWorthEntryNative,
   NetWorthTableRow as TableRow,
@@ -50,6 +50,8 @@ import type {
 } from '~client/types/gql';
 import { NetWorthAggregate as Aggregate } from '~shared/constants';
 
+export { getCategories, getEntries, getSubcategories } from './direct';
+
 const nullEntry = (date: Date): NetWorthEntryNative => ({
   id: -date.getTime(),
   date,
@@ -57,24 +59,6 @@ const nullEntry = (date: Date): NetWorthEntryNative => ({
   currencies: [],
   creditLimit: [],
 });
-
-const getNonFilteredCategories = (state: State): NetWorthCategory[] => state.netWorth.categories;
-const getNonFilteredSubcategories = (state: State): NetWorthSubcategory[] =>
-  state.netWorth.subcategories;
-
-export const getEntries = (state: State): NetWorthEntryNative[] => state.netWorth.entries;
-
-export const getCategories = createSelector(
-  getNonFilteredCategories,
-  sortByKey('type', 'category'),
-);
-export const getSubcategories = createSelector(
-  getNonFilteredSubcategories,
-  compose<NetWorthSubcategory[], NetWorthSubcategory[], NetWorthSubcategory[]>(
-    sortByKey('subcategory'),
-    sortByKey('categoryId'),
-  ),
-);
 
 const withoutSkipValues = (entries: NetWorthEntryNative[]): NetWorthEntryNative[] =>
   entries.map(({ values, ...rest }) => ({
@@ -367,7 +351,7 @@ const getNetWorthPropsDeriver = createSelector(
   (appConfig, monthly, dates, categories, subcategories) =>
     compose(
       withFTI(new Date(appConfig.birthDate)),
-      withSpend(dates, getSpendingColumn(dates)(monthly).spending),
+      withSpend(dates, getSpendingColumn(monthly, dates.length)),
       withTypeSplit(categories, subcategories),
       withAggregates(categories, subcategories),
     ),
@@ -398,24 +382,6 @@ export const getLatestNetWorthAggregate = moize(
   { maxSize: 1 },
 );
 
-export const getStartPredictionIndex = moize(
-  (today: Date) =>
-    createSelector(
-      getNumMonths,
-      getFutureMonths(today),
-      getEntries,
-      (numMonths, futureMonths, entries) => {
-        const isEndOfMonth = currentDayIsEndOfMonth(today);
-        const predictCurrentMonth =
-          !isEndOfMonth && !entries.some((entry) => isSameMonth(entry.date, today));
-        return Math.max(1, numMonths - futureMonths - (predictCurrentMonth ? 1 : 0));
-      },
-    ),
-  { maxSize: 1 },
-);
-
-export const assumedHousePriceInflation = 0.05;
-
 const houseCategory = 'House';
 
 function PMT({ principal, paymentsRemaining, rate }: MortgageValue): number {
@@ -432,13 +398,14 @@ function PMT({ principal, paymentsRemaining, rate }: MortgageValue): number {
 export type HomeEquity = { value: number; debt: number };
 
 export const getHomeEquity = moize(
-  (today: Date) =>
+  (today: Date, longTermOptions: LongTermOptions = longTermOptionsDisabled) =>
     createSelector(
       getStartPredictionIndex(today),
+      getGraphDates(today, longTermOptions),
       getCategories,
       getSubcategories,
       getNetWorthRows,
-      (startPredictionIndex, categories, subcategories, rows) => {
+      (startPredictionIndex, dates, categories, subcategories, rows) => {
         if (rows.length < startPredictionIndex) {
           return [];
         }
@@ -466,7 +433,7 @@ export const getHomeEquity = moize(
           debt: -debtToPresent[index],
         }));
 
-        const latestDebts = rows[startPredictionIndex - 1].values
+        const outstandingMortgages = rows[startPredictionIndex - 1].values
           .filter(
             (value): value is NetWorthValueObjectRead & { mortgage: MortgageValue } =>
               !!value.mortgage,
@@ -476,30 +443,46 @@ export const getHomeEquity = moize(
             monthlyPayment: PMT(mortgage),
           }));
 
-        const forecastDebt = Array(rows.length - startPredictionIndex)
-          .fill(0)
-          .reduce<number[][]>(
-            (last) => [
-              ...last,
-              latestDebts.map<number>((debt, homeIndex) =>
-                Math.max(
-                  0,
-                  last[last.length - 1][homeIndex] * (1 + debt.rate / 100) ** (1 / 12) -
-                    debt.monthlyPayment,
-                ),
-              ),
-            ],
-            [latestDebts.map<number>((debt) => debt.principal)],
+        const forecastDebt = dates
+          .slice(startPredictionIndex)
+          .reduce<{ monthIndex: number; mortgages: number[][] }>(
+            (last, { monthIndex }) => {
+              const monthsSinceLastForecast = monthIndex - last.monthIndex;
+              return {
+                monthIndex,
+                mortgages: [
+                  ...last.mortgages,
+                  outstandingMortgages.map<number>((mortgage, homeIndex) => {
+                    // The debt is forecast in periods of arbitrary length in months
+                    // But the debt is assumed to be repaid monthly, so this is taken into account
+                    const lastDebt = last.mortgages[last.mortgages.length - 1][homeIndex];
+                    const forecastDebtForHome = forecastCompoundedReturns(
+                      lastDebt,
+                      monthsSinceLastForecast,
+                      -mortgage.monthlyPayment,
+                      mortgage.rate / 100,
+                    );
+                    return Math.max(0, forecastDebtForHome);
+                  }),
+                ],
+              };
+            },
+            {
+              monthIndex: startPredictionIndex - 1,
+              mortgages: [outstandingMortgages.map<number>(({ principal }) => principal)],
+            },
           )
-          .slice(1)
+          .mortgages.slice(1)
           .map<number>((debtStack) => debtStack.reduce<number>((last, debt) => last + debt, 0));
 
         const latestHomeValue = homeValueToPresent[homeValueToPresent.length - 1];
 
-        const forecastHomeValue = Array(rows.length - startPredictionIndex)
-          .fill(0)
-          .map(
-            (_, index) => latestHomeValue * (1 + assumedHousePriceInflation) ** ((index + 1) / 12),
+        const forecastHomeValue = dates
+          .slice(startPredictionIndex)
+          .map<number>(
+            ({ monthIndex }) =>
+              latestHomeValue *
+              (1 + HOUSE_PRICE_INFLATION) ** ((monthIndex - startPredictionIndex + 1) / 12),
           );
 
         const forecastHomeEquity = forecastHomeValue.map<HomeEquity>((value, index) => ({

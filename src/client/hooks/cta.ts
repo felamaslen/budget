@@ -6,6 +6,10 @@ type Options = {
   stopPropagation?: boolean;
 };
 
+export const stopEventPropagation = <E extends HTMLElement = HTMLElement>(
+  event: React.MouseEvent<E>,
+): void => event.stopPropagation();
+
 export function useCTA<E extends HTMLElement = HTMLElement>(
   onActivate: () => void,
   options?: Options,
@@ -24,7 +28,7 @@ export function useCTA<E extends HTMLElement = HTMLElement>(
       },
       onClick: (event: React.MouseEvent<E>): void => {
         if (stopPropagation) {
-          event.stopPropagation();
+          stopEventPropagation(event);
         }
         debouncedActivate();
       },

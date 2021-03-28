@@ -14,7 +14,6 @@ import {
   lastInArray,
   limitTimeSeriesLength,
   modifyTransaction,
-  randnBm,
   sortByDate,
   sortByKey,
   sortByTotal,
@@ -24,7 +23,6 @@ import {
   withoutIds,
 } from './data';
 import { Average } from '~client/constants';
-import { mockRandom } from '~client/test-utils/random';
 import type { Data, FundNative, TransactionNative as Transaction } from '~client/types';
 import type { FundInput } from '~client/types/gql';
 
@@ -337,14 +335,6 @@ describe('data module', () => {
         [10.1, 91723],
         [11.5, 91231],
       ]);
-    });
-  });
-
-  describe(randnBm.name, () => {
-    it('should return a Gaussian-incremented value from two random numbers', () => {
-      expect.assertions(1);
-      mockRandom();
-      expect(randnBm()).toBe(Math.sqrt(-2 * Math.log(0.36123)) * Math.cos(2 * Math.PI * 0.96951));
     });
   });
 

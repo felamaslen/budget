@@ -18,6 +18,10 @@ export const GRAPH_ZOOM_SPEED = 0.15;
 
 export const GRAPH_CASHFLOW_PADDING: Padding = [40, 0, 0, 0];
 
+export const GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS = 30;
+
+export const HOUSE_PRICE_INFLATION = 0.05;
+
 type SpendCategory = { name: PageListCost; key: number };
 
 export const GRAPH_SPEND_CATEGORIES: SpendCategory[] = [

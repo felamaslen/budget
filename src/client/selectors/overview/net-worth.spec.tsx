@@ -2,7 +2,6 @@ import React from 'react';
 import numericHash from 'string-hash';
 
 import {
-  assumedHousePriceInflation,
   getCategories,
   getHomeEquity,
   getLatestNetWorthAggregate,
@@ -11,6 +10,7 @@ import {
   getSubcategories,
 } from './net-worth';
 import * as breakdownBlocks from '~client/components/net-worth/breakdown.blocks';
+import { HOUSE_PRICE_INFLATION } from '~client/constants';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 import { NetWorthCategoryType } from '~client/types/enum';
@@ -354,9 +354,9 @@ describe('Overview selectors (net worth)', () => {
       const principalJun = principalMay * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
       const principalJul = principalJun * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
 
-      const housePriceMay = 34500000 * (1 + assumedHousePriceInflation) ** (1 / 12);
-      const housePriceJun = housePriceMay * (1 + assumedHousePriceInflation) ** (1 / 12);
-      const housePriceJul = housePriceJun * (1 + assumedHousePriceInflation) ** (1 / 12);
+      const housePriceMay = 34500000 * (1 + HOUSE_PRICE_INFLATION) ** (1 / 12);
+      const housePriceJun = housePriceMay * (1 + HOUSE_PRICE_INFLATION) ** (1 / 12);
+      const housePriceJul = housePriceJun * (1 + HOUSE_PRICE_INFLATION) ** (1 / 12);
 
       const forecastEquity = getHomeEquity(now)(stateWithHomeEquity).slice(4);
 

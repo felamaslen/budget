@@ -1,7 +1,7 @@
 import type { Monthly } from './gql';
 import type { GQL } from './shared';
 
-export type MonthlyProcessed = GQL<Monthly> & {
+type OverviewGraphExtra = {
   assets: number[]; // excludes options, includes pension
   liabilities: number[];
   netWorth: number[];
@@ -10,6 +10,7 @@ export type MonthlyProcessed = GQL<Monthly> & {
   pension: number[];
   cashOther: number[]; // e.g. savings accounts, foreign accounts
   investments: number[]; // this includes cash and is based on the recorded value
+  investmentPurchases: number[]; // includes stock purchases as well as things like house purchases
   homeEquity: number[];
   options: number[]; // excludes SAYE savings (but includes the profit if any at current prices)
   income: number[];
@@ -17,20 +18,34 @@ export type MonthlyProcessed = GQL<Monthly> & {
   net: number[];
 };
 
-export type MonthlyProcessedKey = keyof Omit<MonthlyProcessed, keyof Monthly>;
+export type OverviewGraphValues = GQL<Monthly> & OverviewGraphExtra;
 
-export type MonthlyWithPartialProcess = GQL<Monthly> &
-  Partial<Omit<MonthlyProcessed, keyof Monthly>>;
-export type MonthlyWithProcess<K extends MonthlyProcessedKey> = Monthly & Pick<MonthlyProcessed, K>;
+export type OverviewGraphPartial = GQL<Monthly> & Partial<OverviewGraphExtra>;
 
-export type MergedMonthly = Omit<
-  MonthlyProcessed,
+export type OverviewGraphRequired<
+  K extends keyof OverviewGraphExtra,
+  G extends OverviewGraphPartial = OverviewGraphPartial
+> = GQL<Monthly> & G & Pick<OverviewGraphValues, K>;
+
+export type OverviewGraphDate = { date: Date; monthIndex: number };
+
+export type MergedOverviewGraphValues = Omit<
+  OverviewGraphValues,
   Exclude<keyof Monthly, 'stocks' | 'income' | 'investmentPurchases'>
 > & {
   startPredictionIndex: number;
 };
 
-export type TableValues<T = never, K extends keyof MonthlyProcessed = keyof MonthlyProcessed> = {
+export type OverviewGraph = {
+  dates: Date[];
+  values: OverviewGraphValues;
+  startPredictionIndex: number;
+};
+
+export type TableValues<
+  T = never,
+  K extends keyof OverviewGraphValues = keyof OverviewGraphValues
+> = {
   [key in K]: T;
 } & {
   netWorth: T;
@@ -61,8 +76,8 @@ export type OverviewColumn = {
     to: string;
     replace?: boolean;
   };
-  include?: (keyof MonthlyProcessed)[];
-  exclude?: (keyof MonthlyProcessed)[];
+  include?: (keyof OverviewGraphValues)[];
+  exclude?: (keyof OverviewGraphValues)[];
 };
 
 export type OverviewTableColumn = [OverviewHeader, OverviewColumn];

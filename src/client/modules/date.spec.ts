@@ -1,4 +1,4 @@
-import endOfMonth from 'date-fns/endOfMonth';
+import { endOfMonth, getUnixTime } from 'date-fns';
 import timezoneMock from 'timezone-mock';
 
 import { timeSeriesTicks, getMonthDatesList } from './date';
@@ -215,6 +215,165 @@ describe('date module', () => {
       ];
 
       expect(result).toStrictEqual(expectedResult);
+    });
+
+    it('should handle ranges of decades', () => {
+      expect.assertions(2);
+      const result = timeSeriesTicks(
+        getUnixTime(new Date('2020-02-03')),
+        getUnixTime(new Date('2048-07-31')),
+      );
+
+      expect(result).toHaveLength(29);
+      expect(result).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "label": "2020",
+            "major": 2,
+            "time": 1580515200,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1612137600,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1643673600,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1675209600,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1706745600,
+          },
+          Object {
+            "label": null,
+            "major": 1,
+            "time": 1738368000,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1769904000,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1801440000,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1832976000,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1864598400,
+          },
+          Object {
+            "label": "2030",
+            "major": 2,
+            "time": 1896134400,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1927670400,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1959206400,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 1990828800,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2022364800,
+          },
+          Object {
+            "label": null,
+            "major": 1,
+            "time": 2053900800,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2085436800,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2117059200,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2148595200,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2180131200,
+          },
+          Object {
+            "label": "2040",
+            "major": 2,
+            "time": 2211667200,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2243289600,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2274825600,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2306361600,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2337897600,
+          },
+          Object {
+            "label": null,
+            "major": 1,
+            "time": 2369520000,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2401056000,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2432592000,
+          },
+          Object {
+            "label": null,
+            "major": 0,
+            "time": 2464128000,
+          },
+        ]
+      `);
     });
   });
 

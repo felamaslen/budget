@@ -1,24 +1,20 @@
 import React, { useMemo, useContext, useCallback } from 'react';
 
-import { AfterCanvas } from './after-canvas';
 import { Key } from './key';
-import {
-  GraphCashFlow,
-  getValuesWithTime,
-  TimeValuesProps,
-} from '~client/components/graph-cashflow';
+import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashflow';
+import { Sidebar } from '~client/components/graph-cashflow/sidebar';
+import { ToggleContainer } from '~client/components/graph-cashflow/toggle';
 import { profitLossColor, transformToMovingAverage } from '~client/components/graph/helpers';
 import { TodayContext, usePersistentState } from '~client/hooks';
 import { cumulativeSum } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import { DrawProps, Line, MergedMonthly } from '~client/types';
+import { DrawProps, Line, OverviewGraph } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
 export type Props = {
   showAll: boolean;
-  startDate: Date;
-  futureMonths: number;
-  monthly: Pick<MergedMonthly, 'income' | 'spending' | 'net'>;
+  longTerm: boolean;
+  graph: OverviewGraph;
   investments: number[];
 };
 
@@ -28,22 +24,19 @@ const getRatioToIncome = (income: number[], values: number[]): number[] =>
 const inverseRatio = (values: number[]): number[] => values.map((value) => 1 - value);
 
 function processData(
-  startDate: Date,
-  showAll: boolean,
+  longTerm: boolean,
   isCumulative: boolean,
-  { net, income, spending }: Props['monthly'],
+  graph: OverviewGraph,
   investments: number[],
 ): Line[] {
-  const opts: TimeValuesProps = { startDate };
-
   const arrows: Line[] =
-    showAll || isCumulative
+    longTerm || isCumulative
       ? []
       : [
           {
             key: 'net',
             name: 'Cash flow',
-            data: getValuesWithTime(net, opts),
+            data: getValuesWithTime(graph.dates, graph.values.net),
             arrows: true,
             color: profitLossColor,
           },
@@ -55,8 +48,8 @@ function processData(
       key: 'spending',
       name: 'Expenses',
       data: isCumulative
-        ? getValuesWithTime(cumulativeSum(spending), opts)
-        : transformToMovingAverage(getValuesWithTime(spending, opts), 3),
+        ? getValuesWithTime(graph.dates, cumulativeSum(graph.values.spending))
+        : transformToMovingAverage(getValuesWithTime(graph.dates, graph.values.spending), 3),
       fill: false,
       smooth: true,
       color: colors[PageNonStandard.Overview].spending,
@@ -66,10 +59,10 @@ function processData(
       key: 'investments',
       name: 'Investments',
       data: isCumulative
-        ? getValuesWithTime(cumulativeSum(investments), opts)
+        ? getValuesWithTime(graph.dates, cumulativeSum(investments))
         : getValuesWithTime(
-            getRatioToIncome(cumulativeSum(income), cumulativeSum(investments)),
-            opts,
+            graph.dates,
+            getRatioToIncome(cumulativeSum(graph.values.income), cumulativeSum(investments)),
           ),
       color: colors.funds.main,
       smooth: true,
@@ -80,7 +73,7 @@ function processData(
       ? {
           key: 'income',
           name: 'Income',
-          data: getValuesWithTime(cumulativeSum(income), opts),
+          data: getValuesWithTime(graph.dates, cumulativeSum(graph.values.income)),
           fill: false,
           smooth: true,
           color: colors.green,
@@ -91,11 +84,19 @@ function processData(
           name: 'Savings ratio',
           data: isCumulative
             ? getValuesWithTime(
-                inverseRatio(getRatioToIncome(cumulativeSum(income), cumulativeSum(spending))),
-                opts,
+                graph.dates,
+                inverseRatio(
+                  getRatioToIncome(
+                    cumulativeSum(graph.values.income),
+                    cumulativeSum(graph.values.spending),
+                  ),
+                ),
               )
             : transformToMovingAverage(
-                getValuesWithTime(inverseRatio(getRatioToIncome(income, spending)), opts),
+                getValuesWithTime(
+                  graph.dates,
+                  inverseRatio(getRatioToIncome(graph.values.income, graph.values.spending)),
+                ),
                 12,
               ),
           secondary: true,
@@ -106,7 +107,7 @@ function processData(
   ];
 }
 
-export const GraphSpending: React.FC<Props> = ({ startDate, monthly, investments, showAll }) => {
+export const GraphSpending: React.FC<Props> = ({ graph, investments, showAll, longTerm }) => {
   const today = useContext(TodayContext);
 
   const [isCumulative, setCumulative] = usePersistentState<boolean>(
@@ -115,8 +116,8 @@ export const GraphSpending: React.FC<Props> = ({ startDate, monthly, investments
   );
 
   const lines = useMemo<Line[]>(
-    () => processData(startDate, showAll, isCumulative, monthly, investments),
-    [startDate, showAll, isCumulative, monthly, investments],
+    () => processData(showAll || longTerm, isCumulative, graph, investments),
+    [showAll, longTerm, isCumulative, graph, investments],
   );
 
   const AfterLines = useCallback<React.FC<DrawProps>>(
@@ -132,7 +133,13 @@ export const GraphSpending: React.FC<Props> = ({ startDate, monthly, investments
       today={today}
       lines={lines}
       AfterLines={AfterLines}
-      After={<AfterCanvas isCumulative={isCumulative} setCumulative={setCumulative} />}
+      After={
+        <Sidebar>
+          <ToggleContainer value={isCumulative} setValue={setCumulative}>
+            Cumulative
+          </ToggleContainer>
+        </Sidebar>
+      }
     />
   );
 };

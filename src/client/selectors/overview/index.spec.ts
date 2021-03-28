@@ -1,23 +1,18 @@
 import { endOfMonth, getUnixTime, isSameMonth } from 'date-fns';
 import numericHash from 'string-hash';
 
-import { getProcessedMonthlyValues, getOverviewTable } from '.';
+import { getOverviewGraphValues, getOverviewTable, getLongTermRates } from '.';
+
+import { HOUSE_PRICE_INFLATION } from '~client/constants';
 import type { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data';
-import { mockRandom } from '~client/test-utils/random';
-import type { MonthlyProcessed } from '~client/types';
+import type { LongTermOptions, OverviewGraphValues } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
 describe('Overview selectors', () => {
-  beforeEach(() => {
-    mockRandom([0.15, 0.99]);
-  });
-
-  const randnBm0 = Math.sqrt(-2 * Math.log(0.15)) * Math.cos(2 * Math.PI * 0.99);
-
   const now = new Date('2018-03-23T11:54:23.127Z');
 
-  describe('getProcessedMonthlyValues', () => {
+  describe('getOverviewGraphValues', () => {
     const testState: State = {
       ...state,
       [PageNonStandard.Funds]: {
@@ -90,15 +85,23 @@ describe('Overview selectors', () => {
       /* Jul-18 */ 0,
     ];
 
-    describe('when there is no net worth entry for the current month', () => {
-      const stateWithoutCurrentMonth: State = {
-        ...testState,
-        netWorth: {
-          ...testState.netWorth,
-          entries: testState.netWorth.entries.filter((entry) => !isSameMonth(entry.date, now)),
-        },
-      };
+    const expectedIncomeAverage = 1686; // (1500 / 2 + 1900 / 4 + 2000 / 8) / (1 / 2 + 1 / 4 + 1 / 8)
+    const expectedStockPurchaseAverage = 20050 / 3;
 
+    const mar18Transactions =
+      /* fund-A Mar-27 transaction */ 1804 * 1.32 -
+      0.72 -
+      /* fund-B Mar-17 transaction */ (109 * 51 + 3);
+
+    const stateWithoutCurrentMonth: State = {
+      ...testState,
+      netWorth: {
+        ...testState.netWorth,
+        entries: testState.netWorth.entries.filter((entry) => !isSameMonth(entry.date, now)),
+      },
+    };
+
+    describe('when there is no net worth entry for the current month', () => {
       // Check the test data at src/client/test-data/state.ts to verify these assertions
       const currentFundsValue = 10 * 4973 + 51 * 113;
 
@@ -107,11 +110,10 @@ describe('Overview selectors', () => {
       const stocksJan18 = 100779;
       const stocksFeb18 = 101459;
       const stocksMar18 = currentFundsValue;
-      const stocksApr18 =
-        currentFundsValue * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
-      const stocksMay18 = stocksApr18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
-      const stocksJun18 = stocksMay18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
-      const stocksJul18 = stocksJun18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+      const stocksApr18 = currentFundsValue * (1 + annualisedFundReturns) ** (1 / 12);
+      const stocksMay18 = stocksApr18 * (1 + annualisedFundReturns) ** (1 / 12);
+      const stocksJun18 = stocksMay18 * (1 + annualisedFundReturns) ** (1 / 12);
+      const stocksJul18 = stocksJun18 * (1 + annualisedFundReturns) ** (1 / 12);
 
       const stocks = [
         /* Jan-18 */ stocksJan18,
@@ -154,7 +156,7 @@ describe('Overview selectors', () => {
       ];
 
       const monthlyMortgagePayment =
-        ((1.0274 ** (1 / 12) - 1) * 18744200) / (1 - (1.0274 ** (1 / 12)) ** -359);
+        ((1.0274 ** (1 / 12) - 1) * 18744200) / (1 - (1.0274 ** (1 / 12)) ** -(12 * 25 - 1));
 
       const homeValue = [
         /* Jan-18 */ 21000000,
@@ -220,7 +222,15 @@ describe('Overview selectors', () => {
         /* Jul-18 */ 657 * (176.28 - 123.6),
       ];
 
-      const income = [2000, 1900, 1500, 2500, 2300, 1800, 2600];
+      const income = [
+        2000,
+        1900,
+        1500,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+      ];
       const bills = [1000, 900, 400, 650, 0, 0, 0];
       const food = [50, 13, 27, 27, 27, 27, 27];
       const general = [150, 90, 10, 90, 90, 90, 90];
@@ -243,8 +253,7 @@ describe('Overview selectors', () => {
         spending[2] +
         stocks[2] -
         stocks[1] +
-        /* fund-A Mar-27 transaction */ (1804 * 1.32 - 0.72) -
-        /* fund-B Mar-17 transaction */ (109 * 51 + 3) +
+        mar18Transactions +
         homeValue[2] -
         homeValue[1] +
         cashOther[2] -
@@ -351,21 +360,35 @@ describe('Overview selectors', () => {
         ${'spending'}                      | ${'spending'}       | ${spending}
       `('should add values for $description', ({ prop, value }) => {
         expect.assertions(1);
-        const { values: result } = getProcessedMonthlyValues(now, 0)(stateWithoutCurrentMonth);
-        expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value.map(Math.round));
+        const { values: result } = getOverviewGraphValues(now, 0)(stateWithoutCurrentMonth);
+        expect(result[prop as keyof OverviewGraphValues]).toStrictEqual(value.map(Math.round));
+      });
+
+      it('should return the date list', () => {
+        expect.assertions(1);
+        const result = getOverviewGraphValues(now, 0)(testState);
+        expect(result.dates).toStrictEqual([
+          new Date('2018-01-31T23:59:59.999Z'),
+          new Date('2018-02-28T23:59:59.999Z'),
+          new Date('2018-03-31T23:59:59.999Z'),
+          new Date('2018-04-30T23:59:59.999Z'),
+          new Date('2018-05-31T23:59:59.999Z'),
+          new Date('2018-06-30T23:59:59.999Z'),
+          new Date('2018-07-31T23:59:59.999Z'),
+        ]);
       });
 
       it('should return the start prediction index', () => {
         expect.assertions(1);
-        expect(
-          getProcessedMonthlyValues(now, 0)(stateWithoutCurrentMonth).startPredictionIndex,
-        ).toBe(2);
+        expect(getOverviewGraphValues(now, 0)(stateWithoutCurrentMonth).startPredictionIndex).toBe(
+          2,
+        );
       });
 
       describe('when showing old months', () => {
         it('should calculate the cost basis for the old months too', () => {
           expect.assertions(1);
-          const processedWithOldMonths = getProcessedMonthlyValues(now, 11)(state);
+          const processedWithOldMonths = getOverviewGraphValues(now, 11)(state);
 
           const costBasisMay17 =
             1117.87 * 80.510256 -
@@ -393,10 +416,10 @@ describe('Overview selectors', () => {
               /* Jan-18 */ costBasisMay17,
               /* Feb-18 */ costBasisMay17,
               /* Mar-18 */ costBasisMay17,
-              /* Apr-18 */ costBasisMay17,
-              /* May-18 */ costBasisMay17,
-              /* Jun-18 */ costBasisMay17,
-              /* Jul-18 */ costBasisMay17,
+              /* Apr-18 */ costBasisMay17 + expectedStockPurchaseAverage,
+              /* May-18 */ costBasisMay17 + expectedStockPurchaseAverage * 2,
+              /* Jun-18 */ costBasisMay17 + expectedStockPurchaseAverage * 3,
+              /* Jul-18 */ costBasisMay17 + expectedStockPurchaseAverage * 4,
             ].map(Math.round),
           );
         });
@@ -411,11 +434,15 @@ describe('Overview selectors', () => {
 
       const stocksJan18 = 100779;
       const stocksFeb18 = 101459;
-      const stocksMar18 = Math.round(currentFundsValue);
-      const stocksApr18 = stocksMar18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
-      const stocksMay18 = stocksApr18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
-      const stocksJun18 = stocksMay18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
-      const stocksJul18 = stocksJun18 * (1 + annualisedFundReturns + randnBm0 * 0.01) ** (1 / 12);
+      const stocksMar18 = currentFundsValue;
+      const stocksApr18 =
+        stocksMar18 * (1 + annualisedFundReturns) ** (1 / 12) + expectedStockPurchaseAverage;
+      const stocksMay18 =
+        stocksApr18 * (1 + annualisedFundReturns) ** (1 / 12) + expectedStockPurchaseAverage;
+      const stocksJun18 =
+        stocksMay18 * (1 + annualisedFundReturns) ** (1 / 12) + expectedStockPurchaseAverage;
+      const stocksJul18 =
+        stocksJun18 * (1 + annualisedFundReturns) ** (1 / 12) + expectedStockPurchaseAverage;
 
       const stocks = [
         /* Jan-18 */ stocksJan18,
@@ -425,7 +452,7 @@ describe('Overview selectors', () => {
         /* May-18 */ stocksMay18,
         /* Jun-18 */ stocksJun18,
         /* Jul-18 */ stocksJul18,
-      ].map(Math.round);
+      ];
 
       const pension = [
         /* Jan-18 */ 0,
@@ -448,7 +475,7 @@ describe('Overview selectors', () => {
       ];
 
       const monthlyMortgagePayment =
-        ((1.0279 ** (1 / 12) - 1) * 18420900) / (1 - (1.0279 ** (1 / 12)) ** -358);
+        ((1.0279 ** (1 / 12) - 1) * 18420900) / (1 - (1.0279 ** (1 / 12)) ** -(12 * 25 - 2));
 
       const homeValue = [
         /* Jan-18 */ 21000000,
@@ -516,7 +543,15 @@ describe('Overview selectors', () => {
         /* Jul-18 */ jul18OptionValue,
       ];
 
-      const income = [2000, 1900, 1500, 2500, 2300, 1800, 2600];
+      const income = [
+        2000,
+        1900,
+        1500,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+      ];
       const bills = [1000, 900, 400, 650, 0, 0, 0];
       const food = [50, 13, 20, 20, 20, 20, 20];
       const general = [150, 90, 10, 90, 90, 90, 90];
@@ -540,7 +575,8 @@ describe('Overview selectors', () => {
         income[3] -
         spending[3] +
         stocks[3] -
-        stocks[2] +
+        stocks[2] -
+        expectedStockPurchaseAverage +
         homeValue[3] -
         homeValue[2] +
         cashOther[3] -
@@ -550,7 +586,8 @@ describe('Overview selectors', () => {
         income[4] -
         spending[4] +
         stocks[4] -
-        stocks[3] +
+        stocks[3] -
+        expectedStockPurchaseAverage +
         homeValue[4] -
         homeValue[3] +
         cashOther[4] -
@@ -560,7 +597,8 @@ describe('Overview selectors', () => {
         income[5] -
         spending[5] +
         stocks[5] -
-        stocks[4] +
+        stocks[4] -
+        expectedStockPurchaseAverage +
         homeValue[5] -
         homeValue[4] +
         cashOther[5] -
@@ -570,7 +608,8 @@ describe('Overview selectors', () => {
         income[6] -
         spending[6] +
         stocks[6] -
-        stocks[5] +
+        stocks[5] -
+        expectedStockPurchaseAverage +
         homeValue[6] -
         homeValue[5] +
         cashOther[6] -
@@ -630,13 +669,13 @@ describe('Overview selectors', () => {
         ${'spending'}                      | ${'spending'}    | ${spending}
       `('should use the actual $description value for the current month', ({ prop, value }) => {
         expect.assertions(1);
-        const { values: result } = getProcessedMonthlyValues(endOfMonth(now), 0)(testState);
-        expect(result[prop as keyof MonthlyProcessed]).toStrictEqual(value.map(Math.round));
+        const { values: result } = getOverviewGraphValues(endOfMonth(now), 0)(testState);
+        expect(result[prop as keyof OverviewGraphValues]).toStrictEqual(value.map(Math.round));
       });
 
       it('should return the start prediction index', () => {
         expect.assertions(1);
-        expect(getProcessedMonthlyValues(now, 0)(testState).startPredictionIndex).toBe(3);
+        expect(getOverviewGraphValues(now, 0)(testState).startPredictionIndex).toBe(3);
       });
     });
 
@@ -663,8 +702,294 @@ describe('Overview selectors', () => {
 
       it('should recalculate the current month fund value', () => {
         expect.assertions(1);
-        const { values: result } = getProcessedMonthlyValues(now, 0)(testStateWithFundPrices);
+        const { values: result } = getOverviewGraphValues(now, 0)(testStateWithFundPrices);
         expect(result.stocks[2]).toBe(Math.round(101 * 67.93));
+      });
+    });
+
+    describe('when making long term predictions', () => {
+      const testLongTermOptions: LongTermOptions = {
+        enabled: true,
+        rates: {
+          income: 350000,
+          stockPurchase: 185000,
+        },
+      };
+
+      describe.each`
+        case                                                      | stateToTest
+        ${'there is a net worth entry for the current month'}     | ${testState}
+        ${'there is not a net worth entry for the current month'} | ${stateWithoutCurrentMonth}
+      `('when $case', ({ stateToTest }) => {
+        it('should predict 30 years into the future, yearly', () => {
+          expect.assertions(1);
+          const result = getOverviewGraphValues(now, 0, testLongTermOptions)(stateToTest);
+          expect(result.dates).toStrictEqual([
+            new Date('2018-01-31T23:59:59.999Z'),
+            new Date('2018-02-28T23:59:59.999Z'),
+            new Date('2018-03-31T23:59:59.999Z'),
+            new Date('2019-03-31T23:59:59.999Z'),
+            new Date('2020-03-31T23:59:59.999Z'),
+            new Date('2021-03-31T23:59:59.999Z'),
+            new Date('2022-03-31T23:59:59.999Z'),
+            new Date('2023-03-31T23:59:59.999Z'),
+            new Date('2024-03-31T23:59:59.999Z'),
+            new Date('2025-03-31T23:59:59.999Z'),
+            new Date('2026-03-31T23:59:59.999Z'),
+            new Date('2027-03-31T23:59:59.999Z'),
+            new Date('2028-03-31T23:59:59.999Z'),
+            new Date('2029-03-31T23:59:59.999Z'),
+            new Date('2030-03-31T23:59:59.999Z'),
+            new Date('2031-03-31T23:59:59.999Z'),
+            new Date('2032-03-31T23:59:59.999Z'),
+            new Date('2033-03-31T23:59:59.999Z'),
+            new Date('2034-03-31T23:59:59.999Z'),
+            new Date('2035-03-31T23:59:59.999Z'),
+            new Date('2036-03-31T23:59:59.999Z'),
+            new Date('2037-03-31T23:59:59.999Z'),
+            new Date('2038-03-31T23:59:59.999Z'),
+            new Date('2039-03-31T23:59:59.999Z'),
+            new Date('2040-03-31T23:59:59.999Z'),
+            new Date('2041-03-31T23:59:59.999Z'),
+            new Date('2042-03-31T23:59:59.999Z'),
+            new Date('2043-03-31T23:59:59.999Z'),
+            new Date('2044-03-31T23:59:59.999Z'),
+            new Date('2045-03-31T23:59:59.999Z'),
+            new Date('2046-03-31T23:59:59.999Z'),
+            new Date('2047-03-31T23:59:59.999Z'),
+            new Date('2048-03-31T23:59:59.999Z'),
+          ]);
+        });
+      });
+
+      it('should extrapolate the (yearly) income values explicitly', () => {
+        expect.assertions(3);
+        const { values: result } = getOverviewGraphValues(now, 0, testLongTermOptions)(testState);
+
+        expect(result.income).toHaveLength(33);
+        expect(result.income.slice(0, 3)).toStrictEqual([2000, 1900, 1500]);
+
+        expect(result.income.slice(3).every((value) => value === 350000 * 12)).toBe(true);
+      });
+
+      it('should extrapolate the (yearly) spending values explicitly', () => {
+        expect.assertions(2);
+        const result = getOverviewGraphValues(now, 0, testLongTermOptions)(testState);
+
+        expect(result.values.spending).toHaveLength(33);
+        expect(result.values.spending).toMatchInlineSnapshot(`
+          Array [
+            1260,
+            2068,
+            713,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+            14124,
+          ]
+        `);
+      });
+
+      it('should extend the stock values based on assumed investment', () => {
+        expect.assertions(1);
+        const { annualisedFundReturns } = testState[PageNonStandard.Overview];
+        const { values: result } = getOverviewGraphValues(now, 0, testLongTermOptions)(testState);
+        const { values: resultWithoutFuture } = getOverviewGraphValues(now, 0)(testState);
+
+        const returnRate = (1 + annualisedFundReturns) ** (1 / 12);
+
+        const stocksMar18 = resultWithoutFuture.stocks[2];
+        const stocksMar19 =
+          (((((((((((stocksMar18 * /* Apr */ returnRate + 185000) /* May */ * returnRate +
+            185000) /* Jun */ *
+            returnRate +
+            185000) /* Jul */ *
+            returnRate +
+            185000) /* Aug */ *
+            returnRate +
+            185000) /* Sep */ *
+            returnRate +
+            185000) /* Oct */ *
+            returnRate +
+            185000) /* Nov */ *
+            returnRate +
+            185000) /* Dec */ *
+            returnRate +
+            185000) /* Jan */ *
+            returnRate +
+            185000) /* Feb */ *
+            returnRate +
+            185000) /* Mar */ *
+            returnRate +
+          185000;
+        const stocksMar20 =
+          (((((((((((stocksMar19 * /* Apr */ returnRate + 185000) /* May */ * returnRate +
+            185000) /* Jun */ *
+            returnRate +
+            185000) /* Jul */ *
+            returnRate +
+            185000) /* Aug */ *
+            returnRate +
+            185000) /* Sep */ *
+            returnRate +
+            185000) /* Oct */ *
+            returnRate +
+            185000) /* Nov */ *
+            returnRate +
+            185000) /* Dec */ *
+            returnRate +
+            185000) /* Jan */ *
+            returnRate +
+            185000) /* Feb */ *
+            returnRate +
+            185000) /* Mar */ *
+            returnRate +
+          185000;
+        const stocksMar21 =
+          (((((((((((stocksMar20 * /* Apr */ returnRate + 185000) /* May */ * returnRate +
+            185000) /* Jun */ *
+            returnRate +
+            185000) /* Jul */ *
+            returnRate +
+            185000) /* Aug */ *
+            returnRate +
+            185000) /* Sep */ *
+            returnRate +
+            185000) /* Oct */ *
+            returnRate +
+            185000) /* Nov */ *
+            returnRate +
+            185000) /* Dec */ *
+            returnRate +
+            185000) /* Jan */ *
+            returnRate +
+            185000) /* Feb */ *
+            returnRate +
+            185000) /* Mar */ *
+            returnRate +
+          185000;
+
+        expect(result.stocks.slice(2, 6)).toStrictEqual(
+          [stocksMar18, stocksMar19, stocksMar20, stocksMar21].map(Math.round),
+        );
+      });
+
+      it('should predict the home debt down to zero', () => {
+        expect.assertions(2);
+        const { values: result } = getOverviewGraphValues(now, 0, testLongTermOptions)(testState);
+
+        // Assert essentially that there is no debt by the end
+        expect(result.homeEquity[result.homeEquity.length - 1]).toBe(
+          Math.round(result.homeEquity[result.homeEquity.length - 2] * (1 + HOUSE_PRICE_INFLATION)),
+        );
+
+        expect(result.homeEquity).toMatchInlineSnapshot(`
+          Array [
+            1680500,
+            2255800,
+            3079100,
+            4678252,
+            6345778,
+            8084773,
+            9898479,
+            11790290,
+            13763760,
+            15822610,
+            17970740,
+            20212232,
+            22551362,
+            24992609,
+            27540666,
+            30200447,
+            32977101,
+            35876022,
+            38902861,
+            42063539,
+            45364259,
+            48811523,
+            52412140,
+            56173248,
+            60102327,
+            64207215,
+            68496126,
+            72806631,
+            76446963,
+            80269311,
+            84282776,
+            88496915,
+            92921761,
+          ]
+        `);
+      });
+
+      it('should predict the bills numbers', () => {
+        expect.assertions(2);
+        const { values: result } = getOverviewGraphValues(now, 0, testLongTermOptions)(testState);
+
+        expect(result.bills[10]).not.toBe(0);
+        expect(result.bills).toMatchInlineSnapshot(`
+          Array [
+            1000,
+            900,
+            400,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+            10800,
+          ]
+        `);
       });
     });
   });
@@ -696,11 +1021,11 @@ describe('Overview selectors', () => {
                 "value": 10,
               },
               "income": Object {
-                "rgb": "#92df9b",
+                "rgb": "#24bf37",
                 "value": 2000,
               },
               "net": Object {
-                "rgb": "#cbf0cf",
+                "rgb": "#b5e9bc",
                 "value": 740,
               },
               "netWorth": Object {
@@ -746,7 +1071,7 @@ describe('Overview selectors', () => {
                 "value": 1000,
               },
               "income": Object {
-                "rgb": "#a7e5af",
+                "rgb": "#47c957",
                 "value": 1900,
               },
               "net": Object {
@@ -800,7 +1125,7 @@ describe('Overview selectors', () => {
                 "value": 1500,
               },
               "net": Object {
-                "rgb": "#c7efcc",
+                "rgb": "#b1e8b7",
                 "value": 787,
               },
               "netWorth": Object {
@@ -816,7 +1141,7 @@ describe('Overview selectors', () => {
                 "value": 713,
               },
               "stocks": Object {
-                "rgb": "#abb8be",
+                "rgb": "#adb9bf",
                 "value": 399098,
               },
             },
@@ -846,16 +1171,16 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#36c448",
-                "value": 2500,
+                "rgb": "#92df9b",
+                "value": 1686,
               },
               "net": Object {
-                "rgb": "#8ede98",
-                "value": 1573,
+                "rgb": "#b3e9ba",
+                "value": 759,
               },
               "netWorth": Object {
-                "rgb": "#2dc240",
-                "value": 4381350,
+                "rgb": "#2dc23f",
+                "value": 4389869,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -867,7 +1192,7 @@ describe('Overview selectors', () => {
               },
               "stocks": Object {
                 "rgb": "#aab7bd",
-                "value": 404136,
+                "value": 410252,
               },
             },
             "future": true,
@@ -896,16 +1221,16 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#5bcf69",
-                "value": 2300,
+                "rgb": "#92df9b",
+                "value": 1686,
               },
               "net": Object {
-                "rgb": "#4ecb5e",
-                "value": 2023,
+                "rgb": "#24bf37",
+                "value": 1409,
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4514798,
+                "value": 4532120,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -917,7 +1242,7 @@ describe('Overview selectors', () => {
               },
               "stocks": Object {
                 "rgb": "#8d9fa7",
-                "value": 409237,
+                "value": 421530,
               },
             },
             "future": true,
@@ -946,16 +1271,16 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#bdecc3",
-                "value": 1800,
+                "rgb": "#92df9b",
+                "value": 1686,
               },
               "net": Object {
-                "rgb": "#93e09d",
-                "value": 1523,
+                "rgb": "#24bf37",
+                "value": 1409,
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4648246,
+                "value": 4674956,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -967,7 +1292,7 @@ describe('Overview selectors', () => {
               },
               "stocks": Object {
                 "rgb": "#718690",
-                "value": 414402,
+                "value": 432934,
               },
             },
             "future": true,
@@ -996,16 +1321,16 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#24bf37",
-                "value": 2600,
+                "rgb": "#92df9b",
+                "value": 1686,
               },
               "net": Object {
                 "rgb": "#24bf37",
-                "value": 2323,
+                "value": 1409,
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4782995,
+                "value": 4818378,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -1017,7 +1342,7 @@ describe('Overview selectors', () => {
               },
               "stocks": Object {
                 "rgb": "#546e7a",
-                "value": 419633,
+                "value": 444467,
               },
             },
             "future": true,
@@ -1028,6 +1353,31 @@ describe('Overview selectors', () => {
           },
         ]
       `);
+    });
+  });
+
+  describe('getLongTermRates', () => {
+    /*
+     * Calculated by (exponential average):
+     * (1500 / 2 + 1900 / 4 + 2000 / 8) /
+     * (1 / 2 + 1 / 4 + 1 / 8)
+     */
+    const expectedIncome = 1685.714;
+
+    /*
+     * Calculated by (simple mean):
+     * (20050 + 0 + 0) / 3
+     */
+    const expectedStockPurchase = 6683.333;
+
+    it.each`
+      thing              | value
+      ${'income'}        | ${expectedIncome}
+      ${'stockPurchase'} | ${expectedStockPurchase}
+    `('should return the calculated average for $thing', ({ thing, value }) => {
+      expect.assertions(1);
+      const result = getLongTermRates(now)(state);
+      expect(result[thing as keyof LongTermOptions['rates']]).toBeCloseTo(value);
     });
   });
 });

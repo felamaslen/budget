@@ -5,7 +5,7 @@ import React from 'react';
 
 import { GraphBalance, Props } from '.';
 import { ResizeContext, TodayContext } from '~client/hooks';
-import { getFutureMonths, getProcessedMonthlyValues, getStartDate } from '~client/selectors';
+import { getOverviewGraphValues } from '~client/selectors';
 import { testNow, testState as state } from '~client/test-data/state';
 
 describe('<GraphBalance />', () => {
@@ -27,18 +27,16 @@ describe('<GraphBalance />', () => {
   const today = endOfDay(testNow);
 
   const setup = (): RenderResult => {
-    const processedMonthly = getProcessedMonthlyValues(today, 0)(state);
+    const graph = getOverviewGraphValues(today, 0)(state);
     const props: Props = {
       isMobile: false,
       showAll: false,
       setShowAll: jest.fn(),
       isLoading: false,
-      startDate: getStartDate(state),
-      futureMonths: getFutureMonths(today)(state),
-      monthly: {
-        ...processedMonthly.values,
-        startPredictionIndex: processedMonthly.startPredictionIndex,
-      },
+      graph,
+      longTermOptions: { enabled: false, rates: {} },
+      setLongTermOptions: jest.fn(),
+      defaultRates: { years: 30, income: 488500, stockPurchase: 255000, xirr: 0.18 },
     };
 
     return render(
@@ -75,16 +73,32 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="213.5"
-                y2="213.5"
+                y1="248.5"
+                y2="248.5"
               />
               <line
                 stroke="#999"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="126.5"
-                y2="126.5"
+                y1="196.5"
+                y2="196.5"
+              />
+              <line
+                stroke="#999"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="144.5"
+                y2="144.5"
+              />
+              <line
+                stroke="#999"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="92.5"
+                y2="92.5"
               />
               <line
                 stroke="#999"
@@ -101,96 +115,160 @@ describe('<GraphBalance />', () => {
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="282.5"
-                y2="282.5"
+                y1="289.5"
+                y2="289.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="265.5"
-                y2="265.5"
+                y1="279.5"
+                y2="279.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="248.5"
-                y2="248.5"
+                y1="268.5"
+                y2="268.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="230.5"
-                y2="230.5"
+                y1="258.5"
+                y2="258.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="196.5"
-                y2="196.5"
+                y1="237.5"
+                y2="237.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="178.5"
-                y2="178.5"
+                y1="227.5"
+                y2="227.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="161.5"
-                y2="161.5"
+                y1="216.5"
+                y2="216.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="144.5"
-                y2="144.5"
+                y1="206.5"
+                y2="206.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="109.5"
-                y2="109.5"
+                y1="185.5"
+                y2="185.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="92.5"
-                y2="92.5"
+                y1="175.5"
+                y2="175.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="74.5"
-                y2="74.5"
+                y1="164.5"
+                y2="164.5"
               />
               <line
                 stroke="#eaeaea"
                 stroke-width="1"
                 x1="0"
                 x2="500"
-                y1="57.5"
-                y2="57.5"
+                y1="154.5"
+                y2="154.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="133.5"
+                y2="133.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="123.5"
+                y2="123.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="112.5"
+                y2="112.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="102.5"
+                y2="102.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="81.5"
+                y2="81.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="71.5"
+                y2="71.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="60.5"
+                y2="60.5"
+              />
+              <line
+                stroke="#eaeaea"
+                stroke-width="1"
+                x1="0"
+                x2="500"
+                y1="50.5"
+                y2="50.5"
               />
             </g>
             <g>
@@ -210,7 +288,17 @@ describe('<GraphBalance />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="211.5"
+                y="246.5"
+              >
+                £10k
+              </text>
+              <text
+                alignment-baseline="baseline"
+                font-family="Arial, Helvetica, sans-serif"
+                font-size="11"
+                text-anchor="start"
+                x="0"
+                y="194.5"
               >
                 £20k
               </text>
@@ -220,7 +308,17 @@ describe('<GraphBalance />', () => {
                 font-size="11"
                 text-anchor="start"
                 x="0"
-                y="124.5"
+                y="142.5"
+              >
+                £30k
+              </text>
+              <text
+                alignment-baseline="baseline"
+                font-family="Arial, Helvetica, sans-serif"
+                font-size="11"
+                text-anchor="start"
+                x="0"
+                y="90.5"
               >
                 £40k
               </text>
@@ -232,7 +330,7 @@ describe('<GraphBalance />', () => {
                 x="0"
                 y="38.5"
               >
-                £60k
+                £50k
               </text>
             </g>
             <g>
@@ -878,15 +976,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0.0,180.3 L77.3,165.6 L163.0,149.0 L245.9,130.3 L331.5,109.4 L414.4,85.8 L500.0,59.4"
-            fill="none"
-            stroke="#999"
-            stroke-width="1"
-          />
-        </g>
-        <g>
-          <path
-            d="M0,227.17833333333334 Q51,212 77.3,202.2 C108,191 132,174 163.0,166.6 C191,160 217,163 245.9,161.3 C276,159 302,158 331.5,156.1 C360,154 385,153 414.4,150.8 Q444,149 500.0,145.5 L500,300 L0,300"
+            d="M0,212.614 Q51,195 77.3,182.7 C108,169 131,149 163.0,139.9 C190,132 217,135 245.9,133.1 C276,131 302,129 331.5,126.3 C361,124 385,122 414.4,119.4 Q444,117 500.0,112.6 L500,300 L0,300"
             fill="rgba(150,140,39,0.5)"
             stroke="none"
             stroke-width="2"
@@ -894,7 +984,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,222.81124333333332 Q52,209 77.3,197.9 C109,184 131,160 163.0,149.3 C190,141 217,146 245.9,143.9 C276,142 302,140 331.5,138.4 C360,137 385,135 414.4,132.9 Q444,131 500.0,127.4 L500.0,145.5 Q444,149 414.4,150.8 C385,153 360,154 331.5,156.1 C302,158 276,159 245.9,161.3 C217,163 191,160 163.0,166.6 C132,174 108,191 77.3,202.2 Q51,212 0.0,227.2"
+            d="M0,207.373492 Q52,191 77.3,177.4 C109,160 130,132 163.0,119.1 C189,109 217,114 245.9,111.8 C276,109 302,107 331.5,104.3 C361,102 385,99 414.4,96.9 Q444,94 500.0,89.4 L500.0,112.6 Q444,117 414.4,119.4 C385,122 361,124 331.5,126.3 C302,129 276,131 245.9,133.1 C217,135 190,132 163.0,139.9 C131,149 108,169 77.3,182.7 Q51,195 0.0,212.6"
             fill="rgba(84,110,122,0.4)"
             stroke="none"
             stroke-width="2"
@@ -902,7 +992,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0.0,212.5 L77.3,187.6 L163.0,151.9 L245.9,146.7 L331.5,141.4 L414.4,136.1 L500.0,130.9"
+            d="M0.0,195.0 L77.3,165.1 L163.0,122.3 L245.9,115.1 L331.5,108.0 L414.4,100.8 L500.0,93.6"
             fill="none"
             stroke="rgba(84,110,122,0.5)"
             stroke-dasharray="3,5"
@@ -911,7 +1001,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,222.81124333333332 Q47,172 77.3,157.2 C104,145 133,147 163.0,144.1 C192,141 217,140 245.9,138.5 C276,136 302,135 331.5,132.8 C360,131 385,129 414.4,127.1 Q444,125 500.0,121.4 L500.0,127.4 Q444,131 414.4,132.9 C385,135 360,137 331.5,138.4 C302,140 276,142 245.9,143.9 C217,146 190,141 163.0,149.3 C131,160 109,184 77.3,197.9 Q52,209 0.0,222.8"
+            d="M0,207.373492 Q45,147 77.3,128.7 C103,114 133,117 163.0,112.9 C192,109 217,108 245.9,105.3 C276,103 302,100 331.5,97.6 C361,95 385,93 414.4,89.9 Q444,87 500.0,82.2 L500.0,89.4 Q444,94 414.4,96.9 C385,99 361,102 331.5,104.3 C302,107 276,109 245.9,111.8 C217,114 189,109 163.0,119.1 C130,132 109,160 77.3,177.4 Q52,191 0.0,207.4"
             fill="rgba(145,194,129,0.4)"
             stroke="none"
             stroke-width="2"
@@ -919,13 +1009,13 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,227.17833333333334 Q42,130 77.3,105.4 C99,91 133,115 163.0,116.4"
+            d="M0,212.614 Q40,97 77.3,66.5 C97,50 133,79 163.0,79.6"
             fill="none"
             stroke="#039"
             stroke-width="2"
           />
           <path
-            d="M162.98342541436463,116.37019000000001 C192,117 217,113 245.9,110.7 C276,109 302,107 331.5,104.9 C360,103 385,101 414.4,99.2 Q444,97 500.0,93.3"
+            d="M162.98342541436463,79.644228 C192,81 217,75 245.9,72.3 C276,70 302,68 331.5,64.9 C361,62 385,60 414.4,57.5 Q444,55 500.0,50.0"
             fill="none"
             stroke="#808080"
             stroke-width="2"
@@ -933,7 +1023,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,227.17833333333334 Q42,129 77.3,104.9 C99,90 133,115 163.0,115.9 C192,117 217,112 245.9,110.2 C276,108 302,106 331.5,104.4 C360,102 385,101 414.4,98.7 Q444,97 500.0,92.9 L500.0,93.3 Q444,97 414.4,99.2 C385,101 360,103 331.5,104.9 C302,107 276,109 245.9,110.7 C217,113 192,117 163.0,116.4 C133,115 99,91 77.3,105.4 Q42,130 0.0,227.2"
+            d="M0,212.614 Q40,97 77.3,65.9 C97,50 133,78 163.0,79.1 C192,80 217,74 245.9,71.7 C276,69 302,67 331.5,64.3 C361,62 385,59 414.4,56.9 Q444,54 500.0,49.4 L500.0,50.0 Q444,55 414.4,57.5 C385,60 361,62 331.5,64.9 C302,68 276,70 245.9,72.3 C217,75 192,81 163.0,79.6 C133,79 97,50 77.3,66.5 Q40,97 0.0,212.6"
             fill="rgba(47,123,211,0.5)"
             stroke="none"
             stroke-width="2"
@@ -941,7 +1031,7 @@ describe('<GraphBalance />', () => {
         </g>
         <g>
           <path
-            d="M0,227.17833333333334 Q41,128 77.3,103.4 C99,89 133,113 163.0,114.0 C192,115 217,110 245.9,108.2 C276,106 302,104 331.5,102.4 C360,100 385,99 414.4,96.5 Q444,94 500.0,90.6"
+            d="M0,212.614 Q40,95 77.3,64.1 C97,48 133,76 163.0,76.8 C192,78 217,72 245.9,69.4 C276,67 302,65 331.5,61.9 C361,59 385,57 414.4,54.3 Q444,52 500.0,46.7"
             fill="none"
             stroke="#5aa8be"
             stroke-dasharray="3,5"
@@ -949,187 +1039,146 @@ describe('<GraphBalance />', () => {
           />
         </g>
         <g>
-          <g>
-            <rect
-              fill="rgba(255,255,255,0.6)"
-              height="62"
-              width="64"
-              x="48"
-              y="88"
-            />
-            <text
-              alignment-baseline="hanging"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="50"
-              y="92"
-            >
-              £125k (1y)
-            </text>
-            <text
-              alignment-baseline="hanging"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="50"
-              y="114"
-            >
-              £2m (3y)
-            </text>
-            <text
-              alignment-baseline="hanging"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="50"
-              y="136"
-            >
-              £34m (5y)
-            </text>
-          </g>
-          <g>
-            <rect
-              fill="rgba(255,255,255,0.6)"
-              height="80"
-              width="250"
-              x="45"
-              y="8"
-            />
-            <text
-              alignment-baseline="hanging"
-              color="#000"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="16"
-              x="65"
-              y="10"
-            >
-              Net worth
-            </text>
-            <line
-              stroke="#039"
-              stroke-width="2"
-              x1="50"
-              x2="74"
-              y1="40"
-              y2="40"
-            />
-            <text
-              alignment-baseline="middle"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="78"
-              y="40"
-            >
-              Actual
-            </text>
-            <line
-              stroke="#808080"
-              stroke-width="2"
-              x1="130"
-              x2="154"
-              y1="40"
-              y2="40"
-            />
-            <text
-              alignment-baseline="middle"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="158"
-              y="40"
-            >
-              Predicted
-            </text>
-            <rect
-              fill="rgba(150,140,39,0.5)"
-              height="6"
-              width="24"
-              x="130"
-              y="69"
-            />
-            <text
-              alignment-baseline="middle"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="158"
-              y="72"
-            >
-              Home equity
-            </text>
-            <rect
-              fill="rgba(84,110,122,0.5)"
-              height="6"
-              width="24"
-              x="50"
-              y="53"
-            />
-            <text
-              alignment-baseline="middle"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="78"
-              y="56"
-            >
-              Stocks
-            </text>
-            <rect
-              fill="#91c281"
-              height="6"
-              width="24"
-              x="130"
-              y="53"
-            />
-            <text
-              alignment-baseline="middle"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="158"
-              y="56"
-            >
-              Locked cash
-            </text>
-            <rect
-              fill="rgba(47,123,211,0.5)"
-              height="6"
-              width="24"
-              x="50"
-              y="69"
-            />
-            <text
-              alignment-baseline="middle"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="78"
-              y="72"
-            >
-              Pension
-            </text>
-            <line
-              stroke="#5aa8be"
-              stroke-dasharray="3,4"
-              stroke-width="2"
-              x1="220"
-              x2="244"
-              y1="40.5"
-              y2="40.5"
-            />
-            <text
-              alignment-baseline="middle"
-              fill="#333"
-              font-family="Arial, Helvetica, sans-serif"
-              font-size="11"
-              x="248"
-              y="40"
-            >
-              Options
-            </text>
-          </g>
+          <rect
+            fill="rgba(255,255,255,0.6)"
+            height="80"
+            width="250"
+            x="45"
+            y="8"
+          />
+          <text
+            alignment-baseline="hanging"
+            color="#000"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="16"
+            x="65"
+            y="10"
+          >
+            Net worth
+          </text>
+          <line
+            stroke="#039"
+            stroke-width="2"
+            x1="50"
+            x2="74"
+            y1="40"
+            y2="40"
+          />
+          <text
+            alignment-baseline="middle"
+            fill="#333"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="11"
+            x="78"
+            y="40"
+          >
+            Actual
+          </text>
+          <line
+            stroke="#808080"
+            stroke-width="2"
+            x1="130"
+            x2="154"
+            y1="40"
+            y2="40"
+          />
+          <text
+            alignment-baseline="middle"
+            fill="#333"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="11"
+            x="158"
+            y="40"
+          >
+            Predicted
+          </text>
+          <rect
+            fill="rgba(150,140,39,0.5)"
+            height="6"
+            width="24"
+            x="130"
+            y="69"
+          />
+          <text
+            alignment-baseline="middle"
+            fill="#333"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="11"
+            x="158"
+            y="72"
+          >
+            Home equity
+          </text>
+          <rect
+            fill="rgba(84,110,122,0.5)"
+            height="6"
+            width="24"
+            x="50"
+            y="53"
+          />
+          <text
+            alignment-baseline="middle"
+            fill="#333"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="11"
+            x="78"
+            y="56"
+          >
+            Stocks
+          </text>
+          <rect
+            fill="#91c281"
+            height="6"
+            width="24"
+            x="130"
+            y="53"
+          />
+          <text
+            alignment-baseline="middle"
+            fill="#333"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="11"
+            x="158"
+            y="56"
+          >
+            Locked cash
+          </text>
+          <rect
+            fill="rgba(47,123,211,0.5)"
+            height="6"
+            width="24"
+            x="50"
+            y="69"
+          />
+          <text
+            alignment-baseline="middle"
+            fill="#333"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="11"
+            x="78"
+            y="72"
+          >
+            Pension
+          </text>
+          <line
+            stroke="#5aa8be"
+            stroke-dasharray="3,4"
+            stroke-width="2"
+            x1="220"
+            x2="244"
+            y1="40.5"
+            y2="40.5"
+          />
+          <text
+            alignment-baseline="middle"
+            fill="#333"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="11"
+            x="248"
+            y="40"
+          >
+            Options
+          </text>
         </g>
       </svg>
     `);

@@ -26,7 +26,7 @@ export const testState: State = {
     annualisedFundReturns: 0.143,
     monthly: {
       stocks: [100779, 101459, 102981],
-      investmentPurchases: [0, 0, 0, 0, 0, 0, 0],
+      investmentPurchases: [0, 0, 20050, 0, 376000, 250000, 0],
       [PageListStandard.Income]: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
       [PageListStandard.Bills]: [1000, 900, 400, 650, 0, 0, 0],
       [PageListStandard.Food]: [50, 13, 20, 19, 0, 0, 0],
@@ -179,7 +179,7 @@ export const testState: State = {
             subcategory: numericHash('real-mortgage-subcategory-id'),
             mortgage: {
               principal: 19319500,
-              paymentsRemaining: 360,
+              paymentsRemaining: 12 * 25,
               rate: 2.82,
             },
             skip: false,
@@ -209,7 +209,7 @@ export const testState: State = {
             subcategory: numericHash('real-mortgage-subcategory-id'),
             mortgage: {
               principal: 18744200,
-              paymentsRemaining: 359,
+              paymentsRemaining: 12 * 25 - 1,
               rate: 2.74,
             },
             skip: false,
@@ -264,7 +264,7 @@ export const testState: State = {
             subcategory: numericHash('real-mortgage-subcategory-id'),
             mortgage: {
               principal: 18420900,
-              paymentsRemaining: 358,
+              paymentsRemaining: 12 * 25 - 2,
               rate: 2.79,
             },
             skip: false,

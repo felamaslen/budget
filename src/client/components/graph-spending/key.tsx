@@ -1,4 +1,3 @@
-import getUnixTime from 'date-fns/getUnixTime';
 import React from 'react';
 import { BaseKey } from '~client/components/graph-cashflow/base-key';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
@@ -15,21 +14,7 @@ type Props = PixPrimary &
 
 const [fontSize, fontFamily] = FONT_GRAPH_KEY;
 
-export const Key: React.FC<Props> = ({
-  isCumulative,
-  now,
-  pixX,
-  pixY1,
-  maxX,
-  minY,
-  maxY,
-  title,
-}) => {
-  const future0 = pixX(getUnixTime(now));
-  const future1 = pixY1(maxY);
-  const futureW = pixX(maxX) - future0;
-  const futureH = pixY1(minY) - future1;
-
+export const Key: React.FC<Props> = ({ isCumulative, title }) => {
   const keys: { text: string; color: string }[] = [
     {
       text: `Spending (${isCumulative ? 'cumulative' : 'quarterly avg.'})`,
@@ -69,13 +54,6 @@ export const Key: React.FC<Props> = ({
           </text>
         </React.Fragment>
       ))}
-      <rect
-        x={future0}
-        y={future1}
-        width={futureW}
-        height={futureH}
-        fill={colors.translucent.light.dark}
-      />
     </BaseKey>
   );
 };

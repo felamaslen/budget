@@ -1,7 +1,4 @@
-import addMonths from 'date-fns/addMonths';
-import endOfMonth from 'date-fns/endOfMonth';
 import getUnixTime from 'date-fns/getUnixTime';
-import isSameMonth from 'date-fns/isSameMonth';
 import React, { useCallback, useMemo } from 'react';
 
 import { hoverEffect } from './labels';
@@ -10,7 +7,7 @@ import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { getDataX, getStackedDataY } from '~client/components/graph/helpers';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatPercent } from '~client/modules/format';
-import type { PickUnion, Range, DrawProps, Line } from '~client/types';
+import type { PickUnion, Range, DrawProps, Line, Data, Point } from '~client/types';
 
 export type Props = PickUnion<LineGraphProps, 'lines' | 'AfterLines' | 'After'> & {
   isMobile?: boolean;
@@ -21,27 +18,14 @@ export type Props = PickUnion<LineGraphProps, 'lines' | 'AfterLines' | 'After'> 
   maxY2?: number;
 };
 
-function getTimeAtIndex(
-  index: number,
-  startDate: Date,
-  now?: Date,
-  breakAtToday?: boolean,
-): number {
-  const date = endOfMonth(addMonths(startDate, index));
-  return getUnixTime(breakAtToday && now && isSameMonth(now, date) ? now : date);
-}
-
 export type TimeValuesProps = {
   now?: Date;
   breakAtToday?: boolean;
   startDate: Date;
 };
 
-export const getValuesWithTime = (
-  data: number[],
-  { now, breakAtToday, startDate }: TimeValuesProps,
-): [number, number][] =>
-  data.map((value, index) => [getTimeAtIndex(index, startDate, now, breakAtToday), value]);
+export const getValuesWithTime = (dates: Date[], values: number[]): Data =>
+  values.map<Point>((value, index) => [getUnixTime(dates[index]), value]);
 
 function getRanges(lines: Line[], minY2Initial = 0, maxY2Initial = -Infinity): Range {
   return lines.reduce(

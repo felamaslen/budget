@@ -11,51 +11,74 @@ import moize from 'moize';
 import { replaceAtIndex } from 'replace-array';
 import { createSelector } from 'reselect';
 
-import {
-  getMonthlyValues,
-  getSpendingColumn,
-  getFutureMonths,
-  getMonthDates,
-  roundedArrays,
-} from './common';
+import { getFutureMonths, getMonthDates, getGraphDates, getStartPredictionIndex } from './common';
+import { getAnnualisedFundReturns, getMonthlyValues, getSubcategories } from './direct';
 import {
   calculatePredictedSAYEMonthlyDeposit,
   EntryWithFTI,
   getDerivedNetWorthEntries,
   getHomeEquity,
-  getStartPredictionIndex,
-  getSubcategories,
   HomeEquity,
 } from './net-worth';
+import {
+  forecastCompoundedReturns,
+  longTermOptionsDisabled,
+  reduceDates,
+  roundedArrays,
+  withSpendingColumn,
+} from './utils';
 
-import { Average } from '~client/constants';
+import { Average, GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
-import { arrayAverage, getTotalCost, IDENTITY, randnBm, rightPad } from '~client/modules/data';
+import { arrayAverage, getTotalCost, omitTypeName, rightPad } from '~client/modules/data';
 import { State } from '~client/reducers';
-import { filterPastTransactions, getFundsCachedValue } from '~client/selectors/funds';
+import {
+  filterPastTransactions,
+  getFundsCachedValue,
+  getFundsCostToDate,
+} from '~client/selectors/funds';
 import { getFundsRows } from '~client/selectors/funds/helpers';
 import {
-  MonthlyProcessed,
-  Median,
   FundNative as Fund,
+  GQL,
+  LongTermOptions,
+  LongTermRates,
+  Median,
+  OverviewGraph,
+  OverviewGraphDate as GraphDate,
+  OverviewGraphPartial,
+  OverviewGraphRequired,
+  OverviewGraphValues,
   OverviewTable,
   OverviewTableRow,
   SplitRange,
   TableValues,
-  MonthlyProcessedKey,
-  MonthlyWithProcess,
-  GQL,
 } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
 import type { Monthly, NetWorthSubcategory } from '~client/types/gql';
-import type {} from '~client/types/overview';
 import { NetWorthAggregate } from '~shared/constants';
 
 export * from './common';
 export * from './net-worth';
 
 type Category = keyof GQL<Monthly>;
+
+export const getLongTermRates = moize(
+  (today: Date) =>
+    createSelector(
+      getMonthlyValues,
+      getAnnualisedFundReturns,
+      getStartPredictionIndex(today),
+      (monthly, xirr, startPredictionIndex): LongTermRates => ({
+        years: GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS,
+        income: arrayAverage(monthly.income.slice(0, startPredictionIndex), Average.Exp),
+        stockPurchase: arrayAverage(monthly.investmentPurchases.slice(0, startPredictionIndex)),
+        xirr,
+      }),
+    ),
+  { maxSize: 1 },
+);
 
 const futureCategories: Category[] = [
   PageListStandard.Food,
@@ -69,58 +92,59 @@ const extrapolateCurrentMonthCategories: Category[] = [
   PageListStandard.Social,
 ];
 
-export const getAnnualisedFundReturns = (state: State): number =>
-  state.overview.annualisedFundReturns;
+const getMonthlyStockPurchase = (
+  longTermOptions: LongTermOptions,
+  longTermRates: LongTermRates,
+): number => longTermOptions.rates.stockPurchase ?? longTermRates.stockPurchase;
 
-const withNetWorth = <K extends MonthlyProcessedKey>(
+const withNetWorth = <
+  G extends Partial<OverviewGraphValues> &
+    Pick<OverviewGraphValues, 'income' | 'spending' | AggregateKey | 'stocks' | 'stockCostBasis'>
+>(
+  dates: GraphDate[],
   startPredictionIndex: number,
   netWorth: EntryWithFTI[],
-  homeEquity: HomeEquity[],
   funds: Fund[],
+  homeEquity: HomeEquity[],
+  longTermOptions: LongTermOptions,
+  longTermRates: LongTermRates,
 ) => (
-  monthly: MonthlyWithProcess<K | 'spending' | 'cashOther'>,
-): MonthlyWithProcess<K | 'spending' | 'cashOther'> &
-  Pick<MonthlyProcessed, 'netWorth' | 'assets' | 'liabilities' | 'homeEquity'> => {
-  const assets = netWorth.reduce<number[]>((last, entry, index) => {
+  graph: G,
+): G & Pick<OverviewGraphValues, 'netWorth' | 'assets' | 'liabilities' | 'homeEquity'> => {
+  const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
+
+  const assets = dates.reduce<number[]>((last, { date }, index) => {
     if (index < startPredictionIndex) {
-      return [...last, entry.assets];
+      return [...last, netWorth[index].assets];
     }
 
-    const income = monthly.income[index];
-    const spending = monthly.spending[index];
-    const stockReturn = monthly.stocks[index] - monthly.stocks[index - 1];
+    const fundCosts =
+      getFundsCostToDate(date, funds) -
+      (index > 0 ? getFundsCostToDate(dates[index - 1].date, funds) : 0);
 
-    const stockTransactionCost =
-      index === startPredictionIndex
-        ? funds.reduce<number>(
-            (sum, { transactions }) =>
-              sum +
-              getTotalCost(
-                transactions.filter(({ date }) => isSameMonth(date, netWorth[index].date)),
-              ),
-            0,
-          )
-        : 0;
+    const income = graph.income[index];
+    const spending = graph.spending[index] + fundCosts;
+
+    const stockReturn = graph.stocks[index] - graph.stocks[index - 1] - monthlyStockPurchase;
 
     const homeValueChange = homeEquity[index].value - homeEquity[index - 1].value;
-    const otherCashChange = monthly.cashOther[index] - monthly.cashOther[index - 1];
+    const otherCashChange = graph.cashOther[index] - graph.cashOther[index - 1];
 
-    const netChange =
-      income - spending + stockReturn - stockTransactionCost + homeValueChange + otherCashChange;
+    const netChange = income - spending + stockReturn + homeValueChange + otherCashChange;
 
     return [...last, last[last.length - 1] + netChange];
   }, []);
 
-  const liabilities = netWorth.reduce<number[]>((last, entry, index) => {
+  const liabilities = dates.reduce<number[]>((last, _, index) => {
     if (index < startPredictionIndex) {
-      return [...last, -entry.liabilities];
+      return [...last, -netWorth[index].liabilities];
     }
     const homeDebtChange = homeEquity[index].debt - homeEquity[index - 1].debt;
     return [...last, last[last.length - 1] + homeDebtChange];
   }, []);
 
   return {
-    ...monthly,
+    ...graph,
     assets,
     liabilities,
     netWorth: assets.map((value, index) => value + liabilities[index]),
@@ -129,128 +153,194 @@ const withNetWorth = <K extends MonthlyProcessedKey>(
 };
 
 function predictByPastAverages(
-  category: Category,
-  cost: number[],
-  futureMonths: number,
-  currentMonthRatio: number,
+  dates: GraphDate[],
   currentIndex: number,
+  currentMonthRatio: number,
+  category: Category,
+  presentValues: number[],
+  averageMode: Average = Average.Median,
 ): number[] {
   const currentItems = extrapolateCurrentMonthCategories.includes(category)
     ? replaceAtIndex(
-        cost.slice(0, -futureMonths),
+        presentValues.slice(0, currentIndex + 1),
         currentIndex,
-        Math.round(cost[currentIndex] * currentMonthRatio),
+        Math.round(presentValues[currentIndex] * currentMonthRatio),
       )
-    : cost.slice(0, -futureMonths);
+    : presentValues.slice(0, currentIndex + 1);
 
-  const average = Math.round(arrayAverage(currentItems, Average.Median));
+  const average = Math.round(arrayAverage(currentItems, averageMode));
 
-  return futureMonths > 0 ? currentItems.concat(Array(futureMonths).fill(average)) : currentItems;
+  return reduceDates(
+    dates.slice(currentIndex + 1),
+    (last, nextDate, prevDate) => [...last, average * (nextDate.monthIndex - prevDate.monthIndex)],
+    dates[currentIndex],
+    currentItems,
+  );
 }
 
-function calculateFutures<K extends MonthlyProcessedKey>(
-  numRows: number,
-  today: Date,
-  futureMonths: number,
-): (monthly: MonthlyWithProcess<K>) => MonthlyWithProcess<K> {
-  if (futureMonths <= 0) {
-    return IDENTITY;
+function predictIncome(
+  dates: GraphDate[],
+  currentIndex: number,
+  currentIncome: number[],
+  longTermOptions: LongTermOptions,
+): number[] {
+  if (!longTermOptions.enabled || typeof longTermOptions.rates.income === 'undefined') {
+    return predictByPastAverages(dates, currentIndex, 0, 'income', currentIncome, Average.Exp);
   }
 
-  const currentMonthRatio = getDaysInMonth(today) / getDate(today);
+  return reduceDates(
+    dates.slice(currentIndex + 1),
+    (last, nextDate, prevDate) => [
+      ...last,
+      (longTermOptions.rates.income as number) * (nextDate.monthIndex - prevDate.monthIndex),
+    ],
+    dates[currentIndex],
+    currentIncome.slice(0, currentIndex + 1),
+  );
+}
 
-  return (monthly): MonthlyWithProcess<K> =>
-    futureCategories.reduce<MonthlyWithProcess<K>>(
+function calculateFutures<G extends OverviewGraphPartial>(
+  dates: GraphDate[],
+  today: Date,
+  longTermOptions: LongTermOptions,
+): (graph: G) => G {
+  const currentMonthRatio = getDaysInMonth(today) / getDate(today);
+  const currentIndex = dates.findIndex(({ date }) => isSameMonth(date, today));
+
+  return (graph: G): G =>
+    futureCategories.reduce<G>(
       (last, category) => ({
         ...last,
         [category]: predictByPastAverages(
-          category,
-          monthly[category],
-          futureMonths,
+          dates,
+          currentIndex,
           currentMonthRatio,
-          numRows - 1 - futureMonths,
+          category,
+          graph[category],
         ),
       }),
-      monthly,
+      {
+        ...graph,
+        income: predictIncome(dates, currentIndex, graph.income, longTermOptions),
+        bills: longTermOptions.enabled
+          ? predictByPastAverages(dates, currentIndex, currentMonthRatio, 'bills', graph.bills)
+          : graph.bills,
+        investmentPurchases: rightPad(graph.investmentPurchases, dates.length, 0),
+      },
     );
 }
 
-const withNetChange = <K extends MonthlyProcessedKey>() => (
-  monthly: MonthlyWithProcess<K> & Pick<MonthlyProcessed, 'spending'>,
-): MonthlyWithProcess<K> & Pick<MonthlyProcessed, 'spending' | 'net'> => ({
-  ...monthly,
-  net: monthly.income.map((value, index) => value - monthly.spending[index]),
+const withNetChange = <G extends OverviewGraphRequired<'spending'>>() => (
+  graph: G,
+): OverviewGraphRequired<'net', G> => ({
+  ...graph,
+  net: graph.income.map((value, index) => value - graph.spending[index]),
 });
 
-const withPredictedSpending = <K extends MonthlyProcessedKey>(
-  dates: Date[],
+const withPredictedSpending = <G extends OverviewGraphPartial>(
+  dates: GraphDate[],
   today: Date,
-  futureMonths: number,
-) => (
-  monthly: MonthlyWithProcess<K>,
-): MonthlyWithProcess<K> & Pick<MonthlyProcessed, 'spending' | 'net'> =>
-  compose(
-    withNetChange<K>(),
-    getSpendingColumn<K>(dates),
-    calculateFutures<K>(dates.length, today, futureMonths),
-  )(monthly);
+  longTermOptions: LongTermOptions,
+): ((graph: G) => OverviewGraphRequired<'spending' | 'net', G>) =>
+  compose<G, G, OverviewGraphRequired<'spending', G>, OverviewGraphRequired<'spending' | 'net', G>>(
+    withNetChange(),
+    withSpendingColumn(dates.length),
+    calculateFutures(dates, today, longTermOptions),
+  );
 
-const predictStockReturns = (futureMonths: number, annualisedFundReturns: number) => (
-  stocks: number[],
-): number[] =>
-  futureMonths > 0
-    ? Array(futureMonths)
-        .fill(0)
-        .reduce<number[]>(
-          (last) => [
-            ...last,
-            last[last.length - 1] * (1 + (annualisedFundReturns + randnBm() * 0.01)) ** (1 / 12),
-          ],
-          stocks,
-        )
-        .map(Math.round)
-    : stocks;
-
-const withCurrentStockValue = (futureMonths: number, currentStockValue: number) => (
-  stocks: number[],
-): number[] => replaceAtIndex(stocks, stocks.length - 1, currentStockValue);
-
-const withStocks = <K extends MonthlyProcessedKey>(
-  dates: Date[],
-  funds: Fund[],
-  numOldMonths: number,
-  futureMonths: number,
-  currentStockValue: number,
+const predictStockReturns = (
+  dates: GraphDate[],
   annualisedFundReturns: number,
-) => (
-  monthly: MonthlyWithProcess<K>,
-): MonthlyWithProcess<K> & Pick<MonthlyProcessed, 'stockCostBasis'> => ({
-  ...monthly,
-  stocks: compose(
-    predictStockReturns(futureMonths, annualisedFundReturns),
-    withCurrentStockValue(futureMonths, Math.round(currentStockValue)),
-  )(monthly.stocks),
-  stockCostBasis: Array(numOldMonths + dates.length)
-    .fill(0)
-    .map<Date>((_, index) => endOfMonth(addMonths(dates[0], index - numOldMonths)))
-    .map<number>((monthDate) =>
-      funds.reduce<number>(
-        (last, fund) => last + getTotalCost(filterPastTransactions(monthDate, fund.transactions)),
-        0,
+  monthlyStockPurchase: number,
+) => (stocks: number[]): number[] =>
+  reduceDates(
+    dates.slice(stocks.length),
+    (last, nextDate, prevDate) => [
+      ...last,
+      forecastCompoundedReturns(
+        last[last.length - 1],
+        nextDate.monthIndex - prevDate.monthIndex,
+        monthlyStockPurchase,
+        annualisedFundReturns,
       ),
+    ],
+    dates[stocks.length - 1],
+    stocks,
+  );
+
+const withCurrentStockValue = (currentStockValue: number) => (stocks: number[]): number[] =>
+  replaceAtIndex(stocks, stocks.length - 1, currentStockValue);
+
+const getStockCostBasis = (
+  dates: GraphDate[],
+  monthlyStockPurchase: number,
+  numOldMonths: number,
+  startPredictionIndex: number,
+  funds: Fund[],
+): number[] =>
+  Array(numOldMonths)
+    .fill(0)
+    .map<GraphDate>((_, index) => ({
+      date: endOfMonth(addMonths(dates[0].date, index - numOldMonths)),
+      monthIndex: index - numOldMonths,
+    }))
+    .concat(dates)
+    .map<number>(({ date, monthIndex }) =>
+      funds.reduce<number>(
+        (last, fund) => last + getTotalCost(filterPastTransactions(date, fund.transactions)),
+        monthlyStockPurchase * Math.max(0, monthIndex - startPredictionIndex + 1),
+      ),
+    );
+
+const withStocks = <G extends OverviewGraphPartial>(
+  numOldMonths: number,
+  longTermOptions: LongTermOptions,
+) => (
+  longTermRates: LongTermRates,
+  startPredictionIndex: number,
+  dates: GraphDate[],
+  monthly: Monthly,
+  funds: Fund[],
+  fundsCachedValue: { value: number },
+  annualisedFundReturns: number,
+) => (graph: G): OverviewGraphRequired<'stocks' | 'stockCostBasis', G> => {
+  const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
+  const currentStockValue = fundsCachedValue.value;
+
+  return {
+    ...graph,
+    stocks: compose(
+      predictStockReturns(
+        dates,
+        longTermOptions.enabled
+          ? longTermOptions.rates.xirr ?? annualisedFundReturns
+          : annualisedFundReturns,
+        monthlyStockPurchase,
+      ),
+      withCurrentStockValue(currentStockValue),
+    )(monthly.stocks),
+    stockCostBasis: getStockCostBasis(
+      dates,
+      monthlyStockPurchase,
+      numOldMonths,
+      startPredictionIndex,
+      funds,
     ),
-});
+  };
+};
 
 type AggregateKey = 'pension' | 'cashOther' | 'options' | 'investments';
 
-function withAggregateNetWorth(
-  today: Date,
+function withAggregateNetWorth<G extends Partial<OverviewGraphValues>>(
+  dates: GraphDate[],
   startPredictionIndex: number,
   subcategories: NetWorthSubcategory[],
   aggregatedNetWorth: EntryWithFTI[],
-): (monthly: Monthly) => MonthlyWithProcess<AggregateKey> {
+  longTermOptions: LongTermOptions,
+  longTermRates: LongTermRates,
+): (graph: G) => G & Pick<OverviewGraphValues, AggregateKey> {
   const currentEntries = aggregatedNetWorth.slice(0, startPredictionIndex);
-  const fillCurrent = (values: number[]): number[] => rightPad(values, aggregatedNetWorth.length);
+  const fillCurrent = (values: number[]): number[] => rightPad(values, dates.length);
   const fillAggregate = (key: NetWorthAggregate): number[] =>
     fillCurrent(currentEntries.map(({ aggregate }) => aggregate[key]));
 
@@ -260,66 +350,137 @@ function withAggregateNetWorth(
     startPredictionIndex,
   );
 
-  return (monthly: Monthly): MonthlyWithProcess<AggregateKey> => ({
-    ...monthly,
+  const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
+  const currentInvestmentsValue =
+    currentEntries[currentEntries.length - 1]?.aggregate[NetWorthAggregate.stocks] ?? 0;
+
+  return (graph: G): G & Pick<OverviewGraphValues, AggregateKey> => ({
+    ...graph,
     pension: fillAggregate(NetWorthAggregate.pension),
     cashOther: fillAggregate(NetWorthAggregate.cashOther).map(
-      (value, index) => value + sayeDeposit * Math.max(0, index - (startPredictionIndex - 1)),
+      (value, index) =>
+        value + sayeDeposit * Math.max(0, dates[index].monthIndex - (startPredictionIndex - 1)),
     ),
-    investments: fillAggregate(NetWorthAggregate.stocks),
+    investments: currentEntries
+      .map(({ aggregate }) => aggregate[NetWorthAggregate.stocks])
+      .concat(
+        dates
+          .slice(currentEntries.length)
+          .map<number>(
+            ({ monthIndex }) =>
+              currentInvestmentsValue + monthlyStockPurchase * (monthIndex - startPredictionIndex),
+          ),
+      ),
     options: fillCurrent(currentEntries.map(({ options }) => options)).map(
       (value, index) => value + sayeProfit * Math.max(0, index - (startPredictionIndex - 1)),
     ),
   });
 }
 
-export const getProcessedMonthlyValues = moize(
-  (
+const getNetWorthMonthlyComposer = moize(
+  <G extends OverviewGraphRequired<'income' | 'spending' | 'net' | 'stocks' | 'stockCostBasis'>>(
+    today: Date,
+    longTermOptions: LongTermOptions,
+  ) =>
+    createSelector(
+      getLongTermRates(today),
+      getGraphDates(today, longTermOptions),
+      getStartPredictionIndex(today),
+      getDerivedNetWorthEntries,
+      getFundsRows,
+      getSubcategories,
+      getHomeEquity(today, longTermOptions),
+      (
+        longTermRates,
+        dates,
+        startPredictionIndex,
+        netWorth,
+        funds,
+        subcategories,
+        homeEquity,
+      ): ((
+        graph: G,
+      ) => OverviewGraphRequired<
+        'assets' | 'liabilities' | 'netWorth' | 'homeEquity' | AggregateKey,
+        G
+      >) =>
+        compose(
+          withNetWorth<G & Pick<OverviewGraphValues, AggregateKey | 'stocks' | 'income'>>(
+            dates,
+            startPredictionIndex,
+            netWorth,
+            funds,
+            homeEquity,
+            longTermOptions,
+            longTermRates,
+          ),
+          withAggregateNetWorth(
+            dates,
+            startPredictionIndex,
+            subcategories,
+            netWorth,
+            longTermOptions,
+            longTermRates,
+          ),
+        ),
+    ),
+  { maxSize: 1 },
+);
+
+const getFundsMonthlyComposer = moize(
+  <G extends OverviewGraphPartial>(
     today: Date,
     numOldMonths: number,
-  ): ((state: State) => { values: MonthlyProcessed; startPredictionIndex: number }) =>
+    longTermOptions: LongTermOptions,
+  ): ((state: State) => (graph: G) => OverviewGraphRequired<'stocks' | 'stockCostBasis', G>) =>
     createSelector(
+      getLongTermRates(today),
       getStartPredictionIndex(today),
-      getFutureMonths(today),
-      getMonthDates,
-      getSubcategories,
-      getDerivedNetWorthEntries,
+      getGraphDates(today, longTermOptions),
+      getMonthlyValues,
       getFundsRows,
       getFundsCachedValue.today(today),
       getAnnualisedFundReturns,
+      withStocks(numOldMonths, longTermOptions),
+    ),
+  { maxSize: 1 },
+);
+
+export const getOverviewGraphValues = moize(
+  (
+    today: Date,
+    numOldMonths: number,
+    longTermOptions: LongTermOptions = longTermOptionsDisabled,
+  ): ((state: State) => OverviewGraph) =>
+    createSelector(
+      getNetWorthMonthlyComposer(today, longTermOptions),
+      getFundsMonthlyComposer<OverviewGraphRequired<'investmentPurchases'>>(
+        today,
+        numOldMonths,
+        longTermOptions,
+      ),
+      getStartPredictionIndex(today),
+      getGraphDates(today, longTermOptions),
       getMonthlyValues,
-      getHomeEquity(today),
-      (
-        startPredictionIndex,
-        futureMonths,
-        dates,
-        subcategories,
-        netWorth,
-        funds,
-        fundsCachedValue,
-        annualisedFundReturns,
-        monthly,
-        homeEquity,
-      ) => {
-        const values = compose(
-          withNetWorth<AggregateKey | 'stockCostBasis' | 'spending' | 'net'>(
-            startPredictionIndex,
-            netWorth,
-            homeEquity,
-            funds,
-          ),
-          withPredictedSpending<AggregateKey | 'stockCostBasis'>(dates, today, futureMonths),
-          withStocks<AggregateKey>(
-            dates,
-            funds,
-            numOldMonths,
-            futureMonths,
-            fundsCachedValue.value,
-            annualisedFundReturns,
-          ),
-          withAggregateNetWorth(today, startPredictionIndex, subcategories, netWorth),
+      (netWorthMonthlyComposer, fundsMonthlyComposer, startPredictionIndex, dates, monthly) => {
+        const values: OverviewGraphValues = compose<
+          Monthly,
+          GQL<Monthly>,
+          OverviewGraphRequired<'stockCostBasis'>,
+          OverviewGraphRequired<'stockCostBasis' | 'spending' | 'net'>,
+          OverviewGraphValues
+        >(
+          netWorthMonthlyComposer,
+          withPredictedSpending(dates, today, longTermOptions),
+          fundsMonthlyComposer,
+          omitTypeName,
         )(monthly);
-        return { values: roundedArrays<MonthlyProcessed>(values), startPredictionIndex };
+
+        return {
+          dates: dates.map<Date>(({ date }) => date),
+          values: roundedArrays(values),
+          startPredictionIndex,
+        };
       },
     ),
   { maxSize: 1 },
@@ -339,7 +500,7 @@ const getFormattedMonths = (
 
 type TableNumberRows = TableValues<number[], 'netWorth' | 'net'>;
 
-const getTableValues = (monthly: MonthlyProcessed): TableNumberRows =>
+const getTableValues = (monthly: OverviewGraphValues): TableNumberRows =>
   OVERVIEW_COLUMNS.reduce<TableNumberRows>(
     (last, [key]) => ({
       [key]: monthly[key as keyof TableNumberRows],
@@ -399,21 +560,23 @@ const getCellColor = (ranges: Ranges, medians: Medians) => (
   key: keyof TableValues,
 ): string => getOverviewScoreColor(value, ranges[key], medians[key], overviewCategoryColor[key]);
 
-const getCells = (
-  monthly: Omit<MonthlyProcessed, 'startPredictionIndex'>,
-  getColor: ReturnType<typeof getCellColor>,
-) => (index: number): OverviewTableRow['cells'] =>
+const getCells = (graph: OverviewGraphValues, getColor: ReturnType<typeof getCellColor>) => (
+  index: number,
+): OverviewTableRow['cells'] =>
   OVERVIEW_COLUMNS.reduce<OverviewTableRow['cells']>(
     (
       last,
       [
         key,
-        { include = [key as keyof Omit<MonthlyProcessed, 'startPredictionIndex'>], exclude = [] },
+        {
+          include = [key as keyof Omit<OverviewGraphValues, 'startPredictionIndex'>],
+          exclude = [],
+        },
       ],
     ) => {
       const value =
-        include.reduce<number>((sum, column) => sum + monthly[column][index], 0) -
-        exclude.reduce<number>((sum, column) => sum + monthly[column][index], 0);
+        include.reduce<number>((sum, column) => sum + graph[column][index], 0) -
+        exclude.reduce<number>((sum, column) => sum + graph[column][index], 0);
 
       return { ...last, [key]: { value, rgb: getColor(value, key as keyof TableValues) } };
     },
@@ -425,16 +588,16 @@ export const getOverviewTable = moize(
     createSelector(
       getMonthDates,
       getFutureMonths(today),
-      getProcessedMonthlyValues(today, 0),
-      (dates, futureMonths, monthly): OverviewTable => {
+      getOverviewGraphValues(today, 0),
+      (dates, futureMonths, graph): OverviewTable => {
         const months = getFormattedMonths(dates);
-        const values = getTableValues(monthly.values);
+        const values = getTableValues(graph.values);
         const scoreValues = getScoreValues(values, futureMonths);
         const ranges = getRanges(values, scoreValues);
         const medians = getMedians(values, scoreValues);
         const endOfCurrentMonth = endOfMonth(today);
 
-        const getRowCells = getCells(monthly.values, getCellColor(ranges, medians));
+        const getRowCells = getCells(graph.values, getCellColor(ranges, medians));
 
         return months.map<OverviewTableRow>(({ year, month, monthText }, index) => {
           const past = dates[index] < today;
