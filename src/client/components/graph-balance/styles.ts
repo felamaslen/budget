@@ -7,7 +7,7 @@ export const RateSetter = styled.div`
   cursor: col-resize;
   display: flex;
   flex-flow: column;
-  margin: ${rem(2)} 0 0 0;
+  margin: ${rem(4)} 0 0 0;
   padding: 0 ${rem(4)};
   position: relative;
   width: 100%;

@@ -52,7 +52,8 @@ const PADDING_DESKTOP: Padding = [20, 3, 0, 12];
 const PADDING_DESKTOP_WITH_SIDEBAR: Padding = [20, 3, 0, 60];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
 
-const modeList = Object.values(Mode);
+const modeListDesktop = Object.values(Mode);
+const modeListMobile = [Mode.ROI, Mode.Value];
 
 function useDynamicPrices(): [HistoryOptions, (nextQuery: HistoryOptions) => void] {
   const query = useSelector(getHistoryOptions);
@@ -333,19 +334,18 @@ function useGraphProps({
   const fundLines = useSelector(getFundLines.today(today));
   const { startTime, cacheTimes } = useSelector(getFundsCache);
 
-  const selectedMode = isMobile ? Mode.ROI : mode;
   const filteredFundLines = useMemo<FundLine[]>(
     () =>
-      fundLines[selectedMode].filter(({ id }) =>
+      fundLines[mode].filter(({ id }) =>
         isMobile ? id === GRAPH_FUNDS_OVERALL_ID : toggleList[id] !== false,
       ),
-    [fundLines, selectedMode, isMobile, toggleList],
+    [fundLines, mode, isMobile, toggleList],
   );
-  const lines = filterLines(isMobile, filteredFundLines, selectedMode, startTime, cacheTimes);
+  const lines = filterLines(isMobile, filteredFundLines, mode, startTime, cacheTimes);
 
-  const [ranges, tickSizeY] = getRanges(lines, cacheTimes, selectedMode);
+  const [ranges, tickSizeY] = getRanges(lines, cacheTimes, mode);
 
-  const labelY = useCallback((value) => formatValue(value, selectedMode), [selectedMode]);
+  const labelY = useCallback((value) => formatValue(value, mode), [mode]);
 
   const BeforeLines = useCallback<React.FC<DrawProps>>(
     (props) => (
@@ -363,18 +363,11 @@ function useGraphProps({
 
   const AfterLines = useCallback<React.FC<SiblingProps>>(
     (props) =>
-      [Mode.ROI, Mode.Value].includes(selectedMode) ? (
-        <BuySellDots
-          {...props}
-          fundLines={filteredFundLines}
-          startTime={startTime}
-          mode={selectedMode}
-        />
+      [Mode.ROI, Mode.Value].includes(mode) ? (
+        <BuySellDots {...props} fundLines={filteredFundLines} startTime={startTime} mode={mode} />
       ) : null,
-    [filteredFundLines, startTime, selectedMode],
+    [filteredFundLines, startTime, mode],
   );
-
-  const hoverEffect = hoverEffectByMode[selectedMode];
 
   return {
     isMobile,
@@ -384,7 +377,7 @@ function useGraphProps({
     BeforeLines,
     AfterLines,
     lines,
-    hoverEffect,
+    hoverEffect: hoverEffectByMode[mode],
   };
 }
 
@@ -395,14 +388,23 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   const fundItems = useSelector(getFundItems.today(today));
 
   const [historyOptions, setHistoryOptions] = useDynamicPrices();
+  const modeList = isMobile ? modeListMobile : modeListDesktop;
   const [mode, changeMode] = usePersistentState<Mode>(modeList[0], 'graph_funds_mode');
+
+  const modeIsValid = modeList.includes(mode);
+  useEffect(() => {
+    if (!modeIsValid) {
+      changeMode(modeList[0]);
+    }
+  }, [modeIsValid, modeList, changeMode]);
+
   const [sidebarOpen, setSidebarOpen] = usePersistentState<boolean>(false, 'funds_sidebar_open');
   const [toggleList, setToggleList] = useToggleList(fundItems);
   const graphProps = useGraphProps({
     width,
     height,
     isMobile,
-    mode,
+    mode: modeIsValid ? mode : modeList[0],
     today,
     toggleList,
   });
@@ -413,20 +415,19 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
         {graphProps.minX !== graphProps.maxX && (
           <LineGraph {...graphProps} padding={getPadding(isMobile, sidebarOpen)} />
         )}
-        {!isMobile && (
-          <AfterCanvas
-            historyOptions={historyOptions}
-            modeList={modeList}
-            mode={mode}
-            changeMode={changeMode}
-            fundItems={fundItems}
-            toggleList={toggleList}
-            setToggleList={setToggleList}
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            changePeriod={setHistoryOptions}
-          />
-        )}
+        <AfterCanvas
+          isMobile={isMobile}
+          historyOptions={historyOptions}
+          modeList={modeList}
+          mode={mode}
+          changeMode={changeMode}
+          fundItems={fundItems}
+          toggleList={toggleList}
+          setToggleList={setToggleList}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          changePeriod={setHistoryOptions}
+        />
       </Styled.GraphFunds>
       {!isMobile && (
         <Styled.GraphFunds width={width} height={height}>

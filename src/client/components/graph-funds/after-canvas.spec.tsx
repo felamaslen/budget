@@ -12,6 +12,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
   const changeMode = jest.fn();
 
   const props: Props = {
+    isMobile: false,
     historyOptions: {
       period: FundPeriod.Year,
       length: 1,
@@ -57,7 +58,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
       const inputPeriod = getByDisplayValue('Year');
 
       act(() => {
-        fireEvent.change(inputPeriod, { target: { value: 'Month' } });
+        fireEvent.change(inputPeriod, { target: { value: 'Months' } });
       });
 
       await waitFor(() => {
@@ -95,7 +96,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
         changePeriod.mockClear();
 
         act(() => {
-          fireEvent.change(inputPeriod, { target: { value: 'Month' } });
+          fireEvent.change(inputPeriod, { target: { value: 'Months' } });
         });
 
         await waitFor(() => {
@@ -125,7 +126,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
         changePeriod.mockClear();
 
         act(() => {
-          fireEvent.change(inputPeriod, { target: { value: 'Year' } });
+          fireEvent.change(inputPeriod, { target: { value: 'Years' } });
         });
 
         await waitFor(() => {
@@ -140,7 +141,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
         changePeriod.mockClear();
 
         act(() => {
-          fireEvent.change(inputPeriod, { target: { value: 'Month' } });
+          fireEvent.change(inputPeriod, { target: { value: 'Months' } });
         });
 
         await waitFor(() => {

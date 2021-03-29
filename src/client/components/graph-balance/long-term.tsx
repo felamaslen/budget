@@ -7,6 +7,7 @@ import type { Props as RangeProps } from '~client/components/form-field/range';
 import { ToggleContainer } from '~client/components/graph-cashflow/toggle';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { Button } from '~client/styled/shared';
+import { SettingsFull, SettingsGroup } from '~client/styled/shared/settings';
 import type { LongTermOptions, LongTermRates } from '~client/types';
 
 export type Props = {
@@ -72,23 +73,35 @@ export const LongTermSettings: React.FC<Props> = ({ options, setOptions, default
 
   return (
     <>
-      <ToggleContainer value={options.enabled} setValue={toggleEnabled}>
-        Long term
-      </ToggleContainer>
+      <SettingsGroup>
+        <SettingsFull>
+          <ToggleContainer value={options.enabled} setValue={toggleEnabled}>
+            Long term
+          </ToggleContainer>
+        </SettingsFull>
+      </SettingsGroup>
       {options.enabled && (
         <>
-          <Button onClick={reset}>Reset</Button>
-          <RateSetter
-            title="Years"
-            value={years}
-            defaultValue={defaultRates.years}
-            setValue={setYears}
-            min={1}
-            max={30}
-            step={1}
-          >
-            {years}
-          </RateSetter>
+          <SettingsGroup>
+            <SettingsFull>
+              <Button onClick={reset}>Reset</Button>
+            </SettingsFull>
+          </SettingsGroup>
+          <SettingsGroup>
+            <SettingsFull>
+              <RateSetter
+                title="Years"
+                value={years}
+                defaultValue={defaultRates.years}
+                setValue={setYears}
+                min={1}
+                max={30}
+                step={1}
+              >
+                {years}
+              </RateSetter>
+            </SettingsFull>
+          </SettingsGroup>
           <RateSetter
             title="Income"
             value={income}

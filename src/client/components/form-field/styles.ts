@@ -27,6 +27,7 @@ import {
 } from '~client/components/page-funds/styles';
 import { breakpoint } from '~client/styled/mixins';
 import { fontFamily } from '~client/styled/reset';
+import { SettingsInput } from '~client/styled/shared/settings';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const centerGridOne = css`
@@ -81,6 +82,15 @@ const formFieldStyles = ({
     line-height: inherit !important;
     margin-left: ${rem(4)};
     width: auto !important;
+  }
+
+  ${SettingsInput} & {
+    width: 100%;
+
+    input,
+    select {
+      width: 100%;
+    }
   }
 
   ${breakpoint(breakpoints.mobile)} {

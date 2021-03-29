@@ -1,16 +1,30 @@
-import React, { Dispatch, SetStateAction, useCallback, useMemo } from 'react';
+import pluralize from 'pluralize';
+import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import * as Styled from './styles';
-import { FormFieldRange, FormFieldSelect, SelectOptions } from '~client/components/form-field';
+import {
+  FormFieldNumber,
+  FormFieldRange,
+  FormFieldSelect,
+  SelectOptions,
+} from '~client/components/form-field';
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { useCTA, useDebouncedState, useUpdateEffect } from '~client/hooks';
 import { abbreviateFundName } from '~client/modules/finance';
+import { Hamburger } from '~client/styled/shared/hamburger';
+import {
+  SettingsBackground,
+  SettingsGroup,
+  SettingsInput,
+  SettingsLabel,
+} from '~client/styled/shared/settings';
 import type { Id, FundItem, HistoryOptions } from '~client/types';
 import { FundPeriod } from '~client/types/gql';
 
 export type ToggleList = Record<string, boolean | null>;
 
 export type Props = Pick<ItemProps, 'toggleList' | 'setToggleList'> & {
+  isMobile: boolean;
   historyOptions: HistoryOptions;
   modeList: Mode[];
   mode: Mode;
@@ -70,17 +84,13 @@ const Item: React.FC<ItemProps> = ({
   );
 };
 
-const periodSelectOptions: SelectOptions<FundPeriod> = [
-  { internal: FundPeriod.Year, external: 'Year' },
-  { internal: FundPeriod.Month, external: 'Month' },
-];
-
 type TempQueryState = {
   lengths: Record<FundPeriod, number>;
   denominator: FundPeriod;
 };
 
 export const AfterCanvas: React.FC<Props> = ({
+  isMobile,
   historyOptions,
   modeList,
   mode,
@@ -92,10 +102,7 @@ export const AfterCanvas: React.FC<Props> = ({
   setSidebarOpen,
   changePeriod,
 }) => {
-  const modeSelectOptions = useMemo<SelectOptions<Mode>>(
-    () => modeList.map((internal) => ({ internal })),
-    [modeList],
-  );
+  const [mobileActive, setMobileActive] = useState<boolean>(false);
 
   const [tempQuery, debouncedQuery, setTempQuery] = useDebouncedState<TempQueryState>(
     {
@@ -106,7 +113,20 @@ export const AfterCanvas: React.FC<Props> = ({
       },
       denominator: historyOptions.period,
     },
-    100,
+    300,
+  );
+
+  const periodSelectOptions = useMemo<SelectOptions<FundPeriod>>(
+    () => [
+      { internal: FundPeriod.Year, external: pluralize('Year', tempQuery.lengths.year) },
+      { internal: FundPeriod.Month, external: pluralize('Month', tempQuery.lengths.month) },
+    ],
+    [tempQuery.lengths],
+  );
+
+  const modeSelectOptions = useMemo<SelectOptions<Mode>>(
+    () => modeList.map((internal) => ({ internal })),
+    [modeList],
   );
 
   const changePeriodDenominator = useCallback(
@@ -118,7 +138,7 @@ export const AfterCanvas: React.FC<Props> = ({
     (length: number) =>
       setTempQuery((last) => ({
         ...last,
-        lengths: { ...last.lengths, [last.denominator]: length },
+        lengths: { ...last.lengths, [last.denominator]: Math.max(0, Math.round(length)) },
       })),
     [setTempQuery],
   );
@@ -130,45 +150,80 @@ export const AfterCanvas: React.FC<Props> = ({
     });
   }, [debouncedQuery, changePeriod]);
 
-  const maxLength = tempQuery.denominator === FundPeriod.Year ? 10 : 18;
+  const lengthProps = {
+    value: tempQuery.lengths[tempQuery.denominator],
+    onChange: changePeriodLength,
+    min: 0,
+    max: tempQuery.denominator === FundPeriod.Year ? 10 : 18,
+  };
 
   return (
     <>
-      <Styled.FundModeSwitch>
-        <Styled.PeriodLengthIndicator>
-          {tempQuery.lengths[tempQuery.denominator]}
-        </Styled.PeriodLengthIndicator>
-        <FormFieldSelect
-          options={periodSelectOptions}
-          value={tempQuery.denominator}
-          onChange={changePeriodDenominator}
-        />
-        <FormFieldRange
-          value={tempQuery.lengths[tempQuery.denominator]}
-          onChange={changePeriodLength}
-          min={0}
-          max={maxLength}
-          step={1}
-        />
-        <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
-      </Styled.FundModeSwitch>
-      <Styled.FundSidebar
-        tabIndex={-1}
-        isOpen={sidebarOpen}
-        onClick={(): void => setSidebarOpen((last) => !last)}
-      >
-        {fundItems &&
-          fundItems.map((item: FundItem) => (
-            <Item
-              key={item.id}
-              numItems={fundItems.length}
-              {...item}
-              abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
-              toggleList={toggleList}
-              setToggleList={setToggleList}
-            />
-          ))}
-      </Styled.FundSidebar>
+      {isMobile && (
+        <Styled.MobileSettingsButton onClick={(): void => setMobileActive((last) => !last)}>
+          <Hamburger />
+        </Styled.MobileSettingsButton>
+      )}
+      {(!isMobile || mobileActive) && (
+        <>
+          <SettingsBackground onClick={(): void => setMobileActive(false)} />
+          <Styled.FundModeSwitch>
+            <SettingsGroup>
+              <SettingsLabel>Length</SettingsLabel>
+              <SettingsInput>
+                {(isMobile && <FormFieldNumber {...lengthProps} />) || (
+                  <FormFieldRange {...lengthProps} step={1} />
+                )}
+              </SettingsInput>
+            </SettingsGroup>
+            <Styled.PeriodLengthSettingsGroup>
+              <SettingsLabel>Period</SettingsLabel>
+              <SettingsInput>
+                {isMobile && !tempQuery.lengths[tempQuery.denominator] ? (
+                  <Styled.PeriodLengthIndicator>Unlimited</Styled.PeriodLengthIndicator>
+                ) : null}
+                {!isMobile && (
+                  <Styled.PeriodLengthIndicator>
+                    {tempQuery.lengths[tempQuery.denominator] || 'Unlimited'}
+                  </Styled.PeriodLengthIndicator>
+                )}
+                {tempQuery.lengths[tempQuery.denominator] > 0 ? (
+                  <FormFieldSelect
+                    options={periodSelectOptions}
+                    value={tempQuery.denominator}
+                    onChange={changePeriodDenominator}
+                  />
+                ) : null}
+              </SettingsInput>
+            </Styled.PeriodLengthSettingsGroup>
+            <SettingsGroup>
+              <SettingsLabel>Mode</SettingsLabel>
+              <SettingsInput>
+                <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
+              </SettingsInput>
+            </SettingsGroup>
+          </Styled.FundModeSwitch>
+        </>
+      )}
+      {!isMobile && (
+        <Styled.FundSidebar
+          tabIndex={-1}
+          isOpen={sidebarOpen}
+          onClick={(): void => setSidebarOpen((last) => !last)}
+        >
+          {fundItems &&
+            fundItems.map((item: FundItem) => (
+              <Item
+                key={item.id}
+                numItems={fundItems.length}
+                {...item}
+                abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
+                toggleList={toggleList}
+                setToggleList={setToggleList}
+              />
+            ))}
+        </Styled.FundSidebar>
+      )}
     </>
   );
 };

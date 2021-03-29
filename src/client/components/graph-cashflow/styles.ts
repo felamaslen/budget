@@ -2,67 +2,55 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
+import { breakpoint } from '~client/styled/mixins';
 import { FlexCenter } from '~client/styled/shared';
-import { colors } from '~client/styled/variables';
+import { HamburgerButton } from '~client/styled/shared/hamburger';
+import { SettingsDialog, SettingsGroup } from '~client/styled/shared/settings';
+import { breakpoints, colors } from '~client/styled/variables';
 
 export type SidebarProps = {
   open: boolean;
 };
 
-export const SidebarToggle = styled.button`
-  align-items: center;
-  appearance: none;
-  background: ${colors.white};
-  border: none;
-  cursor: pointer;
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-  height: ${rem(24)};
-  left: ${rem(-24)};
-  outline: none;
-  padding: 0;
-  position: absolute;
-  top: 0;
-  width: ${rem(24)};
-`;
-
-export const SidebarToggleHamburger = styled.span`
-  &,
-  &::before,
-  &::after {
-    background: ${colors.black};
-    height: ${rem(2)};
-    width: ${rem(16)};
-  }
-
-  &::before,
-  &::after {
-    content: '';
-    display: block;
-  }
-
-  &::before {
-    margin-top: ${rem(-6)};
-  }
-
-  &::after {
-    margin-top: ${rem(10)};
-  }
-`;
-
-export const Sidebar = styled.div<SidebarProps>(
+export const SidebarToggle = styled(HamburgerButton)<SidebarProps>(
   ({ open }) => css`
-    background: ${colors.translucent.dark.light};
-    display: flex;
-    flex-flow: column;
-    height: 100%;
-    right: ${rem(open ? 0 : -128)};
     position: absolute;
+    right: 0;
     top: 0;
-    transition: 0.1s right ease;
-    width: ${rem(128)};
     z-index: 10;
+
+    ${breakpoint(breakpoints.mobile)} {
+      right: ${rem(open ? 128 : 0)};
+      transition: 0.1s right ease;
+    }
+  `,
+);
+
+export const Sidebar = styled(SettingsDialog)<SidebarProps>(
+  ({ open }) => css`
+    display: ${open ? 'block' : 'none'};
+
+    ${breakpoint(breakpoints.mobile)} {
+      background: ${colors.translucent.dark.light};
+      display: flex;
+      flex-flow: column;
+      height: 100%;
+      justify-content: flex-start;
+      left: initial;
+      overflow-y: auto;
+      padding: 0;
+      position: absolute;
+      right: ${rem(open ? 0 : -128)};
+      top: 0;
+      transform: none;
+      transition: 0.1s right ease;
+      width: ${rem(128)};
+      z-index: 9;
+
+      ${SettingsGroup} {
+        width: 100%;
+      }
+    }
   `,
 );
 

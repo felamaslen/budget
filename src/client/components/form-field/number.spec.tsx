@@ -10,12 +10,13 @@ describe('<FormFieldNumber />', () => {
   };
 
   it('should render an input with the value', () => {
-    expect.assertions(2);
+    expect.assertions(3);
     const { getByDisplayValue } = render(<FormFieldNumber {...props} />);
     const input = getByDisplayValue('103.45') as HTMLInputElement;
 
     expect(input).toBeInTheDocument();
     expect(input.type).toBe('number');
+    expect(input.inputMode).toBe('numeric');
   });
 
   it('should call onChange when changing the value, after the blur', () => {

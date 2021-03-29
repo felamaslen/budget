@@ -48,6 +48,7 @@ const { Field, FieldInline } = makeInlineField<
   },
   inputProps: {
     type: 'number',
+    inputMode: 'numeric',
   },
 });
 

@@ -7,6 +7,7 @@ import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashf
 import { Sidebar } from '~client/components/graph-cashflow/sidebar';
 import { ToggleContainer } from '~client/components/graph-cashflow/toggle';
 import { TodayContext, usePersistentState } from '~client/hooks';
+import { SettingsFull, SettingsGroup } from '~client/styled/shared/settings';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
 import type { Line, LongTermOptions, OverviewGraph } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
@@ -172,12 +173,20 @@ export const GraphBalance: React.FC<Props> = ({
       AfterLines={<Key title="Net worth" />}
       After={
         <Sidebar>
-          <ToggleContainer value={showLiabilities} setValue={setShowLiabilities}>
-            Split
-          </ToggleContainer>
-          <ToggleContainer value={showAll} setValue={setShowAll} isLoading={isLoading}>
-            Show all
-          </ToggleContainer>
+          <SettingsGroup>
+            <SettingsFull>
+              <ToggleContainer value={showLiabilities} setValue={setShowLiabilities}>
+                Split
+              </ToggleContainer>
+            </SettingsFull>
+          </SettingsGroup>
+          <SettingsGroup>
+            <SettingsFull>
+              <ToggleContainer value={showAll} setValue={setShowAll} isLoading={isLoading}>
+                Show all
+              </ToggleContainer>
+            </SettingsFull>
+          </SettingsGroup>
           <LongTermSettings
             options={longTermOptions}
             setOptions={setLongTermOptions}

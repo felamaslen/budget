@@ -120,13 +120,13 @@ describe('<GraphFundItem />', () => {
         z-index: 2;
       }
 
-      .enskbpv5 .emotion-2 {
+      .enskbpv7 .emotion-2 {
         position: relative;
         height: 125px;
       }
 
       @media only screen and (min-width: 500px) {
-        .enskbpv5 .emotion-2 {
+        .enskbpv7 .emotion-2 {
           height: 100%;
         }
       }
@@ -255,7 +255,7 @@ describe('<GraphFundItem />', () => {
         }
 
         @media only screen and (min-width: 500px) {
-          .css-8izwno-Graph {
+          .css-1pl1xkf-Graph {
             display: inline-block;
             position: static;
             width: 100px;
@@ -264,7 +264,7 @@ describe('<GraphFundItem />', () => {
             box-shadow: 0 3px 10px rgba(0,0,0,0.2);
           }
 
-          .emotion-1 .css-8izwno-Graph {
+          .emotion-1 .css-1pl1xkf-Graph {
             z-index: 10;
             width: 100px;
             height: 100%;
@@ -327,13 +327,13 @@ describe('<GraphFundItem />', () => {
           z-index: 2;
         }
 
-        .enskbpv5 .emotion-4 {
+        .enskbpv7 .emotion-4 {
           position: relative;
           height: 125px;
         }
 
         @media only screen and (min-width: 500px) {
-          .enskbpv5 .emotion-4 {
+          .enskbpv7 .emotion-4 {
             height: 100%;
           }
         }
