@@ -449,10 +449,63 @@ export const pointVisible = (valX: number, minX: number, maxX: number): boolean 
 export const profitLossColor = ([, value]: Point): string =>
   value < 0 ? colors[PageNonStandard.Funds].loss : colors[PageNonStandard.Funds].profit;
 
-export function transformToMovingAverage(data: Data, period: number): Data {
-  if (!period) {
+export function transformToMovingAverage(data: Data, period: number, timeWeighted = false): Data {
+  if (!(period && data.length)) {
     return [];
   }
+  if (data.length === 1) {
+    return data;
+  }
+
+  if (timeWeighted) {
+    const timeIntervalBase = data[1][0] - data[0][0];
+    const interpolatedTimeSeries = data.reduce<{ data: Data; takeIndexes: number[] }>(
+      (last, point, index) => {
+        if (index === 0) {
+          return { data: [...last.data, point], takeIndexes: [...last.takeIndexes, 0] };
+        }
+        const lastTakeIndex = last.takeIndexes[last.takeIndexes.length - 1];
+        const timeInterval = point[0] - data[index - 1][0];
+
+        if (timeInterval === timeIntervalBase) {
+          return {
+            data: [...last.data, point],
+            takeIndexes: [...last.takeIndexes, lastTakeIndex + 1],
+          };
+        }
+
+        const timeIntervalRatio = timeInterval / timeIntervalBase;
+        const numInterpolatedValues = Math.floor(timeIntervalRatio) - 1;
+        if (numInterpolatedValues <= 0) {
+          return {
+            data: [...last.data, point],
+            takeIndexes: [...last.takeIndexes, lastTakeIndex + 1],
+          };
+        }
+        return {
+          data: [
+            ...last.data,
+            ...Array(numInterpolatedValues)
+              .fill(0)
+              .map<Point>((_, interpolateIndex) => [
+                last.data[last.data.length - 1][0] + (interpolateIndex + 1) * timeIntervalBase,
+                last.data[last.data.length - 1][1] +
+                  ((point[1] / timeIntervalRatio - last.data[last.data.length - 1][1]) *
+                    (interpolateIndex + 1)) /
+                    (numInterpolatedValues + 1),
+              ]),
+            [point[0], point[1] / timeIntervalRatio],
+          ],
+          takeIndexes: [...last.takeIndexes, lastTakeIndex + numInterpolatedValues + 1],
+        };
+      },
+      { data: [], takeIndexes: [] },
+    );
+
+    const movingAverageLine = transformToMovingAverage(interpolatedTimeSeries.data, period);
+    return interpolatedTimeSeries.takeIndexes.map<Point>((index) => movingAverageLine[index]);
+  }
+
   const [points] = data.reduce<[Data, number[]]>(
     ([lastPoints, compareData], [xValue, yValue]) => {
       const nextCompareData = compareData.slice(1 - period).concat([yValue]);

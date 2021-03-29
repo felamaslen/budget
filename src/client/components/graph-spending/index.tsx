@@ -49,7 +49,7 @@ function processData(
       name: 'Expenses',
       data: isCumulative
         ? getValuesWithTime(graph.dates, cumulativeSum(graph.values.spending))
-        : transformToMovingAverage(getValuesWithTime(graph.dates, graph.values.spending), 3),
+        : transformToMovingAverage(getValuesWithTime(graph.dates, graph.values.spending), 3, true),
       fill: false,
       smooth: true,
       color: colors[PageNonStandard.Overview].spending,
