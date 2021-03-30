@@ -11,7 +11,7 @@ import type { FundNative as Fund, FundQuotes } from '~client/types';
 import { PageNonStandard, RequestType } from '~client/types/enum';
 import type { FundPriceGroup } from '~client/types/gql';
 
-type FundPriceGroupRebased = FundPriceGroup & {
+export type FundPriceGroupRebased = FundPriceGroup & {
   rebasePriceRatio: number[];
 };
 

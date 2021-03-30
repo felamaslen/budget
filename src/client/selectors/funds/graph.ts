@@ -3,7 +3,7 @@ import isAfter from 'date-fns/isAfter';
 import { createSelector } from 'reselect';
 
 import { getRealisedValue, getBuyCost } from './gains';
-import { getViewSoldFunds, getFundsCache, getFundsRows } from './helpers';
+import { FundPriceGroupRebased, getFundsCache, getFundsRows, getViewSoldFunds } from './helpers';
 import { getFundLineProcessed, FundsWithReturns, Return, FundWithReturns } from './lines';
 import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
@@ -16,7 +16,6 @@ import type {
   FundLine,
   FundNative as Fund,
   FundOrder,
-  StockSplitNative,
   TransactionNative as Transaction,
 } from '~client/types';
 
@@ -25,10 +24,13 @@ type WithInfo<V = Record<string, unknown>> = Fund &
     transactionsToDate: Transaction[][][];
   };
 
+const pricesFallback: FundPriceGroupRebased[] = [
+  { startIndex: 0, values: [0], rebasePriceRatio: [1] },
+];
+
 const getItemsWithInfo = memoiseNowAndToday((time) =>
   createSelector(getFundsRows, getFundsCache, (items, { prices, startTime, cacheTimes }) =>
     items
-      .filter(({ id }) => prices[id])
       .map(({ transactions, ...rest }) => ({
         ...rest,
         transactions: transactions.filter(({ date }) => !isAfter(date, time)),
@@ -37,24 +39,26 @@ const getItemsWithInfo = memoiseNowAndToday((time) =>
         id,
         ...rest,
         transactions,
-        transactionsToDate: prices[id].map<Transaction[][]>((group, groupIndex) =>
-          group.values.map<Transaction[]>((_, index) =>
-            groupIndex === prices[id].length - 1 && index === group.values.length - 1
-              ? transactions
-              : transactions.filter(
-                  ({ date }) =>
-                    getUnixTime(date) < startTime + cacheTimes[index + group.startIndex],
-                ),
-          ),
+        transactionsToDate: (prices[id] ?? pricesFallback).map<Transaction[][]>(
+          (group, groupIndex) =>
+            group.values.map<Transaction[]>((_, index) =>
+              groupIndex === (prices[id] ?? pricesFallback).length - 1 &&
+              index === group.values.length - 1
+                ? transactions
+                : transactions.filter(
+                    ({ date }) =>
+                      getUnixTime(date) < startTime + cacheTimes[index + group.startIndex],
+                  ),
+            ),
         ),
       }))
       .filter(({ transactionsToDate }) =>
         transactionsToDate.some((group) => group.some((transactions) => transactions.length > 0)),
       )
-      .map((item) => ({
+      .map(({ cachedPrices, ...item }) => ({
         ...item,
         latestValue:
-          (lastInArray(lastInArray(prices[item.id])?.values ?? []) ?? 0) *
+          (lastInArray(lastInArray(prices[item.id] ?? [])?.values ?? []) ?? 0) *
           getTotalUnits(item.transactions),
       }))
       .sort((a, b) => b.latestValue - a.latestValue),
@@ -85,10 +89,9 @@ const getReturnsById = memoiseNowAndToday((time, key) =>
       items.reduce<FundsWithReturns>(
         (last, { id, transactionsToDate }) => ({
           ...last,
-          [id]: prices[id].map<FundWithReturns>(
+          [id]: (prices[id] ?? pricesFallback).map<FundWithReturns>(
             ({ startIndex, values, rebasePriceRatio }, groupIndex) => {
-              const stockSplits: StockSplitNative[] =
-                funds.find((fund) => fund.id === id)?.stockSplits ?? [];
+              const stockSplits = funds.find((fund) => fund.id === id)?.stockSplits ?? [];
               return {
                 startIndex,
                 values: values.map<Return>((price, index) => ({

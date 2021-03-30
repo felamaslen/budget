@@ -1,4 +1,5 @@
 import { getUnixTime } from 'date-fns';
+import numericHash from 'string-hash';
 
 import { getFundItems, getFundLines } from './graph';
 import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
@@ -7,7 +8,7 @@ import { abbreviateFundName } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
 import { testState } from '~client/test-data';
-import type { FundItem } from '~client/types';
+import type { Data, FundItem } from '~client/types';
 import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
 describe('Fund selectors / graph', () => {
@@ -397,6 +398,82 @@ describe('Fund selectors / graph', () => {
           20.33,
         ]
       `);
+    });
+
+    describe('when some funds are not included in the data set', () => {
+      // This was causing a bug where the reported ROI on the graph was
+      // inconsistent depending on the period / length requested, and
+      // not equal to the value on the main header
+      const stateWithExcludedFund: State = {
+        ...testState,
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
+          items: [
+            {
+              id: numericHash('included-fund'),
+              item: 'Included fund',
+              transactions: [
+                {
+                  date: new Date('2016-10-05'),
+                  units: 950,
+                  price: 55.12,
+                  fees: 22,
+                  taxes: 32,
+                },
+              ],
+              stockSplits: [],
+            },
+            {
+              id: numericHash('excluded-fund'),
+              item: 'Excluded fund',
+              transactions: [
+                {
+                  date: new Date('2014-02-05'),
+                  units: 105,
+                  price: 86.92,
+                  fees: 54,
+                  taxes: 30,
+                },
+                {
+                  date: new Date('2014-03-10'),
+                  units: -105,
+                  price: 88.56,
+                  fees: 105,
+                  taxes: 26,
+                },
+              ],
+              stockSplits: [],
+            },
+          ],
+          __optimistic: [undefined, undefined],
+          startTime: getUnixTime(new Date('2020-01-02')),
+          cacheTimes: [86400 * 10, 86400 * 13],
+          prices: {
+            [numericHash('included-fund')]: [
+              {
+                startIndex: 0,
+                values: [54.78, 59.83],
+              },
+            ],
+          },
+        },
+      };
+
+      it('should include the excluded funds realised values', () => {
+        expect.assertions(1);
+        const overallLine = getFundLines
+          .today(today)(stateWithExcludedFund)
+          [Mode.ROI].find(({ id }) => id === GRAPH_FUNDS_OVERALL_ID)?.data as Data;
+
+        const expectedRealisedValue = 105 * 88.56 - (105 + 26);
+        const expectedPaperValue = 950 * 59.83;
+        const expectedCosts = 950 * 55.12 + 22 + 32 + 105 * 86.92 + 54 + 30;
+
+        const expectedGain =
+          (100 * (expectedPaperValue + expectedRealisedValue - expectedCosts)) / expectedCosts;
+
+        expect(overallLine[overallLine.length - 1][1]).toBeCloseTo(expectedGain);
+      });
     });
   });
 });
