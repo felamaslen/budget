@@ -32,6 +32,7 @@ describe('<GraphBalance />', () => {
       isMobile: false,
       showAll: false,
       setShowAll: jest.fn(),
+      setMobileGraph: jest.fn(),
       isLoading: false,
       graph,
       longTermOptions: { enabled: false, rates: {} },

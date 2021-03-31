@@ -797,6 +797,7 @@ export type NetWorthDeleted = {
 export type NetWorthCashTotal = {
   cashInBank: Scalars['Int'];
   cashToInvest: Scalars['Int'];
+  stockValue: Scalars['Int'];
   date?: Maybe<Scalars['Date']>;
 };
 
@@ -1660,6 +1661,7 @@ export type NetWorthDeletedResolvers<ContextType = Context, ParentType extends R
 export type NetWorthCashTotalResolvers<ContextType = Context, ParentType extends ResolversParentTypes['NetWorthCashTotal'] = ResolversParentTypes['NetWorthCashTotal']> = {
   cashInBank?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   cashToInvest?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  stockValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   date?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

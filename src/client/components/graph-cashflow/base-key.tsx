@@ -1,9 +1,13 @@
 import React from 'react';
+
+import type { GraphCashFlowTitle } from './types';
+
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
 
 export type Props = {
-  title: string;
+  title: GraphCashFlowTitle;
+  setMobileGraph: React.Dispatch<React.SetStateAction<GraphCashFlowTitle>>;
   height?: number;
   width?: number;
   children?: React.ReactNode;
@@ -11,7 +15,13 @@ export type Props = {
 
 const [fontSize, fontFamily] = FONT_GRAPH_TITLE;
 
-export const BaseKey: React.FC<Props> = ({ title, children, height = 60, width = 200 }) => (
+export const BaseKey: React.FC<Props> = ({
+  title,
+  setMobileGraph,
+  children,
+  height = 60,
+  width = 200,
+}) => (
   <g>
     <rect x={45} y={8} width={width} height={height} fill={colors.translucent.light.dark} />
 
@@ -22,6 +32,7 @@ export const BaseKey: React.FC<Props> = ({ title, children, height = 60, width =
       alignmentBaseline="hanging"
       fontSize={fontSize}
       fontFamily={fontFamily}
+      onClick={(): void => setMobileGraph(title === 'Net worth' ? 'Cash flow' : 'Net worth')}
     >
       {title}
     </text>

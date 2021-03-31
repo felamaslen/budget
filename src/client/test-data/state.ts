@@ -337,6 +337,7 @@ export const testState: State = {
     cashTotal: {
       cashInBank: 1500000,
       cashToInvest: 200000,
+      stockValue: 1655017,
       date: null,
     },
   },

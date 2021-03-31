@@ -11,6 +11,7 @@ import { colorKey } from '~client/modules/color';
 import { abbreviateFundName } from '~client/modules/finance';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getCashBreakdown, getPortfolio, getStockValue } from '~client/selectors';
+import { Button } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
 import type { BlockItem } from '~client/types';
 
@@ -24,7 +25,9 @@ export const FundWeights: React.FC = () => {
   const today = useContext(TodayContext);
   const portfolio = useSelector(getPortfolio(today));
   const stockValue = useSelector(getStockValue(today));
-  const { cashInBank, cashToInvest } = useSelector(getCashBreakdown(today));
+  const { cashInBank, cashToInvest, breakdown } = useSelector(getCashBreakdown(today));
+
+  const [infoOpen, setInfoOpen] = useState<boolean>(false);
 
   const blocks = useMemo(() => {
     const relevantNetWorth = cashInBank + cashToInvest + stockValue;
@@ -79,5 +82,83 @@ export const FundWeights: React.FC = () => {
     return null;
   }
 
-  return <BlockPacker blocks={blocks} onHover={onHover} status={status} />;
+  return (
+    <>
+      <BlockPacker blocks={blocks} onHover={onHover} status={status} />
+      <Styled.HelpButton>
+        <Button onClick={(): void => setInfoOpen((last) => !last)}>
+          {infoOpen ? 'Close help' : '?'}
+        </Button>
+      </Styled.HelpButton>
+      {infoOpen && (
+        <Styled.InfoDialogBackground>
+          <Styled.InfoDialog>
+            <h6>Cash breakdown:</h6>
+            <table>
+              <tbody>
+                <Styled.InfoDialogRowRawValue>
+                  <th>
+                    C<sub>e</sub>
+                  </th>
+                  <th>= Net worth &ldquo;Cash (easy access)&rdquo;</th>
+                  <td>{formatCurrency(breakdown.Ce)}</td>
+                </Styled.InfoDialogRowRawValue>
+                <Styled.InfoDialogRowRawValue>
+                  <th>S</th>
+                  <th>= Net worth &ldquo;Stocks&rdquo;</th>
+                  <td>{formatCurrency(breakdown.S)}</td>
+                </Styled.InfoDialogRowRawValue>
+                <Styled.InfoDialogRowRawValue>
+                  <th>
+                    V<sub>d</sub>
+                  </th>
+                  <th>= Stock value at net worth date</th>
+                  <td>{formatCurrency(breakdown.Vd)}</td>
+                </Styled.InfoDialogRowRawValue>
+                <Styled.InfoDialogRowRawValue>
+                  <th>I</th>
+                  <th>= Investments since net worth date</th>
+                  <td>{formatCurrency(breakdown.I)}</td>
+                </Styled.InfoDialogRowRawValue>
+                <Styled.InfoDialogRowRawValue>
+                  <th>P</th>
+                  <th>= Purchases since net worth date</th>
+                  <td>{formatCurrency(breakdown.P)}</td>
+                </Styled.InfoDialogRowRawValue>
+                <Styled.InfoDialogRowDerived>
+                  <th>
+                    C<sub>d</sub>
+                  </th>
+                  <th>
+                    = Cash to invest at net worth date = max{'{'}0, S - V<sub>d</sub>
+                    {'}'}
+                  </th>
+                  <td>{formatCurrency(Math.max(0, breakdown.S - breakdown.Vd))}</td>
+                </Styled.InfoDialogRowDerived>
+                <Styled.InfoDialogRowImportant>
+                  <th>
+                    C<sub>b</sub>
+                  </th>
+                  <th>
+                    = Cash in bank = C<sub>e</sub> - P - max{'{'}0, I - C<sub>d</sub>
+                    {'}'}
+                  </th>
+                  <td>{formatCurrency(cashInBank)}</td>
+                </Styled.InfoDialogRowImportant>
+                <Styled.InfoDialogRowImportant>
+                  <th>
+                    C<sub>i</sub>
+                  </th>
+                  <th>
+                    = Cash to invest = max{'{'}0, S - V<sub>d</sub> - I{'}'}
+                  </th>
+                  <td>{formatCurrency(cashToInvest)}</td>
+                </Styled.InfoDialogRowImportant>
+              </tbody>
+            </table>
+          </Styled.InfoDialog>
+        </Styled.InfoDialogBackground>
+      )}
+    </>
+  );
 };

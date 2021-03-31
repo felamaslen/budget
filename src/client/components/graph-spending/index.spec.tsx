@@ -14,10 +14,13 @@ describe('<GraphSpending />', () => {
   const setup = (): RenderResult => {
     const graph = getOverviewGraphValues(today, 0)(state);
     const props: Props = {
+      isMobile: false,
       showAll: false,
+      setShowAll: jest.fn(),
       longTerm: false,
       investments: Array(graph.values.income.length).fill(0),
       graph,
+      setMobileGraph: jest.fn(),
     };
 
     return render(

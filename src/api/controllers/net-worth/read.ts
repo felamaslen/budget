@@ -52,7 +52,7 @@ export async function readNetWorthCashTotal(
   const netWorth = await selectLatestCashTotal(db, uid, endOfMonth(now));
 
   if (!netWorth) {
-    return { cashInBank: 0, cashToInvest: 0, date: null };
+    return { cashInBank: 0, cashToInvest: 0, stockValue: 0, date: null };
   }
 
   const stockValueAtNetWorthDate = await getTotalFundValue(db, uid, netWorth.date);
@@ -62,6 +62,7 @@ export async function readNetWorthCashTotal(
   return {
     cashInBank: Math.max(0, netWorth.cashInBank),
     cashToInvest: Math.max(0, cashToInvestAtNetWorthDate),
+    stockValue: Math.max(0, stockValueAtNetWorthDate),
     date: netWorth.date,
   };
 }

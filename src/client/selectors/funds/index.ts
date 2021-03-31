@@ -158,6 +158,13 @@ export const getCashBreakdown = moize(
           cashTotal.cashInBank - purchaseCosts - Math.max(0, investments - cashTotal.cashToInvest),
         ),
         cashToInvest: Math.round(Math.max(0, cashTotal.cashToInvest - investments)),
+        breakdown: {
+          Ce: cashTotal.cashInBank, // "Cash (easy access)" at net worth date
+          S: cashTotal.cashToInvest + cashTotal.stockValue, // "Stocks" at net worth date
+          Vd: cashTotal.stockValue, // Actual stock value at net worth date
+          I: investments, // Investments since net worth date
+          P: purchaseCosts, // Purchase costs since net worth date
+        },
       }),
     ),
   { maxSize: 1 },

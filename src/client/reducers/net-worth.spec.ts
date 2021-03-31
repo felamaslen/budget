@@ -593,6 +593,7 @@ describe('Net worth reducer', () => {
       netWorthCashTotal: {
         cashInBank: 123,
         cashToInvest: 456,
+        stockValue: 789,
         date: '2020-04-20',
       },
     });
@@ -732,6 +733,7 @@ describe('Net worth reducer', () => {
       expect(result.cashTotal).toStrictEqual({
         cashInBank: 123,
         cashToInvest: 456,
+        stockValue: 789,
         date: new Date('2020-04-20'),
       });
     });

@@ -259,6 +259,7 @@ describe('Funds controller', () => {
         {
           cashInBank: expect.any(Number),
           cashToInvest: expect.any(Number),
+          stockValue: expect.any(Number),
           date: null,
         },
       );
@@ -304,6 +305,7 @@ describe('Funds controller', () => {
         {
           cashInBank: expect.any(Number),
           cashToInvest: expect.any(Number),
+          stockValue: expect.any(Number),
           date: null,
         },
       );
@@ -337,6 +339,7 @@ describe('Funds controller', () => {
         {
           cashInBank: expect.any(Number),
           cashToInvest: expect.any(Number),
+          stockValue: expect.any(Number),
           date: null,
         },
       );

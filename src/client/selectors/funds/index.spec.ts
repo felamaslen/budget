@@ -266,6 +266,7 @@ describe('Funds selectors', () => {
         cashTotal: {
           cashInBank: 1886691,
           cashToInvest: 2996287,
+          stockValue: 7765614,
           date: new Date('2018-02-27'),
         },
       },

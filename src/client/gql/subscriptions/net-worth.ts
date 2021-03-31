@@ -95,6 +95,7 @@ export const NetWorthCashTotalUpdated = gql`
     netWorthCashTotalUpdated {
       cashInBank
       cashToInvest
+      stockValue
       date
     }
   }

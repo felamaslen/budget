@@ -37,6 +37,7 @@ export const Initial = gql`
     netWorthCashTotal {
       cashInBank
       cashToInvest
+      stockValue
       date
     }
 

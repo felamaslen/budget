@@ -4559,14 +4559,40 @@ exports[`<PageOverview /> should render graphs 1`] = `
       class="emotion-8 emotion-9"
     >
       <div
-        class="emotion-14 emotion-15"
+        class="emotion-10 emotion-11"
       >
-        <a
-          class="emotion-16 emotion-17"
-        />
-        <span>
-          Cumulative
-        </span>
+        <div
+          class="emotion-12 emotion-13"
+        >
+          <div
+            class="emotion-14 emotion-15"
+          >
+            <a
+              class="emotion-16 emotion-17"
+            />
+            <span>
+              Cumulative
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="emotion-10 emotion-11"
+      >
+        <div
+          class="emotion-12 emotion-13"
+        >
+          <div
+            class="emotion-14 emotion-15"
+          >
+            <a
+              class="emotion-16 emotion-17"
+            />
+            <span>
+              Show all
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

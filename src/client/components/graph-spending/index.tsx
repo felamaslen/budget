@@ -4,18 +4,23 @@ import { Key } from './key';
 import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashflow';
 import { Sidebar } from '~client/components/graph-cashflow/sidebar';
 import { ToggleContainer } from '~client/components/graph-cashflow/toggle';
+import type { GraphCashFlowTitle } from '~client/components/graph-cashflow/types';
 import { profitLossColor, transformToMovingAverage } from '~client/components/graph/helpers';
 import { TodayContext, usePersistentState } from '~client/hooks';
 import { cumulativeSum } from '~client/modules/data';
-import { colors } from '~client/styled/variables';
+import { SettingsFull, SettingsGroup } from '~client/styled/shared/settings';
+import { colors, graphOverviewHeightMobile } from '~client/styled/variables';
 import { DrawProps, Line, OverviewGraph } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
 export type Props = {
+  isMobile: boolean;
   showAll: boolean;
+  setShowAll: React.Dispatch<React.SetStateAction<boolean>>;
   longTerm: boolean;
   graph: OverviewGraph;
   investments: number[];
+  setMobileGraph: React.Dispatch<React.SetStateAction<GraphCashFlowTitle>>;
 };
 
 const getRatioToIncome = (income: number[], values: number[]): number[] =>
@@ -107,7 +112,15 @@ function processData(
   ];
 }
 
-export const GraphSpending: React.FC<Props> = ({ graph, investments, showAll, longTerm }) => {
+export const GraphSpending: React.FC<Props> = ({
+  isMobile,
+  graph,
+  investments,
+  showAll,
+  setShowAll,
+  longTerm,
+  setMobileGraph,
+}) => {
   const today = useContext(TodayContext);
 
   const [isCumulative, setCumulative] = usePersistentState<boolean>(
@@ -121,8 +134,16 @@ export const GraphSpending: React.FC<Props> = ({ graph, investments, showAll, lo
   );
 
   const AfterLines = useCallback<React.FC<DrawProps>>(
-    (props) => <Key isCumulative={isCumulative} now={today} title="Cash flow" {...props} />,
-    [today, isCumulative],
+    (props) => (
+      <Key
+        isCumulative={isCumulative}
+        now={today}
+        title="Cash flow"
+        {...props}
+        setMobileGraph={setMobileGraph}
+      />
+    ),
+    [today, isCumulative, setMobileGraph],
   );
 
   return (
@@ -130,14 +151,26 @@ export const GraphSpending: React.FC<Props> = ({ graph, investments, showAll, lo
       dualAxis={!isCumulative}
       minY2={0}
       maxY2={1}
+      graphHeight={isMobile ? graphOverviewHeightMobile : undefined}
       today={today}
       lines={lines}
       AfterLines={AfterLines}
       After={
         <Sidebar>
-          <ToggleContainer value={isCumulative} setValue={setCumulative}>
-            Cumulative
-          </ToggleContainer>
+          <SettingsGroup>
+            <SettingsFull>
+              <ToggleContainer value={isCumulative} setValue={setCumulative}>
+                Cumulative
+              </ToggleContainer>
+            </SettingsFull>
+          </SettingsGroup>
+          <SettingsGroup>
+            <SettingsFull>
+              <ToggleContainer value={showAll} setValue={setShowAll}>
+                Show all
+              </ToggleContainer>
+            </SettingsFull>
+          </SettingsGroup>
         </Sidebar>
       }
     />

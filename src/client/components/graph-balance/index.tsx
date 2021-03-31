@@ -6,6 +6,7 @@ import { LongTermSettings, Props as LongTermSettingsProps } from './long-term';
 import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashflow';
 import { Sidebar } from '~client/components/graph-cashflow/sidebar';
 import { ToggleContainer } from '~client/components/graph-cashflow/toggle';
+import type { GraphCashFlowTitle } from '~client/components/graph-cashflow/types';
 import { TodayContext, usePersistentState } from '~client/hooks';
 import { SettingsFull, SettingsGroup } from '~client/styled/shared/settings';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
@@ -135,6 +136,7 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
 
 export type Props = {
   isMobile: boolean;
+  setMobileGraph: React.Dispatch<React.SetStateAction<GraphCashFlowTitle>>;
   showAll: boolean;
   setShowAll: React.Dispatch<React.SetStateAction<boolean>>;
   isLoading: boolean;
@@ -145,6 +147,7 @@ export type Props = {
 
 export const GraphBalance: React.FC<Props> = ({
   isMobile,
+  setMobileGraph,
   showAll,
   setShowAll,
   isLoading,
@@ -170,7 +173,7 @@ export const GraphBalance: React.FC<Props> = ({
       today={today}
       graphHeight={isMobile ? graphOverviewHeightMobile : undefined}
       lines={lines}
-      AfterLines={<Key title="Net worth" />}
+      AfterLines={<Key title="Net worth" setMobileGraph={setMobileGraph} />}
       After={
         <Sidebar>
           <SettingsGroup>

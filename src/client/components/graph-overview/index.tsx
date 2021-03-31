@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as Styled from './styles';
 import { errorOpened } from '~client/actions';
 import { GraphBalance } from '~client/components/graph-balance';
+import type { GraphCashFlowTitle } from '~client/components/graph-cashflow/types';
 import { GraphSpending } from '~client/components/graph-spending';
 import { ErrorLevel } from '~client/constants/error';
 import { TodayContext, useIsMobile, usePersistentState } from '~client/hooks';
@@ -105,24 +106,32 @@ export const GraphOverview: React.FC = () => {
     }
   }, [showAll, fetchOld]);
 
+  const [mobileGraph, setMobileGraph] = useState<GraphCashFlowTitle>('Net worth');
+
   return (
     <Styled.GraphOverview data-testid="graph-overview">
-      <GraphBalance
-        isMobile={isMobile}
-        showAll={showAllAndReady}
-        setShowAll={setShowAll}
-        isLoading={fetching && !showAllAndReady}
-        graph={mergedGraph}
-        longTermOptions={longTermOptions}
-        setLongTermOptions={setLongTermOptions}
-        defaultRates={defaultRates}
-      />
-      {!isMobile && (
+      {(!isMobile || mobileGraph === 'Net worth') && (
+        <GraphBalance
+          isMobile={isMobile}
+          showAll={showAllAndReady}
+          setShowAll={setShowAll}
+          isLoading={fetching && !showAllAndReady}
+          graph={mergedGraph}
+          longTermOptions={longTermOptions}
+          setLongTermOptions={setLongTermOptions}
+          defaultRates={defaultRates}
+          setMobileGraph={setMobileGraph}
+        />
+      )}
+      {(!isMobile || mobileGraph === 'Cash flow') && (
         <GraphSpending
+          isMobile={isMobile}
           graph={mergedGraph}
           investments={stockAndInvestmentPurchases}
           showAll={showAllAndReady}
+          setShowAll={setShowAll}
           longTerm={longTermOptions.enabled}
+          setMobileGraph={setMobileGraph}
         />
       )}
     </Styled.GraphOverview>
