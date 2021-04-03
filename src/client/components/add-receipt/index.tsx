@@ -35,6 +35,8 @@ export type Props = {
 
 type Entry = Omit<GQL<ListItemExtended>, 'date' | 'shop'> & { page: ReceiptPage };
 
+type EntryErrors = Partial<Record<Exclude<keyof Entry, 'id' | 'page'>, boolean>>;
+
 const pageOptions: SelectOptions<ReceiptPage> = [
   { internal: ReceiptPage.Food, external: 'Food' },
   { internal: ReceiptPage.General, external: 'General' },
@@ -43,6 +45,7 @@ const pageOptions: SelectOptions<ReceiptPage> = [
 
 type EntryProps = {
   entry: Entry;
+  errors?: EntryErrors;
   loading: boolean;
   isOnly: boolean;
   onChange: (id: number, delta: Delta<Entry>) => void;
@@ -125,6 +128,7 @@ function useAutocompleteItem(
 }
 
 type PropsItem = {
+  error?: boolean;
   onChange: (item: string | undefined) => void;
   suggestion: string | null;
   setSuggestion: React.Dispatch<React.SetStateAction<string | null>>;
@@ -133,6 +137,7 @@ type PropsItem = {
 
 const EntryFormItemField: React.FC<PropsItem> = ({
   item,
+  error,
   onChange,
   suggestion,
   setSuggestion,
@@ -194,7 +199,7 @@ const EntryFormItemField: React.FC<PropsItem> = ({
   }, [validSuggestion, suggestion, onChange]);
 
   return (
-    <Styled.ItemField>
+    <Styled.ItemField error={error}>
       <FormFieldTextInline
         value={item}
         onChange={onChange}
@@ -209,6 +214,7 @@ const EntryFormItemField: React.FC<PropsItem> = ({
 
 const EntryForm: React.FC<EntryProps> = ({
   entry,
+  errors,
   loading,
   isOnly,
   onChange,
@@ -234,17 +240,16 @@ const EntryForm: React.FC<EntryProps> = ({
   return (
     <FlexCenter>
       <Styled.ItemCategory>
-        <Styled.ItemField>
-          <EntryFormItemField
-            onChange={onChangeItem}
-            item={entry.item}
-            suggestion={itemSuggestion}
-            setSuggestion={setItemSuggestion}
-            focus={focus}
-            setFocus={setFocus}
-          />
-        </Styled.ItemField>
-        <Styled.CategoryField>
+        <EntryFormItemField
+          error={errors?.item}
+          onChange={onChangeItem}
+          item={entry.item}
+          suggestion={itemSuggestion}
+          setSuggestion={setItemSuggestion}
+          focus={focus}
+          setFocus={setFocus}
+        />
+        <Styled.CategoryField error={errors?.category}>
           <FormFieldTextInline
             value={entry.category}
             onChange={onChangeCategory}
@@ -253,13 +258,17 @@ const EntryForm: React.FC<EntryProps> = ({
         </Styled.CategoryField>
       </Styled.ItemCategory>
       <Styled.CostPage>
-        <FormFieldCost value={entry.cost} onChange={onChangeCost} />
-        <FormFieldSelect
-          options={pageOptions}
-          value={entry.page}
-          onChange={onChangePage}
-          inputProps={{ disabled: loading }}
-        />
+        <Styled.CostPageField error={errors?.cost}>
+          <FormFieldCost value={entry.cost} onChange={onChangeCost} />
+        </Styled.CostPageField>
+        <Styled.CostPageField>
+          <FormFieldSelect
+            options={pageOptions}
+            value={entry.page}
+            onChange={onChangePage}
+            inputProps={{ disabled: loading }}
+          />
+        </Styled.CostPageField>
       </Styled.CostPage>
       <FlexColumn>
         <ButtonDelete onClick={(): void => onRemove(entry.id)} disabled={isOnly}>
@@ -333,6 +342,18 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
   const isValid =
     canRequestFinish && entries.every((entry) => !!(entry.item && entry.category && entry.cost));
 
+  const errors = entries.reduce<Record<number, EntryErrors>>(
+    (last, { id, item, category, cost }) => ({
+      ...last,
+      [id]: {
+        item: !item,
+        category: !category,
+        cost: !cost,
+      },
+    }),
+    {},
+  );
+
   const [finished, setFinished] = useState<boolean>(false);
   const onFinish = useCallback(() => {
     if (canRequestFinish) {
@@ -396,7 +417,9 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
           <Flex>
             <label htmlFor="receipt-shop">
               <Styled.Label>Shop</Styled.Label>
-              <FormFieldTextInline id="receipt-shop" value={shop} onChange={setShop} />
+              <Styled.Field error={!shop}>
+                <FormFieldTextInline id="receipt-shop" value={shop} onChange={setShop} />
+              </Styled.Field>
             </label>
           </Flex>
         </FlexColumn>
@@ -404,6 +427,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
           {entries.map((entry, index) => (
             <EntryForm
               key={entry.id}
+              errors={errors[entry.id]}
               entry={entry}
               loading={loading}
               isOnly={entries.length === 1}

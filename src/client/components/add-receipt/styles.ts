@@ -1,10 +1,27 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { rem } from 'polished';
+import { rem, rgba } from 'polished';
 
 import { FormField } from '~client/components/form-field/styles';
 import { breakpoint } from '~client/styled/mixins';
 import { FlexColumn, Flex } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
+
+type FieldProps = {
+  error?: boolean;
+};
+
+export const Field = styled.div<FieldProps>(
+  ({ error = false }) => css`
+    ${error &&
+    css`
+      input {
+        background: ${rgba(colors.error, 0.05)} !important;
+        border-bottom-color: ${colors.error};
+      }
+    `}
+  `,
+);
 
 export const ItemSuggestion = styled.span`
   align-items: center;
@@ -96,7 +113,7 @@ export const ItemCategory = styled(FlexColumn)`
   height: ${rem(48)};
 `;
 
-export const ItemField = styled.div`
+export const ItemField = styled(Field)`
   align-items: center;
   display: inline-flex;
   flex: 0 0 ${rem(24)};
@@ -117,7 +134,7 @@ export const ItemField = styled.div`
   }
 `;
 
-export const CategoryField = styled.div`
+export const CategoryField = styled(Field)`
   flex: 0 0 ${rem(24)};
 
   input {
@@ -128,7 +145,13 @@ export const CategoryField = styled.div`
   }
 `;
 
-export const CostPage = styled(FlexColumn)``;
+export const CostPage = styled(FlexColumn)`
+  height: ${rem(48)};
+`;
+
+export const CostPageField = styled(Field)`
+  flex: 0 0 ${rem(24)};
+`;
 
 export const CreateRow = styled(Flex)`
   justify-content: flex-end;
