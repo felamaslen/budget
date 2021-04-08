@@ -3,7 +3,7 @@ import { format } from 'date-fns-tz';
 import { sql, TaggedTemplateLiteralInvocationType } from 'slonik';
 import config from '~api/config';
 
-const toLocalISO = (date: Date): string =>
+export const toLocalISO = (date: Date): string =>
   format(date, 'yyyy-MM-dd', { timeZone: config.timeZone });
 
 const formatMonthStart = (month: Date): string => toLocalISO(startOfMonth(month));
