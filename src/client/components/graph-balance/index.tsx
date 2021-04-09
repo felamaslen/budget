@@ -21,7 +21,8 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
 
   const dataAssets = getValuesWithTime(graph.dates, graph.values.assets);
   const dataLiabilities = getValuesWithTime(graph.dates, graph.values.liabilities);
-  const dataNetWorth = getValuesWithTime(graph.dates, withoutPension);
+  const dataNetWorth = getValuesWithTime(graph.dates, graph.values.netWorth);
+  const dataWithoutPension = getValuesWithTime(graph.dates, withoutPension);
   const dataPension = getValuesWithTime(graph.dates, graph.values.pension);
   const dataOptions = getValuesWithTime(graph.dates, graph.values.options);
 
@@ -74,8 +75,8 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       color: rgba(colors.netWorth.aggregate[NetWorthAggregate.cashOther], 0.4),
     },
     {
-      key: 'net-worth-without-pension',
-      name: 'Net worth (excl. pension)',
+      key: 'net-worth',
+      name: 'Net worth',
       data: dataNetWorth,
       fill: false,
       smooth: true,
@@ -88,7 +89,7 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       key: 'pension',
       name: 'Pension',
       data: dataPension,
-      stack: [dataNetWorth],
+      stack: [dataWithoutPension],
       fill: true,
       smooth: true,
       color: rgba(colors.netWorth.aggregate[NetWorthAggregate.pension], 0.5),
@@ -97,7 +98,7 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       key: 'options',
       name: 'Options',
       data: dataOptions,
-      stack: [dataNetWorth, dataPension],
+      stack: [dataNetWorth],
       sliceAtFirstPositive: 1,
       fill: false,
       smooth: true,

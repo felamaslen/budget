@@ -95,7 +95,10 @@ const extrapolateCurrentMonthCategories: Category[] = [
 const getMonthlyStockPurchase = (
   longTermOptions: LongTermOptions,
   longTermRates: LongTermRates,
-): number => longTermOptions.rates.stockPurchase ?? longTermRates.stockPurchase;
+): number =>
+  longTermOptions.enabled
+    ? longTermOptions.rates.stockPurchase ?? longTermRates.stockPurchase
+    : longTermRates.stockPurchase;
 
 const withNetWorth = <
   G extends Partial<OverviewGraphValues> &
