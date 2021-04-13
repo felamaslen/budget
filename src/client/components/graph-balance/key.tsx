@@ -68,7 +68,7 @@ export const Key: React.FC<Props> = (props) => (
       y={keyY2 - 3}
       width={keyLineWidth}
       height={6}
-      fill={rgba(colors.netWorth.homeEquity, 0.5)}
+      fill={rgba(colors.netWorth.illiquidEquity, 0.5)}
     />
     <text
       x={keyTextX1}
@@ -78,7 +78,7 @@ export const Key: React.FC<Props> = (props) => (
       fontSize={fontSize}
       alignmentBaseline="middle"
     >
-      Home equity
+      Illiquid equity
     </text>
 
     <rect

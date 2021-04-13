@@ -115,10 +115,10 @@ describe('Net worth entry form', () => {
       },
       {
         subcategory: numericHash('fake-subcategory-id-my-mortgage'),
-        mortgage: {
+        loan: {
           principal: 16877654,
           paymentsRemaining: 176,
-          rate: 0.165,
+          rate: 1.65,
         },
         skip: false,
       },
@@ -269,7 +269,7 @@ describe('Net worth entry form', () => {
     const sectionCategoryMyMortgage = getByText('Mortgage');
     const inputMyMortgagePrincipalBefore = queryByDisplayValue('168776.54');
     const inputMyMortgagePaymentsRemainingBefore = queryByDisplayValue('176');
-    const inputMyMortgageRateBefore = queryByDisplayValue('0.165');
+    const inputMyMortgageRateBefore = queryByDisplayValue('1.65');
 
     expect(sectionCategoryMyMortgage).toBeInTheDocument();
     expect(inputMyMortgagePrincipalBefore).not.toBeInTheDocument();
@@ -282,7 +282,7 @@ describe('Net worth entry form', () => {
 
     const inputMyMortgagePrincipal = getByDisplayValue('168776.54');
     const inputMyMortgagePaymentsRemaining = getByDisplayValue('176');
-    const inputMyMortgageRate = getByDisplayValue('0.165');
+    const inputMyMortgageRate = getByDisplayValue('1.65');
 
     expect(inputMyMortgagePrincipal).toBeInTheDocument();
     expect(inputMyMortgagePaymentsRemaining).toBeInTheDocument();
@@ -303,7 +303,7 @@ describe('Net worth entry form', () => {
     });
 
     act(() => {
-      fireEvent.change(inputMyMortgageRate, { target: { value: '0.169' } });
+      fireEvent.change(inputMyMortgageRate, { target: { value: '1.69' } });
     });
     act(() => {
       fireEvent.blur(inputMyMortgageRate);
@@ -501,7 +501,7 @@ describe('Net worth entry form', () => {
                 skip: null,
                 fx: null,
                 option: null,
-                mortgage: null,
+                loan: null,
               },
               {
                 subcategory: numericHash('fake-subcategory-id-cc'),
@@ -509,7 +509,7 @@ describe('Net worth entry form', () => {
                 skip: false,
                 fx: null,
                 option: null,
-                mortgage: null,
+                loan: null,
               },
               {
                 subcategory: numericHash('fake-subcategory-id-some-share'),
@@ -522,14 +522,14 @@ describe('Net worth entry form', () => {
                 skip: null,
                 simple: null,
                 fx: null,
-                mortgage: null,
+                loan: null,
               },
               {
                 subcategory: numericHash('fake-subcategory-id-my-mortgage'),
-                mortgage: {
+                loan: {
                   principal: 15599823,
                   paymentsRemaining: 175,
-                  rate: 0.169,
+                  rate: 1.69,
                 },
                 skip: false,
                 simple: null,
@@ -657,10 +657,10 @@ describe('Net worth entry form', () => {
               }),
               expect.objectContaining({
                 subcategory: numericHash('fake-subcategory-id-my-mortgage'),
-                mortgage: {
+                loan: {
                   principal: 15599823,
                   paymentsRemaining: 175,
-                  rate: 0.169,
+                  rate: 1.69,
                 },
                 skip: false,
               }),

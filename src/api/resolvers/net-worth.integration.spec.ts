@@ -320,6 +320,7 @@ describe('Net worth resolver', () => {
     const subcategory: Create<Omit<NetWorthSubcategory, 'categoryId'>> = {
       subcategory: 'Current account',
       hasCreditLimit: null,
+      appreciationRate: null,
       opacity: 0.8,
       isSAYE: null,
     };
@@ -450,6 +451,7 @@ describe('Net worth resolver', () => {
             categoryId
             subcategory
             hasCreditLimit
+            appreciationRate
             isSAYE
             opacity
           }
@@ -540,6 +542,7 @@ describe('Net worth resolver', () => {
       const modifiedSubcategory = {
         ...subcategory,
         subcategory: 'Savings account',
+        appreciationRate: 6.5,
       };
 
       const setup = async (
@@ -585,11 +588,12 @@ describe('Net worth resolver', () => {
         expect(row).toStrictEqual(
           expect.objectContaining({
             subcategory: 'Savings account',
+            appreciation_rate: 6.5,
           }),
         );
       });
 
-      describe('if the category does not exist', () => {
+      describe('when the category does not exist', () => {
         it('should respond with an error', async () => {
           expect.assertions(3);
 
@@ -660,9 +664,15 @@ describe('Net worth resolver', () => {
       isOption: true,
     };
 
-    const categoryMortgage: Create<NetWorthCategory> = {
+    const categoryHouse: Create<NetWorthCategory> = {
+      type: NetWorthCategoryType.Asset,
+      category: 'House',
+      color: '#00ff32',
+    };
+
+    const categoryDebts: Create<NetWorthCategory> = {
       type: NetWorthCategoryType.Liability,
-      category: 'Mortgage',
+      category: 'My big debts',
       color: '#ffcc00',
       isOption: false,
     };
@@ -697,7 +707,15 @@ describe('Net worth resolver', () => {
       opacity: 1,
     };
 
-    const subcategoryMortgage: Create<NetWorthSubcategory> = {
+    const subcategoryHouse: Create<NetWorthSubcategory> = {
+      categoryId: 0,
+      subcategory: 'My house',
+      hasCreditLimit: null,
+      appreciationRate: 5.5,
+      opacity: 1,
+    };
+
+    const subcategoryLoan: Create<NetWorthSubcategory> = {
       categoryId: 0,
       subcategory: 'My house mortgage',
       hasCreditLimit: false,
@@ -725,16 +743,18 @@ describe('Net worth resolver', () => {
       categoryId: {
         bank: number;
         options: number;
-        mortgage: number;
+        house: number;
+        debts: number;
         cc: number;
       };
       subcategoryId: {
         currentAccount: number;
         foreignCash: number;
         options: number;
+        house: number;
         SAYE: number;
         SAYE2: number;
-        mortgage: number;
+        loan: number;
         mainCC: number;
         travelCC: number;
       };
@@ -747,9 +767,16 @@ describe('Net worth resolver', () => {
       const [
         categoryIdBank,
         categoryIdOptions,
-        categoryIdMortgage,
+        categoryIdHouse,
+        categoryIdDebts,
         categoryIdCC,
-      ] = await createCategories([categoryBank, categoryOptions, categoryMortgage, categoryCC]);
+      ] = await createCategories([
+        categoryBank,
+        categoryOptions,
+        categoryHouse,
+        categoryDebts,
+        categoryCC,
+      ]);
 
       const [
         subcategoryIdCurrentAccount,
@@ -757,7 +784,8 @@ describe('Net worth resolver', () => {
         subcategoryIdOptions,
         subcategoryIdSAYE,
         subcategoryIdSAYE2,
-        subcategoryIdMortgage,
+        subcategoryIdHouse,
+        subcategoryIdLoan,
         subcategoryIdMainCC,
         subcategoryIdTravelCC,
       ] = await createSubcategories([
@@ -776,7 +804,11 @@ describe('Net worth resolver', () => {
           subcategory: 'My other SAYE options',
           isSAYE: true,
         },
-        { ...subcategoryMortgage, categoryId: categoryIdMortgage },
+        {
+          ...subcategoryHouse,
+          categoryId: categoryIdHouse,
+        },
+        { ...subcategoryLoan, categoryId: categoryIdDebts },
         { ...subcategoryMainCC, categoryId: categoryIdCC },
         { ...subcategoryTravelCC, categoryId: categoryIdCC },
       ]);
@@ -785,16 +817,18 @@ describe('Net worth resolver', () => {
         categoryId: {
           bank: categoryIdBank,
           options: categoryIdOptions,
-          mortgage: categoryIdMortgage,
+          house: categoryIdHouse,
+          debts: categoryIdDebts, // e.g. mortgage, bank loan, car loan
           cc: categoryIdCC,
         },
         subcategoryId: {
           currentAccount: subcategoryIdCurrentAccount,
           foreignCash: subcategoryIdForeignCash,
           options: subcategoryIdOptions,
+          house: subcategoryIdHouse,
           SAYE: subcategoryIdSAYE,
           SAYE2: subcategoryIdSAYE2,
-          mortgage: subcategoryIdMortgage,
+          loan: subcategoryIdLoan,
           mainCC: subcategoryIdMainCC,
           travelCC: subcategoryIdTravelCC,
         },
@@ -1092,19 +1126,19 @@ describe('Net worth resolver', () => {
         });
       });
 
-      describe('sending entry with mortgage values', () => {
-        const setupMortgage = async (): Promise<{
+      describe('sending entry with loan values', () => {
+        const setupLoan = async (): Promise<{
           parents: Parents;
-          entryWithMortgage: RawDate<NetWorthEntryInput, 'date'>;
+          entryWithLoan: RawDate<NetWorthEntryInput, 'date'>;
         }> => {
           const { parents } = await setupParents();
-          const entryWithMortgage: RawDate<NetWorthEntryInput, 'date'> = {
+          const entryWithLoan: RawDate<NetWorthEntryInput, 'date'> = {
             date: '2020-04-15',
             values: [
               {
-                subcategory: parents.subcategoryId.mortgage,
+                subcategory: parents.subcategoryId.loan,
                 skip: null,
-                mortgage: {
+                loan: {
                   principal: 35987623,
                   paymentsRemaining: 25 * 12 - 3,
                   rate: 2.74,
@@ -1115,12 +1149,12 @@ describe('Net worth resolver', () => {
             creditLimit: [],
           };
 
-          return { parents, entryWithMortgage };
+          return { parents, entryWithLoan };
         };
 
-        it('should add the mortgage value rows', async () => {
+        it('should add the loan value rows', async () => {
           expect.assertions(3);
-          const { parents, entryWithMortgage } = await setupMortgage();
+          const { parents, entryWithLoan } = await setupLoan();
 
           const res = await app.authGqlClient.mutate<
             Mutation,
@@ -1128,7 +1162,7 @@ describe('Net worth resolver', () => {
           >({
             mutation,
             variables: {
-              input: entryWithMortgage,
+              input: entryWithLoan,
             },
           });
 
@@ -1149,18 +1183,18 @@ describe('Net worth resolver', () => {
           expect(rowValues).toStrictEqual([
             expect.objectContaining({
               id: expect.any(Number),
-              subcategory: parents.subcategoryId.mortgage,
+              subcategory: parents.subcategoryId.loan,
               skip: null,
               value: -35987623,
             }),
           ]);
 
-          const rowMortgageValues = await app
-            .db('net_worth_mortgage_values')
+          const rowLoanValues = await app
+            .db('net_worth_loan_values')
             .where({ values_id: rowValues[0].id })
             .select();
 
-          expect(rowMortgageValues).toStrictEqual([
+          expect(rowLoanValues).toStrictEqual([
             expect.objectContaining({
               payments_remaining: 297,
               rate: 2.74,
@@ -1194,7 +1228,7 @@ describe('Net worth resolver', () => {
                   strikePrice
                   marketPrice
                 }
-                mortgage {
+                loan {
                   principal
                   rate
                   paymentsRemaining
@@ -1240,7 +1274,7 @@ describe('Net worth resolver', () => {
               simple: 166523,
               fx: null,
               option: null,
-              mortgage: null,
+              loan: null,
               skip: null,
             }),
             expect.objectContaining({
@@ -1254,7 +1288,7 @@ describe('Net worth resolver', () => {
                 }),
               ],
               option: null,
-              mortgage: null,
+              loan: null,
               skip: null,
             }),
             expect.objectContaining({
@@ -1263,7 +1297,7 @@ describe('Net worth resolver', () => {
               simple: -15000,
               fx: null,
               option: null,
-              mortgage: null,
+              loan: null,
               skip: null,
             }),
             expect.objectContaining({
@@ -1272,7 +1306,7 @@ describe('Net worth resolver', () => {
               simple: -1340,
               fx: null,
               option: null,
-              mortgage: null,
+              loan: null,
               skip: true,
             }),
           ]),
@@ -1301,8 +1335,8 @@ describe('Net worth resolver', () => {
             date: '2020-03-30',
             values: [
               {
-                subcategory: parents.subcategoryId.mortgage,
-                mortgage: {
+                subcategory: parents.subcategoryId.loan,
+                loan: {
                   paymentsRemaining: 125,
                   principal: 16544005,
                   rate: 2.74,
@@ -1358,7 +1392,7 @@ describe('Net worth resolver', () => {
                   expect.objectContaining({
                     value: -16544005,
                     simple: null,
-                    mortgage: expect.objectContaining({
+                    loan: expect.objectContaining({
                       paymentsRemaining: 125,
                       principal: 16544005,
                       rate: 2.74,

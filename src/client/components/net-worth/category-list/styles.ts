@@ -113,6 +113,13 @@ export const ToggleVisibility = styled.div`
   grid-row: 1;
   grid-column: 1;
   justify-content: center;
+
+  button {
+    &:active,
+    &:focus {
+      background: none;
+    }
+  }
 `;
 
 export const ButtonDeleteContainer = styled(InlineFlexCenter)`

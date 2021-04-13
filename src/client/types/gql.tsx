@@ -689,6 +689,7 @@ export type NetWorthSubcategory = {
   categoryId: Scalars['Int'];
   subcategory: Scalars['String'];
   hasCreditLimit?: Maybe<Scalars['Boolean']>;
+  appreciationRate?: Maybe<Scalars['Float']>;
   isSAYE?: Maybe<Scalars['Boolean']>;
   opacity?: Maybe<Scalars['Float']>;
 };
@@ -697,6 +698,7 @@ export type NetWorthSubcategoryInput = {
   categoryId: Scalars['Int'];
   subcategory: Scalars['String'];
   hasCreditLimit?: Maybe<Scalars['Boolean']>;
+  appreciationRate?: Maybe<Scalars['Float']>;
   isSAYE?: Maybe<Scalars['Boolean']>;
   opacity?: Maybe<Scalars['Float']>;
 };
@@ -732,14 +734,14 @@ export type OptionValueInput = {
   vested?: Maybe<Scalars['NonNegativeInt']>;
 };
 
-export type MortgageValue = {
-  __typename?: 'MortgageValue';
+export type LoanValue = {
+  __typename?: 'LoanValue';
   principal: Scalars['NonNegativeInt'];
   paymentsRemaining: Scalars['NonNegativeInt'];
   rate: Scalars['Float'];
 };
 
-export type MortgageValueInput = {
+export type LoanValueInput = {
   principal: Scalars['NonNegativeInt'];
   paymentsRemaining: Scalars['NonNegativeInt'];
   rate: Scalars['Float'];
@@ -753,7 +755,7 @@ export type NetWorthValueObject = {
   simple?: Maybe<Scalars['Int']>;
   fx?: Maybe<Array<FxValue>>;
   option?: Maybe<OptionValue>;
-  mortgage?: Maybe<MortgageValue>;
+  loan?: Maybe<LoanValue>;
 };
 
 export type NetWorthValueInput = {
@@ -762,7 +764,7 @@ export type NetWorthValueInput = {
   simple?: Maybe<Scalars['Int']>;
   fx?: Maybe<Array<FxValueInput>>;
   option?: Maybe<OptionValueInput>;
-  mortgage?: Maybe<MortgageValueInput>;
+  loan?: Maybe<LoanValueInput>;
 };
 
 export type CreditLimit = {
@@ -900,7 +902,7 @@ export type OverviewOld = {
   pension: Array<Scalars['Int']>;
   cashOther: Array<Scalars['Int']>;
   investments: Array<Scalars['Int']>;
-  homeEquity: Array<Scalars['Int']>;
+  illiquidEquity: Array<Scalars['Int']>;
   options: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   spending: Array<Scalars['Int']>;
@@ -995,7 +997,7 @@ export type NetWorthCategoryPartsFragment = (
 
 export type NetWorthSubcategoryPartsFragment = (
   { __typename?: 'NetWorthSubcategory' }
-  & Pick<NetWorthSubcategory, 'categoryId' | 'subcategory' | 'hasCreditLimit' | 'isSAYE' | 'opacity'>
+  & Pick<NetWorthSubcategory, 'categoryId' | 'subcategory' | 'hasCreditLimit' | 'appreciationRate' | 'isSAYE' | 'opacity'>
 );
 
 export type NetWorthEntryPartsFragment = (
@@ -1010,9 +1012,9 @@ export type NetWorthEntryPartsFragment = (
     )>>, option?: Maybe<(
       { __typename?: 'OptionValue' }
       & Pick<OptionValue, 'units' | 'strikePrice' | 'marketPrice' | 'vested'>
-    )>, mortgage?: Maybe<(
-      { __typename?: 'MortgageValue' }
-      & Pick<MortgageValue, 'principal' | 'paymentsRemaining' | 'rate'>
+    )>, loan?: Maybe<(
+      { __typename?: 'LoanValue' }
+      & Pick<LoanValue, 'principal' | 'paymentsRemaining' | 'rate'>
     )> }
   )>, creditLimit: Array<(
     { __typename?: 'CreditLimit' }
@@ -1542,7 +1544,7 @@ export type OverviewOldQuery = (
   { __typename?: 'Query' }
   & { overviewOld?: Maybe<(
     { __typename?: 'OverviewOld' }
-    & Pick<OverviewOld, 'startDate' | 'stocks' | 'investmentPurchases' | 'pension' | 'cashOther' | 'investments' | 'homeEquity' | 'assets' | 'liabilities' | 'options' | 'netWorth' | 'income' | 'spending'>
+    & Pick<OverviewOld, 'startDate' | 'stocks' | 'investmentPurchases' | 'pension' | 'cashOther' | 'investments' | 'illiquidEquity' | 'assets' | 'liabilities' | 'options' | 'netWorth' | 'income' | 'spending'>
   )> }
 );
 
@@ -1948,6 +1950,7 @@ export const NetWorthSubcategoryPartsFragmentDoc = gql`
   categoryId
   subcategory
   hasCreditLimit
+  appreciationRate
   isSAYE
   opacity
 }
@@ -1969,7 +1972,7 @@ export const NetWorthEntryPartsFragmentDoc = gql`
       marketPrice
       vested
     }
-    mortgage {
+    loan {
       principal
       paymentsRemaining
       rate
@@ -2506,7 +2509,7 @@ export const OverviewOldDocument = gql`
     pension
     cashOther
     investments
-    homeEquity
+    illiquidEquity
     assets
     liabilities
     options

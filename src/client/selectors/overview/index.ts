@@ -17,8 +17,8 @@ import {
   calculatePredictedSAYEMonthlyDeposit,
   EntryWithFTI,
   getDerivedNetWorthEntries,
-  getHomeEquity,
-  HomeEquity,
+  getIlliquidEquity,
+  IlliquidEquity,
 } from './net-worth';
 import {
   forecastCompoundedReturns,
@@ -108,12 +108,12 @@ const withNetWorth = <
   startPredictionIndex: number,
   netWorth: EntryWithFTI[],
   funds: Fund[],
-  homeEquity: HomeEquity[],
+  illiquidEquity: IlliquidEquity[],
   longTermOptions: LongTermOptions,
   longTermRates: LongTermRates,
 ) => (
   graph: G,
-): G & Pick<OverviewGraphValues, 'netWorth' | 'assets' | 'liabilities' | 'homeEquity'> => {
+): G & Pick<OverviewGraphValues, 'netWorth' | 'assets' | 'liabilities' | 'illiquidEquity'> => {
   const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
 
   const assets = dates.reduce<number[]>((last, { date }, index) => {
@@ -130,10 +130,10 @@ const withNetWorth = <
 
     const stockReturn = graph.stocks[index] - graph.stocks[index - 1] - monthlyStockPurchase;
 
-    const homeValueChange = homeEquity[index].value - homeEquity[index - 1].value;
+    const illiquidAppreciation = illiquidEquity[index].value - illiquidEquity[index - 1].value;
     const otherCashChange = graph.cashOther[index] - graph.cashOther[index - 1];
 
-    const netChange = income - spending + stockReturn + homeValueChange + otherCashChange;
+    const netChange = income - spending + stockReturn + illiquidAppreciation + otherCashChange;
 
     return [...last, last[last.length - 1] + netChange];
   }, []);
@@ -142,8 +142,8 @@ const withNetWorth = <
     if (index < startPredictionIndex) {
       return [...last, -netWorth[index].liabilities];
     }
-    const homeDebtChange = homeEquity[index].debt - homeEquity[index - 1].debt;
-    return [...last, last[last.length - 1] + homeDebtChange];
+    const loanDebtChange = illiquidEquity[index].debt - illiquidEquity[index - 1].debt;
+    return [...last, last[last.length - 1] + loanDebtChange];
   }, []);
 
   return {
@@ -151,7 +151,7 @@ const withNetWorth = <
     assets,
     liabilities,
     netWorth: assets.map((value, index) => value + liabilities[index]),
-    homeEquity: homeEquity.map(({ value, debt }) => value + debt),
+    illiquidEquity: illiquidEquity.map(({ value, debt }) => value + debt),
   };
 };
 
@@ -392,7 +392,7 @@ const getNetWorthMonthlyComposer = moize(
       getDerivedNetWorthEntries,
       getFundsRows,
       getSubcategories,
-      getHomeEquity(today, longTermOptions),
+      getIlliquidEquity(today, longTermOptions),
       (
         longTermRates,
         dates,
@@ -400,11 +400,11 @@ const getNetWorthMonthlyComposer = moize(
         netWorth,
         funds,
         subcategories,
-        homeEquity,
+        illiquidEquity,
       ): ((
         graph: G,
       ) => OverviewGraphRequired<
-        'assets' | 'liabilities' | 'netWorth' | 'homeEquity' | AggregateKey,
+        'assets' | 'liabilities' | 'netWorth' | 'illiquidEquity' | AggregateKey,
         G
       >) =>
         compose(
@@ -413,7 +413,7 @@ const getNetWorthMonthlyComposer = moize(
             startPredictionIndex,
             netWorth,
             funds,
-            homeEquity,
+            illiquidEquity,
             longTermOptions,
             longTermRates,
           ),

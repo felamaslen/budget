@@ -13,13 +13,21 @@ describe('<FormFieldNetWorthValue />', () => {
     setterResult = { base: 'kept' };
   });
 
+  const onChange = jest
+    .fn()
+    .mockImplementation(
+      (setter: Setter<Record<string, unknown> | Record<string, unknown>>): void => {
+        setterResult = typeof setter === 'function' ? setter(setterResult) : setter;
+      },
+    );
+
   const props: Props = {
     value: {
       subcategory: numericHash('some-subcategory-id'),
       simple: 156,
       fx: null,
       option: null,
-      mortgage: null,
+      loan: null,
     },
     currencies: [
       {
@@ -31,13 +39,7 @@ describe('<FormFieldNetWorthValue />', () => {
         rate: 0.95,
       },
     ],
-    onChange: jest
-      .fn()
-      .mockImplementation(
-        (setter: Setter<Record<string, unknown> | Record<string, unknown>>): void => {
-          setterResult = typeof setter === 'function' ? setter(setterResult) : setter;
-        },
-      ),
+    onChange,
   };
 
   it('should render a cost form field', () => {
@@ -67,9 +69,9 @@ describe('<FormFieldNetWorthValue />', () => {
   });
 
   describe.each`
-    condition       | erroneousValue
-    ${'an option'}  | ${{ option: [{ units: 100, strikePrice: 30, marketPrice: 43 }] }}
-    ${'a mortgage'} | ${{ mortgage: { principal: 15000000, paymentsRemaining: 275, rate: 0.175 } }}
+    condition      | erroneousValue
+    ${'an option'} | ${{ option: [{ units: 100, strikePrice: 30, marketPrice: 43 }] }}
+    ${'a loan'}    | ${{ loan: { principal: 15000000, paymentsRemaining: 275, rate: 0.175 } }}
   `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
     const setupErroneous = (): RenderResult =>
       render(
@@ -160,7 +162,7 @@ describe('<FormFieldNetWorthValue />', () => {
             },
           ],
           option: null,
-          mortgage: null,
+          loan: null,
         });
       });
     });
@@ -207,7 +209,7 @@ describe('<FormFieldNetWorthValue />', () => {
             },
           ],
           option: null,
-          mortgage: null,
+          loan: null,
         });
       });
 
@@ -232,7 +234,7 @@ describe('<FormFieldNetWorthValue />', () => {
             },
           ],
           option: null,
-          mortgage: null,
+          loan: null,
         });
       });
     });
@@ -328,7 +330,7 @@ describe('<FormFieldNetWorthValue />', () => {
         simple: 6723,
         fx: null,
         option: null,
-        mortgage: null,
+        loan: null,
       });
     });
   });
@@ -387,7 +389,7 @@ describe('<FormFieldNetWorthValue />', () => {
           base: 'kept',
           simple: null,
           fx: null,
-          mortgage: null,
+          loan: null,
           option: {
             units: 105,
             strikePrice: 45.532,
@@ -400,10 +402,10 @@ describe('<FormFieldNetWorthValue />', () => {
     });
 
     describe.each`
-      condition     | erroneousValue
-      ${'simple'}   | ${{ simple: 103 }}
-      ${'FX'}       | ${{ fx: [{ value: 103, currency: 'USD' }] }}
-      ${'mortgage'} | ${{ mortgage: { principal: 16500000, remainingPayments: 123, rate: 0.27 } }}
+      condition   | erroneousValue
+      ${'simple'} | ${{ simple: 103 }}
+      ${'FX'}     | ${{ fx: [{ value: 103, currency: 'USD' }] }}
+      ${'loan'}   | ${{ loan: { principal: 16500000, remainingPayments: 123, rate: 0.27 } }}
     `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
       // this would only happen if the API was set up incorrectly
       const setupErroneous = (): RenderResult =>
@@ -484,7 +486,7 @@ describe('<FormFieldNetWorthValue />', () => {
           base: 'kept',
           simple: null,
           fx: null,
-          mortgage: null,
+          loan: null,
           option: {
             units: 100,
             vested: 53,
@@ -496,18 +498,18 @@ describe('<FormFieldNetWorthValue />', () => {
     });
   });
 
-  describe('switching to a mortgage value', () => {
-    const propsMortgage: Props = {
+  describe('switching to a loan value', () => {
+    const propsLoan: Props = {
       ...props,
-      isMortgage: true,
+      isLoan: true,
       value: {
         ...props.value,
         simple: null,
-        mortgage: { principal: 27500000, paymentsRemaining: 268, rate: 0.219 },
+        loan: { principal: 27500000, paymentsRemaining: 268, rate: 0.219 },
       },
     };
 
-    const setup = (): RenderResult => render(<FormFieldNetWorthValue {...propsMortgage} />);
+    const setup = (): RenderResult => render(<FormFieldNetWorthValue {...propsLoan} />);
 
     describe.each`
       field                  | placeholder             | fieldValue     | updatedValue | delta
@@ -548,7 +550,7 @@ describe('<FormFieldNetWorthValue />', () => {
           simple: null,
           fx: null,
           option: null,
-          mortgage: {
+          loan: {
             principal: 27500000,
             paymentsRemaining: 268,
             rate: 0.219,
@@ -568,12 +570,12 @@ describe('<FormFieldNetWorthValue />', () => {
       const setupErroneous = (): RenderResult =>
         render(
           <FormFieldNetWorthValue
-            {...propsMortgage}
+            {...propsLoan}
             value={{ ...props.value, simple: null, ...erroneousValue }}
           />,
         );
 
-      it('should render the usual mortgage fields', () => {
+      it('should render the usual loan fields', () => {
         expect.assertions(4);
         const { getAllByRole } = setupErroneous();
 
@@ -586,28 +588,6 @@ describe('<FormFieldNetWorthValue />', () => {
         expect(inputPrincipal.value).toBe('0.00');
         expect(inputPaymentsRemaining.value).toBe('0');
         expect(inputRate.value).toBe('0');
-      });
-
-      it.each`
-        field                  | index
-        ${'principal'}         | ${0}
-        ${'paymentsRemaining'} | ${1}
-        ${'rate'}              | ${2}
-      `('should not call onChange with data only from $field', ({ index }) => {
-        expect.assertions(1);
-        const { getAllByRole } = setupErroneous();
-
-        const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
-        const fieldInput = inputs[index];
-
-        act(() => {
-          fireEvent.change(fieldInput, { target: { value: '100' } });
-        });
-        act(() => {
-          fireEvent.blur(fieldInput);
-        });
-
-        expect(props.onChange).not.toHaveBeenCalled();
       });
 
       it('should call onChange with complete data', () => {
@@ -631,6 +611,9 @@ describe('<FormFieldNetWorthValue />', () => {
         act(() => {
           fireEvent.change(inputRate, { target: { value: '0.43' } });
         });
+
+        onChange.mockClear();
+
         act(() => {
           fireEvent.blur(inputRate);
         });
@@ -641,7 +624,7 @@ describe('<FormFieldNetWorthValue />', () => {
           simple: null,
           fx: null,
           option: null,
-          mortgage: {
+          loan: {
             principal: 16756844,
             paymentsRemaining: 17,
             rate: 0.43,

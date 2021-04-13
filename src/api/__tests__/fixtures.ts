@@ -327,6 +327,7 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
         category_id: categoryIdHouse,
         subcategory: '1 Some Place',
         has_credit_limit: null,
+        appreciation_rate: 0.038,
         opacity: 1,
       },
       {
@@ -585,7 +586,7 @@ export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
     },
   ]);
 
-  await db('net_worth_mortgage_values').insert([
+  await db('net_worth_loan_values').insert([
     {
       values_id: valueIdOldestMortgage,
       payments_remaining: 360,

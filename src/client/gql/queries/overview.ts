@@ -9,7 +9,7 @@ export const overviewOld = gql`
       pension
       cashOther
       investments
-      homeEquity
+      illiquidEquity
       assets
       liabilities
       options

@@ -38,6 +38,7 @@ const Subcategory = gql`
     categoryId: Int!
     subcategory: String!
     hasCreditLimit: Boolean
+    appreciationRate: Float
     isSAYE: Boolean
     opacity: Float
   }
@@ -46,6 +47,7 @@ const Subcategory = gql`
     categoryId: Int!
     subcategory: String!
     hasCreditLimit: Boolean
+    appreciationRate: Float
     isSAYE: Boolean
     opacity: Float
   }
@@ -88,12 +90,12 @@ const Value = gql`
     vested: NonNegativeInt
   }
 
-  type MortgageValue {
+  type LoanValue {
     principal: NonNegativeInt!
     paymentsRemaining: NonNegativeInt!
     rate: Float!
   }
-  input MortgageValueInput {
+  input LoanValueInput {
     principal: NonNegativeInt!
     paymentsRemaining: NonNegativeInt!
     rate: Float!
@@ -108,7 +110,7 @@ const Value = gql`
     simple: Int
     fx: [FXValue!]
     option: OptionValue
-    mortgage: MortgageValue
+    loan: LoanValue
   }
 
   input NetWorthValueInput {
@@ -118,7 +120,7 @@ const Value = gql`
     simple: Int
     fx: [FXValueInput!]
     option: OptionValueInput
-    mortgage: MortgageValueInput
+    loan: LoanValueInput
   }
 `;
 

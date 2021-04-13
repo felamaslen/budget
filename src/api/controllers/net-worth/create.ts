@@ -10,8 +10,8 @@ import {
   insertEntry,
   insertValues,
   insertFXValues,
+  insertLoanValues,
   insertOptionValues,
-  insertMortgageValues,
   insertWithNetWorthId,
 } from '~api/queries';
 import {
@@ -22,13 +22,13 @@ import {
   NetWorthValueInput,
   ValueRow,
   FXValueRow,
+  LoanValueRow,
   OptionValueRow,
-  MortgageValueRow,
 } from '~api/types';
 
 function getRowValue(value: NetWorthValueInput): number | null {
-  if (value.mortgage) {
-    return -value.mortgage.principal;
+  if (value.loan) {
+    return -value.loan.principal;
   }
 
   return value.simple ?? null;
@@ -37,7 +37,7 @@ function getRowValue(value: NetWorthValueInput): number | null {
 type ValueChildRows = {
   fx: FXValueRow[];
   options: OptionValueRow[];
-  mortgage: MortgageValueRow[];
+  loan: LoanValueRow[];
 };
 
 function getFXValuesRows(valueId: number, row: NetWorthValueInput): FXValueRow[] {
@@ -61,27 +61,27 @@ function getOptionValuesRows(valueId: number, row: NetWorthValueInput): OptionVa
   return [[valueId, units, strikePrice, marketPrice, vested ?? 0]];
 }
 
-function getMortgageValuesRows(valueId: number, row: NetWorthValueInput): MortgageValueRow[] {
-  if (!row.mortgage) {
+function getLoanValuesRows(valueId: number, row: NetWorthValueInput): LoanValueRow[] {
+  if (!row.loan) {
     return [];
   }
 
-  const { paymentsRemaining, rate } = row.mortgage;
+  const { paymentsRemaining, rate } = row.loan;
 
   return [[valueId, paymentsRemaining, rate]];
 }
 
 function getValueChildRows(valueIds: number[], values: NetWorthValueInput[]): ValueChildRows {
   return values.reduce<ValueChildRows>(
-    ({ fx, options, mortgage }, row, index) => ({
+    ({ fx, options, loan }, row, index) => ({
       fx: [...fx, ...getFXValuesRows(valueIds[index], row)],
       options: [...options, ...getOptionValuesRows(valueIds[index], row)],
-      mortgage: [...mortgage, ...getMortgageValuesRows(valueIds[index], row)],
+      loan: [...loan, ...getLoanValuesRows(valueIds[index], row)],
     }),
     {
       fx: [],
       options: [],
-      mortgage: [],
+      loan: [],
     },
   );
 }
@@ -110,7 +110,7 @@ export async function createValues(
   await Promise.all([
     insertFXValues(db, valueChildRows.fx),
     insertOptionValues(db, valueChildRows.options),
-    insertMortgageValues(db, valueChildRows.mortgage),
+    insertLoanValues(db, valueChildRows.loan),
   ]);
 }
 

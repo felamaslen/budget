@@ -116,6 +116,21 @@ export const CreditLimit = styled(ItemRow)`
   }
 `;
 
+export const Illiquid = styled(CreditLimit)`
+  & > div {
+    font-size: ${rem(10)};
+    white-space: nowrap;
+  }
+
+  &::before {
+    content: 'Illiquid';
+  }
+
+  input[type='number'] {
+    max-width: ${rem(50)};
+  }
+`;
+
 export const IsSAYE = styled(ItemRow)`
   grid-row: 3;
 

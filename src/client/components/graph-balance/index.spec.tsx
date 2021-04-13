@@ -1108,7 +1108,7 @@ describe('<GraphBalance />', () => {
             x="158"
             y="72"
           >
-            Home equity
+            Illiquid equity
           </text>
           <rect
             fill="rgba(84,110,122,0.5)"

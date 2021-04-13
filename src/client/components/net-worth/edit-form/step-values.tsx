@@ -62,7 +62,6 @@ type OnChangeValue = (
 type PropsEditByType = {
   isLiability: boolean;
   isOption: boolean;
-  isMortgage: boolean;
   subcategories: NetWorthSubcategory[];
   creditLimit: CreditLimit[];
   currencies: Currency[];
@@ -74,7 +73,6 @@ type PropsEditByType = {
 const EditByType: React.FC<PropsEditByType> = ({
   isLiability,
   isOption,
-  isMortgage,
   subcategories,
   creditLimit: creditLimitList,
   currencies,
@@ -92,6 +90,7 @@ const EditByType: React.FC<PropsEditByType> = ({
 
   const [newValue, setNewValue] = useState(value);
   const [creditLimit, setCreditLimit] = useState<number | null | undefined>(initialCreditLimit);
+  const isLoan = isLiability && typeof creditLimit !== 'number';
 
   const setSkip = useCallback((newSkip?: boolean | null): void => {
     setNewValue((last) => ({ ...last, skip: newSkip ?? null }));
@@ -118,7 +117,7 @@ const EditByType: React.FC<PropsEditByType> = ({
         <FormFieldNetWorthValue
           value={value}
           isOption={isOption}
-          isMortgage={isMortgage}
+          isLoan={isLoan}
           onChange={setNewValue}
           currencies={currencies}
         />
@@ -194,7 +193,7 @@ const AddByType: React.FC<PropsAddByType> = ({
   const categoryItem = categories.find(({ id }) => id === category);
 
   const isOption = categoryItem?.isOption ?? false;
-  const isMortgage = categoryItem?.category === 'Mortgage';
+  const isLoan = categoryItem?.type === NetWorthCategoryType.Liability && !hasCreditLimit;
 
   const onAddCallback = useCallback(() => {
     onAdd(value, creditLimit || null);
@@ -224,7 +223,7 @@ const AddByType: React.FC<PropsAddByType> = ({
         <FormFieldNetWorthValue
           value={value}
           isOption={isOption}
-          isMortgage={isMortgage}
+          isLoan={isLoan}
           onChange={setValue}
           currencies={currencies}
         />
@@ -362,7 +361,6 @@ const EditByCategory: React.FC<{
           key={value.subcategory}
           isLiability={isLiability}
           isOption={!!category.isOption}
-          isMortgage={category.category === 'Mortgage'}
           subcategories={subcategories}
           creditLimit={item.creditLimit}
           currencies={item.currencies}

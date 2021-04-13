@@ -22,7 +22,6 @@ import {
 } from './utils';
 
 import { getText } from '~client/components/net-worth/breakdown.blocks';
-import { HOUSE_PRICE_INFLATION } from '~client/constants';
 import { blockPacker } from '~client/modules/block-packer';
 import { lastInArray } from '~client/modules/data';
 import { formatCurrency, formatPercent } from '~client/modules/format';
@@ -38,12 +37,13 @@ import type {
   NetWorthTableRow as TableRow,
   NetWorthValueObjectNative,
   NetWorthValueObjectRead,
+  OverviewGraphDate,
   WithSubTree,
 } from '~client/types';
 import { NetWorthCategoryType } from '~client/types/enum';
 import type {
   Currency,
-  MortgageValue,
+  LoanValue,
   NetWorthCategory,
   NetWorthSubcategory,
   OptionValue,
@@ -115,7 +115,7 @@ function sumComplexValue(
       0,
     ) ?? 0) +
     (value.option ? optionValue(value.option, isSAYE(value), withSAYEResidual) : 0) +
-    -(value.mortgage?.principal ?? 0)
+    -(value.loan?.principal ?? 0)
   );
 }
 
@@ -382,9 +382,7 @@ export const getLatestNetWorthAggregate = moize(
   { maxSize: 1 },
 );
 
-const houseCategory = 'House';
-
-function PMT({ principal, paymentsRemaining, rate }: MortgageValue): number {
+function PMT({ principal, paymentsRemaining, rate }: LoanValue): number {
   if (!paymentsRemaining) {
     return 0;
   }
@@ -395,9 +393,124 @@ function PMT({ principal, paymentsRemaining, rate }: MortgageValue): number {
   return (monthlyRate * principal) / (1 - (1 + monthlyRate) ** -paymentsRemaining);
 }
 
-export type HomeEquity = { value: number; debt: number };
+export type IlliquidEquity = { value: number; debt: number };
 
-export const getHomeEquity = moize(
+type CompoundLoanOrAsset = {
+  principal: number;
+  interestRate: number;
+};
+
+const forecastCompoundStack = <T extends CompoundLoanOrAsset>(
+  composer: (lastValue: number, monthsSinceLastForecast: number, loanOrAsset: T) => number,
+) => (dates: OverviewGraphDate[], startPredictionIndex: number, currentStack: T[]): number[] =>
+  dates
+    .slice(startPredictionIndex)
+    .reduce<{ monthIndex: number; values: number[][] }>(
+      (last, { monthIndex }) => {
+        const monthsSinceLastForecast = monthIndex - last.monthIndex;
+        return {
+          monthIndex,
+          values: [
+            ...last.values,
+            currentStack.map<number>((loanOrAsset, loanOrAssetIndex) => {
+              const lastValue = last.values[last.values.length - 1][loanOrAssetIndex];
+              return composer(lastValue, monthsSinceLastForecast, loanOrAsset);
+            }),
+          ],
+        };
+      },
+      {
+        monthIndex: startPredictionIndex - 1,
+        values: [currentStack.map<number>(({ principal }) => principal)],
+      },
+    )
+    .values.slice(1)
+    .map<number>((stack) => stack.reduce<number>((last, value) => last + value, 0));
+
+type CompoundLoan = CompoundLoanOrAsset & { monthlyPayment: number };
+
+const forecastCompoundLoanDebt = forecastCompoundStack<CompoundLoan>(
+  (principal, monthsSinceLastForecast, loan) =>
+    // The debt is forecast in periods of arbitrary length in months
+    // But debt is assumed to be repaid monthly, so this is taken into account
+    Math.max(
+      0,
+      forecastCompoundedReturns(
+        principal,
+        monthsSinceLastForecast,
+        -loan.monthlyPayment,
+        loan.interestRate / 100,
+      ),
+    ),
+);
+
+const forecastAppreciatingIlliquidAsset = forecastCompoundStack(
+  (principal, monthsSinceLastForecast, asset) =>
+    forecastCompoundedReturns(principal, monthsSinceLastForecast, 0, asset.interestRate / 100),
+);
+
+function getIlliquidAssetValue(
+  startPredictionIndex: number,
+  dates: OverviewGraphDate[],
+  categories: NetWorthCategory[],
+  subcategories: NetWorthSubcategory[],
+  rows: NetWorthEntryNative[],
+): number[] {
+  const filterIlliquidValues = filterValuesBySubcategory(
+    ({ appreciationRate = null }) => appreciationRate !== null,
+  )(subcategories);
+
+  const illiquidValueToPresent = rows
+    .slice(0, startPredictionIndex)
+    .map<number>((row) =>
+      row.values
+        .filter(filterIlliquidValues)
+        .reduce<number>((last, { simple }) => last + (simple ?? 0), 0),
+    );
+
+  const currentIlliquidAssets = rows[startPredictionIndex - 1].values
+    .filter(filterIlliquidValues)
+    .map<CompoundLoanOrAsset>(({ simple, subcategory }) => ({
+      principal: simple ?? 0,
+      // appreciation rates are always in %
+      interestRate:
+        subcategories.find((compare) => compare.id === subcategory)?.appreciationRate ?? 0,
+    }));
+
+  const forecastIlliquidValue = forecastAppreciatingIlliquidAsset(
+    dates,
+    startPredictionIndex,
+    currentIlliquidAssets,
+  );
+
+  return illiquidValueToPresent.concat(forecastIlliquidValue);
+}
+
+function getLoanDebt(
+  startPredictionIndex: number,
+  dates: OverviewGraphDate[],
+  rows: NetWorthEntryNative[],
+): number[] {
+  const debtToPresent = rows
+    .slice(0, startPredictionIndex)
+    .map<number>((row) =>
+      row.values.reduce<number>((last, { loan }) => last + (loan?.principal ?? 0), 0),
+    );
+
+  const outstandingLoans = rows[startPredictionIndex - 1].values
+    .filter((value): value is NetWorthValueObjectRead & { loan: LoanValue } => !!value.loan)
+    .map<CompoundLoan>(({ loan }) => ({
+      principal: loan.principal,
+      interestRate: loan.rate,
+      monthlyPayment: PMT(loan),
+    }));
+
+  const forecastDebt = forecastCompoundLoanDebt(dates, startPredictionIndex, outstandingLoans);
+
+  return debtToPresent.concat(forecastDebt);
+}
+
+export const getIlliquidEquity = moize(
   (today: Date, longTermOptions: LongTermOptions = longTermOptionsDisabled) =>
     createSelector(
       getStartPredictionIndex(today),
@@ -405,92 +518,24 @@ export const getHomeEquity = moize(
       getCategories,
       getSubcategories,
       getNetWorthRows,
-      (startPredictionIndex, dates, categories, subcategories, rows) => {
+      (startPredictionIndex, dates, categories, subcategories, rows): IlliquidEquity[] => {
         if (rows.length < startPredictionIndex) {
           return [];
         }
 
-        const debtToPresent = rows
-          .slice(0, startPredictionIndex)
-          .map<number>((row) =>
-            row.values.reduce<number>((last, { mortgage }) => last + (mortgage?.principal ?? 0), 0),
-          );
+        const illiquidAssetValue = getIlliquidAssetValue(
+          startPredictionIndex,
+          dates,
+          categories,
+          subcategories,
+          rows,
+        );
+        const loanDebt = getLoanDebt(startPredictionIndex, dates, rows);
 
-        const filterValuesByHouse = filterValuesByCategory(
-          ({ category }) => category === houseCategory,
-        )(categories, subcategories);
-
-        const homeValueToPresent = rows
-          .slice(0, startPredictionIndex)
-          .map<number>((row) =>
-            row.values
-              .filter(filterValuesByHouse)
-              .reduce<number>((last, { simple }) => last + (simple ?? 0), 0),
-          );
-
-        const homeEquityToPresent = homeValueToPresent.map<HomeEquity>((value, index) => ({
+        return illiquidAssetValue.map<IlliquidEquity>((value, index) => ({
           value,
-          debt: -debtToPresent[index],
+          debt: -loanDebt[index],
         }));
-
-        const outstandingMortgages = rows[startPredictionIndex - 1].values
-          .filter(
-            (value): value is NetWorthValueObjectRead & { mortgage: MortgageValue } =>
-              !!value.mortgage,
-          )
-          .map<MortgageValue & { monthlyPayment: number }>(({ mortgage }) => ({
-            ...mortgage,
-            monthlyPayment: PMT(mortgage),
-          }));
-
-        const forecastDebt = dates
-          .slice(startPredictionIndex)
-          .reduce<{ monthIndex: number; mortgages: number[][] }>(
-            (last, { monthIndex }) => {
-              const monthsSinceLastForecast = monthIndex - last.monthIndex;
-              return {
-                monthIndex,
-                mortgages: [
-                  ...last.mortgages,
-                  outstandingMortgages.map<number>((mortgage, homeIndex) => {
-                    // The debt is forecast in periods of arbitrary length in months
-                    // But the debt is assumed to be repaid monthly, so this is taken into account
-                    const lastDebt = last.mortgages[last.mortgages.length - 1][homeIndex];
-                    const forecastDebtForHome = forecastCompoundedReturns(
-                      lastDebt,
-                      monthsSinceLastForecast,
-                      -mortgage.monthlyPayment,
-                      mortgage.rate / 100,
-                    );
-                    return Math.max(0, forecastDebtForHome);
-                  }),
-                ],
-              };
-            },
-            {
-              monthIndex: startPredictionIndex - 1,
-              mortgages: [outstandingMortgages.map<number>(({ principal }) => principal)],
-            },
-          )
-          .mortgages.slice(1)
-          .map<number>((debtStack) => debtStack.reduce<number>((last, debt) => last + debt, 0));
-
-        const latestHomeValue = homeValueToPresent[homeValueToPresent.length - 1];
-
-        const forecastHomeValue = dates
-          .slice(startPredictionIndex)
-          .map<number>(
-            ({ monthIndex }) =>
-              latestHomeValue *
-              (1 + HOUSE_PRICE_INFLATION) ** ((monthIndex - startPredictionIndex + 1) / 12),
-          );
-
-        const forecastHomeEquity = forecastHomeValue.map<HomeEquity>((value, index) => ({
-          value,
-          debt: -forecastDebt[index],
-        }));
-
-        return homeEquityToPresent.concat(forecastHomeEquity);
       },
     ),
   { maxSize: 1 },

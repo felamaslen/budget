@@ -107,21 +107,21 @@ export async function deleteChangedOptionValues(
   `);
 }
 
-export async function deleteChangedMortgageValues(
+export async function deleteChangedLoanValues(
   db: DatabaseTransactionConnectionType,
   uid: number,
   netWorthId: number,
   subcategories: number[],
 ): Promise<void> {
   await db.query(sql`
-    DELETE FROM net_worth_mortgage_values nwmv
+    DELETE FROM net_worth_loan_values nwlv
     USING net_worth nw, net_worth_values nwv
     WHERE ${sql.join(
       [
         sql`nw.uid = ${uid}`,
         sql`nw.id = ${netWorthId}`,
         sql`nwv.net_worth_id = nw.id`,
-        sql`nwmv.values_id = nwv.id`,
+        sql`nwlv.values_id = nwv.id`,
         sql`nwv.subcategory = ANY(${sql.array(subcategories, 'int4')})`,
       ],
       sql` AND `,

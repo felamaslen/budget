@@ -11,7 +11,7 @@ type OverviewGraphExtra = {
   cashOther: number[]; // e.g. savings accounts, foreign accounts
   investments: number[]; // this includes cash and is based on the recorded value
   investmentPurchases: number[]; // includes stock purchases as well as things like house purchases
-  homeEquity: number[];
+  illiquidEquity: number[];
   options: number[]; // excludes SAYE savings (but includes the profit if any at current prices)
   income: number[];
   spending: number[];

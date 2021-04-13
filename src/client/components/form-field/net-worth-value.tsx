@@ -12,13 +12,7 @@ import type {
   NetWorthValueObjectRead as NetWorthValue,
   NetWorthValueObjectRead,
 } from '~client/types';
-import type {
-  Currency,
-  FxValue,
-  OptionValue,
-  MortgageValue,
-  MortgageValueInput,
-} from '~client/types/gql';
+import type { Currency, FxValue, LoanValue, LoanValueInput, OptionValue } from '~client/types/gql';
 
 type FXEventAdd = { value: number; currency: string };
 type FXEventRemove = { index: number };
@@ -95,7 +89,7 @@ export type Props = {
   onChange: React.Dispatch<React.SetStateAction<NetWorthValueObjectRead>>;
   currencies: Omit<Currency, 'id'>[];
   isOption?: boolean;
-  isMortgage?: boolean;
+  isLoan?: boolean;
 };
 
 const coerceSimpleFXValue = (value: NetWorthValue): number | FxValue[] =>
@@ -179,7 +173,7 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
         simple: null,
         fx: removeAtIndex(fxValue, index),
         option: null,
-        mortgage: null,
+        loan: null,
       });
     },
     [onChange, fxValue, initialValue],
@@ -192,14 +186,14 @@ const FormFieldSimpleFX: React.FC<PropsFieldSimpleFX> = ({
         simple: null,
         fx: [...fxValue, { value, currency }],
         option: null,
-        mortgage: null,
+        loan: null,
       }),
     [onChange, fxValue, initialValue],
   );
 
   const onChangeSimpleValue = useCallback(
     (value?: number) =>
-      onChange({ ...initialValue, simple: value ?? 0, fx: null, option: null, mortgage: null }),
+      onChange({ ...initialValue, simple: value ?? 0, fx: null, option: null, loan: null }),
     [onChange, initialValue],
   );
 
@@ -277,7 +271,7 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ value, onChange }) => {
 
   useEffect(() => {
     if (optionDeltaComplete(delta)) {
-      onChange((last) => ({ ...last, simple: null, fx: null, mortgage: null, option: delta }));
+      onChange((last) => ({ ...last, simple: null, fx: null, loan: null, option: delta }));
     }
   }, [delta, onChange, value.option]);
 
@@ -325,13 +319,10 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ value, onChange }) => {
   );
 };
 
-const coerceMortgage = <V extends NetWorthValue>(
-  value: V,
-): Partial<MortgageValue | MortgageValueInput> => value.mortgage ?? {};
+const coerceLoan = <V extends NetWorthValue>(value: V): Partial<LoanValue | LoanValueInput> =>
+  value.loan ?? { principal: Math.max(0, -(value.simple ?? 0)), rate: 0, paymentsRemaining: 0 };
 
-const mortgageDeltaComplete = (
-  delta: Partial<MortgageValue> | MortgageValue,
-): delta is MortgageValue =>
+const loanDeltaComplete = (delta: Partial<LoanValue> | LoanValue): delta is LoanValue =>
   Object.keys(delta).length === 3 &&
   Object.values(delta).every((value) => typeof value !== 'undefined');
 
@@ -339,12 +330,12 @@ const principalProps = { placeholder: 'Principal' };
 const paymentsRemainingProps = { placeholder: 'Payments remaining' };
 const rateProps = { placeholder: 'Interest rate' };
 
-type PropsFieldMortgage = Pick<Props, 'value' | 'onChange'>;
+type PropsFieldLoan = Pick<Props, 'value' | 'onChange'>;
 
-export const FormFieldMortgage: React.FC<PropsFieldMortgage> = ({ value, onChange }) => {
+export const FormFieldLoan: React.FC<PropsFieldLoan> = ({ value, onChange }) => {
   const id = value.subcategory;
-  const initialDelta = useMemo<Partial<MortgageValue>>(() => coerceMortgage(value), [value]);
-  const [delta, setDelta] = useState<Partial<MortgageValue>>(coerceMortgage(value));
+  const initialDelta = useMemo<Partial<LoanValue>>(() => coerceLoan(value), [value]);
+  const [delta, setDelta] = useState<Partial<LoanValue>>(initialDelta);
   useEffect(() => {
     setDelta(initialDelta);
   }, [initialDelta]);
@@ -361,26 +352,26 @@ export const FormFieldMortgage: React.FC<PropsFieldMortgage> = ({ value, onChang
   const onChangeRate = useCallback((rate = 0) => setDelta((last) => ({ ...last, rate })), []);
 
   useEffect(() => {
-    if (mortgageDeltaComplete(delta)) {
-      onChange((last) => ({ ...last, simple: null, fx: null, option: null, mortgage: delta }));
+    if (loanDeltaComplete(delta)) {
+      onChange((last) => ({ ...last, simple: null, fx: null, option: null, loan: delta }));
     }
-  }, [delta, onChange, value.mortgage]);
+  }, [delta, onChange, value.loan]);
 
   return (
-    <Styled.NetWorthValueMortgage>
+    <Styled.NetWorthValueLoan>
       <div>
-        <label htmlFor={`mortgage-principal-${id}`}>Principal</label>
+        <label htmlFor={`loan-principal-${id}`}>Principal</label>
         <FormFieldCost
-          id={`mortgage-principal-${id}`}
+          id={`loan-principal-${id}`}
           inputProps={principalProps}
           value={delta.principal ?? 0}
           onChange={onChangePrincipal}
         />
       </div>
       <div>
-        <label htmlFor={`mortgage-payments-remaining-${id}`}>Payments remaining</label>
+        <label htmlFor={`loan-payments-remaining-${id}`}>Payments remaining</label>
         <FormFieldNumber
-          id={`mortgage-payments-remaining-${id}`}
+          id={`loan-payments-remaining-${id}`}
           inputProps={paymentsRemainingProps}
           value={delta.paymentsRemaining ?? 0}
           onChange={onChangePaymentsRemaining}
@@ -389,31 +380,31 @@ export const FormFieldMortgage: React.FC<PropsFieldMortgage> = ({ value, onChang
         />
       </div>
       <div>
-        <label htmlFor={`mortgage-rate-${id}`}>Interest rate</label>
+        <label htmlFor={`loan-rate-${id}`}>Interest rate</label>
         <FormFieldNumber
-          id={`mortgage-rate-${id}`}
+          id={`loan-rate-${id}`}
           inputProps={rateProps}
           value={delta.rate ?? 0}
           onChange={onChangeRate}
           min={0}
-          step={0.001}
+          step={0.01}
         />
       </div>
-    </Styled.NetWorthValueMortgage>
+    </Styled.NetWorthValueLoan>
   );
 };
 
 export const FormFieldNetWorthValue: React.FC<Props> = ({
   value,
   isOption: valueIsOption = false,
-  isMortgage: valueIsMortgage = false,
+  isLoan: valueIsLoan = false,
   onChange,
   currencies,
 }) => (
   <Styled.NetWorthValue>
-    {valueIsMortgage && <FormFieldMortgage value={value} onChange={onChange} />}
+    {valueIsLoan && <FormFieldLoan value={value} onChange={onChange} />}
     {valueIsOption && <FormFieldOption value={value} onChange={onChange} />}
-    {!valueIsMortgage && !valueIsOption && (
+    {!valueIsLoan && !valueIsOption && (
       <FormFieldSimpleFX value={value} onChange={onChange} currencies={currencies} />
     )}
   </Styled.NetWorthValue>

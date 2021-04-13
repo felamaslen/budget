@@ -255,7 +255,7 @@ export async function getOldOverviewData(
   const cashOther = mapNetWorth('locked_cash');
   const investments = mapNetWorth('investments'); // stocks + cash
   const options = mapNetWorth('options');
-  const homeEquity = mapNetWorth('home_equity');
+  const illiquidEquity = mapNetWorth('illiquid_equity');
   const assets = mapNetWorth('assets'); // this includes pension but excludes options
   const liabilities = mapNetWorth('liabilities');
   const netWorth = assets.map((value, index) => value + liabilities[index]);
@@ -267,7 +267,7 @@ export async function getOldOverviewData(
     pension,
     cashOther,
     investments,
-    homeEquity,
+    illiquidEquity,
     assets,
     liabilities,
     options,

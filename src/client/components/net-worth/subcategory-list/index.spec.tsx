@@ -61,8 +61,69 @@ describe('NetWorthSubcategoryList', () => {
         categoryId: numericHash('my-category'),
         subcategory: 'Different bank account',
         hasCreditLimit: null,
+        appreciationRate: null,
         isSAYE: null,
         opacity: 0.75,
+      });
+    });
+
+    describe('when the category is a non-option asset', () => {
+      const propsAsset: Props = {
+        ...props,
+        parent: {
+          ...props.parent,
+          type: NetWorthCategoryType.Asset,
+          isOption: null,
+          category: 'Property portfolio',
+        },
+        subcategories: [
+          {
+            ...props.subcategories[0],
+            subcategory: 'My house',
+          },
+        ],
+      };
+
+      it('should have an option to add an appreciation rate', () => {
+        expect.assertions(7);
+
+        const { getByTestId } = render(<NetWorthSubcategoryList {...propsAsset} />);
+        const { getByRole, getByText } = within(getByTestId('subcategory-item-My house'));
+
+        const inputIsIlliquid = getByRole('checkbox') as HTMLInputElement;
+        const buttonUpdate = getByText('Update') as HTMLButtonElement;
+
+        expect(inputIsIlliquid).toBeInTheDocument();
+        expect(buttonUpdate).toBeInTheDocument();
+        expect(inputIsIlliquid.checked).toBe(false);
+
+        act(() => {
+          fireEvent.click(inputIsIlliquid);
+        });
+
+        const inputAppreciationRate = getByRole('spinbutton') as HTMLInputElement;
+
+        expect(inputAppreciationRate).toBeInTheDocument();
+        expect(inputAppreciationRate.value).toBe('0');
+
+        act(() => {
+          fireEvent.change(inputAppreciationRate, { target: { value: '3.8' } });
+          fireEvent.blur(inputAppreciationRate);
+        });
+
+        act(() => {
+          fireEvent.click(buttonUpdate);
+        });
+
+        expect(onUpdate).toHaveBeenCalledTimes(1);
+        expect(onUpdate).toHaveBeenCalledWith(
+          numericHash('my-existing-subcategory'),
+          expect.objectContaining({
+            categoryId: numericHash('my-category'),
+            subcategory: 'My house',
+            appreciationRate: 3.8,
+          }),
+        );
       });
     });
 
@@ -195,6 +256,7 @@ describe('NetWorthSubcategoryList', () => {
         categoryId: numericHash('my-category'),
         subcategory: 'Different bank account',
         hasCreditLimit: null,
+        appreciationRate: null,
         isSAYE: null,
         opacity: 0.75,
       });

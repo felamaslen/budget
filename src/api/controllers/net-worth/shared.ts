@@ -4,7 +4,7 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 import { getInvalidIds, getInvalidCreditCategories } from '~api/queries';
 import {
   FxValue,
-  MortgageValue,
+  LoanValue,
   OptionValue,
   CreditLimit,
   Currency,
@@ -12,8 +12,8 @@ import {
   JoinedEntryRowWithCurrencies,
   JoinedEntryRowWithCreditLimit,
   JoinedEntryRowWithFXValue,
+  JoinedEntryRowWithLoanValue,
   JoinedEntryRowWithOptionValue,
-  JoinedEntryRowWithMortgageValue,
   NetWorthEntryInput,
   NetWorthValueObject,
   NetWorthEntry,
@@ -33,8 +33,8 @@ const entryRowHasFXValue = (row: JoinedEntryRow): row is JoinedEntryRowWithFXVal
 const entryRowHasOptionValue = (row: JoinedEntryRow): row is JoinedEntryRowWithOptionValue =>
   row.op_units !== null;
 
-const entryRowHasMortgageValue = (row: JoinedEntryRow): row is JoinedEntryRowWithMortgageValue =>
-  row.mortgage_payments_remaining !== null;
+const entryRowHasLoanValue = (row: JoinedEntryRow): row is JoinedEntryRowWithLoanValue =>
+  row.loan_payments_remaining !== null && row.loan_rate !== null;
 
 function sumFXValues(row: JoinedEntryRow): number {
   if (!entryRowHasFXValue(row)) {
@@ -66,7 +66,7 @@ function sumValueFromRow(row: JoinedEntryRow): number {
 }
 
 const getRowSimple = (row: JoinedEntryRow): number | null =>
-  entryRowHasMortgageValue(row) ? null : row.value_simple ?? null;
+  entryRowHasLoanValue(row) ? null : row.value_simple ?? null;
 
 const getRowFX = (row: JoinedEntryRowWithFXValue): FxValue[] =>
   row.fx_values.map<FxValue>((value, index) => ({
@@ -81,10 +81,10 @@ const getRowOption = (row: JoinedEntryRowWithOptionValue): OptionValue => ({
   marketPrice: row.op_market_price,
 });
 
-const getRowMortgage = (row: JoinedEntryRowWithMortgageValue): MortgageValue => ({
+const getRowLoan = (row: JoinedEntryRowWithLoanValue): LoanValue => ({
   principal: -row.value_simple,
-  rate: row.mortgage_rate,
-  paymentsRemaining: row.mortgage_payments_remaining,
+  rate: row.loan_rate,
+  paymentsRemaining: row.loan_payments_remaining,
 });
 
 export function combineJoinedEntryRows(entryRows: readonly JoinedEntryRow[]): NetWorthEntry {
@@ -113,7 +113,7 @@ export function combineJoinedEntryRows(entryRows: readonly JoinedEntryRow[]): Ne
       simple: getRowSimple(row),
       fx: entryRowHasFXValue(row) ? getRowFX(row) : null,
       option: entryRowHasOptionValue(row) ? getRowOption(row) : null,
-      mortgage: entryRowHasMortgageValue(row) ? getRowMortgage(row) : null,
+      loan: entryRowHasLoanValue(row) ? getRowLoan(row) : null,
     };
 
     return [...last, valueObject];

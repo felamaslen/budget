@@ -649,6 +649,7 @@ export type NetWorthSubcategory = {
   categoryId: Scalars['Int'];
   subcategory: Scalars['String'];
   hasCreditLimit?: Maybe<Scalars['Boolean']>;
+  appreciationRate?: Maybe<Scalars['Float']>;
   isSAYE?: Maybe<Scalars['Boolean']>;
   opacity?: Maybe<Scalars['Float']>;
 };
@@ -657,6 +658,7 @@ export type NetWorthSubcategoryInput = {
   categoryId: Scalars['Int'];
   subcategory: Scalars['String'];
   hasCreditLimit?: Maybe<Scalars['Boolean']>;
+  appreciationRate?: Maybe<Scalars['Float']>;
   isSAYE?: Maybe<Scalars['Boolean']>;
   opacity?: Maybe<Scalars['Float']>;
 };
@@ -689,13 +691,13 @@ export type OptionValueInput = {
   vested?: Maybe<Scalars['NonNegativeInt']>;
 };
 
-export type MortgageValue = {
+export type LoanValue = {
   principal: Scalars['NonNegativeInt'];
   paymentsRemaining: Scalars['NonNegativeInt'];
   rate: Scalars['Float'];
 };
 
-export type MortgageValueInput = {
+export type LoanValueInput = {
   principal: Scalars['NonNegativeInt'];
   paymentsRemaining: Scalars['NonNegativeInt'];
   rate: Scalars['Float'];
@@ -708,7 +710,7 @@ export type NetWorthValueObject = {
   simple?: Maybe<Scalars['Int']>;
   fx?: Maybe<Array<FxValue>>;
   option?: Maybe<OptionValue>;
-  mortgage?: Maybe<MortgageValue>;
+  loan?: Maybe<LoanValue>;
 };
 
 export type NetWorthValueInput = {
@@ -717,7 +719,7 @@ export type NetWorthValueInput = {
   simple?: Maybe<Scalars['Int']>;
   fx?: Maybe<Array<FxValueInput>>;
   option?: Maybe<OptionValueInput>;
-  mortgage?: Maybe<MortgageValueInput>;
+  loan?: Maybe<LoanValueInput>;
 };
 
 export type CreditLimit = {
@@ -840,7 +842,7 @@ export type OverviewOld = {
   pension: Array<Scalars['Int']>;
   cashOther: Array<Scalars['Int']>;
   investments: Array<Scalars['Int']>;
-  homeEquity: Array<Scalars['Int']>;
+  illiquidEquity: Array<Scalars['Int']>;
   options: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   spending: Array<Scalars['Int']>;
@@ -1056,8 +1058,8 @@ export type ResolversTypes = {
   FXValueInput: FxValueInput;
   OptionValue: ResolverTypeWrapper<OptionValue>;
   OptionValueInput: OptionValueInput;
-  MortgageValue: ResolverTypeWrapper<MortgageValue>;
-  MortgageValueInput: MortgageValueInput;
+  LoanValue: ResolverTypeWrapper<LoanValue>;
+  LoanValueInput: LoanValueInput;
   NetWorthValueObject: ResolverTypeWrapper<NetWorthValueObject>;
   NetWorthValueInput: NetWorthValueInput;
   CreditLimit: ResolverTypeWrapper<CreditLimit>;
@@ -1156,8 +1158,8 @@ export type ResolversParentTypes = {
   FXValueInput: FxValueInput;
   OptionValue: OptionValue;
   OptionValueInput: OptionValueInput;
-  MortgageValue: MortgageValue;
-  MortgageValueInput: MortgageValueInput;
+  LoanValue: LoanValue;
+  LoanValueInput: LoanValueInput;
   NetWorthValueObject: NetWorthValueObject;
   NetWorthValueInput: NetWorthValueInput;
   CreditLimit: CreditLimit;
@@ -1548,6 +1550,7 @@ export type NetWorthSubcategoryResolvers<ContextType = Context, ParentType exten
   categoryId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   subcategory?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   hasCreditLimit?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  appreciationRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   isSAYE?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   opacity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1572,7 +1575,7 @@ export type OptionValueResolvers<ContextType = Context, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type MortgageValueResolvers<ContextType = Context, ParentType extends ResolversParentTypes['MortgageValue'] = ResolversParentTypes['MortgageValue']> = {
+export type LoanValueResolvers<ContextType = Context, ParentType extends ResolversParentTypes['LoanValue'] = ResolversParentTypes['LoanValue']> = {
   principal?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   paymentsRemaining?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   rate?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
@@ -1586,7 +1589,7 @@ export type NetWorthValueObjectResolvers<ContextType = Context, ParentType exten
   simple?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   fx?: Resolver<Maybe<Array<ResolversTypes['FXValue']>>, ParentType, ContextType>;
   option?: Resolver<Maybe<ResolversTypes['OptionValue']>, ParentType, ContextType>;
-  mortgage?: Resolver<Maybe<ResolversTypes['MortgageValue']>, ParentType, ContextType>;
+  loan?: Resolver<Maybe<ResolversTypes['LoanValue']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1696,7 +1699,7 @@ export type OverviewOldResolvers<ContextType = Context, ParentType extends Resol
   pension?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   cashOther?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   investments?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
-  homeEquity?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  illiquidEquity?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   options?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   income?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   spending?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1800,7 +1803,7 @@ export type Resolvers<ContextType = Context> = {
   SimpleValue?: SimpleValueResolvers<ContextType>;
   FXValue?: FxValueResolvers<ContextType>;
   OptionValue?: OptionValueResolvers<ContextType>;
-  MortgageValue?: MortgageValueResolvers<ContextType>;
+  LoanValue?: LoanValueResolvers<ContextType>;
   NetWorthValueObject?: NetWorthValueObjectResolvers<ContextType>;
   CreditLimit?: CreditLimitResolvers<ContextType>;
   Currency?: CurrencyResolvers<ContextType>;

@@ -14,7 +14,7 @@ import {
   deleteOldCurrencies,
   deleteChangedFXValues,
   deleteChangedOptionValues,
-  deleteChangedMortgageValues,
+  deleteChangedLoanValues,
 } from '~api/queries';
 import { MutationUpdateNetWorthEntryArgs, CrudResponseUpdate } from '~api/types';
 
@@ -54,7 +54,7 @@ export async function updateNetWorthEntry(
     deleteOldCurrencies(db, uid, netWorthId, deletedCurrencies),
     deleteChangedFXValues(db, uid, netWorthId, changedValues),
     deleteChangedOptionValues(db, uid, netWorthId, allSubcategories),
-    deleteChangedMortgageValues(db, uid, netWorthId, allSubcategories),
+    deleteChangedLoanValues(db, uid, netWorthId, allSubcategories),
   ]);
 
   await Promise.all([

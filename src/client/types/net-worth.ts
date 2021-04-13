@@ -34,11 +34,11 @@ export type NetWorthValueObjectRead = NetWorthEntryRead['values'][0];
 
 export type NetWorthValueObjectNative = Omit<
   GQL<NonNullable<NetWorthValueObjectRead>>,
-  'fx' | 'option' | 'mortgage'
+  'fx' | 'option' | 'loan'
 > & {
   fx?: GQL<NonNullable<NetWorthValueObjectRead['fx']>[0]>[] | null;
   option?: GQL<NonNullable<NetWorthValueObjectRead['option']>> | null;
-  mortgage?: GQL<NonNullable<NetWorthValueObjectRead['mortgage']>> | null;
+  loan?: GQL<NonNullable<NetWorthValueObjectRead['loan']>> | null;
 };
 
 export type NetWorthEntryNative = Pick<NativeDate<NetWorthEntryRead, 'date'>, 'id' | 'date'> & {

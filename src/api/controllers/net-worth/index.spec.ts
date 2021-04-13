@@ -49,8 +49,8 @@ describe('Net worth controller', () => {
           op_strike_price: null,
           op_market_price: null,
           op_vested: null,
-          mortgage_payments_remaining: null,
-          mortgage_rate: null,
+          loan_payments_remaining: null,
+          loan_rate: null,
         },
       ]);
 
@@ -72,7 +72,7 @@ describe('Net worth controller', () => {
               simple: 722934,
               fx: null,
               option: null,
-              mortgage: null,
+              loan: null,
               skip: null,
             },
           ],
@@ -123,8 +123,8 @@ describe('Net worth controller', () => {
             op_strike_price: null,
             op_market_price: null,
             op_vested: null,
-            mortgage_payments_remaining: null,
-            mortgage_rate: null,
+            loan_payments_remaining: null,
+            loan_rate: null,
           },
         ])
         .mockResolvedValueOnce([
@@ -147,8 +147,8 @@ describe('Net worth controller', () => {
             op_strike_price: null,
             op_market_price: null,
             op_vested: null,
-            mortgage_payments_remaining: null,
-            mortgage_rate: null,
+            loan_payments_remaining: null,
+            loan_rate: null,
           },
         ]);
 
@@ -174,7 +174,7 @@ describe('Net worth controller', () => {
                 { value: 56, currency: 'USD' },
               ],
               option: null,
-              mortgage: null,
+              loan: null,
               skip: null,
             },
           ],

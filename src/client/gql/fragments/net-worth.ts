@@ -14,6 +14,7 @@ export const NetWorthSubcategoryParts = gql`
     categoryId
     subcategory
     hasCreditLimit
+    appreciationRate
     isSAYE
     opacity
   }
@@ -36,7 +37,7 @@ export const NetWorthEntryParts = gql`
         marketPrice
         vested
       }
-      mortgage {
+      loan {
         principal
         paymentsRemaining
         rate

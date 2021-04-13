@@ -225,7 +225,7 @@ async function seedNetWorth(trx: Knex.Transaction, uid: number): Promise<void> {
   const netWorthValueIds = await trx('net_worth_values').insert(rowsNetWorthValues).returning('id');
 
   await Promise.all(
-    ['net_worth_fx_values', 'net_worth_mortgage_values', 'net_worth_option_values'].map(
+    ['net_worth_fx_values', 'net_worth_loan_values', 'net_worth_option_values'].map(
       async (childTable) => {
         const rowsRaw = await readTableFromCsv<CSVRowValueDependent>(childTable);
         return trx(childTable).insert(

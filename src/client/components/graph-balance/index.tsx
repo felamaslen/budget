@@ -26,27 +26,27 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
   const dataPension = getValuesWithTime(graph.dates, graph.values.pension);
   const dataOptions = getValuesWithTime(graph.dates, graph.values.options);
 
-  const dataHomeEquity = getValuesWithTime(graph.dates, graph.values.homeEquity);
+  const dataIlliquidEquity = getValuesWithTime(graph.dates, graph.values.illiquidEquity);
   const dataStocks = getValuesWithTime(graph.dates, graph.values.stocks);
   const dataStockCostBasis = getValuesWithTime(graph.dates, graph.values.stockCostBasis);
   const dataLockedCash = getValuesWithTime(graph.dates, graph.values.cashOther);
 
   const linesCommon: Line[] = [
     {
-      key: 'home-equity',
-      name: 'Home equity',
-      data: dataHomeEquity,
+      key: 'illiquid-equity',
+      name: 'Illiquid equity',
+      data: dataIlliquidEquity,
       sliceAtFirstPositive: 2,
       fill: true,
       smooth: true,
-      color: rgba(colors.netWorth.homeEquity, 0.5),
+      color: rgba(colors.netWorth.illiquidEquity, 0.5),
       strokeWidth: 2,
     },
     {
       key: 'stocks',
       name: 'Stocks',
       data: dataStocks,
-      stack: [dataHomeEquity],
+      stack: [dataIlliquidEquity],
       sliceAtFirstPositive: 1,
       fill: true,
       smooth: true,
@@ -56,7 +56,7 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       key: 'stock-cost-basis',
       name: 'Stock cost basis',
       data: dataStockCostBasis,
-      stack: [dataHomeEquity],
+      stack: [dataIlliquidEquity],
       sliceAtFirstPositive: 1,
       fill: false,
       strokeWidth: 1,
@@ -68,7 +68,7 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       key: 'locked-cash',
       name: 'Locked cash',
       data: dataLockedCash,
-      stack: [dataHomeEquity, dataStocks],
+      stack: [dataIlliquidEquity, dataStocks],
       sliceAtFirstPositive: 1,
       fill: true,
       smooth: true,

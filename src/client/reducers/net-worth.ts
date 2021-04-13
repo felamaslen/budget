@@ -80,7 +80,7 @@ const omitComplexValueTypeNames = (value: NetWorthValueObjectRead): NetWorthValu
   ...value,
   fx: value.fx?.map(omitTypeName) ?? null,
   option: value.option ? omitTypeName(value.option) : null,
-  mortgage: value.mortgage ? omitTypeName(value.mortgage) : null,
+  loan: value.loan ? omitTypeName(value.loan) : null,
 });
 
 const mapEntry = (entry: NetWorthEntryRead): Entry => ({

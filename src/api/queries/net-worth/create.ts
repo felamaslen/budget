@@ -1,6 +1,6 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
-import { Item, ValueRow, FXValueRow, OptionValueRow, MortgageValueRow } from '~api/types';
+import { Item, ValueRow, FXValueRow, OptionValueRow, LoanValueRow } from '~api/types';
 
 export async function insertEntry(
   db: DatabaseTransactionConnectionType,
@@ -61,16 +61,16 @@ export async function insertOptionValues(
   `);
 }
 
-export async function insertMortgageValues(
+export async function insertLoanValues(
   db: DatabaseTransactionConnectionType,
-  mortgageValuesRows: MortgageValueRow[],
+  loanValuesRows: LoanValueRow[],
 ): Promise<void> {
-  if (!mortgageValuesRows.length) {
+  if (!loanValuesRows.length) {
     return;
   }
   await db.query(sql`
-    INSERT INTO net_worth_mortgage_values (values_id, payments_remaining, rate)
-    SELECT * FROM ${sql.unnest(mortgageValuesRows, ['int4', 'int4', 'float4'])}
+    INSERT INTO net_worth_loan_values (values_id, payments_remaining, rate)
+    SELECT * FROM ${sql.unnest(loanValuesRows, ['int4', 'int4', 'float4'])}
   `);
 }
 

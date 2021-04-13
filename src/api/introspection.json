@@ -5085,6 +5085,18 @@
             "deprecationReason": null
           },
           {
+            "name": "appreciationRate",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "isSAYE",
             "description": null,
             "args": [],
@@ -5154,6 +5166,16 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "appreciationRate",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
               "ofType": null
             },
             "defaultValue": null
@@ -5432,7 +5454,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "MortgageValue",
+        "name": "LoanValue",
         "description": null,
         "fields": [
           {
@@ -5491,7 +5513,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "MortgageValueInput",
+        "name": "LoanValueInput",
         "description": null,
         "fields": null,
         "inputFields": [
@@ -5636,12 +5658,12 @@
             "deprecationReason": null
           },
           {
-            "name": "mortgage",
+            "name": "loan",
             "description": null,
             "args": [],
             "type": {
               "kind": "OBJECT",
-              "name": "MortgageValue",
+              "name": "LoanValue",
               "ofType": null
             },
             "isDeprecated": false,
@@ -5722,11 +5744,11 @@
             "defaultValue": null
           },
           {
-            "name": "mortgage",
+            "name": "loan",
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "MortgageValueInput",
+              "name": "LoanValueInput",
               "ofType": null
             },
             "defaultValue": null
@@ -7012,7 +7034,7 @@
             "deprecationReason": null
           },
           {
-            "name": "homeEquity",
+            "name": "illiquidEquity",
             "description": null,
             "args": [],
             "type": {

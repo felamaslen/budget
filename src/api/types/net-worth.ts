@@ -16,7 +16,7 @@ export type SubcategoryRow = Omit<
 export type ValueRow = [number, boolean | null, number, number | null];
 export type FXValueRow = [number, number, string];
 export type OptionValueRow = [number, number, number, number, number];
-export type MortgageValueRow = [number, number, number];
+export type LoanValueRow = [number, number, number];
 
 export type JoinedEntryRow = {
   id: number;
@@ -43,8 +43,8 @@ export type JoinedEntryRow = {
   op_market_price: number | null;
   op_vested: number | null;
 
-  mortgage_payments_remaining: number | null;
-  mortgage_rate: number | null;
+  loan_payments_remaining: number | null;
+  loan_rate: number | null;
 };
 
 export type JoinedEntryRowWithCurrencies = JoinedEntryRow & {
@@ -70,10 +70,10 @@ export type JoinedEntryRowWithOptionValue = JoinedEntryRow & {
   op_vested: number;
 };
 
-export type JoinedEntryRowWithMortgageValue = JoinedEntryRow & {
+export type JoinedEntryRowWithLoanValue = JoinedEntryRow & {
   value_simple: number;
-  mortgage_payments_remaining: number;
-  mortgage_rate: number;
+  loan_payments_remaining: number;
+  loan_rate: number;
 };
 
 export type OldNetWorthRow = {
@@ -82,7 +82,7 @@ export type OldNetWorthRow = {
   liabilities: number;
   pension: number;
   options: number;
-  home_equity: number;
+  illiquid_equity: number;
   locked_cash: number;
   investments: number;
 };

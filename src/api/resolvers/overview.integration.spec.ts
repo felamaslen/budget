@@ -141,7 +141,7 @@ describe('Overview resolver', () => {
           cashOther
           investments
           investmentPurchases
-          homeEquity
+          illiquidEquity
           options
           netWorth
           income
@@ -265,7 +265,7 @@ describe('Overview resolver', () => {
       /* Feb-16 */ 0,
     ];
 
-    const expectedHomeEquity = [
+    const expectedIlliquidEquity = [
       /* Sep-14 */ 0,
       /* Oct-14 */ 0,
       /* Nov-14 */ 0,
@@ -398,7 +398,7 @@ describe('Overview resolver', () => {
       ${'other cash'}                  | ${'cashOther'}           | ${expectedCashOther}
       ${'investments (stocks + cash)'} | ${'investments'}         | ${expectedInvestments}
       ${'investment purchases'}        | ${'investmentPurchases'} | ${expectedInvestmentPurchases}
-      ${'home equity'}                 | ${'homeEquity'}          | ${expectedHomeEquity}
+      ${'illiquid equity'}             | ${'illiquidEquity'}      | ${expectedIlliquidEquity}
       ${'options'}                     | ${'options'}             | ${expectedOptions}
       ${'net worth'}                   | ${'netWorth'}            | ${expectedNetWorth}
       ${'income'}                      | ${'income'}              | ${expectedIncome}

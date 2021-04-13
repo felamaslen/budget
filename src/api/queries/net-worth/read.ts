@@ -38,8 +38,8 @@ const joinEntryRows = (
       sql`nwopv.market_price as op_market_price`,
       sql`nwopv.vested as op_vested`,
 
-      sql`nwmv.payments_remaining as mortgage_payments_remaining`,
-      sql`nwmv.rate as mortgage_rate`,
+      sql`nwlv.payments_remaining as loan_payments_remaining`,
+      sql`nwlv.rate as loan_rate`,
     ],
     sql`, `,
   )}
@@ -98,7 +98,7 @@ const joinEntryRows = (
   LEFT JOIN net_worth_subcategories nws ON nws.id = nwv.subcategory
   LEFT JOIN net_worth_fx_values nwfxv on nwfxv.values_id = nwv.id
   LEFT JOIN net_worth_option_values nwopv on nwopv.values_id = nwv.id
-  LEFT JOIN net_worth_mortgage_values nwmv ON nwmv.values_id = nwv.id
+  LEFT JOIN net_worth_loan_values nwlv ON nwlv.values_id = nwv.id
 
   GROUP BY ${sql.join(
     [
@@ -118,8 +118,8 @@ const joinEntryRows = (
       sql`nwopv.strike_price`,
       sql`nwopv.market_price`,
       sql`nwopv.vested`,
-      sql`nwmv.payments_remaining`,
-      sql`nwmv.rate`,
+      sql`nwlv.payments_remaining`,
+      sql`nwlv.rate`,
     ],
     sql`, `,
   )}
@@ -180,6 +180,8 @@ export async function selectOldNetWorth(
               sql`nwv.value AS value_simple`,
               sql`nwcat.category`,
               sql`nwcat.type = 'asset' as is_asset`,
+              sql`nwsc.appreciation_rate is not null as is_illiquid_asset`,
+              sql`nwlv.rate is not null as is_loan_debt`,
               sql`nwsc.is_saye`,
               sql`nwfx.value AS value_fx`,
               sql`nwfx.currency AS value_fx_currency`,
@@ -196,6 +198,7 @@ export async function selectOldNetWorth(
           LEFT JOIN net_worth_categories nwcat ON nwcat.id = nwsc.category_id
           LEFT JOIN net_worth_fx_values nwfx ON nwfx.values_id = nwv.id
           LEFT JOIN net_worth_option_values nwop ON nwop.values_id = nwv.id
+          LEFT JOIN net_worth_loan_values nwlv ON nwlv.values_id = nwv.id
           LEFT JOIN net_worth_currencies nwc
             ON nwc.net_worth_id = nw.id
             AND nwc.currency = nwfx.currency
@@ -246,11 +249,11 @@ export async function selectOldNetWorth(
           GROUP BY v.id
         )`,
 
-        sql`values_home_equity AS (
+        sql`values_illiquid_equity AS (
           SELECT
             v.id
             ,SUM(
-              CASE WHEN v.category IN (${'Mortgage'}, ${'House'})
+              CASE WHEN v.is_illiquid_asset OR v.is_loan_debt
               THEN COALESCE(v.value_simple, 0)
               ELSE 0
               END
@@ -285,7 +288,7 @@ export async function selectOldNetWorth(
         sql`values_liabilities.value AS liabilities`,
         sql`values_pension.value AS pension`,
         sql`values_options.value AS options`,
-        sql`values_home_equity.value AS home_equity`,
+        sql`values_illiquid_equity.value AS illiquid_equity`,
         sql`values_locked_cash.value AS locked_cash`,
         sql`values_investments.value AS investments`,
       ],
@@ -296,7 +299,7 @@ export async function selectOldNetWorth(
     LEFT JOIN values_liabilities ON values_liabilities.id = v.id
     LEFT JOIN values_pension ON values_pension.id = v.id
     LEFT JOIN values_options ON values_options.id = v.id
-    LEFT JOIN values_home_equity ON values_home_equity.id = v.id
+    LEFT JOIN values_illiquid_equity ON values_illiquid_equity.id = v.id
     LEFT JOIN values_locked_cash ON values_locked_cash.id = v.id
     LEFT JOIN values_investments ON values_investments.id = v.id
     ORDER BY v.date DESC

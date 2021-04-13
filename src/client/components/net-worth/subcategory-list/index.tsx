@@ -3,22 +3,31 @@ import React, { useState, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { CrudList } from '~client/components/crud-list';
-import { FormFieldText, FormFieldRange, FormFieldTickbox } from '~client/components/form-field';
+import {
+  FormFieldText,
+  FormFieldRange,
+  FormFieldTickbox,
+  FormFieldNumber,
+} from '~client/components/form-field';
 import { OnCreate, OnUpdate, OnDelete } from '~client/hooks';
-import { Button, ButtonDelete } from '~client/styled/shared';
+import { Button, ButtonDelete, FlexColumn, InlineFlex } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
 import type { Create } from '~client/types';
-import type {
+import {
   NetWorthSubcategory as Subcategory,
   NetWorthSubcategoryInput,
   NetWorthCategory as Category,
   NetWorthSubcategory,
+  NetWorthCategoryType,
 } from '~client/types/gql';
 
 const getCreditLimitDisabled = (parent: Pick<Category, 'type'>): boolean =>
-  parent.type !== 'liability';
+  parent.type !== NetWorthCategoryType.Liability;
 
 const getSAYEDisabled = (parent: Pick<Category, 'isOption'>): boolean => !parent.isOption;
+
+const getIlliquidDisabled = (parent: Pick<Category, 'type' | 'isOption'>): boolean =>
+  parent.type !== NetWorthCategoryType.Asset || !!parent.isOption;
 
 type PropsForm = {
   buttonText: string;
@@ -36,6 +45,7 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
     categoryId,
     subcategory = 'Some bank account',
     hasCreditLimit = null,
+    appreciationRate = null,
     isSAYE = null,
     opacity,
   },
@@ -51,11 +61,22 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
   const isSAYEDisabled = getSAYEDisabled(parent);
   const initialIsSAYE = isSAYEDisabled ? null : !!isSAYE;
 
+  const illiquidDisabled = getIlliquidDisabled(parent);
+  const initialAppreciationRate = illiquidDisabled ? null : appreciationRate;
+
   const [tempHasCreditLimit, setTempHasCreditLimit] = useState<boolean | null>(
     initialHasCreditLimit,
   );
 
   const [tempIsSAYE, setTempIsSAYE] = useState<boolean | null>(initialIsSAYE);
+
+  const [tempAppreciationRate, setTempAppreciationRate] = useState<number | null>(
+    initialAppreciationRate,
+  );
+  const toggleIlliquid = useCallback(
+    (): void => setTempAppreciationRate((last) => (last === null ? 0 : null)),
+    [],
+  );
 
   const [tempOpacity, setTempOpacity] = useState<number>(opacity ?? defaultOpacity);
 
@@ -63,6 +84,7 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
     onDelete &&
     tempSubcategory === subcategory &&
     tempHasCreditLimit === initialHasCreditLimit &&
+    tempAppreciationRate === initialAppreciationRate &&
     tempIsSAYE === initialIsSAYE &&
     tempOpacity === opacity
   );
@@ -73,10 +95,19 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
         categoryId,
         subcategory: tempSubcategory,
         hasCreditLimit: tempHasCreditLimit,
+        appreciationRate: tempAppreciationRate,
         isSAYE: tempIsSAYE,
         opacity: tempOpacity,
       }),
-    [onChange, categoryId, tempSubcategory, tempHasCreditLimit, tempIsSAYE, tempOpacity],
+    [
+      onChange,
+      categoryId,
+      tempSubcategory,
+      tempHasCreditLimit,
+      tempAppreciationRate,
+      tempIsSAYE,
+      tempOpacity,
+    ],
   );
 
   return (
@@ -112,6 +143,29 @@ const NetWorthSubcategoryItemForm: React.FC<PropsForm> = ({
             onChange={setTempHasCreditLimit}
           />
         </Styled.CreditLimit>
+      )}
+      {!illiquidDisabled && (
+        <Styled.Illiquid>
+          <FormFieldTickbox
+            item="illiquid"
+            value={tempAppreciationRate !== null}
+            onChange={toggleIlliquid}
+          />
+          {tempAppreciationRate !== null && (
+            <FlexColumn>
+              <span>Appreciation:</span>
+              <InlineFlex>
+                <FormFieldNumber
+                  value={tempAppreciationRate}
+                  onChange={setTempAppreciationRate}
+                  min={-99.9}
+                  step={0.1}
+                />
+                %
+              </InlineFlex>
+            </FlexColumn>
+          )}
+        </Styled.Illiquid>
       )}
       {!isSAYEDisabled && (
         <Styled.IsSAYE>
@@ -194,6 +248,7 @@ export const NetWorthSubcategoryList: React.FC<Props> = ({
       <Styled.Name>{'Name'}</Styled.Name>
       <Styled.Opacity>Opacity</Styled.Opacity>
       {!getCreditLimitDisabled(parent) && <Styled.CreditLimit>Credit limit</Styled.CreditLimit>}
+      {!getIlliquidDisabled(parent) && <Styled.Illiquid>Illiquid</Styled.Illiquid>}
     </Styled.ListHead>
     <CrudList<NetWorthSubcategoryInput, NetWorthSubcategory, CrudProps>
       items={subcategories}

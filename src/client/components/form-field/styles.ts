@@ -574,4 +574,4 @@ export const NetWorthValueOption = styled.div`
   }
 `;
 
-export const NetWorthValueMortgage = NetWorthValueOption;
+export const NetWorthValueLoan = NetWorthValueOption;

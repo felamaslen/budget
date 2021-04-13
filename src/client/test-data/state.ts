@@ -146,6 +146,7 @@ export const testState: State = {
         categoryId: numericHash('real-house-category-id'),
         subcategory: 'My house',
         hasCreditLimit: null,
+        appreciationRate: 5,
         opacity: 0.15,
       },
       {
@@ -177,7 +178,7 @@ export const testState: State = {
         values: [
           {
             subcategory: numericHash('real-mortgage-subcategory-id'),
-            mortgage: {
+            loan: {
               principal: 19319500,
               paymentsRemaining: 12 * 25,
               rate: 2.82,
@@ -207,7 +208,7 @@ export const testState: State = {
           },
           {
             subcategory: numericHash('real-mortgage-subcategory-id'),
-            mortgage: {
+            loan: {
               principal: 18744200,
               paymentsRemaining: 12 * 25 - 1,
               rate: 2.74,
@@ -262,7 +263,7 @@ export const testState: State = {
           },
           {
             subcategory: numericHash('real-mortgage-subcategory-id'),
-            mortgage: {
+            loan: {
               principal: 18420900,
               paymentsRemaining: 12 * 25 - 2,
               rate: 2.79,

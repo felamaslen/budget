@@ -3,14 +3,13 @@ import numericHash from 'string-hash';
 
 import {
   getCategories,
-  getHomeEquity,
+  getIlliquidEquity,
   getLatestNetWorthAggregate,
   getNetWorthBreakdown,
   getNetWorthTable,
   getSubcategories,
 } from './net-worth';
 import * as breakdownBlocks from '~client/components/net-worth/breakdown.blocks';
-import { HOUSE_PRICE_INFLATION } from '~client/constants';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 import { NetWorthCategoryType } from '~client/types/enum';
@@ -271,17 +270,35 @@ describe('Overview selectors (net worth)', () => {
     });
   });
 
-  describe('getHomeEquity', () => {
+  describe('getIlliquidEquity', () => {
     const now = new Date('2018-05-02');
 
     const principal = 26755400;
     const paymentsRemaining = 250;
     const interestRate = 2.76; // percent
+    const appreciationRate = 5; // percent
 
-    const stateWithHomeEquity: State = {
+    const stateWithIlliquidEquity: State = {
       ...testState,
       netWorth: {
         ...testState.netWorth,
+        subcategories: [
+          {
+            id: numericHash('real-house-subcategory-id'),
+            categoryId: numericHash('real-house-category-id'),
+            subcategory: 'My house',
+            hasCreditLimit: null,
+            appreciationRate,
+            opacity: 0.15,
+          },
+          {
+            id: numericHash('real-mortgage-subcategory-id'),
+            categoryId: numericHash('real-mortgage-category-id'),
+            subcategory: 'My mortgage',
+            hasCreditLimit: false,
+            opacity: 0.1,
+          },
+        ],
         entries: [
           {
             id: numericHash('entry-id-a1'),
@@ -289,7 +306,7 @@ describe('Overview selectors (net worth)', () => {
             values: [
               {
                 subcategory: numericHash('real-mortgage-subcategory-id'),
-                mortgage: {
+                loan: {
                   principal,
                   paymentsRemaining,
                   rate: interestRate,
@@ -307,13 +324,13 @@ describe('Overview selectors (net worth)', () => {
       },
     };
 
-    it('should get the home equity values up to the present month', () => {
+    it('should get the illiquid equity values up to the present month', () => {
       expect.assertions(3);
 
       const expectedAprilValue = 34500000;
       const expectedAprilDebt = -26755400;
 
-      const presentEquity = getHomeEquity(now)(stateWithHomeEquity).slice(0, 4);
+      const presentEquity = getIlliquidEquity(now)(stateWithIlliquidEquity).slice(0, 4);
 
       expect(presentEquity).toHaveLength(4);
       expect(presentEquity).toStrictEqual([
@@ -345,7 +362,7 @@ describe('Overview selectors (net worth)', () => {
       `);
     });
 
-    it('should use the latest mortgage rate/terms/principal data to predict the future equity', () => {
+    it('should use the latest loan rate/terms/principal data to predict the future equity', () => {
       expect.assertions(8);
 
       const monthlyDebtPaid = 140386.57786325; // PMT(0.0276^(1/12), 250, 267554) - monthly payment
@@ -354,17 +371,17 @@ describe('Overview selectors (net worth)', () => {
       const principalJun = principalMay * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
       const principalJul = principalJun * (1 + interestRate / 100) ** (1 / 12) - monthlyDebtPaid;
 
-      const housePriceMay = 34500000 * (1 + HOUSE_PRICE_INFLATION) ** (1 / 12);
-      const housePriceJun = housePriceMay * (1 + HOUSE_PRICE_INFLATION) ** (1 / 12);
-      const housePriceJul = housePriceJun * (1 + HOUSE_PRICE_INFLATION) ** (1 / 12);
+      const assetValueMay = 34500000 * (1 + appreciationRate / 100) ** (1 / 12);
+      const assetValueJun = assetValueMay * (1 + appreciationRate / 100) ** (1 / 12);
+      const assetValueJul = assetValueJun * (1 + appreciationRate / 100) ** (1 / 12);
 
-      const forecastEquity = getHomeEquity(now)(stateWithHomeEquity).slice(4);
+      const forecastEquity = getIlliquidEquity(now)(stateWithIlliquidEquity).slice(4);
 
       expect(forecastEquity).toHaveLength(3);
 
-      expect(forecastEquity[0].value / 100).toBeCloseTo(housePriceMay / 100, 1);
-      expect(forecastEquity[1].value / 100).toBeCloseTo(housePriceJun / 100, 1);
-      expect(forecastEquity[2].value / 100).toBeCloseTo(housePriceJul / 100, 1);
+      expect(forecastEquity[0].value / 100).toBeCloseTo(assetValueMay / 100, 1);
+      expect(forecastEquity[1].value / 100).toBeCloseTo(assetValueJun / 100, 1);
+      expect(forecastEquity[2].value / 100).toBeCloseTo(assetValueJul / 100, 1);
 
       expect(forecastEquity[0].debt / 100).toBeCloseTo(-principalMay / 100, 1);
       expect(forecastEquity[1].debt / 100).toBeCloseTo(-principalJun / 100, 1);
@@ -378,11 +395,11 @@ describe('Overview selectors (net worth)', () => {
           },
           Object {
             "debt": -26595990.863798123,
-            "value": 34781687.18879059,
+            "value": 34781687.1887906,
           },
           Object {
             "debt": -26516014.630626306,
-            "value": 34923392.08780186,
+            "value": 34923392.087801866,
           },
         ]
       `);
