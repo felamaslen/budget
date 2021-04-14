@@ -10,7 +10,8 @@ import { useMoreItems } from './hooks';
 import * as Styled from './styles';
 import type { PropsMemoisedItem } from './types';
 import { getOlderExists } from '~client/selectors';
-import type { Item, PageListCost } from '~client/types';
+import type { Item } from '~client/types';
+import type { PageListStandard } from '~client/types/gql';
 
 type Props<I extends Item, P extends string, E extends Record<string, unknown>> = {
   page: P;
@@ -61,7 +62,7 @@ const makeRow = <I extends Item, E extends Record<string, unknown>>(
 
 export const InfiniteWindow = <
   I extends Item,
-  P extends PageListCost,
+  P extends PageListStandard,
   E extends Record<string, unknown>
 >({
   page,

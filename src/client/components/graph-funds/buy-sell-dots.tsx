@@ -1,17 +1,57 @@
-import React from 'react';
+import flatten from 'lodash/flatten';
+import groupBy from 'lodash/groupBy';
+import React, { Fragment } from 'react';
+import { replaceAtIndex } from 'replace-array';
 
 import { getFundLineName } from './name';
 
 import { Arrow } from '~client/components/arrow';
 import type { SiblingProps } from '~client/components/graph';
+import type { HLPoint } from '~client/components/graph/hooks';
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
-import type { FundLine } from '~client/types';
+import type { FundLine, FundOrder, Point } from '~client/types';
 
 export type Props = SiblingProps & {
   fundLines: FundLine[];
   startTime: number;
   mode: Mode;
+};
+
+type FundOrderWithLinePoint = FundOrder & { linePoint: Point };
+
+const combineFundOrdersByMatchedDate = (
+  orders: FundOrderWithLinePoint[],
+): FundOrderWithLinePoint[] =>
+  orders.reduce<FundOrderWithLinePoint[]>(
+    (last, order, index) =>
+      index > 0 && order.linePoint[0] === last[last.length - 1].linePoint[0]
+        ? replaceAtIndex(last, last.length - 1, (prev) => ({
+            ...prev,
+            size: prev.size + order.size,
+          }))
+        : [...last, order],
+    [],
+  );
+
+const groupFundOrdersByType = (orders: FundOrderWithLinePoint[]): FundOrderWithLinePoint[] => {
+  const buys = orders.filter((order) => !order.isSell && !order.isReinvestment);
+  const sells = orders.filter((order) => order.isSell);
+  const drips = orders.filter((order) => order.isReinvestment);
+
+  return flatten([buys, sells, drips].map(combineFundOrdersByMatchedDate));
+};
+
+const shouldShowOrders = (mode: Mode, hlPoint: HLPoint | undefined) => (
+  fundLine: FundLine,
+): boolean => {
+  if (!hlPoint) {
+    return false;
+  }
+  if (fundLine.id === GRAPH_FUNDS_OVERALL_ID) {
+    return true;
+  }
+  return mode === Mode.Value && getFundLineName(fundLine.id, fundLine.item) === hlPoint.group;
 };
 
 export const BuySellDots: React.FC<Props> = ({
@@ -23,58 +63,42 @@ export const BuySellDots: React.FC<Props> = ({
   startTime,
 }) => (
   <g>
-    {fundLines
-      .filter(
-        (fund) =>
-          (mode !== Mode.Value || fund.id === GRAPH_FUNDS_OVERALL_ID) &&
-          hlPoint &&
-          getFundLineName(fund.id, fund.item) === hlPoint.group,
-      )
-      .reduce<Pick<FundLine, 'id' | 'orders' | 'data'>[]>(
-        (last, next) =>
-          next.id === last[last.length - 1]?.id
-            ? [
-                ...last.slice(0, last.length - 1),
-                {
-                  ...last[last.length - 1],
-                  data: [...last[last.length - 1].data, ...next.data],
-                },
-              ]
-            : [
-                ...last,
-                {
-                  id: next.id,
-                  orders: next.orders,
-                  data: next.data,
-                },
-              ],
-        [],
-      )
+    {Object.entries(groupBy(fundLines.filter(shouldShowOrders(mode, hlPoint)), 'id'))
+      .map<Pick<FundLine, 'id' | 'orders' | 'data'>>(([, lineParts]) => ({
+        id: lineParts[0].id,
+        orders: lineParts[0].orders,
+        data: flatten(lineParts.map((part) => part.data)),
+      }))
       .map(({ id, orders, data }) => (
-        <g key={id}>
-          {orders
-            .filter((order) => !order.isReinvestment)
-            .map((order) => {
-              const linePoint = data.find(([x]) => x >= order.time - startTime);
-              if (!linePoint) {
-                return null;
-              }
-              return (
-                <Arrow
-                  key={order.time}
-                  startX={linePoint[0]}
-                  startY={linePoint[1]}
-                  length={10}
-                  angle={order.isSell ? -Math.PI / 2 : Math.PI / 2}
-                  color={order.isSell ? colors.loss.dark : colors.profit.dark}
-                  fill={true}
-                  arrowSize={-0.1}
-                  pixX={pixX}
-                  pixY={pixY1}
-                />
-              );
-            })}
-        </g>
+        <Fragment key={id}>
+          {groupFundOrdersByType(
+            orders
+              .filter(
+                (order) =>
+                  !order.isReinvestment &&
+                  // Require the visible scraped data to contain the transaction date
+                  data.some(([x]) => x < order.time - startTime) &&
+                  data.some(([x]) => x >= order.time - startTime),
+              )
+              .map<FundOrderWithLinePoint>((order) => {
+                const linePointIndex = data.findIndex(([x]) => x >= order.time - startTime);
+                return { ...order, linePoint: data[Math.max(0, linePointIndex - 1)] };
+              }),
+          ).map((order) => (
+            <Arrow
+              key={`${order.time}-${order.isSell ? 'sell' : 'buy'}`}
+              startX={order.linePoint[0]}
+              startY={order.linePoint[1]}
+              length={mode === Mode.ROI ? 10 : pixY1(0) - pixY1(order.size)}
+              angle={order.isSell ? -Math.PI / 2 : Math.PI / 2}
+              color={order.isSell ? colors.loss.dark : colors.profit.dark}
+              fill={true}
+              arrowSize={-0.1}
+              pixX={pixX}
+              pixY={pixY1}
+            />
+          ))}
+        </Fragment>
       ))}
   </g>
 );

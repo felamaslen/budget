@@ -17,7 +17,7 @@ import {
 } from '~client/actions';
 import reducer, { initialState, State } from '~client/reducers/overview';
 import { testResponse } from '~client/test-data';
-import type { PageListCost, StandardInput } from '~client/types';
+import type { StandardInput } from '~client/types';
 import { PageListStandard, ReceiptPage } from '~client/types/enum';
 import type { FundHistory } from '~client/types/gql';
 import { investmentPurchaseCategories } from '~shared/constants';
@@ -385,7 +385,7 @@ describe('Overview reducer', () => {
       const action = listOverviewUpdated(page, overviewCost);
       const result = reducer(initialState, action);
 
-      expect(result.monthly[page as PageListCost]).toStrictEqual(overviewCost);
+      expect(result.monthly[page as PageListStandard]).toStrictEqual(overviewCost);
     });
   });
 

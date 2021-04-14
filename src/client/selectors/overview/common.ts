@@ -17,7 +17,6 @@ import { withoutDeleted } from '~client/selectors/crud';
 import { getRawItems } from '~client/selectors/list';
 import type {
   ListItemStandardNative,
-  ListItemExtendedNative,
   NativeDate,
   OverviewGraphDate as GraphDate,
   CashTotalNative,
@@ -104,10 +103,10 @@ export const getCostSinceCashTotals = moize(
       getCashTotal,
       getRawItems<ListItemStandardNative, PageListStandard.Income>(PageListStandard.Income),
       getRawItems<ListItemStandardNative, PageListStandard.Bills>(PageListStandard.Bills),
-      getRawItems<ListItemExtendedNative, PageListStandard.Food>(PageListStandard.Food),
-      getRawItems<ListItemExtendedNative, PageListStandard.General>(PageListStandard.General),
-      getRawItems<ListItemExtendedNative, PageListStandard.Holiday>(PageListStandard.Holiday),
-      getRawItems<ListItemExtendedNative, PageListStandard.Social>(PageListStandard.Social),
+      getRawItems<ListItemStandardNative, PageListStandard.Food>(PageListStandard.Food),
+      getRawItems<ListItemStandardNative, PageListStandard.General>(PageListStandard.General),
+      getRawItems<ListItemStandardNative, PageListStandard.Holiday>(PageListStandard.Holiday),
+      getRawItems<ListItemStandardNative, PageListStandard.Social>(PageListStandard.Social),
       ({ date: cashTotalDate }, income, ...args) =>
         cashTotalDate
           ? args.reduce(

@@ -7,7 +7,7 @@ import { useSuggestions, Result as Suggestions } from '../suggestions';
 import type { Fields, FieldKey, PropsItemCreate } from '../types';
 import { useCTA } from '~client/hooks';
 import { Button } from '~client/styled/shared';
-import type { PageList } from '~client/types';
+import type { Create, PageList } from '~client/types';
 import type { ListItemInput } from '~client/types/gql';
 
 function deltaIsComplete<I extends ListItemInput>(delta: Partial<I> | I): delta is I {
@@ -35,8 +35,8 @@ const Suggestion: React.FC<{
 };
 
 type FieldProps<I extends ListItemInput, E extends Record<string, unknown>> = {
-  fields: Fields<I, E>;
-  field: FieldKey<I>;
+  fields: Fields<Create<I>, E>;
+  field: FieldKey<Create<I>>;
   delta: Partial<I>;
   setDelta: React.Dispatch<React.SetStateAction<Partial<I>>>;
   active: boolean;
@@ -102,7 +102,7 @@ const CreateField = <I extends ListItemInput, E extends Record<string, unknown>>
 export const AccessibleListCreateItem = <
   I extends ListItemInput,
   P extends PageList,
-  E extends Record<string, unknown> = never
+  E extends Record<string, unknown> = Record<string, unknown>
 >({
   page,
   fields,
@@ -123,7 +123,7 @@ export const AccessibleListCreateItem = <
   );
   const [delta, setDelta] = useState<Partial<I>>(initialDelta);
 
-  const fieldKeys = Object.keys(fields) as FieldKey<I>[];
+  const fieldKeys = Object.keys(fields) as FieldKey<Create<I>>[];
   const {
     activeField,
     setActiveField,
@@ -177,7 +177,7 @@ export const AccessibleListCreateItem = <
 
   return (
     <Styled.CreateRow data-testid="create-form" as="div">
-      {fieldKeys.map((field: FieldKey<I>) => (
+      {fieldKeys.map((field) => (
         <CreateField
           key={String(field)}
           fields={fields}

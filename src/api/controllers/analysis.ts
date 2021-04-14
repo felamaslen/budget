@@ -15,7 +15,6 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getPeriodCostForCategory, getPeriodCostDeep } from '~api/queries';
 import {
-  isExtendedPage,
   AnalysisPage,
   AnalysisPeriod,
   AnalysisGroupBy,
@@ -77,22 +76,14 @@ export function getCategoryColumn(
   category: AnalysisPage,
   groupBy?: AnalysisGroupBy,
 ): AnalysisGroupColumn | null {
-  if ([AnalysisPage.Income, AnalysisPage.Bills].includes(category)) {
-    return 'item';
-  }
-  if (groupBy === AnalysisGroupBy.Category) {
-    if (isExtendedPage(category)) {
+  switch (groupBy) {
+    case AnalysisGroupBy.Category:
       return 'category';
-    }
-
-    return 'item';
+    case 'shop':
+      return 'shop';
+    default:
+      return null;
   }
-
-  if (groupBy === 'shop') {
-    return 'shop';
-  }
-
-  return null;
 }
 
 export async function getAnalysisData(

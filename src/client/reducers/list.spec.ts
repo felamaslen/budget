@@ -14,9 +14,9 @@ import {
   receiptCreated,
 } from '~client/actions';
 import { testResponse } from '~client/test-data';
-import type { Id, RawDate, StandardInput, WithIds } from '~client/types';
-import { PageListExtended, PageListStandard, ReceiptPage, RequestType } from '~client/types/enum';
-import type { InitialQuery, ListReadResponse } from '~client/types/gql';
+import type { Id, NativeDate, StandardInput, WithIds } from '~client/types';
+import { PageListStandard, ReceiptPage, RequestType } from '~client/types/enum';
+import type { InitialQuery, ListItemStandardInput, ListReadResponse } from '~client/types/gql';
 
 describe('List reducer', () => {
   type ExtraState = {
@@ -40,7 +40,7 @@ describe('List reducer', () => {
     baz: 'initial baz',
   };
 
-  const initialStateDaily: DailyState<Item> = {
+  const initialStateDaily: DailyState = {
     items: [],
     __optimistic: [],
     total: 0,
@@ -54,13 +54,9 @@ describe('List reducer', () => {
     initialState,
   );
 
-  const pageDaily = PageListExtended.Food;
+  const pageDaily = PageListStandard.Food;
 
-  const dailyReducer = makeDailyListReducer<
-    RawDate<Item, 'date'>,
-    typeof pageDaily,
-    Omit<State, 'baz'>
-  >(pageDaily);
+  const dailyReducer = makeDailyListReducer<typeof pageDaily, Omit<State, 'baz'>>(pageDaily);
 
   const testDate = new Date('2020-04-20');
 
@@ -86,13 +82,17 @@ describe('List reducer', () => {
           id: numericHash('some-id'),
           date: '2020-04-20',
           item: 'yes',
+          category: 'category one',
           cost: 123,
+          shop: 'shop one',
         },
         {
           id: numericHash('other-id'),
           date: '2020-04-21',
           item: 'no',
+          category: 'category two',
           cost: 456,
+          shop: 'shop two',
         },
       ],
     };
@@ -171,7 +171,9 @@ describe('List reducer', () => {
       {
         date: new Date('2019-07-10'),
         item: 'some item',
+        category: 'category one',
         cost: 3,
+        shop: 'shop one',
       },
       false,
       numericHash('some-fake-id'),
@@ -182,7 +184,9 @@ describe('List reducer', () => {
       {
         date: new Date('2019-07-10'),
         item: 'some item',
+        category: 'category one',
         cost: 3,
+        shop: 'shop one',
       },
       true,
       numericHash('some-real-id'),
@@ -202,6 +206,8 @@ describe('List reducer', () => {
                 date: new Date('2019-07-10'),
                 item: 'some item',
                 cost: 3,
+                category: 'category one',
+                shop: 'shop one',
               },
             ],
             __optimistic: [RequestType.create],
@@ -224,6 +230,8 @@ describe('List reducer', () => {
                   date: new Date('2019-07-10'),
                   item: 'some item',
                   cost: 3,
+                  category: 'category one',
+                  shop: 'shop one',
                 },
               ],
               __optimistic: [undefined],
@@ -248,6 +256,8 @@ describe('List reducer', () => {
                   date: new Date('2019-07-10'),
                   item: 'some item',
                   cost: 3,
+                  category: 'category one',
+                  shop: 'shop one',
                 },
               ],
               __optimistic: [undefined],
@@ -274,6 +284,8 @@ describe('List reducer', () => {
                 date: new Date('2020-04-20'),
                 item: 'some item',
                 cost: 1023,
+                category: 'category one',
+                shop: 'shop one',
               },
               false,
             ),
@@ -294,6 +306,8 @@ describe('List reducer', () => {
           date: new Date('2019-07-12'),
           item: 'some item',
           cost: 34,
+          category: 'category one',
+          shop: 'shop one',
         },
         false,
         numericHash('some-fake-id'),
@@ -319,6 +333,8 @@ describe('List reducer', () => {
             date: new Date('2019-07-12'),
             item: 'some item',
             cost: 34,
+            category: 'category one',
+            shop: 'shop one',
           },
           true,
           numericHash('some-real-id'),
@@ -362,6 +378,8 @@ describe('List reducer', () => {
         date: new Date('2020-04-20'),
         item: 'some item',
         cost: 20,
+        category: 'category one',
+        shop: 'shop one',
       },
       false,
     );
@@ -375,6 +393,8 @@ describe('List reducer', () => {
         date: new Date('2020-04-20'),
         item: 'some item',
         cost: 20,
+        category: 'category one',
+        shop: 'shop one',
       },
       true,
     );
@@ -421,6 +441,8 @@ describe('List reducer', () => {
             date: new Date('2020-04-20'),
             item: 'some item',
             cost: 20,
+            category: 'category one',
+            shop: 'shop one',
           },
           false,
         );
@@ -542,6 +564,8 @@ describe('List reducer', () => {
                 date: new Date('2020-04-21'),
                 item: 'new item',
                 cost: 2934,
+                category: 'category one',
+                shop: 'shop one',
               },
               false,
             ),
@@ -551,8 +575,9 @@ describe('List reducer', () => {
     });
 
     describe('for daily lists', () => {
-      const stateDaily = {
+      const stateDaily: DailyState<ExtraState> = {
         ...state,
+        items: [{ ...state.items[0], category: 'category one', shop: 'shop one' }],
         total: 5,
         weekly: 2,
         offset: 0,
@@ -571,6 +596,8 @@ describe('List reducer', () => {
           date: new Date('2020-04-20'),
           item: 'some item',
           cost: 5,
+          category: 'category one',
+          shop: 'shop one',
         },
         false,
       );
@@ -595,6 +622,8 @@ describe('List reducer', () => {
             date: new Date('2020-04-20'),
             item: 'some item',
             cost: 5,
+            category: 'category one',
+            shop: 'shop one',
           },
           false,
         );
@@ -620,10 +649,12 @@ describe('List reducer', () => {
       __optimistic: [undefined],
     };
 
-    const deletedItem = {
+    const deletedItem: NativeDate<ListItemStandardInput, 'date'> = {
       date: new Date('2020-04-20'),
       item: 'some item',
       cost: 3,
+      category: 'category one',
+      shop: 'shop one',
     };
 
     const actionFromLocal = listItemDeleted<StandardInput, typeof page>(
@@ -775,6 +806,8 @@ describe('List reducer', () => {
                 date: new Date('2020-04-20'),
                 item: 'some item',
                 cost: 3,
+                category: 'category one',
+                shop: 'shop one',
               },
               false,
             ),
@@ -784,8 +817,9 @@ describe('List reducer', () => {
     });
 
     describe('for daily lists', () => {
-      const stateDaily = {
+      const stateDaily: DailyState = {
         ...state,
+        items: [{ ...state.items[0], category: 'category one', shop: 'shop one' }],
         total: 51,
         weekly: 17,
         offset: 0,
@@ -833,6 +867,8 @@ describe('List reducer', () => {
           date: '2020-04-20',
           item: 'some item',
           cost: 123,
+          category: 'category one',
+          shop: 'shop one',
         },
       ],
       olderExists: true,
@@ -845,7 +881,7 @@ describe('List reducer', () => {
     it('should append the data to state', () => {
       expect.assertions(1);
 
-      const statePre = {
+      const statePre: DailyState = {
         ...initialStateDaily,
         items: [
           {
@@ -853,6 +889,8 @@ describe('List reducer', () => {
             date: new Date('2020-04-23'),
             item: 'existing item',
             cost: 156,
+            category: 'category one',
+            shop: 'shop one',
           },
         ],
         __optimistic: [RequestType.create],
@@ -868,12 +906,16 @@ describe('List reducer', () => {
               date: new Date('2020-04-23'),
               item: 'existing item',
               cost: 156,
+              category: 'category one',
+              shop: 'shop one',
             },
             {
               id: numericHash('id-1'),
               date: new Date('2020-04-20'),
               item: 'some item',
               cost: 123,
+              category: 'category one',
+              shop: 'shop one',
             },
           ],
           __optimistic: [RequestType.create, undefined],
@@ -946,7 +988,7 @@ describe('List reducer', () => {
     });
 
     describe('if one or more of the items already exists in the state', () => {
-      const statePre = {
+      const statePre: DailyState = {
         ...initialStateDaily,
         items: [
           {
@@ -954,18 +996,24 @@ describe('List reducer', () => {
             date: new Date('2020-04-20'),
             item: 'item 0',
             cost: 1,
+            category: 'category one',
+            shop: 'shop one',
           },
           {
             id: numericHash('id-1'),
             date: new Date('2020-04-21'),
             item: 'item 1',
             cost: 2,
+            category: 'category one',
+            shop: 'shop one',
           },
           {
             id: numericHash('id-2'),
             date: new Date('2020-04-22'),
             item: 'item 2',
             cost: 3,
+            category: 'category one',
+            shop: 'shop one',
           },
         ],
         __optimistic: [RequestType.update, undefined, undefined],
@@ -978,18 +1026,24 @@ describe('List reducer', () => {
             date: '2020-04-28',
             item: 'item 1 from API',
             cost: 24,
+            category: 'category one',
+            shop: 'shop one',
           },
           {
             id: numericHash('id-2'),
             date: '2020-04-22',
             item: 'item 2 from API',
             cost: 25,
+            category: 'category one',
+            shop: 'shop one',
           },
           {
             id: numericHash('id-3'),
             date: '2020-04-23',
             item: 'item 3 from API',
             cost: 26,
+            category: 'category one',
+            shop: 'shop one',
           },
         ],
       });

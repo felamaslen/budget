@@ -11,7 +11,7 @@ import { InfiniteWindow } from './window';
 import { ModalDialog } from '~client/components/modal-dialog';
 import { isStandardListPage } from '~client/constants/data';
 import { useIsMobile } from '~client/hooks';
-import type { PageList } from '~client/types';
+import type { Create, PageList } from '~client/types';
 import type { ListItemInput } from '~client/types/gql';
 
 const emptyObject = {};
@@ -53,7 +53,7 @@ export const AccessibleList = <
 
   const ListContext = createListContext<E>();
 
-  const fieldKeys = useMemo(() => Object.keys(fields) as FieldKey<I>[], [fields]);
+  const fieldKeys = useMemo(() => Object.keys(fields) as FieldKey<Create<I>>[], [fields]);
   const fieldKeysMobile = useMemo(() => Object.keys(fieldsMobile ?? {}) as MK[], [fieldsMobile]);
 
   const editModal = useMobileEditModal(itemsSorted, onUpdate, onDelete);

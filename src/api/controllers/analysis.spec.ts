@@ -67,8 +67,8 @@ describe('Analysis controller', () => {
     it('should return a group as expected', () => {
       expect.assertions(6);
 
-      expect(getCategoryColumn(AnalysisPage.Income)).toBe('item');
-      expect(getCategoryColumn(AnalysisPage.Bills)).toBe('item');
+      expect(getCategoryColumn(AnalysisPage.Income, AnalysisGroupBy.Category)).toBe('category');
+      expect(getCategoryColumn(AnalysisPage.Bills, AnalysisGroupBy.Category)).toBe('category');
       expect(getCategoryColumn(AnalysisPage.Food, AnalysisGroupBy.Category)).toBe('category');
       expect(getCategoryColumn(AnalysisPage.General, AnalysisGroupBy.Category)).toBe('category');
       expect(getCategoryColumn(AnalysisPage.Social, AnalysisGroupBy.Category)).toBe('category');

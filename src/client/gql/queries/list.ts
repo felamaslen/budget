@@ -8,20 +8,6 @@ export const MoreListDataStandard = gql`
         date
         item
         cost
-      }
-      olderExists
-    }
-  }
-`;
-
-export const MoreListDataExtended = gql`
-  query MoreListDataExtended($page: PageListExtended!, $offset: Int!, $limit: Int!) {
-    readListExtended(page: $page, offset: $offset, limit: $limit) {
-      items {
-        id
-        date
-        item
-        cost
         category
         shop
       }

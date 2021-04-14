@@ -9,7 +9,6 @@ import {
   MutationCreateReceiptArgs,
   MutationDeleteListItemArgs,
   MutationUpdateListItemArgs,
-  PageListExtended,
   PageListStandard,
   ReceiptPage,
 } from '~api/types';
@@ -28,6 +27,8 @@ describe('List controller', () => {
         date: '2020-04-20',
         item: 'Salary payment',
         cost: 324103,
+        category: 'category one',
+        shop: 'company one',
       },
     };
 
@@ -124,7 +125,7 @@ describe('List controller', () => {
             shop: 'Some shop',
           },
           {
-            page: PageListExtended.General,
+            page: PageListStandard.General,
             id: 456,
             date: new Date('2020-04-21'),
             item: 'Some general item',
@@ -133,7 +134,7 @@ describe('List controller', () => {
             shop: 'Some shop',
           },
           {
-            page: PageListExtended.Social,
+            page: PageListStandard.Social,
             id: 789,
             date: new Date('2020-04-21'),
             item: 'Some social item',
@@ -154,6 +155,8 @@ describe('List controller', () => {
         date: '2020-04-20',
         item: 'Other payment',
         cost: 324103,
+        category: 'category one',
+        shop: 'company one',
       },
     };
 

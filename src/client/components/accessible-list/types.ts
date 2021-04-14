@@ -5,7 +5,7 @@ import type { FieldComponent } from '~client/components/form-field';
 import type { ModalFields } from '~client/components/modal-dialog/field';
 import type { ListCrud, OnCreateList, OnDeleteList, OnUpdateList } from '~client/hooks';
 import type { ApiListState } from '~client/selectors/list';
-import type { Delta, FieldKey, Id, PageList, PickUnion, WithIds } from '~client/types';
+import type { Create, Delta, FieldKey, Id, PageList, PickUnion, WithIds } from '~client/types';
 import type { ListItem, ListItemInput } from '~client/types/gql';
 
 export type State<I extends ListItem, P extends string> = ApiListState<I, P>;
@@ -29,7 +29,7 @@ export type RowComponent<
 export type FieldsMobile<
   I extends ListItemInput,
   MK extends keyof I = FieldKey<I>,
-  E extends Record<string, unknown> = never
+  E extends Record<string, unknown> = Record<string, unknown>
 > = {
   [K in MK]?: ComponentType<{ field: MK; value: I[K] } & Partial<E>>;
 };
@@ -42,14 +42,14 @@ export type HeaderProps<
 > = H & {
   page: P;
   isMobile: boolean;
-  fields: FieldKey<I>[];
+  fields: FieldKey<Create<I>>[];
   fieldsMobile: MK[];
-  categoryLabel?: string;
+  labels?: Partial<Record<keyof I, string>>;
 };
 
 export type CustomSelector<I extends ListItemInput, E extends Record<string, unknown>> = (
   items: WithIds<I>[],
-) => { [id: number]: Partial<E> };
+) => Record<Id, Partial<E>>;
 
 export type ItemProcessor<I extends ListItemInput, E extends Record<string, unknown>> = (
   item: I,
@@ -63,7 +63,7 @@ export type PropsCrud<I extends ListItemInput> = {
 
 type CommonProps<I extends ListItemInput, P extends PageList, E extends Record<string, unknown>> = {
   page: P;
-  fields: Fields<I, E>;
+  fields: Fields<Create<I>, E>;
   modalFields?: ModalFields<I>;
   itemProcessor?: ItemProcessor<I, E>;
   Row?: RowComponent<I, E>;
@@ -121,10 +121,14 @@ export type PropsMemoisedItem<E extends Record<string, unknown>> = {
 export type PropsItemCreate<
   I extends ListItemInput,
   P extends PageList,
-  E extends Record<string, unknown> = never
+  E extends Record<string, unknown> = Record<string, unknown>
 > = {
   deltaSeed?: () => Delta<I>;
 } & PickUnion<CommonProps<I, P, E>, 'page' | 'fields' | 'modalFields' | 'suggestionFields'> &
   Pick<PropsCrud<I>, 'onCreate'>;
 
 export type ActiveField<I extends ListItemInput> = FieldKey<I> | null | '__add-button';
+
+export type DailyRecord = {
+  dailyTotal?: number;
+};

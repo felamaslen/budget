@@ -57,19 +57,25 @@ describe('Search resolvers', () => {
         uid: app.uid,
         date: '2020-04-20',
         item: 'Mortgage',
+        category: 'Housing',
         cost: 1,
+        shop: 'My bank',
       },
       {
         uid: app.uid,
         date: '2020-04-20',
         item: 'Water',
+        category: 'Utilities',
         cost: 1,
+        shop: 'My water company',
       },
       {
         uid: app.uid,
         date: '2020-04-20',
         item: 'Rent',
+        category: 'Housing',
         cost: 1,
+        shop: 'My landlord',
       },
     ]);
   });
@@ -171,8 +177,8 @@ describe('Search resolvers', () => {
       expect(res.data.search).toStrictEqual(
         expect.objectContaining({
           error: null,
-          nextCategory: null,
-          nextField: null,
+          nextCategory: ['Housing'],
+          nextField: 'category',
         }),
       );
     },

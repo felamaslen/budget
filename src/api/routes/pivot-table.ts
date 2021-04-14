@@ -7,7 +7,7 @@ import { replaceAtIndex, removeAtIndex } from 'replace-array';
 import { validatedAuthDbRoute } from '~api/middleware/request';
 import { authMiddleware } from '~api/modules/auth';
 import { selectPivotTable, PivotColumn, PivotTableRow } from '~api/queries';
-import { PageListExtended, isExtendedPage, PageListStandard } from '~api/types';
+import { PageListStandard } from '~api/types';
 
 enum SortAlgorithm {
   similarity = 'similarity',
@@ -84,7 +84,7 @@ type Query = {
 const querySchema = joi.object({
   table: joi
     .string()
-    .valid(...Object.values(PageListExtended))
+    .valid(...Object.values(PageListStandard))
     .required(),
   sort: joi
     .string()
@@ -99,10 +99,7 @@ function getPivotColumn(table: PageListStandard, deep: boolean): PivotColumn {
   if (!deep) {
     return 'item';
   }
-  if (isExtendedPage(table)) {
-    return 'category';
-  }
-  return 'item';
+  return 'category';
 }
 
 const routeGet = validatedAuthDbRoute<void, void, Query>(

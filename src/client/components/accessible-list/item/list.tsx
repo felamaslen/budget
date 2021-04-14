@@ -8,7 +8,7 @@ import * as Styled from '../styles';
 import type { Fields, FieldKey, PropsItem, PropsCrud, RowComponent } from '../types';
 import { useCTA } from '~client/hooks';
 import { ButtonDelete } from '~client/styled/shared/button';
-import type { Id, PageList, WithIds } from '~client/types';
+import type { Create, Id, PageList, WithIds } from '~client/types';
 import type { ListItemInput } from '~client/types/gql';
 
 const identityProcessor = <E extends Record<string, unknown>>(): Partial<E> => ({});
@@ -17,8 +17,8 @@ type FieldProps<I extends ListItemInput, E extends Record<string, unknown>> = Pi
   PropsCrud<I>,
   'onUpdate'
 > & {
-  fields: Fields<I, E>;
-  field: FieldKey<I>;
+  fields: Fields<Create<I>, E>;
+  field: FieldKey<Create<I>>;
   id: Id;
   item: WithIds<I>;
   extraProps?: Partial<E>;
@@ -104,11 +104,11 @@ const AccessibleListItem = <
     );
   }
 
-  const fieldKeys = Object.keys(fields) as FieldKey<I>[];
+  const fieldKeys = Object.keys(fields) as FieldKey<Create<I>>[];
 
   return (
     <Row isMobile={false} item={item} style={style} odd={odd} {...itemExtraProps}>
-      {fieldKeys.map((field: FieldKey<I>) => (
+      {fieldKeys.map((field) => (
         <ListField<I, E>
           key={field as string}
           fields={fields}

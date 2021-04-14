@@ -7,9 +7,10 @@ import createStore, { MockStore } from 'redux-mock-store';
 import sinon from 'sinon';
 import numericHash from 'string-hash';
 
-import { AccessibleListStandard } from './standard';
+import { AccessibleListStandard, StandardLabels } from './standard';
 import * as listMutationHooks from '~client/hooks/mutations/list';
 import { State } from '~client/reducers';
+import type { DailyState } from '~client/reducers/list';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
@@ -19,7 +20,7 @@ jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
 }));
 
-describe('<AccessibleListStandard />', () => {
+describe(AccessibleListStandard.name, () => {
   const onCreate = jest.fn();
   const onUpdate = jest.fn();
   const onDelete = jest.fn();
@@ -32,7 +33,7 @@ describe('<AccessibleListStandard />', () => {
     });
   });
 
-  const page: PageListStandard.Bills = PageListStandard.Bills;
+  const page: PageListStandard = PageListStandard.Bills;
 
   let matchMedia: MatchMediaMock;
 
@@ -50,14 +51,33 @@ describe('<AccessibleListStandard />', () => {
       ...testState[page],
       items: [
         {
-          id: numericHash('some-id'),
-          date: new Date('2020-04-20'),
+          id: numericHash('id-1'),
+          date: new Date('2020-04-17'),
           item: 'item one',
+          category: 'category one',
           cost: 931,
+          shop: 'shop one',
+        },
+        {
+          id: numericHash('id-2'),
+          date: new Date('2020-04-20'),
+          item: 'item two',
+          category: 'category two',
+          cost: 118,
+          shop: 'shop two',
+        },
+        {
+          id: numericHash('id-3'),
+          date: new Date('2020-04-20'),
+          item: 'item three',
+          category: 'category three',
+          cost: 173,
+          shop: 'shop three',
         },
       ],
       __optimistic: [undefined],
       total: 1886394,
+      weekly: 6457,
     },
   };
 
@@ -71,7 +91,7 @@ describe('<AccessibleListStandard />', () => {
     const renderResult = render(
       <Provider store={store}>
         <GQLProviderMock>
-          <AccessibleListStandard<PageListStandard.Bills> {...props} />
+          <AccessibleListStandard {...props} />
         </GQLProviderMock>
       </Provider>,
     );
@@ -80,16 +100,40 @@ describe('<AccessibleListStandard />', () => {
   };
 
   describe.each`
-    field     | displayValue
-    ${'date'} | ${'20/04/2020'}
-    ${'item'} | ${'item one'}
-    ${'cost'} | ${'9.31'}
-  `('$field field', ({ displayValue }) => {
-    it('should be rendered', () => {
-      expect.assertions(1);
-      const { getByDisplayValue } = setup();
-      expect(getByDisplayValue(displayValue)).toBeInTheDocument();
+    id        | date            | item            | category            | cost      | shop
+    ${'id-3'} | ${'20/04/2020'} | ${'item three'} | ${'category three'} | ${'1.73'} | ${'shop three'}
+    ${'id-2'} | ${'20/04/2020'} | ${'item two'}   | ${'category two'}   | ${'1.18'} | ${'shop two'}
+    ${'id-1'} | ${'17/04/2020'} | ${'item one'}   | ${'category one'}   | ${'9.31'} | ${'shop one'}
+  `('item with id $id', ({ date, item, category, cost, shop }) => {
+    describe.each`
+      field         | displayValue
+      ${'date'}     | ${date}
+      ${'item'}     | ${item}
+      ${'category'} | ${category}
+      ${'cost'}     | ${cost}
+      ${'shop'}     | ${shop}
+    `('$field field', ({ displayValue }) => {
+      it('should be rendered', () => {
+        expect.assertions(1);
+        const { getAllByDisplayValue } = setup();
+        expect(getAllByDisplayValue(displayValue).length).toBeGreaterThan(0);
+      });
     });
+  });
+
+  it.each`
+    header
+    ${'Date'}
+    ${'Item'}
+    ${'Category'}
+    ${'Cost'}
+    ${'Shop'}
+  `('should render the $header header column', ({ header }) => {
+    expect.assertions(1);
+    const { getByTestId } = setup();
+    const headerDom = getByTestId('header');
+    const { getByText } = within(headerDom);
+    expect(getByText(header)).toBeInTheDocument();
   });
 
   it('should automatically fill the date field with the current date', () => {
@@ -102,7 +146,7 @@ describe('<AccessibleListStandard />', () => {
     const inputs = getAllByRole('textbox', { hidden: true }) as HTMLInputElement[];
     const addButton = getByText('Add') as HTMLButtonElement;
 
-    const [dateInput, itemInput, costInput] = inputs;
+    const [dateInput, itemInput, categoryInput, costInput, shopInput] = inputs;
 
     expect(dateInput.value).toBe('18/04/2020');
 
@@ -117,6 +161,16 @@ describe('<AccessibleListStandard />', () => {
     });
 
     act(() => {
+      fireEvent.focus(categoryInput);
+    });
+    act(() => {
+      fireEvent.change(categoryInput, { target: { value: 'some new category' } });
+    });
+    act(() => {
+      fireEvent.blur(categoryInput);
+    });
+
+    act(() => {
       fireEvent.focus(costInput);
     });
     act(() => {
@@ -127,6 +181,16 @@ describe('<AccessibleListStandard />', () => {
     });
 
     act(() => {
+      fireEvent.focus(shopInput);
+    });
+    act(() => {
+      fireEvent.change(shopInput, { target: { value: 'some new shop' } });
+    });
+    act(() => {
+      fireEvent.blur(shopInput);
+    });
+
+    act(() => {
       fireEvent.click(addButton);
     });
 
@@ -134,18 +198,28 @@ describe('<AccessibleListStandard />', () => {
     expect(onCreate).toHaveBeenCalledWith({
       date: new Date('2020-04-18'),
       item: 'some new item',
+      category: 'some new category',
       cost: 18993,
+      shop: 'some new shop',
     });
 
     clock.restore();
   });
 
-  it('should render the total cost of the items', () => {
+  it('should render the total cost header', () => {
     expect.assertions(1);
     const { getByTestId } = setup();
     const header = getByTestId('header');
     const { getByText } = within(header);
     expect(getByText('Total: £18.9k')).toBeInTheDocument();
+  });
+
+  it('should render the weekly cost header', () => {
+    expect.assertions(1);
+    const { getByTestId } = setup();
+    const header = getByTestId('header');
+    const { getByText } = within(header);
+    expect(getByText('Weekly: £64.57')).toBeInTheDocument();
   });
 
   it('should sort the items first by date, then by item', () => {
@@ -159,19 +233,25 @@ describe('<AccessibleListStandard />', () => {
             id: numericHash('some-id'),
             date: new Date('2020-04-20'),
             item: 'item 1',
+            category: 'category 1',
             cost: 1,
+            shop: 'shop 1',
           },
           {
             id: numericHash('other-id'),
             date: new Date('2020-04-21'),
             item: 'item 2',
+            category: 'category 2',
             cost: 1,
+            shop: 'shop 2',
           },
           {
             id: numericHash('next-id'),
             date: new Date('2020-04-20'),
             item: 'An item',
+            category: 'category 3',
             cost: 1,
+            shop: 'shop 3',
           },
         ],
         __optimistic: [undefined, undefined, undefined],
@@ -187,6 +267,26 @@ describe('<AccessibleListStandard />', () => {
     expect(getFirstItem('item 2')).toBeInTheDocument();
     expect(getSecondItem('An item')).toBeInTheDocument();
     expect(getThirdItem('item 1')).toBeInTheDocument();
+  });
+
+  describe.each`
+    index | date            | total
+    ${1}  | ${'20/04/2020'} | ${'£2.91'}
+    ${2}  | ${'17/04/2020'} | ${'£9.31'}
+  `('daily totals for $date', ({ total, index }) => {
+    it('should be rendered on the correct row', () => {
+      expect.assertions(1);
+      const { getAllByRole } = setup();
+      const rows = getAllByRole('listitem') as HTMLLIElement[];
+      const { getByText } = within(rows[index]);
+      expect(getByText(total)).toBeInTheDocument();
+    });
+
+    it('should only be rendered on one row', () => {
+      expect.assertions(1);
+      const { getAllByText } = setup();
+      expect(getAllByText(total)).toHaveLength(1);
+    });
   });
 
   describe('when rendering on mobiles', () => {
@@ -408,7 +508,7 @@ describe('<AccessibleListStandard />', () => {
           white-space: nowrap;
         }
 
-        .emotion-22 {
+        .emotion-42 {
           -webkit-align-items: center;
           -webkit-box-align: center;
           -ms-flex-align: center;
@@ -432,7 +532,7 @@ describe('<AccessibleListStandard />', () => {
           width: 100%;
         }
 
-        .emotion-22 button {
+        .emotion-42 button {
           -webkit-align-items: center;
           -webkit-box-align: center;
           -ms-flex-align: center;
@@ -456,7 +556,7 @@ describe('<AccessibleListStandard />', () => {
           width: 8rem;
         }
 
-        .emotion-24 {
+        .emotion-44 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -481,7 +581,7 @@ describe('<AccessibleListStandard />', () => {
           font-weight: bold;
         }
 
-        .e4ltp6k2 .emotion-24 {
+        .e4ltp6k2 .emotion-44 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -499,15 +599,15 @@ describe('<AccessibleListStandard />', () => {
           grid-column: 4;
         }
 
-        .e4ltp6k1 .emotion-24,
-        .e4ltp6k1 .emotion-24:hover,
-        .e4ltp6k1 .emotion-24:active {
+        .e4ltp6k1 .emotion-44,
+        .e4ltp6k1 .emotion-44:hover,
+        .e4ltp6k1 .emotion-44:active {
           background: none;
           border: none;
           box-shadow: none;
         }
 
-        .e4ltp6k1 .emotion-24::after {
+        .e4ltp6k1 .emotion-44::after {
           display: block;
           margin-left: 16px;
           content: '';
@@ -519,12 +619,12 @@ describe('<AccessibleListStandard />', () => {
           transform-origin: left center;
         }
 
-        .emotion-24:disabled {
+        .emotion-44:disabled {
           background: none;
         }
 
         @media only screen and (min-width: 500px) {
-          .emotion-24 {
+          .emotion-44 {
             display: inline-block;
             margin: 0;
             padding: 5px 12px 6px;
@@ -549,23 +649,23 @@ describe('<AccessibleListStandard />', () => {
             z-index: 4;
           }
 
-          .emotion-24:hover,
-          .emotion-24:focus {
+          .emotion-44:hover,
+          .emotion-44:focus {
             background: #80be69;
           }
 
-          .emotion-24:active {
+          .emotion-44:active {
             background: #638c4d;
           }
 
-          .emotion-24:disabled {
+          .emotion-44:disabled {
             background: #9c9c9c;
             cursor: default;
             border: 1px solid #666;
           }
         }
 
-        .e1w7s03s5 .emotion-24 {
+        .e1w7s03s5 .emotion-44 {
           margin: 2px 4px;
         }
 
@@ -604,11 +704,10 @@ describe('<AccessibleListStandard />', () => {
                   style="position: relative; height: 768px; width: 1024px; overflow: auto; will-change: transform; direction: ltr;"
                 >
                   <div
-                    style="height: 30px; width: 100%;"
+                    style="height: 90px; width: 100%;"
                   >
                     <li
                       class="emotion-12 emotion-13"
-                      role="button"
                       style="position: absolute; left: 0px; top: 0px; height: 30px; width: 100%;"
                     >
                       <button
@@ -618,6 +717,54 @@ describe('<AccessibleListStandard />', () => {
                           class="emotion-16 emotion-17"
                         >
                           20/04/2020
+                        </span>
+                        <span
+                          class="emotion-18 emotion-17"
+                        >
+                          item three
+                        </span>
+                        <span
+                          class="emotion-20 emotion-17"
+                        >
+                          £1.73
+                        </span>
+                      </button>
+                    </li>
+                    <li
+                      class="emotion-12 emotion-13"
+                      style="position: absolute; left: 0px; top: 30px; height: 30px; width: 100%;"
+                    >
+                      <button
+                        class="emotion-14 emotion-15"
+                      >
+                        <span
+                          class="emotion-16 emotion-17"
+                        >
+                          20/04/2020
+                        </span>
+                        <span
+                          class="emotion-18 emotion-17"
+                        >
+                          item two
+                        </span>
+                        <span
+                          class="emotion-20 emotion-17"
+                        >
+                          £1.18
+                        </span>
+                      </button>
+                    </li>
+                    <li
+                      class="emotion-12 emotion-13"
+                      style="position: absolute; left: 0px; top: 60px; height: 30px; width: 100%;"
+                    >
+                      <button
+                        class="emotion-14 emotion-15"
+                      >
+                        <span
+                          class="emotion-16 emotion-17"
+                        >
+                          17/04/2020
                         </span>
                         <span
                           class="emotion-18 emotion-17"
@@ -636,10 +783,10 @@ describe('<AccessibleListStandard />', () => {
               </div>
             </div>
             <div
-              class="emotion-22 emotion-23"
+              class="emotion-42 emotion-43"
             >
               <button
-                class="emotion-24 emotion-25"
+                class="emotion-44 emotion-45"
               >
                 Add
               </button>
@@ -651,7 +798,7 @@ describe('<AccessibleListStandard />', () => {
 
     it.each`
       field     | example
-      ${'date'} | ${'20/04/2020'}
+      ${'date'} | ${'17/04/2020'}
       ${'item'} | ${'item one'}
       ${'cost'} | ${'£9.31'}
     `('should render the $field field(s) correctly', ({ example }) => {
@@ -660,10 +807,27 @@ describe('<AccessibleListStandard />', () => {
       expect(getByText(example)).toBeInTheDocument();
     });
 
-    it('should not render a total cost', () => {
-      expect.assertions(1);
-      const { queryByText } = setupMobile();
-      expect(queryByText('Total: £18.9k')).not.toBeInTheDocument();
+    describe('when rendering on mobiles', () => {
+      it.each`
+        item             | value
+        ${'weekly cost'} | ${'Weekly: £64.57'}
+        ${'total cost'}  | ${'Total: £18.9k'}
+        ${'category'}    | ${'Category'}
+        ${'shop'}        | ${'Shop'}
+      `('should not render the $item header', ({ value }) => {
+        expect.assertions(1);
+        const { getByTestId } = setupMobile();
+        const header = getByTestId('header');
+        const { queryByText } = within(header);
+        expect(queryByText(value)).not.toBeInTheDocument();
+      });
+
+      it('should not render daily totals', () => {
+        expect.assertions(2);
+        const { queryByText, queryAllByText } = setupMobile();
+        expect(queryByText('£2.91')).not.toBeInTheDocument();
+        expect(queryAllByText('£9.31')).toHaveLength(1);
+      });
     });
 
     it('should not render delete buttons', () => {
@@ -721,11 +885,13 @@ describe('<AccessibleListStandard />', () => {
           fireEvent.click(addButton);
         });
         const modalDialog = getByTestId('modal-dialog');
-        const { getByRole, getByDisplayValue, getByText: getModalText } = within(modalDialog);
+        const { getAllByRole, getByRole, getByDisplayValue, getByText: getModalText } = within(
+          modalDialog,
+        );
 
         const dateInput = getByDisplayValue('2020-04-14') as HTMLInputElement;
-        const itemInput = getByRole('textbox') as HTMLInputElement;
         const costInput = getByRole('spinbutton') as HTMLInputElement;
+        const [itemInput, categoryInput, shopInput] = getAllByRole('textbox') as HTMLInputElement[];
 
         act(() => {
           fireEvent.change(dateInput, { target: { value: '2020-04-20' } });
@@ -740,10 +906,22 @@ describe('<AccessibleListStandard />', () => {
           fireEvent.blur(itemInput);
         });
         act(() => {
+          fireEvent.change(categoryInput, { target: { value: 'some new category' } });
+        });
+        act(() => {
+          fireEvent.blur(categoryInput);
+        });
+        act(() => {
           fireEvent.change(costInput, { target: { value: '23.65' } });
         });
         act(() => {
           fireEvent.blur(costInput);
+        });
+        act(() => {
+          fireEvent.change(shopInput, { target: { value: 'some new shop' } });
+        });
+        act(() => {
+          fireEvent.blur(shopInput);
         });
 
         const buttonConfirm = getModalText('Do it.') as HTMLButtonElement;
@@ -752,13 +930,13 @@ describe('<AccessibleListStandard />', () => {
         });
 
         expect(onCreate).toHaveBeenCalledTimes(1);
-        expect(onCreate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            date: new Date('2020-04-20'),
-            item: 'some new item',
-            cost: 2365,
-          }),
-        );
+        expect(onCreate).toHaveBeenCalledWith({
+          date: new Date('2020-04-20'),
+          item: 'some new item',
+          category: 'some new category',
+          cost: 2365,
+          shop: 'some new shop',
+        });
 
         act(() => {
           clock.runAll();
@@ -786,7 +964,7 @@ describe('<AccessibleListStandard />', () => {
         expect(modalDialog).toBeInTheDocument();
 
         const { queryByText: queryModalText } = within(modalDialog);
-        expect(queryModalText(`Editing id#${numericHash('some-id')}`)).toBeInTheDocument();
+        expect(queryModalText(`Editing id#${numericHash('id-1')}`)).toBeInTheDocument();
         expect(queryModalText('−')).toBeInTheDocument();
       });
 
@@ -800,11 +978,13 @@ describe('<AccessibleListStandard />', () => {
           fireEvent.click(itemField);
         });
         const modalDialog = getByTestId('modal-dialog');
-        const { getByRole, getByDisplayValue, getByText: getModalText } = within(modalDialog);
+        const { getAllByRole, getByRole, getByDisplayValue, getByText: getModalText } = within(
+          modalDialog,
+        );
 
-        const dateInput = getByDisplayValue('2020-04-20') as HTMLInputElement;
-        const itemInput = getByRole('textbox') as HTMLInputElement;
+        const dateInput = getByDisplayValue('2020-04-17') as HTMLInputElement;
         const costInput = getByRole('spinbutton') as HTMLInputElement;
+        const [itemInput, categoryInput, shopInput] = getAllByRole('textbox') as HTMLInputElement[];
 
         act(() => {
           fireEvent.change(dateInput, { target: { value: '2020-04-23' } });
@@ -819,10 +999,22 @@ describe('<AccessibleListStandard />', () => {
           fireEvent.blur(itemInput);
         });
         act(() => {
+          fireEvent.change(categoryInput, { target: { value: 'updated category' } });
+        });
+        act(() => {
+          fireEvent.blur(categoryInput);
+        });
+        act(() => {
           fireEvent.change(costInput, { target: { value: '998.31' } });
         });
         act(() => {
           fireEvent.blur(costInput);
+        });
+        act(() => {
+          fireEvent.change(shopInput, { target: { value: 'updated shop' } });
+        });
+        act(() => {
+          fireEvent.blur(shopInput);
         });
 
         const buttonConfirm = getModalText('Do it.') as HTMLButtonElement;
@@ -832,17 +1024,22 @@ describe('<AccessibleListStandard />', () => {
 
         expect(onUpdate).toHaveBeenCalledTimes(1);
         expect(onUpdate).toHaveBeenCalledWith(
-          numericHash('some-id'),
-          expect.objectContaining({
+          numericHash('id-1'),
+          {
             date: new Date('2020-04-23'),
             item: 'updated item',
+            category: 'updated category',
             cost: 99831,
-          }),
-          expect.objectContaining({
-            date: new Date('2020-04-20'),
+            shop: 'updated shop',
+          },
+          {
+            id: numericHash('id-1'),
+            date: new Date('2020-04-17'),
             item: 'item one',
+            category: 'category one',
             cost: 931,
-          }),
+            shop: 'shop one',
+          },
         );
 
         clock.restore();
@@ -864,13 +1061,102 @@ describe('<AccessibleListStandard />', () => {
         });
 
         expect(onDelete).toHaveBeenCalledTimes(1);
-        expect(onDelete).toHaveBeenCalledWith(numericHash('some-id'), {
-          id: numericHash('some-id'),
-          date: new Date('2020-04-20'),
+        expect(onDelete).toHaveBeenCalledWith(numericHash('id-1'), {
+          id: numericHash('id-1'),
+          date: new Date('2020-04-17'),
           item: 'item one',
+          category: 'category one',
           cost: 931,
+          shop: 'shop one',
         });
       });
     });
   });
+
+  describe.each`
+    field         | customLabel     | fieldValue        | inputValue            | updatedFieldValue
+    ${'category'} | ${'myCategory'} | ${'category one'} | ${'updated category'} | ${undefined}
+    ${'cost'}     | ${'myCost'}     | ${'9.31'}         | ${'2.42'}             | ${242}
+    ${'shop'}     | ${'myShop'}     | ${'shop one'}     | ${'updated shop'}     | ${undefined}
+  `(
+    'when a custom $field field name is given',
+    ({ field, customLabel, fieldValue, inputValue, updatedFieldValue }) => {
+      const customPage = PageListStandard.General;
+      const labels: StandardLabels = { [field]: customLabel };
+
+      type CustomState = {
+        [customPage]: DailyState;
+      };
+
+      const customState: CustomState = {
+        [customPage]: {
+          items: [
+            {
+              id: numericHash('id-1'),
+              date: new Date('2020-04-17'),
+              item: 'item one',
+              category: 'category one',
+              cost: 931,
+              shop: 'shop one',
+            },
+          ],
+          __optimistic: [undefined],
+          total: 1023,
+          weekly: 951,
+          offset: 0,
+          olderExists: null,
+        },
+      };
+
+      const setupCustom = (): RenderResult & { store: MockStore<CustomState> } => {
+        matchMedia.useMediaQuery(`(min-width: ${breakpoints.mobile}px)`);
+        const store = createStore<CustomState>()(customState);
+        const renderResult = render(
+          <Provider store={store}>
+            <GQLProviderMock>
+              <AccessibleListStandard page={customPage} labels={labels} />
+            </GQLProviderMock>
+          </Provider>,
+        );
+
+        return { store, ...renderResult };
+      };
+
+      it('should render the field', () => {
+        expect.assertions(1);
+        const { getByDisplayValue } = setupCustom();
+        expect(getByDisplayValue(fieldValue)).toBeInTheDocument();
+      });
+
+      it('should call onUpdate with the right values', () => {
+        expect.assertions(2);
+        const { getByDisplayValue } = setupCustom();
+        const input = getByDisplayValue(fieldValue) as HTMLInputElement;
+
+        act(() => {
+          fireEvent.focus(input);
+        });
+        act(() => {
+          fireEvent.change(input, { target: { value: inputValue } });
+        });
+        act(() => {
+          fireEvent.blur(input);
+        });
+
+        expect(onUpdate).toHaveBeenCalledTimes(1);
+        expect(onUpdate).toHaveBeenCalledWith(
+          numericHash('id-1'),
+          { [field]: updatedFieldValue ?? inputValue },
+          {
+            id: numericHash('id-1'),
+            date: new Date('2020-04-17'),
+            item: 'item one',
+            category: 'category one',
+            cost: 931,
+            shop: 'shop one',
+          },
+        );
+      });
+    },
+  );
 });

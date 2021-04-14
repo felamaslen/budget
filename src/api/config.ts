@@ -15,11 +15,14 @@ export default {
     url:
       process.env.NODE_ENV === 'test'
         ? getenv.string(
-            'DATABASE_URL',
-            `postgres://docker:docker@localhost:${getenv.int(
-              'DB_PORT_BUDGET_DEV',
-              5432,
-            )}/budget_test`,
+            'DATABASE_URL_TEST',
+            getenv.string(
+              'DATABASE_URL',
+              `postgres://docker:docker@localhost:${getenv.int(
+                'DB_PORT_BUDGET_DEV',
+                5432,
+              )}/budget_test`,
+            ),
           )
         : getenv.string('DATABASE_URL'),
   },

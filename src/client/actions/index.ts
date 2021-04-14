@@ -6,12 +6,7 @@ import type { ActionLogin } from './login';
 import type { ActionNetWorth } from './net-worth';
 import { isStandardListPage } from '~client/constants/data';
 import type { PageList, StandardInput } from '~client/types';
-import type {
-  ListItemInput,
-  ListItemStandardInput,
-  PageListExtended,
-  PageListStandard,
-} from '~client/types/gql';
+import type { ListItemInput, ListItemStandardInput, PageListStandard } from '~client/types/gql';
 
 export * from './api';
 export * from './error';
@@ -26,7 +21,7 @@ export type Action =
   | ActionFunds
   | ActionReceiptCreated
   | ActionList<ListItemInput, PageList>
-  | ActionList<ListItemStandardInput, PageListExtended>
+  | ActionList<ListItemStandardInput, PageListStandard>
   | ActionLogin
   | ActionNetWorth;
 

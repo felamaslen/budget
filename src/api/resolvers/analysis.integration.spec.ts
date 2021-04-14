@@ -68,14 +68,14 @@ describe('Analysis resolvers', () => {
             expect.objectContaining({
               item: 'income',
               tree: expect.arrayContaining([
-                expect.objectContaining({ category: 'Salary', sum: 433201 }),
+                expect.objectContaining({ category: 'Side work', sum: 433201 }),
               ]),
             }),
             expect.objectContaining({
               item: 'bills',
               tree: expect.arrayContaining([
-                expect.objectContaining({ category: 'Rent', sum: 72500 }),
-                expect.objectContaining({ category: 'Electricity', sum: 3902 }),
+                expect.objectContaining({ category: 'Housing', sum: 72500 }),
+                expect.objectContaining({ category: 'Utilities', sum: 3902 }),
               ]),
             }),
             expect.objectContaining({
@@ -246,14 +246,14 @@ describe('Analysis resolvers', () => {
           expect.objectContaining({
             item: 'income',
             tree: expect.arrayContaining([
-              expect.objectContaining({ category: 'Salary', sum: 433201 }),
+              expect.objectContaining({ category: 'Contract', sum: 433201 }),
             ]),
           }),
           expect.objectContaining({
             item: 'bills',
             tree: expect.arrayContaining([
-              expect.objectContaining({ category: 'Rent', sum: 72500 }),
-              expect.objectContaining({ category: 'Electricity', sum: 3902 }),
+              expect.objectContaining({ category: 'My bank', sum: 72500 }),
+              expect.objectContaining({ category: 'My energy company', sum: 3902 }),
             ]),
           }),
           expect.objectContaining({

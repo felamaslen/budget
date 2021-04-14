@@ -7,7 +7,6 @@ export {
   AnalysisGroupBy,
   FundPeriod,
   PageListStandard,
-  PageListExtended,
   MonthlyCategory,
   NetWorthCategoryType,
   SearchPage,

@@ -2,15 +2,14 @@ import React, { useState, useCallback } from 'react';
 
 import * as Styled from './styles';
 import type { FieldsMobile, ComponentType } from './types';
-import { FormFieldText, FormFieldCost, FormFieldDate } from '~client/components/form-field';
-import { ModalDialog, ModalFields, makeField } from '~client/components/modal-dialog';
+import { ModalDialog, ModalFields } from '~client/components/modal-dialog';
 import { useCTA } from '~client/hooks';
 import { formatItem } from '~client/modules/format';
 import { Button } from '~client/styled/shared';
-import type { Id, PageList, StandardInput } from '~client/types';
-import type { ListItemInput, ListItemStandard } from '~client/types/gql';
+import type { Id, ListItemStandardNative as ListItemStandard, PageList } from '~client/types';
+import type { ListItemInput } from '~client/types/gql';
 
-export type DefaultMobileKeys = 'date' | 'item' | 'cost';
+export type StandardMobileKeys = 'date' | 'item' | 'cost';
 
 type StandardFieldPropsMobile<
   V,
@@ -29,16 +28,10 @@ const StandardFieldMobile = <V, E extends Record<string, unknown> = Record<strin
   </Styled.StandardFieldMobile>
 );
 
-export const standardFieldsMobile: FieldsMobile<ListItemStandard, DefaultMobileKeys> = {
+export const standardFieldsMobile: FieldsMobile<ListItemStandard, StandardMobileKeys> = {
   date: StandardFieldMobile,
   item: StandardFieldMobile,
   cost: StandardFieldMobile,
-};
-
-export const standardModalFields: ModalFields<StandardInput> = {
-  date: makeField('date', FormFieldDate),
-  item: makeField('item', FormFieldText),
-  cost: makeField('cost', FormFieldCost),
 };
 
 type FieldPropsMobile<

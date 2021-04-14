@@ -5,13 +5,7 @@ import type {
   Page,
   PageList,
 } from '~client/types';
-import {
-  AnalysisPage,
-  PageListExtended,
-  PageListStandard,
-  PageNonStandard,
-  SearchPage,
-} from '~client/types/enum';
+import { AnalysisPage, PageListStandard, PageNonStandard, SearchPage } from '~client/types/enum';
 
 // debounce requests to update the server by 1 second
 export const TIMER_UPDATE_SERVER = 1000;
@@ -47,7 +41,6 @@ export const OVERVIEW_COLUMNS = Object.entries(overviewColumns) as OverviewTable
 
 const PAGES_NON_STANDARD = Object.values(PageNonStandard);
 const PAGES_LIST_STANDARD = Object.values(PageListStandard);
-const PAGES_LIST_EXTENDED = Object.values(PageListExtended);
 const PAGES_SEARCH = Object.values(SearchPage);
 export const PAGES_ANALYSIS = Object.values(AnalysisPage);
 export const PAGES_ANALYSIS_COST = PAGES_ANALYSIS.filter((page) => page !== AnalysisPage.Income);
@@ -63,9 +56,6 @@ export const isPage = <T extends string>(name?: T | Page): name is Page =>
 
 export const isStandardListPage = <T extends string>(name?: T | Page): name is PageListStandard =>
   !!name && (PAGES_LIST_STANDARD as string[]).includes(name);
-
-export const isExtendedListPage = <T extends string>(name?: T | Page): name is PageListExtended =>
-  !!name && (PAGES_LIST_EXTENDED as string[]).includes(name);
 
 export const isSearchPage = <T extends string>(name?: T | SearchPage): name is SearchPage =>
   !!name && (PAGES_SEARCH as string[]).includes(name);

@@ -72,7 +72,6 @@ export type Query = {
   overviewPreview?: Maybe<OverviewPreview>;
   readFunds?: Maybe<ReadFundsResponse>;
   readList?: Maybe<ListReadResponse>;
-  readListExtended?: Maybe<ListReadResponseExtended>;
   readListTotals?: Maybe<ListTotalsResponse>;
   readNetWorthCategories?: Maybe<Array<NetWorthCategory>>;
   readNetWorthEntries?: Maybe<NetWorthEntryOverview>;
@@ -129,13 +128,6 @@ export type QueryOverviewPreviewArgs = {
 
 export type QueryReadListArgs = {
   page: PageListStandard;
-  offset?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryReadListExtendedArgs = {
-  page: PageListExtended;
   offset?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
 };
@@ -514,13 +506,6 @@ export enum PageListStandard {
   Social = 'social'
 }
 
-export enum PageListExtended {
-  Food = 'food',
-  General = 'general',
-  Holiday = 'holiday',
-  Social = 'social'
-}
-
 export type ListItem = {
   id: Scalars['Int'];
   item: Scalars['String'];
@@ -530,37 +515,14 @@ export type ListItemStandard = {
   id: Scalars['Int'];
   date: Scalars['Date'];
   item: Scalars['String'];
-  cost: Scalars['Int'];
-};
-
-export type ListItemExtended = {
-  id: Scalars['Int'];
-  date: Scalars['Date'];
-  item: Scalars['String'];
   category: Scalars['String'];
   cost: Scalars['Int'];
   shop: Scalars['String'];
 };
 
-export type ListItemStandardOrExtended = {
-  date: Scalars['Date'];
-  item: Scalars['String'];
-  category?: Maybe<Scalars['String']>;
-  cost: Scalars['Int'];
-  shop?: Maybe<Scalars['String']>;
-};
-
 export type ListReadResponse = {
   error?: Maybe<Scalars['String']>;
   items: Array<ListItemStandard>;
-  olderExists?: Maybe<Scalars['Boolean']>;
-  weekly?: Maybe<Scalars['Int']>;
-  total?: Maybe<Scalars['Int']>;
-};
-
-export type ListReadResponseExtended = {
-  error?: Maybe<Scalars['String']>;
-  items: Array<ListItemExtended>;
   olderExists?: Maybe<Scalars['Boolean']>;
   weekly?: Maybe<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
@@ -581,8 +543,8 @@ export type ListItemStandardInput = {
   date: Scalars['String'];
   item: Scalars['String'];
   cost: Scalars['Int'];
-  category?: Maybe<Scalars['String']>;
-  shop?: Maybe<Scalars['String']>;
+  category: Scalars['String'];
+  shop: Scalars['String'];
 };
 
 export type ReceiptInput = {
@@ -597,11 +559,19 @@ export type ReceiptCreated = {
   items?: Maybe<Array<ReceiptItem>>;
 };
 
+export type ListItemStandardSubscription = {
+  date: Scalars['Date'];
+  item: Scalars['String'];
+  category: Scalars['String'];
+  cost: Scalars['Int'];
+  shop: Scalars['String'];
+};
+
 export type ListItemCreateUpdate = {
   page: PageListStandard;
   id: Scalars['Int'];
   fakeId?: Maybe<Scalars['Int']>;
-  item: ListItemStandardOrExtended;
+  item: ListItemStandardSubscription;
   overviewCost: Array<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
   weekly?: Maybe<Scalars['Int']>;
@@ -1033,19 +1003,16 @@ export type ResolversTypes = {
   AppConfig: ResolverTypeWrapper<AppConfig>;
   AppConfigInput: AppConfigInput;
   PageListStandard: PageListStandard;
-  PageListExtended: PageListExtended;
   ListItem: ResolverTypeWrapper<ListItem>;
   ListItemStandard: ResolverTypeWrapper<ListItemStandard>;
-  ListItemExtended: ResolverTypeWrapper<ListItemExtended>;
-  ListItemStandardOrExtended: ResolverTypeWrapper<ListItemStandardOrExtended>;
   ListReadResponse: ResolverTypeWrapper<ListReadResponse>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  ListReadResponseExtended: ResolverTypeWrapper<ListReadResponseExtended>;
   ListTotalsResponse: ResolverTypeWrapper<ListTotalsResponse>;
   ListItemInput: ListItemInput;
   ListItemStandardInput: ListItemStandardInput;
   ReceiptInput: ReceiptInput;
   ReceiptCreated: ResolverTypeWrapper<ReceiptCreated>;
+  ListItemStandardSubscription: ResolverTypeWrapper<ListItemStandardSubscription>;
   ListItemCreateUpdate: ResolverTypeWrapper<ListItemCreateUpdate>;
   ListItemDelete: ResolverTypeWrapper<ListItemDelete>;
   ReceiptItem: ResolverTypeWrapper<ReceiptItem>;
@@ -1137,16 +1104,14 @@ export type ResolversParentTypes = {
   AppConfigInput: AppConfigInput;
   ListItem: ListItem;
   ListItemStandard: ListItemStandard;
-  ListItemExtended: ListItemExtended;
-  ListItemStandardOrExtended: ListItemStandardOrExtended;
   ListReadResponse: ListReadResponse;
   Boolean: Scalars['Boolean'];
-  ListReadResponseExtended: ListReadResponseExtended;
   ListTotalsResponse: ListTotalsResponse;
   ListItemInput: ListItemInput;
   ListItemStandardInput: ListItemStandardInput;
   ReceiptInput: ReceiptInput;
   ReceiptCreated: ReceiptCreated;
+  ListItemStandardSubscription: ListItemStandardSubscription;
   ListItemCreateUpdate: ListItemCreateUpdate;
   ListItemDelete: ListItemDelete;
   ReceiptItem: ReceiptItem;
@@ -1229,7 +1194,6 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   overviewPreview?: Resolver<Maybe<ResolversTypes['OverviewPreview']>, ParentType, ContextType, RequireFields<QueryOverviewPreviewArgs, 'category' | 'date'>>;
   readFunds?: Resolver<Maybe<ResolversTypes['ReadFundsResponse']>, ParentType, ContextType>;
   readList?: Resolver<Maybe<ResolversTypes['ListReadResponse']>, ParentType, ContextType, RequireFields<QueryReadListArgs, 'page'>>;
-  readListExtended?: Resolver<Maybe<ResolversTypes['ListReadResponseExtended']>, ParentType, ContextType, RequireFields<QueryReadListExtendedArgs, 'page'>>;
   readListTotals?: Resolver<Maybe<ResolversTypes['ListTotalsResponse']>, ParentType, ContextType, RequireFields<QueryReadListTotalsArgs, 'page'>>;
   readNetWorthCategories?: Resolver<Maybe<Array<ResolversTypes['NetWorthCategory']>>, ParentType, ContextType, RequireFields<QueryReadNetWorthCategoriesArgs, never>>;
   readNetWorthEntries?: Resolver<Maybe<ResolversTypes['NetWorthEntryOverview']>, ParentType, ContextType>;
@@ -1452,41 +1416,15 @@ export type ListItemStandardResolvers<ContextType = Context, ParentType extends 
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   item?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  cost?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type ListItemExtendedResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ListItemExtended'] = ResolversParentTypes['ListItemExtended']> = {
-  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  item?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   category?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   cost?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   shop?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type ListItemStandardOrExtendedResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ListItemStandardOrExtended'] = ResolversParentTypes['ListItemStandardOrExtended']> = {
-  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  item?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  category?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  cost?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  shop?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type ListReadResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ListReadResponse'] = ResolversParentTypes['ListReadResponse']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   items?: Resolver<Array<ResolversTypes['ListItemStandard']>, ParentType, ContextType>;
-  olderExists?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  weekly?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type ListReadResponseExtendedResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ListReadResponseExtended'] = ResolversParentTypes['ListReadResponseExtended']> = {
-  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  items?: Resolver<Array<ResolversTypes['ListItemExtended']>, ParentType, ContextType>;
   olderExists?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   weekly?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1506,11 +1444,20 @@ export type ReceiptCreatedResolvers<ContextType = Context, ParentType extends Re
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ListItemStandardSubscriptionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ListItemStandardSubscription'] = ResolversParentTypes['ListItemStandardSubscription']> = {
+  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  item?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  category?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  cost?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  shop?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type ListItemCreateUpdateResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ListItemCreateUpdate'] = ResolversParentTypes['ListItemCreateUpdate']> = {
   page?: Resolver<ResolversTypes['PageListStandard'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   fakeId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  item?: Resolver<ResolversTypes['ListItemStandardOrExtended'], ParentType, ContextType>;
+  item?: Resolver<ResolversTypes['ListItemStandardSubscription'], ParentType, ContextType>;
   overviewCost?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   weekly?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1790,12 +1737,10 @@ export type Resolvers<ContextType = Context> = {
   AppConfig?: AppConfigResolvers<ContextType>;
   ListItem?: ListItemResolvers<ContextType>;
   ListItemStandard?: ListItemStandardResolvers<ContextType>;
-  ListItemExtended?: ListItemExtendedResolvers<ContextType>;
-  ListItemStandardOrExtended?: ListItemStandardOrExtendedResolvers<ContextType>;
   ListReadResponse?: ListReadResponseResolvers<ContextType>;
-  ListReadResponseExtended?: ListReadResponseExtendedResolvers<ContextType>;
   ListTotalsResponse?: ListTotalsResponseResolvers<ContextType>;
   ReceiptCreated?: ReceiptCreatedResolvers<ContextType>;
+  ListItemStandardSubscription?: ListItemStandardSubscriptionResolvers<ContextType>;
   ListItemCreateUpdate?: ListItemCreateUpdateResolvers<ContextType>;
   ListItemDelete?: ListItemDeleteResolvers<ContextType>;
   ReceiptItem?: ReceiptItemResolvers<ContextType>;

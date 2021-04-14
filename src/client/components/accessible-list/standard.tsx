@@ -1,154 +1,153 @@
 import endOfDay from 'date-fns/endOfDay';
 import startOfDay from 'date-fns/startOfDay';
-import React, { useMemo } from 'react';
+import React, { CSSProperties, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AccessibleList } from './base';
-import { standardFieldsMobile, DefaultMobileKeys, standardModalFields } from './mobile';
-import { getStandardCost, StateStandard, sortStandardItems } from './selectors';
-import { StandardRow, StandardHeader as StyledStandardHeader, HeaderColumn } from './styles';
+import { standardFieldsMobile, StandardMobileKeys } from './mobile';
 import {
-  FieldKey,
-  HeaderProps,
-  PropsItem,
-  FieldsMobile,
-  CustomSelector,
-  Props,
-  ItemProcessor,
-} from './types';
+  getStandardCost,
+  StateStandard,
+  sortStandardItems,
+  getWeeklyCost,
+  dailySelector,
+} from './selectors';
+import * as Styled from './styles';
+import { FieldKey, HeaderProps, Fields, Props, ItemProcessor, DailyRecord } from './types';
 import {
   FormFieldTextInline,
   FormFieldCostInline,
   FormFieldDateInline,
+  FormFieldDate,
+  FormFieldText,
+  FormFieldCost,
 } from '~client/components/form-field';
+import { ModalFields, makeField } from '~client/components/modal-dialog';
 import { useListCrudStandard } from '~client/hooks';
 import { formatCurrency, capitalise } from '~client/modules/format';
-import type { PageListCost, PickUnion, StandardInput, WithIds } from '~client/types';
-import type { ListItem, PageListStandard } from '~client/types/gql';
+import type {
+  Create,
+  GQL,
+  ListItemStandardNative as ListItemStandard,
+  PickUnion,
+  StandardInput,
+  WithIds,
+} from '~client/types';
+import type { ListItemStandardInput, PageListStandard } from '~client/types/gql';
 
-export const standardFields = {
+export const standardFields: Fields<Create<ListItemStandard>> = {
   date: FormFieldDateInline,
   item: FormFieldTextInline,
+  category: FormFieldTextInline,
   cost: FormFieldCostInline,
+  shop: FormFieldTextInline,
 };
 
-const standardSuggestionFields: FieldKey<ListItem>[] = ['item'];
+const standardSuggestionFields: FieldKey<ListItemStandard>[] = ['item', 'category', 'shop'];
 
-const deltaSeed = <I extends StandardInput>(): Partial<I> =>
-  ({
-    date: startOfDay(new Date()),
-  } as Partial<I>);
+const deltaSeed = (): Partial<StandardInput> => ({
+  date: startOfDay(new Date()),
+});
 
-export type ExtraProps = {
+export type ExtraProps = DailyRecord & {
   isFuture: boolean;
 };
 
-const makeItemProcessor = <I extends StandardInput, E extends ExtraProps>(
-  now: Date,
-): ItemProcessor<I, E> => (item): Partial<E> =>
-  ({
-    isFuture: item.date > now,
-  } as Partial<E>);
+const makeItemProcessor = (now: Date): ItemProcessor<ListItemStandard, ExtraProps> => (
+  item,
+): Partial<ExtraProps> => ({
+  isFuture: item.date > now,
+});
 
-export const StandardHeader = <
-  I extends StandardInput,
-  P extends PageListCost,
-  MK extends keyof I
->({
-  page,
-  isMobile,
-  fields,
-  fieldsMobile,
-  categoryLabel = 'category',
-  children,
-}: React.PropsWithChildren<HeaderProps<I, P, MK>>): React.ReactElement<HeaderProps<I, P, MK>> => {
-  const total = useSelector<StateStandard<WithIds<I>, P>, number>(getStandardCost(page));
-  const fieldKeys = (isMobile ? fieldsMobile : fields) as string[];
+export const StandardHeader: React.FC<
+  HeaderProps<GQL<ListItemStandard>, PageListStandard, StandardMobileKeys>
+> = ({ page, isMobile, fields, fieldsMobile, labels, children }) => {
+  const total = useSelector<StateStandard<WithIds<ListItemStandard>, PageListStandard>, number>(
+    getStandardCost(page),
+  );
+  const fieldKeys = isMobile ? fieldsMobile : fields;
+  const weeklyValue = useSelector(getWeeklyCost(page));
+
   return (
-    <StyledStandardHeader data-testid="header">
-      {fieldKeys
-        .filter((field) => field !== 'id')
-        .map((field) => (
-          <HeaderColumn key={field} column={field}>
-            {capitalise(field === 'category' ? categoryLabel : (field as string))}
-          </HeaderColumn>
-        ))}
+    <Styled.StandardHeader data-testid="header">
+      {fieldKeys.map((field) => (
+        <Styled.HeaderColumn key={field} column={field}>
+          {capitalise(labels?.[field] ?? field)}
+        </Styled.HeaderColumn>
+      ))}
       {children}
       {!isMobile && (
-        <HeaderColumn>
-          Total: {formatCurrency(total, { abbreviate: true, precision: 1 })}
-        </HeaderColumn>
+        <Styled.WeeklyHeader>Weekly: {formatCurrency(weeklyValue)}</Styled.WeeklyHeader>
       )}
-    </StyledStandardHeader>
+      {!isMobile && (
+        <Styled.HeaderColumn>
+          Total: {formatCurrency(total, { abbreviate: true, precision: 1 })}
+        </Styled.HeaderColumn>
+      )}
+    </Styled.StandardHeader>
   );
 };
 
-export type PropsStandard<
-  I extends StandardInput,
-  P extends PageListCost,
-  MK extends keyof I = DefaultMobileKeys,
-  E extends Record<string, unknown> = never
-> = PickUnion<Props<I, P, MK, E & ExtraProps>, 'page' | 'color' | 'modalFields'> & {
-  fields?: Props<I, P, MK, E & ExtraProps>['fields'];
-  fieldsMobile?: FieldsMobile<I, MK, E & ExtraProps>;
-  suggestionFields?: FieldKey<I>[];
-  customSelector?: CustomSelector<I, E>;
-  categoryLabel?: string;
-  Header?: React.FC<HeaderProps<I, P, MK>>;
-  Row?: PropsItem<I, P, MK, E & ExtraProps>['Row'];
+export const StandardRow: React.FC<
+  { isMobile: boolean; style?: CSSProperties; odd?: boolean } & Partial<DailyRecord & ExtraProps>
+> = ({ children, dailyTotal, isFuture, isMobile, odd, style }) => (
+  <Styled.StandardRow style={style} odd={odd} isFuture={isFuture}>
+    {children}
+    {!isMobile && !!dailyTotal && (
+      <Styled.DailyTotal>{formatCurrency(dailyTotal)}</Styled.DailyTotal>
+    )}
+  </Styled.StandardRow>
+);
+
+export type StandardLabels = Partial<
+  Record<Exclude<keyof ListItemStandardInput, 'date' | 'item'>, string>
+>;
+
+export type PropsStandard = PickUnion<
+  Props<StandardInput, PageListStandard, StandardMobileKeys, ExtraProps>,
+  'page' | 'color'
+> & {
+  labels?: StandardLabels;
 };
 
-export const AccessibleListStandard = <
-  P extends PageListCost = PageListCost,
-  I extends StandardInput = StandardInput,
-  MK extends keyof I = DefaultMobileKeys,
-  E extends Record<string, unknown> = Record<string, unknown>
->({
-  page,
-  color,
-  fields = standardFields as Props<I, P, MK, E & ExtraProps>['fields'],
-  fieldsMobile = standardFieldsMobile as FieldsMobile<I, MK, E & ExtraProps>,
-  modalFields = (standardModalFields as unknown) as Props<I, P, MK, E & ExtraProps>['modalFields'],
-  suggestionFields,
-  customSelector,
-  categoryLabel = 'category',
-  Header = StandardHeader as Props<I, P, MK>['Header'],
-  Row = StandardRow as PropsStandard<I, P, MK, E>['Row'],
-}: PropsStandard<I, P, MK, E & ExtraProps>): React.ReactElement<
-  PropsStandard<I, P, MK, E & ExtraProps>
-> => {
+export const AccessibleListStandard: React.FC<PropsStandard> = ({ page, color, labels }) => {
   const now = useMemo<Date>(() => endOfDay(new Date()), []);
-  const itemProcessor = useMemo<Props<I, P, MK, E & ExtraProps>['itemProcessor']>(
-    () => makeItemProcessor(now),
-    [now],
+  const itemProcessor = useMemo<
+    Props<ListItemStandard, PageListStandard, StandardMobileKeys, ExtraProps>['itemProcessor']
+  >(() => makeItemProcessor(now), [now]);
+  const headerProps = useMemo(() => ({ labels }), [labels]);
+  const modalFields = useMemo<ModalFields<ListItemStandard>>(
+    () => ({
+      date: makeField('date', FormFieldDate),
+      item: makeField('item', FormFieldText),
+      category: makeField('category', FormFieldText, labels?.category),
+      cost: makeField('cost', FormFieldCost, labels?.cost),
+      shop: makeField('shop', FormFieldText, labels?.shop),
+    }),
+    [labels],
   );
-  const allSuggestionFields = useMemo<FieldKey<I>[]>(
-    () => [...(suggestionFields ?? []), ...standardSuggestionFields] as FieldKey<I>[],
-    [suggestionFields],
-  );
-  const headerProps = useMemo(() => ({ categoryLabel }), [categoryLabel]);
 
   const { onCreate, onUpdate, onDelete } = useListCrudStandard(page as PageListStandard);
 
   return (
-    <AccessibleList<I, P, MK, E & ExtraProps>
+    <AccessibleList<ListItemStandard, PageListStandard, StandardMobileKeys, ExtraProps>
       windowise
       page={page}
       onCreate={onCreate}
       onUpdate={onUpdate}
       onDelete={onDelete}
       color={color}
-      fields={fields}
-      fieldsMobile={fieldsMobile}
+      fields={standardFields}
+      fieldsMobile={standardFieldsMobile}
       modalFields={modalFields}
-      sortItems={sortStandardItems<WithIds<I>>()}
-      suggestionFields={allSuggestionFields}
+      sortItems={sortStandardItems}
+      suggestionFields={standardSuggestionFields}
       deltaSeed={deltaSeed}
-      customSelector={customSelector}
+      customSelector={dailySelector}
       itemProcessor={itemProcessor}
       headerProps={headerProps}
-      Row={Row}
-      Header={Header}
+      Row={StandardRow}
+      Header={StandardHeader}
     />
   );
 };

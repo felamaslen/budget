@@ -30,8 +30,8 @@ import type {
 } from '~client/types/gql';
 
 type ResponseKeys = {
-  created: 'listItemStandardCreated' | 'listItemExtendedCreated' | 'fundCreated';
-  updated: 'listItemStandardUpdated' | 'listItemExtendedUpdated' | 'fundUpdated';
+  created: 'listItemStandardCreated' | 'fundCreated';
+  updated: 'listItemStandardUpdated' | 'fundUpdated';
   deleted: 'listItemDeleted' | 'fundDeleted';
 };
 
@@ -187,25 +187,6 @@ const standardOptions: GenericHookOptions<
   toNative: withNativeDate('date'),
 };
 
-const extendedOptions: GenericHookOptions<
-  ListItemStandardInput,
-  StandardInput,
-  PageListStandard,
-  ListItemCreateUpdate,
-  never
-> = {
-  ...standardOptions,
-  responseKeys: {
-    created: 'listItemExtendedCreated',
-    updated: 'listItemExtendedUpdated',
-    deleted: 'listItemDeleted',
-  },
-  subscriptions: {
-    useOnCreate: gql.useListItemExtendedCreatedSubscription,
-    useOnUpdate: gql.useListItemExtendedUpdatedSubscription,
-  },
-};
-
 const fundOptions: GenericHookOptions<
   FundData,
   FundInputNative,
@@ -245,15 +226,9 @@ function useReceiptSubscription(): () => void {
 
 export function useListSubscriptions(): () => void {
   const onReconnectStandard = useListSubscriptionsGeneric(standardOptions);
-  const onReconnectExtended = useListSubscriptionsGeneric(extendedOptions);
   const onReconnectFunds = useListSubscriptionsGeneric(fundOptions);
 
   const onReconnectReceipt = useReceiptSubscription();
 
-  return composeWithoutArgs(
-    onReconnectStandard,
-    onReconnectExtended,
-    onReconnectFunds,
-    onReconnectReceipt,
-  );
+  return composeWithoutArgs(onReconnectStandard, onReconnectFunds, onReconnectReceipt);
 }

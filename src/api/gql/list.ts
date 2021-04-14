@@ -10,13 +10,6 @@ const query = gql`
     social
   }
 
-  enum PageListExtended {
-    food
-    general
-    holiday
-    social
-  }
-
   type ListItem {
     id: Int!
     item: String!
@@ -25,33 +18,13 @@ const query = gql`
     id: Int!
     date: Date!
     item: String!
-    cost: Int!
-  }
-  type ListItemExtended {
-    id: Int!
-    date: Date!
-    item: String!
     category: String!
     cost: Int!
     shop: String!
   }
-  type ListItemStandardOrExtended {
-    date: Date!
-    item: String!
-    category: String
-    cost: Int!
-    shop: String
-  }
   type ListReadResponse {
     error: String
     items: [ListItemStandard!]!
-    olderExists: Boolean
-    weekly: Int
-    total: Int
-  }
-  type ListReadResponseExtended {
-    error: String
-    items: [ListItemExtended!]!
     olderExists: Boolean
     weekly: Int
     total: Int
@@ -64,7 +37,6 @@ const query = gql`
   }
   extend type Query {
     readList(page: PageListStandard!, offset: Int, limit: Int): ListReadResponse
-    readListExtended(page: PageListExtended!, offset: Int, limit: Int): ListReadResponseExtended
     readListTotals(page: PageListStandard!): ListTotalsResponse
   }
 `;
@@ -79,8 +51,8 @@ const mutation = gql`
     date: String!
     item: String!
     cost: Int!
-    category: String
-    shop: String
+    category: String!
+    shop: String!
   }
 
   input ReceiptInput {
@@ -113,11 +85,18 @@ const mutation = gql`
 `;
 
 const subscription = gql`
+  type ListItemStandardSubscription {
+    date: Date!
+    item: String!
+    category: String!
+    cost: Int!
+    shop: String!
+  }
   type ListItemCreateUpdate {
     page: PageListStandard!
     id: Int!
     fakeId: Int
-    item: ListItemStandardOrExtended!
+    item: ListItemStandardSubscription!
     overviewCost: [Int!]!
     total: Int
     weekly: Int

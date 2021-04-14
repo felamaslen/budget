@@ -2,7 +2,12 @@ import numericHash from 'string-hash';
 import * as funds from './funds';
 
 import { State } from '~client/reducers';
-import { FundPeriod, NetWorthCategoryType, PageListStandard } from '~client/types/enum';
+import {
+  FundPeriod,
+  NetWorthCategoryType,
+  PageListStandard,
+  PageNonStandard,
+} from '~client/types/enum';
 
 export const testNow = new Date('2018-03-13T11:23:01Z');
 
@@ -342,7 +347,7 @@ export const testState: State = {
       date: null,
     },
   },
-  funds: {
+  [PageNonStandard.Funds]: {
     items: funds.testRows,
     __optimistic: funds.testRows.map(() => undefined),
     viewSoldFunds: false,

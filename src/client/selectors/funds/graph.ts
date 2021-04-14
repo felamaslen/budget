@@ -110,21 +110,15 @@ const getReturnsById = memoiseNowAndToday((time, key) =>
   ),
 );
 
-const mapFundOrder = ({ date, fees, units }: Transaction): FundOrder => ({
+const mapFundOrder = ({ date, fees, units, price }: Transaction): FundOrder => ({
   time: getUnixTime(date),
   isSell: units < 0,
   isReinvestment: fees < 0,
+  size: Math.abs(units * price),
 });
 
 const sortFundOrders = (orders: FundOrder[]): FundOrder[] =>
-  orders
-    .slice()
-    .sort((a, b) => a.time - b.time)
-    .reduce<FundOrder[]>(
-      (last, order) =>
-        last.some((compare) => compare.time === order.time) ? last : [...last, order],
-      [],
-    );
+  orders.slice().sort((a, b) => a.time - b.time);
 
 export const getFundItems = memoiseNowAndToday((time, key) =>
   createSelector(

@@ -67,23 +67,6 @@ describe('Standard list resolvers', () => {
           date
           item
           cost
-        }
-        olderExists
-        weekly
-        total
-      }
-    }
-  `;
-
-  const readQueryExtended = gql`
-    query ReadListExtended($page: PageListExtended!, $offset: Int, $limit: Int) {
-      readListExtended(page: $page, offset: $offset, limit: $limit) {
-        error
-        items {
-          id
-          date
-          item
-          cost
           category
           shop
         }
@@ -114,8 +97,10 @@ describe('Standard list resolvers', () => {
 
   const income = {
     date: '2020-04-20',
-    item: 'Salary (my job)',
+    item: 'Salary',
     cost: 328967, // bit of a misnomer for this route :)
+    category: 'Mainline',
+    shop: 'My company',
   };
   const incomeDelta = {
     item: 'Different salary (changed jobs)',
@@ -125,6 +110,8 @@ describe('Standard list resolvers', () => {
     date: '2020-04-02',
     item: 'Rent',
     cost: 174910,
+    category: 'Housing',
+    shop: 'My landlord',
   };
   const billDelta = { item: 'Mortgage', cost: 155602 };
 
@@ -165,23 +152,21 @@ describe('Standard list resolvers', () => {
   const socialDelta = { item: 'Garlic bread' };
 
   describe.each`
-    page                | extended | testItem   | delta
-    ${PageList.Income}  | ${false} | ${income}  | ${incomeDelta}
-    ${PageList.Bills}   | ${false} | ${bill}    | ${billDelta}
-    ${PageList.Food}    | ${true}  | ${food}    | ${foodDelta}
-    ${PageList.General} | ${true}  | ${general} | ${generalDelta}
-    ${PageList.Holiday} | ${true}  | ${holiday} | ${holidayDelta}
-    ${PageList.Social}  | ${true}  | ${social}  | ${socialDelta}
+    page                | testItem   | delta
+    ${PageList.Income}  | ${income}  | ${incomeDelta}
+    ${PageList.Bills}   | ${bill}    | ${billDelta}
+    ${PageList.Food}    | ${food}    | ${foodDelta}
+    ${PageList.General} | ${general} | ${generalDelta}
+    ${PageList.Holiday} | ${holiday} | ${holidayDelta}
+    ${PageList.Social}  | ${social}  | ${socialDelta}
   `(
     '$page resolvers',
     ({
       page,
-      extended,
       testItem,
       delta,
     }: {
       page: PageList;
-      extended: boolean;
       testItem: RawDate<ListItemStandardInput, 'date'>;
       delta: Partial<RawDate<ListItemStandardInput, 'date'>>;
     }) => {
@@ -250,14 +235,14 @@ describe('Standard list resolvers', () => {
         ): Promise<Maybe<ListReadResponse>> => {
           await app.authGqlClient.clearStore();
           const res = await app.authGqlClient.query<Query, QueryReadListArgs>({
-            query: extended ? readQueryExtended : readQuery,
+            query: readQuery,
             variables: {
               page,
               offset: pageNumber ?? null,
               limit: limit ?? null,
             },
           });
-          return (extended ? res.data?.readListExtended : res.data?.readList) ?? null;
+          return res.data?.readList ?? null;
         };
 
         const setup = async (

@@ -42,6 +42,8 @@ describe('List mutations', () => {
     date: new Date('2020-04-20'),
     item: 'Some item',
     cost: 341,
+    category: 'Some category',
+    shop: 'Some shop',
   };
 
   const testDelta: Partial<StandardInput> = {

@@ -72,10 +72,13 @@ export const Initial = gql`
         id
         date
         item
+        category
         cost
+        shop
       }
       olderExists
       total
+      weekly
     }
 
     bills: readList(page: bills, offset: 0, limit: 100) {
@@ -84,13 +87,16 @@ export const Initial = gql`
         id
         date
         item
+        category
         cost
+        shop
       }
       olderExists
       total
+      weekly
     }
 
-    food: readListExtended(page: food, offset: 0, limit: 100) {
+    food: readList(page: food, offset: 0, limit: 100) {
       error
       items {
         id
@@ -105,7 +111,7 @@ export const Initial = gql`
       weekly
     }
 
-    general: readListExtended(page: general, offset: 0, limit: 100) {
+    general: readList(page: general, offset: 0, limit: 100) {
       error
       items {
         id
@@ -120,7 +126,7 @@ export const Initial = gql`
       weekly
     }
 
-    holiday: readListExtended(page: holiday, offset: 0, limit: 100) {
+    holiday: readList(page: holiday, offset: 0, limit: 100) {
       error
       items {
         id
@@ -135,7 +141,7 @@ export const Initial = gql`
       weekly
     }
 
-    social: readListExtended(page: social, offset: 0, limit: 100) {
+    social: readList(page: social, offset: 0, limit: 100) {
       error
       items {
         id

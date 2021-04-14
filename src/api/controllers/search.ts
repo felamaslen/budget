@@ -33,8 +33,8 @@ export const getSuggestions = async (
   }
 
   const { page, column } = args;
-  if (['food', 'general'].includes(page) && column === 'item') {
-    const nextField = 'category'; // TODO: make this dynamic / define it somewhere
+  if (column === 'item') {
+    const nextField = 'category';
 
     const result = await db.query<{ value: string; nextField: string }>(
       getSearchResults(uid, page, nextField, getColumnResults(uid, args)),

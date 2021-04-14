@@ -23,15 +23,11 @@ import {
   ListItemStandard,
   ListItemInput,
   ListItem,
-  ListItemExtended,
-  ListReadResponse,
-  ListReadResponseExtended,
   MutationCreateListItemArgs,
   MutationDeleteListItemArgs,
   MutationUpdateListItemArgs,
   PageListCost,
   QueryReadListArgs,
-  QueryReadListExtendedArgs,
   RawDate,
   TypeMap,
   QueryReadListTotalsArgs,
@@ -115,13 +111,20 @@ async function getPublishedProperties(
   return { overviewCost, ...listTotals };
 }
 
-async function readListData<I extends ListItemStandard>(
+const typeMapStandard: TypeMap<ListItemStandard> = {
+  date: 'date',
+  item: 'varchar',
+  cost: 'int4',
+  category: 'varchar',
+  shop: 'varchar',
+};
+
+export async function readList(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  args: QueryReadListArgs | QueryReadListExtendedArgs,
-  typeMap: TypeMap<RawDate<I, 'date'>>,
+  args: QueryReadListArgs,
 ): Promise<{
-  items: I[];
+  items: ListItemStandard[];
   total: number;
   weekly: number;
   olderExists: boolean;
@@ -130,12 +133,12 @@ async function readListData<I extends ListItemStandard>(
   const offset = args.offset ?? 0;
 
   const [rows, { total, weekly }, olderExists] = await Promise.all([
-    selectListItems<I>(db, uid, args.page, typeMap, limit, offset),
+    selectListItems<ListItemStandard>(db, uid, args.page, typeMapStandard, limit, offset),
     getListTotals(db, uid, args.page),
     getOlderExists(db, uid, args.page, limit, offset),
   ]);
 
-  const items = rows.map<I>((row) => row);
+  const items = rows.map<ListItemStandard>((row) => row);
 
   return { items, total, weekly, olderExists };
 }
@@ -147,19 +150,9 @@ const baseController = makeCrudController<ListItemStandard>({
   withUid: true,
 });
 
-const typeMapStandard: TypeMap<ListItemStandard> = {
-  date: 'date',
-  item: 'varchar',
-  cost: 'int4',
-};
-
-const processInput = (
-  input: ListItemStandardInput,
-): Create<ListItemStandard> | Create<ListItemExtended> => ({
+const processInput = (input: ListItemStandardInput): Create<ListItemStandard> => ({
   ...input,
   date: new Date(input.date),
-  category: input.category ?? undefined,
-  shop: input.shop ?? undefined,
 });
 
 export async function createList(
@@ -227,28 +220,6 @@ export async function createReceipt(
 
   await pubsub.publish(`${PubSubTopic.ReceiptCreated}.${uid}`, receipt);
   return receipt;
-}
-
-export async function readList(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  args: QueryReadListArgs,
-): Promise<ListReadResponse> {
-  const result = await readListData<ListItemStandard>(db, uid, args, typeMapStandard);
-  return result;
-}
-
-export async function readListExtended(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  args: QueryReadListExtendedArgs,
-): Promise<ListReadResponseExtended> {
-  const result = await readListData<ListItemExtended>(db, uid, args, {
-    ...typeMapStandard,
-    category: 'varchar',
-    shop: 'varchar',
-  });
-  return result;
 }
 
 export async function readListTotals(

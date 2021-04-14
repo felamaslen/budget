@@ -1,10 +1,8 @@
 import { generateFakeId } from '~client/modules/data';
 import type { GQL, Id, PageList, WithIds } from '~client/types';
 import type {
-  ListItemExtended,
   ListItemInput,
   ListReadResponse,
-  ListReadResponseExtended,
   ListItemStandard,
   Maybe,
   ReceiptItem,
@@ -123,13 +121,13 @@ export type MoreListDataReceived<P extends string> = {
   type: ListActionType.MoreReceived;
   page: P;
   res: Omit<GQL<ListReadResponse>, 'items'> & {
-    items: (ListItemStandard | ListItemExtended)[];
+    items: ListItemStandard[];
   };
 };
 
 export const moreListDataReceived = <P extends PageList>(
   page: P,
-  res: P extends PageList ? ListReadResponse | ListReadResponseExtended : never,
+  res: P extends PageList ? ListReadResponse : never,
 ): MoreListDataReceived<P> => ({
   type: ListActionType.MoreReceived,
   page,

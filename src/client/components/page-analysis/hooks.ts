@@ -28,12 +28,7 @@ import type {
   MainBlockName,
   NativeDate,
 } from '~client/types';
-import {
-  AnalysisPage,
-  AnalysisPeriod,
-  AnalysisGroupBy,
-  PageListStandard,
-} from '~client/types/enum';
+import { AnalysisPage, AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
 import type {
   AnalysisDeepQuery,
   AnalysisQuery,
@@ -99,9 +94,7 @@ export function getBlocks(
         total: block.total,
         color: getTreeColor(block.name),
         subTree: block.subTree,
-        hasBreakdown:
-          isStandardListPage(block.name) &&
-          ![PageListStandard.Income, PageListStandard.Bills].includes(block.name),
+        hasBreakdown: isStandardListPage(block.name),
       })),
   );
 }

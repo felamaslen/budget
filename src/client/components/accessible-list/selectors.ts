@@ -1,22 +1,23 @@
 import { compose } from '@typed/compose';
+import isSameDay from 'date-fns/isSameDay';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
-import type { State } from './types';
+import type { CustomSelector, DailyRecord, State } from './types';
 import { IDENTITY, sortByKey } from '~client/modules/data';
 import { State as CrudState } from '~client/reducers/crud';
 import { DailyState } from '~client/reducers/list';
 import { withoutDeleted } from '~client/selectors/crud';
 import { getRawItems } from '~client/selectors/list';
-import type { Id, ListItemStandardNative as ListItemStandard, PageList } from '~client/types';
-import type { ListItem, ListItemInput } from '~client/types/gql';
+import type { GQL, Id, ListItemStandardNative as ListItemStandard, PageList } from '~client/types';
+import type { ListItem, ListItemInput, PageListStandard } from '~client/types/gql';
 
 export type StateStandard<I extends ListItemStandard, P extends string> = {
   [page in P]: DailyState<I>;
 };
 
 export const getStandardCost = moize(
-  <I extends ListItemStandard, P extends string, S extends StateStandard<I, P>>(page: P) => (
+  <S extends StateStandard<ListItemStandard, PageListStandard>>(page: PageListStandard) => (
     state: S,
   ): number => state[page].total,
 );
@@ -43,12 +44,34 @@ export const getItem = moize(
     state[page].items.find((item) => item.id === id) as I,
 );
 
-export const sortStandardItems = moize(<I extends ListItemStandard>() =>
-  sortByKey<'item' | 'date', I>({ key: 'date', order: -1 }, 'item'),
+export const sortStandardItems = sortByKey<'item' | 'date', ListItemStandard>(
+  { key: 'date', order: -1 },
+  'item',
 );
 
 export const getWeeklyCost = moize(
   <I extends ListItemStandard, P extends string, S extends StateStandard<I, P>>(page: P) => (
     state: S,
   ): number => state[page].weekly,
+);
+
+export const dailySelector: CustomSelector<ListItemStandard, DailyRecord> = moize(
+  (sortedItems: GQL<ListItemStandard>[]): Record<Id, DailyRecord> =>
+    sortedItems.reduce<{ dailySum: number; record: Record<Id, DailyRecord> }>(
+      (last, { id, date, cost }, index) => {
+        if (index === sortedItems.length - 1 || !isSameDay(date, sortedItems[index + 1].date)) {
+          return {
+            dailySum: 0,
+            record: { ...last.record, [id]: { dailyTotal: last.dailySum + cost } },
+          };
+        }
+
+        return { dailySum: last.dailySum + cost, record: last.record };
+      },
+      {
+        dailySum: 0,
+        record: {},
+      },
+    ).record,
+  { maxSize: 1 },
 );

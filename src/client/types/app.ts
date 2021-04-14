@@ -1,4 +1,4 @@
-import type { PageListExtended, PageListStandard } from './gql';
+import type { PageListStandard } from './gql';
 
 export enum PageNonStandard {
   Overview = 'overview',
@@ -6,8 +6,6 @@ export enum PageNonStandard {
   Funds = 'funds',
 }
 
-export type PageListCost = PageListStandard | PageListExtended;
+export type Page = PageNonStandard | PageListStandard;
 
-export type Page = PageNonStandard | PageListStandard | PageListExtended;
-
-export type PageList = PageNonStandard.Funds | PageListCost;
+export type PageList = PageNonStandard.Funds | PageListStandard;

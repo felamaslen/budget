@@ -1,15 +1,21 @@
 import React from 'react';
 import type { RouteComponentProps } from 'react-router';
 
-import { AccessibleListStandard, AccessibleListDaily } from '~client/components/accessible-list';
+import { AccessibleListStandard } from '~client/components/accessible-list';
+import type { StandardLabels } from '~client/components/accessible-list/standard';
 import { pageColor } from '~client/modules/color';
 import { colors } from '~client/styled/variables';
-import { PageListStandard, PageListExtended } from '~client/types/enum';
+import { PageListStandard } from '~client/types/enum';
 
 export * from '~client/components/page-funds';
 
+const labelsIncome: StandardLabels = { cost: 'Value', shop: 'Place' };
 export const Income: React.FC<RouteComponentProps> = () => (
-  <AccessibleListStandard page={PageListStandard.Income} color={pageColor(colors.income.main)} />
+  <AccessibleListStandard
+    page={PageListStandard.Income}
+    color={pageColor(colors.income.main)}
+    labels={labelsIncome}
+  />
 );
 
 export const Bills: React.FC<RouteComponentProps> = () => (
@@ -17,25 +23,22 @@ export const Bills: React.FC<RouteComponentProps> = () => (
 );
 
 export const Food: React.FC<RouteComponentProps> = () => (
-  <AccessibleListDaily page={PageListExtended.Food} color={pageColor(colors.food.main)} />
+  <AccessibleListStandard page={PageListStandard.Food} color={pageColor(colors.food.main)} />
 );
 
 export const General: React.FC<RouteComponentProps> = () => (
-  <AccessibleListDaily page={PageListExtended.General} color={pageColor(colors.general.main)} />
+  <AccessibleListStandard page={PageListStandard.General} color={pageColor(colors.general.main)} />
 );
 
+const labelsHoliday: StandardLabels = { category: 'Holiday' };
 export const Holiday: React.FC<RouteComponentProps> = () => (
-  <AccessibleListDaily
-    page={PageListExtended.Holiday}
+  <AccessibleListStandard
+    page={PageListStandard.Holiday}
     color={pageColor(colors.holiday.main)}
-    categoryLabel="holiday"
+    labels={labelsHoliday}
   />
 );
 
 export const Social: React.FC<RouteComponentProps> = () => (
-  <AccessibleListDaily
-    page={PageListExtended.Social}
-    color={pageColor(colors.social.main)}
-    categoryLabel="society"
-  />
+  <AccessibleListStandard page={PageListStandard.Social} color={pageColor(colors.social.main)} />
 );

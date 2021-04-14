@@ -113,15 +113,36 @@ export async function generateFunds(uid: number, db: Knex): Promise<void> {
 export async function generateListData(uid: number, db: Knex): Promise<void> {
   await db
     .insert([
-      { uid, date: '2015-04-18', item: 'Salary', cost: 365202 },
-      { uid, date: '2018-03-24', item: 'Salary', cost: 433201 },
+      {
+        uid,
+        date: '2015-04-18',
+        item: 'Salary',
+        category: 'Main job',
+        cost: 365202,
+        shop: 'My company',
+      },
+      {
+        uid,
+        date: '2018-03-24',
+        item: 'Salary',
+        category: 'Side work',
+        cost: 433201,
+        shop: 'Contract',
+      },
     ])
     .into('income');
 
   await db
     .insert([
-      { uid, date: '2018-03-25', item: 'Rent', cost: 72500 },
-      { uid, date: '2018-03-25', item: 'Electricity', cost: 3902 },
+      { uid, date: '2018-03-25', item: 'Rent', category: 'Housing', cost: 72500, shop: 'My bank' },
+      {
+        uid,
+        date: '2018-03-25',
+        item: 'Electricity',
+        category: 'Utilities',
+        cost: 3902,
+        shop: 'My energy company',
+      },
     ])
     .into('bills');
 

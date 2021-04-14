@@ -1,4 +1,4 @@
-import type { Padding, PageListCost, HistoryOptions } from '~client/types';
+import type { Padding, HistoryOptions } from '~client/types';
 import { FundPeriod, PageListStandard } from '~client/types/enum';
 import type { QueryFundHistoryArgs } from '~client/types/gql';
 
@@ -20,7 +20,7 @@ export const GRAPH_CASHFLOW_PADDING: Padding = [40, 0, 0, 0];
 
 export const GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS = 30;
 
-type SpendCategory = { name: PageListCost; key: number };
+type SpendCategory = { name: PageListStandard; key: number };
 
 export const GRAPH_SPEND_CATEGORIES: SpendCategory[] = [
   { name: PageListStandard.Bills, key: 15 },

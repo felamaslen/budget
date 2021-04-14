@@ -1,27 +1,27 @@
-date,item,cost
--18+14,Salary (my job),225810
--17+11,Salary (my job),225810
--16+12,Salary (my job),225811
--15+15,Salary (my job),225810
--14+15,Salary (my job),271103
--13+24,Salary (my job),271112
--12+01,Salary (my job),270993
--12+11,Salary (other job),186650
--11+28,Salary (my job),322305
--10+17,Salary (my job),322305
--09+20,Salary (my job),322305
--08+19,Salary (my job),322305
--07+15,Salary (my job),322305
--06+27,Salary (my job),322305
--05+13,Salary (my job),322306
--04+05,Salary (my job),322305
--03+22,Salary (my job),322352
--02+10,Salary (my job),322305
--01+16,Salary (my job),322305
-+00+14,Salary (new job),339217
-+01+13,Salary (new job),339217
-+02+20,Salary (new job),339218
-+03+21,Salary (new job),339217
-+04+19,Salary (new job),330229
-+06+23,Salary (new job),331108
-+07+22,Salary (new job),331026
+date,item,category,cost,shop
+-18+14,Salary (my job),Main work,225810,My company
+-17+11,Salary (my job),Main work,225810,My company
+-16+12,Salary (my job),Main work,225811,My company
+-15+15,Salary (my job),Main work,225810,My company
+-14+15,Salary (my job),Main work,271103,My company
+-13+24,Salary (my job),Main work,271112,My company
+-12+01,Salary (my job),Main work,270993,My company
+-12+11,Salary (other job),Side work,186650,Other company
+-11+28,Salary (my job),Main work,322305,My company 
+-10+17,Salary (my job),Main work,322305,My company
+-09+20,Salary (my job),Main work,322305,My company
+-08+19,Salary (my job),Main work,322305,My company
+-07+15,Salary (my job),Main work,322305,My company
+-06+27,Salary (my job),Main work,322305,My company
+-05+13,Salary (my job),Main work,322306,My company
+-04+05,Salary (my job),Main work,322305,My company
+-03+22,Salary (my job),Main work,322352,My company
+-02+10,Salary (my job),Main work,322305,My company
+-01+16,Salary (my job),Main work,322305,My company
++00+14,Salary (new job),Main work,339217,New company
++01+13,Salary (new job),Main work,339217,New company
++02+20,Salary (new job),Main work,339218,New company
++03+21,Salary (new job),Main work,339217,New company
++04+19,Salary (new job),Main work,330229,New company
++06+23,Salary (new job),Main work,331108,New company
++07+22,Salary (new job),Main work,331026,New company

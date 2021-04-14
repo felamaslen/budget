@@ -50,12 +50,16 @@ describe('<AccessibleList />', () => {
           date: new Date('2020-04-13'),
           item: 'Item b',
           cost: 9881,
+          category: 'category one',
+          shop: 'shop one',
         },
         {
           id: numericHash('real-id-a'),
           date: new Date('2020-04-20'),
           item: 'Item a',
           cost: 287,
+          category: 'category one',
+          shop: 'shop one',
         },
       ],
       __optimistic: [undefined, undefined],
@@ -121,7 +125,7 @@ describe('<AccessibleList />', () => {
     const utils = render(
       <GQLProviderMock>
         <Provider store={store}>
-          <AccessibleListStandard<MyPage> page={myPage} />
+          <AccessibleListStandard page={myPage} />
         </Provider>
       </GQLProviderMock>,
       renderOptions,
@@ -205,6 +209,8 @@ describe('<AccessibleList />', () => {
             date: new Date('2020-03-01'),
             item: 'Item c',
             cost: 176,
+            category: 'category one',
+            shop: 'shop one',
           },
         ],
         __optimistic: [...testState[myPage].__optimistic, RequestType.delete],
@@ -433,7 +439,13 @@ describe('<AccessibleList />', () => {
         addButton: HTMLButtonElement;
       }> => {
         const { inputs, createForm, renderResult } = getInputs();
-        const [dateInput, itemInput, costInput] = inputs as HTMLInputElement[];
+        const [
+          dateInput,
+          itemInput,
+          categoryInput,
+          costInput,
+          shopInput,
+        ] = inputs as HTMLInputElement[];
         const { getByText } = within(createForm);
         const addButton = getByText('Add') as HTMLButtonElement;
 
@@ -456,6 +468,15 @@ describe('<AccessibleList />', () => {
           fireEvent.blur(itemInput);
         });
         act(() => {
+          fireEvent.focus(categoryInput);
+        });
+        act(() => {
+          fireEvent.change(categoryInput, { target: { value: 'Different category innit' } });
+        });
+        act(() => {
+          fireEvent.blur(categoryInput);
+        });
+        act(() => {
           fireEvent.focus(costInput);
         });
         act(() => {
@@ -463,6 +484,15 @@ describe('<AccessibleList />', () => {
         });
         act(() => {
           fireEvent.blur(costInput);
+        });
+        act(() => {
+          fireEvent.focus(shopInput);
+        });
+        act(() => {
+          fireEvent.change(shopInput, { target: { value: 'Different shop innit' } });
+        });
+        act(() => {
+          fireEvent.blur(shopInput);
         });
 
         act(() => {
@@ -480,11 +510,14 @@ describe('<AccessibleList />', () => {
 
         await waitFor(() => {
           expect(onCreate).toHaveBeenCalledTimes(1);
-          expect(onCreate).toHaveBeenCalledWith({
-            date: new Date('2020-06-05'),
-            item: 'Different item innit',
-            cost: 1065,
-          });
+        });
+
+        expect(onCreate).toHaveBeenCalledWith({
+          date: new Date('2020-06-05'),
+          item: 'Different item innit',
+          category: 'Different category innit',
+          cost: 1065,
+          shop: 'Different shop innit',
         });
 
         act(() => {

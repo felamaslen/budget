@@ -77,7 +77,6 @@ export type Query = {
   overviewPreview?: Maybe<OverviewPreview>;
   readFunds?: Maybe<ReadFundsResponse>;
   readList?: Maybe<ListReadResponse>;
-  readListExtended?: Maybe<ListReadResponseExtended>;
   readListTotals?: Maybe<ListTotalsResponse>;
   readNetWorthCategories?: Maybe<Array<NetWorthCategory>>;
   readNetWorthEntries?: Maybe<NetWorthEntryOverview>;
@@ -134,13 +133,6 @@ export type QueryOverviewPreviewArgs = {
 
 export type QueryReadListArgs = {
   page: PageListStandard;
-  offset?: Maybe<Scalars['Int']>;
-  limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryReadListExtendedArgs = {
-  page: PageListExtended;
   offset?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
 };
@@ -541,13 +533,6 @@ export enum PageListStandard {
   Social = 'social'
 }
 
-export enum PageListExtended {
-  Food = 'food',
-  General = 'general',
-  Holiday = 'holiday',
-  Social = 'social'
-}
-
 export type ListItem = {
   __typename?: 'ListItem';
   id: Scalars['Int'];
@@ -559,41 +544,15 @@ export type ListItemStandard = {
   id: Scalars['Int'];
   date: Scalars['Date'];
   item: Scalars['String'];
-  cost: Scalars['Int'];
-};
-
-export type ListItemExtended = {
-  __typename?: 'ListItemExtended';
-  id: Scalars['Int'];
-  date: Scalars['Date'];
-  item: Scalars['String'];
   category: Scalars['String'];
   cost: Scalars['Int'];
   shop: Scalars['String'];
-};
-
-export type ListItemStandardOrExtended = {
-  __typename?: 'ListItemStandardOrExtended';
-  date: Scalars['Date'];
-  item: Scalars['String'];
-  category?: Maybe<Scalars['String']>;
-  cost: Scalars['Int'];
-  shop?: Maybe<Scalars['String']>;
 };
 
 export type ListReadResponse = {
   __typename?: 'ListReadResponse';
   error?: Maybe<Scalars['String']>;
   items: Array<ListItemStandard>;
-  olderExists?: Maybe<Scalars['Boolean']>;
-  weekly?: Maybe<Scalars['Int']>;
-  total?: Maybe<Scalars['Int']>;
-};
-
-export type ListReadResponseExtended = {
-  __typename?: 'ListReadResponseExtended';
-  error?: Maybe<Scalars['String']>;
-  items: Array<ListItemExtended>;
   olderExists?: Maybe<Scalars['Boolean']>;
   weekly?: Maybe<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
@@ -615,8 +574,8 @@ export type ListItemStandardInput = {
   date: Scalars['String'];
   item: Scalars['String'];
   cost: Scalars['Int'];
-  category?: Maybe<Scalars['String']>;
-  shop?: Maybe<Scalars['String']>;
+  category: Scalars['String'];
+  shop: Scalars['String'];
 };
 
 export type ReceiptInput = {
@@ -632,12 +591,21 @@ export type ReceiptCreated = {
   items?: Maybe<Array<ReceiptItem>>;
 };
 
+export type ListItemStandardSubscription = {
+  __typename?: 'ListItemStandardSubscription';
+  date: Scalars['Date'];
+  item: Scalars['String'];
+  category: Scalars['String'];
+  cost: Scalars['Int'];
+  shop: Scalars['String'];
+};
+
 export type ListItemCreateUpdate = {
   __typename?: 'ListItemCreateUpdate';
   page: PageListStandard;
   id: Scalars['Int'];
   fakeId?: Maybe<Scalars['Int']>;
-  item: ListItemStandardOrExtended;
+  item: ListItemStandardSubscription;
   overviewCost: Array<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
   weekly?: Maybe<Scalars['Int']>;
@@ -1455,45 +1423,45 @@ export type InitialQuery = (
     & FundHistoryPartsFragment
   )>, income?: Maybe<(
     { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total'>
+    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
     & { items: Array<(
       { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'cost'>
+      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
     )> }
   )>, bills?: Maybe<(
     { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total'>
+    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
     & { items: Array<(
       { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'cost'>
+      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
     )> }
   )>, food?: Maybe<(
-    { __typename?: 'ListReadResponseExtended' }
-    & Pick<ListReadResponseExtended, 'error' | 'olderExists' | 'total' | 'weekly'>
+    { __typename?: 'ListReadResponse' }
+    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
     & { items: Array<(
-      { __typename?: 'ListItemExtended' }
-      & Pick<ListItemExtended, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
+      { __typename?: 'ListItemStandard' }
+      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
     )> }
   )>, general?: Maybe<(
-    { __typename?: 'ListReadResponseExtended' }
-    & Pick<ListReadResponseExtended, 'error' | 'olderExists' | 'total' | 'weekly'>
+    { __typename?: 'ListReadResponse' }
+    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
     & { items: Array<(
-      { __typename?: 'ListItemExtended' }
-      & Pick<ListItemExtended, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
+      { __typename?: 'ListItemStandard' }
+      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
     )> }
   )>, holiday?: Maybe<(
-    { __typename?: 'ListReadResponseExtended' }
-    & Pick<ListReadResponseExtended, 'error' | 'olderExists' | 'total' | 'weekly'>
+    { __typename?: 'ListReadResponse' }
+    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
     & { items: Array<(
-      { __typename?: 'ListItemExtended' }
-      & Pick<ListItemExtended, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
+      { __typename?: 'ListItemStandard' }
+      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
     )> }
   )>, social?: Maybe<(
-    { __typename?: 'ListReadResponseExtended' }
-    & Pick<ListReadResponseExtended, 'error' | 'olderExists' | 'total' | 'weekly'>
+    { __typename?: 'ListReadResponse' }
+    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
     & { items: Array<(
-      { __typename?: 'ListItemExtended' }
-      & Pick<ListItemExtended, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
+      { __typename?: 'ListItemStandard' }
+      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
     )> }
   )> }
 );
@@ -1512,26 +1480,7 @@ export type MoreListDataStandardQuery = (
     & Pick<ListReadResponse, 'olderExists'>
     & { items: Array<(
       { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'cost'>
-    )> }
-  )> }
-);
-
-export type MoreListDataExtendedQueryVariables = Exact<{
-  page: PageListExtended;
-  offset: Scalars['Int'];
-  limit: Scalars['Int'];
-}>;
-
-
-export type MoreListDataExtendedQuery = (
-  { __typename?: 'Query' }
-  & { readListExtended?: Maybe<(
-    { __typename?: 'ListReadResponseExtended' }
-    & Pick<ListReadResponseExtended, 'olderExists'>
-    & { items: Array<(
-      { __typename?: 'ListItemExtended' }
-      & Pick<ListItemExtended, 'id' | 'date' | 'item' | 'cost' | 'category' | 'shop'>
+      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'cost' | 'category' | 'shop'>
     )> }
   )> }
 );
@@ -1711,25 +1660,10 @@ export type ListItemStandardCreatedSubscription = (
   { __typename?: 'Subscription' }
   & { listItemStandardCreated: (
     { __typename?: 'ListItemCreateUpdate' }
-    & Pick<ListItemCreateUpdate, 'page' | 'id' | 'fakeId' | 'overviewCost'>
-    & { item: (
-      { __typename?: 'ListItemStandardOrExtended' }
-      & Pick<ListItemStandardOrExtended, 'date' | 'item' | 'cost'>
-    ) }
-  ) }
-);
-
-export type ListItemExtendedCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ListItemExtendedCreatedSubscription = (
-  { __typename?: 'Subscription' }
-  & { listItemExtendedCreated: (
-    { __typename?: 'ListItemCreateUpdate' }
     & Pick<ListItemCreateUpdate, 'page' | 'id' | 'fakeId' | 'overviewCost' | 'total' | 'weekly'>
     & { item: (
-      { __typename?: 'ListItemStandardOrExtended' }
-      & Pick<ListItemStandardOrExtended, 'date' | 'item' | 'category' | 'cost' | 'shop'>
+      { __typename?: 'ListItemStandardSubscription' }
+      & Pick<ListItemStandardSubscription, 'date' | 'item' | 'category' | 'cost' | 'shop'>
     ) }
   ) }
 );
@@ -1741,25 +1675,10 @@ export type ListItemStandardUpdatedSubscription = (
   { __typename?: 'Subscription' }
   & { listItemStandardUpdated: (
     { __typename?: 'ListItemCreateUpdate' }
-    & Pick<ListItemCreateUpdate, 'page' | 'id' | 'overviewCost'>
-    & { item: (
-      { __typename?: 'ListItemStandardOrExtended' }
-      & Pick<ListItemStandardOrExtended, 'date' | 'item' | 'cost'>
-    ) }
-  ) }
-);
-
-export type ListItemExtendedUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ListItemExtendedUpdatedSubscription = (
-  { __typename?: 'Subscription' }
-  & { listItemExtendedUpdated: (
-    { __typename?: 'ListItemCreateUpdate' }
     & Pick<ListItemCreateUpdate, 'page' | 'id' | 'overviewCost' | 'total' | 'weekly'>
     & { item: (
-      { __typename?: 'ListItemStandardOrExtended' }
-      & Pick<ListItemStandardOrExtended, 'date' | 'item' | 'category' | 'cost' | 'shop'>
+      { __typename?: 'ListItemStandardSubscription' }
+      & Pick<ListItemStandardSubscription, 'date' | 'item' | 'category' | 'cost' | 'shop'>
     ) }
   ) }
 );
@@ -2384,10 +2303,13 @@ export const InitialDocument = gql`
       id
       date
       item
+      category
       cost
+      shop
     }
     olderExists
     total
+    weekly
   }
   bills: readList(page: bills, offset: 0, limit: 100) {
     error
@@ -2395,12 +2317,15 @@ export const InitialDocument = gql`
       id
       date
       item
+      category
       cost
+      shop
     }
     olderExists
     total
+    weekly
   }
-  food: readListExtended(page: food, offset: 0, limit: 100) {
+  food: readList(page: food, offset: 0, limit: 100) {
     error
     items {
       id
@@ -2414,7 +2339,7 @@ export const InitialDocument = gql`
     total
     weekly
   }
-  general: readListExtended(page: general, offset: 0, limit: 100) {
+  general: readList(page: general, offset: 0, limit: 100) {
     error
     items {
       id
@@ -2428,7 +2353,7 @@ export const InitialDocument = gql`
     total
     weekly
   }
-  holiday: readListExtended(page: holiday, offset: 0, limit: 100) {
+  holiday: readList(page: holiday, offset: 0, limit: 100) {
     error
     items {
       id
@@ -2442,7 +2367,7 @@ export const InitialDocument = gql`
     total
     weekly
   }
-  social: readListExtended(page: social, offset: 0, limit: 100) {
+  social: readList(page: social, offset: 0, limit: 100) {
     error
     items {
       id
@@ -2473,23 +2398,6 @@ export const MoreListDataStandardDocument = gql`
       date
       item
       cost
-    }
-    olderExists
-  }
-}
-    `;
-
-export function useMoreListDataStandardQuery(options: Omit<Urql.UseQueryArgs<MoreListDataStandardQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<MoreListDataStandardQuery>({ query: MoreListDataStandardDocument, ...options });
-};
-export const MoreListDataExtendedDocument = gql`
-    query MoreListDataExtended($page: PageListExtended!, $offset: Int!, $limit: Int!) {
-  readListExtended(page: $page, offset: $offset, limit: $limit) {
-    items {
-      id
-      date
-      item
-      cost
       category
       shop
     }
@@ -2498,8 +2406,8 @@ export const MoreListDataExtendedDocument = gql`
 }
     `;
 
-export function useMoreListDataExtendedQuery(options: Omit<Urql.UseQueryArgs<MoreListDataExtendedQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<MoreListDataExtendedQuery>({ query: MoreListDataExtendedDocument, ...options });
+export function useMoreListDataStandardQuery(options: Omit<Urql.UseQueryArgs<MoreListDataStandardQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<MoreListDataStandardQuery>({ query: MoreListDataStandardDocument, ...options });
 };
 export const OverviewOldDocument = gql`
     query OverviewOld($now: Date) {
@@ -2694,16 +2602,22 @@ export function useFundAllocationTargetsUpdatedSubscription<TData = FundAllocati
 };
 export const ListItemStandardCreatedDocument = gql`
     subscription ListItemStandardCreated {
-  listItemStandardCreated: listItemCreated(pages: [income, bills]) {
+  listItemStandardCreated: listItemCreated(
+    pages: [income, bills, food, general, holiday, social]
+  ) {
     page
     id
     fakeId
     item {
       date
       item
+      category
       cost
+      shop
     }
     overviewCost
+    total
+    weekly
   }
 }
     `;
@@ -2711,14 +2625,13 @@ export const ListItemStandardCreatedDocument = gql`
 export function useListItemStandardCreatedSubscription<TData = ListItemStandardCreatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ListItemStandardCreatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ListItemStandardCreatedSubscription, TData>) {
   return Urql.useSubscription<ListItemStandardCreatedSubscription, TData, ListItemStandardCreatedSubscriptionVariables>({ query: ListItemStandardCreatedDocument, ...options }, handler);
 };
-export const ListItemExtendedCreatedDocument = gql`
-    subscription ListItemExtendedCreated {
-  listItemExtendedCreated: listItemCreated(
-    pages: [food, general, holiday, social]
+export const ListItemStandardUpdatedDocument = gql`
+    subscription ListItemStandardUpdated {
+  listItemStandardUpdated: listItemUpdated(
+    pages: [income, bills, food, general, holiday, social]
   ) {
     page
     id
-    fakeId
     item {
       date
       item
@@ -2729,54 +2642,12 @@ export const ListItemExtendedCreatedDocument = gql`
     overviewCost
     total
     weekly
-  }
-}
-    `;
-
-export function useListItemExtendedCreatedSubscription<TData = ListItemExtendedCreatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ListItemExtendedCreatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ListItemExtendedCreatedSubscription, TData>) {
-  return Urql.useSubscription<ListItemExtendedCreatedSubscription, TData, ListItemExtendedCreatedSubscriptionVariables>({ query: ListItemExtendedCreatedDocument, ...options }, handler);
-};
-export const ListItemStandardUpdatedDocument = gql`
-    subscription ListItemStandardUpdated {
-  listItemStandardUpdated: listItemUpdated(pages: [income, bills]) {
-    page
-    id
-    item {
-      date
-      item
-      cost
-    }
-    overviewCost
   }
 }
     `;
 
 export function useListItemStandardUpdatedSubscription<TData = ListItemStandardUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ListItemStandardUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ListItemStandardUpdatedSubscription, TData>) {
   return Urql.useSubscription<ListItemStandardUpdatedSubscription, TData, ListItemStandardUpdatedSubscriptionVariables>({ query: ListItemStandardUpdatedDocument, ...options }, handler);
-};
-export const ListItemExtendedUpdatedDocument = gql`
-    subscription ListItemExtendedUpdated {
-  listItemExtendedUpdated: listItemUpdated(
-    pages: [food, general, holiday, social]
-  ) {
-    page
-    id
-    item {
-      date
-      item
-      category
-      cost
-      shop
-    }
-    overviewCost
-    total
-    weekly
-  }
-}
-    `;
-
-export function useListItemExtendedUpdatedSubscription<TData = ListItemExtendedUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ListItemExtendedUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ListItemExtendedUpdatedSubscription, TData>) {
-  return Urql.useSubscription<ListItemExtendedUpdatedSubscription, TData, ListItemExtendedUpdatedSubscriptionVariables>({ query: ListItemExtendedUpdatedDocument, ...options }, handler);
 };
 export const ListItemDeletedDocument = gql`
     subscription ListItemDeleted {

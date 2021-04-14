@@ -1,85 +1,85 @@
-date,item,cost
--18+02,Rent,150000
--18+11,Phone,3199
--18+03,Council Tax,167256
--18+16,Energy,6200
--17+02,Rent,150000
--17+12,Phone,3199
--17+16,Energy,6200
--16+02,Rent,150000
--16+12,Phone,1499
--16+16,Energy,6200
--15+02,Rent,155000
--15+12,Phone,1499
--15+24,Water,3565
--15+16,Energy,6200
--14+02,Rent,155000
--14+12,Phone,1499
--14+16,Energy,6200
--13+04,Rent,155000
--13+12,Phone,1499
--13+16,Energy,6200
--12+02,Rent,155000
--12+12,Phone,1499
--12+16,Energy,6200
--11+01,Mortgage,114453
--11+12,Phone,1499
--11+16,Energy,6200
--10+01,Mortgage,114453
--10+12,Phone,1499
--10+16,Energy,6200
--09+01,Mortgage,114453
--09+12,Phone,1499
--09+16,Energy,6200
--08+01,Mortgage,114453
--08+12,Phone,1499
--08+16,Energy,6200
--07+01,Mortgage,114453
--07+12,Phone,1499
--07+16,Energy,6200
--06+01,Mortgage,114453
--06+12,Phone,1499
--06+04,Council Tax,175520
--06+16,Energy,6200
--05+01,Mortgage,114453
--05+12,Phone,1499
--05+16,Energy,6200
--04+01,Mortgage,105929
--04+12,Phone,1499
--04+16,Energy,6200
--03+01,Mortgage,105929
--03+12,Phone,1499
--03+16,Energy,6200
--03+24,Water,3620
--02+01,Mortgage,105929
--02+12,Phone,1499
--02+16,Energy,6200
--01+01,Mortgage,105929
--01+12,Phone,1499
--01+16,Energy,6200
-+00+01,Mortgage,105929
-+00+12,Phone,1499
-+00+16,Energy,6200
-+01+02,Mortgage,105929
-+01+12,Phone,1499
-+01+16,Energy,6200
-+02+02,Mortgage,105929
-+02+12,Phone,1499
-+02+16,Energy,6200
-+03+02,Mortgage,105929
-+03+12,Phone,1499
-+03+16,Energy,6200
-+04+02,Mortgage,105929
-+04+12,Phone,1499
-+04+16,Energy,6200
-+05+02,Mortgage,105929
-+05+12,Phone,1499
-+05+16,Energy,6200
-+06+02,Mortgage,105929
-+06+12,Phone,1499
-+06+16,Energy,6200
-+06+03,Council Tax,179605
-+07+02,Mortgage,105929
-+07+12,Phone,1499
-+07+16,Energy,6200
-+09+24,Water,3710
+date,item,category,cost,shop
+-18+02,Rent,Housing,150000,My landlord
+-18+11,Phone,Comms,3199,My phone company
+-18+03,Council Tax,Tax,167256,Taxman
+-18+16,Energy,Utilities,6200,My energy company
+-17+02,Rent,Housing,150000,My landlord
+-17+12,Phone,Comms,3199,My phone company
+-17+16,Energy,Utilities,6200,My energy company
+-16+02,Rent,Housing,150000,My landlord
+-16+12,Phone,Comms,1499,My phone company
+-16+16,Energy,Utilities,6200,My energy supplier
+-15+02,Rent,Housing,155000,My landlord
+-15+12,Phone,Comms,1499,My phone company
+-15+24,Water,Utilities,3565,My water company
+-15+16,Energy,Utilities,6200,My energy supplier
+-14+02,Rent,Housing,155000,My landlord
+-14+12,Phone,Comms,1499,My phone company
+-14+16,Energy,Utilities,6200,My energy supplier
+-13+04,Rent,Housing,155000,My landlord
+-13+12,Phone,Comms,1499,My phone company
+-13+16,Energy,Utilities,6200,My energy supplier
+-12+02,Rent,Housing,155000,My landlord
+-12+12,Phone,Comms,1499,My phone company
+-12+16,Energy,Utilities,6200,My energy supplier
+-11+01,Mortgage,Housing,114453,My bank
+-11+12,Phone,Comms,1499,My phone company
+-11+16,Energy,Utilities,6200,My energy supplier
+-10+01,Mortgage,Housing,114453,My bank
+-10+12,Phone,Comms,1499,My phone company
+-10+16,Energy,Utilities,6200,My energy supplier
+-09+01,Mortgage,Housing,114453,My bank
+-09+12,Phone,Comms,1499,My phone company
+-09+16,Energy,Utilities,6200,My energy supplier
+-08+01,Mortgage,Housing,114453,My bank
+-08+12,Phone,Comms,1499,My phone company
+-08+16,Energy,Utilities,6200,My energy supplier
+-07+01,Mortgage,Housing,114453,My bank
+-07+12,Phone,Comms,1499,My phone company
+-07+16,Energy,Utilities,6200,My energy supplier
+-06+01,Mortgage,Housing,114453,My bank
+-06+12,Phone,Comms,1499,My phone company
+-06+04,Council Tax,175520,Taxman
+-06+16,Energy,Utilities,6200,My energy supplier
+-05+01,Mortgage,Housing,114453,My bank
+-05+12,Phone,Comms,1499,My phone company
+-05+16,Energy,Utilities,6200,My energy supplier
+-04+01,Mortgage,Housing,105929,My bank
+-04+12,Phone,Comms,1499,My phone company
+-04+16,Energy,Utilities,6200,My energy supplier
+-03+01,Mortgage,Housing,105929,My bank
+-03+12,Phone,Comms,1499,My phone company
+-03+16,Energy,Utilities,6200,My energy supplier
+-03+24,Water,Utilities,3620,My water company
+-02+01,Mortgage,Housing,105929,My bank
+-02+12,Phone,Comms,1499,My phone company
+-02+16,Energy,Utilities,6200,My energy supplier
+-01+01,Mortgage,Housing,105929,My bank
+-01+12,Phone,Comms,1499,My phone company
+-01+16,Energy,Utilities,6200,My energy supplier
++00+01,Mortgage,Housing,105929,My bank
++00+12,Phone,Comms,1499,My phone company
++00+16,Energy,Utilities,6200,My energy supplier
++01+02,Mortgage,Housing,105929,My bank
++01+12,Phone,Comms,1499,My phone company
++01+16,Energy,Utilities,6200,My energy supplier
++02+02,Mortgage,Housing,105929,My bank
++02+12,Phone,Comms,1499,My phone company
++02+16,Energy,Utilities,6200,My energy supplier
++03+02,Mortgage,Housing,105929,My bank
++03+12,Phone,Comms,1499,My phone company
++03+16,Energy,Utilities,6200,My energy supplier
++04+02,Mortgage,Housing,105929,My bank
++04+12,Phone,Comms,1499,My phone company
++04+16,Energy,Utilities,6200,My energy supplier
++05+02,Mortgage,Housing,105929,My bank
++05+12,Phone,Comms,1499,My phone company
++05+16,Energy,Utilities,6200,My energy supplier
++06+02,Mortgage,Housing,105929,My bank
++06+12,Phone,Comms,1499,My phone company
++06+16,Energy,Utilities,6200,My energy supplier
++06+03,Council Tax,179605,Taxman
++07+02,Mortgage,Housing,105929,My bank
++07+12,Phone,Comms,1499,My phone company
++07+16,Energy,Utilities,6200,My energy supplier
++09+24,Water,Utilities,3710,My water company

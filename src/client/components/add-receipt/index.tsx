@@ -27,13 +27,13 @@ import {
 } from '~client/styled/shared';
 import type { Delta, GQL } from '~client/types';
 import { ReceiptPage } from '~client/types/enum';
-import type { ListItemExtended, ReceiptInput } from '~client/types/gql';
+import type { ListItemStandard, ReceiptInput } from '~client/types/gql';
 
 export type Props = {
   setAddingReceipt: (enabled: boolean) => void;
 };
 
-type Entry = Omit<GQL<ListItemExtended>, 'date' | 'shop'> & { page: ReceiptPage };
+type Entry = Omit<GQL<ListItemStandard>, 'date' | 'shop'> & { page: ReceiptPage };
 
 type EntryErrors = Partial<Record<Exclude<keyof Entry, 'id' | 'page'>, boolean>>;
 
