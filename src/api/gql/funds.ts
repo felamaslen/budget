@@ -54,6 +54,7 @@ export const fundsSchema = gql`
   enum FundPeriod {
     year
     month
+    ytd
   }
 
   type ReadFundsResponse {

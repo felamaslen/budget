@@ -17,6 +17,7 @@
     "build:client": "NODE_ENV=production webpack --mode production",
     "build": "sh ./scripts/build.sh",
     "start": "node lib/api",
+    "start:dev": "nodemon | roarr pretty-print",
     "dev": "docker-compose up",
     "dev:api": "SKIP_APP=true yarn dev",
     "test:api:unit": "TZ=UTC jest -w 4 -c jest.api.unit.config.js --detectOpenHandles --forceExit",

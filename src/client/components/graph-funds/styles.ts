@@ -4,8 +4,8 @@ import { rem } from 'polished';
 
 import { breakpoint } from '~client/styled/mixins';
 import { HamburgerButton } from '~client/styled/shared/hamburger';
-import { Flex } from '~client/styled/shared/layout';
-import { SettingsDialog, SettingsGroup } from '~client/styled/shared/settings';
+import { Flex, FlexColumn } from '~client/styled/shared/layout';
+import { SettingsDialog } from '~client/styled/shared/settings';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const Container = styled(Flex)`
@@ -60,11 +60,34 @@ export const FundModeSwitch = styled(SettingsDialog)`
   }
 `;
 
-export const PeriodLengthSettingsGroup = styled(SettingsGroup)`
+export const FundPeriodSwitch = styled(FlexColumn)`
+  align-items: center;
+  flex: 1;
+
   ${breakpoint(breakpoints.mobile)} {
-    width: ${rem(100)};
+    background: ${colors.translucent.light};
+    flex-flow: row;
   }
 `;
+
+export const FundPeriodButton = styled.button<{ active?: boolean }>(
+  ({ active = false }) => css`
+    appearance: none;
+    border: none;
+    background: none;
+    color: ${active ? colors.blue : colors.dark.mediumLight};
+    font-weight: ${active ? 'bold' : 'normal'};
+    outline: none;
+
+    ${breakpoint(breakpoints.mobile)} {
+      cursor: pointer;
+
+      &:not(:last-child) {
+        border-right: 1px solid ${colors.light.mediumDark};
+      }
+    }
+  `,
+);
 
 type FundSidebarProps = { isOpen: boolean };
 const fundSidebarStyles = ({ isOpen }: FundSidebarProps): SerializedStyles => css`
@@ -128,12 +151,6 @@ export const SidebarCheckbox = styled.span<{
 
 export const SidebarFund = styled.a`
   padding-left: 12px;
-`;
-
-export const PeriodLengthIndicator = styled.span`
-  font-size: ${rem(14)};
-  line-height: ${rem(18)};
-  padding: 0 ${rem(4)};
 `;
 
 export const MobileSettingsButton = styled(HamburgerButton)`

@@ -1,13 +1,7 @@
-import pluralize from 'pluralize';
 import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import * as Styled from './styles';
-import {
-  FormFieldNumber,
-  FormFieldRange,
-  FormFieldSelect,
-  SelectOptions,
-} from '~client/components/form-field';
+import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
 import { useCTA, useDebouncedState, useUpdateEffect } from '~client/hooks';
 import { abbreviateFundName } from '~client/modules/finance';
@@ -84,10 +78,14 @@ const Item: React.FC<ItemProps> = ({
   );
 };
 
-type TempQueryState = {
-  lengths: Record<FundPeriod, number>;
-  denominator: FundPeriod;
-};
+const periodSelectOptions: SelectOptions<HistoryOptions> = [
+  { internal: { period: FundPeriod.Month, length: 3 }, external: '3 months' },
+  { internal: { period: FundPeriod.Ytd }, external: 'YTD' },
+  { internal: { period: FundPeriod.Year, length: 1 }, external: '1 year' },
+  { internal: { period: FundPeriod.Year, length: 3 }, external: '3 years' },
+  { internal: { period: FundPeriod.Year, length: 5 }, external: '5 years' },
+  { internal: { period: FundPeriod.Year, length: 0 }, external: 'Max' },
+];
 
 export const AfterCanvas: React.FC<Props> = ({
   isMobile,
@@ -104,24 +102,8 @@ export const AfterCanvas: React.FC<Props> = ({
 }) => {
   const [mobileActive, setMobileActive] = useState<boolean>(false);
 
-  const [tempQuery, debouncedQuery, setTempQuery] = useDebouncedState<TempQueryState>(
-    {
-      lengths: {
-        [FundPeriod.Year]: 1,
-        [FundPeriod.Month]: 6,
-        [historyOptions.period]: historyOptions.length,
-      },
-      denominator: historyOptions.period,
-    },
-    300,
-  );
-
-  const periodSelectOptions = useMemo<SelectOptions<FundPeriod>>(
-    () => [
-      { internal: FundPeriod.Year, external: pluralize('Year', tempQuery.lengths.year) },
-      { internal: FundPeriod.Month, external: pluralize('Month', tempQuery.lengths.month) },
-    ],
-    [tempQuery.lengths],
+  const [tempQuery, debouncedQuery, setTempQuery] = useDebouncedState<HistoryOptions>(
+    historyOptions,
   );
 
   const modeSelectOptions = useMemo<SelectOptions<Mode>>(
@@ -129,33 +111,12 @@ export const AfterCanvas: React.FC<Props> = ({
     [modeList],
   );
 
-  const changePeriodDenominator = useCallback(
-    (denominator: FundPeriod) => setTempQuery((last) => ({ ...last, denominator })),
-    [setTempQuery],
-  );
-
-  const changePeriodLength = useCallback(
-    (length: number) =>
-      setTempQuery((last) => ({
-        ...last,
-        lengths: { ...last.lengths, [last.denominator]: Math.max(0, Math.round(length)) },
-      })),
-    [setTempQuery],
-  );
-
   useUpdateEffect(() => {
     changePeriod({
-      period: debouncedQuery.denominator,
-      length: debouncedQuery.lengths[debouncedQuery.denominator],
+      period: debouncedQuery.period,
+      length: debouncedQuery.length,
     });
   }, [debouncedQuery, changePeriod]);
-
-  const lengthProps = {
-    value: tempQuery.lengths[tempQuery.denominator],
-    onChange: changePeriodLength,
-    min: 0,
-    max: tempQuery.denominator === FundPeriod.Year ? 10 : 18,
-  };
 
   return (
     <>
@@ -169,33 +130,25 @@ export const AfterCanvas: React.FC<Props> = ({
           <SettingsBackground onClick={(): void => setMobileActive(false)} />
           <Styled.FundModeSwitch>
             <SettingsGroup>
-              <SettingsLabel>Length</SettingsLabel>
-              <SettingsInput>
-                {(isMobile && <FormFieldNumber {...lengthProps} />) || (
-                  <FormFieldRange {...lengthProps} step={1} />
-                )}
-              </SettingsInput>
-            </SettingsGroup>
-            <Styled.PeriodLengthSettingsGroup>
               <SettingsLabel>Period</SettingsLabel>
               <SettingsInput>
-                {isMobile && !tempQuery.lengths[tempQuery.denominator] ? (
-                  <Styled.PeriodLengthIndicator>Unlimited</Styled.PeriodLengthIndicator>
-                ) : null}
-                {!isMobile && (
-                  <Styled.PeriodLengthIndicator>
-                    {tempQuery.lengths[tempQuery.denominator] || 'Unlimited'}
-                  </Styled.PeriodLengthIndicator>
-                )}
-                {tempQuery.lengths[tempQuery.denominator] > 0 ? (
-                  <FormFieldSelect
-                    options={periodSelectOptions}
-                    value={tempQuery.denominator}
-                    onChange={changePeriodDenominator}
-                  />
-                ) : null}
+                <Styled.FundPeriodSwitch>
+                  {periodSelectOptions.map(({ internal, external }) => (
+                    <Styled.FundPeriodButton
+                      key={external}
+                      active={
+                        internal.period === tempQuery.period &&
+                        (typeof internal.length === 'undefined' ||
+                          internal.length === tempQuery.length)
+                      }
+                      onClick={(): void => setTempQuery(internal)}
+                    >
+                      {external}
+                    </Styled.FundPeriodButton>
+                  ))}
+                </Styled.FundPeriodSwitch>
               </SettingsInput>
-            </Styled.PeriodLengthSettingsGroup>
+            </SettingsGroup>
             <SettingsGroup>
               <SettingsLabel>Mode</SettingsLabel>
               <SettingsInput>

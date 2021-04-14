@@ -17,4 +17,4 @@ COPY --chown=appuser:appgroup nodemon.json ./
 ENV SKIP_APP=false
 ENV DEBUG=
 
-CMD nodemon | roarr pretty-print
+CMD yarn start:dev

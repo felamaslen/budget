@@ -31,10 +31,11 @@ describe('Funds controller', () => {
     const now = new Date('2017-09-05');
 
     it.each`
-      period              | length | expectedDate
-      ${FundPeriod.Year}  | ${1}   | ${'2016-09-05'}
-      ${FundPeriod.Year}  | ${3}   | ${'2014-09-05'}
-      ${FundPeriod.Month} | ${6}   | ${'2017-03-05'}
+      period              | length  | expectedDate
+      ${FundPeriod.Year}  | ${1}    | ${'2016-09-05'}
+      ${FundPeriod.Year}  | ${3}    | ${'2014-09-05'}
+      ${FundPeriod.Month} | ${6}    | ${'2017-03-05'}
+      ${FundPeriod.Ytd}   | ${null} | ${'2017-01-01'}
     `('should return the correct timestamp', ({ period, length, expectedDate }) => {
       expect.assertions(1);
       expect(getMaxAge(now, period, length)).toStrictEqual(new Date(expectedDate));

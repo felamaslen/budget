@@ -243,7 +243,8 @@ export type FundPrices = {
 
 export enum FundPeriod {
   Year = 'year',
-  Month = 'month'
+  Month = 'month',
+  Ytd = 'ytd'
 }
 
 export type ReadFundsResponse = {

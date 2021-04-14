@@ -29,15 +29,23 @@ describe('<AfterCanvas /> (funds graph)', () => {
   };
 
   describe('Changing resolution', () => {
-    it('should change the length', async () => {
+    it.each`
+      query         | period              | length
+      ${'3 months'} | ${FundPeriod.Month} | ${3}
+      ${'YTD'}      | ${FundPeriod.Ytd}   | ${undefined}
+      ${'1 year'}   | ${FundPeriod.Year}  | ${1}
+      ${'3 years'}  | ${FundPeriod.Year}  | ${3}
+      ${'5 years'}  | ${FundPeriod.Year}  | ${5}
+      ${'Max'}      | ${FundPeriod.Year}  | ${0}
+    `('should change the period and length query to $query', async ({ query, period, length }) => {
       expect.hasAssertions();
+      const { getByText } = render(<AfterCanvas {...props} />);
+      const button = getByText(query) as HTMLButtonElement;
 
-      const { getByDisplayValue } = render(<AfterCanvas {...props} />);
-
-      const inputLength = getByDisplayValue('1');
+      expect(button).toBeInTheDocument();
 
       act(() => {
-        fireEvent.change(inputLength, { target: { value: '2' } });
+        fireEvent.click(button);
       });
 
       await waitFor(() => {
@@ -45,113 +53,8 @@ describe('<AfterCanvas /> (funds graph)', () => {
       });
 
       expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
-        period: FundPeriod.Year,
-        length: 2,
-      });
-    });
-
-    it('should change the period', async () => {
-      expect.hasAssertions();
-
-      const { getByDisplayValue } = render(<AfterCanvas {...props} />);
-
-      const inputPeriod = getByDisplayValue('Year');
-
-      act(() => {
-        fireEvent.change(inputPeriod, { target: { value: 'Months' } });
-      });
-
-      await waitFor(() => {
-        expect(changePeriod).toHaveBeenCalledTimes(1);
-      });
-
-      expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
-        period: FundPeriod.Month,
-        length: 6,
-      });
-    });
-
-    describe('when switching periods', () => {
-      it('should remember the last length for the given period', async () => {
-        expect.hasAssertions();
-
-        const { getByDisplayValue } = render(<AfterCanvas {...props} />);
-
-        const inputPeriod = getByDisplayValue('Year');
-        const inputLength = getByDisplayValue('1');
-
-        act(() => {
-          fireEvent.change(inputLength, { target: { value: '7' } });
-        });
-
-        await waitFor(() => {
-          expect(changePeriod).toHaveBeenCalledTimes(1);
-        });
-
-        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
-          period: FundPeriod.Year,
-          length: 7,
-        });
-
-        changePeriod.mockClear();
-
-        act(() => {
-          fireEvent.change(inputPeriod, { target: { value: 'Months' } });
-        });
-
-        await waitFor(() => {
-          expect(changePeriod).toHaveBeenCalledTimes(1);
-        });
-
-        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
-          period: FundPeriod.Month,
-          length: 6,
-        });
-
-        changePeriod.mockClear();
-
-        act(() => {
-          fireEvent.change(inputLength, { target: { value: '17' } });
-        });
-
-        await waitFor(() => {
-          expect(changePeriod).toHaveBeenCalledTimes(1);
-        });
-
-        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
-          period: FundPeriod.Month,
-          length: 17,
-        });
-
-        changePeriod.mockClear();
-
-        act(() => {
-          fireEvent.change(inputPeriod, { target: { value: 'Years' } });
-        });
-
-        await waitFor(() => {
-          expect(changePeriod).toHaveBeenCalledTimes(1);
-        });
-
-        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
-          period: FundPeriod.Year,
-          length: 7,
-        });
-
-        changePeriod.mockClear();
-
-        act(() => {
-          fireEvent.change(inputPeriod, { target: { value: 'Months' } });
-        });
-
-        await waitFor(() => {
-          expect(changePeriod).toHaveBeenCalledTimes(1);
-        });
-
-        expect(changePeriod).toHaveBeenCalledWith<[HistoryOptions]>({
-          period: FundPeriod.Month,
-          length: 17,
-        });
+        period,
+        length,
       });
     });
   });

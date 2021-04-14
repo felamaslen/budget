@@ -1,4 +1,4 @@
-import { addYears, addMonths, getUnixTime } from 'date-fns';
+import { addYears, addMonths, getUnixTime, startOfYear } from 'date-fns';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -62,6 +62,9 @@ const baseController = makeCrudController<FundListRow, FundMain>({
 export { baseController as fundsControllerBase };
 
 export function getMaxAge(now: Date, period?: Maybe<FundPeriod>, length?: Maybe<number>): Date {
+  if (period === FundPeriod.Ytd) {
+    return startOfYear(now);
+  }
   if (!length) {
     return new Date(0);
   }
