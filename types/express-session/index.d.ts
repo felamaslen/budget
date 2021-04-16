@@ -5,6 +5,6 @@ declare module 'express-session' {
   interface SessionData {
     uid: number | null;
     apiKey: string | null;
-    config: Partial<Omit<AppConfig, 'birthDate' | 'pieTolerance' | 'futureMonths'>>;
+    config: Partial<Omit<AppConfig, 'futureMonths'>>;
   }
 }

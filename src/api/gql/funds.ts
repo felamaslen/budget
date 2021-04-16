@@ -57,6 +57,14 @@ export const fundsSchema = gql`
     ytd
   }
 
+  enum FundMode {
+    ROI
+    Value
+    Stacked
+    Price
+    PriceNormalised
+  }
+
   type ReadFundsResponse {
     items: [Fund!]!
   }

@@ -4,9 +4,9 @@ export const setConfig = gql`
   mutation SetConfig($config: AppConfigInput!) {
     setConfig(config: $config) {
       birthDate
-      pieTolerance
       futureMonths
-      futureMonths
+      realTimePrices
+      fundMode
       fundPeriod
       fundLength
     }

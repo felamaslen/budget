@@ -8,14 +8,15 @@ import { getFundLineName } from './name';
 import { Arrow } from '~client/components/arrow';
 import type { SiblingProps } from '~client/components/graph';
 import type { HLPoint } from '~client/components/graph/hooks';
-import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
+import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';
 import type { FundLine, FundOrder, Point } from '~client/types';
+import { FundMode } from '~client/types/enum';
 
 export type Props = SiblingProps & {
   fundLines: FundLine[];
   startTime: number;
-  mode: Mode;
+  mode: FundMode;
 };
 
 type FundOrderWithLinePoint = FundOrder & { linePoint: Point };
@@ -42,7 +43,7 @@ const groupFundOrdersByType = (orders: FundOrderWithLinePoint[]): FundOrderWithL
   return flatten([buys, sells, drips].map(combineFundOrdersByMatchedDate));
 };
 
-const shouldShowOrders = (mode: Mode, hlPoint: HLPoint | undefined) => (
+const shouldShowOrders = (mode: FundMode, hlPoint: HLPoint | undefined) => (
   fundLine: FundLine,
 ): boolean => {
   if (!hlPoint) {
@@ -51,7 +52,7 @@ const shouldShowOrders = (mode: Mode, hlPoint: HLPoint | undefined) => (
   if (fundLine.id === GRAPH_FUNDS_OVERALL_ID) {
     return true;
   }
-  return mode === Mode.Value && getFundLineName(fundLine.id, fundLine.item) === hlPoint.group;
+  return mode === FundMode.Value && getFundLineName(fundLine.id, fundLine.item) === hlPoint.group;
 };
 
 export const BuySellDots: React.FC<Props> = ({
@@ -89,7 +90,7 @@ export const BuySellDots: React.FC<Props> = ({
               key={`${order.time}-${order.isSell ? 'sell' : 'buy'}`}
               startX={order.linePoint[0]}
               startY={order.linePoint[1]}
-              length={mode === Mode.ROI ? 10 : pixY1(0) - pixY1(order.size)}
+              length={mode === FundMode.Roi ? 10 : pixY1(0) - pixY1(order.size)}
               angle={order.isSell ? -Math.PI / 2 : Math.PI / 2}
               color={order.isSell ? colors.loss.dark : colors.profit.dark}
               fill={true}

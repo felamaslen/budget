@@ -40,7 +40,7 @@ export const QueueNotSaved = styled.span`
   }
 `;
 
-export const Logo = styled.a`
+export const Logo = styled.span`
   align-items: center;
   display: flex;
   flex: 1;
@@ -68,16 +68,44 @@ export const Logo = styled.a`
 export const TitleContainer = styled(Flex)`
   align-items: center;
   height: 100%;
-  padding-right: ${rem(36)};
 `;
 
 export const Title = styled.h1`
+  align-items: center;
+  display: inline-flex;
   font-size: ${rem(22)};
   margin: 0;
+
+  & > span {
+    margin-right: ${rem(4)};
+  }
 
   ${breakpoint(breakpoints.mobile)} {
     flex: 0 0 ${rem(sizes.navbarHeight - 6)};
     line-height: ${rem(sizes.navbarHeight - 6)};
+  }
+`;
+
+export const Loader = styled.div`
+  height: ${rem(22)};
+  position: relative;
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 0 0 ${rem(22)};
+    margin: 0 ${rem(8)} 0 ${rem(4)};
+  }
+`;
+
+export const SettingsButton = styled.a`
+  align-items: center;
+  color: ${colors.light.mediumLight};
+  cursor: pointer;
+  display: inline-flex;
+  font-size: ${rem(28)};
+  margin-left: ${rem(4)};
+
+  ${breakpoint(breakpoints.mobile)} {
+    margin-left: 0;
   }
 `;
 

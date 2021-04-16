@@ -19,6 +19,7 @@ export const ListHeadFunds = styled(FlexCenter)`
     flex: 1;
     flex: 0 0 330px;
     flex-flow: row;
+    height: 100%;
     width: auto;
 
     ${FormField} {
@@ -64,7 +65,7 @@ export const OverallGain = styled(GainStyles.PriceChangeHighlight)<GainProps>`
     flex: 0 0 auto;
     padding: 0 ${rem(16)} 0 ${rem(8)};
     width: auto;
-    height: auto;
+    height: 100%;
     background-color: transparent;
     background-image: linear-gradient(
       to right,
@@ -84,6 +85,7 @@ export const Main = styled.div`
   margin-left: ${rem(8)};
   margin-right: ${rem(8)};
   ${breakpoint(breakpoints.mobile)} {
+    margin-left: 0;
     margin-right: 0;
   }
 `;
@@ -154,12 +156,22 @@ export const DayGain = styled(GainStyles.DayGain)`
   ${breakdownStyleDay};
 `;
 
-export const ViewOptions = styled(FlexColumn)``;
+export const ViewOptions = styled(FlexColumn)`
+  height: 100%;
+
+  input,
+  select,
+  span {
+    font-size: ${rem(12)} !important;
+  }
+  input {
+    margin: 0 ${rem(4)};
+  }
+`;
 
 export const CacheAge = styled.span``;
 
-export const ViewSold = styled(Flex)`
-  font-size: ${rem(13)};
-  margin-left: ${rem(4)};
+export const Toggles = styled(Flex)`
+  align-items: center;
   white-space: nowrap;
 `;

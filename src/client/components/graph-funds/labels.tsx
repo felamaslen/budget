@@ -9,11 +9,11 @@ import { useSelector } from 'react-redux';
 import { HoverEffect, LabelProps } from '~client/components/graph/hooks';
 import { useSelfAdjustingLabel } from '~client/components/highlight-point';
 import { LabelBase } from '~client/components/highlight-point/styles';
-import { Mode } from '~client/constants';
 import { formatPercent } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { getFundsCache } from '~client/selectors';
 import { FlexCenter } from '~client/styled/shared';
+import { FundMode } from '~client/types/enum';
 
 const NoWrap = styled.span`
   white-space: nowrap;
@@ -49,7 +49,7 @@ const ValueLabel = styled(NoWrap)`
 const formatTime = (startTime: number, cacheTime: number): string =>
   format(fromUnixTime(startTime + cacheTime), 'dd/MM/yy');
 
-type LabelBaseFundsProps = LabelProps & { mode: Mode; showChange?: boolean };
+type LabelBaseFundsProps = LabelProps & { mode: FundMode; showChange?: boolean };
 
 const LabelBaseFunds: React.FC<LabelBaseFundsProps> = ({
   name,
@@ -94,22 +94,24 @@ const LabelBaseFunds: React.FC<LabelBaseFundsProps> = ({
   );
 };
 
-const LabelROI: React.FC<LabelProps> = (props) => <LabelBaseFunds {...props} mode={Mode.ROI} />;
+const LabelROI: React.FC<LabelProps> = (props) => <LabelBaseFunds {...props} mode={FundMode.Roi} />;
 
-const LabelValue: React.FC<LabelProps> = (props) => <LabelBaseFunds {...props} mode={Mode.Value} />;
+const LabelValue: React.FC<LabelProps> = (props) => (
+  <LabelBaseFunds {...props} mode={FundMode.Value} />
+);
 
 const LabelPrice: React.FC<LabelProps> = (props) => (
-  <LabelBaseFunds {...props} mode={Mode.Price} showChange={true} />
+  <LabelBaseFunds {...props} mode={FundMode.Price} showChange={true} />
 );
 
 const LabelPriceNormalised: React.FC<LabelProps> = (props) => (
-  <LabelBaseFunds {...props} mode={Mode.PriceNormalised} showChange={true} />
+  <LabelBaseFunds {...props} mode={FundMode.PriceNormalised} showChange={true} />
 );
 
-export const hoverEffectByMode: Record<Mode, HoverEffect> = {
-  [Mode.ROI]: { Label: LabelROI },
-  [Mode.Value]: { Label: LabelValue },
-  [Mode.Stacked]: { Label: LabelValue },
-  [Mode.Price]: { Label: LabelPrice },
-  [Mode.PriceNormalised]: { Label: LabelPriceNormalised },
+export const hoverEffectByMode: Record<FundMode, HoverEffect> = {
+  [FundMode.Roi]: { Label: LabelROI },
+  [FundMode.Value]: { Label: LabelValue },
+  [FundMode.Stacked]: { Label: LabelValue },
+  [FundMode.Price]: { Label: LabelPrice },
+  [FundMode.PriceNormalised]: { Label: LabelPriceNormalised },
 };

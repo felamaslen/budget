@@ -69,11 +69,11 @@ describe('<Root />', () => {
 
   it('should render an app logo', async () => {
     expect.hasAssertions();
-    const { getByText } = setup();
+    const { getAllByRole } = setup();
     await waitFor(() => {
-      const header = getByText('Budget') as HTMLHeadingElement;
+      const header = getAllByRole('heading')[1];
       expect(header).toBeInTheDocument();
-      expect(header.tagName).toBe('H1');
+      expect(header).toHaveTextContent('Budget');
     });
   });
 });

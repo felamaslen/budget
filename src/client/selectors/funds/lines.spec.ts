@@ -11,7 +11,8 @@ import {
   getFundLinePriceNormalised,
   getFundLinePrice,
 } from './lines';
-import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
+import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { FundMode } from '~client/types/enum';
 
 describe('Funds selectors / lines', () => {
   const id1 = numericHash('my-fund-id');
@@ -340,10 +341,10 @@ describe('Funds selectors / lines', () => {
     const overallPrice: number[] = [];
 
     describe.each`
-      description   | mode          | resultDescription     | expectedResult
-      ${'absolute'} | ${Mode.Value} | ${'an absolute line'} | ${overallAbsolute}
-      ${'ROI'}      | ${Mode.ROI}   | ${'an ROI line'}      | ${overallROI}
-      ${'price'}    | ${Mode.Price} | ${'an empty line'}    | ${overallPrice}
+      description   | mode              | resultDescription     | expectedResult
+      ${'absolute'} | ${FundMode.Value} | ${'an absolute line'} | ${overallAbsolute}
+      ${'ROI'}      | ${FundMode.Roi}   | ${'an ROI line'}      | ${overallROI}
+      ${'price'}    | ${FundMode.Price} | ${'an empty line'}    | ${overallPrice}
     `('if the mode is $description', ({ mode, resultDescription, expectedResult }) => {
       it(`should return ${resultDescription}`, () => {
         expect.assertions(1);
@@ -367,11 +368,11 @@ describe('Funds selectors / lines', () => {
       ${id3} | ${[{ startIndex: 1, values: [763] }]}
     `('for id $id', ({ id, priceLine }) => {
       describe.each`
-        description     | mode                    | resultDescription     | getExpectedResult
-        ${'absolute'}   | ${Mode.Value}           | ${'an absolute line'} | ${getFundLineAbsolute}
-        ${'ROI'}        | ${Mode.ROI}             | ${'an ROI line'}      | ${getFundLineROI}
-        ${'price'}      | ${Mode.Price}           | ${'a list of prices'} | ${priceLine}
-        ${'normalised'} | ${Mode.PriceNormalised} | ${'a list of values'} | ${normalisedLine}
+        description     | mode                        | resultDescription     | getExpectedResult
+        ${'absolute'}   | ${FundMode.Value}           | ${'an absolute line'} | ${getFundLineAbsolute}
+        ${'ROI'}        | ${FundMode.Roi}             | ${'an ROI line'}      | ${getFundLineROI}
+        ${'price'}      | ${FundMode.Price}           | ${'a list of prices'} | ${priceLine}
+        ${'normalised'} | ${FundMode.PriceNormalised} | ${'a list of values'} | ${normalisedLine}
       `('if the mode is $description', ({ mode, resultDescription, getExpectedResult }) => {
         const expectedResult =
           typeof getExpectedResult === 'function'
@@ -389,7 +390,7 @@ describe('Funds selectors / lines', () => {
   describe(getFundLineProcessed.name, () => {
     it('should process a normal fund line', () => {
       expect.assertions(1);
-      expect(getFundLineProcessed(fundsWithReturns, cacheTimes, Mode.ROI, id1))
+      expect(getFundLineProcessed(fundsWithReturns, cacheTimes, FundMode.Roi, id1))
         .toMatchInlineSnapshot(`
         Array [
           Array [
@@ -413,8 +414,9 @@ describe('Funds selectors / lines', () => {
     describe('when processing an overall line', () => {
       it('should return a line', () => {
         expect.assertions(1);
-        expect(getFundLineProcessed(fundsWithReturns, cacheTimes, Mode.ROI, GRAPH_FUNDS_OVERALL_ID))
-          .toMatchInlineSnapshot(`
+        expect(
+          getFundLineProcessed(fundsWithReturns, cacheTimes, FundMode.Roi, GRAPH_FUNDS_OVERALL_ID),
+        ).toMatchInlineSnapshot(`
           Array [
             Array [
               Array [
@@ -455,7 +457,7 @@ describe('Funds selectors / lines', () => {
               ],
             },
             cacheTimes,
-            Mode.ROI,
+            FundMode.Roi,
             GRAPH_FUNDS_OVERALL_ID,
           ),
         ).toMatchInlineSnapshot(`

@@ -2,14 +2,14 @@ import { getUnixTime } from 'date-fns';
 import numericHash from 'string-hash';
 
 import { getFundItems, getFundLines } from './graph';
-import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
 import { abbreviateFundName } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
 import { testState } from '~client/test-data';
 import type { Data, FundItem } from '~client/types';
-import { FundPeriod, PageNonStandard } from '~client/types/enum';
+import { FundMode, FundPeriod, PageNonStandard } from '~client/types/enum';
 
 describe('Fund selectors / graph', () => {
   const today = new Date('2020-04-20');
@@ -209,35 +209,35 @@ describe('Fund selectors / graph', () => {
       expect.assertions(1);
       const result = getFundLines.today(today)(state);
       expect(result).toStrictEqual({
-        [Mode.ROI]: expect.arrayContaining([
+        [FundMode.Roi]: expect.arrayContaining([
           expect.objectContaining({
             id: expect.any(Number),
             color: expect.stringMatching(/^#[0-9a-f]{6}$/),
             data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
           }),
         ]),
-        [Mode.Value]: expect.arrayContaining([
+        [FundMode.Value]: expect.arrayContaining([
           expect.objectContaining({
             id: expect.any(Number),
             color: expect.stringMatching(/^#[0-9a-f]{6}$/),
             data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
           }),
         ]),
-        [Mode.Stacked]: expect.arrayContaining([
+        [FundMode.Stacked]: expect.arrayContaining([
           expect.objectContaining({
             id: expect.any(Number),
             color: expect.stringMatching(/^#[0-9a-f]{6}$/),
             data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
           }),
         ]),
-        [Mode.Price]: expect.arrayContaining([
+        [FundMode.Price]: expect.arrayContaining([
           expect.objectContaining({
             id: expect.any(Number),
             color: expect.stringMatching(/^#[0-9a-f]{6}$/),
             data: expect.arrayContaining([[expect.any(Number), expect.any(Number)]]),
           }),
         ]),
-        [Mode.PriceNormalised]: expect.arrayContaining([
+        [FundMode.PriceNormalised]: expect.arrayContaining([
           expect.objectContaining({
             id: expect.any(Number),
             color: expect.stringMatching(/^#[0-9a-f]{6}$/),
@@ -325,7 +325,7 @@ describe('Fund selectors / graph', () => {
 
         const fundLines = getFundLines.today(today)(stateWithStockSplit);
 
-        const splitLinePrice = fundLines[Mode.Price].find((line) => line.id === 10);
+        const splitLinePrice = fundLines[FundMode.Price].find((line) => line.id === 10);
 
         expect(splitLinePrice?.data).toStrictEqual([
           [18860400, 429.5],
@@ -367,7 +367,7 @@ describe('Fund selectors / graph', () => {
 
         const fundLines = getFundLines.today(today)(stateWithStockSplit);
 
-        const splitLineROI = fundLines[Mode.ROI].find((line) => line.id === 10);
+        const splitLineROI = fundLines[FundMode.Roi].find((line) => line.id === 10);
 
         expect(splitLineROI?.data).toStrictEqual([
           [18860400, 0.29],
@@ -420,19 +420,19 @@ describe('Fund selectors / graph', () => {
       const result = getFundLines.today(today)(stateNoSold);
 
       soldIds.forEach((soldId) => {
-        expect(result[Mode.ROI]).not.toStrictEqual(
+        expect(result[FundMode.Roi]).not.toStrictEqual(
           expect.objectContaining({
             [soldId]: expect.anything,
           }),
         );
 
-        expect(result[Mode.Value]).not.toStrictEqual(
+        expect(result[FundMode.Value]).not.toStrictEqual(
           expect.objectContaining({
             [soldId]: expect.anything,
           }),
         );
 
-        expect(result[Mode.Price]).not.toStrictEqual(
+        expect(result[FundMode.Price]).not.toStrictEqual(
           expect.objectContaining({
             [soldId]: expect.anything,
           }),
@@ -462,7 +462,7 @@ describe('Fund selectors / graph', () => {
 
       const result = getFundLines.today(today)(stateWithSold);
 
-      const overallLine = result[Mode.ROI].find(({ id }) => id === GRAPH_FUNDS_OVERALL_ID);
+      const overallLine = result[FundMode.Roi].find(({ id }) => id === GRAPH_FUNDS_OVERALL_ID);
 
       expect(overallLine?.data[overallLine?.data.length - 1]).toMatchInlineSnapshot(`
         Array [
@@ -535,7 +535,7 @@ describe('Fund selectors / graph', () => {
         expect.assertions(1);
         const overallLine = getFundLines
           .today(today)(stateWithExcludedFund)
-          [Mode.ROI].find(({ id }) => id === GRAPH_FUNDS_OVERALL_ID)?.data as Data;
+          [FundMode.Roi].find(({ id }) => id === GRAPH_FUNDS_OVERALL_ID)?.data as Data;
 
         const expectedRealisedValue = 105 * 88.56 - (105 + 26);
         const expectedPaperValue = 950 * 59.83;

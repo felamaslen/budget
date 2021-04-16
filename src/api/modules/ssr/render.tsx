@@ -22,7 +22,7 @@ import config from '~api/config';
 import { getAppConfig } from '~api/controllers';
 import { getUidFromToken } from '~api/modules/auth';
 
-import { Action, configUpdated, loggedOut } from '~client/actions';
+import { Action, configUpdatedFromApi, loggedOut } from '~client/actions';
 import type { SSRExchange } from '~client/components/gql-provider';
 import { getInitialQueryVariables } from '~client/hooks/queries/initial';
 import rootReducer, { State } from '~client/reducers';
@@ -119,7 +119,7 @@ function setupStore(req: Request, apiKey: string | null): Store<State, Action> {
   }
 
   const appConfig = getAppConfig({}, {}, req);
-  store.dispatch(configUpdated(appConfig));
+  store.dispatch(configUpdatedFromApi(appConfig));
 
   return store;
 }

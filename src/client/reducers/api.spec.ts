@@ -4,12 +4,14 @@ import {
   ActionTypeLogin,
   apiLoaded,
   apiLoading,
-  configUpdated,
+  configUpdatedFromApi,
+  configUpdatedFromLocal,
   fundQueryUpdated,
   loggedOut,
 } from '~client/actions';
-import reducer, { initialState } from '~client/reducers/api';
-import { FundPeriod } from '~client/types/enum';
+import reducer, { initialState, State } from '~client/reducers/api';
+import type { LocalAppConfig } from '~client/types';
+import { FundMode, FundPeriod } from '~client/types/enum';
 
 describe('API reducer', () => {
   describe(ActionTypeLogin.LoggedOut, () => {
@@ -19,15 +21,21 @@ describe('API reducer', () => {
     });
   });
 
-  describe(ActionTypeApi.ConfigUpdated, () => {
-    const action = configUpdated({ birthDate: '1992-03-01' });
+  describe(ActionTypeApi.ConfigUpdatedFromApi, () => {
+    const action = configUpdatedFromApi({
+      birthDate: '1992-03-01',
+      realTimePrices: false,
+      fundMode: FundMode.Price,
+    });
     const result = reducer(initialState, action);
 
     it('should set the updated config', () => {
       expect.assertions(1);
       expect(result.appConfig).toStrictEqual(
-        expect.objectContaining({
+        expect.objectContaining<Partial<LocalAppConfig>>({
           birthDate: '1992-03-01',
+          realTimePrices: false,
+          fundMode: FundMode.Price,
         }),
       );
     });
@@ -35,6 +43,38 @@ describe('API reducer', () => {
     it('should not update the serial', () => {
       expect.assertions(1);
       expect(result.appConfigSerial).toBe(0);
+    });
+  });
+
+  describe(ActionTypeApi.ConfigUpdatedFromLocal, () => {
+    const action = configUpdatedFromLocal({
+      birthDate: '1994-05-10',
+      realTimePrices: false,
+      historyOptions: {
+        period: FundPeriod.Ytd,
+        length: null,
+      },
+    });
+
+    const result = reducer(initialState, action);
+
+    it('should set the updated config (optimistically)', () => {
+      expect.assertions(1);
+      expect(result.appConfig).toStrictEqual(
+        expect.objectContaining<Partial<State['appConfig']>>({
+          birthDate: '1994-05-10',
+          realTimePrices: false,
+          historyOptions: {
+            period: FundPeriod.Ytd,
+            length: null,
+          },
+        }),
+      );
+    });
+
+    it('should increment the serial', () => {
+      expect.assertions(1);
+      expect(result.appConfigSerial).toBe(initialState.appConfigSerial + 1);
     });
   });
 

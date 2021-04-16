@@ -1,23 +1,29 @@
+import { formatISO } from 'date-fns';
 import config from '~api/config';
 
 import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
 import { AppConfig, MutationSetConfigArgs } from '~api/types';
 import { Context } from '~api/types/resolver';
 
-import { defaultFundLength, defaultFundPeriod } from '~client/constants';
-
-export const defaultConfig: Omit<AppConfig, 'birthDate' | 'pieTolerance' | 'futureMonths'> = {
-  fundPeriod: defaultFundPeriod,
-  fundLength: defaultFundLength,
-};
+import {
+  defaultBirthDate,
+  defaultFundLength,
+  defaultFundMode,
+  defaultFundPeriod,
+  defaultRealTimePrices,
+} from '~shared/constants';
 
 export function getAppConfig(_: unknown, __: unknown, ctx: Context): AppConfig {
   return {
-    birthDate: config.data.overview.birthDate,
-    pieTolerance: config.data.pie.tolerance,
+    birthDate: ctx.session.config?.birthDate ?? defaultBirthDate,
     futureMonths: config.data.overview.numFuture,
-    fundPeriod: ctx.session.config?.fundPeriod ?? defaultConfig.fundPeriod,
-    fundLength: ctx.session.config?.fundLength ?? defaultConfig.fundLength,
+    realTimePrices: ctx.session.config?.realTimePrices ?? defaultRealTimePrices,
+    fundMode: ctx.session.config?.fundMode ?? defaultFundMode,
+    fundPeriod: ctx.session.config?.fundPeriod ?? defaultFundPeriod,
+    fundLength:
+      typeof ctx.session.config?.fundLength === 'undefined'
+        ? defaultFundLength
+        : ctx.session.config?.fundLength ?? null,
   };
 }
 
@@ -29,8 +35,16 @@ export function setAppConfig(
   const previousConfig = ctx.session.config ?? {};
   ctx.session.config = {
     ...previousConfig,
+    birthDate: args.config.birthDate
+      ? formatISO(args.config.birthDate, { representation: 'date' })
+      : previousConfig.birthDate,
+    realTimePrices: args.config.realTimePrices ?? previousConfig.realTimePrices,
+    fundMode: args.config.fundMode ?? previousConfig.fundMode,
     fundPeriod: args.config.fundPeriod ?? previousConfig.fundPeriod,
-    fundLength: args.config.fundLength ?? previousConfig.fundLength,
+    fundLength:
+      typeof args.config.fundLength === 'undefined'
+        ? previousConfig.fundLength
+        : args.config.fundLength ?? null,
   };
 
   return new Promise((resolve, reject) => {

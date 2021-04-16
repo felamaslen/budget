@@ -73,7 +73,6 @@ export default {
       startYear: getenv.int('START_YEAR', 2014),
       startMonth: getenv.int('START_MONTH', 9),
       investmentPurchaseCategories,
-      birthDate: getenv.string('BIRTH_DATE', '1990-01-01'),
     },
     pie: {
       tolerance: getenv.float('PIE_TOLERANCE', 0.075),

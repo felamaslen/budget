@@ -228,6 +228,14 @@ export enum FundPeriod {
   Ytd = 'ytd'
 }
 
+export enum FundMode {
+  Roi = 'ROI',
+  Value = 'Value',
+  Stacked = 'Stacked',
+  Price = 'Price',
+  PriceNormalised = 'PriceNormalised'
+}
+
 export type ReadFundsResponse = {
   items: Array<Fund>;
 };
@@ -483,16 +491,18 @@ export type CrudResponseDelete = {
 
 export type AppConfig = {
   birthDate: Scalars['String'];
-  pieTolerance: Scalars['Float'];
   futureMonths: Scalars['Int'];
+  realTimePrices: Scalars['Boolean'];
+  fundMode?: Maybe<FundMode>;
   fundPeriod?: Maybe<FundPeriod>;
   fundLength?: Maybe<Scalars['NonNegativeInt']>;
 };
 
 export type AppConfigInput = {
   birthDate?: Maybe<Scalars['Date']>;
-  pieTolerance?: Maybe<Scalars['Float']>;
   futureMonths?: Maybe<Scalars['Int']>;
+  realTimePrices?: Maybe<Scalars['Boolean']>;
+  fundMode?: Maybe<FundMode>;
   fundPeriod?: Maybe<FundPeriod>;
   fundLength?: Maybe<Scalars['NonNegativeInt']>;
 };
@@ -979,6 +989,7 @@ export type ResolversTypes = {
   FundPriceGroup: ResolverTypeWrapper<FundPriceGroup>;
   FundPrices: ResolverTypeWrapper<FundPrices>;
   FundPeriod: FundPeriod;
+  FundMode: FundMode;
   ReadFundsResponse: ResolverTypeWrapper<ReadFundsResponse>;
   FundHistory: ResolverTypeWrapper<FundHistory>;
   FundValueIndividual: ResolverTypeWrapper<FundValueIndividual>;
@@ -1001,12 +1012,12 @@ export type ResolversTypes = {
   CrudResponseUpdate: ResolverTypeWrapper<CrudResponseUpdate>;
   CrudResponseDelete: ResolverTypeWrapper<CrudResponseDelete>;
   AppConfig: ResolverTypeWrapper<AppConfig>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   AppConfigInput: AppConfigInput;
   PageListStandard: PageListStandard;
   ListItem: ResolverTypeWrapper<ListItem>;
   ListItemStandard: ResolverTypeWrapper<ListItemStandard>;
   ListReadResponse: ResolverTypeWrapper<ListReadResponse>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   ListTotalsResponse: ResolverTypeWrapper<ListTotalsResponse>;
   ListItemInput: ListItemInput;
   ListItemStandardInput: ListItemStandardInput;
@@ -1101,11 +1112,11 @@ export type ResolversParentTypes = {
   CrudResponseUpdate: CrudResponseUpdate;
   CrudResponseDelete: CrudResponseDelete;
   AppConfig: AppConfig;
+  Boolean: Scalars['Boolean'];
   AppConfigInput: AppConfigInput;
   ListItem: ListItem;
   ListItemStandard: ListItemStandard;
   ListReadResponse: ListReadResponse;
-  Boolean: Scalars['Boolean'];
   ListTotalsResponse: ListTotalsResponse;
   ListItemInput: ListItemInput;
   ListItemStandardInput: ListItemStandardInput;
@@ -1399,8 +1410,9 @@ export type CrudResponseDeleteResolvers<ContextType = Context, ParentType extend
 
 export type AppConfigResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AppConfig'] = ResolversParentTypes['AppConfig']> = {
   birthDate?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  pieTolerance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   futureMonths?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  realTimePrices?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  fundMode?: Resolver<Maybe<ResolversTypes['FundMode']>, ParentType, ContextType>;
   fundPeriod?: Resolver<Maybe<ResolversTypes['FundPeriod']>, ParentType, ContextType>;
   fundLength?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

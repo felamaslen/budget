@@ -210,8 +210,10 @@ export const PriceChangeHighlight = styled.div<HighlightProps>(
         content: '';
         display: ${highlight === 0 ? 'none' : 'block'};
         height: 100%;
+        left: 0;
         opacity: 0;
         position: absolute;
+        top: 0;
         width: 100%;
       }
     }

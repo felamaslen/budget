@@ -1,23 +1,29 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PricesWorker from 'worker-loader!../../workers/prices'; // eslint-disable-line import/no-unresolved
 
 import { todayPricesFetched } from '~client/actions';
+import type { SelectOptions } from '~client/components/form-field';
 import { highlightTimeMs } from '~client/components/fund-gain-info/styles';
 import { ApiContext, useUpdateEffect } from '~client/hooks';
 import { isSold } from '~client/modules/data';
 import { getGenericFullSymbol } from '~client/modules/finance';
 import { isServerSide } from '~client/modules/ssr';
-import { getFundsRows } from '~client/selectors';
+import { getAppConfig, getFundsRows } from '~client/selectors';
 import type { FundQuotes } from '~client/types';
+import { FundMode } from '~client/types/enum';
 import { useStockPricesQuery } from '~client/types/gql';
 
 const worker = isServerSide ? undefined : new PricesWorker();
 
+const minFetchIntervalMs = 1000 * 5;
+
 export function useTodayPrices(): void {
   const dispatch = useDispatch();
-  const apiKey = useContext(ApiContext);
+  const { realTimePrices } = useSelector(getAppConfig);
+  const paused = !realTimePrices;
 
+  const apiKey = useContext(ApiContext);
   const funds = useSelector(getFundsRows);
 
   const codes = useMemo<string[]>(
@@ -42,12 +48,21 @@ export function useTodayPrices(): void {
     requestPolicy: 'network-only',
   });
 
+  const lastFetchTime = useRef<number>(0);
+  const fetchIfNecessary = useCallback(() => {
+    const now = Date.now();
+    if (now - lastFetchTime.current > minFetchIntervalMs) {
+      fetchPrices();
+      lastFetchTime.current = now;
+    }
+  }, [fetchPrices]);
+
   const haveCodes = codes.length > 0;
   useEffect(() => {
     if (worker) {
       worker.onmessage = (): void => {
-        if (haveCodes) {
-          fetchPrices();
+        if (!paused && haveCodes) {
+          fetchIfNecessary();
         }
       };
     }
@@ -57,10 +72,10 @@ export function useTodayPrices(): void {
         worker.onmessage = null;
       }
     };
-  }, [fetchPrices, haveCodes]);
+  }, [fetchIfNecessary, paused, haveCodes]);
 
   useEffect(() => {
-    if (prices) {
+    if (prices && !paused) {
       const quotes = funds.reduce<FundQuotes>((last, { id, item }) => {
         const price =
           prices.stockPrices?.prices.find(({ code }) => code === getGenericFullSymbol(item))
@@ -69,7 +84,15 @@ export function useTodayPrices(): void {
       }, {});
       dispatch(todayPricesFetched(quotes, prices.stockPrices?.refreshTime ?? null));
     }
-  }, [dispatch, funds, prices]);
+  }, [dispatch, paused, funds, prices]);
+
+  useEffect(() => {
+    if (paused) {
+      dispatch(todayPricesFetched({}, null));
+    } else {
+      fetchIfNecessary();
+    }
+  }, [dispatch, paused, fetchIfNecessary]);
 }
 
 type Highlight = {
@@ -116,4 +139,24 @@ export function usePriceChangeHighlight(
   }, [latestPrice]);
 
   return highlight.value;
+}
+
+const modeListDesktop = Object.values(FundMode);
+const modeListMobile = [FundMode.Roi, FundMode.Value];
+
+export function useFundModeList(isMobile: boolean): FundMode[] {
+  return isMobile ? modeListMobile : modeListDesktop;
+}
+
+const fundModeText: Partial<Record<FundMode, string>> = {
+  [FundMode.Stacked]: 'Value (stacked)',
+  [FundMode.PriceNormalised]: 'Price (normalised)',
+};
+
+export function useFundModeSelectOptions(isMobile: boolean): SelectOptions<FundMode> {
+  const modeList = useFundModeList(isMobile);
+  return useMemo<SelectOptions<FundMode>>(
+    () => modeList.map((internal) => ({ internal, external: fundModeText[internal] })),
+    [modeList],
+  );
 }

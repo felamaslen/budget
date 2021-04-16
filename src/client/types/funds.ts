@@ -57,7 +57,7 @@ export type RowPrices = Data[] | null;
 
 export type HistoryOptions = {
   period: FundPeriod;
-  length?: number;
+  length: number | null;
 };
 
 export type FundQuotes = Record<number, number | null>;

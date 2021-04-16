@@ -5,7 +5,7 @@ import { createSelector } from 'reselect';
 import { getRealisedValue, getBuyCost } from './gains';
 import { FundPriceGroupRebased, getFundsCache, getFundsRows, getViewSoldFunds } from './helpers';
 import { getFundLineProcessed, FundsWithReturns, Return, FundWithReturns } from './lines';
-import { Mode, GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
 import { getTotalUnits, isSold, lastInArray } from '~client/modules/data';
 import { abbreviateFundName } from '~client/modules/finance';
@@ -18,6 +18,7 @@ import type {
   FundOrder,
   TransactionNative as Transaction,
 } from '~client/types';
+import { FundMode } from '~client/types/enum';
 
 type WithInfo<V = Record<string, unknown>> = Fund &
   V & {
@@ -154,8 +155,13 @@ export const getFundLines = memoiseNowAndToday((time, key) =>
     getFundsCache,
     getHiddenBecauseSold[key](time),
     getReturnsById[key](time),
-    (fundItems, { cacheTimes }, hiddenBecauseSold, fundsWithReturns): Record<Mode, FundLine[]> => {
-      const getFundLinesByMode = (mode: Mode): FundLine[] =>
+    (
+      fundItems,
+      { cacheTimes },
+      hiddenBecauseSold,
+      fundsWithReturns,
+    ): Record<FundMode, FundLine[]> => {
+      const getFundLinesByMode = (mode: FundMode): FundLine[] =>
         fundItems
           .filter(({ id }) => !hiddenBecauseSold[id])
           .reduce<FundLine[]>((last, fund) => {
@@ -164,11 +170,11 @@ export const getFundLines = memoiseNowAndToday((time, key) =>
           }, []);
 
       return {
-        [Mode.ROI]: getFundLinesByMode(Mode.ROI),
-        [Mode.Value]: getFundLinesByMode(Mode.Value),
-        [Mode.Stacked]: getFundLinesByMode(Mode.Stacked),
-        [Mode.Price]: getFundLinesByMode(Mode.Price),
-        [Mode.PriceNormalised]: getFundLinesByMode(Mode.PriceNormalised),
+        [FundMode.Roi]: getFundLinesByMode(FundMode.Roi),
+        [FundMode.Value]: getFundLinesByMode(FundMode.Value),
+        [FundMode.Stacked]: getFundLinesByMode(FundMode.Stacked),
+        [FundMode.Price]: getFundLinesByMode(FundMode.Price),
+        [FundMode.PriceNormalised]: getFundLinesByMode(FundMode.PriceNormalised),
       };
     },
   ),

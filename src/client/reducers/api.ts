@@ -1,12 +1,15 @@
-import { Action, ActionTypeApi, ActionTypeLogin, ActionTypeFunds } from '~client/actions';
-import { defaultFundLength, defaultFundPeriod } from '~client/constants';
-import type { GQL, HistoryOptions } from '~client/types';
-import { AppConfig } from '~client/types/gql';
+import isValidDate from 'date-fns/isValid';
 
-export type LocalAppConfig = {
-  birthDate: string;
-  historyOptions: HistoryOptions;
-};
+import { Action, ActionTypeApi, ActionTypeLogin, ActionTypeFunds } from '~client/actions';
+import type { GQL, HistoryOptions, LocalAppConfig } from '~client/types';
+import type { AppConfig } from '~client/types/gql';
+
+import {
+  defaultFundLength,
+  defaultFundMode,
+  defaultFundPeriod,
+  defaultRealTimePrices,
+} from '~shared/constants';
 
 export type State = {
   loading: number;
@@ -25,6 +28,8 @@ export const initialState: State = {
   error: null,
   appConfig: {
     birthDate: '1990-01-01',
+    realTimePrices: defaultRealTimePrices,
+    fundMode: defaultFundMode,
     historyOptions: defaultHistoryOptions,
   },
   appConfigSerial: 0,
@@ -41,17 +46,36 @@ const updateConfigRemote = (state: State, updatedConfig: Partial<GQL<AppConfig>>
   appConfig: {
     ...state.appConfig,
     birthDate: updatedConfig.birthDate ?? state.appConfig.birthDate,
+    realTimePrices: updatedConfig.realTimePrices ?? state.appConfig.realTimePrices,
+    fundMode: updatedConfig.fundMode ?? state.appConfig.fundMode,
     historyOptions: {
       period: updatedConfig.fundPeriod ?? state.appConfig.historyOptions.period,
-      length: updatedConfig.fundLength ?? state.appConfig.historyOptions.length,
+      length:
+        typeof updatedConfig.fundLength === 'undefined'
+          ? state.appConfig.historyOptions.length
+          : updatedConfig.fundLength ?? null,
     },
   },
 });
 
+const updateConfigLocal = (state: State, updatedConfig: Partial<LocalAppConfig>): State => ({
+  ...state,
+  appConfig: {
+    ...state.appConfig,
+    ...updatedConfig,
+    birthDate: isValidDate(new Date(updatedConfig.birthDate ?? state.appConfig.birthDate))
+      ? updatedConfig.birthDate ?? state.appConfig.birthDate
+      : state.appConfig.birthDate,
+  },
+  appConfigSerial: state.appConfigSerial + 1,
+});
+
 export default function api(state: State = initialState, action: Action): State {
   switch (action.type) {
-    case ActionTypeApi.ConfigUpdated:
+    case ActionTypeApi.ConfigUpdatedFromApi:
       return updateConfigRemote(state, action.config);
+    case ActionTypeApi.ConfigUpdatedFromLocal:
+      return updateConfigLocal(state, action.config);
     case ActionTypeApi.Loading:
       return { ...state, loading: state.loading + 1 };
     case ActionTypeApi.Loaded:

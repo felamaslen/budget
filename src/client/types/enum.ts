@@ -5,6 +5,7 @@ export {
   AnalysisPage,
   AnalysisPeriod,
   AnalysisGroupBy,
+  FundMode,
   FundPeriod,
   PageListStandard,
   MonthlyCategory,

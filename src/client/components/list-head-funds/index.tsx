@@ -89,10 +89,10 @@ export const ListHeadFunds: React.FC<Props> = ({
       />
       <Styled.ViewOptions>
         <FormFieldSelect options={sortOptions} value={sort} onChange={setSort} />
-        <Styled.ViewSold>
+        <Styled.Toggles>
           <input type="checkbox" checked={viewSoldFunds} onChange={onViewSoldToggle} />
-          <span>View sold</span>
-        </Styled.ViewSold>
+          <span>Sold</span>
+        </Styled.Toggles>
       </Styled.ViewOptions>
     </Styled.ListHeadFunds>
   );

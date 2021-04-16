@@ -3,7 +3,7 @@ import moize from 'moize';
 import sinon from 'sinon';
 
 import { App, getTestApp } from '~api/test-utils/create-server';
-import { AppConfig, AppConfigInput, Query, Maybe, Mutation } from '~api/types';
+import { AppConfig, AppConfigInput, Query, Maybe, Mutation, FundMode } from '~api/types';
 
 describe('Config resolver', () => {
   let clock: sinon.SinonFakeTimers;
@@ -20,8 +20,9 @@ describe('Config resolver', () => {
     query {
       config {
         birthDate
-        pieTolerance
         futureMonths
+        realTimePrices
+        fundMode
         fundPeriod
         fundLength
       }
@@ -48,12 +49,13 @@ describe('Config resolver', () => {
     );
 
     it.each`
-      description        | prop              | value
-      ${'birth date'}    | ${'birthDate'}    | ${'1990-01-01'}
-      ${'pie tolerance'} | ${'pieTolerance'} | ${0.075}
-      ${'future months'} | ${'futureMonths'} | ${12}
-      ${'fund period'}   | ${'fundPeriod'}   | ${expect.anything()}
-      ${'fund length'}   | ${'fundLength'}   | ${expect.anything()}
+      description           | prop                | value
+      ${'birth date'}       | ${'birthDate'}      | ${'1990-01-01'}
+      ${'future months'}    | ${'futureMonths'}   | ${12}
+      ${'real time prices'} | ${'realTimePrices'} | ${true}
+      ${'fund mode'}        | ${'fundMode'}       | ${FundMode.Roi}
+      ${'fund period'}      | ${'fundPeriod'}     | ${expect.anything()}
+      ${'fund length'}      | ${'fundLength'}     | ${expect.anything()}
     `('should return the $description', async ({ prop, value }) => {
       expect.assertions(1);
       const res = await setup();
@@ -70,18 +72,21 @@ describe('Config resolver', () => {
       mutation SetConfig($config: AppConfigInput!) {
         setConfig(config: $config) {
           birthDate
-          pieTolerance
           futureMonths
-          futureMonths
+          realTimePrices
+          fundMode
           fundPeriod
           fundLength
         }
       }
     `;
     describe.each`
-      prop            | nextValue
-      ${'fundPeriod'} | ${'month'}
-      ${'fundLength'} | ${7}
+      prop                | nextValue
+      ${'realTimePrices'} | ${false}
+      ${'fundMode'}       | ${FundMode.Stacked}
+      ${'fundPeriod'}     | ${'month'}
+      ${'fundLength'}     | ${7}
+      ${'birthDate'}      | ${'1992-10-13'}
     `('setting $prop', ({ prop, nextValue }) => {
       const setup = async (config: AppConfigInput): Promise<Maybe<AppConfig>> => {
         app.authGqlClient.clearStore();

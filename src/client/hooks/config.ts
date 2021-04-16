@@ -2,7 +2,7 @@ import { useDebounceCallback } from '@react-hook/debounce';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { configUpdated } from '~client/actions';
+import { configUpdatedFromApi } from '~client/actions';
 import { useConfigUpdatedSubscription, useSetConfigMutation } from '~client/hooks/gql';
 import { getAppConfig, getAppConfigSerial } from '~client/selectors';
 
@@ -16,7 +16,7 @@ export function useAppConfig(): () => void {
   const updatedConfig = updatedConfigResult.data?.configUpdated;
   useEffect(() => {
     if (updatedConfig) {
-      dispatch(configUpdated(updatedConfig));
+      dispatch(configUpdatedFromApi(updatedConfig));
     }
   }, [dispatch, updatedConfig]);
 
@@ -29,6 +29,8 @@ export function useAppConfig(): () => void {
       debouncedRemoteUpdate({
         config: {
           birthDate: appConfig.birthDate,
+          realTimePrices: appConfig.realTimePrices,
+          fundMode: appConfig.fundMode,
           fundPeriod: appConfig.historyOptions.period,
           fundLength: appConfig.historyOptions.length,
         },

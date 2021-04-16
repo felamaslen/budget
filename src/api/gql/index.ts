@@ -31,16 +31,18 @@ export const mainSchema = gql`
 
   type AppConfig {
     birthDate: String!
-    pieTolerance: Float!
     futureMonths: Int!
+    realTimePrices: Boolean!
+    fundMode: FundMode
     fundPeriod: FundPeriod
     fundLength: NonNegativeInt
   }
 
   input AppConfigInput {
     birthDate: Date
-    pieTolerance: Float
     futureMonths: Int
+    realTimePrices: Boolean
+    fundMode: FundMode
     fundPeriod: FundPeriod
     fundLength: NonNegativeInt
   }

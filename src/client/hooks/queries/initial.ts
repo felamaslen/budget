@@ -5,8 +5,8 @@ import { useInitialQuery } from '../gql';
 import { dataRead, errorOpened } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import { isServerSide } from '~client/modules/ssr';
-import type { LocalAppConfig } from '~client/reducers/api';
 import { getAppConfig } from '~client/selectors';
+import type { LocalAppConfig } from '~client/types';
 import { InitialQueryVariables } from '~client/types/gql';
 
 export const getInitialQueryVariables = (appConfig: LocalAppConfig): InitialQueryVariables => ({

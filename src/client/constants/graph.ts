@@ -1,5 +1,5 @@
 import type { Padding, HistoryOptions } from '~client/types';
-import { FundPeriod, PageListStandard } from '~client/types/enum';
+import { PageListStandard } from '~client/types/enum';
 import type { QueryFundHistoryArgs } from '~client/types/gql';
 
 const defaultFont = 'Arial, Helvetica, sans-serif';
@@ -40,22 +40,11 @@ export const GRAPH_FUND_ITEM_HEIGHT_LARGE = 120;
 export const GRAPH_FUNDS_WIDTH = 500;
 export const GRAPH_FUNDS_HEIGHT = 300;
 
-export enum Mode {
-  ROI = 'ROI',
-  Value = 'Value',
-  Stacked = 'Value (stacked)',
-  Price = 'Price',
-  PriceNormalised = 'Price (normalised)',
-}
-
 export const isHistoryOptionsEqual = (a: QueryFundHistoryArgs, b: QueryFundHistoryArgs): boolean =>
   a.period === b.period && a.length === b.length;
 
 export const fundHistoryMatch = (query: QueryFundHistoryArgs) => (
   compare: HistoryOptions,
 ): boolean => isHistoryOptionsEqual(query, compare);
-
-export const defaultFundPeriod = FundPeriod.Year;
-export const defaultFundLength = 1;
 
 export const GRAPH_FUNDS_NUM_TICKS = 10;

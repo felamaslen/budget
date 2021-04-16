@@ -4,6 +4,14 @@ export type PickUnion<T extends Record<string, unknown>, K extends keyof T> = { 
 export type PickRequire<T extends Record<string, unknown>, K extends keyof T> = Omit<T, K> &
   Required<Pick<T, K>>;
 
+export type RequiredNotNull<T> = T extends Record<string, unknown>
+  ? Required<
+      {
+        [K in keyof T]: RequiredNotNull<T[K]>;
+      }
+    >
+  : NonNullable<T>;
+
 export type Id = number;
 
 export type FieldKey<I extends ListItemInput> = keyof I;

@@ -85,11 +85,15 @@ const formFieldStyles = ({
   }
 
   ${SettingsInput} & {
+    justify-content: flex-start;
     width: 100%;
 
     input,
     select {
       width: 100%;
+    }
+    input[type='checkbox'] {
+      width: auto;
     }
   }
 

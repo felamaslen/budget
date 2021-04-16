@@ -3,6 +3,7 @@ import * as funds from './funds';
 
 import { State } from '~client/reducers';
 import {
+  FundMode,
   FundPeriod,
   NetWorthCategoryType,
   PageListStandard,
@@ -17,6 +18,8 @@ export const testState: State = {
     error: null,
     appConfig: {
       birthDate: '1990-01-01',
+      realTimePrices: true,
+      fundMode: FundMode.Roi,
       historyOptions: {
         period: FundPeriod.Year,
         length: 1,

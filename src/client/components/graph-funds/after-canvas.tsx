@@ -1,28 +1,22 @@
-import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
-import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
-import { useCTA, useDebouncedState, useUpdateEffect } from '~client/hooks';
+import { useFundModeSelectOptions } from '~client/components/page-funds/hooks';
+import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
+import { useCTA } from '~client/hooks';
 import { abbreviateFundName } from '~client/modules/finance';
-import { Hamburger } from '~client/styled/shared/hamburger';
-import {
-  SettingsBackground,
-  SettingsGroup,
-  SettingsInput,
-  SettingsLabel,
-} from '~client/styled/shared/settings';
+import { SettingsGroup, SettingsInput, SettingsLabel } from '~client/styled/shared/settings';
 import type { Id, FundItem, HistoryOptions } from '~client/types';
-import { FundPeriod } from '~client/types/gql';
+import { FundMode, FundPeriod } from '~client/types/enum';
 
 export type ToggleList = Record<string, boolean | null>;
 
 export type Props = Pick<ItemProps, 'toggleList' | 'setToggleList'> & {
   isMobile: boolean;
   historyOptions: HistoryOptions;
-  modeList: Mode[];
-  mode: Mode;
-  changeMode: Dispatch<SetStateAction<Mode>>;
+  mode: FundMode;
+  changeMode: (newMode: FundMode) => void;
   fundItems: FundItem[];
   sidebarOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
@@ -78,9 +72,9 @@ const Item: React.FC<ItemProps> = ({
   );
 };
 
-const periodSelectOptions: SelectOptions<HistoryOptions> = [
+export const periodSelectOptions: SelectOptions<HistoryOptions> = [
   { internal: { period: FundPeriod.Month, length: 3 }, external: '3 months' },
-  { internal: { period: FundPeriod.Ytd }, external: 'YTD' },
+  { internal: { period: FundPeriod.Ytd, length: null }, external: 'YTD' },
   { internal: { period: FundPeriod.Year, length: 1 }, external: '1 year' },
   { internal: { period: FundPeriod.Year, length: 3 }, external: '3 years' },
   { internal: { period: FundPeriod.Year, length: 5 }, external: '5 years' },
@@ -90,7 +84,6 @@ const periodSelectOptions: SelectOptions<HistoryOptions> = [
 export const AfterCanvas: React.FC<Props> = ({
   isMobile,
   historyOptions,
-  modeList,
   mode,
   changeMode,
   fundItems,
@@ -100,83 +93,58 @@ export const AfterCanvas: React.FC<Props> = ({
   setSidebarOpen,
   changePeriod,
 }) => {
-  const [mobileActive, setMobileActive] = useState<boolean>(false);
-
-  const [tempQuery, debouncedQuery, setTempQuery] = useDebouncedState<HistoryOptions>(
-    historyOptions,
-  );
-
-  const modeSelectOptions = useMemo<SelectOptions<Mode>>(
-    () => modeList.map((internal) => ({ internal })),
-    [modeList],
-  );
-
-  useUpdateEffect(() => {
-    changePeriod({
-      period: debouncedQuery.period,
-      length: debouncedQuery.length,
-    });
-  }, [debouncedQuery, changePeriod]);
+  const modeSelectOptions = useFundModeSelectOptions(isMobile);
+  if (isMobile) {
+    return null; // TODO: open settings dialog to "funds" section
+  }
 
   return (
     <>
-      {isMobile && (
-        <Styled.MobileSettingsButton onClick={(): void => setMobileActive((last) => !last)}>
-          <Hamburger />
-        </Styled.MobileSettingsButton>
-      )}
-      {(!isMobile || mobileActive) && (
-        <>
-          <SettingsBackground onClick={(): void => setMobileActive(false)} />
-          <Styled.FundModeSwitch>
-            <SettingsGroup>
-              <SettingsLabel>Period</SettingsLabel>
-              <SettingsInput>
-                <Styled.FundPeriodSwitch>
-                  {periodSelectOptions.map(({ internal, external }) => (
-                    <Styled.FundPeriodButton
-                      key={external}
-                      active={
-                        internal.period === tempQuery.period &&
-                        (typeof internal.length === 'undefined' ||
-                          internal.length === tempQuery.length)
-                      }
-                      onClick={(): void => setTempQuery(internal)}
-                    >
-                      {external}
-                    </Styled.FundPeriodButton>
-                  ))}
-                </Styled.FundPeriodSwitch>
-              </SettingsInput>
-            </SettingsGroup>
-            <SettingsGroup>
-              <SettingsLabel>Mode</SettingsLabel>
-              <SettingsInput>
-                <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
-              </SettingsInput>
-            </SettingsGroup>
-          </Styled.FundModeSwitch>
-        </>
-      )}
-      {!isMobile && (
-        <Styled.FundSidebar
-          tabIndex={-1}
-          isOpen={sidebarOpen}
-          onClick={(): void => setSidebarOpen((last) => !last)}
-        >
-          {fundItems &&
-            fundItems.map((item: FundItem) => (
-              <Item
-                key={item.id}
-                numItems={fundItems.length}
-                {...item}
-                abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
-                toggleList={toggleList}
-                setToggleList={setToggleList}
-              />
-            ))}
-        </Styled.FundSidebar>
-      )}
+      <Styled.FundModeSwitch>
+        <SettingsGroup>
+          <SettingsLabel>Period</SettingsLabel>
+          <SettingsInput>
+            <Styled.FundPeriodSwitch>
+              {periodSelectOptions.map(({ internal, external }) => (
+                <Styled.FundPeriodButton
+                  key={external}
+                  active={
+                    internal.period === historyOptions.period &&
+                    (typeof internal.length === 'undefined' ||
+                      internal.length === historyOptions.length)
+                  }
+                  onClick={(): void => changePeriod(internal)}
+                >
+                  {external}
+                </Styled.FundPeriodButton>
+              ))}
+            </Styled.FundPeriodSwitch>
+          </SettingsInput>
+        </SettingsGroup>
+        <SettingsGroup>
+          <SettingsLabel>Mode</SettingsLabel>
+          <SettingsInput>
+            <FormFieldSelect options={modeSelectOptions} value={mode} onChange={changeMode} />
+          </SettingsInput>
+        </SettingsGroup>
+      </Styled.FundModeSwitch>
+      <Styled.FundSidebar
+        tabIndex={-1}
+        isOpen={sidebarOpen}
+        onClick={(): void => setSidebarOpen((last) => !last)}
+      >
+        {fundItems &&
+          fundItems.map((item: FundItem) => (
+            <Item
+              key={item.id}
+              numItems={fundItems.length}
+              {...item}
+              abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
+              toggleList={toggleList}
+              setToggleList={setToggleList}
+            />
+          ))}
+      </Styled.FundSidebar>
     </>
   );
 };

@@ -3,9 +3,8 @@ import React from 'react';
 
 import { AfterCanvas, Props } from './after-canvas';
 
-import { Mode } from '~client/constants/graph';
 import type { HistoryOptions } from '~client/types';
-import { FundPeriod } from '~client/types/enum';
+import { FundMode, FundPeriod } from '~client/types/enum';
 
 describe('<AfterCanvas /> (funds graph)', () => {
   const changePeriod = jest.fn();
@@ -17,8 +16,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
       period: FundPeriod.Year,
       length: 1,
     },
-    modeList: [Mode.Price, Mode.Value],
-    mode: Mode.Price,
+    mode: FundMode.Price,
     changeMode,
     fundItems: [],
     toggleList: {},
@@ -32,7 +30,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
     it.each`
       query         | period              | length
       ${'3 months'} | ${FundPeriod.Month} | ${3}
-      ${'YTD'}      | ${FundPeriod.Ytd}   | ${undefined}
+      ${'YTD'}      | ${FundPeriod.Ytd}   | ${null}
       ${'1 year'}   | ${FundPeriod.Year}  | ${1}
       ${'3 years'}  | ${FundPeriod.Year}  | ${3}
       ${'5 years'}  | ${FundPeriod.Year}  | ${5}
@@ -69,8 +67,8 @@ describe('<AfterCanvas /> (funds graph)', () => {
     });
 
     it.each`
-      mode          | description
-      ${Mode.Value} | ${'value'}
+      mode              | description
+      ${FundMode.Value} | ${'value'}
     `('should fire an event for the $description mode', ({ mode }) => {
       expect.assertions(1);
       const { getByDisplayValue } = render(<AfterCanvas {...props} />);

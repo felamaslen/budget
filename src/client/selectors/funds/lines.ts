@@ -1,8 +1,9 @@
 import { replaceAtIndex } from 'replace-array';
 
-import { GRAPH_FUNDS_OVERALL_ID, Mode } from '~client/constants/graph';
+import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { IDENTITY, lastInArray, rightPad } from '~client/modules/data';
 import type { Data, GQL, Id, Point } from '~client/types';
+import { FundMode } from '~client/types/enum';
 import type { FundPriceGroup } from '~client/types/gql';
 
 export type Return = {
@@ -169,28 +170,32 @@ export const getFundLinePriceNormalised = (
     ),
   }));
 
-export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: Mode): FundGroup[] {
+export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: FundMode): FundGroup[] {
   switch (mode) {
-    case Mode.Value:
-    case Mode.Stacked:
+    case FundMode.Value:
+    case FundMode.Stacked:
       return getOverallAbsolute(fundsWithReturns);
-    case Mode.ROI:
+    case FundMode.Roi:
       return getOverallROI(fundsWithReturns);
     default:
       return [];
   }
 }
 
-export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: Id): FundGroup[] {
+export function getFundLine(
+  fundsWithReturns: FundsWithReturns,
+  mode: FundMode,
+  id: Id,
+): FundGroup[] {
   switch (mode) {
-    case Mode.Value:
-    case Mode.Stacked:
+    case FundMode.Value:
+    case FundMode.Stacked:
       return getFundLineAbsolute(fundsWithReturns, id);
-    case Mode.ROI:
+    case FundMode.Roi:
       return getFundLineROI(fundsWithReturns, id);
-    case Mode.Price:
+    case FundMode.Price:
       return getFundLinePrice(fundsWithReturns, id);
-    case Mode.PriceNormalised:
+    case FundMode.PriceNormalised:
       return getFundLinePriceNormalised(fundsWithReturns, id);
     default:
       return [];
@@ -200,7 +205,7 @@ export function getFundLine(fundsWithReturns: FundsWithReturns, mode: Mode, id: 
 export function getFundLineProcessed(
   fundsWithReturns: FundsWithReturns,
   cacheTimes: number[],
-  mode: Mode,
+  mode: FundMode,
   id: Id = GRAPH_FUNDS_OVERALL_ID,
 ): Data[] {
   const groups =

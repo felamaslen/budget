@@ -57,9 +57,9 @@ describe('<ListHeadFunds />', () => {
 
   it('should call an onViewSoldToggle function when a tickbox is toggled', () => {
     expect.assertions(3);
-    const { getByRole, container } = setup();
+    const { getAllByRole, container } = setup();
 
-    const tickbox = getByRole('checkbox') as HTMLInputElement;
+    const tickbox = getAllByRole('checkbox')[0] as HTMLInputElement;
     expect(tickbox.checked).toBe(false);
 
     act(() => {

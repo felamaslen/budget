@@ -10,7 +10,12 @@ import { hoverEffectByMode } from './labels';
 import { getFundLineName } from './name';
 import * as Styled from './styles';
 
-import { errorOpened, fundPricesUpdated, fundQueryUpdated } from '~client/actions';
+import {
+  configUpdatedFromLocal,
+  errorOpened,
+  fundPricesUpdated,
+  fundQueryUpdated,
+} from '~client/actions';
 import { FundWeights } from '~client/components/fund-weights';
 import {
   LineGraph,
@@ -19,20 +24,26 @@ import {
   TimeAxes,
   useGraphWidth,
 } from '~client/components/graph';
+import { useFundModeList } from '~client/components/page-funds/hooks';
 import { ErrorLevel } from '~client/constants/error';
 import {
   GRAPH_FUNDS_WIDTH,
   GRAPH_FUNDS_HEIGHT,
   GRAPH_FUNDS_OVERALL_ID,
   GRAPH_FUNDS_NUM_TICKS,
-  Mode,
 } from '~client/constants/graph';
-import { TodayContext, usePersistentState, useUpdateEffect } from '~client/hooks';
+import { TodayContext, usePersistentState } from '~client/hooks';
 import { useFundPricesUpdateQuery } from '~client/hooks/gql';
 import { lastInArray } from '~client/modules/data';
 import { getTickSize } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
-import { getFundItems, getFundLines, getFundsCache, getHistoryOptions } from '~client/selectors';
+import {
+  getAppConfig,
+  getFundItems,
+  getFundLines,
+  getFundsCache,
+  getHistoryOptions,
+} from '~client/selectors';
 import { graphFundsHeightMobile } from '~client/styled/variables';
 import type {
   Data,
@@ -47,13 +58,11 @@ import type {
   Point,
   Range,
 } from '~client/types';
+import { FundMode } from '~client/types/enum';
 
 const PADDING_DESKTOP: Padding = [20, 3, 0, 12];
 const PADDING_DESKTOP_WITH_SIDEBAR: Padding = [20, 3, 0, 60];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
-
-const modeListDesktop = Object.values(Mode);
-const modeListMobile = [Mode.ROI, Mode.Value];
 
 function useDynamicPrices(): [HistoryOptions, (nextQuery: HistoryOptions) => void] {
   const query = useSelector(getHistoryOptions);
@@ -67,14 +76,19 @@ function useDynamicPrices(): [HistoryOptions, (nextQuery: HistoryOptions) => voi
     [dispatch],
   );
 
-  const [res, refresh] = useFundPricesUpdateQuery({
-    variables: query,
-    pause: true,
-  });
+  const hasChangedQuery = useRef<boolean>(false);
+  const initialQuery = useRef<HistoryOptions>(query);
+  useEffect(() => {
+    if (query !== initialQuery.current) {
+      hasChangedQuery.current = true;
+    }
+  }, [query]);
 
-  useUpdateEffect(() => {
-    refresh();
-  }, [query, refresh]);
+  const [res] = useFundPricesUpdateQuery({
+    pause: !hasChangedQuery.current,
+    variables: query,
+    requestPolicy: 'cache-and-network',
+  });
 
   useEffect(() => {
     if (res.error) {
@@ -118,7 +132,7 @@ const filterLines = moize(
   (
     isMobile: boolean,
     filteredFundLines: FundLine[],
-    mode: Mode,
+    mode: FundMode,
     startTime: number,
     cacheTimes: number[],
   ): Line[] => {
@@ -132,7 +146,7 @@ const filterLines = moize(
       stack: GraphStack;
     };
 
-    if (mode === Mode.Stacked) {
+    if (mode === FundMode.Stacked) {
       const groupedLines = groupBy(sortedLines, 'id');
 
       const result = Object.entries(groupedLines)
@@ -218,7 +232,7 @@ const filterLines = moize(
           data,
           color,
           strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
-          smooth: mode !== Mode.Value,
+          smooth: mode !== FundMode.Value,
         };
 
         return {
@@ -238,7 +252,7 @@ const filterLines = moize(
 );
 
 const getRanges = moize(
-  (lines: Line[], times: number[], mode: Mode): [Range, number] => {
+  (lines: Line[], times: number[], mode: FundMode): [Range, number] => {
     if (times.length <= 1) {
       return [
         {
@@ -258,7 +272,7 @@ const getRanges = moize(
       .filter((values) => values.length);
 
     let minY = 0;
-    if (mode !== Mode.Value) {
+    if (mode !== FundMode.Value) {
       minY = valuesY.reduce(
         (min, line) =>
           Math.min(
@@ -281,7 +295,7 @@ const getRanges = moize(
       minY -= 0.5;
       maxY += 0.5;
     }
-    if (mode === Mode.ROI && minY === 0) {
+    if (mode === FundMode.Roi && minY === 0) {
       minY = -maxY * 0.2;
     }
 
@@ -327,7 +341,7 @@ function useGraphProps({
   width: number;
   height: number;
   isMobile: boolean;
-  mode: Mode;
+  mode: FundMode;
   today: Date;
   toggleList: ToggleList;
 }): LineGraphProps {
@@ -363,7 +377,7 @@ function useGraphProps({
 
   const AfterLines = useCallback<React.FC<SiblingProps>>(
     (props) =>
-      [Mode.ROI, Mode.Value].includes(mode) ? (
+      [FundMode.Roi, FundMode.Value].includes(mode) ? (
         <BuySellDots {...props} fundLines={filteredFundLines} startTime={startTime} mode={mode} />
       ) : null,
     [filteredFundLines, startTime, mode],
@@ -385,18 +399,22 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
   const today = useContext(TodayContext);
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
+
+  const dispatch = useDispatch();
+
   const fundItems = useSelector(getFundItems.today(today));
+  const { fundMode: mode } = useSelector(getAppConfig);
 
   const [historyOptions, setHistoryOptions] = useDynamicPrices();
-  const modeList = isMobile ? modeListMobile : modeListDesktop;
-  const [mode, changeMode] = usePersistentState<Mode>(modeList[0], 'graph_funds_mode');
+  const modeList = useFundModeList(isMobile);
+  const changeMode = useCallback(
+    (newMode: FundMode) => {
+      dispatch(configUpdatedFromLocal({ fundMode: newMode }));
+    },
+    [dispatch],
+  );
 
-  const modeIsValid = modeList.includes(mode);
-  useEffect(() => {
-    if (!modeIsValid) {
-      changeMode(modeList[0]);
-    }
-  }, [modeIsValid, modeList, changeMode]);
+  const validMode = modeList.includes(mode) ? mode : modeList[0];
 
   const [sidebarOpen, setSidebarOpen] = usePersistentState<boolean>(false, 'funds_sidebar_open');
   const [toggleList, setToggleList] = useToggleList(fundItems);
@@ -404,7 +422,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
     width,
     height,
     isMobile,
-    mode: modeIsValid ? mode : modeList[0],
+    mode: validMode,
     today,
     toggleList,
   });
@@ -418,8 +436,7 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
         <AfterCanvas
           isMobile={isMobile}
           historyOptions={historyOptions}
-          modeList={modeList}
-          mode={mode}
+          mode={validMode}
           changeMode={changeMode}
           fundItems={fundItems}
           toggleList={toggleList}

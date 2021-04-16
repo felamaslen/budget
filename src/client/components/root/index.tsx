@@ -10,6 +10,7 @@ import { compose } from 'redux';
 
 import { loggedOut } from '~client/actions';
 import { Anonymous, Props as AnonymousProps } from '~client/components/anonymous';
+import { Config } from '~client/components/config';
 import { ErrorMessages } from '~client/components/error-messages';
 import { GQLProvider } from '~client/components/gql-provider';
 import { Header, Props as HeaderProps } from '~client/components/header';
@@ -41,13 +42,20 @@ export type Props = {
   offline?: boolean;
 } & ContentProps;
 
-const RootContainer: React.FC<HeaderProps> = ({ onLogout, children, ...props }) => {
+const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
+  onLogout,
+  children,
+  ...props
+}) => {
   const windowWidth = useDebouncedResize();
   const today = useToday();
+
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
 
   const [, logoutFromServer] = useLogoutMutation();
   const logout = useCallback(() => {
     logoutFromServer();
+    setSettingsOpen(false);
     onLogout();
   }, [onLogout, logoutFromServer]);
 
@@ -56,9 +64,12 @@ const RootContainer: React.FC<HeaderProps> = ({ onLogout, children, ...props }) 
       <TodayContext.Provider value={today}>
         <Main>
           <Global styles={reset} />
-          <Header {...props} onLogout={logout} />
+          <Header {...props} onLogout={logout} setSettingsOpen={setSettingsOpen} />
           <ErrorMessages />
-          <PageWrapper>{children}</PageWrapper>
+          <PageWrapper>
+            {children}
+            <Config open={settingsOpen} setOpen={setSettingsOpen} />
+          </PageWrapper>
         </Main>
       </TodayContext.Provider>
     </ResizeContext.Provider>

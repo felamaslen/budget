@@ -239,6 +239,14 @@ export enum FundPeriod {
   Ytd = 'ytd'
 }
 
+export enum FundMode {
+  Roi = 'ROI',
+  Value = 'Value',
+  Stacked = 'Stacked',
+  Price = 'Price',
+  PriceNormalised = 'PriceNormalised'
+}
+
 export type ReadFundsResponse = {
   __typename?: 'ReadFundsResponse';
   items: Array<Fund>;
@@ -510,16 +518,18 @@ export type CrudResponseDelete = {
 export type AppConfig = {
   __typename?: 'AppConfig';
   birthDate: Scalars['String'];
-  pieTolerance: Scalars['Float'];
   futureMonths: Scalars['Int'];
+  realTimePrices: Scalars['Boolean'];
+  fundMode?: Maybe<FundMode>;
   fundPeriod?: Maybe<FundPeriod>;
   fundLength?: Maybe<Scalars['NonNegativeInt']>;
 };
 
 export type AppConfigInput = {
   birthDate?: Maybe<Scalars['Date']>;
-  pieTolerance?: Maybe<Scalars['Float']>;
   futureMonths?: Maybe<Scalars['Int']>;
+  realTimePrices?: Maybe<Scalars['Boolean']>;
+  fundMode?: Maybe<FundMode>;
   fundPeriod?: Maybe<FundPeriod>;
   fundLength?: Maybe<Scalars['NonNegativeInt']>;
 };
@@ -1003,7 +1013,7 @@ export type SetConfigMutation = (
   { __typename?: 'Mutation' }
   & { setConfig?: Maybe<(
     { __typename?: 'AppConfig' }
-    & Pick<AppConfig, 'birthDate' | 'pieTolerance' | 'futureMonths' | 'fundPeriod' | 'fundLength'>
+    & Pick<AppConfig, 'birthDate' | 'futureMonths' | 'realTimePrices' | 'fundMode' | 'fundPeriod' | 'fundLength'>
   )> }
 );
 
@@ -1558,7 +1568,7 @@ export type ConfigUpdatedSubscription = (
   { __typename?: 'Subscription' }
   & { configUpdated: (
     { __typename?: 'AppConfig' }
-    & Pick<AppConfig, 'birthDate' | 'fundPeriod' | 'fundLength'>
+    & Pick<AppConfig, 'birthDate' | 'realTimePrices' | 'fundMode' | 'fundPeriod' | 'fundLength'>
   ) }
 );
 
@@ -1912,9 +1922,9 @@ export const SetConfigDocument = gql`
     mutation SetConfig($config: AppConfigInput!) {
   setConfig(config: $config) {
     birthDate
-    pieTolerance
     futureMonths
-    futureMonths
+    realTimePrices
+    fundMode
     fundPeriod
     fundLength
   }
@@ -2490,6 +2500,8 @@ export const ConfigUpdatedDocument = gql`
     subscription ConfigUpdated {
   configUpdated {
     birthDate
+    realTimePrices
+    fundMode
     fundPeriod
     fundLength
   }

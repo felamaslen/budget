@@ -1,10 +1,11 @@
 import { render, RenderResult } from '@testing-library/react';
 import React from 'react';
-import { AppLogo } from '.';
+import { AppLogo, Props } from '.';
 
 describe('<AppLogo />', () => {
-  const props = {
+  const props: Props = {
     loading: false,
+    setSettingsOpen: jest.fn(),
   };
 
   const setup = (customProps = {}): RenderResult => render(<AppLogo {...props} {...customProps} />);
@@ -54,6 +55,20 @@ describe('<AppLogo />', () => {
       }
 
       .emotion-2 {
+        height: 1.375rem;
+        position: relative;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-2 {
+          -webkit-flex: 0 0 1.375rem;
+          -ms-flex: 0 0 1.375rem;
+          flex: 0 0 1.375rem;
+          margin: 0 0.5rem 0 0.25rem;
+        }
+      }
+
+      .emotion-4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -75,7 +90,7 @@ describe('<AppLogo />', () => {
         position: relative;
       }
 
-      .emotion-2::before {
+      .emotion-4::before {
         background-image: url(path/to/test/file);
         -webkit-background-position: -1px -59px;
         background-position: -1px -59px;
@@ -90,14 +105,14 @@ describe('<AppLogo />', () => {
       }
 
       @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-        .emotion-2::before {
+        .emotion-4::before {
           background-image: url(path/to/test/file);
           -webkit-background-size: 262px 88px;
           background-size: 262px 88px;
         }
       }
 
-      .emotion-4 {
+      .emotion-6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -107,16 +122,27 @@ describe('<AppLogo />', () => {
         -ms-flex-align: center;
         align-items: center;
         height: 100%;
-        padding-right: 2.25rem;
       }
 
-      .emotion-6 {
+      .emotion-8 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
         font-size: 1.375rem;
         margin: 0;
       }
 
+      .emotion-8>span {
+        margin-right: 0.25rem;
+      }
+
       @media only screen and (min-width: 500px) {
-        .emotion-6 {
+        .emotion-8 {
           -webkit-flex: 0 0 2.6875rem;
           -ms-flex: 0 0 2.6875rem;
           flex: 0 0 2.6875rem;
@@ -124,23 +150,54 @@ describe('<AppLogo />', () => {
         }
       }
 
+      .emotion-10 {
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        color: #eaeaea;
+        cursor: pointer;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        font-size: 1.75rem;
+        margin-left: 0.25rem;
+      }
+
+      @media only screen and (min-width: 500px) {
+        .emotion-10 {
+          margin-left: 0;
+        }
+      }
+
       <div>
         <div
           class="emotion-0 emotion-1"
         >
-          <a
+          <div
             class="emotion-2 emotion-3"
+          />
+          <span
+            class="emotion-4 emotion-5"
           >
             <div
-              class="emotion-4 emotion-5"
+              class="emotion-6 emotion-7"
             >
               <h1
-                class="emotion-6 emotion-7"
+                class="emotion-8 emotion-9"
               >
-                Budget
+                <span>
+                  Budget
+                </span>
               </h1>
+              <a
+                class="emotion-10 emotion-11"
+              >
+                ⚙
+              </a>
             </div>
-          </a>
+          </span>
         </div>
       </div>
     `);
@@ -239,6 +296,66 @@ describe('<AppLogo />', () => {
         }
 
         .emotion-2 {
+          height: 1.375rem;
+          position: relative;
+        }
+
+        @media only screen and (min-width: 500px) {
+          .emotion-2 {
+            -webkit-flex: 0 0 1.375rem;
+            -ms-flex: 0 0 1.375rem;
+            flex: 0 0 1.375rem;
+            margin: 0 0.5rem 0 0.25rem;
+          }
+        }
+
+        .emotion-4 {
+          position: relative;
+          width: 22px;
+          height: 22px;
+          -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+          -webkit-animation: animation-0 2s 0s infinite linear;
+          animation: animation-0 2s 0s infinite linear;
+          -webkit-flex: 0 0 1.375rem;
+          -ms-flex: 0 0 1.375rem;
+          flex: 0 0 1.375rem;
+          opacity: 1;
+          position: absolute;
+          right: 0;
+          -webkit-transition: opacity 0.5s ease;
+          transition: opacity 0.5s ease;
+        }
+
+        .emotion-5 {
+          position: absolute;
+          top: 0;
+          bottom: auto;
+          height: 11px;
+          width: 11px;
+          background-color: #fbe07f;
+          border-radius: 100%;
+          -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+          -webkit-animation: animation-1 2s 0s infinite linear;
+          animation: animation-1 2s 0s infinite linear;
+        }
+
+        .emotion-6 {
+          position: absolute;
+          top: auto;
+          bottom: 0;
+          height: 11px;
+          width: 11px;
+          background-color: #fbe07f;
+          border-radius: 100%;
+          -webkit-animation-fill-mode: forwards;
+          animation-fill-mode: forwards;
+          -webkit-animation: animation-1 2s -1s infinite linear;
+          animation: animation-1 2s -1s infinite linear;
+        }
+
+        .emotion-7 {
           -webkit-align-items: center;
           -webkit-box-align: center;
           -ms-flex-align: center;
@@ -260,7 +377,7 @@ describe('<AppLogo />', () => {
           position: relative;
         }
 
-        .emotion-2::before {
+        .emotion-7::before {
           background-image: url(path/to/test/file);
           -webkit-background-position: -1px -59px;
           background-position: -1px -59px;
@@ -275,14 +392,14 @@ describe('<AppLogo />', () => {
         }
 
         @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-          .emotion-2::before {
+          .emotion-7::before {
             background-image: url(path/to/test/file);
             -webkit-background-size: 262px 88px;
             background-size: 262px 88px;
           }
         }
 
-        .emotion-4 {
+        .emotion-9 {
           display: -webkit-box;
           display: -webkit-flex;
           display: -ms-flexbox;
@@ -292,16 +409,27 @@ describe('<AppLogo />', () => {
           -ms-flex-align: center;
           align-items: center;
           height: 100%;
-          padding-right: 2.25rem;
         }
 
-        .emotion-6 {
+        .emotion-11 {
+          -webkit-align-items: center;
+          -webkit-box-align: center;
+          -ms-flex-align: center;
+          align-items: center;
+          display: -webkit-inline-box;
+          display: -webkit-inline-flex;
+          display: -ms-inline-flexbox;
+          display: inline-flex;
           font-size: 1.375rem;
           margin: 0;
         }
 
+        .emotion-11>span {
+          margin-right: 0.25rem;
+        }
+
         @media only screen and (min-width: 500px) {
-          .emotion-6 {
+          .emotion-11 {
             -webkit-flex: 0 0 2.6875rem;
             -ms-flex: 0 0 2.6875rem;
             flex: 0 0 2.6875rem;
@@ -309,80 +437,65 @@ describe('<AppLogo />', () => {
           }
         }
 
-        .emotion-8 {
-          position: relative;
-          width: 22px;
-          height: 22px;
-          -webkit-animation-fill-mode: forwards;
-          animation-fill-mode: forwards;
-          -webkit-animation: animation-0 2s 0s infinite linear;
-          animation: animation-0 2s 0s infinite linear;
-          -webkit-flex: 0 0 auto;
-          -ms-flex: 0 0 auto;
-          flex: 0 0 auto;
-          margin-left: 0.5rem;
-          opacity: 1;
-          position: absolute;
-          right: 0;
-          -webkit-transition: opacity 0.5s ease;
-          transition: opacity 0.5s ease;
+        .emotion-13 {
+          -webkit-align-items: center;
+          -webkit-box-align: center;
+          -ms-flex-align: center;
+          align-items: center;
+          color: #eaeaea;
+          cursor: pointer;
+          display: -webkit-inline-box;
+          display: -webkit-inline-flex;
+          display: -ms-inline-flexbox;
+          display: inline-flex;
+          font-size: 1.75rem;
+          margin-left: 0.25rem;
         }
 
-        .emotion-9 {
-          position: absolute;
-          top: 0;
-          bottom: auto;
-          height: 11px;
-          width: 11px;
-          background-color: #fbe07f;
-          border-radius: 100%;
-          -webkit-animation-fill-mode: forwards;
-          animation-fill-mode: forwards;
-          -webkit-animation: animation-1 2s 0s infinite linear;
-          animation: animation-1 2s 0s infinite linear;
-        }
-
-        .emotion-10 {
-          position: absolute;
-          top: auto;
-          bottom: 0;
-          height: 11px;
-          width: 11px;
-          background-color: #fbe07f;
-          border-radius: 100%;
-          -webkit-animation-fill-mode: forwards;
-          animation-fill-mode: forwards;
-          -webkit-animation: animation-1 2s -1s infinite linear;
-          animation: animation-1 2s -1s infinite linear;
+        @media only screen and (min-width: 500px) {
+          .emotion-13 {
+            margin-left: 0;
+          }
         }
 
         <div>
           <div
             class="emotion-0 emotion-1"
           >
-            <a
+            <div
               class="emotion-2 emotion-3"
             >
+              <span
+                class="emotion-4"
+              >
+                <span
+                  class="emotion-5"
+                />
+                <span
+                  class="emotion-6"
+                />
+              </span>
+            </div>
+            <span
+              class="emotion-7 emotion-8"
+            >
               <div
-                class="emotion-4 emotion-5"
+                class="emotion-9 emotion-10"
               >
                 <h1
-                  class="emotion-6 emotion-7"
+                  class="emotion-11 emotion-12"
                 >
-                  Budget
+                  <span>
+                    Budget
+                  </span>
                 </h1>
-                <span
-                  class="emotion-8"
+                <a
+                  class="emotion-13 emotion-14"
                 >
-                  <span
-                    class="emotion-9"
-                  />
-                  <span
-                    class="emotion-10"
-                  />
-                </span>
+                  ⚙
+                </a>
               </div>
-            </a>
+            </span>
           </div>
         </div>
       `);
