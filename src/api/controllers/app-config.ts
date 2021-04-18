@@ -1,9 +1,10 @@
 import { formatISO } from 'date-fns';
+import { DatabaseTransactionConnectionType, sql } from 'slonik';
 import config from '~api/config';
+import { UserRow } from '~api/modules/auth';
 
 import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
-import { AppConfig, MutationSetConfigArgs } from '~api/types';
-import { Context } from '~api/types/resolver';
+import { AppConfig, AppConfigSet, MutationSetConfigArgs } from '~api/types';
 
 import {
   defaultBirthDate,
@@ -13,27 +14,49 @@ import {
   defaultRealTimePrices,
 } from '~shared/constants';
 
-export function getAppConfig(_: unknown, __: unknown, ctx: Context): AppConfig {
+const defaultAppConfig: AppConfig = {
+  birthDate: defaultBirthDate,
+  futureMonths: config.data.overview.numFuture,
+  realTimePrices: defaultRealTimePrices,
+  fundMode: defaultFundMode,
+  fundPeriod: defaultFundPeriod,
+  fundLength: defaultFundLength,
+};
+
+export async function getAppConfig(
+  db: DatabaseTransactionConnectionType,
+  uid?: number | null,
+): Promise<AppConfig> {
+  if (!uid) {
+    return defaultAppConfig;
+  }
+  const {
+    rows: [userAppConfig],
+  } = await db.query<Pick<UserRow, 'config'>>(sql`SELECT config FROM users WHERE uid = ${uid}`);
+  if (!userAppConfig) {
+    return defaultAppConfig;
+  }
+
   return {
-    birthDate: ctx.session.config?.birthDate ?? defaultBirthDate,
-    futureMonths: config.data.overview.numFuture,
-    realTimePrices: ctx.session.config?.realTimePrices ?? defaultRealTimePrices,
-    fundMode: ctx.session.config?.fundMode ?? defaultFundMode,
-    fundPeriod: ctx.session.config?.fundPeriod ?? defaultFundPeriod,
+    ...defaultAppConfig,
+    birthDate: userAppConfig.config?.birthDate ?? defaultAppConfig.birthDate,
+    realTimePrices: userAppConfig.config?.realTimePrices ?? defaultAppConfig.realTimePrices,
+    fundMode: userAppConfig.config?.fundMode ?? defaultAppConfig.fundMode,
+    fundPeriod: userAppConfig.config?.fundPeriod ?? defaultAppConfig.fundPeriod,
     fundLength:
-      typeof ctx.session.config?.fundLength === 'undefined'
-        ? defaultFundLength
-        : ctx.session.config?.fundLength ?? null,
+      typeof userAppConfig.config?.fundLength === 'undefined'
+        ? defaultAppConfig.fundLength
+        : userAppConfig.config?.fundLength ?? null,
   };
 }
 
-export function setAppConfig(
-  root: unknown,
+export async function setAppConfig(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
   args: MutationSetConfigArgs,
-  ctx: Context,
-): Promise<AppConfig> {
-  const previousConfig = ctx.session.config ?? {};
-  ctx.session.config = {
+): Promise<AppConfigSet> {
+  const previousConfig = await getAppConfig(db, uid);
+  const nextConfig: AppConfig = {
     ...previousConfig,
     birthDate: args.config.birthDate
       ? formatISO(args.config.birthDate, { representation: 'date' })
@@ -47,15 +70,10 @@ export function setAppConfig(
         : args.config.fundLength ?? null,
   };
 
-  return new Promise((resolve, reject) => {
-    ctx.session.save((err) => {
-      if (err) {
-        reject(err);
-      } else {
-        const nextConfig = getAppConfig(root, {}, ctx);
-        pubsub.publish(`${PubSubTopic.ConfigUpdated}.${ctx.session.uid}`, nextConfig);
-        resolve(nextConfig);
-      }
-    });
-  });
+  await db.query(sql`
+  UPDATE users SET config = ${JSON.stringify(nextConfig)} WHERE uid = ${uid}
+  `);
+
+  pubsub.publish(`${PubSubTopic.ConfigUpdated}.${uid}`, nextConfig);
+  return { config: nextConfig };
 }

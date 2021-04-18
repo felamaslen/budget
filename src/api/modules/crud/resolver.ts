@@ -46,7 +46,8 @@ export function genericMutationResolver<Result extends { error?: Maybe<string> }
 ): Resolver<MutationArgs, Maybe<Partial<Result>>> {
   return genericAuthDbResolver<MutationArgs, Partial<Result>>(async (db, uid, args) => {
     try {
-      return await db.transaction(async (trx) => handler(trx, uid, args));
+      const res = await db.transaction(async (trx) => handler(trx, uid, args));
+      return res;
     } catch (err) {
       if (isBoom(err) && err.output.statusCode < 500) {
         return { error: err.message } as Partial<Result>;

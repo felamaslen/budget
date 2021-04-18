@@ -2,7 +2,7 @@ import { Request, RequestHandler, Response } from 'express';
 import isObject from 'lodash/isObject';
 
 import { renderApp, RenderedApp } from './render';
-import { catchAsyncErrors } from '~api/modules/error-handling';
+import { authDbRoute } from '~api/middleware/request';
 
 function normalizeAssets(assets: Record<string, string> | string[] | string): string[] {
   if (isObject(assets)) {
@@ -31,8 +31,8 @@ function renderDevApp(_: Request, res: Response, renderedApp: RenderedApp): void
 }
 
 export const makeSinglePageApp = (hot: boolean, offline = false): RequestHandler =>
-  catchAsyncErrors(async (req, res) => {
-    const renderedApp = await renderApp(req, hot, offline);
+  authDbRoute(async (db, req, res) => {
+    const renderedApp = await renderApp(db, req, hot, offline);
 
     if (hot) {
       renderDevApp(req, res, renderedApp);

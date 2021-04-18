@@ -2,6 +2,10 @@ import { gql } from 'urql';
 
 export const Initial = gql`
   query Initial($fundPeriod: FundPeriod, $fundLength: NonNegativeInt) {
+    config {
+      ...ConfigParts
+    }
+
     overview {
       startDate
       endDate

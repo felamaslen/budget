@@ -1,16 +1,19 @@
 import { getAppConfig, setAppConfig } from '~api/controllers';
-import { withResolverAuth } from '~api/modules/auth';
-import { createSubscription } from '~api/modules/crud';
+import {
+  createSubscription,
+  genericAuthDbResolver,
+  genericMutationResolver,
+} from '~api/modules/crud';
 import { PubSubTopic } from '~api/modules/graphql/pubsub';
 import { Resolvers } from '~api/types';
 
 export const configResolvers: Resolvers = {
   Query: {
-    config: withResolverAuth(getAppConfig),
+    config: genericAuthDbResolver(getAppConfig),
   },
 
   Mutation: {
-    setConfig: withResolverAuth(setAppConfig),
+    setConfig: genericMutationResolver(setAppConfig),
   },
 
   Subscription: {

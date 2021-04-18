@@ -6,6 +6,7 @@ import {
   apiLoading,
   configUpdatedFromApi,
   configUpdatedFromLocal,
+  dataRead,
   fundQueryUpdated,
   loggedOut,
 } from '~client/actions';
@@ -75,6 +76,26 @@ describe('API reducer', () => {
     it('should increment the serial', () => {
       expect.assertions(1);
       expect(result.appConfigSerial).toBe(initialState.appConfigSerial + 1);
+    });
+  });
+
+  describe(ActionTypeApi.DataRead, () => {
+    const action = dataRead({
+      config: {
+        birthDate: '1992-05-10',
+        futureMonths: 17,
+        realTimePrices: false,
+        fundMode: FundMode.Roi,
+        fundPeriod: FundPeriod.Ytd,
+        fundLength: null,
+      },
+    });
+
+    it('should set the app config', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+
+      expect(result.appConfig.birthDate).toBe('1992-05-10');
     });
   });
 

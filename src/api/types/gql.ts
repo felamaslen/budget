@@ -297,7 +297,7 @@ export type Mutation = {
   deleteNetWorthSubcategory?: Maybe<CrudResponseDelete>;
   login: LoginResponse;
   logout: LogoutResponse;
-  setConfig?: Maybe<AppConfig>;
+  setConfig?: Maybe<AppConfigSet>;
   updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
   updateFund?: Maybe<CrudResponseUpdate>;
   updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
@@ -496,6 +496,11 @@ export type AppConfig = {
   fundMode?: Maybe<FundMode>;
   fundPeriod?: Maybe<FundPeriod>;
   fundLength?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type AppConfigSet = {
+  config?: Maybe<AppConfig>;
+  error?: Maybe<Scalars['String']>;
 };
 
 export type AppConfigInput = {
@@ -1013,6 +1018,7 @@ export type ResolversTypes = {
   CrudResponseDelete: ResolverTypeWrapper<CrudResponseDelete>;
   AppConfig: ResolverTypeWrapper<AppConfig>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  AppConfigSet: ResolverTypeWrapper<AppConfigSet>;
   AppConfigInput: AppConfigInput;
   PageListStandard: PageListStandard;
   ListItem: ResolverTypeWrapper<ListItem>;
@@ -1113,6 +1119,7 @@ export type ResolversParentTypes = {
   CrudResponseDelete: CrudResponseDelete;
   AppConfig: AppConfig;
   Boolean: Scalars['Boolean'];
+  AppConfigSet: AppConfigSet;
   AppConfigInput: AppConfigInput;
   ListItem: ListItem;
   ListItemStandard: ListItemStandard;
@@ -1324,7 +1331,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   deleteNetWorthSubcategory?: Resolver<Maybe<ResolversTypes['CrudResponseDelete']>, ParentType, ContextType, RequireFields<MutationDeleteNetWorthSubcategoryArgs, 'id'>>;
   login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'pin'>>;
   logout?: Resolver<ResolversTypes['LogoutResponse'], ParentType, ContextType>;
-  setConfig?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType, RequireFields<MutationSetConfigArgs, 'config'>>;
+  setConfig?: Resolver<Maybe<ResolversTypes['AppConfigSet']>, ParentType, ContextType, RequireFields<MutationSetConfigArgs, 'config'>>;
   updateCashAllocationTarget?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateCashAllocationTargetArgs, 'target'>>;
   updateFund?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateFundArgs, 'id' | 'input'>>;
   updateFundAllocationTargets?: Resolver<Maybe<ResolversTypes['UpdatedFundAllocationTargets']>, ParentType, ContextType, RequireFields<MutationUpdateFundAllocationTargetsArgs, 'deltas'>>;
@@ -1415,6 +1422,12 @@ export type AppConfigResolvers<ContextType = Context, ParentType extends Resolve
   fundMode?: Resolver<Maybe<ResolversTypes['FundMode']>, ParentType, ContextType>;
   fundPeriod?: Resolver<Maybe<ResolversTypes['FundPeriod']>, ParentType, ContextType>;
   fundLength?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AppConfigSetResolvers<ContextType = Context, ParentType extends ResolversParentTypes['AppConfigSet'] = ResolversParentTypes['AppConfigSet']> = {
+  config?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType>;
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1747,6 +1760,7 @@ export type Resolvers<ContextType = Context> = {
   CrudResponseUpdate?: CrudResponseUpdateResolvers<ContextType>;
   CrudResponseDelete?: CrudResponseDeleteResolvers<ContextType>;
   AppConfig?: AppConfigResolvers<ContextType>;
+  AppConfigSet?: AppConfigSetResolvers<ContextType>;
   ListItem?: ListItemResolvers<ContextType>;
   ListItemStandard?: ListItemStandardResolvers<ContextType>;
   ListReadResponse?: ListReadResponseResolvers<ContextType>;

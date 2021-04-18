@@ -41,22 +41,25 @@ const updateConfig = (state: State, updatedConfig: Partial<LocalAppConfig>): Sta
   appConfigSerial: state.appConfigSerial + 1,
 });
 
-const updateConfigRemote = (state: State, updatedConfig: Partial<GQL<AppConfig>>): State => ({
-  ...state,
-  appConfig: {
-    ...state.appConfig,
-    birthDate: updatedConfig.birthDate ?? state.appConfig.birthDate,
-    realTimePrices: updatedConfig.realTimePrices ?? state.appConfig.realTimePrices,
-    fundMode: updatedConfig.fundMode ?? state.appConfig.fundMode,
-    historyOptions: {
-      period: updatedConfig.fundPeriod ?? state.appConfig.historyOptions.period,
-      length:
-        typeof updatedConfig.fundLength === 'undefined'
-          ? state.appConfig.historyOptions.length
-          : updatedConfig.fundLength ?? null,
-    },
-  },
-});
+const updateConfigRemote = (state: State, updatedConfig?: Partial<GQL<AppConfig>> | null): State =>
+  updatedConfig
+    ? {
+        ...state,
+        appConfig: {
+          ...state.appConfig,
+          birthDate: updatedConfig.birthDate ?? state.appConfig.birthDate,
+          realTimePrices: updatedConfig.realTimePrices ?? state.appConfig.realTimePrices,
+          fundMode: updatedConfig.fundMode ?? state.appConfig.fundMode,
+          historyOptions: {
+            period: updatedConfig.fundPeriod ?? state.appConfig.historyOptions.period,
+            length:
+              typeof updatedConfig.fundLength === 'undefined'
+                ? state.appConfig.historyOptions.length
+                : updatedConfig.fundLength ?? null,
+          },
+        },
+      }
+    : state;
 
 const updateConfigLocal = (state: State, updatedConfig: Partial<LocalAppConfig>): State => ({
   ...state,
@@ -74,6 +77,8 @@ export default function api(state: State = initialState, action: Action): State 
   switch (action.type) {
     case ActionTypeApi.ConfigUpdatedFromApi:
       return updateConfigRemote(state, action.config);
+    case ActionTypeApi.DataRead:
+      return updateConfigRemote(state, action.res.config);
     case ActionTypeApi.ConfigUpdatedFromLocal:
       return updateConfigLocal(state, action.config);
     case ActionTypeApi.Loading:

@@ -13,11 +13,12 @@ import { redisClient } from './redis';
 
 import config from '~api/config';
 import { getPool } from '~api/modules/db';
-import { LoginResponse, UserInfo } from '~api/types';
+import { AppConfig, LoginResponse, UserInfo } from '~api/types';
 import { User, Resolver } from '~api/types/resolver';
 
-type UserRow = UserInfo & {
+export type UserRow = UserInfo & {
   pin_hash: string;
+  config: Partial<Omit<AppConfig, 'futureMonths'>> | null;
 };
 
 export async function whoami({ uid }: Required<User>): Promise<UserInfo | null> {
@@ -104,7 +105,7 @@ export async function checkLoggedIn(
   db: DatabaseTransactionConnectionType,
   pin: number,
 ): Promise<UserInfo> {
-  const users = await db.query<UserRow>(sql`SELECT uid, name, pin_hash FROM users`);
+  const users = await db.query<Omit<UserRow, 'config'>>(sql`SELECT uid, name, pin_hash FROM users`);
 
   const validUser = await users.rows.reduce<Promise<UserInfo | null>>(
     (last, { uid, name, pin_hash }) =>

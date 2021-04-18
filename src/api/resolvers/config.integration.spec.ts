@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 import moize from 'moize';
 import sinon from 'sinon';
 
-import { App, getTestApp } from '~api/test-utils/create-server';
+import { App, getTestApp, makeTestApp } from '~api/test-utils/create-server';
 import { AppConfig, AppConfigInput, Query, Maybe, Mutation, FundMode } from '~api/types';
 
 describe('Config resolver', () => {
@@ -71,12 +71,14 @@ describe('Config resolver', () => {
     const mutation = gql`
       mutation SetConfig($config: AppConfigInput!) {
         setConfig(config: $config) {
-          birthDate
-          futureMonths
-          realTimePrices
-          fundMode
-          fundPeriod
-          fundLength
+          config {
+            birthDate
+            futureMonths
+            realTimePrices
+            fundMode
+            fundPeriod
+            fundLength
+          }
         }
       }
     `;
@@ -94,7 +96,7 @@ describe('Config resolver', () => {
           mutation,
           variables: { config },
         });
-        return res.data?.setConfig ?? null;
+        return res.data?.setConfig?.config ?? null;
       };
 
       it('should return the updated config', async () => {
@@ -106,7 +108,7 @@ describe('Config resolver', () => {
         expect(res).toStrictEqual(expect.objectContaining({ [prop]: nextValue }));
       });
 
-      it('should persist the config', async () => {
+      it('should persist the config within the same session', async () => {
         expect.assertions(1);
 
         await setup({
@@ -114,6 +116,18 @@ describe('Config resolver', () => {
         });
 
         const res = await app.authGqlClient.query<Query>({ query: getConfig });
+
+        expect(res.data.config).toStrictEqual(expect.objectContaining({ [prop]: nextValue }));
+      });
+
+      it('should persist the config from a different session, logged in as the same user', async () => {
+        expect.assertions(1);
+
+        await setup({ [prop]: nextValue });
+
+        const separateApp = await makeTestApp();
+
+        const res = await separateApp.authGqlClient.query<Query>({ query: getConfig });
 
         expect(res.data.config).toStrictEqual(expect.objectContaining({ [prop]: nextValue }));
       });

@@ -16,6 +16,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { StaticRouter } from 'react-router-dom';
 import prepass from 'react-ssr-prepass';
 import { createStore, Store } from 'redux';
+import type { DatabaseTransactionConnectionType } from 'slonik';
 import { Provider as GQLProvider } from 'urql';
 
 import config from '~api/config';
@@ -37,7 +38,9 @@ const statsFileDev = path.resolve(__dirname, '../../../../static/loadable-stats-
 
 global.window = {} as Window & typeof globalThis;
 
-function getApiKeyFromRequest(req: Request): string | null {
+type ApiKeyWithUid = { apiKey: string; uid: number };
+
+function getApiKeyFromRequest(req: Request): ApiKeyWithUid | null {
   try {
     const apiKey = req.session.apiKey;
     if (!apiKey) {
@@ -48,7 +51,7 @@ function getApiKeyFromRequest(req: Request): string | null {
     if (!uid) {
       return null;
     }
-    return apiKey;
+    return { uid, apiKey };
   } catch (err) {
     return null;
   }
@@ -93,16 +96,16 @@ function getScriptTags(extractors: ChunkExtractor[], hot: boolean): string {
   return `${jsonScripts}\n${scriptTagsModule}\n${scriptTagsNoModule}`;
 }
 
-function setupPreloaderClient(apiKey: string | null): { client: Client; ssr: SSRExchange } {
+function setupPreloaderClient(user: ApiKeyWithUid | null): { client: Client; ssr: SSRExchange } {
   const ssr = ssrExchange({ isClient: false });
 
   const client = createClient({
     url: `http://localhost:${config.app.port}/graphql`,
     suspense: true,
-    fetchOptions: apiKey
+    fetchOptions: user
       ? {
           headers: {
-            Authorization: apiKey,
+            Authorization: user.apiKey,
           },
         }
       : undefined,
@@ -112,13 +115,16 @@ function setupPreloaderClient(apiKey: string | null): { client: Client; ssr: SSR
   return { ssr, client };
 }
 
-function setupStore(req: Request, apiKey: string | null): Store<State, Action> {
+async function setupStore(
+  db: DatabaseTransactionConnectionType,
+  user: ApiKeyWithUid | null,
+): Promise<Store<State, Action>> {
   const store = createStore<State, Action, unknown, unknown>(rootReducer);
-  if (!apiKey) {
+  if (!user) {
     store.dispatch(loggedOut());
   }
 
-  const appConfig = getAppConfig({}, {}, req);
+  const appConfig = await getAppConfig(db, user?.uid);
   store.dispatch(configUpdatedFromApi(appConfig));
 
   return store;
@@ -127,7 +133,7 @@ function setupStore(req: Request, apiKey: string | null): Store<State, Action> {
 function extractJSX(
   extractors: ChunkExtractor[],
   req: Request,
-  apiKey: string | null,
+  user: ApiKeyWithUid | null,
   client: Client,
   store: Store<State>,
   offline = false,
@@ -136,7 +142,7 @@ function extractJSX(
     <ReduxProvider store={store}>
       <GQLProvider value={client}>
         <StaticRouter location={req.url}>
-          <App loggedIn={!!apiKey} offline={offline} />
+          <App loggedIn={!!user} offline={offline} />
         </StaticRouter>
       </GQLProvider>
     </ReduxProvider>
@@ -161,17 +167,22 @@ async function preloadData(client: Client, store: Store<State>, jsx: JSX.Element
   ]);
 }
 
-export async function renderApp(req: Request, hot: boolean, offline = false): Promise<RenderedApp> {
+export async function renderApp(
+  db: DatabaseTransactionConnectionType,
+  req: Request,
+  hot: boolean,
+  offline = false,
+): Promise<RenderedApp> {
   const statsFiles = hot ? [statsFileDev] : [statsFileLegacy, statsFileModule];
   const extractors = statsFiles.map((statsFile) => new ChunkExtractor({ statsFile }));
 
-  const apiKey = getApiKeyFromRequest(req);
-  const { ssr, client } = setupPreloaderClient(apiKey);
-  const store = setupStore(req, apiKey);
+  const user = getApiKeyFromRequest(req);
+  const { ssr, client } = setupPreloaderClient(user);
+  const store = await setupStore(db, user);
 
-  const jsx = extractJSX(extractors, req, apiKey, client, store, offline);
+  const jsx = extractJSX(extractors, req, user, client, store, offline);
 
-  if (apiKey) {
+  if (user) {
     await preloadData(client, store, jsx);
   }
 
@@ -184,7 +195,7 @@ export async function renderApp(req: Request, hot: boolean, offline = false): Pr
   return {
     html,
     scriptTags,
-    apiKey: JSON.stringify(apiKey),
+    apiKey: JSON.stringify(user?.apiKey ?? null),
     ssrData: JSON.stringify(ssrData),
     initialState: JSON.stringify(initialState),
   };

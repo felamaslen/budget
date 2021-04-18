@@ -317,7 +317,7 @@ export type Mutation = {
   deleteNetWorthSubcategory?: Maybe<CrudResponseDelete>;
   login: LoginResponse;
   logout: LogoutResponse;
-  setConfig?: Maybe<AppConfig>;
+  setConfig?: Maybe<AppConfigSet>;
   updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
   updateFund?: Maybe<CrudResponseUpdate>;
   updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
@@ -523,6 +523,12 @@ export type AppConfig = {
   fundMode?: Maybe<FundMode>;
   fundPeriod?: Maybe<FundPeriod>;
   fundLength?: Maybe<Scalars['NonNegativeInt']>;
+};
+
+export type AppConfigSet = {
+  __typename?: 'AppConfigSet';
+  config?: Maybe<AppConfig>;
+  error?: Maybe<Scalars['String']>;
 };
 
 export type AppConfigInput = {
@@ -956,6 +962,11 @@ export type LogoutResponse = {
   ok?: Maybe<Scalars['Boolean']>;
 };
 
+export type ConfigPartsFragment = (
+  { __typename?: 'AppConfig' }
+  & Pick<AppConfig, 'birthDate' | 'futureMonths' | 'realTimePrices' | 'fundMode' | 'fundPeriod' | 'fundLength'>
+);
+
 export type FundHistoryPartsFragment = (
   { __typename?: 'FundHistory' }
   & Pick<FundHistory, 'startTime' | 'cacheTimes' | 'annualisedFundReturns' | 'overviewCost'>
@@ -1012,8 +1023,11 @@ export type SetConfigMutationVariables = Exact<{
 export type SetConfigMutation = (
   { __typename?: 'Mutation' }
   & { setConfig?: Maybe<(
-    { __typename?: 'AppConfig' }
-    & Pick<AppConfig, 'birthDate' | 'futureMonths' | 'realTimePrices' | 'fundMode' | 'fundPeriod' | 'fundLength'>
+    { __typename?: 'AppConfigSet' }
+    & { config?: Maybe<(
+      { __typename?: 'AppConfig' }
+      & ConfigPartsFragment
+    )> }
   )> }
 );
 
@@ -1390,7 +1404,10 @@ export type InitialQueryVariables = Exact<{
 export type InitialQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'cashAllocationTarget'>
-  & { overview?: Maybe<(
+  & { config?: Maybe<(
+    { __typename?: 'AppConfig' }
+    & ConfigPartsFragment
+  )>, overview?: Maybe<(
     { __typename?: 'Overview' }
     & Pick<Overview, 'startDate' | 'endDate' | 'annualisedFundReturns'>
     & { monthly: (
@@ -1568,7 +1585,7 @@ export type ConfigUpdatedSubscription = (
   { __typename?: 'Subscription' }
   & { configUpdated: (
     { __typename?: 'AppConfig' }
-    & Pick<AppConfig, 'birthDate' | 'realTimePrices' | 'fundMode' | 'fundPeriod' | 'fundLength'>
+    & ConfigPartsFragment
   ) }
 );
 
@@ -1852,6 +1869,16 @@ export type NetWorthCashTotalUpdatedSubscription = (
   ) }
 );
 
+export const ConfigPartsFragmentDoc = gql`
+    fragment ConfigParts on AppConfig {
+  birthDate
+  futureMonths
+  realTimePrices
+  fundMode
+  fundPeriod
+  fundLength
+}
+    `;
 export const FundHistoryPartsFragmentDoc = gql`
     fragment FundHistoryParts on FundHistory {
   startTime
@@ -1921,15 +1948,12 @@ export const NetWorthEntryPartsFragmentDoc = gql`
 export const SetConfigDocument = gql`
     mutation SetConfig($config: AppConfigInput!) {
   setConfig(config: $config) {
-    birthDate
-    futureMonths
-    realTimePrices
-    fundMode
-    fundPeriod
-    fundLength
+    config {
+      ...ConfigParts
+    }
   }
 }
-    `;
+    ${ConfigPartsFragmentDoc}`;
 
 export function useSetConfigMutation() {
   return Urql.useMutation<SetConfigMutation, SetConfigMutationVariables>(SetConfigDocument);
@@ -2250,6 +2274,9 @@ export function useFundHistoryIndividualQuery(options: Omit<Urql.UseQueryArgs<Fu
 };
 export const InitialDocument = gql`
     query Initial($fundPeriod: FundPeriod, $fundLength: NonNegativeInt) {
+  config {
+    ...ConfigParts
+  }
   overview {
     startDate
     endDate
@@ -2392,7 +2419,8 @@ export const InitialDocument = gql`
     weekly
   }
 }
-    ${NetWorthCategoryPartsFragmentDoc}
+    ${ConfigPartsFragmentDoc}
+${NetWorthCategoryPartsFragmentDoc}
 ${NetWorthSubcategoryPartsFragmentDoc}
 ${NetWorthEntryPartsFragmentDoc}
 ${FundHistoryPartsFragmentDoc}`;
@@ -2499,14 +2527,10 @@ export function useReceiptItemsQuery(options: Omit<Urql.UseQueryArgs<ReceiptItem
 export const ConfigUpdatedDocument = gql`
     subscription ConfigUpdated {
   configUpdated {
-    birthDate
-    realTimePrices
-    fundMode
-    fundPeriod
-    fundLength
+    ...ConfigParts
   }
 }
-    `;
+    ${ConfigPartsFragmentDoc}`;
 
 export function useConfigUpdatedSubscription<TData = ConfigUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ConfigUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ConfigUpdatedSubscription, TData>) {
   return Urql.useSubscription<ConfigUpdatedSubscription, TData, ConfigUpdatedSubscriptionVariables>({ query: ConfigUpdatedDocument, ...options }, handler);

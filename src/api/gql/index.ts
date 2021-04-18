@@ -38,6 +38,11 @@ export const mainSchema = gql`
     fundLength: NonNegativeInt
   }
 
+  type AppConfigSet {
+    config: AppConfig
+    error: String
+  }
+
   input AppConfigInput {
     birthDate: Date
     futureMonths: Int
@@ -52,7 +57,7 @@ export const mainSchema = gql`
   }
 
   type Mutation {
-    setConfig(config: AppConfigInput!): AppConfig
+    setConfig(config: AppConfigInput!): AppConfigSet
   }
 
   type Subscription {
