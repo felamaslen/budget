@@ -75,17 +75,8 @@ export const getTotalCost = (transactions: Transaction[]): number =>
 export const isSold = (transactionsList: Transaction[]): boolean =>
   getTotalUnits(transactionsList) === 0;
 
-export const addToTransactionsList = (
-  transactionsList: Transaction[],
-  item: Transaction,
-): Transaction[] => [...transactionsList, item];
-
-export const modifyTransaction = (
-  transactionsList: Transaction[],
-  index: number,
-  delta: Partial<Transaction>,
-): Transaction[] =>
-  replaceAtIndex(transactionsList, index, (oldItem) => ({ ...oldItem, ...delta }));
+export const partialModification = <T>(items: T[], index: number, delta: Partial<T>): T[] =>
+  replaceAtIndex(items, index, (old) => ({ ...old, ...delta }));
 
 export function arrayAverage(values: number[], mode: Average = Average.Mean): number {
   if (!values.length) {
@@ -267,9 +258,10 @@ export const toNativeFund = <F extends GQL<FundData>>(input: F): NativeFund<F> =
   stockSplits: input.stockSplits.map(compose(omitTypeName, withNativeDate('date'))),
 });
 
-export const toRawFund = ({ stockSplits, ...input }: FundInputNative): FundInput => ({
+export const toRawFund = (input: FundInputNative): FundInput => ({
   ...input,
   transactions: input.transactions.map(withRawDate('date')),
+  stockSplits: input.stockSplits.map(withRawDate('date')),
 });
 
 export const toRawNetWorthEntry = (input: Create<NetWorthEntryNative>): NetWorthEntryInput => ({

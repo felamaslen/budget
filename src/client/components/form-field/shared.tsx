@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import * as Styled from './styles';
 import { useField, FieldOptions as Options } from '~client/hooks';
 
-type CommonProps<V> = WrapperProps & {
+export type CommonProps<V> = WrapperProps & {
   id?: string;
   inputProps?: Partial<React.HTMLProps<HTMLInputElement>>;
   value: V;

@@ -1983,16 +1983,15 @@ exports[`<PageOverview /> should render graphs 1`] = `
 }
 
 .emotion-4 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
   -webkit-appearance: none;
   -moz-appearance: none;
   -ms-appearance: none;
   appearance: none;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
   background: rgba(255,255,255,0.6);
-  border: none;
   cursor: pointer;
   display: -webkit-box;
   display: -webkit-flex;
@@ -2007,13 +2006,21 @@ exports[`<PageOverview /> should render graphs 1`] = `
   -webkit-justify-content: center;
   justify-content: center;
   height: 1.5rem;
-  outline: none;
   padding: 0;
   width: 1.5rem;
   position: absolute;
   right: 0;
   top: 0;
   z-index: 10;
+}
+
+.emotion-4,
+.emotion-4:active,
+.emotion-4:focus,
+.emotion-4:hover {
+  background: none;
+  border: none;
+  outline: none;
 }
 
 @media only screen and (min-width: 500px) {

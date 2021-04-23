@@ -198,6 +198,11 @@ export type StockSplit = {
   ratio: Scalars['NonNegativeFloat'];
 };
 
+export type StockSplitInput = {
+  date: Scalars['Date'];
+  ratio: Scalars['NonNegativeFloat'];
+};
+
 export type Fund = {
   __typename?: 'Fund';
   id: Scalars['Int'];
@@ -219,6 +224,7 @@ export type FundInput = {
   item: Scalars['String'];
   transactions: Array<TransactionInput>;
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+  stockSplits?: Maybe<Array<StockSplitInput>>;
 };
 
 export type FundPriceGroup = {

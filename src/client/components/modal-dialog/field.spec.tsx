@@ -1,6 +1,6 @@
 import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
-import { ModalDialogField, makeField, FieldTransactions } from './field';
+import { ModalDialogField, makeField } from './field';
 import { FormFieldText } from '~client/components/form-field';
 
 describe('<ModalDialogField />', () => {
@@ -29,25 +29,6 @@ describe('<ModalDialogField />', () => {
     const { getByDisplayValue } = setup();
     const input = getByDisplayValue('bar');
     expect(input).toBeInTheDocument();
-  });
-
-  describe('when the item is transactions', () => {
-    const setupTransactions = (): RenderResult =>
-      setup({
-        field: 'transactions' as const,
-        Field: FieldTransactions,
-        value: [{ date: new Date('2020-04-20'), units: 130, price: 8.5, fees: 0, taxes: 0 }],
-      });
-
-    it('should render a transactions field', () => {
-      expect.assertions(5);
-      const { getAllByText } = setupTransactions();
-      expect(getAllByText('Date:')).toHaveLength(2);
-      expect(getAllByText('Units:')).toHaveLength(2);
-      expect(getAllByText('Price:')).toHaveLength(2);
-      expect(getAllByText('Fees:')).toHaveLength(2);
-      expect(getAllByText('Taxes:')).toHaveLength(2);
-    });
   });
 
   it('should call onChange when blurring the field', () => {

@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import * as Styled from './styles';
-import { FieldComponent, FormFieldTransactions } from '~client/components/form-field';
-import type { TransactionNative as Transaction, FieldKey } from '~client/types';
+import { FieldComponent } from '~client/components/form-field';
+import type { FieldKey } from '~client/types';
 import type { ListItemInput } from '~client/types/gql';
 
 export type FieldWrapper<V = never> = React.FC<{
@@ -16,25 +16,29 @@ export function makeField<V = never>(
   field: string,
   Field: FieldComponent<V>,
   label = field,
+  isToggled = false,
 ): FieldWrapper<V> {
-  const WrappedField: FieldWrapper<V> = ({ id, invalid, value, onChange }) => (
-    <>
-      <Styled.FormLabel item={field as string}>
-        <label htmlFor={id}>{label}</label>
-      </Styled.FormLabel>
-      <Field invalid={invalid} value={value} onChange={onChange} />
-    </>
-  );
+  const WrappedField: FieldWrapper<V> = ({ id, invalid, value, onChange }) => {
+    const [expanded, setExpanded] = useState<boolean>(!isToggled);
+    return (
+      <>
+        <Styled.FormLabelRow>
+          <Styled.FormLabel item={field as string}>
+            <label htmlFor={id}>{label}</label>
+          </Styled.FormLabel>
+          {isToggled && (
+            <Styled.ToggleButton onClick={(): void => setExpanded((last) => !last)}>
+              {expanded ? <>&minus;</> : '+'}
+            </Styled.ToggleButton>
+          )}
+        </Styled.FormLabelRow>
+        {expanded && <Field invalid={invalid} value={value} onChange={onChange} />}
+      </>
+    );
+  };
 
   return WrappedField;
 }
-
-export const FieldTransactions: FieldWrapper<Transaction[]> = ({ invalid, value, onChange }) => (
-  <Styled.FormRowInner>
-    <Styled.FormLabel item="transactions">transactions</Styled.FormLabel>
-    <FormFieldTransactions invalid={invalid} value={value} onChange={onChange} />
-  </Styled.FormRowInner>
-);
 
 export type ModalFields<I extends ListItemInput> = {
   [K in FieldKey<I>]?: FieldWrapper<Exclude<I[K], null | undefined>>;

@@ -13,9 +13,9 @@ import { AccessibleList, Fields } from '~client/components/accessible-list';
 import {
   FormFieldTextInline,
   FormFieldTransactions,
-  FormFieldTransactionsInline,
   FormFieldText,
   FormFieldNumber,
+  FormFieldStockSplits,
 } from '~client/components/form-field';
 import { GraphFunds } from '~client/components/graph-funds';
 import { makeField, ModalFields } from '~client/components/modal-dialog';
@@ -43,7 +43,6 @@ const isSort = (value: any | Sort): value is Sort =>
 
 const fields = {
   item: FormFieldTextInline,
-  transactions: FormFieldTransactionsInline,
 } as Fields<FundInput>;
 
 const fieldsMobile = {
@@ -53,7 +52,8 @@ const fieldsMobile = {
 
 const modalFields: ModalFields<FundInput> = {
   item: makeField('item', FormFieldText),
-  transactions: makeField('transactions', FormFieldTransactions),
+  transactions: makeField('transactions', FormFieldTransactions, undefined, true),
+  stockSplits: makeField('stockSplits', FormFieldStockSplits, 'Stock splits', true),
   allocationTarget: makeField('allocationTarget', FormFieldNumber, 'Allocation'),
 };
 

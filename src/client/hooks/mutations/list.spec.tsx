@@ -293,6 +293,7 @@ describe('List mutations', () => {
       transactions: [
         { date: new Date('2020-04-03'), units: 154.28, price: 99.13, fees: 132, taxes: 19 },
       ],
+      stockSplits: [{ date: new Date('2021-03-01'), ratio: 10 }],
     };
 
     const TestComponentFunds: React.FC = () => {
@@ -317,9 +318,7 @@ describe('List mutations', () => {
     };
 
     describe('onCreate', () => {
-      it('should dispatch an optimistic create action', async () => {
-        expect.hasAssertions();
-
+      beforeEach(() => {
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
           fromValue({
             data: {
@@ -329,6 +328,10 @@ describe('List mutations', () => {
             },
           }),
         );
+      });
+
+      it('should dispatch an optimistic create action', async () => {
+        expect.hasAssertions();
 
         const { store, getByText } = setup(TestComponentFunds);
         expect(store.getActions()).toHaveLength(0);
@@ -343,6 +346,30 @@ describe('List mutations', () => {
             apiLoaded,
           ]);
         });
+      });
+
+      it('should pass the right variables into the mutation', async () => {
+        expect.hasAssertions();
+
+        const { store, getByText } = setup(TestComponentFunds);
+        expect(store.getActions()).toHaveLength(0);
+        act(() => {
+          fireEvent.click(getByText('Create!'));
+        });
+
+        await waitFor(() => {
+          expect(mockClient.executeMutation).toHaveBeenCalledTimes(1);
+        });
+
+        expect(mockClient.executeMutation).toHaveBeenCalledWith(
+          expect.objectContaining({
+            variables: expect.objectContaining({
+              fakeId: expect.any(Number),
+              input: testFund,
+            }),
+          }),
+          expect.anything(),
+        );
       });
     });
 

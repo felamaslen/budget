@@ -1,6 +1,8 @@
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
+import { ButtonUnStyled } from './reset';
+
 import { colors } from '~client/styled/variables';
 
 export const Hamburger = styled.span`
@@ -27,17 +29,14 @@ export const Hamburger = styled.span`
   }
 `;
 
-export const HamburgerButton = styled.button`
+export const HamburgerButton = styled(ButtonUnStyled)`
   align-items: center;
-  appearance: none;
   background: ${colors.translucent.light.dark};
-  border: none;
   cursor: pointer;
   display: flex;
   flex-flow: column;
   justify-content: center;
   height: ${rem(24)};
-  outline: none;
   padding: 0;
   width: ${rem(24)};
 `;

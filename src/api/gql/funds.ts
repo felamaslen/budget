@@ -20,6 +20,10 @@ export const fundsSchema = gql`
     date: Date!
     ratio: NonNegativeFloat!
   }
+  input StockSplitInput {
+    date: Date!
+    ratio: NonNegativeFloat!
+  }
 
   type Fund {
     id: Int!
@@ -39,6 +43,7 @@ export const fundsSchema = gql`
     item: String!
     transactions: [TransactionInput!]!
     allocationTarget: NonNegativeInt
+    stockSplits: [StockSplitInput!]
   }
 
   type FundPriceGroup {

@@ -72,7 +72,7 @@ describe('<PinDisplay />', () => {
 
       .emotion-2 input::-webkit-inner-spin-button,
       .emotion-2 input::-webkit-outer-spin-button {
-        -webkit-apperance: none;
+        -webkit-appearance: none;
         display: none;
         margin: 0;
       }
@@ -157,7 +157,7 @@ describe('<PinDisplay />', () => {
 
       .emotion-6 input::-webkit-inner-spin-button,
       .emotion-6 input::-webkit-outer-spin-button {
-        -webkit-apperance: none;
+        -webkit-appearance: none;
         display: none;
         margin: 0;
       }

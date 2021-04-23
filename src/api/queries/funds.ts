@@ -103,6 +103,32 @@ export async function upsertTransactions(
   `);
 }
 
+export async function upsertStockSplits(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  id: number,
+  stockSplits: StockSplit[],
+): Promise<void> {
+  await db.query(sql`
+  DELETE FROM funds_stock_splits
+  USING funds
+  WHERE ${sql.join(
+    [sql`funds.uid = ${uid}`, sql`funds.id = ${id}`, sql`funds.id = funds_stock_splits.fund_id`],
+    sql` AND `,
+  )}
+  `);
+  if (!stockSplits.length) {
+    return;
+  }
+  await db.query(sql`
+  INSERT INTO funds_stock_splits (fund_id, date, ratio)
+  SELECT * FROM ${sql.unnest(
+    stockSplits.map(({ date, ratio }) => [id, formatDate(date), ratio]),
+    ['int4', 'date', 'float8'],
+  )}
+  `);
+}
+
 export type FundListRow = {
   id: number;
   item: string;

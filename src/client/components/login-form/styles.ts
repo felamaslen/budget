@@ -170,7 +170,7 @@ const inputPinStyles = ({ done }: InputPinProps): SerializedStyles => css`
     -moz-appearance: textfield;
     &::-webkit-inner-spin-button,
     &::-webkit-outer-spin-button {
-      -webkit-apperance: none;
+      -webkit-appearance: none;
       display: none;
       margin: 0;
     }

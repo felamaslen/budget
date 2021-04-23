@@ -1,10 +1,11 @@
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import { usePriceChangeHighlight } from './hooks';
 import * as Styled from './styles';
 import type { FundProps } from './types';
 
+import { CompositeValue, FormFieldFundMetadata } from '~client/components/form-field/fund-metadata';
 import { FundGainInfo } from '~client/components/fund-gain-info';
 import { GraphFundItem } from '~client/components/graph-fund-item';
 import { Pie } from '~client/components/pie';
@@ -82,6 +83,20 @@ export const FundRow: React.FC<Props> = ({
     [setTempAllocationTarget, maxAllocationTarget],
   );
 
+  const compositeValue = useMemo<CompositeValue>(
+    () => ({ transactions: item.transactions, stockSplits: item.stockSplits }),
+    [item],
+  );
+
+  const onChangeComposite = useCallback(
+    (delta: CompositeValue | undefined) => {
+      if (delta) {
+        onUpdate(item.id, delta, item);
+      }
+    },
+    [item, onUpdate],
+  );
+
   if (!viewSoldFunds && isSold) {
     return null;
   }
@@ -103,6 +118,7 @@ export const FundRow: React.FC<Props> = ({
   return (
     <Styled.FundRow isSold={isSold} odd={true}>
       {children}
+      <FormFieldFundMetadata value={compositeValue} onChange={onChangeComposite} />
       <Styled.TargetAllocation onWheel={scrollAllocationTarget}>
         <Pie
           size={18}

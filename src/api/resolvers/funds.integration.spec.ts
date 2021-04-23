@@ -34,18 +34,24 @@ describe('Funds resolver', () => {
     app = await getTestApp();
   });
 
-  type RawDateFund = Omit<FundInput, 'transactions'> & {
+  type RawDateFund = Omit<FundInput, 'stockSplits' | 'transactions'> & {
     id: number;
     transactions: RawDate<Transaction, 'date'>[];
     stockSplits: RawDate<StockSplit, 'date'>[];
   };
 
-  type RawDateFundInput = Create<Omit<RawDateFund, 'stockSplits'>>;
+  type RawDateFundInput = Create<RawDateFund>;
 
   const fundInput: RawDateFundInput = {
     item: 'My fund',
     transactions: [{ date: '2020-04-20', units: 69, price: 949.35, fees: 1199, taxes: 1776 }],
     allocationTarget: 20,
+    stockSplits: [
+      {
+        date: '2020-04-11',
+        ratio: 8,
+      },
+    ],
   };
 
   const altFundName = 'Different fund';
@@ -124,6 +130,26 @@ describe('Funds resolver', () => {
             price: 949.35,
             fees: 1199,
             taxes: 1776,
+          }),
+        ]),
+      );
+    });
+
+    it('should create stock split rows in the database', async () => {
+      expect.assertions(2);
+      const res = await setup();
+
+      const id = res?.id as number;
+
+      const rows = await app.db('funds_stock_splits').where({ fund_id: id }).select();
+
+      expect(rows).toHaveLength(1);
+      expect(rows).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            date: new Date('2020-04-11'),
+            ratio: 8,
           }),
         ]),
       );
@@ -383,14 +409,6 @@ describe('Funds resolver', () => {
     }> => {
       const [id] = await createFunds([fund]);
 
-      await app.db('funds_stock_splits').insert([
-        {
-          fund_id: id,
-          date: '2020-04-20',
-          ratio: 10,
-        },
-      ]);
-
       await app.authGqlClient.clearStore();
       const res = await app.authGqlClient.query<Query>({
         query,
@@ -417,7 +435,7 @@ describe('Funds resolver', () => {
               taxes: 1776,
             }),
           ],
-          stockSplits: [expect.objectContaining({ date: '2020-04-20', ratio: 10 })],
+          stockSplits: [expect.objectContaining({ date: '2020-04-11', ratio: 8 })],
         }),
       );
     });
@@ -691,6 +709,12 @@ describe('Funds resolver', () => {
         { date: '2020-04-29', units: 123, price: 100.3, fees: 0, taxes: 104 },
       ],
       allocationTarget: 15,
+      stockSplits: [
+        {
+          date: '2020-04-09',
+          ratio: 12,
+        },
+      ],
     };
 
     const setup = async (
@@ -725,8 +749,8 @@ describe('Funds resolver', () => {
       expect(res?.error).toBeNull();
     });
 
-    it('should update the fund and transactions in the database', async () => {
-      expect.assertions(3);
+    it('should update the fund, transactions and stock splits in the database', async () => {
+      expect.assertions(5);
       const { id } = await setup();
 
       const row = await app.db('funds').where({ id }).first();
@@ -757,6 +781,18 @@ describe('Funds resolver', () => {
             price: 100.3,
             fees: 0,
             taxes: 104,
+          }),
+        ]),
+      );
+
+      const stockSplitRows = await app.db('funds_stock_splits').where({ fund_id: id }).select();
+
+      expect(stockSplitRows).toHaveLength(1);
+      expect(stockSplitRows).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            date: new Date('2020-04-09'),
+            ratio: 12,
           }),
         ]),
       );

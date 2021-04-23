@@ -25,6 +25,7 @@ import {
   selectAllocationTargetSum,
   selectIndividualFullFundHistory,
   selectStockSplits,
+  upsertStockSplits,
 } from '~api/queries';
 import {
   CrudResponseCreate,
@@ -187,13 +188,16 @@ export async function readFundHistoryIndividual(
 export async function createFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { fakeId, input: { item, transactions, allocationTarget } }: MutationCreateFundArgs,
+  { fakeId, input }: MutationCreateFundArgs,
 ): Promise<CrudResponseCreate> {
   const { id } = await baseController.create(db, uid, {
-    item,
-    allocationTarget,
+    item: input.item,
+    allocationTarget: input.allocationTarget,
   });
-  await upsertTransactions(db, uid, id, transactions);
+  await Promise.all([
+    upsertStockSplits(db, uid, id, input.stockSplits ?? []),
+    upsertTransactions(db, uid, id, input.transactions),
+  ]);
 
   const [overviewCost, stockSplits, cashTotal] = await Promise.all([
     getDisplayedFundValues(db, uid, new Date()),
@@ -201,18 +205,18 @@ export async function createFund(
     readNetWorthCashTotal(db, uid),
   ]);
 
-  await pubsub.publish(`${PubSubTopic.FundCreated}.${uid}`, {
+  pubsub.publish(`${PubSubTopic.FundCreated}.${uid}`, {
     id,
     fakeId,
     item: {
-      item,
-      allocationTarget,
-      transactions,
+      item: input.item,
+      allocationTarget: input.allocationTarget,
+      transactions: input.transactions,
       stockSplits,
     },
     overviewCost,
   });
-  await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
+  pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { id };
 }
@@ -230,15 +234,18 @@ export { selectCashTarget as readCashTarget } from '~api/queries';
 export async function updateFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { id, input: { item, allocationTarget, transactions } }: MutationUpdateFundArgs,
+  { id, input }: MutationUpdateFundArgs,
 ): Promise<CrudResponseUpdate> {
-  await upsertTransactions(db, uid, id, transactions);
+  await Promise.all([
+    upsertStockSplits(db, uid, id, input.stockSplits ?? []),
+    upsertTransactions(db, uid, id, input.transactions),
+  ]);
 
   const previousItem = await selectPreviousItem(db, id);
 
   await baseController.update(db, uid, id, {
-    item,
-    allocationTarget,
+    item: input.item,
+    allocationTarget: input.allocationTarget,
   });
 
   const fundsWithSameName = await selectFundsByName(db, id);
@@ -252,18 +259,18 @@ export async function updateFund(
     readNetWorthCashTotal(db, uid),
   ]);
 
-  await pubsub.publish(`${PubSubTopic.FundUpdated}.${uid}`, {
+  pubsub.publish(`${PubSubTopic.FundUpdated}.${uid}`, {
     id,
     fakeId: null,
     item: {
-      item,
-      allocationTarget,
-      transactions,
+      item: input.item,
+      allocationTarget: input.allocationTarget,
+      transactions: input.transactions,
       stockSplits,
     },
     overviewCost,
   });
-  await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
+  pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { error: null };
 }

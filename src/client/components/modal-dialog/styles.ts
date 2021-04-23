@@ -1,5 +1,7 @@
 import { css, keyframes, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
+import { rem } from 'polished';
+import { ButtonUnStyled } from '~client/styled/shared/reset';
 import { colors } from '~client/styled/variables';
 
 const modalEnterState = css`
@@ -97,28 +99,40 @@ export const FormList = styled.ul`
   flex-flow: column nowrap;
 `;
 
-export const FormRow = styled.li<{ field: string }>`
-  display: flex;
-  line-height: 32px;
-  flex-flow: ${({ field }): 'row' | 'column' => (field === 'transactions' ? 'column' : 'row')}
-    nowrap;
+export const FormLabelRow = styled.div`
+  flex: 1;
 `;
 
-export const FormLabel = styled.span<{ item: string }>(
-  ({ item }) => css`
-    flex-basis: 0;
-    flex-grow: 1;
-    text-transform: capitalize;
-    &::after {
-      content: ':';
-    }
+const columnFields = ['stockSplits', 'transactions'];
 
-    ${item === 'transactions' &&
+export const FormRow = styled.li<{ field: string }>(
+  ({ field }) => css`
+    display: flex;
+    line-height: ${rem(32)};
+    flex-flow: ${columnFields.includes(field) ? 'column' : 'row'};
+    flex-wrap: nowrap;
+
+    ${columnFields.includes(field) &&
     css`
-      flex-basis: auto;
-    `};
+      ${FormLabelRow} {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+      }
+    `}
   `,
 );
+
+export const FormLabel = styled.span<{ item?: string }>`
+  flex-basis: 0;
+  flex-grow: 1;
+  text-transform: capitalize;
+  &::after {
+    content: ':';
+  }
+`;
+
+export const ToggleButton = styled(ButtonUnStyled)``;
 
 export const FormRowInner = styled.div`
   display: flex;

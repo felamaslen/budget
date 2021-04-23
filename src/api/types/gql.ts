@@ -191,6 +191,11 @@ export type StockSplit = {
   ratio: Scalars['NonNegativeFloat'];
 };
 
+export type StockSplitInput = {
+  date: Scalars['Date'];
+  ratio: Scalars['NonNegativeFloat'];
+};
+
 export type Fund = {
   id: Scalars['Int'];
   item: Scalars['String'];
@@ -210,6 +215,7 @@ export type FundInput = {
   item: Scalars['String'];
   transactions: Array<TransactionInput>;
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+  stockSplits?: Maybe<Array<StockSplitInput>>;
 };
 
 export type FundPriceGroup = {
@@ -988,6 +994,7 @@ export type ResolversTypes = {
   Float: ResolverTypeWrapper<Scalars['Float']>;
   TransactionInput: TransactionInput;
   StockSplit: ResolverTypeWrapper<StockSplit>;
+  StockSplitInput: StockSplitInput;
   Fund: ResolverTypeWrapper<Fund>;
   FundData: ResolverTypeWrapper<FundData>;
   FundInput: FundInput;
@@ -1091,6 +1098,7 @@ export type ResolversParentTypes = {
   Float: Scalars['Float'];
   TransactionInput: TransactionInput;
   StockSplit: StockSplit;
+  StockSplitInput: StockSplitInput;
   Fund: Fund;
   FundData: FundData;
   FundInput: FundInput;

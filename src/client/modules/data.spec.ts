@@ -4,7 +4,6 @@ import shortid from 'shortid';
 import numericHash from 'string-hash';
 
 import {
-  addToTransactionsList,
   arrayAverage,
   exponentialRegression,
   generateFakeId,
@@ -13,7 +12,7 @@ import {
   isSold,
   lastInArray,
   limitTimeSeriesLength,
-  modifyTransaction,
+  partialModification,
   sortByDate,
   sortByKey,
   sortByTotal,
@@ -23,7 +22,12 @@ import {
   withoutIds,
 } from './data';
 import { Average } from '~client/constants';
-import type { Data, FundNative, TransactionNative as Transaction } from '~client/types';
+import type {
+  Data,
+  FundNative,
+  StockSplitNative,
+  TransactionNative as Transaction,
+} from '~client/types';
 import type { FundInput } from '~client/types/gql';
 
 jest.mock('shortid', () => ({
@@ -107,33 +111,12 @@ describe('data module', () => {
     },
   ];
 
-  describe(addToTransactionsList.name, () => {
-    it('should add a list item from API-like data', () => {
-      expect.assertions(2);
+  const stockSplitList: StockSplitNative[] = [
+    { date: new Date('2020-04-01'), ratio: 3 },
+    { date: new Date('2020-10-12'), ratio: 5 },
+  ];
 
-      const transactionsListAdded = addToTransactionsList(transactionsList, {
-        date: new Date('2018-09-13T03:20Z'),
-        units: 20,
-        price: 0.15,
-        fees: 0,
-        taxes: 0,
-      });
-
-      expect(transactionsListAdded).toHaveLength(transactionsList.length + 1);
-
-      expect(transactionsListAdded[transactionsListAdded.length - 1]).toStrictEqual<Transaction>(
-        expect.objectContaining({
-          date: new Date('2018-09-13T03:20Z'),
-          units: 20,
-          price: 0.15,
-          fees: 0,
-          taxes: 0,
-        }),
-      );
-    });
-  });
-
-  describe(modifyTransaction.name, () => {
+  describe('partialModification', () => {
     it.each`
       index | key        | newValue
       ${1}  | ${'date'}  | ${new Date('2018-03-14T00:00:00.000Z')}
@@ -154,7 +137,7 @@ describe('data module', () => {
       }) => {
         expect.assertions(9);
 
-        const modifiedTransactionsList = modifyTransaction(transactionsList, index, {
+        const modifiedTransactionsList = partialModification(transactionsList, index, {
           [key]: newValue,
         });
 
@@ -179,6 +162,34 @@ describe('data module', () => {
             expect(modifiedTransactionsList[compareIndex]).toBe(transaction);
           }
         });
+      },
+    );
+
+    it.each`
+      index | key        | newValue
+      ${1}  | ${'date'}  | ${new Date('2020-04-05')}
+      ${0}  | ${'ratio'} | ${15}
+    `(
+      'should modify the $key of a stock split list at a specified index',
+      ({
+        index,
+        key,
+        newValue,
+      }: {
+        index: number;
+        key: keyof StockSplitNative;
+        newValue: StockSplitNative[keyof StockSplitNative];
+      }) => {
+        expect.assertions(2);
+
+        const modifiedStockSplits = partialModification(stockSplitList, index, {
+          [key]: newValue,
+        });
+
+        expect(modifiedStockSplits[index][key]).toStrictEqual(newValue);
+
+        // check that the original list wasn't mutated
+        expect(stockSplitList[index][key]).not.toStrictEqual(modifiedStockSplits[index][key]);
       },
     );
   });
@@ -227,7 +238,7 @@ describe('data module', () => {
       expect.assertions(2);
 
       expect(isSold(transactionsList)).toBe(true);
-      expect(isSold(modifyTransaction(transactionsList, 3, { units: -1238 }))).toBe(false);
+      expect(isSold(partialModification(transactionsList, 3, { units: -1238 }))).toBe(false);
     });
   });
 
@@ -601,6 +612,7 @@ describe('data module', () => {
             taxes: 771,
           },
         ],
+        stockSplits: [],
       });
     });
   });
