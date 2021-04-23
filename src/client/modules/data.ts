@@ -22,6 +22,7 @@ import type {
   TransactionNative as Transaction,
 } from '~client/types';
 import type { FundData, FundInput, ListItem, NetWorthEntryInput } from '~client/types/gql';
+import { calculateTransactionCost } from '~shared/funds';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +68,7 @@ export function getTotalUnits(
 export const getTotalCost = (transactions: Transaction[]): number =>
   roundTotal(
     transactions.reduce<number>(
-      (last, { units, price, fees, taxes }) => last + units * price + fees + taxes,
+      (last, transaction) => last + calculateTransactionCost(transaction),
       0,
     ),
   );

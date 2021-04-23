@@ -13,6 +13,7 @@ export const FundCreated = gql`
           price
           taxes
           fees
+          drip
         }
         stockSplits {
           date
@@ -37,6 +38,7 @@ export const FundUpdated = gql`
           price
           taxes
           fees
+          drip
         }
         stockSplits {
           date

@@ -23,8 +23,8 @@ describe(FormFieldFundMetadata.name, () => {
   });
 
   const transactions: Transaction[] = [
-    { date: new Date('2017-11-10'), units: 10.5, price: 9.76, fees: 10, taxes: 3 },
-    { date: new Date('2018-09-05'), units: -3, price: 1.3, fees: 4, taxes: 2 },
+    { date: new Date('2017-11-10'), units: 10.5, price: 9.76, fees: 10, taxes: 3, drip: false },
+    { date: new Date('2018-09-05'), units: -3, price: 1.3, fees: 4, taxes: 2, drip: false },
   ];
   const stockSplits: StockSplitNative[] = [
     { date: new Date('2020-04-20'), ratio: 10 },
@@ -288,7 +288,7 @@ describe(FormFieldFundMetadata.name, () => {
 
     describe('when editing transactions', () => {
       it('should handle adding a transaction', () => {
-        expect.assertions(10);
+        expect.assertions(12);
         const { getByTestId, getByText } = setup();
 
         const inputGroup = getByTestId('transaction-create-input');
@@ -297,12 +297,13 @@ describe(FormFieldFundMetadata.name, () => {
         const inputs = inputGroup.querySelectorAll('input');
 
         const inputDate = inputs[0];
-        const inputUnits = inputs[1];
-        const inputPrice = inputs[2];
-        const inputFees = inputs[3];
-        const inputTaxes = inputs[4];
+        const inputDRIP = inputs[1];
+        const inputUnits = inputs[2];
+        const inputPrice = inputs[3];
+        const inputFees = inputs[4];
+        const inputTaxes = inputs[5];
 
-        [inputDate, inputUnits, inputPrice, inputFees, inputTaxes].forEach((input) =>
+        [inputDate, inputDRIP, inputUnits, inputPrice, inputFees, inputTaxes].forEach((input) =>
           expect(input).toBeInTheDocument(),
         );
 
@@ -313,6 +314,11 @@ describe(FormFieldFundMetadata.name, () => {
         });
         act(() => {
           fireEvent.blur(inputDate);
+        });
+        expect(props.onChange).not.toHaveBeenCalled();
+
+        act(() => {
+          fireEvent.click(inputDRIP);
         });
         expect(props.onChange).not.toHaveBeenCalled();
 
@@ -362,6 +368,7 @@ describe(FormFieldFundMetadata.name, () => {
               price: 1.72,
               taxes: 437,
               fees: 522,
+              drip: true,
             }),
           ],
         });
@@ -467,6 +474,32 @@ describe(FormFieldFundMetadata.name, () => {
             transactions: expect.arrayContaining(
               partialModification(value.transactions, valueIndex, {
                 date: new Date('2017-04-03'),
+              }),
+            ),
+          });
+        });
+
+        it('should handle drip input', () => {
+          expect.assertions(3);
+          const { getAllByRole } = setup();
+
+          const inputDrip = getAllByRole('checkbox')[displayIndex + 1];
+          expect(inputDrip).toBeInTheDocument();
+
+          act(() => {
+            fireEvent.click(inputDrip);
+          });
+
+          act(() => {
+            jest.runAllTimers();
+          });
+
+          expect(props.onChange).toHaveBeenCalledTimes(1);
+          expect(props.onChange).toHaveBeenCalledWith({
+            stockSplits: value.stockSplits,
+            transactions: expect.arrayContaining(
+              partialModification(value.transactions, valueIndex, {
+                drip: true,
               }),
             ),
           });

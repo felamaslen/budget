@@ -1,4 +1,5 @@
 import { getUnixTime } from 'date-fns';
+import { round } from 'lodash';
 import numericHash from 'string-hash';
 
 import { getFundItems, getFundLines } from './graph';
@@ -181,7 +182,7 @@ describe('Fund selectors / graph', () => {
     it('should filter out funds with only future transactions', () => {
       expect.assertions(1);
 
-      const stateWithFutureFund = {
+      const stateWithFutureFund: State = {
         ...state,
         [PageNonStandard.Funds]: {
           ...state[PageNonStandard.Funds],
@@ -190,7 +191,14 @@ describe('Fund selectors / graph', () => {
               ...state[PageNonStandard.Funds].items[0],
               item: 'Some future fund',
               transactions: [
-                { date: new Date('2020-04-21'), units: 23, price: 4.47826, fees: 0, taxes: 0 },
+                {
+                  date: new Date('2020-04-21'),
+                  units: 23,
+                  price: 4.47826,
+                  fees: 0,
+                  taxes: 0,
+                  drip: false,
+                },
               ],
             },
             ...state[PageNonStandard.Funds].items.slice(1),
@@ -263,6 +271,7 @@ describe('Fund selectors / graph', () => {
                   fees: 148,
                   taxes: 100,
                   date: new Date('2017-05-09'),
+                  drip: false,
                 },
               ],
               stockSplits: [
@@ -405,6 +414,72 @@ describe('Fund selectors / graph', () => {
       });
     });
 
+    describe('when a DRIP transaction is present', () => {
+      const stateWithDRIP: State = {
+        ...testState,
+        [PageNonStandard.Funds]: {
+          ...testState[PageNonStandard.Funds],
+          startTime: getUnixTime(new Date('2017-05-13')),
+          cacheTimes: [
+            0, // 2017-05-13
+            86400, // 2017-05-14
+          ],
+          items: [
+            {
+              id: 10,
+              item: 'some fund 1',
+              transactions: [
+                {
+                  date: new Date('2017-02-09'),
+                  price: 428,
+                  units: 934,
+                  fees: 148,
+                  taxes: 100,
+                  drip: false,
+                },
+                {
+                  date: new Date('2017-05-11'),
+                  price: 413,
+                  units: 25,
+                  fees: 152,
+                  taxes: 53,
+                  drip: true,
+                },
+              ],
+              stockSplits: [],
+            },
+          ],
+          prices: {
+            10: [
+              {
+                values: [411, 413],
+                startIndex: 0,
+              },
+            ],
+          },
+        },
+      };
+
+      it('should omit the unit price of the transaction from the cost', () => {
+        expect.assertions(1);
+
+        const fundLines = getFundLines.today(today)(stateWithDRIP);
+
+        const dripLineROI = fundLines[FundMode.Roi].find((line) => line.id === 10);
+
+        // note we don't include the units here for the DRIP transaction
+        const expectedCost = 428 * 934 + 148 + 100 + 152 + 53;
+
+        const value0 = 411 * (934 + 25);
+        const value1 = 413 * (934 + 25);
+
+        expect(dripLineROI?.data).toStrictEqual([
+          [0, round((100 * (value0 - expectedCost)) / expectedCost, 2)],
+          [86400, round((100 * (value1 - expectedCost)) / expectedCost, 2)],
+        ]);
+      });
+    });
+
     it('should filter out sold funds, if the option is set', () => {
       expect.assertions(9);
       const stateNoSold = {
@@ -442,7 +517,7 @@ describe('Fund selectors / graph', () => {
 
     it('should include all past transactions of a sold fund on the last datapoint', () => {
       expect.assertions(1);
-      const stateWithSold = {
+      const stateWithSold: State = {
         ...state,
         [PageNonStandard.Funds]: {
           ...state[PageNonStandard.Funds],
@@ -450,9 +525,30 @@ describe('Fund selectors / graph', () => {
             {
               ...state[PageNonStandard.Funds].items[0],
               transactions: [
-                { date: new Date('2017-05-09'), units: 934, price: 428.2655, fees: 0, taxes: 0 },
-                { date: new Date('2017-07-10'), units: -934, price: 522.229, fees: 0, taxes: 0 },
-                { date: new Date('2020-04-21'), units: 1000, price: 79.015, fees: 0, taxes: 0 },
+                {
+                  date: new Date('2017-05-09'),
+                  units: 934,
+                  price: 428.2655,
+                  fees: 0,
+                  taxes: 0,
+                  drip: false,
+                },
+                {
+                  date: new Date('2017-07-10'),
+                  units: -934,
+                  price: 522.229,
+                  fees: 0,
+                  taxes: 0,
+                  drip: false,
+                },
+                {
+                  date: new Date('2020-04-21'),
+                  units: 1000,
+                  price: 79.015,
+                  fees: 0,
+                  taxes: 0,
+                  drip: false,
+                },
               ],
             },
             ...state[PageNonStandard.Funds].items.slice(1),
@@ -491,6 +587,7 @@ describe('Fund selectors / graph', () => {
                   price: 55.12,
                   fees: 22,
                   taxes: 32,
+                  drip: false,
                 },
               ],
               stockSplits: [],
@@ -505,6 +602,7 @@ describe('Fund selectors / graph', () => {
                   price: 86.92,
                   fees: 54,
                   taxes: 30,
+                  drip: false,
                 },
                 {
                   date: new Date('2014-03-10'),
@@ -512,6 +610,7 @@ describe('Fund selectors / graph', () => {
                   price: 88.56,
                   fees: 105,
                   taxes: 26,
+                  drip: false,
                 },
               ],
               stockSplits: [],

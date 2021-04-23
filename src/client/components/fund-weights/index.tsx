@@ -121,6 +121,11 @@ export const FundWeights: React.FC = () => {
                   <td>{formatCurrency(breakdown.I)}</td>
                 </Styled.InfoDialogRowRawValue>
                 <Styled.InfoDialogRowRawValue>
+                  <th>N</th>
+                  <th>= Income since net worth date</th>
+                  <td>{formatCurrency(breakdown.N)}</td>
+                </Styled.InfoDialogRowRawValue>
+                <Styled.InfoDialogRowRawValue>
                   <th>P</th>
                   <th>= Purchases since net worth date</th>
                   <td>{formatCurrency(breakdown.P)}</td>
@@ -140,7 +145,7 @@ export const FundWeights: React.FC = () => {
                     C<sub>b</sub>
                   </th>
                   <th>
-                    = Cash in bank = C<sub>e</sub> - P - max{'{'}0, I - C<sub>d</sub>
+                    = Cash in bank = C<sub>e</sub> + N - P - max{'{'}0, I - C<sub>d</sub>
                     {'}'}
                   </th>
                   <td>{formatCurrency(cashInBank)}</td>

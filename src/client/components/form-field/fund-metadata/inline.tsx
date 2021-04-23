@@ -5,6 +5,7 @@ import { FormFieldDateInline } from '../date';
 import { FormFieldNumberInline } from '../number';
 import { Wrapper, WrapperProps } from '../shared';
 
+import { FormFieldTickbox } from '../tickbox';
 import * as Styled from './styles';
 import type {
   CompositeValue,
@@ -97,7 +98,7 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
   ...props
 }) => {
   const {
-    item: { date, units, price, fees, taxes },
+    item: { date, units, price, fees, taxes, drip },
   } = props;
   const {
     onChangeDate,
@@ -105,6 +106,7 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
     onChangePrice,
     onChangeFees,
     onChangeTaxes,
+    onChangeDrip,
   } = useSingleTransactionField(props.onChange, props.index);
 
   return (
@@ -113,6 +115,10 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
     >
       <Styled.TransactionRowDate>
         <FormFieldDateInline value={date} onChange={onChangeDate} />
+        <Styled.TransactionInlineDRIP>
+          <span>DRIP:</span>
+          <FormFieldTickbox value={drip} onChange={onChangeDrip} />
+        </Styled.TransactionInlineDRIP>
       </Styled.TransactionRowDate>
       <FlexColumn>
         <Styled.UnitsPriceRow>
@@ -123,12 +129,12 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
             <FormFieldNumberInline allowEmpty value={price} onChange={onChangePrice} />
           </Styled.TransactionRowPrice>
         </Styled.UnitsPriceRow>
-        <Styled.TransactionRowFees>
+        <Styled.TransactionRowSmall>
           <Styled.FeesLabel>Fees</Styled.FeesLabel>
           <FormFieldCostInline allowEmpty value={fees} onChange={onChangeFees} />
           <Styled.FeesLabel>Taxes</Styled.FeesLabel>
           <FormFieldCostInline allowEmpty value={taxes} onChange={onChangeTaxes} />
-        </Styled.TransactionRowFees>
+        </Styled.TransactionRowSmall>
       </FlexColumn>
       {children}
     </Styled.ComponentListItem>
@@ -184,15 +190,23 @@ export const FormFieldFundMetadata: React.FC<PropsComposite> = ({
   onChange,
   ...props
 }) => {
+  const blurred = useRef<boolean>(false);
   const [focused, setFocused] = useState<boolean>(!!props.active);
   const [tabMode, setTabMode] = useState<TabMode>('transactions');
   const modalRef = useRef<HTMLDivElement>(null);
-  const onToggleModal = useCallback(() => setFocused((last) => !last), []);
+  const onToggleModal = useCallback(
+    () => setFocused((last) => (blurred.current ? last : !last)),
+    [],
+  );
   const onBlurModal = useCallback((): void => {
+    blurred.current = true;
     window.setTimeout(() => {
       if (!modalRef.current?.contains(document.activeElement)) {
         setFocused(false);
       }
+      setTimeout(() => {
+        blurred.current = false;
+      }, 500);
     }, 0);
   }, []);
   useEffect(() => {

@@ -10,8 +10,8 @@ import { partialModification } from '~client/modules/data';
 import type { StockSplitNative, TransactionNative } from '~client/types';
 
 const transactions: TransactionNative[] = [
-  { date: new Date('2017-11-10'), units: 10.5, price: 9.76, fees: 10, taxes: 3 },
-  { date: new Date('2018-09-05'), units: -3, price: 1.3, fees: 4, taxes: 2 },
+  { date: new Date('2017-11-10'), units: 10.5, price: 9.76, fees: 10, taxes: 3, drip: false },
+  { date: new Date('2018-09-05'), units: -3, price: 1.3, fees: 4, taxes: 2, drip: false },
 ];
 const stockSplits: StockSplitNative[] = [
   { date: new Date('2020-04-20'), ratio: 10 },
@@ -224,6 +224,7 @@ describe(FormFieldTransactions.name, () => {
     ${'price'} | ${'Price:'}
     ${'fees'}  | ${'Fees:'}
     ${'taxes'} | ${'Taxes:'}
+    ${'drip'}  | ${'DRIP:'}
   `('should render labels for the $field fields', ({ label }) => {
     expect.assertions(1);
     const { queryAllByText } = setupModal();
@@ -284,7 +285,7 @@ describe(FormFieldTransactions.name, () => {
     });
 
     it('should handle units input', async () => {
-      expect.assertions(3);
+      expect.hasAssertions();
       const { getByDisplayValue } = setupModal();
 
       const inputUnits = getByDisplayValue(String(transactions[valueIndex].units));
@@ -311,7 +312,7 @@ describe(FormFieldTransactions.name, () => {
     });
 
     it('should handle price input', async () => {
-      expect.assertions(3);
+      expect.hasAssertions();
       const { getByDisplayValue } = setupModal();
 
       const inputPrice = getByDisplayValue(String(transactions[valueIndex].price));
@@ -332,6 +333,30 @@ describe(FormFieldTransactions.name, () => {
         expect.arrayContaining(
           partialModification(value, valueIndex, {
             price: 126.7692,
+          }),
+        ),
+      );
+    });
+
+    it('should handle toggling DRIP', async () => {
+      expect.hasAssertions();
+      const { getAllByRole } = setupModal();
+
+      const inputDRIP = getAllByRole('checkbox')[displayIndex + 1];
+      expect(inputDRIP).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.click(inputDRIP);
+      });
+
+      await waitFor(() => {
+        expect(props.onChange).toHaveBeenCalledTimes(1);
+      });
+
+      expect(props.onChange).toHaveBeenCalledWith(
+        expect.arrayContaining(
+          partialModification(value, valueIndex, {
+            drip: true,
           }),
         ),
       );
@@ -399,7 +424,7 @@ describe(FormFieldTransactions.name, () => {
   });
 
   it('should handle adding a transaction', () => {
-    expect.assertions(8);
+    expect.assertions(14);
     const { getByTestId, getByText } = setupModal();
 
     const inputGroup = getByTestId('transaction-create-input');
@@ -410,8 +435,13 @@ describe(FormFieldTransactions.name, () => {
     const inputDate = inputs[0];
     const inputUnits = inputs[1];
     const inputPrice = inputs[2];
+    const inputFees = inputs[3];
+    const inputTaxes = inputs[4];
+    const inputDRIP = inputs[5];
 
-    [inputDate, inputUnits, inputPrice].forEach((input) => expect(input).toBeInTheDocument());
+    [inputDate, inputUnits, inputPrice, inputFees, inputTaxes, inputDRIP].forEach((input) =>
+      expect(input).toBeInTheDocument(),
+    );
 
     const buttonAdd = getByText('+');
 
@@ -441,15 +471,42 @@ describe(FormFieldTransactions.name, () => {
     expect(props.onChange).not.toHaveBeenCalled();
 
     act(() => {
+      fireEvent.change(inputFees, { target: { value: '43.56' } });
+    });
+    act(() => {
+      fireEvent.blur(inputFees);
+    });
+
+    expect(props.onChange).not.toHaveBeenCalled();
+
+    act(() => {
+      fireEvent.change(inputTaxes, { target: { value: '112.02' } });
+    });
+    act(() => {
+      fireEvent.blur(inputTaxes);
+    });
+
+    expect(props.onChange).not.toHaveBeenCalled();
+
+    act(() => {
+      fireEvent.click(inputDRIP);
+    });
+
+    expect(props.onChange).not.toHaveBeenCalled();
+
+    act(() => {
       fireEvent.click(buttonAdd);
     });
 
     expect(props.onChange).toHaveBeenCalledWith([
       ...value,
-      expect.objectContaining({
+      expect.objectContaining<TransactionNative>({
         date: new Date('2019-02-11'),
         units: 562.23,
         price: 1095.91,
+        fees: 4356,
+        taxes: 11202,
+        drip: true,
       }),
     ]);
   });

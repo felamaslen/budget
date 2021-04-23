@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import { removeAtIndex } from 'replace-array';
+import { removeAtIndex, replaceAtIndex } from 'replace-array';
 import shortid from 'shortid';
 import numericHash from 'string-hash';
 
@@ -87,6 +87,7 @@ describe('data module', () => {
       price: 428,
       fees: 172,
       taxes: 0,
+      drip: false,
     },
     {
       date: new Date('2018-03-13T00:00:00.000Z'),
@@ -94,6 +95,7 @@ describe('data module', () => {
       price: 421,
       fees: 7,
       taxes: 6,
+      drip: false,
     },
     {
       date: new Date('2018-06-07T00:00:00.000Z'),
@@ -101,6 +103,7 @@ describe('data module', () => {
       price: 436,
       fees: 390,
       taxes: 0,
+      drip: false,
     },
     {
       date: new Date('2018-04-26T00:00:00.000Z'),
@@ -108,6 +111,7 @@ describe('data module', () => {
       price: 428,
       fees: 91,
       taxes: 0,
+      drip: false,
     },
   ];
 
@@ -135,7 +139,7 @@ describe('data module', () => {
         key: keyof Transaction;
         newValue: Transaction[keyof Transaction];
       }) => {
-        expect.assertions(9);
+        expect.assertions(10);
 
         const modifiedTransactionsList = partialModification(transactionsList, index, {
           [key]: newValue,
@@ -209,9 +213,30 @@ describe('data module', () => {
         expect(
           getTotalUnits(
             [
-              { date: new Date('2020-04-10'), units: 110, price: 100, fees: 0, taxes: 0 },
-              { date: new Date('2020-04-13'), units: 143, price: 56, fees: 0, taxes: 0 },
-              { date: new Date('2020-04-20'), units: 95, price: 20, fees: 0, taxes: 0 },
+              {
+                date: new Date('2020-04-10'),
+                units: 110,
+                price: 100,
+                fees: 0,
+                taxes: 0,
+                drip: false,
+              },
+              {
+                date: new Date('2020-04-13'),
+                units: 143,
+                price: 56,
+                fees: 0,
+                taxes: 0,
+                drip: false,
+              },
+              {
+                date: new Date('2020-04-20'),
+                units: 95,
+                price: 20,
+                fees: 0,
+                taxes: 0,
+                drip: false,
+              },
             ],
             [
               { date: new Date('2020-04-13'), ratio: 2 },
@@ -230,6 +255,14 @@ describe('data module', () => {
       expect(getTotalCost(transactionsList)).toBe(
         934 * 428 + 172 + 25 * 421 + 7 + 6 - 1239 * 436 + 390 + 280 * 428 + 91,
       );
+    });
+
+    it('should exclude units for DRIP transactions', () => {
+      expect.assertions(1);
+
+      expect(
+        getTotalCost(replaceAtIndex(transactionsList, 0, (last) => ({ ...last, drip: true }))),
+      ).toBe(172 + 25 * 421 + 7 + 6 - 1239 * 436 + 390 + 280 * 428 + 91);
     });
   });
 
@@ -560,6 +593,7 @@ describe('data module', () => {
               price: 327.59,
               fees: 99,
               taxes: 771,
+              drip: false,
             },
           ],
           stockSplits: [{ date: '2020-04-03', ratio: 5 }],
@@ -575,6 +609,7 @@ describe('data module', () => {
             price: 327.59,
             fees: 99,
             taxes: 771,
+            drip: false,
           },
         ],
         stockSplits: [{ date: new Date('2020-04-03'), ratio: 5 }],
@@ -596,6 +631,7 @@ describe('data module', () => {
               price: 327.59,
               fees: 99,
               taxes: 771,
+              drip: false,
             },
           ],
           stockSplits: [],
@@ -610,6 +646,7 @@ describe('data module', () => {
             price: 327.59,
             fees: 99,
             taxes: 771,
+            drip: false,
           },
         ],
         stockSplits: [],

@@ -13,7 +13,11 @@ import { getTotalCost, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/api';
-import { getCashTotal, getCostSinceCashTotals } from '~client/selectors/overview/common';
+import {
+  getCashTotal,
+  getCostSinceCashTotals,
+  getIncomeSinceCashTotals,
+} from '~client/selectors/overview/common';
 import type {
   Data,
   Id,
@@ -152,10 +156,14 @@ export const getCashBreakdown = moize(
     createSelector(
       getCashTotal,
       getCostSinceCashTotals(today),
+      getIncomeSinceCashTotals(today),
       getInvestmentsSinceCashTotal(today),
-      (cashTotal, purchaseCosts, investments) => ({
+      (cashTotal, purchaseCosts, income, investments) => ({
         cashInBank: Math.round(
-          cashTotal.cashInBank - purchaseCosts - Math.max(0, investments - cashTotal.cashToInvest),
+          cashTotal.cashInBank +
+            income -
+            purchaseCosts -
+            Math.max(0, investments - cashTotal.cashToInvest),
         ),
         cashToInvest: Math.round(Math.max(0, cashTotal.cashToInvest - investments)),
         breakdown: {
@@ -164,6 +172,7 @@ export const getCashBreakdown = moize(
           Vd: cashTotal.stockValue, // Actual stock value at net worth date
           I: investments, // Investments since net worth date
           P: purchaseCosts, // Purchase costs since net worth date
+          N: income, // Income since net worth date
         },
       }),
     ),

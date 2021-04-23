@@ -48,6 +48,10 @@ export const TabButton = styled(ButtonUnStyled)<{ active?: boolean }>(
         background: ${colors.light.mediumLight} !important;
       }
     `}
+
+    &:active, &:focus {
+      background: ${colors.light.mediumDark} !important;
+    }
   `,
 );
 
@@ -138,7 +142,24 @@ export const TransactionRowPrice = styled(ComponentRow)`
   ${componentItem(transactionsWidthPrice)};
 `;
 
-export const TransactionRowFees = styled(ComponentRow)`
+export const TransactionInlineDRIP = styled.div`
+  display: flex;
+  font-size: ${rem(11)};
+  & > span {
+    flex: 1;
+  }
+  & > div {
+    border: none !important;
+    display: inline !important;
+    width: auto !important;
+  }
+  input[type='checkbox'] {
+    height: auto !important;
+    width: auto;
+  }
+`;
+
+export const TransactionRowSmall = styled(ComponentRow)`
   font-size: ${rem(13)};
   ${FormField} {
     font-size: inherit;

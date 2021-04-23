@@ -19,7 +19,6 @@ import type {
   ListItemStandardNative,
   NativeDate,
   OverviewGraphDate as GraphDate,
-  CashTotalNative,
   LongTermOptions,
 } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
@@ -89,31 +88,31 @@ const getPageCostSinceDate = <I extends NativeDate<ListItemStandard, 'date'>>(
 
 export const getCostSinceCashTotals = moize(
   (today: Date) =>
-    createSelector<
-      State,
-      CashTotalNative,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      CrudState<ListItemStandardNative>,
-      number
-    >(
+    createSelector(
       getCashTotal,
-      getRawItems<ListItemStandardNative, PageListStandard.Income>(PageListStandard.Income),
       getRawItems<ListItemStandardNative, PageListStandard.Bills>(PageListStandard.Bills),
       getRawItems<ListItemStandardNative, PageListStandard.Food>(PageListStandard.Food),
       getRawItems<ListItemStandardNative, PageListStandard.General>(PageListStandard.General),
       getRawItems<ListItemStandardNative, PageListStandard.Holiday>(PageListStandard.Holiday),
       getRawItems<ListItemStandardNative, PageListStandard.Social>(PageListStandard.Social),
-      ({ date: cashTotalDate }, income, ...args) =>
+      ({ date: cashTotalDate }, ...args) =>
         cashTotalDate
           ? args.reduce(
               (last, items) => last + getPageCostSinceDate(today, cashTotalDate, items),
-              -getPageCostSinceDate(today, cashTotalDate, income),
+              0,
             )
           : 0,
+    ),
+  { maxSize: 1 },
+);
+
+export const getIncomeSinceCashTotals = moize(
+  (today: Date) =>
+    createSelector(
+      getCashTotal,
+      getRawItems<ListItemStandardNative, PageListStandard.Income>(PageListStandard.Income),
+      ({ date: cashTotalDate }, income) =>
+        cashTotalDate ? getPageCostSinceDate(today, cashTotalDate, income) : 0,
     ),
   { maxSize: 1 },
 );

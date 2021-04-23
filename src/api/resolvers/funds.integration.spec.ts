@@ -44,7 +44,9 @@ describe('Funds resolver', () => {
 
   const fundInput: RawDateFundInput = {
     item: 'My fund',
-    transactions: [{ date: '2020-04-20', units: 69, price: 949.35, fees: 1199, taxes: 1776 }],
+    transactions: [
+      { date: '2020-04-20', units: 69, price: 949.35, fees: 1199, taxes: 1776, drip: false },
+    ],
     allocationTarget: 20,
     stockSplits: [
       {
@@ -130,6 +132,7 @@ describe('Funds resolver', () => {
             price: 949.35,
             fees: 1199,
             taxes: 1776,
+            is_drip: false,
           }),
         ]),
       );
@@ -391,6 +394,7 @@ describe('Funds resolver', () => {
               price
               fees
               taxes
+              drip
             }
             stockSplits {
               date
@@ -433,6 +437,7 @@ describe('Funds resolver', () => {
               price: 949.35,
               fees: 1199,
               taxes: 1776,
+              drip: false,
             }),
           ],
           stockSplits: [expect.objectContaining({ date: '2020-04-11', ratio: 8 })],
@@ -705,8 +710,8 @@ describe('Funds resolver', () => {
       ...fundInput,
       item: altFundName,
       transactions: [
-        { date: '2020-04-20', units: 69, price: 42.8, fees: 87, taxes: 0 },
-        { date: '2020-04-29', units: 123, price: 100.3, fees: 0, taxes: 104 },
+        { date: '2020-04-20', units: 69, price: 42.8, fees: 87, taxes: 0, drip: true },
+        { date: '2020-04-29', units: 123, price: 100.3, fees: 0, taxes: 104, drip: false },
       ],
       allocationTarget: 15,
       stockSplits: [
@@ -774,6 +779,7 @@ describe('Funds resolver', () => {
             price: 42.8,
             fees: 87,
             taxes: 0,
+            is_drip: true,
           }),
           expect.objectContaining({
             date: new Date('2020-04-29'),
@@ -781,6 +787,7 @@ describe('Funds resolver', () => {
             price: 100.3,
             fees: 0,
             taxes: 104,
+            is_drip: false,
           }),
         ]),
       );

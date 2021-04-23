@@ -291,7 +291,14 @@ describe('List mutations', () => {
 
     const testFundDelta: Partial<FundInput> = {
       transactions: [
-        { date: new Date('2020-04-03'), units: 154.28, price: 99.13, fees: 132, taxes: 19 },
+        {
+          date: new Date('2020-04-03'),
+          units: 154.28,
+          price: 99.13,
+          fees: 132,
+          taxes: 19,
+          drip: false,
+        },
       ],
       stockSplits: [{ date: new Date('2021-03-01'), ratio: 10 }],
     };

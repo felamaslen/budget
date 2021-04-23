@@ -58,7 +58,9 @@ describe('Funds reducer', () => {
           {
             id: numericHash('id-1'),
             item: 'My fund 1',
-            transactions: [{ date: '2019-06-30', units: 100, price: 99.23, fees: 0, taxes: 0 }],
+            transactions: [
+              { date: '2019-06-30', units: 100, price: 99.23, fees: 0, taxes: 0, drip: false },
+            ],
             stockSplits: [],
             allocationTarget: 0,
           },
@@ -114,7 +116,14 @@ describe('Funds reducer', () => {
             id: numericHash('id-1'),
             item: 'My fund 1',
             transactions: [
-              { date: new Date('2019-06-30'), units: 100, price: 99.23, fees: 0, taxes: 0 },
+              {
+                date: new Date('2019-06-30'),
+                units: 100,
+                price: 99.23,
+                fees: 0,
+                taxes: 0,
+                drip: false,
+              },
             ],
             stockSplits: [],
             allocationTarget: 0,

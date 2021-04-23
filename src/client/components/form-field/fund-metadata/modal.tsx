@@ -5,6 +5,7 @@ import { FormFieldCost } from '../cost';
 import { FormFieldDate } from '../date';
 import { FormFieldNumber } from '../number';
 import { Wrapper } from '../shared';
+import { FormFieldTickbox } from '../tickbox';
 
 import * as Styled from './styles';
 import type {
@@ -96,7 +97,7 @@ const FormFieldTransaction: React.FC<PropsFormFieldTransaction> = ({
   ...props
 }) => {
   const {
-    item: { date, units, price, fees, taxes },
+    item: { date, units, price, fees, taxes, drip },
   } = props;
   const {
     onChangeDate,
@@ -104,6 +105,7 @@ const FormFieldTransaction: React.FC<PropsFormFieldTransaction> = ({
     onChangePrice,
     onChangeFees,
     onChangeTaxes,
+    onChangeDrip,
   } = useSingleTransactionField(props.onChange, props.index);
 
   const id = useMemo(() => shortid.generate(), []);
@@ -137,22 +139,30 @@ const FormFieldTransaction: React.FC<PropsFormFieldTransaction> = ({
             <FormFieldNumber id={`price-${id}`} value={price} onChange={onChangePrice} />
           </Styled.ComponentCol>
         </Styled.TransactionRowPrice>
-        <Styled.TransactionRowFees>
+        <Styled.TransactionRowSmall>
           <Styled.TransactionLabel>
             <label htmlFor={`fees-${id}`}>Fees:</label>
           </Styled.TransactionLabel>
           <Styled.ComponentCol>
             <FormFieldCost id={`fees-${id}`} value={fees} onChange={onChangeFees} />
           </Styled.ComponentCol>
-        </Styled.TransactionRowFees>
-        <Styled.TransactionRowFees>
+        </Styled.TransactionRowSmall>
+        <Styled.TransactionRowSmall>
           <Styled.TransactionLabel>
             <label htmlFor={`taxes-${id}`}>Taxes:</label>
           </Styled.TransactionLabel>
           <Styled.ComponentCol>
             <FormFieldCost id={`taxes-${id}`} value={taxes} onChange={onChangeTaxes} />
           </Styled.ComponentCol>
-        </Styled.TransactionRowFees>
+        </Styled.TransactionRowSmall>
+        <Styled.TransactionRowSmall>
+          <Styled.TransactionLabel>
+            <label htmlFor={`drip-${id}`}>DRIP:</label>
+          </Styled.TransactionLabel>
+          <Styled.ComponentCol>
+            <FormFieldTickbox id={`drip-${id}`} value={drip} onChange={onChangeDrip} />
+          </Styled.ComponentCol>
+        </Styled.TransactionRowSmall>
       </Styled.ComponentFields>
       {children}
     </Styled.ComponentListItem>

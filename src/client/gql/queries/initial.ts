@@ -58,6 +58,7 @@ export const Initial = gql`
           price
           fees
           taxes
+          drip
         }
         stockSplits {
           date

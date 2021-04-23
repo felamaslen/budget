@@ -34,6 +34,7 @@ import {
   OverviewOld,
   OldNetWorthRow,
 } from '~api/types';
+import { calculateTransactionCost } from '~shared/funds';
 
 const {
   startYear,
@@ -143,7 +144,7 @@ export function calculateXIRRFromTransactions(
   );
 
   const payments = [
-    ...transactions.map(({ units, price, fees, taxes }) => -(units * price + fees + taxes)),
+    ...transactions.map((transaction) => -calculateTransactionCost(transaction)),
     currentValue,
   ];
 

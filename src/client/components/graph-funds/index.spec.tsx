@@ -40,6 +40,7 @@ describe('<GraphFunds />', () => {
                     price: 99.6,
                     fees: 0,
                     taxes: 0,
+                    drip: false,
                   },
                 ],
                 stockSplits: [],

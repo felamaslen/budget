@@ -182,6 +182,7 @@ export type Transaction = {
   price: Scalars['NonNegativeFloat'];
   fees: Scalars['Int'];
   taxes: Scalars['Int'];
+  drip: Scalars['Boolean'];
 };
 
 export type TransactionInput = {
@@ -190,6 +191,7 @@ export type TransactionInput = {
   price: Scalars['NonNegativeFloat'];
   fees: Scalars['Int'];
   taxes: Scalars['Int'];
+  drip: Scalars['Boolean'];
 };
 
 export type StockSplit = {
@@ -1445,7 +1447,7 @@ export type InitialQuery = (
       & Pick<Fund, 'id' | 'item' | 'allocationTarget'>
       & { transactions: Array<(
         { __typename?: 'Transaction' }
-        & Pick<Transaction, 'date' | 'units' | 'price' | 'fees' | 'taxes'>
+        & Pick<Transaction, 'date' | 'units' | 'price' | 'fees' | 'taxes' | 'drip'>
       )>, stockSplits: Array<(
         { __typename?: 'StockSplit' }
         & Pick<StockSplit, 'date' | 'ratio'>
@@ -1608,7 +1610,7 @@ export type FundCreatedSubscription = (
       & Pick<FundData, 'item' | 'allocationTarget'>
       & { transactions: Array<(
         { __typename?: 'Transaction' }
-        & Pick<Transaction, 'date' | 'units' | 'price' | 'taxes' | 'fees'>
+        & Pick<Transaction, 'date' | 'units' | 'price' | 'taxes' | 'fees' | 'drip'>
       )>, stockSplits: Array<(
         { __typename?: 'StockSplit' }
         & Pick<StockSplit, 'date' | 'ratio'>
@@ -1630,7 +1632,7 @@ export type FundUpdatedSubscription = (
       & Pick<FundData, 'item' | 'allocationTarget'>
       & { transactions: Array<(
         { __typename?: 'Transaction' }
-        & Pick<Transaction, 'date' | 'units' | 'price' | 'taxes' | 'fees'>
+        & Pick<Transaction, 'date' | 'units' | 'price' | 'taxes' | 'fees' | 'drip'>
       )>, stockSplits: Array<(
         { __typename?: 'StockSplit' }
         & Pick<StockSplit, 'date' | 'ratio'>
@@ -2330,6 +2332,7 @@ export const InitialDocument = gql`
         price
         fees
         taxes
+        drip
       }
       stockSplits {
         date
@@ -2554,6 +2557,7 @@ export const FundCreatedDocument = gql`
         price
         taxes
         fees
+        drip
       }
       stockSplits {
         date
@@ -2581,6 +2585,7 @@ export const FundUpdatedDocument = gql`
         price
         taxes
         fees
+        drip
       }
       stockSplits {
         date

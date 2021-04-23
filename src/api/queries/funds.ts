@@ -88,17 +88,18 @@ export async function upsertTransactions(
     return;
   }
   await db.query(sql`
-  INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes)
+  INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes, is_drip)
   SELECT * FROM ${sql.unnest(
-    transactions.map(({ date, units, price, fees, taxes }) => [
+    transactions.map(({ date, units, price, fees, taxes, drip }) => [
       id,
       formatDate(date),
       units,
       price,
       fees,
       taxes,
+      drip,
     ]),
-    ['int4', 'date', 'float8', 'float8', 'int4', 'int4'],
+    ['int4', 'date', 'float8', 'float8', 'int4', 'int4', 'bool'],
   )}
   `);
 }
@@ -135,28 +136,35 @@ export type FundListRow = {
   allocation_target: number | null;
 };
 
-type JoinedFundRow = FundListRow & {
+type TransactionJoins = {
   transaction_ids: number[] | [null];
   transaction_dates: string[] | [null];
   transaction_units: number[] | [null];
   transaction_prices: number[] | [null];
   transaction_fees: number[] | [null];
   transaction_taxes: number[] | [null];
+  transaction_drip: boolean[] | [null];
+};
+
+type StockSplitJoins = {
   stock_split_ids: number[] | [null];
   stock_split_dates: string[] | [null];
   stock_split_ratios: number[] | [null];
 };
 
-type JoinedFundRowWithTransactions = JoinedFundRow & {
+type JoinedFundRow = FundListRow & TransactionJoins & StockSplitJoins;
+
+type JoinedFundRowWithTransactions = Omit<JoinedFundRow, keyof TransactionJoins> & {
   transaction_ids: number[];
   transaction_dates: string[];
   transaction_units: number[];
   transaction_prices: number[];
   transaction_fees: number[];
   transaction_taxes: number[];
+  transaction_drip: boolean[];
 };
 
-type JoinedFundRowWithStockSplits = JoinedFundRow & {
+type JoinedFundRowWithStockSplits = Omit<JoinedFundRow, keyof StockSplitJoins> & {
   stock_split_ids: number[];
   stock_split_dates: string[];
   stock_split_ratios: number[];
@@ -184,6 +192,7 @@ export async function selectFundsItems(
         sql`array_agg(transactions.price ORDER BY transactions.date DESC) as transaction_prices`,
         sql`array_agg(transactions.fees ORDER BY transactions.date DESC) as transaction_fees`,
         sql`array_agg(transactions.taxes ORDER BY transactions.date DESC) as transaction_taxes`,
+        sql`array_agg(transactions.is_drip ORDER BY transactions.date DESC) as transaction_drip`,
         sql`array_agg(stock_splits.id ORDER BY stock_splits.date ASC) as stock_split_ids`,
         sql`array_agg(stock_splits.date ORDER BY stock_splits.date ASC) as stock_split_dates`,
         sql`array_agg(stock_splits.ratio ORDER BY stock_splits.date ASC) as stock_split_ratios`,
@@ -213,6 +222,7 @@ export async function selectFundsItems(
             price: row.transaction_prices[index],
             fees: row.transaction_fees[index],
             taxes: row.transaction_taxes[index],
+            drip: row.transaction_drip[index],
           })),
           'id',
         ).map((tr) => omit(tr, 'id'))

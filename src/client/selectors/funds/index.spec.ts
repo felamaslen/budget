@@ -115,7 +115,14 @@ describe('Funds selectors', () => {
         id: numericHash('some-id'),
         item: 'new fund',
         transactions: [
-          { date: new Date('2019-07-23'), units: 13, price: 0.92308, fees: 0, taxes: 0 },
+          {
+            date: new Date('2019-07-23'),
+            units: 13,
+            price: 0.92308,
+            fees: 0,
+            taxes: 0,
+            drip: false,
+          },
         ],
         stockSplits: [],
       },
@@ -132,6 +139,7 @@ describe('Funds selectors', () => {
             price: 0.1,
             fees: 0,
             taxes: 0,
+            drip: false,
           },
         ],
         stockSplits: [],
@@ -439,6 +447,7 @@ describe('Funds selectors', () => {
                   units: 1887,
                   fees: 652,
                   taxes: 4763,
+                  drip: false,
                 },
                 {
                   date: new Date('2018-02-28'),
@@ -446,6 +455,7 @@ describe('Funds selectors', () => {
                   units: 473,
                   fees: 165,
                   taxes: 9965,
+                  drip: false,
                 },
                 {
                   date: new Date('2018-03-21'),
@@ -453,6 +463,7 @@ describe('Funds selectors', () => {
                   units: 91,
                   fees: 449,
                   taxes: 6694,
+                  drip: false,
                 },
               ],
               stockSplits: [],

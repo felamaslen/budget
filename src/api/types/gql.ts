@@ -176,6 +176,7 @@ export type Transaction = {
   price: Scalars['NonNegativeFloat'];
   fees: Scalars['Int'];
   taxes: Scalars['Int'];
+  drip: Scalars['Boolean'];
 };
 
 export type TransactionInput = {
@@ -184,6 +185,7 @@ export type TransactionInput = {
   price: Scalars['NonNegativeFloat'];
   fees: Scalars['Int'];
   taxes: Scalars['Int'];
+  drip: Scalars['Boolean'];
 };
 
 export type StockSplit = {
@@ -992,6 +994,7 @@ export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
   Transaction: ResolverTypeWrapper<Transaction>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   TransactionInput: TransactionInput;
   StockSplit: ResolverTypeWrapper<StockSplit>;
   StockSplitInput: StockSplitInput;
@@ -1024,7 +1027,6 @@ export type ResolversTypes = {
   CrudResponseUpdate: ResolverTypeWrapper<CrudResponseUpdate>;
   CrudResponseDelete: ResolverTypeWrapper<CrudResponseDelete>;
   AppConfig: ResolverTypeWrapper<AppConfig>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   AppConfigSet: ResolverTypeWrapper<AppConfigSet>;
   AppConfigInput: AppConfigInput;
   PageListStandard: PageListStandard;
@@ -1096,6 +1098,7 @@ export type ResolversParentTypes = {
   Query: {};
   Transaction: Transaction;
   Float: Scalars['Float'];
+  Boolean: Scalars['Boolean'];
   TransactionInput: TransactionInput;
   StockSplit: StockSplit;
   StockSplitInput: StockSplitInput;
@@ -1126,7 +1129,6 @@ export type ResolversParentTypes = {
   CrudResponseUpdate: CrudResponseUpdate;
   CrudResponseDelete: CrudResponseDelete;
   AppConfig: AppConfig;
-  Boolean: Scalars['Boolean'];
   AppConfigSet: AppConfigSet;
   AppConfigInput: AppConfigInput;
   ListItem: ListItem;
@@ -1237,6 +1239,7 @@ export type TransactionResolvers<ContextType = Context, ParentType extends Resol
   price?: Resolver<ResolversTypes['NonNegativeFloat'], ParentType, ContextType>;
   fees?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   taxes?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  drip?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

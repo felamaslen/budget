@@ -12,6 +12,7 @@ const hookOptions: HookOptions<TransactionNative> = {
     price: 0,
     fees: 0,
     taxes: 0,
+    drip: false,
   }),
   processItems: sortByKey<'date', TransactionNative>({ key: 'date', order: -1 }),
   validateItem: (delta) => !!(delta.units && delta.price),
@@ -32,6 +33,7 @@ export function useSingleTransactionField(
   onChangePrice: (value: number | undefined) => void;
   onChangeFees: (value: number | undefined) => void;
   onChangeTaxes: (value: number | undefined) => void;
+  onChangeDrip: (value: boolean | undefined) => void;
 } {
   const [delta, setDelta] = useState<Partial<TransactionNative>>({});
   const prevDelta = useRef<Partial<TransactionNative>>(delta);
@@ -55,6 +57,9 @@ export function useSingleTransactionField(
     (taxes?: number) => setDelta((last) => ({ ...last, taxes })),
     [],
   );
+  const onChangeDrip = useCallback((drip?: boolean) => {
+    setDelta((last) => ({ ...last, drip }));
+  }, []);
 
-  return { onChangeDate, onChangeUnits, onChangePrice, onChangeFees, onChangeTaxes };
+  return { onChangeDate, onChangeUnits, onChangePrice, onChangeFees, onChangeTaxes, onChangeDrip };
 }

@@ -242,7 +242,9 @@ describe('Funds controller', () => {
         input: {
           item: 'Some fund',
           allocationTarget: 37,
-          transactions: [{ date: new Date('2020-04-20'), units: 3, price: 21, fees: 13, taxes: 7 }],
+          transactions: [
+            { date: new Date('2020-04-20'), units: 3, price: 21, fees: 13, taxes: 7, drip: false },
+          ],
         },
       };
 
@@ -276,7 +278,9 @@ describe('Funds controller', () => {
       const input: FundInput = {
         item: 'Some fund',
         allocationTarget: 37,
-        transactions: [{ date: new Date('2020-04-20'), units: 3, price: 21, fees: 13, taxes: 7 }],
+        transactions: [
+          { date: new Date('2020-04-20'), units: 3, price: 21, fees: 13, taxes: 7, drip: false },
+        ],
       };
 
       const publishSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
