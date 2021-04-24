@@ -111,10 +111,10 @@ const getReturnsById = memoiseNowAndToday((time, key) =>
   ),
 );
 
-const mapFundOrder = ({ date, fees, units, price }: Transaction): FundOrder => ({
+const mapFundOrder = ({ date, units, price, drip }: Transaction): FundOrder => ({
   time: getUnixTime(date),
   isSell: units < 0,
-  isReinvestment: fees < 0,
+  isReinvestment: drip,
   size: Math.abs(units * price),
 });
 

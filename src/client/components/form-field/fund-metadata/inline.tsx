@@ -112,6 +112,7 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
   return (
     <Styled.ComponentListItem
       data-testid={create ? 'transaction-create-input' : 'transaction-edit-input'}
+      isDrip={props.item.drip}
     >
       <Styled.TransactionRowDate>
         <FormFieldDateInline value={date} onChange={onChangeDate} />

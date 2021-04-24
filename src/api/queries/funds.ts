@@ -46,7 +46,7 @@ export async function selectTransactions(
   now: Date,
 ): Promise<readonly Transaction[]> {
   const result = await db.query<Transaction>(sql`
-  SELECT date, units, price, fees, taxes
+  SELECT date, units, price, fees, taxes, is_drip as drip
   FROM funds f
   INNER JOIN funds_transactions ft ON ft.fund_id = f.id
   WHERE f.uid = ${uid} AND ft.date <= ${now.toISOString()}

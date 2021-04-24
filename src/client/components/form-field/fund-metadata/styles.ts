@@ -1,6 +1,6 @@
 import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
-import { rem } from 'polished';
+import { rem, rgba } from 'polished';
 
 import { FormField } from '~client/components/form-field/styles';
 import { ModalDialog } from '~client/components/modal-dialog/styles';
@@ -275,40 +275,48 @@ export const ComponentList = styled.ul`
   }
 `;
 
-export const ComponentListItem = styled.li`
-  ${ModalDialog} & {
-    display: flex;
-    flex-flow: row;
+export const ComponentListItem = styled.li<{ isDrip?: boolean }>(
+  ({ isDrip }) => css`
+    background: ${rgba(isDrip ? colors.profit.light : colors.white, 0.5)};
 
-    & > div {
+    ${ModalDialog} & {
       display: flex;
-      flex-flow: column;
+      flex-flow: row;
+
+      & > div {
+        display: flex;
+        flex-flow: column;
+      }
+
+      &:not(:last-child) {
+        padding-bottom: 3px;
+        border-bottom: 1px dotted ${colors.light.mediumDark};
+      }
     }
 
-    &:not(:last-child) {
-      padding-bottom: 3px;
-      border-bottom: 1px dotted ${colors.light.mediumDark};
-    }
-  }
+    ${breakpoint(breakpoints.mobile)} {
+      display: flex;
+      align-items: center;
+      line-height: 24px;
+      flex: 0 0 24px;
 
-  ${breakpoint(breakpoints.mobile)} {
-    display: flex;
-    align-items: center;
-    line-height: 24px;
-    flex: 0 0 24px;
+      &:not(:last-child) {
+        border-bottom: 1px solid ${colors.light.mediumDark};
+        padding-bottom: ${rem(2)};
+      }
 
-    &:not(:last-child) {
-      border-bottom: 1px solid ${colors.light.mediumDark};
-      padding-bottom: ${rem(2)};
-    }
+      input {
+        padding: 0 0 0 1px;
+        font-size: 12px;
+        height: 22px;
+        line-height: 22px;
+        border: 1px solid #ccc;
+        box-shadow: none;
+      }
 
-    input {
-      padding: 0 0 0 1px;
-      font-size: 12px;
-      height: 22px;
-      line-height: 22px;
-      border: 1px solid #ccc;
-      box-shadow: none;
+      ${FormField} {
+        border: none;
+      }
     }
-  }
-`;
+  `,
+);

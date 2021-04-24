@@ -1,5 +1,6 @@
 import { getUnixTime } from 'date-fns';
 import { round } from 'lodash';
+import { replaceAtIndex } from 'replace-array';
 import numericHash from 'string-hash';
 
 import { getFundItems, getFundLines } from './graph';
@@ -25,6 +26,13 @@ describe('Fund selectors / graph', () => {
     },
     funds: {
       ...testState.funds,
+      items: replaceAtIndex(testState.funds.items, 3, (last) => ({
+        ...last,
+        transactions: replaceAtIndex(last.transactions, 0, (transaction) => ({
+          ...transaction,
+          drip: true,
+        })),
+      })),
       viewSoldFunds: true,
     },
   };
@@ -41,7 +49,7 @@ describe('Fund selectors / graph', () => {
             {
               time: getUnixTime(new Date('2016-09-21')),
               isSell: false,
-              isReinvestment: false,
+              isReinvestment: true,
               size: 1499.7 * 133.36,
             },
             {
@@ -141,7 +149,7 @@ describe('Fund selectors / graph', () => {
             {
               time: getUnixTime(new Date('2016-09-21')),
               isSell: false,
-              isReinvestment: false,
+              isReinvestment: true,
               size: 1499.7 * 133.36,
             },
             {
@@ -563,7 +571,7 @@ describe('Fund selectors / graph', () => {
       expect(overallLine?.data[overallLine?.data.length - 1]).toMatchInlineSnapshot(`
         Array [
           28623600,
-          20.33,
+          65.32,
         ]
       `);
     });

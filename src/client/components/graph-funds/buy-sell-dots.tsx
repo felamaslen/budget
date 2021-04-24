@@ -55,6 +55,27 @@ const shouldShowOrders = (mode: FundMode, hlPoint: HLPoint | undefined) => (
   return mode === FundMode.Value && getFundLineName(fundLine.id, fundLine.item) === hlPoint.group;
 };
 
+function getArrowColor(order: FundOrder): string {
+  if (order.isReinvestment) {
+    return colors.income.arrow;
+  }
+  return order.isSell ? colors.loss.dark : colors.profit.dark;
+}
+
+function getArrowAngle(order: FundOrder): number {
+  if (order.isReinvestment) {
+    return Math.PI / 4;
+  }
+  return order.isSell ? -Math.PI / 2 : Math.PI / 2;
+}
+
+function getArrowLength(order: FundOrder, mode: FundMode, pixY: (y: number) => number): number {
+  if (mode === FundMode.Roi || order.isReinvestment) {
+    return 10;
+  }
+  return pixY(0) - pixY(order.size);
+}
+
 export const BuySellDots: React.FC<Props> = ({
   fundLines,
   hlPoint,
@@ -76,7 +97,6 @@ export const BuySellDots: React.FC<Props> = ({
             orders
               .filter(
                 (order) =>
-                  !order.isReinvestment &&
                   // Require the visible scraped data to contain the transaction date
                   data.some(([x]) => x < order.time - startTime) &&
                   data.some(([x]) => x >= order.time - startTime),
@@ -90,9 +110,9 @@ export const BuySellDots: React.FC<Props> = ({
               key={`${order.time}-${order.isSell ? 'sell' : 'buy'}`}
               startX={order.linePoint[0]}
               startY={order.linePoint[1]}
-              length={mode === FundMode.Roi ? 10 : pixY1(0) - pixY1(order.size)}
-              angle={order.isSell ? -Math.PI / 2 : Math.PI / 2}
-              color={order.isSell ? colors.loss.dark : colors.profit.dark}
+              length={getArrowLength(order, mode, pixY1)}
+              angle={getArrowAngle(order)}
+              color={getArrowColor(order)}
               fill={true}
               arrowSize={-0.1}
               pixX={pixX}

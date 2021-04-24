@@ -149,6 +149,7 @@ export const colors = {
   },
   income: {
     main: rgb(67, 216, 21),
+    arrow: rgb(20, 93, 20),
   },
   bills: {
     main: rgb(183, 28, 28),
