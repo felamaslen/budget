@@ -273,8 +273,8 @@ describe('Funds selectors', () => {
         ...state.netWorth,
         cashTotal: {
           cashInBank: 1886691,
-          cashToInvest: 2996287,
           stockValue: 7765614,
+          stocksIncludingCash: 7765614 + 2996287,
           date: new Date('2018-02-27'),
         },
       },
@@ -492,7 +492,15 @@ describe('Funds selectors', () => {
             cashTotal: {
               ...stateWithTransactions.netWorth.cashTotal,
               cashInBank: 100667,
-              cashToInvest: 123 * 473 + 165 + 9965 + 125 * 91 + 449 + 6694 - 8455,
+              stocksIncludingCash:
+                stateWithTransactions.netWorth.cashTotal.stockValue +
+                123 * 473 +
+                165 +
+                9965 +
+                125 * 91 +
+                449 +
+                6694 -
+                8455,
             },
           },
         };

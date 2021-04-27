@@ -4,7 +4,7 @@ import { createNetWorthEntry, updateNetWorthEntry, deleteNetWorthEntry } from '.
 
 import * as pubsub from '~api/modules/graphql/pubsub';
 import * as queries from '~api/queries';
-import { NetWorthEntryInput } from '~api/types';
+import { NetWorthCashTotal, NetWorthEntryInput } from '~api/types';
 
 jest.mock('~api/modules/graphql/pubsub');
 jest.mock('~api/queries');
@@ -81,12 +81,12 @@ describe('Net worth controller', () => {
         },
       });
 
-      expect(pubsubSpy).toHaveBeenCalledWith(
+      expect(pubsubSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          cashToInvest: expect.any(Number),
           stockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
           date: null,
         },
       );
@@ -186,12 +186,12 @@ describe('Net worth controller', () => {
         },
       });
 
-      expect(pubsubSpy).toHaveBeenCalledWith(
+      expect(pubsubSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          cashToInvest: expect.any(Number),
           stockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
           date: null,
         },
       );
@@ -215,12 +215,12 @@ describe('Net worth controller', () => {
         id: 65,
       });
 
-      expect(pubsubSpy).toHaveBeenCalledWith(
+      expect(pubsubSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          cashToInvest: expect.any(Number),
           stockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
           date: null,
         },
       );

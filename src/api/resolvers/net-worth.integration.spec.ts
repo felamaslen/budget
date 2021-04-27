@@ -1827,8 +1827,8 @@ describe('Net worth resolver', () => {
       query NetWorthCashTotal {
         netWorthCashTotal {
           cashInBank
-          cashToInvest
           stockValue
+          stocksIncludingCash
           date
         }
       }
@@ -1844,8 +1844,8 @@ describe('Net worth resolver', () => {
       const res = await app.authGqlClient.query<Query>({ query });
 
       const cashInBank = res.data.netWorthCashTotal?.cashInBank;
-      const cashToInvest = res.data.netWorthCashTotal?.cashToInvest;
       const stockValue = res.data.netWorthCashTotal?.stockValue;
+      const stocksIncludingCash = res.data.netWorthCashTotal?.stocksIncludingCash;
 
       const expectedCashInBank = 1288520; // check seed data
       const expectedISAValue = 6449962;
@@ -1853,11 +1853,9 @@ describe('Net worth resolver', () => {
       const expectedFundValueAtNetWorthDate =
         127.39 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229);
 
-      const expectedCashToInvest = expectedISAValue - expectedFundValueAtNetWorthDate;
-
       expect(cashInBank).toBeCloseTo(expectedCashInBank);
-      expect(cashToInvest).toBeCloseTo(expectedCashToInvest);
       expect(stockValue).toBeCloseTo(expectedFundValueAtNetWorthDate);
+      expect(stocksIncludingCash).toBeCloseTo(expectedISAValue);
 
       expect(res.data.netWorthCashTotal?.date).toBe('2020-03-31');
     });

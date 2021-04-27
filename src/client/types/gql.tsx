@@ -848,8 +848,8 @@ export type NetWorthDeleted = {
 export type NetWorthCashTotal = {
   __typename?: 'NetWorthCashTotal';
   cashInBank: Scalars['Int'];
-  cashToInvest: Scalars['Int'];
   stockValue: Scalars['Int'];
+  stocksIncludingCash: Scalars['Int'];
   date?: Maybe<Scalars['Date']>;
 };
 
@@ -1439,7 +1439,7 @@ export type InitialQuery = (
     )> }
   )>, netWorthCashTotal?: Maybe<(
     { __typename?: 'NetWorthCashTotal' }
-    & Pick<NetWorthCashTotal, 'cashInBank' | 'cashToInvest' | 'stockValue' | 'date'>
+    & Pick<NetWorthCashTotal, 'cashInBank' | 'stockValue' | 'stocksIncludingCash' | 'date'>
   )>, funds?: Maybe<(
     { __typename?: 'ReadFundsResponse' }
     & { items: Array<(
@@ -1873,7 +1873,7 @@ export type NetWorthCashTotalUpdatedSubscription = (
   { __typename?: 'Subscription' }
   & { netWorthCashTotalUpdated: (
     { __typename?: 'NetWorthCashTotal' }
-    & Pick<NetWorthCashTotal, 'cashInBank' | 'cashToInvest' | 'stockValue' | 'date'>
+    & Pick<NetWorthCashTotal, 'cashInBank' | 'stockValue' | 'stocksIncludingCash' | 'date'>
   ) }
 );
 
@@ -2316,8 +2316,8 @@ export const InitialDocument = gql`
   }
   netWorthCashTotal {
     cashInBank
-    cashToInvest
     stockValue
+    stocksIncludingCash
     date
   }
   cashAllocationTarget
@@ -2851,8 +2851,8 @@ export const NetWorthCashTotalUpdatedDocument = gql`
     subscription NetWorthCashTotalUpdated {
   netWorthCashTotalUpdated {
     cashInBank
-    cashToInvest
     stockValue
+    stocksIncludingCash
     date
   }
 }

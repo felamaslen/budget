@@ -203,8 +203,8 @@ const Entry = gql`
 
   type NetWorthCashTotal {
     cashInBank: Int!
-    cashToInvest: Int!
     stockValue: Int!
+    stocksIncludingCash: Int!
     date: Date
   }
 

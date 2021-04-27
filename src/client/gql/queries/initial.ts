@@ -40,8 +40,8 @@ export const Initial = gql`
 
     netWorthCashTotal {
       cashInBank
-      cashToInvest
       stockValue
+      stocksIncludingCash
       date
     }
 

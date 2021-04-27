@@ -55,6 +55,13 @@ const shouldShowOrders = (mode: FundMode, hlPoint: HLPoint | undefined) => (
   return mode === FundMode.Value && getFundLineName(fundLine.id, fundLine.item) === hlPoint.group;
 };
 
+function getArrowKey(order: FundOrder): string {
+  if (order.isReinvestment) {
+    return `${order.time}-drip`;
+  }
+  return `${order.time}-${order.isSell ? 'sell' : 'buy'}`;
+}
+
 function getArrowColor(order: FundOrder): string {
   if (order.isReinvestment) {
     return colors.income.arrow;
@@ -107,7 +114,7 @@ export const BuySellDots: React.FC<Props> = ({
               }),
           ).map((order) => (
             <Arrow
-              key={`${order.time}-${order.isSell ? 'sell' : 'buy'}`}
+              key={getArrowKey(order)}
               startX={order.linePoint[0]}
               startY={order.linePoint[1]}
               length={getArrowLength(order, mode, pixY1)}

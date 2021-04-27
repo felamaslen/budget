@@ -21,6 +21,7 @@ import {
   MutationCreateFundArgs,
   MutationDeleteFundArgs,
   MutationUpdateFundArgs,
+  NetWorthCashTotal,
 } from '~api/types';
 
 jest.mock('~api/queries');
@@ -257,12 +258,12 @@ describe('Funds controller', () => {
         item: { ...args.input, stockSplits: [] },
         overviewCost: [1, 7, 23],
       });
-      expect(publishSpy).toHaveBeenCalledWith(
+      expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          cashToInvest: expect.any(Number),
           stockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
           date: null,
         },
       );
@@ -305,12 +306,12 @@ describe('Funds controller', () => {
         item: { ...args.input, stockSplits: [{ date: '2020-05-10', ratio: 6 }] },
         overviewCost: [1, 7, 23],
       });
-      expect(publishSpy).toHaveBeenCalledWith(
+      expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          cashToInvest: expect.any(Number),
           stockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
           date: null,
         },
       );
@@ -339,12 +340,12 @@ describe('Funds controller', () => {
         id: 118,
         overviewCost: [1, 7, 23],
       });
-      expect(publishSpy).toHaveBeenCalledWith(
+      expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          cashToInvest: expect.any(Number),
           stockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
           date: null,
         },
       );

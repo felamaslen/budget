@@ -6401,7 +6401,7 @@
             "deprecationReason": null
           },
           {
-            "name": "cashToInvest",
+            "name": "stockValue",
             "description": null,
             "args": [],
             "type": {
@@ -6417,7 +6417,7 @@
             "deprecationReason": null
           },
           {
-            "name": "stockValue",
+            "name": "stocksIncludingCash",
             "description": null,
             "args": [],
             "type": {
