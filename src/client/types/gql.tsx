@@ -69,6 +69,7 @@ export type Query = {
   analysisDeep?: Maybe<Array<CategoryCostTreeDeep>>;
   cashAllocationTarget?: Maybe<Scalars['NonNegativeInt']>;
   config?: Maybe<AppConfig>;
+  exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
@@ -101,6 +102,11 @@ export type QueryAnalysisDeepArgs = {
   period: AnalysisPeriod;
   groupBy: AnalysisGroupBy;
   page?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryExchangeRatesArgs = {
+  base: Scalars['String'];
 };
 
 
@@ -173,6 +179,18 @@ export type QuerySearchArgs = {
 
 export type QueryStockPricesArgs = {
   codes: Array<Scalars['String']>;
+};
+
+export type ExchangeRate = {
+  __typename?: 'ExchangeRate';
+  currency: Scalars['String'];
+  rate: Scalars['NonNegativeFloat'];
+};
+
+export type ExchangeRatesResponse = {
+  __typename?: 'ExchangeRatesResponse';
+  error?: Maybe<Scalars['String']>;
+  rates?: Maybe<Array<ExchangeRate>>;
 };
 
 export type Transaction = {
@@ -1356,6 +1374,23 @@ export type AnalysisDeepQuery = (
   )>> }
 );
 
+export type ExchangeRatesQueryVariables = Exact<{
+  base: Scalars['String'];
+}>;
+
+
+export type ExchangeRatesQuery = (
+  { __typename?: 'Query' }
+  & { exchangeRates?: Maybe<(
+    { __typename?: 'ExchangeRatesResponse' }
+    & Pick<ExchangeRatesResponse, 'error'>
+    & { rates?: Maybe<Array<(
+      { __typename?: 'ExchangeRate' }
+      & Pick<ExchangeRate, 'currency' | 'rate'>
+    )>> }
+  )> }
+);
+
 export type FundPricesUpdateQueryVariables = Exact<{
   period?: Maybe<FundPeriod>;
   length?: Maybe<Scalars['NonNegativeInt']>;
@@ -2239,6 +2274,21 @@ export const AnalysisDeepDocument = gql`
 
 export function useAnalysisDeepQuery(options: Omit<Urql.UseQueryArgs<AnalysisDeepQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<AnalysisDeepQuery>({ query: AnalysisDeepDocument, ...options });
+};
+export const ExchangeRatesDocument = gql`
+    query ExchangeRates($base: String!) {
+  exchangeRates(base: $base) {
+    error
+    rates {
+      currency
+      rate
+    }
+  }
+}
+    `;
+
+export function useExchangeRatesQuery(options: Omit<Urql.UseQueryArgs<ExchangeRatesQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ExchangeRatesQuery>({ query: ExchangeRatesDocument, ...options });
 };
 export const FundPricesUpdateDocument = gql`
     query FundPricesUpdate($period: FundPeriod, $length: NonNegativeInt) {

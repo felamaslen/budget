@@ -1,6 +1,6 @@
 import { getReceiptCategories, getSuggestions, getReceiptItem } from '~api/controllers';
 import { genericAuthDbResolver } from '~api/modules/crud';
-import { Resolvers } from '~api/types';
+import type { Resolvers } from '~api/types';
 
 export const searchResolvers: Resolvers = {
   Query: {

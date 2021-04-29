@@ -10,6 +10,7 @@ import { Resolvers } from '~api/types';
 
 export * from './analysis';
 export * from './config';
+export * from './exchange-rates';
 export * from './funds';
 export * from './list';
 export * from './net-worth';

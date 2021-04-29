@@ -1,6 +1,7 @@
 import { isValid } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import config from '~api/config';
 import { getMultipleStockQuotes } from '~api/modules/finance';
 import logger from '~api/modules/logger';
 import { redisClient } from '~api/modules/redis';
@@ -10,8 +11,6 @@ const codeKey = (code: string): string => `stockPrice_${code}`;
 const lockKey = 'stockPriceLock';
 const lastUpdateKey = 'stockPriceUpdateTime';
 
-const cacheExpirySeconds = process.env.NODE_ENV === 'development' ? 86400 : 60 * 5;
-
 async function getStockPricesFromApi(codes: string[]): Promise<(number | null)[]> {
   if (!codes.length) {
     return [];
@@ -19,7 +18,7 @@ async function getStockPricesFromApi(codes: string[]): Promise<(number | null)[]
   const quotes = await getMultipleStockQuotes(codes);
   await Promise.all(
     codes.map((code, index) =>
-      redisClient.set(codeKey(code), quotes[index] ?? 0, 'ex', cacheExpirySeconds),
+      redisClient.set(codeKey(code), quotes[index] ?? 0, 'ex', config.apiCacheExpirySeconds),
     ),
   );
   await redisClient.set(lastUpdateKey, new Date().toISOString());
@@ -63,7 +62,7 @@ export async function getStockPrices(
     return { prices: [] };
   }
 
-  await redisClient.set(lockKey, 'locked', 'ex', cacheExpirySeconds);
+  await redisClient.set(lockKey, 'locked', 'ex', config.apiCacheExpirySeconds);
 
   const uniqueCodes = Array.from(new Set(args.codes));
   const prices = await getCachedStockPrices(uniqueCodes);

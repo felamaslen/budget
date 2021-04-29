@@ -1,12 +1,12 @@
 import format from 'date-fns/format';
-import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { replaceAtIndex } from 'replace-array';
-import { debounce } from 'throttle-debounce';
 
 import { Step } from './constants';
 import { FormContainer, Props as ContainerProps } from './form-container';
 import * as Styled from './styles';
 import { FormFieldText, FormFieldNumber } from '~client/components/form-field';
+import { useExchangeRatesQuery } from '~client/hooks/gql';
 import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared';
 import type { Create, NetWorthEntryNative as Entry } from '~client/types';
 import type { CurrencyInput as Currency } from '~client/types/gql';
@@ -37,106 +37,40 @@ function validateCurrency(symbol: string, currencies: Currency[] = []): string {
   return symbolUpper;
 }
 
-type Rates = {
-  [currency: string]: number;
-};
+type Rates = Record<string, number>;
 
-type OnSuccess = (rates: Rates) => void;
-
-const getCurrencies = debounce(
-  100,
-  async (
-    symbols: string[],
-    { signal }: AbortController,
-    onSuccess: OnSuccess,
-    onError: (err: Error) => void,
-    onComplete: () => void,
-  ): Promise<void> => {
-    try {
-      const url = new URL('https://api.exchangeratesapi.io/latest');
-      url.search = new URLSearchParams({
-        _timestamp: String(Date.now()),
-        base: BASE,
-        symbols: symbols.join(','),
-      }).toString();
-      const res = await fetch(url.toString(), { signal });
-      const { rates } = await res.json();
-      onSuccess(rates);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        onError(err);
-      }
-    } finally {
-      onComplete();
-    }
-  },
-);
-
-type GetRates = (extraSymbol?: string) => void;
-
-function useCurrencyApi(symbols: string[]): [Rates, GetRates, boolean, Error | null] {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-  const abortController = useRef<AbortController>();
+function useCurrencyApi(): [Rates, () => void, boolean, Error | null] {
   const [rates, setRates] = useState<Rates>({});
-  const [cacheTime, setCacheTime] = useState<number>(0);
 
-  const onSuccess: OnSuccess = useCallback(
-    (newRates) => {
+  const [{ data: currencies, fetching, error: requestError }, getRates] = useExchangeRatesQuery({
+    variables: { base: BASE },
+    requestPolicy: 'cache-first',
+    pause: true,
+  });
+
+  const errorString = currencies?.exchangeRates?.error ?? requestError?.message ?? null;
+  const error = errorString ? new Error(errorString) : null;
+
+  useEffect(() => {
+    if (currencies) {
       setRates(
-        Object.keys(newRates).reduce(
-          (last, symbol) => ({
+        (currencies.exchangeRates?.rates ?? []).reduce<Rates>(
+          (last, { currency, rate }) => ({
             ...last,
-            [symbol]: 1 / newRates[symbol],
+            [currency]: 1 / rate,
           }),
-          rates,
+          {},
         ),
       );
+    }
+  }, [currencies]);
 
-      setCacheTime(Date.now());
-    },
-    [rates],
-  );
-
-  const onComplete = useCallback(() => {
-    setLoading(false);
-  }, []);
-
-  const getRates: GetRates = useCallback(
-    (extraSymbol?: string) => {
-      setError(null);
-      const allSymbols: string[] = Array.from(
-        new Set(extraSymbol ? [...symbols, extraSymbol] : symbols),
-      ).filter((value) => value.length > 0);
-
-      const allCached = allSymbols.every((symbol) => rates[symbol]);
-      if (allCached && cacheTime && cacheTime > Date.now() - 3600 * 1000) {
-        return;
-      }
-
-      abortController.current?.abort();
-      const controller = new AbortController();
-      abortController.current = controller;
-      setLoading(true);
-
-      getCurrencies(allSymbols, controller, onSuccess, setError, onComplete);
-    },
-    [rates, cacheTime, symbols, onSuccess, onComplete],
-  );
-
-  useEffect(
-    (): (() => void) => (): void => {
-      abortController.current?.abort();
-    },
-    [],
-  );
-
-  return [rates, getRates, loading, error];
+  return [rates, getRates, fetching, error];
 }
 
 function useRateRefresh(
   rates: Rates,
-  getRates: GetRates,
+  getRates: () => void,
   loading: boolean,
   symbol: string,
   setRate: (rate: number) => void,
@@ -146,7 +80,7 @@ function useRateRefresh(
     try {
       validateCurrency(symbol);
       setReadyToInsert(true);
-      getRates(symbol);
+      getRates();
     } catch (err) {
       // do nothing - invalid symbol
     }
@@ -176,7 +110,7 @@ type PropsEditCurrency = {
   onChange: (entry: Currency) => void;
   onRemove: (currency: string) => void;
   rates: Rates;
-  getRates: GetRates;
+  getRates: () => void;
   loadingRates: boolean;
 };
 
@@ -328,8 +262,7 @@ export const StepCurrencies: React.FC<Props> = ({ containerProps, item, onEdit }
     [onEdit, item],
   );
 
-  const symbols = item.currencies.map(({ currency }) => currency);
-  const [rates, getRates, loadingRates, errorRates] = useCurrencyApi(symbols);
+  const [rates, getRates, loadingRates, errorRates] = useCurrencyApi();
 
   return (
     <FormContainer {...containerProps} step={Step.Currencies}>

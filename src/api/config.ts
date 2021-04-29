@@ -36,6 +36,7 @@ export default {
     port: getenv.int('PORT', 3000),
   },
   openExchangeRatesApiKey: getenv.string('OPEN_EXCHANGE_RATES_API_KEY', ''),
+  apiCacheExpirySeconds: process.env.NODE_ENV === 'development' ? 86400 : 60 * 5,
   scrapeTimeout: getenv.int('SCRAPE_TIMEOUT', 30000),
   user: {
     tokenSecret: getenv.string('USER_TOKEN_SECRET', 'somesupersecret'),

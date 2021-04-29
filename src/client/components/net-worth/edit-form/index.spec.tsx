@@ -1,14 +1,23 @@
-import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/react';
-import fetchMock from 'jest-fetch-mock';
-import nock from 'nock';
+import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import type { DocumentNode } from 'graphql';
 import React from 'react';
 import sinon from 'sinon';
 import numericHash from 'string-hash';
+import { Client } from 'urql';
+import { fromValue } from 'wonka';
 
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
+import * as QueryExchangeRates from '~client/gql/queries/exchange-rates';
+import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import type { Create, Id, NetWorthEntryNative as NetWorthEntry } from '~client/types';
 import { NetWorthCategoryType } from '~client/types/enum';
-import type { NetWorthCategory, NetWorthSubcategory, NetWorthValueInput } from '~client/types/gql';
+import {
+  NetWorthCategory,
+  NetWorthSubcategory,
+  NetWorthValueInput,
+  Query,
+  QueryExchangeRatesArgs,
+} from '~client/types/gql';
 
 const categories: NetWorthCategory[] = [
   {
@@ -131,11 +140,46 @@ describe('Net worth entry form', () => {
     ],
     currencies: [
       {
-        currency: 'USD',
-        rate: 0.78,
+        currency: 'EUR',
+        rate: 0.84,
       },
     ],
   };
+
+  const mockGQLClient = ({
+    executeQuery: ({
+      variables,
+      query,
+    }: {
+      variables: Record<string, unknown>;
+      query: DocumentNode;
+    }) => {
+      if (
+        query === QueryExchangeRates.ExchangeRates &&
+        (variables as QueryExchangeRatesArgs).base === 'GBP'
+      ) {
+        return fromValue<{ data: Query }>({
+          data: {
+            exchangeRates: {
+              error: null,
+              rates: [
+                { currency: 'GBP', rate: 1 },
+                { currency: 'USD', rate: 1.39 },
+                { currency: 'EUR', rate: 1.15 },
+              ],
+            },
+          },
+        });
+      }
+
+      return fromValue({
+        data: null,
+      });
+    },
+  } as unknown) as Client;
+
+  const renderWithMocks = (children: React.ReactElement): RenderResult =>
+    render(<GQLProviderMock client={mockGQLClient}>{children}</GQLProviderMock>);
 
   const updateDate = ({ getByLabelText, getByText }: RenderResult, setNewDate = true): void => {
     const inputDate = getByLabelText('entry-date');
@@ -158,17 +202,17 @@ describe('Net worth entry form', () => {
   };
 
   const updateCurrencyManually = ({ getByDisplayValue, getByText }: RenderResult): void => {
-    const inputUSD = getByDisplayValue('0.78');
+    const inputEUR = getByDisplayValue('0.84');
     const buttonNext = getByText('Next');
 
-    expect(inputUSD).toBeInTheDocument();
+    expect(inputEUR).toBeInTheDocument();
     expect(buttonNext).toBeInTheDocument();
 
     act(() => {
-      fireEvent.change(inputUSD, { target: { value: '0.776' } });
+      fireEvent.change(inputEUR, { target: { value: '0.876' } });
     });
     act(() => {
-      fireEvent.blur(inputUSD);
+      fireEvent.blur(inputEUR);
     });
 
     act(() => {
@@ -310,35 +354,19 @@ describe('Net worth entry form', () => {
     });
   };
 
-  const updateCurrencyAutomatically = async ({
+  const updateCurrencyAutomatically = ({
     getByDisplayValue,
     getByText,
     getAllByText,
-  }: RenderResult): Promise<void> => {
-    const inputUSD = getByDisplayValue('0.78') as HTMLInputElement;
+  }: RenderResult): void => {
+    const inputEUR = getByDisplayValue('0.84') as HTMLInputElement;
     const refreshButtons = getAllByText('↻');
     const buttonNext = getByText('Next');
 
-    expect(inputUSD).toBeInTheDocument();
+    expect(inputEUR).toBeInTheDocument();
     expect(refreshButtons).toHaveLength(2);
 
     expect(buttonNext).toBeInTheDocument();
-
-    nock('https://api.exchangeratesapi.io')
-      .defaultReplyHeaders({
-        'Access-Control-Allow-Origin': '*',
-      })
-      .get(`/latest?_timestamp=${now.getTime() + 100}&base=GBP&symbols=USD`)
-      .reply(200, {
-        rates: {
-          USD: 1.24859,
-        },
-        base: 'GBP',
-      });
-
-    fetchMock.mockIf(
-      `https://api.exchangerates.io/latest?_timestamp=${now.getTime() + 100}&base=GBP&symbols=USD`,
-    );
 
     act(() => {
       fireEvent.click(refreshButtons[0]);
@@ -347,18 +375,7 @@ describe('Net worth entry form', () => {
       clock.tick(101);
     });
 
-    await waitFor(
-      () => {
-        expect(inputUSD.value).toBe(`${1 / 1.24859}`);
-      },
-      {
-        container: inputUSD,
-        timeout: 1000,
-        mutationObserverOptions: {
-          attributes: true,
-        },
-      },
-    );
+    expect(inputEUR.value).toBe(`${1 / 1.15}`);
 
     act(() => {
       fireEvent.click(buttonNext);
@@ -415,14 +432,14 @@ describe('Net worth entry form', () => {
     describe('when initially opened', () => {
       it('should start on the date step', () => {
         expect.assertions(1);
-        const { getByText } = render(<NetWorthEditForm {...props} />);
+        const { getByText } = renderWithMocks(<NetWorthEditForm {...props} />);
         const title = getByText('On what date were the data collected?');
         expect(title).toBeInTheDocument();
       });
 
       it('should move to the currencies step when hitting next', () => {
         expect.assertions(4);
-        const renderProps = render(<NetWorthEditForm {...props} />);
+        const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
 
         expect(props.onUpdate).not.toHaveBeenCalled();
@@ -435,7 +452,7 @@ describe('Net worth entry form', () => {
     describe('when on the currencies step', () => {
       it('should move to the assets step when hitting next', () => {
         expect.assertions(5);
-        const renderProps = render(<NetWorthEditForm {...props} />);
+        const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
         updateCurrencyManually(renderProps);
 
@@ -445,7 +462,7 @@ describe('Net worth entry form', () => {
 
       it('should move back to the date step when hitting previous', () => {
         expect.assertions(4);
-        const renderProps = render(<NetWorthEditForm {...props} />);
+        const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
 
         const prevButton = renderProps.getByText('Previous') as HTMLButtonElement;
@@ -463,7 +480,7 @@ describe('Net worth entry form', () => {
     describe('when on the assets step', () => {
       it('should move to the liabilities step when hitting next', () => {
         expect.assertions(17);
-        const renderProps = render(<NetWorthEditForm {...props} />);
+        const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
         updateCurrencyManually(renderProps);
         updateAssets(renderProps);
@@ -477,19 +494,19 @@ describe('Net worth entry form', () => {
     describe('when on the liabilities step', () => {
       let renderProps: RenderResult;
 
-      const setup = async (): Promise<void> => {
-        renderProps = render(<NetWorthEditForm {...props} />);
+      const setup = (): void => {
+        renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
-        await updateCurrencyAutomatically(renderProps);
+        updateCurrencyAutomatically(renderProps);
         updateAssets(renderProps);
         updateOptions(renderProps);
         updateMortgage(renderProps);
         updateLiabilities(renderProps);
       };
 
-      it('should call onUpdate when hitting finish', async () => {
-        expect.assertions(32);
-        await setup();
+      it('should call onUpdate when hitting finish', () => {
+        expect.assertions(31);
+        setup();
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
           numericHash('some-fake-id'),
           {
@@ -545,17 +562,17 @@ describe('Net worth entry form', () => {
             ],
             currencies: [
               {
-                currency: 'USD',
-                rate: 1 / 1.24859,
+                currency: 'EUR',
+                rate: 1 / 1.15,
               },
             ],
           },
         );
       });
 
-      it('should reset the active ID', async () => {
-        expect.assertions(32);
-        await setup();
+      it('should reset the active ID', () => {
+        expect.assertions(31);
+        setup();
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });
     });
@@ -572,14 +589,14 @@ describe('Net worth entry form', () => {
     describe('when initially opened', () => {
       it('should start on the date step', () => {
         expect.assertions(1);
-        const { getByText } = render(<NetWorthAddForm {...props} />);
+        const { getByText } = renderWithMocks(<NetWorthAddForm {...props} />);
         const title = getByText('On what date were the data collected?');
         expect(title).toBeInTheDocument();
       });
 
       it('should move to the currencies step when hitting next', () => {
         expect.assertions(4);
-        const renderProps = render(<NetWorthAddForm {...props} />);
+        const renderProps = renderWithMocks(<NetWorthAddForm {...props} />);
         updateDate(renderProps);
 
         expect(props.onCreate).not.toHaveBeenCalled();
@@ -592,7 +609,7 @@ describe('Net worth entry form', () => {
     describe('when on the currencies step', () => {
       it('should move to the assets step when hitting next', () => {
         expect.assertions(5);
-        const renderProps = render(<NetWorthAddForm {...props} />);
+        const renderProps = renderWithMocks(<NetWorthAddForm {...props} />);
         updateDate(renderProps);
         updateCurrencyManually(renderProps);
 
@@ -604,7 +621,7 @@ describe('Net worth entry form', () => {
     describe('when on the assets step', () => {
       it('should move to the liabilities step when hitting next', () => {
         expect.assertions(17);
-        const renderProps = render(<NetWorthAddForm {...props} />);
+        const renderProps = renderWithMocks(<NetWorthAddForm {...props} />);
         updateDate(renderProps);
         updateCurrencyManually(renderProps);
         updateAssets(renderProps);
@@ -618,10 +635,10 @@ describe('Net worth entry form', () => {
     describe('when on the liabilities step', () => {
       let renderProps: RenderResult;
 
-      const setup = async (): Promise<void> => {
-        renderProps = render(<NetWorthAddForm {...props} />);
+      const setup = (): void => {
+        renderProps = renderWithMocks(<NetWorthAddForm {...props} />);
         updateDate(renderProps);
-        await updateCurrencyAutomatically(renderProps);
+        updateCurrencyAutomatically(renderProps);
         updateAssets(renderProps);
         updateOptions(renderProps);
         updateMortgage(renderProps);
@@ -629,8 +646,8 @@ describe('Net worth entry form', () => {
       };
 
       it('should call onCreate when hitting finish', async () => {
-        expect.assertions(32);
-        await setup();
+        expect.assertions(31);
+        setup();
         expect(props.onCreate).toHaveBeenCalledWith<[Create<NetWorthEntry>]>(
           expect.objectContaining<Partial<Create<NetWorthEntry>>>({
             date: new Date(newDate),
@@ -673,27 +690,27 @@ describe('Net worth entry form', () => {
             ],
             currencies: [
               expect.objectContaining({
-                currency: 'USD',
-                rate: 1 / 1.24859,
+                currency: 'EUR',
+                rate: 1 / 1.15,
               }),
             ],
           }),
         );
       });
 
-      it('should reset the active ID', async () => {
-        expect.assertions(32);
-        await setup();
+      it('should reset the active ID', () => {
+        expect.assertions(31);
+        setup();
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });
     });
 
     describe('if a date is not entered', () => {
-      it('should use the end date of the next month', async () => {
-        expect.assertions(25);
-        const renderProps = render(<NetWorthAddForm {...props} />);
+      it('should use the end date of the next month', () => {
+        expect.assertions(24);
+        const renderProps = renderWithMocks(<NetWorthAddForm {...props} />);
         updateDate(renderProps, false);
-        await updateCurrencyAutomatically(renderProps);
+        updateCurrencyAutomatically(renderProps);
         updateAssets(renderProps);
         updateOptions(renderProps);
         updateLiabilities(renderProps);
@@ -714,7 +731,9 @@ describe('Net worth entry form', () => {
 
       it('should set the date to today', () => {
         expect.assertions(2);
-        const { getByText, getByDisplayValue } = render(<NetWorthAddForm {...propsNoEntries} />);
+        const { getByText, getByDisplayValue } = renderWithMocks(
+          <NetWorthAddForm {...propsNoEntries} />,
+        );
 
         const title = getByText('On what date were the data collected?');
         const input = getByDisplayValue('2020-06-03');

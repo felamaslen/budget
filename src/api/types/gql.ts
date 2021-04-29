@@ -64,6 +64,7 @@ export type Query = {
   analysisDeep?: Maybe<Array<CategoryCostTreeDeep>>;
   cashAllocationTarget?: Maybe<Scalars['NonNegativeInt']>;
   config?: Maybe<AppConfig>;
+  exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
@@ -96,6 +97,11 @@ export type QueryAnalysisDeepArgs = {
   period: AnalysisPeriod;
   groupBy: AnalysisGroupBy;
   page?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryExchangeRatesArgs = {
+  base: Scalars['String'];
 };
 
 
@@ -168,6 +174,16 @@ export type QuerySearchArgs = {
 
 export type QueryStockPricesArgs = {
   codes: Array<Scalars['String']>;
+};
+
+export type ExchangeRate = {
+  currency: Scalars['String'];
+  rate: Scalars['NonNegativeFloat'];
+};
+
+export type ExchangeRatesResponse = {
+  error?: Maybe<Scalars['String']>;
+  rates?: Maybe<Array<ExchangeRate>>;
 };
 
 export type Transaction = {
@@ -992,6 +1008,8 @@ export type ResolversTypes = {
   CategoryCostTreeDeep: ResolverTypeWrapper<CategoryCostTreeDeep>;
   AnalysisResponse: ResolverTypeWrapper<AnalysisResponse>;
   Query: ResolverTypeWrapper<{}>;
+  ExchangeRate: ResolverTypeWrapper<ExchangeRate>;
+  ExchangeRatesResponse: ResolverTypeWrapper<ExchangeRatesResponse>;
   Transaction: ResolverTypeWrapper<Transaction>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
@@ -1096,6 +1114,8 @@ export type ResolversParentTypes = {
   CategoryCostTreeDeep: CategoryCostTreeDeep;
   AnalysisResponse: AnalysisResponse;
   Query: {};
+  ExchangeRate: ExchangeRate;
+  ExchangeRatesResponse: ExchangeRatesResponse;
   Transaction: Transaction;
   Float: Scalars['Float'];
   Boolean: Scalars['Boolean'];
@@ -1214,6 +1234,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   analysisDeep?: Resolver<Maybe<Array<ResolversTypes['CategoryCostTreeDeep']>>, ParentType, ContextType, RequireFields<QueryAnalysisDeepArgs, 'category' | 'period' | 'groupBy'>>;
   cashAllocationTarget?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   config?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType>;
+  exchangeRates?: Resolver<Maybe<ResolversTypes['ExchangeRatesResponse']>, ParentType, ContextType, RequireFields<QueryExchangeRatesArgs, 'base'>>;
   fundHistory?: Resolver<Maybe<ResolversTypes['FundHistory']>, ParentType, ContextType, RequireFields<QueryFundHistoryArgs, never>>;
   fundHistoryIndividual?: Resolver<Maybe<ResolversTypes['FundHistoryIndividual']>, ParentType, ContextType, RequireFields<QueryFundHistoryIndividualArgs, 'id'>>;
   netWorthCashTotal?: Resolver<Maybe<ResolversTypes['NetWorthCashTotal']>, ParentType, ContextType>;
@@ -1231,6 +1252,18 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   search?: Resolver<Maybe<ResolversTypes['SearchResult']>, ParentType, ContextType, RequireFields<QuerySearchArgs, 'page' | 'column' | 'searchTerm'>>;
   stockPrices?: Resolver<Maybe<ResolversTypes['StockPricesResponse']>, ParentType, ContextType, RequireFields<QueryStockPricesArgs, 'codes'>>;
   whoami?: Resolver<Maybe<ResolversTypes['UserInfo']>, ParentType, ContextType>;
+};
+
+export type ExchangeRateResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ExchangeRate'] = ResolversParentTypes['ExchangeRate']> = {
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  rate?: Resolver<ResolversTypes['NonNegativeFloat'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ExchangeRatesResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ExchangeRatesResponse'] = ResolversParentTypes['ExchangeRatesResponse']> = {
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  rates?: Resolver<Maybe<Array<ResolversTypes['ExchangeRate']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TransactionResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Transaction'] = ResolversParentTypes['Transaction']> = {
@@ -1744,6 +1777,8 @@ export type Resolvers<ContextType = Context> = {
   CategoryCostTreeDeep?: CategoryCostTreeDeepResolvers<ContextType>;
   AnalysisResponse?: AnalysisResponseResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  ExchangeRate?: ExchangeRateResolvers<ContextType>;
+  ExchangeRatesResponse?: ExchangeRatesResponseResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
   StockSplit?: StockSplitResolvers<ContextType>;
   Fund?: FundResolvers<ContextType>;

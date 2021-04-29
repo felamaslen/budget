@@ -2,14 +2,9 @@ import nock, { Scope } from 'nock';
 import prompts from 'prompts';
 import sinon from 'sinon';
 
-import {
-  nockCurrencies,
-  nockHLFund,
-  nockHLShare,
-  nockHLShareFX,
-  nockGeneralShare,
-} from './__tests__/nocks';
+import { nockHLFund, nockHLShare, nockHLShareFX, nockGeneralShare } from './__tests__/nocks';
 import { run } from '.';
+import { nockCurrencies } from '~api/__tests__/nocks';
 import * as pubsub from '~api/modules/graphql/pubsub';
 import { db } from '~api/test-utils/knex';
 

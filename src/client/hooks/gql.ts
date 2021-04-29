@@ -14,6 +14,7 @@ export {
   useDeleteNetWorthCategoryMutation,
   useDeleteNetWorthEntryMutation,
   useDeleteNetWorthSubcategoryMutation,
+  useExchangeRatesQuery,
   useFundAllocationTargetsUpdatedSubscription,
   useFundCreatedSubscription,
   useFundDeletedSubscription,

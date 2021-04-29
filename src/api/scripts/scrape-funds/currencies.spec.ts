@@ -1,7 +1,7 @@
 import nock from 'nock';
 
+import mockOpenExchangeRatesResponse from '../../vendor/currencies.json';
 import { getCurrencyPrices } from './currencies';
-import mockOpenExchangeRatesResponse from './vendor/currencies.json';
 import config from '~api/config';
 
 describe('getCurrencyPrices', () => {

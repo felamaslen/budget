@@ -2,20 +2,12 @@ import path from 'path';
 import fs from 'fs-extra';
 import nock, { Scope } from 'nock';
 
-import mockOpenExchangeRatesResponse from '../vendor/currencies.json';
-import config from '~api/config';
-
 const testFileFund = path.resolve(__dirname, '../vendor/fund-test-hl.html');
 const testFileShare = path.resolve(__dirname, '../vendor/share-test-hl.html');
 const testFileShareFX = path.resolve(__dirname, '../vendor/share-test-hl-dollar.html');
 
 const testFileGenericShareHTML = path.resolve(__dirname, '../vendor/quote-yahoo.html');
 const testFileGenericShareJSON = path.resolve(__dirname, '../vendor/quote-yahoo.json');
-
-export const nockCurrencies = (status = 200): Scope =>
-  nock('https://openexchangerates.org')
-    .get(`/api/latest.json?app_id=${config.openExchangeRatesApiKey}`)
-    .reply(status, status === 200 ? mockOpenExchangeRatesResponse : undefined);
 
 export const nockHLFund = async (status = 200): Promise<Scope> =>
   nock('http://www.hl.co.uk')
