@@ -199,7 +199,7 @@ kind: CronJob
 metadata:
   name: budget-scrape-funds
 spec:
-  schedule: "0 18 * * 1-6"
+  schedule: "0 6 * * 2-6"
   jobTemplate:
     spec:
       template:
