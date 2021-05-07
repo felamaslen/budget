@@ -1,8 +1,10 @@
 import { addHours, getUnixTime } from 'date-fns';
 import gql from 'graphql-tag';
 import sinon from 'sinon';
+import { sql } from 'slonik';
 
 import config from '~api/config';
+import { getPool, withSlonik } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   Create,
@@ -58,14 +60,18 @@ describe('Funds resolver', () => {
 
   const altFundName = 'Different fund';
 
-  const clearDb = async (): Promise<void> => {
-    await app.db('funds').where({ item: fundInput.item }).del();
-    await app.db('funds').where({ item: altFundName }).del();
-    await app.db('fund_cache_time').del();
-    await app.db('funds_cash_target').truncate();
-  };
-
-  beforeEach(clearDb);
+  beforeEach(
+    withSlonik(async (db) => {
+      await db.query(
+        sql`DELETE FROM funds WHERE uid = ${app.uid} AND item = ANY(${sql.array(
+          [fundInput.item, altFundName],
+          'text',
+        )})`,
+      );
+      await db.query(sql`DELETE FROM fund_cache_time`);
+      await db.query(sql`DELETE FROM funds_cash_target WHERE uid = ${app.uid}`);
+    }),
+  );
 
   describe('createFund', () => {
     const mutation = gql`
@@ -104,9 +110,11 @@ describe('Funds resolver', () => {
 
       const id = res?.id as number;
 
-      const row = await app.db('funds').where({ item: fundInput.item }).first();
+      const { rows } = await getPool().query(
+        sql`SELECT * FROM funds WHERE uid = ${app.uid} AND item = ${fundInput.item} LIMIT 1`,
+      );
 
-      expect(row).toStrictEqual(
+      expect(rows[0]).toStrictEqual(
         expect.objectContaining({
           id,
           item: 'My fund',
@@ -121,7 +129,9 @@ describe('Funds resolver', () => {
 
       const id = res?.id as number;
 
-      const rows = await app.db('funds_transactions').where({ fund_id: id }).select();
+      const { rows } = await getPool().query(
+        sql`SELECT * FROM funds_transactions WHERE fund_id = ${id}`,
+      );
 
       expect(rows).toHaveLength(1);
       expect(rows).toStrictEqual(
@@ -144,7 +154,9 @@ describe('Funds resolver', () => {
 
       const id = res?.id as number;
 
-      const rows = await app.db('funds_stock_splits').where({ fund_id: id }).select();
+      const { rows } = await getPool().query(
+        sql`SELECT * FROM funds_stock_splits WHERE fund_id = ${id}`,
+      );
 
       expect(rows).toHaveLength(1);
       expect(rows).toStrictEqual(
@@ -190,9 +202,11 @@ describe('Funds resolver', () => {
 
         expect(res.data?.updateCashAllocationTarget?.error).toBeNull();
 
-        const result = await app.db('funds_cash_target').where({ uid: app.uid }).select();
+        const { rows } = await getPool().query(
+          sql`SELECT * FROM funds_cash_target WHERE uid = ${app.uid}`,
+        );
 
-        expect(result).toStrictEqual([
+        expect(rows).toStrictEqual([
           expect.objectContaining({
             allocation_target: 4500000,
           }),
@@ -239,17 +253,24 @@ describe('Funds resolver', () => {
       secondAllocation: number,
       thirdAllocation: number,
     ): Promise<Maybe<UpdatedFundAllocationTargets>> => {
-      await app.db('funds').where({ uid: app.uid }).del();
-      const [, id2, id3] = await app
-        .db('funds')
-        .insert([
-          { uid: app.uid, item: 'Fund 1', allocation_target: 50 },
-          { uid: app.uid, item: 'Fund 2', allocation_target: 30 },
-          { uid: app.uid, item: 'Fund 3', allocation_target: 20 },
-          { uid: app.uid, item: 'Fund 4', allocation_target: null },
-          { uid: app.uid, item: 'Fund 5', allocation_target: 0 },
-        ])
-        .returning('id');
+      const [, id2, id3] = await getPool().transaction(async (db) => {
+        await db.query(sql`DELETE FROM funds WHERE uid = ${app.uid}`);
+        const { rows: idRows } = await db.query<{ id: number }>(sql`
+        INSERT INTO funds (uid, item, allocation_target)
+        SELECT * FROM ${sql.unnest(
+          [
+            [app.uid, 'Fund 1', 50],
+            [app.uid, 'Fund 2', 30],
+            [app.uid, 'Fund 3', 20],
+            [app.uid, 'Fund 4', null],
+            [app.uid, 'Fund 5', 0],
+          ],
+          ['int4', 'text', 'float8'],
+        )}
+        RETURNING id
+        `);
+        return idRows.map((row) => row.id);
+      });
 
       const res = await app.authGqlClient.mutate<Mutation, MutationUpdateFundAllocationTargetsArgs>(
         {
@@ -276,7 +297,7 @@ describe('Funds resolver', () => {
           expect.assertions(1);
           await setup(secondAllocation, thirdAllocation);
 
-          const rows = await app.db('funds').where({ uid: app.uid }).select();
+          const { rows } = await getPool().query(sql`SELECT * FROM funds WHERE uid = ${app.uid}`);
 
           expect(rows).toStrictEqual(
             expect.arrayContaining([
@@ -325,7 +346,7 @@ describe('Funds resolver', () => {
 
         const res = await setup(secondAllocation, thirdAllocation);
 
-        const rows = await app.db('funds').where({ uid: app.uid }).select();
+        const { rows } = await getPool().query(sql`SELECT * FROM funds WHERE uid = ${app.uid}`);
 
         expect(rows).toStrictEqual(
           expect.arrayContaining([
@@ -501,34 +522,44 @@ describe('Funds resolver', () => {
       res: Maybe<FundHistory>;
     }> => {
       const [fundId] = await createFunds([fundInput]);
-      const {
-        rows: [{ fid }],
-      } = await app.db.raw<{ rows: { fid: number }[] }>(
-        `
-        INSERT INTO fund_scrape (broker, item) VALUES ('generic', ?)
+      const { cids, fid } = await getPool().transaction(async (db) => {
+        const { rows } = await db.query<{ fid: number }>(sql`
+        INSERT INTO fund_scrape (broker, item) VALUES (${'generic'}, ${fundInput.item})
         ON CONFLICT (broker, item) DO UPDATE set broker = excluded.broker
         RETURNING fid
-        `,
-        [fundInput.item],
-      );
+        `);
+        const cacheFid = rows[0].fid;
 
-      const cids = await app.db('fund_cache_time').insert(cacheTimeRows).returning('cid');
+        const { rows: cidRows } = await db.query<{ cid: number }>(sql`
+        INSERT INTO fund_cache_time (time)
+        SELECT * FROM ${sql.unnest(
+          cacheTimeRows.map((row) => [row.time.toISOString()]),
+          ['timestamptz'],
+        )}
+        RETURNING cid
+        `);
+        const cacheIds = cidRows.map((row) => row.cid);
 
-      type CacheRow = { cid: number; fid: number; price: number };
+        await db.query(sql`
+        INSERT INTO fund_cache (cid, fid, price)
+        SELECT * FROM ${sql.unnest(
+          cacheIds.reduce<[number, number, number][]>(
+            (last, cid) => [
+              ...last,
+              [
+                cid,
+                cacheFid,
+                (last[last.length - 1]?.[2] ?? 100) * (1 + 0.05 * (2 * Math.random() - 1)),
+              ],
+            ],
+            [],
+          ),
+          ['int4', 'int4', 'float8'],
+        )}
+        `);
 
-      const cacheRows = cids.reduce<CacheRow[]>(
-        (last, cid) => [
-          ...last,
-          {
-            cid,
-            fid,
-            price: (last[last.length - 1]?.price ?? 100) * (1 + 0.05 * (2 * Math.random() - 1)),
-          },
-        ],
-        [],
-      );
-
-      await app.db('fund_cache').insert(cacheRows);
+        return { cids: cacheIds, fid: cacheFid };
+      });
 
       const clock = sinon.useFakeTimers(new Date('2020-04-26T13:20:03Z'));
 
@@ -539,8 +570,12 @@ describe('Funds resolver', () => {
 
       clock.restore();
 
-      await app.db('fund_scrape').where({ fid }).del();
-      await app.db('fund_cache_time').whereIn('cid', cids).del();
+      await getPool().transaction(async (db) => {
+        await db.query(sql`DELETE FROM fund_scrape WHERE fid = ${fid}`);
+        await db.query(
+          sql`DELETE FROM fund_cache_time WHERE cid = ANY(${sql.array(cids, 'int4')})`,
+        );
+      });
 
       return {
         fundId: fundId as number,
@@ -654,26 +689,30 @@ describe('Funds resolver', () => {
 
     const setup = async (): Promise<Maybe<FundHistoryIndividual>> => {
       const [fundId] = await createFunds([fundInput]);
-      const {
-        rows: [{ fid }],
-      } = await app.db.raw<{ rows: { fid: number }[] }>(
-        `
-        INSERT INTO fund_scrape (broker, item) VALUES ('generic', ?)
+      await getPool().transaction(async (db) => {
+        const { rows: fundScrapeRows } = await db.query<{ fid: number }>(sql`
+        INSERT INTO fund_scrape (broker, item) VALUES (${'generic'}, ${fundInput.item})
         ON CONFLICT (broker, item) DO UPDATE set broker = excluded.broker
         RETURNING fid
-        `,
-        [fundInput.item],
-      );
+        `);
+        const fid = fundScrapeRows[0].fid;
 
-      const [cid1, cid2] = await app
-        .db('fund_cache_time')
-        .insert([{ time: new Date('2020-04-20T11:20:31Z') }, { time: new Date('2020-04-21') }])
-        .returning('cid');
+        const { rows: cacheTimeRows } = await db.query<{ cid: number }>(sql`
+        INSERT INTO fund_cache_time (time) VALUES ${sql.join(
+          [sql`(${'2020-04-20T11:20:31Z'})`, sql`(${'2020-04-21Z'})`],
+          sql`, `,
+        )}
+        RETURNING cid
+        `);
+        const [cid1, cid2] = cacheTimeRows.map((row) => row.cid);
 
-      await app.db('fund_cache').insert([
-        { fid, cid: cid1, price: 441.52 },
-        { fid, cid: cid2, price: 436.81 },
-      ]);
+        await db.query(sql`
+        INSERT INTO fund_cache (fid, cid, price) VALUES ${sql.join(
+          [sql`(${fid}, ${cid1}, ${441.52})`, sql`(${fid}, ${cid2}, ${436.81})`],
+          sql`, `,
+        )}
+        `);
+      });
 
       const res = await app.authGqlClient.query<Query, QueryFundHistoryIndividualArgs>({
         query,
@@ -688,10 +727,12 @@ describe('Funds resolver', () => {
 
       expect(res).toStrictEqual(
         expect.objectContaining<FundHistoryIndividual>({
-          values: [
-            { date: getUnixTime(new Date('2020-04-20T11:20:31Z')), price: 441.52 },
-            { date: getUnixTime(new Date('2020-04-21')), price: 436.81 },
-          ].map(expect.objectContaining),
+          values: expect.arrayContaining(
+            [
+              { date: getUnixTime(new Date('2020-04-20T11:20:31Z')), price: 441.52 },
+              { date: getUnixTime(new Date('2020-04-21')), price: 436.81 },
+            ].map(expect.objectContaining),
+          ),
         }),
       );
     });
@@ -758,7 +799,19 @@ describe('Funds resolver', () => {
       expect.assertions(5);
       const { id } = await setup();
 
-      const row = await app.db('funds').where({ id }).first();
+      const [
+        {
+          rows: [row],
+        },
+        { rows: transactionRows },
+        { rows: stockSplitRows },
+      ] = await getPool().connect(async (db) =>
+        Promise.all([
+          db.query(sql`SELECT * FROM funds WHERE id = ${id}`),
+          db.query(sql`SELECT ft.* FROM funds_transactions ft WHERE ft.fund_id = ${id}`),
+          db.query(sql`SELECT ss.* FROM funds_stock_splits ss WHERE ss.fund_id = ${id}`),
+        ]),
+      );
 
       expect(row).toStrictEqual(
         expect.objectContaining({
@@ -767,8 +820,6 @@ describe('Funds resolver', () => {
           allocation_target: modifiedFund.allocationTarget,
         }),
       );
-
-      const transactionRows = await app.db('funds_transactions').where({ fund_id: id }).select();
 
       expect(transactionRows).toHaveLength(2);
       expect(transactionRows).toStrictEqual(
@@ -792,8 +843,6 @@ describe('Funds resolver', () => {
         ]),
       );
 
-      const stockSplitRows = await app.db('funds_stock_splits').where({ fund_id: id }).select();
-
       expect(stockSplitRows).toHaveLength(1);
       expect(stockSplitRows).toStrictEqual(
         expect.arrayContaining([
@@ -809,10 +858,12 @@ describe('Funds resolver', () => {
       it('should also update the name of the fund_cache entry', async () => {
         expect.assertions(2);
 
-        await app
-          .db('fund_scrape')
-          .whereIn('item', ['My fund 1', 'My fund with changed name'])
-          .del();
+        await getPool().query(
+          sql`DELETE FROM fund_scrape WHERE item = ANY(${sql.array(
+            ['My fund 1', 'My fund with changed name'],
+            'text',
+          )})`,
+        );
 
         const [id] = await createFunds([
           {
@@ -821,11 +872,9 @@ describe('Funds resolver', () => {
           },
         ]);
 
-        await app.db('fund_scrape').insert({
-          broker: 'hl',
-          fid: 12345,
-          item: 'My fund 1',
-        });
+        await getPool().query(
+          sql`INSERT INTO fund_scrape (broker, fid, item) VALUES (${'hl'}, ${12345}, ${'My fund 1'})`,
+        );
 
         await setup(
           {
@@ -835,7 +884,7 @@ describe('Funds resolver', () => {
           id,
         );
 
-        const fundScrape = await app.db('fund_scrape').select();
+        const { rows: fundScrape } = await getPool().query(sql`SELECT * FROM fund_scrape`);
 
         expect(fundScrape).toStrictEqual(
           expect.arrayContaining([
@@ -894,8 +943,8 @@ describe('Funds resolver', () => {
       expect.assertions(1);
       const { id } = await setup();
 
-      const row = await app.db('funds').where({ id }).first();
-      expect(row).toBeUndefined();
+      const { rowCount } = await getPool().query(sql`SELECT * FROM funds WHERE id = ${id}`);
+      expect(rowCount).toBe(0);
     });
   });
 });

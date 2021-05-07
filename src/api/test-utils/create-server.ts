@@ -2,15 +2,12 @@ import { Server } from 'http';
 import ApolloClient, { PresetConfig } from 'apollo-boost';
 import axios from 'axios';
 import 'cross-fetch/polyfill';
-import * as Knex from 'knex';
 import moize from 'moize';
 import request, { SuperTest, Test } from 'supertest';
 
-import { db } from './knex';
 import { run } from '~api/index';
 
 export type App = {
-  db: Knex;
   agent: SuperTest<Test>;
   gqlClient: ApolloClient<unknown>;
   authGqlClient: ApolloClient<unknown>;
@@ -72,7 +69,6 @@ export const makeTestApp = async (): Promise<App> => {
   }
 
   return {
-    db,
     agent,
     gqlClient,
     authGqlClient,

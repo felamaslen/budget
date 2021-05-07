@@ -1,12 +1,13 @@
 import nock, { Scope } from 'nock';
 import prompts from 'prompts';
 import sinon from 'sinon';
+import { sql } from 'slonik';
 
 import { nockHLFund, nockHLShare, nockHLShareFX, nockGeneralShare } from './__tests__/nocks';
 import { run } from '.';
 import { nockCurrencies } from '~api/__tests__/nocks';
+import { getPool, withSlonik } from '~api/modules/db';
 import * as pubsub from '~api/modules/graphql/pubsub';
-import { db } from '~api/test-utils/knex';
 
 type TestFundPrice = {
   cid: number;
@@ -37,61 +38,62 @@ describe('Fund scraper - integration tests', () => {
     clock.restore();
   });
 
-  const clearDb = async (): Promise<void> => {
-    await db('funds').select().del();
-    await db('fund_scrape').select().del();
-    await db('fund_cache_time').select().del();
+  const clearDb = withSlonik(async (db) => {
+    await db.query(sql`DELETE FROM funds`);
+    await db.query(sql`DELETE FROM fund_scrape`);
+    await db.query(sql`DELETE FROM fund_cache_time`);
 
-    await db('users').select().del();
-    await db('users').insert({ uid: uid1, name: 'test-user-funds-1', pin_hash: 'some-pin-hash' });
-    await db('users').insert({ uid: uid2, name: 'test-user-funds-2', pin_hash: 'other-pin-hash' });
+    await db.query(sql`DELETE FROM users`);
+    await db.query(sql`
+    INSERT INTO users (uid, name, pin_hash) VALUES ${sql.join(
+      [
+        sql`(${uid1}, ${'test-user-funds-1'}, ${'some-pin-hash'})`,
+        sql`(${uid2}, ${'test-user-funds-2'}, ${'other-pin-hash'})`,
+      ],
+      sql`, `,
+    )}
+    `);
 
-    fundIds = await db('funds')
-      .insert([
-        {
-          uid: uid1,
-          item: 'City of London Investment Trust ORD 25p (share)',
-        },
-        {
-          uid: uid1,
-          item: 'Jupiter Asian Income Class I (accum.)',
-        },
-        {
-          uid: uid1,
-          item: 'Apple Inc Com Stk NPV (share)',
-        },
-        {
-          uid: uid2,
-          item: 'City of London Investment Trust ORD 25p (share)',
-        },
-        {
-          uid: uid1,
-          item: 'Morgan Stanley Sterling Corporate Bond Class F (accum.)',
-        },
-        {
-          uid: uid1,
-          item: 'Scottish Mortgage Investment Trust (SMT.L) (stock)',
-        },
-      ])
-      .returning('id');
+    const { rows: fundIdRows } = await db.query<{ id: number }>(sql`
+    INSERT INTO funds (uid, item)
+    SELECT * FROM ${sql.unnest(
+      [
+        [uid1, 'City of London Investment Trust ORD 25p (share)'],
+        [uid1, 'Jupiter Asian Income Class I (accum.)'],
+        [uid1, 'Apple Inc Com Stk NPV (share)'],
+        [uid2, 'City of London Investment Trust ORD 25p (share)'],
+        [uid1, 'Morgan Stanley Sterling Corporate Bond Class F (accum.)'],
+        [uid1, 'Scottish Mortgage Investment Trust (SMT.L) (stock)'],
+      ],
+      ['int4', 'text'],
+    )}
+    RETURNING id
+    `);
+    fundIds = fundIdRows.map((row) => row.id);
 
-    await db('funds_transactions').insert([
-      { fund_id: fundIds[0], date: '2016-08-24', units: 89.095, price: 1122.39744 },
-      { fund_id: fundIds[0], date: '2016-09-19', units: 894.134, price: 111.84 },
-      { fund_id: fundIds[0], date: '2017-04-27', units: -883.229, price: 101.8988 },
-      { fund_id: fundIds[1], date: '2016-11-10', units: 30, price: 6.43333 },
-      { fund_id: fundIds[1], date: '2017-04-03', units: -23, price: 7.608696 },
-      { fund_id: fundIds[2], date: '2017-12-10', units: 14, price: 15478.857 },
-      { fund_id: fundIds[2], date: '2018-01-05', units: -13, price: 21271 },
-      { fund_id: fundIds[3], date: '2016-08-07', units: 1032.19, price: 542.8468 },
-      { fund_id: fundIds[4], date: '2016-09-19', units: 1678.42, price: 119.16 },
-      { fund_id: fundIds[4], date: '2017-02-14', units: 846.38, price: 118.15 },
-      { fund_id: fundIds[4], date: '2017-10-25', units: 817, price: 122.399 },
-      { fund_id: fundIds[4], date: '2017-03-14', units: 1217.43, price: 123.21 },
-      { fund_id: fundIds[4], date: '2017-09-24', units: -4559.23, price: 122.722 },
-      { fund_id: fundIds[5], date: '2016-09-20', units: 1565, price: 385.31 },
-    ]);
-  };
+    await db.query(sql`
+    INSERT INTO funds_transactions (fund_id, date, units, price)
+    SELECT * FROM ${sql.unnest(
+      [
+        [fundIds[0], '2016-08-24', 89.095, 1122.39744],
+        [fundIds[0], '2016-09-19', 894.134, 111.84],
+        [fundIds[0], '2017-04-27', -883.229, 101.8988],
+        [fundIds[1], '2016-11-10', 30, 6.43333],
+        [fundIds[1], '2017-04-03', -23, 7.608696],
+        [fundIds[2], '2017-12-10', 14, 15478.857],
+        [fundIds[2], '2018-01-05', -13, 21271],
+        [fundIds[3], '2016-08-07', 1032.19, 542.8468],
+        [fundIds[4], '2016-09-19', 1678.42, 119.16],
+        [fundIds[4], '2017-02-14', 846.38, 118.15],
+        [fundIds[4], '2017-10-25', 817, 122.399],
+        [fundIds[4], '2017-03-14', 1217.43, 123.21],
+        [fundIds[4], '2017-09-24', -4559.23, 122.722],
+        [fundIds[5], '2016-09-20', 1565, 385.31],
+      ],
+      ['int4', 'date', 'float8', 'float8'],
+    )}
+    `);
+  });
 
   const setupNocks = async (failures: string[] = []): Promise<Record<string, Scope | Scope[]>> => ({
     currencies: nockCurrencies(failures.includes('currencies') ? 500 : 200),
@@ -109,17 +111,17 @@ describe('Fund scraper - integration tests', () => {
   });
 
   describe('Scraping prices', () => {
-    const getTestFundPrice = async (fundId: number): Promise<TestFundPrice[]> => {
-      const result = await db
-        .select<TestFundPrice[]>('fct.cid', 'fct.time', 'fc.price')
-        .from('funds as f')
-        .innerJoin('fund_scrape as fs', 'fs.item', 'f.item')
-        .innerJoin('fund_cache as fc', 'fc.fid', 'fs.fid')
-        .innerJoin('fund_cache_time as fct', 'fct.cid', 'fc.cid')
-        .where('f.id', fundId);
-
-      return result;
-    };
+    const getTestFundPrice = withSlonik<readonly TestFundPrice[], [number]>(async (db, fundId) => {
+      const result = await db.query<TestFundPrice>(sql`
+      SELECT fct.cid, fct.time, fc.price
+      FROM funds f
+      INNER JOIN fund_scrape fs ON fs.item = f.item
+      INNER JOIN fund_cache fc ON fc.fid = fs.fid
+      INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
+      WHERE f.id = ${fundId}
+      `);
+      return result.rows;
+    });
 
     beforeEach(async () => {
       process.argv = ['script', '--prices'];
@@ -281,49 +283,58 @@ describe('Fund scraper - integration tests', () => {
       },
     ];
 
-    beforeEach(async () => {
-      process.argv = ['script', '--holdings'];
+    beforeEach(
+      withSlonik(async (db) => {
+        process.argv = ['script', '--holdings'];
 
-      await db('stocks').truncate();
-      await db('stock_codes').truncate();
+        await db.query(sql`TRUNCATE stocks`);
+        await db.query(sql`TRUNCATE stock_codes`);
 
-      await db('stock_codes').insert(testPreExistingCodes);
+        await db.query(sql`
+        INSERT INTO stock_codes (name, code)
+        SELECT * FROM ${sql.unnest(
+          testPreExistingCodes.map((row) => [row.name, row.code]),
+          ['text', 'text'],
+        )}
+        `);
 
-      // This is mocking what a user might input, expecting the prompts to happen in
-      // alphabetical order, per-fund
-      prompts.inject([
-        'LON:BP', // BP
-        'LON:BATS', // British American Tobacco
-        'LON:GLX', // GlaxoSmithKline
-        'LON:LLOY', // Lloyds
-        'LON:RDSA', // Royal Dutch Shell
-        'LON:VOD', // Vodafone
-        '', // AXA Framlington UK Select
-        '', // J O Hambro
-        '', // Jupiter UK Special Situations
-        '', // Lindsell Train UK Equity
-        '', // Majedie UK Equity
-        '', // Marlborough Multi Cap
-        '', // Marlborough UK Micro-Cap
-        '', // Old Mutual Global Investors
-        '', // River & Mercantile UK Dynamic
-        '', // Woodford CF
-      ]);
-    });
+        // This is mocking what a user might input, expecting the prompts to happen in
+        // alphabetical order, per-fund
+        prompts.inject([
+          'LON:BP', // BP
+          'LON:BATS', // British American Tobacco
+          'LON:GLX', // GlaxoSmithKline
+          'LON:LLOY', // Lloyds
+          'LON:RDSA', // Royal Dutch Shell
+          'LON:VOD', // Vodafone
+          '', // AXA Framlington UK Select
+          '', // J O Hambro
+          '', // Jupiter UK Special Situations
+          '', // Lindsell Train UK Equity
+          '', // Majedie UK Equity
+          '', // Marlborough Multi Cap
+          '', // Marlborough UK Micro-Cap
+          '', // Old Mutual Global Investors
+          '', // River & Mercantile UK Dynamic
+          '', // Woodford CF
+        ]);
+      }),
+    );
 
     it('should keep the already existing stock code cache', async () => {
       expect.assertions(1);
       await run();
 
-      const stockCodes = await db('stock_codes')
-        .select()
-        .whereIn(
-          'name',
-          testPreExistingCodes.map(({ name }) => name),
-        )
-        .orderBy('name');
+      const stockCodes = await getPool().query(sql`
+      SELECT * FROM stock_codes
+      WHERE name = ANY(${sql.array(
+        testPreExistingCodes.map(({ name }) => name),
+        'text',
+      )})
+      ORDER BY name
+      `);
 
-      expect(stockCodes).toStrictEqual([
+      expect(stockCodes.rows).toStrictEqual([
         expect.objectContaining({
           name: 'Diageo plc Ordinary 28 101/108p',
           code: 'LON:DGE',
@@ -347,16 +358,17 @@ describe('Fund scraper - integration tests', () => {
       expect.assertions(1);
       await run();
 
-      const stockCodes = await db('stock_codes')
-        .select()
-        .whereNotIn(
-          'name',
-          testPreExistingCodes.map(({ name }) => name),
-        )
-        .whereNotNull('code')
-        .orderBy('name');
+      const stockCodes = await getPool().query(sql`
+      SELECT * FROM stock_codes
+      WHERE name != ALL(${sql.array(
+        testPreExistingCodes.map(({ name }) => name),
+        'text',
+      )})
+        AND code IS NOT NULL
+      ORDER BY name
+      `);
 
-      expect(stockCodes).toStrictEqual([
+      expect(stockCodes.rows).toStrictEqual([
         expect.objectContaining({
           name: 'BP Plc Ordinary US$0.25',
           code: 'LON:BP',
@@ -389,16 +401,17 @@ describe('Fund scraper - integration tests', () => {
 
       await run();
 
-      const stockCodes = await db('stock_codes')
-        .select()
-        .whereNotIn(
-          'name',
-          testPreExistingCodes.map(({ name }) => name),
-        )
-        .whereNull('code')
-        .orderBy('name');
+      const stockCodes = await getPool().query(sql`
+      SELECT * FROM stock_codes
+      WHERE name != ALL(${sql.array(
+        testPreExistingCodes.map(({ name }) => name),
+        'text',
+      )})
+        AND code IS NULL
+      ORDER BY name
+      `);
 
-      expect(stockCodes).toStrictEqual([
+      expect(stockCodes.rows).toStrictEqual([
         expect.objectContaining({
           name: 'AXA Framlington UK Select Opportunities Class ZI',
           code: null,
@@ -451,11 +464,15 @@ describe('Fund scraper - integration tests', () => {
 
       await run();
 
-      const stocks = await db('stocks').select().where({ uid: userId }).orderBy('name');
+      const stocks = await getPool().query(sql`
+      SELECT * FROM stocks
+      WHERE uid = ${userId}
+      ORDER BY name
+      `);
 
-      expect(stocks).toHaveLength(10);
+      expect(stocks.rows).toHaveLength(10);
 
-      expect(stocks).toStrictEqual([
+      expect(stocks.rows).toStrictEqual([
         expect.objectContaining({
           name: 'BP Plc Ordinary US$0.25',
           code: 'LON:BP',

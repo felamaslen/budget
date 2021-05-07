@@ -1,26 +1,31 @@
-import Knex from 'knex';
+import { sql } from 'slonik';
 
 import config from '~api/config';
+import { withSlonik } from '~api/modules/db';
 import logger from '~api/modules/logger';
 import { generateUserPin } from '~api/test-utils/generate-user-pin';
 
-export async function seed(db: Knex): Promise<void> {
+export const seed = withSlonik(async (db) => {
   logger.info('[seed] creating admin user');
 
-  const trx = await db.transaction();
-
-  await trx('users').where({ name: 'admin' }).del();
+  await db.query(sql`DELETE FROM users WHERE name = ${'admin'}`);
 
   const { pinRaw, pinHash } = await generateUserPin(config.user.defaultPin);
 
-  const [id] = await trx('users')
-    .insert({
-      name: 'admin',
-      pin_hash: pinHash,
-    })
-    .returning('uid');
+  const {
+    rows: [{ uid }],
+  } = await db.query<{ uid: number }>(sql`
+  INSERT INTO users (name, pin_hash)
+  VALUES (${'admin'}, ${pinHash})
+  RETURNING uid
+  `);
 
-  await trx.commit();
+  logger.info('[seed] created admin user', { id: uid, pin: pinRaw });
+});
 
-  logger.info('[seed] created admin user', { id, pin: pinRaw });
+if (require.main === module) {
+  seed().catch((err) => {
+    logger.error('Caught fatal error: %s', err);
+    process.exit(1);
+  });
 }

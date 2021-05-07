@@ -47,15 +47,18 @@ There is a web-based API written in Node.js, which also runs a web app. The Andr
 - This is accessible at `http://localhost:3000` by default
     - To set the port, change the `PORT` environment variable in `.env`
 
-#### Migrations / seeds:
+#### Migrations
 
-To run database migrations and seeds on the development environment:
+To run database migrations:
 
-- `docker-compose exec budget sh -c "./node_modules/.bin/knex migrate:latest"`
+- `yarn migrate up`
 
-- `docker-compose exec budget sh -c "./node_modules/.bin/knex seed:run"`
+#### Seeds
 
-- The admin user PIN is 1234
+To run seeds:
+
+- `yarn seed:user`
+- `yarn seed:stage-data`
 
 ## Documentation:
 

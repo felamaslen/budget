@@ -3,8 +3,10 @@ import { FetchResult } from 'apollo-boost';
 import addDays from 'date-fns/addDays';
 import gql from 'graphql-tag';
 import sinon from 'sinon';
+import { sql } from 'slonik';
 
 import config from '~api/config';
+import { getPool, withSlonik } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import { Mutation, MutationLoginArgs, Query } from '~api/types';
 
@@ -58,13 +60,15 @@ describe('User resolver', () => {
     let clock: sinon.SinonFakeTimers;
     const now = new Date('2020-03-07T23:06:23Z');
 
-    beforeEach(async () => {
-      clock = sinon.useFakeTimers({
-        now,
-        toFake: ['Date'],
-      });
-      await app.db('ip_login_req').truncate();
-    });
+    beforeEach(
+      withSlonik(async (db) => {
+        clock = sinon.useFakeTimers({
+          now,
+          toFake: ['Date'],
+        });
+        await db.query(sql`TRUNCATE ip_login_req`);
+      }),
+    );
 
     afterEach(() => {
       clock.restore();
@@ -85,7 +89,8 @@ describe('User resolver', () => {
     it('should return a successful login response', async () => {
       expect.assertions(3);
 
-      const { uid } = (await app.db.select<{ uid: number }>('uid').from('users').first()) || {};
+      const uid = (await getPool().query<{ uid: number }>(sql`SELECT uid FROM users LIMIT 1`))
+        .rows[0]?.uid;
 
       const res = await app.gqlClient.mutate<Mutation, MutationLoginArgs>({
         mutation: login,

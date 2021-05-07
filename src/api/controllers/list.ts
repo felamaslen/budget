@@ -113,10 +113,10 @@ async function getPublishedProperties(
 
 const typeMapStandard: TypeMap<ListItemStandard> = {
   date: 'date',
-  item: 'varchar',
+  item: 'text',
   cost: 'int4',
-  category: 'varchar',
-  shop: 'varchar',
+  category: 'text',
+  shop: 'text',
 };
 
 export async function readList(
@@ -189,10 +189,10 @@ export async function createReceipt(
         table,
         {
           date: 'date',
-          item: 'varchar',
+          item: 'text',
           cost: 'int4',
-          category: 'varchar',
-          shop: 'varchar',
+          category: 'text',
+          shop: 'text',
         },
         group.map<RawDate<ListItemStandardInput, 'date'>>((item) => ({
           date: formatDate(args.date),

@@ -26,13 +26,13 @@ import {
   getInvestmentPurchasesSummary,
 } from '~api/queries';
 import {
-  Transaction,
-  Overview,
-  QueryOverviewArgs,
-  PageListStandard,
-  QueryOverviewOldArgs,
-  OverviewOld,
   OldNetWorthRow,
+  Overview,
+  OverviewOld,
+  PageListStandard,
+  QueryOverviewArgs,
+  QueryOverviewOldArgs,
+  Transaction,
 } from '~api/types';
 import { calculateTransactionCost } from '~shared/funds';
 
@@ -249,7 +249,7 @@ export async function getOldOverviewData(
 
   const mapNetWorth = (key: Exclude<keyof OldNetWorthRow, 'date'>): number[] =>
     monthEnds.map<number>(
-      (date) => oldNetWorth.find((row) => isSameMonth(new Date(row.date), date))?.[key] ?? 0,
+      (date) => oldNetWorth.find((row) => isSameMonth(row.date, date))?.[key] ?? 0,
     );
 
   const pension = mapNetWorth('pension');

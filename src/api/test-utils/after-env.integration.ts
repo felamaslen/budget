@@ -2,7 +2,7 @@ import nock from 'nock';
 
 import { getServer } from './create-server';
 import { seedUser } from '~api/__tests__/fixtures';
-import { db } from '~api/test-utils/knex';
+import { migrator } from '~api/migrate';
 
 jest.mock('ioredis');
 
@@ -13,8 +13,8 @@ beforeAll(async () => {
   nock.enableNetConnect('127.0.0.1');
 
   if (!hasRun) {
-    await db.migrate.latest();
-    await seedUser(db);
+    await migrator.up();
+    await seedUser();
 
     hasRun = true;
   }

@@ -13,14 +13,24 @@ export type SubcategoryRow = Omit<
   is_saye: NetWorthSubcategory['isSAYE'];
 };
 
+export type NetWorthEntryRow = {
+  id: number;
+  date: string;
+};
+
+export type ValueRowSelect = {
+  id: number;
+  subcategory: number;
+  net_worth_id: number;
+  value: number | null;
+};
+
 export type ValueRow = [number, boolean | null, number, number | null];
 export type FXValueRow = [number, number, string];
 export type OptionValueRow = [number, number, number, number, number];
 export type LoanValueRow = [number, number, number];
 
-export type JoinedEntryRow = {
-  id: number;
-  date: string;
+export type JoinedEntryRow = NetWorthEntryRow & {
   is_saye: boolean | null;
 
   currency_ids: number[] | [null];
@@ -77,7 +87,7 @@ export type JoinedEntryRowWithLoanValue = JoinedEntryRow & {
 };
 
 export type OldNetWorthRow = {
-  date: string;
+  date: Date;
   assets: number;
   liabilities: number;
   pension: number;

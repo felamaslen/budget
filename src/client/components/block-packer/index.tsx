@@ -8,7 +8,8 @@ import type { Preview } from './types';
 import { useCTA } from '~client/hooks';
 import { VOID } from '~client/modules/data';
 import { colors } from '~client/styled/variables';
-import type { PickUnion, BlockItem, FlexBlocks, Box } from '~client/types';
+import type { BlockItem, FlexBlocks, Box } from '~client/types';
+import type { PickUnion } from '~shared/types';
 
 export { statusHeight } from './styles';
 

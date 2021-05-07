@@ -88,6 +88,7 @@ module.exports = {
           'jest.client.config.js',
           'src/client/**/*.ts',
           'src/client/**/*.tsx',
+          'src/api/migrate.ts',
           'src/api/pre-index.js',
           'src/api/test-utils/**/*.ts',
           'src/api/test-utils/**/*.js',

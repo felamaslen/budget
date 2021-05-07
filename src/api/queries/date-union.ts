@@ -10,7 +10,7 @@ const formatMonthStart = (month: Date): string => toLocalISO(startOfMonth(month)
 
 export const getEndOfMonthUnion = (
   monthEnds: Date[],
-): TaggedTemplateLiteralInvocationType<{ month_date: string }[]> =>
+): TaggedTemplateLiteralInvocationType<{ month_date: string }> =>
   sql`
   SELECT ${sql.join(
     [
@@ -23,7 +23,7 @@ export const getEndOfMonthUnion = (
 
 export const getMonthRangeUnion = (
   monthEnds: Date[],
-): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }[]> =>
+): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }> =>
   sql`
   SELECT ${sql.join(
     [
@@ -42,7 +42,7 @@ export const getMonthRangeUnion = (
 
 export const getDateRangeUnion = (
   dayEnds: Date[],
-): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }[]> =>
+): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }> =>
   sql`
   SELECT ${sql.join(
     [

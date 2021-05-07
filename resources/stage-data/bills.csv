@@ -39,7 +39,7 @@ date,item,category,cost,shop
 -07+16,Energy,Utilities,6200,My energy supplier
 -06+01,Mortgage,Housing,114453,My bank
 -06+12,Phone,Comms,1499,My phone company
--06+04,Council Tax,175520,Taxman
+-06+04,Council Tax,Tax,175520,Taxman
 -06+16,Energy,Utilities,6200,My energy supplier
 -05+01,Mortgage,Housing,114453,My bank
 -05+12,Phone,Comms,1499,My phone company
@@ -78,7 +78,7 @@ date,item,category,cost,shop
 +06+02,Mortgage,Housing,105929,My bank
 +06+12,Phone,Comms,1499,My phone company
 +06+16,Energy,Utilities,6200,My energy supplier
-+06+03,Council Tax,179605,Taxman
++06+03,Council Tax,Tax,179605,Taxman
 +07+02,Mortgage,Housing,105929,My bank
 +07+12,Phone,Comms,1499,My phone company
 +07+16,Energy,Utilities,6200,My energy supplier

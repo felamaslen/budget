@@ -1,4 +1,6 @@
 import gql from 'graphql-tag';
+import { sql } from 'slonik';
+import { withSlonik } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   Query,
@@ -11,74 +13,39 @@ import {
 
 describe('Search resolvers', () => {
   let app: App;
-  beforeAll(async () => {
-    app = await getTestApp();
+  beforeAll(
+    withSlonik(async (db) => {
+      app = await getTestApp();
 
-    await app.db('food').truncate();
-    await app.db('bills').truncate();
+      await db.query(sql`TRUNCATE food`);
+      await db.query(sql`TRUNCATE bills`);
 
-    await app.db('food').insert([
-      {
-        uid: app.uid,
-        date: '2020-04-20',
-        item: 'Pears',
-        category: 'Fruit',
-        cost: 1,
-        shop: 'Tesco',
-      },
-      {
-        uid: app.uid,
-        date: '2020-04-20',
-        item: 'Apples',
-        category: 'Fruit',
-        cost: 1,
-        shop: "Sainsbury's",
-      },
-      {
-        uid: app.uid,
-        date: '2020-04-20',
-        item: 'Chocolate fondue',
-        category: 'Fondue',
-        cost: 1,
-        shop: 'Chocolate shop',
-      },
-      {
-        uid: app.uid,
-        date: '2020-04-20',
-        item: 'Apple pie',
-        category: 'Dessert',
-        cost: 1,
-        shop: 'Waitrose',
-      },
-    ]);
+      await db.query(sql`
+      INSERT INTO food (uid, date, item, category, cost, shop)
+      SELECT * FROM ${sql.unnest(
+        [
+          [app.uid, '2020-04-20', 'Pears', 'Fruit', 1, 'Tesco'],
+          [app.uid, '2020-04-20', 'Apples', 'Fruit', 1, "Sainsbury's"],
+          [app.uid, '2020-04-20', 'Chocolate fondue', 'Fondue', 1, 'Chocolate shop'],
+          [app.uid, '2020-04-20', 'Apple pie', 'Dessert', 1, 'Waitrose'],
+        ],
+        ['int4', 'date', 'text', 'text', 'int4', 'text'],
+      )}
+      `);
 
-    await app.db('bills').insert([
-      {
-        uid: app.uid,
-        date: '2020-04-20',
-        item: 'Mortgage',
-        category: 'Housing',
-        cost: 1,
-        shop: 'My bank',
-      },
-      {
-        uid: app.uid,
-        date: '2020-04-20',
-        item: 'Water',
-        category: 'Utilities',
-        cost: 1,
-        shop: 'My water company',
-      },
-      {
-        uid: app.uid,
-        date: '2020-04-20',
-        item: 'Rent',
-        category: 'Housing',
-        cost: 1,
-        shop: 'My landlord',
-      },
-    ]);
-  });
+      await db.query(sql`
+      INSERT INTO bills (uid, date, item, category, cost, shop)
+      SELECT * FROM ${sql.unnest(
+        [
+          [app.uid, '2020-04-20', 'Mortgage', 'Housing', 1, 'My bank'],
+          [app.uid, '2020-04-20', 'Water', 'Utilities', 1, 'My water company'],
+          [app.uid, '2020-04-20', 'Rent', 'Housing', 1, 'My landlord'],
+        ],
+        ['int4', 'date', 'text', 'text', 'int4', 'text'],
+      )}
+      `);
+    }),
+  );
 
   const search = gql`
     query SearchSuggestions(

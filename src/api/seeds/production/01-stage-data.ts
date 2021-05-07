@@ -1,12 +1,15 @@
 import path from 'path';
 import { compose } from '@typed/compose';
 import parse from 'csv-parse/lib/sync';
-import { addMonths, setDay, startOfMonth } from 'date-fns';
+import { addMonths, formatISO, setDay, startOfMonth } from 'date-fns';
 import fs from 'fs-extra';
-import Knex from 'knex';
+import { DatabaseTransactionConnectionType, sql } from 'slonik';
 
+import { withSlonik } from '~api/modules/db';
 import logger from '~api/modules/logger';
-import { PageListStandard } from '~api/types';
+import { FundListRow } from '~api/queries';
+import { ListItemStandard, PageListStandard, RawDate } from '~api/types';
+import { Transaction } from '~client/types/gql';
 
 const now = new Date();
 const monthStart = startOfMonth(now);
@@ -23,22 +26,21 @@ const mapUids = <R extends Record<string, unknown>>(uid: number) => (
   row: R,
 ): R & { uid: number } => ({ ...row, uid });
 
-function mapDates<R extends { date: string }>({
-  date,
-  ...row
-}: R): Omit<R, 'date'> & { date: Date } {
+function mapDates<R extends { date: string }>({ date, ...row }: R): R {
   const [, monthDelta, , dayOfMonth] = (date as string).match(
     /^((-|\+)\d+)((-|\+)\d+)$/,
   ) as RegExpMatchArray;
   return {
-    date: setDay(addMonths(monthStart, Number(monthDelta)), Number(dayOfMonth)),
     ...row,
-  };
+    date: formatISO(setDay(addMonths(monthStart, Number(monthDelta)), Number(dayOfMonth)), {
+      representation: 'date',
+    }),
+  } as R;
 }
 
 const mapDatesWithUids = <R extends { date: string }>(
   uid: number,
-): ((row: R) => Omit<R, 'date'> & { date: Date; uid: number }) => compose(mapDates, mapUids(uid));
+): ((row: R) => R & { uid: number }) => compose(mapDates, mapUids(uid));
 
 const removeColumn = <K extends string>(key: K) => <R extends { [key in K]: unknown }>({
   [key]: discard,
@@ -70,31 +72,41 @@ const mapForeignId = <
   Child extends { [key in ForeignKey]: number }
 >(
   parentsRaw: Parent[],
-  parentIds: number[],
+  parentIdRows: readonly { [key in ParentKey]: number }[],
   parentKey: ParentKey,
   foreignKey: ForeignKey,
 ) => (child: Child): Child => ({
   ...child,
   [foreignKey]:
-    parentIds[
+    parentIdRows[
       parentsRaw.findIndex((parent) => (parent[parentKey] as number) === child[foreignKey])
-    ],
+    ][parentKey],
 });
 
-async function insertStandardListFromCsv(
-  trx: Knex.Transaction,
+const insertStandardListFromCsv = async (
+  db: DatabaseTransactionConnectionType,
   uid: number,
   tableName: PageListStandard,
-): Promise<void> {
+): Promise<void> => {
   logger.info(`[seed] creating ${tableName} data`);
 
-  await trx(tableName).where({ uid }).del();
+  await db.query(sql`DELETE FROM ${sql.identifier([tableName])} WHERE uid = ${uid}`);
 
-  const rows = await readTableFromCsv<{ date: string }>(tableName);
-  await trx(tableName).insert(rows.map(mapDatesWithUids(uid)));
-}
+  const rows = await readTableFromCsv<RawDate<ListItemStandard, 'date'>>(tableName);
 
-async function seedStandardList(trx: Knex.Transaction, uid: number): Promise<void> {
+  await db.query(sql`
+  INSERT INTO ${sql.identifier([tableName])} (uid, date, item, category, cost, shop)
+  SELECT * FROM ${sql.unnest(
+    rows.map(mapDates).map((row) => [uid, row.date, row.item, row.category, row.cost, row.shop]),
+    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+  )}
+  `);
+};
+
+const seedStandardList = async (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<void> => {
   await Promise.all(
     [
       PageListStandard.Income,
@@ -103,38 +115,58 @@ async function seedStandardList(trx: Knex.Transaction, uid: number): Promise<voi
       PageListStandard.General,
       PageListStandard.Social,
       PageListStandard.Holiday,
-    ].map((page) => insertStandardListFromCsv(trx, uid, page)),
+    ].map((page) => insertStandardListFromCsv(db, uid, page)),
   );
-}
+};
 
-async function seedFunds(trx: Knex.Transaction, uid: number): Promise<void> {
+type CSVFundRow = Omit<FundListRow, 'allocation_target'> & {
+  allocation_target: number | 'null';
+};
+
+type CSVRowFundTransaction = Omit<RawDate<Transaction, 'date'>, 'drip'> & {
+  fund_id: number;
+  is_drip: 'true' | 'false';
+};
+
+const seedFunds = async (db: DatabaseTransactionConnectionType, uid: number): Promise<void> => {
   logger.info('[seed] creating funds data');
 
-  await trx('funds').where({ uid }).del();
+  await db.query(sql`DELETE FROM funds WHERE uid = ${uid}`);
 
-  const rowsFunds = (
-    await readTableFromCsv<{ id: number; allocation_target: string | number }>('funds')
-  ).map(({ allocation_target, ...rest }) => ({
-    ...rest,
-    allocation_target:
-      allocation_target.toString().toUpperCase() === 'NULL' ? null : allocation_target,
-  }));
+  const rowsFundsRaw = await readTableFromCsv<CSVFundRow>('funds');
+  const rowsFunds = rowsFundsRaw.map(nullableKey('allocation_target'));
 
-  const rowsTransactions = await readTableFromCsv<{ date: string; fund_id: number }>(
-    'funds_transactions',
-  );
+  const { rows: fundIdRows } = await db.query<{ id: number }>(sql`
+  INSERT INTO funds (uid, item, allocation_target)
+  SELECT * FROM ${sql.unnest(
+    rowsFunds.map((row) => [uid, row.item, row.allocation_target]),
+    ['int4', 'text', 'float8'],
+  )}
+  RETURNING id
+  `);
 
-  const fundIds = await trx('funds')
-    .insert(rowsFunds.map(mapUids(uid)).map(removeId))
-    .returning('id');
+  const rowsTransactionsRaw = await readTableFromCsv<CSVRowFundTransaction>('funds_transactions');
+  const rowsTransactions = rowsTransactionsRaw
+    .map(nullableBool('is_drip'))
+    .map(mapDates)
+    .map(mapForeignId(rowsFundsRaw, fundIdRows, 'id', 'fund_id'));
 
-  await trx('funds_transactions').insert(
-    rowsTransactions.map(mapDates).map(({ fund_id, ...rest }) => ({
-      fund_id: fundIds[rowsFunds.findIndex((row) => row.id === fund_id)],
-      ...rest,
-    })),
-  );
-}
+  await db.query(sql`
+  INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes, is_drip)
+  SELECT * FROM ${sql.unnest(
+    rowsTransactions.map((row) => [
+      row.fund_id,
+      row.date,
+      row.units,
+      row.price,
+      row.fees,
+      row.taxes,
+      row.is_drip,
+    ]),
+    ['int4', 'date', 'float8', 'float8', 'int4', 'int4', 'bool'],
+  )}
+  `);
+};
 
 type CSVRowNetWorthCategory = {
   id: number;
@@ -148,6 +180,7 @@ type CSVRowNetWorthSubcategory = {
   id: number;
   subcategory: string;
   has_credit_limit: 'true' | 'false' | 'null';
+  appreciation_rate: number | 'null';
   is_saye: 'true' | 'false' | 'null';
   opacity: number;
   category_id: number;
@@ -167,7 +200,25 @@ type CSVRowNetWorthValue = {
   comment: string;
 };
 
-type CSVRowValueDependent = { values_id: number };
+type CSVRowFXValue = {
+  values_id: number;
+  value: number;
+  currency: string;
+};
+
+type CSVRowLoanValue = {
+  values_id: number;
+  payments_remaining: number;
+  rate: number;
+};
+
+type CSVRowOptionValue = {
+  values_id: number;
+  units: number;
+  vested: number;
+  strike_price: number;
+  market_price: number;
+};
 
 type CSVRowCurrency = {
   net_worth_id: number;
@@ -181,8 +232,11 @@ type CSVRowCreditLimit = {
   value: number;
 };
 
-async function seedNetWorth(trx: Knex.Transaction, uid: number): Promise<void> {
+const seedNetWorth = async (db: DatabaseTransactionConnectionType, uid: number): Promise<void> => {
   logger.info('[seed] creating net worth data');
+
+  await db.query(sql`DELETE FROM net_worth WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM net_worth_categories WHERE uid = ${uid}`);
 
   const rowsCategoriesRaw = await readTableFromCsv<CSVRowNetWorthCategory>('net_worth_categories');
 
@@ -191,26 +245,53 @@ async function seedNetWorth(trx: Knex.Transaction, uid: number): Promise<void> {
     .map(nullableBool('is_option'))
     .map(mapUids(uid));
 
-  const categoryIds = await trx('net_worth_categories').insert(rowsCategories).returning('id');
+  const { rows: categoryIdRows } = await db.query<{ id: number }>(sql`
+  INSERT INTO net_worth_categories (uid, type, category, color, is_option)
+  SELECT * FROM ${sql.unnest(
+    rowsCategories.map((row) => [uid, row.type, row.category, row.color, row.is_option]),
+    ['int4', 'text', 'text', 'text', 'bool'],
+  )}
+  RETURNING id
+  `);
 
   const rowsSubcategoriesRaw = await readTableFromCsv<CSVRowNetWorthSubcategory>(
     'net_worth_subcategories',
   );
   const rowsSubcategories = rowsSubcategoriesRaw
-    .map(mapForeignId(rowsCategoriesRaw, categoryIds, 'id', 'category_id'))
+    .map(mapForeignId(rowsCategoriesRaw, categoryIdRows, 'id', 'category_id'))
     .map(removeId)
     .map(nullableBool('has_credit_limit'))
+    .map(nullableKey('appreciation_rate'))
     .map(nullableBool('is_saye'));
 
-  const subcategoryIds = await trx('net_worth_subcategories')
-    .insert(rowsSubcategories)
-    .returning('id');
+  const { rows: subcategoryIdRows } = await db.query<{ id: number }>(sql`
+  INSERT INTO net_worth_subcategories (category_id, subcategory, has_credit_limit, opacity, is_saye, appreciation_rate)
+  SELECT * FROM ${sql.unnest(
+    rowsSubcategories.map((row) => [
+      row.category_id,
+      row.subcategory,
+      row.has_credit_limit,
+      row.opacity,
+      row.is_saye,
+      row.appreciation_rate,
+    ]),
+    ['int4', 'text', 'bool', 'float8', 'bool', 'float8'],
+  )}
+  RETURNING id
+  `);
 
   const rowsNetWorthRaw = await readTableFromCsv<CSVRowNetWorth>('net_worth');
 
   const rowsNetWorth = rowsNetWorthRaw.map(mapDatesWithUids(uid)).map(removeId);
 
-  const netWorthIds = await trx('net_worth').insert(rowsNetWorth).returning('id');
+  const { rows: netWorthIdRows } = await db.query<{ id: number }>(sql`
+  INSERT INTO net_worth (uid, date)
+  SELECT * FROM ${sql.unnest(
+    rowsNetWorth.map((row) => [uid, row.date]),
+    ['int4', 'date'],
+  )}
+  RETURNING id
+  `);
 
   const rowsNetWorthValuesRaw = await readTableFromCsv<CSVRowNetWorthValue>('net_worth_values');
 
@@ -218,52 +299,99 @@ async function seedNetWorth(trx: Knex.Transaction, uid: number): Promise<void> {
     .map(nullableKey('value'))
     .map(nullableKey('skip'))
     .map(removeColumn('comment'))
-    .map(mapForeignId(rowsNetWorthRaw, netWorthIds, 'id', 'net_worth_id'))
-    .map(mapForeignId(rowsSubcategoriesRaw, subcategoryIds, 'id', 'subcategory'))
+    .map(mapForeignId(rowsNetWorthRaw, netWorthIdRows, 'id', 'net_worth_id'))
+    .map(mapForeignId(rowsSubcategoriesRaw, subcategoryIdRows, 'id', 'subcategory'))
     .map(removeId);
 
-  const netWorthValueIds = await trx('net_worth_values').insert(rowsNetWorthValues).returning('id');
+  const { rows: netWorthValueIdRows } = await db.query<{ id: number }>(sql`
+  INSERT INTO net_worth_values (net_worth_id, subcategory, value, skip)
+  SELECT * FROM ${sql.unnest(
+    rowsNetWorthValues.map((row) => [row.net_worth_id, row.subcategory, row.value, row.skip]),
+    ['int4', 'int4', 'int4', 'bool'],
+  )}
+  RETURNING id
+  `);
 
-  await Promise.all(
-    ['net_worth_fx_values', 'net_worth_loan_values', 'net_worth_option_values'].map(
-      async (childTable) => {
-        const rowsRaw = await readTableFromCsv<CSVRowValueDependent>(childTable);
-        return trx(childTable).insert(
-          rowsRaw.map(mapForeignId(rowsNetWorthValuesRaw, netWorthValueIds, 'id', 'values_id')),
-        );
-      },
-    ),
-  );
+  const rowsFXValuesRaw = await readTableFromCsv<CSVRowFXValue>('net_worth_fx_values');
+  await db.query(sql`
+  INSERT INTO net_worth_fx_values (values_id, value, currency)
+  SELECT * FROM ${sql.unnest(
+    rowsFXValuesRaw
+      .map(mapForeignId(rowsNetWorthValuesRaw, netWorthValueIdRows, 'id', 'values_id'))
+      .map((row) => [row.values_id, row.value, row.currency]),
+    ['int4', 'float8', 'text'],
+  )}
+  `);
+
+  const rowsLoanValuesRaw = await readTableFromCsv<CSVRowLoanValue>('net_worth_loan_values');
+  await db.query(sql`
+  INSERT INTO net_worth_loan_values (values_id, payments_remaining, rate)
+  SELECT * FROM ${sql.unnest(
+    rowsLoanValuesRaw
+      .map(mapForeignId(rowsNetWorthValuesRaw, netWorthValueIdRows, 'id', 'values_id'))
+      .map((row) => [row.values_id, row.payments_remaining, row.rate]),
+    ['int4', 'int4', 'float8'],
+  )}
+  `);
+
+  const rowsOptionValuesRaw = await readTableFromCsv<CSVRowOptionValue>('net_worth_option_values');
+  await db.query(sql`
+  INSERT INTO net_worth_option_values (values_id, units, vested, strike_price, market_price)
+  SELECT * FROM ${sql.unnest(
+    rowsOptionValuesRaw
+      .map(mapForeignId(rowsNetWorthValuesRaw, netWorthValueIdRows, 'id', 'values_id'))
+      .map((row) => [row.values_id, row.units, row.vested, row.strike_price, row.market_price]),
+    ['int4', 'float8', 'float8', 'float8', 'float8'],
+  )}
+  `);
 
   const rowsCurrenciesRaw = await readTableFromCsv<CSVRowCurrency>('net_worth_currencies');
   const rowsCurrencies = rowsCurrenciesRaw.map(
-    mapForeignId(rowsNetWorthRaw, netWorthIds, 'id', 'net_worth_id'),
+    mapForeignId(rowsNetWorthRaw, netWorthIdRows, 'id', 'net_worth_id'),
   );
-  await trx('net_worth_currencies').insert(rowsCurrencies);
+  await db.query(sql`
+  INSERT INTO net_worth_currencies (net_worth_id, currency, rate)
+  SELECT * FROM ${sql.unnest(
+    rowsCurrencies.map((row) => [row.net_worth_id, row.currency, row.rate]),
+    ['int4', 'text', 'float8'],
+  )}
+  `);
 
   const rowsCreditLimitRaw = await readTableFromCsv<CSVRowCreditLimit>('net_worth_credit_limit');
   const rowsCreditLimit = rowsCreditLimitRaw
-    .map(mapForeignId(rowsNetWorthRaw, netWorthIds, 'id', 'net_worth_id'))
-    .map(mapForeignId(rowsSubcategoriesRaw, subcategoryIds, 'id', 'subcategory'));
-  await trx('net_worth_credit_limit').insert(rowsCreditLimit);
-}
+    .map(mapForeignId(rowsNetWorthRaw, netWorthIdRows, 'id', 'net_worth_id'))
+    .map(mapForeignId(rowsSubcategoriesRaw, subcategoryIdRows, 'id', 'subcategory'));
+  await db.query(sql`
+  INSERT INTO net_worth_credit_limit (net_worth_id, subcategory, value)
+  SELECT * FROM ${sql.unnest(
+    rowsCreditLimit.map((row) => [row.net_worth_id, row.subcategory, row.value]),
+    ['int4', 'int4', 'int4'],
+  )}
+  `);
+};
 
-export async function seed(db: Knex): Promise<void> {
-  const trx = await db.transaction();
-
-  const adminUser = await trx('users')
-    .where({ name: 'admin' })
-    .select<{ uid: number }>('uid')
-    .first();
+export const seed = withSlonik(async (db) => {
+  const {
+    rows: [adminUser],
+  } = await db.query<{ uid: number }>(sql`
+  SELECT uid FROM users
+  WHERE name = ${'admin'}
+  LIMIT 1
+  `);
   if (!adminUser) {
     throw new Error('Admin user seed must run prior to stage data seed');
   }
 
   const { uid } = adminUser;
 
-  await seedNetWorth(trx, uid);
-  await seedStandardList(trx, uid);
-  await seedFunds(trx, uid);
+  await seedNetWorth(db, uid);
+  await seedStandardList(db, uid);
+  await seedFunds(db, uid);
+});
 
-  await trx.commit();
+if (require.main === module) {
+  seed().catch((err) => {
+    logger.error('Caught fatal error: %s', err);
+    process.exit(1);
+  });
 }

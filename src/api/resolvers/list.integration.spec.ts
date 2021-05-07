@@ -1,6 +1,8 @@
-import { format, addDays } from 'date-fns';
+import { addDays, formatISO } from 'date-fns';
 import gql from 'graphql-tag';
 import sinon from 'sinon';
+import { sql } from 'slonik';
+import { getPool } from '~api/modules/db';
 
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
@@ -24,6 +26,7 @@ import {
   MutationCreateReceiptArgs,
   ReceiptCreated,
   ReceiptPage,
+  ListItemStandard,
 } from '~api/types';
 
 describe('Standard list resolvers', () => {
@@ -170,12 +173,16 @@ describe('Standard list resolvers', () => {
       testItem: RawDate<ListItemStandardInput, 'date'>;
       delta: Partial<RawDate<ListItemStandardInput, 'date'>>;
     }) => {
-      const clearDb = async (): Promise<void> => {
-        await app.db(page).where({ item: testItem.item }).del();
-        await app.db(page).where({ item: delta.item }).del();
-      };
-
-      beforeEach(clearDb);
+      beforeEach(async () => {
+        await getPool().connect(async (db) => {
+          await db.query(
+            sql`DELETE FROM ${sql.identifier([page])} WHERE item = ANY(${sql.array(
+              [testItem.item, delta.item].filter((x: string | undefined): x is string => !!x),
+              'text',
+            )})`,
+          );
+        });
+      });
 
       describe(`create ${page}`, () => {
         const setup = async (): Promise<Maybe<CrudResponseCreate>> => {
@@ -211,15 +218,13 @@ describe('Standard list resolvers', () => {
           expect.assertions(1);
           const res = await setup();
 
-          const row = await app
-            .db(page)
-            .where({
-              id: res?.id,
-              uid: app.uid,
-            })
-            .first();
+          const { rows } = await getPool().query(sql`
+          SELECT * FROM ${sql.identifier([page])} WHERE id = ${res?.id as number} AND uid = ${
+            app.uid
+          }
+          `);
 
-          expect(row).toStrictEqual(
+          expect(rows[0]).toStrictEqual(
             expect.objectContaining({
               ...testItem,
               date: new Date(testItem.date),
@@ -246,15 +251,21 @@ describe('Standard list resolvers', () => {
         };
 
         const setup = async (
-          data: Record<string, unknown> = testItem,
+          data: ListItemStandardInput = testItem,
           pageNumber?: number,
           limit?: number,
         ): Promise<{ id: number; res: Maybe<ListReadResponse> }> => {
-          await app.db(page).truncate();
-          const [id] = await app
-            .db(page)
-            .insert({ uid: app.uid, ...data })
-            .returning('id');
+          const id = await getPool().connect(async (db) => {
+            await db.query(sql`TRUNCATE ${sql.identifier([page])}`);
+            const { rows } = await db.query<{ id: number }>(sql`
+            INSERT INTO ${sql.identifier([page])} (uid, date, item, category, cost, shop)
+            VALUES (${app.uid}, ${data.date}, ${data.item}, ${data.category}, ${data.cost}, ${
+              data.shop
+            })
+            RETURNING id
+            `);
+            return rows[0].id;
+          });
 
           const res = await readItems(pageNumber, limit);
 
@@ -310,17 +321,25 @@ describe('Standard list resolvers', () => {
             pageNumber?: number,
             limit?: number,
           ): Promise<Maybe<ListReadResponse>> => {
-            await app.db(page).truncate();
-
-            await app.db(page).insert(
-              Array(10)
-                .fill(0)
-                .map((_, index) => ({
-                  uid: app.uid,
-                  ...testItem,
-                  date: format(addDays(baseDate, -index), 'yyyy-MM-dd'),
-                })),
-            );
+            await getPool().connect(async (db) => {
+              await db.query(sql`DELETE FROM ${sql.identifier([page])} WHERE uid = ${app.uid}`);
+              await db.query(sql`
+              INSERT INTO ${sql.identifier([page])} (uid, date, item, category, cost, shop)
+              SELECT * FROM ${sql.unnest(
+                Array(10)
+                  .fill(0)
+                  .map((_, index) => [
+                    app.uid,
+                    formatISO(addDays(baseDate, -index), { representation: 'date' }),
+                    testItem.item,
+                    testItem.category,
+                    testItem.cost,
+                    testItem.shop,
+                  ]),
+                ['int4', 'date', 'text', 'text', 'int4', 'text'],
+              )}
+              `);
+            });
 
             return readItems(pageNumber, limit);
           };
@@ -373,20 +392,25 @@ describe('Standard list resolvers', () => {
           it('should respond with the total cost', async () => {
             expect.assertions(2);
 
-            const [{ sum }] = await app
-              .db(page)
-              .sum<{ sum: string }[]>('cost')
-              .where({ uid: app.uid });
+            const { rows: sumRows } = await getPool().query<{ sum: number }>(sql`
+            SELECT SUM(cost) AS sum FROM ${sql.identifier([page])} WHERE uid = ${app.uid}
+            `);
+            const sum = sumRows[0].sum ?? 0;
 
             const res = await setupTotals();
 
-            expect(res?.total).toBe(Number(sum));
+            expect(res?.total).toBe(sum);
 
-            await app.db(page).insert({ ...testItem, uid: app.uid, cost: 124356 });
+            await getPool().query(sql`
+            INSERT INTO ${sql.identifier([page])} (uid, date, item, category, cost, shop)
+            VALUES (${app.uid}, ${testItem.date}, ${testItem.item}, ${
+              testItem.category
+            }, ${124356}, ${testItem.shop})
+            `);
 
             const resAfter = await setupTotals();
 
-            expect(resAfter?.total).toBe(Number(sum) + 124356);
+            expect(resAfter?.total).toBe(sum + 124356);
           });
 
           it('should respond with the weekly cost', async () => {
@@ -399,10 +423,14 @@ describe('Standard list resolvers', () => {
 
       describe(`update ${page}`, () => {
         const setup = async (): Promise<{ existingId: number; res: Maybe<CrudResponseUpdate> }> => {
-          const [existingId] = await app
-            .db(page)
-            .insert({ ...testItem, uid: app.uid })
-            .returning('id');
+          const { rows } = await getPool().query<{ id: number }>(sql`
+          INSERT INTO ${sql.identifier([page])} (uid, date, item, category, cost, shop)
+          VALUES (${app.uid}, ${testItem.date}, ${testItem.item}, ${testItem.category}, ${
+            testItem.cost
+          }, ${testItem.shop})
+          RETURNING id
+          `);
+          const existingId = rows[0].id;
 
           const res = await app.authGqlClient.mutate<
             Mutation,
@@ -431,9 +459,11 @@ describe('Standard list resolvers', () => {
           expect.assertions(1);
           const { existingId } = await setup();
 
-          const row = await app.db(page).where({ id: existingId }).first();
+          const { rows } = await getPool().query(sql`
+          SELECT * FROM ${sql.identifier([page])} WHERE id = ${existingId}
+          `);
 
-          expect(row).toStrictEqual(
+          expect(rows[0]).toStrictEqual(
             expect.objectContaining({
               ...testItem,
               ...delta,
@@ -445,10 +475,14 @@ describe('Standard list resolvers', () => {
 
       describe(`delete ${page}`, () => {
         const setup = async (): Promise<{ id: number; res: Maybe<CrudResponseDelete> }> => {
-          const [existingId] = await app
-            .db(page)
-            .insert({ ...testItem, uid: app.uid })
-            .returning('id');
+          const { rows } = await getPool().query<{ id: number }>(sql`
+          INSERT INTO ${sql.identifier([page])} (uid, date, item, category, cost, shop)
+          VALUES (${app.uid}, ${testItem.date}, ${testItem.item}, ${testItem.category}, ${
+            testItem.cost
+          }, ${testItem.shop})
+          RETURNING id
+          `);
+          const existingId = rows[0].id;
 
           const res = await app.authGqlClient.mutate<Mutation, MutationDeleteListItemArgs>({
             mutation: deleteMutation,
@@ -474,7 +508,10 @@ describe('Standard list resolvers', () => {
 
           const { id } = await setup();
 
-          expect(await app.db(page).where({ id }).first()).toBeUndefined();
+          const { rowCount } = await getPool().query(
+            sql`SELECT * FROM ${sql.identifier([page])} WHERE id = ${id}`,
+          );
+          expect(rowCount).toBe(0);
         });
       });
     },
@@ -516,9 +553,11 @@ describe('Standard list resolvers', () => {
     ];
 
     const setup = async (): Promise<Maybe<ReceiptCreated>> => {
-      await app.db('food').where({ uid: app.uid, item: 'Blueberries' }).del();
-      await app.db('general').where({ uid: app.uid, item: 'Bin liners' }).del();
-      await app.db('holiday').where({ uid: app.uid, item: 'Gift card' }).del();
+      await getPool().connect(async (db) => {
+        await db.query(sql`DELETE FROM food WHERE uid = ${app.uid} AND item = ${'Blueberries'}`);
+        await db.query(sql`DELETE FROM general WHERE uid = ${app.uid} AND item = ${'Bin liners'}`);
+        await db.query(sql`DELETE FROM social WHERE uid = ${app.uid} AND item = ${'Gift card'}`);
+      });
 
       const res = await app.authGqlClient.mutate<
         Mutation,
@@ -539,9 +578,9 @@ describe('Standard list resolvers', () => {
 
       await setup();
 
-      const rowsFood = await app.db('food').select();
-      const rowsGeneral = await app.db('general').select();
-      const rowsSocial = await app.db('social').select();
+      const { rows: rowsFood } = await getPool().query(sql`SELECT * FROM food`);
+      const { rows: rowsGeneral } = await getPool().query(sql`SELECT * FROM general`);
+      const { rows: rowsSocial } = await getPool().query(sql`SELECT * FROM social`);
 
       expect(rowsFood).toStrictEqual(
         expect.arrayContaining([
@@ -585,22 +624,25 @@ describe('Standard list resolvers', () => {
 
       const res = await setup();
 
-      const rowFood = await app.db('food').where({ uid: app.uid, item: 'Blueberries' }).first();
-      const rowGeneral = await app
-        .db('general')
-        .where({ uid: app.uid, item: 'Bin liners' })
-        .first();
-      const rowSocial = await app.db('social').where({ uid: app.uid, item: 'Gift card' }).first();
+      const { rows: rowsFood } = await getPool().query<RawDate<ListItemStandard, 'date'>>(
+        sql`SELECT * FROM food WHERE uid = ${app.uid} AND item = ${'Blueberries'} LIMIT 1`,
+      );
+      const { rows: rowsGeneral } = await getPool().query<RawDate<ListItemStandard, 'date'>>(
+        sql`SELECT * FROM general WHERE uid = ${app.uid} AND item = ${'Bin liners'} LIMIT 1`,
+      );
+      const { rows: rowsSocial } = await getPool().query<RawDate<ListItemStandard, 'date'>>(
+        sql`SELECT * FROM social WHERE uid = ${app.uid} AND item = ${'Gift card'} LIMIT 1`,
+      );
 
-      expect(rowFood.id).toStrictEqual(expect.any(Number));
-      expect(rowGeneral.id).toStrictEqual(expect.any(Number));
-      expect(rowSocial.id).toStrictEqual(expect.any(Number));
+      expect(rowsFood[0].id).toStrictEqual(expect.any(Number));
+      expect(rowsGeneral[0].id).toStrictEqual(expect.any(Number));
+      expect(rowsSocial[0].id).toStrictEqual(expect.any(Number));
 
       expect(res?.items).toHaveLength(3);
 
       expect(res?.items).toStrictEqual(
         expect.arrayContaining(
-          [{ id: rowFood.id }, { id: rowGeneral.id }, { id: rowSocial.id }].map(
+          [{ id: rowsFood[0].id }, { id: rowsGeneral[0].id }, { id: rowsSocial[0].id }].map(
             expect.objectContaining,
           ),
         ),

@@ -7,7 +7,8 @@ import { NowLine } from '~client/components/graph-cashflow/now-line';
 import { getDataX, getStackedDataY } from '~client/components/graph/helpers';
 import { GRAPH_HEIGHT, GRAPH_CASHFLOW_PADDING } from '~client/constants/graph';
 import { formatPercent } from '~client/modules/format';
-import type { PickUnion, Range, DrawProps, Line, Data, Point } from '~client/types';
+import type { Range, DrawProps, Line, Data, Point } from '~client/types';
+import type { PickUnion } from '~shared/types';
 
 export type Props = PickUnion<LineGraphProps, 'lines' | 'AfterLines' | 'After'> & {
   isMobile?: boolean;

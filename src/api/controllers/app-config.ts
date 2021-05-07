@@ -30,12 +30,14 @@ export async function getAppConfig(
   if (!uid) {
     return defaultAppConfig;
   }
-  const {
-    rows: [userAppConfig],
-  } = await db.query<Pick<UserRow, 'config'>>(sql`SELECT config FROM users WHERE uid = ${uid}`);
-  if (!userAppConfig) {
+  const { rowCount, rows } = await db.query(sql`SELECT config FROM users WHERE uid = ${uid}`);
+  if (rowCount !== 1) {
     return defaultAppConfig;
   }
+
+  // TODO: fix slonik types bug upstream so we can assert the type in the query
+  // See this issue: https://github.com/gajus/slonik/issues/275
+  const userAppConfig = (rows[0] as unknown) as Pick<UserRow, 'config'>;
 
   return {
     ...defaultAppConfig,

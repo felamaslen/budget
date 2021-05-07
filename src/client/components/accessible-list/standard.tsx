@@ -29,11 +29,11 @@ import type {
   Create,
   GQL,
   ListItemStandardNative as ListItemStandard,
-  PickUnion,
   StandardInput,
   WithIds,
 } from '~client/types';
 import type { ListItemStandardInput, PageListStandard } from '~client/types/gql';
+import type { PickUnion } from '~shared/types';
 
 export const standardFields: Fields<Create<ListItemStandard>> = {
   date: FormFieldDateInline,

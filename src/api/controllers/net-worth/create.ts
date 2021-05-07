@@ -138,7 +138,7 @@ export async function createCurrencies(
     db,
     'net_worth_currencies',
     ['currency', 'rate'],
-    ['varchar', 'float8'],
+    ['text', 'float8'],
     netWorthId,
     currencies,
   );

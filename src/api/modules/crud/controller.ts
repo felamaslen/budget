@@ -22,7 +22,8 @@ import {
 } from './types';
 
 import { pubsub } from '~api/modules/graphql/pubsub';
-import { Create, Item, PickPartial } from '~api/types';
+import { Create, Item } from '~api/types';
+import { PickPartial } from '~shared/types';
 
 const notFoundError = (item: string): Error => boom.notFound(`${item} not found`);
 

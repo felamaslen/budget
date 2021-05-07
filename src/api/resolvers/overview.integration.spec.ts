@@ -1,8 +1,10 @@
 import gql from 'graphql-tag';
 import moize from 'moize';
 import sinon from 'sinon';
+import { sql } from 'slonik';
 
 import { seedData } from '~api/__tests__/fixtures';
+import { withSlonik } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import { Query, Overview, OverviewOld, Maybe } from '~api/types';
 
@@ -10,13 +12,15 @@ describe('Overview resolver', () => {
   let clock: sinon.SinonFakeTimers;
   let app: App;
   const now = new Date('2018-04-20');
-  beforeAll(async () => {
-    clock = sinon.useFakeTimers(now);
-    app = await getTestApp();
+  beforeAll(
+    withSlonik(async (db) => {
+      clock = sinon.useFakeTimers(now);
+      app = await getTestApp();
 
-    await app.db('net_worth').del();
-    await seedData(app.uid, app.db);
-  });
+      await db.query(sql`DELETE FROM net_worth`);
+      await seedData(app.uid);
+    }),
+  );
   afterAll(async () => {
     clock.restore();
   });

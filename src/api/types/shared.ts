@@ -1,6 +1,3 @@
-export type PickPartial<T extends Record<string, unknown>, K extends keyof T> = Omit<T, K> &
-  Partial<Pick<T, K>>;
-
 export type PromiseResolvedType<T> = T extends Promise<infer R> ? R : never;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsyncReturnType<T extends (...args: any) => any> = PromiseResolvedType<ReturnType<T>>;

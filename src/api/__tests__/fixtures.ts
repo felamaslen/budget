@@ -1,655 +1,377 @@
-import Knex from 'knex';
+import { DatabaseTransactionConnectionType, sql } from 'slonik';
+import { withSlonik } from '~api/modules/db';
 import { generateUserPin } from '~api/test-utils/generate-user-pin';
 
-export async function generateFunds(uid: number, db: Knex): Promise<void> {
-  const fundIds = await db
-    .insert([
-      { uid, item: 'fund1' },
-      { uid, item: 'fund2' },
-      { uid, item: 'fund3' },
-    ])
-    .returning('id')
-    .into('funds');
+const generateFunds = async (db: DatabaseTransactionConnectionType, uid: number): Promise<void> => {
+  const fundIdsResult = await db.query<{ id: number }>(sql`
+  INSERT INTO funds (uid, item)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, 'fund1'],
+      [uid, 'fund2'],
+      [uid, 'fund3'],
+    ],
+    ['int4', 'text'],
+  )}
+  RETURNING id
+  `);
+  const fundIds = fundIdsResult.rows.map<number>((row) => row.id);
 
-  const cids = await db('fund_cache_time')
-    .insert([
-      { time: '2017-09-30T17:01:01Z' },
-      { time: '2017-09-01T17:01:01Z' },
-      { time: '2017-08-31T17:01:02Z' },
-      { time: '2016-11-07T06:26:40Z' },
-      { time: '2014-10-14T17:01:01Z' },
-      { time: '2015-02-03T15:30:01Z' },
-      { time: '2015-08-29T15:30:01Z' },
-      { time: '2020-03-30T17:01:01Z' },
-    ])
-    .returning('cid');
+  const priceCacheIdsResult = await db.query<{ cid: number }>(sql`
+  INSERT INTO fund_cache_time (time)
+  SELECT * FROM ${sql.unnest(
+    [
+      ['2017-09-30T17:01:01Z'],
+      ['2017-09-01T17:01:01Z'],
+      ['2017-08-31T17:01:02Z'],
+      ['2016-11-07T06:26:40Z'],
+      ['2014-10-14T17:01:01Z'],
+      ['2015-02-03T15:30:01Z'],
+      ['2015-08-29T15:30:01Z'],
+      ['2020-03-30T17:01:01Z'],
+    ],
+    ['timestamptz'],
+  )}
+  RETURNING cid
+  `);
+  const cids = priceCacheIdsResult.rows.map((row) => row.cid);
 
-  const fids = await db('fund_scrape')
-    .insert([
-      { broker: 'hl', item: 'fund1' },
-      { broker: 'hl', item: 'fund2' },
-      { broker: 'hl', item: 'fund3' },
-    ])
-    .returning('fid');
+  const fundScrapeResult = await db.query<{ fid: number }>(sql`
+  INSERT INTO fund_scrape (broker, item)
+  SELECT * FROM ${sql.unnest(
+    [
+      ['hl', 'fund1'],
+      ['hl', 'fund2'],
+      ['hl', 'fund3'],
+    ],
+    ['text', 'text'],
+  )}
+  RETURNING fid
+  `);
+  const fids = fundScrapeResult.rows.map((row) => row.fid);
 
-  await db
-    .insert([
-      { cid: cids[1], fid: fids[0], price: 124.04 },
-      { cid: cids[1], fid: fids[1], price: 95.49 },
-      { cid: cids[1], fid: fids[2], price: 49.52 },
-      { cid: cids[2], fid: fids[0], price: 123 },
-      { cid: cids[2], fid: fids[1], price: 100 },
-      { cid: cids[2], fid: fids[2], price: 50.97 },
-      { cid: cids[3], fid: fids[1], price: 95.3 },
-      { cid: cids[4], fid: fids[0], price: 117.93 },
-      { cid: cids[5], fid: fids[0], price: 119.27 },
-      { cid: cids[6], fid: fids[0], price: 120.05 },
-      { cid: cids[7], fid: fids[0], price: 127.39 },
-    ])
-    .into('fund_cache');
+  await db.query(sql`
+  INSERT INTO fund_cache (cid, fid, price)
+  SELECT * FROM ${sql.unnest(
+    [
+      [cids[1], fids[0], 124.04],
+      [cids[1], fids[1], 95.49],
+      [cids[1], fids[2], 49.52],
+      [cids[2], fids[0], 123],
+      [cids[2], fids[1], 100],
+      [cids[2], fids[2], 50.97],
+      [cids[3], fids[1], 95.3],
+      [cids[4], fids[0], 117.93],
+      [cids[5], fids[0], 119.27],
+      [cids[6], fids[0], 120.05],
+      [cids[7], fids[0], 127.39],
+    ],
+    ['int4', 'int4', 'float8'],
+  )}
+  `);
 
-  await db
-    .insert([
-      {
-        fund_id: fundIds[0],
-        date: '2014-10-13',
-        units: 1005.2,
-        price: 1139.92,
-        fees: 10,
-        taxes: 14,
-      },
-      {
-        fund_id: fundIds[0],
-        date: '2015-08-21',
-        units: -1005.2,
-        price: 1549.03,
-        fees: 5,
-        taxes: 204,
-      },
-      {
-        fund_id: fundIds[2],
-        date: '2016-09-19',
-        units: 1678.42,
-        price: 119.15,
-        fees: 16,
-        taxes: 0,
-      },
-      {
-        fund_id: fundIds[2],
-        date: '2017-02-14',
-        units: 846.38,
-        price: 118.15,
-        fees: 0,
-        taxes: 0,
-      },
-      {
-        fund_id: fundIds[0],
-        date: '2016-08-24',
-        units: 89.095,
-        price: 1122.3,
-        fees: 8,
-        taxes: 0,
-      },
-      {
-        fund_id: fundIds[0],
-        date: '2016-09-19',
-        units: 894.134,
-        price: 111.84,
-        fees: 0,
-        taxes: 0,
-      },
-      {
-        fund_id: fundIds[0],
-        date: '2017-04-27',
-        units: -883.229,
-        price: 101.898,
-        fees: 0,
-        taxes: 0,
-      },
-    ])
-    .into('funds_transactions');
-}
+  await db.query(sql`
+  INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes)
+  SELECT * FROM ${sql.unnest(
+    [
+      [fundIds[0], '2014-10-13', 1005.2, 1139.92, 10, 14],
+      [fundIds[0], '2015-08-21', -1005.2, 1549.03, 5, 204],
+      [fundIds[2], '2016-09-19', 1678.42, 119.15, 16, 0],
+      [fundIds[2], '2017-02-14', 846.38, 118.15, 0, 0],
+      [fundIds[0], '2016-08-24', 89.095, 1122.3, 8, 0],
+      [fundIds[0], '2016-09-19', 894.134, 111.84, 0, 0],
+      [fundIds[0], '2017-04-27', -883.229, 101.898, 0, 0],
+    ],
+    ['int4', 'date', 'float8', 'float8', 'int4', 'int4'],
+  )}
+  `);
+};
 
-export async function generateListData(uid: number, db: Knex): Promise<void> {
-  await db
-    .insert([
-      {
-        uid,
-        date: '2015-04-18',
-        item: 'Salary',
-        category: 'Main job',
-        cost: 365202,
-        shop: 'My company',
-      },
-      {
-        uid,
-        date: '2018-03-24',
-        item: 'Salary',
-        category: 'Side work',
-        cost: 433201,
-        shop: 'Contract',
-      },
-    ])
-    .into('income');
+const generateListData = async (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<void> => {
+  await db.query(sql`
+  INSERT INTO income (uid, date, item, category, cost, shop)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, '2015-04-18', 'Salary', 'Main job', 365202, 'My company'],
+      [uid, '2018-03-24', 'Salary', 'Side work', 433201, 'Contract'],
+    ],
+    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+  )}
+  `);
 
-  await db
-    .insert([
-      { uid, date: '2018-03-25', item: 'Rent', category: 'Housing', cost: 72500, shop: 'My bank' },
-      {
-        uid,
-        date: '2018-03-25',
-        item: 'Electricity',
-        category: 'Utilities',
-        cost: 3902,
-        shop: 'My energy company',
-      },
-    ])
-    .into('bills');
+  await db.query(sql`
+  INSERT INTO bills (uid, date, item, category, cost, shop)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, '2018-03-25', 'Rent', 'Housing', 72500, 'My bank'],
+      [uid, '2018-03-25', 'Electricity', 'Utilities', 3902, 'My energy company'],
+    ],
+    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+  )}
+  `);
 
-  await db
-    .insert([
-      {
-        uid,
-        date: '2015-05-07',
-        shop: "Sainsbury's",
-        category: 'Confectionery',
-        item: 'Doughnuts',
-        cost: 83,
-      },
-      {
-        uid,
-        date: '2015-05-03',
-        shop: "Sainsbury's",
-        category: 'Pastry',
-        item: 'Danish pastry',
-        cost: 156,
-      },
-      { uid, date: '2018-03-25', shop: 'Tesco', category: 'Food', item: 'Breakfast', cost: 19239 },
-      { uid, date: '2018-03-25', shop: 'Morrisons', category: 'Food', item: 'Lunch', cost: 91923 },
-      {
-        uid,
-        date: '2018-03-25',
-        shop: "Sainsbury's",
-        category: 'Snacks',
-        item: 'Nuts',
-        cost: 2239,
-      },
-    ])
-    .into('food');
+  await db.query(sql`
+  INSERT INTO food (uid, date, item, category, cost, shop)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, '2015-05-07', 'Doughnuts', 'Confectionery', 83, "Sainsbury's"],
+      [uid, '2015-05-03', 'Danish pastry', 'Pastry', 156, "Sainsbury's"],
+      [uid, '2018-03-25', 'Breakfast', 'Food', 19239, 'Tesco'],
+      [uid, '2018-03-25', 'Lunch', 'Food', 91923, 'Morrisons'],
+      [uid, '2018-03-25', 'Nuts', 'Snacks', 2239, "Sainsbury's"],
+    ],
+    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+  )}
+  `);
 
-  await db
-    .insert([
-      { uid, date: '2015-05-10', shop: 'Foo', category: 'Bar', item: 'Baz', cost: 7619 },
-      { uid, date: '2018-03-25', shop: 'Amazon', category: 'Foo', item: 'Kitchen', cost: 1231 },
-      {
-        uid,
-        date: '2018-03-25',
-        shop: 'Hardware store',
-        category: 'Foo',
-        item: 'Household',
-        cost: 9912,
-      },
-      {
-        uid,
-        date: new Date('2018-03-13'),
-        item: 'Deposit',
-        category: 'House purchase',
-        cost: 5956000,
-        shop: 'Some conveyancer',
-      },
-      {
-        uid,
-        date: new Date('2015-05-20'),
-        item: 'Old Deposit',
-        category: 'House purchase',
-        cost: 12300000,
-        shop: 'Other conveyancer',
-      },
-    ])
-    .into('general');
+  await db.query(sql`
+  INSERT INTO general (uid, date, item, category, cost, shop)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, '2015-05-10', 'Baz', 'Bar', 7619, 'Foo'],
+      [uid, '2018-03-25', 'Kitchen', 'Foo', 1231, 'Amazon'],
+      [uid, '2018-03-25', 'Household', 'Foo', 9912, 'Hardware store'],
+      [uid, '2018-03-13', 'Deposit', 'House purchase', 5956000, 'Some conveyancer'],
+      [uid, '2015-05-20', 'Old Deposit', 'House purchase', 12300000, 'Other conveyancer'],
+    ],
+    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+  )}
+  `);
 
-  await db
-    .insert([
-      {
-        uid,
-        date: '2018-03-25',
-        shop: 'Travel agents',
-        category: 'a country',
-        item: 'Somewhere',
-        cost: 11023,
-      },
-      {
-        uid,
-        date: '2018-03-25',
-        shop: 'Skyscanner',
-        category: 'a country',
-        item: 'Otherplace',
-        cost: 23991,
-      },
-    ])
-    .into('holiday');
+  await db.query(sql`
+  INSERT INTO social (uid, date, item, category, cost, shop)
+  SELECT * FROM ${sql.unnest(
+    [[uid, '2018-03-25', 'Friends', 'Bar', 61923, 'Some pub']],
+    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+  )}
+  `);
 
-  await db
-    .insert([
-      { uid, date: '2018-03-25', shop: 'Some pub', category: 'Bar', item: 'Friends', cost: 61923 },
-    ])
-    .into('social');
-}
+  await db.query(sql`
+  INSERT INTO holiday (uid, date, item, category, cost, shop)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, '2018-03-25', 'Somewhere', 'a country', 11023, 'Travel agents'],
+      [uid, '2018-03-25', 'Otherplace', 'a country', 23991, 'Skyscanner'],
+    ],
+    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+  )}
+  `);
+};
 
-export async function generateNetWorth(uid: number, db: Knex): Promise<void> {
-  const [
-    categoryIdCash,
-    categoryIdLockedCash,
-    categoryIdInvestments,
-    categoryIdHouse,
-    categoryIdOptions,
-    categoryIdPension,
-    categoryIdMortgage,
-    categoryIdCC,
-  ] = await db('net_worth_categories')
-    .insert([
-      {
-        uid,
-        type: 'asset',
-        category: 'Cash (easy access)',
-        color: 'green',
-        is_option: false,
-      },
-      {
-        uid,
-        type: 'asset',
-        category: 'Cash (other)',
-        color: 'teal',
-        is_option: false,
-      },
-      {
-        uid,
-        type: 'asset',
-        category: 'Stocks',
-        color: 'teal',
-        is_option: false,
-      },
-      {
-        uid,
-        type: 'asset',
-        category: 'House',
-        color: 'darkgreen',
-        is_option: false,
-      },
-      {
-        uid,
-        type: 'asset',
-        category: 'Options',
-        color: 'turquoise',
-        is_option: true,
-      },
-      {
-        uid,
-        type: 'asset',
-        category: 'Pension',
-        color: 'darkblue',
-        is_option: true,
-      },
-      {
-        uid,
-        type: 'liability',
-        category: 'Mortgage',
-        color: 'darkred',
-        is_option: null,
-      },
-      {
-        uid,
-        type: 'liability',
-        category: 'Credit Cards',
-        color: 'red',
-        is_option: null,
-      },
-    ])
-    .returning('id');
+const generateNetWorth = async (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<void> => {
+  const {
+    rows: [
+      categoryIdCash,
+      categoryIdLockedCash,
+      categoryIdInvestments,
+      categoryIdHouse,
+      categoryIdOptions,
+      categoryIdPension,
+      categoryIdMortgage,
+      categoryIdCC,
+    ],
+  } = await db.query<{ id: number }>(sql`
+  INSERT INTO net_worth_categories (uid, type, category, color, is_option)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, 'asset', 'Cash (easy access)', 'green', false],
+      [uid, 'asset', 'Cash (other)', 'teal', false],
+      [uid, 'asset', 'Stocks', 'teal', false],
+      [uid, 'asset', 'House', 'darkgreen', false],
+      [uid, 'asset', 'Options', 'turquoise', true],
+      [uid, 'asset', 'Pension', 'darkblue', true],
+      [uid, 'liability', 'Mortgage', 'darkred', null],
+      [uid, 'liability', 'Credit Cards', 'red', null],
+    ],
+    ['int4', 'text', 'text', 'text', 'bool'],
+  )}
+  RETURNING id
+  `);
 
-  const [
-    subcategoryIdBank,
-    subcategoryIdLockedCash,
-    subcategoryIdForeignCash,
-    subcategoryIdISA,
-    subcategoryIdMyHouse,
-    subcategoryIdMyOption,
-    subcategoryIdMyPension,
-    subcategoryIdMySAYE,
-    subcategoryIdMyMortgage,
-    subcategoryIdMyCC,
-  ] = await db('net_worth_subcategories')
-    .insert([
-      {
-        category_id: categoryIdCash,
-        subcategory: 'Bank acount',
-        has_credit_limit: null,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdLockedCash,
-        subcategory: 'Money market funds',
-        has_credit_limit: null,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdCash,
-        subcategory: 'Foreign cash',
-        has_credit_limit: null,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdInvestments,
-        subcategory: 'My ISA',
-        has_credit_limit: null,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdHouse,
-        subcategory: '1 Some Place',
-        has_credit_limit: null,
-        appreciation_rate: 0.038,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdOptions,
-        subcategory: 'My option',
-        has_credit_limit: null,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdPension,
-        subcategory: 'My pension',
-        has_credit_limit: null,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdOptions,
-        subcategory: 'My SAYE',
-        is_saye: true,
-        has_credit_limit: null,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdMortgage,
-        subcategory: 'My mortgage',
-        has_credit_limit: null,
-        opacity: 1,
-      },
-      {
-        category_id: categoryIdCC,
-        subcategory: 'My credit card',
-        has_credit_limit: true,
-        opacity: 1,
-      },
-    ])
-    .returning('id');
+  const {
+    rows: [
+      subcategoryIdBank,
+      subcategoryIdLockedCash,
+      subcategoryIdForeignCash,
+      subcategoryIdISA,
+      subcategoryIdMyHouse,
+      subcategoryIdMyOption,
+      subcategoryIdMyPension,
+      subcategoryIdMySAYE,
+      subcategoryIdMyMortgage,
+      subcategoryIdMyCC,
+    ],
+  } = await db.query<{ id: number }>(sql`
+  INSERT INTO net_worth_subcategories (category_id, subcategory, has_credit_limit, is_saye, appreciation_rate, opacity)
+  SELECT * FROM ${sql.unnest(
+    [
+      [categoryIdCash.id, 'Bank acount', null, null, null, 1],
+      [categoryIdLockedCash.id, 'Money market funds', null, null, null, 1],
+      [categoryIdCash.id, 'Foreign cash', null, null, null, 1],
+      [categoryIdInvestments.id, 'My ISA', null, null, null, 1],
+      [categoryIdHouse.id, '1 Some Place', null, null, 0.038, 1],
+      [categoryIdOptions.id, 'My option', null, null, null, 1],
+      [categoryIdPension.id, 'My pension', null, null, null, 1],
+      [categoryIdOptions.id, 'My SAYE', null, true, null, 1],
+      [categoryIdMortgage.id, 'My mortgage', null, null, null, 1],
+      [categoryIdCC.id, 'My credit card', true, null, null, 1],
+    ],
+    ['int4', 'text', 'bool', 'bool', 'float8', 'float8'],
+  )}
+  RETURNING id
+  `);
 
-  const [entryIdOldest, entryIdOld, entryIdLastMonth] = await db('net_worth')
-    .insert([
-      {
-        uid,
-        date: new Date('2015-03-27'),
-      },
-      {
-        uid,
-        date: new Date('2015-05-31'),
-      },
-      {
-        uid,
-        date: new Date('2020-03-31'),
-      },
-    ])
-    .returning('id');
+  const {
+    rows: [entryIdOldest, entryIdOld, entryIdLastMonth],
+  } = await db.query<{ id: number }>(sql`
+  INSERT INTO net_worth (uid, date)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, '2015-03-27'],
+      [uid, '2015-05-31'],
+      [uid, '2020-03-31'],
+    ],
+    ['int4', 'date'],
+  )}
+  RETURNING id
+  `);
 
-  await db('net_worth_credit_limit').insert({
-    net_worth_id: entryIdOldest,
-    subcategory: subcategoryIdMyCC,
-    value: 600000,
-  });
+  await db.query(sql`
+  INSERT INTO net_worth_credit_limit (net_worth_id, subcategory, value)
+  VALUES (${entryIdOldest.id}, ${subcategoryIdMyCC.id}, ${600000})
+  `);
 
-  await db('net_worth_currencies').insert([
-    {
-      net_worth_id: entryIdOldest,
-      currency: 'CNY',
-      rate: 0.113,
-    },
-    {
-      net_worth_id: entryIdOld,
-      currency: 'CNY',
-      rate: 0.116,
-    },
-    {
-      net_worth_id: entryIdOld,
-      currency: 'USD',
-      rate: 0.783,
-    },
-  ]);
+  await db.query(sql`
+  INSERT INTO net_worth_currencies (net_worth_id, currency, rate)
+  SELECT * FROM ${sql.unnest(
+    [
+      [entryIdOldest.id, 'CNY', 0.113],
+      [entryIdOld.id, 'CNY', 0.116],
+      [entryIdOld.id, 'USD', 0.783],
+    ],
+    ['int4', 'text', 'float8'],
+  )}
+  `);
 
-  const [
-    ,
-    valueIdOldestFX,
-    ,
-    ,
-    valueIdOldestOption,
-    valueIdOldestSAYE,
-    ,
-    valueIdOldestMortgage,
-    ,
-    ,
-    valueIdOldFX,
-    ,
-    valueIdOldOption,
-    ,
-    ,
-    valueIdOldMortgage,
-  ] = await db('net_worth_values')
-    .insert([
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdBank,
-        value: 1050000,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdForeignCash,
-        value: null,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdLockedCash,
-        value: 1667500,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdMyHouse,
-        value: 42500000,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdMyOption,
-        value: null,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdMySAYE,
-        value: null,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdMyPension,
-        value: 1054200,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdMyMortgage,
-        value: -36125000,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOldest,
-        subcategory: subcategoryIdMyCC,
-        value: -16532,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOld,
-        subcategory: subcategoryIdBank,
-        value: 996542,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOld,
-        subcategory: subcategoryIdForeignCash,
-        value: null,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOld,
-        subcategory: subcategoryIdMyHouse,
-        value: 43500000,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOld,
-        subcategory: subcategoryIdMyOption,
-        value: null,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOld,
-        subcategory: subcategoryIdISA,
-        value: 6354004,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOld,
-        subcategory: subcategoryIdMyPension,
-        value: 1117503,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOld,
-        subcategory: subcategoryIdMyMortgage,
-        value: -34713229,
-        skip: null,
-      },
-      {
-        net_worth_id: entryIdOld,
-        subcategory: subcategoryIdMyCC,
-        value: -12322,
-        skip: null,
-      },
-    ])
-    .returning('id');
+  const {
+    rows: [
+      ,
+      valueIdOldestFX,
+      ,
+      ,
+      valueIdOldestOption,
+      valueIdOldestSAYE,
+      ,
+      valueIdOldestMortgage,
+      ,
+      ,
+      valueIdOldFX,
+      ,
+      valueIdOldOption,
+      ,
+      ,
+      valueIdOldMortgage,
+    ],
+  } = await db.query(sql`
+  INSERT INTO net_worth_values (net_worth_id, subcategory, value, skip)
+  SELECT * FROM ${sql.unnest(
+    [
+      [entryIdOldest.id, subcategoryIdBank.id, 1050000, null],
+      [entryIdOldest.id, subcategoryIdForeignCash.id, null, null],
+      [entryIdOldest.id, subcategoryIdLockedCash.id, 1667500, null],
+      [entryIdOldest.id, subcategoryIdMyHouse.id, 42500000, null],
+      [entryIdOldest.id, subcategoryIdMyOption.id, null, null],
+      [entryIdOldest.id, subcategoryIdMySAYE.id, null, null],
+      [entryIdOldest.id, subcategoryIdMyPension.id, 1054200, null],
+      [entryIdOldest.id, subcategoryIdMyMortgage.id, -36125000, null],
+      [entryIdOldest.id, subcategoryIdMyCC.id, -16532, null],
+      [entryIdOld.id, subcategoryIdBank.id, 996542, null],
+      [entryIdOld.id, subcategoryIdForeignCash.id, null, null],
+      [entryIdOld.id, subcategoryIdMyHouse.id, 43500000, null],
+      [entryIdOld.id, subcategoryIdMyOption.id, null, null],
+      [entryIdOld.id, subcategoryIdISA.id, 6354004, null],
+      [entryIdOld.id, subcategoryIdMyPension.id, 1117503, null],
+      [entryIdOld.id, subcategoryIdMyMortgage.id, -34713229, null],
+      [entryIdOld.id, subcategoryIdMyCC.id, -12322, null],
+      [entryIdLastMonth.id, subcategoryIdISA.id, 6449962, null],
+      [entryIdLastMonth.id, subcategoryIdBank.id, 1288520, null],
+    ],
+    ['int4', 'int4', 'int4', 'bool'],
+  )}
+  RETURNING id
+  `);
 
-  await db('net_worth_values').insert([
-    {
-      net_worth_id: entryIdLastMonth,
-      subcategory: subcategoryIdISA,
-      value: 6449962,
-      skip: null,
-    },
-    {
-      net_worth_id: entryIdLastMonth,
-      subcategory: subcategoryIdBank,
-      value: 1288520,
-      skip: null,
-    },
-  ]);
+  await db.query(sql`
+  INSERT INTO net_worth_fx_values (values_id, currency, value)
+  SELECT * FROM ${sql.unnest(
+    [
+      [valueIdOldestFX.id, 'CNY', 62000],
+      [valueIdOldFX.id, 'USD', 105],
+      [valueIdOldFX.id, 'CNY', 57451],
+    ],
+    ['int4', 'text', 'int4'],
+  )}
+  `);
 
-  await db('net_worth_fx_values').insert([
-    {
-      values_id: valueIdOldestFX,
-      currency: 'CNY',
-      value: 62000,
-    },
-    {
-      values_id: valueIdOldFX,
-      currency: 'USD',
-      value: 105,
-    },
-    {
-      values_id: valueIdOldFX,
-      currency: 'CNY',
-      value: 57451,
-    },
-  ]);
+  await db.query(sql`
+  INSERT INTO net_worth_option_values (values_id, units, vested, strike_price, market_price)
+  SELECT * FROM ${sql.unnest(
+    [
+      [valueIdOldestOption.id, 165, 149, 112.83, 99.39],
+      [valueIdOldestSAYE.id, 1556, 993, 1350.3, 2113.7],
+      [valueIdOldOption.id, 1324, 101, 4.53, 19.27],
+    ],
+    ['int4', 'int4', 'int4', 'float8', 'float8'],
+  )}
+  `);
 
-  await db('net_worth_option_values').insert([
-    {
-      values_id: valueIdOldestOption,
-      units: 165,
-      vested: 149,
-      strike_price: 112.83,
-      market_price: 99.39,
-    },
-    {
-      values_id: valueIdOldestSAYE,
-      units: 1556,
-      vested: 993,
-      strike_price: 1350.3,
-      market_price: 2113.7,
-    },
-    {
-      values_id: valueIdOldOption,
-      units: 1324,
-      vested: 101,
-      strike_price: 4.53,
-      market_price: 19.27,
-    },
-  ]);
+  await db.query(sql`
+  INSERT INTO net_worth_loan_values (values_id, payments_remaining, rate)
+  SELECT * FROM ${sql.unnest(
+    [
+      [valueIdOldestMortgage.id, 360, 2.74],
+      [valueIdOldMortgage.id, 358, 2.71],
+    ],
+    ['int4', 'int4', 'float8'],
+  )};
+  `);
+};
 
-  await db('net_worth_loan_values').insert([
-    {
-      values_id: valueIdOldestMortgage,
-      payments_remaining: 360,
-      rate: 2.74,
-    },
-    {
-      values_id: valueIdOldMortgage,
-      payments_remaining: 358,
-      rate: 2.71,
-    },
-  ]);
-}
-
-export async function seedUser(db: Knex): Promise<number> {
-  await db('users').del();
+export const seedUser = withSlonik<number>(async (db) => {
+  await db.query(sql`DELETE FROM users`);
 
   const { pinHash } = await generateUserPin(1234);
 
-  const [uid] = await db('users')
-    .insert({
-      name: 'test-user',
-      pin_hash: pinHash,
-    })
-    .returning('uid');
+  const {
+    rows: [{ uid }],
+  } = await db.query<{ uid: number }>(sql`
+  INSERT INTO users (name, pin_hash)
+  VALUES (${'test-user'}, ${pinHash})
+  RETURNING uid
+  `);
 
   return uid;
-}
+});
 
-export async function seedData(uid: number, db: Knex): Promise<void> {
-  await db('fund_scrape').del();
-  await db('fund_cache_time').del();
+export const seedData = withSlonik<void, [number]>(async (db, uid) => {
+  await db.query(sql`DELETE FROM fund_scrape`);
+  await db.query(sql`DELETE FROM fund_cache_time`);
 
-  await db('net_worth').del();
-  await db('net_worth_subcategories').del();
-  await db('net_worth_categories').del();
+  await db.query(sql`DELETE FROM net_worth WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM net_worth_categories WHERE uid = ${uid}`);
 
-  await db('income').del();
-  await db('bills').del();
-  await db('food').del();
-  await db('general').del();
-  await db('holiday').del();
-  await db('social').del();
+  await db.query(sql`DELETE FROM income WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM bills WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM food WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM general WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM social WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM holiday WHERE uid = ${uid}`);
 
-  await Promise.all([generateFunds(uid, db), generateListData(uid, db), generateNetWorth(uid, db)]);
-}
+  await Promise.all([generateFunds(db, uid), generateListData(db, uid), generateNetWorth(db, uid)]);
+});

@@ -27,22 +27,20 @@ node {
           sh 'psql postgres://docker:docker@db/postgres -c "create database budget_test;"'
         }
 
-        stage('Run parallel tests') {
-          parallel([
-            "Lint": {
-              sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
-            },
-            "Client unit tests": {
-              sh "docker run --rm ${IMAGE} sh -c 'yarn test:client:ci'"
-            },
-            "API unit tests": {
-              sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
-            }
-          ])
+        stage('Lint') {
+          sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
+        }
+
+        stage('Client unit tests') {
+          sh "docker run --rm ${IMAGE} sh -c 'yarn test:client:ci'"
+        }
+
+        stage('API unit tests') {
+          sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
         }
 
         stage('API integration tests') {
-          sh "docker run --rm --link ${pg.id}:db -e 'DATABASE_URL=postgres://docker:docker@db/budget_test' ${IMAGE} sh -c 'yarn test:api:integration'"
+          sh "docker run --rm --link ${pg.id}:db -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' ${IMAGE} sh -c 'yarn test:api:integration'"
         }
       }
     }

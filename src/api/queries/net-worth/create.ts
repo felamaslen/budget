@@ -42,7 +42,7 @@ export async function insertFXValues(
   }
   await db.query(sql`
     INSERT INTO net_worth_fx_values (values_id, value, currency)
-    SELECT * FROM ${sql.unnest(fxValuesRows, ['int4', 'float4', 'varchar'])}
+    SELECT * FROM ${sql.unnest(fxValuesRows, ['int4', 'float4', 'text'])}
     ON CONFLICT (values_id, currency)
       DO UPDATE SET value = excluded.value
   `);

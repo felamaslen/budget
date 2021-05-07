@@ -1,41 +1,48 @@
 import gql from 'graphql-tag';
 import sinon from 'sinon';
+import { sql } from 'slonik';
 
 import { seedData } from '~api/__tests__/fixtures';
+import { getPool, withSlonik } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
-  Maybe,
-  RawDate,
-  RawDateDeep,
+  AsyncReturnType,
+  CategoryRow,
   Create,
-  Query,
-  Mutation,
+  CreditLimit,
   CrudResponseCreate,
-  CrudResponseUpdate,
   CrudResponseDelete,
+  CrudResponseUpdate,
+  Maybe,
+  Mutation,
+  MutationCreateNetWorthCategoryArgs,
+  MutationCreateNetWorthEntryArgs,
+  MutationCreateNetWorthSubcategoryArgs,
+  MutationDeleteNetWorthCategoryArgs,
+  MutationDeleteNetWorthEntryArgs,
+  MutationDeleteNetWorthSubcategoryArgs,
+  MutationUpdateNetWorthCategoryArgs,
+  MutationUpdateNetWorthEntryArgs,
+  MutationUpdateNetWorthSubcategoryArgs,
   NetWorthCategory,
   NetWorthCategoryInput,
-  MutationCreateNetWorthCategoryArgs,
-  QueryReadNetWorthCategoriesArgs,
-  MutationUpdateNetWorthCategoryArgs,
-  MutationDeleteNetWorthCategoryArgs,
   NetWorthCategoryType,
+  NetWorthEntry,
+  NetWorthEntryInput,
+  NetWorthEntryOverview,
+  NetWorthEntryRow,
+  NetWorthValueObject,
   NetWorthSubcategory,
   NetWorthSubcategoryInput,
-  MutationCreateNetWorthSubcategoryArgs,
+  Query,
+  QueryReadNetWorthCategoriesArgs,
   QueryReadNetWorthSubcategoriesArgs,
-  MutationUpdateNetWorthSubcategoryArgs,
-  MutationDeleteNetWorthSubcategoryArgs,
-  NetWorthEntryInput,
-  MutationCreateNetWorthEntryArgs,
-  AsyncReturnType,
-  NetWorthEntry,
-  NetWorthEntryOverview,
-  NetWorthValueObject,
-  CreditLimit,
-  MutationUpdateNetWorthEntryArgs,
-  MutationDeleteNetWorthEntryArgs,
+  RawDate,
+  RawDateDeep,
+  SubcategoryRow,
+  ValueRowSelect,
 } from '~api/types';
+import { RequiredNotNull } from '~shared/types';
 
 describe('Net worth resolver', () => {
   let app: App;
@@ -43,12 +50,12 @@ describe('Net worth resolver', () => {
     app = await getTestApp();
   });
 
-  const clearDb = async (): Promise<void> => {
-    await app.db('net_worth_categories').del();
-    await app.db('net_worth').del();
-  };
-
-  beforeEach(clearDb);
+  beforeEach(
+    withSlonik(async (db) => {
+      await db.query(sql`DELETE FROM net_worth_categories`);
+      await db.query(sql`DELETE FROM net_worth`);
+    }),
+  );
 
   const category: NetWorthCategoryInput = {
     type: NetWorthCategoryType.Asset,
@@ -136,22 +143,31 @@ describe('Net worth resolver', () => {
       });
 
       it('should create the category in the database', async () => {
-        expect.assertions(1);
+        expect.assertions(2);
         const res = await setup();
 
-        const row = await app
-          .db('net_worth_categories')
-          .where({ id: res?.id, category: category.category })
-          .first();
-        expect(row).not.toBeUndefined();
+        expect(res?.id).not.toBeUndefined();
+
+        const rows = await getPool().query(sql`
+        SELECT * FROM net_worth_categories
+        WHERE id = ${res?.id as number} AND category = ${category.category}
+        LIMIT 1
+        `);
+
+        expect(rows.rowCount).toBe(1);
       });
 
       it('should accept isOption value', async () => {
         expect.assertions(1);
 
         const res = await setup({ ...category, isOption: true });
-        const row = await app.db('net_worth_categories').where({ id: res?.id }).first();
-        expect(row.is_option).toBe(true);
+
+        const { rows } = await getPool().query<RequiredNotNull<CategoryRow>>(sql`
+        SELECT * FROM net_worth_categories
+        WHERE id = ${res?.id as number}
+        `);
+
+        expect(rows[0].is_option).toBe(true);
       });
     });
 
@@ -269,9 +285,12 @@ describe('Net worth resolver', () => {
         expect.assertions(1);
         const { id } = await setup();
 
-        const row = await app.db('net_worth_categories').where({ id }).first();
+        const { rows } = await getPool().query<RequiredNotNull<CategoryRow>>(sql`
+        SELECT * FROM net_worth_categories
+        WHERE id = ${id}
+        `);
 
-        expect(row).toStrictEqual(
+        expect(rows[0]).toStrictEqual(
           expect.objectContaining({
             category: 'Bank',
             is_option: true,
@@ -310,8 +329,11 @@ describe('Net worth resolver', () => {
       it('should delete the category from the database', async () => {
         expect.assertions(1);
         const { id } = await setup();
-        const row = await app.db('net_worth_categories').where({ id }).first();
-        expect(row).toBeUndefined();
+        const { rowCount } = await getPool().query<RequiredNotNull<CategoryRow>>(sql`
+        SELECT * FROM net_worth_categories
+        WHERE id = ${id}
+        `);
+        expect(rowCount).toBe(0);
       });
     });
   });
@@ -369,11 +391,11 @@ describe('Net worth resolver', () => {
         expect.assertions(1);
         const res = await setup();
 
-        const row = await app
-          .db('net_worth_subcategories')
-          .where({ id: res?.id, subcategory: subcategory.subcategory })
-          .first();
-        expect(row).not.toBeUndefined();
+        const { rowCount } = await getPool().query<RequiredNotNull<SubcategoryRow>>(sql`
+        SELECT * FROM net_worth_subcategories
+        WHERE id = ${res?.id as number} AND subcategory = ${subcategory.subcategory}
+        `);
+        expect(rowCount).toBe(1);
       });
 
       describe('when the category does not exist', () => {
@@ -390,11 +412,11 @@ describe('Net worth resolver', () => {
           expect.assertions(1);
           await setup(nonexistentCategoryId);
 
-          const row = await app
-            .db('net_worth_subcategories')
-            .where({ category_id: nonexistentCategoryId })
-            .first();
-          expect(row).toBeUndefined();
+          const { rowCount } = await getPool().query<RequiredNotNull<SubcategoryRow>>(sql`
+          SELECT * FROM net_worth_subcategories
+          WHERE category_id = ${nonexistentCategoryId}
+          `);
+          expect(rowCount).toBe(0);
         });
       });
 
@@ -432,8 +454,11 @@ describe('Net worth resolver', () => {
           const res = await setupSAYE();
 
           expect(res?.id).toStrictEqual(expect.any(Number));
-          const row = await app.db('net_worth_subcategories').where({ id: res?.id }).first();
-          expect(row).toStrictEqual(
+          const { rows } = await getPool().query<RequiredNotNull<SubcategoryRow>>(sql`
+          SELECT * FROM net_worth_subcategories
+          WHERE id = ${res?.id as number}
+          `);
+          expect(rows[0]).toStrictEqual(
             expect.objectContaining({
               subcategory: subcategory.subcategory,
               is_saye: true,
@@ -583,9 +608,12 @@ describe('Net worth resolver', () => {
         expect.assertions(1);
         const { id } = await setup();
 
-        const row = await app.db('net_worth_subcategories').where({ id }).first();
+        const { rows } = await getPool().query<RequiredNotNull<SubcategoryRow>>(sql`
+        SELECT * FROM net_worth_subcategories
+        WHERE id = ${id}
+        `);
 
-        expect(row).toStrictEqual(
+        expect(rows[0]).toStrictEqual(
           expect.objectContaining({
             subcategory: 'Savings account',
             appreciation_rate: 6.5,
@@ -644,8 +672,11 @@ describe('Net worth resolver', () => {
       it('should delete the subcategory from the database', async () => {
         expect.assertions(1);
         const { id } = await setup();
-        const row = await app.db('net_worth_subcategories').where({ id }).first();
-        expect(row).toBeUndefined();
+        const { rowCount } = await getPool().query<RequiredNotNull<SubcategoryRow>>(sql`
+        SELECT * FROM net_worth_subcategories
+        WHERE id = ${id}
+        `);
+        expect(rowCount).toBe(0);
       });
     });
   });
@@ -952,18 +983,43 @@ describe('Net worth resolver', () => {
         const { res, parents } = await setup();
         const id = res?.id as number;
 
-        const rowMain = await app.db('net_worth').where({ id }).first();
+        const [
+          { rows: rowsMain },
+          { rows: rowValues },
+          { rows: rowValuesFX },
+          { rows: creditLimitRows },
+          { rows: currencyRows },
+        ] = await getPool().connect(async (db) =>
+          Promise.all([
+            db.query(sql`
+            SELECT * FROM net_worth
+            WHERE id = ${id}
+            `),
+            db.query<ValueRowSelect>(sql`
+            SELECT * FROM net_worth_values
+            WHERE net_worth_id = ${id}
+            `),
+            db.query(sql`
+            SELECT nwfxv.* FROM net_worth_fx_values nwfxv
+            INNER JOIN net_worth_values nwv ON nwv.id = nwfxv.values_id
+            WHERE nwv.net_worth_id = ${id}
+            `),
+            db.query(sql`
+            SELECT * FROM net_worth_credit_limit
+            WHERE net_worth_id = ${id}
+            `),
+            db.query(sql`
+            SELECT * FROM net_worth_currencies
+            WHERE net_worth_id = ${id}
+            `),
+          ]),
+        );
 
-        expect(rowMain).toStrictEqual({
+        expect(rowsMain[0]).toStrictEqual({
           id,
           date: new Date('2020-04-14'),
           uid: app.uid,
         });
-
-        const rowValues = await app
-          .db<{ id: number; subcategory: number; net_worth_id: number }>('net_worth_values')
-          .where({ net_worth_id: id })
-          .select();
 
         expect(rowValues).toHaveLength(4);
         expect(rowValues).toStrictEqual(
@@ -996,14 +1052,6 @@ describe('Net worth resolver', () => {
           ({ subcategory }) => subcategory === parents.subcategoryId.foreignCash,
         )?.id as number;
 
-        const rowValuesFX = await app
-          .db('net_worth_fx_values')
-          .whereIn(
-            'values_id',
-            rowValues.map((row) => row.id),
-          )
-          .select();
-
         expect(rowValuesFX).toStrictEqual([
           expect.objectContaining({
             values_id: foreignCashValueId,
@@ -1011,13 +1059,6 @@ describe('Net worth resolver', () => {
             value: 62000,
           }),
         ]);
-
-        const creditLimitRows = await app
-          .db('net_worth_credit_limit')
-          .where({
-            net_worth_id: id,
-          })
-          .select();
 
         expect(creditLimitRows).toHaveLength(2);
         expect(creditLimitRows).toStrictEqual(
@@ -1032,11 +1073,6 @@ describe('Net worth resolver', () => {
             }),
           ]),
         );
-
-        const currencyRows = await app
-          .db('net_worth_currencies')
-          .where({ net_worth_id: id })
-          .select();
 
         expect(currencyRows).toStrictEqual([
           expect.objectContaining({
@@ -1096,10 +1132,20 @@ describe('Net worth resolver', () => {
 
           const id = res.data?.createNetWorthEntry?.id as number;
 
-          const rowValues = await app
-            .db<{ id: number; subcategory: number; net_worth_id: number }>('net_worth_values')
-            .where({ net_worth_id: id })
-            .select();
+          const [{ rows: rowValues }, { rows: rowOptionValues }] = await getPool().connect(
+            async (db) =>
+              Promise.all([
+                db.query<ValueRowSelect>(sql`
+                SELECT * FROM net_worth_values
+                WHERE net_worth_id = ${id}
+                `),
+                db.query(sql`
+                SELECT nwopv.* FROM net_worth_option_values nwopv
+                INNER JOIN net_worth_values nwv ON nwv.id = nwopv.values_id
+                WHERE nwv.net_worth_id = ${id}
+                `),
+              ]),
+          );
 
           expect(rowValues).toStrictEqual([
             expect.objectContaining({
@@ -1109,11 +1155,6 @@ describe('Net worth resolver', () => {
               value: null,
             }),
           ]);
-
-          const rowOptionValues = await app
-            .db('net_worth_option_values')
-            .where({ values_id: rowValues[0].id })
-            .select();
 
           expect(rowOptionValues).toStrictEqual([
             expect.objectContaining({
@@ -1175,10 +1216,20 @@ describe('Net worth resolver', () => {
 
           const id = res.data?.createNetWorthEntry?.id as number;
 
-          const rowValues = await app
-            .db<{ id: number; subcategory: number; net_worth_id: number }>('net_worth_values')
-            .where({ net_worth_id: id })
-            .select();
+          const [{ rows: rowValues }, { rows: rowLoanValues }] = await getPool().connect(
+            async (db) =>
+              Promise.all([
+                db.query<ValueRowSelect>(sql`
+                SELECT * FROM net_worth_values
+                WHERE net_worth_id = ${id}
+                `),
+                db.query(sql`
+                SELECT nwlv.* FROM net_worth_loan_values nwlv
+                INNER JOIN net_worth_values nwv ON nwv.id = nwlv.values_id
+                WHERE nwv.net_worth_id = ${id}
+                `),
+              ]),
+          );
 
           expect(rowValues).toStrictEqual([
             expect.objectContaining({
@@ -1188,11 +1239,6 @@ describe('Net worth resolver', () => {
               value: -35987623,
             }),
           ]);
-
-          const rowLoanValues = await app
-            .db('net_worth_loan_values')
-            .where({ values_id: rowValues[0].id })
-            .select();
 
           expect(rowLoanValues).toStrictEqual([
             expect.objectContaining({
@@ -1524,9 +1570,11 @@ describe('Net worth resolver', () => {
 
         expect(res.data?.updateNetWorthEntry?.error).toBeNull();
 
-        const row = await app.db('net_worth').where({ id }).first();
+        const { rows } = await getPool().query<NetWorthEntryRow>(sql`
+        SELECT * FROM net_worth WHERE id = ${id}
+        `);
 
-        expect(row.date).toStrictEqual(new Date('2020-04-15'));
+        expect(rows[0].date).toStrictEqual(new Date('2020-04-15'));
       });
 
       it('should update a value', async () => {
@@ -1555,7 +1603,9 @@ describe('Net worth resolver', () => {
 
         expect(res.data?.updateNetWorthEntry?.error).toBeNull();
 
-        const valueRows = await app.db('net_worth_values').where({ net_worth_id: id }).select();
+        const { rows: valueRows } = await getPool().query(sql`
+        SELECT * FROM net_worth_values WHERE net_worth_id = ${id}
+        `);
 
         expect(valueRows).toStrictEqual([
           expect.objectContaining({
@@ -1591,10 +1641,9 @@ describe('Net worth resolver', () => {
 
         expect(res.data?.updateNetWorthEntry?.error).toBeNull();
 
-        const creditLimitRows = await app
-          .db('net_worth_credit_limit')
-          .where({ net_worth_id: id })
-          .select();
+        const { rows: creditLimitRows } = await getPool().query(sql`
+        SELECT * FROM net_worth_credit_limit WHERE net_worth_id = ${id}
+        `);
 
         expect(creditLimitRows).toStrictEqual([
           expect.objectContaining({
@@ -1630,10 +1679,9 @@ describe('Net worth resolver', () => {
 
         expect(res.data?.updateNetWorthEntry?.error).toBeNull();
 
-        const currencyRows = await app
-          .db('net_worth_currencies')
-          .where({ net_worth_id: id })
-          .select();
+        const { rows: currencyRows } = await getPool().query(sql`
+        SELECT * FROM net_worth_currencies WHERE net_worth_id = ${id}
+        `);
 
         expect(currencyRows).toStrictEqual([
           expect.objectContaining({
@@ -1678,7 +1726,9 @@ describe('Net worth resolver', () => {
 
         expect(res.data?.updateNetWorthEntry?.error).toBeNull();
 
-        const valuesRows = await app.db('net_worth_values').where({ net_worth_id: id }).select();
+        const { rows: valuesRows } = await getPool().query(sql`
+        SELECT * FROM net_worth_values WHERE net_worth_id = ${id}
+        `);
 
         expect(valuesRows).toHaveLength(2);
 
@@ -1702,9 +1752,12 @@ describe('Net worth resolver', () => {
 
         const allValueIds = valuesRows.map((row) => row.id);
 
-        const optionValuesRows = await app
-          .db('net_worth_option_values')
-          .whereIn('values_id', allValueIds);
+        const { rows: optionValuesRows } = await getPool().query(sql`
+        SELECT * FROM net_worth_option_values WHERE values_id = ANY(${sql.array(
+          allValueIds,
+          'int4',
+        )})
+        `);
 
         expect(optionValuesRows).toStrictEqual([
           expect.objectContaining({
@@ -1772,11 +1825,11 @@ describe('Net worth resolver', () => {
         expect(resA.data?.updateNetWorthEntry?.error).toBeNull();
         expect(resB.data?.updateNetWorthEntry?.error).toBeNull();
 
-        const optionValuesRows = await app.db
-          .from('net_worth_values as v')
-          .innerJoin('net_worth_option_values as ov', 'ov.values_id', 'v.id')
-          .where('v.net_worth_id', '=', id)
-          .select('ov.*');
+        const { rows: optionValuesRows } = await getPool().query(sql`
+        SELECT ov.* FROM net_worth_values v
+        INNER JOIN net_worth_option_values ov ON ov.values_id = v.id
+        WHERE v.net_worth_id = ${id}
+        `);
 
         expect(optionValuesRows).toStrictEqual([
           expect.objectContaining({
@@ -1806,8 +1859,10 @@ describe('Net worth resolver', () => {
 
         expect(id).toStrictEqual(expect.any(Number));
 
-        const rowBefore = await app.db('net_worth').where({ id }).first();
-        expect(rowBefore).not.toBeUndefined();
+        const { rowCount: countBefore } = await getPool().query(sql`
+        SELECT * FROM net_worth WHERE id = ${id}
+        `);
+        expect(countBefore).toBe(1);
 
         const res = await app.authGqlClient.mutate<Mutation, MutationDeleteNetWorthEntryArgs>({
           mutation,
@@ -1816,8 +1871,10 @@ describe('Net worth resolver', () => {
 
         expect(res.data?.deleteNetWorthEntry?.error).toBeNull();
 
-        const rowAfter = await app.db('net_worth').where({ id }).first();
-        expect(rowAfter).toBeUndefined();
+        const { rowCount: countAfter } = await getPool().query(sql`
+        SELECT * FROM net_worth WHERE id = ${id}
+        `);
+        expect(countAfter).toBe(0);
       });
     });
   });
@@ -1835,7 +1892,7 @@ describe('Net worth resolver', () => {
     `;
 
     beforeEach(async () => {
-      await seedData(app.uid, app.db);
+      await seedData(app.uid);
     });
 
     it('should return the split cash to invest and cash in bank values', async () => {

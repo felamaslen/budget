@@ -87,7 +87,7 @@ export async function upsertFundHashes(
 ): Promise<number[]> {
   const result = await db.query<{ fid: number }>(sql`
   INSERT INTO fund_scrape (item, broker)
-  SELECT * FROM ${sql.unnest(tuples, ['varchar', 'varchar'])}
+  SELECT * FROM ${sql.unnest(tuples, ['text', 'text'])}
   ON CONFLICT (item, broker) DO UPDATE
     SET item = excluded.item
   RETURNING fid

@@ -29,7 +29,7 @@ export async function getListCostSummary(
   category: PageListStandard,
 ): Promise<number[]> {
   const results = await db.query<{ month_cost: number }>(sql`
-  SELECT COALESCE(SUM(cost), 0) AS month_cost
+  SELECT COALESCE(SUM(cost), 0)::int4 AS month_cost
   FROM (${getMonthRangeUnion(monthEnds)}) dates
   ${joinCategory(uid, category, 'list_data')}
   ${
@@ -53,7 +53,7 @@ export async function getInvestmentPurchasesSummary(
   monthEnds: Date[],
 ): Promise<number[]> {
   const results = await db.query<{ month_cost: number }>(sql`
-  SELECT COALESCE(SUM(cost), 0) AS month_cost
+  SELECT COALESCE(SUM(cost), 0)::int4 AS month_cost
   FROM (${getMonthRangeUnion(monthEnds)}) dates
   LEFT JOIN ${sql.identifier([PageListStandard.General])} AS ${sql.identifier([
     'general',
@@ -79,7 +79,7 @@ export async function getInvestmentPurchasesSummary(
 export async function getSpendingSummary(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  dates: TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }[]>,
+  dates: TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }>,
 ): Promise<number[]> {
   const results = await db.query<{ month_cost: number }>(sql`
   WITH ${sql.join(
@@ -87,13 +87,13 @@ export async function getSpendingSummary(
       sql`dates AS (${dates})`,
 
       sql`sum_bills AS (
-        SELECT dates.start_date, COALESCE(SUM(bills.cost), 0) AS cost
+        SELECT dates.start_date, COALESCE(SUM(bills.cost), 0)::int4 AS cost
         FROM dates
         ${joinCategory(uid, PageListStandard.Bills)}
         GROUP BY dates.start_date
       )`,
       sql`sum_food AS (
-        SELECT dates.start_date, COALESCE(SUM(food.cost), 0) AS cost
+        SELECT dates.start_date, COALESCE(SUM(food.cost), 0)::int4 AS cost
         FROM dates
         ${joinCategory(uid, PageListStandard.Food)}
         GROUP BY dates.start_date
@@ -108,19 +108,19 @@ export async function getSpendingSummary(
             THEN 0
             ELSE general.cost
             END
-        ), 0) AS cost
+        ), 0)::int4 AS cost
         FROM dates
         ${joinCategory(uid, PageListStandard.General)}
         GROUP BY dates.start_date
       )`,
       sql`sum_holiday AS (
-        SELECT dates.start_date, COALESCE(SUM(holiday.cost), 0) AS cost
+        SELECT dates.start_date, COALESCE(SUM(holiday.cost), 0)::int4 AS cost
         FROM dates
         ${joinCategory(uid, PageListStandard.Holiday)}
         GROUP BY dates.start_date
       )`,
       sql`sum_social AS (
-        SELECT dates.start_date, COALESCE(SUM(social.cost), 0) AS cost
+        SELECT dates.start_date, COALESCE(SUM(social.cost), 0)::int4 AS cost
         FROM dates
         ${joinCategory(uid, PageListStandard.Social)}
         GROUP BY dates.start_date

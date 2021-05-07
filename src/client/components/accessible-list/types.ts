@@ -5,8 +5,9 @@ import type { FieldComponent } from '~client/components/form-field';
 import type { ModalFields } from '~client/components/modal-dialog/field';
 import type { ListCrud, OnCreateList, OnDeleteList, OnUpdateList } from '~client/hooks';
 import type { ApiListState } from '~client/selectors/list';
-import type { Create, Delta, FieldKey, Id, PageList, PickUnion, WithIds } from '~client/types';
+import type { Create, Delta, FieldKey, Id, PageList, WithIds } from '~client/types';
 import type { ListItem, ListItemInput } from '~client/types/gql';
+import type { PickUnion } from '~shared/types';
 
 export type State<I extends ListItem, P extends string> = ApiListState<I, P>;
 

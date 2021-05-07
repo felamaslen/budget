@@ -1,8 +1,10 @@
 import gql from 'graphql-tag';
 import moize from 'moize';
 import sinon from 'sinon';
+import { sql } from 'slonik';
 
 import { seedData } from '~api/__tests__/fixtures';
+import { getPool } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   AnalysisGroupBy,
@@ -22,7 +24,7 @@ describe('Analysis resolvers', () => {
   beforeAll(async () => {
     clock = sinon.useFakeTimers(new Date('2018-04-20'));
     app = await getTestApp();
-    await seedData(app.uid, app.db);
+    await seedData(app.uid);
   });
   afterAll(async () => {
     clock.restore();
@@ -185,14 +187,12 @@ describe('Analysis resolvers', () => {
     it('should ignore certain expense categories', async () => {
       expect.assertions(2);
 
-      await app.db('general').insert({
-        uid: app.uid,
-        date: '2018-03-11',
-        item: 'Down payment',
-        category: 'House purchase',
-        cost: 1700000,
-        shop: 'Solicitors',
-      });
+      await getPool().query(sql`
+      INSERT INTO general (uid, date, item, category, cost, shop)
+      VALUES (${
+        app.uid
+      }, ${'2018-03-11'}, ${'Down payment'}, ${'House purchase'}, ${1700000}, ${'Solicitors'})
+      `);
 
       const res = await setup();
       expect(res).toStrictEqual(

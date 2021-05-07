@@ -45,14 +45,14 @@ export async function selectTransactions(
   uid: number,
   now: Date,
 ): Promise<readonly Transaction[]> {
-  const result = await db.query<Transaction>(sql`
+  const result = await db.query(sql`
   SELECT date, units, price, fees, taxes, is_drip as drip
   FROM funds f
   INNER JOIN funds_transactions ft ON ft.fund_id = f.id
   WHERE f.uid = ${uid} AND ft.date <= ${now.toISOString()}
   ORDER BY ft.date
   `);
-  return result.rows;
+  return (result.rows as unknown) as readonly Transaction[];
 }
 
 export async function selectStockSplits(
@@ -328,7 +328,7 @@ export async function selectIndividualFullFundHistory(
   uid: number,
   id: number,
 ): Promise<readonly FundHistoryIndividualRow[]> {
-  const results = await db.query<FundHistoryIndividualRow>(sql`
+  const results = await db.query(sql`
   SELECT fct.time AS date, fc.price
   FROM funds f
   INNER JOIN fund_scrape fs ON fs.item = f.item
@@ -337,7 +337,7 @@ export async function selectIndividualFullFundHistory(
   WHERE f.id = ${id} AND f.uid = ${uid}
   ORDER BY fct.time
   `);
-  return results.rows;
+  return (results.rows as unknown) as readonly FundHistoryIndividualRow[];
 }
 
 export async function selectCashTarget(

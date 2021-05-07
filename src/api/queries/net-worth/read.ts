@@ -154,11 +154,11 @@ export async function selectAllEntries(
 const valueSimpleFxSaye = sql.join(
   [
     sql`COALESCE(v.value_simple, 0)`,
-    sql`COALESCE(v.value_fx * v.fx_rate * 100, 0)::integer`,
+    sql`COALESCE(v.value_fx * v.fx_rate * 100, 0)::int4`,
     sql`COALESCE(
       CASE WHEN v.is_saye THEN v.value_op_vested * v.value_op_strike_price ELSE 0 END,
       0
-    )::integer`,
+    )::int4`,
   ],
   sql` + `,
 );
@@ -169,7 +169,7 @@ export async function selectOldNetWorth(
   startDate: string,
   oldDateEnd: string,
 ): Promise<readonly OldNetWorthRow[]> {
-  const result = await db.query<OldNetWorthRow>(sql`
+  const result = await db.query(sql`
     WITH ${sql.join(
       [
         sql`values AS (
@@ -216,7 +216,7 @@ export async function selectOldNetWorth(
         sql`values_assets AS (
           SELECT
             v.id
-            ,SUM(CASE WHEN (not v.is_asset) THEN 0 ELSE ${valueSimpleFxSaye} END) AS value
+            ,SUM(CASE WHEN (not v.is_asset) THEN 0 ELSE ${valueSimpleFxSaye} END)::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -224,7 +224,7 @@ export async function selectOldNetWorth(
         sql`values_liabilities AS (
           SELECT
             v.id
-            ,SUM(CASE WHEN v.is_asset THEN 0 ELSE ${valueSimpleFxSaye} END) AS value
+            ,SUM(CASE WHEN v.is_asset THEN 0 ELSE ${valueSimpleFxSaye} END)::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -232,7 +232,7 @@ export async function selectOldNetWorth(
         sql`values_pension AS (
           SELECT
             v.id
-            ,SUM(CASE WHEN v.category = ${'Pension'} THEN ${valueSimpleFxSaye} ELSE 0 END) AS value
+            ,SUM(CASE WHEN v.category = ${'Pension'} THEN ${valueSimpleFxSaye} ELSE 0 END)::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -244,7 +244,7 @@ export async function selectOldNetWorth(
               COALESCE(v.value_op_vested *
                 GREATEST(0, v.value_op_market_price - v.value_op_strike_price)
               )
-            )::integer AS value
+            )::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -257,7 +257,7 @@ export async function selectOldNetWorth(
               THEN COALESCE(v.value_simple, 0)
               ELSE 0
               END
-            ) AS value
+            )::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -265,7 +265,7 @@ export async function selectOldNetWorth(
         sql`values_locked_cash AS (
           SELECT
             v.id
-            ,SUM(CASE WHEN v.category = ${'Cash (other)'} THEN ${valueSimpleFxSaye} ELSE 0 END) AS value
+            ,SUM(CASE WHEN v.category = ${'Cash (other)'} THEN ${valueSimpleFxSaye} ELSE 0 END)::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -273,7 +273,7 @@ export async function selectOldNetWorth(
         sql`values_investments AS (
           SELECT
             v.id
-            ,SUM(CASE WHEN v.category = ${'Stocks'} THEN ${valueSimpleFxSaye} ELSE 0 END) AS value
+            ,SUM(CASE WHEN v.category = ${'Stocks'} THEN ${valueSimpleFxSaye} ELSE 0 END)::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -304,7 +304,7 @@ export async function selectOldNetWorth(
     LEFT JOIN values_investments ON values_investments.id = v.id
     ORDER BY v.date DESC
   `);
-  return result.rows;
+  return (result.rows as unknown) as readonly OldNetWorthRow[];
 }
 
 type LatestCashTotalRow = {
