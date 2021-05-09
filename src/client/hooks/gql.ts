@@ -23,6 +23,7 @@ export {
   useFundPricesUpdateQuery,
   useFundUpdatedSubscription,
   useInitialQuery,
+  useListBucketsQuery,
   useListItemDeletedSubscription,
   useListItemStandardCreatedSubscription,
   useListItemStandardUpdatedSubscription,
@@ -53,4 +54,5 @@ export {
   useUpdateNetWorthCategoryMutation,
   useUpdateNetWorthEntryMutation,
   useUpdateNetWorthSubcategoryMutation,
+  useUpsertBucketMutation,
 } from '~client/types/gql';

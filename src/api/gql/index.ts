@@ -1,6 +1,7 @@
 import gql from 'graphql-tag';
 
 export * from './analysis';
+export * from './buckets';
 export * from './currencies';
 export * from './funds';
 export * from './list';

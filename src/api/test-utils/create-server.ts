@@ -1,5 +1,5 @@
 import { Server } from 'http';
-import ApolloClient, { PresetConfig } from 'apollo-boost';
+import ApolloClient, { InMemoryCache, PresetConfig } from 'apollo-boost';
 import axios from 'axios';
 import 'cross-fetch/polyfill';
 import moize from 'moize';
@@ -48,6 +48,9 @@ export const makeTestApp = async (): Promise<App> => {
         },
       });
     },
+    cache: new InMemoryCache({
+      dataIdFromObject: (o): string | null => (o.id ? o.id : null),
+    }),
   });
 
   const loginRes = await axios.post(graphqlUrl, {

@@ -1,4 +1,5 @@
 export * from './analysis';
+export * from './buckets';
 export * from './date-union';
 export * from './fund-value-cost';
 export * from './funds';

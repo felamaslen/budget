@@ -72,6 +72,7 @@ export type Query = {
   exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
+  listBuckets?: Maybe<ListBucketsResponse>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   overview?: Maybe<Overview>;
   overviewOld?: Maybe<OverviewOld>;
@@ -118,6 +119,11 @@ export type QueryFundHistoryArgs = {
 
 export type QueryFundHistoryIndividualArgs = {
   id: Scalars['NonNegativeInt'];
+};
+
+
+export type QueryListBucketsArgs = {
+  date: Scalars['String'];
 };
 
 
@@ -179,6 +185,178 @@ export type QuerySearchArgs = {
 
 export type QueryStockPricesArgs = {
   codes: Array<Scalars['String']>;
+};
+
+export type Bucket = {
+  __typename?: 'Bucket';
+  id: Scalars['NonNegativeInt'];
+  page: AnalysisPage;
+  filterCategory?: Maybe<Scalars['String']>;
+  expectedValue: Scalars['NonNegativeInt'];
+  actualValue: Scalars['NonNegativeInt'];
+};
+
+export type BucketInput = {
+  page: AnalysisPage;
+  filterCategory?: Maybe<Scalars['String']>;
+  value: Scalars['NonNegativeInt'];
+};
+
+export type UpsertBucketResponse = {
+  __typename?: 'UpsertBucketResponse';
+  buckets?: Maybe<Array<Bucket>>;
+  error?: Maybe<Scalars['String']>;
+};
+
+export type ListBucketsResponse = {
+  __typename?: 'ListBucketsResponse';
+  buckets?: Maybe<Array<Bucket>>;
+  error?: Maybe<Scalars['String']>;
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  createFund?: Maybe<CrudResponseCreate>;
+  createListItem?: Maybe<CrudResponseCreate>;
+  createNetWorthCategory?: Maybe<CrudResponseCreate>;
+  createNetWorthEntry?: Maybe<CrudResponseCreate>;
+  createNetWorthSubcategory?: Maybe<CrudResponseCreate>;
+  createReceipt?: Maybe<ReceiptCreated>;
+  deleteFund?: Maybe<CrudResponseDelete>;
+  deleteListItem?: Maybe<CrudResponseDelete>;
+  deleteNetWorthCategory?: Maybe<CrudResponseDelete>;
+  deleteNetWorthEntry?: Maybe<CrudResponseDelete>;
+  deleteNetWorthSubcategory?: Maybe<CrudResponseDelete>;
+  login: LoginResponse;
+  logout: LogoutResponse;
+  setConfig?: Maybe<AppConfigSet>;
+  updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
+  updateFund?: Maybe<CrudResponseUpdate>;
+  updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
+  updateListItem?: Maybe<CrudResponseUpdate>;
+  updateNetWorthCategory?: Maybe<CrudResponseUpdate>;
+  updateNetWorthEntry?: Maybe<CrudResponseUpdate>;
+  updateNetWorthSubcategory?: Maybe<CrudResponseUpdate>;
+  upsertBucket?: Maybe<UpsertBucketResponse>;
+};
+
+
+export type MutationCreateFundArgs = {
+  fakeId: Scalars['Int'];
+  input: FundInput;
+};
+
+
+export type MutationCreateListItemArgs = {
+  page: PageListStandard;
+  fakeId: Scalars['Int'];
+  input: ListItemStandardInput;
+};
+
+
+export type MutationCreateNetWorthCategoryArgs = {
+  input: NetWorthCategoryInput;
+};
+
+
+export type MutationCreateNetWorthEntryArgs = {
+  input: NetWorthEntryInput;
+};
+
+
+export type MutationCreateNetWorthSubcategoryArgs = {
+  input: NetWorthSubcategoryInput;
+};
+
+
+export type MutationCreateReceiptArgs = {
+  date: Scalars['Date'];
+  shop: Scalars['String'];
+  items: Array<ReceiptInput>;
+};
+
+
+export type MutationDeleteFundArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteListItemArgs = {
+  page: PageListStandard;
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteNetWorthCategoryArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteNetWorthEntryArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteNetWorthSubcategoryArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationLoginArgs = {
+  pin: Scalars['Int'];
+};
+
+
+export type MutationSetConfigArgs = {
+  config: AppConfigInput;
+};
+
+
+export type MutationUpdateCashAllocationTargetArgs = {
+  target: Scalars['NonNegativeInt'];
+};
+
+
+export type MutationUpdateFundArgs = {
+  id: Scalars['Int'];
+  input: FundInput;
+};
+
+
+export type MutationUpdateFundAllocationTargetsArgs = {
+  deltas: Array<TargetDelta>;
+};
+
+
+export type MutationUpdateListItemArgs = {
+  page: PageListStandard;
+  id: Scalars['Int'];
+  input: ListItemStandardInput;
+};
+
+
+export type MutationUpdateNetWorthCategoryArgs = {
+  id: Scalars['Int'];
+  input: NetWorthCategoryInput;
+};
+
+
+export type MutationUpdateNetWorthEntryArgs = {
+  id: Scalars['Int'];
+  input: NetWorthEntryInput;
+};
+
+
+export type MutationUpdateNetWorthSubcategoryArgs = {
+  id: Scalars['Int'];
+  input: NetWorthSubcategoryInput;
+};
+
+
+export type MutationUpsertBucketArgs = {
+  date: Scalars['String'];
+  id: Scalars['NonNegativeInt'];
+  bucket: BucketInput;
 };
 
 export type ExchangeRate = {
@@ -326,143 +504,6 @@ export type StockPricesResponse = {
   error?: Maybe<Scalars['String']>;
   prices: Array<StockPrice>;
   refreshTime?: Maybe<Scalars['DateTime']>;
-};
-
-export type Mutation = {
-  __typename?: 'Mutation';
-  createFund?: Maybe<CrudResponseCreate>;
-  createListItem?: Maybe<CrudResponseCreate>;
-  createNetWorthCategory?: Maybe<CrudResponseCreate>;
-  createNetWorthEntry?: Maybe<CrudResponseCreate>;
-  createNetWorthSubcategory?: Maybe<CrudResponseCreate>;
-  createReceipt?: Maybe<ReceiptCreated>;
-  deleteFund?: Maybe<CrudResponseDelete>;
-  deleteListItem?: Maybe<CrudResponseDelete>;
-  deleteNetWorthCategory?: Maybe<CrudResponseDelete>;
-  deleteNetWorthEntry?: Maybe<CrudResponseDelete>;
-  deleteNetWorthSubcategory?: Maybe<CrudResponseDelete>;
-  login: LoginResponse;
-  logout: LogoutResponse;
-  setConfig?: Maybe<AppConfigSet>;
-  updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
-  updateFund?: Maybe<CrudResponseUpdate>;
-  updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
-  updateListItem?: Maybe<CrudResponseUpdate>;
-  updateNetWorthCategory?: Maybe<CrudResponseUpdate>;
-  updateNetWorthEntry?: Maybe<CrudResponseUpdate>;
-  updateNetWorthSubcategory?: Maybe<CrudResponseUpdate>;
-};
-
-
-export type MutationCreateFundArgs = {
-  fakeId: Scalars['Int'];
-  input: FundInput;
-};
-
-
-export type MutationCreateListItemArgs = {
-  page: PageListStandard;
-  fakeId: Scalars['Int'];
-  input: ListItemStandardInput;
-};
-
-
-export type MutationCreateNetWorthCategoryArgs = {
-  input: NetWorthCategoryInput;
-};
-
-
-export type MutationCreateNetWorthEntryArgs = {
-  input: NetWorthEntryInput;
-};
-
-
-export type MutationCreateNetWorthSubcategoryArgs = {
-  input: NetWorthSubcategoryInput;
-};
-
-
-export type MutationCreateReceiptArgs = {
-  date: Scalars['Date'];
-  shop: Scalars['String'];
-  items: Array<ReceiptInput>;
-};
-
-
-export type MutationDeleteFundArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type MutationDeleteListItemArgs = {
-  page: PageListStandard;
-  id: Scalars['Int'];
-};
-
-
-export type MutationDeleteNetWorthCategoryArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type MutationDeleteNetWorthEntryArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type MutationDeleteNetWorthSubcategoryArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type MutationLoginArgs = {
-  pin: Scalars['Int'];
-};
-
-
-export type MutationSetConfigArgs = {
-  config: AppConfigInput;
-};
-
-
-export type MutationUpdateCashAllocationTargetArgs = {
-  target: Scalars['NonNegativeInt'];
-};
-
-
-export type MutationUpdateFundArgs = {
-  id: Scalars['Int'];
-  input: FundInput;
-};
-
-
-export type MutationUpdateFundAllocationTargetsArgs = {
-  deltas: Array<TargetDelta>;
-};
-
-
-export type MutationUpdateListItemArgs = {
-  page: PageListStandard;
-  id: Scalars['Int'];
-  input: ListItemStandardInput;
-};
-
-
-export type MutationUpdateNetWorthCategoryArgs = {
-  id: Scalars['Int'];
-  input: NetWorthCategoryInput;
-};
-
-
-export type MutationUpdateNetWorthEntryArgs = {
-  id: Scalars['Int'];
-  input: NetWorthEntryInput;
-};
-
-
-export type MutationUpdateNetWorthSubcategoryArgs = {
-  id: Scalars['Int'];
-  input: NetWorthSubcategoryInput;
 };
 
 export type FundCreateUpdate = {
@@ -1041,6 +1082,25 @@ export type NetWorthEntryPartsFragment = (
   )> }
 );
 
+export type UpsertBucketMutationVariables = Exact<{
+  date: Scalars['String'];
+  id: Scalars['NonNegativeInt'];
+  bucket: BucketInput;
+}>;
+
+
+export type UpsertBucketMutation = (
+  { __typename?: 'Mutation' }
+  & { upsertBucket?: Maybe<(
+    { __typename?: 'UpsertBucketResponse' }
+    & Pick<UpsertBucketResponse, 'error'>
+    & { buckets?: Maybe<Array<(
+      { __typename?: 'Bucket' }
+      & Pick<Bucket, 'id' | 'page' | 'filterCategory' | 'expectedValue' | 'actualValue'>
+    )>> }
+  )> }
+);
+
 export type SetConfigMutationVariables = Exact<{
   config: AppConfigInput;
 }>;
@@ -1372,6 +1432,23 @@ export type AnalysisDeepQuery = (
       & Pick<CategoryTreeItem, 'category' | 'sum'>
     )> }
   )>> }
+);
+
+export type ListBucketsQueryVariables = Exact<{
+  date: Scalars['String'];
+}>;
+
+
+export type ListBucketsQuery = (
+  { __typename?: 'Query' }
+  & { listBuckets?: Maybe<(
+    { __typename?: 'ListBucketsResponse' }
+    & Pick<ListBucketsResponse, 'error'>
+    & { buckets?: Maybe<Array<(
+      { __typename?: 'Bucket' }
+      & Pick<Bucket, 'id' | 'page' | 'filterCategory' | 'expectedValue' | 'actualValue'>
+    )>> }
+  )> }
 );
 
 export type ExchangeRatesQueryVariables = Exact<{
@@ -1988,6 +2065,24 @@ export const NetWorthEntryPartsFragmentDoc = gql`
   }
 }
     `;
+export const UpsertBucketDocument = gql`
+    mutation UpsertBucket($date: String!, $id: NonNegativeInt!, $bucket: BucketInput!) {
+  upsertBucket(date: $date, id: $id, bucket: $bucket) {
+    buckets {
+      id
+      page
+      filterCategory
+      expectedValue
+      actualValue
+    }
+    error
+  }
+}
+    `;
+
+export function useUpsertBucketMutation() {
+  return Urql.useMutation<UpsertBucketMutation, UpsertBucketMutationVariables>(UpsertBucketDocument);
+};
 export const SetConfigDocument = gql`
     mutation SetConfig($config: AppConfigInput!) {
   setConfig(config: $config) {
@@ -2274,6 +2369,24 @@ export const AnalysisDeepDocument = gql`
 
 export function useAnalysisDeepQuery(options: Omit<Urql.UseQueryArgs<AnalysisDeepQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<AnalysisDeepQuery>({ query: AnalysisDeepDocument, ...options });
+};
+export const ListBucketsDocument = gql`
+    query ListBuckets($date: String!) {
+  listBuckets(date: $date) {
+    buckets {
+      id
+      page
+      filterCategory
+      expectedValue
+      actualValue
+    }
+    error
+  }
+}
+    `;
+
+export function useListBucketsQuery(options: Omit<Urql.UseQueryArgs<ListBucketsQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ListBucketsQuery>({ query: ListBucketsDocument, ...options });
 };
 export const ExchangeRatesDocument = gql`
     query ExchangeRates($base: String!) {

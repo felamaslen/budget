@@ -301,8 +301,7 @@ const getRanges = moize(
 
     // get the tick size for the new range
     const tickSize = getTickSize(minY, maxY, GRAPH_FUNDS_NUM_TICKS);
-
-    if (!Number.isNaN(tickSize)) {
+    if (!tickSize) {
       minY = tickSize * Math.floor(minY / tickSize);
       maxY = tickSize * Math.ceil(maxY / tickSize);
     }

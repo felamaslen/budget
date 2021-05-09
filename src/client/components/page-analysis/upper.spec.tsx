@@ -15,6 +15,7 @@ describe('PageAnalysis / <Upper />', () => {
     description: 'foo',
     loading: false,
     onRequest,
+    setShowBuckets: jest.fn(),
   };
 
   describe('period switcher', () => {

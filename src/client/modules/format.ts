@@ -142,8 +142,8 @@ export const normaliseTickSize = (tickSize: number): number => {
 
 export function getTickSize(min: number, max: number, numTicks = 5): number {
   const minimum = (max - min) / numTicks;
-
-  return normaliseTickSize(minimum);
+  const result = normaliseTickSize(minimum);
+  return Number.isNaN(result) ? 0 : result;
 }
 
 export const toISO = (value: Date): string => format(value, 'yyyy-MM-dd');
