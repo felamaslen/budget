@@ -61,12 +61,13 @@ export async function selectBucketsWithCurrentValue(
       )`,
       sql`bucket_filtered_value AS (
         SELECT COALESCE(SUM(t.cost), 0)::int4 AS value
-        FROM buckets b
+        FROM page_buckets b
         INNER JOIN page_items t ON 1=1
         WHERE ${sql.join(
           [sql`b.filter_category IS NOT NULL`, sql`t.category = b.filter_category`],
           sql` AND `,
         )}
+        GROUP BY b.id
       )`,
       sql`bucket_rows AS (
         SELECT ${sql.join(
@@ -87,7 +88,7 @@ export async function selectBucketsWithCurrentValue(
               END
             ) OVER (PARTITION BY b.id) -
             CASE
-              WHEN b.filter_category IS NULL THEN bf.value
+              WHEN b.filter_category IS NULL THEN COALESCE(bf.value, 0)
               ELSE 0
             END,
             0
