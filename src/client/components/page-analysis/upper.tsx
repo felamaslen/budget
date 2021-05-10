@@ -6,7 +6,6 @@ import DotLoader from 'react-spinners/DotLoader';
 import { Query } from './hooks';
 import * as Styled from './styles';
 
-import { Button } from '~client/styled/shared';
 import { AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
 
 export type Props = {
@@ -16,7 +15,6 @@ export type Props = {
   description: string;
   loading: boolean;
   onRequest: (request: Partial<Query>) => void;
-  setShowBuckets: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const spinnerOverride = css`
@@ -25,15 +23,7 @@ const spinnerOverride = css`
   top: ${rem(4)};
 `;
 
-const Upper: React.FC<Props> = ({
-  period,
-  groupBy,
-  page,
-  description,
-  loading,
-  onRequest,
-  setShowBuckets,
-}) => (
+const Upper: React.FC<Props> = ({ period, groupBy, page, description, loading, onRequest }) => (
   <Styled.Upper>
     <Styled.Input>
       <span>{'Period:'}</span>
@@ -70,15 +60,7 @@ const Upper: React.FC<Props> = ({
       </Styled.Button>
     </Styled.Buttons>
     <DotLoader loading={loading} size={22} css={spinnerOverride} />
-    <Styled.PeriodTitle>
-      {description}
-      <Button onClick={(): void => setShowBuckets((last) => !last)}>
-        Buckets
-        <span aria-label="Toggle buckets view" role="img">
-          🪣
-        </span>
-      </Button>
-    </Styled.PeriodTitle>
+    <Styled.PeriodTitle>{description}</Styled.PeriodTitle>
   </Styled.Upper>
 );
 

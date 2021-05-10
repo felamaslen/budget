@@ -1,36 +1,46 @@
+import omit from 'lodash/omit';
 import React from 'react';
+
+import { ActualValues, ExpectedValues, getRecordSum } from './hooks';
 import * as Styled from './styles';
+
 import { formatCurrency, formatPercent, getTickSize } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
 import { AnalysisPage } from '~client/types/gql';
 
+export type HealthIndicatorProps = {
+  healthy: boolean;
+  healthText?: string | null;
+};
+
+export const HealthIndicator: React.FC<HealthIndicatorProps> = ({ healthText, healthy }) => (
+  <span role="img" aria-label="health" title={healthText ?? undefined}>
+    {healthy ? '✔️' : '⚠️'}
+  </span>
+);
+
 export type Props = {
-  expectedValues: Record<AnalysisPage, number>;
-  actualValues: Record<AnalysisPage, number>;
+  expectedValues: ExpectedValues;
+  actualValues: ActualValues;
 };
 
 const nonIncomePages = Object.entries(AnalysisPage).filter(
   ([, page]) => page !== AnalysisPage.Income,
 );
 
+const spendingCategories: [string, AnalysisPage | 'funds'][] = [
+  ...nonIncomePages,
+  ['funds', 'funds'],
+];
+
 export const OverallHealth: React.FC<Props> = ({ actualValues, expectedValues }) => {
-  const spendingTargetValue = nonIncomePages.reduce<number>(
-    (last, [, page]) => last + expectedValues[page],
-    0,
-  );
-  const spendingActualValue = nonIncomePages.reduce<number>(
-    (last, [, page]) => last + actualValues[page],
-    0,
-  );
+  const expectedNonIncome = getRecordSum(omit(expectedValues, AnalysisPage.Income));
+  const actualNonIncome = getRecordSum(omit(actualValues, AnalysisPage.Income));
 
-  const incomeTargetValue = expectedValues[AnalysisPage.Income];
-  const incomeActualValue = actualValues[AnalysisPage.Income];
+  const maxExpected = Math.max(expectedNonIncome, expectedValues.income);
+  const maxActual = Math.max(actualNonIncome, actualValues.income);
 
-  const maxTargetValue = Math.max(spendingTargetValue, incomeTargetValue);
-  const maxActualValue = Math.max(spendingActualValue, incomeActualValue);
-
-  const maxValue = Math.max(maxTargetValue, maxActualValue);
-
+  const maxValue = Math.max(maxExpected, maxActual);
   if (!maxValue) {
     return null;
   }
@@ -44,28 +54,28 @@ export const OverallHealth: React.FC<Props> = ({ actualValues, expectedValues })
         <Styled.HealthTargetWrapperInside>
           <Styled.HealthActual
             color={colors.income.main}
-            style={{ width: formatPercent(incomeActualValue / maxValue) }}
+            style={{ width: formatPercent(actualValues.income / maxValue) }}
           />
         </Styled.HealthTargetWrapperInside>
         <Styled.HealthTargetWrapperInside>
           <Styled.HealthTarget
             color={colors.income.main}
-            style={{ width: formatPercent(incomeTargetValue / maxValue) }}
+            style={{ width: formatPercent(expectedValues.income / maxValue) }}
           />
         </Styled.HealthTargetWrapperInside>
       </Styled.HealthTargetWrapper>
       <Styled.HealthTargetWrapper>
         <Styled.HealthTargetWrapperInside>
-          {nonIncomePages.map(([, page]) => (
+          {spendingCategories.map(([, page]) => (
             <Styled.HealthActual
               key={page}
               color={colors[page].main}
-              style={{ left: 0, width: formatPercent(actualValues[page] / maxValue) }}
+              style={{ width: formatPercent(actualValues[page] / maxValue) }}
             />
           ))}
         </Styled.HealthTargetWrapperInside>
         <Styled.HealthTargetWrapperInside>
-          {nonIncomePages.map(([, page]) => (
+          {spendingCategories.map(([, page]) => (
             <Styled.HealthTarget
               key={page}
               color={colors[page].main}

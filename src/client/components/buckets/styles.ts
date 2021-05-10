@@ -66,6 +66,10 @@ export const HealthAxis = styled(Flex)`
   }
 `;
 
+export const HealthStatus = styled(FlexCenter)`
+  font-size: ${rem(14)};
+`;
+
 export const DateTitle = styled.h3`
   flex: 1;
   font-size: ${rem(16)};

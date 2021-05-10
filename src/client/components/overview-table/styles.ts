@@ -160,6 +160,7 @@ export const Header = styled(Row)`
 
 export const HeaderLink = styled(Cell)`
   align-items: center;
+  display: inline-flex;
   justify-content: space-between;
   overflow: hidden;
   white-space: nowrap;
@@ -167,6 +168,10 @@ export const HeaderLink = styled(Cell)`
   text-align: center;
   background: ${({ column }): string =>
     colors.overview[`${column}Mobile` as keyof typeof colors.overview] ?? colors.white};
+
+  & > a {
+    text-decoration: none;
+  }
 
   button {
     flex: 0 0 auto;
@@ -179,8 +184,10 @@ export const HeaderLink = styled(Cell)`
 
 export const HeaderText = styled.span`
   color: black;
+  flex: 1;
 
   ${breakpoint(breakpoints.mobile)} {
     padding: 0 ${rem(2)};
+    text-align: left;
   }
 `;

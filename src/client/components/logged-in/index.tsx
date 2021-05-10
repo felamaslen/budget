@@ -45,7 +45,7 @@ const routes: RouteObject[] = [
   { key: 'social', component: hot(PageSocial) },
   {
     key: 'overview',
-    path: ['/', '/net-worth', '/net-worth/*'],
+    path: ['/', '/buckets', '/net-worth', '/net-worth/*'],
     exact: true,
     component: hot(PageOverview),
   },

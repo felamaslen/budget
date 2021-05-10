@@ -61,13 +61,8 @@ export async function selectBucketsWithCurrentValue(
       )`,
       sql`bucket_filtered_value AS (
         SELECT COALESCE(SUM(t.cost), 0)::int4 AS value
-        FROM page_buckets b
-        INNER JOIN page_items t ON 1=1
-        WHERE ${sql.join(
-          [sql`b.filter_category IS NOT NULL`, sql`t.category = b.filter_category`],
-          sql` AND `,
-        )}
-        GROUP BY b.id
+        FROM page_items t
+        INNER JOIN page_buckets b ON b.filter_category = t.category
       )`,
       sql`bucket_rows AS (
         SELECT ${sql.join(
@@ -133,4 +128,28 @@ export async function updateBucket(
   }, value = ${bucket.value}
   WHERE uid = ${uid} AND id = ${id}
   `);
+}
+
+export async function selectInvestmentBucket(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<number | undefined> {
+  const { rows } = await db.query<{ value: number }>(sql`
+  SELECT value FROM bucket_investment
+  WHERE uid = ${uid}
+  `);
+  return rows[0]?.value;
+}
+
+export async function upsertInvestmentBucket(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  value: number,
+): Promise<number> {
+  const { rows } = await db.query<{ value: number }>(sql`
+  INSERT INTO bucket_investment (uid, value) VALUES (${uid}, ${value})
+  ON CONFLICT (uid) DO UPDATE SET value = excluded.value
+  RETURNING value
+  `);
+  return rows[0].value;
 }

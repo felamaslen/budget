@@ -12,5 +12,8 @@ export const ListBuckets = gql`
       }
       error
     }
+    getInvestmentBucket {
+      value
+    }
   }
 `;

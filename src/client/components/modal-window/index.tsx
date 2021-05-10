@@ -1,3 +1,4 @@
+import type { History } from 'history';
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 import * as Styled from './styles';
@@ -33,3 +34,9 @@ export const ModalWindow: React.FC<Props> = ({ title, onClosed = NULL, width, ch
     </Styled.ModalWindow>
   );
 };
+
+export function useCloseModal(history: History): () => void {
+  return useCallback(() => {
+    history.replace('/');
+  }, [history]);
+}

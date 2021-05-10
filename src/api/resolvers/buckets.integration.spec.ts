@@ -6,12 +6,15 @@ import { getPool } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   AnalysisPage,
+  InvestmentBucket,
   ListBucketsResponse,
   Maybe,
   Mutation,
+  MutationSetInvestmentBucketArgs,
   MutationUpsertBucketArgs,
   Query,
   QueryListBucketsArgs,
+  SetInvestmentBucketResponse,
   UpsertBucketResponse,
 } from '~api/types';
 
@@ -275,6 +278,131 @@ describe('Bucket resolvers', () => {
               actualValue: 11023 + 23991,
             }),
           ]),
+        );
+      });
+    });
+  });
+
+  describe('Query GetInvestmentBucket', () => {
+    const query = gql`
+      query GetInvestmentBucket {
+        getInvestmentBucket {
+          value
+        }
+      }
+    `;
+
+    const setup = async (): Promise<Maybe<InvestmentBucket>> => {
+      const res = await app.authGqlClient.query<Query>({ query });
+      return res.data.getInvestmentBucket ?? null;
+    };
+
+    describe('when there is an entry in the database', () => {
+      beforeEach(async () => {
+        await getPool().query(sql`
+        INSERT INTO bucket_investment (uid, value)
+        VALUES (${app.uid}, ${1234})
+        ON CONFLICT (uid) DO UPDATE SET value = excluded.value
+        `);
+      });
+
+      it('should return the value in the database', async () => {
+        expect.assertions(1);
+        const result = await setup();
+        expect(result).toStrictEqual(expect.objectContaining(<InvestmentBucket>{ value: 1234 }));
+      });
+    });
+
+    describe('when there is no entry in the database', () => {
+      beforeEach(async () => {
+        await getPool().query(sql`DELETE FROM bucket_investment WHERE uid = ${app.uid}`);
+      });
+
+      it('should return zero', async () => {
+        expect.assertions(1);
+        await app.authGqlClient.clearStore();
+        const result = await setup();
+        expect(result).toStrictEqual(expect.objectContaining(<InvestmentBucket>{ value: 0 }));
+      });
+    });
+  });
+
+  describe('Mutation SetInvestmentBucket', () => {
+    const mutation = gql`
+      mutation SetInvestmentBucket($value: NonNegativeInt!) {
+        setInvestmentBucket(value: $value) {
+          bucket {
+            value
+          }
+          error
+        }
+      }
+    `;
+
+    const setup = async (value: number): Promise<Maybe<SetInvestmentBucketResponse>> => {
+      const res = await app.authGqlClient.mutate<Mutation, MutationSetInvestmentBucketArgs>({
+        mutation,
+        variables: { value },
+      });
+      return res.data?.setInvestmentBucket ?? null;
+    };
+
+    describe('when there is an entry in the database', () => {
+      beforeEach(async () => {
+        await getPool().query(sql`
+        INSERT INTO bucket_investment (uid, value)
+        VALUES (${app.uid}, ${1234})
+        ON CONFLICT (uid) DO UPDATE SET value = excluded.value
+        `);
+      });
+
+      it('should update the entry value', async () => {
+        expect.assertions(1);
+        await setup(5678);
+        const { rows } = await getPool().query(sql`
+        SELECT * FROM bucket_investment WHERE uid = ${app.uid}
+        `);
+        expect(rows).toStrictEqual([{ uid: app.uid, value: 5678 }]);
+      });
+
+      it('should return the updated value', async () => {
+        expect.assertions(1);
+        const res = await setup(5678);
+        expect(res).toStrictEqual(
+          expect.objectContaining<SetInvestmentBucketResponse>({
+            error: null,
+            bucket: expect.objectContaining({
+              value: 5678,
+            }),
+          }),
+        );
+      });
+    });
+
+    describe('when there is no entry in the database', () => {
+      beforeEach(async () => {
+        await getPool().query(sql`DELETE FROM bucket_investment WHERE uid = ${app.uid}`);
+      });
+
+      it('should create the entry value', async () => {
+        expect.assertions(1);
+        await setup(5678);
+        const { rows } = await getPool().query(sql`
+        SELECT * FROM bucket_investment WHERE uid = ${app.uid}
+        `);
+        expect(rows).toStrictEqual([{ uid: app.uid, value: 5678 }]);
+      });
+
+      it('should return the updated value', async () => {
+        expect.assertions(1);
+        const res = await setup(5678);
+        expect(res).toStrictEqual(
+          expect.objectContaining(<SetInvestmentBucketResponse>{
+            error: null,
+            bucket: expect.objectContaining({
+              value: 5678,
+            }),
+          }),
         );
       });
     });

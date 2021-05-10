@@ -1,19 +1,18 @@
 import React, { useCallback, useState } from 'react';
 
+import { HealthIndicator, HealthIndicatorProps } from './health';
 import * as Styled from './styles';
 
 import { FormFieldCost, FormFieldText } from '~client/components/form-field';
 import { formatPercent } from '~client/modules/format';
 import { Button } from '~client/styled/shared';
-import { AnalysisPage, Bucket } from '~client/types/gql';
+import { AnalysisPage, Bucket, InvestmentBucket } from '~client/types/gql';
 
 export type BucketFormProps = {
   bucket: Bucket;
-  healthy: boolean;
-  healthText: string | null;
   title: string;
   upsertBucket: (bucket: Bucket) => void;
-};
+} & HealthIndicatorProps;
 
 export const BucketForm: React.FC<BucketFormProps> = ({
   bucket,
@@ -46,9 +45,7 @@ export const BucketForm: React.FC<BucketFormProps> = ({
             title
           )}
         </Styled.BucketFormTitle>
-        <span role="img" aria-label="health" title={healthText ?? undefined}>
-          {healthy ? '✔️' : '⚠️'}
-        </span>
+        <HealthIndicator healthy={healthy} healthText={healthText} />
       </Styled.BucketFormHealth>
       <Styled.BucketValuesIndicator>
         <Styled.BucketExpected
@@ -100,5 +97,44 @@ export const BucketFilterForm: React.FC<BucketFilterFormProps> = ({ page, upsert
       </Styled.BucketMeta>
       <Styled.Filler />
     </Styled.BucketFormNew>
+  );
+};
+
+export type BucketInvestmentFormProps = {
+  bucket: InvestmentBucket;
+  actualValue: number;
+  setInvestmentBucket: (bucket: InvestmentBucket) => void;
+} & HealthIndicatorProps;
+
+export const BucketInvestmentForm: React.FC<BucketInvestmentFormProps> = ({
+  actualValue,
+  bucket,
+  healthy,
+  healthText,
+  setInvestmentBucket,
+}) => {
+  const maxValue = Math.max(bucket.value, actualValue);
+  return (
+    <Styled.BucketForm>
+      <Styled.BucketFormHealth>
+        <Styled.BucketFormTitle>Investments</Styled.BucketFormTitle>
+        <HealthIndicator healthy={healthy} healthText={healthText} />
+      </Styled.BucketFormHealth>
+      <Styled.BucketValuesIndicator>
+        <Styled.BucketExpected
+          style={{ height: maxValue ? formatPercent(bucket.value / maxValue) : 0 }}
+        />
+        <Styled.BucketActual
+          style={{ height: maxValue ? formatPercent(actualValue / maxValue) : 0 }}
+        />
+      </Styled.BucketValuesIndicator>
+      <Styled.BucketMeta>
+        <FormFieldCost
+          value={bucket.value}
+          onChange={(value): void => setInvestmentBucket({ value })}
+          inputProps={{ autoComplete: 'off' }}
+        />
+      </Styled.BucketMeta>
+    </Styled.BucketForm>
   );
 };

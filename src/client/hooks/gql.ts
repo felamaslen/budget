@@ -46,6 +46,7 @@ export {
   useReceiptItemsQuery,
   useSearchSuggestionsQuery,
   useSetConfigMutation,
+  useSetInvestmentBucketMutation,
   useStockPricesQuery,
   useUpdateCashAllocationTargetMutation,
   useUpdateFundAllocationTargetsMutation,

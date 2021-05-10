@@ -90,6 +90,10 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   justify-content: space-between;
@@ -122,6 +126,11 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
+.emotion-4>a {
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
 .emotion-4 button {
   -webkit-flex: 0 0 auto;
   -ms-flex: 0 0 auto;
@@ -136,11 +145,15 @@ exports[`<PageOverview /> should render a table 1`] = `
 
 .emotion-6 {
   color: black;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
 @media only screen and (min-width: 500px) {
   .emotion-6 {
     padding: 0 0.125rem;
+    text-align: left;
   }
 }
 
@@ -403,6 +416,10 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   justify-content: space-between;
@@ -434,6 +451,11 @@ exports[`<PageOverview /> should render a table 1`] = `
     height: 1.5rem;
     border-left: 3px solid #222;
   }
+}
+
+.emotion-10>a {
+  -webkit-text-decoration: none;
+  text-decoration: none;
 }
 
 .emotion-10 button {
@@ -475,6 +497,10 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   justify-content: space-between;
@@ -505,6 +531,11 @@ exports[`<PageOverview /> should render a table 1`] = `
     flex-grow: 7;
     height: 1.5rem;
   }
+}
+
+.emotion-14>a {
+  -webkit-text-decoration: none;
+  text-decoration: none;
 }
 
 .emotion-14 button {
@@ -546,6 +577,10 @@ exports[`<PageOverview /> should render a table 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
   justify-content: space-between;
@@ -576,6 +611,11 @@ exports[`<PageOverview /> should render a table 1`] = `
     flex-grow: 12;
     height: 1.5rem;
   }
+}
+
+.emotion-18>a {
+  -webkit-text-decoration: none;
+  text-decoration: none;
 }
 
 .emotion-18 button {
@@ -1335,6 +1375,16 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       >
         Month
       </span>
+      <a
+        href="/buckets"
+      >
+        <span
+          aria-label="Toggle buckets view"
+          role="img"
+        >
+          🪣
+        </span>
+      </a>
       <button
         class="emotion-8 emotion-9"
       >

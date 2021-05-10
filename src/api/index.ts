@@ -55,6 +55,21 @@ function setupDevAssets(app: express.Express): void {
   );
 }
 
+const singlePageAppRoutes: string[] = [
+  '/',
+  '/buckets',
+  '/net-worth',
+  '/net-worth/*',
+  '/analysis/:groupBy?/:period?/:page?',
+  '/funds',
+  '/income',
+  '/bills',
+  '/food',
+  '/general',
+  '/holiday',
+  '/social',
+];
+
 function setupWebApp(app: express.Express): void {
   app.set('views', path.join(__dirname, '../client/templates'));
   app.set('view engine', 'ejs');
@@ -64,17 +79,9 @@ function setupWebApp(app: express.Express): void {
 
   const singlePageApp = makeSinglePageApp(hot);
 
-  app.get('/', singlePageApp);
-  app.get('/net-worth', singlePageApp);
-  app.get('/net-worth/*', singlePageApp);
-  app.get('/analysis/:groupBy?/:period?/:page?', singlePageApp);
-  app.get('/funds', singlePageApp);
-  app.get('/income', singlePageApp);
-  app.get('/bills', singlePageApp);
-  app.get('/food', singlePageApp);
-  app.get('/general', singlePageApp);
-  app.get('/holiday', singlePageApp);
-  app.get('/social', singlePageApp);
+  singlePageAppRoutes.forEach((route) => {
+    app.get(route, singlePageApp);
+  });
 
   app.get('/index.html', makeSinglePageApp(false, true));
 }

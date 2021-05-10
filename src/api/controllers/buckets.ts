@@ -2,13 +2,22 @@ import { badRequest } from '@hapi/boom';
 import { endOfMonth, formatISO, isValid, startOfMonth } from 'date-fns';
 import { flatten } from 'lodash';
 import { DatabaseTransactionConnectionType } from 'slonik';
-import { insertBucket, selectBucketsWithCurrentValue, updateBucket } from '~api/queries';
+import {
+  insertBucket,
+  selectBucketsWithCurrentValue,
+  selectInvestmentBucket,
+  updateBucket,
+  upsertInvestmentBucket,
+} from '~api/queries';
 import {
   AnalysisPage,
   Bucket,
+  InvestmentBucket,
   ListBucketsResponse,
+  MutationSetInvestmentBucketArgs,
   MutationUpsertBucketArgs,
   QueryListBucketsArgs,
+  SetInvestmentBucketResponse,
   UpsertBucketResponse,
 } from '~api/types';
 
@@ -59,4 +68,21 @@ export async function upsertBucket(
     await insertBucket(db, uid, bucket);
   }
   return listBuckets(db, uid, { date });
+}
+
+export async function getInvestmentBucket(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<InvestmentBucket> {
+  const value = await selectInvestmentBucket(db, uid);
+  return { value: value ?? 0 };
+}
+
+export async function setInvestmentBucket(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  { value }: MutationSetInvestmentBucketArgs,
+): Promise<SetInvestmentBucketResponse> {
+  const updatedValue = await upsertInvestmentBucket(db, uid, value);
+  return { error: null, bucket: { value: updatedValue } };
 }

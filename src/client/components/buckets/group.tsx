@@ -1,6 +1,12 @@
 import React from 'react';
 
-import { BucketFilterForm, BucketForm, BucketFormProps } from './form';
+import {
+  BucketFilterForm,
+  BucketForm,
+  BucketFormProps,
+  BucketInvestmentForm,
+  BucketInvestmentFormProps,
+} from './form';
 import * as Styled from './styles';
 
 import { formatCurrency } from '~client/modules/format';
@@ -52,6 +58,36 @@ export const BucketGroup: React.FC<BucketGroupProps> = ({ page, buckets, upsertB
         />
       ))}
       <BucketFilterForm page={page} upsertBucket={upsertBucket} />
+    </Styled.BucketGroupFormList>
+  </Styled.BucketGroup>
+);
+
+export type BucketGroupInvestmentProps = Pick<
+  BucketInvestmentFormProps,
+  'actualValue' | 'bucket' | 'setInvestmentBucket'
+>;
+
+export const BucketGroupInvestment: React.FC<BucketGroupInvestmentProps> = ({
+  actualValue,
+  bucket,
+  setInvestmentBucket,
+}) => (
+  <Styled.BucketGroup color={colors.funds.main}>
+    <Styled.BucketGroupTitle>Investments</Styled.BucketGroupTitle>
+    <Styled.BucketGroupFormList>
+      <BucketInvestmentForm
+        actualValue={actualValue}
+        bucket={bucket}
+        setInvestmentBucket={setInvestmentBucket}
+        healthy={actualValue >= bucket.value}
+        healthText={
+          actualValue < bucket.value
+            ? `Consider investing ${formatCurrency(bucket.value - actualValue, {
+                abbreviate: true,
+              })} more this month`
+            : null
+        }
+      />
     </Styled.BucketGroupFormList>
   </Styled.BucketGroup>
 );

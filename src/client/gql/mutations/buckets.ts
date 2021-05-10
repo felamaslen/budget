@@ -14,3 +14,14 @@ export const UpsertBucket = gql`
     }
   }
 `;
+
+export const SetInvestmentBucket = gql`
+  mutation SetInvestmentBucket($value: NonNegativeInt!) {
+    setInvestmentBucket(value: $value) {
+      bucket {
+        value
+      }
+      error
+    }
+  }
+`;

@@ -1,6 +1,4 @@
-import loadable from '@loadable/component';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { hot } from 'react-hot-loader/root';
 import { useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
 
@@ -26,12 +24,6 @@ import { getInvestmentsBetweenDates } from '~client/selectors';
 import type { GQL } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 import { CategoryCostTree, CategoryCostTreeDeep } from '~client/types/gql';
-
-const Buckets = hot(
-  loadable(() => import(/* webpackPrefetch: true */ '~client/components/buckets'), {
-    fallback: <span />,
-  }),
-);
 
 export type RouteParams = {
   groupBy?: string;
@@ -121,11 +113,8 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
     })})`;
   }, [cost, costDeep, saved, activeMain, activeSub]);
 
-  const [showBuckets, setShowBuckets] = useState<boolean>(false);
-
   return (
     <Styled.Page page={PageNonStandard.Analysis}>
-      {showBuckets && <Buckets onClose={(): void => setShowBuckets(false)} />}
       <Upper
         period={query.period}
         groupBy={query.groupBy}
@@ -133,7 +122,6 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
         description={description ?? ''}
         loading={loading || loadingDeep}
         onRequest={onRequest}
-        setShowBuckets={setShowBuckets}
       />
       <Styled.Outer>
         <ListTree

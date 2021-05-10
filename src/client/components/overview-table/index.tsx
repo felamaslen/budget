@@ -1,6 +1,6 @@
 import React, { memo, useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
 import { OverviewTableCells as Cells } from './cells';
 import * as Styled from './styles';
@@ -63,6 +63,11 @@ const Header: React.FC<Props & ColumnsProps> = ({ columns, addReceipt }) => (
   <Styled.Header>
     <Styled.HeaderLink column="month" key="month">
       <Styled.HeaderText>Month</Styled.HeaderText>
+      <Link to="/buckets">
+        <span aria-label="Toggle buckets view" role="img">
+          🪣
+        </span>
+      </Link>
       <ButtonAdd onClick={addReceipt}>+</ButtonAdd>
     </Styled.HeaderLink>
     {columns.map(([column, { name, link }]) => (

@@ -72,6 +72,7 @@ export type Query = {
   exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
+  getInvestmentBucket?: Maybe<InvestmentBucket>;
   listBuckets?: Maybe<ListBucketsResponse>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   overview?: Maybe<Overview>;
@@ -214,6 +215,22 @@ export type ListBucketsResponse = {
   error?: Maybe<Scalars['String']>;
 };
 
+export type InvestmentBucket = {
+  __typename?: 'InvestmentBucket';
+  value: Scalars['NonNegativeInt'];
+};
+
+export type InvestmentBucketInput = {
+  __typename?: 'InvestmentBucketInput';
+  value: Scalars['NonNegativeInt'];
+};
+
+export type SetInvestmentBucketResponse = {
+  __typename?: 'SetInvestmentBucketResponse';
+  bucket?: Maybe<InvestmentBucket>;
+  error?: Maybe<Scalars['String']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createFund?: Maybe<CrudResponseCreate>;
@@ -230,6 +247,7 @@ export type Mutation = {
   login: LoginResponse;
   logout: LogoutResponse;
   setConfig?: Maybe<AppConfigSet>;
+  setInvestmentBucket?: Maybe<SetInvestmentBucketResponse>;
   updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
   updateFund?: Maybe<CrudResponseUpdate>;
   updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
@@ -309,6 +327,11 @@ export type MutationLoginArgs = {
 
 export type MutationSetConfigArgs = {
   config: AppConfigInput;
+};
+
+
+export type MutationSetInvestmentBucketArgs = {
+  value: Scalars['NonNegativeInt'];
 };
 
 
@@ -1101,6 +1124,23 @@ export type UpsertBucketMutation = (
   )> }
 );
 
+export type SetInvestmentBucketMutationVariables = Exact<{
+  value: Scalars['NonNegativeInt'];
+}>;
+
+
+export type SetInvestmentBucketMutation = (
+  { __typename?: 'Mutation' }
+  & { setInvestmentBucket?: Maybe<(
+    { __typename?: 'SetInvestmentBucketResponse' }
+    & Pick<SetInvestmentBucketResponse, 'error'>
+    & { bucket?: Maybe<(
+      { __typename?: 'InvestmentBucket' }
+      & Pick<InvestmentBucket, 'value'>
+    )> }
+  )> }
+);
+
 export type SetConfigMutationVariables = Exact<{
   config: AppConfigInput;
 }>;
@@ -1448,6 +1488,9 @@ export type ListBucketsQuery = (
       { __typename?: 'Bucket' }
       & Pick<Bucket, 'id' | 'page' | 'filterCategory' | 'expectedValue' | 'actualValue'>
     )>> }
+  )>, getInvestmentBucket?: Maybe<(
+    { __typename?: 'InvestmentBucket' }
+    & Pick<InvestmentBucket, 'value'>
   )> }
 );
 
@@ -2083,6 +2126,20 @@ export const UpsertBucketDocument = gql`
 export function useUpsertBucketMutation() {
   return Urql.useMutation<UpsertBucketMutation, UpsertBucketMutationVariables>(UpsertBucketDocument);
 };
+export const SetInvestmentBucketDocument = gql`
+    mutation SetInvestmentBucket($value: NonNegativeInt!) {
+  setInvestmentBucket(value: $value) {
+    bucket {
+      value
+    }
+    error
+  }
+}
+    `;
+
+export function useSetInvestmentBucketMutation() {
+  return Urql.useMutation<SetInvestmentBucketMutation, SetInvestmentBucketMutationVariables>(SetInvestmentBucketDocument);
+};
 export const SetConfigDocument = gql`
     mutation SetConfig($config: AppConfigInput!) {
   setConfig(config: $config) {
@@ -2381,6 +2438,9 @@ export const ListBucketsDocument = gql`
       actualValue
     }
     error
+  }
+  getInvestmentBucket {
+    value
   }
 }
     `;
