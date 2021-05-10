@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: budget-migrate
+  labels:
+    app: budget-migrate
+spec:
+  template:
+    metadata:
+      labels:
+        app: budget-migrate
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: budget-migrate
+          image: docker.fela.space/budget:0
+          command: ['yarn', 'migrate', 'up']
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pass
+                  key: url
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '200m'
+            limits:
+              memory: '256Mi'
+              cpu: '200m'
+      restartPolicy: Never
+  activeDeadlineSeconds: 600
+  backoffLimit: 1
