@@ -115,7 +115,7 @@
     "isomorphic-unfetch": "^3.1.0",
     "jsonwebtoken": "^8.5.1",
     "libpq": "^1.8.9",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "moize": "^5.4.6",
     "morgan": "^1.9.1",
     "num-words": "^1.2.2",
