@@ -84,7 +84,7 @@ export const BucketGroupInvestment: React.FC<BucketGroupInvestmentProps> = ({
           actualValue < bucket.value
             ? `Consider investing ${formatCurrency(bucket.value - actualValue, {
                 abbreviate: true,
-              })} more this month`
+              })} more`
             : null
         }
       />

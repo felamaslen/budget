@@ -45,8 +45,8 @@ describe('Bucket resolvers', () => {
     });
 
     const query = gql`
-      query ListBuckets($date: String!) {
-        listBuckets(date: $date) {
+      query ListBuckets($startDate: String!, $endDate: String!) {
+        listBuckets(startDate: $startDate, endDate: $endDate) {
           buckets {
             id
             page
@@ -63,7 +63,8 @@ describe('Bucket resolvers', () => {
       const res = await app.authGqlClient.query<Query, QueryListBucketsArgs>({
         query,
         variables: {
-          date: '2018-03-01',
+          startDate: '2018-03-01',
+          endDate: '2018-03-31',
         },
       });
       return res.data?.listBuckets ?? null;
@@ -170,8 +171,13 @@ describe('Bucket resolvers', () => {
     });
 
     const mutation = gql`
-      mutation UpsertBucket($date: String!, $id: NonNegativeInt!, $bucket: BucketInput!) {
-        upsertBucket(date: $date, id: $id, bucket: $bucket) {
+      mutation UpsertBucket(
+        $startDate: String!
+        $endDate: String!
+        $id: NonNegativeInt!
+        $bucket: BucketInput!
+      ) {
+        upsertBucket(startDate: $startDate, endDate: $endDate, id: $id, bucket: $bucket) {
           buckets {
             id
             page
@@ -188,7 +194,8 @@ describe('Bucket resolvers', () => {
       const res = await app.authGqlClient.mutate<Mutation, MutationUpsertBucketArgs>({
         mutation,
         variables: {
-          date: '2018-03-01',
+          startDate: '2018-03-01',
+          endDate: '2018-03-31',
           id,
           bucket: {
             page: AnalysisPage.Holiday,

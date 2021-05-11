@@ -124,7 +124,8 @@ export type QueryFundHistoryIndividualArgs = {
 
 
 export type QueryListBucketsArgs = {
-  date: Scalars['String'];
+  startDate: Scalars['String'];
+  endDate: Scalars['String'];
 };
 
 
@@ -377,7 +378,8 @@ export type MutationUpdateNetWorthSubcategoryArgs = {
 
 
 export type MutationUpsertBucketArgs = {
-  date: Scalars['String'];
+  startDate: Scalars['String'];
+  endDate: Scalars['String'];
   id: Scalars['NonNegativeInt'];
   bucket: BucketInput;
 };
@@ -1106,7 +1108,8 @@ export type NetWorthEntryPartsFragment = (
 );
 
 export type UpsertBucketMutationVariables = Exact<{
-  date: Scalars['String'];
+  startDate: Scalars['String'];
+  endDate: Scalars['String'];
   id: Scalars['NonNegativeInt'];
   bucket: BucketInput;
 }>;
@@ -1475,7 +1478,8 @@ export type AnalysisDeepQuery = (
 );
 
 export type ListBucketsQueryVariables = Exact<{
-  date: Scalars['String'];
+  startDate: Scalars['String'];
+  endDate: Scalars['String'];
 }>;
 
 
@@ -2109,8 +2113,8 @@ export const NetWorthEntryPartsFragmentDoc = gql`
 }
     `;
 export const UpsertBucketDocument = gql`
-    mutation UpsertBucket($date: String!, $id: NonNegativeInt!, $bucket: BucketInput!) {
-  upsertBucket(date: $date, id: $id, bucket: $bucket) {
+    mutation UpsertBucket($startDate: String!, $endDate: String!, $id: NonNegativeInt!, $bucket: BucketInput!) {
+  upsertBucket(startDate: $startDate, endDate: $endDate, id: $id, bucket: $bucket) {
     buckets {
       id
       page
@@ -2428,8 +2432,8 @@ export function useAnalysisDeepQuery(options: Omit<Urql.UseQueryArgs<AnalysisDee
   return Urql.useQuery<AnalysisDeepQuery>({ query: AnalysisDeepDocument, ...options });
 };
 export const ListBucketsDocument = gql`
-    query ListBuckets($date: String!) {
-  listBuckets(date: $date) {
+    query ListBuckets($startDate: String!, $endDate: String!) {
+  listBuckets(startDate: $startDate, endDate: $endDate) {
     buckets {
       id
       page

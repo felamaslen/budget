@@ -1,8 +1,8 @@
 import { gql } from 'urql';
 
 export const ListBuckets = gql`
-  query ListBuckets($date: String!) {
-    listBuckets(date: $date) {
+  query ListBuckets($startDate: String!, $endDate: String!) {
+    listBuckets(startDate: $startDate, endDate: $endDate) {
       buckets {
         id
         page

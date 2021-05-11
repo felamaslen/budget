@@ -1,5 +1,5 @@
 import { badRequest } from '@hapi/boom';
-import { endOfMonth, formatISO, isValid, startOfMonth } from 'date-fns';
+import { formatISO, isValid } from 'date-fns';
 import { flatten } from 'lodash';
 import { DatabaseTransactionConnectionType } from 'slonik';
 import {
@@ -32,14 +32,19 @@ function validateDate(date: string): Date {
 export async function listBuckets(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { date }: QueryListBucketsArgs,
+  args: QueryListBucketsArgs,
 ): Promise<ListBucketsResponse> {
-  const dateObject = validateDate(date);
-  const startDate = formatISO(startOfMonth(dateObject), { representation: 'date' });
-  const endDate = formatISO(endOfMonth(dateObject), { representation: 'date' });
+  const startDate = validateDate(args.startDate);
+  const endDate = validateDate(args.endDate);
   const bucketsRows = await Promise.all(
     Object.values(AnalysisPage).map((page) =>
-      selectBucketsWithCurrentValue(db, uid, page, startDate, endDate),
+      selectBucketsWithCurrentValue(
+        db,
+        uid,
+        page,
+        formatISO(startDate, { representation: 'date' }),
+        formatISO(endDate, { representation: 'date' }),
+      ),
     ),
   );
   const buckets = flatten(bucketsRows).map<Bucket>((row) => ({
@@ -59,15 +64,16 @@ export async function listBuckets(
 export async function upsertBucket(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  { date, id, bucket }: MutationUpsertBucketArgs,
+  { startDate, endDate, id, bucket }: MutationUpsertBucketArgs,
 ): Promise<UpsertBucketResponse> {
-  validateDate(date);
+  validateDate(startDate);
+  validateDate(endDate);
   if (id) {
     await updateBucket(db, uid, id, bucket);
   } else {
     await insertBucket(db, uid, bucket);
   }
-  return listBuckets(db, uid, { date });
+  return listBuckets(db, uid, { startDate, endDate });
 }
 
 export async function getInvestmentBucket(

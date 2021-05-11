@@ -119,7 +119,8 @@ export type QueryFundHistoryIndividualArgs = {
 
 
 export type QueryListBucketsArgs = {
-  date: Scalars['String'];
+  startDate: Scalars['String'];
+  endDate: Scalars['String'];
 };
 
 
@@ -365,7 +366,8 @@ export type MutationUpdateNetWorthSubcategoryArgs = {
 
 
 export type MutationUpsertBucketArgs = {
-  date: Scalars['String'];
+  startDate: Scalars['String'];
+  endDate: Scalars['String'];
   id: Scalars['NonNegativeInt'];
   bucket: BucketInput;
 };
@@ -1310,7 +1312,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   fundHistory?: Resolver<Maybe<ResolversTypes['FundHistory']>, ParentType, ContextType, RequireFields<QueryFundHistoryArgs, never>>;
   fundHistoryIndividual?: Resolver<Maybe<ResolversTypes['FundHistoryIndividual']>, ParentType, ContextType, RequireFields<QueryFundHistoryIndividualArgs, 'id'>>;
   getInvestmentBucket?: Resolver<Maybe<ResolversTypes['InvestmentBucket']>, ParentType, ContextType>;
-  listBuckets?: Resolver<Maybe<ResolversTypes['ListBucketsResponse']>, ParentType, ContextType, RequireFields<QueryListBucketsArgs, 'date'>>;
+  listBuckets?: Resolver<Maybe<ResolversTypes['ListBucketsResponse']>, ParentType, ContextType, RequireFields<QueryListBucketsArgs, 'startDate' | 'endDate'>>;
   netWorthCashTotal?: Resolver<Maybe<ResolversTypes['NetWorthCashTotal']>, ParentType, ContextType>;
   overview?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType, RequireFields<QueryOverviewArgs, never>>;
   overviewOld?: Resolver<Maybe<ResolversTypes['OverviewOld']>, ParentType, ContextType, RequireFields<QueryOverviewOldArgs, never>>;
@@ -1388,7 +1390,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   updateNetWorthCategory?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthCategoryArgs, 'id' | 'input'>>;
   updateNetWorthEntry?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthEntryArgs, 'id' | 'input'>>;
   updateNetWorthSubcategory?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateNetWorthSubcategoryArgs, 'id' | 'input'>>;
-  upsertBucket?: Resolver<Maybe<ResolversTypes['UpsertBucketResponse']>, ParentType, ContextType, RequireFields<MutationUpsertBucketArgs, 'date' | 'id' | 'bucket'>>;
+  upsertBucket?: Resolver<Maybe<ResolversTypes['UpsertBucketResponse']>, ParentType, ContextType, RequireFields<MutationUpsertBucketArgs, 'startDate' | 'endDate' | 'id' | 'bucket'>>;
 };
 
 export type ExchangeRateResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ExchangeRate'] = ResolversParentTypes['ExchangeRate']> = {

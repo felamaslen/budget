@@ -39,12 +39,17 @@ export const bucketsSchema = gql`
   }
 
   extend type Query {
-    listBuckets(date: String!): ListBucketsResponse
+    listBuckets(startDate: String!, endDate: String!): ListBucketsResponse
     getInvestmentBucket: InvestmentBucket
   }
 
   extend type Mutation {
-    upsertBucket(date: String!, id: NonNegativeInt!, bucket: BucketInput!): UpsertBucketResponse
+    upsertBucket(
+      startDate: String!
+      endDate: String!
+      id: NonNegativeInt!
+      bucket: BucketInput!
+    ): UpsertBucketResponse
     setInvestmentBucket(value: NonNegativeInt!): SetInvestmentBucketResponse
   }
 `;

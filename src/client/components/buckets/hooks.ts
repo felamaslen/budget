@@ -1,8 +1,14 @@
+import { compose } from '@typed/compose';
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
 import formatDate from 'date-fns/format';
 import formatISO from 'date-fns/formatISO';
+import getMonth from 'date-fns/getMonth';
+import setMonth from 'date-fns/setMonth';
 import startOfMonth from 'date-fns/startOfMonth';
+import startOfYear from 'date-fns/startOfYear';
+import flatten from 'lodash/flatten';
+import groupBy from 'lodash/groupBy';
 import omit from 'lodash/omit';
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -15,28 +21,63 @@ import { formatCurrency } from '~client/modules/format';
 import { getInvestmentsBetweenDates } from '~client/selectors';
 import { AnalysisPage, Bucket, InvestmentBucket, useListBucketsQuery } from '~client/types/gql';
 
-export function useDate(): {
-  date: string;
+function getTitle(startDate: Date, endDate: Date, numMonthsInView: number): string {
+  if (numMonthsInView >= 12) {
+    return formatDate(startDate, 'yyyy');
+  }
+  if (numMonthsInView > 1) {
+    return `${formatDate(startDate, 'MMMM, yyyy')} to ${formatDate(endDate, 'MMMM, yyyy')}`;
+  }
+  return formatDate(startDate, 'MMMM yyyy');
+}
+
+function getStartDate(date: Date, numMonthsInView: number): Date {
+  if (numMonthsInView >= 12) {
+    return startOfYear(date);
+  }
+  if (numMonthsInView > 1) {
+    return startOfMonth(
+      setMonth(date, Math.floor(getMonth(date) / numMonthsInView) * numMonthsInView),
+    );
+  }
+  return startOfMonth(date);
+}
+
+const normaliseValue = (value: number, numMonthsInView: number): number =>
+  Math.max(0, Math.round(value / numMonthsInView));
+
+export function useDate(
+  numMonthsInView: number,
+): {
   startDate: Date;
+  startDateString: string;
   endDate: Date;
+  endDateString: string;
   description: string;
   skipDate: SkipDate;
 } {
-  const [date, setDate] = useState<Date>(startOfMonth(new Date()));
+  const [date, setDate] = useState<Date>(getStartDate(new Date(), numMonthsInView));
+  useEffect(() => {
+    setDate((last) => getStartDate(last, numMonthsInView));
+  }, [numMonthsInView]);
+
   const skipDate = useCallback(
-    (direction: -1 | 1) => setDate((last) => addMonths(last, direction)),
-    [],
+    (direction: -1 | 1) => setDate((last) => addMonths(last, direction * numMonthsInView)),
+    [numMonthsInView],
   );
 
   const startDate = useMemo(() => startOfMonth(date), [date]);
-  const endDate = useMemo(() => endOfMonth(date), [date]);
-  const dateISO = formatISO(date, { representation: 'date' });
+  const endDate = useMemo(() => endOfMonth(addMonths(date, numMonthsInView - 1)), [
+    date,
+    numMonthsInView,
+  ]);
 
   return {
-    date: dateISO,
     startDate,
+    startDateString: formatISO(startDate, { representation: 'date' }),
     endDate,
-    description: formatDate(date, 'MMMM yyyy'),
+    endDateString: formatISO(endDate, { representation: 'date' }),
+    description: getTitle(startDate, endDate, numMonthsInView),
     skipDate,
   };
 }
@@ -46,8 +87,41 @@ const initialBucketState: BucketState = {
   investmentBucket: { value: 0 },
 };
 
+export function moveBucketRemainderToCatchAll(buckets: Bucket[]): Bucket[] {
+  return flatten(
+    Object.values(groupBy(buckets, 'page')).map<Bucket[]>((pageBuckets) => {
+      const catchAllBucket = pageBuckets.find((bucket) => !bucket.filterCategory) as Bucket;
+      const nonCatchAllBuckets = pageBuckets.filter((bucket) => !!bucket.filterCategory);
+      const leftover = Math.max(
+        0,
+        nonCatchAllBuckets.reduce<number>(
+          (last, bucket) => last + bucket.expectedValue - bucket.actualValue,
+          0,
+        ),
+      );
+      return [
+        {
+          ...catchAllBucket,
+          actualValue: catchAllBucket.actualValue - leftover,
+        },
+        ...nonCatchAllBuckets,
+      ];
+    }),
+  );
+}
+
+const multiplyBucketValues = (numMonthsInView: number) => (buckets: Bucket[]): Bucket[] =>
+  buckets.map<Bucket>(
+    (bucket: Bucket): Bucket => ({
+      ...bucket,
+      expectedValue: bucket.expectedValue * numMonthsInView, // always based to 1 month on the server
+    }),
+  );
+
 export function useBuckets(
-  date: string,
+  startDate: string,
+  endDate: string,
+  numMonthsInView: number,
 ): [
   BucketState,
   Dispatch<SetStateAction<BucketState>>,
@@ -60,49 +134,64 @@ export function useBuckets(
   const [bucketState, setBucketState] = useState<BucketState>(initialBucketState);
 
   const [{ data, fetching, error }, refresh] = useListBucketsQuery({
-    variables: { date },
+    variables: { startDate, endDate },
     requestPolicy: 'network-only',
   });
 
   useEffect(() => {
     if (!fetching) {
       setBucketState((last) => ({
-        buckets: data?.listBuckets?.buckets ?? last.buckets,
-        investmentBucket: data?.getInvestmentBucket ?? last.investmentBucket,
+        buckets: data?.listBuckets?.buckets
+          ? compose(
+              multiplyBucketValues(numMonthsInView),
+              moveBucketRemainderToCatchAll,
+            )(data.listBuckets.buckets)
+          : last.buckets,
+        investmentBucket: data?.getInvestmentBucket
+          ? { ...data.getInvestmentBucket, value: data.getInvestmentBucket.value * numMonthsInView }
+          : last.investmentBucket,
       }));
     }
-  }, [data, fetching]);
+  }, [data, fetching, numMonthsInView]);
 
   return [bucketState, setBucketState, { fetching, error, refresh }];
 }
 
 export function useBucketsMutation(
-  date: string,
+  startDate: string,
+  endDate: string,
   setBucketState: React.Dispatch<React.SetStateAction<BucketState>>,
+  numMonthsInView: number,
 ): (bucket: Bucket) => void {
   const [mutationResult, runMutation] = useUpsertBucketMutation();
   useEffect(() => {
     if (!mutationResult.fetching && mutationResult.data?.upsertBucket) {
       setBucketState((last) => ({
         ...last,
-        buckets: mutationResult.data?.upsertBucket?.buckets ?? last.buckets,
+        buckets: mutationResult.data?.upsertBucket?.buckets
+          ? compose(
+              multiplyBucketValues(numMonthsInView),
+              moveBucketRemainderToCatchAll,
+            )(mutationResult.data.upsertBucket.buckets)
+          : last.buckets,
       }));
     }
-  }, [setBucketState, mutationResult.fetching, mutationResult.data]);
+  }, [setBucketState, numMonthsInView, mutationResult.fetching, mutationResult.data]);
 
   const upsertBucket = useCallback(
     (bucket: Bucket) => {
       runMutation({
-        date,
+        startDate,
+        endDate,
         id: bucket.id,
         bucket: {
           page: bucket.page,
           filterCategory: bucket.filterCategory,
-          value: bucket.expectedValue,
+          value: normaliseValue(bucket.expectedValue, numMonthsInView),
         },
       });
     },
-    [runMutation, date],
+    [runMutation, numMonthsInView, startDate, endDate],
   );
 
   return upsertBucket;
@@ -110,22 +199,28 @@ export function useBucketsMutation(
 
 export function useInvestmentBucketMutation(
   setBucketState: React.Dispatch<React.SetStateAction<BucketState>>,
+  numMonthsInView: number,
 ): (investmentBucket: InvestmentBucket) => void {
   const [mutationResult, runMutation] = useSetInvestmentBucketMutation();
   useEffect(() => {
     if (!mutationResult.fetching && mutationResult.data?.setInvestmentBucket) {
       setBucketState((last) => ({
         ...last,
-        investmentBucket: mutationResult.data?.setInvestmentBucket?.bucket ?? last.investmentBucket,
+        investmentBucket: mutationResult.data?.setInvestmentBucket?.bucket
+          ? {
+              ...mutationResult.data.setInvestmentBucket.bucket,
+              value: mutationResult.data.setInvestmentBucket.bucket.value * numMonthsInView,
+            }
+          : last.investmentBucket,
       }));
     }
-  }, [setBucketState, mutationResult.fetching, mutationResult.data]);
+  }, [setBucketState, numMonthsInView, mutationResult.fetching, mutationResult.data]);
 
   const setInvestmentBucket = useCallback(
     (bucket: InvestmentBucket) => {
-      runMutation(bucket);
+      runMutation({ ...bucket, value: normaliseValue(bucket.value, numMonthsInView) });
     },
-    [runMutation],
+    [runMutation, numMonthsInView],
   );
 
   return setInvestmentBucket;

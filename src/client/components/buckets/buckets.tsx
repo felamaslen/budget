@@ -15,17 +15,38 @@ import {
 } from './hooks';
 import * as Styled from './styles';
 
+import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { ModalWindow, useCloseModal } from '~client/components/modal-window';
+import { usePersistentState } from '~client/hooks';
 import { Button, ButtonRefresh } from '~client/styled/shared';
 import { AnalysisPage } from '~client/types/gql';
 
+const numMonthsInViewOptions: SelectOptions<number> = [
+  { internal: 1, external: 'Month' },
+  { internal: 2, external: 'Two-Month' },
+  { internal: 3, external: 'Quarter' },
+  { internal: 12, external: 'Year' },
+];
+
 export const Buckets: React.FC<RouteComponentProps> = ({ history }) => {
-  const { date, description, startDate, endDate, skipDate } = useDate();
+  const [numMonthsInView, setNumMonthsInView] = usePersistentState<number>(12, 'bucket_num_months');
+  const { description, startDate, startDateString, endDate, endDateString, skipDate } = useDate(
+    numMonthsInView,
+  );
 
-  const [bucketState, setBucketState, { fetching, error, refresh }] = useBuckets(date);
+  const [bucketState, setBucketState, { fetching, error, refresh }] = useBuckets(
+    startDateString,
+    endDateString,
+    numMonthsInView,
+  );
 
-  const upsertBucket = useBucketsMutation(date, setBucketState);
-  const setInvestmentBucket = useInvestmentBucketMutation(setBucketState);
+  const upsertBucket = useBucketsMutation(
+    startDateString,
+    endDateString,
+    setBucketState,
+    numMonthsInView,
+  );
+  const setInvestmentBucket = useInvestmentBucketMutation(setBucketState, numMonthsInView);
 
   const actualValues = useActualValues(startDate, endDate, bucketState.buckets);
   const expectedValues = useExpectedValues(bucketState);
@@ -39,6 +60,11 @@ export const Buckets: React.FC<RouteComponentProps> = ({ history }) => {
       <Styled.Main>
         <Styled.TitleBar>
           <Button onClick={(): void => skipDate(-1)}>Previous</Button>
+          <FormFieldSelect
+            value={numMonthsInView}
+            options={numMonthsInViewOptions}
+            onChange={setNumMonthsInView}
+          />
           <Styled.DateTitle>{description}</Styled.DateTitle>
           <ButtonRefresh onClick={(): void => refresh()}>&#8635;</ButtonRefresh>
           <Button onClick={(): void => skipDate(1)}>Next</Button>
