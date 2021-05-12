@@ -3,8 +3,9 @@ import styled from '@emotion/styled';
 import { rem, rgba } from 'polished';
 
 import { FormField } from '~client/components/form-field/styles';
-import { Flex, FlexCenter, FlexColumn } from '~client/styled/shared';
-import { colors } from '~client/styled/variables';
+import { breakpoint } from '~client/styled/mixins';
+import { Button, ButtonRefresh, Flex, FlexCenter, FlexColumn } from '~client/styled/shared';
+import { breakpoints, colors } from '~client/styled/variables';
 
 export const Main = styled(FlexColumn)`
   align-items: center;
@@ -19,10 +20,46 @@ export const StatusBar = styled(Flex)`
   width: 100%;
 `;
 
-export const TitleBar = styled(FlexCenter)`
+export const TitleBar = styled.div`
+  display: grid;
   flex: 0 0 ${rem(20)};
+  grid-template-columns: ${rem(100)} auto ${rem(100)};
+  grid-template-rows: auto auto;
   margin: ${rem(2)} 0;
   width: 100%;
+
+  ${breakpoint(breakpoints.mobile)} {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+`;
+
+const PrevNextButton = styled(Button)`
+  width: ${rem(80)};
+`;
+
+export const PrevButton = styled(PrevNextButton)`
+  grid-column: 1;
+  grid-row: 1;
+`;
+
+export const NextButton = styled(PrevNextButton)`
+  grid-column: 3;
+`;
+
+export const RefreshButton = styled(ButtonRefresh)`
+  border-radius: 100%;
+  grid-column: 3;
+  grid-row: 2;
+  height: ${rem(28)};
+  margin: auto;
+  width: ${rem(28)};
+`;
+
+export const PeriodSwitcher = styled(FlexCenter)`
+  grid-column: 1;
+  grid-row: 2;
 `;
 
 export const OverallHealth = styled(FlexColumn)`
@@ -73,7 +110,9 @@ export const HealthStatus = styled(FlexCenter)`
 export const DateTitle = styled.h3`
   flex: 1;
   font-size: ${rem(16)};
-  margin: 0;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  margin: auto;
   text-align: center;
 `;
 
@@ -94,6 +133,12 @@ export const BucketMeta = styled(FlexColumn)`
     white-space: nowrap;
     width: ${rem(72)};
   }
+`;
+
+export const AddBucketButtonContainer = styled(FlexCenter)`
+  height: ${rem(28)};
+  padding: ${rem(3)};
+  width: ${rem(28)};
 `;
 
 export const Filler = styled.div`

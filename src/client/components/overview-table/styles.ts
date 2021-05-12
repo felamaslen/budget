@@ -1,7 +1,11 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
+
+import nav1x from '~client/images/nav.png';
+import nav2x from '~client/images/nav@2x.png';
 import { breakpoint, unimportant } from '~client/styled/mixins';
+import { ButtonUnStyled } from '~client/styled/shared/reset';
 import { breakpoints, colors } from '~client/styled/variables';
 import type { OverviewHeader } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
@@ -169,16 +173,53 @@ export const HeaderLink = styled(Cell)`
   background: ${({ column }): string =>
     colors.overview[`${column}Mobile` as keyof typeof colors.overview] ?? colors.white};
 
-  & > a {
-    text-decoration: none;
-  }
-
   button {
     flex: 0 0 auto;
   }
 
   ${breakpoint(breakpoints.mobile)} {
     padding: ${rem(2)};
+  }
+`;
+
+export const HeaderLinkButton = styled(ButtonUnStyled)`
+  align-items: center;
+  cursor: pointer;
+  display: inline-flex;
+  height: ${rem(22)};
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  width: ${rem(22)};
+
+  ${breakpoint(breakpoints.mobile)} {
+    margin: 0 ${rem(2)};
+  }
+`;
+
+export const AddReceiptButton = styled.span`
+  background-image: url(${nav1x});
+  background-position: -92px -62px;
+  display: block;
+  height: ${rem(22)};
+  width: ${rem(22)};
+
+  @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    background-image: url(${nav2x});
+    background-size: 262px 88px;
+  }
+`;
+
+export const BucketButton = styled.span`
+  background-image: url(${nav1x});
+  background-position: -120px -62px;
+  display: block;
+  height: ${rem(22)};
+  width: ${rem(22)};
+
+  @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    background-image: url(${nav2x});
+    background-size: 262px 88px;
   }
 `;
 

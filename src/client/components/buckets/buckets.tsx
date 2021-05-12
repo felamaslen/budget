@@ -18,7 +18,6 @@ import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { ModalWindow, useCloseModal } from '~client/components/modal-window';
 import { usePersistentState } from '~client/hooks';
-import { Button, ButtonRefresh } from '~client/styled/shared';
 import { AnalysisPage } from '~client/types/gql';
 
 const numMonthsInViewOptions: SelectOptions<number> = [
@@ -59,15 +58,17 @@ export const Buckets: React.FC<RouteComponentProps> = ({ history }) => {
     <ModalWindow title="Buckets" onClosed={onClosed} width={600}>
       <Styled.Main>
         <Styled.TitleBar>
-          <Button onClick={(): void => skipDate(-1)}>Previous</Button>
-          <FormFieldSelect
-            value={numMonthsInView}
-            options={numMonthsInViewOptions}
-            onChange={setNumMonthsInView}
-          />
+          <Styled.PrevButton onClick={(): void => skipDate(-1)}>Previous</Styled.PrevButton>
+          <Styled.PeriodSwitcher>
+            <FormFieldSelect
+              value={numMonthsInView}
+              options={numMonthsInViewOptions}
+              onChange={setNumMonthsInView}
+            />
+          </Styled.PeriodSwitcher>
           <Styled.DateTitle>{description}</Styled.DateTitle>
-          <ButtonRefresh onClick={(): void => refresh()}>&#8635;</ButtonRefresh>
-          <Button onClick={(): void => skipDate(1)}>Next</Button>
+          <Styled.RefreshButton onClick={(): void => refresh()}>&#8635;</Styled.RefreshButton>
+          <Styled.NextButton onClick={(): void => skipDate(1)}>Next</Styled.NextButton>
         </Styled.TitleBar>
         <OverallHealth actualValues={actualValues} expectedValues={expectedValues} />
         <Styled.BucketGroupList>

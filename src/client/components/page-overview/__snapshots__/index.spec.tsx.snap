@@ -126,11 +126,6 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-4>a {
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
 .emotion-4 button {
   -webkit-flex: 0 0 auto;
   -ms-flex: 0 0 auto;
@@ -158,315 +153,75 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 .emotion-8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  margin: 0 6px;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  padding: 1em 0;
-  width: 100%;
-  background: #ffa35c;
-  font-size: 0.6em;
-  border: none;
-  border-radius: 3px;
-  outline: none;
-  text-transform: uppercase;
-  font-weight: bold;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  margin: 0;
-  padding: 0;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  font-size: 18px;
-  line-height: 22px;
-  background: #c00;
-  border-radius: 100%;
-  border: none;
-  box-shadow: none;
-  color: #fff;
-  background: #009918;
-}
-
-.e4ltp6k2 .emotion-8 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  margin: 0 0.2em;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  grid-row: 1;
-  grid-column: 4;
-}
-
-.e4ltp6k1 .emotion-8,
-.e4ltp6k1 .emotion-8:hover,
-.e4ltp6k1 .emotion-8:active {
-  background: none;
-  border: none;
-  box-shadow: none;
-}
-
-.e4ltp6k1 .emotion-8::after {
+  background-image: url(path/to/test/file);
+  -webkit-background-position: -120px -62px;
+  background-position: -120px -62px;
   display: block;
-  margin-left: 16px;
-  content: '';
-  width: 0;
-  height: 0;
-  border: solid transparent;
-  border-left-color: #111;
-  border-width: 6px 8px;
-  transform-origin: left center;
+  height: 1.375rem;
+  width: 1.375rem;
 }
 
-.emotion-8:disabled {
-  background: none;
-}
-
-@media only screen and (min-width: 500px) {
+@media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .emotion-8 {
-    display: inline-block;
-    margin: 0;
-    padding: 5px 12px 6px;
-    -webkit-box-flex: 0;
-    -webkit-flex-grow: 0;
-    -ms-flex-positive: 0;
-    flex-grow: 0;
-    width: auto;
-    box-shadow: inset 0px 1px 0px 0px rgba(0,0,0,0.2);
-    background: #74ad5a;
-    border: 1px solid #3b6e22;
-    border-radius: 0;
-    cursor: pointer;
-    color: #fff;
-    font-family: Arial;
-    font-size: 13px;
-    height: 24px;
-    position: relative;
-    -webkit-text-decoration: none;
-    text-decoration: none;
-    text-transform: none;
-    z-index: 4;
-  }
-
-  .emotion-8:hover,
-  .emotion-8:focus {
-    background: #80be69;
-  }
-
-  .emotion-8:active {
-    background: #638c4d;
-  }
-
-  .emotion-8:disabled {
-    background: #9c9c9c;
-    cursor: default;
-    border: 1px solid #666;
-  }
-}
-
-.e1w7s03s5 .emotion-8 {
-  margin: 2px 4px;
-}
-
-.e1w7s03s17 .emotion-8,
-.e1w7s03s20 .emotion-8 {
-  margin: 0 5px;
-  -webkit-flex: 0 0 auto;
-  -ms-flex: 0 0 auto;
-  flex: 0 0 auto;
-}
-
-.e18ot30j1 .emotion-8 {
-  margin: 0 3px;
-  top: 0;
-  -webkit-flex: 0 0 1.375rem;
-  -ms-flex: 0 0 1.375rem;
-  flex: 0 0 1.375rem;
-}
-
-@media only screen and (min-width: 500px) {
-  .emotion-8 {
-    display: -webkit-inline-box;
-    display: -webkit-inline-flex;
-    display: -ms-inline-flexbox;
-    display: inline-flex;
-    margin: 0;
-    padding: 0;
-    -webkit-align-items: center;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
-    -webkit-justify-content: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    font-size: 18px;
-    line-height: 22px;
-    background: #c00;
-    border-radius: 100%;
-    border: none;
-    box-shadow: none;
-    color: #fff;
-  }
-}
-
-@media only screen and (min-width: 500px) {
-  .emotion-8:focus,
-  .emotion-8:hover {
-    background: #900;
-  }
-
-  .emotion-8:focus:active,
-  .emotion-8:hover:active {
-    background: #600;
-  }
-}
-
-.e4ltp6k2>.emotion-8 {
-  grid-row: 1;
-  grid-column: 3;
-}
-
-.ekbie0b0 .emotion-8 {
-  width: 16px;
-  height: 16px;
-  font-size: 16px;
-  line-height: 16px;
-}
-
-.e1w7s03s5 .emotion-8 {
-  grid-column: 4;
-  margin: 0;
-}
-
-.e1w7s03s17 .emotion-8 {
-  grid-column: 4;
-}
-
-@media only screen and (min-width: 500px) {
-  .emotion-8 {
-    background: #009918;
-  }
-}
-
-@media only screen and (min-width: 500px) {
-  .emotion-8:focus,
-  .emotion-8:hover {
-    background: #006610;
-  }
-
-  .emotion-8:focus:active,
-  .emotion-8:hover:active {
-    background: #003308;
+    background-image: url(path/to/test/file);
+    -webkit-background-size: 262px 88px;
+    background-size: 262px 88px;
   }
 }
 
 .emotion-10 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-flex-flow: row nowrap;
-  -webkit-flex-flow: row nowrap;
-  -ms-flex-flow: row nowrap;
-  flex-flow: row nowrap;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
-  flex-grow: 1;
-  -webkit-flex-basis: 0;
-  -ms-flex-preferred-size: 0;
-  flex-basis: 0;
-  padding: 0.25rem;
-  position: relative;
-  width: 100%;
-  vertical-align: middle;
-  text-align: left;
-  height: 2rem;
-  line-height: 1.5rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  cursor: pointer;
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
   display: inline-flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
-  overflow: hidden;
-  white-space: nowrap;
-  height: 1.5rem;
-  text-align: center;
-  background: #b7ffa3;
+  height: 1.375rem;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  width: 1.375rem;
 }
 
-@media only screen and (min-width: 350px) {
-  .emotion-10 {
-    padding: 0.25rem;
-    white-space: nowrap;
-  }
-}
-
-@media only screen and (min-width: 500px) {
-  .emotion-10 {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    padding: 0 0.125rem;
-    -webkit-box-flex: 7;
-    -webkit-flex-grow: 7;
-    -ms-flex-positive: 7;
-    flex-grow: 7;
-    height: 1.5rem;
-    border-left: 3px solid #222;
-  }
-}
-
-.emotion-10>a {
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.emotion-10 button {
-  -webkit-flex: 0 0 auto;
-  -ms-flex: 0 0 auto;
-  flex: 0 0 auto;
+.emotion-10,
+.emotion-10:active,
+.emotion-10:focus,
+.emotion-10:hover {
+  background: none;
+  border: none;
+  outline: none;
 }
 
 @media only screen and (min-width: 500px) {
   .emotion-10 {
-    padding: 0.125rem;
+    margin: 0 0.125rem;
+  }
+}
+
+.emotion-12 {
+  background-image: url(path/to/test/file);
+  -webkit-background-position: -92px -62px;
+  background-position: -92px -62px;
+  display: block;
+  height: 1.375rem;
+  width: 1.375rem;
+}
+
+@media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .emotion-12 {
+    background-image: url(path/to/test/file);
+    -webkit-background-size: 262px 88px;
+    background-size: 262px 88px;
   }
 }
 
@@ -508,7 +263,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   white-space: nowrap;
   height: 1.5rem;
   text-align: center;
-  background: #ffa3a3;
+  background: #b7ffa3;
 }
 
 @media only screen and (min-width: 350px) {
@@ -530,12 +285,8 @@ exports[`<PageOverview /> should render a table 1`] = `
     -ms-flex-positive: 7;
     flex-grow: 7;
     height: 1.5rem;
+    border-left: 3px solid #222;
   }
-}
-
-.emotion-14>a {
-  -webkit-text-decoration: none;
-  text-decoration: none;
 }
 
 .emotion-14 button {
@@ -588,7 +339,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   white-space: nowrap;
   height: 1.5rem;
   text-align: center;
-  background: #a3baff;
+  background: #ffa3a3;
 }
 
 @media only screen and (min-width: 350px) {
@@ -605,17 +356,12 @@ exports[`<PageOverview /> should render a table 1`] = `
     display: -ms-flexbox;
     display: flex;
     padding: 0 0.125rem;
-    -webkit-box-flex: 12;
-    -webkit-flex-grow: 12;
-    -ms-flex-positive: 12;
-    flex-grow: 12;
+    -webkit-box-flex: 7;
+    -webkit-flex-grow: 7;
+    -ms-flex-positive: 7;
+    flex-grow: 7;
     height: 1.5rem;
   }
-}
-
-.emotion-18>a {
-  -webkit-text-decoration: none;
-  text-decoration: none;
 }
 
 .emotion-18 button {
@@ -631,6 +377,81 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 .emotion-22 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex-flow: row nowrap;
+  -webkit-flex-flow: row nowrap;
+  -ms-flex-flow: row nowrap;
+  flex-flow: row nowrap;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  -webkit-flex-basis: 0;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  padding: 0.25rem;
+  position: relative;
+  width: 100%;
+  vertical-align: middle;
+  text-align: left;
+  height: 2rem;
+  line-height: 1.5rem;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 1.5rem;
+  text-align: center;
+  background: #a3baff;
+}
+
+@media only screen and (min-width: 350px) {
+  .emotion-22 {
+    padding: 0.25rem;
+    white-space: nowrap;
+  }
+}
+
+@media only screen and (min-width: 500px) {
+  .emotion-22 {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 0 0.125rem;
+    -webkit-box-flex: 12;
+    -webkit-flex-grow: 12;
+    -ms-flex-positive: 12;
+    flex-grow: 12;
+    height: 1.5rem;
+  }
+}
+
+.emotion-22 button {
+  -webkit-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+
+@media only screen and (min-width: 500px) {
+  .emotion-22 {
+    padding: 0.125rem;
+  }
+}
+
+.emotion-26 {
   -webkit-flex: 1 1 auto;
   -ms-flex: 1 1 auto;
   flex: 1 1 auto;
@@ -638,19 +459,19 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-22 {
+  .emotion-26 {
     overflow-y: unset;
     overflow: hidden;
   }
 }
 
 @media only screen and (min-width: 1200px) {
-  .emotion-22 {
+  .emotion-26 {
     overflow: unset;
   }
 }
 
-.emotion-24 {
+.emotion-28 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -665,12 +486,12 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-24 {
+  .emotion-28 {
     font-size: 1rem;
   }
 }
 
-.emotion-26 {
+.emotion-30 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -697,14 +518,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-26 {
+  .emotion-30 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-26 {
+  .emotion-30 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -721,7 +542,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-28 {
+.emotion-32 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -747,14 +568,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-28 {
+  .emotion-32 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-28 {
+  .emotion-32 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -772,24 +593,24 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-30 {
+.emotion-34 {
   outline: none;
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-30:hover .emotion-33,
-  .emotion-30:focus .emotion-33 {
+  .emotion-34:hover .emotion-37,
+  .emotion-34:focus .emotion-37 {
     display: none;
   }
 
-  .emotion-30:hover .emotion-35,
-  .emotion-30:focus .emotion-35 {
+  .emotion-34:hover .emotion-39,
+  .emotion-34:focus .emotion-39 {
     display: block;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-32 {
+  .emotion-36 {
     position: absolute;
     left: 0;
     padding: 0 0.125rem;
@@ -797,12 +618,12 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-34 {
+.emotion-38 {
   display: none;
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-34 {
+  .emotion-38 {
     position: absolute;
     left: 0;
     padding: 0 0.125rem;
@@ -811,12 +632,12 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-34 {
+  .emotion-38 {
     background: rgba(255,255,255,0.8);
   }
 }
 
-.emotion-36 {
+.emotion-40 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -842,14 +663,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-36 {
+  .emotion-40 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-36 {
+  .emotion-40 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -866,7 +687,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-44 {
+.emotion-48 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -892,14 +713,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-44 {
+  .emotion-48 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-44 {
+  .emotion-48 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -916,7 +737,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-80 {
+.emotion-84 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -930,7 +751,7 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-80 {
+  .emotion-84 {
     font-size: 1rem;
     font-weight: bold;
     font-size: 0.875rem;
@@ -938,12 +759,12 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 1200px) {
-  .emotion-80 {
+  .emotion-84 {
     font-size: 1rem;
   }
 }
 
-.emotion-82 {
+.emotion-86 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -972,14 +793,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-82 {
+  .emotion-86 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-82 {
+  .emotion-86 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -994,7 +815,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-84 {
+.emotion-88 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1021,14 +842,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-84 {
+  .emotion-88 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-84 {
+  .emotion-88 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -1044,7 +865,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-92 {
+.emotion-96 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1071,14 +892,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-92 {
+  .emotion-96 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-92 {
+  .emotion-96 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -1093,7 +914,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-100 {
+.emotion-104 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1120,14 +941,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-100 {
+  .emotion-104 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-100 {
+  .emotion-104 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -1142,7 +963,7 @@ exports[`<PageOverview /> should render a table 1`] = `
   }
 }
 
-.emotion-108 {
+.emotion-112 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1155,19 +976,19 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-108 {
+  .emotion-112 {
     font-size: 1rem;
     font-size: 0.875rem;
   }
 }
 
 @media only screen and (min-width: 1200px) {
-  .emotion-108 {
+  .emotion-112 {
     font-size: 1rem;
   }
 }
 
-.emotion-110 {
+.emotion-114 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1193,14 +1014,14 @@ exports[`<PageOverview /> should render a table 1`] = `
 }
 
 background:#fbe07f@media only screen and (min-width: 350px) {
-  .emotion-110 {
+  .emotion-114 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-110 {
+  .emotion-114 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -1215,7 +1036,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
   }
 }
 
-.emotion-112 {
+.emotion-116 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1241,14 +1062,14 @@ background:#fbe07f@media only screen and (min-width: 350px) {
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-112 {
+  .emotion-116 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-112 {
+  .emotion-116 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -1264,7 +1085,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
   }
 }
 
-.emotion-120 {
+.emotion-124 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1290,14 +1111,14 @@ background:#fbe07f@media only screen and (min-width: 350px) {
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-120 {
+  .emotion-124 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-120 {
+  .emotion-124 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -1312,7 +1133,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
   }
 }
 
-.emotion-128 {
+.emotion-132 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1338,14 +1159,14 @@ background:#fbe07f@media only screen and (min-width: 350px) {
 }
 
 @media only screen and (min-width: 350px) {
-  .emotion-128 {
+  .emotion-132 {
     padding: 0.25rem;
     white-space: nowrap;
   }
 }
 
 @media only screen and (min-width: 500px) {
-  .emotion-128 {
+  .emotion-132 {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -1377,22 +1198,22 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </span>
       <a
         href="/buckets"
+        style="text-decoration: none;"
       >
         <span
-          aria-label="Toggle buckets view"
-          role="img"
-        >
-          🪣
-        </span>
+          class="emotion-8 emotion-9"
+        />
       </a>
       <button
-        class="emotion-8 emotion-9"
+        class="emotion-10 emotion-11"
       >
-        +
+        <span
+          class="emotion-12 emotion-13"
+        />
       </button>
     </div>
     <div
-      class="emotion-10 emotion-5"
+      class="emotion-14 emotion-5"
     >
       <span
         class="emotion-6 emotion-7"
@@ -1401,7 +1222,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </span>
     </div>
     <div
-      class="emotion-14 emotion-5"
+      class="emotion-18 emotion-5"
     >
       <span
         class="emotion-6 emotion-7"
@@ -1410,7 +1231,7 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </span>
     </div>
     <div
-      class="emotion-18 emotion-5"
+      class="emotion-22 emotion-5"
     >
       <a
         class="emotion-6 emotion-7"
@@ -1421,71 +1242,71 @@ background:#fbe07f@media only screen and (min-width: 350px) {
     </div>
   </div>
   <div
-    class="emotion-22 emotion-23"
+    class="emotion-26 emotion-27"
   >
     <div
-      class="emotion-24 emotion-25"
+      class="emotion-28 emotion-29"
     >
       <div
-        class="emotion-26 emotion-27"
+        class="emotion-30 emotion-31"
       >
         Jan-18
       </div>
       <div
-        class="emotion-28 emotion-27"
+        class="emotion-32 emotion-31"
         style="background-color: rgb(36, 191, 55);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £20.00
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £20.00
           </span>
         </span>
       </div>
       <div
-        class="emotion-36 emotion-27"
+        class="emotion-40 emotion-31"
         style="background-color: rgb(213, 110, 110);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £12.60
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £12.60
           </span>
         </span>
       </div>
       <div
-        class="emotion-44 emotion-27"
+        class="emotion-48 emotion-31"
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £16.8k
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £16,805.00
           </span>
@@ -1493,68 +1314,68 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
     </div>
     <div
-      class="emotion-24 emotion-25"
+      class="emotion-28 emotion-29"
     >
       <div
-        class="emotion-26 emotion-27"
+        class="emotion-30 emotion-31"
       >
         Feb-18
       </div>
       <div
-        class="emotion-28 emotion-27"
+        class="emotion-32 emotion-31"
         style="background-color: rgb(71, 201, 87);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £19.00
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £19.00
           </span>
         </span>
       </div>
       <div
-        class="emotion-36 emotion-27"
+        class="emotion-40 emotion-31"
         style="background-color: rgb(191, 36, 36);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £20.68
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £20.68
           </span>
         </span>
       </div>
       <div
-        class="emotion-44 emotion-27"
+        class="emotion-48 emotion-31"
         style="background-color: rgb(36, 191, 55);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £45k
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £45,017.98
           </span>
@@ -1562,68 +1383,68 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
     </div>
     <div
-      class="emotion-80 emotion-25"
+      class="emotion-84 emotion-29"
     >
       <div
-        class="emotion-82 emotion-27"
+        class="emotion-86 emotion-31"
       >
         Mar-18
       </div>
       <div
-        class="emotion-84 emotion-27"
+        class="emotion-88 emotion-31"
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £15.00
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £15.00
           </span>
         </span>
       </div>
       <div
-        class="emotion-92 emotion-27"
+        class="emotion-96 emotion-31"
         style="background-color: rgb(223, 146, 146);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £8.73
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £8.73
           </span>
         </span>
       </div>
       <div
-        class="emotion-100 emotion-27"
+        class="emotion-104 emotion-31"
         style="background-color: rgb(56, 197, 73);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £42.5k
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £42,488.48
           </span>
@@ -1631,68 +1452,68 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
     </div>
     <div
-      class="emotion-108 emotion-25"
+      class="emotion-112 emotion-29"
     >
       <div
-        class="emotion-110 emotion-27"
+        class="emotion-114 emotion-31"
       >
         Apr-18
       </div>
       <div
-        class="emotion-112 emotion-27"
+        class="emotion-116 emotion-31"
         style="background-color: rgb(146, 223, 155);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £16.86
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £16.86
           </span>
         </span>
       </div>
       <div
-        class="emotion-120 emotion-27"
+        class="emotion-124 emotion-31"
         style="background-color: rgb(221, 139, 139);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £9.48
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £9.48
           </span>
         </span>
       </div>
       <div
-        class="emotion-128 emotion-27"
+        class="emotion-132 emotion-31"
         style="background-color: rgb(45, 194, 63);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £43.9k
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £43,898.48
           </span>
@@ -1700,68 +1521,68 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
     </div>
     <div
-      class="emotion-108 emotion-25"
+      class="emotion-112 emotion-29"
     >
       <div
-        class="emotion-110 emotion-27"
+        class="emotion-114 emotion-31"
       >
         May-18
       </div>
       <div
-        class="emotion-112 emotion-27"
+        class="emotion-116 emotion-31"
         style="background-color: rgb(146, 223, 155);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £16.86
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £16.86
           </span>
         </span>
       </div>
       <div
-        class="emotion-120 emotion-27"
+        class="emotion-124 emotion-31"
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £2.98
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £2.98
           </span>
         </span>
       </div>
       <div
-        class="emotion-128 emotion-27"
+        class="emotion-132 emotion-31"
         style="background-color: rgb(36, 191, 55);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £45.3k
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £45,320.78
           </span>
@@ -1769,68 +1590,68 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
     </div>
     <div
-      class="emotion-108 emotion-25"
+      class="emotion-112 emotion-29"
     >
       <div
-        class="emotion-110 emotion-27"
+        class="emotion-114 emotion-31"
       >
         Jun-18
       </div>
       <div
-        class="emotion-112 emotion-27"
+        class="emotion-116 emotion-31"
         style="background-color: rgb(146, 223, 155);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £16.86
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £16.86
           </span>
         </span>
       </div>
       <div
-        class="emotion-120 emotion-27"
+        class="emotion-124 emotion-31"
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £2.98
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £2.98
           </span>
         </span>
       </div>
       <div
-        class="emotion-128 emotion-27"
+        class="emotion-132 emotion-31"
         style="background-color: rgb(36, 191, 55);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £46.7k
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £46,748.93
           </span>
@@ -1838,68 +1659,68 @@ background:#fbe07f@media only screen and (min-width: 350px) {
       </div>
     </div>
     <div
-      class="emotion-108 emotion-25"
+      class="emotion-112 emotion-29"
     >
       <div
-        class="emotion-110 emotion-27"
+        class="emotion-114 emotion-31"
       >
         Jul-18
       </div>
       <div
-        class="emotion-112 emotion-27"
+        class="emotion-116 emotion-31"
         style="background-color: rgb(146, 223, 155);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £16.86
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £16.86
           </span>
         </span>
       </div>
       <div
-        class="emotion-120 emotion-27"
+        class="emotion-124 emotion-31"
         style="background-color: rgb(255, 255, 255);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £2.98
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £2.98
           </span>
         </span>
       </div>
       <div
-        class="emotion-128 emotion-27"
+        class="emotion-132 emotion-31"
         style="background-color: rgb(36, 191, 55);"
       >
         <span
-          class="emotion-30 emotion-31"
+          class="emotion-34 emotion-35"
           tabindex="0"
         >
           <span
-            class="emotion-32 emotion-33"
+            class="emotion-36 emotion-37"
           >
             £48.2k
           </span>
           <span
-            class="emotion-34 emotion-35"
+            class="emotion-38 emotion-39"
           >
             £48,182.94
           </span>

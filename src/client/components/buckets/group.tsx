@@ -20,14 +20,14 @@ function getHealthText(page: string, actualValue: number, expectedValue: number)
         abbreviate: true,
       })}`;
     }
-    return null;
+    return `Income surplus of ${formatCurrency(actualValue - expectedValue, { abbreviate: true })}`;
   }
   if (actualValue > expectedValue) {
     return `Spending on ${page} is ${formatCurrency(actualValue - expectedValue, {
       abbreviate: true,
     })} in excess of budget`;
   }
-  return null;
+  return `${formatCurrency(expectedValue - actualValue, { abbreviate: true })} left to spend`;
 }
 
 export type BucketGroupProps = {

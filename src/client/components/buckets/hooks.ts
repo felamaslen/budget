@@ -58,7 +58,7 @@ export function useDate(
 } {
   const [date, setDate] = useState<Date>(getStartDate(new Date(), numMonthsInView));
   useEffect(() => {
-    setDate((last) => getStartDate(last, numMonthsInView));
+    setDate(getStartDate(new Date(), numMonthsInView));
   }, [numMonthsInView]);
 
   const skipDate = useCallback(

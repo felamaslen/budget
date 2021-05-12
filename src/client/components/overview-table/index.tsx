@@ -8,7 +8,6 @@ import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { useMediaQuery, TodayContext } from '~client/hooks';
 import { getOverviewTable } from '~client/selectors';
 import { breakpointBase } from '~client/styled/mixins';
-import { ButtonAdd } from '~client/styled/shared';
 import { breakpoints } from '~client/styled/variables';
 import type {
   OverviewHeader,
@@ -63,12 +62,12 @@ const Header: React.FC<Props & ColumnsProps> = ({ columns, addReceipt }) => (
   <Styled.Header>
     <Styled.HeaderLink column="month" key="month">
       <Styled.HeaderText>Month</Styled.HeaderText>
-      <Link to="/buckets">
-        <span aria-label="Toggle buckets view" role="img">
-          🪣
-        </span>
+      <Link to="/buckets" style={{ textDecoration: 'none' }}>
+        <Styled.BucketButton />
       </Link>
-      <ButtonAdd onClick={addReceipt}>+</ButtonAdd>
+      <Styled.HeaderLinkButton onClick={addReceipt}>
+        <Styled.AddReceiptButton />
+      </Styled.HeaderLinkButton>
     </Styled.HeaderLink>
     {columns.map(([column, { name, link }]) => (
       <Styled.HeaderLink column={column} key={name}>

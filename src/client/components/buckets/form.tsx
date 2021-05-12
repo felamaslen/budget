@@ -5,7 +5,7 @@ import * as Styled from './styles';
 
 import { FormFieldCost, FormFieldText } from '~client/components/form-field';
 import { formatPercent } from '~client/modules/format';
-import { Button } from '~client/styled/shared';
+import { ButtonAdd } from '~client/styled/shared';
 import { AnalysisPage, Bucket, InvestmentBucket } from '~client/types/gql';
 
 export type BucketFormProps = {
@@ -93,7 +93,9 @@ export const BucketFilterForm: React.FC<BucketFilterFormProps> = ({ page, upsert
         <FormFieldCost value={expectedValue} onChange={setExpectedValue} />
       </Styled.BucketMeta>
       <Styled.BucketMeta>
-        <Button onClick={addBucket}>Add</Button>
+        <Styled.AddBucketButtonContainer>
+          <ButtonAdd onClick={addBucket}>+</ButtonAdd>
+        </Styled.AddBucketButtonContainer>
       </Styled.BucketMeta>
       <Styled.Filler />
     </Styled.BucketFormNew>
