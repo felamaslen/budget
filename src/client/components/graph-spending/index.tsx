@@ -1,4 +1,5 @@
 import React, { useMemo, useContext, useCallback } from 'react';
+import { replaceAtIndex } from 'replace-array';
 
 import { Key } from './key';
 import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashflow';
@@ -12,6 +13,7 @@ import { SettingsFull, SettingsGroup } from '~client/styled/shared/settings';
 import { colors, graphOverviewHeightMobile } from '~client/styled/variables';
 import { DrawProps, Line, OverviewGraph } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
+import type { InitialCumulativeValues } from '~client/types/gql';
 
 export type Props = {
   isMobile: boolean;
@@ -19,6 +21,7 @@ export type Props = {
   setShowAll: React.Dispatch<React.SetStateAction<boolean>>;
   longTerm: boolean;
   graph: OverviewGraph;
+  initialCumulativeValues: InitialCumulativeValues;
   investments: number[];
   setMobileGraph: React.Dispatch<React.SetStateAction<GraphCashFlowTitle>>;
 };
@@ -28,14 +31,19 @@ const getRatioToIncome = (income: number[], values: number[]): number[] =>
 
 const inverseRatio = (values: number[]): number[] => values.map((value) => 1 - value);
 
+const insertInitialValue = (values: number[], initialValue: number): number[] =>
+  replaceAtIndex(values, 0, (last) => initialValue + last);
+
 function processData(
+  showAll: boolean,
   longTerm: boolean,
   isCumulative: boolean,
   graph: OverviewGraph,
+  initialCumulativeValues: InitialCumulativeValues,
   investments: number[],
 ): Line[] {
   const arrows: Line[] =
-    longTerm || isCumulative
+    showAll || longTerm || isCumulative
       ? []
       : [
           {
@@ -47,13 +55,21 @@ function processData(
           },
         ];
 
+  const income = showAll
+    ? graph.values.income
+    : insertInitialValue(graph.values.income, initialCumulativeValues.income);
+
+  const spending = showAll
+    ? graph.values.spending
+    : insertInitialValue(graph.values.spending, initialCumulativeValues.spending);
+
   return [
     ...arrows,
     {
       key: 'spending',
       name: 'Expenses',
       data: isCumulative
-        ? getValuesWithTime(graph.dates, cumulativeSum(graph.values.spending))
+        ? getValuesWithTime(graph.dates, cumulativeSum(spending))
         : transformToMovingAverage(getValuesWithTime(graph.dates, graph.values.spending), 3, true),
       fill: false,
       smooth: true,
@@ -67,7 +83,7 @@ function processData(
         ? getValuesWithTime(graph.dates, cumulativeSum(investments))
         : getValuesWithTime(
             graph.dates,
-            getRatioToIncome(cumulativeSum(graph.values.income), cumulativeSum(investments)),
+            getRatioToIncome(cumulativeSum(income), cumulativeSum(investments)),
           ),
       color: colors.funds.main,
       smooth: true,
@@ -78,7 +94,7 @@ function processData(
       ? {
           key: 'income',
           name: 'Income',
-          data: getValuesWithTime(graph.dates, cumulativeSum(graph.values.income)),
+          data: getValuesWithTime(graph.dates, cumulativeSum(income)),
           fill: false,
           smooth: true,
           color: colors.green,
@@ -90,18 +106,10 @@ function processData(
           data: isCumulative
             ? getValuesWithTime(
                 graph.dates,
-                inverseRatio(
-                  getRatioToIncome(
-                    cumulativeSum(graph.values.income),
-                    cumulativeSum(graph.values.spending),
-                  ),
-                ),
+                inverseRatio(getRatioToIncome(cumulativeSum(income), cumulativeSum(spending))),
               )
             : transformToMovingAverage(
-                getValuesWithTime(
-                  graph.dates,
-                  inverseRatio(getRatioToIncome(graph.values.income, graph.values.spending)),
-                ),
+                getValuesWithTime(graph.dates, inverseRatio(getRatioToIncome(income, spending))),
                 12,
               ),
           secondary: true,
@@ -115,6 +123,7 @@ function processData(
 export const GraphSpending: React.FC<Props> = ({
   isMobile,
   graph,
+  initialCumulativeValues,
   investments,
   showAll,
   setShowAll,
@@ -129,8 +138,8 @@ export const GraphSpending: React.FC<Props> = ({
   );
 
   const lines = useMemo<Line[]>(
-    () => processData(showAll || longTerm, isCumulative, graph, investments),
-    [showAll, longTerm, isCumulative, graph, investments],
+    () => processData(showAll, longTerm, isCumulative, graph, initialCumulativeValues, investments),
+    [showAll, longTerm, isCumulative, graph, initialCumulativeValues, investments],
   );
 
   const AfterLines = useCallback<React.FC<DrawProps>>(

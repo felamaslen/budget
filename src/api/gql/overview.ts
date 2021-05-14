@@ -23,11 +23,17 @@ export const overviewSchema = gql`
     social: [Int!]!
   }
 
+  type InitialCumulativeValues {
+    income: Int!
+    spending: Int!
+  }
+
   type Overview {
     startDate: Date!
     endDate: Date!
     annualisedFundReturns: Float!
     monthly: Monthly!
+    initialCumulativeValues: InitialCumulativeValues!
   }
 
   type OverviewOld {

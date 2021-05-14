@@ -56,7 +56,7 @@ import {
   TableValues,
 } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
-import type { Monthly, NetWorthSubcategory } from '~client/types/gql';
+import type { InitialCumulativeValues, Monthly, NetWorthSubcategory } from '~client/types/gql';
 import { NetWorthAggregate } from '~shared/constants';
 
 export * from './common';
@@ -622,3 +622,6 @@ export const getOverviewTable = moize(
     maxSize: 1,
   },
 );
+
+export const getInitialCumulativeValues = (state: State): InitialCumulativeValues =>
+  state.overview.initialCumulativeValues;

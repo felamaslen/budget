@@ -18,6 +18,10 @@ export const testResponse: InitialQuery = {
       [PageListStandard.Holiday]: [],
       [PageListStandard.Social]: [],
     },
+    initialCumulativeValues: {
+      income: 123,
+      spending: 456,
+    },
   },
 
   netWorthCategories: [],

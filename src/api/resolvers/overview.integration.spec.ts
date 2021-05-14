@@ -42,6 +42,10 @@ describe('Overview resolver', () => {
             holiday
             social
           }
+          initialCumulativeValues {
+            income
+            spending
+          }
         }
       }
     `;
@@ -78,6 +82,18 @@ describe('Overview resolver', () => {
           [page]: [...Array(24).fill(0), value, ...Array(13).fill(0)],
         }),
       );
+    });
+
+    it('should return the initial cumulative income value', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res?.initialCumulativeValues.income).toBe(365202);
+    });
+
+    it('should return the initial cumulative spending value', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res?.initialCumulativeValues.spending).toBe(83 + 156 + 7619); // exclude house deposit of 12300000
     });
 
     it('should return funds data', async () => {

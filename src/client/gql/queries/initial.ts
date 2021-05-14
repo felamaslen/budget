@@ -20,6 +20,10 @@ export const Initial = gql`
         holiday
         social
       }
+      initialCumulativeValues {
+        income
+        spending
+      }
     }
 
     netWorthCategories: readNetWorthCategories {

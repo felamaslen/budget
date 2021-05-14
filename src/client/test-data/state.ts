@@ -42,6 +42,10 @@ export const testState: State = {
       [PageListStandard.Holiday]: [10, 1000, 95, 13, 0, 0, 0],
       [PageListStandard.Social]: [50, 65, 134, 10, 0, 0, 0],
     },
+    initialCumulativeValues: {
+      income: 0,
+      spending: 0,
+    },
   },
   netWorth: {
     categories: [

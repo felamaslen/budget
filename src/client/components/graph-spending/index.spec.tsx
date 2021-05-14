@@ -20,6 +20,7 @@ describe('<GraphSpending />', () => {
       longTerm: false,
       investments: Array(graph.values.income.length).fill(0),
       graph,
+      initialCumulativeValues: { spending: 0, income: 0 },
       setMobileGraph: jest.fn(),
     };
 

@@ -12,7 +12,11 @@ import { ErrorLevel } from '~client/constants/error';
 import { TodayContext, useIsMobile, usePersistentState } from '~client/hooks';
 import { useOverviewOldQuery } from '~client/hooks/gql';
 import { getMonthDatesList } from '~client/modules/date';
-import { getLongTermRates, getOverviewGraphValues } from '~client/selectors';
+import {
+  getInitialCumulativeValues,
+  getLongTermRates,
+  getOverviewGraphValues,
+} from '~client/selectors';
 import { longTermOptionsDisabled } from '~client/selectors/overview/utils';
 import type { LongTermOptions, OverviewGraph } from '~client/types';
 
@@ -40,6 +44,7 @@ export const GraphOverview: React.FC = () => {
       longTermOptions,
     ),
   );
+  const initialCumulativeValues = useSelector(getInitialCumulativeValues);
 
   useEffect(() => {
     if (error) {
@@ -127,6 +132,7 @@ export const GraphOverview: React.FC = () => {
         <GraphSpending
           isMobile={isMobile}
           graph={mergedGraph}
+          initialCumulativeValues={initialCumulativeValues}
           investments={stockAndInvestmentPurchases}
           showAll={showAllAndReady}
           setShowAll={setShowAll}

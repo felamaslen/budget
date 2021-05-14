@@ -44,6 +44,10 @@ export const initialState: State = {
     [PageListStandard.Holiday]: [],
     [PageListStandard.Social]: [],
   },
+  initialCumulativeValues: {
+    income: 0,
+    spending: 0,
+  },
 };
 
 const onRead = (state: State, res: InitialQuery): State =>

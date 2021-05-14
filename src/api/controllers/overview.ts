@@ -3,6 +3,7 @@ import {
   differenceInDays,
   differenceInMonths,
   endOfMonth,
+  formatISO,
   isAfter,
   isSameMonth,
   setMonth,
@@ -24,6 +25,8 @@ import {
   getSpendingSummary,
   getMonthRangeUnion,
   getInvestmentPurchasesSummary,
+  selectInitialCumulativeIncome,
+  selectInitialCumulativeSpending,
 } from '~api/queries';
 import {
   OldNetWorthRow,
@@ -213,10 +216,13 @@ export async function getOverviewData(
   args: QueryOverviewArgs,
 ): Promise<Overview> {
   const now = args.now ?? new Date();
+  const startDate = formatISO(startOfMonth(getStartTime(now)), { representation: 'date' });
 
-  const [monthly, annualisedFundReturns] = await Promise.all([
+  const [monthly, annualisedFundReturns, income, spending] = await Promise.all([
     getMonthlyCategoryValues(db, uid, now),
     getAnnualisedFundReturns(db, uid, now),
+    selectInitialCumulativeIncome(db, uid, startDate),
+    selectInitialCumulativeSpending(db, uid, startDate),
   ]);
   const startTime = getStartTime(now);
   const endTime = getEndTime(now);
@@ -226,6 +232,10 @@ export async function getOverviewData(
     startDate: endOfMonth(startTime),
     endDate: endOfMonth(endTime),
     monthly,
+    initialCumulativeValues: {
+      income,
+      spending,
+    },
   };
 }
 

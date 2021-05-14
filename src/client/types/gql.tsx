@@ -960,12 +960,19 @@ export type Monthly = {
   social: Array<Scalars['Int']>;
 };
 
+export type InitialCumulativeValues = {
+  __typename?: 'InitialCumulativeValues';
+  income: Scalars['Int'];
+  spending: Scalars['Int'];
+};
+
 export type Overview = {
   __typename?: 'Overview';
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
   annualisedFundReturns: Scalars['Float'];
   monthly: Monthly;
+  initialCumulativeValues: InitialCumulativeValues;
 };
 
 export type OverviewOld = {
@@ -1580,6 +1587,9 @@ export type InitialQuery = (
     & { monthly: (
       { __typename?: 'Monthly' }
       & Pick<Monthly, 'stocks' | 'investmentPurchases' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
+    ), initialCumulativeValues: (
+      { __typename?: 'InitialCumulativeValues' }
+      & Pick<InitialCumulativeValues, 'income' | 'spending'>
     ) }
   )>, netWorthCategories?: Maybe<Array<(
     { __typename?: 'NetWorthCategory' }
@@ -2525,6 +2535,10 @@ export const InitialDocument = gql`
       general
       holiday
       social
+    }
+    initialCumulativeValues {
+      income
+      spending
     }
   }
   netWorthCategories: readNetWorthCategories {

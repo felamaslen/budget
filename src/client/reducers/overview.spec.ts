@@ -77,6 +77,10 @@ describe('Overview reducer', () => {
           [PageListStandard.Holiday]: [46352, 0, 47398, 55597],
           [PageListStandard.Social]: [13275, 12593, 12400, 8115],
         },
+        initialCumulativeValues: {
+          income: 123,
+          spending: 456,
+        },
       },
     });
 
@@ -112,6 +116,18 @@ describe('Overview reducer', () => {
           [PageListStandard.General]: [12192, 9515, 28335, 160600],
           [PageListStandard.Holiday]: [46352, 0, 47398, 55597],
           [PageListStandard.Social]: [13275, 12593, 12400, 8115],
+        }),
+      );
+    });
+
+    it('should set the initial cumulative data', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+
+      expect(result.initialCumulativeValues).toStrictEqual(
+        expect.objectContaining<State['initialCumulativeValues']>({
+          income: 123,
+          spending: 456,
         }),
       );
     });

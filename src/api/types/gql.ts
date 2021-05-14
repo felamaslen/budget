@@ -895,11 +895,17 @@ export type Monthly = {
   social: Array<Scalars['Int']>;
 };
 
+export type InitialCumulativeValues = {
+  income: Scalars['Int'];
+  spending: Scalars['Int'];
+};
+
 export type Overview = {
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
   annualisedFundReturns: Scalars['Float'];
   monthly: Monthly;
+  initialCumulativeValues: InitialCumulativeValues;
 };
 
 export type OverviewOld = {
@@ -1158,6 +1164,7 @@ export type ResolversTypes = {
   NetWorthCashTotal: ResolverTypeWrapper<NetWorthCashTotal>;
   MonthlyCategory: MonthlyCategory;
   Monthly: ResolverTypeWrapper<Monthly>;
+  InitialCumulativeValues: ResolverTypeWrapper<InitialCumulativeValues>;
   Overview: ResolverTypeWrapper<Overview>;
   OverviewOld: ResolverTypeWrapper<OverviewOld>;
   OverviewPreview: ResolverTypeWrapper<OverviewPreview>;
@@ -1266,6 +1273,7 @@ export type ResolversParentTypes = {
   NetWorthDeleted: NetWorthDeleted;
   NetWorthCashTotal: NetWorthCashTotal;
   Monthly: Monthly;
+  InitialCumulativeValues: InitialCumulativeValues;
   Overview: Overview;
   OverviewOld: OverviewOld;
   OverviewPreview: OverviewPreview;
@@ -1813,11 +1821,18 @@ export type MonthlyResolvers<ContextType = Context, ParentType extends Resolvers
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type InitialCumulativeValuesResolvers<ContextType = Context, ParentType extends ResolversParentTypes['InitialCumulativeValues'] = ResolversParentTypes['InitialCumulativeValues']> = {
+  income?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  spending?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type OverviewResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Overview'] = ResolversParentTypes['Overview']> = {
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   annualisedFundReturns?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   monthly?: Resolver<ResolversTypes['Monthly'], ParentType, ContextType>;
+  initialCumulativeValues?: Resolver<ResolversTypes['InitialCumulativeValues'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1957,6 +1972,7 @@ export type Resolvers<ContextType = Context> = {
   NetWorthDeleted?: NetWorthDeletedResolvers<ContextType>;
   NetWorthCashTotal?: NetWorthCashTotalResolvers<ContextType>;
   Monthly?: MonthlyResolvers<ContextType>;
+  InitialCumulativeValues?: InitialCumulativeValuesResolvers<ContextType>;
   Overview?: OverviewResolvers<ContextType>;
   OverviewOld?: OverviewOldResolvers<ContextType>;
   OverviewPreview?: OverviewPreviewResolvers<ContextType>;
