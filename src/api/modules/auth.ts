@@ -140,7 +140,7 @@ export function setupAuth(app: Express): void {
       store:
         process.env.NODE_ENV === 'test'
           ? new MemoryStore()
-          : new RedisStore({ client: redisClient }),
+          : new RedisStore({ client: redisClient, ttl: config.user.sessionExpiryDays * 86400 }),
       cookie: {
         expires:
           process.env.NODE_ENV === 'test'
