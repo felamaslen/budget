@@ -1,11 +1,14 @@
-import type { NativeDate } from './crud';
 import type { Fund, FundInput, FundPeriod, StockSplit, Transaction } from './gql';
 import type { Data } from './graph';
-import type { GQL, Id } from './shared';
+import type { Id } from './shared';
+import type { GQL, GQLShallow, NativeDate } from '~shared/types';
 
 export type TransactionNative = NativeDate<GQL<Transaction>, 'date'>;
 export type StockSplitNative = NativeDate<GQL<StockSplit>, 'date'>;
-export type NativeFund<F extends FundInput> = Omit<GQL<F>, 'transactions' | 'stockSplits'> & {
+export type NativeFund<F extends FundInput> = Omit<
+  GQLShallow<F>,
+  'transactions' | 'stockSplits'
+> & {
   transactions: TransactionNative[];
   stockSplits: StockSplitNative[];
 };

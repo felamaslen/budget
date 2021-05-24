@@ -14,18 +14,19 @@ const getAnalysisConditions = (
   uid: number,
   startTime: Date,
   endTime: Date,
-  category: AnalysisPage | PageListStandard.Income,
+  page: AnalysisPage | PageListStandard.Income,
 ): ListSqlTokenType =>
   sql.join(
     [
+      sql`uid = ${uid}`,
+      sql`page = ${page}`,
       sql`date >= ${format(startTime, 'yyyy-MM-dd')}`,
       sql`date <= ${format(endTime, 'yyyy-MM-dd')}`,
-      sql`uid = ${uid}`,
-      sql`cost > 0`,
-      category === AnalysisPage.General
-        ? sql`category NOT IN (${sql.join(
+      sql`value > 0`,
+      page === AnalysisPage.General
+        ? sql`category != ALL(${sql.array(
             config.data.overview.investmentPurchaseCategories,
-            sql`, `,
+            'text',
           )})`
         : sql`1=1`,
     ],
@@ -38,7 +39,7 @@ const periodCostColumns = (categoryColumn: string | null): ListSqlTokenType =>
       sql`${categoryColumn ? sql.identifier([categoryColumn]) : sql`NULL`} as ${sql.identifier([
         'itemCol',
       ])}`,
-      sql`SUM(cost)::integer AS cost`,
+      sql`SUM(value)::int4 AS cost`,
     ],
     sql`, `,
   );
@@ -48,13 +49,13 @@ export async function getPeriodCostForCategory(
   uid: number,
   startTime: Date,
   endTime: Date,
-  category: AnalysisPage,
+  page: AnalysisPage,
   categoryColumn: string | null,
 ): Promise<readonly PeriodCost[]> {
   const result = await db.query<PeriodCost>(sql`
   SELECT ${periodCostColumns(categoryColumn)}
-  FROM ${sql.identifier([category])}
-  WHERE ${getAnalysisConditions(uid, startTime, endTime, category)}
+  FROM list_standard
+  WHERE ${getAnalysisConditions(uid, startTime, endTime, page)}
   GROUP BY ${sql.identifier(['itemCol'])}
   `);
   return result.rows;
@@ -63,14 +64,14 @@ export async function getPeriodCostForCategory(
 export async function getPeriodCostDeep(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  category: AnalysisPage,
+  page: AnalysisPage,
   categoryColumn: string | null,
   { startTime, endTime }: PeriodCondition,
 ): Promise<readonly PeriodCostDeep[]> {
   const result = await db.query<PeriodCostDeep>(sql`
   SELECT item, ${periodCostColumns(categoryColumn)}
-  FROM ${sql.identifier([category])}
-  WHERE ${getAnalysisConditions(uid, startTime, endTime, category)}
+  FROM list_standard
+  WHERE ${getAnalysisConditions(uid, startTime, endTime, page)}
   GROUP BY item, ${sql.identifier(['itemCol'])}
   ORDER BY ${sql.identifier(['itemCol'])}
   `);

@@ -188,8 +188,8 @@ describe('Analysis resolvers', () => {
       expect.assertions(2);
 
       await getPool().query(sql`
-      INSERT INTO general (uid, date, item, category, cost, shop)
-      VALUES (${
+      INSERT INTO list_standard (page, uid, date, item, category, value, shop)
+      VALUES (${'general'}, ${
         app.uid
       }, ${'2018-03-11'}, ${'Down payment'}, ${'House purchase'}, ${1700000}, ${'Solicitors'})
       `);

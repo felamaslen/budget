@@ -20,9 +20,10 @@ import { FieldComponent, FormFieldTextInline } from '~client/components/form-fie
 import * as listMutationHooks from '~client/hooks/mutations/list';
 import { ListState } from '~client/reducers/list';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { GQL, ListItemStandardNative as ListItemStandard, WithIds } from '~client/types';
+import { ListItemStandardNative as ListItemStandard, WithIds } from '~client/types';
 import { PageListStandard, RequestType } from '~client/types/enum';
 import type { ListItemInput } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',

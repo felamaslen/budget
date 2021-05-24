@@ -1,6 +1,7 @@
 import type { ActionList } from './list';
-import type { FundQuotes, GQL, HistoryOptions, PageNonStandard } from '~client/types';
+import type { FundQuotes, HistoryOptions, PageNonStandard } from '~client/types';
 import type { FundHistory, FundInput, TargetDelta } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 export const enum ActionTypeFunds {
   QueryUpdated = '@@funds/QUERY_UPDATED',

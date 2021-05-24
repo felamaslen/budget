@@ -8,10 +8,10 @@ export const toLocalISO = (date: Date): string =>
 
 const formatMonthStart = (month: Date): string => toLocalISO(startOfMonth(month));
 
-export const getEndOfMonthUnion = (
+export function getEndOfMonthUnion(
   monthEnds: Date[],
-): TaggedTemplateLiteralInvocationType<{ month_date: string }> =>
-  sql`
+): TaggedTemplateLiteralInvocationType<{ month_date: string }> {
+  return sql`
   SELECT ${sql.join(
     [
       sql`${toLocalISO(monthEnds[0])}::date AS month_date`,
@@ -20,11 +20,12 @@ export const getEndOfMonthUnion = (
     sql` UNION SELECT `,
   )}
   `;
+}
 
-export const getMonthRangeUnion = (
+export function getMonthRangeUnion(
   monthEnds: Date[],
-): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }> =>
-  sql`
+): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }> {
+  return sql`
   SELECT ${sql.join(
     [
       sql`${formatMonthStart(monthEnds[0])}::date AS start_date, ${toLocalISO(
@@ -39,11 +40,12 @@ export const getMonthRangeUnion = (
     sql` UNION SELECT `,
   )}
   `;
+}
 
-export const getDateRangeUnion = (
+export function getDateRangeUnion(
   dayEnds: Date[],
-): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }> =>
-  sql`
+): TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }> {
+  return sql`
   SELECT ${sql.join(
     [
       sql`${toLocalISO(dayEnds[0])}::date AS start_date, ${toLocalISO(
@@ -58,3 +60,4 @@ export const getDateRangeUnion = (
     sql` UNION SELECT `,
   )}
   `;
+}

@@ -2,23 +2,17 @@ import omit from 'lodash/omit';
 import { Reducer } from 'redux';
 
 import * as Actions from '~client/actions';
-import { IDENTITY, withNativeDate } from '~client/modules/data';
+import { withNativeDate } from '~client/modules/data';
 import {
   onCreateOptimistic,
   onUpdateOptimistic,
   onDeleteOptimistic,
   State as CrudState,
 } from '~client/reducers/crud';
-import type {
-  GQL,
-  Id,
-  ListItemStandardNative,
-  NativeDate,
-  PageList,
-  StandardInput,
-} from '~client/types';
+import type { Id, ListItemStandardNative, PageList, StandardInput } from '~client/types';
 import { PageListStandard, ReceiptPage } from '~client/types/enum';
-import type { InitialQuery, ListItem, ListItemInput, ListItemStandard } from '~client/types/gql';
+import type { ListItem, ListItemInput, ListItemStandard } from '~client/types/gql';
+import type { GQL, NativeDate } from '~shared/types';
 
 type FullReducer<S, A> = (state: S, action: A) => S;
 
@@ -63,27 +57,6 @@ const onCreate = <
     }),
   );
 
-export const onRead = <
-  P extends PageList,
-  R extends GQL<ListItem>, // items as read from response
-  J extends GQL<ListItem>, // processed item type (i.e. without __typename and with native date)
-  S extends ListState<J>
->(
-  page: P,
-  processItem: (item: R) => J = IDENTITY,
-) => (state: S, action: Actions.ActionApiDataRead): S => {
-  const res = action.res[page];
-  if (!res) {
-    return state;
-  }
-
-  const items: J[] = (((res?.items ?? []) as ListItem[]) as R[]).map(processItem);
-
-  const __optimistic = Array<undefined>(items.length).fill(undefined);
-
-  return { ...state, items, __optimistic };
-};
-
 const onUpdate = <
   I extends GQL<ListItemInput>,
   J extends GQL<ListItem>,
@@ -124,7 +97,6 @@ export function makeListReducer<
 
   const handlerCreate = onCreate<I, J, P, ES>(page);
 
-  const handlerRead = onRead<P, J, J, ListState<J, ES>>(page);
   const handlerUpdate = onUpdate<I, J, P, ES>(page);
   const handlerDelete = onDelete<I, J, P, ES>(page);
 
@@ -135,8 +107,6 @@ export function makeListReducer<
     switch (action.type) {
       case Actions.ListActionType.Created:
         return handlerCreate(state, action);
-      case Actions.ActionTypeApi.DataRead:
-        return handlerRead(state, action);
       case Actions.ListActionType.Updated:
         return handlerUpdate(state, action);
       case Actions.ListActionType.Deleted:
@@ -243,28 +213,6 @@ const withTotals = <
   }));
 };
 
-const makeOnReadDaily = <P extends PageListStandard, ES extends Record<string, unknown>>(
-  page: P,
-): FullReducer<DailyState<ES>, Actions.ActionApiDataRead> => {
-  const onReadList = onRead<P, ListItemStandard, ListItemStandardNative, DailyState<ES>>(
-    page,
-    withNativeDate('date'),
-  );
-  return (state, action): DailyState<ES> => {
-    const pageRes = action.res[page];
-    if (!pageRes) {
-      return state;
-    }
-
-    const total = pageRes.total ?? 0;
-    const weekly =
-      (pageRes as Exclude<InitialQuery[PageListStandard], null | undefined>).weekly ?? 0;
-    const olderExists = pageRes.olderExists ?? null;
-
-    return { ...state, ...onReadList(state, action), total, weekly, olderExists };
-  };
-};
-
 const makeOnMoreReceived = <
   I extends StandardInput,
   P extends PageListStandard,
@@ -275,7 +223,7 @@ const makeOnMoreReceived = <
   filterByPage<I, ListItemStandardNative, P, DailyState<ES>, Actions.MoreListDataReceived<P>>(
     page,
     (state, action) => {
-      const newItems = action.res.items.map(withNativeDate('date'));
+      const newItems = action.res.items.map(withNativeDate('date')) ?? [];
       const existingItems = state.items.filter(
         ({ id }) => !newItems.some((newItem) => newItem.id === id),
       );
@@ -341,7 +289,7 @@ export function makeDailyListReducer<
     total: 0,
     weekly: 0,
     offset: 0,
-    olderExists: null,
+    olderExists: true,
   };
 
   const onCreateDaily = withTotals<
@@ -352,7 +300,6 @@ export function makeDailyListReducer<
     Actions.ListItemCreated<ListItemInput, PageList>
   >(page, onCreate, (total, _, cost) => total + cost);
 
-  const onReadDaily = makeOnReadDaily<P, ES>(page);
   const onMoreReceived = makeOnMoreReceived<StandardInput, P, ES>(page);
   const onReceiptCreated = makeOnReceiptCreated<P, ES>(page);
 
@@ -384,8 +331,6 @@ export function makeDailyListReducer<
       case Actions.ListActionType.Created:
         return onCreateDaily(state, action);
 
-      case Actions.ActionTypeApi.DataRead:
-        return onReadDaily(state, action);
       case Actions.ListActionType.Updated:
         return onUpdateDaily(state, action);
       case Actions.ListActionType.Deleted:

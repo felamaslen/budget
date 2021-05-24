@@ -8,8 +8,8 @@ import { DatabaseTransactionConnectionType, sql } from 'slonik';
 import { withSlonik } from '~api/modules/db';
 import logger from '~api/modules/logger';
 import { FundListRow } from '~api/queries';
-import { ListItemStandard, PageListStandard, RawDate } from '~api/types';
-import { Transaction } from '~client/types/gql';
+import { ListItemStandard, PageListStandard, Transaction } from '~api/types';
+import type { RawDate } from '~shared/types';
 
 const now = new Date();
 const monthStart = startOfMonth(now);
@@ -86,19 +86,21 @@ const mapForeignId = <
 const insertStandardListFromCsv = async (
   db: DatabaseTransactionConnectionType,
   uid: number,
-  tableName: PageListStandard,
+  page: PageListStandard,
 ): Promise<void> => {
-  logger.info(`[seed] creating ${tableName} data`);
+  logger.info(`[seed] creating ${page} data`);
 
-  await db.query(sql`DELETE FROM ${sql.identifier([tableName])} WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM list_standard WHERE page = ${page} AND uid = ${uid}`);
 
-  const rows = await readTableFromCsv<RawDate<ListItemStandard, 'date'>>(tableName);
+  const rows = await readTableFromCsv<RawDate<ListItemStandard, 'date'>>(page);
 
   await db.query(sql`
-  INSERT INTO ${sql.identifier([tableName])} (uid, date, item, category, cost, shop)
+  INSERT INTO list_standard (page, uid, date, item, category, cost, shop)
   SELECT * FROM ${sql.unnest(
-    rows.map(mapDates).map((row) => [uid, row.date, row.item, row.category, row.cost, row.shop]),
-    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+    rows
+      .map(mapDates)
+      .map((row) => [page, uid, row.date, row.item, row.category, row.cost, row.shop]),
+    ['page_category', 'int4', 'date', 'text', 'text', 'int4', 'text'],
   )}
   `);
 };

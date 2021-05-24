@@ -37,9 +37,9 @@ describe('Overview reducer', () => {
     startDate: new Date('2019-04-30T23:59:59.999Z'),
     endDate: new Date('2019-07-31T23:59:59.999Z'),
     annualisedFundReturns: 0.1,
+    stocks: [0, 0, 510000, 2160465],
     monthly: {
       ...initialState.monthly,
-      stocks: [0, 0, 510000, 2160465],
       investmentPurchases: [0, 0, 0, 0],
       [PageListStandard.Income]: [0, 30040, 229838, 196429],
       [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
@@ -66,9 +66,7 @@ describe('Overview reducer', () => {
       overview: {
         startDate: '2019-04-30T23:59:59.999Z',
         endDate: '2019-07-31T22:59:59.999Z',
-        annualisedFundReturns: 0.087,
         monthly: {
-          stocks: [0, 0, 510000, 2160465],
           investmentPurchases: [0, 0, 1884, 0],
           [PageListStandard.Income]: [0, 30040, 229838, 196429],
           [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
@@ -81,6 +79,11 @@ describe('Overview reducer', () => {
           income: 123,
           spending: 456,
         },
+      },
+      fundHistory: {
+        ...(testResponse.fundHistory as FundHistory),
+        annualisedFundReturns: 0.087,
+        overviewCost: [0, 0, 510000, 2160465],
       },
     });
 
@@ -102,13 +105,19 @@ describe('Overview reducer', () => {
       expect(result).toHaveProperty('annualisedFundReturns', 0.087);
     });
 
+    it('should set the stocks data', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+
+      expect(result.stocks).toStrictEqual<State['stocks']>([0, 0, 510000, 2160465]);
+    });
+
     it('should set the cost data', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
       expect(result.monthly).toStrictEqual(
         expect.objectContaining<State['monthly']>({
-          stocks: [0, 0, 510000, 2160465],
           investmentPurchases: [0, 0, 1884, 0],
           [PageListStandard.Income]: [0, 30040, 229838, 196429],
           [PageListStandard.Bills]: [99778, 101073, 118057, 212450],
@@ -406,10 +415,11 @@ describe('Overview reducer', () => {
   });
 
   describe(ActionTypeFunds.PricesUpdated, () => {
-    const res = {
+    const res: FundHistory = {
+      ...(testResponse.fundHistory as FundHistory),
       annualisedFundReturns: 0.674,
       overviewCost: [1, 2, 303],
-    } as FundHistory;
+    };
 
     const action = fundPricesUpdated(res);
 
@@ -419,10 +429,10 @@ describe('Overview reducer', () => {
       expect(result.annualisedFundReturns).toBe(0.674);
     });
 
-    it('should set the overview funds cost', () => {
+    it('should set the overview funds values', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
-      expect(result.monthly.stocks).toStrictEqual([1, 2, 303]);
+      expect(result.stocks).toStrictEqual([1, 2, 303]);
     });
   });
 

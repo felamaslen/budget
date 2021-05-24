@@ -1,7 +1,7 @@
 import isValidDate from 'date-fns/isValid';
 
 import { Action, ActionTypeApi, ActionTypeLogin, ActionTypeFunds } from '~client/actions';
-import type { GQL, HistoryOptions, LocalAppConfig } from '~client/types';
+import type { HistoryOptions, LocalAppConfig } from '~client/types';
 import type { AppConfig } from '~client/types/gql';
 
 import {
@@ -10,6 +10,7 @@ import {
   defaultFundPeriod,
   defaultRealTimePrices,
 } from '~shared/constants';
+import type { GQL } from '~shared/types';
 
 export type State = {
   loading: number;

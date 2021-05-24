@@ -1,11 +1,12 @@
 import moize from 'moize';
 
 import { isStandardListPage } from '~client/constants/data';
-import { State } from '~client/reducers';
-import { State as CrudState } from '~client/reducers/crud';
-import { ListState } from '~client/reducers/list';
-import type { GQL, ListItemStandardNative } from '~client/types';
+import type { State } from '~client/reducers';
+import type { State as CrudState } from '~client/reducers/crud';
+import type { ListState } from '~client/reducers/list';
+import type { ListItemStandardNative } from '~client/types';
 import type { ListItem, PageListStandard } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 export type ApiListState<I extends ListItem, P extends string> = Record<P, ListState<I>> &
   Partial<Pick<State, 'api'>>;
@@ -21,6 +22,6 @@ export const getOlderExists = moize(<P extends string>(page: P) => (state: State
   isStandardListPage(page) ? !!state[page].olderExists : false,
 );
 
-export const getListOffset = moize(<P extends string>(page: P) => (state: State):
-  | number
-  | undefined => (isStandardListPage(page) ? state[page].offset : undefined));
+export const getListOffset = moize(<P extends string>(page: P) => (state: State): number =>
+  isStandardListPage(page) ? state[page].offset : 0,
+);

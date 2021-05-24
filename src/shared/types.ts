@@ -12,3 +12,21 @@ export type PickRequire<T extends Record<string, unknown>, K extends keyof T> = 
 
 export type PickPartial<T extends Record<string, unknown>, K extends keyof T> = Omit<T, K> &
   Partial<Pick<T, K>>;
+
+export type GQLShallow<T> = Omit<T, '__typename'>;
+
+export type GQL<T> = T extends Record<string, unknown>
+  ? { [K in keyof GQLShallow<T>]: GQL<T[K]> }
+  : T;
+
+export type RawDate<V, K extends string> = V extends { [key in K]: Date }
+  ? Omit<V, K> & { [key in K]: string }
+  : V;
+
+export type RawDateDeep<V extends Record<string, unknown>> = {
+  [K in keyof V]: V[K] extends { date: Date } ? RawDate<V[K], 'date'> : V[K];
+};
+
+export type NativeDate<V, K extends keyof V> = V extends { [key in K]: string }
+  ? Omit<V, K> & { [key in K]: Date }
+  : V;

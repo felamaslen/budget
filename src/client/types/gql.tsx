@@ -80,7 +80,6 @@ export type Query = {
   overviewPreview?: Maybe<OverviewPreview>;
   readFunds?: Maybe<ReadFundsResponse>;
   readList?: Maybe<ListReadResponse>;
-  readListTotals?: Maybe<ListTotalsResponse>;
   readNetWorthCategories?: Maybe<Array<NetWorthCategory>>;
   readNetWorthEntries?: Maybe<NetWorthEntryOverview>;
   readNetWorthSubcategories?: Maybe<Array<NetWorthSubcategory>>;
@@ -149,11 +148,6 @@ export type QueryReadListArgs = {
   page: PageListStandard;
   offset?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryReadListTotalsArgs = {
-  page: PageListStandard;
 };
 
 
@@ -637,8 +631,8 @@ export enum PageListStandard {
   Bills = 'bills',
   Food = 'food',
   General = 'general',
-  Holiday = 'holiday',
-  Social = 'social'
+  Social = 'social',
+  Holiday = 'holiday'
 }
 
 export type ListItem = {
@@ -950,7 +944,6 @@ export enum MonthlyCategory {
 
 export type Monthly = {
   __typename?: 'Monthly';
-  stocks: Array<Scalars['Int']>;
   investmentPurchases: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   bills: Array<Scalars['Int']>;
@@ -970,7 +963,6 @@ export type Overview = {
   __typename?: 'Overview';
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  annualisedFundReturns: Scalars['Float'];
   monthly: Monthly;
   initialCumulativeValues: InitialCumulativeValues;
 };
@@ -1583,10 +1575,10 @@ export type InitialQuery = (
     & ConfigPartsFragment
   )>, overview?: Maybe<(
     { __typename?: 'Overview' }
-    & Pick<Overview, 'startDate' | 'endDate' | 'annualisedFundReturns'>
+    & Pick<Overview, 'startDate' | 'endDate'>
     & { monthly: (
       { __typename?: 'Monthly' }
-      & Pick<Monthly, 'stocks' | 'investmentPurchases' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
+      & Pick<Monthly, 'investmentPurchases' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
     ), initialCumulativeValues: (
       { __typename?: 'InitialCumulativeValues' }
       & Pick<InitialCumulativeValues, 'income' | 'spending'>
@@ -1625,48 +1617,6 @@ export type InitialQuery = (
   )>, fundHistory?: Maybe<(
     { __typename?: 'FundHistory' }
     & FundHistoryPartsFragment
-  )>, income?: Maybe<(
-    { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
-    & { items: Array<(
-      { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
-    )> }
-  )>, bills?: Maybe<(
-    { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
-    & { items: Array<(
-      { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
-    )> }
-  )>, food?: Maybe<(
-    { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
-    & { items: Array<(
-      { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
-    )> }
-  )>, general?: Maybe<(
-    { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
-    & { items: Array<(
-      { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
-    )> }
-  )>, holiday?: Maybe<(
-    { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
-    & { items: Array<(
-      { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
-    )> }
-  )>, social?: Maybe<(
-    { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'error' | 'olderExists' | 'total' | 'weekly'>
-    & { items: Array<(
-      { __typename?: 'ListItemStandard' }
-      & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
-    )> }
   )> }
 );
 
@@ -1681,7 +1631,7 @@ export type MoreListDataStandardQuery = (
   { __typename?: 'Query' }
   & { readListStandard?: Maybe<(
     { __typename?: 'ListReadResponse' }
-    & Pick<ListReadResponse, 'olderExists'>
+    & Pick<ListReadResponse, 'total' | 'weekly' | 'olderExists'>
     & { items: Array<(
       { __typename?: 'ListItemStandard' }
       & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'cost' | 'category' | 'shop'>
@@ -2525,9 +2475,7 @@ export const InitialDocument = gql`
   overview {
     startDate
     endDate
-    annualisedFundReturns
     monthly {
-      stocks
       investmentPurchases
       income
       bills
@@ -2584,90 +2532,6 @@ export const InitialDocument = gql`
   fundHistory(period: $fundPeriod, length: $fundLength) {
     ...FundHistoryParts
   }
-  income: readList(page: income, offset: 0, limit: 100) {
-    error
-    items {
-      id
-      date
-      item
-      category
-      cost
-      shop
-    }
-    olderExists
-    total
-    weekly
-  }
-  bills: readList(page: bills, offset: 0, limit: 100) {
-    error
-    items {
-      id
-      date
-      item
-      category
-      cost
-      shop
-    }
-    olderExists
-    total
-    weekly
-  }
-  food: readList(page: food, offset: 0, limit: 100) {
-    error
-    items {
-      id
-      date
-      item
-      category
-      cost
-      shop
-    }
-    olderExists
-    total
-    weekly
-  }
-  general: readList(page: general, offset: 0, limit: 100) {
-    error
-    items {
-      id
-      date
-      item
-      category
-      cost
-      shop
-    }
-    olderExists
-    total
-    weekly
-  }
-  holiday: readList(page: holiday, offset: 0, limit: 100) {
-    error
-    items {
-      id
-      date
-      item
-      category
-      cost
-      shop
-    }
-    olderExists
-    total
-    weekly
-  }
-  social: readList(page: social, offset: 0, limit: 100) {
-    error
-    items {
-      id
-      date
-      item
-      category
-      cost
-      shop
-    }
-    olderExists
-    total
-    weekly
-  }
 }
     ${ConfigPartsFragmentDoc}
 ${NetWorthCategoryPartsFragmentDoc}
@@ -2689,6 +2553,8 @@ export const MoreListDataStandardDocument = gql`
       category
       shop
     }
+    total
+    weekly
     olderExists
   }
 }

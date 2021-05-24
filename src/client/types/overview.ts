@@ -1,5 +1,5 @@
 import type { Monthly } from './gql';
-import type { GQL } from './shared';
+import type { GQL } from '~shared/types';
 
 type OverviewGraphExtra = {
   assets: number[]; // excludes options, includes pension

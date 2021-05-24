@@ -1,3 +1,4 @@
+import { omit } from 'lodash';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { createList, createReceipt, deleteList, getOlderExists, updateList } from './list';
@@ -18,6 +19,21 @@ jest.mock('~api/modules/crud/queries');
 
 describe('List controller', () => {
   const testUserId = 1234;
+
+  const expectedOverviewCost = [1023, 8823, 1291];
+
+  beforeEach(() => {
+    jest.spyOn(queries, 'selectSinglePageListSummary').mockResolvedValueOnce(expectedOverviewCost);
+
+    jest
+      .spyOn(queries, 'selectListTotalCost')
+      .mockResolvedValueOnce([{ page: PageListStandard.Income, total: 1776912 }]);
+    jest.spyOn(queries, 'selectListWeeklyCosts').mockResolvedValueOnce([
+      { year: 2018, weekly: 7659 },
+      { year: 2019, weekly: 12932 },
+      { year: 2020, weekly: 8154 },
+    ]);
+  });
 
   describe(createList.name, () => {
     const args: MutationCreateListItemArgs = {
@@ -41,12 +57,10 @@ describe('List controller', () => {
         ...args.input,
       };
 
-      const overviewCost = [1023, 8823, 1291];
-
-      jest.spyOn(crudQueries, 'insertCrudItem').mockResolvedValueOnce(testItem);
-      jest.spyOn(queries, 'selectListTotalCost').mockResolvedValueOnce(1776912);
-      jest.spyOn(queries, 'selectListWeeklyCosts').mockResolvedValueOnce([7659, 12932, 8154]);
-      jest.spyOn(queries, 'getListCostSummary').mockResolvedValueOnce(overviewCost);
+      jest.spyOn(crudQueries, 'insertCrudItem').mockResolvedValueOnce({
+        ...omit(testItem, 'cost'),
+        value: testItem.cost,
+      });
 
       await createList({} as DatabaseTransactionConnectionType, testUserId, args);
 
@@ -58,7 +72,7 @@ describe('List controller', () => {
           id: 1236,
           fakeId: -1887123,
           item: args.input,
-          overviewCost,
+          overviewCost: expectedOverviewCost,
           total: 1776912,
           weekly: 9113,
         },
@@ -70,14 +84,14 @@ describe('List controller', () => {
     it('should publish a message to the pubsub queue', async () => {
       expect.assertions(2);
 
-      jest.spyOn(queries, 'insertListItems').mockImplementation(async (_, __, table) => {
-        if (table === 'food') {
+      jest.spyOn(queries, 'insertListItems').mockImplementation(async (_, __, page) => {
+        if (page === 'food') {
           return [123];
         }
-        if (table === 'general') {
+        if (page === 'general') {
           return [456];
         }
-        if (table === 'social') {
+        if (page === 'social') {
           return [789];
         }
         return [];
@@ -165,15 +179,10 @@ describe('List controller', () => {
 
       const pubsubSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
-      const overviewCost = [1023, 8823, 1291];
-
       jest.spyOn(crudQueries, 'updateCrudItem').mockResolvedValueOnce({
         ...args.input,
         id: args.id,
       });
-      jest.spyOn(queries, 'selectListTotalCost').mockResolvedValueOnce(1776912);
-      jest.spyOn(queries, 'selectListWeeklyCosts').mockResolvedValueOnce([7659, 12932, 8154]);
-      jest.spyOn(queries, 'getListCostSummary').mockResolvedValueOnce(overviewCost);
 
       await updateList({} as DatabaseTransactionConnectionType, testUserId, args);
 
@@ -184,7 +193,7 @@ describe('List controller', () => {
           page: PageListStandard.Income,
           id: 178,
           item: args.input,
-          overviewCost,
+          overviewCost: expectedOverviewCost,
           total: 1776912,
           weekly: 9113,
         },
@@ -203,12 +212,7 @@ describe('List controller', () => {
 
       const pubsubSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
-      const overviewCost = [1023, 8823, 1291];
-
       jest.spyOn(crudQueries, 'deleteCrudItem').mockResolvedValueOnce(1);
-      jest.spyOn(queries, 'selectListTotalCost').mockResolvedValueOnce(1776912);
-      jest.spyOn(queries, 'selectListWeeklyCosts').mockResolvedValueOnce([7659, 12932, 8154]);
-      jest.spyOn(queries, 'getListCostSummary').mockResolvedValueOnce(overviewCost);
 
       await deleteList({} as DatabaseTransactionConnectionType, testUserId, args);
 
@@ -218,7 +222,7 @@ describe('List controller', () => {
         {
           page: PageListStandard.Income,
           id: 913,
-          overviewCost,
+          overviewCost: expectedOverviewCost,
           total: 1776912,
           weekly: 9113,
         },
@@ -230,7 +234,7 @@ describe('List controller', () => {
     const db = {} as DatabaseTransactionConnectionType;
 
     beforeEach(() => {
-      jest.spyOn(queries, 'countRows').mockResolvedValueOnce(882);
+      jest.spyOn(queries, 'countStandardRows').mockResolvedValueOnce(882);
     });
 
     describe('if there are older rows', () => {

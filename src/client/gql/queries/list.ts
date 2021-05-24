@@ -11,6 +11,8 @@ export const MoreListDataStandard = gql`
         category
         shop
       }
+      total
+      weekly
       olderExists
     }
   }

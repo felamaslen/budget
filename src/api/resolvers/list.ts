@@ -15,7 +15,6 @@ import {
 export const listResolvers: Resolvers = {
   Query: {
     readList: genericAuthDbResolver(controllers.readList),
-    readListTotals: genericAuthDbResolver(controllers.readListTotals),
   },
 
   Mutation: {

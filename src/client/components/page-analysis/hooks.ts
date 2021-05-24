@@ -24,9 +24,7 @@ import type {
   AnalysisTreeVisible,
   BlockItem,
   FlexBlocks,
-  GQL,
   MainBlockName,
-  NativeDate,
 } from '~client/types';
 import { AnalysisPage, AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
 import type {
@@ -36,6 +34,7 @@ import type {
   CategoryCostTree,
   CategoryCostTreeDeep,
 } from '~client/types/gql';
+import type { GQL, NativeDate } from '~shared/types';
 
 const getTreeColor = (name: string): string | undefined => {
   if (isStandardListPage(name)) {

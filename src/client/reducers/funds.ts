@@ -9,10 +9,11 @@ import {
   TodayPricesFetched,
 } from '~client/actions';
 import { lastInArray, toNativeFund } from '~client/modules/data';
-import { makeListReducer, onRead, ListState } from '~client/reducers/list';
-import type { FundNative, FundQuotes, GQL } from '~client/types';
+import { makeListReducer, ListState } from '~client/reducers/list';
+import type { FundNative, FundQuotes } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
-import type { Fund, FundHistory, FundInput, FundPriceGroup } from '~client/types/gql';
+import type { FundHistory, FundInput, FundPriceGroup } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 type ExtraState = {
   viewSoldFunds: boolean;
@@ -56,18 +57,15 @@ const getPriceCache = ({
   ),
 });
 
-const onReadRows = onRead<PageNonStandard.Funds, GQL<Fund>, FundNative, State>(
-  PageNonStandard.Funds,
-  toNativeFund,
-);
-
 const onPeriodLoad = (state: State, res: FundHistory | null | undefined): State =>
   res ? { ...state, ...getPriceCache(res) } : state;
 
 const onReadFunds = (state: State, action: ActionApiDataRead): State =>
   onPeriodLoad(
     {
-      ...onReadRows(state, action),
+      ...state,
+      items: action.res.funds?.items.map(toNativeFund) ?? [],
+      __optimistic: Array<undefined>(action.res.funds?.items?.length ?? 0).fill(undefined),
       cashTarget: action.res.cashAllocationTarget ?? state.cashTarget,
     },
     action.res.fundHistory,

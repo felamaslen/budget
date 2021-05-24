@@ -9,6 +9,7 @@ import type { Monthly, NetWorthCategory, NetWorthSubcategory } from '~client/typ
 export const getCashTotal = (state: State): CashTotalNative => state.netWorth.cashTotal;
 
 export const getMonthlyValues = (state: State): Monthly => state.overview.monthly;
+export const getStockValues = (state: State): number[] => state.overview.stocks;
 
 export const getStartDate = (state: Pick<State, PageNonStandard.Overview>): Date =>
   state.overview.startDate;

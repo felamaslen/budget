@@ -7,30 +7,32 @@ import {
 import { defaultSearchNumResults } from '~api/schema';
 import { QuerySearchArgs, ReceiptPage } from '~api/types';
 
-export const getShortTermQuery = (
+export function getShortTermQuery(
   uid: number,
   { page, column, searchTerm, numResults = defaultSearchNumResults }: QuerySearchArgs,
-): TaggedTemplateLiteralInvocationType<{ value: string; count: number }> =>
-  sql`
+): TaggedTemplateLiteralInvocationType<{ value: string; count: number }> {
+  return sql`
   select ${sql.join(
     [
-      sql`distinct(${sql.identifier([page, column])}) as "value"`,
-      sql`count(${sql.identifier([page, column])}) as "count"`,
+      sql`distinct(${sql.identifier([column])}) as value`,
+      sql`count(${sql.identifier([column])}) as count`,
     ],
     sql`, `,
   )}
-  from ${sql.identifier([page])}
+  from list_standard
   where ${sql.join(
     [
-      sql`${sql.identifier([page, column])} ilike ${`${searchTerm}%`}`,
-      sql`${sql.identifier([page, 'uid'])} = ${uid}`,
+      sql`uid = ${uid}`,
+      sql`page = ${page}`,
+      sql`${sql.identifier([column])} ILIKE ${`${searchTerm}%`}`,
     ],
     sql` and `,
   )}
-  group by ${sql.identifier([page, column])}
-  order by "count" desc
+  group by ${sql.identifier([column])}
+  order by ${sql.identifier(['count'])} desc
   limit ${numResults}
   `;
+}
 
 export function getLongTermQuery(
   uid: number,
@@ -46,20 +48,18 @@ export function getLongTermQuery(
   return sql`
     select distinct ${sql.join(
       [
-        sql`${sql.identifier([page, column])} as "value"`,
-        sql`ts_rank_cd(
-          ${sql.identifier([page, `${column}_search`])},
-          to_tsquery(${tsQuery})
-        ) as "rank"`,
-        sql`char_length(${sql.identifier([page, column])}) as "length"`,
+        sql`${sql.identifier([column])} as "value"`,
+        sql`ts_rank_cd(${sql.identifier([`${column}_search`])}, to_tsquery(${tsQuery})) as "rank"`,
+        sql`char_length(${sql.identifier([column])}) as "length"`,
       ],
       sql`, `,
     )}
-    from ${sql.identifier([page])}
+    from list_standard
     where ${sql.join(
       [
-        sql`${sql.identifier([page, 'uid'])} = ${uid}`,
-        sql`${sql.identifier([page, `${column}_search`])} @@ to_tsquery(${tsQuery})`,
+        sql`uid = ${uid}`,
+        sql`page = ${page}`,
+        sql`${sql.identifier([`${column}_search`])} @@ to_tsquery(${tsQuery})`,
       ],
       sql` and `,
     )}
@@ -75,6 +75,7 @@ export const getSearchResults = (
   columnResults: TaggedTemplateLiteralInvocationType<{ value: string }>,
 ): TaggedTemplateLiteralInvocationType<{ value: string; nextField: string }> =>
   sql`
+  with items as (${columnResults})
   select ${sql.join(
     [
       sql.identifier(['items', 'value']),
@@ -82,14 +83,12 @@ export const getSearchResults = (
     ],
     sql`, `,
   )}
-  from (
-    ${columnResults}
-  ) as items
-  left join ${sql.identifier([page])} as "next_values"
-    on ${sql.identifier(['next_values', 'id'])} = (
-      select "id"
-      from ${sql.identifier([page])}
-      where ${sql.join([sql`"uid" = ${uid}`, sql`"item" = "items"."value"`], sql` and `)}
+  from items
+  left join list_standard as next_values
+    on next_values.id = (
+      select id
+      from list_standard
+      where uid = ${uid} and page = ${page} and item = items.value
       limit 1
     )
   `;
@@ -99,8 +98,6 @@ type ReceiptItem = {
   matched_page: ReceiptPage;
   matched_category: string;
 };
-
-const receiptPages: ReceiptPage[] = Object.values(ReceiptPage);
 
 export async function matchReceiptItems(
   db: DatabaseTransactionConnectionType,
@@ -119,24 +116,13 @@ export async function matchReceiptItems(
       ],
       sql`, `,
     )}
-    FROM (${sql.join(
-      receiptPages.map(
-        (page) => sql`
-      SELECT item, matched_page, matched_category, count(matched_category) as num_matches
-      FROM (
-        SELECT ${sql.join(
-          [sql`item`, sql`${page} AS matched_page`, sql`category as matched_category`],
-          sql`, `,
-        )}
-        FROM ${sql.identifier([page])}
-        WHERE uid = ${uid} AND item IN (${sql.join(items, sql`, `)})
-      ) matched_results
-      GROUP BY item, matched_page, matched_category
-      `,
-      ),
-      sql` UNION `,
-    )}) matched_union
-  ) ordered_union
+    FROM (
+      SELECT item, page as matched_page, category as matched_category, count(category) as num_matches
+      FROM list_standard
+      WHERE uid = ${uid} AND item = ANY(${sql.array(items, 'text')})
+      GROUP BY item, page, category
+    ) matched_results
+  ) ordered_results
   WHERE row_num = 1
   `);
   return rows;
@@ -148,21 +134,13 @@ export async function matchReceiptItemName(
   query: string,
 ): Promise<string | null> {
   const { rows } = await db.query<{ item: string }>(sql`
-  SELECT item, num_matches
-  FROM (${sql.join(
-    receiptPages.map(
-      (page) => sql`
+  SELECT item
+  FROM (
     SELECT item, count(item) as num_matches
-    FROM (
-      SELECT item
-      FROM ${sql.identifier([page])}
-      WHERE uid = ${uid} AND item ILIKE ${`${query}%`}
-    ) matched_results
+    FROM list_standard
+    WHERE uid = ${uid} AND item ILIKE ${`${query}%`}
     GROUP BY item
-    `,
-    ),
-    sql` UNION `,
-  )}) matched_union
+  ) matched_results
   ORDER BY num_matches DESC
   LIMIT 1
   `);

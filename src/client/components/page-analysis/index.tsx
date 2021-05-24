@@ -21,9 +21,9 @@ import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { isAnalysisPage } from '~client/constants/data';
 import { formatCurrency, capitalise } from '~client/modules/format';
 import { getInvestmentsBetweenDates } from '~client/selectors';
-import type { GQL } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 import { CategoryCostTree, CategoryCostTreeDeep } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 export type RouteParams = {
   groupBy?: string;

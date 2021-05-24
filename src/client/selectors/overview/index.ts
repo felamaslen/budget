@@ -12,7 +12,12 @@ import { replaceAtIndex } from 'replace-array';
 import { createSelector } from 'reselect';
 
 import { getFutureMonths, getMonthDates, getGraphDates, getStartPredictionIndex } from './common';
-import { getAnnualisedFundReturns, getMonthlyValues, getSubcategories } from './direct';
+import {
+  getAnnualisedFundReturns,
+  getMonthlyValues,
+  getStockValues,
+  getSubcategories,
+} from './direct';
 import {
   calculatePredictedSAYEMonthlyDeposit,
   EntryWithFTI,
@@ -41,7 +46,6 @@ import {
 import { getFundsRows } from '~client/selectors/funds/helpers';
 import {
   FundNative as Fund,
-  GQL,
   LongTermOptions,
   LongTermRates,
   Median,
@@ -58,6 +62,7 @@ import {
 import { PageListStandard } from '~client/types/enum';
 import type { InitialCumulativeValues, Monthly, NetWorthSubcategory } from '~client/types/gql';
 import { NetWorthAggregate } from '~shared/constants';
+import type { GQL } from '~shared/types';
 
 export * from './common';
 export * from './net-worth';
@@ -302,7 +307,7 @@ const withStocks = <G extends OverviewGraphPartial>(
   longTermRates: LongTermRates,
   startPredictionIndex: number,
   dates: GraphDate[],
-  monthly: Monthly,
+  stocks: number[],
   funds: Fund[],
   fundsCachedValue: { value: number },
   annualisedFundReturns: number,
@@ -321,7 +326,7 @@ const withStocks = <G extends OverviewGraphPartial>(
         monthlyStockPurchase,
       ),
       withCurrentStockValue(currentStockValue),
-    )(monthly.stocks),
+    )(stocks),
     stockCostBasis: getStockCostBasis(
       dates,
       monthlyStockPurchase,
@@ -440,7 +445,7 @@ const getFundsMonthlyComposer = moize(
       getLongTermRates(today),
       getStartPredictionIndex(today),
       getGraphDates(today, longTermOptions),
-      getMonthlyValues,
+      getStockValues,
       getFundsRows,
       getFundsCachedValue.today(today),
       getAnnualisedFundReturns,
@@ -469,8 +474,8 @@ export const getOverviewGraphValues = moize(
         const values: OverviewGraphValues = compose<
           Monthly,
           GQL<Monthly>,
-          OverviewGraphRequired<'stockCostBasis'>,
-          OverviewGraphRequired<'stockCostBasis' | 'spending' | 'net'>,
+          OverviewGraphRequired<'stocks' | 'stockCostBasis'>,
+          OverviewGraphRequired<'stocks' | 'stockCostBasis' | 'spending' | 'net'>,
           OverviewGraphValues
         >(
           netWorthMonthlyComposer,

@@ -1,189 +1,96 @@
-import {
-  sql,
-  DatabaseTransactionConnectionType,
-  TaggedTemplateLiteralInvocationType,
-  IdentifierSqlTokenType,
-} from 'slonik';
+import { sql, DatabaseTransactionConnectionType } from 'slonik';
+
 import { getMonthRangeUnion } from './date-union';
+import { pageCostCTE, standardListPages } from './list';
+
 import config from '~api/config';
-import { PageListStandard } from '~api/types';
+import { PageListCost, PageListStandard } from '~api/types';
 
-const spendingPages: PageListStandard[] = Object.values(PageListStandard).filter(
-  (page) => page !== PageListStandard.Income,
-);
-
-const joinCategory = (
-  uid: number,
-  category: PageListStandard,
-  identifier: string = category,
-): TaggedTemplateLiteralInvocationType => sql`
-LEFT JOIN ${sql.identifier([category])} AS ${sql.identifier([identifier])} ON ${sql.join(
-  [
-    sql`${sql.identifier([identifier, 'uid'])} = ${uid}`,
-    sql`${sql.identifier([identifier, 'date'])} >= dates.start_date`,
-    sql`${sql.identifier([identifier, 'date'])} <= dates.end_date`,
-  ],
-  sql` AND `,
-)}
-`;
-
-export async function getListCostSummary(
+export async function selectSinglePageListSummary(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  monthEnds: Date[],
-  category: PageListStandard,
+  dates: Date[],
+  page: PageListCost,
 ): Promise<number[]> {
-  const results = await db.query<{ month_cost: number }>(sql`
-  SELECT COALESCE(SUM(cost), 0)::int4 AS month_cost
-  FROM (${getMonthRangeUnion(monthEnds)}) dates
-  ${joinCategory(uid, category, 'list_data')}
-  ${
-    category === PageListStandard.General
-      ? sql`AND list_data.category NOT IN (${sql.join(
-          config.data.overview.investmentPurchaseCategories,
-          sql`, `,
-        )})`
-      : sql``
-  }
-  GROUP BY dates.start_date
-  ORDER BY dates.start_date
-  `);
-
-  return results.rows.map(({ month_cost }) => month_cost);
-}
-
-export async function getInvestmentPurchasesSummary(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  monthEnds: Date[],
-): Promise<number[]> {
-  const results = await db.query<{ month_cost: number }>(sql`
-  SELECT COALESCE(SUM(cost), 0)::int4 AS month_cost
-  FROM (${getMonthRangeUnion(monthEnds)}) dates
-  LEFT JOIN ${sql.identifier([PageListStandard.General])} AS ${sql.identifier([
-    'general',
-  ])} ON ${sql.join(
+  const results = await db.query<{ sum: number }>(sql`
+  WITH dates AS (${getMonthRangeUnion(dates)})
+  SELECT COALESCE(SUM(${pageCostCTE}), 0)::int4 AS sum
+  FROM dates
+  LEFT JOIN list_standard ON ${sql.join(
     [
-      sql`${sql.identifier(['general', 'category'])} IN (${sql.join(
-        config.data.overview.investmentPurchaseCategories,
-        sql`, `,
-      )})`,
-      sql`${sql.identifier(['general', 'uid'])} = ${uid}`,
-      sql`${sql.identifier(['general', 'date'])} >= dates.start_date`,
-      sql`${sql.identifier(['general', 'date'])} <= dates.end_date`,
+      sql`uid = ${uid}`,
+      sql`date >= dates.start_date`,
+      sql`date <= dates.end_date`,
+      sql`page = ${page}`,
     ],
     sql` AND `,
   )}
   GROUP BY dates.start_date
   ORDER BY dates.start_date
   `);
-
-  return results.rows.map(({ month_cost }) => month_cost);
+  return results.rows.map((row) => row.sum);
 }
 
-const pageCostCTE = (
-  page: PageListStandard,
-): TaggedTemplateLiteralInvocationType | IdentifierSqlTokenType =>
-  page === PageListStandard.General
-    ? sql`
-        CASE
-          WHEN ${sql.identifier([page, 'category'])} IN (${sql.join(
-        config.data.overview.investmentPurchaseCategories,
-        sql`, `,
-      )})
-          THEN 0
-          ELSE ${sql.identifier([page, 'cost'])}
-        END
-        `
-    : sql.identifier([page, 'cost']);
+export type CategorisedListSummaryRow = {
+  investment_purchases: number;
+} & Record<PageListStandard, number>;
 
-export async function getSpendingSummary(
+export async function selectCategorisedListSummary(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  dates: TaggedTemplateLiteralInvocationType<{ start_date: string; end_date: string }>,
-): Promise<number[]> {
-  const results = await db.query<{ month_cost: number }>(sql`
-  WITH ${sql.join(
+  dates: Date[],
+): Promise<readonly CategorisedListSummaryRow[]> {
+  const results = await db.query<CategorisedListSummaryRow>(sql`
+  WITH dates AS (${getMonthRangeUnion(dates)})
+  SELECT ${sql.join(
     [
-      sql`dates AS (${dates})`,
-
-      ...spendingPages.map(
+      ...standardListPages.map(
         (page) => sql`
-        ${sql.identifier([`sum_${page}`])} AS (
-          SELECT dates.start_date, COALESCE(SUM(${pageCostCTE(page)}), 0)::int4 AS cost
-          FROM dates
-          ${joinCategory(uid, page)}
-          GROUP BY dates.start_date
-        )
+        COALESCE(SUM(
+          CASE WHEN page = ${page} THEN (${pageCostCTE}) ELSE 0 END
+        ), 0)::int4 AS ${sql.identifier([page])}
         `,
       ),
+      sql`COALESCE(SUM(
+        CASE WHEN
+          page != ${PageListStandard.Income}
+          AND page = ${PageListStandard.General}
+          AND category = ANY(${sql.array(
+            config.data.overview.investmentPurchaseCategories,
+            'text',
+          )})
+        THEN value
+        ELSE 0 END
+      ), 0)::int4 AS investment_purchases`,
     ],
     sql`, `,
   )}
-
-  SELECT (${sql.join(
-    spendingPages.map((page) => sql`${sql.identifier([`sum_${page}`, 'cost'])}`),
-    sql` + `,
-  )})::int4 AS month_cost
-
   FROM dates
-  ${sql.join(
-    spendingPages.map(
-      (page) => sql`
-      LEFT JOIN ${sql.identifier([`sum_${page}`])} ON ${sql.identifier([
-        `sum_${page}`,
-        'start_date',
-      ])} = dates.start_date
-      `,
-    ),
-    sql` `,
+  LEFT JOIN list_standard ON ${sql.join(
+    [sql`uid = ${uid}`, sql`date >= dates.start_date`, sql`date <= dates.end_date`],
+    sql` AND `,
   )}
+  GROUP BY dates.start_date
   ORDER BY dates.start_date
   `);
-  return results.rows.map(({ month_cost }) => month_cost);
+  return results.rows;
 }
 
-export async function selectInitialCumulativeIncome(
+export type InitialCumulativeListRow = {
+  page: PageListStandard;
+  sum: number;
+};
+
+export async function selectInitialCumulativeList(
   db: DatabaseTransactionConnectionType,
   uid: number,
   startDate: string,
-): Promise<number> {
-  const results = await db.query<{ sum: number }>(sql`
-  SELECT SUM(cost)::int4 AS sum
-  FROM income
+): Promise<readonly InitialCumulativeListRow[]> {
+  const results = await db.query<InitialCumulativeListRow>(sql`
+  SELECT page, COALESCE(SUM(${pageCostCTE}), 0)::int4 AS sum
+  FROM list_standard
   WHERE uid = ${uid} AND date < ${startDate}
+  GROUP BY page
   `);
-  return results.rows[0]?.sum ?? 0;
-}
-
-export async function selectInitialCumulativeSpending(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  startDate: string,
-): Promise<number> {
-  const results = await db.query<{ sum: number }>(sql`
-  WITH ${sql.join(
-    spendingPages.map(
-      (page) => sql`${sql.identifier([`sum_${page}`])} AS (
-        SELECT COALESCE(SUM(
-          ${pageCostCTE(page)}
-        ), 0) AS sum
-        FROM ${sql.identifier([page])}
-        WHERE uid = ${uid} AND date < ${startDate}
-      )`,
-    ),
-    sql`, `,
-  )}
-
-  SELECT (${sql.join(
-    spendingPages.map((page) => sql`${sql.identifier([`sum_${page}`, 'sum'])}`),
-    sql` + `,
-  )})::int4 AS sum
-  FROM (SELECT 1) r
-  ${sql.join(
-    spendingPages.map((page) => sql`LEFT JOIN ${sql.identifier([`sum_${page}`])} ON 1=1`),
-    sql` `,
-  )}
-  `);
-  return results.rows[0].sum ?? 0;
+  return results.rows;
 }

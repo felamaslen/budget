@@ -9,6 +9,7 @@ import {
   QueryReceiptItemsArgs,
   SearchPage,
   SearchItem,
+  PageListStandard,
 } from '~api/types/gql';
 
 describe('Search resolvers', () => {
@@ -17,31 +18,39 @@ describe('Search resolvers', () => {
     withSlonik(async (db) => {
       app = await getTestApp();
 
-      await db.query(sql`TRUNCATE food`);
-      await db.query(sql`TRUNCATE bills`);
+      await db.query(
+        sql`DELETE FROM list_standard WHERE uid = ${app.uid} AND page IN ('bills', 'food')`,
+      );
 
       await db.query(sql`
-      INSERT INTO food (uid, date, item, category, cost, shop)
+      INSERT INTO list_standard (page, uid, date, item, category, value, shop)
       SELECT * FROM ${sql.unnest(
         [
-          [app.uid, '2020-04-20', 'Pears', 'Fruit', 1, 'Tesco'],
-          [app.uid, '2020-04-20', 'Apples', 'Fruit', 1, "Sainsbury's"],
-          [app.uid, '2020-04-20', 'Chocolate fondue', 'Fondue', 1, 'Chocolate shop'],
-          [app.uid, '2020-04-20', 'Apple pie', 'Dessert', 1, 'Waitrose'],
+          [PageListStandard.Food, app.uid, '2020-04-20', 'Pears', 'Fruit', 1, 'Tesco'],
+          [PageListStandard.Food, app.uid, '2020-04-20', 'Apples', 'Fruit', 1, "Sainsbury's"],
+          [
+            PageListStandard.Food,
+            app.uid,
+            '2020-04-20',
+            'Chocolate fondue',
+            'Fondue',
+            1,
+            'Chocolate shop',
+          ],
+          [PageListStandard.Food, app.uid, '2020-04-20', 'Apple pie', 'Dessert', 1, 'Waitrose'],
+          [PageListStandard.Bills, app.uid, '2020-04-20', 'Mortgage', 'Housing', 1, 'My bank'],
+          [
+            PageListStandard.Bills,
+            app.uid,
+            '2020-04-20',
+            'Water',
+            'Utilities',
+            1,
+            'My water company',
+          ],
+          [PageListStandard.Bills, app.uid, '2020-04-20', 'Rent', 'Housing', 1, 'My landlord'],
         ],
-        ['int4', 'date', 'text', 'text', 'int4', 'text'],
-      )}
-      `);
-
-      await db.query(sql`
-      INSERT INTO bills (uid, date, item, category, cost, shop)
-      SELECT * FROM ${sql.unnest(
-        [
-          [app.uid, '2020-04-20', 'Mortgage', 'Housing', 1, 'My bank'],
-          [app.uid, '2020-04-20', 'Water', 'Utilities', 1, 'My water company'],
-          [app.uid, '2020-04-20', 'Rent', 'Housing', 1, 'My landlord'],
-        ],
-        ['int4', 'date', 'text', 'text', 'int4', 'text'],
+        ['page_category', 'int4', 'date', 'text', 'text', 'int4', 'text'],
       )}
       `);
     }),

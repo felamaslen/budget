@@ -61,10 +61,10 @@ spec:
           resources:
             requests:
               memory: '256Mi'
-              cpu: '200m'
+              cpu: '1'
             limits:
               memory: '1Gi'
-              cpu: '500m'
+              cpu: '1'
       dnsConfig:
         options:
           - name: ndots

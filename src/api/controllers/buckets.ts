@@ -1,6 +1,5 @@
 import { badRequest } from '@hapi/boom';
 import { formatISO, isValid } from 'date-fns';
-import { flatten } from 'lodash';
 import { DatabaseTransactionConnectionType } from 'slonik';
 import {
   insertBucket,
@@ -10,7 +9,6 @@ import {
   upsertInvestmentBucket,
 } from '~api/queries';
 import {
-  AnalysisPage,
   Bucket,
   InvestmentBucket,
   ListBucketsResponse,
@@ -36,18 +34,13 @@ export async function listBuckets(
 ): Promise<ListBucketsResponse> {
   const startDate = validateDate(args.startDate);
   const endDate = validateDate(args.endDate);
-  const bucketsRows = await Promise.all(
-    Object.values(AnalysisPage).map((page) =>
-      selectBucketsWithCurrentValue(
-        db,
-        uid,
-        page,
-        formatISO(startDate, { representation: 'date' }),
-        formatISO(endDate, { representation: 'date' }),
-      ),
-    ),
+  const bucketsRows = await selectBucketsWithCurrentValue(
+    db,
+    uid,
+    formatISO(startDate, { representation: 'date' }),
+    formatISO(endDate, { representation: 'date' }),
   );
-  const buckets = flatten(bucketsRows).map<Bucket>((row) => ({
+  const buckets = bucketsRows.map<Bucket>((row) => ({
     id: row.id,
     page: row.page,
     filterCategory: row.filter_category,

@@ -30,16 +30,11 @@ const selectAllDatesInRange = (monthEnds: Date[]): TaggedTemplateLiteralInvocati
 `;
 
 const selectSingleDate = (date: Date): TaggedTemplateLiteralInvocationType => sql`
-  select b.cid, b.time
-  from (
-    select
-      fct.cid
-      ,fct.time
-      ,row_number() over (order by fct.time desc) as scrape_num
-    from fund_cache_time fct
-    where fct.time <= ${date.toISOString()}
-  ) b 
-  where b.scrape_num = 1 
+  select cid, time
+  from fund_cache_time
+  where time <= ${date.toISOString()}
+  order by time desc
+  limit 1
 `;
 
 const selectRebasedFundValues = (uid: number): TaggedTemplateLiteralInvocationType => sql`

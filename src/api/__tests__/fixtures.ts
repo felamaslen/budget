@@ -1,8 +1,15 @@
 import { DatabaseTransactionConnectionType, sql } from 'slonik';
 import { withSlonik } from '~api/modules/db';
 import { generateUserPin } from '~api/test-utils/generate-user-pin';
+import { PageListStandard } from '~api/types';
 
-const generateFunds = async (db: DatabaseTransactionConnectionType, uid: number): Promise<void> => {
+export const generateFunds = async (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<void> => {
+  await db.query(sql`DELETE FROM fund_scrape`);
+  await db.query(sql`DELETE FROM fund_cache_time`);
+
   const fundIdsResult = await db.query<{ id: number }>(sql`
   INSERT INTO funds (uid, item)
   SELECT * FROM ${sql.unnest(
@@ -87,84 +94,78 @@ const generateFunds = async (db: DatabaseTransactionConnectionType, uid: number)
   `);
 };
 
-const generateListData = async (
+export const generateListData = async (
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<void> => {
-  await db.query(sql`
-  INSERT INTO income (uid, date, item, category, cost, shop)
-  SELECT * FROM ${sql.unnest(
-    [
-      [uid, '2015-04-18', 'Salary', 'Main job', 365202, 'My company'],
-      [uid, '2018-03-24', 'Salary', 'Side work', 433201, 'Contract'],
-    ],
-    ['int4', 'date', 'text', 'text', 'int4', 'text'],
-  )}
-  `);
+  await db.query(sql`DELETE FROM list_standard WHERE uid = ${uid}`);
 
   await db.query(sql`
-  INSERT INTO bills (uid, date, item, category, cost, shop)
+  INSERT INTO list_standard (uid, page, date, item, category, value, shop)
   SELECT * FROM ${sql.unnest(
     [
-      [uid, '2018-03-25', 'Rent', 'Housing', 72500, 'My bank'],
-      [uid, '2018-03-25', 'Electricity', 'Utilities', 3902, 'My energy company'],
+      [uid, PageListStandard.Income, '2015-04-18', 'Salary', 'Main job', 365202, 'My company'],
+      [uid, PageListStandard.Income, '2018-03-24', 'Salary', 'Side work', 433201, 'Contract'],
+      [uid, PageListStandard.Bills, '2018-03-25', 'Rent', 'Housing', 72500, 'My bank'],
+      [
+        uid,
+        PageListStandard.Bills,
+        '2018-03-25',
+        'Electricity',
+        'Utilities',
+        3902,
+        'My energy company',
+      ],
+      [uid, PageListStandard.Food, '2015-05-07', 'Doughnuts', 'Confectionery', 83, "Sainsbury's"],
+      [uid, PageListStandard.Food, '2015-05-03', 'Danish pastry', 'Pastry', 156, "Sainsbury's"],
+      [uid, PageListStandard.Food, '2018-03-25', 'Breakfast', 'Food', 19239, 'Tesco'],
+      [uid, PageListStandard.Food, '2018-03-25', 'Lunch', 'Food', 91923, 'Morrisons'],
+      [uid, PageListStandard.Food, '2018-03-25', 'Nuts', 'Snacks', 2239, "Sainsbury's"],
+      [uid, PageListStandard.General, '2015-05-10', 'Baz', 'Bar', 7619, 'Foo'],
+      [uid, PageListStandard.General, '2018-03-25', 'Kitchen', 'Foo', 1231, 'Amazon'],
+      [uid, PageListStandard.General, '2018-03-25', 'Household', 'Foo', 9912, 'Hardware store'],
+      [
+        uid,
+        PageListStandard.General,
+        '2018-03-13',
+        'Deposit',
+        'House purchase',
+        5956000,
+        'Some conveyancer',
+      ],
+      [
+        uid,
+        PageListStandard.General,
+        '2015-05-20',
+        'Old Deposit',
+        'House purchase',
+        12300000,
+        'Other conveyancer',
+      ],
+      [uid, PageListStandard.Social, '2018-03-25', 'Friends', 'Bar', 61923, 'Some pub'],
+      [
+        uid,
+        PageListStandard.Holiday,
+        '2018-03-25',
+        'Somewhere',
+        'a country',
+        11023,
+        'Travel agents',
+      ],
+      [uid, PageListStandard.Holiday, '2018-03-25', 'Otherplace', 'a country', 23991, 'Skyscanner'],
     ],
-    ['int4', 'date', 'text', 'text', 'int4', 'text'],
-  )}
-  `);
-
-  await db.query(sql`
-  INSERT INTO food (uid, date, item, category, cost, shop)
-  SELECT * FROM ${sql.unnest(
-    [
-      [uid, '2015-05-07', 'Doughnuts', 'Confectionery', 83, "Sainsbury's"],
-      [uid, '2015-05-03', 'Danish pastry', 'Pastry', 156, "Sainsbury's"],
-      [uid, '2018-03-25', 'Breakfast', 'Food', 19239, 'Tesco'],
-      [uid, '2018-03-25', 'Lunch', 'Food', 91923, 'Morrisons'],
-      [uid, '2018-03-25', 'Nuts', 'Snacks', 2239, "Sainsbury's"],
-    ],
-    ['int4', 'date', 'text', 'text', 'int4', 'text'],
-  )}
-  `);
-
-  await db.query(sql`
-  INSERT INTO general (uid, date, item, category, cost, shop)
-  SELECT * FROM ${sql.unnest(
-    [
-      [uid, '2015-05-10', 'Baz', 'Bar', 7619, 'Foo'],
-      [uid, '2018-03-25', 'Kitchen', 'Foo', 1231, 'Amazon'],
-      [uid, '2018-03-25', 'Household', 'Foo', 9912, 'Hardware store'],
-      [uid, '2018-03-13', 'Deposit', 'House purchase', 5956000, 'Some conveyancer'],
-      [uid, '2015-05-20', 'Old Deposit', 'House purchase', 12300000, 'Other conveyancer'],
-    ],
-    ['int4', 'date', 'text', 'text', 'int4', 'text'],
-  )}
-  `);
-
-  await db.query(sql`
-  INSERT INTO social (uid, date, item, category, cost, shop)
-  SELECT * FROM ${sql.unnest(
-    [[uid, '2018-03-25', 'Friends', 'Bar', 61923, 'Some pub']],
-    ['int4', 'date', 'text', 'text', 'int4', 'text'],
-  )}
-  `);
-
-  await db.query(sql`
-  INSERT INTO holiday (uid, date, item, category, cost, shop)
-  SELECT * FROM ${sql.unnest(
-    [
-      [uid, '2018-03-25', 'Somewhere', 'a country', 11023, 'Travel agents'],
-      [uid, '2018-03-25', 'Otherplace', 'a country', 23991, 'Skyscanner'],
-    ],
-    ['int4', 'date', 'text', 'text', 'int4', 'text'],
+    ['int4', 'page_category', 'date', 'text', 'text', 'int4', 'text'],
   )}
   `);
 };
 
-const generateNetWorth = async (
+export const generateNetWorth = async (
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<void> => {
+  await db.query(sql`DELETE FROM net_worth WHERE uid = ${uid}`);
+  await db.query(sql`DELETE FROM net_worth_categories WHERE uid = ${uid}`);
+
   const {
     rows: [
       categoryIdCash,
@@ -360,18 +361,5 @@ export const seedUser = withSlonik<number>(async (db) => {
 });
 
 export const seedData = withSlonik<void, [number]>(async (db, uid) => {
-  await db.query(sql`DELETE FROM fund_scrape`);
-  await db.query(sql`DELETE FROM fund_cache_time`);
-
-  await db.query(sql`DELETE FROM net_worth WHERE uid = ${uid}`);
-  await db.query(sql`DELETE FROM net_worth_categories WHERE uid = ${uid}`);
-
-  await db.query(sql`DELETE FROM income WHERE uid = ${uid}`);
-  await db.query(sql`DELETE FROM bills WHERE uid = ${uid}`);
-  await db.query(sql`DELETE FROM food WHERE uid = ${uid}`);
-  await db.query(sql`DELETE FROM general WHERE uid = ${uid}`);
-  await db.query(sql`DELETE FROM social WHERE uid = ${uid}`);
-  await db.query(sql`DELETE FROM holiday WHERE uid = ${uid}`);
-
   await Promise.all([generateFunds(db, uid), generateListData(db, uid), generateNetWorth(db, uid)]);
 });

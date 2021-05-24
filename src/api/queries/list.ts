@@ -1,133 +1,141 @@
-import { sql, DatabaseTransactionConnectionType, ListSqlTokenType } from 'slonik';
-import { Create, ListItem, ListItemInput, PageListCost, RawDate, TypeMap } from '~api/types';
+import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
-export async function countRows(
+import config from '~api/config';
+import {
+  ListItemStandard,
+  ListItemStandardInput,
+  PageListCost,
+  PageListStandard,
+} from '~api/types';
+import type { GQL, NativeDate, RawDate } from '~shared/types';
+
+export const pageCostCTE = sql`
+CASE
+  WHEN page = ${PageListStandard.General} AND category = ANY(${sql.array(
+  config.data.overview.investmentPurchaseCategories,
+  'text',
+)})
+  THEN 0
+  ELSE value
+END
+`;
+
+export type StandardListRow = NativeDate<Omit<GQL<ListItemStandard>, 'cost'>, 'date'> & {
+  value: number;
+};
+
+export async function countStandardRows(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
+  page: PageListCost,
 ): Promise<number> {
-  const {
-    rows: [{ count }],
-  } = await db.query<{ count: number }>(sql`
+  const result = await db.query<{ count: number }>(sql`
   SELECT COUNT(*) AS count
-  FROM ${sql.identifier([table])}
-  WHERE uid = ${uid}
+  FROM list_standard
+  WHERE uid = ${uid} AND page = ${page}
   `);
-  return count;
+  return result.rows[0].count ?? 0;
 }
+
+export const standardListPages = Object.values(PageListStandard);
+
+export const spendingPages: PageListStandard[] = Object.values(PageListStandard).filter(
+  (page) => page !== PageListStandard.Income,
+);
+
+export type StandardListTotalCostRow = { page: PageListStandard; total: number };
 
 export async function selectListTotalCost(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
-): Promise<number> {
-  const { rows } = await db.query<{ total: number }>(sql`
-  SELECT COALESCE(SUM(cost), 0) AS total
-  FROM ${sql.identifier([table])}
-  WHERE uid = ${uid}
+  page?: PageListCost,
+): Promise<readonly StandardListTotalCostRow[]> {
+  const { rows } = await db.query<StandardListTotalCostRow>(sql`
+  SELECT page, COALESCE(SUM(${pageCostCTE}), 0)::int4 AS total
+  FROM list_standard
+  WHERE ${sql.join(
+    [sql`uid = ${uid}`, page ? sql`page = ${page}` : null].filter(Boolean),
+    sql` AND `,
+  )}
+  GROUP BY page
   `);
-  return rows[0].total;
+  return rows;
 }
+
+export type WeeklyCostRow = {
+  year: number;
+  weekly: number;
+};
 
 export async function selectListWeeklyCosts(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
-): Promise<number[]> {
-  const results = await db.query<{ year_weekly_cost: number }>(sql`
-  SELECT SUM(cost) / MAX(week) AS year_weekly_cost
-  FROM (
-    SELECT cost, date_part('year', date) AS year, date_part('week', date) AS week
-    FROM ${sql.identifier([table])}
-    WHERE uid = ${uid}
-  ) costs
+  page: PageListCost,
+): Promise<readonly WeeklyCostRow[]> {
+  const results = await db.query<WeeklyCostRow>(sql`
+  WITH values AS (
+    SELECT ${sql.join(
+      [
+        sql`${pageCostCTE} AS value`,
+        sql`DATE_PART('year', date) AS year`,
+        sql`DATE_PART('week', date) AS week`,
+      ],
+      sql`, `,
+    )}
+    FROM list_standard
+    WHERE uid = ${uid} AND page = ${page}
+  )
+  SELECT year, (SUM(value) / GREATEST(1, MAX(week) - MIN(week)))::int4 AS weekly
+  FROM values
   GROUP BY year
   ORDER BY year
   `);
-  return results.rows.map(({ year_weekly_cost }) => year_weekly_cost);
+  return results.rows;
 }
 
-type TypeMapEntry<I extends ListItemInput> = [keyof Create<I>, string];
-
-const getTypes = <I extends ListItemInput>(typeMap: TypeMap<I>): TypeMapEntry<I>[] =>
-  Object.entries(typeMap) as TypeMapEntry<I>[];
-
-const getDbColumns = <I extends ListItemInput>(
-  types: TypeMapEntry<I>[],
-  columnMap?: Partial<TypeMap<I>>,
-): string[] => types.map(([column]) => columnMap?.[column] ?? (column as string));
-
-const getColumnList = <I extends ListItemInput>(
-  types: TypeMapEntry<I>[],
-  columnMap?: TypeMap<I>,
-): ListSqlTokenType =>
-  sql.join(
-    getDbColumns(types, columnMap).map((dbColumn) => sql.identifier([dbColumn])),
-    sql`, `,
-  );
-
-const getHumanColumnList = <I extends ListItemInput>(
-  types: TypeMapEntry<I>[],
-  columnMap: Partial<TypeMap<I>>,
-): ListSqlTokenType =>
-  sql.join(
-    getDbColumns(types, columnMap).map(
-      (dbColumn, index) =>
-        sql`${sql.identifier([dbColumn])} AS ${sql.identifier([types[index][0] as string])}`,
-    ),
-    sql`, `,
-  );
-
-export async function insertListItems<I extends ListItemInput>(
+export async function insertListItems(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
-  typeMap: TypeMap<RawDate<I, 'date'>>,
-  items: RawDate<I, 'date'>[],
-  columnMap?: TypeMap<RawDate<I, 'date'>>,
+  page: PageListCost,
+  items: RawDate<ListItemStandardInput, 'date'>[],
 ): Promise<number[]> {
-  const types = getTypes(typeMap);
-  const columnList = getColumnList(types, columnMap);
-
   const result = await db.query<{ id: number }>(sql`
-  INSERT INTO ${sql.identifier([table])}
-    (uid, ${columnList})
+  INSERT INTO list_standard (page, uid, date, item, category, shop, value)
   SELECT * FROM ${sql.unnest(
-    items.map((item) => [uid, ...types.map(([column]) => item[column])]),
-    ['int4', ...types.map(([, type]) => type)],
+    items.map((item) => [page, uid, item.date, item.item, item.category, item.shop, item.cost]),
+    ['page_category', 'int4', 'date', 'text', 'text', 'text', 'int4'],
   )}
   RETURNING id
   `);
   return result.rows.map<number>((row) => row.id);
 }
 
-export async function selectListItems<I extends ListItem>(
+export async function selectListItems(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
-  typeMap: TypeMap<RawDate<I, 'date'>>,
+  page: PageListCost,
   limit: number,
   offset: number,
-): Promise<readonly I[]> {
-  const { rows } = await db.query<I>(sql`
-  SELECT id, ${getHumanColumnList(getTypes(typeMap), {})}
-  FROM ${sql.identifier([table])}
-  WHERE uid = ${uid}
+): Promise<readonly GQL<NativeDate<ListItemStandard, 'date'>>[]> {
+  const { rows } = await db.query(sql`
+  SELECT id, date, item, category, shop, value AS cost
+  FROM list_standard
+  WHERE uid = ${uid} AND page = ${page}
   ORDER BY date DESC, id ASC
   LIMIT ${limit}
   OFFSET ${offset * limit}
   `);
-  return rows;
+  return (rows as unknown) as readonly GQL<NativeDate<ListItemStandard, 'date'>>[];
 }
 
 export async function deleteListItem(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
+  page: PageListCost,
   id: number,
 ): Promise<void> {
   await db.query(sql`
-  DELETE FROM ${sql.identifier([table])}
-  WHERE uid = ${uid} AND id = ${id}
+  DELETE FROM list_standard
+  WHERE uid = ${uid} AND page = ${page} AND id = ${id}
   `);
 }

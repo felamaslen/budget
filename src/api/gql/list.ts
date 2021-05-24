@@ -6,8 +6,8 @@ const query = gql`
     bills
     food
     general
-    holiday
     social
+    holiday
   }
 
   type ListItem {
@@ -37,7 +37,6 @@ const query = gql`
   }
   extend type Query {
     readList(page: PageListStandard!, offset: Int, limit: Int): ListReadResponse
-    readListTotals(page: PageListStandard!): ListTotalsResponse
   }
 `;
 

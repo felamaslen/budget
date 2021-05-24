@@ -11,14 +11,6 @@ export const enum RequestType {
   delete = 'delete',
 }
 
-export type RawDate<V, K extends keyof V> = V extends { [key in K]: Date }
-  ? Omit<V, K> & { [key in K]: string }
-  : V;
-
-export type NativeDate<V, K extends keyof V> = V extends { [key in K]: string }
-  ? Omit<V, K> & { [key in K]: Date }
-  : V;
-
 export type IdKey = 'id' | 'fakeId';
 
 export interface Item {

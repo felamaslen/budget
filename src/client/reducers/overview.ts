@@ -20,22 +20,22 @@ import {
   ActionReceiptCreated,
 } from '~client/actions';
 import { getMonthDatesList } from '~client/modules/date';
-import type { GQL, NativeDate, StandardInput } from '~client/types';
+import type { StandardInput } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
 import type { InitialQuery } from '~client/types/gql';
 import { investmentPurchaseCategories } from '~shared/constants';
+import type { GQL, NativeDate } from '~shared/types';
 
 export type State = NativeDate<
   GQL<Exclude<InitialQuery['overview'], null | undefined>>,
   'startDate' | 'endDate'
->;
+> & { annualisedFundReturns: number; stocks: number[] };
 
 export const initialState: State = {
   startDate: endOfMonth(addYears(new Date(), -1)),
   endDate: endOfMonth(new Date()),
-  annualisedFundReturns: 0.1,
+  annualisedFundReturns: 0,
   monthly: {
-    stocks: [],
     investmentPurchases: [],
     [PageListStandard.Income]: [],
     [PageListStandard.Bills]: [],
@@ -44,20 +44,22 @@ export const initialState: State = {
     [PageListStandard.Holiday]: [],
     [PageListStandard.Social]: [],
   },
+  stocks: [],
   initialCumulativeValues: {
     income: 0,
     spending: 0,
   },
 };
 
-const onRead = (state: State, res: InitialQuery): State =>
-  res.overview
-    ? {
-        ...res.overview,
-        startDate: endOfDay(new Date(res.overview?.startDate)),
-        endDate: endOfDay(new Date(res.overview?.endDate)),
-      }
-    : state;
+const onRead = (state: State, res: InitialQuery): State => ({
+  ...state,
+  startDate: res.overview ? endOfDay(new Date(res.overview?.startDate)) : state.startDate,
+  endDate: res.overview ? endOfDay(new Date(res.overview?.endDate)) : state.endDate,
+  monthly: res.overview?.monthly ?? state.monthly,
+  annualisedFundReturns: res.fundHistory?.annualisedFundReturns ?? state.annualisedFundReturns,
+  stocks: res.fundHistory?.overviewCost ?? state.stocks,
+  initialCumulativeValues: res.overview?.initialCumulativeValues ?? state.initialCumulativeValues,
+});
 
 const getStateRowDates = moize(
   ({ startDate, endDate }: State): Date[] => getMonthDatesList(startDate, endDate),
@@ -163,11 +165,8 @@ const onDelete = (state: State, action: ListItemDeleted<StandardInput, PageListS
 
 const onFundPricesUpdated = (state: State, action: FundPricesUpdated): State => ({
   ...state,
-  annualisedFundReturns: action.res.annualisedFundReturns,
-  monthly: {
-    ...state.monthly,
-    stocks: action.res.overviewCost,
-  },
+  annualisedFundReturns: action.res.annualisedFundReturns ?? state.annualisedFundReturns,
+  stocks: action.res.overviewCost,
 });
 
 const onReceiptCreated = (state: State, action: ActionReceiptCreated): State => ({

@@ -1,4 +1,6 @@
 import { DatabaseTransactionConnectionType, sql } from 'slonik';
+
+import { standardListPages } from './list';
 import config from '~api/config';
 import { AnalysisPage, BucketInput } from '~api/types';
 
@@ -13,7 +15,6 @@ export type BucketWithCurrentValueRow = {
 export async function selectBucketsWithCurrentValue(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  page: AnalysisPage,
   startDate: string,
   endDate: string,
 ): Promise<readonly BucketWithCurrentValueRow[]> {
@@ -21,86 +22,97 @@ export async function selectBucketsWithCurrentValue(
   WITH ${sql.join(
     [
       sql`page_items AS (
-      SELECT t.id, t.category, t.cost FROM ${sql.identifier([page])} t
-      WHERE ${sql.join(
-        [
-          sql`t.uid = ${uid}`,
-          sql`t.date BETWEEN ${startDate} AND ${endDate}`,
-          page === AnalysisPage.General &&
-            sql`t.category != ALL(${sql.array(
+        SELECT page, id, category, value
+        FROM list_standard
+        WHERE ${sql.join(
+          [
+            sql`uid = ${uid}`,
+            sql`date BETWEEN ${startDate} AND ${endDate}`,
+            sql`NOT(page = ${AnalysisPage.General} AND category = ANY(${sql.array(
               config.data.overview.investmentPurchaseCategories,
               'text',
-            )})`,
-        ].filter(Boolean),
-        sql` AND `,
-      )}
+            )}))`,
+          ],
+          sql` AND `,
+        )}
       )`,
+
       sql`page_buckets AS (
         SELECT * FROM (
           SELECT id, uid, page, filter_category, value
-          FROM buckets b
-          WHERE ${sql.join(
-            [sql`b.uid = ${uid}`, sql`b.page = ${page}`, sql`b.filter_category IS NOT NULL`],
-            sql` AND `,
-          )}
-        ) b_defined_category
+          FROM buckets
+          WHERE uid = ${uid} AND filter_category IS NOT NULL
+        ) buckets_defined_category
+
         UNION SELECT * FROM (
           SELECT ${sql.join(
             [
-              sql`COALESCE(b.id, 0)::int4 as id`,
-              sql`${uid}::int4 as uid`,
-              sql`r.page`,
-              sql`NULL as filter_category`,
-              sql`COALESCE(b.value, 0)::int4 as value`,
+              sql`COALESCE(id, 0) AS id`,
+              sql`${uid}::int4 AS uid`,
+              sql`pages.page`,
+              sql`NULL AS filter_category`,
+              sql`COALESCE(value, 0) AS value`,
             ],
             sql`, `,
           )}
-          FROM (SELECT ${page}::page_category AS page) r
-          LEFT JOIN buckets b ON b.uid = ${uid} AND b.page = r.page AND b.filter_category IS NULL
-        ) b_null_category
+          FROM (
+            ${sql.join(
+              standardListPages.map((page) => sql`SELECT ${page}::page_category AS page`),
+              sql` UNION `,
+            )}
+          ) pages
+          LEFT JOIN buckets ON ${sql.join(
+            [
+              sql`buckets.uid = ${uid}`,
+              sql`buckets.page = pages.page`,
+              sql`buckets.filter_category IS NULL`,
+            ],
+            sql` AND `,
+          )}
+        ) buckets_null_category
+      )
+      `,
+
+      sql`buckets_filtered_values AS (
+        SELECT b.page, COALESCE(SUM(t.value), 0)::int4 AS value
+        FROM page_buckets b
+        LEFT JOIN page_items t ON t.page = b.page AND t.category = b.filter_category
+        GROUP BY b.page
       )`,
-      sql`bucket_filtered_value AS (
-        SELECT COALESCE(SUM(t.cost), 0)::int4 AS value
-        FROM page_items t
-        INNER JOIN page_buckets b ON b.filter_category = t.category
-      )`,
+
       sql`bucket_rows AS (
         SELECT ${sql.join(
           [
             sql`b.id`,
-            sql`row_number() OVER (PARTITION BY b.id) AS row_num`,
+            sql`row_number() OVER (PARTITION BY b.page, b.id) AS row_num`,
             sql`b.page`,
             sql`b.filter_category`,
             sql`b.value`,
             sql`COALESCE(
             SUM(
-              CASE
-                WHEN (
-                  b.filter_category IS NULL OR
-                  (b.filter_category IS NOT NULL AND t.category = b.filter_category)
-                ) THEN t.cost
-                ELSE 0
-              END
-            ) OVER (PARTITION BY b.id) -
-            CASE
-              WHEN b.filter_category IS NULL THEN COALESCE(bf.value, 0)
-              ELSE 0
-            END,
+              CASE WHEN (b.filter_category IS NULL OR t.category = b.filter_category)
+                THEN t.value
+              ELSE 0 END
+            ) OVER (PARTITION BY b.page, b.id) -
+            CASE WHEN b.filter_category IS NULL THEN COALESCE(bf.value, 0)
+            ELSE 0 END,
             0
           )::int4 AS value_actual`,
           ],
           sql`, `,
         )}
         FROM page_buckets b
-        LEFT JOIN bucket_filtered_value bf ON 1=1
-        LEFT JOIN page_items t ON 1=1
-      )
-      `,
+        INNER JOIN buckets_filtered_values bf ON bf.page = b.page
+        LEFT JOIN page_items t ON t.page = b.page
+      )`,
     ],
     sql`, `,
   )}
-  SELECT id, page, filter_category, value, value_actual FROM bucket_rows
+
+  SELECT id, page, filter_category, value, value_actual
+  FROM bucket_rows
   WHERE row_num = 1
+  ORDER BY page, filter_category
   `);
   return rows;
 }

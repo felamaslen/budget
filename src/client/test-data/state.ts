@@ -32,8 +32,8 @@ export const testState: State = {
     startDate: new Date('2018-01-31T23:59:59.999Z'),
     endDate: new Date('2018-07-31T23:59:59.999Z'),
     annualisedFundReturns: 0.143,
+    stocks: [100779, 101459, 102981],
     monthly: {
-      stocks: [100779, 101459, 102981],
       investmentPurchases: [0, 0, 20050, 0, 376000, 250000, 0],
       [PageListStandard.Income]: [2000, 1900, 1500, 2500, 2300, 1800, 2600],
       [PageListStandard.Bills]: [1000, 900, 400, 650, 0, 0, 0],

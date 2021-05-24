@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import sinon from 'sinon';
 import { sql } from 'slonik';
 
+import { seedData } from '~api/__tests__/fixtures';
 import config from '~api/config';
 import { getPool, withSlonik } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
@@ -24,11 +25,11 @@ import {
   Query,
   QueryFundHistoryArgs,
   QueryFundHistoryIndividualArgs,
-  RawDate,
   StockSplit,
   Transaction,
   UpdatedFundAllocationTargets,
 } from '~api/types';
+import type { RawDate } from '~shared/types';
 
 describe('Funds resolver', () => {
   let app: App;
@@ -651,8 +652,51 @@ describe('Funds resolver', () => {
 
     it('should return the overview fund values', async () => {
       expect.assertions(1);
-      const { res } = await setup();
-      expect(res?.overviewCost).toStrictEqual(expect.arrayContaining([expect.any(Number)]));
+
+      // see src/api/seeds/test/test-data.ts
+      const aug2017ScrapedValue = Math.round(
+        123 * (89.095 + 894.134 - 883.229) + 100 * 0 + 50.97 * (1678.42 + 846.38),
+      );
+
+      await seedData(app.uid);
+
+      const clock = sinon.useFakeTimers(new Date('2018-04-20'));
+
+      await app.authGqlClient.clearStore();
+      const res = await app.authGqlClient.query<Query, QueryFundHistoryArgs>({
+        query,
+      });
+
+      clock.restore();
+
+      expect(res?.data.fundHistory?.overviewCost).toStrictEqual([
+        /* Mar-16 */ 0,
+        /* Apr-16 */ 0,
+        /* May-16 */ 0,
+        /* Jun-16 */ 0,
+        /* Jul-16 */ 0,
+        /* Aug-16 */ 0,
+        /* Sep-16 */ 0,
+        /* Oct-16 */ 0,
+        /* Nov-16 */ 0,
+        /* Dec-16 */ 0,
+        /* Jan-17 */ 0,
+        /* Feb-17 */ 0,
+        /* Mar-17 */ 0,
+        /* Apr-17 */ 0,
+        /* May-17 */ 0,
+        /* Jun-17 */ 0,
+        /* Jul-17 */ 0,
+        /* Aug-17 */ aug2017ScrapedValue,
+        /* Sep-17 */ 0,
+        /* Oct-17 */ 0,
+        /* Nov-17 */ 0,
+        /* Dec-17 */ 0,
+        /* Jan-18 */ 0,
+        /* Feb-18 */ 0,
+        /* Mar-18 */ 0,
+        /* Apr-18 */ 0,
+      ]);
     });
 
     it('should return the prices for each fund', async () => {

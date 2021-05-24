@@ -809,33 +809,6 @@
             "deprecationReason": null
           },
           {
-            "name": "readListTotals",
-            "description": null,
-            "args": [
-              {
-                "name": "page",
-                "description": null,
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "ENUM",
-                    "name": "PageListStandard",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "OBJECT",
-              "name": "ListTotalsResponse",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "readNetWorthCategories",
             "description": null,
             "args": [
@@ -4442,13 +4415,13 @@
             "deprecationReason": null
           },
           {
-            "name": "holiday",
+            "name": "social",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "social",
+            "name": "holiday",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -7088,30 +7061,6 @@
         "description": null,
         "fields": [
           {
-            "name": "stocks",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Int",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "investmentPurchases",
             "description": null,
             "args": [],
@@ -7359,22 +7308,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Date",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "annualisedFundReturns",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
                 "ofType": null
               }
             },

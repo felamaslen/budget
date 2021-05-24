@@ -23,6 +23,18 @@ import logger from '~api/modules/logger';
 import { makeSinglePageApp } from '~api/modules/ssr';
 import routes from '~api/routes';
 
+const webLoggerStream = {
+  write: (text: string): void => {
+    logger.info(text);
+  },
+};
+
+const webLoggerStreamError = {
+  write: (text: string): void => {
+    logger.error(text);
+  },
+};
+
 const API_PREFIX = '/api/v4';
 
 const hot = process.env.SKIP_APP !== 'true' && process.env.NODE_ENV === 'development';
@@ -90,28 +102,25 @@ function setupLogging(app: express.Express): void {
   if (process.env.NODE_ENV === 'test') {
     return;
   }
-  if (process.env.NODE_ENV === 'development') {
-    app.use(webLogger('dev'));
-  } else {
-    webLogger.token('remote-addr', getIp);
 
-    app.use(
-      webLogger('common', {
-        skip: (_: unknown, res: express.Response) => res.statusCode < 400,
-        stream: process.stderr,
-      }),
-    );
+  webLogger.token('remote-addr', getIp);
 
-    app.use(
-      webLogger('common', {
-        skip: (req: Request, res: express.Response) =>
-          req.url.startsWith('/liveness') ||
-          req.url.startsWith('/readiness') ||
-          res.statusCode >= 400,
-        stream: process.stdout,
-      }),
-    );
-  }
+  app.use(
+    webLogger('common', {
+      skip: (_: unknown, res: express.Response) => res.statusCode < 400,
+      stream: webLoggerStreamError,
+    }),
+  );
+
+  app.use(
+    webLogger('common', {
+      skip: (req: Request, res: express.Response) =>
+        req.url.startsWith('/liveness') ||
+        req.url.startsWith('/readiness') ||
+        res.statusCode >= 400,
+      stream: webLoggerStream,
+    }),
+  );
 }
 
 function setupDataInput(app: express.Express): void {

@@ -17,7 +17,7 @@
     "build:client": "NODE_ENV=production webpack --mode production",
     "build": "sh ./scripts/build.sh",
     "start": "node lib/api",
-    "start:dev": "nodemon | roarr pretty-print",
+    "start:dev": "NODE_ENV=development nodemon | roarr pretty-print",
     "dev": "docker-compose up",
     "dev:api": "SKIP_APP=true yarn dev",
     "test:api:unit": "TZ=UTC jest -w 4 -c jest.api.unit.config.js --detectOpenHandles --forceExit",
@@ -31,7 +31,7 @@
     "prettier": "prettier -c src",
     "ts-prune": "sh ./scripts/ts-prune.sh",
     "migrate": "node lib/api/migrate.js",
-    "migrate:dev": "ts-node -r tsconfig-paths/register src/api/migrate.ts",
+    "migrate:dev": "NODE_ENV=development ts-node -r tsconfig-paths/register src/api/migrate.ts",
     "seed:user": "node lib/api/seeds/production/00-admin-user.js",
     "seed:user:dev": "ts-node -r tsconfig-paths/register src/api/seeds/production/00-admin-user.ts",
     "seed:stage-data": "node lib/api/seeds/production/01-stage-data.js",
@@ -39,9 +39,9 @@
     "scrape": "node ./lib/api/scripts/scrape-funds",
     "scrape_funds": "yarn scrape --prices",
     "scrape_holdings": "yarn scrape --holdings",
-    "dev:scrape": "docker-compose run budget ./node_modules/.bin/ts-node -r tsconfig-paths/register ./src/api/scripts/scrape-funds",
-    "dev:scrape_funds": "yarn dev:scrape --prices",
-    "dev:scrape_holdings": "yarn dev:scrape --holdings"
+    "scrape:dev": "NODE_ENV=development ts-node -r tsconfig-paths/register ./src/api/scripts/scrape-funds",
+    "scrape_funds:dev": "yarn scrape:dev --prices",
+    "scrape_holdings:dev": "yarn scrape:dev --holdings"
   },
   "repository": {
     "type": "git",

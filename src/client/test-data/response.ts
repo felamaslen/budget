@@ -7,9 +7,7 @@ export const testResponse: InitialQuery = {
   overview: {
     startDate: '2018-10-31T23:59:59.999Z',
     endDate: '2020-04-30T23:59:59.999+0100',
-    annualisedFundReturns: 0.173,
     monthly: {
-      stocks: [],
       investmentPurchases: [],
       [PageListStandard.Income]: [],
       [PageListStandard.Bills]: [],
@@ -38,32 +36,7 @@ export const testResponse: InitialQuery = {
     startTime: getUnixTime(new Date('2017-02-03')),
     cacheTimes: [],
     prices: [],
-    annualisedFundReturns: 0.653,
     overviewCost: [],
-  },
-
-  [PageListStandard.Income]: {
-    items: [],
-    total: 0,
-  },
-  [PageListStandard.Bills]: {
-    items: [],
-    total: 0,
-  },
-  [PageListStandard.Food]: {
-    items: [],
-    total: 0,
-  },
-  [PageListStandard.General]: {
-    items: [],
-    total: 0,
-  },
-  [PageListStandard.Holiday]: {
-    items: [],
-    total: 0,
-  },
-  [PageListStandard.Social]: {
-    items: [],
-    total: 0,
+    annualisedFundReturns: 0.173,
   },
 };

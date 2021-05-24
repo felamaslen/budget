@@ -25,9 +25,10 @@ import {
   FlexCenter,
   FlexColumn,
 } from '~client/styled/shared';
-import type { Delta, GQL } from '~client/types';
+import type { Delta } from '~client/types';
 import { ReceiptPage } from '~client/types/enum';
 import type { ListItemStandard, ReceiptInput } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 export type Props = {
   setAddingReceipt: (enabled: boolean) => void;

@@ -30,7 +30,6 @@ import { colors } from '~client/styled/variables';
 import type {
   BlockItem,
   FlexBlocks,
-  GQL,
   LongTermOptions,
   NetWorthAggregateSums as AggregateSums,
   NetWorthEntryNative,
@@ -49,6 +48,7 @@ import type {
   OptionValue,
 } from '~client/types/gql';
 import { NetWorthAggregate as Aggregate } from '~shared/constants';
+import type { GQL } from '~shared/types';
 
 export { getCategories, getEntries, getSubcategories } from './direct';
 
@@ -452,7 +452,6 @@ const forecastAppreciatingIlliquidAsset = forecastCompoundStack(
 function getIlliquidAssetValue(
   startPredictionIndex: number,
   dates: OverviewGraphDate[],
-  categories: NetWorthCategory[],
   subcategories: NetWorthSubcategory[],
   rows: NetWorthEntryNative[],
 ): number[] {
@@ -515,10 +514,9 @@ export const getIlliquidEquity = moize(
     createSelector(
       getStartPredictionIndex(today),
       getGraphDates(today, longTermOptions),
-      getCategories,
       getSubcategories,
       getNetWorthRows,
-      (startPredictionIndex, dates, categories, subcategories, rows): IlliquidEquity[] => {
+      (startPredictionIndex, dates, subcategories, rows): IlliquidEquity[] => {
         if (rows.length < startPredictionIndex) {
           return [];
         }
@@ -526,7 +524,6 @@ export const getIlliquidEquity = moize(
         const illiquidAssetValue = getIlliquidAssetValue(
           startPredictionIndex,
           dates,
-          categories,
           subcategories,
           rows,
         );

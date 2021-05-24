@@ -9,9 +9,7 @@ export const Initial = gql`
     overview {
       startDate
       endDate
-      annualisedFundReturns
       monthly {
-        stocks
         investmentPurchases
         income
         bills
@@ -73,96 +71,6 @@ export const Initial = gql`
 
     fundHistory(period: $fundPeriod, length: $fundLength) {
       ...FundHistoryParts
-    }
-
-    income: readList(page: income, offset: 0, limit: 100) {
-      error
-      items {
-        id
-        date
-        item
-        category
-        cost
-        shop
-      }
-      olderExists
-      total
-      weekly
-    }
-
-    bills: readList(page: bills, offset: 0, limit: 100) {
-      error
-      items {
-        id
-        date
-        item
-        category
-        cost
-        shop
-      }
-      olderExists
-      total
-      weekly
-    }
-
-    food: readList(page: food, offset: 0, limit: 100) {
-      error
-      items {
-        id
-        date
-        item
-        category
-        cost
-        shop
-      }
-      olderExists
-      total
-      weekly
-    }
-
-    general: readList(page: general, offset: 0, limit: 100) {
-      error
-      items {
-        id
-        date
-        item
-        category
-        cost
-        shop
-      }
-      olderExists
-      total
-      weekly
-    }
-
-    holiday: readList(page: holiday, offset: 0, limit: 100) {
-      error
-      items {
-        id
-        date
-        item
-        category
-        cost
-        shop
-      }
-      olderExists
-      total
-      weekly
-    }
-
-    social: readList(page: social, offset: 0, limit: 100) {
-      error
-      items {
-        id
-        date
-        item
-        category
-        cost
-        shop
-      }
-      olderExists
-      total
-      weekly
     }
   }
 `;

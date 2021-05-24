@@ -129,13 +129,7 @@ function useToggleList(
 }
 
 const filterLines = moize(
-  (
-    isMobile: boolean,
-    filteredFundLines: FundLine[],
-    mode: FundMode,
-    startTime: number,
-    cacheTimes: number[],
-  ): Line[] => {
+  (filteredFundLines: FundLine[], mode: FundMode, cacheTimes: number[]): Line[] => {
     const sortedLines = filteredFundLines.slice().sort((a, b) => a.id - b.id);
 
     const initialStack: Data = cacheTimes.map<Point>((time) => [time, 0]);
@@ -354,7 +348,7 @@ function useGraphProps({
       ),
     [fundLines, mode, isMobile, toggleList],
   );
-  const lines = filterLines(isMobile, filteredFundLines, mode, startTime, cacheTimes);
+  const lines = filterLines(filteredFundLines, mode, cacheTimes);
 
   const [ranges, tickSizeY] = getRanges(lines, cacheTimes, mode);
 

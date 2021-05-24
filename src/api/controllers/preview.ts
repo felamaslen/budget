@@ -4,8 +4,8 @@ import { DatabaseTransactionConnectionType } from 'slonik';
 import {
   selectPreviewRowsStocks,
   selectPreviewRowsStandard,
-  getSpendingSummary,
-  getDateRangeUnion,
+  selectCategorisedListSummary,
+  spendingPages,
 } from '~api/queries';
 import {
   MonthlyCategory,
@@ -56,6 +56,17 @@ async function getOverviewPreviewStocks(
   );
 }
 
+async function getSpendingSummary(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  dates: Date[],
+): Promise<number[]> {
+  const categorisedRows = await selectCategorisedListSummary(db, uid, dates);
+  return cumulativeFill(
+    categorisedRows.map((row) => spendingPages.reduce<number>((sum, page) => sum + row[page], 0)),
+  );
+}
+
 async function getOverviewPreviewValues(
   db: DatabaseTransactionConnectionType,
   uid: number,
@@ -68,7 +79,7 @@ async function getOverviewPreviewValues(
     case MonthlyCategory.Stocks:
       return getOverviewPreviewStocks(db, uid, dayEnds);
     case MonthlyCategory.Spending:
-      return cumulativeFill(await getSpendingSummary(db, uid, getDateRangeUnion(dayEnds)));
+      return getSpendingSummary(db, uid, dayEnds);
     default:
       return getOverviewPreviewStandard(db, uid, dayEnds, category, startDate, endDate);
   }

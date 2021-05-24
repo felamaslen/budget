@@ -1,9 +1,7 @@
 import numericHash from 'string-hash';
 import { makeListReducer, makeDailyListReducer, ListState, DailyState } from './list';
 import {
-  ActionTypeApi,
   ActionTypeLogin,
-  dataRead,
   ListActionType,
   listItemCreated,
   listItemUpdated,
@@ -13,10 +11,10 @@ import {
   moreListDataReceived,
   receiptCreated,
 } from '~client/actions';
-import { testResponse } from '~client/test-data';
-import type { Id, NativeDate, StandardInput, WithIds } from '~client/types';
+import type { Id, StandardInput, WithIds } from '~client/types';
 import { PageListStandard, ReceiptPage, RequestType } from '~client/types/enum';
-import type { InitialQuery, ListItemStandardInput, ListReadResponse } from '~client/types/gql';
+import type { ListItemStandardInput, ListReadResponse } from '~client/types/gql';
+import type { NativeDate, RequiredNotNull } from '~shared/types';
 
 describe('List reducer', () => {
   type ExtraState = {
@@ -46,7 +44,7 @@ describe('List reducer', () => {
     total: 0,
     weekly: 0,
     offset: 0,
-    olderExists: null,
+    olderExists: true,
   };
 
   const myListReducer = makeListReducer<Item, WithIds<Item>, typeof page, ExtraState>(
@@ -72,96 +70,6 @@ describe('List reducer', () => {
     it('should return the initial (daily) state', () => {
       expect.assertions(1);
       expect(dailyReducer(undefined, action)).toStrictEqual(initialStateDaily);
-    });
-  });
-
-  describe(ActionTypeApi.DataRead, () => {
-    const response: InitialQuery[typeof page] = {
-      items: [
-        {
-          id: numericHash('some-id'),
-          date: '2020-04-20',
-          item: 'yes',
-          category: 'category one',
-          cost: 123,
-          shop: 'shop one',
-        },
-        {
-          id: numericHash('other-id'),
-          date: '2020-04-21',
-          item: 'no',
-          category: 'category two',
-          cost: 456,
-          shop: 'shop two',
-        },
-      ],
-    };
-
-    const action = dataRead({
-      ...testResponse,
-      [page]: response,
-    });
-
-    it('should insert rows into the state', () => {
-      expect.assertions(2);
-      const result = myListReducer(initialState, action);
-
-      expect(result.items).toStrictEqual([
-        expect.objectContaining({ id: numericHash('some-id'), item: 'yes' }),
-        expect.objectContaining({ id: numericHash('other-id'), item: 'no' }),
-      ]);
-      expect(result.__optimistic).toStrictEqual([undefined, undefined]);
-    });
-
-    it('should handle the case when the response data contain no items', () => {
-      expect.assertions(1);
-      expect(
-        myListReducer(
-          initialState,
-          dataRead({
-            ...testResponse,
-            [page]: {
-              items: [],
-            },
-          }),
-        ),
-      ).toStrictEqual(initialState);
-    });
-
-    describe('for daily lists', () => {
-      const actionRead = dataRead({
-        ...testResponse,
-        [pageDaily]: {
-          total: 335,
-          weekly: 122,
-          olderExists: true,
-          items: [
-            {
-              id: numericHash('some-id'),
-              date: '2019-05-03',
-              item: 'some-item',
-              category: 'some-category',
-              cost: 102,
-              shop: 'some-shop',
-            },
-          ],
-        },
-      });
-
-      it.each`
-        description                | prop        | value
-        ${'all-time total'}        | ${'total'}  | ${335}
-        ${'weekly moving average'} | ${'weekly'} | ${122}
-      `('should insert the $description value from the response', ({ prop, value }) => {
-        expect.assertions(1);
-        const result = dailyReducer(initialStateDaily, actionRead);
-
-        expect(result).toStrictEqual(
-          expect.objectContaining({
-            [prop]: value,
-          }),
-        );
-      });
     });
   });
 
@@ -860,7 +768,7 @@ describe('List reducer', () => {
   });
 
   describe(ListActionType.MoreReceived, () => {
-    const res: ListReadResponse = {
+    const res: RequiredNotNull<Omit<ListReadResponse, 'error'>> = {
       items: [
         {
           id: numericHash('id-1'),
@@ -874,6 +782,7 @@ describe('List reducer', () => {
       olderExists: true,
       total: 123456,
       weekly: 8765,
+      __typename: 'ListReadResponse',
     };
 
     const action = moreListDataReceived(pageDaily, res);
@@ -960,7 +869,7 @@ describe('List reducer', () => {
     });
 
     describe('if the olderExists value changed', () => {
-      const resEnd = {
+      const resEnd: ListReadResponse = {
         ...res,
         olderExists: false,
       };

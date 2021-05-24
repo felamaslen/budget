@@ -11,7 +11,6 @@ import {
 import { omitTypeName, sortByKey } from '~client/modules/data';
 import type {
   CashTotalNative,
-  GQL,
   Id,
   NetWorthEntryNative as Entry,
   NetWorthEntryRead,
@@ -23,6 +22,7 @@ import type {
   NetWorthCategory as Category,
   NetWorthSubcategory as Subcategory,
 } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 export type State = {
   categories: GQL<Category>[];

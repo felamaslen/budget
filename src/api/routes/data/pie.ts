@@ -4,24 +4,24 @@ import { DatabaseTransactionConnectionType, sql } from 'slonik';
 
 import config from '~api/config';
 import { authDbRoute } from '~api/middleware/request';
-import { PageListStandard as Page } from '~api/types';
+import { PageListStandard } from '~api/types';
 
 type PieCol = [string, string];
 
-export function getPieCols(category: Page): PieCol[] | null {
-  if ([Page.Food, Page.General].includes(category)) {
+export function getPieCols(category: PageListStandard): PieCol[] | null {
+  if ([PageListStandard.Food, PageListStandard.General].includes(category)) {
     return [
       ['shop', 'Shop cost'],
       ['category', 'Category cost'],
     ];
   }
-  if (category === Page.Social) {
+  if (category === PageListStandard.Social) {
     return [
       ['shop', 'Shop cost'],
       ['category', 'Society cost'],
     ];
   }
-  if (category === Page.Holiday) {
+  if (category === PageListStandard.Holiday) {
     return [
       ['shop', 'Shop cost'],
       ['category', 'Holiday cost'],
@@ -40,15 +40,15 @@ async function getPieQuery(
   db: DatabaseTransactionConnectionType,
   uid: number,
   pieCol: PieCol,
-  category: Page,
+  page: PageListStandard,
 ): Promise<readonly PieRow[]> {
   const [column] = pieCol;
   const limit = config.data.pie.detail;
 
   const results = await db.query<PieRow>(sql`
-  SELECT ${sql.identifier([column])} AS col, SUM(cost) AS cost
-  FROM ${sql.identifier([category])}
-  WHERE ${sql.join([sql`cost > 0`, sql`uid = ${uid}`], sql` AND `)}
+  SELECT ${sql.identifier([column])} AS col, SUM(value) AS cost
+  FROM list_standard
+  WHERE page = ${page} AND uid = ${uid} AND value > 0
   GROUP BY col
   ORDER BY cost DESC
   LIMIT ${limit}
@@ -109,7 +109,7 @@ async function getPieData(
   db: DatabaseTransactionConnectionType,
   uid: number,
   pieCols: PieCol[],
-  category: Page,
+  category: PageListStandard,
 ): Promise<Segment[]> {
   const threshold = config.data.pie.tolerance / (2 * Math.PI);
 
@@ -124,7 +124,7 @@ async function getPieData(
 
 const routeGet = authDbRoute(async (db, req, res) => {
   const { category } = req.params;
-  const pieCols = getPieCols(category as Page);
+  const pieCols = getPieCols(category as PageListStandard);
   if (!pieCols) {
     throw boom.badRequest('unknown category');
   }
@@ -132,7 +132,7 @@ const routeGet = authDbRoute(async (db, req, res) => {
     throw boom.unauthorized();
   }
 
-  const list = await getPieData(db, req.user.uid, pieCols, category as Page);
+  const list = await getPieData(db, req.user.uid, pieCols, category as PageListStandard);
   res.json({ data: { list } });
 });
 

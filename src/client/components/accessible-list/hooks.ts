@@ -96,22 +96,17 @@ export function useMoreItems(page: PageListStandard): () => Promise<void> {
   const offset = useSelector(getListOffset(page));
 
   const [{ data, fetching, stale }, fetchMore] = gql.useMoreListDataStandardQuery({
-    pause: true,
+    pause: offset > 0,
     variables: {
       page,
-      offset: (offset ?? 0) + 1,
+      offset,
       limit: PAGE_LIST_LIMIT,
     },
   });
 
   useEffect(() => {
-    if (data?.readListStandard?.items && !fetching && !stale) {
-      dispatch(
-        moreListDataReceived(page, {
-          items: data.readListStandard.items,
-          olderExists: data.readListStandard.olderExists,
-        }),
-      );
+    if (data?.readListStandard && !fetching && !stale) {
+      dispatch(moreListDataReceived(page, data.readListStandard));
     }
   }, [page, dispatch, data, fetching, stale]);
 

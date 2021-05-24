@@ -3,13 +3,13 @@ import isSameDay from 'date-fns/isSameDay';
 
 import { GRAPH_SPEND_CATEGORIES } from '~client/constants/graph';
 import type {
-  GQL,
   LongTermOptions,
   OverviewGraphDate,
   OverviewGraphPartial,
   OverviewGraphRequired,
 } from '~client/types';
 import type { Monthly } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 export const spendingCategories = GRAPH_SPEND_CATEGORIES.map(({ name }) => name);
 

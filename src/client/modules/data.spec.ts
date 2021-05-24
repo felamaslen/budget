@@ -596,7 +596,7 @@ describe('data module', () => {
               drip: false,
             },
           ],
-          stockSplits: [{ date: '2020-04-03', ratio: 5 }],
+          stockSplits: [{ __typename: 'StockSplit', date: '2020-04-03', ratio: 5 }],
         }),
       ).toStrictEqual<FundNative>({
         id: 123,

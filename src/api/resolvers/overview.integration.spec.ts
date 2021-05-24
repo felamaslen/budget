@@ -31,9 +31,7 @@ describe('Overview resolver', () => {
         overview {
           startDate
           endDate
-          annualisedFundReturns
           monthly {
-            stocks
             investmentPurchases
             income
             bills
@@ -96,50 +94,10 @@ describe('Overview resolver', () => {
       expect(res?.initialCumulativeValues.spending).toBe(83 + 156 + 7619); // exclude house deposit of 12300000
     });
 
-    it('should return funds data', async () => {
-      expect.assertions(1);
-      const res = await setup();
-
-      // see src/api/seeds/test/test-data.ts
-      const aug2017ScrapedValue = Math.round(
-        123 * (89.095 + 894.134 - 883.229) + 100 * 0 + 50.97 * (1678.42 + 846.38),
-      );
-
-      expect(res?.monthly.stocks).toStrictEqual([
-        /* Mar-16 */ 0,
-        /* Apr-16 */ 0,
-        /* May-16 */ 0,
-        /* Jun-16 */ 0,
-        /* Jul-16 */ 0,
-        /* Aug-16 */ 0,
-        /* Sep-16 */ 0,
-        /* Oct-16 */ 0,
-        /* Nov-16 */ 0,
-        /* Dec-16 */ 0,
-        /* Jan-17 */ 0,
-        /* Feb-17 */ 0,
-        /* Mar-17 */ 0,
-        /* Apr-17 */ 0,
-        /* May-17 */ 0,
-        /* Jun-17 */ 0,
-        /* Jul-17 */ 0,
-        /* Aug-17 */ aug2017ScrapedValue,
-        /* Sep-17 */ 0,
-        /* Oct-17 */ 0,
-        /* Nov-17 */ 0,
-        /* Dec-17 */ 0,
-        /* Jan-18 */ 0,
-        /* Feb-18 */ 0,
-        /* Mar-18 */ 0,
-        /* Apr-18 */ 0,
-      ]);
-    });
-
     it.each`
-      description                  | prop                       | value
-      ${'start date'}              | ${'startDate'}             | ${'2016-03-31'}
-      ${'end date'}                | ${'endDate'}               | ${'2019-04-30'}
-      ${'annualised fund returns'} | ${'annualisedFundReturns'} | ${0.07}
+      description     | prop           | value
+      ${'start date'} | ${'startDate'} | ${'2016-03-31'}
+      ${'end date'}   | ${'endDate'}   | ${'2019-04-30'}
     `('should return the $description', async ({ prop, value }) => {
       expect.assertions(1);
       const res = await setup();

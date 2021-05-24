@@ -1,5 +1,6 @@
+import { compose } from '@typed/compose';
 import { flatten } from 'array-flatten';
-import groupBy from 'lodash/groupBy';
+import { groupBy } from 'lodash';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getDisplayedMonths } from './overview';
@@ -9,12 +10,13 @@ import config from '~api/config';
 import { makeCrudController } from '~api/modules/crud';
 import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
 import {
-  countRows,
-  getListCostSummary,
+  countStandardRows,
   insertListItems,
   selectListItems,
   selectListTotalCost,
   selectListWeeklyCosts,
+  selectSinglePageListSummary,
+  StandardListRow,
 } from '~api/queries';
 import {
   CrudResponseCreate,
@@ -28,18 +30,15 @@ import {
   MutationUpdateListItemArgs,
   PageListCost,
   QueryReadListArgs,
-  RawDate,
-  TypeMap,
-  QueryReadListTotalsArgs,
-  ListTotalsResponse,
   ListItemStandardInput,
   Create,
   PageListStandard,
   MutationCreateReceiptArgs,
-  ReceiptInput,
   ReceiptCreated,
   ReceiptItem,
+  ListReadResponse,
 } from '~api/types';
+import type { RawDate } from '~shared/types';
 
 const hasDate = <I extends Record<string, unknown>>(
   item: I | (I & { date: Date }),
@@ -54,27 +53,38 @@ function withFormattedDate<I extends Record<string, unknown>>(item: I): Record<s
   return item;
 }
 
+const costToValue = <I extends { cost: number }>({
+  cost,
+  ...input
+}: I): Omit<I, 'cost'> & { value: number } => ({ ...input, value: cost });
+
+const valueToCost = <I extends { value: number }>({
+  value,
+  ...input
+}: I): Omit<I, 'value'> & { cost: number } => ({ ...input, cost: value });
+
 export async function getOlderExists(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
+  page: PageListCost,
   limit: number,
   offset: number,
 ): Promise<boolean> {
-  const numRows = await countRows(db, uid, table);
+  const numRows = await countStandardRows(db, uid, page);
   return numRows > limit * (offset + 1);
 }
 
 export async function getWeeklyCost(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
+  page: PageListCost,
 ): Promise<number> {
-  const costs = await selectListWeeklyCosts(db, uid, table);
+  const rows = await selectListWeeklyCosts(db, uid, page);
   const decay = 0.7;
   return Math.round(
-    costs.reduce<number>(
-      (last, cost, index) => (index === 0 ? cost : decay * cost + (1 - decay) * last),
+    rows.reduce<number>(
+      (prev, { weekly: value }, index) =>
+        index === 0 ? value : decay * value + (1 - decay) * prev,
       0,
     ),
   );
@@ -83,13 +93,13 @@ export async function getWeeklyCost(
 export async function getListTotals(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListCost,
+  page: PageListCost,
 ): Promise<{ total: number; weekly: number }> {
-  const [total, weekly] = await Promise.all([
-    selectListTotalCost(db, uid, table),
-    getWeeklyCost(db, uid, table),
+  const [totals, weekly] = await Promise.all([
+    selectListTotalCost(db, uid, page),
+    getWeeklyCost(db, uid, page),
   ]);
-
+  const total = totals[0]?.total ?? 0;
   return { total, weekly };
 }
 
@@ -99,41 +109,29 @@ type PublishedProperties = {
   weekly: number;
 };
 
-async function getPublishedProperties(
+export async function getPublishedProperties(
   db: DatabaseTransactionConnectionType,
   uid: number,
   page: PageListStandard,
 ): Promise<PublishedProperties> {
   const [overviewCost, listTotals] = await Promise.all([
-    getListCostSummary(db, uid, getDisplayedMonths(new Date()), page),
+    selectSinglePageListSummary(db, uid, getDisplayedMonths(new Date()), page),
     getListTotals(db, uid, page),
   ]);
+
   return { overviewCost, ...listTotals };
 }
-
-const typeMapStandard: TypeMap<ListItemStandard> = {
-  date: 'date',
-  item: 'text',
-  cost: 'int4',
-  category: 'text',
-  shop: 'text',
-};
 
 export async function readList(
   db: DatabaseTransactionConnectionType,
   uid: number,
   args: QueryReadListArgs,
-): Promise<{
-  items: ListItemStandard[];
-  total: number;
-  weekly: number;
-  olderExists: boolean;
-}> {
+): Promise<ListReadResponse> {
   const limit = args.limit ?? config.data.listPageLimit;
   const offset = args.offset ?? 0;
 
   const [rows, { total, weekly }, olderExists] = await Promise.all([
-    selectListItems<ListItemStandard>(db, uid, args.page, typeMapStandard, limit, offset),
+    selectListItems(db, uid, args.page, limit, offset),
     getListTotals(db, uid, args.page),
     getOlderExists(db, uid, args.page, limit, offset),
   ]);
@@ -143,15 +141,23 @@ export async function readList(
   return { items, total, weekly, olderExists };
 }
 
-const baseController = makeCrudController<ListItemStandard>({
-  table: 'list_base_fake_table_name',
+const baseController = makeCrudController<StandardListRow, ListItemStandard>({
+  table: 'list_standard',
   item: 'List item',
-  jsonToDb: withFormattedDate,
+  jsonToDb: compose<Create<ListItemStandard>, Create<StandardListRow>, Create<StandardListRow>>(
+    withFormattedDate,
+    costToValue,
+  ),
+  dbToJson: valueToCost,
   withUid: true,
 });
 
-const processInput = (input: ListItemStandardInput): Create<ListItemStandard> => ({
+const processInput = (
+  page: PageListStandard,
+  input: ListItemStandardInput,
+): Create<ListItemStandard> & { page: PageListStandard } => ({
   ...input,
+  page,
   date: new Date(input.date),
 });
 
@@ -160,7 +166,7 @@ export async function createList(
   uid: number,
   args: MutationCreateListItemArgs,
 ): Promise<CrudResponseCreate> {
-  const { id, ...item } = await baseController.create(db, uid, processInput(args.input), args.page);
+  const { id, ...item } = await baseController.create(db, uid, processInput(args.page, args.input));
 
   await pubsub.publish(`${PubSubTopic.ListItemCreated}.${uid}`, {
     page: args.page,
@@ -177,23 +183,14 @@ export async function createReceipt(
   uid: number,
   args: MutationCreateReceiptArgs,
 ): Promise<ReceiptCreated> {
-  const groupedItemsDictionary = groupBy(args.items, 'page');
-
-  const groupedItems = Object.entries(groupedItemsDictionary) as [PageListCost, ReceiptInput[]][];
+  const groupedItems = Object.values(groupBy(args.items, 'page'));
 
   const groupResults = await Promise.all(
-    groupedItems.map(([table, group]) =>
-      insertListItems<ListItemStandardInput>(
+    groupedItems.map((group) =>
+      insertListItems(
         db,
         uid,
-        table,
-        {
-          date: 'date',
-          item: 'text',
-          cost: 'int4',
-          category: 'text',
-          shop: 'text',
-        },
+        group[0].page,
         group.map<RawDate<ListItemStandardInput, 'date'>>((item) => ({
           date: formatDate(args.date),
           item: item.item,
@@ -207,7 +204,7 @@ export async function createReceipt(
 
   const receipt: ReceiptCreated = {
     items: flatten(
-      groupedItems.map<ReceiptItem[]>(([, group], groupIndex) =>
+      groupedItems.map<ReceiptItem[]>((group, groupIndex) =>
         group.map<ReceiptItem>((input, index) => ({
           ...input,
           id: groupResults[groupIndex][index],
@@ -222,21 +219,12 @@ export async function createReceipt(
   return receipt;
 }
 
-export async function readListTotals(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  args: QueryReadListTotalsArgs,
-): Promise<ListTotalsResponse> {
-  const result = await getListTotals(db, uid, args.page);
-  return result;
-}
-
 export async function updateList(
   db: DatabaseTransactionConnectionType,
   uid: number,
   args: MutationUpdateListItemArgs,
 ): Promise<CrudResponseUpdate> {
-  await baseController.update(db, uid, args.id, processInput(args.input), args.page);
+  await baseController.update(db, uid, args.id, processInput(args.page, args.input));
 
   await pubsub.publish(`${PubSubTopic.ListItemUpdated}.${uid}`, {
     page: args.page,
@@ -253,7 +241,7 @@ export async function deleteList(
   uid: number,
   args: MutationDeleteListItemArgs,
 ): Promise<CrudResponseDelete> {
-  await baseController.delete(db, uid, args.id, args.page);
+  await baseController.delete(db, uid, args.id);
 
   await pubsub.publish(`${PubSubTopic.ListItemDeleted}.${uid}`, {
     page: args.page,

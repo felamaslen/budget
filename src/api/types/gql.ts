@@ -75,7 +75,6 @@ export type Query = {
   overviewPreview?: Maybe<OverviewPreview>;
   readFunds?: Maybe<ReadFundsResponse>;
   readList?: Maybe<ListReadResponse>;
-  readListTotals?: Maybe<ListTotalsResponse>;
   readNetWorthCategories?: Maybe<Array<NetWorthCategory>>;
   readNetWorthEntries?: Maybe<NetWorthEntryOverview>;
   readNetWorthSubcategories?: Maybe<Array<NetWorthSubcategory>>;
@@ -144,11 +143,6 @@ export type QueryReadListArgs = {
   page: PageListStandard;
   offset?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryReadListTotalsArgs = {
-  page: PageListStandard;
 };
 
 
@@ -601,8 +595,8 @@ export enum PageListStandard {
   Bills = 'bills',
   Food = 'food',
   General = 'general',
-  Holiday = 'holiday',
-  Social = 'social'
+  Social = 'social',
+  Holiday = 'holiday'
 }
 
 export type ListItem = {
@@ -885,7 +879,6 @@ export enum MonthlyCategory {
 }
 
 export type Monthly = {
-  stocks: Array<Scalars['Int']>;
   investmentPurchases: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
   bills: Array<Scalars['Int']>;
@@ -903,7 +896,6 @@ export type InitialCumulativeValues = {
 export type Overview = {
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  annualisedFundReturns: Scalars['Float'];
   monthly: Monthly;
   initialCumulativeValues: InitialCumulativeValues;
 };
@@ -1327,7 +1319,6 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   overviewPreview?: Resolver<Maybe<ResolversTypes['OverviewPreview']>, ParentType, ContextType, RequireFields<QueryOverviewPreviewArgs, 'category' | 'date'>>;
   readFunds?: Resolver<Maybe<ResolversTypes['ReadFundsResponse']>, ParentType, ContextType>;
   readList?: Resolver<Maybe<ResolversTypes['ListReadResponse']>, ParentType, ContextType, RequireFields<QueryReadListArgs, 'page'>>;
-  readListTotals?: Resolver<Maybe<ResolversTypes['ListTotalsResponse']>, ParentType, ContextType, RequireFields<QueryReadListTotalsArgs, 'page'>>;
   readNetWorthCategories?: Resolver<Maybe<Array<ResolversTypes['NetWorthCategory']>>, ParentType, ContextType, RequireFields<QueryReadNetWorthCategoriesArgs, never>>;
   readNetWorthEntries?: Resolver<Maybe<ResolversTypes['NetWorthEntryOverview']>, ParentType, ContextType>;
   readNetWorthSubcategories?: Resolver<Maybe<Array<ResolversTypes['NetWorthSubcategory']>>, ParentType, ContextType, RequireFields<QueryReadNetWorthSubcategoriesArgs, never>>;
@@ -1810,7 +1801,6 @@ export type NetWorthCashTotalResolvers<ContextType = Context, ParentType extends
 };
 
 export type MonthlyResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Monthly'] = ResolversParentTypes['Monthly']> = {
-  stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   investmentPurchases?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   income?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   bills?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -1830,7 +1820,6 @@ export type InitialCumulativeValuesResolvers<ContextType = Context, ParentType e
 export type OverviewResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Overview'] = ResolversParentTypes['Overview']> = {
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  annualisedFundReturns?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   monthly?: Resolver<ResolversTypes['Monthly'], ParentType, ContextType>;
   initialCumulativeValues?: Resolver<ResolversTypes['InitialCumulativeValues'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

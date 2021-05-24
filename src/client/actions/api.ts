@@ -1,5 +1,6 @@
-import type { GQL, GQLDeep, LocalAppConfig } from '~client/types';
+import type { LocalAppConfig } from '~client/types';
 import type { AppConfig, InitialQuery } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 export const enum ActionTypeApi {
   ConfigUpdatedFromApi = '@@api/CONFIG_UPDATED_FROM_API',
@@ -35,10 +36,10 @@ export const configUpdatedFromLocal = (
 
 export type ActionApiDataRead = {
   type: ActionTypeApi.DataRead;
-  res: GQLDeep<InitialQuery>;
+  res: GQL<InitialQuery>;
 };
 
-export const dataRead = (res: GQLDeep<InitialQuery>): ActionApiDataRead => ({
+export const dataRead = (res: GQL<InitialQuery>): ActionApiDataRead => ({
   type: ActionTypeApi.DataRead,
   res,
 });

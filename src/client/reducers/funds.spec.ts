@@ -13,9 +13,10 @@ import {
   todayPricesFetched,
 } from '~client/actions';
 import { testResponse, testState } from '~client/test-data';
-import type { FundQuotes, GQL } from '~client/types';
+import type { FundQuotes } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 import type { FundHistory, InitialQuery } from '~client/types/gql';
+import type { GQL } from '~shared/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',

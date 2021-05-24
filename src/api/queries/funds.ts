@@ -2,25 +2,18 @@ import { omit, uniqBy } from 'lodash';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import { formatDate } from '~api/controllers/shared';
-import {
-  Create,
-  Fund,
-  PageNonStandard as Page,
-  RawDate,
-  StockSplit,
-  TargetDelta,
-  Transaction,
-} from '~api/types';
+import { Create, Fund, PageNonStandard, StockSplit, TargetDelta, Transaction } from '~api/types';
+import type { RawDate } from '~shared/types';
 
 export type FundMain = Omit<Fund, 'transactions' | 'stockSplits'>;
 
 export async function insertFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  fund: RawDate<Create<FundMain>, 'date'>,
+  fund: Create<FundMain>,
 ): Promise<number> {
   const { rows } = await db.query<{ id: number }>(sql`
-  INSERT INTO ${sql.identifier([Page.Funds])} (uid, item, allocation_target)
+  INSERT INTO ${sql.identifier([PageNonStandard.Funds])} (uid, item, allocation_target)
   VALUES (${uid}, ${fund.item}, ${fund.allocationTarget ?? null})
   RETURNING id
   `);
@@ -31,10 +24,10 @@ export async function updateFund(
   db: DatabaseTransactionConnectionType,
   uid: number,
   id: number,
-  fund: RawDate<Create<FundMain>, 'date'>,
+  fund: Create<FundMain>,
 ): Promise<void> {
   await db.query(sql`
-  UPDATE ${sql.identifier([Page.Funds])}
+  UPDATE ${sql.identifier([PageNonStandard.Funds])}
   SET item = ${fund.item}, allocation_target = ${fund.allocationTarget ?? null}
   WHERE uid = ${uid} and id = ${id}
   `);

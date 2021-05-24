@@ -18,15 +18,13 @@ import { formatDate } from './shared';
 import config from '~api/config';
 import {
   getMonthlyTotalFundValues,
-  getListCostSummary,
   getTotalFundValue,
-  selectTransactions,
+  selectCategorisedListSummary,
+  selectInitialCumulativeList,
   selectOldNetWorth,
-  getSpendingSummary,
-  getMonthRangeUnion,
-  getInvestmentPurchasesSummary,
-  selectInitialCumulativeIncome,
-  selectInitialCumulativeSpending,
+  selectTransactions,
+  spendingPages,
+  standardListPages,
 } from '~api/queries';
 import {
   OldNetWorthRow,
@@ -92,37 +90,23 @@ async function getMonthlyCategoryValues(
   db: DatabaseTransactionConnectionType,
   uid: number,
   now: Date,
-): Promise<
-  Pick<
-    Overview['monthly'],
-    | 'stocks'
-    | 'investmentPurchases'
-    | 'income'
-    | 'bills'
-    | 'food'
-    | 'general'
-    | 'holiday'
-    | 'social'
-  >
-> {
-  const [
-    stocks,
-    investmentPurchases,
-    income,
-    bills,
-    food,
-    general,
-    holiday,
-    social,
-  ] = await Promise.all<number[]>([
-    getDisplayedFundValues(db, uid, now),
-    getInvestmentPurchasesSummary(db, uid, getDisplayedMonths(now, true)),
-    ...Object.values(PageListStandard).map((category) =>
-      getListCostSummary(db, uid, getDisplayedMonths(now, true), category),
-    ),
-  ]);
+): Promise<Pick<Overview['monthly'], 'investmentPurchases' | PageListStandard>> {
+  const categorisedRows = await selectCategorisedListSummary(
+    db,
+    uid,
+    getDisplayedMonths(now, true),
+  );
 
-  return { stocks, investmentPurchases, income, bills, food, general, holiday, social };
+  const investmentPurchases = categorisedRows.map((row) => row.investment_purchases);
+  const listCostSummary = standardListPages.reduce<Record<PageListStandard, number[]>>(
+    (last, page) => ({
+      ...last,
+      [page]: categorisedRows.map((row) => row[page]),
+    }),
+    {} as Record<PageListStandard, number[]>,
+  );
+
+  return { investmentPurchases, ...listCostSummary };
 }
 
 export const DEFAULT_INVESTMENT_RATE = 0.07;
@@ -218,23 +202,22 @@ export async function getOverviewData(
   const now = args.now ?? new Date();
   const startDate = formatISO(startOfMonth(getStartTime(now)), { representation: 'date' });
 
-  const [monthly, annualisedFundReturns, income, spending] = await Promise.all([
+  const [monthly, initialCumulativeValues] = await Promise.all([
     getMonthlyCategoryValues(db, uid, now),
-    getAnnualisedFundReturns(db, uid, now),
-    selectInitialCumulativeIncome(db, uid, startDate),
-    selectInitialCumulativeSpending(db, uid, startDate),
+    selectInitialCumulativeList(db, uid, startDate),
   ]);
   const startTime = getStartTime(now);
   const endTime = getEndTime(now);
 
   return {
-    annualisedFundReturns,
     startDate: endOfMonth(startTime),
     endDate: endOfMonth(endTime),
     monthly,
     initialCumulativeValues: {
-      income,
-      spending,
+      income: initialCumulativeValues.find((row) => row.page === PageListStandard.Income)?.sum ?? 0,
+      spending: initialCumulativeValues
+        .filter((row) => row.page !== PageListStandard.Income)
+        .reduce<number>((last, row) => last + row.sum, 0),
     },
   };
 }
@@ -249,13 +232,17 @@ export async function getOldOverviewData(
 
   const monthEnds = getOldMonths(now);
 
-  const [stocks, investmentPurchases, oldNetWorth, income, spending] = await Promise.all([
+  const [stocks, oldNetWorth, categorisedRows] = await Promise.all([
     getFundValues(db, uid, monthEnds),
-    getInvestmentPurchasesSummary(db, uid, monthEnds),
     selectOldNetWorth(db, uid, formatDate(startDate), formatDate(oldDateEnd)),
-    getListCostSummary(db, uid, monthEnds, PageListStandard.Income),
-    getSpendingSummary(db, uid, getMonthRangeUnion(monthEnds)),
+    selectCategorisedListSummary(db, uid, monthEnds),
   ]);
+
+  const income = categorisedRows.map((row) => row.income);
+  const spending = categorisedRows.map((row) =>
+    spendingPages.reduce<number>((sum, page) => sum + row[page], 0),
+  );
+  const investmentPurchases = categorisedRows.map((row) => row.investment_purchases);
 
   const mapNetWorth = (key: Exclude<keyof OldNetWorthRow, 'date'>): number[] =>
     monthEnds.map<number>(

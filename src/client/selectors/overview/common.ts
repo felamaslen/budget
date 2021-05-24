@@ -15,14 +15,10 @@ import type { State as CrudState } from '~client/reducers/crud';
 import type { State } from '~client/reducers/types';
 import { withoutDeleted } from '~client/selectors/crud';
 import { getRawItems } from '~client/selectors/list';
-import type {
-  ListItemStandardNative,
-  NativeDate,
-  OverviewGraphDate as GraphDate,
-  LongTermOptions,
-} from '~client/types';
+import type { ListItemStandardNative, OverviewGraphDate, LongTermOptions } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
 import type { ListItemStandard } from '~client/types/gql';
+import type { NativeDate } from '~shared/types';
 
 export { getAnnualisedFundReturns, getCashTotal, getEndDate, getStartDate } from './direct';
 
@@ -63,7 +59,7 @@ export const getGraphDates = moize(
 
       return Array(longTermOptions.rates.years ?? GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS)
         .fill(0)
-        .reduce<GraphDate[]>(
+        .reduce<OverviewGraphDate[]>(
           (last, _, index) => [
             ...last,
             {

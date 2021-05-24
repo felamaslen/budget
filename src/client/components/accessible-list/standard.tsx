@@ -27,13 +27,12 @@ import { useListCrudStandard } from '~client/hooks';
 import { formatCurrency, capitalise } from '~client/modules/format';
 import type {
   Create,
-  GQL,
   ListItemStandardNative as ListItemStandard,
   StandardInput,
   WithIds,
 } from '~client/types';
 import type { ListItemStandardInput, PageListStandard } from '~client/types/gql';
-import type { PickUnion } from '~shared/types';
+import type { GQL, PickUnion } from '~shared/types';
 
 export const standardFields: Fields<Create<ListItemStandard>> = {
   date: FormFieldDateInline,

@@ -13,7 +13,6 @@ export const overviewSchema = gql`
   }
 
   type Monthly {
-    stocks: [Int!]!
     investmentPurchases: [Int!]!
     income: [Int!]!
     bills: [Int!]!
@@ -31,7 +30,6 @@ export const overviewSchema = gql`
   type Overview {
     startDate: Date!
     endDate: Date!
-    annualisedFundReturns: Float!
     monthly: Monthly!
     initialCumulativeValues: InitialCumulativeValues!
   }

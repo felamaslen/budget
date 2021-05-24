@@ -92,6 +92,20 @@ describe('Bucket resolvers', () => {
             },
             {
               id: expect.any(Number),
+              page: AnalysisPage.Bills,
+              filterCategory: null,
+              expectedValue: 0,
+              actualValue: 72500 + 3902,
+            },
+            {
+              id: 0,
+              page: AnalysisPage.Food,
+              filterCategory: null,
+              expectedValue: 0,
+              actualValue: 19239 + 91923,
+            },
+            {
+              id: expect.any(Number),
               page: AnalysisPage.Food,
               filterCategory: 'Snacks',
               expectedValue: 3000,
@@ -103,6 +117,20 @@ describe('Bucket resolvers', () => {
               filterCategory: null,
               expectedValue: 20000,
               actualValue: 1231 + 9912, // exclude house purchases
+            },
+            {
+              id: 0,
+              page: AnalysisPage.Social,
+              filterCategory: null,
+              expectedValue: 0,
+              actualValue: 61923,
+            },
+            {
+              id: 0,
+              page: AnalysisPage.Holiday,
+              filterCategory: null,
+              expectedValue: 0,
+              actualValue: 11023 + 23991,
             },
           ].map(expect.objectContaining),
         ),
@@ -144,7 +172,9 @@ describe('Bucket resolvers', () => {
     describe('when a page has no data for the given month', () => {
       it('should still have a bucket', async () => {
         expect.assertions(1);
-        await getPool().query(sql`DELETE FROM social WHERE uid = ${app.uid}`);
+        await getPool().query(
+          sql`DELETE FROM list_standard WHERE page = ${'social'} AND uid = ${app.uid}`,
+        );
         await app.authGqlClient.clearStore();
         const res = await setup();
         expect(res?.buckets).toStrictEqual(

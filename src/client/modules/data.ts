@@ -10,19 +10,17 @@ import { toISO } from './format';
 import { Average } from '~client/constants';
 import type {
   Create,
-  Data as Line,
+  Data,
   FundInputNative,
-  GQL,
   Item,
-  NativeDate,
   NativeFund,
   NetWorthEntryNative,
-  RawDate,
   StockSplitNative,
-  TransactionNative as Transaction,
+  TransactionNative,
 } from '~client/types';
 import type { FundData, FundInput, ListItem, NetWorthEntryInput } from '~client/types/gql';
 import { calculateTransactionCost } from '~shared/funds';
+import type { GQLShallow, NativeDate, RawDate } from '~shared/types';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,7 +52,7 @@ export function getUnitRebase(stockSplits: StockSplitNative[], transactionDate: 
 }
 
 export function getTotalUnits(
-  transactions: Transaction[],
+  transactions: TransactionNative[],
   stockSplits: StockSplitNative[] = [],
 ): number {
   return roundTotal(
@@ -65,7 +63,7 @@ export function getTotalUnits(
   );
 }
 
-export const getTotalCost = (transactions: Transaction[]): number =>
+export const getTotalCost = (transactions: TransactionNative[]): number =>
   roundTotal(
     transactions.reduce<number>(
       (last, transaction) => last + calculateTransactionCost(transaction),
@@ -73,7 +71,7 @@ export const getTotalCost = (transactions: Transaction[]): number =>
     ),
   );
 
-export const isSold = (transactionsList: Transaction[]): boolean =>
+export const isSold = (transactionsList: TransactionNative[]): boolean =>
   getTotalUnits(transactionsList) === 0;
 
 export const partialModification = <T>(items: T[], index: number, delta: Partial<T>): T[] =>
@@ -147,7 +145,7 @@ export function exponentialRegression(
   return { slope, intercept, logValues, points };
 }
 
-export const limitTimeSeriesLength = (timeSeries: Line, limit: number): Line =>
+export const limitTimeSeriesLength = (timeSeries: Data, limit: number): Data =>
   new Array(timeSeries.length).fill(0).reduce((last) => {
     if (last.length <= limit) {
       return last;
@@ -253,7 +251,7 @@ export const withRawDateTime = <K extends string, T extends Record<K, Date>>(...
 export const omitTypeName = <T extends Record<string, unknown>>(item: T): Omit<T, '__typename'> =>
   omit(item, '__typename');
 
-export const toNativeFund = <F extends GQL<FundData>>(input: F): NativeFund<F> => ({
+export const toNativeFund = <F extends GQLShallow<FundData>>(input: F): NativeFund<F> => ({
   ...omitTypeName(input),
   transactions: input.transactions.map(compose(omitTypeName, withNativeDate('date'))),
   stockSplits: input.stockSplits.map(compose(omitTypeName, withNativeDate('date'))),

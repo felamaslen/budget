@@ -14,26 +14,27 @@ export type PreviewRow = {
 export async function selectPreviewRowsStandard(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  table: PageListStandard,
+  page: PageListStandard,
   startDate: Date,
   endDate: Date,
 ): Promise<readonly PreviewRow[]> {
   const result = await db.query<PreviewRow>(sql`
   SELECT date, SUM(cost) AS value
-  FROM ${sql.identifier([table])}
+  FROM list_standard
   WHERE ${sql.join(
     [
       sql`uid = ${uid}`,
+      sql`page = ${page}`,
       sql`date >= ${format(startDate, 'yyyy-MM-dd')}`,
       sql`date <= ${format(endDate, 'yyyy-MM-dd')}`,
     ],
     sql` AND `,
   )}
   ${
-    table === PageListStandard.General
-      ? sql`AND category NOT IN (${sql.join(
+    page === PageListStandard.General
+      ? sql`AND category != ALL(${sql.array(
           config.data.overview.investmentPurchaseCategories,
-          sql`, `,
+          'text',
         )})`
       : sql``
   }

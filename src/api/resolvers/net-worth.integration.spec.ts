@@ -37,12 +37,10 @@ import {
   Query,
   QueryReadNetWorthCategoriesArgs,
   QueryReadNetWorthSubcategoriesArgs,
-  RawDate,
-  RawDateDeep,
   SubcategoryRow,
   ValueRowSelect,
 } from '~api/types';
-import { RequiredNotNull } from '~shared/types';
+import type { RawDate, RawDateDeep, RequiredNotNull } from '~shared/types';
 
 describe('Net worth resolver', () => {
   let app: App;
