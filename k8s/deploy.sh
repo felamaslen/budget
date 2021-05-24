@@ -17,4 +17,6 @@ kubectl -n=$namespace apply -f ./manifest_with_image.yml
 
 rm -f manifest_with_image.yml
 
+kubectl -n=$namespace rollout status deploy/budget
+
 exit 0

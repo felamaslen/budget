@@ -20,6 +20,7 @@ metadata:
     app: budget
 spec:
   replicas: 1
+  progressDeadlineSeconds: 30
   selector:
     matchLabels:
       app: budget
@@ -61,7 +62,7 @@ spec:
           resources:
             requests:
               memory: '256Mi'
-              cpu: '1'
+              cpu: '0.5'
             limits:
               memory: '1Gi'
               cpu: '1'
