@@ -6,3 +6,11 @@ export type BucketState = {
   buckets: Bucket[];
   investmentBucket: InvestmentBucket;
 };
+
+export type ViewOption = {
+  numMonthsInView: number;
+  monthOffset?: number;
+  renderTitle?: (startDate: Date, endDate: Date) => string;
+};
+
+export type ViewOptionKey = 'month' | 'twoMonth' | 'quarter' | 'year' | 'financialYear';

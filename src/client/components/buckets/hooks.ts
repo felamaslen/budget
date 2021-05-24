@@ -14,14 +14,18 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } f
 import { useSelector } from 'react-redux';
 import type { CombinedError } from 'urql';
 
-import type { BucketState, SkipDate } from './types';
+import type { BucketState, SkipDate, ViewOption } from './types';
 
 import { useUpsertBucketMutation, useSetInvestmentBucketMutation } from '~client/hooks/gql';
 import { formatCurrency } from '~client/modules/format';
 import { getInvestmentsBetweenDates } from '~client/selectors';
 import { AnalysisPage, Bucket, InvestmentBucket, useListBucketsQuery } from '~client/types/gql';
 
-function getTitle(startDate: Date, endDate: Date, numMonthsInView: number): string {
+function getTitle(startDate: Date, endDate: Date, viewOption: ViewOption): string {
+  const { numMonthsInView, renderTitle } = viewOption;
+  if (renderTitle) {
+    return renderTitle(startDate, endDate);
+  }
   if (numMonthsInView >= 12) {
     return formatDate(startDate, 'yyyy');
   }
@@ -31,9 +35,10 @@ function getTitle(startDate: Date, endDate: Date, numMonthsInView: number): stri
   return formatDate(startDate, 'MMMM yyyy');
 }
 
-function getStartDate(date: Date, numMonthsInView: number): Date {
+function getStartDate(date: Date, viewOption: ViewOption): Date {
+  const { numMonthsInView, monthOffset = 0 } = viewOption;
   if (numMonthsInView >= 12) {
-    return startOfYear(date);
+    return addMonths(startOfYear(date), monthOffset);
   }
   if (numMonthsInView > 1) {
     return startOfMonth(
@@ -47,7 +52,7 @@ const normaliseValue = (value: number, numMonthsInView: number): number =>
   Math.max(0, Math.round(value / numMonthsInView));
 
 export function useDate(
-  numMonthsInView: number,
+  viewOption: ViewOption,
 ): {
   startDate: Date;
   startDateString: string;
@@ -56,20 +61,21 @@ export function useDate(
   description: string;
   skipDate: SkipDate;
 } {
-  const [date, setDate] = useState<Date>(getStartDate(new Date(), numMonthsInView));
+  const [date, setDate] = useState<Date>(getStartDate(new Date(), viewOption));
   useEffect(() => {
-    setDate(getStartDate(new Date(), numMonthsInView));
-  }, [numMonthsInView]);
+    setDate(getStartDate(new Date(), viewOption));
+  }, [viewOption]);
 
   const skipDate = useCallback(
-    (direction: -1 | 1) => setDate((last) => addMonths(last, direction * numMonthsInView)),
-    [numMonthsInView],
+    (direction: -1 | 1) =>
+      setDate((last) => addMonths(last, direction * viewOption.numMonthsInView)),
+    [viewOption.numMonthsInView],
   );
 
   const startDate = useMemo(() => startOfMonth(date), [date]);
-  const endDate = useMemo(() => endOfMonth(addMonths(date, numMonthsInView - 1)), [
+  const endDate = useMemo(() => endOfMonth(addMonths(date, viewOption.numMonthsInView - 1)), [
     date,
-    numMonthsInView,
+    viewOption.numMonthsInView,
   ]);
 
   return {
@@ -77,7 +83,7 @@ export function useDate(
     startDateString: formatISO(startDate, { representation: 'date' }),
     endDate,
     endDateString: formatISO(endDate, { representation: 'date' }),
-    description: getTitle(startDate, endDate, numMonthsInView),
+    description: getTitle(startDate, endDate, viewOption),
     skipDate,
   };
 }
