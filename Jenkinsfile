@@ -47,8 +47,8 @@ node {
 
     stage('Deploy') {
       if (env.BRANCH_NAME == "master") {
-        sh './k8s/deploy.sh'
         sh './k8s/migrate.sh'
+        sh './k8s/deploy.sh'
       }
     }
   }
