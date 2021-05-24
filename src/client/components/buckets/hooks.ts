@@ -19,7 +19,7 @@ import type { BucketState, SkipDate, ViewOption } from './types';
 import { useUpsertBucketMutation, useSetInvestmentBucketMutation } from '~client/hooks/gql';
 import { formatCurrency } from '~client/modules/format';
 import { getInvestmentsBetweenDates } from '~client/selectors';
-import { AnalysisPage, Bucket, InvestmentBucket, useListBucketsQuery } from '~client/types/gql';
+import { AnalysisPage, Bucket, useListBucketsQuery } from '~client/types/gql';
 
 function getTitle(startDate: Date, endDate: Date, viewOption: ViewOption): string {
   const { numMonthsInView, renderTitle } = viewOption;
@@ -90,7 +90,7 @@ export function useDate(
 
 const initialBucketState: BucketState = {
   buckets: [],
-  investmentBucket: { value: 0 },
+  investmentBucket: { expectedValue: 0, purchaseValue: 0 },
 };
 
 export function moveBucketRemainderToCatchAll(buckets: Bucket[]): Bucket[] {
@@ -153,8 +153,11 @@ export function useBuckets(
               moveBucketRemainderToCatchAll,
             )(data.listBuckets.buckets)
           : last.buckets,
-        investmentBucket: data?.getInvestmentBucket
-          ? { ...data.getInvestmentBucket, value: data.getInvestmentBucket.value * numMonthsInView }
+        investmentBucket: data?.listBuckets?.investmentBucket
+          ? {
+              ...data.listBuckets.investmentBucket,
+              expectedValue: data.listBuckets.investmentBucket.expectedValue * numMonthsInView,
+            }
           : last.investmentBucket,
       }));
     }
@@ -206,16 +209,17 @@ export function useBucketsMutation(
 export function useInvestmentBucketMutation(
   setBucketState: React.Dispatch<React.SetStateAction<BucketState>>,
   numMonthsInView: number,
-): (investmentBucket: InvestmentBucket) => void {
+): (expectedValue: number) => void {
   const [mutationResult, runMutation] = useSetInvestmentBucketMutation();
   useEffect(() => {
     if (!mutationResult.fetching && mutationResult.data?.setInvestmentBucket) {
       setBucketState((last) => ({
         ...last,
-        investmentBucket: mutationResult.data?.setInvestmentBucket?.bucket
+        investmentBucket: mutationResult.data?.setInvestmentBucket
           ? {
-              ...mutationResult.data.setInvestmentBucket.bucket,
-              value: mutationResult.data.setInvestmentBucket.bucket.value * numMonthsInView,
+              ...last.investmentBucket,
+              expectedValue:
+                (mutationResult.data.setInvestmentBucket.expectedValue ?? 0) * numMonthsInView,
             }
           : last.investmentBucket,
       }));
@@ -223,8 +227,8 @@ export function useInvestmentBucketMutation(
   }, [setBucketState, numMonthsInView, mutationResult.fetching, mutationResult.data]);
 
   const setInvestmentBucket = useCallback(
-    (bucket: InvestmentBucket) => {
-      runMutation({ ...bucket, value: normaliseValue(bucket.value, numMonthsInView) });
+    (expectedValue: number) => {
+      runMutation({ value: normaliseValue(expectedValue, numMonthsInView) });
     },
     [runMutation, numMonthsInView],
   );
@@ -243,10 +247,11 @@ export type ActualValues = ExpectedValues;
 export function useActualValues(
   startDate: Date,
   endDate: Date,
-  buckets: BucketState['buckets'],
+  { buckets, investmentBucket }: BucketState,
 ): ActualValues {
-  const actualInvested = useSelector(getInvestmentsBetweenDates(startDate, endDate));
-  const actualInvestedCapped = Math.max(0, actualInvested);
+  const actualStockInvested = useSelector(getInvestmentsBetweenDates(startDate, endDate));
+  const actualInvestmentPurchases = investmentBucket.purchaseValue;
+  const actualInvestedCapped = Math.max(0, actualStockInvested + actualInvestmentPurchases);
 
   return useMemo(
     () =>
@@ -274,7 +279,7 @@ export function useExpectedValues({ buckets, investmentBucket }: BucketState): E
           ...last,
           [page]: getTargetSumForPage(buckets, page),
         }),
-        { funds: investmentBucket.value } as ExpectedValues,
+        { funds: investmentBucket.expectedValue } as ExpectedValues,
       ),
     [buckets, investmentBucket],
   );

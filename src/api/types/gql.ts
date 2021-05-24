@@ -67,7 +67,6 @@ export type Query = {
   exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
-  getInvestmentBucket?: Maybe<InvestmentBucket>;
   listBuckets?: Maybe<ListBucketsResponse>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   overview?: Maybe<Overview>;
@@ -197,13 +196,15 @@ export type UpsertBucketResponse = {
   error?: Maybe<Scalars['String']>;
 };
 
-export type ListBucketsResponse = {
-  buckets?: Maybe<Array<Bucket>>;
-  error?: Maybe<Scalars['String']>;
+export type InvestmentBucket = {
+  expectedValue: Scalars['NonNegativeInt'];
+  purchaseValue: Scalars['NonNegativeInt'];
 };
 
-export type InvestmentBucket = {
-  value: Scalars['NonNegativeInt'];
+export type ListBucketsResponse = {
+  error?: Maybe<Scalars['String']>;
+  buckets?: Maybe<Array<Bucket>>;
+  investmentBucket?: Maybe<InvestmentBucket>;
 };
 
 export type InvestmentBucketInput = {
@@ -211,7 +212,7 @@ export type InvestmentBucketInput = {
 };
 
 export type SetInvestmentBucketResponse = {
-  bucket?: Maybe<InvestmentBucket>;
+  expectedValue?: Maybe<Scalars['NonNegativeInt']>;
   error?: Maybe<Scalars['String']>;
 };
 
@@ -1069,8 +1070,8 @@ export type ResolversTypes = {
   Bucket: ResolverTypeWrapper<Bucket>;
   BucketInput: BucketInput;
   UpsertBucketResponse: ResolverTypeWrapper<UpsertBucketResponse>;
-  ListBucketsResponse: ResolverTypeWrapper<ListBucketsResponse>;
   InvestmentBucket: ResolverTypeWrapper<InvestmentBucket>;
+  ListBucketsResponse: ResolverTypeWrapper<ListBucketsResponse>;
   InvestmentBucketInput: ResolverTypeWrapper<InvestmentBucketInput>;
   SetInvestmentBucketResponse: ResolverTypeWrapper<SetInvestmentBucketResponse>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -1183,8 +1184,8 @@ export type ResolversParentTypes = {
   Bucket: Bucket;
   BucketInput: BucketInput;
   UpsertBucketResponse: UpsertBucketResponse;
-  ListBucketsResponse: ListBucketsResponse;
   InvestmentBucket: InvestmentBucket;
+  ListBucketsResponse: ListBucketsResponse;
   InvestmentBucketInput: InvestmentBucketInput;
   SetInvestmentBucketResponse: SetInvestmentBucketResponse;
   Mutation: {};
@@ -1311,7 +1312,6 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   exchangeRates?: Resolver<Maybe<ResolversTypes['ExchangeRatesResponse']>, ParentType, ContextType, RequireFields<QueryExchangeRatesArgs, 'base'>>;
   fundHistory?: Resolver<Maybe<ResolversTypes['FundHistory']>, ParentType, ContextType, RequireFields<QueryFundHistoryArgs, never>>;
   fundHistoryIndividual?: Resolver<Maybe<ResolversTypes['FundHistoryIndividual']>, ParentType, ContextType, RequireFields<QueryFundHistoryIndividualArgs, 'id'>>;
-  getInvestmentBucket?: Resolver<Maybe<ResolversTypes['InvestmentBucket']>, ParentType, ContextType>;
   listBuckets?: Resolver<Maybe<ResolversTypes['ListBucketsResponse']>, ParentType, ContextType, RequireFields<QueryListBucketsArgs, 'startDate' | 'endDate'>>;
   netWorthCashTotal?: Resolver<Maybe<ResolversTypes['NetWorthCashTotal']>, ParentType, ContextType>;
   overview?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType, RequireFields<QueryOverviewArgs, never>>;
@@ -1344,14 +1344,16 @@ export type UpsertBucketResponseResolvers<ContextType = Context, ParentType exte
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type ListBucketsResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ListBucketsResponse'] = ResolversParentTypes['ListBucketsResponse']> = {
-  buckets?: Resolver<Maybe<Array<ResolversTypes['Bucket']>>, ParentType, ContextType>;
-  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+export type InvestmentBucketResolvers<ContextType = Context, ParentType extends ResolversParentTypes['InvestmentBucket'] = ResolversParentTypes['InvestmentBucket']> = {
+  expectedValue?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
+  purchaseValue?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type InvestmentBucketResolvers<ContextType = Context, ParentType extends ResolversParentTypes['InvestmentBucket'] = ResolversParentTypes['InvestmentBucket']> = {
-  value?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
+export type ListBucketsResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['ListBucketsResponse'] = ResolversParentTypes['ListBucketsResponse']> = {
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  buckets?: Resolver<Maybe<Array<ResolversTypes['Bucket']>>, ParentType, ContextType>;
+  investmentBucket?: Resolver<Maybe<ResolversTypes['InvestmentBucket']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1361,7 +1363,7 @@ export type InvestmentBucketInputResolvers<ContextType = Context, ParentType ext
 };
 
 export type SetInvestmentBucketResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['SetInvestmentBucketResponse'] = ResolversParentTypes['SetInvestmentBucketResponse']> = {
-  bucket?: Resolver<Maybe<ResolversTypes['InvestmentBucket']>, ParentType, ContextType>;
+  expectedValue?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1898,8 +1900,8 @@ export type Resolvers<ContextType = Context> = {
   Query?: QueryResolvers<ContextType>;
   Bucket?: BucketResolvers<ContextType>;
   UpsertBucketResponse?: UpsertBucketResponseResolvers<ContextType>;
-  ListBucketsResponse?: ListBucketsResponseResolvers<ContextType>;
   InvestmentBucket?: InvestmentBucketResolvers<ContextType>;
+  ListBucketsResponse?: ListBucketsResponseResolvers<ContextType>;
   InvestmentBucketInput?: InvestmentBucketInputResolvers<ContextType>;
   SetInvestmentBucketResponse?: SetInvestmentBucketResponseResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;

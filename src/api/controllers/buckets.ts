@@ -32,14 +32,12 @@ export async function listBuckets(
   uid: number,
   args: QueryListBucketsArgs,
 ): Promise<ListBucketsResponse> {
-  const startDate = validateDate(args.startDate);
-  const endDate = validateDate(args.endDate);
-  const bucketsRows = await selectBucketsWithCurrentValue(
-    db,
-    uid,
-    formatISO(startDate, { representation: 'date' }),
-    formatISO(endDate, { representation: 'date' }),
-  );
+  const startDate = formatISO(validateDate(args.startDate), { representation: 'date' });
+  const endDate = formatISO(validateDate(args.endDate), { representation: 'date' });
+  const [bucketsRows, investmentBucketRows] = await Promise.all([
+    selectBucketsWithCurrentValue(db, uid, startDate, endDate),
+    selectInvestmentBucket(db, uid, startDate, endDate),
+  ]);
   const buckets = bucketsRows.map<Bucket>((row) => ({
     id: row.id,
     page: row.page,
@@ -47,10 +45,15 @@ export async function listBuckets(
     expectedValue: row.value ?? 0,
     actualValue: row.value_actual,
   }));
+  const investmentBucket: InvestmentBucket = {
+    expectedValue: investmentBucketRows[0]?.expected_value ?? 0,
+    purchaseValue: investmentBucketRows[0]?.purchase_value ?? 0,
+  };
 
   return {
     error: null,
     buckets,
+    investmentBucket,
   };
 }
 
@@ -69,19 +72,11 @@ export async function upsertBucket(
   return listBuckets(db, uid, { startDate, endDate });
 }
 
-export async function getInvestmentBucket(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-): Promise<InvestmentBucket> {
-  const value = await selectInvestmentBucket(db, uid);
-  return { value: value ?? 0 };
-}
-
 export async function setInvestmentBucket(
   db: DatabaseTransactionConnectionType,
   uid: number,
   { value }: MutationSetInvestmentBucketArgs,
 ): Promise<SetInvestmentBucketResponse> {
   const updatedValue = await upsertInvestmentBucket(db, uid, value);
-  return { error: null, bucket: { value: updatedValue } };
+  return { error: null, expectedValue: updatedValue };
 }

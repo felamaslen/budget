@@ -20,13 +20,15 @@ export const bucketsSchema = gql`
     error: String
   }
 
-  type ListBucketsResponse {
-    buckets: [Bucket!]
-    error: String
+  type InvestmentBucket {
+    expectedValue: NonNegativeInt!
+    purchaseValue: NonNegativeInt!
   }
 
-  type InvestmentBucket {
-    value: NonNegativeInt!
+  type ListBucketsResponse {
+    error: String
+    buckets: [Bucket!]
+    investmentBucket: InvestmentBucket
   }
 
   type InvestmentBucketInput {
@@ -34,13 +36,12 @@ export const bucketsSchema = gql`
   }
 
   type SetInvestmentBucketResponse {
-    bucket: InvestmentBucket
+    expectedValue: NonNegativeInt
     error: String
   }
 
   extend type Query {
     listBuckets(startDate: String!, endDate: String!): ListBucketsResponse
-    getInvestmentBucket: InvestmentBucket
   }
 
   extend type Mutation {

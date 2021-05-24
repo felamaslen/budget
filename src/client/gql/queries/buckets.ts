@@ -10,10 +10,11 @@ export const ListBuckets = gql`
         expectedValue
         actualValue
       }
+      investmentBucket {
+        expectedValue
+        purchaseValue
+      }
       error
-    }
-    getInvestmentBucket {
-      value
     }
   }
 `;

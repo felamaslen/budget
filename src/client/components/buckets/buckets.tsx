@@ -71,7 +71,7 @@ export const Buckets: React.FC<RouteComponentProps> = ({ history }) => {
     viewOption.numMonthsInView,
   );
 
-  const actualValues = useActualValues(startDate, endDate, bucketState.buckets);
+  const actualValues = useActualValues(startDate, endDate, bucketState);
   const expectedValues = useExpectedValues(bucketState);
 
   const [healthy, healthStatus] = useHealthStatus(expectedValues, actualValues);

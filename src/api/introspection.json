@@ -598,18 +598,6 @@
             "deprecationReason": null
           },
           {
-            "name": "getInvestmentBucket",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "InvestmentBucket",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "listBuckets",
             "description": null,
             "args": [
@@ -1251,9 +1239,64 @@
       },
       {
         "kind": "OBJECT",
+        "name": "InvestmentBucket",
+        "description": null,
+        "fields": [
+          {
+            "name": "expectedValue",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "NonNegativeInt",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "purchaseValue",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "NonNegativeInt",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "ListBucketsResponse",
         "description": null,
         "fields": [
+          {
+            "name": "error",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "buckets",
             "description": null,
@@ -1275,40 +1318,13 @@
             "deprecationReason": null
           },
           {
-            "name": "error",
+            "name": "investmentBucket",
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
+              "kind": "OBJECT",
+              "name": "InvestmentBucket",
               "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "InvestmentBucket",
-        "description": null,
-        "fields": [
-          {
-            "name": "value",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "NonNegativeInt",
-                "ofType": null
-              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1352,12 +1368,12 @@
         "description": null,
         "fields": [
           {
-            "name": "bucket",
+            "name": "expectedValue",
             "description": null,
             "args": [],
             "type": {
-              "kind": "OBJECT",
-              "name": "InvestmentBucket",
+              "kind": "SCALAR",
+              "name": "NonNegativeInt",
               "ofType": null
             },
             "isDeprecated": false,

@@ -79,10 +79,10 @@ export const BucketGroupInvestment: React.FC<BucketGroupInvestmentProps> = ({
         actualValue={actualValue}
         bucket={bucket}
         setInvestmentBucket={setInvestmentBucket}
-        healthy={actualValue >= bucket.value}
+        healthy={actualValue >= bucket.expectedValue}
         healthText={
-          actualValue < bucket.value
-            ? `Consider investing ${formatCurrency(bucket.value - actualValue, {
+          actualValue < bucket.expectedValue
+            ? `Consider investing ${formatCurrency(bucket.expectedValue - actualValue, {
                 abbreviate: true,
               })} more`
             : null

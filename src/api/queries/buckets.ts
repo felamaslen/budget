@@ -2,7 +2,7 @@ import { DatabaseTransactionConnectionType, sql } from 'slonik';
 
 import { standardListPages } from './list';
 import config from '~api/config';
-import { AnalysisPage, BucketInput } from '~api/types';
+import { AnalysisPage, BucketInput, PageListStandard } from '~api/types';
 
 export type BucketWithCurrentValueRow = {
   id: number;
@@ -142,15 +142,43 @@ export async function updateBucket(
   `);
 }
 
+export type InvestmentBucketRow = {
+  expected_value: number;
+  purchase_value: number;
+};
+
 export async function selectInvestmentBucket(
   db: DatabaseTransactionConnectionType,
   uid: number,
-): Promise<number | undefined> {
-  const { rows } = await db.query<{ value: number }>(sql`
-  SELECT value FROM bucket_investment
-  WHERE uid = ${uid}
+  startDate: string,
+  endDate: string,
+): Promise<readonly InvestmentBucketRow[]> {
+  const { rows } = await db.query<InvestmentBucketRow>(sql`
+  SELECT COALESCE(expected_value, 0) AS expected_value, COALESCE(purchase_value, 0) AS purchase_value
+  FROM (SELECT 1) r
+  LEFT JOIN (
+    SELECT COALESCE(SUM(value), 0)::int4 AS purchase_value
+    FROM list_standard
+    WHERE ${sql.join(
+      [
+        sql`uid = ${uid}`,
+        sql`page = ${PageListStandard.General}`,
+        sql`category = ANY(${sql.array(
+          config.data.overview.investmentPurchaseCategories,
+          'text',
+        )})`,
+        sql`date BETWEEN ${startDate} AND ${endDate}`,
+      ],
+      sql` AND `,
+    )}
+  ) p ON TRUE
+  LEFT JOIN (
+    SELECT bi.value AS expected_value
+    FROM bucket_investment bi
+    WHERE bi.uid = ${uid}
+  ) b ON TRUE
   `);
-  return rows[0]?.value;
+  return rows;
 }
 
 export async function upsertInvestmentBucket(

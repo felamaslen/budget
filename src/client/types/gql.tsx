@@ -72,7 +72,6 @@ export type Query = {
   exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
-  getInvestmentBucket?: Maybe<InvestmentBucket>;
   listBuckets?: Maybe<ListBucketsResponse>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   overview?: Maybe<Overview>;
@@ -204,15 +203,17 @@ export type UpsertBucketResponse = {
   error?: Maybe<Scalars['String']>;
 };
 
-export type ListBucketsResponse = {
-  __typename?: 'ListBucketsResponse';
-  buckets?: Maybe<Array<Bucket>>;
-  error?: Maybe<Scalars['String']>;
-};
-
 export type InvestmentBucket = {
   __typename?: 'InvestmentBucket';
-  value: Scalars['NonNegativeInt'];
+  expectedValue: Scalars['NonNegativeInt'];
+  purchaseValue: Scalars['NonNegativeInt'];
+};
+
+export type ListBucketsResponse = {
+  __typename?: 'ListBucketsResponse';
+  error?: Maybe<Scalars['String']>;
+  buckets?: Maybe<Array<Bucket>>;
+  investmentBucket?: Maybe<InvestmentBucket>;
 };
 
 export type InvestmentBucketInput = {
@@ -222,7 +223,7 @@ export type InvestmentBucketInput = {
 
 export type SetInvestmentBucketResponse = {
   __typename?: 'SetInvestmentBucketResponse';
-  bucket?: Maybe<InvestmentBucket>;
+  expectedValue?: Maybe<Scalars['NonNegativeInt']>;
   error?: Maybe<Scalars['String']>;
 };
 
@@ -1135,11 +1136,7 @@ export type SetInvestmentBucketMutation = (
   { __typename?: 'Mutation' }
   & { setInvestmentBucket?: Maybe<(
     { __typename?: 'SetInvestmentBucketResponse' }
-    & Pick<SetInvestmentBucketResponse, 'error'>
-    & { bucket?: Maybe<(
-      { __typename?: 'InvestmentBucket' }
-      & Pick<InvestmentBucket, 'value'>
-    )> }
+    & Pick<SetInvestmentBucketResponse, 'expectedValue' | 'error'>
   )> }
 );
 
@@ -1490,10 +1487,10 @@ export type ListBucketsQuery = (
     & { buckets?: Maybe<Array<(
       { __typename?: 'Bucket' }
       & Pick<Bucket, 'id' | 'page' | 'filterCategory' | 'expectedValue' | 'actualValue'>
-    )>> }
-  )>, getInvestmentBucket?: Maybe<(
-    { __typename?: 'InvestmentBucket' }
-    & Pick<InvestmentBucket, 'value'>
+    )>>, investmentBucket?: Maybe<(
+      { __typename?: 'InvestmentBucket' }
+      & Pick<InvestmentBucket, 'expectedValue' | 'purchaseValue'>
+    )> }
   )> }
 );
 
@@ -2093,9 +2090,7 @@ export function useUpsertBucketMutation() {
 export const SetInvestmentBucketDocument = gql`
     mutation SetInvestmentBucket($value: NonNegativeInt!) {
   setInvestmentBucket(value: $value) {
-    bucket {
-      value
-    }
+    expectedValue
     error
   }
 }
@@ -2401,10 +2396,11 @@ export const ListBucketsDocument = gql`
       expectedValue
       actualValue
     }
+    investmentBucket {
+      expectedValue
+      purchaseValue
+    }
     error
-  }
-  getInvestmentBucket {
-    value
   }
 }
     `;

@@ -54,6 +54,10 @@ describe('Bucket resolvers', () => {
             expectedValue
             actualValue
           }
+          investmentBucket {
+            expectedValue
+            purchaseValue
+          }
           error
         }
       }
@@ -135,6 +139,51 @@ describe('Bucket resolvers', () => {
           ].map(expect.objectContaining),
         ),
       );
+    });
+
+    describe('Investment bucket', () => {
+      it('should use the investment purchase value from the database', async () => {
+        expect.assertions(1);
+        const res = await setup();
+        expect(res?.investmentBucket).toStrictEqual(
+          expect.objectContaining(<InvestmentBucket>{ purchaseValue: 5956000 }),
+        );
+      });
+
+      describe('when there is an entry in the database', () => {
+        beforeEach(async () => {
+          await getPool().query(sql`
+          INSERT INTO bucket_investment (uid, value)
+          VALUES (${app.uid}, ${1234})
+          ON CONFLICT (uid) DO UPDATE SET value = excluded.value
+          `);
+          await app.authGqlClient.clearStore();
+        });
+
+        it('should use the given expected value', async () => {
+          expect.assertions(1);
+          const res = await setup();
+          expect(res?.investmentBucket).toStrictEqual(
+            expect.objectContaining(<InvestmentBucket>{ expectedValue: 1234 }),
+          );
+        });
+      });
+
+      describe('when there is no entry in the database', () => {
+        beforeEach(async () => {
+          await getPool().query(sql`DELETE FROM bucket_investment WHERE uid = ${app.uid}`);
+          await app.authGqlClient.clearStore();
+        });
+
+        it('should set the expected value to zero', async () => {
+          expect.assertions(1);
+          await app.authGqlClient.clearStore();
+          const res = await setup();
+          expect(res?.investmentBucket).toStrictEqual(
+            expect.objectContaining(<InvestmentBucket>{ expectedValue: 0 }),
+          );
+        });
+      });
     });
 
     it('should return a list of missing buckets with zero ID', async () => {
@@ -320,57 +369,11 @@ describe('Bucket resolvers', () => {
     });
   });
 
-  describe('Query GetInvestmentBucket', () => {
-    const query = gql`
-      query GetInvestmentBucket {
-        getInvestmentBucket {
-          value
-        }
-      }
-    `;
-
-    const setup = async (): Promise<Maybe<InvestmentBucket>> => {
-      const res = await app.authGqlClient.query<Query>({ query });
-      return res.data.getInvestmentBucket ?? null;
-    };
-
-    describe('when there is an entry in the database', () => {
-      beforeEach(async () => {
-        await getPool().query(sql`
-        INSERT INTO bucket_investment (uid, value)
-        VALUES (${app.uid}, ${1234})
-        ON CONFLICT (uid) DO UPDATE SET value = excluded.value
-        `);
-      });
-
-      it('should return the value in the database', async () => {
-        expect.assertions(1);
-        const result = await setup();
-        expect(result).toStrictEqual(expect.objectContaining(<InvestmentBucket>{ value: 1234 }));
-      });
-    });
-
-    describe('when there is no entry in the database', () => {
-      beforeEach(async () => {
-        await getPool().query(sql`DELETE FROM bucket_investment WHERE uid = ${app.uid}`);
-      });
-
-      it('should return zero', async () => {
-        expect.assertions(1);
-        await app.authGqlClient.clearStore();
-        const result = await setup();
-        expect(result).toStrictEqual(expect.objectContaining(<InvestmentBucket>{ value: 0 }));
-      });
-    });
-  });
-
   describe('Mutation SetInvestmentBucket', () => {
     const mutation = gql`
       mutation SetInvestmentBucket($value: NonNegativeInt!) {
         setInvestmentBucket(value: $value) {
-          bucket {
-            value
-          }
+          expectedValue
           error
         }
       }
@@ -408,9 +411,7 @@ describe('Bucket resolvers', () => {
         expect(res).toStrictEqual(
           expect.objectContaining<SetInvestmentBucketResponse>({
             error: null,
-            bucket: expect.objectContaining({
-              value: 5678,
-            }),
+            expectedValue: 5678,
           }),
         );
       });
@@ -436,9 +437,7 @@ describe('Bucket resolvers', () => {
         expect(res).toStrictEqual(
           expect.objectContaining(<SetInvestmentBucketResponse>{
             error: null,
-            bucket: expect.objectContaining({
-              value: 5678,
-            }),
+            expectedValue: 5678,
           }),
         );
       });

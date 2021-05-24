@@ -105,7 +105,7 @@ export const BucketFilterForm: React.FC<BucketFilterFormProps> = ({ page, upsert
 export type BucketInvestmentFormProps = {
   bucket: InvestmentBucket;
   actualValue: number;
-  setInvestmentBucket: (bucket: InvestmentBucket) => void;
+  setInvestmentBucket: (expectedValue: number) => void;
 } & HealthIndicatorProps;
 
 export const BucketInvestmentForm: React.FC<BucketInvestmentFormProps> = ({
@@ -115,7 +115,7 @@ export const BucketInvestmentForm: React.FC<BucketInvestmentFormProps> = ({
   healthText,
   setInvestmentBucket,
 }) => {
-  const maxValue = Math.max(bucket.value, actualValue);
+  const maxValue = Math.max(bucket.expectedValue, actualValue);
   return (
     <Styled.BucketForm>
       <Styled.BucketFormHealth>
@@ -124,7 +124,7 @@ export const BucketInvestmentForm: React.FC<BucketInvestmentFormProps> = ({
       </Styled.BucketFormHealth>
       <Styled.BucketValuesIndicator>
         <Styled.BucketExpected
-          style={{ height: maxValue ? formatPercent(bucket.value / maxValue) : 0 }}
+          style={{ height: maxValue ? formatPercent(bucket.expectedValue / maxValue) : 0 }}
         />
         <Styled.BucketActual
           style={{ height: maxValue ? formatPercent(actualValue / maxValue) : 0 }}
@@ -132,8 +132,8 @@ export const BucketInvestmentForm: React.FC<BucketInvestmentFormProps> = ({
       </Styled.BucketValuesIndicator>
       <Styled.BucketMeta>
         <FormFieldCost
-          value={bucket.value}
-          onChange={(value): void => setInvestmentBucket({ value })}
+          value={bucket.expectedValue}
+          onChange={setInvestmentBucket}
           inputProps={{ autoComplete: 'off' }}
         />
       </Styled.BucketMeta>
