@@ -23,10 +23,12 @@ import { testResponse, CURRENCY_CZK, SUBCATEGORY_WALLET } from '~client/test-dat
 import type { NetWorthEntryNative as Entry, NetWorthValueObjectRead } from '~client/types';
 import { NetWorthCategoryType } from '~client/types/enum';
 import type {
+  NetWorthCashTotal,
   NetWorthCategory as Category,
   NetWorthSubcategory as Subcategory,
   NetWorthValueObject,
 } from '~client/types/gql';
+import type { NativeDate } from '~shared/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
@@ -595,6 +597,8 @@ describe('Net worth reducer', () => {
         stockValue: 456,
         stocksIncludingCash: 789,
         date: '2020-04-20',
+        incomeSince: 213,
+        spendingSince: 418,
       },
     });
 
@@ -730,11 +734,13 @@ describe('Net worth reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
 
-      expect(result.cashTotal).toStrictEqual({
+      expect(result.cashTotal).toStrictEqual<NativeDate<NetWorthCashTotal, 'date'>>({
         cashInBank: 123,
         stockValue: 456,
         stocksIncludingCash: 789,
         date: new Date('2020-04-20'),
+        incomeSince: 213,
+        spendingSince: 418,
       });
     });
   });

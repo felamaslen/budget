@@ -866,6 +866,8 @@ export type NetWorthCashTotal = {
   stockValue: Scalars['Int'];
   stocksIncludingCash: Scalars['Int'];
   date?: Maybe<Scalars['Date']>;
+  incomeSince: Scalars['Int'];
+  spendingSince: Scalars['Int'];
 };
 
 export enum MonthlyCategory {
@@ -1799,6 +1801,8 @@ export type NetWorthCashTotalResolvers<ContextType = Context, ParentType extends
   stockValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stocksIncludingCash?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   date?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  incomeSince?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  spendingSince?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

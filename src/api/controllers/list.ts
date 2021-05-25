@@ -3,6 +3,7 @@ import { flatten } from 'array-flatten';
 import { groupBy } from 'lodash';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import { readNetWorthCashTotal } from './net-worth';
 import { getDisplayedMonths } from './overview';
 import { formatDate } from './shared';
 
@@ -168,13 +169,21 @@ export async function createList(
 ): Promise<CrudResponseCreate> {
   const { id, ...item } = await baseController.create(db, uid, processInput(args.page, args.input));
 
-  await pubsub.publish(`${PubSubTopic.ListItemCreated}.${uid}`, {
-    page: args.page,
-    id,
-    fakeId: args.fakeId,
-    item,
-    ...(await getPublishedProperties(db, uid, args.page)),
-  });
+  const [listPublishedProperties, cashTotal] = await Promise.all([
+    getPublishedProperties(db, uid, args.page),
+    readNetWorthCashTotal(db, uid),
+  ]);
+
+  await Promise.all([
+    pubsub.publish(`${PubSubTopic.ListItemCreated}.${uid}`, {
+      page: args.page,
+      id,
+      fakeId: args.fakeId,
+      item,
+      ...listPublishedProperties,
+    }),
+    pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
+  ]);
   return { id };
 }
 
@@ -215,7 +224,12 @@ export async function createReceipt(
     ),
   };
 
-  await pubsub.publish(`${PubSubTopic.ReceiptCreated}.${uid}`, receipt);
+  const cashTotal = await readNetWorthCashTotal(db, uid);
+
+  await Promise.all([
+    pubsub.publish(`${PubSubTopic.ReceiptCreated}.${uid}`, receipt),
+    pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
+  ]);
   return receipt;
 }
 
@@ -226,12 +240,20 @@ export async function updateList(
 ): Promise<CrudResponseUpdate> {
   await baseController.update(db, uid, args.id, processInput(args.page, args.input));
 
-  await pubsub.publish(`${PubSubTopic.ListItemUpdated}.${uid}`, {
-    page: args.page,
-    id: args.id,
-    item: args.input,
-    ...(await getPublishedProperties(db, uid, args.page)),
-  });
+  const [listPublishedProperties, cashTotal] = await Promise.all([
+    getPublishedProperties(db, uid, args.page),
+    readNetWorthCashTotal(db, uid),
+  ]);
+
+  await Promise.all([
+    pubsub.publish(`${PubSubTopic.ListItemUpdated}.${uid}`, {
+      page: args.page,
+      id: args.id,
+      item: args.input,
+      ...listPublishedProperties,
+    }),
+    pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
+  ]);
 
   return { error: null };
 }
@@ -243,11 +265,19 @@ export async function deleteList(
 ): Promise<CrudResponseDelete> {
   await baseController.delete(db, uid, args.id);
 
-  await pubsub.publish(`${PubSubTopic.ListItemDeleted}.${uid}`, {
-    page: args.page,
-    id: args.id,
-    ...(await getPublishedProperties(db, uid, args.page)),
-  });
+  const [listPublishedProperties, cashTotal] = await Promise.all([
+    getPublishedProperties(db, uid, args.page),
+    readNetWorthCashTotal(db, uid),
+  ]);
+
+  await Promise.all([
+    pubsub.publish(`${PubSubTopic.ListItemDeleted}.${uid}`, {
+      page: args.page,
+      id: args.id,
+      ...listPublishedProperties,
+    }),
+    pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
+  ]);
 
   return { error: null };
 }

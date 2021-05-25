@@ -94,3 +94,34 @@ export async function selectInitialCumulativeList(
   `);
   return results.rows;
 }
+
+export type SpendingAndIncomeRow = {
+  income: number;
+  spending: number;
+};
+
+export async function selectSpendingAndIncomeSinceDate(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  sinceDate: string,
+  now: string,
+): Promise<SpendingAndIncomeRow> {
+  const results = await db.query<SpendingAndIncomeRow>(sql`
+  SELECT ${sql.join(
+    [
+      sql`COALESCE(
+        SUM(CASE WHEN page = ${PageListStandard.Income} THEN (${pageCostCTE}) ELSE 0 END),
+        0
+      )::int4 AS income`,
+      sql`COALESCE(
+        SUM(CASE WHEN page != ${PageListStandard.Income} THEN (${pageCostCTE}) ELSE 0 END),
+        0
+      )::int4 AS spending`,
+    ],
+    sql`, `,
+  )}
+  FROM list_standard
+  WHERE uid = ${uid} AND date > ${sinceDate} AND date <= ${now}
+  `);
+  return results.rows[0] ?? { income: 0, spending: 0 };
+}

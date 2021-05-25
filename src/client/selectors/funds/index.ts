@@ -13,11 +13,7 @@ import { getTotalCost, getTotalUnits, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/api';
-import {
-  getCashTotal,
-  getCostSinceCashTotals,
-  getIncomeSinceCashTotals,
-} from '~client/selectors/overview/common';
+import { getCashTotal } from '~client/selectors/overview/common';
 import type {
   Data,
   Id,
@@ -214,31 +210,25 @@ const getInvestmentsSinceCashTotal = moize(
 
 export const getCashBreakdown = moize(
   (today: Date) =>
-    createSelector(
-      getCashTotal,
-      getCostSinceCashTotals(today),
-      getIncomeSinceCashTotals(today),
-      getInvestmentsSinceCashTotal(today),
-      (cashTotal, purchaseCosts, income, investments) => ({
-        cashInBank: Math.round(
-          cashTotal.cashInBank +
-            income -
-            purchaseCosts -
-            Math.max(0, investments - (cashTotal.stocksIncludingCash - cashTotal.stockValue)),
-        ),
-        cashToInvest: Math.round(
-          Math.max(0, cashTotal.stocksIncludingCash - cashTotal.stockValue - investments),
-        ),
-        breakdown: {
-          Ce: cashTotal.cashInBank, // "Cash (easy access)" at net worth date
-          S: cashTotal.stocksIncludingCash, // "Stocks" at net worth date
-          Vd: cashTotal.stockValue, // Actual stock value at net worth date
-          I: investments, // Investments since net worth date
-          P: purchaseCosts, // Purchase costs since net worth date
-          N: income, // Income since net worth date
-        },
-      }),
-    ),
+    createSelector(getCashTotal, getInvestmentsSinceCashTotal(today), (cashTotal, investments) => ({
+      cashInBank: Math.round(
+        cashTotal.cashInBank +
+          cashTotal.incomeSince -
+          cashTotal.spendingSince -
+          Math.max(0, investments - (cashTotal.stocksIncludingCash - cashTotal.stockValue)),
+      ),
+      cashToInvest: Math.round(
+        Math.max(0, cashTotal.stocksIncludingCash - cashTotal.stockValue - investments),
+      ),
+      breakdown: {
+        Ce: cashTotal.cashInBank, // "Cash (easy access)" at net worth date
+        S: cashTotal.stocksIncludingCash, // "Stocks" at net worth date
+        Vd: cashTotal.stockValue, // Actual stock value at net worth date
+        I: investments, // Investments since net worth date
+        P: cashTotal.spendingSince, // Purchase costs since net worth date
+        N: cashTotal.incomeSince, // Income since net worth date
+      },
+    })),
   { maxSize: 1 },
 );
 

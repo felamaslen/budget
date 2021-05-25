@@ -1,4 +1,4 @@
-import { addDays, endOfMonth } from 'date-fns';
+import { addDays, endOfMonth, formatISO } from 'date-fns';
 import groupBy from 'lodash/groupBy';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -10,6 +10,7 @@ import {
   selectAllEntries,
   selectLatestCashTotal,
   getTotalFundValue,
+  selectSpendingAndIncomeSinceDate,
 } from '~api/queries';
 import type { NetWorthCashTotal, NetWorthEntry, NetWorthEntryOverview } from '~api/types';
 
@@ -52,15 +53,32 @@ export async function readNetWorthCashTotal(
   const netWorth = await selectLatestCashTotal(db, uid, endOfMonth(now));
 
   if (!netWorth) {
-    return { cashInBank: 0, stocksIncludingCash: 0, stockValue: 0, date: null };
+    return {
+      cashInBank: 0,
+      stocksIncludingCash: 0,
+      stockValue: 0,
+      date: null,
+      incomeSince: 0,
+      spendingSince: 0,
+    };
   }
 
-  const stockValueAtNetWorthDate = await getTotalFundValue(db, uid, addDays(netWorth.date, 1));
+  const [stockValueAtNetWorthDate, { income, spending }] = await Promise.all([
+    getTotalFundValue(db, uid, addDays(netWorth.date, 1)),
+    selectSpendingAndIncomeSinceDate(
+      db,
+      uid,
+      formatISO(netWorth.date, { representation: 'date' }),
+      formatISO(now, { representation: 'date' }),
+    ),
+  ]);
 
   return {
     cashInBank: Math.max(0, netWorth.cashInBank),
     stockValue: Math.max(0, stockValueAtNetWorthDate),
     stocksIncludingCash: Math.max(0, netWorth.stocksIncludingCash),
     date: netWorth.date,
+    incomeSince: income,
+    spendingSince: spending,
   };
 }

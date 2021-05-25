@@ -352,6 +352,8 @@ export const testState: State = {
       stockValue: 1655017,
       stocksIncludingCash: 1853492,
       date: null,
+      incomeSince: 0,
+      spendingSince: 0,
     },
   },
   [PageNonStandard.Funds]: {

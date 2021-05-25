@@ -29,4 +29,6 @@ export type RawDateDeep<V extends Record<string, unknown>> = {
 
 export type NativeDate<V, K extends keyof V> = V extends { [key in K]: string }
   ? Omit<V, K> & { [key in K]: Date }
+  : V extends { [key in K]?: string | null }
+  ? Omit<V, K> & { [key in K]?: Date | null }
   : V;

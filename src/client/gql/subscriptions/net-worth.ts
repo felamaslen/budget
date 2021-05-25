@@ -97,6 +97,8 @@ export const NetWorthCashTotalUpdated = gql`
       stockValue
       stocksIncludingCash
       date
+      incomeSince
+      spendingSince
     }
   }
 `;

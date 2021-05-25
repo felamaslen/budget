@@ -88,6 +88,8 @@ describe('Net worth controller', () => {
           stockValue: expect.any(Number),
           stocksIncludingCash: expect.any(Number),
           date: null,
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
         },
       );
     });
@@ -193,6 +195,8 @@ describe('Net worth controller', () => {
           stockValue: expect.any(Number),
           stocksIncludingCash: expect.any(Number),
           date: null,
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
         },
       );
     });
@@ -222,6 +226,8 @@ describe('Net worth controller', () => {
           stockValue: expect.any(Number),
           stocksIncludingCash: expect.any(Number),
           date: null,
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
         },
       );
     });

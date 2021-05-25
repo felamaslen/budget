@@ -930,6 +930,8 @@ export type NetWorthCashTotal = {
   stockValue: Scalars['Int'];
   stocksIncludingCash: Scalars['Int'];
   date?: Maybe<Scalars['Date']>;
+  incomeSince: Scalars['Int'];
+  spendingSince: Scalars['Int'];
 };
 
 export enum MonthlyCategory {
@@ -1597,7 +1599,7 @@ export type InitialQuery = (
     )> }
   )>, netWorthCashTotal?: Maybe<(
     { __typename?: 'NetWorthCashTotal' }
-    & Pick<NetWorthCashTotal, 'cashInBank' | 'stockValue' | 'stocksIncludingCash' | 'date'>
+    & Pick<NetWorthCashTotal, 'cashInBank' | 'stockValue' | 'stocksIncludingCash' | 'date' | 'incomeSince' | 'spendingSince'>
   )>, funds?: Maybe<(
     { __typename?: 'ReadFundsResponse' }
     & { items: Array<(
@@ -1989,7 +1991,7 @@ export type NetWorthCashTotalUpdatedSubscription = (
   { __typename?: 'Subscription' }
   & { netWorthCashTotalUpdated: (
     { __typename?: 'NetWorthCashTotal' }
-    & Pick<NetWorthCashTotal, 'cashInBank' | 'stockValue' | 'stocksIncludingCash' | 'date'>
+    & Pick<NetWorthCashTotal, 'cashInBank' | 'stockValue' | 'stocksIncludingCash' | 'date' | 'incomeSince' | 'spendingSince'>
   ) }
 );
 
@@ -2504,6 +2506,8 @@ export const InitialDocument = gql`
     stockValue
     stocksIncludingCash
     date
+    incomeSince
+    spendingSince
   }
   cashAllocationTarget
   funds: readFunds {
@@ -2957,6 +2961,8 @@ export const NetWorthCashTotalUpdatedDocument = gql`
     stockValue
     stocksIncludingCash
     date
+    incomeSince
+    spendingSince
   }
 }
     `;

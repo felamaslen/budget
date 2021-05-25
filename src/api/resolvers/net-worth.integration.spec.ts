@@ -1,3 +1,4 @@
+import { ApolloQueryResult } from 'apollo-boost';
 import gql from 'graphql-tag';
 import sinon from 'sinon';
 import { sql } from 'slonik';
@@ -24,6 +25,7 @@ import {
   MutationUpdateNetWorthCategoryArgs,
   MutationUpdateNetWorthEntryArgs,
   MutationUpdateNetWorthSubcategoryArgs,
+  NetWorthCashTotal,
   NetWorthCategory,
   NetWorthCategoryInput,
   NetWorthCategoryType,
@@ -1881,38 +1883,53 @@ describe('Net worth resolver', () => {
     const query = gql`
       query NetWorthCashTotal {
         netWorthCashTotal {
+          date
           cashInBank
           stockValue
           stocksIncludingCash
-          date
+          incomeSince
+          spendingSince
         }
       }
     `;
 
-    beforeEach(async () => {
+    let res: ApolloQueryResult<Query>;
+
+    beforeAll(async () => {
       await seedData(app.uid);
+      const clock = sinon.useFakeTimers(new Date('2020-04-10'));
+      await app.authGqlClient.clearStore();
+      res = await app.authGqlClient.query<Query>({ query });
+      clock.restore();
     });
 
-    it('should return the split cash to invest and cash in bank values', async () => {
-      expect.assertions(4);
-
-      const res = await app.authGqlClient.query<Query>({ query });
-
-      const cashInBank = res.data.netWorthCashTotal?.cashInBank;
-      const stockValue = res.data.netWorthCashTotal?.stockValue;
-      const stocksIncludingCash = res.data.netWorthCashTotal?.stocksIncludingCash;
-
-      const expectedCashInBank = 1288520; // check seed data
-      const expectedISAValue = 6449962;
-
-      const expectedFundValueAtNetWorthDate =
-        127.39 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229);
-
-      expect(cashInBank).toBeCloseTo(expectedCashInBank);
-      expect(stockValue).toBeCloseTo(expectedFundValueAtNetWorthDate);
-      expect(stocksIncludingCash).toBeCloseTo(expectedISAValue);
-
+    it('should return the date of the net worth entry where values are calculated from', () => {
+      expect.assertions(1);
       expect(res.data.netWorthCashTotal?.date).toBe('2020-03-31');
     });
+
+    // check fixtures data to verify the expected values here
+    const expectedCashInBank = 1288520; // check seed data
+    const expectedISAValue = 6449962;
+
+    const expectedFundValueAtNetWorthDate = 127.39 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229);
+
+    const expectedIncomeSinceNetWorthDate = 15422;
+    const expectedSpendingSinceNetWorthDate = 350;
+
+    it.each`
+      thing                                   | key                      | expectedValue
+      ${'Cash in bank'}                       | ${'cashInBank'}          | ${expectedCashInBank}
+      ${'Fund value'}                         | ${'stockValue'}          | ${expectedFundValueAtNetWorthDate}
+      ${'Stocks (including investable cash)'} | ${'stocksIncludingCash'} | ${expectedISAValue}
+      ${'Income since net worth date'}        | ${'incomeSince'}         | ${expectedIncomeSinceNetWorthDate}
+      ${'Spending since net worth date'}      | ${'spendingSince'}       | ${expectedSpendingSinceNetWorthDate}
+    `(
+      'should return the $thing',
+      ({ key, expectedValue }: { key: keyof NetWorthCashTotal; expectedValue: number }) => {
+        expect.assertions(1);
+        expect(res.data.netWorthCashTotal?.[key]).toBeCloseTo(expectedValue);
+      },
+    );
   });
 });

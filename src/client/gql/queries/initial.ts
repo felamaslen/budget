@@ -45,6 +45,8 @@ export const Initial = gql`
       stockValue
       stocksIncludingCash
       date
+      incomeSince
+      spendingSince
     }
 
     cashAllocationTarget

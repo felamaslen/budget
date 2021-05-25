@@ -206,6 +206,8 @@ const Entry = gql`
     stockValue: Int!
     stocksIncludingCash: Int!
     date: Date
+    incomeSince: Int!
+    spendingSince: Int!
   }
 
   extend type Query {

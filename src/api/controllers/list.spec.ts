@@ -49,7 +49,7 @@ describe('List controller', () => {
     };
 
     it('should publish a message', async () => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       const pubsubSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
       const testItem = {
@@ -64,7 +64,7 @@ describe('List controller', () => {
 
       await createList({} as DatabaseTransactionConnectionType, testUserId, args);
 
-      expect(pubsubSpy).toHaveBeenCalledTimes(1);
+      expect(pubsubSpy).toHaveBeenCalledTimes(2);
       expect(pubsubSpy).toHaveBeenCalledWith(
         `${pubsub.PubSubTopic.ListItemCreated}.${testUserId}`,
         {
@@ -77,12 +77,19 @@ describe('List controller', () => {
           weekly: 9113,
         },
       );
+      expect(pubsubSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${testUserId}`,
+        expect.objectContaining({
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
+        }),
+      );
     });
   });
 
   describe(createReceipt.name, () => {
     it('should publish a message to the pubsub queue', async () => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       jest.spyOn(queries, 'insertListItems').mockImplementation(async (_, __, page) => {
         if (page === 'food') {
@@ -126,7 +133,7 @@ describe('List controller', () => {
 
       await createReceipt({} as DatabaseTransactionConnectionType, testUserId, args);
 
-      expect(pubsubSpy).toHaveBeenCalledTimes(1);
+      expect(pubsubSpy).toHaveBeenCalledTimes(2);
       expect(pubsubSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.ReceiptCreated}.${testUserId}`, {
         items: [
           {
@@ -158,6 +165,13 @@ describe('List controller', () => {
           },
         ],
       });
+      expect(pubsubSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${testUserId}`,
+        expect.objectContaining({
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
+        }),
+      );
     });
   });
 
@@ -175,7 +189,7 @@ describe('List controller', () => {
     };
 
     it('should publish a message', async () => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       const pubsubSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
@@ -186,7 +200,7 @@ describe('List controller', () => {
 
       await updateList({} as DatabaseTransactionConnectionType, testUserId, args);
 
-      expect(pubsubSpy).toHaveBeenCalledTimes(1);
+      expect(pubsubSpy).toHaveBeenCalledTimes(2);
       expect(pubsubSpy).toHaveBeenCalledWith(
         `${pubsub.PubSubTopic.ListItemUpdated}.${testUserId}`,
         {
@@ -198,6 +212,13 @@ describe('List controller', () => {
           weekly: 9113,
         },
       );
+      expect(pubsubSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${testUserId}`,
+        expect.objectContaining({
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
+        }),
+      );
     });
   });
 
@@ -208,7 +229,7 @@ describe('List controller', () => {
     };
 
     it('should publish a message', async () => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       const pubsubSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
@@ -216,7 +237,7 @@ describe('List controller', () => {
 
       await deleteList({} as DatabaseTransactionConnectionType, testUserId, args);
 
-      expect(pubsubSpy).toHaveBeenCalledTimes(1);
+      expect(pubsubSpy).toHaveBeenCalledTimes(2);
       expect(pubsubSpy).toHaveBeenCalledWith(
         `${pubsub.PubSubTopic.ListItemDeleted}.${testUserId}`,
         {
@@ -226,6 +247,13 @@ describe('List controller', () => {
           total: 1776912,
           weekly: 9113,
         },
+      );
+      expect(pubsubSpy).toHaveBeenCalledWith(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${testUserId}`,
+        expect.objectContaining({
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
+        }),
       );
     });
   });

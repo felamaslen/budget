@@ -1,24 +1,17 @@
 import addYears from 'date-fns/addYears';
 import differenceInMonths from 'date-fns/differenceInMonths';
 import endOfMonth from 'date-fns/endOfMonth';
-import isBefore from 'date-fns/isBefore';
 import isSameMonth from 'date-fns/isSameMonth';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
-import { getCashTotal, getEndDate, getEntries, getStartDate } from './direct';
+import { getEndDate, getEntries, getStartDate } from './direct';
 import { currentDayIsEndOfMonth, mapMonthDates } from './utils';
 
 import { GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS } from '~client/constants';
 import { getMonthDatesList, inclusiveMonthDifference } from '~client/modules/date';
-import type { State as CrudState } from '~client/reducers/crud';
 import type { State } from '~client/reducers/types';
-import { withoutDeleted } from '~client/selectors/crud';
-import { getRawItems } from '~client/selectors/list';
-import type { ListItemStandardNative, OverviewGraphDate, LongTermOptions } from '~client/types';
-import { PageListStandard } from '~client/types/enum';
-import type { ListItemStandard } from '~client/types/gql';
-import type { NativeDate } from '~shared/types';
+import type { OverviewGraphDate, LongTermOptions } from '~client/types';
 
 export { getAnnualisedFundReturns, getCashTotal, getEndDate, getStartDate } from './direct';
 
@@ -70,45 +63,5 @@ export const getGraphDates = moize(
           presentGraphDates,
         );
     }),
-  { maxSize: 1 },
-);
-
-const getPageCostSinceDate = <I extends NativeDate<ListItemStandard, 'date'>>(
-  today: Date,
-  since: Date,
-  items: CrudState<I>,
-): number =>
-  withoutDeleted(items)
-    .filter(({ date }) => isBefore(since, date) && isBefore(date, today))
-    .reduce<number>((last, { cost }) => last + cost, 0);
-
-export const getCostSinceCashTotals = moize(
-  (today: Date) =>
-    createSelector(
-      getCashTotal,
-      getRawItems<ListItemStandardNative, PageListStandard.Bills>(PageListStandard.Bills),
-      getRawItems<ListItemStandardNative, PageListStandard.Food>(PageListStandard.Food),
-      getRawItems<ListItemStandardNative, PageListStandard.General>(PageListStandard.General),
-      getRawItems<ListItemStandardNative, PageListStandard.Holiday>(PageListStandard.Holiday),
-      getRawItems<ListItemStandardNative, PageListStandard.Social>(PageListStandard.Social),
-      ({ date: cashTotalDate }, ...args) =>
-        cashTotalDate
-          ? args.reduce(
-              (last, items) => last + getPageCostSinceDate(today, cashTotalDate, items),
-              0,
-            )
-          : 0,
-    ),
-  { maxSize: 1 },
-);
-
-export const getIncomeSinceCashTotals = moize(
-  (today: Date) =>
-    createSelector(
-      getCashTotal,
-      getRawItems<ListItemStandardNative, PageListStandard.Income>(PageListStandard.Income),
-      ({ date: cashTotalDate }, income) =>
-        cashTotalDate ? getPageCostSinceDate(today, cashTotalDate, income) : 0,
-    ),
   { maxSize: 1 },
 );

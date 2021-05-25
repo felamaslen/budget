@@ -106,6 +106,8 @@ export const generateListData = async (
     [
       [uid, PageListStandard.Income, '2015-04-18', 'Salary', 'Main job', 365202, 'My company'],
       [uid, PageListStandard.Income, '2018-03-24', 'Salary', 'Side work', 433201, 'Contract'],
+      [uid, PageListStandard.Income, '2020-04-05', 'Salary', 'Side work', 15422, 'Contract'],
+      [uid, PageListStandard.Income, '2020-04-11', 'Salary', 'Main job', 366729, 'My company'],
       [uid, PageListStandard.Bills, '2018-03-25', 'Rent', 'Housing', 72500, 'My bank'],
       [
         uid,
@@ -121,6 +123,7 @@ export const generateListData = async (
       [uid, PageListStandard.Food, '2018-03-25', 'Breakfast', 'Food', 19239, 'Tesco'],
       [uid, PageListStandard.Food, '2018-03-25', 'Lunch', 'Food', 91923, 'Morrisons'],
       [uid, PageListStandard.Food, '2018-03-25', 'Nuts', 'Snacks', 2239, "Sainsbury's"],
+      [uid, PageListStandard.Food, '2020-04-09', 'Sausages', 'Meat', 350, 'Tesco'],
       [uid, PageListStandard.General, '2015-05-10', 'Baz', 'Bar', 7619, 'Foo'],
       [uid, PageListStandard.General, '2018-03-25', 'Kitchen', 'Foo', 1231, 'Amazon'],
       [uid, PageListStandard.General, '2018-03-25', 'Household', 'Foo', 9912, 'Hardware store'],

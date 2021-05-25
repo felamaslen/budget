@@ -40,6 +40,8 @@ export const initialState: State = {
     stockValue: 0,
     stocksIncludingCash: 0,
     date: null,
+    incomeSince: 0,
+    spendingSince: 0,
   },
 };
 
@@ -100,6 +102,8 @@ const withCashTotals = (state: State, cashTotals?: GQL<NetWorthCashTotal> | null
           stockValue: cashTotals.stockValue,
           stocksIncludingCash: cashTotals.stocksIncludingCash,
           date: cashTotals.date ? new Date(cashTotals.date) : null,
+          incomeSince: cashTotals.incomeSince,
+          spendingSince: cashTotals.spendingSince,
         },
       }
     : state;
