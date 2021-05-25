@@ -1,7 +1,7 @@
 import { sql } from 'slonik';
 
 import config from '~api/config';
-import { withSlonik } from '~api/modules/db';
+import { getPool, withSlonik } from '~api/modules/db';
 import logger from '~api/modules/logger';
 import { generateUserPin } from '~api/test-utils/generate-user-pin';
 
@@ -24,8 +24,12 @@ export const seed = withSlonik(async (db) => {
 });
 
 if (require.main === module) {
-  seed().catch((err) => {
-    logger.error('Caught fatal error: %s', err);
-    process.exit(1);
-  });
+  seed()
+    .then(() => {
+      getPool().end();
+    })
+    .catch((err) => {
+      logger.error('Caught fatal error: %s', err);
+      process.exit(1);
+    });
 }
