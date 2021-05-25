@@ -61,15 +61,17 @@ const onPeriodLoad = (state: State, res: FundHistory | null | undefined): State 
   res ? { ...state, ...getPriceCache(res) } : state;
 
 const onReadFunds = (state: State, action: ActionApiDataRead): State =>
-  onPeriodLoad(
-    {
-      ...state,
-      items: action.res.funds?.items.map(toNativeFund) ?? [],
-      __optimistic: Array<undefined>(action.res.funds?.items?.length ?? 0).fill(undefined),
-      cashTarget: action.res.cashAllocationTarget ?? state.cashTarget,
-    },
-    action.res.fundHistory,
-  );
+  action.res.funds
+    ? onPeriodLoad(
+        {
+          ...state,
+          items: action.res.funds.items.map(toNativeFund),
+          __optimistic: Array<undefined>(action.res.funds.items?.length ?? 0).fill(undefined),
+          cashTarget: action.res.cashAllocationTarget ?? state.cashTarget,
+        },
+        action.res.fundHistory,
+      )
+    : state;
 
 const fundsListReducer = makeListReducer<
   GQL<FundInput>,
