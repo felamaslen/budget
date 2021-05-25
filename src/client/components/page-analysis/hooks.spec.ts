@@ -95,39 +95,14 @@ describe('Analysis hooks', () => {
           "childIndex": 0,
           "children": Object {
             "box": Object {
-              "flex": 0.1804557916620506,
+              "flex": 0.1520527681325915,
               "flow": "row",
             },
             "childIndex": 1,
-            "children": Object {
-              "box": Object {
-                "flex": 0.18562006553931645,
-                "flow": "row",
-              },
-              "childIndex": 2,
-              "items": Object {
-                "blocks": Array [
-                  Object {
-                    "area": 8374.05396881478,
-                    "childCount": 2,
-                    "color": "#113822",
-                    "flex": 1,
-                    "hasBreakdown": false,
-                    "name": "saved",
-                    "subTree": undefined,
-                    "total": 67123,
-                  },
-                ],
-                "box": Object {
-                  "flex": 1.0000000000000016,
-                  "flow": "row",
-                },
-              },
-            },
             "items": Object {
               "blocks": Array [
                 Object {
-                  "area": 36739.893946697885,
+                  "area": 38013.19203314789,
                   "childCount": 1,
                   "color": "#43a047",
                   "flex": 1,
@@ -148,7 +123,7 @@ describe('Analysis hooks', () => {
                       "items": Object {
                         "blocks": Array [
                           Object {
-                            "area": 17172.780251290234,
+                            "area": 17767.93897071162,
                             "childCount": 1,
                             "flex": 1,
                             "name": "foo2_bar2",
@@ -157,7 +132,7 @@ describe('Analysis hooks', () => {
                           },
                         ],
                         "box": Object {
-                          "flex": 1.0000000000000002,
+                          "flex": 0.9999999999999998,
                           "flow": "row",
                         },
                       },
@@ -165,7 +140,7 @@ describe('Analysis hooks', () => {
                     "items": Object {
                       "blocks": Array [
                         Object {
-                          "area": 19567.11369540765,
+                          "area": 20245.25306243627,
                           "childCount": 0,
                           "flex": 1,
                           "name": "foo2_bar1",
@@ -183,7 +158,7 @@ describe('Analysis hooks', () => {
                 },
               ],
               "box": Object {
-                "flex": 0.8143799344606835,
+                "flex": 1.0000000000000004,
                 "flow": "row",
               },
             },
@@ -191,7 +166,7 @@ describe('Analysis hooks', () => {
           "items": Object {
             "blocks": Array [
               Object {
-                "area": 204886.05208448734,
+                "area": 211986.80796685212,
                 "childCount": 0,
                 "color": "#01579b",
                 "flex": 1,
@@ -206,7 +181,7 @@ describe('Analysis hooks', () => {
                   "items": Object {
                     "blocks": Array [
                       Object {
-                        "area": 204886.05208448734,
+                        "area": 211986.80796685212,
                         "childCount": 0,
                         "flex": 1,
                         "name": "foo1_bar1",
@@ -224,7 +199,7 @@ describe('Analysis hooks', () => {
               },
             ],
             "box": Object {
-              "flex": 0.8195442083379494,
+              "flex": 0.8479472318674085,
               "flow": "row",
             },
           },
@@ -245,35 +220,10 @@ describe('Analysis hooks', () => {
             "flow": "column",
           },
           "childIndex": 0,
-          "children": Object {
-            "box": Object {
-              "flex": 0.039266856440190394,
-              "flow": "row",
-            },
-            "childIndex": 1,
-            "items": Object {
-              "blocks": Array [
-                Object {
-                  "area": 9816.714110047584,
-                  "childCount": 1,
-                  "color": "#113822",
-                  "flex": 1,
-                  "hasBreakdown": false,
-                  "name": "saved",
-                  "subTree": undefined,
-                  "total": 67123,
-                },
-              ],
-              "box": Object {
-                "flex": 0.9999999999999986,
-                "flow": "row",
-              },
-            },
-          },
           "items": Object {
             "blocks": Array [
               Object {
-                "area": 240183.2858899524,
+                "area": 250000,
                 "childCount": 0,
                 "color": "#01579b",
                 "flex": 1,
@@ -282,13 +232,13 @@ describe('Analysis hooks', () => {
                 "subTree": Object {
                   "box": Object {
                     "flex": 1,
-                    "flow": "row",
+                    "flow": "column",
                   },
                   "childIndex": 0,
                   "items": Object {
                     "blocks": Array [
                       Object {
-                        "area": 240183.2858899524,
+                        "area": 250000,
                         "childCount": 0,
                         "flex": 1,
                         "name": "foo1_bar1",
@@ -298,7 +248,7 @@ describe('Analysis hooks', () => {
                     ],
                     "box": Object {
                       "flex": 1,
-                      "flow": "row",
+                      "flow": "column",
                     },
                   },
                 },
@@ -306,8 +256,8 @@ describe('Analysis hooks', () => {
               },
             ],
             "box": Object {
-              "flex": 0.9607331435598097,
-              "flow": "row",
+              "flex": 1,
+              "flow": "column",
             },
           },
         }
@@ -327,35 +277,10 @@ describe('Analysis hooks', () => {
             "flow": "column",
           },
           "childIndex": 0,
-          "children": Object {
-            "box": Object {
-              "flex": 0.039266856440190345,
-              "flow": "row",
-            },
-            "childIndex": 1,
-            "items": Object {
-              "blocks": Array [
-                Object {
-                  "area": 0.47120227728228403,
-                  "childCount": 1,
-                  "color": "#113822",
-                  "flex": 1,
-                  "hasBreakdown": false,
-                  "name": "saved",
-                  "subTree": undefined,
-                  "total": 67123,
-                },
-              ],
-              "box": Object {
-                "flex": 0.9999999999999998,
-                "flow": "row",
-              },
-            },
-          },
           "items": Object {
             "blocks": Array [
               Object {
-                "area": 11.528797722717716,
+                "area": 12,
                 "childCount": 0,
                 "color": "#01579b",
                 "flex": 1,
@@ -370,7 +295,7 @@ describe('Analysis hooks', () => {
                   "items": Object {
                     "blocks": Array [
                       Object {
-                        "area": 11.528797722717716,
+                        "area": 12,
                         "childCount": 0,
                         "flex": 1,
                         "name": "foo1_bar1",
@@ -388,7 +313,7 @@ describe('Analysis hooks', () => {
               },
             ],
             "box": Object {
-              "flex": 0.9607331435598097,
+              "flex": 1,
               "flow": "column",
             },
           },

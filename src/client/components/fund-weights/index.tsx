@@ -13,7 +13,7 @@ import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getCashBreakdown, getPortfolio, getStockValue } from '~client/selectors';
 import { Button } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
-import type { BlockItem } from '~client/types';
+import type { BlockItem, Id, PortfolioItem } from '~client/types';
 
 const formatLabel = (value: number, total: number, suffix: string): string =>
   `(${formatPercent(value / total, { precision: 1 })}) [${formatCurrency(value, {
@@ -21,13 +21,86 @@ const formatLabel = (value: number, total: number, suffix: string): string =>
     precision: 1,
   })}] ${suffix}`;
 
+const StockHelp: React.FC<{ item: PortfolioItem }> = ({
+  item: {
+    item,
+    value,
+    metadata: {
+      unitsBought,
+      buyPriceSplitAdj,
+      unitsSold,
+      sellPriceSplitAdj,
+      unitsReinvested,
+      reinvestmentPriceSplitAdj,
+      feesPaid,
+      taxesPaid,
+      totalCostOfHolding,
+      pnl,
+      currentPrice,
+    },
+  },
+}) => (
+  <>
+    <h6>
+      Summary for <em>{item}</em>
+    </h6>
+    <table>
+      <tbody>
+        <tr>
+          <th>Units bought</th>
+          <td>
+            {unitsBought} @ {buyPriceSplitAdj ? formatCurrency(buyPriceSplitAdj) : 'N/A'}
+          </td>
+        </tr>
+        <tr>
+          <th>Units sold</th>
+          <td>
+            {unitsSold} @ {sellPriceSplitAdj ? formatCurrency(sellPriceSplitAdj) : 'N/A'}
+          </td>
+        </tr>
+        <tr>
+          <th>Units reinvested from dividends</th>
+          <td>
+            {unitsReinvested} @{' '}
+            {reinvestmentPriceSplitAdj ? formatCurrency(reinvestmentPriceSplitAdj) : 'N/A'}
+          </td>
+        </tr>
+        <tr>
+          <th>Total fees paid</th>
+          <td>{formatCurrency(feesPaid)}</td>
+        </tr>
+        <tr>
+          <th>Total taxes paid</th>
+          <td>{formatCurrency(taxesPaid)}</td>
+        </tr>
+        <tr>
+          <th>Current price</th>
+          <td>{formatCurrency(currentPrice)}</td>
+        </tr>
+        <tr>
+          <th>Current value of holding</th>
+          <td>{formatCurrency(value)}</td>
+        </tr>
+        <tr>
+          <th>PnL</th>
+          <td>
+            {formatCurrency(pnl, { brackets: true })} {pnl > 0 ? '☝' : '☟'}{' '}
+            {formatPercent(pnl / totalCostOfHolding)}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </>
+);
+
 export const FundWeights: React.FC = () => {
   const today = useContext(TodayContext);
   const portfolio = useSelector(getPortfolio(today));
   const stockValue = useSelector(getStockValue(today));
   const { cashInBank, cashToInvest, breakdown } = useSelector(getCashBreakdown(today));
 
-  const [infoOpen, setInfoOpen] = useState<boolean>(false);
+  const [helpOpen, setHelpOpen] = useState<boolean>(false);
+  const [stockInfoHelp, setStockInfoHelp] = useState<Id | null>(null);
 
   const blocks = useMemo(() => {
     const relevantNetWorth = cashInBank + cashToInvest + stockValue;
@@ -37,7 +110,7 @@ export const FundWeights: React.FC = () => {
         name: 'Stocks',
         total: stockValue,
         color: colors.transparent,
-        subTree: portfolio.map<BlockItem>(({ item, value }) => {
+        subTree: portfolio.map<BlockItem>(({ id, item, value }) => {
           const nameAbbreviated = abbreviateFundName(item);
 
           return {
@@ -49,6 +122,9 @@ export const FundWeights: React.FC = () => {
                 {nameAbbreviated}
               </Styled.Label>
             ),
+            onClick: (): void => {
+              setStockInfoHelp(id);
+            },
           };
         }),
       },
@@ -86,11 +162,19 @@ export const FundWeights: React.FC = () => {
     <>
       <BlockPacker blocks={blocks} onHover={onHover} status={status} />
       <Styled.HelpButton>
-        <Button onClick={(): void => setInfoOpen((last) => !last)}>
-          {infoOpen ? 'Close help' : '?'}
+        <Button
+          onClick={(): void => {
+            if (stockInfoHelp) {
+              setStockInfoHelp(null);
+            } else {
+              setHelpOpen((last) => !last);
+            }
+          }}
+        >
+          {helpOpen || stockInfoHelp ? 'Close help' : '?'}
         </Button>
       </Styled.HelpButton>
-      {infoOpen && (
+      {helpOpen && (
         <Styled.InfoDialogBackground>
           <Styled.InfoDialog>
             <h6>Cash breakdown:</h6>
@@ -161,6 +245,13 @@ export const FundWeights: React.FC = () => {
                 </Styled.InfoDialogRowImportant>
               </tbody>
             </table>
+          </Styled.InfoDialog>
+        </Styled.InfoDialogBackground>
+      )}
+      {stockInfoHelp && !helpOpen && (
+        <Styled.InfoDialogBackground>
+          <Styled.InfoDialog>
+            <StockHelp item={portfolio.find(({ id }) => id === stockInfoHelp) as PortfolioItem} />
           </Styled.InfoDialog>
         </Styled.InfoDialogBackground>
       )}

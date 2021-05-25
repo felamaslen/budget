@@ -41,6 +41,7 @@ type InfiniteChildProps = CommonProps &
   PickUnion<BlockItem, 'name' | 'color' | 'childCount' | 'text' | 'hasBreakdown'> & {
     active?: boolean;
     subTree?: FlexBlocks<BlockItem>;
+    onClick?: () => void;
   };
 
 const InfiniteChild = memo<InfiniteChildProps>((props) => {
@@ -58,6 +59,7 @@ const InfiniteChild = memo<InfiniteChildProps>((props) => {
     hasBreakdown,
     isSubTree,
     isDeep,
+    onClick,
     onHover,
     setPreview,
   } = props;
@@ -80,23 +82,25 @@ const InfiniteChild = memo<InfiniteChildProps>((props) => {
   );
 
   const canDive = isDeep || hasBreakdown;
-  const onDiveIn = useMemo(
-    () =>
-      canDive
-        ? (): void => {
-            setPreview({
-              open: true,
-              name,
-              color: rgba(color ?? colors.transparent, 0),
-              left: childRef.current?.offsetLeft ?? 0,
-              top: childRef.current?.offsetTop ?? 0,
-              width: childRef.current?.offsetWidth ?? 0,
-              height: childRef.current?.offsetHeight ?? 0,
-            });
-          }
-        : VOID,
-    [canDive, setPreview, name, color],
-  );
+  const onDiveIn = useMemo<() => void>(() => {
+    if (onClick) {
+      return onClick;
+    }
+    if (canDive) {
+      return (): void => {
+        setPreview({
+          open: true,
+          name,
+          color: rgba(color ?? colors.transparent, 0),
+          left: childRef.current?.offsetLeft ?? 0,
+          top: childRef.current?.offsetTop ?? 0,
+          width: childRef.current?.offsetWidth ?? 0,
+          height: childRef.current?.offsetHeight ?? 0,
+        });
+      };
+    }
+    return VOID;
+  }, [onClick, canDive, setPreview, name, color]);
 
   const diveProps = useCTA(onDiveIn);
 
@@ -168,6 +172,7 @@ const InfiniteBox: React.FC<
               isDeep={isDeep}
               hasBreakdown={item.hasBreakdown}
               isSubTree={isSubTree}
+              onClick={item.onClick}
               onHover={onHover}
               setPreview={setPreview}
             />

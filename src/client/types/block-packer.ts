@@ -31,4 +31,5 @@ export type BlockItem = {
   childCount?: number;
   hasBreakdown?: boolean;
   text?: ReactElement | ReactText;
+  onClick?: () => void;
 };

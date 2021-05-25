@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 
 import { getDayGain, getDayGainAbs, getPaperValue, getRealisedValue, getBuyCost } from './gains';
 import { getFundsRows, getFundsCache, PriceCache, PriceCacheRebased } from './helpers';
-import { getTotalCost, lastInArray } from '~client/modules/data';
+import { getTotalCost, getTotalUnits, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/api';
@@ -25,6 +25,9 @@ import type {
   Portfolio,
   RowPrices,
   FundNative,
+  TransactionNative,
+  StockSplitNative,
+  PortfolioItem,
 } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
@@ -96,19 +99,77 @@ const getTransactionsToDateWithPrices = memoiseNowAndToday((time) =>
   }),
 );
 
-export const getPortfolio = moize((date: Date) =>
-  createSelector(
-    getTransactionsToDateWithPrices.month(date),
-    (funds): Portfolio =>
-      funds
-        .filter(({ price, transactions }) => price && transactions.length)
-        .map(({ id, item, transactions, stockSplits, price, allocationTarget }) => ({
-          id,
-          item,
-          value: getPaperValue(transactions, stockSplits, price),
-          allocationTarget: allocationTarget ?? 0,
-        })),
-  ),
+function getAveragePriceSplitAdj(
+  transactions: TransactionNative[],
+  stockSplits: StockSplitNative[],
+): [number, number] {
+  const units = getTotalUnits(transactions, stockSplits);
+  return [
+    units,
+    units ? transactions.reduce<number>((last, row) => last + row.price * row.units, 0) / units : 0,
+  ];
+}
+
+function getPortfolioMetadata(
+  transactions: TransactionNative[],
+  stockSplits: StockSplitNative[],
+  currentPrice: number,
+  paperValue: number,
+): PortfolioItem['metadata'] {
+  const [unitsBought, buyPriceSplitAdj] = getAveragePriceSplitAdj(
+    transactions.filter((row) => row.units > 0 && !row.drip),
+    stockSplits,
+  );
+  const [unitsReinvested, reinvestmentPriceSplitAdj] = getAveragePriceSplitAdj(
+    transactions.filter((row) => row.drip),
+    stockSplits,
+  );
+  const [unitsSold, sellPriceSplitAdj] = getAveragePriceSplitAdj(
+    transactions.filter((row) => row.units < 0),
+    stockSplits,
+  );
+
+  const feesPaid = transactions.reduce<number>((last, row) => last + row.fees, 0);
+  const taxesPaid = transactions.reduce<number>((last, row) => last + row.taxes, 0);
+
+  const totalCostOfHolding = getBuyCost(transactions);
+  const realisedValue = getRealisedValue(transactions);
+  const pnl = paperValue + realisedValue - totalCostOfHolding;
+
+  return {
+    unitsBought,
+    buyPriceSplitAdj,
+    unitsSold: -unitsSold,
+    sellPriceSplitAdj,
+    unitsReinvested,
+    reinvestmentPriceSplitAdj,
+    feesPaid,
+    taxesPaid,
+    currentPrice,
+    totalCostOfHolding,
+    pnl,
+  };
+}
+
+export const getPortfolio = moize(
+  (date: Date) =>
+    createSelector(
+      getTransactionsToDateWithPrices.month(date),
+      (funds): Portfolio =>
+        funds
+          .filter(({ price, transactions }) => price && transactions.length)
+          .map(({ id, item, transactions, stockSplits, price, allocationTarget }) => {
+            const value = getPaperValue(transactions, stockSplits, price);
+            return {
+              id,
+              item,
+              value,
+              allocationTarget: allocationTarget ?? 0,
+              metadata: getPortfolioMetadata(transactions, stockSplits, price, value),
+            };
+          }),
+    ),
+  { maxSize: 1 },
 );
 
 export const getStockValue = moize(

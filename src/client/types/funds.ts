@@ -44,6 +44,19 @@ export type PortfolioItem = {
   item: string;
   value: number;
   allocationTarget: number;
+  metadata: {
+    unitsBought: number;
+    buyPriceSplitAdj: number;
+    unitsSold: number;
+    sellPriceSplitAdj: number;
+    unitsReinvested: number;
+    reinvestmentPriceSplitAdj: number;
+    feesPaid: number;
+    taxesPaid: number;
+    currentPrice: number;
+    totalCostOfHolding: number;
+    pnl: number;
+  };
 };
 export type Portfolio = PortfolioItem[];
 

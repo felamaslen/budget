@@ -226,26 +226,96 @@ describe('Funds selectors', () => {
           item: 'some fund 1',
           value: 399098.2,
           allocationTarget: 0,
+          metadata: expect.objectContaining({}),
         },
         {
           id: 3,
           item: 'some fund 2',
           value: 0,
           allocationTarget: 0,
+          metadata: expect.objectContaining({}),
         },
         {
           id: 1,
           item: 'some fund 3',
           value: 0,
           allocationTarget: 0,
+          metadata: expect.objectContaining({}),
         },
         {
           id: 5,
           item: 'test fund 4',
           value: 0,
           allocationTarget: 0,
+          metadata: expect.objectContaining({}),
         },
       ]);
+    });
+
+    it('should calculate metadata for each fund in the portfolio', () => {
+      expect.assertions(4);
+      const result = getPortfolio(new Date('2020-04-20'))(state);
+
+      expect(result[0].metadata).toMatchInlineSnapshot(`
+        Object {
+          "buyPriceSplitAdj": 428,
+          "currentPrice": 427.3,
+          "feesPaid": 148,
+          "pnl": -901.7999999999884,
+          "reinvestmentPriceSplitAdj": 0,
+          "sellPriceSplitAdj": 0,
+          "taxesPaid": 100,
+          "totalCostOfHolding": 400000,
+          "unitsBought": 934,
+          "unitsReinvested": 0,
+          "unitsSold": -0,
+        }
+      `);
+      expect(result[1].metadata).toMatchInlineSnapshot(`
+        Object {
+          "buyPriceSplitAdj": 100,
+          "currentPrice": 101.37,
+          "feesPaid": 20,
+          "pnl": 5300,
+          "reinvestmentPriceSplitAdj": 0,
+          "sellPriceSplitAdj": 112,
+          "taxesPaid": 80,
+          "totalCostOfHolding": 45000,
+          "unitsBought": 450,
+          "unitsReinvested": 0,
+          "unitsSold": 450,
+        }
+      `);
+      expect(result[2].metadata).toMatchInlineSnapshot(`
+        Object {
+          "buyPriceSplitAdj": 80.510256,
+          "currentPrice": 78.54,
+          "feesPaid": 0,
+          "pnl": -9239.999899999995,
+          "reinvestmentPriceSplitAdj": 0,
+          "sellPriceSplitAdj": 72.24453648,
+          "taxesPaid": 0,
+          "totalCostOfHolding": 89999.9999,
+          "unitsBought": 1117.87,
+          "unitsReinvested": 0,
+          "unitsSold": 1117.87,
+        }
+      `);
+      expect(result[3].metadata).toMatchInlineSnapshot(`
+        Object {
+          "buyPriceSplitAdj": 133.36,
+          "currentPrice": 144.94,
+          "feesPaid": 0,
+          "pnl": 65622.008,
+          "reinvestmentPriceSplitAdj": 0,
+          "sellPriceSplitAdj": 177.1167567,
+          "taxesPaid": 0,
+          "totalCostOfHolding": 199999.992,
+          "unitsBought": 1499.7,
+          "unitsReinvested": 0,
+          "unitsSold": 1499.7,
+        }
+      `);
     });
 
     it('should not include fund transactions from the future', () => {

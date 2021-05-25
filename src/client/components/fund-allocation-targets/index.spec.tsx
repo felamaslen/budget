@@ -2,6 +2,7 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { FundAllocationTargets, Props } from '.';
+import type { PortfolioItem } from '~client/types';
 
 describe('<FundAllocationTargets />', () => {
   const props: Props = {
@@ -27,12 +28,14 @@ describe('<FundAllocationTargets />', () => {
         item: 'Fund A',
         value: 150000,
         allocationTarget: 0.3,
+        metadata: {} as PortfolioItem['metadata'],
       },
       {
         id: 2,
         item: 'Fund B',
         value: 200000,
         allocationTarget: 0.4,
+        metadata: {} as PortfolioItem['metadata'],
       },
     ],
     cashTarget: 100000,

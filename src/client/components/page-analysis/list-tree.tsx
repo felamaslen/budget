@@ -137,7 +137,7 @@ const ListTree: React.FC<Props> = ({
             open={!!treeOpen.saved}
             visible={treeVisible.saved !== false}
             ratio={income ? itemSaved.total / income : 0}
-            disabled={!!treeVisible[AnalysisPage.Income]}
+            disabled={treeVisible[AnalysisPage.Income] !== false}
             onHover={onHover}
             onToggle={toggleTreeItem}
             onToggleExpand={onToggleExpand}

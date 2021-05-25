@@ -87,7 +87,7 @@ export function getBlocks(
     height,
     forest
       .filter(({ name }) => treeVisible[name] !== false && name !== 'invested')
-      .filter(({ name }) => !(treeVisible[AnalysisPage.Income] && name === 'saved'))
+      .filter(({ name }) => treeVisible[AnalysisPage.Income] === false || name !== 'saved')
       .map((block) => ({
         name: block.name,
         total: block.total,
