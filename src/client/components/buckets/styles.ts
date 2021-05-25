@@ -10,6 +10,7 @@ import { breakpoints, colors } from '~client/styled/variables';
 export const Main = styled(FlexColumn)`
   align-items: center;
   background: ${colors.white};
+  flex: 1 1 0;
 `;
 
 export const StatusBar = styled(Flex)`
@@ -201,7 +202,6 @@ export const BucketActual = styled(BucketValuesIndicatorPart)`
 
 export const BucketGroup = styled(FlexColumn)<{ color: string }>(
   ({ color }) => css`
-    flex: 1;
     margin: ${rem(2)} 0 ${rem(4)} 0;
 
     ${BucketExpected} {
@@ -210,14 +210,22 @@ export const BucketGroup = styled(FlexColumn)<{ color: string }>(
     ${BucketActual} {
       background-color: ${rgba(color, 0.4)};
     }
+
+    ${breakpoint(breakpoints.mobile)} {
+      flex: 1;
+    }
   `,
 );
 
 export const BucketGroupList = styled(Flex)`
-  flex: 1;
+  flex: 1 1 0;
   overflow-y: auto;
-  max-height: ${rem(400)};
   width: 100%;
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 1;
+    max-height: ${rem(400)};
+  }
 `;
 
 export const BucketGroupTitle = styled.h4`

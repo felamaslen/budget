@@ -34,6 +34,10 @@ export const PageFunds = styled(Page)`
   }
   ${breakpoint(breakpoints.desktop)} {
     flex-direction: row;
+
+    ${Base} {
+      flex: 0 0 auto;
+    }
   }
 `;
 
