@@ -6,9 +6,10 @@ export type CategoryRow = Omit<NetWorthCategory, 'isOption'> & {
 
 export type SubcategoryRow = Omit<
   NetWorthSubcategory,
-  'categoryId' | 'hasCreditLimit' | 'isSAYE'
+  'categoryId' | 'appreciationRate' | 'hasCreditLimit' | 'isSAYE'
 > & {
   category_id: NetWorthSubcategory['categoryId'];
+  appreciation_rate: NetWorthSubcategory['appreciationRate'];
   has_credit_limit: NetWorthSubcategory['hasCreditLimit'];
   is_saye: NetWorthSubcategory['isSAYE'];
 };

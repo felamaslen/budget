@@ -128,6 +128,10 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ isMobile, table }) => {
   const graphHeightNetWorth = isMobile ? 100 : 240;
   const graphHeightFTI = isMobile ? 100 : 180;
 
+  if (dimensionsNetWorthLeft.minY === dimensionsNetWorthLeft.maxY) {
+    return null;
+  }
+
   return (
     <>
       <Styled.GraphSection>

@@ -13,8 +13,8 @@ import {
   CrudControllerFactory,
   CrudItem,
   CrudOptions,
+  CrudOptionsExtended,
   DeleteItem,
-  Noop,
   ParentDependency,
   ReadItem,
   UpdateItem,
@@ -22,8 +22,8 @@ import {
 } from './types';
 
 import { pubsub } from '~api/modules/graphql/pubsub';
+import { DJMap, mapExternalToInternal, mapInternalToExternal } from '~api/modules/key-map';
 import { Create, Item } from '~api/types';
-import { PickPartial } from '~shared/types';
 
 const notFoundError = (item: string): Error => boom.notFound(`${item} not found`);
 
@@ -39,6 +39,9 @@ async function checkParentDependency<J extends CrudItem, P extends CrudItem>(
   }
   const parentRow = await selectCrudItem<P>(
     parentDependency.withUid ?? false,
+    undefined,
+    undefined,
+    false,
     db,
     uid,
     parentDependency.table,
@@ -64,43 +67,62 @@ export const makeCreateItem = <D extends CrudItem, J extends CrudItem, P extends
   parentDependency,
   validateParentDependency,
   createTopic,
-}: CrudOptions<D, J, P>): CreateItem<J> => async (
+}: CrudOptionsExtended<D, J, P>): CreateItem<J> => async (
   db: DatabaseTransactionConnectionType,
   uid: number,
   data: Create<J>,
   table = defaultTable,
 ): Promise<J> => {
   await checkParentDependency(db, uid, data, parentDependency, validateParentDependency);
-  const rowData = jsonToDb(data);
+  const rowData = jsonToDb(data as J);
   const createdRow = await insertCrudItem(withUid, db, uid, table, rowData);
-  const createdItem = dbToJson(withoutUid(createdRow));
+  const createdItem = dbToJson(withoutUid(createdRow) as D);
   if (createTopic) {
     await pubsub.publish(filterTopic(createTopic, uid), { item: createdItem });
   }
-  return createdItem;
+  return createdItem as J;
 };
 
 export const makeReadItem = <D extends CrudItem, J extends CrudItem, P extends CrudItem>({
   table: defaultTable,
   withUid = false,
+  parentDependency,
+  parentKeyInternal,
   dbToJson,
   item,
-}: CrudOptions<D, J, P>): ReadItem<J> => async (
+}: CrudOptionsExtended<D, J, P>): ReadItem<J> => async (
   db: DatabaseTransactionConnectionType,
   uid: number,
   id?: number,
   table = defaultTable,
 ): Promise<J[]> => {
   if (id) {
-    const rowData = await selectCrudItem<D>(withUid, db, uid, table, id);
+    const rowData = await selectCrudItem<D>(
+      withUid,
+      parentDependency?.table,
+      parentKeyInternal,
+      parentDependency?.withUid,
+      db,
+      uid,
+      table,
+      id,
+    );
     if (!rowData) {
       throw notFoundError(item);
     }
-    return [dbToJson(withoutUid(rowData))];
+    return [dbToJson(withoutUid(rowData)) as J];
   }
 
-  const rowData = await selectAllCrudItems<D>(withUid, db, uid, table);
-  return rowData.map((row) => dbToJson(withoutUid(row)));
+  const rowData = await selectAllCrudItems<D>(
+    withUid,
+    parentDependency?.table,
+    parentKeyInternal,
+    parentDependency?.withUid,
+    db,
+    uid,
+    table,
+  );
+  return rowData.map((row) => dbToJson(withoutUid(row)) as J);
 };
 
 export const makeUpdateItem = <D extends CrudItem, J extends CrudItem, P extends CrudItem>({
@@ -112,7 +134,7 @@ export const makeUpdateItem = <D extends CrudItem, J extends CrudItem, P extends
   parentDependency,
   validateParentDependency,
   updateTopic,
-}: CrudOptions<D, J, P>): UpdateItem<J> => async (
+}: CrudOptionsExtended<D, J, P>): UpdateItem<J> => async (
   db: DatabaseTransactionConnectionType,
   uid: number,
   id: number,
@@ -120,7 +142,7 @@ export const makeUpdateItem = <D extends CrudItem, J extends CrudItem, P extends
   table = defaultTable,
 ): Promise<J> => {
   await checkParentDependency(db, uid, data, parentDependency, validateParentDependency);
-  const rowData = jsonToDb(data);
+  const rowData = jsonToDb(data as J);
   const updatedRow = await updateCrudItem<D>(withUid, db, uid, table, id, rowData);
   if (!updatedRow) {
     throw notFoundError(item);
@@ -129,7 +151,7 @@ export const makeUpdateItem = <D extends CrudItem, J extends CrudItem, P extends
   if (updateTopic) {
     await pubsub.publish(filterTopic(updateTopic, uid), { item: updatedItem });
   }
-  return updatedItem;
+  return updatedItem as J;
 };
 
 export const makeDeleteItem = <D extends CrudItem, J extends CrudItem, P extends CrudItem>({
@@ -156,19 +178,21 @@ export function makeCrudController<
   D extends Item = Item,
   J extends Item = D,
   P extends CrudItem = CrudItem
->(options: PickPartial<CrudOptions<D, J, P>, 'jsonToDb' | 'dbToJson'>): CrudControllerFactory<J> {
-  const noopD: Noop<Create<J>, D> = (value) => (value as Record<string, unknown>) as D;
-  const noopJ: Noop<D, J> = (value) => (value as Record<string, unknown>) as J;
-  const optionsWithDefaults: CrudOptions<D, J, P> = {
+>(options: CrudOptions<D, J, P>): CrudControllerFactory<J> {
+  const extendedOptions: CrudOptionsExtended<D, J, P> = {
     ...options,
-    jsonToDb: options.jsonToDb ?? noopD,
-    dbToJson: options.dbToJson ?? noopJ,
+    dbToJson: options.dbToJson ?? mapInternalToExternal<D, J>((options.dbMap ?? []) as DJMap<D>),
+    jsonToDb: options.jsonToDb ?? mapExternalToInternal((options.dbMap ?? []) as DJMap<D>),
+    parentKeyInternal: options.parentDependency
+      ? (options.dbMap ?? []).find((row) => row.external === options.parentDependency?.key)
+          ?.internal ?? (options.parentDependency.key as keyof D)
+      : undefined,
   };
 
   return {
-    create: makeCreateItem(optionsWithDefaults),
-    read: makeReadItem(optionsWithDefaults),
-    update: makeUpdateItem(optionsWithDefaults),
-    delete: makeDeleteItem(optionsWithDefaults),
+    create: makeCreateItem(extendedOptions),
+    read: makeReadItem(extendedOptions),
+    update: makeUpdateItem(extendedOptions),
+    delete: makeDeleteItem(extendedOptions),
   };
 }

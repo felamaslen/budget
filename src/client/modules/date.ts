@@ -49,8 +49,10 @@ function timeTick(
   t1: number,
   { start, tickSize, numTicks, getMajor, label = NULL, extra = NULL }: TimeTickOptions,
 ): Tick[] {
-  const actualNumTicks =
-    typeof tickSize === 'number' && !numTicks ? Math.ceil((t1 - t0) / tickSize) + 1 : numTicks;
+  const actualNumTicks = Math.max(
+    0,
+    typeof tickSize === 'number' && !numTicks ? Math.ceil((t1 - t0) / tickSize) + 1 : numTicks ?? 0,
+  );
 
   const getTickTime =
     typeof tickSize === 'function'

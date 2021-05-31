@@ -4,8 +4,6 @@ import { makeCrudController } from './controller';
 import * as queries from './queries';
 
 import * as pubsub from '~api/modules/graphql/pubsub';
-import { DJMap, mapExternalToInternal, mapInternalToExternal } from '~api/modules/key-map';
-import { Create } from '~api/types';
 
 jest.mock('./queries');
 jest.mock('~api/modules/graphql/pubsub');
@@ -16,8 +14,6 @@ describe('Crud controller', () => {
   describe(makeCrudController.name, () => {
     const table = 'my_table';
     const item = 'MyItem';
-
-    const dbMap = [{ external: 'someProperty', internal: 'internal_property_name' }];
 
     type MyItemRow = {
       id: number;
@@ -34,8 +30,7 @@ describe('Crud controller', () => {
     const myController = makeCrudController<MyItemRow, MyItem>({
       table,
       item,
-      jsonToDb: mapExternalToInternal(dbMap as DJMap<Create<MyItemRow>>),
-      dbToJson: mapInternalToExternal(dbMap as DJMap<MyItemRow>),
+      dbMap: [{ external: 'someProperty', internal: 'internal_property_name' }],
       withUid: false,
       createTopic: 'MY_ITEM_CREATED',
       updateTopic: 'MY_ITEM_UPDATED',
@@ -108,7 +103,16 @@ describe('Crud controller', () => {
         const result = await myController.read(db, testUserId, 12);
 
         expect(readSpy).toHaveBeenCalledTimes(1);
-        expect(readSpy).toHaveBeenCalledWith(false, db, testUserId, table, 12);
+        expect(readSpy).toHaveBeenCalledWith(
+          false,
+          undefined, // parent table
+          undefined, // parent key (internal)
+          undefined, // parent withUid
+          db,
+          testUserId,
+          table,
+          12,
+        );
 
         expect(result).toStrictEqual<MyItem[]>([
           {
@@ -138,7 +142,15 @@ describe('Crud controller', () => {
         const result = await myController.read(db, testUserId);
 
         expect(readSpy).toHaveBeenCalledTimes(1);
-        expect(readSpy).toHaveBeenCalledWith(false, db, testUserId, table);
+        expect(readSpy).toHaveBeenCalledWith(
+          false,
+          undefined, // parent table
+          undefined, // parent key (internal)
+          undefined, // parent withUid
+          db,
+          testUserId,
+          table,
+        );
 
         expect(result).toStrictEqual<MyItem[]>([
           {

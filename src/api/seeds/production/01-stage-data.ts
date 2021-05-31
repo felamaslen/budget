@@ -95,7 +95,7 @@ const insertStandardListFromCsv = async (
   const rows = await readTableFromCsv<RawDate<ListItemStandard, 'date'>>(page);
 
   await db.query(sql`
-  INSERT INTO list_standard (page, uid, date, item, category, cost, shop)
+  INSERT INTO list_standard (page, uid, date, item, category, value, shop)
   SELECT * FROM ${sql.unnest(
     rows
       .map(mapDates)
@@ -397,7 +397,9 @@ if (require.main === module) {
       getPool().end();
     })
     .catch((err) => {
-      logger.error('Caught fatal error: %s', err);
+      logger.error('Caught fatal error', {
+        err: err.stack,
+      });
       process.exit(1);
     });
 }

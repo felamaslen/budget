@@ -518,9 +518,12 @@ describe('Net worth resolver', () => {
 
       describe('when not passing an id', () => {
         it('should respond with the all the subcategories belonging to the user', async () => {
-          expect.assertions(2);
+          expect.assertions(3);
 
-          const [categoryId] = await createCategories([category]);
+          const [categoryId, categoryIdForeign] = await createCategories([
+            category,
+            { ...category, category: 'Foreign category' },
+          ]);
 
           const subcategory0: NetWorthSubcategoryInput = {
             ...subcategory,
@@ -532,8 +535,31 @@ describe('Net worth resolver', () => {
             categoryId,
             subcategory: 'Subcategory B',
           };
+          const subcategory2: NetWorthSubcategoryInput = {
+            ...subcategory,
+            categoryId: categoryIdForeign,
+            subcategory: 'Subcategory C',
+          };
 
-          await createSubcategories([subcategory0, subcategory1]);
+          await createSubcategories([subcategory0, subcategory1, subcategory2]);
+
+          await getPool().transaction(async (db) => {
+            const {
+              rows: [{ uid: foreignUid }],
+            } = await db.query<{ uid: number }>(
+              sql`
+              INSERT INTO users (name, pin_hash, config)
+              VALUES (${'Foreign user'}, ${'my-pin-hash'}, ${JSON.stringify({})})
+              RETURNING uid
+              `,
+            );
+
+            expect(foreignUid).toStrictEqual(expect.any(Number));
+
+            await db.query(
+              sql`UPDATE net_worth_categories SET uid = ${foreignUid} WHERE id = ${categoryIdForeign}`,
+            );
+          });
 
           const result = await setup();
 

@@ -29,7 +29,9 @@ if (require.main === module) {
       getPool().end();
     })
     .catch((err) => {
-      logger.error('Caught fatal error: %s', err);
+      logger.error('Caught fatal error', {
+        err: err.stack,
+      });
       process.exit(1);
     });
 }

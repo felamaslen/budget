@@ -273,6 +273,11 @@ describe('data module', () => {
       expect(isSold(transactionsList)).toBe(true);
       expect(isSold(partialModification(transactionsList, 3, { units: -1238 }))).toBe(false);
     });
+
+    it('should return false for an empty list', () => {
+      expect.assertions(1);
+      expect(isSold([])).toBe(false);
+    });
   });
 
   describe(sortByTotal.name, () => {

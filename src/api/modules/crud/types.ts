@@ -1,7 +1,8 @@
 import { Request } from 'express';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import { Create, Item } from '~api/types';
+import type { Create, Item } from '~api/types';
+import type { PickPartial } from '~shared/types';
 
 export interface CrudItem extends Item {
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -39,18 +40,31 @@ export type ValidateParentDependency<J extends Item, P extends CrudItem> = (
   parent: P,
 ) => void;
 
-export type CrudOptions<D extends Item, J extends Item, P extends CrudItem = CrudItem> = {
+export type DBMap<D extends Item, J extends Item> = {
+  internal: keyof Create<D>;
+  external: keyof Create<J>;
+}[];
+
+export type CrudOptionsExtended<D extends Item, J extends Item, P extends CrudItem = CrudItem> = {
   table: string;
   withUid?: boolean;
   item: string;
-  jsonToDb: JsonToDb<D, J>;
-  dbToJson: DbToJson<D, J>;
+  dbMap?: DBMap<D, J>;
   parentDependency?: ParentDependency<J>;
   validateParentDependency?: ValidateParentDependency<J, P>;
   createTopic?: string;
   updateTopic?: string;
   deleteTopic?: string;
+  jsonToDb: ((item: J) => D) | ((item: Create<J>) => Create<D>);
+  dbToJson: ((row: D) => J) | ((row: Create<D>) => Create<J>);
+  parentKeyInternal?: keyof D;
 };
+
+export type CrudOptions<
+  D extends Item,
+  J extends Item,
+  P extends CrudItem = CrudItem
+> = PickPartial<CrudOptionsExtended<D, J, P>, 'jsonToDb' | 'dbToJson'>;
 
 export type CreateItem<J extends CrudItem> = (
   db: DatabaseTransactionConnectionType,

@@ -72,7 +72,7 @@ export const getTotalCost = (transactions: TransactionNative[]): number =>
   );
 
 export const isSold = (transactionsList: TransactionNative[]): boolean =>
-  getTotalUnits(transactionsList) === 0;
+  transactionsList.length > 0 && getTotalUnits(transactionsList) === 0;
 
 export const partialModification = <T>(items: T[], index: number, delta: Partial<T>): T[] =>
   replaceAtIndex(items, index, (old) => ({ ...old, ...delta }));

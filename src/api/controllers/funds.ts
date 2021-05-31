@@ -8,7 +8,6 @@ import { getAnnualisedFundReturns, getDisplayedFundValues } from './overview';
 import config from '~api/config';
 import { makeCrudController } from '~api/modules/crud';
 import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
-import { DJMap, mapExternalToInternal, mapInternalToExternal } from '~api/modules/key-map';
 import {
   FundHistoryRow,
   FundListRow,
@@ -50,13 +49,10 @@ import {
   UpdatedFundAllocationTargets,
 } from '~api/types';
 
-const dbMap: DJMap<FundListRow> = [{ external: 'allocationTarget', internal: 'allocation_target' }];
-
 const baseController = makeCrudController<FundListRow, FundMain>({
   table: Page.Funds,
   item: 'Funds',
-  jsonToDb: mapExternalToInternal(dbMap),
-  dbToJson: mapInternalToExternal(dbMap),
+  dbMap: [{ external: 'allocationTarget', internal: 'allocation_target' }],
   withUid: true,
 });
 

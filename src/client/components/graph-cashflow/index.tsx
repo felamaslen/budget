@@ -83,6 +83,10 @@ export const GraphCashFlow: React.FC<Props> = ({
     [dualAxis, today],
   );
 
+  if (ranges.minY === ranges.maxY) {
+    return null;
+  }
+
   return (
     <LineGraph
       isMobile={isMobile}
