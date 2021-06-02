@@ -105,21 +105,20 @@ export async function matchReceiptItems(
   items: string[],
 ): Promise<readonly ReceiptItem[]> {
   const { rows } = await db.query<ReceiptItem>(sql`
-  SELECT item, matched_page, matched_category
+  SELECT item, page AS matched_page, category AS matched_category
   FROM (
-    SELECT ${sql.join(
-      [
-        sql`item`,
-        sql`matched_page`,
-        sql`matched_category`,
-        sql`row_number() over (partition by item order by num_matches desc) as row_num`,
-      ],
-      sql`, `,
-    )}
+    SELECT matched_results.*, row_number() over (partition by item order by num_matches desc) AS row_num
     FROM (
-      SELECT item, page as matched_page, category as matched_category, count(category) as num_matches
+      SELECT item, page, category, count(category) as num_matches
       FROM list_standard
-      WHERE uid = ${uid} AND item = ANY(${sql.array(items, 'text')})
+      WHERE ${sql.join(
+        [
+          sql`uid = ${uid}`,
+          sql`page IN (${sql.join(Object.values(ReceiptPage), sql`, `)})`,
+          sql`item = ANY(${sql.array(items, 'text')})`,
+        ],
+        sql` AND `,
+      )}
       GROUP BY item, page, category
     ) matched_results
   ) ordered_results
@@ -138,7 +137,14 @@ export async function matchReceiptItemName(
   FROM (
     SELECT item, count(item) as num_matches
     FROM list_standard
-    WHERE uid = ${uid} AND item ILIKE ${`${query}%`}
+    WHERE ${sql.join(
+      [
+        sql`uid = ${uid}`,
+        sql`page IN (${sql.join(Object.values(ReceiptPage), sql`, `)})`,
+        sql`item ILIKE ${`${query}%`}`,
+      ],
+      sql` AND `,
+    )}
     GROUP BY item
   ) matched_results
   ORDER BY num_matches DESC

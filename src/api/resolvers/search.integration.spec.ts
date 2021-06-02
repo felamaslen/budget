@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import { sql } from 'slonik';
-import { withSlonik } from '~api/modules/db';
+import { getPool, withSlonik } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   Query,
@@ -202,6 +202,26 @@ describe('Search resolvers', () => {
       expect(res.data?.receiptItem).toBe('Chocolate fondue');
     });
 
+    it('should only return item information relating to receipt pages', async () => {
+      expect.assertions(1);
+      await getPool().query(sql`
+      INSERT INTO list_standard (uid, page, date, item, category, value, shop)
+      VALUES (${app.uid}, ${
+        PageListStandard.Bills
+      }, ${'2020-04-20'}, ${'Road tax'}, ${'Tax'}, ${15100}, ${'DVLA'})
+      `);
+
+      await app.authGqlClient.clearStore();
+      const res = await app.authGqlClient.query<Query, QueryReceiptItemArgs>({
+        query: receiptItem,
+        variables: {
+          item: 'roa',
+        },
+      });
+
+      expect(res.data?.receiptItem).not.toBe('Road tax');
+    });
+
     describe('when no item matches', () => {
       it('should return null', async () => {
         expect.assertions(1);
@@ -262,6 +282,33 @@ describe('Search resolvers', () => {
             item: 'Apples',
             page: 'food',
             category: 'Fruit',
+          }),
+        ]),
+      );
+    });
+
+    it('should only return category information relating to receipt pages', async () => {
+      expect.assertions(1);
+      await getPool().query(sql`
+      INSERT INTO list_standard (uid, page, date, item, category, value, shop)
+      VALUES (${app.uid}, ${
+        PageListStandard.Bills
+      }, ${'2020-04-20'}, ${'Apple'}, ${'Subscriptions'}, ${123}, ${'Some shop'})
+      `);
+
+      await app.authGqlClient.clearStore();
+      const res = await app.authGqlClient.query<Query, QueryReceiptItemsArgs>({
+        query: receiptItems,
+        variables: {
+          items: ['Apple'],
+        },
+      });
+
+      expect(res.data?.receiptItems).not.toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            item: 'Apple',
+            page: PageListStandard.Bills,
           }),
         ]),
       );
