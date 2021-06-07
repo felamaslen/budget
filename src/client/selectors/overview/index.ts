@@ -25,18 +25,13 @@ import {
   getIlliquidEquity,
   IlliquidEquity,
 } from './net-worth';
-import {
-  forecastCompoundedReturns,
-  longTermOptionsDisabled,
-  reduceDates,
-  roundedArrays,
-  withSpendingColumn,
-} from './utils';
+import { longTermOptionsDisabled, reduceDates, roundedArrays, withSpendingColumn } from './utils';
 
 import { Average, GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
 import { arrayAverage, getTotalCost, omitTypeName, rightPad } from '~client/modules/data';
+import { forecastCompoundedReturns } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import {
   filterPastTransactions,
@@ -50,7 +45,7 @@ import {
   LongTermRates,
   Median,
   OverviewGraph,
-  OverviewGraphDate as GraphDate,
+  OverviewGraphDate,
   OverviewGraphPartial,
   OverviewGraphRequired,
   OverviewGraphValues,
@@ -105,63 +100,173 @@ const getMonthlyStockPurchase = (
     ? longTermOptions.rates.stockPurchase ?? longTermRates.stockPurchase
     : longTermRates.stockPurchase;
 
-const withNetWorth = <
-  G extends Partial<OverviewGraphValues> &
-    Pick<OverviewGraphValues, 'income' | 'spending' | AggregateKey | 'stocks' | 'stockCostBasis'>
->(
-  dates: GraphDate[],
-  startPredictionIndex: number,
-  netWorth: EntryWithFTI[],
-  funds: Fund[],
-  illiquidEquity: IlliquidEquity[],
-  longTermOptions: LongTermOptions,
-  longTermRates: LongTermRates,
-) => (
-  graph: G,
-): G & Pick<OverviewGraphValues, 'netWorth' | 'assets' | 'liabilities' | 'illiquidEquity'> => {
-  const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
+type NetWorthContext = {
+  dates: OverviewGraphDate[];
+  startPredictionIndex: number;
+  subcategories: NetWorthSubcategory[];
+  netWorth: EntryWithFTI[];
+  funds: Fund[];
+  illiquidEquity: IlliquidEquity[];
+  longTermOptions: LongTermOptions;
+  longTermRates: LongTermRates;
+};
 
-  const assets = dates.reduce<number[]>((last, { date }, index) => {
-    if (index < startPredictionIndex) {
-      return [...last, netWorth[index].assets];
+type GraphForNetWorth = Partial<OverviewGraphValues> &
+  Pick<OverviewGraphValues, 'income' | 'spending' | 'stocks'>;
+
+type NetWorthKey =
+  | 'cashLiquid'
+  | 'cashOther'
+  | 'illiquidEquity'
+  | 'pension'
+  | 'options'
+  | 'investments'
+  | 'assets'
+  | 'liabilities'
+  | 'netWorth';
+
+type GraphWithNetWorth<G extends GraphForNetWorth> = G & Pick<OverviewGraphValues, NetWorthKey>;
+
+function predictLiquidCash<G extends GraphForNetWorth>(ctx: NetWorthContext, graph: G): number[] {
+  const monthlyStockPurchase = getMonthlyStockPurchase(ctx.longTermOptions, ctx.longTermRates);
+
+  return ctx.dates.reduce<number[]>((last, { date, monthIndex }, index) => {
+    if (index < ctx.startPredictionIndex) {
+      return [...last, ctx.netWorth[index].aggregate[NetWorthAggregate.cashEasyAccess]];
     }
 
-    const fundCosts =
-      getFundsCostToDate(date, funds) -
-      (index > 0 ? getFundsCostToDate(dates[index - 1].date, funds) : 0);
+    const fundCostsPredicted =
+      monthlyStockPurchase * (monthIndex - ctx.dates[index - 1].monthIndex);
+    const fundCostsActual =
+      getFundsCostToDate(date, ctx.funds) -
+      (index > 0 ? getFundsCostToDate(ctx.dates[index - 1].date, ctx.funds) : 0);
 
+    const spending = graph.spending[index] + fundCostsPredicted + fundCostsActual;
     const income = graph.income[index];
-    const spending = graph.spending[index] + fundCosts;
 
-    const stockReturn = graph.stocks[index] - graph.stocks[index - 1] - monthlyStockPurchase;
+    const netChange = income - spending;
 
-    const illiquidAppreciation = illiquidEquity[index].value - illiquidEquity[index - 1].value;
-    const otherCashChange = graph.cashOther[index] - graph.cashOther[index - 1];
+    return [...last, Math.max(0, last[last.length - 1] + netChange)];
+  }, []);
+}
 
-    const netChange = income - spending + stockReturn + illiquidAppreciation + otherCashChange;
+function predictOtherCash(
+  ctx: NetWorthContext,
+  sayeDeposit: number,
+  stocks: number[],
+  investments: number[],
+): number[] {
+  return ctx.dates.reduce<number[]>((last, { monthIndex }, index) => {
+    const investmentDiff = Math.max(0, investments[index] - stocks[index]);
+
+    if (index < ctx.startPredictionIndex) {
+      return [...last, ctx.netWorth[index].aggregate[NetWorthAggregate.cashOther] + investmentDiff];
+    }
+
+    const sayeChange = sayeDeposit * (monthIndex - ctx.dates[index - 1].monthIndex);
+
+    const netChange = sayeChange + investmentDiff;
 
     return [...last, last[last.length - 1] + netChange];
   }, []);
+}
 
-  const liabilities = dates.reduce<number[]>((last, _, index) => {
-    if (index < startPredictionIndex) {
-      return [...last, -netWorth[index].liabilities];
+function predictInvestments(ctx: NetWorthContext, stocks: number[]): number[] {
+  return ctx.dates.reduce<number[]>((last, _, index) => {
+    if (index < ctx.startPredictionIndex) {
+      return [...last, ctx.netWorth[index].aggregate[NetWorthAggregate.stocks]];
     }
-    const loanDebtChange = illiquidEquity[index].debt - illiquidEquity[index - 1].debt;
+
+    const stockReturn = stocks[index] - stocks[index - 1];
+
+    return [...last, last[last.length - 1] + stockReturn];
+  }, []);
+}
+
+function predictOptions(ctx: NetWorthContext, sayeProfit: number): number[] {
+  return ctx.dates.reduce<number[]>((last, { monthIndex }, index) => {
+    if (index < ctx.startPredictionIndex) {
+      return [...last, ctx.netWorth[index].options];
+    }
+
+    const netChange = sayeProfit * (monthIndex - ctx.dates[index - 1].monthIndex);
+
+    return [...last, last[last.length - 1] + netChange];
+  }, []);
+}
+
+function predictAssets<G extends GraphForNetWorth>(
+  ctx: NetWorthContext,
+  graph: G,
+  cashLiquid: number[],
+  cashOther: number[],
+): number[] {
+  return ctx.dates.reduce<number[]>((last, _, index) => {
+    if (index < ctx.startPredictionIndex) {
+      return [...last, ctx.netWorth[index].assets];
+    }
+
+    const stockReturn = graph.stocks[index] - graph.stocks[index - 1];
+
+    const illiquidChange = ctx.illiquidEquity[index].value - ctx.illiquidEquity[index - 1].value;
+    const liquidCashChange = cashLiquid[index] - cashLiquid[index - 1];
+    const otherCashChange = cashOther[index] - cashOther[index - 1];
+
+    const netChange = stockReturn + illiquidChange + liquidCashChange + otherCashChange;
+
+    return [...last, last[last.length - 1] + netChange];
+  }, []);
+}
+
+function predictLiabilities(ctx: NetWorthContext): number[] {
+  return ctx.dates.reduce<number[]>((last, _, index) => {
+    if (index < ctx.startPredictionIndex) {
+      return [...last, -ctx.netWorth[index].liabilities];
+    }
+    const loanDebtChange = ctx.illiquidEquity[index].debt - ctx.illiquidEquity[index - 1].debt;
     return [...last, last[last.length - 1] + loanDebtChange];
   }, []);
+}
+
+const withNetWorth = <G extends GraphForNetWorth>(ctx: NetWorthContext) => (
+  graph: G,
+): GraphWithNetWorth<G> => {
+  const currentEntries = ctx.netWorth.slice(0, ctx.startPredictionIndex);
+  const fillCurrent = (values: number[]): number[] => rightPad(values, ctx.dates.length);
+  const fillAggregate = (key: NetWorthAggregate): number[] =>
+    fillCurrent(currentEntries.map(({ aggregate }) => aggregate[key]));
+
+  const { deposit: sayeDeposit, profit: sayeProfit } = calculatePredictedSAYEMonthlyDeposit(
+    ctx.subcategories,
+    ctx.netWorth,
+    ctx.startPredictionIndex,
+  );
+
+  const options = predictOptions(ctx, sayeProfit);
+  const investments = predictInvestments(ctx, graph.stocks);
+
+  const cashLiquid = predictLiquidCash(ctx, graph);
+  const cashOther = predictOtherCash(ctx, sayeDeposit, graph.stocks, investments);
+
+  const assets = predictAssets(ctx, graph, cashLiquid, cashOther);
+  const liabilities = predictLiabilities(ctx);
 
   return {
     ...graph,
+    cashLiquid,
+    cashOther,
+    illiquidEquity: ctx.illiquidEquity.map(({ value, debt }) => value + debt),
+    pension: fillAggregate(NetWorthAggregate.pension),
+    options,
+    investments,
     assets,
     liabilities,
     netWorth: assets.map((value, index) => value + liabilities[index]),
-    illiquidEquity: illiquidEquity.map(({ value, debt }) => value + debt),
   };
 };
 
 function predictByPastAverages(
-  dates: GraphDate[],
+  dates: OverviewGraphDate[],
   currentIndex: number,
   currentMonthRatio: number,
   category: Category,
@@ -187,7 +292,7 @@ function predictByPastAverages(
 }
 
 function predictIncome(
-  dates: GraphDate[],
+  dates: OverviewGraphDate[],
   currentIndex: number,
   currentIncome: number[],
   longTermOptions: LongTermOptions,
@@ -208,7 +313,7 @@ function predictIncome(
 }
 
 function calculateFutures<G extends OverviewGraphPartial>(
-  dates: GraphDate[],
+  dates: OverviewGraphDate[],
   today: Date,
   longTermOptions: LongTermOptions,
 ): (graph: G) => G {
@@ -246,7 +351,7 @@ const withNetChange = <G extends OverviewGraphRequired<'spending'>>() => (
 });
 
 const withPredictedSpending = <G extends OverviewGraphPartial>(
-  dates: GraphDate[],
+  dates: OverviewGraphDate[],
   today: Date,
   longTermOptions: LongTermOptions,
 ): ((graph: G) => OverviewGraphRequired<'spending' | 'net', G>) =>
@@ -257,7 +362,7 @@ const withPredictedSpending = <G extends OverviewGraphPartial>(
   );
 
 const predictStockReturns = (
-  dates: GraphDate[],
+  dates: OverviewGraphDate[],
   annualisedFundReturns: number,
   monthlyStockPurchase: number,
 ) => (stocks: number[]): number[] =>
@@ -280,7 +385,7 @@ const withCurrentStockValue = (currentStockValue: number) => (stocks: number[]):
   replaceAtIndex(stocks, stocks.length - 1, currentStockValue);
 
 const getStockCostBasis = (
-  dates: GraphDate[],
+  dates: OverviewGraphDate[],
   monthlyStockPurchase: number,
   numOldMonths: number,
   startPredictionIndex: number,
@@ -288,7 +393,7 @@ const getStockCostBasis = (
 ): number[] =>
   Array(numOldMonths)
     .fill(0)
-    .map<GraphDate>((_, index) => ({
+    .map<OverviewGraphDate>((_, index) => ({
       date: endOfMonth(addMonths(dates[0].date, index - numOldMonths)),
       monthIndex: index - numOldMonths,
     }))
@@ -306,7 +411,7 @@ const withStocks = <G extends OverviewGraphPartial>(
 ) => (
   longTermRates: LongTermRates,
   startPredictionIndex: number,
-  dates: GraphDate[],
+  dates: OverviewGraphDate[],
   stocks: number[],
   funds: Fund[],
   fundsCachedValue: { value: number },
@@ -337,54 +442,6 @@ const withStocks = <G extends OverviewGraphPartial>(
   };
 };
 
-type AggregateKey = 'pension' | 'cashOther' | 'options' | 'investments';
-
-function withAggregateNetWorth<G extends Partial<OverviewGraphValues>>(
-  dates: GraphDate[],
-  startPredictionIndex: number,
-  subcategories: NetWorthSubcategory[],
-  aggregatedNetWorth: EntryWithFTI[],
-  longTermOptions: LongTermOptions,
-  longTermRates: LongTermRates,
-): (graph: G) => G & Pick<OverviewGraphValues, AggregateKey> {
-  const currentEntries = aggregatedNetWorth.slice(0, startPredictionIndex);
-  const fillCurrent = (values: number[]): number[] => rightPad(values, dates.length);
-  const fillAggregate = (key: NetWorthAggregate): number[] =>
-    fillCurrent(currentEntries.map(({ aggregate }) => aggregate[key]));
-
-  const { deposit: sayeDeposit, profit: sayeProfit } = calculatePredictedSAYEMonthlyDeposit(
-    subcategories,
-    aggregatedNetWorth,
-    startPredictionIndex,
-  );
-
-  const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
-  const currentInvestmentsValue =
-    currentEntries[currentEntries.length - 1]?.aggregate[NetWorthAggregate.stocks] ?? 0;
-
-  return (graph: G): G & Pick<OverviewGraphValues, AggregateKey> => ({
-    ...graph,
-    pension: fillAggregate(NetWorthAggregate.pension),
-    cashOther: fillAggregate(NetWorthAggregate.cashOther).map(
-      (value, index) =>
-        value + sayeDeposit * Math.max(0, dates[index].monthIndex - (startPredictionIndex - 1)),
-    ),
-    investments: currentEntries
-      .map(({ aggregate }) => aggregate[NetWorthAggregate.stocks])
-      .concat(
-        dates
-          .slice(currentEntries.length)
-          .map<number>(
-            ({ monthIndex }) =>
-              currentInvestmentsValue + monthlyStockPurchase * (monthIndex - startPredictionIndex),
-          ),
-      ),
-    options: fillCurrent(currentEntries.map(({ options }) => options)).map(
-      (value, index) => value + sayeProfit * Math.max(0, index - (startPredictionIndex - 1)),
-    ),
-  });
-}
-
 const getNetWorthMonthlyComposer = moize(
   <G extends OverviewGraphRequired<'income' | 'spending' | 'net' | 'stocks' | 'stockCostBasis'>>(
     today: Date,
@@ -406,31 +463,17 @@ const getNetWorthMonthlyComposer = moize(
         funds,
         subcategories,
         illiquidEquity,
-      ): ((
-        graph: G,
-      ) => OverviewGraphRequired<
-        'assets' | 'liabilities' | 'netWorth' | 'illiquidEquity' | AggregateKey,
-        G
-      >) =>
-        compose(
-          withNetWorth<G & Pick<OverviewGraphValues, AggregateKey | 'stocks' | 'income'>>(
-            dates,
-            startPredictionIndex,
-            netWorth,
-            funds,
-            illiquidEquity,
-            longTermOptions,
-            longTermRates,
-          ),
-          withAggregateNetWorth(
-            dates,
-            startPredictionIndex,
-            subcategories,
-            netWorth,
-            longTermOptions,
-            longTermRates,
-          ),
-        ),
+      ): ((graph: G) => OverviewGraphRequired<NetWorthKey, G>) =>
+        withNetWorth<G>({
+          dates,
+          startPredictionIndex,
+          subcategories,
+          netWorth,
+          funds,
+          illiquidEquity,
+          longTermOptions,
+          longTermRates,
+        }),
     ),
   { maxSize: 1 },
 );

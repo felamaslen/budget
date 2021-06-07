@@ -14,16 +14,12 @@ import { createSelector } from 'reselect';
 
 import { getMonthDates, getGraphDates, getStartPredictionIndex } from './common';
 import { getCategories, getEntries, getMonthlyValues, getSubcategories } from './direct';
-import {
-  forecastCompoundedReturns,
-  getSpendingColumn,
-  longTermOptionsDisabled,
-  roundedNumbers,
-} from './utils';
+import { getSpendingColumn, longTermOptionsDisabled, roundedNumbers } from './utils';
 
 import { getText } from '~client/components/net-worth/breakdown.blocks';
 import { blockPacker } from '~client/modules/block-packer';
 import { lastInArray } from '~client/modules/data';
+import { forecastCompoundedReturns } from '~client/modules/finance';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getAppConfig } from '~client/selectors/config';
 import { colors } from '~client/styled/variables';
@@ -382,7 +378,7 @@ export const getLatestNetWorthAggregate = moize(
   { maxSize: 1 },
 );
 
-function PMT({ principal, paymentsRemaining, rate }: LoanValue): number {
+export function PMT({ principal, paymentsRemaining, rate }: LoanValue): number {
   if (!paymentsRemaining) {
     return 0;
   }
@@ -427,9 +423,9 @@ const forecastCompoundStack = <T extends CompoundLoanOrAsset>(
     .values.slice(1)
     .map<number>((stack) => stack.reduce<number>((last, value) => last + value, 0));
 
-type CompoundLoan = CompoundLoanOrAsset & { monthlyPayment: number };
+export type CompoundLoan = CompoundLoanOrAsset & { monthlyPayment: number };
 
-const forecastCompoundLoanDebt = forecastCompoundStack<CompoundLoan>(
+export const forecastCompoundLoanDebt = forecastCompoundStack<CompoundLoan>(
   (principal, monthsSinceLastForecast, loan) =>
     // The debt is forecast in periods of arbitrary length in months
     // But debt is assumed to be repaid monthly, so this is taken into account

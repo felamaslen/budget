@@ -161,6 +161,54 @@ describe('Overview selectors', () => {
         /* Jul-18 */ 10654,
       ];
 
+      const income = [
+        2000,
+        1900,
+        1500,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+      ];
+
+      const bills = [1000, 900, 400, 650, 0, 0, 0];
+      const food = [50, 13, 27, 27, 27, 27, 27];
+      const general = [150, 90, 10, 90, 90, 90, 90];
+      const social = [50, 65, 181, 65, 65, 65, 65];
+      const holiday = [10, 1000, 95, 95, 95, 95, 95];
+
+      const spending = [
+        /* Jan-18 */ 1000 + 50 + 150 + 50 + 10,
+        /* Feb-18 */ 900 + 13 + 90 + 65 + 1000,
+        /* Mar-18 */ 713,
+        /* Apr-18 */ 277 + /* bills */ 650,
+        /* May-18 */ 277,
+        /* Jun-18 */ 277,
+        /* Jul-18 */ 277,
+      ];
+
+      const cashLiquidMar18 =
+        10324 +
+        1296523 +
+        Math.round(37.5 * 100 * 0.035) +
+        income[2] -
+        spending[2] +
+        mar18Transactions;
+      const cashLiquidApr18 = cashLiquidMar18 + income[3] - spending[3];
+      const cashLiquidMay18 = cashLiquidApr18 + income[4] - spending[4];
+      const cashLiquidJun18 = cashLiquidMay18 + income[5] - spending[5];
+      const cashLiquidJul18 = cashLiquidJun18 + income[6] - spending[6];
+
+      const cashLiquid = [
+        /* Jan-18 */ 0,
+        /* Feb-18 */ 10324 + 1296523 + Math.round(37.5 * 100 * 0.035),
+        /* Mar-18 */ cashLiquidMar18,
+        /* Apr-18 */ cashLiquidApr18,
+        /* May-18 */ cashLiquidMay18,
+        /* Jun-18 */ cashLiquidJun18,
+        /* Jul-18 */ cashLiquidJul18,
+      ];
+
       const cashOther = [
         /* Jan-18 */ 0,
         /* Feb-18 */ 855912 + Math.round(657 * 123.6),
@@ -236,31 +284,6 @@ describe('Overview selectors', () => {
         /* May-18 */ 657 * (176.28 - 123.6),
         /* Jun-18 */ 657 * (176.28 - 123.6),
         /* Jul-18 */ 657 * (176.28 - 123.6),
-      ];
-
-      const income = [
-        2000,
-        1900,
-        1500,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-      ];
-      const bills = [1000, 900, 400, 650, 0, 0, 0];
-      const food = [50, 13, 27, 27, 27, 27, 27];
-      const general = [150, 90, 10, 90, 90, 90, 90];
-      const social = [50, 65, 181, 65, 65, 65, 65];
-      const holiday = [10, 1000, 95, 95, 95, 95, 95];
-
-      const spending = [
-        /* Jan-18 */ 1000 + 50 + 150 + 50 + 10,
-        /* Feb-18 */ 900 + 13 + 90 + 65 + 1000,
-        /* Mar-18 */ 713,
-        /* Apr-18 */ 277 + /* bills */ 650,
-        /* May-18 */ 277,
-        /* Jun-18 */ 277,
-        /* Jul-18 */ 277,
       ];
 
       const assetsPredictedMar18 =
@@ -364,6 +387,7 @@ describe('Overview selectors', () => {
         ${'investments (excluding cash)'}  | ${'stocks'}         | ${stocks}
         ${'investment cost basis'}         | ${'stockCostBasis'} | ${stockCostBasis}
         ${'pension'}                       | ${'pension'}        | ${pension}
+        ${'liquid cash'}                   | ${'cashLiquid'}     | ${cashLiquid}
         ${'other cash'}                    | ${'cashOther'}      | ${cashOther}
         ${'illiquid equity'}               | ${'illiquidEquity'} | ${illiquidEquity}
         ${'options'}                       | ${'options'}        | ${options}
@@ -480,6 +504,59 @@ describe('Overview selectors', () => {
         /* Jul-18 */ 11237,
       ];
 
+      const income = [
+        2000,
+        1900,
+        1500,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+        expectedIncomeAverage,
+      ];
+      const bills = [1000, 900, 400, 650, 0, 0, 0];
+      const food = [50, 13, 20, 20, 20, 20, 20];
+      const general = [150, 90, 10, 90, 90, 90, 90];
+      const social = [50, 65, 134, 65, 65, 65, 65];
+      const holiday = [10, 1000, 95, 95, 95, 95, 95];
+
+      const spending = [
+        /* Jan-18 */ 1000 + 50 + 150 + 50 + 10,
+        /* Feb-18 */ 900 + 13 + 90 + 65 + 1000,
+        /* Mar-18 */ 400 + 20 + 10 + 134 + 95,
+        /* Apr-18 */ 270 + /* bills */ 650,
+        /* May-18 */ 270,
+        /* Jun-18 */ 270,
+        /* Jul-18 */ 270,
+      ];
+
+      const expectedLiquidCashMar18 = 9752 + 1051343;
+      const expectedLiquidCashApr18 =
+        expectedLiquidCashMar18 +
+        expectedIncomeAverage -
+        (spending[3] + expectedStockPurchaseAverage);
+      const expectedLiquidCashMay18 =
+        expectedLiquidCashApr18 +
+        expectedIncomeAverage -
+        (spending[4] + expectedStockPurchaseAverage);
+      const expectedLiquidCashJun18 =
+        expectedLiquidCashMay18 +
+        expectedIncomeAverage -
+        (spending[4] + expectedStockPurchaseAverage);
+      const expectedLiquidCashJul18 =
+        expectedLiquidCashJun18 +
+        expectedIncomeAverage -
+        (spending[4] + expectedStockPurchaseAverage);
+
+      const cashLiquid = [
+        /* Jan-18 */ 0,
+        /* Feb-18 */ 10324 + Math.round(37.5 * 100 * 0.035) + 1296523,
+        /* Mar-18 */ expectedLiquidCashMar18,
+        /* Apr-18 */ expectedLiquidCashApr18,
+        /* May-18 */ expectedLiquidCashMay18,
+        /* Jun-18 */ expectedLiquidCashJun18,
+        /* Jul-18 */ expectedLiquidCashJul18,
+      ];
+
       const cashOther = [
         /* Jan-18 */ 0,
         /* Feb-18 */ 855912 + 657 * 123.6,
@@ -557,31 +634,6 @@ describe('Overview selectors', () => {
         /* May-18 */ may18OptionValue,
         /* Jun-18 */ jun18OptionValue,
         /* Jul-18 */ jul18OptionValue,
-      ];
-
-      const income = [
-        2000,
-        1900,
-        1500,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-      ];
-      const bills = [1000, 900, 400, 650, 0, 0, 0];
-      const food = [50, 13, 20, 20, 20, 20, 20];
-      const general = [150, 90, 10, 90, 90, 90, 90];
-      const social = [50, 65, 134, 65, 65, 65, 65];
-      const holiday = [10, 1000, 95, 95, 95, 95, 95];
-
-      const spending = [
-        /* Jan-18 */ 1000 + 50 + 150 + 50 + 10,
-        /* Feb-18 */ 900 + 13 + 90 + 65 + 1000,
-        /* Mar-18 */ 400 + 20 + 10 + 134 + 95,
-        /* Apr-18 */ 270 + /* bills */ 650,
-        /* May-18 */ 270,
-        /* Jun-18 */ 270,
-        /* Jul-18 */ 270,
       ];
 
       // We're currently in March, at the end of the month, so we
@@ -673,6 +725,7 @@ describe('Overview selectors', () => {
         ${'net worth (excluding options)'} | ${'netWorth'}       | ${netWorth}
         ${'stocks'}                        | ${'stocks'}         | ${stocks}
         ${'pension'}                       | ${'pension'}        | ${pension}
+        ${'liquid cash'}                   | ${'cashLiquid'}     | ${cashLiquid}
         ${'other cash'}                    | ${'cashOther'}      | ${cashOther}
         ${'illiquid equity'}               | ${'illiquidEquity'} | ${illiquidEquity}
         ${'options'}                       | ${'options'}        | ${options}

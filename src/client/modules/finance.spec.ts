@@ -1,6 +1,42 @@
-import { abbreviateFundName, extractLongName, getGenericFullSymbol } from './finance';
+import {
+  abbreviateFundName,
+  extractLongName,
+  forecastTotalLoanPayable,
+  getGenericFullSymbol,
+} from './finance';
 
 describe('Finance module', () => {
+  describe(forecastTotalLoanPayable.name, () => {
+    describe('when the payment is lower than the principal', () => {
+      it('should return the total interest paid over the lifetime of the loan', () => {
+        expect.assertions(4);
+        expect(forecastTotalLoanPayable(36000000, 147692, 0.0274)).toMatchInlineSnapshot(
+          `52129616`,
+        );
+        expect(forecastTotalLoanPayable(36000000, 200000, 0.0274)).toMatchInlineSnapshot(
+          `46099175`,
+        );
+        expect(forecastTotalLoanPayable(36000000, 147692, 0.05)).toMatchInlineSnapshot(`163953390`);
+        expect(forecastTotalLoanPayable(36000000, 200000, 0.06)).toMatchInlineSnapshot(`84644693`);
+      });
+    });
+
+    describe('when the payment is higher than the principal', () => {
+      it('should return the lower of the two', () => {
+        expect.assertions(2);
+        expect(forecastTotalLoanPayable(60032, 60033, 0.05)).toBe(60032);
+        expect(forecastTotalLoanPayable(60033, 60033, 0.05)).toBe(60033);
+      });
+    });
+
+    describe('when the payment is insufficient to cover the interest', () => {
+      it('should return Infinity', () => {
+        expect.assertions(1);
+        expect(forecastTotalLoanPayable(36000000, 105, 0.03)).toBe(Infinity);
+      });
+    });
+  });
+
   describe('abbreviateFundName', () => {
     it.each`
       short             | long

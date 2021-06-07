@@ -979,6 +979,7 @@ export type OverviewOld = {
   stocks: Array<Scalars['Int']>;
   investmentPurchases: Array<Scalars['Int']>;
   pension: Array<Scalars['Int']>;
+  cashLiquid: Array<Scalars['Int']>;
   cashOther: Array<Scalars['Int']>;
   investments: Array<Scalars['Int']>;
   illiquidEquity: Array<Scalars['Int']>;
@@ -1647,7 +1648,7 @@ export type OverviewOldQuery = (
   { __typename?: 'Query' }
   & { overviewOld?: Maybe<(
     { __typename?: 'OverviewOld' }
-    & Pick<OverviewOld, 'startDate' | 'stocks' | 'investmentPurchases' | 'pension' | 'cashOther' | 'investments' | 'illiquidEquity' | 'assets' | 'liabilities' | 'options' | 'netWorth' | 'income' | 'spending'>
+    & Pick<OverviewOld, 'startDate' | 'stocks' | 'investmentPurchases' | 'pension' | 'cashLiquid' | 'cashOther' | 'investments' | 'illiquidEquity' | 'assets' | 'liabilities' | 'options' | 'netWorth' | 'income' | 'spending'>
   )> }
 );
 
@@ -2570,6 +2571,7 @@ export const OverviewOldDocument = gql`
     stocks
     investmentPurchases
     pension
+    cashLiquid
     cashOther
     investments
     illiquidEquity

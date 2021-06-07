@@ -94,6 +94,7 @@ export type OldNetWorthRow = {
   pension: number;
   options: number;
   illiquid_equity: number;
+  liquid_cash: number;
   locked_cash: number;
   investments: number;
 };

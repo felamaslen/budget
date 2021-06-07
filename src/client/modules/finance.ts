@@ -1,6 +1,32 @@
 import { compose } from '@typed/compose';
 import moize from 'moize';
 
+// Loan functions
+export const forecastCompoundedReturns = (
+  initialValue: number,
+  numPeriods: number,
+  payment: number,
+  interestRateYearly: number,
+): number =>
+  Array(numPeriods)
+    .fill(0)
+    .reduce<number>((last) => last * (1 + interestRateYearly) ** (1 / 12) + payment, initialValue);
+
+export function forecastTotalLoanPayable(
+  initialValue: number,
+  payment: number,
+  interestRateYearly: number,
+): number {
+  if (payment >= initialValue) {
+    return initialValue;
+  }
+  const remainingDebt = Math.round((initialValue - payment) * (1 + interestRateYearly) ** (1 / 12));
+  if (remainingDebt >= initialValue) {
+    return Infinity; // interest rate is too low to repay the debt
+  }
+  return payment + forecastTotalLoanPayable(remainingDebt, payment, interestRateYearly);
+}
+
 // Fund name abbreviations
 
 // helper functions

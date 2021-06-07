@@ -76,6 +76,7 @@ export const GraphOverview: React.FC = () => {
         stocks: [...overviewOld.stocks, ...graph.values.stocks],
         stockCostBasis: graph.values.stockCostBasis,
         pension: [...overviewOld.pension, ...graph.values.pension],
+        cashLiquid: [...overviewOld.cashLiquid, ...graph.values.cashLiquid],
         cashOther: [...overviewOld.cashOther, ...graph.values.cashOther],
         investments: [...overviewOld.investments, ...graph.values.investments],
         investmentPurchases: [

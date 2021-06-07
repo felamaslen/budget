@@ -15,14 +15,9 @@ import { PageNonStandard } from '~client/types/enum';
 import { NetWorthAggregate } from '~shared/constants';
 
 function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
-  const withoutPension = graph.values.netWorth.map(
-    (value, index) => value - graph.values.pension[index],
-  );
-
   const dataAssets = getValuesWithTime(graph.dates, graph.values.assets);
   const dataLiabilities = getValuesWithTime(graph.dates, graph.values.liabilities);
   const dataNetWorth = getValuesWithTime(graph.dates, graph.values.netWorth);
-  const dataWithoutPension = getValuesWithTime(graph.dates, withoutPension);
   const dataPension = getValuesWithTime(graph.dates, graph.values.pension);
   const dataOptions = getValuesWithTime(graph.dates, graph.values.options);
 
@@ -30,12 +25,23 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
   const dataStocks = getValuesWithTime(graph.dates, graph.values.stocks);
   const dataStockCostBasis = getValuesWithTime(graph.dates, graph.values.stockCostBasis);
   const dataLockedCash = getValuesWithTime(graph.dates, graph.values.cashOther);
+  const dataLiquidCash = getValuesWithTime(graph.dates, graph.values.cashLiquid);
 
   const linesCommon: Line[] = [
+    {
+      key: 'liquid-cash',
+      name: 'Liquid cash',
+      data: dataLiquidCash,
+      stack: [dataStocks, dataLockedCash],
+      fill: true,
+      smooth: true,
+      color: rgba(colors.netWorth.aggregate[NetWorthAggregate.cashEasyAccess], 0.3),
+    },
     {
       key: 'illiquid-equity',
       name: 'Illiquid equity',
       data: dataIlliquidEquity,
+      stack: [dataStocks, dataLockedCash, dataLiquidCash, dataPension],
       sliceAtFirstPositive: 2,
       fill: true,
       smooth: true,
@@ -46,7 +52,6 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       key: 'stocks',
       name: 'Stocks',
       data: dataStocks,
-      stack: [dataIlliquidEquity],
       sliceAtFirstPositive: 1,
       fill: true,
       smooth: true,
@@ -56,7 +61,6 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       key: 'stock-cost-basis',
       name: 'Stock cost basis',
       data: dataStockCostBasis,
-      stack: [dataIlliquidEquity],
       sliceAtFirstPositive: 1,
       fill: false,
       strokeWidth: 1,
@@ -68,7 +72,7 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       key: 'locked-cash',
       name: 'Locked cash',
       data: dataLockedCash,
-      stack: [dataIlliquidEquity, dataStocks],
+      stack: [dataStocks],
       sliceAtFirstPositive: 1,
       fill: true,
       smooth: true,
@@ -89,7 +93,7 @@ function getGraphData(graph: OverviewGraph, showLiabilities: boolean): Line[] {
       key: 'pension',
       name: 'Pension',
       data: dataPension,
-      stack: [dataWithoutPension],
+      stack: [dataStocks, dataLockedCash, dataLiquidCash],
       fill: true,
       smooth: true,
       color: rgba(colors.netWorth.aggregate[NetWorthAggregate.pension], 0.5),

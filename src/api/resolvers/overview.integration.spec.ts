@@ -116,6 +116,7 @@ describe('Overview resolver', () => {
           startDate
           stocks
           pension
+          cashLiquid
           cashOther
           investments
           investmentPurchases
@@ -169,6 +170,27 @@ describe('Overview resolver', () => {
       /* Mar-15 */ 1054200,
       /* Apr-15 */ 0,
       /* May-15 */ 1117503,
+      /* Jun-15 */ 0,
+      /* Jul-15 */ 0,
+      /* Aug-15 */ 0,
+      /* Sep-15 */ 0,
+      /* Oct-15 */ 0,
+      /* Nov-15 */ 0,
+      /* Dec-15 */ 0,
+      /* Jan-16 */ 0,
+      /* Feb-16 */ 0,
+    ];
+
+    const expectedLiquidCash = [
+      /* Sep-14 */ 0,
+      /* Oct-14 */ 0,
+      /* Nov-14 */ 0,
+      /* Dec-14 */ 0,
+      /* Jan-15 */ 0,
+      /* Feb-15 */ 0,
+      /* Mar-15 */ 1050000 + Math.round(62000 * 100 * 0.113),
+      /* Apr-15 */ 0,
+      /* May-15 */ 996542 + Math.round(57451 * 100 * 0.116) + Math.round(105 * 100 * 0.783),
       /* Jun-15 */ 0,
       /* Jul-15 */ 0,
       /* Aug-15 */ 0,
@@ -373,6 +395,7 @@ describe('Overview resolver', () => {
       ${'start date'}                  | ${'startDate'}           | ${'2014-09-30'}
       ${'stocks'}                      | ${'stocks'}              | ${expectedStocks}
       ${'pension'}                     | ${'pension'}             | ${expectedPension}
+      ${'liquid cash'}                 | ${'cashLiquid'}          | ${expectedLiquidCash}
       ${'other cash'}                  | ${'cashOther'}           | ${expectedCashOther}
       ${'investments (stocks + cash)'} | ${'investments'}         | ${expectedInvestments}
       ${'investment purchases'}        | ${'investmentPurchases'} | ${expectedInvestmentPurchases}

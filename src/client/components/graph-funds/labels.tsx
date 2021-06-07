@@ -12,14 +12,10 @@ import { LabelBase } from '~client/components/highlight-point/styles';
 import { formatPercent } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { getFundsCache } from '~client/selectors';
-import { FlexCenter } from '~client/styled/shared';
+import { CenterNoWrap } from '~client/styled/shared';
 import { FundMode } from '~client/types/enum';
 
 const NoWrap = styled.span`
-  white-space: nowrap;
-`;
-
-const CenterNoWrap = styled(FlexCenter)`
   white-space: nowrap;
 `;
 

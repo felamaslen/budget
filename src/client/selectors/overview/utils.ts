@@ -51,16 +51,6 @@ export const longTermOptionsDisabled: LongTermOptions = { enabled: false, rates:
 export const mapMonthDates = (dates: Date[]): OverviewGraphDate[] =>
   dates.map<OverviewGraphDate>((date, monthIndex) => ({ date, monthIndex }));
 
-export const forecastCompoundedReturns = (
-  initialValue: number,
-  numPeriods: number,
-  payment: number,
-  interestRateYearly: number,
-): number =>
-  Array(numPeriods)
-    .fill(0)
-    .reduce<number>((last) => last * (1 + interestRateYearly) ** (1 / 12) + payment, initialValue);
-
 export const reduceDates = <T>(
   dates: OverviewGraphDate[],
   reducerFn: (

@@ -16,15 +16,13 @@ const keyTextX0 = keyX0 + keyLineWidth + keyMargin;
 const keyX1 = 130;
 const keyTextX1 = keyX1 + keyLineWidth + keyMargin;
 
-const keyX2 = 220;
-const keyTextX2 = keyX2 + keyLineWidth + keyMargin;
-
 const keyY0 = 40;
 const keyY1 = 56;
 const keyY2 = 72;
+const keyY3 = 88;
 
 export const Key: React.FC<Props> = (props) => (
-  <BaseKey {...props} height={80} width={250}>
+  <BaseKey {...props} height={80} width={180}>
     <line
       x1={keyX0}
       y1={keyY0}
@@ -65,14 +63,14 @@ export const Key: React.FC<Props> = (props) => (
 
     <rect
       x={keyX1}
-      y={keyY2 - 3}
+      y={keyY3 - 3}
       width={keyLineWidth}
       height={6}
       fill={rgba(colors.netWorth.illiquidEquity, 0.5)}
     />
     <text
       x={keyTextX1}
-      y={keyY2}
+      y={keyY3}
       fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
@@ -100,15 +98,33 @@ export const Key: React.FC<Props> = (props) => (
     </text>
 
     <rect
+      x={keyX0}
+      y={keyY2 - 3}
+      width={keyLineWidth}
+      height={6}
+      fill={colors.netWorth.aggregate[NetWorthAggregate.cashEasyAccess]}
+    />
+    <text
+      x={keyTextX0}
+      y={keyY2}
+      fill={colors.dark.light}
+      fontFamily={fontFamily}
+      fontSize={fontSize}
+      alignmentBaseline="middle"
+    >
+      Cash
+    </text>
+
+    <rect
       x={keyX1}
-      y={keyY1 - 3}
+      y={keyY2 - 3}
       width={keyLineWidth}
       height={6}
       fill={colors.netWorth.aggregate[NetWorthAggregate.cashOther]}
     />
     <text
       x={keyTextX1}
-      y={keyY1}
+      y={keyY2}
       fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
@@ -119,14 +135,14 @@ export const Key: React.FC<Props> = (props) => (
 
     <rect
       x={keyX0}
-      y={keyY2 - 3}
+      y={keyY3 - 3}
       width={keyLineWidth}
       height={6}
       fill={rgba(colors.netWorth.aggregate[NetWorthAggregate.pension], 0.5)}
     />
     <text
       x={keyTextX0}
-      y={keyY2}
+      y={keyY3}
       fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}
@@ -136,17 +152,17 @@ export const Key: React.FC<Props> = (props) => (
     </text>
 
     <line
-      x1={keyX2}
-      y1={keyY0 + 0.5}
-      x2={keyX2 + keyLineWidth}
-      y2={keyY0 + 0.5}
+      x1={keyX1}
+      y1={keyY1 + 0.5}
+      x2={keyX1 + keyLineWidth}
+      y2={keyY1 + 0.5}
       stroke={colors.netWorth.options}
       strokeDasharray="3,4"
       strokeWidth={2}
     />
     <text
-      x={keyTextX2}
-      y={keyY0}
+      x={keyTextX1}
+      y={keyY1}
       fill={colors.dark.light}
       fontFamily={fontFamily}
       fontSize={fontSize}

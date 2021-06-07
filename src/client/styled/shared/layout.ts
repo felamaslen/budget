@@ -16,8 +16,16 @@ export const FlexColumn = styled(Flex)`
   flex-flow: column;
 `;
 
+export const FlexCenterColumn = styled(FlexCenter)`
+  flex-flow: column;
+`;
+
 export const InlineFlexCenter = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+`;
+
+export const CenterNoWrap = styled(FlexCenter)`
+  white-space: nowrap;
 `;

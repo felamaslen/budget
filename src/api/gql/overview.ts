@@ -42,6 +42,7 @@ export const overviewSchema = gql`
     stocks: [Int!]!
     investmentPurchases: [Int!]!
     pension: [Int!]!
+    cashLiquid: [Int!]!
     cashOther: [Int!]!
     investments: [Int!]!
     illiquidEquity: [Int!]!

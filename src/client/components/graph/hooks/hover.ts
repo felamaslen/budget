@@ -64,27 +64,25 @@ function reduceClosestPoint(lines: Line[], calc: Calc, { posX, posY }: Position)
     .reduce<Closest | null>((last, line) => {
       const pixY = getPixY(calc, line.secondary);
 
-      return getStackedData(line.data, line.stack).reduce<Closest | null>(
-        (next, point, index): Closest | null => {
-          const distX = Math.abs(calc.pixX(point[0]) - posX);
-          const distY = Math.abs(pixY(point[1]) - posY);
-          if (next && !(distX < next.distX || (distX === next.distX && distY < next.distY))) {
-            return next;
-          }
+      return getStackedData(line.data, line.stack).reduce<Closest | null>((next, point, index) => {
+        const yValueCompare = line.fill ? point[1] - line.data[index][1] / 2 : point[1];
+        const distX = Math.abs(calc.pixX(point[0]) - posX);
+        const distY = Math.abs(pixY(yValueCompare) - posY);
+        if (next && !(distX < next.distX || (distX === next.distX && distY < next.distY))) {
+          return next;
+        }
 
-          return {
-            distX,
-            distY,
-            key: line.key,
-            group: line.name,
-            point,
-            unstackedPoint: line.data[index],
-            secondary: line.secondary,
-            index,
-          };
-        },
-        last,
-      );
+        return {
+          distX,
+          distY,
+          key: line.key,
+          group: line.name,
+          point,
+          unstackedPoint: line.data[index],
+          secondary: line.secondary,
+          index,
+        };
+      }, last);
     }, null);
 }
 

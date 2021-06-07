@@ -262,10 +262,20 @@ export async function selectOldNetWorth(
           GROUP BY v.id
         )`,
 
+        sql`values_liquid_cash AS (
+          SELECT
+            v.id
+            ,SUM(CASE WHEN v.category = ${NetWorthAggregate.cashEasyAccess}
+              THEN ${valueSimpleFxSaye} ELSE 0 END)::int4 AS value
+          FROM values v
+          GROUP BY v.id
+        )`,
+
         sql`values_locked_cash AS (
           SELECT
             v.id
-            ,SUM(CASE WHEN v.category = ${'Cash (other)'} THEN ${valueSimpleFxSaye} ELSE 0 END)::int4 AS value
+            ,SUM(CASE WHEN v.category = ${NetWorthAggregate.cashOther}
+              THEN ${valueSimpleFxSaye} ELSE 0 END)::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -273,7 +283,7 @@ export async function selectOldNetWorth(
         sql`values_investments AS (
           SELECT
             v.id
-            ,SUM(CASE WHEN v.category = ${'Stocks'} THEN ${valueSimpleFxSaye} ELSE 0 END)::int4 AS value
+            ,SUM(CASE WHEN v.category = ${NetWorthAggregate.stocks} THEN ${valueSimpleFxSaye} ELSE 0 END)::int4 AS value
           FROM values v
           GROUP BY v.id
         )`,
@@ -289,6 +299,7 @@ export async function selectOldNetWorth(
         sql`values_pension.value AS pension`,
         sql`values_options.value AS options`,
         sql`values_illiquid_equity.value AS illiquid_equity`,
+        sql`values_liquid_cash.value AS liquid_cash`,
         sql`values_locked_cash.value AS locked_cash`,
         sql`values_investments.value AS investments`,
       ],
@@ -300,6 +311,7 @@ export async function selectOldNetWorth(
     LEFT JOIN values_pension ON values_pension.id = v.id
     LEFT JOIN values_options ON values_options.id = v.id
     LEFT JOIN values_illiquid_equity ON values_illiquid_equity.id = v.id
+    LEFT JOIN values_liquid_cash ON values_liquid_cash.id = v.id
     LEFT JOIN values_locked_cash ON values_locked_cash.id = v.id
     LEFT JOIN values_investments ON values_investments.id = v.id
     ORDER BY v.date DESC

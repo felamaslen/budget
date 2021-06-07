@@ -7,6 +7,7 @@ export const overviewOld = gql`
       stocks
       investmentPurchases
       pension
+      cashLiquid
       cashOther
       investments
       illiquidEquity

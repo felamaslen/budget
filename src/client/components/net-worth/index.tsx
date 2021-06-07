@@ -5,6 +5,7 @@ import { Route } from 'react-router-dom';
 
 import { NetWorthCategoryList } from './category-list';
 import { NetWorthList } from './list';
+import { NetWorthLoans } from './loans';
 import * as Styled from './styles';
 import { NetWorthView } from './view';
 
@@ -72,15 +73,24 @@ const NetWorth: React.FC<RouteComponentProps> = ({ history }) => {
           />
         )}
       />
+      <Route
+        path="/net-worth/loans"
+        render={(routeProps): React.ReactElement => (
+          <NetWorthLoans {...routeProps} subcategories={subcategories} entries={entries} />
+        )}
+      />
       <Styled.TabBar>
         <Styled.Tab exact to="/net-worth" activeClassName="selected">
-          {'View'}
+          View
         </Styled.Tab>
         <Styled.Tab to="/net-worth/edit/categories" activeClassName="selected">
-          {'Categories'}
+          Categories
         </Styled.Tab>
         <Styled.Tab to="/net-worth/edit/list" activeClassName="selected">
-          {'Entries'}
+          Entries
+        </Styled.Tab>
+        <Styled.Tab to="/net-worth/loans" activeClassName="selected">
+          Loans
         </Styled.Tab>
       </Styled.TabBar>
     </ModalWindow>

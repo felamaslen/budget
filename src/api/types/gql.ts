@@ -911,6 +911,7 @@ export type OverviewOld = {
   stocks: Array<Scalars['Int']>;
   investmentPurchases: Array<Scalars['Int']>;
   pension: Array<Scalars['Int']>;
+  cashLiquid: Array<Scalars['Int']>;
   cashOther: Array<Scalars['Int']>;
   investments: Array<Scalars['Int']>;
   illiquidEquity: Array<Scalars['Int']>;
@@ -1839,6 +1840,7 @@ export type OverviewOldResolvers<ContextType = Context, ParentType extends Resol
   stocks?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   investmentPurchases?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   pension?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
+  cashLiquid?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   cashOther?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   investments?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   illiquidEquity?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
