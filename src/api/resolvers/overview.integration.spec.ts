@@ -146,7 +146,7 @@ describe('Overview resolver', () => {
       /* Dec-14 */ 0,
       /* Jan-15 */ 0,
       /* Feb-15 */ expectedStocksFeb2015August2015,
-      /* Mar-15 */ 0,
+      /* Mar-15 */ expectedStocksFeb2015August2015,
       /* Apr-15 */ 0,
       /* May-15 */ 0,
       /* Jun-15 */ 0,
@@ -209,9 +209,9 @@ describe('Overview resolver', () => {
       /* Dec-14 */ 0,
       /* Jan-15 */ 0,
       /* Feb-15 */ 0,
-      /* Mar-15 */ 1667500,
+      /* Mar-15 */ 1667500 + 6338760 - expectedStocksFeb2015August2015,
       /* Apr-15 */ 0,
-      /* May-15 */ 0,
+      /* May-15 */ 0 + 6354004 - 0,
       /* Jun-15 */ 0,
       /* Jul-15 */ 0,
       /* Aug-15 */ 0,
@@ -230,7 +230,7 @@ describe('Overview resolver', () => {
       /* Dec-14 */ 0,
       /* Jan-15 */ 0,
       /* Feb-15 */ 0,
-      /* Mar-15 */ 0,
+      /* Mar-15 */ 6338760,
       /* Apr-15 */ 0,
       /* May-15 */ 6354004,
       /* Jun-15 */ 0,
@@ -317,6 +317,7 @@ describe('Overview resolver', () => {
       /* Mar-15 */ Math.round(
         /* bank */ 1050000 +
           /* locked cash */ 1667500 +
+          /* ISA */ 6338760 +
           /* fx */ 62000 * 0.113 * 100 +
           /* house */ 42500000 +
           /* pension */ 1054200 +

@@ -251,8 +251,10 @@ export async function getOldOverviewData(
 
   const pension = mapNetWorth('pension');
   const cashLiquid = mapNetWorth('liquid_cash');
-  const cashOther = mapNetWorth('locked_cash');
   const investments = mapNetWorth('investments'); // stocks + cash
+  const cashOther = mapNetWorth('locked_cash').map(
+    (value, index) => value + Math.max(0, investments[index] - stocks[index]),
+  );
   const options = mapNetWorth('options');
   const illiquidEquity = mapNetWorth('illiquid_equity');
   const assets = mapNetWorth('assets'); // this includes pension but excludes options
