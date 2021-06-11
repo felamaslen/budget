@@ -182,6 +182,45 @@ describe('Funds selectors / lines', () => {
         `);
       });
     });
+
+    describe('when a stock has prices for a time in which it has zero cost', () => {
+      const idBoughtAfterScrape = numericHash('my-undefined-period-fund');
+      const fundsWithReturnsUndefinedPeriod: FundsWithReturns = {
+        [idBoughtAfterScrape]: [
+          {
+            startIndex: 0,
+            values: [
+              {
+                price: 100,
+                priceRebased: 100,
+                units: 0,
+                cost: 0,
+                realised: 0,
+              },
+              {
+                price: 101,
+                priceRebased: 101,
+                units: 10,
+                cost: 1000,
+                realised: 0,
+              },
+            ],
+          },
+        ],
+      };
+
+      it('should not return values in the undefined period', () => {
+        expect.assertions(3);
+
+        const result = getFundLineROI(fundsWithReturnsUndefinedPeriod, idBoughtAfterScrape);
+
+        expect(result.some(({ values }) => values.some((value) => Number.isNaN(value)))).toBe(
+          false,
+        );
+        expect(result[0].values).toStrictEqual([1]); // filter out NaN values
+        expect(result[0].startIndex).toBe(1); // increment the start index by the number of filtered values
+      });
+    });
   });
 
   describe('getFundLinePrice', () => {

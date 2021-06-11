@@ -52,7 +52,6 @@ import type {
   FundLine,
   GraphStack,
   HistoryOptions,
-  Id,
   Line,
   Padding,
   Point,
@@ -128,119 +127,100 @@ function useToggleList(
   return [toggleList, setToggleList];
 }
 
-const filterLines = moize(
-  (filteredFundLines: FundLine[], mode: FundMode, cacheTimes: number[]): Line[] => {
-    const sortedLines = filteredFundLines.slice().sort((a, b) => a.id - b.id);
+function stackLines(groupedLines: Record<number, FundLine[]>, cacheTimes: number[]): Line[] {
+  type Accumulator = {
+    last: Line[];
+    stack: GraphStack;
+  };
 
-    const initialStack: Data = cacheTimes.map<Point>((time) => [time, 0]);
+  const initialStack: Data = cacheTimes.map<Point>((time) => [time, 0]);
 
-    type Accumulator = {
-      last: Line[];
-      idCount: Record<Id, number>;
-      stack: GraphStack;
-    };
+  return Object.entries(groupedLines)
+    .reduce<Accumulator>(
+      ({ last, stack }, [, group]) => {
+        const { id, item, color } = group[0];
+        const data = group.reduce<Data>(
+          (prev, next) =>
+            prev.map(([x, y]) => [x, y + (next.data.find(([time]) => time === x)?.[1] ?? 0)]),
+          initialStack,
+        );
 
-    if (mode === FundMode.Stacked) {
-      const groupedLines = groupBy(sortedLines, 'id');
+        const shouldStack = id !== GRAPH_FUNDS_OVERALL_ID;
+        const nextStack = shouldStack
+          ? initialStack.map<Point>(([x], index) => [x, data[index][1]])
+          : initialStack;
 
-      const result = Object.entries(groupedLines)
-        .map<FundLine>(([, group]) =>
-          group.reduce<FundLine>(
-            (last, next) => ({
-              ...last,
-              data: last.data.map(([x, y]) => [
-                x,
-                y + (next.data.find(([time]) => time === x)?.[1] ?? 0),
-              ]),
-            }),
-            { ...group[0], data: initialStack },
-          ),
-        )
-        .reduce<Accumulator>(
-          ({ last, idCount, stack }, { id, item, color, data }) => {
-            const shouldStack = id !== GRAPH_FUNDS_OVERALL_ID;
-            const nextStack = shouldStack
-              ? initialStack.map<Point>(([x], index) => [x, data[index][1]])
-              : initialStack;
+        const filteredStack = shouldStack
+          ? stack.map((component) => component.filter(([x]) => data.some(([time]) => time === x)))
+          : undefined;
 
-            const filteredStack = shouldStack
-              ? stack.map((component) =>
-                  component.filter(([x]) => data.some(([time]) => time === x)),
-                )
-              : undefined;
-
-            const nextLine: Line = {
-              key: `${id}-${idCount[id] || 0}`,
-              name: getFundLineName(id, item),
-              data,
-              fill: shouldStack,
-              stack: filteredStack,
-              color: shouldStack ? rgba(color, 0.75) : color,
-              strokeWidth: 1,
-              smooth: false,
-            };
-
-            return {
-              idCount: { ...idCount, [id]: (idCount[id] || 0) + 1 },
-              stack: [...stack, nextStack],
-              last: [...last, nextLine],
-            };
-          },
-          {
-            last: [],
-            idCount: {},
-            stack: [],
-          },
-        )
-        .last.map<Line>((line) => {
-          if (line.name === 'Overall') {
-            return line;
-          }
-
-          const stackBegin =
-            line.stack?.reduce<number>((last, stack) => last + stack[0][1], 0) ?? 0;
-          const stackEnd =
-            line.stack?.reduce<number>((last, stack) => last + stack[stack.length - 1][1], 0) ?? 0;
-
-          return {
-            ...line,
-            data: [
-              [line.data[0][0], stackBegin],
-              ...line.data,
-              [line.data[line.data.length - 1][0], stackEnd],
-            ],
-            stack:
-              line.stack?.map((component) => [[line.data[0][0], stackBegin], ...component]) ??
-              undefined,
-          };
-        });
-
-      return result;
-    }
-
-    const { last: numberedLines } = sortedLines.reduce<Omit<Accumulator, 'stack'>>(
-      ({ last, idCount }, { id, item, color, data }) => {
         const nextLine: Line = {
-          key: `${id}-${idCount[id] || 0}`,
+          key: String(id),
           name: getFundLineName(id, item),
           data,
-          color,
-          strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
-          smooth: mode !== FundMode.Value,
+          fill: shouldStack,
+          stack: filteredStack,
+          color: shouldStack ? rgba(color, 0.75) : color,
+          strokeWidth: 1,
+          smooth: false,
         };
 
         return {
-          idCount: { ...idCount, [id]: (idCount[id] || 0) + 1 },
+          stack: [...stack, nextStack],
           last: [...last, nextLine],
         };
       },
       {
         last: [],
-        idCount: {},
+        stack: [],
       },
-    );
+    )
+    .last.map<Line>((line) => {
+      if (line.name === 'Overall') {
+        return line;
+      }
 
-    return numberedLines;
+      const stackBegin = line.stack?.reduce<number>((last, stack) => last + stack[0][1], 0) ?? 0;
+      const stackEnd =
+        line.stack?.reduce<number>((last, stack) => last + stack[stack.length - 1][1], 0) ?? 0;
+
+      return {
+        ...line,
+        data: [
+          [line.data[0][0], stackBegin],
+          ...line.data,
+          [line.data[line.data.length - 1][0], stackEnd],
+        ],
+        stack:
+          line.stack?.map((component) => [[line.data[0][0], stackBegin], ...component]) ??
+          undefined,
+      };
+    });
+}
+
+const filterLines = moize(
+  (filteredFundLines: FundLine[], mode: FundMode, cacheTimes: number[]): Line[] => {
+    const sortedLines = filteredFundLines.slice().sort((a, b) => a.id - b.id);
+    const groupedLines = groupBy(sortedLines, 'id');
+
+    if (mode === FundMode.Stacked) {
+      return stackLines(groupedLines, cacheTimes);
+    }
+
+    return Object.entries(groupedLines).reduce<Line[]>(
+      (prev, [, group]) => [
+        ...prev,
+        ...group.map<Line>(({ id, item, color, data }, index) => ({
+          key: `${id}-${index}`,
+          name: getFundLineName(id, item),
+          data,
+          color,
+          strokeWidth: id === GRAPH_FUNDS_OVERALL_ID ? 2 : 1,
+          smooth: mode !== FundMode.Value,
+        })),
+      ],
+      [],
+    );
   },
   { maxSize: 1 },
 );

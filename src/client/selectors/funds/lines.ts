@@ -36,20 +36,16 @@ function reduceReturnsAtDate(
   return (funds, prevValue, timeIndex): number =>
     composer(
       prevValue,
-      funds.reduce<number>(
-        (last, fund) =>
-          fund
-            .filter(
-              ({ startIndex, values }) =>
-                timeIndex >= startIndex && values.length > timeIndex - startIndex,
-            )
-            .reduce<number>(
-              (fundLast, { startIndex, values }) =>
-                fundLast + mapper(values[timeIndex - startIndex]),
-              last,
-            ),
-        0,
-      ),
+      funds.reduce<number>((last, fund) => {
+        const matchingGroup = fund.find(
+          ({ startIndex, values }) =>
+            startIndex <= timeIndex && values.length > timeIndex - startIndex,
+        );
+
+        return matchingGroup
+          ? last + mapper(matchingGroup.values[timeIndex - matchingGroup.startIndex])
+          : last;
+      }, 0),
     );
 }
 
@@ -130,10 +126,15 @@ function mapSingleLine(
   mapper: ReturnMapper,
 ): (fundsWithReturns: FundsWithReturns, id: Id) => FundGroup[] {
   return (fundsWithReturns, id): FundGroup[] =>
-    fundsWithReturns[id].map(({ values, startIndex }) => ({
-      startIndex,
-      values: values.map(mapper),
-    }));
+    fundsWithReturns[id].map(({ values, startIndex }) => {
+      const allValues = values.map(mapper);
+      const nonNanValues = allValues.filter((value) => !Number.isNaN(value));
+      const firstNonNanValueIndex = allValues.findIndex((value) => !Number.isNaN(value));
+      return {
+        startIndex: startIndex + firstNonNanValueIndex,
+        values: nonNanValues,
+      };
+    });
 }
 
 const getValue = ({ units, priceRebased }: Return): number => units * priceRebased;
