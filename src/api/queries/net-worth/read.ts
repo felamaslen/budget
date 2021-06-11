@@ -396,3 +396,36 @@ export async function selectLatestCashTotal(
     stocksIncludingCash: stocksIncludingCashRow.value,
   };
 }
+
+export type NetWorthLoansRow = {
+  subcategory: string;
+  date: Date;
+  principal: number;
+  rate: number;
+  payments_remaining: number;
+};
+
+export async function selectNetWorthLoans(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<readonly NetWorthLoansRow[]> {
+  const result = await db.query(sql`
+  SELECT ${sql.join(
+    [
+      sql`nws.subcategory`,
+      sql`nw.date`,
+      sql`COALESCE(-nwv.value, 0)::int4 AS principal`,
+      sql`nwlv.rate`,
+      sql`nwlv.payments_remaining`,
+    ],
+    sql`, `,
+  )}
+  FROM net_worth_values nwv
+  INNER JOIN net_worth nw ON nw.id = nwv.net_worth_id
+  INNER JOIN net_worth_subcategories nws ON nws.id = nwv.subcategory
+  INNER JOIN net_worth_loan_values nwlv ON nwlv.values_id = nwv.id
+  WHERE nw.uid = ${uid}
+  ORDER BY nws.id, nw.date
+  `);
+  return (result.rows as unknown) as readonly NetWorthLoansRow[];
+}

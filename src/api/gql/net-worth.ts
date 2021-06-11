@@ -210,9 +210,25 @@ const Entry = gql`
     spendingSince: Int!
   }
 
+  type NetWorthLoanValue {
+    date: Date!
+    value: LoanValue!
+  }
+
+  type NetWorthLoan {
+    subcategory: String!
+    values: [NetWorthLoanValue!]!
+  }
+
+  type NetWorthLoansResponse {
+    error: String
+    loans: [NetWorthLoan!]
+  }
+
   extend type Query {
     readNetWorthEntries: NetWorthEntryOverview
     netWorthCashTotal: NetWorthCashTotal
+    netWorthLoans: NetWorthLoansResponse
   }
 
   extend type Mutation {

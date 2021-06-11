@@ -29,11 +29,12 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
   visible,
   setVisible,
 }) => {
-  const totalPayableModified = forecastTotalLoanPayable(
-    modifiedLoan.principal,
-    modifiedLoan.monthlyPayment,
-    modifiedLoan.interestRate / 100,
-  );
+  const totalPayableModified =
+    forecastTotalLoanPayable(
+      modifiedLoan.principal,
+      modifiedLoan.monthlyPayment,
+      modifiedLoan.interestRate / 100,
+    ) + (override?.lumpSum ?? 0);
   const totalPayableOriginal = forecastTotalLoanPayable(
     originalLoan.principal,
     originalLoan.monthlyPayment,
@@ -45,7 +46,9 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
       <Flex>
         <FormFieldTickbox
           value={visible}
-          onChange={(): void => setVisible((last) => ({ ...last, [line.key]: !last[line.key] }))}
+          onChange={(): void =>
+            setVisible((last) => ({ ...last, [line.key]: last[line.key] === false }))
+          }
         />
         <Styled.LoansSidebarTitle color={line.color as string}>
           {line.name}

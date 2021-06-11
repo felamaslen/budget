@@ -1,6 +1,7 @@
-import { CompoundLoan } from '~client/selectors';
+import type { CompoundLoan } from '~client/selectors';
 import type { Line } from '~client/types';
-import type { LoanValue, NetWorthValueObject } from '~client/types/gql';
+import type { LoanValue, NetWorthLoan, NetWorthLoanValue } from '~client/types/gql';
+import type { NativeDate } from '~shared/types';
 
 export type LoanWithInfo = {
   loanValue: LoanValue;
@@ -11,7 +12,9 @@ export type LoanWithInfo = {
   visible: boolean;
 };
 
-export type ValueWithRequiredLoan = NetWorthValueObject & { loan: LoanValue };
+export type NetWorthLoanNative = Omit<NetWorthLoan, 'values'> & {
+  values: NativeDate<NetWorthLoanValue, 'date'>[];
+};
 
 export type LoanOverride = {
   overpayment: number; // percent

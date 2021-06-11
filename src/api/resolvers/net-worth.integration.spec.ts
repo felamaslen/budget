@@ -1958,4 +1958,63 @@ describe('Net worth resolver', () => {
       },
     );
   });
+
+  describe('netWorthLoans', () => {
+    const query = gql`
+      query NetWorthLoans {
+        netWorthLoans {
+          loans {
+            subcategory
+            values {
+              date
+              value {
+                principal
+                rate
+                paymentsRemaining
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    it('should return the list of historical and current loans, grouped by subcategory', async () => {
+      expect.assertions(1);
+      await seedData(app.uid);
+      const res = await app.authGqlClient.query<Query>({ query });
+      expect(res.data.netWorthLoans).toMatchInlineSnapshot(`
+        Object {
+          "__typename": "NetWorthLoansResponse",
+          "loans": Array [
+            Object {
+              "__typename": "NetWorthLoan",
+              "subcategory": "My mortgage",
+              "values": Array [
+                Object {
+                  "__typename": "NetWorthLoanValue",
+                  "date": "2015-03-27",
+                  "value": Object {
+                    "__typename": "LoanValue",
+                    "paymentsRemaining": 360,
+                    "principal": 36125000,
+                    "rate": 2.74,
+                  },
+                },
+                Object {
+                  "__typename": "NetWorthLoanValue",
+                  "date": "2015-05-31",
+                  "value": Object {
+                    "__typename": "LoanValue",
+                    "paymentsRemaining": 358,
+                    "principal": 34713229,
+                    "rate": 2.71,
+                  },
+                },
+              ],
+            },
+          ],
+        }
+      `);
+    });
+  });
 });

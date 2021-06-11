@@ -6,6 +6,7 @@ import {
   updateNetWorthEntry,
   deleteNetWorthEntry,
   readNetWorthCashTotal,
+  readNetWorthLoans,
 } from '~api/controllers';
 import {
   genericMutationResolver,
@@ -26,6 +27,7 @@ export const netWorthResolvers: Resolvers = {
     readNetWorthEntries: genericAuthDbResolver(readNetWorthEntries),
 
     netWorthCashTotal: genericAuthDbResolver(readNetWorthCashTotal),
+    netWorthLoans: genericAuthDbResolver(readNetWorthLoans),
   },
 
   Mutation: {

@@ -11,8 +11,16 @@ import {
   selectLatestCashTotal,
   getTotalFundValue,
   selectSpendingAndIncomeSinceDate,
+  selectNetWorthLoans,
 } from '~api/queries';
-import type { NetWorthCashTotal, NetWorthEntry, NetWorthEntryOverview } from '~api/types';
+import {
+  NetWorthCashTotal,
+  NetWorthEntry,
+  NetWorthEntryOverview,
+  NetWorthLoan,
+  NetWorthLoansResponse,
+  NetWorthLoanValue,
+} from '~api/types';
 
 export async function fetchById(
   db: DatabaseTransactionConnectionType,
@@ -81,4 +89,24 @@ export async function readNetWorthCashTotal(
     incomeSince: income,
     spendingSince: spending,
   };
+}
+
+export async function readNetWorthLoans(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<NetWorthLoansResponse> {
+  const rows = await selectNetWorthLoans(db, uid);
+  const loans = Object.entries(groupBy(rows, 'subcategory')).map<NetWorthLoan>(([, group]) => ({
+    subcategory: group[0].subcategory,
+    values: group.map<NetWorthLoanValue>((row) => ({
+      date: row.date,
+      value: {
+        principal: row.principal,
+        rate: row.rate,
+        paymentsRemaining: row.payments_remaining,
+      },
+    })),
+  }));
+
+  return { loans };
 }
