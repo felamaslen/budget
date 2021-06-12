@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import * as Styled from './styles';
 import type { LoanOverride, LoanOverrides, LoanWithInfo } from './types';
@@ -41,6 +41,19 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
     originalLoan.interestRate / 100,
   );
 
+  const onChangeOverrideOverpayment = useCallback(
+    (monthlyPayment: number): void => {
+      setOverrides((last) => ({
+        ...last,
+        [line.key]: {
+          ...(last[line.key] ?? { lumpSum: 0 }),
+          overpayment: Math.max(0, monthlyPayment - originalLoan.monthlyPayment),
+        },
+      }));
+    },
+    [setOverrides, originalLoan.monthlyPayment, line.key],
+  );
+
   return (
     <Styled.LoansSidebarItem>
       <Flex>
@@ -56,26 +69,22 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
       </Flex>
       <Styled.LoanInfo>
         <Styled.LoanInfoGrid>
-          <Styled.LoanInfoLabel>Regular overpayment</Styled.LoanInfoLabel>
+          <Styled.LoanInfoLabel>Monthly payment</Styled.LoanInfoLabel>
           <Styled.LoanInfoInput>
-            <FormFieldRange
-              value={override?.overpayment ?? 0}
-              min={0}
-              max={1}
-              step={0.01}
-              onChange={(value): void =>
-                setOverrides((last) => ({
-                  ...last,
-                  [line.key]: {
-                    ...(last[line.key] ?? { lumpSum: 0 }),
-                    overpayment: value,
-                  },
-                }))
-              }
+            <FormFieldCost
+              value={modifiedLoan.monthlyPayment}
+              onChange={onChangeOverrideOverpayment}
+              inputProps={{ min: originalLoan.monthlyPayment / 100 }}
             />
           </Styled.LoanInfoInput>
           <Styled.LoanInfoValues>
-            {formatPercent(override?.overpayment ?? 0, { precision: 0 })}
+            <FormFieldRange
+              value={modifiedLoan.monthlyPayment}
+              min={originalLoan.monthlyPayment}
+              max={originalLoan.principal / 10}
+              step={1}
+              onChange={onChangeOverrideOverpayment}
+            />
           </Styled.LoanInfoValues>
           <Styled.LoanInfoLabel>Lump sum payment</Styled.LoanInfoLabel>
           <Styled.LoanInfoInput>
@@ -111,14 +120,14 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
               <td>{loanValue.paymentsRemaining}</td>
             </tr>
             <tr>
-              <td>New monthly payment:</td>
-              <td>
-                <b>{formatCurrency(modifiedLoan.monthlyPayment)}</b>
-              </td>
+              <td>Original monthly payment:</td>
+              <td>{formatCurrency(originalLoan.monthlyPayment)}</td>
             </tr>
             <tr>
               <td>Total payable:</td>
-              <td>{formatCurrency(totalPayableModified)}</td>
+              <td>
+                <b>{formatCurrency(totalPayableModified)}</b>
+              </td>
             </tr>
             <tr>
               <td>Total payable (original):</td>
@@ -127,7 +136,7 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
             <tr>
               <td>Saving:</td>
               <td>
-                <b>{formatCurrency(totalPayableOriginal - totalPayableModified)}</b>
+                <b>{formatCurrency(Math.max(0, totalPayableOriginal - totalPayableModified))}</b>
               </td>
             </tr>
           </tbody>

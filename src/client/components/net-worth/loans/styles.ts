@@ -82,4 +82,8 @@ export const LoanInfoInput = styled.div`
 export const LoanInfoValues = styled.span`
   grid-column: 3;
   padding: 0 ${rem(8)};
+
+  input[type='range'] {
+    max-width: 100%;
+  }
 `;

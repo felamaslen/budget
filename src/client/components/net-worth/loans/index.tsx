@@ -4,12 +4,13 @@ import differenceInMonths from 'date-fns/differenceInMonths';
 import endOfMonth from 'date-fns/endOfMonth';
 import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 import { LoansGraph } from './graph';
 import { LoansSidebar } from './sidebar';
 import * as Styled from './styles';
 import type { LoanOverrides, LoanWithInfo, NetWorthLoanNative } from './types';
+import { usePersistentState } from '~client/hooks';
 import { colorKey } from '~client/modules/color';
 import { CompoundLoan, forecastCompoundLoanDebt, PMT } from '~client/selectors';
 import { mapMonthDates } from '~client/selectors/overview/utils';
@@ -70,8 +71,7 @@ function enrichLoansWithInfo(
         PMT({
           ...latestValue.value,
           principal: originalLoan.principal - overrideLumpSum,
-        }) *
-        (1 + overrideOverpayment),
+        }) + overrideOverpayment,
     };
 
     const lineDates = mapMonthDates(
@@ -158,8 +158,8 @@ export const NetWorthLoans: React.FC<Props> = ({ subcategories, entries }) => {
     }
   }, [debouncedRefetch, entries, subcategories]);
 
-  const [visible, setVisible] = useState<Record<string, boolean>>({});
-  const [overrides, setOverrides] = useState<LoanOverrides>({});
+  const [visible, setVisible] = usePersistentState<Record<string, boolean>>({}, 'loan_visible');
+  const [overrides, setOverrides] = usePersistentState<LoanOverrides>({}, 'loan_overrides');
   const loans = useMemo(() => getLoans(data?.netWorthLoans?.loans ?? [], visible, overrides), [
     data,
     visible,
