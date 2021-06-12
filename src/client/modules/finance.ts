@@ -14,17 +14,21 @@ export const forecastCompoundedReturns = (
 
 export function forecastTotalLoanPayable(
   initialValue: number,
-  payment: number,
+  monthlyPayment: number,
   interestRateYearly: number,
 ): number {
-  if (payment >= initialValue) {
+  if (monthlyPayment >= initialValue) {
     return initialValue;
   }
-  const remainingDebt = Math.round((initialValue - payment) * (1 + interestRateYearly) ** (1 / 12));
+  const remainingDebt = Math.round(
+    (initialValue - monthlyPayment) * (1 + interestRateYearly) ** (1 / 12),
+  );
   if (remainingDebt >= initialValue) {
-    return Infinity; // interest rate is too low to repay the debt
+    return Infinity; // monthly payment is too low to repay the debt
   }
-  return payment + forecastTotalLoanPayable(remainingDebt, payment, interestRateYearly);
+  return (
+    monthlyPayment + forecastTotalLoanPayable(remainingDebt, monthlyPayment, interestRateYearly)
+  );
 }
 
 // Fund name abbreviations
