@@ -94,11 +94,13 @@ const Value = gql`
     principal: NonNegativeInt!
     paymentsRemaining: NonNegativeInt!
     rate: Float!
+    paid: Int
   }
   input LoanValueInput {
     principal: NonNegativeInt!
     paymentsRemaining: NonNegativeInt!
     rate: Float!
+    paid: Int
   }
 
   type NetWorthValueObject {

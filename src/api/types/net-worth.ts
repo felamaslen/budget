@@ -29,7 +29,7 @@ export type ValueRowSelect = {
 export type ValueRow = [number, boolean | null, number, number | null];
 export type FXValueRow = [number, number, string];
 export type OptionValueRow = [number, number, number, number, number];
-export type LoanValueRow = [number, number, number];
+export type LoanValueRow = [number, number, number, number | null];
 
 export type JoinedEntryRow = NetWorthEntryRow & {
   is_saye: boolean | null;
@@ -56,6 +56,7 @@ export type JoinedEntryRow = NetWorthEntryRow & {
 
   loan_payments_remaining: number | null;
   loan_rate: number | null;
+  loan_paid: number | null;
 };
 
 export type JoinedEntryRowWithCurrencies = JoinedEntryRow & {

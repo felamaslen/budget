@@ -317,12 +317,14 @@ export type LoanValue = {
   principal: Scalars['NonNegativeInt'];
   paymentsRemaining: Scalars['NonNegativeInt'];
   rate: Scalars['Float'];
+  paid?: Maybe<Scalars['Int']>;
 };
 
 export type LoanValueInput = {
   principal: Scalars['NonNegativeInt'];
   paymentsRemaining: Scalars['NonNegativeInt'];
   rate: Scalars['Float'];
+  paid?: Maybe<Scalars['Int']>;
 };
 
 export type LoginResponse = {
@@ -1560,6 +1562,7 @@ export type LoanValueResolvers<ContextType = Context, ParentType extends Resolve
   principal?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   paymentsRemaining?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   rate?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  paid?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

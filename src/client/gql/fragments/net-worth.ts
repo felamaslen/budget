@@ -41,6 +41,7 @@ export const NetWorthEntryParts = gql`
         principal
         paymentsRemaining
         rate
+        paid
       }
     }
     creditLimit {

@@ -84,6 +84,7 @@ const getRowOption = (row: JoinedEntryRowWithOptionValue): OptionValue => ({
 const getRowLoan = (row: JoinedEntryRowWithLoanValue): LoanValue => ({
   principal: -row.value_simple,
   rate: row.loan_rate,
+  paid: row.loan_paid,
   paymentsRemaining: row.loan_payments_remaining,
 });
 

@@ -423,7 +423,7 @@ const forecastCompoundStack = <T extends CompoundLoanOrAsset>(
     .values.slice(1)
     .map<number>((stack) => stack.reduce<number>((last, value) => last + value, 0));
 
-export type CompoundLoan = CompoundLoanOrAsset & { monthlyPayment: number };
+export type CompoundLoan = CompoundLoanOrAsset & { monthlyPayment: number; paid: number };
 
 export const forecastCompoundLoanDebt = forecastCompoundStack<CompoundLoan>(
   (principal, monthsSinceLastForecast, loan) =>
@@ -498,6 +498,7 @@ function getLoanDebt(
       principal: loan.principal,
       interestRate: loan.rate,
       monthlyPayment: PMT(loan),
+      paid: loan.paid ?? 0,
     }));
 
   const forecastDebt = forecastCompoundLoanDebt(dates, startPredictionIndex, outstandingLoans);

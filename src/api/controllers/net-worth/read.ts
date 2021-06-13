@@ -104,6 +104,7 @@ export async function readNetWorthLoans(
         principal: row.principal,
         rate: row.rate,
         paymentsRemaining: row.payments_remaining,
+        paid: row.paid,
       },
     })),
   }));

@@ -66,9 +66,9 @@ function getLoanValuesRows(valueId: number, row: NetWorthValueInput): LoanValueR
     return [];
   }
 
-  const { paymentsRemaining, rate } = row.loan;
+  const { paymentsRemaining, rate, paid = null } = row.loan;
 
-  return [[valueId, paymentsRemaining, rate]];
+  return [[valueId, paymentsRemaining, rate, paid]];
 }
 
 function getValueChildRows(valueIds: number[], values: NetWorthValueInput[]): ValueChildRows {

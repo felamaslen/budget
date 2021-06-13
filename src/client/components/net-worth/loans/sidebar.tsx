@@ -30,16 +30,20 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
   setVisible,
 }) => {
   const totalPayableModified =
+    modifiedLoan.paid +
     forecastTotalLoanPayable(
       modifiedLoan.principal,
       modifiedLoan.monthlyPayment,
       modifiedLoan.interestRate / 100,
-    ) + (override?.lumpSum ?? 0);
-  const totalPayableOriginal = forecastTotalLoanPayable(
-    originalLoan.principal,
-    originalLoan.monthlyPayment,
-    originalLoan.interestRate / 100,
-  );
+    ) +
+    (override?.lumpSum ?? 0);
+  const totalPayableOriginal =
+    originalLoan.paid +
+    forecastTotalLoanPayable(
+      originalLoan.principal,
+      originalLoan.monthlyPayment,
+      originalLoan.interestRate / 100,
+    );
 
   const onChangeOverrideOverpayment = useCallback(
     (monthlyPayment: number): void => {

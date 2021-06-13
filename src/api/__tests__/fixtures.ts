@@ -340,13 +340,13 @@ export const generateNetWorth = async (
   `);
 
   await db.query(sql`
-  INSERT INTO net_worth_loan_values (values_id, payments_remaining, rate)
+  INSERT INTO net_worth_loan_values (values_id, payments_remaining, rate, paid)
   SELECT * FROM ${sql.unnest(
     [
-      [valueIdOldestMortgage.id, 360, 2.74],
-      [valueIdOldMortgage.id, 358, 2.71],
+      [valueIdOldestMortgage.id, 360, 2.74, 147692],
+      [valueIdOldMortgage.id, 358, 2.71, 147687],
     ],
-    ['int4', 'int4', 'float8'],
+    ['int4', 'int4', 'float8', 'int4'],
   )};
   `);
 };

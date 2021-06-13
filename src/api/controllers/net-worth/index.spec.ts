@@ -51,6 +51,7 @@ describe('Net worth controller', () => {
           op_vested: null,
           loan_payments_remaining: null,
           loan_rate: null,
+          loan_paid: null,
         },
       ]);
 
@@ -127,6 +128,7 @@ describe('Net worth controller', () => {
             op_vested: null,
             loan_payments_remaining: null,
             loan_rate: null,
+            loan_paid: null,
           },
         ])
         .mockResolvedValueOnce([
@@ -151,6 +153,7 @@ describe('Net worth controller', () => {
             op_vested: null,
             loan_payments_remaining: null,
             loan_rate: null,
+            loan_paid: null,
           },
         ]);
 

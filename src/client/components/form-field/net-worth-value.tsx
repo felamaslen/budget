@@ -320,15 +320,21 @@ const FormFieldOption: React.FC<PropsFieldOption> = ({ value, onChange }) => {
 };
 
 const coerceLoan = <V extends NetWorthValue>(value: V): Partial<LoanValue | LoanValueInput> =>
-  value.loan ?? { principal: Math.max(0, -(value.simple ?? 0)), rate: 0, paymentsRemaining: 0 };
+  value.loan ?? {
+    principal: Math.max(0, -(value.simple ?? 0)),
+    rate: 0,
+    paymentsRemaining: 0,
+    paid: null,
+  };
 
 const loanDeltaComplete = (delta: Partial<LoanValue> | LoanValue): delta is LoanValue =>
-  Object.keys(delta).length === 3 &&
+  Object.keys(delta).length === 4 &&
   Object.values(delta).every((value) => typeof value !== 'undefined');
 
 const principalProps = { placeholder: 'Principal' };
 const paymentsRemainingProps = { placeholder: 'Payments remaining' };
 const rateProps = { placeholder: 'Interest rate' };
+const paidProps = { placeholder: 'Paid this month' };
 
 type PropsFieldLoan = Pick<Props, 'value' | 'onChange'>;
 
@@ -350,6 +356,7 @@ export const FormFieldLoan: React.FC<PropsFieldLoan> = ({ value, onChange }) => 
     [],
   );
   const onChangeRate = useCallback((rate = 0) => setDelta((last) => ({ ...last, rate })), []);
+  const onChangePaid = useCallback((paid = null) => setDelta((last) => ({ ...last, paid })), []);
 
   useEffect(() => {
     if (loanDeltaComplete(delta)) {
@@ -388,6 +395,16 @@ export const FormFieldLoan: React.FC<PropsFieldLoan> = ({ value, onChange }) => 
           onChange={onChangeRate}
           min={0}
           step={0.01}
+        />
+      </div>
+      <div>
+        <label htmlFor={`loan-paid-${id}`}>Paid this month</label>
+        <FormFieldCost
+          id={`loan-paid-${id}`}
+          inputProps={paidProps}
+          value={delta.paid ?? 0}
+          onChange={onChangePaid}
+          min={0}
         />
       </div>
     </Styled.NetWorthValueLoan>

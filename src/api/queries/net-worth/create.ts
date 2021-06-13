@@ -69,8 +69,8 @@ export async function insertLoanValues(
     return;
   }
   await db.query(sql`
-    INSERT INTO net_worth_loan_values (values_id, payments_remaining, rate)
-    SELECT * FROM ${sql.unnest(loanValuesRows, ['int4', 'int4', 'float4'])}
+    INSERT INTO net_worth_loan_values (values_id, payments_remaining, rate, paid)
+    SELECT * FROM ${sql.unnest(loanValuesRows, ['int4', 'int4', 'float4', 'int4'])}
   `);
 }
 

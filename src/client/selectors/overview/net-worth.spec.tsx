@@ -310,6 +310,7 @@ describe('Overview selectors (net worth)', () => {
                   principal,
                   paymentsRemaining,
                   rate: interestRate,
+                  paid: 123,
                 },
               },
               {

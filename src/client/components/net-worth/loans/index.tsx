@@ -57,11 +57,13 @@ function enrichLoansWithInfo(
     const overrideOverpayment = overrides[loan.subcategory]?.overpayment ?? 0;
 
     const latestValue = loan.values[loan.values.length - 1];
+    const paidSoFar = loan.values.reduce<number>((last, { value }) => last + (value.paid ?? 0), 0);
 
     const originalLoan: CompoundLoan = {
       interestRate: latestValue.value.rate,
       monthlyPayment: PMT(latestValue.value),
       principal: latestValue.value.principal,
+      paid: paidSoFar,
     };
 
     const modifiedLoan: CompoundLoan = {

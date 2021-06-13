@@ -11,6 +11,7 @@ export const netWorthLoans = gql`
             principal
             rate
             paymentsRemaining
+            paid
           }
         }
       }

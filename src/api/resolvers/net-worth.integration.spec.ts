@@ -5,6 +5,7 @@ import { sql } from 'slonik';
 
 import { seedData } from '~api/__tests__/fixtures';
 import { getPool, withSlonik } from '~api/modules/db';
+import type { NetWorthLoansRow } from '~api/queries';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   AsyncReturnType,
@@ -1209,6 +1210,7 @@ describe('Net worth resolver', () => {
                   principal: 35987623,
                   paymentsRemaining: 25 * 12 - 3,
                   rate: 2.74,
+                  paid: 154,
                 },
               },
             ],
@@ -1267,9 +1269,10 @@ describe('Net worth resolver', () => {
           ]);
 
           expect(rowLoanValues).toStrictEqual([
-            expect.objectContaining({
+            expect.objectContaining<Partial<NetWorthLoansRow>>({
               payments_remaining: 297,
               rate: 2.74,
+              paid: 154,
             }),
           ]);
         });
@@ -1304,6 +1307,7 @@ describe('Net worth resolver', () => {
                   principal
                   rate
                   paymentsRemaining
+                  paid
                 }
               }
               creditLimit {
@@ -1412,6 +1416,7 @@ describe('Net worth resolver', () => {
                   paymentsRemaining: 125,
                   principal: 16544005,
                   rate: 2.74,
+                  paid: 154,
                 },
               },
             ],
@@ -1443,6 +1448,7 @@ describe('Net worth resolver', () => {
         const { res, expectedEntryTemplate } = await setup();
 
         expect(res?.current).toHaveLength(7);
+
         expect(res?.current).toStrictEqual(
           expect.arrayContaining<RawDate<NetWorthEntry, 'date'>>(
             [
@@ -1468,6 +1474,7 @@ describe('Net worth resolver', () => {
                       paymentsRemaining: 125,
                       principal: 16544005,
                       rate: 2.74,
+                      paid: 154,
                     }),
                   }),
                 ],
@@ -1971,6 +1978,7 @@ describe('Net worth resolver', () => {
                 principal
                 rate
                 paymentsRemaining
+                paid
               }
             }
           }
@@ -1995,6 +2003,7 @@ describe('Net worth resolver', () => {
                   "date": "2015-03-27",
                   "value": Object {
                     "__typename": "LoanValue",
+                    "paid": 147692,
                     "paymentsRemaining": 360,
                     "principal": 36125000,
                     "rate": 2.74,
@@ -2005,6 +2014,7 @@ describe('Net worth resolver', () => {
                   "date": "2015-05-31",
                   "value": Object {
                     "__typename": "LoanValue",
+                    "paid": 147687,
                     "paymentsRemaining": 358,
                     "principal": 34713229,
                     "rate": 2.71,

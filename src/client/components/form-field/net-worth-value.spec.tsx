@@ -71,7 +71,7 @@ describe('<FormFieldNetWorthValue />', () => {
   describe.each`
     condition      | erroneousValue
     ${'an option'} | ${{ option: [{ units: 100, strikePrice: 30, marketPrice: 43 }] }}
-    ${'a loan'}    | ${{ loan: { principal: 15000000, paymentsRemaining: 275, rate: 0.175 } }}
+    ${'a loan'}    | ${{ loan: { principal: 15000000, paymentsRemaining: 275, rate: 0.175, paid: 123 } }}
   `('if the value is $condition (erroneously)', ({ erroneousValue }) => {
     const setupErroneous = (): RenderResult =>
       render(
@@ -505,7 +505,7 @@ describe('<FormFieldNetWorthValue />', () => {
       value: {
         ...props.value,
         simple: null,
-        loan: { principal: 27500000, paymentsRemaining: 268, rate: 0.219 },
+        loan: { principal: 27500000, paymentsRemaining: 268, rate: 0.219, paid: 165 },
       },
     };
 
@@ -516,6 +516,7 @@ describe('<FormFieldNetWorthValue />', () => {
       ${'principal'}         | ${'Principal'}          | ${'275000.00'} | ${'273280'}  | ${{ principal: 27328000 }}
       ${'paymentsRemaining'} | ${'Payments remaining'} | ${'268'}       | ${'267'}     | ${{ paymentsRemaining: 267 }}
       ${'rate'}              | ${'Interest rate'}      | ${'0.219'}     | ${'0.372'}   | ${{ rate: 0.372 }}
+      ${'paid'}              | ${'Paid this month'}    | ${'1.65'}      | ${'118.3'}   | ${{ paid: 11830 }}
     `('$field field', ({ placeholder, fieldValue, updatedValue, delta }) => {
       it('should be rendered', () => {
         expect.assertions(1);
@@ -554,6 +555,7 @@ describe('<FormFieldNetWorthValue />', () => {
             principal: 27500000,
             paymentsRemaining: 268,
             rate: 0.219,
+            paid: 165,
             ...delta,
           },
         });
@@ -576,18 +578,19 @@ describe('<FormFieldNetWorthValue />', () => {
         );
 
       it('should render the usual loan fields', () => {
-        expect.assertions(4);
+        expect.assertions(5);
         const { getAllByRole } = setupErroneous();
 
         const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
 
-        expect(inputs).toHaveLength(3);
+        expect(inputs).toHaveLength(4);
 
-        const [inputPrincipal, inputPaymentsRemaining, inputRate] = inputs;
+        const [inputPrincipal, inputPaymentsRemaining, inputRate, inputPaid] = inputs;
 
         expect(inputPrincipal.value).toBe('0.00');
         expect(inputPaymentsRemaining.value).toBe('0');
         expect(inputRate.value).toBe('0');
+        expect(inputPaid.value).toBe('0.00');
       });
 
       it('should call onChange with complete data', () => {
@@ -628,6 +631,7 @@ describe('<FormFieldNetWorthValue />', () => {
             principal: 16756844,
             paymentsRemaining: 17,
             rate: 0.43,
+            paid: null,
           },
         });
       });

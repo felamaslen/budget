@@ -40,6 +40,7 @@ const joinEntryRows = (
 
       sql`nwlv.payments_remaining as loan_payments_remaining`,
       sql`nwlv.rate as loan_rate`,
+      sql`nwlv.paid as loan_paid`,
     ],
     sql`, `,
   )}
@@ -120,6 +121,7 @@ const joinEntryRows = (
       sql`nwopv.vested`,
       sql`nwlv.payments_remaining`,
       sql`nwlv.rate`,
+      sql`nwlv.paid`,
     ],
     sql`, `,
   )}
@@ -403,6 +405,7 @@ export type NetWorthLoansRow = {
   principal: number;
   rate: number;
   payments_remaining: number;
+  paid: number | null;
 };
 
 export async function selectNetWorthLoans(
@@ -417,6 +420,7 @@ export async function selectNetWorthLoans(
       sql`COALESCE(-nwv.value, 0)::int4 AS principal`,
       sql`nwlv.rate`,
       sql`nwlv.payments_remaining`,
+      sql`nwlv.paid`,
     ],
     sql`, `,
   )}

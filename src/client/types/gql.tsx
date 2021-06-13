@@ -353,12 +353,14 @@ export type LoanValue = {
   principal: Scalars['NonNegativeInt'];
   paymentsRemaining: Scalars['NonNegativeInt'];
   rate: Scalars['Float'];
+  paid?: Maybe<Scalars['Int']>;
 };
 
 export type LoanValueInput = {
   principal: Scalars['NonNegativeInt'];
   paymentsRemaining: Scalars['NonNegativeInt'];
   rate: Scalars['Float'];
+  paid?: Maybe<Scalars['Int']>;
 };
 
 export type LoginResponse = {
@@ -1118,7 +1120,7 @@ export type NetWorthEntryPartsFragment = (
       & Pick<OptionValue, 'units' | 'strikePrice' | 'marketPrice' | 'vested'>
     )>, loan?: Maybe<(
       { __typename?: 'LoanValue' }
-      & Pick<LoanValue, 'principal' | 'paymentsRemaining' | 'rate'>
+      & Pick<LoanValue, 'principal' | 'paymentsRemaining' | 'rate' | 'paid'>
     )> }
   )>, creditLimit: Array<(
     { __typename?: 'CreditLimit' }
@@ -1673,7 +1675,7 @@ export type NetWorthLoansQuery = (
         & Pick<NetWorthLoanValue, 'date'>
         & { value: (
           { __typename?: 'LoanValue' }
-          & Pick<LoanValue, 'principal' | 'rate' | 'paymentsRemaining'>
+          & Pick<LoanValue, 'principal' | 'rate' | 'paymentsRemaining' | 'paid'>
         ) }
       )> }
     )>> }
@@ -2101,6 +2103,7 @@ export const NetWorthEntryPartsFragmentDoc = gql`
       principal
       paymentsRemaining
       rate
+      paid
     }
   }
   creditLimit {
@@ -2616,6 +2619,7 @@ export const NetWorthLoansDocument = gql`
           principal
           rate
           paymentsRemaining
+          paid
         }
       }
     }

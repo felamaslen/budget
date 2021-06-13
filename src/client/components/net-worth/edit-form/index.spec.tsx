@@ -128,6 +128,7 @@ describe('Net worth entry form', () => {
           principal: 16877654,
           paymentsRemaining: 176,
           rate: 1.65,
+          paid: 10403,
         },
         skip: false,
       },
@@ -327,10 +328,12 @@ describe('Net worth entry form', () => {
     const inputMyMortgagePrincipal = getByDisplayValue('168776.54');
     const inputMyMortgagePaymentsRemaining = getByDisplayValue('176');
     const inputMyMortgageRate = getByDisplayValue('1.65');
+    const inputMyMortgagePaid = getByDisplayValue('104.03');
 
     expect(inputMyMortgagePrincipal).toBeInTheDocument();
     expect(inputMyMortgagePaymentsRemaining).toBeInTheDocument();
     expect(inputMyMortgageRate).toBeInTheDocument();
+    expect(inputMyMortgagePaid).toBeInTheDocument();
 
     act(() => {
       fireEvent.change(inputMyMortgagePrincipal, { target: { value: '155998.23' } });
@@ -351,6 +354,12 @@ describe('Net worth entry form', () => {
     });
     act(() => {
       fireEvent.blur(inputMyMortgageRate);
+    });
+    act(() => {
+      fireEvent.change(inputMyMortgagePaid, { target: { value: '144.9' } });
+    });
+    act(() => {
+      fireEvent.blur(inputMyMortgagePaid);
     });
   };
 
@@ -505,7 +514,7 @@ describe('Net worth entry form', () => {
       };
 
       it('should call onUpdate when hitting finish', () => {
-        expect.assertions(31);
+        expect.assertions(32);
         setup();
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
           numericHash('some-fake-id'),
@@ -547,6 +556,7 @@ describe('Net worth entry form', () => {
                   principal: 15599823,
                   paymentsRemaining: 175,
                   rate: 1.69,
+                  paid: 14490,
                 },
                 skip: false,
                 simple: null,
@@ -571,7 +581,7 @@ describe('Net worth entry form', () => {
       });
 
       it('should reset the active ID', () => {
-        expect.assertions(31);
+        expect.assertions(32);
         setup();
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });
@@ -646,7 +656,7 @@ describe('Net worth entry form', () => {
       };
 
       it('should call onCreate when hitting finish', async () => {
-        expect.assertions(31);
+        expect.assertions(32);
         setup();
         expect(props.onCreate).toHaveBeenCalledWith<[Create<NetWorthEntry>]>(
           expect.objectContaining<Partial<Create<NetWorthEntry>>>({
@@ -678,6 +688,7 @@ describe('Net worth entry form', () => {
                   principal: 15599823,
                   paymentsRemaining: 175,
                   rate: 1.69,
+                  paid: 14490,
                 },
                 skip: false,
               }),
@@ -699,7 +710,7 @@ describe('Net worth entry form', () => {
       });
 
       it('should reset the active ID', () => {
-        expect.assertions(31);
+        expect.assertions(32);
         setup();
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });
