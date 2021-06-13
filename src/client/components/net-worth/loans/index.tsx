@@ -66,6 +66,11 @@ function enrichLoansWithInfo(
       paid: paidSoFar,
     };
 
+    const minMonthlyPayment = PMT({
+      ...latestValue.value,
+      principal: originalLoan.principal - overrideLumpSum,
+    });
+
     const modifiedLoan: CompoundLoan = {
       ...originalLoan,
       principal: originalLoan.principal - overrideLumpSum,
@@ -102,6 +107,7 @@ function enrichLoansWithInfo(
       loanValue: latestValue.value,
       modifiedLoan,
       originalLoan,
+      minMonthlyPayment,
       visible: visible[loan.subcategory] !== false,
       line: {
         key: loan.subcategory,

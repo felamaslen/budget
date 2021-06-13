@@ -24,6 +24,7 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
   loanValue,
   modifiedLoan,
   originalLoan,
+  minMonthlyPayment,
   override,
   setOverrides,
   visible,
@@ -51,11 +52,11 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
         ...last,
         [line.key]: {
           ...(last[line.key] ?? { lumpSum: 0 }),
-          overpayment: Math.max(0, monthlyPayment - originalLoan.monthlyPayment),
+          overpayment: Math.max(0, monthlyPayment - minMonthlyPayment),
         },
       }));
     },
-    [setOverrides, originalLoan.monthlyPayment, line.key],
+    [setOverrides, minMonthlyPayment, line.key],
   );
 
   return (
@@ -78,13 +79,12 @@ const LoansSidebarItem: React.FC<PropsItem> = ({
             <FormFieldCost
               value={modifiedLoan.monthlyPayment}
               onChange={onChangeOverrideOverpayment}
-              inputProps={{ min: originalLoan.monthlyPayment / 100 }}
             />
           </Styled.LoanInfoInput>
           <Styled.LoanInfoValues>
             <FormFieldRange
               value={modifiedLoan.monthlyPayment}
-              min={originalLoan.monthlyPayment}
+              min={minMonthlyPayment}
               max={originalLoan.principal / 10}
               step={1}
               onChange={onChangeOverrideOverpayment}

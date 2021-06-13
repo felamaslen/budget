@@ -7,6 +7,7 @@ export type LoanWithInfo = {
   loanValue: LoanValue;
   originalLoan: CompoundLoan;
   modifiedLoan: CompoundLoan;
+  minMonthlyPayment: number;
   line: Line;
   originalData?: number[];
   visible: boolean;
