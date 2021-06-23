@@ -1,6 +1,5 @@
 import React, { memo, SVGProps, useMemo } from 'react';
 
-import { ArrowLine } from './arrow-line';
 import { DynamicColorLine } from './dynamic-color-line';
 import {
   getPathProps,
@@ -98,12 +97,9 @@ const AverageLine: React.FC<AverageProps> = ({ data, movingAverage, ...props }) 
 };
 
 const RenderedLine: React.FC<Props> = ({
-  line: { data, stack, secondary, color, fill, smooth, movingAverage, arrows, strokeWidth, dashed },
+  line: { data, stack, secondary, color, fill, smooth, movingAverage, strokeWidth, dashed },
   ...props
 }) => {
-  if (arrows) {
-    return <ArrowLine data={data} secondary={secondary} color={color} {...props} />;
-  }
   if (!data.length || props.minY === props.maxY) {
     return null;
   }

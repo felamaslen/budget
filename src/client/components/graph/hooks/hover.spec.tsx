@@ -32,7 +32,6 @@ describe('Hover hook', () => {
           fill: true,
           smooth: true,
           movingAverage: { period: 2, color: 'darkred' },
-          arrows: false,
         },
         {
           key: 'line-c',
@@ -57,7 +56,6 @@ describe('Hover hook', () => {
           color: 'blue',
           strokeWidth: 1,
           smooth: false,
-          arrows: false,
           secondary: true,
         },
       ],

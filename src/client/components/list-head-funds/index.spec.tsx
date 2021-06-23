@@ -3,7 +3,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
 
-import { ListHeadFunds, ListHeadFundsMobile, Props } from '.';
+import { ListHeadFunds, ListHeadFundsMobile, Props, PropsGainValues } from '.';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
@@ -19,7 +19,7 @@ describe('<ListHeadFunds />', () => {
     },
     annualisedFundReturns: 0.233,
     cachedValue: {
-      ageText: '3 hours ago',
+      ageMs: 3 * 3600 + 19,
       value: 399098,
       gain: -0.0192,
       gainAbs: -11273,
@@ -77,11 +77,11 @@ describe('<ListHeadFunds />', () => {
 });
 
 describe('<ListHeadFundsMobile />', () => {
-  const props = {
+  const props: PropsGainValues = {
     totalCost: 400000,
     annualisedFundReturns: 0.27,
     cachedValue: {
-      ageText: '3 hours ago',
+      ageMs: 3 * 3600 - 27,
       value: 399098,
       gain: 0.0237,
       gainAbs: 107194,

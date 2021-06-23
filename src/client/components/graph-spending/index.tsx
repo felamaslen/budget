@@ -6,7 +6,7 @@ import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashf
 import { Sidebar } from '~client/components/graph-cashflow/sidebar';
 import { ToggleContainer } from '~client/components/graph-cashflow/toggle';
 import type { GraphCashFlowTitle } from '~client/components/graph-cashflow/types';
-import { profitLossColor, transformToMovingAverage } from '~client/components/graph/helpers';
+import { transformToMovingAverage } from '~client/components/graph/helpers';
 import { TodayContext, usePersistentState } from '~client/hooks';
 import { cumulativeSum } from '~client/modules/data';
 import { SettingsFull, SettingsGroup } from '~client/styled/shared/settings';
@@ -42,19 +42,6 @@ function processData(
   initialCumulativeValues: InitialCumulativeValues,
   investments: number[],
 ): Line[] {
-  const arrows: Line[] =
-    showAll || longTerm || isCumulative
-      ? []
-      : [
-          {
-            key: 'net',
-            name: 'Cash flow',
-            data: getValuesWithTime(graph.dates, graph.values.net),
-            arrows: true,
-            color: profitLossColor,
-          },
-        ];
-
   const income = showAll
     ? graph.values.income
     : insertInitialValue(graph.values.income, initialCumulativeValues.income);
@@ -64,7 +51,6 @@ function processData(
     : insertInitialValue(graph.values.spending, initialCumulativeValues.spending);
 
   return [
-    ...arrows,
     {
       key: 'spending',
       name: 'Expenses',

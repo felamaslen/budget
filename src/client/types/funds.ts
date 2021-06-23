@@ -66,7 +66,7 @@ export type CachedValue = {
   gainAbs: number;
   dayGain: number;
   dayGainAbs: number;
-  ageText: string;
+  ageMs: number | null;
 };
 
 export type RowPrices = Data[] | null;

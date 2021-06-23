@@ -63,7 +63,7 @@ export const OverallGain = styled(GainStyles.PriceChangeHighlight)<GainProps>`
 
   ${breakpoint(breakpoints.mobile)} {
     flex: 0 0 auto;
-    padding: 0 ${rem(16)} 0 ${rem(8)};
+    padding: 0 ${rem(8)} 0 ${rem(8)};
     width: auto;
     height: 100%;
     background-color: transparent;

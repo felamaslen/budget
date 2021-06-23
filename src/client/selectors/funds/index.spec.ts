@@ -1,10 +1,8 @@
 import addDays from 'date-fns/addDays';
-import getUnixTime from 'date-fns/getUnixTime';
 import numericHash from 'string-hash';
 
 import {
   getCashBreakdown,
-  getFundsCachedValueAgeText,
   getFundsCachedValue,
   getFundsCost,
   getPortfolio,
@@ -69,31 +67,11 @@ describe('Funds selectors', () => {
     },
   };
 
-  describe('getFundsCachedValueAgeText', () => {
-    it('should return the expected string', () => {
-      expect.assertions(1);
-      const now = new Date('2018-06-03');
-
-      expect(getFundsCachedValueAgeText(getUnixTime(now) - 4000, [0, 100, 400], now)).toBe(
-        '1 hour ago',
-      );
-    });
-
-    it('getFundsCachedValueAgeText uses only one unit', () => {
-      expect.assertions(1);
-      const now = new Date('2018-06-03');
-
-      expect(
-        getFundsCachedValueAgeText(getUnixTime(now) - 86400 - 3600 * 5.4, [0, 100, 400], now),
-      ).toBe('1 day ago');
-    });
-  });
-
   describe('getFundsCachedValue', () => {
     it.each`
       prop            | expectedValue
       ${'value'}      | ${399098.2}
-      ${'ageText'}    | ${'7 months ago'}
+      ${'ageMs'}      | ${1000 * (202.7807754633 * 86400)}
       ${'gain'}       | ${0.0827}
       ${'gainAbs'}    | ${60780.2}
       ${'dayGain'}    | ${getDayGain(state)}
@@ -167,7 +145,7 @@ describe('Funds selectors', () => {
         dayGain: getDayGain(stateNoPrice),
         dayGainAbs: getDayGainAbs(stateNoPrice),
         value: 399098.2,
-        ageText: '7 months ago',
+        ageMs: Math.floor(1000 * 202.7807754633 * 86400),
       });
     });
   });

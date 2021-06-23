@@ -3,7 +3,6 @@ import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
 import startOfDay from 'date-fns/startOfDay';
 import subDays from 'date-fns/subDays';
-import humanizeDuration from 'humanize-duration';
 import moize from 'moize';
 import { createSelector } from 'reselect';
 
@@ -34,32 +33,16 @@ export * from './lines';
 
 export const getHistoryOptions = createSelector(getAppConfig, (config) => config.historyOptions);
 
-export function getFundsCachedValueAgeText(
-  startTime: number,
-  cacheTimes: number[],
-  now: Date,
-): string {
-  const age = now.getTime() - 1000 * (cacheTimes[cacheTimes.length - 1] + startTime);
-
-  if (Number.isNaN(age)) {
-    return 'no values';
-  }
-  if (age < 0) {
-    return 'in the future!';
-  }
-
-  return `${humanizeDuration(age, { round: true, largest: 1 })} ago`;
-}
-
 const getFundCacheAge = memoiseNowAndToday((time) =>
   createSelector(getFundsCache, (cache: PriceCache | undefined) => {
     if (!cache) {
-      return '';
+      return null;
     }
 
     const { startTime, cacheTimes } = cache;
 
-    return getFundsCachedValueAgeText(startTime, cacheTimes, time);
+    const age = time.getTime() - 1000 * (cacheTimes[cacheTimes.length - 1] + startTime);
+    return Number.isNaN(age) ? null : age;
   }),
 );
 
@@ -238,7 +221,7 @@ export const getFundsCachedValue = memoiseNowAndToday((time, key) =>
     getFundCacheAge[key](time),
     getDayGain,
     getDayGainAbs,
-    (funds, ageText, dayGain, dayGainAbs) => {
+    (funds, ageMs, dayGain, dayGainAbs) => {
       const paperValue = funds.reduce<number>(
         (last, { transactions, stockSplits, price }) =>
           last + getPaperValue(transactions, stockSplits, price),
@@ -260,7 +243,7 @@ export const getFundsCachedValue = memoiseNowAndToday((time, key) =>
 
       return {
         value: paperValue,
-        ageText,
+        ageMs,
         gain,
         gainAbs,
         dayGain,

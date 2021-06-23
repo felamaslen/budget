@@ -93,7 +93,6 @@ export type Line = LineAppearance & {
   movingAverage?: LineAppearance & {
     period: number;
   };
-  arrows?: boolean;
 } & PathProps;
 
 export type UnkeyedLine = Pick<Line, Exclude<keyof Line, 'key'>>;
