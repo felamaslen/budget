@@ -13,7 +13,7 @@ node {
       script {
         docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
           sh 'rm -rf node_modules'
-          sh 'make build push'
+          sh 'make build_linux_amd64 push'
         }
       }
     }

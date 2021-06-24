@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This script should be run in a Debian/Ubuntu environment
 
@@ -18,13 +18,13 @@ cd $(dirname "$0")
 
 APP_NAMESPACE="$(cat ./namespace.yml | grep "name:" | head -n1 | awk '{print $2}' | cut -d'"' -f2)" 
 
-if [[ -z "$ADVERTISE_IFACE" ]]; then
+if [ -z "$ADVERTISE_IFACE" ]; then
   echo "Must set ADVERTISE_IFACE"
   exit 1
 fi
 
 ADVERTISE_ADDRESS="$(ip addr show dev $ADVERTISE_IFACE | grep inet | grep -v inet6 | awk '{print $2}' | cut -d'/' -f1)"
-if [[ -z "$ADVERTISE_ADDRESS" ]]; then
+if [ -z "$ADVERTISE_ADDRESS" ]; then
   echo "$ADVERTISE_IFACE must have a valid inet4 address"
   exit 1
 fi
@@ -34,7 +34,7 @@ NETWORK_CIDR=10.11.0.0/16
 function setup_cluster_dependencies {
   echo "Setting up cluster dependencies..."
 
-  if [[ -z $(lsmod | grep br_netfilter) ]]; then
+  if [ -z $(lsmod | grep br_netfilter) ]; then
     echo "Enabling br_netfilter"
     sudo modprobe br_netfilter
   else
@@ -102,7 +102,7 @@ function init_cluster {
 
   echo "Copying kubernetes config"
   mkdir -p $HOME/.kube
-  if [[ -f "$HOME/.kube/config" ]]; then
+  if [ -f "$HOME/.kube/config" ]; then
     echo "Backing up old config as $HOME/.kube/config.bak"
     mv $HOME/.kube/config $HOME/.kube/config.bak
   fi
@@ -124,12 +124,12 @@ function init_network {
 
   calico_running=0
 
-  while [[ $calico_running -ne 1 ]]; do
+  while [ $calico_running -ne 1 ]; do
     status=$(kubectl get pods -n calico-system)
-    [[ ! -z "$(echo "$status" | grep STATUS)" && \
-      -z "$(echo "$status" | awk '{print $3}' | grep -v STATUS | grep -v Running)" ]] && calico_running=1
+    [ ! -z "$(echo "$status" | grep STATUS)" && \
+      -z "$(echo "$status" | awk '{print $3}' | grep -v STATUS | grep -v Running)" ] && calico_running=1
 
-    if [[ $calico_running -ne 1 ]]; then
+    if [ $calico_running -ne 1 ]; then
       echo "$status"
       sleep 5
     fi
@@ -142,11 +142,11 @@ function init_network {
 
   nodes_ready=0
 
-  while [[ $nodes_ready -ne 1 ]]; do
+  while [ $nodes_ready -ne 1 ]; do
     nodes=$(kubectl get nodes -o wide)
-    [[ -z "$(echo "$nodes" | awk '{print $2}' | grep -v STATUS | grep -v Ready)" ]] && nodes_ready=1
+    [ -z "$(echo "$nodes" | awk '{print $2}' | grep -v STATUS | grep -v Ready)" ] && nodes_ready=1
 
-    if [[ $nodes_ready -eq 0 ]]; then
+    if [ $nodes_ready -eq 0 ]; then
       echo "$nodes"
       sleep 5
     fi
@@ -211,11 +211,11 @@ function setup_db {
 
   pod_ready=0
   pod_name=""
-  while [[ $pod_ready -eq 0 ]]; do
+  while [ $pod_ready -eq 0 ]; do
     pod_line=$(kubectl -n=$APP_NAMESPACE get pods | grep budget-database)
     pod_status=$(echo "$pod_line" | awk '{print $3}')
 
-    if [[ ! -z "$pod_line" && "$pod_status" -eq "Running" ]]; then
+    if [ ! -z "$pod_line" && "$pod_status" -eq "Running" ]; then
       echo "Pod running"
 
       pod_name=$(echo "$pod_line" | awk '{print $1}')
@@ -224,7 +224,7 @@ function setup_db {
       log_ready="$(kubectl -n=$APP_NAMESPACE logs $pod_name 2>/dev/null | grep "ready to accept connections")"
       set -e
 
-      if [[ -z "$log_ready" ]]; then
+      if [ -z "$log_ready" ]; then
         echo "Database not ready, waiting..."
         sleep 5
       else

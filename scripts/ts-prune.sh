@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 output=$(ts-prune -p tsconfig.json \
   | grep -v test-data \

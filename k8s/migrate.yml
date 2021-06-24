@@ -15,7 +15,8 @@ spec:
       containers:
         - name: budget-migrate
           image: docker.fela.space/budget:0
-          command: ['yarn', 'migrate', 'up']
+          imagePullPolicy: Always
+          command: ['node', 'lib/api/migrate.js', 'up']
           env:
             - name: NODE_ENV
               value: production
