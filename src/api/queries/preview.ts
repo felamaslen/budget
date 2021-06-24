@@ -19,7 +19,7 @@ export async function selectPreviewRowsStandard(
   endDate: Date,
 ): Promise<readonly PreviewRow[]> {
   const result = await db.query<PreviewRow>(sql`
-  SELECT date, SUM(cost) AS value
+  SELECT date, SUM(value) AS value
   FROM list_standard
   WHERE ${sql.join(
     [
