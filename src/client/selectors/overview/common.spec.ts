@@ -8,8 +8,10 @@ import {
   getNumMonths,
   getFutureMonths,
   getMonthDates,
+  getGraphDates,
 } from '~client/selectors/overview/common';
 import { testState as state } from '~client/test-data/state';
+import { OverviewGraphDate } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
 describe('Overview selectors (common)', () => {
@@ -105,6 +107,72 @@ describe('Overview selectors (common)', () => {
         new Date('2018-06-30T23:59:59.999Z'),
         new Date('2018-07-31T23:59:59.999Z'),
       ]);
+    });
+  });
+
+  describe('getGraphDates', () => {
+    describe('when using long term options', () => {
+      it('should return future dates split by year', () => {
+        expect.assertions(1);
+
+        const result = getGraphDates(new Date('2021-06-23'), {
+          enabled: true,
+          rates: {
+            years: 5,
+          },
+        })({
+          ...state,
+          overview: {
+            ...state.overview,
+            startDate: new Date('2021-04-30'),
+            endDate: new Date('2021-08-31'),
+          },
+        });
+
+        expect(result).toStrictEqual<OverviewGraphDate[]>([
+          { date: new Date('2021-04-30T23:59:59.999Z'), monthIndex: 0 },
+          { date: new Date('2021-05-31T23:59:59.999Z'), monthIndex: 1 },
+          { date: new Date('2021-06-30T23:59:59.999Z'), monthIndex: 2 },
+          { date: new Date('2021-12-31T23:59:59.999Z'), monthIndex: 8 },
+          { date: new Date('2022-12-31T23:59:59.999Z'), monthIndex: 20 },
+          { date: new Date('2023-12-31T23:59:59.999Z'), monthIndex: 32 },
+          { date: new Date('2024-12-31T23:59:59.999Z'), monthIndex: 44 },
+          { date: new Date('2025-12-31T23:59:59.999Z'), monthIndex: 56 },
+        ]);
+      });
+    });
+
+    describe('when the present month is december', () => {
+      it('should add an extra year', () => {
+        expect.assertions(1);
+
+        const result = getGraphDates(new Date('2021-12-19'), {
+          enabled: true,
+          rates: {
+            years: 5,
+          },
+        })({
+          ...state,
+          overview: {
+            ...state.overview,
+            startDate: new Date('2021-08-31'),
+            endDate: new Date('2022-02-28'),
+          },
+        });
+
+        expect(result).toStrictEqual<OverviewGraphDate[]>([
+          { date: new Date('2021-08-31T23:59:59.999Z'), monthIndex: 0 },
+          { date: new Date('2021-09-30T23:59:59.999Z'), monthIndex: 1 },
+          { date: new Date('2021-10-31T23:59:59.999Z'), monthIndex: 2 },
+          { date: new Date('2021-11-30T23:59:59.999Z'), monthIndex: 3 },
+          { date: new Date('2021-12-31T23:59:59.999Z'), monthIndex: 4 },
+          { date: new Date('2022-12-31T23:59:59.999Z'), monthIndex: 16 },
+          { date: new Date('2023-12-31T23:59:59.999Z'), monthIndex: 28 },
+          { date: new Date('2024-12-31T23:59:59.999Z'), monthIndex: 40 },
+          { date: new Date('2025-12-31T23:59:59.999Z'), monthIndex: 52 },
+          { date: new Date('2026-12-31T23:59:59.999Z'), monthIndex: 64 },
+        ]);
+      });
     });
   });
 });

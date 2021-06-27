@@ -21,6 +21,7 @@ import startOfHour from 'date-fns/startOfHour';
 import startOfISOWeek from 'date-fns/startOfISOWeek';
 import startOfMinute from 'date-fns/startOfMinute';
 import startOfMonth from 'date-fns/startOfMonth';
+import startOfYear from 'date-fns/startOfYear';
 
 import { NULL } from '~client/modules/data';
 
@@ -85,7 +86,7 @@ const timeTickLifetime: TimeTickFn = (t0, t1) => {
   const numTicks = differenceInYears(fromUnixTime(t1), t0Date) + 1;
 
   return timeTick(t0, t1, {
-    start: startOfMonth(t0Date),
+    start: startOfYear(t0Date),
     tickSize: (start, index) => addYears(start, index),
     getMajor: (time): Major => {
       const year = getYear(time);
@@ -99,7 +100,7 @@ const timeTickLifetime: TimeTickFn = (t0, t1) => {
     },
     numTicks,
     label: (time) => {
-      if (getYear(time) % 10 === 0) {
+      if (getYear(time) % 5 === 0) {
         return format(time, 'yyyy');
       }
       return null;

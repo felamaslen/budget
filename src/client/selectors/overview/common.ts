@@ -1,6 +1,8 @@
 import addYears from 'date-fns/addYears';
 import differenceInMonths from 'date-fns/differenceInMonths';
 import endOfMonth from 'date-fns/endOfMonth';
+import endOfYear from 'date-fns/endOfYear';
+import getMonth from 'date-fns/getMonth';
 import isSameMonth from 'date-fns/isSameMonth';
 import moize from 'moize';
 import { createSelector } from 'reselect';
@@ -50,14 +52,19 @@ export const getGraphDates = moize(
 
       const presentGraphDates = mapMonthDates(getMonthDatesList(startDate, endOfMonth(today)));
 
+      const lastDate = presentGraphDates[presentGraphDates.length - 1].date;
+      const longTermStartDate = endOfYear(addYears(lastDate, getMonth(lastDate) === 11 ? 1 : 0));
+      const initialMonthIndex =
+        differenceInMonths(longTermStartDate, lastDate) + presentGraphDates.length - 1;
+
       return Array(longTermOptions.rates.years ?? GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS)
         .fill(0)
         .reduce<OverviewGraphDate[]>(
           (last, _, index) => [
             ...last,
             {
-              date: addYears(presentGraphDates[presentGraphDates.length - 1].date, index + 1),
-              monthIndex: presentGraphDates.length - 1 + (index + 1) * 12,
+              date: endOfYear(addYears(longTermStartDate, index)),
+              monthIndex: initialMonthIndex + index * 12,
             },
           ],
           presentGraphDates,

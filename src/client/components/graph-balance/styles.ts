@@ -14,6 +14,7 @@ export const RateSetter = styled.div`
 
   input {
     flex: 1;
+    min-width: 0;
   }
 `;
 

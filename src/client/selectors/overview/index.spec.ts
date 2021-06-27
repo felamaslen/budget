@@ -787,6 +787,7 @@ describe('Overview selectors', () => {
       const testLongTermOptions: LongTermOptions = {
         enabled: true,
         rates: {
+          years: 30,
           income: 350000,
           stockPurchase: 185000,
         },
@@ -804,48 +805,49 @@ describe('Overview selectors', () => {
             new Date('2018-01-31T23:59:59.999Z'),
             new Date('2018-02-28T23:59:59.999Z'),
             new Date('2018-03-31T23:59:59.999Z'),
-            new Date('2019-03-31T23:59:59.999Z'),
-            new Date('2020-03-31T23:59:59.999Z'),
-            new Date('2021-03-31T23:59:59.999Z'),
-            new Date('2022-03-31T23:59:59.999Z'),
-            new Date('2023-03-31T23:59:59.999Z'),
-            new Date('2024-03-31T23:59:59.999Z'),
-            new Date('2025-03-31T23:59:59.999Z'),
-            new Date('2026-03-31T23:59:59.999Z'),
-            new Date('2027-03-31T23:59:59.999Z'),
-            new Date('2028-03-31T23:59:59.999Z'),
-            new Date('2029-03-31T23:59:59.999Z'),
-            new Date('2030-03-31T23:59:59.999Z'),
-            new Date('2031-03-31T23:59:59.999Z'),
-            new Date('2032-03-31T23:59:59.999Z'),
-            new Date('2033-03-31T23:59:59.999Z'),
-            new Date('2034-03-31T23:59:59.999Z'),
-            new Date('2035-03-31T23:59:59.999Z'),
-            new Date('2036-03-31T23:59:59.999Z'),
-            new Date('2037-03-31T23:59:59.999Z'),
-            new Date('2038-03-31T23:59:59.999Z'),
-            new Date('2039-03-31T23:59:59.999Z'),
-            new Date('2040-03-31T23:59:59.999Z'),
-            new Date('2041-03-31T23:59:59.999Z'),
-            new Date('2042-03-31T23:59:59.999Z'),
-            new Date('2043-03-31T23:59:59.999Z'),
-            new Date('2044-03-31T23:59:59.999Z'),
-            new Date('2045-03-31T23:59:59.999Z'),
-            new Date('2046-03-31T23:59:59.999Z'),
-            new Date('2047-03-31T23:59:59.999Z'),
-            new Date('2048-03-31T23:59:59.999Z'),
+            new Date('2018-12-31T23:59:59.999Z'),
+            new Date('2019-12-31T23:59:59.999Z'),
+            new Date('2020-12-31T23:59:59.999Z'),
+            new Date('2021-12-31T23:59:59.999Z'),
+            new Date('2022-12-31T23:59:59.999Z'),
+            new Date('2023-12-31T23:59:59.999Z'),
+            new Date('2024-12-31T23:59:59.999Z'),
+            new Date('2025-12-31T23:59:59.999Z'),
+            new Date('2026-12-31T23:59:59.999Z'),
+            new Date('2027-12-31T23:59:59.999Z'),
+            new Date('2028-12-31T23:59:59.999Z'),
+            new Date('2029-12-31T23:59:59.999Z'),
+            new Date('2030-12-31T23:59:59.999Z'),
+            new Date('2031-12-31T23:59:59.999Z'),
+            new Date('2032-12-31T23:59:59.999Z'),
+            new Date('2033-12-31T23:59:59.999Z'),
+            new Date('2034-12-31T23:59:59.999Z'),
+            new Date('2035-12-31T23:59:59.999Z'),
+            new Date('2036-12-31T23:59:59.999Z'),
+            new Date('2037-12-31T23:59:59.999Z'),
+            new Date('2038-12-31T23:59:59.999Z'),
+            new Date('2039-12-31T23:59:59.999Z'),
+            new Date('2040-12-31T23:59:59.999Z'),
+            new Date('2041-12-31T23:59:59.999Z'),
+            new Date('2042-12-31T23:59:59.999Z'),
+            new Date('2043-12-31T23:59:59.999Z'),
+            new Date('2044-12-31T23:59:59.999Z'),
+            new Date('2045-12-31T23:59:59.999Z'),
+            new Date('2046-12-31T23:59:59.999Z'),
+            new Date('2047-12-31T23:59:59.999Z'),
           ]);
         });
       });
 
       it('should extrapolate the (yearly) income values explicitly', () => {
-        expect.assertions(3);
+        expect.assertions(4);
         const { values: result } = getOverviewGraphValues(now, 0, testLongTermOptions)(testState);
 
         expect(result.income).toHaveLength(33);
         expect(result.income.slice(0, 3)).toStrictEqual([2000, 1900, 1500]);
+        expect(result.income[3]).toBe(350000 * 9);
 
-        expect(result.income.slice(3).every((value) => value === 350000 * 12)).toBe(true);
+        expect(result.income.slice(4).every((value) => value === 350000 * 12)).toBe(true);
       });
 
       it('should extrapolate the (yearly) spending values explicitly', () => {
@@ -858,7 +860,7 @@ describe('Overview selectors', () => {
             1260,
             2068,
             713,
-            14124,
+            10593,
             14124,
             14124,
             14124,
@@ -900,9 +902,11 @@ describe('Overview selectors', () => {
 
         const returnRate = (1 + annualisedFundReturns) ** (1 / 12);
 
+        const stocksJan18 = resultWithoutFuture.stocks[0];
+        const stocksFeb18 = resultWithoutFuture.stocks[1];
         const stocksMar18 = resultWithoutFuture.stocks[2];
-        const stocksMar19 =
-          (((((((((((stocksMar18 * /* Apr */ returnRate + 185000) /* May */ * returnRate +
+        const stocksDec18 =
+          ((((((((stocksMar18 * /* Apr */ returnRate + 185000) /* May */ * returnRate +
             185000) /* Jun */ *
             returnRate +
             185000) /* Jul */ *
@@ -916,16 +920,16 @@ describe('Overview selectors', () => {
             185000) /* Nov */ *
             returnRate +
             185000) /* Dec */ *
-            returnRate +
-            185000) /* Jan */ *
-            returnRate +
-            185000) /* Feb */ *
-            returnRate +
-            185000) /* Mar */ *
             returnRate +
           185000;
-        const stocksMar20 =
-          (((((((((((stocksMar19 * /* Apr */ returnRate + 185000) /* May */ * returnRate +
+        const stocksDec19 =
+          (((((((((((stocksDec18 * /* Jan */ returnRate + 185000) /* Feb */ * returnRate +
+            185000) /* Mar */ *
+            returnRate +
+            185000) /* Apr */ *
+            returnRate +
+            185000) /* May */ *
+            returnRate +
             185000) /* Jun */ *
             returnRate +
             185000) /* Jul */ *
@@ -939,16 +943,16 @@ describe('Overview selectors', () => {
             185000) /* Nov */ *
             returnRate +
             185000) /* Dec */ *
-            returnRate +
-            185000) /* Jan */ *
-            returnRate +
-            185000) /* Feb */ *
-            returnRate +
-            185000) /* Mar */ *
             returnRate +
           185000;
-        const stocksMar21 =
-          (((((((((((stocksMar20 * /* Apr */ returnRate + 185000) /* May */ * returnRate +
+        const stocksDec20 =
+          (((((((((((stocksDec19 * /* Jan */ returnRate + 185000) /* Feb */ * returnRate +
+            185000) /* Mar */ *
+            returnRate +
+            185000) /* Apr */ *
+            returnRate +
+            185000) /* May */ *
+            returnRate +
             185000) /* Jun */ *
             returnRate +
             185000) /* Jul */ *
@@ -962,17 +966,13 @@ describe('Overview selectors', () => {
             185000) /* Nov */ *
             returnRate +
             185000) /* Dec */ *
-            returnRate +
-            185000) /* Jan */ *
-            returnRate +
-            185000) /* Feb */ *
-            returnRate +
-            185000) /* Mar */ *
             returnRate +
           185000;
 
-        expect(result.stocks.slice(2, 6)).toStrictEqual(
-          [stocksMar18, stocksMar19, stocksMar20, stocksMar21].map(Math.round),
+        expect(result.stocks.slice(0, 6)).toStrictEqual(
+          [stocksJan18, stocksFeb18, stocksMar18, stocksDec18, stocksDec19, stocksDec20].map(
+            Math.round,
+          ),
         );
       });
 
@@ -981,47 +981,46 @@ describe('Overview selectors', () => {
         const { values: result } = getOverviewGraphValues(now, 0, testLongTermOptions)(testState);
 
         // Assert essentially that there is no debt by the end
-        expect(result.illiquidEquity[result.illiquidEquity.length - 1]).toBe(
-          Math.round(
-            result.illiquidEquity[result.illiquidEquity.length - 2] * illiquidAppreciation,
-          ),
-        );
+        expect(
+          result.illiquidEquity[result.illiquidEquity.length - 1] /
+            result.illiquidEquity[result.illiquidEquity.length - 2],
+        ).toBeCloseTo(illiquidAppreciation);
 
         expect(result.illiquidEquity).toMatchInlineSnapshot(`
           Array [
             1680500,
             2255800,
             3079100,
-            4678252,
-            6345778,
-            8084773,
-            9898479,
-            11790290,
-            13763760,
-            15822610,
-            17970740,
-            20212232,
-            22551362,
-            24992609,
-            27540666,
-            30200447,
-            32977101,
-            35876022,
-            38902861,
-            42063539,
-            45364259,
-            48811523,
-            52412140,
-            56173248,
-            60102327,
-            64207215,
-            68496126,
-            72806631,
-            76446963,
-            80269311,
-            84282776,
-            88496915,
-            92921761,
+            4272172,
+            5922320,
+            7643150,
+            9437866,
+            11309823,
+            13262536,
+            15299683,
+            17425118,
+            19642876,
+            21957184,
+            24372471,
+            26893374,
+            29524750,
+            32271690,
+            35139525,
+            38133840,
+            41260488,
+            44525600,
+            47935601,
+            51497224,
+            55217522,
+            59103888,
+            63164068,
+            67406182,
+            71838738,
+            75520162,
+            79296170,
+            83260978,
+            87424027,
+            91795229,
           ]
         `);
       });
@@ -1036,7 +1035,7 @@ describe('Overview selectors', () => {
             1000,
             900,
             400,
-            10800,
+            8100,
             10800,
             10800,
             10800,
