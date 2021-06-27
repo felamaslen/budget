@@ -117,7 +117,7 @@ export async function selectListItems(
   limit: number,
   offset: number,
 ): Promise<readonly GQL<NativeDate<ListItemStandard, 'date'>>[]> {
-  const { rows } = await db.query(sql`
+  const { rows } = await db.query<GQL<NativeDate<ListItemStandard, 'date'>>>(sql`
   SELECT id, date, item, category, shop, value AS cost
   FROM list_standard
   WHERE uid = ${uid} AND page = ${page}
@@ -125,7 +125,7 @@ export async function selectListItems(
   LIMIT ${limit}
   OFFSET ${offset * limit}
   `);
-  return (rows as unknown) as readonly GQL<NativeDate<ListItemStandard, 'date'>>[];
+  return rows;
 }
 
 export async function deleteListItem(

@@ -171,7 +171,7 @@ export async function selectOldNetWorth(
   startDate: string,
   oldDateEnd: string,
 ): Promise<readonly OldNetWorthRow[]> {
-  const result = await db.query(sql`
+  const result = await db.query<OldNetWorthRow>(sql`
     WITH ${sql.join(
       [
         sql`values AS (
@@ -318,7 +318,7 @@ export async function selectOldNetWorth(
     LEFT JOIN values_investments ON values_investments.id = v.id
     ORDER BY v.date DESC
   `);
-  return (result.rows as unknown) as readonly OldNetWorthRow[];
+  return result.rows;
 }
 
 type LatestCashTotalRow = {
@@ -412,7 +412,7 @@ export async function selectNetWorthLoans(
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<readonly NetWorthLoansRow[]> {
-  const result = await db.query(sql`
+  const result = await db.query<NetWorthLoansRow>(sql`
   SELECT ${sql.join(
     [
       sql`nws.subcategory`,
@@ -431,5 +431,5 @@ export async function selectNetWorthLoans(
   WHERE nw.uid = ${uid}
   ORDER BY nws.id, nw.date
   `);
-  return (result.rows as unknown) as readonly NetWorthLoansRow[];
+  return result.rows;
 }
