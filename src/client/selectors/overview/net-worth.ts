@@ -28,6 +28,7 @@ import type {
   FlexBlocks,
   LongTermOptions,
   NetWorthAggregateSums as AggregateSums,
+  NetWorthEntryInputNative,
   NetWorthEntryNative,
   NetWorthTableRow as TableRow,
   NetWorthValueObjectNative,
@@ -41,7 +42,9 @@ import type {
   LoanValue,
   NetWorthCategory,
   NetWorthSubcategory,
+  NetWorthValueInput,
   OptionValue,
+  OptionValueInput,
 } from '~client/types/gql';
 import { NetWorthAggregate as Aggregate } from '~shared/constants';
 import type { GQL } from '~shared/types';
@@ -69,7 +72,7 @@ type FilterPredicate<T> = (value: T) => boolean;
 const filterValuesByCategory = (predicate: FilterPredicate<NetWorthCategory>) => (
   categories: NetWorthCategory[],
   subcategories: NetWorthSubcategory[],
-) => (value: NetWorthValueObjectNative): boolean =>
+) => (value: NetWorthValueObjectNative | NetWorthValueInput): boolean =>
   categories
     .filter(predicate)
     .some((category) =>
@@ -81,19 +84,24 @@ const filterValuesByCategory = (predicate: FilterPredicate<NetWorthCategory>) =>
 
 const filterValuesBySubcategory = (predicate: FilterPredicate<NetWorthSubcategory>) => (
   subcategories: NetWorthSubcategory[],
-) => (value: NetWorthValueObjectNative): boolean =>
+) => (value: NetWorthValueObjectNative | NetWorthValueInput): boolean =>
   subcategories.filter(predicate).some((subcategory) => subcategory.id === value.subcategory);
 
 const isValueSAYE = filterValuesBySubcategory(({ isSAYE }) => !!isSAYE);
 
-const residualSAYEValue = (option: GQL<OptionValue>): number => option.vested * option.strikePrice;
+const residualSAYEValue = (option: GQL<OptionValue> | OptionValueInput): number =>
+  (option.vested ?? 0) * option.strikePrice;
 
-const optionValue = (option: GQL<OptionValue>, isSAYE: boolean, withSAYEResidual = false): number =>
-  option.vested * Math.max(0, option.marketPrice - option.strikePrice) +
+const optionValue = (
+  option: GQL<OptionValue> | OptionValueInput,
+  isSAYE: boolean,
+  withSAYEResidual = false,
+): number =>
+  (option.vested ?? 0) * Math.max(0, option.marketPrice - option.strikePrice) +
   (withSAYEResidual && isSAYE ? residualSAYEValue(option) : 0);
 
 function sumComplexValue(
-  value: NetWorthValueObjectNative,
+  value: NetWorthValueObjectNative | NetWorthValueInput,
   currencies: Currency[],
   subcategories: NetWorthSubcategory[],
   withSAYEResidual = false,
@@ -118,7 +126,7 @@ function sumComplexValue(
 const sumValues = (
   currencies: Currency[],
   subcategories: NetWorthSubcategory[],
-  values: NetWorthValueObjectNative[],
+  values: (NetWorthValueObjectNative | NetWorthValueInput)[],
   withSAYEResidual = false,
 ): number =>
   values.reduce<number>(
@@ -246,19 +254,20 @@ export const getNetWorthRows = createSelector(
   (monthDates, entries) => monthDates.map(getEntryForMonth(entries)),
 );
 
-const sumByType = (
+export const sumByType = (
   categoryType: NetWorthCategoryType,
   categories: NetWorthCategory[],
   subcategories: NetWorthSubcategory[],
-  { currencies, values }: NetWorthEntryNative,
-  categoryPredicate: (category: NetWorthCategory) => boolean = (): true => true,
+  { currencies, values }: NetWorthEntryNative | NetWorthEntryInputNative,
+  categoryPredicate?: (category: NetWorthCategory) => boolean,
 ): number =>
   sumValues(
     currencies,
     subcategories,
     values.filter(
       filterValuesByCategory(
-        (category) => category.type === categoryType && categoryPredicate(category),
+        (category) =>
+          category.type === categoryType && (!categoryPredicate || categoryPredicate(category)),
       )(categories, subcategories),
     ),
   );

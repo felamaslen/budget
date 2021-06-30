@@ -1,6 +1,6 @@
 import { useDebounceCallback } from '@react-hook/debounce';
 import addMonths from 'date-fns/addMonths';
-import differenceInMonths from 'date-fns/differenceInMonths';
+import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths';
 import endOfMonth from 'date-fns/endOfMonth';
 import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
@@ -145,7 +145,7 @@ function getLoans(
 
   const loansWithStartIndex = loansWithDate.map((loan) => ({
     ...loan,
-    startIndex: differenceInMonths(loan.values[0].date, startDate),
+    startIndex: differenceInCalendarMonths(loan.values[0].date, startDate),
   }));
 
   return enrichLoansWithInfo(visible, overrides, startDate, loansWithStartIndex);

@@ -13,7 +13,6 @@ import {
   AddByCategoryValue,
   FormContainer as NetWorthEditForm,
 } from '~client/components/net-worth/edit-form/styles';
-import { ButtonDelete as NetWorthEntryDelete } from '~client/components/net-worth/list/styles';
 import { breakpoint } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 
@@ -25,7 +24,7 @@ const buttonStyles = ({ expanded = false }: ButtonProps): SerializedStyles => cs
   margin: 0 6px;
   flex-grow: 1;
   justify-content: center;
-  padding: 1em 0;
+  padding: ${rem(8)};
   width: 100%;
   background: ${colors.button.mobile};
   font-size: 0.6em;
@@ -161,11 +160,12 @@ export const ButtonDelete = styled(ButtonCrud)`
     grid-row: 1;
     grid-column: 3;
   }
-  ${NetWorthEntryDelete} & {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-    line-height: 16px;
+  ${NetWorthEditForm} & {
+    border-radius: 2px;
+    font-size: ${rem(14)};
+    padding: 0 ${rem(8)};
+    text-transform: none;
+    width: auto;
   }
   ${EditCurrency} & {
     grid-column: 4;

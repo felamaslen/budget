@@ -1,38 +1,24 @@
 import React from 'react';
 
 import { Step } from './constants';
-import Navigation, { Props as NavigationProps } from './navigation';
 
 import * as Styled from './styles';
-import { ButtonCancel } from '~client/styled/shared/button';
+import { Button } from '~client/styled/shared/button';
 import type { Id, NetWorthEntryInputNative as NetWorthEntryInput } from '~client/types';
 
-export type Props = NavigationProps & {
+export type Props = {
   add?: boolean;
   step: Step;
   id?: Id;
   item: NetWorthEntryInput;
-  onComplete: (event: React.MouseEvent) => void;
+  onDone: () => void;
 };
 
-export const FormContainer: React.FC<Props> = ({
-  add = false,
-  step,
-  children,
-  onComplete,
-  onPrevStep,
-  onNextStep,
-  onFirstStep,
-  onLastStep,
-}) => (
+export const FormContainer: React.FC<Props> = ({ add = false, step, children, onDone }) => (
   <Styled.FormContainer add={add}>
-    <ButtonCancel onClick={onComplete}>{'Cancel'}</ButtonCancel>
     <Styled.FormSection step={step}>{children}</Styled.FormSection>
-    <Navigation
-      onPrevStep={onPrevStep}
-      onNextStep={onNextStep}
-      onFirstStep={onFirstStep}
-      onLastStep={onLastStep}
-    />
+    <Styled.FormNavigation>
+      <Button onClick={onDone}>Done</Button>
+    </Styled.FormNavigation>
   </Styled.FormContainer>
 );

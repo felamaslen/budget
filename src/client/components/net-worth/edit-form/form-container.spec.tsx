@@ -16,64 +16,24 @@ describe('(net worth edit form) <FormContainer />', () => {
       creditLimit: [],
       currencies: [],
     },
-    onComplete: jest.fn(),
-    onPrevStep: jest.fn(),
-    onNextStep: jest.fn(),
-    onFirstStep: false,
-    onLastStep: false,
+    onDone: jest.fn(),
   };
 
-  describe('cancel button', () => {
+  describe('done button', () => {
     it('should be rendered', () => {
       expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
-      const cancelButton = getByText('Cancel');
-      expect(cancelButton).toBeInTheDocument();
+      const doneButton = getByText('Done');
+      expect(doneButton).toBeInTheDocument();
     });
-    it('should call onComplete when clicked', () => {
+    it('should call onDone when clicked', () => {
       expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
-      const cancelButton = getByText('Cancel');
-      act(() => {
-        fireEvent.click(cancelButton);
-      });
-      expect(props.onComplete).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('previous button', () => {
-    it('should be rendered', () => {
-      expect.assertions(1);
-      const { getByText } = render(<FormContainer {...props} />);
-      const prevButton = getByText('Previous');
-      expect(prevButton).toBeInTheDocument();
-    });
-    it('should call onPrevStep when clicked', () => {
-      expect.assertions(1);
-      const { getByText } = render(<FormContainer {...props} />);
-      const prevButton = getByText('Previous');
+      const prevButton = getByText('Done');
       act(() => {
         fireEvent.click(prevButton);
       });
-      expect(props.onPrevStep).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('next button', () => {
-    it('should be rendered', () => {
-      expect.assertions(1);
-      const { getByText } = render(<FormContainer {...props} />);
-      const nextButton = getByText('Next');
-      expect(nextButton).toBeInTheDocument();
-    });
-    it('should call onPrevStep when clicked', () => {
-      expect.assertions(1);
-      const { getByText } = render(<FormContainer {...props} />);
-      const nextButton = getByText('Next');
-      act(() => {
-        fireEvent.click(nextButton);
-      });
-      expect(props.onNextStep).toHaveBeenCalledTimes(1);
+      expect(props.onDone).toHaveBeenCalledTimes(1);
     });
   });
 });

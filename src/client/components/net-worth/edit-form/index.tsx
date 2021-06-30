@@ -1,9 +1,10 @@
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
-import { Step, steps } from './constants';
+import { Step } from './constants';
 import { Props as ContainerProps } from './form-container';
+import { StepOverview } from './overview';
 import { StepCurrencies } from './step-currencies';
 import { StepDate } from './step-date';
 import { StepAssets, StepLiabilities } from './step-values';
@@ -20,11 +21,17 @@ type PropsItemForm = {
   categories: NetWorthCategory[];
   subcategories: NetWorthSubcategory[];
   setActiveId: SetActiveId;
+  onDelete?: () => void;
   onEdit: (
     id: Id,
     item: Create<NetWorthEntry>,
     onComplete: React.EventHandler<React.MouseEvent | React.KeyboardEvent | React.TouchEvent>,
   ) => void;
+};
+
+type TempState = {
+  item: Create<NetWorthEntry>;
+  touched: boolean;
 };
 
 const NetWorthItemForm: React.FC<PropsItemForm> = ({
@@ -33,49 +40,58 @@ const NetWorthItemForm: React.FC<PropsItemForm> = ({
   categories,
   subcategories,
   setActiveId,
+  onDelete,
   onEdit,
 }) => {
-  const onComplete = useCallback(
-    (event) => {
-      if (event) {
-        event.stopPropagation();
-      }
-      setActiveId(null);
-    },
-    [setActiveId],
+  const [step, setStep] = useState<Step | null>(null);
+
+  const [{ item: tempItem, touched }, setTemp] = useState<TempState>({
+    item: withoutId<NetWorthEntry>(item),
+    touched: false,
+  });
+  const setTempItem = useCallback(
+    (action: React.SetStateAction<TempState['item']>) =>
+      setTemp((last) => ({
+        item: typeof action === 'function' ? action(last.item) : action,
+        touched: true,
+      })),
+    [],
   );
 
-  const [tempItem, setTempItem] = useState<Create<NetWorthEntry>>(withoutId<NetWorthEntry>(item));
-  const [step, setStep] = useState<Step>(steps[0]);
+  const onCancel = useCallback(() => {
+    setTemp({ item: withoutId<NetWorthEntry>(item), touched: false });
+  }, [item]);
 
-  const onPrevStep = useCallback(() => {
-    const stepIndex = steps.indexOf(step);
-    if (stepIndex > 0) {
-      setStep(steps[stepIndex - 1]);
-    }
-  }, [step]);
+  useEffect(() => {
+    onCancel();
+  }, [item, onCancel]);
 
-  const onNextStep = useCallback(() => {
-    const stepIndex = steps.indexOf(step);
-    if (stepIndex < steps.length - 1) {
-      setStep(steps[stepIndex + 1]);
+  const onBack = useCallback(() => {
+    if (touched) {
+      onCancel();
     } else {
-      onEdit(item.id, tempItem, onComplete);
+      setActiveId(null);
     }
-  }, [onComplete, step, item.id, tempItem, onEdit]);
+  }, [setActiveId, touched, onCancel]);
 
-  const onFirstStep = steps.indexOf(step) === 0;
-  const onLastStep = steps.indexOf(step) === steps.length - 1;
+  const onComplete = useCallback(() => {
+    if (add) {
+      setActiveId(null);
+    }
+  }, [add, setActiveId]);
+
+  const onSave = useCallback(() => {
+    setTemp((last) => ({ ...last, touched: false }));
+    onEdit(item.id, tempItem, onComplete);
+  }, [onEdit, item.id, tempItem, onComplete]);
+
+  const onDone = useCallback(() => setStep(null), []);
 
   const containerProps: Omit<ContainerProps, 'step'> = {
     add,
-    onComplete,
+    onDone,
     id: item.id,
     item,
-    onPrevStep,
-    onNextStep,
-    onFirstStep,
-    onLastStep,
   };
 
   const stepProps = {
@@ -98,7 +114,19 @@ const NetWorthItemForm: React.FC<PropsItemForm> = ({
     return <StepLiabilities containerProps={containerProps} {...stepProps} />;
   }
 
-  throw new Error('Invalid step set for <NetWorthEditForm />');
+  return (
+    <StepOverview
+      add={add}
+      categories={categories}
+      subcategories={subcategories}
+      item={tempItem}
+      touched={touched}
+      onBack={onBack}
+      onDelete={onDelete}
+      onSave={onSave}
+      setStep={setStep}
+    />
+  );
 };
 
 type PropsBase = Omit<PropsItemForm, 'add' | 'onEdit'>;

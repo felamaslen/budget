@@ -4,7 +4,6 @@ import React, { memo, useCallback } from 'react';
 import { NetWorthEditForm } from '../edit-form';
 import * as Styled from './styles';
 import { OnUpdate } from '~client/hooks';
-import { ButtonDelete } from '~client/styled/shared';
 import type { NetWorthEntryNative as Entry, SetActiveId, Create } from '~client/types';
 import type {
   NetWorthCategory as Category,
@@ -34,13 +33,18 @@ const NetWorthListItem: React.FC<Props> = ({
 }) => {
   const onActivate = useCallback(() => setActive(item.id), [item.id, setActive]);
 
+  const dateFormatted = format(item.date, 'dd MMM yy');
+
+  const onDeleteConfirmed = useCallback(() => {
+    if (window.confirm(`Are you sure you want to delete the entry for: ${dateFormatted}?`)) {
+      onDelete();
+    }
+  }, [onDelete, dateFormatted]);
+
   if (noneActive) {
     return (
       <Styled.ItemSummary onClick={onActivate}>
-        <span>{format(item.date, 'dd MMM yy')}</span>
-        <Styled.ButtonDelete>
-          <ButtonDelete onClick={onDelete}>&minus;</ButtonDelete>
-        </Styled.ButtonDelete>
+        <span>{dateFormatted}</span>
       </Styled.ItemSummary>
     );
   }
@@ -54,6 +58,7 @@ const NetWorthListItem: React.FC<Props> = ({
       categories={categories}
       subcategories={subcategories}
       setActiveId={setActive}
+      onDelete={onDeleteConfirmed}
       onUpdate={onUpdate}
     />
   );

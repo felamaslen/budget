@@ -570,7 +570,7 @@ describe(AccessibleListStandard.name, () => {
           -ms-flex-pack: center;
           -webkit-justify-content: center;
           justify-content: center;
-          padding: 1em 0;
+          padding: 0.5rem;
           width: 100%;
           background: #ffa35c;
           font-size: 0.6em;

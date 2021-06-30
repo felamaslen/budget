@@ -6,9 +6,43 @@ import { breakpoint } from '~client/styled/mixins';
 import { asButton } from '~client/styled/shared/role';
 import { colors, breakpoints } from '~client/styled/variables';
 
+export const OverviewGrid = styled.div`
+  display: flex;
+  flex: 1;
+  flex-flow: column;
+  padding: ${rem(4)} ${rem(8)};
+  width: 100%;
+
+  ${breakpoint(breakpoints.mobile)} {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: auto auto;
+  }
+`;
+
+export const OverviewSection = styled.div`
+  border: 2px dashed ${colors.light.dark};
+  border-radius: ${rem(8)};
+  margin: ${rem(4)};
+  padding: ${rem(4)} ${rem(8)};
+
+  p {
+    margin: ${rem(4)} 0;
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    cursor: pointer;
+    width: auto;
+  }
+`;
+
+export const OverviewSectionTitle = styled.h4`
+  margin: ${rem(4)} 0;
+`;
+
 export const FormNavigation = styled.div`
   display: flex;
-  flex: 0 0 24px;
+  flex: 0 0 ${rem(24)};
   align-items: center;
   justify-content: space-between;
   background: #efefef;

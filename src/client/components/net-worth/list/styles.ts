@@ -74,10 +74,3 @@ const itemSummaryStyles = ({ add }: ItemSummaryProps): SerializedStyles => css`
 `;
 
 export const ItemSummary = asButton(styled.div<ItemSummaryProps>(itemSummaryStyles));
-
-export const ButtonDelete = styled.div`
-  display: inline-flex;
-  position: absolute;
-  right: ${rem(4)};
-  top: ${rem(4)};
-`;

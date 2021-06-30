@@ -10,13 +10,15 @@ export const stopEventPropagation = <E extends HTMLElement = HTMLElement>(
   event: React.MouseEvent<E>,
 ): void => event.stopPropagation();
 
+export type CTAEvents<E extends HTMLElement = HTMLElement> = {
+  onClick: ReactEventHandler<E>;
+  onKeyDown: ReactEventHandler<E>;
+};
+
 export function useCTA<E extends HTMLElement = HTMLElement>(
   onActivate: () => void,
   options?: Options,
-): {
-  onClick: ReactEventHandler<E>;
-  onKeyDown: ReactEventHandler<E>;
-} {
+): CTAEvents<E> {
   const stopPropagation = !!options?.stopPropagation;
   const events = useMemo(() => {
     const debouncedActivate = debounce(10, true, onActivate);

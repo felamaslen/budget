@@ -433,8 +433,8 @@ const StepValues: React.FC<PropsStep> = ({
   return (
     <FormContainer {...containerProps} step={step}>
       <Styled.SectionTitle>
-        <span>{name}</span>
         <span>
+          {name}
           {' - '}
           {format(item.date, 'yyyy-MM-dd')}
         </span>
