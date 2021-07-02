@@ -47,7 +47,7 @@ const getFundsScrapedCache = (state: StateSliced): PriceCache => ({
 
 export const getTodayPrices = (state: StateSliced): FundQuotes =>
   state[PageNonStandard.Funds].todayPrices;
-const getTodayPriceTime = (state: StateSliced): number =>
+export const getTodayPriceTime = (state: StateSliced): number =>
   state[PageNonStandard.Funds].todayPriceFetchTime ?? 0;
 
 const combineRealTimeQuotesWithScrapedCache = (quotes: FundQuotes, latestTime: number) => (

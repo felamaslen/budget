@@ -3,12 +3,13 @@ import { useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
 
 import { CashRow } from './cash-row';
+import { FundsContext } from './context';
 import { FundHeader } from './header';
 import { useTodayPrices } from './hooks';
 import { FundNameMobile, FundDetailMobile } from './mobile';
 import { FundRow } from './row';
 import * as Styled from './styles';
-import { FundProps, Sort, defaultSort, HeadProps, SortCriteria } from './types';
+import { FundProps, Sort, defaultSort, SortCriteria, PageFundsContext } from './types';
 import { AccessibleList, Fields } from '~client/components/accessible-list';
 import {
   FormFieldTextInline,
@@ -79,7 +80,7 @@ const makeSortItems = ({ criteria, direction }: Sort): SortItems => (funds, prop
 
 export const Funds: React.FC<RouteComponentProps> = () => {
   const isMobile = useIsMobile();
-  useTodayPrices();
+  const lastScraped = useTodayPrices();
   const cache = useSelector(getFundsCache);
   const composedSelector = useCallback(
     (items: Fund[]): ComposedProps => {
@@ -103,34 +104,38 @@ export const Funds: React.FC<RouteComponentProps> = () => {
 
   const { onCreate, onUpdate, onDelete } = useListCrudFunds();
 
+  const context = useMemo<PageFundsContext>(
+    () => ({
+      sort,
+      setSort,
+      lastScraped,
+    }),
+    [sort, setSort, lastScraped],
+  );
+
   return (
-    <Styled.PageFunds>
-      <AccessibleList<
-        FundInput,
-        PageNonStandard.Funds,
-        'item' | 'transactions',
-        FundProps,
-        HeadProps
-      >
-        page={PageNonStandard.Funds}
-        onCreate={onCreate}
-        onUpdate={onUpdate}
-        onDelete={onDelete}
-        color={pageColor(colors.funds.main)}
-        fields={fields}
-        fieldsMobile={fieldsMobile}
-        modalFields={modalFields}
-        deltaSeed={deltaSeed}
-        itemProcessor={itemProcessor}
-        customSelector={composedSelector}
-        sortItemsPost={sortItems}
-        Row={FundRow}
-        Header={FundHeader}
-        headerProps={{ sort, setSort }}
-        FirstItem={CashRow}
-      />
-      {!isMobile && <GraphFunds />}
-    </Styled.PageFunds>
+    <FundsContext.Provider value={context}>
+      <Styled.PageFunds>
+        <AccessibleList<FundInput, PageNonStandard.Funds, 'item' | 'transactions', FundProps>
+          page={PageNonStandard.Funds}
+          onCreate={onCreate}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+          color={pageColor(colors.funds.main)}
+          fields={fields}
+          fieldsMobile={fieldsMobile}
+          modalFields={modalFields}
+          deltaSeed={deltaSeed}
+          itemProcessor={itemProcessor}
+          customSelector={composedSelector}
+          sortItemsPost={sortItems}
+          Row={FundRow}
+          Header={FundHeader}
+          FirstItem={CashRow}
+        />
+        {!isMobile && <GraphFunds />}
+      </Styled.PageFunds>
+    </FundsContext.Provider>
   );
 };
 export default Funds;

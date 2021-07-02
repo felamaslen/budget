@@ -9,18 +9,23 @@ import { ApiContext, useUpdateEffect } from '~client/hooks';
 import { isSold } from '~client/modules/data';
 import { getGenericFullSymbol } from '~client/modules/finance';
 import { isServerSide } from '~client/modules/ssr';
-import { getAppConfig, getFundsRows } from '~client/selectors';
+import { getAppConfig, getFundsRows, getTodayPriceTime } from '~client/selectors';
 import type { FundQuotes } from '~client/types';
 import { FundMode } from '~client/types/enum';
 import { useStockPricesQuery } from '~client/types/gql';
 
 const worker = isServerSide ? undefined : new PricesWorker();
 
-const minFetchIntervalMs = 1000 * 5;
+export const minFetchIntervalMs = 1000 * 5;
 
-export function useTodayPrices(): void {
+export function useTodayPrices(): Date {
   const dispatch = useDispatch();
   const { realTimePrices } = useSelector(getAppConfig);
+  const todayPriceTime = useSelector(getTodayPriceTime);
+  const [lastScraped, setLastScraped] = useState<Date>(new Date());
+  useEffect(() => {
+    setLastScraped(new Date());
+  }, [todayPriceTime]);
   const paused = !realTimePrices;
 
   const apiKey = useContext(ApiContext);
@@ -93,6 +98,8 @@ export function useTodayPrices(): void {
       fetchIfNecessary();
     }
   }, [dispatch, paused, fetchIfNecessary]);
+
+  return lastScraped;
 }
 
 type Highlight = {

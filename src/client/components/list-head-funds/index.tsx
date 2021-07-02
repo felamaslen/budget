@@ -1,29 +1,31 @@
 import humanizeDuration from 'humanize-duration';
 import { mix } from 'polished';
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
 
 import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { formatOptionsAbsolute, formatOptionsRelative } from '~client/components/fund-gain-info';
 import { HighlightProps } from '~client/components/fund-gain-info/styles';
 import { GraphFunds } from '~client/components/graph-funds';
+import { FundsContext } from '~client/components/page-funds/context';
 import { usePriceChangeHighlight } from '~client/components/page-funds/hooks';
-import { Sort, defaultSort, HeadProps, SortCriteria } from '~client/components/page-funds/types';
+import { Sort, defaultSort, SortCriteria } from '~client/components/page-funds/types';
+import { useNow } from '~client/hooks';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
 import type { CachedValue, HistoryOptions } from '~client/types';
 
-export type PropsGainValues = {
+export type PropsCommon = {
   totalCost: number;
   annualisedFundReturns: number;
   cachedValue: CachedValue;
 };
 
-export type Props = PropsGainValues & {
+export type Props = PropsCommon & {
   viewSoldFunds: boolean;
   historyOptions: HistoryOptions;
   onViewSoldToggle: () => void;
-} & HeadProps;
+};
 
 const sortOptions: SelectOptions<Sort> = [
   { internal: { criteria: SortCriteria.Value, direction: 1 }, external: 'Value ↓' },
@@ -65,14 +67,22 @@ const Arc: FC<{ sliceAngle: number; color: string }> = ({ sliceAngle, color }) =
   </svg>
 );
 
-const GainValues: FC<PropsGainValues & HighlightProps & { isMobile: boolean }> = ({
+export type PropsGainValues = PropsCommon &
+  HighlightProps & {
+    isMobile: boolean;
+    lastScraped: Date;
+  };
+
+const GainValues: FC<PropsGainValues> = ({
   isMobile,
   totalCost,
   annualisedFundReturns,
-  cachedValue: { ageMs, value, gain, dayGain, gainAbs, dayGainAbs },
+  cachedValue: { value, gain, dayGain, gainAbs, dayGainAbs },
+  lastScraped,
   highlight,
 }) => {
-  const ageSlice = Math.min(1, (ageMs ?? 0) / maxAgeMs);
+  const now = useNow();
+  const ageSlice = Math.min(1, (now.getTime() - lastScraped.getTime()) / maxAgeMs);
   return (
     <Styled.OverallGain profit={value > totalCost} loss={value < totalCost} highlight={highlight}>
       <Styled.Main>
@@ -110,9 +120,8 @@ export const ListHeadFunds: FC<Props> = ({
   annualisedFundReturns,
   cachedValue,
   onViewSoldToggle,
-  sort = defaultSort,
-  setSort,
 }) => {
+  const { lastScraped, sort = defaultSort, setSort } = useContext(FundsContext);
   const highlight = usePriceChangeHighlight(cachedValue.value);
 
   return (
@@ -122,6 +131,7 @@ export const ListHeadFunds: FC<Props> = ({
         totalCost={totalCost}
         annualisedFundReturns={annualisedFundReturns}
         cachedValue={cachedValue}
+        lastScraped={lastScraped}
         highlight={highlight}
       />
       <Styled.ViewOptions>
@@ -135,18 +145,24 @@ export const ListHeadFunds: FC<Props> = ({
   );
 };
 
-export const ListHeadFundsMobile: FC<PropsGainValues> = ({
+export type PropsMobile = PropsCommon;
+
+export const ListHeadFundsMobile: FC<PropsMobile> = ({
   totalCost,
   annualisedFundReturns,
   cachedValue,
-}) => (
-  <Styled.ListHeadFunds>
-    <GainValues
-      isMobile={true}
-      totalCost={totalCost}
-      annualisedFundReturns={annualisedFundReturns}
-      cachedValue={cachedValue}
-    />
-    <GraphFunds isMobile />
-  </Styled.ListHeadFunds>
-);
+}) => {
+  const { lastScraped } = useContext(FundsContext);
+  return (
+    <Styled.ListHeadFunds>
+      <GainValues
+        isMobile={true}
+        totalCost={totalCost}
+        annualisedFundReturns={annualisedFundReturns}
+        cachedValue={cachedValue}
+        lastScraped={lastScraped}
+      />
+      <GraphFunds isMobile />
+    </Styled.ListHeadFunds>
+  );
+};

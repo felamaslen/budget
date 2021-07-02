@@ -20,7 +20,8 @@ export type Sort = {
 
 export const defaultSort: Sort = { criteria: SortCriteria.Value, direction: 1 };
 
-export type HeadProps = {
+export type PageFundsContext = {
   sort?: Sort;
   setSort: React.Dispatch<React.SetStateAction<Sort>>;
+  lastScraped: Date;
 };

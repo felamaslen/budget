@@ -3,7 +3,8 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
 
-import { ListHeadFunds, ListHeadFundsMobile, Props, PropsGainValues } from '.';
+import { ListHeadFunds, ListHeadFundsMobile, Props, PropsMobile } from '.';
+import { FundsContext } from '~client/components/page-funds/context';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
@@ -27,7 +28,6 @@ describe('<ListHeadFunds />', () => {
       dayGainAbs: 9964.92,
     },
     onViewSoldToggle: jest.fn(),
-    setSort: jest.fn(),
   };
 
   const setup = (
@@ -36,7 +36,9 @@ describe('<ListHeadFunds />', () => {
   ): RenderResult =>
     render(
       <GQLProviderMock>
-        <ListHeadFunds {...props} {...customProps} />
+        <FundsContext.Provider value={{ setSort: jest.fn(), lastScraped: new Date() }}>
+          <ListHeadFunds {...props} {...customProps} />
+        </FundsContext.Provider>
       </GQLProviderMock>,
       options,
     );
@@ -77,7 +79,7 @@ describe('<ListHeadFunds />', () => {
 });
 
 describe('<ListHeadFundsMobile />', () => {
-  const props: PropsGainValues = {
+  const props: PropsMobile = {
     totalCost: 400000,
     annualisedFundReturns: 0.27,
     cachedValue: {
@@ -94,7 +96,9 @@ describe('<ListHeadFundsMobile />', () => {
     render(
       <Provider store={createStore<State>()(testState)}>
         <GQLProviderMock>
-          <ListHeadFundsMobile {...props} />
+          <FundsContext.Provider value={{ setSort: jest.fn(), lastScraped: new Date() }}>
+            <ListHeadFundsMobile {...props} />
+          </FundsContext.Provider>
         </GQLProviderMock>
       </Provider>,
     );
