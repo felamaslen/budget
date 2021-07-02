@@ -96,7 +96,7 @@ describe('Search resolvers', () => {
     ${'frequent'} | ${'food'}  | ${'category'} | ${'f'}       | ${['Fruit', 'Fondue']}
     ${'page'}     | ${'bills'} | ${'item'}     | ${'r'}       | ${['Rent']}
   `('should return $case matches', async ({ page, column, searchTerm, results }) => {
-    expect.assertions(1);
+    expect.assertions(2);
 
     const res = await app.authGqlClient.query<Query, QuerySearchArgs>({
       query: search,
@@ -111,9 +111,10 @@ describe('Search resolvers', () => {
       expect.objectContaining({
         error: null,
         searchTerm,
-        list: results,
+        list: expect.arrayContaining(results),
       }),
     );
+    expect(res.data.search?.list).toHaveLength(results.length);
   });
 
   it.each`
@@ -122,7 +123,7 @@ describe('Search resolvers', () => {
   `(
     'should give next category matches $case',
     async ({ page, column, searchTerm, nextCategory }) => {
-      expect.assertions(1);
+      expect.assertions(2);
       const res = await app.authGqlClient.query<Query, QuerySearchArgs>({
         query: search,
         variables: { page, column, searchTerm },
@@ -131,10 +132,11 @@ describe('Search resolvers', () => {
       expect(res.data.search).toStrictEqual(
         expect.objectContaining({
           error: null,
-          nextCategory,
+          nextCategory: expect.arrayContaining(nextCategory),
           nextField: 'category',
         }),
       );
+      expect(res.data.search?.nextCategory).toHaveLength(nextCategory.length);
     },
   );
 
