@@ -149,7 +149,7 @@ describe('Funds reducer', () => {
   });
 
   describe(ActionTypeFunds.PricesUpdated, () => {
-    const res: GQL<FundHistory> = {
+    const res: GQL<Omit<FundHistory, 'latestValue'>> = {
       startTime: 1430,
       cacheTimes: [2, 100, 183],
       annualisedFundReturns: 0.674,

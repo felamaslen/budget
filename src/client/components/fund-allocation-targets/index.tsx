@@ -6,11 +6,11 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import * as Styled from './styles';
 import { colorKey } from '~client/modules/color';
 import { lastInArray, VOID } from '~client/modules/data';
-import { abbreviateFundName } from '~client/modules/finance';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { colors } from '~client/styled/variables';
 import type { Portfolio, PortfolioItem, FundNative as Fund } from '~client/types';
 import type { TargetDelta } from '~client/types/gql';
+import { abbreviateFundName } from '~shared/abbreviation';
 
 const minimumAdjustmentValue = 100000;
 

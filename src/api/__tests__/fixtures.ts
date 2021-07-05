@@ -14,7 +14,7 @@ export const generateFunds = async (
   INSERT INTO funds (uid, item)
   SELECT * FROM ${sql.unnest(
     [
-      [uid, 'fund1'],
+      [uid, 'Scottish Mortgage Investment Trust (SMT.L) (stock)'],
       [uid, 'fund2'],
       [uid, 'fund3'],
     ],
@@ -48,7 +48,7 @@ export const generateFunds = async (
   INSERT INTO fund_scrape (broker, item)
   SELECT * FROM ${sql.unnest(
     [
-      ['hl', 'fund1'],
+      ['generic', 'Scottish Mortgage Investment Trust (SMT.L) (stock)'],
       ['hl', 'fund2'],
       ['hl', 'fund3'],
     ],

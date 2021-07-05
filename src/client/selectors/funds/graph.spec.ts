@@ -6,12 +6,12 @@ import numericHash from 'string-hash';
 import { getFundItems, getFundLines } from './graph';
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
-import { abbreviateFundName } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
 import { testState } from '~client/test-data';
 import type { Data, FundItem } from '~client/types';
 import { FundMode, FundPeriod, PageNonStandard } from '~client/types/enum';
+import { abbreviateFundName } from '~shared/abbreviation';
 
 describe('Fund selectors / graph', () => {
   const today = new Date('2020-04-20');

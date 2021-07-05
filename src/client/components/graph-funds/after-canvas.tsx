@@ -5,10 +5,10 @@ import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { useFundModeSelectOptions } from '~client/components/page-funds/hooks';
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { useCTA } from '~client/hooks';
-import { abbreviateFundName } from '~client/modules/finance';
 import { SettingsGroup, SettingsInput, SettingsLabel } from '~client/styled/shared/settings';
 import type { Id, FundItem, HistoryOptions } from '~client/types';
 import { FundMode, FundPeriod } from '~client/types/enum';
+import { abbreviateFundName } from '~shared/abbreviation';
 
 export type ToggleList = Record<string, boolean | null>;
 

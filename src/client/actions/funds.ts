@@ -24,10 +24,12 @@ export const fundQueryUpdated = (historyOptions: HistoryOptions): FundQueryUpdat
 
 export type FundPricesUpdated = {
   type: ActionTypeFunds.PricesUpdated;
-  res: GQL<FundHistory>;
+  res: GQL<Omit<FundHistory, 'latestValue'>>;
 };
 
-export const fundPricesUpdated = (res: GQL<FundHistory>): FundPricesUpdated => ({
+export const fundPricesUpdated = (
+  res: GQL<Omit<FundHistory, 'latestValue'>>,
+): FundPricesUpdated => ({
   type: ActionTypeFunds.PricesUpdated,
   res,
 });

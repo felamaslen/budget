@@ -45,7 +45,7 @@ const getPriceCache = ({
   startTime,
   cacheTimes,
   prices,
-}: FundHistory): Pick<State, 'startTime' | 'cacheTimes' | 'prices'> => ({
+}: Omit<FundHistory, 'latestValue'>): Pick<State, 'startTime' | 'cacheTimes' | 'prices'> => ({
   startTime,
   cacheTimes,
   prices: prices.reduce<Record<number, FundPriceGroup[]>>(
@@ -57,8 +57,10 @@ const getPriceCache = ({
   ),
 });
 
-const onPeriodLoad = (state: State, res: FundHistory | null | undefined): State =>
-  res ? { ...state, ...getPriceCache(res) } : state;
+const onPeriodLoad = (
+  state: State,
+  res: Omit<FundHistory, 'latestValue'> | null | undefined,
+): State => (res ? { ...state, ...getPriceCache(res) } : state);
 
 const onReadFunds = (state: State, action: ActionApiDataRead): State =>
   action.res.funds

@@ -1,11 +1,13 @@
-import { isValid } from 'date-fns';
+import { endOfDay, isValid } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import config from '~api/config';
 import { getMultipleStockQuotes } from '~api/modules/finance';
 import logger from '~api/modules/logger';
 import { redisClient } from '~api/modules/redis';
+import { selectUnitsWithPrice } from '~api/queries';
 import { QueryStockPricesArgs, StockPrice, StockPricesResponse } from '~api/types';
+import { getGenericFullSymbol } from '~shared/abbreviation';
 
 const codeKey = (code: string): string => `stockPrice_${code}`;
 const lockKey = 'stockPriceLock';
@@ -48,7 +50,7 @@ async function getCachedStockPrices(codes: string[]): Promise<StockPrice[]> {
 }
 
 export async function getStockPrices(
-  _: DatabaseTransactionConnectionType,
+  db: DatabaseTransactionConnectionType,
   uid: number,
   args: QueryStockPricesArgs,
 ): Promise<StockPricesResponse> {
@@ -65,12 +67,26 @@ export async function getStockPrices(
   await redisClient.set(lockKey, 'locked', 'ex', config.apiCacheExpirySeconds);
 
   const uniqueCodes = Array.from(new Set(args.codes));
-  const prices = await getCachedStockPrices(uniqueCodes);
+
+  const [prices, unitsWithPrices] = await Promise.all([
+    getCachedStockPrices(uniqueCodes),
+    selectUnitsWithPrice(db, uid, endOfDay(new Date())),
+  ]);
+
+  const latestValue = unitsWithPrices.reduce<number>(
+    (sum, row) =>
+      sum +
+      row.units_rebased *
+        (prices.find(({ code }) => code === getGenericFullSymbol(row.name))?.price ??
+          row.scraped_price),
+    0,
+  );
+
   const refreshTimeRaw = await redisClient.get(lastUpdateKey);
   const refreshTimeDate = refreshTimeRaw ? new Date(refreshTimeRaw) : null;
   const refreshTime = isValid(refreshTimeDate) ? refreshTimeDate : null;
 
   await redisClient.del(lockKey);
 
-  return { prices, refreshTime };
+  return { prices, latestValue, refreshTime };
 }

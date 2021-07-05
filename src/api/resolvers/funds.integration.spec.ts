@@ -1,7 +1,9 @@
 import { addHours, getUnixTime } from 'date-fns';
 import gql from 'graphql-tag';
+import moize from 'moize';
 import sinon from 'sinon';
 import { sql } from 'slonik';
+import yahooFinance from 'yahoo-finance';
 
 import { seedData } from '~api/__tests__/fixtures';
 import config from '~api/config';
@@ -28,8 +30,11 @@ import {
   StockSplit,
   Transaction,
   UpdatedFundAllocationTargets,
+  QueryStockPricesArgs,
+  StockPrice,
+  StockPricesResponse,
 } from '~api/types';
-import type { RawDate } from '~shared/types';
+import type { NativeDate, RawDate } from '~shared/types';
 
 describe('Funds resolver', () => {
   let app: App;
@@ -71,6 +76,23 @@ describe('Funds resolver', () => {
       );
       await db.query(sql`DELETE FROM fund_cache_time`);
       await db.query(sql`DELETE FROM funds_cash_target WHERE uid = ${app.uid}`);
+
+      // eslint-disable-next-line
+      yahooFinance.quote = jest.fn(
+        async () =>
+          ({
+            'FCSS.L': ({
+              price: {
+                regularMarketPrice: 388.29,
+              } as yahooFinance.Quote<'price'>['price'],
+            } as unknown) as yahooFinance.Quote,
+            'SMT.L': ({
+              price: {
+                regularMarketPrice: 1197.23,
+              } as yahooFinance.Quote<'price'>['price'],
+            } as unknown) as yahooFinance.Quote,
+          } as Record<string, yahooFinance.Quote<'price'> | null | undefined>),
+      );
     }),
   );
 
@@ -779,6 +801,65 @@ describe('Funds resolver', () => {
           ),
         }),
       );
+    });
+  });
+
+  describe('stockPrices', () => {
+    const query = gql`
+      query StockPrices($codes: [String!]!) {
+        stockPrices(codes: $codes) {
+          error
+          prices {
+            code
+            price
+          }
+          latestValue
+          refreshTime
+        }
+      }
+    `;
+
+    const setup = moize.promise(
+      async (): Promise<Maybe<NativeDate<StockPricesResponse, 'refreshTime'>>> => {
+        await seedData(app.uid);
+        const clock = sinon.useFakeTimers(new Date('2020-04-26T13:20:03Z'));
+        await app.authGqlClient.clearStore();
+        const res = await app.authGqlClient.query<Query, QueryStockPricesArgs>({
+          query,
+          variables: {
+            codes: ['FCSS.L', 'SMT.L'],
+          },
+        });
+        clock.restore();
+        return res.data?.stockPrices ?? null;
+      },
+    );
+
+    it('should return the latest prices', async () => {
+      expect.assertions(2);
+      const res = await setup();
+      expect(res?.prices).toHaveLength(2);
+      expect(res?.prices).toStrictEqual(
+        expect.arrayContaining<StockPrice>(
+          [
+            { code: 'FCSS.L', price: 388.29 },
+            { code: 'SMT.L', price: 1197.23 },
+          ].map(expect.objectContaining),
+        ),
+      );
+    });
+
+    it('should return the latest value', async () => {
+      expect.assertions(2);
+      const res = await setup();
+      expect(res?.latestValue).toStrictEqual(expect.any(Number));
+      expect(res?.latestValue).toMatchInlineSnapshot(`119723`);
+    });
+
+    it('should set and return the refresh time', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res?.refreshTime).toMatchInlineSnapshot(`"2020-04-26T13:20:03.000Z"`);
     });
   });
 

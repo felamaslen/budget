@@ -970,6 +970,7 @@ export type StockPricesResponse = {
   __typename?: 'StockPricesResponse';
   error?: Maybe<Scalars['String']>;
   prices: Array<StockPrice>;
+  latestValue?: Maybe<Scalars['Int']>;
   refreshTime?: Maybe<Scalars['DateTime']>;
 };
 

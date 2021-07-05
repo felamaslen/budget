@@ -37,16 +37,7 @@ const selectSingleDate = (date: Date): TaggedTemplateLiteralInvocationType => sq
   limit 1
 `;
 
-const selectRebasedFundValues = (uid: number): TaggedTemplateLiteralInvocationType => sql`
-  select ${sql.join(
-    [
-      sql`ft.fund_id`,
-      sql`(fc.price * ft.units * exp(sum(ln(coalesce(fss.ratio, 1))))) as present_value_rebased`,
-      sql`c.time`,
-    ],
-    sql`, `,
-  )}
-
+const joinFundPrices = (uid: number): TaggedTemplateLiteralInvocationType => sql`
   from cache_at_date c 
   inner join fund_cache fc on fc.cid = c.cid
   inner join fund_scrape fs on fs.fid = fc.fid
@@ -57,7 +48,18 @@ const selectRebasedFundValues = (uid: number): TaggedTemplateLiteralInvocationTy
   left join funds_stock_splits fss on fss.fund_id = f.id
     and fss.date > ft.date
     and fss.date <= c.time
+`;
 
+const selectRebasedFundValues = (uid: number): TaggedTemplateLiteralInvocationType => sql`
+  select ${sql.join(
+    [
+      sql`ft.fund_id`,
+      sql`(fc.price * ft.units * exp(sum(ln(coalesce(fss.ratio, 1))))) as present_value_rebased`,
+      sql`c.time`,
+    ],
+    sql`, `,
+  )}
+  ${joinFundPrices(uid)}
   group by ft.fund_id, ft.units, fc.price, c.time
 `;
 
@@ -109,4 +111,49 @@ export async function getTotalFundValue(
   from funds_rebased
   `);
   return result.rows[0]?.value;
+}
+
+export type UnitsAndPricesRow = {
+  name: string;
+  units_rebased: number;
+  scraped_price: number;
+};
+
+export async function selectUnitsWithPrice(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  now: Date,
+): Promise<readonly UnitsAndPricesRow[]> {
+  const { rows } = await db.query<UnitsAndPricesRow>(sql`
+  with ${sql.join(
+    [
+      sql`cache_at_date as (${selectSingleDate(now)})`,
+      sql`units_per_transaction as (
+        select ${sql.join(
+          [
+            sql`f.item`,
+            sql`ft.units * exp(sum(ln(coalesce(fss.ratio, 1)))) as units_rebased`,
+            sql`fc.price as scraped_price`,
+          ],
+          sql`, `,
+        )}
+        ${joinFundPrices(uid)}
+        group by f.item, ft.units, fc.price
+      )`,
+    ],
+    sql`, `,
+  )}
+
+  select ${sql.join(
+    [
+      sql`item as name`,
+      sql`sum(units_rebased) as units_rebased`,
+      sql`max(scraped_price) as scraped_price`,
+    ],
+    sql`, `,
+  )}
+  from units_per_transaction
+  group by item
+  `);
+  return rows;
 }

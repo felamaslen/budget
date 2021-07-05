@@ -8,7 +8,6 @@ import { getFundLineProcessed, FundsWithReturns, Return, FundWithReturns } from 
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
 import { getTotalUnits, isSold, lastInArray } from '~client/modules/data';
-import { abbreviateFundName } from '~client/modules/finance';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { colors } from '~client/styled/variables';
 import type {
@@ -19,6 +18,7 @@ import type {
   TransactionNative as Transaction,
 } from '~client/types';
 import { FundMode } from '~client/types/enum';
+import { abbreviateFundName } from '~shared/abbreviation';
 
 type WithInfo<V = Record<string, unknown>> = Fund &
   V & {

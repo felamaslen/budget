@@ -1,9 +1,5 @@
-import {
-  abbreviateFundName,
-  extractLongName,
-  forecastTotalLoanPayable,
-  getGenericFullSymbol,
-} from './finance';
+import { forecastTotalLoanPayable } from './finance';
+import { abbreviateFundName, extractLongName, getGenericFullSymbol } from '~shared/abbreviation';
 
 describe('Finance module', () => {
   describe(forecastTotalLoanPayable.name, () => {

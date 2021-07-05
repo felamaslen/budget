@@ -8,12 +8,12 @@ import { GRAPH_WIDTH, GRAPH_HEIGHT } from '~client/constants/graph';
 import { TodayContext } from '~client/hooks';
 import { blockPacker } from '~client/modules/block-packer';
 import { colorKey } from '~client/modules/color';
-import { abbreviateFundName } from '~client/modules/finance';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getCashBreakdown, getPortfolio, getStockValue } from '~client/selectors';
 import { Button } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
 import type { BlockItem, Id, PortfolioItem } from '~client/types';
+import { abbreviateFundName } from '~shared/abbreviation';
 
 const formatLabel = (value: number, total: number, suffix: string): string =>
   `(${formatPercent(value / total, { precision: 1 })}) [${formatCurrency(value, {
