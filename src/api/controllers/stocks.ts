@@ -6,7 +6,12 @@ import { getMultipleStockQuotes } from '~api/modules/finance';
 import logger from '~api/modules/logger';
 import { redisClient } from '~api/modules/redis';
 import { selectUnitsWithPrice } from '~api/queries';
-import { QueryStockPricesArgs, StockPrice, StockPricesResponse } from '~api/types';
+import {
+  QueryStockPricesArgs,
+  StockPrice,
+  StockPricesResponse,
+  StockValueResponse,
+} from '~api/types';
 import { getGenericFullSymbol } from '~shared/abbreviation';
 
 const codeKey = (code: string): string => `stockPrice_${code}`;
@@ -50,7 +55,7 @@ async function getCachedStockPrices(codes: string[]): Promise<StockPrice[]> {
 }
 
 export async function getStockPrices(
-  db: DatabaseTransactionConnectionType,
+  _: DatabaseTransactionConnectionType,
   uid: number,
   args: QueryStockPricesArgs,
 ): Promise<StockPricesResponse> {
@@ -68,19 +73,7 @@ export async function getStockPrices(
 
   const uniqueCodes = Array.from(new Set(args.codes));
 
-  const [prices, unitsWithPrices] = await Promise.all([
-    getCachedStockPrices(uniqueCodes),
-    selectUnitsWithPrice(db, uid, endOfDay(new Date())),
-  ]);
-
-  const latestValue = unitsWithPrices.reduce<number>(
-    (sum, row) =>
-      sum +
-      row.units_rebased *
-        (prices.find(({ code }) => code === getGenericFullSymbol(row.name))?.price ??
-          row.scraped_price),
-    0,
-  );
+  const prices = await getCachedStockPrices(uniqueCodes);
 
   const refreshTimeRaw = await redisClient.get(lastUpdateKey);
   const refreshTimeDate = refreshTimeRaw ? new Date(refreshTimeRaw) : null;
@@ -88,5 +81,34 @@ export async function getStockPrices(
 
   await redisClient.del(lockKey);
 
-  return { prices, latestValue, refreshTime };
+  return { prices, refreshTime };
+}
+
+export async function getStockValue(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<StockValueResponse> {
+  const funds = await selectUnitsWithPrice(db, uid, endOfDay(new Date()));
+  const codes = funds
+    .map((fund) => getGenericFullSymbol(fund.name))
+    .filter((c: string | null): c is string => !!c);
+
+  const { prices, refreshTime } = await getStockPrices(db, uid, { codes });
+
+  const latestValue = Math.round(
+    funds.reduce<number>(
+      (sum, row) =>
+        sum +
+        row.units_rebased *
+          (prices.find(({ code }) => code === getGenericFullSymbol(row.name))?.price ??
+            row.scraped_price),
+      0,
+    ),
+  );
+
+  const previousValue = Math.round(
+    funds.reduce<number>((sum, row) => sum + row.units_rebased * row.scraped_price, 0),
+  );
+
+  return { latestValue, previousValue, refreshTime };
 }

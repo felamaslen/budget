@@ -787,6 +787,7 @@ export type Query = {
   receiptItems?: Maybe<Array<ReceiptCategory>>;
   search?: Maybe<SearchResult>;
   stockPrices?: Maybe<StockPricesResponse>;
+  stockValue?: Maybe<StockValueResponse>;
   whoami?: Maybe<UserInfo>;
 };
 
@@ -970,7 +971,6 @@ export type StockPricesResponse = {
   __typename?: 'StockPricesResponse';
   error?: Maybe<Scalars['String']>;
   prices: Array<StockPrice>;
-  latestValue?: Maybe<Scalars['Int']>;
   refreshTime?: Maybe<Scalars['DateTime']>;
 };
 
@@ -983,6 +983,14 @@ export type StockSplit = {
 export type StockSplitInput = {
   date: Scalars['Date'];
   ratio: Scalars['NonNegativeFloat'];
+};
+
+export type StockValueResponse = {
+  __typename?: 'StockValueResponse';
+  error?: Maybe<Scalars['String']>;
+  latestValue?: Maybe<Scalars['Int']>;
+  previousValue?: Maybe<Scalars['Int']>;
+  refreshTime?: Maybe<Scalars['DateTime']>;
 };
 
 export type Subscription = {

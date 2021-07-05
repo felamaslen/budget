@@ -116,7 +116,13 @@ export const fundsSchema = gql`
   type StockPricesResponse {
     error: String
     prices: [StockPrice!]!
+    refreshTime: DateTime
+  }
+
+  type StockValueResponse {
+    error: String
     latestValue: Int
+    previousValue: Int
     refreshTime: DateTime
   }
 
@@ -127,6 +133,7 @@ export const fundsSchema = gql`
     fundHistoryIndividual(id: NonNegativeInt!): FundHistoryIndividual
 
     stockPrices(codes: [String!]!): StockPricesResponse
+    stockValue: StockValueResponse
   }
 
   extend type Mutation {

@@ -33,6 +33,7 @@ import {
   QueryStockPricesArgs,
   StockPrice,
   StockPricesResponse,
+  StockValueResponse,
 } from '~api/types';
 import type { NativeDate, RawDate } from '~shared/types';
 
@@ -813,7 +814,6 @@ describe('Funds resolver', () => {
             code
             price
           }
-          latestValue
           refreshTime
         }
       }
@@ -849,11 +849,49 @@ describe('Funds resolver', () => {
       );
     });
 
+    it('should set and return the refresh time', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res?.refreshTime).toMatchInlineSnapshot(`"2020-04-26T13:20:03.000Z"`);
+    });
+  });
+
+  describe('stockValue', () => {
+    const query = gql`
+      query StockValue {
+        stockValue {
+          latestValue
+          previousValue
+          refreshTime
+        }
+      }
+    `;
+
+    const setup = moize.promise(
+      async (): Promise<Maybe<NativeDate<StockValueResponse, 'refreshTime'>>> => {
+        await seedData(app.uid);
+        const clock = sinon.useFakeTimers(new Date('2020-04-26T13:20:03Z'));
+        await app.authGqlClient.clearStore();
+        const res = await app.authGqlClient.query<Query>({
+          query,
+        });
+        clock.restore();
+        return res.data?.stockValue ?? null;
+      },
+    );
+
     it('should return the latest value', async () => {
       expect.assertions(2);
       const res = await setup();
       expect(res?.latestValue).toStrictEqual(expect.any(Number));
       expect(res?.latestValue).toMatchInlineSnapshot(`119723`);
+    });
+
+    it('should return the previous value', async () => {
+      expect.assertions(2);
+      const res = await setup();
+      expect(res?.previousValue).toStrictEqual(expect.any(Number));
+      expect(res?.previousValue).toMatchInlineSnapshot(`12739`);
     });
 
     it('should set and return the refresh time', async () => {

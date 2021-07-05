@@ -726,6 +726,7 @@ export type Query = {
   receiptItems?: Maybe<Array<ReceiptCategory>>;
   search?: Maybe<SearchResult>;
   stockPrices?: Maybe<StockPricesResponse>;
+  stockValue?: Maybe<StockValueResponse>;
   whoami?: Maybe<UserInfo>;
 };
 
@@ -900,7 +901,6 @@ export type StockPrice = {
 export type StockPricesResponse = {
   error?: Maybe<Scalars['String']>;
   prices: Array<StockPrice>;
-  latestValue?: Maybe<Scalars['Int']>;
   refreshTime?: Maybe<Scalars['DateTime']>;
 };
 
@@ -912,6 +912,13 @@ export type StockSplit = {
 export type StockSplitInput = {
   date: Scalars['Date'];
   ratio: Scalars['NonNegativeFloat'];
+};
+
+export type StockValueResponse = {
+  error?: Maybe<Scalars['String']>;
+  latestValue?: Maybe<Scalars['Int']>;
+  previousValue?: Maybe<Scalars['Int']>;
+  refreshTime?: Maybe<Scalars['DateTime']>;
 };
 
 export type Subscription = {
@@ -1186,6 +1193,7 @@ export type ResolversTypes = {
   StockPricesResponse: ResolverTypeWrapper<StockPricesResponse>;
   StockSplit: ResolverTypeWrapper<StockSplit>;
   StockSplitInput: StockSplitInput;
+  StockValueResponse: ResolverTypeWrapper<StockValueResponse>;
   Subscription: ResolverTypeWrapper<{}>;
   TargetDelta: TargetDelta;
   TargetDeltaResponse: ResolverTypeWrapper<TargetDeltaResponse>;
@@ -1295,6 +1303,7 @@ export type ResolversParentTypes = {
   StockPricesResponse: StockPricesResponse;
   StockSplit: StockSplit;
   StockSplitInput: StockSplitInput;
+  StockValueResponse: StockValueResponse;
   Subscription: {};
   TargetDelta: TargetDelta;
   TargetDeltaResponse: TargetDeltaResponse;
@@ -1809,6 +1818,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   receiptItems?: Resolver<Maybe<Array<ResolversTypes['ReceiptCategory']>>, ParentType, ContextType, RequireFields<QueryReceiptItemsArgs, 'items'>>;
   search?: Resolver<Maybe<ResolversTypes['SearchResult']>, ParentType, ContextType, RequireFields<QuerySearchArgs, 'page' | 'column' | 'searchTerm'>>;
   stockPrices?: Resolver<Maybe<ResolversTypes['StockPricesResponse']>, ParentType, ContextType, RequireFields<QueryStockPricesArgs, 'codes'>>;
+  stockValue?: Resolver<Maybe<ResolversTypes['StockValueResponse']>, ParentType, ContextType>;
   whoami?: Resolver<Maybe<ResolversTypes['UserInfo']>, ParentType, ContextType>;
 };
 
@@ -1870,7 +1880,6 @@ export type StockPriceResolvers<ContextType = Context, ParentType extends Resolv
 export type StockPricesResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['StockPricesResponse'] = ResolversParentTypes['StockPricesResponse']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   prices?: Resolver<Array<ResolversTypes['StockPrice']>, ParentType, ContextType>;
-  latestValue?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   refreshTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1878,6 +1887,14 @@ export type StockPricesResponseResolvers<ContextType = Context, ParentType exten
 export type StockSplitResolvers<ContextType = Context, ParentType extends ResolversParentTypes['StockSplit'] = ResolversParentTypes['StockSplit']> = {
   date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   ratio?: Resolver<ResolversTypes['NonNegativeFloat'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type StockValueResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['StockValueResponse'] = ResolversParentTypes['StockValueResponse']> = {
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  latestValue?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  previousValue?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  refreshTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2021,6 +2038,7 @@ export type Resolvers<ContextType = Context> = {
   StockPrice?: StockPriceResolvers<ContextType>;
   StockPricesResponse?: StockPricesResponseResolvers<ContextType>;
   StockSplit?: StockSplitResolvers<ContextType>;
+  StockValueResponse?: StockValueResponseResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   TargetDeltaResponse?: TargetDeltaResponseResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
