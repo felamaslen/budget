@@ -21,9 +21,9 @@ export type FundsWithReturns = {
   [fundId in string]: FundWithReturns[];
 };
 
-type FundGroup = GQL<FundPriceGroup>;
+export type FundGroup = GQL<FundPriceGroup>;
 
-type ReturnMapper = (value: Return) => number;
+type ReturnMapper<I = undefined> = (value: Return, timeIndex: number, intermediate: I) => number;
 
 type ReturnComposer = (prev: number, next: number) => number;
 
@@ -43,7 +43,12 @@ function reduceReturnsAtDate(
         );
 
         return matchingGroup
-          ? last + mapper(matchingGroup.values[timeIndex - matchingGroup.startIndex])
+          ? last +
+              mapper(
+                matchingGroup.values[timeIndex - matchingGroup.startIndex],
+                timeIndex,
+                undefined,
+              )
           : last;
       }, 0),
     );
@@ -122,12 +127,16 @@ function reduceOverallLine(
   };
 }
 
-function mapSingleLine(
-  mapper: ReturnMapper,
+function mapSingleLine<I>(
+  mapper: ReturnMapper<I>,
+  getIntermediate?: (funds: FundsWithReturns) => I,
 ): (fundsWithReturns: FundsWithReturns, id: Id) => FundGroup[] {
-  return (fundsWithReturns, id): FundGroup[] =>
-    fundsWithReturns[id].map(({ values, startIndex }) => {
-      const allValues = values.map(mapper);
+  return (fundsWithReturns, id): FundGroup[] => {
+    const intermediate = getIntermediate?.(fundsWithReturns) as I;
+    return fundsWithReturns[id].map(({ values, startIndex }) => {
+      const allValues = values.map((value, index) =>
+        mapper(value, index + startIndex, intermediate),
+      );
       const nonNanValues = allValues.filter((value) => !Number.isNaN(value));
       const firstNonNanValueIndex = allValues.findIndex((value) => !Number.isNaN(value));
       return {
@@ -135,6 +144,7 @@ function mapSingleLine(
         values: nonNanValues,
       };
     });
+  };
 }
 
 const getValue = ({ units, priceRebased }: Return): number => units * priceRebased;
@@ -154,6 +164,15 @@ export const getOverallAbsolute = reduceOverallLine([reduceValue], Math.round);
 export const getOverallROI = reduceOverallLine([reduceCost, reduceROI], roundROI);
 
 export const getFundLineAbsolute = mapSingleLine(getValue);
+
+export const getFundLineAllocation = mapSingleLine<number[]>(
+  (fund, timeIndex, totalValues) => getValue(fund) / totalValues[timeIndex],
+  (funds) =>
+    reduceOverallLine([reduceValue])(funds).reduce<number[]>(
+      (last, group) => [...last, ...Array(group.startIndex - last.length).fill(0), ...group.values],
+      [],
+    ),
+);
 
 export const getFundLineROI = mapSingleLine((returns) =>
   roundROI(getROI(getCost(returns), getRealisedValue(returns))),
@@ -177,6 +196,11 @@ export function getOverallLine(fundsWithReturns: FundsWithReturns, mode: FundMod
     case FundMode.Value:
     case FundMode.Stacked:
       return getOverallAbsolute(fundsWithReturns);
+    case FundMode.Allocation:
+      return getOverallAbsolute(fundsWithReturns).map((group) => ({
+        ...group,
+        values: Array(group.values.length).fill(1),
+      }));
     case FundMode.Roi:
       return getOverallROI(fundsWithReturns);
     default:
@@ -193,6 +217,8 @@ export function getFundLine(
     case FundMode.Value:
     case FundMode.Stacked:
       return getFundLineAbsolute(fundsWithReturns, id);
+    case FundMode.Allocation:
+      return getFundLineAllocation(fundsWithReturns, id);
     case FundMode.Roi:
       return getFundLineROI(fundsWithReturns, id);
     case FundMode.Price:

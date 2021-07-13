@@ -2,11 +2,13 @@ import numericHash from 'string-hash';
 import {
   getOverallAbsolute,
   getFundLineAbsolute,
+  getFundLineAllocation,
   getOverallROI,
   getFundLineROI,
   getOverallLine,
   getFundLine,
   getFundLineProcessed,
+  FundGroup,
   FundsWithReturns,
   getFundLinePriceNormalised,
   getFundLinePrice,
@@ -49,7 +51,7 @@ describe('Funds selectors / lines', () => {
 
   const cacheTimes = [10000, 10030, 10632];
 
-  describe(getOverallAbsolute.name, () => {
+  describe('getOverallAbsolute', () => {
     it('should sum values and return a line', () => {
       expect.assertions(1);
       const result = getOverallAbsolute(fundsWithReturns);
@@ -65,7 +67,7 @@ describe('Funds selectors / lines', () => {
     });
   });
 
-  describe(getFundLineAbsolute.name, () => {
+  describe('getFundLineAbsolute', () => {
     it.each`
       id     | startIndex | expectedResult
       ${id1} | ${0}       | ${[100 * 34, 102 * 34, 103 * 18]}
@@ -77,6 +79,20 @@ describe('Funds selectors / lines', () => {
       const result = getFundLineAbsolute(fundsWithReturns, id);
 
       expect(result).toStrictEqual([{ startIndex, values: expectedResult }]);
+    });
+  });
+
+  describe('getFundLineAllocation', () => {
+    it.each`
+      id     | startIndex | expectedResult
+      ${id1} | ${0}       | ${[1, (102 * 34) / (102 * 34 + 763 * 591), (103 * 18) / (103 * 18 + 954 * 105)]}
+      ${id2} | ${2}       | ${[(954 * 105) / (103 * 18 + 954 * 105), 1]}
+      ${id3} | ${1}       | ${[(763 * 591) / (102 * 34 + 763 * 591)]}
+    `('should get a list of values for id $id', ({ id, startIndex, expectedResult }) => {
+      expect.assertions(1);
+      expect(getFundLineAllocation(fundsWithReturns, id)).toStrictEqual([
+        { startIndex, values: expectedResult },
+      ]);
     });
   });
 
@@ -377,13 +393,15 @@ describe('Funds selectors / lines', () => {
   describe(getOverallLine.name, () => {
     const overallAbsolute = getOverallAbsolute(fundsWithReturns);
     const overallROI = getOverallROI(fundsWithReturns);
-    const overallPrice: number[] = [];
+    const overallPrice: FundGroup[] = [];
+    const overallAllocation: FundGroup[] = [{ startIndex: 0, values: [1, 1, 1, 1] }];
 
     describe.each`
-      description   | mode              | resultDescription     | expectedResult
-      ${'absolute'} | ${FundMode.Value} | ${'an absolute line'} | ${overallAbsolute}
-      ${'ROI'}      | ${FundMode.Roi}   | ${'an ROI line'}      | ${overallROI}
-      ${'price'}    | ${FundMode.Price} | ${'an empty line'}    | ${overallPrice}
+      description     | mode                   | resultDescription     | expectedResult
+      ${'absolute'}   | ${FundMode.Value}      | ${'an absolute line'} | ${overallAbsolute}
+      ${'ROI'}        | ${FundMode.Roi}        | ${'an ROI line'}      | ${overallROI}
+      ${'price'}      | ${FundMode.Price}      | ${'an empty line'}    | ${overallPrice}
+      ${'allocation'} | ${FundMode.Allocation} | ${'an absolute line'} | ${overallAllocation}
     `('if the mode is $description', ({ mode, resultDescription, expectedResult }) => {
       it(`should return ${resultDescription}`, () => {
         expect.assertions(1);
@@ -407,11 +425,12 @@ describe('Funds selectors / lines', () => {
       ${id3} | ${[{ startIndex: 1, values: [763] }]}
     `('for id $id', ({ id, priceLine }) => {
       describe.each`
-        description     | mode                        | resultDescription     | getExpectedResult
-        ${'absolute'}   | ${FundMode.Value}           | ${'an absolute line'} | ${getFundLineAbsolute}
-        ${'ROI'}        | ${FundMode.Roi}             | ${'an ROI line'}      | ${getFundLineROI}
-        ${'price'}      | ${FundMode.Price}           | ${'a list of prices'} | ${priceLine}
-        ${'normalised'} | ${FundMode.PriceNormalised} | ${'a list of values'} | ${normalisedLine}
+        description     | mode                        | resultDescription          | getExpectedResult
+        ${'absolute'}   | ${FundMode.Value}           | ${'an absolute line'}      | ${getFundLineAbsolute}
+        ${'ROI'}        | ${FundMode.Roi}             | ${'an ROI line'}           | ${getFundLineROI}
+        ${'price'}      | ${FundMode.Price}           | ${'a list of prices'}      | ${priceLine}
+        ${'allocation'} | ${FundMode.Allocation}      | ${'a list of allocations'} | ${getFundLineAllocation}
+        ${'normalised'} | ${FundMode.PriceNormalised} | ${'a list of values'}      | ${normalisedLine}
       `('if the mode is $description', ({ mode, resultDescription, getExpectedResult }) => {
         const expectedResult =
           typeof getExpectedResult === 'function'

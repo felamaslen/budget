@@ -222,6 +222,7 @@ export enum FundMode {
   Roi = 'ROI',
   Value = 'Value',
   Stacked = 'Stacked',
+  Allocation = 'Allocation',
   Price = 'Price',
   PriceNormalised = 'PriceNormalised'
 }

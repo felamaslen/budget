@@ -68,6 +68,7 @@ export const fundsSchema = gql`
     ROI
     Value
     Stacked
+    Allocation
     Price
     PriceNormalised
   }

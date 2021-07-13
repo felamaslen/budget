@@ -173,6 +173,7 @@ export const getFundLines = memoiseNowAndToday((time, key) =>
         [FundMode.Roi]: getFundLinesByMode(FundMode.Roi),
         [FundMode.Value]: getFundLinesByMode(FundMode.Value),
         [FundMode.Stacked]: getFundLinesByMode(FundMode.Stacked),
+        [FundMode.Allocation]: getFundLinesByMode(FundMode.Allocation),
         [FundMode.Price]: getFundLinesByMode(FundMode.Price),
         [FundMode.PriceNormalised]: getFundLinesByMode(FundMode.PriceNormalised),
       };

@@ -92,6 +92,10 @@ const LabelBaseFunds: React.FC<LabelBaseFundsProps> = ({
 
 const LabelROI: React.FC<LabelProps> = (props) => <LabelBaseFunds {...props} mode={FundMode.Roi} />;
 
+const LabelAllocation: React.FC<LabelProps> = (props) => (
+  <LabelBaseFunds {...props} mode={FundMode.Allocation} />
+);
+
 const LabelValue: React.FC<LabelProps> = (props) => (
   <LabelBaseFunds {...props} mode={FundMode.Value} />
 );
@@ -108,6 +112,7 @@ export const hoverEffectByMode: Record<FundMode, HoverEffect> = {
   [FundMode.Roi]: { Label: LabelROI },
   [FundMode.Value]: { Label: LabelValue },
   [FundMode.Stacked]: { Label: LabelValue },
+  [FundMode.Allocation]: { Label: LabelAllocation },
   [FundMode.Price]: { Label: LabelPrice },
   [FundMode.PriceNormalised]: { Label: LabelPriceNormalised },
 };

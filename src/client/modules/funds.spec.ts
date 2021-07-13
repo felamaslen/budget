@@ -8,6 +8,7 @@ describe('funds module', () => {
       ${FundMode.Roi}             | ${'percentage'}                   | ${13.2984} | ${'13.30%'}
       ${FundMode.Value}           | ${'currency value'}               | ${104023}  | ${'£1k'}
       ${FundMode.Stacked}         | ${'currency value'}               | ${104023}  | ${'£1k'}
+      ${FundMode.Allocation}      | ${'percentage'}                   | ${0.19667} | ${'19.67%'}
       ${FundMode.Price}           | ${'currency value'}               | ${491}     | ${'£4.91'}
       ${FundMode.Price}           | ${'currency value (abbreviated)'} | ${931239}  | ${'£9.3k'}
       ${FundMode.PriceNormalised} | ${'positive percentage'}          | ${117.348} | ${'17.35%'}

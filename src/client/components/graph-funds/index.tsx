@@ -203,7 +203,7 @@ const filterLines = moize(
     const sortedLines = filteredFundLines.slice().sort((a, b) => a.id - b.id);
     const groupedLines = groupBy(sortedLines, 'id');
 
-    if (mode === FundMode.Stacked) {
+    if ([FundMode.Allocation, FundMode.Stacked].includes(mode)) {
       return stackLines(groupedLines, cacheTimes);
     }
 
