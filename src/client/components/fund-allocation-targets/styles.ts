@@ -33,17 +33,16 @@ type AdjustmentProps = {
 
 export const Adjustment = styled.div<AdjustmentProps>(
   ({ direction }) => css`
-    display: none;
+    border-bottom: 4px solid ${direction === 1 ? colors.profit.dark : colors.loss.dark};
+    bottom: 0;
+    display: flex;
+    height: 4px;
+    ${direction === 1 ? `left: 0;` : `right: 0;`};
+    position: absolute;
 
     ${breakpoint(breakpoints.mobile)} {
       align-items: flex-end;
-      border-bottom: 4px solid ${direction === 1 ? colors.profit.dark : colors.loss.dark};
-      bottom: 0;
-      display: flex;
       height: ${rem(12)};
-      position: absolute;
-
-      ${direction === 1 ? `left: 0;` : `right: 0;`};
     }
   `,
 );
