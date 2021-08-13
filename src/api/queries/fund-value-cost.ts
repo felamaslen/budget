@@ -132,7 +132,7 @@ export async function selectUnitsWithPrice(
         select ${sql.join(
           [
             sql`f.item`,
-            sql`ft.units * exp(sum(ln(coalesce(fss.ratio, 1)))) as units_rebased`,
+            sql`sum(ft.units * exp(ln(coalesce(fss.ratio, 1)))) as units_rebased`,
             sql`fc.price as scraped_price`,
           ],
           sql`, `,

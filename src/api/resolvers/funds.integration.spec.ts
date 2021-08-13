@@ -884,14 +884,14 @@ describe('Funds resolver', () => {
       expect.assertions(2);
       const res = await setup();
       expect(res?.latestValue).toStrictEqual(expect.any(Number));
-      expect(res?.latestValue).toMatchInlineSnapshot(`119723`);
+      expect(res?.latestValue).toMatchInlineSnapshot(`359169`);
     });
 
     it('should return the previous value', async () => {
       expect.assertions(2);
       const res = await setup();
       expect(res?.previousValue).toStrictEqual(expect.any(Number));
-      expect(res?.previousValue).toMatchInlineSnapshot(`12739`);
+      expect(res?.previousValue).toMatchInlineSnapshot(`38217`);
     });
 
     it('should set and return the refresh time', async () => {
