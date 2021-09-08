@@ -7,7 +7,7 @@ import moize from 'moize';
 import { createSelector } from 'reselect';
 
 import { getDayGain, getDayGainAbs, getPaperValue, getRealisedValue, getBuyCost } from './gains';
-import { getFundsRows, getFundsCache, PriceCache, PriceCacheRebased } from './helpers';
+import { getFundsRows, getFundsCache, PriceCacheRebased } from './helpers';
 import { getTotalCost, getTotalUnits, lastInArray } from '~client/modules/data';
 import { memoiseNowAndToday } from '~client/modules/time';
 import { State } from '~client/reducers';
@@ -32,19 +32,6 @@ export * from './helpers';
 export * from './lines';
 
 export const getHistoryOptions = createSelector(getAppConfig, (config) => config.historyOptions);
-
-const getFundCacheAge = memoiseNowAndToday((time) =>
-  createSelector(getFundsCache, (cache: PriceCache | undefined) => {
-    if (!cache) {
-      return null;
-    }
-
-    const { startTime, cacheTimes } = cache;
-
-    const age = time.getTime() - 1000 * (cacheTimes[cacheTimes.length - 1] + startTime);
-    return Number.isNaN(age) ? null : age;
-  }),
-);
 
 export const filterPastTransactions = (today: Date, transactions: Transaction[]): Transaction[] =>
   transactions.filter(({ date }) => isBefore(startOfDay(date), today));
@@ -218,10 +205,9 @@ export const getCashBreakdown = moize(
 export const getFundsCachedValue = memoiseNowAndToday((time, key) =>
   createSelector(
     getTransactionsToDateWithPrices[key](endOfDay(time)),
-    getFundCacheAge[key](time),
     getDayGain,
     getDayGainAbs,
-    (funds, ageMs, dayGain, dayGainAbs) => {
+    (funds, dayGain, dayGainAbs) => {
       const paperValue = funds.reduce<number>(
         (last, { transactions, stockSplits, price }) =>
           last + getPaperValue(transactions, stockSplits, price),
@@ -243,7 +229,6 @@ export const getFundsCachedValue = memoiseNowAndToday((time, key) =>
 
       return {
         value: paperValue,
-        ageMs,
         gain,
         gainAbs,
         dayGain,

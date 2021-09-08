@@ -71,7 +71,6 @@ describe('Funds selectors', () => {
     it.each`
       prop            | expectedValue
       ${'value'}      | ${399098.2}
-      ${'ageMs'}      | ${1000 * (202.7807754633 * 86400)}
       ${'gain'}       | ${0.0827}
       ${'gainAbs'}    | ${60780.2}
       ${'dayGain'}    | ${getDayGain(state)}
@@ -145,7 +144,6 @@ describe('Funds selectors', () => {
         dayGain: getDayGain(stateNoPrice),
         dayGainAbs: getDayGainAbs(stateNoPrice),
         value: 399098.2,
-        ageMs: Math.floor(1000 * 202.7807754633 * 86400),
       });
     });
   });

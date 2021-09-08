@@ -1,10 +1,13 @@
 import { render, act, fireEvent, RenderResult } from '@testing-library/react';
+import { startOfSecond, subSeconds } from 'date-fns';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
+import sinon from 'sinon';
 
 import { ListHeadFunds, ListHeadFundsMobile, Props, PropsMobile } from '.';
 import { FundsContext } from '~client/components/page-funds/context';
+import type { PageFundsContext } from '~client/components/page-funds/types';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
@@ -20,7 +23,6 @@ describe('<ListHeadFunds />', () => {
     },
     annualisedFundReturns: 0.233,
     cachedValue: {
-      ageMs: 3 * 3600 + 19,
       value: 399098,
       gain: -0.0192,
       gainAbs: -11273,
@@ -33,13 +35,19 @@ describe('<ListHeadFunds />', () => {
   const setup = (
     customProps: Partial<Props> = {},
     options: Partial<RenderResult> = {},
+    state: Partial<State> = {},
+    context: Partial<PageFundsContext> = {},
   ): RenderResult =>
     render(
-      <GQLProviderMock>
-        <FundsContext.Provider value={{ setSort: jest.fn(), lastScraped: new Date() }}>
-          <ListHeadFunds {...props} {...customProps} />
-        </FundsContext.Provider>
-      </GQLProviderMock>,
+      <Provider store={createStore<State>()({ ...testState, ...state })}>
+        <GQLProviderMock>
+          <FundsContext.Provider
+            value={{ setSort: jest.fn(), lastScraped: new Date(), ...context }}
+          >
+            <ListHeadFunds {...props} {...customProps} />
+          </FundsContext.Provider>
+        </GQLProviderMock>
+      </Provider>,
       options,
     );
 
@@ -76,6 +84,60 @@ describe('<ListHeadFunds />', () => {
 
     expect(tickbox.checked).toBe(true);
   });
+
+  it('should display an arc indicating the age of the current price cache', () => {
+    expect.assertions(1);
+    const now = new Date();
+    const clock = sinon.useFakeTimers(now);
+
+    const { getByTestId } = setup(
+      {},
+      {},
+      {},
+      {
+        lastScraped: subSeconds(startOfSecond(now), 175),
+      },
+    );
+
+    expect(getByTestId('scrape-arc')).toMatchInlineSnapshot(`
+      <svg
+        data-testid="scrape-arc"
+        height="24"
+        width="24"
+      >
+        <path
+          d="M12,3 A9,9 0,1,1 7.499999999999998,19.794228634059948"
+          fill="none"
+          stroke="#948cef"
+          stroke-width="3"
+        />
+      </svg>
+    `);
+
+    clock.restore();
+  });
+
+  describe('when the config option "realTimePrices" is set to false', () => {
+    it('should not render the price cache age arc', () => {
+      expect.assertions(1);
+
+      const { queryByTestId } = setup(
+        {},
+        {},
+        {
+          api: {
+            ...testState.api,
+            appConfig: {
+              ...testState.api.appConfig,
+              realTimePrices: false,
+            },
+          },
+        },
+      );
+
+      expect(queryByTestId('scrape-arc')).not.toBeInTheDocument();
+    });
+  });
 });
 
 describe('<ListHeadFundsMobile />', () => {
@@ -83,7 +145,6 @@ describe('<ListHeadFundsMobile />', () => {
     totalCost: 400000,
     annualisedFundReturns: 0.27,
     cachedValue: {
-      ageMs: 3 * 3600 - 27,
       value: 399098,
       gain: 0.0237,
       gainAbs: 107194,

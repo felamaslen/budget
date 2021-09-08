@@ -2,6 +2,7 @@ import humanizeDuration from 'humanize-duration';
 import { mix } from 'polished';
 import React, { FC, useContext } from 'react';
 
+import { useSelector } from 'react-redux';
 import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { formatOptionsAbsolute, formatOptionsRelative } from '~client/components/fund-gain-info';
@@ -12,6 +13,7 @@ import { usePriceChangeHighlight } from '~client/components/page-funds/hooks';
 import { Sort, defaultSort, SortCriteria } from '~client/components/page-funds/types';
 import { useNow } from '~client/hooks';
 import { formatCurrency, formatPercent } from '~client/modules/format';
+import { getAppConfig } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import type { CachedValue, HistoryOptions } from '~client/types';
 
@@ -55,7 +57,7 @@ function getTimeColor(ageSlice: number): string {
 const maxAgeMs = 1000 * 60 * 5;
 
 const Arc: FC<{ sliceAngle: number; color: string }> = ({ sliceAngle, color }) => (
-  <svg height={24} width={24}>
+  <svg data-testid="scrape-arc" height={24} width={24}>
     <path
       strokeWidth={3}
       stroke={color}
@@ -69,8 +71,8 @@ const Arc: FC<{ sliceAngle: number; color: string }> = ({ sliceAngle, color }) =
 
 export type PropsGainValues = PropsCommon &
   HighlightProps & {
+    cacheAgeMs: number;
     isMobile: boolean;
-    lastScraped: Date;
   };
 
 const GainValues: FC<PropsGainValues> = ({
@@ -78,11 +80,11 @@ const GainValues: FC<PropsGainValues> = ({
   totalCost,
   annualisedFundReturns,
   cachedValue: { value, gain, dayGain, gainAbs, dayGainAbs },
-  lastScraped,
+  cacheAgeMs,
   highlight,
 }) => {
-  const now = useNow();
-  const ageSlice = Math.min(1, (now.getTime() - lastScraped.getTime()) / maxAgeMs);
+  const ageSlice = Math.min(0.999, cacheAgeMs / maxAgeMs);
+  const { realTimePrices } = useSelector(getAppConfig);
   return (
     <Styled.OverallGain profit={value > totalCost} loss={value < totalCost} highlight={highlight}>
       <Styled.Main>
@@ -109,10 +111,15 @@ const GainValues: FC<PropsGainValues> = ({
           </Styled.DayGainOuter>
         </Styled.Breakdown>
       )}
-      <Arc sliceAngle={ageSlice * 2 * Math.PI} color={getTimeColor(ageSlice)} />
+      {realTimePrices && <Arc sliceAngle={ageSlice * 2 * Math.PI} color={getTimeColor(ageSlice)} />}
     </Styled.OverallGain>
   );
 };
+
+function useCacheAgeMs(lastScraped: Date): number {
+  const now = useNow();
+  return now.getTime() - lastScraped.getTime();
+}
 
 export const ListHeadFunds: FC<Props> = ({
   totalCost,
@@ -123,15 +130,16 @@ export const ListHeadFunds: FC<Props> = ({
 }) => {
   const { lastScraped, sort = defaultSort, setSort } = useContext(FundsContext);
   const highlight = usePriceChangeHighlight(cachedValue.value);
+  const cacheAgeMs = useCacheAgeMs(lastScraped);
 
   return (
-    <Styled.ListHeadFunds title={getAgeText(cachedValue.ageMs)}>
+    <Styled.ListHeadFunds title={getAgeText(cacheAgeMs)}>
       <GainValues
         isMobile={false}
         totalCost={totalCost}
         annualisedFundReturns={annualisedFundReturns}
         cachedValue={cachedValue}
-        lastScraped={lastScraped}
+        cacheAgeMs={cacheAgeMs}
         highlight={highlight}
       />
       <Styled.ViewOptions>
@@ -153,6 +161,7 @@ export const ListHeadFundsMobile: FC<PropsMobile> = ({
   cachedValue,
 }) => {
   const { lastScraped } = useContext(FundsContext);
+  const cacheAgeMs = useCacheAgeMs(lastScraped);
   return (
     <Styled.ListHeadFunds>
       <GainValues
@@ -160,7 +169,7 @@ export const ListHeadFundsMobile: FC<PropsMobile> = ({
         totalCost={totalCost}
         annualisedFundReturns={annualisedFundReturns}
         cachedValue={cachedValue}
-        lastScraped={lastScraped}
+        cacheAgeMs={cacheAgeMs}
       />
       <GraphFunds isMobile />
     </Styled.ListHeadFunds>

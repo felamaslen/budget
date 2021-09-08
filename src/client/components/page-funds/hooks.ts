@@ -1,3 +1,4 @@
+import fromUnixTime from 'date-fns/fromUnixTime';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PricesWorker from 'worker-loader!../../workers/prices'; // eslint-disable-line import/no-unresolved
@@ -16,16 +17,15 @@ import { getGenericFullSymbol } from '~shared/abbreviation';
 
 const worker = isServerSide ? undefined : new PricesWorker();
 
-export const minFetchIntervalMs = 1000 * 5;
+const fetchIntervalMs = (5 * 60 + 3) * 1000;
+const minTimeBetweenFetchMs = 30 * 1000;
 
 export function useTodayPrices(): Date {
   const dispatch = useDispatch();
   const { realTimePrices } = useSelector(getAppConfig);
-  const todayPriceTime = useSelector(getTodayPriceTime);
-  const [lastScraped, setLastScraped] = useState<Date>(new Date());
-  useEffect(() => {
-    setLastScraped(new Date());
-  }, [todayPriceTime]);
+  const lastScrapedTimestamp = useSelector(getTodayPriceTime);
+  const lastScraped = useMemo(() => fromUnixTime(lastScrapedTimestamp), [lastScrapedTimestamp]);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
   const paused = !realTimePrices;
 
   const apiKey = useContext(ApiContext);
@@ -53,14 +53,16 @@ export function useTodayPrices(): Date {
     requestPolicy: 'network-only',
   });
 
-  const lastFetchTime = useRef<number>(0);
   const fetchIfNecessary = useCallback(() => {
     const now = Date.now();
-    if (now - lastFetchTime.current > minFetchIntervalMs) {
+    if (
+      now - lastScraped.getTime() >= fetchIntervalMs &&
+      now - lastFetchTime >= minTimeBetweenFetchMs
+    ) {
       fetchPrices();
-      lastFetchTime.current = now;
+      setLastFetchTime(now);
     }
-  }, [fetchPrices]);
+  }, [fetchPrices, lastScraped, lastFetchTime]);
 
   const haveCodes = codes.length > 0;
   useEffect(() => {

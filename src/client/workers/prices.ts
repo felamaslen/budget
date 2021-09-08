@@ -1,6 +1,3 @@
-const fetchIntervalMs = 30000;
-const initialFetchDelayMs = 5000;
-
 // eslint-disable-next-line no-restricted-globals
 const ctx: Worker = (self as unknown) as Worker;
 
@@ -8,21 +5,15 @@ function fetchPrices(): void {
   ctx.postMessage('Fetch!');
 }
 
-let timer: NodeJS.Timeout;
 let interval: NodeJS.Timeout;
 
 function startFetching(): void {
-  clearTimeout(timer);
-  timer = setTimeout(() => {
+  interval = setInterval(() => {
     fetchPrices();
-    interval = setInterval(() => {
-      fetchPrices();
-    }, fetchIntervalMs);
-  }, initialFetchDelayMs);
+  }, 5000);
 }
 
 function stopFetching(): void {
-  clearTimeout(timer);
   clearInterval(interval);
 }
 

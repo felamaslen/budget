@@ -93,14 +93,91 @@ const StockHelp: React.FC<{ item: PortfolioItem }> = ({
   </>
 );
 
+const CashHelp: React.FC<{
+  cashBreakdown: ReturnType<ReturnType<typeof getCashBreakdown>>;
+}> = ({ cashBreakdown: { cashInBank, cashToInvest, breakdown } }) => (
+  <Styled.InfoDialogBackground>
+    <Styled.InfoDialog>
+      <h6>Cash breakdown:</h6>
+      <table>
+        <tbody>
+          <Styled.InfoDialogRowRawValue>
+            <th>
+              C<sub>e</sub>
+            </th>
+            <th>= Net worth &ldquo;Cash (easy access)&rdquo;</th>
+            <td>{formatCurrency(breakdown.Ce)}</td>
+          </Styled.InfoDialogRowRawValue>
+          <Styled.InfoDialogRowRawValue>
+            <th>S</th>
+            <th>= Net worth &ldquo;Stocks&rdquo;</th>
+            <td>{formatCurrency(breakdown.S)}</td>
+          </Styled.InfoDialogRowRawValue>
+          <Styled.InfoDialogRowRawValue>
+            <th>
+              V<sub>d</sub>
+            </th>
+            <th>= Stock value at net worth date</th>
+            <td>{formatCurrency(breakdown.Vd)}</td>
+          </Styled.InfoDialogRowRawValue>
+          <Styled.InfoDialogRowRawValue>
+            <th>I</th>
+            <th>= Investments since net worth date</th>
+            <td>{formatCurrency(breakdown.I)}</td>
+          </Styled.InfoDialogRowRawValue>
+          <Styled.InfoDialogRowRawValue>
+            <th>N</th>
+            <th>= Income since net worth date</th>
+            <td>{formatCurrency(breakdown.N)}</td>
+          </Styled.InfoDialogRowRawValue>
+          <Styled.InfoDialogRowRawValue>
+            <th>P</th>
+            <th>= Purchases since net worth date</th>
+            <td>{formatCurrency(breakdown.P)}</td>
+          </Styled.InfoDialogRowRawValue>
+          <Styled.InfoDialogRowDerived>
+            <th>
+              C<sub>d</sub>
+            </th>
+            <th>
+              = Cash to invest at net worth date = max{'{'}0, S - V<sub>d</sub>
+              {'}'}
+            </th>
+            <td>{formatCurrency(Math.max(0, breakdown.S - breakdown.Vd))}</td>
+          </Styled.InfoDialogRowDerived>
+          <Styled.InfoDialogRowImportant>
+            <th>
+              C<sub>b</sub>
+            </th>
+            <th>
+              = Cash in bank = C<sub>e</sub> + N - P - max{'{'}0, I - C<sub>d</sub>
+              {'}'}
+            </th>
+            <td>{formatCurrency(cashInBank)}</td>
+          </Styled.InfoDialogRowImportant>
+          <Styled.InfoDialogRowImportant>
+            <th>
+              C<sub>i</sub>
+            </th>
+            <th>
+              = Cash to invest = max{'{'}0, S - V<sub>d</sub> - I{'}'}
+            </th>
+            <td>{formatCurrency(cashToInvest)}</td>
+          </Styled.InfoDialogRowImportant>
+        </tbody>
+      </table>
+    </Styled.InfoDialog>
+  </Styled.InfoDialogBackground>
+);
+
 export const FundWeights: React.FC = () => {
   const today = useContext(TodayContext);
   const portfolio = useSelector(getPortfolio(today));
   const stockValue = useSelector(getStockValue(today));
-  const { cashInBank, cashToInvest, breakdown } = useSelector(getCashBreakdown(today));
+  const cashBreakdown = useSelector(getCashBreakdown(today));
+  const { cashInBank, cashToInvest } = cashBreakdown;
 
-  const [helpOpen, setHelpOpen] = useState<boolean>(false);
-  const [stockInfoHelp, setStockInfoHelp] = useState<Id | null>(null);
+  const [stockInfoHelp, setStockInfoHelp] = useState<'CASH' | Id | null>(null);
 
   const blocks = useMemo(() => {
     const relevantNetWorth = cashInBank + cashToInvest + stockValue;
@@ -133,6 +210,9 @@ export const FundWeights: React.FC = () => {
         total: cashInBank + cashToInvest,
         color: 'grey',
         text: <Styled.Label small={cashToInvest < relevantNetWorth / 20}>Cash</Styled.Label>,
+        onClick: (): void => {
+          setStockInfoHelp('CASH');
+        },
         subTree: [
           {
             name: formatLabel(cashToInvest, relevantNetWorth, 'Cash to invest'),
@@ -161,97 +241,24 @@ export const FundWeights: React.FC = () => {
   return (
     <>
       <BlockPacker blocks={blocks} onHover={onHover} status={status} />
-      <Styled.HelpButton>
-        <Button
-          onClick={(): void => {
-            if (stockInfoHelp) {
+      {!!stockInfoHelp && (
+        <Styled.HelpButton>
+          <Button
+            onClick={(): void => {
               setStockInfoHelp(null);
-            } else {
-              setHelpOpen((last) => !last);
-            }
-          }}
-        >
-          {helpOpen || stockInfoHelp ? 'Close help' : '?'}
-        </Button>
-      </Styled.HelpButton>
-      {helpOpen && (
-        <Styled.InfoDialogBackground>
-          <Styled.InfoDialog>
-            <h6>Cash breakdown:</h6>
-            <table>
-              <tbody>
-                <Styled.InfoDialogRowRawValue>
-                  <th>
-                    C<sub>e</sub>
-                  </th>
-                  <th>= Net worth &ldquo;Cash (easy access)&rdquo;</th>
-                  <td>{formatCurrency(breakdown.Ce)}</td>
-                </Styled.InfoDialogRowRawValue>
-                <Styled.InfoDialogRowRawValue>
-                  <th>S</th>
-                  <th>= Net worth &ldquo;Stocks&rdquo;</th>
-                  <td>{formatCurrency(breakdown.S)}</td>
-                </Styled.InfoDialogRowRawValue>
-                <Styled.InfoDialogRowRawValue>
-                  <th>
-                    V<sub>d</sub>
-                  </th>
-                  <th>= Stock value at net worth date</th>
-                  <td>{formatCurrency(breakdown.Vd)}</td>
-                </Styled.InfoDialogRowRawValue>
-                <Styled.InfoDialogRowRawValue>
-                  <th>I</th>
-                  <th>= Investments since net worth date</th>
-                  <td>{formatCurrency(breakdown.I)}</td>
-                </Styled.InfoDialogRowRawValue>
-                <Styled.InfoDialogRowRawValue>
-                  <th>N</th>
-                  <th>= Income since net worth date</th>
-                  <td>{formatCurrency(breakdown.N)}</td>
-                </Styled.InfoDialogRowRawValue>
-                <Styled.InfoDialogRowRawValue>
-                  <th>P</th>
-                  <th>= Purchases since net worth date</th>
-                  <td>{formatCurrency(breakdown.P)}</td>
-                </Styled.InfoDialogRowRawValue>
-                <Styled.InfoDialogRowDerived>
-                  <th>
-                    C<sub>d</sub>
-                  </th>
-                  <th>
-                    = Cash to invest at net worth date = max{'{'}0, S - V<sub>d</sub>
-                    {'}'}
-                  </th>
-                  <td>{formatCurrency(Math.max(0, breakdown.S - breakdown.Vd))}</td>
-                </Styled.InfoDialogRowDerived>
-                <Styled.InfoDialogRowImportant>
-                  <th>
-                    C<sub>b</sub>
-                  </th>
-                  <th>
-                    = Cash in bank = C<sub>e</sub> + N - P - max{'{'}0, I - C<sub>d</sub>
-                    {'}'}
-                  </th>
-                  <td>{formatCurrency(cashInBank)}</td>
-                </Styled.InfoDialogRowImportant>
-                <Styled.InfoDialogRowImportant>
-                  <th>
-                    C<sub>i</sub>
-                  </th>
-                  <th>
-                    = Cash to invest = max{'{'}0, S - V<sub>d</sub> - I{'}'}
-                  </th>
-                  <td>{formatCurrency(cashToInvest)}</td>
-                </Styled.InfoDialogRowImportant>
-              </tbody>
-            </table>
-          </Styled.InfoDialog>
-        </Styled.InfoDialogBackground>
+            }}
+          >
+            Close help
+          </Button>
+        </Styled.HelpButton>
       )}
-      {stockInfoHelp && !helpOpen && (
+      {!!stockInfoHelp && (
         <Styled.InfoDialogBackground>
           <Styled.InfoDialog>
-            <StockHelp item={portfolio.find(({ id }) => id === stockInfoHelp) as PortfolioItem} />
+            {stockInfoHelp === 'CASH' && <CashHelp cashBreakdown={cashBreakdown} />}
+            {stockInfoHelp !== 'CASH' && (
+              <StockHelp item={portfolio.find(({ id }) => id === stockInfoHelp) as PortfolioItem} />
+            )}
           </Styled.InfoDialog>
         </Styled.InfoDialogBackground>
       )}
