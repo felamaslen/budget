@@ -1,7 +1,7 @@
 /* @jsx jsx */
 import { Global, jsx } from '@emotion/react';
 import loadable from '@loadable/component';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
@@ -24,6 +24,7 @@ import {
   useOffline,
   useToday,
 } from '~client/hooks';
+import { useWindowFocus } from '~client/hooks/focus';
 import { VOID } from '~client/modules/data';
 import { reset } from '~client/styled/reset';
 import { Main, PageWrapper } from '~client/styled/shared';
@@ -110,10 +111,7 @@ const App: React.FC<Props> = ({
 
 export default App;
 
-export const ClientApp = compose(
-  hot,
-  withRouter,
-)(() => {
+const ClientAppReloader: React.FC = () => {
   const [offline, wasOffline] = useOffline();
   const [connectionAttempt, setConnectionAttempt] = useState<number>(0);
   const onReconnect = useCallback((): void => setConnectionAttempt((last) => last + 1), []);
@@ -142,4 +140,32 @@ export const ClientApp = compose(
       />
     </GQLProvider>
   );
+};
+
+const maxTimeUnfocusedBeforeReloadMs = 1000 * 60 * 60 * 2;
+
+export const ClientApp = compose(
+  hot,
+  withRouter,
+)(() => {
+  const [shouldReload, setShouldReload] = useState<boolean>(false);
+  const reloadTimer = useRef<number>(0);
+
+  const onFocus = useCallback((timeSinceLastFocusedMs: number): void => {
+    if (timeSinceLastFocusedMs > maxTimeUnfocusedBeforeReloadMs) {
+      setShouldReload(true);
+    }
+  }, []);
+
+  useWindowFocus(onFocus);
+
+  useEffect(() => {
+    if (shouldReload) {
+      reloadTimer.current = window.setTimeout(() => {
+        setShouldReload(false);
+      }, 100);
+    }
+  }, [shouldReload]);
+
+  return shouldReload ? <SpinnerInit /> : <ClientAppReloader />;
 });
