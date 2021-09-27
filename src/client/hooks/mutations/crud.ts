@@ -5,7 +5,7 @@ import { apiLoaded, apiLoading } from '~client/actions';
 import { useUpdateEffect } from '~client/hooks/effect';
 import * as gql from '~client/hooks/gql';
 import { IDENTITY, toRawNetWorthEntry } from '~client/modules/data';
-import type { Create, Id, NetWorthEntryNative } from '~client/types';
+import type { Id, NetWorthEntryNative } from '~client/types';
 import { RequestType } from '~client/types/enum';
 import type {
   Mutation,
@@ -13,6 +13,7 @@ import type {
   NetWorthEntryInput,
   NetWorthSubcategoryInput,
 } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 export type OnCreate<I> = (item: I) => void;
 export type OnUpdate<I> = (id: Id, item: I) => void;

@@ -1,5 +1,5 @@
 import { rgba } from 'polished';
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo } from 'react';
 
 import { Key } from './key';
 import { LongTermSettings, Props as LongTermSettingsProps } from './long-term';
@@ -7,7 +7,7 @@ import { GraphCashFlow, getValuesWithTime } from '~client/components/graph-cashf
 import { Sidebar } from '~client/components/graph-cashflow/sidebar';
 import { ToggleContainer } from '~client/components/graph-cashflow/toggle';
 import type { GraphCashFlowTitle } from '~client/components/graph-cashflow/types';
-import { TodayContext, usePersistentState } from '~client/hooks';
+import { usePersistentState, useToday } from '~client/hooks';
 import { SettingsFull, SettingsGroup } from '~client/styled/shared/settings';
 import { graphOverviewHeightMobile, colors } from '~client/styled/variables';
 import type { Line, LongTermOptions, OverviewGraph } from '~client/types';
@@ -161,7 +161,7 @@ export const GraphBalance: React.FC<Props> = ({
   setLongTermOptions,
   defaultRates,
 }) => {
-  const today = useContext(TodayContext);
+  const today = useToday();
   const [showLiabilities, setShowLiabilities] = usePersistentState<boolean>(
     false,
     'split_net_worth_graph',

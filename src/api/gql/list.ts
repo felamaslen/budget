@@ -84,25 +84,18 @@ const mutation = gql`
 `;
 
 const subscription = gql`
-  type ListItemStandardSubscription {
-    date: Date!
-    item: String!
-    category: String!
-    cost: Int!
-    shop: String!
+  type ListItemStandardCreatedSubscription {
+    fakeId: Int!
+    item: ListItemStandard!
   }
-  type ListItemCreateUpdate {
+
+  type ListSubscription {
     page: PageListStandard!
-    id: Int!
-    fakeId: Int
-    item: ListItemStandardSubscription!
-    overviewCost: [Int!]!
-    total: Int
-    weekly: Int
-  }
-  type ListItemDelete {
-    page: PageListStandard!
-    id: Int!
+
+    created: ListItemStandardCreatedSubscription
+    updated: ListItemStandard
+    deleted: NonNegativeInt
+
     overviewCost: [Int!]!
     total: Int
     weekly: Int
@@ -119,9 +112,7 @@ const subscription = gql`
   }
 
   extend type Subscription {
-    listItemCreated(pages: [PageListStandard!]!): ListItemCreateUpdate!
-    listItemUpdated(pages: [PageListStandard!]!): ListItemCreateUpdate!
-    listItemDeleted: ListItemDelete!
+    listChanged(pages: [PageListStandard!]!): ListSubscription!
 
     receiptCreated: ReceiptCreated!
   }

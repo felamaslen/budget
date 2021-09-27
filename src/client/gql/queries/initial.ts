@@ -53,21 +53,7 @@ export const Initial = gql`
 
     funds: readFunds {
       items {
-        id
-        item
-        allocationTarget
-        transactions {
-          date
-          units
-          price
-          fees
-          taxes
-          drip
-        }
-        stockSplits {
-          date
-          ratio
-        }
+        ...FundParts
       }
     }
 

@@ -9,10 +9,10 @@ import {
   onDeleteOptimistic,
   State as CrudState,
 } from '~client/reducers/crud';
-import type { Id, ListItemStandardNative, PageList, StandardInput } from '~client/types';
+import type { Id, ListItemStandardNative, PageList, StandardInput, WithIds } from '~client/types';
 import { PageListStandard, ReceiptPage } from '~client/types/enum';
 import type { ListItem, ListItemInput, ListItemStandard } from '~client/types/gql';
-import type { GQL, NativeDate } from '~shared/types';
+import type { GQL, NativeDate, RawDate } from '~shared/types';
 
 type FullReducer<S, A> = (state: S, action: A) => S;
 
@@ -219,30 +219,36 @@ const makeOnMoreReceived = <
   ES extends Record<string, unknown>
 >(
   page: P,
-): FullReducer<DailyState<ES>, Actions.MoreListDataReceived<PageList>> =>
-  filterByPage<I, ListItemStandardNative, P, DailyState<ES>, Actions.MoreListDataReceived<P>>(
-    page,
-    (state, action) => {
-      const newItems = action.res.items.map(withNativeDate('date')) ?? [];
-      const existingItems = state.items.filter(
-        ({ id }) => !newItems.some((newItem) => newItem.id === id),
-      );
+): FullReducer<
+  DailyState<ES>,
+  Actions.MoreListDataReceived<PageList, WithIds<RawDate<I, 'date'>>>
+> =>
+  filterByPage<
+    I,
+    ListItemStandardNative,
+    P,
+    DailyState<ES>,
+    Actions.MoreListDataReceived<P, WithIds<RawDate<I, 'date'>>>
+  >(page, (state, action) => {
+    const newItems = action.res.items.map(withNativeDate('date')) ?? [];
+    const existingItems = state.items.filter(
+      ({ id }) => !newItems.some((newItem) => newItem.id === id),
+    );
 
-      const existingOptimistic = state.__optimistic.filter(
-        (_, index) => !newItems.some((newItem) => newItem.id === state.items[index].id),
-      );
+    const existingOptimistic = state.__optimistic.filter(
+      (_, index) => !newItems.some((newItem) => newItem.id === state.items[index].id),
+    );
 
-      return {
-        ...state,
-        weekly: action.res.weekly ?? state.weekly,
-        total: action.res.total ?? state.total,
-        offset: state.offset + 1,
-        olderExists: !!action.res.olderExists,
-        items: [...existingItems, ...newItems],
-        __optimistic: [...existingOptimistic, ...Array<undefined>(newItems.length).fill(undefined)],
-      };
-    },
-  );
+    return {
+      ...state,
+      weekly: action.res.weekly ?? state.weekly,
+      total: action.res.total ?? state.total,
+      offset: state.offset + 1,
+      olderExists: !!action.res.olderExists,
+      items: [...existingItems, ...newItems],
+      __optimistic: [...existingOptimistic, ...Array<undefined>(newItems.length).fill(undefined)],
+    };
+  });
 
 const makeOnReceiptCreated = <P extends PageListStandard, ES extends Record<string, unknown>>(
   page: P,

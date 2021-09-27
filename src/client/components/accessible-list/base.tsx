@@ -11,8 +11,9 @@ import { InfiniteWindow } from './window';
 import { ModalDialog } from '~client/components/modal-dialog';
 import { isStandardListPage } from '~client/constants/data';
 import { useIsMobile } from '~client/hooks';
-import type { Create, PageList } from '~client/types';
+import type { PageList } from '~client/types';
 import type { ListItemInput } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 const emptyObject = {};
 
@@ -42,6 +43,7 @@ export const AccessibleList = <
   Header,
   headerProps = emptyObject as H,
   FirstItem,
+  useItems,
 }: Props<I, P, MK, E, H>): React.ReactElement<Props<I, P, MK, E, H>> => {
   const isMobile = useIsMobile();
   const { itemsSorted, extraProps } = useSortedItems(
@@ -131,6 +133,7 @@ export const AccessibleList = <
             isMobile={isMobile}
             items={itemsSorted}
             MemoisedItem={MemoisedItem}
+            useItems={useItems}
           />
         )}
         {isMobile && (

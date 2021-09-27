@@ -1,8 +1,8 @@
 import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/react';
 import React from 'react';
-import sinon from 'sinon';
 
 import { useField } from './field';
+import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe(useField.name, () => {
   type Props = {
@@ -258,14 +258,7 @@ describe(useField.name, () => {
     });
 
     describe('when setting the field to inactive', () => {
-      let clock: sinon.SinonFakeTimers;
-
-      beforeEach(() => {
-        clock = sinon.useFakeTimers();
-      });
-      afterEach(() => {
-        clock.restore();
-      });
+      const mockedTime = mockTimeOnly();
 
       const setup = (newValue?: string): RenderResult => {
         const renderProps = render(<TestComponent {...props} inline />);
@@ -285,7 +278,7 @@ describe(useField.name, () => {
           });
         }
 
-        clock.tick(100);
+        mockedTime.clock.tick(100);
 
         act(() => {
           fireEvent.click(activateButton);
@@ -299,7 +292,7 @@ describe(useField.name, () => {
         const { getByTestId } = setup();
         const input = getByTestId('input');
         act(() => {
-          clock.runAll();
+          mockedTime.clock.runAll();
         });
         await waitFor(() => {
           expect(document.activeElement).toBe(input);

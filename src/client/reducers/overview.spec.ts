@@ -1,4 +1,3 @@
-import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import {
@@ -17,6 +16,7 @@ import {
 } from '~client/actions';
 import reducer, { initialState, State } from '~client/reducers/overview';
 import { testResponse } from '~client/test-data';
+import { mockTimeOnly } from '~client/test-utils/mock-time';
 import type { StandardInput } from '~client/types';
 import { PageListStandard, ReceiptPage } from '~client/types/enum';
 import type { FundHistory } from '~client/types/gql';
@@ -24,13 +24,7 @@ import { investmentPurchaseCategories } from '~shared/constants';
 
 describe('Overview reducer', () => {
   const now = new Date('2019-07-13T11:43:10+0100');
-  let clock: sinon.SinonFakeTimers;
-  beforeAll(() => {
-    clock = sinon.useFakeTimers(now);
-  });
-  afterAll(() => {
-    clock.restore();
-  });
+  mockTimeOnly(now);
 
   const state: State = {
     ...initialState,

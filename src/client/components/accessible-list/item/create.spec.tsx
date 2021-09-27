@@ -1,6 +1,5 @@
 import { render, RenderResult, act, fireEvent } from '@testing-library/react';
 import React from 'react';
-import sinon from 'sinon';
 
 import { standardFields } from '../standard';
 import type { PropsItemCreate } from '../types';
@@ -8,19 +7,18 @@ import type { PropsItemCreate } from '../types';
 import { AccessibleListCreateItem } from './create';
 
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { mockTime } from '~client/test-utils/mock-time';
 import { PageListStandard } from '~client/types/enum';
 import type { ListItemInput } from '~client/types/gql';
 
 describe('Accessible list create form', () => {
-  let clock: sinon.SinonFakeTimers;
-  beforeEach(() => {
-    clock = sinon.useFakeTimers();
-  });
+  const mockedTime = mockTime();
+  beforeEach(mockedTime.setup);
   afterEach(() => {
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
-    clock.restore();
+    mockedTime.teardown();
   });
 
   const page = PageListStandard.Income as const;
@@ -54,7 +52,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputDate);
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
     act(() => {
       fireEvent.change(inputDate, { target: { value: date } });
@@ -65,7 +63,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputItem);
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
     act(() => {
       fireEvent.change(inputItem, { target: { value: item } });
@@ -76,7 +74,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputCategory);
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
     act(() => {
       fireEvent.change(inputCategory, { target: { value: category } });
@@ -87,7 +85,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputCost);
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
     act(() => {
       fireEvent.change(inputCost, { target: { value: cost } });
@@ -98,7 +96,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputShop);
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
     act(() => {
       fireEvent.change(inputShop, { target: { value: shop } });

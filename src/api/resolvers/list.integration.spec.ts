@@ -87,17 +87,6 @@ describe('Standard list resolvers', () => {
     }
   `;
 
-  const income = {
-    date: '2020-04-20',
-    item: 'Salary',
-    cost: 328967, // bit of a misnomer for this route :)
-    category: 'Mainline',
-    shop: 'My company',
-  };
-  const incomeDelta = {
-    item: 'Different salary (changed jobs)',
-  };
-
   const bill = {
     date: '2020-04-02',
     item: 'Rent',
@@ -145,7 +134,6 @@ describe('Standard list resolvers', () => {
 
   describe.each`
     page                | testItem   | delta
-    ${PageList.Income}  | ${income}  | ${incomeDelta}
     ${PageList.Bills}   | ${bill}    | ${billDelta}
     ${PageList.Food}    | ${food}    | ${foodDelta}
     ${PageList.General} | ${general} | ${generalDelta}

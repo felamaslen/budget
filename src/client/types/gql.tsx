@@ -175,26 +175,10 @@ export type Fund = {
   stockSplits: Array<StockSplit>;
 };
 
-export type FundCreateUpdate = {
-  __typename?: 'FundCreateUpdate';
-  id: Scalars['Int'];
-  fakeId?: Maybe<Scalars['Int']>;
-  item: FundData;
-  overviewCost: Array<Scalars['Int']>;
-};
-
-export type FundData = {
-  __typename?: 'FundData';
-  item: Scalars['String'];
-  transactions: Array<Transaction>;
-  stockSplits: Array<StockSplit>;
-  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
-};
-
-export type FundDelete = {
-  __typename?: 'FundDelete';
-  id: Scalars['Int'];
-  overviewCost: Array<Scalars['Int']>;
+export type FundCreatedSubscription = {
+  __typename?: 'FundCreatedSubscription';
+  fakeId: Scalars['Int'];
+  item: Fund;
 };
 
 export type FundHistory = {
@@ -245,10 +229,74 @@ export type FundPrices = {
   groups: Array<FundPriceGroup>;
 };
 
+export type FundSubscription = {
+  __typename?: 'FundSubscription';
+  created?: Maybe<FundCreatedSubscription>;
+  updated?: Maybe<Fund>;
+  deleted?: Maybe<Scalars['NonNegativeInt']>;
+  overviewCost: Array<Scalars['Int']>;
+};
+
 export type FundValueIndividual = {
   __typename?: 'FundValueIndividual';
   date: Scalars['Int'];
   price: Scalars['NonNegativeFloat'];
+};
+
+export type Income = {
+  __typename?: 'Income';
+  id: Scalars['Int'];
+  date: Scalars['Date'];
+  item: Scalars['String'];
+  category: Scalars['String'];
+  cost: Scalars['Int'];
+  shop: Scalars['String'];
+  deductions: Array<IncomeDeduction>;
+};
+
+export type IncomeCreatedSubscription = {
+  __typename?: 'IncomeCreatedSubscription';
+  fakeId: Scalars['Int'];
+  item: Income;
+};
+
+export type IncomeDeduction = {
+  __typename?: 'IncomeDeduction';
+  name: Scalars['String'];
+  value: Scalars['Int'];
+};
+
+export type IncomeDeductionInput = {
+  name: Scalars['String'];
+  value: Scalars['Int'];
+};
+
+export type IncomeInput = {
+  date: Scalars['String'];
+  item: Scalars['String'];
+  cost: Scalars['Int'];
+  category: Scalars['String'];
+  shop: Scalars['String'];
+  deductions: Array<IncomeDeductionInput>;
+};
+
+export type IncomeReadResponse = {
+  __typename?: 'IncomeReadResponse';
+  error?: Maybe<Scalars['String']>;
+  items: Array<Income>;
+  olderExists?: Maybe<Scalars['Boolean']>;
+  weekly?: Maybe<Scalars['Int']>;
+  total?: Maybe<Scalars['Int']>;
+};
+
+export type IncomeSubscription = {
+  __typename?: 'IncomeSubscription';
+  created?: Maybe<IncomeCreatedSubscription>;
+  updated?: Maybe<Income>;
+  deleted?: Maybe<Scalars['NonNegativeInt']>;
+  overviewCost: Array<Scalars['Int']>;
+  total?: Maybe<Scalars['Int']>;
+  weekly?: Maybe<Scalars['Int']>;
 };
 
 export type InitialCumulativeValues = {
@@ -281,26 +329,6 @@ export type ListItem = {
   item: Scalars['String'];
 };
 
-export type ListItemCreateUpdate = {
-  __typename?: 'ListItemCreateUpdate';
-  page: PageListStandard;
-  id: Scalars['Int'];
-  fakeId?: Maybe<Scalars['Int']>;
-  item: ListItemStandardSubscription;
-  overviewCost: Array<Scalars['Int']>;
-  total?: Maybe<Scalars['Int']>;
-  weekly?: Maybe<Scalars['Int']>;
-};
-
-export type ListItemDelete = {
-  __typename?: 'ListItemDelete';
-  page: PageListStandard;
-  id: Scalars['Int'];
-  overviewCost: Array<Scalars['Int']>;
-  total?: Maybe<Scalars['Int']>;
-  weekly?: Maybe<Scalars['Int']>;
-};
-
 export type ListItemInput = {
   fakeId?: Maybe<Scalars['Int']>;
   item: Scalars['String'];
@@ -316,20 +344,17 @@ export type ListItemStandard = {
   shop: Scalars['String'];
 };
 
+export type ListItemStandardCreatedSubscription = {
+  __typename?: 'ListItemStandardCreatedSubscription';
+  fakeId: Scalars['Int'];
+  item: ListItemStandard;
+};
+
 export type ListItemStandardInput = {
   date: Scalars['String'];
   item: Scalars['String'];
   cost: Scalars['Int'];
   category: Scalars['String'];
-  shop: Scalars['String'];
-};
-
-export type ListItemStandardSubscription = {
-  __typename?: 'ListItemStandardSubscription';
-  date: Scalars['Date'];
-  item: Scalars['String'];
-  category: Scalars['String'];
-  cost: Scalars['Int'];
   shop: Scalars['String'];
 };
 
@@ -340,6 +365,17 @@ export type ListReadResponse = {
   olderExists?: Maybe<Scalars['Boolean']>;
   weekly?: Maybe<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
+};
+
+export type ListSubscription = {
+  __typename?: 'ListSubscription';
+  page: PageListStandard;
+  created?: Maybe<ListItemStandardCreatedSubscription>;
+  updated?: Maybe<ListItemStandard>;
+  deleted?: Maybe<Scalars['NonNegativeInt']>;
+  overviewCost: Array<Scalars['Int']>;
+  total?: Maybe<Scalars['Int']>;
+  weekly?: Maybe<Scalars['Int']>;
 };
 
 export type ListTotalsResponse = {
@@ -404,12 +440,14 @@ export enum MonthlyCategory {
 export type Mutation = {
   __typename?: 'Mutation';
   createFund?: Maybe<CrudResponseCreate>;
+  createIncome?: Maybe<CrudResponseCreate>;
   createListItem?: Maybe<CrudResponseCreate>;
   createNetWorthCategory?: Maybe<CrudResponseCreate>;
   createNetWorthEntry?: Maybe<CrudResponseCreate>;
   createNetWorthSubcategory?: Maybe<CrudResponseCreate>;
   createReceipt?: Maybe<ReceiptCreated>;
   deleteFund?: Maybe<CrudResponseDelete>;
+  deleteIncome?: Maybe<CrudResponseDelete>;
   deleteListItem?: Maybe<CrudResponseDelete>;
   deleteNetWorthCategory?: Maybe<CrudResponseDelete>;
   deleteNetWorthEntry?: Maybe<CrudResponseDelete>;
@@ -421,6 +459,7 @@ export type Mutation = {
   updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
   updateFund?: Maybe<CrudResponseUpdate>;
   updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
+  updateIncome?: Maybe<CrudResponseUpdate>;
   updateListItem?: Maybe<CrudResponseUpdate>;
   updateNetWorthCategory?: Maybe<CrudResponseUpdate>;
   updateNetWorthEntry?: Maybe<CrudResponseUpdate>;
@@ -432,6 +471,12 @@ export type Mutation = {
 export type MutationCreateFundArgs = {
   fakeId: Scalars['Int'];
   input: FundInput;
+};
+
+
+export type MutationCreateIncomeArgs = {
+  fakeId: Scalars['Int'];
+  input: IncomeInput;
 };
 
 
@@ -465,6 +510,11 @@ export type MutationCreateReceiptArgs = {
 
 
 export type MutationDeleteFundArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type MutationDeleteIncomeArgs = {
   id: Scalars['Int'];
 };
 
@@ -518,6 +568,12 @@ export type MutationUpdateFundArgs = {
 
 export type MutationUpdateFundAllocationTargetsArgs = {
   deltas: Array<TargetDelta>;
+};
+
+
+export type MutationUpdateIncomeArgs = {
+  id: Scalars['Int'];
+  input: IncomeInput;
 };
 
 
@@ -780,6 +836,7 @@ export type Query = {
   overviewOld?: Maybe<OverviewOld>;
   overviewPreview?: Maybe<OverviewPreview>;
   readFunds?: Maybe<ReadFundsResponse>;
+  readIncome?: Maybe<IncomeReadResponse>;
   readList?: Maybe<ListReadResponse>;
   readNetWorthCategories?: Maybe<Array<NetWorthCategory>>;
   readNetWorthEntries?: Maybe<NetWorthEntryOverview>;
@@ -843,6 +900,12 @@ export type QueryOverviewOldArgs = {
 export type QueryOverviewPreviewArgs = {
   category: MonthlyCategory;
   date: Scalars['Date'];
+};
+
+
+export type QueryReadIncomeArgs = {
+  offset?: Maybe<Scalars['Int']>;
+  limit?: Maybe<Scalars['Int']>;
 };
 
 
@@ -999,13 +1062,10 @@ export type Subscription = {
   cashAllocationTargetUpdated: Scalars['NonNegativeInt'];
   configUpdated: AppConfig;
   fundAllocationTargetsUpdated: UpdatedFundAllocationTargets;
-  fundCreated: FundCreateUpdate;
-  fundDeleted: FundDelete;
   fundPricesUpdated?: Maybe<FundHistory>;
-  fundUpdated: FundCreateUpdate;
-  listItemCreated: ListItemCreateUpdate;
-  listItemDeleted: ListItemDelete;
-  listItemUpdated: ListItemCreateUpdate;
+  fundsChanged: FundSubscription;
+  incomeChanged: IncomeSubscription;
+  listChanged: ListSubscription;
   netWorthCashTotalUpdated: NetWorthCashTotal;
   netWorthCategoryCreated: NetWorthCategoryCreated;
   netWorthCategoryDeleted: NetWorthDeleted;
@@ -1026,12 +1086,7 @@ export type SubscriptionFundPricesUpdatedArgs = {
 };
 
 
-export type SubscriptionListItemCreatedArgs = {
-  pages: Array<PageListStandard>;
-};
-
-
-export type SubscriptionListItemUpdatedArgs = {
+export type SubscriptionListChangedArgs = {
   pages: Array<PageListStandard>;
 };
 
@@ -1093,6 +1148,18 @@ export type ConfigPartsFragment = (
   & Pick<AppConfig, 'birthDate' | 'futureMonths' | 'realTimePrices' | 'fundMode' | 'fundPeriod' | 'fundLength'>
 );
 
+export type FundPartsFragment = (
+  { __typename?: 'Fund' }
+  & Pick<Fund, 'id' | 'item' | 'allocationTarget'>
+  & { transactions: Array<(
+    { __typename?: 'Transaction' }
+    & Pick<Transaction, 'date' | 'units' | 'price' | 'fees' | 'taxes' | 'drip'>
+  )>, stockSplits: Array<(
+    { __typename?: 'StockSplit' }
+    & Pick<StockSplit, 'date' | 'ratio'>
+  )> }
+);
+
 export type FundHistoryPartsFragment = (
   { __typename?: 'FundHistory' }
   & Pick<FundHistory, 'startTime' | 'cacheTimes' | 'annualisedFundReturns' | 'overviewCost'>
@@ -1103,6 +1170,20 @@ export type FundHistoryPartsFragment = (
       { __typename?: 'FundPriceGroup' }
       & Pick<FundPriceGroup, 'startIndex' | 'values'>
     )> }
+  )> }
+);
+
+export type ListItemStandardPartsFragment = (
+  { __typename?: 'ListItemStandard' }
+  & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
+);
+
+export type IncomePartsFragment = (
+  { __typename?: 'Income' }
+  & Pick<Income, 'id' | 'date' | 'item' | 'category' | 'cost' | 'shop'>
+  & { deductions: Array<(
+    { __typename?: 'IncomeDeduction' }
+    & Pick<IncomeDeduction, 'name' | 'value'>
   )> }
 );
 
@@ -1258,6 +1339,47 @@ export type UpdateFundAllocationTargetsMutation = (
       { __typename?: 'TargetDeltaResponse' }
       & Pick<TargetDeltaResponse, 'id' | 'allocationTarget'>
     )>> }
+  )> }
+);
+
+export type CreateIncomeMutationVariables = Exact<{
+  fakeId: Scalars['Int'];
+  input: IncomeInput;
+}>;
+
+
+export type CreateIncomeMutation = (
+  { __typename?: 'Mutation' }
+  & { createIncome?: Maybe<(
+    { __typename?: 'CrudResponseCreate' }
+    & Pick<CrudResponseCreate, 'error' | 'id'>
+  )> }
+);
+
+export type UpdateIncomeMutationVariables = Exact<{
+  id: Scalars['Int'];
+  input: IncomeInput;
+}>;
+
+
+export type UpdateIncomeMutation = (
+  { __typename?: 'Mutation' }
+  & { updateIncome?: Maybe<(
+    { __typename?: 'CrudResponseUpdate' }
+    & Pick<CrudResponseUpdate, 'error'>
+  )> }
+);
+
+export type DeleteIncomeMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DeleteIncomeMutation = (
+  { __typename?: 'Mutation' }
+  & { deleteIncome?: Maybe<(
+    { __typename?: 'CrudResponseDelete' }
+    & Pick<CrudResponseDelete, 'error'>
   )> }
 );
 
@@ -1636,14 +1758,7 @@ export type InitialQuery = (
     { __typename?: 'ReadFundsResponse' }
     & { items: Array<(
       { __typename?: 'Fund' }
-      & Pick<Fund, 'id' | 'item' | 'allocationTarget'>
-      & { transactions: Array<(
-        { __typename?: 'Transaction' }
-        & Pick<Transaction, 'date' | 'units' | 'price' | 'fees' | 'taxes' | 'drip'>
-      )>, stockSplits: Array<(
-        { __typename?: 'StockSplit' }
-        & Pick<StockSplit, 'date' | 'ratio'>
-      )> }
+      & FundPartsFragment
     )> }
   )>, fundHistory?: Maybe<(
     { __typename?: 'FundHistory' }
@@ -1666,6 +1781,28 @@ export type MoreListDataStandardQuery = (
     & { items: Array<(
       { __typename?: 'ListItemStandard' }
       & Pick<ListItemStandard, 'id' | 'date' | 'item' | 'cost' | 'category' | 'shop'>
+    )> }
+  )> }
+);
+
+export type MoreIncomeDataQueryVariables = Exact<{
+  offset: Scalars['Int'];
+  limit: Scalars['Int'];
+}>;
+
+
+export type MoreIncomeDataQuery = (
+  { __typename?: 'Query' }
+  & { readIncome?: Maybe<(
+    { __typename?: 'IncomeReadResponse' }
+    & Pick<IncomeReadResponse, 'total' | 'weekly' | 'olderExists'>
+    & { items: Array<(
+      { __typename?: 'Income' }
+      & Pick<Income, 'id' | 'date' | 'item' | 'cost' | 'category' | 'shop'>
+      & { deductions: Array<(
+        { __typename?: 'IncomeDeduction' }
+        & Pick<IncomeDeduction, 'name' | 'value'>
+      )> }
     )> }
   )> }
 );
@@ -1769,58 +1906,25 @@ export type ConfigUpdatedSubscription = (
   ) }
 );
 
-export type FundCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type FundsChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FundCreatedSubscription = (
+export type FundsChangedSubscription = (
   { __typename?: 'Subscription' }
-  & { fundCreated: (
-    { __typename?: 'FundCreateUpdate' }
-    & Pick<FundCreateUpdate, 'id' | 'fakeId' | 'overviewCost'>
-    & { item: (
-      { __typename?: 'FundData' }
-      & Pick<FundData, 'item' | 'allocationTarget'>
-      & { transactions: Array<(
-        { __typename?: 'Transaction' }
-        & Pick<Transaction, 'date' | 'units' | 'price' | 'taxes' | 'fees' | 'drip'>
-      )>, stockSplits: Array<(
-        { __typename?: 'StockSplit' }
-        & Pick<StockSplit, 'date' | 'ratio'>
-      )> }
-    ) }
-  ) }
-);
-
-export type FundUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type FundUpdatedSubscription = (
-  { __typename?: 'Subscription' }
-  & { fundUpdated: (
-    { __typename?: 'FundCreateUpdate' }
-    & Pick<FundCreateUpdate, 'id' | 'overviewCost'>
-    & { item: (
-      { __typename?: 'FundData' }
-      & Pick<FundData, 'item' | 'allocationTarget'>
-      & { transactions: Array<(
-        { __typename?: 'Transaction' }
-        & Pick<Transaction, 'date' | 'units' | 'price' | 'taxes' | 'fees' | 'drip'>
-      )>, stockSplits: Array<(
-        { __typename?: 'StockSplit' }
-        & Pick<StockSplit, 'date' | 'ratio'>
-      )> }
-    ) }
-  ) }
-);
-
-export type FundDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type FundDeletedSubscription = (
-  { __typename?: 'Subscription' }
-  & { fundDeleted: (
-    { __typename?: 'FundDelete' }
-    & Pick<FundDelete, 'id' | 'overviewCost'>
+  & { fundsChanged: (
+    { __typename?: 'FundSubscription' }
+    & Pick<FundSubscription, 'deleted' | 'overviewCost'>
+    & { created?: Maybe<(
+      { __typename?: 'FundCreatedSubscription' }
+      & Pick<FundCreatedSubscription, 'fakeId'>
+      & { item: (
+        { __typename?: 'Fund' }
+        & FundPartsFragment
+      ) }
+    )>, updated?: Maybe<(
+      { __typename?: 'Fund' }
+      & FundPartsFragment
+    )> }
   ) }
 );
 
@@ -1860,44 +1964,47 @@ export type FundAllocationTargetsUpdatedSubscription = (
   ) }
 );
 
-export type ListItemStandardCreatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type IncomeChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListItemStandardCreatedSubscription = (
+export type IncomeChangedSubscription = (
   { __typename?: 'Subscription' }
-  & { listItemStandardCreated: (
-    { __typename?: 'ListItemCreateUpdate' }
-    & Pick<ListItemCreateUpdate, 'page' | 'id' | 'fakeId' | 'overviewCost' | 'total' | 'weekly'>
-    & { item: (
-      { __typename?: 'ListItemStandardSubscription' }
-      & Pick<ListItemStandardSubscription, 'date' | 'item' | 'category' | 'cost' | 'shop'>
-    ) }
+  & { incomeChanged: (
+    { __typename?: 'IncomeSubscription' }
+    & Pick<IncomeSubscription, 'deleted' | 'overviewCost' | 'total' | 'weekly'>
+    & { created?: Maybe<(
+      { __typename?: 'IncomeCreatedSubscription' }
+      & Pick<IncomeCreatedSubscription, 'fakeId'>
+      & { item: (
+        { __typename?: 'Income' }
+        & IncomePartsFragment
+      ) }
+    )>, updated?: Maybe<(
+      { __typename?: 'Income' }
+      & IncomePartsFragment
+    )> }
   ) }
 );
 
-export type ListItemStandardUpdatedSubscriptionVariables = Exact<{ [key: string]: never; }>;
+export type ListChangedSubscriptionVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ListItemStandardUpdatedSubscription = (
+export type ListChangedSubscription = (
   { __typename?: 'Subscription' }
-  & { listItemStandardUpdated: (
-    { __typename?: 'ListItemCreateUpdate' }
-    & Pick<ListItemCreateUpdate, 'page' | 'id' | 'overviewCost' | 'total' | 'weekly'>
-    & { item: (
-      { __typename?: 'ListItemStandardSubscription' }
-      & Pick<ListItemStandardSubscription, 'date' | 'item' | 'category' | 'cost' | 'shop'>
-    ) }
-  ) }
-);
-
-export type ListItemDeletedSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ListItemDeletedSubscription = (
-  { __typename?: 'Subscription' }
-  & { listItemDeleted: (
-    { __typename?: 'ListItemDelete' }
-    & Pick<ListItemDelete, 'page' | 'id' | 'overviewCost' | 'total' | 'weekly'>
+  & { listChanged: (
+    { __typename?: 'ListSubscription' }
+    & Pick<ListSubscription, 'page' | 'deleted' | 'overviewCost' | 'total' | 'weekly'>
+    & { created?: Maybe<(
+      { __typename?: 'ListItemStandardCreatedSubscription' }
+      & Pick<ListItemStandardCreatedSubscription, 'fakeId'>
+      & { item: (
+        { __typename?: 'ListItemStandard' }
+        & ListItemStandardPartsFragment
+      ) }
+    )>, updated?: Maybe<(
+      { __typename?: 'ListItemStandard' }
+      & ListItemStandardPartsFragment
+    )> }
   ) }
 );
 
@@ -2059,6 +2166,25 @@ export const ConfigPartsFragmentDoc = gql`
   fundLength
 }
     `;
+export const FundPartsFragmentDoc = gql`
+    fragment FundParts on Fund {
+  id
+  item
+  allocationTarget
+  transactions {
+    date
+    units
+    price
+    fees
+    taxes
+    drip
+  }
+  stockSplits {
+    date
+    ratio
+  }
+}
+    `;
 export const FundHistoryPartsFragmentDoc = gql`
     fragment FundHistoryParts on FundHistory {
   startTime
@@ -2072,6 +2198,30 @@ export const FundHistoryPartsFragmentDoc = gql`
   }
   annualisedFundReturns
   overviewCost
+}
+    `;
+export const ListItemStandardPartsFragmentDoc = gql`
+    fragment ListItemStandardParts on ListItemStandard {
+  id
+  date
+  item
+  category
+  cost
+  shop
+}
+    `;
+export const IncomePartsFragmentDoc = gql`
+    fragment IncomeParts on Income {
+  id
+  date
+  item
+  category
+  cost
+  shop
+  deductions {
+    name
+    value
+  }
 }
     `;
 export const NetWorthCategoryPartsFragmentDoc = gql`
@@ -2228,6 +2378,40 @@ export const UpdateFundAllocationTargetsDocument = gql`
 
 export function useUpdateFundAllocationTargetsMutation() {
   return Urql.useMutation<UpdateFundAllocationTargetsMutation, UpdateFundAllocationTargetsMutationVariables>(UpdateFundAllocationTargetsDocument);
+};
+export const CreateIncomeDocument = gql`
+    mutation CreateIncome($fakeId: Int!, $input: IncomeInput!) {
+  createIncome(fakeId: $fakeId, input: $input) {
+    error
+    id
+  }
+}
+    `;
+
+export function useCreateIncomeMutation() {
+  return Urql.useMutation<CreateIncomeMutation, CreateIncomeMutationVariables>(CreateIncomeDocument);
+};
+export const UpdateIncomeDocument = gql`
+    mutation UpdateIncome($id: Int!, $input: IncomeInput!) {
+  updateIncome(id: $id, input: $input) {
+    error
+  }
+}
+    `;
+
+export function useUpdateIncomeMutation() {
+  return Urql.useMutation<UpdateIncomeMutation, UpdateIncomeMutationVariables>(UpdateIncomeDocument);
+};
+export const DeleteIncomeDocument = gql`
+    mutation DeleteIncome($id: Int!) {
+  deleteIncome(id: $id) {
+    error
+  }
+}
+    `;
+
+export function useDeleteIncomeMutation() {
+  return Urql.useMutation<DeleteIncomeMutation, DeleteIncomeMutationVariables>(DeleteIncomeDocument);
 };
 export const CreateListItemDocument = gql`
     mutation CreateListItem($page: PageListStandard!, $fakeId: Int!, $input: ListItemStandardInput!) {
@@ -2567,21 +2751,7 @@ export const InitialDocument = gql`
   cashAllocationTarget
   funds: readFunds {
     items {
-      id
-      item
-      allocationTarget
-      transactions {
-        date
-        units
-        price
-        fees
-        taxes
-        drip
-      }
-      stockSplits {
-        date
-        ratio
-      }
+      ...FundParts
     }
   }
   fundHistory(period: $fundPeriod, length: $fundLength) {
@@ -2592,6 +2762,7 @@ export const InitialDocument = gql`
 ${NetWorthCategoryPartsFragmentDoc}
 ${NetWorthSubcategoryPartsFragmentDoc}
 ${NetWorthEntryPartsFragmentDoc}
+${FundPartsFragmentDoc}
 ${FundHistoryPartsFragmentDoc}`;
 
 export function useInitialQuery(options: Omit<Urql.UseQueryArgs<InitialQueryVariables>, 'query'> = {}) {
@@ -2617,6 +2788,31 @@ export const MoreListDataStandardDocument = gql`
 
 export function useMoreListDataStandardQuery(options: Omit<Urql.UseQueryArgs<MoreListDataStandardQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<MoreListDataStandardQuery>({ query: MoreListDataStandardDocument, ...options });
+};
+export const MoreIncomeDataDocument = gql`
+    query MoreIncomeData($offset: Int!, $limit: Int!) {
+  readIncome(offset: $offset, limit: $limit) {
+    items {
+      id
+      date
+      item
+      cost
+      category
+      shop
+      deductions {
+        name
+        value
+      }
+    }
+    total
+    weekly
+    olderExists
+  }
+}
+    `;
+
+export function useMoreIncomeDataQuery(options: Omit<Urql.UseQueryArgs<MoreIncomeDataQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<MoreIncomeDataQuery>({ query: MoreIncomeDataDocument, ...options });
 };
 export const NetWorthLoansDocument = gql`
     query NetWorthLoans {
@@ -2729,74 +2925,26 @@ export const ConfigUpdatedDocument = gql`
 export function useConfigUpdatedSubscription<TData = ConfigUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ConfigUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ConfigUpdatedSubscription, TData>) {
   return Urql.useSubscription<ConfigUpdatedSubscription, TData, ConfigUpdatedSubscriptionVariables>({ query: ConfigUpdatedDocument, ...options }, handler);
 };
-export const FundCreatedDocument = gql`
-    subscription FundCreated {
-  fundCreated {
-    id
-    fakeId
-    item {
-      item
-      transactions {
-        date
-        units
-        price
-        taxes
-        fees
-        drip
+export const FundsChangedDocument = gql`
+    subscription FundsChanged {
+  fundsChanged {
+    created {
+      fakeId
+      item {
+        ...FundParts
       }
-      stockSplits {
-        date
-        ratio
-      }
-      allocationTarget
     }
-    overviewCost
-  }
-}
-    `;
-
-export function useFundCreatedSubscription<TData = FundCreatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<FundCreatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<FundCreatedSubscription, TData>) {
-  return Urql.useSubscription<FundCreatedSubscription, TData, FundCreatedSubscriptionVariables>({ query: FundCreatedDocument, ...options }, handler);
-};
-export const FundUpdatedDocument = gql`
-    subscription FundUpdated {
-  fundUpdated {
-    id
-    item {
-      item
-      transactions {
-        date
-        units
-        price
-        taxes
-        fees
-        drip
-      }
-      stockSplits {
-        date
-        ratio
-      }
-      allocationTarget
+    updated {
+      ...FundParts
     }
+    deleted
     overviewCost
   }
 }
-    `;
+    ${FundPartsFragmentDoc}`;
 
-export function useFundUpdatedSubscription<TData = FundUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<FundUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<FundUpdatedSubscription, TData>) {
-  return Urql.useSubscription<FundUpdatedSubscription, TData, FundUpdatedSubscriptionVariables>({ query: FundUpdatedDocument, ...options }, handler);
-};
-export const FundDeletedDocument = gql`
-    subscription FundDeleted {
-  fundDeleted {
-    id
-    overviewCost
-  }
-}
-    `;
-
-export function useFundDeletedSubscription<TData = FundDeletedSubscription>(options: Omit<Urql.UseSubscriptionArgs<FundDeletedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<FundDeletedSubscription, TData>) {
-  return Urql.useSubscription<FundDeletedSubscription, TData, FundDeletedSubscriptionVariables>({ query: FundDeletedDocument, ...options }, handler);
+export function useFundsChangedSubscription<TData = FundsChangedSubscription>(options: Omit<Urql.UseSubscriptionArgs<FundsChangedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<FundsChangedSubscription, TData>) {
+  return Urql.useSubscription<FundsChangedSubscription, TData, FundsChangedSubscriptionVariables>({ query: FundsChangedDocument, ...options }, handler);
 };
 export const FundPricesUpdatedDocument = gql`
     subscription FundPricesUpdated($period: FundPeriod, $length: NonNegativeInt) {
@@ -2832,69 +2980,52 @@ export const FundAllocationTargetsUpdatedDocument = gql`
 export function useFundAllocationTargetsUpdatedSubscription<TData = FundAllocationTargetsUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<FundAllocationTargetsUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<FundAllocationTargetsUpdatedSubscription, TData>) {
   return Urql.useSubscription<FundAllocationTargetsUpdatedSubscription, TData, FundAllocationTargetsUpdatedSubscriptionVariables>({ query: FundAllocationTargetsUpdatedDocument, ...options }, handler);
 };
-export const ListItemStandardCreatedDocument = gql`
-    subscription ListItemStandardCreated {
-  listItemStandardCreated: listItemCreated(
-    pages: [income, bills, food, general, holiday, social]
-  ) {
-    page
-    id
-    fakeId
-    item {
-      date
-      item
-      category
-      cost
-      shop
+export const IncomeChangedDocument = gql`
+    subscription IncomeChanged {
+  incomeChanged {
+    created {
+      fakeId
+      item {
+        ...IncomeParts
+      }
     }
-    overviewCost
-    total
-    weekly
-  }
-}
-    `;
-
-export function useListItemStandardCreatedSubscription<TData = ListItemStandardCreatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ListItemStandardCreatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ListItemStandardCreatedSubscription, TData>) {
-  return Urql.useSubscription<ListItemStandardCreatedSubscription, TData, ListItemStandardCreatedSubscriptionVariables>({ query: ListItemStandardCreatedDocument, ...options }, handler);
-};
-export const ListItemStandardUpdatedDocument = gql`
-    subscription ListItemStandardUpdated {
-  listItemStandardUpdated: listItemUpdated(
-    pages: [income, bills, food, general, holiday, social]
-  ) {
-    page
-    id
-    item {
-      date
-      item
-      category
-      cost
-      shop
+    updated {
+      ...IncomeParts
     }
+    deleted
     overviewCost
     total
     weekly
   }
 }
-    `;
+    ${IncomePartsFragmentDoc}`;
 
-export function useListItemStandardUpdatedSubscription<TData = ListItemStandardUpdatedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ListItemStandardUpdatedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ListItemStandardUpdatedSubscription, TData>) {
-  return Urql.useSubscription<ListItemStandardUpdatedSubscription, TData, ListItemStandardUpdatedSubscriptionVariables>({ query: ListItemStandardUpdatedDocument, ...options }, handler);
+export function useIncomeChangedSubscription<TData = IncomeChangedSubscription>(options: Omit<Urql.UseSubscriptionArgs<IncomeChangedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<IncomeChangedSubscription, TData>) {
+  return Urql.useSubscription<IncomeChangedSubscription, TData, IncomeChangedSubscriptionVariables>({ query: IncomeChangedDocument, ...options }, handler);
 };
-export const ListItemDeletedDocument = gql`
-    subscription ListItemDeleted {
-  listItemDeleted {
+export const ListChangedDocument = gql`
+    subscription ListChanged {
+  listChanged(pages: [bills, food, general, holiday, social]) {
     page
-    id
+    created {
+      fakeId
+      item {
+        ...ListItemStandardParts
+      }
+    }
+    updated {
+      ...ListItemStandardParts
+    }
+    deleted
     overviewCost
     total
     weekly
   }
 }
-    `;
+    ${ListItemStandardPartsFragmentDoc}`;
 
-export function useListItemDeletedSubscription<TData = ListItemDeletedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ListItemDeletedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ListItemDeletedSubscription, TData>) {
-  return Urql.useSubscription<ListItemDeletedSubscription, TData, ListItemDeletedSubscriptionVariables>({ query: ListItemDeletedDocument, ...options }, handler);
+export function useListChangedSubscription<TData = ListChangedSubscription>(options: Omit<Urql.UseSubscriptionArgs<ListChangedSubscriptionVariables>, 'query'> = {}, handler?: Urql.SubscriptionHandler<ListChangedSubscription, TData>) {
+  return Urql.useSubscription<ListChangedSubscription, TData, ListChangedSubscriptionVariables>({ query: ListChangedDocument, ...options }, handler);
 };
 export const ReceiptCreatedDocument = gql`
     subscription ReceiptCreated {

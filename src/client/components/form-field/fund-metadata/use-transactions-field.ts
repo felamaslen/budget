@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { HookOptions, HookProps, HookResult, useCompositeField } from './hooks';
+import { HookOptions, HookProps, HookResult, useCompositeField } from '../metadata/hooks';
 
 import { sortByKey } from '~client/modules/data';
 import type { TransactionNative } from '~client/types';

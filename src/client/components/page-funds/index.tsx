@@ -20,7 +20,7 @@ import {
 } from '~client/components/form-field';
 import { GraphFunds } from '~client/components/graph-funds';
 import { makeField, ModalFields } from '~client/components/modal-dialog';
-import { useIsMobile, useListCrudFunds, usePersistentState } from '~client/hooks';
+import { NowProvider, useIsMobile, useListCrudFunds, usePersistentState } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
 import { getFundsCache, getGainsForRow, getPricesForRow, getRowGains } from '~client/selectors';
@@ -115,26 +115,28 @@ export const Funds: React.FC<RouteComponentProps> = () => {
 
   return (
     <FundsContext.Provider value={context}>
-      <Styled.PageFunds>
-        <AccessibleList<FundInput, PageNonStandard.Funds, 'item' | 'transactions', FundProps>
-          page={PageNonStandard.Funds}
-          onCreate={onCreate}
-          onUpdate={onUpdate}
-          onDelete={onDelete}
-          color={pageColor(colors.funds.main)}
-          fields={fields}
-          fieldsMobile={fieldsMobile}
-          modalFields={modalFields}
-          deltaSeed={deltaSeed}
-          itemProcessor={itemProcessor}
-          customSelector={composedSelector}
-          sortItemsPost={sortItems}
-          Row={FundRow}
-          Header={FundHeader}
-          FirstItem={CashRow}
-        />
-        {!isMobile && <GraphFunds />}
-      </Styled.PageFunds>
+      <NowProvider>
+        <Styled.PageFunds>
+          <AccessibleList<FundInput, PageNonStandard.Funds, 'item' | 'transactions', FundProps>
+            page={PageNonStandard.Funds}
+            onCreate={onCreate}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+            color={pageColor(colors.funds.main)}
+            fields={fields}
+            fieldsMobile={fieldsMobile}
+            modalFields={modalFields}
+            deltaSeed={deltaSeed}
+            itemProcessor={itemProcessor}
+            customSelector={composedSelector}
+            sortItemsPost={sortItems}
+            Row={FundRow}
+            Header={FundHeader}
+            FirstItem={CashRow}
+          />
+          {!isMobile && <GraphFunds />}
+        </Styled.PageFunds>
+      </NowProvider>
     </FundsContext.Provider>
   );
 };

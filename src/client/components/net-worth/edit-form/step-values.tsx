@@ -14,7 +14,6 @@ import {
 import { useCTA } from '~client/hooks';
 import { ButtonAdd, ButtonDelete } from '~client/styled/shared';
 import type {
-  Create,
   Id,
   NetWorthEntryNative as NetWorthEntry,
   NetWorthValueObjectRead,
@@ -28,6 +27,7 @@ import type {
   NetWorthSubcategory,
   NetWorthValueObject,
 } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 type PropsCreditLimitEditor = {
   creditLimit: number;

@@ -9,14 +9,7 @@ import { PageListStandard } from '~client/types/enum';
 
 export * from '~client/components/page-funds';
 
-const labelsIncome: StandardLabels = { cost: 'Value', shop: 'Place' };
-export const Income: React.FC<RouteComponentProps> = () => (
-  <AccessibleListStandard
-    page={PageListStandard.Income}
-    color={pageColor(colors.income.main)}
-    labels={labelsIncome}
-  />
-);
+export { Income } from './income';
 
 export const Bills: React.FC<RouteComponentProps> = () => (
   <AccessibleListStandard page={PageListStandard.Bills} color={pageColor(colors.bills.main)} />

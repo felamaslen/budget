@@ -103,7 +103,7 @@ export const FormLabelRow = styled.div`
   flex: 1;
 `;
 
-const columnFields = ['stockSplits', 'transactions'];
+const columnFields = ['stockSplits', 'transactions', 'deductions'];
 
 export const FormRow = styled.li<{ field: string }>(
   ({ field }) => css`

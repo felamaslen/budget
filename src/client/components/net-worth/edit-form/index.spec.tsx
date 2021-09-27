@@ -1,7 +1,6 @@
 import { render, fireEvent, act, RenderResult } from '@testing-library/react';
 import type { DocumentNode } from 'graphql';
 import React from 'react';
-import sinon from 'sinon';
 import numericHash from 'string-hash';
 import { Client } from 'urql';
 import { fromValue } from 'wonka';
@@ -9,7 +8,8 @@ import { fromValue } from 'wonka';
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
 import * as QueryExchangeRates from '~client/gql/queries/exchange-rates';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import type { Create, Id, NetWorthEntryNative as NetWorthEntry } from '~client/types';
+import { mockTimeOnly } from '~client/test-utils/mock-time';
+import type { Id, NetWorthEntryNative as NetWorthEntry } from '~client/types';
 import { NetWorthCategoryType } from '~client/types/enum';
 import {
   NetWorthCategory,
@@ -18,6 +18,7 @@ import {
   Query,
   QueryExchangeRatesArgs,
 } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 const categories: NetWorthCategory[] = [
   {
@@ -87,13 +88,7 @@ describe('Net worth entry form', () => {
   const oldDateNextMonth = '2020-05-31T23:59:59.999Z';
   const newDate = '2020-04-24';
 
-  let clock: sinon.SinonFakeTimers;
-  beforeEach(() => {
-    clock = sinon.useFakeTimers(now);
-  });
-  afterEach(() => {
-    clock.restore();
-  });
+  const mockedTime = mockTimeOnly(now);
 
   const propsBase = {
     categories,
@@ -409,7 +404,7 @@ describe('Net worth entry form', () => {
       fireEvent.click(refreshButtons[0]);
     });
     act(() => {
-      clock.tick(101);
+      mockedTime.clock.tick(101);
     });
 
     expect(inputEUR.value).toBe(`${1 / 1.15}`);

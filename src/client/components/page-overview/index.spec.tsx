@@ -1,33 +1,33 @@
 import { render, RenderResult } from '@testing-library/react';
-import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter, Route } from 'react-router-dom';
 import configureStore from 'redux-mock-store';
 
 import { PageOverview } from '.';
-import { ResizeContext, TodayContext } from '~client/hooks';
+import { ResizeContext, TodayProvider } from '~client/hooks';
 import { State } from '~client/reducers';
 import { testNow, testState as state } from '~client/test-data/state';
 import '~client/test-utils/match-media';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe('<PageOverview />', () => {
   const mockStore = configureStore<State>();
-  const today = endOfDay(testNow);
+  mockTimeOnly(testNow);
 
   const getContainer = (): RenderResult =>
     render(
       <MemoryRouter>
         <Provider store={mockStore(state)}>
           <GQLProviderMock>
-            <TodayContext.Provider value={today}>
+            <TodayProvider>
               <ResizeContext.Provider value={1020}>
                 <MemoryRouter initialEntries={['/']}>
                   <Route path="/" component={PageOverview} />
                 </MemoryRouter>
               </ResizeContext.Provider>
-            </TodayContext.Provider>
+            </TodayProvider>
           </GQLProviderMock>
         </Provider>
       </MemoryRouter>,

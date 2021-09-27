@@ -1,60 +1,19 @@
 import { gql } from 'urql';
 
-export const FundCreated = gql`
-  subscription FundCreated {
-    fundCreated {
-      id
-      fakeId
-      item {
-        item
-        transactions {
-          date
-          units
-          price
-          taxes
-          fees
-          drip
+export const FundsChanged = gql`
+  subscription FundsChanged {
+    fundsChanged {
+      created {
+        fakeId
+        item {
+          ...FundParts
         }
-        stockSplits {
-          date
-          ratio
-        }
-        allocationTarget
       }
-      overviewCost
-    }
-  }
-`;
-
-export const FundUpdated = gql`
-  subscription FundUpdated {
-    fundUpdated {
-      id
-      item {
-        item
-        transactions {
-          date
-          units
-          price
-          taxes
-          fees
-          drip
-        }
-        stockSplits {
-          date
-          ratio
-        }
-        allocationTarget
+      updated {
+        ...FundParts
       }
-      overviewCost
-    }
-  }
-`;
+      deleted
 
-export const FundDeleted = gql`
-  subscription FundDeleted {
-    fundDeleted {
-      id
       overviewCost
     }
   }

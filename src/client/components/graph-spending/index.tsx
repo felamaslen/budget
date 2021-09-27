@@ -1,4 +1,4 @@
-import React, { useMemo, useContext, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
 import { Key } from './key';
@@ -7,7 +7,7 @@ import { Sidebar } from '~client/components/graph-cashflow/sidebar';
 import { ToggleContainer } from '~client/components/graph-cashflow/toggle';
 import type { GraphCashFlowTitle } from '~client/components/graph-cashflow/types';
 import { transformToMovingAverage } from '~client/components/graph/helpers';
-import { TodayContext, usePersistentState } from '~client/hooks';
+import { usePersistentState, useToday } from '~client/hooks';
 import { cumulativeSum } from '~client/modules/data';
 import { SettingsFull, SettingsGroup } from '~client/styled/shared/settings';
 import { colors, graphOverviewHeightMobile } from '~client/styled/variables';
@@ -36,7 +36,6 @@ const insertInitialValue = (values: number[], initialValue: number): number[] =>
 
 function processData(
   showAll: boolean,
-  longTerm: boolean,
   isCumulative: boolean,
   graph: OverviewGraph,
   initialCumulativeValues: InitialCumulativeValues,
@@ -113,10 +112,9 @@ export const GraphSpending: React.FC<Props> = ({
   investments,
   showAll,
   setShowAll,
-  longTerm,
   setMobileGraph,
 }) => {
-  const today = useContext(TodayContext);
+  const today = useToday();
 
   const [isCumulative, setCumulative] = usePersistentState<boolean>(
     false,
@@ -124,8 +122,8 @@ export const GraphSpending: React.FC<Props> = ({
   );
 
   const lines = useMemo<Line[]>(
-    () => processData(showAll, longTerm, isCumulative, graph, initialCumulativeValues, investments),
-    [showAll, longTerm, isCumulative, graph, initialCumulativeValues, investments],
+    () => processData(showAll, isCumulative, graph, initialCumulativeValues, investments),
+    [showAll, isCumulative, graph, initialCumulativeValues, investments],
   );
 
   const AfterLines = useCallback<React.FC<DrawProps>>(

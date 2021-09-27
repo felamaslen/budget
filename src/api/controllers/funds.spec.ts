@@ -18,6 +18,7 @@ import {
   FundInput,
   FundPeriod,
   FundPrices,
+  FundSubscription,
   MutationCreateFundArgs,
   MutationDeleteFundArgs,
   MutationUpdateFundArgs,
@@ -236,7 +237,6 @@ describe('Funds controller', () => {
 
       jest.spyOn(crudQueries, 'insertCrudItem').mockResolvedValueOnce({ id: 781 });
       jest.spyOn(overview, 'getDisplayedFundValues').mockResolvedValueOnce([1, 7, 23]);
-      jest.spyOn(queries, 'selectStockSplits').mockResolvedValueOnce([]);
 
       const args: MutationCreateFundArgs = {
         fakeId: -8813,
@@ -252,12 +252,30 @@ describe('Funds controller', () => {
       await createFund({} as DatabaseTransactionConnectionType, uid, args);
 
       expect(publishSpy).toHaveBeenCalledTimes(2);
-      expect(publishSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.FundCreated}.${uid}`, {
-        id: 781,
-        fakeId: -8813,
-        item: { ...args.input, stockSplits: [] },
-        overviewCost: [1, 7, 23],
-      });
+      expect(publishSpy).toHaveBeenCalledWith<[string, FundSubscription]>(
+        `${pubsub.PubSubTopic.FundsChanged}.${uid}`,
+        {
+          created: {
+            fakeId: -8813,
+            item: {
+              ...args.input,
+              id: 781,
+              transactions: [
+                {
+                  date: new Date('2020-04-20'),
+                  units: 3,
+                  price: 21,
+                  fees: 13,
+                  taxes: 7,
+                  drip: false,
+                },
+              ],
+              stockSplits: [],
+            },
+          },
+          overviewCost: [1, 7, 23],
+        },
+      );
       expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
@@ -284,15 +302,13 @@ describe('Funds controller', () => {
         transactions: [
           { date: new Date('2020-04-20'), units: 3, price: 21, fees: 13, taxes: 7, drip: false },
         ],
+        stockSplits: [{ date: new Date('2020-05-10'), ratio: 6 }],
       };
 
       const publishSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
       jest.spyOn(crudQueries, 'updateCrudItem').mockResolvedValueOnce({ ...input, id: 792 });
       jest.spyOn(overview, 'getDisplayedFundValues').mockResolvedValueOnce([1, 7, 23]);
-      jest
-        .spyOn(queries, 'selectStockSplits')
-        .mockResolvedValueOnce([{ date: '2020-05-10', ratio: 6 }]);
 
       const args: MutationUpdateFundArgs = {
         id: 792,
@@ -302,12 +318,27 @@ describe('Funds controller', () => {
       await updateFund({} as DatabaseTransactionConnectionType, uid, args);
 
       expect(publishSpy).toHaveBeenCalledTimes(2);
-      expect(publishSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.FundUpdated}.${uid}`, {
-        id: 792,
-        fakeId: null,
-        item: { ...args.input, stockSplits: [{ date: '2020-05-10', ratio: 6 }] },
-        overviewCost: [1, 7, 23],
-      });
+      expect(publishSpy).toHaveBeenCalledWith<[string, FundSubscription]>(
+        `${pubsub.PubSubTopic.FundsChanged}.${uid}`,
+        {
+          updated: {
+            ...args.input,
+            id: args.id,
+            transactions: [
+              {
+                date: new Date('2020-04-20'),
+                units: 3,
+                price: 21,
+                fees: 13,
+                taxes: 7,
+                drip: false,
+              },
+            ],
+            stockSplits: [{ date: new Date('2020-05-10'), ratio: 6 }],
+          },
+          overviewCost: [1, 7, 23],
+        },
+      );
       expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
@@ -340,10 +371,13 @@ describe('Funds controller', () => {
       await deleteFund({} as DatabaseTransactionConnectionType, uid, args);
 
       expect(publishSpy).toHaveBeenCalledTimes(2);
-      expect(publishSpy).toHaveBeenCalledWith(`${pubsub.PubSubTopic.FundDeleted}.${uid}`, {
-        id: 118,
-        overviewCost: [1, 7, 23],
-      });
+      expect(publishSpy).toHaveBeenCalledWith<[string, FundSubscription]>(
+        `${pubsub.PubSubTopic.FundsChanged}.${uid}`,
+        {
+          deleted: 118,
+          overviewCost: [1, 7, 23],
+        },
+      );
       expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {

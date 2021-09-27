@@ -1,20 +1,19 @@
 import { gql } from 'urql';
 
-export const ListItemStandardCreated = gql`
-  subscription ListItemStandardCreated {
-    listItemStandardCreated: listItemCreated(
-      pages: [income, bills, food, general, holiday, social]
-    ) {
-      page
-      id
-      fakeId
-      item {
-        date
-        item
-        category
-        cost
-        shop
+export const IncomeChanged = gql`
+  subscription IncomeChanged {
+    incomeChanged {
+      created {
+        fakeId
+        item {
+          ...IncomeParts
+        }
       }
+      updated {
+        ...IncomeParts
+      }
+      deleted
+
       overviewCost
       total
       weekly
@@ -22,32 +21,21 @@ export const ListItemStandardCreated = gql`
   }
 `;
 
-export const ListItemStandardUpdated = gql`
-  subscription ListItemStandardUpdated {
-    listItemStandardUpdated: listItemUpdated(
-      pages: [income, bills, food, general, holiday, social]
-    ) {
+export const ListChanged = gql`
+  subscription ListChanged {
+    listChanged(pages: [bills, food, general, holiday, social]) {
       page
-      id
-      item {
-        date
-        item
-        category
-        cost
-        shop
+      created {
+        fakeId
+        item {
+          ...ListItemStandardParts
+        }
       }
-      overviewCost
-      total
-      weekly
-    }
-  }
-`;
+      updated {
+        ...ListItemStandardParts
+      }
+      deleted
 
-export const ListItemDeleted = gql`
-  subscription ListItemDeleted {
-    listItemDeleted {
-      page
-      id
       overviewCost
       total
       weekly

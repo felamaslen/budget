@@ -1,8 +1,8 @@
 import { Request } from 'express';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
-import type { Create, Item } from '~api/types';
-import type { PickPartial } from '~shared/types';
+import type { Item } from '~api/types';
+import type { Create, PickPartial } from '~shared/types';
 
 export interface CrudItem extends Item {
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any

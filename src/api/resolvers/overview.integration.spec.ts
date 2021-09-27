@@ -63,9 +63,11 @@ describe('Overview resolver', () => {
       },
     );
 
+    const expectedDeductedIncome = 433201 - (39765 + 10520); // check seed
+
     it.each`
       page                     | value
-      ${'income'}              | ${433201}
+      ${'income'}              | ${expectedDeductedIncome}
       ${'bills'}               | ${76402}
       ${'food'}                | ${113401}
       ${'general'}             | ${11143}
@@ -82,10 +84,10 @@ describe('Overview resolver', () => {
       );
     });
 
-    it('should return the initial cumulative income value', async () => {
+    it('should return the initial cumulative (deducted) income value', async () => {
       expect.assertions(1);
       const res = await setup();
-      expect(res?.initialCumulativeValues.income).toBe(365202);
+      expect(res?.initialCumulativeValues.income).toBe(470242 - (105040 + 39872));
     });
 
     it('should return the initial cumulative spending value', async () => {
@@ -357,7 +359,7 @@ describe('Overview resolver', () => {
       /* Jan-15 */ 0,
       /* Feb-15 */ 0,
       /* Mar-15 */ 0,
-      /* Apr-15 */ 365202,
+      /* Apr-15 */ 470242 - (105040 + 39872),
       /* May-15 */ 0,
       /* Jun-15 */ 0,
       /* Jul-15 */ 0,

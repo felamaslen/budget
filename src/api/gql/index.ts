@@ -4,6 +4,7 @@ export * from './analysis';
 export * from './buckets';
 export * from './currencies';
 export * from './funds';
+export * from './income';
 export * from './list';
 export * from './net-worth';
 export * from './overview';

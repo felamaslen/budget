@@ -17,13 +17,7 @@ import { Header, Props as HeaderProps } from '~client/components/header';
 import type { ContentProps } from '~client/components/logged-in';
 import { Spinner, SpinnerInit, SpinnerContext } from '~client/components/spinner';
 import { Outer } from '~client/components/spinner/styles';
-import {
-  ResizeContext,
-  TodayContext,
-  useDebouncedResize,
-  useOffline,
-  useToday,
-} from '~client/hooks';
+import { ResizeContext, TodayProvider, useDebouncedResize, useOffline } from '~client/hooks';
 import { useWindowFocus } from '~client/hooks/focus';
 import { VOID } from '~client/modules/data';
 import { reset } from '~client/styled/reset';
@@ -49,7 +43,6 @@ const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
   ...props
 }) => {
   const windowWidth = useDebouncedResize();
-  const today = useToday();
 
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
 
@@ -62,7 +55,7 @@ const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
 
   return (
     <ResizeContext.Provider value={windowWidth}>
-      <TodayContext.Provider value={today}>
+      <TodayProvider>
         <Main>
           <Global styles={reset} />
           <Header {...props} onLogout={logout} setSettingsOpen={setSettingsOpen} />
@@ -72,7 +65,7 @@ const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
             <Config open={settingsOpen} setOpen={setSettingsOpen} />
           </PageWrapper>
         </Main>
-      </TodayContext.Provider>
+      </TodayProvider>
     </ResizeContext.Provider>
   );
 };

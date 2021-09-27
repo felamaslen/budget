@@ -13,20 +13,41 @@ export async function selectSinglePageListSummary(
   page: PageListCost,
 ): Promise<number[]> {
   const results = await db.query<{ sum: number }>(sql`
-  WITH dates AS (${getMonthRangeUnion(dates)})
-  SELECT COALESCE(SUM(${pageCostCTE}), 0)::int4 AS sum
-  FROM dates
-  LEFT JOIN list_standard ON ${sql.join(
+  WITH ${sql.join(
     [
-      sql`uid = ${uid}`,
-      sql`date >= dates.start_date`,
-      sql`date <= dates.end_date`,
-      sql`page = ${page}`,
+      sql`dates AS (${getMonthRangeUnion(dates)})`,
+      sql`
+      list_deducted AS (
+        SELECT ${sql.join(
+          [
+            sql`dates.start_date`,
+            sql`list_standard.id`,
+            sql`list_standard.value + COALESCE(SUM(income_deductions.value), 0) AS value`,
+          ],
+          sql`, `,
+        )}
+        FROM dates
+        LEFT JOIN list_standard ON ${sql.join(
+          [
+            sql`uid = ${uid}`,
+            sql`page = ${page}`,
+            sql`date >= dates.start_date`,
+            sql`date <= dates.end_date`,
+          ],
+          sql` AND `,
+        )}
+        LEFT JOIN income_deductions ON income_deductions.list_id = list_standard.id
+        GROUP BY start_date, list_standard.id
+      )
+      `,
     ],
-    sql` AND `,
+    sql`, `,
   )}
-  GROUP BY dates.start_date
-  ORDER BY dates.start_date
+  SELECT COALESCE(SUM(${pageCostCTE('list_deducted')}), 0)::int4 AS sum
+  FROM list_deducted
+  LEFT JOIN list_standard ON list_standard.id = list_deducted.id
+  GROUP BY start_date
+  ORDER BY start_date
   `);
   return results.rows.map((row) => row.sum);
 }
@@ -41,13 +62,37 @@ export async function selectCategorisedListSummary(
   dates: Date[],
 ): Promise<readonly CategorisedListSummaryRow[]> {
   const results = await db.query<CategorisedListSummaryRow>(sql`
-  WITH dates AS (${getMonthRangeUnion(dates)})
+  WITH ${sql.join(
+    [
+      sql`dates AS (${getMonthRangeUnion(dates)})`,
+      sql`
+      list_deducted AS (
+        SELECT ${sql.join(
+          [
+            sql`dates.start_date`,
+            sql`list_standard.id`,
+            sql`list_standard.value + COALESCE(SUM(income_deductions.value), 0) AS value`,
+          ],
+          sql`, `,
+        )}
+        FROM dates
+        LEFT JOIN list_standard ON ${sql.join(
+          [sql`uid = ${uid}`, sql`date >= dates.start_date`, sql`date <= dates.end_date`],
+          sql` AND `,
+        )}
+        LEFT JOIN income_deductions ON income_deductions.list_id = list_standard.id
+        GROUP BY start_date, list_standard.id
+      )
+      `,
+    ],
+    sql`, `,
+  )}
+
   SELECT ${sql.join(
     [
       ...standardListPages.map(
-        (page) => sql`
-        COALESCE(SUM(
-          CASE WHEN page = ${page} THEN (${pageCostCTE}) ELSE 0 END
+        (page) => sql`COALESCE(SUM(
+          CASE WHEN page = ${page} THEN (${pageCostCTE('list_deducted')}) ELSE 0 END
         ), 0)::int4 AS ${sql.identifier([page])}
         `,
       ),
@@ -59,19 +104,16 @@ export async function selectCategorisedListSummary(
             config.data.overview.investmentPurchaseCategories,
             'text',
           )})
-        THEN value
+        THEN list_deducted.value
         ELSE 0 END
       ), 0)::int4 AS investment_purchases`,
     ],
     sql`, `,
   )}
-  FROM dates
-  LEFT JOIN list_standard ON ${sql.join(
-    [sql`uid = ${uid}`, sql`date >= dates.start_date`, sql`date <= dates.end_date`],
-    sql` AND `,
-  )}
-  GROUP BY dates.start_date
-  ORDER BY dates.start_date
+  FROM list_deducted
+  LEFT JOIN list_standard ON list_standard.id = list_deducted.id
+  GROUP BY start_date
+  ORDER BY start_date
   `);
   return results.rows;
 }
@@ -87,9 +129,22 @@ export async function selectInitialCumulativeList(
   startDate: string,
 ): Promise<readonly InitialCumulativeListRow[]> {
   const results = await db.query<InitialCumulativeListRow>(sql`
-  SELECT page, COALESCE(SUM(${pageCostCTE}), 0)::int4 AS sum
-  FROM list_standard
-  WHERE uid = ${uid} AND date < ${startDate}
+  WITH list_deducted AS (
+    SELECT ${sql.join(
+      [
+        sql`list_standard.id`,
+        sql`list_standard.value + COALESCE(SUM(income_deductions.value), 0) AS value`,
+      ],
+      sql`, `,
+    )}
+    FROM list_standard
+    LEFT JOIN income_deductions ON income_deductions.list_id = list_standard.id
+    WHERE uid = ${uid} AND date < ${startDate}
+    GROUP BY list_standard.id
+  )
+  SELECT page, (COALESCE(SUM(${pageCostCTE('list_deducted')}), 0))::int4 AS sum
+  FROM list_deducted
+  LEFT JOIN list_standard ON list_standard.id = list_deducted.id
   GROUP BY page
   `);
   return results.rows;
@@ -107,21 +162,36 @@ export async function selectSpendingAndIncomeSinceDate(
   now: string,
 ): Promise<SpendingAndIncomeRow> {
   const results = await db.query<SpendingAndIncomeRow>(sql`
+  WITH list_deducted AS (
+    SELECT ${sql.join(
+      [
+        sql`list_standard.id`,
+        sql`list_standard.value + COALESCE(SUM(income_deductions.value), 0) AS value`,
+      ],
+      sql`, `,
+    )}
+    FROM list_standard
+    LEFT JOIN income_deductions ON income_deductions.list_id = list_standard.id
+    WHERE uid = ${uid} AND date > ${sinceDate} AND date <= ${now}
+    GROUP BY list_standard.id
+  )
   SELECT ${sql.join(
     [
       sql`COALESCE(
-        SUM(CASE WHEN page = ${PageListStandard.Income} THEN (${pageCostCTE}) ELSE 0 END),
+        SUM(CASE WHEN page = ${PageListStandard.Income} THEN (${pageCostCTE(
+        'list_deducted',
+      )}) ELSE 0 END),
         0
       )::int4 AS income`,
       sql`COALESCE(
-        SUM(CASE WHEN page != ${PageListStandard.Income} THEN (${pageCostCTE}) ELSE 0 END),
+        SUM(CASE WHEN page != ${PageListStandard.Income} THEN (${pageCostCTE()}) ELSE 0 END),
         0
       )::int4 AS spending`,
     ],
     sql`, `,
   )}
-  FROM list_standard
-  WHERE uid = ${uid} AND date > ${sinceDate} AND date <= ${now}
+  FROM list_deducted
+  LEFT JOIN list_standard ON list_standard.id = list_deducted.id
   `);
   return results.rows[0] ?? { income: 0, spending: 0 };
 }

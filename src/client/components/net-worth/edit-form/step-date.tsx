@@ -4,7 +4,8 @@ import { Step } from './constants';
 import { FormContainer, Props as ContainerProps } from './form-container';
 import * as Styled from './styles';
 import { FormFieldDate } from '~client/components/form-field';
-import type { Create, NetWorthEntryNative as Entry } from '~client/types';
+import type { NetWorthEntryNative as Entry } from '~client/types';
+import type { Create } from '~shared/types';
 
 type Props = {
   containerProps: Omit<ContainerProps, 'step'>;

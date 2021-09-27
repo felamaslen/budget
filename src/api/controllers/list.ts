@@ -32,14 +32,15 @@ import {
   PageListCost,
   QueryReadListArgs,
   ListItemStandardInput,
-  Create,
   PageListStandard,
   MutationCreateReceiptArgs,
   ReceiptCreated,
   ReceiptItem,
   ListReadResponse,
+  QueryReadIncomeArgs,
+  ListSubscription,
 } from '~api/types';
-import type { RawDate } from '~shared/types';
+import type { Create, RawDate } from '~shared/types';
 
 const hasDate = <I extends Record<string, unknown>>(
   item: I | (I & { date: Date }),
@@ -123,13 +124,22 @@ export async function getPublishedProperties(
   return { overviewCost, ...listTotals };
 }
 
+export const getLimitAndOffset = (
+  args: QueryReadListArgs | QueryReadIncomeArgs,
+): {
+  limit: number;
+  offset: number;
+} => ({
+  limit: args.limit ?? config.data.listPageLimit,
+  offset: args.offset ?? 0,
+});
+
 export async function readList(
   db: DatabaseTransactionConnectionType,
   uid: number,
   args: QueryReadListArgs,
 ): Promise<ListReadResponse> {
-  const limit = args.limit ?? config.data.listPageLimit;
-  const offset = args.offset ?? 0;
+  const { limit, offset } = getLimitAndOffset(args);
 
   const [rows, { total, weekly }, olderExists] = await Promise.all([
     selectListItems(db, uid, args.page, limit, offset),
@@ -137,12 +147,19 @@ export async function readList(
     getOlderExists(db, uid, args.page, limit, offset),
   ]);
 
-  const items = rows.map<ListItemStandard>((row) => row);
+  const items = rows.map<ListItemStandard>((row) => ({
+    id: row.id,
+    date: row.date,
+    item: row.item,
+    category: row.category,
+    cost: row.cost,
+    shop: row.shop,
+  }));
 
   return { items, total, weekly, olderExists };
 }
 
-const baseController = makeCrudController<StandardListRow, ListItemStandard>({
+export const baseController = makeCrudController<StandardListRow, ListItemStandard>({
   table: 'list_standard',
   item: 'List item',
   jsonToDb: compose<Create<ListItemStandard>, Create<StandardListRow>, Create<StandardListRow>>(
@@ -153,7 +170,7 @@ const baseController = makeCrudController<StandardListRow, ListItemStandard>({
   withUid: true,
 });
 
-const processInput = (
+export const processInput = (
   page: PageListStandard,
   input: ListItemStandardInput,
 ): Create<ListItemStandard> & { page: PageListStandard } => ({
@@ -175,11 +192,12 @@ export async function createList(
   ]);
 
   await Promise.all([
-    pubsub.publish(`${PubSubTopic.ListItemCreated}.${uid}`, {
+    pubsub.publish<ListSubscription>(`${PubSubTopic.ListChanged}.${uid}`, {
       page: args.page,
-      id,
-      fakeId: args.fakeId,
-      item,
+      created: {
+        fakeId: args.fakeId,
+        item: { id, ...item },
+      },
       ...listPublishedProperties,
     }),
     pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
@@ -238,7 +256,7 @@ export async function updateList(
   uid: number,
   args: MutationUpdateListItemArgs,
 ): Promise<CrudResponseUpdate> {
-  await baseController.update(db, uid, args.id, processInput(args.page, args.input));
+  const result = await baseController.update(db, uid, args.id, processInput(args.page, args.input));
 
   const [listPublishedProperties, cashTotal] = await Promise.all([
     getPublishedProperties(db, uid, args.page),
@@ -246,10 +264,9 @@ export async function updateList(
   ]);
 
   await Promise.all([
-    pubsub.publish(`${PubSubTopic.ListItemUpdated}.${uid}`, {
+    pubsub.publish<ListSubscription>(`${PubSubTopic.ListChanged}.${uid}`, {
       page: args.page,
-      id: args.id,
-      item: args.input,
+      updated: result,
       ...listPublishedProperties,
     }),
     pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
@@ -271,9 +288,9 @@ export async function deleteList(
   ]);
 
   await Promise.all([
-    pubsub.publish(`${PubSubTopic.ListItemDeleted}.${uid}`, {
+    pubsub.publish<ListSubscription>(`${PubSubTopic.ListChanged}.${uid}`, {
       page: args.page,
-      id: args.id,
+      deleted: args.id,
       ...listPublishedProperties,
     }),
     pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),

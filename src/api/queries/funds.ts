@@ -2,8 +2,8 @@ import { omit, uniqBy } from 'lodash';
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import { formatDate } from '~api/controllers/shared';
-import { Create, Fund, PageNonStandard, StockSplit, TargetDelta, Transaction } from '~api/types';
-import type { RawDate } from '~shared/types';
+import { Fund, PageNonStandard, StockSplit, TargetDelta, Transaction } from '~api/types';
+import { Create } from '~shared/types';
 
 export type FundMain = Omit<Fund, 'transactions' | 'stockSplits'>;
 
@@ -44,21 +44,6 @@ export async function selectTransactions(
   INNER JOIN funds_transactions ft ON ft.fund_id = f.id
   WHERE f.uid = ${uid} AND ft.date <= ${now.toISOString()}
   ORDER BY ft.date
-  `);
-  return result.rows;
-}
-
-export async function selectStockSplits(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  id: number,
-): Promise<readonly RawDate<StockSplit, 'date'>[]> {
-  const result = await db.query<RawDate<StockSplit, 'date'>>(sql`
-  SELECT date, ratio
-  FROM funds f
-  INNER JOIN funds_stock_splits ss ON ss.fund_id = f.id
-  WHERE f.uid = ${uid} AND f.id = ${id}
-  ORDER BY ss.date
   `);
   return result.rows;
 }

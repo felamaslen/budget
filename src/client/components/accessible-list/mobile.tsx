@@ -4,35 +4,9 @@ import * as Styled from './styles';
 import type { FieldsMobile, ComponentType } from './types';
 import { ModalDialog, ModalFields } from '~client/components/modal-dialog';
 import { useCTA } from '~client/hooks';
-import { formatItem } from '~client/modules/format';
 import { Button } from '~client/styled/shared';
-import type { Id, ListItemStandardNative as ListItemStandard, PageList } from '~client/types';
+import type { Id, PageList } from '~client/types';
 import type { ListItemInput } from '~client/types/gql';
-
-export type StandardMobileKeys = 'date' | 'item' | 'cost';
-
-type StandardFieldPropsMobile<
-  V,
-  E extends Record<string, unknown> = Record<string, unknown>
-> = Partial<E> & {
-  field: string;
-  value: V;
-};
-
-const StandardFieldMobile = <V, E extends Record<string, unknown> = Record<string, unknown>>({
-  field,
-  value,
-}: StandardFieldPropsMobile<V, E>): React.ReactElement<StandardFieldPropsMobile<V, E>> => (
-  <Styled.StandardFieldMobile field={field}>
-    {formatItem(field as string, value)}
-  </Styled.StandardFieldMobile>
-);
-
-export const standardFieldsMobile: FieldsMobile<ListItemStandard, StandardMobileKeys> = {
-  date: StandardFieldMobile,
-  item: StandardFieldMobile,
-  cost: StandardFieldMobile,
-};
 
 type FieldPropsMobile<
   I extends ListItemInput,

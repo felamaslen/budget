@@ -15,16 +15,21 @@ import type { FundInputNative, Id, PageList, StandardInput, WithIds } from '~cli
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 import type {
   FundInput,
+  IncomeInput,
   ListItemInput,
   ListItemStandardInput,
   Mutation,
   MutationCreateFundArgs,
+  MutationCreateIncomeArgs,
   MutationCreateListItemArgs,
   MutationDeleteFundArgs,
+  MutationDeleteIncomeArgs,
   MutationDeleteListItemArgs,
   MutationUpdateFundArgs,
+  MutationUpdateIncomeArgs,
   MutationUpdateListItemArgs,
 } from '~client/types/gql';
+import { NativeDate } from '~shared/types';
 
 export type OnCreateList<I extends ListItemInput> = (item: I) => void;
 export type OnUpdateList<I extends ListItemInput> = (
@@ -41,9 +46,9 @@ export type ListCrud<I extends ListItemInput> = {
 };
 
 type ResponseKeys = {
-  create: 'createListItem' | 'createFund';
-  update: 'updateListItem' | 'updateFund';
-  delete: 'deleteListItem' | 'deleteFund';
+  create: 'createListItem' | 'createFund' | 'createIncome';
+  update: 'updateListItem' | 'updateFund' | 'updateIncome';
+  delete: 'deleteListItem' | 'deleteFund' | 'deleteIncome';
 };
 
 function useServerError(result: { error?: Error }, prefix: string, dispatch: Dispatch): void {
@@ -200,6 +205,45 @@ const standardOptions = moize(
 
 export function useListCrudStandard(page: PageListStandard): ListCrud<StandardInput> {
   return useListCrudGeneric(standardOptions(page));
+}
+
+const incomeOptions: GenericHookOptions<
+  NativeDate<IncomeInput, 'date'>,
+  IncomeInput,
+  PageListStandard.Income,
+  MutationCreateIncomeArgs,
+  MutationUpdateIncomeArgs,
+  MutationDeleteIncomeArgs
+> = {
+  page: PageListStandard.Income,
+  responseKeys: {
+    create: 'createIncome',
+    update: 'updateIncome',
+    delete: 'deleteIncome',
+  },
+  mutations: {
+    useCreate: gql.useCreateIncomeMutation,
+    useUpdate: gql.useUpdateIncomeMutation,
+    useDelete: gql.useDeleteIncomeMutation,
+  },
+  getArgs: {
+    create: (input, fakeId): MutationCreateIncomeArgs => ({
+      fakeId,
+      input: withRawDate<'date', typeof input>('date')(omit(input, '__typename', 'id')),
+    }),
+    update: (id, delta, item): MutationUpdateIncomeArgs => ({
+      id,
+      input: withRawDate<'date', NativeDate<IncomeInput, 'date'>>('date')({
+        ...omit(item, '__typename', 'id'),
+        ...delta,
+      }),
+    }),
+    delete: (id): MutationDeleteIncomeArgs => ({ id }),
+  },
+};
+
+export function useListCrudIncome(): ListCrud<NativeDate<IncomeInput, 'date'>> {
+  return useListCrudGeneric(incomeOptions);
 }
 
 const fundOptions: GenericHookOptions<

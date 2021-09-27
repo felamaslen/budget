@@ -10,7 +10,6 @@ import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   AsyncReturnType,
   CategoryRow,
-  Create,
   CreditLimit,
   CrudResponseCreate,
   CrudResponseDelete,
@@ -43,7 +42,7 @@ import {
   SubcategoryRow,
   ValueRowSelect,
 } from '~api/types';
-import type { RawDate, RawDateDeep, RequiredNotNull } from '~shared/types';
+import type { Create, RawDate, RawDateDeep, RequiredNotNull } from '~shared/types';
 
 describe('Net worth resolver', () => {
   let app: App;
@@ -1947,7 +1946,7 @@ describe('Net worth resolver', () => {
 
     const expectedFundValueAtNetWorthDate = 127.39 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229);
 
-    const expectedIncomeSinceNetWorthDate = 15422;
+    const expectedIncomeSinceNetWorthDate = 15422 - (3629 + 1550);
     const expectedSpendingSinceNetWorthDate = 350;
 
     it.each`

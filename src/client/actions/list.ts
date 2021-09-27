@@ -1,7 +1,14 @@
 import { generateFakeId } from '~client/modules/data';
-import type { Id, PageList, WithIds } from '~client/types';
-import type { ListItemInput, ListReadResponse, Maybe, ReceiptItem } from '~client/types/gql';
-import type { GQL } from '~shared/types';
+import type { Id, ListReadResponseNative, PageList, WithIds } from '~client/types';
+import { PageListStandard } from '~client/types/enum';
+import type {
+  Income,
+  ListItemInput,
+  ListItemStandard,
+  Maybe,
+  ReceiptItem,
+} from '~client/types/gql';
+import { GQL } from '~shared/types';
 
 export const enum ListActionType {
   Created = '@@list/ITEM_CREATED',
@@ -112,16 +119,16 @@ export const listOverviewUpdated = <P extends PageList>(
   weekly,
 });
 
-export type MoreListDataReceived<P extends PageList> = {
+export type MoreListDataReceived<P extends PageList, I extends GQL<ListItemStandard>> = {
   type: ListActionType.MoreReceived;
   page: P;
-  res: GQL<ListReadResponse>;
+  res: ListReadResponseNative<I>;
 };
 
-export const moreListDataReceived = <P extends PageList>(
+export const moreListDataReceived = <P extends PageList, I extends GQL<ListItemStandard>>(
   page: P,
-  res: ListReadResponse,
-): MoreListDataReceived<P> => ({
+  res: ListReadResponseNative<I>,
+): MoreListDataReceived<P, I> => ({
   type: ListActionType.MoreReceived,
   page,
   res,
@@ -132,4 +139,5 @@ export type ActionList<I extends ListItemInput, P extends PageList> =
   | ListItemUpdated<I, P>
   | ListItemDeleted<I, P>
   | ListOverviewUpdated<P>
-  | MoreListDataReceived<P>;
+  | MoreListDataReceived<P, ListItemStandard>
+  | MoreListDataReceived<PageListStandard.Income, Income>;

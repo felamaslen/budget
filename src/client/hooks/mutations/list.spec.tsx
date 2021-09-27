@@ -5,7 +5,7 @@ import createMockStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 import { fromValue } from 'wonka';
 
-import { useListCrudStandard, useListCrudFunds } from './list';
+import { useListCrudStandard, useListCrudFunds, useListCrudIncome } from './list';
 import {
   errorOpened,
   listItemCreated,
@@ -21,6 +21,16 @@ import { testState } from '~client/test-data/state';
 import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
 import type { FundInputNative as FundInput, StandardInput, WithIds } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
+import {
+  CreateIncomeDocument,
+  DeleteIncomeDocument,
+  Income,
+  IncomeInput,
+  MutationCreateIncomeArgs,
+  MutationUpdateIncomeArgs,
+  UpdateIncomeDocument,
+} from '~client/types/gql';
+import { NativeDate } from '~shared/types';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'my-short-id',
@@ -276,6 +286,196 @@ describe('List mutations', () => {
             });
           });
         });
+      });
+    });
+  });
+
+  describe(useListCrudIncome.name, () => {
+    const testIncome: WithIds<NativeDate<IncomeInput, 'date'>> = {
+      id: 129,
+      date: new Date('2020-04-20'),
+      item: 'Salary',
+      cost: 708333,
+      category: 'Work',
+      shop: 'Some company',
+      deductions: [{ name: 'Income tax', value: -195030 }],
+    };
+
+    const testIncomeDelta: Partial<NativeDate<IncomeInput, 'date'>> = {
+      item: 'Different salary',
+      deductions: [
+        { name: 'Income tax', value: -195030 },
+        { name: 'SAYE', value: -50000 },
+      ],
+    };
+
+    const TestComponentIncome: React.FC = () => {
+      const { onCreate, onUpdate, onDelete } = useListCrudIncome();
+
+      return (
+        <>
+          <button data-testid="btn-create" onClick={(): void => onCreate(testIncome)}>
+            Create!
+          </button>
+          <button
+            data-testid="btn-update"
+            onClick={(): void => onUpdate(testId, testIncomeDelta, testIncome)}
+          >
+            Update!
+          </button>
+          <button data-testid="btn-delete" onClick={(): void => onDelete(testId, testIncome)}>
+            Delete!
+          </button>
+        </>
+      );
+    };
+
+    describe('onCreate', () => {
+      beforeEach(() => {
+        (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
+          fromValue({
+            data: {
+              createFund: {
+                error: null,
+              },
+            },
+          }),
+        );
+      });
+
+      it('should dispatch an optimistic create action', async () => {
+        expect.hasAssertions();
+
+        const { store, getByText } = setup(TestComponentIncome);
+        expect(store.getActions()).toHaveLength(0);
+        act(() => {
+          fireEvent.click(getByText('Create!'));
+        });
+
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemCreated(
+              PageListStandard.Income,
+              testIncome,
+              false,
+              numericHash('some-fake-id'),
+            ),
+            apiLoading,
+            apiLoaded,
+          ]);
+        });
+
+        expect(mockClient.executeMutation).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: CreateIncomeDocument,
+            variables: expect.objectContaining<MutationCreateIncomeArgs>({
+              fakeId: expect.any(Number),
+              input: {
+                date: '2020-04-20',
+                item: 'Salary',
+                cost: 708333,
+                category: 'Work',
+                shop: 'Some company',
+                deductions: [{ name: 'Income tax', value: -195030 }],
+              },
+            }),
+          }),
+          expect.anything(),
+        );
+      });
+    });
+
+    describe('onUpdate', () => {
+      it('should dispatch an optimistic update action', async () => {
+        expect.hasAssertions();
+
+        (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
+          fromValue({
+            data: {
+              updateFund: {
+                error: null,
+              },
+            },
+          }),
+        );
+
+        const { store, getByText } = setup(TestComponentIncome);
+        expect(store.getActions()).toHaveLength(0);
+        act(() => {
+          fireEvent.click(getByText('Update!'));
+        });
+
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemUpdated<NativeDate<Income, 'date'>>(
+              PageListStandard.Income,
+              testId,
+              testIncomeDelta,
+              testIncome,
+              false,
+            ),
+            apiLoading,
+            apiLoaded,
+          ]);
+        });
+
+        expect(mockClient.executeMutation).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: UpdateIncomeDocument,
+            variables: expect.objectContaining<MutationUpdateIncomeArgs>({
+              id: testId,
+              input: {
+                date: '2020-04-20',
+                item: 'Different salary',
+                cost: 708333,
+                category: 'Work',
+                shop: 'Some company',
+                deductions: [
+                  { name: 'Income tax', value: -195030 },
+                  { name: 'SAYE', value: -50000 },
+                ],
+              },
+            }),
+          }),
+          expect.anything(),
+        );
+      });
+    });
+
+    describe('onDelete', () => {
+      it('should dispatch an optimistic delete action', async () => {
+        expect.hasAssertions();
+
+        (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
+          fromValue({
+            data: {
+              deleteFund: {
+                error: null,
+              },
+            },
+          }),
+        );
+
+        const { store, getByText } = setup(TestComponentIncome);
+        expect(store.getActions()).toHaveLength(0);
+        act(() => {
+          fireEvent.click(getByText('Delete!'));
+        });
+
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([
+            listItemDeleted(PageListStandard.Income, testId, testIncome, false),
+            apiLoading,
+            apiLoaded,
+          ]);
+        });
+
+        expect(mockClient.executeMutation).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: DeleteIncomeDocument,
+          }),
+          expect.anything(),
+        );
       });
     });
   });

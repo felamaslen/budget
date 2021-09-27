@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import { usePriceChangeHighlight } from './hooks';
@@ -9,7 +9,7 @@ import { CompositeValue, FormFieldFundMetadata } from '~client/components/form-f
 import { FundGainInfo } from '~client/components/fund-gain-info';
 import { GraphFundItem } from '~client/components/graph-fund-item';
 import { Pie } from '~client/components/pie';
-import { TodayContext, useDebouncedState, useListCrudFunds } from '~client/hooks';
+import { useDebouncedState, useListCrudFunds, useToday } from '~client/hooks';
 import {
   getViewSoldFunds,
   getFundsCachedValue,
@@ -29,7 +29,7 @@ export const FundRow: React.FC<Props> = ({
   prices,
   gain,
 }) => {
-  const today = useContext(TodayContext);
+  const today = useToday();
   const viewSoldFunds = useSelector(getViewSoldFunds);
   const latestValue = useSelector(getFundsCachedValue.today(today));
 

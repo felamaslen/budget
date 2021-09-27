@@ -1,5 +1,25 @@
 import { gql } from 'urql';
 
+export const FundParts = gql`
+  fragment FundParts on Fund {
+    id
+    item
+    allocationTarget
+    transactions {
+      date
+      units
+      price
+      fees
+      taxes
+      drip
+    }
+    stockSplits {
+      date
+      ratio
+    }
+  }
+`;
+
 export const FundHistoryParts = gql`
   fragment FundHistoryParts on FundHistory {
     startTime

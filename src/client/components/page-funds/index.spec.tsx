@@ -8,7 +8,6 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter, Route } from 'react-router';
 import createStore, { MockStore } from 'redux-mock-store';
-import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { Funds } from '.';
@@ -17,6 +16,7 @@ import { State } from '~client/reducers';
 import { PriceCache } from '~client/selectors';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { mockTime } from '~client/test-utils/mock-time';
 import type { FundNative as Fund } from '~client/types';
 import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
@@ -109,17 +109,15 @@ describe('<PageFunds />', () => {
     return { store, ...renderResult };
   };
 
-  let clock: sinon.SinonFakeTimers;
+  const mockedTime = mockTime(new Date('2020-04-20'));
   let matchMedia: MatchMediaMock;
   beforeAll(() => {
     matchMedia = new MatchMediaMock();
   });
-  beforeEach(() => {
-    clock = sinon.useFakeTimers(new Date('2020-04-20'));
-  });
+  beforeEach(mockedTime.setup);
   afterEach(() => {
     matchMedia.clear();
-    clock.restore();
+    mockedTime.teardown();
   });
 
   it('should render', () => {

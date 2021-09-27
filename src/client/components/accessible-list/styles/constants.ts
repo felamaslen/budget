@@ -5,6 +5,7 @@ export const fieldSizes: { [field: string]: number } = {
   shop: 120,
   cost: 96,
   default: 180,
+  deductions: 64,
 };
 
 export const rowHeightMobile = 30;

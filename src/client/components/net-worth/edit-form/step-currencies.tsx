@@ -8,8 +8,9 @@ import * as Styled from './styles';
 import { FormFieldText, FormFieldNumber } from '~client/components/form-field';
 import { useExchangeRatesQuery } from '~client/hooks/gql';
 import { ButtonDelete, ButtonAdd, ButtonRefresh } from '~client/styled/shared';
-import type { Create, NetWorthEntryNative as Entry } from '~client/types';
+import type { NetWorthEntryNative as Entry } from '~client/types';
 import type { CurrencyInput as Currency } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 const BASE = 'GBP';
 

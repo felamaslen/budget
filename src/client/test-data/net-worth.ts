@@ -1,5 +1,4 @@
 import numericHash from 'string-hash';
-import type { Create } from '~client/types';
 import { NetWorthCategoryType } from '~client/types/enum';
 import type {
   Currency,
@@ -7,7 +6,7 @@ import type {
   NetWorthEntry as Entry,
   NetWorthSubcategory as Subcategory,
 } from '~client/types/gql';
-import type { NativeDate } from '~shared/types';
+import type { Create, NativeDate } from '~shared/types';
 
 export const CATEGORY_CASH: Category = {
   id: numericHash('real-cash-category-id'),

@@ -125,7 +125,7 @@ export const NetWorthGraph: React.FC<GraphProps> = ({ isMobile, table }) => {
 
   const graphWidth = useGraphWidth(isMobile ? breakpoints.mobile : 320);
   const graphWidthWithMargin = isMobile ? (graphWidth - 6) / 2 : graphWidth;
-  const graphHeightNetWorth = isMobile ? 100 : 240;
+  const graphHeightNetWorth = isMobile ? 100 : 200;
   const graphHeightFTI = isMobile ? 100 : 180;
 
   if (dimensionsNetWorthLeft.minY === dimensionsNetWorthLeft.maxY) {

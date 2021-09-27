@@ -34,12 +34,6 @@ export const fundsSchema = gql`
     allocationTarget: NonNegativeInt
     stockSplits: [StockSplit!]!
   }
-  type FundData {
-    item: String!
-    transactions: [Transaction!]!
-    stockSplits: [StockSplit!]!
-    allocationTarget: NonNegativeInt
-  }
 
   input FundInput {
     item: String!
@@ -145,21 +139,21 @@ export const fundsSchema = gql`
     updateFundAllocationTargets(deltas: [TargetDelta!]!): UpdatedFundAllocationTargets
   }
 
-  type FundCreateUpdate {
-    id: Int!
-    fakeId: Int
-    item: FundData!
-    overviewCost: [Int!]!
+  type FundCreatedSubscription {
+    fakeId: Int!
+    item: Fund!
   }
-  type FundDelete {
-    id: Int!
+
+  type FundSubscription {
+    created: FundCreatedSubscription
+    updated: Fund
+    deleted: NonNegativeInt
+
     overviewCost: [Int!]!
   }
 
   extend type Subscription {
-    fundCreated: FundCreateUpdate!
-    fundUpdated: FundCreateUpdate!
-    fundDeleted: FundDelete!
+    fundsChanged: FundSubscription!
 
     fundPricesUpdated(period: FundPeriod, length: NonNegativeInt): FundHistory
     cashAllocationTargetUpdated: NonNegativeInt!

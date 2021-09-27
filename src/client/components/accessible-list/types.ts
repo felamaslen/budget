@@ -2,12 +2,12 @@ import type { StyledComponent } from '@emotion/styled';
 import type { CSSProperties, FC } from 'react';
 
 import type { FieldComponent } from '~client/components/form-field';
-import type { ModalFields } from '~client/components/modal-dialog/field';
+import type { ModalFields } from '~client/components/modal-dialog/types';
 import type { ListCrud, OnCreateList, OnDeleteList, OnUpdateList } from '~client/hooks';
 import type { ApiListState } from '~client/selectors/list';
-import type { Create, Delta, FieldKey, Id, PageList, WithIds } from '~client/types';
+import type { Delta, FieldKey, Id, PageList, WithIds } from '~client/types';
 import type { ListItem, ListItemInput } from '~client/types/gql';
-import type { PickUnion } from '~shared/types';
+import type { Create, PickUnion } from '~shared/types';
 
 export type State<I extends ListItem, P extends string> = ApiListState<I, P>;
 
@@ -77,6 +77,8 @@ export type SortItemsPost<I extends ListItemInput, E extends Record<string, unkn
   extraMap: { [id: number]: Partial<E> },
 ) => I[];
 
+export type UseItems<P extends PageList> = (page: P) => () => Promise<void>;
+
 export type Props<
   I extends ListItemInput,
   P extends PageList,
@@ -94,6 +96,7 @@ export type Props<
   sortItems?: SortItemsPre<WithIds<I>>;
   sortItemsPost?: SortItemsPost<WithIds<I>, E>;
   customSelector?: CustomSelector<I, E>;
+  useItems?: UseItems<P>;
 } & ListCrud<I>;
 
 export type PropsItem<

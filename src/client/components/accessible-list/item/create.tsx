@@ -7,8 +7,9 @@ import { useSuggestions, Result as Suggestions } from '../suggestions';
 import type { Fields, FieldKey, PropsItemCreate } from '../types';
 import { useCTA } from '~client/hooks';
 import { Button } from '~client/styled/shared';
-import type { Create, PageList } from '~client/types';
+import type { PageList } from '~client/types';
 import type { ListItemInput } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 function deltaIsComplete<I extends ListItemInput>(delta: Partial<I> | I): delta is I {
   return Object.keys(delta).every((key) => typeof Reflect.get(delta, key) !== 'undefined');

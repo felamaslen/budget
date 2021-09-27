@@ -23,7 +23,8 @@ import {
 
 import { pubsub } from '~api/modules/graphql/pubsub';
 import { DJMap, mapExternalToInternal, mapInternalToExternal } from '~api/modules/key-map';
-import { Create, Item } from '~api/types';
+import { Item } from '~api/types';
+import { Create } from '~shared/types';
 
 const notFoundError = (item: string): Error => boom.notFound(`${item} not found`);
 

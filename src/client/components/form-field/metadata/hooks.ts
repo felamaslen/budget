@@ -1,8 +1,44 @@
-import { useCallback, useMemo, useState } from 'react';
+import { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { removeAtIndex } from 'replace-array';
-import { useField } from '~client/hooks';
+
+import { CTAEvents, useCTA, useField } from '~client/hooks';
 import { partialModification } from '~client/modules/data';
 import { Id } from '~client/types';
+
+export function useModalFocus(
+  active: boolean | undefined,
+): {
+  ref: RefObject<HTMLDivElement>;
+  focused: boolean;
+  toggleEvents: CTAEvents;
+  onBlurModal: () => void;
+} {
+  const [focused, setFocused] = useState<boolean>(!!active);
+  const blurred = useRef<boolean>(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const onToggleModal = useCallback(
+    () => setFocused((last) => (blurred.current ? last : !last)),
+    [],
+  );
+  const onBlurModal = useCallback((): void => {
+    blurred.current = true;
+    window.setTimeout(() => {
+      if (!modalRef.current?.contains(document.activeElement)) {
+        setFocused(false);
+      }
+      setTimeout(() => {
+        blurred.current = false;
+      }, 500);
+    }, 0);
+  }, []);
+  useEffect(() => {
+    setFocused(!!active);
+  }, [active]);
+
+  const toggleEvents = useCTA(onToggleModal);
+
+  return { ref: modalRef, focused, toggleEvents, onBlurModal };
+}
 
 export type HookProps<F> = {
   value: F[];

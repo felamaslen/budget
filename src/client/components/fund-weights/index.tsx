@@ -1,11 +1,11 @@
 import { rgba } from 'polished';
-import React, { useState, useCallback, useMemo, useContext } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import * as Styled from './styles';
 import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { GRAPH_WIDTH, GRAPH_HEIGHT } from '~client/constants/graph';
-import { TodayContext } from '~client/hooks';
+import { useToday } from '~client/hooks';
 import { blockPacker } from '~client/modules/block-packer';
 import { colorKey } from '~client/modules/color';
 import { formatCurrency, formatPercent } from '~client/modules/format';
@@ -171,7 +171,7 @@ const CashHelp: React.FC<{
 );
 
 export const FundWeights: React.FC = () => {
-  const today = useContext(TodayContext);
+  const today = useToday();
   const portfolio = useSelector(getPortfolio(today));
   const stockValue = useSelector(getStockValue(today));
   const cashBreakdown = useSelector(getCashBreakdown(today));

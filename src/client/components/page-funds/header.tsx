@@ -1,10 +1,10 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import * as Styled from './styles';
 import { fundsViewSoldToggled } from '~client/actions';
 import { ListHeadFunds, ListHeadFundsMobile } from '~client/components/list-head-funds';
-import { TodayContext, useNow } from '~client/hooks';
+import { useNow, useToday } from '~client/hooks';
 import {
   getAnnualisedFundReturns,
   getFundsCachedValue,
@@ -18,7 +18,7 @@ type Props = {
 };
 
 export const FundHeader: React.FC<Props> = ({ isMobile }) => {
-  const today = useContext(TodayContext);
+  const today = useToday();
   const now = useNow();
   const totalCost = useSelector(getFundsCost(today));
   const viewSoldFunds = useSelector(getViewSoldFunds);

@@ -2,25 +2,22 @@ import { render, fireEvent, act, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
-import sinon from 'sinon';
 
 import { ErrorMessages } from '.';
 import { errorClosed, errorRemoved } from '~client/actions';
 import { ErrorLevel, ERROR_CLOSE_TIME, ERROR_MESSAGE_DELAY } from '~client/constants/error';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
+import { mockTime } from '~client/test-utils/mock-time';
 
 describe('<ErrorMessages />', () => {
-  let clock: sinon.SinonFakeTimers;
-  beforeEach(() => {
-    clock = sinon.useFakeTimers();
-  });
-
+  const mockedTime = mockTime();
+  beforeEach(mockedTime.setup);
   afterEach(() => {
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
-    clock.restore();
+    mockedTime.teardown();
   });
 
   const state: State = {
@@ -94,7 +91,7 @@ describe('<ErrorMessages />', () => {
         const { store } = setupClick();
 
         act(() => {
-          clock.tick(ERROR_CLOSE_TIME);
+          mockedTime.clock.tick(ERROR_CLOSE_TIME);
         });
 
         expect(store.getActions()).toStrictEqual([errorClosed(id), errorRemoved(id)]);
@@ -107,12 +104,12 @@ describe('<ErrorMessages />', () => {
 
       expect(store.getActions()).not.toStrictEqual(expect.arrayContaining([errorClosed(id)]));
       act(() => {
-        clock.tick(ERROR_MESSAGE_DELAY);
+        mockedTime.clock.tick(ERROR_MESSAGE_DELAY);
       });
       expect(store.getActions()).toStrictEqual(expect.arrayContaining([errorClosed(id)]));
       expect(store.getActions()).not.toStrictEqual(expect.arrayContaining([errorRemoved(id)]));
       act(() => {
-        clock.tick(ERROR_CLOSE_TIME);
+        mockedTime.clock.tick(ERROR_CLOSE_TIME);
       });
       expect(store.getActions()).toStrictEqual(expect.arrayContaining([errorRemoved(id)]));
     });
@@ -131,10 +128,10 @@ describe('<ErrorMessages />', () => {
         const { store } = setupMouseover();
 
         act(() => {
-          clock.tick(ERROR_MESSAGE_DELAY);
+          mockedTime.clock.tick(ERROR_MESSAGE_DELAY);
         });
         act(() => {
-          clock.tick(ERROR_CLOSE_TIME);
+          mockedTime.clock.tick(ERROR_CLOSE_TIME);
         });
         expect(store.getActions()).not.toStrictEqual(expect.arrayContaining([errorClosed(id)]));
         expect(store.getActions()).not.toStrictEqual(expect.arrayContaining([errorRemoved(id)]));

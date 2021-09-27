@@ -1,18 +1,11 @@
 /* eslint-disable max-len */
 import { render, RenderResult, act } from '@testing-library/react';
 import React from 'react';
-import sinon from 'sinon';
-
 import { Pie } from '.';
+import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe('<Pie />', () => {
-  let clock: sinon.SinonFakeTimers;
-  beforeEach(() => {
-    clock = sinon.useFakeTimers();
-  });
-  afterEach(() => {
-    clock.restore();
-  });
+  const mockedTime = mockTimeOnly();
 
   const props = {
     size: 20,
@@ -28,7 +21,7 @@ describe('<Pie />', () => {
     expect.assertions(1);
     const { container } = setup();
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
 
     expect(container).toMatchInlineSnapshot(`
@@ -85,7 +78,7 @@ describe('<Pie />', () => {
     `);
 
     act(() => {
-      clock.tick(100);
+      mockedTime.clock.tick(100);
     });
 
     expect(container).toMatchInlineSnapshot(`
@@ -113,7 +106,7 @@ describe('<Pie />', () => {
     `);
 
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
 
     expect(container).toMatchInlineSnapshot(`
@@ -145,7 +138,7 @@ describe('<Pie />', () => {
     expect.assertions(3);
     const { container } = setup();
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
 
     act(() => {
@@ -177,7 +170,7 @@ describe('<Pie />', () => {
     `);
 
     act(() => {
-      clock.tick(50);
+      mockedTime.clock.tick(50);
     });
 
     expect(container).toMatchInlineSnapshot(`
@@ -205,7 +198,7 @@ describe('<Pie />', () => {
     `);
 
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
 
     expect(container).toMatchInlineSnapshot(`

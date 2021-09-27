@@ -1,16 +1,8 @@
 import React, { useCallback, useState } from 'react';
 
 import * as Styled from './styles';
-import { FieldComponent } from '~client/components/form-field';
-import type { FieldKey } from '~client/types';
-import type { ListItemInput } from '~client/types/gql';
-
-export type FieldWrapper<V = never> = React.FC<{
-  id: string;
-  invalid?: boolean;
-  value: V;
-  onChange: (value: V) => void;
-}>;
+import type { FieldWrapper } from './types';
+import type { FieldComponent } from '~client/components/form-field';
 
 export function makeField<V = never>(
   field: string,
@@ -39,10 +31,6 @@ export function makeField<V = never>(
 
   return WrappedField;
 }
-
-export type ModalFields<I extends ListItemInput> = {
-  [K in FieldKey<I>]?: FieldWrapper<Exclude<I[K], null | undefined>>;
-};
 
 type PropsModalField<V> = {
   id: string;

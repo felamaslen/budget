@@ -1,8 +1,8 @@
 import { render, RenderResult, act, fireEvent } from '@testing-library/react';
 import React from 'react';
-import sinon from 'sinon';
 
 import { usePersistentState, PersistentStateValidator as Validator } from './persist';
+import { mockTime } from '~client/test-utils/mock-time';
 
 describe('usePersistentState', () => {
   let getItemSpy: jest.SpyInstance;
@@ -13,16 +13,13 @@ describe('usePersistentState', () => {
     setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation();
   });
 
-  let clock: sinon.SinonFakeTimers;
-
-  beforeEach(() => {
-    clock = sinon.useFakeTimers();
-  });
+  const mockedTime = mockTime();
+  beforeEach(mockedTime.setup);
   afterEach(() => {
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
-    clock.restore();
+    mockedTime.teardown();
 
     getItemSpy.mockReset();
     setItemSpy.mockReset();
@@ -145,7 +142,7 @@ describe('usePersistentState', () => {
     expect(setItemSpy).toHaveBeenCalledTimes(0);
 
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
 
     expect(setItemSpy).toHaveBeenCalledTimes(1);
@@ -174,7 +171,7 @@ describe('usePersistentState', () => {
       fireEvent.click(getByTestId('btn-increment'));
     });
     act(() => {
-      clock.runAll();
+      mockedTime.clock.runAll();
     });
 
     expect(localStorage.setItem).toHaveBeenCalledTimes(1);

@@ -4,15 +4,19 @@ import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
 
 import { GraphBalance, Props } from '.';
-import { ResizeContext, TodayContext } from '~client/hooks';
+import { ResizeContext, TodayProvider } from '~client/hooks';
 import { getOverviewGraphValues } from '~client/selectors';
 import { testNow, testState as state } from '~client/test-data/state';
+import { mockTime } from '~client/test-utils/mock-time';
 
 describe('<GraphBalance />', () => {
   let randomSpy: jest.SpyInstance;
 
+  const today = endOfDay(testNow);
+  const mockedTime = mockTime(testNow);
+
   beforeEach(() => {
-    jest.useFakeTimers();
+    mockedTime.setup();
     let randomIndex = 0;
     randomSpy = jest.spyOn(Math, 'random').mockImplementation((): number => {
       randomIndex += 1;
@@ -20,11 +24,9 @@ describe('<GraphBalance />', () => {
     });
   });
   afterEach(() => {
-    jest.useRealTimers();
     randomSpy.mockRestore();
+    mockedTime.teardown();
   });
-
-  const today = endOfDay(testNow);
 
   const setup = (): RenderResult => {
     const graph = getOverviewGraphValues(today, 0)(state);
@@ -41,11 +43,11 @@ describe('<GraphBalance />', () => {
     };
 
     return render(
-      <TodayContext.Provider value={today}>
+      <TodayProvider>
         <ResizeContext.Provider value={894}>
           <GraphBalance {...props} />
         </ResizeContext.Provider>
-      </TodayContext.Provider>,
+      </TodayProvider>,
     );
   };
 

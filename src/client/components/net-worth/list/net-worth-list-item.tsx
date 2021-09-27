@@ -4,11 +4,12 @@ import React, { memo, useCallback } from 'react';
 import { NetWorthEditForm } from '../edit-form';
 import * as Styled from './styles';
 import { OnUpdate } from '~client/hooks';
-import type { NetWorthEntryNative as Entry, SetActiveId, Create } from '~client/types';
+import type { NetWorthEntryNative as Entry, SetActiveId } from '~client/types';
 import type {
   NetWorthCategory as Category,
   NetWorthSubcategory as Subcategory,
 } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 type Props = {
   item: Entry;

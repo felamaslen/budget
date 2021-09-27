@@ -12,7 +12,6 @@ import {
 import { OnCreate, OnUpdate, OnDelete } from '~client/hooks';
 import { Button, ButtonDelete, FlexColumn, InlineFlex } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
-import type { Create } from '~client/types';
 import {
   NetWorthSubcategory as Subcategory,
   NetWorthSubcategoryInput,
@@ -20,6 +19,7 @@ import {
   NetWorthSubcategory,
   NetWorthCategoryType,
 } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 const getCreditLimitDisabled = (parent: Pick<Category, 'type'>): boolean =>
   parent.type !== NetWorthCategoryType.Liability;

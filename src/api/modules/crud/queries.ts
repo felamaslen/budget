@@ -7,7 +7,7 @@ import {
 } from 'slonik';
 
 import type { CrudItem } from './types';
-import type { Create } from '~api/types';
+import type { Create } from '~shared/types';
 
 const whereId = (table: string, withUid: boolean, uid: number, id: number): ListSqlTokenType =>
   sql.join(

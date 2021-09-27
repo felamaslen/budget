@@ -1,4 +1,8 @@
-import { sql, DatabaseTransactionConnectionType } from 'slonik';
+import {
+  sql,
+  DatabaseTransactionConnectionType,
+  TaggedTemplateLiteralInvocationType,
+} from 'slonik';
 
 import config from '~api/config';
 import {
@@ -9,14 +13,15 @@ import {
 } from '~api/types';
 import type { GQL, NativeDate, RawDate } from '~shared/types';
 
-export const pageCostCTE = sql`
+export const pageCostCTE = (
+  listStandardTableName = 'list_standard',
+): TaggedTemplateLiteralInvocationType => sql`
 CASE
   WHEN page = ${PageListStandard.General} AND category = ANY(${sql.array(
   config.data.overview.investmentPurchaseCategories,
   'text',
-)})
-  THEN 0
-  ELSE value
+)}) THEN 0
+  ELSE ${sql.identifier([listStandardTableName, 'value'])}
 END
 `;
 
@@ -51,7 +56,7 @@ export async function selectListTotalCost(
   page?: PageListCost,
 ): Promise<readonly StandardListTotalCostRow[]> {
   const { rows } = await db.query<StandardListTotalCostRow>(sql`
-  SELECT page, COALESCE(SUM(${pageCostCTE}), 0)::int4 AS total
+  SELECT page, COALESCE(SUM(${pageCostCTE()}), 0)::int4 AS total
   FROM list_standard
   WHERE ${sql.join(
     [sql`uid = ${uid}`, page ? sql`page = ${page}` : null].filter(Boolean),
@@ -76,7 +81,7 @@ export async function selectListWeeklyCosts(
   WITH values AS (
     SELECT ${sql.join(
       [
-        sql`${pageCostCTE} AS value`,
+        sql`${pageCostCTE()} AS value`,
         sql`DATE_PART('year', date) AS year`,
         sql`DATE_PART('week', date) AS week`,
       ],
@@ -110,18 +115,30 @@ export async function insertListItems(
   return result.rows.map<number>((row) => row.id);
 }
 
+export type ListItemStandardRow = {
+  readonly id: number;
+  date: Date;
+  item: string;
+  category: string;
+  shop: string;
+  cost: number;
+};
+
 export async function selectListItems(
   db: DatabaseTransactionConnectionType,
   uid: number,
   page: PageListCost,
   limit: number,
   offset: number,
-): Promise<readonly GQL<NativeDate<ListItemStandard, 'date'>>[]> {
-  const { rows } = await db.query<GQL<NativeDate<ListItemStandard, 'date'>>>(sql`
-  SELECT id, date, item, category, shop, value AS cost
-  FROM list_standard
-  WHERE uid = ${uid} AND page = ${page}
-  ORDER BY date DESC, id ASC
+): Promise<readonly ListItemStandardRow[]> {
+  const { rows } = await db.query<ListItemStandardRow>(sql`
+  SELECT ${sql.join(
+    [sql`l.id`, sql`l.date`, sql`l.item`, sql`l.category`, sql`l.shop`, sql`l.value AS cost`],
+    sql`, `,
+  )}
+  FROM list_standard l
+  WHERE l.uid = ${uid} AND l.page = ${page}
+  ORDER BY l.date DESC, l.id ASC
   LIMIT ${limit}
   OFFSET ${offset * limit}
   `);

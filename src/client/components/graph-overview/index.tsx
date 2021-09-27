@@ -1,6 +1,6 @@
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as Styled from './styles';
@@ -9,7 +9,7 @@ import { GraphBalance } from '~client/components/graph-balance';
 import type { GraphCashFlowTitle } from '~client/components/graph-cashflow/types';
 import { GraphSpending } from '~client/components/graph-spending';
 import { ErrorLevel } from '~client/constants/error';
-import { TodayContext, useIsMobile, usePersistentState } from '~client/hooks';
+import { useIsMobile, usePersistentState, useToday } from '~client/hooks';
 import { useOverviewOldQuery } from '~client/hooks/gql';
 import { getMonthDatesList } from '~client/modules/date';
 import {
@@ -22,7 +22,7 @@ import type { LongTermOptions, OverviewGraph } from '~client/types';
 
 export const GraphOverview: React.FC = () => {
   const dispatch = useDispatch();
-  const today = useContext(TodayContext);
+  const today = useToday();
 
   const isMobile = useIsMobile();
   const [showAll, setShowAll] = useState<boolean>(false);

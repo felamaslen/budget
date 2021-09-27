@@ -6,6 +6,7 @@ import * as crudQueries from '~api/modules/crud/queries';
 import * as pubsub from '~api/modules/graphql/pubsub';
 import * as queries from '~api/queries';
 import {
+  ListSubscriptionRawDate,
   MutationCreateListItemArgs,
   MutationCreateReceiptArgs,
   MutationDeleteListItemArgs,
@@ -65,13 +66,17 @@ describe('List controller', () => {
       await createList({} as DatabaseTransactionConnectionType, testUserId, args);
 
       expect(pubsubSpy).toHaveBeenCalledTimes(2);
-      expect(pubsubSpy).toHaveBeenCalledWith(
-        `${pubsub.PubSubTopic.ListItemCreated}.${testUserId}`,
+      expect(pubsubSpy).toHaveBeenCalledWith<[string, ListSubscriptionRawDate]>(
+        `${pubsub.PubSubTopic.ListChanged}.${testUserId}`,
         {
           page: PageListStandard.Income,
-          id: 1236,
-          fakeId: -1887123,
-          item: args.input,
+          created: {
+            fakeId: -1887123,
+            item: {
+              ...args.input,
+              id: 1236,
+            },
+          },
           overviewCost: expectedOverviewCost,
           total: 1776912,
           weekly: 9113,
@@ -194,19 +199,19 @@ describe('List controller', () => {
       const pubsubSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
 
       jest.spyOn(crudQueries, 'updateCrudItem').mockResolvedValueOnce({
-        ...args.input,
+        ...omit(args.input, 'cost'),
+        value: args.input.cost,
         id: args.id,
       });
 
       await updateList({} as DatabaseTransactionConnectionType, testUserId, args);
 
       expect(pubsubSpy).toHaveBeenCalledTimes(2);
-      expect(pubsubSpy).toHaveBeenCalledWith(
-        `${pubsub.PubSubTopic.ListItemUpdated}.${testUserId}`,
+      expect(pubsubSpy).toHaveBeenCalledWith<[string, ListSubscriptionRawDate]>(
+        `${pubsub.PubSubTopic.ListChanged}.${testUserId}`,
         {
           page: PageListStandard.Income,
-          id: 178,
-          item: args.input,
+          updated: { id: args.id, ...args.input },
           overviewCost: expectedOverviewCost,
           total: 1776912,
           weekly: 9113,
@@ -238,11 +243,11 @@ describe('List controller', () => {
       await deleteList({} as DatabaseTransactionConnectionType, testUserId, args);
 
       expect(pubsubSpy).toHaveBeenCalledTimes(2);
-      expect(pubsubSpy).toHaveBeenCalledWith(
-        `${pubsub.PubSubTopic.ListItemDeleted}.${testUserId}`,
+      expect(pubsubSpy).toHaveBeenCalledWith<[string, ListSubscriptionRawDate]>(
+        `${pubsub.PubSubTopic.ListChanged}.${testUserId}`,
         {
           page: PageListStandard.Income,
-          id: 913,
+          deleted: 913,
           overviewCost: expectedOverviewCost,
           total: 1776912,
           weekly: 9113,

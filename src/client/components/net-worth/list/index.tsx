@@ -5,11 +5,12 @@ import { NetWorthListItem } from './net-worth-list-item';
 import * as Styled from './styles';
 import { CrudList } from '~client/components/crud-list';
 import { OnCreate, OnUpdate, OnDelete } from '~client/hooks';
-import type { Create, NetWorthEntryNative as Entry } from '~client/types';
+import type { NetWorthEntryNative as Entry } from '~client/types';
 import type {
   NetWorthCategory as Category,
   NetWorthSubcategory as Subcategory,
 } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 type Props = {
   data: Entry[];

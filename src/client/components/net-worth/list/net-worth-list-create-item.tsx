@@ -4,11 +4,12 @@ import { NetWorthAddForm } from '../edit-form';
 import * as Styled from './styles';
 import { CREATE_ID } from '~client/constants/data';
 import { OnCreate } from '~client/hooks';
-import type { Create, NetWorthEntryNative as Entry, SetActiveId } from '~client/types';
+import type { NetWorthEntryNative as Entry, SetActiveId } from '~client/types';
 import type {
   NetWorthCategory as Category,
   NetWorthSubcategory as Subcategory,
 } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 type Props = {
   data: Entry[];

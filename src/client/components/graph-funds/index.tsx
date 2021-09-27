@@ -1,7 +1,7 @@
 import groupBy from 'lodash/groupBy';
 import moize from 'moize';
 import { rgba } from 'polished';
-import React, { useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas, ToggleList } from './after-canvas';
@@ -32,7 +32,7 @@ import {
   GRAPH_FUNDS_OVERALL_ID,
   GRAPH_FUNDS_NUM_TICKS,
 } from '~client/constants/graph';
-import { TodayContext, usePersistentState } from '~client/hooks';
+import { usePersistentState, useToday } from '~client/hooks';
 import { useFundPricesUpdateQuery } from '~client/hooks/gql';
 import { lastInArray } from '~client/modules/data';
 import { getTickSize } from '~client/modules/format';
@@ -369,7 +369,7 @@ function useGraphProps({
 }
 
 export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
-  const today = useContext(TodayContext);
+  const today = useToday();
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
 

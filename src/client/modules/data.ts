@@ -9,7 +9,6 @@ import { toISO } from './format';
 
 import { Average } from '~client/constants';
 import type {
-  Create,
   Data,
   FundInputNative,
   Item,
@@ -18,9 +17,9 @@ import type {
   StockSplitNative,
   TransactionNative,
 } from '~client/types';
-import type { FundData, FundInput, ListItem, NetWorthEntryInput } from '~client/types/gql';
+import type { Fund, FundInput, ListItem, NetWorthEntryInput } from '~client/types/gql';
 import { calculateTransactionCost } from '~shared/funds';
-import type { GQLShallow, NativeDate, RawDate } from '~shared/types';
+import type { Create, GQLShallow, NativeDate, RawDate } from '~shared/types';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -251,7 +250,7 @@ export const withRawDateTime = <K extends string, T extends Record<K, Date>>(...
 export const omitTypeName = <T extends Record<string, unknown>>(item: T): Omit<T, '__typename'> =>
   omit(item, '__typename');
 
-export const toNativeFund = <F extends GQLShallow<FundData>>(input: F): NativeFund<F> => ({
+export const toNativeFund = <F extends GQLShallow<Omit<Fund, 'id'>>>(input: F): NativeFund<F> => ({
   ...omitTypeName(input),
   transactions: input.transactions.map(compose(omitTypeName, withNativeDate('date'))),
   stockSplits: input.stockSplits.map(compose(omitTypeName, withNativeDate('date'))),

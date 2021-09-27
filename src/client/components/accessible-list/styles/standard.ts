@@ -4,6 +4,7 @@ import { rem } from 'polished';
 
 import { Row } from './shared';
 import { asHeading } from '~client/styled/shared/role';
+import { colors } from '~client/styled/variables';
 
 export const StandardHeader = asHeading(styled.div`
   display: flex;
@@ -15,6 +16,9 @@ export const StandardRow = styled(Row)<{
 }>(
   ({ isFuture }) => css`
     line-height: ${rem(24)};
-    ${!!isFuture && `opacity: 0.5;`}
+    ${!!isFuture &&
+    css`
+      color: ${colors.medium.mediumDark};
+    `}
   `,
 );

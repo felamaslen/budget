@@ -10,7 +10,6 @@ import config from '~api/config';
 import { getPool, withSlonik } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
-  Create,
   CrudResponseCreate,
   CrudResponseDelete,
   CrudResponseUpdate,
@@ -35,7 +34,7 @@ import {
   StockPricesResponse,
   StockValueResponse,
 } from '~api/types';
-import type { NativeDate, RawDate } from '~shared/types';
+import type { Create, NativeDate, RawDate } from '~shared/types';
 
 describe('Funds resolver', () => {
   let app: App;

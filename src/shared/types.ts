@@ -13,6 +13,8 @@ export type PickRequire<T extends Record<string, unknown>, K extends keyof T> = 
 export type PickPartial<T extends Record<string, unknown>, K extends keyof T> = Omit<T, K> &
   Partial<Pick<T, K>>;
 
+export type Create<V> = Omit<V, 'id'>;
+
 export type GQLShallow<T> = Omit<T, '__typename'>;
 
 export type GQL<T> = T extends Record<string, unknown>

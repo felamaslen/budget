@@ -4,12 +4,14 @@ import endOfDay from 'date-fns/endOfDay';
 import React from 'react';
 
 import { GraphSpending, Props } from '.';
-import { ResizeContext, TodayContext } from '~client/hooks';
+import { ResizeContext, TodayProvider } from '~client/hooks';
 import { getOverviewGraphValues } from '~client/selectors';
 import { testNow, testState as state } from '~client/test-data/state';
+import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe('<GraphSpending />', () => {
   const today = endOfDay(testNow);
+  mockTimeOnly(today);
 
   const setup = (): RenderResult => {
     const graph = getOverviewGraphValues(today, 0)(state);
@@ -25,11 +27,11 @@ describe('<GraphSpending />', () => {
     };
 
     return render(
-      <TodayContext.Provider value={today}>
+      <TodayProvider>
         <ResizeContext.Provider value={1032}>
           <GraphSpending {...props} />
         </ResizeContext.Provider>
-      </TodayContext.Provider>,
+      </TodayProvider>,
     );
   };
 

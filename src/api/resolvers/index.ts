@@ -14,6 +14,7 @@ export * from './config';
 export * from './exchange-rates';
 export * from './funds';
 export * from './list';
+export * from './income';
 export * from './net-worth';
 export * from './overview';
 export * from './search';

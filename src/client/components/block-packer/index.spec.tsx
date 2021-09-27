@@ -1,9 +1,9 @@
 import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import React from 'react';
-import sinon from 'sinon';
 
 import { BlockPacker, Props } from '.';
 import { blockPacker } from '~client/modules/block-packer';
+import { mockTimeOnly } from '~client/test-utils/mock-time';
 import type { BlockItem, WithSubTree } from '~client/types';
 
 describe('<BlockPacker />', () => {
@@ -382,13 +382,7 @@ describe('<BlockPacker />', () => {
     ${'clicking'}   | ${fireEvent.click}
     ${'activating'} | ${fireActivateEvent}
   `('when $event a level-0 block containing a breakdown', ({ handler }) => {
-    let clock: sinon.SinonFakeTimers;
-    beforeEach(() => {
-      clock = sinon.useFakeTimers();
-    });
-    afterEach(() => {
-      clock.restore();
-    });
+    const mockedTime = mockTimeOnly();
 
     it('should expand the block to fill the view', () => {
       expect.assertions(10);
@@ -408,7 +402,7 @@ describe('<BlockPacker />', () => {
       expect(preview.style.backgroundColor).toBe('rgba(128, 0, 128, 0)');
 
       act(() => {
-        clock.next();
+        mockedTime.clock.next();
       });
 
       expect(preview.style.left).toBe('0px');

@@ -6,11 +6,7 @@ import {
   createSubscription,
 } from '~api/modules/crud';
 import { PubSubTopic } from '~api/modules/graphql/pubsub';
-import {
-  Resolvers,
-  SubscriptionListItemCreatedArgs,
-  SubscriptionListItemUpdatedArgs,
-} from '~api/types';
+import type { Resolvers, SubscriptionListChangedArgs } from '~api/types';
 
 export const listResolvers: Resolvers = {
   Query: {
@@ -26,18 +22,11 @@ export const listResolvers: Resolvers = {
   },
 
   Subscription: {
-    listItemCreated: createFilteredSubscription<
-      'ListItemCreateUpdate',
-      SubscriptionListItemCreatedArgs
-    >(PubSubTopic.ListItemCreated, (payload, args) => args.pages.includes(payload.page)),
+    listChanged: createFilteredSubscription<'ListSubscription', SubscriptionListChangedArgs>(
+      PubSubTopic.ListChanged,
+      (payload, args) => args.pages.includes(payload.page),
+    ),
 
     receiptCreated: createSubscription<'ReceiptCreated'>(PubSubTopic.ReceiptCreated),
-
-    listItemUpdated: createFilteredSubscription<
-      'ListItemCreateUpdate',
-      SubscriptionListItemUpdatedArgs
-    >(PubSubTopic.ListItemUpdated, (payload, args) => args.pages.includes(payload.page)),
-
-    listItemDeleted: createSubscription<'ListItemDelete'>(PubSubTopic.ListItemDeleted),
   },
 };

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { UseSubscriptionArgs, SubscriptionHandler, UseSubscriptionResponse } from 'urql';
 
@@ -13,149 +13,72 @@ import {
 import { ErrorLevel } from '~client/constants/error';
 import * as gql from '~client/hooks/gql';
 import { composeWithoutArgs } from '~client/modules/compose-without-args';
-import { toNativeFund, VOID, withNativeDate } from '~client/modules/data';
-import type { FundInputNative, Id, Item, PageList, StandardInput } from '~client/types';
+import { toNativeFund, withNativeDate } from '~client/modules/data';
+import type { Id, NativeFund, PageList, StandardInput } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
-import type {
+import {
   Exact,
-  FundCreateUpdate,
-  FundData,
-  FundDelete,
-  ListItemCreateUpdate,
-  ListItemDelete,
+  Fund,
+  FundsChangedSubscription,
+  IncomeChangedSubscription,
+  IncomeInput,
+  ListChangedSubscription,
   ListItemInput,
   ListItemStandardInput,
   Maybe,
-  ReceiptCreatedSubscription,
+  useFundsChangedSubscription,
 } from '~client/types/gql';
-
-type ResponseKeys = {
-  created: 'listItemStandardCreated' | 'fundCreated';
-  updated: 'listItemStandardUpdated' | 'fundUpdated';
-  deleted: 'listItemDeleted' | 'fundDeleted';
-};
-
-type OverviewSubscription = {
-  overviewCost: number[];
-  total?: Maybe<number>;
-  weekly?: Maybe<number>;
-};
-
-type CreateUpdateBase<T extends ListItemInput = ListItemInput> = {
-  id: Id;
-  fakeId?: Maybe<Id>;
-  item: T;
-} & OverviewSubscription;
-
-type DeleteBase = {
-  id: Id;
-} & OverviewSubscription;
-
-type SubscriptionCreateUpdate<T extends CreateUpdateBase> = Partial<
-  { [key in ResponseKeys['created'] | ResponseKeys['updated']]: T }
->;
-type SubscriptionDelete<T extends Item> = Partial<{ [key in ResponseKeys['deleted']]: T }>;
+import { GQLShallow, NativeDate } from '~shared/types';
 
 export type SubscriptionArgs = Omit<
   UseSubscriptionArgs<Exact<{ [key: string]: never }>, unknown>,
   'query'
 >;
 
-type GenericHookOptions<
-  I extends ListItemInput,
+type SubscriptionResponseGeneric<J extends ListItemInput> = {
+  created?: Maybe<{
+    fakeId: Id;
+    item: J;
+  }>;
+  updated?: Maybe<J>;
+  deleted?: Maybe<Id>;
+
+  overviewCost: number[];
+  total?: Maybe<number>;
+  weekly?: Maybe<number>;
+};
+
+export type GenericHookOptions<
+  I extends ListItemInput & { id: Id },
   J extends ListItemInput,
   P extends PageList,
-  ResponseCreateUpdate extends CreateUpdateBase<I>,
-  ResponseDelete extends DeleteBase
+  SubscriptionResponse extends Record<S, SubscriptionResponseGeneric<I>>,
+  S extends string
 > = {
-  getPage: (res: ResponseCreateUpdate | ResponseDelete) => P;
-  responseKeys: ResponseKeys;
-  subscriptions: {
-    useOnCreate: (
-      options: SubscriptionArgs,
-      handler?: SubscriptionHandler<SubscriptionCreateUpdate<ResponseCreateUpdate>, void>,
-    ) => UseSubscriptionResponse<
-      void,
-      Partial<Record<ResponseKeys['created'], ResponseCreateUpdate>>
-    >;
-    useOnUpdate: (
-      options: SubscriptionArgs,
-      handler?: SubscriptionHandler<SubscriptionCreateUpdate<ResponseCreateUpdate>, void>,
-    ) => UseSubscriptionResponse<
-      void,
-      Partial<Record<ResponseKeys['updated'], ResponseCreateUpdate>>
-    >;
-    useOnDelete?: (
-      options: SubscriptionArgs,
-      handler?: SubscriptionHandler<SubscriptionDelete<ResponseDelete>, void>,
-    ) => UseSubscriptionResponse<void, Partial<Record<ResponseKeys['deleted'], ResponseDelete>>>;
-  };
+  responseKey: S;
+  getPage: (res: SubscriptionResponse) => P;
+  useSubscription: (
+    options: Omit<UseSubscriptionArgs<Record<string, never>>, 'query'>,
+    handler?: SubscriptionHandler<SubscriptionResponse, SubscriptionResponse>,
+  ) => UseSubscriptionResponse<SubscriptionResponse, Record<string, never>>;
   toNative: (input: I) => J;
 };
 
-function useListSubscriptionsGeneric<
-  I extends ListItemInput,
+export function useListSubscriptionsGeneric<
+  I extends ListItemInput & { id: Id },
   J extends ListItemInput,
   P extends PageList,
-  ResponseCreateUpdate extends CreateUpdateBase<I>,
-  ResponseDelete extends DeleteBase | never
+  SubscriptionResponse extends Record<S, SubscriptionResponseGeneric<I>>,
+  S extends string
 >({
-  responseKeys,
-  subscriptions,
+  responseKey,
+  useSubscription,
   toNative,
   getPage,
-}: GenericHookOptions<I, J, P, ResponseCreateUpdate, ResponseDelete>): () => void {
+}: GenericHookOptions<I, J, P, SubscriptionResponse, S>): () => void {
   const dispatch = useDispatch();
 
-  const onListItemCreated = useCallback<
-    SubscriptionHandler<SubscriptionCreateUpdate<ResponseCreateUpdate>, void>
-  >(
-    (_, { [responseKeys.created]: res }) => {
-      if (!res) {
-        return;
-      }
-      const page = getPage(res);
-      dispatch(listItemCreated(page, toNative(res.item), true, res.id, res.fakeId ?? 0));
-      dispatch(listOverviewUpdated(page, res.overviewCost, res.total, res.weekly));
-    },
-    [dispatch, responseKeys.created, getPage, toNative],
-  );
-
-  const onListItemUpdated = useCallback<
-    SubscriptionHandler<SubscriptionCreateUpdate<ResponseCreateUpdate>, void>
-  >(
-    (_, { [responseKeys.updated]: res }) => {
-      if (!res) {
-        return;
-      }
-      const page = getPage(res);
-      dispatch(listItemUpdated(page, res.id, toNative(res.item), null, true));
-      dispatch(listOverviewUpdated(page, res.overviewCost, res.total, res.weekly));
-    },
-    [dispatch, responseKeys.updated, getPage, toNative],
-  );
-
-  const onListItemDeleted = useCallback<
-    SubscriptionHandler<SubscriptionDelete<ResponseDelete>, void>
-  >(
-    (_, { [responseKeys.deleted]: res }) => {
-      if (!res) {
-        return;
-      }
-      const page = getPage(res);
-      dispatch(listItemDeleted(page, res.id, {} as ListItemInput, true));
-      dispatch(listOverviewUpdated(page, res.overviewCost, res.total, res.weekly));
-    },
-    [dispatch, responseKeys.deleted, getPage],
-  );
-
-  const [resultItemCreated, onReconnectCreate] = subscriptions.useOnCreate({}, onListItemCreated);
-  const [resultItemUpdated, onReconnectUpdate] = subscriptions.useOnUpdate({}, onListItemUpdated);
-  const resultItemDeleted = subscriptions.useOnDelete?.({}, onListItemDeleted);
-
-  const onReconnectDelete = resultItemDeleted?.[1] ?? VOID;
-
-  const error = resultItemCreated.error ?? resultItemUpdated.error ?? resultItemDeleted?.[0].error;
+  const [{ data, error }, onReconnect] = useSubscription({});
 
   useEffect(() => {
     if (error) {
@@ -163,47 +86,77 @@ function useListSubscriptionsGeneric<
     }
   }, [dispatch, error]);
 
-  return composeWithoutArgs(onReconnectCreate, onReconnectUpdate, onReconnectDelete);
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+    const page = getPage(data);
+
+    const created = data[responseKey].created;
+    if (created) {
+      dispatch(
+        listItemCreated(page, toNative(created.item), true, created.item.id, created.fakeId),
+      );
+    }
+
+    const updated = data[responseKey].updated;
+    if (updated) {
+      dispatch(listItemUpdated(page, updated.id, toNative(updated), null, true));
+    }
+
+    const deleted = data[responseKey].deleted;
+    if (deleted) {
+      dispatch(listItemDeleted(page, deleted, {} as ListItemInput, true));
+    }
+
+    dispatch(
+      listOverviewUpdated(
+        page,
+        data[responseKey].overviewCost,
+        data[responseKey].total,
+        data[responseKey].weekly,
+      ),
+    );
+  }, [dispatch, responseKey, getPage, toNative, data]);
+
+  return onReconnect;
 }
 
 const standardOptions: GenericHookOptions<
-  ListItemStandardInput,
+  ListItemStandardInput & { id: Id },
   StandardInput,
   PageListStandard,
-  ListItemCreateUpdate,
-  ListItemDelete
+  ListChangedSubscription,
+  'listChanged'
 > = {
-  responseKeys: {
-    created: 'listItemStandardCreated',
-    updated: 'listItemStandardUpdated',
-    deleted: 'listItemDeleted',
-  },
-  subscriptions: {
-    useOnCreate: gql.useListItemStandardCreatedSubscription,
-    useOnUpdate: gql.useListItemStandardUpdatedSubscription,
-    useOnDelete: gql.useListItemDeletedSubscription,
-  },
-  getPage: (res) => res.page,
+  responseKey: 'listChanged',
+  useSubscription: gql.useListChangedSubscription,
+  getPage: (res) => res.listChanged.page,
+  toNative: withNativeDate('date'),
+};
+
+const incomeOptions: GenericHookOptions<
+  IncomeInput & { id: Id },
+  NativeDate<IncomeInput, 'date'> & { id: Id },
+  PageListStandard.Income,
+  IncomeChangedSubscription,
+  'incomeChanged'
+> = {
+  responseKey: 'incomeChanged',
+  useSubscription: gql.useIncomeChangedSubscription,
+  getPage: () => PageListStandard.Income,
   toNative: withNativeDate('date'),
 };
 
 const fundOptions: GenericHookOptions<
-  FundData,
-  FundInputNative,
+  GQLShallow<Fund>,
+  NativeFund<GQLShallow<Fund>>,
   PageNonStandard.Funds,
-  FundCreateUpdate,
-  FundDelete
+  FundsChangedSubscription,
+  'fundsChanged'
 > = {
-  responseKeys: {
-    created: 'fundCreated',
-    updated: 'fundUpdated',
-    deleted: 'fundDeleted',
-  },
-  subscriptions: {
-    useOnCreate: gql.useFundCreatedSubscription,
-    useOnUpdate: gql.useFundUpdatedSubscription,
-    useOnDelete: gql.useFundDeletedSubscription,
-  },
+  responseKey: 'fundsChanged',
+  useSubscription: useFundsChangedSubscription,
   getPage: () => PageNonStandard.Funds,
   toNative: toNativeFund,
 };
@@ -211,24 +164,27 @@ const fundOptions: GenericHookOptions<
 function useReceiptSubscription(): () => void {
   const dispatch = useDispatch();
 
-  const onReceiptCreated = useCallback(
-    (_, res: ReceiptCreatedSubscription): void => {
-      if (res.receiptCreated.items) {
-        dispatch(receiptCreated(res.receiptCreated.items));
-      }
-    },
-    [dispatch],
-  );
+  const [res, onReconnect] = gql.useReceiptCreatedSubscription({});
+  useEffect(() => {
+    if (res.data?.receiptCreated.items) {
+      dispatch(receiptCreated(res.data.receiptCreated.items));
+    }
+  }, [dispatch, res.data]);
 
-  const [, onReconnect] = gql.useReceiptCreatedSubscription({}, onReceiptCreated);
   return onReconnect;
 }
 
 export function useListSubscriptions(): () => void {
   const onReconnectStandard = useListSubscriptionsGeneric(standardOptions);
+  const onReconnectIncome = useListSubscriptionsGeneric(incomeOptions);
   const onReconnectFunds = useListSubscriptionsGeneric(fundOptions);
 
   const onReconnectReceipt = useReceiptSubscription();
 
-  return composeWithoutArgs(onReconnectStandard, onReconnectFunds, onReconnectReceipt);
+  return composeWithoutArgs(
+    onReconnectStandard,
+    onReconnectIncome,
+    onReconnectFunds,
+    onReconnectReceipt,
+  );
 }

@@ -42,9 +42,7 @@ export const fundsResolvers: Resolvers = {
   },
 
   Subscription: {
-    fundCreated: createSubscription<'FundCreateUpdate'>(PubSubTopic.FundCreated),
-    fundUpdated: createSubscription<'FundCreateUpdate'>(PubSubTopic.FundUpdated),
-    fundDeleted: createSubscription<'FundDelete'>(PubSubTopic.FundDeleted),
+    fundsChanged: createSubscription<'FundSubscription'>(PubSubTopic.FundsChanged),
 
     fundPricesUpdated: {
       subscribe: (): AsyncIterator<void> => pubsub.asyncIterator(PubSubTopic.FundPricesUpdated),

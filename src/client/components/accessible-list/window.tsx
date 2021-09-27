@@ -8,16 +8,17 @@ import InfiniteLoader from 'react-window-infinite-loader';
 import { createListContext } from './context';
 import { useMoreItems } from './hooks';
 import * as Styled from './styles';
-import type { PropsMemoisedItem } from './types';
+import type { PropsMemoisedItem, UseItems } from './types';
 import { getOlderExists } from '~client/selectors';
-import type { Item } from '~client/types';
+import type { Item, PageList } from '~client/types';
 import type { PageListStandard } from '~client/types/gql';
 
-type Props<I extends Item, P extends string, E extends Record<string, unknown>> = {
+type Props<I extends Item, P extends PageList, E extends Record<string, unknown>> = {
   page: P;
   isMobile: boolean;
   items: I[];
   MemoisedItem: React.FC<PropsMemoisedItem<E>>;
+  useItems?: UseItems<P>;
 };
 
 type ItemData<I extends Item> = {
@@ -68,12 +69,13 @@ export const InfiniteWindow = <
   page,
   isMobile,
   items,
+  useItems = useMoreItems,
   MemoisedItem,
 }: Props<I, P, E>): React.ReactElement => {
   const olderExists = useSelector(getOlderExists(page));
   const itemCount = olderExists ? items.length + 1 : items.length;
 
-  const loadMore = useMoreItems(page);
+  const loadMore = useItems(page);
 
   const itemData = useMemo<ItemData<I>>(() => ({ items, olderExists }), [items, olderExists]);
 

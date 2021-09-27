@@ -17,3 +17,25 @@ export const MoreListDataStandard = gql`
     }
   }
 `;
+
+export const MoreIncomeData = gql`
+  query MoreIncomeData($offset: Int!, $limit: Int!) {
+    readIncome(offset: $offset, limit: $limit) {
+      items {
+        id
+        date
+        item
+        cost
+        category
+        shop
+        deductions {
+          name
+          value
+        }
+      }
+      total
+      weekly
+      olderExists
+    }
+  }
+`;

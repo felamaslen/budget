@@ -1,7 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { FormFieldCostInline } from '../cost';
 import { FormFieldDateInline } from '../date';
+import { useModalFocus } from '../metadata/hooks';
+import * as StyledCommon from '../metadata/styles';
 import { FormFieldNumberInline } from '../number';
 import { Wrapper, WrapperProps } from '../shared';
 
@@ -19,7 +21,6 @@ import { useSingleStockSplitField, useStockSplitsField } from './use-stock-split
 import { useSingleTransactionField, useTransactionsField } from './use-transactions-field';
 import { emptyComposite, emptyStockSplits, emptyTransactions, getComponentKey } from './utils';
 
-import { useCTA } from '~client/hooks';
 import { ButtonAdd, ButtonDelete, FlexColumn } from '~client/styled/shared';
 import type { StockSplitNative, TransactionNative } from '~client/types';
 
@@ -34,7 +35,7 @@ const FormFieldStockSplitInline: React.FC<PropsFormFieldStockSplit> = ({
   const { onChangeDate, onChangeRatio } = useSingleStockSplitField(props.onChange, props.index);
 
   return (
-    <Styled.ComponentListItem
+    <StyledCommon.ComponentListItem
       data-testid={create ? 'stock-split-create-input' : 'stock-split-edit-input'}
     >
       <Styled.StockSplitRowDate>
@@ -50,7 +51,7 @@ const FormFieldStockSplitInline: React.FC<PropsFormFieldStockSplit> = ({
         />
       </Styled.StockSplitRowRatio>
       {children}
-    </Styled.ComponentListItem>
+    </StyledCommon.ComponentListItem>
   );
 };
 
@@ -65,15 +66,15 @@ const TabModeStockSplits: React.FC<PropsTabModeStockSplits> = ({
 
   return (
     <>
-      <Styled.ModalHead>
+      <StyledCommon.ModalHead>
         <Styled.ModalHeadStockSplitDate>Date</Styled.ModalHeadStockSplitDate>
         <Styled.ModalHeadRatio>Ratio</Styled.ModalHeadRatio>
-      </Styled.ModalHead>
-      <Styled.ComponentList>
+      </StyledCommon.ModalHead>
+      <StyledCommon.ComponentList>
         <FormFieldStockSplitInline item={newItem} onChange={onChangeAddField} create>
-          <Styled.ComponentRowButton>
+          <StyledCommon.ComponentRowButton>
             <ButtonAdd onClick={onCreate}>+</ButtonAdd>
-          </Styled.ComponentRowButton>
+          </StyledCommon.ComponentRowButton>
         </FormFieldStockSplitInline>
         {items.map((item, index) => (
           <FormFieldStockSplitInline
@@ -87,7 +88,7 @@ const TabModeStockSplits: React.FC<PropsTabModeStockSplits> = ({
             </span>
           </FormFieldStockSplitInline>
         ))}
-      </Styled.ComponentList>
+      </StyledCommon.ComponentList>
     </>
   );
 };
@@ -110,7 +111,7 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
   } = useSingleTransactionField(props.onChange, props.index);
 
   return (
-    <Styled.ComponentListItem
+    <StyledCommon.ComponentListItem
       data-testid={create ? 'transaction-create-input' : 'transaction-edit-input'}
       isDrip={props.item.drip}
     >
@@ -138,7 +139,7 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
         </Styled.TransactionRowSmall>
       </FlexColumn>
       {children}
-    </Styled.ComponentListItem>
+    </StyledCommon.ComponentListItem>
   );
 };
 
@@ -153,16 +154,16 @@ const TabModeTransactions: React.FC<PropsTabModeTransactions> = ({
 
   return (
     <>
-      <Styled.ModalHead>
+      <StyledCommon.ModalHead>
         <Styled.ModalHeadTransactionDate>Date</Styled.ModalHeadTransactionDate>
         <Styled.ModalHeadUnits>Units</Styled.ModalHeadUnits>
         <Styled.ModalHeadPrice>Price</Styled.ModalHeadPrice>
-      </Styled.ModalHead>
-      <Styled.ComponentList>
+      </StyledCommon.ModalHead>
+      <StyledCommon.ComponentList>
         <FormFieldTransactionInline item={newItem} onChange={onChangeAddField} create>
-          <Styled.ComponentRowButton>
+          <StyledCommon.ComponentRowButton>
             <ButtonAdd onClick={onCreate}>+</ButtonAdd>
-          </Styled.ComponentRowButton>
+          </StyledCommon.ComponentRowButton>
         </FormFieldTransactionInline>
         {items.map((item, index) => (
           <FormFieldTransactionInline
@@ -176,7 +177,7 @@ const TabModeTransactions: React.FC<PropsTabModeTransactions> = ({
             </span>
           </FormFieldTransactionInline>
         ))}
-      </Styled.ComponentList>
+      </StyledCommon.ComponentList>
     </>
   );
 };
@@ -191,30 +192,8 @@ export const FormFieldFundMetadata: React.FC<PropsComposite> = ({
   onChange,
   ...props
 }) => {
-  const blurred = useRef<boolean>(false);
-  const [focused, setFocused] = useState<boolean>(!!props.active);
   const [tabMode, setTabMode] = useState<TabMode>('transactions');
-  const modalRef = useRef<HTMLDivElement>(null);
-  const onToggleModal = useCallback(
-    () => setFocused((last) => (blurred.current ? last : !last)),
-    [],
-  );
-  const onBlurModal = useCallback((): void => {
-    blurred.current = true;
-    window.setTimeout(() => {
-      if (!modalRef.current?.contains(document.activeElement)) {
-        setFocused(false);
-      }
-      setTimeout(() => {
-        blurred.current = false;
-      }, 500);
-    }, 0);
-  }, []);
-  useEffect(() => {
-    setFocused(!!props.active);
-  }, [props.active]);
-
-  const toggleEvents = useCTA(onToggleModal);
+  const { ref, focused, toggleEvents, onBlurModal } = useModalFocus(props.active);
 
   const onChangeTransactions = useCallback(
     (transactions: TransactionNative[] = []) =>
@@ -230,11 +209,11 @@ export const FormFieldFundMetadata: React.FC<PropsComposite> = ({
 
   return (
     <Wrapper item="transactions">
-      <Styled.NumTransactions active={props.active} {...toggleEvents}>
+      <StyledCommon.InactiveToggleIndicator active={props.active} {...toggleEvents}>
         {value.transactions.length}
-      </Styled.NumTransactions>
+      </StyledCommon.InactiveToggleIndicator>
       {focused && (
-        <Styled.ComponentModal ref={modalRef} onBlur={onBlurModal}>
+        <StyledCommon.ComponentModal ref={ref} onBlur={onBlurModal}>
           <Styled.TabBar>
             <Styled.TabButton
               active={tabMode === 'transactions'}
@@ -249,15 +228,15 @@ export const FormFieldFundMetadata: React.FC<PropsComposite> = ({
               Stock splits
             </Styled.TabButton>
           </Styled.TabBar>
-          <Styled.ModalInner>
+          <StyledCommon.ModalInner>
             {tabMode === 'transactions' && (
               <TabModeTransactions value={value.transactions} onChange={onChangeTransactions} />
             )}
             {tabMode === 'stockSplits' && (
               <TabModeStockSplits value={value.stockSplits} onChange={onChangeStockSplits} />
             )}
-          </Styled.ModalInner>
-        </Styled.ComponentModal>
+          </StyledCommon.ModalInner>
+        </StyledCommon.ComponentModal>
       )}
     </Wrapper>
   );

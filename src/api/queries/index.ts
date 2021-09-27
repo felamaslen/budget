@@ -3,6 +3,7 @@ export * from './buckets';
 export * from './date-union';
 export * from './fund-value-cost';
 export * from './funds';
+export * from './income';
 export * from './list';
 export * from './list-cost-summary';
 export * from './net-worth';

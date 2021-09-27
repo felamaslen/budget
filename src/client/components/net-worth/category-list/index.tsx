@@ -12,7 +12,6 @@ import {
 import { CREATE_ID } from '~client/constants/data';
 import { OnCreate, OnUpdate, OnDelete } from '~client/hooks';
 import { Button, ButtonDelete } from '~client/styled/shared';
-import type { Create } from '~client/types';
 import { NetWorthCategoryType } from '~client/types/enum';
 import type {
   NetWorthCategory as Category,
@@ -21,6 +20,7 @@ import type {
   NetWorthSubcategory as Subcategory,
   NetWorthSubcategoryInput,
 } from '~client/types/gql';
+import type { Create } from '~shared/types';
 
 const typeOptions: SelectOptions<Category['type'] | 'option'> = [
   { internal: NetWorthCategoryType.Asset, external: 'Asset' },

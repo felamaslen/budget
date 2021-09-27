@@ -23,7 +23,6 @@ import {
   updateAllocationTarget,
   selectAllocationTargetSum,
   selectIndividualFullFundHistory,
-  selectStockSplits,
   upsertStockSplits,
 } from '~api/queries';
 import {
@@ -35,6 +34,7 @@ import {
   FundHistoryIndividual,
   FundPeriod,
   FundPrices,
+  FundSubscription,
   Maybe,
   MutationCreateFundArgs,
   MutationDeleteFundArgs,
@@ -195,20 +195,21 @@ export async function createFund(
     upsertTransactions(db, uid, id, input.transactions),
   ]);
 
-  const [overviewCost, stockSplits, cashTotal] = await Promise.all([
+  const [overviewCost, cashTotal] = await Promise.all([
     getDisplayedFundValues(db, uid, new Date()),
-    selectStockSplits(db, uid, id),
     readNetWorthCashTotal(db, uid),
   ]);
 
-  pubsub.publish(`${PubSubTopic.FundCreated}.${uid}`, {
-    id,
-    fakeId,
-    item: {
-      item: input.item,
-      allocationTarget: input.allocationTarget,
-      transactions: input.transactions,
-      stockSplits,
+  pubsub.publish<FundSubscription>(`${PubSubTopic.FundsChanged}.${uid}`, {
+    created: {
+      fakeId,
+      item: {
+        id,
+        item: input.item,
+        allocationTarget: input.allocationTarget,
+        transactions: input.transactions,
+        stockSplits: input.stockSplits ?? [],
+      },
     },
     overviewCost,
   });
@@ -249,20 +250,18 @@ export async function updateFund(
     await updateFundCacheItemReference(db, fundsWithSameName[0].item, previousItem);
   }
 
-  const [overviewCost, stockSplits, cashTotal] = await Promise.all([
+  const [overviewCost, cashTotal] = await Promise.all([
     getDisplayedFundValues(db, uid, new Date()),
-    selectStockSplits(db, uid, id),
     readNetWorthCashTotal(db, uid),
   ]);
 
-  pubsub.publish(`${PubSubTopic.FundUpdated}.${uid}`, {
-    id,
-    fakeId: null,
-    item: {
+  pubsub.publish<FundSubscription>(`${PubSubTopic.FundsChanged}.${uid}`, {
+    updated: {
+      id,
       item: input.item,
       allocationTarget: input.allocationTarget,
       transactions: input.transactions,
-      stockSplits,
+      stockSplits: input.stockSplits ?? [],
     },
     overviewCost,
   });
@@ -282,7 +281,10 @@ export async function deleteFund(
     getDisplayedFundValues(db, uid, new Date()),
     readNetWorthCashTotal(db, uid),
   ]);
-  await pubsub.publish(`${PubSubTopic.FundDeleted}.${uid}`, { id, overviewCost });
+  await pubsub.publish<FundSubscription>(`${PubSubTopic.FundsChanged}.${uid}`, {
+    deleted: id,
+    overviewCost,
+  });
   await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { error: null };

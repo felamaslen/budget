@@ -102,14 +102,40 @@ export const generateListData = async (
 ): Promise<void> => {
   await db.query(sql`DELETE FROM list_standard WHERE uid = ${uid}`);
 
+  const incomeIdRows = await db.query<{ id: number }>(sql`
+  INSERT INTO list_standard (uid, page, date, item, category, value, shop)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, PageListStandard.Income, '2015-04-18', 'Salary', 'Main job', 470242, 'My company'],
+      [uid, PageListStandard.Income, '2018-03-24', 'Salary', 'Side work', 433201, 'Contract'],
+      [uid, PageListStandard.Income, '2020-04-05', 'Salary', 'Side work', 15422, 'Contract'],
+      [uid, PageListStandard.Income, '2020-04-11', 'Salary', 'Main job', 366729, 'My company'],
+    ],
+    ['int4', 'page_category', 'date', 'text', 'text', 'int4', 'text'],
+  )}
+  RETURNING id
+  `);
+
+  await db.query(sql`
+  INSERT INTO income_deductions (list_id, name, value)
+  SELECT * FROM ${sql.unnest(
+    [
+      [incomeIdRows.rows[0].id, 'Income tax', -105040],
+      [incomeIdRows.rows[0].id, 'NI', -39872],
+      [incomeIdRows.rows[1].id, 'VAT', -39765],
+      [incomeIdRows.rows[1].id, 'Pension', -10520],
+      [incomeIdRows.rows[2].id, 'Pension', -3629],
+      [incomeIdRows.rows[2].id, 'VAT', -1550],
+      [incomeIdRows.rows[3].id, 'NI', -41395],
+    ],
+    ['int4', 'text', 'int4'],
+  )}
+  `);
+
   await db.query(sql`
   INSERT INTO list_standard (uid, page, date, item, category, value, shop)
   SELECT * FROM ${sql.unnest(
     [
-      [uid, PageListStandard.Income, '2015-04-18', 'Salary', 'Main job', 365202, 'My company'],
-      [uid, PageListStandard.Income, '2018-03-24', 'Salary', 'Side work', 433201, 'Contract'],
-      [uid, PageListStandard.Income, '2020-04-05', 'Salary', 'Side work', 15422, 'Contract'],
-      [uid, PageListStandard.Income, '2020-04-11', 'Salary', 'Main job', 366729, 'My company'],
       [uid, PageListStandard.Bills, '2018-03-25', 'Rent', 'Housing', 72500, 'My bank'],
       [
         uid,

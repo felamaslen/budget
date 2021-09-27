@@ -3,6 +3,7 @@ import shortid from 'shortid';
 
 import { FormFieldCost } from '../cost';
 import { FormFieldDate } from '../date';
+import * as StyledCommon from '../metadata/styles';
 import { FormFieldNumber } from '../number';
 import { Wrapper } from '../shared';
 import { FormFieldTickbox } from '../tickbox';
@@ -33,29 +34,29 @@ const FormFieldStockSplit: React.FC<PropsFormFieldStockSplit> = ({
   const id = useMemo(() => shortid.generate(), []);
 
   return (
-    <Styled.ComponentListItem
+    <StyledCommon.ComponentListItem
       data-testid={create ? 'stock-split-create-input' : 'stock-split-edit-input'}
     >
-      <Styled.ComponentFields>
+      <StyledCommon.ComponentFields>
         <Styled.StockSplitRowDate>
           <Styled.TransactionLabel>
             <label htmlFor={`date-${id}`}>Date:</label>
           </Styled.TransactionLabel>
-          <Styled.ComponentCol>
+          <StyledCommon.ComponentCol>
             <FormFieldDate id={`date-${id}`} value={date} onChange={onChangeDate} />
-          </Styled.ComponentCol>
+          </StyledCommon.ComponentCol>
         </Styled.StockSplitRowDate>
         <Styled.StockSplitRowRatio>
           <Styled.TransactionLabel>
             <label htmlFor={`ratio-${id}`}>Ratio:</label>
           </Styled.TransactionLabel>
-          <Styled.ComponentCol>
+          <StyledCommon.ComponentCol>
             <FormFieldNumber id={`ratio-${id}`} value={ratio} onChange={onChangeRatio} />
-          </Styled.ComponentCol>
+          </StyledCommon.ComponentCol>
         </Styled.StockSplitRowRatio>
-      </Styled.ComponentFields>
+      </StyledCommon.ComponentFields>
       {children}
-    </Styled.ComponentListItem>
+    </StyledCommon.ComponentListItem>
   );
 };
 export const FormFieldStockSplits: React.FC<PropsFormFieldModalStockSplits> = ({
@@ -68,11 +69,11 @@ export const FormFieldStockSplits: React.FC<PropsFormFieldModalStockSplits> = ({
 
   return (
     <Wrapper item="stockSplits" invalid={invalid}>
-      <Styled.ComponentList>
+      <StyledCommon.ComponentList>
         <FormFieldStockSplit item={newItem} onChange={onChangeAddField} create>
-          <Styled.ComponentRowButton>
+          <StyledCommon.ComponentRowButton>
             <ButtonAdd onClick={onCreate}>+</ButtonAdd>
-          </Styled.ComponentRowButton>
+          </StyledCommon.ComponentRowButton>
         </FormFieldStockSplit>
         {items.map((item, index) => (
           <FormFieldStockSplit
@@ -81,12 +82,12 @@ export const FormFieldStockSplits: React.FC<PropsFormFieldModalStockSplits> = ({
             index={index}
             onChange={onUpdate}
           >
-            <Styled.ComponentRowButton>
+            <StyledCommon.ComponentRowButton>
               <ButtonDelete onClick={(): void => onDelete(index)}>&minus;</ButtonDelete>
-            </Styled.ComponentRowButton>
+            </StyledCommon.ComponentRowButton>
           </FormFieldStockSplit>
         ))}
-      </Styled.ComponentList>
+      </StyledCommon.ComponentList>
     </Wrapper>
   );
 };
@@ -111,62 +112,62 @@ const FormFieldTransaction: React.FC<PropsFormFieldTransaction> = ({
   const id = useMemo(() => shortid.generate(), []);
 
   return (
-    <Styled.ComponentListItem
+    <StyledCommon.ComponentListItem
       data-testid={create ? 'transaction-create-input' : 'transaction-edit-input'}
       isDrip={props.item.drip}
     >
-      <Styled.ComponentFields>
+      <StyledCommon.ComponentFields>
         <Styled.TransactionRowDate>
           <Styled.TransactionLabel>
             <label htmlFor={`date-${id}`}>Date:</label>
           </Styled.TransactionLabel>
-          <Styled.ComponentCol>
+          <StyledCommon.ComponentCol>
             <FormFieldDate id={`date-${id}`} value={date} onChange={onChangeDate} />
-          </Styled.ComponentCol>
+          </StyledCommon.ComponentCol>
         </Styled.TransactionRowDate>
         <Styled.TransactionRowUnits>
           <Styled.TransactionLabel>
             <label htmlFor={`units-${id}`}>Units:</label>
           </Styled.TransactionLabel>
-          <Styled.ComponentCol>
+          <StyledCommon.ComponentCol>
             <FormFieldNumber id={`units-${id}`} value={units} onChange={onChangeUnits} />
-          </Styled.ComponentCol>
+          </StyledCommon.ComponentCol>
         </Styled.TransactionRowUnits>
         <Styled.TransactionRowPrice>
           <Styled.TransactionLabel>
             <label htmlFor={`price-${id}`}>Price:</label>
           </Styled.TransactionLabel>
-          <Styled.ComponentCol>
+          <StyledCommon.ComponentCol>
             <FormFieldNumber id={`price-${id}`} value={price} onChange={onChangePrice} />
-          </Styled.ComponentCol>
+          </StyledCommon.ComponentCol>
         </Styled.TransactionRowPrice>
         <Styled.TransactionRowSmall>
           <Styled.TransactionLabel>
             <label htmlFor={`fees-${id}`}>Fees:</label>
           </Styled.TransactionLabel>
-          <Styled.ComponentCol>
+          <StyledCommon.ComponentCol>
             <FormFieldCost id={`fees-${id}`} value={fees} onChange={onChangeFees} />
-          </Styled.ComponentCol>
+          </StyledCommon.ComponentCol>
         </Styled.TransactionRowSmall>
         <Styled.TransactionRowSmall>
           <Styled.TransactionLabel>
             <label htmlFor={`taxes-${id}`}>Taxes:</label>
           </Styled.TransactionLabel>
-          <Styled.ComponentCol>
+          <StyledCommon.ComponentCol>
             <FormFieldCost id={`taxes-${id}`} value={taxes} onChange={onChangeTaxes} />
-          </Styled.ComponentCol>
+          </StyledCommon.ComponentCol>
         </Styled.TransactionRowSmall>
         <Styled.TransactionRowSmall>
           <Styled.TransactionLabel>
             <label htmlFor={`drip-${id}`}>DRIP:</label>
           </Styled.TransactionLabel>
-          <Styled.ComponentCol>
+          <StyledCommon.ComponentCol>
             <FormFieldTickbox id={`drip-${id}`} value={drip} onChange={onChangeDrip} />
-          </Styled.ComponentCol>
+          </StyledCommon.ComponentCol>
         </Styled.TransactionRowSmall>
-      </Styled.ComponentFields>
+      </StyledCommon.ComponentFields>
       {children}
-    </Styled.ComponentListItem>
+    </StyledCommon.ComponentListItem>
   );
 };
 
@@ -180,11 +181,11 @@ export const FormFieldTransactions: React.FC<PropsFormFieldModalTransactions> = 
 
   return (
     <Wrapper item="transactions" invalid={invalid}>
-      <Styled.ComponentList>
+      <StyledCommon.ComponentList>
         <FormFieldTransaction item={newItem} onChange={onChangeAddField} create>
-          <Styled.ComponentRowButton>
+          <StyledCommon.ComponentRowButton>
             <ButtonAdd onClick={onCreate}>+</ButtonAdd>
-          </Styled.ComponentRowButton>
+          </StyledCommon.ComponentRowButton>
         </FormFieldTransaction>
         {items.map((item, index) => (
           <FormFieldTransaction
@@ -193,12 +194,12 @@ export const FormFieldTransactions: React.FC<PropsFormFieldModalTransactions> = 
             index={index}
             onChange={onUpdate}
           >
-            <Styled.ComponentRowButton>
+            <StyledCommon.ComponentRowButton>
               <ButtonDelete onClick={(): void => onDelete(index)}>&minus;</ButtonDelete>
-            </Styled.ComponentRowButton>
+            </StyledCommon.ComponentRowButton>
           </FormFieldTransaction>
         ))}
-      </Styled.ComponentList>
+      </StyledCommon.ComponentList>
     </Wrapper>
   );
 };

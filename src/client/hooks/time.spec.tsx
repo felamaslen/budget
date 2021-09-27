@@ -3,33 +3,25 @@ import endOfDay from 'date-fns/endOfDay';
 import endOfSecond from 'date-fns/endOfSecond';
 import startOfSecond from 'date-fns/startOfSecond';
 import React, { useEffect } from 'react';
-import sinon from 'sinon';
 
-import { useToday, useNow } from './time';
+import { NowProvider, TodayProvider, useNow, useToday } from './time';
+import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe('Time hooks', () => {
   const now = new Date('2020-04-20T13:25:10.783Z');
-
-  let clock: sinon.SinonFakeTimers;
-
-  beforeEach(() => {
-    clock = sinon.useFakeTimers(now);
-  });
-  afterEach(() => {
-    clock.restore();
-  });
+  const mockedTime = mockTimeOnly(now);
 
   const ticksToEndOfDay = endOfDay(now).getTime() - now.getTime();
   const ticksToEndOfSecond = endOfSecond(now).getTime() - now.getTime();
 
   describe.each`
-    hook          | useHook     | roundTo     | roundFn          | ticksToNext
-    ${'useToday'} | ${useToday} | ${'day'}    | ${endOfDay}      | ${ticksToEndOfDay}
-    ${'useNow'}   | ${useNow}   | ${'second'} | ${startOfSecond} | ${ticksToEndOfSecond}
-  `('$hook', ({ useHook, roundTo, roundFn, ticksToNext }) => {
+    hook          | useHook     | Provider         | roundTo     | roundFn          | ticksToNext
+    ${'useToday'} | ${useToday} | ${TodayProvider} | ${'day'}    | ${endOfDay}      | ${ticksToEndOfDay}
+    ${'useNow'}   | ${useNow}   | ${NowProvider}   | ${'second'} | ${startOfSecond} | ${ticksToEndOfSecond}
+  `('$hook', ({ Provider, useHook, roundTo, roundFn, ticksToNext }) => {
     const callback = jest.fn();
 
-    const TestComponent: React.FC = () => {
+    const Child: React.FC = () => {
       const time = useHook();
       useEffect(() => {
         callback(time);
@@ -38,7 +30,13 @@ describe('Time hooks', () => {
       return <span>{time.toISOString()}</span>;
     };
 
-    const setup = (): RenderResult => render(<TestComponent />);
+    const Parent: React.FC = () => (
+      <Provider>
+        <Child />
+      </Provider>
+    );
+
+    const setup = (): RenderResult => render(<Parent />);
 
     it(`should return the current time, rounded to the ${roundTo}`, () => {
       expect.assertions(1);
@@ -51,11 +49,11 @@ describe('Time hooks', () => {
       setup();
       expect(callback).toHaveBeenCalledTimes(1);
       act(() => {
-        clock.tick(ticksToNext - 1);
+        mockedTime.clock.tick(ticksToNext - 1);
       });
       expect(callback).toHaveBeenCalledTimes(1);
       act(() => {
-        clock.tick(1000);
+        mockedTime.clock.tick(1000);
       });
       expect(callback).toHaveBeenCalledTimes(2);
     });

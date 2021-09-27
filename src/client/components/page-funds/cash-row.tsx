@@ -1,10 +1,10 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as Styled from './styles';
 import { cashTargetUpdated, allocationTargetsUpdated } from '~client/actions';
 import { FundAllocationTargets } from '~client/components/fund-allocation-targets';
-import { TodayContext } from '~client/hooks';
+import { useToday } from '~client/hooks';
 import * as gql from '~client/hooks/gql';
 import {
   getCashBreakdown,
@@ -15,7 +15,7 @@ import {
 import type { TargetDelta } from '~client/types/gql';
 
 export const CashRow: React.FC = () => {
-  const today = useContext(TodayContext);
+  const today = useToday();
 
   const dispatch = useDispatch();
   const funds = useSelector(getFundsRows);

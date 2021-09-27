@@ -6,6 +6,7 @@ export {
   FormFieldTransactions,
   FormFieldStockSplits,
 } from './fund-metadata';
+export { FormFieldIncomeMetadata, FormFieldIncomeDeductions } from './income-metadata';
 export { FormFieldNetWorthValue } from './net-worth-value';
 export { FormFieldNumber } from './number';
 export { FormFieldRange } from './range';

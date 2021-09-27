@@ -3,7 +3,9 @@ import React from 'react';
 import sinon from 'sinon';
 import numericHash from 'string-hash';
 
-import { ModalDialog, Props, animationTime, makeField } from '.';
+import { animationTime } from './hooks';
+import type { Props } from './types';
+import { ModalDialog, makeField } from '.';
 import { FormFieldText, FormFieldCost, FormFieldDate } from '~client/components/form-field';
 import { CREATE_ID } from '~client/constants/data';
 import type { Id } from '~client/types';
