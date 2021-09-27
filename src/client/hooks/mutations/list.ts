@@ -9,12 +9,13 @@ import { useFetchingState } from './crud';
 import { errorOpened, listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import * as gql from '~client/hooks/gql';
-import { omitTypeName, toRawFund, withRawDate } from '~client/modules/data';
+import { omitTypeName, toRawFund, toRawIncome, withRawDate } from '~client/modules/data';
 
 import type { FundInputNative, Id, PageList, StandardInput, WithIds } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 import type {
   FundInput,
+  Income,
   IncomeInput,
   ListItemInput,
   ListItemStandardInput,
@@ -208,7 +209,7 @@ export function useListCrudStandard(page: PageListStandard): ListCrud<StandardIn
 }
 
 const incomeOptions: GenericHookOptions<
-  NativeDate<IncomeInput, 'date'>,
+  NativeDate<Income, 'date'>,
   IncomeInput,
   PageListStandard.Income,
   MutationCreateIncomeArgs,
@@ -229,20 +230,17 @@ const incomeOptions: GenericHookOptions<
   getArgs: {
     create: (input, fakeId): MutationCreateIncomeArgs => ({
       fakeId,
-      input: withRawDate<'date', typeof input>('date')(omit(input, '__typename', 'id')),
+      input: toRawIncome(input),
     }),
     update: (id, delta, item): MutationUpdateIncomeArgs => ({
       id,
-      input: withRawDate<'date', NativeDate<IncomeInput, 'date'>>('date')({
-        ...omit(item, '__typename', 'id'),
-        ...delta,
-      }),
+      input: toRawIncome({ ...item, ...delta }),
     }),
     delete: (id): MutationDeleteIncomeArgs => ({ id }),
   },
 };
 
-export function useListCrudIncome(): ListCrud<NativeDate<IncomeInput, 'date'>> {
+export function useListCrudIncome(): ListCrud<NativeDate<Income, 'date'>> {
   return useListCrudGeneric(incomeOptions);
 }
 

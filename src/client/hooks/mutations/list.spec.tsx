@@ -25,6 +25,7 @@ import {
   CreateIncomeDocument,
   DeleteIncomeDocument,
   Income,
+  IncomeDeductionInput,
   IncomeInput,
   MutationCreateIncomeArgs,
   MutationUpdateIncomeArgs,
@@ -291,21 +292,26 @@ describe('List mutations', () => {
   });
 
   describe(useListCrudIncome.name, () => {
-    const testIncome: WithIds<NativeDate<IncomeInput, 'date'>> = {
+    const testIncome: NativeDate<Income, 'date'> = {
+      __typename: 'Income',
       id: 129,
       date: new Date('2020-04-20'),
       item: 'Salary',
       cost: 708333,
       category: 'Work',
       shop: 'Some company',
-      deductions: [{ name: 'Income tax', value: -195030 }],
+      deductions: [{ __typename: 'IncomeDeduction', name: 'Income tax', value: -195030 }],
     };
 
     const testIncomeDelta: Partial<NativeDate<IncomeInput, 'date'>> = {
       item: 'Different salary',
       deductions: [
-        { name: 'Income tax', value: -195030 },
-        { name: 'SAYE', value: -50000 },
+        {
+          __typename: 'IncomeDeduction',
+          name: 'Income tax',
+          value: -195030,
+        } as IncomeDeductionInput,
+        { __typename: 'IncomeDeduction', name: 'SAYE', value: -50000 } as IncomeDeductionInput,
       ],
     };
 

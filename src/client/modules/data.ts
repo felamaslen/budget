@@ -17,9 +17,17 @@ import type {
   StockSplitNative,
   TransactionNative,
 } from '~client/types';
-import type { Fund, FundInput, ListItem, NetWorthEntryInput } from '~client/types/gql';
+import type {
+  Fund,
+  FundInput,
+  Income,
+  IncomeDeductionInput,
+  IncomeInput,
+  ListItem,
+  NetWorthEntryInput,
+} from '~client/types/gql';
 import { calculateTransactionCost } from '~shared/funds';
-import type { Create, GQLShallow, NativeDate, RawDate } from '~shared/types';
+import type { Create, GQL, GQLShallow, NativeDate, RawDate } from '~shared/types';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -261,6 +269,19 @@ export const toRawFund = (input: FundInputNative): FundInput => ({
   transactions: input.transactions.map(withRawDate('date')),
   stockSplits: input.stockSplits.map(withRawDate('date')),
 });
+
+export const toRawIncome = (
+  input: NativeDate<Income, 'date'> | NativeDate<IncomeInput, 'date'>,
+): IncomeInput =>
+  omit(
+    {
+      ...input,
+      date: toISO(input.date),
+      deductions: (input.deductions as GQL<IncomeDeductionInput>[]).map(omitTypeName),
+    },
+    'id',
+    '__typename',
+  );
 
 export const toRawNetWorthEntry = (input: Create<NetWorthEntryNative>): NetWorthEntryInput => ({
   ...input,
