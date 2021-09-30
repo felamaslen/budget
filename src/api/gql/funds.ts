@@ -8,6 +8,7 @@ export const fundsSchema = gql`
     fees: Int!
     taxes: Int!
     drip: Boolean!
+    pension: Boolean!
   }
   input TransactionInput {
     date: Date!
@@ -16,6 +17,7 @@ export const fundsSchema = gql`
     fees: Int!
     taxes: Int!
     drip: Boolean!
+    pension: Boolean!
   }
 
   type StockSplit {

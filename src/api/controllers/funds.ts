@@ -1,4 +1,5 @@
 import { addYears, addMonths, getUnixTime, startOfYear } from 'date-fns';
+import { omit, uniqBy } from 'lodash';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -24,12 +25,16 @@ import {
   selectAllocationTargetSum,
   selectIndividualFullFundHistory,
   upsertStockSplits,
+  JoinedFundRow,
+  JoinedFundRowWithTransactions,
+  JoinedFundRowWithStockSplits,
 } from '~api/queries';
 import {
   AsyncReturnType,
   CrudResponseCreate,
   CrudResponseDelete,
   CrudResponseUpdate,
+  Fund,
   FundHistory,
   FundHistoryIndividual,
   FundPeriod,
@@ -45,7 +50,9 @@ import {
   QueryFundHistoryArgs,
   QueryFundHistoryIndividualArgs,
   ReadFundsResponse,
+  StockSplit,
   TargetDeltaResponse,
+  Transaction,
   UpdatedFundAllocationTargets,
 } from '~api/types';
 
@@ -218,11 +225,47 @@ export async function createFund(
   return { id };
 }
 
+const hasTransactions = (row: JoinedFundRow): row is JoinedFundRowWithTransactions =>
+  !!row.transaction_ids[0];
+
+const hasStockSplits = (row: JoinedFundRow): row is JoinedFundRowWithStockSplits =>
+  !!row.stock_split_ids[0];
+
 export async function readFunds(
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<ReadFundsResponse> {
-  const items = await selectFundsItems(db, uid);
+  const joinedRows = await selectFundsItems(db, uid);
+  const items = joinedRows.map<Fund>((row) => ({
+    id: row.id,
+    item: row.item,
+    allocationTarget: row.allocation_target,
+    transactions: hasTransactions(row)
+      ? uniqBy(
+          row.transaction_ids.map<Transaction & { id: number }>((id, index) => ({
+            id,
+            date: new Date(row.transaction_dates[index]),
+            units: row.transaction_units[index],
+            price: row.transaction_prices[index],
+            fees: row.transaction_fees[index],
+            taxes: row.transaction_taxes[index],
+            drip: row.transaction_drip[index],
+            pension: row.transaction_pension[index],
+          })),
+          'id',
+        ).map((tr) => omit(tr, 'id'))
+      : [],
+    stockSplits: hasStockSplits(row)
+      ? uniqBy(
+          row.stock_split_ids.map<StockSplit & { id: number }>((id, index) => ({
+            id,
+            date: new Date(row.stock_split_dates[index]),
+            ratio: row.stock_split_ratios[index],
+          })),
+          'id',
+        ).map((tr) => omit(tr, 'id'))
+      : [],
+  }));
   return { items };
 }
 

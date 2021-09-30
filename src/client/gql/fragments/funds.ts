@@ -12,6 +12,7 @@ export const FundParts = gql`
       fees
       taxes
       drip
+      pension
     }
     stockSplits {
       date

@@ -37,20 +37,33 @@ const selectSingleDate = (date: Date): TaggedTemplateLiteralInvocationType => sq
   limit 1
 `;
 
-const joinFundPrices = (uid: number): TaggedTemplateLiteralInvocationType => sql`
+const joinFundPrices = (
+  uid: number,
+  includePension = false,
+): TaggedTemplateLiteralInvocationType => sql`
   from cache_at_date c 
   inner join fund_cache fc on fc.cid = c.cid
   inner join fund_scrape fs on fs.fid = fc.fid
 
   inner join funds f on f.uid = ${uid} and fs.item = f.item
-  inner join funds_transactions ft on ft.fund_id = f.id and ft.date <= c.time
+  inner join funds_transactions ft on ${sql.join(
+    [
+      sql`ft.fund_id = f.id`,
+      sql`ft.date <= c.time`,
+      includePension ? undefined : sql`not ft.is_pension`,
+    ].filter((condition): condition is TaggedTemplateLiteralInvocationType => !!condition),
+    sql` and `,
+  )}
 
   left join funds_stock_splits fss on fss.fund_id = f.id
     and fss.date > ft.date
     and fss.date <= c.time
 `;
 
-const selectRebasedFundValues = (uid: number): TaggedTemplateLiteralInvocationType => sql`
+const selectRebasedFundValues = (
+  uid: number,
+  includePension?: boolean,
+): TaggedTemplateLiteralInvocationType => sql`
   select ${sql.join(
     [
       sql`ft.fund_id`,
@@ -59,7 +72,7 @@ const selectRebasedFundValues = (uid: number): TaggedTemplateLiteralInvocationTy
     ],
     sql`, `,
   )}
-  ${joinFundPrices(uid)}
+  ${joinFundPrices(uid, includePension)}
   group by ft.fund_id, ft.units, fc.price, c.time
 `;
 
@@ -73,7 +86,7 @@ export async function getMonthlyTotalFundValues(
     [
       sql`dates as (${getEndOfMonthUnion(monthEnds)})`,
       sql`cache_at_date AS (${selectAllDatesInRange(monthEnds)})`,
-      sql`funds_rebased as (${selectRebasedFundValues(uid)})`,
+      sql`funds_rebased as (${selectRebasedFundValues(uid, false)})`,
     ],
     sql`, `,
   )}
@@ -102,7 +115,7 @@ export async function getTotalFundValue(
   WITH ${sql.join(
     [
       sql`cache_at_date as (${selectSingleDate(atDate)})`,
-      sql`funds_rebased as (${selectRebasedFundValues(uid)})`,
+      sql`funds_rebased as (${selectRebasedFundValues(uid, true)})`,
     ],
     sql`, `,
   )}
@@ -137,7 +150,7 @@ export async function selectUnitsWithPrice(
           ],
           sql`, `,
         )}
-        ${joinFundPrices(uid)}
+        ${joinFundPrices(uid, true)}
         group by f.item, ft.units, fc.price
       )`,
     ],

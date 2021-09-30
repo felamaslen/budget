@@ -13,6 +13,7 @@ describe('Funds controller', () => {
         fees: 230,
         taxes: 11,
         drip: false,
+        pension: false,
       },
       {
         date: new Date('2016-10-09'),
@@ -21,6 +22,7 @@ describe('Funds controller', () => {
         fees: 138,
         taxes: 0,
         drip: false,
+        pension: false,
       },
       {
         date: new Date('2017-04-30'),
@@ -29,6 +31,7 @@ describe('Funds controller', () => {
         fees: 150,
         taxes: 50,
         drip: false,
+        pension: false,
       },
       {
         date: new Date('2018-10-11'),
@@ -37,6 +40,7 @@ describe('Funds controller', () => {
         fees: 237,
         taxes: 33000,
         drip: false,
+        pension: false,
       },
     ];
 
@@ -59,6 +63,7 @@ describe('Funds controller', () => {
               fees: 185,
               taxes: 43,
               drip: true,
+              pension: false,
             },
           ]),
         ).toBe(
@@ -71,6 +76,7 @@ describe('Funds controller', () => {
               fees: 185,
               taxes: 43,
               drip: true,
+              pension: false,
             },
           ]),
         );
@@ -85,6 +91,7 @@ describe('Funds controller', () => {
         fees: 5,
         taxes: 6,
         drip: false,
+        pension: false,
       },
     ];
 
@@ -113,6 +120,7 @@ describe('Funds controller', () => {
             fees: 8,
             taxes: 0,
             drip: false,
+            pension: false,
           },
           {
             date: new Date('2016-09-19'),
@@ -121,6 +129,7 @@ describe('Funds controller', () => {
             fees: 16,
             taxes: 0,
             drip: false,
+            pension: false,
           },
           {
             date: new Date('2016-09-19'),
@@ -129,6 +138,7 @@ describe('Funds controller', () => {
             fees: 0,
             taxes: 0,
             drip: false,
+            pension: false,
           },
           {
             date: new Date('2017-02-14'),
@@ -137,6 +147,7 @@ describe('Funds controller', () => {
             fees: 0,
             taxes: 0,
             drip: false,
+            pension: false,
           },
           {
             date: new Date('2017-04-27'),
@@ -145,6 +156,7 @@ describe('Funds controller', () => {
             fees: 0,
             taxes: 0,
             drip: false,
+            pension: false,
           },
           {
             date: new Date('2020-04-20'),
@@ -153,6 +165,7 @@ describe('Funds controller', () => {
             fees: 1199,
             taxes: 1776,
             drip: false,
+            pension: false,
           },
         ]);
         expect(result).not.toBeNaN();

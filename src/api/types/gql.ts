@@ -1031,6 +1031,7 @@ export type Transaction = {
   fees: Scalars['Int'];
   taxes: Scalars['Int'];
   drip: Scalars['Boolean'];
+  pension: Scalars['Boolean'];
 };
 
 export type TransactionInput = {
@@ -1040,6 +1041,7 @@ export type TransactionInput = {
   fees: Scalars['Int'];
   taxes: Scalars['Int'];
   drip: Scalars['Boolean'];
+  pension: Scalars['Boolean'];
 };
 
 export type UpdatedFundAllocationTargets = {
@@ -2021,6 +2023,7 @@ export type TransactionResolvers<ContextType = Context, ParentType extends Resol
   fees?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   taxes?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   drip?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  pension?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

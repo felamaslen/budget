@@ -23,8 +23,24 @@ describe(FormFieldFundMetadata.name, () => {
   });
 
   const transactions: Transaction[] = [
-    { date: new Date('2017-11-10'), units: 10.5, price: 9.76, fees: 10, taxes: 3, drip: false },
-    { date: new Date('2018-09-05'), units: -3, price: 1.3, fees: 4, taxes: 2, drip: false },
+    {
+      date: new Date('2017-11-10'),
+      units: 10.5,
+      price: 9.76,
+      fees: 10,
+      taxes: 3,
+      drip: false,
+      pension: false,
+    },
+    {
+      date: new Date('2018-09-05'),
+      units: -3,
+      price: 1.3,
+      fees: 4,
+      taxes: 2,
+      drip: false,
+      pension: false,
+    },
   ];
   const stockSplits: StockSplitNative[] = [
     { date: new Date('2020-04-20'), ratio: 10 },
@@ -288,7 +304,7 @@ describe(FormFieldFundMetadata.name, () => {
 
     describe('when editing transactions', () => {
       it('should handle adding a transaction', () => {
-        expect.assertions(12);
+        expect.assertions(10);
         const { getByTestId, getByText } = setup();
 
         const inputGroup = getByTestId('transaction-create-input');
@@ -298,14 +314,21 @@ describe(FormFieldFundMetadata.name, () => {
 
         const inputDate = inputs[0];
         const inputDRIP = inputs[1];
-        const inputUnits = inputs[2];
-        const inputPrice = inputs[3];
-        const inputFees = inputs[4];
-        const inputTaxes = inputs[5];
+        const inputPension = inputs[2];
+        const inputUnits = inputs[3];
+        const inputPrice = inputs[4];
+        const inputFees = inputs[5];
+        const inputTaxes = inputs[6];
 
-        [inputDate, inputDRIP, inputUnits, inputPrice, inputFees, inputTaxes].forEach((input) =>
-          expect(input).toBeInTheDocument(),
-        );
+        [
+          inputDate,
+          inputDRIP,
+          inputPension,
+          inputUnits,
+          inputPrice,
+          inputFees,
+          inputTaxes,
+        ].forEach((input) => expect(input).toBeInTheDocument());
 
         const buttonAdd = getByText('+');
 
@@ -315,12 +338,13 @@ describe(FormFieldFundMetadata.name, () => {
         act(() => {
           fireEvent.blur(inputDate);
         });
-        expect(props.onChange).not.toHaveBeenCalled();
 
         act(() => {
           fireEvent.click(inputDRIP);
         });
-        expect(props.onChange).not.toHaveBeenCalled();
+        act(() => {
+          fireEvent.click(inputPension);
+        });
 
         act(() => {
           fireEvent.change(inputUnits, { target: { value: '562.23' } });
@@ -328,7 +352,6 @@ describe(FormFieldFundMetadata.name, () => {
         act(() => {
           fireEvent.blur(inputUnits);
         });
-        expect(props.onChange).not.toHaveBeenCalled();
 
         act(() => {
           fireEvent.change(inputPrice, { target: { value: '1.72' } });
@@ -369,6 +392,7 @@ describe(FormFieldFundMetadata.name, () => {
               taxes: 437,
               fees: 522,
               drip: true,
+              pension: true,
             }),
           ],
         });
@@ -483,7 +507,7 @@ describe(FormFieldFundMetadata.name, () => {
           expect.assertions(3);
           const { getAllByRole } = setup();
 
-          const inputDrip = getAllByRole('checkbox')[displayIndex + 1];
+          const inputDrip = getAllByRole('checkbox')[(displayIndex + 1) * 2];
           expect(inputDrip).toBeInTheDocument();
 
           act(() => {
@@ -500,6 +524,32 @@ describe(FormFieldFundMetadata.name, () => {
             transactions: expect.arrayContaining(
               partialModification(value.transactions, valueIndex, {
                 drip: true,
+              }),
+            ),
+          });
+        });
+
+        it('should handle pension input', () => {
+          expect.assertions(3);
+          const { getAllByRole } = setup();
+
+          const inputPension = getAllByRole('checkbox')[(displayIndex + 1) * 2 + 1];
+          expect(inputPension).toBeInTheDocument();
+
+          act(() => {
+            fireEvent.click(inputPension);
+          });
+
+          act(() => {
+            jest.runAllTimers();
+          });
+
+          expect(props.onChange).toHaveBeenCalledTimes(1);
+          expect(props.onChange).toHaveBeenCalledWith({
+            stockSplits: value.stockSplits,
+            transactions: expect.arrayContaining(
+              partialModification(value.transactions, valueIndex, {
+                pension: true,
               }),
             ),
           });

@@ -244,7 +244,15 @@ describe('Funds controller', () => {
           item: 'Some fund',
           allocationTarget: 37,
           transactions: [
-            { date: new Date('2020-04-20'), units: 3, price: 21, fees: 13, taxes: 7, drip: false },
+            {
+              date: new Date('2020-04-20'),
+              units: 3,
+              price: 21,
+              fees: 13,
+              taxes: 7,
+              drip: false,
+              pension: false,
+            },
           ],
         },
       };
@@ -268,6 +276,7 @@ describe('Funds controller', () => {
                   fees: 13,
                   taxes: 7,
                   drip: false,
+                  pension: false,
                 },
               ],
               stockSplits: [],
@@ -300,7 +309,15 @@ describe('Funds controller', () => {
         item: 'Some fund',
         allocationTarget: 37,
         transactions: [
-          { date: new Date('2020-04-20'), units: 3, price: 21, fees: 13, taxes: 7, drip: false },
+          {
+            date: new Date('2020-04-20'),
+            units: 3,
+            price: 21,
+            fees: 13,
+            taxes: 7,
+            drip: false,
+            pension: false,
+          },
         ],
         stockSplits: [{ date: new Date('2020-05-10'), ratio: 6 }],
       };
@@ -332,6 +349,7 @@ describe('Funds controller', () => {
                 fees: 13,
                 taxes: 7,
                 drip: false,
+                pension: false,
               },
             ],
             stockSplits: [{ date: new Date('2020-05-10'), ratio: 6 }],

@@ -390,7 +390,15 @@ describe(useListSubscriptions.name, () => {
                 id: 8912,
                 item: 'my fund',
                 transactions: [
-                  { date: '2020-04-20', units: 1, price: 2, fees: 3, taxes: 4, drip: true },
+                  {
+                    date: '2020-04-20',
+                    units: 1,
+                    price: 2,
+                    fees: 3,
+                    taxes: 4,
+                    drip: true,
+                    pension: true,
+                  },
                 ],
                 stockSplits: [{ date: '2020-04-21', ratio: 10 }],
               },
@@ -416,13 +424,21 @@ describe(useListSubscriptions.name, () => {
       const actions = store.getActions();
       expect(actions).toStrictEqual(
         expect.arrayContaining([
-          listItemCreated(
+          listItemCreated<FundNative, PageNonStandard.Funds>(
             PageNonStandard.Funds,
             {
               id: 8912,
               item: 'my fund',
               transactions: [
-                { date: new Date('2020-04-20'), units: 1, price: 2, fees: 3, taxes: 4, drip: true },
+                {
+                  date: new Date('2020-04-20'),
+                  units: 1,
+                  price: 2,
+                  fees: 3,
+                  taxes: 4,
+                  drip: true,
+                  pension: true,
+                },
               ],
               stockSplits: [{ date: new Date('2020-04-21'), ratio: 10 }],
             },
@@ -448,7 +464,15 @@ describe(useListSubscriptions.name, () => {
               id: 8912,
               item: 'my fund',
               transactions: [
-                { date: '2020-04-20', units: 1, price: 2, fees: 3, taxes: 4, drip: true },
+                {
+                  date: '2020-04-20',
+                  units: 1,
+                  price: 2,
+                  fees: 3,
+                  taxes: 4,
+                  drip: true,
+                  pension: true,
+                },
               ],
               stockSplits: [{ date: '2020-04-21', ratio: 10 }],
             },
@@ -480,7 +504,15 @@ describe(useListSubscriptions.name, () => {
               id: 8912,
               item: 'my fund',
               transactions: [
-                { date: new Date('2020-04-20'), units: 1, price: 2, fees: 3, taxes: 4, drip: true },
+                {
+                  date: new Date('2020-04-20'),
+                  units: 1,
+                  price: 2,
+                  fees: 3,
+                  taxes: 4,
+                  drip: true,
+                  pension: true,
+                },
               ],
               stockSplits: [{ date: new Date('2020-04-21'), ratio: 10 }],
             },

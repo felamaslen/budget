@@ -28,6 +28,7 @@ describe('Overview selectors', () => {
                 fees: 3,
                 taxes: 0,
                 drip: false,
+                pension: false,
               },
               {
                 date: new Date('2018-03-27'),
@@ -36,6 +37,7 @@ describe('Overview selectors', () => {
                 fees: 0.72,
                 taxes: 0,
                 drip: false,
+                pension: false,
               },
             ],
             stockSplits: [],
@@ -52,6 +54,7 @@ describe('Overview selectors', () => {
                 fees: 3,
                 taxes: 0,
                 drip: false,
+                pension: false,
               },
             ],
             stockSplits: [],
@@ -748,6 +751,37 @@ describe('Overview selectors', () => {
       });
     });
 
+    it('should not include pension stock transactions in the stocks value', () => {
+      expect.assertions(1);
+      const resultWithoutPension = getOverviewGraphValues(now, 0)(testState);
+      const resultWithPension = getOverviewGraphValues(
+        now,
+        0,
+      )({
+        ...testState,
+        [PageNonStandard.Funds]: {
+          ...testState[PageNonStandard.Funds],
+          items: testState[PageNonStandard.Funds].items.map((row) => ({
+            ...row,
+            transactions: [
+              ...row.transactions,
+              {
+                date: new Date('2016-01-02'),
+                units: 10000,
+                price: 10000,
+                taxes: 100,
+                fees: 100,
+                drip: false,
+                pension: true,
+              },
+            ],
+          })),
+        },
+      });
+
+      expect(resultWithPension.values.stocks).toStrictEqual(resultWithoutPension.values.stocks);
+    });
+
     describe('when there are updated fund prices', () => {
       const testStateWithFundPrices: State = {
         ...testState,
@@ -765,6 +799,7 @@ describe('Overview selectors', () => {
                   fees: 10,
                   taxes: 11,
                   drip: false,
+                  pension: false,
                 },
               ],
               stockSplits: [],

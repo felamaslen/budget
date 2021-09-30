@@ -35,8 +35,8 @@ import { forecastCompoundedReturns } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import {
   filterPastTransactions,
-  getFundsCachedValue,
   getFundsCostToDate,
+  getFundsValueTodayWithoutPension,
 } from '~client/selectors/funds';
 import { getFundsRows } from '~client/selectors/funds/helpers';
 import {
@@ -414,11 +414,10 @@ const withStocks = <G extends OverviewGraphPartial>(
   dates: OverviewGraphDate[],
   stocks: number[],
   funds: Fund[],
-  fundsCachedValue: { value: number },
+  currentStockValue: number,
   annualisedFundReturns: number,
 ) => (graph: G): OverviewGraphRequired<'stocks' | 'stockCostBasis', G> => {
   const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
-  const currentStockValue = fundsCachedValue.value;
 
   return {
     ...graph,
@@ -490,7 +489,7 @@ const getFundsMonthlyComposer = moize(
       getGraphDates(today, longTermOptions),
       getStockValues,
       getFundsRows,
-      getFundsCachedValue.today(today),
+      getFundsValueTodayWithoutPension(today),
       getAnnualisedFundReturns,
       withStocks(numOldMonths, longTermOptions),
     ),

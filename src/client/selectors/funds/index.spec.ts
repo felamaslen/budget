@@ -11,6 +11,7 @@ import {
   getMaxAllocationTarget,
   getStockValue,
   getInvestmentsBetweenDates,
+  getFundsValueTodayWithoutPension,
 } from '.';
 
 import type { State } from '~client/reducers';
@@ -99,6 +100,7 @@ describe('Funds selectors', () => {
             fees: 0,
             taxes: 0,
             drip: false,
+            pension: false,
           },
         ],
         stockSplits: [],
@@ -117,6 +119,7 @@ describe('Funds selectors', () => {
             fees: 0,
             taxes: 0,
             drip: false,
+            pension: false,
           },
         ],
         stockSplits: [],
@@ -145,6 +148,38 @@ describe('Funds selectors', () => {
         dayGainAbs: getDayGainAbs(stateNoPrice),
         value: 399098.2,
       });
+    });
+  });
+
+  describe('getFundsValueTodayWithoutPension', () => {
+    const stateWithPension: State = {
+      ...state,
+      [PageNonStandard.Funds]: {
+        ...state[PageNonStandard.Funds],
+        items: [
+          {
+            ...state[PageNonStandard.Funds].items[0],
+            transactions: [
+              ...state[PageNonStandard.Funds].items[0].transactions,
+              {
+                ...state[PageNonStandard.Funds].items[0].transactions[0],
+                pension: true,
+              },
+            ],
+            stockSplits: [],
+          },
+          ...state[PageNonStandard.Funds].items.slice(1),
+        ],
+      },
+    };
+
+    it('should get the total fund value, skipping pension transactions', () => {
+      expect.assertions(2);
+      const resultWithPension = getFundsValueTodayWithoutPension(testNow)(stateWithPension);
+      const resultWithoutPension = getFundsValueTodayWithoutPension(testNow)(state);
+
+      expect(resultWithPension).toStrictEqual(resultWithoutPension);
+      expect(resultWithoutPension).toBe(399098.2);
     });
   });
 
@@ -357,6 +392,7 @@ describe('Funds selectors', () => {
                   fees: 652,
                   taxes: 4763,
                   drip: false,
+                  pension: false,
                 },
                 {
                   date: new Date('2018-02-28'),
@@ -365,6 +401,7 @@ describe('Funds selectors', () => {
                   fees: 165,
                   taxes: 9965,
                   drip: false,
+                  pension: false,
                 },
                 {
                   date: new Date('2018-03-21'),
@@ -373,6 +410,7 @@ describe('Funds selectors', () => {
                   fees: 449,
                   taxes: 6694,
                   drip: false,
+                  pension: false,
                 },
               ],
               stockSplits: [],

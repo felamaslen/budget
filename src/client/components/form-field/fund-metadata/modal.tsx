@@ -98,7 +98,7 @@ const FormFieldTransaction: React.FC<PropsFormFieldTransaction> = ({
   ...props
 }) => {
   const {
-    item: { date, units, price, fees, taxes, drip },
+    item: { date, units, price, fees, taxes, drip, pension },
   } = props;
   const {
     onChangeDate,
@@ -107,6 +107,7 @@ const FormFieldTransaction: React.FC<PropsFormFieldTransaction> = ({
     onChangeFees,
     onChangeTaxes,
     onChangeDrip,
+    onChangePension,
   } = useSingleTransactionField(props.onChange, props.index);
 
   const id = useMemo(() => shortid.generate(), []);
@@ -163,6 +164,14 @@ const FormFieldTransaction: React.FC<PropsFormFieldTransaction> = ({
           </Styled.TransactionLabel>
           <StyledCommon.ComponentCol>
             <FormFieldTickbox id={`drip-${id}`} value={drip} onChange={onChangeDrip} />
+          </StyledCommon.ComponentCol>
+        </Styled.TransactionRowSmall>
+        <Styled.TransactionRowSmall>
+          <Styled.TransactionLabel>
+            <label htmlFor={`pension-${id}`}>Pension:</label>
+          </Styled.TransactionLabel>
+          <StyledCommon.ComponentCol>
+            <FormFieldTickbox id={`pension-${id}`} value={pension} onChange={onChangePension} />
           </StyledCommon.ComponentCol>
         </Styled.TransactionRowSmall>
       </StyledCommon.ComponentFields>

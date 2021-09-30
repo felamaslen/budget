@@ -80,18 +80,18 @@ export const generateFunds = async (
   `);
 
   await db.query(sql`
-  INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes)
+  INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes, is_drip, is_pension)
   SELECT * FROM ${sql.unnest(
     [
-      [fundIds[0], '2014-10-13', 1005.2, 1139.92, 10, 14],
-      [fundIds[0], '2015-08-21', -1005.2, 1549.03, 5, 204],
-      [fundIds[2], '2016-09-19', 1678.42, 119.15, 16, 0],
-      [fundIds[2], '2017-02-14', 846.38, 118.15, 0, 0],
-      [fundIds[0], '2016-08-24', 89.095, 1122.3, 8, 0],
-      [fundIds[0], '2016-09-19', 894.134, 111.84, 0, 0],
-      [fundIds[0], '2017-04-27', -883.229, 101.898, 0, 0],
+      [fundIds[0], '2014-10-13', 1005.2, 1139.92, 10, 14, false, false],
+      [fundIds[0], '2015-08-21', -1005.2, 1549.03, 5, 204, false, false],
+      [fundIds[2], '2016-09-19', 1678.42, 119.15, 16, 0, false, false],
+      [fundIds[2], '2017-02-14', 846.38, 118.15, 0, 0, false, false],
+      [fundIds[0], '2016-08-24', 89.095, 1122.3, 8, 0, false, false],
+      [fundIds[0], '2016-09-19', 894.134, 111.84, 0, 0, false, false],
+      [fundIds[0], '2017-04-27', -883.229, 101.898, 0, 0, false, false],
     ],
-    ['int4', 'date', 'float8', 'float8', 'int4', 'int4'],
+    ['int4', 'date', 'float8', 'float8', 'int4', 'int4', 'bool', 'bool'],
   )}
   `);
 };

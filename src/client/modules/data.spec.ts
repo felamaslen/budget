@@ -88,6 +88,7 @@ describe('data module', () => {
       fees: 172,
       taxes: 0,
       drip: false,
+      pension: false,
     },
     {
       date: new Date('2018-03-13T00:00:00.000Z'),
@@ -96,6 +97,7 @@ describe('data module', () => {
       fees: 7,
       taxes: 6,
       drip: false,
+      pension: false,
     },
     {
       date: new Date('2018-06-07T00:00:00.000Z'),
@@ -104,6 +106,7 @@ describe('data module', () => {
       fees: 390,
       taxes: 0,
       drip: false,
+      pension: false,
     },
     {
       date: new Date('2018-04-26T00:00:00.000Z'),
@@ -112,6 +115,7 @@ describe('data module', () => {
       fees: 91,
       taxes: 0,
       drip: false,
+      pension: false,
     },
   ];
 
@@ -139,7 +143,7 @@ describe('data module', () => {
         key: keyof Transaction;
         newValue: Transaction[keyof Transaction];
       }) => {
-        expect.assertions(10);
+        expect.assertions(11);
 
         const modifiedTransactionsList = partialModification(transactionsList, index, {
           [key]: newValue,
@@ -220,6 +224,7 @@ describe('data module', () => {
                 fees: 0,
                 taxes: 0,
                 drip: false,
+                pension: false,
               },
               {
                 date: new Date('2020-04-13'),
@@ -228,6 +233,7 @@ describe('data module', () => {
                 fees: 0,
                 taxes: 0,
                 drip: false,
+                pension: false,
               },
               {
                 date: new Date('2020-04-20'),
@@ -236,6 +242,7 @@ describe('data module', () => {
                 fees: 0,
                 taxes: 0,
                 drip: false,
+                pension: false,
               },
             ],
             [
@@ -599,6 +606,7 @@ describe('data module', () => {
               fees: 99,
               taxes: 771,
               drip: false,
+              pension: false,
             },
           ],
           stockSplits: [{ __typename: 'StockSplit', date: '2020-04-03', ratio: 5 }],
@@ -615,6 +623,7 @@ describe('data module', () => {
             fees: 99,
             taxes: 771,
             drip: false,
+            pension: false,
           },
         ],
         stockSplits: [{ date: new Date('2020-04-03'), ratio: 5 }],
@@ -637,6 +646,7 @@ describe('data module', () => {
               fees: 99,
               taxes: 771,
               drip: false,
+              pension: false,
             },
           ],
           stockSplits: [],
@@ -652,6 +662,7 @@ describe('data module', () => {
             fees: 99,
             taxes: 771,
             drip: false,
+            pension: false,
           },
         ],
         stockSplits: [],

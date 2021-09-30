@@ -1109,6 +1109,7 @@ export type Transaction = {
   fees: Scalars['Int'];
   taxes: Scalars['Int'];
   drip: Scalars['Boolean'];
+  pension: Scalars['Boolean'];
 };
 
 export type TransactionInput = {
@@ -1118,6 +1119,7 @@ export type TransactionInput = {
   fees: Scalars['Int'];
   taxes: Scalars['Int'];
   drip: Scalars['Boolean'];
+  pension: Scalars['Boolean'];
 };
 
 export type UpdatedFundAllocationTargets = {
@@ -1153,7 +1155,7 @@ export type FundPartsFragment = (
   & Pick<Fund, 'id' | 'item' | 'allocationTarget'>
   & { transactions: Array<(
     { __typename?: 'Transaction' }
-    & Pick<Transaction, 'date' | 'units' | 'price' | 'fees' | 'taxes' | 'drip'>
+    & Pick<Transaction, 'date' | 'units' | 'price' | 'fees' | 'taxes' | 'drip' | 'pension'>
   )>, stockSplits: Array<(
     { __typename?: 'StockSplit' }
     & Pick<StockSplit, 'date' | 'ratio'>
@@ -2178,6 +2180,7 @@ export const FundPartsFragmentDoc = gql`
     fees
     taxes
     drip
+    pension
   }
   stockSplits {
     date

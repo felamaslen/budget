@@ -504,6 +504,7 @@ describe('List mutations', () => {
           fees: 132,
           taxes: 19,
           drip: false,
+          pension: false,
         },
       ],
       stockSplits: [{ date: new Date('2021-03-01'), ratio: 10 }],

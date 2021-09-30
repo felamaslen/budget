@@ -53,7 +53,15 @@ describe('Funds resolver', () => {
   const fundInput: RawDateFundInput = {
     item: 'My fund',
     transactions: [
-      { date: '2020-04-20', units: 69, price: 949.35, fees: 1199, taxes: 1776, drip: false },
+      {
+        date: '2020-04-20',
+        units: 69,
+        price: 949.35,
+        fees: 1199,
+        taxes: 1776,
+        drip: false,
+        pension: false,
+      },
     ],
     allocationTarget: 20,
     stockSplits: [
@@ -439,6 +447,7 @@ describe('Funds resolver', () => {
               fees
               taxes
               drip
+              pension
             }
             stockSplits {
               date
@@ -475,13 +484,14 @@ describe('Funds resolver', () => {
           item: 'My fund',
           allocationTarget: 20,
           transactions: [
-            expect.objectContaining({
+            expect.objectContaining<RawDate<Transaction, 'date'>>({
               date: '2020-04-20',
               units: 69,
               price: 949.35,
               fees: 1199,
               taxes: 1776,
               drip: false,
+              pension: false,
             }),
           ],
           stockSplits: [expect.objectContaining({ date: '2020-04-11', ratio: 8 })],
@@ -721,6 +731,73 @@ describe('Funds resolver', () => {
       ]);
     });
 
+    it('should not include pension transactions', async () => {
+      expect.assertions(2);
+
+      await seedData(app.uid);
+
+      const clock = sinon.useFakeTimers(new Date('2018-04-20'));
+
+      await app.authGqlClient.clearStore();
+      const resPrevious = await app.authGqlClient.query<Query, QueryFundHistoryArgs>({
+        query,
+      });
+
+      await getPool().connect(async (db) => {
+        const fundIdRows = await db.query<{ id: number }>(sql`
+        SELECT id FROM funds WHERE uid = ${app.uid}
+        `);
+        await db.query(sql`
+        INSERT INTO funds_transactions (fund_id, date, units, price, fees, taxes, is_drip, is_pension)
+        SELECT * FROM ${sql.unnest(
+          fundIdRows.rows.map((row) => [row.id, '2014-01-01', 10000, 10000, 0, 0, false, true]),
+          ['int4', 'date', 'float8', 'float8', 'int4', 'int4', 'bool', 'bool'],
+        )}
+        `);
+      });
+
+      await app.authGqlClient.clearStore();
+      const res = await app.authGqlClient.query<Query, QueryFundHistoryArgs>({
+        query,
+      });
+
+      clock.restore();
+
+      expect(res?.data.fundHistory?.overviewCost).toStrictEqual(
+        resPrevious?.data.fundHistory?.overviewCost,
+      );
+      expect(res?.data.fundHistory?.overviewCost).toMatchInlineSnapshot(`
+        Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          281978,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ]
+      `);
+    });
+
     it('should return the prices for each fund', async () => {
       expect.assertions(1);
       const { res, fundId } = await setup();
@@ -883,14 +960,14 @@ describe('Funds resolver', () => {
       expect.assertions(2);
       const res = await setup();
       expect(res?.latestValue).toStrictEqual(expect.any(Number));
-      expect(res?.latestValue).toMatchInlineSnapshot(`359169`);
+      expect(res?.latestValue).toMatchInlineSnapshot(`24423492`);
     });
 
     it('should return the previous value', async () => {
       expect.assertions(2);
       const res = await setup();
       expect(res?.previousValue).toStrictEqual(expect.any(Number));
-      expect(res?.previousValue).toMatchInlineSnapshot(`38217`);
+      expect(res?.previousValue).toMatchInlineSnapshot(`2598756`);
     });
 
     it('should set and return the refresh time', async () => {
@@ -913,8 +990,24 @@ describe('Funds resolver', () => {
       ...fundInput,
       item: altFundName,
       transactions: [
-        { date: '2020-04-20', units: 69, price: 42.8, fees: 87, taxes: 0, drip: true },
-        { date: '2020-04-29', units: 123, price: 100.3, fees: 0, taxes: 104, drip: false },
+        {
+          date: '2020-04-20',
+          units: 69,
+          price: 42.8,
+          fees: 87,
+          taxes: 0,
+          drip: true,
+          pension: false,
+        },
+        {
+          date: '2020-04-29',
+          units: 123,
+          price: 100.3,
+          fees: 0,
+          taxes: 104,
+          drip: false,
+          pension: true,
+        },
       ],
       allocationTarget: 15,
       stockSplits: [
@@ -993,6 +1086,7 @@ describe('Funds resolver', () => {
             fees: 87,
             taxes: 0,
             is_drip: true,
+            is_pension: false,
           }),
           expect.objectContaining({
             date: new Date('2020-04-29'),
@@ -1001,6 +1095,7 @@ describe('Funds resolver', () => {
             fees: 0,
             taxes: 104,
             is_drip: false,
+            is_pension: true,
           }),
         ]),
       );

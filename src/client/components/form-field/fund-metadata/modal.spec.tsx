@@ -10,8 +10,24 @@ import { partialModification } from '~client/modules/data';
 import type { StockSplitNative, TransactionNative } from '~client/types';
 
 const transactions: TransactionNative[] = [
-  { date: new Date('2017-11-10'), units: 10.5, price: 9.76, fees: 10, taxes: 3, drip: false },
-  { date: new Date('2018-09-05'), units: -3, price: 1.3, fees: 4, taxes: 2, drip: false },
+  {
+    date: new Date('2017-11-10'),
+    units: 10.5,
+    price: 9.76,
+    fees: 10,
+    taxes: 3,
+    drip: false,
+    pension: false,
+  },
+  {
+    date: new Date('2018-09-05'),
+    units: -3,
+    price: 1.3,
+    fees: 4,
+    taxes: 2,
+    drip: false,
+    pension: false,
+  },
 ];
 const stockSplits: StockSplitNative[] = [
   { date: new Date('2020-04-20'), ratio: 10 },
@@ -218,13 +234,14 @@ describe(FormFieldTransactions.name, () => {
   const setupModal = (): RenderResult => render(<FormFieldTransactions {...props} />);
 
   it.each`
-    field      | label
-    ${'date'}  | ${'Date:'}
-    ${'units'} | ${'Units:'}
-    ${'price'} | ${'Price:'}
-    ${'fees'}  | ${'Fees:'}
-    ${'taxes'} | ${'Taxes:'}
-    ${'drip'}  | ${'DRIP:'}
+    field        | label
+    ${'date'}    | ${'Date:'}
+    ${'units'}   | ${'Units:'}
+    ${'price'}   | ${'Price:'}
+    ${'fees'}    | ${'Fees:'}
+    ${'taxes'}   | ${'Taxes:'}
+    ${'drip'}    | ${'DRIP:'}
+    ${'pension'} | ${'Pension:'}
   `('should render labels for the $field fields', ({ label }) => {
     expect.assertions(1);
     const { queryAllByText } = setupModal();
@@ -340,9 +357,9 @@ describe(FormFieldTransactions.name, () => {
 
     it('should handle toggling DRIP', async () => {
       expect.hasAssertions();
-      const { getAllByRole } = setupModal();
+      const { getAllByLabelText } = setupModal();
 
-      const inputDRIP = getAllByRole('checkbox')[displayIndex + 1];
+      const inputDRIP = getAllByLabelText('DRIP:')[displayIndex + 1];
       expect(inputDRIP).toBeInTheDocument();
 
       act(() => {
@@ -357,6 +374,30 @@ describe(FormFieldTransactions.name, () => {
         expect.arrayContaining(
           partialModification(value, valueIndex, {
             drip: true,
+          }),
+        ),
+      );
+    });
+
+    it('should handle toggling pension', async () => {
+      expect.hasAssertions();
+      const { getAllByLabelText } = setupModal();
+
+      const inputPension = getAllByLabelText('Pension:')[displayIndex + 1];
+      expect(inputPension).toBeInTheDocument();
+
+      act(() => {
+        fireEvent.click(inputPension);
+      });
+
+      await waitFor(() => {
+        expect(props.onChange).toHaveBeenCalledTimes(1);
+      });
+
+      expect(props.onChange).toHaveBeenCalledWith(
+        expect.arrayContaining(
+          partialModification(value, valueIndex, {
+            pension: true,
           }),
         ),
       );
@@ -424,7 +465,7 @@ describe(FormFieldTransactions.name, () => {
   });
 
   it('should handle adding a transaction', () => {
-    expect.assertions(14);
+    expect.assertions(10);
     const { getByTestId, getByText } = setupModal();
 
     const inputGroup = getByTestId('transaction-create-input');
@@ -438,10 +479,17 @@ describe(FormFieldTransactions.name, () => {
     const inputFees = inputs[3];
     const inputTaxes = inputs[4];
     const inputDRIP = inputs[5];
+    const inputPension = inputs[6];
 
-    [inputDate, inputUnits, inputPrice, inputFees, inputTaxes, inputDRIP].forEach((input) =>
-      expect(input).toBeInTheDocument(),
-    );
+    [
+      inputDate,
+      inputUnits,
+      inputPrice,
+      inputFees,
+      inputTaxes,
+      inputDRIP,
+      inputPension,
+    ].forEach((input) => expect(input).toBeInTheDocument());
 
     const buttonAdd = getByText('+');
 
@@ -451,7 +499,6 @@ describe(FormFieldTransactions.name, () => {
     act(() => {
       fireEvent.blur(inputDate);
     });
-    expect(props.onChange).not.toHaveBeenCalled();
 
     act(() => {
       fireEvent.change(inputUnits, { target: { value: '562.23' } });
@@ -459,7 +506,6 @@ describe(FormFieldTransactions.name, () => {
     act(() => {
       fireEvent.blur(inputUnits);
     });
-    expect(props.onChange).not.toHaveBeenCalled();
 
     act(() => {
       fireEvent.change(inputPrice, { target: { value: '1095.91' } });
@@ -468,16 +514,12 @@ describe(FormFieldTransactions.name, () => {
       fireEvent.blur(inputPrice);
     });
 
-    expect(props.onChange).not.toHaveBeenCalled();
-
     act(() => {
       fireEvent.change(inputFees, { target: { value: '43.56' } });
     });
     act(() => {
       fireEvent.blur(inputFees);
     });
-
-    expect(props.onChange).not.toHaveBeenCalled();
 
     act(() => {
       fireEvent.change(inputTaxes, { target: { value: '112.02' } });
@@ -486,10 +528,11 @@ describe(FormFieldTransactions.name, () => {
       fireEvent.blur(inputTaxes);
     });
 
-    expect(props.onChange).not.toHaveBeenCalled();
-
     act(() => {
       fireEvent.click(inputDRIP);
+    });
+    act(() => {
+      fireEvent.click(inputPension);
     });
 
     expect(props.onChange).not.toHaveBeenCalled();
@@ -507,6 +550,7 @@ describe(FormFieldTransactions.name, () => {
         fees: 4356,
         taxes: 11202,
         drip: true,
+        pension: true,
       }),
     ]);
   });

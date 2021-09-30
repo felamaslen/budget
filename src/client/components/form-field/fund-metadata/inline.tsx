@@ -99,7 +99,7 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
   ...props
 }) => {
   const {
-    item: { date, units, price, fees, taxes, drip },
+    item: { date, units, price, fees, taxes, drip, pension },
   } = props;
   const {
     onChangeDate,
@@ -108,6 +108,7 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
     onChangeFees,
     onChangeTaxes,
     onChangeDrip,
+    onChangePension,
   } = useSingleTransactionField(props.onChange, props.index);
 
   return (
@@ -120,6 +121,8 @@ const FormFieldTransactionInline: React.FC<PropsFormFieldTransaction> = ({
         <Styled.TransactionInlineDRIP>
           <span>DRIP:</span>
           <FormFieldTickbox value={drip} onChange={onChangeDrip} />
+          <span>SIPP:</span>
+          <FormFieldTickbox value={pension} onChange={onChangePension} />
         </Styled.TransactionInlineDRIP>
       </Styled.TransactionRowDate>
       <FlexColumn>

@@ -41,6 +41,7 @@ describe('<GraphFunds />', () => {
                     fees: 0,
                     taxes: 0,
                     drip: false,
+                    pension: false,
                   },
                 ],
                 stockSplits: [],
