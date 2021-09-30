@@ -9,6 +9,7 @@ type Props = {
 
 const pages: { page: Styled.NavPage; path?: string }[] = [
   { page: PageNonStandard.Overview, path: '/' },
+  { page: PageNonStandard.Planning },
   { page: PageNonStandard.Analysis },
   { page: PageNonStandard.Funds },
   { page: PageListStandard.Income },

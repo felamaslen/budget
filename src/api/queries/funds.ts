@@ -1,7 +1,8 @@
 import { sql, DatabaseTransactionConnectionType } from 'slonik';
 
 import { formatDate } from '~api/controllers/shared';
-import { Fund, PageNonStandard, StockSplit, TargetDelta, Transaction } from '~api/types';
+import { Fund, StockSplit, TargetDelta, Transaction } from '~api/types';
+import { PageNonStandard } from '~shared/constants';
 import { Create } from '~shared/types';
 
 export type FundMain = Omit<Fund, 'transactions' | 'stockSplits'>;

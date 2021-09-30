@@ -1,5 +1,12 @@
 import { FundMode, FundPeriod } from '~client/types/gql';
 
+export enum PageNonStandard {
+  Overview = 'overview',
+  Planning = 'planning',
+  Analysis = 'analysis',
+  Funds = 'funds',
+}
+
 export enum NetWorthAggregate {
   cashEasyAccess = 'Cash (easy access)',
   cashOther = 'Cash (other)',

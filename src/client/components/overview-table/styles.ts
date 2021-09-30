@@ -6,7 +6,7 @@ import nav1x from '~client/images/nav.png';
 import nav2x from '~client/images/nav@2x.png';
 import { breakpoint, unimportant } from '~client/styled/mixins';
 import { ButtonUnStyled } from '~client/styled/shared/reset';
-import { breakpoints, colors } from '~client/styled/variables';
+import { breakpoints, colors, navSpriteHeight, navSpriteWidth } from '~client/styled/variables';
 import type { OverviewHeader } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
@@ -206,7 +206,7 @@ export const AddReceiptButton = styled.span`
 
   @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     background-image: url(${nav2x});
-    background-size: 262px 88px;
+    background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
   }
 `;
 
@@ -219,7 +219,7 @@ export const BucketButton = styled.span`
 
   @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     background-image: url(${nav2x});
-    background-size: 262px 88px;
+    background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
   }
 `;
 

@@ -5,7 +5,13 @@ import nav1x from '~client/images/nav.png';
 import nav2x from '~client/images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
 import { Flex } from '~client/styled/shared';
-import { breakpoints, sizes, colors } from '~client/styled/variables';
+import {
+  breakpoints,
+  sizes,
+  colors,
+  navSpriteWidth,
+  navSpriteHeight,
+} from '~client/styled/variables';
 
 export const AppLogo = styled.div`
   display: flex;
@@ -60,7 +66,7 @@ export const Logo = styled.span`
     width: ${rem(sizes.logo)};
     @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
       background-image: url(${nav2x});
-      background-size: 262px 88px;
+      background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
     }
   }
 `;

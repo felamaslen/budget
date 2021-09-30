@@ -1,10 +1,5 @@
 import type { PageListStandard } from './gql';
-
-export enum PageNonStandard {
-  Overview = 'overview',
-  Analysis = 'analysis',
-  Funds = 'funds',
-}
+import type { PageNonStandard } from '~shared/constants';
 
 export type Page = PageNonStandard | PageListStandard;
 

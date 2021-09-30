@@ -1,10 +1,5 @@
-import { PageListStandard, ReceiptPage } from './gql';
-
-export enum PageNonStandard {
-  Overview = 'overview',
-  Analysis = 'analysis',
-  Funds = 'funds',
-}
+import type { PageListStandard, ReceiptPage } from './gql';
+import type { PageNonStandard } from '~shared/constants';
 
 export type PageListCost = PageListStandard | ReceiptPage;
 

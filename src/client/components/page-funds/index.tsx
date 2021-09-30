@@ -25,12 +25,8 @@ import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
 import { getFundsCache, getGainsForRow, getPricesForRow, getRowGains } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import {
-  Delta,
-  FundInputNative as FundInput,
-  FundNative as Fund,
-  PageNonStandard,
-} from '~client/types';
+import { Delta, FundInputNative as FundInput, FundNative as Fund } from '~client/types';
+import { PageNonStandard } from '~shared/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isSort = (value: any | Sort): value is Sort =>

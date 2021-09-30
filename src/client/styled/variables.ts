@@ -2,6 +2,7 @@ import { compose } from '@typed/compose';
 import { rgb, rgba, lighten, desaturate } from 'polished';
 
 import { ErrorLevel } from '~client/constants/error';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 import { NetWorthAggregate } from '~shared/constants';
 
 export const breakpoints = {
@@ -11,6 +12,9 @@ export const breakpoints = {
   tablet: 1200,
   desktop: 1325,
 };
+
+export const navSpriteWidth = 292;
+export const navSpriteHeight = 88;
 
 export const graphOverviewHeightMobile = 240;
 export const graphFundsHeightMobile = 125;
@@ -110,7 +114,7 @@ export const colors = {
     mobile: rgb(255, 163, 92),
     disabled: rgb(156, 156, 156),
   },
-  overview: {
+  [PageNonStandard.Overview]: {
     main: rgb(66, 66, 66),
     income: rgb(36, 191, 55),
     incomeMobile: rgb(183, 255, 163),
@@ -140,33 +144,36 @@ export const colors = {
       [NetWorthAggregate.mortgage]: rgb(180, 99, 122),
     },
   },
-  funds: {
+  [PageNonStandard.Planning]: {
+    main: rgb(33, 33, 33),
+  },
+  [PageNonStandard.Funds]: {
     main: colorStocks,
     profit: rgb(0, 204, 51),
     loss: rgb(204, 51, 0),
     fundUp: rgb(0, 230, 18),
     fundDown: rgb(255, 44, 44),
   },
-  income: {
+  [PageListStandard.Income]: {
     main: rgb(67, 216, 21),
     arrow: rgb(20, 93, 20),
   },
-  bills: {
+  [PageListStandard.Bills]: {
     main: rgb(183, 28, 28),
   },
-  food: {
+  [PageListStandard.Food]: {
     main: rgb(67, 160, 71),
   },
-  general: {
+  [PageListStandard.General]: {
     main: rgb(1, 87, 155),
   },
-  holiday: {
+  [PageListStandard.Holiday]: {
     main: rgb(0, 137, 123),
   },
-  social: {
+  [PageListStandard.Social]: {
     main: rgb(191, 158, 36),
   },
-  analysis: {
+  [PageNonStandard.Analysis]: {
     main: rgb(244, 167, 66),
   },
   blockIndex: [

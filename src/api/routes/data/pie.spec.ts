@@ -1,5 +1,6 @@
 import { getPieCols, processQueryResult } from './pie';
-import { PageNonStandard, PageListStandard } from '~api/types';
+import { PageListStandard } from '~api/types';
+import { PageNonStandard } from '~shared/constants';
 
 describe('Pie route', () => {
   describe('getPieCols', () => {

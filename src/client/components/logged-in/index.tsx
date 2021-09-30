@@ -21,6 +21,7 @@ const PageOverview = loadable(
   () => import(/* webpackPrefetch: true */ '~client/components/page-overview'),
   lazyOptions,
 );
+const PagePlanning = loadable(() => import('~client/components/planning'), lazyOptions);
 const PageAnalysis = loadable(() => import('~client/components/page-analysis'), lazyOptions);
 const PageFunds = loadable(() => import('~client/components/page-funds'), lazyOptions);
 const PageIncome = loadable(() => import('~client/components/page-list/income'), lazyOptions);
@@ -31,6 +32,7 @@ const PageHoliday = loadable(() => import('~client/components/page-list/holiday'
 const PageSocial = loadable(() => import('~client/components/page-list/social'), lazyOptions);
 
 const routes: RouteObject[] = [
+  { key: 'planning', component: hot(PagePlanning) },
   {
     key: 'analysis',
     path: '/analysis/:groupBy?/:period?/:page?',

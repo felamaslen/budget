@@ -107,8 +107,8 @@ describe('<AppLogo />', () => {
       @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
         .emotion-4::before {
           background-image: url(path/to/test/file);
-          -webkit-background-size: 262px 88px;
-          background-size: 262px 88px;
+          -webkit-background-size: 292px 88px;
+          background-size: 292px 88px;
         }
       }
 
@@ -394,8 +394,8 @@ describe('<AppLogo />', () => {
         @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
           .emotion-7::before {
             background-image: url(path/to/test/file);
-            -webkit-background-size: 262px 88px;
-            background-size: 262px 88px;
+            -webkit-background-size: 292px 88px;
+            background-size: 292px 88px;
           }
         }
 

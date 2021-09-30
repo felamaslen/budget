@@ -5,7 +5,13 @@ import { NavLink } from 'react-router-dom';
 import nav1x from '../../images/nav.png';
 import nav2x from '../../images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
-import { sizes, colors, breakpoints } from '~client/styled/variables';
+import {
+  sizes,
+  colors,
+  breakpoints,
+  navSpriteWidth,
+  navSpriteHeight,
+} from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 export const NavList = styled.nav`
@@ -39,6 +45,7 @@ type PageBackgroundPosition = Record<NavPage, string>;
 const pageBackgroundPositionMobile: PageBackgroundPosition = {
   logout: '-30px -59px',
   [PageNonStandard.Overview]: '-1px -1px',
+  [PageNonStandard.Planning]: '-263px -1px',
   [PageNonStandard.Analysis]: '-30px -1px',
   [PageNonStandard.Funds]: '-59px -1px',
   [PageListStandard.Income]: '-88px -1px',
@@ -52,6 +59,7 @@ const pageBackgroundPositionMobile: PageBackgroundPosition = {
 const pageBackgroundPositionDesktop: PageBackgroundPosition = {
   logout: '-58px -59px',
   [PageNonStandard.Overview]: '-1px -30px',
+  [PageNonStandard.Planning]: '-263px -30px',
   [PageNonStandard.Analysis]: '-30px -30px',
   [PageNonStandard.Funds]: '-59px -30px',
   [PageListStandard.Income]: '-88px -30px',
@@ -87,7 +95,7 @@ export const Link = styled(NavLink)<LinkProps>`
 
     @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
       background-image: url(${nav2x});
-      background-size: 262px 88px;
+      background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
     }
   }
 

@@ -1,4 +1,3 @@
-export { PageNonStandard } from './app';
 export { MainBlockName } from './analysis';
 export { RequestType } from './crud';
 export {
@@ -14,3 +13,4 @@ export {
   SearchItem,
   ReceiptPage,
 } from './gql';
+export { PageNonStandard } from '~shared/constants';

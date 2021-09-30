@@ -3,8 +3,9 @@ import { createSelector } from 'reselect';
 
 import { sortByKey } from '~client/modules/data';
 import type { State } from '~client/reducers/types';
-import type { CashTotalNative, NetWorthEntryNative, PageNonStandard } from '~client/types';
+import type { CashTotalNative, NetWorthEntryNative } from '~client/types';
 import type { Monthly, NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
+import type { PageNonStandard } from '~shared/constants';
 
 export const getCashTotal = (state: State): CashTotalNative => state.netWorth.cashTotal;
 

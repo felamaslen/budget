@@ -46,7 +46,6 @@ import {
   MutationUpdateCashAllocationTargetArgs,
   MutationUpdateFundAllocationTargetsArgs,
   MutationUpdateFundArgs,
-  PageNonStandard as Page,
   QueryFundHistoryArgs,
   QueryFundHistoryIndividualArgs,
   ReadFundsResponse,
@@ -55,9 +54,10 @@ import {
   Transaction,
   UpdatedFundAllocationTargets,
 } from '~api/types';
+import { PageNonStandard } from '~shared/constants';
 
 const baseController = makeCrudController<FundListRow, FundMain>({
-  table: Page.Funds,
+  table: PageNonStandard.Funds,
   item: 'Funds',
   dbMap: [{ external: 'allocationTarget', internal: 'allocation_target' }],
   withUid: true,

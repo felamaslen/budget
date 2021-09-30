@@ -16,9 +16,9 @@ import {
   receiptCreated,
 } from '~client/actions';
 import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
-import { FundNative, Id, PageNonStandard, StandardInput } from '~client/types';
+import { FundNative, Id, StandardInput } from '~client/types';
 
-import { PageListStandard } from '~client/types/enum';
+import { PageListStandard, PageNonStandard } from '~client/types/enum';
 import {
   FundsChangedDocument,
   FundsChangedSubscription,
