@@ -3,7 +3,7 @@ const baseConfig = require('./jest.config');
 module.exports = {
   ...baseConfig,
   testEnvironment: 'jsdom',
-  roots: ['./src/client'],
+  roots: ['./src/client', './src/shared'],
   moduleNameMapper: {
     '\\.(jpg|png)': '<rootDir>/src/client/test-utils/file-loader.js',
     '^file-loader': '<rootDir>/src/client/__mocks__/file-mock.js',

@@ -8,7 +8,7 @@ import {
   ActionTypeApi,
   ActionApiDataRead,
 } from '~client/actions';
-import { omitTypeName, sortByKey } from '~client/modules/data';
+import { sortByKey } from '~client/modules/data';
 import type {
   CashTotalNative,
   Id,
@@ -23,6 +23,7 @@ import type {
   NetWorthSubcategory as Subcategory,
 } from '~client/types/gql';
 import type { GQL } from '~shared/types';
+import { omitTypeName } from '~shared/utils';
 
 export type State = {
   categories: GQL<Category>[];

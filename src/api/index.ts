@@ -72,6 +72,8 @@ const singlePageAppRoutes: string[] = [
   '/buckets',
   '/net-worth',
   '/net-worth/*',
+  '/planning',
+  '/planning/*',
   '/analysis/:groupBy?/:period?/:page?',
   '/funds',
   '/income',
@@ -157,18 +159,18 @@ function setupErrorHandling(app: express.Express): void {
 function setupMiddleware(app: express.Express): void {
   app.use(
     helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: [`'self'`],
-          connectSrc: [`'self'`, `https://api.exchangeratesapi.io`],
-          imgSrc: [`'self'`, 'data:'],
-          styleSrc: [`'self'`, `'unsafe-inline'`],
-          scriptSrc:
-            process.env.NODE_ENV === 'development'
-              ? [`'self'`, `'unsafe-inline'`, `'unsafe-eval'`]
-              : [`'self'`, `'unsafe-inline'`],
-        },
-      },
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'development'
+          ? false
+          : {
+              directives: {
+                defaultSrc: [`'self'`],
+                connectSrc: [`'self'`, `https://api.exchangeratesapi.io`],
+                imgSrc: [`'self'`, 'data:'],
+                styleSrc: [`'self'`, `'unsafe-inline'`],
+                scriptSrc: [`'self'`, `'unsafe-inline'`],
+              },
+            },
     }),
   );
   app.get('/robots.txt', (_, res) => {

@@ -5,10 +5,11 @@ import { breakpoint } from '~client/styled/mixins';
 import { asLink } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
-type ModalWindowProps = { visible: boolean; width?: number };
+export type ModalWindowProps = { visible: boolean; width?: number; fullSize?: boolean };
 const modalWindowStyles = ({
   visible,
   width = breakpoints.mobile,
+  fullSize = false,
 }: ModalWindowProps): SerializedStyles => css`
   background: ${colors.shadow.mediumDark};
   display: flex;
@@ -24,13 +25,19 @@ const modalWindowStyles = ({
     background: ${colors.shadow.mediumLight};
     border-width: 2px 10px 0 10px;
     box-shadow: 0 2px 6px ${colors.shadow.mediumLight};
-    left: 50%;
-    height: auto;
-    max-height: 90%;
-    min-width: ${rem(width)};
-    top: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    width: auto !important;
+    ${fullSize
+      ? `
+      width: 100%;
+      `
+      : `
+      left: 50%;
+      height: auto;
+      max-height: 90%;
+      min-width: ${rem(width)};
+      top: 50%;
+      transform: translateX(-50%) translateY(-50%);
+      width: auto !important;
+      `}
   }
 `;
 export const ModalWindow = styled.div<ModalWindowProps>(modalWindowStyles);

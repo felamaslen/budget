@@ -17,6 +17,7 @@ export * from './list';
 export * from './income';
 export * from './net-worth';
 export * from './overview';
+export * from './planning';
 export * from './search';
 export * from './user';
 

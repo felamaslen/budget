@@ -28,6 +28,7 @@ import type {
 } from '~client/types/gql';
 import { calculateTransactionCost } from '~shared/funds';
 import type { Create, GQL, GQLShallow, NativeDate, RawDate } from '~shared/types';
+import { omitTypeName } from '~shared/utils';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -254,9 +255,6 @@ export const withRawDateTime = <K extends string, T extends Record<K, Date>>(...
     (last, key) => ({ ...last, [key]: item[key].toISOString() }),
     item as RawDate<T, K>,
   );
-
-export const omitTypeName = <T extends Record<string, unknown>>(item: T): Omit<T, '__typename'> =>
-  omit(item, '__typename');
 
 export const toNativeFund = <F extends GQLShallow<Omit<Fund, 'id'>>>(input: F): NativeFund<F> => ({
   ...omitTypeName(input),

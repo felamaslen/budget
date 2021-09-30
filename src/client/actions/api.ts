@@ -39,7 +39,7 @@ export type ActionApiDataRead = {
   res: GQL<InitialQuery>;
 };
 
-export const dataRead = (res: GQL<InitialQuery>): ActionApiDataRead => ({
+export const dataRead = (res: InitialQuery): ActionApiDataRead => ({
   type: ActionTypeApi.DataRead,
   res,
 });

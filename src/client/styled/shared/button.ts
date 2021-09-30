@@ -110,29 +110,35 @@ const buttonStyles = ({ expanded = false }: ButtonProps): SerializedStyles => cs
 
 export const Button = styled.button<ButtonProps>(buttonStyles);
 
-const ButtonCrud = styled(Button)`
-  ${AddByCategoryValue} &,
-  ${EditByCategory} & {
-    margin: 0 5px;
-    flex: 0 0 auto;
-  }
-  ${NetWorthValueFX} & {
-    margin: 0 3px;
-    top: 0;
-    flex: 0 0 ${rem(22)};
-  }
-`;
+const defaultButtonSize = 22;
 
-const deleteStyles = css`
+type ButtonCrudProps = { size?: number };
+
+const ButtonCrud = styled(Button)<ButtonCrudProps>(
+  ({ size = defaultButtonSize }) => css`
+    ${AddByCategoryValue} &,
+  ${EditByCategory} & {
+      margin: 0 5px;
+      flex: 0 0 auto;
+    }
+    ${NetWorthValueFX} & {
+      margin: 0 3px;
+      top: 0;
+      flex: 0 0 ${rem(size)};
+    }
+  `,
+);
+
+const deleteStyles = (size: number): SerializedStyles => css`
   display: inline-flex;
   margin: 0;
   padding: 0;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  font-size: 18px;
-  line-height: 22px;
+  width: ${rem(size)};
+  height: ${rem(size)};
+  font-size: ${rem(size - 4)};
+  line-height: ${rem(size)};
   background: ${colors.delete};
   border-radius: 100%;
   border: none;
@@ -140,41 +146,43 @@ const deleteStyles = css`
   color: ${colors.white};
 `;
 
-export const ButtonDelete = styled(ButtonCrud)`
-  ${deleteStyles};
-  ${breakpoint(breakpoints.mobile)} {
-    ${deleteStyles};
-  }
+export const ButtonDelete = styled(ButtonCrud)<ButtonCrudProps>(
+  ({ size = defaultButtonSize }) => css`
+    ${deleteStyles(size)};
+    ${breakpoint(breakpoints.mobile)} {
+      ${deleteStyles(size)};
+    }
 
-  ${breakpoint(breakpoints.mobile)} {
-    &:focus,
-    &:hover {
-      background: ${darken(0.1)(colors.delete)};
-      &:active {
-        background: ${darken(0.2)(colors.delete)};
+    ${breakpoint(breakpoints.mobile)} {
+      &:focus,
+      &:hover {
+        background: ${darken(0.1)(colors.delete)};
+        &:active {
+          background: ${darken(0.2)(colors.delete)};
+        }
       }
     }
-  }
 
-  ${CategoryItemForm} > & {
-    grid-row: 1;
-    grid-column: 3;
-  }
-  ${NetWorthEditForm} & {
-    border-radius: 2px;
-    font-size: ${rem(14)};
-    padding: 0 ${rem(8)};
-    text-transform: none;
-    width: auto;
-  }
-  ${EditCurrency} & {
-    grid-column: 4;
-    margin: 0;
-  }
-  ${AddByCategoryValue} & {
-    grid-column: 4;
-  }
-`;
+    ${CategoryItemForm} > & {
+      grid-row: 1;
+      grid-column: 3;
+    }
+    ${NetWorthEditForm} & {
+      border-radius: 2px;
+      font-size: ${rem(14)};
+      padding: 0 ${rem(8)};
+      text-transform: none;
+      width: auto;
+    }
+    ${EditCurrency} & {
+      grid-column: 4;
+      margin: 0;
+    }
+    ${AddByCategoryValue} & {
+      grid-column: 4;
+    }
+  `,
+);
 
 export const ButtonAdd = styled(ButtonDelete)`
   background: ${colors.create};

@@ -9,7 +9,7 @@ import { useFetchingState } from './crud';
 import { errorOpened, listItemCreated, listItemDeleted, listItemUpdated } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import * as gql from '~client/hooks/gql';
-import { omitTypeName, toRawFund, toRawIncome, withRawDate } from '~client/modules/data';
+import { toRawFund, toRawIncome, withRawDate } from '~client/modules/data';
 
 import type { FundInputNative, Id, PageList, StandardInput, WithIds } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
@@ -30,7 +30,8 @@ import type {
   MutationUpdateIncomeArgs,
   MutationUpdateListItemArgs,
 } from '~client/types/gql';
-import { NativeDate } from '~shared/types';
+import type { NativeDate } from '~shared/types';
+import { omitTypeName } from '~shared/utils';
 
 export type OnCreateList<I extends ListItemInput> = (item: I) => void;
 export type OnUpdateList<I extends ListItemInput> = (

@@ -8,6 +8,7 @@ export * from './income';
 export * from './list';
 export * from './net-worth';
 export * from './overview';
+export * from './planning';
 export * from './search';
 export * from './user';
 

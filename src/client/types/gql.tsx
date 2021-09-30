@@ -456,6 +456,7 @@ export type Mutation = {
   logout: LogoutResponse;
   setConfig?: Maybe<AppConfigSet>;
   setInvestmentBucket?: Maybe<SetInvestmentBucketResponse>;
+  syncPlanning?: Maybe<PlanningSyncResponse>;
   updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
   updateFund?: Maybe<CrudResponseUpdate>;
   updateFundAllocationTargets?: Maybe<UpdatedFundAllocationTargets>;
@@ -552,6 +553,11 @@ export type MutationSetConfigArgs = {
 
 export type MutationSetInvestmentBucketArgs = {
   value: Scalars['NonNegativeInt'];
+};
+
+
+export type MutationSyncPlanningArgs = {
+  input: PlanningSync;
 };
 
 
@@ -819,6 +825,148 @@ export enum PageListStandard {
   Holiday = 'holiday'
 }
 
+export type PlanningAccount = {
+  __typename?: 'PlanningAccount';
+  id: Scalars['NonNegativeInt'];
+  account: Scalars['String'];
+  netWorthSubcategoryId: Scalars['NonNegativeInt'];
+  income: Array<PlanningIncome>;
+  pastIncome: Array<PlanningPastIncome>;
+  creditCards: Array<PlanningCreditCard>;
+  values: Array<PlanningValue>;
+};
+
+export type PlanningAccountInput = {
+  id?: Maybe<Scalars['NonNegativeInt']>;
+  account: Scalars['String'];
+  netWorthSubcategoryId: Scalars['NonNegativeInt'];
+  income: Array<PlanningIncomeInput>;
+  creditCards: Array<PlanningCreditCardInput>;
+  values: Array<PlanningValueInput>;
+};
+
+export type PlanningAccountsResponse = {
+  __typename?: 'PlanningAccountsResponse';
+  accounts: Array<PlanningAccount>;
+};
+
+export type PlanningCreditCard = {
+  __typename?: 'PlanningCreditCard';
+  id: Scalars['NonNegativeInt'];
+  netWorthSubcategoryId: Scalars['NonNegativeInt'];
+  payments: Array<PlanningCreditCardPayment>;
+};
+
+export type PlanningCreditCardInput = {
+  id?: Maybe<Scalars['NonNegativeInt']>;
+  netWorthSubcategoryId: Scalars['NonNegativeInt'];
+  payments: Array<PlanningCreditCardPaymentInput>;
+};
+
+export type PlanningCreditCardPayment = {
+  __typename?: 'PlanningCreditCardPayment';
+  id: Scalars['NonNegativeInt'];
+  year: Scalars['NonNegativeInt'];
+  month: Scalars['NonNegativeInt'];
+  value: Scalars['Int'];
+};
+
+export type PlanningCreditCardPaymentInput = {
+  id?: Maybe<Scalars['NonNegativeInt']>;
+  year: Scalars['NonNegativeInt'];
+  month: Scalars['NonNegativeInt'];
+  value: Scalars['Int'];
+};
+
+export type PlanningIncome = {
+  __typename?: 'PlanningIncome';
+  id: Scalars['NonNegativeInt'];
+  startDate: Scalars['Date'];
+  endDate: Scalars['Date'];
+  salary: Scalars['NonNegativeInt'];
+  taxCode: Scalars['String'];
+  pensionContrib: Scalars['Float'];
+  studentLoan: Scalars['Boolean'];
+};
+
+export type PlanningIncomeInput = {
+  id?: Maybe<Scalars['NonNegativeInt']>;
+  startDate: Scalars['Date'];
+  endDate: Scalars['Date'];
+  salary: Scalars['NonNegativeInt'];
+  taxCode: Scalars['String'];
+  pensionContrib: Scalars['Float'];
+  studentLoan: Scalars['Boolean'];
+};
+
+export type PlanningParameters = {
+  __typename?: 'PlanningParameters';
+  year: Scalars['NonNegativeInt'];
+  rates: Array<TaxRate>;
+  thresholds: Array<TaxThreshold>;
+};
+
+export type PlanningParametersInput = {
+  year: Scalars['NonNegativeInt'];
+  rates: Array<PlanningTaxRateInput>;
+  thresholds: Array<PlanningTaxThresholdInput>;
+};
+
+export type PlanningParametersResponse = {
+  __typename?: 'PlanningParametersResponse';
+  parameters: Array<PlanningParameters>;
+};
+
+export type PlanningPastIncome = {
+  __typename?: 'PlanningPastIncome';
+  date: Scalars['Date'];
+  gross: Scalars['NonNegativeInt'];
+  deductions: Array<IncomeDeduction>;
+};
+
+export type PlanningSync = {
+  parameters: Array<PlanningParametersInput>;
+  accounts: Array<PlanningAccountInput>;
+};
+
+export type PlanningSyncResponse = {
+  __typename?: 'PlanningSyncResponse';
+  error?: Maybe<Scalars['String']>;
+  parameters?: Maybe<Array<PlanningParameters>>;
+  accounts?: Maybe<Array<PlanningAccount>>;
+};
+
+export type PlanningTaxRateInput = {
+  name: Scalars['String'];
+  value: Scalars['Float'];
+};
+
+export type PlanningTaxThresholdInput = {
+  name: Scalars['String'];
+  value: Scalars['NonNegativeInt'];
+};
+
+export type PlanningValue = {
+  __typename?: 'PlanningValue';
+  id: Scalars['NonNegativeInt'];
+  year: Scalars['NonNegativeInt'];
+  month: Scalars['NonNegativeInt'];
+  transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
+  name: Scalars['String'];
+  value?: Maybe<Scalars['Int']>;
+  formula?: Maybe<Scalars['String']>;
+};
+
+export type PlanningValueInput = {
+  id?: Maybe<Scalars['NonNegativeInt']>;
+  year: Scalars['NonNegativeInt'];
+  month: Scalars['NonNegativeInt'];
+  transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
+  name: Scalars['String'];
+  value?: Maybe<Scalars['Int']>;
+  formula?: Maybe<Scalars['String']>;
+};
+
 
 export type Query = {
   __typename?: 'Query';
@@ -841,6 +989,8 @@ export type Query = {
   readNetWorthCategories?: Maybe<Array<NetWorthCategory>>;
   readNetWorthEntries?: Maybe<NetWorthEntryOverview>;
   readNetWorthSubcategories?: Maybe<Array<NetWorthSubcategory>>;
+  readPlanningAccounts?: Maybe<PlanningAccountsResponse>;
+  readPlanningParameters?: Maybe<PlanningParametersResponse>;
   receiptItem?: Maybe<Scalars['String']>;
   receiptItems?: Maybe<Array<ReceiptCategory>>;
   search?: Maybe<SearchResult>;
@@ -1101,6 +1251,18 @@ export type TargetDeltaResponse = {
   allocationTarget: Scalars['NonNegativeInt'];
 };
 
+export type TaxRate = {
+  __typename?: 'TaxRate';
+  name: Scalars['String'];
+  value: Scalars['Float'];
+};
+
+export type TaxThreshold = {
+  __typename?: 'TaxThreshold';
+  name: Scalars['String'];
+  value: Scalars['NonNegativeInt'];
+};
+
 export type Transaction = {
   __typename?: 'Transaction';
   date: Scalars['Date'];
@@ -1221,6 +1383,44 @@ export type NetWorthEntryPartsFragment = (
   )>, currencies: Array<(
     { __typename?: 'Currency' }
     & Pick<Currency, 'currency' | 'rate'>
+  )> }
+);
+
+export type PlanningParametersPartsFragment = (
+  { __typename?: 'PlanningParameters' }
+  & Pick<PlanningParameters, 'year'>
+  & { rates: Array<(
+    { __typename?: 'TaxRate' }
+    & Pick<TaxRate, 'name' | 'value'>
+  )>, thresholds: Array<(
+    { __typename?: 'TaxThreshold' }
+    & Pick<TaxThreshold, 'name' | 'value'>
+  )> }
+);
+
+export type PlanningAccountPartsFragment = (
+  { __typename?: 'PlanningAccount' }
+  & Pick<PlanningAccount, 'id' | 'account' | 'netWorthSubcategoryId'>
+  & { income: Array<(
+    { __typename?: 'PlanningIncome' }
+    & Pick<PlanningIncome, 'id' | 'startDate' | 'endDate' | 'salary' | 'taxCode' | 'pensionContrib' | 'studentLoan'>
+  )>, pastIncome: Array<(
+    { __typename?: 'PlanningPastIncome' }
+    & Pick<PlanningPastIncome, 'date' | 'gross'>
+    & { deductions: Array<(
+      { __typename?: 'IncomeDeduction' }
+      & Pick<IncomeDeduction, 'name' | 'value'>
+    )> }
+  )>, creditCards: Array<(
+    { __typename?: 'PlanningCreditCard' }
+    & Pick<PlanningCreditCard, 'id' | 'netWorthSubcategoryId'>
+    & { payments: Array<(
+      { __typename?: 'PlanningCreditCardPayment' }
+      & Pick<PlanningCreditCardPayment, 'id' | 'year' | 'month' | 'value'>
+    )> }
+  )>, values: Array<(
+    { __typename?: 'PlanningValue' }
+    & Pick<PlanningValue, 'id' | 'year' | 'month' | 'transferToAccountId' | 'name' | 'value' | 'formula'>
   )> }
 );
 
@@ -1588,6 +1788,26 @@ export type DeleteNetWorthEntryMutation = (
   )> }
 );
 
+export type SyncPlanningMutationVariables = Exact<{
+  input: PlanningSync;
+}>;
+
+
+export type SyncPlanningMutation = (
+  { __typename?: 'Mutation' }
+  & { syncPlanning?: Maybe<(
+    { __typename?: 'PlanningSyncResponse' }
+    & Pick<PlanningSyncResponse, 'error'>
+    & { parameters?: Maybe<Array<(
+      { __typename?: 'PlanningParameters' }
+      & PlanningParametersPartsFragment
+    )>>, accounts?: Maybe<Array<(
+      { __typename?: 'PlanningAccount' }
+      & PlanningAccountPartsFragment
+    )>> }
+  )> }
+);
+
 export type AnalysisQueryVariables = Exact<{
   period: AnalysisPeriod;
   groupBy: AnalysisGroupBy;
@@ -1855,6 +2075,26 @@ export type OverviewPreviewQuery = (
   & { overviewPreview?: Maybe<(
     { __typename?: 'OverviewPreview' }
     & Pick<OverviewPreview, 'startDate' | 'values'>
+  )> }
+);
+
+export type ReadPlanningQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ReadPlanningQuery = (
+  { __typename?: 'Query' }
+  & { readPlanningParameters?: Maybe<(
+    { __typename?: 'PlanningParametersResponse' }
+    & { parameters: Array<(
+      { __typename?: 'PlanningParameters' }
+      & PlanningParametersPartsFragment
+    )> }
+  )>, readPlanningAccounts?: Maybe<(
+    { __typename?: 'PlanningAccountsResponse' }
+    & { accounts: Array<(
+      { __typename?: 'PlanningAccount' }
+      & PlanningAccountPartsFragment
+    )> }
   )> }
 );
 
@@ -2279,6 +2519,62 @@ export const NetWorthEntryPartsFragmentDoc = gql`
   }
 }
     `;
+export const PlanningParametersPartsFragmentDoc = gql`
+    fragment PlanningParametersParts on PlanningParameters {
+  year
+  rates {
+    name
+    value
+  }
+  thresholds {
+    name
+    value
+  }
+}
+    `;
+export const PlanningAccountPartsFragmentDoc = gql`
+    fragment PlanningAccountParts on PlanningAccount {
+  id
+  account
+  netWorthSubcategoryId
+  income {
+    id
+    startDate
+    endDate
+    salary
+    taxCode
+    pensionContrib
+    studentLoan
+  }
+  pastIncome {
+    date
+    gross
+    deductions {
+      name
+      value
+    }
+  }
+  creditCards {
+    id
+    netWorthSubcategoryId
+    payments {
+      id
+      year
+      month
+      value
+    }
+  }
+  values {
+    id
+    year
+    month
+    transferToAccountId
+    name
+    value
+    formula
+  }
+}
+    `;
 export const UpsertBucketDocument = gql`
     mutation UpsertBucket($startDate: String!, $endDate: String!, $id: NonNegativeInt!, $bucket: BucketInput!) {
   upsertBucket(startDate: $startDate, endDate: $endDate, id: $id, bucket: $bucket) {
@@ -2590,6 +2886,24 @@ export const DeleteNetWorthEntryDocument = gql`
 export function useDeleteNetWorthEntryMutation() {
   return Urql.useMutation<DeleteNetWorthEntryMutation, DeleteNetWorthEntryMutationVariables>(DeleteNetWorthEntryDocument);
 };
+export const SyncPlanningDocument = gql`
+    mutation SyncPlanning($input: PlanningSync!) {
+  syncPlanning(input: $input) {
+    error
+    parameters {
+      ...PlanningParametersParts
+    }
+    accounts {
+      ...PlanningAccountParts
+    }
+  }
+}
+    ${PlanningParametersPartsFragmentDoc}
+${PlanningAccountPartsFragmentDoc}`;
+
+export function useSyncPlanningMutation() {
+  return Urql.useMutation<SyncPlanningMutation, SyncPlanningMutationVariables>(SyncPlanningDocument);
+};
 export const AnalysisDocument = gql`
     query Analysis($period: AnalysisPeriod!, $groupBy: AnalysisGroupBy!, $page: Int) {
   analysis(period: $period, groupBy: $groupBy, page: $page) {
@@ -2874,6 +3188,25 @@ export const OverviewPreviewDocument = gql`
 
 export function useOverviewPreviewQuery(options: Omit<Urql.UseQueryArgs<OverviewPreviewQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<OverviewPreviewQuery>({ query: OverviewPreviewDocument, ...options });
+};
+export const ReadPlanningDocument = gql`
+    query ReadPlanning {
+  readPlanningParameters {
+    parameters {
+      ...PlanningParametersParts
+    }
+  }
+  readPlanningAccounts {
+    accounts {
+      ...PlanningAccountParts
+    }
+  }
+}
+    ${PlanningParametersPartsFragmentDoc}
+${PlanningAccountPartsFragmentDoc}`;
+
+export function useReadPlanningQuery(options: Omit<Urql.UseQueryArgs<ReadPlanningQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ReadPlanningQuery>({ query: ReadPlanningDocument, ...options });
 };
 export const SearchSuggestionsDocument = gql`
     query SearchSuggestions($page: SearchPage!, $column: SearchItem!, $searchTerm: String!, $numResults: Int) {

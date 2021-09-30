@@ -1,0 +1,259 @@
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { rem } from 'polished';
+
+import type { AccountTransaction } from './types';
+
+import { FormField } from '~client/components/form-field/styles';
+import { breakpoint } from '~client/styled/mixins';
+import {
+  Button as ButtonShared,
+  ButtonAdd,
+  ButtonDelete,
+  Flex,
+  FlexColumn,
+} from '~client/styled/shared';
+import { breakpoints, colors } from '~client/styled/variables';
+
+const borderColor = colors.light.mediumDark;
+const widthDate = 76;
+const lineHeight = 22;
+const monthGroupItemWidth = 104;
+const monthGroupValueWidth = 84;
+
+export const Button = styled(ButtonShared)`
+  ${breakpoint(breakpoints.mobile)} {
+    align-items: center;
+    display: inline-flex;
+    height: ${rem(lineHeight - 4)};
+    padding: 0 ${rem(4)};
+  }
+`;
+
+export const Planning = styled(Flex)`
+  background: ${colors.white};
+  overflow: hidden;
+  min-height: 0;
+  width: 100%;
+`;
+
+export const Sidebar = styled(FlexColumn)`
+  flex: 0 0 auto;
+  overflow: auto;
+  min-height: 0;
+`;
+
+export const Table = styled(FlexColumn)`
+  flex: 1;
+  font-size: ${rem(13)};
+  overflow-x: auto;
+  min-height: 0;
+  min-width: 0;
+`;
+
+export const Header = styled(Flex)`
+  align-items: center;
+  border-bottom: 3px solid ${borderColor};
+  flex: 0 0 auto;
+  font-weight: bold;
+  height: ${rem(lineHeight)};
+  width: 100%;
+`;
+
+export const Body = styled(FlexColumn)`
+  flex: 1;
+`;
+
+export const MonthGroup = styled.div`
+  display: grid;
+  grid-template-columns: ${rem(lineHeight)} auto;
+`;
+
+export const MonthGroupRows = styled(FlexColumn)``;
+
+export const MonthHeader = styled.div`
+  align-items: center;
+  border-right: 3px solid ${borderColor};
+  border-bottom: 1px solid ${borderColor};
+  display: inline-flex;
+  flex: 0 0 ${rem(lineHeight)};
+  grid-column: 1;
+  height: 100%;
+  justify-content: center;
+  white-space: nowrap;
+`;
+
+export const MonthHeaderText = styled.span`
+  display: inline-flex;
+  font-weight: bold;
+  justify-content: center;
+  overflow: visible;
+  transform: rotate(-90deg);
+  width: 0;
+`;
+
+export const Row = styled(Flex)`
+  align-items: center;
+  border-bottom: 1px solid ${borderColor};
+  height: ${rem(lineHeight)};
+`;
+
+export const MonthEnd = styled(Row)`
+  background: ${colors.light.mediumLight};
+  font-weight: bold;
+`;
+
+export const Cell = styled.div`
+  align-items: center;
+  border-right: 1px solid ${borderColor};
+  display: inline-flex;
+  height: ${rem(lineHeight)};
+  padding: 0 ${rem(2)};
+`;
+
+export const CellNumeric = styled(Cell)`
+  justify-content: flex-end;
+`;
+
+export const MonthDate = styled(Cell)`
+  flex: 0 0 ${rem(widthDate)};
+`;
+
+export const HeaderStart = styled(Cell)`
+  border-right: 3px solid ${borderColor};
+  width: ${rem(lineHeight)};
+  flex: 0 0 ${rem(lineHeight)};
+`;
+
+export const MonthDateHeader = styled(Cell)`
+  flex: 0 0 ${rem(widthDate)};
+  width: ${rem(widthDate)};
+`;
+
+export const AccountGroup = styled.div<Pick<AccountTransaction, 'isVerified'>>(
+  ({ isVerified = false }) => css`
+    font-weight: ${isVerified ? 'bold' : 'normal'};
+    display: grid;
+    grid-template-columns: ${rem(monthGroupItemWidth)} ${rem(monthGroupValueWidth)};
+
+    input[type='text'] {
+      width: 100%;
+    }
+  `,
+);
+
+export const AccountGroupWrapper = styled(FlexColumn)`
+  flex: 0 0 ${rem(monthGroupItemWidth + monthGroupValueWidth)};
+  font-size: ${rem(10)};
+
+  ${ButtonAdd}, ${ButtonDelete} {
+    flex: 0 0 auto;
+  }
+`;
+
+export const AccountsInMonth = styled(Flex)``;
+
+export const AccountGroupHeader = styled(Cell)`
+  flex: 0 0 ${rem(monthGroupItemWidth + monthGroupValueWidth)};
+  position: relative;
+  width: ${rem(monthGroupItemWidth + monthGroupValueWidth)};
+
+  & > span {
+    flex: 1;
+  }
+
+  input[type='text'] {
+    width: ${rem(monthGroupValueWidth)};
+  }
+`;
+
+export const AccountEditForm = styled(FlexColumn)`
+  background: ${colors.translucent.light.light};
+  border: 1px solid ${borderColor};
+  border-top: none;
+  left: 0;
+  max-height: ${rem(360)};
+  min-height: ${rem(96)};
+  overflow-y: auto;
+  position: absolute;
+  top: ${rem(lineHeight)};
+  width: ${rem(220)};
+  z-index: 5;
+
+  & > div {
+    width: 100%;
+  }
+
+  h5,
+  h6 {
+    margin: 0 0 ${rem(4)} 0;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    display: flex;
+    min-width: 0;
+    width: 100%;
+  }
+
+  ${FormField} {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+  }
+  input {
+    min-width: 0;
+  }
+`;
+
+export const AccountEditFormLabel = styled.span`
+  flex: 0 0 ${rem(64)};
+`;
+
+export const AccountEditFormSection = styled(FlexColumn)`
+  border-bottom: 1px solid ${borderColor};
+  margin: 0 0 ${rem(4)} 0;
+  padding: ${rem(2)} 0;
+`;
+
+export const AccountGroupItem = styled(Cell)`
+  grid-column: 1;
+`;
+
+export const AccountGroupItemText = styled.span`
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+export const AccountGroupValue = styled(CellNumeric)`
+  grid-column: 2;
+`;
+
+export const Rates = styled(FlexColumn)`
+  font-size: ${rem(12)};
+`;
+
+export const RatesForm = styled(FlexColumn)``;
+
+export const RatesLabel = styled.div`
+  flex: 1;
+`;
+
+export const RatesValue = styled(Flex)`
+  flex: 1;
+  input {
+    width: ${rem(64)};
+  }
+`;
+
+export const ThresholdsValue = styled(RatesValue)`
+  input {
+    width: ${rem(96)};
+  }
+`;
