@@ -68,12 +68,6 @@ describe('Analysis resolvers', () => {
         expect.objectContaining({
           cost: expect.arrayContaining([
             expect.objectContaining({
-              item: 'income',
-              tree: expect.arrayContaining([
-                expect.objectContaining({ category: 'Side work', sum: 433201 }),
-              ]),
-            }),
-            expect.objectContaining({
               item: 'bills',
               tree: expect.arrayContaining([
                 expect.objectContaining({ category: 'Housing', sum: 72500 }),
@@ -107,6 +101,21 @@ describe('Analysis resolvers', () => {
             }),
           ]),
         }),
+      );
+    });
+
+    it('should return income data, excluding deductions', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res?.cost).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            item: 'income',
+            tree: expect.arrayContaining([
+              expect.objectContaining({ category: 'Side work', sum: 433201 - (39765 + 10520) }),
+            ]),
+          }),
+        ]),
       );
     });
 
@@ -244,12 +253,6 @@ describe('Analysis resolvers', () => {
       expect(res?.cost).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            item: 'income',
-            tree: expect.arrayContaining([
-              expect.objectContaining({ category: 'Contract', sum: 433201 }),
-            ]),
-          }),
-          expect.objectContaining({
             item: 'bills',
             tree: expect.arrayContaining([
               expect.objectContaining({ category: 'My bank', sum: 72500 }),
@@ -281,6 +284,21 @@ describe('Analysis resolvers', () => {
             item: 'social',
             tree: expect.arrayContaining([
               expect.objectContaining({ category: 'Some pub', sum: 61923 }),
+            ]),
+          }),
+        ]),
+      );
+    });
+
+    it('should return income data, excluding deductions', async () => {
+      expect.assertions(1);
+      const res = await setup();
+      expect(res?.cost).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            item: 'income',
+            tree: expect.arrayContaining([
+              expect.objectContaining({ category: 'Contract', sum: 433201 - (39765 + 10520) }),
             ]),
           }),
         ]),

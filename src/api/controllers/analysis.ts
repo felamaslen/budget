@@ -72,10 +72,7 @@ export function periodCondition(now: Date, period: AnalysisPeriod, pageIndex = 0
   throw new Error('Invalid period parameter');
 }
 
-export function getCategoryColumn(
-  category: AnalysisPage,
-  groupBy?: AnalysisGroupBy,
-): AnalysisGroupColumn | null {
+export function getCategoryColumn(groupBy?: AnalysisGroupBy): AnalysisGroupColumn | null {
   switch (groupBy) {
     case AnalysisGroupBy.Category:
       return 'category';
@@ -98,14 +95,7 @@ export async function getAnalysisData(
 
   const periodCostByCategory = await Promise.all<readonly PeriodCost[]>(
     CATEGORIES.map((category) =>
-      getPeriodCostForCategory(
-        db,
-        uid,
-        startTime,
-        endTime,
-        category,
-        getCategoryColumn(category, groupBy),
-      ),
+      getPeriodCostForCategory(db, uid, startTime, endTime, category, getCategoryColumn(groupBy)),
     ),
   );
 
@@ -135,7 +125,7 @@ export async function getDeepAnalysisData(
     db,
     uid,
     category,
-    getCategoryColumn(category, groupBy),
+    getCategoryColumn(groupBy),
     periodCondition(now, period, pageIndex ?? 0),
   );
 

@@ -22,7 +22,7 @@ const getAnalysisConditions = (
       sql`page = ${page}`,
       sql`date >= ${format(startTime, 'yyyy-MM-dd')}`,
       sql`date <= ${format(endTime, 'yyyy-MM-dd')}`,
-      sql`value > 0`,
+      sql`list_standard.value > 0`,
       page === AnalysisPage.General
         ? sql`category != ALL(${sql.array(
             config.data.overview.investmentPurchaseCategories,
@@ -53,9 +53,16 @@ export async function getPeriodCostForCategory(
   categoryColumn: string | null,
 ): Promise<readonly PeriodCost[]> {
   const result = await db.query<PeriodCost>(sql`
+  WITH list_items as (
+    SELECT list_standard.id, date, item, category, shop,
+      list_standard.value + COALESCE(SUM(income_deductions.value), 0) AS value
+    FROM list_standard
+    LEFT JOIN income_deductions ON income_deductions.list_id = list_standard.id
+    WHERE ${getAnalysisConditions(uid, startTime, endTime, page)}
+    GROUP BY list_standard.id
+  )
   SELECT ${periodCostColumns(categoryColumn)}
-  FROM list_standard
-  WHERE ${getAnalysisConditions(uid, startTime, endTime, page)}
+  FROM list_items
   GROUP BY ${sql.identifier(['itemCol'])}
   `);
   return result.rows;
