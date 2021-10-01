@@ -7,6 +7,7 @@ import * as StyledForm from './styles';
 
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { ButtonAdd, Flex } from '~client/styled/shared';
+import { H6 } from '~client/styled/shared/typography';
 import { NetWorthSubcategory } from '~client/types/gql';
 
 export type Props = {
@@ -64,7 +65,7 @@ export const CreditEditForm: React.FC<Props> = ({ tempAccount, updateAndSave }) 
 
   return (
     <StyledForm.CreditEditForm>
-      <h6>Credit cards</h6>
+      <H6>Credit cards</H6>
       <ul>
         {attachedCreditCards.map((row) => (
           <li key={row.id}>{row.subcategory}</li>

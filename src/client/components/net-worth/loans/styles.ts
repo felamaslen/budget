@@ -4,6 +4,7 @@ import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
 
 import { Flex, FlexColumn } from '~client/styled/shared';
+import { H4 } from '~client/styled/shared/typography';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const graphHeight = 450;
@@ -43,7 +44,7 @@ export const LoansSidebarItem = styled(FlexColumn)`
   font-size: ${rem(14)};
 `;
 
-export const LoansSidebarTitle = styled.h4<{ color?: string }>(
+export const LoansSidebarTitle = styled(H4)<{ color?: string }>(
   ({ color = colors.black }) => css`
     align-items: center;
     color: ${color};

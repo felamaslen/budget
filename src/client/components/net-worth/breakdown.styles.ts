@@ -5,6 +5,7 @@ import { rem } from 'polished';
 import { Label as LabelBase } from '~client/components/fund-weights/styles';
 import { breakpoint } from '~client/styled/mixins';
 import { Button, Flex, FlexColumn } from '~client/styled/shared';
+import { H3 } from '~client/styled/shared/typography';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const BreakdownContainer = styled(FlexColumn)`
@@ -62,7 +63,7 @@ export const NavNext = styled(NavButton)`
   border-left-color: ${arrowColor};
 `;
 
-export const Title = styled.h3`
+export const Title = styled(H3)`
   flex: 1;
   font-size: ${rem(14)};
   margin: 0;

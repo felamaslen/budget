@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
 import { asLink } from '~client/styled/shared';
+import { H2 } from '~client/styled/shared/typography';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export type ModalWindowProps = { visible: boolean; width?: number; fullSize?: boolean };
@@ -52,7 +53,7 @@ export const Meta = styled.div`
   color: ${colors.white};
 `;
 
-export const Title = styled.h2`
+export const Title = styled(H2)`
   margin: 0 5px;
   font-size: 16px;
   font-weight: bold;

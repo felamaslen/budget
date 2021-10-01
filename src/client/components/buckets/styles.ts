@@ -5,6 +5,7 @@ import { rem, rgba } from 'polished';
 import { FormField } from '~client/components/form-field/styles';
 import { breakpoint } from '~client/styled/mixins';
 import { Button, ButtonRefresh, Flex, FlexCenter, FlexColumn } from '~client/styled/shared';
+import { H3, H4 } from '~client/styled/shared/typography';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const Main = styled(FlexColumn)`
@@ -108,7 +109,7 @@ export const HealthStatus = styled(FlexCenter)`
   font-size: ${rem(14)};
 `;
 
-export const DateTitle = styled.h3`
+export const DateTitle = styled(H3)`
   flex: 1;
   font-size: ${rem(16)};
   grid-column: 2;
@@ -173,7 +174,7 @@ export const BucketFormHealth = styled(Flex)`
   }
 `;
 
-export const BucketFormTitle = styled.h4`
+export const BucketFormTitle = styled(H4)`
   flex: 1;
   font-style: italic;
   margin: 0;
@@ -228,9 +229,7 @@ export const BucketGroupList = styled(Flex)`
   }
 `;
 
-export const BucketGroupTitle = styled.h4`
-  font-size: ${rem(14)};
-  margin: ${rem(2)} 0;
+export const BucketGroupTitle = styled(H4)`
   text-align: center;
   text-transform: capitalize;
 `;

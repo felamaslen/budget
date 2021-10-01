@@ -119,7 +119,7 @@ export function useTransactionFormElements(
       name: rawName,
       ...parsedValue,
     });
-    setRawValue(undefined);
+    setRawName(undefined);
     setRawValue(undefined);
   }, [rawName, rawValue, onChange]);
 

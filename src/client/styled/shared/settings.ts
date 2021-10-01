@@ -36,11 +36,6 @@ export const SettingsDialog = styled(FlexColumn)`
   transform: translateX(-50%) translateY(-50%);
   width: ${rem(230)};
   z-index: 101;
-
-  h3 {
-    font-size: ${rem(16)};
-    margin: ${rem(4)} 0 ${rem(8)} 0;
-  }
 `;
 
 export const SettingsGuild = styled.div`

@@ -7,6 +7,7 @@ import { RouteComponentProps, Route, Switch, withRouter } from 'react-router-dom
 
 import { SpinnerInit } from '~client/components/spinner';
 import { useInitialData, useSubscriptions } from '~client/hooks';
+import { H1 } from '~client/styled/shared/typography';
 
 type RouteObject = {
   key: string;
@@ -55,7 +56,7 @@ const routes: RouteObject[] = [
 
 const NotFound: React.FC = () => (
   <div>
-    <h1>{'Page not found'}</h1>
+    <H1>{'Page not found'}</H1>
   </div>
 );
 

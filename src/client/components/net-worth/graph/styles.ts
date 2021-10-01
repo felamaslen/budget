@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { darken, rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
+import { H3, H4 } from '~client/styled/shared/typography';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const keyColors = {
@@ -32,7 +33,7 @@ export const GraphSection = styled.div`
   }
 `;
 
-export const FTILabel = styled.h3`
+export const FTILabel = styled(H3)`
   align-items: center;
   display: inline-flex;
   font-size: ${rem(14)};
@@ -76,7 +77,7 @@ export const GraphKey = styled.div`
     font-size: ${rem(16)};
   }
 
-  h4,
+  ${H4},
   ul {
     margin: 0;
     padding: 0;

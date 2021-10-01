@@ -4,7 +4,8 @@ import { replaceAtIndex } from 'replace-array';
 import { StandardRates, StandardThresholds } from './constants';
 import { usePlanningDispatch, usePlanningState } from './context';
 import { PropsRateForm, PropsThresholdForm, RateForm, ThresholdForm } from './form/rate';
-import * as Styled from './styles';
+
+import { SidebarSection } from './sidebar-section';
 
 export type Props = {
   year: number;
@@ -96,7 +97,7 @@ export const Rates: React.FC<Props> = ({ year }) => {
   const setThreshold = useMemo(() => setParam('thresholds'), [setParam]);
 
   return (
-    <Styled.Rates>
+    <SidebarSection title="Rates" initialOpen>
       {standardRates.map(({ name, label }) => (
         <RateForm
           key={name}
@@ -115,6 +116,6 @@ export const Rates: React.FC<Props> = ({ year }) => {
           setThreshold={setThreshold}
         />
       ))}
-    </Styled.Rates>
+    </SidebarSection>
   );
 };

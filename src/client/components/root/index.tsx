@@ -22,6 +22,7 @@ import { useWindowFocus } from '~client/hooks/focus';
 import { VOID } from '~client/modules/data';
 import { reset } from '~client/styled/reset';
 import { Main, PageWrapper } from '~client/styled/shared';
+import { H2, H3 } from '~client/styled/shared/typography';
 import { useLogoutMutation } from '~client/types/gql';
 
 const LoggedIn = hot(
@@ -72,9 +73,9 @@ const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
 
 const Offline: React.FC = () => (
   <Outer>
-    <h2>Offline</h2>
+    <H2>Offline</H2>
     <BarLoader />
-    <h3>Trying to reconnect...</h3>
+    <H3>Trying to reconnect...</H3>
   </Outer>
 );
 

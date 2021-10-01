@@ -56,4 +56,6 @@ export type MonthByAccount = {
 
 export type PlanningData = PlanningMonth & {
   accounts: MonthByAccount[];
+  numRows: number;
+  isCurrentMonth: boolean;
 };

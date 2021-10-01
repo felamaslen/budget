@@ -11,6 +11,7 @@ import { ButtonAdd } from '~client/styled/shared';
 
 export type Props = {
   account: PlanningData['accounts'][0];
+  numRows: number;
 } & Pick<
   AccountGroupItemProps,
   'onAddTransaction' | 'onChangeTransaction' | 'onRemoveTransaction'
@@ -20,6 +21,7 @@ export type Props = {
 
 export const MonthAccount: React.FC<Props> = ({
   account,
+  numRows,
   onAddTransaction,
   onChangeTransaction,
   onRemoveTransaction,
@@ -35,6 +37,7 @@ export const MonthAccount: React.FC<Props> = ({
   );
 
   const addElements = useTransactionFormElements(onAddTransactionCallback);
+  const numBlankRows = Math.max(0, numRows - (creditCards.length + transactions.length + 1));
 
   return (
     <Styled.AccountGroupWrapper key={accountGroup.account}>
@@ -56,6 +59,14 @@ export const MonthAccount: React.FC<Props> = ({
           onRemoveTransaction={onRemoveTransaction}
         />
       ))}
+      {Array(numBlankRows)
+        .fill(0)
+        .map((_, index) => (
+          <Styled.AccountGroup key={`blank-row-${index}`}>
+            <Styled.AccountGroupItem />
+            <Styled.AccountGroupValue />
+          </Styled.AccountGroup>
+        ))}
       <Styled.AccountGroup key={CREATE_ID}>
         <Styled.AccountGroupItem>
           {addElements.name}

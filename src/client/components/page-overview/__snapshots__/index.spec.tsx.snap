@@ -1962,11 +1962,6 @@ exports[`<PageOverview /> should render graphs 1`] = `
   display: none;
 }
 
-.emotion-8 h3 {
-  font-size: 1rem;
-  margin: 0.25rem 0 0.5rem 0;
-}
-
 @media only screen and (min-width: 500px) {
   .emotion-8 {
     background: rgba(255,255,255,0.2);

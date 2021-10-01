@@ -12,6 +12,7 @@ import { useIsMobile } from '~client/hooks';
 import { getAppConfig } from '~client/selectors';
 import { Button } from '~client/styled/shared';
 import * as Styled from '~client/styled/shared/settings';
+import { H3 } from '~client/styled/shared/typography';
 import { LocalAppConfig } from '~client/types';
 
 export type Props = {
@@ -41,7 +42,7 @@ export const Config: FC<Props> = ({ open, setOpen }) => {
       <Styled.SettingsBackgroundModal onClick={(): void => setOpen(false)} />
       <Styled.SettingsDialog>
         <Styled.SettingsGuild>
-          <h3>Global Settings</h3>
+          <H3>Global Settings</H3>
           <Styled.SettingsGroupModal>
             <Styled.SettingsLabelModal>Date of birth</Styled.SettingsLabelModal>
             <Styled.SettingsInput>
@@ -58,7 +59,7 @@ export const Config: FC<Props> = ({ open, setOpen }) => {
           </Styled.SettingsGroupModal>
         </Styled.SettingsGuild>
         <Styled.SettingsGuild>
-          <h3>Funds</h3>
+          <H3>Funds</H3>
           <Styled.SettingsGroupModal>
             <Styled.SettingsLabelModal>Real-time prices</Styled.SettingsLabelModal>
             <Styled.SettingsInput>

@@ -4,6 +4,7 @@ import { rem } from 'polished';
 
 import { breakpoint } from '~client/styled/mixins';
 import { Page as PageBase, Button as ButtonBase } from '~client/styled/shared';
+import { H3 } from '~client/styled/shared/typography';
 import { breakpoints, colors } from '~client/styled/variables';
 import type { Page as PageType, MainBlockName } from '~client/types';
 
@@ -52,7 +53,7 @@ export const Buttons = styled.div`
   }
 `;
 
-export const PeriodTitle = styled.h3`
+export const PeriodTitle = styled(H3)`
   width: 100%;
   margin: 0;
   text-align: center;

@@ -271,6 +271,8 @@ const getAccountReducer = (
     };
   });
 
+const numNewInputRows = 1;
+
 export function usePlanningData(state: State, year: number): PlanningData[] {
   const today = useToday();
   const months = usePlanningMonths(year);
@@ -287,15 +289,22 @@ export function usePlanningData(state: State, year: number): PlanningData[] {
       creditCards,
     );
 
-    return months.reduce<PlanningData[]>(
-      (accumulator, planningMonth, monthIndex) => [
+    return months.reduce<PlanningData[]>((accumulator, planningMonth, monthIndex) => {
+      const accounts = accountReducer(accumulator, planningMonth, monthIndex);
+      const numRows = accounts.reduce<number>(
+        (max, account) =>
+          Math.max(max, account.creditCards.length + account.transactions.length + numNewInputRows),
+        3,
+      );
+      return [
         ...accumulator,
         {
           ...planningMonth,
-          accounts: accountReducer(accumulator, planningMonth, monthIndex),
+          accounts,
+          numRows,
+          isCurrentMonth: isSameMonth(new Date(planningMonth.year, planningMonth.month), today),
         },
-      ],
-      [],
-    );
+      ];
+    }, []);
   }, [today, months, state.accounts, netWorth, incomeRates, creditCards]);
 }

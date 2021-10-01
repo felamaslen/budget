@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { FlexCenter, FlexColumn } from '~client/styled/shared';
+import { H4 } from '~client/styled/shared/typography';
 import { colors } from '~client/styled/variables';
 
 export const Label = styled.span<{ small: boolean }>(
@@ -38,8 +39,7 @@ export const InfoDialog = styled(FlexColumn)`
     text-align: right;
   }
 
-  h6 {
-    font-size: ${rem(14)};
+  ${H4} {
     margin: ${rem(4)} 0 ${rem(12)} 0;
   }
 `;

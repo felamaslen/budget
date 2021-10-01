@@ -1,27 +1,18 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 
-import { AddAccount, ModifyAccount } from './accounts';
-import { ToggleButton } from './button';
+import { ModifyAccount } from './accounts';
 import { usePlanningState } from './context';
 import * as Styled from './styles';
 
-export const Header: React.FC = () => {
+export const Header = React.forwardRef<HTMLDivElement>((_, ref) => {
   const state = usePlanningState();
-
-  const [addingAccount, setAddingAccount] = useState<boolean>(false);
-  const onToggleAddAccount = useCallback(() => setAddingAccount((last) => !last), []);
-
   return (
-    <Styled.Header>
-      <Styled.HeaderStart />
+    <Styled.Header ref={ref}>
       <Styled.MonthDateHeader>Date</Styled.MonthDateHeader>
       {state.accounts.map((account) => (
         <ModifyAccount key={account.account} account={account} />
       ))}
-      <Styled.Cell>
-        <ToggleButton active={addingAccount} onToggle={onToggleAddAccount} />
-      </Styled.Cell>
-      {addingAccount && <AddAccount />}
     </Styled.Header>
   );
-};
+});
+Header.displayName = 'Header';

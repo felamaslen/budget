@@ -244,7 +244,7 @@ function getTransferTransactionsForAccountAtMonth(
             ...next,
             {
               id: `${row.id ?? CREATE_ID}-transfer-to`,
-              name: row.name,
+              name: `${account.account} transfer`,
               computedValue: -(evaluateValue(row) ?? 0) || undefined,
               isComputed: true,
               isVerified: isPast,

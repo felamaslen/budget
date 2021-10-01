@@ -125,6 +125,8 @@ describe('<AppLogo />', () => {
       }
 
       .emotion-8 {
+        font-size: 1.25rem;
+        margin: 0.25rem 0;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -412,6 +414,8 @@ describe('<AppLogo />', () => {
         }
 
         .emotion-11 {
+          font-size: 1.25rem;
+          margin: 0.25rem 0;
           -webkit-align-items: center;
           -webkit-box-align: center;
           -ms-flex-align: center;

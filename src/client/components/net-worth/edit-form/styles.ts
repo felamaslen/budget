@@ -4,6 +4,7 @@ import { rem } from 'polished';
 import { Step } from './constants';
 import { breakpoint } from '~client/styled/mixins';
 import { asButton } from '~client/styled/shared/role';
+import { H3, H4, H5, H6 } from '~client/styled/shared/typography';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export const OverviewGrid = styled.div`
@@ -36,7 +37,7 @@ export const OverviewSection = styled.div`
   }
 `;
 
-export const OverviewSectionTitle = styled.h4`
+export const OverviewSectionTitle = styled(H4)`
   margin: ${rem(4)} 0;
 `;
 
@@ -216,16 +217,14 @@ export const AddLabel = styled.span`
   }
 `;
 
-export const SectionTitle = styled.h5`
+export const SectionTitle = styled(H3)`
   margin: ${rem(8)} 0;
   text-align: center;
-  font-size: 16px;
 `;
 
-export const SectionSubtitle = asButton(styled.h6`
+export const SectionSubtitle = asButton(styled(H4)`
   margin: 0;
-  font-size: 14px;
-  line-height: 24px;
+  line-height: ${rem(24)};
   outline: none;
 
   &::after {
@@ -271,7 +270,7 @@ export const SectionSubtitle = asButton(styled.h6`
   }
 `);
 
-export const Subcategory = styled.h6`
+export const Subcategory = styled(H6)`
   ${EditByCategoryGroup} & {
     grid-column: 1;
     grid-row: 1;
@@ -317,8 +316,8 @@ export const AddCurrency = styled(EditCurrency)`
   }
 `;
 
-export const CurrencyTitle = styled.h5`
-  margin: 0 5px;
+export const CurrencyTitle = styled(H5)`
+  margin: 0 ${rem(4)};
   grid-column: 1;
 
   ${AddCurrency} & {

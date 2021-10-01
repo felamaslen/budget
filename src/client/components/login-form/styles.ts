@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
 import { Button, FlexCenter } from '~client/styled/shared';
+import { H3 } from '~client/styled/shared/typography';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const TitleContainer = styled(FlexCenter)`
@@ -15,7 +16,7 @@ export const TitleContainer = styled(FlexCenter)`
   }
 `;
 
-export const Title = styled.h3`
+export const Title = styled(H3)`
   margin: 0;
   height: 48px;
   line-height: 48px;

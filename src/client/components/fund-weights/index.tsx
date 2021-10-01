@@ -11,6 +11,7 @@ import { colorKey } from '~client/modules/color';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getCashBreakdown, getPortfolio, getStockValue } from '~client/selectors';
 import { Button } from '~client/styled/shared';
+import { H4 } from '~client/styled/shared/typography';
 import { colors } from '~client/styled/variables';
 import type { BlockItem, Id, PortfolioItem } from '~client/types';
 import { abbreviateFundName } from '~shared/abbreviation';
@@ -41,9 +42,9 @@ const StockHelp: React.FC<{ item: PortfolioItem }> = ({
   },
 }) => (
   <>
-    <h6>
+    <H4>
       Summary for <em>{item}</em>
-    </h6>
+    </H4>
     <table>
       <tbody>
         <tr>
@@ -98,7 +99,7 @@ const CashHelp: React.FC<{
 }> = ({ cashBreakdown: { cashInBank, cashToInvest, breakdown } }) => (
   <Styled.InfoDialogBackground>
     <Styled.InfoDialog>
-      <h6>Cash breakdown:</h6>
+      <H4>Cash breakdown:</H4>
       <table>
         <tbody>
           <Styled.InfoDialogRowRawValue>

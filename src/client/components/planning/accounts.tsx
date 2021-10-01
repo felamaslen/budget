@@ -5,6 +5,8 @@ import { ToggleButton } from './button';
 import { usePlanningDispatch, usePlanningState } from './context';
 import { CreditEditForm } from './form/credit';
 import { IncomeEditForm } from './form/income';
+import * as StyledForm from './form/styles';
+import { SidebarSection } from './sidebar-section';
 import * as Styled from './styles';
 import type { Account } from './types';
 
@@ -12,6 +14,7 @@ import { FormFieldSelect, FormFieldText, SelectOptions } from '~client/component
 import { useCTA } from '~client/hooks';
 import { partialModification } from '~client/modules/data';
 import { getCategories, getSubcategories } from '~client/selectors';
+import { H5 } from '~client/styled/shared/typography';
 import type { PlanningAccount, PlanningAccountInput } from '~client/types/gql';
 import { NetWorthAggregate } from '~shared/constants';
 import type { GQL } from '~shared/types';
@@ -73,11 +76,19 @@ export const AddAccount: React.FC = () => {
   }
 
   return (
-    <Styled.AccountGroupHeader>
-      <FormFieldSelect options={options} value={subcategoryId} onChange={setSubcategoryId} />
-      <FormFieldText value={account} onChange={setAccount} />
-      <Styled.Button onClick={onAdd}>+</Styled.Button>
-    </Styled.AccountGroupHeader>
+    <SidebarSection title="Add account">
+      <StyledForm.AddAccountForm>
+        <StyledForm.AddAccountLabelAccount>Account:</StyledForm.AddAccountLabelAccount>
+        <StyledForm.AddAccountInputAccount>
+          <FormFieldSelect options={options} value={subcategoryId} onChange={setSubcategoryId} />
+        </StyledForm.AddAccountInputAccount>
+        <StyledForm.AddAccountLabelName>Name:</StyledForm.AddAccountLabelName>
+        <StyledForm.AddAccountInputName>
+          <FormFieldText value={account} onChange={setAccount} />
+        </StyledForm.AddAccountInputName>
+        <StyledForm.AddAccountButton onClick={onAdd}>+</StyledForm.AddAccountButton>
+      </StyledForm.AddAccountForm>
+    </SidebarSection>
   );
 };
 
@@ -123,7 +134,7 @@ const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
   return (
     <Styled.AccountEditForm>
       <div>
-        <h5>Edit account #{account.id}</h5>
+        <H5>Edit account #{account.id}</H5>
       </div>
       <IncomeEditForm
         tempAccount={tempAccount}

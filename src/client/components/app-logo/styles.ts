@@ -5,6 +5,7 @@ import nav1x from '~client/images/nav.png';
 import nav2x from '~client/images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
 import { Flex } from '~client/styled/shared';
+import { H1 } from '~client/styled/shared/typography';
 import {
   breakpoints,
   sizes,
@@ -76,7 +77,7 @@ export const TitleContainer = styled(Flex)`
   height: 100%;
 `;
 
-export const Title = styled.h1`
+export const Title = styled(H1)`
   align-items: center;
   display: inline-flex;
   font-size: ${rem(22)};
