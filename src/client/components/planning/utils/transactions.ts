@@ -147,12 +147,6 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
       isComputed: true,
     },
     {
-      id: 'tax-relief',
-      name: 'Tax relief',
-      computedValue: combinedIncomeWithDeductions.taxRelief,
-      isComputed: true,
-    },
-    {
       id: 'ni-predicted',
       name: 'NI',
       computedValue: -combinedIncomeWithDeductions.ni,
