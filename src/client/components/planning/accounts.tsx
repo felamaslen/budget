@@ -1,7 +1,6 @@
 import React, { SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { ToggleButton } from './button';
 import { usePlanningDispatch, usePlanningState } from './context';
 import { CreditEditForm } from './form/credit';
 import { IncomeEditForm } from './form/income';
@@ -10,10 +9,16 @@ import { SidebarSection } from './sidebar-section';
 import * as Styled from './styles';
 import type { Account } from './types';
 
-import { FormFieldSelect, FormFieldText, SelectOptions } from '~client/components/form-field';
+import {
+  FormFieldCostInline,
+  FormFieldSelect,
+  FormFieldText,
+  SelectOptions,
+} from '~client/components/form-field';
 import { useCTA } from '~client/hooks';
 import { partialModification } from '~client/modules/data';
 import { getCategories, getSubcategories } from '~client/selectors';
+import { Button, FlexColumn } from '~client/styled/shared';
 import { H5 } from '~client/styled/shared/typography';
 import type { PlanningAccount, PlanningAccountInput } from '~client/types/gql';
 import { NetWorthAggregate } from '~shared/constants';
@@ -45,6 +50,8 @@ export const AddAccount: React.FC = () => {
 
   const [account, setAccount] = useState<string>('');
   const [subcategoryId, setSubcategoryId] = useState<number>(options[0]?.internal ?? 0);
+  const [upperLimit, setUpperLimit] = useState<number | undefined>();
+  const [lowerLimit, setlowerLimit] = useState<number | undefined>();
 
   const dispatch = usePlanningDispatch();
 
@@ -62,6 +69,8 @@ export const AddAccount: React.FC = () => {
             {
               account,
               netWorthSubcategoryId: subcategoryId,
+              upperLimit,
+              lowerLimit,
               income: [],
               pastIncome: [],
               creditCards: [],
@@ -69,7 +78,7 @@ export const AddAccount: React.FC = () => {
             },
           ],
     }));
-  }, [dispatch, subcategoryId, account]);
+  }, [dispatch, subcategoryId, account, upperLimit, lowerLimit]);
 
   if (!options.length) {
     return null;
@@ -77,17 +86,37 @@ export const AddAccount: React.FC = () => {
 
   return (
     <SidebarSection title="Add account">
-      <StyledForm.AddAccountForm>
-        <StyledForm.AddAccountLabelAccount>Account:</StyledForm.AddAccountLabelAccount>
-        <StyledForm.AddAccountInputAccount>
-          <FormFieldSelect options={options} value={subcategoryId} onChange={setSubcategoryId} />
-        </StyledForm.AddAccountInputAccount>
-        <StyledForm.AddAccountLabelName>Name:</StyledForm.AddAccountLabelName>
-        <StyledForm.AddAccountInputName>
-          <FormFieldText value={account} onChange={setAccount} />
-        </StyledForm.AddAccountInputName>
-        <StyledForm.AddAccountButton onClick={onAdd}>+</StyledForm.AddAccountButton>
-      </StyledForm.AddAccountForm>
+      <StyledForm.ModifyAccountForm>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>Account:</StyledForm.ModifyAccountFormLabel>
+          <StyledForm.ModifyAccountFormInput>
+            <FormFieldSelect options={options} value={subcategoryId} onChange={setSubcategoryId} />
+          </StyledForm.ModifyAccountFormInput>
+        </StyledForm.ModifyAccountFormRow>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>Name:</StyledForm.ModifyAccountFormLabel>
+          <StyledForm.ModifyAccountFormInput>
+            <FormFieldText value={account} onChange={setAccount} />
+          </StyledForm.ModifyAccountFormInput>
+        </StyledForm.ModifyAccountFormRow>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>
+            <Button onClick={onAdd}>+</Button>
+          </StyledForm.ModifyAccountFormLabel>
+        </StyledForm.ModifyAccountFormRow>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>Lower limit</StyledForm.ModifyAccountFormLabel>
+          <StyledForm.ModifyAccountFormInput>
+            <FormFieldCostInline value={lowerLimit} onChange={setlowerLimit} />
+          </StyledForm.ModifyAccountFormInput>
+        </StyledForm.ModifyAccountFormRow>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>Upper limit</StyledForm.ModifyAccountFormLabel>
+          <StyledForm.ModifyAccountFormInput>
+            <FormFieldCostInline value={upperLimit} onChange={setUpperLimit} />
+          </StyledForm.ModifyAccountFormInput>
+        </StyledForm.ModifyAccountFormRow>
+      </StyledForm.ModifyAccountForm>
     </SidebarSection>
   );
 };
@@ -131,11 +160,50 @@ const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
     [onSave],
   );
 
+  const setName = useCallback(
+    (name: string) => setTempAccount((prevAccount) => ({ ...prevAccount, account: name })),
+    [setTempAccount],
+  );
+  const setUpperLimit = useCallback(
+    (upperLimit: number | undefined) =>
+      setTempAccount((prevAccount) => ({ ...prevAccount, upperLimit: upperLimit || null })),
+    [setTempAccount],
+  );
+  const setLowerLimit = useCallback(
+    (lowerLimit: number | undefined) =>
+      setTempAccount((prevAccount) => ({ ...prevAccount, lowerLimit: lowerLimit || null })),
+    [setTempAccount],
+  );
+
   return (
     <Styled.AccountEditForm>
-      <div>
+      <FlexColumn>
         <H5>Edit account #{account.id}</H5>
-      </div>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>Name</StyledForm.ModifyAccountFormLabel>
+          <StyledForm.ModifyAccountFormInput>
+            <FormFieldText value={tempAccount.account} onChange={setName} />
+          </StyledForm.ModifyAccountFormInput>
+        </StyledForm.ModifyAccountFormRow>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>Lower limit</StyledForm.ModifyAccountFormLabel>
+          <StyledForm.ModifyAccountFormInput>
+            <FormFieldCostInline
+              value={tempAccount.lowerLimit ?? undefined}
+              onChange={setLowerLimit}
+            />
+          </StyledForm.ModifyAccountFormInput>
+        </StyledForm.ModifyAccountFormRow>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>Upper limit</StyledForm.ModifyAccountFormLabel>
+          <StyledForm.ModifyAccountFormInput>
+            <FormFieldCostInline
+              value={tempAccount.upperLimit ?? undefined}
+              onChange={setUpperLimit}
+            />
+          </StyledForm.ModifyAccountFormInput>
+        </StyledForm.ModifyAccountFormRow>
+      </FlexColumn>
       <IncomeEditForm
         tempAccount={tempAccount}
         setTempAccount={setTempAccount}
@@ -154,18 +222,11 @@ const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
 };
 
 type PropsModifyAccount = {
-  account: PlanningAccountInput;
+  account: GQL<PlanningAccount>;
 };
 
-export const ModifyAccount: React.FC<PropsModifyAccount> = ({ account }) => {
-  const [editing, setEditing] = useState<boolean>(false);
-  const onToggleEditing = useCallback(() => setEditing((last) => !last), []);
-
-  return (
-    <Styled.AccountGroupHeader>
-      <span>{account.account}</span>
-      <ToggleButton active={editing} onToggle={onToggleEditing} />
-      {editing && !!account.id && <AccountEditForm account={account as GQL<PlanningAccount>} />}
-    </Styled.AccountGroupHeader>
-  );
-};
+export const ModifyAccount: React.FC<PropsModifyAccount> = ({ account }) => (
+  <SidebarSection title={`[Account] ${account.account}`}>
+    <AccountEditForm account={account} />
+  </SidebarSection>
+);

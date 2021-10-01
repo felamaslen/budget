@@ -106,9 +106,9 @@ describe('<ListHeadFunds />', () => {
         width="24"
       >
         <path
-          d="M12,3 A9,9 0,1,1 7.499999999999998,19.794228634059948"
+          d="M12,3 A9,9 0,1,1 7.664216933084565,19.886760120394772"
           fill="none"
-          stroke="#948cef"
+          stroke="#948def"
           stroke-width="3"
         />
       </svg>

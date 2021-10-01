@@ -770,6 +770,8 @@ export type PlanningAccount = {
   pastIncome: Array<PlanningPastIncome>;
   creditCards: Array<PlanningCreditCard>;
   values: Array<PlanningValue>;
+  upperLimit?: Maybe<Scalars['Int']>;
+  lowerLimit?: Maybe<Scalars['Int']>;
 };
 
 export type PlanningAccountInput = {
@@ -779,6 +781,8 @@ export type PlanningAccountInput = {
   income: Array<PlanningIncomeInput>;
   creditCards: Array<PlanningCreditCardInput>;
   values: Array<PlanningValueInput>;
+  upperLimit?: Maybe<Scalars['Int']>;
+  lowerLimit?: Maybe<Scalars['Int']>;
 };
 
 export type PlanningAccountsResponse = {
@@ -2082,6 +2086,8 @@ export type PlanningAccountResolvers<ContextType = Context, ParentType extends R
   pastIncome?: Resolver<Array<ResolversTypes['PlanningPastIncome']>, ParentType, ContextType>;
   creditCards?: Resolver<Array<ResolversTypes['PlanningCreditCard']>, ParentType, ContextType>;
   values?: Resolver<Array<ResolversTypes['PlanningValue']>, ParentType, ContextType>;
+  upperLimit?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  lowerLimit?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

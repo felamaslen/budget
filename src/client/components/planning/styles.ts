@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { rem } from 'polished';
+import { rem, rgba } from 'polished';
 
 import type { AccountTransaction } from './types';
 
@@ -45,13 +45,17 @@ export const Planning = styled(Flex)`
 `;
 
 export const Sidebar = styled(FlexColumn)`
-  flex: 0 0 ${rem(180)};
+  background: ${colors.light.mediumLight};
+  flex: 0 0 ${rem(240)};
   overflow-x: hidden;
   min-height: 0;
 `;
 
 export const SidebarTitle = styled(H3)`
+  background: ${colors.light.light};
+  border-bottom: 1px dashed ${colors.light.dark};
   cursor: pointer;
+  margin: ${rem(8)} 0 0 0;
 `;
 
 export const SidebarToggleStatus = styled.span`
@@ -59,6 +63,7 @@ export const SidebarToggleStatus = styled.span`
 `;
 
 export const SidebarSection = styled(FlexColumn)`
+  background: ${colors.light.light};
   border-bottom: 1px solid ${colors.light.mediumDark};
   font-size: ${rem(12)};
   margin-bottom: ${rem(8)};
@@ -220,6 +225,7 @@ export const AccountGroupHeader = styled(Cell)`
   flex: 0 0 ${rem(monthGroupItemWidth + monthGroupValueWidth)};
   position: relative;
   width: ${rem(monthGroupItemWidth + monthGroupValueWidth)};
+  z-index: 5;
 
   & > span {
     flex: 1;
@@ -234,13 +240,6 @@ export const AccountEditForm = styled(FlexColumn)`
   background: ${colors.translucent.light.light};
   border: 1px solid ${borderColor};
   border-top: none;
-  left: 0;
-  max-height: ${rem(360)};
-  min-height: ${rem(96)};
-  overflow-y: auto;
-  position: absolute;
-  top: ${rem(lineHeight)};
-  width: ${rem(220)};
   z-index: 5;
 
   & > div {
@@ -289,7 +288,23 @@ export const AccountGroupItemText = styled.span`
   text-overflow: ellipsis;
 `;
 
-export const AccountGroupValue = styled(CellNumeric)`
+export const AccountGroupValue = styled(CellNumeric)<{
+  tooLow?: boolean;
+  tooHigh?: boolean;
+  justRight?: boolean;
+}>`
+  background-color: ${({ tooLow = false, tooHigh = false, justRight = false }): string => {
+    if (tooLow) {
+      return rgba(colors.error, 0.3);
+    }
+    if (tooHigh) {
+      return rgba(colors.amber, 0.8);
+    }
+    if (justRight) {
+      return rgba(colors.green, 0.3);
+    }
+    return 'none';
+  }} !important;
   grid-column: 2;
 `;
 

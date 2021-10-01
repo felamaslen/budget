@@ -332,12 +332,16 @@ const syncAccountRows = syncItems<AccountRow, MutationSyncPlanningArgs>({
       .map<Omit<AccountRow, 'id' | 'uid'>>((account) => ({
         account: account.account,
         net_worth_subcategory_id: account.netWorthSubcategoryId,
+        limit_upper: account.upperLimit ?? null,
+        limit_lower: account.lowerLimit ?? null,
       })),
   getUpdatedInput: (args) =>
     args.input.accounts.filter(isAccountInputExisting).map<Omit<AccountRow, 'uid'>>((account) => ({
       id: account.id,
       account: account.account,
       net_worth_subcategory_id: account.netWorthSubcategoryId,
+      limit_upper: account.upperLimit ?? null,
+      limit_lower: account.lowerLimit ?? null,
     })),
 });
 

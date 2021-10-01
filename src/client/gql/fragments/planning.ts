@@ -19,6 +19,8 @@ export const PlanningAccountParts = gql`
     id
     account
     netWorthSubcategoryId
+    upperLimit
+    lowerLimit
     income {
       id
       startDate

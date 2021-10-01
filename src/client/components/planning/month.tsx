@@ -4,9 +4,9 @@ import React, { useMemo } from 'react';
 
 import { useTransactionForm } from './form/hooks';
 import { MonthAccount } from './month-account';
-import { MonthEnd } from './month-end';
+import { AccountValue, MonthEnd } from './month-end';
 import * as Styled from './styles';
-import type { AccountTransaction, PlanningData } from './types';
+import type { PlanningData } from './types';
 
 export type Props = {
   dataForMonth: PlanningData;
@@ -19,13 +19,23 @@ export const Month: React.FC<Props> = ({ dataForMonth, isStart, year }) => {
 
   const startDate = useMemo<Date>(() => endOfMonth(addMonths(date, -1)), [date]);
 
-  const accountValuesStart = useMemo<AccountTransaction[]>(
-    () => accounts.map(({ startValue }) => startValue),
+  const accountValuesStart = useMemo<AccountValue[]>(
+    () =>
+      accounts.map(({ accountGroup, startValue }) => ({
+        ...startValue,
+        upperLimit: accountGroup.upperLimit,
+        lowerLimit: accountGroup.lowerLimit,
+      })),
     [accounts],
   );
 
-  const accountValuesEnd = useMemo<AccountTransaction[]>(
-    () => accounts.map(({ endValue }) => endValue),
+  const accountValuesEnd = useMemo<AccountValue[]>(
+    () =>
+      accounts.map(({ accountGroup, endValue }) => ({
+        ...endValue,
+        upperLimit: accountGroup.upperLimit,
+        lowerLimit: accountGroup.lowerLimit,
+      })),
     [accounts],
   );
 

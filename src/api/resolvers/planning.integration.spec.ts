@@ -179,6 +179,8 @@ describe('Planning resolver', () => {
               value
               formula
             }
+            upperLimit
+            lowerLimit
           }
         }
       }
@@ -228,6 +230,8 @@ describe('Planning resolver', () => {
             income: [],
             creditCards: [],
             values: [],
+            upperLimit: 1500000,
+            lowerLimit: 500000,
           },
           {
             account: 'My test account',
@@ -255,6 +259,8 @@ describe('Planning resolver', () => {
               { year: 2020, month: 2, name: 'Some random expense', value: -80000 },
               { year: 2020, month: 9, name: 'Expected income', formula: '75 * 29.3' },
             ],
+            upperLimit: 210000,
+            lowerLimit: 200000,
           },
         ],
       },
@@ -347,11 +353,15 @@ describe('Planning resolver', () => {
               uid: app.uid,
               account: 'My test account',
               net_worth_subcategory_id: myBankId,
+              limit_upper: 210000,
+              limit_lower: 200000,
             }),
             expect.objectContaining<Partial<AccountRow>>({
               uid: app.uid,
               account: 'Something account',
               net_worth_subcategory_id: myOtherBankId,
+              limit_upper: 1500000,
+              limit_lower: 500000,
             }),
           ]),
         );
@@ -516,6 +526,8 @@ describe('Planning resolver', () => {
                 income: [],
                 creditCards: [],
                 values: [],
+                upperLimit: 1500000,
+                lowerLimit: 500000,
               }),
               expect.objectContaining({
                 id: expect.any(Number),
@@ -560,6 +572,8 @@ describe('Planning resolver', () => {
                     formula: '75 * 29.3',
                   }),
                 ]),
+                upperLimit: 210000,
+                lowerLimit: 200000,
               }),
             ]),
           }),
@@ -638,6 +652,7 @@ describe('Planning resolver', () => {
             {
               ...omit(omitTypeName(createRes.accounts?.[1] as PlanningAccountInput), 'pastIncome'),
               account: 'My modified test account',
+              upperLimit: 1000000,
               income: [
                 {
                   ...omitTypeName(createRes.accounts?.[1]?.income[0] as PlanningIncomeInput),
@@ -792,6 +807,7 @@ describe('Planning resolver', () => {
           {
             ...rowsAfterCreate.rows[0],
             account: 'My modified test account',
+            limit_upper: 1000000,
           },
         ]);
       });

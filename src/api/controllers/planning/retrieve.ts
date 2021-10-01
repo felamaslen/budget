@@ -124,7 +124,7 @@ export async function getPlanningAccounts(
   }));
 
   return Object.entries(groupBy(accountRows, 'id')).map<PlanningAccount>(([, accountGroup]) => {
-    const { id, account, net_worth_subcategory_id } = accountGroup[0];
+    const { id, account, net_worth_subcategory_id, limit_lower, limit_upper } = accountGroup[0];
 
     const pastIncome = previousIncome
       .filter((compare) => compare.item.toLowerCase().includes(account.toLowerCase()))
@@ -189,6 +189,8 @@ export async function getPlanningAccounts(
       pastIncome,
       creditCards,
       values,
+      upperLimit: limit_upper,
+      lowerLimit: limit_lower,
     };
   });
 }

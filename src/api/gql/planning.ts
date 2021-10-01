@@ -64,6 +64,8 @@ export const planningSchema = gql`
     pastIncome: [PlanningPastIncome!]!
     creditCards: [PlanningCreditCard!]!
     values: [PlanningValue!]!
+    upperLimit: Int
+    lowerLimit: Int
   }
 
   input PlanningTaxRateInput {
@@ -122,6 +124,8 @@ export const planningSchema = gql`
     income: [PlanningIncomeInput!]!
     creditCards: [PlanningCreditCardInput!]!
     values: [PlanningValueInput!]!
+    upperLimit: Int
+    lowerLimit: Int
   }
 
   input PlanningSync {
