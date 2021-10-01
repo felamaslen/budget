@@ -1,14 +1,16 @@
 import React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router';
 
+import { NavLink } from 'react-router-dom';
 import * as Styled from './styles';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
-type Props = {
+type Props = RouteComponentProps & {
   onLogout: () => void;
 };
 
-const pages: { page: Styled.NavPage; path?: string }[] = [
-  { page: PageNonStandard.Overview, path: '/' },
+const pages: { page: Styled.NavPage; path?: string; paths?: string[] }[] = [
+  { page: PageNonStandard.Overview, path: '/', paths: ['/', '/buckets', '/net-worth'] },
   { page: PageNonStandard.Planning },
   { page: PageNonStandard.Analysis },
   { page: PageNonStandard.Funds },
@@ -20,29 +22,34 @@ const pages: { page: Styled.NavPage; path?: string }[] = [
   { page: PageListStandard.Social },
 ];
 
-export const Navbar: React.FC<Props> = ({ onLogout }) => (
+function doesPathMatch(
+  location: string,
+  page: Styled.NavPage,
+  paths: string[] | undefined,
+): boolean {
+  return (
+    location.startsWith(`/${page}`) ||
+    (paths?.some((path) => path === location || (path.length > 1 && location.startsWith(path))) ??
+      false)
+  );
+}
+
+const Navbar: React.FC<Props> = ({ location, onLogout }) => (
   <Styled.NavList>
-    {pages.map(({ page, path }) => (
-      <Styled.Link
-        key={page}
-        exact
-        to={path ?? `/${page}`}
-        tabIndex={-1}
-        activeClassName="active"
-        page={page}
-      >
-        {page}
+    {pages.map(({ page, path, paths }) => (
+      <Styled.Link key={page} page={page} isActive={doesPathMatch(location.pathname, page, paths)}>
+        <NavLink to={path ?? `/${page}`} tabIndex={-1}>
+          {page}
+        </NavLink>
       </Styled.Link>
     ))}
-    <Styled.Link
-      to="/"
-      as="a"
-      tabIndex={-1}
-      page="logout"
-      onClick={onLogout}
-      activeClassName="not-active"
-    >
-      Log out
+    <Styled.Link isActive={false} page="logout">
+      <NavLink to="/" tabIndex={-1} onClick={onLogout}>
+        Log out
+      </NavLink>
     </Styled.Link>
   </Styled.NavList>
 );
+
+const NavbarRouted = withRouter(Navbar);
+export { NavbarRouted as Navbar };

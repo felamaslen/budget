@@ -1,6 +1,6 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
-import { NavLink } from 'react-router-dom';
 
 import nav1x from '../../images/nav.png';
 import nav2x from '../../images/nav@2x.png';
@@ -36,8 +36,8 @@ export const NavList = styled.nav`
 export type NavPage = PageNonStandard | PageListStandard | 'logout';
 
 type LinkProps = {
+  isActive: boolean;
   page: NavPage;
-  to: string;
 };
 
 type PageBackgroundPosition = Record<NavPage, string>;
@@ -70,85 +70,83 @@ const pageBackgroundPositionDesktop: PageBackgroundPosition = {
   [PageListStandard.Social]: '-233px -30px',
 };
 
-export const Link = styled(NavLink)<LinkProps>`
-  flex: 1 0 0;
-  height: ${rem(sizes.heightNavMobile - 3)};
-  line-height: ${rem(30)};
-  overflow: hidden;
-  text-align: center;
-  border-bottom: ${rem(4)} solid transparent;
-  cursor: pointer;
-  &.active {
-    border-color: ${colors.accent as string};
-  }
-  &:focus {
-    outline: none;
-  }
-  &::before {
-    background-image: url(${nav1x});
-    background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
-    content: '';
-    display: block;
-    margin: 0 auto;
-    height: ${rem(28)};
-    width: ${rem(28)};
-
-    @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-      background-image: url(${nav2x});
-      background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
-    }
-  }
-
-  ${breakpoint(breakpoints.mobile)} {
-    border-bottom: ${rem(3)} solid transparent;
-    border-color: ${({ page }): string => {
-      if (page === 'logout') {
-        return colors.light.mediumLight;
+export const Link = styled.span<LinkProps>(
+  ({ isActive, page }) => css`
+    a {
+      flex: 1 0 0;
+      height: ${rem(sizes.heightNavMobile - 3)};
+      line-height: ${rem(30)};
+      overflow: hidden;
+      text-align: center;
+      border-bottom: ${rem(4)} solid ${isActive ? colors.accent : colors.transparent};
+      cursor: pointer;
+      &:focus {
+        outline: none;
       }
-      return colors[page].main;
-    }};
-    border-radius: 3px 3px 0 0;
-    box-sizing: content-box;
-    color: ${colors.white};
-    display: block;
-    flex: 0 0 ${rem(46)};
-    height: ${rem(30)};
-    padding: ${rem(2)} ${rem(1)} 0 ${rem(1)};
-    text-align: center;
-    text-decoration: none;
-    text-transform: capitalize;
+      &::before {
+        background-image: url(${nav1x});
+        background-position: ${pageBackgroundPositionMobile[page]};
+        content: '';
+        display: block;
+        margin: 0 auto;
+        height: ${rem(28)};
+        width: ${rem(28)};
 
-    &.active {
-      border-bottom-color: ${colors.black};
-      cursor: default;
-      &,
-      &:hover,
-      &:active {
-        background: ${colors.shadow.mediumDark as string};
+        @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+          background-image: url(${nav2x});
+          background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
+        }
+      }
+
+      ${breakpoint(breakpoints.mobile)} {
+        border-bottom: ${rem(3)} solid transparent;
+        border-color: ${page === 'logout' ? colors.light.mediumLight : colors[page].main};
+        border-radius: 3px 3px 0 0;
+        box-sizing: content-box;
+        color: ${colors.white};
+        display: block;
+        flex: 0 0 ${rem(46)};
+        height: ${rem(30)};
+        padding: ${rem(2)} ${rem(1)} 0 ${rem(1)};
+        text-align: center;
+        text-decoration: none;
+        text-transform: capitalize;
+
+        ${isActive
+          ? css`
+              border-bottom-color: ${colors.black};
+              cursor: default;
+              &,
+              &:hover,
+              &:active {
+                background: ${colors.shadow.mediumDark as string};
+              }
+            `
+          : css``}
+
+        &::before {
+          background-position: ${pageBackgroundPositionDesktop[page]};
+        }
+
+        &:hover {
+          background: ${colors.shadow.light as string};
+        }
+        &:active {
+          background: ${colors.shadow.mediumLight as string};
+        }
+      }
+
+      ${breakpoint(breakpoints.tablet)} {
+        display: flex;
+        flex: 0 0 auto;
+        margin: 0 ${rem(4)} 0 0;
+        padding: ${rem(4)} ${rem(4)} 0 ${rem(2)};
+        text-align: left;
+
+        &::before {
+          margin: 0 ${rem(4)} 0 0;
+        }
       }
     }
-
-    &::before {
-      background-position: ${({ page }): string => pageBackgroundPositionDesktop[page]};
-    }
-
-    &:hover {
-      background: ${colors.shadow.light as string};
-    }
-    &:active {
-      background: ${colors.shadow.mediumLight as string};
-    }
-  }
-
-  ${breakpoint(breakpoints.tablet)} {
-    display: flex;
-    flex: 0 0 auto;
-    margin: 0 ${rem(4)} 0 0;
-    padding: ${rem(4)} ${rem(4)} 0 ${rem(2)};
-    text-align: left;
-
-    &::before {
-      margin: 0 ${rem(4)} 0 0;
-    }
-  }
-`;
+  `,
+);
