@@ -2,7 +2,6 @@ import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/
 import React from 'react';
 
 import { useField } from './field';
-import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe(useField.name, () => {
   type Props = {
@@ -258,7 +257,9 @@ describe(useField.name, () => {
     });
 
     describe('when setting the field to inactive', () => {
-      const mockedTime = mockTimeOnly();
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
 
       const setup = (newValue?: string): RenderResult => {
         const renderProps = render(<TestComponent {...props} inline />);
@@ -278,7 +279,7 @@ describe(useField.name, () => {
           });
         }
 
-        mockedTime.clock.tick(100);
+        jest.advanceTimersByTime(100);
 
         act(() => {
           fireEvent.click(activateButton);
@@ -292,7 +293,7 @@ describe(useField.name, () => {
         const { getByTestId } = setup();
         const input = getByTestId('input');
         act(() => {
-          mockedTime.clock.runAll();
+          jest.runAllTimers();
         });
         await waitFor(() => {
           expect(document.activeElement).toBe(input);
@@ -358,12 +359,12 @@ describe(useField.name, () => {
         });
 
         await new Promise<void>((resolve) =>
-          setImmediate(() => {
+          setTimeout(() => {
             render(<TestComponent {...props} inline value="new-value" />, {
               container: renderProps.container,
             });
             resolve();
-          }),
+          }, 0),
         );
 
         return renderProps;

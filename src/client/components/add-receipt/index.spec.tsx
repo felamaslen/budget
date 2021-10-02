@@ -104,8 +104,6 @@ describe('<AddReceipt />', () => {
       jest.runAllTimers();
     });
 
-    jest.useRealTimers();
-
     matchMedia.clear();
     mutateSpy.mockRestore();
   });

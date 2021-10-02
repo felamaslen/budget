@@ -21,7 +21,6 @@ describe('useCTA', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
-  afterEach(jest.useRealTimers);
 
   describe('onClick event', () => {
     it('should be returned', () => {

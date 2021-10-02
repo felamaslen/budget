@@ -205,7 +205,7 @@ describe('List mutations', () => {
             fireEvent.click(getByText('Update!'));
 
             await new Promise<void>((resolve) => {
-              setImmediate(() => {
+              setTimeout(() => {
                 expect(store.getActions()).toStrictEqual(
                   expect.arrayContaining([
                     errorOpened(
@@ -216,7 +216,7 @@ describe('List mutations', () => {
                 );
 
                 resolve();
-              });
+              }, 0);
             });
           });
         });
@@ -272,7 +272,7 @@ describe('List mutations', () => {
             fireEvent.click(getByText('Delete!'));
 
             await new Promise<void>((resolve) => {
-              setImmediate(() => {
+              setTimeout(() => {
                 expect(store.getActions()).toStrictEqual(
                   expect.arrayContaining([
                     errorOpened(
@@ -283,7 +283,7 @@ describe('List mutations', () => {
                 );
 
                 resolve();
-              });
+              }, 0);
             });
           });
         });

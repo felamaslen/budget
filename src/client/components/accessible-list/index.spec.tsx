@@ -5,11 +5,9 @@ import {
   RenderResult,
   within,
   RenderOptions,
-  waitFor,
 } from '@testing-library/react';
 import format from 'date-fns/format';
 import MatchMediaMock from 'jest-matchmedia-mock';
-import MockDate from 'mockdate';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
@@ -71,10 +69,6 @@ describe('<AccessibleList />', () => {
 
   beforeAll(() => {
     matchMedia = new MatchMediaMock();
-    MockDate.set(new Date('2020-05-03'));
-  });
-  afterAll(() => {
-    MockDate.reset();
   });
 
   const onCreate = jest.fn();
@@ -82,6 +76,8 @@ describe('<AccessibleList />', () => {
   const onDelete = jest.fn();
 
   beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2020-05-03'));
     jest.spyOn(listMutationHooks, 'useListCrudStandard').mockReturnValue({
       onCreate,
       onUpdate,
@@ -89,8 +85,11 @@ describe('<AccessibleList />', () => {
     });
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     matchMedia.clear();
+    act(() => {
+      jest.runAllTimers();
+    });
   });
 
   function getContainerBase<
@@ -137,7 +136,7 @@ describe('<AccessibleList />', () => {
   describe('standard header', () => {
     it('should be rendered', () => {
       expect.assertions(4);
-      const { getByRole } = getContainerStandard();
+      const { getByRole, unmount } = getContainerStandard();
       const header = getByRole('heading');
 
       expect(header).toBeInTheDocument();
@@ -147,6 +146,7 @@ describe('<AccessibleList />', () => {
       expect(getByText('Date')).toBeInTheDocument();
       expect(getByText('Item')).toBeInTheDocument();
       expect(getByText('Cost')).toBeInTheDocument();
+      unmount();
     });
   });
 
@@ -173,17 +173,18 @@ describe('<AccessibleList />', () => {
 
     it('should be rendered', () => {
       expect.assertions(2);
-      const { getByRole } = setup();
+      const { getByRole, unmount } = setup();
       const header = getByRole('heading');
 
       expect(header).toBeInTheDocument();
       expect(header).toHaveTextContent('This is a custom header');
+      unmount();
     });
   });
 
   it('should render the items in descending order of date', () => {
     expect.assertions(3);
-    const { getByRole } = getContainerStandard();
+    const { getByRole, unmount } = getContainerStandard();
     const list = getByRole('list');
     const { getAllByRole } = within(list);
     const listItems = getAllByRole('listitem') as HTMLElement[];
@@ -195,11 +196,12 @@ describe('<AccessibleList />', () => {
 
     expect(getFirstValue('20/04/2020')).toBeInTheDocument();
     expect(getSecondValue('13/04/2020')).toBeInTheDocument();
+    unmount();
   });
 
   it('should not render optimistically deleted items', () => {
     expect.assertions(3);
-    const { queryByDisplayValue } = getContainerStandard({
+    const { queryByDisplayValue, unmount } = getContainerStandard({
       ...testState,
       [myPage]: {
         ...testState[myPage],
@@ -221,6 +223,7 @@ describe('<AccessibleList />', () => {
     expect(queryByDisplayValue('01/03/2020')).not.toBeInTheDocument();
     expect(queryByDisplayValue('Item c')).not.toBeInTheDocument();
     expect(queryByDisplayValue('1.76')).not.toBeInTheDocument();
+    unmount();
   });
 
   describe.each`
@@ -239,16 +242,17 @@ describe('<AccessibleList />', () => {
     `('$field field', ({ field, inputValue, valueUpdate, newValue }) => {
       it('should be rendered', () => {
         expect.assertions(2);
-        const { getByDisplayValue } = getContainerStandard();
+        const { getByDisplayValue, unmount } = getContainerStandard();
         const input = getByDisplayValue(inputValue) as HTMLInputElement;
 
         expect(input).toBeInTheDocument();
         expect(input.type).toBe('text'); // all inline fields
+        unmount();
       });
 
       it('should call onUpdate when changed', () => {
         expect.assertions(3);
-        const { getByDisplayValue } = getContainerStandard();
+        const { getByDisplayValue, unmount } = getContainerStandard();
         const input = getByDisplayValue(inputValue) as HTMLInputElement;
 
         act(() => {
@@ -267,6 +271,7 @@ describe('<AccessibleList />', () => {
           { [field]: newValue ?? valueUpdate },
           testState[myPage].items[stateIndex],
         );
+        unmount();
       });
 
       describe('when the value is set to empty', () => {
@@ -285,16 +290,17 @@ describe('<AccessibleList />', () => {
 
         it('should not call onUpdate', () => {
           expect.assertions(1);
-          const { input } = setup();
+          const { input, unmount } = setup();
           act(() => {
             fireEvent.blur(input);
           });
           expect(onUpdate).not.toHaveBeenCalled();
+          unmount();
         });
 
         it('should reset the input value on blur', () => {
           expect.assertions(2);
-          const { input, container } = setup();
+          const { input, container, unmount } = setup();
 
           expect(input.value).toBe('');
           act(() => {
@@ -306,30 +312,32 @@ describe('<AccessibleList />', () => {
 
             expect(getByDisplayValue(inputValue)).toBeInTheDocument();
           });
+          unmount();
         });
       });
 
       describe('delete button', () => {
-        const getDeleteButton = (): {
+        const getDeleteButton = (): Pick<RenderResult, 'unmount'> & {
           store: MockStore<MyState>;
           button: HTMLButtonElement;
         } => {
-          const { store, getAllByText } = getContainerStandard();
+          const { store, getAllByText, unmount } = getContainerStandard();
           const deleteButtons = getAllByText('−') as HTMLButtonElement[];
           const button = deleteButtons[listIndex];
 
-          return { store, button };
+          return { store, button, unmount };
         };
 
         it('should be rendered', () => {
           expect.assertions(1);
-          const { button } = getDeleteButton();
+          const { button, unmount } = getDeleteButton();
           expect(button).toBeInTheDocument();
+          unmount();
         });
 
         it('should call onDelete when clicked', () => {
           expect.assertions(2);
-          const { button } = getDeleteButton();
+          const { button, unmount } = getDeleteButton();
 
           act(() => {
             fireEvent.click(button);
@@ -337,6 +345,7 @@ describe('<AccessibleList />', () => {
 
           expect(onDelete).toHaveBeenCalledTimes(1);
           expect(onDelete).toHaveBeenCalledWith(id, testState[myPage].items[stateIndex]);
+          unmount();
         });
       });
     });
@@ -376,14 +385,15 @@ describe('<AccessibleList />', () => {
 
         it('should be rendered', () => {
           expect.assertions(2);
-          const { input } = getCreateInput();
+          const { input, renderResult } = getCreateInput();
           expect(input).toBeInTheDocument();
           expect(input.value).toBe(initialValue);
+          renderResult.unmount();
         });
 
-        it('should not call onCreate immediately on change', async () => {
+        it('should not call onCreate immediately on change', () => {
           expect.assertions(2);
-          const { input } = getCreateInput();
+          const { input, renderResult } = getCreateInput();
           act(() => {
             fireEvent.focus(input);
           });
@@ -396,16 +406,17 @@ describe('<AccessibleList />', () => {
           });
           expect(input.value).toBe(inputValueAfter);
           expect(onCreate).not.toHaveBeenCalled();
+          renderResult.unmount();
         });
 
         describe('when the value is set to empty', () => {
-          const setup = async (): Promise<{
+          const setup = (): Pick<RenderResult, 'unmount'> & {
             input: HTMLInputElement;
             store: MockStore<MyState>;
-          }> => {
+          } => {
             const {
               input,
-              renderResult: { store },
+              renderResult: { store, unmount },
             } = getCreateInput();
 
             act(() => {
@@ -414,31 +425,32 @@ describe('<AccessibleList />', () => {
               });
             });
 
-            return { input, store };
+            return { input, store, unmount };
           };
 
-          it('should not reset the input value on blur', async () => {
+          it('should not reset the input value on blur', () => {
             expect.assertions(2);
-            const { input } = await setup();
+            const { input, unmount } = setup();
 
             expect(input.value).toBe('');
             act(() => {
               fireEvent.blur(input);
             });
             expect(input.value).toBe(field === 'date' ? initialValue : '');
+            unmount();
           });
         });
       },
     );
 
     describe('after adding values to the form', () => {
-      const setup = async (): Promise<{
+      const setup = (): {
         renderResult: { store: MockStore<MyState> } & RenderResult;
         dateInput: HTMLInputElement;
         itemInput: HTMLInputElement;
         costInput: HTMLInputElement;
         addButton: HTMLButtonElement;
-      }> => {
+      } => {
         const { inputs, createForm, renderResult } = getInputs();
         const [
           dateInput,
@@ -503,15 +515,16 @@ describe('<AccessibleList />', () => {
         return { renderResult, dateInput, itemInput, costInput, addButton };
       };
 
-      it('should call onCreate after pressing the add button', async () => {
-        expect.hasAssertions();
-        jest.useFakeTimers();
+      it('should call onCreate after pressing the add button', () => {
+        expect.assertions(3);
         expect(onCreate).not.toHaveBeenCalled();
-        await setup();
+        const { renderResult } = setup();
 
-        await waitFor(() => {
-          expect(onCreate).toHaveBeenCalledTimes(1);
+        act(() => {
+          jest.runAllTimers();
         });
+
+        expect(onCreate).toHaveBeenCalledTimes(1);
 
         expect(onCreate).toHaveBeenCalledWith({
           date: new Date('2020-06-05'),
@@ -521,42 +534,35 @@ describe('<AccessibleList />', () => {
           shop: 'Different shop innit',
         });
 
-        act(() => {
-          jest.runAllTimers();
-        });
-        jest.useRealTimers();
+        renderResult.unmount();
       });
 
-      it('should reset the input values after creating an item', async () => {
-        expect.hasAssertions();
-        jest.useFakeTimers();
-        const { dateInput, itemInput, costInput } = await setup();
-
-        await waitFor(() => {
-          expect(dateInput.value).toBe('03/05/2020');
-          expect(itemInput.value).toBe('');
-          expect(costInput.value).toBe('');
+      it('should focus the first input field so that another item can be created quickly', () => {
+        expect.assertions(1);
+        act(() => {
+          jest.runAllTimers();
         });
+        const { dateInput, renderResult } = setup();
 
         act(() => {
           jest.runAllTimers();
         });
-        jest.useRealTimers();
+        expect(document.activeElement).toBe(dateInput);
+        renderResult.unmount();
       });
 
-      it('should focus the first input field so that another item can be created quickly', async () => {
-        expect.hasAssertions();
-        const { dateInput } = await setup();
-
-        await waitFor(() => {
-          expect(document.activeElement).toBe(dateInput);
-        });
-
+      it('should reset the input values after creating an item', () => {
+        expect.assertions(3);
         jest.useFakeTimers();
+        const { dateInput, itemInput, costInput, renderResult } = setup();
+
         act(() => {
           jest.runAllTimers();
         });
-        jest.useRealTimers();
+        expect(dateInput.value).toBe('03/05/2020');
+        expect(itemInput.value).toBe('');
+        expect(costInput.value).toBe('');
+        renderResult.unmount();
       });
     });
   });

@@ -2,10 +2,11 @@
 import { render, RenderResult, act } from '@testing-library/react';
 import React from 'react';
 import { Pie } from '.';
-import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe('<Pie />', () => {
-  const mockedTime = mockTimeOnly();
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
 
   const props = {
     size: 20,
@@ -21,7 +22,7 @@ describe('<Pie />', () => {
     expect.assertions(1);
     const { container } = setup();
     act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
 
     expect(container).toMatchInlineSnapshot(`
@@ -78,7 +79,7 @@ describe('<Pie />', () => {
     `);
 
     act(() => {
-      mockedTime.clock.tick(100);
+      jest.advanceTimersByTime(100);
     });
 
     expect(container).toMatchInlineSnapshot(`
@@ -106,7 +107,7 @@ describe('<Pie />', () => {
     `);
 
     act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
 
     expect(container).toMatchInlineSnapshot(`
@@ -138,7 +139,7 @@ describe('<Pie />', () => {
     expect.assertions(3);
     const { container } = setup();
     act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
 
     act(() => {
@@ -170,7 +171,7 @@ describe('<Pie />', () => {
     `);
 
     act(() => {
-      mockedTime.clock.tick(50);
+      jest.advanceTimersByTime(50);
     });
 
     expect(container).toMatchInlineSnapshot(`
@@ -198,7 +199,7 @@ describe('<Pie />', () => {
     `);
 
     act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
 
     expect(container).toMatchInlineSnapshot(`

@@ -2,7 +2,6 @@ import { render, RenderResult, act, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { usePersistentState, PersistentStateValidator as Validator } from './persist';
-import { mockTime } from '~client/test-utils/mock-time';
 
 describe('usePersistentState', () => {
   let getItemSpy: jest.SpyInstance;
@@ -13,13 +12,11 @@ describe('usePersistentState', () => {
     setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation();
   });
 
-  const mockedTime = mockTime();
-  beforeEach(mockedTime.setup);
+  beforeEach(jest.useFakeTimers);
   afterEach(() => {
     act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
-    mockedTime.teardown();
 
     getItemSpy.mockReset();
     setItemSpy.mockReset();
@@ -142,7 +139,7 @@ describe('usePersistentState', () => {
     expect(setItemSpy).toHaveBeenCalledTimes(0);
 
     act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
 
     expect(setItemSpy).toHaveBeenCalledTimes(1);
@@ -163,15 +160,11 @@ describe('usePersistentState', () => {
 
     act(() => {
       fireEvent.click(getByTestId('btn-increment'));
-    });
-    act(() => {
+      fireEvent.click(getByTestId('btn-increment'));
       fireEvent.click(getByTestId('btn-increment'));
     });
     act(() => {
-      fireEvent.click(getByTestId('btn-increment'));
-    });
-    act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
 
     expect(localStorage.setItem).toHaveBeenCalledTimes(1);

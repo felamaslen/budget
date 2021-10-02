@@ -7,18 +7,17 @@ import type { PropsItemCreate } from '../types';
 import { AccessibleListCreateItem } from './create';
 
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { mockTime } from '~client/test-utils/mock-time';
 import { PageListStandard } from '~client/types/enum';
 import type { ListItemInput } from '~client/types/gql';
 
 describe('Accessible list create form', () => {
-  const mockedTime = mockTime();
-  beforeEach(mockedTime.setup);
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
   afterEach(() => {
     act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
-    mockedTime.teardown();
   });
 
   const page = PageListStandard.Income as const;
@@ -52,7 +51,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputDate);
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
     act(() => {
       fireEvent.change(inputDate, { target: { value: date } });
@@ -63,7 +62,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputItem);
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
     act(() => {
       fireEvent.change(inputItem, { target: { value: item } });
@@ -74,7 +73,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputCategory);
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
     act(() => {
       fireEvent.change(inputCategory, { target: { value: category } });
@@ -85,7 +84,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputCost);
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
     act(() => {
       fireEvent.change(inputCost, { target: { value: cost } });
@@ -96,7 +95,7 @@ describe('Accessible list create form', () => {
 
     act(() => {
       fireEvent.focus(inputShop);
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
     act(() => {
       fireEvent.change(inputShop, { target: { value: shop } });

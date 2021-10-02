@@ -3,7 +3,6 @@ import React from 'react';
 
 import { BlockPacker, Props } from '.';
 import { blockPacker } from '~client/modules/block-packer';
-import { mockTimeOnly } from '~client/test-utils/mock-time';
 import type { BlockItem, WithSubTree } from '~client/types';
 
 describe('<BlockPacker />', () => {
@@ -381,35 +380,9 @@ describe('<BlockPacker />', () => {
     event           | handler
     ${'clicking'}   | ${fireEvent.click}
     ${'activating'} | ${fireActivateEvent}
-  `('when $event a level-0 block containing a breakdown', ({ handler }) => {
-    const mockedTime = mockTimeOnly();
-
-    it('should expand the block to fill the view', () => {
-      expect.assertions(10);
-
-      const { container, getByTestId } = getContainer();
-      const parentBlock = getByTestId('parent block 2');
-      act(() => {
-        handler(parentBlock);
-      });
-
-      const preview = getByTestId('preview');
-      expect(preview).toBeInTheDocument();
-      expect(preview.style.left).toBe(`${parentBlock.offsetLeft}px`);
-      expect(preview.style.top).toBe(`${parentBlock.offsetTop}px`);
-      expect(preview.style.width).toBe(`${parentBlock.offsetWidth}px`);
-      expect(preview.style.height).toBe(`${parentBlock.offsetHeight}px`);
-      expect(preview.style.backgroundColor).toBe('rgba(128, 0, 128, 0)');
-
-      act(() => {
-        mockedTime.clock.next();
-      });
-
-      expect(preview.style.left).toBe('0px');
-      expect(preview.style.top).toBe('0px');
-      expect(preview.style.width).toBe(`${(container as HTMLDivElement).offsetWidth}px`);
-      expect(preview.style.height).toBe(`${(container as HTMLDivElement).offsetHeight}px`);
-    });
+  `('when $event a level-0 block containing a breakdown', () => {
+    // This requires a testing environment which actually renders the block
+    it.todo('should expand the block to fill the view');
   });
 
   describe('when passing a custom child', () => {

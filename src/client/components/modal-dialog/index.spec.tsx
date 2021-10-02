@@ -1,6 +1,5 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { animationTime } from './hooks';
@@ -38,7 +37,7 @@ describe('<ModalDialog />', () => {
 
   it('should hide after a delay', () => {
     expect.assertions(4);
-    const clock = sinon.useFakeTimers();
+    jest.useFakeTimers();
 
     const { container } = render(<ModalDialog {...props} />);
     expect(container.childNodes).toHaveLength(1);
@@ -49,16 +48,14 @@ describe('<ModalDialog />', () => {
     expect(container.childNodes).toHaveLength(1);
 
     act(() => {
-      clock.tick(animationTime - 1);
+      jest.advanceTimersByTime(animationTime - 1);
     });
     expect(container.childNodes).toHaveLength(1);
 
     act(() => {
-      clock.tick(1);
+      jest.advanceTimersByTime(1);
     });
     expect(container.childNodes).toHaveLength(0);
-
-    clock.restore();
   });
 
   it('should show from inactive', () => {
@@ -90,7 +87,8 @@ describe('<ModalDialog />', () => {
 
   it('should render a form list', () => {
     expect.assertions(4);
-    const clock = sinon.useFakeTimers(new Date('2020-04-10T15:23Z'));
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2020-04-10T15:23Z'));
 
     const { getByTestId, getByDisplayValue } = render(<ModalDialog {...props} />);
 
@@ -104,8 +102,6 @@ describe('<ModalDialog />', () => {
     expect(inputDate).toBeInTheDocument();
     expect(inputItem).toBeInTheDocument();
     expect(inputNumber).toBeInTheDocument();
-
-    clock.restore();
   });
 
   describe('cancel button', () => {
@@ -138,7 +134,8 @@ describe('<ModalDialog />', () => {
 
     it('should call the onSubmit event when clicked', () => {
       expect.assertions(2);
-      const clock = sinon.useFakeTimers(new Date('2020-04-10T15:23Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2020-04-10T15:23Z'));
 
       const { getByText } = render(<ModalDialog {...props} />);
       const submitButton = getByText('Do it.');
@@ -152,14 +149,13 @@ describe('<ModalDialog />', () => {
         item: 'some item',
         cost: 342,
       });
-
-      clock.restore();
     });
 
     it('should submit an edited form', () => {
       expect.assertions(5);
 
-      const clock = sinon.useFakeTimers(new Date('2020-04-10T15:23Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2020-04-10T15:23Z'));
 
       const { getByText, getByDisplayValue } = render(<ModalDialog {...props} />);
       const submitButton = getByText('Do it.');
@@ -200,8 +196,6 @@ describe('<ModalDialog />', () => {
         item: 'other item',
         cost: 108,
       });
-
-      clock.restore();
     });
 
     it('should not submit invalid values', () => {

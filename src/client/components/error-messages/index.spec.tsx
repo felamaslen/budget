@@ -8,16 +8,15 @@ import { errorClosed, errorRemoved } from '~client/actions';
 import { ErrorLevel, ERROR_CLOSE_TIME, ERROR_MESSAGE_DELAY } from '~client/constants/error';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
-import { mockTime } from '~client/test-utils/mock-time';
 
 describe('<ErrorMessages />', () => {
-  const mockedTime = mockTime();
-  beforeEach(mockedTime.setup);
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
   afterEach(() => {
     act(() => {
-      mockedTime.clock.runAll();
+      jest.runAllTimers();
     });
-    mockedTime.teardown();
   });
 
   const state: State = {
@@ -91,7 +90,7 @@ describe('<ErrorMessages />', () => {
         const { store } = setupClick();
 
         act(() => {
-          mockedTime.clock.tick(ERROR_CLOSE_TIME);
+          jest.advanceTimersByTime(ERROR_CLOSE_TIME);
         });
 
         expect(store.getActions()).toStrictEqual([errorClosed(id), errorRemoved(id)]);
@@ -104,12 +103,12 @@ describe('<ErrorMessages />', () => {
 
       expect(store.getActions()).not.toStrictEqual(expect.arrayContaining([errorClosed(id)]));
       act(() => {
-        mockedTime.clock.tick(ERROR_MESSAGE_DELAY);
+        jest.advanceTimersByTime(ERROR_MESSAGE_DELAY);
       });
       expect(store.getActions()).toStrictEqual(expect.arrayContaining([errorClosed(id)]));
       expect(store.getActions()).not.toStrictEqual(expect.arrayContaining([errorRemoved(id)]));
       act(() => {
-        mockedTime.clock.tick(ERROR_CLOSE_TIME);
+        jest.advanceTimersByTime(ERROR_CLOSE_TIME);
       });
       expect(store.getActions()).toStrictEqual(expect.arrayContaining([errorRemoved(id)]));
     });
@@ -128,10 +127,10 @@ describe('<ErrorMessages />', () => {
         const { store } = setupMouseover();
 
         act(() => {
-          mockedTime.clock.tick(ERROR_MESSAGE_DELAY);
+          jest.advanceTimersByTime(ERROR_MESSAGE_DELAY);
         });
         act(() => {
-          mockedTime.clock.tick(ERROR_CLOSE_TIME);
+          jest.advanceTimersByTime(ERROR_CLOSE_TIME);
         });
         expect(store.getActions()).not.toStrictEqual(expect.arrayContaining([errorClosed(id)]));
         expect(store.getActions()).not.toStrictEqual(expect.arrayContaining([errorRemoved(id)]));

@@ -12,10 +12,6 @@ describe(FormFieldIncomeMetadata.name, () => {
     jest.useFakeTimers();
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   const incomeDeductions: IncomeDeductionNative[] = [
     { name: 'Income tax', value: -195000 },
     { name: 'NI', value: -41300 },

@@ -5,11 +5,13 @@ import startOfSecond from 'date-fns/startOfSecond';
 import React, { useEffect } from 'react';
 
 import { NowProvider, TodayProvider, useNow, useToday } from './time';
-import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe('Time hooks', () => {
   const now = new Date('2020-04-20T13:25:10.783Z');
-  const mockedTime = mockTimeOnly(now);
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(now);
+  });
 
   const ticksToEndOfDay = endOfDay(now).getTime() - now.getTime();
   const ticksToEndOfSecond = endOfSecond(now).getTime() - now.getTime();
@@ -49,11 +51,11 @@ describe('Time hooks', () => {
       setup();
       expect(callback).toHaveBeenCalledTimes(1);
       act(() => {
-        mockedTime.clock.tick(ticksToNext - 1);
+        jest.advanceTimersByTime(ticksToNext - 1);
       });
       expect(callback).toHaveBeenCalledTimes(1);
       act(() => {
-        mockedTime.clock.tick(1000);
+        jest.advanceTimersByTime(1000);
       });
       expect(callback).toHaveBeenCalledTimes(2);
     });

@@ -7,16 +7,15 @@ import { GraphBalance, Props } from '.';
 import { ResizeContext, TodayProvider } from '~client/hooks';
 import { getOverviewGraphValues } from '~client/selectors';
 import { testNow, testState as state } from '~client/test-data/state';
-import { mockTime } from '~client/test-utils/mock-time';
 
 describe('<GraphBalance />', () => {
   let randomSpy: jest.SpyInstance;
 
   const today = endOfDay(testNow);
-  const mockedTime = mockTime(testNow);
 
   beforeEach(() => {
-    mockedTime.setup();
+    jest.useFakeTimers();
+    jest.setSystemTime(testNow);
     let randomIndex = 0;
     randomSpy = jest.spyOn(Math, 'random').mockImplementation((): number => {
       randomIndex += 1;
@@ -25,7 +24,6 @@ describe('<GraphBalance />', () => {
   });
   afterEach(() => {
     randomSpy.mockRestore();
-    mockedTime.teardown();
   });
 
   const setup = (): RenderResult => {

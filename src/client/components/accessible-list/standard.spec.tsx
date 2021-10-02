@@ -4,7 +4,6 @@ import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
-import sinon from 'sinon';
 import numericHash from 'string-hash';
 
 import { AccessibleListStandard, StandardLabels } from './standard';
@@ -138,7 +137,8 @@ describe(AccessibleListStandard.name, () => {
 
   it('should automatically fill the date field with the current date', () => {
     expect.assertions(3);
-    const clock = sinon.useFakeTimers(new Date('2020-04-18'));
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2020-04-18'));
     const { getByTestId } = setup();
     const createForm = getByTestId('create-form');
     const { getAllByRole, getByText } = within(createForm);
@@ -202,8 +202,6 @@ describe(AccessibleListStandard.name, () => {
       cost: 18993,
       shop: 'some new shop',
     });
-
-    clock.restore();
   });
 
   it('should render the total cost header', () => {
@@ -878,7 +876,8 @@ describe(AccessibleListStandard.name, () => {
 
       it('should create an item', async () => {
         expect.assertions(3);
-        const clock = sinon.useFakeTimers(new Date('2020-04-14'));
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2020-04-14'));
         const { getByText, getByTestId, queryByTestId } = setupMobile();
         const addButton = getByText('Add');
         act(() => {
@@ -939,14 +938,12 @@ describe(AccessibleListStandard.name, () => {
         });
 
         act(() => {
-          clock.runAll();
+          jest.runAllTimers();
         });
 
         await waitFor(() => {
           expect(queryByTestId('modal-dialog')).not.toBeInTheDocument();
         });
-
-        clock.restore();
       });
     });
 
@@ -970,7 +967,8 @@ describe(AccessibleListStandard.name, () => {
 
       it('should update an item', () => {
         expect.assertions(2);
-        const clock = sinon.useFakeTimers(new Date('2020-04-29'));
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2020-04-29'));
 
         const { getByText, getByTestId } = setupMobile();
         const itemField = getByText('item one');
@@ -1041,8 +1039,6 @@ describe(AccessibleListStandard.name, () => {
             shop: 'shop one',
           },
         );
-
-        clock.restore();
       });
 
       it('should delete an item', () => {

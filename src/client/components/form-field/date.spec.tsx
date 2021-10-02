@@ -1,9 +1,7 @@
 import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
-import sinon from 'sinon';
 
 import { FormFieldDate, FormFieldDateInline } from './date';
-import { mockTime } from '~client/test-utils/mock-time';
 
 describe('<FormFieldDate />', () => {
   const props = {
@@ -42,7 +40,8 @@ describe('<FormFieldDate />', () => {
   it('should accept an empty string as an input value', () => {
     // this is because the browser allows resetting the input
     expect.assertions(3);
-    const clock = sinon.useFakeTimers(new Date('2020-04-20'));
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2020-04-20'));
 
     const { getByDisplayValue } = render(<FormFieldDate {...props} />);
     const input = getByDisplayValue('2017-11-10') as HTMLInputElement;
@@ -59,15 +58,14 @@ describe('<FormFieldDate />', () => {
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     expect(input.value).toBe('2020-04-20');
-
-    clock.restore();
   });
 
   describe('when rendering inline', () => {
     const now = new Date('2019-07-06T16:47:20Z');
-    const mockedTime = mockTime(now);
-    beforeAll(mockedTime.setup);
-    afterAll(mockedTime.teardown);
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(now);
+    });
 
     it('should use the current date by default', () => {
       expect.assertions(1);
@@ -167,7 +165,7 @@ describe('<FormFieldDate />', () => {
     it('should set the end of a month when the month length is longer than the current month', () => {
       expect.assertions(6);
 
-      mockedTime.clock.setSystemTime(new Date('2020-06-10')); // June has 30 days
+      jest.setSystemTime(new Date('2020-06-10')); // June has 30 days
 
       const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
       const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
@@ -180,7 +178,7 @@ describe('<FormFieldDate />', () => {
       expect(props.onChange).toHaveBeenCalledTimes(1);
       expect(props.onChange).toHaveBeenCalledWith(new Date('2020-05-31'));
 
-      mockedTime.clock.setSystemTime(now);
+      jest.setSystemTime(now);
     });
 
     it('should set dates based on an abbreviated full date', () => {

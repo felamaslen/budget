@@ -8,7 +8,6 @@ import { fromValue } from 'wonka';
 import { NetWorthEditForm, NetWorthAddForm, PropsEdit, PropsAdd } from '.';
 import * as QueryExchangeRates from '~client/gql/queries/exchange-rates';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { mockTimeOnly } from '~client/test-utils/mock-time';
 import type { Id, NetWorthEntryNative as NetWorthEntry } from '~client/types';
 import { NetWorthCategoryType } from '~client/types/enum';
 import {
@@ -88,7 +87,10 @@ describe('Net worth entry form', () => {
   const oldDateNextMonth = '2020-05-31T23:59:59.999Z';
   const newDate = '2020-04-24';
 
-  const mockedTime = mockTimeOnly(now);
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(now);
+  });
 
   const propsBase = {
     categories,
@@ -404,7 +406,7 @@ describe('Net worth entry form', () => {
       fireEvent.click(refreshButtons[0]);
     });
     act(() => {
-      mockedTime.clock.tick(101);
+      jest.advanceTimersByTime(101);
     });
 
     expect(inputEUR.value).toBe(`${1 / 1.15}`);

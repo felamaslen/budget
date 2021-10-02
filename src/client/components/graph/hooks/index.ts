@@ -1,2 +1,2 @@
-export * from './hover';
-export * from './size';
+export { HLPoint, HoverEffect, LabelProps, useHover } from './hover';
+export { useGraphWidth } from './size';

@@ -18,10 +18,6 @@ describe(FormFieldFundMetadata.name, () => {
     jest.useFakeTimers();
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   const transactions: Transaction[] = [
     {
       date: new Date('2017-11-10'),
@@ -142,6 +138,8 @@ describe(FormFieldFundMetadata.name, () => {
 
         act(() => {
           fireEvent.click(buttonAdd);
+        });
+        act(() => {
           jest.runAllTimers();
         });
 
@@ -190,6 +188,8 @@ describe(FormFieldFundMetadata.name, () => {
 
         act(() => {
           fireEvent.click(buttonAdd);
+        });
+        act(() => {
           jest.runAllTimers();
         });
 
@@ -489,6 +489,8 @@ describe(FormFieldFundMetadata.name, () => {
 
           act(() => {
             fireEvent.blur(inputDate);
+          });
+          act(() => {
             jest.runAllTimers();
           });
 
@@ -576,6 +578,8 @@ describe(FormFieldFundMetadata.name, () => {
 
           act(() => {
             fireEvent.blur(inputPrice);
+          });
+          act(() => {
             jest.runAllTimers();
           });
 

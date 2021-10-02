@@ -3,7 +3,6 @@ import { startOfSecond, subSeconds } from 'date-fns';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore from 'redux-mock-store';
-import sinon from 'sinon';
 
 import { ListHeadFunds, ListHeadFundsMobile, Props, PropsMobile } from '.';
 import { FundsContext } from '~client/components/page-funds/context';
@@ -88,7 +87,8 @@ describe('<ListHeadFunds />', () => {
   it('should display an arc indicating the age of the current price cache', () => {
     expect.assertions(1);
     const now = new Date();
-    const clock = sinon.useFakeTimers(now);
+    jest.useFakeTimers();
+    jest.setSystemTime(now);
 
     const { getByTestId } = setup(
       {},
@@ -113,8 +113,6 @@ describe('<ListHeadFunds />', () => {
         />
       </svg>
     `);
-
-    clock.restore();
   });
 
   describe('when the config option "realTimePrices" is set to false', () => {

@@ -103,7 +103,6 @@ describe('<FundRow />', () => {
         expect(onUpdate).toHaveBeenCalledTimes(1);
       });
       expect(onUpdate).toHaveBeenCalledWith(numericHash('fund-1'), { allocationTarget: 36 }, fund);
-      jest.useRealTimers();
     });
 
     it('should respond to updates from the store', async () => {
@@ -130,8 +129,6 @@ describe('<FundRow />', () => {
       await waitFor(() => {
         expect(getByText('45%')).toBeInTheDocument();
       });
-
-      jest.useRealTimers();
     });
   });
 });

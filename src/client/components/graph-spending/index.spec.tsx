@@ -7,11 +7,13 @@ import { GraphSpending, Props } from '.';
 import { ResizeContext, TodayProvider } from '~client/hooks';
 import { getOverviewGraphValues } from '~client/selectors';
 import { testNow, testState as state } from '~client/test-data/state';
-import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe('<GraphSpending />', () => {
   const today = endOfDay(testNow);
-  mockTimeOnly(today);
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(today);
+  });
 
   const setup = (): RenderResult => {
     const graph = getOverviewGraphValues(today, 0)(state);

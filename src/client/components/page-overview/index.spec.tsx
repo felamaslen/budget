@@ -10,11 +10,13 @@ import { State } from '~client/reducers';
 import { testNow, testState as state } from '~client/test-data/state';
 import '~client/test-utils/match-media';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { mockTimeOnly } from '~client/test-utils/mock-time';
 
 describe('<PageOverview />', () => {
   const mockStore = configureStore<State>();
-  mockTimeOnly(testNow);
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(testNow);
+  });
 
   const getContainer = (): RenderResult =>
     render(

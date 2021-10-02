@@ -9,3 +9,7 @@ beforeAll(() => {
 afterAll(() => {
   nock.enableNetConnect();
 });
+
+afterEach(() => {
+  jest.useRealTimers();
+});

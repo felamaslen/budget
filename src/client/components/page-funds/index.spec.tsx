@@ -16,7 +16,6 @@ import { State } from '~client/reducers';
 import { PriceCache } from '~client/selectors';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import { mockTime } from '~client/test-utils/mock-time';
 import type { FundNative as Fund } from '~client/types';
 import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
@@ -112,15 +111,15 @@ describe('<PageFunds />', () => {
     return { store, ...renderResult };
   };
 
-  const mockedTime = mockTime(new Date('2020-04-20'));
   let matchMedia: MatchMediaMock;
   beforeAll(() => {
     matchMedia = new MatchMediaMock();
   });
-  beforeEach(mockedTime.setup);
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
   afterEach(() => {
     matchMedia.clear();
-    mockedTime.teardown();
   });
 
   it('should render', () => {
