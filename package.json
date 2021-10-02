@@ -149,7 +149,7 @@
     "throttle-debounce": "^2.1.0",
     "urql": "^2.0.5",
     "winston": "^3.2.1",
-    "ws": "^7.4.0",
+    "ws": "^7.4.6",
     "yahoo-finance": "^0.3.6",
     "yamljs": "^0.3.0"
   },
