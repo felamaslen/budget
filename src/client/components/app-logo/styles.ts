@@ -4,8 +4,7 @@ import { rem } from 'polished';
 import nav1x from '~client/images/nav.png';
 import nav2x from '~client/images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
-import { Flex } from '~client/styled/shared';
-import { H1 } from '~client/styled/shared/typography';
+import { Flex, H1 } from '~client/styled/shared';
 import {
   breakpoints,
   sizes,

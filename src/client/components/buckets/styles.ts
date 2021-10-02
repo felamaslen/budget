@@ -4,8 +4,7 @@ import { rem, rgba } from 'polished';
 
 import { FormField } from '~client/components/form-field/styles';
 import { breakpoint } from '~client/styled/mixins';
-import { Button, ButtonRefresh, Flex, FlexCenter, FlexColumn } from '~client/styled/shared';
-import { H3, H4 } from '~client/styled/shared/typography';
+import { Button, ButtonRefresh, Flex, FlexCenter, FlexColumn, H3, H4 } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const Main = styled(FlexColumn)`

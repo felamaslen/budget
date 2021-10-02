@@ -18,8 +18,7 @@ import {
 import { useCTA } from '~client/hooks';
 import { partialModification } from '~client/modules/data';
 import { getCategories, getSubcategories } from '~client/selectors';
-import { Button, FlexColumn } from '~client/styled/shared';
-import { H5 } from '~client/styled/shared/typography';
+import { Button, FlexColumn, H5 } from '~client/styled/shared';
 import type { PlanningAccount, PlanningAccountInput } from '~client/types/gql';
 import { NetWorthAggregate } from '~shared/constants';
 import type { GQL } from '~shared/types';

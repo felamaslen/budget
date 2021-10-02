@@ -7,7 +7,7 @@ import { RouteComponentProps, Route, Switch, withRouter } from 'react-router-dom
 
 import { SpinnerInit } from '~client/components/spinner';
 import { useInitialData, useSubscriptions } from '~client/hooks';
-import { H1 } from '~client/styled/shared/typography';
+import { H1 } from '~client/styled/shared';
 
 type RouteObject = {
   key: string;

@@ -2,8 +2,7 @@ import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
-import { Button, FlexCenter } from '~client/styled/shared';
-import { H3 } from '~client/styled/shared/typography';
+import { Button, FlexCenter, H3 } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const TitleContainer = styled(FlexCenter)`

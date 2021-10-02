@@ -12,8 +12,9 @@ import {
   ButtonDelete,
   Flex,
   FlexColumn,
+  H3,
 } from '~client/styled/shared';
-import { H3 } from '~client/styled/shared/typography';
+import { HamburgerButton } from '~client/styled/shared/hamburger';
 import { breakpoints, colors } from '~client/styled/variables';
 
 const borderColor = colors.light.mediumDark;
@@ -25,10 +26,13 @@ const monthGroupValueWidth = 84;
 export const scrollBarWidth = 8;
 
 export const Button = styled(ButtonShared)`
+  flex: 0 0 ${rem(36)};
+
   ${breakpoint(breakpoints.mobile)} {
     align-items: center;
     display: inline-flex;
     height: ${rem(lineHeight - 4)};
+    margin: 0 ${rem(2)};
     padding: 0 ${rem(4)};
   }
 `;
@@ -44,11 +48,44 @@ export const Planning = styled(Flex)`
   width: 100%;
 `;
 
-export const Sidebar = styled(FlexColumn)`
+const sidebarWidthMobile = 240;
+
+export const Sidebar = styled(FlexColumn)<{
+  isHidden: boolean;
+}>`
   background: ${colors.light.mediumLight};
+  border-left: 1px solid ${colors.light.dark};
+  border-bottom: 1px solid ${colors.light.dark};
   flex: 0 0 ${rem(240)};
+  max-height: 100%;
   overflow-x: hidden;
+  padding: 0 ${rem(4)};
+  position: absolute;
+  margin-right: ${({ isHidden = false }): string => rem(isHidden ? -(sidebarWidthMobile - 24) : 0)};
   min-height: 0;
+  right: 0;
+  transition: 0.3s ease margin-right;
+  width: ${rem(sidebarWidthMobile)};
+  z-index: 5;
+
+  ${HamburgerButton} {
+    flex: 0 0 auto;
+    margin-left: ${rem(-4)};
+    z-index: 10;
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    padding-left: 0;
+    position: static;
+    transition: none;
+    width: auto;
+  }
+`;
+
+export const SidebarBody = styled(FlexColumn)<{
+  isHidden: boolean;
+}>`
+  display: ${({ isHidden }): string => (isHidden ? 'none' : 'flex')};
 `;
 
 export const SidebarTitle = styled(H3)`
@@ -83,8 +120,11 @@ export const MonthHeaders = styled(FlexColumn)`
   grid-column: 1;
   overflow: auto;
   padding-bottom: ${rem(scrollBarWidth)};
-  ::-webkit-scrollbar {
-    width: 0;
+
+  ${breakpoint(breakpoints.mobile)} {
+    ::-webkit-scrollbar {
+      width: 0;
+    }
   }
 `;
 
@@ -103,9 +143,11 @@ export const TableScrollArea = styled.div`
   min-height: 0;
   min-width: 0;
   width: 100%;
-  ::-webkit-scrollbar {
-    height: ${rem(scrollBarWidth)};
-    width: ${rem(scrollBarWidth)};
+  ${breakpoint(breakpoints.mobile)} {
+    ::-webkit-scrollbar {
+      height: ${rem(scrollBarWidth)};
+      width: ${rem(scrollBarWidth)};
+    }
   }
 `;
 
@@ -117,8 +159,10 @@ export const Header = styled(Flex)`
   height: ${rem(lineHeight)};
   overflow-x: auto;
   overflow-y: hidden;
-  ::-webkit-scrollbar {
-    height: 0;
+  ${breakpoint(breakpoints.mobile)} {
+    ::-webkit-scrollbar {
+      height: 0;
+    }
   }
 `;
 
@@ -264,6 +308,12 @@ export const AccountEditForm = styled(FlexColumn)`
   }
   input {
     min-width: 0;
+  }
+
+  ${Button} {
+    line-height: ${rem(10)};
+    font-size: ${rem(10)};
+    width: ${rem(64)};
   }
 `;
 

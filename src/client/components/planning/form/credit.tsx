@@ -6,8 +6,7 @@ import type { Account } from '../types';
 import * as StyledForm from './styles';
 
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
-import { ButtonAdd, Flex } from '~client/styled/shared';
-import { H6 } from '~client/styled/shared/typography';
+import { ButtonAdd, Flex, H6 } from '~client/styled/shared';
 import { NetWorthSubcategory } from '~client/types/gql';
 
 export type Props = {

@@ -39,13 +39,13 @@ const Navbar: React.FC<Props> = ({ location, onLogout }) => (
     {pages.map(({ page, path, paths }) => (
       <Styled.Link key={page} page={page} isActive={doesPathMatch(location.pathname, page, paths)}>
         <NavLink to={path ?? `/${page}`} tabIndex={-1}>
-          {page}
+          <Styled.LinkText>{page}</Styled.LinkText>
         </NavLink>
       </Styled.Link>
     ))}
     <Styled.Link isActive={false} page="logout">
       <NavLink to="/" tabIndex={-1} onClick={onLogout}>
-        Log out
+        <Styled.LinkText>Log out</Styled.LinkText>
       </NavLink>
     </Styled.Link>
   </Styled.NavList>

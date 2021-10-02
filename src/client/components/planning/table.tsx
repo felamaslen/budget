@@ -30,16 +30,20 @@ function useSynchronisedScroll(): {
   }, []);
 
   useEffect(() => {
-    if (monthHeadersRef.current) {
-      monthHeadersRef.current.onwheel = (e): void => {
-        e.preventDefault();
-      };
-    }
-    if (headerRef.current) {
-      headerRef.current.onwheel = (e): void => {
-        e.preventDefault();
-      };
-    }
+    const cancelScrollEvents = (element: HTMLDivElement | null): void => {
+      if (element) {
+        // eslint-disable-next-line no-param-reassign
+        element.onwheel = (e): void => {
+          e.preventDefault();
+        };
+        // eslint-disable-next-line no-param-reassign
+        element.ontouchstart = (e): void => {
+          e.preventDefault();
+        };
+      }
+    };
+    cancelScrollEvents(monthHeadersRef.current);
+    cancelScrollEvents(headerRef.current);
   }, []);
 
   return { monthHeadersRef, headerRef, scrollAreaRef, onScroll };

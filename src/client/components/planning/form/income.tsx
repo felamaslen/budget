@@ -15,7 +15,7 @@ import {
 } from '~client/components/form-field';
 import { useCTA } from '~client/hooks';
 import { toISO } from '~client/modules/format';
-import { H6 } from '~client/styled/shared/typography';
+import { H6, FlexCenter } from '~client/styled/shared';
 
 type FormFieldIncomeProps = {
   value: AccountIncome;
@@ -147,12 +147,12 @@ export const IncomeEditForm: React.FC<IncomeEditFormProps> = ({
   return (
     <StyledForm.IncomeEditForm>
       <H6>Income</H6>
-      <div>
+      <FlexCenter>
         <Styled.Button {...onIncomeLeftCTA}>&larr;</Styled.Button>
         {editingIncomeIndex < 0 ? 'Add' : 'Edit'} income:
         <Styled.Button {...onIncomeRightCTA}>&rarr;</Styled.Button>
         {editingIncomeId ? `#${editingIncomeId}` : 'new'}
-      </div>
+      </FlexCenter>
       <div>
         {editingIncomeIndex < 0 ? (
           <>

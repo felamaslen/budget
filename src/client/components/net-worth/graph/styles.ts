@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { darken, rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
-import { H3, H4 } from '~client/styled/shared/typography';
+import { H3, H4 } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
 
 export const keyColors = {

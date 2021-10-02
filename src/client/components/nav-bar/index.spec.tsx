@@ -1,11 +1,23 @@
 import { render, act, fireEvent, RenderResult } from '@testing-library/react';
+import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { Navbar } from '.';
+import { breakpoints } from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 describe('<Navbar />', () => {
+  let matchMedia: MatchMediaMock;
+  const mobileQuery = `(max-width: ${breakpoints.mobile - 1}px)`;
+  beforeAll(() => {
+    matchMedia = new MatchMediaMock();
+    matchMedia.useMediaQuery(mobileQuery);
+  });
+  afterEach(() => {
+    matchMedia.clear();
+  });
+
   const props = {
     onLogout: jest.fn(),
   };
@@ -28,14 +40,17 @@ describe('<Navbar />', () => {
     ${PageListStandard.General} | ${'/general'}
     ${PageListStandard.Holiday} | ${'/holiday'}
     ${PageListStandard.Social}  | ${'/social'}
-  `('should render a button for the $page page', async ({ page, path }) => {
+  `('should render a button for the $page page', ({ page, path }) => {
     expect.assertions(3);
-    const { findByText } = getContainer();
+    const { getAllByRole } = getContainer();
 
-    const link = (await findByText(page)) as HTMLAnchorElement;
-    expect(link).toBeInTheDocument();
-    expect(link.href).toBe(`http://localhost${path}`);
-    expect(link.tabIndex).toBe(-1);
+    const links = getAllByRole('link');
+    const matchingLink = links.find((link) => link.textContent === page) as HTMLAnchorElement;
+
+    expect(matchingLink).toBeInTheDocument();
+
+    expect(matchingLink.href).toBe(`http://localhost${path}`);
+    expect(matchingLink.tabIndex).toBe(-1);
   });
 
   it('should render a logout button', async () => {

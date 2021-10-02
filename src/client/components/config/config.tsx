@@ -10,9 +10,8 @@ import { periodSelectOptions } from '~client/components/graph-funds/after-canvas
 import { useFundModeSelectOptions } from '~client/components/page-funds/hooks';
 import { useIsMobile } from '~client/hooks';
 import { getAppConfig } from '~client/selectors';
-import { Button } from '~client/styled/shared';
+import { Button, H3 } from '~client/styled/shared';
 import * as Styled from '~client/styled/shared/settings';
-import { H3 } from '~client/styled/shared/typography';
 import { LocalAppConfig } from '~client/types';
 
 export type Props = {

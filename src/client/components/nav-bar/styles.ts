@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
@@ -15,9 +15,9 @@ import {
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 export const NavList = styled.nav`
+  align-items: center;
   display: flex;
-  flex: 0 0 ${sizes.heightNavMobile}px;
-  align-items: flex-end;
+  flex: 0 0 ${rem(sizes.heightNavMobile)};
   margin: 0;
   padding: 0;
   width: 100%;
@@ -28,6 +28,7 @@ export const NavList = styled.nav`
   transition: 0.2s opacity;
 
   ${breakpoint(breakpoints.mobile)} {
+    align-items: flex-end;
     flex: 1 1 0;
     box-shadow: none;
   }
@@ -70,83 +71,106 @@ const pageBackgroundPositionDesktop: PageBackgroundPosition = {
   [PageListStandard.Social]: '-233px -30px',
 };
 
-export const Link = styled.span<LinkProps>(
-  ({ isActive, page }) => css`
+export const Link = styled.span<LinkProps>`
+  border-bottom: ${rem(4)} solid
+    ${({ isActive }): string => (isActive ? colors.accent : colors.transparent)};
+  display: block;
+  flex: 1 0 0;
+  height: 100%;
+  padding-top: ${rem(3)};
+
+  a {
+    cursor: pointer;
+    display: block;
+    line-height: ${rem(30)};
+    text-align: center;
+    &:focus {
+      outline: none;
+    }
+    &::before {
+      background-image: url(${nav1x});
+      background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
+      content: '';
+      display: block;
+      margin: 0 auto;
+      height: ${rem(28)};
+      width: ${rem(28)};
+
+      @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        background-image: url(${nav2x});
+        background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
+      }
+    }
+  }
+
+  ${breakpoint(breakpoints.mobile)} {
+    border-bottom: none;
+    flex: 0 0 auto;
+    height: ${rem(sizes.heightNavMobile)};
+    margin: 0 ${rem(2)};
+    padding-top: 0;
+
     a {
-      flex: 1 0 0;
-      height: ${rem(sizes.heightNavMobile - 3)};
-      line-height: ${rem(30)};
-      overflow: hidden;
+      border-bottom: ${rem(4)} solid transparent;
+      border-bottom-color: ${({ page }): string =>
+        page === 'logout' ? colors.light.mediumLight : colors[page].main};
+      border-radius: 3px 3px 0 0;
+      box-sizing: content-box;
+      color: ${colors.white};
+      display: block;
+      height: ${rem(28)};
+      padding: ${rem(2)} ${rem(10)};
       text-align: center;
-      border-bottom: ${rem(4)} solid ${isActive ? colors.accent : colors.transparent};
-      cursor: pointer;
-      &:focus {
-        outline: none;
-      }
-      &::before {
-        background-image: url(${nav1x});
-        background-position: ${pageBackgroundPositionMobile[page]};
-        content: '';
-        display: block;
-        margin: 0 auto;
-        height: ${rem(28)};
-        width: ${rem(28)};
+      text-decoration: none;
+      text-transform: capitalize;
 
-        @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-          background-image: url(${nav2x});
-          background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
-        }
-      }
-
-      ${breakpoint(breakpoints.mobile)} {
-        border-bottom: ${rem(3)} solid transparent;
-        border-color: ${page === 'logout' ? colors.light.mediumLight : colors[page].main};
-        border-radius: 3px 3px 0 0;
-        box-sizing: content-box;
-        color: ${colors.white};
-        display: block;
-        flex: 0 0 ${rem(46)};
-        height: ${rem(30)};
-        padding: ${rem(2)} ${rem(1)} 0 ${rem(1)};
-        text-align: center;
-        text-decoration: none;
-        text-transform: capitalize;
-
-        ${isActive
+      ${({ isActive }): SerializedStyles =>
+        isActive
           ? css`
-              border-bottom-color: ${colors.black};
               cursor: default;
               &,
               &:hover,
               &:active {
-                background: ${colors.shadow.mediumDark as string};
+                background: ${colors.shadow.mediumDark};
               }
             `
-          : css``}
+          : css`
+              &:hover {
+                background: ${colors.shadow.light};
+              }
 
-        &::before {
-          background-position: ${pageBackgroundPositionDesktop[page]};
-        }
+              &:active {
+                background: ${colors.shadow.mediumLight};
+              }
+            `}
 
-        &:hover {
-          background: ${colors.shadow.light as string};
-        }
-        &:active {
-          background: ${colors.shadow.mediumLight as string};
-        }
-      }
-
-      ${breakpoint(breakpoints.tablet)} {
-        display: flex;
-        flex: 0 0 auto;
-        margin: 0 ${rem(4)} 0 0;
-        padding: ${rem(4)} ${rem(4)} 0 ${rem(2)};
-        text-align: left;
-
-        &::before {
-          margin: 0 ${rem(4)} 0 0;
-        }
+      &::before {
+        background-position: ${({ page }): string => pageBackgroundPositionDesktop[page]};
       }
     }
-  `,
-);
+  }
+
+  ${breakpoint(breakpoints.tablet)} {
+    margin: 0 ${rem(8)} 0 0;
+    padding: 0;
+
+    a {
+      display: flex;
+      flex: 0 0 auto;
+      height: ${rem(30)};
+      padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
+      text-align: left;
+
+      &::before {
+        margin: ${rem(2)};
+      }
+    }
+  }
+`;
+
+export const LinkText = styled.span`
+  display: none;
+  ${breakpoint(breakpoints.tablet)} {
+    display: inline;
+  }
+`;

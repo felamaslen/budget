@@ -21,8 +21,7 @@ import { ResizeContext, TodayProvider, useDebouncedResize, useOffline } from '~c
 import { useWindowFocus } from '~client/hooks/focus';
 import { VOID } from '~client/modules/data';
 import { reset } from '~client/styled/reset';
-import { Main, PageWrapper } from '~client/styled/shared';
-import { H2, H3 } from '~client/styled/shared/typography';
+import { H2, H3, Main, PageWrapper } from '~client/styled/shared';
 import { useLogoutMutation } from '~client/types/gql';
 
 const LoggedIn = hot(

@@ -3,8 +3,7 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 
 import { breakpoint } from '~client/styled/mixins';
-import { Page as PageBase, Button as ButtonBase } from '~client/styled/shared';
-import { H3 } from '~client/styled/shared/typography';
+import { Button as ButtonBase, Page as PageBase, H3 } from '~client/styled/shared';
 import { breakpoints, colors } from '~client/styled/variables';
 import type { Page as PageType, MainBlockName } from '~client/types';
 

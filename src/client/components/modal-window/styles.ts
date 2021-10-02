@@ -2,8 +2,7 @@ import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
-import { asLink } from '~client/styled/shared';
-import { H2 } from '~client/styled/shared/typography';
+import { asLink, H2 } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
 export type ModalWindowProps = { visible: boolean; width?: number; fullSize?: boolean };

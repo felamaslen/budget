@@ -2,10 +2,14 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 
 import * as Styled from '../styles';
-import { FlexColumn } from '~client/styled/shared';
+import { ButtonAdd, FlexColumn } from '~client/styled/shared';
 
 export const IncomeEditForm = styled(Styled.AccountEditFormSection)``;
-export const CreditEditForm = styled(Styled.AccountEditFormSection)``;
+export const CreditEditForm = styled(Styled.AccountEditFormSection)`
+  ${ButtonAdd} {
+    flex: 0 0 auto;
+  }
+`;
 
 export const ModifyAccountForm = styled(FlexColumn)`
   font-size: ${rem(13)};
