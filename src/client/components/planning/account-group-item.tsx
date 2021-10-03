@@ -57,10 +57,10 @@ const AccountGroupItemEditable: React.FC<AccountGroupItemEditableProps> = ({
 }) => {
   const onChange = useCallback(
     (delta: Pick<AccountTransaction, 'name' | 'value' | 'formula'>): void => {
-      onChangeTransaction(accountGroup.netWorthSubcategoryId, delta);
+      onChangeTransaction(accountGroup.netWorthSubcategoryId, transaction.name, delta);
       onCancelEdit();
     },
-    [accountGroup.netWorthSubcategoryId, onCancelEdit, onChangeTransaction],
+    [accountGroup.netWorthSubcategoryId, onCancelEdit, transaction.name, onChangeTransaction],
   );
 
   const elements = useTransactionFormElements(onChange, transaction);

@@ -12,7 +12,11 @@ import type { PlanningValueInput } from '~client/types/gql';
 export type NewValue = Pick<PlanningValueInput, 'name' | 'formula' | 'value'>;
 
 export type OnAddTransaction = (netWorthSubcategoryId: number, newValue: NewValue) => void;
-export type OnChangeTransaction = OnAddTransaction;
+export type OnChangeTransaction = (
+  netWorthSubcategoryId: number,
+  oldName: string,
+  newValue: NewValue,
+) => void;
 export type OnRemoveTransaction = (netWorthSubcategoryId: number, name: string) => void;
 
 export type OnChangeCreditCard = (
@@ -191,7 +195,7 @@ export function useTransactionForm(
   );
 
   const onChangeTransaction = useCallback<OnChangeTransaction>(
-    (netWorthSubcategory, newValue) => {
+    (netWorthSubcategory, oldName, newValue) => {
       dispatch((last) => ({
         ...last,
         accounts: replaceAtIndex(
@@ -205,9 +209,7 @@ export function useTransactionForm(
               prev.values,
               prev.values.findIndex(
                 (compare) =>
-                  compare.year === year &&
-                  compare.month === month &&
-                  compare.name === newValue.name,
+                  compare.year === year && compare.month === month && compare.name === oldName,
               ),
               newValue,
             ),

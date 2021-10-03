@@ -1,48 +1,42 @@
-import type { AccountCreditCardPayment, PlanningData, PlanningMonth, State } from '../types';
+import isAfter from 'date-fns/isAfter';
 
-import { Average } from '~client/constants';
-import { arrayAverage } from '~client/modules/data';
-import type { NetWorthSubcategory } from '~client/types/gql';
+import type { AccountCreditCardPayment, CreditCardRecord, PlanningMonth, State } from '../types';
 
 function predictCreditCardPayment(
-  accumulator: PlanningData[],
-  accountIndex: number,
-  creditCardNetWorthSubcategoryId: number,
+  cardRecord: CreditCardRecord,
+  canPredictMonth: boolean,
 ): number | undefined {
-  const existingValues = accumulator
-    .map<number | undefined>(
-      (row) =>
-        row.accounts[accountIndex].creditCards.find(
-          (compare) =>
-            compare.netWorthSubcategoryId === creditCardNetWorthSubcategoryId && compare.isVerified,
-        )?.value,
-    )
-    .filter((v): v is number => typeof v !== 'undefined');
-
-  return existingValues.length ? arrayAverage(existingValues, Average.Median) : undefined;
+  if (!canPredictMonth) {
+    return undefined;
+  }
+  return cardRecord.averageRecordedPayment;
 }
 
 export function getCreditCardsForAccountAtMonth(
-  accumulator: PlanningData[],
-  creditCards: NetWorthSubcategory[],
-  { year, month }: PlanningMonth,
-  accounts: State['accounts'],
-  index: number,
+  creditCards: CreditCardRecord[],
+  { year, month, date }: PlanningMonth,
+  account: State['accounts'][0],
 ): AccountCreditCardPayment[] {
-  return accounts[index].creditCards.map<AccountCreditCardPayment>((row) => {
-    const existingPayment = row.payments.find(
-      (compare) => compare.year === year && compare.month === month,
-    );
+  return account.creditCards
+    .map<AccountCreditCardPayment | undefined>((row) => {
+      const cardRecord = creditCards.find(
+        (compare) => compare.netWorthSubcategoryId === row.netWorthSubcategoryId,
+      );
+      if (!cardRecord) {
+        return undefined;
+      }
+      const existingPayment = row.payments.find(
+        (compare) => compare.year === year && compare.month === month,
+      );
 
-    return {
-      netWorthSubcategoryId: row.netWorthSubcategoryId,
-      name:
-        creditCards.find((compare) => compare.id === row.netWorthSubcategoryId)?.subcategory ??
-        'Unknown',
-      value:
-        existingPayment?.value ??
-        predictCreditCardPayment(accumulator, index, row.netWorthSubcategoryId),
-      isVerified: !!existingPayment,
-    };
-  });
+      return {
+        netWorthSubcategoryId: row.netWorthSubcategoryId,
+        name: cardRecord.name,
+        value:
+          existingPayment?.value ??
+          predictCreditCardPayment(cardRecord, isAfter(date, cardRecord.lastRecordedPayment.date)),
+        isVerified: !!existingPayment,
+      };
+    })
+    .filter((p): p is AccountCreditCardPayment => !!p);
 }

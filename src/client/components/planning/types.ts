@@ -46,6 +46,13 @@ export type Account = State['accounts'][0];
 export type AccountIncome = Account['income'][0];
 export type AccountCredit = Account['creditCards'][0];
 
+export type CreditCardRecord = {
+  netWorthSubcategoryId: number;
+  name: string;
+  lastRecordedPayment: PlanningMonth;
+  averageRecordedPayment: number | undefined;
+};
+
 export type MonthByAccount = {
   accountGroup: Account;
   startValue: AccountTransaction;

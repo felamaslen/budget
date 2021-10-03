@@ -62,7 +62,7 @@ function getPastIncomeTransactionsForAccountAtMonth(
 }
 
 function getPredictedIncomeTransactionsForAccountAtMonth(
-  rates: IncomeRates,
+  rates: IncomeRates | undefined,
   date: Date,
   income: State['accounts'][0]['income'],
   manualTransactions: AccountTransaction[],
@@ -90,11 +90,11 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
         taxableIncome,
         group.taxCode,
         pensionContribIndividual,
-        rates.taxBasicAllowance,
-        rates.taxAdditionalThreshold,
-        rates.taxBasicRate,
-        rates.taxHigherRate,
-        rates.taxAdditionalRate,
+        rates?.taxBasicAllowance ?? 0,
+        rates?.taxAdditionalThreshold ?? 0,
+        rates?.taxBasicRate ?? 0,
+        rates?.taxHigherRate ?? 0,
+        rates?.taxAdditionalRate ?? 0,
       );
 
       return {
@@ -106,10 +106,10 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
           last.ni +
           calculateMonthlyNIContributions(
             taxableIncome,
-            rates.niPaymentThreshold,
-            rates.niUpperEarningsLimit,
-            rates.niLowerRate,
-            rates.niHigherRate,
+            rates?.niPaymentThreshold ?? 0,
+            rates?.niUpperEarningsLimit ?? 0,
+            rates?.niLowerRate ?? 0,
+            rates?.niHigherRate ?? 0,
           ),
       };
     },
@@ -122,8 +122,8 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
   const studentLoan = repayStudentLoan
     ? calculateMonthlyStudentLoanRepayment(
         taxableIncomeFull,
-        rates.studentLoanRate,
-        Math.round(rates.studentLoanThreshold / 12),
+        rates?.studentLoanRate ?? 0,
+        Math.round((rates?.studentLoanThreshold ?? 0) / 12),
       )
     : 0;
 
@@ -133,30 +133,35 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
       name: 'Salary',
       computedValue: combinedIncomeWithDeductions.salary,
       isComputed: true,
+      isVerified: false,
     },
     {
       id: 'pension-predicted',
       name: 'Pension',
       computedValue: -combinedIncomeWithDeductions.pension,
       isComputed: true,
+      isVerified: false,
     },
     {
       id: 'income-tax-predicted',
       name: 'Income tax',
       computedValue: -combinedIncomeWithDeductions.incomeTax,
       isComputed: true,
+      isVerified: false,
     },
     {
       id: 'ni-predicted',
       name: 'NI',
       computedValue: -combinedIncomeWithDeductions.ni,
       isComputed: true,
+      isVerified: false,
     },
     {
       id: 'student-loan-predicted',
       name: 'Student loan',
       computedValue: -studentLoan,
       isComputed: true,
+      isVerified: false,
     },
   ].filter((group) => group.computedValue !== 0);
 }
@@ -174,7 +179,7 @@ function sortIncomeTransactions(income: AccountTransaction[]): AccountTransactio
 }
 
 function getIncomeTransactionsForAccountAtMonth(
-  rates: IncomeRates,
+  rates: IncomeRates | undefined,
   date: Date,
   isPast: boolean,
   account: State['accounts'][0],
@@ -252,7 +257,7 @@ function getTransferTransactionsForAccountAtMonth(
 
 export function getTransactionsForAccountAtMonth(
   today: Date,
-  rates: IncomeRates,
+  rates: IncomeRates | undefined,
   accounts: State['accounts'],
   index: number,
   { year, month, date }: PlanningMonth,

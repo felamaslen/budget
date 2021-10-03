@@ -1,11 +1,30 @@
+import endOfMonth from 'date-fns/endOfMonth';
 import getMonth from 'date-fns/getMonth';
 import getYear from 'date-fns/getYear';
 
 import { startMonth } from '../constants';
+import type { PlanningMonth } from '../types';
+
+export function getFinancialYearFromYearMonth(year: number, month: number): number {
+  return year + (month < startMonth ? -1 : 0);
+}
 
 export function getFinancialYear(date: Date): number {
-  return getYear(date) + (getMonth(date) < startMonth ? -1 : 0);
+  return getFinancialYearFromYearMonth(getYear(date), getMonth(date));
 }
+
+export function getDateFromYearAndMonth(year: number, month: number): Date {
+  return endOfMonth(new Date(year, month));
+}
+
+export const mapPlanningMonth = (row: Pick<PlanningMonth, 'year' | 'month'>): PlanningMonth => ({
+  ...row,
+  date: getDateFromYearAndMonth(row.year, row.month),
+});
+
+export const mapPlanningMonths = (
+  dates: Pick<PlanningMonth, 'year' | 'month'>[],
+): PlanningMonth[] => dates.map<PlanningMonth>(mapPlanningMonth);
 
 function getTaxFreeAllowance(taxCode: string): number {
   if (taxCode === 'OT') {

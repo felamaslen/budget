@@ -86,7 +86,7 @@ describe('<ListHeadFunds />', () => {
 
   it('should display an arc indicating the age of the current price cache', () => {
     expect.assertions(1);
-    const now = new Date();
+    const now = new Date('2020-04-20T15:30:11.584+0100');
     jest.useFakeTimers();
     jest.setSystemTime(now);
 
@@ -106,9 +106,9 @@ describe('<ListHeadFunds />', () => {
         width="24"
       >
         <path
-          d="M12,3 A9,9 0,1,1 7.499999999999998,19.794228634059948"
+          d="M12,3 A9,9 0,1,1 11.943451704309972,3.0001776522947665"
           fill="none"
-          stroke="#948cef"
+          stroke="#483be4"
           stroke-width="3"
         />
       </svg>
