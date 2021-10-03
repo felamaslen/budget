@@ -514,7 +514,7 @@ export type MutationSetInvestmentBucketArgs = {
 
 
 export type MutationSyncPlanningArgs = {
-  input: PlanningSync;
+  input?: Maybe<PlanningSync>;
 };
 
 
@@ -919,8 +919,6 @@ export type Query = {
   readNetWorthCategories?: Maybe<Array<NetWorthCategory>>;
   readNetWorthEntries?: Maybe<NetWorthEntryOverview>;
   readNetWorthSubcategories?: Maybe<Array<NetWorthSubcategory>>;
-  readPlanningAccounts?: Maybe<PlanningAccountsResponse>;
-  readPlanningParameters?: Maybe<PlanningParametersResponse>;
   receiptItem?: Maybe<Scalars['String']>;
   receiptItems?: Maybe<Array<ReceiptCategory>>;
   search?: Maybe<SearchResult>;
@@ -1903,7 +1901,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   logout?: Resolver<ResolversTypes['LogoutResponse'], ParentType, ContextType>;
   setConfig?: Resolver<Maybe<ResolversTypes['AppConfigSet']>, ParentType, ContextType, RequireFields<MutationSetConfigArgs, 'config'>>;
   setInvestmentBucket?: Resolver<Maybe<ResolversTypes['SetInvestmentBucketResponse']>, ParentType, ContextType, RequireFields<MutationSetInvestmentBucketArgs, 'value'>>;
-  syncPlanning?: Resolver<Maybe<ResolversTypes['PlanningSyncResponse']>, ParentType, ContextType, RequireFields<MutationSyncPlanningArgs, 'input'>>;
+  syncPlanning?: Resolver<Maybe<ResolversTypes['PlanningSyncResponse']>, ParentType, ContextType, RequireFields<MutationSyncPlanningArgs, never>>;
   updateCashAllocationTarget?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateCashAllocationTargetArgs, 'target'>>;
   updateFund?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateFundArgs, 'id' | 'input'>>;
   updateFundAllocationTargets?: Resolver<Maybe<ResolversTypes['UpdatedFundAllocationTargets']>, ParentType, ContextType, RequireFields<MutationUpdateFundAllocationTargetsArgs, 'deltas'>>;
@@ -2183,8 +2181,6 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   readNetWorthCategories?: Resolver<Maybe<Array<ResolversTypes['NetWorthCategory']>>, ParentType, ContextType, RequireFields<QueryReadNetWorthCategoriesArgs, never>>;
   readNetWorthEntries?: Resolver<Maybe<ResolversTypes['NetWorthEntryOverview']>, ParentType, ContextType>;
   readNetWorthSubcategories?: Resolver<Maybe<Array<ResolversTypes['NetWorthSubcategory']>>, ParentType, ContextType, RequireFields<QueryReadNetWorthSubcategoriesArgs, never>>;
-  readPlanningAccounts?: Resolver<Maybe<ResolversTypes['PlanningAccountsResponse']>, ParentType, ContextType>;
-  readPlanningParameters?: Resolver<Maybe<ResolversTypes['PlanningParametersResponse']>, ParentType, ContextType>;
   receiptItem?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QueryReceiptItemArgs, 'item'>>;
   receiptItems?: Resolver<Maybe<Array<ResolversTypes['ReceiptCategory']>>, ParentType, ContextType, RequireFields<QueryReceiptItemsArgs, 'items'>>;
   search?: Resolver<Maybe<ResolversTypes['SearchResult']>, ParentType, ContextType, RequireFields<QuerySearchArgs, 'page' | 'column' | 'searchTerm'>>;

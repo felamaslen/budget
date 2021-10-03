@@ -147,12 +147,7 @@ export const planningSchema = gql`
     accounts: [PlanningAccount!]!
   }
 
-  extend type Query {
-    readPlanningParameters: PlanningParametersResponse
-    readPlanningAccounts: PlanningAccountsResponse
-  }
-
   extend type Mutation {
-    syncPlanning(input: PlanningSync!): PlanningSyncResponse
+    syncPlanning(input: PlanningSync): PlanningSyncResponse
   }
 `;

@@ -1,7 +1,6 @@
 import { FetchResult } from 'apollo-boost';
 import gql from 'graphql-tag';
 import { omit } from 'lodash';
-import moize from 'moize';
 import { sql } from 'slonik';
 
 import { getPool, withSlonik } from '~api/modules/db';
@@ -33,16 +32,9 @@ import {
 import { omitTypeName } from '~shared/utils';
 
 describe('Planning resolver', () => {
-  const cleanup = withSlonik(async (db) => {
-    await db.query(sql`DELETE FROM planning_accounts`);
-    await db.query(sql`DELETE FROM planning_rates`);
-    await db.query(sql`DELETE FROM planning_thresholds`);
-  });
-
   let app: App;
   beforeAll(async () => {
     app = await getTestApp();
-    await cleanup();
   });
 
   const myNetWorthCategory = 'My net worth category';
@@ -54,6 +46,10 @@ describe('Planning resolver', () => {
   let myCreditCardId: number;
 
   const setupInitialData = withSlonik(async (db) => {
+    await db.query(sql`DELETE FROM planning_accounts`);
+    await db.query(sql`DELETE FROM planning_rates`);
+    await db.query(sql`DELETE FROM planning_thresholds`);
+
     await db.query(sql`DELETE FROM net_worth_categories WHERE category = ${myNetWorthCategory}`);
     await db.query(sql`DELETE FROM list_standard WHERE page = ${PageListStandard.Income}`);
 
@@ -122,10 +118,10 @@ describe('Planning resolver', () => {
   });
 
   describe('Mutation syncPlanning', () => {
-    beforeAll(setupInitialData);
+    beforeEach(setupInitialData);
 
     const mutation = gql`
-      mutation SyncPlanning($input: PlanningSync!) {
+      mutation SyncPlanning($input: PlanningSync) {
         syncPlanning(input: $input) {
           error
           parameters {
@@ -279,9 +275,7 @@ describe('Planning resolver', () => {
     };
 
     describe('creating new planning data', () => {
-      afterAll(cleanup);
-
-      const setup = moize.promise(setupCreate);
+      const setup = setupCreate;
 
       it('should create threshold rows in the database', async () => {
         expect.assertions(2);
@@ -613,8 +607,6 @@ describe('Planning resolver', () => {
     });
 
     describe('updating existing planning data', () => {
-      beforeEach(cleanup);
-
       const variablesUpdate = (createRes: PlanningSyncResponse): MutationSyncPlanningArgs => ({
         input: {
           parameters: [
@@ -868,6 +860,41 @@ describe('Planning resolver', () => {
           { ...paymentRowsAfterCreate.rows[0], value: -29273 },
           expect.objectContaining({ year: 2020, month: 12, value: -77502 }),
         ]);
+      });
+    });
+
+    describe('when called without an input', () => {
+      it('should return the current planning state', async () => {
+        expect.assertions(1);
+        await setupCreate();
+        app.authGqlClient.clearStore();
+        const res = await app.authGqlClient.mutate<
+          { syncPlanning: PlanningSyncResponse },
+          MutationSyncPlanningArgs
+        >({
+          mutation,
+          variables: { input: null },
+        });
+
+        expect(res.data?.syncPlanning).toStrictEqual({
+          __typename: 'PlanningSyncResponse',
+          error: null,
+          accounts: expect.arrayContaining([
+            expect.objectContaining({ account: 'Something account' }),
+          ]),
+          parameters: expect.arrayContaining([
+            expect.objectContaining({
+              year: 2020,
+              rates: expect.arrayContaining([
+                expect.objectContaining({ name: 'IncomeTaxBasicRate', value: 0.2 }),
+                expect.objectContaining({ name: 'IncomeTaxHigherRate', value: 0.4 }),
+              ]),
+              thresholds: expect.arrayContaining([
+                expect.objectContaining({ name: 'IncomeTaxBasicAllowance', value: 37500 }),
+              ]),
+            }),
+          ]),
+        });
       });
     });
   });

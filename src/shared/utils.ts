@@ -39,3 +39,8 @@ export function optionalDeep<T, K extends string>(item: T | T[], key: K): Option
   }
   return item as OptionalDeep<T, K>;
 }
+
+export const coalesceKeys = <T extends Partial<Record<K, unknown>>, K extends string>(
+  obj: T,
+  ...keys: K[]
+): T => keys.reduce<T>((last, key) => ({ ...last, [key]: last[key] ?? null }), obj);

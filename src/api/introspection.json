@@ -4114,13 +4114,9 @@
                 "name": "input",
                 "description": null,
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "PlanningSync",
-                    "ofType": null
-                  }
+                  "kind": "INPUT_OBJECT",
+                  "name": "PlanningSync",
+                  "ofType": null
                 },
                 "defaultValue": null
               }
@@ -8532,30 +8528,6 @@
                   "ofType": null
                 }
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "readPlanningAccounts",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "PlanningAccountsResponse",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "readPlanningParameters",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "PlanningParametersResponse",
-              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

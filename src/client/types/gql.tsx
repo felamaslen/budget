@@ -557,7 +557,7 @@ export type MutationSetInvestmentBucketArgs = {
 
 
 export type MutationSyncPlanningArgs = {
-  input: PlanningSync;
+  input?: Maybe<PlanningSync>;
 };
 
 
@@ -993,8 +993,6 @@ export type Query = {
   readNetWorthCategories?: Maybe<Array<NetWorthCategory>>;
   readNetWorthEntries?: Maybe<NetWorthEntryOverview>;
   readNetWorthSubcategories?: Maybe<Array<NetWorthSubcategory>>;
-  readPlanningAccounts?: Maybe<PlanningAccountsResponse>;
-  readPlanningParameters?: Maybe<PlanningParametersResponse>;
   receiptItem?: Maybe<Scalars['String']>;
   receiptItems?: Maybe<Array<ReceiptCategory>>;
   search?: Maybe<SearchResult>;
@@ -1793,7 +1791,7 @@ export type DeleteNetWorthEntryMutation = (
 );
 
 export type SyncPlanningMutationVariables = Exact<{
-  input: PlanningSync;
+  input?: Maybe<PlanningSync>;
 }>;
 
 
@@ -2079,26 +2077,6 @@ export type OverviewPreviewQuery = (
   & { overviewPreview?: Maybe<(
     { __typename?: 'OverviewPreview' }
     & Pick<OverviewPreview, 'startDate' | 'values'>
-  )> }
-);
-
-export type ReadPlanningQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ReadPlanningQuery = (
-  { __typename?: 'Query' }
-  & { readPlanningParameters?: Maybe<(
-    { __typename?: 'PlanningParametersResponse' }
-    & { parameters: Array<(
-      { __typename?: 'PlanningParameters' }
-      & PlanningParametersPartsFragment
-    )> }
-  )>, readPlanningAccounts?: Maybe<(
-    { __typename?: 'PlanningAccountsResponse' }
-    & { accounts: Array<(
-      { __typename?: 'PlanningAccount' }
-      & PlanningAccountPartsFragment
-    )> }
   )> }
 );
 
@@ -2893,7 +2871,7 @@ export function useDeleteNetWorthEntryMutation() {
   return Urql.useMutation<DeleteNetWorthEntryMutation, DeleteNetWorthEntryMutationVariables>(DeleteNetWorthEntryDocument);
 };
 export const SyncPlanningDocument = gql`
-    mutation SyncPlanning($input: PlanningSync!) {
+    mutation SyncPlanning($input: PlanningSync) {
   syncPlanning(input: $input) {
     error
     parameters {
@@ -3194,25 +3172,6 @@ export const OverviewPreviewDocument = gql`
 
 export function useOverviewPreviewQuery(options: Omit<Urql.UseQueryArgs<OverviewPreviewQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<OverviewPreviewQuery>({ query: OverviewPreviewDocument, ...options });
-};
-export const ReadPlanningDocument = gql`
-    query ReadPlanning {
-  readPlanningParameters {
-    parameters {
-      ...PlanningParametersParts
-    }
-  }
-  readPlanningAccounts {
-    accounts {
-      ...PlanningAccountParts
-    }
-  }
-}
-    ${PlanningParametersPartsFragmentDoc}
-${PlanningAccountPartsFragmentDoc}`;
-
-export function useReadPlanningQuery(options: Omit<Urql.UseQueryArgs<ReadPlanningQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<ReadPlanningQuery>({ query: ReadPlanningDocument, ...options });
 };
 export const SearchSuggestionsDocument = gql`
     query SearchSuggestions($page: SearchPage!, $column: SearchItem!, $searchTerm: String!, $numResults: Int) {

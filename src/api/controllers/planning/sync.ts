@@ -44,6 +44,8 @@ import {
 } from '~api/types';
 import { Create } from '~shared/types';
 
+type SyncInputModify = NonNullable<Required<MutationSyncPlanningArgs>['input']>;
+
 const reduceParameters = (
   inputParameters: PlanningParametersInput[],
   key: 'thresholds' | 'rates',
@@ -63,10 +65,10 @@ const reduceParameters = (
 async function syncParameters(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  args: MutationSyncPlanningArgs,
+  input: SyncInputModify,
 ): Promise<void> {
-  const allThresholds = reduceParameters(args.input.parameters, 'thresholds');
-  const allRates = reduceParameters(args.input.parameters, 'rates');
+  const allThresholds = reduceParameters(input.parameters, 'thresholds');
+  const allRates = reduceParameters(input.parameters, 'rates');
 
   await Promise.all([upsertThresholds(db, uid, allThresholds), upsertRates(db, uid, allRates)]);
 }
@@ -321,13 +323,13 @@ const syncValues = syncItems<PlanningValueRow, PlanningAccountWithId[]>({
     getAllValueRows(accountInputs).filter((row): row is PlanningValueRow => !!row.id),
 });
 
-const syncAccountRows = syncItems<AccountRow, MutationSyncPlanningArgs>({
+const syncAccountRows = syncItems<AccountRow, SyncInputModify>({
   insertRows: insertPlanningAccounts,
   updateRow: updatePlanningAccount,
   selectExistingRows: selectPlanningAccounts,
   deleteOldRows: deleteOldPlanningAccounts,
-  getNewInput: (args) =>
-    args.input.accounts
+  getNewInput: (input) =>
+    input.accounts
       .filter((account) => !account.id)
       .map<Omit<AccountRow, 'id' | 'uid'>>((account) => ({
         account: account.account,
@@ -335,8 +337,8 @@ const syncAccountRows = syncItems<AccountRow, MutationSyncPlanningArgs>({
         limit_upper: account.upperLimit ?? null,
         limit_lower: account.lowerLimit ?? null,
       })),
-  getUpdatedInput: (args) =>
-    args.input.accounts.filter(isAccountInputExisting).map<Omit<AccountRow, 'uid'>>((account) => ({
+  getUpdatedInput: (input) =>
+    input.accounts.filter(isAccountInputExisting).map<Omit<AccountRow, 'uid'>>((account) => ({
       id: account.id,
       account: account.account,
       net_worth_subcategory_id: account.netWorthSubcategoryId,
@@ -352,11 +354,11 @@ type PlanningAccountWithId = Omit<PlanningAccountInput, 'id'> & {
 async function syncAccounts(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  args: MutationSyncPlanningArgs,
+  input: SyncInputModify,
 ): Promise<void> {
-  const allAccounts = await syncAccountRows(db, uid, args);
+  const allAccounts = await syncAccountRows(db, uid, input);
 
-  const accountInputs = args.input.accounts
+  const accountInputs = input.accounts
     .map((account) => ({
       ...account,
       id:
@@ -384,8 +386,10 @@ export async function syncPlanning(
   uid: number,
   args: MutationSyncPlanningArgs,
 ): Promise<PlanningSyncResponse> {
-  await syncParameters(db, uid, args);
-  await syncAccounts(db, uid, args);
+  if (args.input) {
+    await syncParameters(db, uid, args.input);
+    await syncAccounts(db, uid, args.input);
+  }
 
   const [parameters, accounts] = await Promise.all([
     getPlanningParameters(db, uid),

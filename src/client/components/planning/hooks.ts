@@ -37,16 +37,40 @@ import { getEntries, getSubcategories } from '~client/selectors';
 import type { NetWorthEntryNative } from '~client/types';
 import {
   NetWorthSubcategory,
+  PlanningSync,
   PlanningTaxRateInput,
   PlanningTaxThresholdInput,
-  useReadPlanningQuery,
+  SyncPlanningMutation,
   useSyncPlanningMutation,
 } from '~client/types/gql';
-import { omitDeep } from '~shared/utils';
+import { coalesceKeys, omitDeep } from '~shared/utils';
 
-const isStateEqual = (s0: State, s1: State): boolean =>
-  isEqual(omitDeep(s0.accounts, 'id'), omitDeep(s1.accounts, 'id')) &&
-  isEqual(omitDeep(s0.parameters, 'id'), omitDeep(s1.parameters, 'id'));
+const getCompareState = (state: State): State => ({
+  parameters: state.parameters,
+  accounts: state.accounts.map<State['accounts'][0]>((account) => ({
+    ...omitDeep(account, 'id'),
+    values: account.values.map((row) =>
+      coalesceKeys(omit(row, 'id'), 'value', 'formula', 'transferToAccountId'),
+    ),
+  })),
+});
+
+export const isStateEqual = (s0: State, s1: State): boolean =>
+  isEqual(getCompareState(s0), getCompareState(s1));
+
+const processSyncedState = (result: SyncPlanningMutation | undefined): State =>
+  omitDeep(
+    {
+      accounts: result?.syncPlanning?.accounts ?? [],
+      parameters: result?.syncPlanning?.parameters ?? [],
+    },
+    '__typename',
+  );
+
+const processLocalState = (state: State): PlanningSync => ({
+  accounts: state.accounts.map((row) => omit(row, 'pastIncome')),
+  parameters: state.parameters,
+});
 
 export function usePlanning(): {
   state: State;
@@ -56,69 +80,44 @@ export function usePlanning(): {
 } {
   const [state, setState] = useState<State>(initialState);
   const [isSynced, setSynced] = useState<boolean>(true);
+
+  const [{ data, fetching, error }, sync] = useSyncPlanningMutation();
+  const syncDebounce = useDebounceCallback(sync, 300);
+
+  useEffect(() => {
+    sync();
+  }, [sync]);
+
   const lastSyncedState = useRef<State>(state);
-
-  const [
-    { data: stateInitial, fetching: fetchingInitial, error: errorInitial },
-  ] = useReadPlanningQuery();
+  const hasLoaded = useRef<boolean>(false);
+  const canSync = !fetching && !error;
 
   useEffect(() => {
-    setState((last) => {
-      const receivedState: State = omitDeep(
-        {
-          accounts: stateInitial?.readPlanningAccounts?.accounts ?? last.accounts,
-          parameters: stateInitial?.readPlanningParameters?.parameters ?? last.parameters,
-        },
-        '__typename',
-      );
-      lastSyncedState.current = receivedState;
-      return receivedState;
-    });
-  }, [stateInitial]);
-
-  const [
-    { data: stateSynced, fetching: fetchingSync, error: errorSync },
-    sync,
-  ] = useSyncPlanningMutation();
-
-  const isLoading = fetchingInitial || fetchingSync;
-  const error = errorInitial ?? errorSync;
-
-  const syncDebounce = useDebounceCallback(sync);
-
-  useEffect(() => {
-    if (!isStateEqual(state, lastSyncedState.current)) {
-      setSynced(false);
-      if (!isLoading && !error) {
-        lastSyncedState.current = state;
+    if (canSync && !isStateEqual(state, lastSyncedState.current)) {
+      lastSyncedState.current = state;
+      if (hasLoaded.current) {
+        setSynced(false);
         syncDebounce({
-          input: {
-            accounts: state.accounts.map((row) => omit(row, 'pastIncome')),
-            parameters: state.parameters,
-          },
+          input: processLocalState(state),
         });
+      } else {
+        hasLoaded.current = true;
       }
     }
-  }, [syncDebounce, state, isLoading, error]);
+  }, [syncDebounce, canSync, state]);
 
   useEffect(() => {
-    setState((last) =>
-      omitDeep(
-        {
-          parameters: stateSynced?.syncPlanning?.parameters ?? last.parameters,
-          accounts: stateSynced?.syncPlanning?.accounts ?? last.accounts,
-        },
-        '__typename',
-      ),
-    );
-    setSynced(true);
-  }, [stateSynced]);
+    if (data) {
+      setState(processSyncedState(data));
+      setSynced(true);
+    }
+  }, [data]);
 
   return {
     state,
     setState,
     isSynced,
-    isLoading,
+    isLoading: fetching,
   };
 }
 
