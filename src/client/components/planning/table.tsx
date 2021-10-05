@@ -1,4 +1,5 @@
 import React, { RefObject, useCallback, useEffect, useRef } from 'react';
+import { usePlanningContext } from './context';
 
 import { Header } from './header';
 import { Month } from './month';
@@ -8,7 +9,7 @@ import type { PlanningData } from './types';
 
 export type Props = {
   year: number;
-  planningData: PlanningData[];
+  tableData: PlanningData[];
 };
 
 function useSynchronisedScroll(): {
@@ -49,19 +50,20 @@ function useSynchronisedScroll(): {
   return { monthHeadersRef, headerRef, scrollAreaRef, onScroll };
 }
 
-export const Table: React.FC<Props> = ({ year, planningData }) => {
+export const Table: React.FC = () => {
   const scroll = useSynchronisedScroll();
+  const { local, table } = usePlanningContext();
   return (
     <Styled.Table>
-      <MonthHeaders ref={scroll.monthHeadersRef} planningData={planningData} />
+      <MonthHeaders ref={scroll.monthHeadersRef} tableData={table} />
       <Styled.TableWithoutLeftHeader>
         <Header ref={scroll.headerRef} />
         <Styled.TableScrollArea ref={scroll.scrollAreaRef} onScroll={scroll.onScroll}>
           <Styled.MonthGroups>
-            {planningData.map((dataForMonth, index) => (
+            {table.map((dataForMonth, index) => (
               <Month
-                key={`${year}-${dataForMonth.month}`}
-                year={year}
+                key={`${local.year}-${dataForMonth.month}`}
+                year={local.year}
                 dataForMonth={dataForMonth}
                 isStart={index === 0}
               />

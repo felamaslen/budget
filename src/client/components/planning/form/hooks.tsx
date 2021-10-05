@@ -165,11 +165,11 @@ export function useTransactionForm(
   onRemoveTransaction: OnRemoveTransaction;
   onChangeCreditCard: OnChangeCreditCard;
 } {
-  const dispatch = usePlanningDispatch();
+  const { sync } = usePlanningDispatch();
 
   const onAddTransaction = useCallback<OnAddTransaction>(
     (netWorthSubcategoryId, newValue) => {
-      dispatch((prevState) => ({
+      sync((prevState) => ({
         ...prevState,
         accounts: replaceAtIndex(
           prevState.accounts,
@@ -191,12 +191,12 @@ export function useTransactionForm(
         ),
       }));
     },
-    [dispatch, year, month],
+    [sync, year, month],
   );
 
   const onChangeTransaction = useCallback<OnChangeTransaction>(
     (netWorthSubcategory, oldName, newValue) => {
-      dispatch((last) => ({
+      sync((last) => ({
         ...last,
         accounts: replaceAtIndex(
           last.accounts,
@@ -217,12 +217,12 @@ export function useTransactionForm(
         ),
       }));
     },
-    [dispatch, year, month],
+    [sync, year, month],
   );
 
   const onRemoveTransaction = useCallback<OnRemoveTransaction>(
     (netWorthSubcategory, name) => {
-      dispatch((last) => ({
+      sync((last) => ({
         ...last,
         accounts: replaceAtIndex(
           last.accounts,
@@ -238,12 +238,12 @@ export function useTransactionForm(
         ),
       }));
     },
-    [dispatch, year, month],
+    [sync, year, month],
   );
 
   const onChangeCreditCard = useCallback<OnChangeCreditCard>(
     (netWorthSubcategoryId, creditCard) => {
-      dispatch((prevState) => ({
+      sync((prevState) => ({
         ...prevState,
         accounts: replaceAtIndex(
           prevState.accounts,
@@ -292,7 +292,7 @@ export function useTransactionForm(
         ),
       }));
     },
-    [dispatch, year, month],
+    [sync, year, month],
   );
 
   return { onAddTransaction, onChangeTransaction, onRemoveTransaction, onChangeCreditCard };

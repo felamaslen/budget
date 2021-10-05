@@ -2,14 +2,10 @@ import React, { useCallback, useMemo } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
 import { StandardRates, StandardThresholds } from './constants';
-import { usePlanningDispatch, usePlanningState } from './context';
+import { usePlanningContext, usePlanningDispatch } from './context';
 import { PropsRateForm, PropsThresholdForm, RateForm, ThresholdForm } from './form/rate';
 
 import { SidebarSection } from './sidebar-section';
-
-export type Props = {
-  year: number;
-};
 
 const standardRates: Pick<PropsRateForm, 'label' | 'name'>[] = [
   { name: StandardRates.IncomeTaxBasicRate, label: 'Income tax basic rate' },
@@ -31,26 +27,26 @@ const standardThresholds: Pick<PropsThresholdForm, 'label' | 'name'>[] = [
   { name: StandardThresholds.StudentLoanThreshold, label: 'Student loan threshold' },
 ];
 
-export const Rates: React.FC<Props> = ({ year }) => {
-  const state = usePlanningState();
-  const dispatch = usePlanningDispatch();
+export const Rates: React.FC = () => {
+  const { local, state } = usePlanningContext();
+  const { sync } = usePlanningDispatch();
 
-  const parameters = state.parameters.find((compare) => compare.year === year);
+  const parameters = state.parameters.find((compare) => compare.year === local.year);
 
   const rates = parameters?.rates ?? [];
   const thresholds = parameters?.thresholds ?? [];
 
   const setParam = useCallback(
     (key: 'rates' | 'thresholds') => (name: string, value = 0): void => {
-      dispatch((last) => {
-        const parametersForYear = last.parameters.find((compare) => compare.year === year);
+      sync((last) => {
+        const parametersForYear = last.parameters.find((compare) => compare.year === local.year);
         if (!parametersForYear) {
           return {
             ...last,
             parameters: [
               ...last.parameters,
               {
-                year,
+                year: local.year,
                 rates: key === 'rates' ? [{ name, value }] : [],
                 thresholds: key === 'thresholds' ? [{ name, value }] : [],
               },
@@ -62,7 +58,7 @@ export const Rates: React.FC<Props> = ({ year }) => {
             ...last,
             parameters: replaceAtIndex(
               last.parameters,
-              last.parameters.findIndex((compare) => compare.year === year),
+              last.parameters.findIndex((compare) => compare.year === local.year),
               (prevParam) => ({
                 ...prevParam,
                 [key]: [...prevParam[key], { name, value }],
@@ -74,7 +70,7 @@ export const Rates: React.FC<Props> = ({ year }) => {
           ...last,
           parameters: replaceAtIndex(
             last.parameters,
-            last.parameters.findIndex((compare) => compare.year === year),
+            last.parameters.findIndex((compare) => compare.year === local.year),
             (prevParam) => ({
               ...prevParam,
               [key]: replaceAtIndex(
@@ -90,7 +86,7 @@ export const Rates: React.FC<Props> = ({ year }) => {
         };
       });
     },
-    [dispatch, year],
+    [sync, local.year],
   );
 
   const setRate = useMemo(() => setParam('rates'), [setParam]);

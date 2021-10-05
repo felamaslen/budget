@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from 'react';
 import type { PlanningSyncResponse } from '~client/types/gql';
 import type { GQL, OptionalDeep } from '~shared/types';
 
@@ -9,6 +10,7 @@ export type AccountTransaction = {
   formula?: string;
   isVerified?: boolean;
   isComputed?: boolean;
+  isTransfer?: boolean;
 };
 
 export type AccountCreditCardPayment = {
@@ -42,6 +44,23 @@ export type State = OptionalDeep<
   'id'
 >;
 
+export type LocalState = {
+  year: number;
+};
+
+export type PlanningDispatch = {
+  local: Dispatch<SetStateAction<LocalState>>;
+  sync: Dispatch<SetStateAction<State>>;
+};
+
+export type PlanningContextState = {
+  state: State;
+  local: LocalState;
+  isSynced: boolean;
+  isLoading: boolean;
+  table: PlanningData[];
+};
+
 export type Account = State['accounts'][0];
 export type AccountIncome = Account['income'][0];
 export type AccountCredit = Account['creditCards'][0];
@@ -57,6 +76,8 @@ export type MonthByAccount = {
   accountGroup: Account;
   startValue: AccountTransaction;
   transactions: AccountTransaction[];
+  taxRelief: number;
+  previousYearTaxRelief: number;
   creditCards: AccountCreditCardPayment[];
   endValue: AccountTransaction;
 };

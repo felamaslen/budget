@@ -1,18 +1,32 @@
-import { createContext, Dispatch, SetStateAction, useContext } from 'react';
+import { createContext, useContext } from 'react';
 
-import type { State } from './types';
+import { LocalState, PlanningContextState, PlanningDispatch, State } from './types';
+import { getFinancialYear } from './utils';
+
 import { VOID } from '~client/modules/data';
 
-export const PlanningContextSetState = createContext<Dispatch<SetStateAction<State>>>(VOID);
-
-export const usePlanningDispatch = (): Dispatch<SetStateAction<State>> =>
-  useContext(PlanningContextSetState);
+export const PlanningContextDispatch = createContext<PlanningDispatch>({
+  local: VOID,
+  sync: VOID,
+});
+export const usePlanningDispatch = (): PlanningDispatch => useContext(PlanningContextDispatch);
 
 export const initialState: State = {
   accounts: [],
   parameters: [],
 };
 
-export const PlanningContextState = createContext<State>(initialState);
+export const initialLocalState: LocalState = {
+  year: getFinancialYear(new Date()),
+};
 
-export const usePlanningState = (): State => useContext(PlanningContextState);
+export const PlanningContext = createContext<PlanningContextState>({
+  state: initialState,
+  local: initialLocalState,
+  isSynced: true,
+  isLoading: true,
+  table: [],
+});
+
+export const usePlanningContext = (): PlanningContextState => useContext(PlanningContext);
+export const usePlanningState = (): State => usePlanningContext().state;

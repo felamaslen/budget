@@ -5,16 +5,16 @@ import * as Styled from './styles';
 import type { PlanningData } from './types';
 
 export type Props = {
-  planningData: PlanningData[];
+  tableData: PlanningData[];
 };
 
 // first month shows start as well as end
 const getMonthEndNumRows = (monthIndex: number): number => (monthIndex === 0 ? 2 : 1);
 
-export const MonthHeaders = React.forwardRef<HTMLDivElement, Props>(({ planningData }, ref) => (
+export const MonthHeaders = React.forwardRef<HTMLDivElement, Props>(({ tableData }, ref) => (
   <Styled.MonthHeaders ref={ref}>
     <Styled.MonthHeadersPadding />
-    {planningData.map((row, index) => (
+    {tableData.map((row, index) => (
       <Styled.MonthHeader
         key={`month-header-${row.year}-${row.month}`}
         numRows={row.numRows + getMonthEndNumRows(index)}

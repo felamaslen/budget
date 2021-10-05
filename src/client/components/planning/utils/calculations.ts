@@ -37,52 +37,78 @@ function getTaxFreeAllowance(taxCode: string): number {
   return 10 * Number(match[1]) * 100;
 }
 
+function calculateTaxCalculationValues(
+  taxableIncome: number,
+  taxCode: string,
+  basicAllowance: number,
+  additionalThreshold: number,
+): {
+  basic: number;
+  higher: number;
+  additional: number;
+} {
+  const taxFreeAllowanceYearly = getTaxFreeAllowance(taxCode);
+  const taxFreeAllowanceMonthly = Math.round(taxFreeAllowanceYearly / 12);
+  return {
+    basic: Math.min(
+      Math.round(basicAllowance / 12),
+      Math.max(0, taxableIncome - taxFreeAllowanceMonthly),
+    ),
+    higher: Math.max(
+      0,
+      Math.min(Math.round(additionalThreshold / 12), taxableIncome) -
+        Math.round((taxFreeAllowanceYearly + basicAllowance) / 12),
+    ),
+    additional: Math.max(0, taxableIncome - Math.round(additionalThreshold / 12)),
+  };
+}
+
 export function calculateMonthlyIncomeTax(
   taxableIncome: number,
   taxCode: string,
-  pensionContrib: number,
   basicAllowance: number,
   additionalThreshold: number,
   basicRate: number,
   higherRate: number,
   additionalRate: number,
-): {
-  tax: number;
-  pensionTaxRelief: number;
-} {
-  const taxFreeAllowanceYearly = getTaxFreeAllowance(taxCode);
-  const taxFreeAllowanceMonthly = Math.round(taxFreeAllowanceYearly / 12);
-  const taxedAtBasicRate = Math.min(
-    Math.round(basicAllowance / 12),
-    Math.max(0, taxableIncome - taxFreeAllowanceMonthly),
+): number {
+  const { basic, higher, additional } = calculateTaxCalculationValues(
+    taxableIncome,
+    taxCode,
+    basicAllowance,
+    additionalThreshold,
   );
-  const taxedAtHigherRate = Math.max(
-    0,
-    Math.min(Math.round(additionalThreshold / 12), taxableIncome) -
-      Math.round((taxFreeAllowanceYearly + basicAllowance) / 12),
+
+  const basicTaxPaid = basic * basicRate;
+  const higherTaxPaid = higher * higherRate;
+  const additionalTaxPaid = additional * additionalRate;
+
+  return Math.round(basicTaxPaid + higherTaxPaid + additionalTaxPaid);
+}
+
+export function calculateMonthlyTaxRelief(
+  taxableIncome: number,
+  taxCode: string,
+  taxDeductions: number, // i.e. private pension contribution
+  basicAllowance: number,
+  additionalThreshold: number,
+  basicRate: number,
+  higherRate: number,
+  additionalRate: number,
+): number {
+  const { basic, higher, additional } = calculateTaxCalculationValues(
+    taxableIncome,
+    taxCode,
+    basicAllowance,
+    additionalThreshold,
   );
-  const taxedAtAdditionalRate = Math.max(0, taxableIncome - Math.round(additionalThreshold / 12));
 
-  const basicTaxPaid = taxedAtBasicRate * basicRate;
-  const higherTaxPaid = taxedAtHigherRate * higherRate;
-  const additionalTaxPaid = taxedAtAdditionalRate * additionalRate;
+  const additionalTaxRelief = Math.min(additional, taxDeductions) * additionalRate;
+  const higherTaxRelief = Math.min(higher, Math.max(0, taxDeductions - additional)) * higherRate;
+  const basicTaxRelief =
+    Math.min(basic, Math.max(0, taxDeductions - higher - additional)) * basicRate;
 
-  const additionalPensionTaxRelief =
-    Math.min(taxedAtAdditionalRate, pensionContrib) * additionalRate;
-  const higherPensionTaxRelief =
-    Math.min(taxedAtHigherRate, Math.max(0, pensionContrib - taxedAtAdditionalRate)) * higherRate;
-  const basicPensionTaxRelief =
-    Math.min(
-      taxedAtBasicRate,
-      Math.max(0, pensionContrib - taxedAtHigherRate - taxedAtAdditionalRate),
-    ) * basicRate;
-
-  return {
-    tax: Math.round(basicTaxPaid + higherTaxPaid + additionalTaxPaid),
-    pensionTaxRelief: Math.round(
-      basicPensionTaxRelief + higherPensionTaxRelief + additionalPensionTaxRelief,
-    ),
-  };
+  return Math.round(basicTaxRelief + higherTaxRelief + additionalTaxRelief);
 }
 
 export function calculateMonthlyNIContributions(

@@ -52,14 +52,14 @@ export const AddAccount: React.FC = () => {
   const [upperLimit, setUpperLimit] = useState<number | undefined>();
   const [lowerLimit, setlowerLimit] = useState<number | undefined>();
 
-  const dispatch = usePlanningDispatch();
+  const { sync } = usePlanningDispatch();
 
   const onAdd = useCallback(() => {
     if (!(subcategoryId && account)) {
       return;
     }
 
-    dispatch((last) => ({
+    sync((last) => ({
       ...last,
       accounts: last.accounts.some((compare) => compare.netWorthSubcategoryId === subcategoryId)
         ? last.accounts
@@ -77,7 +77,7 @@ export const AddAccount: React.FC = () => {
             },
           ],
     }));
-  }, [dispatch, subcategoryId, account, upperLimit, lowerLimit]);
+  }, [sync, subcategoryId, account, upperLimit, lowerLimit]);
 
   if (!options.length) {
     return null;
@@ -125,7 +125,7 @@ type PropsAccountEditForm = {
 };
 
 const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
-  const dispatch = usePlanningDispatch();
+  const { sync } = usePlanningDispatch();
   const [tempAccount, setTempAccount] = useState<Account>(account);
   useEffect(() => {
     setTempAccount(account);
@@ -133,7 +133,7 @@ const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
 
   const onSave = useCallback(
     (nextAccount: GQL<PlanningAccountInput>) => {
-      dispatch((last) => ({
+      sync((last) => ({
         ...last,
         accounts: partialModification(
           last.accounts,
@@ -142,7 +142,7 @@ const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
         ),
       }));
     },
-    [dispatch, account.id],
+    [sync, account.id],
   );
 
   const onSaveLatest = useCallback(() => onSave(tempAccount), [tempAccount, onSave]);

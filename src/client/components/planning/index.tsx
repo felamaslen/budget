@@ -1,36 +1,57 @@
-import getYear from 'date-fns/getYear';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { RouteComponentProps } from 'react-router';
 
-import { PlanningContextSetState, PlanningContextState } from './context';
-import { usePlanning, usePlanningData } from './hooks';
+import { initialLocalState, PlanningContext, PlanningContextDispatch } from './context';
+import { usePlanning, usePlanningTableData } from './hooks';
+import { PlanningOverview } from './overview/overview';
 import { Sidebar } from './sidebar';
 import { Status } from './status/status';
 import * as Styled from './styles';
 import { Table } from './table';
+import type { LocalState, PlanningContextState, PlanningDispatch } from './types';
 
-import { useToday } from '~client/hooks';
+import { useIsMobile } from '~client/hooks';
 
 const PagePlanning: React.FC<RouteComponentProps> = () => {
-  const today = useToday();
+  const isMobile = useIsMobile();
+
   const { state, setState, isSynced, isLoading } = usePlanning();
+  const [localState, setLocalState] = useState<LocalState>(initialLocalState);
 
-  const [year, setYear] = useState<number>(getYear(today));
+  const tableData = usePlanningTableData(state, localState.year);
 
-  const planningData = usePlanningData(state, year);
+  const context = useMemo<PlanningContextState>(
+    () => ({
+      state,
+      isSynced,
+      isLoading,
+      local: localState,
+      table: tableData,
+    }),
+    [state, localState, isSynced, isLoading, tableData],
+  );
+
+  const dispatch = useMemo<PlanningDispatch>(
+    () => ({
+      local: setLocalState,
+      sync: setState,
+    }),
+    [setLocalState, setState],
+  );
 
   return (
-    <PlanningContextState.Provider value={state}>
-      <PlanningContextSetState.Provider value={setState}>
+    <PlanningContextDispatch.Provider value={dispatch}>
+      <PlanningContext.Provider value={context}>
         <Styled.PlanningWrapper>
           <Styled.Planning>
-            <Table year={year} planningData={planningData} />
-            <Sidebar year={year} />
+            <Table />
+            {!isMobile && <PlanningOverview />}
+            <Sidebar />
           </Styled.Planning>
-          <Status showSpinner={!isSynced || isLoading} year={year} setYear={setYear} />
+          <Status />
         </Styled.PlanningWrapper>
-      </PlanningContextSetState.Provider>
-    </PlanningContextState.Provider>
+      </PlanningContext.Provider>
+    </PlanningContextDispatch.Provider>
   );
 };
 export default PagePlanning;

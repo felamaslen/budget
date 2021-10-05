@@ -5,60 +5,123 @@ import isBefore from 'date-fns/isBefore';
 import isSameMonth from 'date-fns/isSameMonth';
 import { replaceAtIndex } from 'replace-array';
 
-import type { AccountTransaction, IncomeRates, PlanningMonth, State } from '../types';
+import { ComputedTransactionName } from '../constants';
+import type { AccountTransaction, IncomeRates, PlanningData, PlanningMonth, State } from '../types';
 import {
   calculateMonthlyIncomeTax,
   calculateMonthlyNIContributions,
   calculateMonthlyStudentLoanRepayment,
+  calculateMonthlyTaxRelief,
 } from './calculations';
 
 import { CREATE_ID } from '~client/constants/data';
-import type { PlanningValue } from '~client/types/gql';
+import type { IncomeDeduction, PlanningValue } from '~client/types/gql';
+
+const isTaxDeductible = (transaction: AccountTransaction): boolean =>
+  !transaction.isComputed && /^Pension/.test(transaction.name);
+
+const isSalarySacrifice = (deduction: IncomeDeduction): boolean =>
+  deduction.name === 'Pension' || /\(SalSac\)/.test(deduction.name);
+
+function sortIncomeTransactions(income: AccountTransaction[]): AccountTransaction[] {
+  return income.sort((a, b) => {
+    if (a.name === 'Salary') {
+      return -1;
+    }
+    if (b.name === 'Salary') {
+      return 1;
+    }
+    return a.name < b.name ? -1 : 1;
+  });
+}
+
+export type TransactionsWithTaxRelief = {
+  transactions: AccountTransaction[];
+  taxRelief: number;
+};
 
 function getPastIncomeTransactionsForAccountAtMonth(
+  rates: IncomeRates | undefined,
   date: Date,
   pastIncome: State['accounts'][0]['pastIncome'],
-): AccountTransaction[] {
+  income: State['accounts'][0]['income'],
+  manualTransactions: AccountTransaction[],
+): TransactionsWithTaxRelief {
   const pastIncomeFiltered = pastIncome.filter((compare) =>
     isSameMonth(new Date(compare.date), date),
   );
   if (!pastIncomeFiltered.length) {
-    return [];
+    return { transactions: [], taxRelief: 0 };
   }
-  return pastIncomeFiltered.reduce<AccountTransaction[]>(
-    (last, { deductions }) =>
-      deductions.reduce<AccountTransaction[]>((next, { name, value }) => {
-        if (next.some((compare) => compare.name === name)) {
-          return replaceAtIndex<AccountTransaction>(
-            next,
-            next.findIndex((compare) => compare.name === name),
-            (prev) => ({
-              ...prev,
-              computedValue: (prev.value ?? 0) + value,
-            }),
-          );
-        }
-        return [
-          ...next,
-          {
-            id: `deduction-${name}-${value}`,
-            name,
-            computedValue: value,
-            isComputed: true,
-            isVerified: true,
-          },
-        ];
-      }, last),
-    [
-      {
-        id: `salary-${date.toISOString()}`,
-        name: 'Salary',
-        computedValue: pastIncomeFiltered.reduce<number>((sum, { gross }) => sum + gross, 0),
-        isComputed: true,
-        isVerified: true,
-      },
-    ],
+
+  const grossIncome = pastIncomeFiltered.reduce<number>((sum, { gross }) => sum + gross, 0);
+
+  const transactions = sortIncomeTransactions(
+    pastIncomeFiltered.reduce<AccountTransaction[]>(
+      (last, { deductions }) =>
+        deductions.reduce<AccountTransaction[]>((next, { name, value }) => {
+          if (next.some((compare) => compare.name === name)) {
+            return replaceAtIndex<AccountTransaction>(
+              next,
+              next.findIndex((compare) => compare.name === name),
+              (prev) => ({
+                ...prev,
+                computedValue: (prev.value ?? 0) + value,
+              }),
+            );
+          }
+          return [
+            ...next,
+            {
+              id: `deduction-${name}-${value}`,
+              name,
+              computedValue: value,
+              isComputed: true,
+              isVerified: true,
+            },
+          ];
+        }, last),
+      [
+        {
+          id: `salary-${date.toISOString()}`,
+          name: ComputedTransactionName.GrossIncome,
+          computedValue: grossIncome,
+          isComputed: true,
+          isVerified: true,
+        },
+      ],
+    ),
   );
+
+  const taxableIncome = pastIncomeFiltered.reduce<number>(
+    (sum0, { deductions }) =>
+      deductions.filter(isSalarySacrifice).reduce<number>((sum1, { value }) => sum1 + value, sum0),
+    grossIncome,
+  );
+
+  const taxCode = income.find(
+    (compare) =>
+      !isAfter(new Date(compare.startDate), date) && !isAfter(date, new Date(compare.endDate)),
+  )?.taxCode;
+
+  const taxDeductions = manualTransactions
+    .filter(isTaxDeductible)
+    .reduce<number>((sum, { computedValue = 0 }) => sum - computedValue, 0);
+
+  const taxRelief = taxCode
+    ? calculateMonthlyTaxRelief(
+        taxableIncome,
+        taxCode,
+        taxDeductions,
+        rates?.taxBasicAllowance ?? 0,
+        rates?.taxAdditionalThreshold ?? 0,
+        rates?.taxBasicRate ?? 0,
+        rates?.taxHigherRate ?? 0,
+        rates?.taxAdditionalRate ?? 0,
+      )
+    : 0;
+
+  return { transactions, taxRelief };
 }
 
 function getPredictedIncomeTransactionsForAccountAtMonth(
@@ -66,7 +129,7 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
   date: Date,
   income: State['accounts'][0]['income'],
   manualTransactions: AccountTransaction[],
-): AccountTransaction[] {
+): TransactionsWithTaxRelief {
   const relevantIncome = income.filter(
     (group) =>
       !isBefore(endOfMonth(new Date(group.endDate)), date) &&
@@ -82,14 +145,25 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
     (last, group) => {
       const pensionContribSalarySacrifice = (group.pensionContrib * group.salary) / 12;
       const taxableIncome = group.salary / 12 - pensionContribSalarySacrifice;
-      const pensionContribIndividual = manualTransactions
-        .filter((compare) => /^Pension/.test(compare.name))
-        .reduce<number>((sum, { computedValue = 0 }) => sum - computedValue, 0);
 
-      const { tax, pensionTaxRelief } = calculateMonthlyIncomeTax(
+      const tax = calculateMonthlyIncomeTax(
         taxableIncome,
         group.taxCode,
-        pensionContribIndividual,
+        rates?.taxBasicAllowance ?? 0,
+        rates?.taxAdditionalThreshold ?? 0,
+        rates?.taxBasicRate ?? 0,
+        rates?.taxHigherRate ?? 0,
+        rates?.taxAdditionalRate ?? 0,
+      );
+
+      const taxDeductions = manualTransactions
+        .filter(isTaxDeductible)
+        .reduce<number>((sum, { computedValue = 0 }) => sum - computedValue, 0);
+
+      const taxRelief = calculateMonthlyTaxRelief(
+        taxableIncome,
+        group.taxCode,
+        taxDeductions,
         rates?.taxBasicAllowance ?? 0,
         rates?.taxAdditionalThreshold ?? 0,
         rates?.taxBasicRate ?? 0,
@@ -101,7 +175,7 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
         salary: last.salary + Math.round(group.salary / 12),
         pension: last.pension + Math.round(pensionContribSalarySacrifice),
         incomeTax: last.incomeTax + tax,
-        taxRelief: last.taxRelief + pensionTaxRelief,
+        taxRelief: last.taxRelief + taxRelief,
         ni:
           last.ni +
           calculateMonthlyNIContributions(
@@ -127,55 +201,45 @@ function getPredictedIncomeTransactionsForAccountAtMonth(
       )
     : 0;
 
-  return [
+  const transactions: AccountTransaction[] = [
     {
       id: 'salary-predicted',
-      name: 'Salary',
+      name: ComputedTransactionName.GrossIncome,
       computedValue: combinedIncomeWithDeductions.salary,
       isComputed: true,
       isVerified: false,
     },
     {
       id: 'pension-predicted',
-      name: 'Pension',
+      name: ComputedTransactionName.Pension,
       computedValue: -combinedIncomeWithDeductions.pension,
       isComputed: true,
       isVerified: false,
     },
     {
       id: 'income-tax-predicted',
-      name: 'Income tax',
+      name: ComputedTransactionName.IncomeTax,
       computedValue: -combinedIncomeWithDeductions.incomeTax,
       isComputed: true,
       isVerified: false,
     },
     {
       id: 'ni-predicted',
-      name: 'NI',
+      name: ComputedTransactionName.NI,
       computedValue: -combinedIncomeWithDeductions.ni,
       isComputed: true,
       isVerified: false,
     },
     {
       id: 'student-loan-predicted',
-      name: 'Student loan',
+      name: ComputedTransactionName.StudentLoan,
       computedValue: -studentLoan,
       isComputed: true,
       isVerified: false,
     },
-  ].filter((group) => group.computedValue !== 0);
-}
+  ];
 
-function sortIncomeTransactions(income: AccountTransaction[]): AccountTransaction[] {
-  return income.sort((a, b) => {
-    if (a.name === 'Salary') {
-      return -1;
-    }
-    if (b.name === 'Salary') {
-      return 1;
-    }
-    return a.name < b.name ? -1 : 1;
-  });
+  return { transactions, taxRelief: combinedIncomeWithDeductions.taxRelief };
 }
 
 function getIncomeTransactionsForAccountAtMonth(
@@ -184,17 +248,21 @@ function getIncomeTransactionsForAccountAtMonth(
   isPast: boolean,
   account: State['accounts'][0],
   manualTransactions: AccountTransaction[],
-): AccountTransaction[] {
-  return sortIncomeTransactions(
-    isPast
-      ? getPastIncomeTransactionsForAccountAtMonth(date, account.pastIncome)
-      : getPredictedIncomeTransactionsForAccountAtMonth(
-          rates,
-          date,
-          account.income,
-          manualTransactions,
-        ),
-  );
+): TransactionsWithTaxRelief {
+  return isPast
+    ? getPastIncomeTransactionsForAccountAtMonth(
+        rates,
+        date,
+        account.pastIncome,
+        account.income,
+        manualTransactions,
+      )
+    : getPredictedIncomeTransactionsForAccountAtMonth(
+        rates,
+        date,
+        account.income,
+        manualTransactions,
+      );
 }
 
 function evaluateValue(row: Pick<PlanningValue, 'value' | 'formula'>): number | undefined {
@@ -216,6 +284,7 @@ function getManualTransactionsForAccountAtMonth(
       value: row.value ?? undefined,
       formula: row.formula ?? undefined,
       isVerified: isPast,
+      isTransfer: !!row.transferToAccountId,
     }));
 }
 
@@ -247,6 +316,7 @@ function getTransferTransactionsForAccountAtMonth(
               computedValue: -(evaluateValue(row) ?? 0) || undefined,
               isComputed: true,
               isVerified: isPast,
+              isTransfer: true,
             },
           ],
           last,
@@ -261,7 +331,7 @@ export function getTransactionsForAccountAtMonth(
   accounts: State['accounts'],
   index: number,
   { year, month, date }: PlanningMonth,
-): AccountTransaction[] {
+): TransactionsWithTaxRelief {
   const isPast = isAfter(today, date);
   const manualTransactions = getManualTransactionsForAccountAtMonth(
     year,
@@ -269,15 +339,45 @@ export function getTransactionsForAccountAtMonth(
     isPast,
     accounts[index],
   );
-  return [
-    ...getIncomeTransactionsForAccountAtMonth(
-      rates,
-      date,
-      isPast,
-      accounts[index],
-      manualTransactions,
-    ),
+
+  const income = getIncomeTransactionsForAccountAtMonth(
+    rates,
+    date,
+    isPast,
+    accounts[index],
+    manualTransactions,
+  );
+
+  const transactions: AccountTransaction[] = [
+    ...income.transactions,
     ...manualTransactions,
     ...getTransferTransactionsForAccountAtMonth(year, month, isPast, accounts, index),
-  ];
+  ].filter((group) => group.computedValue !== 0);
+
+  return { transactions, taxRelief: income.taxRelief };
+}
+
+export function nameIncluded(name: string, names: (string | RegExp)[]): boolean {
+  return names.some((compare) =>
+    typeof compare === 'string' ? compare === name : compare.test(name),
+  );
+}
+
+export function sumComputedTransactionsByName(
+  table: PlanningData[],
+  ...names: (string | RegExp)[]
+): number {
+  return table.reduce<number>(
+    (sum0, row) =>
+      row.accounts.reduce<number>(
+        (sum1, account) =>
+          account.transactions.reduce<number>(
+            (sum2, transaction) =>
+              sum2 + (nameIncluded(transaction.name, names) ? transaction.computedValue ?? 0 : 0),
+            sum1,
+          ),
+        sum0,
+      ),
+    0,
+  );
 }

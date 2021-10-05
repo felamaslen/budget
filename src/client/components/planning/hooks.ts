@@ -281,13 +281,20 @@ const getAccountReducer = (
         ? typeof start !== 'undefined'
         : accumulator[monthIndex - 1].accounts[accountIndex].endValue.isVerified;
 
-    const transactions = getTransactionsForAccountAtMonth(
+    const { transactions, taxRelief } = getTransactionsForAccountAtMonth(
       today,
       incomeRates[planningMonth.year],
       accounts,
       accountIndex,
       planningMonth,
     );
+
+    const previousYearTaxRelief =
+      planningMonth.month === startMonth
+        ? accumulator
+            .filter((row) => row.year === planningMonth.year - 1)
+            .reduce<number>((sum, row) => sum + row.accounts[accountIndex].taxRelief, 0)
+        : 0;
 
     const creditCardValues = getCreditCardsForAccountAtMonth(
       creditCardRecords,
@@ -320,6 +327,8 @@ const getAccountReducer = (
       },
       creditCards: creditCardValues,
       transactions,
+      taxRelief,
+      previousYearTaxRelief,
       endValue: {
         id: `${accountGroup.id ?? `${CREATE_ID}_${accountGroup.account}`}_end`,
         name: accountGroup.account,
@@ -332,7 +341,7 @@ const getAccountReducer = (
 
 const numNewInputRows = 1;
 
-export function usePlanningData(state: State, year: number): PlanningData[] {
+export function usePlanningTableData(state: State, year: number): PlanningData[] {
   const today = useToday();
   const planningMonths = usePlanningMonths(year);
   const netWorth = useSelector(getEntries);

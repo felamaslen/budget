@@ -17,3 +17,11 @@ export const enum StandardThresholds {
   NIUEL = 'NIUEL',
   StudentLoanThreshold = 'StudentLoanThreshold',
 }
+
+export const enum ComputedTransactionName {
+  GrossIncome = 'Salary',
+  IncomeTax = 'Income tax',
+  NI = 'NI',
+  Pension = 'Pension (SalSac)',
+  StudentLoan = 'Student loan',
+}

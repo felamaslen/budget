@@ -6,10 +6,17 @@ import createMockStore from 'redux-mock-store';
 import numericHash from 'string-hash';
 
 import { StandardRates, StandardThresholds } from './constants';
-import { PlanningContextState } from './context';
-import { isStateEqual, usePlanningData, usePlanningMonths } from './hooks';
+import { PlanningContext } from './context';
+import { isStateEqual, usePlanningTableData, usePlanningMonths } from './hooks';
 import type { AccountValue } from './month-end';
-import { AccountCreditCardPayment, AccountTransaction, PlanningMonth, State } from './types';
+import {
+  AccountCreditCardPayment,
+  AccountTransaction,
+  PlanningContextState,
+  PlanningData,
+  PlanningMonth,
+  State,
+} from './types';
 
 import { TodayProvider } from '~client/hooks';
 import type { State as ReduxState } from '~client/reducers';
@@ -107,7 +114,7 @@ describe(usePlanningMonths.name, () => {
   });
 });
 
-describe(usePlanningData.name, () => {
+describe(usePlanningTableData.name, () => {
   const now = new Date('2021-09-10T15:03:11+0100');
   beforeEach(() => {
     jest.useFakeTimers();
@@ -205,6 +212,13 @@ describe(usePlanningData.name, () => {
             value: -150000,
             transferToAccountId: numericHash('account-savings'),
           },
+          {
+            id: numericHash('value-3'),
+            year: 2021,
+            month: 7,
+            name: 'Pension (SIPP)',
+            value: -50000,
+          },
         ],
         income: [
           {
@@ -233,6 +247,16 @@ describe(usePlanningData.name, () => {
     ],
   };
 
+  const testContext: PlanningContextState = {
+    state: testState,
+    local: {
+      year: 2020,
+    },
+    isSynced: true,
+    isLoading: false,
+    table: [],
+  };
+
   const createStore = createMockStore<ReduxState>();
   const store = createStore(testReduxStateWithDates);
 
@@ -240,9 +264,7 @@ describe(usePlanningData.name, () => {
     <GQLProviderMock client={mockClient}>
       <Provider store={store}>
         <TodayProvider>
-          <PlanningContextState.Provider value={testState}>
-            {children}
-          </PlanningContextState.Provider>
+          <PlanningContext.Provider value={testContext}>{children}</PlanningContext.Provider>
         </TodayProvider>
       </Provider>
     </GQLProviderMock>
@@ -250,13 +272,17 @@ describe(usePlanningData.name, () => {
 
   it('should return twelve groups, corresponding to the months in the financial year', () => {
     expect.assertions(1);
-    const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+    const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+      wrapper: Wrapper,
+    });
     expect(result.current).toHaveLength(12);
   });
 
   it("should set the numRows on the group to the minimum of 3, and the max of all of the group's accounts", () => {
     expect.assertions(12);
-    const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+    const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+      wrapper: Wrapper,
+    });
     expect(result.current[0].numRows).toMatchInlineSnapshot(`3`); // April
     expect(result.current[1].numRows).toMatchInlineSnapshot(`3`); // May
     expect(result.current[2].numRows).toMatchInlineSnapshot(`3`); // June
@@ -274,7 +300,9 @@ describe(usePlanningData.name, () => {
   it('should set isCurrentMonth to true on the current month', () => {
     expect.assertions(12);
     // current month is September
-    const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+    const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+      wrapper: Wrapper,
+    });
     expect(result.current[0].isCurrentMonth).toBe(false); // April
     expect(result.current[1].isCurrentMonth).toBe(false); // May
     expect(result.current[2].isCurrentMonth).toBe(false); // June
@@ -292,7 +320,9 @@ describe(usePlanningData.name, () => {
   describe('accounts', () => {
     it('should each be present on every group', () => {
       expect.assertions(24);
-      const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
       result.current.forEach((group) => {
         expect(group.accounts).toHaveLength(2);
         expect(group.accounts).toStrictEqual(
@@ -317,7 +347,9 @@ describe(usePlanningData.name, () => {
 
     it('should include explicit transactions', () => {
       expect.assertions(2);
-      const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
 
       expect(result.current[6].accounts[1].transactions).toStrictEqual(
         expect.arrayContaining([
@@ -328,6 +360,7 @@ describe(usePlanningData.name, () => {
             formula: undefined,
             computedValue: -120500,
             isVerified: false,
+            isTransfer: true,
           }),
         ]),
       );
@@ -348,7 +381,9 @@ describe(usePlanningData.name, () => {
 
     it('should include calculated transfer-to transactions from other accounts', () => {
       expect.assertions(1);
-      const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
 
       expect(result.current[6].accounts[0].transactions).toStrictEqual(
         expect.arrayContaining([
@@ -358,6 +393,7 @@ describe(usePlanningData.name, () => {
             computedValue: 120500,
             isVerified: false, // since it's in the future
             isComputed: true,
+            isTransfer: true,
           }),
         ]),
       );
@@ -365,7 +401,9 @@ describe(usePlanningData.name, () => {
 
     it('should include verified income transactions, including deductions', () => {
       expect.assertions(1);
-      const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
       expect(result.current[3].accounts[1].transactions).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining<AccountTransaction>({
@@ -388,7 +426,9 @@ describe(usePlanningData.name, () => {
 
     it('should include predicted income transactions, for future months', () => {
       expect.assertions(11);
-      const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
 
       // Apr
       expect(result.current[0].accounts[1].transactions).not.toStrictEqual(
@@ -443,7 +483,7 @@ describe(usePlanningData.name, () => {
           }),
           expect.objectContaining({
             id: 'pension-predicted',
-            name: 'Pension',
+            name: 'Pension (SalSac)',
             computedValue: -21250,
             isComputed: true,
             isVerified: false,
@@ -492,7 +532,9 @@ describe(usePlanningData.name, () => {
 
     it('should include actual credit card transactions', () => {
       expect.assertions(3);
-      const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
 
       // Jun
       expect(result.current[2].accounts[1].creditCards).toStrictEqual<AccountCreditCardPayment[]>([
@@ -527,7 +569,9 @@ describe(usePlanningData.name, () => {
 
     it('should include predicted credit card transactions, based on the median value', () => {
       expect.assertions(9);
-      const { result } = renderHook(() => usePlanningData(testState, myYear), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
 
       // Apr
       expect(result.current[0].accounts[1].creditCards).toStrictEqual<AccountCreditCardPayment[]>([
@@ -581,7 +625,7 @@ describe(usePlanningData.name, () => {
     describe('start and end values', () => {
       it('should return undefined for past months with no net worth entry', () => {
         expect.assertions(4);
-        const { result } = renderHook(() => usePlanningData(testState, myYear - 1), {
+        const { result } = renderHook(() => usePlanningTableData(testState, myYear - 1), {
           wrapper: Wrapper,
         });
 
@@ -627,7 +671,7 @@ describe(usePlanningData.name, () => {
         'should return actual values for a past month ($month) with a net worth entry',
         ({ index, start0, start1, end0, end1 }) => {
           expect.assertions(4);
-          const { result } = renderHook(() => usePlanningData(testState, myYear), {
+          const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
             wrapper: Wrapper,
           });
 
@@ -665,7 +709,7 @@ describe(usePlanningData.name, () => {
 
       it('should return a predicted value for a present month without a net worth entry', () => {
         expect.assertions(4);
-        const { result } = renderHook(() => usePlanningData(testState, myYear), {
+        const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
           wrapper: Wrapper,
         });
 
@@ -725,7 +769,7 @@ describe(usePlanningData.name, () => {
         'should return predicted values for a future month ($month) without a net worth entry',
         ({ index, start0, start1, end0, end1 }) => {
           expect.assertions(4);
-          const { result } = renderHook(() => usePlanningData(testState, myYear), {
+          const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
             wrapper: Wrapper,
           });
 
@@ -761,6 +805,33 @@ describe(usePlanningData.name, () => {
         },
       );
     });
+
+    describe('when the first month is in the future', () => {
+      it('should include pension tax relief from the previous year', () => {
+        expect.assertions(1);
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2021-04-03'));
+
+        const { result } = renderHook(() => usePlanningTableData(testState, 2022), {
+          wrapper: Wrapper,
+        });
+
+        expect(result.current).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<Partial<PlanningData>>({
+              date: new Date('2022-04-30T23:59:59.999Z'),
+              year: 2022,
+              month: 3,
+              accounts: expect.arrayContaining([
+                expect.objectContaining<Partial<PlanningData['accounts'][0]>>({
+                  previousYearTaxRelief: 50000 * 0.4,
+                }),
+              ]),
+            }),
+          ]),
+        );
+      });
+    });
   });
 
   describe('when fetching a year in the future', () => {
@@ -787,7 +858,9 @@ describe(usePlanningData.name, () => {
 
     it('should extrapolate boundary conditions from the latest actual net worth value', () => {
       expect.assertions(4);
-      const { result } = renderHook(() => usePlanningData(testState, 2022), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, 2022), {
+        wrapper: Wrapper,
+      });
 
       expect(result.current[0].accounts[0].startValue.computedValue).toBe(expectedSavingMar21);
       expect(result.current[0].accounts[0].endValue.computedValue).toBe(
@@ -800,7 +873,9 @@ describe(usePlanningData.name, () => {
 
     it('should extrapolate credit card payments from the previous year', () => {
       expect.assertions(2);
-      const { result } = renderHook(() => usePlanningData(testState, 2022), { wrapper: Wrapper });
+      const { result } = renderHook(() => usePlanningTableData(testState, 2022), {
+        wrapper: Wrapper,
+      });
 
       expect(result.current[1].accounts[1].startValue.computedValue).toBe(expectedCheckingApr22);
       expect(result.current[1].accounts[1].endValue.computedValue).toBe(
