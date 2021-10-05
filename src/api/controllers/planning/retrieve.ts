@@ -8,6 +8,7 @@ import {
   AccountRowIncomeJoins,
   AccountRowValueJoins,
   AccountRowWithJoins,
+  ParameterRow,
   PreviousIncomeRow,
   PreviousIncomeRowWithDeduction,
   selectPlanningAccountsWithJoins,
@@ -27,6 +28,13 @@ import {
   PlanningPastIncome,
   PlanningValue,
 } from '~api/types';
+import { TaxRate } from '~client/types/gql';
+
+const filterParameterRows = (year: number, rows: readonly ParameterRow[]): TaxRate[] =>
+  rows
+    .filter((row) => row.year === year)
+    .map<TaxRate>((row) => ({ name: row.name, value: row.value }))
+    .sort((a, b) => (a.name < b.name ? -1 : 1));
 
 export async function getPlanningParameters(
   db: DatabaseTransactionConnectionType,
@@ -39,16 +47,12 @@ export async function getPlanningParameters(
 
   const years = Array.from(
     new Set([...thresholdRows.map((row) => row.year), ...rateRows.map((row) => row.year)]),
-  );
+  ).sort();
 
   const planningParameters = years.map<PlanningParameters>((year) => ({
     year,
-    thresholds: thresholdRows
-      .filter((row) => row.year === year)
-      .map((row) => ({ name: row.name, value: row.value })),
-    rates: rateRows
-      .filter((row) => row.year === year)
-      .map((row) => ({ name: row.name, value: row.value })),
+    thresholds: filterParameterRows(year, thresholdRows),
+    rates: filterParameterRows(year, rateRows),
   }));
 
   return planningParameters;

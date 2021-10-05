@@ -889,9 +889,7 @@ describe('Planning resolver', () => {
     });
 
     describe('when called without an input', () => {
-      it('should return the current planning state', async () => {
-        expect.assertions(1);
-        await setupCreate();
+      const setupRead = async (): Promise<PlanningSyncResponse | undefined> => {
         app.authGqlClient.clearStore();
         const res = await app.authGqlClient.mutate<
           { syncPlanning: PlanningSyncResponse },
@@ -900,8 +898,15 @@ describe('Planning resolver', () => {
           mutation,
           variables: { input: null },
         });
+        return res.data?.syncPlanning;
+      };
 
-        expect(res.data?.syncPlanning).toStrictEqual({
+      it('should return the current planning state', async () => {
+        expect.assertions(1);
+        await setupCreate();
+        const res = await setupRead();
+
+        expect(res).toStrictEqual({
           __typename: 'PlanningSyncResponse',
           error: null,
           accounts: expect.arrayContaining([
@@ -920,6 +925,22 @@ describe('Planning resolver', () => {
             }),
           ]),
         });
+      });
+
+      it('should order parameters by year, ascending', async () => {
+        expect.assertions(1);
+        await setupCreate();
+        await getPool().query(sql`
+        INSERT INTO planning_rates (uid, year, name, value)
+        VALUES (${app.uid}, ${1996}, ${'My old rate name'}, ${123})
+        `);
+        const res = await setupRead();
+
+        expect(res?.parameters).toStrictEqual([
+          expect.objectContaining({ year: 1996 }),
+          expect.objectContaining({ year: 2020 }),
+          expect.objectContaining({ year: 2021 }),
+        ]);
       });
     });
   });
