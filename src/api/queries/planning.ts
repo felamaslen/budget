@@ -49,6 +49,7 @@ const selectParameterRows = (tableName: string) => async (
   const { rows } = await db.query<ParameterRow>(sql`
   SELECT * FROM ${sql.identifier([`planning_${tableName}`])}
   WHERE uid = ${uid}
+  ORDER BY name
   `);
   return rows;
 };
@@ -132,6 +133,7 @@ export async function selectPlanningAccounts(
   const { rows } = await db.query<AccountRow>(sql`
   SELECT * FROM planning_accounts
   WHERE uid = ${uid}
+  ORDER BY account
   `);
   return rows;
 }

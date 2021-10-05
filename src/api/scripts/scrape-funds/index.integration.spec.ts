@@ -1,12 +1,12 @@
 import nock, { Scope } from 'nock';
 import prompts from 'prompts';
 import sinon from 'sinon';
-import { sql } from 'slonik';
+import { DatabasePoolConnectionType, sql } from 'slonik';
 
 import { nockHLFund, nockHLShare, nockHLShareFX, nockGeneralShare } from './__tests__/nocks';
 import { run } from '.';
 import { nockCurrencies } from '~api/__tests__/nocks';
-import { getPool, withSlonik } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import * as pubsub from '~api/modules/graphql/pubsub';
 
 type TestFundPrice = {
@@ -38,7 +38,7 @@ describe('Fund scraper - integration tests', () => {
     clock.restore();
   });
 
-  const clearDb = withSlonik(async (db) => {
+  const clearDb = async (db: DatabasePoolConnectionType): Promise<void> => {
     await db.query(sql`DELETE FROM funds`);
     await db.query(sql`DELETE FROM fund_scrape`);
     await db.query(sql`DELETE FROM fund_cache_time`);
@@ -93,7 +93,7 @@ describe('Fund scraper - integration tests', () => {
       ['int4', 'date', 'float8', 'float8'],
     )}
     `);
-  });
+  };
 
   const setupNocks = async (failures: string[] = []): Promise<Record<string, Scope | Scope[]>> => ({
     currencies: nockCurrencies(failures.includes('currencies') ? 500 : 200),
@@ -104,15 +104,16 @@ describe('Fund scraper - integration tests', () => {
   });
 
   beforeEach(async () => {
-    await clearDb();
+    await getPool().connect(clearDb);
     clock.reset();
     nock.cleanAll();
     await setupNocks();
   });
 
   describe('Scraping prices', () => {
-    const getTestFundPrice = withSlonik<readonly TestFundPrice[], [number]>(async (db, fundId) => {
-      const result = await db.query<TestFundPrice>(sql`
+    const getTestFundPrice = async (fundId: number): Promise<readonly TestFundPrice[]> => {
+      const result = await getPool().connect(async (db) => {
+        const { rows } = await db.query<TestFundPrice>(sql`
       SELECT fct.cid, fct.time, fc.price
       FROM funds f
       INNER JOIN fund_scrape fs ON fs.item = f.item
@@ -120,8 +121,10 @@ describe('Fund scraper - integration tests', () => {
       INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
       WHERE f.id = ${fundId}
       `);
-      return result.rows;
-    });
+        return rows;
+      });
+      return result;
+    };
 
     beforeEach(async () => {
       process.argv = ['script', '--prices'];
@@ -283,8 +286,8 @@ describe('Fund scraper - integration tests', () => {
       },
     ];
 
-    beforeEach(
-      withSlonik(async (db) => {
+    beforeEach(async () => {
+      await getPool().connect(async (db) => {
         process.argv = ['script', '--holdings'];
 
         await db.query(sql`TRUNCATE stocks`);
@@ -318,8 +321,8 @@ describe('Fund scraper - integration tests', () => {
           '', // River & Mercantile UK Dynamic
           '', // Woodford CF
         ]);
-      }),
-    );
+      });
+    });
 
     it('should keep the already existing stock code cache', async () => {
       expect.assertions(1);

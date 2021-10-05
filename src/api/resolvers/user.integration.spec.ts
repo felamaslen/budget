@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import { sql } from 'slonik';
 
 import config from '~api/config';
-import { getPool, withSlonik } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import { Mutation, MutationLoginArgs, Query } from '~api/types';
 
@@ -60,15 +60,15 @@ describe('User resolver', () => {
     let clock: sinon.SinonFakeTimers;
     const now = new Date('2020-03-07T23:06:23Z');
 
-    beforeEach(
-      withSlonik(async (db) => {
+    beforeEach(async () => {
+      await getPool().connect(async (db) => {
         clock = sinon.useFakeTimers({
           now,
           toFake: ['Date'],
         });
         await db.query(sql`TRUNCATE ip_login_req`);
-      }),
-    );
+      });
+    });
 
     afterEach(() => {
       clock.restore();

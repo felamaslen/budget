@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import { sql } from 'slonik';
 
 import { seedData } from '~api/__tests__/fixtures';
-import { getPool, withSlonik } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import type { NetWorthLoansRow } from '~api/queries';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
@@ -50,12 +50,12 @@ describe('Net worth resolver', () => {
     app = await getTestApp();
   });
 
-  beforeEach(
-    withSlonik(async (db) => {
+  beforeEach(async () => {
+    await getPool().connect(async (db) => {
       await db.query(sql`DELETE FROM net_worth_categories`);
       await db.query(sql`DELETE FROM net_worth`);
-    }),
-  );
+    });
+  });
 
   const category: NetWorthCategoryInput = {
     type: NetWorthCategoryType.Asset,

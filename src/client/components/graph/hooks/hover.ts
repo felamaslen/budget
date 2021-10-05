@@ -96,7 +96,7 @@ function getClosest(
   return reduceClosestPoint(filteredLines, calc, position);
 }
 
-export type Props = {
+type Props = {
   lines: Line[];
   isMobile?: boolean;
   calc: Calc;

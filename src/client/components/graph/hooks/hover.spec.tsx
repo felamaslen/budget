@@ -1,6 +1,6 @@
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React, { RefObject } from 'react';
-import { useHover, HookResult, HLPoint, HoverEffect, Props } from './hover';
+import { useHover, HookResult, HLPoint, HoverEffect, HoverProps } from './hover';
 import { genPixelCompute } from '~client/components/graph/helpers';
 
 describe('Hover hook', () => {
@@ -22,7 +22,7 @@ describe('Hover hook', () => {
 
   let hookResult: RenderHookResult<unknown, HookResult | null>;
   beforeEach(() => {
-    const hookProps: Props = {
+    const hookProps: HoverProps = {
       lines: [
         {
           key: 'line-a',

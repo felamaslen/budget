@@ -4,6 +4,7 @@ import nock from 'nock';
 import { getServer } from './create-server';
 import { seedUser } from '~api/__tests__/fixtures';
 import { migrator } from '~api/migrate';
+import { getPool } from '~api/modules/db';
 
 jest.mock('ioredis', () => {
   // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
@@ -43,8 +44,9 @@ beforeAll(async () => {
   global.server = await getServer();
 });
 
-afterAll(() => {
+afterAll(async () => {
   global.server?.close();
+  await getPool().end();
 
   nock.enableNetConnect();
 });

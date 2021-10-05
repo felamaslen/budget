@@ -7,7 +7,7 @@ import yahooFinance from 'yahoo-finance';
 
 import { seedData } from '~api/__tests__/fixtures';
 import config from '~api/config';
-import { getPool, withSlonik } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   CrudResponseCreate,
@@ -74,8 +74,8 @@ describe('Funds resolver', () => {
 
   const altFundName = 'Different fund';
 
-  beforeEach(
-    withSlonik(async (db) => {
+  beforeEach(async () => {
+    await getPool().connect(async (db) => {
       await db.query(
         sql`DELETE FROM funds WHERE uid = ${app.uid} AND item = ANY(${sql.array(
           [fundInput.item, altFundName],
@@ -101,8 +101,8 @@ describe('Funds resolver', () => {
             } as unknown) as yahooFinance.Quote,
           } as Record<string, yahooFinance.Quote<'price'> | null | undefined>),
       );
-    }),
-  );
+    });
+  });
 
   describe('createFund', () => {
     const mutation = gql`

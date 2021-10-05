@@ -1,9 +1,9 @@
 import { FetchResult } from 'apollo-boost';
 import gql from 'graphql-tag';
 import { omit } from 'lodash';
-import { sql } from 'slonik';
+import { DatabasePoolConnectionType, sql } from 'slonik';
 
-import { getPool, withSlonik } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import {
   AccountRow,
   PlanningCreditCardPaymentRow,
@@ -18,17 +18,15 @@ import {
   Maybe,
   MutationSyncPlanningArgs,
   PageListStandard,
-  PlanningAccountInput,
-  PlanningCreditCardInput,
-  PlanningCreditCardPaymentInput,
-  PlanningIncomeInput,
-  PlanningParametersInput,
+  PlanningAccount,
+  PlanningCreditCardPayment,
   PlanningPastIncome,
   PlanningSyncResponse,
-  PlanningTaxRateInput,
-  PlanningTaxThresholdInput,
-  PlanningValueInput,
+  PlanningValue,
+  TaxRate,
+  TaxThreshold,
 } from '~api/types';
+import { PlanningParameters } from '~client/types/gql';
 import { omitTypeName } from '~shared/utils';
 
 describe('Planning resolver', () => {
@@ -45,7 +43,7 @@ describe('Planning resolver', () => {
   let myOtherBankId: number;
   let myCreditCardId: number;
 
-  const setupInitialData = withSlonik(async (db) => {
+  const setupInitialData = async (db: DatabasePoolConnectionType): Promise<void> => {
     await db.query(sql`DELETE FROM planning_accounts`);
     await db.query(sql`DELETE FROM planning_rates`);
     await db.query(sql`DELETE FROM planning_thresholds`);
@@ -115,11 +113,9 @@ describe('Planning resolver', () => {
       ['int4', 'text', 'int4'],
     )}
     `);
-  });
+  };
 
   describe('Mutation syncPlanning', () => {
-    beforeEach(setupInitialData);
-
     const mutation = gql`
       mutation SyncPlanning($input: PlanningSync) {
         syncPlanning(input: $input) {
@@ -263,6 +259,10 @@ describe('Planning resolver', () => {
     });
 
     const setupCreate = async (): Promise<FetchResult<{ syncPlanning: PlanningSyncResponse }>> => {
+      await getPool().connect(async (db) => {
+        await setupInitialData(db);
+      });
+
       await app.authGqlClient.clearStore();
       const res = await app.authGqlClient.mutate<
         { syncPlanning: PlanningSyncResponse },
@@ -577,7 +577,11 @@ describe('Planning resolver', () => {
       it('should return past income data', async () => {
         expect.assertions(1);
         const res = await setup();
-        expect(res.data?.syncPlanning.accounts?.[0].pastIncome).toStrictEqual([
+        expect(
+          res.data?.syncPlanning.accounts?.find(
+            (compare) => compare.netWorthSubcategoryId === myOtherBankId,
+          )?.pastIncome,
+        ).toStrictEqual([
           expect.objectContaining<PlanningPastIncome>({
             date: ('2020-04-20' as unknown) as Date,
             gross: 500000,
@@ -607,80 +611,101 @@ describe('Planning resolver', () => {
     });
 
     describe('updating existing planning data', () => {
-      const variablesUpdate = (createRes: PlanningSyncResponse): MutationSyncPlanningArgs => ({
-        input: {
-          parameters: [
-            {
-              ...omitTypeName(createRes.parameters?.[0] as PlanningParametersInput),
-              thresholds: [
-                omitTypeName(createRes.parameters?.[0].thresholds[0] as PlanningTaxThresholdInput),
-                // Note, basic allowance threshold should be removed
-                {
-                  name: 'OtherThreshold',
-                  value: 15000000,
-                },
-              ],
-              rates: [
-                {
-                  ...omitTypeName(createRes.parameters?.[0].rates[0] as PlanningTaxRateInput),
-                  value: 0.07, // I wish!
-                },
-                // Note, the higher rate should be removed
-                {
-                  name: 'IncomeTaxAdditionalRate',
-                  value: 0.45,
-                },
-              ],
-            },
-            // Note, 2021 parameters should be removed
-            {
-              year: 2024,
-              thresholds: [{ name: '2024ThresholdA', value: 123 }],
-              rates: [{ name: '2024RateA', value: 0.17 }],
-            },
-          ],
-          accounts: [
-            // Note, "Something account" should be removed
-            {
-              ...omit(omitTypeName(createRes.accounts?.[1] as PlanningAccountInput), 'pastIncome'),
-              account: 'My modified test account',
-              upperLimit: 1000000,
-              income: [
-                {
-                  ...omitTypeName(createRes.accounts?.[1]?.income[0] as PlanningIncomeInput),
-                  salary: 6600000,
-                },
-              ],
-              creditCards: [
-                {
-                  ...omitTypeName(
-                    createRes.accounts?.[1]?.creditCards[0] as PlanningCreditCardInput,
-                  ),
-                  payments: [
-                    {
-                      ...omitTypeName(
-                        createRes.accounts?.[1]?.creditCards[0]
-                          ?.payments[0] as PlanningCreditCardPaymentInput,
-                      ),
-                      value: -29273,
-                    },
-                    // Note, Nov-2020 should be removed
-                    { year: 2020, month: 12, value: -77502 },
-                  ],
-                },
-              ],
-              values: [
-                {
-                  ...omitTypeName(createRes.accounts?.[1]?.values[0] as PlanningValueInput),
-                  name: 'Some modified random expense',
-                },
-                // Note, Sep-2020 value should be removed
-                { year: 2020, month: 5, name: 'Some new value', formula: '-2000 / 395' },
-              ],
-            },
-          ],
-        },
-      });
+      const variablesUpdate = (createRes: PlanningSyncResponse): MutationSyncPlanningArgs => {
+        const parameter0 = createRes.parameters?.find(
+          (compare) => compare.year === 2020,
+        ) as PlanningParameters;
+
+        const threshold0 = parameter0.thresholds.find(
+          (compare) => compare.name === 'IncomeTaxBasicAllowance',
+        ) as TaxThreshold;
+
+        const rate0 = parameter0.rates.find(
+          (compare) => compare.name === 'IncomeTaxBasicRate',
+        ) as TaxRate;
+
+        const account1 = createRes.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        ) as PlanningAccount;
+
+        const ccPayment0 = account1.creditCards[0].payments.find(
+          (compare) => compare.month === 6,
+        ) as PlanningCreditCardPayment;
+
+        const value0 = account1.values.find(
+          (compare) => compare.name === 'Some random expense',
+        ) as PlanningValue;
+
+        return {
+          input: {
+            parameters: [
+              {
+                ...omitTypeName(parameter0),
+                thresholds: [
+                  omitTypeName(threshold0),
+                  // Note, basic threshold (2020) should be removed
+                  {
+                    name: 'OtherThreshold',
+                    value: 15000000,
+                  },
+                ],
+                rates: [
+                  {
+                    ...omitTypeName(rate0),
+                    value: 0.07, // I wish!
+                  },
+                  // Note, the higher rate should be removed
+                  {
+                    name: 'IncomeTaxAdditionalRate',
+                    value: 0.45,
+                  },
+                ],
+              },
+              // Note, 2021 parameters should be removed
+              {
+                year: 2024,
+                thresholds: [{ name: '2024ThresholdA', value: 123 }],
+                rates: [{ name: '2024RateA', value: 0.17 }],
+              },
+            ],
+            accounts: [
+              // Note, "Something account" should be removed
+              {
+                ...omit(omitTypeName(account1), 'pastIncome'),
+                account: 'My modified test account',
+                upperLimit: 1000000,
+                income: [
+                  {
+                    ...omitTypeName(account1.income[0]),
+                    salary: 6600000,
+                  },
+                ],
+                creditCards: [
+                  {
+                    ...omitTypeName(account1.creditCards[0]),
+                    payments: [
+                      {
+                        ...omitTypeName(ccPayment0),
+                        value: -29273,
+                      },
+                      // Note, Nov-2020 should be removed
+                      { year: 2020, month: 12, value: -77502 },
+                    ],
+                  },
+                ],
+                values: [
+                  {
+                    ...omitTypeName(value0),
+                    name: 'Some modified random expense',
+                  },
+                  // Note, Sep-2020 value should be removed
+                  { year: 2020, month: 5, name: 'Some new value', formula: '-2000 / 395' },
+                ],
+              },
+            ],
+          },
+        };
+      };
 
       const setupUpdate = async (
         createRes: PlanningSyncResponse,
@@ -723,7 +748,7 @@ describe('Planning resolver', () => {
             uid: app.uid,
           },
           {
-            ...rowsAfterCreate.rows[1],
+            ...rowsAfterCreate.rows[0],
           },
           {
             id: expect.any(Number),

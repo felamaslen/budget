@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import { sql } from 'slonik';
-import { getPool, withSlonik } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   Query,
@@ -14,8 +14,8 @@ import {
 
 describe('Search resolvers', () => {
   let app: App;
-  beforeAll(
-    withSlonik(async (db) => {
+  beforeAll(async () => {
+    await getPool().connect(async (db) => {
       app = await getTestApp();
 
       await db.query(
@@ -53,8 +53,8 @@ describe('Search resolvers', () => {
         ['page_category', 'int4', 'date', 'text', 'text', 'int4', 'text'],
       )}
       `);
-    }),
-  );
+    });
+  });
 
   const search = gql`
     query SearchSuggestions(

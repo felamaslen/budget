@@ -3,7 +3,7 @@ import { sql } from 'slonik';
 import { selectSinglePageListSummary } from './list-cost-summary';
 
 import { seedData, seedUser } from '~api/__tests__/fixtures';
-import { getPool, withSlonik } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import { PageListStandard } from '~api/types';
 
 describe('List cost summary queries', () => {
@@ -14,11 +14,9 @@ describe('List cost summary queries', () => {
     await seedData(uid);
   });
 
-  afterAll(
-    withSlonik(async (db) => {
-      await db.query(sql`DELETE FROM users WHERE uid = ${uid}`);
-    }),
-  );
+  afterAll(async () => {
+    await getPool().query(sql`DELETE FROM users WHERE uid = ${uid}`);
+  });
 
   describe(selectSinglePageListSummary.name, () => {
     const dates: Date[] = [new Date('2018-03-31'), new Date('2018-04-30')];
