@@ -20,16 +20,20 @@ kubectl -n=$NAMESPACE apply -f ./migrate_with_image.yml
 # wait for pod to start running
 pod_running=0
 while [ $pod_running -eq 0 ]; do
-  pod_status=$(kubectl \
+  pod=$(kubectl \
     get pods \
     -n=$NAMESPACE \
     -lapp=$JOB_NAME \
-    -o json \
-    | jq '.items[0].status.conditions[] | select(.type == "ContainersReady" and .status == "True")')
+    -o json)
 
-  if [ ! -z "$pod_status" ]; then
-    pod_running=1
+  if [ ! -z "$pod" ]; then
+    pod_status=$(echo "$pod" | jq '.items[0].status.conditions[] | select(.type == "ContainersReady" and .status == "True")')
+
+    if [ ! -z "$pod_status" ]; then
+      pod_running=1
+    fi
   fi
+
   if [ $pod_running -eq 0 ]; then
     sleep 1
   fi
