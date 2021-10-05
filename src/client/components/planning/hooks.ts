@@ -58,7 +58,7 @@ const getCompareState = (state: State): State => ({
 export const isStateEqual = (s0: State, s1: State): boolean =>
   isEqual(getCompareState(s0), getCompareState(s1));
 
-const processSyncedState = (result: SyncPlanningMutation | undefined): State =>
+const processSyncedState = (result: SyncPlanningMutation): State =>
   omitDeep(
     {
       accounts: result?.syncPlanning?.accounts ?? [],
@@ -107,7 +107,7 @@ export function usePlanning(): {
   }, [syncDebounce, canSync, state]);
 
   useEffect(() => {
-    if (data) {
+    if (data && !data.syncPlanning?.error) {
       setState(processSyncedState(data));
       setSynced(true);
     }

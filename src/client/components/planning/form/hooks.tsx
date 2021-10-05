@@ -116,7 +116,7 @@ export function useTransactionFormElements(
   );
   const onUpdate = useCallback(() => {
     const parsedValue = parseRawValue(rawValue);
-    if (!(rawName && parsedValue)) {
+    if (!(rawName && (parsedValue?.value || parsedValue?.formula))) {
       return;
     }
     onChange({
