@@ -58,6 +58,7 @@ export type PlanningContextState = {
   local: LocalState;
   isSynced: boolean;
   isLoading: boolean;
+  error: string | null;
   table: PlanningData[];
 };
 

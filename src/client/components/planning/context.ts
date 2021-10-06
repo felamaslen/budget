@@ -25,6 +25,7 @@ export const PlanningContext = createContext<PlanningContextState>({
   local: initialLocalState,
   isSynced: true,
   isLoading: true,
+  error: null,
   table: [],
 });
 

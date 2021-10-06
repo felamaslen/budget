@@ -1,118 +1,27 @@
 import { renderHook } from '@testing-library/react-hooks';
-import { endOfMonth } from 'date-fns';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createMockStore from 'redux-mock-store';
 import numericHash from 'string-hash';
 
-import { StandardRates, StandardThresholds } from './constants';
-import { PlanningContext } from './context';
-import { isStateEqual, usePlanningTableData, usePlanningMonths } from './hooks';
-import type { AccountValue } from './month-end';
-import {
+import { StandardRates, StandardThresholds } from '../constants';
+import { PlanningContext } from '../context';
+import type { AccountValue } from '../month-end';
+import type {
   AccountCreditCardPayment,
   AccountTransaction,
   PlanningContextState,
   PlanningData,
-  PlanningMonth,
   State,
-} from './types';
+} from '../types';
+
+import { usePlanningTableData } from './table';
 
 import { TodayProvider } from '~client/hooks';
 import type { State as ReduxState } from '~client/reducers';
 import { testState as testReduxState } from '~client/test-data/state';
 import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
 import { NetWorthEntryNative } from '~client/types';
-
-describe('isStateEqual', () => {
-  const compareState: State = {
-    accounts: [
-      {
-        netWorthSubcategoryId: 700,
-        account: 'my-account',
-        values: [{ id: 100, value: 364, formula: null, year: 2021, month: 4, name: 'Some name' }],
-        creditCards: [
-          {
-            id: 200,
-            netWorthSubcategoryId: 12,
-            payments: [{ id: 201, value: -2766, year: 2021, month: 7 }],
-          },
-        ],
-        income: [
-          {
-            id: 600,
-            startDate: '2021-01-02',
-            endDate: '2022-03-10',
-            taxCode: '1257L',
-            salary: 8500000,
-            pensionContrib: 0.03,
-            studentLoan: false,
-          },
-        ],
-        pastIncome: [
-          { date: '2020-12-10', gross: 6600000, deductions: [{ name: 'Tax', value: -125039 }] },
-        ],
-      },
-    ],
-    parameters: [
-      {
-        year: 2021,
-        rates: [{ name: 'My rate', value: 0.452 }],
-        thresholds: [{ name: 'My threshold', value: 89002 }],
-      },
-    ],
-  };
-
-  describe('when all the values are the same', () => {
-    it('should return true', () => {
-      expect.assertions(1);
-      expect(isStateEqual(compareState, { ...compareState })).toBe(true);
-    });
-  });
-
-  describe('when a value changed from undefined to null', () => {
-    const stateWithUndefined: State = {
-      ...compareState,
-      accounts: [
-        {
-          ...compareState.accounts[0],
-          values: [
-            {
-              ...compareState.accounts[0].values[0],
-              formula: undefined,
-            },
-          ],
-        },
-      ],
-    };
-
-    it('should return true', () => {
-      expect.assertions(1);
-      expect(isStateEqual(compareState, stateWithUndefined)).toBe(true);
-    });
-  });
-});
-
-describe(usePlanningMonths.name, () => {
-  it('should return a list of planning months, corresponding to a financial year', () => {
-    expect.assertions(1);
-    const { result } = renderHook(() => usePlanningMonths(2021));
-    expect(result.current).toStrictEqual<PlanningMonth[]>([
-      { year: 2021, month: 3, date: endOfMonth(new Date('2021-04-01')) },
-      { year: 2021, month: 4, date: endOfMonth(new Date('2021-05-01')) },
-      { year: 2021, month: 5, date: endOfMonth(new Date('2021-06-01')) },
-      { year: 2021, month: 6, date: endOfMonth(new Date('2021-07-01')) },
-      { year: 2021, month: 7, date: endOfMonth(new Date('2021-08-01')) },
-      { year: 2021, month: 8, date: endOfMonth(new Date('2021-09-01')) },
-      { year: 2021, month: 9, date: endOfMonth(new Date('2021-10-01')) },
-      { year: 2021, month: 10, date: endOfMonth(new Date('2021-11-01')) },
-      { year: 2021, month: 11, date: endOfMonth(new Date('2021-12-01')) },
-      { year: 2021, month: 0, date: endOfMonth(new Date('2022-01-01')) },
-      { year: 2021, month: 1, date: endOfMonth(new Date('2022-02-01')) },
-      { year: 2021, month: 2, date: endOfMonth(new Date('2022-03-01')) },
-    ]);
-  });
-});
 
 describe(usePlanningTableData.name, () => {
   const now = new Date('2021-09-10T15:03:11+0100');
@@ -254,6 +163,7 @@ describe(usePlanningTableData.name, () => {
     },
     isSynced: true,
     isLoading: false,
+    error: null,
     table: [],
   };
 

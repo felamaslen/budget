@@ -1,4 +1,4 @@
-import { css } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import { rem } from 'polished';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -14,10 +14,11 @@ import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { useToday } from '~client/hooks';
 import { getStartDate } from '~client/selectors';
 
-const spinnerOverride = css`
+const spinnerOverride = (showSpinner = false): SerializedStyles => css`
   position: absolute;
   margin: ${rem(4)};
   right: 0;
+  visibility: ${showSpinner ? 'visible' : 'hidden'};
 `;
 
 export const Status: React.FC = () => {
@@ -25,7 +26,7 @@ export const Status: React.FC = () => {
   const startFinancialYear = getFinancialYear(startDate);
   const today = useToday();
 
-  const { local, isSynced, isLoading } = usePlanningContext();
+  const { local, isSynced, isLoading, error } = usePlanningContext();
   const { local: dispatchLocal } = usePlanningDispatch();
   const setYear = useCallback((year: number) => dispatchLocal((last) => ({ ...last, year })), [
     dispatchLocal,
@@ -52,7 +53,8 @@ export const Status: React.FC = () => {
   return (
     <Styled.StatusBar>
       <FormFieldSelect options={yearOptions} value={local.year} onChange={setYear} />
-      {showSpinner && <DotLoader size={18} css={spinnerOverride} />}
+      {error ? <Styled.StatusError>{error}</Styled.StatusError> : null}
+      <DotLoader size={18} css={spinnerOverride(showSpinner)} />
     </Styled.StatusBar>
   );
 };

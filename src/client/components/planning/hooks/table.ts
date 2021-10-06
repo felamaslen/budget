@@ -1,18 +1,12 @@
-import { useDebounceCallback } from '@react-hook/debounce';
 import addMonths from 'date-fns/addMonths';
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths';
 import endOfMonth from 'date-fns/endOfMonth';
-import getMonth from 'date-fns/getMonth';
-import getYear from 'date-fns/getYear';
 import isAfter from 'date-fns/isAfter';
 import isSameMonth from 'date-fns/isSameMonth';
-import isEqual from 'lodash/isEqual';
-import omit from 'lodash/omit';
-import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { StandardRates, StandardThresholds, startMonth } from './constants';
-import { initialState } from './context';
+import { StandardRates, StandardThresholds, startMonth } from '../constants';
 import type {
   CreditCardRecord,
   IncomeRates,
@@ -20,141 +14,28 @@ import type {
   PlanningData,
   PlanningMonth,
   State,
-} from './types';
+} from '../types';
 import {
+  getCreditCardRecords,
   getCreditCardsForAccountAtMonth,
-  getDateFromYearAndMonth,
-  getFinancialYearFromYearMonth,
   getTransactionsForAccountAtMonth,
-  mapPlanningMonth,
-} from './utils';
+} from '../utils';
 
-import { Average } from '~client/constants';
+import { useCreditCards } from './credit';
+import { fillMonths, usePlanningMonths } from './months';
+import { filterNetWorthByMonth } from './utils';
+
 import { CREATE_ID } from '~client/constants/data';
 import { useToday } from '~client/hooks';
-import { arrayAverage } from '~client/modules/data';
-import { getEntries, getSubcategories } from '~client/selectors';
+import { getEntries } from '~client/selectors';
 import type { NetWorthEntryNative } from '~client/types';
-import {
-  NetWorthSubcategory,
-  PlanningSync,
-  PlanningTaxRateInput,
-  PlanningTaxThresholdInput,
-  SyncPlanningMutation,
-  useSyncPlanningMutation,
-} from '~client/types/gql';
-import { coalesceKeys, omitDeep } from '~shared/utils';
-
-const getCompareState = (state: State): State => ({
-  parameters: state.parameters,
-  accounts: state.accounts.map<State['accounts'][0]>((account) => ({
-    ...omitDeep(account, 'id'),
-    values: account.values.map((row) =>
-      coalesceKeys(omit(row, 'id'), 'value', 'formula', 'transferToAccountId'),
-    ),
-  })),
-});
-
-export const isStateEqual = (s0: State, s1: State): boolean =>
-  isEqual(getCompareState(s0), getCompareState(s1));
-
-const processSyncedState = (result: SyncPlanningMutation): State =>
-  omitDeep(
-    {
-      accounts: result?.syncPlanning?.accounts ?? [],
-      parameters: result?.syncPlanning?.parameters ?? [],
-    },
-    '__typename',
-  );
-
-const processLocalState = (state: State): PlanningSync => ({
-  accounts: state.accounts.map((row) => omit(row, 'pastIncome')),
-  parameters: state.parameters,
-});
-
-export function usePlanning(): {
-  state: State;
-  setState: Dispatch<SetStateAction<State>>;
-  isSynced: boolean;
-  isLoading: boolean;
-} {
-  const [state, setState] = useState<State>(initialState);
-  const [isSynced, setSynced] = useState<boolean>(true);
-
-  const [{ data, fetching, error }, sync] = useSyncPlanningMutation();
-  const syncDebounce = useDebounceCallback(sync, 300);
-
-  useEffect(() => {
-    sync();
-  }, [sync]);
-
-  const lastSyncedState = useRef<State>(state);
-  const hasLoaded = useRef<boolean>(false);
-  const canSync = !fetching && !error;
-
-  useEffect(() => {
-    if (canSync && !isStateEqual(state, lastSyncedState.current)) {
-      lastSyncedState.current = state;
-      if (hasLoaded.current) {
-        setSynced(false);
-        syncDebounce({
-          input: processLocalState(state),
-        });
-      } else {
-        hasLoaded.current = true;
-      }
-    }
-  }, [syncDebounce, canSync, state]);
-
-  useEffect(() => {
-    if (data && !data.syncPlanning?.error) {
-      setState(processSyncedState(data));
-      setSynced(true);
-    }
-  }, [data]);
-
-  return {
-    state,
-    setState,
-    isSynced,
-    isLoading: fetching,
-  };
-}
-
-function filterNetWorthByMonth(
-  entries: NetWorthEntryNative[],
-  date: Date,
-): NetWorthEntryNative | undefined {
-  return entries.find((entry) => isSameMonth(entry.date, date));
-}
+import type { PlanningTaxRateInput, PlanningTaxThresholdInput } from '~client/types/gql';
 
 function getNetWorthValueForSubcategoryId(
   entry: NetWorthEntryNative | undefined,
   subcategoryId: number,
 ): number | undefined {
   return entry?.values.find((value) => value.subcategory === subcategoryId)?.simple ?? undefined;
-}
-
-export function useRecordedMonthNetWorth(date: Date): NetWorthEntryNative | undefined {
-  const entries = useSelector(getEntries);
-  return filterNetWorthByMonth(entries, date);
-}
-
-function fillMonths(startDate: Date, numMonths: number): PlanningMonth[] {
-  return Array(numMonths)
-    .fill(0)
-    .map((_, index) => {
-      const date = endOfMonth(addMonths(startDate, index));
-      const month = getMonth(date);
-      return { date, year: getFinancialYearFromYearMonth(getYear(date), month), month };
-    });
-}
-
-export function usePlanningMonths(year: number): PlanningMonth[] {
-  return useMemo<PlanningMonth[]>(() => {
-    const atYear = getDateFromYearAndMonth(year, startMonth);
-    return fillMonths(atYear, 12);
-  }, [year]);
 }
 
 type ParametersForYear = {
@@ -209,51 +90,6 @@ function useIncomeRates(state: State): Record<number, IncomeRates> {
       };
     }, {});
   }, [state]);
-}
-
-export function useCreditCards(): NetWorthSubcategory[] {
-  const netWorthSubcategories = useSelector(getSubcategories);
-  return useMemo(() => netWorthSubcategories.filter((compare) => !!compare.hasCreditLimit), [
-    netWorthSubcategories,
-  ]);
-}
-
-function getCreditCardRecords(
-  accounts: State['accounts'],
-  creditCards: NetWorthSubcategory[],
-): CreditCardRecord[] {
-  return creditCards.map<CreditCardRecord>((card) => ({
-    netWorthSubcategoryId: card.id,
-    name: card.subcategory,
-    lastRecordedPayment: mapPlanningMonth(
-      accounts.reduce<Pick<PlanningMonth, 'year' | 'month'>>(
-        (last, account) =>
-          account.creditCards
-            .find((compare) => compare.netWorthSubcategoryId === card.id)
-            ?.payments.reduce<Pick<PlanningMonth, 'year' | 'month'>>(
-              (next, payment) =>
-                payment.year > next.year ||
-                (payment.year === next.year && payment.month > next.month)
-                  ? { year: payment.year, month: payment.month }
-                  : next,
-              last,
-            ) ?? last,
-        { year: 0, month: 0 },
-      ),
-    ),
-    averageRecordedPayment:
-      arrayAverage(
-        accounts.reduce<number[]>(
-          (last, account) =>
-            (
-              account.creditCards.find((compare) => compare.netWorthSubcategoryId === card.id)
-                ?.payments ?? []
-            ).reduce<number[]>((next, payment) => [...next, payment.value], last),
-          [],
-        ),
-        Average.Median,
-      ) || undefined,
-  }));
 }
 
 const getAccountReducer = (

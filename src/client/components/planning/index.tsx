@@ -15,7 +15,7 @@ import { useIsMobile } from '~client/hooks';
 const PagePlanning: React.FC<RouteComponentProps> = () => {
   const isMobile = useIsMobile();
 
-  const { state, setState, isSynced, isLoading } = usePlanning();
+  const { state, setState, isSynced, isLoading, error } = usePlanning();
   const [localState, setLocalState] = useState<LocalState>(initialLocalState);
 
   const tableData = usePlanningTableData(state, localState.year);
@@ -25,10 +25,11 @@ const PagePlanning: React.FC<RouteComponentProps> = () => {
       state,
       isSynced,
       isLoading,
+      error,
       local: localState,
       table: tableData,
     }),
-    [state, localState, isSynced, isLoading, tableData],
+    [state, localState, isSynced, isLoading, error, tableData],
   );
 
   const dispatch = useMemo<PlanningDispatch>(
