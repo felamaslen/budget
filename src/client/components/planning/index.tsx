@@ -4,6 +4,7 @@ import type { RouteComponentProps } from 'react-router';
 import { initialLocalState, PlanningContext, PlanningContextDispatch } from './context';
 import { usePlanning, usePlanningTableData } from './hooks';
 import { PlanningOverview } from './overview/overview';
+import { PlanningPieChart } from './pie/pie';
 import { Sidebar } from './sidebar';
 import { Status } from './status/status';
 import * as Styled from './styles';
@@ -48,6 +49,7 @@ const PagePlanning: React.FC<RouteComponentProps> = () => {
             <Table />
             {!isMobile && <PlanningOverview />}
             <Sidebar />
+            <PlanningPieChart />
           </Styled.Planning>
           <Status />
         </Styled.PlanningWrapper>
