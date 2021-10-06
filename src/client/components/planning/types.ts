@@ -44,18 +44,11 @@ export type State = OptionalDeep<
   'id'
 >;
 
-export type LocalState = {
-  year: number;
-};
-
-export type PlanningDispatch = {
-  local: Dispatch<SetStateAction<LocalState>>;
-  sync: Dispatch<SetStateAction<State>>;
-};
+export type PlanningDispatch = Dispatch<SetStateAction<State>>;
 
 export type PlanningContextState = {
   state: State;
-  local: LocalState;
+  year: number;
   isSynced: boolean;
   isLoading: boolean;
   error: string | null;

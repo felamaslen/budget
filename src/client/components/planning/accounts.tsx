@@ -52,7 +52,7 @@ export const AddAccount: React.FC = () => {
   const [upperLimit, setUpperLimit] = useState<number | undefined>();
   const [lowerLimit, setlowerLimit] = useState<number | undefined>();
 
-  const { sync } = usePlanningDispatch();
+  const sync = usePlanningDispatch();
 
   const onAdd = useCallback(() => {
     if (!(subcategoryId && account)) {
@@ -125,7 +125,7 @@ type PropsAccountEditForm = {
 };
 
 const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
-  const { sync } = usePlanningDispatch();
+  const sync = usePlanningDispatch();
   const [tempAccount, setTempAccount] = useState<Account>(account);
   useEffect(() => {
     setTempAccount(account);

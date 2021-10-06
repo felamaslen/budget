@@ -28,10 +28,10 @@ const standardThresholds: Pick<PropsThresholdForm, 'label' | 'name'>[] = [
 ];
 
 export const Rates: React.FC = () => {
-  const { local, state } = usePlanningContext();
-  const { sync } = usePlanningDispatch();
+  const { year, state } = usePlanningContext();
+  const sync = usePlanningDispatch();
 
-  const parameters = state.parameters.find((compare) => compare.year === local.year);
+  const parameters = state.parameters.find((compare) => compare.year === year);
 
   const rates = parameters?.rates ?? [];
   const thresholds = parameters?.thresholds ?? [];
@@ -39,14 +39,14 @@ export const Rates: React.FC = () => {
   const setParam = useCallback(
     (key: 'rates' | 'thresholds') => (name: string, value = 0): void => {
       sync((last) => {
-        const parametersForYear = last.parameters.find((compare) => compare.year === local.year);
+        const parametersForYear = last.parameters.find((compare) => compare.year === year);
         if (!parametersForYear) {
           return {
             ...last,
             parameters: [
               ...last.parameters,
               {
-                year: local.year,
+                year,
                 rates: key === 'rates' ? [{ name, value }] : [],
                 thresholds: key === 'thresholds' ? [{ name, value }] : [],
               },
@@ -58,7 +58,7 @@ export const Rates: React.FC = () => {
             ...last,
             parameters: replaceAtIndex(
               last.parameters,
-              last.parameters.findIndex((compare) => compare.year === local.year),
+              last.parameters.findIndex((compare) => compare.year === year),
               (prevParam) => ({
                 ...prevParam,
                 [key]: [...prevParam[key], { name, value }],
@@ -70,7 +70,7 @@ export const Rates: React.FC = () => {
           ...last,
           parameters: replaceAtIndex(
             last.parameters,
-            last.parameters.findIndex((compare) => compare.year === local.year),
+            last.parameters.findIndex((compare) => compare.year === year),
             (prevParam) => ({
               ...prevParam,
               [key]: replaceAtIndex(
@@ -86,7 +86,7 @@ export const Rates: React.FC = () => {
         };
       });
     },
-    [sync, local.year],
+    [sync, year],
   );
 
   const setRate = useMemo(() => setParam('rates'), [setParam]);

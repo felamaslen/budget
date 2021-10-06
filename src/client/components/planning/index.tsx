@@ -1,48 +1,45 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { RouteComponentProps } from 'react-router';
 
-import { initialLocalState, PlanningContext, PlanningContextDispatch } from './context';
-import { usePlanning, usePlanningTableData } from './hooks';
+import { PlanningContext, PlanningContextDispatch } from './context';
+import { usePlanning, usePlanningTableData, useYear } from './hooks';
 import { PlanningOverview } from './overview/overview';
 import { PlanningPieChart } from './pie/pie';
 import { Sidebar } from './sidebar';
 import { Status } from './status/status';
 import * as Styled from './styles';
 import { Table } from './table';
-import type { LocalState, PlanningContextState, PlanningDispatch } from './types';
+import type { PlanningContextState } from './types';
 
 import { useIsMobile } from '~client/hooks';
 
-const PagePlanning: React.FC<RouteComponentProps> = () => {
+const PagePlanning: React.FC<RouteComponentProps<{ year?: string }>> = ({ history, match }) => {
   const isMobile = useIsMobile();
 
   const { state, setState, isSynced, isLoading, error } = usePlanning();
-  const [localState, setLocalState] = useState<LocalState>(initialLocalState);
+  const year = useYear(match.params.year);
+  useEffect(() => {
+    if (!match.params.year) {
+      history.replace(`/planning/${year}`);
+    }
+  }, [history, match.params.year, year]);
 
-  const tableData = usePlanningTableData(state, localState.year);
+  const tableData = usePlanningTableData(state, year);
 
   const context = useMemo<PlanningContextState>(
     () => ({
       state,
+      year,
       isSynced,
       isLoading,
       error,
-      local: localState,
       table: tableData,
     }),
-    [state, localState, isSynced, isLoading, error, tableData],
-  );
-
-  const dispatch = useMemo<PlanningDispatch>(
-    () => ({
-      local: setLocalState,
-      sync: setState,
-    }),
-    [setLocalState, setState],
+    [state, year, isSynced, isLoading, error, tableData],
   );
 
   return (
-    <PlanningContextDispatch.Provider value={dispatch}>
+    <PlanningContextDispatch.Provider value={setState}>
       <PlanningContext.Provider value={context}>
         <Styled.PlanningWrapper>
           <Styled.Planning>

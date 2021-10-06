@@ -165,9 +165,7 @@ describe(usePlanningTableData.name, () => {
 
   const testContext: PlanningContextState = {
     state: testState,
-    local: {
-      year: 2020,
-    },
+    year: 2020,
     isSynced: true,
     isLoading: false,
     error: null,

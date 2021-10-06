@@ -1,18 +1,13 @@
 import { css, SerializedStyles } from '@emotion/react';
 import { rem } from 'polished';
-import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import DotLoader from 'react-spinners/DotLoader';
 
-import { numYearsToPlan } from '../constants';
-import { usePlanningContext, usePlanningDispatch } from '../context';
-import { getFinancialYear } from '../utils';
+import { usePlanningContext } from '../context';
+import { useYearOptions } from '../hooks/years';
 
 import * as Styled from './styles';
-
-import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
-import { useToday } from '~client/hooks';
-import { getStartDate } from '~client/selectors';
 
 const spinnerOverride = (showSpinner = false): SerializedStyles => css`
   position: absolute;
@@ -22,39 +17,24 @@ const spinnerOverride = (showSpinner = false): SerializedStyles => css`
 `;
 
 export const Status: React.FC = () => {
-  const startDate = useSelector(getStartDate);
-  const startFinancialYear = getFinancialYear(startDate);
-  const today = useToday();
-
-  const { local, isSynced, isLoading, error } = usePlanningContext();
-  const { local: dispatchLocal } = usePlanningDispatch();
-  const setYear = useCallback((year: number) => dispatchLocal((last) => ({ ...last, year })), [
-    dispatchLocal,
-  ]);
+  const { year, isSynced, isLoading, error } = usePlanningContext();
   const showSpinner = !isSynced || isLoading;
 
-  const years = useMemo<number[]>(
-    () =>
-      Array(Math.max(0, getFinancialYear(today) - startFinancialYear + 1 + numYearsToPlan))
-        .fill(0)
-        .map((_, index) => startFinancialYear + index),
-    [startFinancialYear, today],
-  );
-
-  const yearOptions = useMemo<SelectOptions<number>>(
-    () =>
-      years.map((financialYear) => ({
-        internal: financialYear,
-        external: `FY ${financialYear - 2000}/${financialYear - 2000 + 1}`,
-      })),
-    [years],
-  );
+  const yearOptions = useYearOptions();
 
   return (
     <Styled.StatusBar>
-      <FormFieldSelect options={yearOptions} value={local.year} onChange={setYear} />
+      <Styled.YearButtons>
+        {yearOptions.map((financialYear) => (
+          <Styled.YearButton key={financialYear} isActive={financialYear === year}>
+            <Link to={`/planning/${financialYear}`}>
+              FY {financialYear - 2000}/{financialYear - 2000 + 1}
+            </Link>
+          </Styled.YearButton>
+        ))}
+      </Styled.YearButtons>
       {error ? <Styled.StatusError>{error}</Styled.StatusError> : null}
-      <DotLoader size={18} css={spinnerOverride(showSpinner)} />
+      {showSpinner && <DotLoader size={18} css={spinnerOverride(showSpinner)} />}
     </Styled.StatusBar>
   );
 };

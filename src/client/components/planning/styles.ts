@@ -40,7 +40,7 @@ export const Button = styled(ButtonShared)`
 export const PlanningWrapper = styled.div`
   display: grid;
   grid-template-rows: auto ${rem(24)};
-  grid-template-columns: auto;
+  grid-template-columns: 100%;
   width: 100%;
 `;
 
