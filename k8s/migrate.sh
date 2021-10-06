@@ -26,12 +26,12 @@ while [ $pod_running -eq 0 ]; do
     -lapp=$JOB_NAME \
     -o json)
 
-  if [ ! -z "$pod" ] && [ "$pod" != "null" ]; then
-    pod_status=$(echo "$pod" | jq '.items[0].status.conditions[] | select(.type == "ContainersReady" and .status == "True")')
+  set +e
+  pod_status=$(echo "$pod" | jq '.items[0].status.conditions[] | select(.type == "ContainersReady" and .status == "True")' 2>/dev/null)
+  set -e
 
-    if [ ! -z "$pod_status" ]; then
-      pod_running=1
-    fi
+  if [ ! -z "$pod_status" ]; then
+    pod_running=1
   fi
 
   if [ $pod_running -eq 0 ]; then
