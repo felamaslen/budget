@@ -128,6 +128,13 @@ describe(usePlanningTableData.name, () => {
             name: 'Pension (SIPP)',
             value: -50000,
           },
+          {
+            id: numericHash('value-4'),
+            year: 2021,
+            month: 7,
+            name: 'My zero value',
+            value: 0,
+          },
         ],
         income: [
           {
@@ -197,7 +204,7 @@ describe(usePlanningTableData.name, () => {
     expect(result.current[1].numRows).toMatchInlineSnapshot(`3`); // May
     expect(result.current[2].numRows).toMatchInlineSnapshot(`3`); // June
     expect(result.current[3].numRows).toMatchInlineSnapshot(`4`); // July
-    expect(result.current[4].numRows).toMatchInlineSnapshot(`3`); // August
+    expect(result.current[4].numRows).toMatchInlineSnapshot(`4`); // August
     expect(result.current[5].numRows).toMatchInlineSnapshot(`7`); // September
     expect(result.current[6].numRows).toMatchInlineSnapshot(`8`); // October
     expect(result.current[7].numRows).toMatchInlineSnapshot(`7`); // November
@@ -329,6 +336,27 @@ describe(usePlanningTableData.name, () => {
             computedValue: -105603,
             isComputed: true,
             isVerified: true,
+          }),
+        ]),
+      );
+    });
+
+    it('should include manual transactions, including those with zero value', () => {
+      expect.assertions(1);
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
+      expect(result.current[4].accounts[1].transactions).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining<AccountTransaction>({
+            id: numericHash('value-3'),
+            name: 'Pension (SIPP)',
+            computedValue: -50000,
+          }),
+          expect.objectContaining<AccountTransaction>({
+            id: numericHash('value-4'),
+            name: 'My zero value',
+            computedValue: 0,
           }),
         ]),
       );

@@ -40,6 +40,8 @@ export type TransactionsWithTaxRelief = {
   taxRelief: number;
 };
 
+const filterOutZero = (transaction: AccountTransaction): boolean => transaction.computedValue !== 0;
+
 function getPastIncomeTransactionsForAccountAtMonth(
   rates: IncomeRates | undefined,
   date: Date,
@@ -349,10 +351,12 @@ export function getTransactionsForAccountAtMonth(
   );
 
   const transactions: AccountTransaction[] = [
-    ...income.transactions,
+    ...income.transactions.filter(filterOutZero),
     ...manualTransactions,
-    ...getTransferTransactionsForAccountAtMonth(year, month, isPast, accounts, index),
-  ].filter((group) => group.computedValue !== 0);
+    ...getTransferTransactionsForAccountAtMonth(year, month, isPast, accounts, index).filter(
+      filterOutZero,
+    ),
+  ];
 
   return { transactions, taxRelief: income.taxRelief };
 }
