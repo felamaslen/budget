@@ -165,7 +165,7 @@ export function useTransactionForm(
   onRemoveTransaction: OnRemoveTransaction;
   onChangeCreditCard: OnChangeCreditCard;
 } {
-  const { sync } = usePlanningDispatch();
+  const sync = usePlanningDispatch();
 
   const onAddTransaction = useCallback<OnAddTransaction>(
     (netWorthSubcategoryId, newValue) => {

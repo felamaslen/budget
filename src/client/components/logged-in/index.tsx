@@ -33,7 +33,7 @@ const PageHoliday = loadable(() => import('~client/components/page-list/holiday'
 const PageSocial = loadable(() => import('~client/components/page-list/social'), lazyOptions);
 
 const routes: RouteObject[] = [
-  { key: 'planning', component: hot(PagePlanning) },
+  { key: 'planning', path: '/planning/:year?', component: hot(PagePlanning) },
   {
     key: 'analysis',
     path: '/analysis/:groupBy?/:period?/:page?',

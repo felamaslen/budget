@@ -37,15 +37,28 @@ export const Button = styled(ButtonShared)`
   }
 `;
 
-export const PlanningWrapper = styled(FlexColumn)`
+export const PlanningWrapper = styled.div`
+  display: grid;
+  grid-template-rows: auto ${rem(24)};
+  grid-template-columns: 100%;
   width: 100%;
 `;
 
-export const Planning = styled(Flex)`
+export const Planning = styled.div`
   background: ${colors.white};
+  display: grid;
+  grid-column: 1;
+  grid-row: 1;
+  grid-template-rows: 100%;
+  grid-template-columns: auto;
+  height: 100%;
   overflow: hidden;
-  min-height: 0;
   width: 100%;
+
+  ${breakpoint(breakpoints.mobile)} {
+    grid-template-rows: 1fr ${rem(300)};
+    grid-template-columns: auto ${rem(240)} auto;
+  }
 `;
 
 const sidebarWidthMobile = 240;
@@ -56,7 +69,6 @@ export const Sidebar = styled(FlexColumn)<{
   background: ${colors.light.mediumLight};
   border-left: 1px solid ${colors.light.dark};
   border-bottom: 1px solid ${colors.light.dark};
-  flex: 0 0 ${rem(240)};
   max-height: 100%;
   overflow-x: hidden;
   padding: 0 ${rem(4)};
@@ -75,6 +87,8 @@ export const Sidebar = styled(FlexColumn)<{
   }
 
   ${breakpoint(breakpoints.mobile)} {
+    grid-column: 3;
+    grid-row: 1;
     padding-left: 0;
     position: static;
     transition: none;
@@ -109,11 +123,15 @@ export const SidebarSection = styled(FlexColumn)`
 
 export const Table = styled.div`
   display: grid;
-  flex: 1;
   font-size: ${rem(13)};
   grid-template-columns: ${rem(lineHeight)} auto;
   grid-template-rows: 100%;
   min-width: 0;
+
+  ${breakpoint(breakpoints.mobile)} {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
 `;
 
 export const MonthHeaders = styled(FlexColumn)`
