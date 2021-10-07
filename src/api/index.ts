@@ -168,7 +168,7 @@ function setupMiddleware(app: express.Express): void {
                 connectSrc: [`'self'`, `https://api.exchangeratesapi.io`],
                 imgSrc: [`'self'`, 'data:'],
                 styleSrc: [`'self'`, `'unsafe-inline'`],
-                scriptSrc: [`'self'`, `'unsafe-inline'`, `'https://www.gstatic.com'`],
+                scriptSrc: [`'self'`, `'unsafe-inline'`, `https://www.gstatic.com`],
               },
             },
     }),
