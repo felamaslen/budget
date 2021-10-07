@@ -39,7 +39,7 @@ const AccountGroupItemWrapper: React.FC<AccountGroupItemWrapperProps> = ({
   return (
     <Styled.AccountGroup isVerified={transaction.isVerified} {...onActivate}>
       <Styled.AccountGroupItem>{name}</Styled.AccountGroupItem>
-      <Styled.AccountGroupValue>{value}</Styled.AccountGroupValue>
+      <Styled.AccountGroupValue color={transaction.color}>{value}</Styled.AccountGroupValue>
     </Styled.AccountGroup>
   );
 };

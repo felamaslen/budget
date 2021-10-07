@@ -25,3 +25,8 @@ export const enum ComputedTransactionName {
   Pension = 'Pension (SalSac)',
   StudentLoan = 'Student loan',
 }
+
+export const enum StandardTransactions {
+  Investments = 'Investments',
+  SIPP = 'Pension (SIPP)',
+}

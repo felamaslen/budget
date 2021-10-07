@@ -11,6 +11,7 @@ export type AccountTransaction = {
   isVerified?: boolean;
   isComputed?: boolean;
   isTransfer?: boolean;
+  color?: string;
 };
 
 export type AccountCreditCardPayment = {

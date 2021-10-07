@@ -1,3 +1,4 @@
+import { compose } from '@typed/compose';
 import addMonths from 'date-fns/addMonths';
 import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths';
 import endOfMonth from 'date-fns/endOfMonth';
@@ -6,7 +7,13 @@ import isSameMonth from 'date-fns/isSameMonth';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { StandardRates, StandardThresholds, startMonth } from '../constants';
+import {
+  ComputedTransactionName,
+  StandardRates,
+  StandardThresholds,
+  StandardTransactions,
+  startMonth,
+} from '../constants';
 import type {
   CreditCardRecord,
   IncomeRates,
@@ -27,9 +34,16 @@ import { filterNetWorthByMonth } from './utils';
 
 import { CREATE_ID } from '~client/constants/data';
 import { useToday } from '~client/hooks';
+import { scoreColor } from '~client/modules/color';
 import { getEntries } from '~client/selectors';
+import { colors } from '~client/styled/variables';
 import type { NetWorthEntryNative } from '~client/types';
-import type { PlanningTaxRateInput, PlanningTaxThresholdInput } from '~client/types/gql';
+import {
+  PageListStandard,
+  PlanningTaxRateInput,
+  PlanningTaxThresholdInput,
+} from '~client/types/gql';
+import { NetWorthAggregate, PageNonStandard } from '~shared/constants';
 
 function getNetWorthValueForSubcategoryId(
   entry: NetWorthEntryNative | undefined,
@@ -177,6 +191,55 @@ const getAccountReducer = (
 
 const numNewInputRows = 1;
 
+const addSingleColorScale = (transactionName: string, color: string, isNegative = false) => (
+  data: PlanningData[],
+): PlanningData[] => {
+  const maxValue = data.reduce<number>(
+    (max0, group) =>
+      group.accounts.reduce<number>(
+        (max1, account) =>
+          account.transactions.reduce<number>(
+            (max2, transaction) =>
+              transaction.name === transactionName
+                ? Math.max(max2, (isNegative ? -1 : 1) * (transaction.computedValue ?? 0))
+                : max2,
+            max1,
+          ),
+        max0,
+      ),
+    0,
+  );
+
+  return data.map<PlanningData>((group) => ({
+    ...group,
+    accounts: group.accounts.map<PlanningData['accounts'][0]>((account) => ({
+      ...account,
+      transactions: account.transactions.map<PlanningData['accounts'][0]['transactions'][0]>(
+        (transaction) =>
+          transaction.name === transactionName
+            ? {
+                ...transaction,
+                color: scoreColor(
+                  color,
+                  ((isNegative ? -1 : 1) * (transaction.computedValue ?? 0)) / maxValue,
+                ),
+              }
+            : transaction,
+      ),
+    })),
+  }));
+};
+
+const addColorScales = compose(
+  addSingleColorScale(ComputedTransactionName.GrossIncome, colors[PageListStandard.Income].main),
+  addSingleColorScale(StandardTransactions.Investments, colors[PageNonStandard.Funds].main, true),
+  addSingleColorScale(
+    StandardTransactions.SIPP,
+    colors.netWorth.aggregate[NetWorthAggregate.pension],
+    true,
+  ),
+);
+
 export function usePlanningTableData(state: State, year: number): PlanningData[] {
   const today = useToday();
   const planningMonths = usePlanningMonths(year);
@@ -232,6 +295,6 @@ export function usePlanningTableData(state: State, year: number): PlanningData[]
       [],
     );
 
-    return allReduced.slice(numAdditionalMonths);
+    return addColorScales(allReduced.slice(numAdditionalMonths));
   }, [today, planningMonths, state.accounts, netWorth, incomeRates, creditCards]);
 }

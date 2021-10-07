@@ -260,38 +260,61 @@ describe(usePlanningTableData.name, () => {
       });
     });
 
-    it('should include explicit transactions', () => {
-      expect.assertions(2);
-      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
-        wrapper: Wrapper,
+    describe('explicit transactions', () => {
+      it('should be included', () => {
+        expect.assertions(2);
+        const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+          wrapper: Wrapper,
+        });
+
+        expect(result.current[6].accounts[1].transactions).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<AccountTransaction>({
+              id: numericHash('value-0'),
+              name: 'Transfer to savings',
+              value: -120500,
+              formula: undefined,
+              computedValue: -120500,
+              isVerified: false,
+              isTransfer: true,
+            }),
+          ]),
+        );
+
+        expect(result.current[10].accounts[1].transactions).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<AccountTransaction>({
+              id: numericHash('value-1'),
+              name: 'Car payment',
+              value: -56293,
+              formula: undefined,
+              computedValue: -56293,
+              isVerified: false,
+            }),
+          ]),
+        );
       });
 
-      expect(result.current[6].accounts[1].transactions).toStrictEqual(
-        expect.arrayContaining([
-          expect.objectContaining<AccountTransaction>({
-            id: numericHash('value-0'),
-            name: 'Transfer to savings',
-            value: -120500,
-            formula: undefined,
-            computedValue: -120500,
-            isVerified: false,
-            isTransfer: true,
-          }),
-        ]),
-      );
-
-      expect(result.current[10].accounts[1].transactions).toStrictEqual(
-        expect.arrayContaining([
-          expect.objectContaining<AccountTransaction>({
-            id: numericHash('value-1'),
-            name: 'Car payment',
-            value: -56293,
-            formula: undefined,
-            computedValue: -56293,
-            isVerified: false,
-          }),
-        ]),
-      );
+      it('should be included when the value is zero', () => {
+        expect.assertions(1);
+        const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+          wrapper: Wrapper,
+        });
+        expect(result.current[4].accounts[1].transactions).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<AccountTransaction>({
+              id: numericHash('value-3'),
+              name: 'Pension (SIPP)',
+              computedValue: -50000,
+            }),
+            expect.objectContaining<AccountTransaction>({
+              id: numericHash('value-4'),
+              name: 'My zero value',
+              computedValue: 0,
+            }),
+          ]),
+        );
+      });
     });
 
     it('should include calculated transfer-to transactions from other accounts', () => {
@@ -334,27 +357,6 @@ describe(usePlanningTableData.name, () => {
             computedValue: -105603,
             isComputed: true,
             isVerified: true,
-          }),
-        ]),
-      );
-    });
-
-    it('should include manual transactions, including those with zero value', () => {
-      expect.assertions(1);
-      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
-        wrapper: Wrapper,
-      });
-      expect(result.current[4].accounts[1].transactions).toStrictEqual(
-        expect.arrayContaining([
-          expect.objectContaining<AccountTransaction>({
-            id: numericHash('value-3'),
-            name: 'Pension (SIPP)',
-            computedValue: -50000,
-          }),
-          expect.objectContaining<AccountTransaction>({
-            id: numericHash('value-4'),
-            name: 'My zero value',
-            computedValue: 0,
           }),
         ]),
       );
@@ -464,6 +466,32 @@ describe(usePlanningTableData.name, () => {
       expect(result.current[11].accounts[1].transactions).toStrictEqual(
         result.current[5].accounts[1].transactions,
       );
+    });
+
+    it('should add a color scale to income transactions', () => {
+      expect.assertions(6);
+      const { result } = renderHook(() => usePlanningTableData(testState, myYear), {
+        wrapper: Wrapper,
+      });
+
+      const salaryVerifiedJul = result.current[3].accounts[1].transactions.find(
+        (compare) => compare.name === 'Salary',
+      );
+
+      const salaryPredictedNov = result.current[7].accounts[1].transactions.find(
+        (compare) => compare.name === 'Salary',
+      );
+      const salaryPredictedDec = result.current[8].accounts[1].transactions.find(
+        (compare) => compare.name === 'Salary',
+      );
+
+      expect(salaryVerifiedJul?.color).not.toBeUndefined();
+      expect(salaryPredictedNov?.color).not.toBeUndefined();
+      expect(salaryPredictedDec?.color).not.toBeUndefined();
+
+      expect(salaryVerifiedJul?.color).toMatchInlineSnapshot(`"#6de149"`);
+      expect(salaryPredictedNov?.color).toMatchInlineSnapshot(`"#43d815"`);
+      expect(salaryPredictedDec?.color).toMatchInlineSnapshot(`"#43d815"`);
     });
 
     it('should include actual credit card transactions', () => {

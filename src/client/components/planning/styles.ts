@@ -357,11 +357,15 @@ export const AccountGroupItemText = styled.span`
 `;
 
 export const AccountGroupValue = styled(CellNumeric)<{
+  color?: string;
   tooLow?: boolean;
   tooHigh?: boolean;
   justRight?: boolean;
 }>`
-  background-color: ${({ tooLow = false, tooHigh = false, justRight = false }): string => {
+  background-color: ${({ color, tooLow = false, tooHigh = false, justRight = false }): string => {
+    if (color) {
+      return color;
+    }
     if (tooLow) {
       return rgba(colors.error, 0.3);
     }
