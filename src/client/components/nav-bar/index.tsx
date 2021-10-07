@@ -10,7 +10,7 @@ type Props = RouteComponentProps & {
 };
 
 const pages: { page: Styled.NavPage; path?: string; paths?: string[] }[] = [
-  { page: PageNonStandard.Overview, path: '/', paths: ['/', '/buckets', '/net-worth'] },
+  { page: PageNonStandard.Overview, path: '/', paths: ['/', '/net-worth'] },
   { page: PageNonStandard.Planning },
   { page: PageNonStandard.Analysis },
   { page: PageNonStandard.Funds },

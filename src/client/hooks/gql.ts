@@ -24,7 +24,6 @@ export {
   useFundsChangedSubscription,
   useIncomeChangedSubscription,
   useInitialQuery,
-  useListBucketsQuery,
   useListChangedSubscription,
   useLoginMutation,
   useMoreListDataStandardQuery,
@@ -45,7 +44,6 @@ export {
   useReceiptItemsQuery,
   useSearchSuggestionsQuery,
   useSetConfigMutation,
-  useSetInvestmentBucketMutation,
   useStockPricesQuery,
   useUpdateCashAllocationTargetMutation,
   useUpdateFundAllocationTargetsMutation,
@@ -55,5 +53,4 @@ export {
   useUpdateNetWorthCategoryMutation,
   useUpdateNetWorthEntryMutation,
   useUpdateNetWorthSubcategoryMutation,
-  useUpsertBucketMutation,
 } from '~client/types/gql';

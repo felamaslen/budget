@@ -69,7 +69,6 @@ function setupDevAssets(app: express.Express): void {
 
 const singlePageAppRoutes: string[] = [
   '/',
-  '/buckets',
   '/net-worth',
   '/net-worth/*',
   '/planning',

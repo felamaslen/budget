@@ -9,7 +9,6 @@ import {
 import { Resolvers } from '~api/types';
 
 export * from './analysis';
-export * from './buckets';
 export * from './config';
 export * from './exchange-rates';
 export * from './funds';

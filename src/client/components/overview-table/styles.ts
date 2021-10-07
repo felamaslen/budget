@@ -210,19 +210,6 @@ export const AddReceiptButton = styled.span`
   }
 `;
 
-export const BucketButton = styled.span`
-  background-image: url(${nav1x});
-  background-position: -120px -62px;
-  display: block;
-  height: ${rem(22)};
-  width: ${rem(22)};
-
-  @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    background-image: url(${nav2x});
-    background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
-  }
-`;
-
 export const HeaderText = styled.span`
   color: black;
   flex: 1;

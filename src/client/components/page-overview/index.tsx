@@ -40,8 +40,6 @@ const lazyOptions = { fallback: <LoadingFallback /> };
 const NetWorth = hot(loadable(() => import('~client/components/net-worth'), lazyOptions));
 const Planning = hot(loadable(() => import('~client/components/planning'), lazyOptions));
 
-const Buckets = hot(loadable(() => import('~client/components/buckets'), lazyOptions));
-
 export const PageOverview: React.FC<RouteComponentProps> = () => {
   const [addingReceipt, setAddingReceipt] = useState<boolean>(false);
   const addReceipt = useCallback(() => setAddingReceipt(true), []);
@@ -52,7 +50,6 @@ export const PageOverview: React.FC<RouteComponentProps> = () => {
         <Fragment>
           <Route path="/net-worth" component={NetWorth} />
           <Route path="/planning" component={Planning} />
-          <Route path="/buckets" component={Buckets} />
         </Fragment>
       )}
       {addingReceipt && <AddReceipt setAddingReceipt={setAddingReceipt} />}

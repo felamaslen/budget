@@ -70,21 +70,6 @@ export type AppConfigSet = {
   error?: Maybe<Scalars['String']>;
 };
 
-export type Bucket = {
-  __typename?: 'Bucket';
-  id: Scalars['NonNegativeInt'];
-  page: AnalysisPage;
-  filterCategory?: Maybe<Scalars['String']>;
-  expectedValue: Scalars['NonNegativeInt'];
-  actualValue: Scalars['NonNegativeInt'];
-};
-
-export type BucketInput = {
-  page: AnalysisPage;
-  filterCategory?: Maybe<Scalars['String']>;
-  value: Scalars['NonNegativeInt'];
-};
-
 export type CategoryCostTree = {
   __typename?: 'CategoryCostTree';
   item: AnalysisPage;
@@ -305,24 +290,6 @@ export type InitialCumulativeValues = {
   spending: Scalars['Int'];
 };
 
-export type InvestmentBucket = {
-  __typename?: 'InvestmentBucket';
-  expectedValue: Scalars['NonNegativeInt'];
-  purchaseValue: Scalars['NonNegativeInt'];
-};
-
-export type InvestmentBucketInput = {
-  __typename?: 'InvestmentBucketInput';
-  value: Scalars['NonNegativeInt'];
-};
-
-export type ListBucketsResponse = {
-  __typename?: 'ListBucketsResponse';
-  error?: Maybe<Scalars['String']>;
-  buckets?: Maybe<Array<Bucket>>;
-  investmentBucket?: Maybe<InvestmentBucket>;
-};
-
 export type ListItem = {
   __typename?: 'ListItem';
   id: Scalars['Int'];
@@ -455,7 +422,6 @@ export type Mutation = {
   login: LoginResponse;
   logout: LogoutResponse;
   setConfig?: Maybe<AppConfigSet>;
-  setInvestmentBucket?: Maybe<SetInvestmentBucketResponse>;
   syncPlanning?: Maybe<PlanningSyncResponse>;
   updateCashAllocationTarget?: Maybe<CrudResponseUpdate>;
   updateFund?: Maybe<CrudResponseUpdate>;
@@ -465,7 +431,6 @@ export type Mutation = {
   updateNetWorthCategory?: Maybe<CrudResponseUpdate>;
   updateNetWorthEntry?: Maybe<CrudResponseUpdate>;
   updateNetWorthSubcategory?: Maybe<CrudResponseUpdate>;
-  upsertBucket?: Maybe<UpsertBucketResponse>;
 };
 
 
@@ -551,11 +516,6 @@ export type MutationSetConfigArgs = {
 };
 
 
-export type MutationSetInvestmentBucketArgs = {
-  value: Scalars['NonNegativeInt'];
-};
-
-
 export type MutationSyncPlanningArgs = {
   input?: Maybe<PlanningSync>;
 };
@@ -605,14 +565,6 @@ export type MutationUpdateNetWorthEntryArgs = {
 export type MutationUpdateNetWorthSubcategoryArgs = {
   id: Scalars['Int'];
   input: NetWorthSubcategoryInput;
-};
-
-
-export type MutationUpsertBucketArgs = {
-  startDate: Scalars['String'];
-  endDate: Scalars['String'];
-  id: Scalars['NonNegativeInt'];
-  bucket: BucketInput;
 };
 
 export type NetWorthCashTotal = {
@@ -981,7 +933,6 @@ export type Query = {
   exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
-  listBuckets?: Maybe<ListBucketsResponse>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   netWorthLoans?: Maybe<NetWorthLoansResponse>;
   overview?: Maybe<Overview>;
@@ -1030,12 +981,6 @@ export type QueryFundHistoryArgs = {
 
 export type QueryFundHistoryIndividualArgs = {
   id: Scalars['NonNegativeInt'];
-};
-
-
-export type QueryListBucketsArgs = {
-  startDate: Scalars['String'];
-  endDate: Scalars['String'];
 };
 
 
@@ -1166,12 +1111,6 @@ export type SearchResult = {
   nextField?: Maybe<Scalars['String']>;
 };
 
-export type SetInvestmentBucketResponse = {
-  __typename?: 'SetInvestmentBucketResponse';
-  expectedValue?: Maybe<Scalars['NonNegativeInt']>;
-  error?: Maybe<Scalars['String']>;
-};
-
 export type SimpleValue = {
   __typename?: 'SimpleValue';
   value: Scalars['Int'];
@@ -1290,12 +1229,6 @@ export type UpdatedFundAllocationTargets = {
   __typename?: 'UpdatedFundAllocationTargets';
   error?: Maybe<Scalars['String']>;
   deltas?: Maybe<Array<TargetDeltaResponse>>;
-};
-
-export type UpsertBucketResponse = {
-  __typename?: 'UpsertBucketResponse';
-  buckets?: Maybe<Array<Bucket>>;
-  error?: Maybe<Scalars['String']>;
 };
 
 export type User = {
@@ -1423,39 +1356,6 @@ export type PlanningAccountPartsFragment = (
   )>, values: Array<(
     { __typename?: 'PlanningValue' }
     & Pick<PlanningValue, 'id' | 'year' | 'month' | 'transferToAccountId' | 'name' | 'value' | 'formula'>
-  )> }
-);
-
-export type UpsertBucketMutationVariables = Exact<{
-  startDate: Scalars['String'];
-  endDate: Scalars['String'];
-  id: Scalars['NonNegativeInt'];
-  bucket: BucketInput;
-}>;
-
-
-export type UpsertBucketMutation = (
-  { __typename?: 'Mutation' }
-  & { upsertBucket?: Maybe<(
-    { __typename?: 'UpsertBucketResponse' }
-    & Pick<UpsertBucketResponse, 'error'>
-    & { buckets?: Maybe<Array<(
-      { __typename?: 'Bucket' }
-      & Pick<Bucket, 'id' | 'page' | 'filterCategory' | 'expectedValue' | 'actualValue'>
-    )>> }
-  )> }
-);
-
-export type SetInvestmentBucketMutationVariables = Exact<{
-  value: Scalars['NonNegativeInt'];
-}>;
-
-
-export type SetInvestmentBucketMutation = (
-  { __typename?: 'Mutation' }
-  & { setInvestmentBucket?: Maybe<(
-    { __typename?: 'SetInvestmentBucketResponse' }
-    & Pick<SetInvestmentBucketResponse, 'expectedValue' | 'error'>
   )> }
 );
 
@@ -1851,27 +1751,6 @@ export type AnalysisDeepQuery = (
       & Pick<CategoryTreeItem, 'category' | 'sum'>
     )> }
   )>> }
-);
-
-export type ListBucketsQueryVariables = Exact<{
-  startDate: Scalars['String'];
-  endDate: Scalars['String'];
-}>;
-
-
-export type ListBucketsQuery = (
-  { __typename?: 'Query' }
-  & { listBuckets?: Maybe<(
-    { __typename?: 'ListBucketsResponse' }
-    & Pick<ListBucketsResponse, 'error'>
-    & { buckets?: Maybe<Array<(
-      { __typename?: 'Bucket' }
-      & Pick<Bucket, 'id' | 'page' | 'filterCategory' | 'expectedValue' | 'actualValue'>
-    )>>, investmentBucket?: Maybe<(
-      { __typename?: 'InvestmentBucket' }
-      & Pick<InvestmentBucket, 'expectedValue' | 'purchaseValue'>
-    )> }
-  )> }
 );
 
 export type ExchangeRatesQueryVariables = Exact<{
@@ -2559,36 +2438,6 @@ export const PlanningAccountPartsFragmentDoc = gql`
   }
 }
     `;
-export const UpsertBucketDocument = gql`
-    mutation UpsertBucket($startDate: String!, $endDate: String!, $id: NonNegativeInt!, $bucket: BucketInput!) {
-  upsertBucket(startDate: $startDate, endDate: $endDate, id: $id, bucket: $bucket) {
-    buckets {
-      id
-      page
-      filterCategory
-      expectedValue
-      actualValue
-    }
-    error
-  }
-}
-    `;
-
-export function useUpsertBucketMutation() {
-  return Urql.useMutation<UpsertBucketMutation, UpsertBucketMutationVariables>(UpsertBucketDocument);
-};
-export const SetInvestmentBucketDocument = gql`
-    mutation SetInvestmentBucket($value: NonNegativeInt!) {
-  setInvestmentBucket(value: $value) {
-    expectedValue
-    error
-  }
-}
-    `;
-
-export function useSetInvestmentBucketMutation() {
-  return Urql.useMutation<SetInvestmentBucketMutation, SetInvestmentBucketMutationVariables>(SetInvestmentBucketDocument);
-};
 export const SetConfigDocument = gql`
     mutation SetConfig($config: AppConfigInput!) {
   setConfig(config: $config) {
@@ -2927,28 +2776,6 @@ export const AnalysisDeepDocument = gql`
 
 export function useAnalysisDeepQuery(options: Omit<Urql.UseQueryArgs<AnalysisDeepQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<AnalysisDeepQuery>({ query: AnalysisDeepDocument, ...options });
-};
-export const ListBucketsDocument = gql`
-    query ListBuckets($startDate: String!, $endDate: String!) {
-  listBuckets(startDate: $startDate, endDate: $endDate) {
-    buckets {
-      id
-      page
-      filterCategory
-      expectedValue
-      actualValue
-    }
-    investmentBucket {
-      expectedValue
-      purchaseValue
-    }
-    error
-  }
-}
-    `;
-
-export function useListBucketsQuery(options: Omit<Urql.UseQueryArgs<ListBucketsQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<ListBucketsQuery>({ query: ListBucketsDocument, ...options });
 };
 export const ExchangeRatesDocument = gql`
     query ExchangeRates($base: String!) {
