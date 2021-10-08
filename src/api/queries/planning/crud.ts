@@ -1,70 +1,21 @@
-import { formatISO } from 'date-fns';
 import { DatabaseTransactionConnectionType, sql } from 'slonik';
-import { PageListStandard } from '~api/types';
+
+import type {
+  AccountRow,
+  PlanningCreditCardPaymentRow,
+  PlanningCreditCardRow,
+  PlanningIncomeRow,
+  PlanningValueRow,
+} from './types';
+import { selectParameterRows, upsertUserParameterRowsByYear } from './utils';
+
 import { Create } from '~shared/types';
 
-export type ParameterRow = {
-  readonly id: number;
-  uid: number;
-  year: number;
-  name: string;
-  value: number;
-};
-
-export type ThresholdRow = ParameterRow;
-export type RateRow = ParameterRow; // value is a float instead of int, but JS doesn't know the difference
-
-const upsertAllUserParameterRows = (valueType: 'int4' | 'float8', tableName: string) => async (
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  inputs: Omit<ParameterRow, 'id' | 'uid'>[],
-): Promise<void> => {
-  const { rows: existingIdRows } = await db.query<{ id: number }>(sql`
-  INSERT INTO ${sql.identifier([`planning_${tableName}`])} (uid, year, name, value)
-  SELECT * FROM ${sql.unnest(
-    inputs.map((input) => [uid, input.year, input.name, input.value]),
-    ['int4', 'int4', 'text', valueType],
-  )}
-  ON CONFLICT (uid, year, name) DO UPDATE SET value = excluded.value
-  RETURNING id
-  `);
-
-  await db.query(sql`
-  DELETE FROM ${sql.identifier([`planning_${tableName}`])}
-  WHERE uid = ${uid} AND id != ALL(${sql.array(
-    existingIdRows.map((row) => row.id),
-    'int4',
-  )})
-  `);
-};
-
-export const upsertThresholds = upsertAllUserParameterRows('int4', 'thresholds');
-
-export const upsertRates = upsertAllUserParameterRows('float8', 'rates');
-
-const selectParameterRows = (tableName: string) => async (
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-): Promise<readonly ParameterRow[]> => {
-  const { rows } = await db.query<ParameterRow>(sql`
-  SELECT * FROM ${sql.identifier([`planning_${tableName}`])}
-  WHERE uid = ${uid}
-  ORDER BY name
-  `);
-  return rows;
-};
+export const upsertThresholds = upsertUserParameterRowsByYear('int4', 'thresholds');
+export const upsertRates = upsertUserParameterRowsByYear('float8', 'rates');
 
 export const selectThresholds = selectParameterRows('thresholds');
 export const selectRates = selectParameterRows('rates');
-
-export type AccountRow = {
-  readonly id: number;
-  uid: number;
-  account: string;
-  net_worth_subcategory_id: number;
-  limit_upper: number | null;
-  limit_lower: number | null;
-};
 
 export async function insertPlanningAccounts(
   db: DatabaseTransactionConnectionType,
@@ -137,167 +88,6 @@ export async function selectPlanningAccounts(
   `);
   return rows;
 }
-
-export type AccountRowIncomeJoins = {
-  income_id: number | null;
-  income_start_date: string | Date | null;
-  income_end_date: string | Date | null;
-  income_salary: number | null;
-  income_tax_code: string | null;
-  income_pension_contrib: number | null;
-  income_student_loan: boolean | null;
-};
-
-export type AccountRowCreditCardJoins = {
-  credit_card_id: number | null;
-  credit_card_net_worth_subcategory_id: number | null;
-};
-
-export type AccountRowCreditCardPaymentJoins = {
-  credit_card_payment_id: number | null;
-  credit_card_payment_credit_card_id: number | null;
-  credit_card_payment_year: number | null;
-  credit_card_payment_month: number | null;
-  credit_card_payment_value: number | null;
-};
-
-export type AccountRowValueJoins = {
-  value_id: number | null;
-  value_name: string | null;
-  value_year: number | null;
-  value_month: number | null;
-  value_value: number | null;
-  value_formula: string | null;
-  value_transfer_to: number | null;
-};
-
-export type AccountRowWithJoins = AccountRow &
-  AccountRowIncomeJoins &
-  AccountRowCreditCardJoins &
-  AccountRowCreditCardPaymentJoins &
-  AccountRowValueJoins;
-
-export async function selectPlanningAccountsWithJoins(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-): Promise<readonly AccountRowWithJoins[]> {
-  const { rows } = await db.query<AccountRowWithJoins>(sql`
-  SELECT ${sql.join(
-    [
-      sql`accounts.*`,
-      sql`planning_income.id AS income_id`,
-      sql`planning_income.start_date AS income_start_date `,
-      sql`planning_income.end_date AS income_end_date `,
-      sql`planning_income.salary AS income_salary`,
-      sql`planning_income.tax_code AS income_tax_code `,
-      sql`planning_income.pension_contrib AS income_pension_contrib `,
-      sql`planning_income.student_loan AS income_student_loan`,
-      sql`cc.id AS credit_card_id`,
-      sql`cc.net_worth_subcategory_id AS credit_card_net_worth_subcategory_id`,
-      sql`ccp.id AS credit_card_payment_id`,
-      sql`ccp.credit_card_id AS credit_card_payment_credit_card_id`,
-      sql`ccp.year AS credit_card_payment_year`,
-      sql`ccp.month AS credit_card_payment_month`,
-      sql`ccp.value AS credit_card_payment_value`,
-      sql`v.id AS value_id`,
-      sql`v.name AS value_name`,
-      sql`v.year AS value_year`,
-      sql`v.month AS value_month`,
-      sql`v.value AS value_value`,
-      sql`v.formula AS value_formula`,
-      sql`v.transfer_to AS value_transfer_to`,
-    ],
-    sql`, `,
-  )}
-  FROM planning_accounts accounts
-  LEFT JOIN planning_income ON planning_income.account_id = accounts.id
-  LEFT JOIN planning_credit_cards cc ON cc.account_id = accounts.id
-  LEFT JOIN planning_credit_card_payments ccp ON ccp.credit_card_id = cc.id
-  LEFT JOIN planning_values v ON v.account_id = accounts.id
-  WHERE accounts.uid = ${uid}
-  ORDER BY ${sql.join(
-    [
-      sql`accounts.net_worth_subcategory_id`,
-      sql`planning_income.start_date`,
-      sql`cc.id`,
-      sql`ccp.year`,
-      sql`ccp.month`,
-      sql`v.id`,
-    ],
-    sql`, `,
-  )}
-  `);
-  return rows;
-}
-
-export type PreviousIncomeRow = {
-  id: number;
-  date: Date;
-  item: string;
-  gross: number;
-  deduction_name: string | null;
-  deduction_value: number | null;
-};
-
-export type PreviousIncomeDeductionRow = {
-  deduction_name: string;
-  deduction_value: number;
-};
-
-export type PreviousIncomeRowWithDeduction = Omit<
-  PreviousIncomeRow,
-  keyof PreviousIncomeDeductionRow
-> &
-  PreviousIncomeDeductionRow;
-
-export async function selectPlanningPreviousIncome(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  now: Date,
-  accountNames: string[],
-): Promise<readonly PreviousIncomeRow[]> {
-  const { rows } = await db.query<PreviousIncomeRow>(sql`
-  SELECT ${sql.join(
-    [
-      sql`list_standard.id`,
-      sql`date`,
-      sql`item`,
-      sql`list_standard.value AS gross`,
-      sql`income_deductions.name AS deduction_name`,
-      sql`income_deductions.value AS deduction_value`,
-    ],
-    sql`, `,
-  )}
-  FROM list_standard
-  LEFT JOIN income_deductions ON income_deductions.list_id = list_standard.id
-  WHERE ${sql.join(
-    [
-      sql`uid = ${uid}`,
-      sql`page = ${PageListStandard.Income}`,
-      sql`item ILIKE ANY(${sql.array(
-        accountNames.map((account) => `Salary (${account})`),
-        'text',
-      )})`,
-      sql`list_standard.value > 0`,
-      sql`date < ${formatISO(now, { representation: 'date' })}::date`,
-    ],
-    sql` AND `,
-  )}
-  ORDER BY date, item, income_deductions.name
-  `);
-  return rows;
-}
-
-export type PlanningIncomeRow = {
-  id: number;
-  account_id: number;
-  start_date: string | Date;
-  end_date: string | Date;
-  salary: number;
-  tax_code: string;
-  pension_contrib: number;
-  student_loan: boolean;
-};
 
 export async function insertPlanningIncome(
   db: DatabaseTransactionConnectionType,
@@ -379,12 +169,6 @@ export async function selectPlanningIncome(
   return rows;
 }
 
-export type PlanningCreditCardRow = {
-  readonly id: number;
-  account_id: number;
-  net_worth_subcategory_id: number;
-};
-
 export async function insertPlanningCreditCards(
   db: DatabaseTransactionConnectionType,
   uid: number,
@@ -459,14 +243,6 @@ export async function selectPlanningCreditCards(
   return rows;
 }
 
-export type PlanningCreditCardPaymentRow = {
-  readonly id: number;
-  credit_card_id: number;
-  year: number;
-  month: number;
-  value: number;
-};
-
 export async function insertPlanningCreditCardPayments(
   db: DatabaseTransactionConnectionType,
   uid: number,
@@ -513,20 +289,21 @@ export async function updatePlanningCreditCardPayments(
   `);
 }
 
-export async function deleteOldPlanningCreditCardPayments(
+export const deleteOldPlanningCreditCardPayments = (year: number) => async (
   db: DatabaseTransactionConnectionType,
   uid: number,
   existingPaymentIds: number[],
-): Promise<void> {
+): Promise<void> => {
   await db.query(sql`
   DELETE FROM planning_credit_card_payments
   USING planning_credit_cards, planning_accounts
   WHERE planning_credit_cards.id = planning_credit_card_payments.credit_card_id
     AND planning_accounts.id = planning_credit_cards.account_id
     AND planning_accounts.uid = ${uid}
+    AND planning_credit_card_payments.year = ${year}
     AND planning_credit_card_payments.id != ALL(${sql.array(existingPaymentIds, 'int4')})
   `);
-}
+};
 
 export async function selectPlanningCreditCardPayments(
   db: DatabaseTransactionConnectionType,
@@ -542,17 +319,6 @@ export async function selectPlanningCreditCardPayments(
   `);
   return rows;
 }
-
-export type PlanningValueRow = {
-  readonly id: number;
-  year: number;
-  month: number;
-  account_id: number;
-  name: string;
-  value: number | null;
-  formula: string | null;
-  transfer_to: number | null;
-};
 
 export async function insertPlanningValues(
   db: DatabaseTransactionConnectionType,
@@ -608,19 +374,20 @@ export async function updatePlanningValue(
   `);
 }
 
-export async function deleteOldPlanningValues(
+export const deleteOldPlanningValues = (year: number) => async (
   db: DatabaseTransactionConnectionType,
   uid: number,
   existingValueIds: number[],
-): Promise<void> {
+): Promise<void> => {
   await db.query(sql`
   DELETE FROM planning_values
   USING planning_accounts
   WHERE planning_accounts.id = planning_values.account_id
     AND planning_accounts.uid = ${uid}
+    AND planning_values.year = ${year}
     AND planning_values.id != ALL(${sql.array(existingValueIds, 'int4')})
   `);
-}
+};
 
 export async function selectPlanningValues(
   db: DatabaseTransactionConnectionType,

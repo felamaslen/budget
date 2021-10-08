@@ -74,6 +74,7 @@ export const AddAccount: React.FC = () => {
               pastIncome: [],
               creditCards: [],
               values: [],
+              computedValues: [],
             },
           ],
     }));

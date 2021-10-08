@@ -33,13 +33,21 @@ export type OptionalDeep<T, U extends string> = T extends Record<string, unknown
 export type GQLShallow<T> = Omit<T, '__typename'>;
 export type GQL<T> = OmitDeep<T, '__typename'>;
 
-export type RawDate<V, K extends string> = V extends { [key in K]: Date }
-  ? Omit<V, K> & { [key in K]: string }
-  : V;
+export type RawDate<T, U extends string> = T extends Partial<Record<U, Date>>
+  ? Omit<T, U> & { [key in U]: T extends Record<key, Date> ? string : never }
+  : T;
 
-export type RawDateDeep<V extends Record<string, unknown>> = {
-  [K in keyof V]: V[K] extends { date: Date } ? RawDate<V[K], 'date'> : V[K];
-};
+export type RawDateDeep<T, U extends string = 'date'> = T extends Record<string, unknown>
+  ? {
+      [K in keyof T]: K extends U
+        ? T extends Partial<Record<K, Date>>
+          ? string
+          : RawDateDeep<T[K], U>
+        : RawDateDeep<T[K], U>;
+    }
+  : T extends Record<string, unknown>[]
+  ? RawDateDeep<T[0], U>[]
+  : T;
 
 export type NativeDate<V, K extends keyof V> = V extends { [key in K]: string }
   ? Omit<V, K> & { [key in K]: Date }

@@ -72,6 +72,6 @@ export async function getExchangeRates(
     const rates = convertRatesBase(rawExchangeRates.rates, args.base);
     return { error: null, rates };
   } catch (err) {
-    return { error: err.message, rates: null };
+    return { error: (err as Error).message, rates: null };
   }
 }

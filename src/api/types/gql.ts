@@ -478,6 +478,7 @@ export type MutationSetConfigArgs = {
 
 
 export type MutationSyncPlanningArgs = {
+  year: Scalars['NonNegativeInt'];
   input?: Maybe<PlanningSync>;
 };
 
@@ -723,9 +724,10 @@ export type PlanningAccount = {
   account: Scalars['String'];
   netWorthSubcategoryId: Scalars['NonNegativeInt'];
   income: Array<PlanningIncome>;
-  pastIncome: Array<PlanningPastIncome>;
   creditCards: Array<PlanningCreditCard>;
   values: Array<PlanningValue>;
+  computedValues: Array<PlanningComputedValue>;
+  computedStartValue?: Maybe<Scalars['Int']>;
   upperLimit?: Maybe<Scalars['Int']>;
   lowerLimit?: Maybe<Scalars['Int']>;
 };
@@ -741,14 +743,20 @@ export type PlanningAccountInput = {
   lowerLimit?: Maybe<Scalars['Int']>;
 };
 
-export type PlanningAccountsResponse = {
-  accounts: Array<PlanningAccount>;
+export type PlanningComputedValue = {
+  key: Scalars['String'];
+  month: Scalars['NonNegativeInt'];
+  name: Scalars['String'];
+  value: Scalars['Int'];
+  isVerified: Scalars['Boolean'];
+  isTransfer: Scalars['Boolean'];
 };
 
 export type PlanningCreditCard = {
   id: Scalars['NonNegativeInt'];
   netWorthSubcategoryId: Scalars['NonNegativeInt'];
   payments: Array<PlanningCreditCardPayment>;
+  predictedPayment?: Maybe<Scalars['Int']>;
 };
 
 export type PlanningCreditCardInput = {
@@ -759,14 +767,12 @@ export type PlanningCreditCardInput = {
 
 export type PlanningCreditCardPayment = {
   id: Scalars['NonNegativeInt'];
-  year: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
   value: Scalars['Int'];
 };
 
 export type PlanningCreditCardPaymentInput = {
   id?: Maybe<Scalars['NonNegativeInt']>;
-  year: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
   value: Scalars['Int'];
 };
@@ -792,36 +798,26 @@ export type PlanningIncomeInput = {
 };
 
 export type PlanningParameters = {
-  year: Scalars['NonNegativeInt'];
   rates: Array<TaxRate>;
   thresholds: Array<TaxThreshold>;
 };
 
 export type PlanningParametersInput = {
-  year: Scalars['NonNegativeInt'];
   rates: Array<PlanningTaxRateInput>;
   thresholds: Array<PlanningTaxThresholdInput>;
 };
 
-export type PlanningParametersResponse = {
-  parameters: Array<PlanningParameters>;
-};
-
-export type PlanningPastIncome = {
-  date: Scalars['Date'];
-  gross: Scalars['NonNegativeInt'];
-  deductions: Array<IncomeDeduction>;
-};
-
 export type PlanningSync = {
-  parameters: Array<PlanningParametersInput>;
+  parameters: PlanningParametersInput;
   accounts: Array<PlanningAccountInput>;
 };
 
 export type PlanningSyncResponse = {
   error?: Maybe<Scalars['String']>;
-  parameters?: Maybe<Array<PlanningParameters>>;
+  year?: Maybe<Scalars['NonNegativeInt']>;
+  parameters?: Maybe<PlanningParameters>;
   accounts?: Maybe<Array<PlanningAccount>>;
+  taxReliefFromPreviousYear?: Maybe<Scalars['Int']>;
 };
 
 export type PlanningTaxRateInput = {
@@ -836,7 +832,6 @@ export type PlanningTaxThresholdInput = {
 
 export type PlanningValue = {
   id: Scalars['NonNegativeInt'];
-  year: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
   transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
   name: Scalars['String'];
@@ -846,7 +841,6 @@ export type PlanningValue = {
 
 export type PlanningValueInput = {
   id?: Maybe<Scalars['NonNegativeInt']>;
-  year: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
   transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
   name: Scalars['String'];
@@ -1324,7 +1318,7 @@ export type ResolversTypes = {
   PageListStandard: PageListStandard;
   PlanningAccount: ResolverTypeWrapper<PlanningAccount>;
   PlanningAccountInput: PlanningAccountInput;
-  PlanningAccountsResponse: ResolverTypeWrapper<PlanningAccountsResponse>;
+  PlanningComputedValue: ResolverTypeWrapper<PlanningComputedValue>;
   PlanningCreditCard: ResolverTypeWrapper<PlanningCreditCard>;
   PlanningCreditCardInput: PlanningCreditCardInput;
   PlanningCreditCardPayment: ResolverTypeWrapper<PlanningCreditCardPayment>;
@@ -1333,8 +1327,6 @@ export type ResolversTypes = {
   PlanningIncomeInput: PlanningIncomeInput;
   PlanningParameters: ResolverTypeWrapper<PlanningParameters>;
   PlanningParametersInput: PlanningParametersInput;
-  PlanningParametersResponse: ResolverTypeWrapper<PlanningParametersResponse>;
-  PlanningPastIncome: ResolverTypeWrapper<PlanningPastIncome>;
   PlanningSync: PlanningSync;
   PlanningSyncResponse: ResolverTypeWrapper<PlanningSyncResponse>;
   PlanningTaxRateInput: PlanningTaxRateInput;
@@ -1456,7 +1448,7 @@ export type ResolversParentTypes = {
   OverviewPreview: OverviewPreview;
   PlanningAccount: PlanningAccount;
   PlanningAccountInput: PlanningAccountInput;
-  PlanningAccountsResponse: PlanningAccountsResponse;
+  PlanningComputedValue: PlanningComputedValue;
   PlanningCreditCard: PlanningCreditCard;
   PlanningCreditCardInput: PlanningCreditCardInput;
   PlanningCreditCardPayment: PlanningCreditCardPayment;
@@ -1465,8 +1457,6 @@ export type ResolversParentTypes = {
   PlanningIncomeInput: PlanningIncomeInput;
   PlanningParameters: PlanningParameters;
   PlanningParametersInput: PlanningParametersInput;
-  PlanningParametersResponse: PlanningParametersResponse;
-  PlanningPastIncome: PlanningPastIncome;
   PlanningSync: PlanningSync;
   PlanningSyncResponse: PlanningSyncResponse;
   PlanningTaxRateInput: PlanningTaxRateInput;
@@ -1798,7 +1788,7 @@ export type MutationResolvers<ContextType = Context, ParentType extends Resolver
   login?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'pin'>>;
   logout?: Resolver<ResolversTypes['LogoutResponse'], ParentType, ContextType>;
   setConfig?: Resolver<Maybe<ResolversTypes['AppConfigSet']>, ParentType, ContextType, RequireFields<MutationSetConfigArgs, 'config'>>;
-  syncPlanning?: Resolver<Maybe<ResolversTypes['PlanningSyncResponse']>, ParentType, ContextType, RequireFields<MutationSyncPlanningArgs, never>>;
+  syncPlanning?: Resolver<Maybe<ResolversTypes['PlanningSyncResponse']>, ParentType, ContextType, RequireFields<MutationSyncPlanningArgs, 'year'>>;
   updateCashAllocationTarget?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateCashAllocationTargetArgs, 'target'>>;
   updateFund?: Resolver<Maybe<ResolversTypes['CrudResponseUpdate']>, ParentType, ContextType, RequireFields<MutationUpdateFundArgs, 'id' | 'input'>>;
   updateFundAllocationTargets?: Resolver<Maybe<ResolversTypes['UpdatedFundAllocationTargets']>, ParentType, ContextType, RequireFields<MutationUpdateFundAllocationTargetsArgs, 'deltas'>>;
@@ -1977,16 +1967,22 @@ export type PlanningAccountResolvers<ContextType = Context, ParentType extends R
   account?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   netWorthSubcategoryId?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   income?: Resolver<Array<ResolversTypes['PlanningIncome']>, ParentType, ContextType>;
-  pastIncome?: Resolver<Array<ResolversTypes['PlanningPastIncome']>, ParentType, ContextType>;
   creditCards?: Resolver<Array<ResolversTypes['PlanningCreditCard']>, ParentType, ContextType>;
   values?: Resolver<Array<ResolversTypes['PlanningValue']>, ParentType, ContextType>;
+  computedValues?: Resolver<Array<ResolversTypes['PlanningComputedValue']>, ParentType, ContextType>;
+  computedStartValue?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   upperLimit?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   lowerLimit?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type PlanningAccountsResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningAccountsResponse'] = ResolversParentTypes['PlanningAccountsResponse']> = {
-  accounts?: Resolver<Array<ResolversTypes['PlanningAccount']>, ParentType, ContextType>;
+export type PlanningComputedValueResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningComputedValue'] = ResolversParentTypes['PlanningComputedValue']> = {
+  key?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  month?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  value?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  isVerified?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isTransfer?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1994,12 +1990,12 @@ export type PlanningCreditCardResolvers<ContextType = Context, ParentType extend
   id?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   netWorthSubcategoryId?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   payments?: Resolver<Array<ResolversTypes['PlanningCreditCardPayment']>, ParentType, ContextType>;
+  predictedPayment?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PlanningCreditCardPaymentResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningCreditCardPayment'] = ResolversParentTypes['PlanningCreditCardPayment']> = {
   id?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
-  year?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   month?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   value?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -2017,34 +2013,22 @@ export type PlanningIncomeResolvers<ContextType = Context, ParentType extends Re
 };
 
 export type PlanningParametersResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningParameters'] = ResolversParentTypes['PlanningParameters']> = {
-  year?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   rates?: Resolver<Array<ResolversTypes['TaxRate']>, ParentType, ContextType>;
   thresholds?: Resolver<Array<ResolversTypes['TaxThreshold']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type PlanningParametersResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningParametersResponse'] = ResolversParentTypes['PlanningParametersResponse']> = {
-  parameters?: Resolver<Array<ResolversTypes['PlanningParameters']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type PlanningPastIncomeResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningPastIncome'] = ResolversParentTypes['PlanningPastIncome']> = {
-  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  gross?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
-  deductions?: Resolver<Array<ResolversTypes['IncomeDeduction']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type PlanningSyncResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningSyncResponse'] = ResolversParentTypes['PlanningSyncResponse']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  parameters?: Resolver<Maybe<Array<ResolversTypes['PlanningParameters']>>, ParentType, ContextType>;
+  year?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
+  parameters?: Resolver<Maybe<ResolversTypes['PlanningParameters']>, ParentType, ContextType>;
   accounts?: Resolver<Maybe<Array<ResolversTypes['PlanningAccount']>>, ParentType, ContextType>;
+  taxReliefFromPreviousYear?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PlanningValueResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningValue'] = ResolversParentTypes['PlanningValue']> = {
   id?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
-  year?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   month?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   transferToAccountId?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -2286,13 +2270,11 @@ export type Resolvers<ContextType = Context> = {
   OverviewOld?: OverviewOldResolvers<ContextType>;
   OverviewPreview?: OverviewPreviewResolvers<ContextType>;
   PlanningAccount?: PlanningAccountResolvers<ContextType>;
-  PlanningAccountsResponse?: PlanningAccountsResponseResolvers<ContextType>;
+  PlanningComputedValue?: PlanningComputedValueResolvers<ContextType>;
   PlanningCreditCard?: PlanningCreditCardResolvers<ContextType>;
   PlanningCreditCardPayment?: PlanningCreditCardPaymentResolvers<ContextType>;
   PlanningIncome?: PlanningIncomeResolvers<ContextType>;
   PlanningParameters?: PlanningParametersResolvers<ContextType>;
-  PlanningParametersResponse?: PlanningParametersResponseResolvers<ContextType>;
-  PlanningPastIncome?: PlanningPastIncomeResolvers<ContextType>;
   PlanningSyncResponse?: PlanningSyncResponseResolvers<ContextType>;
   PlanningValue?: PlanningValueResolvers<ContextType>;
   PositiveInt?: GraphQLScalarType;

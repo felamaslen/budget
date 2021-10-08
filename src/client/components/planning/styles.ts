@@ -53,12 +53,23 @@ export const Planning = styled.div`
   grid-template-columns: auto;
   height: 100%;
   overflow: hidden;
+  position: relative;
   width: 100%;
 
   ${breakpoint(breakpoints.mobile)} {
     grid-template-rows: 1fr ${rem(300)};
     grid-template-columns: auto ${rem(240)} auto;
   }
+`;
+
+export const LoadingYearOverlay = styled.div`
+  background: ${colors.translucent.light.dark};
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 15;
 `;
 
 const sidebarWidthMobile = 240;

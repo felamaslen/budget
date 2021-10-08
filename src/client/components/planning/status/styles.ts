@@ -44,6 +44,9 @@ export const YearButton = styled.span<{ isActive: boolean }>`
 export const StatusError = styled.span`
   flex: 1 1 auto;
   color: ${colors.error};
+  overflow: hidden;
   padding-left: ${rem(4)};
   text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;

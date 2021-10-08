@@ -129,7 +129,7 @@ async function updateHoldings(
             logger.warn(`Skipped null code for stock: ${name}`);
           }
         } catch (err) {
-          if (err.message === 'Cancelled') {
+          if ((err as Error).message === 'Cancelled') {
             // this happens iff the user cancels a prompt for a stock code
             // in this case, we exit the entire process (for good UX)
             logger.info('Fund holdings update process cancelled by user');
@@ -196,7 +196,7 @@ function getFundsWithHoldings(funds: Fund[], data: DataByUrl): FundWithHoldings[
       ];
     } catch (err) {
       logger.warn(`Couldn't get holdings for fund with name: ${fund.name}`);
-      logger.debug(err.stack);
+      logger.debug((err as Error).stack);
 
       return results;
     }

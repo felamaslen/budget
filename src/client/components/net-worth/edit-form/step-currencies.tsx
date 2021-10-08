@@ -142,7 +142,7 @@ const EditCurrency: React.FC<PropsEditCurrency> = ({
         setError(undefined);
         onChange({ ...entry, rate });
       } catch (err) {
-        setError(err.message);
+        setError(err as Error);
       }
     }
   }, [tempRate, entry, onChange]);
@@ -203,7 +203,7 @@ const AddCurrency: React.FC<PropsAddCurrency> = ({
       setError(undefined);
       onAdd({ currency, rate });
     } catch (err) {
-      setError(err.message);
+      setError(err as Error);
     }
   }, [currencies, onAdd, tempCurrency, tempRate]);
 

@@ -26,7 +26,7 @@ export async function downloadUrl(url: string | null): Promise<string | null> {
 
     return res.data;
   } catch (err) {
-    logger.error(`Error downloading ${url}: ${err.message}`);
+    logger.error(`Error downloading ${url}: ${(err as Error).message}`);
     throw err;
   }
 }

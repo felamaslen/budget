@@ -7,7 +7,6 @@ import numericHash from 'string-hash';
 
 import { toISO } from './format';
 
-import { Average } from '~client/constants';
 import type {
   Data,
   FundInputNative,
@@ -84,42 +83,6 @@ export const isSold = (transactionsList: TransactionNative[]): boolean =>
 
 export const partialModification = <T>(items: T[], index: number, delta: Partial<T>): T[] =>
   replaceAtIndex(items, index, (old) => ({ ...old, ...delta }));
-
-export function arrayAverage(values: number[], mode: Average = Average.Mean): number {
-  if (!values.length) {
-    return NaN;
-  }
-  if (mode === Average.Median) {
-    const sorted = [...values].sort((prev, next) => prev - next);
-
-    const oddLength = sorted.length & 1;
-    if (oddLength) {
-      // odd: get the middle value
-      return sorted[Math.floor((sorted.length - 1) / 2)];
-    }
-
-    // even: get the middle two values and find the average of them
-    const low = sorted[Math.floor(sorted.length / 2) - 1];
-    const high = sorted[Math.floor(sorted.length / 2)];
-
-    return (low + high) / 2;
-  }
-  if (mode === Average.Exp) {
-    const weights = new Array(values.length)
-      .fill(0)
-      .map((_, index) => 2 ** -(index + 1))
-      .reverse();
-
-    const weightSum = weights.reduce((sum, value) => sum + value, 0);
-
-    return (
-      values.reduce((average, value, index) => average + value * weights[index], 0) / weightSum
-    );
-  }
-
-  // mean
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
 
 export function linearRegression(line: number[]): { slope: number; intercept: number } {
   const sumX = line.reduce<number>((last, _, index) => last + index + 1, 0);

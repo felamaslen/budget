@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { numYearsToPlan } from '../constants';
-import { getFinancialYear } from '../utils';
 import { useToday } from '~client/hooks';
 import { getStartDate } from '~client/selectors';
+import { getFinancialYear } from '~shared/planning';
 
 export function useYearOptions(): number[] {
   const today = useToday();

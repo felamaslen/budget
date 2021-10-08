@@ -1,6 +1,7 @@
 import { FetchResult } from 'apollo-boost';
 import gql from 'graphql-tag';
 import { omit } from 'lodash';
+import sinon from 'sinon';
 import { DatabasePoolConnectionType, sql } from 'slonik';
 
 import { getPool } from '~api/modules/db';
@@ -14,19 +15,21 @@ import {
   ThresholdRow,
 } from '~api/queries/planning';
 import { App, getTestApp } from '~api/test-utils/create-server';
+import { Maybe, MutationSyncPlanningArgs, PageListStandard } from '~api/types';
 import {
-  Maybe,
-  MutationSyncPlanningArgs,
-  PageListStandard,
   PlanningAccount,
+  PlanningAccountInput,
+  PlanningComputedValue,
+  PlanningCreditCard,
   PlanningCreditCardPayment,
-  PlanningPastIncome,
+  PlanningIncome,
+  PlanningParameters,
   PlanningSyncResponse,
   PlanningValue,
   TaxRate,
   TaxThreshold,
-} from '~api/types';
-import { PlanningParameters } from '~client/types/gql';
+} from '~client/types/gql';
+import type { RawDateDeep } from '~shared/types';
 import { omitTypeName } from '~shared/utils';
 
 describe('Planning resolver', () => {
@@ -34,6 +37,8 @@ describe('Planning resolver', () => {
   beforeAll(async () => {
     app = await getTestApp();
   });
+
+  const myYear = 2020;
 
   const myNetWorthCategory = 'My net worth category';
   const myBank = 'My net worth bank subcategory';
@@ -43,12 +48,21 @@ describe('Planning resolver', () => {
   let myOtherBankId: number;
   let myCreditCardId: number;
 
+  const myBankValueFeb2020 = 300000;
+  const myOtherBankValueFeb2020 = 500000;
+
+  type MutationSyncPlanningArgsRawDate = RawDateDeep<
+    MutationSyncPlanningArgs,
+    'startDate' | 'endDate'
+  >;
+
   const setupInitialData = async (db: DatabasePoolConnectionType): Promise<void> => {
     await db.query(sql`DELETE FROM planning_accounts`);
     await db.query(sql`DELETE FROM planning_rates`);
     await db.query(sql`DELETE FROM planning_thresholds`);
 
     await db.query(sql`DELETE FROM net_worth_categories WHERE category = ${myNetWorthCategory}`);
+    await db.query(sql`DELETE FROM net_worth WHERE uid = ${app.uid}`);
     await db.query(sql`DELETE FROM list_standard WHERE page = ${PageListStandard.Income}`);
 
     const categoryInsertResult = await db.query<{ id: number }>(sql`
@@ -73,6 +87,18 @@ describe('Planning resolver', () => {
     myBankId = subcategoryInsertResult.rows[0].id;
     myOtherBankId = subcategoryInsertResult.rows[1].id;
     myCreditCardId = subcategoryInsertResult.rows[2].id;
+
+    const netWorthEntryInsertResult = await db.query<{ id: number }>(sql`
+    INSERT INTO net_worth (uid, date) VALUES (${app.uid}, ${'2020-01-31'}) RETURNING id
+    `);
+    const netWorthEntryId = netWorthEntryInsertResult.rows[0].id;
+
+    await db.query(sql`
+    INSERT INTO net_worth_values (net_worth_id, subcategory, value, skip)
+    VALUES
+    (${netWorthEntryId}, ${myBankId}, ${myBankValueFeb2020}, ${false})
+    ,(${netWorthEntryId}, ${myOtherBankId}, ${myOtherBankValueFeb2020}, ${false})
+    `);
 
     const incomeIdRows = await db.query<{ id: number }>(sql`
     INSERT INTO list_standard (uid, page, date, item, category, value, shop)
@@ -117,11 +143,11 @@ describe('Planning resolver', () => {
 
   describe('Mutation syncPlanning', () => {
     const mutation = gql`
-      mutation SyncPlanning($input: PlanningSync) {
-        syncPlanning(input: $input) {
+      mutation SyncPlanning($year: NonNegativeInt!, $input: PlanningSync) {
+        syncPlanning(year: $year, input: $input) {
           error
+          year
           parameters {
-            year
             rates {
               name
               value
@@ -144,27 +170,18 @@ describe('Planning resolver', () => {
               pensionContrib
               studentLoan
             }
-            pastIncome {
-              date
-              gross
-              deductions {
-                name
-                value
-              }
-            }
             creditCards {
               id
               netWorthSubcategoryId
               payments {
                 id
-                year
                 month
                 value
               }
+              predictedPayment
             }
             values {
               id
-              year
               month
               transferToAccountId
               name
@@ -173,48 +190,70 @@ describe('Planning resolver', () => {
             }
             upperLimit
             lowerLimit
+            computedValues {
+              key
+              month
+              name
+              value
+              isVerified
+              isTransfer
+            }
+            computedStartValue
           }
+          taxReliefFromPreviousYear
         }
       }
     `;
 
     const variablesCreate = (): MutationSyncPlanningArgs => ({
+      year: myYear,
       input: {
-        parameters: [
-          {
-            year: 2020,
-            thresholds: [
-              {
-                name: 'IncomeTaxBasicThreshold',
-                value: 12500,
-              },
-              {
-                name: 'IncomeTaxBasicAllowance',
-                value: 37500,
-              },
-            ],
-            rates: [
-              {
-                name: 'IncomeTaxBasicRate',
-                value: 0.2,
-              },
-              {
-                name: 'IncomeTaxHigherRate',
-                value: 0.4,
-              },
-            ],
-          },
-          {
-            year: 2021,
-            thresholds: [
-              {
-                name: 'IncomeTaxBasicThreshold',
-                value: 12570,
-              },
-            ],
-            rates: [],
-          },
-        ],
+        parameters: {
+          thresholds: [
+            {
+              name: 'IncomeTaxBasicThreshold',
+              value: 12500,
+            },
+            {
+              name: 'IncomeTaxBasicAllowance',
+              value: 3750000,
+            },
+            {
+              name: 'NIPT',
+              value: 79700,
+            },
+            {
+              name: 'NIUEL',
+              value: 418900,
+            },
+            {
+              name: 'StudentLoanThreshold',
+              value: 2750000,
+            },
+          ],
+          rates: [
+            {
+              name: 'IncomeTaxBasicRate',
+              value: 0.2,
+            },
+            {
+              name: 'IncomeTaxHigherRate',
+              value: 0.4,
+            },
+            {
+              name: 'NILowerRate',
+              value: 0.12,
+            },
+            {
+              name: 'NIHigherRate',
+              value: 0.02,
+            },
+            {
+              name: 'StudentLoanRate',
+              value: 0.09,
+            },
+          ],
+        },
         accounts: [
           {
             account: 'Something account',
@@ -242,14 +281,14 @@ describe('Planning resolver', () => {
               {
                 netWorthSubcategoryId: myCreditCardId,
                 payments: [
-                  { year: 2020, month: 6, value: -38625 },
-                  { year: 2020, month: 11, value: -22690 },
+                  { month: 6, value: -38625 },
+                  { month: 10, value: -22690 },
                 ],
               },
             ],
             values: [
-              { year: 2020, month: 2, name: 'Some random expense', value: -80000 },
-              { year: 2020, month: 9, name: 'Expected income', formula: '75 * 29.3' },
+              { month: 2, name: 'Some random expense', value: -80000 },
+              { month: 9, name: 'Expected income', formula: '75 * 29.3' },
             ],
             upperLimit: 210000,
             lowerLimit: 200000,
@@ -289,25 +328,37 @@ describe('Planning resolver', () => {
           expect.arrayContaining([
             expect.objectContaining<Partial<ThresholdRow>>({
               uid: app.uid,
-              year: 2020,
+              year: myYear,
               name: 'IncomeTaxBasicThreshold',
               value: 12500,
             }),
             expect.objectContaining<Partial<ThresholdRow>>({
               uid: app.uid,
-              year: 2020,
+              year: myYear,
               name: 'IncomeTaxBasicAllowance',
-              value: 37500,
+              value: 3750000,
             }),
             expect.objectContaining<Partial<ThresholdRow>>({
               uid: app.uid,
-              year: 2021,
-              name: 'IncomeTaxBasicThreshold',
-              value: 12570,
+              year: myYear,
+              name: 'NIPT',
+              value: 79700,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              uid: app.uid,
+              year: myYear,
+              name: 'NIUEL',
+              value: 418900,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              uid: app.uid,
+              year: myYear,
+              name: 'StudentLoanThreshold',
+              value: 2750000,
             }),
           ]),
         );
-        expect(thresholdRows.rows).toHaveLength(3);
+        expect(thresholdRows.rows).toHaveLength(5);
       });
 
       it('should create rate rows in the database', async () => {
@@ -320,19 +371,37 @@ describe('Planning resolver', () => {
           expect.arrayContaining([
             expect.objectContaining<Partial<RateRow>>({
               uid: app.uid,
-              year: 2020,
+              year: myYear,
               name: 'IncomeTaxBasicRate',
               value: 0.2,
             }),
             expect.objectContaining<Partial<RateRow>>({
               uid: app.uid,
-              year: 2020,
+              year: myYear,
               name: 'IncomeTaxHigherRate',
               value: 0.4,
             }),
+            expect.objectContaining<Partial<RateRow>>({
+              uid: app.uid,
+              year: myYear,
+              name: 'NILowerRate',
+              value: 0.12,
+            }),
+            expect.objectContaining<Partial<RateRow>>({
+              uid: app.uid,
+              year: myYear,
+              name: 'NIHigherRate',
+              value: 0.02,
+            }),
+            expect.objectContaining<Partial<RateRow>>({
+              uid: app.uid,
+              year: myYear,
+              name: 'StudentLoanRate',
+              value: 0.09,
+            }),
           ]),
         );
-        expect(rateRows.rows).toHaveLength(2);
+        expect(rateRows.rows).toHaveLength(5);
       });
 
       it('should create account rows in the database', async () => {
@@ -425,7 +494,7 @@ describe('Planning resolver', () => {
             }),
             expect.objectContaining<Partial<PlanningCreditCardPaymentRow>>({
               year: 2020,
-              month: 11,
+              month: 10,
               value: -22690,
             }),
           ]),
@@ -473,45 +542,29 @@ describe('Planning resolver', () => {
         expect(res.data?.syncPlanning).toStrictEqual(
           expect.objectContaining<PlanningSyncResponse>({
             error: null,
-            parameters: expect.arrayContaining([
-              expect.objectContaining({
-                year: 2020,
-                thresholds: expect.arrayContaining(
-                  [
-                    {
-                      name: 'IncomeTaxBasicThreshold',
-                      value: 12500,
-                    },
-                    {
-                      name: 'IncomeTaxBasicAllowance',
-                      value: 37500,
-                    },
-                  ].map(expect.objectContaining),
-                ),
-                rates: expect.arrayContaining(
-                  [
-                    {
-                      name: 'IncomeTaxBasicRate',
-                      value: 0.2,
-                    },
-                    {
-                      name: 'IncomeTaxHigherRate',
-                      value: 0.4,
-                    },
-                  ].map(expect.objectContaining),
-                ),
-              }),
-              expect.objectContaining({
-                year: 2021,
-                thresholds: [
-                  {
-                    name: 'IncomeTaxBasicThreshold',
-                    value: 12570,
-                  },
-                ].map(expect.objectContaining),
-                rates: [],
-              }),
-            ]),
+            year: myYear,
+            parameters: expect.objectContaining<Partial<PlanningParameters>>({
+              thresholds: expect.arrayContaining([
+                expect.objectContaining<TaxThreshold>({
+                  name: 'IncomeTaxBasicThreshold',
+                  value: 12500,
+                }),
+                expect.objectContaining<TaxThreshold>({
+                  name: 'IncomeTaxBasicAllowance',
+                  value: 3750000,
+                }),
+              ]),
+              rates: expect.arrayContaining([
+                expect.objectContaining<TaxRate>({
+                  name: 'IncomeTaxBasicRate',
+                  value: 0.2,
+                }),
+                expect.objectContaining<TaxRate>({
+                  name: 'IncomeTaxHigherRate',
+                  value: 0.4,
+                }),
+              ]),
+            }),
             accounts: expect.arrayContaining([
               expect.objectContaining({
                 id: expect.any(Number),
@@ -523,7 +576,7 @@ describe('Planning resolver', () => {
                 upperLimit: 1500000,
                 lowerLimit: 500000,
               }),
-              expect.objectContaining({
+              expect.objectContaining<PlanningAccount>({
                 id: expect.any(Number),
                 account: 'My test account',
                 netWorthSubcategoryId: myBankId,
@@ -544,8 +597,8 @@ describe('Planning resolver', () => {
                     netWorthSubcategoryId: myCreditCardId,
                     payments: expect.arrayContaining(
                       [
-                        { id: expect.any(Number), year: 2020, month: 6, value: -38625 },
-                        { id: expect.any(Number), year: 2020, month: 11, value: -22690 },
+                        { id: expect.any(Number), month: 6, value: -38625 },
+                        { id: expect.any(Number), month: 10, value: -22690 },
                       ].map(expect.objectContaining),
                     ),
                   }),
@@ -553,74 +606,40 @@ describe('Planning resolver', () => {
                 values: expect.arrayContaining([
                   expect.objectContaining({
                     id: expect.any(Number),
-                    year: 2020,
                     month: 2,
                     name: 'Some random expense',
                     value: -80000,
+                    formula: null,
+                    transferToAccountId: null,
                   }),
                   expect.objectContaining({
                     id: expect.any(Number),
-                    year: 2020,
                     month: 9,
                     name: 'Expected income',
+                    value: null,
                     formula: '75 * 29.3',
+                    transferToAccountId: null,
                   }),
                 ]),
                 upperLimit: 210000,
                 lowerLimit: 200000,
+                computedValues: [],
               }),
             ]),
           }),
         );
       });
-
-      it('should return past income data', async () => {
-        expect.assertions(1);
-        const res = await setup();
-        expect(
-          res.data?.syncPlanning.accounts?.find(
-            (compare) => compare.netWorthSubcategoryId === myOtherBankId,
-          )?.pastIncome,
-        ).toStrictEqual([
-          expect.objectContaining<PlanningPastIncome>({
-            date: ('2020-04-20' as unknown) as Date,
-            gross: 500000,
-            deductions: [
-              expect.objectContaining({
-                name: 'NI',
-                value: -41302,
-              }),
-              expect.objectContaining({
-                name: 'Tax',
-                value: -59622,
-              }),
-            ],
-          }),
-          expect.objectContaining<PlanningPastIncome>({
-            date: ('2020-05-14' as unknown) as Date,
-            gross: 510000,
-            deductions: [
-              expect.objectContaining({
-                name: 'Tax',
-                value: -49020,
-              }),
-            ],
-          }),
-        ]);
-      });
     });
 
     describe('updating existing planning data', () => {
-      const variablesUpdate = (createRes: PlanningSyncResponse): MutationSyncPlanningArgs => {
-        const parameter0 = createRes.parameters?.find(
-          (compare) => compare.year === 2020,
-        ) as PlanningParameters;
-
-        const threshold0 = parameter0.thresholds.find(
+      const variablesUpdate = (
+        createRes: PlanningSyncResponse,
+      ): MutationSyncPlanningArgsRawDate => {
+        const threshold0 = createRes.parameters?.thresholds.find(
           (compare) => compare.name === 'IncomeTaxBasicAllowance',
         ) as TaxThreshold;
 
-        const rate0 = parameter0.rates.find(
+        const rate0 = createRes.parameters?.rates.find(
           (compare) => compare.name === 'IncomeTaxBasicRate',
         ) as TaxRate;
 
@@ -637,41 +656,33 @@ describe('Planning resolver', () => {
         ) as PlanningValue;
 
         return {
+          year: myYear,
           input: {
-            parameters: [
-              {
-                ...omitTypeName(parameter0),
-                thresholds: [
-                  omitTypeName(threshold0),
-                  // Note, basic threshold (2020) should be removed
-                  {
-                    name: 'OtherThreshold',
-                    value: 15000000,
-                  },
-                ],
-                rates: [
-                  {
-                    ...omitTypeName(rate0),
-                    value: 0.07, // I wish!
-                  },
-                  // Note, the higher rate should be removed
-                  {
-                    name: 'IncomeTaxAdditionalRate',
-                    value: 0.45,
-                  },
-                ],
-              },
-              // Note, 2021 parameters should be removed
-              {
-                year: 2024,
-                thresholds: [{ name: '2024ThresholdA', value: 123 }],
-                rates: [{ name: '2024RateA', value: 0.17 }],
-              },
-            ],
+            parameters: {
+              thresholds: [
+                omitTypeName(threshold0),
+                // Note, basic threshold (2020) should be removed
+                {
+                  name: 'OtherThreshold',
+                  value: 15000000,
+                },
+              ],
+              rates: [
+                {
+                  ...omitTypeName(rate0),
+                  value: 0.07, // I wish!
+                },
+                // Note, the higher rate should be removed
+                {
+                  name: 'IncomeTaxAdditionalRate',
+                  value: 0.45,
+                },
+              ],
+            },
             accounts: [
               // Note, "Something account" should be removed
               {
-                ...omit(omitTypeName(account1), 'pastIncome'),
+                ...omit(account1, '__typename', 'computedValues', 'computedStartValue'),
                 account: 'My modified test account',
                 upperLimit: 1000000,
                 income: [
@@ -682,14 +693,14 @@ describe('Planning resolver', () => {
                 ],
                 creditCards: [
                   {
-                    ...omitTypeName(account1.creditCards[0]),
+                    ...omit(account1.creditCards[0], '__typename', 'predictedPayment'),
                     payments: [
                       {
                         ...omitTypeName(ccPayment0),
                         value: -29273,
                       },
                       // Note, Nov-2020 should be removed
-                      { year: 2020, month: 12, value: -77502 },
+                      { month: 11, value: -77502 },
                     ],
                   },
                 ],
@@ -699,7 +710,7 @@ describe('Planning resolver', () => {
                     name: 'Some modified random expense',
                   },
                   // Note, Sep-2020 value should be removed
-                  { year: 2020, month: 5, name: 'Some new value', formula: '-2000 / 395' },
+                  { month: 5, name: 'Some new value', formula: '-2000 / 395' },
                 ],
               },
             ],
@@ -713,7 +724,7 @@ describe('Planning resolver', () => {
         await app.authGqlClient.clearStore();
         const res = await app.authGqlClient.mutate<
           { syncPlanning: PlanningSyncResponse },
-          MutationSyncPlanningArgs
+          MutationSyncPlanningArgsRawDate
         >({
           mutation,
           variables: variablesUpdate(createRes),
@@ -736,17 +747,12 @@ describe('Planning resolver', () => {
         expect(rowsAfterCreate.rows).toStrictEqual([
           expect.objectContaining({ name: 'IncomeTaxBasicAllowance' }),
           expect.objectContaining({ name: 'IncomeTaxBasicThreshold', year: 2020 }),
-          expect.objectContaining({ name: 'IncomeTaxBasicThreshold', year: 2021 }),
+          expect.objectContaining({ name: 'NIPT' }),
+          expect.objectContaining({ name: 'NIUEL' }),
+          expect.objectContaining({ name: 'StudentLoanThreshold' }),
         ]);
 
         expect(rowsAfterUpdate.rows).toStrictEqual<ThresholdRow[]>([
-          {
-            id: expect.any(Number),
-            name: '2024ThresholdA',
-            year: 2024,
-            value: 123,
-            uid: app.uid,
-          },
           {
             ...rowsAfterCreate.rows[0],
           },
@@ -775,16 +781,12 @@ describe('Planning resolver', () => {
         expect(rowsAfterCreate.rows).toStrictEqual([
           expect.objectContaining({ name: 'IncomeTaxBasicRate' }),
           expect.objectContaining({ name: 'IncomeTaxHigherRate' }),
+          expect.objectContaining({ name: 'NIHigherRate' }),
+          expect.objectContaining({ name: 'NILowerRate' }),
+          expect.objectContaining({ name: 'StudentLoanRate' }),
         ]);
 
         expect(rowsAfterUpdate.rows).toStrictEqual<ThresholdRow[]>([
-          {
-            id: expect.any(Number),
-            name: '2024RateA',
-            year: 2024,
-            value: 0.17,
-            uid: app.uid,
-          },
           {
             id: expect.any(Number),
             name: 'IncomeTaxAdditionalRate',
@@ -878,69 +880,711 @@ describe('Planning resolver', () => {
 
         expect(paymentRowsAfterCreate.rows).toStrictEqual([
           expect.objectContaining({ year: 2020, month: 6, value: -38625 }),
-          expect.objectContaining({ year: 2020, month: 11, value: -22690 }),
+          expect.objectContaining({ year: 2020, month: 10, value: -22690 }),
         ]);
 
         expect(paymentRowsAfterUpdate.rows).toStrictEqual([
           { ...paymentRowsAfterCreate.rows[0], value: -29273 },
-          expect.objectContaining({ year: 2020, month: 12, value: -77502 }),
+          expect.objectContaining({ year: 2020, month: 11, value: -77502 }),
         ]);
       });
     });
 
+    describe('adding new data for a different year', () => {
+      const otherYear = myYear + 3;
+
+      const variablesNewYear = (
+        createRes: PlanningSyncResponse,
+      ): MutationSyncPlanningArgsRawDate => ({
+        year: otherYear,
+        input: {
+          parameters: {
+            thresholds: [
+              {
+                name: 'IncomeTaxBasicAllowance',
+                value: 3790000,
+              },
+            ],
+            rates: [
+              {
+                name: 'IncomeTaxBasicRate',
+                value: 0.23,
+              },
+            ],
+          },
+          accounts:
+            createRes.accounts?.map<PlanningAccountInput>((account) => ({
+              ...omit(omitTypeName(account), '__typename', 'computedValues', 'computedStartValue'),
+              income: account.income.map(omitTypeName),
+              creditCards: account.creditCards.map((card) => ({
+                ...omit(card, '__typename', 'predictedPayment'),
+                payments: [],
+              })),
+              values:
+                account.account === 'My test account'
+                  ? [{ month: 4, name: 'Some new year expense', value: -55000 }]
+                  : [],
+            })) ?? [],
+        },
+      });
+
+      const setupNewYear = async (
+        createRes: PlanningSyncResponse,
+      ): Promise<Maybe<PlanningSyncResponse> | undefined> => {
+        await app.authGqlClient.clearStore();
+        const res = await app.authGqlClient.mutate<
+          { syncPlanning: PlanningSyncResponse },
+          MutationSyncPlanningArgsRawDate
+        >({
+          mutation,
+          variables: variablesNewYear(createRes),
+        });
+        return res.data?.syncPlanning;
+      };
+
+      it('should add new threshold rows while keeping the existing ones', async () => {
+        expect.assertions(2);
+        const createRes = await setupCreate();
+        await setupNewYear(createRes.data?.syncPlanning as PlanningSyncResponse);
+
+        const { rows } = await getPool().query<ThresholdRow>(
+          sql`SELECT * FROM planning_thresholds ORDER BY name, year`,
+        );
+
+        expect(rows).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<Partial<ThresholdRow>>({
+              year: myYear,
+              name: 'IncomeTaxBasicAllowance',
+              value: 3750000,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              year: myYear,
+              name: 'IncomeTaxBasicThreshold',
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              name: 'NIPT',
+              value: 79700,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              name: 'NIUEL',
+              value: 418900,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              name: 'StudentLoanThreshold',
+              value: 2750000,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              year: otherYear,
+              name: 'IncomeTaxBasicAllowance',
+              value: 3790000,
+            }),
+          ]),
+        );
+        expect(rows).toHaveLength(6);
+      });
+
+      it('should add new rate rows while keeping the existing ones', async () => {
+        expect.assertions(2);
+        const createRes = await setupCreate();
+        await setupNewYear(createRes.data?.syncPlanning as PlanningSyncResponse);
+
+        const { rows } = await getPool().query<ThresholdRow>(
+          sql`SELECT * FROM planning_rates ORDER BY name, year`,
+        );
+
+        expect(rows).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<Partial<ThresholdRow>>({
+              year: myYear,
+              name: 'IncomeTaxBasicRate',
+              value: 0.2,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              year: myYear,
+              name: 'IncomeTaxHigherRate',
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              name: 'NILowerRate',
+              value: 0.12,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              name: 'NIHigherRate',
+              value: 0.02,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              name: 'StudentLoanRate',
+              value: 0.09,
+            }),
+            expect.objectContaining<Partial<ThresholdRow>>({
+              year: otherYear,
+              name: 'IncomeTaxBasicRate',
+              value: 0.23,
+            }),
+          ]),
+        );
+        expect(rows).toHaveLength(6);
+      });
+
+      it('should add new value rows while keeping the existing ones', async () => {
+        expect.assertions(2);
+        const createRes = await setupCreate();
+        await setupNewYear(createRes.data?.syncPlanning as PlanningSyncResponse);
+
+        const valueRows = await getPool().query<PlanningValueRow>(sql`
+        SELECT planning_values.*
+        FROM planning_accounts
+        INNER JOIN planning_values ON planning_values.account_id = planning_accounts.id
+        WHERE planning_accounts.uid = ${app.uid}
+        `);
+
+        expect(valueRows.rows).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<Partial<PlanningValueRow>>({
+              year: myYear,
+              name: 'Some random expense',
+            }),
+            expect.objectContaining<Partial<PlanningValueRow>>({
+              year: myYear,
+              name: 'Expected income',
+            }),
+            expect.objectContaining<Partial<PlanningValueRow>>({
+              year: otherYear,
+              name: 'Some new year expense',
+              value: -55000,
+            }),
+          ]),
+        );
+        expect(valueRows.rows).toHaveLength(3);
+      });
+    });
+
     describe('when called without an input', () => {
-      const setupRead = async (): Promise<PlanningSyncResponse | undefined> => {
+      let clock: sinon.SinonFakeTimers | undefined;
+      afterEach(() => {
+        clock?.restore();
+      });
+
+      const setupRead = async (year = myYear): Promise<PlanningSyncResponse | undefined> => {
         app.authGqlClient.clearStore();
+        clock = sinon.useFakeTimers(new Date('2020-05-11T15:30:20+0100'));
         const res = await app.authGqlClient.mutate<
           { syncPlanning: PlanningSyncResponse },
           MutationSyncPlanningArgs
         >({
           mutation,
-          variables: { input: null },
+          variables: { year, input: null },
         });
         return res.data?.syncPlanning;
       };
 
-      it('should return the current planning state', async () => {
+      it('should return the current planning state for the given year', async () => {
         expect.assertions(1);
         await setupCreate();
         const res = await setupRead();
 
-        expect(res).toStrictEqual({
+        expect(res).toStrictEqual<PlanningSyncResponse>({
           __typename: 'PlanningSyncResponse',
           error: null,
+          year: myYear,
           accounts: expect.arrayContaining([
-            expect.objectContaining({ account: 'Something account' }),
-          ]),
-          parameters: expect.arrayContaining([
             expect.objectContaining({
-              year: 2020,
-              rates: expect.arrayContaining([
-                expect.objectContaining({ name: 'IncomeTaxBasicRate', value: 0.2 }),
-                expect.objectContaining({ name: 'IncomeTaxHigherRate', value: 0.4 }),
-              ]),
-              thresholds: expect.arrayContaining([
-                expect.objectContaining({ name: 'IncomeTaxBasicAllowance', value: 37500 }),
-              ]),
+              account: 'Something account',
+              upperLimit: expect.any(Number),
+              lowerLimit: expect.any(Number),
             }),
           ]),
+          parameters: {
+            __typename: 'PlanningParameters',
+            rates: expect.arrayContaining([
+              expect.objectContaining({ name: 'IncomeTaxBasicRate', value: 0.2 }),
+              expect.objectContaining({ name: 'IncomeTaxHigherRate', value: 0.4 }),
+            ]),
+            thresholds: expect.arrayContaining([
+              expect.objectContaining({ name: 'IncomeTaxBasicAllowance', value: 3750000 }),
+            ]),
+          },
+          taxReliefFromPreviousYear: expect.any(Number),
         });
       });
 
-      it('should order parameters by year, ascending', async () => {
-        expect.assertions(1);
+      it('should only include those parameters relevant to the given year', async () => {
+        expect.assertions(2);
         await setupCreate();
         await getPool().query(sql`
         INSERT INTO planning_rates (uid, year, name, value)
-        VALUES (${app.uid}, ${1996}, ${'My old rate name'}, ${123})
+        VALUES (${app.uid}, ${myYear - 1}, ${'My old rate name'}, ${123})
         `);
         const res = await setupRead();
 
-        expect(res?.parameters).toStrictEqual([
-          expect.objectContaining({ year: 1996 }),
-          expect.objectContaining({ year: 2020 }),
-          expect.objectContaining({ year: 2021 }),
+        expect(res?.parameters?.rates).toHaveLength(5);
+        expect(res?.parameters?.thresholds).toHaveLength(5);
+      });
+
+      it('should include income data associated with the account', async () => {
+        expect.assertions(2);
+        await setupCreate();
+        const res = await setupRead();
+
+        const accountWithoutSalary = res?.accounts?.find(
+          (compare) => compare.account === 'Something account',
+        );
+
+        const accountWithSalary = res?.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        );
+
+        expect(accountWithoutSalary?.income).toHaveLength(0);
+
+        expect(accountWithSalary?.income).toStrictEqual<PlanningIncome[]>([
+          expect.objectContaining<PlanningIncome>({
+            id: expect.any(Number),
+            startDate: '2020-01-20',
+            endDate: '2021-01-01',
+            salary: 6000000,
+            taxCode: '1250L',
+            studentLoan: true,
+            pensionContrib: 0.03,
+          }),
         ]);
+      });
+
+      it('should include credit card data associated with the account', async () => {
+        expect.assertions(2);
+        await setupCreate();
+        const res = await setupRead();
+
+        const accountWithoutCC = res?.accounts?.find(
+          (compare) => compare.account === 'Something account',
+        );
+
+        const accountWithCC = res?.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        );
+
+        expect(accountWithoutCC?.creditCards).toHaveLength(0);
+
+        expect(accountWithCC?.creditCards).toStrictEqual<PlanningCreditCard[]>([
+          expect.objectContaining<PlanningCreditCard>({
+            id: expect.any(Number),
+            netWorthSubcategoryId: myCreditCardId,
+            payments: expect.arrayContaining([
+              expect.objectContaining<PlanningCreditCardPayment>({
+                id: expect.any(Number),
+                month: 6,
+                value: -38625,
+              }),
+              expect.objectContaining<PlanningCreditCardPayment>({
+                id: expect.any(Number),
+                month: 10,
+                value: -22690,
+              }),
+            ]),
+            predictedPayment: expect.any(Number),
+          }),
+        ]);
+      });
+
+      it('should include value data associated with the account at the given year', async () => {
+        expect.assertions(2);
+        const resCreate = await setupCreate();
+        const createdAccount = resCreate.data?.syncPlanning?.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        ) as PlanningAccount;
+        await getPool().query(sql`
+        INSERT INTO planning_values (year, month, account_id, name, value)
+        VALUES (${myYear - 1}, ${3}, ${createdAccount.id}, ${'Some old value'}, ${-1560})
+        `);
+        const res = await setupRead();
+
+        const accountWithoutValues = res?.accounts?.find(
+          (compare) => compare.account === 'Something account',
+        );
+
+        const accountWithValues = res?.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        );
+
+        expect(accountWithoutValues?.values).toHaveLength(0);
+
+        expect(accountWithValues?.values).toStrictEqual<PlanningValue[]>([
+          expect.objectContaining<PlanningValue>({
+            id: expect.any(Number),
+            month: 2,
+            name: 'Some random expense',
+            value: -80000,
+            formula: null,
+            transferToAccountId: null,
+          }),
+          expect.objectContaining<PlanningValue>({
+            id: expect.any(Number),
+            month: 9,
+            name: 'Expected income',
+            value: null,
+            formula: '75 * 29.3',
+            transferToAccountId: null,
+          }),
+        ]);
+      });
+
+      it('should compute previous income values with deductions', async () => {
+        expect.assertions(1);
+        await setupCreate();
+        const res = await setupRead();
+
+        const accountWithIncome = res?.accounts?.find(
+          (compare) => compare.account === 'Something account',
+        );
+
+        expect(accountWithIncome?.computedValues).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<PlanningComputedValue>({
+              key: `salary-2020-04-30`,
+              month: 3,
+              name: 'Salary',
+              value: 500000,
+              isVerified: true, // since it's in the past
+              isTransfer: false,
+            }),
+            expect.objectContaining<PlanningComputedValue>({
+              key: `deduction-2020-3-Tax`,
+              month: 3,
+              name: 'Tax',
+              value: -59622,
+              isVerified: true,
+              isTransfer: false,
+            }),
+            expect.objectContaining<PlanningComputedValue>({
+              key: `deduction-2020-3-NI`,
+              month: 3,
+              name: 'NI',
+              value: -41302,
+              isVerified: true,
+              isTransfer: false,
+            }),
+          ]),
+        );
+      });
+
+      it('should compute predicted income transactions, for future months', async () => {
+        expect.assertions(2);
+        await setupCreate();
+        await getPool().query(sql`
+        INSERT INTO list_standard (uid, page, date, item, category, value, shop)
+        VALUES (${app.uid}, ${
+          PageListStandard.Income
+        }, ${'2020-05-14'}, ${'Salary (My test account)'}, ${'Work'}, ${550000}, ${'My company'})
+        `);
+        const res = await setupRead();
+
+        const accountWithSalary = res?.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        );
+
+        expect(accountWithSalary?.computedValues).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<PlanningComputedValue>({
+              key: 'salary-2020-5-predicted',
+              month: 5, // June
+              name: 'Salary',
+              value: 500000,
+              isVerified: false,
+              isTransfer: false,
+            }),
+            expect.objectContaining<PlanningComputedValue>({
+              key: 'deduction-2020-5-Pension-predicted',
+              month: 5,
+              name: 'Pension (SalSac)',
+              value: -15000,
+              isVerified: false,
+              isTransfer: false,
+            }),
+            expect.objectContaining<PlanningComputedValue>({
+              key: 'deduction-2020-5-Tax-predicted',
+              month: 5,
+              name: 'Income tax',
+              value: -62500,
+              isVerified: false,
+              isTransfer: false,
+            }),
+            expect.objectContaining<PlanningComputedValue>({
+              key: 'deduction-2020-5-NI-predicted',
+              month: 5,
+              name: 'NI',
+              value: -42026,
+              isVerified: false,
+              isTransfer: false,
+            }),
+            expect.objectContaining<PlanningComputedValue>({
+              key: 'deduction-2020-5-Student loan-predicted',
+              month: 5,
+              name: 'Student loan',
+              value: -23025,
+              isVerified: false,
+              isTransfer: false,
+            }),
+          ]),
+        );
+
+        expect(accountWithSalary?.computedValues).not.toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              key: 'salary-2020-4-predicted',
+              month: 4,
+              name: 'Salary',
+            }),
+          ]),
+        );
+      });
+
+      describe('when there is no income recorded for the current month', () => {
+        const setupWithoutPresentIncome = async (): ReturnType<typeof setupRead> => {
+          await setupCreate();
+          await getPool().query(sql`
+          DELETE FROM list_standard WHERE page = ${
+            PageListStandard.Income
+          } AND date = ${'2020-05-14'}
+          `);
+          const res = await setupRead();
+          return res;
+        };
+
+        it('should compute predicted income for the present month', async () => {
+          expect.assertions(1);
+          const res = await setupWithoutPresentIncome();
+
+          const accountWithSalary = res?.accounts?.find(
+            (compare) => compare.account === 'My test account',
+          );
+          expect(accountWithSalary?.computedValues).toStrictEqual(
+            expect.arrayContaining([
+              expect.objectContaining<PlanningComputedValue>({
+                key: 'salary-2020-4-predicted',
+                month: 4, // May
+                name: 'Salary',
+                value: 500000,
+                isVerified: false,
+                isTransfer: false,
+              }),
+              expect.objectContaining<PlanningComputedValue>({
+                key: 'deduction-2020-4-Pension-predicted',
+                month: 4,
+                name: 'Pension (SalSac)',
+                value: -15000,
+                isVerified: false,
+                isTransfer: false,
+              }),
+              expect.objectContaining<PlanningComputedValue>({
+                key: 'deduction-2020-4-Tax-predicted',
+                month: 4,
+                name: 'Income tax',
+                value: -62500,
+                isVerified: false,
+                isTransfer: false,
+              }),
+              expect.objectContaining<PlanningComputedValue>({
+                key: 'deduction-2020-4-NI-predicted',
+                month: 4,
+                name: 'NI',
+                value: -42026,
+                isVerified: false,
+                isTransfer: false,
+              }),
+              expect.objectContaining<PlanningComputedValue>({
+                key: 'deduction-2020-4-Student loan-predicted',
+                month: 4,
+                name: 'Student loan',
+                value: -23025,
+                isVerified: false,
+                isTransfer: false,
+              }),
+            ]),
+          );
+        });
+      });
+
+      it('should compute transfer transactions', async () => {
+        expect.assertions(1);
+        const resCreate = await setupCreate();
+
+        const accountWithSalary = resCreate.data?.syncPlanning.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        );
+
+        const accountToTransferTo = resCreate.data?.syncPlanning.accounts?.find(
+          (compare) => compare.account === 'Something account',
+        );
+
+        await getPool().connect(async (db) => {
+          await db.query(sql`
+          INSERT INTO planning_values (year, month, account_id, name, value, formula, transfer_to)
+          SELECT * FROM ${sql.unnest(
+            [
+              [
+                myYear,
+                6,
+                accountWithSalary?.id,
+                'Transfer to other account',
+                -16000,
+                null,
+                accountToTransferTo?.id,
+              ],
+            ],
+            ['int4', 'int4', 'int4', 'text', 'int4', 'text', 'int4'],
+          )}
+          `);
+        });
+
+        const res = await setupRead();
+
+        const accountToTransferToRead = res?.accounts?.find(
+          (compare) => compare.account === 'Something account',
+        );
+
+        expect(accountToTransferToRead?.computedValues).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              name: 'My test account transfer',
+              value: 16000,
+              isTransfer: true,
+            }),
+          ]),
+        );
+      });
+
+      it('should not return income transactions where the value is zero', async () => {
+        expect.assertions(4);
+        await setupCreate();
+        await getPool().connect(async (db) => {
+          await db.query(sql`
+          UPDATE planning_income SET student_loan = ${false}
+          `);
+
+          await db.query(sql`
+          UPDATE planning_rates SET value = 0 WHERE name = ANY(${sql.array(
+            ['NILowerRate', 'NIHigherRate'],
+            'text',
+          )})
+          `);
+        });
+
+        const res = await setupRead();
+
+        const accountWithSalary = res?.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        );
+
+        expect(accountWithSalary?.computedValues).not.toHaveLength(0);
+
+        expect(accountWithSalary?.computedValues).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              name: 'Salary',
+            }),
+          ]),
+        );
+
+        expect(accountWithSalary?.computedValues).not.toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              name: 'Student loan',
+            }),
+          ]),
+        );
+        expect(accountWithSalary?.computedValues).not.toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              name: 'NI',
+            }),
+          ]),
+        );
+      });
+
+      it('should compute the predicted credit card payment, for future months', async () => {
+        expect.assertions(1);
+        await setupCreate();
+        const res = await setupRead();
+
+        const accountWithCreditCard = res?.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        );
+
+        // median of *all* existing payments (this is necessary so that it's consistent across
+        // requests for multiple years)
+        expect(accountWithCreditCard?.creditCards[0].predictedPayment).toBe(-38625);
+      });
+
+      it('should compute the value of the account at the beginning of the financial year', async () => {
+        expect.assertions(2);
+        await setupCreate();
+        const res = await setupRead();
+
+        const accountWithMyBank = res?.accounts?.find(
+          (compare) => compare.account === 'My test account',
+        );
+        const accountWithMyOtherBank = res?.accounts?.find(
+          (compare) => compare.account === 'Something account',
+        );
+
+        expect(accountWithMyBank?.computedStartValue).toBe(myBankValueFeb2020);
+        expect(accountWithMyOtherBank?.computedStartValue).toBe(myOtherBankValueFeb2020);
+      });
+
+      describe('for a year in the future', () => {
+        it('should compute the tax relief from pension contributions in the previous year', async () => {
+          expect.assertions(1);
+          const resCreate = await setupCreate();
+          const accountWithIncome = resCreate.data?.syncPlanning.accounts?.find(
+            (compare) => compare.account === 'Something account',
+          ) as PlanningAccount;
+          await getPool().connect(async (db) => {
+            await db.query(sql`
+          INSERT INTO planning_values (account_id, year, month, name, value) VALUES
+          (${accountWithIncome.id}, ${myYear}, ${5}, ${'Pension (SIPP)'}, ${-20000})
+          ,(${accountWithIncome.id}, ${myYear}, ${7}, ${'Pension (SIPP)'}, ${-15000})
+          `);
+            await db.query(sql`
+          INSERT INTO planning_thresholds (uid, year, name, value) VALUES
+          (${app.uid}, ${myYear}, ${'IncomeTaxAdditionalThreshold'}, ${15000000})
+          `);
+            await db.query(sql`
+          INSERT INTO planning_rates (uid, year, name, value) VALUES
+          (${app.uid}, ${myYear}, ${'IncomeTaxAdditionalRate'}, ${0.45})
+          `);
+          });
+
+          const expectedTaxRelief = 0.4 * (20000 + 15000);
+
+          const res = await setupRead(myYear + 1);
+          expect(res?.taxReliefFromPreviousYear).toBeCloseTo(expectedTaxRelief);
+        });
+
+        it('should return the parameters for the given year', async () => {
+          expect.assertions(1);
+          await setupCreate();
+
+          await getPool().query(sql`
+          INSERT INTO planning_rates (uid, year, name, value)
+          VALUES (${app.uid}, ${myYear + 1}, ${'MyRate'}, ${0.25})
+          `);
+
+          const res = await setupRead(myYear + 1);
+
+          expect(res?.parameters?.rates).toStrictEqual(
+            expect.arrayContaining([expect.objectContaining({ name: 'MyRate', value: 0.25 })]),
+          );
+        });
+
+        it('should include credit cards', async () => {
+          expect.assertions(1);
+          await setupCreate();
+
+          const res = await setupRead(myYear + 1);
+
+          expect(
+            res?.accounts?.find((compare) => compare.account === 'My test account')?.creditCards,
+          ).toHaveLength(1);
+        });
       });
     });
   });

@@ -4,7 +4,6 @@ import shortid from 'shortid';
 import numericHash from 'string-hash';
 
 import {
-  arrayAverage,
   exponentialRegression,
   generateFakeId,
   getTotalCost,
@@ -21,7 +20,6 @@ import {
   withoutId,
   withoutIds,
 } from './data';
-import { Average } from '~client/constants';
 import type {
   Data,
   FundNative,
@@ -294,43 +292,6 @@ describe('data module', () => {
         { total: 3 },
         { total: 1, foo: 'bar' },
       ]);
-    });
-  });
-
-  describe(arrayAverage.name, () => {
-    it('should get the median of a list of data', () => {
-      expect.assertions(2);
-      expect(arrayAverage([1, 2, 5, 10, 10, 11, 9, 3, 20], Average.Median)).toBe(9);
-      expect(arrayAverage([1, 5, 10, 10, 11, 9, 3, 20], Average.Median)).toBe(9.5);
-    });
-
-    it('should get an exponential average for a list of data', () => {
-      expect.assertions(1);
-      const theList = [1, 2, 5, 10, 10, 11, 9, 3, 20];
-
-      const averageExp = 13.105675146771038;
-
-      expect(arrayAverage(theList, Average.Exp)).toBe(averageExp);
-    });
-
-    it('should get the mean by default', () => {
-      expect.assertions(2);
-
-      expect(arrayAverage([1, 2, 5, 10, 10, 11, 9, 3, 20])).toBe(71 / 9);
-      expect(arrayAverage([1, 5, 10, 10, 11, 9, 3, 20])).toBe(8.625);
-    });
-
-    it('should not mutate the array', () => {
-      expect.assertions(1);
-
-      const values = [1, 7, 3, 9];
-      arrayAverage(values, Average.Median);
-      expect(values).toStrictEqual([1, 7, 3, 9]);
-    });
-
-    it('should handle the case when the array is empty', () => {
-      expect.assertions(1);
-      expect(arrayAverage([])).toBeNaN();
     });
   });
 

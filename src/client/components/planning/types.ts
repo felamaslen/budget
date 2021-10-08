@@ -3,7 +3,7 @@ import type { PlanningSyncResponse } from '~client/types/gql';
 import type { GQL, OptionalDeep } from '~shared/types';
 
 export type AccountTransaction = {
-  id: number | string;
+  key: number | string;
   name: string;
   computedValue: number | undefined;
   value?: number;
@@ -21,35 +21,24 @@ export type AccountCreditCardPayment = {
   isVerified?: boolean;
 };
 
-export type IncomeRates = {
-  taxBasicRate: number;
-  taxHigherRate: number;
-  taxAdditionalRate: number;
-  taxBasicAllowance: number;
-  taxAdditionalThreshold: number;
-  niPaymentThreshold: number;
-  niUpperEarningsLimit: number;
-  niLowerRate: number;
-  niHigherRate: number;
-  studentLoanRate: number;
-  studentLoanThreshold: number;
-};
-
 export type PlanningMonth = { date: Date; year: number; month: number };
 
 export type State = OptionalDeep<
-  GQL<{
-    accounts: NonNullable<Required<PlanningSyncResponse>['accounts']>;
-    parameters: NonNullable<Required<PlanningSyncResponse>['parameters']>;
-  }>,
+  GQL<
+    Omit<PlanningSyncResponse, 'year' | 'accounts' | 'parameters'> & {
+      year: number;
+      accounts: NonNullable<Required<PlanningSyncResponse>['accounts']>;
+      parameters: NonNullable<Required<PlanningSyncResponse>['parameters']>;
+    }
+  >,
   'id'
 >;
 
 export type PlanningDispatch = Dispatch<SetStateAction<State>>;
 
 export type PlanningContextState = {
+  localYear: number;
   state: State;
-  year: number;
   isSynced: boolean;
   isLoading: boolean;
   error: string | null;
@@ -63,16 +52,13 @@ export type AccountCredit = Account['creditCards'][0];
 export type CreditCardRecord = {
   netWorthSubcategoryId: number;
   name: string;
-  lastRecordedPayment: PlanningMonth;
-  averageRecordedPayment: number | undefined;
+  lastRecordedPaymentMonth: number;
 };
 
 export type MonthByAccount = {
   accountGroup: Account;
   startValue: AccountTransaction;
   transactions: AccountTransaction[];
-  taxRelief: number;
-  previousYearTaxRelief: number;
   creditCards: AccountCreditCardPayment[];
   endValue: AccountTransaction;
 };

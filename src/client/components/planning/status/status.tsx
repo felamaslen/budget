@@ -17,7 +17,7 @@ const spinnerOverride = (showSpinner = false): SerializedStyles => css`
 `;
 
 export const Status: React.FC = () => {
-  const { year, isSynced, isLoading, error } = usePlanningContext();
+  const { isSynced, isLoading, error, state } = usePlanningContext();
   const showSpinner = !isSynced || isLoading;
 
   const yearOptions = useYearOptions();
@@ -26,7 +26,7 @@ export const Status: React.FC = () => {
     <Styled.StatusBar>
       <Styled.YearButtons>
         {yearOptions.map((financialYear) => (
-          <Styled.YearButton key={financialYear} isActive={financialYear === year}>
+          <Styled.YearButton key={financialYear} isActive={financialYear === state.year}>
             <Link to={`/planning/${financialYear}`}>
               FY {financialYear - 2000}/{financialYear - 2000 + 1}
             </Link>

@@ -44,3 +44,51 @@ export const coalesceKeys = <T extends Partial<Record<K, unknown>>, K extends st
   obj: T,
   ...keys: K[]
 ): T => keys.reduce<T>((last, key) => ({ ...last, [key]: last[key] ?? null }), obj);
+
+export const enum Average {
+  Mean,
+  Median,
+  Exp,
+}
+
+export function arrayAverage(values: number[], mode: Average = Average.Mean): number {
+  if (!values.length) {
+    return NaN;
+  }
+  if (mode === Average.Median) {
+    const sorted = [...values].sort((prev, next) => prev - next);
+
+    const oddLength = sorted.length & 1;
+    if (oddLength) {
+      // odd: get the middle value
+      return sorted[Math.floor((sorted.length - 1) / 2)];
+    }
+
+    // even: get the middle two values and find the average of them
+    const low = sorted[Math.floor(sorted.length / 2) - 1];
+    const high = sorted[Math.floor(sorted.length / 2)];
+
+    return (low + high) / 2;
+  }
+  if (mode === Average.Exp) {
+    const weights = new Array(values.length)
+      .fill(0)
+      .map((_, index) => 2 ** -(index + 1))
+      .reverse();
+
+    const weightSum = weights.reduce((sum, value) => sum + value, 0);
+
+    return (
+      values.reduce((average, value, index) => average + value * weights[index], 0) / weightSum
+    );
+  }
+
+  // mean
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+export const roundObject = <T extends Record<string, number>>(obj: T): T =>
+  Object.entries(obj).reduce<T>(
+    (last, [key, value]) => ({ ...last, [key]: Math.round(value) }),
+    obj,
+  );

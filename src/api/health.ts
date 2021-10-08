@@ -33,7 +33,7 @@ export function healthRoutes(): Router {
       });
     } catch (err) {
       logger.error('readiness check failed: %s', {
-        err: err.message,
+        err: (err as Error).message,
       });
 
       res.status(500);

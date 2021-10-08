@@ -52,7 +52,7 @@ export function genericMutationResolver<Result extends { error?: Maybe<string> }
       if (isBoom(err) && err.output.statusCode < 500) {
         return { error: err.message } as Partial<Result>;
       }
-      logger.error('[mutation] %s', err.stack);
+      logger.error('[mutation] %s', (err as Error).stack);
       return { error: 'Server error' } as Partial<Result>;
     }
   });

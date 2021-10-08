@@ -12,7 +12,6 @@ export const planningSchema = gql`
   }
 
   type PlanningParameters {
-    year: NonNegativeInt!
     rates: [TaxRate!]!
     thresholds: [TaxThreshold!]!
   }
@@ -27,15 +26,8 @@ export const planningSchema = gql`
     studentLoan: Boolean!
   }
 
-  type PlanningPastIncome {
-    date: Date!
-    gross: NonNegativeInt!
-    deductions: [IncomeDeduction!]!
-  }
-
   type PlanningCreditCardPayment {
     id: NonNegativeInt!
-    year: NonNegativeInt!
     month: NonNegativeInt!
     value: Int!
   }
@@ -44,11 +36,11 @@ export const planningSchema = gql`
     id: NonNegativeInt!
     netWorthSubcategoryId: NonNegativeInt!
     payments: [PlanningCreditCardPayment!]!
+    predictedPayment: Int
   }
 
   type PlanningValue {
     id: NonNegativeInt!
-    year: NonNegativeInt!
     month: NonNegativeInt!
     transferToAccountId: NonNegativeInt
     name: String!
@@ -56,16 +48,34 @@ export const planningSchema = gql`
     formula: String
   }
 
+  type PlanningComputedValue {
+    key: String!
+    month: NonNegativeInt!
+    name: String!
+    value: Int!
+    isVerified: Boolean!
+    isTransfer: Boolean!
+  }
+
   type PlanningAccount {
     id: NonNegativeInt!
     account: String!
     netWorthSubcategoryId: NonNegativeInt!
     income: [PlanningIncome!]!
-    pastIncome: [PlanningPastIncome!]!
     creditCards: [PlanningCreditCard!]!
     values: [PlanningValue!]!
+    computedValues: [PlanningComputedValue!]!
+    computedStartValue: Int
     upperLimit: Int
     lowerLimit: Int
+  }
+
+  type PlanningSyncResponse {
+    error: String
+    year: NonNegativeInt
+    parameters: PlanningParameters
+    accounts: [PlanningAccount!]
+    taxReliefFromPreviousYear: Int
   }
 
   input PlanningTaxRateInput {
@@ -79,7 +89,6 @@ export const planningSchema = gql`
   }
 
   input PlanningParametersInput {
-    year: NonNegativeInt!
     rates: [PlanningTaxRateInput!]!
     thresholds: [PlanningTaxThresholdInput!]!
   }
@@ -96,7 +105,6 @@ export const planningSchema = gql`
 
   input PlanningCreditCardPaymentInput {
     id: NonNegativeInt
-    year: NonNegativeInt!
     month: NonNegativeInt!
     value: Int!
   }
@@ -109,7 +117,6 @@ export const planningSchema = gql`
 
   input PlanningValueInput {
     id: NonNegativeInt
-    year: NonNegativeInt!
     month: NonNegativeInt!
     transferToAccountId: NonNegativeInt
     name: String!
@@ -129,25 +136,11 @@ export const planningSchema = gql`
   }
 
   input PlanningSync {
-    parameters: [PlanningParametersInput!]!
+    parameters: PlanningParametersInput!
     accounts: [PlanningAccountInput!]!
   }
 
-  type PlanningSyncResponse {
-    error: String
-    parameters: [PlanningParameters!]
-    accounts: [PlanningAccount!]
-  }
-
-  type PlanningParametersResponse {
-    parameters: [PlanningParameters!]!
-  }
-
-  type PlanningAccountsResponse {
-    accounts: [PlanningAccount!]!
-  }
-
   extend type Mutation {
-    syncPlanning(input: PlanningSync): PlanningSyncResponse
+    syncPlanning(year: NonNegativeInt!, input: PlanningSync): PlanningSyncResponse
   }
 `;

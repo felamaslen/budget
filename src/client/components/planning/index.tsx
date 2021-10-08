@@ -16,20 +16,20 @@ import { useIsMobile } from '~client/hooks';
 const PagePlanning: React.FC<RouteComponentProps<{ year?: string }>> = ({ history, match }) => {
   const isMobile = useIsMobile();
 
-  const { state, setState, isSynced, isLoading, error } = usePlanning();
   const year = useYear(match.params.year);
+  const { state, setState, isSynced, isLoading, error } = usePlanning(year);
   useEffect(() => {
     if (!match.params.year) {
       history.replace(`/planning/${year}`);
     }
   }, [history, match.params.year, year]);
 
-  const tableData = usePlanningTableData(state, year);
+  const tableData = usePlanningTableData(state);
 
   const context = useMemo<PlanningContextState>(
     () => ({
       state,
-      year,
+      localYear: year,
       isSynced,
       isLoading,
       error,
@@ -37,6 +37,8 @@ const PagePlanning: React.FC<RouteComponentProps<{ year?: string }>> = ({ histor
     }),
     [state, year, isSynced, isLoading, error, tableData],
   );
+
+  const isLoadingYear = state.year !== year;
 
   return (
     <PlanningContextDispatch.Provider value={setState}>
@@ -47,6 +49,7 @@ const PagePlanning: React.FC<RouteComponentProps<{ year?: string }>> = ({ histor
             {!isMobile && <PlanningOverview />}
             <Sidebar />
             <PlanningPieChart />
+            {isLoadingYear && <Styled.LoadingYearOverlay />}
           </Styled.Planning>
           <Status />
         </Styled.PlanningWrapper>

@@ -1,10 +1,11 @@
 import groupBy from 'lodash/groupBy';
 import { useMemo } from 'react';
 
-import { ComputedTransactionName } from '../constants';
 import { usePlanningContext } from '../context';
-import type { PlanningContextState } from '../types';
+import type { PlanningContextState, State } from '../types';
 import { nameIncluded, sumComputedTransactionsByName } from '../utils';
+
+import { ComputedTransactionName } from '~shared/planning';
 
 export type PlanningOverviewRow = { name: string; value: number; isBold?: boolean };
 
@@ -105,26 +106,22 @@ function useCreditCardRow(table: PlanningContextState['table']): PlanningOvervie
   }, [table]);
 }
 
-function usePreviousYearTaxRelief(table: PlanningContextState['table']): PlanningOverviewRow {
-  return useMemo<PlanningOverviewRow>(() => {
-    const value = table.reduce<number>(
-      (sum0, { accounts }) =>
-        accounts.reduce<number>(
-          (sum1, { previousYearTaxRelief }) => sum1 + previousYearTaxRelief,
-          sum0,
-        ),
-      0,
-    );
-    return { name: 'Tax relief from previous year', value };
-  }, [table]);
+function usePreviousYearTaxRelief(state: State): PlanningOverviewRow {
+  return useMemo<PlanningOverviewRow>(
+    () => ({
+      name: 'Tax relief from previous year',
+      value: state.taxReliefFromPreviousYear ?? 0,
+    }),
+    [state.taxReliefFromPreviousYear],
+  );
 }
 
 export function useOverviewData(): PlanningOverviewRow[] {
-  const { table } = usePlanningContext();
+  const { state, table } = usePlanningContext();
   const computedRows = useComputedRows(table);
   const customRows = useCustomRows(table);
   const creditCardRow = useCreditCardRow(table);
-  const previousYearTaxRelief = usePreviousYearTaxRelief(table);
+  const previousYearTaxRelief = usePreviousYearTaxRelief(state);
 
   return [...computedRows, previousYearTaxRelief, ...customRows, creditCardRow];
 }

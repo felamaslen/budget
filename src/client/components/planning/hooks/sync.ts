@@ -9,21 +9,28 @@ import { isStateEqual } from './utils';
 import { PlanningSync, SyncPlanningMutation, useSyncPlanningMutation } from '~client/types/gql';
 import { omitDeep } from '~shared/utils';
 
-const processSyncedState = (result: SyncPlanningMutation): State =>
+const toLocalState = (result: SyncPlanningMutation): State =>
   omitDeep(
     {
-      accounts: result?.syncPlanning?.accounts ?? [],
-      parameters: result?.syncPlanning?.parameters ?? [],
+      ...omit(result.syncPlanning, 'error'),
+      year: result.syncPlanning?.year ?? 0,
+      parameters: result.syncPlanning?.parameters ?? initialState.parameters,
+      accounts: result.syncPlanning?.accounts ?? initialState.accounts,
     },
     '__typename',
   );
 
-const processLocalState = (state: State): PlanningSync => ({
-  accounts: state.accounts.map((row) => omit(row, 'pastIncome')),
+const toRemotePayload = (state: State): PlanningSync => ({
+  accounts: state.accounts.map((row) => ({
+    ...omit(row, 'computedValues', 'computedStartValue'),
+    creditCards: row.creditCards.map((card) => omit(card, 'predictedPayment')),
+  })),
   parameters: state.parameters,
 });
 
-export function usePlanning(): {
+export function usePlanning(
+  localYear: number,
+): {
   state: State;
   setState: Dispatch<SetStateAction<State>>;
   isSynced: boolean;
@@ -38,8 +45,8 @@ export function usePlanning(): {
   const syncDebounce = useDebounceCallback(sync, 300);
 
   useEffect(() => {
-    sync();
-  }, [sync]);
+    sync({ year: localYear });
+  }, [sync, localYear]);
 
   const lastSyncedState = useRef<State | undefined>(undefined);
   const lastVerifiedState = useRef<State | undefined>(undefined);
@@ -55,10 +62,11 @@ export function usePlanning(): {
       setSynced(false);
       setError(null);
       syncDebounce({
-        input: processLocalState(state),
+        year: localYear,
+        input: toRemotePayload(state),
       });
     }
-  }, [syncDebounce, canSync, state]);
+  }, [syncDebounce, canSync, state, localYear]);
 
   useEffect(() => {
     const responseError = requestError?.message ?? data?.syncPlanning?.error;
@@ -68,15 +76,15 @@ export function usePlanning(): {
       if (lastVerifiedState.current) {
         setState(lastVerifiedState.current);
       }
-    } else if (data?.syncPlanning) {
+    } else if (data?.syncPlanning?.year === localYear) {
       setSynced(true);
-      const processed = processSyncedState(data);
+      const processed = toLocalState(data);
       lastVerifiedState.current = processed;
       lastSyncedState.current = processed;
       setState(processed);
       setError(null);
     }
-  }, [data, requestError]);
+  }, [data, requestError, localYear]);
 
   return {
     error,

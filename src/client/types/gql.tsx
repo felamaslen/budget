@@ -517,6 +517,7 @@ export type MutationSetConfigArgs = {
 
 
 export type MutationSyncPlanningArgs = {
+  year: Scalars['NonNegativeInt'];
   input?: Maybe<PlanningSync>;
 };
 
@@ -783,9 +784,10 @@ export type PlanningAccount = {
   account: Scalars['String'];
   netWorthSubcategoryId: Scalars['NonNegativeInt'];
   income: Array<PlanningIncome>;
-  pastIncome: Array<PlanningPastIncome>;
   creditCards: Array<PlanningCreditCard>;
   values: Array<PlanningValue>;
+  computedValues: Array<PlanningComputedValue>;
+  computedStartValue?: Maybe<Scalars['Int']>;
   upperLimit?: Maybe<Scalars['Int']>;
   lowerLimit?: Maybe<Scalars['Int']>;
 };
@@ -801,9 +803,14 @@ export type PlanningAccountInput = {
   lowerLimit?: Maybe<Scalars['Int']>;
 };
 
-export type PlanningAccountsResponse = {
-  __typename?: 'PlanningAccountsResponse';
-  accounts: Array<PlanningAccount>;
+export type PlanningComputedValue = {
+  __typename?: 'PlanningComputedValue';
+  key: Scalars['String'];
+  month: Scalars['NonNegativeInt'];
+  name: Scalars['String'];
+  value: Scalars['Int'];
+  isVerified: Scalars['Boolean'];
+  isTransfer: Scalars['Boolean'];
 };
 
 export type PlanningCreditCard = {
@@ -811,6 +818,7 @@ export type PlanningCreditCard = {
   id: Scalars['NonNegativeInt'];
   netWorthSubcategoryId: Scalars['NonNegativeInt'];
   payments: Array<PlanningCreditCardPayment>;
+  predictedPayment?: Maybe<Scalars['Int']>;
 };
 
 export type PlanningCreditCardInput = {
@@ -822,14 +830,12 @@ export type PlanningCreditCardInput = {
 export type PlanningCreditCardPayment = {
   __typename?: 'PlanningCreditCardPayment';
   id: Scalars['NonNegativeInt'];
-  year: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
   value: Scalars['Int'];
 };
 
 export type PlanningCreditCardPaymentInput = {
   id?: Maybe<Scalars['NonNegativeInt']>;
-  year: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
   value: Scalars['Int'];
 };
@@ -857,39 +863,27 @@ export type PlanningIncomeInput = {
 
 export type PlanningParameters = {
   __typename?: 'PlanningParameters';
-  year: Scalars['NonNegativeInt'];
   rates: Array<TaxRate>;
   thresholds: Array<TaxThreshold>;
 };
 
 export type PlanningParametersInput = {
-  year: Scalars['NonNegativeInt'];
   rates: Array<PlanningTaxRateInput>;
   thresholds: Array<PlanningTaxThresholdInput>;
 };
 
-export type PlanningParametersResponse = {
-  __typename?: 'PlanningParametersResponse';
-  parameters: Array<PlanningParameters>;
-};
-
-export type PlanningPastIncome = {
-  __typename?: 'PlanningPastIncome';
-  date: Scalars['Date'];
-  gross: Scalars['NonNegativeInt'];
-  deductions: Array<IncomeDeduction>;
-};
-
 export type PlanningSync = {
-  parameters: Array<PlanningParametersInput>;
+  parameters: PlanningParametersInput;
   accounts: Array<PlanningAccountInput>;
 };
 
 export type PlanningSyncResponse = {
   __typename?: 'PlanningSyncResponse';
   error?: Maybe<Scalars['String']>;
-  parameters?: Maybe<Array<PlanningParameters>>;
+  year?: Maybe<Scalars['NonNegativeInt']>;
+  parameters?: Maybe<PlanningParameters>;
   accounts?: Maybe<Array<PlanningAccount>>;
+  taxReliefFromPreviousYear?: Maybe<Scalars['Int']>;
 };
 
 export type PlanningTaxRateInput = {
@@ -905,7 +899,6 @@ export type PlanningTaxThresholdInput = {
 export type PlanningValue = {
   __typename?: 'PlanningValue';
   id: Scalars['NonNegativeInt'];
-  year: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
   transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
   name: Scalars['String'];
@@ -915,7 +908,6 @@ export type PlanningValue = {
 
 export type PlanningValueInput = {
   id?: Maybe<Scalars['NonNegativeInt']>;
-  year: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
   transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
   name: Scalars['String'];
@@ -1323,7 +1315,6 @@ export type NetWorthEntryPartsFragment = (
 
 export type PlanningParametersPartsFragment = (
   { __typename?: 'PlanningParameters' }
-  & Pick<PlanningParameters, 'year'>
   & { rates: Array<(
     { __typename?: 'TaxRate' }
     & Pick<TaxRate, 'name' | 'value'>
@@ -1335,27 +1326,23 @@ export type PlanningParametersPartsFragment = (
 
 export type PlanningAccountPartsFragment = (
   { __typename?: 'PlanningAccount' }
-  & Pick<PlanningAccount, 'id' | 'account' | 'netWorthSubcategoryId' | 'upperLimit' | 'lowerLimit'>
+  & Pick<PlanningAccount, 'id' | 'account' | 'netWorthSubcategoryId' | 'upperLimit' | 'lowerLimit' | 'computedStartValue'>
   & { income: Array<(
     { __typename?: 'PlanningIncome' }
     & Pick<PlanningIncome, 'id' | 'startDate' | 'endDate' | 'salary' | 'taxCode' | 'pensionContrib' | 'studentLoan'>
-  )>, pastIncome: Array<(
-    { __typename?: 'PlanningPastIncome' }
-    & Pick<PlanningPastIncome, 'date' | 'gross'>
-    & { deductions: Array<(
-      { __typename?: 'IncomeDeduction' }
-      & Pick<IncomeDeduction, 'name' | 'value'>
-    )> }
   )>, creditCards: Array<(
     { __typename?: 'PlanningCreditCard' }
-    & Pick<PlanningCreditCard, 'id' | 'netWorthSubcategoryId'>
+    & Pick<PlanningCreditCard, 'id' | 'netWorthSubcategoryId' | 'predictedPayment'>
     & { payments: Array<(
       { __typename?: 'PlanningCreditCardPayment' }
-      & Pick<PlanningCreditCardPayment, 'id' | 'year' | 'month' | 'value'>
+      & Pick<PlanningCreditCardPayment, 'id' | 'month' | 'value'>
     )> }
   )>, values: Array<(
     { __typename?: 'PlanningValue' }
-    & Pick<PlanningValue, 'id' | 'year' | 'month' | 'transferToAccountId' | 'name' | 'value' | 'formula'>
+    & Pick<PlanningValue, 'id' | 'month' | 'transferToAccountId' | 'name' | 'value' | 'formula'>
+  )>, computedValues: Array<(
+    { __typename?: 'PlanningComputedValue' }
+    & Pick<PlanningComputedValue, 'key' | 'month' | 'name' | 'value' | 'isVerified' | 'isTransfer'>
   )> }
 );
 
@@ -1691,6 +1678,7 @@ export type DeleteNetWorthEntryMutation = (
 );
 
 export type SyncPlanningMutationVariables = Exact<{
+  year: Scalars['NonNegativeInt'];
   input?: Maybe<PlanningSync>;
 }>;
 
@@ -1699,11 +1687,11 @@ export type SyncPlanningMutation = (
   { __typename?: 'Mutation' }
   & { syncPlanning?: Maybe<(
     { __typename?: 'PlanningSyncResponse' }
-    & Pick<PlanningSyncResponse, 'error'>
-    & { parameters?: Maybe<Array<(
+    & Pick<PlanningSyncResponse, 'error' | 'year' | 'taxReliefFromPreviousYear'>
+    & { parameters?: Maybe<(
       { __typename?: 'PlanningParameters' }
       & PlanningParametersPartsFragment
-    )>>, accounts?: Maybe<Array<(
+    )>, accounts?: Maybe<Array<(
       { __typename?: 'PlanningAccount' }
       & PlanningAccountPartsFragment
     )>> }
@@ -2382,7 +2370,6 @@ export const NetWorthEntryPartsFragmentDoc = gql`
     `;
 export const PlanningParametersPartsFragmentDoc = gql`
     fragment PlanningParametersParts on PlanningParameters {
-  year
   rates {
     name
     value
@@ -2409,33 +2396,33 @@ export const PlanningAccountPartsFragmentDoc = gql`
     pensionContrib
     studentLoan
   }
-  pastIncome {
-    date
-    gross
-    deductions {
-      name
-      value
-    }
-  }
   creditCards {
     id
     netWorthSubcategoryId
     payments {
       id
-      year
       month
       value
     }
+    predictedPayment
   }
   values {
     id
-    year
     month
     transferToAccountId
     name
     value
     formula
   }
+  computedValues {
+    key
+    month
+    name
+    value
+    isVerified
+    isTransfer
+  }
+  computedStartValue
 }
     `;
 export const SetConfigDocument = gql`
@@ -2720,15 +2707,17 @@ export function useDeleteNetWorthEntryMutation() {
   return Urql.useMutation<DeleteNetWorthEntryMutation, DeleteNetWorthEntryMutationVariables>(DeleteNetWorthEntryDocument);
 };
 export const SyncPlanningDocument = gql`
-    mutation SyncPlanning($input: PlanningSync) {
-  syncPlanning(input: $input) {
+    mutation SyncPlanning($year: NonNegativeInt!, $input: PlanningSync) {
+  syncPlanning(year: $year, input: $input) {
     error
+    year
     parameters {
       ...PlanningParametersParts
     }
     accounts {
       ...PlanningAccountParts
     }
+    taxReliefFromPreviousYear
   }
 }
     ${PlanningParametersPartsFragmentDoc}

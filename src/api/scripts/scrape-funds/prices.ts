@@ -41,7 +41,7 @@ export const getGenericQuotes = (funds: Fund[]): Promise<(number | null)[]> =>
         logger.debug(`Downloading generic quote for symbol ${symbol}`);
         return await getStockQuote(symbol);
       } catch (err) {
-        logger.error(`Error getting generic quote ${symbol}: ${err.message}`);
+        logger.error(`Error getting generic quote ${symbol}: ${(err as Error).message}`);
         throw err;
       }
     }),
@@ -65,7 +65,7 @@ function getPricesFromData(
       return [...results, { ...fund, price }];
     } catch (err) {
       logger.warn(`Couldn't get price for fund with name: ${fund.name}`);
-      logger.debug(err.stack);
+      logger.debug((err as Error).stack);
 
       return results;
     }

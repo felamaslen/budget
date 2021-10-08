@@ -2,7 +2,7 @@ import { formatISO } from 'date-fns';
 import { isEqual, omit } from 'lodash';
 import type { DatabaseTransactionConnectionType } from 'slonik';
 
-import { getPlanningAccounts, getPlanningParameters } from './retrieve';
+import { getPlanningData } from './retrieve';
 import {
   AccountRow,
   deleteOldPlanningAccounts,
@@ -47,44 +47,41 @@ import { Create } from '~shared/types';
 type SyncInputModify = NonNullable<Required<MutationSyncPlanningArgs>['input']>;
 
 const reduceParameters = (
-  inputParameters: PlanningParametersInput[],
+  year: number,
+  inputParameters: PlanningParametersInput,
   key: 'thresholds' | 'rates',
 ): Omit<ParameterRow, 'id' | 'uid'>[] =>
-  inputParameters.reduce<Omit<ParameterRow, 'id' | 'uid'>[]>(
-    (last, input) => [
-      ...last,
-      ...input[key].map<Omit<ParameterRow, 'id' | 'uid'>>(({ name, value }) => ({
-        year: input.year,
-        name,
-        value,
-      })),
-    ],
-    [],
-  );
+  inputParameters[key].map<Omit<ParameterRow, 'id' | 'uid'>>((input) => ({
+    ...input,
+    year,
+  }));
 
 async function syncParameters(
   db: DatabaseTransactionConnectionType,
   uid: number,
+  year: number,
   input: SyncInputModify,
 ): Promise<void> {
-  const allThresholds = reduceParameters(input.parameters, 'thresholds');
-  const allRates = reduceParameters(input.parameters, 'rates');
+  const allThresholds = reduceParameters(year, input.parameters, 'thresholds');
+  const allRates = reduceParameters(year, input.parameters, 'rates');
 
-  await Promise.all([upsertThresholds(db, uid, allThresholds), upsertRates(db, uid, allRates)]);
+  await Promise.all([
+    upsertThresholds(db, uid, year, allThresholds),
+    upsertRates(db, uid, year, allRates),
+  ]);
 }
 
-type WithoutUid<Row extends { readonly id: number }> = Row extends { uid: number }
-  ? Omit<Row, 'uid'>
-  : Row;
+type SyncRow = { readonly id: number };
 
-const syncItems = <Row extends { readonly id: number }, Input>({
-  insertRows,
-  updateRow,
-  deleteOldRows,
-  selectExistingRows,
-  getNewInput,
-  getUpdatedInput,
-}: {
+type WithoutUid<Row extends SyncRow> = Row extends { uid: number } ? Omit<Row, 'uid'> : Row;
+
+type SyncItems<Row extends SyncRow, Input> = (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  input: Input,
+) => Promise<readonly (Row | WithoutUid<Row>)[]>;
+
+type SyncItemsOptions<Row extends SyncRow, Input> = {
   insertRows: (
     db: DatabaseTransactionConnectionType,
     uid: number,
@@ -106,10 +103,19 @@ const syncItems = <Row extends { readonly id: number }, Input>({
   ) => Promise<readonly Row[]>;
   getNewInput: (input: Input) => Create<WithoutUid<Row>>[];
   getUpdatedInput: (input: Input) => WithoutUid<Row>[];
-}) => async (
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  input: Input,
+};
+
+const syncItems = <Row extends SyncRow, Input>({
+  insertRows,
+  updateRow,
+  deleteOldRows,
+  selectExistingRows,
+  getNewInput,
+  getUpdatedInput,
+}: SyncItemsOptions<Row, Input>): SyncItems<Row, Input> => async (
+  db,
+  uid,
+  input,
 ): Promise<readonly (Row | WithoutUid<Row>)[]> => {
   const existingRows = await selectExistingRows(db, uid);
   const newInput = getNewInput(input);
@@ -207,11 +213,11 @@ const syncCreditCards = syncItems<PlanningCreditCardRow, PlanningAccountWithId[]
     }, []),
 });
 
-const mapCreditCardPayment = (creditCardId: number) => (
+const mapCreditCardPayment = (year: number, creditCardId: number) => (
   row: PlanningCreditCardPaymentInput,
 ): Create<PlanningCreditCardPaymentRow> => ({
   credit_card_id: creditCardId,
-  year: row.year,
+  year,
   month: row.month,
   value: row.value,
 });
@@ -240,43 +246,48 @@ const getAccountInputsWithNewCreditCardIds = ({
       .filter((card) => !!card.id),
   }));
 
-const syncCreditCardPayments = syncItems<PlanningCreditCardPaymentRow, CreditCardSyncInput>({
-  insertRows: insertPlanningCreditCardPayments,
-  updateRow: updatePlanningCreditCardPayments,
-  deleteOldRows: deleteOldPlanningCreditCardPayments,
-  selectExistingRows: selectPlanningCreditCardPayments,
-  getNewInput: (input) =>
-    getAccountInputsWithNewCreditCardIds(input).reduce<Create<PlanningCreditCardPaymentRow>[]>(
-      (last, accountInput) =>
-        accountInput.creditCards.reduce<Create<PlanningCreditCardPaymentRow>[]>(
-          (next, card) => [
-            ...next,
-            ...card.payments.filter((row) => !row.id).map(mapCreditCardPayment(card.id as number)),
-          ],
-          last,
-        ),
-      [],
-    ),
-  getUpdatedInput: (input) =>
-    getAccountInputsWithNewCreditCardIds(input).reduce<PlanningCreditCardPaymentRow[]>(
-      (last, accountInput) =>
-        accountInput.creditCards
-          .filter((row) => !!row.id)
-          .reduce<PlanningCreditCardPaymentRow[]>((next, card) => {
-            const paymentMapper = mapCreditCardPayment(card.id as number);
-            return [
+const syncCreditCardPayments = (
+  year: number,
+): SyncItems<PlanningCreditCardPaymentRow, CreditCardSyncInput> =>
+  syncItems({
+    insertRows: insertPlanningCreditCardPayments,
+    updateRow: updatePlanningCreditCardPayments,
+    deleteOldRows: deleteOldPlanningCreditCardPayments(year),
+    selectExistingRows: selectPlanningCreditCardPayments,
+    getNewInput: (input) =>
+      getAccountInputsWithNewCreditCardIds(input).reduce<Create<PlanningCreditCardPaymentRow>[]>(
+        (last, accountInput) =>
+          accountInput.creditCards.reduce<Create<PlanningCreditCardPaymentRow>[]>(
+            (next, card) => [
               ...next,
               ...card.payments
-                .filter((row) => !!row.id)
-                .map<PlanningCreditCardPaymentRow>((row) => ({
-                  ...paymentMapper(row),
-                  id: row.id as number,
-                })),
-            ];
-          }, last),
-      [],
-    ),
-});
+                .filter((row) => !row.id)
+                .map(mapCreditCardPayment(year, card.id as number)),
+            ],
+            last,
+          ),
+        [],
+      ),
+    getUpdatedInput: (input) =>
+      getAccountInputsWithNewCreditCardIds(input).reduce<PlanningCreditCardPaymentRow[]>(
+        (last, accountInput) =>
+          accountInput.creditCards
+            .filter((row) => !!row.id)
+            .reduce<PlanningCreditCardPaymentRow[]>((next, card) => {
+              const paymentMapper = mapCreditCardPayment(year, card.id as number);
+              return [
+                ...next,
+                ...card.payments
+                  .filter((row) => !!row.id)
+                  .map<PlanningCreditCardPaymentRow>((row) => ({
+                    ...paymentMapper(row),
+                    id: row.id as number,
+                  })),
+              ];
+            }, last),
+        [],
+      ),
+  });
 
 type AccountInputExisting = Create<PlanningAccountInput> & {
   id: NonNullable<PlanningAccountInput['id']>;
@@ -289,6 +300,7 @@ type PlanningValueRowCreateOrUpdate = Create<PlanningValueRow> &
   Partial<Pick<PlanningValueRow, 'id'>>;
 
 const getAllValueRows = (
+  year: number,
   accountInputs: PlanningAccountWithId[],
 ): PlanningValueRowCreateOrUpdate[] =>
   accountInputs.reduce<PlanningValueRowCreateOrUpdate[]>(
@@ -299,7 +311,7 @@ const getAllValueRows = (
           {
             id: row.id ?? undefined,
             account_id: account.id,
-            year: row.year,
+            year,
             month: row.month,
             name: row.name,
             value: row.value ?? null,
@@ -312,16 +324,19 @@ const getAllValueRows = (
     [],
   );
 
-const syncValues = syncItems<PlanningValueRow, PlanningAccountWithId[]>({
-  insertRows: insertPlanningValues,
-  updateRow: updatePlanningValue,
-  selectExistingRows: selectPlanningValues,
-  deleteOldRows: deleteOldPlanningValues,
-  getNewInput: (accountInputs) =>
-    getAllValueRows(accountInputs).filter((row): row is Create<PlanningValueRow> => !row.id),
-  getUpdatedInput: (accountInputs) =>
-    getAllValueRows(accountInputs).filter((row): row is PlanningValueRow => !!row.id),
-});
+const syncValues = (year: number): SyncItems<PlanningValueRow, PlanningAccountWithId[]> =>
+  syncItems({
+    insertRows: insertPlanningValues,
+    updateRow: updatePlanningValue,
+    selectExistingRows: selectPlanningValues,
+    deleteOldRows: deleteOldPlanningValues(year),
+    getNewInput: (accountInputs) =>
+      getAllValueRows(year, accountInputs).filter(
+        (row): row is Create<PlanningValueRow> => !row.id,
+      ),
+    getUpdatedInput: (accountInputs) =>
+      getAllValueRows(year, accountInputs).filter((row): row is PlanningValueRow => !!row.id),
+  });
 
 const syncAccountRows = syncItems<AccountRow, SyncInputModify>({
   insertRows: insertPlanningAccounts,
@@ -354,6 +369,7 @@ type PlanningAccountWithId = Omit<PlanningAccountInput, 'id'> & {
 async function syncAccounts(
   db: DatabaseTransactionConnectionType,
   uid: number,
+  year: number,
   input: SyncInputModify,
 ): Promise<void> {
   const allAccounts = await syncAccountRows(db, uid, input);
@@ -376,9 +392,9 @@ async function syncAccounts(
   const [, creditCardRows] = await Promise.all([
     syncIncome(db, uid, accountInputs),
     syncCreditCards(db, uid, accountInputs),
-    syncValues(db, uid, accountInputs),
+    syncValues(year)(db, uid, accountInputs),
   ]);
-  await syncCreditCardPayments(db, uid, { accountInputs, creditCardRows });
+  await syncCreditCardPayments(year)(db, uid, { accountInputs, creditCardRows });
 }
 
 export async function syncPlanning(
@@ -387,14 +403,15 @@ export async function syncPlanning(
   args: MutationSyncPlanningArgs,
 ): Promise<PlanningSyncResponse> {
   if (args.input) {
-    await syncParameters(db, uid, args.input);
-    await syncAccounts(db, uid, args.input);
+    await syncParameters(db, uid, args.year, args.input);
+    await syncAccounts(db, uid, args.year, args.input);
   }
 
-  const [parameters, accounts] = await Promise.all([
-    getPlanningParameters(db, uid),
-    getPlanningAccounts(db, uid),
-  ]);
+  const response = await getPlanningData(db, uid, args.year);
 
-  return { parameters, accounts };
+  return {
+    error: null,
+    year: args.year,
+    ...response,
+  };
 }

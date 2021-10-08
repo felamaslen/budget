@@ -2,7 +2,6 @@ import { gql } from 'urql';
 
 export const PlanningParametersParts = gql`
   fragment PlanningParametersParts on PlanningParameters {
-    year
     rates {
       name
       value
@@ -30,32 +29,32 @@ export const PlanningAccountParts = gql`
       pensionContrib
       studentLoan
     }
-    pastIncome {
-      date
-      gross
-      deductions {
-        name
-        value
-      }
-    }
     creditCards {
       id
       netWorthSubcategoryId
       payments {
         id
-        year
         month
         value
       }
+      predictedPayment
     }
     values {
       id
-      year
       month
       transferToAccountId
       name
       value
       formula
     }
+    computedValues {
+      key
+      month
+      name
+      value
+      isVerified
+      isTransfer
+    }
+    computedStartValue
   }
 `;

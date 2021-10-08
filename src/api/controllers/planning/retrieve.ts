@@ -1,141 +1,98 @@
-import { startOfMonth } from 'date-fns';
-import { groupBy, uniqBy } from 'lodash';
+import { groupBy, omit } from 'lodash';
 import type { DatabaseTransactionConnectionType } from 'slonik';
+
+import {
+  accountRowHasCreditCardPayment,
+  accountRowHasIncome,
+  accountRowHasJoins,
+  accountRowHasValue,
+  computeTaxReliefFromPreviousYear,
+  getComputedTransactionsForAccount,
+  getRelevantYears,
+} from './utils';
 
 import {
   AccountRowCreditCardJoins,
   AccountRowCreditCardPaymentJoins,
-  AccountRowIncomeJoins,
-  AccountRowValueJoins,
-  AccountRowWithJoins,
+  LatestPlanningAccountValueRow,
   ParameterRow,
   PreviousIncomeRow,
-  PreviousIncomeRowWithDeduction,
-  selectPlanningAccountsWithJoins,
+  selectAverageCreditCardPayments,
+  selectLatestActualPlanningAccountValues,
+  selectPlanningAccountsWithCreditCards,
+  selectPlanningAccountsWithIncome,
+  selectPlanningAccountsWithValues,
   selectPlanningPreviousIncome,
   selectRates,
   selectThresholds,
 } from '~api/queries/planning';
 import {
-  IncomeDeduction,
+  AsyncReturnType,
   PlanningAccount,
-  PlanningAccountsResponse,
   PlanningCreditCard,
   PlanningCreditCardPayment,
   PlanningIncome,
   PlanningParameters,
-  PlanningParametersResponse,
-  PlanningPastIncome,
-  PlanningValue,
+  PlanningSyncResponse,
+  TaxRate,
+  TaxThreshold,
 } from '~api/types';
-import { TaxRate } from '~client/types/gql';
 
-const filterParameterRows = (year: number, rows: readonly ParameterRow[]): TaxRate[] =>
-  rows
-    .filter((row) => row.year === year)
-    .map<TaxRate>((row) => ({ name: row.name, value: row.value }))
-    .sort((a, b) => (a.name < b.name ? -1 : 1));
-
-export async function getPlanningParameters(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-): Promise<PlanningParameters[]> {
-  const [thresholdRows, rateRows] = await Promise.all([
-    selectThresholds(db, uid),
-    selectRates(db, uid),
-  ]);
-
-  const years = Array.from(
-    new Set([...thresholdRows.map((row) => row.year), ...rateRows.map((row) => row.year)]),
-  ).sort();
-
-  const planningParameters = years.map<PlanningParameters>((year) => ({
-    year,
-    thresholds: filterParameterRows(year, thresholdRows),
-    rates: filterParameterRows(year, rateRows),
-  }));
-
-  return planningParameters;
-}
-
-type WithRequiredJoin<
-  T,
-  U extends Record<string, unknown | null>,
-  StillNullable extends keyof U = never
-> = T extends U
-  ? Omit<T, keyof U> &
-      {
-        [K in keyof U]: K extends StillNullable ? U[K] : NonNullable<U[K]>;
-      }
-  : never;
-
-type AccountRowWithIncomeJoins = WithRequiredJoin<AccountRowWithJoins, AccountRowIncomeJoins>;
-type AccountRowWithCreditCardJoins = WithRequiredJoin<
-  AccountRowWithJoins,
-  AccountRowCreditCardJoins
->;
-type AccountRowWithCreditCardPaymentJoins = WithRequiredJoin<
-  AccountRowWithJoins,
-  AccountRowCreditCardPaymentJoins
->;
-type AccountRowWithValueJoins = WithRequiredJoin<
-  AccountRowWithJoins,
-  AccountRowValueJoins,
-  'value_value' | 'value_formula' | 'value_transfer_to'
->;
-
-const isIncomeRow = (row: AccountRowWithJoins): row is AccountRowWithIncomeJoins => !!row.income_id;
-
-const isCreditCardRow = (row: AccountRowWithJoins): row is AccountRowWithCreditCardJoins =>
-  !!row.credit_card_id;
-
-const isCreditCardPaymentRow = (
-  row: AccountRowWithJoins,
-): row is AccountRowWithCreditCardPaymentJoins => !!row.credit_card_payment_id;
-
-const isValueRow = (row: AccountRowWithJoins): row is AccountRowWithValueJoins => !!row.value_id;
-
-const isDeductionRow = (row: PreviousIncomeRow): row is PreviousIncomeRowWithDeduction =>
-  !!row.deduction_name;
-
-export async function getPlanningAccounts(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  now = new Date(),
-): Promise<PlanningAccount[]> {
-  const accountRows = await selectPlanningAccountsWithJoins(db, uid);
-  const accountNames = Array.from(new Set(accountRows.map((row) => row.account)));
-  const previousIncomeRows = await selectPlanningPreviousIncome(
-    db,
-    uid,
-    startOfMonth(now),
-    accountNames,
+function constructAccounts(
+  year: number,
+  now: Date,
+  accountRowsWithIncome: AsyncReturnType<typeof selectPlanningAccountsWithIncome>,
+  accountRowsWithCreditCards: AsyncReturnType<typeof selectPlanningAccountsWithCreditCards>,
+  averageCreditCardPaymentRows: AsyncReturnType<typeof selectAverageCreditCardPayments>,
+  accountRowsWithValues: AsyncReturnType<typeof selectPlanningAccountsWithValues>,
+  thresholdRows: readonly ParameterRow[],
+  rateRows: readonly ParameterRow[],
+  previousIncomeRows: readonly PreviousIncomeRow[],
+  latestActualValues: readonly LatestPlanningAccountValueRow[],
+): PlanningAccount[] {
+  const accountsWithIncome = groupBy(accountRowsWithIncome, 'id');
+  const creditCardsGrouped = groupBy(accountRowsWithCreditCards, 'id');
+  const valuesGrouped = groupBy(
+    accountRowsWithValues.filter(accountRowHasValue).filter((row) => row.value_year === year),
+    'id',
   );
 
-  const previousIncome = Object.entries(groupBy(previousIncomeRows, 'id')).map<{
-    item: string;
-    pastIncome: PlanningPastIncome;
-  }>(([, group]) => ({
-    item: group[0].item,
-    pastIncome: {
-      date: group[0].date,
-      gross: group[0].gross,
-      deductions: group.filter(isDeductionRow).map<IncomeDeduction>((row) => ({
-        name: row.deduction_name,
-        value: row.deduction_value,
-      })),
-    },
-  }));
+  return Object.entries(accountsWithIncome).map<PlanningAccount>(([accountId, incomeGroup]) => {
+    const creditCards = creditCardsGrouped[accountId].filter(
+      accountRowHasJoins<AccountRowCreditCardJoins, AccountRowCreditCardPaymentJoins>(
+        'credit_card_id',
+      ),
+    );
 
-  return Object.entries(groupBy(accountRows, 'id')).map<PlanningAccount>(([, accountGroup]) => {
-    const { id, account, net_worth_subcategory_id, limit_lower, limit_upper } = accountGroup[0];
+    const {
+      computedStartValue,
+      computedValues,
+      predictedCreditCardPayments,
+    } = getComputedTransactionsForAccount(
+      {
+        accountsWithIncome,
+        thresholdRows,
+        rateRows,
+        valueRows: accountRowsWithValues.filter(accountRowHasValue),
+        latestActualValues,
+        previousIncome: previousIncomeRows,
+        creditCardPayments: creditCards
+          .filter(accountRowHasCreditCardPayment)
+          .filter((card) => card.id === incomeGroup[0].id),
+        averageCreditCardPaymentRows,
+      },
+      year,
+      now,
+      incomeGroup,
+    );
 
-    const pastIncome = previousIncome
-      .filter((compare) => compare.item.toLowerCase().includes(account.toLowerCase()))
-      .map((group) => group.pastIncome);
-
-    const income = uniqBy(accountGroup.filter(isIncomeRow), 'income_id').map<PlanningIncome>(
-      (row) => ({
+    return {
+      id: incomeGroup[0].id,
+      netWorthSubcategoryId: incomeGroup[0].net_worth_subcategory_id,
+      account: incomeGroup[0].account,
+      upperLimit: incomeGroup[0].limit_upper,
+      lowerLimit: incomeGroup[0].limit_lower,
+      income: incomeGroup.filter(accountRowHasIncome).map<PlanningIncome>((row) => ({
         id: row.income_id,
         startDate: new Date(row.income_start_date),
         endDate: new Date(row.income_end_date),
@@ -143,74 +100,104 @@ export async function getPlanningAccounts(
         taxCode: row.income_tax_code,
         pensionContrib: row.income_pension_contrib,
         studentLoan: row.income_student_loan,
-      }),
-    );
-
-    const creditCardPaymentRows = uniqBy(
-      accountGroup.filter(isCreditCardPaymentRow),
-      'credit_card_payment_id',
-    );
-
-    const creditCards = uniqBy(
-      accountGroup.filter(isCreditCardRow),
-      'credit_card_id',
-    ).map<PlanningCreditCard>((row) => {
-      const payments = creditCardPaymentRows
-        .filter(
-          (paymentRow) => paymentRow.credit_card_payment_credit_card_id === row.credit_card_id,
-        )
-        .map<PlanningCreditCardPayment>((paymentRow) => ({
-          id: paymentRow.credit_card_payment_id,
-          year: paymentRow.credit_card_payment_year,
-          month: paymentRow.credit_card_payment_month,
-          value: paymentRow.credit_card_payment_value,
-        }));
-
-      return {
-        id: row.credit_card_id,
-        netWorthSubcategoryId: row.credit_card_net_worth_subcategory_id,
-        payments,
-      };
-    });
-
-    const values = uniqBy(accountGroup.filter(isValueRow), 'value_id').map<PlanningValue>(
-      (row) => ({
-        id: row.value_id,
-        year: row.value_year,
-        month: row.value_month,
-        name: row.value_name,
-        value: row.value_value,
-        formula: row.value_formula,
-        transferToAccountId: row.value_transfer_to,
-      }),
-    );
-
-    return {
-      id,
-      account,
-      netWorthSubcategoryId: net_worth_subcategory_id,
-      income,
-      pastIncome,
-      creditCards,
-      values,
-      upperLimit: limit_upper,
-      lowerLimit: limit_lower,
+      })),
+      creditCards: Object.entries(groupBy(creditCards, 'credit_card_id')).map<PlanningCreditCard>(
+        ([, creditCardGroup]) => ({
+          id: creditCardGroup[0].credit_card_id,
+          netWorthSubcategoryId: creditCardGroup[0].credit_card_net_worth_subcategory_id,
+          payments: creditCardGroup
+            .filter(accountRowHasCreditCardPayment)
+            .filter((row) => row.credit_card_payment_year === year)
+            .map<PlanningCreditCardPayment>((row) => ({
+              id: row.credit_card_payment_id,
+              month: row.credit_card_payment_month,
+              value: row.credit_card_payment_value,
+            })),
+          predictedPayment: predictedCreditCardPayments[creditCardGroup[0].credit_card_id],
+        }),
+      ),
+      values:
+        valuesGrouped[accountId]?.map((row) => ({
+          id: row.value_id,
+          name: row.value_name,
+          month: row.value_month,
+          value: row.value_value,
+          formula: row.value_formula,
+          transferToAccountId: row.value_transfer_to,
+        })) ?? [],
+      computedValues,
+      computedStartValue,
     };
   });
 }
 
-export async function readPlanningParameters(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-): Promise<PlanningParametersResponse> {
-  const parameters = await getPlanningParameters(db, uid);
-  return { parameters };
-}
+const constructParameters = (
+  year: number,
+  thresholdRows: readonly ParameterRow[],
+  rateRows: readonly ParameterRow[],
+): PlanningParameters => ({
+  rates: rateRows
+    .filter((compare) => compare.year === year)
+    .map<TaxRate>((row) => omit(row, 'id', 'uid', 'year')),
+  thresholds: thresholdRows
+    .filter((compare) => compare.year === year)
+    .map<TaxThreshold>((row) => omit(row, 'id', 'uid', 'year')),
+});
 
-export async function readPlanningAccounts(
+export async function getPlanningData(
   db: DatabaseTransactionConnectionType,
   uid: number,
-): Promise<PlanningAccountsResponse> {
-  const accounts = await getPlanningAccounts(db, uid);
-  return { accounts };
+  year: number,
+  now = new Date(),
+): Promise<Omit<PlanningSyncResponse, 'error' | 'year'>> {
+  const [
+    accountRowsWithIncome,
+    accountRowsWithCreditCards,
+    averageCreditCardPaymentRows,
+    accountRowsWithValues,
+  ] = await Promise.all([
+    selectPlanningAccountsWithIncome(db, uid, year),
+    selectPlanningAccountsWithCreditCards(db, uid, year),
+    selectAverageCreditCardPayments(db, uid),
+    selectPlanningAccountsWithValues(db, uid, year),
+  ]);
+
+  const accountNames = Array.from(new Set(accountRowsWithIncome.map((row) => row.account)));
+
+  const [latestActualValues, previousIncomeRows] = await Promise.all([
+    selectLatestActualPlanningAccountValues(db, uid, year),
+    selectPlanningPreviousIncome(db, uid, year, accountNames, now),
+  ]);
+
+  // Always include the previous year, so as to calculate tax relief
+  const relevantYears = getRelevantYears(year, previousIncomeRows);
+
+  const [thresholdRows, rateRows] = await Promise.all([
+    selectThresholds(db, uid, relevantYears),
+    selectRates(db, uid, relevantYears),
+  ]);
+
+  return {
+    accounts: constructAccounts(
+      year,
+      now,
+      accountRowsWithIncome,
+      accountRowsWithCreditCards,
+      averageCreditCardPaymentRows,
+      accountRowsWithValues,
+      thresholdRows,
+      rateRows,
+      previousIncomeRows,
+      latestActualValues,
+    ),
+    parameters: constructParameters(year, thresholdRows, rateRows),
+    taxReliefFromPreviousYear: computeTaxReliefFromPreviousYear(
+      year,
+      thresholdRows,
+      rateRows,
+      accountRowsWithIncome,
+      accountRowsWithValues,
+      previousIncomeRows,
+    ),
+  };
 }

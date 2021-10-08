@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
-import { StandardRates, StandardThresholds } from './constants';
 import { usePlanningContext, usePlanningDispatch } from './context';
 import { PropsRateForm, PropsThresholdForm, RateForm, ThresholdForm } from './form/rate';
-
 import { SidebarSection } from './sidebar-section';
+
+import { StandardRates, StandardThresholds } from '~shared/planning';
 
 const standardRates: Pick<PropsRateForm, 'label' | 'name'>[] = [
   { name: StandardRates.IncomeTaxBasicRate, label: 'Income tax basic rate' },
@@ -28,65 +28,41 @@ const standardThresholds: Pick<PropsThresholdForm, 'label' | 'name'>[] = [
 ];
 
 export const Rates: React.FC = () => {
-  const { year, state } = usePlanningContext();
+  const { state } = usePlanningContext();
   const sync = usePlanningDispatch();
 
-  const parameters = state.parameters.find((compare) => compare.year === year);
-
-  const rates = parameters?.rates ?? [];
-  const thresholds = parameters?.thresholds ?? [];
+  const rates = state.parameters?.rates ?? [];
+  const thresholds = state.parameters?.thresholds ?? [];
 
   const setParam = useCallback(
     (key: 'rates' | 'thresholds') => (name: string, value = 0): void => {
       sync((last) => {
-        const parametersForYear = last.parameters.find((compare) => compare.year === year);
-        if (!parametersForYear) {
+        if (!last.parameters[key].some((compare) => compare.name === name)) {
           return {
             ...last,
-            parameters: [
+            parameters: {
               ...last.parameters,
-              {
-                year,
-                rates: key === 'rates' ? [{ name, value }] : [],
-                thresholds: key === 'thresholds' ? [{ name, value }] : [],
-              },
-            ],
-          };
-        }
-        if (!parametersForYear[key].some((compare) => compare.name === name)) {
-          return {
-            ...last,
-            parameters: replaceAtIndex(
-              last.parameters,
-              last.parameters.findIndex((compare) => compare.year === year),
-              (prevParam) => ({
-                ...prevParam,
-                [key]: [...prevParam[key], { name, value }],
-              }),
-            ),
+              [key]: [...last.parameters[key], { name, value }],
+            },
           };
         }
         return {
           ...last,
-          parameters: replaceAtIndex(
-            last.parameters,
-            last.parameters.findIndex((compare) => compare.year === year),
-            (prevParam) => ({
-              ...prevParam,
-              [key]: replaceAtIndex(
-                prevParam[key],
-                prevParam[key].findIndex((compare) => compare.name === name),
-                (prevValue) => ({
-                  ...prevValue,
-                  value: value ?? prevValue.value,
-                }),
-              ),
-            }),
-          ),
+          parameters: {
+            ...last.parameters,
+            [key]: replaceAtIndex(
+              last.parameters[key],
+              last.parameters[key].findIndex((compare) => compare.name === name),
+              (prevValue) => ({
+                ...prevValue,
+                value: value ?? prevValue.value,
+              }),
+            ),
+          },
         };
       });
     },
-    [sync, year],
+    [sync],
   );
 
   const setRate = useMemo(() => setParam('rates'), [setParam]);

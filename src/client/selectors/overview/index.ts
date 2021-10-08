@@ -27,10 +27,10 @@ import {
 } from './net-worth';
 import { longTermOptionsDisabled, reduceDates, roundedArrays, withSpendingColumn } from './utils';
 
-import { Average, GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS } from '~client/constants';
+import { GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS } from '~client/constants';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { getOverviewScoreColor, overviewCategoryColor } from '~client/modules/color';
-import { arrayAverage, getTotalCost, rightPad } from '~client/modules/data';
+import { getTotalCost, rightPad } from '~client/modules/data';
 import { forecastCompoundedReturns } from '~client/modules/finance';
 import { State } from '~client/reducers';
 import {
@@ -58,7 +58,7 @@ import { PageListStandard } from '~client/types/enum';
 import type { InitialCumulativeValues, Monthly, NetWorthSubcategory } from '~client/types/gql';
 import { NetWorthAggregate } from '~shared/constants';
 import type { GQL } from '~shared/types';
-import { omitTypeName } from '~shared/utils';
+import { arrayAverage, Average, omitTypeName } from '~shared/utils';
 
 export * from './common';
 export * from './net-worth';

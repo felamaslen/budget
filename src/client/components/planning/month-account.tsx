@@ -51,7 +51,7 @@ export const MonthAccount: React.FC<Props> = ({
       ))}
       {transactions.map((transaction) => (
         <AccountGroupItem
-          key={`transaction-${transaction.id}`}
+          key={transaction.key}
           accountGroup={accountGroup}
           transaction={transaction}
           onAddTransaction={onAddTransaction}

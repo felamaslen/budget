@@ -95,7 +95,7 @@ export async function processScrape(
 
     logger.info('Finished scraping funds');
   } catch (err) {
-    logger.error('Error scraping funds:', err.message);
+    logger.error('Error scraping funds:', (err as Error).message);
 
     throw err;
   }

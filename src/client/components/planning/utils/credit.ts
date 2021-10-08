@@ -1,24 +1,10 @@
-import isAfter from 'date-fns/isAfter';
-
 import type { AccountCreditCardPayment, CreditCardRecord, PlanningMonth, State } from '../types';
-import { mapPlanningMonth } from './calculations';
-import { Average } from '~client/constants';
-import { arrayAverage } from '~client/modules/data';
+import { getSequentialMonth } from './calculations';
 import type { NetWorthSubcategory } from '~client/types/gql';
-
-function predictCreditCardPayment(
-  cardRecord: CreditCardRecord,
-  canPredictMonth: boolean,
-): number | undefined {
-  if (!canPredictMonth) {
-    return undefined;
-  }
-  return cardRecord.averageRecordedPayment;
-}
 
 export function getCreditCardsForAccountAtMonth(
   creditCards: CreditCardRecord[],
-  { year, month, date }: PlanningMonth,
+  { month }: PlanningMonth,
   account: State['accounts'][0],
 ): AccountCreditCardPayment[] {
   return account.creditCards
@@ -29,16 +15,16 @@ export function getCreditCardsForAccountAtMonth(
       if (!cardRecord) {
         return undefined;
       }
-      const existingPayment = row.payments.find(
-        (compare) => compare.year === year && compare.month === month,
-      );
+      const existingPayment = row.payments.find((compare) => compare.month === month);
 
       return {
         netWorthSubcategoryId: row.netWorthSubcategoryId,
         name: cardRecord.name,
         value:
           existingPayment?.value ??
-          predictCreditCardPayment(cardRecord, isAfter(date, cardRecord.lastRecordedPayment.date)),
+          (getSequentialMonth(month) > cardRecord.lastRecordedPaymentMonth
+            ? row.predictedPayment ?? undefined
+            : undefined),
         isVerified: !!existingPayment,
       };
     })
@@ -52,33 +38,15 @@ export function getCreditCardRecords(
   return creditCards.map<CreditCardRecord>((card) => ({
     netWorthSubcategoryId: card.id,
     name: card.subcategory,
-    lastRecordedPayment: mapPlanningMonth(
-      accounts.reduce<Pick<PlanningMonth, 'year' | 'month'>>(
-        (last, account) =>
-          account.creditCards
-            .find((compare) => compare.netWorthSubcategoryId === card.id)
-            ?.payments.reduce<Pick<PlanningMonth, 'year' | 'month'>>(
-              (next, payment) =>
-                payment.year > next.year ||
-                (payment.year === next.year && payment.month > next.month)
-                  ? { year: payment.year, month: payment.month }
-                  : next,
-              last,
-            ) ?? last,
-        { year: 0, month: 0 },
-      ),
+    lastRecordedPaymentMonth: accounts.reduce<number>(
+      (max0, account) =>
+        account.creditCards
+          .find((compare) => compare.netWorthSubcategoryId === card.id)
+          ?.payments.reduce<number>(
+            (max1, payment) => Math.max(getSequentialMonth(payment.month), max1),
+            max0,
+          ) ?? max0,
+      -1,
     ),
-    averageRecordedPayment:
-      arrayAverage(
-        accounts.reduce<number[]>(
-          (last, account) =>
-            (
-              account.creditCards.find((compare) => compare.netWorthSubcategoryId === card.id)
-                ?.payments ?? []
-            ).reduce<number[]>((next, payment) => [...next, payment.value], last),
-          [],
-        ),
-        Average.Median,
-      ) || undefined,
   }));
 }

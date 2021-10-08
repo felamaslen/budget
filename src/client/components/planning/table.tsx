@@ -52,7 +52,7 @@ function useSynchronisedScroll(): {
 
 export const Table: React.FC = () => {
   const scroll = useSynchronisedScroll();
-  const { year, table } = usePlanningContext();
+  const { state, table } = usePlanningContext();
   return (
     <Styled.Table>
       <MonthHeaders ref={scroll.monthHeadersRef} tableData={table} />
@@ -62,8 +62,8 @@ export const Table: React.FC = () => {
           <Styled.MonthGroups>
             {table.map((dataForMonth, index) => (
               <Month
-                key={`${year}-${dataForMonth.month}`}
-                year={year}
+                key={`${state.year}-${dataForMonth.month}`}
+                year={state.year}
                 dataForMonth={dataForMonth}
                 isStart={index === 0}
               />

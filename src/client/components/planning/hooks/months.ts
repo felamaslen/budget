@@ -5,15 +5,18 @@ import getYear from 'date-fns/getYear';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { startMonth } from '../constants';
 import type { PlanningMonth } from '../types';
-import { getDateFromYearAndMonth, getFinancialYearFromYearMonth } from '../utils';
 import { filterNetWorthByMonth } from './utils';
 
 import { getEntries } from '~client/selectors';
 import type { NetWorthEntryNative } from '~client/types';
+import {
+  getDateFromYearAndMonth,
+  getFinancialYearFromYearMonth,
+  startMonth,
+} from '~shared/planning';
 
-export function fillMonths(startDate: Date, numMonths: number): PlanningMonth[] {
+function fillMonths(startDate: Date, numMonths: number): PlanningMonth[] {
   return Array(numMonths)
     .fill(0)
     .map((_, index) => {

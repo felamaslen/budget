@@ -182,7 +182,6 @@ export function useTransactionForm(
               ...prev.values,
               {
                 ...newValue,
-                year,
                 month,
                 transferToAccountId: getTransferAccountId(prevState, newValue),
               },
@@ -191,106 +190,115 @@ export function useTransactionForm(
         ),
       }));
     },
-    [sync, year, month],
+    [sync, month],
   );
 
   const onChangeTransaction = useCallback<OnChangeTransaction>(
     (netWorthSubcategory, oldName, newValue) => {
-      sync((last) => ({
-        ...last,
-        accounts: replaceAtIndex(
-          last.accounts,
-          last.accounts.findIndex(
-            (compare) => compare.netWorthSubcategoryId === netWorthSubcategory,
-          ),
-          (prev) => ({
-            ...prev,
-            values: partialModification(
-              prev.values,
-              prev.values.findIndex(
-                (compare) =>
-                  compare.year === year && compare.month === month && compare.name === oldName,
+      sync((last) =>
+        last.year === year
+          ? {
+              ...last,
+              accounts: replaceAtIndex(
+                last.accounts,
+                last.accounts.findIndex(
+                  (compare) => compare.netWorthSubcategoryId === netWorthSubcategory,
+                ),
+                (prev) => ({
+                  ...prev,
+                  values: partialModification(
+                    prev.values,
+                    prev.values.findIndex(
+                      (compare) => compare.month === month && compare.name === oldName,
+                    ),
+                    newValue,
+                  ),
+                }),
               ),
-              newValue,
-            ),
-          }),
-        ),
-      }));
+            }
+          : last,
+      );
     },
     [sync, year, month],
   );
 
   const onRemoveTransaction = useCallback<OnRemoveTransaction>(
     (netWorthSubcategory, name) => {
-      sync((last) => ({
-        ...last,
-        accounts: replaceAtIndex(
-          last.accounts,
-          last.accounts.findIndex(
-            (compare) => compare.netWorthSubcategoryId === netWorthSubcategory,
-          ),
-          (prev) => ({
-            ...prev,
-            values: prev.values.filter(
-              (value) => !(value.year === year && value.month === month && value.name === name),
-            ),
-          }),
-        ),
-      }));
+      sync((last) =>
+        last.year === year
+          ? {
+              ...last,
+              accounts: replaceAtIndex(
+                last.accounts,
+                last.accounts.findIndex(
+                  (compare) => compare.netWorthSubcategoryId === netWorthSubcategory,
+                ),
+                (prev) => ({
+                  ...prev,
+                  values: prev.values.filter(
+                    (value) => !(value.month === month && value.name === name),
+                  ),
+                }),
+              ),
+            }
+          : last,
+      );
     },
     [sync, year, month],
   );
 
   const onChangeCreditCard = useCallback<OnChangeCreditCard>(
     (netWorthSubcategoryId, creditCard) => {
-      sync((prevState) => ({
-        ...prevState,
-        accounts: replaceAtIndex(
-          prevState.accounts,
-          prevState.accounts.findIndex(
-            (compare) => compare.netWorthSubcategoryId === netWorthSubcategoryId,
-          ),
-          (prevAccount) => ({
-            ...prevAccount,
-            creditCards: replaceAtIndex(
-              prevAccount.creditCards,
-              prevAccount.creditCards.findIndex(
-                (compare) => compare.netWorthSubcategoryId === creditCard.netWorthSubcategoryId,
+      sync((prevState) =>
+        prevState.year === year
+          ? {
+              ...prevState,
+              accounts: replaceAtIndex(
+                prevState.accounts,
+                prevState.accounts.findIndex(
+                  (compare) => compare.netWorthSubcategoryId === netWorthSubcategoryId,
+                ),
+                (prevAccount) => ({
+                  ...prevAccount,
+                  creditCards: replaceAtIndex(
+                    prevAccount.creditCards,
+                    prevAccount.creditCards.findIndex(
+                      (compare) =>
+                        compare.netWorthSubcategoryId === creditCard.netWorthSubcategoryId,
+                    ),
+                    (prevCreditCard) => {
+                      if (typeof creditCard.value === 'undefined') {
+                        return {
+                          ...prevCreditCard,
+                          payments: prevCreditCard.payments.filter(
+                            (compare) => compare.month !== month,
+                          ),
+                        };
+                      }
+                      if (prevCreditCard.payments.some((compare) => compare.month === month)) {
+                        return {
+                          ...prevCreditCard,
+                          payments: partialModification(
+                            prevCreditCard.payments,
+                            prevCreditCard.payments.findIndex((compare) => compare.month === month),
+                            { value: creditCard.value },
+                          ),
+                        };
+                      }
+                      return {
+                        ...prevCreditCard,
+                        payments: [
+                          ...prevCreditCard.payments,
+                          { year, month, value: creditCard.value },
+                        ],
+                      };
+                    },
+                  ),
+                }),
               ),
-              (prevCreditCard) => {
-                if (typeof creditCard.value === 'undefined') {
-                  return {
-                    ...prevCreditCard,
-                    payments: prevCreditCard.payments.filter(
-                      (compare) => !(compare.year === year && compare.month === month),
-                    ),
-                  };
-                }
-                if (
-                  prevCreditCard.payments.some(
-                    (compare) => compare.year === year && compare.month === month,
-                  )
-                ) {
-                  return {
-                    ...prevCreditCard,
-                    payments: partialModification(
-                      prevCreditCard.payments,
-                      prevCreditCard.payments.findIndex(
-                        (compare) => compare.year === year && compare.month === month,
-                      ),
-                      { value: creditCard.value },
-                    ),
-                  };
-                }
-                return {
-                  ...prevCreditCard,
-                  payments: [...prevCreditCard.payments, { year, month, value: creditCard.value }],
-                };
-              },
-            ),
-          }),
-        ),
-      }));
+            }
+          : prevState,
+      );
     },
     [sync, year, month],
   );

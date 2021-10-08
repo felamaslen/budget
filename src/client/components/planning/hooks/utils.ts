@@ -7,14 +7,20 @@ import type { State } from '../types';
 import type { NetWorthEntryNative } from '~client/types';
 import { coalesceKeys, omitDeep } from '~shared/utils';
 
-const getCompareState = (state: State): State => ({
+const getCompareState = (state: State): Record<string, unknown> => ({
   parameters: state.parameters,
-  accounts: state.accounts.map<State['accounts'][0]>((account) => ({
-    ...omitDeep(account, 'id'),
-    values: account.values.map((row) =>
-      coalesceKeys(omit(row, 'id'), 'value', 'formula', 'transferToAccountId'),
+  accounts: state.accounts.map((account) =>
+    omitDeep(
+      {
+        ...omit(account, 'computedValues'),
+        creditCards: account.creditCards.map((card) => omit(card, 'predictedPayment')),
+        values: account.values.map((row) =>
+          coalesceKeys(row, 'value', 'formula', 'transferToAccountId'),
+        ),
+      },
+      'id',
     ),
-  })),
+  ),
 });
 
 export const isStateEqual = (s0: State, s1: State): boolean =>

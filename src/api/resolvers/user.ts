@@ -17,7 +17,7 @@ export const userResolvers: Resolvers = {
       try {
         return await attemptLogin(ctx, pin, new Date());
       } catch (err) {
-        return { error: err.message };
+        return { error: (err as Error).message };
       }
     },
 
