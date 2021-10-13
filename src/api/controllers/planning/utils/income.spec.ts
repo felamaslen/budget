@@ -175,6 +175,7 @@ describe(reducePredictedIncome, () => {
         net_worth_subcategory_id: 184,
         limit_lower: null,
         limit_upper: null,
+        include_bills: null,
         income_id: 100,
         income_salary: 3700000,
         income_start_date: new Date('2022-03-19'),

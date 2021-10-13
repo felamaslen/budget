@@ -2,6 +2,7 @@ import { groupBy, omit } from 'lodash';
 import type { DatabaseTransactionConnectionType } from 'slonik';
 
 import {
+  accountRowHasBills,
   accountRowHasCreditCardPayment,
   accountRowHasIncome,
   accountRowHasJoins,
@@ -19,6 +20,7 @@ import {
   PreviousIncomeRow,
   selectAverageCreditCardPayments,
   selectLatestActualPlanningAccountValues,
+  selectPlanningAccountsWithBills,
   selectPlanningAccountsWithCreditCards,
   selectPlanningAccountsWithIncome,
   selectPlanningAccountsWithValues,
@@ -45,6 +47,7 @@ function constructAccounts(
   accountRowsWithCreditCards: AsyncReturnType<typeof selectPlanningAccountsWithCreditCards>,
   averageCreditCardPaymentRows: AsyncReturnType<typeof selectAverageCreditCardPayments>,
   accountRowsWithValues: AsyncReturnType<typeof selectPlanningAccountsWithValues>,
+  accountRowsWithBills: AsyncReturnType<typeof selectPlanningAccountsWithBills>,
   thresholdRows: readonly ParameterRow[],
   rateRows: readonly ParameterRow[],
   previousIncomeRows: readonly PreviousIncomeRow[],
@@ -74,6 +77,9 @@ function constructAccounts(
         thresholdRows,
         rateRows,
         valueRows: accountRowsWithValues.filter(accountRowHasValue),
+        billsRows: incomeGroup[0].include_bills
+          ? accountRowsWithBills.filter(accountRowHasBills)
+          : [],
         latestActualValues,
         previousIncome: previousIncomeRows,
         creditCardPayments: creditCards
@@ -127,6 +133,7 @@ function constructAccounts(
         })) ?? [],
       computedValues,
       computedStartValue,
+      includeBills: incomeGroup[0].include_bills,
     };
   });
 }
@@ -155,11 +162,13 @@ export async function getPlanningData(
     accountRowsWithCreditCards,
     averageCreditCardPaymentRows,
     accountRowsWithValues,
+    accountRowsWithBills,
   ] = await Promise.all([
     selectPlanningAccountsWithIncome(db, uid),
     selectPlanningAccountsWithCreditCards(db, uid, year),
     selectAverageCreditCardPayments(db, uid),
     selectPlanningAccountsWithValues(db, uid, year),
+    selectPlanningAccountsWithBills(db, uid, year),
   ]);
 
   const accountNames = Array.from(new Set(accountRowsWithIncome.map((row) => row.account)));
@@ -185,6 +194,7 @@ export async function getPlanningData(
       accountRowsWithCreditCards,
       averageCreditCardPaymentRows,
       accountRowsWithValues,
+      accountRowsWithBills,
       thresholdRows,
       rateRows,
       previousIncomeRows,

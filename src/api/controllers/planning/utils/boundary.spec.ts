@@ -57,6 +57,7 @@ describe(getComputedYearStartAccountValue.name, () => {
   ];
   const creditCardPayments: CalculationRows['creditCardPayments'] = [];
   const valueRows: CalculationRows['valueRows'] = [];
+  const billsRows: CalculationRows['billsRows'] = [];
   const previousIncomeReduction: IntermediatePreviousIncomeReduction[] = [];
   const predictedIncomeReduction: IntermediatePredictedIncomeReduction[] = [];
   const predictedCreditCardPayments: Record<number, number> = {};
@@ -90,7 +91,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows },
+        { latestActualValues, creditCardPayments, valueRows, billsRows },
         previousIncomeExample,
         predictedIncomeReduction,
         predictedCreditCardPayments,
@@ -107,7 +108,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows },
+        { latestActualValues, creditCardPayments, valueRows, billsRows },
         [
           ...previousIncomeExample,
           {
@@ -153,7 +154,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows },
+        { latestActualValues, creditCardPayments, valueRows, billsRows },
         previousIncomeReduction,
         predictedIncomeExample,
         predictedCreditCardPayments,
@@ -230,7 +231,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows: valueRowsExample },
+        { latestActualValues, creditCardPayments, valueRows: valueRowsExample, billsRows },
         previousIncomeReduction,
         predictedIncomeReduction,
         predictedCreditCardPayments,
@@ -238,6 +239,38 @@ describe(getComputedYearStartAccountValue.name, () => {
       );
 
       expect(result).toBeCloseTo(154420 - 142203);
+    });
+  });
+
+  describe('when there are bills', () => {
+    const billsExample: CalculationRows['billsRows'] = [
+      {
+        id: accountId,
+        bills_date: new Date('2021-07-09'),
+        bills_sum: -44523,
+      },
+      {
+        id: accountId,
+        bills_date: new Date('2022-04-22'),
+        bills_sum: -1852,
+      },
+    ];
+
+    it('should include those bills which occured between the net worth date and the current year', () => {
+      expect.assertions(1);
+
+      const result = getComputedYearStartAccountValue(
+        accountId,
+        now,
+        year,
+        { latestActualValues, creditCardPayments, valueRows, billsRows: billsExample },
+        previousIncomeReduction,
+        predictedIncomeReduction,
+        predictedCreditCardPayments,
+        transfersTo,
+      );
+
+      expect(result).toBeCloseTo(154420 - 44523);
     });
   });
 });

@@ -43,7 +43,8 @@ export function getComputedYearStartAccountValue(
     latestActualValues,
     creditCardPayments,
     valueRows,
-  }: Pick<CalculationRows, 'latestActualValues' | 'creditCardPayments' | 'valueRows'>,
+    billsRows,
+  }: Pick<CalculationRows, 'latestActualValues' | 'creditCardPayments' | 'valueRows' | 'billsRows'>,
   previousIncomeReduction: IntermediatePreviousIncomeReduction[],
   predictedIncomeReduction: IntermediatePredictedIncomeReduction[],
   predictedCreditCardPayments: Record<number, number>,
@@ -119,6 +120,11 @@ export function getComputedYearStartAccountValue(
     0,
   );
 
+  const billsRowsToCount = billsRows.filter(
+    (row) => row.id === accountId && getFinancialYear(row.bills_date) < year,
+  );
+  const billsContribution = billsRowsToCount.reduce<number>((sum, row) => sum + row.bills_sum, 0);
+
   const transfersToContribution = transfersTo
     .filter(
       (row) =>
@@ -132,6 +138,7 @@ export function getComputedYearStartAccountValue(
     previousIncomeContribution +
     predictedIncomeContribution +
     explicitValuesContribution +
+    billsContribution +
     creditCardPaymentContribution +
     transfersToContribution
   );

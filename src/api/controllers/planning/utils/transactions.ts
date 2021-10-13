@@ -1,5 +1,6 @@
 import type { CalculationRows } from '../types';
 
+import { getComputedBillsValuesForAccount, reduceBillsForAccount } from './bills';
 import { getComputedYearStartAccountValue } from './boundary';
 import { getComputedCreditCardPayments } from './credit';
 import {
@@ -32,15 +33,18 @@ export function getComputedTransactionsForAccount(
   const previousIncome = getComputedPreviousIncomeForAccount(previousIncomeReduction, year);
 
   const predictedIncomeReduction = reducePredictedIncome(calculationRows, year, now, incomeGroup);
-
   const predictedIncome = getComputedPredictedIncomeForAccount(year, predictedIncomeReduction);
 
   const transfersReduction = reduceTransfers(calculationRows, accountId, now);
   const transfersValues = getComputedTransferValuesForAccount(year, transfersReduction);
 
+  const billsReduction = reduceBillsForAccount(incomeGroup[0].id, calculationRows);
+  const billsValues = getComputedBillsValuesForAccount(year, now, billsReduction);
+
   const computedValues: PlanningComputedValue[] = [
     ...previousIncome,
     ...predictedIncome,
+    ...billsValues,
     ...transfersValues,
   ].map((row) => ({
     ...row,

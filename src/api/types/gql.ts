@@ -730,6 +730,7 @@ export type PlanningAccount = {
   computedStartValue?: Maybe<Scalars['Int']>;
   upperLimit?: Maybe<Scalars['Int']>;
   lowerLimit?: Maybe<Scalars['Int']>;
+  includeBills?: Maybe<Scalars['Boolean']>;
 };
 
 export type PlanningAccountInput = {
@@ -741,6 +742,7 @@ export type PlanningAccountInput = {
   values: Array<PlanningValueInput>;
   upperLimit?: Maybe<Scalars['Int']>;
   lowerLimit?: Maybe<Scalars['Int']>;
+  includeBills?: Maybe<Scalars['Boolean']>;
 };
 
 export type PlanningComputedValue = {
@@ -1973,6 +1975,7 @@ export type PlanningAccountResolvers<ContextType = Context, ParentType extends R
   computedStartValue?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   upperLimit?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   lowerLimit?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  includeBills?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

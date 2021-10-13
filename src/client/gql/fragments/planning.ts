@@ -56,5 +56,6 @@ export const PlanningAccountParts = gql`
       isTransfer
     }
     computedStartValue
+    includeBills
   }
 `;

@@ -1,6 +1,7 @@
 import { DatabaseTransactionConnectionType, sql } from 'slonik';
 import type {
   AccountRow,
+  AccountRowBillsJoins,
   AccountRowCreditCardJoins,
   AccountRowCreditCardPaymentJoins,
   AccountRowIncomeJoins,
@@ -8,9 +9,11 @@ import type {
 } from './types';
 import {
   financialDateCTE,
+  financialYearStart,
   planningStartDateCTE,
   planningStartDateIncludingPreviousYearCTE,
 } from './utils';
+import { PageListStandard } from '~api/types';
 
 export async function selectPlanningAccountsWithIncome(
   db: DatabaseTransactionConnectionType,
@@ -112,6 +115,45 @@ export async function selectPlanningAccountsWithValues(
   )}
   WHERE a.uid = ${uid}
   ORDER BY a.net_worth_subcategory_id, v.id
+  `);
+  return rows;
+}
+
+export async function selectPlanningAccountsWithBills(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  year: number,
+): Promise<readonly ({ id: number } & AccountRowBillsJoins)[]> {
+  const { rows } = await db.query<AccountRow & AccountRowBillsJoins>(sql`
+  WITH ${sql.join(
+    [
+      sql`start_date AS ${planningStartDateCTE(uid, year)}`,
+      sql`bills AS (
+        SELECT MAX(b.date) AS date, (SUM(-b.value))::int4 AS value
+        FROM list_standard b
+        LEFT JOIN start_date ON TRUE
+        WHERE ${sql.join(
+          [
+            sql`uid = ${uid}`,
+            sql`page = ${PageListStandard.Bills}`,
+            sql`b.date > start_date.date`,
+            sql`b.date < ${financialYearStart(year + 1)}`,
+          ],
+          sql` AND `,
+        )}
+        GROUP BY to_char(b.date, 'YYYY-MM')
+      )`,
+    ],
+    sql`, `,
+  )}
+  SELECT ${sql.join(
+    [sql`a.id`, sql`a.include_bills`, sql`b.date AS bills_date`, sql`b.value AS bills_sum`],
+    sql`, `,
+  )}
+  FROM planning_accounts a
+  LEFT JOIN bills b ON a.include_bills IS TRUE
+  WHERE a.uid = ${uid}
+  ORDER BY a.net_worth_subcategory_id, b.date
   `);
   return rows;
 }

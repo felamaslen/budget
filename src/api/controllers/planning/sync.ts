@@ -351,6 +351,7 @@ const syncAccountRows = syncItems<AccountRow, SyncInputModify>({
         net_worth_subcategory_id: account.netWorthSubcategoryId,
         limit_upper: account.upperLimit ?? null,
         limit_lower: account.lowerLimit ?? null,
+        include_bills: account.includeBills ?? null,
       })),
   getUpdatedInput: (input) =>
     input.accounts.filter(isAccountInputExisting).map<Omit<AccountRow, 'uid'>>((account) => ({
@@ -359,6 +360,7 @@ const syncAccountRows = syncItems<AccountRow, SyncInputModify>({
       net_worth_subcategory_id: account.netWorthSubcategoryId,
       limit_upper: account.upperLimit ?? null,
       limit_lower: account.lowerLimit ?? null,
+      include_bills: account.includeBills ?? null,
     })),
 });
 

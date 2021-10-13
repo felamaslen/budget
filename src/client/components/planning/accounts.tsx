@@ -1,3 +1,4 @@
+import { compose } from '@typed/compose';
 import React, { SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -7,12 +8,13 @@ import { IncomeEditForm } from './form/income';
 import * as StyledForm from './form/styles';
 import { SidebarSection } from './sidebar-section';
 import * as Styled from './styles';
-import type { Account } from './types';
+import type { Account, State } from './types';
 
 import {
   FormFieldCostInline,
   FormFieldSelect,
   FormFieldText,
+  FormFieldTickbox,
   SelectOptions,
 } from '~client/components/form-field';
 import { useCTA } from '~client/hooks';
@@ -125,6 +127,26 @@ type PropsAccountEditForm = {
   account: GQL<PlanningAccount>;
 };
 
+const ensureSingleIncludeBillsAccount = (nextAccount: GQL<PlanningAccountInput>) => (
+  accounts: State['accounts'],
+): State['accounts'] =>
+  nextAccount.includeBills
+    ? accounts.map((sibling) =>
+        sibling.netWorthSubcategoryId === nextAccount.netWorthSubcategoryId || !sibling.includeBills
+          ? sibling
+          : { ...sibling, includeBills: false },
+      )
+    : accounts;
+
+const upsertAccountDelta = (accountId: number, nextAccount: GQL<PlanningAccountInput>) => (
+  accounts: State['accounts'],
+): State['accounts'] =>
+  partialModification(
+    accounts,
+    accounts.findIndex((compare) => compare.id === accountId),
+    optionalDeep(nextAccount, 'id'),
+  );
+
 const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
   const sync = usePlanningDispatch();
   const [tempAccount, setTempAccount] = useState<Account>(account);
@@ -136,11 +158,10 @@ const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
     (nextAccount: GQL<PlanningAccountInput>) => {
       sync((last) => ({
         ...last,
-        accounts: partialModification(
-          last.accounts,
-          last.accounts.findIndex((compare) => compare.id === account.id),
-          optionalDeep(nextAccount, 'id'),
-        ),
+        accounts: compose(
+          upsertAccountDelta(account.id, nextAccount),
+          ensureSingleIncludeBillsAccount(nextAccount),
+        )(last.accounts),
       }));
     },
     [sync, account.id],
@@ -174,6 +195,9 @@ const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
       setTempAccount((prevAccount) => ({ ...prevAccount, lowerLimit: lowerLimit || null })),
     [setTempAccount],
   );
+  const onToggleIncludeBills = useCallback(() => {
+    setTempAccount((prevAccount) => ({ ...prevAccount, includeBills: !prevAccount.includeBills }));
+  }, []);
 
   return (
     <Styled.AccountEditForm>
@@ -201,6 +225,12 @@ const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
               value={tempAccount.upperLimit ?? undefined}
               onChange={setUpperLimit}
             />
+          </StyledForm.ModifyAccountFormInput>
+        </StyledForm.ModifyAccountFormRow>
+        <StyledForm.ModifyAccountFormRow>
+          <StyledForm.ModifyAccountFormLabel>Include bills</StyledForm.ModifyAccountFormLabel>
+          <StyledForm.ModifyAccountFormInput>
+            <FormFieldTickbox value={!!tempAccount.includeBills} onChange={onToggleIncludeBills} />
           </StyledForm.ModifyAccountFormInput>
         </StyledForm.ModifyAccountFormRow>
       </FlexColumn>

@@ -1,5 +1,6 @@
 import type {
   AccountRow,
+  AccountRowBillsJoins,
   AccountRowCreditCardJoins,
   AccountRowCreditCardPaymentJoins,
   AccountRowValueJoins,
@@ -18,6 +19,10 @@ export type CalculationRows = {
     { id: number } & AccountRowValueJoins,
     AccountRowValueJoins,
     'value_value' | 'value_formula' | 'value_transfer_to'
+  >[];
+  billsRows: readonly WithRequiredJoin<
+    { id: number } & AccountRowBillsJoins,
+    AccountRowBillsJoins
   >[];
   latestActualValues: readonly LatestPlanningAccountValueRow[];
   previousIncome: readonly PreviousIncomeRow[];

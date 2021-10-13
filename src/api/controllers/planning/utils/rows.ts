@@ -2,6 +2,7 @@ import { replaceAtIndex } from 'replace-array';
 
 import {
   AccountRow,
+  AccountRowBillsJoins,
   AccountRowCreditCardJoins,
   AccountRowCreditCardPaymentJoins,
   AccountRowIncomeJoins,
@@ -36,6 +37,8 @@ export const accountRowHasValue = accountRowHasJoins<
   AccountRowValueJoins,
   'value_value' | 'value_formula' | 'value_transfer_to'
 >('value_id');
+
+export const accountRowHasBills = accountRowHasJoins<AccountRowBillsJoins>('bills_date');
 
 export function reduceYearMonthAccumulation<
   T extends { year: number; month: number } & Record<ChildKey, Child>,

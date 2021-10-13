@@ -23,7 +23,7 @@ export async function insertPlanningAccounts(
   accounts: Omit<AccountRow, 'id' | 'uid'>[],
 ): Promise<readonly AccountRow[]> {
   const { rows } = await db.query<AccountRow>(sql`
-  INSERT INTO planning_accounts (uid, account, net_worth_subcategory_id, limit_upper, limit_lower)
+  INSERT INTO planning_accounts (uid, account, net_worth_subcategory_id, limit_upper, limit_lower, include_bills)
   SELECT * FROM (
     SELECT new_accounts.* FROM ${sql.unnest(
       accounts.map((account) => [
@@ -32,8 +32,9 @@ export async function insertPlanningAccounts(
         account.net_worth_subcategory_id,
         account.limit_upper,
         account.limit_lower,
+        account.include_bills,
       ]),
-      ['int4', 'text', 'int4', 'int4', 'int4'],
+      ['int4', 'text', 'int4', 'int4', 'int4', 'bool'],
     )} AS new_accounts(uid, account, net_worth_subcategory_id)
     INNER JOIN net_worth_subcategories nws ON nws.id = new_accounts.net_worth_subcategory_id
     INNER JOIN net_worth_categories nwc ON nwc.id = nws.category_id AND nwc.uid = ${uid}
@@ -59,6 +60,7 @@ export async function updatePlanningAccount(
       sql`account = ${account.account}`,
       sql`limit_upper = ${account.limit_upper}`,
       sql`limit_lower = ${account.limit_lower}`,
+      sql`include_bills = ${account.include_bills}`,
     ],
     sql`, `,
   )}

@@ -199,6 +199,7 @@ describe('Planning resolver', () => {
               isTransfer
             }
             computedStartValue
+            includeBills
           }
           taxReliefFromPreviousYear
         }
@@ -263,6 +264,7 @@ describe('Planning resolver', () => {
             values: [],
             upperLimit: 1500000,
             lowerLimit: 500000,
+            includeBills: false,
           },
           {
             account: 'My test account',
@@ -426,6 +428,7 @@ describe('Planning resolver', () => {
               net_worth_subcategory_id: myBankId,
               limit_upper: 210000,
               limit_lower: 200000,
+              include_bills: null,
             }),
             expect.objectContaining<Partial<AccountRow>>({
               uid: app.uid,
@@ -433,6 +436,7 @@ describe('Planning resolver', () => {
               net_worth_subcategory_id: myOtherBankId,
               limit_upper: 1500000,
               limit_lower: 500000,
+              include_bills: false,
             }),
           ]),
         );
@@ -585,15 +589,17 @@ describe('Planning resolver', () => {
               ]),
             }),
             accounts: expect.arrayContaining([
-              expect.objectContaining({
+              expect.objectContaining<PlanningAccount>({
                 id: expect.any(Number),
                 account: 'Something account',
                 netWorthSubcategoryId: myOtherBankId,
                 income: [],
                 creditCards: [],
                 values: [],
+                computedValues: expect.arrayContaining([]),
                 upperLimit: 1500000,
                 lowerLimit: 500000,
+                includeBills: false,
               }),
               expect.objectContaining<PlanningAccount>({
                 id: expect.any(Number),
@@ -652,6 +658,7 @@ describe('Planning resolver', () => {
                 upperLimit: 210000,
                 lowerLimit: 200000,
                 computedValues: [],
+                includeBills: null,
               }),
             ]),
           }),
@@ -713,6 +720,7 @@ describe('Planning resolver', () => {
                 ...omit(account1, '__typename', 'computedValues', 'computedStartValue'),
                 account: 'My modified test account',
                 upperLimit: 1000000,
+                includeBills: true,
                 income: [
                   {
                     ...omitTypeName(account1.income[0]),
@@ -846,8 +854,14 @@ describe('Planning resolver', () => {
         );
 
         expect(rowsAfterCreate.rows).toStrictEqual([
-          expect.objectContaining({ account: 'My test account' }),
-          expect.objectContaining({ account: 'Something account' }),
+          expect.objectContaining<Partial<AccountRow>>({
+            account: 'My test account',
+            include_bills: null,
+          }),
+          expect.objectContaining<Partial<AccountRow>>({
+            account: 'Something account',
+            include_bills: false,
+          }),
         ]);
 
         expect(rowsAfterUpdate.rows).toStrictEqual([
@@ -855,6 +869,7 @@ describe('Planning resolver', () => {
             ...rowsAfterCreate.rows[0],
             account: 'My modified test account',
             limit_upper: 1000000,
+            include_bills: true,
           },
         ]);
       });
@@ -1629,6 +1644,86 @@ describe('Planning resolver', () => {
           expect(
             res?.accounts?.find((compare) => compare.account === 'My test account')?.creditCards,
           ).toHaveLength(1);
+        });
+      });
+
+      describe('when includeBills is true', () => {
+        const setupIncludeBills = async (): Promise<PlanningSyncResponse | undefined> => {
+          const resCreate = await setupCreate();
+          const myAccount = resCreate.data?.syncPlanning?.accounts?.find(
+            (compare) => compare.account === 'Something account',
+          ) as PlanningAccount;
+          await getPool().connect(async (db) => {
+            await db.query(sql`
+            UPDATE planning_accounts SET include_bills = ${true} WHERE id = ${myAccount.id}
+            `);
+            await db.query(sql`
+            INSERT INTO list_standard (uid, page, date, item, category, value, shop)
+            SELECT * FROM ${sql.unnest(
+              [
+                [
+                  app.uid,
+                  PageListStandard.Bills,
+                  '2020-04-18',
+                  'Gas',
+                  'Utilities',
+                  9114,
+                  'Energy company',
+                ],
+                [
+                  app.uid,
+                  PageListStandard.Bills,
+                  '2020-05-13',
+                  'Mortgage',
+                  'Housing',
+                  132023,
+                  'Bank',
+                ],
+                [
+                  app.uid,
+                  PageListStandard.Bills,
+                  '2020-05-29',
+                  'Electricity',
+                  'Utilities',
+                  6238,
+                  'Energy company',
+                ],
+              ],
+              ['int4', 'page_category', 'date', 'text', 'text', 'int4', 'text'],
+            )}
+            `);
+          });
+          const res = await setupRead();
+          return res;
+        };
+
+        it('should aggregate and add bills as computed transactions', async () => {
+          expect.assertions(1);
+          const res = await setupIncludeBills();
+          const myAccount = res?.accounts?.find(
+            (compare) => compare.account === 'Something account',
+          ) as PlanningAccount;
+
+          expect(myAccount.computedValues).toStrictEqual(
+            expect.arrayContaining([
+              expect.objectContaining<Partial<PlanningComputedValue>>({
+                key: 'bills-2020-3',
+                month: 3,
+                name: 'Bills',
+                value: -9114,
+                isVerified: true,
+                isTransfer: false,
+              }),
+              expect.objectContaining<Partial<PlanningComputedValue>>({
+                key: 'bills-2020-4',
+                month: 4,
+                name: 'Bills',
+                value: -(132023 + 6238),
+                isVerified: false,
+                isTransfer: false,
+              }),
+            ]),
+          );
         });
       });
     });

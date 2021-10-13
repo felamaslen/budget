@@ -790,6 +790,7 @@ export type PlanningAccount = {
   computedStartValue?: Maybe<Scalars['Int']>;
   upperLimit?: Maybe<Scalars['Int']>;
   lowerLimit?: Maybe<Scalars['Int']>;
+  includeBills?: Maybe<Scalars['Boolean']>;
 };
 
 export type PlanningAccountInput = {
@@ -801,6 +802,7 @@ export type PlanningAccountInput = {
   values: Array<PlanningValueInput>;
   upperLimit?: Maybe<Scalars['Int']>;
   lowerLimit?: Maybe<Scalars['Int']>;
+  includeBills?: Maybe<Scalars['Boolean']>;
 };
 
 export type PlanningComputedValue = {
@@ -1326,7 +1328,7 @@ export type PlanningParametersPartsFragment = (
 
 export type PlanningAccountPartsFragment = (
   { __typename?: 'PlanningAccount' }
-  & Pick<PlanningAccount, 'id' | 'account' | 'netWorthSubcategoryId' | 'upperLimit' | 'lowerLimit' | 'computedStartValue'>
+  & Pick<PlanningAccount, 'id' | 'account' | 'netWorthSubcategoryId' | 'upperLimit' | 'lowerLimit' | 'computedStartValue' | 'includeBills'>
   & { income: Array<(
     { __typename?: 'PlanningIncome' }
     & Pick<PlanningIncome, 'id' | 'startDate' | 'endDate' | 'salary' | 'taxCode' | 'pensionContrib' | 'studentLoan'>
@@ -2423,6 +2425,7 @@ export const PlanningAccountPartsFragmentDoc = gql`
     isTransfer
   }
   computedStartValue
+  includeBills
 }
     `;
 export const SetConfigDocument = gql`

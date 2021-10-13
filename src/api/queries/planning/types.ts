@@ -16,6 +16,7 @@ export type AccountRow = {
   net_worth_subcategory_id: number;
   limit_upper: number | null;
   limit_lower: number | null;
+  include_bills: boolean | null;
 };
 
 export type PlanningIncomeRow = {
@@ -62,6 +63,11 @@ export type AccountRowIncomeJoins = {
   income_tax_code: string | null;
   income_pension_contrib: number | null;
   income_student_loan: boolean | null;
+};
+
+export type AccountRowBillsJoins = {
+  bills_date: Date | null;
+  bills_sum: number | null;
 };
 
 export type AccountRowCreditCardJoins = {

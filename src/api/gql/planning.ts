@@ -68,6 +68,7 @@ export const planningSchema = gql`
     computedStartValue: Int
     upperLimit: Int
     lowerLimit: Int
+    includeBills: Boolean
   }
 
   type PlanningSyncResponse {
@@ -133,6 +134,7 @@ export const planningSchema = gql`
     values: [PlanningValueInput!]!
     upperLimit: Int
     lowerLimit: Int
+    includeBills: Boolean
   }
 
   input PlanningSync {
