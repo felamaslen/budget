@@ -156,7 +156,7 @@ export async function getPlanningData(
     averageCreditCardPaymentRows,
     accountRowsWithValues,
   ] = await Promise.all([
-    selectPlanningAccountsWithIncome(db, uid, year),
+    selectPlanningAccountsWithIncome(db, uid),
     selectPlanningAccountsWithCreditCards(db, uid, year),
     selectAverageCreditCardPayments(db, uid),
     selectPlanningAccountsWithValues(db, uid, year),

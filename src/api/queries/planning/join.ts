@@ -11,12 +11,10 @@ import {
   planningStartDateCTE,
   planningStartDateIncludingPreviousYearCTE,
 } from './utils';
-import { startMonth } from '~shared/planning';
 
 export async function selectPlanningAccountsWithIncome(
   db: DatabaseTransactionConnectionType,
   uid: number,
-  year: number,
 ): Promise<readonly (AccountRow & AccountRowIncomeJoins)[]> {
   const { rows } = await db.query<AccountRow & AccountRowIncomeJoins>(sql`
   SELECT ${sql.join(
@@ -34,7 +32,6 @@ export async function selectPlanningAccountsWithIncome(
   )}
   FROM planning_accounts a
   LEFT JOIN planning_income i ON i.account_id = a.id
-    AND i.start_date < make_date(${year + 1}, ${startMonth}, 1)
   WHERE a.uid = ${uid}
   ORDER BY a.net_worth_subcategory_id, i.start_date
   `);

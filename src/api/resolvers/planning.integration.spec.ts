@@ -276,6 +276,14 @@ describe('Planning resolver', () => {
                 studentLoan: true,
                 pensionContrib: 0.03,
               },
+              {
+                startDate: ('2025-05-03' as unknown) as Date,
+                endDate: ('2026-01-01' as unknown) as Date,
+                salary: 8500000,
+                taxCode: '1257L',
+                studentLoan: true,
+                pensionContrib: 0.03,
+              },
             ],
             creditCards: [
               {
@@ -432,7 +440,7 @@ describe('Planning resolver', () => {
       });
 
       it('should create income rows in the database', async () => {
-        expect.assertions(1);
+        expect.assertions(2);
         await setup();
 
         const incomeRows = await getPool().query<PlanningIncomeRow>(sql`
@@ -442,16 +450,27 @@ describe('Planning resolver', () => {
         WHERE planning_accounts.uid = ${app.uid}
         `);
 
-        expect(incomeRows.rows).toStrictEqual([
-          expect.objectContaining<Partial<PlanningIncomeRow>>({
-            start_date: new Date('2020-01-20'),
-            end_date: new Date('2021-01-01'),
-            salary: 6000000,
-            tax_code: '1250L',
-            student_loan: true,
-            pension_contrib: 0.03,
-          }),
-        ]);
+        expect(incomeRows.rows).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<Partial<PlanningIncomeRow>>({
+              start_date: new Date('2020-01-20'),
+              end_date: new Date('2021-01-01'),
+              salary: 6000000,
+              tax_code: '1250L',
+              student_loan: true,
+              pension_contrib: 0.03,
+            }),
+            expect.objectContaining<Partial<PlanningIncomeRow>>({
+              start_date: new Date('2025-05-03'),
+              end_date: new Date('2026-01-01'),
+              salary: 8500000,
+              tax_code: '1257L',
+              student_loan: true,
+              pension_contrib: 0.03,
+            }),
+          ]),
+        );
+        expect(incomeRows.rows).toHaveLength(2);
       });
 
       it('should create credit card rows in the database', async () => {
@@ -580,7 +599,7 @@ describe('Planning resolver', () => {
                 id: expect.any(Number),
                 account: 'My test account',
                 netWorthSubcategoryId: myBankId,
-                income: [
+                income: expect.arrayContaining([
                   expect.objectContaining({
                     id: expect.any(Number),
                     startDate: ('2020-01-20' as unknown) as Date,
@@ -590,7 +609,16 @@ describe('Planning resolver', () => {
                     studentLoan: true,
                     pensionContrib: 0.03,
                   }),
-                ],
+                  expect.objectContaining({
+                    id: expect.any(Number),
+                    startDate: ('2025-05-03' as unknown) as Date,
+                    endDate: ('2026-01-01' as unknown) as Date,
+                    salary: 8500000,
+                    taxCode: '1257L',
+                    studentLoan: true,
+                    pensionContrib: 0.03,
+                  }),
+                ]),
                 creditCards: [
                   expect.objectContaining({
                     id: expect.any(Number),
@@ -844,7 +872,12 @@ describe('Planning resolver', () => {
           sql`SELECT * FROM planning_income ORDER BY account_id`,
         );
 
-        expect(rowsAfterCreate.rows).toStrictEqual([expect.objectContaining({ salary: 6000000 })]);
+        expect(rowsAfterCreate.rows).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ salary: 6000000 }),
+            expect.objectContaining({ salary: 8500000 }),
+          ]),
+        );
 
         expect(rowsAfterUpdate.rows).toStrictEqual([
           {
@@ -1121,8 +1154,8 @@ describe('Planning resolver', () => {
         expect(res?.parameters?.thresholds).toHaveLength(5);
       });
 
-      it('should include income data associated with the account', async () => {
-        expect.assertions(2);
+      it('should include all income data associated with the account', async () => {
+        expect.assertions(3);
         await setupCreate();
         const res = await setupRead();
 
@@ -1136,17 +1169,29 @@ describe('Planning resolver', () => {
 
         expect(accountWithoutSalary?.income).toHaveLength(0);
 
-        expect(accountWithSalary?.income).toStrictEqual<PlanningIncome[]>([
-          expect.objectContaining<PlanningIncome>({
-            id: expect.any(Number),
-            startDate: '2020-01-20',
-            endDate: '2021-01-01',
-            salary: 6000000,
-            taxCode: '1250L',
-            studentLoan: true,
-            pensionContrib: 0.03,
-          }),
-        ]);
+        expect(accountWithSalary?.income).toStrictEqual(
+          expect.arrayContaining<PlanningIncome>([
+            expect.objectContaining<PlanningIncome>({
+              id: expect.any(Number),
+              startDate: '2025-05-03',
+              endDate: '2026-01-01',
+              salary: 8500000,
+              taxCode: '1257L',
+              studentLoan: true,
+              pensionContrib: 0.03,
+            }),
+            expect.objectContaining<PlanningIncome>({
+              id: expect.any(Number),
+              startDate: '2020-01-20',
+              endDate: '2021-01-01',
+              salary: 6000000,
+              taxCode: '1250L',
+              studentLoan: true,
+              pensionContrib: 0.03,
+            }),
+          ]),
+        );
+        expect(accountWithSalary?.income).toHaveLength(2);
       });
 
       it('should include credit card data associated with the account', async () => {
