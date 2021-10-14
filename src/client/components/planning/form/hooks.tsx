@@ -287,10 +287,7 @@ export function useTransactionForm(
                       }
                       return {
                         ...prevCreditCard,
-                        payments: [
-                          ...prevCreditCard.payments,
-                          { year, month, value: creditCard.value },
-                        ],
+                        payments: [...prevCreditCard.payments, { month, value: creditCard.value }],
                       };
                     },
                   ),

@@ -1,8 +1,13 @@
 import { render } from '@testing-library/react';
+import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, { SetStateAction } from 'react';
+import numericHash from 'string-hash';
 
-import { parseRawValue, useTransactionFormElements } from './hooks';
+import { PlanningContextDispatch } from '../context';
+import type { State } from '../types';
+
+import { parseRawValue, useTransactionForm, useTransactionFormElements } from './hooks';
 
 describe(parseRawValue.name, () => {
   it('should handle rounding errors in explicit values', () => {
@@ -68,5 +73,65 @@ describe(useTransactionFormElements.name, () => {
 
       expect(onChange).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe(useTransactionForm.name, () => {
+  let syncState: State = {
+    year: 2020,
+    parameters: {
+      rates: [],
+      thresholds: [],
+    },
+    accounts: [
+      {
+        id: numericHash('my-account'),
+        netWorthSubcategoryId: numericHash('my-account-subcategory'),
+        account: 'My account',
+        creditCards: [
+          {
+            id: numericHash('my-credit-card-id'),
+            netWorthSubcategoryId: numericHash('my-credit-card-subcategory'),
+            payments: [],
+            predictedPayment: null,
+          },
+        ],
+        values: [],
+        income: [],
+        computedValues: [],
+        computedStartValue: null,
+        includeBills: null,
+      },
+    ],
+    taxReliefFromPreviousYear: null,
+    error: null,
+  };
+
+  const sync = jest.fn((action: SetStateAction<State>) => {
+    syncState = typeof action === 'function' ? action(syncState) : action;
+  });
+
+  const Wrapper: React.FC = ({ children }) => (
+    <PlanningContextDispatch.Provider value={sync}>{children}</PlanningContextDispatch.Provider>
+  );
+
+  const setup = (): RenderHookResult<
+    Record<string, unknown>,
+    ReturnType<typeof useTransactionForm>
+  > =>
+    renderHook(() => useTransactionForm(2020, 7), {
+      wrapper: Wrapper,
+    });
+
+  it('should not add the year to credit card payments', () => {
+    expect.assertions(1);
+    const { result } = setup();
+    result.current.onChangeCreditCard(numericHash('my-account-subcategory'), {
+      netWorthSubcategoryId: numericHash('my-credit-card-subcategory'),
+      name: 'My credit card',
+      value: -12592,
+    });
+
+    expect(syncState.accounts[0].creditCards[0].payments[0]).not.toHaveProperty('year');
   });
 });
