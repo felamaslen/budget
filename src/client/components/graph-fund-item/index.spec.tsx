@@ -1,4 +1,5 @@
-import { act, fireEvent, render, RenderResult } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DocumentNode } from 'graphql';
 import React from 'react';
 import { Client } from 'urql';
@@ -219,9 +220,7 @@ describe('<GraphFundItem />', () => {
     it('should render a filled graph', async () => {
       expect.hasAssertions();
       const { container, getByRole } = setup();
-      act(() => {
-        fireEvent.focus(getByRole('button'));
-      });
+      userEvent.click(getByRole('button'));
       expect(container).toMatchInlineSnapshot(`
         .emotion-0 {
           -webkit-align-items: center;

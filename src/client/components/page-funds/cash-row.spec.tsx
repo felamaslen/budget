@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createMockStore, { MockStore } from 'redux-mock-store';
@@ -59,15 +60,11 @@ describe('<CashRow />', () => {
 
       expect(adjustment).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.mouseOver(adjustment);
-      });
+      userEvent.hover(adjustment);
 
       expect(getByText(previewText)).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.mouseOut(adjustment);
-      });
+      userEvent.unhover(adjustment);
 
       expect(queryByText(previewText)).not.toBeInTheDocument();
     });

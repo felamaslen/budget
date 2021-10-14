@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { FormFieldCost, FormFieldCostInline } from './cost';
@@ -25,12 +26,12 @@ describe('<FormFieldCost />', () => {
     const { findByDisplayValue } = render(<FormFieldCost {...props} />);
     const input = (await findByDisplayValue('103.45')) as HTMLInputElement;
 
-    fireEvent.change(input, { target: { value: '10.93' } });
+    userEvent.type(input, '{selectall}{backspace}10.93');
 
     expect(props.onChange).not.toHaveBeenCalled();
     expect(input.value).toBe('10.93');
 
-    fireEvent.blur(input);
+    userEvent.tab();
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     expect(props.onChange).toHaveBeenCalledWith(1093);
@@ -72,16 +73,12 @@ describe('<FormFieldCost />', () => {
       const { getByDisplayValue } = render(<FormFieldCostInline {...props} />);
       const input = getByDisplayValue('103.45') as HTMLInputElement;
 
-      act(() => {
-        fireEvent.change(input, { target: { value: '229.119330' } });
-      });
+      userEvent.type(input, '{selectall}{backspace}229.119330');
 
       expect(props.onChange).not.toHaveBeenCalled();
       expect(input.value).toBe('229.119330');
 
-      act(() => {
-        fireEvent.blur(input);
-      });
+      userEvent.tab();
 
       expect(props.onChange).toHaveBeenCalledTimes(1);
       expect(props.onChange).toHaveBeenCalledWith(22912);
@@ -93,9 +90,7 @@ describe('<FormFieldCost />', () => {
       const { container, getByDisplayValue } = render(<FormFieldCostInline {...props} />);
       const input = getByDisplayValue('103.45') as HTMLInputElement;
 
-      act(() => {
-        fireEvent.change(input, { target: { value: '229.119330' } });
-      });
+      userEvent.type(input, '{selectall}{backspace}229.119330');
 
       expect(input.value).toBe('229.119330');
 
@@ -131,15 +126,11 @@ describe('<FormFieldCost />', () => {
 
         const input = getByDisplayValue('') as HTMLInputElement;
 
-        act(() => {
-          fireEvent.change(input, { target: { value: initial } });
-        });
+        userEvent.type(input, `{selectall}{backspace}${initial}`);
 
         expect(input.value).toBe(initial);
 
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.tab();
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(props.onChange).toHaveBeenCalledWith(Math.round(value));
@@ -161,15 +152,11 @@ describe('<FormFieldCost />', () => {
 
         const input = getByDisplayValue(fixed) as HTMLInputElement;
 
-        act(() => {
-          fireEvent.change(input, { target: { value: initial } });
-        });
+        userEvent.type(input, `{selectall}{backspace}${initial}`);
 
         expect(input.value).toBe(initial);
 
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.tab();
 
         expect(input.value).toBe(fixed);
       });
@@ -182,12 +169,8 @@ describe('<FormFieldCost />', () => {
 
         const input = getByDisplayValue('') as HTMLInputElement;
 
-        act(() => {
-          fireEvent.change(input, { target: { value: initial } });
-        });
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.type(input, `{selectall}{backspace}${initial}`);
+        userEvent.tab();
         act(() => {
           render(<FormFieldCostInline {...props} value={Math.round(value)} active={false} />, {
             container,
@@ -208,9 +191,7 @@ describe('<FormFieldCost />', () => {
         const { getByDisplayValue } = render(<FormFieldCostInline {...props} />);
         const input = getByDisplayValue('103.45') as HTMLInputElement;
 
-        act(() => {
-          fireEvent.change(input, { target: { value: '' } });
-        });
+        userEvent.type(input, '{selectall}{backspace}');
 
         return input;
       };
@@ -226,9 +207,7 @@ describe('<FormFieldCost />', () => {
         expect.assertions(2);
         const input = setup();
 
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.tab();
 
         expect(input.value).toBe('103.45');
         expect(props.onChange).not.toHaveBeenCalled();
@@ -238,51 +217,6 @@ describe('<FormFieldCost />', () => {
     describe('decimal fraction input', () => {
       const propsDecimal = { ...props, value: undefined, label: 'cost-input' };
 
-      const testInputCharacter = (
-        renderProps: RenderResult,
-        value: string,
-        changeTo: number | null,
-      ): void => {
-        propsDecimal.onChange.mockClear();
-        const input = renderProps.getByLabelText('cost-input') as HTMLInputElement;
-
-        act(() => {
-          fireEvent.change(input, { target: { value } });
-        });
-
-        expect(input.value).toBe(value);
-
-        act(() => {
-          fireEvent.blur(input);
-        });
-
-        if (changeTo === null) {
-          expect(propsDecimal.onChange).not.toHaveBeenCalled();
-        } else {
-          expect(propsDecimal.onChange).toHaveBeenCalledTimes(1);
-          expect(propsDecimal.onChange).toHaveBeenCalledWith(changeTo);
-        }
-      };
-
-      const testInput = (
-        renderProps: RenderResult,
-        value: string | string[],
-        changeTo: (number | null)[],
-      ): void => {
-        const firstWord = Array.isArray(value) ? value[0] : value;
-        const chars = firstWord.split('');
-
-        chars.forEach((_, index) =>
-          testInputCharacter(renderProps, firstWord.substring(0, index + 1), changeTo[index]),
-        );
-
-        if (Array.isArray(value) && value.length > 1) {
-          value.slice(1).forEach((word, index) => {
-            testInputCharacter(renderProps, word, changeTo[index + chars.length]);
-          });
-        }
-      };
-
       it('should start with an empty value', () => {
         expect.assertions(1);
         const renderProps = render(<FormFieldCostInline {...propsDecimal} />);
@@ -291,17 +225,49 @@ describe('<FormFieldCost />', () => {
       });
 
       it.each`
-        case                              | value                | changeTo                           | numAssertions
-        ${'without zeroes'}               | ${'1.5'}             | ${[100, null, 150]}                | ${8}
-        ${'with a zero in the middle'}    | ${'1.05'}            | ${[100, null, null, 105]}          | ${10}
-        ${'from an integer'}              | ${['1005', '1.005']} | ${[100, 1000, 10000, 100500, 101]} | ${15}
-        ${'when less than 1'}             | ${'.3'}              | ${[0, 30]}                         | ${6}
-        ${'when less than 1 with a zero'} | ${'.05'}             | ${[0, null, 5]}                    | ${8}
-        ${'when the value is negative'}   | ${'-1.09'}           | ${[null, -100, null, null, -109]}  | ${12}
-      `('should handle the case $case', ({ value, changeTo, numAssertions }) => {
-        expect.assertions(numAssertions);
-        const renderProps = render(<FormFieldCostInline {...propsDecimal} />);
-        testInput(renderProps, value, changeTo);
+        case                              | value      | expectedCalls
+        ${'without zeroes'}               | ${'1.5'}   | ${[100, 150]}
+        ${'with a zero in the middle'}    | ${'1.05'}  | ${[100, 105]}
+        ${'when less than 1'}             | ${'.3'}    | ${[0, 30]}
+        ${'when less than 1 with a zero'} | ${'.05'}   | ${[0, 5]}
+        ${'when the value is negative'}   | ${'-1.09'} | ${[-100, -109]}
+      `(
+        'should handle the case $case',
+        ({ value, expectedCalls }: { value: string; expectedCalls: number[] }) => {
+          expect.assertions(expectedCalls.length + 1);
+
+          const { getByLabelText } = render(<FormFieldCostInline {...propsDecimal} />);
+          const input = getByLabelText('cost-input') as HTMLInputElement;
+
+          value.split('').forEach((_, index) => {
+            userEvent.type(input, `{selectall}{backspace}${value.substring(0, index + 1)}`);
+            userEvent.tab();
+          });
+
+          expect(propsDecimal.onChange).toHaveBeenCalledTimes(expectedCalls.length);
+          expectedCalls.forEach((expectedCall, index) => {
+            expect(propsDecimal.onChange).toHaveBeenNthCalledWith(index + 1, expectedCall);
+          });
+        },
+      );
+
+      it('should handle the case from an integer to a float (after initial activation of int)', () => {
+        expect.assertions(3);
+        const { getByLabelText } = render(<FormFieldCostInline {...propsDecimal} />);
+        const input = getByLabelText('cost-input') as HTMLInputElement;
+
+        userEvent.type(input, '{selectall}{backspace}1005');
+        userEvent.tab();
+
+        userEvent.type(
+          input,
+          '{end}{backspace}{backspace}{backspace}{arrowLeft}{arrowLeft}{arrowLeft}.',
+        );
+        userEvent.tab();
+
+        expect(propsDecimal.onChange).toHaveBeenCalledTimes(2);
+        expect(propsDecimal.onChange).toHaveBeenNthCalledWith(1, 100500);
+        expect(propsDecimal.onChange).toHaveBeenNthCalledWith(2, 101);
       });
 
       it('should handle invalid input', () => {
@@ -309,12 +275,8 @@ describe('<FormFieldCost />', () => {
         const renderProps = render(<FormFieldCostInline {...propsDecimal} />);
         const input = renderProps.getByDisplayValue('') as HTMLInputElement;
 
-        act(() => {
-          fireEvent.change(input, { target: { value: 'not-a-number' } });
-        });
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.type(input, 'not-a-number');
+        userEvent.tab();
 
         expect(props.onChange).not.toHaveBeenCalled();
         expect(input.value).toBe('');
@@ -325,18 +287,11 @@ describe('<FormFieldCost />', () => {
         const renderProps = render(<FormFieldCostInline {...propsDecimal} />);
         const input = renderProps.getByDisplayValue('') as HTMLInputElement;
 
-        act(() => {
-          fireEvent.change(input, { target: { value: '1.5' } });
-        });
-        act(() => {
-          fireEvent.change(input, { target: { value: '1.5f' } });
-        });
+        userEvent.type(input, '1.5f');
 
         expect(input.value).toBe('1.5');
 
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.tab();
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(props.onChange).toHaveBeenCalledWith(150);

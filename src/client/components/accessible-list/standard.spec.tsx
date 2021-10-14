@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
-import { render, RenderResult, within, act, fireEvent, waitFor } from '@testing-library/react';
+import { render, RenderResult, within, act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -150,49 +151,23 @@ describe(AccessibleListStandard.name, () => {
 
     expect(dateInput.value).toBe('18/04/2020');
 
-    act(() => {
-      fireEvent.focus(itemInput);
-    });
-    act(() => {
-      fireEvent.change(itemInput, { target: { value: 'some new item' } });
-    });
-    act(() => {
-      fireEvent.blur(itemInput);
-    });
+    userEvent.click(itemInput);
+    userEvent.clear(itemInput);
+    userEvent.type(itemInput, 'some new item');
 
-    act(() => {
-      fireEvent.focus(categoryInput);
-    });
-    act(() => {
-      fireEvent.change(categoryInput, { target: { value: 'some new category' } });
-    });
-    act(() => {
-      fireEvent.blur(categoryInput);
-    });
+    userEvent.click(categoryInput);
+    userEvent.clear(categoryInput);
+    userEvent.type(categoryInput, 'some new category');
 
-    act(() => {
-      fireEvent.focus(costInput);
-    });
-    act(() => {
-      fireEvent.change(costInput, { target: { value: '189.93' } });
-    });
-    act(() => {
-      fireEvent.blur(costInput);
-    });
+    userEvent.click(costInput);
+    userEvent.clear(costInput);
+    userEvent.type(costInput, '189.93');
 
-    act(() => {
-      fireEvent.focus(shopInput);
-    });
-    act(() => {
-      fireEvent.change(shopInput, { target: { value: 'some new shop' } });
-    });
-    act(() => {
-      fireEvent.blur(shopInput);
-    });
+    userEvent.click(shopInput);
+    userEvent.clear(shopInput);
+    userEvent.type(shopInput, 'some new shop');
 
-    act(() => {
-      fireEvent.click(addButton);
-    });
+    userEvent.click(addButton);
 
     expect(onCreate).toHaveBeenCalledTimes(1);
     expect(onCreate).toHaveBeenCalledWith({
@@ -862,9 +837,7 @@ describe(AccessibleListStandard.name, () => {
         const addButton = getByText('Add');
         expect(queryByTestId('modal-dialog')).not.toBeInTheDocument();
 
-        act(() => {
-          fireEvent.click(addButton);
-        });
+        userEvent.click(addButton);
 
         const modalDialog = getByTestId('modal-dialog');
         expect(modalDialog).toBeInTheDocument();
@@ -880,9 +853,7 @@ describe(AccessibleListStandard.name, () => {
         jest.setSystemTime(new Date('2020-04-14'));
         const { getByText, getByTestId, queryByTestId } = setupMobile();
         const addButton = getByText('Add');
-        act(() => {
-          fireEvent.click(addButton);
-        });
+        userEvent.click(addButton);
         const modalDialog = getByTestId('modal-dialog');
         const { getAllByRole, getByRole, getByDisplayValue, getByText: getModalText } = within(
           modalDialog,
@@ -892,41 +863,19 @@ describe(AccessibleListStandard.name, () => {
         const costInput = getByRole('spinbutton') as HTMLInputElement;
         const [itemInput, categoryInput, shopInput] = getAllByRole('textbox') as HTMLInputElement[];
 
-        act(() => {
-          fireEvent.change(dateInput, { target: { value: '2020-04-20' } });
-        });
-        act(() => {
-          fireEvent.blur(dateInput);
-        });
-        act(() => {
-          fireEvent.change(itemInput, { target: { value: 'some new item' } });
-        });
-        act(() => {
-          fireEvent.blur(itemInput);
-        });
-        act(() => {
-          fireEvent.change(categoryInput, { target: { value: 'some new category' } });
-        });
-        act(() => {
-          fireEvent.blur(categoryInput);
-        });
-        act(() => {
-          fireEvent.change(costInput, { target: { value: '23.65' } });
-        });
-        act(() => {
-          fireEvent.blur(costInput);
-        });
-        act(() => {
-          fireEvent.change(shopInput, { target: { value: 'some new shop' } });
-        });
-        act(() => {
-          fireEvent.blur(shopInput);
-        });
+        userEvent.clear(dateInput);
+        userEvent.type(dateInput, '2020-04-20');
+        userEvent.clear(itemInput);
+        userEvent.type(itemInput, 'some new item');
+        userEvent.clear(categoryInput);
+        userEvent.type(categoryInput, 'some new category');
+        userEvent.clear(costInput);
+        userEvent.type(costInput, '23.65');
+        userEvent.clear(shopInput);
+        userEvent.type(shopInput, 'some new shop');
 
         const buttonConfirm = getModalText('Do it.') as HTMLButtonElement;
-        act(() => {
-          fireEvent.click(buttonConfirm);
-        });
+        userEvent.click(buttonConfirm);
 
         expect(onCreate).toHaveBeenCalledTimes(1);
         expect(onCreate).toHaveBeenCalledWith({
@@ -953,9 +902,7 @@ describe(AccessibleListStandard.name, () => {
         const { getByText, getByTestId } = setupMobile();
         const itemField = getByText('item one');
 
-        act(() => {
-          fireEvent.click(itemField);
-        });
+        userEvent.click(itemField);
 
         const modalDialog = getByTestId('modal-dialog');
         expect(modalDialog).toBeInTheDocument();
@@ -972,9 +919,7 @@ describe(AccessibleListStandard.name, () => {
 
         const { getByText, getByTestId } = setupMobile();
         const itemField = getByText('item one');
-        act(() => {
-          fireEvent.click(itemField);
-        });
+        userEvent.click(itemField);
         const modalDialog = getByTestId('modal-dialog');
         const { getAllByRole, getByRole, getByDisplayValue, getByText: getModalText } = within(
           modalDialog,
@@ -984,41 +929,23 @@ describe(AccessibleListStandard.name, () => {
         const costInput = getByRole('spinbutton') as HTMLInputElement;
         const [itemInput, categoryInput, shopInput] = getAllByRole('textbox') as HTMLInputElement[];
 
-        act(() => {
-          fireEvent.change(dateInput, { target: { value: '2020-04-23' } });
-        });
-        act(() => {
-          fireEvent.blur(dateInput);
-        });
-        act(() => {
-          fireEvent.change(itemInput, { target: { value: 'updated item' } });
-        });
-        act(() => {
-          fireEvent.blur(itemInput);
-        });
-        act(() => {
-          fireEvent.change(categoryInput, { target: { value: 'updated category' } });
-        });
-        act(() => {
-          fireEvent.blur(categoryInput);
-        });
-        act(() => {
-          fireEvent.change(costInput, { target: { value: '998.31' } });
-        });
-        act(() => {
-          fireEvent.blur(costInput);
-        });
-        act(() => {
-          fireEvent.change(shopInput, { target: { value: 'updated shop' } });
-        });
-        act(() => {
-          fireEvent.blur(shopInput);
-        });
+        userEvent.clear(dateInput);
+        userEvent.type(dateInput, '2020-04-23');
+
+        userEvent.clear(itemInput);
+        userEvent.type(itemInput, 'updated item');
+
+        userEvent.clear(categoryInput);
+        userEvent.type(categoryInput, 'updated category');
+
+        userEvent.clear(costInput);
+        userEvent.type(costInput, '998.31');
+
+        userEvent.clear(shopInput);
+        userEvent.type(shopInput, 'updated shop');
 
         const buttonConfirm = getModalText('Do it.') as HTMLButtonElement;
-        act(() => {
-          fireEvent.click(buttonConfirm);
-        });
+        userEvent.click(buttonConfirm);
 
         expect(onUpdate).toHaveBeenCalledTimes(1);
         expect(onUpdate).toHaveBeenCalledWith(
@@ -1045,16 +972,12 @@ describe(AccessibleListStandard.name, () => {
         expect.assertions(2);
         const { getByText, getByTestId } = setupMobile();
         const itemField = getByText('item one');
-        act(() => {
-          fireEvent.click(itemField);
-        });
+        userEvent.click(itemField);
         const modalDialog = getByTestId('modal-dialog');
         const { getByText: getModalText } = within(modalDialog);
 
         const buttonDelete = getModalText('−') as HTMLButtonElement;
-        act(() => {
-          fireEvent.click(buttonDelete);
-        });
+        userEvent.click(buttonDelete);
 
         expect(onDelete).toHaveBeenCalledTimes(1);
         expect(onDelete).toHaveBeenCalledWith(numericHash('id-1'), {
@@ -1129,15 +1052,9 @@ describe(AccessibleListStandard.name, () => {
         const { getByDisplayValue } = setupCustom();
         const input = getByDisplayValue(fieldValue) as HTMLInputElement;
 
-        act(() => {
-          fireEvent.focus(input);
-        });
-        act(() => {
-          fireEvent.change(input, { target: { value: inputValue } });
-        });
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.clear(input);
+        userEvent.type(input, inputValue);
+        userEvent.tab();
 
         expect(onUpdate).toHaveBeenCalledTimes(1);
         expect(onUpdate).toHaveBeenCalledWith(

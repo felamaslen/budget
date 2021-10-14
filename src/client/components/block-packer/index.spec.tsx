@@ -1,4 +1,5 @@
 import { render, fireEvent, RenderResult, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { BlockPacker, Props } from '.';
@@ -361,9 +362,7 @@ describe('<BlockPacker />', () => {
     it('should call onHover with the full list of names', () => {
       expect.assertions(2);
       const { getByTestId } = render(<BlockPacker {...propsArbitraryDepth} />);
-      act(() => {
-        fireEvent.mouseOver(getByTestId('A5'));
-      });
+      userEvent.hover(getByTestId('A5'));
 
       expect(propsArbitraryDepth.onHover).toHaveBeenCalledTimes(1);
       expect(propsArbitraryDepth.onHover).toHaveBeenCalledWith('A1', 'A2', 'A3', 'A4', 'A5');
@@ -371,14 +370,12 @@ describe('<BlockPacker />', () => {
   });
 
   const fireActivateEvent = (element: HTMLElement): void => {
-    fireEvent.keyDown(element, {
-      key: 'Enter',
-    });
+    userEvent.type(element, '{enter}');
   };
 
   describe.each`
     event           | handler
-    ${'clicking'}   | ${fireEvent.click}
+    ${'clicking'}   | ${userEvent.click}
     ${'activating'} | ${fireActivateEvent}
   `('when $event a level-0 block containing a breakdown', () => {
     // This requires a testing environment which actually renders the block

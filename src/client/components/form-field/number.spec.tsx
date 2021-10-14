@@ -1,4 +1,5 @@
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { FormFieldNumber } from './number';
@@ -24,16 +25,13 @@ describe('<FormFieldNumber />', () => {
     const { getByDisplayValue } = render(<FormFieldNumber {...props} />);
     const input = getByDisplayValue('103.45') as HTMLInputElement;
 
-    act(() => {
-      fireEvent.change(input, { target: { value: '10.93' } });
-    });
+    userEvent.clear(input);
+    userEvent.type(input, '10.93');
 
     expect(props.onChange).not.toHaveBeenCalled();
     expect(input.value).toBe('10.93');
 
-    act(() => {
-      fireEvent.blur(input);
-    });
+    userEvent.tab();
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     expect(props.onChange).toHaveBeenCalledWith(10.93);

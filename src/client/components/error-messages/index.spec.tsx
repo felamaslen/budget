@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { render, act, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
@@ -72,9 +73,7 @@ describe('<ErrorMessages />', () => {
     describe('when clicked', () => {
       const setupClick = (): RenderResult & { store: MockStore } => {
         const renderResult = setup();
-        act(() => {
-          fireEvent.click(renderResult.getByText(text));
-        });
+        userEvent.click(renderResult.getByText(text));
         return renderResult;
       };
 
@@ -116,9 +115,7 @@ describe('<ErrorMessages />', () => {
     describe('when mousing over', () => {
       const setupMouseover = (): RenderResult & { store: MockStore } => {
         const renderResult = setup();
-        act(() => {
-          fireEvent.mouseOver(renderResult.getByText(text));
-        });
+        userEvent.hover(renderResult.getByText(text));
         return renderResult;
       };
 

@@ -1,4 +1,5 @@
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { AfterCanvas, Props } from './after-canvas';
@@ -42,9 +43,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
 
       expect(button).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.click(button);
-      });
+      userEvent.click(button);
 
       await waitFor(() => {
         expect(changePeriod).toHaveBeenCalledTimes(1);
@@ -74,12 +73,8 @@ describe('<AfterCanvas /> (funds graph)', () => {
       const { getByDisplayValue } = render(<AfterCanvas {...props} />);
       const modeSelector = getByDisplayValue('Price') as HTMLSelectElement;
 
-      act(() => {
-        fireEvent.change(modeSelector, { target: { value: mode } });
-      });
-      act(() => {
-        fireEvent.blur(modeSelector);
-      });
+      userEvent.selectOptions(modeSelector, mode);
+      userEvent.tab();
 
       expect(changeMode).toHaveBeenCalledWith(mode);
     });

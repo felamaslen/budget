@@ -1,4 +1,5 @@
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import numericHash from 'string-hash';
 
@@ -117,9 +118,7 @@ describe('<ModalDialog />', () => {
       const { getByText } = render(<ModalDialog {...props} />);
       const cancelButton = getByText('nope.avi');
 
-      act(() => {
-        fireEvent.click(cancelButton);
-      });
+      userEvent.click(cancelButton);
       expect(props.onCancel).toHaveBeenCalledTimes(1);
     });
   });
@@ -140,9 +139,7 @@ describe('<ModalDialog />', () => {
       const { getByText } = render(<ModalDialog {...props} />);
       const submitButton = getByText('Do it.');
 
-      act(() => {
-        fireEvent.click(submitButton);
-      });
+      userEvent.click(submitButton);
       expect(props.onSubmit).toHaveBeenCalledTimes(1);
       expect(props.onSubmit).toHaveBeenCalledWith<[Id, MyItem]>(numericHash('some-id'), {
         date: new Date('2020-04-10'),
@@ -168,28 +165,15 @@ describe('<ModalDialog />', () => {
       expect(inputItem).toBeInTheDocument();
       expect(inputCost).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputDate, { target: { value: '2020-04-20' } });
-      });
-      act(() => {
-        fireEvent.blur(inputDate);
-      });
-      act(() => {
-        fireEvent.change(inputItem, { target: { value: 'other item' } });
-      });
-      act(() => {
-        fireEvent.blur(inputItem);
-      });
-      act(() => {
-        fireEvent.change(inputCost, { target: { value: '1.08' } });
-      });
-      act(() => {
-        fireEvent.blur(inputCost);
-      });
+      userEvent.clear(inputDate);
+      userEvent.type(inputDate, '2020-04-20');
+      userEvent.clear(inputItem);
+      userEvent.type(inputItem, 'other item');
+      userEvent.clear(inputCost);
+      userEvent.type(inputCost, '1.08');
 
-      act(() => {
-        fireEvent.click(submitButton);
-      });
+      userEvent.click(submitButton);
+
       expect(props.onSubmit).toHaveBeenCalledTimes(1);
       expect(props.onSubmit).toHaveBeenCalledWith<[Id, MyItem]>(numericHash('some-id'), {
         date: new Date('2020-04-20'),
@@ -209,16 +193,9 @@ describe('<ModalDialog />', () => {
       expect(inputItem).toBeInTheDocument();
       expect(inputCost).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputItem, { target: { value: '' } });
-      });
-      act(() => {
-        fireEvent.blur(inputItem);
-      });
+      userEvent.clear(inputItem);
+      userEvent.click(submitButton);
 
-      act(() => {
-        fireEvent.click(submitButton);
-      });
       expect(props.onSubmit).not.toHaveBeenCalled();
     });
   });
@@ -245,9 +222,7 @@ describe('<ModalDialog />', () => {
       const { getByText } = render(<ModalDialog {...props} onRemove={onRemove} />);
       const removeButton = getByText('−');
 
-      act(() => {
-        fireEvent.click(removeButton);
-      });
+      userEvent.click(removeButton);
       expect(onRemove).toHaveBeenCalledTimes(1);
     });
   });

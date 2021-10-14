@@ -1,4 +1,5 @@
-import { render, fireEvent, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import numericHash from 'string-hash';
 
@@ -30,9 +31,7 @@ describe('(net worth edit form) <FormContainer />', () => {
       expect.assertions(1);
       const { getByText } = render(<FormContainer {...props} />);
       const prevButton = getByText('Done');
-      act(() => {
-        fireEvent.click(prevButton);
-      });
+      userEvent.click(prevButton);
       expect(props.onDone).toHaveBeenCalledTimes(1);
     });
   });

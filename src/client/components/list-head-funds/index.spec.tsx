@@ -1,4 +1,5 @@
-import { render, act, fireEvent, RenderResult } from '@testing-library/react';
+import { render, act, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { startOfSecond, subSeconds } from 'date-fns';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -71,9 +72,7 @@ describe('<ListHeadFunds />', () => {
     const tickbox = getAllByRole('checkbox')[0] as HTMLInputElement;
     expect(tickbox.checked).toBe(false);
 
-    act(() => {
-      fireEvent.click(tickbox);
-    });
+    userEvent.click(tickbox);
 
     expect(props.onViewSoldToggle).toHaveBeenCalledTimes(1);
 

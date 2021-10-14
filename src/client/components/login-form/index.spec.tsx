@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/react';
+import { render, RenderResult, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
@@ -48,34 +49,25 @@ describe('<LoginForm />', () => {
         expect(document.activeElement).toBe(pin0);
       });
 
-      act(() => {
-        fireEvent.change(pin0, { target: { value: '1' } });
-      });
+      userEvent.type(pin0, '1');
       await waitFor(() => {
-        expect(document.activeElement).toBe(pin1);
+        expect(pin1).toHaveFocus();
       });
 
-      act(() => {
-        fireEvent.change(pin1, { target: { value: '2' } });
-      });
+      userEvent.type(pin1, '2');
       await waitFor(() => {
-        expect(document.activeElement).toBe(pin2);
+        expect(pin2).toHaveFocus();
       });
 
-      act(() => {
-        fireEvent.change(pin2, { target: { value: '3' } });
-      });
+      userEvent.type(pin2, '3');
       await waitFor(() => {
-        expect(document.activeElement).toBe(pin3);
+        expect(pin3).toHaveFocus();
       });
 
-      act(() => {
-        fireEvent.change(pin3, { target: { value: '5' } });
-      });
-      await waitFor(() => {
-        // last item
-        expect(document.activeElement).toBe(pin3);
-      });
+      userEvent.type(pin3, '5');
+
+      // last item
+      expect(pin3).toHaveFocus();
     });
 
     const setupEnterPin = (): ReturnType<typeof setup> => {
@@ -83,18 +75,10 @@ describe('<LoginForm />', () => {
       const inputs = renderResult.getAllByRole('spinbutton') as HTMLInputElement[];
       const [pin0, pin1, pin2, pin3] = inputs;
 
-      act(() => {
-        fireEvent.change(pin0, { target: { value: '1' } });
-      });
-      act(() => {
-        fireEvent.change(pin1, { target: { value: '7' } });
-      });
-      act(() => {
-        fireEvent.change(pin2, { target: { value: '3' } });
-      });
-      act(() => {
-        fireEvent.change(pin3, { target: { value: '5' } });
-      });
+      userEvent.type(pin0, '1');
+      userEvent.type(pin1, '7');
+      userEvent.type(pin2, '3');
+      userEvent.type(pin3, '5');
 
       return renderResult;
     };

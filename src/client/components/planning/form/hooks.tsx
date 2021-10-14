@@ -40,7 +40,7 @@ const emptyTransaction: Pick<AccountTransaction, 'value' | 'formula'> = {
   formula: undefined,
 };
 
-function parseRawValue(
+export function parseRawValue(
   rawValue: string | undefined,
 ): Pick<AccountTransaction, 'value' | 'formula'> | null {
   if (!rawValue) {
@@ -55,7 +55,7 @@ function parseRawValue(
     }
     return { value: undefined, formula: rawValue.substring(1) };
   }
-  return { value: (Number(rawValue) || 0) * 100, formula: undefined };
+  return { value: Math.round((Number(rawValue) || 0) * 100), formula: undefined };
 }
 
 export function useEscapeCancel(onCancel: () => void, isActive = true): void {

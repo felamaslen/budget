@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import { render, RenderResult, within, act, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import numericHash from 'string-hash';
 
@@ -116,12 +117,8 @@ describe('<NetWorthCategoryList />', () => {
         expect.assertions(2);
         const { input } = getInput();
 
-        act(() => {
-          fireEvent.change(input, { target: { value: newValue } });
-        });
-        act(() => {
-          fireEvent.blur(input);
-        });
+        fireEvent.change(input, { target: { value: newValue } });
+        userEvent.tab();
 
         expect(input.value).toBe(newValue);
         expect(props.onUpdateCategory).not.toHaveBeenCalled();
@@ -177,9 +174,7 @@ describe('<NetWorthCategoryList />', () => {
             expect(input.value).toBe(testInputValue);
             expect(props.onUpdateCategory).not.toHaveBeenCalled();
 
-            act(() => {
-              fireEvent.click(button);
-            });
+            userEvent.click(button);
 
             expect(props.onUpdateCategory).toHaveBeenCalledWith(categoryId, {
               category,
@@ -244,9 +239,7 @@ describe('<NetWorthCategoryList />', () => {
       it('should call onDeleteCategory on click', () => {
         expect.assertions(2);
         const { button } = getDeleteButton();
-        act(() => {
-          fireEvent.click(button);
-        });
+        userEvent.click(button);
         expect(onDeleteCategory).toHaveBeenCalledTimes(1);
         expect(onDeleteCategory).toHaveBeenCalledWith(categoryId);
       });
@@ -354,9 +347,7 @@ describe('<NetWorthCategoryList />', () => {
             expect(input.value).toBe(testInputValue);
             expect(props.onCreateCategory).not.toHaveBeenCalled();
 
-            act(() => {
-              fireEvent.click(button);
-            });
+            userEvent.click(button);
 
             expect(props.onCreateCategory).toHaveBeenCalledWith({
               category: 'Cash',

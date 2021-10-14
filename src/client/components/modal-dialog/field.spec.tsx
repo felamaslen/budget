@@ -1,4 +1,5 @@
-import { render, fireEvent, RenderResult, act } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ModalDialogField, makeField } from './field';
 import { FormFieldText } from '~client/components/form-field';
@@ -36,15 +37,12 @@ describe('<ModalDialogField />', () => {
     const { getByDisplayValue } = setup();
     const input = getByDisplayValue('bar');
 
-    act(() => {
-      fireEvent.change(input, { target: { value: 'hello' } });
-    });
+    userEvent.clear(input);
+    userEvent.type(input, 'hello');
 
     expect(props.onChange).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.blur(input);
-    });
+    userEvent.tab();
 
     expect(props.onChange).toHaveBeenCalledWith('item', 'hello');
   });

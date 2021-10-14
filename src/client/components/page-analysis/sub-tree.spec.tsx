@@ -1,4 +1,5 @@
-import { render, fireEvent, RenderResult, act } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { SubTree } from './sub-tree';
@@ -39,9 +40,7 @@ describe('<PageAnalysis /> / <SubTree />', () => {
   `('should call onHover on mouse over of the $position item', ({ index, name }) => {
     const { container } = getContainer();
 
-    act(() => {
-      fireEvent.mouseOver(container.childNodes[0].childNodes[index]);
-    });
+    userEvent.hover(container.childNodes[0].childNodes[index] as Element);
 
     expect(props.onHover).toHaveBeenCalledTimes(1);
     expect(props.onHover).toHaveBeenCalledWith(AnalysisPage.Food, name);

@@ -1,4 +1,5 @@
-import { render, act, fireEvent, RenderResult } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -62,9 +63,7 @@ describe('<Navbar />', () => {
     expect(link).toBeInTheDocument();
     expect(link.tabIndex).toBe(-1);
 
-    act(() => {
-      fireEvent.click(link);
-    });
+    userEvent.click(link);
 
     expect(props.onLogout).toHaveBeenCalledTimes(1);
   });

@@ -1,11 +1,13 @@
-import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React from 'react';
 import { Provider } from 'react-redux';
 import createMockStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
+import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
 
-import { useListCrudStandard, useListCrudFunds, useListCrudIncome } from './list';
+import { useListCrudStandard, useListCrudFunds, useListCrudIncome, ListCrud } from './list';
 import {
   errorOpened,
   listItemCreated,
@@ -19,7 +21,12 @@ import * as dataModule from '~client/modules/data';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
-import type { FundInputNative as FundInput, StandardInput, WithIds } from '~client/types';
+import type {
+  FundInputNative as FundInput,
+  FundInputNative,
+  StandardInput,
+  WithIds,
+} from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 import {
   CreateIncomeDocument,
@@ -61,40 +68,26 @@ describe('List mutations', () => {
     item: 'Other item',
   };
 
-  const TestComponent: React.FC = () => {
-    const { onCreate, onUpdate, onDelete } = useListCrudStandard(page);
-
-    return (
-      <>
-        <button data-testid="btn-create" onClick={(): void => onCreate(testItem)}>
-          Create!
-        </button>
-        <button
-          data-testid="btn-update"
-          onClick={(): void => onUpdate(testId, testDelta, testItem)}
-        >
-          Update!
-        </button>
-        <button data-testid="btn-delete" onClick={(): void => onDelete(testId, testItem)}>
-          Delete!
-        </button>
-      </>
-    );
-  };
-
-  const setup = (Component: React.FC = TestComponent): RenderResult & { store: MockStore } => {
-    const store = getStore(testState);
-    const utils = render(
+  const createWrapper = (store: MockStore): React.FC => {
+    const Wrapper: React.FC = ({ children }) => (
       <Provider store={store}>
-        <GQLProviderMock>
-          <Component />
-        </GQLProviderMock>
-      </Provider>,
+        <GQLProviderMock>{children}</GQLProviderMock>
+      </Provider>
     );
-    return { ...utils, store };
+    return Wrapper;
   };
 
   describe(useListCrudStandard.name, () => {
+    const setup = (): RenderHookResult<{ page: PageListStandard }, ListCrud<StandardInput>> & {
+      store: MockStore;
+    } => {
+      const store = getStore(testState);
+      const utils = renderHook(() => useListCrudStandard(page), {
+        wrapper: createWrapper(store),
+      });
+      return { ...utils, store };
+    };
+
     describe('onCreate', () => {
       it('should dispatch an optimistic create action', async () => {
         expect.hasAssertions();
@@ -109,10 +102,10 @@ describe('List mutations', () => {
           }),
         );
 
-        const { store, getByText } = setup();
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Create!'));
+          result.current.onCreate(testItem);
         });
 
         await waitFor(() => {
@@ -138,11 +131,11 @@ describe('List mutations', () => {
             }),
           );
 
-          const { store, getByText } = setup();
+          const { store, result } = setup();
           expect(store.getActions()).toHaveLength(0);
 
           act(() => {
-            fireEvent.click(getByText('Create!'));
+            result.current.onCreate(testItem);
           });
 
           await waitFor(() => {
@@ -170,10 +163,10 @@ describe('List mutations', () => {
           }),
         );
 
-        const { store, getByText } = setup();
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Update!'));
+          result.current.onUpdate(testId, testDelta, testItem);
         });
 
         await waitFor(() => {
@@ -187,10 +180,11 @@ describe('List mutations', () => {
 
       describe('when an error occurs', () => {
         it('should dispatch an error action', async () => {
-          expect.assertions(2);
+          expect.hasAssertions();
 
-          (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
+          jest.spyOn(mockClient, 'executeMutation').mockImplementationOnce((request) =>
             fromValue({
+              operation: makeOperation('mutation', request, {} as OperationContext),
               data: {
                 updateListItem: {
                   error: 'Something bad happened',
@@ -199,25 +193,18 @@ describe('List mutations', () => {
             }),
           );
 
-          const { store, getByText } = setup();
+          const { store, result } = setup();
           expect(store.getActions()).toHaveLength(0);
-          await act(async () => {
-            fireEvent.click(getByText('Update!'));
+          act(() => {
+            result.current.onUpdate(testId, testDelta, testItem);
+          });
 
-            await new Promise<void>((resolve) => {
-              setTimeout(() => {
-                expect(store.getActions()).toStrictEqual(
-                  expect.arrayContaining([
-                    errorOpened(
-                      `Error updating list item: Something bad happened`,
-                      ErrorLevel.Warn,
-                    ),
-                  ]),
-                );
-
-                resolve();
-              }, 0);
-            });
+          await waitFor(() => {
+            expect(store.getActions()).toStrictEqual(
+              expect.arrayContaining([
+                errorOpened(`Error updating list item: Something bad happened`, ErrorLevel.Warn),
+              ]),
+            );
           });
         });
       });
@@ -237,10 +224,10 @@ describe('List mutations', () => {
           }),
         );
 
-        const { store, getByText } = setup();
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Delete!'));
+          result.current.onDelete(testId, testItem);
         });
 
         await waitFor(() => {
@@ -254,10 +241,11 @@ describe('List mutations', () => {
 
       describe('when an error occurs', () => {
         it('should dispatch an error action', async () => {
-          expect.assertions(2);
+          expect.hasAssertions();
 
-          (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
+          jest.spyOn(mockClient, 'executeMutation').mockImplementationOnce((request) =>
             fromValue({
+              operation: makeOperation('mutation', request, {} as OperationContext),
               data: {
                 deleteListItem: {
                   error: 'Something bad happened',
@@ -266,25 +254,18 @@ describe('List mutations', () => {
             }),
           );
 
-          const { store, getByText } = setup();
+          const { store, result } = setup();
           expect(store.getActions()).toHaveLength(0);
-          await act(async () => {
-            fireEvent.click(getByText('Delete!'));
+          act(() => {
+            result.current.onDelete(testId, testItem);
+          });
 
-            await new Promise<void>((resolve) => {
-              setTimeout(() => {
-                expect(store.getActions()).toStrictEqual(
-                  expect.arrayContaining([
-                    errorOpened(
-                      `Error deleting list item: Something bad happened`,
-                      ErrorLevel.Warn,
-                    ),
-                  ]),
-                );
-
-                resolve();
-              }, 0);
-            });
+          await waitFor(() => {
+            expect(store.getActions()).toStrictEqual(
+              expect.arrayContaining([
+                errorOpened(`Error deleting list item: Something bad happened`, ErrorLevel.Warn),
+              ]),
+            );
           });
         });
       });
@@ -292,6 +273,19 @@ describe('List mutations', () => {
   });
 
   describe(useListCrudIncome.name, () => {
+    const setup = (): RenderHookResult<
+      Record<string, unknown>,
+      ListCrud<NativeDate<Income, 'date'>>
+    > & {
+      store: MockStore;
+    } => {
+      const store = getStore(testState);
+      const utils = renderHook(useListCrudIncome, {
+        wrapper: createWrapper(store),
+      });
+      return { ...utils, store };
+    };
+
     const testIncome: NativeDate<Income, 'date'> = {
       __typename: 'Income',
       id: 129,
@@ -315,27 +309,6 @@ describe('List mutations', () => {
       ],
     };
 
-    const TestComponentIncome: React.FC = () => {
-      const { onCreate, onUpdate, onDelete } = useListCrudIncome();
-
-      return (
-        <>
-          <button data-testid="btn-create" onClick={(): void => onCreate(testIncome)}>
-            Create!
-          </button>
-          <button
-            data-testid="btn-update"
-            onClick={(): void => onUpdate(testId, testIncomeDelta, testIncome)}
-          >
-            Update!
-          </button>
-          <button data-testid="btn-delete" onClick={(): void => onDelete(testId, testIncome)}>
-            Delete!
-          </button>
-        </>
-      );
-    };
-
     describe('onCreate', () => {
       beforeEach(() => {
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
@@ -352,10 +325,10 @@ describe('List mutations', () => {
       it('should dispatch an optimistic create action', async () => {
         expect.hasAssertions();
 
-        const { store, getByText } = setup(TestComponentIncome);
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Create!'));
+          result.current.onCreate(testIncome);
         });
 
         await waitFor(() => {
@@ -405,10 +378,10 @@ describe('List mutations', () => {
           }),
         );
 
-        const { store, getByText } = setup(TestComponentIncome);
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Update!'));
+          result.current.onUpdate(testId, testIncomeDelta, testIncome);
         });
 
         await waitFor(() => {
@@ -462,10 +435,10 @@ describe('List mutations', () => {
           }),
         );
 
-        const { store, getByText } = setup(TestComponentIncome);
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Delete!'));
+          result.current.onDelete(testId, testIncome);
         });
 
         await waitFor(() => {
@@ -487,6 +460,16 @@ describe('List mutations', () => {
   });
 
   describe(useListCrudFunds.name, () => {
+    const setup = (): RenderHookResult<Record<string, unknown>, ListCrud<FundInputNative>> & {
+      store: MockStore;
+    } => {
+      const store = getStore(testState);
+      const utils = renderHook(useListCrudFunds, {
+        wrapper: createWrapper(store),
+      });
+      return { ...utils, store };
+    };
+
     const testFund: WithIds<FundInput> = {
       id: 123,
       item: 'Some fund',
@@ -510,27 +493,6 @@ describe('List mutations', () => {
       stockSplits: [{ date: new Date('2021-03-01'), ratio: 10 }],
     };
 
-    const TestComponentFunds: React.FC = () => {
-      const { onCreate, onUpdate, onDelete } = useListCrudFunds();
-
-      return (
-        <>
-          <button data-testid="btn-create" onClick={(): void => onCreate(testFund)}>
-            Create!
-          </button>
-          <button
-            data-testid="btn-update"
-            onClick={(): void => onUpdate(testId, testFundDelta, testFund)}
-          >
-            Update!
-          </button>
-          <button data-testid="btn-delete" onClick={(): void => onDelete(testId, testFund)}>
-            Delete!
-          </button>
-        </>
-      );
-    };
-
     describe('onCreate', () => {
       beforeEach(() => {
         (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
@@ -547,10 +509,10 @@ describe('List mutations', () => {
       it('should dispatch an optimistic create action', async () => {
         expect.hasAssertions();
 
-        const { store, getByText } = setup(TestComponentFunds);
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Create!'));
+          result.current.onCreate(testFund);
         });
 
         await waitFor(() => {
@@ -565,10 +527,10 @@ describe('List mutations', () => {
       it('should pass the right variables into the mutation', async () => {
         expect.hasAssertions();
 
-        const { store, getByText } = setup(TestComponentFunds);
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Create!'));
+          result.current.onCreate(testFund);
         });
 
         await waitFor(() => {
@@ -601,10 +563,10 @@ describe('List mutations', () => {
           }),
         );
 
-        const { store, getByText } = setup(TestComponentFunds);
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Update!'));
+          result.current.onUpdate(testId, testFundDelta, testFund);
         });
 
         await waitFor(() => {
@@ -631,10 +593,10 @@ describe('List mutations', () => {
           }),
         );
 
-        const { store, getByText } = setup(TestComponentFunds);
+        const { store, result } = setup();
         expect(store.getActions()).toHaveLength(0);
         act(() => {
-          fireEvent.click(getByText('Delete!'));
+          result.current.onDelete(testId, testFund);
         });
 
         await waitFor(() => {

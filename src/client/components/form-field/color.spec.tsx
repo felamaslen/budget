@@ -1,4 +1,5 @@
 import { render, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { FormFieldColor } from './color';
@@ -21,15 +22,11 @@ describe('<FormFieldColor />', () => {
     const { getByDisplayValue } = render(<FormFieldColor {...props} />);
     const input = getByDisplayValue('#aa09b3') as HTMLInputElement;
 
-    act(() => {
-      fireEvent.change(input, { target: { value: '#aa83b9' } });
-    });
+    fireEvent.input(input, { target: { value: '#aa83b9' } });
 
     expect(props.onChange).toHaveBeenCalledWith('#aa83b9');
 
-    act(() => {
-      fireEvent.blur(input);
-    });
+    userEvent.tab();
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
   });

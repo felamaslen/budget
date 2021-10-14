@@ -1,4 +1,5 @@
-import { render, fireEvent, act, within } from '@testing-library/react';
+import { render, fireEvent, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import numericHash from 'string-hash';
 
@@ -44,17 +45,13 @@ describe('NetWorthSubcategoryList', () => {
 
       const buttonUpdate = getByText('Update') as HTMLButtonElement;
 
-      act(() => {
-        fireEvent.change(inputSubcategory, { target: { value: 'Different bank account' } });
-        fireEvent.blur(inputSubcategory);
+      userEvent.clear(inputSubcategory);
+      userEvent.clear(inputSubcategory);
+      userEvent.type(inputSubcategory, 'Different bank account');
 
-        fireEvent.change(inputOpacity, { target: { value: '0.75' } });
-        fireEvent.blur(inputOpacity);
-      });
+      fireEvent.change(inputOpacity, { target: { value: '0.75' } });
 
-      act(() => {
-        fireEvent.click(buttonUpdate);
-      });
+      userEvent.click(buttonUpdate);
 
       expect(onUpdate).toHaveBeenCalledTimes(1);
       expect(onUpdate).toHaveBeenCalledWith(numericHash('my-existing-subcategory'), {
@@ -97,23 +94,17 @@ describe('NetWorthSubcategoryList', () => {
         expect(buttonUpdate).toBeInTheDocument();
         expect(inputIsIlliquid.checked).toBe(false);
 
-        act(() => {
-          fireEvent.click(inputIsIlliquid);
-        });
+        userEvent.click(inputIsIlliquid);
 
         const inputAppreciationRate = getByRole('spinbutton') as HTMLInputElement;
 
         expect(inputAppreciationRate).toBeInTheDocument();
         expect(inputAppreciationRate.value).toBe('0');
 
-        act(() => {
-          fireEvent.change(inputAppreciationRate, { target: { value: '3.8' } });
-          fireEvent.blur(inputAppreciationRate);
-        });
+        userEvent.clear(inputAppreciationRate);
+        userEvent.type(inputAppreciationRate, '3.8');
 
-        act(() => {
-          fireEvent.click(buttonUpdate);
-        });
+        userEvent.click(buttonUpdate);
 
         expect(onUpdate).toHaveBeenCalledTimes(1);
         expect(onUpdate).toHaveBeenCalledWith(
@@ -155,13 +146,8 @@ describe('NetWorthSubcategoryList', () => {
         expect(inputHasCreditLimit).toBeInTheDocument();
         expect(buttonUpdate).toBeInTheDocument();
 
-        act(() => {
-          fireEvent.click(inputHasCreditLimit);
-        });
-
-        act(() => {
-          fireEvent.click(buttonUpdate);
-        });
+        userEvent.click(inputHasCreditLimit);
+        userEvent.click(buttonUpdate);
 
         expect(onUpdate).toHaveBeenCalledTimes(1);
         expect(onUpdate).toHaveBeenCalledWith(
@@ -204,13 +190,8 @@ describe('NetWorthSubcategoryList', () => {
         expect(inputIsSAYE).toBeInTheDocument();
         expect(buttonUpdate).toBeInTheDocument();
 
-        act(() => {
-          fireEvent.click(inputIsSAYE);
-        });
-
-        act(() => {
-          fireEvent.click(buttonUpdate);
-        });
+        userEvent.click(inputIsSAYE);
+        userEvent.click(buttonUpdate);
 
         expect(onUpdate).toHaveBeenCalledTimes(1);
         expect(onUpdate).toHaveBeenCalledWith(
@@ -239,17 +220,12 @@ describe('NetWorthSubcategoryList', () => {
 
       const buttonCreate = getByText('Create') as HTMLButtonElement;
 
-      act(() => {
-        fireEvent.change(inputSubcategory, { target: { value: 'Different bank account' } });
-        fireEvent.blur(inputSubcategory);
+      userEvent.clear(inputSubcategory);
+      userEvent.type(inputSubcategory, 'Different bank account');
 
-        fireEvent.change(inputOpacity, { target: { value: '0.75' } });
-        fireEvent.blur(inputOpacity);
-      });
+      fireEvent.change(inputOpacity, { target: { value: '0.75' } });
 
-      act(() => {
-        fireEvent.click(buttonCreate);
-      });
+      userEvent.click(buttonCreate);
 
       expect(onCreate).toHaveBeenCalledTimes(1);
       expect(onCreate).toHaveBeenCalledWith({

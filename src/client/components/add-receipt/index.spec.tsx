@@ -1,4 +1,5 @@
-import { render, act, fireEvent, waitFor, RenderResult } from '@testing-library/react';
+import { render, act, waitFor, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { DocumentNode } from 'graphql';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
@@ -124,30 +125,24 @@ describe('<AddReceipt />', () => {
   describe('when entering receipt information', () => {
     const setDate = (result: RenderResult, date: string): void => {
       const inputDate = result.getByLabelText('Date');
-      act(() => {
-        fireEvent.change(inputDate, { target: { value: date } });
-      });
-      act(() => {
-        fireEvent.blur(inputDate);
-      });
+      userEvent.clear(inputDate);
+      userEvent.type(inputDate, date);
+      userEvent.tab();
     };
 
     const setShop = (result: RenderResult, shop: string): void => {
       const inputShop = result.getByLabelText('Shop');
-      act(() => {
-        fireEvent.change(inputShop, { target: { value: shop } });
-      });
-      act(() => {
-        fireEvent.blur(inputShop);
-      });
+      userEvent.clear(inputShop);
+      userEvent.type(inputShop, shop);
+      userEvent.tab();
     };
 
     const addItem = (
       result: RenderResult,
       item: string,
       cost: string,
-      page?: string,
-      category?: string,
+      page = 'Food',
+      category = '{rightArrow}',
     ): void => {
       const inputsPage = result.getAllByDisplayValue('Food');
       const inputsItem = result.getAllByPlaceholderText('Item');
@@ -159,21 +154,18 @@ describe('<AddReceipt />', () => {
       const inputCategory = inputsCategory[inputsCategory.length - 1];
       const inputCost = inputsCost[inputsCost.length - 1];
 
-      act(() => {
-        fireEvent.change(inputItem, { target: { value: item } });
-        fireEvent.blur(inputItem);
+      userEvent.clear(inputItem);
+      userEvent.type(inputItem, item);
 
-        fireEvent.change(inputCost, { target: { value: cost } });
-        fireEvent.blur(inputCost);
+      userEvent.clear(inputCost);
+      userEvent.type(inputCost, cost);
 
-        if (page) {
-          fireEvent.change(inputPage, { target: { value: page } });
-        }
-        if (category) {
-          fireEvent.change(inputCategory, { target: { value: category } });
-          fireEvent.blur(inputCategory);
-        }
-      });
+      userEvent.selectOptions(inputPage, page);
+
+      userEvent.clear(inputCategory);
+      userEvent.type(inputCategory, category);
+
+      userEvent.tab();
     };
 
     const enterReceipt = async (): Promise<RenderResult> => {
@@ -187,9 +179,7 @@ describe('<AddReceipt />', () => {
       await waitFor(() => {
         expect(buttonAdd.disabled).toBe(false);
       });
-      act(() => {
-        fireEvent.click(buttonAdd);
-      });
+      userEvent.click(buttonAdd);
 
       addItem(result, 'Some general item', '4.56', 'General', 'Some general category');
 
@@ -197,15 +187,11 @@ describe('<AddReceipt />', () => {
 
       const inputGeneralItem = result.getByDisplayValue('Some general item');
 
-      act(() => {
-        fireEvent.change(inputGeneralItem, { target: { value: 'Other general item' } });
-        fireEvent.blur(inputGeneralItem);
-      });
+      userEvent.clear(inputGeneralItem);
+      userEvent.type(inputGeneralItem, 'Other general item');
 
       const inputComplete = result.getByText('Autocomplete') as HTMLButtonElement;
-      act(() => {
-        fireEvent.click(inputComplete);
-      });
+      userEvent.click(inputComplete);
 
       await waitFor(() => {
         expect(result.getByText('Finish')).toBeInTheDocument();
@@ -215,9 +201,7 @@ describe('<AddReceipt />', () => {
       await waitFor(() => {
         expect(inputFinish.disabled).toBe(false);
       });
-      act(() => {
-        fireEvent.click(inputFinish);
-      });
+      userEvent.click(inputFinish);
 
       await waitFor(() => {
         expect(mutateSpy).toHaveBeenCalledTimes(1);
@@ -276,9 +260,7 @@ describe('<AddReceipt />', () => {
       expect.hasAssertions();
       const result = setup();
       addItem(result, 'Some food item', '1.23');
-      act(() => {
-        fireEvent.click(result.getByText('+'));
-      });
+      userEvent.click(result.getByText('+'));
       addItem(result, 'Other general item', '4.56');
 
       expect(result.getByText('Total: £5.79')).toBeInTheDocument();
@@ -291,18 +273,15 @@ describe('<AddReceipt />', () => {
       const { getAllByPlaceholderText, getByText } = setup();
       const inputItem = getAllByPlaceholderText('Item')[0] as HTMLInputElement;
 
-      act(() => {
-        fireEvent.change(inputItem, { target: { value: 'cri' } });
-      });
+      userEvent.clear(inputItem);
+      userEvent.type(inputItem, 'cri');
 
       await waitFor(() => {
         expect(getByText('Crisps')).toBeInTheDocument();
         expect(inputItem.value).toBe('Cri');
       });
 
-      act(() => {
-        fireEvent.blur(inputItem);
-      });
+      userEvent.tab();
 
       expect(inputItem.value).toBe('Cri');
     });

@@ -1,4 +1,5 @@
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { FormFieldText, FormFieldTextInline } from '.';
@@ -75,9 +76,8 @@ describe('<FormFieldText />', () => {
       const consoleSpy = jest.spyOn(global.console, 'error');
       const { getByDisplayValue } = render(<FormFieldTextInline {...props} value={undefined} />);
       const input = getByDisplayValue('') as HTMLInputElement;
-      act(() => {
-        fireEvent.change(input, { target: { value: 'some value' } });
-      });
+      userEvent.clear(input);
+      userEvent.type(input, 'some value');
 
       expect(input.value).toBe('some value');
       // A warning is logged to the console if an uncontrolled input has its value changed in React,
@@ -89,18 +89,14 @@ describe('<FormFieldText />', () => {
       const setup = (): HTMLInputElement => {
         const { getByDisplayValue } = render(<FormFieldTextInline {...props} />);
         const input = getByDisplayValue('foo') as HTMLInputElement;
-        act(() => {
-          fireEvent.change(input, { target: { value: '' } });
-        });
+        userEvent.clear(input);
         return input;
       };
 
       it('should not call onChange', () => {
         expect.assertions(1);
-        const input = setup();
-        act(() => {
-          fireEvent.blur(input);
-        });
+        setup();
+        userEvent.tab();
 
         expect(props.onChange).not.toHaveBeenCalled();
       });
@@ -109,9 +105,7 @@ describe('<FormFieldText />', () => {
         expect.assertions(2);
         const input = setup();
         expect(input.value).toBe('');
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.tab();
         expect(input.value).toBe('foo');
       });
     });
@@ -121,12 +115,8 @@ describe('<FormFieldText />', () => {
         expect.assertions(2);
         const { getByDisplayValue } = render(<FormFieldTextInline {...props} allowEmpty />);
         const input = getByDisplayValue('foo');
-        act(() => {
-          fireEvent.change(input, { target: { value: '' } });
-        });
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.clear(input);
+        userEvent.tab();
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(props.onChange).toHaveBeenCalledWith('');
@@ -167,27 +157,30 @@ describe('<FormFieldText />', () => {
     const { getByDisplayValue } = render(<FormFieldText {...props} />);
     const input = getByDisplayValue('foo');
 
-    fireEvent.change(input, { target: { value: 'bar' } });
+    userEvent.clear(input);
+    userEvent.type(input, 'bar');
     expect(props.onChange).not.toHaveBeenCalled();
 
-    fireEvent.blur(input);
+    userEvent.tab();
     expect(props.onChange).toHaveBeenCalledTimes(1);
     expect(props.onChange).toHaveBeenCalledWith('bar');
   });
 
   it('should call onType when changing the value, before the blur', () => {
-    expect.assertions(4);
+    expect.assertions(5);
     const { getByDisplayValue } = render(<FormFieldText {...props} />);
     const input = getByDisplayValue('foo');
 
     expect(props.onType).not.toHaveBeenCalled();
 
-    fireEvent.change(input, { target: { value: 'b' } });
-    expect(props.onType).toHaveBeenCalledTimes(1);
-    expect(props.onType).toHaveBeenCalledWith('b');
+    userEvent.clear(input);
+    userEvent.type(input, 'b');
+    expect(props.onType).toHaveBeenCalledTimes(2);
+    expect(props.onType).toHaveBeenNthCalledWith(1, '');
+    expect(props.onType).toHaveBeenNthCalledWith(2, 'b');
 
-    fireEvent.blur(input);
-    expect(props.onType).toHaveBeenCalledTimes(1);
+    userEvent.tab();
+    expect(props.onType).toHaveBeenCalledTimes(2);
   });
 
   it('should call an onFocus input prop when focusing manually', () => {
@@ -196,9 +189,7 @@ describe('<FormFieldText />', () => {
     const { getByDisplayValue } = render(<FormFieldText {...props} inputProps={{ onFocus }} />);
 
     expect(onFocus).toHaveBeenCalledTimes(0);
-    act(() => {
-      fireEvent.focus(getByDisplayValue('foo'));
-    });
+    userEvent.click(getByDisplayValue('foo'));
     expect(onFocus).toHaveBeenCalledTimes(1);
   });
 
@@ -208,10 +199,8 @@ describe('<FormFieldText />', () => {
     const { getByDisplayValue } = render(<FormFieldText {...props} inputProps={{ onBlur }} />);
 
     expect(onBlur).toHaveBeenCalledTimes(0);
-    act(() => {
-      fireEvent.focus(getByDisplayValue('foo'));
-      fireEvent.blur(getByDisplayValue('foo'));
-    });
+    userEvent.click(getByDisplayValue('foo'));
+    userEvent.tab();
     expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,4 +1,5 @@
-import { act, fireEvent, render, RenderResult, waitFor, within } from '@testing-library/react';
+import { render, RenderResult, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { removeAtIndex } from 'replace-array';
 
@@ -57,12 +58,8 @@ describe(FormFieldIncomeDeductions.name, () => {
       const inputName = getByDisplayValue(incomeDeductions[valueIndex].name);
       expect(inputName).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputName, { target: { value: 'Student loan' } });
-      });
-      act(() => {
-        fireEvent.blur(inputName);
-      });
+      userEvent.type(inputName, '{selectall}Student loan');
+      userEvent.tab();
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -86,12 +83,8 @@ describe(FormFieldIncomeDeductions.name, () => {
       );
       expect(inputValue).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputValue, { target: { value: '-489.23' } });
-      });
-      act(() => {
-        fireEvent.blur(inputValue);
-      });
+      userEvent.type(inputValue, '{selectall}-489.23');
+      userEvent.tab();
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -113,16 +106,14 @@ describe(FormFieldIncomeDeductions.name, () => {
       const removeButtons = getAllByText('−');
       expect(removeButtons).toHaveLength(2);
 
-      act(() => {
-        fireEvent.click(removeButtons[displayIndex]);
-      });
+      userEvent.click(removeButtons[displayIndex]);
 
       expect(props.onChange).toHaveBeenCalledWith(removeAtIndex(value, valueIndex));
     });
   });
 
   it('should handle adding an income deduction', () => {
-    expect.assertions(6);
+    expect.assertions(5);
     const { getByTestId, getByText } = setupModal();
 
     const inputGroup = getByTestId('income-deduction-create-input');
@@ -136,25 +127,13 @@ describe(FormFieldIncomeDeductions.name, () => {
 
     const buttonAdd = getByText('+');
 
-    act(() => {
-      fireEvent.change(inputName, { target: { value: 'SAYE' } });
-    });
-    act(() => {
-      fireEvent.blur(inputName);
-    });
+    userEvent.type(inputName, '{selectall}SAYE');
+    userEvent.type(inputValue, '{selectall}-500');
+    userEvent.tab();
+
     expect(props.onChange).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.change(inputValue, { target: { value: '-500' } });
-    });
-    act(() => {
-      fireEvent.blur(inputValue);
-    });
-    expect(props.onChange).not.toHaveBeenCalled();
-
-    act(() => {
-      fireEvent.click(buttonAdd);
-    });
+    userEvent.click(buttonAdd);
 
     expect(props.onChange).toHaveBeenCalledWith([
       ...value,
@@ -166,10 +145,10 @@ describe(FormFieldIncomeDeductions.name, () => {
   });
 
   it.each`
-    case       | item       | emptyValue
-    ${'zero'}  | ${'value'} | ${0}
-    ${'empty'} | ${'name'}  | ${''}
-  `('should not add an income deduction with $case $item', ({ item, emptyValue }) => {
+    case       | item       | nameInput                  | valueInput
+    ${'zero'}  | ${'value'} | ${'{selectall}Some thing'} | ${'{selectall}0'}
+    ${'empty'} | ${'name'}  | ${'{rightArrow}'}          | ${'{selectall}123'}
+  `('should not add an income deduction with $case $item', ({ nameInput, valueInput }) => {
     expect.assertions(1);
 
     const { getByTestId, getByText } = setupModal();
@@ -182,25 +161,10 @@ describe(FormFieldIncomeDeductions.name, () => {
     const inputName = inputs[0];
     const inputValue = inputs[1];
 
-    act(() => {
-      fireEvent.change(inputName, {
-        target: { value: item === 'name' ? emptyValue : 'Some thing' },
-      });
-    });
-    act(() => {
-      fireEvent.blur(inputName);
-    });
+    userEvent.type(inputName, nameInput);
+    userEvent.type(inputValue, valueInput);
 
-    act(() => {
-      fireEvent.change(inputValue, { target: { value: item === 'value' ? emptyValue : '123' } });
-    });
-    act(() => {
-      fireEvent.blur(inputValue);
-    });
-
-    act(() => {
-      fireEvent.click(buttonAdd);
-    });
+    userEvent.click(buttonAdd);
 
     expect(props.onChange).not.toHaveBeenCalled();
   });

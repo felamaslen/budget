@@ -1,7 +1,18 @@
-import { act, fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { useTransactionFormElements } from './hooks';
+import { parseRawValue, useTransactionFormElements } from './hooks';
+
+describe(parseRawValue.name, () => {
+  it('should handle rounding errors in explicit values', () => {
+    expect.assertions(1);
+    expect(parseRawValue('-635.68')).toStrictEqual<ReturnType<typeof parseRawValue>>({
+      value: -63568,
+      formula: undefined,
+    });
+  });
+});
 
 describe(useTransactionFormElements.name, () => {
   const onChange = jest.fn();
@@ -24,19 +35,12 @@ describe(useTransactionFormElements.name, () => {
 
     const [nameInput, valueInput] = getAllByRole('textbox') as HTMLInputElement[];
 
-    act(() => {
-      fireEvent.change(nameInput, { target: { value: 'My name' } });
-    });
-
-    act(() => {
-      fireEvent.change(valueInput, { target: { value: '-452.39' } });
-    });
+    userEvent.type(nameInput, 'My name');
+    userEvent.type(valueInput, '{selectall}{backspace}-452.39');
 
     expect(onChange).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.keyDown(nameInput, { key: 'Enter' });
-    });
+    userEvent.type(nameInput, '{enter}');
 
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith({
@@ -47,9 +51,9 @@ describe(useTransactionFormElements.name, () => {
   });
 
   describe.each`
-    case               | name         | value
-    ${'name is empty'} | ${''}        | ${'1.23'}
-    ${'value is zero'} | ${'my name'} | ${'0.00'}
+    case               | name                        | value
+    ${'name is empty'} | ${'{selectall}{backspace}'} | ${'1.23'}
+    ${'value is zero'} | ${'my name'}                | ${'0.00'}
   `('when $case', (inputs: { name: string; value: string }) => {
     it('should not call onChange', () => {
       expect.assertions(1);
@@ -58,17 +62,9 @@ describe(useTransactionFormElements.name, () => {
 
       const [nameInput, valueInput] = getAllByRole('textbox') as HTMLInputElement[];
 
-      act(() => {
-        fireEvent.change(nameInput, { target: { value: inputs.name } });
-      });
-
-      act(() => {
-        fireEvent.change(valueInput, { target: { value: inputs.value } });
-      });
-
-      act(() => {
-        fireEvent.keyDown(nameInput, { key: 'Enter' });
-      });
+      userEvent.type(nameInput, inputs.name);
+      userEvent.type(valueInput, `{selectall}{backspace}${inputs.value}`);
+      userEvent.type(nameInput, '{enter}');
 
       expect(onChange).not.toHaveBeenCalled();
     });

@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { render, act, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { FormFieldSelect, PropsSelect, SelectOptions } from './select';
@@ -46,9 +47,7 @@ describe('<FormFieldSelect />', () => {
 
     expect(props.onChange).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.change(select, { target: { value: 'My option' } });
-    });
+    userEvent.selectOptions(select, 'My option');
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     expect(props.onChange).toHaveBeenCalledWith('else');
@@ -57,8 +56,8 @@ describe('<FormFieldSelect />', () => {
   it('should update the value if the available options changes', () => {
     expect.assertions(6);
     const optionsA = [{ internal: 'A' }, { internal: 'B' }, { internal: 'C' }];
-    const optionsB = optionsA.slice(0, 2);
-    const optionsC = optionsA.slice(0, 1);
+    const optionsB = [{ internal: 'A' }, { internal: 'B' }];
+    const optionsC = [{ internal: 'A' }];
 
     const { container } = render(<FormFieldSelect {...props} options={optionsA} value="B" />);
     const select = container.querySelector('select') as HTMLSelectElement;
@@ -66,9 +65,7 @@ describe('<FormFieldSelect />', () => {
     expect(select).toBeInTheDocument();
     expect(select.tagName).toBe('SELECT');
 
-    act(() => {
-      fireEvent.change(select, { target: { value: 'C' } });
-    });
+    userEvent.selectOptions(select, 'C');
 
     expect(props.onChange).toHaveBeenCalledWith('C');
 
@@ -114,9 +111,7 @@ describe('<FormFieldSelect />', () => {
       expect.assertions(1);
       const { getByDisplayValue } = setupGeneric();
       const input = getByDisplayValue('The first option') as HTMLSelectElement;
-      act(() => {
-        fireEvent.change(input, { target: { value: 'This is second option' } });
-      });
+      userEvent.selectOptions(input, 'This is second option');
 
       expect(propsGeneric.onChange).toHaveBeenCalledWith({ foo: 'no', bar: 1 });
     });

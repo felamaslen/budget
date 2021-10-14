@@ -1,4 +1,5 @@
-import { act, fireEvent, render, RenderResult, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import type { DocumentNode } from 'graphql';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -205,35 +206,29 @@ describe('Generic crud hooks', () => {
     ${useNetWorthSubcategoryCrud.name} | ${testCaseNetWorthSubcategory}
     ${useNetWorthEntryCrud.name}       | ${testCaseNetWorthEntry}
   `('$name', ({ testCase }: { testCase: TestCase<Record<string, unknown>> }) => {
-    const TestComponent: React.FC = () => {
-      const crud = testCase.useHook({ onError });
+    const Wrapper: React.FC = ({ children }) => (
+      <GQLProviderMock>
+        <Provider store={store}>{children}</Provider>
+      </GQLProviderMock>
+    );
 
-      return (
-        <>
-          <button onClick={(): void => crud.onCreate(testCase.createInput)}>Create!</button>
-          <button onClick={(): void => crud.onUpdate(testCase.testId, testCase.updateInput)}>
-            Update!
-          </button>
-          <button onClick={(): void => crud.onDelete(testCase.testId)}>Delete!</button>
-        </>
-      );
-    };
-
-    const setup = (): RenderResult =>
-      render(
-        <GQLProviderMock>
-          <Provider store={store}>
-            <TestComponent />
-          </Provider>
-        </GQLProviderMock>,
+    const setup = (): RenderHookResult<
+      Partial<HookCallOptions>,
+      CrudProps<Record<string, unknown>>
+    > =>
+      renderHook<Partial<HookCallOptions>, CrudProps<Record<string, unknown>>>(
+        () => testCase.useHook({ onError }),
+        {
+          wrapper: Wrapper,
+        },
       );
 
     describe('Creating', () => {
       it('should call the correct mutation', async () => {
         expect.assertions(2);
-        const { getByText } = setup();
+        const { result } = setup();
         act(() => {
-          fireEvent.click(getByText('Create!'));
+          result.current.onCreate(testCase.createInput);
         });
 
         await waitFor(() => {
@@ -261,9 +256,9 @@ describe('Generic crud hooks', () => {
             }),
           );
 
-          const { getByText } = setup();
+          const { result } = setup();
           act(() => {
-            fireEvent.click(getByText('Create!'));
+            result.current.onCreate(testCase.createInput);
           });
 
           await waitFor(() => {
@@ -277,9 +272,9 @@ describe('Generic crud hooks', () => {
     describe('Updating', () => {
       it('should call the correct mutation', async () => {
         expect.assertions(2);
-        const { getByText } = setup();
+        const { result } = setup();
         act(() => {
-          fireEvent.click(getByText('Update!'));
+          result.current.onUpdate(testCase.testId, testCase.updateInput);
         });
 
         await waitFor(() => {
@@ -307,9 +302,9 @@ describe('Generic crud hooks', () => {
             }),
           );
 
-          const { getByText } = setup();
+          const { result } = setup();
           act(() => {
-            fireEvent.click(getByText('Update!'));
+            result.current.onUpdate(testCase.testId, testCase.updateInput);
           });
 
           await waitFor(() => {
@@ -323,9 +318,9 @@ describe('Generic crud hooks', () => {
     describe('Deleting', () => {
       it('should call the correct mutation', async () => {
         expect.assertions(2);
-        const { getByText } = setup();
+        const { result } = setup();
         act(() => {
-          fireEvent.click(getByText('Delete!'));
+          result.current.onDelete(testCase.testId);
         });
 
         await waitFor(() => {
@@ -355,9 +350,9 @@ describe('Generic crud hooks', () => {
             }),
           );
 
-          const { getByText } = setup();
+          const { result } = setup();
           act(() => {
-            fireEvent.click(getByText('Delete!'));
+            result.current.onDelete(testCase.testId);
           });
 
           await waitFor(() => {

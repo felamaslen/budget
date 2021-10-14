@@ -1,4 +1,5 @@
 import { render, RenderResult, fireEvent, within, act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { DocumentNode } from 'graphql';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -111,11 +112,8 @@ describe('Accessible list create item', () => {
 
       const [inputSomeField] = renderResult.inputs;
 
-      act(() => {
-        fireEvent.change(inputSomeField, {
-          target: { value: 'c' },
-        });
-      });
+      userEvent.clear(inputSomeField);
+      userEvent.type(inputSomeField, 'c');
 
       await waitFor(() => {
         expect(renderResult.getByRole('list', { hidden: true })).toBeInTheDocument();
@@ -148,11 +146,8 @@ describe('Accessible list create item', () => {
 
       expect(queryByRole('list', { hidden: true })).not.toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputSomeField, {
-          target: { value: 'c' },
-        });
-      });
+      userEvent.clear(inputSomeField);
+      userEvent.type(inputSomeField, 'c');
 
       await waitFor(() => {
         expect(queryByRole('list', { hidden: true })).toBeInTheDocument();
@@ -167,11 +162,8 @@ describe('Accessible list create item', () => {
 
       const inputNextField = inputs[1];
 
-      act(() => {
-        fireEvent.change(inputNextField, {
-          target: { value: 'c' },
-        });
-      });
+      userEvent.clear(inputNextField);
+      userEvent.type(inputNextField, 'c');
 
       expect(queryByRole('list')).not.toBeInTheDocument();
     });
@@ -228,22 +220,12 @@ describe('Accessible list create item', () => {
 
         expect(inputSomeField.value).toBe('Caster sugar');
 
-        act(() => {
-          fireEvent.focus(inputNextField);
-        });
-        act(() => {
-          fireEvent.change(inputNextField, { target: { value: 'Manual value' } });
-        });
-
-        act(() => {
-          fireEvent.blur(inputNextField);
-        });
+        userEvent.tab();
+        userEvent.clear(inputNextField);
+        userEvent.type(inputNextField, 'Manual value');
 
         const addButton = getByText('Add') as HTMLButtonElement;
-
-        act(() => {
-          fireEvent.click(addButton);
-        });
+        userEvent.click(addButton);
 
         expect(props.onCreate).toHaveBeenCalledTimes(1);
         expect(props.onCreate).toHaveBeenCalledWith({
@@ -266,11 +248,8 @@ describe('Accessible list create item', () => {
 
           const addButton = getByText('Add') as HTMLButtonElement;
 
-          act(() => {
-            fireEvent.change(inputNextField, {
-              target: { value: 'z' },
-            });
-          });
+          userEvent.clear(inputNextField);
+          userEvent.type(inputNextField, 'z');
 
           await waitFor(() => {
             expect(getAllByRole('listitem', { hidden: true }).length).toBeGreaterThan(0);

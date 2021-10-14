@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Digit } from './digit';
 
@@ -23,9 +24,7 @@ describe('<Digit />', () => {
     const { getByText } = setup();
     const button = getByText('3') as HTMLButtonElement;
 
-    act(() => {
-      fireEvent.mouseDown(button);
-    });
+    userEvent.click(button);
 
     expect(props.onInput).toHaveBeenCalledTimes(1);
     expect(props.onInput).toHaveBeenCalledWith(3);

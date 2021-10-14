@@ -1,13 +1,12 @@
-import { render, act, fireEvent, RenderResult } from '@testing-library/react';
-import React from 'react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React, { SetStateAction } from 'react';
 import numericHash from 'string-hash';
 
 import { FormFieldNetWorthValue, Props } from './net-worth-value';
 import type { NetWorthValueInput } from '~client/types/gql';
 
 describe('<FormFieldNetWorthValue />', () => {
-  type Setter<T extends unknown = unknown> = (last: T) => T;
-
   let setterResult: Record<string, unknown> = { base: 'kept' };
   beforeEach(() => {
     setterResult = { base: 'kept' };
@@ -15,11 +14,9 @@ describe('<FormFieldNetWorthValue />', () => {
 
   const onChange = jest
     .fn()
-    .mockImplementation(
-      (setter: Setter<Record<string, unknown> | Record<string, unknown>>): void => {
-        setterResult = typeof setter === 'function' ? setter(setterResult) : setter;
-      },
-    );
+    .mockImplementation((setter: SetStateAction<Record<string, unknown>>): void => {
+      setterResult = typeof setter === 'function' ? setter(setterResult) : setter;
+    });
 
   const props: Props = {
     value: {
@@ -55,12 +52,9 @@ describe('<FormFieldNetWorthValue />', () => {
     const { getByDisplayValue } = render(<FormFieldNetWorthValue {...props} />);
     const input = getByDisplayValue('1.56') as HTMLInputElement;
 
-    act(() => {
-      fireEvent.change(input, { target: { value: '106.32' } });
-    });
-    act(() => {
-      fireEvent.blur(input);
-    });
+    userEvent.clear(input);
+    userEvent.type(input, '106.32');
+    userEvent.tab();
 
     expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
       ...props.value,
@@ -95,12 +89,9 @@ describe('<FormFieldNetWorthValue />', () => {
       const { getByDisplayValue } = setupErroneous();
       const input = getByDisplayValue('0.00') as HTMLInputElement;
 
-      act(() => {
-        fireEvent.change(input, { target: { value: '123.45' } });
-      });
-      act(() => {
-        fireEvent.blur(input);
-      });
+      userEvent.clear(input);
+      userEvent.type(input, '123.45');
+      userEvent.tab();
 
       expect(props.onChange).toHaveBeenCalledTimes(1);
       expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
@@ -114,9 +105,7 @@ describe('<FormFieldNetWorthValue />', () => {
     const setup = (): RenderResult => {
       const renderResult = render(<FormFieldNetWorthValue {...props} />);
       const checkbox = renderResult.getByRole('checkbox') as HTMLInputElement;
-      act(() => {
-        fireEvent.click(checkbox);
-      });
+      userEvent.click(checkbox);
 
       return renderResult;
     };
@@ -139,18 +128,13 @@ describe('<FormFieldNetWorthValue />', () => {
         const addButton = getByText('+') as HTMLButtonElement;
         expect(addButton).toBeInTheDocument();
 
-        act(() => {
-          fireEvent.change(input, { target: { value: '156.23' } });
-        });
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.clear(input);
+        userEvent.type(input, '156.23');
+        userEvent.tab();
 
         expect(props.onChange).not.toHaveBeenCalled();
 
-        act(() => {
-          fireEvent.click(addButton);
-        });
+        userEvent.click(addButton);
 
         expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
           ...props.value,
@@ -192,12 +176,9 @@ describe('<FormFieldNetWorthValue />', () => {
         const modifyInput = getByDisplayValue('156.23') as HTMLInputElement;
         expect(modifyInput).toBeInTheDocument();
 
-        act(() => {
-          fireEvent.change(modifyInput, { target: { value: '887.3' } });
-        });
-        act(() => {
-          fireEvent.blur(modifyInput);
-        });
+        userEvent.clear(modifyInput);
+        userEvent.type(modifyInput, '887.3');
+        userEvent.tab();
 
         expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
           ...props.value,
@@ -220,9 +201,7 @@ describe('<FormFieldNetWorthValue />', () => {
         const modifyCurrency = getByDisplayValue('USD') as HTMLSelectElement;
         expect(modifyCurrency).toBeInTheDocument();
 
-        act(() => {
-          fireEvent.change(modifyCurrency, { target: { value: 'EUR' } });
-        });
+        userEvent.selectOptions(modifyCurrency, 'EUR');
 
         expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
           ...props.value,
@@ -272,9 +251,7 @@ describe('<FormFieldNetWorthValue />', () => {
         const deleteButtons = getAllByText('−') as HTMLButtonElement[];
         expect(deleteButtons).toHaveLength(2);
 
-        act(() => {
-          fireEvent.click(deleteButtons[index]);
-        });
+        userEvent.click(deleteButtons[index]);
 
         expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
           ...props.value,
@@ -295,9 +272,7 @@ describe('<FormFieldNetWorthValue />', () => {
         const deleteButtons = getAllByText('−') as HTMLButtonElement[];
         expect(deleteButtons).toHaveLength(1);
 
-        act(() => {
-          fireEvent.click(deleteButtons[0]);
-        });
+        userEvent.click(deleteButtons[0]);
 
         expect(props.onChange).not.toHaveBeenCalled();
       });
@@ -310,20 +285,15 @@ describe('<FormFieldNetWorthValue />', () => {
 
       expect(queryByDisplayValue('1.56')).not.toBeInTheDocument();
 
-      act(() => {
-        fireEvent.click(checkbox);
-      });
+      userEvent.click(checkbox);
 
       const simpleInput = getByDisplayValue('1.56') as HTMLInputElement;
       expect(simpleInput).toBeInTheDocument();
       expect(props.onChange).not.toHaveBeenCalled();
 
-      act(() => {
-        fireEvent.change(simpleInput, { target: { value: '67.23' } });
-      });
-      act(() => {
-        fireEvent.blur(simpleInput);
-      });
+      userEvent.clear(simpleInput);
+      userEvent.type(simpleInput, '67.23');
+      userEvent.tab();
 
       expect(props.onChange).toHaveBeenCalledWith<[NetWorthValueInput]>({
         ...props.value,
@@ -378,12 +348,9 @@ describe('<FormFieldNetWorthValue />', () => {
         const { getByDisplayValue } = setup();
 
         const input = getByDisplayValue(fieldValue);
-        act(() => {
-          fireEvent.change(input, { target: { value: updatedValue } });
-        });
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.clear(input);
+        userEvent.type(input, updatedValue);
+        userEvent.tab();
 
         expect(setterResult).toStrictEqual({
           base: 'kept',
@@ -440,12 +407,9 @@ describe('<FormFieldNetWorthValue />', () => {
         const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
         const fieldInput = inputs[index];
 
-        act(() => {
-          fireEvent.change(fieldInput, { target: { value: '100' } });
-        });
-        act(() => {
-          fireEvent.blur(fieldInput);
-        });
+        userEvent.clear(fieldInput);
+        userEvent.type(fieldInput, '100');
+        userEvent.tab();
 
         expect(props.onChange).not.toHaveBeenCalled();
       });
@@ -456,30 +420,19 @@ describe('<FormFieldNetWorthValue />', () => {
         const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
         const [inputUnits, inputVested, inputStrikePrice, inputMarketPrice] = inputs;
 
-        act(() => {
-          fireEvent.change(inputUnits, { target: { value: '100' } });
-        });
-        act(() => {
-          fireEvent.blur(inputUnits);
-        });
-        act(() => {
-          fireEvent.change(inputVested, { target: { value: '53' } });
-        });
-        act(() => {
-          fireEvent.blur(inputVested);
-        });
-        act(() => {
-          fireEvent.change(inputStrikePrice, { target: { value: '45' } });
-        });
-        act(() => {
-          fireEvent.blur(inputStrikePrice);
-        });
-        act(() => {
-          fireEvent.change(inputMarketPrice, { target: { value: '37.2' } });
-        });
-        act(() => {
-          fireEvent.blur(inputMarketPrice);
-        });
+        userEvent.clear(inputUnits);
+        userEvent.type(inputUnits, '100');
+
+        userEvent.clear(inputVested);
+        userEvent.type(inputVested, '53');
+
+        userEvent.clear(inputStrikePrice);
+        userEvent.type(inputStrikePrice, '45');
+
+        userEvent.clear(inputMarketPrice);
+        userEvent.type(inputMarketPrice, '37.2');
+
+        userEvent.tab();
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(setterResult).toStrictEqual({
@@ -539,12 +492,9 @@ describe('<FormFieldNetWorthValue />', () => {
         const { getByDisplayValue } = setup();
 
         const input = getByDisplayValue(fieldValue);
-        act(() => {
-          fireEvent.change(input, { target: { value: updatedValue } });
-        });
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.clear(input);
+        userEvent.type(input, updatedValue);
+        userEvent.tab();
 
         expect(setterResult).toStrictEqual({
           base: 'kept',
@@ -599,27 +549,18 @@ describe('<FormFieldNetWorthValue />', () => {
         const inputs = getAllByRole('spinbutton') as HTMLInputElement[];
         const [inputPrincipal, inputPaymentsRemaining, inputRate] = inputs;
 
-        act(() => {
-          fireEvent.change(inputPrincipal, { target: { value: '167568.44' } });
-        });
-        act(() => {
-          fireEvent.blur(inputPrincipal);
-        });
-        act(() => {
-          fireEvent.change(inputPaymentsRemaining, { target: { value: '17' } });
-        });
-        act(() => {
-          fireEvent.blur(inputPaymentsRemaining);
-        });
-        act(() => {
-          fireEvent.change(inputRate, { target: { value: '0.43' } });
-        });
+        userEvent.clear(inputPrincipal);
+        userEvent.type(inputPrincipal, '167568.44');
+
+        userEvent.clear(inputPaymentsRemaining);
+        userEvent.type(inputPaymentsRemaining, '17');
+
+        userEvent.clear(inputRate);
+        userEvent.type(inputRate, '0.43');
 
         onChange.mockClear();
 
-        act(() => {
-          fireEvent.blur(inputRate);
-        });
+        userEvent.tab();
 
         expect(props.onChange).toHaveBeenCalledTimes(1);
         expect(setterResult).toStrictEqual({

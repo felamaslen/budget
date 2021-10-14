@@ -1,146 +1,111 @@
-import { render, fireEvent, act, RenderResult, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import React from 'react';
 
-import { useField } from './field';
+import { FieldOptions, Result, useField } from './field';
 
 describe(useField.name, () => {
-  type Props = {
-    value: string;
-    onChange: (value: string) => void;
-    inline?: boolean;
-    immediate?: boolean;
-  };
-
-  const props: Props = {
+  const onChange = jest.fn();
+  const myFieldOptions: FieldOptions<string, React.ChangeEvent<HTMLInputElement>> = {
     value: 'my-initial-value',
-    onChange: jest.fn(),
-  };
-
-  const TestComponent: React.FC<Props> = ({
-    value,
     onChange,
-    inline = false,
-    immediate = false,
-  }) => {
-    const [active, setActive] = React.useState<boolean>(false);
-
-    const {
-      currentValue,
-      inputValue,
-      onChange: onChangeInput,
-      inputRef,
-      onBlur,
-      onCancel,
-    } = useField({
-      value,
-      onChange,
-      active,
-      inline,
-      immediate,
-    });
-
-    return (
-      <div>
-        <span data-testid="current-value">{currentValue}</span>
-        <span data-testid="input-value">{inputValue}</span>
-        <input
-          ref={inputRef}
-          value={inputValue}
-          data-testid="input"
-          onChange={onChangeInput}
-          onBlur={onBlur}
-        />
-        <button
-          data-testid="button-activate-toggle"
-          onClick={(): void => setActive((last) => !last)}
-        />
-        <button data-testid="button-cancel" onClick={(): void => onCancel()} />
-      </div>
-    );
   };
 
   it('should set currentValue to the initial value', () => {
     expect.assertions(1);
-    const { getByTestId } = render(<TestComponent {...props} />);
-    expect(getByTestId('current-value')).toHaveTextContent('my-initial-value');
+    const { result } = renderHook(() => useField(myFieldOptions));
+    expect(result.current.currentValue).toBe('my-initial-value');
   });
 
   it('should set inputValue to the initial value', () => {
     expect.assertions(1);
-    const { getByTestId } = render(<TestComponent {...props} />);
-    expect(getByTestId('input-value')).toHaveTextContent('my-initial-value');
+    const { result } = renderHook(() => useField(myFieldOptions));
+    expect(result.current.inputValue).toBe('my-initial-value');
   });
 
   describe('when changing the input value', () => {
-    const setup = (customProps = {}): RenderResult => {
-      const renderProps = render(<TestComponent {...props} {...customProps} />);
-      const input = renderProps.getByTestId('input');
+    const setup = (
+      extraFieldOptions: Partial<FieldOptions<string, React.ChangeEvent<HTMLInputElement>>> = {},
+    ): RenderHookResult<
+      FieldOptions<string, React.ChangeEvent<HTMLInputElement>>,
+      Result<string, React.ChangeEvent<HTMLInputElement>>
+    > => {
+      const hookResult = renderHook<
+        FieldOptions<string, React.ChangeEvent<HTMLInputElement>>,
+        Result<string, React.ChangeEvent<HTMLInputElement>>
+      >((props) => useField(props), { initialProps: { ...myFieldOptions, ...extraFieldOptions } });
 
       act(() => {
-        fireEvent.change(input, { target: { value: 'new-value' } });
+        hookResult.result.current.onChange({
+          target: { value: 'new-value' } as React.ChangeEvent<HTMLInputElement>['target'],
+        } as React.ChangeEvent<HTMLInputElement>);
       });
 
-      return renderProps;
+      return hookResult;
     };
 
     it('should set the currentValue to the changed value', () => {
       expect.assertions(1);
-      const { getByTestId } = setup();
-      expect(getByTestId('current-value')).toHaveTextContent('new-value');
+      const { result } = setup();
+      expect(result.current.currentValue).toBe('new-value');
     });
 
     it('should set the inputValue to the changed value', () => {
       expect.assertions(1);
-      const { getByTestId } = setup();
-      expect(getByTestId('input-value')).toHaveTextContent('new-value');
+      const { result } = setup();
+      expect(result.current.inputValue).toBe('new-value');
     });
 
-    it('should NOT immediately call onChange', () => {
-      expect.assertions(1);
-      setup();
-      expect(props.onChange).not.toHaveBeenCalled();
-    });
+    it('should call onChange only after onBlur is called', () => {
+      expect.assertions(3);
+      const { result } = setup();
 
-    it('should call onChange after blurring the input', () => {
-      expect.assertions(1);
-      const { getByTestId } = setup();
-      const input = getByTestId('input');
+      expect(onChange).not.toHaveBeenCalled();
       act(() => {
-        fireEvent.blur(input);
+        result.current.onBlur();
       });
-
-      expect(props.onChange).toHaveBeenCalledWith('new-value');
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith('new-value');
     });
 
     describe('if the immediate option is set', () => {
       it('should not wait for the blur to call onChange', () => {
-        expect.assertions(2);
-        const { getByTestId } = setup({ immediate: true });
-        const input = getByTestId('input');
-        expect(props.onChange).toHaveBeenCalledWith('new-value');
+        expect.assertions(3);
+        const { result } = setup({ immediate: true });
+
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(onChange).toHaveBeenCalledWith('new-value');
+
         act(() => {
-          fireEvent.blur(input);
+          result.current.onBlur();
         });
-        expect(props.onChange).toHaveBeenCalledTimes(1);
+
+        expect(onChange).toHaveBeenCalledTimes(1);
       });
 
       it('should not call onChange as a result of an external change', () => {
         expect.assertions(3);
-        const { container, getByTestId } = render(
-          <TestComponent {...props} value="old-value" immediate={true} />,
-        );
-        const input = getByTestId('input') as HTMLInputElement;
-        expect(input.value).toBe('old-value');
-        act(() => {
-          render(<TestComponent {...props} immediate={true} value="new-value" />, { container });
+
+        const { rerender, result } = renderHook<
+          FieldOptions<string, React.ChangeEvent<HTMLInputElement>>,
+          Result<string, React.ChangeEvent<HTMLInputElement>>
+        >((props) => useField(props), {
+          initialProps: { ...myFieldOptions, immediate: true, value: 'old-value' },
         });
-        expect(props.onChange).not.toHaveBeenCalled();
-        expect(input.value).toBe('new-value');
+
+        expect(result.current.inputValue).toBe('old-value');
+
+        act(() => {
+          rerender({ ...myFieldOptions, immediate: true, value: 'new-value' });
+        });
+
+        expect(result.current.inputValue).toBe('new-value');
+        expect(onChange).not.toHaveBeenCalled();
       });
     });
 
     it('should work on generalised "inputs"', () => {
-      expect.assertions(2);
+      expect.assertions(4);
 
       type MyGeneralValue = {
         complex: number;
@@ -152,106 +117,110 @@ describe(useField.name, () => {
       const oldValue: MyGeneralValue = { complex: 201, field: 'old-field' };
       const newValue: MyGeneralValue = { complex: 1983, field: 'new-field' };
 
-      const GeneralisedField: React.FC<{
-        value: MyGeneralValue;
-        onChange: (value: MyGeneralValue) => void;
-      }> = (generalProps) => {
-        const { currentValue, onChange } = useField<MyGeneralValue, MyGeneralChangeEvent>({
-          ...generalProps,
+      const { result } = renderHook<
+        FieldOptions<MyGeneralValue, MyGeneralChangeEvent>,
+        Result<MyGeneralValue, MyGeneralChangeEvent>
+      >((props) => useField(props), {
+        initialProps: {
+          value: oldValue,
+          onChange,
           immediate: true,
-        });
-
-        return (
-          <>
-            <span data-testid="current-value">{JSON.stringify(currentValue)}</span>
-            <button data-testid="test-button" onClick={(): void => onChange(newValue)} />
-          </>
-        );
-      };
-
-      const onChange = jest.fn();
-      const { getByTestId } = render(<GeneralisedField value={oldValue} onChange={onChange} />);
-      act(() => {
-        fireEvent.click(getByTestId('test-button'));
+        },
       });
 
-      expect(JSON.parse((getByTestId('current-value') as HTMLSpanElement).innerHTML)).toStrictEqual(
-        newValue,
-      );
+      expect(result.current.currentValue).toBe(oldValue);
 
+      act(() => {
+        result.current.onChange(newValue);
+      });
+
+      expect(result.current.currentValue).toBe(newValue);
+      expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenCalledWith(newValue);
     });
   });
 
-  describe('when blurring the input', () => {
-    const setup = (): RenderResult => {
-      const renderProps = render(<TestComponent {...props} />);
-      const input = renderProps.getByTestId('input');
-
-      act(() => {
-        fireEvent.blur(input);
-      });
-
-      return renderProps;
-    };
-
+  describe('when calling onBlur', () => {
     it('should not call onChange if the input value did not change', () => {
       expect.assertions(1);
-      setup();
-      expect(props.onChange).not.toHaveBeenCalled();
+      const { result } = renderHook(() => useField(myFieldOptions));
+      act(() => {
+        result.current.onBlur();
+      });
+      expect(onChange).not.toHaveBeenCalled();
     });
   });
 
   describe('when cancelling the input', () => {
-    const setup = (): RenderResult => {
-      const renderProps = render(<TestComponent {...props} value="old-value" />);
-      const cancelButton = renderProps.getByTestId('button-cancel');
-      const input = renderProps.getByTestId('input');
+    const setup = (): RenderHookResult<
+      FieldOptions<string>,
+      Result<string, React.ChangeEvent<HTMLInputElement>>
+    > => {
+      const hookResult = renderHook<
+        FieldOptions<string>,
+        Result<string, React.ChangeEvent<HTMLInputElement>>
+      >(useField, {
+        initialProps: {
+          ...myFieldOptions,
+          value: 'old-value',
+        },
+      });
 
       act(() => {
-        fireEvent.change(input, { target: { value: 'new-value' } });
-      });
-      act(() => {
-        fireEvent.click(cancelButton);
+        hookResult.result.current.onChange({
+          target: { value: 'new-value' } as React.ChangeEvent<HTMLInputElement>['target'],
+        } as React.ChangeEvent<HTMLInputElement>);
       });
 
-      return renderProps;
+      act(() => {
+        hookResult.result.current.onCancel();
+      });
+
+      return hookResult;
     };
 
     it('should not call onChange', () => {
       expect.assertions(1);
       setup();
-      expect(props.onChange).not.toHaveBeenCalled();
+      expect(onChange).not.toHaveBeenCalled();
     });
 
     it('should restore the original input value', () => {
       expect.assertions(1);
-      const { getByTestId } = setup();
-      expect((getByTestId('input') as HTMLInputElement).value).toBe('old-value');
+      const { result } = setup();
+      expect(result.current.inputValue).toBe('old-value');
     });
   });
 
   describe('when the input is displayed inline', () => {
     describe('when setting the field to active', () => {
-      const setup = (): RenderResult => {
-        const renderProps = render(<TestComponent {...props} inline />);
-        const activateButton = renderProps.getByTestId('button-activate-toggle');
-
-        act(() => {
-          fireEvent.click(activateButton);
+      it('should focus and select the input ref', async () => {
+        expect.hasAssertions();
+        const { rerender, result } = renderHook<
+          FieldOptions<string>,
+          Result<string, React.ChangeEvent<HTMLInputElement>>
+        >(useField, {
+          initialProps: {
+            ...myFieldOptions,
+            inline: true,
+            active: false,
+          },
         });
 
-        return renderProps;
-      };
+        const inputRef = result.current.inputRef;
+        inputRef.current = document.createElement('input');
+        inputRef.current.value = result.current.inputValue;
 
-      it('should focus and select the input ref', async () => {
-        expect.assertions(4);
-        const { getByTestId } = setup();
-        const input = getByTestId('input') as HTMLInputElement;
+        const focusSpy = jest.spyOn(inputRef.current, 'focus');
+
+        act(() => {
+          rerender({ ...myFieldOptions, inline: true, active: true, value: 'old-value' });
+        });
+
         await waitFor(() => {
-          expect(document.activeElement).toBe(input);
-          expect(input.selectionStart).toBe(0);
-          expect(input.selectionEnd).toBe('my-initial-value'.length);
+          expect(focusSpy).toHaveBeenCalledTimes(1);
+          expect(inputRef.current?.selectionStart).toBe(0);
+          expect(inputRef.current?.selectionEnd).toBe('my-initial-value'.length);
         });
       });
     });
@@ -261,119 +230,153 @@ describe(useField.name, () => {
         jest.useFakeTimers();
       });
 
-      const setup = (newValue?: string): RenderResult => {
-        const renderProps = render(<TestComponent {...props} inline />);
-        const input = renderProps.getByTestId('input');
-        const activateButton = renderProps.getByTestId('button-activate-toggle');
+      const setup = (
+        newValue = myFieldOptions.value,
+      ): RenderHookResult<
+        FieldOptions<string>,
+        Result<string, React.ChangeEvent<HTMLInputElement>>
+      > => {
+        const hookResult = renderHook<
+          FieldOptions<string>,
+          Result<string, React.ChangeEvent<HTMLInputElement>>
+        >(useField, {
+          initialProps: {
+            ...myFieldOptions,
+            inline: true,
+            active: true,
+          },
+        });
 
         act(() => {
-          fireEvent.click(activateButton);
+          hookResult.result.current.onChange({
+            target: { value: newValue } as React.ChangeEvent<HTMLInputElement>['target'],
+          } as React.ChangeEvent<HTMLInputElement>);
         });
-        act(() => {
-          fireEvent.focus(input);
-        });
-
-        if (newValue) {
-          act(() => {
-            fireEvent.change(input, { target: { value: 'new-value' } });
-          });
-        }
 
         jest.advanceTimersByTime(100);
 
         act(() => {
-          fireEvent.click(activateButton);
+          hookResult.rerender({ ...myFieldOptions, inline: true, active: false });
         });
 
-        return renderProps;
+        return hookResult;
       };
 
       it('should not blur the input ref', async () => {
         expect.assertions(1);
-        const { getByTestId } = setup();
-        const input = getByTestId('input');
+        const { result } = setup();
+        result.current.inputRef.current = document.createElement('input');
+        const blurSpy = jest.spyOn(result.current.inputRef.current, 'blur');
         act(() => {
           jest.runAllTimers();
         });
-        await waitFor(() => {
-          expect(document.activeElement).toBe(input);
-        });
+        expect(blurSpy).not.toHaveBeenCalled();
       });
 
       describe('if the value was updated', () => {
         it('should keep the new inputValue', () => {
           expect.assertions(1);
-          const { getByTestId } = setup('new-value');
-          expect((getByTestId('input') as HTMLInputElement).value).toBe('new-value');
+          const { result } = setup('new-value');
+          expect(result.current.inputValue).toBe('new-value');
         });
 
         it('should not call onChange', () => {
           expect.assertions(1);
           setup('new-value');
-          expect(props.onChange).not.toHaveBeenCalled();
+          expect(onChange).not.toHaveBeenCalled();
         });
       });
     });
 
     describe('when manually blurring the input', () => {
-      const setup = (newValue?: string): RenderResult => {
-        const renderProps = render(<TestComponent {...props} inline />);
-        const input = renderProps.getByTestId('input');
-
-        if (newValue) {
-          act(() => {
-            fireEvent.change(input, { target: { value: 'new-value' } });
-          });
-        }
-
-        act(() => {
-          fireEvent.blur(input);
+      const setup = (
+        newValue = myFieldOptions.value,
+      ): RenderHookResult<
+        FieldOptions<string>,
+        Result<string, React.ChangeEvent<HTMLInputElement>>
+      > => {
+        const hookResult = renderHook<
+          FieldOptions<string>,
+          Result<string, React.ChangeEvent<HTMLInputElement>>
+        >(useField, {
+          initialProps: {
+            ...myFieldOptions,
+            inline: true,
+          },
         });
 
-        return renderProps;
+        act(() => {
+          hookResult.result.current.onChange({
+            target: { value: newValue } as React.ChangeEvent<HTMLInputElement>['target'],
+          } as React.ChangeEvent<HTMLInputElement>);
+        });
+
+        act(() => {
+          hookResult.result.current.onBlur();
+        });
+
+        return hookResult;
       };
 
       describe('if the value was not updated', () => {
         it('should not call onChange', () => {
           expect.assertions(1);
           setup();
-          expect(props.onChange).not.toHaveBeenCalled();
+          expect(onChange).not.toHaveBeenCalled();
         });
       });
 
       describe('if the value was updated', () => {
         it('should call onChange', () => {
-          expect.assertions(1);
+          expect.assertions(2);
           setup('new-value');
-          expect(props.onChange).toHaveBeenCalledWith('new-value');
+          expect(onChange).toHaveBeenCalledTimes(1);
+          expect(onChange).toHaveBeenCalledWith('new-value');
         });
       });
     });
 
     describe('when the value of the field was updated externally', () => {
-      const setup = async (): Promise<RenderResult> => {
-        const renderProps = render(<TestComponent {...props} inline />);
-        const activateButton = renderProps.getByTestId('button-activate-toggle');
+      const setup = async (): Promise<
+        RenderHookResult<FieldOptions<string>, Result<string, React.ChangeEvent<HTMLInputElement>>>
+      > => {
+        const hookResult = renderHook<
+          FieldOptions<string>,
+          Result<string, React.ChangeEvent<HTMLInputElement>>
+        >(useField, {
+          initialProps: {
+            ...myFieldOptions,
+            inline: true,
+          },
+        });
+
         act(() => {
-          fireEvent.click(activateButton);
+          hookResult.rerender({
+            ...myFieldOptions,
+            inline: true,
+            active: true,
+          });
         });
 
         await new Promise<void>((resolve) =>
           setTimeout(() => {
-            render(<TestComponent {...props} inline value="new-value" />, {
-              container: renderProps.container,
+            hookResult.rerender({
+              ...myFieldOptions,
+              inline: true,
+              active: true,
+              value: 'new-value',
             });
             resolve();
           }, 0),
         );
 
-        return renderProps;
+        return hookResult;
       };
 
       it('should update the input value accordingly', async () => {
         expect.assertions(1);
-        const { getByTestId } = await setup();
-        expect((getByTestId('input') as HTMLInputElement).value).toBe('new-value');
+        const { result } = await setup();
+        expect(result.current.inputValue).toBe('new-value');
       });
     });
   });

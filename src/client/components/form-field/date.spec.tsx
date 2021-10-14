@@ -1,4 +1,5 @@
-import { render, fireEvent, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { FormFieldDate, FormFieldDateInline } from './date';
@@ -24,15 +25,11 @@ describe('<FormFieldDate />', () => {
     const { getByDisplayValue } = render(<FormFieldDate {...props} />);
     const input = getByDisplayValue('2017-11-10');
 
-    act(() => {
-      fireEvent.change(input, { target: { value: '2014-04-09' } });
-    });
+    userEvent.type(input, '2014-04-09');
 
     expect(props.onChange).toHaveBeenCalledWith(new Date('2014-04-09'));
 
-    act(() => {
-      fireEvent.blur(input);
-    });
+    userEvent.tab();
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
   });
@@ -46,15 +43,11 @@ describe('<FormFieldDate />', () => {
     const { getByDisplayValue } = render(<FormFieldDate {...props} />);
     const input = getByDisplayValue('2017-11-10') as HTMLInputElement;
 
-    act(() => {
-      fireEvent.change(input, { target: { value: '' } });
-    });
+    userEvent.type(input, '{selectall}{backspace}');
 
     expect(props.onChange).toHaveBeenCalledWith(new Date('2020-04-20'));
 
-    act(() => {
-      fireEvent.blur(input);
-    });
+    userEvent.tab();
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     expect(input.value).toBe('2020-04-20');
@@ -87,93 +80,46 @@ describe('<FormFieldDate />', () => {
       const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
       const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
 
-      act(() => {
-        fireEvent.change(input, { target: { value: '' } });
-      });
+      userEvent.type(input, '{selectall}{backspace}');
 
       expect(input.value).toBe('');
 
-      act(() => {
-        fireEvent.blur(input);
-      });
+      userEvent.tab();
 
       expect(props.onChange).not.toHaveBeenCalled();
       expect(input.value).toBe('10/11/2017');
     });
 
-    const testInput = (input: HTMLInputElement, value: string): void => {
-      const chars = value.split('');
-      chars.forEach((_, index): void => {
-        const valueToIndex = value.substring(0, index + 1);
-        act(() => {
-          fireEvent.change(input, { target: { value: valueToIndex } });
-        });
-        act(() => {
-          expect(input.value).toBe(valueToIndex);
-        });
-      });
-    };
-
-    it('should set dates based on a single number', () => {
-      expect.assertions(4);
+    it.each`
+      case                          | value         | expectedDate
+      ${'single number'}            | ${'1'}        | ${new Date('2019-07-01')}
+      ${'date and month'}           | ${'4/3'}      | ${new Date('2019-03-04')}
+      ${'date, month and year'}     | ${'29/1/21'}  | ${new Date('2021-01-29')}
+      ${'abbreviated full date'}    | ${'2/9/16'}   | ${new Date('2016-09-02')}
+      ${'full date with full year'} | ${'2/9/2016'} | ${new Date('2016-09-02')}
+    `('should set dates based on a $case', ({ value, expectedDate }) => {
+      expect.assertions(3);
       const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
       const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
-      testInput(input, '1');
 
+      userEvent.type(input, `{selectall}{backspace}${value}`);
       expect(props.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.blur(input);
-      });
+      userEvent.tab();
 
       expect(props.onChange).toHaveBeenCalledTimes(1);
-      expect(props.onChange).toHaveBeenCalledWith(new Date('2019-07-01'));
-    });
-
-    it('should set dates based on a date and month', () => {
-      expect.assertions(6);
-      const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
-      const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
-      testInput(input, '4/3');
-
-      expect(props.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.blur(input);
-      });
-
-      expect(props.onChange).toHaveBeenCalledTimes(1);
-      expect(props.onChange).toHaveBeenCalledWith(new Date('2019-03-04'));
-    });
-
-    it('should set dates based on a date, month and year', () => {
-      expect.assertions(10);
-      const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
-      const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
-      testInput(input, '29/1/21');
-
-      expect(props.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.blur(input);
-      });
-
-      expect(props.onChange).toHaveBeenCalledTimes(1);
-      expect(props.onChange).toHaveBeenCalledWith(new Date('2021-01-29'));
+      expect(props.onChange).toHaveBeenCalledWith(expectedDate);
     });
 
     it('should set the end of a month when the month length is longer than the current month', () => {
-      expect.assertions(6);
+      expect.assertions(2);
 
       jest.setSystemTime(new Date('2020-06-10')); // June has 30 days
 
       const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
       const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
 
-      testInput(input, '31/5');
-      act(() => {
-        fireEvent.blur(input);
-      });
+      userEvent.type(input, '{selectall}{backspace}31/5');
+      userEvent.tab();
 
       expect(props.onChange).toHaveBeenCalledTimes(1);
       expect(props.onChange).toHaveBeenCalledWith(new Date('2020-05-31'));
@@ -181,53 +127,17 @@ describe('<FormFieldDate />', () => {
       jest.setSystemTime(now);
     });
 
-    it('should set dates based on an abbreviated full date', () => {
-      expect.assertions(9);
-      const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
-      const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
-      testInput(input, '2/9/16');
-
-      expect(props.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.blur(input);
-      });
-
-      expect(props.onChange).toHaveBeenCalledTimes(1);
-      expect(props.onChange).toHaveBeenCalledWith(new Date('2016-09-02'));
-    });
-
-    it('should set dates based on a full date with full year', () => {
-      expect.assertions(11);
-      const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
-      const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
-      testInput(input, '2/9/2016');
-
-      expect(props.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.blur(input);
-      });
-
-      expect(props.onChange).toHaveBeenCalledTimes(1);
-      expect(props.onChange).toHaveBeenCalledWith(new Date('2016-09-02'));
-    });
-
     it('should not call onChange with an invalid value', () => {
       expect.assertions(4);
       const { getByDisplayValue } = render(<FormFieldDateInline {...props} />);
       const input = getByDisplayValue('10/11/2017') as HTMLInputElement;
 
-      act(() => {
-        fireEvent.change(input, { target: { value: 'not-a-date' } });
-      });
+      userEvent.type(input, '{selectall}{backspace}not-a-date');
 
       expect(props.onChange).not.toHaveBeenCalled();
       expect(input.value).toBe('not-a-date');
 
-      act(() => {
-        fireEvent.blur(input);
-      });
+      userEvent.tab();
 
       expect(input.value).toBe('10/11/2017');
       expect(props.onChange).not.toHaveBeenCalled();

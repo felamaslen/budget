@@ -1,4 +1,5 @@
-import { render, RenderResult, act, fireEvent } from '@testing-library/react';
+import { render, RenderResult, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { standardFields } from '../standard';
@@ -49,64 +50,42 @@ describe('Accessible list create form', () => {
     const addButton = renderResult.getByText('Add');
     const [inputDate, inputItem, inputCategory, inputCost, inputShop] = inputs;
 
+    userEvent.click(inputDate);
     act(() => {
-      fireEvent.focus(inputDate);
       jest.runAllTimers();
     });
-    act(() => {
-      fireEvent.change(inputDate, { target: { value: date } });
-    });
-    act(() => {
-      fireEvent.blur(inputDate);
-    });
+    userEvent.clear(inputDate);
+    userEvent.type(inputDate, date);
 
+    userEvent.click(inputItem);
     act(() => {
-      fireEvent.focus(inputItem);
       jest.runAllTimers();
     });
-    act(() => {
-      fireEvent.change(inputItem, { target: { value: item } });
-    });
-    act(() => {
-      fireEvent.blur(inputItem);
-    });
+    userEvent.clear(inputItem);
+    userEvent.type(inputItem, item);
 
+    userEvent.click(inputCategory);
     act(() => {
-      fireEvent.focus(inputCategory);
       jest.runAllTimers();
     });
-    act(() => {
-      fireEvent.change(inputCategory, { target: { value: category } });
-    });
-    act(() => {
-      fireEvent.blur(inputCategory);
-    });
+    userEvent.clear(inputCategory);
+    userEvent.type(inputCategory, category);
 
+    userEvent.click(inputCost);
     act(() => {
-      fireEvent.focus(inputCost);
       jest.runAllTimers();
     });
-    act(() => {
-      fireEvent.change(inputCost, { target: { value: cost } });
-    });
-    act(() => {
-      fireEvent.blur(inputCost);
-    });
+    userEvent.clear(inputCost);
+    userEvent.type(inputCost, cost);
 
+    userEvent.click(inputShop);
     act(() => {
-      fireEvent.focus(inputShop);
       jest.runAllTimers();
     });
-    act(() => {
-      fireEvent.change(inputShop, { target: { value: shop } });
-    });
-    act(() => {
-      fireEvent.blur(inputShop);
-    });
+    userEvent.clear(inputShop);
+    userEvent.type(inputShop, shop);
 
-    act(() => {
-      fireEvent.click(addButton);
-    });
+    userEvent.click(addButton);
   };
 
   const firstDateExternal = '1/3/20';

@@ -1,4 +1,5 @@
-import { RenderResult, render, within, fireEvent, act } from '@testing-library/react';
+import { RenderResult, render, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import addDays from 'date-fns/addDays';
 import addSeconds from 'date-fns/addSeconds';
 import getUnixTime from 'date-fns/getUnixTime';
@@ -360,12 +361,7 @@ describe('<PageFunds />', () => {
 
       if (selectValue) {
         const select = renderResult.getByDisplayValue('Value ↓') as HTMLSelectElement;
-        act(() => {
-          fireEvent.change(select, { target: { value: selectValue } });
-        });
-        act(() => {
-          fireEvent.blur(select);
-        });
+        userEvent.selectOptions(select, selectValue);
       }
 
       return renderResult;

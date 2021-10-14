@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { render, act, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { DocumentNode } from 'graphql';
 import React from 'react';
 import numericHash from 'string-hash';
@@ -181,49 +182,31 @@ describe('Net worth entry form', () => {
   const renderWithMocks = (children: React.ReactElement): RenderResult =>
     render(<GQLProviderMock client={mockGQLClient}>{children}</GQLProviderMock>);
 
-  const updateDate = ({ getByLabelText, getByText }: RenderResult, setNewDate = true): void => {
-    act(() => {
-      fireEvent.click(getByText('Date'));
-    });
+  const updateDate = ({ getByLabelText, getByText }: RenderResult): void => {
+    userEvent.click(getByText('Date'));
     const inputDate = getByLabelText('entry-date');
     const buttonDone = getByText('Done');
 
     expect(inputDate).toBeInTheDocument();
     expect(buttonDone).toBeInTheDocument();
 
-    if (setNewDate) {
-      act(() => {
-        fireEvent.change(inputDate, { target: { value: newDate } });
-      });
-      act(() => {
-        fireEvent.blur(inputDate);
-      });
-    }
-    act(() => {
-      fireEvent.click(buttonDone);
-    });
+    userEvent.clear(inputDate);
+    userEvent.type(inputDate, newDate);
+    userEvent.click(buttonDone);
   };
 
   const updateCurrencyManually = ({ getByDisplayValue, getByText }: RenderResult): void => {
-    act(() => {
-      fireEvent.click(getByText('Currencies'));
-    });
+    userEvent.click(getByText('Currencies'));
     const inputEUR = getByDisplayValue('0.84');
     const buttonDone = getByText('Done');
 
     expect(inputEUR).toBeInTheDocument();
     expect(buttonDone).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.change(inputEUR, { target: { value: '0.876' } });
-    });
-    act(() => {
-      fireEvent.blur(inputEUR);
-    });
+    userEvent.clear(inputEUR);
+    userEvent.type(inputEUR, '0.876');
 
-    act(() => {
-      fireEvent.click(buttonDone);
-    });
+    userEvent.click(buttonDone);
   };
 
   const updateAssets = ({
@@ -231,9 +214,7 @@ describe('Net worth entry form', () => {
     queryByDisplayValue,
     getByDisplayValue,
   }: RenderResult): void => {
-    act(() => {
-      fireEvent.click(getByText('Assets'));
-    });
+    userEvent.click(getByText('Assets'));
     const sectionCategoryMyAssets = getByText('My assets');
     const inputMyBankBefore = queryByDisplayValue('3856.1');
     const buttonDone = getByText('Done');
@@ -242,23 +223,14 @@ describe('Net worth entry form', () => {
     expect(inputMyBankBefore).not.toBeInTheDocument();
     expect(buttonDone).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.click(sectionCategoryMyAssets);
-    });
+    userEvent.click(sectionCategoryMyAssets);
 
     const inputMyBank = getByDisplayValue('3856.10');
     expect(inputMyBank).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.change(inputMyBank, { target: { value: '4000.12' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyBank);
-    });
-
-    act(() => {
-      fireEvent.click(getByText('Done'));
-    });
+    userEvent.clear(inputMyBank);
+    userEvent.type(inputMyBank, '4000.12');
+    userEvent.click(getByText('Done'));
   };
 
   const updateOptions = ({
@@ -266,9 +238,7 @@ describe('Net worth entry form', () => {
     queryByDisplayValue,
     getByDisplayValue,
   }: RenderResult): void => {
-    act(() => {
-      fireEvent.click(getByText('Assets'));
-    });
+    userEvent.click(getByText('Assets'));
     const sectionCategoryMyOptions = getByText('My options');
     const inputMyOptionUnitsBefore = queryByDisplayValue('1326');
     const inputMyOptionStrikeBefore = queryByDisplayValue('1350.2');
@@ -283,9 +253,7 @@ describe('Net worth entry form', () => {
 
     expect(buttonDone).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.click(sectionCategoryMyOptions);
-    });
+    userEvent.click(sectionCategoryMyOptions);
 
     const inputMyOptionUnits = getByDisplayValue('1326');
     const inputMyOptionStrike = getByDisplayValue('1350.2');
@@ -295,30 +263,16 @@ describe('Net worth entry form', () => {
     expect(inputMyOptionStrike).toBeInTheDocument();
     expect(inputMyOptionMarket).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.change(inputMyOptionUnits, { target: { value: '1006' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyOptionUnits);
-    });
+    userEvent.clear(inputMyOptionUnits);
+    userEvent.type(inputMyOptionUnits, '1006');
 
-    act(() => {
-      fireEvent.change(inputMyOptionStrike, { target: { value: '1440.2' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyOptionStrike);
-    });
+    userEvent.clear(inputMyOptionStrike);
+    userEvent.type(inputMyOptionStrike, '1440.2');
 
-    act(() => {
-      fireEvent.change(inputMyOptionMarket, { target: { value: '2093.7' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyOptionMarket);
-    });
+    userEvent.clear(inputMyOptionMarket);
+    userEvent.type(inputMyOptionMarket, '2093.7');
 
-    act(() => {
-      fireEvent.click(buttonDone);
-    });
+    userEvent.click(buttonDone);
   };
 
   const updateMortgage = ({
@@ -326,9 +280,7 @@ describe('Net worth entry form', () => {
     queryByDisplayValue,
     getByDisplayValue,
   }: RenderResult): void => {
-    act(() => {
-      fireEvent.click(getByText('Liabilities'));
-    });
+    userEvent.click(getByText('Liabilities'));
     const sectionCategoryMyMortgage = getByText('Mortgage');
     const inputMyMortgagePrincipalBefore = queryByDisplayValue('168776.54');
     const inputMyMortgagePaymentsRemainingBefore = queryByDisplayValue('176');
@@ -339,9 +291,7 @@ describe('Net worth entry form', () => {
     expect(inputMyMortgagePaymentsRemainingBefore).not.toBeInTheDocument();
     expect(inputMyMortgageRateBefore).not.toBeInTheDocument();
 
-    act(() => {
-      fireEvent.click(sectionCategoryMyMortgage);
-    });
+    userEvent.click(sectionCategoryMyMortgage);
 
     const inputMyMortgagePrincipal = getByDisplayValue('168776.54');
     const inputMyMortgagePaymentsRemaining = getByDisplayValue('176');
@@ -353,36 +303,19 @@ describe('Net worth entry form', () => {
     expect(inputMyMortgageRate).toBeInTheDocument();
     expect(inputMyMortgagePaid).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.change(inputMyMortgagePrincipal, { target: { value: '155998.23' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyMortgagePrincipal);
-    });
+    userEvent.clear(inputMyMortgagePrincipal);
+    userEvent.type(inputMyMortgagePrincipal, '155998.23');
 
-    act(() => {
-      fireEvent.change(inputMyMortgagePaymentsRemaining, { target: { value: '175' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyMortgagePaymentsRemaining);
-    });
+    userEvent.clear(inputMyMortgagePaymentsRemaining);
+    userEvent.type(inputMyMortgagePaymentsRemaining, '175');
 
-    act(() => {
-      fireEvent.change(inputMyMortgageRate, { target: { value: '1.69' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyMortgageRate);
-    });
-    act(() => {
-      fireEvent.change(inputMyMortgagePaid, { target: { value: '144.9' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyMortgagePaid);
-    });
+    userEvent.clear(inputMyMortgageRate);
+    userEvent.type(inputMyMortgageRate, '1.69');
 
-    act(() => {
-      fireEvent.click(getByText('Done'));
-    });
+    userEvent.clear(inputMyMortgagePaid);
+    userEvent.type(inputMyMortgagePaid, '144.9');
+
+    userEvent.click(getByText('Done'));
   };
 
   const updateCurrencyAutomatically = ({
@@ -390,9 +323,7 @@ describe('Net worth entry form', () => {
     getByText,
     getAllByText,
   }: RenderResult): void => {
-    act(() => {
-      fireEvent.click(getByText('Currencies'));
-    });
+    userEvent.click(getByText('Currencies'));
     const inputEUR = getByDisplayValue('0.84') as HTMLInputElement;
     const refreshButtons = getAllByText('↻');
     const buttonDone = getByText('Done');
@@ -402,18 +333,14 @@ describe('Net worth entry form', () => {
 
     expect(buttonDone).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.click(refreshButtons[0]);
-    });
+    userEvent.click(refreshButtons[0]);
     act(() => {
       jest.advanceTimersByTime(101);
     });
 
     expect(inputEUR.value).toBe(`${1 / 1.15}`);
 
-    act(() => {
-      fireEvent.click(buttonDone);
-    });
+    userEvent.click(buttonDone);
   };
 
   const updateLiabilities = ({
@@ -421,9 +348,7 @@ describe('Net worth entry form', () => {
     queryByDisplayValue,
     getByDisplayValue,
   }: RenderResult): void => {
-    act(() => {
-      fireEvent.click(getByText('Liabilities'));
-    });
+    userEvent.click(getByText('Liabilities'));
     const sectionCategoryMyLiabilities = getByText('My liabilities');
     const inputMyCCBefore = queryByDisplayValue('-210.54');
     const buttonDone = getByText('Done');
@@ -432,9 +357,7 @@ describe('Net worth entry form', () => {
     expect(inputMyCCBefore).not.toBeInTheDocument();
     expect(buttonDone).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.click(sectionCategoryMyLiabilities);
-    });
+    userEvent.click(sectionCategoryMyLiabilities);
 
     const inputMyCC = getByDisplayValue('-210.54');
     expect(inputMyCC).toBeInTheDocument();
@@ -442,21 +365,13 @@ describe('Net worth entry form', () => {
     const inputCreditLimit = getByDisplayValue('6500.00');
     expect(inputCreditLimit).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.change(inputMyCC, { target: { value: '-159.01' } });
-    });
-    act(() => {
-      fireEvent.blur(inputMyCC);
-    });
-    act(() => {
-      fireEvent.change(inputCreditLimit, { target: { value: '6000' } });
-    });
-    act(() => {
-      fireEvent.blur(inputCreditLimit);
-    });
-    act(() => {
-      fireEvent.click(buttonDone);
-    });
+    userEvent.clear(inputMyCC);
+    userEvent.type(inputMyCC, '-159.01');
+
+    userEvent.clear(inputCreditLimit);
+    userEvent.type(inputCreditLimit, '6000');
+
+    userEvent.click(buttonDone);
   };
 
   describe('<NetWorthEditForm />', () => {
@@ -488,9 +403,7 @@ describe('Net worth entry form', () => {
         it('should move to the date step', () => {
           expect.assertions(1);
           const { getByText } = renderWithMocks(<NetWorthEditForm {...props} />);
-          act(() => {
-            fireEvent.click(getByText('Date'));
-          });
+          userEvent.click(getByText('Date'));
           const title = getByText('On what date were the data collected?');
           expect(title).toBeInTheDocument();
         });
@@ -500,9 +413,7 @@ describe('Net worth entry form', () => {
         it('should move to the currencies step', () => {
           expect.assertions(1);
           const { getByText } = renderWithMocks(<NetWorthEditForm {...props} />);
-          act(() => {
-            fireEvent.click(getByText('Currencies'));
-          });
+          userEvent.click(getByText('Currencies'));
           const title = getByText(`Currencies - ${oldDate}`);
           expect(title).toBeInTheDocument();
         });
@@ -512,9 +423,7 @@ describe('Net worth entry form', () => {
         it('should move to the currencies step', () => {
           expect.assertions(1);
           const { getByText } = renderWithMocks(<NetWorthEditForm {...props} />);
-          act(() => {
-            fireEvent.click(getByText('Assets'));
-          });
+          userEvent.click(getByText('Assets'));
           const title = getByText(`Assets - ${oldDate}`);
           expect(title).toBeInTheDocument();
         });
@@ -524,9 +433,7 @@ describe('Net worth entry form', () => {
         it('should move to the currencies step', () => {
           expect.assertions(1);
           const { getByText } = renderWithMocks(<NetWorthEditForm {...props} />);
-          act(() => {
-            fireEvent.click(getByText('Liabilities'));
-          });
+          userEvent.click(getByText('Liabilities'));
           const title = getByText(`Liabilities - ${oldDate}`);
           expect(title).toBeInTheDocument();
         });
@@ -539,9 +446,7 @@ describe('Net worth entry form', () => {
         const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateDate(renderProps);
         expect(props.onUpdate).not.toHaveBeenCalled();
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
           numericHash('some-fake-id'),
           expect.objectContaining({
@@ -557,9 +462,7 @@ describe('Net worth entry form', () => {
         const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateCurrencyManually(renderProps);
         expect(props.onUpdate).not.toHaveBeenCalled();
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
           numericHash('some-fake-id'),
           expect.objectContaining({
@@ -578,9 +481,7 @@ describe('Net worth entry form', () => {
         const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateCurrencyAutomatically(renderProps);
         expect(props.onUpdate).not.toHaveBeenCalled();
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
           numericHash('some-fake-id'),
           expect.objectContaining({
@@ -601,9 +502,7 @@ describe('Net worth entry form', () => {
         const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateAssets(renderProps);
         expect(props.onUpdate).not.toHaveBeenCalled();
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
           numericHash('some-fake-id'),
           expect.objectContaining({
@@ -626,9 +525,7 @@ describe('Net worth entry form', () => {
         const renderProps = renderWithMocks(<NetWorthEditForm {...props} />);
         updateOptions(renderProps);
         expect(props.onUpdate).not.toHaveBeenCalled();
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
           numericHash('some-fake-id'),
           expect.objectContaining({
@@ -659,9 +556,7 @@ describe('Net worth entry form', () => {
         updateLiabilities(renderProps);
         updateMortgage(renderProps);
         expect(props.onUpdate).not.toHaveBeenCalled();
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
         expect(props.onUpdate).toHaveBeenCalledWith<[Id, Create<NetWorthEntry>]>(
           numericHash('some-fake-id'),
           expect.objectContaining({
@@ -726,9 +621,7 @@ describe('Net worth entry form', () => {
 
         expect(props.onCreate).not.toHaveBeenCalled();
 
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
         expect(props.onCreate).toHaveBeenCalledWith<[Create<NetWorthEntry>]>(
           expect.objectContaining<Partial<Create<NetWorthEntry>>>({
             date: new Date(newDate),
@@ -783,26 +676,23 @@ describe('Net worth entry form', () => {
       it('should reset the active ID', () => {
         expect.assertions(32);
         const renderProps = setup();
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
         expect(props.setActiveId).toHaveBeenCalledWith(null);
       });
     });
 
     describe('when a date is not entered', () => {
       it('should use the end date of the next month', () => {
-        expect.assertions(24);
+        expect.assertions(22);
         const renderProps = renderWithMocks(<NetWorthAddForm {...props} />);
-        updateDate(renderProps, false);
+        userEvent.click(renderProps.getByText('Date'));
+        userEvent.click(renderProps.getByText('Done'));
         updateCurrencyAutomatically(renderProps);
         updateAssets(renderProps);
         updateOptions(renderProps);
         updateLiabilities(renderProps);
 
-        act(() => {
-          fireEvent.click(renderProps.getByText('Save'));
-        });
+        userEvent.click(renderProps.getByText('Save'));
 
         expect(props.onCreate).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -824,9 +714,7 @@ describe('Net worth entry form', () => {
           <NetWorthAddForm {...propsNoEntries} />,
         );
 
-        act(() => {
-          fireEvent.click(getByText('Date'));
-        });
+        userEvent.click(getByText('Date'));
 
         const title = getByText('On what date were the data collected?');
         const input = getByDisplayValue('2020-06-03');

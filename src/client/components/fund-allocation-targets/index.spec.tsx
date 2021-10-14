@@ -1,4 +1,4 @@
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { FundAllocationTargets, Props } from '.';
@@ -57,9 +57,7 @@ describe('<FundAllocationTargets />', () => {
       expect.hasAssertions();
       const { getByTestId, getByText } = render(<FundAllocationTargets {...props} />);
       const cashTarget = getByTestId('target-cash');
-      act(() => {
-        fireEvent.mouseDown(cashTarget, { clientX: 104 });
-      });
+      fireEvent.mouseDown(cashTarget, { clientX: 104 });
 
       await waitFor(() => {
         expect(getByText(/^Cash target: /)).toBeInTheDocument();

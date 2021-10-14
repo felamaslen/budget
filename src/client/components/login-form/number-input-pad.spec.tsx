@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { NumberInputPad } from './number-input-pad';
@@ -30,21 +31,19 @@ describe('<NumberInputPad />', () => {
     });
 
     const activateByKeyboard = (button: HTMLButtonElement): void => {
-      fireEvent.keyDown(button, { key: 'Enter' });
+      userEvent.type(button, '{enter}');
     };
 
     it.each`
       event                            | handler
-      ${'pressed'}                     | ${fireEvent.mouseDown}
+      ${'pressed'}                     | ${userEvent.click}
       ${'activated with the keyboard'} | ${activateByKeyboard}
     `('should call onInput when $event', ({ handler }) => {
       expect.assertions(2);
       const { getByText } = setup();
       const button = getByText(String(digit)) as HTMLButtonElement;
 
-      act(() => {
-        handler(button);
-      });
+      handler(button);
 
       expect(props.onInput).toHaveBeenCalledTimes(1);
       expect(props.onInput).toHaveBeenCalledWith(digit);

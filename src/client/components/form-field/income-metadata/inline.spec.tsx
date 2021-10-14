@@ -1,4 +1,5 @@
-import { act, fireEvent, render, RenderResult, within } from '@testing-library/react';
+import { act, render, RenderResult, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { removeAtIndex } from 'replace-array';
 
@@ -36,9 +37,7 @@ describe(FormFieldIncomeMetadata.name, () => {
   const renderAndFocus = (): RenderResult => {
     const renderResult = render(<FormFieldIncomeMetadata {...props} />);
     const button = renderResult.getByText('2') as HTMLButtonElement;
-    act(() => {
-      fireEvent.click(button);
-    });
+    userEvent.click(button);
     return renderResult;
   };
 
@@ -61,7 +60,7 @@ describe(FormFieldIncomeMetadata.name, () => {
     });
 
     it('should handle adding a deduction', () => {
-      expect.assertions(6);
+      expect.assertions(5);
       const { getByTestId, getByText } = setup();
 
       const inputGroup = getByTestId('income-deduction-create-input');
@@ -76,25 +75,14 @@ describe(FormFieldIncomeMetadata.name, () => {
 
       const buttonAdd = getByText('+');
 
-      act(() => {
-        fireEvent.change(inputName, { target: { value: 'SAYE' } });
-      });
-      act(() => {
-        fireEvent.blur(inputName);
-      });
-      expect(props.onChange).not.toHaveBeenCalled();
-
-      act(() => {
-        fireEvent.change(inputValue, { target: { value: '-500' } });
-      });
-      act(() => {
-        fireEvent.blur(inputValue);
-      });
+      userEvent.type(inputName, '{selectall}{backspace}SAYE');
+      userEvent.type(inputValue, '{selectall}{backspace}-500');
 
       expect(props.onChange).not.toHaveBeenCalled();
 
+      userEvent.click(buttonAdd);
+
       act(() => {
-        fireEvent.click(buttonAdd);
         jest.runAllTimers();
       });
 
@@ -108,10 +96,10 @@ describe(FormFieldIncomeMetadata.name, () => {
     });
 
     it.each`
-      case       | item       | emptyValue
-      ${'zero'}  | ${'value'} | ${0}
-      ${'empty'} | ${'name'}  | ${''}
-    `('should not add a deduction with $case $item', ({ item, emptyValue }) => {
+      case       | item       | nameInput         | valueInput
+      ${'zero'}  | ${'value'} | ${'Some tax'}     | ${'0'}
+      ${'empty'} | ${'name'}  | ${'{rightArrow}'} | ${'-123'}
+    `('should not add a deduction with $case $item', ({ nameInput, valueInput }) => {
       expect.assertions(1);
 
       const { getByTestId, getByText } = setup();
@@ -124,24 +112,12 @@ describe(FormFieldIncomeMetadata.name, () => {
       const inputName = inputs[0];
       const inputValue = inputs[1];
 
-      act(() => {
-        fireEvent.change(inputName, {
-          target: { value: item === 'name' ? emptyValue : 'Some tax' },
-        });
-      });
-      act(() => {
-        fireEvent.blur(inputName);
-      });
+      userEvent.type(inputName, nameInput);
+      userEvent.type(inputValue, valueInput);
+
+      userEvent.click(buttonAdd);
 
       act(() => {
-        fireEvent.change(inputValue, { target: { value: item === 'value' ? emptyValue : -123 } });
-      });
-      act(() => {
-        fireEvent.blur(inputValue);
-      });
-
-      act(() => {
-        fireEvent.click(buttonAdd);
         jest.runAllTimers();
       });
 
@@ -172,15 +148,11 @@ describe(FormFieldIncomeMetadata.name, () => {
         const inputName = getByDisplayValue(incomeDeductions[valueIndex].name);
         expect(inputName).toBeInTheDocument();
 
-        act(() => {
-          fireEvent.change(inputName, { target: { value: 'Different tax' } });
-        });
+        userEvent.type(inputName, '{selectall}{backspace}Different tax');
 
         expect(props.onChange).not.toHaveBeenCalled();
 
-        act(() => {
-          fireEvent.blur(inputName);
-        });
+        userEvent.tab();
 
         act(() => {
           jest.runAllTimers();
@@ -206,15 +178,11 @@ describe(FormFieldIncomeMetadata.name, () => {
         const input = getByDisplayValue(oldDisplayValue);
         expect(input).toBeInTheDocument();
 
-        act(() => {
-          fireEvent.change(input, { target: { value: displayValue } });
-        });
+        userEvent.type(input, `{selectall}{backspace}${displayValue}`);
 
         expect(props.onChange).not.toHaveBeenCalled();
 
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.tab();
 
         act(() => {
           jest.runAllTimers();
@@ -234,9 +202,7 @@ describe(FormFieldIncomeMetadata.name, () => {
         const removeButtons = getAllByText('−');
         expect(removeButtons).toHaveLength(2);
 
-        act(() => {
-          fireEvent.click(removeButtons[displayIndex]);
-        });
+        userEvent.click(removeButtons[displayIndex]);
 
         expect(props.onChange).toHaveBeenCalledWith(removeAtIndex(value, valueIndex));
       });

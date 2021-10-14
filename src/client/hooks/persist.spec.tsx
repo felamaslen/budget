@@ -1,5 +1,5 @@
-import { render, RenderResult, act, fireEvent } from '@testing-library/react';
-import React from 'react';
+import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import type { Dispatch, SetStateAction } from 'react';
 
 import { usePersistentState, PersistentStateValidator as Validator } from './persist';
 
@@ -34,51 +34,18 @@ describe('usePersistentState', () => {
     complex: ['yes', { it: 'is' }],
   };
 
-  const TestComponent: React.FC<{ validator?: Validator<MyState> | null }> = ({ validator }) => {
-    const [state, setState] = usePersistentState<MyState>(
-      defaultState,
-      'my-persistent-state-key',
-      validator,
-    );
-
-    const testReplace = React.useCallback(() => {
-      setState({
-        some: 'foo',
-        thing: -1,
-        complex: ['yes', { it: 'is not' }],
-      });
-    }, [setState]);
-
-    const testIncrement = React.useCallback(() => {
-      setState(
-        (last: MyState): MyState => ({
-          ...last,
-          thing: last.thing + 1,
-        }),
-      );
-    }, [setState]);
-
-    return (
-      <div>
-        <button data-testid="btn-replace" onClick={testReplace}>
-          Replace
-        </button>
-        <button data-testid="btn-increment" onClick={testIncrement}>
-          Increment
-        </button>
-        <pre data-testid="state">{JSON.stringify(state)}</pre>
-      </div>
-    );
-  };
-
-  const setup = (validator?: Validator<MyState> | null): RenderResult =>
-    render(<TestComponent validator={validator} />);
+  const setup = (
+    validator?: Validator<MyState> | null,
+  ): RenderHookResult<
+    Parameters<typeof usePersistentState>,
+    [MyState, Dispatch<SetStateAction<MyState>>]
+  > => renderHook(() => usePersistentState(defaultState, 'my-persistent-state-key', validator));
 
   it('should return the current state', () => {
     expect.assertions(1);
 
-    const { getByTestId } = setup();
-    expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual({
+    const { result } = setup();
+    expect(result.current[0]).toStrictEqual<MyState>({
       some: 'foo',
       thing: 3,
       complex: ['yes', { it: 'is' }],
@@ -88,13 +55,17 @@ describe('usePersistentState', () => {
   it('should set the new state (immediately)', () => {
     expect.assertions(1);
 
-    const { getByTestId } = setup();
+    const { result } = setup();
 
     act(() => {
-      fireEvent.click(getByTestId('btn-replace'));
+      result.current[1]({
+        some: 'foo',
+        thing: -1,
+        complex: ['yes', { it: 'is not' }],
+      });
     });
 
-    expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual({
+    expect(result.current[0]).toStrictEqual<MyState>({
       some: 'foo',
       thing: -1,
       complex: ['yes', { it: 'is not' }],
@@ -104,23 +75,33 @@ describe('usePersistentState', () => {
   it('should allow setting state through passing a function', () => {
     expect.assertions(2);
 
-    const { getByTestId } = setup();
+    const { result } = setup();
 
     act(() => {
-      fireEvent.click(getByTestId('btn-increment'));
+      result.current[1](
+        (last: MyState): MyState => ({
+          ...last,
+          thing: last.thing + 1,
+        }),
+      );
     });
 
-    expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual({
+    expect(result.current[0]).toStrictEqual<MyState>({
       some: 'foo',
       thing: 4,
       complex: ['yes', { it: 'is' }],
     });
 
     act(() => {
-      fireEvent.click(getByTestId('btn-increment'));
+      result.current[1](
+        (last: MyState): MyState => ({
+          ...last,
+          thing: last.thing + 1,
+        }),
+      );
     });
 
-    expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual({
+    expect(result.current[0]).toStrictEqual<MyState>({
       some: 'foo',
       thing: 5,
       complex: ['yes', { it: 'is' }],
@@ -130,10 +111,14 @@ describe('usePersistentState', () => {
   it('should call localStorage.setItem after setting state', () => {
     expect.assertions(3);
 
-    const { getByTestId } = setup();
+    const { result } = setup();
 
     act(() => {
-      fireEvent.click(getByTestId('btn-replace'));
+      result.current[1]({
+        some: 'foo',
+        thing: -1,
+        complex: ['yes', { it: 'is not' }],
+      });
     });
 
     expect(setItemSpy).toHaveBeenCalledTimes(0);
@@ -156,12 +141,19 @@ describe('usePersistentState', () => {
   it('should debounce the call to setItem', () => {
     expect.assertions(1);
 
-    const { getByTestId } = setup();
+    const { result } = setup();
+
+    const incrementState = (): void => {
+      result.current[1]((last) => ({
+        ...last,
+        thing: last.thing + 1,
+      }));
+    };
 
     act(() => {
-      fireEvent.click(getByTestId('btn-increment'));
-      fireEvent.click(getByTestId('btn-increment'));
-      fireEvent.click(getByTestId('btn-increment'));
+      incrementState();
+      incrementState();
+      incrementState();
     });
     act(() => {
       jest.runAllTimers();
@@ -173,23 +165,19 @@ describe('usePersistentState', () => {
   it('should load state using getItem if possible', () => {
     expect.assertions(1);
 
-    const customValue = {
+    const customValue: MyState = {
       some: 'bar',
       thing: 90,
       complex: ['yes', { it: 'is' }],
     };
 
-    getItemSpy.mockImplementationOnce((key: string): string | null => {
-      if (key === 'my-persistent-state-key') {
-        return JSON.stringify(customValue);
-      }
+    getItemSpy.mockImplementationOnce((key: string): string | null =>
+      key === 'my-persistent-state-key' ? JSON.stringify(customValue) : null,
+    );
 
-      return null;
-    });
+    const { result } = setup();
 
-    const { getByTestId } = setup();
-
-    expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual(customValue);
+    expect(result.current[0]).toStrictEqual(customValue);
   });
 
   it('should accept an optional validator', () => {
@@ -205,9 +193,9 @@ describe('usePersistentState', () => {
 
     getItemSpy.mockReturnValueOnce(JSON.stringify(customValue));
 
-    const { getByTestId } = setup(validator);
+    const { result } = setup(validator);
 
-    expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual({
+    expect(result.current[0]).toStrictEqual({
       some: 'foo',
       thing: 3,
       complex: ['yes', { it: 'is' }],
@@ -218,7 +206,7 @@ describe('usePersistentState', () => {
     it('should treat the default state as the initial state', () => {
       expect.assertions(1);
 
-      const customValue = {
+      const customValue: MyState = {
         some: 'valid',
         thing: 23,
         complex: ['yes', { it: 'is not' }],
@@ -226,9 +214,9 @@ describe('usePersistentState', () => {
 
       getItemSpy.mockReturnValueOnce(JSON.stringify(customValue));
 
-      const { getByTestId } = setup(null);
+      const { result } = setup(null);
 
-      expect(JSON.parse(getByTestId('state').innerHTML)).toStrictEqual(defaultState);
+      expect(result.current[0]).toStrictEqual(defaultState);
     });
   });
 });

@@ -1,4 +1,5 @@
-import { render, fireEvent, act } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import Upper, { Props } from './upper';
@@ -53,9 +54,7 @@ describe('PageAnalysis / <Upper />', () => {
           expect.assertions(1);
           const { getByTestId } = render(<Upper {...props} />);
           const radio = getByTestId(`input-period-${period}`) as HTMLInputElement;
-          act(() => {
-            fireEvent.click(radio);
-          });
+          userEvent.click(radio);
 
           expect(onRequest).not.toHaveBeenCalled();
         });
@@ -71,9 +70,7 @@ describe('PageAnalysis / <Upper />', () => {
           expect.assertions(2);
           const { getByTestId } = render(<Upper {...props} />);
           const radio = getByTestId(`input-period-${period}`) as HTMLInputElement;
-          act(() => {
-            fireEvent.click(radio);
-          });
+          userEvent.click(radio);
 
           expect(onRequest).toHaveBeenCalledTimes(1);
           expect(onRequest).toHaveBeenCalledWith({ period });
@@ -118,9 +115,7 @@ describe('PageAnalysis / <Upper />', () => {
           expect.assertions(1);
           const { getByTestId } = render(<Upper {...props} />);
           const radio = getByTestId(`input-groupby-${groupBy}`) as HTMLInputElement;
-          act(() => {
-            fireEvent.click(radio);
-          });
+          userEvent.click(radio);
 
           expect(onRequest).not.toHaveBeenCalled();
         });
@@ -136,9 +131,7 @@ describe('PageAnalysis / <Upper />', () => {
           expect.assertions(2);
           const { getByTestId } = render(<Upper {...props} />);
           const radio = getByTestId(`input-groupby-${groupBy}`) as HTMLInputElement;
-          act(() => {
-            fireEvent.click(radio);
-          });
+          userEvent.click(radio);
 
           expect(onRequest).toHaveBeenCalledTimes(1);
           expect(onRequest).toHaveBeenCalledWith({ groupBy });
@@ -168,18 +161,14 @@ describe('PageAnalysis / <Upper />', () => {
     const previous = getByText('Previous') as HTMLButtonElement;
     const next = getByText('Next') as HTMLButtonElement;
 
-    act(() => {
-      fireEvent.click(previous);
-    });
+    userEvent.click(previous);
 
     expect(onRequest).toHaveBeenCalledTimes(1);
     expect(onRequest).toHaveBeenCalledWith({ page: 2 });
 
     onRequest.mockClear();
 
-    act(() => {
-      fireEvent.click(next);
-    });
+    userEvent.click(next);
 
     expect(onRequest).toHaveBeenCalledTimes(1);
     expect(onRequest).toHaveBeenCalledWith({ page: 0 });

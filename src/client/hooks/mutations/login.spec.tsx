@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Provider } from 'react-redux';
 import getStore, { MockStore } from 'redux-mock-store';
@@ -108,9 +109,7 @@ describe('Login hook', () => {
 
       const renderResult = setup();
 
-      act(() => {
-        fireEvent.click(renderResult.getByTestId('btn-login'));
-      });
+      userEvent.click(renderResult.getByTestId('btn-login'));
 
       spy.mockRestore();
 

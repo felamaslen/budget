@@ -1,11 +1,5 @@
-import {
-  act,
-  fireEvent,
-  render,
-  RenderResult,
-  within,
-  RenderOptions,
-} from '@testing-library/react';
+import { act, render, RenderResult, within, RenderOptions } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import format from 'date-fns/format';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
@@ -255,15 +249,12 @@ describe('<AccessibleList />', () => {
         const { getByDisplayValue, unmount } = getContainerStandard();
         const input = getByDisplayValue(inputValue) as HTMLInputElement;
 
-        act(() => {
-          fireEvent.change(input, { target: { value: valueUpdate } });
-        });
+        userEvent.clear(input);
+        userEvent.type(input, valueUpdate);
 
         expect(onUpdate).not.toHaveBeenCalled();
 
-        act(() => {
-          fireEvent.blur(input);
-        });
+        userEvent.tab();
 
         expect(onUpdate).toHaveBeenCalledTimes(1);
         expect(onUpdate).toHaveBeenCalledWith(
@@ -279,21 +270,15 @@ describe('<AccessibleList />', () => {
           const renderResult = getContainerStandard();
           const input = renderResult.getByDisplayValue(inputValue) as HTMLInputElement;
 
-          act(() => {
-            fireEvent.change(input, {
-              target: { value: '' },
-            });
-          });
+          userEvent.clear(input);
 
           return { input, ...renderResult };
         };
 
         it('should not call onUpdate', () => {
           expect.assertions(1);
-          const { input, unmount } = setup();
-          act(() => {
-            fireEvent.blur(input);
-          });
+          const { unmount } = setup();
+          userEvent.tab();
           expect(onUpdate).not.toHaveBeenCalled();
           unmount();
         });
@@ -303,9 +288,7 @@ describe('<AccessibleList />', () => {
           const { input, container, unmount } = setup();
 
           expect(input.value).toBe('');
-          act(() => {
-            fireEvent.blur(input);
-          });
+          userEvent.tab();
 
           act(() => {
             const { getByDisplayValue } = getContainerStandard(testState, undefined, { container });
@@ -339,9 +322,7 @@ describe('<AccessibleList />', () => {
           expect.assertions(2);
           const { button, unmount } = getDeleteButton();
 
-          act(() => {
-            fireEvent.click(button);
-          });
+          userEvent.click(button);
 
           expect(onDelete).toHaveBeenCalledTimes(1);
           expect(onDelete).toHaveBeenCalledWith(id, testState[myPage].items[stateIndex]);
@@ -394,16 +375,10 @@ describe('<AccessibleList />', () => {
         it('should not call onCreate immediately on change', () => {
           expect.assertions(2);
           const { input, renderResult } = getCreateInput();
-          act(() => {
-            fireEvent.focus(input);
-          });
-          act(() => {
-            fireEvent.change(input, { target: { value: valueInsert } });
-          });
+          userEvent.clear(input);
+          userEvent.type(input, valueInsert);
+          userEvent.tab();
 
-          act(() => {
-            fireEvent.blur(input);
-          });
           expect(input.value).toBe(inputValueAfter);
           expect(onCreate).not.toHaveBeenCalled();
           renderResult.unmount();
@@ -419,11 +394,7 @@ describe('<AccessibleList />', () => {
               renderResult: { store, unmount },
             } = getCreateInput();
 
-            act(() => {
-              fireEvent.change(input, {
-                target: { value: '' },
-              });
-            });
+            userEvent.clear(input);
 
             return { input, store, unmount };
           };
@@ -433,9 +404,7 @@ describe('<AccessibleList />', () => {
             const { input, unmount } = setup();
 
             expect(input.value).toBe('');
-            act(() => {
-              fireEvent.blur(input);
-            });
+            userEvent.tab();
             expect(input.value).toBe(field === 'date' ? initialValue : '');
             unmount();
           });
@@ -462,55 +431,22 @@ describe('<AccessibleList />', () => {
         const { getByText } = within(createForm);
         const addButton = getByText('Add') as HTMLButtonElement;
 
-        act(() => {
-          fireEvent.focus(dateInput);
-        });
-        act(() => {
-          fireEvent.change(dateInput, { target: { value: '5/6' } });
-        });
-        act(() => {
-          fireEvent.blur(dateInput);
-        });
-        act(() => {
-          fireEvent.focus(itemInput);
-        });
-        act(() => {
-          fireEvent.change(itemInput, { target: { value: 'Different item innit' } });
-        });
-        act(() => {
-          fireEvent.blur(itemInput);
-        });
-        act(() => {
-          fireEvent.focus(categoryInput);
-        });
-        act(() => {
-          fireEvent.change(categoryInput, { target: { value: 'Different category innit' } });
-        });
-        act(() => {
-          fireEvent.blur(categoryInput);
-        });
-        act(() => {
-          fireEvent.focus(costInput);
-        });
-        act(() => {
-          fireEvent.change(costInput, { target: { value: '10.65' } });
-        });
-        act(() => {
-          fireEvent.blur(costInput);
-        });
-        act(() => {
-          fireEvent.focus(shopInput);
-        });
-        act(() => {
-          fireEvent.change(shopInput, { target: { value: 'Different shop innit' } });
-        });
-        act(() => {
-          fireEvent.blur(shopInput);
-        });
+        userEvent.clear(dateInput);
+        userEvent.type(dateInput, '5/6');
 
-        act(() => {
-          fireEvent.click(addButton);
-        });
+        userEvent.clear(itemInput);
+        userEvent.type(itemInput, 'Different item innit');
+
+        userEvent.clear(categoryInput);
+        userEvent.type(categoryInput, 'Different category innit');
+
+        userEvent.clear(costInput);
+        userEvent.type(costInput, '10.65');
+
+        userEvent.clear(shopInput);
+        userEvent.type(shopInput, 'Different shop innit');
+
+        userEvent.click(addButton);
 
         return { renderResult, dateInput, itemInput, costInput, addButton };
       };
@@ -643,9 +579,7 @@ describe('<AccessibleList />', () => {
       const listItem = getByRole('listitem');
       const { getByTestId } = within(listItem);
       const button = getByTestId('custom-field-change') as HTMLButtonElement;
-      act(() => {
-        fireEvent.click(button);
-      });
+      userEvent.click(button);
       expect(onUpdate).toHaveBeenCalledTimes(1);
       expect(onUpdate).toHaveBeenCalledWith(
         mockCustomFieldItem.id,

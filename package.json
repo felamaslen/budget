@@ -178,6 +178,7 @@
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/react": "^11.2.2",
     "@testing-library/react-hooks": "^7.0.2",
+    "@testing-library/user-event": "^13.3.0",
     "@types/bcrypt": "^3.0.0",
     "@types/compression": "^1.7.0",
     "@types/connect-redis": "^0.0.16",

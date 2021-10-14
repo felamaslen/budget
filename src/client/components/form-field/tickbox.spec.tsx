@@ -1,4 +1,5 @@
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { FormFieldTickbox } from './tickbox';
@@ -27,9 +28,7 @@ describe('<FormFieldTickbox />', () => {
 
     expect(props.onChange).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(input);
-    });
+    userEvent.click(input);
 
     expect(props.onChange).toHaveBeenCalledWith(false);
     props.onChange.mockReset();
@@ -38,9 +37,7 @@ describe('<FormFieldTickbox />', () => {
       render(<FormFieldTickbox {...props} value={false} />, { container });
     });
 
-    act(() => {
-      fireEvent.click(input);
-    });
+    userEvent.click(input);
 
     expect(props.onChange).toHaveBeenCalledWith(true);
   });

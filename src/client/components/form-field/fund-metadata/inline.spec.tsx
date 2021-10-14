@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult, within } from '@testing-library/react';
+import { render, act, RenderResult, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import format from 'date-fns/format';
 import React from 'react';
 import { removeAtIndex } from 'replace-array';
@@ -62,9 +63,7 @@ describe(FormFieldFundMetadata.name, () => {
   const renderAndFocus = (): RenderResult => {
     const renderResult = render(<FormFieldFundMetadata {...props} />);
     const button = renderResult.getByText('2') as HTMLButtonElement;
-    act(() => {
-      fireEvent.click(button);
-    });
+    userEvent.click(button);
     return renderResult;
   };
 
@@ -97,14 +96,12 @@ describe(FormFieldFundMetadata.name, () => {
     describe('when editing stock splits', () => {
       const setupStockSplits = (): RenderResult => {
         const renderResult: RenderResult = setup();
-        act(() => {
-          fireEvent.click(renderResult.getByText('Stock splits'));
-        });
+        userEvent.click(renderResult.getByText('Stock splits'));
         return renderResult;
       };
 
       it('should handle adding a stock split', () => {
-        expect.assertions(6);
+        expect.assertions(5);
         const { getByTestId, getByText } = setupStockSplits();
 
         const inputGroup = getByTestId('stock-split-create-input');
@@ -119,26 +116,12 @@ describe(FormFieldFundMetadata.name, () => {
 
         const buttonAdd = getByText('+');
 
-        act(() => {
-          fireEvent.change(inputDate, { target: { value: '12/4/20' } });
-        });
-        act(() => {
-          fireEvent.blur(inputDate);
-        });
-        expect(props.onChange).not.toHaveBeenCalled();
-
-        act(() => {
-          fireEvent.change(inputRatio, { target: { value: '6' } });
-        });
-        act(() => {
-          fireEvent.blur(inputRatio);
-        });
+        userEvent.type(inputDate, '{selectall}{backspace}12/4/20');
+        userEvent.type(inputRatio, '6');
 
         expect(props.onChange).not.toHaveBeenCalled();
 
-        act(() => {
-          fireEvent.click(buttonAdd);
-        });
+        userEvent.click(buttonAdd);
         act(() => {
           jest.runAllTimers();
         });
@@ -172,23 +155,11 @@ describe(FormFieldFundMetadata.name, () => {
         const inputDate = inputs[0];
         const inputRatio = inputs[1];
 
-        act(() => {
-          fireEvent.change(inputDate, { target: { value: '2020-04-20' } });
-        });
-        act(() => {
-          fireEvent.blur(inputDate);
-        });
+        userEvent.type(inputDate, '{selectall}{backspace}2020-04-20');
+        userEvent.type(inputRatio, `{selectall}{backspace}${ratio}`);
 
-        act(() => {
-          fireEvent.change(inputRatio, { target: { value: String(ratio) } });
-        });
-        act(() => {
-          fireEvent.blur(inputRatio);
-        });
+        userEvent.click(buttonAdd);
 
-        act(() => {
-          fireEvent.click(buttonAdd);
-        });
         act(() => {
           jest.runAllTimers();
         });
@@ -222,19 +193,15 @@ describe(FormFieldFundMetadata.name, () => {
           );
           expect(inputDate).toBeInTheDocument();
 
-          act(() => {
-            fireEvent.change(inputDate, { target: { value: '1/9/20' } });
-          });
-
+          userEvent.type(inputDate, '{selectall}{backspace}1/9/20');
           expect(props.onChange).not.toHaveBeenCalled();
 
-          act(() => {
-            fireEvent.blur(inputDate);
-          });
+          userEvent.tab();
 
           act(() => {
             jest.runAllTimers();
           });
+
           expect(props.onChange).toHaveBeenCalledTimes(1);
           expect(props.onChange).toHaveBeenCalledWith({
             transactions: value.transactions,
@@ -259,15 +226,11 @@ describe(FormFieldFundMetadata.name, () => {
           const inputRatio = getByDisplayValue(oldDisplayValue);
           expect(inputRatio).toBeInTheDocument();
 
-          act(() => {
-            fireEvent.change(inputRatio, { target: { value: displayValue } });
-          });
+          userEvent.type(inputRatio, `{selectall}{backspace}${displayValue}`);
 
           expect(props.onChange).not.toHaveBeenCalled();
 
-          act(() => {
-            fireEvent.blur(inputRatio);
-          });
+          userEvent.tab();
 
           act(() => {
             jest.runAllTimers();
@@ -290,9 +253,7 @@ describe(FormFieldFundMetadata.name, () => {
           const removeButtons = getAllByText('−');
           expect(removeButtons).toHaveLength(2);
 
-          act(() => {
-            fireEvent.click(removeButtons[displayIndex]);
-          });
+          userEvent.click(removeButtons[displayIndex]);
 
           expect(props.onChange).toHaveBeenCalledWith({
             stockSplits: removeAtIndex(value.stockSplits, valueIndex),
@@ -332,52 +293,21 @@ describe(FormFieldFundMetadata.name, () => {
 
         const buttonAdd = getByText('+');
 
-        act(() => {
-          fireEvent.change(inputDate, { target: { value: '11/2/19' } });
-        });
-        act(() => {
-          fireEvent.blur(inputDate);
-        });
+        userEvent.type(inputDate, '{selectall}{backspace}11/2/19');
 
-        act(() => {
-          fireEvent.click(inputDRIP);
-        });
-        act(() => {
-          fireEvent.click(inputPension);
-        });
+        userEvent.click(inputDRIP);
+        userEvent.click(inputPension);
 
-        act(() => {
-          fireEvent.change(inputUnits, { target: { value: '562.23' } });
-        });
-        act(() => {
-          fireEvent.blur(inputUnits);
-        });
-
-        act(() => {
-          fireEvent.change(inputPrice, { target: { value: '1.72' } });
-        });
-        act(() => {
-          fireEvent.blur(inputPrice);
-        });
-
-        act(() => {
-          fireEvent.change(inputTaxes, { target: { value: '4.37' } });
-        });
-        act(() => {
-          fireEvent.blur(inputTaxes);
-        });
-
-        act(() => {
-          fireEvent.change(inputFees, { target: { value: '5.22' } });
-        });
-        act(() => {
-          fireEvent.blur(inputFees);
-        });
+        userEvent.type(inputUnits, '{selectall}{backspace}562.23');
+        userEvent.type(inputPrice, '{selectall}{backspace}1.72');
+        userEvent.type(inputTaxes, '{selectall}{backspace}4.37');
+        userEvent.type(inputFees, '{selectall}{backspace}5.22');
 
         expect(props.onChange).not.toHaveBeenCalled();
 
+        userEvent.click(buttonAdd);
+
         act(() => {
-          fireEvent.click(buttonAdd);
           jest.runAllTimers();
         });
 
@@ -399,10 +329,10 @@ describe(FormFieldFundMetadata.name, () => {
       });
 
       it.each`
-        property
-        ${'units'}
-        ${'price'}
-      `('should not add a transaction with zero $property', ({ property }) => {
+        property   | unitsInput                        | priceInput
+        ${'price'} | ${'{selectall}{backspace}562.23'} | ${'{rightArrow}'}
+        ${'units'} | ${'rightArrow'}                   | ${'{selectall}{backspace}1095.91'}
+      `('should not add a transaction with zero $property', ({ unitsInput, priceInput }) => {
         expect.assertions(1);
 
         const { getByTestId, getByText } = setup();
@@ -416,32 +346,14 @@ describe(FormFieldFundMetadata.name, () => {
         const inputUnits = inputs[1];
         const inputPrice = inputs[2];
 
-        act(() => {
-          fireEvent.change(inputDate, { target: { value: '2019-02-11' } });
-        });
-        act(() => {
-          fireEvent.blur(inputDate);
-        });
+        userEvent.type(inputDate, '2019-02-11');
 
-        if (property !== 'units') {
-          act(() => {
-            fireEvent.change(inputUnits, { target: { value: '562.23' } });
-          });
-          act(() => {
-            fireEvent.blur(inputUnits);
-          });
-        }
-        if (property !== 'price') {
-          act(() => {
-            fireEvent.change(inputPrice, { target: { value: '1095.91' } });
-          });
-          act(() => {
-            fireEvent.blur(inputPrice);
-          });
-        }
+        userEvent.type(inputUnits, unitsInput);
+        userEvent.type(inputPrice, priceInput);
+
+        userEvent.click(buttonAdd);
 
         act(() => {
-          fireEvent.click(buttonAdd);
           jest.runAllTimers();
         });
 
@@ -481,15 +393,11 @@ describe(FormFieldFundMetadata.name, () => {
           );
           expect(inputDate).toBeInTheDocument();
 
-          act(() => {
-            fireEvent.change(inputDate, { target: { value: '3/4/17' } });
-          });
-
+          userEvent.type(inputDate, '{selectall}{backspace}3/4/17');
           expect(props.onChange).not.toHaveBeenCalled();
 
-          act(() => {
-            fireEvent.blur(inputDate);
-          });
+          userEvent.tab();
+
           act(() => {
             jest.runAllTimers();
           });
@@ -512,9 +420,7 @@ describe(FormFieldFundMetadata.name, () => {
           const inputDrip = getAllByRole('checkbox')[(displayIndex + 1) * 2];
           expect(inputDrip).toBeInTheDocument();
 
-          act(() => {
-            fireEvent.click(inputDrip);
-          });
+          userEvent.click(inputDrip);
 
           act(() => {
             jest.runAllTimers();
@@ -538,9 +444,7 @@ describe(FormFieldFundMetadata.name, () => {
           const inputPension = getAllByRole('checkbox')[(displayIndex + 1) * 2 + 1];
           expect(inputPension).toBeInTheDocument();
 
-          act(() => {
-            fireEvent.click(inputPension);
-          });
+          userEvent.click(inputPension);
 
           act(() => {
             jest.runAllTimers();
@@ -570,15 +474,11 @@ describe(FormFieldFundMetadata.name, () => {
           const inputPrice = getByDisplayValue(oldDisplayValue);
           expect(inputPrice).toBeInTheDocument();
 
-          act(() => {
-            fireEvent.change(inputPrice, { target: { value: displayValue } });
-          });
-
+          userEvent.type(inputPrice, `{selectall}{backspace}${displayValue}`);
           expect(props.onChange).not.toHaveBeenCalled();
 
-          act(() => {
-            fireEvent.blur(inputPrice);
-          });
+          userEvent.tab();
+
           act(() => {
             jest.runAllTimers();
           });
@@ -604,26 +504,11 @@ describe(FormFieldFundMetadata.name, () => {
           const inputUnits = getByDisplayValue(String(transactions[valueIndex].units));
           const inputPrice = getByDisplayValue(String(transactions[valueIndex].price));
 
-          act(() => {
-            fireEvent.change(inputPrice, { target: { value: '126.7692' } });
-          });
-          act(() => {
-            fireEvent.blur(inputPrice);
-          });
+          userEvent.type(inputPrice, '{selectall}{backspace}126.7692');
+          userEvent.type(inputUnits, '{selectall}{backspace}34.2219');
+          userEvent.type(inputDate, '{selectall}{backspace}3/4/17');
 
-          act(() => {
-            fireEvent.change(inputUnits, { target: { value: '34.2219' } });
-          });
-          act(() => {
-            fireEvent.blur(inputUnits);
-          });
-
-          act(() => {
-            fireEvent.change(inputDate, { target: { value: '3/4/17' } });
-          });
-          act(() => {
-            fireEvent.blur(inputDate);
-          });
+          userEvent.tab();
 
           act(() => {
             jest.runAllTimers();
@@ -649,9 +534,7 @@ describe(FormFieldFundMetadata.name, () => {
           const removeButtons = getAllByText('−');
           expect(removeButtons).toHaveLength(2);
 
-          act(() => {
-            fireEvent.click(removeButtons[displayIndex]);
-          });
+          userEvent.click(removeButtons[displayIndex]);
 
           expect(props.onChange).toHaveBeenCalledWith({
             stockSplits: value.stockSplits,

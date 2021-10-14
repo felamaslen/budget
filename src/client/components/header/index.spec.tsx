@@ -1,4 +1,5 @@
-import { render, act, fireEvent, RenderResult } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter as Router } from 'react-router-dom';
@@ -65,9 +66,7 @@ describe('<Header />', () => {
       expect.assertions(1);
 
       const { getByText } = setup();
-      act(() => {
-        fireEvent.click(getByText('Log out'));
-      });
+      userEvent.click(getByText('Log out'));
 
       expect(props.onLogout).toHaveBeenCalledTimes(1);
     });

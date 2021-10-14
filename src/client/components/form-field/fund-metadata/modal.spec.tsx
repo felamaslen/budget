@@ -1,4 +1,5 @@
-import { render, fireEvent, act, RenderResult, waitFor, within } from '@testing-library/react';
+import { render, RenderResult, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import format from 'date-fns/format';
 import React from 'react';
 import { removeAtIndex } from 'replace-array';
@@ -79,12 +80,8 @@ describe(FormFieldStockSplits.name, () => {
       );
       expect(inputDate).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputDate, { target: { value: '2020-01-02' } });
-      });
-      act(() => {
-        fireEvent.blur(inputDate);
-      });
+      userEvent.type(inputDate, '{selectall}2020-01-02');
+      userEvent.tab();
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -106,12 +103,8 @@ describe(FormFieldStockSplits.name, () => {
       const inputRatio = getByDisplayValue(String(stockSplits[valueIndex].ratio));
       expect(inputRatio).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputRatio, { target: { value: '4' } });
-      });
-      act(() => {
-        fireEvent.blur(inputRatio);
-      });
+      userEvent.type(inputRatio, '{selectall}4');
+      userEvent.tab();
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -133,16 +126,14 @@ describe(FormFieldStockSplits.name, () => {
       const removeButtons = getAllByText('−');
       expect(removeButtons).toHaveLength(2);
 
-      act(() => {
-        fireEvent.click(removeButtons[displayIndex]);
-      });
+      userEvent.click(removeButtons[displayIndex]);
 
       expect(props.onChange).toHaveBeenCalledWith(removeAtIndex(value, valueIndex));
     });
   });
 
   it('should handle adding a stock split', () => {
-    expect.assertions(6);
+    expect.assertions(5);
     const { getByTestId, getByText } = setupModal();
 
     const inputGroup = getByTestId('stock-split-create-input');
@@ -156,25 +147,12 @@ describe(FormFieldStockSplits.name, () => {
 
     const buttonAdd = getByText('+');
 
-    act(() => {
-      fireEvent.change(inputDate, { target: { value: '2020-02-11' } });
-    });
-    act(() => {
-      fireEvent.blur(inputDate);
-    });
+    userEvent.type(inputDate, '2020-02-11');
+    userEvent.type(inputRatio, '{selectall}15');
+
     expect(props.onChange).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.change(inputRatio, { target: { value: '15' } });
-    });
-    act(() => {
-      fireEvent.blur(inputRatio);
-    });
-    expect(props.onChange).not.toHaveBeenCalled();
-
-    act(() => {
-      fireEvent.click(buttonAdd);
-    });
+    userEvent.click(buttonAdd);
 
     expect(props.onChange).toHaveBeenCalledWith([
       ...value,
@@ -202,23 +180,10 @@ describe(FormFieldStockSplits.name, () => {
     const inputDate = inputs[0];
     const inputRatio = inputs[1];
 
-    act(() => {
-      fireEvent.change(inputDate, { target: { value: '2019-02-11' } });
-    });
-    act(() => {
-      fireEvent.blur(inputDate);
-    });
+    userEvent.type(inputDate, '{selectall}2019-02-11');
+    userEvent.type(inputRatio, `{selectall}${String(ratio)}`);
 
-    act(() => {
-      fireEvent.change(inputRatio, { target: { value: String(ratio) } });
-    });
-    act(() => {
-      fireEvent.blur(inputRatio);
-    });
-
-    act(() => {
-      fireEvent.click(buttonAdd);
-    });
+    userEvent.click(buttonAdd);
 
     expect(props.onChange).not.toHaveBeenCalled();
   });
@@ -281,12 +246,8 @@ describe(FormFieldTransactions.name, () => {
       );
       expect(inputDate).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputDate, { target: { value: '2017-04-03' } });
-      });
-      act(() => {
-        fireEvent.blur(inputDate);
-      });
+      userEvent.type(inputDate, '{selectall}2017-04-03');
+      userEvent.tab();
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -308,12 +269,8 @@ describe(FormFieldTransactions.name, () => {
       const inputUnits = getByDisplayValue(String(transactions[valueIndex].units));
       expect(inputUnits).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputUnits, { target: { value: '34.2219' } });
-      });
-      act(() => {
-        fireEvent.blur(inputUnits);
-      });
+      userEvent.type(inputUnits, '{selectall}34.2219');
+      userEvent.tab();
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -335,12 +292,8 @@ describe(FormFieldTransactions.name, () => {
       const inputPrice = getByDisplayValue(String(transactions[valueIndex].price));
       expect(inputPrice).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(inputPrice, { target: { value: '126.7692' } });
-      });
-      act(() => {
-        fireEvent.blur(inputPrice);
-      });
+      userEvent.type(inputPrice, '{selectall}126.7692');
+      userEvent.tab();
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -362,9 +315,7 @@ describe(FormFieldTransactions.name, () => {
       const inputDRIP = getAllByLabelText('DRIP:')[displayIndex + 1];
       expect(inputDRIP).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.click(inputDRIP);
-      });
+      userEvent.click(inputDRIP);
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -386,9 +337,7 @@ describe(FormFieldTransactions.name, () => {
       const inputPension = getAllByLabelText('Pension:')[displayIndex + 1];
       expect(inputPension).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.click(inputPension);
-      });
+      userEvent.click(inputPension);
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(1);
@@ -413,26 +362,11 @@ describe(FormFieldTransactions.name, () => {
       const inputUnits = getByDisplayValue(String(transactions[valueIndex].units));
       const inputPrice = getByDisplayValue(String(transactions[valueIndex].price));
 
-      act(() => {
-        fireEvent.change(inputPrice, { target: { value: '126.7692' } });
-      });
-      act(() => {
-        fireEvent.blur(inputPrice);
-      });
+      userEvent.type(inputPrice, '{selectall}126.7692');
+      userEvent.type(inputUnits, '{selectall}34.2219');
+      userEvent.type(inputDate, '{selectall}2017-04-03');
 
-      act(() => {
-        fireEvent.change(inputUnits, { target: { value: '34.2219' } });
-      });
-      act(() => {
-        fireEvent.blur(inputUnits);
-      });
-
-      act(() => {
-        fireEvent.change(inputDate, { target: { value: '2017-04-03' } });
-      });
-      act(() => {
-        fireEvent.blur(inputDate);
-      });
+      userEvent.tab();
 
       await waitFor(() => {
         expect(props.onChange).toHaveBeenCalledTimes(3);
@@ -456,9 +390,7 @@ describe(FormFieldTransactions.name, () => {
       const removeButtons = getAllByText('−');
       expect(removeButtons).toHaveLength(2);
 
-      act(() => {
-        fireEvent.click(removeButtons[displayIndex]);
-      });
+      userEvent.click(removeButtons[displayIndex]);
 
       expect(props.onChange).toHaveBeenCalledWith(removeAtIndex(value, valueIndex));
     });
@@ -493,53 +425,18 @@ describe(FormFieldTransactions.name, () => {
 
     const buttonAdd = getByText('+');
 
-    act(() => {
-      fireEvent.change(inputDate, { target: { value: '2019-02-11' } });
-    });
-    act(() => {
-      fireEvent.blur(inputDate);
-    });
+    userEvent.type(inputDate, '{selectall}2019-02-11');
+    userEvent.type(inputUnits, '{selectall}562.23');
+    userEvent.type(inputPrice, '{selectall}1095.91');
+    userEvent.type(inputFees, '{selectall}43.56');
+    userEvent.type(inputTaxes, '{selectall}112.02');
 
-    act(() => {
-      fireEvent.change(inputUnits, { target: { value: '562.23' } });
-    });
-    act(() => {
-      fireEvent.blur(inputUnits);
-    });
-
-    act(() => {
-      fireEvent.change(inputPrice, { target: { value: '1095.91' } });
-    });
-    act(() => {
-      fireEvent.blur(inputPrice);
-    });
-
-    act(() => {
-      fireEvent.change(inputFees, { target: { value: '43.56' } });
-    });
-    act(() => {
-      fireEvent.blur(inputFees);
-    });
-
-    act(() => {
-      fireEvent.change(inputTaxes, { target: { value: '112.02' } });
-    });
-    act(() => {
-      fireEvent.blur(inputTaxes);
-    });
-
-    act(() => {
-      fireEvent.click(inputDRIP);
-    });
-    act(() => {
-      fireEvent.click(inputPension);
-    });
+    userEvent.click(inputDRIP);
+    userEvent.click(inputPension);
 
     expect(props.onChange).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(buttonAdd);
-    });
+    userEvent.click(buttonAdd);
 
     expect(props.onChange).toHaveBeenCalledWith([
       ...value,
@@ -556,10 +453,10 @@ describe(FormFieldTransactions.name, () => {
   });
 
   it.each`
-    property
-    ${'units'}
-    ${'cost'}
-  `('should not add a transaction with zero $property', ({ property }) => {
+    property   | unitsInput              | costInput
+    ${'units'} | ${'{rightArrow}'}       | ${'{selectall}562.23'}
+    ${'cost'}  | ${'{selectall}1095.91'} | ${'{rightArrow}'}
+  `('should not add a transaction with zero $property', ({ unitsInput, costInput }) => {
     expect.assertions(1);
 
     const { getByTestId, getByText } = setupModal();
@@ -573,33 +470,11 @@ describe(FormFieldTransactions.name, () => {
     const inputUnits = inputs[1];
     const inputCost = inputs[2];
 
-    act(() => {
-      fireEvent.change(inputDate, { target: { value: '2019-02-11' } });
-    });
-    act(() => {
-      fireEvent.blur(inputDate);
-    });
+    userEvent.type(inputDate, '{selectall}2019-02-11');
+    userEvent.type(inputUnits, unitsInput);
+    userEvent.type(inputCost, costInput);
 
-    if (property !== 'units') {
-      act(() => {
-        fireEvent.change(inputUnits, { target: { value: '562.23' } });
-      });
-      act(() => {
-        fireEvent.blur(inputUnits);
-      });
-    }
-    if (property !== 'cost') {
-      act(() => {
-        fireEvent.change(inputCost, { target: { value: '1095.91' } });
-      });
-      act(() => {
-        fireEvent.blur(inputCost);
-      });
-    }
-
-    act(() => {
-      fireEvent.click(buttonAdd);
-    });
+    userEvent.click(buttonAdd);
 
     expect(props.onChange).not.toHaveBeenCalled();
   });

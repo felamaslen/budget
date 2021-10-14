@@ -1,4 +1,5 @@
-import { render, fireEvent, RenderResult, act } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import ListTree, { Props } from './list-tree';
@@ -112,9 +113,7 @@ describe('<PageAnalysis /> / <ListTree />', () => {
       const child = ul.childNodes[index];
       const main = child.childNodes[0];
 
-      act(() => {
-        fireEvent.click(main);
-      });
+      userEvent.click(main as Element);
 
       expect(props.setTreeOpen).toHaveBeenCalledTimes(1);
       expect(props.setTreeOpen).toHaveBeenCalledWith(expect.any(Function));
@@ -128,9 +127,7 @@ describe('<PageAnalysis /> / <ListTree />', () => {
       const child = ul.childNodes[index];
       const main = child.childNodes[0];
 
-      act(() => {
-        fireEvent.mouseOver(main);
-      });
+      userEvent.hover(main as Element);
 
       expect(props.onHover).toHaveBeenCalledTimes(1);
       expect(props.onHover).toHaveBeenCalledWith(name);
@@ -144,9 +141,7 @@ describe('<PageAnalysis /> / <ListTree />', () => {
       const child = ul.childNodes[index];
       const main = child.childNodes[0];
 
-      act(() => {
-        fireEvent.mouseOut(main);
-      });
+      userEvent.unhover(main as Element);
 
       expect(props.onHover).toHaveBeenCalledTimes(1);
       expect(props.onHover).toHaveBeenCalledWith();
@@ -161,9 +156,7 @@ describe('<PageAnalysis /> / <ListTree />', () => {
       const main = child.childNodes[0];
       const input = main.childNodes[1].childNodes[0] as HTMLInputElement;
 
-      act(() => {
-        fireEvent.click(input);
-      });
+      userEvent.click(input);
 
       expect(props.toggleTreeItem).toHaveBeenCalledTimes(1);
       expect(props.toggleTreeItem).toHaveBeenCalledWith(name);

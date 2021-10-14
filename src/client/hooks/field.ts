@@ -116,7 +116,7 @@ export type FieldOptions<V, E = React.ChangeEvent<HTMLInputElement>> = {
   active?: boolean;
 };
 
-type Result<V, E> = Pick<State<V>, 'currentValue' | 'inputValue'> & {
+export type Result<V, E> = Pick<State<V>, 'currentValue' | 'inputValue'> & {
   inputRef: React.MutableRefObject<HTMLInputElement | null>;
   onChange: (event: E) => void;
   onBlur: () => void;
