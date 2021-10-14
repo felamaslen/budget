@@ -685,6 +685,7 @@ export type Overview = {
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
   monthly: Monthly;
+  futureIncome: Array<Scalars['Int']>;
   initialCumulativeValues: InitialCumulativeValues;
 };
 
@@ -1936,6 +1937,7 @@ export type OverviewResolvers<ContextType = Context, ParentType extends Resolver
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   monthly?: Resolver<ResolversTypes['Monthly'], ParentType, ContextType>;
+  futureIncome?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   initialCumulativeValues?: Resolver<ResolversTypes['InitialCumulativeValues'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

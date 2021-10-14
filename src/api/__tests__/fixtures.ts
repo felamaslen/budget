@@ -1,7 +1,8 @@
 import { DatabaseTransactionConnectionType, sql } from 'slonik';
 import { withSlonik } from '~api/modules/db';
 import { generateUserPin } from '~api/test-utils/generate-user-pin';
-import { PageListStandard } from '~api/types';
+import { AsyncReturnType, PageListStandard } from '~api/types';
+import { StandardRates, StandardThresholds } from '~shared/planning';
 
 export const generateFunds = async (
   db: DatabaseTransactionConnectionType,
@@ -193,7 +194,12 @@ export const generateListData = async (
 export const generateNetWorth = async (
   db: DatabaseTransactionConnectionType,
   uid: number,
-): Promise<void> => {
+): Promise<{
+  subcategoryIds: {
+    subcategoryIdBank: number;
+    subcategoryIdLockedCash: number;
+  };
+}> => {
   await db.query(sql`DELETE FROM net_worth WHERE uid = ${uid}`);
   await db.query(sql`DELETE FROM net_worth_categories WHERE uid = ${uid}`);
 
@@ -375,6 +381,86 @@ export const generateNetWorth = async (
     ['int4', 'int4', 'float8', 'int4'],
   )};
   `);
+
+  return {
+    subcategoryIds: {
+      subcategoryIdBank: subcategoryIdBank.id,
+      subcategoryIdLockedCash: subcategoryIdLockedCash.id,
+    },
+  };
+};
+
+export const generatePlanning = async (
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  subcategoryIds: AsyncReturnType<typeof generateNetWorth>['subcategoryIds'],
+): Promise<void> => {
+  await db.query(sql`DELETE FROM planning_rates`);
+  await db.query(sql`DELETE FROM planning_thresholds`);
+
+  const accountIdsResult = await db.query<{ id: number }>(sql`
+  INSERT INTO planning_accounts (uid, account, net_worth_subcategory_id)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, 'Account A', subcategoryIds.subcategoryIdBank],
+      [uid, 'Account B', subcategoryIds.subcategoryIdLockedCash],
+    ],
+    ['int4', 'text', 'int4'],
+  )}
+  RETURNING id
+  `);
+  const accountIds = accountIdsResult.rows.map((row) => row.id);
+
+  await db.query(sql`
+  INSERT INTO planning_income (account_id, start_date, end_date, salary, tax_code, pension_contrib, student_loan)
+  SELECT * FROM ${sql.unnest(
+    [
+      [accountIds[0], '2018-03-10', '2020-04-30', 6600000, '1257L', 0.03, true],
+      [accountIds[0], '2018-02-15', '2019-12-11', 3700000, '818L', 0.05, false],
+    ],
+    ['int4', 'date', 'date', 'int4', 'text', 'float8', 'bool'],
+  )}
+  `);
+
+  await db.query(sql`
+  INSERT INTO planning_rates (uid, year, name, value)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, 2018, StandardRates.IncomeTaxBasicRate, 0.2],
+      [uid, 2018, StandardRates.IncomeTaxHigherRate, 0.4],
+      [uid, 2018, StandardRates.IncomeTaxAdditionalRate, 0.45],
+      [uid, 2018, StandardRates.NILowerRate, 0.12],
+      [uid, 2018, StandardRates.NIHigherRate, 0.02],
+      [uid, 2018, StandardRates.StudentLoanRate, 0.09],
+      [uid, 2019, StandardRates.IncomeTaxBasicRate, 0.2],
+      [uid, 2019, StandardRates.IncomeTaxHigherRate, 0.4],
+      [uid, 2019, StandardRates.IncomeTaxAdditionalRate, 0.45],
+      [uid, 2019, StandardRates.NILowerRate, 0.1325],
+      [uid, 2019, StandardRates.NIHigherRate, 0.0325],
+      [uid, 2019, StandardRates.StudentLoanRate, 0.09],
+    ],
+    ['int4', 'int4', 'text', 'float8'],
+  )}
+  `);
+
+  await db.query(sql`
+  INSERT INTO planning_thresholds (uid, year, name, value)
+  SELECT * FROM ${sql.unnest(
+    [
+      [uid, 2018, StandardThresholds.IncomeTaxBasicAllowance, 3750000],
+      [uid, 2018, StandardThresholds.IncomeTaxAdditionalThreshold, 15000000],
+      [uid, 2018, StandardThresholds.NIPT, 79700],
+      [uid, 2018, StandardThresholds.NIUEL, 418900],
+      [uid, 2018, StandardThresholds.StudentLoanThreshold, 2500000],
+      [uid, 2019, StandardThresholds.IncomeTaxBasicAllowance, 3750000],
+      [uid, 2019, StandardThresholds.IncomeTaxAdditionalThreshold, 15000000],
+      [uid, 2019, StandardThresholds.NIPT, 79700],
+      [uid, 2019, StandardThresholds.NIUEL, 418900],
+      [uid, 2019, StandardThresholds.StudentLoanThreshold, 2729500],
+    ],
+    ['int4', 'int4', 'text', 'float8'],
+  )}
+  `);
 };
 
 export const seedUser = withSlonik<number>(async (db) => {
@@ -394,5 +480,10 @@ export const seedUser = withSlonik<number>(async (db) => {
 });
 
 export const seedData = withSlonik<void, [number]>(async (db, uid) => {
-  await Promise.all([generateFunds(db, uid), generateListData(db, uid), generateNetWorth(db, uid)]);
+  const [, , netWorth] = await Promise.all([
+    generateFunds(db, uid),
+    generateListData(db, uid),
+    generateNetWorth(db, uid),
+  ]);
+  await generatePlanning(db, uid, netWorth.subcategoryIds);
 });

@@ -44,6 +44,7 @@ export const initialState: State = {
     [PageListStandard.Holiday]: [],
     [PageListStandard.Social]: [],
   },
+  futureIncome: [],
   stocks: [],
   initialCumulativeValues: {
     income: 0,
@@ -56,6 +57,7 @@ const onRead = (state: State, res: InitialQuery): State => ({
   startDate: res.overview ? endOfDay(new Date(res.overview?.startDate)) : state.startDate,
   endDate: res.overview ? endOfDay(new Date(res.overview?.endDate)) : state.endDate,
   monthly: res.overview?.monthly ?? state.monthly,
+  futureIncome: res.overview?.futureIncome ?? state.futureIncome,
   annualisedFundReturns: res.fundHistory?.annualisedFundReturns ?? state.annualisedFundReturns,
   stocks: res.fundHistory?.overviewCost ?? state.stocks,
   initialCumulativeValues: res.overview?.initialCumulativeValues ?? state.initialCumulativeValues,

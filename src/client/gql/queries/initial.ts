@@ -18,6 +18,7 @@ export const Initial = gql`
         holiday
         social
       }
+      futureIncome
       initialCumulativeValues {
         income
         spending

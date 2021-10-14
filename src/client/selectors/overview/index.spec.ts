@@ -102,7 +102,16 @@ describe('Overview selectors', () => {
       /* Jul-18 */ 0,
     ];
 
-    const expectedIncomeAverage = 1686; // (1500 / 2 + 1900 / 4 + 2000 / 8) / (1 / 2 + 1 / 4 + 1 / 8)
+    const income = [
+      2000, // Jan 18
+      1900, // Feb 18
+      156230, // Mar 18 (current month);
+      411392, // Apr 18; check test state data
+      0, // May 18; no future data from planning
+      0, // Jun 18
+      0, // Jul 18
+    ];
+
     const expectedStockPurchaseAverage = 20050 / 3;
 
     const mar18Transactions =
@@ -162,16 +171,6 @@ describe('Overview selectors', () => {
         /* May-18 */ 10654,
         /* Jun-18 */ 10654,
         /* Jul-18 */ 10654,
-      ];
-
-      const income = [
-        2000,
-        1900,
-        1500,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
       ];
 
       const bills = [1000, 900, 400, 650, 0, 0, 0];
@@ -552,15 +551,6 @@ describe('Overview selectors', () => {
         /* Jul-18 */ 11237,
       ];
 
-      const income = [
-        2000,
-        1900,
-        1500,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-        expectedIncomeAverage,
-      ];
       const bills = [1000, 900, 400, 650, 0, 0, 0];
       const food = [50, 13, 20, 20, 20, 20, 20];
       const general = [150, 90, 10, 90, 90, 90, 90];
@@ -579,21 +569,13 @@ describe('Overview selectors', () => {
 
       const expectedLiquidCashMar18 = 9752 + 1051343;
       const expectedLiquidCashApr18 =
-        expectedLiquidCashMar18 +
-        expectedIncomeAverage -
-        (spending[3] + expectedStockPurchaseAverage);
+        expectedLiquidCashMar18 + income[3] - (spending[3] + expectedStockPurchaseAverage);
       const expectedLiquidCashMay18 =
-        expectedLiquidCashApr18 +
-        expectedIncomeAverage -
-        (spending[4] + expectedStockPurchaseAverage);
+        expectedLiquidCashApr18 + income[4] - (spending[4] + expectedStockPurchaseAverage);
       const expectedLiquidCashJun18 =
-        expectedLiquidCashMay18 +
-        expectedIncomeAverage -
-        (spending[4] + expectedStockPurchaseAverage);
+        expectedLiquidCashMay18 + income[5] - (spending[4] + expectedStockPurchaseAverage);
       const expectedLiquidCashJul18 =
-        expectedLiquidCashJun18 +
-        expectedIncomeAverage -
-        (spending[4] + expectedStockPurchaseAverage);
+        expectedLiquidCashJun18 + income[6] - (spending[4] + expectedStockPurchaseAverage);
 
       const cashLiquid = [
         /* Jan-18 */ 0,
@@ -1178,11 +1160,11 @@ describe('Overview selectors', () => {
                 "value": 10,
               },
               "income": Object {
-                "rgb": "#24bf37",
+                "rgb": "#91df9b",
                 "value": 2000,
               },
               "net": Object {
-                "rgb": "#b5e9bc",
+                "rgb": "#feffff",
                 "value": 740,
               },
               "netWorth": Object {
@@ -1228,11 +1210,11 @@ describe('Overview selectors', () => {
                 "value": 1000,
               },
               "income": Object {
-                "rgb": "#47c957",
+                "rgb": "#92df9b",
                 "value": 1900,
               },
               "net": Object {
-                "rgb": "#NaNNaNNaN",
+                "rgb": "#ecbdbd",
                 "value": -168,
               },
               "netWorth": Object {
@@ -1278,12 +1260,12 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#fff",
-                "value": 1500,
+                "rgb": "#68d375",
+                "value": 156230,
               },
               "net": Object {
-                "rgb": "#b1e8b7",
-                "value": 787,
+                "rgb": "#92df9b",
+                "value": 155517,
               },
               "netWorth": Object {
                 "rgb": "#38c549",
@@ -1328,16 +1310,16 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#92df9b",
-                "value": 1686,
+                "rgb": "#24bf37",
+                "value": 411392,
               },
               "net": Object {
-                "rgb": "#b3e9ba",
-                "value": 759,
+                "rgb": "#24bf37",
+                "value": 410465,
               },
               "netWorth": Object {
-                "rgb": "#2dc23f",
-                "value": 4389869,
+                "rgb": "#24bf37",
+                "value": 4799575,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -1378,16 +1360,16 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#92df9b",
-                "value": 1686,
+                "rgb": "#fff",
+                "value": 0,
               },
               "net": Object {
-                "rgb": "#24bf37",
-                "value": 1409,
+                "rgb": "#NaNNaNNaN",
+                "value": -277,
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4532120,
+                "value": 4940140,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -1428,16 +1410,16 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#92df9b",
-                "value": 1686,
+                "rgb": "#fff",
+                "value": 0,
               },
               "net": Object {
-                "rgb": "#24bf37",
-                "value": 1409,
+                "rgb": "#NaNNaNNaN",
+                "value": -277,
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4674956,
+                "value": 5081290,
               },
               "social": Object {
                 "rgb": "#dfcf92",
@@ -1478,16 +1460,16 @@ describe('Overview selectors', () => {
                 "value": 95,
               },
               "income": Object {
-                "rgb": "#92df9b",
-                "value": 1686,
+                "rgb": "#fff",
+                "value": 0,
               },
               "net": Object {
-                "rgb": "#24bf37",
-                "value": 1409,
+                "rgb": "#NaNNaNNaN",
+                "value": -277,
               },
               "netWorth": Object {
                 "rgb": "#24bf37",
-                "value": 4818378,
+                "value": 5223026,
               },
               "social": Object {
                 "rgb": "#dfcf92",

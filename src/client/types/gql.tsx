@@ -742,6 +742,7 @@ export type Overview = {
   startDate: Scalars['Date'];
   endDate: Scalars['Date'];
   monthly: Monthly;
+  futureIncome: Array<Scalars['Int']>;
   initialCumulativeValues: InitialCumulativeValues;
 };
 
@@ -1821,7 +1822,7 @@ export type InitialQuery = (
     & ConfigPartsFragment
   )>, overview?: Maybe<(
     { __typename?: 'Overview' }
-    & Pick<Overview, 'startDate' | 'endDate'>
+    & Pick<Overview, 'startDate' | 'endDate' | 'futureIncome'>
     & { monthly: (
       { __typename?: 'Monthly' }
       & Pick<Monthly, 'investmentPurchases' | 'income' | 'bills' | 'food' | 'general' | 'holiday' | 'social'>
@@ -2841,6 +2842,7 @@ export const InitialDocument = gql`
       holiday
       social
     }
+    futureIncome
     initialCumulativeValues {
       income
       spending

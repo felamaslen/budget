@@ -120,6 +120,15 @@ export type PreviousIncomeRowWithDeduction = Omit<
 > &
   PreviousIncomeDeductionRow;
 
+export type PlanningOverviewIncomeRow = {
+  start_date: Date;
+  end_date: Date;
+  salary: number;
+  tax_code: string;
+  pension_contrib: number;
+  student_loan: boolean;
+};
+
 export type AverageCreditCardPaymentRow = {
   credit_card_id: number;
   value: number;

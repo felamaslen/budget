@@ -4,6 +4,7 @@ import { DatabaseTransactionConnectionType, sql } from 'slonik';
 import type {
   AverageCreditCardPaymentRow,
   LatestPlanningAccountValueRow,
+  PlanningOverviewIncomeRow,
   PreviousIncomeRow,
 } from './types';
 import { planningStartDateCTE, planningStartDateIncludingPreviousYearCTE } from './utils';
@@ -92,6 +93,20 @@ export async function selectPlanningPreviousIncome(
     sql` AND `,
   )}
   ORDER BY list_standard.date, item, income_deductions.name
+  `);
+  return rows;
+}
+
+export async function selectPlanningOverviewIncome(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  startDate: string,
+): Promise<readonly PlanningOverviewIncomeRow[]> {
+  const { rows } = await db.query<PlanningOverviewIncomeRow>(sql`
+  SELECT i.start_date, i.end_date, i.salary, i.tax_code, i.pension_contrib, i.student_loan
+  FROM planning_income i
+  INNER JOIN planning_accounts a ON a.id = i.account_id
+  WHERE a.uid = ${uid} AND i.end_date >= ${startDate}
   `);
   return rows;
 }

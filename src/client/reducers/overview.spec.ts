@@ -71,6 +71,7 @@ describe('Overview reducer', () => {
           [PageListStandard.Holiday]: [46352, 0, 47398, 55597],
           [PageListStandard.Social]: [13275, 12593, 12400, 8115],
         },
+        futureIncome: [1024, 2049],
         initialCumulativeValues: {
           income: 123,
           spending: 456,
@@ -135,6 +136,13 @@ describe('Overview reducer', () => {
           spending: 456,
         }),
       );
+    });
+
+    it('should set the future income data', () => {
+      expect.assertions(1);
+      const result = reducer(initialState, action);
+
+      expect(result.futureIncome).toStrictEqual<State['futureIncome']>([1024, 2049]);
     });
   });
 

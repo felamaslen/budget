@@ -31,6 +31,7 @@ export const overviewSchema = gql`
     startDate: Date!
     endDate: Date!
     monthly: Monthly!
+    futureIncome: [Int!]!
     initialCumulativeValues: InitialCumulativeValues!
   }
 

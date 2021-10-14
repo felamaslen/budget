@@ -40,6 +40,7 @@ describe('Overview resolver', () => {
             holiday
             social
           }
+          futureIncome
           initialCumulativeValues {
             income
             spending
@@ -108,6 +109,48 @@ describe('Overview resolver', () => {
           [prop]: value,
         }),
       );
+    });
+
+    it('should generate future income predictions based on the combined planning data', async () => {
+      expect.assertions(1);
+      const res = await setup();
+
+      // check planning data in seed; tax calculations are unit tested individually
+      const expectedMonthlyNetIncomeA2018 =
+        Math.round((6600000 * 0.97) / 12) - 109000 - 42996 - 29265;
+      const expectedMonthlyNetIncomeB2018 = Math.round((3700000 * 0.95) / 12) - 44950 - 25586;
+
+      const expectedMonthlyNetIncomeA2019 =
+        Math.round((6600000 * 0.97) / 12) - 109000 - 48669 - 27544;
+      const expectedMonthlyNetIncomeB2019 = Math.round((3700000 * 0.95) / 12) - 44950 - 28251;
+
+      expect(res?.futureIncome).toStrictEqual([
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Apr-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // May-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Jun-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Jul-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Aug-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Sep-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Oct-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Nov-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Dec-18
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Jan-19
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Feb-19
+        expectedMonthlyNetIncomeA2018 + expectedMonthlyNetIncomeB2018, // Mar-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // Apr-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // May-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // Jun-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // Jul-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // Aug-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // Sep-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // Oct-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // Nov-19
+        expectedMonthlyNetIncomeA2019 + expectedMonthlyNetIncomeB2019, // Dec-19
+        expectedMonthlyNetIncomeA2019, // Jan-20
+        expectedMonthlyNetIncomeA2019, // Feb-20
+        expectedMonthlyNetIncomeA2019, // Mar-20
+        Math.round((6600000 * 0.97) / 12), // Apr-20; no rates defined so tax etc. is 0
+      ]);
     });
   });
 

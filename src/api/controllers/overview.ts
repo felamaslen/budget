@@ -1,5 +1,6 @@
 import {
   addMonths,
+  differenceInCalendarMonths,
   differenceInDays,
   differenceInMonths,
   endOfMonth,
@@ -14,9 +15,16 @@ import {
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import {
+  calculateNIForFutureIncome,
+  calculateStudentLoanForFutureIncome,
+  calculateTaxForFutureIncome,
+} from './planning/utils/calculations';
 import { formatDate } from './shared';
 import config from '~api/config';
 import {
+  ParameterRow,
+  PlanningOverviewIncomeRow,
   getMonthlyTotalFundValues,
   getTotalFundValue,
   selectCategorisedListSummary,
@@ -24,6 +32,9 @@ import {
   selectOldNetWorth,
   selectTransactions,
   spendingPages,
+  selectPlanningOverviewIncome,
+  selectRates,
+  selectThresholds,
   standardListPages,
 } from '~api/queries';
 import {
@@ -36,6 +47,7 @@ import {
   Transaction,
 } from '~api/types';
 import { calculateTransactionCost } from '~shared/funds';
+import { getFinancialYear } from '~shared/planning';
 
 const {
   startYear,
@@ -194,6 +206,48 @@ export function getOldDateBoundaries(now = new Date()): { startDate: Date; oldDa
   return { startDate, oldDateEnd };
 }
 
+function getFutureIncome(
+  now: Date,
+  planningIncome: readonly PlanningOverviewIncomeRow[],
+  rateRows: readonly ParameterRow[],
+  thresholdRows: readonly ParameterRow[],
+): number[] {
+  const initialMonth = endOfMonth(now);
+  const maxDate = planningIncome.reduce<Date>(
+    (prev, row) => (row.end_date > prev ? endOfMonth(row.end_date) : prev),
+    initialMonth,
+  );
+  const numRows = differenceInCalendarMonths(maxDate, initialMonth) + 1;
+  const calculationRows = { rateRows, thresholdRows };
+
+  return Array(numRows)
+    .fill(0)
+    .map<number>((_, index) => {
+      const date = addMonths(initialMonth, index);
+      const financialYear = getFinancialYear(date);
+      const dateLeft = startOfMonth(date);
+      const dateRight = endOfMonth(date);
+
+      return planningIncome
+        .filter((row) => !isAfter(row.start_date, dateRight) && !isAfter(dateLeft, row.end_date))
+        .reduce<number>((sum, row) => {
+          const taxableIncome = Math.round((row.salary * (1 - row.pension_contrib)) / 12);
+          const tax = calculateTaxForFutureIncome(
+            calculationRows,
+            taxableIncome,
+            row.tax_code,
+            financialYear,
+          );
+          const ni = calculateNIForFutureIncome(calculationRows, taxableIncome, financialYear);
+          const studentLoan = row.student_loan
+            ? calculateStudentLoanForFutureIncome(calculationRows, taxableIncome, financialYear)
+            : 0;
+
+          return sum + taxableIncome - (tax + ni + studentLoan);
+        }, 0);
+    });
+}
+
 export async function getOverviewData(
   db: DatabaseTransactionConnectionType,
   uid: number,
@@ -202,12 +256,21 @@ export async function getOverviewData(
   const now = args.now ?? new Date();
   const startDate = formatISO(startOfMonth(getStartTime(now)), { representation: 'date' });
 
-  const [monthly, initialCumulativeValues] = await Promise.all([
+  const currentFinancialYear = getFinancialYear(now);
+  // Two years prediction is sufficient
+  const parameterYears = [currentFinancialYear, currentFinancialYear + 1];
+
+  const [monthly, initialCumulativeValues, planningIncome, rates, thresholds] = await Promise.all([
     getMonthlyCategoryValues(db, uid, now),
     selectInitialCumulativeList(db, uid, startDate),
+    selectPlanningOverviewIncome(db, uid, formatISO(startOfMonth(now), { representation: 'date' })),
+    selectRates(db, uid, parameterYears),
+    selectThresholds(db, uid, parameterYears),
   ]);
   const startTime = getStartTime(now);
   const endTime = getEndTime(now);
+
+  const futureIncome = getFutureIncome(now, planningIncome, rates, thresholds);
 
   return {
     startDate: endOfMonth(startTime),
@@ -219,6 +282,7 @@ export async function getOverviewData(
         .filter((row) => row.page !== PageListStandard.Income)
         .reduce<number>((last, row) => last + row.sum, 0),
     },
+    futureIncome,
   };
 }
 

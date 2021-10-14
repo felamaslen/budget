@@ -14,6 +14,7 @@ import { createSelector } from 'reselect';
 import { getFutureMonths, getMonthDates, getGraphDates, getStartPredictionIndex } from './common';
 import {
   getAnnualisedFundReturns,
+  getFutureIncome,
   getMonthlyValues,
   getStockValues,
   getSubcategories,
@@ -296,10 +297,16 @@ function predictIncome(
   dates: OverviewGraphDate[],
   currentIndex: number,
   currentIncome: number[],
+  futureIncome: number[],
   longTermOptions: LongTermOptions,
 ): number[] {
   if (!longTermOptions.enabled || typeof longTermOptions.rates.income === 'undefined') {
-    return predictByPastAverages(dates, currentIndex, 0, 'income', currentIncome, Average.Exp);
+    return reduceDates(
+      dates.slice(currentIndex),
+      (last, _, __, index) => [...last, futureIncome[index] ?? 0],
+      dates[currentIndex],
+      currentIncome.slice(0, currentIndex),
+    );
   }
 
   return reduceDates(
@@ -316,6 +323,7 @@ function predictIncome(
 function calculateFutures<G extends OverviewGraphPartial>(
   dates: OverviewGraphDate[],
   today: Date,
+  futureIncome: number[],
   longTermOptions: LongTermOptions,
 ): (graph: G) => G {
   const currentMonthRatio = getDaysInMonth(today) / getDate(today);
@@ -335,7 +343,7 @@ function calculateFutures<G extends OverviewGraphPartial>(
       }),
       {
         ...graph,
-        income: predictIncome(dates, currentIndex, graph.income, longTermOptions),
+        income: predictIncome(dates, currentIndex, graph.income, futureIncome, longTermOptions),
         bills: longTermOptions.enabled
           ? predictByPastAverages(dates, currentIndex, currentMonthRatio, 'bills', graph.bills)
           : graph.bills,
@@ -354,12 +362,13 @@ const withNetChange = <G extends OverviewGraphRequired<'spending'>>() => (
 const withPredictedSpending = <G extends OverviewGraphPartial>(
   dates: OverviewGraphDate[],
   today: Date,
+  futureIncome: number[],
   longTermOptions: LongTermOptions,
 ): ((graph: G) => OverviewGraphRequired<'spending' | 'net', G>) =>
   compose<G, G, OverviewGraphRequired<'spending', G>, OverviewGraphRequired<'spending' | 'net', G>>(
     withNetChange(),
     withSpendingColumn(dates.length),
-    calculateFutures(dates, today, longTermOptions),
+    calculateFutures(dates, today, futureIncome, longTermOptions),
   );
 
 const predictStockReturns = (
@@ -519,8 +528,16 @@ export const getOverviewGraphValues = moize(
       ),
       getStartPredictionIndex(today),
       getGraphDates(today, longTermOptions),
+      getFutureIncome,
       getMonthlyValues,
-      (netWorthMonthlyComposer, fundsMonthlyComposer, startPredictionIndex, dates, monthly) => {
+      (
+        netWorthMonthlyComposer,
+        fundsMonthlyComposer,
+        startPredictionIndex,
+        dates,
+        futureIncome,
+        monthly,
+      ) => {
         const values: OverviewGraphValues = compose<
           Monthly,
           GQL<Monthly>,
@@ -529,7 +546,7 @@ export const getOverviewGraphValues = moize(
           OverviewGraphValues
         >(
           netWorthMonthlyComposer,
-          withPredictedSpending(dates, today, longTermOptions),
+          withPredictedSpending(dates, today, futureIncome, longTermOptions),
           fundsMonthlyComposer,
           omitTypeName,
         )(monthly);
