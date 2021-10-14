@@ -401,7 +401,14 @@ const getStockCostBasis = (
     .concat(dates)
     .map<number>(({ date, monthIndex }) =>
       funds.reduce<number>(
-        (last, fund) => last + getTotalCost(filterPastTransactions(date, fund.transactions)),
+        (last, fund) =>
+          last +
+          getTotalCost(
+            filterPastTransactions(
+              date,
+              fund.transactions.filter((transaction) => !transaction.drip && !transaction.pension),
+            ),
+          ),
         monthlyStockPurchase * Math.max(0, monthIndex - startPredictionIndex + 1),
       ),
     );

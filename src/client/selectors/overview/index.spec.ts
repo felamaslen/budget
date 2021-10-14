@@ -467,6 +467,51 @@ describe('Overview selectors', () => {
           );
         });
       });
+
+      describe.each`
+        case      | pension  | drip
+        ${'SIPP'} | ${true}  | ${false}
+        ${'DRIP'} | ${false} | ${true}
+      `('when there is a $case stock transaction', (testCase) => {
+        const stateWithExtraTransaction: State = {
+          ...state,
+          [PageNonStandard.Funds]: {
+            ...state[PageNonStandard.Funds],
+            items: [
+              {
+                ...state[PageNonStandard.Funds].items[0],
+                transactions: [
+                  ...state[PageNonStandard.Funds].items[0].transactions,
+                  {
+                    date: new Date('2018-02-14'),
+                    units: 1000,
+                    price: 10,
+                    taxes: 1093,
+                    fees: 8823,
+                    pension: testCase.pension,
+                    drip: testCase.drip,
+                  },
+                ],
+              },
+              ...state[PageNonStandard.Funds].items.slice(1),
+            ],
+          },
+        };
+
+        it('should not be included in the stock cost basis', () => {
+          expect.assertions(1);
+
+          const { values: resultWithoutExtraTransaction } = getOverviewGraphValues(now, 0)(state);
+          const { values: resultWithExtraTransaction } = getOverviewGraphValues(
+            now,
+            0,
+          )(stateWithExtraTransaction);
+
+          expect(resultWithExtraTransaction.stockCostBasis).toStrictEqual(
+            resultWithoutExtraTransaction.stockCostBasis,
+          );
+        });
+      });
     });
 
     describe('when there is a net worth entry for the current month', () => {
