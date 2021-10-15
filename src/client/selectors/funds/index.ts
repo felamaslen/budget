@@ -197,10 +197,13 @@ export const getCashBreakdown = moize(
   (today: Date) =>
     createSelector(getCashTotal, getInvestmentsSinceCashTotal(today), (cashTotal, investments) => ({
       cashInBank: Math.round(
-        cashTotal.cashInBank +
-          cashTotal.incomeSince -
-          cashTotal.spendingSince -
-          Math.max(0, investments - (cashTotal.stocksIncludingCash - cashTotal.stockValue)),
+        Math.max(
+          0,
+          cashTotal.cashInBank +
+            cashTotal.incomeSince -
+            cashTotal.spendingSince -
+            Math.max(0, investments - (cashTotal.stocksIncludingCash - cashTotal.stockValue)),
+        ),
       ),
       cashToInvest: Math.round(
         Math.max(0, cashTotal.stocksIncludingCash - cashTotal.stockValue - investments),

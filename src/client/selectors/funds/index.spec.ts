@@ -370,6 +370,22 @@ describe('Funds selectors', () => {
       );
     });
 
+    it('should not return a negative value for cashInBank', () => {
+      expect.assertions(1);
+      const stateWithNegativeCash: State = {
+        ...stateWithCashTotal,
+        netWorth: {
+          ...stateWithCashTotal.netWorth,
+          cashTotal: {
+            ...stateWithCashTotal.netWorth.cashTotal,
+            spendingSince: 11000000,
+          },
+        },
+      };
+
+      expect(getCashBreakdown(today)(stateWithNegativeCash).cashInBank).toBe(0);
+    });
+
     it('should return the cashToInvest value from the state', () => {
       expect.assertions(1);
       expect(getCashBreakdown(today)(stateWithCashTotal).cashToInvest).toBe(2996287);
