@@ -82,7 +82,9 @@ export function getComputedYearStartAccountValue(
       0,
     );
 
-  const allCreditCardIds = creditCardPayments.map((card) => card.credit_card_id);
+  const allCreditCardIds = Array.from(
+    new Set(creditCardPayments.map((card) => card.credit_card_id)),
+  );
 
   const monthsToPredict = Array(numMonthsToPredict)
     .fill(0)

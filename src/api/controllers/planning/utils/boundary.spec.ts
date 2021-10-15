@@ -273,4 +273,66 @@ describe(getComputedYearStartAccountValue.name, () => {
       expect(result).toBeCloseTo(154420 - 44523);
     });
   });
+
+  describe('when there are actual credit card payments', () => {
+    const ccExample: CalculationRows['creditCardPayments'] = [
+      {
+        id: accountId,
+        credit_card_id: numericHash('my-credit-card'),
+        credit_card_payment_id: numericHash('my-credit-card-payment'),
+        credit_card_payment_year: 2021,
+        credit_card_payment_month: 7,
+        credit_card_payment_value: -15540,
+        credit_card_net_worth_subcategory_id: numericHash('my-credit-card-net-worth-subcategory'),
+      },
+    ];
+
+    it('should take the card payments into account', () => {
+      expect.assertions(1);
+
+      const result = getComputedYearStartAccountValue(
+        accountId,
+        now,
+        year,
+        { latestActualValues, creditCardPayments: ccExample, valueRows, billsRows },
+        previousIncomeReduction,
+        predictedIncomeReduction,
+        {
+          [numericHash('my-credit-card')]: 0,
+        },
+        transfersTo,
+      );
+
+      expect(result).toBeCloseTo(154420 - 15540);
+    });
+
+    describe('when there are multiple payments for the same credit card', () => {
+      it('should only count the credit card once', () => {
+        expect.assertions(1);
+
+        const result = getComputedYearStartAccountValue(
+          accountId,
+          now,
+          year,
+          {
+            latestActualValues,
+            creditCardPayments: [
+              ccExample[0],
+              { ...ccExample[0], credit_card_payment_month: 9, credit_card_payment_value: -61923 },
+            ],
+            valueRows,
+            billsRows,
+          },
+          previousIncomeReduction,
+          predictedIncomeReduction,
+          {
+            [numericHash('my-credit-card')]: 0,
+          },
+          transfersTo,
+        );
+
+        expect(result).toBeCloseTo(154420 - (15540 + 61923));
+      });
+    });
+  });
 });
