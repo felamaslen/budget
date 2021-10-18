@@ -53,7 +53,13 @@ export const makeTestApp = async (): Promise<App> => {
     }),
   });
 
-  const loginRes = await axios.post(graphqlUrl, {
+  const loginRes = await axios.post<{
+    data?: {
+      login: {
+        uid: number;
+      };
+    };
+  }>(graphqlUrl, {
     query: `
       mutation {
         login(pin: 1234) {
