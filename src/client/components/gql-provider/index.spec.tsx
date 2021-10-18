@@ -2,15 +2,17 @@ import { Server } from 'http';
 import { addResolversToSchema } from '@graphql-tools/schema';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import axios from 'axios';
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { buildSchema, execute, subscribe } from 'graphql';
+import { PubSub } from 'graphql-subscriptions';
 import gql from 'graphql-tag';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import nock from 'nock';
 import fetch from 'node-fetch';
 import React from 'react';
-import { useQuery } from 'urql';
+import { useQuery, useSubscription } from 'urql';
 import ws from 'ws';
 
 import { GQLProvider } from '.';
@@ -18,19 +20,22 @@ import { GQLProvider } from '.';
 describe('GQLProvider', () => {
   const myApiKey = 'my-api-key';
 
+  const pubsub = new PubSub();
+  const TEST_PUBSUB_TOPIC = 'TEST_PUBSUB_TOPIC';
+
   // Ripped off the graphql-ws docs
   const greetingsList = ['Hello', 'Hi', 'Bonjour', 'Bienvenido'];
-  let greetingIndex = 0;
 
-  const generateGreetings = async (): Promise<{ greetings: string }> => {
-    const greetings = greetingsList[greetingIndex % greetingsList.length];
-    greetingIndex += 1;
-    return { greetings };
-  };
   const schema = addResolversToSchema({
     schema: buildSchema(`
+    type BroadcastGreeting {
+      ok: Boolean!
+    }
     type Query {
       hello: String
+    }
+    type Mutation {
+      broadcastGreeting(index: Int!): BroadcastGreeting
     }
     type Subscription {
       greetings: String
@@ -40,8 +45,17 @@ describe('GQLProvider', () => {
       Query: {
         hello: (): string => 'Hello world!',
       },
+      Mutation: {
+        broadcastGreeting: (_, { index }): { ok: boolean } => {
+          pubsub.publish(TEST_PUBSUB_TOPIC, greetingsList[index % greetingsList.length]);
+          return { ok: true };
+        },
+      },
       Subscription: {
-        greetings: generateGreetings,
+        greetings: {
+          subscribe: (): AsyncIterator<void> => pubsub.asyncIterator(TEST_PUBSUB_TOPIC),
+          resolve: (payload): unknown => payload,
+        },
       },
     },
   });
@@ -105,16 +119,29 @@ describe('GQLProvider', () => {
     }
   `;
 
+  const testSubscription = gql`
+    subscription TestSubscription {
+      greetings
+    }
+  `;
+
   const TestComponent: React.FC = () => {
-    const [{ data }, runTestQuery] = useQuery({
+    const [resQuery, runTestQuery] = useQuery({
       query: testQuery,
       pause: true,
+    });
+
+    const [resSubscription] = useSubscription({
+      query: testSubscription,
     });
 
     return (
       <>
         <button onClick={runTestQuery}>Run test query</button>
-        <pre data-testid="test-query-data">{JSON.stringify(data ?? null)}</pre>
+        <pre data-testid="test-query-data">{JSON.stringify(resQuery.data ?? null)}</pre>
+        <pre data-testid="test-subscription-data">
+          {JSON.stringify(resSubscription.data ?? null)}
+        </pre>
       </>
     );
   };
@@ -137,6 +164,48 @@ describe('GQLProvider', () => {
     await waitFor(() => {
       expect(JSON.parse(getByTestId('test-query-data').innerHTML)).toStrictEqual({
         hello: 'Hello world!',
+      });
+    });
+  });
+
+  it('should receive a subscription initiated by external mutation', async () => {
+    expect.hasAssertions();
+
+    const subscribeSpy = jest.spyOn(pubsub, 'subscribe');
+
+    const { getByTestId } = render(
+      <GQLProvider apiKey={myApiKey}>
+        <TestComponent />
+      </GQLProvider>,
+    );
+
+    await waitFor(() => {
+      expect(subscribeSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(JSON.parse(getByTestId('test-subscription-data').innerHTML)).toBeNull();
+
+    await axios.post(
+      `http://localhost:4000/graphql?query=${encodeURIComponent(
+        `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
+      )}&variables=${encodeURIComponent(JSON.stringify({ index: 1 }))}`,
+    );
+
+    await waitFor(() => {
+      expect(JSON.parse(getByTestId('test-subscription-data').innerHTML)).toStrictEqual({
+        greetings: 'Hi',
+      });
+    });
+
+    await axios.post(
+      `http://localhost:4000/graphql?query=${encodeURIComponent(
+        `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
+      )}&variables=${encodeURIComponent(JSON.stringify({ index: 3 }))}`,
+    );
+
+    await waitFor(() => {
+      expect(JSON.parse(getByTestId('test-subscription-data').innerHTML)).toStrictEqual({
+        greetings: 'Bienvenido',
       });
     });
   });
