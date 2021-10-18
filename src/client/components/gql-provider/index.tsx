@@ -1,34 +1,51 @@
-import { createClient, dedupExchange, cacheExchange, fetchExchange, ssrExchange } from '@urql/core';
-import { createClient as createWSClient } from 'graphql-ws';
+import {
+  Client,
+  createClient,
+  dedupExchange,
+  cacheExchange,
+  fetchExchange,
+  ssrExchange,
+  subscriptionExchange,
+  Exchange,
+} from '@urql/core';
+import { createClient as createWSClient, Sink } from 'graphql-ws';
 import React, { useMemo, useRef } from 'react';
-import { Client, Provider, subscriptionExchange } from 'urql';
+import { Provider } from 'urql';
 
-import { isServerSide } from '~client/modules/ssr';
+import { getIsServerSide } from '~client/modules/ssr';
 
-const isSecure = isServerSide ? null : window.location.protocol === 'https:';
-const wsUrl = isServerSide
-  ? ''
-  : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
+function getWSUrl(): string {
+  const isServerSide = getIsServerSide();
+  const isSecure = isServerSide ? null : window.location.protocol === 'https:';
+  return isServerSide ? '' : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
+}
 
 export type SSRExchange = ReturnType<typeof ssrExchange>;
 
 type ClientProps = { apiKey: string | null; onReconnected?: () => void };
 
-export const ssr = isServerSide
-  ? undefined
-  : ssrExchange({
-      isClient: true,
-      initialState: window.__URQL_DATA__,
-    });
-
 export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconnected }) => {
   const hasConnected = useRef<boolean>(false);
+  const graphqlUrl = `${window.location.protocol}//${window.location.host}/graphql`;
+  const wsUrl = getWSUrl();
+  const ssr = useMemo(
+    () =>
+      getIsServerSide()
+        ? undefined
+        : ssrExchange({
+            isClient: true,
+            initialState: window.__URQL_DATA__,
+          }),
+    [],
+  );
 
   const client = useMemo<Client>(() => {
     if (!apiKey) {
       return createClient({
-        url: '/graphql',
-        exchanges: [dedupExchange, cacheExchange, ssr as SSRExchange, fetchExchange],
+        url: graphqlUrl,
+        exchanges: [dedupExchange, cacheExchange, ssr, fetchExchange].filter(
+          (e): e is Exchange => !!e,
+        ),
       });
     }
 
@@ -52,7 +69,7 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconne
     });
 
     return createClient({
-      url: '/graphql',
+      url: graphqlUrl,
       fetchOptions: {
         headers: {
           Authorization: apiKey,
@@ -61,19 +78,19 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconne
       exchanges: [
         dedupExchange,
         cacheExchange,
-        ssr as SSRExchange,
+        ssr,
         fetchExchange,
         subscriptionExchange({
           forwardSubscription: (operation) => ({
             subscribe: (sink): { unsubscribe: () => void } => {
-              const dispose = wsClient.subscribe(operation, sink);
+              const dispose = wsClient.subscribe(operation, sink as Sink);
               return {
                 unsubscribe: dispose,
               };
             },
           }),
         }),
-      ],
+      ].filter((e): e is Exchange => !!e),
     });
   }, [apiKey, onReconnected]);
 
