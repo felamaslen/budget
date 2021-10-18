@@ -8,14 +8,14 @@ import type { SelectOptions } from '~client/components/form-field';
 import { highlightTimeMs } from '~client/components/fund-gain-info/styles';
 import { ApiContext, useUpdateEffect } from '~client/hooks';
 import { isSold } from '~client/modules/data';
-import { isServerSide } from '~client/modules/ssr';
+import { getIsServerSide } from '~client/modules/ssr';
 import { getAppConfig, getFundsRows, getTodayPriceTime } from '~client/selectors';
 import type { FundQuotes } from '~client/types';
 import { FundMode } from '~client/types/enum';
 import { useStockPricesQuery } from '~client/types/gql';
 import { getGenericFullSymbol } from '~shared/abbreviation';
 
-const worker = isServerSide ? undefined : new PricesWorker();
+const worker = getIsServerSide() ? undefined : new PricesWorker();
 
 const fetchIntervalMs = (5 * 60 + 3) * 1000;
 const minTimeBetweenFetchMs = 30 * 1000;

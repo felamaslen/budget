@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useInitialQuery } from '../gql';
 import { dataRead, errorOpened } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
-import { isServerSide } from '~client/modules/ssr';
+import { getIsServerSide } from '~client/modules/ssr';
 import { getAppConfig } from '~client/selectors';
 import type { LocalAppConfig } from '~client/types';
 import { InitialQueryVariables } from '~client/types/gql';
@@ -22,7 +22,7 @@ export function useInitialData(): { loading: boolean; error: string | undefined 
 
   const [{ data, fetching, error }] = useInitialQuery({
     variables: getInitialQueryVariables(appConfig),
-    pause: hasLoaded || isServerSide,
+    pause: hasLoaded || getIsServerSide(),
   });
 
   const errorMessage = error?.message;
@@ -36,7 +36,7 @@ export function useInitialData(): { loading: boolean; error: string | undefined 
   }, [dispatch, errorMessage, error]);
 
   useEffect(() => {
-    if (!isServerSide && data && !fetching) {
+    if (!getIsServerSide() && data && !fetching) {
       dispatch(dataRead(data));
       setHasLoaded(true);
     } else {

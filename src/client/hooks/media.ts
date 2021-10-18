@@ -1,9 +1,8 @@
 import { useMemo, useState, useEffect } from 'react';
-import { VOID } from '~client/modules/data';
-import { isServerSide } from '~client/modules/ssr';
+import { getIsServerSide } from '~client/modules/ssr';
 import { breakpoints } from '~client/styled/variables';
 
-const shouldSkip = isServerSide && process.env.NODE_ENV !== 'test';
+const shouldSkip = getIsServerSide() && process.env.NODE_ENV !== 'test';
 
 export function useMediaQuery(queryString: string): boolean {
   const matchQuery = useMemo(
@@ -14,14 +13,14 @@ export function useMediaQuery(queryString: string): boolean {
   const [matches, setMatches] = useState<boolean>(matchQuery.matches);
   useEffect(() => {
     if (shouldSkip) {
-      return VOID;
+      return undefined;
     }
 
     const listener = ({ matches: nowMatches }: MediaQueryListEvent): void => setMatches(nowMatches);
-    matchQuery.addListener(listener);
+    matchQuery.addEventListener('change', listener);
 
     return (): void => {
-      matchQuery.removeListener(listener);
+      matchQuery.removeEventListener('change', listener);
     };
   }, [matchQuery]);
 
