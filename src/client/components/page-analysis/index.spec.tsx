@@ -21,7 +21,7 @@ describe('<PageAnalysis />', () => {
   type Overrides = Partial<AnalysisQuery['analysis']>;
 
   const getMockClient = (overrides: Overrides = {}): Client =>
-    (({
+    ({
       executeQuery: ({ query }: { variables: Record<string, unknown>; query: DocumentNode }) => {
         if (query === AnalysisQueries.Analysis) {
           return fromValue({
@@ -48,7 +48,7 @@ describe('<PageAnalysis />', () => {
           data: null,
         });
       },
-    } as unknown) as Client);
+    } as unknown as Client);
 
   let matchMedia: MatchMediaMock;
   let querySpy: jest.SpyInstance;

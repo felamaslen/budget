@@ -67,30 +67,27 @@ function constructAccounts(
       ),
     );
 
-    const {
-      computedStartValue,
-      computedValues,
-      predictedCreditCardPayments,
-    } = getComputedTransactionsForAccount(
-      {
-        accountsWithIncome,
-        thresholdRows,
-        rateRows,
-        valueRows: accountRowsWithValues.filter(accountRowHasValue),
-        billsRows: incomeGroup[0].include_bills
-          ? accountRowsWithBills.filter(accountRowHasBills)
-          : [],
-        latestActualValues,
-        previousIncome: previousIncomeRows,
-        creditCardPayments: creditCards
-          .filter(accountRowHasCreditCardPayment)
-          .filter((card) => card.id === incomeGroup[0].id),
-        averageCreditCardPaymentRows,
-      },
-      year,
-      now,
-      incomeGroup,
-    );
+    const { computedStartValue, computedValues, predictedCreditCardPayments } =
+      getComputedTransactionsForAccount(
+        {
+          accountsWithIncome,
+          thresholdRows,
+          rateRows,
+          valueRows: accountRowsWithValues.filter(accountRowHasValue),
+          billsRows: incomeGroup[0].include_bills
+            ? accountRowsWithBills.filter(accountRowHasBills)
+            : [],
+          latestActualValues,
+          previousIncome: previousIncomeRows,
+          creditCardPayments: creditCards
+            .filter(accountRowHasCreditCardPayment)
+            .filter((card) => card.id === incomeGroup[0].id),
+          averageCreditCardPaymentRows,
+        },
+        year,
+        now,
+        incomeGroup,
+      );
 
     return {
       id: incomeGroup[0].id,

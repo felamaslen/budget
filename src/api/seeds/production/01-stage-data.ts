@@ -3,6 +3,7 @@ import { compose } from '@typed/compose';
 import parse from 'csv-parse/lib/sync';
 import { addMonths, formatISO, setDay, startOfMonth } from 'date-fns';
 import fs from 'fs-extra';
+import { omit } from 'lodash';
 import { DatabaseTransactionConnectionType, sql } from 'slonik';
 
 import { getPool, withSlonik } from '~api/modules/db';
@@ -22,9 +23,9 @@ async function readTableFromCsv<R extends Record<string, unknown>>(
   return parsed;
 }
 
-const mapUids = <R extends Record<string, unknown>>(uid: number) => (
-  row: R,
-): R & { uid: number } => ({ ...row, uid });
+const mapUids =
+  <R extends Record<string, unknown>>(uid: number) =>
+  (row: R): R & { uid: number } => ({ ...row, uid });
 
 function mapDates<R extends { date: string }>({ date, ...row }: R): R {
   const [, monthDelta, , dayOfMonth] = (date as string).match(
@@ -42,46 +43,46 @@ const mapDatesWithUids = <R extends { date: string }>(
   uid: number,
 ): ((row: R) => R & { uid: number }) => compose(mapDates, mapUids(uid));
 
-const removeColumn = <K extends string>(key: K) => <R extends { [key in K]: unknown }>({
-  [key]: discard,
-  ...row
-}: R): Omit<R, K> => row;
+const removeColumn =
+  <K extends string>(key: K) =>
+  <T extends Record<K, unknown>>(obj: T): Omit<T, K> =>
+    omit(obj, key);
 
 const removeId = removeColumn('id');
 
-const nullableKey = <K extends string, V extends string | number>(key: K) => <
-  R extends { [key in K]: V | 'null' }
->(
-  row: R,
-): Omit<R, K> & { [key in K]: R[K] | null } => ({
-  ...row,
-  [key]: row[key] === 'null' ? null : row[key],
-});
+const nullableKey =
+  <K extends string, V extends string | number>(key: K) =>
+  <R extends { [key in K]: V | 'null' }>(row: R): Omit<R, K> & { [key in K]: R[K] | null } => ({
+    ...row,
+    [key]: row[key] === 'null' ? null : row[key],
+  });
 
-const nullableBool = <K extends string, R extends { [key in K]: 'true' | 'false' | 'null' }>(
-  key: K,
-) => (row: R): Omit<R, K> & { [key in K]: boolean | null } => ({
-  ...row,
-  [key]: row[key] === 'null' ? null : row[key] === 'true',
-});
+const nullableBool =
+  <K extends string, R extends { [key in K]: 'true' | 'false' | 'null' }>(key: K) =>
+  (row: R): Omit<R, K> & { [key in K]: boolean | null } => ({
+    ...row,
+    [key]: row[key] === 'null' ? null : row[key] === 'true',
+  });
 
-const mapForeignId = <
-  ParentKey extends string,
-  ForeignKey extends string,
-  Parent extends { [key in ParentKey]: number },
-  Child extends { [key in ForeignKey]: number }
->(
-  parentsRaw: Parent[],
-  parentIdRows: readonly { [key in ParentKey]: number }[],
-  parentKey: ParentKey,
-  foreignKey: ForeignKey,
-) => (child: Child): Child => ({
-  ...child,
-  [foreignKey]:
-    parentIdRows[
-      parentsRaw.findIndex((parent) => (parent[parentKey] as number) === child[foreignKey])
-    ][parentKey],
-});
+const mapForeignId =
+  <
+    ParentKey extends string,
+    ForeignKey extends string,
+    Parent extends { [key in ParentKey]: number },
+    Child extends { [key in ForeignKey]: number },
+  >(
+    parentsRaw: Parent[],
+    parentIdRows: readonly { [key in ParentKey]: number }[],
+    parentKey: ParentKey,
+    foreignKey: ForeignKey,
+  ) =>
+  (child: Child): Child => ({
+    ...child,
+    [foreignKey]:
+      parentIdRows[
+        parentsRaw.findIndex((parent) => (parent[parentKey] as number) === child[foreignKey])
+      ][parentKey],
+  });
 
 const insertStandardListFromCsv = async (
   db: DatabaseTransactionConnectionType,

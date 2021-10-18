@@ -39,12 +39,8 @@ export const Month: React.FC<Props> = ({ dataForMonth, isStart, year }) => {
     [accounts],
   );
 
-  const {
-    onAddTransaction,
-    onChangeTransaction,
-    onRemoveTransaction,
-    onChangeCreditCard,
-  } = useTransactionForm(year, dataForMonth.month);
+  const { onAddTransaction, onChangeTransaction, onRemoveTransaction, onChangeCreditCard } =
+    useTransactionForm(year, dataForMonth.month);
 
   return (
     <Styled.MonthGroup>

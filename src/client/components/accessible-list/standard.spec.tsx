@@ -855,9 +855,12 @@ describe(AccessibleListStandard.name, () => {
         const addButton = getByText('Add');
         userEvent.click(addButton);
         const modalDialog = getByTestId('modal-dialog');
-        const { getAllByRole, getByRole, getByDisplayValue, getByText: getModalText } = within(
-          modalDialog,
-        );
+        const {
+          getAllByRole,
+          getByRole,
+          getByDisplayValue,
+          getByText: getModalText,
+        } = within(modalDialog);
 
         const dateInput = getByDisplayValue('2020-04-14') as HTMLInputElement;
         const costInput = getByRole('spinbutton') as HTMLInputElement;
@@ -921,9 +924,12 @@ describe(AccessibleListStandard.name, () => {
         const itemField = getByText('item one');
         userEvent.click(itemField);
         const modalDialog = getByTestId('modal-dialog');
-        const { getAllByRole, getByRole, getByDisplayValue, getByText: getModalText } = within(
-          modalDialog,
-        );
+        const {
+          getAllByRole,
+          getByRole,
+          getByDisplayValue,
+          getByText: getModalText,
+        } = within(modalDialog);
 
         const dateInput = getByDisplayValue('2020-04-17') as HTMLInputElement;
         const costInput = getByRole('spinbutton') as HTMLInputElement;

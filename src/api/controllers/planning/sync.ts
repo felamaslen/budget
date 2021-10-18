@@ -105,49 +105,47 @@ type SyncItemsOptions<Row extends SyncRow, Input> = {
   getUpdatedInput: (input: Input) => WithoutUid<Row>[];
 };
 
-const syncItems = <Row extends SyncRow, Input>({
-  insertRows,
-  updateRow,
-  deleteOldRows,
-  selectExistingRows,
-  getNewInput,
-  getUpdatedInput,
-}: SyncItemsOptions<Row, Input>): SyncItems<Row, Input> => async (
-  db,
-  uid,
-  input,
-): Promise<readonly (Row | WithoutUid<Row>)[]> => {
-  const existingRows = await selectExistingRows(db, uid);
-  const newInput = getNewInput(input);
-  const updatedInput = getUpdatedInput(input);
+const syncItems =
+  <Row extends SyncRow, Input>({
+    insertRows,
+    updateRow,
+    deleteOldRows,
+    selectExistingRows,
+    getNewInput,
+    getUpdatedInput,
+  }: SyncItemsOptions<Row, Input>): SyncItems<Row, Input> =>
+  async (db, uid, input): Promise<readonly (Row | WithoutUid<Row>)[]> => {
+    const existingRows = await selectExistingRows(db, uid);
+    const newInput = getNewInput(input);
+    const updatedInput = getUpdatedInput(input);
 
-  const updatedDelta = updatedInput.filter((row) => {
-    const existingRow = existingRows.find(({ id }) => id === row.id);
-    return !!existingRow && !isEqual(omit(row, 'id'), omit(existingRow, 'id', 'uid'));
+    const updatedDelta = updatedInput.filter((row) => {
+      const existingRow = existingRows.find(({ id }) => id === row.id);
+      return !!existingRow && !isEqual(omit(row, 'id'), omit(existingRow, 'id', 'uid'));
+    });
+
+    await Promise.all(updatedDelta.map((row) => updateRow(db, uid, row)));
+
+    const insertedRows = await insertRows(db, uid, newInput);
+
+    const existingIds = [...insertedRows, ...updatedInput].map((row) => row.id);
+
+    await deleteOldRows(db, uid, existingIds);
+
+    return [...updatedInput, ...insertedRows];
+  };
+
+const mapIncomeRow =
+  (accountId: number) =>
+  (row: PlanningIncomeInput): Create<PlanningIncomeRow> => ({
+    account_id: accountId,
+    start_date: formatISO(row.startDate, { representation: 'date' }),
+    end_date: formatISO(row.endDate, { representation: 'date' }),
+    salary: row.salary,
+    tax_code: row.taxCode,
+    pension_contrib: row.pensionContrib,
+    student_loan: row.studentLoan,
   });
-
-  await Promise.all(updatedDelta.map((row) => updateRow(db, uid, row)));
-
-  const insertedRows = await insertRows(db, uid, newInput);
-
-  const existingIds = [...insertedRows, ...updatedInput].map((row) => row.id);
-
-  await deleteOldRows(db, uid, existingIds);
-
-  return [...updatedInput, ...insertedRows];
-};
-
-const mapIncomeRow = (accountId: number) => (
-  row: PlanningIncomeInput,
-): Create<PlanningIncomeRow> => ({
-  account_id: accountId,
-  start_date: formatISO(row.startDate, { representation: 'date' }),
-  end_date: formatISO(row.endDate, { representation: 'date' }),
-  salary: row.salary,
-  tax_code: row.taxCode,
-  pension_contrib: row.pensionContrib,
-  student_loan: row.studentLoan,
-});
 
 const syncIncome = syncItems<PlanningIncomeRow, PlanningAccountWithId[]>({
   insertRows: insertPlanningIncome,
@@ -176,12 +174,12 @@ const syncIncome = syncItems<PlanningIncomeRow, PlanningAccountWithId[]>({
     }, []),
 });
 
-const mapCreditCard = (accountId: number) => (
-  row: PlanningCreditCardInput,
-): Create<PlanningCreditCardRow> => ({
-  account_id: accountId,
-  net_worth_subcategory_id: row.netWorthSubcategoryId,
-});
+const mapCreditCard =
+  (accountId: number) =>
+  (row: PlanningCreditCardInput): Create<PlanningCreditCardRow> => ({
+    account_id: accountId,
+    net_worth_subcategory_id: row.netWorthSubcategoryId,
+  });
 
 const syncCreditCards = syncItems<PlanningCreditCardRow, PlanningAccountWithId[]>({
   insertRows: insertPlanningCreditCards,
@@ -213,14 +211,14 @@ const syncCreditCards = syncItems<PlanningCreditCardRow, PlanningAccountWithId[]
     }, []),
 });
 
-const mapCreditCardPayment = (year: number, creditCardId: number) => (
-  row: PlanningCreditCardPaymentInput,
-): Create<PlanningCreditCardPaymentRow> => ({
-  credit_card_id: creditCardId,
-  year,
-  month: row.month,
-  value: row.value,
-});
+const mapCreditCardPayment =
+  (year: number, creditCardId: number) =>
+  (row: PlanningCreditCardPaymentInput): Create<PlanningCreditCardPaymentRow> => ({
+    credit_card_id: creditCardId,
+    year,
+    month: row.month,
+    value: row.value,
+  });
 
 type CreditCardSyncInput = {
   accountInputs: PlanningAccountWithId[];

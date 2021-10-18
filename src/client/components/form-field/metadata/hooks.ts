@@ -5,9 +5,7 @@ import { CTAEvents, useCTA, useField } from '~client/hooks';
 import { partialModification } from '~client/modules/data';
 import { Id } from '~client/types';
 
-export function useModalFocus(
-  active: boolean | undefined,
-): {
+export function useModalFocus(active: boolean | undefined): {
   ref: RefObject<HTMLDivElement>;
   focused: boolean;
   toggleEvents: CTAEvents;
@@ -79,10 +77,10 @@ export function useCompositeField<F>(
     [items, onChange],
   );
 
-  const onDelete = useCallback((index: number) => onChange(removeAtIndex(items, index)), [
-    items,
-    onChange,
-  ]);
+  const onDelete = useCallback(
+    (index: number) => onChange(removeAtIndex(items, index)),
+    [items, onChange],
+  );
 
   const [newItem, setNewItem] = useState<F>(newItemInit());
 

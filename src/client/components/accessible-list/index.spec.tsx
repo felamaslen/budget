@@ -88,7 +88,7 @@ describe('<AccessibleList />', () => {
 
   function getContainerBase<
     I extends ListItemInput,
-    E extends Record<string, unknown> = Record<string, unknown>
+    E extends Record<string, unknown> = Record<string, unknown>,
   >(
     state: MyState<I>,
     props: Omit<Props<I, MyPage, never, E>, 'onCreate' | 'onUpdate' | 'onDelete'>,
@@ -421,13 +421,8 @@ describe('<AccessibleList />', () => {
         addButton: HTMLButtonElement;
       } => {
         const { inputs, createForm, renderResult } = getInputs();
-        const [
-          dateInput,
-          itemInput,
-          categoryInput,
-          costInput,
-          shopInput,
-        ] = inputs as HTMLInputElement[];
+        const [dateInput, itemInput, categoryInput, costInput, shopInput] =
+          inputs as HTMLInputElement[];
         const { getByText } = within(createForm);
         const addButton = getByText('Add') as HTMLButtonElement;
 

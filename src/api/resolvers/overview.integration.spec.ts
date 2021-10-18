@@ -57,12 +57,10 @@ describe('Overview resolver', () => {
       });
     });
 
-    const setup = moize.promise(
-      async (): Promise<Overview | null | undefined> => {
-        const res = await app.authGqlClient.query<Query>({ query });
-        return res.data?.overview;
-      },
-    );
+    const setup = moize.promise(async (): Promise<Overview | null | undefined> => {
+      const res = await app.authGqlClient.query<Query>({ query });
+      return res.data?.overview;
+    });
 
     const expectedDeductedIncome = 433201 - (39765 + 10520); // check seed
 
@@ -174,191 +172,189 @@ describe('Overview resolver', () => {
       }
     `;
 
-    const setup = moize.promise(
-      async (): Promise<Maybe<OverviewOld>> => {
-        const res = await app.authGqlClient.query<Query>({ query });
-        return res.data?.overviewOld ?? null;
-      },
-    );
+    const setup = moize.promise(async (): Promise<Maybe<OverviewOld>> => {
+      const res = await app.authGqlClient.query<Query>({ query });
+      return res.data?.overviewOld ?? null;
+    });
 
     // The expected values come from the seed data in src/api/__tests__/fixtures
     const expectedStocksOctober2014Jan2015 = Math.round(1005.2 * 117.93);
     const expectedStocksFeb2015August2015 = Math.round(1005.2 * 119.27);
     const expectedStocks = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ expectedStocksOctober2014Jan2015,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ expectedStocksFeb2015August2015,
-      /* Mar-15 */ expectedStocksFeb2015August2015,
-      /* Apr-15 */ 0,
-      /* May-15 */ 0,
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      expectedStocksOctober2014Jan2015, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      expectedStocksFeb2015August2015, // Feb-15
+      expectedStocksFeb2015August2015, // Mar-15
+      0, // Apr-15
+      0, // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedPension = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ 1054200,
-      /* Apr-15 */ 0,
-      /* May-15 */ 1117503,
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      1054200, // Mar-15
+      0, // Apr-15
+      1117503, // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedLiquidCash = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ 1050000 + Math.round(62000 * 100 * 0.113),
-      /* Apr-15 */ 0,
-      /* May-15 */ 996542 + Math.round(57451 * 100 * 0.116) + Math.round(105 * 100 * 0.783),
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      1050000 + Math.round(62000 * 100 * 0.113), // Mar-15
+      0, // Apr-15
+      996542 + Math.round(57451 * 100 * 0.116) + Math.round(105 * 100 * 0.783), // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedCashOther = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ 1667500 + 6338760 - expectedStocksFeb2015August2015,
-      /* Apr-15 */ 0,
-      /* May-15 */ 0 + 6354004 - 0,
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      1667500 + 6338760 - expectedStocksFeb2015August2015, // Mar-15
+      0, // Apr-15
+      0 + 6354004 - 0, // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedInvestments = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ 6338760,
-      /* Apr-15 */ 0,
-      /* May-15 */ 6354004,
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      6338760, // Mar-15
+      0, // Apr-15
+      6354004, // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedInvestmentPurchases = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ 0,
-      /* Apr-15 */ 0,
-      /* May-15 */ 12300000,
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      0, // Mar-15
+      0, // Apr-15
+      12300000, // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedIlliquidEquity = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ 42500000 - 36125000,
-      /* Apr-15 */ 0,
-      /* May-15 */ 43500000 - 34713229,
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      42500000 - 36125000, // Mar-15
+      0, // Apr-15
+      43500000 - 34713229, // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedOptions = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ Math.round(993 * (2113.7 - 1350.3)),
-      /* Apr-15 */ 0,
-      /* May-15 */ Math.round(101 * (19.27 - 4.53)),
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      Math.round(993 * (2113.7 - 1350.3)), // Mar-15
+      0, // Apr-15
+      Math.round(101 * (19.27 - 4.53)), // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedNetWorth = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
       /* Mar-15 */ Math.round(
         /* bank */ 1050000 +
           /* locked cash */ 1667500 +
@@ -368,9 +364,9 @@ describe('Overview resolver', () => {
           /* pension */ 1054200 +
           /* SAYE */ Math.round(993 * 1350.3) +
           /* mortgage */ -36125000 +
-          /* cc */ -16532,
+          -16532, // cc
       ),
-      /* Apr-15 */ 0,
+      0, // Apr-15
       /* May-15 */ Math.round(
         /* bank */ 996542 +
           /* locked cash */ 0 +
@@ -381,59 +377,59 @@ describe('Overview resolver', () => {
           /* pension */ 1117503 +
           /* SAYE */ 0 +
           /* mortgage */ -34713229 +
-          /* cc */ -12322,
+          -12322, // cc
       ),
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedIncome = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ 0,
-      /* Apr-15 */ 470242 - (105040 + 39872),
-      /* May-15 */ 0,
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      0, // Mar-15
+      470242 - (105040 + 39872), // Apr-15
+      0, // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     const expectedSpending = [
-      /* Sep-14 */ 0,
-      /* Oct-14 */ 0,
-      /* Nov-14 */ 0,
-      /* Dec-14 */ 0,
-      /* Jan-15 */ 0,
-      /* Feb-15 */ 0,
-      /* Mar-15 */ 0,
-      /* Apr-15 */ 0,
-      /* May-15 */ 83 + 156 + 7619,
-      /* Jun-15 */ 0,
-      /* Jul-15 */ 0,
-      /* Aug-15 */ 0,
-      /* Sep-15 */ 0,
-      /* Oct-15 */ 0,
-      /* Nov-15 */ 0,
-      /* Dec-15 */ 0,
-      /* Jan-16 */ 0,
-      /* Feb-16 */ 0,
+      0, // Sep-14
+      0, // Oct-14
+      0, // Nov-14
+      0, // Dec-14
+      0, // Jan-15
+      0, // Feb-15
+      0, // Mar-15
+      0, // Apr-15
+      83 + 156 + 7619, // May-15
+      0, // Jun-15
+      0, // Jul-15
+      0, // Aug-15
+      0, // Sep-15
+      0, // Oct-15
+      0, // Nov-15
+      0, // Dec-15
+      0, // Jan-16
+      0, // Feb-16
     ];
 
     it.each`

@@ -35,7 +35,7 @@ describe('Accessible list create item', () => {
     suggestionFields: ['item'],
   };
 
-  const mockClient = ({
+  const mockClient = {
     executeQuery: ({
       query,
       variables,
@@ -81,7 +81,7 @@ describe('Accessible list create item', () => {
         data: null,
       });
     },
-  } as unknown) as Client;
+  } as unknown as Client;
 
   const setup = (customProps: Partial<typeof props> = {}): RenderResult =>
     render(

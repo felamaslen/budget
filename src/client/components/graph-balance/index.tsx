@@ -167,10 +167,10 @@ export const GraphBalance: React.FC<Props> = ({
     'split_net_worth_graph',
   );
 
-  const lines = useMemo<Line[]>(() => getGraphData(graph, showLiabilities), [
-    graph,
-    showLiabilities,
-  ]);
+  const lines = useMemo<Line[]>(
+    () => getGraphData(graph, showLiabilities),
+    [graph, showLiabilities],
+  );
 
   return (
     <GraphCashFlow

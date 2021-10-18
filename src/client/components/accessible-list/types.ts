@@ -15,7 +15,7 @@ export { FieldKey } from '~client/types';
 
 export type Fields<
   I extends ListItemInput,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 > = {
   [K in FieldKey<I>]: FieldComponent<I[K] | undefined, E>;
 };
@@ -24,13 +24,13 @@ export type ComponentType<P extends Record<string, unknown>> = FC<P> | StyledCom
 
 export type RowComponent<
   I extends ListItemInput,
-  E extends Record<string, unknown>
+  E extends Record<string, unknown>,
 > = ComponentType<Partial<E> & { isMobile: boolean; item: WithIds<I>; odd?: boolean }>;
 
 export type FieldsMobile<
   I extends ListItemInput,
   MK extends keyof I = FieldKey<I>,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 > = {
   [K in MK]?: ComponentType<{ field: MK; value: I[K] } & Partial<E>>;
 };
@@ -39,7 +39,7 @@ export type HeaderProps<
   I extends ListItemInput,
   P,
   MK extends keyof I,
-  H extends Record<string, unknown> = Record<string, unknown>
+  H extends Record<string, unknown> = Record<string, unknown>,
 > = H & {
   page: P;
   isMobile: boolean;
@@ -84,7 +84,7 @@ export type Props<
   P extends PageList,
   MK extends keyof I = never,
   E extends Record<string, unknown> = never,
-  H extends Record<string, unknown> = Record<string, unknown>
+  H extends Record<string, unknown> = Record<string, unknown>,
 > = CommonProps<I, P, E> & {
   windowise?: boolean;
   color?: string;
@@ -103,7 +103,7 @@ export type PropsItem<
   I extends ListItemInput,
   P extends PageList,
   MK extends keyof I,
-  E extends Record<string, unknown> = never
+  E extends Record<string, unknown> = never,
 > = {
   id: Id;
   isMobile: boolean;
@@ -125,7 +125,7 @@ export type PropsMemoisedItem<E extends Record<string, unknown>> = {
 export type PropsItemCreate<
   I extends ListItemInput,
   P extends PageList,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 > = {
   deltaSeed?: () => Delta<I>;
 } & PickUnion<CommonProps<I, P, E>, 'page' | 'fields' | 'modalFields' | 'suggestionFields'> &

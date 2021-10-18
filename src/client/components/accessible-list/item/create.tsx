@@ -20,10 +20,10 @@ const Suggestion: React.FC<{
   index: number;
   activateSuggestion: (index: number) => void;
 }> = ({ suggestion, index, activateSuggestion }) => {
-  const onActivate = useCallback((): void => activateSuggestion(index), [
-    index,
-    activateSuggestion,
-  ]);
+  const onActivate = useCallback(
+    (): void => activateSuggestion(index),
+    [index, activateSuggestion],
+  );
   const { onClick, onKeyDown } = useCTA(onActivate);
 
   return (
@@ -66,10 +66,10 @@ const CreateField = <I extends ListItemInput, E extends Record<string, unknown>>
     [field, setDelta],
   );
 
-  const onType = useCallback((newValue): void => requestSuggestions(field, String(newValue)), [
-    requestSuggestions,
-    field,
-  ]);
+  const onType = useCallback(
+    (newValue): void => requestSuggestions(field, String(newValue)),
+    [requestSuggestions, field],
+  );
 
   const onFocus = useCallback(() => setActiveField(field), [setActiveField, field]);
   return (
@@ -103,7 +103,7 @@ const CreateField = <I extends ListItemInput, E extends Record<string, unknown>>
 export const AccessibleListCreateItem = <
   I extends ListItemInput,
   P extends PageList,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 >({
   page,
   fields,

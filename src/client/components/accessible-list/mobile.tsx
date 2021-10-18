@@ -11,7 +11,7 @@ import type { ListItemInput } from '~client/types/gql';
 type FieldPropsMobile<
   I extends ListItemInput,
   F extends keyof I,
-  E extends Record<string, unknown> = never
+  E extends Record<string, unknown> = never,
 > = {
   fieldsMobile: FieldsMobile<I, F, E>;
   field: F;
@@ -22,7 +22,7 @@ type FieldPropsMobile<
 export const ListFieldMobile = <
   I extends ListItemInput,
   F extends keyof I,
-  E extends Record<string, unknown>
+  E extends Record<string, unknown>,
 >({
   fieldsMobile,
   field,

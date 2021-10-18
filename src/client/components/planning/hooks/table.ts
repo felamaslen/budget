@@ -38,118 +38,120 @@ function getNetWorthValueForSubcategoryId(
   return entry?.values.find((value) => value.subcategory === subcategoryId)?.simple ?? undefined;
 }
 
-const getAccountReducer = (
-  today: Date,
-  netWorth: NetWorthEntryNative[],
-  accounts: State['accounts'],
-  creditCardRecords: CreditCardRecord[],
-) => (
-  accumulator: PlanningData[],
-  planningMonth: PlanningMonth,
-  monthIndex: number,
-): MonthByAccount[] =>
-  accounts.map<MonthByAccount>((accountGroup, accountIndex) => {
-    const start =
-      monthIndex === 0
-        ? accountGroup.computedStartValue ?? undefined
-        : accumulator[accumulator.length - 1].accounts[accountIndex].endValue.computedValue;
+const getAccountReducer =
+  (
+    today: Date,
+    netWorth: NetWorthEntryNative[],
+    accounts: State['accounts'],
+    creditCardRecords: CreditCardRecord[],
+  ) =>
+  (
+    accumulator: PlanningData[],
+    planningMonth: PlanningMonth,
+    monthIndex: number,
+  ): MonthByAccount[] =>
+    accounts.map<MonthByAccount>((accountGroup, accountIndex) => {
+      const start =
+        monthIndex === 0
+          ? accountGroup.computedStartValue ?? undefined
+          : accumulator[accumulator.length - 1].accounts[accountIndex].endValue.computedValue;
 
-    const startVerified =
-      monthIndex === 0
-        ? !!getNetWorthValueForSubcategoryId(
-            filterNetWorthByMonth(netWorth, addMonths(planningMonth.date, -1)),
-            accountGroup.netWorthSubcategoryId,
-          )
-        : accumulator[monthIndex - 1].accounts[accountIndex].endValue.isVerified;
+      const startVerified =
+        monthIndex === 0
+          ? !!getNetWorthValueForSubcategoryId(
+              filterNetWorthByMonth(netWorth, addMonths(planningMonth.date, -1)),
+              accountGroup.netWorthSubcategoryId,
+            )
+          : accumulator[monthIndex - 1].accounts[accountIndex].endValue.isVerified;
 
-    const transactions = getTransactionsForAccountAtMonth(
-      today,
-      accounts,
-      accountIndex,
-      planningMonth,
-    );
+      const transactions = getTransactionsForAccountAtMonth(
+        today,
+        accounts,
+        accountIndex,
+        planningMonth,
+      );
 
-    const creditCardValues = getCreditCardsForAccountAtMonth(
-      creditCardRecords,
-      planningMonth,
-      accounts[accountIndex],
-    );
+      const creditCardValues = getCreditCardsForAccountAtMonth(
+        creditCardRecords,
+        planningMonth,
+        accounts[accountIndex],
+      );
 
-    const recordedEnd = getNetWorthValueForSubcategoryId(
-      filterNetWorthByMonth(netWorth, planningMonth.date),
-      accountGroup.netWorthSubcategoryId,
-    );
-    const end =
-      recordedEnd ??
-      (typeof start === 'undefined'
-        ? undefined
-        : (start ?? 0) +
-          transactions.reduce<number>((sum, { computedValue = 0 }) => sum + computedValue, 0) +
-          creditCardValues.reduce<number>((sum, { value = 0 }) => sum + value, 0));
+      const recordedEnd = getNetWorthValueForSubcategoryId(
+        filterNetWorthByMonth(netWorth, planningMonth.date),
+        accountGroup.netWorthSubcategoryId,
+      );
+      const end =
+        recordedEnd ??
+        (typeof start === 'undefined'
+          ? undefined
+          : (start ?? 0) +
+            transactions.reduce<number>((sum, { computedValue = 0 }) => sum + computedValue, 0) +
+            creditCardValues.reduce<number>((sum, { value = 0 }) => sum + value, 0));
 
-    const endVerified = !!recordedEnd;
+      const endVerified = !!recordedEnd;
 
-    return {
-      accountGroup,
-      startValue: {
-        key: `${accountGroup.id ?? `${CREATE_ID}_${accountGroup.account}`}_start`,
-        name: accountGroup.account,
-        computedValue: start,
-        isComputed: true,
-        isVerified: startVerified,
-      },
-      creditCards: creditCardValues,
-      transactions,
-      endValue: {
-        key: `${accountGroup.id ?? `${CREATE_ID}_${accountGroup.account}`}_end`,
-        name: accountGroup.account,
-        computedValue: end,
-        isComputed: true,
-        isVerified: endVerified,
-      },
-    };
-  });
+      return {
+        accountGroup,
+        startValue: {
+          key: `${accountGroup.id ?? `${CREATE_ID}_${accountGroup.account}`}_start`,
+          name: accountGroup.account,
+          computedValue: start,
+          isComputed: true,
+          isVerified: startVerified,
+        },
+        creditCards: creditCardValues,
+        transactions,
+        endValue: {
+          key: `${accountGroup.id ?? `${CREATE_ID}_${accountGroup.account}`}_end`,
+          name: accountGroup.account,
+          computedValue: end,
+          isComputed: true,
+          isVerified: endVerified,
+        },
+      };
+    });
 
 const numNewInputRows = 1;
 
-const addSingleColorScale = (transactionName: string, color: string, isNegative = false) => (
-  data: PlanningData[],
-): PlanningData[] => {
-  const maxValue = data.reduce<number>(
-    (max0, group) =>
-      group.accounts.reduce<number>(
-        (max1, account) =>
-          account.transactions.reduce<number>(
-            (max2, transaction) =>
-              transaction.name === transactionName
-                ? Math.max(max2, (isNegative ? -1 : 1) * (transaction.computedValue ?? 0))
-                : max2,
-            max1,
-          ),
-        max0,
-      ),
-    0,
-  );
+const addSingleColorScale =
+  (transactionName: string, color: string, isNegative = false) =>
+  (data: PlanningData[]): PlanningData[] => {
+    const maxValue = data.reduce<number>(
+      (max0, group) =>
+        group.accounts.reduce<number>(
+          (max1, account) =>
+            account.transactions.reduce<number>(
+              (max2, transaction) =>
+                transaction.name === transactionName
+                  ? Math.max(max2, (isNegative ? -1 : 1) * (transaction.computedValue ?? 0))
+                  : max2,
+              max1,
+            ),
+          max0,
+        ),
+      0,
+    );
 
-  return data.map<PlanningData>((group) => ({
-    ...group,
-    accounts: group.accounts.map<PlanningData['accounts'][0]>((account) => ({
-      ...account,
-      transactions: account.transactions.map<PlanningData['accounts'][0]['transactions'][0]>(
-        (transaction) =>
-          transaction.name === transactionName
-            ? {
-                ...transaction,
-                color: scoreColor(
-                  color,
-                  ((isNegative ? -1 : 1) * (transaction.computedValue ?? 0)) / maxValue,
-                ),
-              }
-            : transaction,
-      ),
-    })),
-  }));
-};
+    return data.map<PlanningData>((group) => ({
+      ...group,
+      accounts: group.accounts.map<PlanningData['accounts'][0]>((account) => ({
+        ...account,
+        transactions: account.transactions.map<PlanningData['accounts'][0]['transactions'][0]>(
+          (transaction) =>
+            transaction.name === transactionName
+              ? {
+                  ...transaction,
+                  color: scoreColor(
+                    color,
+                    ((isNegative ? -1 : 1) * (transaction.computedValue ?? 0)) / maxValue,
+                  ),
+                }
+              : transaction,
+        ),
+      })),
+    }));
+  };
 
 const addColorScales = compose(
   addSingleColorScale(ComputedTransactionName.GrossIncome, colors[PageListStandard.Income].main),

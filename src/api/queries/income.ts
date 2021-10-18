@@ -19,10 +19,9 @@ type IncomeDeductionJoins = {
 
 export type IncomeRowWithJoins = IncomeRow & IncomeDeductionJoins;
 
-export type IncomeRowWithDeduction = Omit<IncomeRowWithJoins, keyof IncomeDeductionJoins> &
-  {
-    [K in keyof IncomeDeductionJoins]: NonNullable<IncomeDeductionJoins[K]>;
-  };
+export type IncomeRowWithDeduction = Omit<IncomeRowWithJoins, keyof IncomeDeductionJoins> & {
+  [K in keyof IncomeDeductionJoins]: NonNullable<IncomeDeductionJoins[K]>;
+};
 
 export async function selectIncome(
   db: DatabaseTransactionConnectionType,

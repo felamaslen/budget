@@ -10,7 +10,7 @@ type OmitDeep<T, U extends string> = T extends Record<string, unknown>
 
 export function omitDeep<T, K extends string>(item: T | T[], key: K): OmitDeep<T, K> {
   if (Array.isArray(item)) {
-    return (item.map((i) => omitDeep(i, key)) as unknown) as OmitDeep<T, K>;
+    return item.map((i) => omitDeep(i, key)) as unknown as OmitDeep<T, K>;
   }
   if (typeof item === 'object' && item !== null) {
     return Object.entries(omit(item as Record<string, unknown>, key)).reduce<OmitDeep<T, K>>(
@@ -26,7 +26,7 @@ export function omitDeep<T, K extends string>(item: T | T[], key: K): OmitDeep<T
 
 export function optionalDeep<T, K extends string>(item: T | T[], key: K): OptionalDeep<T, K> {
   if (Array.isArray(item)) {
-    return (item.map((i) => optionalDeep(i, key)) as unknown) as OptionalDeep<T, K>;
+    return item.map((i) => optionalDeep(i, key)) as unknown as OptionalDeep<T, K>;
   }
   if (typeof item === 'object' && item !== null) {
     return Object.entries(item as Record<string, unknown>).reduce<OptionalDeep<T, K>>(

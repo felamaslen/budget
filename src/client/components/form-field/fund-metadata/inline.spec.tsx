@@ -281,15 +281,9 @@ describe(FormFieldFundMetadata.name, () => {
         const inputFees = inputs[5];
         const inputTaxes = inputs[6];
 
-        [
-          inputDate,
-          inputDRIP,
-          inputPension,
-          inputUnits,
-          inputPrice,
-          inputFees,
-          inputTaxes,
-        ].forEach((input) => expect(input).toBeInTheDocument());
+        [inputDate, inputDRIP, inputPension, inputUnits, inputPrice, inputFees, inputTaxes].forEach(
+          (input) => expect(input).toBeInTheDocument(),
+        );
 
         const buttonAdd = getByText('+');
 

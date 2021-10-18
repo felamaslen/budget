@@ -232,10 +232,10 @@ const EntryForm: React.FC<EntryProps> = ({
   const onChangeCost = useCallback((cost: number) => onChange(id, { cost }), [id, onChange]);
   const onChangePage = useCallback((page: ReceiptPage) => onChange(id, { page }), [id, onChange]);
 
-  const onChangeItem = useCallback((item: string | undefined) => onChange(id, { item }), [
-    id,
-    onChange,
-  ]);
+  const onChangeItem = useCallback(
+    (item: string | undefined) => onChange(id, { item }),
+    [id, onChange],
+  );
   const [itemSuggestion, setItemSuggestion] = useState<string | null>(null);
 
   return (

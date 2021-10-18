@@ -31,26 +31,30 @@ export const ListHeadFunds = styled(FlexCenter)`
   }
 `;
 
-const getGainColor = (isMobile: boolean) => ({ profit, loss }: GainProps): string => {
-  if (isMobile) {
+const getGainColor =
+  (isMobile: boolean) =>
+  ({ profit, loss }: GainProps): string => {
+    if (isMobile) {
+      if (profit) {
+        return colors.profit.translucent ?? '';
+      }
+      if (loss) {
+        return colors.loss.translucent ?? '';
+      }
+    }
     if (profit) {
-      return colors.profit.translucent ?? '';
+      return colors.profit.light;
     }
     if (loss) {
-      return colors.loss.translucent ?? '';
+      return colors.loss.light;
     }
-  }
-  if (profit) {
-    return colors.profit.light;
-  }
-  if (loss) {
-    return colors.loss.light;
-  }
-  return colors.transparent;
-};
+    return colors.transparent;
+  };
 
-const getGainColorLight = (isMobile: boolean) => ({ profit, loss }: GainProps): string =>
-  compose(desaturate(0.6), lighten(0.1))(getGainColor(isMobile)({ profit, loss }));
+const getGainColorLight =
+  (isMobile: boolean) =>
+  ({ profit, loss }: GainProps): string =>
+    compose(desaturate(0.6), lighten(0.1))(getGainColor(isMobile)({ profit, loss }));
 
 export const OverallGain = styled(GainStyles.PriceChangeHighlight)<GainProps>`
   align-items: center;

@@ -49,10 +49,10 @@ export function ModalDialogField<V = never>({
   onChange,
   invalid,
 }: PropsModalField<V>): React.ReactElement | null {
-  const onChangeCallback = useCallback((newValue: V) => onChange(field as string, newValue), [
-    onChange,
-    field,
-  ]);
+  const onChangeCallback = useCallback(
+    (newValue: V) => onChange(field as string, newValue),
+    [onChange, field],
+  );
 
   if (!Field) {
     return null;

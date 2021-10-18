@@ -15,10 +15,9 @@ export type Update<V> = Create<V> & Item;
 export type WithRequiredJoin<
   T extends Record<string, unknown>,
   U extends Record<string, unknown | null>,
-  StillNullable extends keyof U = never
+  StillNullable extends keyof U = never,
 > = T extends U
-  ? Omit<T, keyof U> &
-      {
-        [K in keyof U]: K extends StillNullable ? U[K] : NonNullable<U[K]>;
-      }
+  ? Omit<T, keyof U> & {
+      [K in keyof U]: K extends StillNullable ? U[K] : NonNullable<U[K]>;
+    }
   : never;

@@ -63,9 +63,8 @@ export const FormFieldStockSplits: React.FC<PropsFormFieldModalStockSplits> = ({
   invalid = false,
   ...props
 }) => {
-  const { items, newItem, onChangeAddField, onCreate, onUpdate, onDelete } = useStockSplitsField(
-    props,
-  );
+  const { items, newItem, onChangeAddField, onCreate, onUpdate, onDelete } =
+    useStockSplitsField(props);
 
   return (
     <Wrapper item="stockSplits" invalid={invalid}>
@@ -184,9 +183,8 @@ export const FormFieldTransactions: React.FC<PropsFormFieldModalTransactions> = 
   invalid = false,
   ...props
 }) => {
-  const { items, newItem, onChangeAddField, onCreate, onUpdate, onDelete } = useTransactionsField(
-    props,
-  );
+  const { items, newItem, onChangeAddField, onCreate, onUpdate, onDelete } =
+    useTransactionsField(props);
 
   return (
     <Wrapper item="transactions" invalid={invalid}>

@@ -73,7 +73,7 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
       ? ({} as QuerySearchArgs)
       : ({
           ...state.query,
-          page: (page as string) as SearchPage,
+          page: page as string as SearchPage,
           numResults: numToRequest,
         } as QuerySearchArgs),
   });
@@ -171,16 +171,14 @@ export function useSuggestions<I extends ListItemInput, P extends PageList>({
       const nextValue = state.next[index] ?? null;
       const nextField = state.nextField ?? naturalNextField;
 
-      setDelta(
-        (last: Partial<I>): Partial<I> => {
-          const withMain: Partial<I> = {
-            ...last,
-            [state.activeField ?? '']: state.list[index],
-          };
+      setDelta((last: Partial<I>): Partial<I> => {
+        const withMain: Partial<I> = {
+          ...last,
+          [state.activeField ?? '']: state.list[index],
+        };
 
-          return nextValue && nextField ? { ...withMain, [nextField]: nextValue } : withMain;
-        },
-      );
+        return nextValue && nextField ? { ...withMain, [nextField]: nextValue } : withMain;
+      });
       focusTimer.current = window.setTimeout(() => {
         setState((last) => ({
           ...last,

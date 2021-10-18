@@ -271,16 +271,16 @@ describe('Planning resolver', () => {
             netWorthSubcategoryId: myBankId,
             income: [
               {
-                startDate: ('2020-01-20' as unknown) as Date,
-                endDate: ('2021-01-01' as unknown) as Date,
+                startDate: '2020-01-20' as unknown as Date,
+                endDate: '2021-01-01' as unknown as Date,
                 salary: 6000000,
                 taxCode: '1250L',
                 studentLoan: true,
                 pensionContrib: 0.03,
               },
               {
-                startDate: ('2025-05-03' as unknown) as Date,
-                endDate: ('2026-01-01' as unknown) as Date,
+                startDate: '2025-05-03' as unknown as Date,
+                endDate: '2026-01-01' as unknown as Date,
                 salary: 8500000,
                 taxCode: '1257L',
                 studentLoan: true,
@@ -608,8 +608,8 @@ describe('Planning resolver', () => {
                 income: expect.arrayContaining([
                   expect.objectContaining({
                     id: expect.any(Number),
-                    startDate: ('2020-01-20' as unknown) as Date,
-                    endDate: ('2021-01-01' as unknown) as Date,
+                    startDate: '2020-01-20' as unknown as Date,
+                    endDate: '2021-01-01' as unknown as Date,
                     salary: 6000000,
                     taxCode: '1250L',
                     studentLoan: true,
@@ -617,8 +617,8 @@ describe('Planning resolver', () => {
                   }),
                   expect.objectContaining({
                     id: expect.any(Number),
-                    startDate: ('2025-05-03' as unknown) as Date,
-                    endDate: ('2026-01-01' as unknown) as Date,
+                    startDate: '2025-05-03' as unknown as Date,
+                    endDate: '2026-01-01' as unknown as Date,
                     salary: 8500000,
                     taxCode: '1257L',
                     studentLoan: true,

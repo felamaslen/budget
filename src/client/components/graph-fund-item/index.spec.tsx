@@ -32,7 +32,7 @@ describe('<GraphFundItem />', () => {
     sold: false,
   };
 
-  const mockClient = ({
+  const mockClient = {
     executeQuery: ({
       variables,
       query,
@@ -63,7 +63,7 @@ describe('<GraphFundItem />', () => {
       }
       return fromValue({ data: null });
     },
-  } as unknown) as Client;
+  } as unknown as Client;
 
   const setup = (customProps: Partial<Props> = {}): RenderResult =>
     render(

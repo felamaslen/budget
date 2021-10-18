@@ -57,7 +57,7 @@ const AccessibleListItem = <
   I extends ListItemInput,
   P extends PageList,
   MK extends keyof I,
-  E extends Record<string, unknown> = never
+  E extends Record<string, unknown> = never,
 >({
   fields,
   fieldsMobile = {},

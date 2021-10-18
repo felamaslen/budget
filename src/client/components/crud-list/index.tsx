@@ -10,7 +10,7 @@ import type { SetActiveId, WithIds } from '~client/types';
 type MetaProps<
   I extends Record<string, unknown>,
   J extends WithIds<I>,
-  E extends Record<string, unknown>
+  E extends Record<string, unknown>,
 > = E &
   Partial<
     CrudProps<I> & {
@@ -23,7 +23,7 @@ type MetaProps<
 type Props<
   I extends Record<string, unknown>,
   J extends WithIds<I> = WithIds<I>,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 > = CrudProps<I> &
   Pick<ItemProps<I, J, E>, 'Item' | 'extraProps'> & {
     items: J[];
@@ -42,7 +42,7 @@ type Props<
 export const CrudList = <
   I extends Record<string, unknown>,
   J extends WithIds<I> = WithIds<I>,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 >({
   items,
   Item,

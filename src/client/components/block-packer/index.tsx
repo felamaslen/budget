@@ -234,9 +234,10 @@ function useClickDive(
     [],
   );
 
-  const onDive = useMemo(() => (onClick ? (name: string | null): void => onClick(name) : VOID), [
-    onClick,
-  ]);
+  const onDive = useMemo(
+    () => (onClick ? (name: string | null): void => onClick(name) : VOID),
+    [onClick],
+  );
 
   const fadeTimer = useRef<number>();
   const hadPreview = useRef<boolean>(false);

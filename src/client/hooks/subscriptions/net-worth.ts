@@ -32,9 +32,9 @@ type CreateUpdate<T extends Item> = {
   item?: Maybe<T>;
 };
 
-type SubscriptionCreateUpdate<T extends Item> = Partial<
-  { [key in ResponseKeys['created'] | ResponseKeys['updated']]: CreateUpdate<T> }
->;
+type SubscriptionCreateUpdate<T extends Item> = Partial<{
+  [key in ResponseKeys['created'] | ResponseKeys['updated']]: CreateUpdate<T>;
+}>;
 
 type SubscriptionDelete = Partial<{ [key in ResponseKeys['deleted']]: { id: Id } }>;
 
@@ -42,7 +42,7 @@ type CrudOptions<
   T extends Item,
   ActionCreate extends Action = Action,
   ActionUpdate extends Action = Action,
-  ActionDelete extends Action = Action
+  ActionDelete extends Action = Action,
 > = {
   responseKeys: ResponseKeys;
   actions: {
@@ -70,7 +70,7 @@ function useNetWorthCrud<
   T extends Item,
   ActionCreate extends Action = Action,
   ActionUpdate extends Action = Action,
-  ActionDelete extends Action = Action
+  ActionDelete extends Action = Action,
 >({
   responseKeys,
   subscriptions,

@@ -127,25 +127,26 @@ type PropsAccountEditForm = {
   account: GQL<PlanningAccount>;
 };
 
-const ensureSingleIncludeBillsAccount = (nextAccount: GQL<PlanningAccountInput>) => (
-  accounts: State['accounts'],
-): State['accounts'] =>
-  nextAccount.includeBills
-    ? accounts.map((sibling) =>
-        sibling.netWorthSubcategoryId === nextAccount.netWorthSubcategoryId || !sibling.includeBills
-          ? sibling
-          : { ...sibling, includeBills: false },
-      )
-    : accounts;
+const ensureSingleIncludeBillsAccount =
+  (nextAccount: GQL<PlanningAccountInput>) =>
+  (accounts: State['accounts']): State['accounts'] =>
+    nextAccount.includeBills
+      ? accounts.map((sibling) =>
+          sibling.netWorthSubcategoryId === nextAccount.netWorthSubcategoryId ||
+          !sibling.includeBills
+            ? sibling
+            : { ...sibling, includeBills: false },
+        )
+      : accounts;
 
-const upsertAccountDelta = (accountId: number, nextAccount: GQL<PlanningAccountInput>) => (
-  accounts: State['accounts'],
-): State['accounts'] =>
-  partialModification(
-    accounts,
-    accounts.findIndex((compare) => compare.id === accountId),
-    optionalDeep(nextAccount, 'id'),
-  );
+const upsertAccountDelta =
+  (accountId: number, nextAccount: GQL<PlanningAccountInput>) =>
+  (accounts: State['accounts']): State['accounts'] =>
+    partialModification(
+      accounts,
+      accounts.findIndex((compare) => compare.id === accountId),
+      optionalDeep(nextAccount, 'id'),
+    );
 
 const AccountEditForm: React.FC<PropsAccountEditForm> = ({ account }) => {
   const sync = usePlanningDispatch();

@@ -53,7 +53,7 @@ export type GenericHookOptions<
   J extends ListItemInput,
   P extends PageList,
   SubscriptionResponse extends Record<S, SubscriptionResponseGeneric<I>>,
-  S extends string
+  S extends string,
 > = {
   responseKey: S;
   getPage: (res: SubscriptionResponse) => P;
@@ -69,7 +69,7 @@ export function useListSubscriptionsGeneric<
   J extends ListItemInput,
   P extends PageList,
   SubscriptionResponse extends Record<S, SubscriptionResponseGeneric<I>>,
-  S extends string
+  S extends string,
 >({
   responseKey,
   useSubscription,

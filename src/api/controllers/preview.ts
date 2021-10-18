@@ -31,7 +31,7 @@ async function getOverviewPreviewStandard(
   const rows = await selectPreviewRowsStandard(
     db,
     uid,
-    (category as string) as PageListStandard,
+    category as string as PageListStandard,
     startDate,
     endDate,
   );

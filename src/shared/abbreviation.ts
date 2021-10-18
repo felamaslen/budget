@@ -2,17 +2,18 @@ import { compose } from '@typed/compose';
 import moize from 'moize';
 
 // helper functions
-const usingRegex = (regex: RegExp, processor: (name: string, matches: string[]) => string) => (
-  name: string,
-): string => {
-  const matches = name.match(regex);
-  return matches ? processor(name, matches) : name;
-};
+const usingRegex =
+  (regex: RegExp, processor: (name: string, matches: string[]) => string) =>
+  (name: string): string => {
+    const matches = name.match(regex);
+    return matches ? processor(name, matches) : name;
+  };
 
 const extractConsonants = (value: string): string => value.replace(/[AEIOU]/gi, '');
 
 // constants
-const ordinaryShare = /((Ord(inary)?)|ORD)( Shares)?(( [0-9]+( [0-9]+)?p)|( [0-9]+(\.[0-9]+)?))?( Share)?/;
+const ordinaryShare =
+  /((Ord(inary)?)|ORD)( Shares)?(( [0-9]+( [0-9]+)?p)|( [0-9]+(\.[0-9]+)?))?( Share)?/;
 
 // common preparation functions
 const removeUnused = (a: string): string =>

@@ -43,8 +43,9 @@ export const GRAPH_FUNDS_HEIGHT = 300;
 export const isHistoryOptionsEqual = (a: QueryFundHistoryArgs, b: QueryFundHistoryArgs): boolean =>
   a.period === b.period && a.length === b.length;
 
-export const fundHistoryMatch = (query: QueryFundHistoryArgs) => (
-  compare: HistoryOptions,
-): boolean => isHistoryOptionsEqual(query, compare);
+export const fundHistoryMatch =
+  (query: QueryFundHistoryArgs) =>
+  (compare: HistoryOptions): boolean =>
+    isHistoryOptionsEqual(query, compare);
 
 export const GRAPH_FUNDS_NUM_TICKS = 10;

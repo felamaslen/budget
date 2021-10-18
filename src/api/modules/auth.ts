@@ -70,18 +70,16 @@ export function getUidFromToken(token?: string | null): number | null {
   return uid ?? null;
 }
 
-export const withResolverAuth = <A, T>(resolver: Resolver<A, T, Request>): Resolver<A, T> => async (
-  root,
-  args,
-  ctx,
-): Promise<T | null> => {
-  const token = jwtFromRequest(ctx);
-  ctx.user = { uid: token ? getUidFromToken(token) ?? 0 : ctx.session.uid ?? 0 };
-  if (!ctx.user?.uid) {
-    return null;
-  }
-  return resolver(root, args, ctx);
-};
+export const withResolverAuth =
+  <A, T>(resolver: Resolver<A, T, Request>): Resolver<A, T> =>
+  async (root, args, ctx): Promise<T | null> => {
+    const token = jwtFromRequest(ctx);
+    ctx.user = { uid: token ? getUidFromToken(token) ?? 0 : ctx.session.uid ?? 0 };
+    if (!ctx.user?.uid) {
+      return null;
+    }
+    return resolver(root, args, ctx);
+  };
 
 export function genToken({ uid }: User): Omit<LoginResponse, 'name'> {
   const expires = addDays(new Date(), config.user.sessionExpiryDays);

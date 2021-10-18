@@ -821,19 +821,14 @@ describe('Net worth resolver', () => {
       parents: Parents;
       entryInput: RawDate<NetWorthEntryInput, 'date'>;
     }> => {
-      const [
-        categoryIdBank,
-        categoryIdOptions,
-        categoryIdHouse,
-        categoryIdDebts,
-        categoryIdCC,
-      ] = await createCategories([
-        categoryBank,
-        categoryOptions,
-        categoryHouse,
-        categoryDebts,
-        categoryCC,
-      ]);
+      const [categoryIdBank, categoryIdOptions, categoryIdHouse, categoryIdDebts, categoryIdCC] =
+        await createCategories([
+          categoryBank,
+          categoryOptions,
+          categoryHouse,
+          categoryDebts,
+          categoryCC,
+        ]);
 
       const [
         subcategoryIdCurrentAccount,

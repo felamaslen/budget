@@ -8,7 +8,7 @@ describe('Pie route', () => {
       expect.assertions(5);
 
       expect(() =>
-        getPieCols((PageNonStandard.Funds as unknown) as PageListStandard),
+        getPieCols(PageNonStandard.Funds as unknown as PageListStandard),
       ).toThrowErrorMatchingInlineSnapshot(`"Invalid category"`);
 
       expect(getPieCols(PageListStandard.Food)).toStrictEqual([

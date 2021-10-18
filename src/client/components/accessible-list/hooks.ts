@@ -21,7 +21,7 @@ export type ItemExtraPropsMap<E extends Record<string, unknown>> = { [id: string
 export function useSortedItems<
   I extends ListItem,
   P extends string,
-  E extends Record<string, unknown>
+  E extends Record<string, unknown>,
 >(
   page: P,
   sortItemsPre?: SortItemsPre<I>,
@@ -33,10 +33,10 @@ export function useSortedItems<
 } {
   const itemsSortedPre: I[] = useSelector(getItems<I, P>(page, sortItemsPre));
 
-  const extraProps = useMemo<ItemExtraPropsMap<E>>(() => customSelector(itemsSortedPre), [
-    itemsSortedPre,
-    customSelector,
-  ]);
+  const extraProps = useMemo<ItemExtraPropsMap<E>>(
+    () => customSelector(itemsSortedPre),
+    [itemsSortedPre, customSelector],
+  );
 
   const itemsSorted: I[] = useMemo<I[]>(
     () => (sortItemsPost ? sortItemsPost(itemsSortedPre, extraProps) : itemsSortedPre),

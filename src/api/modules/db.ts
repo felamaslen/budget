@@ -41,7 +41,9 @@ export const getPool = moize(() =>
 );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const withSlonik = <R = void, A extends any[] = never[]>(
-  handler: (connection: DatabaseTransactionConnectionType, ...args: A) => Promise<R>,
-): ((...args: A) => Promise<R>) => async (...args: A): Promise<R> =>
-  getPool().transaction((connection): Promise<R> => handler(connection, ...args));
+export const withSlonik =
+  <R = void, A extends unknown[] = never[]>(
+    handler: (connection: DatabaseTransactionConnectionType, ...args: A) => Promise<R>,
+  ): ((...args: A) => Promise<R>) =>
+  async (...args: A): Promise<R> =>
+    getPool().transaction((connection): Promise<R> => handler(connection, ...args));

@@ -148,10 +148,10 @@ const NetWorthCategoryItem: React.FC<PropsItem> = ({
 
   const itemExpanded = expanded === item.id;
   const setExpanded = useCallback(() => onExpand(item.id), [onExpand, item.id]);
-  const toggleExpand = useCallback(() => onExpand((last) => (last === item.id ? null : item.id)), [
-    onExpand,
-    item.id,
-  ]);
+  const toggleExpand = useCallback(
+    () => onExpand((last) => (last === item.id ? null : item.id)),
+    [onExpand, item.id],
+  );
 
   return (
     <Styled.CategoryItem

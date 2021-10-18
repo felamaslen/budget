@@ -1,3 +1,5 @@
-export const composeWithoutArgs = (...fns: ((...args: any[]) => void)[]) => (): void => {
-  fns.forEach((fn) => fn());
-};
+export const composeWithoutArgs =
+  (...fns: ((...args: any[]) => void)[]) =>
+  (): void => {
+    fns.forEach((fn) => fn());
+  };

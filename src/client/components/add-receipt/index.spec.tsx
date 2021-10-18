@@ -24,7 +24,7 @@ describe('<AddReceipt />', () => {
     setAddingReceipt: jest.fn(),
   };
 
-  const mockClient = ({
+  const mockClient = {
     executeQuery: ({
       variables,
       query,
@@ -78,7 +78,7 @@ describe('<AddReceipt />', () => {
         data: null,
       });
     },
-  } as unknown) as Client;
+  } as unknown as Client;
 
   const store = createMockStore()({});
   const setup = (): RenderResult =>

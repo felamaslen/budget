@@ -67,7 +67,7 @@ type GenericHookOptions<
   P extends PageList,
   ArgsCreate extends { fakeId: Id; input: J },
   ArgsUpdate extends { id: Id; input: J },
-  ArgsDelete extends { id: Id }
+  ArgsDelete extends { id: Id },
 > = {
   page: P;
   responseKeys: ResponseKeys;
@@ -89,7 +89,7 @@ function useListCrudGeneric<
   P extends PageList,
   ArgsCreate extends { fakeId: Id; input: J },
   ArgsUpdate extends { id: Id; input: J },
-  ArgsDelete extends { id: Id }
+  ArgsDelete extends { id: Id },
 >({
   page,
   responseKeys,
@@ -161,7 +161,7 @@ function useListCrudGeneric<
 
 export type MutationHookStandard<
   I extends ListItemInput,
-  P extends PageListStandard
+  P extends PageListStandard,
 > = () => Urql.UseMutationResponse<Partial<Mutation>, { page: P; fakeId: Id; input: I }>;
 
 const standardOptions = moize(

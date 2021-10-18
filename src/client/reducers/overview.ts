@@ -71,33 +71,35 @@ const getStateRowDates = moize(
 const getDateIndex = (state: State, date: Date): number =>
   getStateRowDates(state).findIndex((item) => isSameMonth(date, item));
 
-const setCost = (state: State, date: Date, diff: number) => (last: number[]): number[] =>
-  replaceAtIndex(last, getDateIndex(state, date), (value) => value + diff);
+const setCost =
+  (state: State, date: Date, diff: number) =>
+  (last: number[]): number[] =>
+    replaceAtIndex(last, getDateIndex(state, date), (value) => value + diff);
 
-const withInvestments = (delta: Partial<StandardInput> | null, item?: StandardInput | null) => (
-  state: State,
-): State => ({
-  ...state,
-  monthly: {
-    ...state.monthly,
-    investmentPurchases: compose(
-      setCost(
-        state,
-        delta?.date ?? item?.date ?? new Date(),
-        delta?.category && investmentPurchaseCategories.includes(delta.category)
-          ? delta.cost ?? item?.cost ?? 0
-          : 0,
-      ),
-      setCost(
-        state,
-        item?.date ?? new Date(),
-        item?.category && investmentPurchaseCategories.includes(item.category)
-          ? -(item?.cost ?? 0)
-          : 0,
-      ),
-    )(state.monthly.investmentPurchases),
-  },
-});
+const withInvestments =
+  (delta: Partial<StandardInput> | null, item?: StandardInput | null) =>
+  (state: State): State => ({
+    ...state,
+    monthly: {
+      ...state.monthly,
+      investmentPurchases: compose(
+        setCost(
+          state,
+          delta?.date ?? item?.date ?? new Date(),
+          delta?.category && investmentPurchaseCategories.includes(delta.category)
+            ? delta.cost ?? item?.cost ?? 0
+            : 0,
+        ),
+        setCost(
+          state,
+          item?.date ?? new Date(),
+          item?.category && investmentPurchaseCategories.includes(item.category)
+            ? -(item?.cost ?? 0)
+            : 0,
+        ),
+      )(state.monthly.investmentPurchases),
+    },
+  });
 
 const onCreate = (state: State, action: ListItemCreated<StandardInput, PageListStandard>): State =>
   withInvestments(action.delta)(

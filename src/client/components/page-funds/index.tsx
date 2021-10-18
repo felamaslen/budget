@@ -68,11 +68,13 @@ const itemProcessor = (fund: FundInput): Pick<FundProps, 'isSold'> => ({
 
 type SortItems = (funds: Fund[], props: { [id: string]: Partial<FundProps> }) => Fund[];
 
-const makeSortItems = ({ criteria, direction }: Sort): SortItems => (funds, props): Fund[] =>
-  [...funds].sort(
-    ({ id: idA }, { id: idB }) =>
-      direction * ((props[idB]?.gain?.[criteria] ?? 0) - (props[idA]?.gain?.[criteria] ?? 0)),
-  );
+const makeSortItems =
+  ({ criteria, direction }: Sort): SortItems =>
+  (funds, props): Fund[] =>
+    [...funds].sort(
+      ({ id: idA }, { id: idB }) =>
+        direction * ((props[idB]?.gain?.[criteria] ?? 0) - (props[idA]?.gain?.[criteria] ?? 0)),
+    );
 
 export const Funds: React.FC<RouteComponentProps> = () => {
   const isMobile = useIsMobile();

@@ -36,14 +36,14 @@ describe('Analysis hooks', () => {
       expect.assertions(1);
       const expectedResult: AnalysisSortedTree<MainBlockName>[] = [
         {
-          name: (PageListStandard.General as string) as MainBlockName,
+          name: PageListStandard.General as string as MainBlockName,
           derived: false,
           color: colors[PageListStandard.General].main,
           subTree: [{ name: 'foo1_bar1', total: 1642283 }],
           total: 1642283,
         },
         {
-          name: (PageListStandard.Food as string) as MainBlockName,
+          name: PageListStandard.Food as string as MainBlockName,
           derived: false,
           color: colors[PageListStandard.Food].main,
           subTree: [

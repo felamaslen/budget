@@ -6,7 +6,7 @@ import type { Id, SetActiveId, WithIds } from '~client/types';
 export type ItemComponent<
   I extends Record<string, unknown>,
   J extends WithIds<I>,
-  E extends Record<string, unknown>
+  E extends Record<string, unknown>,
 > = React.FC<
   E &
     Pick<CrudProps<I>, 'onUpdate'> & {
@@ -23,7 +23,7 @@ export type ItemComponent<
 export type Props<
   I extends Record<string, unknown>,
   J extends WithIds<I> = WithIds<I>,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 > = Omit<CrudProps<I>, 'onCreate'> & {
   activeId: number | null;
   item: J;
@@ -36,7 +36,7 @@ export type Props<
 const CrudListItem = <
   I extends Record<string, unknown>,
   J extends WithIds<I>,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 >({
   activeId,
   item,
