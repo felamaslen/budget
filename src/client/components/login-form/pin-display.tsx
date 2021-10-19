@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useCallback } from 'react';
 import * as Styled from './styles';
 import { LOGIN_INPUT_LENGTH } from '~client/constants/data';
 
-type Props = {
+export type Props = {
   inputStep: number;
   onInput: (value: number, index: number) => void;
   onFocus: (index: number) => void;
