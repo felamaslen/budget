@@ -8,6 +8,7 @@
     "node": "14"
   },
   "scripts": {
+    "prepare": "husky install",
     "check-types": "tsc",
     "check-types:watch": "yarn check-types --watch",
     "gen-gql-types": "graphql-codegen --config codegen.yml",
@@ -54,20 +55,15 @@
     "url": "https://github.com/felamaslen/budget/issues"
   },
   "homepage": "https://github.com/felamaslen/budget#readme",
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
-    "*.js": [
-      "eslint --fix"
-    ],
+    "*.js": "eslint --cache --fix",
     "*.ts": [
-      "eslint --fix"
+      "eslint --fix",
+      "prettier --write"
     ],
     "*.tsx": [
-      "eslint --fix"
+      "eslint --fix",
+      "prettier --write"
     ]
   },
   "dependencies": {
@@ -259,7 +255,7 @@
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.2.0",
     "file-loader": "^6.2.0",
-    "husky": "^4.2.3",
+    "husky": "^7.0.0",
     "ioredis-mock": "^5.6.0",
     "istanbul-api": "^3.0.0",
     "istanbul-lib-coverage": "^3.0.0",
