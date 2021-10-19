@@ -1,12 +1,12 @@
 import {
+  cacheExchange,
   Client,
   createClient,
   dedupExchange,
-  cacheExchange,
+  Exchange,
   fetchExchange,
   ssrExchange,
   subscriptionExchange,
-  Exchange,
 } from '@urql/core';
 import { createClient as createWSClient, Sink } from 'graphql-ws';
 import React, { useMemo, useRef } from 'react';
@@ -14,21 +14,21 @@ import { Provider } from 'urql';
 
 import { isServerSide } from '~client/modules/ssr';
 
-function getWSUrl(): string {
+const getWSUrl = (): string => {
   const isSecure = isServerSide ? null : window.location.protocol === 'https:';
   return isServerSide ? '' : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
-}
+};
 
-const ssr = isServerSide
+export type SSRExchange = ReturnType<typeof ssrExchange>;
+
+type ClientProps = { apiKey: string | null; onReconnected?: () => void };
+
+export const ssr = isServerSide
   ? undefined
   : ssrExchange({
       isClient: true,
       initialState: window.__URQL_DATA__,
     });
-
-export type SSRExchange = ReturnType<typeof ssrExchange>;
-
-type ClientProps = { apiKey: string | null; onReconnected?: () => void };
 
 export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconnected }) => {
   const hasConnected = useRef<boolean>(false);

@@ -37,6 +37,7 @@ describe('GQLProvider', () => {
     }
     type Query {
       hello: String
+      authenticatedHello: String
     }
     type Mutation {
       broadcastGreeting(index: Int!): BroadcastGreeting
@@ -48,6 +49,8 @@ describe('GQLProvider', () => {
     resolvers: {
       Query: {
         hello: (): string => 'Hello world!',
+        authenticatedHello: (_, __, req): string =>
+          req.headers.authorization === myApiKey ? 'You are authorised' : 'Unauthorised',
       },
       Mutation: {
         broadcastGreeting: (_, { index }): { ok: boolean } => {
@@ -210,6 +213,67 @@ describe('GQLProvider', () => {
     await waitFor(() => {
       expect(JSON.parse(getByTestId('test-subscription-data').innerHTML)).toStrictEqual({
         greetings: 'Bienvenido',
+      });
+    });
+  });
+
+  describe('Authenticated queries', () => {
+    const testQueryAuth = gql`
+      query TestQueryAuth {
+        authenticatedHello
+      }
+    `;
+
+    const TestComponentAuth: React.FC = () => {
+      const [resQuery, runTestQuery] = useQuery({
+        query: testQueryAuth,
+      });
+
+      return (
+        <>
+          <button onClick={runTestQuery}>Run test query</button>
+          <pre data-testid="test-query-data">{JSON.stringify(resQuery.data ?? null)}</pre>
+        </>
+      );
+    };
+
+    describe('when the API key is defined and correct', () => {
+      it('should return an authenticated response', async () => {
+        expect.hasAssertions();
+
+        const { getByTestId } = render(
+          <GQLProvider apiKey={myApiKey}>
+            <TestComponentAuth />
+          </GQLProvider>,
+        );
+
+        await waitFor(() => {
+          expect(JSON.parse(getByTestId('test-query-data').innerHTML)).toStrictEqual({
+            authenticatedHello: 'You are authorised',
+          });
+        });
+      });
+    });
+
+    describe.each`
+      case                          | apiKey
+      ${'there is no API key'}      | ${''}
+      ${'the API key is incorrect'} | ${`NOT-${myApiKey}`}
+    `('when $case', ({ apiKey }) => {
+      it('should return an unauthorised response', async () => {
+        expect.hasAssertions();
+
+        const { getByTestId } = render(
+          <GQLProvider apiKey={apiKey}>
+            <TestComponentAuth />
+          </GQLProvider>,
+        );
+
+        await waitFor(() => {
+          expect(JSON.parse(getByTestId('test-query-data').innerHTML)).toStrictEqual({
+            authenticatedHello: 'Unauthorised',
+          });
+        });
       });
     });
   });
