@@ -23,45 +23,45 @@ export enum AnalysisGroupBy {
 }
 
 export enum AnalysisPage {
-  Income = 'income',
   Bills = 'bills',
   Food = 'food',
   General = 'general',
   Holiday = 'holiday',
+  Income = 'income',
   Social = 'social'
 }
 
 export enum AnalysisPeriod {
-  Year = 'year',
   Month = 'month',
-  Week = 'week'
+  Week = 'week',
+  Year = 'year'
 }
 
 export type AnalysisResponse = {
   __typename?: 'AnalysisResponse';
   cost: Array<CategoryCostTree>;
   description: Scalars['String'];
-  startDate: Scalars['Date'];
   endDate: Scalars['Date'];
+  startDate: Scalars['Date'];
 };
 
 export type AppConfig = {
   __typename?: 'AppConfig';
   birthDate: Scalars['String'];
-  futureMonths: Scalars['Int'];
-  realTimePrices: Scalars['Boolean'];
+  fundLength?: Maybe<Scalars['NonNegativeInt']>;
   fundMode?: Maybe<FundMode>;
   fundPeriod?: Maybe<FundPeriod>;
-  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+  futureMonths: Scalars['Int'];
+  realTimePrices: Scalars['Boolean'];
 };
 
 export type AppConfigInput = {
   birthDate?: Maybe<Scalars['Date']>;
-  futureMonths?: Maybe<Scalars['Int']>;
-  realTimePrices?: Maybe<Scalars['Boolean']>;
+  fundLength?: Maybe<Scalars['NonNegativeInt']>;
   fundMode?: Maybe<FundMode>;
   fundPeriod?: Maybe<FundPeriod>;
-  fundLength?: Maybe<Scalars['NonNegativeInt']>;
+  futureMonths?: Maybe<Scalars['Int']>;
+  realTimePrices?: Maybe<Scalars['Boolean']>;
 };
 
 export type AppConfigSet = {
@@ -140,24 +140,13 @@ export type ExchangeRatesResponse = {
   rates?: Maybe<Array<ExchangeRate>>;
 };
 
-export type FxValue = {
-  __typename?: 'FXValue';
-  value: Scalars['Float'];
-  currency: Scalars['String'];
-};
-
-export type FxValueInput = {
-  value: Scalars['Float'];
-  currency: Scalars['String'];
-};
-
 export type Fund = {
   __typename?: 'Fund';
+  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
   id: Scalars['Int'];
   item: Scalars['String'];
-  transactions: Array<Transaction>;
-  allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
   stockSplits: Array<StockSplit>;
+  transactions: Array<Transaction>;
 };
 
 export type FundCreatedSubscription = {
@@ -168,11 +157,11 @@ export type FundCreatedSubscription = {
 
 export type FundHistory = {
   __typename?: 'FundHistory';
-  startTime: Scalars['Int'];
-  cacheTimes: Array<Scalars['Int']>;
-  prices: Array<FundPrices>;
   annualisedFundReturns: Scalars['Float'];
+  cacheTimes: Array<Scalars['Int']>;
   overviewCost: Array<Scalars['Int']>;
+  prices: Array<FundPrices>;
+  startTime: Scalars['Int'];
 };
 
 export type FundHistoryIndividual = {
@@ -181,24 +170,24 @@ export type FundHistoryIndividual = {
 };
 
 export type FundInput = {
-  item: Scalars['String'];
-  transactions: Array<TransactionInput>;
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
+  item: Scalars['String'];
   stockSplits?: Maybe<Array<StockSplitInput>>;
+  transactions: Array<TransactionInput>;
 };
 
 export enum FundMode {
-  Roi = 'ROI',
-  Value = 'Value',
-  Stacked = 'Stacked',
   Allocation = 'Allocation',
   Price = 'Price',
-  PriceNormalised = 'PriceNormalised'
+  PriceNormalised = 'PriceNormalised',
+  Roi = 'ROI',
+  Stacked = 'Stacked',
+  Value = 'Value'
 }
 
 export enum FundPeriod {
-  Year = 'year',
   Month = 'month',
+  Year = 'year',
   Ytd = 'ytd'
 }
 
@@ -217,9 +206,9 @@ export type FundPrices = {
 export type FundSubscription = {
   __typename?: 'FundSubscription';
   created?: Maybe<FundCreatedSubscription>;
-  updated?: Maybe<Fund>;
   deleted?: Maybe<Scalars['NonNegativeInt']>;
   overviewCost: Array<Scalars['Int']>;
+  updated?: Maybe<Fund>;
 };
 
 export type FundValueIndividual = {
@@ -228,15 +217,26 @@ export type FundValueIndividual = {
   price: Scalars['NonNegativeFloat'];
 };
 
+export type FxValue = {
+  __typename?: 'FXValue';
+  currency: Scalars['String'];
+  value: Scalars['Float'];
+};
+
+export type FxValueInput = {
+  currency: Scalars['String'];
+  value: Scalars['Float'];
+};
+
 export type Income = {
   __typename?: 'Income';
-  id: Scalars['Int'];
-  date: Scalars['Date'];
-  item: Scalars['String'];
   category: Scalars['String'];
   cost: Scalars['Int'];
-  shop: Scalars['String'];
+  date: Scalars['Date'];
   deductions: Array<IncomeDeduction>;
+  id: Scalars['Int'];
+  item: Scalars['String'];
+  shop: Scalars['String'];
 };
 
 export type IncomeCreatedSubscription = {
@@ -257,12 +257,12 @@ export type IncomeDeductionInput = {
 };
 
 export type IncomeInput = {
-  date: Scalars['String'];
-  item: Scalars['String'];
-  cost: Scalars['Int'];
   category: Scalars['String'];
-  shop: Scalars['String'];
+  cost: Scalars['Int'];
+  date: Scalars['String'];
   deductions: Array<IncomeDeductionInput>;
+  item: Scalars['String'];
+  shop: Scalars['String'];
 };
 
 export type IncomeReadResponse = {
@@ -270,17 +270,17 @@ export type IncomeReadResponse = {
   error?: Maybe<Scalars['String']>;
   items: Array<Income>;
   olderExists?: Maybe<Scalars['Boolean']>;
-  weekly?: Maybe<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
+  weekly?: Maybe<Scalars['Int']>;
 };
 
 export type IncomeSubscription = {
   __typename?: 'IncomeSubscription';
   created?: Maybe<IncomeCreatedSubscription>;
-  updated?: Maybe<Income>;
   deleted?: Maybe<Scalars['NonNegativeInt']>;
   overviewCost: Array<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
+  updated?: Maybe<Income>;
   weekly?: Maybe<Scalars['Int']>;
 };
 
@@ -303,11 +303,11 @@ export type ListItemInput = {
 
 export type ListItemStandard = {
   __typename?: 'ListItemStandard';
-  id: Scalars['Int'];
-  date: Scalars['Date'];
-  item: Scalars['String'];
   category: Scalars['String'];
   cost: Scalars['Int'];
+  date: Scalars['Date'];
+  id: Scalars['Int'];
+  item: Scalars['String'];
   shop: Scalars['String'];
 };
 
@@ -318,10 +318,10 @@ export type ListItemStandardCreatedSubscription = {
 };
 
 export type ListItemStandardInput = {
+  category: Scalars['String'];
+  cost: Scalars['Int'];
   date: Scalars['String'];
   item: Scalars['String'];
-  cost: Scalars['Int'];
-  category: Scalars['String'];
   shop: Scalars['String'];
 };
 
@@ -330,18 +330,18 @@ export type ListReadResponse = {
   error?: Maybe<Scalars['String']>;
   items: Array<ListItemStandard>;
   olderExists?: Maybe<Scalars['Boolean']>;
-  weekly?: Maybe<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
+  weekly?: Maybe<Scalars['Int']>;
 };
 
 export type ListSubscription = {
   __typename?: 'ListSubscription';
-  page: PageListStandard;
   created?: Maybe<ListItemStandardCreatedSubscription>;
-  updated?: Maybe<ListItemStandard>;
   deleted?: Maybe<Scalars['NonNegativeInt']>;
   overviewCost: Array<Scalars['Int']>;
+  page: PageListStandard;
   total?: Maybe<Scalars['Int']>;
+  updated?: Maybe<ListItemStandard>;
   weekly?: Maybe<Scalars['Int']>;
 };
 
@@ -354,26 +354,26 @@ export type ListTotalsResponse = {
 
 export type LoanValue = {
   __typename?: 'LoanValue';
-  principal: Scalars['NonNegativeInt'];
-  paymentsRemaining: Scalars['NonNegativeInt'];
-  rate: Scalars['Float'];
   paid?: Maybe<Scalars['Int']>;
+  paymentsRemaining: Scalars['NonNegativeInt'];
+  principal: Scalars['NonNegativeInt'];
+  rate: Scalars['Float'];
 };
 
 export type LoanValueInput = {
-  principal: Scalars['NonNegativeInt'];
-  paymentsRemaining: Scalars['NonNegativeInt'];
-  rate: Scalars['Float'];
   paid?: Maybe<Scalars['Int']>;
+  paymentsRemaining: Scalars['NonNegativeInt'];
+  principal: Scalars['NonNegativeInt'];
+  rate: Scalars['Float'];
 };
 
 export type LoginResponse = {
   __typename?: 'LoginResponse';
-  error?: Maybe<Scalars['String']>;
-  uid?: Maybe<Scalars['Int']>;
-  name?: Maybe<Scalars['String']>;
   apiKey?: Maybe<Scalars['String']>;
+  error?: Maybe<Scalars['String']>;
   expires?: Maybe<Scalars['DateTime']>;
+  name?: Maybe<Scalars['String']>;
+  uid?: Maybe<Scalars['Int']>;
 };
 
 export type LogoutResponse = {
@@ -384,24 +384,24 @@ export type LogoutResponse = {
 
 export type Monthly = {
   __typename?: 'Monthly';
-  investmentPurchases: Array<Scalars['Int']>;
-  income: Array<Scalars['Int']>;
   bills: Array<Scalars['Int']>;
   food: Array<Scalars['Int']>;
   general: Array<Scalars['Int']>;
   holiday: Array<Scalars['Int']>;
+  income: Array<Scalars['Int']>;
+  investmentPurchases: Array<Scalars['Int']>;
   social: Array<Scalars['Int']>;
 };
 
 export enum MonthlyCategory {
-  Stocks = 'stocks',
-  Income = 'income',
-  Spending = 'spending',
   Bills = 'bills',
   Food = 'food',
   General = 'general',
   Holiday = 'holiday',
-  Social = 'social'
+  Income = 'income',
+  Social = 'social',
+  Spending = 'spending',
+  Stocks = 'stocks'
 }
 
 export type Mutation = {
@@ -447,9 +447,9 @@ export type MutationCreateIncomeArgs = {
 
 
 export type MutationCreateListItemArgs = {
-  page: PageListStandard;
   fakeId: Scalars['Int'];
   input: ListItemStandardInput;
+  page: PageListStandard;
 };
 
 
@@ -470,8 +470,8 @@ export type MutationCreateNetWorthSubcategoryArgs = {
 
 export type MutationCreateReceiptArgs = {
   date: Scalars['Date'];
-  shop: Scalars['String'];
   items: Array<ReceiptInput>;
+  shop: Scalars['String'];
 };
 
 
@@ -486,8 +486,8 @@ export type MutationDeleteIncomeArgs = {
 
 
 export type MutationDeleteListItemArgs = {
-  page: PageListStandard;
   id: Scalars['Int'];
+  page: PageListStandard;
 };
 
 
@@ -517,8 +517,8 @@ export type MutationSetConfigArgs = {
 
 
 export type MutationSyncPlanningArgs = {
-  year: Scalars['NonNegativeInt'];
   input?: Maybe<PlanningSync>;
+  year: Scalars['NonNegativeInt'];
 };
 
 
@@ -545,9 +545,9 @@ export type MutationUpdateIncomeArgs = {
 
 
 export type MutationUpdateListItemArgs = {
-  page: PageListStandard;
   id: Scalars['Int'];
   input: ListItemStandardInput;
+  page: PageListStandard;
 };
 
 
@@ -571,20 +571,20 @@ export type MutationUpdateNetWorthSubcategoryArgs = {
 export type NetWorthCashTotal = {
   __typename?: 'NetWorthCashTotal';
   cashInBank: Scalars['Int'];
-  stockValue: Scalars['Int'];
-  stocksIncludingCash: Scalars['Int'];
   date?: Maybe<Scalars['Date']>;
   incomeSince: Scalars['Int'];
   spendingSince: Scalars['Int'];
+  stocksIncludingCash: Scalars['Int'];
+  stockValue: Scalars['Int'];
 };
 
 export type NetWorthCategory = {
   __typename?: 'NetWorthCategory';
-  id: Scalars['Int'];
-  type: NetWorthCategoryType;
   category: Scalars['String'];
   color: Scalars['String'];
+  id: Scalars['Int'];
   isOption?: Maybe<Scalars['Boolean']>;
+  type: NetWorthCategoryType;
 };
 
 export type NetWorthCategoryCreated = {
@@ -594,10 +594,10 @@ export type NetWorthCategoryCreated = {
 };
 
 export type NetWorthCategoryInput = {
-  type: NetWorthCategoryType;
   category: Scalars['String'];
   color: Scalars['String'];
   isOption?: Maybe<Scalars['Boolean']>;
+  type: NetWorthCategoryType;
 };
 
 export enum NetWorthCategoryType {
@@ -619,11 +619,11 @@ export type NetWorthDeleted = {
 
 export type NetWorthEntry = {
   __typename?: 'NetWorthEntry';
-  id: Scalars['Int'];
-  date: Scalars['Date'];
-  values: Array<NetWorthValueObject>;
   creditLimit: Array<CreditLimit>;
   currencies: Array<Currency>;
+  date: Scalars['Date'];
+  id: Scalars['Int'];
+  values: Array<NetWorthValueObject>;
 };
 
 export type NetWorthEntryCreated = {
@@ -633,10 +633,10 @@ export type NetWorthEntryCreated = {
 };
 
 export type NetWorthEntryInput = {
-  date: Scalars['Date'];
-  values: Array<NetWorthValueInput>;
   creditLimit: Array<CreditLimitInput>;
   currencies: Array<CurrencyInput>;
+  date: Scalars['Date'];
+  values: Array<NetWorthValueInput>;
 };
 
 export type NetWorthEntryOverview = {
@@ -656,27 +656,27 @@ export type NetWorthLoan = {
   values: Array<NetWorthLoanValue>;
 };
 
-export type NetWorthLoanValue = {
-  __typename?: 'NetWorthLoanValue';
-  date: Scalars['Date'];
-  value: LoanValue;
-};
-
 export type NetWorthLoansResponse = {
   __typename?: 'NetWorthLoansResponse';
   error?: Maybe<Scalars['String']>;
   loans?: Maybe<Array<NetWorthLoan>>;
 };
 
+export type NetWorthLoanValue = {
+  __typename?: 'NetWorthLoanValue';
+  date: Scalars['Date'];
+  value: LoanValue;
+};
+
 export type NetWorthSubcategory = {
   __typename?: 'NetWorthSubcategory';
-  id: Scalars['Int'];
-  categoryId: Scalars['Int'];
-  subcategory: Scalars['String'];
-  hasCreditLimit?: Maybe<Scalars['Boolean']>;
   appreciationRate?: Maybe<Scalars['Float']>;
+  categoryId: Scalars['Int'];
+  hasCreditLimit?: Maybe<Scalars['Boolean']>;
+  id: Scalars['Int'];
   isSAYE?: Maybe<Scalars['Boolean']>;
   opacity?: Maybe<Scalars['Float']>;
+  subcategory: Scalars['String'];
 };
 
 export type NetWorthSubcategoryCreated = {
@@ -686,12 +686,12 @@ export type NetWorthSubcategoryCreated = {
 };
 
 export type NetWorthSubcategoryInput = {
-  categoryId: Scalars['Int'];
-  subcategory: Scalars['String'];
-  hasCreditLimit?: Maybe<Scalars['Boolean']>;
   appreciationRate?: Maybe<Scalars['Float']>;
+  categoryId: Scalars['Int'];
+  hasCreditLimit?: Maybe<Scalars['Boolean']>;
   isSAYE?: Maybe<Scalars['Boolean']>;
   opacity?: Maybe<Scalars['Float']>;
+  subcategory: Scalars['String'];
 };
 
 export type NetWorthSubcategoryUpdated = {
@@ -701,67 +701,67 @@ export type NetWorthSubcategoryUpdated = {
 };
 
 export type NetWorthValueInput = {
-  subcategory: Scalars['Int'];
-  skip?: Maybe<Scalars['Boolean']>;
-  simple?: Maybe<Scalars['Int']>;
   fx?: Maybe<Array<FxValueInput>>;
-  option?: Maybe<OptionValueInput>;
   loan?: Maybe<LoanValueInput>;
+  option?: Maybe<OptionValueInput>;
+  simple?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Boolean']>;
+  subcategory: Scalars['Int'];
 };
 
 export type NetWorthValueObject = {
   __typename?: 'NetWorthValueObject';
-  subcategory: Scalars['Int'];
-  skip?: Maybe<Scalars['Boolean']>;
-  value: Scalars['Int'];
-  simple?: Maybe<Scalars['Int']>;
   fx?: Maybe<Array<FxValue>>;
-  option?: Maybe<OptionValue>;
   loan?: Maybe<LoanValue>;
+  option?: Maybe<OptionValue>;
+  simple?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Boolean']>;
+  subcategory: Scalars['Int'];
+  value: Scalars['Int'];
 };
 
 
 
 export type OptionValue = {
   __typename?: 'OptionValue';
-  units: Scalars['NonNegativeInt'];
-  strikePrice: Scalars['NonNegativeFloat'];
   marketPrice: Scalars['NonNegativeFloat'];
+  strikePrice: Scalars['NonNegativeFloat'];
+  units: Scalars['NonNegativeInt'];
   vested: Scalars['NonNegativeInt'];
 };
 
 export type OptionValueInput = {
-  units: Scalars['NonNegativeInt'];
-  strikePrice: Scalars['NonNegativeFloat'];
   marketPrice: Scalars['NonNegativeFloat'];
+  strikePrice: Scalars['NonNegativeFloat'];
+  units: Scalars['NonNegativeInt'];
   vested?: Maybe<Scalars['NonNegativeInt']>;
 };
 
 export type Overview = {
   __typename?: 'Overview';
-  startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  monthly: Monthly;
   futureIncome: Array<Scalars['Int']>;
   initialCumulativeValues: InitialCumulativeValues;
+  monthly: Monthly;
+  startDate: Scalars['Date'];
 };
 
 export type OverviewOld = {
   __typename?: 'OverviewOld';
-  startDate: Scalars['Date'];
   assets: Array<Scalars['Int']>;
-  liabilities: Array<Scalars['Int']>;
-  netWorth: Array<Scalars['Int']>;
-  stocks: Array<Scalars['Int']>;
-  investmentPurchases: Array<Scalars['Int']>;
-  pension: Array<Scalars['Int']>;
   cashLiquid: Array<Scalars['Int']>;
   cashOther: Array<Scalars['Int']>;
-  investments: Array<Scalars['Int']>;
   illiquidEquity: Array<Scalars['Int']>;
-  options: Array<Scalars['Int']>;
   income: Array<Scalars['Int']>;
+  investmentPurchases: Array<Scalars['Int']>;
+  investments: Array<Scalars['Int']>;
+  liabilities: Array<Scalars['Int']>;
+  netWorth: Array<Scalars['Int']>;
+  options: Array<Scalars['Int']>;
+  pension: Array<Scalars['Int']>;
   spending: Array<Scalars['Int']>;
+  startDate: Scalars['Date'];
+  stocks: Array<Scalars['Int']>;
 };
 
 export type OverviewPreview = {
@@ -771,49 +771,49 @@ export type OverviewPreview = {
 };
 
 export enum PageListStandard {
-  Income = 'income',
   Bills = 'bills',
   Food = 'food',
   General = 'general',
-  Social = 'social',
-  Holiday = 'holiday'
+  Holiday = 'holiday',
+  Income = 'income',
+  Social = 'social'
 }
 
 export type PlanningAccount = {
   __typename?: 'PlanningAccount';
-  id: Scalars['NonNegativeInt'];
   account: Scalars['String'];
-  netWorthSubcategoryId: Scalars['NonNegativeInt'];
-  income: Array<PlanningIncome>;
-  creditCards: Array<PlanningCreditCard>;
-  values: Array<PlanningValue>;
-  computedValues: Array<PlanningComputedValue>;
   computedStartValue?: Maybe<Scalars['Int']>;
-  upperLimit?: Maybe<Scalars['Int']>;
-  lowerLimit?: Maybe<Scalars['Int']>;
+  computedValues: Array<PlanningComputedValue>;
+  creditCards: Array<PlanningCreditCard>;
+  id: Scalars['NonNegativeInt'];
   includeBills?: Maybe<Scalars['Boolean']>;
+  income: Array<PlanningIncome>;
+  lowerLimit?: Maybe<Scalars['Int']>;
+  netWorthSubcategoryId: Scalars['NonNegativeInt'];
+  upperLimit?: Maybe<Scalars['Int']>;
+  values: Array<PlanningValue>;
 };
 
 export type PlanningAccountInput = {
-  id?: Maybe<Scalars['NonNegativeInt']>;
   account: Scalars['String'];
-  netWorthSubcategoryId: Scalars['NonNegativeInt'];
-  income: Array<PlanningIncomeInput>;
   creditCards: Array<PlanningCreditCardInput>;
-  values: Array<PlanningValueInput>;
-  upperLimit?: Maybe<Scalars['Int']>;
-  lowerLimit?: Maybe<Scalars['Int']>;
+  id?: Maybe<Scalars['NonNegativeInt']>;
   includeBills?: Maybe<Scalars['Boolean']>;
+  income: Array<PlanningIncomeInput>;
+  lowerLimit?: Maybe<Scalars['Int']>;
+  netWorthSubcategoryId: Scalars['NonNegativeInt'];
+  upperLimit?: Maybe<Scalars['Int']>;
+  values: Array<PlanningValueInput>;
 };
 
 export type PlanningComputedValue = {
   __typename?: 'PlanningComputedValue';
+  isTransfer: Scalars['Boolean'];
+  isVerified: Scalars['Boolean'];
   key: Scalars['String'];
   month: Scalars['NonNegativeInt'];
   name: Scalars['String'];
   value: Scalars['Int'];
-  isVerified: Scalars['Boolean'];
-  isTransfer: Scalars['Boolean'];
 };
 
 export type PlanningCreditCard = {
@@ -845,23 +845,23 @@ export type PlanningCreditCardPaymentInput = {
 
 export type PlanningIncome = {
   __typename?: 'PlanningIncome';
-  id: Scalars['NonNegativeInt'];
-  startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  salary: Scalars['NonNegativeInt'];
-  taxCode: Scalars['String'];
+  id: Scalars['NonNegativeInt'];
   pensionContrib: Scalars['Float'];
+  salary: Scalars['NonNegativeInt'];
+  startDate: Scalars['Date'];
   studentLoan: Scalars['Boolean'];
+  taxCode: Scalars['String'];
 };
 
 export type PlanningIncomeInput = {
-  id?: Maybe<Scalars['NonNegativeInt']>;
-  startDate: Scalars['Date'];
   endDate: Scalars['Date'];
-  salary: Scalars['NonNegativeInt'];
-  taxCode: Scalars['String'];
+  id?: Maybe<Scalars['NonNegativeInt']>;
   pensionContrib: Scalars['Float'];
+  salary: Scalars['NonNegativeInt'];
+  startDate: Scalars['Date'];
   studentLoan: Scalars['Boolean'];
+  taxCode: Scalars['String'];
 };
 
 export type PlanningParameters = {
@@ -876,17 +876,17 @@ export type PlanningParametersInput = {
 };
 
 export type PlanningSync = {
-  parameters: PlanningParametersInput;
   accounts: Array<PlanningAccountInput>;
+  parameters: PlanningParametersInput;
 };
 
 export type PlanningSyncResponse = {
   __typename?: 'PlanningSyncResponse';
-  error?: Maybe<Scalars['String']>;
-  year?: Maybe<Scalars['NonNegativeInt']>;
-  parameters?: Maybe<PlanningParameters>;
   accounts?: Maybe<Array<PlanningAccount>>;
+  error?: Maybe<Scalars['String']>;
+  parameters?: Maybe<PlanningParameters>;
   taxReliefFromPreviousYear?: Maybe<Scalars['Int']>;
+  year?: Maybe<Scalars['NonNegativeInt']>;
 };
 
 export type PlanningTaxRateInput = {
@@ -901,21 +901,21 @@ export type PlanningTaxThresholdInput = {
 
 export type PlanningValue = {
   __typename?: 'PlanningValue';
+  formula?: Maybe<Scalars['String']>;
   id: Scalars['NonNegativeInt'];
   month: Scalars['NonNegativeInt'];
-  transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
   name: Scalars['String'];
+  transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
   value?: Maybe<Scalars['Int']>;
-  formula?: Maybe<Scalars['String']>;
 };
 
 export type PlanningValueInput = {
+  formula?: Maybe<Scalars['String']>;
   id?: Maybe<Scalars['NonNegativeInt']>;
   month: Scalars['NonNegativeInt'];
-  transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
   name: Scalars['String'];
+  transferToAccountId?: Maybe<Scalars['NonNegativeInt']>;
   value?: Maybe<Scalars['Int']>;
-  formula?: Maybe<Scalars['String']>;
 };
 
 
@@ -949,17 +949,17 @@ export type Query = {
 
 
 export type QueryAnalysisArgs = {
-  period: AnalysisPeriod;
   groupBy: AnalysisGroupBy;
   page?: Maybe<Scalars['Int']>;
+  period: AnalysisPeriod;
 };
 
 
 export type QueryAnalysisDeepArgs = {
   category: AnalysisPage;
-  period: AnalysisPeriod;
   groupBy: AnalysisGroupBy;
   page?: Maybe<Scalars['Int']>;
+  period: AnalysisPeriod;
 };
 
 
@@ -969,8 +969,8 @@ export type QueryExchangeRatesArgs = {
 
 
 export type QueryFundHistoryArgs = {
-  period?: Maybe<FundPeriod>;
   length?: Maybe<Scalars['NonNegativeInt']>;
+  period?: Maybe<FundPeriod>;
 };
 
 
@@ -996,15 +996,15 @@ export type QueryOverviewPreviewArgs = {
 
 
 export type QueryReadIncomeArgs = {
-  offset?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
 };
 
 
 export type QueryReadListArgs = {
-  page: PageListStandard;
-  offset?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  page: PageListStandard;
 };
 
 
@@ -1029,10 +1029,10 @@ export type QueryReceiptItemsArgs = {
 
 
 export type QuerySearchArgs = {
-  page: SearchPage;
   column: SearchItem;
-  searchTerm: Scalars['String'];
   numResults?: Maybe<Scalars['Int']>;
+  page: SearchPage;
+  searchTerm: Scalars['String'];
 };
 
 
@@ -1047,9 +1047,9 @@ export type ReadFundsResponse = {
 
 export type ReceiptCategory = {
   __typename?: 'ReceiptCategory';
+  category: Scalars['String'];
   item: Scalars['String'];
   page: ReceiptPage;
-  category: Scalars['String'];
 };
 
 export type ReceiptCreated = {
@@ -1059,20 +1059,20 @@ export type ReceiptCreated = {
 };
 
 export type ReceiptInput = {
-  page: ReceiptPage;
-  item: Scalars['String'];
   category: Scalars['String'];
   cost: Scalars['Int'];
+  item: Scalars['String'];
+  page: ReceiptPage;
 };
 
 export type ReceiptItem = {
   __typename?: 'ReceiptItem';
-  page: ReceiptPage;
-  id: Scalars['Int'];
-  date: Scalars['Date'];
-  item: Scalars['String'];
   category: Scalars['String'];
   cost: Scalars['Int'];
+  date: Scalars['Date'];
+  id: Scalars['Int'];
+  item: Scalars['String'];
+  page: ReceiptPage;
   shop: Scalars['String'];
 };
 
@@ -1083,27 +1083,27 @@ export enum ReceiptPage {
 }
 
 export enum SearchItem {
-  Item = 'item',
   Category = 'category',
+  Item = 'item',
   Shop = 'shop'
 }
 
 export enum SearchPage {
-  Income = 'income',
   Bills = 'bills',
   Food = 'food',
   General = 'general',
   Holiday = 'holiday',
+  Income = 'income',
   Social = 'social'
 }
 
 export type SearchResult = {
   __typename?: 'SearchResult';
   error?: Maybe<Scalars['String']>;
-  searchTerm?: Maybe<Scalars['String']>;
   list: Array<Scalars['String']>;
   nextCategory?: Maybe<Array<Scalars['String']>>;
   nextField?: Maybe<Scalars['String']>;
+  searchTerm?: Maybe<Scalars['String']>;
 };
 
 export type SimpleValue = {
@@ -1167,8 +1167,8 @@ export type Subscription = {
 
 
 export type SubscriptionFundPricesUpdatedArgs = {
-  period?: Maybe<FundPeriod>;
   length?: Maybe<Scalars['NonNegativeInt']>;
+  period?: Maybe<FundPeriod>;
 };
 
 
@@ -1177,14 +1177,14 @@ export type SubscriptionListChangedArgs = {
 };
 
 export type TargetDelta = {
-  id: Scalars['Int'];
   allocationTarget: Scalars['NonNegativeInt'];
+  id: Scalars['Int'];
 };
 
 export type TargetDeltaResponse = {
   __typename?: 'TargetDeltaResponse';
-  id: Scalars['Int'];
   allocationTarget: Scalars['NonNegativeInt'];
+  id: Scalars['Int'];
 };
 
 export type TaxRate = {
@@ -1202,28 +1202,28 @@ export type TaxThreshold = {
 export type Transaction = {
   __typename?: 'Transaction';
   date: Scalars['Date'];
-  units: Scalars['Float'];
-  price: Scalars['NonNegativeFloat'];
-  fees: Scalars['Int'];
-  taxes: Scalars['Int'];
   drip: Scalars['Boolean'];
+  fees: Scalars['Int'];
   pension: Scalars['Boolean'];
+  price: Scalars['NonNegativeFloat'];
+  taxes: Scalars['Int'];
+  units: Scalars['Float'];
 };
 
 export type TransactionInput = {
   date: Scalars['Date'];
-  units: Scalars['Float'];
-  price: Scalars['NonNegativeFloat'];
-  fees: Scalars['Int'];
-  taxes: Scalars['Int'];
   drip: Scalars['Boolean'];
+  fees: Scalars['Int'];
   pension: Scalars['Boolean'];
+  price: Scalars['NonNegativeFloat'];
+  taxes: Scalars['Int'];
+  units: Scalars['Float'];
 };
 
 export type UpdatedFundAllocationTargets = {
   __typename?: 'UpdatedFundAllocationTargets';
-  error?: Maybe<Scalars['String']>;
   deltas?: Maybe<Array<TargetDeltaResponse>>;
+  error?: Maybe<Scalars['String']>;
 };
 
 export type User = {
@@ -1233,8 +1233,8 @@ export type User = {
 
 export type UserInfo = {
   __typename?: 'UserInfo';
-  uid: Scalars['Int'];
   name: Scalars['String'];
+  uid: Scalars['Int'];
 };
 
 export type ConfigPartsFragment = (

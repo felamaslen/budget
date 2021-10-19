@@ -166,7 +166,7 @@
     "@emotion/babel-plugin": "^11.1.2",
     "@emotion/eslint-plugin": "^11.0.0",
     "@emotion/jest": "^11.1.0",
-    "@graphql-codegen/cli": "1.19.2",
+    "@graphql-codegen/cli": "^2.2.1",
     "@graphql-codegen/introspection": "^1.18.1",
     "@graphql-codegen/typescript": "1.17.11",
     "@graphql-codegen/typescript-operations": "^1.17.10",
