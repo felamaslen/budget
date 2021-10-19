@@ -12,7 +12,6 @@ module.exports = {
   },
   testMatch: ['**/*.spec.ts?(x)'],
   setupFilesAfterEnv: ['<rootDir>/src/client/test-utils/after-env.ts'],
-  setupFiles: ['<rootDir>/src/client/test-utils/fetch.ts'],
   coverageDirectory: 'coverage/client',
   collectCoverageFrom: [
     'src/client/**/*.{ts,tsx}',
