@@ -1,0 +1,101 @@
+import { Server } from 'http';
+import { addResolversToSchema } from '@graphql-tools/schema';
+import express, { Express } from 'express';
+import { graphqlHTTP } from 'express-graphql';
+import { buildSchema, execute, subscribe } from 'graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { useServer } from 'graphql-ws/lib/use/ws';
+import ws from 'ws';
+
+export const myApiKey = 'my-api-key';
+
+const TEST_PUBSUB_TOPIC = 'TEST_PUBSUB_TOPIC';
+
+const greetingsList = ['Hello', 'Hi', 'Bonjour', 'Bienvenido'];
+
+export const pubsub = new PubSub();
+
+const schema = addResolversToSchema({
+  schema: buildSchema(`
+  type BroadcastGreeting {
+    ok: Boolean!
+  }
+  type Query {
+    hello: String
+    authenticatedHello: String
+  }
+  type Mutation {
+    broadcastGreeting(index: Int!): BroadcastGreeting
+  }
+  type Subscription {
+    greetings: String
+  }
+  `),
+  resolvers: {
+    Query: {
+      hello: (): string => 'Hello world!',
+      authenticatedHello: (_, __, req): string =>
+        req.headers.authorization === myApiKey ? 'You are authorised' : 'Unauthorised',
+    },
+    Mutation: {
+      broadcastGreeting: (_, { index }): { ok: boolean } => {
+        pubsub.publish(TEST_PUBSUB_TOPIC, greetingsList[index % greetingsList.length]);
+        return { ok: true };
+      },
+    },
+    Subscription: {
+      greetings: {
+        subscribe: (): AsyncIterator<void> => pubsub.asyncIterator(TEST_PUBSUB_TOPIC),
+        resolve: (payload): unknown => payload,
+      },
+    },
+  },
+});
+
+export class MockServer {
+  app: Express;
+
+  server: Server | undefined;
+
+  wsServer: ws.Server | undefined;
+
+  constructor() {
+    this.app = express();
+    this.app.use((_, res, next) => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept',
+      );
+      next();
+    });
+    this.app.use('/graphql', graphqlHTTP({ schema }));
+  }
+
+  async setup(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.server = this.app.listen(4000, () => {
+        this.wsServer = new ws.Server({
+          server: this.server,
+          path: '/subscriptions',
+        });
+        useServer({ schema, execute, subscribe }, this.wsServer);
+      });
+
+      this.server.on('error', reject);
+      this.server.on('listening', resolve);
+    });
+  }
+
+  teardown(): void {
+    this.wsServer?.close();
+    this.server?.close();
+  }
+
+  async reconnectAfterDelay(delayMs = 50): Promise<void> {
+    this.teardown();
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    await this.setup();
+  }
+}

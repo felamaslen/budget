@@ -9,7 +9,7 @@ import {
   subscriptionExchange,
 } from '@urql/core';
 import { createClient as createWSClient, Sink } from 'graphql-ws';
-import React, { useMemo, useRef } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef } from 'react';
 import { Provider } from 'urql';
 
 import { isServerSide } from '~client/modules/ssr';
@@ -21,7 +21,10 @@ const getWSUrl = (): string => {
 
 export type SSRExchange = ReturnType<typeof ssrExchange>;
 
-type ClientProps = { apiKey: string | null; onReconnected?: () => void };
+type ClientProps = {
+  apiKey: string | null;
+  setConnectionAttempt?: Dispatch<SetStateAction<number>>;
+};
 
 export const ssr = isServerSide
   ? undefined
@@ -30,8 +33,15 @@ export const ssr = isServerSide
       initialState: window.__URQL_DATA__,
     });
 
-export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconnected }) => {
+export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, setConnectionAttempt }) => {
   const hasConnected = useRef<boolean>(false);
+  const onReconnected = useRef<ClientProps['setConnectionAttempt']>(setConnectionAttempt);
+  useEffect(
+    () => (): void => {
+      onReconnected.current = undefined;
+    },
+    [],
+  );
 
   const client = useMemo<Client>(() => {
     const graphqlUrl = `${window.location.protocol}//${window.location.host}/graphql`;
@@ -57,7 +67,7 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconne
       on: {
         connected: (): void => {
           if (hasConnected.current) {
-            onReconnected?.();
+            onReconnected.current?.((last) => last + 1);
           }
           hasConnected.current = true;
         },

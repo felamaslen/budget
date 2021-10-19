@@ -1,20 +1,13 @@
-import { Server } from 'http';
-import { addResolversToSchema } from '@graphql-tools/schema';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axios from 'axios';
-import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
-import { buildSchema, execute, subscribe } from 'graphql';
-import { PubSub } from 'graphql-subscriptions';
 import gql from 'graphql-tag';
-import { useServer } from 'graphql-ws/lib/use/ws';
 import nock from 'nock';
 import fetch from 'node-fetch';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useSubscription } from 'urql';
-import ws from 'ws';
 
+import { MockServer, myApiKey, pubsub } from './__tests__/utils';
 import { GQLProvider } from '.';
 
 jest.mock('~client/modules/ssr', () => ({
@@ -22,86 +15,19 @@ jest.mock('~client/modules/ssr', () => ({
 }));
 
 describe('GQLProvider', () => {
-  const myApiKey = 'my-api-key';
-
-  const pubsub = new PubSub();
-  const TEST_PUBSUB_TOPIC = 'TEST_PUBSUB_TOPIC';
-
-  // Ripped off the graphql-ws docs
-  const greetingsList = ['Hello', 'Hi', 'Bonjour', 'Bienvenido'];
-
-  const schema = addResolversToSchema({
-    schema: buildSchema(`
-    type BroadcastGreeting {
-      ok: Boolean!
-    }
-    type Query {
-      hello: String
-      authenticatedHello: String
-    }
-    type Mutation {
-      broadcastGreeting(index: Int!): BroadcastGreeting
-    }
-    type Subscription {
-      greetings: String
-    }
-    `),
-    resolvers: {
-      Query: {
-        hello: (): string => 'Hello world!',
-        authenticatedHello: (_, __, req): string =>
-          req.headers.authorization === myApiKey ? 'You are authorised' : 'Unauthorised',
-      },
-      Mutation: {
-        broadcastGreeting: (_, { index }): { ok: boolean } => {
-          pubsub.publish(TEST_PUBSUB_TOPIC, greetingsList[index % greetingsList.length]);
-          return { ok: true };
-        },
-      },
-      Subscription: {
-        greetings: {
-          subscribe: (): AsyncIterator<void> => pubsub.asyncIterator(TEST_PUBSUB_TOPIC),
-          resolve: (payload): unknown => payload,
-        },
-      },
-    },
-  });
-
-  const app = express();
-  let server: Server;
   let mockFetch: typeof global.fetch;
+  const mockServer = new MockServer();
 
   beforeAll(async () => {
     nock.enableNetConnect('localhost:4000');
     mockFetch = global.fetch;
     global.fetch = fetch as unknown as typeof global.fetch;
-    app.use((_, res, next) => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader(
-        'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept',
-      );
-      next();
-    });
-    app.use('/graphql', graphqlHTTP({ schema }));
 
-    await new Promise<void>((resolve, reject) => {
-      server = app.listen(4000, () => {
-        const wsServer = new ws.Server({
-          server,
-          path: '/subscriptions',
-        });
-        useServer({ schema, execute, subscribe }, wsServer);
-      });
-
-      server.on('error', reject);
-      server.on('listening', resolve);
-    });
+    await mockServer.setup();
   });
 
   afterAll(() => {
-    server?.close();
+    mockServer.teardown();
     global.fetch = mockFetch;
   });
 
@@ -217,7 +143,7 @@ describe('GQLProvider', () => {
     });
   });
 
-  describe('Authenticated queries', () => {
+  describe('authenticated queries', () => {
     const testQueryAuth = gql`
       query TestQueryAuth {
         authenticatedHello
@@ -275,6 +201,119 @@ describe('GQLProvider', () => {
           });
         });
       });
+    });
+  });
+
+  describe('when the socket disconnects', () => {
+    const ReconnectChild: React.FC<{ connectAttempt: number }> = ({ connectAttempt }) => {
+      const [resSubscription, resubscribe] = useSubscription({
+        query: testSubscription,
+      });
+
+      useEffect(() => {
+        if (connectAttempt > 0) {
+          resubscribe();
+        }
+      }, [connectAttempt, resubscribe]);
+
+      return (
+        <>
+          <span data-testid="subscription-data">
+            {JSON.stringify(resSubscription.data ?? null)}
+          </span>
+        </>
+      );
+    };
+
+    const ReconnectProvider: React.FC = () => {
+      const [connectAttempt, setConnectionAttempt] = useState<number>(0);
+      return (
+        <GQLProvider apiKey={myApiKey} setConnectionAttempt={setConnectionAttempt}>
+          <span data-testid="test-reconnect-attempt">{connectAttempt}</span>
+          <ReconnectChild connectAttempt={connectAttempt} />
+        </GQLProvider>
+      );
+    };
+
+    it('should attempt a reconnect, and call onReconnected', async () => {
+      expect.hasAssertions();
+
+      // set up reconnect provider
+      const subscribeSpy = jest.spyOn(pubsub, 'subscribe');
+      const { getByTestId, unmount } = render(<ReconnectProvider />);
+      await waitFor(() => {
+        expect(subscribeSpy).toHaveBeenCalledTimes(1);
+      });
+
+      await axios.post(
+        `http://localhost:4000/graphql?query=${encodeURIComponent(
+          `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
+        )}&variables=${encodeURIComponent(JSON.stringify({ index: 0 }))}`,
+      );
+
+      await waitFor(() => {
+        expect(JSON.parse(getByTestId('subscription-data').innerHTML)).toStrictEqual({
+          greetings: 'Hello',
+        });
+      });
+
+      expect(getByTestId('test-reconnect-attempt')).toHaveTextContent('0');
+
+      // initiate disconnect/reconnect cycle
+      await mockServer.reconnectAfterDelay(200);
+
+      await waitFor(() => {
+        expect(getByTestId('test-reconnect-attempt')).toHaveTextContent('1');
+      });
+
+      unmount();
+    });
+
+    it('should seamlessly restart subscriptions', async () => {
+      expect.hasAssertions();
+
+      // set up reconnect provider
+      const subscribeSpy = jest.spyOn(pubsub, 'subscribe');
+      const { getByTestId, unmount } = render(<ReconnectProvider />);
+      await waitFor(() => {
+        expect(subscribeSpy).toHaveBeenCalledTimes(1);
+      });
+
+      await axios.post(
+        `http://localhost:4000/graphql?query=${encodeURIComponent(
+          `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
+        )}&variables=${encodeURIComponent(JSON.stringify({ index: 0 }))}`,
+      );
+
+      await waitFor(() => {
+        expect(JSON.parse(getByTestId('subscription-data').innerHTML)).toStrictEqual({
+          greetings: 'Hello',
+        });
+      });
+
+      expect(getByTestId('test-reconnect-attempt')).toHaveTextContent('0');
+
+      // initiate disconnect/reconnect cycle
+      await mockServer.reconnectAfterDelay(200);
+
+      await waitFor(() => {
+        expect(subscribeSpy).toHaveBeenCalledTimes(2);
+      });
+
+      // trigger second subscription update through external mutation
+      await axios.post(
+        `http://localhost:4000/graphql?query=${encodeURIComponent(
+          `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
+        )}&variables=${encodeURIComponent(JSON.stringify({ index: 1 }))}`,
+      );
+
+      await waitFor(() => {
+        expect(JSON.parse(getByTestId('subscription-data').innerHTML)).toStrictEqual({
+          greetings: 'Hi',
+        });
+      });
+
+      unmount();
     });
   });
 });
