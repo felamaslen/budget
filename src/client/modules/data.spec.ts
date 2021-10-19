@@ -141,7 +141,7 @@ describe('data module', () => {
         key: keyof Transaction;
         newValue: Transaction[keyof Transaction];
       }) => {
-        expect.assertions(11);
+        expect.assertions(4);
 
         const modifiedTransactionsList = partialModification(transactionsList, index, {
           [key]: newValue,
@@ -154,20 +154,8 @@ describe('data module', () => {
           modifiedTransactionsList[index][key],
         );
 
-        // check that the new list was only updated where it needs to be
-        transactionsList.forEach((transaction, compareIndex) => {
-          if (compareIndex === index) {
-            (Object.keys(transaction) as (keyof Transaction)[]).forEach((compareKey) => {
-              if (compareKey !== key) {
-                expect(modifiedTransactionsList[compareIndex][compareKey]).toStrictEqual(
-                  transaction[compareKey],
-                );
-              }
-            });
-          } else {
-            expect(modifiedTransactionsList[compareIndex]).toBe(transaction);
-          }
-        });
+        expect(modifiedTransactionsList[index - 1]).toBe(transactionsList[index - 1]);
+        expect(modifiedTransactionsList[index + 1]).toBe(transactionsList[index + 1]);
       },
     );
 
