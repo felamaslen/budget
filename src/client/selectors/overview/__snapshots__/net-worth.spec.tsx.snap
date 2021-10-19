@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview selectors (net worth) getNetWorthBreakdown should return blocks 1`] = `
+exports[`overview selectors (net worth) getNetWorthBreakdown should return blocks 1`] = `
 Object {
   "box": Object {
     "flex": 1,
