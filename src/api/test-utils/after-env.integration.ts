@@ -28,17 +28,17 @@ jest.mock('ioredis', () => {
   };
 });
 
-let hasRun = false;
+const hasRunMap = new Map<'run', boolean>();
 
 beforeAll(async () => {
   nock.disableNetConnect();
   nock.enableNetConnect('127.0.0.1');
 
-  if (!hasRun) {
+  if (!hasRunMap.has('run')) {
     await migrator.up();
     await seedUser();
 
-    hasRun = true;
+    hasRunMap.set('run', true);
   }
 
   global.server = await getServer();
