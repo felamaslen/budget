@@ -29,7 +29,9 @@ export function useInitialData(): { loading: boolean; error: string | undefined 
   useEffect(() => {
     if (errorMessage) {
       dispatch(errorOpened(`Error loading data: ${errorMessage}`, ErrorLevel.Fatal));
-      console.error('Error loading data', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error loading data', error); // eslint-disable-line no-console
+      }
     }
   }, [dispatch, errorMessage, error]);
 
