@@ -263,7 +263,7 @@
     "ioredis-mock": "^5.6.0",
     "istanbul-api": "^3.0.0",
     "istanbul-lib-coverage": "^3.0.0",
-    "jest": "^27.2.4",
+    "jest": "^27.3.1",
     "jest-fetch-mock": "^3.0.3",
     "jest-matchmedia-mock": "^1.0.1",
     "lint-staged": "^10.0.8",
