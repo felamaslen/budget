@@ -273,14 +273,18 @@ describe('list controller', () => {
     describe('if there are older rows', () => {
       it('should return true', async () => {
         expect.assertions(1);
-        await expect(getOlderExists(db, testUserId, PageListStandard.Food, 100, 7)).resolves.toBe(true);
+        await expect(getOlderExists(db, testUserId, PageListStandard.Food, 100, 7)).resolves.toBe(
+          true,
+        );
       });
     });
 
     describe('if there are no older rows', () => {
       it('should return false', async () => {
         expect.assertions(1);
-        await expect(getOlderExists(db, testUserId, PageListStandard.Food, 100, 8)).resolves.toBe(false);
+        await expect(getOlderExists(db, testUserId, PageListStandard.Food, 100, 8)).resolves.toBe(
+          false,
+        );
       });
     });
   });
