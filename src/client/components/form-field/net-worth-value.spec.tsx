@@ -7,7 +7,7 @@ import { FormFieldNetWorthValue, Props } from './net-worth-value';
 import type { NetWorthValueInput } from '~client/types/gql';
 
 describe('<FormFieldNetWorthValue />', () => {
-  let setterResult: Record<string, unknown> = { base: 'kept' };
+  let setterResult: Record<string, unknown>;
   beforeEach(() => {
     setterResult = { base: 'kept' };
   });

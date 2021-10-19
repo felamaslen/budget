@@ -8,7 +8,7 @@ import { testState as state } from '~client/test-data';
 import type { LongTermOptions, OverviewGraphValues } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
-describe('Overview selectors', () => {
+describe('overview selectors', () => {
   const now = new Date('2018-03-23T11:54:23.127Z');
 
   describe('getOverviewGraphValues', () => {
@@ -164,13 +164,8 @@ describe('Overview selectors', () => {
       ];
 
       const pension = [
-        /* Jan-18 */ 0,
-        /* Feb-18 */ 10654,
-        /* Mar-18 */ 10654,
-        /* Apr-18 */ 10654,
-        /* May-18 */ 10654,
-        /* Jun-18 */ 10654,
-        /* Jul-18 */ 10654,
+        /* Jan-18 */ 0, /* Feb-18 */ 10654, /* Mar-18 */ 10654, /* Apr-18 */ 10654,
+        /* May-18 */ 10654, /* Jun-18 */ 10654, /* Jul-18 */ 10654,
       ];
 
       const bills = [1000, 900, 400, 650, 0, 0, 0];
@@ -542,13 +537,8 @@ describe('Overview selectors', () => {
       ];
 
       const pension = [
-        /* Jan-18 */ 0,
-        /* Feb-18 */ 10654,
-        /* Mar-18 */ 11237,
-        /* Apr-18 */ 11237,
-        /* May-18 */ 11237,
-        /* Jun-18 */ 11237,
-        /* Jul-18 */ 11237,
+        /* Jan-18 */ 0, /* Feb-18 */ 10654, /* Mar-18 */ 11237, /* Apr-18 */ 11237,
+        /* May-18 */ 11237, /* Jun-18 */ 11237, /* Jul-18 */ 11237,
       ];
 
       const bills = [1000, 900, 400, 650, 0, 0, 0];
@@ -1134,364 +1124,111 @@ describe('Overview selectors', () => {
   });
 
   describe('getOverviewTable', () => {
-    it('should get a list of rows for the overview table', () => {
+    it('should get the expected table structure', () => {
       expect.assertions(1);
       const table = getOverviewTable(now)(state);
 
-      expect(table).toMatchInlineSnapshot(`
+      expect(table).toStrictEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            active: expect.any(Boolean),
+            cells: expect.objectContaining({
+              stocks: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              bills: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              food: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              general: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              holiday: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              social: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              income: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              spending: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              net: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+              netWorth: { rgb: expect.stringMatching(/^#[0-9a-f]{6}$/), value: expect.any(Number) },
+            }),
+            month: expect.any(Number),
+            year: expect.any(Number),
+            monthText: expect.any(String),
+            future: expect.any(Boolean),
+            past: expect.any(Boolean),
+          }),
+        ]),
+      );
+    });
+
+    it('should return the correct sequence of formatted months', () => {
+      expect.assertions(1);
+      const table = getOverviewTable(now)(state);
+
+      expect(table.map((row) => row.monthText)).toMatchInlineSnapshot(`
         Array [
-          Object {
-            "active": false,
-            "cells": Object {
-              "bills": Object {
-                "rgb": "#b71c1c",
-                "value": 1000,
-              },
-              "food": Object {
-                "rgb": "#43a047",
-                "value": 50,
-              },
-              "general": Object {
-                "rgb": "#01579b",
-                "value": 150,
-              },
-              "holiday": Object {
-                "rgb": "#fff",
-                "value": 10,
-              },
-              "income": Object {
-                "rgb": "#91df9b",
-                "value": 2000,
-              },
-              "net": Object {
-                "rgb": "#feffff",
-                "value": 740,
-              },
-              "netWorth": Object {
-                "rgb": "#fff",
-                "value": 1680500,
-              },
-              "social": Object {
-                "rgb": "#fff",
-                "value": 50,
-              },
-              "spending": Object {
-                "rgb": "#d26565",
-                "value": 1260,
-              },
-              "stocks": Object {
-                "rgb": "#fff",
-                "value": 100779,
-              },
-            },
-            "future": false,
-            "month": 1,
-            "monthText": "Jan-18",
-            "past": true,
-            "year": 2018,
-          },
-          Object {
-            "active": false,
-            "cells": Object {
-              "bills": Object {
-                "rgb": "#bd2f2f",
-                "value": 900,
-              },
-              "food": Object {
-                "rgb": "#fff",
-                "value": 13,
-              },
-              "general": Object {
-                "rgb": "#80abcd",
-                "value": 90,
-              },
-              "holiday": Object {
-                "rgb": "#00897b",
-                "value": 1000,
-              },
-              "income": Object {
-                "rgb": "#92df9b",
-                "value": 1900,
-              },
-              "net": Object {
-                "rgb": "#ecbdbd",
-                "value": -168,
-              },
-              "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 4501798,
-              },
-              "social": Object {
-                "rgb": "#dfcf92",
-                "value": 65,
-              },
-              "spending": Object {
-                "rgb": "#bf2424",
-                "value": 2068,
-              },
-              "stocks": Object {
-                "rgb": "#fff",
-                "value": 101459,
-              },
-            },
-            "future": false,
-            "month": 2,
-            "monthText": "Feb-18",
-            "past": true,
-            "year": 2018,
-          },
-          Object {
-            "active": true,
-            "cells": Object {
-              "bills": Object {
-                "rgb": "#db8e8e",
-                "value": 400,
-              },
-              "food": Object {
-                "rgb": "#a1d0a3",
-                "value": 27,
-              },
-              "general": Object {
-                "rgb": "#fff",
-                "value": 10,
-              },
-              "holiday": Object {
-                "rgb": "#80c4bd",
-                "value": 95,
-              },
-              "income": Object {
-                "rgb": "#68d375",
-                "value": 156230,
-              },
-              "net": Object {
-                "rgb": "#92df9b",
-                "value": 155517,
-              },
-              "netWorth": Object {
-                "rgb": "#38c549",
-                "value": 4248848,
-              },
-              "social": Object {
-                "rgb": "#bf9e24",
-                "value": 181,
-              },
-              "spending": Object {
-                "rgb": "#df9292",
-                "value": 713,
-              },
-              "stocks": Object {
-                "rgb": "#adb9bf",
-                "value": 399098,
-              },
-            },
-            "future": false,
-            "month": 3,
-            "monthText": "Mar-18",
-            "past": false,
-            "year": 2018,
-          },
-          Object {
-            "active": false,
-            "cells": Object {
-              "bills": Object {
-                "rgb": "#cc5e5e",
-                "value": 650,
-              },
-              "food": Object {
-                "rgb": "#a1d0a3",
-                "value": 27,
-              },
-              "general": Object {
-                "rgb": "#80abcd",
-                "value": 90,
-              },
-              "holiday": Object {
-                "rgb": "#80c4bd",
-                "value": 95,
-              },
-              "income": Object {
-                "rgb": "#24bf37",
-                "value": 411392,
-              },
-              "net": Object {
-                "rgb": "#24bf37",
-                "value": 410465,
-              },
-              "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 4799575,
-              },
-              "social": Object {
-                "rgb": "#dfcf92",
-                "value": 65,
-              },
-              "spending": Object {
-                "rgb": "#da8080",
-                "value": 927,
-              },
-              "stocks": Object {
-                "rgb": "#aab7bd",
-                "value": 410252,
-              },
-            },
-            "future": true,
-            "month": 4,
-            "monthText": "Apr-18",
-            "past": false,
-            "year": 2018,
-          },
-          Object {
-            "active": false,
-            "cells": Object {
-              "bills": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
-              "food": Object {
-                "rgb": "#a1d0a3",
-                "value": 27,
-              },
-              "general": Object {
-                "rgb": "#80abcd",
-                "value": 90,
-              },
-              "holiday": Object {
-                "rgb": "#80c4bd",
-                "value": 95,
-              },
-              "income": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
-              "net": Object {
-                "rgb": "#NaNNaNNaN",
-                "value": -277,
-              },
-              "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 4940140,
-              },
-              "social": Object {
-                "rgb": "#dfcf92",
-                "value": 65,
-              },
-              "spending": Object {
-                "rgb": "#fff",
-                "value": 277,
-              },
-              "stocks": Object {
-                "rgb": "#8d9fa7",
-                "value": 421530,
-              },
-            },
-            "future": true,
-            "month": 5,
-            "monthText": "May-18",
-            "past": false,
-            "year": 2018,
-          },
-          Object {
-            "active": false,
-            "cells": Object {
-              "bills": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
-              "food": Object {
-                "rgb": "#a1d0a3",
-                "value": 27,
-              },
-              "general": Object {
-                "rgb": "#80abcd",
-                "value": 90,
-              },
-              "holiday": Object {
-                "rgb": "#80c4bd",
-                "value": 95,
-              },
-              "income": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
-              "net": Object {
-                "rgb": "#NaNNaNNaN",
-                "value": -277,
-              },
-              "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 5081290,
-              },
-              "social": Object {
-                "rgb": "#dfcf92",
-                "value": 65,
-              },
-              "spending": Object {
-                "rgb": "#fff",
-                "value": 277,
-              },
-              "stocks": Object {
-                "rgb": "#718690",
-                "value": 432934,
-              },
-            },
-            "future": true,
-            "month": 6,
-            "monthText": "Jun-18",
-            "past": false,
-            "year": 2018,
-          },
-          Object {
-            "active": false,
-            "cells": Object {
-              "bills": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
-              "food": Object {
-                "rgb": "#a1d0a3",
-                "value": 27,
-              },
-              "general": Object {
-                "rgb": "#80abcd",
-                "value": 90,
-              },
-              "holiday": Object {
-                "rgb": "#80c4bd",
-                "value": 95,
-              },
-              "income": Object {
-                "rgb": "#fff",
-                "value": 0,
-              },
-              "net": Object {
-                "rgb": "#NaNNaNNaN",
-                "value": -277,
-              },
-              "netWorth": Object {
-                "rgb": "#24bf37",
-                "value": 5223026,
-              },
-              "social": Object {
-                "rgb": "#dfcf92",
-                "value": 65,
-              },
-              "spending": Object {
-                "rgb": "#fff",
-                "value": 277,
-              },
-              "stocks": Object {
-                "rgb": "#546e7a",
-                "value": 444467,
-              },
-            },
-            "future": true,
-            "month": 7,
-            "monthText": "Jul-18",
-            "past": false,
-            "year": 2018,
-          },
+          "Jan-18",
+          "Feb-18",
+          "Mar-18",
+          "Apr-18",
+          "May-18",
+          "Jun-18",
+          "Jul-18",
         ]
       `);
+    });
+
+    it('should return the correct 1-indexed month values', () => {
+      expect.assertions(1);
+      const table = getOverviewTable(now)(state);
+
+      expect(table.map((row) => row.month)).toMatchInlineSnapshot(`
+        Array [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+        ]
+      `);
+    });
+
+    it('should return the correct year', () => {
+      expect.assertions(1);
+      const table = getOverviewTable(now)(state);
+
+      expect(table.map((row) => row.year)).toMatchInlineSnapshot(`
+        Array [
+          2018,
+          2018,
+          2018,
+          2018,
+          2018,
+          2018,
+          2018,
+        ]
+      `);
+    });
+
+    it('should return the correct values for past and future', () => {
+      expect.assertions(14);
+      const table = getOverviewTable(now)(state);
+
+      expect(table[0].past).toBe(true); // Jan-18
+      expect(table[0].future).toBe(false);
+
+      expect(table[1].past).toBe(true); // Feb-18
+      expect(table[1].future).toBe(false);
+
+      expect(table[2].past).toBe(false); // Mar-18
+      expect(table[2].future).toBe(false);
+
+      expect(table[3].past).toBe(false); // Apr-18
+      expect(table[3].future).toBe(true);
+
+      expect(table[4].past).toBe(false); // May-18
+      expect(table[4].future).toBe(true);
+
+      expect(table[5].past).toBe(false); // Jun-18
+      expect(table[5].future).toBe(true);
+
+      expect(table[6].past).toBe(false); // Jul-18
+      expect(table[6].future).toBe(true);
     });
   });
 

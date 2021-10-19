@@ -69,23 +69,24 @@ const getSummaryEntries = createSelector(getEntries, withoutSkipValues);
 
 type FilterPredicate<T> = (value: T) => boolean;
 
-const filterValuesByCategory = (predicate: FilterPredicate<NetWorthCategory>) => (
-  categories: NetWorthCategory[],
-  subcategories: NetWorthSubcategory[],
-) => (value: NetWorthValueObjectNative | NetWorthValueInput): boolean =>
-  categories
-    .filter(predicate)
-    .some((category) =>
-      subcategories.some(
-        (subcategory) =>
-          subcategory.id === value.subcategory && subcategory.categoryId === category.id,
-      ),
-    );
+const filterValuesByCategory =
+  (predicate: FilterPredicate<NetWorthCategory>) =>
+  (categories: NetWorthCategory[], subcategories: NetWorthSubcategory[]) =>
+  (value: NetWorthValueObjectNative | NetWorthValueInput): boolean =>
+    categories
+      .filter(predicate)
+      .some((category) =>
+        subcategories.some(
+          (subcategory) =>
+            subcategory.id === value.subcategory && subcategory.categoryId === category.id,
+        ),
+      );
 
-const filterValuesBySubcategory = (predicate: FilterPredicate<NetWorthSubcategory>) => (
-  subcategories: NetWorthSubcategory[],
-) => (value: NetWorthValueObjectNative | NetWorthValueInput): boolean =>
-  subcategories.filter(predicate).some((subcategory) => subcategory.id === value.subcategory);
+const filterValuesBySubcategory =
+  (predicate: FilterPredicate<NetWorthSubcategory>) =>
+  (subcategories: NetWorthSubcategory[]) =>
+  (value: NetWorthValueObjectNative | NetWorthValueInput): boolean =>
+    subcategories.filter(predicate).some((subcategory) => subcategory.id === value.subcategory);
 
 const isValueSAYE = filterValuesBySubcategory(({ isSAYE }) => !!isSAYE);
 
@@ -229,24 +230,25 @@ export type EntryWithAggregates = NetWorthEntryNative & {
   aggregate: AggregateSums;
 };
 
-export const withAggregates = (
-  categories: NetWorthCategory[],
-  subcategories: NetWorthSubcategory[],
-) => (rows: NetWorthEntryNative[]): EntryWithAggregates[] =>
-  rows.map((entry) => ({
-    ...entry,
-    aggregate: getEntryAggregate(categories, subcategories, entry, {
-      [Aggregate.cashOther]: calculateResidualSAYEOptionsValue(subcategories, entry),
-    }),
-  }));
+export const withAggregates =
+  (categories: NetWorthCategory[], subcategories: NetWorthSubcategory[]) =>
+  (rows: NetWorthEntryNative[]): EntryWithAggregates[] =>
+    rows.map((entry) => ({
+      ...entry,
+      aggregate: getEntryAggregate(categories, subcategories, entry, {
+        [Aggregate.cashOther]: calculateResidualSAYEOptionsValue(subcategories, entry),
+      }),
+    }));
 
-const getEntryForMonth = (entries: NetWorthEntryNative[]) => (date: Date): NetWorthEntryNative => {
-  const matchingEntries = entries
-    .filter(({ date: entryDate }) => isSameMonth(entryDate, date))
-    .sort(({ date: dateA }, { date: dateB }) => Number(dateB) - Number(dateA));
+const getEntryForMonth =
+  (entries: NetWorthEntryNative[]) =>
+  (date: Date): NetWorthEntryNative => {
+    const matchingEntries = entries
+      .filter(({ date: entryDate }) => isSameMonth(entryDate, date))
+      .sort(({ date: dateA }, { date: dateB }) => Number(dateB) - Number(dateA));
 
-  return lastInArray(matchingEntries) ?? nullEntry(date);
-};
+    return lastInArray(matchingEntries) ?? nullEntry(date);
+  };
 
 export const getNetWorthRows = createSelector(
   getMonthDates,
@@ -278,28 +280,28 @@ type EntryTypeSplit = EntryWithAggregates & {
   liabilities: number;
 };
 
-const withTypeSplit = (categories: NetWorthCategory[], subcategories: NetWorthSubcategory[]) => (
-  rows: EntryWithAggregates[],
-): EntryTypeSplit[] =>
-  rows.map((entry) => ({
-    ...entry,
-    assets:
-      sumByType(
+const withTypeSplit =
+  (categories: NetWorthCategory[], subcategories: NetWorthSubcategory[]) =>
+  (rows: EntryWithAggregates[]): EntryTypeSplit[] =>
+    rows.map((entry) => ({
+      ...entry,
+      assets:
+        sumByType(
+          NetWorthCategoryType.Asset,
+          categories,
+          subcategories,
+          entry,
+          (category) => !category.isOption,
+        ) + calculateResidualSAYEOptionsValue(subcategories, entry),
+      options: sumByType(
         NetWorthCategoryType.Asset,
         categories,
         subcategories,
         entry,
-        (category) => !category.isOption,
-      ) + calculateResidualSAYEOptionsValue(subcategories, entry),
-    options: sumByType(
-      NetWorthCategoryType.Asset,
-      categories,
-      subcategories,
-      entry,
-      (category) => !!category.isOption,
-    ),
-    liabilities: -sumByType(NetWorthCategoryType.Liability, categories, subcategories, entry),
-  }));
+        (category) => !!category.isOption,
+      ),
+      liabilities: -sumByType(NetWorthCategoryType.Liability, categories, subcategories, entry),
+    }));
 
 function getSpendingByDate(spending: number[], dates: Date[], date: Date): number {
   const dateIndex = dates.findIndex((compare) => isSameMonth(compare, date));
@@ -312,30 +314,32 @@ function getSpendingByDate(spending: number[], dates: Date[], date: Date): numbe
 
 type EntryWithSpend = EntryTypeSplit & { expenses: number };
 
-const withSpend = (dates: Date[], spending: number[]) => (
-  rows: EntryTypeSplit[],
-): EntryWithSpend[] =>
-  rows.map((entry) => ({
-    ...entry,
-    expenses: getSpendingByDate(spending, dates, entry.date),
-  }));
+const withSpend =
+  (dates: Date[], spending: number[]) =>
+  (rows: EntryTypeSplit[]): EntryWithSpend[] =>
+    rows.map((entry) => ({
+      ...entry,
+      expenses: getSpendingByDate(spending, dates, entry.date),
+    }));
 
 export type EntryWithFTI = EntryWithSpend & { fti: number; pastYearAverageSpend: number };
 
-const withFTI = (birthDate: Date) => (rows: EntryWithSpend[]): EntryWithFTI[] =>
-  rows.map((entry, index) => {
-    const fullYears = differenceInYears(entry.date, birthDate);
-    const days = differenceInDays(entry.date, startOfYear(entry.date));
-    const years = fullYears + days / 365;
+const withFTI =
+  (birthDate: Date) =>
+  (rows: EntryWithSpend[]): EntryWithFTI[] =>
+    rows.map((entry, index) => {
+      const fullYears = differenceInYears(entry.date, birthDate);
+      const days = differenceInDays(entry.date, startOfYear(entry.date));
+      const years = fullYears + days / 365;
 
-    const pastYear = rows.slice(Math.max(0, index - 11), index + 1);
-    const pastYearSpend = pastYear.reduce((sum, { expenses }) => sum + expenses, 0);
-    const pastYearAverageSpend = (pastYearSpend * 12) / pastYear.length;
+      const pastYear = rows.slice(Math.max(0, index - 11), index + 1);
+      const pastYearSpend = pastYear.reduce((sum, { expenses }) => sum + expenses, 0);
+      const pastYearAverageSpend = (pastYearSpend * 12) / pastYear.length;
 
-    const fti = Math.round((entry.assets - entry.liabilities) * (years / pastYearAverageSpend));
+      const fti = Math.round((entry.assets - entry.liabilities) * (years / pastYearAverageSpend));
 
-    return { ...entry, fti, pastYearAverageSpend };
-  });
+      return { ...entry, fti, pastYearAverageSpend };
+    });
 
 type EntryWithTableProps = TableRow;
 
@@ -405,32 +409,34 @@ type CompoundLoanOrAsset = {
   interestRate: number;
 };
 
-const forecastCompoundStack = <T extends CompoundLoanOrAsset>(
-  composer: (lastValue: number, monthsSinceLastForecast: number, loanOrAsset: T) => number,
-) => (dates: OverviewGraphDate[], startPredictionIndex: number, currentStack: T[]): number[] =>
-  dates
-    .slice(startPredictionIndex)
-    .reduce<{ monthIndex: number; values: number[][] }>(
-      (last, { monthIndex }) => {
-        const monthsSinceLastForecast = monthIndex - last.monthIndex;
-        return {
-          monthIndex,
-          values: [
-            ...last.values,
-            currentStack.map<number>((loanOrAsset, loanOrAssetIndex) => {
-              const lastValue = last.values[last.values.length - 1][loanOrAssetIndex];
-              return composer(lastValue, monthsSinceLastForecast, loanOrAsset);
-            }),
-          ],
-        };
-      },
-      {
-        monthIndex: startPredictionIndex - 1,
-        values: [currentStack.map<number>(({ principal }) => principal)],
-      },
-    )
-    .values.slice(1)
-    .map<number>((stack) => stack.reduce<number>((last, value) => last + value, 0));
+const forecastCompoundStack =
+  <T extends CompoundLoanOrAsset>(
+    composer: (lastValue: number, monthsSinceLastForecast: number, loanOrAsset: T) => number,
+  ) =>
+  (dates: OverviewGraphDate[], startPredictionIndex: number, currentStack: T[]): number[] =>
+    dates
+      .slice(startPredictionIndex)
+      .reduce<{ monthIndex: number; values: number[][] }>(
+        (last, { monthIndex }) => {
+          const monthsSinceLastForecast = monthIndex - last.monthIndex;
+          return {
+            monthIndex,
+            values: [
+              ...last.values,
+              currentStack.map<number>((loanOrAsset, loanOrAssetIndex) => {
+                const lastValue = last.values[last.values.length - 1][loanOrAssetIndex];
+                return composer(lastValue, monthsSinceLastForecast, loanOrAsset);
+              }),
+            ],
+          };
+        },
+        {
+          monthIndex: startPredictionIndex - 1,
+          values: [currentStack.map<number>(({ principal }) => principal)],
+        },
+      )
+      .values.slice(1)
+      .map<number>((stack) => stack.reduce<number>((last, value) => last + value, 0));
 
 export type CompoundLoan = CompoundLoanOrAsset & { monthlyPayment: number; paid: number };
 
@@ -582,68 +588,70 @@ type CategoryTreeOptions = {
   factor: -1 | 1;
 };
 
-const categoryTreeBuilder = (
-  currencies: Currency[],
-  categories: NetWorthCategory[],
-  subcategories: NetWorthSubcategory[],
-  values: ValueWithInfo[],
-) => (trees: CategoryTreeOptions[], normalise = false): WithSubTree<BlockItem>[] => {
-  const treeValues = trees.map<
-    CategoryTreeOptions & {
-      groups: Record<string, ValueWithInfo[]>;
-      sumTotal: number;
-    }
-  >((options) => {
-    const filteredValues = values.filter(
-      filterValuesByCategory(({ type }) => type === options.categoryType)(
-        categories,
-        subcategories,
-      ),
+const categoryTreeBuilder =
+  (
+    currencies: Currency[],
+    categories: NetWorthCategory[],
+    subcategories: NetWorthSubcategory[],
+    values: ValueWithInfo[],
+  ) =>
+  (trees: CategoryTreeOptions[], normalise = false): WithSubTree<BlockItem>[] => {
+    const treeValues = trees.map<
+      CategoryTreeOptions & {
+        groups: Record<string, ValueWithInfo[]>;
+        sumTotal: number;
+      }
+    >((options) => {
+      const filteredValues = values.filter(
+        filterValuesByCategory(({ type }) => type === options.categoryType)(
+          categories,
+          subcategories,
+        ),
+      );
+
+      const groups = groupBy(filteredValues, 'info.category.category');
+      const sumTotal = options.factor * sumValues(currencies, subcategories, filteredValues, true);
+
+      return { ...options, groups, sumTotal };
+    });
+
+    const maxSumTotal = treeValues.reduce((last, { sumTotal }) => Math.max(last, sumTotal), 0);
+
+    const normalisedTrees = treeValues.map<WithSubTree<BlockItem>>(
+      ({ name, color, factor, groups, sumTotal }) => ({
+        name: `${name} (${formatCurrency(sumTotal, { abbreviate: true })})`,
+        text: getText(name, 0),
+        total: normalise ? maxSumTotal : sumTotal,
+        color,
+        subTree: Object.entries(groups).map<WithSubTree<BlockItem>>(([category, group]) => {
+          const subTotal = factor * sumValues(currencies, subcategories, group, true);
+          const ratio = subTotal / sumTotal;
+
+          return {
+            name: `${category} (${formatCurrency(subTotal, {
+              abbreviate: true,
+            })}) [${formatPercent(ratio, { precision: 1 })}]`,
+            text: getText(category, 1),
+            total: subTotal * (normalise ? maxSumTotal / sumTotal : 1),
+            color: group[0]?.info.category.color ?? colors.white,
+            subTree: group.map<BlockItem>((value) => {
+              const itemValue = factor * sumValues(currencies, subcategories, [value], true);
+              return {
+                name: `${value.info.subcategory.subcategory} (${formatCurrency(itemValue, {
+                  abbreviate: true,
+                })})`,
+                total: itemValue * (normalise ? maxSumTotal / sumTotal : 1),
+                text: getText(value.info.subcategory.subcategory, 2),
+                color: rgba(colors.white, (value.info.subcategory.opacity ?? 1) / 2),
+              };
+            }),
+          };
+        }),
+      }),
     );
 
-    const groups = groupBy(filteredValues, 'info.category.category');
-    const sumTotal = options.factor * sumValues(currencies, subcategories, filteredValues, true);
-
-    return { ...options, groups, sumTotal };
-  });
-
-  const maxSumTotal = treeValues.reduce((last, { sumTotal }) => Math.max(last, sumTotal), 0);
-
-  const normalisedTrees = treeValues.map<WithSubTree<BlockItem>>(
-    ({ name, color, factor, groups, sumTotal }) => ({
-      name: `${name} (${formatCurrency(sumTotal, { abbreviate: true })})`,
-      text: getText(name, 0),
-      total: normalise ? maxSumTotal : sumTotal,
-      color,
-      subTree: Object.entries(groups).map<WithSubTree<BlockItem>>(([category, group]) => {
-        const subTotal = factor * sumValues(currencies, subcategories, group, true);
-        const ratio = subTotal / sumTotal;
-
-        return {
-          name: `${category} (${formatCurrency(subTotal, {
-            abbreviate: true,
-          })}) [${formatPercent(ratio, { precision: 1 })}]`,
-          text: getText(category, 1),
-          total: subTotal * (normalise ? maxSumTotal / sumTotal : 1),
-          color: group[0]?.info.category.color ?? colors.white,
-          subTree: group.map<BlockItem>((value) => {
-            const itemValue = factor * sumValues(currencies, subcategories, [value], true);
-            return {
-              name: `${value.info.subcategory.subcategory} (${formatCurrency(itemValue, {
-                abbreviate: true,
-              })})`,
-              total: itemValue * (normalise ? maxSumTotal / sumTotal : 1),
-              text: getText(value.info.subcategory.subcategory, 2),
-              color: rgba(colors.white, (value.info.subcategory.opacity ?? 1) / 2),
-            };
-          }),
-        };
-      }),
-    }),
-  );
-
-  return normalisedTrees;
-};
+    return normalisedTrees;
+  };
 
 export const getNetWorthBreakdown = moize(
   ({ values, currencies }: NetWorthEntryNative, width: number, height: number) =>

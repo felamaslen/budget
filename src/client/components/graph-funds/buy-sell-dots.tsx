@@ -43,17 +43,17 @@ const groupFundOrdersByType = (orders: FundOrderWithLinePoint[]): FundOrderWithL
   return flatten([buys, sells, drips].map(combineFundOrdersByMatchedDate));
 };
 
-const shouldShowOrders = (mode: FundMode, hlPoint: HLPoint | undefined) => (
-  fundLine: FundLine,
-): boolean => {
-  if (!hlPoint) {
-    return false;
-  }
-  if (fundLine.id === GRAPH_FUNDS_OVERALL_ID) {
-    return true;
-  }
-  return mode === FundMode.Value && getFundLineName(fundLine.id, fundLine.item) === hlPoint.group;
-};
+const shouldShowOrders =
+  (mode: FundMode, hlPoint: HLPoint | undefined) =>
+  (fundLine: FundLine): boolean => {
+    if (!hlPoint) {
+      return false;
+    }
+    if (fundLine.id === GRAPH_FUNDS_OVERALL_ID) {
+      return true;
+    }
+    return mode === FundMode.Value && getFundLineName(fundLine.id, fundLine.item) === hlPoint.group;
+  };
 
 function getArrowKey(order: FundOrder): string {
   if (order.isReinvestment) {

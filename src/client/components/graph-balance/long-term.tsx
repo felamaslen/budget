@@ -51,8 +51,9 @@ export const LongTermSettings: React.FC<Props> = ({ options, setOptions, default
   );
 
   const setRates = useCallback(
-    (key: keyof LongTermRates) => (value: LongTermRates[typeof key]): void =>
-      setOptions((last) => ({ ...last, rates: { ...last.rates, [key]: value } })),
+    (key: keyof LongTermRates) =>
+      (value: LongTermRates[typeof key]): void =>
+        setOptions((last) => ({ ...last, rates: { ...last.rates, [key]: value } })),
     [setOptions],
   );
 

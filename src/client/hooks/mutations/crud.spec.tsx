@@ -21,7 +21,7 @@ import type { NetWorthEntryNative } from '~client/types';
 import { NetWorthCategoryType, RequestType } from '~client/types/enum';
 import type { NetWorthCategoryInput, NetWorthSubcategoryInput } from '~client/types/gql';
 
-describe('Generic crud hooks', () => {
+describe('generic crud hooks', () => {
   const mutateSpy = mockClient.executeMutation as jest.Mock;
   beforeEach(() => {
     mutateSpy.mockReturnValue(
@@ -223,7 +223,7 @@ describe('Generic crud hooks', () => {
         },
       );
 
-    describe('Creating', () => {
+    describe('creating', () => {
       it('should call the correct mutation', async () => {
         expect.assertions(2);
         const { result } = setup();
@@ -269,7 +269,7 @@ describe('Generic crud hooks', () => {
       });
     });
 
-    describe('Updating', () => {
+    describe('updating', () => {
       it('should call the correct mutation', async () => {
         expect.assertions(2);
         const { result } = setup();
@@ -315,7 +315,7 @@ describe('Generic crud hooks', () => {
       });
     });
 
-    describe('Deleting', () => {
+    describe('deleting', () => {
       it('should call the correct mutation', async () => {
         expect.assertions(2);
         const { result } = setup();

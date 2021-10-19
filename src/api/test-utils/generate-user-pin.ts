@@ -1,8 +1,6 @@
 import bcrypt from 'bcrypt';
 
-export function generateUserPin(
-  pin = Math.floor(Math.random()) * 8999 + 1000,
-): Promise<{
+export function generateUserPin(pin = Math.floor(Math.random()) * 8999 + 1000): Promise<{
   pinRaw: string;
   pinHash: string;
 }> {

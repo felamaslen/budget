@@ -168,11 +168,10 @@ export const NetWorthLoans: React.FC<Props> = ({ subcategories, entries }) => {
 
   const [visible, setVisible] = usePersistentState<Record<string, boolean>>({}, 'loan_visible');
   const [overrides, setOverrides] = usePersistentState<LoanOverrides>({}, 'loan_overrides');
-  const loans = useMemo(() => getLoans(data?.netWorthLoans?.loans ?? [], visible, overrides), [
-    data,
-    visible,
-    overrides,
-  ]);
+  const loans = useMemo(
+    () => getLoans(data?.netWorthLoans?.loans ?? [], visible, overrides),
+    [data, visible, overrides],
+  );
   return (
     <Styled.LoanView>
       {loans.length > 0 && (

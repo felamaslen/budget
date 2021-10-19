@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import { App, getTestApp, makeTestApp } from '~api/test-utils/create-server';
 import { AppConfig, AppConfigInput, Query, Maybe, Mutation, FundMode } from '~api/types';
 
-describe('Config resolver', () => {
+describe('config resolver', () => {
   let clock: sinon.SinonFakeTimers;
   let app: App;
   beforeAll(async () => {

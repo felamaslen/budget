@@ -10,16 +10,19 @@ import {
 } from '~api/queries/planning';
 import type { WithRequiredJoin } from '~api/types';
 
-export const accountRowHasJoins = <
-  Joined extends Record<string, unknown>,
-  Extra extends Record<string, unknown> = Joined,
-  StillNullable extends keyof Joined = never,
-  Row extends { id: number } = { id: number }
->(
-  idKey: keyof Joined,
-) => (
-  row: (Row & Joined & Extra) | WithRequiredJoin<Row & Joined & Extra, Joined, StillNullable>,
-): row is WithRequiredJoin<Row & Joined & Extra, Joined, StillNullable> => !!row[idKey];
+export const accountRowHasJoins =
+  <
+    Joined extends Record<string, unknown>,
+    Extra extends Record<string, unknown> = Joined,
+    StillNullable extends keyof Joined = never,
+    Row extends { id: number } = { id: number },
+  >(
+    idKey: keyof Joined,
+  ) =>
+  (
+    row: (Row & Joined & Extra) | WithRequiredJoin<Row & Joined & Extra, Joined, StillNullable>,
+  ): row is WithRequiredJoin<Row & Joined & Extra, Joined, StillNullable> =>
+    !!row[idKey];
 
 export const accountRowHasIncome = accountRowHasJoins<
   AccountRowIncomeJoins,
@@ -43,7 +46,7 @@ export const accountRowHasBills = accountRowHasJoins<AccountRowBillsJoins>('bill
 export function reduceYearMonthAccumulation<
   T extends { year: number; month: number } & Record<ChildKey, Child>,
   ChildKey extends string,
-  Child extends Record<string, number>
+  Child extends Record<string, number>,
 >(childKey: ChildKey, accumulator: T[], next: T): T[] {
   if (accumulator.some((compare) => compare.year === next.year && compare.month === next.month)) {
     return replaceAtIndex(

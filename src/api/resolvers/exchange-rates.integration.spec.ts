@@ -5,7 +5,7 @@ import { nockCurrencies } from '~api/__tests__/nocks';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import type { ExchangeRatesResponse, Query, QueryExchangeRatesArgs, Maybe } from '~api/types/gql';
 
-describe('Exchange rates resolvers', () => {
+describe('exchange rates resolvers', () => {
   let app: App;
   let currencyNock: Scope;
   beforeAll(async () => {

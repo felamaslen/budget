@@ -32,11 +32,8 @@ export type RouteParams = {
 };
 
 export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match, history }) => {
-  const [
-    query,
-    { cost, income, saved, description, startDate, endDate },
-    loading,
-  ] = useAnalysisData(match.params);
+  const [query, { cost, income, saved, description, startDate, endDate }, loading] =
+    useAnalysisData(match.params);
 
   const onRequest = useCallback(
     (delta: Partial<Query>) => {
@@ -59,12 +56,10 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
   const { width, height } = useBlockDimensions();
 
   const forest = useMemo(() => getForest(cost, saved, invested), [cost, saved, invested]);
-  const blocks = useMemo(() => getBlocks(forest, width, height, treeVisible), [
-    forest,
-    treeVisible,
-    width,
-    height,
-  ]);
+  const blocks = useMemo(
+    () => getBlocks(forest, width, height, treeVisible),
+    [forest, treeVisible, width, height],
+  );
 
   const [, setCategoryDeep, costDeep, loadingDeep] = useAnalysisDeepBlock(query);
   const onBlockClick = useCallback(

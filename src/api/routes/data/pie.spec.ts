@@ -2,13 +2,13 @@ import { getPieCols, processQueryResult } from './pie';
 import { PageListStandard } from '~api/types';
 import { PageNonStandard } from '~shared/constants';
 
-describe('Pie route', () => {
+describe('pie route', () => {
   describe('getPieCols', () => {
     it('should return the expected category list', () => {
       expect.assertions(5);
 
       expect(() =>
-        getPieCols((PageNonStandard.Funds as unknown) as PageListStandard),
+        getPieCols(PageNonStandard.Funds as unknown as PageListStandard),
       ).toThrowErrorMatchingInlineSnapshot(`"Invalid category"`);
 
       expect(getPieCols(PageListStandard.Food)).toStrictEqual([

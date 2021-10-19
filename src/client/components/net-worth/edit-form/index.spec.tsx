@@ -82,7 +82,7 @@ const subcategories: NetWorthSubcategory[] = [
   },
 ];
 
-describe('Net worth entry form', () => {
+describe('net worth entry form', () => {
   const now = new Date('2020-06-03');
   const oldDate = '2020-04-20';
   const oldDateNextMonth = '2020-05-31T23:59:59.999Z';
@@ -147,7 +147,7 @@ describe('Net worth entry form', () => {
     ],
   };
 
-  const mockGQLClient = ({
+  const mockGQLClient = {
     executeQuery: ({
       variables,
       query,
@@ -177,7 +177,7 @@ describe('Net worth entry form', () => {
         data: null,
       });
     },
-  } as unknown) as Client;
+  } as unknown as Client;
 
   const renderWithMocks = (children: React.ReactElement): RenderResult =>
     render(<GQLProviderMock client={mockGQLClient}>{children}</GQLProviderMock>);

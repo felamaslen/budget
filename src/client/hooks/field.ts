@@ -46,52 +46,50 @@ type Reducer<V> = (state: State<V>, action: Action<V>) => State<V>;
 type ConvertExternalToInputValue<V> = (value: V, active?: boolean) => string;
 
 const fieldReducer = moize(
-  <V>(convertExternalToInputValue: ConvertExternalToInputValue<V>) => (
-    state: State<V>,
-    action: Action<V>,
-  ): State<V> => {
-    if (action.type === NavActionType.ValueSet) {
-      const value = action.payload === null ? state.currentValue : action.payload;
-      return {
-        ...state,
-        externalValue: value,
-        currentValue: value,
-        inputValue: convertExternalToInputValue(value, state.active),
-      };
-    }
-    if (action.type === NavActionType.Cancelled) {
-      return {
-        ...state,
-        currentValue: state.externalValue,
-        inputValue: convertExternalToInputValue(state.externalValue, false),
-      };
-    }
-    if (action.type === ActionType.ActiveToggled) {
-      if (action.active && !state.active) {
+  <V>(convertExternalToInputValue: ConvertExternalToInputValue<V>) =>
+    (state: State<V>, action: Action<V>): State<V> => {
+      if (action.type === NavActionType.ValueSet) {
+        const value = action.payload === null ? state.currentValue : action.payload;
         return {
           ...state,
-          active: true,
-          externalValue: action.value,
+          externalValue: value,
+          currentValue: value,
+          inputValue: convertExternalToInputValue(value, state.active),
+        };
+      }
+      if (action.type === NavActionType.Cancelled) {
+        return {
+          ...state,
+          currentValue: state.externalValue,
+          inputValue: convertExternalToInputValue(state.externalValue, false),
+        };
+      }
+      if (action.type === ActionType.ActiveToggled) {
+        if (action.active && !state.active) {
+          return {
+            ...state,
+            active: true,
+            externalValue: action.value,
+            currentValue: action.value,
+          };
+        }
+
+        return {
+          ...state,
+          active: !!action.active,
+          inputValue: action.inputValue,
+        };
+      }
+      if (action.type === ActionType.Typed) {
+        return {
+          ...state,
           currentValue: action.value,
+          inputValue: action.inputValue ?? convertExternalToInputValue(action.value, true),
         };
       }
 
-      return {
-        ...state,
-        active: !!action.active,
-        inputValue: action.inputValue,
-      };
-    }
-    if (action.type === ActionType.Typed) {
-      return {
-        ...state,
-        currentValue: action.value,
-        inputValue: action.inputValue ?? convertExternalToInputValue(action.value, true),
-      };
-    }
-
-    return state;
-  },
+      return state;
+    },
 );
 
 // used to make the input value diverge (temporarily) from the underlying value
@@ -141,8 +139,8 @@ export function useField<V = string, E = React.ChangeEvent<HTMLInputElement>>({
   onType = Data.NULL,
   convertInputToExternalValue = (event: E | React.ChangeEvent<HTMLInputElement>): V | Split<V> =>
     isCustomEvent(event)
-      ? ((event as unknown) as V | Split<V>)
-      : ((event.target.value as unknown) as V),
+      ? (event as unknown as V | Split<V>)
+      : (event.target.value as unknown as V),
   convertExternalToInputValue = Data.IDENTITY,
   allowEmpty = false,
   active = false,

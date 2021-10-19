@@ -8,16 +8,15 @@ import {
 import type { ParameterRow } from './types';
 import { startMonth } from '~shared/planning';
 
-export const upsertUserParameterRowsByYear = (
-  valueType: 'int4' | 'float8',
-  tableName: string,
-) => async (
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  year: number,
-  inputs: Omit<ParameterRow, 'id' | 'uid'>[],
-): Promise<void> => {
-  const { rows: existingIdRows } = await db.query<{ id: number }>(sql`
+export const upsertUserParameterRowsByYear =
+  (valueType: 'int4' | 'float8', tableName: string) =>
+  async (
+    db: DatabaseTransactionConnectionType,
+    uid: number,
+    year: number,
+    inputs: Omit<ParameterRow, 'id' | 'uid'>[],
+  ): Promise<void> => {
+    const { rows: existingIdRows } = await db.query<{ id: number }>(sql`
   INSERT INTO ${sql.identifier([`planning_${tableName}`])} (uid, year, name, value)
   SELECT * FROM ${sql.unnest(
     inputs.map((input) => [uid, input.year, input.name, input.value]),
@@ -27,27 +26,29 @@ export const upsertUserParameterRowsByYear = (
   RETURNING id
   `);
 
-  await db.query(sql`
+    await db.query(sql`
   DELETE FROM ${sql.identifier([`planning_${tableName}`])}
   WHERE uid = ${uid} AND year = ${year} AND id != ALL(${sql.array(
-    existingIdRows.map((row) => row.id),
-    'int4',
-  )})
+      existingIdRows.map((row) => row.id),
+      'int4',
+    )})
   `);
-};
+  };
 
-export const selectParameterRows = (tableName: string) => async (
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  years: number[],
-): Promise<readonly ParameterRow[]> => {
-  const { rows } = await db.query<ParameterRow>(sql`
+export const selectParameterRows =
+  (tableName: string) =>
+  async (
+    db: DatabaseTransactionConnectionType,
+    uid: number,
+    years: number[],
+  ): Promise<readonly ParameterRow[]> => {
+    const { rows } = await db.query<ParameterRow>(sql`
   SELECT * FROM ${sql.identifier([`planning_${tableName}`])}
   WHERE uid = ${uid} AND year = ANY(${sql.array(years, 'int4')})
   ORDER BY name
   `);
-  return rows;
-};
+    return rows;
+  };
 
 export const financialYearStart = (year: number): TaggedTemplateLiteralInvocationType =>
   sql`make_date(${year}, ${startMonth + 1}, 1)`;

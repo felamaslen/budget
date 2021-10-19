@@ -18,7 +18,7 @@ export const authDbRoute = (
 export const validatedAuthDbRoute = <
   D extends Record<string, unknown> | void = void,
   P extends Record<string, unknown> | void = void,
-  Q extends Record<string, unknown> | void = void
+  Q extends Record<string, unknown> | void = void,
 >(
   schema: Partial<{
     data: Schema;

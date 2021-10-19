@@ -7,7 +7,7 @@ import type { AnalysisSortedTree, BlockItem, MainBlockName } from '~client/types
 import { AnalysisPage, PageListStandard } from '~client/types/enum';
 import type { CategoryCostTreeDeep } from '~client/types/gql';
 
-describe('Analysis hooks', () => {
+describe('analysis hooks', () => {
   const state: State = {
     description: 'Some description',
     startDate: new Date('2018-04-01'),
@@ -36,14 +36,14 @@ describe('Analysis hooks', () => {
       expect.assertions(1);
       const expectedResult: AnalysisSortedTree<MainBlockName>[] = [
         {
-          name: (PageListStandard.General as string) as MainBlockName,
+          name: PageListStandard.General as string as MainBlockName,
           derived: false,
           color: colors[PageListStandard.General].main,
           subTree: [{ name: 'foo1_bar1', total: 1642283 }],
           total: 1642283,
         },
         {
-          name: (PageListStandard.Food as string) as MainBlockName,
+          name: PageListStandard.Food as string as MainBlockName,
           derived: false,
           color: colors[PageListStandard.Food].main,
           subTree: [
@@ -86,6 +86,7 @@ describe('Analysis hooks', () => {
       expect.assertions(1);
       const result = getBlocks(forest, ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT);
 
+      // eslint-disable-next-line jest/no-large-snapshots
       expect(result).toMatchInlineSnapshot(`
         Object {
           "box": Object {

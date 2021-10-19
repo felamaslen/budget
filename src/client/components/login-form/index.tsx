@@ -19,9 +19,10 @@ export type Props = {
 export const LoginForm: React.FC<Props> = ({ onLogin, loading }) => {
   const dispatch = useDispatch();
 
-  const onWarn = useCallback((message: string) => dispatch(errorOpened(message, ErrorLevel.Warn)), [
-    dispatch,
-  ]);
+  const onWarn = useCallback(
+    (message: string) => dispatch(errorOpened(message, ErrorLevel.Warn)),
+    [dispatch],
+  );
 
   const [pin, setPin] = useState<number[]>([]);
   const onInput = useCallback(

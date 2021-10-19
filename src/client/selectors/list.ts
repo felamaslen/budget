@@ -11,17 +11,21 @@ import type { GQL } from '~shared/types';
 export type ApiListState<I extends ListItem, P extends string> = Record<P, ListState<I>> &
   Partial<Pick<State, 'api'>>;
 
-export const getRawItems = <
-  I extends GQL<ListItem> = ListItemStandardNative,
-  P extends string = PageListStandard
->(
-  page: P,
-) => (state: ApiListState<I, P>): CrudState<I> => state[page];
+export const getRawItems =
+  <I extends GQL<ListItem> = ListItemStandardNative, P extends string = PageListStandard>(
+    page: P,
+  ) =>
+  (state: ApiListState<I, P>): CrudState<I> =>
+    state[page];
 
-export const getOlderExists = moize(<P extends string>(page: P) => (state: State): boolean =>
-  isStandardListPage(page) ? !!state[page].olderExists : false,
+export const getOlderExists = moize(
+  <P extends string>(page: P) =>
+    (state: State): boolean =>
+      isStandardListPage(page) ? !!state[page].olderExists : false,
 );
 
-export const getListOffset = moize(<P extends string>(page: P) => (state: State): number =>
-  isStandardListPage(page) ? state[page].offset : 0,
+export const getListOffset = moize(
+  <P extends string>(page: P) =>
+    (state: State): number =>
+      isStandardListPage(page) ? state[page].offset : 0,
 );

@@ -37,12 +37,12 @@ export const getSpendingColumn = (graph: GQL<Monthly>, numDates: number): number
       ),
     );
 
-export const withSpendingColumn = <G extends OverviewGraphPartial>(numDates: number) => (
-  graph: G,
-): OverviewGraphRequired<'spending', G> => ({
-  ...graph,
-  spending: getSpendingColumn(graph, numDates),
-});
+export const withSpendingColumn =
+  <G extends OverviewGraphPartial>(numDates: number) =>
+  (graph: G): OverviewGraphRequired<'spending', G> => ({
+    ...graph,
+    spending: getSpendingColumn(graph, numDates),
+  });
 
 export const currentDayIsEndOfMonth = (today: Date): boolean => isSameDay(endOfMonth(today), today);
 

@@ -121,7 +121,7 @@ export function createSubscription<K extends keyof ResolversTypes>(
 
 export function createFilteredSubscription<
   K extends keyof ResolversParentTypes,
-  A extends Record<string, unknown>
+  A extends Record<string, unknown>,
 >(
   topic: PubSubTopic,
   filter: (payload: ResolversParentTypes[K], args: A) => boolean,

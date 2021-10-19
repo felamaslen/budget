@@ -9,7 +9,7 @@ import { State } from '~client/reducers';
 import { testState, testRows, testPrices, testStartTime, testCacheTimes } from '~client/test-data';
 import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
-describe('Funds selectors / gains', () => {
+describe('funds selectors / gains', () => {
   const testCache: PriceCache = {
     startTime: testStartTime,
     cacheTimes: testCacheTimes,
@@ -354,23 +354,20 @@ describe('Funds selectors / gains', () => {
     };
 
     it.each`
-      id           | expected
-      ${10}        | ${rgb(255, 250, 250)}
-      ${3}         | ${rgb(163, 246, 170)}
-      ${1}         | ${rgb(255, 44, 44)}
-      ${5}         | ${rgb(0, 230, 18)}
-      ${6}         | ${rgb(255, 255, 255)}
-      ${'NOEXIST'} | ${null}
-    `('should set the correct colour for fund ID $id', ({ id, expected }) => {
+      id    | expected
+      ${10} | ${rgb(255, 250, 250)}
+      ${3}  | ${rgb(163, 246, 170)}
+      ${1}  | ${rgb(255, 44, 44)}
+      ${5}  | ${rgb(0, 230, 18)}
+      ${6}  | ${rgb(255, 255, 255)}
+    `('should set the colour for fund ID $id to $expected', ({ id, expected }) => {
       expect.assertions(1);
-      if (expected === null) {
-        expect(getGainsForRow(rowGains, id)).toBeNull();
-      } else {
-        expect(getGainsForRow(rowGains, id)).toStrictEqual({
-          ...rowGains[id as 10 | 3 | 1 | 5 | 6],
-          color: expected,
-        });
-      }
+      expect(getGainsForRow(rowGains, id)?.color).toBe(expected);
+    });
+
+    it('should return null for a fund ID which does not exist', () => {
+      expect.assertions(1);
+      expect(getGainsForRow(rowGains, numericHash('NOEXIST'))).toBeNull();
     });
 
     it('should return null if there are no gain data for the fund', () => {

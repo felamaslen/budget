@@ -272,501 +272,28 @@ describe(AccessibleListStandard.name, () => {
     };
 
     it('should render a mobile list view', () => {
-      expect.assertions(1);
-      const { container } = setupMobile();
+      // TODO: convert this to an image test
+      expect.assertions(10);
+      const { getAllByRole } = setupMobile();
+      const listItems = getAllByRole('listitem');
 
-      expect(container).toMatchInlineSnapshot(`
-        .emotion-0 {
-          background-color: red;
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          -webkit-box-flex-flow: column;
-          -webkit-flex-flow: column;
-          -ms-flex-flow: column;
-          flex-flow: column;
-          -webkit-flex: 1 1 0;
-          -ms-flex: 1 1 0;
-          flex: 1 1 0;
-          min-height: 0;
-        }
+      expect(listItems).toHaveLength(3);
 
-        @media only screen and (min-width: 500px) {
-          .emotion-0 {
-            background-color: #fff;
-          }
-        }
+      const withinItem0 = within(listItems[0]);
+      const withinItem1 = within(listItems[1]);
+      const withinItem2 = within(listItems[2]);
 
-        .emotion-2 {
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          font-size: 1rem;
-        }
+      expect(withinItem0.getByText('20/04/2020')).toBeInTheDocument();
+      expect(withinItem0.getByText('item three')).toBeInTheDocument();
+      expect(withinItem0.getByText('£1.73')).toBeInTheDocument();
 
-        .emotion-4 {
-          -webkit-flex: 0 0 6.5rem;
-          -ms-flex: 0 0 6.5rem;
-          flex: 0 0 6.5rem;
-          font-weight: bold;
-          height: 1.75rem;
-          line-height: 1.75rem;
-          padding: 0 0.25rem;
-          text-align: center;
-          white-space: nowrap;
-        }
+      expect(withinItem1.getByText('20/04/2020')).toBeInTheDocument();
+      expect(withinItem1.getByText('item two')).toBeInTheDocument();
+      expect(withinItem1.getByText('£1.18')).toBeInTheDocument();
 
-        @media only screen and (min-width: 500px) {
-          .emotion-4 {
-            -webkit-flex: 0 0 6.25rem;
-            -ms-flex: 0 0 6.25rem;
-            flex: 0 0 6.25rem;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: left;
-          }
-        }
-
-        .emotion-6 {
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          font-weight: bold;
-          height: 1.75rem;
-          line-height: 1.75rem;
-          padding: 0 0.25rem;
-          text-align: center;
-          white-space: nowrap;
-        }
-
-        @media only screen and (min-width: 500px) {
-          .emotion-6 {
-            -webkit-flex: 0 0 9.375rem;
-            -ms-flex: 0 0 9.375rem;
-            flex: 0 0 9.375rem;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: left;
-          }
-        }
-
-        .emotion-8 {
-          -webkit-flex: 0 0 5rem;
-          -ms-flex: 0 0 5rem;
-          flex: 0 0 5rem;
-          font-weight: bold;
-          height: 1.75rem;
-          line-height: 1.75rem;
-          padding: 0 0.25rem;
-          text-align: center;
-          white-space: nowrap;
-        }
-
-        @media only screen and (min-width: 500px) {
-          .emotion-8 {
-            -webkit-flex: 0 0 6rem;
-            -ms-flex: 0 0 6rem;
-            flex: 0 0 6rem;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: left;
-          }
-        }
-
-        .emotion-10 {
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          padding-bottom: 3rem;
-        }
-
-        @media only screen and (min-width: 500px) {
-          .emotion-10 {
-            padding-bottom: 0;
-          }
-        }
-
-        .emotion-12 {
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          height: 1.875rem;
-          line-height: 1.5rem;
-        }
-
-        @media only screen and (min-width: 500px) {
-          .emotion-12 {
-            background-color: #eaeaea;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-          }
-
-          .emotion-12 input[type='text'] {
-            background-color: transparent;
-            border: none;
-            border-right: 1px solid #ccc;
-            height: 1.5rem;
-            margin: 0;
-            outline: none;
-            padding: 0 0.125rem;
-            width: 0;
-            -webkit-flex: 1;
-            -ms-flex: 1;
-            flex: 1;
-          }
-
-          .emotion-12 input[type='text']:focus {
-            box-shadow: inset 0 0 1px 1px #09e;
-          }
-        }
-
-        .emotion-14 {
-          -webkit-align-items: center;
-          -webkit-box-align: center;
-          -ms-flex-align: center;
-          align-items: center;
-          background: none;
-          border: none;
-          color: inherit;
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          font: inherit;
-          height: inherit;
-          overflow: hidden;
-          margin: 0;
-          padding: 0;
-        }
-
-        .emotion-16 {
-          -webkit-flex: 0 0 6.5rem;
-          -ms-flex: 0 0 6.5rem;
-          flex: 0 0 6.5rem;
-          overflow: hidden;
-          padding-right: 0.25rem;
-          text-align: left;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .emotion-18 {
-          -webkit-flex: 1;
-          -ms-flex: 1;
-          flex: 1;
-          overflow: hidden;
-          padding-right: 0.25rem;
-          text-align: left;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .emotion-20 {
-          -webkit-flex: 0 0 5rem;
-          -ms-flex: 0 0 5rem;
-          flex: 0 0 5rem;
-          overflow: hidden;
-          padding-right: 0.25rem;
-          text-align: left;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .emotion-42 {
-          -webkit-align-items: center;
-          -webkit-box-align: center;
-          -ms-flex-align: center;
-          align-items: center;
-          background: rgba(255,255,255,0.8);
-          bottom: 0;
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          -webkit-box-flex-flow: column;
-          -webkit-flex-flow: column;
-          -ms-flex-flow: column;
-          flex-flow: column;
-          height: 3rem;
-          -webkit-box-pack: center;
-          -ms-flex-pack: center;
-          -webkit-justify-content: center;
-          justify-content: center;
-          position: absolute;
-          width: 100%;
-        }
-
-        .emotion-42 button {
-          -webkit-align-items: center;
-          -webkit-box-align: center;
-          -ms-flex-align: center;
-          align-items: center;
-          background: #000;
-          border: none;
-          border-radius: 0.125rem;
-          color: #fff;
-          font-size: 0.875rem;
-          -webkit-flex: 0 0 2.625rem;
-          -ms-flex: 0 0 2.625rem;
-          flex: 0 0 2.625rem;
-          -webkit-box-pack: center;
-          -ms-flex-pack: center;
-          -webkit-justify-content: center;
-          justify-content: center;
-          line-height: 2.5rem;
-          padding: 0;
-          margin: 0;
-          text-transform: uppercase;
-          width: 8rem;
-        }
-
-        .emotion-44 {
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          margin: 0 6px;
-          -webkit-box-flex: 1;
-          -webkit-flex-grow: 1;
-          -ms-flex-positive: 1;
-          flex-grow: 1;
-          -webkit-box-pack: center;
-          -ms-flex-pack: center;
-          -webkit-justify-content: center;
-          justify-content: center;
-          padding: 0.5rem;
-          width: 100%;
-          background: #ffa35c;
-          font-size: 0.6em;
-          border: none;
-          border-radius: 3px;
-          outline: none;
-          text-transform: uppercase;
-          font-weight: bold;
-        }
-
-        .e4ltp6k2 .emotion-44 {
-          display: -webkit-box;
-          display: -webkit-flex;
-          display: -ms-flexbox;
-          display: flex;
-          margin: 0 0.2em;
-          -webkit-align-items: center;
-          -webkit-box-align: center;
-          -ms-flex-align: center;
-          align-items: center;
-          -webkit-box-pack: center;
-          -ms-flex-pack: center;
-          -webkit-justify-content: center;
-          justify-content: center;
-          grid-row: 1;
-          grid-column: 4;
-        }
-
-        .e4ltp6k1 .emotion-44,
-        .e4ltp6k1 .emotion-44:hover,
-        .e4ltp6k1 .emotion-44:active {
-          background: none;
-          border: none;
-          box-shadow: none;
-        }
-
-        .e4ltp6k1 .emotion-44::after {
-          display: block;
-          margin-left: 16px;
-          content: '';
-          width: 0;
-          height: 0;
-          border: solid transparent;
-          border-left-color: #111;
-          border-width: 6px 8px;
-          transform-origin: left center;
-        }
-
-        .emotion-44:disabled {
-          background: none;
-        }
-
-        @media only screen and (min-width: 500px) {
-          .emotion-44 {
-            display: inline-block;
-            margin: 0;
-            padding: 5px 12px 6px;
-            -webkit-box-flex: 0;
-            -webkit-flex-grow: 0;
-            -ms-flex-positive: 0;
-            flex-grow: 0;
-            width: auto;
-            box-shadow: inset 0px 1px 0px 0px rgba(0,0,0,0.2);
-            background: #74ad5a;
-            border: 1px solid #3b6e22;
-            border-radius: 0;
-            cursor: pointer;
-            color: #fff;
-            font-family: Arial;
-            font-size: 13px;
-            height: 24px;
-            position: relative;
-            -webkit-text-decoration: none;
-            text-decoration: none;
-            text-transform: none;
-            z-index: 4;
-          }
-
-          .emotion-44:hover,
-          .emotion-44:focus {
-            background: #80be69;
-          }
-
-          .emotion-44:active {
-            background: #638c4d;
-          }
-
-          .emotion-44:disabled {
-            background: #9c9c9c;
-            cursor: default;
-            border: 1px solid #666;
-          }
-        }
-
-        .e1w7s03s5 .emotion-44 {
-          margin: 2px 4px;
-        }
-
-        <div>
-          <div
-            class="emotion-0 emotion-1"
-            color="red"
-          >
-            <div
-              class="emotion-2 emotion-3"
-              data-testid="header"
-              role="heading"
-            >
-              <div
-                class="emotion-4 emotion-5"
-              >
-                Date
-              </div>
-              <div
-                class="emotion-6 emotion-5"
-              >
-                Item
-              </div>
-              <div
-                class="emotion-8 emotion-5"
-              >
-                Cost
-              </div>
-            </div>
-            <div
-              class="emotion-10 emotion-11"
-              role="list"
-            >
-              <div>
-                <div
-                  style="position: relative; height: 768px; width: 1024px; overflow: auto; will-change: transform; direction: ltr;"
-                >
-                  <div
-                    style="height: 90px; width: 100%;"
-                  >
-                    <li
-                      class="emotion-12 emotion-13"
-                      style="position: absolute; left: 0px; top: 0px; height: 30px; width: 100%;"
-                    >
-                      <button
-                        class="emotion-14 emotion-15"
-                      >
-                        <span
-                          class="emotion-16 emotion-17"
-                        >
-                          20/04/2020
-                        </span>
-                        <span
-                          class="emotion-18 emotion-17"
-                        >
-                          item three
-                        </span>
-                        <span
-                          class="emotion-20 emotion-17"
-                        >
-                          £1.73
-                        </span>
-                      </button>
-                    </li>
-                    <li
-                      class="emotion-12 emotion-13"
-                      style="position: absolute; left: 0px; top: 30px; height: 30px; width: 100%;"
-                    >
-                      <button
-                        class="emotion-14 emotion-15"
-                      >
-                        <span
-                          class="emotion-16 emotion-17"
-                        >
-                          20/04/2020
-                        </span>
-                        <span
-                          class="emotion-18 emotion-17"
-                        >
-                          item two
-                        </span>
-                        <span
-                          class="emotion-20 emotion-17"
-                        >
-                          £1.18
-                        </span>
-                      </button>
-                    </li>
-                    <li
-                      class="emotion-12 emotion-13"
-                      style="position: absolute; left: 0px; top: 60px; height: 30px; width: 100%;"
-                    >
-                      <button
-                        class="emotion-14 emotion-15"
-                      >
-                        <span
-                          class="emotion-16 emotion-17"
-                        >
-                          17/04/2020
-                        </span>
-                        <span
-                          class="emotion-18 emotion-17"
-                        >
-                          item one
-                        </span>
-                        <span
-                          class="emotion-20 emotion-17"
-                        >
-                          £9.31
-                        </span>
-                      </button>
-                    </li>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              class="emotion-42 emotion-43"
-            >
-              <button
-                class="emotion-44 emotion-45"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-      `);
+      expect(withinItem2.getByText('17/04/2020')).toBeInTheDocument();
+      expect(withinItem2.getByText('item one')).toBeInTheDocument();
+      expect(withinItem2.getByText('£9.31')).toBeInTheDocument();
     });
 
     it.each`
@@ -780,27 +307,25 @@ describe(AccessibleListStandard.name, () => {
       expect(getByText(example)).toBeInTheDocument();
     });
 
-    describe('when rendering on mobiles', () => {
-      it.each`
-        item             | value
-        ${'weekly cost'} | ${'Weekly: £64.57'}
-        ${'total cost'}  | ${'Total: £18.9k'}
-        ${'category'}    | ${'Category'}
-        ${'shop'}        | ${'Shop'}
-      `('should not render the $item header', ({ value }) => {
-        expect.assertions(1);
-        const { getByTestId } = setupMobile();
-        const header = getByTestId('header');
-        const { queryByText } = within(header);
-        expect(queryByText(value)).not.toBeInTheDocument();
-      });
+    it.each`
+      item             | value
+      ${'weekly cost'} | ${'Weekly: £64.57'}
+      ${'total cost'}  | ${'Total: £18.9k'}
+      ${'category'}    | ${'Category'}
+      ${'shop'}        | ${'Shop'}
+    `('should not render the $item header', ({ value }) => {
+      expect.assertions(1);
+      const { getByTestId } = setupMobile();
+      const header = getByTestId('header');
+      const { queryByText } = within(header);
+      expect(queryByText(value)).not.toBeInTheDocument();
+    });
 
-      it('should not render daily totals', () => {
-        expect.assertions(2);
-        const { queryByText, queryAllByText } = setupMobile();
-        expect(queryByText('£2.91')).not.toBeInTheDocument();
-        expect(queryAllByText('£9.31')).toHaveLength(1);
-      });
+    it('should not render daily totals', () => {
+      expect.assertions(2);
+      const { queryByText, queryAllByText } = setupMobile();
+      expect(queryByText('£2.91')).not.toBeInTheDocument();
+      expect(queryAllByText('£9.31')).toHaveLength(1);
     });
 
     it('should not render delete buttons', () => {
@@ -855,9 +380,12 @@ describe(AccessibleListStandard.name, () => {
         const addButton = getByText('Add');
         userEvent.click(addButton);
         const modalDialog = getByTestId('modal-dialog');
-        const { getAllByRole, getByRole, getByDisplayValue, getByText: getModalText } = within(
-          modalDialog,
-        );
+        const {
+          getAllByRole,
+          getByRole,
+          getByDisplayValue,
+          getByText: getModalText,
+        } = within(modalDialog);
 
         const dateInput = getByDisplayValue('2020-04-14') as HTMLInputElement;
         const costInput = getByRole('spinbutton') as HTMLInputElement;
@@ -921,9 +449,12 @@ describe(AccessibleListStandard.name, () => {
         const itemField = getByText('item one');
         userEvent.click(itemField);
         const modalDialog = getByTestId('modal-dialog');
-        const { getAllByRole, getByRole, getByDisplayValue, getByText: getModalText } = within(
-          modalDialog,
-        );
+        const {
+          getAllByRole,
+          getByRole,
+          getByDisplayValue,
+          getByText: getModalText,
+        } = within(modalDialog);
 
         const dateInput = getByDisplayValue('2020-04-17') as HTMLInputElement;
         const costInput = getByRole('spinbutton') as HTMLInputElement;

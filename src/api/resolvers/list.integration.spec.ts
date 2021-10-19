@@ -28,7 +28,7 @@ import {
 } from '~api/types';
 import type { RawDate, RawDateDeep } from '~shared/types';
 
-describe('Standard list resolvers', () => {
+describe('standard list resolvers', () => {
   let app: App;
   let clock: sinon.SinonFakeTimers;
   beforeAll(async () => {

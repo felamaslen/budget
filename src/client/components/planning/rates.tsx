@@ -35,33 +35,34 @@ export const Rates: React.FC = () => {
   const thresholds = state.parameters?.thresholds ?? [];
 
   const setParam = useCallback(
-    (key: 'rates' | 'thresholds') => (name: string, value = 0): void => {
-      sync((last) => {
-        if (!last.parameters[key].some((compare) => compare.name === name)) {
+    (key: 'rates' | 'thresholds') =>
+      (name: string, value = 0): void => {
+        sync((last) => {
+          if (!last.parameters[key].some((compare) => compare.name === name)) {
+            return {
+              ...last,
+              parameters: {
+                ...last.parameters,
+                [key]: [...last.parameters[key], { name, value }],
+              },
+            };
+          }
           return {
             ...last,
             parameters: {
               ...last.parameters,
-              [key]: [...last.parameters[key], { name, value }],
+              [key]: replaceAtIndex(
+                last.parameters[key],
+                last.parameters[key].findIndex((compare) => compare.name === name),
+                (prevValue) => ({
+                  ...prevValue,
+                  value: value ?? prevValue.value,
+                }),
+              ),
             },
           };
-        }
-        return {
-          ...last,
-          parameters: {
-            ...last.parameters,
-            [key]: replaceAtIndex(
-              last.parameters[key],
-              last.parameters[key].findIndex((compare) => compare.name === name),
-              (prevValue) => ({
-                ...prevValue,
-                value: value ?? prevValue.value,
-              }),
-            ),
-          },
-        };
-      });
-    },
+        });
+      },
     [sync],
   );
 

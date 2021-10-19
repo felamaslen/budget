@@ -118,16 +118,14 @@ export function useNetWorthCategoryCrud(
   return useCrud<NetWorthCategoryInput, NetWorthCategoryInput>(optionsNetWorthCategory, options);
 }
 
-const optionsNetWorthSubcategory: HookOptions<
-  NetWorthSubcategoryInput,
-  NetWorthSubcategoryInput
-> = {
-  mutations: {
-    useCreate: gql.useCreateNetWorthSubcategoryMutation,
-    useUpdate: gql.useUpdateNetWorthSubcategoryMutation,
-    useDelete: gql.useDeleteNetWorthSubcategoryMutation,
-  },
-};
+const optionsNetWorthSubcategory: HookOptions<NetWorthSubcategoryInput, NetWorthSubcategoryInput> =
+  {
+    mutations: {
+      useCreate: gql.useCreateNetWorthSubcategoryMutation,
+      useUpdate: gql.useUpdateNetWorthSubcategoryMutation,
+      useDelete: gql.useDeleteNetWorthSubcategoryMutation,
+    },
+  };
 
 export function useNetWorthSubcategoryCrud(
   options?: Partial<HookCallOptions>,

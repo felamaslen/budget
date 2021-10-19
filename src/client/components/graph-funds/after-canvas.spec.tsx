@@ -27,7 +27,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
     changePeriod,
   };
 
-  describe('Changing resolution', () => {
+  describe('changing resolution', () => {
     it.each`
       query         | period              | length
       ${'3 months'} | ${FundPeriod.Month} | ${3}
@@ -56,7 +56,7 @@ describe('<AfterCanvas /> (funds graph)', () => {
     });
   });
 
-  describe('Mode list', () => {
+  describe('mode list', () => {
     it('should be rendered', () => {
       expect.assertions(1);
       const { getByDisplayValue } = render(<AfterCanvas {...props} />);

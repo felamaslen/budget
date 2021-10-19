@@ -2,7 +2,7 @@ import permutation from 'array-permutation';
 
 import { blockPacker } from './block-packer';
 
-describe('Flex block packer', () => {
+describe('flex block packer', () => {
   it('should fit a sorted list of totals into a rectangle', () => {
     expect.assertions(1);
 
@@ -31,6 +31,7 @@ describe('Flex block packer', () => {
       },
     ];
 
+    // eslint-disable-next-line jest/no-large-snapshots
     expect(blockPacker<Item>(width, height, totals)).toMatchInlineSnapshot(`
       Object {
         "box": Object {
@@ -135,6 +136,7 @@ describe('Flex block packer', () => {
       },
     ];
 
+    // eslint-disable-next-line jest/no-large-snapshots
     expect(blockPacker(width, height, totals)).toMatchInlineSnapshot(`
       Object {
         "box": Object {
@@ -328,6 +330,7 @@ describe('Flex block packer', () => {
     ];
 
     const result = blockPacker(width, height, items);
+    // eslint-disable-next-line jest/no-large-snapshots
     expect(result).toMatchInlineSnapshot(`
       Object {
         "box": Object {

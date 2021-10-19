@@ -128,7 +128,7 @@ const onRead = (
 
 function simpleUpdate<
   K extends 'categories' | 'subcategories' | 'entries',
-  A extends { item: State[K][0] }
+  A extends { item: State[K][0] },
 >(key: K, state: State, action: A): State {
   return {
     ...state,

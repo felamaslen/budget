@@ -49,7 +49,7 @@ export const standardFields: Fields<Create<ListItemStandard>> = {
 
 type StandardFieldPropsMobile<
   V,
-  E extends Record<string, unknown> = Record<string, unknown>
+  E extends Record<string, unknown> = Record<string, unknown>,
 > = Partial<E> & {
   field: string;
   value: V;
@@ -82,11 +82,11 @@ export type ExtraProps = DailyRecord & {
   isFuture: boolean;
 };
 
-export const makeItemProcessor = <T extends ListItemStandard>(
-  now: Date,
-): ItemProcessor<T, ExtraProps> => (item): Partial<ExtraProps> => ({
-  isFuture: item.date > now,
-});
+export const makeItemProcessor =
+  <T extends ListItemStandard>(now: Date): ItemProcessor<T, ExtraProps> =>
+  (item): Partial<ExtraProps> => ({
+    isFuture: item.date > now,
+  });
 
 export const StandardHeader = <T extends GQL<ListItemStandard>>({
   page,

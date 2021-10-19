@@ -36,7 +36,7 @@ import {
 } from '~api/types';
 import type { Create, NativeDate, RawDate } from '~shared/types';
 
-describe('Funds resolver', () => {
+describe('funds resolver', () => {
   let app: App;
   beforeAll(async () => {
     app = await getTestApp();
@@ -89,16 +89,16 @@ describe('Funds resolver', () => {
       yahooFinance.quote = jest.fn(
         async () =>
           ({
-            'FCSS.L': ({
+            'FCSS.L': {
               price: {
                 regularMarketPrice: 388.29,
               } as yahooFinance.Quote<'price'>['price'],
-            } as unknown) as yahooFinance.Quote,
-            'SMT.L': ({
+            } as unknown as yahooFinance.Quote,
+            'SMT.L': {
               price: {
                 regularMarketPrice: 1197.23,
               } as yahooFinance.Quote<'price'>['price'],
-            } as unknown) as yahooFinance.Quote,
+            } as unknown as yahooFinance.Quote,
           } as Record<string, yahooFinance.Quote<'price'> | null | undefined>),
       );
     });
@@ -202,7 +202,7 @@ describe('Funds resolver', () => {
     });
   });
 
-  describe('Cash allocation target', () => {
+  describe('cash allocation target', () => {
     const mutation = gql`
       mutation UpdateCashAllocationTarget($target: NonNegativeInt!) {
         updateCashAllocationTarget(target: $target) {
@@ -268,7 +268,7 @@ describe('Funds resolver', () => {
     });
   });
 
-  describe('Fund allocation targets', () => {
+  describe('fund allocation targets', () => {
     const mutation = gql`
       mutation UpdateFundAllocationTargets($deltas: [TargetDelta!]!) {
         updateFundAllocationTargets(deltas: $deltas) {

@@ -16,7 +16,7 @@ import {
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { FundMode } from '~client/types/enum';
 
-describe('Funds selectors / lines', () => {
+describe('funds selectors / lines', () => {
   const id1 = numericHash('my-fund-id');
   const id2 = numericHash('my-second-fund-id');
   const id3 = numericHash('short-lived-fund');
@@ -133,7 +133,7 @@ describe('Funds selectors / lines', () => {
       ${id2} | ${roiId2}
       ${id3} | ${roiId3}
     `('should get a list of ROIs for id $id', ({ id, expectedResult }) => {
-      expect.assertions(expectedResult.length + 2);
+      expect.hasAssertions();
 
       const result = getFundLineROI(fundsWithReturns, id);
 
@@ -250,7 +250,7 @@ describe('Funds selectors / lines', () => {
       ${id2} | ${priceId2}
       ${id3} | ${priceId3}
     `('should get an absolute list of prices for id $id', ({ id, expectedResult }) => {
-      expect.assertions(expectedResult.length + 2);
+      expect.hasAssertions();
 
       const result = getFundLinePrice(fundsWithReturns, id);
 
@@ -271,7 +271,7 @@ describe('Funds selectors / lines', () => {
       ${id2} | ${priceId2}
       ${id3} | ${priceId3}
     `('should get a normalised list of prices for id $id', ({ id, expectedResult }) => {
-      expect.assertions(expectedResult.length + 2);
+      expect.hasAssertions();
 
       const result = getFundLinePriceNormalised(fundsWithReturns, id);
 

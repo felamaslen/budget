@@ -17,7 +17,7 @@ import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import { PageListStandard } from '~client/types/enum';
 import { Query, QuerySearchArgs } from '~client/types/gql';
 
-describe('Accessible list create item', () => {
+describe('accessible list create item', () => {
   const myPage = PageListStandard.Income as const;
 
   type MyItem = {
@@ -35,7 +35,7 @@ describe('Accessible list create item', () => {
     suggestionFields: ['item'],
   };
 
-  const mockClient = ({
+  const mockClient = {
     executeQuery: ({
       query,
       variables,
@@ -81,7 +81,7 @@ describe('Accessible list create item', () => {
         data: null,
       });
     },
-  } as unknown) as Client;
+  } as unknown as Client;
 
   const setup = (customProps: Partial<typeof props> = {}): RenderResult =>
     render(

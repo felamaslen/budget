@@ -42,11 +42,8 @@ export const FundRow: React.FC<Props> = ({
 
   const maxAllocationTarget = useSelector(getMaxAllocationTarget(item.id));
 
-  const [
-    tempAllocationTarget,
-    debouncedAllocationTarget,
-    setTempAllocationTarget,
-  ] = useDebouncedState<number | null | undefined>(item.allocationTarget, 500);
+  const [tempAllocationTarget, debouncedAllocationTarget, setTempAllocationTarget] =
+    useDebouncedState<number | null | undefined>(item.allocationTarget, 500);
 
   const setAllocationTarget = useCallback(
     (value) => {

@@ -43,10 +43,10 @@ const RenderedLinePath: React.FC<RenderedPathProps> = ({
   ...props
 }) => {
   const { color, dashed, fill, smooth, strokeWidth } = appearance;
-  const pathProps = useMemo<PathProps>(() => getPathProps({ strokeWidth, dashed }), [
-    strokeWidth,
-    dashed,
-  ]);
+  const pathProps = useMemo<PathProps>(
+    () => getPathProps({ strokeWidth, dashed }),
+    [strokeWidth, dashed],
+  );
 
   const linePath = useMemo<string>(
     () =>

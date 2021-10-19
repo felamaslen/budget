@@ -21,7 +21,7 @@ export function mapInternalToExternal<D extends Row = Row, J extends Row = Row>(
         }
 
         return items;
-      }, (dbResult as unknown) as J),
+      }, dbResult as unknown as J),
     );
 }
 

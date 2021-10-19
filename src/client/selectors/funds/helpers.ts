@@ -50,97 +50,99 @@ export const getTodayPrices = (state: StateSliced): FundQuotes =>
 export const getTodayPriceTime = (state: StateSliced): number =>
   state[PageNonStandard.Funds].todayPriceFetchTime ?? 0;
 
-const combineRealTimeQuotesWithScrapedCache = (quotes: FundQuotes, latestTime: number) => (
-  cache: PriceCache,
-): PriceCache => {
-  const latestTimeStartIndex = cache.cacheTimes.length - 1;
-  if (!Object.keys(quotes).length) {
-    return cache;
-  }
-
-  const allIds = Array.from(new Set([...Object.keys(cache.prices), ...Object.keys(quotes)]));
-  const prices = allIds.reduce<Record<number, FundPriceGroup[]>>((last, id) => {
-    const existingCache: FundPriceGroup[] | undefined = Reflect.get(cache.prices, id);
-    const realTimeQuote: number | null | undefined = Reflect.get(quotes, id);
-    if (existingCache && existingCache.length > 0) {
-      return {
-        ...last,
-        [id]: replaceAtIndex(existingCache, existingCache.length - 1, (prev) => ({
-          ...prev,
-          values: [...prev.values, realTimeQuote ?? prev.values[prev.values.length - 1]],
-        })),
-      };
-    }
-    if (!realTimeQuote) {
-      return last;
+const combineRealTimeQuotesWithScrapedCache =
+  (quotes: FundQuotes, latestTime: number) =>
+  (cache: PriceCache): PriceCache => {
+    const latestTimeStartIndex = cache.cacheTimes.length - 1;
+    if (!Object.keys(quotes).length) {
+      return cache;
     }
 
-    return {
-      ...last,
-      [id]: [
-        {
-          startIndex: latestTimeStartIndex,
-          values: [realTimeQuote],
-        },
-      ],
-    };
-  }, {});
-
-  return {
-    startTime: cache.startTime,
-    cacheTimes: [...cache.cacheTimes, latestTime - cache.startTime],
-    prices,
-  };
-};
-
-const rebaseStockSplitsIntoPastPrices = (funds: Fund[]) => (
-  cache: PriceCache,
-): PriceCacheRebased => {
-  const pricesRebased = Object.entries(cache.prices).reduce<PriceCacheRebased['prices']>(
-    (last, [fundId, prices]) => {
-      const stockSplits = funds.find((fund) => fund.id === Number(fundId))?.stockSplits ?? [];
-      if (!stockSplits.length) {
+    const allIds = Array.from(new Set([...Object.keys(cache.prices), ...Object.keys(quotes)]));
+    const prices = allIds.reduce<Record<number, FundPriceGroup[]>>((last, id) => {
+      const existingCache: FundPriceGroup[] | undefined = Reflect.get(cache.prices, id);
+      const realTimeQuote: number | null | undefined = Reflect.get(quotes, id);
+      if (existingCache && existingCache.length > 0) {
         return {
           ...last,
-          [fundId]: prices.map((group) => ({
-            ...group,
-            rebasePriceRatio: Array(group.values.length).fill(1),
+          [id]: replaceAtIndex(existingCache, existingCache.length - 1, (prev) => ({
+            ...prev,
+            values: [...prev.values, realTimeQuote ?? prev.values[prev.values.length - 1]],
           })),
         };
       }
-
-      const splitsWithTimeIndex = stockSplits.map(({ date, ratio }) => {
-        const splitCacheTime = getUnixTime(date) - cache.startTime;
-        return {
-          appliesBeforeTimeIndex: cache.cacheTimes.findIndex(
-            (cacheTime) => cacheTime > splitCacheTime,
-          ),
-          ratio,
-        };
-      });
-
-      const pricesRebasedForFund = prices.map<FundPriceGroupRebased>(({ startIndex, values }) => ({
-        startIndex,
-        values,
-        rebasePriceRatio: values.map<number>((price, index) =>
-          combineStockSplits(
-            splitsWithTimeIndex.filter(
-              ({ appliesBeforeTimeIndex }) =>
-                appliesBeforeTimeIndex === -1 || appliesBeforeTimeIndex > startIndex + index,
-            ),
-          ),
-        ),
-      }));
+      if (!realTimeQuote) {
+        return last;
+      }
 
       return {
         ...last,
-        [fundId]: pricesRebasedForFund,
+        [id]: [
+          {
+            startIndex: latestTimeStartIndex,
+            values: [realTimeQuote],
+          },
+        ],
       };
-    },
-    cache.prices as PriceCacheRebased['prices'],
-  );
-  return { ...cache, prices: pricesRebased };
-};
+    }, {});
+
+    return {
+      startTime: cache.startTime,
+      cacheTimes: [...cache.cacheTimes, latestTime - cache.startTime],
+      prices,
+    };
+  };
+
+const rebaseStockSplitsIntoPastPrices =
+  (funds: Fund[]) =>
+  (cache: PriceCache): PriceCacheRebased => {
+    const pricesRebased = Object.entries(cache.prices).reduce<PriceCacheRebased['prices']>(
+      (last, [fundId, prices]) => {
+        const stockSplits = funds.find((fund) => fund.id === Number(fundId))?.stockSplits ?? [];
+        if (!stockSplits.length) {
+          return {
+            ...last,
+            [fundId]: prices.map((group) => ({
+              ...group,
+              rebasePriceRatio: Array(group.values.length).fill(1),
+            })),
+          };
+        }
+
+        const splitsWithTimeIndex = stockSplits.map(({ date, ratio }) => {
+          const splitCacheTime = getUnixTime(date) - cache.startTime;
+          return {
+            appliesBeforeTimeIndex: cache.cacheTimes.findIndex(
+              (cacheTime) => cacheTime > splitCacheTime,
+            ),
+            ratio,
+          };
+        });
+
+        const pricesRebasedForFund = prices.map<FundPriceGroupRebased>(
+          ({ startIndex, values }) => ({
+            startIndex,
+            values,
+            rebasePriceRatio: values.map<number>((price, index) =>
+              combineStockSplits(
+                splitsWithTimeIndex.filter(
+                  ({ appliesBeforeTimeIndex }) =>
+                    appliesBeforeTimeIndex === -1 || appliesBeforeTimeIndex > startIndex + index,
+                ),
+              ),
+            ),
+          }),
+        );
+
+        return {
+          ...last,
+          [fundId]: pricesRebasedForFund,
+        };
+      },
+      cache.prices as PriceCacheRebased['prices'],
+    );
+    return { ...cache, prices: pricesRebased };
+  };
 
 export const getFundsCache = createSelector(
   getFundsRows,

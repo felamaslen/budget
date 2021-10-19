@@ -18,7 +18,7 @@ import {
   QueryAnalysisDeepArgs,
 } from '~api/types';
 
-describe('Analysis resolvers', () => {
+describe('analysis resolvers', () => {
   let clock: sinon.SinonFakeTimers;
   let app: App;
   beforeAll(async () => {
@@ -47,19 +47,17 @@ describe('Analysis resolvers', () => {
     }
   `;
 
-  describe('Grouping by year / category', () => {
-    const setup = moize.promise(
-      async (): Promise<Maybe<AnalysisResponse>> => {
-        const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
-          query,
-          variables: {
-            period: AnalysisPeriod.Year,
-            groupBy: AnalysisGroupBy.Category,
-          },
-        });
-        return res.data?.analysis ?? null;
-      },
-    );
+  describe('grouping by year / category', () => {
+    const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
+      const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
+        query,
+        variables: {
+          period: AnalysisPeriod.Year,
+          groupBy: AnalysisGroupBy.Category,
+        },
+      });
+      return res.data?.analysis ?? null;
+    });
 
     it('should return cost data', async () => {
       expect.assertions(1);
@@ -137,20 +135,18 @@ describe('Analysis resolvers', () => {
     });
 
     describe('on leap years', () => {
-      const setupLeapYear = moize.promise(
-        async (): Promise<Maybe<AnalysisResponse>> => {
-          const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
-            query,
-            variables: {
-              period: AnalysisPeriod.Year,
-              groupBy: AnalysisGroupBy.Category,
-              page: 2,
-            },
-          });
+      const setupLeapYear = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
+        const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
+          query,
+          variables: {
+            period: AnalysisPeriod.Year,
+            groupBy: AnalysisGroupBy.Category,
+            page: 2,
+          },
+        });
 
-          return res.data?.analysis ?? null;
-        },
-      );
+        return res.data?.analysis ?? null;
+      });
 
       it('should return data from the given year', async () => {
         expect.assertions(2);
@@ -232,20 +228,18 @@ describe('Analysis resolvers', () => {
     });
   });
 
-  describe('Grouping by month / shop / second page', () => {
-    const setup = moize.promise(
-      async (): Promise<Maybe<AnalysisResponse>> => {
-        const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
-          query,
-          variables: {
-            period: AnalysisPeriod.Month,
-            groupBy: AnalysisGroupBy.Shop,
-            page: 1,
-          },
-        });
-        return res.data?.analysis ?? null;
-      },
-    );
+  describe('grouping by month / shop / second page', () => {
+    const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
+      const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
+        query,
+        variables: {
+          period: AnalysisPeriod.Month,
+          groupBy: AnalysisGroupBy.Shop,
+          page: 1,
+        },
+      });
+      return res.data?.analysis ?? null;
+    });
 
     it('should return cost data for the month', async () => {
       expect.assertions(1);
@@ -323,19 +317,17 @@ describe('Analysis resolvers', () => {
     });
   });
 
-  describe('Grouping by week / category', () => {
-    const setup = moize.promise(
-      async (): Promise<Maybe<AnalysisResponse>> => {
-        const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
-          query,
-          variables: {
-            period: AnalysisPeriod.Week,
-            groupBy: AnalysisGroupBy.Category,
-          },
-        });
-        return res.data?.analysis ?? null;
-      },
-    );
+  describe('grouping by week / category', () => {
+    const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
+      const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
+        query,
+        variables: {
+          period: AnalysisPeriod.Week,
+          groupBy: AnalysisGroupBy.Category,
+        },
+      });
+      return res.data?.analysis ?? null;
+    });
 
     it('should return cost data for the week', async () => {
       expect.assertions(1);
@@ -394,7 +386,7 @@ describe('Analysis resolvers', () => {
     });
   });
 
-  describe('Deep query', () => {
+  describe('deep query', () => {
     const queryDeep = gql`
       query AnalysisDeep(
         $category: AnalysisPage!
@@ -412,20 +404,18 @@ describe('Analysis resolvers', () => {
       }
     `;
 
-    const setup = moize.promise(
-      async (): Promise<Maybe<CategoryCostTreeDeep[]>> => {
-        const res = await app.authGqlClient.query<Query, QueryAnalysisDeepArgs>({
-          query: queryDeep,
-          variables: {
-            category: AnalysisPage.Food,
-            period: AnalysisPeriod.Month,
-            groupBy: AnalysisGroupBy.Category,
-            page: 1,
-          },
-        });
-        return res.data?.analysisDeep ?? null;
-      },
-    );
+    const setup = moize.promise(async (): Promise<Maybe<CategoryCostTreeDeep[]>> => {
+      const res = await app.authGqlClient.query<Query, QueryAnalysisDeepArgs>({
+        query: queryDeep,
+        variables: {
+          category: AnalysisPage.Food,
+          period: AnalysisPeriod.Month,
+          groupBy: AnalysisGroupBy.Category,
+          page: 1,
+        },
+      });
+      return res.data?.analysisDeep ?? null;
+    });
 
     it('should return grouped cost data for the category in the given period', async () => {
       expect.assertions(1);

@@ -25,7 +25,7 @@ export type OverviewGraphPartial = GQL<Monthly> & Partial<OverviewGraphExtra>;
 
 export type OverviewGraphRequired<
   K extends keyof OverviewGraphExtra,
-  G extends OverviewGraphPartial = OverviewGraphPartial
+  G extends OverviewGraphPartial = OverviewGraphPartial,
 > = GQL<Monthly> & G & Pick<OverviewGraphValues, K>;
 
 export type OverviewGraphDate = { date: Date; monthIndex: number };
@@ -45,7 +45,7 @@ export type OverviewGraph = {
 
 export type TableValues<
   T = never,
-  K extends keyof OverviewGraphValues = keyof OverviewGraphValues
+  K extends keyof OverviewGraphValues = keyof OverviewGraphValues,
 > = {
   [key in K]: T;
 } & {

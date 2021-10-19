@@ -38,6 +38,7 @@ describe('<PageAnalysis /> / <SubTree />', () => {
     ${'first'}  | ${0}  | ${AnalysisPage.Food}
     ${'second'} | ${1}  | ${AnalysisPage.General}
   `('should call onHover on mouse over of the $position item', ({ index, name }) => {
+    expect.assertions(2);
     const { container } = getContainer();
 
     userEvent.hover(container.childNodes[0].childNodes[index] as Element);

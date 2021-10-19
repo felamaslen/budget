@@ -10,7 +10,7 @@ export interface CrudItem extends Item {
 
 export type Noop<
   I extends Record<string, unknown> = Record<string, unknown>,
-  O extends Record<string, unknown> = I
+  O extends Record<string, unknown> = I,
 > = (value: I) => O;
 
 export type DbToJson<D extends Item, J extends Item> = ((value: D) => J) | Noop<D, J>;
@@ -63,7 +63,7 @@ export type CrudOptionsExtended<D extends Item, J extends Item, P extends CrudIt
 export type CrudOptions<
   D extends Item,
   J extends Item,
-  P extends CrudItem = CrudItem
+  P extends CrudItem = CrudItem,
 > = PickPartial<CrudOptionsExtended<D, J, P>, 'jsonToDb' | 'dbToJson'>;
 
 export type CreateItem<J extends CrudItem> = (

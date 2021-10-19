@@ -6,7 +6,8 @@ import type { NetWorthSubcategory } from '~client/types/gql';
 
 export function useCreditCards(): NetWorthSubcategory[] {
   const netWorthSubcategories = useSelector(getSubcategories);
-  return useMemo(() => netWorthSubcategories.filter((compare) => !!compare.hasCreditLimit), [
-    netWorthSubcategories,
-  ]);
+  return useMemo(
+    () => netWorthSubcategories.filter((compare) => !!compare.hasCreditLimit),
+    [netWorthSubcategories],
+  );
 }

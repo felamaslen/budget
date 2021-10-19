@@ -13,7 +13,7 @@ import type { Data, FundItem } from '~client/types';
 import { FundMode, FundPeriod, PageNonStandard } from '~client/types/enum';
 import { abbreviateFundName } from '~shared/abbreviation';
 
-describe('Fund selectors / graph', () => {
+describe('fund selectors / graph', () => {
   const today = new Date('2020-04-20');
   const state: State = {
     ...testState,

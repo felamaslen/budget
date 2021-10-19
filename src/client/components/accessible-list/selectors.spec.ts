@@ -5,7 +5,7 @@ import { ApiListState } from '~client/selectors';
 import type { Id } from '~client/types';
 import { RequestType } from '~client/types/enum';
 
-describe('Accessible list selectors', () => {
+describe('accessible list selectors', () => {
   describe('getItems', () => {
     type MyItem = {
       id: Id;

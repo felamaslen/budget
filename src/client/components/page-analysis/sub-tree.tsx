@@ -22,11 +22,10 @@ const SubTreeItem: React.FC<
     total: number;
   }
 > = ({ name, subItemName, onDeactivate, onHover, total, itemCost }) => {
-  const onActivate = useCallback((): void => onHover(name, subItemName), [
-    onHover,
-    name,
-    subItemName,
-  ]);
+  const onActivate = useCallback(
+    (): void => onHover(name, subItemName),
+    [onHover, name, subItemName],
+  );
 
   return (
     <Styled.TreeListItem

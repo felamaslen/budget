@@ -6,7 +6,7 @@ import Upper, { Props } from './upper';
 
 import { AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
 
-describe('PageAnalysis / <Upper />', () => {
+describe('pageAnalysis / <Upper />', () => {
   const onRequest = jest.fn();
 
   const props: Props = {

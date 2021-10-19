@@ -16,7 +16,7 @@ import { NetWorthCategoryType } from '~client/types/enum';
 import type { NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
 import { NetWorthAggregate as Aggregate } from '~shared/constants';
 
-describe('Overview selectors (net worth)', () => {
+describe('overview selectors (net worth)', () => {
   const state = testState;
 
   const testCategory: NetWorthCategory = {
@@ -415,8 +415,6 @@ describe('Overview selectors (net worth)', () => {
           {name} - {level}
         </span>
       ));
-
-      // eslint-disable-next-line jest/prefer-inline-snapshots
       expect(getNetWorthBreakdown(state.netWorth.entries[0], 100, 100)(state)).toMatchSnapshot();
     });
   });

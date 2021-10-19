@@ -28,9 +28,7 @@ const toRemotePayload = (state: State): PlanningSync => ({
   parameters: state.parameters,
 });
 
-export function usePlanning(
-  localYear: number,
-): {
+export function usePlanning(localYear: number): {
   state: State;
   setState: Dispatch<SetStateAction<State>>;
   isSynced: boolean;

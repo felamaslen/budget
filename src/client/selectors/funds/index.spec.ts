@@ -19,7 +19,7 @@ import { testState as state } from '~client/test-data/state';
 import type { CachedValue, FundNative, Portfolio } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
-describe('Funds selectors', () => {
+describe('funds selectors', () => {
   const testNow = new Date('2018-03-23T11:45:20Z');
 
   const testToday = new Date('2020-04-20');
@@ -73,18 +73,14 @@ describe('Funds selectors', () => {
       prop            | expectedValue
       ${'value'}      | ${399098.2}
       ${'gain'}       | ${0.0827}
-      ${'gainAbs'}    | ${60780.2}
-      ${'dayGain'}    | ${getDayGain(state)}
-      ${'dayGainAbs'} | ${getDayGainAbs(state)}
-    `('should get $prop', ({ prop, expectedValue }) => {
+      ${'gainAbs'}    | ${60780.208}
+      ${'dayGain'}    | ${0.007545}
+      ${'dayGainAbs'} | ${2988.8}
+    `('should get numeric prop "$prop"', ({ prop, expectedValue }) => {
       expect.assertions(1);
       const result = getFundsCachedValue.now(testNow)(state);
 
-      if (typeof expectedValue === 'number') {
-        expect(result[prop as keyof CachedValue]).toBeCloseTo(expectedValue, 1);
-      } else {
-        expect(result).toHaveProperty(prop, expectedValue);
-      }
+      expect(result[prop as keyof CachedValue]).toBeCloseTo(expectedValue);
     });
 
     const itemsWithoutPriceData: FundNative[] = [

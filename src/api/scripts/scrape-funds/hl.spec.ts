@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { isHLFundShare, getHoldingsFromDataHL, getPriceFromDataHL, getFundUrlHL } from './hl';
 import { Fund } from './types';
 
-describe('Fund scraper - HL', () => {
+describe('fund scraper - HL', () => {
   const testFileFund = path.resolve(__dirname, './vendor/fund-test-hl.html');
   const testFileShare = path.resolve(__dirname, './vendor/share-test-hl.html');
   const testFileShareComma = path.resolve(__dirname, './vendor/share-test-hl-comma.html');

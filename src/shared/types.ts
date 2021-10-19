@@ -1,9 +1,7 @@
 export type RequiredNotNull<T> = T extends Record<string, unknown>
-  ? Required<
-      {
-        [K in keyof T]: RequiredNotNull<T[K]>;
-      }
-    >
+  ? Required<{
+      [K in keyof T]: RequiredNotNull<T[K]>;
+    }>
   : NonNullable<T>;
 
 export type PickUnion<T extends Record<string, unknown>, K extends keyof T> = { [P in K]: T[P] };
@@ -23,8 +21,9 @@ export type OmitDeep<T, U extends string> = T extends Record<string, unknown>
 
 export type OptionalDeep<T, U extends string> = T extends Record<string, unknown>
   ? U extends keyof T
-    ? { [K in keyof Omit<T, U>]: OptionalDeep<T[K], U> } &
-        Partial<{ [K in U]: NonNullable<OptionalDeep<T[K], U>> }>
+    ? { [K in keyof Omit<T, U>]: OptionalDeep<T[K], U> } & Partial<{
+        [K in U]: NonNullable<OptionalDeep<T[K], U>>;
+      }>
     : { [K in keyof T]: OptionalDeep<T[K], U> }
   : T extends Record<string, unknown>[]
   ? OptionalDeep<T[0], U>[]

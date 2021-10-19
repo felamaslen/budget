@@ -24,12 +24,12 @@ const testPriceSMTGeneric = 1023.0; // regularMarketPrice
 
 jest.mock('~api/modules/graphql/pubsub');
 
-describe('Fund scraper - integration tests', () => {
+describe('fund scraper - integration tests', () => {
   const now = new Date('2020-02-22T20:35Z');
   let clock: sinon.SinonFakeTimers;
   const uid1 = 12345;
   const uid2 = 67891;
-  let fundIds: number[] = [];
+  let fundIds: number[];
 
   beforeAll(async () => {
     clock = sinon.useFakeTimers(now);
@@ -104,13 +104,14 @@ describe('Fund scraper - integration tests', () => {
   });
 
   beforeEach(async () => {
+    fundIds = [];
     await getPool().connect(clearDb);
     clock.reset();
     nock.cleanAll();
     await setupNocks();
   });
 
-  describe('Scraping prices', () => {
+  describe('scraping prices', () => {
     const getTestFundPrice = async (fundId: number): Promise<readonly TestFundPrice[]> => {
       const result = await getPool().connect(async (db) => {
         const { rows } = await db.query<TestFundPrice>(sql`
@@ -260,7 +261,7 @@ describe('Fund scraper - integration tests', () => {
     });
   });
 
-  describe('Scraping holdings', () => {
+  describe('scraping holdings', () => {
     const weightCTY: { [userId: string]: number } = {
       // (100000 + 100000 - 90000) / (100000 + 100000 - 90000 + 193 - 175 + Math.max(0, 216704 - 276523)),
       [uid1]: 0.999836,

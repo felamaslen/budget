@@ -33,8 +33,9 @@ type PropsRow<I extends Item> = {
 };
 
 const isItemLoaded = moize(
-  <I extends Item>(data: ItemData<I>) => (index: number): boolean =>
-    !data.olderExists || index < data.items.length,
+  <I extends Item>(data: ItemData<I>) =>
+    (index: number): boolean =>
+      !data.olderExists || index < data.items.length,
   { maxSize: 1 },
 );
 
@@ -64,7 +65,7 @@ const makeRow = <I extends Item, E extends Record<string, unknown>>(
 export const InfiniteWindow = <
   I extends Item,
   P extends PageListStandard,
-  E extends Record<string, unknown>
+  E extends Record<string, unknown>,
 >({
   page,
   isMobile,

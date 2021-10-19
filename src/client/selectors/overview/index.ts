@@ -230,42 +230,42 @@ function predictLiabilities(ctx: NetWorthContext): number[] {
   }, []);
 }
 
-const withNetWorth = <G extends GraphForNetWorth>(ctx: NetWorthContext) => (
-  graph: G,
-): GraphWithNetWorth<G> => {
-  const currentEntries = ctx.netWorth.slice(0, ctx.startPredictionIndex);
-  const fillCurrent = (values: number[]): number[] => rightPad(values, ctx.dates.length);
-  const fillAggregate = (key: NetWorthAggregate): number[] =>
-    fillCurrent(currentEntries.map(({ aggregate }) => aggregate[key]));
+const withNetWorth =
+  <G extends GraphForNetWorth>(ctx: NetWorthContext) =>
+  (graph: G): GraphWithNetWorth<G> => {
+    const currentEntries = ctx.netWorth.slice(0, ctx.startPredictionIndex);
+    const fillCurrent = (values: number[]): number[] => rightPad(values, ctx.dates.length);
+    const fillAggregate = (key: NetWorthAggregate): number[] =>
+      fillCurrent(currentEntries.map(({ aggregate }) => aggregate[key]));
 
-  const { deposit: sayeDeposit, profit: sayeProfit } = calculatePredictedSAYEMonthlyDeposit(
-    ctx.subcategories,
-    ctx.netWorth,
-    ctx.startPredictionIndex,
-  );
+    const { deposit: sayeDeposit, profit: sayeProfit } = calculatePredictedSAYEMonthlyDeposit(
+      ctx.subcategories,
+      ctx.netWorth,
+      ctx.startPredictionIndex,
+    );
 
-  const options = predictOptions(ctx, sayeProfit);
-  const investments = predictInvestments(ctx, graph.stocks);
+    const options = predictOptions(ctx, sayeProfit);
+    const investments = predictInvestments(ctx, graph.stocks);
 
-  const cashLiquid = predictLiquidCash(ctx, graph);
-  const cashOther = predictOtherCash(ctx, sayeDeposit, graph.stocks, investments);
+    const cashLiquid = predictLiquidCash(ctx, graph);
+    const cashOther = predictOtherCash(ctx, sayeDeposit, graph.stocks, investments);
 
-  const assets = predictAssets(ctx, graph, cashLiquid, cashOther);
-  const liabilities = predictLiabilities(ctx);
+    const assets = predictAssets(ctx, graph, cashLiquid, cashOther);
+    const liabilities = predictLiabilities(ctx);
 
-  return {
-    ...graph,
-    cashLiquid,
-    cashOther,
-    illiquidEquity: ctx.illiquidEquity.map(({ value, debt }) => value + debt),
-    pension: fillAggregate(NetWorthAggregate.pension),
-    options,
-    investments,
-    assets,
-    liabilities,
-    netWorth: assets.map((value, index) => value + liabilities[index]),
+    return {
+      ...graph,
+      cashLiquid,
+      cashOther,
+      illiquidEquity: ctx.illiquidEquity.map(({ value, debt }) => value + debt),
+      pension: fillAggregate(NetWorthAggregate.pension),
+      options,
+      investments,
+      assets,
+      liabilities,
+      netWorth: assets.map((value, index) => value + liabilities[index]),
+    };
   };
-};
 
 function predictByPastAverages(
   dates: OverviewGraphDate[],
@@ -352,12 +352,12 @@ function calculateFutures<G extends OverviewGraphPartial>(
     );
 }
 
-const withNetChange = <G extends OverviewGraphRequired<'spending'>>() => (
-  graph: G,
-): OverviewGraphRequired<'net', G> => ({
-  ...graph,
-  net: graph.income.map((value, index) => value - graph.spending[index]),
-});
+const withNetChange =
+  <G extends OverviewGraphRequired<'spending'>>() =>
+  (graph: G): OverviewGraphRequired<'net', G> => ({
+    ...graph,
+    net: graph.income.map((value, index) => value - graph.spending[index]),
+  });
 
 const withPredictedSpending = <G extends OverviewGraphPartial>(
   dates: OverviewGraphDate[],
@@ -371,28 +371,28 @@ const withPredictedSpending = <G extends OverviewGraphPartial>(
     calculateFutures(dates, today, futureIncome, longTermOptions),
   );
 
-const predictStockReturns = (
-  dates: OverviewGraphDate[],
-  annualisedFundReturns: number,
-  monthlyStockPurchase: number,
-) => (stocks: number[]): number[] =>
-  reduceDates(
-    dates.slice(stocks.length),
-    (last, nextDate, prevDate) => [
-      ...last,
-      forecastCompoundedReturns(
-        last[last.length - 1],
-        nextDate.monthIndex - prevDate.monthIndex,
-        monthlyStockPurchase,
-        annualisedFundReturns,
-      ),
-    ],
-    dates[stocks.length - 1],
-    stocks,
-  );
+const predictStockReturns =
+  (dates: OverviewGraphDate[], annualisedFundReturns: number, monthlyStockPurchase: number) =>
+  (stocks: number[]): number[] =>
+    reduceDates(
+      dates.slice(stocks.length),
+      (last, nextDate, prevDate) => [
+        ...last,
+        forecastCompoundedReturns(
+          last[last.length - 1],
+          nextDate.monthIndex - prevDate.monthIndex,
+          monthlyStockPurchase,
+          annualisedFundReturns,
+        ),
+      ],
+      dates[stocks.length - 1],
+      stocks,
+    );
 
-const withCurrentStockValue = (currentStockValue: number) => (stocks: number[]): number[] =>
-  replaceAtIndex(stocks, stocks.length - 1, currentStockValue);
+const withCurrentStockValue =
+  (currentStockValue: number) =>
+  (stocks: number[]): number[] =>
+    replaceAtIndex(stocks, stocks.length - 1, currentStockValue);
 
 const getStockCostBasis = (
   dates: OverviewGraphDate[],
@@ -422,41 +422,41 @@ const getStockCostBasis = (
       ),
     );
 
-const withStocks = <G extends OverviewGraphPartial>(
-  numOldMonths: number,
-  longTermOptions: LongTermOptions,
-) => (
-  longTermRates: LongTermRates,
-  startPredictionIndex: number,
-  dates: OverviewGraphDate[],
-  stocks: number[],
-  funds: Fund[],
-  currentStockValue: number,
-  annualisedFundReturns: number,
-) => (graph: G): OverviewGraphRequired<'stocks' | 'stockCostBasis', G> => {
-  const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
+const withStocks =
+  <G extends OverviewGraphPartial>(numOldMonths: number, longTermOptions: LongTermOptions) =>
+  (
+    longTermRates: LongTermRates,
+    startPredictionIndex: number,
+    dates: OverviewGraphDate[],
+    stocks: number[],
+    funds: Fund[],
+    currentStockValue: number,
+    annualisedFundReturns: number,
+  ) =>
+  (graph: G): OverviewGraphRequired<'stocks' | 'stockCostBasis', G> => {
+    const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
 
-  return {
-    ...graph,
-    stocks: compose(
-      predictStockReturns(
+    return {
+      ...graph,
+      stocks: compose(
+        predictStockReturns(
+          dates,
+          longTermOptions.enabled
+            ? longTermOptions.rates.xirr ?? annualisedFundReturns
+            : annualisedFundReturns,
+          monthlyStockPurchase,
+        ),
+        withCurrentStockValue(currentStockValue),
+      )(stocks),
+      stockCostBasis: getStockCostBasis(
         dates,
-        longTermOptions.enabled
-          ? longTermOptions.rates.xirr ?? annualisedFundReturns
-          : annualisedFundReturns,
         monthlyStockPurchase,
+        numOldMonths,
+        startPredictionIndex,
+        funds,
       ),
-      withCurrentStockValue(currentStockValue),
-    )(stocks),
-    stockCostBasis: getStockCostBasis(
-      dates,
-      monthlyStockPurchase,
-      numOldMonths,
-      startPredictionIndex,
-      funds,
-    ),
+    };
   };
-};
 
 const getNetWorthMonthlyComposer = moize(
   <G extends OverviewGraphRequired<'income' | 'spending' | 'net' | 'stocks' | 'stockCostBasis'>>(
@@ -630,33 +630,33 @@ const getMedians = (values: TableNumberRows, scoreValues: TableNumberRows): Medi
     {} as Medians,
   );
 
-const getCellColor = (ranges: Ranges, medians: Medians) => (
-  value: number,
-  key: keyof TableValues,
-): string => getOverviewScoreColor(value, ranges[key], medians[key], overviewCategoryColor[key]);
+const getCellColor =
+  (ranges: Ranges, medians: Medians) =>
+  (value: number, key: keyof TableValues): string =>
+    getOverviewScoreColor(value, ranges[key], medians[key], overviewCategoryColor[key]);
 
-const getCells = (graph: OverviewGraphValues, getColor: ReturnType<typeof getCellColor>) => (
-  index: number,
-): OverviewTableRow['cells'] =>
-  OVERVIEW_COLUMNS.reduce<OverviewTableRow['cells']>(
-    (
-      last,
-      [
-        key,
-        {
-          include = [key as keyof Omit<OverviewGraphValues, 'startPredictionIndex'>],
-          exclude = [],
-        },
-      ],
-    ) => {
-      const value =
-        include.reduce<number>((sum, column) => sum + graph[column][index], 0) -
-        exclude.reduce<number>((sum, column) => sum + graph[column][index], 0);
+const getCells =
+  (graph: OverviewGraphValues, getColor: ReturnType<typeof getCellColor>) =>
+  (index: number): OverviewTableRow['cells'] =>
+    OVERVIEW_COLUMNS.reduce<OverviewTableRow['cells']>(
+      (
+        last,
+        [
+          key,
+          {
+            include = [key as keyof Omit<OverviewGraphValues, 'startPredictionIndex'>],
+            exclude = [],
+          },
+        ],
+      ) => {
+        const value =
+          include.reduce<number>((sum, column) => sum + graph[column][index], 0) -
+          exclude.reduce<number>((sum, column) => sum + graph[column][index], 0);
 
-      return { ...last, [key]: { value, rgb: getColor(value, key as keyof TableValues) } };
-    },
-    {} as OverviewTableRow['cells'],
-  );
+        return { ...last, [key]: { value, rgb: getColor(value, key as keyof TableValues) } };
+      },
+      {} as OverviewTableRow['cells'],
+    );
 
 export const getOverviewTable = moize(
   (today: Date): ((state: State) => OverviewTable) =>

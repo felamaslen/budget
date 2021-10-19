@@ -18,9 +18,9 @@ export type StateStandard<I extends ListItemStandard, P extends string> = {
 };
 
 export const getStandardCost = moize(
-  <S extends StateStandard<ListItemStandard, PageListStandard>>(page: PageListStandard) => (
-    state: S,
-  ): number => state[page].total,
+  <S extends StateStandard<ListItemStandard, PageListStandard>>(page: PageListStandard) =>
+    (state: S): number =>
+      state[page].total,
 );
 
 type SortItems<I extends ListItemInput> = (items: I[]) => I[];
@@ -41,8 +41,9 @@ export const getItems = moize(
 );
 
 export const getItem = moize(
-  <I extends ListItem, P extends PageList>(page: P, id: Id) => (state: State<I, P>): I =>
-    state[page].items.find((item) => item.id === id) as I,
+  <I extends ListItem, P extends PageList>(page: P, id: Id) =>
+    (state: State<I, P>): I =>
+      state[page].items.find((item) => item.id === id) as I,
 );
 
 export const sortStandardItems = sortByKey<'item' | 'date', ListItemStandard>(
@@ -51,9 +52,9 @@ export const sortStandardItems = sortByKey<'item' | 'date', ListItemStandard>(
 );
 
 export const getWeeklyCost = moize(
-  <I extends ListItemStandard, P extends string, S extends StateStandard<I, P>>(page: P) => (
-    state: S,
-  ): number => state[page].weekly,
+  <I extends ListItemStandard, P extends string, S extends StateStandard<I, P>>(page: P) =>
+    (state: S): number =>
+      state[page].weekly,
 );
 
 export const dailySelector: CustomSelector<ListItemStandard, DailyRecord> = moize(

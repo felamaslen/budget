@@ -11,7 +11,7 @@ import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import { PageListStandard } from '~client/types/enum';
 import type { ListItemInput } from '~client/types/gql';
 
-describe('Accessible list create form', () => {
+describe('accessible list create form', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });

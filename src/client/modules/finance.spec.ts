@@ -1,7 +1,7 @@
 import { forecastTotalLoanPayable } from './finance';
 import { abbreviateFundName, extractLongName, getGenericFullSymbol } from '~shared/abbreviation';
 
-describe('Finance module', () => {
+describe('finance module', () => {
   describe(forecastTotalLoanPayable.name, () => {
     describe('when the payment is lower than the principal', () => {
       it('should return the total interest paid over the lifetime of the loan', () => {

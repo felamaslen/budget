@@ -413,15 +413,9 @@ describe(FormFieldTransactions.name, () => {
     const inputDRIP = inputs[5];
     const inputPension = inputs[6];
 
-    [
-      inputDate,
-      inputUnits,
-      inputPrice,
-      inputFees,
-      inputTaxes,
-      inputDRIP,
-      inputPension,
-    ].forEach((input) => expect(input).toBeInTheDocument());
+    [inputDate, inputUnits, inputPrice, inputFees, inputTaxes, inputDRIP, inputPension].forEach(
+      (input) => expect(input).toBeInTheDocument(),
+    );
 
     const buttonAdd = getByText('+');
 

@@ -217,163 +217,134 @@ describe('date module', () => {
       expect(result).toStrictEqual(expectedResult);
     });
 
-    it('should handle ranges of decades', () => {
-      expect.assertions(2);
-      const result = timeSeriesTicks(
-        getUnixTime(new Date('2020-02-03')),
-        getUnixTime(new Date('2048-07-31')),
-      );
+    describe('ranges of decades', () => {
+      let result: ReturnType<typeof timeSeriesTicks>;
+      beforeEach(() => {
+        result = timeSeriesTicks(
+          getUnixTime(new Date('2020-02-03')),
+          getUnixTime(new Date('2048-07-31')),
+        );
+      });
 
-      expect(result).toHaveLength(29);
-      expect(result).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "label": "2020",
-            "major": 2,
-            "time": 1577836800,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1609459200,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1640995200,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1672531200,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1704067200,
-          },
-          Object {
-            "label": "2025",
-            "major": 1,
-            "time": 1735689600,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1767225600,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1798761600,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1830297600,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1861920000,
-          },
-          Object {
-            "label": "2030",
-            "major": 2,
-            "time": 1893456000,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1924992000,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1956528000,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 1988150400,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2019686400,
-          },
-          Object {
-            "label": "2035",
-            "major": 1,
-            "time": 2051222400,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2082758400,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2114380800,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2145916800,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2177452800,
-          },
-          Object {
-            "label": "2040",
-            "major": 2,
-            "time": 2208988800,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2240611200,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2272147200,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2303683200,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2335219200,
-          },
-          Object {
-            "label": "2045",
-            "major": 1,
-            "time": 2366841600,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2398377600,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2429913600,
-          },
-          Object {
-            "label": null,
-            "major": 0,
-            "time": 2461449600,
-          },
-        ]
-      `);
+      it('should return the expected number of ticks', () => {
+        expect.assertions(1);
+        expect(result).toHaveLength(29);
+      });
+
+      it('should return labels every five years', () => {
+        expect.assertions(1);
+        expect(result.map((row) => row.label)).toMatchInlineSnapshot(`
+          Array [
+            "2020",
+            null,
+            null,
+            null,
+            null,
+            "2025",
+            null,
+            null,
+            null,
+            null,
+            "2030",
+            null,
+            null,
+            null,
+            null,
+            "2035",
+            null,
+            null,
+            null,
+            null,
+            "2040",
+            null,
+            null,
+            null,
+            null,
+            "2045",
+            null,
+            null,
+            null,
+          ]
+        `);
+      });
+
+      it('should set decade labels as 2-major', () => {
+        expect.assertions(3);
+        expect(result[0].major).toBe(2);
+        expect(result[10].major).toBe(2);
+        expect(result[20].major).toBe(2);
+      });
+
+      it('should set mid-decade labels as 1-major', () => {
+        expect.assertions(3);
+        expect(result[5].major).toBe(1);
+        expect(result[15].major).toBe(1);
+        expect(result[25].major).toBe(1);
+      });
+
+      it('should set all other labels as 0-major', () => {
+        expect.assertions(23);
+        expect(result[1].major).toBe(0);
+        expect(result[2].major).toBe(0);
+        expect(result[3].major).toBe(0);
+        expect(result[4].major).toBe(0);
+        expect(result[6].major).toBe(0);
+        expect(result[7].major).toBe(0);
+        expect(result[8].major).toBe(0);
+        expect(result[9].major).toBe(0);
+        expect(result[11].major).toBe(0);
+        expect(result[12].major).toBe(0);
+        expect(result[13].major).toBe(0);
+        expect(result[14].major).toBe(0);
+        expect(result[16].major).toBe(0);
+        expect(result[17].major).toBe(0);
+        expect(result[18].major).toBe(0);
+        expect(result[19].major).toBe(0);
+        expect(result[21].major).toBe(0);
+        expect(result[22].major).toBe(0);
+        expect(result[23].major).toBe(0);
+        expect(result[24].major).toBe(0);
+        expect(result[26].major).toBe(0);
+        expect(result[27].major).toBe(0);
+        expect(result[28].major).toBe(0);
+      });
+
+      it('should set the expected yearly time difference between each tick', () => {
+        expect.assertions(1);
+        expect(result.map((row) => row.time)).toMatchInlineSnapshot(`
+          Array [
+            1577836800,
+            1609459200,
+            1640995200,
+            1672531200,
+            1704067200,
+            1735689600,
+            1767225600,
+            1798761600,
+            1830297600,
+            1861920000,
+            1893456000,
+            1924992000,
+            1956528000,
+            1988150400,
+            2019686400,
+            2051222400,
+            2082758400,
+            2114380800,
+            2145916800,
+            2177452800,
+            2208988800,
+            2240611200,
+            2272147200,
+            2303683200,
+            2335219200,
+            2366841600,
+            2398377600,
+            2429913600,
+            2461449600,
+          ]
+        `);
+      });
     });
   });
 

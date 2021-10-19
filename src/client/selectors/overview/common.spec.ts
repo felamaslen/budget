@@ -14,7 +14,7 @@ import { testState as state } from '~client/test-data/state';
 import { OverviewGraphDate } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
-describe('Overview selectors (common)', () => {
+describe('overview selectors (common)', () => {
   describe('getStartDate', () => {
     it('should get the start date', () => {
       expect.assertions(1);

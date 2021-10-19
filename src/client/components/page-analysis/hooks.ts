@@ -48,7 +48,7 @@ const getTreeColor = (name: string): string | undefined => {
 
 export function getSortedTree<
   K extends CategoryCostTree | CategoryCostTreeDeep,
-  B extends string = string
+  B extends string = string,
 >(forest: K[], derived = false): AnalysisSortedTree<B>[] {
   return forest.map<AnalysisSortedTree<B>>(({ item, tree }) => ({
     name: item as B,

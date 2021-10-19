@@ -22,7 +22,7 @@ export const AccessibleList = <
   P extends PageList,
   MK extends keyof I = never,
   E extends Record<string, unknown> = never,
-  H extends Record<string, unknown> = Record<string, unknown>
+  H extends Record<string, unknown> = Record<string, unknown>,
 >({
   page,
   onCreate,

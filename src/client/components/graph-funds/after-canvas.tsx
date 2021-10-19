@@ -43,16 +43,14 @@ const Item: React.FC<ItemProps> = ({
   abbreviate = true,
 }) => {
   const onToggle = useCallback(() => {
-    setToggleList(
-      (last: ToggleList): ToggleList => {
-        const next = { ...last, [id]: last[id] === false };
-        if (Object.keys(next).length === numItems && Object.values(next).every((value) => !value)) {
-          return last;
-        }
+    setToggleList((last: ToggleList): ToggleList => {
+      const next = { ...last, [id]: last[id] === false };
+      if (Object.keys(next).length === numItems && Object.values(next).every((value) => !value)) {
+        return last;
+      }
 
-        return next;
-      },
-    );
+      return next;
+    });
   }, [id, setToggleList, numItems]);
 
   const events = useCTA(onToggle, { stopPropagation: true });

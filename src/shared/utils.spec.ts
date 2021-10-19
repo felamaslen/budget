@@ -1,6 +1,6 @@
 import { arrayAverage, Average, omitDeep, optionalDeep } from './utils';
 
-describe('Shared utils', () => {
+describe('shared utils', () => {
   describe(omitDeep.name, () => {
     it('should remove the given key from an object, including arrays, recursively', () => {
       expect.assertions(1);

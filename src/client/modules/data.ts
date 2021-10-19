@@ -101,9 +101,12 @@ export function linearRegression(line: number[]): { slope: number; intercept: nu
   return { slope, intercept };
 }
 
-export function exponentialRegression(
-  line: number[],
-): { slope: number; intercept: number; logValues: number[]; points: number[] } {
+export function exponentialRegression(line: number[]): {
+  slope: number;
+  intercept: number;
+  logValues: number[];
+  points: number[];
+} {
   const logValues = line.filter((value) => value > 0).map(Math.log);
   if (!logValues.length) {
     return { slope: 0, intercept: 0, logValues: [], points: [] };
@@ -163,12 +166,12 @@ function sortKey<K extends string, I extends { [key in K]?: number | string | Da
   return 0;
 }
 
-export const sortByKey = <K extends string, I extends { [key in K]?: number | string | Date }>(
-  ...keys: SortKey<K>[]
-) => (items: I[]): I[] =>
-  [...items].sort((itemA, itemB) =>
-    keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0),
-  );
+export const sortByKey =
+  <K extends string, I extends { [key in K]?: number | string | Date }>(...keys: SortKey<K>[]) =>
+  (items: I[]): I[] =>
+    [...items].sort((itemA, itemB) =>
+      keys.reduce((last, key) => last || sortKey(key, itemA, itemB), 0),
+    );
 
 const asTimestamp = (date: string | Date): number =>
   (date instanceof Date ? date : new Date(date)).getTime();
@@ -179,7 +182,7 @@ export const sortByDate = <I extends { date: string | Date }>(items: I[]): I[] =
 export const sortByTotal = <R extends { total: number }>(items: R[]): R[] =>
   sortByKey<'total', R>({ key: 'total', order: -1 })(items);
 
-export const leftPad = <T>(array: T[], length: number, fill: T = (0 as unknown) as T): T[] =>
+export const leftPad = <T>(array: T[], length: number, fill: T = 0 as unknown as T): T[] =>
   Array(Math.max(0, length - array.length))
     .fill(fill)
     .concat(array);
@@ -187,7 +190,7 @@ export const leftPad = <T>(array: T[], length: number, fill: T = (0 as unknown) 
 export const rightPad = <T>(array: T[], length: number, fill?: T): T[] =>
   array.concat(
     Array<T>(Math.max(0, length - array.length)).fill(
-      fill ?? lastInArray(array) ?? ((0 as unknown) as T),
+      fill ?? lastInArray(array) ?? (0 as unknown as T),
     ),
   );
 
@@ -195,29 +198,29 @@ export const withoutId = <T extends Partial<Item>>({ id, ...rest }: T): Omit<T, 
 export const withoutIds = <T extends Partial<ListItem>>(items: T[]): Omit<T, 'id'>[] =>
   items.map(withoutId);
 
-export const withNativeDate = <K extends string, T extends Record<K, string>>(...keys: K[]) => (
-  item: T,
-): NativeDate<T, K> =>
-  keys.reduce<NativeDate<T, K>>(
-    (last, key) => ({ ...last, [key]: new Date(item[key]) }),
-    item as NativeDate<T, K>,
-  );
+export const withNativeDate =
+  <K extends string, T extends Record<K, string>>(...keys: K[]) =>
+  (item: T): NativeDate<T, K> =>
+    keys.reduce<NativeDate<T, K>>(
+      (last, key) => ({ ...last, [key]: new Date(item[key]) }),
+      item as NativeDate<T, K>,
+    );
 
-export const withRawDate = <K extends string, T extends Record<K, Date>>(...keys: K[]) => (
-  item: T,
-): RawDate<T, K> =>
-  keys.reduce<RawDate<T, K>>(
-    (last, key) => ({ ...last, [key]: toISO(item[key]) }),
-    item as RawDate<T, K>,
-  );
+export const withRawDate =
+  <K extends string, T extends Record<K, Date>>(...keys: K[]) =>
+  (item: T): RawDate<T, K> =>
+    keys.reduce<RawDate<T, K>>(
+      (last, key) => ({ ...last, [key]: toISO(item[key]) }),
+      item as RawDate<T, K>,
+    );
 
-export const withRawDateTime = <K extends string, T extends Record<K, Date>>(...keys: K[]) => (
-  item: T,
-): RawDate<T, K> =>
-  keys.reduce<RawDate<T, K>>(
-    (last, key) => ({ ...last, [key]: item[key].toISOString() }),
-    item as RawDate<T, K>,
-  );
+export const withRawDateTime =
+  <K extends string, T extends Record<K, Date>>(...keys: K[]) =>
+  (item: T): RawDate<T, K> =>
+    keys.reduce<RawDate<T, K>>(
+      (last, key) => ({ ...last, [key]: item[key].toISOString() }),
+      item as RawDate<T, K>,
+    );
 
 export const toNativeFund = <F extends GQLShallow<Omit<Fund, 'id'>>>(input: F): NativeFund<F> => ({
   ...omitTypeName(input),

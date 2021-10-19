@@ -291,12 +291,14 @@ export async function updatePlanningCreditCardPayments(
   `);
 }
 
-export const deleteOldPlanningCreditCardPayments = (year: number) => async (
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  existingPaymentIds: number[],
-): Promise<void> => {
-  await db.query(sql`
+export const deleteOldPlanningCreditCardPayments =
+  (year: number) =>
+  async (
+    db: DatabaseTransactionConnectionType,
+    uid: number,
+    existingPaymentIds: number[],
+  ): Promise<void> => {
+    await db.query(sql`
   DELETE FROM planning_credit_card_payments
   USING planning_credit_cards, planning_accounts
   WHERE planning_credit_cards.id = planning_credit_card_payments.credit_card_id
@@ -305,7 +307,7 @@ export const deleteOldPlanningCreditCardPayments = (year: number) => async (
     AND planning_credit_card_payments.year = ${year}
     AND planning_credit_card_payments.id != ALL(${sql.array(existingPaymentIds, 'int4')})
   `);
-};
+  };
 
 export async function selectPlanningCreditCardPayments(
   db: DatabaseTransactionConnectionType,
@@ -376,12 +378,14 @@ export async function updatePlanningValue(
   `);
 }
 
-export const deleteOldPlanningValues = (year: number) => async (
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  existingValueIds: number[],
-): Promise<void> => {
-  await db.query(sql`
+export const deleteOldPlanningValues =
+  (year: number) =>
+  async (
+    db: DatabaseTransactionConnectionType,
+    uid: number,
+    existingValueIds: number[],
+  ): Promise<void> => {
+    await db.query(sql`
   DELETE FROM planning_values
   USING planning_accounts
   WHERE planning_accounts.id = planning_values.account_id
@@ -389,7 +393,7 @@ export const deleteOldPlanningValues = (year: number) => async (
     AND planning_values.year = ${year}
     AND planning_values.id != ALL(${sql.array(existingValueIds, 'int4')})
   `);
-};
+  };
 
 export async function selectPlanningValues(
   db: DatabaseTransactionConnectionType,

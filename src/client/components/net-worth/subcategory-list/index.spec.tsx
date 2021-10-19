@@ -6,7 +6,7 @@ import numericHash from 'string-hash';
 import { NetWorthSubcategoryList, Props } from './index';
 import { NetWorthCategoryType } from '~client/types/enum';
 
-describe('NetWorthSubcategoryList', () => {
+describe('netWorthSubcategoryList', () => {
   const onCreate = jest.fn();
   const onUpdate = jest.fn();
   const onDelete = jest.fn();

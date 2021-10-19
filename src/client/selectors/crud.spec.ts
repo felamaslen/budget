@@ -2,7 +2,7 @@ import numericHash from 'string-hash';
 import { withoutDeleted } from './crud';
 import { RequestType } from '~client/types/enum';
 
-describe('Crud selector', () => {
+describe('crud selector', () => {
   describe('withoutDeleted', () => {
     it('should remove optimistically deleted items', () => {
       expect.assertions(1);
