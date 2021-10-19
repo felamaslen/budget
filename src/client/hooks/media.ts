@@ -1,8 +1,8 @@
 import { useMemo, useState, useEffect } from 'react';
-import { getIsServerSide } from '~client/modules/ssr';
+import { isServerSide } from '~client/modules/ssr';
 import { breakpoints } from '~client/styled/variables';
 
-const shouldSkip = getIsServerSide() && process.env.NODE_ENV !== 'test';
+const shouldSkip = isServerSide && process.env.NODE_ENV !== 'test';
 
 export function useMediaQuery(queryString: string): boolean {
   const matchQuery = useMemo(

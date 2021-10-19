@@ -1,9 +1,9 @@
 import { useEffect, useState, createContext } from 'react';
 import { debounce } from 'throttle-debounce';
 
-import { getIsServerSide } from '~client/modules/ssr';
+import { isServerSide } from '~client/modules/ssr';
 
-const initialWindowWidth = getIsServerSide() ? 0 : window.innerWidth;
+const initialWindowWidth = isServerSide ? 0 : window.innerWidth;
 
 export const ResizeContext = createContext(initialWindowWidth);
 
@@ -11,7 +11,7 @@ export function useDebouncedResize(): number {
   const [windowWidth, setWindowWidth] = useState<number>(initialWindowWidth);
 
   useEffect(() => {
-    if (getIsServerSide()) {
+    if (isServerSide) {
       return undefined;
     }
     const listener = debounce(50, (): void => setWindowWidth(window.innerWidth));

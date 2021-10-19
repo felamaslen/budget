@@ -12,13 +12,19 @@ import { createClient as createWSClient, Sink } from 'graphql-ws';
 import React, { useMemo, useRef } from 'react';
 import { Provider } from 'urql';
 
-import { getIsServerSide } from '~client/modules/ssr';
+import { isServerSide } from '~client/modules/ssr';
 
 function getWSUrl(): string {
-  const isServerSide = getIsServerSide();
   const isSecure = isServerSide ? null : window.location.protocol === 'https:';
   return isServerSide ? '' : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
 }
+
+const ssr = isServerSide
+  ? undefined
+  : ssrExchange({
+      isClient: true,
+      initialState: window.__URQL_DATA__,
+    });
 
 export type SSRExchange = ReturnType<typeof ssrExchange>;
 
@@ -26,20 +32,10 @@ type ClientProps = { apiKey: string | null; onReconnected?: () => void };
 
 export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconnected }) => {
   const hasConnected = useRef<boolean>(false);
-  const graphqlUrl = `${window.location.protocol}//${window.location.host}/graphql`;
-  const wsUrl = getWSUrl();
-  const ssr = useMemo(
-    () =>
-      getIsServerSide()
-        ? undefined
-        : ssrExchange({
-            isClient: true,
-            initialState: window.__URQL_DATA__,
-          }),
-    [],
-  );
 
   const client = useMemo<Client>(() => {
+    const graphqlUrl = `${window.location.protocol}//${window.location.host}/graphql`;
+
     if (!apiKey) {
       return createClient({
         url: graphqlUrl,
@@ -50,7 +46,7 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconne
     }
 
     const wsClient = createWSClient({
-      url: wsUrl,
+      url: getWSUrl(),
       lazy: false,
       retryAttempts: Infinity,
       retryWait: (retries): Promise<void> =>

@@ -17,6 +17,10 @@ import ws from 'ws';
 
 import { GQLProvider } from '.';
 
+jest.mock('~client/modules/ssr', () => ({
+  isServerSide: false,
+}));
+
 describe('GQLProvider', () => {
   const myApiKey = 'my-api-key';
 
