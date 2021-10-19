@@ -49,6 +49,8 @@ describe('<BlockPacker />', () => {
   it('should render a block tree', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer();
+    // TODO: image test
+    // eslint-disable-next-line jest/no-large-snapshots
     expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
       .emotion-0 {
         display: -webkit-box;

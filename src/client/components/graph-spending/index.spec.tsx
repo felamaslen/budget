@@ -40,6 +40,7 @@ describe('<GraphSpending />', () => {
   it('should render a graph', async () => {
     expect.assertions(1);
     const { getByTestId } = setup();
+    // eslint-disable-next-line jest/no-large-snapshots
     expect(getByTestId('graph-svg')).toMatchInlineSnapshot(`
       <svg
         data-testid="graph-svg"

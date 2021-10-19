@@ -79,6 +79,8 @@ describe('<GraphFundItem />', () => {
   it('should render a graph', async () => {
     expect.hasAssertions();
     const { container } = setup();
+    // TODO: add an image test
+    // eslint-disable-next-line jest/no-large-snapshots
     expect(container).toMatchInlineSnapshot(`
       .emotion-0 {
         -webkit-align-items: center;
@@ -221,6 +223,8 @@ describe('<GraphFundItem />', () => {
       expect.hasAssertions();
       const { container, getByRole } = setup();
       userEvent.click(getByRole('button'));
+      // TODO: add an image test
+      // eslint-disable-next-line jest/no-large-snapshots
       expect(container).toMatchInlineSnapshot(`
         .emotion-0 {
           -webkit-align-items: center;
