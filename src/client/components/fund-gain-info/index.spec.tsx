@@ -1,4 +1,5 @@
 import { render, RenderResult } from '@testing-library/react';
+import { generateImage } from 'jsdom-screenshot';
 import { rgb } from 'polished';
 import React from 'react';
 import { FundGainInfo } from '.';
@@ -33,7 +34,12 @@ describe('<FundGainInfo />', () => {
     expect(getByText(value)).toBeInTheDocument();
   });
 
-  // TODO: add an image test
+  it('should render as verified', async () => {
+    expect.assertions(1);
+    setup();
+    const screenshot = await generateImage();
+    expect(screenshot).toMatchImageSnapshot();
+  });
 
   it('should not render anything if there are no gain info', () => {
     expect.assertions(1);
