@@ -1,3 +1,5 @@
+import { render, RenderResult } from '@testing-library/react';
+import { generateImage } from 'jsdom-screenshot';
 import React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 
@@ -26,15 +28,11 @@ describe('<PageOverview />', () => {
       </MemoryRouter>,
     );
 
-  it('should render a table', () => {
+  it('should render a table and graphs', async () => {
     expect.assertions(1);
-    const { getByTestId } = getContainer();
-    expect(getByTestId('overview-table')).toMatchSnapshot();
-  });
+    getContainer();
+    const screenshot = await generateImage();
 
-  it('should render graphs', () => {
-    expect.assertions(1);
-    const { getByTestId } = getContainer();
-    expect(getByTestId('graph-overview')).toMatchSnapshot();
+    expect(screenshot).toMatchImageSnapshot();
   });
 });
