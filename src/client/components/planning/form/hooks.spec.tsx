@@ -77,35 +77,38 @@ describe(useTransactionFormElements.name, () => {
 });
 
 describe(useTransactionForm.name, () => {
-  let syncState: State = {
-    year: 2020,
-    parameters: {
-      rates: [],
-      thresholds: [],
-    },
-    accounts: [
-      {
-        id: numericHash('my-account'),
-        netWorthSubcategoryId: numericHash('my-account-subcategory'),
-        account: 'My account',
-        creditCards: [
-          {
-            id: numericHash('my-credit-card-id'),
-            netWorthSubcategoryId: numericHash('my-credit-card-subcategory'),
-            payments: [],
-            predictedPayment: null,
-          },
-        ],
-        values: [],
-        income: [],
-        computedValues: [],
-        computedStartValue: null,
-        includeBills: null,
+  let syncState: State;
+  beforeEach(() => {
+    syncState = {
+      year: 2020,
+      parameters: {
+        rates: [],
+        thresholds: [],
       },
-    ],
-    taxReliefFromPreviousYear: null,
-    error: null,
-  };
+      accounts: [
+        {
+          id: numericHash('my-account'),
+          netWorthSubcategoryId: numericHash('my-account-subcategory'),
+          account: 'My account',
+          creditCards: [
+            {
+              id: numericHash('my-credit-card-id'),
+              netWorthSubcategoryId: numericHash('my-credit-card-subcategory'),
+              payments: [],
+              predictedPayment: null,
+            },
+          ],
+          values: [],
+          income: [],
+          computedValues: [],
+          computedStartValue: null,
+          includeBills: null,
+        },
+      ],
+      taxReliefFromPreviousYear: null,
+      error: null,
+    };
+  });
 
   const sync = jest.fn((action: SetStateAction<State>) => {
     syncState = typeof action === 'function' ? action(syncState) : action;

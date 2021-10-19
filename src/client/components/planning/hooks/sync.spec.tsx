@@ -125,7 +125,7 @@ describe(usePlanning.name, () => {
   });
 
   it('should sync state on render', async () => {
-    expect.assertions(6);
+    expect.assertions(15);
 
     const { result, waitForNextUpdate } = renderHook(usePlanningWithYear, { wrapper: Wrapper });
     await waitForNextUpdate();
@@ -144,75 +144,82 @@ describe(usePlanning.name, () => {
     expect(result.current.state.accounts).not.toHaveLength(0);
     expect(result.current.state.parameters.rates).not.toHaveLength(0);
     expect(result.current.state.parameters.thresholds).not.toHaveLength(0);
-    expect(result.current.state).toMatchInlineSnapshot(`
+
+    expect(result.current.state.accounts).toHaveLength(1);
+
+    expect(result.current.state.accounts[0].id).toMatchInlineSnapshot(`178`);
+    expect(result.current.state.accounts[0].account).toMatchInlineSnapshot(`"My account"`);
+    expect(result.current.state.accounts[0].netWorthSubcategoryId).toMatchInlineSnapshot(`85`);
+
+    expect(result.current.state.accounts[0].income).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "endDate": "2021-03-31",
+          "id": 18,
+          "pensionContrib": 0.03,
+          "salary": 8500000,
+          "startDate": "2020-06-05",
+          "studentLoan": true,
+          "taxCode": "818L",
+        },
+      ]
+    `);
+    expect(result.current.state.accounts[0].values).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "formula": "=45*29",
+          "id": 67,
+          "month": 7,
+          "name": "Some purchase",
+          "value": null,
+        },
+      ]
+    `);
+    expect(result.current.state.accounts[0].creditCards).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": 72,
+          "netWorthSubcategoryId": 30,
+          "payments": Array [
+            Object {
+              "id": 1991,
+              "month": 4,
+              "value": -56192,
+            },
+          ],
+          "predictedPayment": 11063,
+        },
+      ]
+    `);
+
+    expect(result.current.state.accounts[0].computedStartValue).toMatchInlineSnapshot(`88389`);
+    expect(result.current.state.accounts[0].computedValues).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "isTransfer": false,
+          "isVerified": false,
+          "key": "salary-predicted-2020-12",
+          "month": 11,
+          "name": "Salary",
+          "value": 708333,
+        },
+      ]
+    `);
+
+    expect(result.current.state.parameters).toMatchInlineSnapshot(`
       Object {
-        "accounts": Array [
+        "rates": Array [
           Object {
-            "account": "My account",
-            "computedStartValue": 88389,
-            "computedValues": Array [
-              Object {
-                "isTransfer": false,
-                "isVerified": false,
-                "key": "salary-predicted-2020-12",
-                "month": 11,
-                "name": "Salary",
-                "value": 708333,
-              },
-            ],
-            "creditCards": Array [
-              Object {
-                "id": 72,
-                "netWorthSubcategoryId": 30,
-                "payments": Array [
-                  Object {
-                    "id": 1991,
-                    "month": 4,
-                    "value": -56192,
-                  },
-                ],
-                "predictedPayment": 11063,
-              },
-            ],
-            "id": 178,
-            "income": Array [
-              Object {
-                "endDate": "2021-03-31",
-                "id": 18,
-                "pensionContrib": 0.03,
-                "salary": 8500000,
-                "startDate": "2020-06-05",
-                "studentLoan": true,
-                "taxCode": "818L",
-              },
-            ],
-            "netWorthSubcategoryId": 85,
-            "values": Array [
-              Object {
-                "formula": "=45*29",
-                "id": 67,
-                "month": 7,
-                "name": "Some purchase",
-                "value": null,
-              },
-            ],
+            "name": "My rate",
+            "value": 0.28,
           },
         ],
-        "parameters": Object {
-          "rates": Array [
-            Object {
-              "name": "My rate",
-              "value": 0.28,
-            },
-          ],
-          "thresholds": Array [
-            Object {
-              "name": "My threshold",
-              "value": 20100,
-            },
-          ],
-        },
-        "year": 2020,
+        "thresholds": Array [
+          Object {
+            "name": "My threshold",
+            "value": 20100,
+          },
+        ],
       }
     `);
   });
