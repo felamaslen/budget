@@ -156,8 +156,8 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.10",
-    "@babel/core": "^7.12.10",
+    "@babel/cli": "^7.15.7",
+    "@babel/core": "^7.15.8",
     "@babel/plugin-transform-runtime": "^7.12.10",
     "@babel/preset-env": "^7.3.4",
     "@babel/preset-react": "^7.0.0",
