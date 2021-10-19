@@ -32,7 +32,7 @@ import {
 import type { RawDateDeep } from '~shared/types';
 import { omitTypeName } from '~shared/utils';
 
-describe('Planning resolver', () => {
+describe('planning resolver', () => {
   let app: App;
   beforeAll(async () => {
     app = await getTestApp();
@@ -141,7 +141,7 @@ describe('Planning resolver', () => {
     `);
   };
 
-  describe('Mutation syncPlanning', () => {
+  describe('mutation syncPlanning', () => {
     const mutation = gql`
       mutation SyncPlanning($year: NonNegativeInt!, $input: PlanningSync) {
         syncPlanning(year: $year, input: $input) {

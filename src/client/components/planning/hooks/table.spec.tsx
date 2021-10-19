@@ -408,9 +408,9 @@ describe(usePlanningTableData.name, () => {
         (compare) => compare.name === 'Salary',
       );
 
-      expect(salaryVerifiedJul?.color).not.toBeUndefined();
-      expect(salaryVerifiedSep?.color).not.toBeUndefined();
-      expect(salaryPredictedDec?.color).not.toBeUndefined();
+      expect(salaryVerifiedJul?.color).toBeDefined();
+      expect(salaryVerifiedSep?.color).toBeDefined();
+      expect(salaryPredictedDec?.color).toBeDefined();
 
       expect(salaryVerifiedJul?.color).toMatchInlineSnapshot(`"#7ae35a"`);
       expect(salaryVerifiedSep?.color).toMatchInlineSnapshot(`"#6de149"`);

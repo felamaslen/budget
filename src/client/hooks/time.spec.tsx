@@ -6,7 +6,7 @@ import React, { useEffect } from 'react';
 
 import { NowProvider, TodayProvider, useNow, useToday } from './time';
 
-describe('Time hooks', () => {
+describe('time hooks', () => {
   const now = new Date('2020-04-20T13:25:10.783Z');
   beforeEach(() => {
     jest.useFakeTimers();

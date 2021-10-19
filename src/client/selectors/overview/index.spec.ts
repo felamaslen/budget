@@ -8,7 +8,7 @@ import { testState as state } from '~client/test-data';
 import type { LongTermOptions, OverviewGraphValues } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
-describe('Overview selectors', () => {
+describe('overview selectors', () => {
   const now = new Date('2018-03-23T11:54:23.127Z');
 
   describe('getOverviewGraphValues', () => {

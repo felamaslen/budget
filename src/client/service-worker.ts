@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-/* eslint-disable no-restricted-globals */
+/* eslint-disable no-restricted-globals, jest/require-hook */
 
 import { clientsClaim, RouteHandlerCallbackOptions } from 'workbox-core';
 import * as navigationPreload from 'workbox-navigation-preload';

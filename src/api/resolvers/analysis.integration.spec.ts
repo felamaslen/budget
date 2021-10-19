@@ -18,7 +18,7 @@ import {
   QueryAnalysisDeepArgs,
 } from '~api/types';
 
-describe('Analysis resolvers', () => {
+describe('analysis resolvers', () => {
   let clock: sinon.SinonFakeTimers;
   let app: App;
   beforeAll(async () => {
@@ -47,7 +47,7 @@ describe('Analysis resolvers', () => {
     }
   `;
 
-  describe('Grouping by year / category', () => {
+  describe('grouping by year / category', () => {
     const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
       const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
         query,
@@ -228,7 +228,7 @@ describe('Analysis resolvers', () => {
     });
   });
 
-  describe('Grouping by month / shop / second page', () => {
+  describe('grouping by month / shop / second page', () => {
     const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
       const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
         query,
@@ -317,7 +317,7 @@ describe('Analysis resolvers', () => {
     });
   });
 
-  describe('Grouping by week / category', () => {
+  describe('grouping by week / category', () => {
     const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
       const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
         query,
@@ -386,7 +386,7 @@ describe('Analysis resolvers', () => {
     });
   });
 
-  describe('Deep query', () => {
+  describe('deep query', () => {
     const queryDeep = gql`
       query AnalysisDeep(
         $category: AnalysisPage!

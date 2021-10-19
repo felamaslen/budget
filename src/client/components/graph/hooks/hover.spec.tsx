@@ -3,7 +3,7 @@ import React, { RefObject } from 'react';
 import { useHover, HookResult, HLPoint, HoverEffect, HoverProps } from './hover';
 import { genPixelCompute } from '~client/components/graph/helpers';
 
-describe('Hover hook', () => {
+describe('hover hook', () => {
   const MyLabel: HoverEffect['Label'] = ({ main: { point } }) => (
     <span>
       {point[0].toFixed(2)},{point[1].toFixed(2)}
@@ -246,7 +246,7 @@ describe('Hover hook', () => {
       });
 
       const hlPointBefore = hookResult.result.current?.hlPoint;
-      expect(hlPointBefore).not.toBeUndefined();
+      expect(hlPointBefore).toBeDefined();
 
       act(() => {
         hookResult.result.current?.events.onMouseLeave?.({} as React.MouseEvent<HTMLDivElement>);

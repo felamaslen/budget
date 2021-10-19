@@ -25,6 +25,7 @@ type ActionStop = {
 };
 type Action = ActionStart | ActionStop;
 
+// eslint-disable-next-line jest/require-hook
 ctx.addEventListener('message', async (event: MessageEvent<Action>): Promise<void> => {
   const action = event.data;
   switch (action.type) {

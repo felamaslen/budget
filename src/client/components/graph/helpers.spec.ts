@@ -2,7 +2,7 @@ import { transformToMovingAverage } from './helpers';
 
 import type { Data } from '~client/types';
 
-describe('Graph (component) helpers', () => {
+describe('graph (component) helpers', () => {
   describe(transformToMovingAverage.name, () => {
     it('should get the moving average of a time series', () => {
       expect.assertions(1);

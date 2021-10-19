@@ -10,7 +10,7 @@ import { getPool } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import { Mutation, MutationLoginArgs, Query } from '~api/types';
 
-describe('User resolver', () => {
+describe('user resolver', () => {
   let app: App;
   beforeAll(async () => {
     app = await getTestApp();
@@ -132,7 +132,7 @@ describe('User resolver', () => {
       );
     });
 
-    describe('IP banning', () => {
+    describe('ip banning', () => {
       const ip0 = '1.2.3.4';
       const ip1 = '1.9.3.7';
 

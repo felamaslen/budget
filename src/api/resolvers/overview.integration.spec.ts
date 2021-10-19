@@ -8,7 +8,7 @@ import { getPool } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import { Query, Overview, OverviewOld, Maybe } from '~api/types';
 
-describe('Overview resolver', () => {
+describe('overview resolver', () => {
   let clock: sinon.SinonFakeTimers;
   let app: App;
   const now = new Date('2018-04-20');

@@ -8,12 +8,13 @@ import { PageOverview } from '.';
 import { ResizeContext, TodayProvider } from '~client/hooks';
 import { State } from '~client/reducers';
 import { testNow, testState as state } from '~client/test-data/state';
-import '~client/test-utils/match-media';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { mockMatchMedia } from '~client/test-utils/match-media';
 
 describe('<PageOverview />', () => {
   const mockStore = configureStore<State>();
   beforeEach(() => {
+    mockMatchMedia();
     jest.useFakeTimers();
     jest.setSystemTime(testNow);
   });
@@ -38,14 +39,12 @@ describe('<PageOverview />', () => {
   it('should render a table', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer();
-    // eslint-disable-next-line  jest/prefer-inline-snapshots
     expect(getByTestId('overview-table')).toMatchSnapshot();
   });
 
   it('should render graphs', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer();
-    // eslint-disable-next-line  jest/prefer-inline-snapshots
     expect(getByTestId('graph-overview')).toMatchSnapshot();
   });
 });

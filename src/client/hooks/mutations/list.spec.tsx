@@ -44,7 +44,7 @@ jest.mock('shortid', () => ({
   generate: (): string => 'my-short-id',
 }));
 
-describe('List mutations', () => {
+describe('list mutations', () => {
   beforeEach(() => {
     jest.spyOn(dataModule, 'generateFakeId').mockReturnValue(numericHash('some-fake-id'));
   });

@@ -44,7 +44,7 @@ import {
 } from '~api/types';
 import type { Create, RawDate, RawDateDeep, RequiredNotNull } from '~shared/types';
 
-describe('Net worth resolver', () => {
+describe('net worth resolver', () => {
   let app: App;
   beforeAll(async () => {
     app = await getTestApp();
@@ -146,7 +146,7 @@ describe('Net worth resolver', () => {
         expect.assertions(2);
         const res = await setup();
 
-        expect(res?.id).not.toBeUndefined();
+        expect(res?.id).toBeDefined();
 
         const rows = await getPool().query(sql`
         SELECT * FROM net_worth_categories
@@ -655,7 +655,7 @@ describe('Net worth resolver', () => {
           const { res } = await setup(nonexistentCategoryId);
 
           expect(res?.error).not.toBeNull();
-          expect(res?.error).not.toBeUndefined();
+          expect(res?.error).toBeDefined();
           expect(res?.error).toMatchInlineSnapshot(`"Category not found"`);
         });
       });

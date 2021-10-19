@@ -11,7 +11,7 @@ import { testState } from '~client/test-data';
 import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import * as types from '~client/types/gql';
 
-describe('Login hook', () => {
+describe('login hook', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });

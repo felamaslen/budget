@@ -123,11 +123,7 @@ const getMinMax = moize(
   { maxSize: 1 },
 );
 
-export type GainsForRow =
-  | (RowGain & {
-      color: string;
-    })
-  | null;
+export type GainsForRow = null | (RowGain & { color: string });
 
 export function getGainsForRow(rowGains: RowGains, id: Id): GainsForRow {
   const rowGain = rowGains[id];
@@ -137,9 +133,9 @@ export function getGainsForRow(rowGains: RowGains, id: Id): GainsForRow {
 
   const [min, max] = getMinMax(rowGains);
   return {
-    ...rowGains[id],
+    ...rowGain,
     color: getFundColor(rowGain.gain ?? 0, min, max),
-  } as GainsForRow;
+  };
 }
 
 const getItemsWithPrices = createSelector(getFundsCache, getFundsRows, (cache, items) => {

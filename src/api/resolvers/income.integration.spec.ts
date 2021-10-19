@@ -22,7 +22,7 @@ import type {
 import { CrudResponseDelete, CrudResponseUpdate } from '~client/types/gql';
 import type { RawDate, RawDateDeep } from '~shared/types';
 
-describe('Income resolvers', () => {
+describe('income resolvers', () => {
   let app: App;
   let clock: sinon.SinonFakeTimers;
   beforeAll(async () => {

@@ -9,7 +9,7 @@ import { NetWorthCashTotal, NetWorthEntryInput } from '~api/types';
 jest.mock('~api/modules/graphql/pubsub');
 jest.mock('~api/queries');
 
-describe('Net worth controller', () => {
+describe('net worth controller', () => {
   const db = {} as DatabaseTransactionConnectionType;
   const uid = 1238;
 

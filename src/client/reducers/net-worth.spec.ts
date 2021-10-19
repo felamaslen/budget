@@ -34,7 +34,7 @@ jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
 }));
 
-describe('Net worth reducer', () => {
+describe('net worth reducer', () => {
   describe.each`
     description                  | action
     ${ActionTypeLogin.LoggedOut} | ${loggedOut()}

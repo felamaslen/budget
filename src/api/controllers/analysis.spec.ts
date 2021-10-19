@@ -7,7 +7,7 @@ import { AnalysisGroupBy, AnalysisPage, AnalysisPeriod } from '~api/types';
 
 jest.mock('~api/queries');
 
-describe('Analysis controller', () => {
+describe('analysis controller', () => {
   const testUserId = 1234;
 
   describe('periodCondition', () => {
@@ -86,14 +86,14 @@ describe('Analysis controller', () => {
         { cost: 130, item: 'Eggs', itemCol: 'Dairy' },
       ]);
 
-      expect(
-        await getDeepAnalysisData({} as DatabaseTransactionConnectionType, testUserId, {
+      await expect(
+        getDeepAnalysisData({} as DatabaseTransactionConnectionType, testUserId, {
           period: AnalysisPeriod.Month,
           groupBy: AnalysisGroupBy.Category,
           page: 0,
           category: AnalysisPage.Food,
         }),
-      ).toStrictEqual([
+      ).resolves.toStrictEqual([
         {
           item: 'Bread',
           tree: [{ category: 'Flour', sum: 80 }],

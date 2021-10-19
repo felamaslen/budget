@@ -16,7 +16,7 @@ import { PageListStandard, ReceiptPage, RequestType } from '~client/types/enum';
 import type { ListItemStandardInput, ListReadResponse } from '~client/types/gql';
 import type { NativeDate, RequiredNotNull } from '~shared/types';
 
-describe('List reducer', () => {
+describe('list reducer', () => {
   type ExtraState = {
     baz: string;
   };

@@ -5,7 +5,7 @@ import { useGraphWidth } from './size';
 import { GRAPH_WIDTH } from '~client/constants/graph';
 import { ResizeContext } from '~client/hooks';
 
-describe('Graph width hook', () => {
+describe('graph width hook', () => {
   const mockWindowWidth = 1039;
 
   const TestComponent: React.FC<{ width?: number }> = ({ width }) => {

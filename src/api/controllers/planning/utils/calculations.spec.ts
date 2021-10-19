@@ -4,7 +4,7 @@ import {
   calculateMonthlyTaxRelief,
 } from './calculations';
 
-describe('Planning utils (calculations)', () => {
+describe('planning utils (calculations)', () => {
   describe(calculateMonthlyIncomeTax.name, () => {
     const basicRate = 0.2;
     const higherRate = 0.4;

@@ -12,7 +12,7 @@ import {
   PageListStandard,
 } from '~api/types/gql';
 
-describe('Search resolvers', () => {
+describe('search resolvers', () => {
   let app: App;
   beforeAll(async () => {
     await getPool().connect(async (db) => {
@@ -172,7 +172,7 @@ describe('Search resolvers', () => {
     expect(res.data.search?.list).toHaveLength(2);
   });
 
-  describe('ReceiptItem', () => {
+  describe('receiptItem', () => {
     const receiptItem = gql`
       query ReceiptItem($item: String!) {
         receiptItem(item: $item)
@@ -239,7 +239,7 @@ describe('Search resolvers', () => {
     });
   });
 
-  describe('ReceiptItems', () => {
+  describe('receiptItems', () => {
     const receiptItems = gql`
       query ReceiptItems($items: [String!]!) {
         receiptItems(items: $items) {

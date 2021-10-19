@@ -6,7 +6,7 @@ import { seedData, seedUser } from '~api/__tests__/fixtures';
 import { getPool } from '~api/modules/db';
 import { PageListStandard } from '~api/types';
 
-describe('List cost summary queries', () => {
+describe('list cost summary queries', () => {
   // Most of these are covered by resolver integration tests
   let uid: number;
   beforeAll(async () => {

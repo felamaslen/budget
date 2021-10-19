@@ -41,7 +41,7 @@ const tokenSchema = joi
   })
   .unknown(true);
 
-export function validateToken<T extends unknown>(
+export function validateToken<T>(
   tokenData: T,
   checkExpiry = false,
 ): Required<User> & { exp: number } {

@@ -3,7 +3,7 @@ import { onCreateOptimistic, onUpdateOptimistic, onDeleteOptimistic, State } fro
 import type { Id } from '~client/types';
 import { RequestType } from '~client/types/enum';
 
-describe('CRUD reducer helpers', () => {
+describe('cRUD reducer helpers', () => {
   type ReadItem = {
     id: Id;
     foo: string;

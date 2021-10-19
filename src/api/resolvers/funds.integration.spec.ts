@@ -36,7 +36,7 @@ import {
 } from '~api/types';
 import type { Create, NativeDate, RawDate } from '~shared/types';
 
-describe('Funds resolver', () => {
+describe('funds resolver', () => {
   let app: App;
   beforeAll(async () => {
     app = await getTestApp();
@@ -202,7 +202,7 @@ describe('Funds resolver', () => {
     });
   });
 
-  describe('Cash allocation target', () => {
+  describe('cash allocation target', () => {
     const mutation = gql`
       mutation UpdateCashAllocationTarget($target: NonNegativeInt!) {
         updateCashAllocationTarget(target: $target) {
@@ -268,7 +268,7 @@ describe('Funds resolver', () => {
     });
   });
 
-  describe('Fund allocation targets', () => {
+  describe('fund allocation targets', () => {
     const mutation = gql`
       mutation UpdateFundAllocationTargets($deltas: [TargetDelta!]!) {
         updateFundAllocationTargets(deltas: $deltas) {

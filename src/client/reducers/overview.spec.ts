@@ -21,7 +21,7 @@ import { PageListStandard, ReceiptPage } from '~client/types/enum';
 import type { FundHistory } from '~client/types/gql';
 import { investmentPurchaseCategories } from '~shared/constants';
 
-describe('Overview reducer', () => {
+describe('overview reducer', () => {
   const now = new Date('2019-07-13T11:43:10+0100');
   beforeEach(() => {
     jest.useFakeTimers();

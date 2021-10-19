@@ -1,7 +1,7 @@
 import { calculateXIRRFromTransactions, DEFAULT_INVESTMENT_RATE } from './overview';
 import { Transaction } from '~api/types';
 
-describe('Funds controller', () => {
+describe('funds controller', () => {
   describe('calculateXIRRFromTransactions', () => {
     const now = new Date('2020-04-20');
     const currentValue = 9675005;

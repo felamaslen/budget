@@ -5,7 +5,7 @@ import { getPublishedProperties } from './list';
 import { getPool } from '~api/modules/db';
 import { PageListStandard } from '~api/types';
 
-describe('List controller (integration)', () => {
+describe('list controller (integration)', () => {
   let uid: number;
   beforeAll(async () => {
     const {

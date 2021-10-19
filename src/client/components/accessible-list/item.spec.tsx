@@ -17,7 +17,7 @@ import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
 import { PageListStandard } from '~client/types/enum';
 import { Query, QuerySearchArgs } from '~client/types/gql';
 
-describe('Accessible list create item', () => {
+describe('accessible list create item', () => {
   const myPage = PageListStandard.Income as const;
 
   type MyItem = {

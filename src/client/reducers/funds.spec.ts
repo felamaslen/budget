@@ -22,7 +22,7 @@ jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
 }));
 
-describe('Funds reducer', () => {
+describe('funds reducer', () => {
   describe(ActionTypeFunds.ViewSoldToggled, () => {
     const action = fundsViewSoldToggled();
 

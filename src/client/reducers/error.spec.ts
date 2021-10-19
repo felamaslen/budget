@@ -6,8 +6,8 @@ jest.mock('shortid', () => ({
   generate: (): string => 'some-fake-id',
 }));
 
-describe('Error reducer', () => {
-  describe('ERROR_OPENED', () => {
+describe('error reducer', () => {
+  describe('eRROR_OPENED', () => {
     const state: State = initialState;
     const action = errorOpened('some message', ErrorLevel.Err);
 
@@ -26,7 +26,7 @@ describe('Error reducer', () => {
     });
   });
 
-  describe('ERROR_CLOSED', () => {
+  describe('eRROR_CLOSED', () => {
     const state: State = [
       { id: 'some_id', message: { text: 'some message', level: ErrorLevel.Warn } },
     ];
@@ -42,7 +42,7 @@ describe('Error reducer', () => {
     });
   });
 
-  describe('ERROR_REMOVED', () => {
+  describe('eRROR_REMOVED', () => {
     const state: State = [
       { id: 'some_id', message: { text: 'some message', level: ErrorLevel.Debug }, closed: true },
     ];

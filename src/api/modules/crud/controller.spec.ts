@@ -8,7 +8,7 @@ import * as pubsub from '~api/modules/graphql/pubsub';
 jest.mock('./queries');
 jest.mock('~api/modules/graphql/pubsub');
 
-describe('Crud controller', () => {
+describe('crud controller', () => {
   const db = {} as DatabaseTransactionConnectionType;
 
   describe(makeCrudController.name, () => {

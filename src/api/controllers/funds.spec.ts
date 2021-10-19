@@ -28,7 +28,7 @@ import {
 jest.mock('~api/queries');
 jest.mock('~api/modules/crud/queries');
 
-describe('Funds controller', () => {
+describe('funds controller', () => {
   describe(getMaxAge.name, () => {
     const now = new Date('2017-09-05');
 

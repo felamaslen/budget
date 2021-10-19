@@ -14,7 +14,7 @@ import reducer, { initialState, State } from '~client/reducers/api';
 import type { LocalAppConfig } from '~client/types';
 import { FundMode, FundPeriod } from '~client/types/enum';
 
-describe('API reducer', () => {
+describe('aPI reducer', () => {
   describe(ActionTypeLogin.LoggedOut, () => {
     it('should reset the state', () => {
       expect.assertions(1);

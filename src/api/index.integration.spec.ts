@@ -1,6 +1,6 @@
 import { App, getTestApp } from '~api/test-utils/create-server';
 
-describe('Health route', () => {
+describe('health route', () => {
   let app: App;
   beforeAll(async () => {
     app = await getTestApp();
