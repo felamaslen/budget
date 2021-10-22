@@ -20,7 +20,7 @@ const testPriceCTY = 424.1;
 const testPriceJupiter = 130.31;
 const testPriceAppleUSD = 225.82;
 const testUSDGBP = 0.771546;
-const testPriceSMTGeneric = 1023.0; // regularMarketPrice
+const testPriceSMTGeneric = 1453.4526; // regularMarketPrice
 
 jest.mock('~api/modules/graphql/pubsub');
 
