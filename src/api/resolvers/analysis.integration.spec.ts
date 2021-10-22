@@ -156,11 +156,6 @@ describe('analysis resolvers', () => {
           Array [
             Object {
               "__typename": "CategoryCostTree",
-              "item": "income",
-              "tree": Array [],
-            },
-            Object {
-              "__typename": "CategoryCostTree",
               "item": "bills",
               "tree": Array [],
             },
@@ -177,6 +172,11 @@ describe('analysis resolvers', () => {
             Object {
               "__typename": "CategoryCostTree",
               "item": "holiday",
+              "tree": Array [],
+            },
+            Object {
+              "__typename": "CategoryCostTree",
+              "item": "income",
               "tree": Array [],
             },
             Object {
@@ -336,11 +336,6 @@ describe('analysis resolvers', () => {
         Array [
           Object {
             "__typename": "CategoryCostTree",
-            "item": "income",
-            "tree": Array [],
-          },
-          Object {
-            "__typename": "CategoryCostTree",
             "item": "bills",
             "tree": Array [],
           },
@@ -357,6 +352,11 @@ describe('analysis resolvers', () => {
           Object {
             "__typename": "CategoryCostTree",
             "item": "holiday",
+            "tree": Array [],
+          },
+          Object {
+            "__typename": "CategoryCostTree",
+            "item": "income",
             "tree": Array [],
           },
           Object {

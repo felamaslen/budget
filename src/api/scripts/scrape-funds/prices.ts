@@ -4,7 +4,7 @@ import { getPriceFromDataHL } from './hl';
 import { upsertFundHashes, insertPrices, insertPriceCache } from './queries';
 import { Fund, CurrencyPrices, Broker } from './types';
 import config from '~api/config';
-import { getStockQuote } from '~api/modules/finance';
+import { getMultipleStockQuotes } from '~api/modules/finance';
 import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
 import logger from '~api/modules/logger';
 
@@ -22,7 +22,7 @@ function getPriceFromData(fund: Fund, currencyPrices: CurrencyPrices, data: stri
   throw new Error('Unknown broker');
 }
 
-function getGenericSymbol(fund: Fund): string | null {
+function getGenericSymbol(fund: Pick<Fund, 'name' | 'broker'>): string | null {
   if (fund.broker !== Broker.Generic) {
     return null;
   }
@@ -30,22 +30,17 @@ function getGenericSymbol(fund: Fund): string | null {
   return symbol;
 }
 
-export const getGenericQuotes = (funds: Fund[]): Promise<(number | null)[]> =>
-  Promise.all(
-    funds.map(async (fund) => {
-      const symbol = getGenericSymbol(fund);
-      if (!symbol) {
-        return null;
-      }
-      try {
-        logger.debug(`Downloading generic quote for symbol ${symbol}`);
-        return await getStockQuote(symbol);
-      } catch (err) {
-        logger.error(`Error getting generic quote ${symbol}: ${(err as Error).message}`);
-        throw err;
-      }
-    }),
-  );
+export async function getGenericQuotes(
+  funds: Pick<Fund, 'name' | 'broker'>[],
+): Promise<(number | null)[]> {
+  const symbols = Array.from(new Set(funds.map(getGenericSymbol).filter((s): s is string => !!s)));
+  const prices = await getMultipleStockQuotes(symbols);
+
+  return funds.map<number | null>((fund) => {
+    const symbol = getGenericSymbol(fund);
+    return symbol ? prices[symbol] : null;
+  });
+}
 
 function getPricesFromData(
   currencyPrices: CurrencyPrices,

@@ -3,7 +3,7 @@ import gql from 'graphql-tag';
 import moize from 'moize';
 import sinon from 'sinon';
 import { sql } from 'slonik';
-import yahooFinance from 'yahoo-finance';
+import yahooFinance from 'yahoo-finance2';
 
 import { seedData } from '~api/__tests__/fixtures';
 import config from '~api/config';
@@ -85,22 +85,16 @@ describe('funds resolver', () => {
       await db.query(sql`DELETE FROM fund_cache_time`);
       await db.query(sql`DELETE FROM funds_cash_target WHERE uid = ${app.uid}`);
 
-      // eslint-disable-next-line
-      yahooFinance.quote = jest.fn(
-        async () =>
-          ({
-            'FCSS.L': {
-              price: {
-                regularMarketPrice: 388.29,
-              } as yahooFinance.Quote<'price'>['price'],
-            } as unknown as yahooFinance.Quote,
-            'SMT.L': {
-              price: {
-                regularMarketPrice: 1197.23,
-              } as yahooFinance.Quote<'price'>['price'],
-            } as unknown as yahooFinance.Quote,
-          } as Record<string, yahooFinance.Quote<'price'> | null | undefined>),
-      );
+      jest.spyOn(yahooFinance, 'quote').mockResolvedValue([
+        {
+          symbol: 'FCSS.L',
+          regularMarketPrice: 388.29,
+        },
+        {
+          symbol: 'SMT.L',
+          regularMarketPrice: 1197.23,
+        },
+      ]);
     });
   });
 
