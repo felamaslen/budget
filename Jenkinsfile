@@ -32,7 +32,7 @@ node {
         }
 
         stage('Client unit tests') {
-          sh "docker run --rm ${IMAGE} sh -c 'yarn test:client:ci'"
+          sh "docker run --rm --privileged ${IMAGE} sh -c 'yarn test:client:ci'"
         }
 
         stage('API unit tests') {
