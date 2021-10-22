@@ -1,9 +1,23 @@
 FROM docker.fela.space/budget_base:latest
 
 RUN mkdir /app
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown appuser:appgroup /app
-USER appuser
 WORKDIR /app
+
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+RUN yarn add puppeteer@10.0.0
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
+USER appuser
 
 COPY --chown=appuser:appgroup package.json ./
 COPY --chown=appuser:appgroup yarn.lock ./
