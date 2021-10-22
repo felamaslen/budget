@@ -18,19 +18,19 @@ const codeKey = (code: string): string => `stockPrice_${code}`;
 const lockKey = 'stockPriceLock';
 const lastUpdateKey = 'stockPriceUpdateTime';
 
-async function getStockPricesFromApi(codes: string[]): Promise<(number | null)[]> {
-  if (!codes.length) {
+async function getStockPricesFromApi(symbols: string[]): Promise<(number | null)[]> {
+  if (!symbols.length) {
     return [];
   }
-  const quotes = await getMultipleStockQuotes(codes);
+  const prices = await getMultipleStockQuotes(symbols);
   await Promise.all(
-    codes.map((code, index) =>
-      redisClient.set(codeKey(code), quotes[index] ?? 0, 'ex', config.apiCacheExpirySeconds),
+    symbols.map((symbol) =>
+      redisClient.set(codeKey(symbol), prices[symbol] ?? 0, 'ex', config.apiCacheExpirySeconds),
     ),
   );
   await redisClient.set(lastUpdateKey, new Date().toISOString());
 
-  return quotes;
+  return symbols.map((symbol) => prices[symbol]);
 }
 
 async function getCachedStockPrices(codes: string[]): Promise<StockPrice[]> {

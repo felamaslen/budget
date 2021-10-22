@@ -27,7 +27,7 @@ export const nockHLShareFX = async (status = 200): Promise<Scope> =>
 
 export const nockGeneralShare = async (status = 200): Promise<Scope> =>
   nock('https://query2.finance.yahoo.com')
-    .get('/v7/finance/quote?symbols=SMT.L')
+    .get('/v7/finance/quote?symbols=REL.L%2CSMT.L')
     .reply(
       status,
       status === 200 ? await fs.readFile(testFileGenericShareJSON, 'utf8') : undefined,

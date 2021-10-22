@@ -20,7 +20,8 @@ const testPriceCTY = 424.1;
 const testPriceJupiter = 130.31;
 const testPriceAppleUSD = 225.82;
 const testUSDGBP = 0.771546;
-const testPriceSMTGeneric = 1453.4526; // regularMarketPrice
+const testPriceSMTGeneric = 1453.0; // regularMarketPrice
+const testPriceRELXGeneric = 2260.0; // regularMarketPrice
 
 jest.mock('~api/modules/graphql/pubsub');
 
@@ -64,6 +65,7 @@ describe('fund scraper - integration tests', () => {
         [uid2, 'City of London Investment Trust ORD 25p (share)'],
         [uid1, 'Morgan Stanley Sterling Corporate Bond Class F (accum.)'],
         [uid1, 'Scottish Mortgage Investment Trust (SMT.L) (stock)'],
+        [uid1, 'RELX options (REL.L) (stock)'],
       ],
       ['int4', 'text'],
     )}
@@ -89,6 +91,7 @@ describe('fund scraper - integration tests', () => {
         [fundIds[4], '2017-03-14', 1217.43, 123.21],
         [fundIds[4], '2017-09-24', -4559.23, 122.722],
         [fundIds[5], '2016-09-20', 1565, 385.31],
+        [fundIds[6], '2023-07-10', 1326, 1352], // note: in the future!
       ],
       ['int4', 'date', 'float8', 'float8'],
     )}
@@ -183,6 +186,20 @@ describe('fund scraper - integration tests', () => {
         expect.objectContaining({
           time: new Date(now),
           price: testPriceSMTGeneric,
+        }),
+      ]);
+    });
+
+    it('should insert new prices for a share for which units will be bought in the future', async () => {
+      expect.assertions(1);
+      await run();
+
+      const futureShareResult = await getTestFundPrice(fundIds[6]);
+
+      expect(futureShareResult).toStrictEqual([
+        expect.objectContaining({
+          time: new Date(now),
+          price: testPriceRELXGeneric,
         }),
       ]);
     });

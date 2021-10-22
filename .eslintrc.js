@@ -104,6 +104,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'import/no-webpack-loader-syntax': 'off',
     'jest/lowercase-name': 'off',
+    'jest/no-expect-resolves': 'off',
     'jest/no-hooks': 'off',
     'jest/prefer-expect-assertions': 'warn',
     'jest/prefer-strict-equal': 'warn',
