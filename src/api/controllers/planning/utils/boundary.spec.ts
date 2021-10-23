@@ -55,7 +55,7 @@ describe(getComputedYearStartAccountValue.name, () => {
   const latestActualValues: CalculationRows['latestActualValues'] = [
     { account_id: accountId, date: new Date('2021-05-31'), value: 154420 },
   ];
-  const creditCardPayments: CalculationRows['creditCardPayments'] = [];
+  const creditCards: CalculationRows['creditCards'] = [];
   const valueRows: CalculationRows['valueRows'] = [];
   const billsRows: CalculationRows['billsRows'] = [];
   const previousIncomeReduction: IntermediatePreviousIncomeReduction[] = [];
@@ -91,7 +91,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows, billsRows },
+        { latestActualValues, creditCards, valueRows, billsRows },
         previousIncomeExample,
         predictedIncomeReduction,
         predictedCreditCardPayments,
@@ -108,7 +108,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows, billsRows },
+        { latestActualValues, creditCards, valueRows, billsRows },
         [
           ...previousIncomeExample,
           {
@@ -154,7 +154,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows, billsRows },
+        { latestActualValues, creditCards, valueRows, billsRows },
         previousIncomeReduction,
         predictedIncomeExample,
         predictedCreditCardPayments,
@@ -231,7 +231,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows: valueRowsExample, billsRows },
+        { latestActualValues, creditCards, valueRows: valueRowsExample, billsRows },
         previousIncomeReduction,
         predictedIncomeReduction,
         predictedCreditCardPayments,
@@ -263,7 +263,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments, valueRows, billsRows: billsExample },
+        { latestActualValues, creditCards, valueRows, billsRows: billsExample },
         previousIncomeReduction,
         predictedIncomeReduction,
         predictedCreditCardPayments,
@@ -275,7 +275,7 @@ describe(getComputedYearStartAccountValue.name, () => {
   });
 
   describe('when there are actual credit card payments', () => {
-    const ccExample: CalculationRows['creditCardPayments'] = [
+    const ccExample: CalculationRows['creditCards'] = [
       {
         id: accountId,
         credit_card_id: numericHash('my-credit-card'),
@@ -294,7 +294,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         accountId,
         now,
         year,
-        { latestActualValues, creditCardPayments: ccExample, valueRows, billsRows },
+        { latestActualValues, creditCards: ccExample, valueRows, billsRows },
         previousIncomeReduction,
         predictedIncomeReduction,
         {
@@ -316,7 +316,7 @@ describe(getComputedYearStartAccountValue.name, () => {
           year,
           {
             latestActualValues,
-            creditCardPayments: [
+            creditCards: [
               ccExample[0],
               { ...ccExample[0], credit_card_payment_month: 9, credit_card_payment_value: -61923 },
             ],
