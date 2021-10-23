@@ -48,8 +48,8 @@ describe('planning resolver', () => {
   let myOtherBankId: number;
   let myCreditCardId: number;
 
-  const myBankValueFeb2020 = 300000;
-  const myOtherBankValueFeb2020 = 500000;
+  const myBankValueJan2020 = 300000;
+  const myOtherBankValueJan2020 = 500000;
 
   type MutationSyncPlanningArgsRawDate = RawDateDeep<
     MutationSyncPlanningArgs,
@@ -96,8 +96,8 @@ describe('planning resolver', () => {
     await db.query(sql`
     INSERT INTO net_worth_values (net_worth_id, subcategory, value, skip)
     VALUES
-    (${netWorthEntryId}, ${myBankId}, ${myBankValueFeb2020}, ${false})
-    ,(${netWorthEntryId}, ${myOtherBankId}, ${myOtherBankValueFeb2020}, ${false})
+    (${netWorthEntryId}, ${myBankId}, ${myBankValueJan2020}, ${false})
+    ,(${netWorthEntryId}, ${myOtherBankId}, ${myOtherBankValueJan2020}, ${false})
     `);
 
     const incomeIdRows = await db.query<{ id: number }>(sql`
@@ -1586,8 +1586,11 @@ describe('planning resolver', () => {
           (compare) => compare.account === 'Something account',
         );
 
-        expect(accountWithMyBank?.computedStartValue).toBe(myBankValueFeb2020);
-        expect(accountWithMyOtherBank?.computedStartValue).toBe(myOtherBankValueFeb2020);
+        const expectedMyBankValueMar2020 = myBankValueJan2020;
+        const expectedOtherBankValueMar2020 = myOtherBankValueJan2020;
+
+        expect(accountWithMyBank?.computedStartValue).toBe(expectedMyBankValueMar2020);
+        expect(accountWithMyOtherBank?.computedStartValue).toBe(expectedOtherBankValueMar2020);
       });
 
       describe('for a year in the future', () => {
@@ -1644,6 +1647,66 @@ describe('planning resolver', () => {
           expect(
             res?.accounts?.find((compare) => compare.account === 'My test account')?.creditCards,
           ).toHaveLength(1);
+        });
+      });
+
+      describe('when the current month already has a net worth entry defined', () => {
+        const setupPreciousNetWorth = async (): Promise<PlanningSyncResponse | undefined> => {
+          await setupCreate();
+          app.authGqlClient.clearStore();
+          await getPool().query(
+            sql`UPDATE net_worth SET date = ${'2020-05-20'} WHERE uid = ${app.uid}`,
+          );
+          clock = sinon.useFakeTimers(new Date('2020-05-23T20:39:10+0100'));
+          const res = await app.authGqlClient.mutate<
+            { syncPlanning: PlanningSyncResponse },
+            MutationSyncPlanningArgs
+          >({
+            mutation,
+            variables: { year: 2021, input: null },
+          });
+          return res.data?.syncPlanning;
+        };
+
+        it('should assume the net worth value relates to the end of the month when computing boundary', async () => {
+          expect.hasAssertions();
+          const res = await setupPreciousNetWorth();
+
+          const accountWithIncome = res?.accounts?.find(
+            (compare) => compare.account === 'My test account',
+          );
+
+          const myBankValueMay2020 = myBankValueJan2020;
+          const expectedPreviousIncomeContribution = 0;
+          // net income Jun 20-Jan 21 inclusive
+          const expectedPredictedIncomeContribution = (500000 - 15000 - 62500 - 42026 - 23025) * 8;
+          const expectedExplicitValuesContribution =
+            75 * 29.3 * 100 - // Sep-20 explicit value
+            80000; // Mar-21 explicit value
+          const averageCreditCardPayment = Math.round((38625 + 22690) / 2);
+          const expectedCreditCardPaymentsContribution = -(
+            (
+              averageCreditCardPayment + // Jun-20
+              38625 + // Jul-20
+              averageCreditCardPayment + // Aug-20
+              averageCreditCardPayment + // Sep-20
+              averageCreditCardPayment + // Oct-20
+              averageCreditCardPayment + // Nov-20
+              averageCreditCardPayment + // Dec-20
+              averageCreditCardPayment + // Jan-21
+              averageCreditCardPayment + // Feb-21
+              22690
+            ) // Mar-21
+          );
+
+          const expectedComputedStartValue =
+            myBankValueMay2020 +
+            expectedPreviousIncomeContribution +
+            expectedPredictedIncomeContribution +
+            expectedExplicitValuesContribution +
+            expectedCreditCardPaymentsContribution;
+
+          expect(accountWithIncome?.computedStartValue).toBe(expectedComputedStartValue);
         });
       });
 
