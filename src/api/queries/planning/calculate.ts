@@ -116,7 +116,7 @@ export async function selectAverageCreditCardPayments(
   uid: number,
 ): Promise<readonly AverageCreditCardPaymentRow[]> {
   const { rows } = await db.query<AverageCreditCardPaymentRow>(sql`
-  SELECT PERCENTILE_DISC(0.5) WITHIN GROUP(ORDER BY ccp.value) AS value, ccp.credit_card_id
+  SELECT (PERCENTILE_CONT(0.5) WITHIN GROUP(ORDER BY ccp.value))::int4 AS value, ccp.credit_card_id
   FROM planning_credit_card_payments ccp
   INNER JOIN planning_credit_cards cc ON cc.id = ccp.credit_card_id
   INNER JOIN planning_accounts a ON a.id = cc.account_id

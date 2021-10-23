@@ -1,17 +1,11 @@
-import {
-  addMonths,
-  differenceInCalendarMonths,
-  endOfMonth,
-  getMonth,
-  isAfter,
-  startOfMonth,
-} from 'date-fns';
+import { addMonths, differenceInCalendarMonths, endOfMonth, getMonth, isAfter } from 'date-fns';
 
 import type { CalculationRows } from '../types';
 import {
   IntermediatePredictedIncomeReduction,
   IntermediatePreviousIncomeReduction,
 } from './income';
+import { accountRowHasCreditCardPayment } from './rows';
 import { IntermediateTransfersReduction } from './transfers';
 
 import type { PreviousIncomeRow } from '~api/queries/planning';
@@ -37,14 +31,14 @@ export function getRelevantYears(
 
 export function getComputedYearStartAccountValue(
   accountId: number,
-  now: Date,
+  predictFromDate: Date,
   year: number,
   {
     latestActualValues,
-    creditCardPayments,
+    creditCards,
     valueRows,
     billsRows,
-  }: Pick<CalculationRows, 'latestActualValues' | 'creditCardPayments' | 'valueRows' | 'billsRows'>,
+  }: Pick<CalculationRows, 'latestActualValues' | 'creditCards' | 'valueRows' | 'billsRows'>,
   previousIncomeReduction: IntermediatePreviousIncomeReduction[],
   predictedIncomeReduction: IntermediatePredictedIncomeReduction[],
   predictedCreditCardPayments: Record<number, number>,
@@ -58,7 +52,7 @@ export function getComputedYearStartAccountValue(
   const latestRecordedDate = endOfMonth(latestActualValue.date);
 
   const endDate = endOfMonth(new Date(year, startMonth));
-  const numMonthsToPredict = Math.max(0, differenceInCalendarMonths(endDate, latestRecordedDate));
+  const numMonthsToPredict = Math.max(0, differenceInCalendarMonths(endDate, predictFromDate));
 
   const previousIncomeContribution = previousIncomeReduction
     .filter((group) => group.year < year && isAfter(group.date, latestRecordedDate))
@@ -82,13 +76,12 @@ export function getComputedYearStartAccountValue(
       0,
     );
 
-  const allCreditCardIds = Array.from(
-    new Set(creditCardPayments.map((card) => card.credit_card_id)),
-  );
+  const allCreditCardIds = Array.from(new Set(creditCards.map((card) => card.credit_card_id)));
+  const creditCardPayments = creditCards.filter(accountRowHasCreditCardPayment);
 
   const monthsToPredict = Array(numMonthsToPredict)
     .fill(0)
-    .map<Date>((_, index) => endOfMonth(addMonths(latestActualValue.date, index)));
+    .map<Date>((_, index) => endOfMonth(addMonths(predictFromDate, index)));
 
   const creditCardPaymentContribution = monthsToPredict.reduce<number>(
     (sum0, date) =>
@@ -102,7 +95,7 @@ export function getComputedYearStartAccountValue(
         if (recordedPayment) {
           return sum1 + recordedPayment.credit_card_payment_value;
         }
-        if (isAfter(date, startOfMonth(now))) {
+        if (!isAfter(predictFromDate, date)) {
           return sum1 + predictedCreditCardPayments[cardId];
         }
         return 0;

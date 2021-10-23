@@ -79,9 +79,7 @@ function constructAccounts(
             : [],
           latestActualValues,
           previousIncome: previousIncomeRows,
-          creditCardPayments: creditCards
-            .filter(accountRowHasCreditCardPayment)
-            .filter((card) => card.id === incomeGroup[0].id),
+          creditCards: creditCards.filter((card) => card.id === incomeGroup[0].id),
           averageCreditCardPaymentRows,
         },
         year,

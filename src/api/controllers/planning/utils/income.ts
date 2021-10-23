@@ -5,7 +5,6 @@ import {
   formatISO,
   getMonth,
   isAfter,
-  startOfMonth,
 } from 'date-fns';
 import { flatten, groupBy } from 'lodash';
 
@@ -213,16 +212,17 @@ type IntermediateIncomeReducer = (
 function reducePredictedIncomeToMonths(
   calculationRows: Pick<CalculationRows, 'rateRows' | 'thresholdRows' | 'previousIncome'>,
   year: number,
-  now: Date,
+  predictFromDate: Date,
 ): IntermediateIncomeReducer {
-  const currentMonth = startOfMonth(now);
   const lastMonthInYear = endOfMonth(getDateFromYearAndMonth(year, ((startMonth - 13) % 12) + 12));
 
   return (accumulator, row): IntermediatePredictedIncomeReduction[] => {
     const startDateDef = new Date(row.income_start_date);
     const endDateDef = endOfMonth(new Date(row.income_end_date));
 
-    const startDate = endOfMonth(isAfter(startDateDef, currentMonth) ? startDateDef : currentMonth);
+    const startDate = endOfMonth(
+      isAfter(startDateDef, predictFromDate) ? startDateDef : predictFromDate,
+    );
     const endDate = isAfter(endDateDef, lastMonthInYear) ? lastMonthInYear : endOfMonth(endDateDef);
 
     const incomeDefinitionMonths = Math.max(0, differenceInCalendarMonths(endDate, startDate) + 1);
@@ -237,10 +237,10 @@ function reducePredictedIncomeToMonths(
 export function reducePredictedIncome(
   calculationRows: Pick<CalculationRows, 'rateRows' | 'thresholdRows' | 'previousIncome'>,
   year: number,
-  now: Date,
+  predictFromDate: Date,
   incomeGroup: (AccountRow & AccountRowIncomeJoins)[],
 ): IntermediatePredictedIncomeReduction[] {
-  const rowReducer = reducePredictedIncomeToMonths(calculationRows, year, now);
+  const rowReducer = reducePredictedIncomeToMonths(calculationRows, year, predictFromDate);
 
   return incomeGroup.filter(accountRowHasIncome).reduce(rowReducer, []);
 }
