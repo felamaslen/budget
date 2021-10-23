@@ -26,9 +26,9 @@ export type CalculationRows = {
   >[];
   latestActualValues: readonly LatestPlanningAccountValueRow[];
   previousIncome: readonly PreviousIncomeRow[];
-  creditCardPayments: readonly WithRequiredJoin<
+  creditCards: readonly WithRequiredJoin<
     { id: number } & AccountRowCreditCardJoins & AccountRowCreditCardPaymentJoins,
-    AccountRowCreditCardJoins & AccountRowCreditCardPaymentJoins
+    AccountRowCreditCardJoins
   >[];
   averageCreditCardPaymentRows: readonly AverageCreditCardPaymentRow[];
 };

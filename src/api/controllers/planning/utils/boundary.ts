@@ -5,6 +5,7 @@ import {
   IntermediatePredictedIncomeReduction,
   IntermediatePreviousIncomeReduction,
 } from './income';
+import { accountRowHasCreditCardPayment } from './rows';
 import { IntermediateTransfersReduction } from './transfers';
 
 import type { PreviousIncomeRow } from '~api/queries/planning';
@@ -34,10 +35,10 @@ export function getComputedYearStartAccountValue(
   year: number,
   {
     latestActualValues,
-    creditCardPayments,
+    creditCards,
     valueRows,
     billsRows,
-  }: Pick<CalculationRows, 'latestActualValues' | 'creditCardPayments' | 'valueRows' | 'billsRows'>,
+  }: Pick<CalculationRows, 'latestActualValues' | 'creditCards' | 'valueRows' | 'billsRows'>,
   previousIncomeReduction: IntermediatePreviousIncomeReduction[],
   predictedIncomeReduction: IntermediatePredictedIncomeReduction[],
   predictedCreditCardPayments: Record<number, number>,
@@ -75,9 +76,8 @@ export function getComputedYearStartAccountValue(
       0,
     );
 
-  const allCreditCardIds = Array.from(
-    new Set(creditCardPayments.map((card) => card.credit_card_id)),
-  );
+  const allCreditCardIds = Array.from(new Set(creditCards.map((card) => card.credit_card_id)));
+  const creditCardPayments = creditCards.filter(accountRowHasCreditCardPayment);
 
   const monthsToPredict = Array(numMonthsToPredict)
     .fill(0)
