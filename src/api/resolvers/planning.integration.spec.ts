@@ -1571,7 +1571,9 @@ describe('planning resolver', () => {
 
         // median of *all* existing payments (this is necessary so that it's consistent across
         // requests for multiple years)
-        expect(accountWithCreditCard?.creditCards[0].predictedPayment).toBe(-38625);
+        expect(accountWithCreditCard?.creditCards[0].predictedPayment).toBe(
+          -Math.round((38625 + 22690) / 2),
+        );
       });
 
       it('should compute the value of the account at the beginning of the financial year', async () => {
