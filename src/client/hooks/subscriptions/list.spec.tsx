@@ -1,9 +1,5 @@
 import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
-import { Provider } from 'react-redux';
-import createMockStore from 'redux-mock-store';
-import { GraphQLRequest, makeOperation, OperationContext } from 'urql';
+import { makeOperation, OperationContext } from 'urql';
 import * as w from 'wonka';
 
 import { useListSubscriptions } from './list';
@@ -15,7 +11,7 @@ import {
   listOverviewUpdated,
   receiptCreated,
 } from '~client/actions';
-import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
+import { mockClient, renderHookWithStore } from '~client/test-utils';
 import { FundNative, Id, StandardInput } from '~client/types';
 
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
@@ -36,24 +32,18 @@ import {
 import { NativeDate } from '~shared/types';
 
 describe(useListSubscriptions.name, () => {
-  const subscribeSpy = mockClient.executeSubscription as jest.Mock;
-
-  const createStore = createMockStore();
-  const store = createStore();
-  const Wrapper: React.FC = ({ children }) => (
-    <Provider store={store}>
-      <GQLProviderMock>{children}</GQLProviderMock>
-    </Provider>
-  );
-
+  let subscribeSpy: jest.SpyInstance<
+    ReturnType<typeof mockClient['executeMutation']>,
+    Parameters<typeof mockClient['executeMutation']>
+  >;
   beforeEach(() => {
-    store.clearActions();
+    subscribeSpy = jest.spyOn(mockClient, 'executeSubscription');
   });
 
   it('should subscribe to standard list item creates', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === ListChangedDocument) {
         const data: ListChangedSubscription = {
           listChanged: {
@@ -83,10 +73,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -116,7 +109,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to standard list item updates', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === ListChangedDocument) {
         const data: ListChangedSubscription = {
           listChanged: {
@@ -143,10 +136,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -176,7 +172,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to standard list item deletes', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === ListChangedDocument) {
         const data: ListChangedSubscription = {
           listChanged: {
@@ -196,10 +192,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -216,7 +215,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to income creates', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === IncomeChangedDocument) {
         const data: IncomeChangedSubscription = {
           incomeChanged: {
@@ -246,10 +245,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -280,7 +282,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to income updates', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === IncomeChangedDocument) {
         const data: IncomeChangedSubscription = {
           incomeChanged: {
@@ -307,10 +309,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -341,7 +346,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to income deletes', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === IncomeChangedDocument) {
         const data: IncomeChangedSubscription = {
           incomeChanged: {
@@ -360,10 +365,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -380,7 +388,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to fund creates', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === FundsChangedDocument) {
         const data: FundsChangedSubscription = {
           fundsChanged: {
@@ -415,10 +423,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -456,7 +467,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to fund updates', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === FundsChangedDocument) {
         const data: FundsChangedSubscription = {
           fundsChanged: {
@@ -488,10 +499,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -529,7 +543,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to fund deletes', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === FundsChangedDocument) {
         const data: FundsChangedSubscription = {
           fundsChanged: {
@@ -546,10 +560,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();
@@ -566,7 +583,7 @@ describe(useListSubscriptions.name, () => {
   it('should subscribe to receipt creations', async () => {
     expect.hasAssertions();
 
-    subscribeSpy.mockImplementation((request: GraphQLRequest) => {
+    subscribeSpy.mockImplementation((request) => {
       if (request.query === ReceiptCreatedDocument) {
         const data: ReceiptCreatedSubscription = {
           receiptCreated: {
@@ -601,10 +618,13 @@ describe(useListSubscriptions.name, () => {
           })),
         );
       }
-      return w.fromValue({ data: null });
+      return w.fromValue({
+        operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
     });
 
-    renderHook(() => useListSubscriptions(), { wrapper: Wrapper });
+    const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
       const actions = store.getActions();

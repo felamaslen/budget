@@ -1,14 +1,11 @@
-import { render, act, RenderResult } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore, { MockStore } from 'redux-mock-store';
 
 import { ErrorMessages } from '.';
 import { errorClosed, errorRemoved } from '~client/actions';
 import { ErrorLevel, ERROR_CLOSE_TIME, ERROR_MESSAGE_DELAY } from '~client/constants/error';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data/state';
+import { renderWithStore } from '~client/test-utils';
 
 describe('<ErrorMessages />', () => {
   beforeEach(() => {
@@ -20,38 +17,23 @@ describe('<ErrorMessages />', () => {
     });
   });
 
-  const state: State = {
-    ...testState,
-    error: [
-      {
-        id: 'f1101',
-        message: { level: ErrorLevel.Err, text: 'foo' },
-        closed: false,
+  const setup = (): ReturnType<typeof renderWithStore> =>
+    renderWithStore(<ErrorMessages />, {
+      customState: {
+        error: [
+          {
+            id: 'f1101',
+            message: { level: ErrorLevel.Err, text: 'foo' },
+            closed: false,
+          },
+          {
+            id: 'g1923',
+            message: { level: ErrorLevel.Warn, text: 'bar' },
+            closed: false,
+          },
+        ],
       },
-      {
-        id: 'g1923',
-        message: { level: ErrorLevel.Warn, text: 'bar' },
-        closed: false,
-      },
-    ],
-  };
-
-  const setup = (
-    customProps = {},
-    customState: State = state,
-  ): RenderResult & {
-    store: MockStore;
-  } => {
-    const store = createStore<State>()(customState);
-
-    const utils = render(
-      <Provider store={store}>
-        <ErrorMessages {...customProps} />
-      </Provider>,
-    );
-
-    return { store, ...utils };
-  };
+    });
 
   it('should render a list', () => {
     expect.assertions(1);
@@ -71,7 +53,7 @@ describe('<ErrorMessages />', () => {
     });
 
     describe('when clicked', () => {
-      const setupClick = (): RenderResult & { store: MockStore } => {
+      const setupClick = (): ReturnType<typeof renderWithStore> => {
         const renderResult = setup();
         userEvent.click(renderResult.getByText(text));
         return renderResult;
@@ -113,7 +95,7 @@ describe('<ErrorMessages />', () => {
     });
 
     describe('when mousing over', () => {
-      const setupMouseover = (): RenderResult & { store: MockStore } => {
+      const setupMouseover = (): ReturnType<typeof renderWithStore> => {
         const renderResult = setup();
         userEvent.hover(renderResult.getByText(text));
         return renderResult;

@@ -1,8 +1,6 @@
 import { waitFor } from '@testing-library/react';
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import React from 'react';
-import { Provider } from 'react-redux';
-import createMockStore, { MockStore } from 'redux-mock-store';
+import { act, RenderHookResult } from '@testing-library/react-hooks';
+import type { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
@@ -18,9 +16,7 @@ import {
 } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import * as dataModule from '~client/modules/data';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data/state';
-import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
+import { mockClient, renderHookWithStore } from '~client/test-utils';
 import type {
   FundInputNative as FundInput,
   FundInputNative,
@@ -49,8 +45,6 @@ describe('list mutations', () => {
     jest.spyOn(dataModule, 'generateFakeId').mockReturnValue(numericHash('some-fake-id'));
   });
 
-  const getStore = createMockStore<State>();
-
   const page = PageListStandard.Income;
 
   const testId = numericHash('some-real-id');
@@ -68,25 +62,10 @@ describe('list mutations', () => {
     item: 'Other item',
   };
 
-  const createWrapper = (store: MockStore): React.FC => {
-    const Wrapper: React.FC = ({ children }) => (
-      <Provider store={store}>
-        <GQLProviderMock>{children}</GQLProviderMock>
-      </Provider>
-    );
-    return Wrapper;
-  };
-
   describe(useListCrudStandard.name, () => {
     const setup = (): RenderHookResult<{ page: PageListStandard }, ListCrud<StandardInput>> & {
       store: MockStore;
-    } => {
-      const store = getStore(testState);
-      const utils = renderHook(() => useListCrudStandard(page), {
-        wrapper: createWrapper(store),
-      });
-      return { ...utils, store };
-    };
+    } => renderHookWithStore(() => useListCrudStandard(page));
 
     describe('onCreate', () => {
       it('should dispatch an optimistic create action', async () => {
@@ -278,13 +257,7 @@ describe('list mutations', () => {
       ListCrud<NativeDate<Income, 'date'>>
     > & {
       store: MockStore;
-    } => {
-      const store = getStore(testState);
-      const utils = renderHook(useListCrudIncome, {
-        wrapper: createWrapper(store),
-      });
-      return { ...utils, store };
-    };
+    } => renderHookWithStore(useListCrudIncome);
 
     const testIncome: NativeDate<Income, 'date'> = {
       __typename: 'Income',
@@ -462,13 +435,7 @@ describe('list mutations', () => {
   describe(useListCrudFunds.name, () => {
     const setup = (): RenderHookResult<Record<string, unknown>, ListCrud<FundInputNative>> & {
       store: MockStore;
-    } => {
-      const store = getStore(testState);
-      const utils = renderHook(useListCrudFunds, {
-        wrapper: createWrapper(store),
-      });
-      return { ...utils, store };
-    };
+    } => renderHookWithStore(useListCrudFunds);
 
     const testFund: WithIds<FundInput> = {
       id: 123,

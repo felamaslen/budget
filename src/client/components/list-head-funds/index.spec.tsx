@@ -1,16 +1,14 @@
-import { render, act, RenderResult } from '@testing-library/react';
+import { act, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { startOfSecond, subSeconds } from 'date-fns';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore from 'redux-mock-store';
 
 import { ListHeadFunds, ListHeadFundsMobile, Props, PropsMobile } from '.';
 import { FundsContext } from '~client/components/page-funds/context';
 import type { PageFundsContext } from '~client/components/page-funds/types';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
-import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { renderWithStore } from '~client/test-utils';
 import { FundPeriod } from '~client/types/enum';
 
 describe('<ListHeadFunds />', () => {
@@ -34,21 +32,18 @@ describe('<ListHeadFunds />', () => {
 
   const setup = (
     customProps: Partial<Props> = {},
-    options: Partial<RenderResult> = {},
-    state: Partial<State> = {},
+    renderOptions: Partial<RenderResult> = {},
+    customState: Partial<State> = {},
     context: Partial<PageFundsContext> = {},
-  ): RenderResult =>
-    render(
-      <Provider store={createStore<State>()({ ...testState, ...state })}>
-        <GQLProviderMock>
-          <FundsContext.Provider
-            value={{ setSort: jest.fn(), lastScraped: new Date(), ...context }}
-          >
-            <ListHeadFunds {...props} {...customProps} />
-          </FundsContext.Provider>
-        </GQLProviderMock>
-      </Provider>,
-      options,
+  ): ReturnType<typeof renderWithStore> =>
+    renderWithStore(
+      <FundsContext.Provider value={{ setSort: jest.fn(), lastScraped: new Date(), ...context }}>
+        <ListHeadFunds {...props} {...customProps} />
+      </FundsContext.Provider>,
+      {
+        customState,
+        renderOptions,
+      },
     );
 
   it.each`
@@ -150,15 +145,11 @@ describe('<ListHeadFundsMobile />', () => {
     },
   };
 
-  const setup = (): RenderResult =>
-    render(
-      <Provider store={createStore<State>()(testState)}>
-        <GQLProviderMock>
-          <FundsContext.Provider value={{ setSort: jest.fn(), lastScraped: new Date() }}>
-            <ListHeadFundsMobile {...props} />
-          </FundsContext.Provider>
-        </GQLProviderMock>
-      </Provider>,
+  const setup = (): ReturnType<typeof renderWithStore> =>
+    renderWithStore(
+      <FundsContext.Provider value={{ setSort: jest.fn(), lastScraped: new Date() }}>
+        <ListHeadFundsMobile {...props} />
+      </FundsContext.Provider>,
     );
 
   it('should render the value unabbreviated', () => {

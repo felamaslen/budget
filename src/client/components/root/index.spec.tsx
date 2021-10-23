@@ -1,18 +1,15 @@
-import { render, RenderResult, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import 'cross-fetch/polyfill';
 import { createMemoryHistory } from 'history';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
-import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import createStore, { MockStore } from 'redux-mock-store';
-import { OperationResult } from 'urql';
+import { makeOperation, OperationContext } from 'urql';
+import { fromValue } from 'wonka';
 
 import App, { Props } from '.';
-import { State } from '~client/reducers';
-import { testState as state } from '~client/test-data/state';
-import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
-import * as gql from '~client/types/gql';
+import * as LoginMutations from '~client/gql/mutations/login';
+import { mockClient, renderWithStore } from '~client/test-utils';
 
 describe('<Root />', () => {
   let matchMedia: MatchMediaMock;
@@ -23,28 +20,28 @@ describe('<Root />', () => {
     matchMedia.clear();
   });
 
-  const setup = (): RenderResult & { store: MockStore } => {
-    const mockRun = async (): Promise<
-      OperationResult<gql.LoginMutation, gql.LoginMutationVariables>
-    > => ({} as OperationResult<gql.LoginMutation, gql.LoginMutationVariables>);
-
-    jest.spyOn(gql, 'useLoginMutation').mockReturnValue([
-      {
-        fetching: false,
-        stale: false,
-        data: {
-          login: {
-            uid: 1,
-            name: 'Someone',
-            apiKey: 'some-api-key',
+  beforeEach(() => {
+    jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) => {
+      if (request.query === LoginMutations.login) {
+        return fromValue({
+          operation: makeOperation('mutation', request, {} as OperationContext),
+          data: {
+            login: {
+              uid: 1,
+              name: 'Someone',
+              apiKey: 'some-api-key',
+            },
           },
-        },
-      },
-      mockRun,
-    ]);
+        });
+      }
+      return fromValue({
+        operation: makeOperation('mutation', request, {} as OperationContext),
+        data: null,
+      });
+    });
+  });
 
-    const store = createStore<State>()(state);
-
+  const setup = (): ReturnType<typeof renderWithStore> => {
     const props: Props = {
       loggedIn: true,
       connectionAttempt: 0,
@@ -54,17 +51,11 @@ describe('<Root />', () => {
       initialEntries: ['/'],
     });
 
-    const utils = render(
-      <Provider store={store}>
-        <Router history={history}>
-          <GQLProviderMock>
-            <App {...props} />
-          </GQLProviderMock>
-        </Router>
-      </Provider>,
+    return renderWithStore(
+      <Router history={history}>
+        <App {...props} />
+      </Router>,
     );
-
-    return { store, ...utils };
   };
 
   it('should render an app logo', async () => {

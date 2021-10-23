@@ -1,21 +1,16 @@
-import { render, RenderResult, fireEvent, within, act, waitFor } from '@testing-library/react';
+import { RenderResult, fireEvent, within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { DocumentNode } from 'graphql';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore from 'redux-mock-store';
-import { Client } from 'urql';
+import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
 
 import { AccessibleListCreateItem } from './item';
 import type { PropsItemCreate } from './types';
 import { FormFieldTextInline } from '~client/components/form-field';
 import * as SearchQueries from '~client/gql/queries/search';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data/state';
-import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { mockClient, renderWithStore } from '~client/test-utils';
 import { PageListStandard } from '~client/types/enum';
-import { Query, QuerySearchArgs } from '~client/types/gql';
+import { QuerySearchArgs } from '~client/types/gql';
 
 describe('accessible list create item', () => {
   const myPage = PageListStandard.Income as const;
@@ -35,21 +30,16 @@ describe('accessible list create item', () => {
     suggestionFields: ['item'],
   };
 
-  const mockClient = {
-    executeQuery: ({
-      query,
-      variables,
-    }: {
-      variables: Record<string, unknown>;
-      query: DocumentNode;
-    }) => {
-      if (query === SearchQueries.SearchSuggestions) {
-        const hasNext = (variables as QuerySearchArgs).column === 'item';
+  beforeEach(() => {
+    jest.spyOn(mockClient, 'executeQuery').mockImplementation((request) => {
+      if (request.query === SearchQueries.SearchSuggestions) {
+        const hasNext = (request.variables as QuerySearchArgs).column === 'item';
         const nextField = hasNext ? 'category' : null;
 
-        switch ((variables as QuerySearchArgs).searchTerm) {
+        switch ((request.variables as QuerySearchArgs).searchTerm) {
           case 'c':
-            return fromValue<{ data: Query }>({
+            return fromValue({
+              operation: makeOperation('query', request, {} as OperationContext),
               data: {
                 search: {
                   list: ['Crockery', 'Caster sugar', 'Abacus'],
@@ -61,7 +51,8 @@ describe('accessible list create item', () => {
             });
 
           case 'z':
-            return fromValue<{ data: Query }>({
+            return fromValue({
+              operation: makeOperation('query', request, {} as OperationContext),
               data: {
                 search: {
                   list: ['Zappa', 'Zenith'],
@@ -73,23 +64,23 @@ describe('accessible list create item', () => {
             });
 
           default:
-            return fromValue({ data: null });
+            return fromValue({
+              operation: makeOperation('query', request, {} as OperationContext),
+              data: null,
+            });
         }
       }
 
       return fromValue({
+        operation: makeOperation('query', request, {} as OperationContext),
         data: null,
       });
-    },
-  } as unknown as Client;
+    });
+  });
 
   const setup = (customProps: Partial<typeof props> = {}): RenderResult =>
-    render(
-      <Provider store={createStore<State>()(testState)}>
-        <GQLProviderMock client={mockClient}>
-          <AccessibleListCreateItem<MyItem, typeof myPage> {...props} {...customProps} />
-        </GQLProviderMock>
-      </Provider>,
+    renderWithStore(
+      <AccessibleListCreateItem<MyItem, typeof myPage> {...props} {...customProps} />,
     );
 
   describe('when suggestions are available', () => {

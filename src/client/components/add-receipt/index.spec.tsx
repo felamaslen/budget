@@ -1,17 +1,14 @@
-import { render, act, waitFor, RenderResult } from '@testing-library/react';
+import { act, waitFor, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { DocumentNode } from 'graphql';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createMockStore from 'redux-mock-store';
-import { Client } from 'urql';
+import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
 
 import { AddReceipt, Props } from '.';
 import * as ListMutations from '~client/gql/mutations/list';
 import * as SearchQueries from '~client/gql/queries/search';
-import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { mockClient, renderWithStore } from '~client/test-utils';
 import { ReceiptPage } from '~client/types/enum';
 import type { QueryReceiptItemArgs, QueryReceiptItemsArgs } from '~client/types/gql';
 
@@ -24,30 +21,33 @@ describe('<AddReceipt />', () => {
     setAddingReceipt: jest.fn(),
   };
 
-  const mockClient = {
-    executeQuery: ({
-      variables,
-      query,
-    }: {
-      variables: Record<string, unknown>;
-      query: DocumentNode;
-    }) => {
+  let matchMedia: MatchMediaMock;
+  beforeAll(() => {
+    matchMedia = new MatchMediaMock();
+  });
+
+  let mutateSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.spyOn(mockClient, 'executeQuery').mockImplementation((request) => {
       if (
-        query === SearchQueries.ReceiptItem &&
-        (variables as QueryReceiptItemArgs).item === 'cri'
+        request.query === SearchQueries.ReceiptItem &&
+        (request.variables as QueryReceiptItemArgs).item === 'cri'
       ) {
         return fromValue({
+          operation: makeOperation('query', request, {} as OperationContext),
           data: {
             receiptItem: 'Crisps',
           },
         });
       }
       if (
-        query === SearchQueries.ReceiptItems &&
-        (variables as QueryReceiptItemsArgs).items[0] === 'Some food item' &&
-        (variables as QueryReceiptItemsArgs).items[1] === 'Other general item'
+        request.query === SearchQueries.ReceiptItems &&
+        (request.variables as QueryReceiptItemsArgs).items[0] === 'Some food item' &&
+        (request.variables as QueryReceiptItemsArgs).items[1] === 'Other general item'
       ) {
         return fromValue({
+          operation: makeOperation('query', request, {} as OperationContext),
           data: {
             receiptItems: [
               {
@@ -59,14 +59,16 @@ describe('<AddReceipt />', () => {
           },
         });
       }
-
       return fromValue({
+        operation: makeOperation('query', request, {} as OperationContext),
         data: null,
       });
-    },
-    executeMutation: ({ query }: { variables: Record<string, unknown>; query: DocumentNode }) => {
-      if (query === ListMutations.CreateReceipt) {
+    });
+
+    mutateSpy = jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) => {
+      if (request.query === ListMutations.CreateReceipt) {
         return fromValue({
+          operation: makeOperation('mutation', request, {} as OperationContext),
           data: {
             createReceipt: {
               error: null,
@@ -75,31 +77,14 @@ describe('<AddReceipt />', () => {
         });
       }
       return fromValue({
+        operation: makeOperation('mutation', request, {} as OperationContext),
         data: null,
       });
-    },
-  } as unknown as Client;
+    });
 
-  const store = createMockStore()({});
-  const setup = (): RenderResult =>
-    render(
-      <GQLProviderMock client={mockClient}>
-        <Provider store={store}>
-          <AddReceipt {...props} />
-        </Provider>
-      </GQLProviderMock>,
-    );
-
-  let mutateSpy: jest.SpyInstance;
-  beforeEach(() => {
-    mutateSpy = jest.spyOn(mockClient, 'executeMutation');
     jest.useFakeTimers();
   });
 
-  let matchMedia: MatchMediaMock;
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
   afterEach(() => {
     act(() => {
       jest.runAllTimers();
@@ -108,6 +93,8 @@ describe('<AddReceipt />', () => {
     matchMedia.clear();
     mutateSpy.mockRestore();
   });
+
+  const setup = (): RenderResult => renderWithStore(<AddReceipt {...props} />);
 
   it.each`
     item      | label     | type

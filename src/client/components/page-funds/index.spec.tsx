@@ -1,4 +1,4 @@
-import { RenderResult, render, within } from '@testing-library/react';
+import { within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import addDays from 'date-fns/addDays';
 import addSeconds from 'date-fns/addSeconds';
@@ -6,9 +6,7 @@ import getUnixTime from 'date-fns/getUnixTime';
 import startOfDay from 'date-fns/startOfDay';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
-import { Provider } from 'react-redux';
 import { MemoryRouter, Route } from 'react-router';
-import createStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 
 import { Funds } from '.';
@@ -16,13 +14,12 @@ import { generateFakeId } from '~client/modules/data';
 import { State } from '~client/reducers';
 import { PriceCache } from '~client/selectors';
 import { testState } from '~client/test-data/state';
-import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { renderWithStore } from '~client/test-utils';
 import type { FundNative as Fund } from '~client/types';
 import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
 describe('<PageFunds />', () => {
-  const state: State = {
-    ...testState,
+  const state: Pick<State, 'api' | PageNonStandard.Funds> = {
     api: {
       ...testState.api,
       appConfig: {
@@ -97,20 +94,13 @@ describe('<PageFunds />', () => {
     },
   };
 
-  const getStore = createStore<State>();
-  const setup = (customState: State = state): RenderResult & { store: MockStore<State> } => {
-    const store = getStore(customState);
-    const renderResult = render(
-      <Provider store={store}>
-        <GQLProviderMock>
-          <MemoryRouter initialEntries={['/funds']}>
-            <Route path="/funds" component={Funds} />
-          </MemoryRouter>
-        </GQLProviderMock>
-      </Provider>,
+  const setup = (customState: Partial<State> = state): ReturnType<typeof renderWithStore> =>
+    renderWithStore(
+      <MemoryRouter initialEntries={['/funds']}>
+        <Route path="/funds" component={Funds} />
+      </MemoryRouter>,
+      { customState },
     );
-    return { store, ...renderResult };
-  };
 
   let matchMedia: MatchMediaMock;
   beforeAll(() => {
@@ -211,8 +201,8 @@ describe('<PageFunds />', () => {
     expect(setup().getByTestId('graph-funds')).toBeInTheDocument();
   });
 
-  describe('if hiding sold funds', () => {
-    const setupSoldHidden = (): RenderResult & { store: MockStore<State> } =>
+  describe('when hiding sold funds', () => {
+    const setupSoldHidden = (): ReturnType<typeof renderWithStore> =>
       setup({
         ...state,
         [PageNonStandard.Funds]: {
@@ -356,7 +346,7 @@ describe('<PageFunds />', () => {
       },
     };
 
-    const setupForSort = (): RenderResult & { store: MockStore<State> } => {
+    const setupForSort = (): ReturnType<typeof renderWithStore> => {
       const renderResult = setup(testStateWithMany);
 
       if (selectValue) {

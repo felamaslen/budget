@@ -1,11 +1,8 @@
-import { render, RenderResult, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore, { MockStore } from 'redux-mock-store';
 import { LoginForm, Props } from '.';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data';
+import { renderWithStore } from '~client/test-utils';
 
 describe('<LoginForm />', () => {
   const baseProps: Props = {
@@ -13,24 +10,8 @@ describe('<LoginForm />', () => {
     loading: false,
   };
 
-  const setup = (
-    customProps: Partial<Props> = {},
-    customState: State = testState,
-    renderOptions: Partial<Pick<RenderResult, 'container'>> = {},
-  ): RenderResult & {
-    store: MockStore;
-  } => {
-    const store = createStore<State>()(customState);
-
-    const utils = render(
-      <Provider store={store}>
-        <LoginForm {...baseProps} {...customProps} />
-      </Provider>,
-      renderOptions,
-    );
-
-    return { store, ...utils };
-  };
+  const setup = (): ReturnType<typeof renderWithStore> =>
+    renderWithStore(<LoginForm {...baseProps} />);
 
   it('should render a title', () => {
     expect.assertions(1);

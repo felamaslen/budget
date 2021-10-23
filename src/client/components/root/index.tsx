@@ -1,5 +1,5 @@
 /* @jsx jsx */
-import { Global, jsx } from '@emotion/react';
+import { jsx } from '@emotion/react';
 import loadable from '@loadable/component';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { hot } from 'react-hot-loader/root';
@@ -20,8 +20,8 @@ import { Outer } from '~client/components/spinner/styles';
 import { ResizeContext, TodayProvider, useDebouncedResize, useOffline } from '~client/hooks';
 import { useWindowFocus } from '~client/hooks/focus';
 import { VOID } from '~client/modules/data';
-import { reset } from '~client/styled/reset';
-import { H2, H3, Main, PageWrapper } from '~client/styled/shared';
+import { GlobalStylesProvider } from '~client/styled/global';
+import { H2, H3, PageWrapper } from '~client/styled/shared';
 import { useLogoutMutation } from '~client/types/gql';
 
 const LoggedIn = hot(
@@ -56,15 +56,14 @@ const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
   return (
     <ResizeContext.Provider value={windowWidth}>
       <TodayProvider>
-        <Main>
-          <Global styles={reset} />
+        <GlobalStylesProvider>
           <Header {...props} onLogout={logout} setSettingsOpen={setSettingsOpen} />
           <ErrorMessages />
           <PageWrapper>
             {children}
             <Config open={settingsOpen} setOpen={setSettingsOpen} />
           </PageWrapper>
-        </Main>
+        </GlobalStylesProvider>
       </TodayProvider>
     </ResizeContext.Provider>
   );

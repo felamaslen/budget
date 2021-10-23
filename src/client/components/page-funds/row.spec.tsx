@@ -1,13 +1,11 @@
-import { RenderResult, render, act, fireEvent, waitFor } from '@testing-library/react';
+import { RenderResult, act, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createMockStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 
 import { FundRow, Props } from './row';
 import * as listMutationHooks from '~client/hooks/mutations/list';
-import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
+import { renderWithStore } from '~client/test-utils';
 import type { FundNative as Fund } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
@@ -24,31 +22,6 @@ describe('<FundRow />', () => {
     });
   });
 
-  const state: State = {
-    ...testState,
-    [PageNonStandard.Funds]: {
-      ...testState[PageNonStandard.Funds],
-      items: [
-        {
-          id: numericHash('fund-1'),
-          item: 'Fund 1',
-          transactions: [],
-          stockSplits: [],
-          allocationTarget: 30,
-        },
-        {
-          id: numericHash('fund-2'),
-          item: 'Fund 2',
-          transactions: [],
-          stockSplits: [],
-          allocationTarget: 45,
-        },
-      ],
-    },
-  };
-
-  const createStore = createMockStore<State>();
-
   const fund: Fund = {
     id: numericHash('fund-1'),
     item: 'My fund',
@@ -64,19 +37,32 @@ describe('<FundRow />', () => {
 
   const setup = (
     props: Partial<Props> = {},
-    customState: State = state,
-    options: Partial<RenderResult> = {},
-  ): RenderResult & { store: MockStore } => {
-    const store = createStore(customState);
-    const renderResult = render(
-      <Provider store={store}>
-        <FundRow {...baseProps} {...props} />
-      </Provider>,
-      options,
-    );
-
-    return { ...renderResult, store };
-  };
+    renderOptions: Partial<RenderResult> = {},
+  ): ReturnType<typeof renderWithStore> =>
+    renderWithStore(<FundRow {...baseProps} {...props} />, {
+      customState: {
+        [PageNonStandard.Funds]: {
+          ...testState[PageNonStandard.Funds],
+          items: [
+            {
+              id: numericHash('fund-1'),
+              item: 'Fund 1',
+              transactions: [],
+              stockSplits: [],
+              allocationTarget: 30,
+            },
+            {
+              id: numericHash('fund-2'),
+              item: 'Fund 2',
+              transactions: [],
+              stockSplits: [],
+              allocationTarget: 45,
+            },
+          ],
+        },
+      },
+      renderOptions,
+    });
 
   describe('target allocation adjustment', () => {
     it('should render the value', () => {
@@ -117,7 +103,6 @@ describe('<FundRow />', () => {
               allocationTarget: 45,
             },
           },
-          state,
           { container },
         );
       });

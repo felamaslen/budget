@@ -1,159 +1,176 @@
-import { render, RenderResult } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { Provider } from 'react-redux';
-import getStore, { MockStore } from 'redux-mock-store';
-import { OperationResult } from 'urql';
+import { waitFor } from '@testing-library/react';
+import { act, RenderHookResult } from '@testing-library/react-hooks';
+import type { MockStore } from 'redux-mock-store';
+import { makeOperation, OperationContext } from 'urql';
+import { delay, fromValue, pipe } from 'wonka';
 
 import { useLogin } from './login';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data';
-import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { errorOpened } from '~client/actions';
+import { ErrorLevel } from '~client/constants/error';
+import * as LoginMutations from '~client/gql/mutations/login';
+import { mockClient, renderHookWithStore } from '~client/test-utils';
 import * as types from '~client/types/gql';
 
-describe('login hook', () => {
+jest.mock('shortid', () => ({
+  generate: (): string => 'my-short-id',
+}));
+
+describe(useLogin.name, () => {
+  let loginSpy: jest.SpyInstance;
+
+  const myCorrectPin = 1235;
+
+  beforeEach(() => {
+    loginSpy = jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) => {
+      if (request.query === LoginMutations.login) {
+        if ((request.variables as types.MutationLoginArgs).pin === myCorrectPin) {
+          return pipe(
+            fromValue({
+              operation: makeOperation('mutation', request, {} as OperationContext),
+              data: {
+                login: {
+                  error: null,
+                  uid: 1,
+                  name: 'Someone',
+                  apiKey: 'some-api-key',
+                },
+              },
+            }),
+            delay(2),
+          );
+        }
+        return pipe(
+          fromValue({
+            operation: makeOperation('mutation', request, {} as OperationContext),
+            data: {
+              login: {
+                error: 'Incorrect PIN',
+                uid: null,
+                name: null,
+                apiKey: null,
+              },
+            },
+          }),
+          delay(2),
+        );
+      }
+      return fromValue({
+        operation: makeOperation('mutation', request, {} as OperationContext),
+        data: null,
+      });
+    });
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  const createStore = getStore<State>();
-
-  const TestComponent: React.FC = () => {
-    const { login, loading, loggedIn, apiKey } = useLogin();
-
-    return (
-      <div>
-        <button data-testid="btn-login" onClick={(): void => login(1235)}>
-          Login
-        </button>
-        <span data-testid="hook-result">
-          {JSON.stringify({
-            loading,
-            loggedIn,
-            apiKey,
-          })}
-        </span>
-      </div>
-    );
-  };
-
-  const setup = (
-    renderOptions: Partial<RenderResult> = {},
-    customStore?: MockStore<State>,
-  ): RenderResult & { store: MockStore } => {
-    const store = customStore ?? createStore(testState);
-
-    const renderResult = render(
-      <Provider store={store}>
-        <GQLProviderMock>
-          <TestComponent />
-        </GQLProviderMock>
-      </Provider>,
-      renderOptions,
-    );
-    return { ...renderResult, store };
-  };
-
-  function assertProp<P extends keyof ReturnType<typeof useLogin>>(
-    { getByTestId }: Pick<RenderResult, 'getByTestId'>,
-    prop: P,
-    expectedValue: ReturnType<typeof useLogin>[P],
-  ): void {
-    expect(JSON.parse(getByTestId('hook-result').innerHTML)).toStrictEqual(
-      expect.objectContaining({
-        [prop]: expectedValue,
-      }),
-    );
-  }
-
-  const mockRun = async (): Promise<
-    OperationResult<types.LoginMutation, types.LoginMutationVariables>
-  > => ({} as OperationResult<types.LoginMutation, types.LoginMutationVariables>);
-
-  it.each`
-    case              | loading
-    ${'fetching'}     | ${true}
-    ${'not fetching'} | ${false}
-  `('should return the loading status when $case', ({ loading }) => {
+  it('should set loading to false initially', () => {
     expect.assertions(1);
+    const { result } = renderHookWithStore(useLogin);
 
-    jest.spyOn(types, 'useLoginMutation').mockReturnValue([
-      {
-        fetching: loading,
-        stale: false,
-      },
-      mockRun,
-    ]);
-
-    const result = setup();
-
-    assertProp(result, 'loading', loading);
+    expect(result.current.loading).toBe(false);
   });
 
   describe('when logging in', () => {
-    const setupLogin = (): ReturnType<typeof setup> => {
-      const spy = jest.spyOn(types, 'useLoginMutation').mockReturnValue([
-        {
-          fetching: true,
-          stale: false,
-          data: {
-            login: {
-              uid: 1,
-              name: 'Someone',
-              apiKey: 'some-api-key',
-            },
-          },
-        },
-        mockRun,
-      ]);
+    const setupLogin = (
+      pin: number,
+    ): RenderHookResult<never, ReturnType<typeof useLogin>> & { store: MockStore } => {
+      const renderHookResult = renderHookWithStore(useLogin);
 
-      const renderResult = setup();
+      act(() => {
+        renderHookResult.result.current.login(pin);
+      });
 
-      userEvent.click(renderResult.getByTestId('btn-login'));
-
-      spy.mockRestore();
-
-      return renderResult;
+      return renderHookResult;
     };
 
-    describe('prior to login', () => {
-      it('should return loggedIn = false', () => {
-        expect.assertions(1);
+    describe('prior to the response being returned', () => {
+      it('should return loggedIn = false, loading = true', () => {
+        expect.assertions(2);
+        const { result } = setupLogin(myCorrectPin);
 
-        const firstResult = setup();
-        assertProp(firstResult, 'loggedIn', false);
+        expect(result.current.loggedIn).toBe(false);
+        expect(result.current.loading).toBe(true);
       });
     });
 
     describe('after successful login', () => {
-      it('should return loggedIn = true', () => {
-        expect.assertions(1);
+      it('should return loggedIn = true, loading = false', async () => {
+        expect.hasAssertions();
+        const { result } = setupLogin(myCorrectPin);
 
-        const secondResult = setupLogin();
-        assertProp(secondResult, 'loggedIn', true);
+        await waitFor(() => {
+          expect(result.current.loggedIn).toBe(true);
+          expect(result.current.loading).toBe(false);
+        });
+      });
+
+      it('should call the login mutation once', () => {
+        expect.assertions(2);
+        setupLogin(myCorrectPin);
+
+        expect(loginSpy).toHaveBeenCalledTimes(1);
+        expect(loginSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: LoginMutations.login,
+            variables: {
+              pin: 1235,
+            },
+          }),
+          {},
+        );
+      });
+
+      it('should return the API key', async () => {
+        expect.hasAssertions();
+        const { result } = setupLogin(myCorrectPin);
+
+        await waitFor(() => {
+          expect(result.current.apiKey).toBe('some-api-key');
+        });
+      });
+
+      it('should not dispatch any actions', async () => {
+        expect.hasAssertions();
+        const { result, store } = setupLogin(myCorrectPin);
+
+        await waitFor(() => {
+          expect(result.current.apiKey).not.toBeNull();
+        });
+
+        expect(store.getActions()).toHaveLength(0);
       });
     });
-  });
 
-  it('should return the API key', () => {
-    expect.assertions(1);
+    describe('after a failed login', () => {
+      it('should set loggedIn = false, loading = false', async () => {
+        expect.hasAssertions();
+        const { result } = setupLogin(myCorrectPin - 1);
 
-    jest.spyOn(types, 'useLoginMutation').mockReturnValue([
-      {
-        fetching: true,
-        stale: false,
-        data: {
-          login: {
-            uid: 1,
-            name: 'Someone',
-            apiKey: 'some-api-key',
-          },
-        },
-      },
-      mockRun,
-    ]);
+        await waitFor(() => {
+          expect(result.current.loggedIn).toBe(false);
+          expect(result.current.loading).toBe(false);
+        });
+      });
 
-    const result = setup();
-    assertProp(result, 'apiKey', 'some-api-key');
+      it('should set the API key to null', async () => {
+        expect.assertions(1);
+        const { result } = setupLogin(myCorrectPin - 1);
+
+        await waitFor(() => {
+          expect(result.current.apiKey).toBeNull();
+        });
+      });
+
+      it('should dispatch an error action', async () => {
+        expect.hasAssertions();
+        const { store } = setupLogin(myCorrectPin - 1);
+
+        await waitFor(() => {
+          expect(store.getActions()).toStrictEqual([errorOpened('Incorrect PIN', ErrorLevel.Warn)]);
+        });
+      });
+    });
   });
 });

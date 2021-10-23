@@ -1,10 +1,7 @@
 import { waitFor } from '@testing-library/react';
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, RenderHookResult } from '@testing-library/react-hooks';
 import type { DocumentNode } from 'graphql';
-import React from 'react';
-import { Provider } from 'react-redux';
-import createMockStore from 'redux-mock-store';
-import { CombinedError } from 'urql';
+import { CombinedError, makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
 
 import {
@@ -16,16 +13,17 @@ import {
 } from './crud';
 
 import * as NetWorthMutations from '~client/gql/mutations/net-worth';
-import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
+import { mockClient, renderHookWithStore } from '~client/test-utils';
 import type { NetWorthEntryNative } from '~client/types';
 import { NetWorthCategoryType, RequestType } from '~client/types/enum';
 import type { NetWorthCategoryInput, NetWorthSubcategoryInput } from '~client/types/gql';
 
 describe('generic crud hooks', () => {
-  const mutateSpy = mockClient.executeMutation as jest.Mock;
+  let mutateSpy: jest.SpyInstance;
   beforeEach(() => {
-    mutateSpy.mockReturnValue(
+    mutateSpy = jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) =>
       fromValue({
+        operation: makeOperation('mutation', request, {} as OperationContext),
         data: null,
       }),
     );
@@ -198,30 +196,16 @@ describe('generic crud hooks', () => {
 
   const onError = jest.fn();
 
-  const store = createMockStore()({});
-
   describe.each`
     name                               | testCase
     ${useNetWorthCategoryCrud.name}    | ${testCaseNetWorthCategory}
     ${useNetWorthSubcategoryCrud.name} | ${testCaseNetWorthSubcategory}
     ${useNetWorthEntryCrud.name}       | ${testCaseNetWorthEntry}
   `('$name', ({ testCase }: { testCase: TestCase<Record<string, unknown>> }) => {
-    const Wrapper: React.FC = ({ children }) => (
-      <GQLProviderMock>
-        <Provider store={store}>{children}</Provider>
-      </GQLProviderMock>
-    );
-
     const setup = (): RenderHookResult<
       Partial<HookCallOptions>,
       CrudProps<Record<string, unknown>>
-    > =>
-      renderHook<Partial<HookCallOptions>, CrudProps<Record<string, unknown>>>(
-        () => testCase.useHook({ onError }),
-        {
-          wrapper: Wrapper,
-        },
-      );
+    > => renderHookWithStore(() => testCase.useHook({ onError }));
 
     describe('creating', () => {
       it('should call the correct mutation', async () => {

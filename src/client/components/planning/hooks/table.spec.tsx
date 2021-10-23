@@ -1,7 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createMockStore from 'redux-mock-store';
 import numericHash from 'string-hash';
 
 import { PlanningContext } from '../context';
@@ -18,7 +15,7 @@ import { usePlanningTableData } from './table';
 import { TodayProvider } from '~client/hooks';
 import type { State as ReduxState } from '~client/reducers';
 import { testState as testReduxState } from '~client/test-data/state';
-import { GQLProviderMock, mockClient } from '~client/test-utils/gql-provider-mock';
+import { renderHookWithStore } from '~client/test-utils';
 import { NetWorthEntryNative } from '~client/types';
 import { StandardRates, StandardThresholds } from '~shared/planning';
 
@@ -206,32 +203,30 @@ describe(usePlanningTableData.name, () => {
     table: [],
   };
 
-  const createStore = createMockStore<ReduxState>();
-  const store = createStore(testReduxStateWithDates);
-
-  const Wrapper: React.FC = ({ children }) => (
-    <GQLProviderMock client={mockClient}>
-      <Provider store={store}>
-        <TodayProvider>
-          <PlanningContext.Provider value={testContext}>{children}</PlanningContext.Provider>
-        </TodayProvider>
-      </Provider>
-    </GQLProviderMock>
+  const wrapper: React.FC = ({ children }) => (
+    <TodayProvider>
+      <PlanningContext.Provider value={testContext}>{children}</PlanningContext.Provider>
+    </TodayProvider>
   );
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const setup = (state: State = testState) =>
+    renderHookWithStore(() => usePlanningTableData(state), {
+      customState: testReduxStateWithDates,
+      renderHookOptions: {
+        wrapper,
+      },
+    });
 
   it('should return twelve groups, corresponding to the months in the financial year', () => {
     expect.assertions(1);
-    const { result } = renderHook(() => usePlanningTableData(testState), {
-      wrapper: Wrapper,
-    });
+    const { result } = setup();
     expect(result.current).toHaveLength(12);
   });
 
   it("should set the numRows on the group to the minimum of 3, and the max of all of the group's accounts", () => {
     expect.assertions(12);
-    const { result } = renderHook(() => usePlanningTableData(testState), {
-      wrapper: Wrapper,
-    });
+    const { result } = setup();
     expect(result.current[0].numRows).toMatchInlineSnapshot(`3`); // April
     expect(result.current[1].numRows).toMatchInlineSnapshot(`3`); // May
     expect(result.current[2].numRows).toMatchInlineSnapshot(`3`); // June
@@ -249,9 +244,7 @@ describe(usePlanningTableData.name, () => {
   it('should set isCurrentMonth to true on the current month', () => {
     expect.assertions(12);
     // current month is September
-    const { result } = renderHook(() => usePlanningTableData(testState), {
-      wrapper: Wrapper,
-    });
+    const { result } = setup();
     expect(result.current[0].isCurrentMonth).toBe(false); // April
     expect(result.current[1].isCurrentMonth).toBe(false); // May
     expect(result.current[2].isCurrentMonth).toBe(false); // June
@@ -269,9 +262,7 @@ describe(usePlanningTableData.name, () => {
   describe('accounts', () => {
     it('should each be present on every group', () => {
       expect.assertions(24);
-      const { result } = renderHook(() => usePlanningTableData(testState), {
-        wrapper: Wrapper,
-      });
+      const { result } = setup();
       result.current.forEach((group) => {
         expect(group.accounts).toHaveLength(2);
         expect(group.accounts).toStrictEqual(
@@ -296,9 +287,7 @@ describe(usePlanningTableData.name, () => {
     describe('explicit transactions', () => {
       it('should be included', () => {
         expect.assertions(2);
-        const { result } = renderHook(() => usePlanningTableData(testState), {
-          wrapper: Wrapper,
-        });
+        const { result } = setup();
 
         expect(result.current[6].accounts[1].transactions).toStrictEqual(
           expect.arrayContaining([
@@ -330,9 +319,7 @@ describe(usePlanningTableData.name, () => {
 
       it('should be included when the value is zero', () => {
         expect.assertions(1);
-        const { result } = renderHook(() => usePlanningTableData(testState), {
-          wrapper: Wrapper,
-        });
+        const { result } = setup();
         expect(result.current[4].accounts[1].transactions).toStrictEqual(
           expect.arrayContaining([
             expect.objectContaining<AccountTransaction>({
@@ -352,9 +339,7 @@ describe(usePlanningTableData.name, () => {
 
     it('should include computed transactions', () => {
       expect.assertions(2);
-      const { result } = renderHook(() => usePlanningTableData(testState), {
-        wrapper: Wrapper,
-      });
+      const { result } = setup();
 
       expect(result.current[6].accounts[0].transactions).toStrictEqual(
         expect.arrayContaining([
@@ -393,9 +378,7 @@ describe(usePlanningTableData.name, () => {
 
     it('should add a color scale to income transactions', () => {
       expect.assertions(6);
-      const { result } = renderHook(() => usePlanningTableData(testState), {
-        wrapper: Wrapper,
-      });
+      const { result } = setup();
 
       const salaryVerifiedJul = result.current[3].accounts[1].transactions.find(
         (compare) => compare.name === 'Salary',
@@ -419,9 +402,7 @@ describe(usePlanningTableData.name, () => {
 
     it('should include actual credit card transactions', () => {
       expect.assertions(3);
-      const { result } = renderHook(() => usePlanningTableData(testState), {
-        wrapper: Wrapper,
-      });
+      const { result } = setup();
 
       // Jun
       expect(result.current[2].accounts[1].creditCards).toStrictEqual<AccountCreditCardPayment[]>([
@@ -456,9 +437,7 @@ describe(usePlanningTableData.name, () => {
 
     it('should fall back to predicted credit card payments, for future months', () => {
       expect.assertions(9);
-      const { result } = renderHook(() => usePlanningTableData(testState), {
-        wrapper: Wrapper,
-      });
+      const { result } = setup();
 
       // Apr
       expect(result.current[0].accounts[1].creditCards).toStrictEqual<AccountCreditCardPayment[]>([
@@ -512,9 +491,7 @@ describe(usePlanningTableData.name, () => {
     describe('start and end values', () => {
       it('should return the initial value from the API', () => {
         expect.assertions(4);
-        const { result } = renderHook(() => usePlanningTableData(testState), {
-          wrapper: Wrapper,
-        });
+        const { result } = setup();
 
         expect(result.current[0].accounts[0].startValue).toStrictEqual<AccountValue>({
           key: `${numericHash('account-savings')}_start`,
@@ -558,9 +535,7 @@ describe(usePlanningTableData.name, () => {
         'should return actual values for a past month ($month) with a net worth entry',
         ({ index, start0, start1, end0, end1 }) => {
           expect.assertions(4);
-          const { result } = renderHook(() => usePlanningTableData(testState), {
-            wrapper: Wrapper,
-          });
+          const { result } = setup();
 
           expect(result.current[index].accounts[0].startValue).toStrictEqual<AccountValue>({
             key: `${numericHash('account-savings')}_start`,
@@ -596,9 +571,7 @@ describe(usePlanningTableData.name, () => {
 
       it('should return a predicted value for a present month without a net worth entry', () => {
         expect.assertions(4);
-        const { result } = renderHook(() => usePlanningTableData(testState), {
-          wrapper: Wrapper,
-        });
+        const { result } = setup();
 
         expect(result.current[5].accounts[0].startValue).toStrictEqual<AccountValue>({
           key: `${numericHash('account-savings')}_start`,
@@ -686,9 +659,7 @@ describe(usePlanningTableData.name, () => {
 
     it('should use the boundary conditions provided by the API', () => {
       expect.assertions(4);
-      const { result } = renderHook(() => usePlanningTableData(stateInFuture), {
-        wrapper: Wrapper,
-      });
+      const { result } = setup(stateInFuture);
 
       expect(result.current[0].accounts[0].startValue.computedValue).toBe(startValueSaving);
       expect(result.current[0].accounts[0].endValue.computedValue).toBe(expectedSavingApr22);

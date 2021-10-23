@@ -1,13 +1,10 @@
-import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { Provider } from 'react-redux';
 import { MemoryRouter as Router } from 'react-router-dom';
-import createStore, { MockStore } from 'redux-mock-store';
 
 import { Header, Props } from '.';
 import { State } from '~client/reducers';
-import { testState } from '~client/test-data/state';
+import { renderWithStore } from '~client/test-utils';
 
 describe('<Header />', () => {
   const props: Props = {
@@ -17,23 +14,15 @@ describe('<Header />', () => {
   };
 
   const setup = (
-    customState: State = testState,
+    customState: Partial<State> = {},
     customProps: Partial<Props> = {},
-  ): RenderResult & {
-    store: MockStore<State>;
-  } => {
-    const store = createStore<State>()(customState);
-
-    const utils = render(
-      <Provider store={store}>
-        <Router>
-          <Header {...props} {...customProps} />
-        </Router>
-      </Provider>,
+  ): ReturnType<typeof renderWithStore> =>
+    renderWithStore(
+      <Router>
+        <Header {...props} {...customProps} />
+      </Router>,
+      { customState },
     );
-
-    return { ...utils, store };
-  };
 
   it('should render a header', () => {
     expect.assertions(1);
@@ -50,9 +39,7 @@ describe('<Header />', () => {
   });
 
   describe('when logged out', () => {
-    const setupLoggedOut = (): RenderResult & {
-      store: MockStore<State>;
-    } => setup(testState, { loggedIn: false });
+    const setupLoggedOut = (): ReturnType<typeof setup> => setup({}, { loggedIn: false });
 
     it('should not render a nav', () => {
       expect.assertions(1);

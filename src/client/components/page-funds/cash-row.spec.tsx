@@ -1,19 +1,12 @@
-import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createMockStore, { MockStore } from 'redux-mock-store';
 
 import { CashRow } from './cash-row';
 import { TodayProvider } from '~client/hooks';
 import * as listMutationHooks from '~client/hooks/mutations/list';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data';
-import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { renderWithStore } from '~client/test-utils';
 
 describe('<CashRow />', () => {
-  const getStore = createMockStore<State>();
-
   const onCreate = jest.fn();
   const onUpdate = jest.fn();
   const onDelete = jest.fn();
@@ -26,19 +19,12 @@ describe('<CashRow />', () => {
     });
   });
 
-  const setup = (): RenderResult & { store: MockStore<State> } => {
-    const store = getStore(testState);
-    const renderResult = render(
-      <Provider store={store}>
-        <GQLProviderMock>
-          <TodayProvider>
-            <CashRow />
-          </TodayProvider>
-        </GQLProviderMock>
-      </Provider>,
+  const setup = (): ReturnType<typeof renderWithStore> =>
+    renderWithStore(
+      <TodayProvider>
+        <CashRow />
+      </TodayProvider>,
     );
-    return { ...renderResult, store };
-  };
 
   it('should render the cash value with target', () => {
     expect.assertions(1);

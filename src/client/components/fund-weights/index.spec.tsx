@@ -1,19 +1,10 @@
-import { render, RenderResult } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore from 'redux-mock-store';
 
 import { FundWeights } from '.';
-import { State } from '~client/reducers';
-import { testState } from '~client/test-data';
+import { renderWithStore } from '~client/test-utils';
 
 describe('<FundWeights />', () => {
-  const setup = (): RenderResult =>
-    render(
-      <Provider store={createStore<State>()(testState)}>
-        <FundWeights />
-      </Provider>,
-    );
+  const setup = (): ReturnType<typeof renderWithStore> => renderWithStore(<FundWeights />);
 
   it('should render a block tree', () => {
     expect.assertions(1);
