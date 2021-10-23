@@ -1,3 +1,5 @@
+import { addMonths, isAfter, startOfMonth } from 'date-fns';
+
 import type { CalculationRows } from '../types';
 
 import { getComputedBillsValuesForAccount, reduceBillsForAccount } from './bills';
@@ -24,6 +26,13 @@ export function getComputedTransactionsForAccount(
   computedValues: PlanningComputedValue[];
   predictedCreditCardPayments: Record<number, number>;
 } {
+  const predictFromDate = startOfMonth(
+    calculationRows.latestActualValues[0] &&
+      !isAfter(startOfMonth(now), calculationRows.latestActualValues[0]?.date)
+      ? addMonths(calculationRows.latestActualValues[0].date, 1)
+      : now,
+  );
+
   const { id: accountId, account } = incomeGroup[0];
   const previousIncomeReduction = reducePreviousIncomeForAccount(
     calculationRows.previousIncome,
@@ -32,7 +41,12 @@ export function getComputedTransactionsForAccount(
 
   const previousIncome = getComputedPreviousIncomeForAccount(previousIncomeReduction, year);
 
-  const predictedIncomeReduction = reducePredictedIncome(calculationRows, year, now, incomeGroup);
+  const predictedIncomeReduction = reducePredictedIncome(
+    calculationRows,
+    year,
+    predictFromDate,
+    incomeGroup,
+  );
   const predictedIncome = getComputedPredictedIncomeForAccount(year, predictedIncomeReduction);
 
   const transfersReduction = reduceTransfers(calculationRows, accountId, now);
