@@ -72,7 +72,7 @@ export function getComputedTransactionsForAccount(
   const computedStartValue = Math.round(
     getComputedYearStartAccountValue(
       accountId,
-      now,
+      predictFromDate,
       year,
       calculationRows,
       previousIncomeReduction,
