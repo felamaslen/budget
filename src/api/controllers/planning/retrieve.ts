@@ -9,6 +9,7 @@ import {
   accountRowHasValue,
   computeTaxReliefFromPreviousYear,
   getComputedTransactionsForAccount,
+  getPredictFromDate,
   getRelevantYears,
 } from './utils';
 
@@ -43,6 +44,7 @@ import {
 function constructAccounts(
   year: number,
   now: Date,
+  predictFromDate: Date,
   accountRowsWithIncome: AsyncReturnType<typeof selectPlanningAccountsWithIncome>,
   accountRowsWithCreditCards: AsyncReturnType<typeof selectPlanningAccountsWithCreditCards>,
   averageCreditCardPaymentRows: AsyncReturnType<typeof selectAverageCreditCardPayments>,
@@ -84,6 +86,7 @@ function constructAccounts(
         },
         year,
         now,
+        predictFromDate,
         incomeGroup,
       );
 
@@ -173,8 +176,8 @@ export async function getPlanningData(
     selectPlanningPreviousIncome(db, uid, year, accountNames, now),
   ]);
 
-  // Always include the previous year, so as to calculate tax relief
-  const relevantYears = getRelevantYears(year, previousIncomeRows);
+  const predictFromDate = getPredictFromDate(now, { latestActualValues });
+  const relevantYears = getRelevantYears(year, predictFromDate, previousIncomeRows);
 
   const [thresholdRows, rateRows] = await Promise.all([
     selectThresholds(db, uid, relevantYears),
@@ -185,6 +188,7 @@ export async function getPlanningData(
     accounts: constructAccounts(
       year,
       now,
+      predictFromDate,
       accountRowsWithIncome,
       accountRowsWithCreditCards,
       averageCreditCardPaymentRows,

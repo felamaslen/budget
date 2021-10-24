@@ -657,7 +657,7 @@ describe('planning resolver', () => {
                 ]),
                 upperLimit: 210000,
                 lowerLimit: 200000,
-                computedValues: [],
+                computedValues: expect.arrayContaining([]),
                 includeBills: null,
               }),
             ]),
@@ -1588,7 +1588,14 @@ describe('planning resolver', () => {
           (compare) => compare.account === 'Something account',
         );
 
-        const expectedMyBankValueMar2020 = myBankValueJan2020;
+        const expectedPredictedIncomeMyBank = (500000 - 15000) * 2; // Feb, Mar 2020
+        const expectedCreditCardPaymentsContribution = Math.round((38625 + 22690) / 2) * 2;
+
+        const expectedMyBankValueMar2020 =
+          myBankValueJan2020 +
+          expectedPredictedIncomeMyBank -
+          expectedCreditCardPaymentsContribution;
+
         const expectedOtherBankValueMar2020 = myOtherBankValueJan2020;
 
         expect(accountWithMyBank?.computedStartValue).toBe(expectedMyBankValueMar2020);

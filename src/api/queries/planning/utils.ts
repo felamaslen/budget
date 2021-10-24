@@ -17,22 +17,22 @@ export const upsertUserParameterRowsByYear =
     inputs: Omit<ParameterRow, 'id' | 'uid'>[],
   ): Promise<void> => {
     const { rows: existingIdRows } = await db.query<{ id: number }>(sql`
-  INSERT INTO ${sql.identifier([`planning_${tableName}`])} (uid, year, name, value)
-  SELECT * FROM ${sql.unnest(
-    inputs.map((input) => [uid, input.year, input.name, input.value]),
-    ['int4', 'int4', 'text', valueType],
-  )}
-  ON CONFLICT (uid, year, name) DO UPDATE SET value = excluded.value
-  RETURNING id
-  `);
+    INSERT INTO ${sql.identifier([`planning_${tableName}`])} (uid, year, name, value)
+    SELECT * FROM ${sql.unnest(
+      inputs.map((input) => [uid, input.year, input.name, input.value]),
+      ['int4', 'int4', 'text', valueType],
+    )}
+    ON CONFLICT (uid, year, name) DO UPDATE SET value = excluded.value
+    RETURNING id
+    `);
 
     await db.query(sql`
-  DELETE FROM ${sql.identifier([`planning_${tableName}`])}
-  WHERE uid = ${uid} AND year = ${year} AND id != ALL(${sql.array(
+    DELETE FROM ${sql.identifier([`planning_${tableName}`])}
+    WHERE uid = ${uid} AND year = ${year} AND id != ALL(${sql.array(
       existingIdRows.map((row) => row.id),
       'int4',
     )})
-  `);
+    `);
   };
 
 export const selectParameterRows =
@@ -43,10 +43,10 @@ export const selectParameterRows =
     years: number[],
   ): Promise<readonly ParameterRow[]> => {
     const { rows } = await db.query<ParameterRow>(sql`
-  SELECT * FROM ${sql.identifier([`planning_${tableName}`])}
-  WHERE uid = ${uid} AND year = ANY(${sql.array(years, 'int4')})
-  ORDER BY name
-  `);
+    SELECT * FROM ${sql.identifier([`planning_${tableName}`])}
+    WHERE uid = ${uid} AND year = ANY(${sql.array(years, 'int4')})
+    ORDER BY name
+    `);
     return rows;
   };
 

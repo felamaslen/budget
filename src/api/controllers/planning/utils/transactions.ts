@@ -1,5 +1,3 @@
-import { addMonths, isAfter, startOfMonth } from 'date-fns';
-
 import type { CalculationRows } from '../types';
 
 import { getComputedBillsValuesForAccount, reduceBillsForAccount } from './bills';
@@ -20,19 +18,13 @@ export function getComputedTransactionsForAccount(
   calculationRows: CalculationRows,
   year: number,
   now: Date,
+  predictFromDate: Date,
   incomeGroup: (AccountRow & AccountRowIncomeJoins)[],
 ): {
   computedStartValue: number;
   computedValues: PlanningComputedValue[];
   predictedCreditCardPayments: Record<number, number>;
 } {
-  const predictFromDate = startOfMonth(
-    calculationRows.latestActualValues[0] &&
-      !isAfter(startOfMonth(now), calculationRows.latestActualValues[0]?.date)
-      ? addMonths(calculationRows.latestActualValues[0].date, 1)
-      : now,
-  );
-
   const { id: accountId, account } = incomeGroup[0];
   const previousIncomeReduction = reducePreviousIncomeForAccount(
     calculationRows.previousIncome,

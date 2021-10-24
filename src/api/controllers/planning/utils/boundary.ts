@@ -1,4 +1,11 @@
-import { addMonths, differenceInCalendarMonths, endOfMonth, getMonth, isAfter } from 'date-fns';
+import {
+  addMonths,
+  differenceInCalendarMonths,
+  endOfMonth,
+  getMonth,
+  isAfter,
+  startOfMonth,
+} from 'date-fns';
 
 import type { CalculationRows } from '../types';
 import {
@@ -8,7 +15,7 @@ import {
 import { accountRowHasCreditCardPayment } from './rows';
 import { IntermediateTransfersReduction } from './transfers';
 
-import type { PreviousIncomeRow } from '~api/queries/planning';
+import type { PreviousIncomeRow } from '~api/queries';
 import {
   evaluatePlanningValue,
   getDateFromYearAndMonth,
@@ -16,15 +23,27 @@ import {
   startMonth,
 } from '~shared/planning';
 
+export function getPredictFromDate(
+  now: Date,
+  { latestActualValues }: Pick<CalculationRows, 'latestActualValues'>,
+): Date {
+  return startOfMonth(latestActualValues[0] ? addMonths(latestActualValues[0].date, 1) : now);
+}
+
 export function getRelevantYears(
   year: number,
+  predictFromDate: Date,
   previousIncomeRows: readonly PreviousIncomeRow[],
 ): number[] {
-  const startYear = previousIncomeRows
+  const predictionStartYear = getFinancialYear(predictFromDate);
+  const previousIncomeOldestYear = previousIncomeRows
     .filter((row) => row.year < year)
     .reduce<number>((min, row) => Math.min(min, row.year), year);
 
-  return Array(year - startYear + 1)
+  const startYear = Math.min(predictionStartYear, previousIncomeOldestYear, year);
+  const endYear = Math.max(year, predictionStartYear);
+
+  return Array(Math.max(1, endYear - startYear + 1))
     .fill(0)
     .map<number>((_, index) => startYear + index);
 }

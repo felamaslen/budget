@@ -1,31 +1,108 @@
-import shortid from 'shortid';
 import numericHash from 'string-hash';
 
 import { CalculationRows } from '../types';
-import { getComputedYearStartAccountValue, getRelevantYears } from './boundary';
+import { getComputedYearStartAccountValue, getPredictFromDate, getRelevantYears } from './boundary';
 import {
   IntermediatePredictedIncomeReduction,
   IntermediatePreviousIncomeReduction,
 } from './income';
 import { IntermediateTransfersReduction } from './transfers';
-import type { PreviousIncomeRow } from '~api/queries/planning';
+import type { LatestPlanningAccountValueRow, PreviousIncomeRow } from '~api/queries/planning';
+
+describe(getPredictFromDate.name, () => {
+  const now = new Date('2021-06-28T11:39:20+0100');
+
+  describe('when there is no recorded net worth value', () => {
+    it('should return the start of the current month', () => {
+      expect.assertions(1);
+      expect(getPredictFromDate(now, { latestActualValues: [] })).toStrictEqual(
+        new Date('2021-06-01T00:00:00.000Z'),
+      );
+    });
+  });
+
+  describe('when there is a recorded net worth value', () => {
+    describe('when the latest recorded net worth value is in the past', () => {
+      it('should return the start of the month following the latest recorded value', () => {
+        expect.assertions(1);
+        expect(
+          getPredictFromDate(now, {
+            latestActualValues: [
+              {
+                date: new Date('2021-02-26'),
+              } as LatestPlanningAccountValueRow,
+            ],
+          }),
+        ).toStrictEqual(new Date('2021-03-01T00:00:00.000Z'));
+      });
+    });
+
+    describe.each`
+      case              | date
+      ${'before today'} | ${new Date('2021-06-14')}
+      ${'after today'}  | ${new Date('2021-06-29')}
+    `('when the latest recorded net worth value is $case in the current month', ({ date }) => {
+      it('should return the start of the following month', () => {
+        expect.assertions(1);
+        expect(
+          getPredictFromDate(now, {
+            latestActualValues: [
+              {
+                date,
+              } as LatestPlanningAccountValueRow,
+            ],
+          }),
+        ).toStrictEqual(new Date('2021-07-01T00:00:00.000Z'));
+      });
+    });
+
+    describe('when the latest recorded net worth value is in the future', () => {
+      it('should return the start of the month following the net worth entry', () => {
+        expect.assertions(1);
+        expect(
+          getPredictFromDate(now, {
+            latestActualValues: [
+              {
+                date: new Date('2021-09-19'),
+              } as LatestPlanningAccountValueRow,
+            ],
+          }),
+        ).toStrictEqual(new Date('2021-10-01T00:00:00.000Z'));
+      });
+    });
+  });
+});
 
 describe(getRelevantYears.name, () => {
-  const previousIncomeRowBase = (): Omit<PreviousIncomeRow, 'year'> => ({
-    id: numericHash(shortid.generate()),
-    date: new Date(), // doesn't matter
-    month: 7,
-    item: 'Some item',
-    gross: 100000,
-    deduction_name: null,
-    deduction_value: null,
+  const previousIncomeRowBase = (): PreviousIncomeRow => ({} as PreviousIncomeRow);
+
+  describe('when there are no recorded income values', () => {
+    it('should return the inclusive range from the prediction start date to the selected year', () => {
+      expect.assertions(5);
+      expect(getRelevantYears(2021, new Date('2021-03-01'), [])).toStrictEqual([2020, 2021]);
+      expect(getRelevantYears(2021, new Date('2021-04-01'), [])).toStrictEqual([2021]);
+      expect(getRelevantYears(2022, new Date('2021-02-01'), [])).toStrictEqual([2020, 2021, 2022]);
+      expect(getRelevantYears(2025, new Date('2021-02-01'), [])).toStrictEqual([
+        2020, 2021, 2022, 2023, 2024, 2025,
+      ]);
+      expect(getRelevantYears(2023, new Date('2021-04-01'), [])).toStrictEqual([2021, 2022, 2023]);
+    });
+
+    describe('when the prediction start date is after the current date', () => {
+      it('should return an inclusive range from the current date to the prediction start date', () => {
+        expect.assertions(1);
+        expect(getRelevantYears(2021, new Date('2023-04-01'), [])).toStrictEqual([
+          2021, 2022, 2023,
+        ]);
+      });
+    });
   });
 
   describe('when there are recorded income against a year after the selected year', () => {
-    it('should return only the selected year', () => {
+    it('should return the inclusive range from the prediction start date to the selected year', () => {
       expect.assertions(1);
       expect(
-        getRelevantYears(2018, [
+        getRelevantYears(2018, new Date('2018-06-01'), [
           { ...previousIncomeRowBase(), year: 2020 },
           { ...previousIncomeRowBase(), year: 2020 },
           { ...previousIncomeRowBase(), year: 2022 },
@@ -35,10 +112,10 @@ describe(getRelevantYears.name, () => {
   });
 
   describe('when there are recorded income against a year in the past', () => {
-    it('should return the inclusive range from the oldest recorded entry to the selected year', () => {
+    it('should return the inclusive range from the oldest previous income entry to the selected year', () => {
       expect.assertions(1);
       expect(
-        getRelevantYears(2023, [
+        getRelevantYears(2023, new Date('2023-05-01'), [
           { ...previousIncomeRowBase(), year: 2020 },
           { ...previousIncomeRowBase(), year: 2020 },
           { ...previousIncomeRowBase(), year: 2022 },
