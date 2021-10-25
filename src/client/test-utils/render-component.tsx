@@ -2,13 +2,15 @@ import { render, RenderResult } from '@testing-library/react';
 import { renderHook, RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router';
 import createStore, { MockStore } from 'redux-mock-store';
 import { Client } from 'urql';
 
 import { GQLProviderMock, mockClient } from './gql-provider-mock';
 
+import { RootContainer } from '~client/components/root';
+import { VOID } from '~client/modules/data';
 import type { State } from '~client/reducers';
-import { GlobalStylesProvider } from '~client/styled/global';
 import { testState } from '~client/test-data';
 
 type RenderWithStoreOptions = {
@@ -16,14 +18,24 @@ type RenderWithStoreOptions = {
   customClient: Client;
 };
 
+export const VisualProvider: React.FC = ({ children }) => (
+  <RootContainer loggedIn={true} onLogout={VOID}>
+    {children}
+  </RootContainer>
+);
+
 export function renderWithStore(
   component: React.ReactElement,
   {
     customState = {},
     customClient = mockClient,
+    includeGlobalStyles = false,
+    initialRouterEntries = ['/'],
     renderOptions = {},
   }: Partial<
     RenderWithStoreOptions & {
+      includeGlobalStyles: boolean;
+      initialRouterEntries: string[];
       renderOptions: Partial<RenderResult>;
     }
   > = {},
@@ -33,7 +45,13 @@ export function renderWithStore(
   const renderResult = render(
     <Provider store={store}>
       <GQLProviderMock client={customClient}>
-        <GlobalStylesProvider>{component}</GlobalStylesProvider>
+        {includeGlobalStyles ? (
+          <MemoryRouter initialEntries={initialRouterEntries}>
+            <VisualProvider>{component}</VisualProvider>
+          </MemoryRouter>
+        ) : (
+          component
+        )}
       </GQLProviderMock>
     </Provider>,
     renderOptions,
