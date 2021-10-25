@@ -282,7 +282,6 @@
     "style-loader": "^0.19.1",
     "supertest": "^6.0.1",
     "timezone-mock": "^1.1.0",
-    "ts-jest": "^26.4.4",
     "ts-node": "^8.6.2",
     "tsconfig-paths": "^3.9.0",
     "tsconfig-paths-jest": "^0.0.1",
