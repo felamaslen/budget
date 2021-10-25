@@ -19,47 +19,43 @@ node {
       }
     }
 
-    stage('Visual regression tests') {
-      script {
-        docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
+    docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
+      docker.image('postgres:10-alpine').withRun('-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker') { pg ->
+
+        docker.image('postgres:10-alpine').inside("--link ${pg.id}:db") {
+          sh 'while ! psql postgres://docker:docker@db/postgres -c "select 1" > /dev/null 2>&1; do sleep 1; done'
+
+          sh 'psql postgres://docker:docker@db/postgres -c "create database budget_test;"'
+        }
+
+        stage('Lint') {
+          sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
+        }
+
+        stage('API unit tests') {
+          sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
+        }
+
+        stage('Client unit tests') {
+          sh "docker run --rm --privileged ${IMAGE} sh -c 'yarn test:client:ci'"
+        }
+
+        stage('Visual regression tests') {
           sh 'make build_visual'
           sh "docker run --rm ${IMAGE_VISUAL} sh -c 'yarn test:visual'"
+        }
+
+        stage('API integration tests') {
+          sh "docker run --rm --link ${pg.id}:db -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' ${IMAGE} sh -c 'yarn test:api:integration'"
         }
       }
     }
 
-    // docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
-    //   docker.image('postgres:10-alpine').withRun('-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker') { pg ->
-
-    //     docker.image('postgres:10-alpine').inside("--link ${pg.id}:db") {
-    //       sh 'while ! psql postgres://docker:docker@db/postgres -c "select 1" > /dev/null 2>&1; do sleep 1; done'
-
-    //       sh 'psql postgres://docker:docker@db/postgres -c "create database budget_test;"'
-    //     }
-
-    //     stage('Lint') {
-    //       sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
-    //     }
-
-    //     stage('Client unit tests') {
-    //       sh "docker run --rm --privileged ${IMAGE} sh -c 'yarn test:client:ci'"
-    //     }
-
-    //     stage('API unit tests') {
-    //       sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
-    //     }
-
-    //     stage('API integration tests') {
-    //       sh "docker run --rm --link ${pg.id}:db -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' ${IMAGE} sh -c 'yarn test:api:integration'"
-    //     }
-    //   }
-    // }
-
-    // stage('Deploy') {
-    //   if (env.BRANCH_NAME == "master") {
-    //     sh './k8s/migrate.sh'
-    //     sh './k8s/deploy.sh'
-    //   }
-    // }
+    if (env.BRANCH_NAME == "master") {
+      stage('Deploy') {
+        sh './k8s/migrate.sh'
+        sh './k8s/deploy.sh'
+      }
+    }
   }
 }
