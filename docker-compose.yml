@@ -19,7 +19,6 @@ services:
     container_name: budget
     build:
       context: .
-      dockerfile: dev.Dockerfile
     depends_on:
       - base
     volumes:
@@ -68,6 +67,22 @@ services:
       - net_budget_dev
     ports:
       - 6380:6379
+
+  visual:
+    build:
+      context: .
+      dockerfile: visual.Dockerfile
+    volumes:
+      - "./src:/app/src"
+    command: sh -c "yarn test:visual"
+
+  visual_update_snapshots:
+    build:
+      context: .
+      dockerfile: visual.Dockerfile
+    volumes:
+      - "./src:/app/src"
+    command: sh -c "yarn test:visual -u"
 
 networks:
   net_budget_dev:

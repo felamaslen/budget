@@ -11,10 +11,13 @@ RUN apk add --no-cache \
       ca-certificates \
       ttf-freefont
 
+ARG NODE_ENV=production
+
+ENV NODE_ENV=${NODE_ENV}
+ENV PATH="/app/node_modules/.bin:${PATH}"
+
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-RUN yarn add puppeteer@10.0.0
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
 USER appuser
