@@ -1,72 +1,20 @@
 import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { generateImage } from 'jsdom-screenshot';
 import React from 'react';
 
+import * as stubs from './__tests__/stubs';
 import { BlockPacker, Props } from '.';
 import { blockPacker } from '~client/modules/block-packer';
 import type { BlockItem, WithSubTree } from '~client/types';
 
 describe('<BlockPacker />', () => {
-  const blocks = blockPacker<BlockItem>(10, 6, [
-    {
-      name: 'parent block 1',
-      total: 24,
-      color: 'darkorange',
-      subTree: [
-        {
-          name: 'child block A',
-          total: 8,
-        },
-        {
-          name: 'child block B',
-          total: 14,
-        },
-        {
-          name: 'child block C',
-          total: 2,
-        },
-      ],
-    },
-    {
-      name: 'parent block 2',
-      total: 36,
-      color: 'purple',
-      hasBreakdown: true,
-    },
-  ]);
-
-  const props: Props = {
-    blocks,
-    activeBlocks: ['not_foo', 'not_bar'],
-    status: 'some-status bar',
-    onClick: jest.fn(),
-    onHover: jest.fn(),
-  };
-
   const getContainer = (customProps = {}): RenderResult =>
-    render(<BlockPacker {...props} {...customProps} />);
-
-  it('should render a block tree', async () => {
-    expect.assertions(1);
-    getContainer();
-
-    const screenshot = await generateImage();
-    expect(screenshot).toMatchImageSnapshot();
-  });
+    render(<BlockPacker {...stubs.props} {...customProps} />);
 
   it('should render a status bar', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer();
     expect(getByTestId('status-bar')).toHaveTextContent('some-status bar');
-  });
-
-  it('should not render blocks if they are null', async () => {
-    expect.assertions(1);
-    getContainer({ blocks: null });
-
-    const screenshot = await generateImage();
-    expect(screenshot).toMatchImageSnapshot();
   });
 
   describe.each`
@@ -85,8 +33,8 @@ describe('<BlockPacker />', () => {
     it('should call onHover with null', () => {
       expect.assertions(2);
       setup();
-      expect(props.onHover).toHaveBeenCalledTimes(1);
-      expect(props.onHover).toHaveBeenCalledWith(null);
+      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
+      expect(stubs.props.onHover).toHaveBeenCalledWith(null);
     });
   });
 
@@ -110,8 +58,8 @@ describe('<BlockPacker />', () => {
     `('should call onHover with the name', ({ id }) => {
       expect.assertions(2);
       interact(handler, id);
-      expect(props.onHover).toHaveBeenCalledTimes(1);
-      expect(props.onHover).toHaveBeenCalledWith(id);
+      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
+      expect(stubs.props.onHover).toHaveBeenCalledWith(id);
     });
   });
 
@@ -129,8 +77,8 @@ describe('<BlockPacker />', () => {
     `('should call onHover with the name and sub-name', ({ parent, id }) => {
       expect.assertions(2);
       interact(handler, id);
-      expect(props.onHover).toHaveBeenCalledTimes(1);
-      expect(props.onHover).toHaveBeenCalledWith(parent, id);
+      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
+      expect(stubs.props.onHover).toHaveBeenCalledWith(parent, id);
     });
   });
 
