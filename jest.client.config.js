@@ -8,6 +8,8 @@ module.exports = {
     '\\.(jpg|png)': '<rootDir>/src/client/test-utils/file-loader.js',
     '^file-loader': '<rootDir>/src/client/__mocks__/file-mock.js',
     '^worker-loader': '<rootDir>/src/client/__mocks__/worker-mock.js',
+    'react-virtualized-auto-sizer':
+      '<rootDir>/src/client/test-utils/react-virtualized-auto-sizer-mock',
     ...baseConfig.moduleNameMapper,
   },
   testMatch: ['**/*.spec.ts?(x)'],
