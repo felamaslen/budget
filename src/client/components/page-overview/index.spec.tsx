@@ -1,4 +1,3 @@
-import { render, RenderResult } from '@testing-library/react';
 import { generateImage } from 'jsdom-screenshot';
 import React from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
@@ -17,12 +16,10 @@ describe('<PageOverview />', () => {
 
   const getContainer = (): ReturnType<typeof renderWithStore> =>
     renderWithStore(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/']}>
         <TodayProvider>
           <ResizeContext.Provider value={1020}>
-            <MemoryRouter initialEntries={['/']}>
-              <Route path="/" component={PageOverview} />
-            </MemoryRouter>
+            <Route path="/" component={PageOverview} />
           </ResizeContext.Provider>
         </TodayProvider>
       </MemoryRouter>,
