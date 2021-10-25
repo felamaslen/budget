@@ -1,8 +1,6 @@
-/* eslint-disable max-len */
 import { within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MatchMediaMock from 'jest-matchmedia-mock';
-import { generateImage } from 'jsdom-screenshot';
 import React from 'react';
 import numericHash from 'string-hash';
 
@@ -259,17 +257,6 @@ describe(AccessibleListStandard.name, () => {
 
       return renderResult;
     };
-
-    it('should render a mobile list view', async () => {
-      expect.assertions(2);
-      const { getAllByRole } = setupMobile();
-      const listItems = getAllByRole('listitem');
-
-      expect(listItems).toHaveLength(3);
-
-      const screenshot = await generateImage();
-      expect(screenshot).toMatchImageSnapshot();
-    });
 
     it.each`
       field     | example

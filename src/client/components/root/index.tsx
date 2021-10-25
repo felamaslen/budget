@@ -37,7 +37,7 @@ export type Props = {
   offline?: boolean;
 } & ContentProps;
 
-const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
+export const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
   onLogout,
   children,
   ...props
