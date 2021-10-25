@@ -22,7 +22,7 @@ node {
     stage('Visual regression tests') {
       script {
         docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
-          sh -c 'make build_visual'
+          sh 'make build_visual'
           sh "docker run --rm ${IMAGE_VISUAL} sh -c 'yarn test:visual'"
         }
       }
