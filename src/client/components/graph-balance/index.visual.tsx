@@ -1,13 +1,13 @@
 /* eslint-disable max-len */
 import { render, RenderResult } from '@testing-library/react';
 import endOfDay from 'date-fns/endOfDay';
-import { generateImage } from 'jsdom-screenshot';
 import React from 'react';
 
 import { GraphBalance, Props } from '.';
 import { ResizeContext, TodayProvider } from '~client/hooks';
 import { getOverviewGraphValues } from '~client/selectors';
 import { testNow, testState as state } from '~client/test-data/state';
+import { renderVisualTest } from '~client/test-utils';
 
 describe('<GraphBalance />', () => {
   let randomSpy: jest.SpyInstance;
@@ -53,7 +53,7 @@ describe('<GraphBalance />', () => {
   it('should render a graph', async () => {
     expect.assertions(1);
     setup();
-    const screenshot = await generateImage();
+    const screenshot = await renderVisualTest();
     expect(screenshot).toMatchImageSnapshot();
   });
 });
