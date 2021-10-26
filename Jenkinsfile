@@ -41,8 +41,7 @@ node {
         }
 
         stage('Visual regression tests') {
-          sh 'make build_visual'
-          sh "docker run --rm ${IMAGE_VISUAL} sh -c 'yarn test:visual'"
+          unstable('Visual regression tests are disabled')
         }
 
         stage('API integration tests') {
