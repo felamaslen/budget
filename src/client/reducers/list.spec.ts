@@ -8,7 +8,7 @@ import {
   listItemDeleted,
   listOverviewUpdated,
   loggedOut,
-  moreListDataReceived,
+  listDataReceived,
   receiptCreated,
 } from '~client/actions';
 import type { Id, StandardInput, WithIds } from '~client/types';
@@ -785,7 +785,7 @@ describe('list reducer', () => {
       __typename: 'ListReadResponse',
     };
 
-    const action = moreListDataReceived(pageDaily, res);
+    const action = listDataReceived(pageDaily, res);
 
     it('should append the data to state', () => {
       expect.assertions(1);
@@ -874,7 +874,7 @@ describe('list reducer', () => {
         olderExists: false,
       };
 
-      const actionEnd = moreListDataReceived(pageDaily, resEnd);
+      const actionEnd = listDataReceived(pageDaily, resEnd);
 
       it('should update the olderExists state value', () => {
         expect.assertions(1);
@@ -888,7 +888,7 @@ describe('list reducer', () => {
     });
 
     describe('if targeted at another page', () => {
-      const actionOtherPage = moreListDataReceived(PageListStandard.Bills, res);
+      const actionOtherPage = listDataReceived(PageListStandard.Bills, res);
 
       it('should be ignored', () => {
         expect.assertions(1);
@@ -928,7 +928,7 @@ describe('list reducer', () => {
         __optimistic: [RequestType.update, undefined, undefined],
       };
 
-      const actionWithDuplicates = moreListDataReceived(pageDaily, {
+      const actionWithDuplicates = listDataReceived(pageDaily, {
         items: [
           {
             id: numericHash('id-1'),

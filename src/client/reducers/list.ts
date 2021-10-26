@@ -216,16 +216,13 @@ const makeOnMoreReceived = <
   ES extends Record<string, unknown>,
 >(
   page: P,
-): FullReducer<
-  DailyState<ES>,
-  Actions.MoreListDataReceived<PageList, WithIds<RawDate<I, 'date'>>>
-> =>
+): FullReducer<DailyState<ES>, Actions.ListDataReceived<PageList, WithIds<RawDate<I, 'date'>>>> =>
   filterByPage<
     I,
     ListItemStandardNative,
     P,
     DailyState<ES>,
-    Actions.MoreListDataReceived<P, WithIds<RawDate<I, 'date'>>>
+    Actions.ListDataReceived<P, WithIds<RawDate<I, 'date'>>>
   >(page, (state, action) => {
     const newItems = action.res.items.map(withNativeDate('date')) ?? [];
     const existingItems = state.items.filter(

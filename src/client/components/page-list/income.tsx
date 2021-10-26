@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
-import { moreListDataReceived } from '~client/actions';
+import { listDataReceived } from '~client/actions';
 import { AccessibleList } from '~client/components/accessible-list';
 import { dailySelector } from '~client/components/accessible-list/selectors';
 import * as Standard from '~client/components/accessible-list/standard';
@@ -15,7 +15,7 @@ import { sortByKey } from '~client/modules/data';
 import { getListOffset } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { PageListStandard } from '~client/types/enum';
-import { Income, IncomeInput, useMoreIncomeDataQuery } from '~client/types/gql';
+import { Income, IncomeInput, useReadIncomeQuery } from '~client/types/gql';
 import type { GQL, NativeDate } from '~shared/types';
 
 export type IncomeInputNative = GQL<NativeDate<IncomeInput, 'date'>>;
@@ -56,7 +56,7 @@ function useIncomeItems(): () => Promise<void> {
   const dispatch = useDispatch();
   const offset = useSelector(getListOffset(PageListStandard.Income));
 
-  const [{ data, fetching, stale }, fetchMore] = useMoreIncomeDataQuery({
+  const [{ data, fetching, stale }, fetchMore] = useReadIncomeQuery({
     pause: offset > 0,
     variables: {
       offset,
@@ -66,7 +66,7 @@ function useIncomeItems(): () => Promise<void> {
 
   useEffect(() => {
     if (data?.readIncome && !fetching && !stale) {
-      dispatch(moreListDataReceived(PageListStandard.Income, data.readIncome));
+      dispatch(listDataReceived(PageListStandard.Income, data.readIncome));
     }
   }, [dispatch, data, fetching, stale]);
 

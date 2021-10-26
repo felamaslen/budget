@@ -119,16 +119,16 @@ export const listOverviewUpdated = <P extends PageList>(
   weekly,
 });
 
-export type MoreListDataReceived<P extends PageList, I extends GQL<ListItemStandard>> = {
+export type ListDataReceived<P extends PageList, I extends GQL<ListItemStandard>> = {
   type: ListActionType.MoreReceived;
   page: P;
   res: ListReadResponseNative<I>;
 };
 
-export const moreListDataReceived = <P extends PageList, I extends GQL<ListItemStandard>>(
+export const listDataReceived = <P extends PageList, I extends GQL<ListItemStandard>>(
   page: P,
   res: ListReadResponseNative<I>,
-): MoreListDataReceived<P, I> => ({
+): ListDataReceived<P, I> => ({
   type: ListActionType.MoreReceived,
   page,
   res,
@@ -139,5 +139,5 @@ export type ActionList<I extends ListItemInput, P extends PageList> =
   | ListItemUpdated<I, P>
   | ListItemDeleted<I, P>
   | ListOverviewUpdated<P>
-  | MoreListDataReceived<P, ListItemStandard>
-  | MoreListDataReceived<PageListStandard.Income, Income>;
+  | ListDataReceived<P, ListItemStandard>
+  | ListDataReceived<PageListStandard.Income, Income>;
