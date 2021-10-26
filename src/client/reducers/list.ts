@@ -267,18 +267,22 @@ const makeOnReceiptCreated =
 const makeOnOverviewUpdated = <
   I extends StandardInput,
   P extends PageListStandard,
-  ES extends Record<string, unknown>,
+  ExtraState extends Record<string, unknown>,
 >(
   page: P,
-): FullReducer<DailyState<ES>, Actions.ListOverviewUpdated<PageList>> =>
-  filterByPage<I, ListItemStandardNative, P, DailyState<ES>, Actions.ListOverviewUpdated<P>>(
-    page,
-    (state, action) => ({
-      ...state,
-      total: action.total ?? state.total,
-      weekly: action.weekly ?? state.weekly,
-    }),
-  );
+): FullReducer<DailyState<ExtraState>, Actions.ListOverviewUpdated<PageList, ExtraState>> =>
+  filterByPage<
+    I,
+    ListItemStandardNative,
+    P,
+    DailyState<ExtraState>,
+    Actions.ListOverviewUpdated<P, ExtraState>
+  >(page, (state, action) => ({
+    ...state,
+    total: action.total ?? state.total,
+    weekly: action.weekly ?? state.weekly,
+    ...action.extraState,
+  }));
 
 export function makeDailyListReducer<
   P extends PageListStandard,
@@ -339,7 +343,7 @@ export function makeDailyListReducer<
         return onDeleteDaily(state, action);
 
       case Actions.ListActionType.OverviewUpdated:
-        return onOverviewUpdated(state, action);
+        return onOverviewUpdated(state, action as Actions.ListOverviewUpdated<P, ES>);
 
       case Actions.ListActionType.MoreReceived:
         return onMoreReceived(state, action);

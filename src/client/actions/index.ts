@@ -5,8 +5,9 @@ import type { ActionList, ActionReceiptCreated } from './list';
 import type { ActionLogin } from './login';
 import type { ActionNetWorth } from './net-worth';
 import { isStandardListPage } from '~client/constants/data';
+import type { IncomeExtraState } from '~client/reducers/types';
 import type { PageList, StandardInput } from '~client/types';
-import type { ListItemInput, ListItemStandardInput, PageListStandard } from '~client/types/gql';
+import type { ListItemInput, PageListStandard } from '~client/types/gql';
 
 export * from './api';
 export * from './error';
@@ -20,8 +21,8 @@ export type Action =
   | ActionError
   | ActionFunds
   | ActionReceiptCreated
-  | ActionList<ListItemInput, PageList>
-  | ActionList<ListItemStandardInput, PageListStandard>
+  | ActionList<StandardInput, PageListStandard.Income, IncomeExtraState>
+  | ActionList<StandardInput, PageListStandard>
   | ActionLogin
   | ActionNetWorth;
 

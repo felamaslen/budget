@@ -143,10 +143,14 @@ export const listDataReceived = <P extends PageList, I extends GQL<ListItemStand
   res,
 });
 
-export type ActionList<I extends ListItemInput, P extends PageList> =
+export type ActionList<
+  I extends ListItemInput,
+  P extends PageList,
+  ExtraState extends Record<string, unknown> = Record<string, unknown>,
+> =
   | ListItemCreated<I, P>
   | ListItemUpdated<I, P>
   | ListItemDeleted<I, P>
-  | ListOverviewUpdated<P>
+  | ListOverviewUpdated<P, ExtraState>
   | ListDataReceived<P, ListItemStandard>
   | ListDataReceived<PageListStandard.Income, Income>;
