@@ -8,6 +8,7 @@ import type { AccountCreditCardPayment, AccountTransaction, State } from '../typ
 import { FormFieldTextInline } from '~client/components/form-field';
 import { partialModification } from '~client/modules/data';
 import type { PlanningValueInput } from '~client/types/gql';
+import { evaluatePlanningValue } from '~shared/planning';
 
 export type NewValue = Pick<PlanningValueInput, 'name' | 'formula' | 'value'>;
 
@@ -24,15 +25,26 @@ export type OnChangeCreditCard = (
   creditCard: AccountCreditCardPayment,
 ) => void;
 
-function getTransferAccountId(state: State, newValue: NewValue): number | null {
-  const match = newValue.name.match(/^Transfer to (.*)$/);
-  if (!match) {
-    return null;
+function getTransferTransaction<T extends NewValue>(state: State, value: T): T {
+  const transferNameMatch = value.name.match(/^Transfer (to|from) (.*)$/);
+  if (!transferNameMatch) {
+    return { ...value, transferToAccountId: null };
   }
+  const [, , transferToAccountName] = transferNameMatch;
   const matchingAccount = state.accounts.find(
-    (compare) => compare.account.toLowerCase() === match[1].toLowerCase(),
+    (compare) => compare.account.toLowerCase() === transferToAccountName.toLowerCase(),
   );
-  return matchingAccount?.id ?? null;
+  if (!matchingAccount) {
+    return { ...value, transferToAccountId: null };
+  }
+
+  const parsedValue = evaluatePlanningValue(value.value ?? null, value.formula ?? null) ?? 0;
+
+  const transferName = `Transfer ${parsedValue > 0 ? 'from' : 'to'} ${transferToAccountName}`;
+
+  const transferToAccountId = matchingAccount.id;
+
+  return { ...value, name: transferName, transferToAccountId };
 }
 
 const emptyTransaction: Pick<AccountTransaction, 'value' | 'formula'> = {
@@ -180,11 +192,10 @@ export function useTransactionForm(
             ...prev,
             values: [
               ...prev.values,
-              {
+              getTransferTransaction(prevState, {
                 ...newValue,
                 month,
-                transferToAccountId: getTransferAccountId(prevState, newValue),
-              },
+              }),
             ],
           }),
         ),
@@ -195,13 +206,13 @@ export function useTransactionForm(
 
   const onChangeTransaction = useCallback<OnChangeTransaction>(
     (netWorthSubcategory, oldName, newValue) => {
-      sync((last) =>
-        last.year === year
+      sync((prevState) =>
+        prevState.year === year
           ? {
-              ...last,
+              ...prevState,
               accounts: replaceAtIndex(
-                last.accounts,
-                last.accounts.findIndex(
+                prevState.accounts,
+                prevState.accounts.findIndex(
                   (compare) => compare.netWorthSubcategoryId === netWorthSubcategory,
                 ),
                 (prev) => ({
@@ -211,12 +222,12 @@ export function useTransactionForm(
                     prev.values.findIndex(
                       (compare) => compare.month === month && compare.name === oldName,
                     ),
-                    newValue,
+                    getTransferTransaction(prevState, newValue),
                   ),
                 }),
               ),
             }
-          : last,
+          : prevState,
       );
     },
     [sync, year, month],

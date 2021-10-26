@@ -104,6 +104,17 @@ describe(useTransactionForm.name, () => {
           computedStartValue: null,
           includeBills: null,
         },
+        {
+          id: numericHash('other-account'),
+          netWorthSubcategoryId: numericHash('other-account-subcategory'),
+          account: 'Other account',
+          creditCards: [],
+          values: [],
+          income: [],
+          computedValues: [],
+          computedStartValue: null,
+          includeBills: null,
+        },
       ],
       taxReliefFromPreviousYear: null,
       error: null,
@@ -136,5 +147,72 @@ describe(useTransactionForm.name, () => {
     });
 
     expect(syncState.accounts[0].creditCards[0].payments[0]).not.toHaveProperty('year');
+  });
+
+  describe('when adding a transfer to a different account', () => {
+    it('should determine the transfer based on the name', () => {
+      expect.assertions(1);
+
+      const { result } = setup();
+
+      result.current.onAddTransaction(numericHash('other-account-subcategory'), {
+        name: 'Transfer to my account',
+        value: -5612,
+      });
+
+      expect(syncState.accounts[1].values[0]).toStrictEqual<State['accounts'][0]['values'][0]>({
+        name: 'Transfer to my account',
+        value: -5612,
+        month: 7,
+        transferToAccountId: numericHash('my-account'),
+      });
+    });
+
+    it('should change the transfer name if it is a positive value', () => {
+      expect.assertions(1);
+
+      const { result } = setup();
+
+      result.current.onAddTransaction(numericHash('other-account-subcategory'), {
+        name: 'Transfer to my account',
+        value: 1822,
+      });
+
+      expect(syncState.accounts[1].values[0]).toStrictEqual<State['accounts'][0]['values'][0]>({
+        name: 'Transfer from my account',
+        value: 1822,
+        month: 7,
+        transferToAccountId: numericHash('my-account'),
+      });
+    });
+  });
+
+  describe('when editing a transfer transaction', () => {
+    it('should update the name when changing the sign', () => {
+      expect.assertions(1);
+
+      const { result } = setup();
+
+      result.current.onAddTransaction(numericHash('other-account-subcategory'), {
+        name: 'Transfer from my account',
+        value: 818,
+      });
+
+      result.current.onChangeTransaction(
+        numericHash('other-account-subcategory'),
+        'Transfer from my account',
+        {
+          name: 'Transfer from my account',
+          value: -12887,
+        },
+      );
+
+      expect(syncState.accounts[1].values[0]).toStrictEqual<State['accounts'][0]['values'][0]>({
+        name: 'Transfer to my account',
+        value: -12887,
+        month: 7,
+        transferToAccountId: numericHash('my-account'),
+      });
+    });
   });
 });
