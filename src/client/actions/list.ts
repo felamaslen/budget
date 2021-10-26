@@ -98,25 +98,34 @@ export const listItemDeleted = <I extends ListItemInput, P extends PageList = Pa
   fromServer,
 });
 
-export type ListOverviewUpdated<P extends PageList> = {
+export type ListOverviewUpdated<
+  P extends PageList,
+  ExtraState extends Record<string, unknown> = never,
+> = {
   type: ListActionType.OverviewUpdated;
   page: P;
   overviewCost: number[];
   total?: Maybe<number>;
   weekly?: Maybe<number>;
+  extraState?: ExtraState;
 };
 
-export const listOverviewUpdated = <P extends PageList>(
+export const listOverviewUpdated = <
+  P extends PageList,
+  ExtraState extends Record<string, unknown> = never,
+>(
   page: P,
   overviewCost: number[],
   total?: Maybe<number>,
   weekly?: Maybe<number>,
-): ListOverviewUpdated<P> => ({
+  extraState?: ExtraState,
+): ListOverviewUpdated<P, ExtraState> => ({
   type: ListActionType.OverviewUpdated,
   page,
   overviewCost,
   total,
   weekly,
+  extraState,
 });
 
 export type ListDataReceived<P extends PageList, I extends GQL<ListItemStandard>> = {
