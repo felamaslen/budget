@@ -18,8 +18,8 @@ type FullReducer<S, A> = (state: S, action: A) => S;
 
 export type ListState<
   I extends GQL<ListItem>,
-  ES extends Record<string, unknown> = Record<string, unknown>,
-> = ES & CrudState<I>;
+  ExtraState extends Record<string, unknown> = Record<string, unknown>,
+> = ExtraState & CrudState<I>;
 
 const filterByPage = <
   I extends GQL<ListItemInput>,
@@ -127,11 +127,8 @@ type DailyProps = {
   olderExists: boolean | null;
 };
 
-export type DailyState<ES extends Record<string, unknown> = Record<string, unknown>> = ListState<
-  ListItemStandardNative,
-  ES
-> &
-  DailyProps;
+export type DailyState<ExtraState extends Record<string, unknown> = Record<string, unknown>> =
+  ListState<ListItemStandardNative, ExtraState> & DailyProps;
 
 const isUpdateDelete = <I extends ListItemInput, A extends Actions.ActionList<I, PageList>>(
   action: A | Actions.ListItemUpdated<I, PageList> | Actions.ListItemDeleted<I, PageList>,

@@ -376,6 +376,7 @@ export const testState: State = {
     __optimistic: [],
     total: 0,
     weekly: 0,
+    totalDeductions: [],
     olderExists: null,
     offset: 0,
   },
