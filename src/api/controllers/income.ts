@@ -4,9 +4,9 @@ import type { DatabaseTransactionConnectionType } from 'slonik';
 import {
   baseController,
   getLimitAndOffset,
-  getListTotals,
   getOlderExists,
   getPublishedProperties,
+  getWeeklyCost,
   processInput,
 } from './list';
 import { readNetWorthCashTotal } from './net-worth';
@@ -20,6 +20,8 @@ import {
   insertIncomeDeductionRows,
   selectIncome,
   selectIncomeDeductionRows,
+  selectIncomeTotals,
+  selectWeeklyNetIncome,
   updateIncomeDeductionRow,
 } from '~api/queries';
 import type { IncomeReadResponse, QueryReadIncomeArgs } from '~api/types';
@@ -31,6 +33,7 @@ import {
   IncomeDeduction,
   IncomeDeductionInput,
   IncomeSubscription,
+  IncomeTotals,
   MutationCreateIncomeArgs,
   MutationDeleteIncomeArgs,
   MutationUpdateIncomeArgs,
@@ -115,9 +118,10 @@ export async function readIncome(
 ): Promise<IncomeReadResponse> {
   const { limit, offset } = getLimitAndOffset(args);
 
-  const [rows, { total, weekly }, olderExists] = await Promise.all([
+  const [rows, totalRows, weeklyCostRows, olderExists] = await Promise.all([
     selectIncome(db, uid, limit, offset),
-    getListTotals(db, uid, PageListStandard.Income),
+    selectIncomeTotals(db, uid),
+    selectWeeklyNetIncome(db, uid),
     getOlderExists(db, uid, PageListStandard.Income, limit, offset),
   ]);
 
@@ -132,7 +136,16 @@ export async function readIncome(
     })),
   }));
 
-  // TODO: return tax totals etc. instead of gross total
+  const total: IncomeTotals = {
+    gross: totalRows[0]?.gross ?? 0,
+    deductions: totalRows.map<IncomeDeduction>((row) => ({
+      name: row.deduction_name,
+      value: -row.deduction_value,
+    })),
+  };
+
+  const weekly = getWeeklyCost(weeklyCostRows);
+
   return { items, total, weekly, olderExists };
 }
 

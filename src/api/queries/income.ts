@@ -1,6 +1,6 @@
 import { DatabaseTransactionConnectionType, sql } from 'slonik';
-
-import type { ListItemStandardRow } from './list';
+import type { ListItemStandardRow, WeeklyCostRow } from './list';
+import { PageListStandard } from '~api/types';
 
 export type IncomeDeductionRow = {
   readonly id: number;
@@ -50,6 +50,75 @@ export async function selectIncome(
   ORDER BY l.date DESC, l.id ASC, i.id ASC
   LIMIT ${limit}
   OFFSET ${offset * limit}
+  `);
+  return rows;
+}
+
+export type IncomeTotalsRow = {
+  gross: number;
+  deduction_name: string;
+  deduction_value: number;
+};
+
+export async function selectIncomeTotals(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<readonly IncomeTotalsRow[]> {
+  const { rows } = await db.query<IncomeTotalsRow>(sql`
+  WITH ${sql.join(
+    [
+      sql`income_sum AS (
+      SELECT COALESCE(SUM(value), 0)::int4 AS gross
+      FROM list_standard
+      WHERE list_standard.uid = ${uid} AND list_standard.page = ${PageListStandard.Income}
+    )`,
+      sql`deduction_sums AS (
+      SELECT ${sql.join(
+        [
+          sql`income_deductions.name AS deduction_name`,
+          sql`COALESCE(SUM(income_deductions.value), 0)::int4 AS deduction_value`,
+        ],
+        sql`, `,
+      )}
+      FROM list_standard
+      INNER JOIN income_deductions ON income_deductions.list_id = list_standard.id
+      WHERE list_standard.uid = ${uid} AND list_standard.page = ${PageListStandard.Income}
+      GROUP BY income_deductions.name
+    )`,
+    ],
+    sql`, `,
+  )}
+  SELECT income_sum.*, deduction_sums.*
+  FROM deduction_sums
+  LEFT JOIN income_sum ON TRUE
+  ORDER BY deduction_sums.deduction_value
+  `);
+  return rows;
+}
+
+export async function selectWeeklyNetIncome(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<readonly WeeklyCostRow[]> {
+  const { rows } = await db.query<WeeklyCostRow>(sql`
+  WITH values AS (
+    SELECT ${sql.join(
+      [
+        sql`(list_standard.value + COALESCE(SUM(income_deductions.value), 0))::int4 AS value`,
+        sql`DATE_PART('year', date) AS year`,
+        sql`DATE_PART('week', date) AS week`,
+      ],
+      sql`, `,
+    )}
+    FROM list_standard
+    LEFT JOIN income_deductions ON income_deductions.list_id = list_standard.id
+    WHERE uid = ${uid} AND page = ${PageListStandard.Income}
+    GROUP BY list_standard.id
+  )
+  SELECT year, (SUM(value) / GREATEST(1, MAX(week) - MIN(week)))::int4 AS weekly
+  FROM values
+  GROUP BY year
+  ORDER BY year
   `);
   return rows;
 }

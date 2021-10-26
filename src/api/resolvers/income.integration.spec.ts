@@ -6,9 +6,10 @@ import { sql } from 'slonik';
 import { getPool } from '~api/modules/db';
 import type { IncomeDeductionRow } from '~api/queries/income';
 import { App, getTestApp } from '~api/test-utils/create-server';
-import type {
+import {
   CrudResponseCreate,
   Income,
+  IncomeDeduction,
   IncomeInput,
   IncomeReadResponse,
   Maybe,
@@ -19,7 +20,7 @@ import type {
   Query,
   QueryReadIncomeArgs,
 } from '~api/types';
-import { CrudResponseDelete, CrudResponseUpdate } from '~client/types/gql';
+import { CrudResponseDelete, CrudResponseUpdate, PageListStandard } from '~client/types/gql';
 import type { RawDate, RawDateDeep } from '~shared/types';
 
 describe('income resolvers', () => {
@@ -53,19 +54,19 @@ describe('income resolvers', () => {
     ],
   };
 
-  describe('createIncome', () => {
-    const mutation = gql`
-      mutation CreateIncome($fakeId: Int!, $input: IncomeInput!) {
-        createIncome(fakeId: $fakeId, input: $input) {
-          error
-          id
-        }
+  const mutationCreate = gql`
+    mutation CreateIncome($fakeId: Int!, $input: IncomeInput!) {
+      createIncome(fakeId: $fakeId, input: $input) {
+        error
+        id
       }
-    `;
+    }
+  `;
 
+  describe('createIncome', () => {
     const setup = async (): Promise<Maybe<CrudResponseCreate>> => {
       const res = await app.authGqlClient.mutate<Mutation, RawDateDeep<MutationCreateIncomeArgs>>({
-        mutation,
+        mutation: mutationCreate,
         variables: {
           fakeId: 0,
           input: {
@@ -152,7 +153,13 @@ describe('income resolvers', () => {
           }
           olderExists
           weekly
-          total
+          total {
+            gross
+            deductions {
+              name
+              value
+            }
+          }
         }
       }
     `;
@@ -182,8 +189,8 @@ describe('income resolvers', () => {
           sql`DELETE FROM list_standard WHERE uid = ${app.uid} AND page = ${'income'}`,
         );
         const { rows } = await db.query<{ id: number }>(sql`
-            INSERT INTO list_standard (page, uid, date, item, category, value, shop)
-            VALUES (${'income'}, ${app.uid}, ${data.date}, ${data.item}, ${data.category}, ${
+          INSERT INTO list_standard (page, uid, date, item, category, value, shop)
+          VALUES (${'income'}, ${app.uid}, ${data.date}, ${data.item}, ${data.category}, ${
           data.cost
         }, ${data.shop})
           RETURNING id
@@ -228,18 +235,105 @@ describe('income resolvers', () => {
       );
     });
 
-    it('should return the weekly value', async () => {
-      expect.assertions(1);
-      const { res } = await setup();
+    describe('aggregated totals', () => {
+      const aggregatedIncomeTestValues: IncomeInput[] = [
+        {
+          ...testIncome,
+          item: 'Salary 0',
+          date: '2020-01-31',
+          cost: 550000,
+          deductions: [
+            { name: 'Income tax', value: -112032 },
+            { name: 'NI', value: -29876 },
+          ],
+        },
+        {
+          ...testIncome,
+          item: 'Salary 1',
+          date: '2020-02-15',
+          cost: 308333,
+          deductions: [
+            { name: 'Income tax', value: -33482 },
+            { name: 'NI', value: -19869 },
+            { name: 'Student loan', value: -5893 },
+          ],
+        },
+        {
+          ...testIncome,
+          item: 'Salary 2',
+          date: '2020-03-21',
+          cost: 708333,
+          deductions: [
+            { name: 'Income tax', value: -187723 },
+            { name: 'NI', value: -43292 },
+          ],
+        },
+      ];
 
-      expect(res?.weekly).toStrictEqual(expect.any(Number));
-    });
+      const createIncomeWithAggregatedTotals = async (): Promise<void> => {
+        await getPool().query(
+          sql`DELETE FROM list_standard WHERE uid = ${app.uid} AND page = ${PageListStandard.Income}`,
+        );
+        await aggregatedIncomeTestValues.reduce<Promise<void>>(
+          async (prev, input): Promise<void> => {
+            await prev;
+            await app.authGqlClient.mutate<Mutation, RawDateDeep<MutationCreateIncomeArgs>>({
+              mutation: mutationCreate,
+              variables: {
+                fakeId: 0,
+                input,
+              },
+            });
+          },
+          Promise.resolve(),
+        );
+      };
 
-    it('should return the total value', async () => {
-      expect.assertions(1);
-      const { res } = await setup();
+      it('should include the total (gross) value', async () => {
+        expect.assertions(1);
+        await createIncomeWithAggregatedTotals();
+        const res = await readIncome(0, 10);
 
-      expect(res?.total).toStrictEqual(expect.any(Number));
+        const expectedTotalGrossIncome = 550000 + 308333 + 708333;
+
+        expect(res?.total?.gross).toBe(expectedTotalGrossIncome);
+      });
+
+      it('should return the weekly value less deductions', async () => {
+        expect.assertions(1);
+        await createIncomeWithAggregatedTotals();
+        const res = await readIncome(0, 10);
+
+        expect(res?.weekly).toMatchInlineSnapshot(`162071`);
+      });
+
+      it('should include aggregated deductions', async () => {
+        expect.assertions(2);
+        await createIncomeWithAggregatedTotals();
+        const res = await readIncome(0, 10);
+
+        const expectedTotalDeductionIncomeTax = 112032 + 33482 + 187723;
+        const expectedTotalDeductionNI = 29876 + 19869 + 43292;
+        const expectedTotalDeductionStudentLoan = 5893;
+
+        expect(res?.total?.deductions).toStrictEqual(
+          expect.arrayContaining([
+            expect.objectContaining<IncomeDeduction>({
+              name: 'Income tax',
+              value: expectedTotalDeductionIncomeTax,
+            }),
+            expect.objectContaining<IncomeDeduction>({
+              name: 'NI',
+              value: expectedTotalDeductionNI,
+            }),
+            expect.objectContaining<IncomeDeduction>({
+              name: 'Student loan',
+              value: expectedTotalDeductionStudentLoan,
+            }),
+          ]),
+        );
+        expect(res?.total?.deductions).toHaveLength(3);
+      });
     });
 
     it('should return the older exists value', async () => {

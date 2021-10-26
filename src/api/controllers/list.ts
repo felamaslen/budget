@@ -18,6 +18,7 @@ import {
   selectListWeeklyCosts,
   selectSinglePageListSummary,
   StandardListRow,
+  WeeklyCostRow,
 } from '~api/queries';
 import {
   CrudResponseCreate,
@@ -76,12 +77,7 @@ export async function getOlderExists(
   return numRows > limit * (offset + 1);
 }
 
-export async function getWeeklyCost(
-  db: DatabaseTransactionConnectionType,
-  uid: number,
-  page: PageListCost,
-): Promise<number> {
-  const rows = await selectListWeeklyCosts(db, uid, page);
+export function getWeeklyCost(rows: readonly WeeklyCostRow[]): number {
   const decay = 0.7;
   return Math.round(
     rows.reduce<number>(
@@ -97,10 +93,11 @@ export async function getListTotals(
   uid: number,
   page: PageListCost,
 ): Promise<{ total: number; weekly: number }> {
-  const [totals, weekly] = await Promise.all([
+  const [totals, weeklyCostRows] = await Promise.all([
     selectListTotalCost(db, uid, page),
-    getWeeklyCost(db, uid, page),
+    selectListWeeklyCosts(db, uid, page),
   ]);
+  const weekly = getWeeklyCost(weeklyCostRows);
   const total = totals[0]?.total ?? 0;
   return { total, weekly };
 }
