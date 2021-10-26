@@ -270,7 +270,7 @@ export type IncomeReadResponse = {
   error?: Maybe<Scalars['String']>;
   items: Array<Income>;
   olderExists?: Maybe<Scalars['Boolean']>;
-  total?: Maybe<Scalars['Int']>;
+  total?: Maybe<IncomeTotals>;
   weekly?: Maybe<Scalars['Int']>;
 };
 
@@ -279,9 +279,15 @@ export type IncomeSubscription = {
   created?: Maybe<IncomeCreatedSubscription>;
   deleted?: Maybe<Scalars['NonNegativeInt']>;
   overviewCost: Array<Scalars['Int']>;
-  total?: Maybe<Scalars['Int']>;
+  total?: Maybe<IncomeTotals>;
   updated?: Maybe<Income>;
   weekly?: Maybe<Scalars['Int']>;
+};
+
+export type IncomeTotals = {
+  __typename?: 'IncomeTotals';
+  deductions: Array<IncomeDeduction>;
+  gross: Scalars['Int'];
 };
 
 export type InitialCumulativeValues = {
@@ -1860,14 +1866,14 @@ export type InitialQuery = (
   )> }
 );
 
-export type MoreListDataStandardQueryVariables = Exact<{
+export type ReadListStandardQueryVariables = Exact<{
   page: PageListStandard;
   offset: Scalars['Int'];
   limit: Scalars['Int'];
 }>;
 
 
-export type MoreListDataStandardQuery = (
+export type ReadListStandardQuery = (
   { __typename?: 'Query' }
   & { readListStandard?: Maybe<(
     { __typename?: 'ListReadResponse' }
@@ -1879,20 +1885,27 @@ export type MoreListDataStandardQuery = (
   )> }
 );
 
-export type MoreIncomeDataQueryVariables = Exact<{
+export type ReadIncomeQueryVariables = Exact<{
   offset: Scalars['Int'];
   limit: Scalars['Int'];
 }>;
 
 
-export type MoreIncomeDataQuery = (
+export type ReadIncomeQuery = (
   { __typename?: 'Query' }
   & { readIncome?: Maybe<(
     { __typename?: 'IncomeReadResponse' }
-    & Pick<IncomeReadResponse, 'total' | 'weekly' | 'olderExists'>
+    & Pick<IncomeReadResponse, 'weekly' | 'olderExists'>
     & { items: Array<(
       { __typename?: 'Income' }
       & Pick<Income, 'id' | 'date' | 'item' | 'cost' | 'category' | 'shop'>
+      & { deductions: Array<(
+        { __typename?: 'IncomeDeduction' }
+        & Pick<IncomeDeduction, 'name' | 'value'>
+      )> }
+    )>, total?: Maybe<(
+      { __typename?: 'IncomeTotals' }
+      & Pick<IncomeTotals, 'gross'>
       & { deductions: Array<(
         { __typename?: 'IncomeDeduction' }
         & Pick<IncomeDeduction, 'name' | 'value'>
@@ -2065,7 +2078,7 @@ export type IncomeChangedSubscription = (
   { __typename?: 'Subscription' }
   & { incomeChanged: (
     { __typename?: 'IncomeSubscription' }
-    & Pick<IncomeSubscription, 'deleted' | 'overviewCost' | 'total' | 'weekly'>
+    & Pick<IncomeSubscription, 'deleted' | 'overviewCost' | 'weekly'>
     & { created?: Maybe<(
       { __typename?: 'IncomeCreatedSubscription' }
       & Pick<IncomeCreatedSubscription, 'fakeId'>
@@ -2076,6 +2089,13 @@ export type IncomeChangedSubscription = (
     )>, updated?: Maybe<(
       { __typename?: 'Income' }
       & IncomePartsFragment
+    )>, total?: Maybe<(
+      { __typename?: 'IncomeTotals' }
+      & Pick<IncomeTotals, 'gross'>
+      & { deductions: Array<(
+        { __typename?: 'IncomeDeduction' }
+        & Pick<IncomeDeduction, 'name' | 'value'>
+      )> }
     )> }
   ) }
 );
@@ -2890,8 +2910,8 @@ ${FundHistoryPartsFragmentDoc}`;
 export function useInitialQuery(options: Omit<Urql.UseQueryArgs<InitialQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<InitialQuery>({ query: InitialDocument, ...options });
 };
-export const MoreListDataStandardDocument = gql`
-    query MoreListDataStandard($page: PageListStandard!, $offset: Int!, $limit: Int!) {
+export const ReadListStandardDocument = gql`
+    query ReadListStandard($page: PageListStandard!, $offset: Int!, $limit: Int!) {
   readListStandard: readList(page: $page, offset: $offset, limit: $limit) {
     items {
       id
@@ -2908,11 +2928,11 @@ export const MoreListDataStandardDocument = gql`
 }
     `;
 
-export function useMoreListDataStandardQuery(options: Omit<Urql.UseQueryArgs<MoreListDataStandardQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<MoreListDataStandardQuery>({ query: MoreListDataStandardDocument, ...options });
+export function useReadListStandardQuery(options: Omit<Urql.UseQueryArgs<ReadListStandardQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ReadListStandardQuery>({ query: ReadListStandardDocument, ...options });
 };
-export const MoreIncomeDataDocument = gql`
-    query MoreIncomeData($offset: Int!, $limit: Int!) {
+export const ReadIncomeDocument = gql`
+    query ReadIncome($offset: Int!, $limit: Int!) {
   readIncome(offset: $offset, limit: $limit) {
     items {
       id
@@ -2926,15 +2946,21 @@ export const MoreIncomeDataDocument = gql`
         value
       }
     }
-    total
+    total {
+      gross
+      deductions {
+        name
+        value
+      }
+    }
     weekly
     olderExists
   }
 }
     `;
 
-export function useMoreIncomeDataQuery(options: Omit<Urql.UseQueryArgs<MoreIncomeDataQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<MoreIncomeDataQuery>({ query: MoreIncomeDataDocument, ...options });
+export function useReadIncomeQuery(options: Omit<Urql.UseQueryArgs<ReadIncomeQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ReadIncomeQuery>({ query: ReadIncomeDocument, ...options });
 };
 export const NetWorthLoansDocument = gql`
     query NetWorthLoans {
@@ -3116,7 +3142,13 @@ export const IncomeChangedDocument = gql`
     }
     deleted
     overviewCost
-    total
+    total {
+      gross
+      deductions {
+        name
+        value
+      }
+    }
     weekly
   }
 }

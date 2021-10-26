@@ -244,7 +244,7 @@ export type IncomeReadResponse = {
   error?: Maybe<Scalars['String']>;
   items: Array<Income>;
   olderExists?: Maybe<Scalars['Boolean']>;
-  total?: Maybe<Scalars['Int']>;
+  total?: Maybe<IncomeTotals>;
   weekly?: Maybe<Scalars['Int']>;
 };
 
@@ -252,9 +252,14 @@ export type IncomeSubscription = {
   created?: Maybe<IncomeCreatedSubscription>;
   deleted?: Maybe<Scalars['NonNegativeInt']>;
   overviewCost: Array<Scalars['Int']>;
-  total?: Maybe<Scalars['Int']>;
+  total?: Maybe<IncomeTotals>;
   updated?: Maybe<Income>;
   weekly?: Maybe<Scalars['Int']>;
+};
+
+export type IncomeTotals = {
+  deductions: Array<IncomeDeduction>;
+  gross: Scalars['Int'];
 };
 
 export type InitialCumulativeValues = {
@@ -1272,6 +1277,7 @@ export type ResolversTypes = {
   IncomeInput: IncomeInput;
   IncomeReadResponse: ResolverTypeWrapper<IncomeReadResponse>;
   IncomeSubscription: ResolverTypeWrapper<IncomeSubscription>;
+  IncomeTotals: ResolverTypeWrapper<IncomeTotals>;
   InitialCumulativeValues: ResolverTypeWrapper<InitialCumulativeValues>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   ListItem: ResolverTypeWrapper<ListItem>;
@@ -1405,6 +1411,7 @@ export type ResolversParentTypes = {
   IncomeInput: IncomeInput;
   IncomeReadResponse: IncomeReadResponse;
   IncomeSubscription: IncomeSubscription;
+  IncomeTotals: IncomeTotals;
   InitialCumulativeValues: InitialCumulativeValues;
   Int: Scalars['Int'];
   ListItem: ListItem;
@@ -1670,7 +1677,7 @@ export type IncomeReadResponseResolvers<ContextType = Context, ParentType extend
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   items?: Resolver<Array<ResolversTypes['Income']>, ParentType, ContextType>;
   olderExists?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  total?: Resolver<Maybe<ResolversTypes['IncomeTotals']>, ParentType, ContextType>;
   weekly?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1679,9 +1686,15 @@ export type IncomeSubscriptionResolvers<ContextType = Context, ParentType extend
   created?: Resolver<Maybe<ResolversTypes['IncomeCreatedSubscription']>, ParentType, ContextType>;
   deleted?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   overviewCost?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
-  total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  total?: Resolver<Maybe<ResolversTypes['IncomeTotals']>, ParentType, ContextType>;
   updated?: Resolver<Maybe<ResolversTypes['Income']>, ParentType, ContextType>;
   weekly?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IncomeTotalsResolvers<ContextType = Context, ParentType extends ResolversParentTypes['IncomeTotals'] = ResolversParentTypes['IncomeTotals']> = {
+  deductions?: Resolver<Array<ResolversTypes['IncomeDeduction']>, ParentType, ContextType>;
+  gross?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2240,6 +2253,7 @@ export type Resolvers<ContextType = Context> = {
   IncomeDeduction?: IncomeDeductionResolvers<ContextType>;
   IncomeReadResponse?: IncomeReadResponseResolvers<ContextType>;
   IncomeSubscription?: IncomeSubscriptionResolvers<ContextType>;
+  IncomeTotals?: IncomeTotalsResolvers<ContextType>;
   InitialCumulativeValues?: InitialCumulativeValuesResolvers<ContextType>;
   ListItem?: ListItemResolvers<ContextType>;
   ListItemStandard?: ListItemStandardResolvers<ContextType>;

@@ -15,7 +15,13 @@ export const IncomeChanged = gql`
       deleted
 
       overviewCost
-      total
+      total {
+        gross
+        deductions {
+          name
+          value
+        }
+      }
       weekly
     }
   }

@@ -15,12 +15,16 @@ const query = gql`
     shop: String!
     deductions: [IncomeDeduction!]!
   }
+  type IncomeTotals {
+    gross: Int!
+    deductions: [IncomeDeduction!]!
+  }
   type IncomeReadResponse {
     error: String
     items: [Income!]!
     olderExists: Boolean
     weekly: Int
-    total: Int
+    total: IncomeTotals
   }
   extend type Query {
     readIncome(offset: Int, limit: Int): IncomeReadResponse
@@ -61,8 +65,8 @@ const subscription = gql`
     deleted: NonNegativeInt
 
     overviewCost: [Int!]!
-    total: Int
     weekly: Int
+    total: IncomeTotals
   }
 
   extend type Subscription {
