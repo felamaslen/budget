@@ -270,7 +270,8 @@ export type IncomeReadResponse = {
   error?: Maybe<Scalars['String']>;
   items: Array<Income>;
   olderExists?: Maybe<Scalars['Boolean']>;
-  total?: Maybe<IncomeTotals>;
+  total?: Maybe<Scalars['Int']>;
+  totalDeductions?: Maybe<Array<IncomeDeduction>>;
   weekly?: Maybe<Scalars['Int']>;
 };
 
@@ -279,15 +280,10 @@ export type IncomeSubscription = {
   created?: Maybe<IncomeCreatedSubscription>;
   deleted?: Maybe<Scalars['NonNegativeInt']>;
   overviewCost: Array<Scalars['Int']>;
-  total?: Maybe<IncomeTotals>;
+  total?: Maybe<Scalars['Int']>;
+  totalDeductions?: Maybe<Array<IncomeDeduction>>;
   updated?: Maybe<Income>;
   weekly?: Maybe<Scalars['Int']>;
-};
-
-export type IncomeTotals = {
-  __typename?: 'IncomeTotals';
-  deductions: Array<IncomeDeduction>;
-  gross: Scalars['Int'];
 };
 
 export type InitialCumulativeValues = {
@@ -1895,7 +1891,7 @@ export type ReadIncomeQuery = (
   { __typename?: 'Query' }
   & { readIncome?: Maybe<(
     { __typename?: 'IncomeReadResponse' }
-    & Pick<IncomeReadResponse, 'weekly' | 'olderExists'>
+    & Pick<IncomeReadResponse, 'olderExists' | 'weekly' | 'total'>
     & { items: Array<(
       { __typename?: 'Income' }
       & Pick<Income, 'id' | 'date' | 'item' | 'cost' | 'category' | 'shop'>
@@ -1903,14 +1899,10 @@ export type ReadIncomeQuery = (
         { __typename?: 'IncomeDeduction' }
         & Pick<IncomeDeduction, 'name' | 'value'>
       )> }
-    )>, total?: Maybe<(
-      { __typename?: 'IncomeTotals' }
-      & Pick<IncomeTotals, 'gross'>
-      & { deductions: Array<(
-        { __typename?: 'IncomeDeduction' }
-        & Pick<IncomeDeduction, 'name' | 'value'>
-      )> }
-    )> }
+    )>, totalDeductions?: Maybe<Array<(
+      { __typename?: 'IncomeDeduction' }
+      & Pick<IncomeDeduction, 'name' | 'value'>
+    )>> }
   )> }
 );
 
@@ -2078,7 +2070,7 @@ export type IncomeChangedSubscription = (
   { __typename?: 'Subscription' }
   & { incomeChanged: (
     { __typename?: 'IncomeSubscription' }
-    & Pick<IncomeSubscription, 'deleted' | 'overviewCost' | 'weekly'>
+    & Pick<IncomeSubscription, 'deleted' | 'overviewCost' | 'weekly' | 'total'>
     & { created?: Maybe<(
       { __typename?: 'IncomeCreatedSubscription' }
       & Pick<IncomeCreatedSubscription, 'fakeId'>
@@ -2089,14 +2081,10 @@ export type IncomeChangedSubscription = (
     )>, updated?: Maybe<(
       { __typename?: 'Income' }
       & IncomePartsFragment
-    )>, total?: Maybe<(
-      { __typename?: 'IncomeTotals' }
-      & Pick<IncomeTotals, 'gross'>
-      & { deductions: Array<(
-        { __typename?: 'IncomeDeduction' }
-        & Pick<IncomeDeduction, 'name' | 'value'>
-      )> }
-    )> }
+    )>, totalDeductions?: Maybe<Array<(
+      { __typename?: 'IncomeDeduction' }
+      & Pick<IncomeDeduction, 'name' | 'value'>
+    )>> }
   ) }
 );
 
@@ -2946,15 +2934,13 @@ export const ReadIncomeDocument = gql`
         value
       }
     }
-    total {
-      gross
-      deductions {
-        name
-        value
-      }
-    }
-    weekly
     olderExists
+    weekly
+    total
+    totalDeductions {
+      name
+      value
+    }
   }
 }
     `;
@@ -3142,14 +3128,12 @@ export const IncomeChangedDocument = gql`
     }
     deleted
     overviewCost
-    total {
-      gross
-      deductions {
-        name
-        value
-      }
-    }
     weekly
+    total
+    totalDeductions {
+      name
+      value
+    }
   }
 }
     ${IncomePartsFragmentDoc}`;

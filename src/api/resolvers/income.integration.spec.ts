@@ -153,12 +153,10 @@ describe('income resolvers', () => {
           }
           olderExists
           weekly
-          total {
-            gross
-            deductions {
-              name
-              value
-            }
+          total
+          totalDeductions {
+            name
+            value
           }
         }
       }
@@ -296,7 +294,7 @@ describe('income resolvers', () => {
 
         const expectedTotalGrossIncome = 550000 + 308333 + 708333;
 
-        expect(res?.total?.gross).toBe(expectedTotalGrossIncome);
+        expect(res?.total).toBe(expectedTotalGrossIncome);
       });
 
       it('should return the weekly value less deductions', async () => {
@@ -316,7 +314,7 @@ describe('income resolvers', () => {
         const expectedTotalDeductionNI = 29876 + 19869 + 43292;
         const expectedTotalDeductionStudentLoan = 5893;
 
-        expect(res?.total?.deductions).toStrictEqual(
+        expect(res?.totalDeductions).toStrictEqual(
           expect.arrayContaining([
             expect.objectContaining<IncomeDeduction>({
               name: 'Income tax',
@@ -332,7 +330,7 @@ describe('income resolvers', () => {
             }),
           ]),
         );
-        expect(res?.total?.deductions).toHaveLength(3);
+        expect(res?.totalDeductions).toHaveLength(3);
       });
     });
 

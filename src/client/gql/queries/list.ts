@@ -33,15 +33,13 @@ export const ReadIncome = gql`
           value
         }
       }
-      total {
-        gross
-        deductions {
-          name
-          value
-        }
-      }
-      weekly
       olderExists
+      weekly
+      total
+      totalDeductions {
+        name
+        value
+      }
     }
   }
 `;

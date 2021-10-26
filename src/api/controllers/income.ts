@@ -34,7 +34,6 @@ import {
   IncomeDeduction,
   IncomeDeductionInput,
   IncomeSubscription,
-  IncomeTotals,
   MutationCreateIncomeArgs,
   MutationDeleteIncomeArgs,
   MutationUpdateIncomeArgs,
@@ -44,23 +43,21 @@ import {
 async function getIncomeTotals(
   db: DatabaseTransactionConnectionType,
   uid: number,
-): Promise<Pick<IncomeReadResponse, 'total' | 'weekly'>> {
+): Promise<Pick<IncomeReadResponse, 'total' | 'totalDeductions' | 'weekly'>> {
   const [totalRows, weeklyCostRows] = await Promise.all([
     selectIncomeTotals(db, uid),
     selectWeeklyNetIncome(db, uid),
   ]);
 
-  const total: IncomeTotals = {
-    gross: totalRows[0]?.gross ?? 0,
-    deductions: totalRows.map<IncomeDeduction>((row) => ({
-      name: row.deduction_name,
-      value: -row.deduction_value,
-    })),
-  };
+  const total = totalRows[0]?.gross ?? 0;
+  const totalDeductions = totalRows.map<IncomeDeduction>((row) => ({
+    name: row.deduction_name,
+    value: -row.deduction_value,
+  }));
 
   const weekly = getWeeklyCost(weeklyCostRows);
 
-  return { total, weekly };
+  return { total, totalDeductions, weekly };
 }
 
 type PublishedProperties = {
