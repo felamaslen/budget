@@ -33,14 +33,18 @@ async function getStockPricesFromApi(symbols: string[]): Promise<(number | null)
   return symbols.map((symbol) => prices[symbol]);
 }
 
-async function getCachedStockPrices(codes: string[]): Promise<StockPrice[]> {
+async function getCachedStockPrices(codes: string[], isLocked: boolean): Promise<StockPrice[]> {
   const existingPrices = await Promise.all(codes.map((code) => redisClient.get(codeKey(code))));
   const codesToFetchFresh = existingPrices.reduce<string[]>(
     (last, price, index) => (price === null ? [...last, codes[index]] : last),
     [],
   );
 
-  const pricesFromApi = await getStockPricesFromApi(codesToFetchFresh);
+  if (isLocked && codesToFetchFresh.length > 0) {
+    logger.warn('[stock-prices] not fetching new prices as request is in progress');
+  }
+
+  const pricesFromApi = isLocked ? [] : await getStockPricesFromApi(codesToFetchFresh);
 
   return [
     ...existingPrices
@@ -64,16 +68,13 @@ export async function getStockPrices(
   }
 
   const lock = await redisClient.get(lockKey);
-  if (lock !== null) {
-    logger.verbose('[stock-prices] returning empty object as request is locked');
-    return { prices: [] };
-  }
+  const isLocked = lock !== null;
 
   await redisClient.set(lockKey, 'locked', 'ex', config.apiCacheExpirySeconds);
 
   const uniqueCodes = Array.from(new Set(args.codes));
 
-  const prices = await getCachedStockPrices(uniqueCodes);
+  const prices = await getCachedStockPrices(uniqueCodes, isLocked);
 
   const refreshTimeRaw = await redisClient.get(lastUpdateKey);
   const refreshTimeDate = refreshTimeRaw ? new Date(refreshTimeRaw) : null;
