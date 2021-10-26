@@ -95,7 +95,7 @@ export function useMoreItems(page: PageListStandard): () => Promise<void> {
   const dispatch = useDispatch();
   const offset = useSelector(getListOffset(page));
 
-  const [{ data, fetching, stale }, fetchMore] = gql.useMoreListDataStandardQuery({
+  const [{ data, fetching, stale }, fetchMore] = gql.useReadListStandardQuery({
     pause: offset > 0,
     variables: {
       page,
