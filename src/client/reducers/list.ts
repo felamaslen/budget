@@ -9,10 +9,10 @@ import {
   onDeleteOptimistic,
   State as CrudState,
 } from '~client/reducers/crud';
-import type { Id, ListItemStandardNative, PageList, StandardInput, WithIds } from '~client/types';
+import type { Id, ListItemStandardNative, PageList, StandardInput } from '~client/types';
 import { PageListStandard, ReceiptPage } from '~client/types/enum';
 import type { ListItem, ListItemInput, ListItemStandard } from '~client/types/gql';
-import type { GQL, NativeDate, RawDate } from '~shared/types';
+import type { GQL, NativeDate } from '~shared/types';
 
 type FullReducer<S, A> = (state: S, action: A) => S;
 
@@ -22,14 +22,22 @@ export type ListState<
 > = ExtraState & CrudState<I>;
 
 const filterByPage = <
-  I extends GQL<ListItemInput>,
-  J extends GQL<ListItem>,
+  ItemInput extends GQL<ListItemInput>,
+  ItemReceived extends GQL<ListItem>,
   P extends PageList,
-  S extends ListState<J> = ListState<J>,
-  ActionParticular extends Actions.ActionList<I, P> = Actions.ActionList<I, P>,
-  ActionGeneral extends Actions.ActionList<GQL<ListItemInput>, PageList> = Actions.ActionList<
+  S extends ListState<GQL<ListItem>> = ListState<GQL<ListItem>>,
+  ExtraState extends Record<string, unknown> = Record<string, unknown>,
+  ActionParticular extends Actions.ActionList<
+    ItemInput,
+    ItemReceived,
+    P,
+    ExtraState
+  > = Actions.ActionList<ItemInput, ItemReceived, P, ExtraState>,
+  ActionGeneral extends { page: string } = Actions.ActionList<
     GQL<ListItemInput>,
-    PageList
+    GQL<ListItem>,
+    PageList,
+    ExtraState
   >,
 >(
   thisPage: PageList,
@@ -42,45 +50,78 @@ const filterByPage = <
 };
 
 const onCreate = <
-  I extends GQL<ListItemInput>,
-  J extends GQL<ListItem>,
+  ItemInput extends GQL<ListItemInput>,
+  ItemStored extends GQL<ListItem>,
   P extends PageList,
-  ES extends Record<string, unknown>,
+  ExtraState extends Record<string, unknown>,
 >(
   page: PageList,
-): FullReducer<ListState<J, ES>, Actions.ActionList<ListItemInput, PageList>> =>
-  filterByPage<I, J, P, ListState<J> & ES, Actions.ListItemCreated<I, P>>(
-    page,
-    (state, action) => ({
-      ...state,
-      ...onCreateOptimistic<I, J>(state, action.id, action.delta, action.originalFakeId),
-    }),
-  );
+): FullReducer<
+  ListState<ItemStored, ExtraState>,
+  Actions.ActionList<ListItemInput, ItemStored, PageList>
+> =>
+  filterByPage<
+    ItemInput,
+    ItemStored,
+    P,
+    ListState<ItemStored, ExtraState>,
+    ExtraState,
+    Actions.ListItemCreated<ItemInput, P>,
+    Actions.ActionList<ListItemInput, ItemStored, PageList>
+  >(page, (state, action) => ({
+    ...state,
+    ...onCreateOptimistic<ItemInput, ItemStored>(
+      state,
+      action.id,
+      action.delta,
+      action.originalFakeId,
+    ),
+  }));
 
 const onUpdate = <
-  I extends GQL<ListItemInput>,
-  J extends GQL<ListItem>,
+  ItemInput extends GQL<ListItemInput>,
+  ItemStored extends GQL<ListItem>,
   P extends PageList,
-  ES extends Record<string, unknown>,
+  ExtraState extends Record<string, unknown>,
 >(
   page: PageList,
-): FullReducer<ListState<J, ES>, Actions.ListItemUpdated<ListItemInput, PageList>> =>
-  filterByPage<I, J, P, ListState<J, ES>, Actions.ListItemUpdated<I, P>>(page, (state, action) => ({
+): FullReducer<
+  ListState<ItemStored, ExtraState>,
+  Actions.ListItemUpdated<ListItemInput, PageList>
+> =>
+  filterByPage<
+    ItemInput,
+    ItemStored,
+    P,
+    ListState<ItemStored, ExtraState>,
+    ExtraState,
+    Actions.ListItemUpdated<ItemInput, P>
+  >(page, (state, action) => ({
     ...state,
-    ...onUpdateOptimistic<I, J>(state, action.id, action.delta, action.fromServer),
+    ...onUpdateOptimistic<ItemInput, ItemStored>(state, action.id, action.delta, action.fromServer),
   }));
 
 const onDelete = <
-  I extends GQL<ListItemInput>,
-  J extends GQL<ListItem>,
+  ItemInput extends GQL<ListItemInput>,
+  ItemStored extends GQL<ListItem>,
   P extends PageList,
-  ES extends Record<string, unknown>,
+  ExtraState extends Record<string, unknown>,
 >(
   page: PageList,
-): FullReducer<ListState<J, ES>, Actions.ListItemDeleted<ListItemInput, PageList>> =>
-  filterByPage<I, J, P, ListState<J, ES>, Actions.ListItemDeleted<I, P>>(page, (state, action) => ({
+): FullReducer<
+  ListState<ItemStored, ExtraState>,
+  Actions.ListItemDeleted<ListItemInput, PageList>
+> =>
+  filterByPage<
+    ItemInput,
+    ItemStored,
+    P,
+    ListState<ItemStored, ExtraState>,
+    ExtraState,
+    Actions.ListItemDeleted<ItemInput, P>
+  >(page, (state, action) => ({
     ...state,
-    ...onDeleteOptimistic<J>(state, action.id, action.fromServer),
+    ...onDeleteOptimistic<ItemStored>(state, action.id, action.fromServer),
   }));
 
 export function makeListReducer<
@@ -130,26 +171,34 @@ type DailyProps = {
 export type DailyState<ExtraState extends Record<string, unknown> = Record<string, unknown>> =
   ListState<ListItemStandardNative, ExtraState> & DailyProps;
 
-const isUpdateDelete = <I extends ListItemInput, A extends Actions.ActionList<I, PageList>>(
-  action: A | Actions.ListItemUpdated<I, PageList> | Actions.ListItemDeleted<I, PageList>,
-): action is Actions.ListItemUpdated<I, PageList> | Actions.ListItemDeleted<I, PageList> =>
-  Reflect.has(action, 'id');
+const isUpdateDelete = <A extends Actions.ActionList<StandardInput, ListItemStandard, PageList>>(
+  action:
+    | A
+    | Actions.ListItemUpdated<StandardInput, PageList>
+    | Actions.ListItemDeleted<StandardInput, PageList>,
+): action is
+  | Actions.ListItemUpdated<StandardInput, PageList>
+  | Actions.ListItemDeleted<StandardInput, PageList> => Reflect.has(action, 'id');
 
-const isCreateUpdate = <I extends StandardInput, A extends Actions.ActionList<I, PageList>>(
-  action: A | Actions.ListItemCreated<I, PageList> | Actions.ListItemUpdated<I, PageList>,
-): action is Actions.ListItemCreated<I, PageList> | Actions.ListItemUpdated<I, PageList> =>
-  Reflect.has(action, 'delta');
+const isCreateUpdate = <A extends Actions.ActionList<StandardInput, ListItemStandard, PageList>>(
+  action:
+    | A
+    | Actions.ListItemCreated<StandardInput, PageList>
+    | Actions.ListItemUpdated<StandardInput, PageList>,
+): action is
+  | Actions.ListItemCreated<StandardInput, PageList>
+  | Actions.ListItemUpdated<StandardInput, PageList> => Reflect.has(action, 'delta');
 
-const isCreate = <I extends StandardInput, A extends Actions.ActionList<I, PageList>>(
-  action: A | Actions.ListItemCreated<I, PageList>,
-): action is Actions.ListItemCreated<I, PageList> => Reflect.has(action, 'originalFakeId');
+const isCreate = <A extends Actions.ActionList<StandardInput, ListItemStandard, PageList>>(
+  action: A | Actions.ListItemCreated<StandardInput, PageList>,
+): action is Actions.ListItemCreated<StandardInput, PageList> =>
+  Reflect.has(action, 'originalFakeId');
 
 const isConfirmCreate = <
-  I extends StandardInput,
-  J extends GQL<ListItem>,
-  A extends Actions.ActionList<I, PageList>,
+  ItemStored extends GQL<ListItem>,
+  A extends Actions.ActionList<StandardInput, ListItemStandard, PageList>,
 >(
-  state: ListState<J>,
+  state: ListState<ItemStored>,
   action: A,
 ): boolean =>
   isCreate(action) &&
@@ -160,16 +209,14 @@ const getItemCostWithId = (state: DailyState, id: Id): number =>
   state.items.find((item) => item.id === id)?.cost ?? 0;
 
 const getPreviousItemCost = <
-  I extends NativeDate<StandardInput, 'date'>,
-  A extends Actions.ActionList<I, PageListStandard>,
+  A extends Actions.ActionList<StandardInput, ListItemStandard, PageListStandard>,
 >(
   state: DailyState,
   action: A,
 ): number => (isUpdateDelete(action) ? getItemCostWithId(state, action.id) : 0);
 
 const getNextItemCost = <
-  I extends StandardInput,
-  A extends Actions.ActionList<I, PageListStandard>,
+  A extends Actions.ActionList<StandardInput, ListItemStandard, PageListStandard>,
 >(
   state: DailyState,
   action: A,
@@ -181,22 +228,22 @@ const getNextItemCost = <
 };
 
 const withTotals = <
-  I extends StandardInput,
   P extends PageListStandard,
-  ES extends Record<string, unknown>,
-  ActionParticular extends Actions.ActionList<I, P>,
-  ActionGeneral extends Actions.ActionList<ListItemInput, PageList>,
+  ExtraState extends Record<string, unknown>,
+  ActionParticular extends Actions.ActionList<StandardInput, ListItemStandard, P, ExtraState>,
+  ActionGeneral extends Actions.ActionList<ListItemInput, ListItemStandard, PageList>,
 >(
   page: P,
   makeListHandler: (page: P) => FullReducer<ListState<ListItemStandardNative>, ActionParticular>,
   getNewTotal: (previousTotal: number, previousItemCost: number, nextItemCost: number) => number,
-): FullReducer<DailyState<ES>, ActionGeneral> => {
+): FullReducer<DailyState<ExtraState>, ActionGeneral> => {
   const listHandler = makeListHandler(page);
   return filterByPage<
-    I,
-    ListItemStandardNative,
+    StandardInput,
+    ListItemStandard,
     P,
-    DailyState<ES>,
+    DailyState<ExtraState>,
+    ExtraState,
     ActionParticular,
     ActionGeneral
   >(page, (state, action) => ({
@@ -210,19 +257,20 @@ const withTotals = <
   }));
 };
 
-const makeOnMoreReceived = <
-  I extends StandardInput,
+const makeOnStandardDataReceived = <
   P extends PageListStandard,
-  ES extends Record<string, unknown>,
+  ExtraState extends Record<string, unknown>,
 >(
   page: P,
-): FullReducer<DailyState<ES>, Actions.ListDataReceived<PageList, WithIds<RawDate<I, 'date'>>>> =>
+): FullReducer<DailyState<ExtraState>, Actions.ListDataReceived<PageList, GQL<ListItemStandard>>> =>
   filterByPage<
-    I,
-    ListItemStandardNative,
+    StandardInput,
+    GQL<ListItemStandard>,
     P,
-    DailyState<ES>,
-    Actions.ListDataReceived<P, WithIds<RawDate<I, 'date'>>>
+    DailyState<ExtraState>,
+    ExtraState,
+    Actions.ListDataReceived<P, GQL<ListItemStandard>, ExtraState>,
+    Actions.ListDataReceived<PageList, GQL<ListItemStandard>>
   >(page, (state, action) => {
     const newItems = action.res.items.map(withNativeDate('date')) ?? [];
     const existingItems = state.items.filter(
@@ -241,6 +289,7 @@ const makeOnMoreReceived = <
       olderExists: !!action.res.olderExists,
       items: [...existingItems, ...newItems],
       __optimistic: [...existingOptimistic, ...Array<undefined>(newItems.length).fill(undefined)],
+      ...action.extraState,
     };
   });
 
@@ -265,17 +314,18 @@ const makeOnReceiptCreated =
   };
 
 const makeOnOverviewUpdated = <
-  I extends StandardInput,
+  ItemInput extends StandardInput,
   P extends PageListStandard,
   ExtraState extends Record<string, unknown>,
 >(
   page: P,
 ): FullReducer<DailyState<ExtraState>, Actions.ListOverviewUpdated<PageList, ExtraState>> =>
   filterByPage<
-    I,
+    ItemInput,
     ListItemStandardNative,
     P,
     DailyState<ExtraState>,
+    ExtraState,
     Actions.ListOverviewUpdated<P, ExtraState>
   >(page, (state, action) => ({
     ...state,
@@ -286,9 +336,12 @@ const makeOnOverviewUpdated = <
 
 export function makeDailyListReducer<
   P extends PageListStandard,
-  ES extends Record<string, unknown> = Record<string, unknown>,
->(page: P, extraState: ES = {} as ES): Reducer<DailyState<ES>, Actions.Action> {
-  const initialState: DailyState<ES> = {
+  ExtraState extends Record<string, unknown> = Record<string, unknown>,
+>(
+  page: P,
+  extraState: ExtraState = {} as ExtraState,
+): Reducer<DailyState<ExtraState>, Actions.Action> {
+  const initialState: DailyState<ExtraState> = {
     ...extraState,
     items: [],
     __optimistic: [],
@@ -299,40 +352,39 @@ export function makeDailyListReducer<
   };
 
   const onCreateDaily = withTotals<
-    NativeDate<ListItemStandard, 'date'>,
     P,
-    ES,
+    ExtraState,
     Actions.ListItemCreated<ListItemStandardNative, P>,
     Actions.ListItemCreated<ListItemInput, PageList>
   >(page, onCreate, (total, _, cost) => total + cost);
 
-  const onMoreReceived = makeOnMoreReceived<StandardInput, P, ES>(page);
-  const onReceiptCreated = makeOnReceiptCreated<P, ES>(page);
+  const onDataReceived = makeOnStandardDataReceived<P, ExtraState>(page);
+  const onReceiptCreated = makeOnReceiptCreated<P, ExtraState>(page);
 
   const onUpdateDaily = withTotals<
-    StandardInput,
     P,
-    ES,
+    ExtraState,
     Actions.ListItemUpdated<NativeDate<ListItemStandard, 'date'>, P>,
     Actions.ListItemUpdated<ListItemInput, PageList>
   >(page, onUpdate, (total, previousCost, nextCost) => total + nextCost - previousCost);
 
   const onDeleteDaily = withTotals<
-    StandardInput,
     P,
-    ES,
+    ExtraState,
     Actions.ListItemDeleted<ListItemStandardNative, P>,
     Actions.ListItemDeleted<ListItemInput, PageList>
   >(page, onDelete, (total, previousCost) => total - previousCost);
 
-  const onOverviewUpdated = makeOnOverviewUpdated<StandardInput, P, ES>(page);
+  const onOverviewUpdated = makeOnOverviewUpdated<StandardInput, P, ExtraState>(page);
 
-  const baseListReducer = makeListReducer<StandardInput, ListItemStandardNative, P, DailyState<ES>>(
-    page,
-    initialState,
-  );
+  const baseListReducer = makeListReducer<
+    StandardInput,
+    ListItemStandardNative,
+    P,
+    DailyState<ExtraState>
+  >(page, initialState);
 
-  return function dailyListReducer(state = initialState, action): DailyState<ES> {
+  return function dailyListReducer(state = initialState, action): DailyState<ExtraState> {
     switch (action.type) {
       case Actions.ListActionType.Created:
         return onCreateDaily(state, action);
@@ -343,10 +395,10 @@ export function makeDailyListReducer<
         return onDeleteDaily(state, action);
 
       case Actions.ListActionType.OverviewUpdated:
-        return onOverviewUpdated(state, action as Actions.ListOverviewUpdated<P, ES>);
+        return onOverviewUpdated(state, action as Actions.ListOverviewUpdated<P, ExtraState>);
 
-      case Actions.ListActionType.MoreReceived:
-        return onMoreReceived(state, action);
+      case Actions.ListActionType.DataReceived:
+        return onDataReceived(state, action);
       case Actions.ListActionType.ReceiptCreated:
         return onReceiptCreated(state, action);
 

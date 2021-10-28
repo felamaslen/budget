@@ -29,7 +29,7 @@ export type Action =
   | ActionFunds
   | ActionReceiptCreated
   | ActionList<StandardInput, Income, PageListStandard.Income, IncomeExtraState>
-  | ActionList<StandardInput, ListItemStandard, PageListStandard, Record<string, never>>
+  | ActionList<StandardInput, ListItemStandard, PageListStandard, Record<string, unknown>>
   | ActionLogin
   | ActionNetWorth;
 
