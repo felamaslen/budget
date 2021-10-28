@@ -1,14 +1,31 @@
 import * as reducers from './list-standard';
 import type { IncomeExtraState } from './types';
-import { ListActionType, listOverviewUpdated } from '~client/actions';
+import { ListActionType, listDataReceived, listOverviewUpdated } from '~client/actions';
 import { PageListStandard } from '~client/types/gql';
 
 describe('income reducer', () => {
-  describe(ListActionType.OverviewUpdated, () => {
-    const myTotalDeductions: IncomeExtraState['totalDeductions'] = [
-      { name: 'Tax', value: 5612293 },
-    ];
+  const myTotalDeductions: IncomeExtraState['totalDeductions'] = [{ name: 'Tax', value: 5612293 }];
 
+  describe(ListActionType.DataReceived, () => {
+    it('should set the extra state', () => {
+      expect.assertions(1);
+      const actionWithExtraState = listDataReceived(
+        PageListStandard.Income,
+        {
+          items: [],
+        },
+        {
+          totalDeductions: myTotalDeductions,
+        },
+      );
+
+      const result = reducers.income(undefined, actionWithExtraState);
+
+      expect(result.totalDeductions).toStrictEqual(myTotalDeductions);
+    });
+  });
+
+  describe(ListActionType.OverviewUpdated, () => {
     const action = listOverviewUpdated<PageListStandard.Income, IncomeExtraState>(
       PageListStandard.Income,
       [],
