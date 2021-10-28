@@ -193,8 +193,9 @@ export function useModalSubmit<I extends ListItemInput>({
 
     if (!nextInvalid.length) {
       onSubmit(id, tempFields);
+      setTempFields(initFields(item, fields));
     }
-  }, [fields, onSubmit, tempFields, id]);
+  }, [item, fields, onSubmit, tempFields, id]);
 
   useEffect(() => {
     if (!active && isInvalid) {

@@ -25,10 +25,8 @@ describe(useModalSubmit.name, () => {
         [field]: FieldComponent,
       },
       active: true,
-      type: 'add',
-      onCancel: jest.fn(),
       onSubmit: jest.fn(),
-    } as Props<ListItemInput>;
+    } as Pick<Props<ListItemInput>, 'active' | 'fields' | 'id' | 'item' | 'onSubmit'>;
 
     it('should initialise the array-type field with an empty array', () => {
       expect.assertions(2);
@@ -45,6 +43,40 @@ describe(useModalSubmit.name, () => {
       expect(props.onSubmit).toHaveBeenCalledWith(CREATE_ID, {
         item: 'My item',
         [field]: [],
+      });
+    });
+  });
+
+  describe('when submitting', () => {
+    it('should clear the field values', () => {
+      expect.assertions(2);
+
+      const fields = {
+        item: FormFieldText,
+      };
+
+      const { result } = renderHook(() =>
+        useModalSubmit({
+          fields,
+          active: true,
+          onSubmit: jest.fn(),
+        }),
+      );
+
+      act(() => {
+        result.current.onChangeField('item', 'My item');
+      });
+
+      expect(result.current.tempFields).toStrictEqual({
+        item: 'My item',
+      });
+
+      act(() => {
+        result.current.onSubmitCallback();
+      });
+
+      expect(result.current.tempFields).toStrictEqual({
+        item: '',
       });
     });
   });
