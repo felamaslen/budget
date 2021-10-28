@@ -10,14 +10,14 @@ export type State = {
 };
 
 export type FieldWrapper<V = never> = React.FC<{
-  id: string;
+  id?: string;
   invalid?: boolean;
   value: V;
   onChange: (value: V) => void;
 }>;
 
 export type ModalFields<I extends ListItemInput> = {
-  [K in FieldKey<I>]?: FieldWrapper<Exclude<I[K], null | undefined>>;
+  [K in FieldKey<I>]?: FieldWrapper<NonNullable<I[K]>>;
 };
 
 export type Props<I extends ListItemInput> = {

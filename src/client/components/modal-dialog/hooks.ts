@@ -6,7 +6,12 @@ import type { DialogType, ModalFields, Props, State } from './types';
 
 import { CREATE_ID } from '~client/constants/data';
 import type { Delta, FieldKey } from '~client/types';
-import type { ListItemInput } from '~client/types/gql';
+import type {
+  IncomeDeductionInput,
+  ListItemInput,
+  StockSplitInput,
+  TransactionInput,
+} from '~client/types/gql';
 
 const enum ActionType {
   Hidden,
@@ -109,20 +114,39 @@ export function useModalState<I extends ListItemInput>({
   return state;
 }
 
+const arrayTypeFields: string[] = ['transactions', 'stockSplits', 'deductions'];
+
 function initField<I extends ListItemInput>(field: 'date', item: Delta<I>): Date;
 function initField<I extends ListItemInput>(field: 'cost', item: Delta<I>): number;
+function initField<I extends ListItemInput>(
+  field: 'transactions',
+  item: Delta<I>,
+): TransactionInput[];
+function initField<I extends ListItemInput>(
+  field: 'stockSplits',
+  item: Delta<I>,
+): StockSplitInput[];
+function initField<I extends ListItemInput>(
+  field: 'deductions',
+  item: Delta<I>,
+): IncomeDeductionInput[];
 function initField<I extends ListItemInput, K extends keyof I>(
   field: keyof I,
   item: Delta<I>,
 ): I[K];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function initField<I extends ListItemInput>(field: FieldKey<I>, item: Partial<I>): any {
+function initField<I extends ListItemInput>(field: FieldKey<I>, item: Partial<I>): unknown {
   if (field === 'date' && !Reflect.get(item, field)) {
     return startOfDay(new Date());
   }
   if (field === 'cost' && typeof Reflect.get(item, field) === 'undefined') {
     return 0;
+  }
+  if (
+    arrayTypeFields.includes(field as string) &&
+    typeof Reflect.get(item, field) === 'undefined'
+  ) {
+    return [];
   }
   return item[field] ?? '';
 }
@@ -169,8 +193,9 @@ export function useModalSubmit<I extends ListItemInput>({
 
     if (!nextInvalid.length) {
       onSubmit(id, tempFields);
+      setTempFields(initFields(item, fields));
     }
-  }, [fields, onSubmit, tempFields, id]);
+  }, [item, fields, onSubmit, tempFields, id]);
 
   useEffect(() => {
     if (!active && isInvalid) {
