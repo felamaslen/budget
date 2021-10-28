@@ -1,8 +1,7 @@
 import { generateFakeId } from '~client/modules/data';
 import type { Id, ListReadResponseNative, PageList, WithIds } from '~client/types';
-import { PageListStandard } from '~client/types/enum';
 import type {
-  Income,
+  ListItem,
   ListItemInput,
   ListItemStandard,
   Maybe,
@@ -16,7 +15,7 @@ export const enum ListActionType {
   Deleted = '@@list/ITEM_DELETED',
   ReceiptCreated = '@@list/RECEIPT_CREATED',
   OverviewUpdated = '@@list/OVERVIEW_UPDATED',
-  MoreReceived = '@@list/MORE_RECEIVED',
+  DataReceived = '@@list/DATA_RECEIVED',
 }
 
 export type ListItemCreated<I extends ListItemInput, P extends PageList> = {
@@ -128,29 +127,42 @@ export const listOverviewUpdated = <
   extraState,
 });
 
-export type ListDataReceived<P extends PageList, I extends GQL<ListItemStandard>> = {
-  type: ListActionType.MoreReceived;
+export type ListDataReceived<
+  P extends PageList,
+  ItemReceived extends GQL<ListItemStandard>,
+  ExtraState extends Record<string, unknown> = Record<string, unknown>,
+> = {
+  type: ListActionType.DataReceived;
   page: P;
-  res: ListReadResponseNative<I>;
+  res: ListReadResponseNative<ItemReceived>;
+  extraState?: ExtraState;
 };
 
-export const listDataReceived = <P extends PageList, I extends GQL<ListItemStandard>>(
+export const listDataReceived = <
+  P extends PageList,
+  ItemReceived extends GQL<ListItemStandard>,
+  ExtraState extends Record<string, unknown> = never,
+>(
   page: P,
-  res: ListReadResponseNative<I>,
-): ListDataReceived<P, I> => ({
-  type: ListActionType.MoreReceived,
+  res: ListReadResponseNative<ItemReceived>,
+  extraState?: ExtraState,
+): ListDataReceived<P, ItemReceived, ExtraState> => ({
+  type: ListActionType.DataReceived,
   page,
   res,
+  extraState,
 });
 
 export type ActionList<
-  I extends ListItemInput,
+  ItemInput extends ListItemInput,
+  ItemReceived extends GQL<ListItem>,
   P extends PageList,
   ExtraState extends Record<string, unknown> = Record<string, unknown>,
 > =
-  | ListItemCreated<I, P>
-  | ListItemUpdated<I, P>
-  | ListItemDeleted<I, P>
+  | ListItemCreated<ItemInput, P>
+  | ListItemUpdated<ItemInput, P>
+  | ListItemDeleted<ItemInput, P>
   | ListOverviewUpdated<P, ExtraState>
-  | ListDataReceived<P, ListItemStandard>
-  | ListDataReceived<PageListStandard.Income, Income>;
+  | (ItemReceived extends GQL<ListItemStandard>
+      ? ListDataReceived<P, ItemReceived, ExtraState>
+      : never);

@@ -1,6 +1,6 @@
 import type { ActionList } from './list';
 import type { FundQuotes, HistoryOptions } from '~client/types';
-import type { FundHistory, FundInput, TargetDelta } from '~client/types/gql';
+import type { Fund, FundHistory, FundInput, TargetDelta } from '~client/types/gql';
 import { PageNonStandard } from '~shared/constants';
 import type { GQL } from '~shared/types';
 
@@ -85,4 +85,4 @@ export type ActionFunds =
   | CashTargetUpdated
   | AllocationTargetsUpdated
   | TodayPricesFetched
-  | ActionList<GQL<FundInput>, PageNonStandard.Funds>;
+  | ActionList<GQL<FundInput>, GQL<Fund>, PageNonStandard.Funds>;
