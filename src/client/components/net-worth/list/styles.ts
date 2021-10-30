@@ -2,6 +2,7 @@ import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 import { breakpoint } from '~client/styled/mixins';
+import { ConfirmModal } from '~client/styled/shared/confirm';
 import { asButton } from '~client/styled/shared/role';
 import { colors, breakpoints } from '~client/styled/variables';
 
@@ -16,6 +17,14 @@ export const NetWorthList = styled.div`
     flex: 0 0 ${rem(480)};
     min-height: initial;
     overflow: hidden;
+  }
+
+  ${ConfirmModal} {
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: 20;
   }
 `;
 
