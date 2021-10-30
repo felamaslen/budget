@@ -4,8 +4,16 @@ import { delay, fromValue, pipe } from 'wonka';
 
 import { useAppConfig } from './config';
 import { configUpdatedFromApi } from '~client/actions';
-import { mockClient, renderHookWithStore } from '~client/test-utils';
-import { ConfigUpdatedDocument, ConfigUpdatedSubscription, FundPeriod } from '~client/types/gql';
+import { testState } from '~client/test-data';
+import { hookRendererWithStore, mockClient, renderHookWithStore } from '~client/test-utils';
+import {
+  ConfigUpdatedDocument,
+  ConfigUpdatedSubscription,
+  FundMode,
+  FundPeriod,
+  SetConfigDocument,
+  SetConfigMutation,
+} from '~client/types/gql';
 
 describe(useAppConfig.name, () => {
   const mockConfigUpdatedSubscription: ConfigUpdatedSubscription = {
@@ -19,10 +27,21 @@ describe(useAppConfig.name, () => {
     },
   };
 
+  const mockSetConfigMutation: SetConfigMutation = {
+    __typename: 'Mutation',
+    setConfig: {},
+  };
+
   let subscribeSpy: jest.SpyInstance<
     ReturnType<typeof mockClient['executeSubscription']>,
     Parameters<typeof mockClient['executeSubscription']>
   >;
+
+  let mutateSpy: jest.SpyInstance<
+    ReturnType<typeof mockClient['executeMutation']>,
+    Parameters<typeof mockClient['executeMutation']>
+  >;
+
   beforeEach(() => {
     subscribeSpy = jest.spyOn(mockClient, 'executeSubscription').mockImplementation((request) => {
       if (request.query === ConfigUpdatedDocument) {
@@ -36,6 +55,19 @@ describe(useAppConfig.name, () => {
       }
       return fromValue({
         operation: makeOperation('subscription', request, {} as OperationContext),
+        data: null,
+      });
+    });
+
+    mutateSpy = jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) => {
+      if (request.query === SetConfigDocument) {
+        return fromValue({
+          operation: makeOperation('mutation', request, {} as OperationContext),
+          data: mockSetConfigMutation,
+        });
+      }
+      return fromValue({
+        operation: makeOperation('mutation', request, {} as OperationContext),
         data: null,
       });
     });
@@ -60,5 +92,42 @@ describe(useAppConfig.name, () => {
     expect(store.getActions()).toStrictEqual([
       configUpdatedFromApi(mockConfigUpdatedSubscription.configUpdated),
     ]);
+  });
+
+  it('should call a mutation to update the config when it changes locally', async () => {
+    expect.hasAssertions();
+    const { render } = hookRendererWithStore(useAppConfig);
+
+    render();
+    render({
+      api: {
+        ...testState.api,
+        appConfig: {
+          ...testState.api.appConfig,
+          birthDate: '1992-02-10',
+          fundMode: FundMode.Value,
+        },
+        appConfigSerial: 20,
+      },
+    });
+
+    expect(mutateSpy).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(mutateSpy).toHaveBeenCalledTimes(1);
+    });
+
+    expect(mutateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: SetConfigDocument,
+        variables: {
+          config: expect.objectContaining({
+            birthDate: '1992-02-10',
+            fundMode: FundMode.Value,
+          }),
+        },
+      }),
+      {},
+    );
   });
 });
