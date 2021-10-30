@@ -1,8 +1,7 @@
 import { generateFakeId } from '~client/modules/data';
 import type { Id, ListReadResponseNative, PageList, WithIds } from '~client/types';
-import { PageListStandard } from '~client/types/enum';
 import type {
-  Income,
+  ListItem,
   ListItemInput,
   ListItemStandard,
   Maybe,
@@ -16,7 +15,7 @@ export const enum ListActionType {
   Deleted = '@@list/ITEM_DELETED',
   ReceiptCreated = '@@list/RECEIPT_CREATED',
   OverviewUpdated = '@@list/OVERVIEW_UPDATED',
-  MoreReceived = '@@list/MORE_RECEIVED',
+  DataReceived = '@@list/DATA_RECEIVED',
 }
 
 export type ListItemCreated<I extends ListItemInput, P extends PageList> = {
@@ -98,46 +97,72 @@ export const listItemDeleted = <I extends ListItemInput, P extends PageList = Pa
   fromServer,
 });
 
-export type ListOverviewUpdated<P extends PageList> = {
+export type ListOverviewUpdated<
+  P extends PageList,
+  ExtraState extends Record<string, unknown> = never,
+> = {
   type: ListActionType.OverviewUpdated;
   page: P;
   overviewCost: number[];
   total?: Maybe<number>;
   weekly?: Maybe<number>;
+  extraState?: ExtraState;
 };
 
-export const listOverviewUpdated = <P extends PageList>(
+export const listOverviewUpdated = <
+  P extends PageList,
+  ExtraState extends Record<string, unknown> = never,
+>(
   page: P,
   overviewCost: number[],
   total?: Maybe<number>,
   weekly?: Maybe<number>,
-): ListOverviewUpdated<P> => ({
+  extraState?: ExtraState,
+): ListOverviewUpdated<P, ExtraState> => ({
   type: ListActionType.OverviewUpdated,
   page,
   overviewCost,
   total,
   weekly,
+  extraState,
 });
 
-export type MoreListDataReceived<P extends PageList, I extends GQL<ListItemStandard>> = {
-  type: ListActionType.MoreReceived;
+export type ListDataReceived<
+  P extends PageList,
+  ItemReceived extends GQL<ListItemStandard>,
+  ExtraState extends Record<string, unknown> = Record<string, unknown>,
+> = {
+  type: ListActionType.DataReceived;
   page: P;
-  res: ListReadResponseNative<I>;
+  res: ListReadResponseNative<ItemReceived>;
+  extraState?: ExtraState;
 };
 
-export const moreListDataReceived = <P extends PageList, I extends GQL<ListItemStandard>>(
+export const listDataReceived = <
+  P extends PageList,
+  ItemReceived extends GQL<ListItemStandard>,
+  ExtraState extends Record<string, unknown> = never,
+>(
   page: P,
-  res: ListReadResponseNative<I>,
-): MoreListDataReceived<P, I> => ({
-  type: ListActionType.MoreReceived,
+  res: ListReadResponseNative<ItemReceived>,
+  extraState?: ExtraState,
+): ListDataReceived<P, ItemReceived, ExtraState> => ({
+  type: ListActionType.DataReceived,
   page,
   res,
+  extraState,
 });
 
-export type ActionList<I extends ListItemInput, P extends PageList> =
-  | ListItemCreated<I, P>
-  | ListItemUpdated<I, P>
-  | ListItemDeleted<I, P>
-  | ListOverviewUpdated<P>
-  | MoreListDataReceived<P, ListItemStandard>
-  | MoreListDataReceived<PageListStandard.Income, Income>;
+export type ActionList<
+  ItemInput extends ListItemInput,
+  ItemReceived extends GQL<ListItem>,
+  P extends PageList,
+  ExtraState extends Record<string, unknown> = Record<string, unknown>,
+> =
+  | ListItemCreated<ItemInput, P>
+  | ListItemUpdated<ItemInput, P>
+  | ListItemDeleted<ItemInput, P>
+  | ListOverviewUpdated<P, ExtraState>
+  | (ItemReceived extends GQL<ListItemStandard>
+      ? ListDataReceived<P, ItemReceived, ExtraState>
+      : never);

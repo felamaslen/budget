@@ -1,7 +1,11 @@
+import type { IncomeExtraState } from './types';
 import { makeDailyListReducer } from '~client/reducers/list';
 import { PageListStandard } from '~client/types/enum';
 
-export const income = makeDailyListReducer(PageListStandard.Income);
+export const income = makeDailyListReducer<PageListStandard.Income, IncomeExtraState>(
+  PageListStandard.Income,
+);
+
 export const bills = makeDailyListReducer(PageListStandard.Bills);
 export const food = makeDailyListReducer(PageListStandard.Food);
 export const general = makeDailyListReducer(PageListStandard.General);

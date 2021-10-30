@@ -14,6 +14,7 @@ import { ErrorLevel } from '~client/constants/error';
 import * as gql from '~client/hooks/gql';
 import { composeWithoutArgs } from '~client/modules/compose-without-args';
 import { toNativeFund, withNativeDate } from '~client/modules/data';
+import { IncomeExtraState } from '~client/reducers/types';
 import type { Id, NativeFund, PageList, StandardInput } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 import {
@@ -54,6 +55,7 @@ export type GenericHookOptions<
   P extends PageList,
   SubscriptionResponse extends Record<S, SubscriptionResponseGeneric<I>>,
   S extends string,
+  ExtraState extends Record<string, unknown> = never,
 > = {
   responseKey: S;
   getPage: (res: SubscriptionResponse) => P;
@@ -62,6 +64,7 @@ export type GenericHookOptions<
     handler?: SubscriptionHandler<SubscriptionResponse, SubscriptionResponse>,
   ) => UseSubscriptionResponse<SubscriptionResponse, Record<string, never>>;
   toNative: (input: I) => J;
+  getExtraState?: (res: SubscriptionResponse[S]) => ExtraState;
 };
 
 export function useListSubscriptionsGeneric<
@@ -70,12 +73,14 @@ export function useListSubscriptionsGeneric<
   P extends PageList,
   SubscriptionResponse extends Record<S, SubscriptionResponseGeneric<I>>,
   S extends string,
+  ExtraState extends Record<string, unknown> = never,
 >({
   responseKey,
   useSubscription,
   toNative,
   getPage,
-}: GenericHookOptions<I, J, P, SubscriptionResponse, S>): () => void {
+  getExtraState,
+}: GenericHookOptions<I, J, P, SubscriptionResponse, S, ExtraState>): () => void {
   const dispatch = useDispatch();
 
   const [{ data, error }, onReconnect] = useSubscription({});
@@ -115,9 +120,10 @@ export function useListSubscriptionsGeneric<
         data[responseKey].overviewCost,
         data[responseKey].total,
         data[responseKey].weekly,
+        getExtraState?.(data[responseKey]),
       ),
     );
-  }, [dispatch, responseKey, getPage, toNative, data]);
+  }, [dispatch, responseKey, getPage, getExtraState, toNative, data]);
 
   return onReconnect;
 }
@@ -140,11 +146,15 @@ const incomeOptions: GenericHookOptions<
   NativeDate<IncomeInput, 'date'> & { id: Id },
   PageListStandard.Income,
   IncomeChangedSubscription,
-  'incomeChanged'
+  'incomeChanged',
+  IncomeExtraState
 > = {
   responseKey: 'incomeChanged',
   useSubscription: gql.useIncomeChangedSubscription,
   getPage: () => PageListStandard.Income,
+  getExtraState: (res) => ({
+    totalDeductions: res.totalDeductions ?? [],
+  }),
   toNative: withNativeDate('date'),
 };
 

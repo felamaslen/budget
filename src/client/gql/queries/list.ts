@@ -1,7 +1,7 @@
 import { gql } from 'urql';
 
-export const MoreListDataStandard = gql`
-  query MoreListDataStandard($page: PageListStandard!, $offset: Int!, $limit: Int!) {
+export const ReadListStandard = gql`
+  query ReadListStandard($page: PageListStandard!, $offset: Int!, $limit: Int!) {
     readListStandard: readList(page: $page, offset: $offset, limit: $limit) {
       items {
         id
@@ -18,8 +18,8 @@ export const MoreListDataStandard = gql`
   }
 `;
 
-export const MoreIncomeData = gql`
-  query MoreIncomeData($offset: Int!, $limit: Int!) {
+export const ReadIncome = gql`
+  query ReadIncome($offset: Int!, $limit: Int!) {
     readIncome(offset: $offset, limit: $limit) {
       items {
         id
@@ -33,9 +33,13 @@ export const MoreIncomeData = gql`
           value
         }
       }
-      total
-      weekly
       olderExists
+      weekly
+      total
+      totalDeductions {
+        name
+        value
+      }
     }
   }
 `;

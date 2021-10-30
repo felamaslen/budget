@@ -21,6 +21,7 @@ const query = gql`
     olderExists: Boolean
     weekly: Int
     total: Int
+    totalDeductions: [IncomeDeduction!]
   }
   extend type Query {
     readIncome(offset: Int, limit: Int): IncomeReadResponse
@@ -61,8 +62,9 @@ const subscription = gql`
     deleted: NonNegativeInt
 
     overviewCost: [Int!]!
-    total: Int
     weekly: Int
+    total: Int
+    totalDeductions: [IncomeDeduction!]
   }
 
   extend type Subscription {

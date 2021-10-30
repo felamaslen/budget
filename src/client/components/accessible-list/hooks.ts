@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getItems } from './selectors';
 import type { SortItemsPre, SortItemsPost, CustomSelector } from './types';
 
-import { moreListDataReceived } from '~client/actions';
+import { listDataReceived } from '~client/actions';
 import { PAGE_LIST_LIMIT } from '~client/constants/data';
 import { OnDeleteList, OnUpdateList } from '~client/hooks';
 import * as gql from '~client/hooks/gql';
@@ -95,7 +95,7 @@ export function useMoreItems(page: PageListStandard): () => Promise<void> {
   const dispatch = useDispatch();
   const offset = useSelector(getListOffset(page));
 
-  const [{ data, fetching, stale }, fetchMore] = gql.useMoreListDataStandardQuery({
+  const [{ data, fetching, stale }, fetchMore] = gql.useReadListStandardQuery({
     pause: offset > 0,
     variables: {
       page,
@@ -106,7 +106,7 @@ export function useMoreItems(page: PageListStandard): () => Promise<void> {
 
   useEffect(() => {
     if (data?.readListStandard && !fetching && !stale) {
-      dispatch(moreListDataReceived(page, data.readListStandard));
+      dispatch(listDataReceived(page, data.readListStandard));
     }
   }, [page, dispatch, data, fetching, stale]);
 

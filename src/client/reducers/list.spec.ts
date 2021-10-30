@@ -8,7 +8,7 @@ import {
   listItemDeleted,
   listOverviewUpdated,
   loggedOut,
-  moreListDataReceived,
+  listDataReceived,
   receiptCreated,
 } from '~client/actions';
 import type { Id, StandardInput, WithIds } from '~client/types';
@@ -38,13 +38,14 @@ describe('list reducer', () => {
     baz: 'initial baz',
   };
 
-  const initialStateDaily: DailyState = {
+  const initialStateDaily: DailyState<ExtraState> = {
     items: [],
     __optimistic: [],
     total: 0,
     weekly: 0,
     offset: 0,
     olderExists: true,
+    baz: 'initial baz',
   };
 
   const myListReducer = makeListReducer<Item, WithIds<Item>, typeof page, ExtraState>(
@@ -54,7 +55,9 @@ describe('list reducer', () => {
 
   const pageDaily = PageListStandard.Food;
 
-  const dailyReducer = makeDailyListReducer<typeof pageDaily, Omit<State, 'baz'>>(pageDaily);
+  const dailyReducer = makeDailyListReducer<typeof pageDaily, ExtraState>(pageDaily, {
+    baz: 'initial baz',
+  });
 
   const testDate = new Date('2020-04-20');
 
@@ -725,7 +728,7 @@ describe('list reducer', () => {
     });
 
     describe('for daily lists', () => {
-      const stateDaily: DailyState = {
+      const stateDaily: DailyState<ExtraState> = {
         ...state,
         items: [{ ...state.items[0], category: 'category one', shop: 'shop one' }],
         total: 51,
@@ -767,7 +770,7 @@ describe('list reducer', () => {
     });
   });
 
-  describe(ListActionType.MoreReceived, () => {
+  describe(ListActionType.DataReceived, () => {
     const res: RequiredNotNull<Omit<ListReadResponse, 'error'>> = {
       items: [
         {
@@ -785,12 +788,12 @@ describe('list reducer', () => {
       __typename: 'ListReadResponse',
     };
 
-    const action = moreListDataReceived(pageDaily, res);
+    const action = listDataReceived(pageDaily, res);
 
     it('should append the data to state', () => {
       expect.assertions(1);
 
-      const statePre: DailyState = {
+      const statePre: DailyState<ExtraState> = {
         ...initialStateDaily,
         items: [
           {
@@ -868,13 +871,25 @@ describe('list reducer', () => {
       );
     });
 
+    describe('when the action has extra state', () => {
+      const actionWithExtraState = listDataReceived(pageDaily, res, {
+        baz: 'next baz',
+      });
+
+      it('should set the extra state from the action', () => {
+        expect.assertions(1);
+        const result = dailyReducer(initialStateDaily, actionWithExtraState);
+        expect(result.baz).toBe('next baz');
+      });
+    });
+
     describe('if the olderExists value changed', () => {
       const resEnd: ListReadResponse = {
         ...res,
         olderExists: false,
       };
 
-      const actionEnd = moreListDataReceived(pageDaily, resEnd);
+      const actionEnd = listDataReceived(pageDaily, resEnd);
 
       it('should update the olderExists state value', () => {
         expect.assertions(1);
@@ -888,7 +903,7 @@ describe('list reducer', () => {
     });
 
     describe('if targeted at another page', () => {
-      const actionOtherPage = moreListDataReceived(PageListStandard.Bills, res);
+      const actionOtherPage = listDataReceived(PageListStandard.Bills, res);
 
       it('should be ignored', () => {
         expect.assertions(1);
@@ -897,7 +912,7 @@ describe('list reducer', () => {
     });
 
     describe('if one or more of the items already exists in the state', () => {
-      const statePre: DailyState = {
+      const statePre: DailyState<ExtraState> = {
         ...initialStateDaily,
         items: [
           {
@@ -928,7 +943,7 @@ describe('list reducer', () => {
         __optimistic: [RequestType.update, undefined, undefined],
       };
 
-      const actionWithDuplicates = moreListDataReceived(pageDaily, {
+      const actionWithDuplicates = listDataReceived(pageDaily, {
         items: [
           {
             id: numericHash('id-1'),

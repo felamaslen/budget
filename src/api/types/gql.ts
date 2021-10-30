@@ -245,6 +245,7 @@ export type IncomeReadResponse = {
   items: Array<Income>;
   olderExists?: Maybe<Scalars['Boolean']>;
   total?: Maybe<Scalars['Int']>;
+  totalDeductions?: Maybe<Array<IncomeDeduction>>;
   weekly?: Maybe<Scalars['Int']>;
 };
 
@@ -253,6 +254,7 @@ export type IncomeSubscription = {
   deleted?: Maybe<Scalars['NonNegativeInt']>;
   overviewCost: Array<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
+  totalDeductions?: Maybe<Array<IncomeDeduction>>;
   updated?: Maybe<Income>;
   weekly?: Maybe<Scalars['Int']>;
 };
@@ -1671,6 +1673,7 @@ export type IncomeReadResponseResolvers<ContextType = Context, ParentType extend
   items?: Resolver<Array<ResolversTypes['Income']>, ParentType, ContextType>;
   olderExists?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  totalDeductions?: Resolver<Maybe<Array<ResolversTypes['IncomeDeduction']>>, ParentType, ContextType>;
   weekly?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1680,6 +1683,7 @@ export type IncomeSubscriptionResolvers<ContextType = Context, ParentType extend
   deleted?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   overviewCost?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  totalDeductions?: Resolver<Maybe<Array<ResolversTypes['IncomeDeduction']>>, ParentType, ContextType>;
   updated?: Resolver<Maybe<ResolversTypes['Income']>, ParentType, ContextType>;
   weekly?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

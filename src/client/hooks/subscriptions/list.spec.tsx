@@ -234,6 +234,7 @@ describe(useListSubscriptions.name, () => {
             overviewCost: [1, 2, 3],
             total: 1005,
             weekly: 86,
+            totalDeductions: [{ name: 'Income tax', value: 4511923 }],
           },
         };
 
@@ -272,7 +273,9 @@ describe(useListSubscriptions.name, () => {
             8912,
             -7712,
           ),
-          listOverviewUpdated(PageListStandard.Income, [1, 2, 3], 1005, 86),
+          listOverviewUpdated(PageListStandard.Income, [1, 2, 3], 1005, 86, {
+            totalDeductions: [{ name: 'Income tax', value: 4511923 }],
+          }),
         ]),
       );
       expect(actions).toHaveLength(2);
@@ -298,6 +301,7 @@ describe(useListSubscriptions.name, () => {
             overviewCost: [1, 2, 3],
             total: 1005,
             weekly: 86,
+            totalDeductions: [{ name: 'Income tax', value: 4511923 }],
           },
         };
 
@@ -336,7 +340,9 @@ describe(useListSubscriptions.name, () => {
             null,
             true,
           ),
-          listOverviewUpdated(PageListStandard.Income, [1, 2, 3], 1005, 86),
+          listOverviewUpdated(PageListStandard.Income, [1, 2, 3], 1005, 86, {
+            totalDeductions: [{ name: 'Income tax', value: 4511923 }],
+          }),
         ]),
       );
       expect(actions).toHaveLength(2);
@@ -354,6 +360,7 @@ describe(useListSubscriptions.name, () => {
             overviewCost: [1, 2, 3],
             total: 1005,
             weekly: 86,
+            totalDeductions: [{ name: 'Income tax', value: 4511923 }],
           },
         };
 
@@ -378,7 +385,9 @@ describe(useListSubscriptions.name, () => {
       expect(actions).toStrictEqual(
         expect.arrayContaining([
           listItemDeleted(PageListStandard.Income, 8912, {} as ListItemInput, true),
-          listOverviewUpdated(PageListStandard.Income, [1, 2, 3], 1005, 86),
+          listOverviewUpdated(PageListStandard.Income, [1, 2, 3], 1005, 86, {
+            totalDeductions: [{ name: 'Income tax', value: 4511923 }],
+          }),
         ]),
       );
       expect(actions).toHaveLength(2);

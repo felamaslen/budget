@@ -4,12 +4,12 @@ import type { DatabaseTransactionConnectionType } from 'slonik';
 import {
   baseController,
   getLimitAndOffset,
-  getListTotals,
   getOlderExists,
-  getPublishedProperties,
+  getWeeklyCost,
   processInput,
 } from './list';
 import { readNetWorthCashTotal } from './net-worth';
+import { getDisplayedMonths } from './overview';
 
 import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
 import {
@@ -20,6 +20,9 @@ import {
   insertIncomeDeductionRows,
   selectIncome,
   selectIncomeDeductionRows,
+  selectIncomeTotals,
+  selectSinglePageListSummary,
+  selectWeeklyNetIncome,
   updateIncomeDeductionRow,
 } from '~api/queries';
 import type { IncomeReadResponse, QueryReadIncomeArgs } from '~api/types';
@@ -36,6 +39,42 @@ import {
   MutationUpdateIncomeArgs,
   PageListStandard,
 } from '~api/types/gql';
+
+async function getIncomeTotals(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<Pick<IncomeReadResponse, 'total' | 'totalDeductions' | 'weekly'>> {
+  const [totalRows, weeklyCostRows] = await Promise.all([
+    selectIncomeTotals(db, uid),
+    selectWeeklyNetIncome(db, uid),
+  ]);
+
+  const total = totalRows[0]?.gross ?? 0;
+  const totalDeductions = totalRows.map<IncomeDeduction>((row) => ({
+    name: row.deduction_name,
+    value: -row.deduction_value,
+  }));
+
+  const weekly = getWeeklyCost(weeklyCostRows);
+
+  return { total, totalDeductions, weekly };
+}
+
+type PublishedProperties = {
+  overviewCost: number[];
+} & Pick<IncomeReadResponse, 'total' | 'weekly'>;
+
+async function getPublishedIncomeProperties(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<PublishedProperties> {
+  const [overviewCost, incomeTotals] = await Promise.all([
+    selectSinglePageListSummary(db, uid, getDisplayedMonths(new Date()), PageListStandard.Income),
+    getIncomeTotals(db, uid),
+  ]);
+
+  return { overviewCost, ...incomeTotals };
+}
 
 async function upsertIncomeDeductions(
   db: DatabaseTransactionConnectionType,
@@ -89,15 +128,15 @@ export async function createIncome(
 
   const deductions = await upsertIncomeDeductions(db, uid, id, args.input.deductions);
 
-  const [listPublishedProperties, cashTotal] = await Promise.all([
-    getPublishedProperties(db, uid, PageListStandard.Income),
+  const [publishedProperties, cashTotal] = await Promise.all([
+    getPublishedIncomeProperties(db, uid),
     readNetWorthCashTotal(db, uid),
   ]);
 
   await Promise.all([
     pubsub.publish<IncomeSubscription>(`${PubSubTopic.IncomeChanged}.${uid}`, {
       created: { fakeId: args.fakeId, item: { id, ...item, deductions } },
-      ...listPublishedProperties,
+      ...publishedProperties,
     }),
     pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
   ]);
@@ -115,9 +154,9 @@ export async function readIncome(
 ): Promise<IncomeReadResponse> {
   const { limit, offset } = getLimitAndOffset(args);
 
-  const [rows, { total, weekly }, olderExists] = await Promise.all([
+  const [rows, incomeTotals, olderExists] = await Promise.all([
     selectIncome(db, uid, limit, offset),
-    getListTotals(db, uid, PageListStandard.Income),
+    getIncomeTotals(db, uid),
     getOlderExists(db, uid, PageListStandard.Income, limit, offset),
   ]);
 
@@ -132,8 +171,7 @@ export async function readIncome(
     })),
   }));
 
-  // TODO: return tax totals etc. instead of gross total
-  return { items, total, weekly, olderExists };
+  return { items, olderExists, ...incomeTotals };
 }
 
 export async function updateIncome(
@@ -149,15 +187,15 @@ export async function updateIncome(
   );
   const deductions = await upsertIncomeDeductions(db, uid, args.id, args.input.deductions);
 
-  const [listPublishedProperties, cashTotal] = await Promise.all([
-    getPublishedProperties(db, uid, PageListStandard.Income),
+  const [publishedProperties, cashTotal] = await Promise.all([
+    getPublishedIncomeProperties(db, uid),
     readNetWorthCashTotal(db, uid),
   ]);
 
   await Promise.all([
     pubsub.publish<IncomeSubscription>(`${PubSubTopic.IncomeChanged}.${uid}`, {
       updated: { ...result, deductions },
-      ...listPublishedProperties,
+      ...publishedProperties,
     }),
     pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
   ]);
@@ -172,15 +210,15 @@ export async function deleteIncome(
 ): Promise<CrudResponseDelete> {
   await baseController.delete(db, uid, args.id);
 
-  const [listPublishedProperties, cashTotal] = await Promise.all([
-    getPublishedProperties(db, uid, PageListStandard.Income),
+  const [publishedProperties, cashTotal] = await Promise.all([
+    getPublishedIncomeProperties(db, uid),
     readNetWorthCashTotal(db, uid),
   ]);
 
   await Promise.all([
     pubsub.publish<IncomeSubscription>(`${PubSubTopic.IncomeChanged}.${uid}`, {
       deleted: args.id,
-      ...listPublishedProperties,
+      ...publishedProperties,
     }),
     pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal),
   ]);
