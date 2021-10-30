@@ -22,3 +22,10 @@ build_visual:
 
 get_image_visual:
 	@echo ${IMG_VISUAL}
+
+generate_coverage: export COVERAGE = true
+generate_coverage:
+	@yarn test:api:unit
+	@yarn test:api:integration
+	@yarn test:client
+	@yarn coverage
