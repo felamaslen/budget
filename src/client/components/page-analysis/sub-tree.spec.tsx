@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { SubTree } from './sub-tree';
-import { AnalysisPage, MainBlockName } from '~client/types/enum';
+import type { MainBlockName } from '~client/types';
+import { AnalysisPage } from '~client/types/enum';
 
 describe('<PageAnalysis /> / <SubTree />', () => {
   const props = {
