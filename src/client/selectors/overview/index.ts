@@ -275,6 +275,10 @@ function predictByPastAverages(
   presentValues: number[],
   averageMode: Average = Average.Median,
 ): number[] {
+  if (currentIndex === -1) {
+    return presentValues;
+  }
+
   const currentItems = extrapolateCurrentMonthCategories.includes(category)
     ? replaceAtIndex(
         presentValues.slice(0, currentIndex + 1),

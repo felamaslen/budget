@@ -11,13 +11,6 @@ describe('<AppLogo />', () => {
 
   const setup = (customProps = {}): RenderResult => render(<AppLogo {...props} {...customProps} />);
 
-  it('should render a logo', () => {
-    // TODO: convert this to an image test
-    expect.assertions(1);
-    const { getByText } = setup();
-    expect(getByText('Budget')).toBeInTheDocument();
-  });
-
   it('should render a settings link', () => {
     expect.assertions(4);
     const { getByText } = setup();

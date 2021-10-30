@@ -2,260 +2,19 @@ import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
+import * as stubs from './__tests__/stubs';
 import { BlockPacker, Props } from '.';
 import { blockPacker } from '~client/modules/block-packer';
 import type { BlockItem, WithSubTree } from '~client/types';
 
 describe('<BlockPacker />', () => {
-  const blocks = blockPacker<BlockItem>(10, 6, [
-    {
-      name: 'parent block 1',
-      total: 24,
-      color: 'darkorange',
-      subTree: [
-        {
-          name: 'child block A',
-          total: 8,
-        },
-        {
-          name: 'child block B',
-          total: 14,
-        },
-        {
-          name: 'child block C',
-          total: 2,
-        },
-      ],
-    },
-    {
-      name: 'parent block 2',
-      total: 36,
-      color: 'purple',
-      hasBreakdown: true,
-    },
-  ]);
-
-  const props: Props = {
-    blocks,
-    activeBlocks: ['not_foo', 'not_bar'],
-    status: 'some-status bar',
-    onClick: jest.fn(),
-    onHover: jest.fn(),
-  };
-
   const getContainer = (customProps = {}): RenderResult =>
-    render(<BlockPacker {...props} {...customProps} />);
-
-  it('should render a block tree', () => {
-    expect.assertions(1);
-    const { getByTestId } = getContainer();
-    // TODO: image test
-    // eslint-disable-next-line jest/no-large-snapshots
-    expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
-      .emotion-0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-        overflow: hidden;
-        position: relative;
-      }
-
-      .emotion-2 {
-        float: left;
-        height: 100%;
-        width: 100%;
-      }
-
-      .emotion-6 {
-        background-image: linear-gradient(to bottom right, rgba(255,255,255,0.6), rgba(0,0,0,0.2));
-        box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
-        cursor: default;
-        float: left;
-        height: 100%;
-        outline: none;
-        overflow: hidden;
-        position: relative;
-        width: 100%;
-      }
-
-      .emotion-6:hover::after,
-      .emotion-6:focus::after {
-        content: '';
-        display: block;
-        height: 100%;
-        width: 100%;
-        background-color: rgba(255,255,0,0.4);
-      }
-
-      .e1ubqewq7 .emotion-6 {
-        background-image: none;
-        box-shadow: 1px 1px 3px -1px inset rgba(0,0,0,0.8);
-        overflow: hidden;
-        padding-top: 1rem;
-        box-shadow: 0 0 1px inset rgba(0,0,0,0.6);
-      }
-
-      .e1ubqewq7 .emotion-6::after {
-        box-sizing: content-box;
-        margin-top: -1rem;
-        padding-bottom: 1rem;
-      }
-
-      .emotion-12 {
-        background-image: none;
-        box-shadow: inset -1px -1px 13px rgba(0,0,0,0.4);
-        cursor: default;
-        float: left;
-        height: 100%;
-        outline: none;
-        overflow: hidden;
-        position: relative;
-        width: 100%;
-      }
-
-      .e1ubqewq7 .emotion-12 {
-        background-image: none;
-        box-shadow: 1px 1px 3px -1px inset rgba(0,0,0,0.8);
-        overflow: hidden;
-        padding-top: 1rem;
-      }
-
-      .e1ubqewq7 .emotion-12::after {
-        box-sizing: content-box;
-        margin-top: -1rem;
-        padding-bottom: 1rem;
-      }
-
-      <div
-        class="emotion-0 emotion-1"
-        data-testid="block-tree"
-      >
-        <div
-          class="emotion-2 emotion-3"
-          style="height: 100%; width: 100%;"
-        >
-          <div
-            class="emotion-2 emotion-3"
-            style="height: 100%; width: 60%;"
-          >
-            <div
-              class="emotion-6 emotion-7"
-              data-testid="parent block 2"
-              name="parent block 2"
-              role="button"
-              style="height: 100%; width: 100%; background-color: purple;"
-              tabindex="0"
-            />
-          </div>
-          <div
-            class="emotion-2 emotion-3"
-            style="height: 100%; width: 40%;"
-          >
-            <div
-              class="emotion-2 emotion-3"
-              style="height: 100%; width: 100%;"
-            >
-              <div
-                class="emotion-12 emotion-7"
-                data-testid="parent block 1"
-                name="parent block 1"
-                role="container"
-                style="height: 100%; width: 100%; background-color: darkorange;"
-                tabindex="0"
-              >
-                <div
-                  class="emotion-2 emotion-3"
-                  style="height: 100%; width: 100%;"
-                >
-                  <div
-                    class="emotion-2 emotion-3"
-                    style="height: 58.333333333333336%; width: 100%;"
-                  >
-                    <div
-                      class="emotion-6 emotion-7"
-                      data-testid="child block B"
-                      name="child block B"
-                      role="container"
-                      style="height: 100%; width: 100%;"
-                      tabindex="0"
-                    />
-                  </div>
-                  <div
-                    class="emotion-2 emotion-3"
-                    style="height: 41.66666666666667%; width: 100%;"
-                  >
-                    <div
-                      class="emotion-2 emotion-3"
-                      style="height: 100%; width: 80%;"
-                    >
-                      <div
-                        class="emotion-6 emotion-7"
-                        data-testid="child block A"
-                        name="child block A"
-                        role="container"
-                        style="height: 100%; width: 100%;"
-                        tabindex="0"
-                      />
-                    </div>
-                    <div
-                      class="emotion-2 emotion-3"
-                      style="height: 100%; width: 19.999999999999996%;"
-                    >
-                      <div
-                        class="emotion-2 emotion-3"
-                        style="height: 100.00000000000003%; width: 100%;"
-                      >
-                        <div
-                          class="emotion-6 emotion-7"
-                          data-testid="child block C"
-                          name="child block C"
-                          role="container"
-                          style="height: 100%; width: 100%;"
-                          tabindex="0"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `);
-  });
+    render(<BlockPacker {...stubs.props} {...customProps} />);
 
   it('should render a status bar', () => {
     expect.assertions(1);
     const { getByTestId } = getContainer();
     expect(getByTestId('status-bar')).toHaveTextContent('some-status bar');
-  });
-
-  it('should not render blocks if they are null', () => {
-    expect.assertions(1);
-    const { getByTestId } = getContainer({ blocks: null });
-    expect(getByTestId('block-tree')).toMatchInlineSnapshot(`
-      .emotion-0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-        overflow: hidden;
-        position: relative;
-      }
-
-      <div
-        class="emotion-0 emotion-1"
-        data-testid="block-tree"
-      />
-    `);
   });
 
   describe.each`
@@ -274,8 +33,8 @@ describe('<BlockPacker />', () => {
     it('should call onHover with null', () => {
       expect.assertions(2);
       setup();
-      expect(props.onHover).toHaveBeenCalledTimes(1);
-      expect(props.onHover).toHaveBeenCalledWith(null);
+      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
+      expect(stubs.props.onHover).toHaveBeenCalledWith(null);
     });
   });
 
@@ -299,8 +58,8 @@ describe('<BlockPacker />', () => {
     `('should call onHover with the name', ({ id }) => {
       expect.assertions(2);
       interact(handler, id);
-      expect(props.onHover).toHaveBeenCalledTimes(1);
-      expect(props.onHover).toHaveBeenCalledWith(id);
+      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
+      expect(stubs.props.onHover).toHaveBeenCalledWith(id);
     });
   });
 
@@ -318,8 +77,8 @@ describe('<BlockPacker />', () => {
     `('should call onHover with the name and sub-name', ({ parent, id }) => {
       expect.assertions(2);
       interact(handler, id);
-      expect(props.onHover).toHaveBeenCalledTimes(1);
-      expect(props.onHover).toHaveBeenCalledWith(parent, id);
+      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
+      expect(stubs.props.onHover).toHaveBeenCalledWith(parent, id);
     });
   });
 

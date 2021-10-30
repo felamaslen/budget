@@ -1,10 +1,7 @@
-/* eslint-disable max-len */
-import { render, RenderResult, within, act, waitFor } from '@testing-library/react';
+import { within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
-import { Provider } from 'react-redux';
-import createStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 
 import { AccessibleListStandard, StandardLabels } from './standard';
@@ -13,7 +10,7 @@ import { State } from '~client/reducers';
 import type { DailyState } from '~client/reducers/list';
 import { breakpoints } from '~client/styled/variables';
 import { testState } from '~client/test-data/state';
-import { GQLProviderMock } from '~client/test-utils/gql-provider-mock';
+import { renderWithStore } from '~client/test-utils/render-component';
 import { PageListStandard } from '~client/types/enum';
 
 jest.mock('shortid', () => ({
@@ -86,18 +83,8 @@ describe(AccessibleListStandard.name, () => {
     color: 'red',
   };
 
-  const setup = (customState: State = state): RenderResult & { store: MockStore<State> } => {
-    const store = createStore<State>()(customState);
-    const renderResult = render(
-      <Provider store={store}>
-        <GQLProviderMock>
-          <AccessibleListStandard {...props} />
-        </GQLProviderMock>
-      </Provider>,
-    );
-
-    return { store, ...renderResult };
-  };
+  const setup = (customState: State = state): ReturnType<typeof renderWithStore> =>
+    renderWithStore(<AccessibleListStandard {...props} />, { customState });
 
   describe.each`
     id        | date            | item            | category            | cost      | shop
@@ -264,37 +251,12 @@ describe(AccessibleListStandard.name, () => {
 
   describe('when rendering on mobiles', () => {
     const mobileQuery = `(max-width: ${breakpoints.mobile - 1}px)`;
-    const setupMobile = (): RenderResult & { store: MockStore<State> } => {
+    const setupMobile = (): ReturnType<typeof renderWithStore> => {
       matchMedia.useMediaQuery(mobileQuery);
       const renderResult = setup();
 
       return renderResult;
     };
-
-    it('should render a mobile list view', () => {
-      // TODO: convert this to an image test
-      expect.assertions(10);
-      const { getAllByRole } = setupMobile();
-      const listItems = getAllByRole('listitem');
-
-      expect(listItems).toHaveLength(3);
-
-      const withinItem0 = within(listItems[0]);
-      const withinItem1 = within(listItems[1]);
-      const withinItem2 = within(listItems[2]);
-
-      expect(withinItem0.getByText('20/04/2020')).toBeInTheDocument();
-      expect(withinItem0.getByText('item three')).toBeInTheDocument();
-      expect(withinItem0.getByText('£1.73')).toBeInTheDocument();
-
-      expect(withinItem1.getByText('20/04/2020')).toBeInTheDocument();
-      expect(withinItem1.getByText('item two')).toBeInTheDocument();
-      expect(withinItem1.getByText('£1.18')).toBeInTheDocument();
-
-      expect(withinItem2.getByText('17/04/2020')).toBeInTheDocument();
-      expect(withinItem2.getByText('item one')).toBeInTheDocument();
-      expect(withinItem2.getByText('£9.31')).toBeInTheDocument();
-    });
 
     it.each`
       field     | example
@@ -558,18 +520,11 @@ describe(AccessibleListStandard.name, () => {
         },
       };
 
-      const setupCustom = (): RenderResult & { store: MockStore<CustomState> } => {
+      const setupCustom = (): ReturnType<typeof renderWithStore> => {
         matchMedia.useMediaQuery(`(min-width: ${breakpoints.mobile}px)`);
-        const store = createStore<CustomState>()(customState);
-        const renderResult = render(
-          <Provider store={store}>
-            <GQLProviderMock>
-              <AccessibleListStandard page={customPage} labels={labels} />
-            </GQLProviderMock>
-          </Provider>,
-        );
-
-        return { store, ...renderResult };
+        return renderWithStore(<AccessibleListStandard page={customPage} labels={labels} />, {
+          customState,
+        });
       };
 
       it('should render the field', () => {

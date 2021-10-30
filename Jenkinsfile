@@ -1,12 +1,13 @@
 node {
   checkout scm
-  result = sh(script: "git log -1 | grep '(wip)'", returnStatus: true)
+  result_skip = sh(script: "git log -1 | grep '(wip)'", returnStatus: true)
 
-  if (result == 0) {
+  if (result_skip == 0) {
     echo "Skipping commit"
   } else {
     script {
       IMAGE = sh(returnStdout: true, script: "make get_image").trim()
+      IMAGE_VISUAL = sh(returnStdout: true, script: "make get_image_visual").trim()
     }
 
     stage('Build and push image') {
@@ -31,12 +32,16 @@ node {
           sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
         }
 
-        stage('Client unit tests') {
-          sh "docker run --rm ${IMAGE} sh -c 'yarn test:client:ci'"
-        }
-
         stage('API unit tests') {
           sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
+        }
+
+        stage('Client unit tests') {
+          sh "docker run --rm --privileged ${IMAGE} sh -c 'yarn test:client:ci'"
+        }
+
+        stage('Visual regression tests') {
+          unstable('Visual regression tests are disabled')
         }
 
         stage('API integration tests') {
@@ -45,8 +50,8 @@ node {
       }
     }
 
-    stage('Deploy') {
-      if (env.BRANCH_NAME == "master") {
+    if (env.BRANCH_NAME == "master") {
+      stage('Deploy') {
         sh './k8s/migrate.sh'
         sh './k8s/deploy.sh'
       }

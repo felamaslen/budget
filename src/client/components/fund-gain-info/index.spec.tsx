@@ -33,8 +33,6 @@ describe('<FundGainInfo />', () => {
     expect(getByText(value)).toBeInTheDocument();
   });
 
-  // TODO: add an image test
-
   it('should not render anything if there are no gain info', () => {
     expect.assertions(1);
     const { container } = setup({ rowGains: null });
