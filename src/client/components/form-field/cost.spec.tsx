@@ -234,7 +234,7 @@ describe('<FormFieldCost />', () => {
       `(
         'should handle the case $case',
         ({ value, expectedCalls }: { value: string; expectedCalls: number[] }) => {
-          expect.assertions(expectedCalls.length + 1);
+          expect.hasAssertions();
 
           const { getByLabelText } = render(<FormFieldCostInline {...propsDecimal} />);
           const input = getByLabelText('cost-input') as HTMLInputElement;
