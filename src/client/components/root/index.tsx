@@ -44,12 +44,9 @@ export const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
 }) => {
   const windowWidth = useDebouncedResize();
 
-  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
-
   const [, logoutFromServer] = useLogoutMutation();
   const logout = useCallback(() => {
     logoutFromServer();
-    setSettingsOpen(false);
     onLogout();
   }, [onLogout, logoutFromServer]);
 
@@ -57,11 +54,11 @@ export const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
     <ResizeContext.Provider value={windowWidth}>
       <TodayProvider>
         <GlobalStylesProvider>
-          <Header {...props} onLogout={logout} setSettingsOpen={setSettingsOpen} />
+          <Header {...props} onLogout={logout} />
           <ErrorMessages />
           <PageWrapper>
             {children}
-            <Config open={settingsOpen} setOpen={setSettingsOpen} />
+            <Config />
           </PageWrapper>
         </GlobalStylesProvider>
       </TodayProvider>

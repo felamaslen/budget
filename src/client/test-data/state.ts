@@ -26,6 +26,7 @@ export const testState: State = {
       },
     },
     appConfigSerial: 0,
+    settingsOpen: false,
   },
   error: [],
   overview: {

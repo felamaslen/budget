@@ -1,24 +1,24 @@
-import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+
 import { AppLogo, Props } from '.';
+import { settingsToggled } from '~client/actions';
+import { renderWithStore } from '~client/test-utils';
 
 describe('<AppLogo />', () => {
   const props: Props = {
     loading: false,
-    setSettingsOpen: jest.fn(),
   };
 
-  const setup = (customProps = {}): RenderResult => render(<AppLogo {...props} {...customProps} />);
+  const setup = (): ReturnType<typeof renderWithStore> => renderWithStore(<AppLogo {...props} />);
 
   it('should render a settings link', () => {
-    expect.assertions(4);
-    const { getByText } = setup();
+    expect.assertions(3);
+    const { getByText, store } = setup();
     const button = getByText('⚙');
     expect(button).toBeInTheDocument();
-    expect(props.setSettingsOpen).not.toHaveBeenCalled();
+    expect(store.getActions()).toHaveLength(0);
     userEvent.click(button);
-    expect(props.setSettingsOpen).toHaveBeenCalledTimes(1);
-    expect(props.setSettingsOpen).toHaveBeenCalledWith(true);
+    expect(store.getActions()).toStrictEqual([settingsToggled(true)]);
   });
 });

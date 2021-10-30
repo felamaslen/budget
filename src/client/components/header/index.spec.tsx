@@ -10,7 +10,6 @@ describe('<Header />', () => {
   const props: Props = {
     loggedIn: true,
     onLogout: jest.fn(),
-    setSettingsOpen: jest.fn(),
   };
 
   const setup = (

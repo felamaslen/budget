@@ -33,8 +33,8 @@ import { NativeDate } from '~shared/types';
 
 describe(useListSubscriptions.name, () => {
   let subscribeSpy: jest.SpyInstance<
-    ReturnType<typeof mockClient['executeMutation']>,
-    Parameters<typeof mockClient['executeMutation']>
+    ReturnType<typeof mockClient['executeSubscription']>,
+    Parameters<typeof mockClient['executeSubscription']>
   >;
   beforeEach(() => {
     subscribeSpy = jest.spyOn(mockClient, 'executeSubscription');

@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 
@@ -10,15 +10,13 @@ import { getApiLoading } from '~client/selectors';
 export type Props = {
   loggedIn: boolean;
   onLogout: () => void;
-  setSettingsOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-const Header: React.FC<RouteComponentProps & Props> = ({ loggedIn, onLogout, setSettingsOpen }) => {
+const Header: React.FC<RouteComponentProps & Props> = ({ loggedIn, onLogout }) => {
   const loadingApi = useSelector(getApiLoading);
-
   return (
     <Styled.Header role="heading">
-      <AppLogo loading={loadingApi} setSettingsOpen={setSettingsOpen} />
+      <AppLogo loading={loadingApi} />
       {loggedIn && <Navbar onLogout={onLogout} />}
     </Styled.Header>
   );

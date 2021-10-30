@@ -1746,6 +1746,17 @@ export type AnalysisDeepQuery = (
   )>> }
 );
 
+export type ConfigQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ConfigQuery = (
+  { __typename?: 'Query' }
+  & { config?: Maybe<(
+    { __typename?: 'AppConfig' }
+    & ConfigPartsFragment
+  )> }
+);
+
 export type ExchangeRatesQueryVariables = Exact<{
   base: Scalars['String'];
 }>;
@@ -2777,6 +2788,17 @@ export const AnalysisDeepDocument = gql`
 
 export function useAnalysisDeepQuery(options: Omit<Urql.UseQueryArgs<AnalysisDeepQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<AnalysisDeepQuery>({ query: AnalysisDeepDocument, ...options });
+};
+export const ConfigDocument = gql`
+    query Config {
+  config {
+    ...ConfigParts
+  }
+}
+    ${ConfigPartsFragmentDoc}`;
+
+export function useConfigQuery(options: Omit<Urql.UseQueryArgs<ConfigQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ConfigQuery>({ query: ConfigDocument, ...options });
 };
 export const ExchangeRatesDocument = gql`
     query ExchangeRates($base: String!) {

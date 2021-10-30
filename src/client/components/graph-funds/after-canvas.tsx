@@ -13,7 +13,6 @@ import { abbreviateFundName } from '~shared/abbreviation';
 export type ToggleList = Record<string, boolean | null>;
 
 export type Props = Pick<ItemProps, 'toggleList' | 'setToggleList'> & {
-  isMobile: boolean;
   historyOptions: HistoryOptions;
   mode: FundMode;
   changeMode: (newMode: FundMode) => void;
@@ -80,7 +79,6 @@ export const periodSelectOptions: SelectOptions<HistoryOptions> = [
 ];
 
 export const AfterCanvas: React.FC<Props> = ({
-  isMobile,
   historyOptions,
   mode,
   changeMode,
@@ -91,11 +89,7 @@ export const AfterCanvas: React.FC<Props> = ({
   setSidebarOpen,
   changePeriod,
 }) => {
-  const modeSelectOptions = useFundModeSelectOptions(isMobile);
-  if (isMobile) {
-    return null; // TODO: open settings dialog to "funds" section
-  }
-
+  const modeSelectOptions = useFundModeSelectOptions(false);
   return (
     <>
       <Styled.FundModeSwitch>

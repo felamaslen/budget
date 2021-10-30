@@ -1,8 +1,9 @@
 import format from 'date-fns/format';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 
 import { NetWorthEditForm } from '../edit-form';
 import * as Styled from './styles';
+import { ConfirmModal } from '~client/components/confirm-modal';
 import { OnUpdate } from '~client/hooks';
 import type { NetWorthEntryNative as Entry, SetActiveId } from '~client/types';
 import type {
@@ -11,7 +12,7 @@ import type {
 } from '~client/types/gql';
 import type { Create } from '~shared/types';
 
-type Props = {
+export type Props = {
   item: Entry;
   categories: Category[];
   subcategories: Subcategory[];
@@ -36,11 +37,13 @@ const NetWorthListItem: React.FC<Props> = ({
 
   const dateFormatted = format(item.date, 'dd MMM yy');
 
-  const onDeleteConfirmed = useCallback(() => {
-    if (window.confirm(`Are you sure you want to delete the entry for: ${dateFormatted}?`)) {
-      onDelete();
-    }
-  }, [onDelete, dateFormatted]);
+  const [confirmingDelete, setConfirmingDelete] = useState<boolean>(false);
+  const onCancelDelete = useCallback(() => setConfirmingDelete(false), []);
+  const onConfirmDelete = useCallback(() => {
+    onDelete();
+    setConfirmingDelete(false);
+  }, [onDelete]);
+  const onDeleteConfirmed = useCallback(() => setConfirmingDelete(true), []);
 
   if (noneActive) {
     return (
@@ -54,14 +57,23 @@ const NetWorthListItem: React.FC<Props> = ({
   }
 
   return (
-    <NetWorthEditForm
-      item={item}
-      categories={categories}
-      subcategories={subcategories}
-      setActiveId={setActive}
-      onDelete={onDeleteConfirmed}
-      onUpdate={onUpdate}
-    />
+    <>
+      <NetWorthEditForm
+        item={item}
+        categories={categories}
+        subcategories={subcategories}
+        setActiveId={setActive}
+        onDelete={onDeleteConfirmed}
+        onUpdate={onUpdate}
+      />
+      {confirmingDelete && (
+        <ConfirmModal
+          title={`Are you sure you want to delete the entry for ${dateFormatted}?`}
+          onCancel={onCancelDelete}
+          onConfirm={onConfirmDelete}
+        />
+      )}
+    </>
   );
 };
 const NetWorthListItemMemo = memo(NetWorthListItem);

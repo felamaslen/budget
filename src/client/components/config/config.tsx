@@ -1,28 +1,25 @@
 /* @jsx jsx */
 import { jsx } from '@emotion/react';
 import formatISO from 'date-fns/formatISO';
-import { Dispatch, FC, Fragment, SetStateAction, useEffect, useState } from 'react';
+import { FC, Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { configUpdatedFromLocal } from '~client/actions';
+import { configUpdatedFromLocal, settingsToggled } from '~client/actions';
 
 import { FormFieldDate, FormFieldSelect, FormFieldTickbox } from '~client/components/form-field';
 import { periodSelectOptions } from '~client/components/graph-funds/after-canvas';
 import { useFundModeSelectOptions } from '~client/components/page-funds/hooks';
 import { useIsMobile } from '~client/hooks';
+import type { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors';
 import { Button, H3 } from '~client/styled/shared';
 import * as Styled from '~client/styled/shared/settings';
 import { LocalAppConfig } from '~client/types';
 
-export type Props = {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-};
-
-export const Config: FC<Props> = ({ open, setOpen }) => {
+export const Config: FC = () => {
   const isMobile = useIsMobile();
   const dispatch = useDispatch();
   const appConfig = useSelector(getAppConfig);
+  const open = useSelector<State>((state) => state.api.settingsOpen);
   const [tempAppConfig, setTempAppConfig] = useState<LocalAppConfig>(appConfig);
   useEffect(() => {
     if (open) {
@@ -38,7 +35,11 @@ export const Config: FC<Props> = ({ open, setOpen }) => {
 
   return (
     <Fragment>
-      <Styled.SettingsBackgroundModal onClick={(): void => setOpen(false)} />
+      <Styled.SettingsBackgroundModal
+        onClick={(): void => {
+          dispatch(settingsToggled());
+        }}
+      />
       <Styled.SettingsDialog>
         <Styled.SettingsGuild>
           <H3>Global Settings</H3>

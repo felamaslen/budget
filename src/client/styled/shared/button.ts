@@ -75,15 +75,12 @@ const buttonStyles = ({ expanded = false }: ButtonProps): SerializedStyles => cs
     padding: 5px 12px 6px;
     flex-grow: 0;
     width: auto;
-    box-shadow: inset 0px 1px 0px 0px ${colors.shadow.light};
     background: ${colors.button.main};
-    border: 1px solid ${colors.button.border};
-    border-radius: 0;
+    border-radius: ${rem(3)};
     cursor: pointer;
     color: ${colors.white};
     font-family: Arial;
-    font-size: 13px;
-    height: 24px;
+    font-size: ${rem(13)};
     position: relative;
     text-decoration: none;
     text-transform: none;
@@ -99,7 +96,6 @@ const buttonStyles = ({ expanded = false }: ButtonProps): SerializedStyles => cs
     &:disabled {
       background: ${colors.button.disabled};
       cursor: default;
-      border: 1px solid ${colors.medium.mediumDark};
     }
   }
 
