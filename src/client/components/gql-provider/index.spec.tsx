@@ -14,7 +14,7 @@ jest.mock('~client/modules/ssr', () => ({
   isServerSide: false,
 }));
 
-describe('GQLProvider', () => {
+describe('gql provider', () => {
   let mockFetch: typeof global.fetch;
   const mockServer = new MockServer();
 
