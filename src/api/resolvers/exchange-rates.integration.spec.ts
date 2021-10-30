@@ -1,5 +1,8 @@
+import type { ApolloQueryResult } from 'apollo-boost';
 import gql from 'graphql-tag';
 import nock, { Scope } from 'nock';
+
+import mockOpenExchangeRatesResponse from '../vendor/currencies.json';
 
 import { nockCurrencies } from '~api/__tests__/nocks';
 import { App, getTestApp } from '~api/test-utils/create-server';
@@ -113,6 +116,16 @@ describe('exchange rates resolvers', () => {
     },
   ];
 
+  const getResponse = async (base: string): Promise<ApolloQueryResult<Query>> => {
+    const res = await app.authGqlClient.query<Query, QueryExchangeRatesArgs>({
+      query,
+      variables: {
+        base,
+      },
+    });
+    return res;
+  };
+
   it.each`
     base     | expectedRates
     ${'GBP'} | ${expectedRatesGBPBase}
@@ -120,14 +133,50 @@ describe('exchange rates resolvers', () => {
     ${'XAG'} | ${expectedRatesXAGBase}
   `('should return currency rates rebased to $base', async ({ base, expectedRates }) => {
     expect.assertions(2);
-    const res = await app.authGqlClient.query<Query, QueryExchangeRatesArgs>({
-      query,
-      variables: {
-        base,
-      },
-    });
+    const res = await getResponse(base);
 
     expect(res.data.exchangeRates?.error).toBeNull();
     expect(res.data.exchangeRates?.rates).toStrictEqual(expectedRates.map(expect.objectContaining));
+  });
+
+  describe('when the response does not contain the given base currency', () => {
+    beforeEach(() => {
+      nock.cleanAll();
+      currencyNock = nockCurrencies(200, {
+        ...mockOpenExchangeRatesResponse,
+        rates: {
+          USD: 1,
+          XAG: 0.05406284,
+          ZAR: 15.00329,
+        },
+      });
+    });
+
+    it('should return an empty array', async () => {
+      expect.assertions(2);
+
+      const resGBP = await getResponse('GBP');
+      const resUSD = await getResponse('USD');
+
+      expect(resGBP.data.exchangeRates?.rates).toHaveLength(0);
+      expect(resUSD.data.exchangeRates?.rates).not.toHaveLength(0);
+    });
+  });
+
+  describe('when an error occurs with the request', () => {
+    beforeEach(() => {
+      nock.cleanAll();
+      currencyNock = nockCurrencies(500);
+    });
+
+    it('should return the error', async () => {
+      expect.assertions(2);
+      const res = await getResponse('GBP');
+
+      expect(res.data.exchangeRates?.rates).toBeNull();
+      expect(res.data.exchangeRates?.error).toMatchInlineSnapshot(
+        `"Request failed with status code 500"`,
+      );
+    });
   });
 });
