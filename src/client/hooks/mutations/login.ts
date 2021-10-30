@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useLoginMutation } from '../gql';
-import { errorOpened } from '~client/actions';
+import { configUpdatedFromApi, errorOpened } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
+import { useConfigQuery } from '~client/types/gql';
 
 type State = {
   pin: number | null;
@@ -18,19 +19,23 @@ export function useLogin(): {
 } {
   const dispatch = useDispatch();
 
-  const [{ data, fetching, error }, request] = useLoginMutation();
+  const [loginResult, requestLogin] = useLoginMutation();
+  const [configResult, requestConfig] = useConfigQuery({ pause: true });
 
-  const apiKeyResult = data?.login.apiKey ?? null;
+  const apiKeyResult = loginResult.data?.login.apiKey ?? null;
 
   const [{ pin, apiKey }, setState] = useState<State>({ pin: null, apiKey: apiKeyResult });
 
   const login = useCallback((newPin: number) => setState((last) => ({ ...last, pin: newPin })), []);
 
   const loggedIn = !!apiKey;
+  const hasConfig = !configResult.fetching && !!configResult.data?.config;
 
   useEffect(() => {
     setState((last) => ({ ...last, apiKey: apiKeyResult }));
   }, [apiKeyResult]);
+
+  const error = loginResult.error ?? configResult.error;
 
   useEffect(() => {
     if (error) {
@@ -38,7 +43,7 @@ export function useLogin(): {
     }
   }, [dispatch, error]);
 
-  const loginError = data?.login?.error;
+  const loginError = loginResult.data?.login?.error;
   useEffect(() => {
     if (loginError) {
       dispatch(errorOpened(loginError, ErrorLevel.Warn));
@@ -47,14 +52,26 @@ export function useLogin(): {
 
   useEffect(() => {
     if (pin) {
-      request({ pin });
+      requestLogin({ pin });
     }
-  }, [pin, request]);
+  }, [pin, requestLogin]);
+
+  useEffect(() => {
+    if (loggedIn) {
+      requestConfig();
+    }
+  }, [loggedIn, requestConfig]);
+
+  useEffect(() => {
+    if (!configResult.fetching && configResult.data?.config) {
+      dispatch(configUpdatedFromApi(configResult.data.config));
+    }
+  }, [configResult, dispatch, pin, requestLogin]);
 
   return {
     login,
-    loading: fetching,
-    loggedIn,
-    apiKey: data?.login?.apiKey ?? null,
+    loading: loginResult.fetching || configResult.fetching,
+    loggedIn: loggedIn && hasConfig,
+    apiKey: loginResult.data?.login?.apiKey ?? null,
   };
 }

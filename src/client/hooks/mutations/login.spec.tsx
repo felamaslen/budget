@@ -5,7 +5,7 @@ import { makeOperation, OperationContext } from 'urql';
 import { delay, fromValue, pipe } from 'wonka';
 
 import { useLogin } from './login';
-import { errorOpened } from '~client/actions';
+import { configUpdatedFromApi, errorOpened } from '~client/actions';
 import { ErrorLevel } from '~client/constants/error';
 import * as LoginMutations from '~client/gql/mutations/login';
 import { mockClient, renderHookWithStore } from '~client/test-utils';
@@ -16,12 +16,23 @@ jest.mock('shortid', () => ({
 }));
 
 describe(useLogin.name, () => {
-  let loginSpy: jest.SpyInstance;
+  let mutationSpy: jest.SpyInstance;
+  let querySpy: jest.SpyInstance;
 
   const myCorrectPin = 1235;
 
+  const mockConfig: types.ConfigQuery = {
+    __typename: 'Query',
+    config: {
+      __typename: 'AppConfig',
+      birthDate: '1992-03-15',
+      realTimePrices: true,
+      futureMonths: 5,
+    },
+  };
+
   beforeEach(() => {
-    loginSpy = jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) => {
+    mutationSpy = jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) => {
       if (request.query === LoginMutations.login) {
         if ((request.variables as types.MutationLoginArgs).pin === myCorrectPin) {
           return pipe(
@@ -56,6 +67,22 @@ describe(useLogin.name, () => {
       }
       return fromValue({
         operation: makeOperation('mutation', request, {} as OperationContext),
+        data: null,
+      });
+    });
+
+    querySpy = jest.spyOn(mockClient, 'executeQuery').mockImplementation((request) => {
+      if (request.query === types.ConfigDocument) {
+        return pipe(
+          fromValue({
+            operation: makeOperation('query', request, {} as OperationContext),
+            data: mockConfig,
+          }),
+          delay(10),
+        );
+      }
+      return fromValue({
+        operation: makeOperation('query', request, {} as OperationContext),
         data: null,
       });
     });
@@ -106,12 +133,15 @@ describe(useLogin.name, () => {
         });
       });
 
-      it('should call the login mutation once', () => {
-        expect.assertions(2);
+      it('should call the login mutation once', async () => {
+        expect.hasAssertions();
         setupLogin(myCorrectPin);
 
-        expect(loginSpy).toHaveBeenCalledTimes(1);
-        expect(loginSpy).toHaveBeenCalledWith(
+        await waitFor(() => {
+          expect(mutationSpy).toHaveBeenCalledTimes(1);
+        });
+
+        expect(mutationSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             query: LoginMutations.login,
             variables: {
@@ -122,6 +152,36 @@ describe(useLogin.name, () => {
         );
       });
 
+      it('should query and set the app config after the login mutation', async () => {
+        expect.hasAssertions();
+
+        const { result, store } = setupLogin(myCorrectPin);
+
+        expect(mutationSpy).toHaveBeenCalledTimes(1);
+        expect(querySpy).not.toHaveBeenCalled();
+
+        expect(result.current.loggedIn).toBe(false);
+        expect(result.current.loading).toBe(true);
+
+        await waitFor(() => {
+          expect(querySpy).toHaveBeenCalledTimes(1);
+        });
+
+        expect(querySpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: types.ConfigDocument,
+          }),
+          {},
+        );
+
+        expect(store.getActions()).toStrictEqual([
+          configUpdatedFromApi(mockConfig.config as types.AppConfig),
+        ]);
+
+        expect(result.current.loggedIn).toBe(true);
+        expect(result.current.loading).toBe(false);
+      });
+
       it('should return the API key', async () => {
         expect.hasAssertions();
         const { result } = setupLogin(myCorrectPin);
@@ -129,17 +189,6 @@ describe(useLogin.name, () => {
         await waitFor(() => {
           expect(result.current.apiKey).toBe('some-api-key');
         });
-      });
-
-      it('should not dispatch any actions', async () => {
-        expect.hasAssertions();
-        const { result, store } = setupLogin(myCorrectPin);
-
-        await waitFor(() => {
-          expect(result.current.apiKey).not.toBeNull();
-        });
-
-        expect(store.getActions()).toHaveLength(0);
       });
     });
 
@@ -168,7 +217,9 @@ describe(useLogin.name, () => {
         const { store } = setupLogin(myCorrectPin - 1);
 
         await waitFor(() => {
-          expect(store.getActions()).toStrictEqual([errorOpened('Incorrect PIN', ErrorLevel.Warn)]);
+          expect(store.getActions()).toStrictEqual(
+            expect.arrayContaining([errorOpened('Incorrect PIN', ErrorLevel.Warn)]),
+          );
         });
       });
     });
