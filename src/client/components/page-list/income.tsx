@@ -52,7 +52,7 @@ const HeaderIncome: React.FC<HeaderIncomeProps> = (props) => (
   <Standard.StandardHeader<GQL<IncomeNative>> {...props} page={PageListStandard.Income} />
 );
 
-function useIncomeItems(): () => Promise<void> {
+export function useIncomeItems(): () => Promise<void> {
   const dispatch = useDispatch();
   const offset = useSelector(getListOffset(PageListStandard.Income));
 
@@ -66,7 +66,11 @@ function useIncomeItems(): () => Promise<void> {
 
   useEffect(() => {
     if (data?.readIncome && !fetching && !stale) {
-      dispatch(listDataReceived(PageListStandard.Income, data.readIncome));
+      dispatch(
+        listDataReceived(PageListStandard.Income, data.readIncome, {
+          totalDeductions: data.readIncome?.totalDeductions ?? [],
+        }),
+      );
     }
   }, [dispatch, data, fetching, stale]);
 
