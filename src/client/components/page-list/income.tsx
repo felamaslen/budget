@@ -1,10 +1,13 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
+
+import * as Styled from './styles';
 import { listDataReceived } from '~client/actions';
 import { AccessibleList } from '~client/components/accessible-list';
 import { dailySelector } from '~client/components/accessible-list/selectors';
 import * as Standard from '~client/components/accessible-list/standard';
+import * as StandardStyled from '~client/components/accessible-list/styles';
 import type { Fields, HeaderProps, Props } from '~client/components/accessible-list/types';
 import { FormFieldIncomeDeductions, FormFieldIncomeMetadata } from '~client/components/form-field';
 import { makeField, ModalFields } from '~client/components/modal-dialog';
@@ -12,7 +15,9 @@ import { PAGE_LIST_LIMIT } from '~client/constants/data';
 import { useListCrudIncome, useToday } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { sortByKey } from '~client/modules/data';
-import { getListOffset } from '~client/selectors';
+import { capitalise, formatCurrency } from '~client/modules/format';
+import { getIncomeMetadata, getListOffset } from '~client/selectors';
+import { Button, H4 } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
 import { PageListStandard } from '~client/types/enum';
 import { Income, IncomeInput, useReadIncomeQuery } from '~client/types/gql';
@@ -48,9 +53,65 @@ type HeaderIncomeProps = HeaderProps<
   Standard.StandardMobileKeys
 >;
 
-const HeaderIncome: React.FC<HeaderIncomeProps> = (props) => (
-  <Standard.StandardHeader<GQL<IncomeNative>> {...props} page={PageListStandard.Income} />
-);
+const HeaderIncome: React.FC<HeaderIncomeProps> = ({ fields, fieldsMobile, isMobile }) => {
+  const metadata = useSelector(getIncomeMetadata);
+  const [showMetadata, setShowMetadata] = useState<boolean>(false);
+  const toggleMetadata = useCallback(() => setShowMetadata((last) => !last), []);
+
+  if (isMobile) {
+    return (
+      <StandardStyled.StandardHeader data-testid="header">
+        {fieldsMobile.map((field) => (
+          <StandardStyled.HeaderColumn key={field as string} column={field as string}>
+            {capitalise(labels ? Reflect.get(labels, field) ?? field : field)}
+          </StandardStyled.HeaderColumn>
+        ))}
+      </StandardStyled.StandardHeader>
+    );
+  }
+
+  return (
+    <StandardStyled.StandardHeader data-testid="header">
+      {fields.map((field) => (
+        <StandardStyled.HeaderColumn key={field as string} column={field as string}>
+          {capitalise(labels ? Reflect.get(labels, field) ?? field : field)}
+        </StandardStyled.HeaderColumn>
+      ))}
+      <StandardStyled.HeaderColumn>
+        <Button onClick={toggleMetadata}>Metadata</Button>
+        {showMetadata && (
+          <Styled.IncomeMetadata>
+            <Styled.IncomeMetadataRow>
+              <Styled.IncomeMetadataLabel>Total</Styled.IncomeMetadataLabel>
+              <Styled.IncomeMetadataValue>
+                {formatCurrency(metadata.total, { abbreviate: true })}
+              </Styled.IncomeMetadataValue>
+              <Styled.IncomeMetadataInfo>[gross]</Styled.IncomeMetadataInfo>
+            </Styled.IncomeMetadataRow>
+            <Styled.IncomeMetadataRow>
+              <Styled.IncomeMetadataLabel>Weekly</Styled.IncomeMetadataLabel>
+              <Styled.IncomeMetadataValue>
+                {formatCurrency(metadata.weekly, { abbreviate: false })}
+              </Styled.IncomeMetadataValue>
+              <Styled.IncomeMetadataInfo>[net]</Styled.IncomeMetadataInfo>
+            </Styled.IncomeMetadataRow>
+            <Styled.IncomeMetadataDeductions>
+              <H4>Deductions</H4>
+              {metadata.deductions.map(({ name, value }) => (
+                <Styled.IncomeMetadataRow key={name}>
+                  <Styled.IncomeMetadataLabel>{name}</Styled.IncomeMetadataLabel>
+                  <Styled.IncomeMetadataValue>
+                    {formatCurrency(-value, { abbreviate: true, brackets: true, precision: 1 })}
+                  </Styled.IncomeMetadataValue>
+                </Styled.IncomeMetadataRow>
+              ))}
+            </Styled.IncomeMetadataDeductions>
+          </Styled.IncomeMetadata>
+        )}
+      </StandardStyled.HeaderColumn>
+    </StandardStyled.StandardHeader>
+  );
+};
 
 export function useIncomeItems(): () => Promise<void> {
   const dispatch = useDispatch();
