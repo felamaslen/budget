@@ -52,15 +52,8 @@ export const overviewSchema = gql`
     spending: [Int!]!
   }
 
-  type OverviewPreview {
-    startDate: Date!
-    values: [Int!]!
-  }
-
   extend type Query {
     overview(now: Date): Overview
     overviewOld(now: Date): OverviewOld
-
-    overviewPreview(category: MonthlyCategory!, date: Date!): OverviewPreview
   }
 `;

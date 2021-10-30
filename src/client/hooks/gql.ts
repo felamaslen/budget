@@ -39,7 +39,6 @@ export {
   useNetWorthSubcategoryDeletedSubscription,
   useNetWorthSubcategoryUpdatedSubscription,
   useOverviewOldQuery,
-  useOverviewPreviewQuery,
   useReceiptCreatedSubscription,
   useReceiptItemQuery,
   useReceiptItemsQuery,
