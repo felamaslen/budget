@@ -31,7 +31,7 @@ import {
 
 const CATEGORIES: AnalysisPage[] = Object.values(AnalysisPage);
 
-const periodConditionWeekly: GetPeriodCondition = (now, pageIndex = 0) => {
+const periodConditionWeekly: GetPeriodCondition = (now, pageIndex) => {
   const startTime = addWeeks(startOfWeek(now, { weekStartsOn: 1 }), -pageIndex);
   const endTime = endOfWeek(startTime, { weekStartsOn: 1 });
 
@@ -40,7 +40,7 @@ const periodConditionWeekly: GetPeriodCondition = (now, pageIndex = 0) => {
   return { startTime, endTime, description };
 };
 
-const periodConditionMonthly: GetPeriodCondition = (now, pageIndex = 0) => {
+const periodConditionMonthly: GetPeriodCondition = (now, pageIndex) => {
   const startTime = addMonths(startOfMonth(now), -pageIndex);
   const endTime = endOfMonth(startTime);
 
@@ -49,7 +49,7 @@ const periodConditionMonthly: GetPeriodCondition = (now, pageIndex = 0) => {
   return { startTime, endTime, description };
 };
 
-const periodConditionYearly: GetPeriodCondition = (now, pageIndex = 0) => {
+const periodConditionYearly: GetPeriodCondition = (now, pageIndex) => {
   const startTime = addYears(startOfYear(now), -pageIndex);
   const endTime = endOfYear(startTime);
 
@@ -59,27 +59,24 @@ const periodConditionYearly: GetPeriodCondition = (now, pageIndex = 0) => {
 };
 
 export function periodCondition(now: Date, period: AnalysisPeriod, pageIndex = 0): PeriodCondition {
-  if (period === 'week') {
-    return periodConditionWeekly(now, pageIndex);
+  switch (period) {
+    case AnalysisPeriod.Week:
+      return periodConditionWeekly(now, pageIndex);
+    case AnalysisPeriod.Month:
+      return periodConditionMonthly(now, pageIndex);
+    case AnalysisPeriod.Year:
+    default:
+      return periodConditionYearly(now, pageIndex);
   }
-  if (period === 'month') {
-    return periodConditionMonthly(now, pageIndex);
-  }
-  if (period === 'year') {
-    return periodConditionYearly(now, pageIndex);
-  }
-
-  throw new Error('Invalid period parameter');
 }
 
-export function getCategoryColumn(groupBy?: AnalysisGroupBy): AnalysisGroupColumn | null {
+export function getCategoryColumn(groupBy: AnalysisGroupBy): AnalysisGroupColumn | null {
   switch (groupBy) {
-    case AnalysisGroupBy.Category:
-      return 'category';
-    case 'shop':
+    case AnalysisGroupBy.Shop:
       return 'shop';
+    case AnalysisGroupBy.Category:
     default:
-      return null;
+      return 'category';
   }
 }
 
