@@ -1,9 +1,11 @@
+import userEvent from '@testing-library/user-event';
 import getUnixTime from 'date-fns/getUnixTime';
 import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 import numericHash from 'string-hash';
 
-import { GraphFunds } from '.';
+import { GraphFunds, Props } from '.';
+import { settingsToggled } from '~client/actions';
 import { testState } from '~client/test-data/state';
 import { renderWithStore } from '~client/test-utils';
 import { PageNonStandard } from '~client/types/enum';
@@ -17,8 +19,8 @@ describe('<GraphFunds />', () => {
     matchMedia.clear();
   });
 
-  const getContainer = (): ReturnType<typeof renderWithStore> =>
-    renderWithStore(<GraphFunds isMobile={false} />, {
+  const getContainer = (props: Partial<Props> = {}): ReturnType<typeof renderWithStore> =>
+    renderWithStore(<GraphFunds isMobile={false} {...props} />, {
       customState: {
         [PageNonStandard.Funds]: {
           ...testState[PageNonStandard.Funds],
@@ -65,6 +67,16 @@ describe('<GraphFunds />', () => {
     const graph = getByTestId('graph-svg') as HTMLElement;
 
     expect(graph).toBeInTheDocument();
+  });
+
+  describe('when rendering on mobiles', () => {
+    it('should open the settings dialog when clicking the graph', () => {
+      expect.assertions(2);
+      const { container, store } = getContainer({ isMobile: true });
+      expect(store.getActions()).toHaveLength(0);
+      userEvent.click(container.childNodes[0] as HTMLDivElement);
+      expect(store.getActions()).toStrictEqual([settingsToggled(true)]);
+    });
   });
 
   it.each`

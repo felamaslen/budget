@@ -17,6 +17,7 @@ export type State = {
   error: Error | null;
   appConfig: LocalAppConfig;
   appConfigSerial: number;
+  settingsOpen: boolean;
 };
 
 const defaultHistoryOptions: HistoryOptions = {
@@ -34,6 +35,7 @@ export const initialState: State = {
     historyOptions: defaultHistoryOptions,
   },
   appConfigSerial: 0,
+  settingsOpen: false,
 };
 
 const updateConfig = (state: State, updatedConfig: Partial<LocalAppConfig>): State => ({
@@ -86,6 +88,8 @@ export default function api(state: State = initialState, action: Action): State 
       return { ...state, loading: state.loading + 1 };
     case ActionTypeApi.Loaded:
       return { ...state, loading: Math.max(0, state.loading - 1) };
+    case ActionTypeApi.SettingsOpenToggled:
+      return { ...state, settingsOpen: action.open ?? !state.settingsOpen };
 
     case ActionTypeLogin.LoggedOut:
       return initialState;

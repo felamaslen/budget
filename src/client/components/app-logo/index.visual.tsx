@@ -2,7 +2,6 @@ import MatchMediaMock from 'jest-matchmedia-mock';
 import React from 'react';
 
 import { AppLogo } from '.';
-import { VOID } from '~client/modules/data';
 import { GlobalStylesProvider } from '~client/styled/global';
 import { renderVisualTest, renderWithStore } from '~client/test-utils';
 
@@ -19,7 +18,7 @@ describe('[visual] AppLogo', () => {
     expect.assertions(1);
     renderWithStore(
       <GlobalStylesProvider>
-        <AppLogo loading={false} setSettingsOpen={VOID} />
+        <AppLogo loading={false} />
       </GlobalStylesProvider>,
     );
     const screenshot = await renderVisualTest();

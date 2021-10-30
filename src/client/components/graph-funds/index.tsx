@@ -15,6 +15,7 @@ import {
   errorOpened,
   fundPricesUpdated,
   fundQueryUpdated,
+  settingsToggled,
 } from '~client/actions';
 import { FundWeights } from '~client/components/fund-weights';
 import {
@@ -368,7 +369,9 @@ function useGraphProps({
   };
 }
 
-export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
+export type Props = { isMobile?: boolean };
+
+export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
   const today = useToday();
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
   const height = isMobile ? graphFundsHeightMobile : GRAPH_FUNDS_HEIGHT;
@@ -400,24 +403,35 @@ export const GraphFunds: React.FC<{ isMobile?: boolean }> = ({ isMobile = false 
     toggleList,
   });
 
+  const onContainerClick = useMemo(
+    () =>
+      isMobile
+        ? (): void => {
+            dispatch(settingsToggled(true));
+          }
+        : undefined,
+    [isMobile, dispatch],
+  );
+
   return (
-    <Styled.Container>
+    <Styled.Container onClick={onContainerClick}>
       <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
         {graphProps.minX !== graphProps.maxX && (
           <LineGraph {...graphProps} padding={getPadding(isMobile, sidebarOpen)} />
         )}
-        <AfterCanvas
-          isMobile={isMobile}
-          historyOptions={historyOptions}
-          mode={validMode}
-          changeMode={changeMode}
-          fundItems={fundItems}
-          toggleList={toggleList}
-          setToggleList={setToggleList}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          changePeriod={setHistoryOptions}
-        />
+        {!isMobile && (
+          <AfterCanvas
+            historyOptions={historyOptions}
+            mode={validMode}
+            changeMode={changeMode}
+            fundItems={fundItems}
+            toggleList={toggleList}
+            setToggleList={setToggleList}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            changePeriod={setHistoryOptions}
+          />
+        )}
       </Styled.GraphFunds>
       {!isMobile && (
         <Styled.GraphFunds width={width} height={height}>

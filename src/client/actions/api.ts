@@ -8,6 +8,7 @@ export const enum ActionTypeApi {
   DataRead = '@@api/DATA_READ',
   Loading = '@@api/LOADING',
   Loaded = '@@api/LOADED',
+  SettingsOpenToggled = '@@api/SETTINGS_OPEN_TOGGLED',
 }
 
 export type ActionApiConfigUpdatedFromApi = {
@@ -50,9 +51,19 @@ export type ActionApiLoaded = { type: ActionTypeApi.Loaded };
 export const apiLoading: ActionApiLoading = { type: ActionTypeApi.Loading };
 export const apiLoaded: ActionApiLoaded = { type: ActionTypeApi.Loaded };
 
+export type ActionSettingsToggled = {
+  type: ActionTypeApi.SettingsOpenToggled;
+  open: boolean | null;
+};
+export const settingsToggled = (open?: boolean): ActionSettingsToggled => ({
+  type: ActionTypeApi.SettingsOpenToggled,
+  open: open ?? null,
+});
+
 export type ActionApi =
   | ActionApiConfigUpdatedFromApi
   | ActionApiConfigUpdatedFromLocal
   | ActionApiDataRead
   | ActionApiLoading
-  | ActionApiLoaded;
+  | ActionApiLoaded
+  | ActionSettingsToggled;

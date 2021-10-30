@@ -12,7 +12,6 @@ describe('<AfterCanvas /> (funds graph)', () => {
   const changeMode = jest.fn();
 
   const props: Props = {
-    isMobile: false,
     historyOptions: {
       period: FundPeriod.Year,
       length: 1,

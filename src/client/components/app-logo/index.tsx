@@ -1,14 +1,16 @@
 import { css, SerializedStyles } from '@emotion/react';
 import { rem } from 'polished';
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import DotLoader from 'react-spinners/DotLoader';
 
 import * as Styled from './styles';
 
+import { settingsToggled } from '~client/actions';
 import { useCTA } from '~client/hooks';
 import { colors } from '~client/styled/variables';
 
-export type Props = { loading: boolean; setSettingsOpen: Dispatch<SetStateAction<boolean>> };
+export type Props = { loading: boolean };
 
 const spinnerOverride = (loading: boolean): SerializedStyles => css`
   flex: 0 0 ${rem(22)};
@@ -18,7 +20,8 @@ const spinnerOverride = (loading: boolean): SerializedStyles => css`
   transition: opacity 0.5s ease;
 `;
 
-export const AppLogo: React.FC<Props> = ({ loading, setSettingsOpen }) => {
+export const AppLogo: React.FC<Props> = ({ loading }) => {
+  const dispatch = useDispatch();
   const [showLoading, setShowLoading] = useState<boolean>(loading);
   const timer = useRef<number>(0);
   useEffect(() => {
@@ -30,7 +33,7 @@ export const AppLogo: React.FC<Props> = ({ loading, setSettingsOpen }) => {
     return (): void => clearTimeout(timer.current);
   }, [loading]);
 
-  const openSettingsDialog = useCallback(() => setSettingsOpen(true), [setSettingsOpen]);
+  const openSettingsDialog = useCallback(() => dispatch(settingsToggled(true)), [dispatch]);
   const logoEvents = useCTA(openSettingsDialog);
 
   return (

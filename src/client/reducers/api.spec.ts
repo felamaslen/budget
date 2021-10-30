@@ -9,6 +9,7 @@ import {
   dataRead,
   fundQueryUpdated,
   loggedOut,
+  settingsToggled,
 } from '~client/actions';
 import reducer, { initialState, State } from '~client/reducers/api';
 import type { LocalAppConfig } from '~client/types';
@@ -136,6 +137,32 @@ describe('aPI reducer', () => {
       expect.assertions(1);
       const result = reducer(initialState, action);
       expect(result.appConfigSerial).toBe(1);
+    });
+  });
+
+  describe(ActionTypeApi.SettingsOpenToggled, () => {
+    describe.each`
+      open
+      ${true}
+      ${false}
+    `('when open is $open', ({ open }) => {
+      const action = settingsToggled(open);
+
+      it('should set the settings dialog open state', () => {
+        expect.assertions(2);
+        expect(reducer({ ...initialState, settingsOpen: false }, action).settingsOpen).toBe(open);
+        expect(reducer({ ...initialState, settingsOpen: true }, action).settingsOpen).toBe(open);
+      });
+    });
+
+    describe('when the status is not provided', () => {
+      const action = settingsToggled();
+
+      it('should toggle the settings dialog open state', () => {
+        expect.assertions(2);
+        expect(reducer({ ...initialState, settingsOpen: false }, action).settingsOpen).toBe(true);
+        expect(reducer({ ...initialState, settingsOpen: true }, action).settingsOpen).toBe(false);
+      });
     });
   });
 });
