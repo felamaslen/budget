@@ -1,9 +1,11 @@
+import { act, render } from '@testing-library/react';
 import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { CTAEvents, useCTA } from './cta';
 
-describe('useCTA', () => {
+describe(useCTA.name, () => {
   const onActivate = jest.fn();
 
   const setup = (): RenderHookResult<unknown, CTAEvents<HTMLElement>> =>
@@ -54,6 +56,60 @@ describe('useCTA', () => {
 
       jest.runAllTimers();
       expect(onActivate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when stopPropagation is false', () => {
+    it('should let click events bubble', () => {
+      expect.assertions(2);
+
+      const onButtonClick = jest.fn();
+      const onDivClick = jest.fn();
+
+      const TestComponent: React.FC = () => {
+        const buttonClickEvents = useCTA(onButtonClick, { stopPropagation: false });
+        return (
+          // eslint-disable-next-line
+          <div onClick={onDivClick}>
+            <button {...buttonClickEvents}>Click me</button>
+          </div>
+        );
+      };
+
+      const { getByRole } = render(<TestComponent />);
+      act(() => {
+        userEvent.click(getByRole('button'));
+      });
+
+      expect(onButtonClick).toHaveBeenCalledTimes(1);
+      expect(onDivClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when stopPropagation is true', () => {
+    it('should stop click events from bubbling', () => {
+      expect.assertions(2);
+
+      const onButtonClick = jest.fn();
+      const onDivClick = jest.fn();
+
+      const TestComponent: React.FC = () => {
+        const buttonClickEvents = useCTA(onButtonClick, { stopPropagation: true });
+        return (
+          // eslint-disable-next-line
+          <div onClick={onDivClick}>
+            <button {...buttonClickEvents}>Click me</button>
+          </div>
+        );
+      };
+
+      const { getByRole } = render(<TestComponent />);
+      act(() => {
+        userEvent.click(getByRole('button'));
+      });
+
+      expect(onButtonClick).toHaveBeenCalledTimes(1);
+      expect(onDivClick).not.toHaveBeenCalled();
     });
   });
 });
