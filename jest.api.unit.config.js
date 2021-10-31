@@ -10,8 +10,9 @@ module.exports = {
   coverageDirectory: 'coverage/api/unit',
   collectCoverageFrom: [
     'src/api/**/*.ts',
+    '!node_modules/**',
     '!src/api/**/*.spec.ts',
     '!src/api/test-utils/**',
-    '!node_modules/**',
+    '!src/api/seeds/**',
   ],
 };

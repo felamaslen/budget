@@ -20,6 +20,8 @@ module.exports = {
     '!node_modules/**',
     '!src/client/test-data/**',
     '!src/client/test-utils/**',
+    '!src/client/__tests__/**',
+    '!src/client/gql/**',
   ],
   snapshotSerializers: ['@emotion/jest/serializer'],
 };

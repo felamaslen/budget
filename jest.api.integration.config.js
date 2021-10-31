@@ -1,3 +1,4 @@
+const apiUnitConfig = require('./jest.api.unit.config');
 const baseConfig = require('./jest.config');
 
 module.exports = {
@@ -8,10 +9,5 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/api/test-utils/after-env.integration.ts'],
   testTimeout: 15000,
   coverageDirectory: 'coverage/api/integration',
-  collectCoverageFrom: [
-    'src/api/**/*.ts',
-    '!src/api/**/*.spec.ts',
-    '!src/api/test-utils/**',
-    '!node_modules/**',
-  ],
+  collectCoverageFrom: apiUnitConfig.collectCoverageFrom,
 };
