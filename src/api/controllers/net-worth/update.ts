@@ -1,3 +1,4 @@
+import { formatISO } from 'date-fns';
 import deepEqual from 'fast-deep-equal';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
@@ -67,7 +68,12 @@ export async function updateNetWorthEntry(
     fetchById(db, uid, netWorthId),
     readNetWorthCashTotal(db, uid),
   ]);
-  await pubsub.publish(`${PubSubTopic.NetWorthEntryUpdated}.${uid}`, { item });
+  await pubsub.publish(`${PubSubTopic.NetWorthEntryUpdated}.${uid}`, {
+    item: {
+      ...item,
+      date: formatISO(item.date, { representation: 'date' }),
+    },
+  });
   await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { error: null };
