@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PixX, SVGPathProps } from '~client/types';
 
-type Props = {
+export type Props = {
   startX: number;
   startY: number;
   length: number;
