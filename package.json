@@ -172,6 +172,7 @@
     "@graphql-codegen/typescript-resolvers": "1.17.11",
     "@graphql-codegen/typescript-urql": "^2.0.2",
     "@hot-loader/react-dom": "^17.0.1",
+    "@jest-mock/express": "^1.4.5",
     "@loadable/babel-plugin": "^5.13.2",
     "@roarr/cli": "^3.2.0",
     "@slonik/migrator": "^0.7.0",
