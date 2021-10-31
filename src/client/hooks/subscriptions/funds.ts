@@ -12,6 +12,7 @@ import { ErrorLevel } from '~client/constants/error';
 import * as gql from '~client/hooks/gql';
 import { composeWithoutArgs } from '~client/modules/compose-without-args';
 import { getHistoryOptions } from '~client/selectors';
+import { omitTypeName } from '~shared/utils';
 
 function useCashTargetSubscription(dispatch: Dispatch): () => void {
   const [updatedCashTarget, onReconnect] = gql.useCashAllocationTargetUpdatedSubscription();
@@ -28,7 +29,9 @@ function useFundAllocationTargetsSubscription(dispatch: Dispatch): () => void {
   useEffect(() => {
     if (updatedFundTargets.data?.fundAllocationTargetsUpdated.deltas) {
       dispatch(
-        allocationTargetsUpdated(updatedFundTargets.data.fundAllocationTargetsUpdated.deltas),
+        allocationTargetsUpdated(
+          updatedFundTargets.data.fundAllocationTargetsUpdated.deltas.map(omitTypeName),
+        ),
       );
     }
   }, [dispatch, updatedFundTargets.data]);

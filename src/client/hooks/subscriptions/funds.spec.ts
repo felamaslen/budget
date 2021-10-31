@@ -6,24 +6,21 @@ import { fromValue, interval, map, pipe } from 'wonka';
 
 import { useFundsSubscriptions } from './funds';
 
-import { fundPricesUpdated } from '~client/actions';
+import { allocationTargetsUpdated, cashTargetUpdated, fundPricesUpdated } from '~client/actions';
 import { testState } from '~client/test-data';
 import { mockClient, renderHookWithStore } from '~client/test-utils';
+import type { HistoryOptions } from '~client/types';
 import {
+  CashAllocationTargetUpdatedDocument,
+  CashAllocationTargetUpdatedSubscription,
+  FundAllocationTargetsUpdatedDocument,
+  FundAllocationTargetsUpdatedSubscription,
   FundPeriod,
   FundPricesUpdatedDocument,
   FundPricesUpdatedSubscription,
 } from '~client/types/gql';
 
 describe(useFundsSubscriptions, () => {
-  let subscribeSpy: jest.SpyInstance<
-    ReturnType<typeof mockClient['executeSubscription']>,
-    Parameters<typeof mockClient['executeSubscription']>
-  >;
-  beforeEach(() => {
-    subscribeSpy = jest.spyOn(mockClient, 'executeSubscription');
-  });
-
   const mockFundPriceUpdates: FundPricesUpdatedSubscription = {
     __typename: 'Subscription',
     fundPricesUpdated: {
@@ -42,10 +39,40 @@ describe(useFundsSubscriptions, () => {
     },
   };
 
-  it('should subscribe to fund price updates', async () => {
-    expect.hasAssertions();
+  const mockAllocationTargetsUpdates: FundAllocationTargetsUpdatedSubscription = {
+    __typename: 'Subscription',
+    fundAllocationTargetsUpdated: {
+      __typename: 'UpdatedFundAllocationTargets',
+      deltas: [
+        { __typename: 'TargetDeltaResponse', id: numericHash('my-fund'), allocationTarget: 0.15 },
+      ],
+    },
+  };
 
-    subscribeSpy.mockImplementation((request) => {
+  const mockCashTargetUpdate: CashAllocationTargetUpdatedSubscription = {
+    __typename: 'Subscription',
+    cashAllocationTargetUpdated: 1500000,
+  };
+
+  let subscribeSpy: jest.SpyInstance;
+
+  const customHistoryOptions: HistoryOptions = {
+    period: FundPeriod.Ytd,
+    length: 0,
+  };
+
+  const customState: Partial<typeof testState> = {
+    api: {
+      ...testState.api,
+      appConfig: {
+        ...testState.api.appConfig,
+        historyOptions: customHistoryOptions,
+      },
+    },
+  };
+
+  beforeEach(() => {
+    subscribeSpy = jest.spyOn(mockClient, 'executeSubscription').mockImplementation((request) => {
       if (request.query === FundPricesUpdatedDocument) {
         return pipe(
           interval(50),
@@ -55,37 +82,102 @@ describe(useFundsSubscriptions, () => {
           })),
         );
       }
+      if (request.query === FundAllocationTargetsUpdatedDocument) {
+        return pipe(
+          interval(30),
+          map(() => ({
+            operation: makeOperation('subscription', request, {} as OperationContext),
+            data: mockAllocationTargetsUpdates,
+          })),
+        );
+      }
+      if (request.query === CashAllocationTargetUpdatedDocument) {
+        return pipe(
+          interval(10),
+          map(() => ({
+            operation: makeOperation('subscription', request, {} as OperationContext),
+            data: mockCashTargetUpdate,
+          })),
+        );
+      }
       return fromValue({
         operation: makeOperation('subscription', request, {} as OperationContext),
         data: null,
       });
     });
+  });
+
+  it('should subscribe to fund price updates', async () => {
+    expect.hasAssertions();
 
     const { store } = renderHookWithStore(useFundsSubscriptions, {
-      customState: {
-        api: {
-          ...testState.api,
-          appConfig: {
-            ...testState.api.appConfig,
-            historyOptions: {
-              period: FundPeriod.Ytd,
-              length: 0,
-            },
-          },
-        },
-      },
+      customState,
     });
 
     await waitFor(() => {
-      expect(store.getActions()).not.toHaveLength(0);
+      expect(store.getActions()).toStrictEqual(
+        expect.arrayContaining([
+          fundPricesUpdated(
+            mockFundPriceUpdates.fundPricesUpdated as NonNullable<
+              FundPricesUpdatedSubscription['fundPricesUpdated']
+            >,
+          ),
+        ]),
+      );
     });
 
-    expect(store.getActions()).toStrictEqual([
-      fundPricesUpdated(
-        mockFundPriceUpdates.fundPricesUpdated as NonNullable<
-          FundPricesUpdatedSubscription['fundPricesUpdated']
-        >,
-      ),
-    ]);
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: FundPricesUpdatedDocument,
+        variables: customHistoryOptions,
+      }),
+      undefined,
+    );
+  });
+
+  it('should subscribe to fund allocation target updates', async () => {
+    expect.hasAssertions();
+
+    const { store } = renderHookWithStore(useFundsSubscriptions, {
+      customState,
+    });
+
+    await waitFor(() => {
+      expect(store.getActions()).toStrictEqual(
+        expect.arrayContaining([
+          allocationTargetsUpdated([{ id: numericHash('my-fund'), allocationTarget: 0.15 }]),
+        ]),
+      );
+    });
+
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: FundAllocationTargetsUpdatedDocument,
+        variables: {},
+      }),
+      undefined,
+    );
+  });
+
+  it('should subscribe to fund cash target updates', async () => {
+    expect.hasAssertions();
+
+    const { store } = renderHookWithStore(useFundsSubscriptions, {
+      customState,
+    });
+
+    await waitFor(() => {
+      expect(store.getActions()).toStrictEqual(
+        expect.arrayContaining([cashTargetUpdated(1500000)]),
+      );
+    });
+
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: CashAllocationTargetUpdatedDocument,
+        variables: {},
+      }),
+      undefined,
+    );
   });
 });
