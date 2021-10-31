@@ -86,7 +86,7 @@ module.exports = {
           'jest.api.integration.config.js',
           'jest.api.unit.config.js',
           'jest.client.config.js',
-          'src/**/__mocks__/*.ts',
+          'src/**/__mocks__/**/*.ts',
           'src/client/**/*.ts',
           'src/client/**/*.tsx',
           'src/api/migrate.ts',
