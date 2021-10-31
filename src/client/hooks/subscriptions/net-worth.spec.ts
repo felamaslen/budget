@@ -10,6 +10,9 @@ import {
   netWorthCategoryCreated,
   netWorthCategoryDeleted,
   netWorthCategoryUpdated,
+  netWorthEntryCreated,
+  netWorthEntryDeleted,
+  netWorthEntryUpdated,
   netWorthSubcategoryCreated,
   netWorthSubcategoryDeleted,
   netWorthSubcategoryUpdated,
@@ -74,6 +77,33 @@ describe(useNetWorthSubscriptions.name, () => {
             map(() => ({
               operation: makeOperation('subscription', request, {} as OperationContext),
               data: stubs.mockNetWorthSubcategoryDeleted,
+            })),
+          );
+        }
+        case types.NetWorthEntryCreatedDocument: {
+          return pipe(
+            interval(2),
+            map(() => ({
+              operation: makeOperation('subscription', request, {} as OperationContext),
+              data: stubs.mockNetWorthEntryCreated,
+            })),
+          );
+        }
+        case types.NetWorthEntryUpdatedDocument: {
+          return pipe(
+            interval(2),
+            map(() => ({
+              operation: makeOperation('subscription', request, {} as OperationContext),
+              data: stubs.mockNetWorthEntryUpdated,
+            })),
+          );
+        }
+        case types.NetWorthEntryDeletedDocument: {
+          return pipe(
+            interval(2),
+            map(() => ({
+              operation: makeOperation('subscription', request, {} as OperationContext),
+              data: stubs.mockNetWorthEntryDeleted,
             })),
           );
         }
@@ -227,6 +257,79 @@ describe(useNetWorthSubscriptions.name, () => {
     expect(subscribeSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         query: types.NetWorthSubcategoryDeletedDocument,
+        variables: {},
+      }),
+      undefined,
+    );
+  });
+
+  it('should subscribe to entry creates', async () => {
+    expect.hasAssertions();
+    const { store } = renderHookWithStore(useNetWorthSubscriptions);
+    act(() => {
+      jest.advanceTimersByTime(3);
+    });
+    expect(store.getActions()).toStrictEqual(
+      expect.arrayContaining([
+        netWorthEntryCreated({
+          id: numericHash('my-entry'),
+          date: '2020-04-20',
+          values: [],
+          creditLimit: [],
+          currencies: [],
+        }),
+      ]),
+    );
+
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: types.NetWorthEntryCreatedDocument,
+        variables: {},
+      }),
+      undefined,
+    );
+  });
+
+  it('should subscribe to entry updates', async () => {
+    expect.hasAssertions();
+    const { store } = renderHookWithStore(useNetWorthSubscriptions);
+    act(() => {
+      jest.advanceTimersByTime(3);
+    });
+    expect(store.getActions()).toStrictEqual(
+      expect.arrayContaining([
+        netWorthEntryUpdated({
+          id: numericHash('my-entry'),
+          date: '2020-04-21',
+          values: [],
+          creditLimit: [],
+          currencies: [],
+        }),
+      ]),
+    );
+
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: types.NetWorthSubcategoryUpdatedDocument,
+        variables: {},
+      }),
+      undefined,
+    );
+  });
+
+  it('should subscribe to entry deletes', async () => {
+    expect.hasAssertions();
+    const { store } = renderHookWithStore(useNetWorthSubscriptions);
+    act(() => {
+      jest.advanceTimersByTime(3);
+    });
+    expect(store.getActions()).toStrictEqual(
+      expect.arrayContaining([netWorthEntryDeleted(numericHash('my-entry'))]),
+    );
+
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: types.NetWorthEntryDeletedDocument,
         variables: {},
       }),
       undefined,

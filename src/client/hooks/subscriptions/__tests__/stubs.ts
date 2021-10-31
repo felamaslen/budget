@@ -5,6 +5,9 @@ import {
   NetWorthCategoryDeletedSubscription,
   NetWorthCategoryType,
   NetWorthCategoryUpdatedSubscription,
+  NetWorthEntryCreatedSubscription,
+  NetWorthEntryDeletedSubscription,
+  NetWorthEntryUpdatedSubscription,
   NetWorthSubcategoryCreatedSubscription,
   NetWorthSubcategoryDeletedSubscription,
   NetWorthSubcategoryUpdatedSubscription,
@@ -81,5 +84,43 @@ export const mockNetWorthSubcategoryDeleted: NetWorthSubcategoryDeletedSubscript
   netWorthSubcategoryDeleted: {
     __typename: 'NetWorthDeleted',
     id: numericHash('bank-subcategory'),
+  },
+};
+
+export const mockNetWorthEntryCreated: NetWorthEntryCreatedSubscription = {
+  __typename: 'Subscription',
+  netWorthEntryCreated: {
+    __typename: 'NetWorthEntryCreated',
+    item: {
+      __typename: 'NetWorthEntry',
+      id: numericHash('my-entry'),
+      date: '2020-04-20',
+      values: [],
+      creditLimit: [],
+      currencies: [],
+    },
+  },
+};
+
+export const mockNetWorthEntryUpdated: NetWorthEntryUpdatedSubscription = {
+  __typename: 'Subscription',
+  netWorthEntryUpdated: {
+    __typename: 'NetWorthEntryUpdated',
+    item: {
+      __typename: 'NetWorthEntry',
+      id: numericHash('my-entry'),
+      date: '2020-04-21',
+      values: [],
+      creditLimit: [],
+      currencies: [],
+    },
+  },
+};
+
+export const mockNetWorthEntryDeleted: NetWorthEntryDeletedSubscription = {
+  __typename: 'Subscription',
+  netWorthEntryDeleted: {
+    __typename: 'NetWorthDeleted',
+    id: numericHash('my-entry'),
   },
 };
