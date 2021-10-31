@@ -3,10 +3,6 @@ import format from 'date-fns/format';
 import { SYMBOL_CURRENCY_HTML, SYMBOL_CURRENCY_RAW } from '~client/constants';
 import type { Transaction } from '~client/types/gql';
 
-export function capitalise(value: string): string {
-  return `${value.substring(0, 1).toUpperCase()}${value.substring(1).toLowerCase()}`;
-}
-
 function round(value: number, precision: number): number {
   const exp = 10 ** precision;
 

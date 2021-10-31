@@ -1,3 +1,4 @@
+import capitalize from 'lodash/capitalize';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
@@ -15,7 +16,7 @@ import { PAGE_LIST_LIMIT } from '~client/constants/data';
 import { useListCrudIncome, useToday } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { sortByKey } from '~client/modules/data';
-import { capitalise, formatCurrency } from '~client/modules/format';
+import { formatCurrency } from '~client/modules/format';
 import { getIncomeMetadata, getListOffset } from '~client/selectors';
 import { Button, H4 } from '~client/styled/shared';
 import { colors } from '~client/styled/variables';
@@ -63,7 +64,7 @@ const HeaderIncome: React.FC<HeaderIncomeProps> = ({ fields, fieldsMobile, isMob
       <StandardStyled.StandardHeader data-testid="header">
         {fieldsMobile.map((field) => (
           <StandardStyled.HeaderColumn key={field as string} column={field as string}>
-            {capitalise(labels ? Reflect.get(labels, field) ?? field : field)}
+            {capitalize(labels ? Reflect.get(labels, field) ?? field : field)}
           </StandardStyled.HeaderColumn>
         ))}
       </StandardStyled.StandardHeader>
@@ -74,7 +75,7 @@ const HeaderIncome: React.FC<HeaderIncomeProps> = ({ fields, fieldsMobile, isMob
     <StandardStyled.StandardHeader data-testid="header">
       {fields.map((field) => (
         <StandardStyled.HeaderColumn key={field as string} column={field as string}>
-          {capitalise(labels ? Reflect.get(labels, field) ?? field : field)}
+          {capitalize(labels ? Reflect.get(labels, field) ?? field : field)}
         </StandardStyled.HeaderColumn>
       ))}
       <StandardStyled.HeaderColumn>

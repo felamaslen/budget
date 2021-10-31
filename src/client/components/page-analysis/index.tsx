@@ -1,3 +1,4 @@
+import capitalize from 'lodash/capitalize';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
@@ -19,7 +20,7 @@ import Upper from './upper';
 
 import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { isAnalysisPage } from '~client/constants/data';
-import { formatCurrency, capitalise } from '~client/modules/format';
+import { formatCurrency } from '~client/modules/format';
 import { getInvestmentsBetweenDates } from '~client/selectors';
 import { PageNonStandard } from '~client/types/enum';
 import { CategoryCostTree, CategoryCostTreeDeep } from '~client/types/gql';
@@ -98,12 +99,12 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
     if (activeSub) {
       const total = main?.tree?.find(({ category }) => category === activeSub)?.sum ?? 0;
 
-      return `${capitalise(activeMain)}: ${activeSub} (${formatCurrency(total, { raw: true })})`;
+      return `${capitalize(activeMain)}: ${activeSub} (${formatCurrency(total, { raw: true })})`;
     }
 
     const total = main.tree.reduce<number>((last, { sum }) => last + sum, 0);
 
-    return `${capitalise(activeMain)} (${formatCurrency(total, {
+    return `${capitalize(activeMain)} (${formatCurrency(total, {
       raw: true,
     })})`;
   }, [cost, costDeep, saved, activeMain, activeSub]);
