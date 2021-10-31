@@ -10,8 +10,10 @@ import {
   getTotalUnits,
   isSold,
   lastInArray,
+  leftPad,
   limitTimeSeriesLength,
   partialModification,
+  randnBm,
   sortByDate,
   sortByKey,
   sortByTotal,
@@ -122,7 +124,7 @@ describe('data module', () => {
     { date: new Date('2020-10-12'), ratio: 5 },
   ];
 
-  describe('partialModification', () => {
+  describe(partialModification.name, () => {
     it.each`
       index | key        | newValue
       ${1}  | ${'date'}  | ${new Date('2018-03-14T00:00:00.000Z')}
@@ -283,6 +285,18 @@ describe('data module', () => {
     });
   });
 
+  describe(leftPad.name, () => {
+    it('should extend an array to the left', () => {
+      expect.assertions(1);
+      expect(leftPad(['bar', 'baz'], 5, 'foo')).toStrictEqual(['foo', 'foo', 'foo', 'bar', 'baz']);
+    });
+
+    it('should default to 0 for the fill value', () => {
+      expect.assertions(1);
+      expect(leftPad([6, 2, 3], 5)).toStrictEqual([0, 0, 6, 2, 3]);
+    });
+  });
+
   describe(exponentialRegression.name, () => {
     it('should return the exponential regresson slope and intercept', () => {
       expect.assertions(3);
@@ -302,6 +316,24 @@ describe('data module', () => {
           221.74123828982772,
         ]
       `);
+    });
+
+    describe.each`
+      case                             | line
+      ${'all values are non-positive'} | ${[-14, 0, -0.3]}
+      ${'there are no values'}         | ${[]}
+    `('when $case', ({ line }) => {
+      it('should return zero values', () => {
+        expect.assertions(1);
+        expect(exponentialRegression(line)).toStrictEqual<ReturnType<typeof exponentialRegression>>(
+          {
+            slope: 0,
+            intercept: 0,
+            logValues: [],
+            points: [],
+          },
+        );
+      });
     });
   });
 
@@ -340,6 +372,21 @@ describe('data module', () => {
         [10.1, 91723],
         [11.5, 91231],
       ]);
+    });
+  });
+
+  describe(randnBm.name, () => {
+    it('should return a gaussian-distributed variable', () => {
+      expect.assertions(2);
+      jest
+        .spyOn(Math, 'random')
+        .mockReturnValueOnce(0.439)
+        .mockReturnValueOnce(0.198)
+        .mockReturnValueOnce(0.265)
+        .mockReturnValueOnce(0.519);
+
+      expect(randnBm()).toMatchInlineSnapshot(`0.4118235213611834`);
+      expect(randnBm()).toMatchInlineSnapshot(`-1.6181400202841318`);
     });
   });
 
@@ -537,7 +584,7 @@ describe('data module', () => {
     });
   });
 
-  describe('toNativeFund', () => {
+  describe(toNativeFund.name, () => {
     it('should replace transaction date strings with native dates, and remove __typename', () => {
       expect.assertions(1);
       expect(
@@ -580,7 +627,7 @@ describe('data module', () => {
     });
   });
 
-  describe('toRawFund', () => {
+  describe(toRawFund.name, () => {
     it('should replace transaction Date objects with strings', () => {
       expect.assertions(1);
       expect(

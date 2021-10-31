@@ -14,7 +14,7 @@ type OverviewBaseColor = string | OverviewColorRange;
 const isColorRange = (color: OverviewBaseColor): color is OverviewColorRange =>
   typeof color !== 'string';
 
-function getOverviewCategoryKeyColor(key: string): OverviewBaseColor {
+export function getOverviewCategoryKeyColor(key: string): OverviewBaseColor {
   if (Reflect.has(colors.overview, key)) {
     return colors.overview[key as keyof typeof colors.overview];
   }
