@@ -54,8 +54,6 @@ describe(useFundsSubscriptions, () => {
     cashAllocationTargetUpdated: 1500000,
   };
 
-  let subscribeSpy: jest.SpyInstance;
-
   const customHistoryOptions: HistoryOptions = {
     period: FundPeriod.Ytd,
     length: 0,
@@ -70,6 +68,11 @@ describe(useFundsSubscriptions, () => {
       },
     },
   };
+
+  let subscribeSpy: jest.SpyInstance<
+    ReturnType<typeof mockClient['executeSubscription']>,
+    Parameters<typeof mockClient['executeSubscription']>
+  >;
 
   beforeEach(() => {
     subscribeSpy = jest.spyOn(mockClient, 'executeSubscription').mockImplementation((request) => {

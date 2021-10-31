@@ -6,8 +6,6 @@ import { validatedAuthDbRoute } from './request';
 
 import * as db from '~api/modules/db';
 
-jest.setTimeout(500);
-
 describe('validatedAuthDbRoute', () => {
   let myTrx: DatabaseTransactionConnectionType;
   let myHandler: jest.Mock;
