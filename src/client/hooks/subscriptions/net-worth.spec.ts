@@ -10,6 +10,9 @@ import {
   netWorthCategoryCreated,
   netWorthCategoryDeleted,
   netWorthCategoryUpdated,
+  netWorthSubcategoryCreated,
+  netWorthSubcategoryDeleted,
+  netWorthSubcategoryUpdated,
 } from '~client/actions';
 import { mockClient, renderHookWithStore } from '~client/test-utils';
 import * as types from '~client/types/gql';
@@ -44,6 +47,33 @@ describe(useNetWorthSubscriptions.name, () => {
             map(() => ({
               operation: makeOperation('subscription', request, {} as OperationContext),
               data: stubs.mockNetWorthCategoryDeleted,
+            })),
+          );
+        }
+        case types.NetWorthSubcategoryCreatedDocument: {
+          return pipe(
+            interval(2),
+            map(() => ({
+              operation: makeOperation('subscription', request, {} as OperationContext),
+              data: stubs.mockNetWorthSubcategoryCreated,
+            })),
+          );
+        }
+        case types.NetWorthSubcategoryUpdatedDocument: {
+          return pipe(
+            interval(2),
+            map(() => ({
+              operation: makeOperation('subscription', request, {} as OperationContext),
+              data: stubs.mockNetWorthSubcategoryUpdated,
+            })),
+          );
+        }
+        case types.NetWorthSubcategoryDeletedDocument: {
+          return pipe(
+            interval(2),
+            map(() => ({
+              operation: makeOperation('subscription', request, {} as OperationContext),
+              data: stubs.mockNetWorthSubcategoryDeleted,
             })),
           );
         }
@@ -126,6 +156,77 @@ describe(useNetWorthSubscriptions.name, () => {
     expect(subscribeSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         query: types.NetWorthCategoryDeletedDocument,
+        variables: {},
+      }),
+      undefined,
+    );
+  });
+
+  it('should subscribe to subcategory creates', async () => {
+    expect.hasAssertions();
+    const { store } = renderHookWithStore(useNetWorthSubscriptions);
+    act(() => {
+      jest.advanceTimersByTime(3);
+    });
+    expect(store.getActions()).toStrictEqual(
+      expect.arrayContaining([
+        netWorthSubcategoryCreated({
+          id: numericHash('bank-subcategory'),
+          categoryId: numericHash('cash-category'),
+          subcategory: 'My bank',
+          opacity: 0.38,
+        }),
+      ]),
+    );
+
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: types.NetWorthCategoryCreatedDocument,
+        variables: {},
+      }),
+      undefined,
+    );
+  });
+
+  it('should subscribe to subcategory updates', async () => {
+    expect.hasAssertions();
+    const { store } = renderHookWithStore(useNetWorthSubscriptions);
+    act(() => {
+      jest.advanceTimersByTime(3);
+    });
+    expect(store.getActions()).toStrictEqual(
+      expect.arrayContaining([
+        netWorthSubcategoryUpdated({
+          id: numericHash('bank-subcategory'),
+          categoryId: numericHash('cash-category'),
+          subcategory: 'Other bank',
+          opacity: 0.92,
+        }),
+      ]),
+    );
+
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: types.NetWorthSubcategoryUpdatedDocument,
+        variables: {},
+      }),
+      undefined,
+    );
+  });
+
+  it('should subscribe to subcategory deletes', async () => {
+    expect.hasAssertions();
+    const { store } = renderHookWithStore(useNetWorthSubscriptions);
+    act(() => {
+      jest.advanceTimersByTime(3);
+    });
+    expect(store.getActions()).toStrictEqual(
+      expect.arrayContaining([netWorthSubcategoryDeleted(numericHash('bank-subcategory'))]),
+    );
+
+    expect(subscribeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: types.NetWorthSubcategoryDeletedDocument,
         variables: {},
       }),
       undefined,
