@@ -8,6 +8,7 @@ import yahooFinance from 'yahoo-finance2';
 import { seedData } from '~api/__tests__/fixtures';
 import config from '~api/config';
 import { getPool } from '~api/modules/db';
+import * as pubsub from '~api/modules/graphql/pubsub';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
   CrudResponseCreate,
@@ -33,7 +34,9 @@ import {
   StockPrice,
   StockPricesResponse,
   StockValueResponse,
+  NetWorthCashTotal,
 } from '~api/types';
+import { FundSubscription } from '~client/types/gql';
 import type { Create, NativeDate, RawDate } from '~shared/types';
 
 describe('funds resolver', () => {
@@ -74,7 +77,10 @@ describe('funds resolver', () => {
 
   const altFundName = 'Different fund';
 
+  let publishSpy: jest.SpyInstance;
+
   beforeEach(async () => {
+    publishSpy = jest.spyOn(pubsub.pubsub, 'publish').mockResolvedValueOnce();
     await getPool().connect(async (db) => {
       await db.query(
         sql`DELETE FROM funds WHERE uid = ${app.uid} AND item = ANY(${sql.array(
@@ -194,6 +200,38 @@ describe('funds resolver', () => {
         ]),
       );
     });
+
+    it('should publish the created fund and updated cash total', async () => {
+      expect.assertions(3);
+
+      const res = await setup();
+
+      expect(publishSpy).toHaveBeenCalledTimes(2);
+      expect(publishSpy).toHaveBeenCalledWith<[string, FundSubscription]>(
+        `${pubsub.PubSubTopic.FundsChanged}.${app.uid}`,
+        {
+          created: {
+            fakeId: 0,
+            item: {
+              ...fundInput,
+              id: res?.id as number,
+            },
+          },
+          overviewCost: expect.arrayContaining([expect.any(Number)]),
+        },
+      );
+      expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${app.uid}`,
+        expect.objectContaining<NetWorthCashTotal>({
+          cashInBank: expect.any(Number),
+          pensionStockValue: expect.any(Number),
+          nonPensionStockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
+        }),
+      );
+    });
   });
 
   describe('cash allocation target', () => {
@@ -212,9 +250,7 @@ describe('funds resolver', () => {
     `;
 
     describe('setter', () => {
-      it('should set the cash target in the database', async () => {
-        expect.assertions(2);
-
+      const setup = async (): Promise<Maybe<CrudResponseUpdate>> => {
         const res = await app.authGqlClient.mutate<
           Mutation,
           MutationUpdateCashAllocationTargetArgs
@@ -224,8 +260,14 @@ describe('funds resolver', () => {
             target: 4500000,
           },
         });
+        return res.data?.updateCashAllocationTarget ?? null;
+      };
 
-        expect(res.data?.updateCashAllocationTarget?.error).toBeNull();
+      it('should set the cash target in the database', async () => {
+        expect.assertions(2);
+
+        const res = await setup();
+        expect(res?.error).toBeNull();
 
         const { rows } = await getPool().query(
           sql`SELECT * FROM funds_cash_target WHERE uid = ${app.uid}`,
@@ -236,6 +278,18 @@ describe('funds resolver', () => {
             allocation_target: 4500000,
           }),
         ]);
+      });
+
+      it('should publish a message to the queue', async () => {
+        expect.assertions(2);
+
+        await setup();
+
+        expect(publishSpy).toHaveBeenCalledTimes(1);
+        expect(publishSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.CashAllocationTargetUpdated}.${app.uid}`,
+          4500000,
+        );
       });
     });
 
@@ -277,7 +331,11 @@ describe('funds resolver', () => {
     const setup = async (
       secondAllocation: number,
       thirdAllocation: number,
-    ): Promise<Maybe<UpdatedFundAllocationTargets>> => {
+    ): Promise<{
+      res: Maybe<UpdatedFundAllocationTargets>;
+      id2: number;
+      id3: number;
+    }> => {
       const [, id2, id3] = await getPool().transaction(async (db) => {
         await db.query(sql`DELETE FROM funds WHERE uid = ${app.uid}`);
         const { rows: idRows } = await db.query<{ id: number }>(sql`
@@ -308,7 +366,7 @@ describe('funds resolver', () => {
           },
         },
       );
-      return res.data?.updateFundAllocationTargets ?? null;
+      return { id2, id3, res: res.data?.updateFundAllocationTargets ?? null };
     };
 
     describe.each`
@@ -337,7 +395,7 @@ describe('funds resolver', () => {
 
         it('should return the updated delta', async () => {
           expect.assertions(1);
-          const res = await setup(secondAllocation, thirdAllocation);
+          const { res } = await setup(secondAllocation, thirdAllocation);
 
           expect(res).toStrictEqual(
             expect.objectContaining({
@@ -352,6 +410,23 @@ describe('funds resolver', () => {
                 }),
               ]),
             }),
+          );
+        });
+
+        it('should publish a message to the queue', async () => {
+          expect.assertions(2);
+
+          const { id2, id3 } = await setup(secondAllocation, thirdAllocation);
+
+          expect(publishSpy).toHaveBeenCalledTimes(1);
+          expect(publishSpy).toHaveBeenCalledWith(
+            `${pubsub.PubSubTopic.FundAllocationTargetsUpdated}.${app.uid}`,
+            {
+              deltas: expect.arrayContaining([
+                { id: id2, allocationTarget: secondAllocation },
+                { id: id3, allocationTarget: thirdAllocation },
+              ]),
+            },
           );
         });
       },
@@ -369,7 +444,7 @@ describe('funds resolver', () => {
         const expectedSecondAllocation = 31; // 50 * 40 / 65
         const expectedThirdAllocation = 19; // 50 * 25 / 65
 
-        const res = await setup(secondAllocation, thirdAllocation);
+        const { res } = await setup(secondAllocation, thirdAllocation);
 
         const { rows } = await getPool().query(sql`SELECT * FROM funds WHERE uid = ${app.uid}`);
 
@@ -1029,6 +1104,7 @@ describe('funds resolver', () => {
     }> => {
       const [fundId] = id ? [id] : await createFunds([data]);
 
+      publishSpy.mockClear();
       const res = await app.authGqlClient.mutate<Mutation, { id: number; input: RawDateFundInput }>(
         {
           mutation,
@@ -1113,6 +1189,35 @@ describe('funds resolver', () => {
       );
     });
 
+    it('should publish to the pubsub topic', async () => {
+      expect.assertions(3);
+
+      const { id } = await setup();
+
+      expect(publishSpy).toHaveBeenCalledTimes(2);
+      expect(publishSpy).toHaveBeenCalledWith<[string, FundSubscription]>(
+        `${pubsub.PubSubTopic.FundsChanged}.${app.uid}`,
+        {
+          updated: {
+            ...modifiedFund,
+            id,
+          },
+          overviewCost: expect.arrayContaining([expect.any(Number)]),
+        },
+      );
+      expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${app.uid}`,
+        expect.objectContaining<NetWorthCashTotal>({
+          cashInBank: expect.any(Number),
+          nonPensionStockValue: expect.any(Number),
+          pensionStockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
+        }),
+      );
+    });
+
     describe('when changing the name of the fund', () => {
       it('should also update the name of the fund_cache entry', async () => {
         expect.assertions(2);
@@ -1183,6 +1288,7 @@ describe('funds resolver', () => {
     }> => {
       const [id] = await createFunds([fundInput]);
 
+      publishSpy.mockClear();
       const res = await app.authGqlClient.mutate<Mutation, MutationDeleteFundArgs>({
         mutation,
         variables: { id },
@@ -1204,6 +1310,32 @@ describe('funds resolver', () => {
 
       const { rowCount } = await getPool().query(sql`SELECT * FROM funds WHERE id = ${id}`);
       expect(rowCount).toBe(0);
+    });
+
+    it('should publish to the pubsub topic', async () => {
+      expect.assertions(3);
+
+      const { id } = await setup();
+
+      expect(publishSpy).toHaveBeenCalledTimes(2);
+      expect(publishSpy).toHaveBeenCalledWith<[string, FundSubscription]>(
+        `${pubsub.PubSubTopic.FundsChanged}.${app.uid}`,
+        {
+          deleted: id,
+          overviewCost: expect.arrayContaining([expect.any(Number)]),
+        },
+      );
+      expect(publishSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
+        `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${app.uid}`,
+        expect.objectContaining<NetWorthCashTotal>({
+          cashInBank: expect.any(Number),
+          pensionStockValue: expect.any(Number),
+          nonPensionStockValue: expect.any(Number),
+          stocksIncludingCash: expect.any(Number),
+          incomeSince: expect.any(Number),
+          spendingSince: expect.any(Number),
+        }),
+      );
     });
   });
 });
