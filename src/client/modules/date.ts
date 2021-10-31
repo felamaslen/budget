@@ -99,12 +99,7 @@ const timeTickLifetime: TimeTickFn = (t0, t1) => {
       return 0;
     },
     numTicks,
-    label: (time) => {
-      if (getYear(time) % 5 === 0) {
-        return format(time, 'yyyy');
-      }
-      return null;
-    },
+    label: (time) => format(time, 'yyyy'),
   });
 };
 
