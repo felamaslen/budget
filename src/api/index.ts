@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires, global-require, import/no-extraneous-dependencies, no-console */
-
 import http, { Server } from 'http';
 import path from 'path';
-import bodyParser from 'body-parser';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import express, { Request } from 'express';
@@ -49,6 +46,7 @@ function setupProdAssets(app: express.Express): void {
 }
 
 function setupDevAssets(app: express.Express): void {
+  /* eslint-disable @typescript-eslint/no-var-requires, global-require, import/no-extraneous-dependencies, no-console */
   const conf = require('../../webpack.config');
   const compiler = require('webpack')(conf);
 
@@ -65,6 +63,7 @@ function setupDevAssets(app: express.Express): void {
       log: console.log,
     }),
   );
+  /* eslint-enable @typescript-eslint/no-var-requires, global-require, import/no-extraneous-dependencies, no-console */
 }
 
 const singlePageAppRoutes: string[] = [
@@ -125,8 +124,8 @@ function setupLogging(app: express.Express): void {
 }
 
 function setupDataInput(app: express.Express): void {
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 }
 
 function setupApiDocs(app: express.Express): void {

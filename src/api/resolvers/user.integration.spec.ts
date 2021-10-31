@@ -16,7 +16,7 @@ describe('user resolver', () => {
     app = await getTestApp();
   });
 
-  describe('query WhoAmI', () => {
+  describe('query whoami', () => {
     const whoami = gql`
       query WhoAmI {
         whoami {
@@ -56,7 +56,7 @@ describe('user resolver', () => {
     });
   });
 
-  describe('mutation Login', () => {
+  describe('mutation login', () => {
     let clock: sinon.SinonFakeTimers;
     const now = new Date('2020-03-07T23:06:23Z');
 
