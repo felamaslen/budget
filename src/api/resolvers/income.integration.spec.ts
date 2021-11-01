@@ -5,7 +5,7 @@ import { sql } from 'slonik';
 
 import { getPool } from '~api/modules/db';
 import type { IncomeDeductionRow } from '~api/queries/income';
-import { App, getTestApp } from '~api/test-utils/create-server';
+import { App, getTestApp, runMutation, runQuery } from '~api/test-utils';
 import {
   CrudResponseCreate,
   Income,
@@ -13,15 +13,13 @@ import {
   IncomeInput,
   IncomeReadResponse,
   Maybe,
-  Mutation,
   MutationCreateIncomeArgs,
   MutationDeleteIncomeArgs,
   MutationUpdateIncomeArgs,
-  Query,
   QueryReadIncomeArgs,
 } from '~api/types';
 import { CrudResponseDelete, CrudResponseUpdate, PageListStandard } from '~client/types/gql';
-import type { RawDate, RawDateDeep } from '~shared/types';
+import type { RawDate } from '~shared/types';
 
 describe('income resolvers', () => {
   let app: App;
@@ -65,16 +63,13 @@ describe('income resolvers', () => {
 
   describe('createIncome', () => {
     const setup = async (): Promise<Maybe<CrudResponseCreate>> => {
-      const res = await app.authGqlClient.mutate<Mutation, RawDateDeep<MutationCreateIncomeArgs>>({
-        mutation: mutationCreate,
-        variables: {
-          fakeId: 0,
-          input: {
-            ...testIncome,
-          },
+      const res = await runMutation<MutationCreateIncomeArgs>(app, mutationCreate, {
+        fakeId: 0,
+        input: {
+          ...testIncome,
         },
       });
-      return res.data?.createIncome ?? null;
+      return res?.createIncome ?? null;
     };
 
     it('should respond with a null error', async () => {
@@ -166,15 +161,11 @@ describe('income resolvers', () => {
       pageNumber?: number,
       limit?: number,
     ): Promise<Maybe<IncomeReadResponse>> => {
-      await app.authGqlClient.clearStore();
-      const res = await app.authGqlClient.query<Query, QueryReadIncomeArgs>({
-        query,
-        variables: {
-          offset: pageNumber ?? null,
-          limit: limit ?? null,
-        },
+      const res = await runQuery<QueryReadIncomeArgs>(app, query, {
+        offset: pageNumber ?? null,
+        limit: limit ?? null,
       });
-      return res.data?.readIncome ?? null;
+      return res?.readIncome ?? null;
     };
 
     const setup = async (
@@ -275,12 +266,9 @@ describe('income resolvers', () => {
         await aggregatedIncomeTestValues.reduce<Promise<void>>(
           async (prev, input): Promise<void> => {
             await prev;
-            await app.authGqlClient.mutate<Mutation, RawDateDeep<MutationCreateIncomeArgs>>({
-              mutation: mutationCreate,
-              variables: {
-                fakeId: 0,
-                input,
-              },
+            await runMutation<MutationCreateIncomeArgs>(app, mutationCreate, {
+              fakeId: 0,
+              input,
             });
           },
           Promise.resolve(),
@@ -449,17 +437,14 @@ describe('income resolvers', () => {
           `);
       });
 
-      const res = await app.authGqlClient.mutate<Mutation, RawDateDeep<MutationUpdateIncomeArgs>>({
-        mutation,
-        variables: {
-          id: existingId,
-          input: {
-            ...testIncome,
-            ...incomeDelta,
-          },
+      const res = await runMutation<MutationUpdateIncomeArgs>(app, mutation, {
+        id: existingId,
+        input: {
+          ...testIncome,
+          ...incomeDelta,
         },
       });
-      return { existingId, res: res.data?.updateIncome ?? null };
+      return { existingId, res: res?.updateIncome ?? null };
     };
 
     it('should respond with a null error', async () => {
@@ -551,14 +536,13 @@ describe('income resolvers', () => {
           `);
       });
 
-      const res = await app.authGqlClient.mutate<Mutation, MutationDeleteIncomeArgs>({
-        mutation,
-        variables: { id: existingId },
+      const res = await runMutation<MutationDeleteIncomeArgs>(app, mutation, {
+        id: existingId,
       });
 
       return {
         id: existingId,
-        res: res.data?.deleteIncome ?? null,
+        res: res?.deleteIncome ?? null,
       };
     };
 
