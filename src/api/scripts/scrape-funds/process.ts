@@ -8,6 +8,8 @@ import { selectFunds } from './queries';
 import { getFundUrl, downloadMultipleUrls } from './scrape';
 import { CLIOptions, Broker, Fund } from './types';
 import config from '~api/config';
+import { withSlonik } from '~api/modules/db';
+import { pubsub, PubSubTopic } from '~api/modules/graphql';
 import logger from '~api/modules/logger';
 
 export function getBroker(name: string): Broker {
@@ -48,10 +50,7 @@ function sumFundsUnitsCosts(funds: Fund[], groupKey: keyof Fund): Fund[] {
   return uniqueFunds;
 }
 
-export async function processScrape(
-  db: DatabaseTransactionConnectionType,
-  flags: CLIOptions,
-): Promise<void> {
+const processScrapeWithTransaction = withSlonik<void, [CLIOptions]>(async (db, flags) => {
   const { holdings, prices } = flags;
 
   if (!holdings && !prices) {
@@ -60,43 +59,51 @@ export async function processScrape(
 
   logger.info('Starting fund scraper...');
 
+  const funds = await getFunds(db);
+
+  if (!funds.length) {
+    logger.info('No funds to scrape - exiting!');
+
+    return;
+  }
+
+  const uniqueFunds = [
+    ...sumFundsUnitsCosts(
+      funds.filter(({ broker }) => broker === Broker.Generic),
+      'name',
+    ),
+    ...sumFundsUnitsCosts(
+      funds.filter(({ broker }) => broker !== Broker.Generic),
+      'url',
+    ),
+  ];
+
+  const rawData = await downloadMultipleUrls(uniqueFunds.map(({ url }) => url));
+
+  if (holdings) {
+    await scrapeFundHoldings(db, funds, uniqueFunds, rawData);
+  }
+  if (prices) {
+    const [currencyPrices, genericQuotes] = await Promise.all([
+      getCurrencyPrices(),
+      getGenericQuotes(uniqueFunds),
+    ]);
+    await scrapeFundPrices(db, currencyPrices, uniqueFunds, rawData, genericQuotes);
+  }
+
+  logger.info('Finished scraping funds');
+});
+
+export async function processScrape(flags: CLIOptions): Promise<void> {
   try {
-    const funds = await getFunds(db);
+    await processScrapeWithTransaction(flags);
 
-    if (!funds.length) {
-      logger.info('No funds to scrape - exiting!');
-
-      return;
+    if (flags.prices) {
+      logger.info('Sending update to pubsub queue');
+      await pubsub.publish(PubSubTopic.FundPricesUpdated, true);
     }
-
-    const uniqueFunds = [
-      ...sumFundsUnitsCosts(
-        funds.filter(({ broker }) => broker === Broker.Generic),
-        'name',
-      ),
-      ...sumFundsUnitsCosts(
-        funds.filter(({ broker }) => broker !== Broker.Generic),
-        'url',
-      ),
-    ];
-
-    const rawData = await downloadMultipleUrls(uniqueFunds.map(({ url }) => url));
-
-    if (holdings) {
-      await scrapeFundHoldings(db, funds, uniqueFunds, rawData);
-    }
-    if (prices) {
-      const [currencyPrices, genericQuotes] = await Promise.all([
-        getCurrencyPrices(),
-        getGenericQuotes(uniqueFunds),
-      ]);
-      await scrapeFundPrices(db, currencyPrices, uniqueFunds, rawData, genericQuotes);
-    }
-
-    logger.info('Finished scraping funds');
   } catch (err) {
     logger.error('Error scraping funds:', (err as Error).message);
-
     throw err;
   }
 }

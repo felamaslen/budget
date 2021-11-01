@@ -5,7 +5,6 @@ import { upsertFundHashes, insertPrices, insertPriceCache } from './queries';
 import { Fund, CurrencyPrices, Broker } from './types';
 import config from '~api/config';
 import { getMultipleStockQuotes } from '~api/modules/finance';
-import { pubsub, PubSubTopic } from '~api/modules/graphql/pubsub';
 import logger from '~api/modules/logger';
 
 type FundWithPrice = Fund & { price: number };
@@ -103,7 +102,4 @@ export async function scrapeFundPrices(
   logger.debug('Inserting prices into database');
 
   await insertNewPriceCache(db, fundsWithPrices, new Date());
-
-  logger.info('Sending update to pubsub queue');
-  await pubsub.publish(PubSubTopic.FundPricesUpdated, true);
 }

@@ -1,13 +1,23 @@
+import { getUnixTime } from 'date-fns';
+import gql from 'graphql-tag';
 import nock, { Scope } from 'nock';
 import prompts from 'prompts';
 import sinon from 'sinon';
 import { DatabasePoolConnectionType, sql } from 'slonik';
+import * as w from 'wonka';
 
 import { nockHLFund, nockHLShare, nockHLShareFX, nockGeneralShare } from './__tests__/nocks';
 import { run } from '.';
 import { nockCurrencies } from '~api/__tests__/nocks';
 import { getPool } from '~api/modules/db';
 import * as pubsub from '~api/modules/graphql/pubsub';
+import { App, getTestApp } from '~api/test-utils/create-server';
+import { FundHistory, Maybe } from '~api/types';
+import {
+  FundPeriod,
+  FundPricesUpdatedSubscription,
+  FundPricesUpdatedSubscriptionVariables,
+} from '~client/types/gql';
 
 type TestFundPrice = {
   cid: number;
@@ -25,12 +35,15 @@ const testPriceRELXGeneric = 2260.0; // regularMarketPrice
 
 describe('fund scraper - integration tests', () => {
   const now = new Date('2020-02-22T20:35Z');
+  let app: App;
   let clock: sinon.SinonFakeTimers;
-  const uid1 = 12345;
+  let uid1: number;
   const uid2 = 67891;
   let fundIds: number[];
 
   beforeAll(async () => {
+    app = await getTestApp({ subscriptions: true });
+    uid1 = app.uid;
     clock = sinon.useFakeTimers(now);
   });
   afterAll(async () => {
@@ -42,13 +55,10 @@ describe('fund scraper - integration tests', () => {
     await db.query(sql`DELETE FROM fund_scrape`);
     await db.query(sql`DELETE FROM fund_cache_time`);
 
-    await db.query(sql`DELETE FROM users`);
+    await db.query(sql`DELETE FROM users WHERE uid = ${uid2}`);
     await db.query(sql`
     INSERT INTO users (uid, name, pin_hash) VALUES ${sql.join(
-      [
-        sql`(${uid1}, ${'test-user-funds-1'}, ${'some-pin-hash'})`,
-        sql`(${uid2}, ${'test-user-funds-2'}, ${'other-pin-hash'})`,
-      ],
+      [sql`(${uid2}, ${'test-user-funds-2'}, ${'other-pin-hash'})`],
       sql`, `,
     )}
     `);
@@ -116,13 +126,13 @@ describe('fund scraper - integration tests', () => {
     const getTestFundPrice = async (fundId: number): Promise<readonly TestFundPrice[]> => {
       const result = await getPool().connect(async (db) => {
         const { rows } = await db.query<TestFundPrice>(sql`
-      SELECT fct.cid, fct.time, fc.price
-      FROM funds f
-      INNER JOIN fund_scrape fs ON fs.item = f.item
-      INNER JOIN fund_cache fc ON fc.fid = fs.fid
-      INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
-      WHERE f.id = ${fundId}
-      `);
+        SELECT fct.cid, fct.time, fc.price
+        FROM funds f
+        INNER JOIN fund_scrape fs ON fs.item = f.item
+        INNER JOIN fund_cache fc ON fc.fid = fs.fid
+        INNER JOIN fund_cache_time fct ON fct.cid = fc.cid
+        WHERE f.id = ${fundId}
+        `);
         return rows;
       });
       return result;
@@ -202,13 +212,136 @@ describe('fund scraper - integration tests', () => {
       ]);
     });
 
-    it('should issue an update to the pubsub topic', async () => {
-      expect.assertions(1);
-      const publishSpy = jest.spyOn(pubsub.pubsub, 'publish');
+    describe('subscriptions', () => {
+      let publishSpy: jest.SpyInstance;
+      beforeAll(async () => {
+        publishSpy = jest.spyOn(pubsub.pubsub, 'publish');
+      });
 
-      await run();
+      const pricesSubscription = gql`
+        subscription FundPricesUpdated($period: FundPeriod, $length: NonNegativeInt!) {
+          fundPricesUpdated(period: $period, length: $length) {
+            startTime
+            cacheTimes
+            prices {
+              fundId
+              groups {
+                startIndex
+                values
+              }
+            }
+            annualisedFundReturns
+            overviewCost
+          }
+        }
+      `;
 
-      expect(publishSpy).toHaveBeenCalledTimes(1);
+      it('should be sent to the correct pubsub topic', async () => {
+        expect.assertions(2);
+        await run();
+
+        expect(publishSpy).toHaveBeenCalledTimes(1);
+        expect(publishSpy).toHaveBeenCalledWith(
+          pubsub.PubSubTopic.FundPricesUpdated,
+          expect.anything(),
+        );
+      });
+
+      it('should update prices for all authenticated clients', async () => {
+        expect.assertions(3);
+
+        await run();
+        clock.tick(3600 * 1000);
+        await setupNocks();
+
+        await run();
+        clock.tick(3600 * 1000);
+        await setupNocks();
+
+        const [subscriptionResult] = await Promise.all([
+          new Promise<Maybe<FundPricesUpdatedSubscription>>((resolve) => {
+            const { unsubscribe } = w.pipe(
+              app.authGqlClient.subscription<
+                FundPricesUpdatedSubscription,
+                FundPricesUpdatedSubscriptionVariables
+              >(pricesSubscription, {
+                period: FundPeriod.Year,
+                length: 4,
+              }),
+              w.subscribe((result) => {
+                unsubscribe();
+                resolve(result.data ?? null);
+              }),
+            );
+          }),
+
+          run(),
+        ]);
+
+        expect(subscriptionResult?.fundPricesUpdated?.startTime).toBe(getUnixTime(now));
+
+        expect(subscriptionResult?.fundPricesUpdated?.annualisedFundReturns).toMatchInlineSnapshot(
+          `0.3785203624289302`,
+        );
+
+        expect(subscriptionResult?.fundPricesUpdated?.prices).toStrictEqual<FundHistory['prices']>(
+          expect.arrayContaining([
+            {
+              fundId: fundIds[0], // CTY
+              groups: [
+                {
+                  startIndex: 0,
+                  values: [424.1, 424.1, 424.1],
+                },
+              ],
+            },
+            {
+              fundId: fundIds[5], // SMT
+              groups: [
+                {
+                  startIndex: 0,
+                  values: [1453, 1453, 1453],
+                },
+              ],
+            },
+            {
+              fundId: fundIds[6], // RELX
+              groups: [
+                {
+                  startIndex: 0,
+                  values: [2260, 2260, 2260],
+                },
+              ],
+            },
+          ]),
+        );
+      });
+
+      it('should not send updates for anonymous clients', async () => {
+        expect.assertions(1);
+
+        const [subscriptionResult] = await Promise.all([
+          new Promise<Maybe<FundPricesUpdatedSubscription>>((resolve) => {
+            const { unsubscribe } = w.pipe(
+              app.gqlClient.subscription<
+                FundPricesUpdatedSubscription,
+                FundPricesUpdatedSubscriptionVariables
+              >(pricesSubscription, {
+                period: FundPeriod.Year,
+                length: 4,
+              }),
+              w.subscribe((result) => {
+                unsubscribe();
+                resolve(result.data ?? null);
+              }),
+            );
+          }),
+
+          run(),
+        ]);
+
+        expect(subscriptionResult?.fundPricesUpdated).toBeNull();
+      });
     });
 
     describe('when one or more requests fail', () => {
@@ -277,11 +410,11 @@ describe('fund scraper - integration tests', () => {
   });
 
   describe('scraping holdings', () => {
-    const weightCTY: { [userId: string]: number } = {
+    const getWeightCTY = (): { [userId: string]: number } => ({
       // (100000 + 100000 - 90000) / (100000 + 100000 - 90000 + 193 - 175 + Math.max(0, 216704 - 276523)),
       [uid1]: 0.999836,
       [uid2]: 1, // only holding
-    };
+    });
 
     const testPreExistingCodes = [
       {
@@ -475,21 +608,25 @@ describe('fund scraper - integration tests', () => {
     });
 
     it.each`
-      userId  | position
-      ${uid1} | ${1}
-      ${uid2} | ${2}
-    `('should update the list of weighted stocks for user $position', async ({ userId }) => {
+      getUserId             | position
+      ${(): number => uid1} | ${1}
+      ${(): number => uid2} | ${2}
+    `('should update the list of weighted stocks for user $position', async ({ getUserId }) => {
       expect.assertions(2);
+
+      const userId = getUserId();
 
       await run();
 
       const stocks = await getPool().query(sql`
-      SELECT * FROM stocks
-      WHERE uid = ${userId}
-      ORDER BY name
-      `);
+        SELECT * FROM stocks
+        WHERE uid = ${userId}
+        ORDER BY name
+        `);
 
       expect(stocks.rows).toHaveLength(10);
+
+      const weightCTY = getWeightCTY();
 
       expect(stocks.rows).toStrictEqual([
         expect.objectContaining({

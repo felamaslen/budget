@@ -1,17 +1,17 @@
 import { processScrape } from './process';
 import { CLIOptions } from './types';
 
-import { getPool, withSlonik } from '~api/modules/db';
+import { getPool } from '~api/modules/db';
 import logger from '~api/modules/logger';
 
-export const run = withSlonik<void>(async (db) => {
+export const run = async (): Promise<void> => {
   const flags: CLIOptions = {
     holdings: process.argv.includes('--holdings'),
     prices: process.argv.includes('--prices'),
   };
 
-  await processScrape(db, flags);
-});
+  await processScrape(flags);
+};
 
 if (require.main === module) {
   run()
