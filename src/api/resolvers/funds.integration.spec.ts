@@ -953,19 +953,23 @@ describe('funds resolver', () => {
     it('should return the latest value (including pension)', async () => {
       expect.assertions(2);
       // check fixtures to verify these expected values
-      const expectedValue = Math.round(1197.23 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229));
+      const expectedValue = Math.round(
+        1197.23 * (1005.2 + 1004 - 1005.2 + 89.095 + 894.134 - 883.229),
+      );
       const res = await setup();
       expect(res?.latestValue).toBeCloseTo(expectedValue);
-      expect(res?.latestValue).toMatchInlineSnapshot(`119723`);
+      expect(res?.latestValue).toMatchInlineSnapshot(`1321742`);
     });
 
     it('should return the previous value (including pension)', async () => {
       expect.assertions(2);
       const res = await setup();
       // check fixtures to verify these expected values
-      const expectedValue = Math.round(127.39 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229));
+      const expectedValue = Math.round(
+        127.39 * (1005.2 + 1004 - 1005.2 + 89.095 + 894.134 - 883.229),
+      );
       expect(res?.previousValue).toBeCloseTo(expectedValue);
-      expect(res?.previousValue).toMatchInlineSnapshot(`12739`);
+      expect(res?.previousValue).toMatchInlineSnapshot(`140639`);
     });
 
     it('should set and return the refresh time', async () => {

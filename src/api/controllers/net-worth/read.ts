@@ -12,6 +12,7 @@ import {
   getTotalFundValue,
   selectSpendingAndIncomeSinceDate,
   selectNetWorthLoans,
+  PensionTransactionOpts,
 } from '~api/queries';
 import {
   NetWorthCashTotal,
@@ -64,15 +65,17 @@ export async function readNetWorthCashTotal(
     return {
       cashInBank: 0,
       stocksIncludingCash: 0,
-      stockValue: 0,
+      pensionStockValue: 0,
+      nonPensionStockValue: 0,
       date: null,
       incomeSince: 0,
       spendingSince: 0,
     };
   }
 
-  const [stockValueAtNetWorthDate, { income, spending }] = await Promise.all([
-    getTotalFundValue(db, uid, addDays(netWorth.date, 1)),
+  const [stockValuePension, stockValueNonPension, { income, spending }] = await Promise.all([
+    getTotalFundValue(db, uid, addDays(netWorth.date, 1), PensionTransactionOpts.OnlyPension),
+    getTotalFundValue(db, uid, addDays(netWorth.date, 1), PensionTransactionOpts.NotPension),
     selectSpendingAndIncomeSinceDate(
       db,
       uid,
@@ -83,7 +86,8 @@ export async function readNetWorthCashTotal(
 
   return {
     cashInBank: Math.max(0, netWorth.cashInBank),
-    stockValue: Math.max(0, stockValueAtNetWorthDate),
+    pensionStockValue: Math.max(0, stockValuePension),
+    nonPensionStockValue: Math.max(0, stockValueNonPension),
     stocksIncludingCash: Math.max(0, netWorth.stocksIncludingCash),
     date: netWorth.date,
     incomeSince: income,

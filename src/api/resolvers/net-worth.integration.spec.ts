@@ -1912,7 +1912,8 @@ describe('net worth resolver', () => {
         netWorthCashTotal {
           date
           cashInBank
-          stockValue
+          nonPensionStockValue
+          pensionStockValue
           stocksIncludingCash
           incomeSince
           spendingSince
@@ -1939,18 +1940,22 @@ describe('net worth resolver', () => {
     const expectedCashInBank = 1288520; // check seed data
     const expectedISAValue = 6449962;
 
-    const expectedFundValueAtNetWorthDate = 127.39 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229);
+    const expectedNonPensionStockValue = Math.round(
+      127.39 * (1005.2 - 1005.2 + 89.095 + 894.134 - 883.229),
+    );
+    const expectedPensionStockValue = Math.round(127.39 * 1004);
 
     const expectedIncomeSinceNetWorthDate = 15422 - (3629 + 1550);
     const expectedSpendingSinceNetWorthDate = 350;
 
     it.each`
-      thing                                   | key                      | expectedValue
-      ${'Cash in bank'}                       | ${'cashInBank'}          | ${expectedCashInBank}
-      ${'Fund value'}                         | ${'stockValue'}          | ${expectedFundValueAtNetWorthDate}
-      ${'Stocks (including investable cash)'} | ${'stocksIncludingCash'} | ${expectedISAValue}
-      ${'Income since net worth date'}        | ${'incomeSince'}         | ${expectedIncomeSinceNetWorthDate}
-      ${'Spending since net worth date'}      | ${'spendingSince'}       | ${expectedSpendingSinceNetWorthDate}
+      thing                                   | key                       | expectedValue
+      ${'Cash in bank'}                       | ${'cashInBank'}           | ${expectedCashInBank}
+      ${'Non-pension stock value'}            | ${'nonPensionStockValue'} | ${expectedNonPensionStockValue}
+      ${'Pension-only stock value'}           | ${'pensionStockValue'}    | ${expectedPensionStockValue}
+      ${'Stocks (including investable cash)'} | ${'stocksIncludingCash'}  | ${expectedISAValue}
+      ${'Income since net worth date'}        | ${'incomeSince'}          | ${expectedIncomeSinceNetWorthDate}
+      ${'Spending since net worth date'}      | ${'spendingSince'}        | ${expectedSpendingSinceNetWorthDate}
     `(
       'should return the $thing',
       ({ key, expectedValue }: { key: keyof NetWorthCashTotal; expectedValue: number }) => {

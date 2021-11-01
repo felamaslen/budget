@@ -87,6 +87,7 @@ export const generateFunds = async (
     [
       [fundIds[0], '2014-10-13', 1005.2, 1139.92, 10, 14, false, false],
       [fundIds[0], '2015-08-21', -1005.2, 1549.03, 5, 204, false, false],
+      [fundIds[0], '2015-09-02', 1004, 1497.32, 11, 54, false, true],
       [fundIds[2], '2016-09-19', 1678.42, 119.15, 16, 0, false, false],
       [fundIds[2], '2017-02-14', 846.38, 118.15, 0, 0, false, false],
       [fundIds[0], '2016-08-24', 89.095, 1122.3, 8, 0, false, false],
