@@ -5,8 +5,8 @@ import { sql } from 'slonik';
 
 import { seedData } from '~api/__tests__/fixtures';
 import { getPool } from '~api/modules/db';
-import { App, getTestApp } from '~api/test-utils/create-server';
-import { Query, Overview, OverviewOld, Maybe } from '~api/types';
+import { App, getTestApp, runQuery } from '~api/test-utils';
+import { Overview, OverviewOld, Maybe, Query } from '~api/types';
 
 describe('overview resolver', () => {
   let clock: sinon.SinonFakeTimers;
@@ -52,14 +52,14 @@ describe('overview resolver', () => {
     describe('when not logged in', () => {
       it('should return null', async () => {
         expect.assertions(1);
-        const res = await app.gqlClient.query<Query>({ query });
+        const res = await app.gqlClient.query<Query>(query).toPromise();
         expect(res.data?.overview).toBeNull();
       });
     });
 
     const setup = moize.promise(async (): Promise<Overview | null | undefined> => {
-      const res = await app.authGqlClient.query<Query>({ query });
-      return res.data?.overview;
+      const res = await runQuery(app, query);
+      return res?.overview;
     });
 
     const expectedDeductedIncome = 433201 - (39765 + 10520); // check seed
@@ -173,8 +173,8 @@ describe('overview resolver', () => {
     `;
 
     const setup = moize.promise(async (): Promise<Maybe<OverviewOld>> => {
-      const res = await app.authGqlClient.query<Query>({ query });
-      return res.data?.overviewOld ?? null;
+      const res = await runQuery(app, query);
+      return res?.overviewOld ?? null;
     });
 
     // The expected values come from the seed data in src/api/__tests__/fixtures
