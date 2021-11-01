@@ -1,12 +1,12 @@
-import { FetchResult } from 'apollo-boost';
-
 import addDays from 'date-fns/addDays';
 import gql from 'graphql-tag';
 import sinon from 'sinon';
 import { sql } from 'slonik';
+import { OperationResult } from 'urql';
 
 import config from '~api/config';
 import { getPool } from '~api/modules/db';
+import { runQuery } from '~api/test-utils';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import { Mutation, MutationLoginArgs, Query } from '~api/types';
 
@@ -30,11 +30,9 @@ describe('user resolver', () => {
       it("should return the current user's info", async () => {
         expect.assertions(1);
 
-        const res = await app.authGqlClient.query<Query>({
-          query: whoami,
-        });
+        const res = await runQuery(app, whoami);
 
-        expect(res.data?.whoami).toStrictEqual(
+        expect(res?.whoami).toStrictEqual(
           expect.objectContaining({
             uid: app.uid,
             name: 'test-user',
@@ -47,11 +45,9 @@ describe('user resolver', () => {
       it('should be null', async () => {
         expect.assertions(1);
 
-        const res = await app.gqlClient.query<Query>({
-          query: whoami,
-        });
+        const res = await app.gqlClient.query<Query>(whoami).toPromise();
 
-        expect(res.data?.whoami).toBeNull();
+        expect(res?.data?.whoami).toBeNull();
       });
     });
   });
@@ -92,10 +88,9 @@ describe('user resolver', () => {
       const uid = (await getPool().query<{ uid: number }>(sql`SELECT uid FROM users LIMIT 1`))
         .rows[0]?.uid;
 
-      const res = await app.gqlClient.mutate<Mutation, MutationLoginArgs>({
-        mutation: login,
-        variables: { pin: 1234 },
-      });
+      const res = await app.gqlClient
+        .mutation<Mutation, MutationLoginArgs>(login, { pin: 1234 })
+        .toPromise();
 
       expect(res.data).toStrictEqual(
         expect.objectContaining({
@@ -115,12 +110,9 @@ describe('user resolver', () => {
     it('should return an unsuccessful login response', async () => {
       expect.assertions(1);
 
-      const res = await app.gqlClient.mutate<Mutation, MutationLoginArgs>({
-        mutation: login,
-        variables: {
-          pin: 1235,
-        },
-      });
+      const res = await app.gqlClient
+        .mutation<Mutation, MutationLoginArgs>(login, { pin: 1235 })
+        .toPromise();
 
       expect(res.data?.login).toStrictEqual(
         expect.objectContaining({
@@ -136,27 +128,35 @@ describe('user resolver', () => {
       const ip0 = '1.2.3.4';
       const ip1 = '1.9.3.7';
 
-      const badLogin = (ip = ip0): Promise<FetchResult<Mutation>> =>
-        app.gqlClient.mutate<Mutation, MutationLoginArgs>({
-          mutation: login,
-          variables: { pin: 9999 },
-          context: {
-            headers: {
-              'X-Forwarded-For': ip,
+      const badLogin = (ip = ip0): Promise<OperationResult<Mutation, MutationLoginArgs>> =>
+        app.gqlClient
+          .mutation<Mutation, MutationLoginArgs>(
+            login,
+            { pin: 9999 },
+            {
+              fetchOptions: {
+                headers: {
+                  'X-Forwarded-For': ip,
+                },
+              },
             },
-          },
-        });
+          )
+          .toPromise();
 
-      const goodLogin = (ip = ip0): Promise<FetchResult<Mutation>> =>
-        app.gqlClient.mutate<Mutation, MutationLoginArgs>({
-          mutation: login,
-          variables: { pin: 1234 },
-          context: {
-            headers: {
-              'X-Forwarded-For': ip,
+      const goodLogin = (ip = ip0): Promise<OperationResult<Mutation, MutationLoginArgs>> =>
+        app.gqlClient
+          .mutation<Mutation, MutationLoginArgs>(
+            login,
+            { pin: 1234 },
+            {
+              fetchOptions: {
+                headers: {
+                  'X-Forwarded-For': ip,
+                },
+              },
             },
-          },
-        });
+          )
+          .toPromise();
 
       const delayedBadLogins = async (
         numLogins: number,
