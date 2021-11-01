@@ -15,10 +15,10 @@ export async function runQuery<Args extends Record<string, unknown>>(
 
 export async function runMutation<Args extends Record<string, unknown>>(
   app: App,
-  query: DocumentNode,
+  mutation: DocumentNode,
   args?: Args,
 ): Promise<Maybe<Mutation>> {
-  const res = await app.authGqlClient.mutation<Mutation, Args>(query, args).toPromise();
+  const res = await app.authGqlClient.mutation<Mutation, Args>(mutation, args).toPromise();
   return res.data ?? null;
 }
 
