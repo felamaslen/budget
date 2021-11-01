@@ -46,7 +46,7 @@ node {
 
         stage('API integration tests') {
           docker.image('redis:6.2-alpine').withRun() { redis ->
-            sh "docker run --rm --link ${pg.id}:db --link ${redis.id}:redis -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' -e 'REDIS_HOST=redis' ${IMAGE} sh -c 'yarn test:api:integration'"
+            sh "docker run --rm --link ${pg.id}:db --link ${redis.id}:redis -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' -e 'REDIS_HOST=redis' -e 'REDIS_PORT=6379' ${IMAGE} sh -c 'yarn test:api:integration'"
           }
         }
       }
