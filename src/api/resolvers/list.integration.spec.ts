@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import { sql } from 'slonik';
 
 import { getPool } from '~api/modules/db';
-import { App, getTestApp } from '~api/test-utils/create-server';
+import { App, getTestApp, runMutation, runQuery } from '~api/test-utils';
 import {
   CrudResponseCreate,
   CrudResponseUpdate,
@@ -13,20 +13,18 @@ import {
   ListItemStandardInput,
   ListReadResponse,
   Maybe,
-  Mutation,
   MutationCreateListItemArgs,
-  MutationCreateReceiptArgs,
   MutationDeleteListItemArgs,
   MutationUpdateListItemArgs,
   PageListStandard as PageList,
-  Query,
   QueryReadListArgs,
   ReceiptInput,
   ReceiptCreated,
   ReceiptPage,
   PageListStandard,
 } from '~api/types';
-import type { RawDate, RawDateDeep } from '~shared/types';
+import { MutationCreateReceiptArgs } from '~client/types/gql';
+import type { RawDate } from '~shared/types';
 
 describe('standard list resolvers', () => {
   let app: App;
@@ -161,20 +159,14 @@ describe('standard list resolvers', () => {
 
       describe(`create ${page}`, () => {
         const setup = async (): Promise<Maybe<CrudResponseCreate>> => {
-          const res = await app.authGqlClient.mutate<
-            Mutation,
-            RawDateDeep<MutationCreateListItemArgs>
-          >({
-            mutation: createMutation,
-            variables: {
-              page,
-              fakeId: 0,
-              input: {
-                ...testItem,
-              } as RawDate<ListItemStandardInput, 'date'>,
-            },
+          const res = await runMutation<MutationCreateListItemArgs>(app, createMutation, {
+            page,
+            fakeId: 0,
+            input: {
+              ...testItem,
+            } as RawDate<ListItemStandardInput, 'date'>,
           });
-          return res.data?.createListItem ?? null;
+          return res?.createListItem ?? null;
         };
 
         it('should respond with a null error', async () => {
@@ -215,16 +207,12 @@ describe('standard list resolvers', () => {
           pageNumber?: number,
           limit?: number,
         ): Promise<Maybe<ListReadResponse>> => {
-          await app.authGqlClient.clearStore();
-          const res = await app.authGqlClient.query<Query, QueryReadListArgs>({
-            query: readQuery,
-            variables: {
-              page,
-              offset: pageNumber ?? null,
-              limit: limit ?? null,
-            },
+          const res = await runQuery<QueryReadListArgs>(app, readQuery, {
+            page,
+            offset: pageNumber ?? null,
+            limit: limit ?? null,
           });
-          return res.data?.readList ?? null;
+          return res?.readList ?? null;
         };
 
         const setup = async (
@@ -377,21 +365,15 @@ describe('standard list resolvers', () => {
           `);
           const existingId = rows[0].id;
 
-          const res = await app.authGqlClient.mutate<
-            Mutation,
-            RawDateDeep<MutationUpdateListItemArgs>
-          >({
-            mutation: updateMutation,
-            variables: {
-              page,
-              id: existingId,
-              input: {
-                ...testItem,
-                ...delta,
-              },
+          const res = await runMutation<MutationUpdateListItemArgs>(app, updateMutation, {
+            page,
+            id: existingId,
+            input: {
+              ...testItem,
+              ...delta,
             },
           });
-          return { existingId, res: res.data?.updateListItem ?? null };
+          return { existingId, res: res?.updateListItem ?? null };
         };
 
         it('should respond with a null error', async () => {
@@ -439,14 +421,14 @@ describe('standard list resolvers', () => {
           `);
           const existingId = rows[0].id;
 
-          const res = await app.authGqlClient.mutate<Mutation, MutationDeleteListItemArgs>({
-            mutation: deleteMutation,
-            variables: { page, id: existingId },
+          const res = await runMutation<MutationDeleteListItemArgs>(app, deleteMutation, {
+            page,
+            id: existingId,
           });
 
           return {
             id: existingId,
-            res: res.data?.deleteListItem ?? null,
+            res: res?.deleteListItem ?? null,
           };
         };
 
@@ -526,18 +508,12 @@ describe('standard list resolvers', () => {
         );
       });
 
-      const res = await app.authGqlClient.mutate<
-        Mutation,
-        RawDate<MutationCreateReceiptArgs, 'date'>
-      >({
-        mutation,
-        variables: {
-          date,
-          shop,
-          items,
-        },
+      const res = await runMutation<MutationCreateReceiptArgs>(app, mutation, {
+        date,
+        shop,
+        items,
       });
-      return res.data?.createReceipt ?? null;
+      return res?.createReceipt ?? null;
     };
 
     it('should create all the items in the database', async () => {
