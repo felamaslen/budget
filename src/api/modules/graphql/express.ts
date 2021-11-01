@@ -43,7 +43,7 @@ function getWSContext(ctx: Context<Extra>): ExecutionContext {
 }
 
 export async function setupGraphQL(app: Express, server: Server): Promise<() => void> {
-  const schema = await fs.readFile(path.resolve(__dirname, '../../introspection.json'));
+  const introspection = await fs.readFile(path.resolve(__dirname, '../../introspection.json'));
 
   app.use(
     '/graphql',
@@ -54,7 +54,7 @@ export async function setupGraphQL(app: Express, server: Server): Promise<() => 
   );
 
   app.get('/introspection', authMiddleware, (_, res) => {
-    res.send(schema);
+    res.send(introspection);
   });
 
   const wsServer = new ws.Server({

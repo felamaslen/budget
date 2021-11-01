@@ -103,12 +103,11 @@ export default App;
 const ClientAppReloader: React.FC = () => {
   const [offline, wasOffline] = useOffline();
   const [connectionAttempt, setConnectionAttempt] = useState<number>(0);
-  const onReconnect = useCallback((): void => setConnectionAttempt((last) => last + 1), []);
   useEffect(() => {
     if (wasOffline && !offline) {
-      onReconnect();
+      setConnectionAttempt((last) => last + 1);
     }
-  }, [wasOffline, offline, onReconnect]);
+  }, [wasOffline, offline]);
 
   const dispatch = useDispatch();
   const [apiKey, onLogin] = useState<string | null>(window.__API_KEY__ ?? null);
@@ -119,7 +118,7 @@ const ClientAppReloader: React.FC = () => {
   }, [dispatch]);
 
   return (
-    <GQLProvider apiKey={apiKey} onReconnected={onReconnect}>
+    <GQLProvider apiKey={apiKey} setConnectionAttempt={setConnectionAttempt}>
       <App
         loggedIn={!!apiKey}
         onLogin={onLogin}

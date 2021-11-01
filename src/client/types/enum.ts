@@ -1,4 +1,3 @@
-export { MainBlockName } from './analysis';
 export { RequestType } from './crud';
 export {
   AnalysisPage,

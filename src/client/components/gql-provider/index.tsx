@@ -1,18 +1,30 @@
-import { createClient, dedupExchange, cacheExchange, fetchExchange, ssrExchange } from '@urql/core';
-import { createClient as createWSClient } from 'graphql-ws';
-import React, { useMemo, useRef } from 'react';
-import { Client, Provider, subscriptionExchange } from 'urql';
+import {
+  cacheExchange,
+  Client,
+  createClient,
+  dedupExchange,
+  Exchange,
+  fetchExchange,
+  ssrExchange,
+  subscriptionExchange,
+} from '@urql/core';
+import { createClient as createWSClient, Sink } from 'graphql-ws';
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef } from 'react';
+import { Provider } from 'urql';
 
 import { isServerSide } from '~client/modules/ssr';
 
-const isSecure = isServerSide ? null : window.location.protocol === 'https:';
-const wsUrl = isServerSide
-  ? ''
-  : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
+const getWSUrl = (): string => {
+  const isSecure = isServerSide ? null : window.location.protocol === 'https:';
+  return isServerSide ? '' : `${isSecure ? 'wss' : 'ws'}://${window.location.host}/subscriptions`;
+};
 
 export type SSRExchange = ReturnType<typeof ssrExchange>;
 
-type ClientProps = { apiKey: string | null; onReconnected?: () => void };
+type ClientProps = {
+  apiKey: string | null;
+  setConnectionAttempt?: Dispatch<SetStateAction<number>>;
+};
 
 export const ssr = isServerSide
   ? undefined
@@ -21,19 +33,30 @@ export const ssr = isServerSide
       initialState: window.__URQL_DATA__,
     });
 
-export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconnected }) => {
+export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, setConnectionAttempt }) => {
   const hasConnected = useRef<boolean>(false);
+  const onReconnected = useRef<ClientProps['setConnectionAttempt']>(setConnectionAttempt);
+  useEffect(
+    () => (): void => {
+      onReconnected.current = undefined;
+    },
+    [],
+  );
 
   const client = useMemo<Client>(() => {
+    const graphqlUrl = `${window.location.protocol}//${window.location.host}/graphql`;
+
     if (!apiKey) {
       return createClient({
-        url: '/graphql',
-        exchanges: [dedupExchange, cacheExchange, ssr as SSRExchange, fetchExchange],
+        url: graphqlUrl,
+        exchanges: [dedupExchange, cacheExchange, ssr, fetchExchange].filter(
+          (e): e is Exchange => !!e,
+        ),
       });
     }
 
     const wsClient = createWSClient({
-      url: wsUrl,
+      url: getWSUrl(),
       lazy: false,
       retryAttempts: Infinity,
       retryWait: (retries): Promise<void> =>
@@ -44,7 +67,7 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconne
       on: {
         connected: (): void => {
           if (hasConnected.current) {
-            onReconnected?.();
+            onReconnected.current?.((last) => last + 1);
           }
           hasConnected.current = true;
         },
@@ -52,7 +75,7 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconne
     });
 
     return createClient({
-      url: '/graphql',
+      url: graphqlUrl,
       fetchOptions: {
         headers: {
           Authorization: apiKey,
@@ -61,19 +84,19 @@ export const GQLProvider: React.FC<ClientProps> = ({ apiKey, children, onReconne
       exchanges: [
         dedupExchange,
         cacheExchange,
-        ssr as SSRExchange,
+        ssr,
         fetchExchange,
         subscriptionExchange({
           forwardSubscription: (operation) => ({
             subscribe: (sink): { unsubscribe: () => void } => {
-              const dispose = wsClient.subscribe(operation, sink);
+              const dispose = wsClient.subscribe(operation, sink as Sink);
               return {
                 unsubscribe: dispose,
               };
             },
           }),
         }),
-      ],
+      ].filter((e): e is Exchange => !!e),
     });
   }, [apiKey, onReconnected]);
 
