@@ -28,24 +28,26 @@ node {
           sh 'psql postgres://docker:docker@db/postgres -c "create database budget_test;"'
         }
 
-        stage('Lint') {
-          sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
-        }
+        // stage('Lint') {
+        //   sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
+        // }
 
-        stage('API unit tests') {
-          sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
-        }
+        // stage('API unit tests') {
+        //   sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
+        // }
 
-        stage('Client unit tests') {
-          sh "docker run --rm --privileged ${IMAGE} sh -c 'yarn test:client:ci'"
-        }
+        // stage('Client unit tests') {
+        //   sh "docker run --rm --privileged ${IMAGE} sh -c 'yarn test:client:ci'"
+        // }
 
-        stage('Visual regression tests') {
-          unstable('Visual regression tests are disabled')
-        }
+        // stage('Visual regression tests') {
+        //   unstable('Visual regression tests are disabled')
+        // }
 
         stage('API integration tests') {
-          sh "docker run --rm --link ${pg.id}:db -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' ${IMAGE} sh -c 'yarn test:api:integration'"
+          docker.image('redis:6.2-alpine').withRun() { redis ->
+            sh "docker run --rm --link ${pg.id}:db --link ${redis.id}:redis -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' -e 'REDIS_HOST=redis' ${IMAGE} sh -c 'yarn test:api:integration'"
+          }
         }
       }
     }
