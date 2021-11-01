@@ -1,4 +1,3 @@
-import { ApolloQueryResult } from 'apollo-boost';
 import gql from 'graphql-tag';
 import sinon from 'sinon';
 import { sql } from 'slonik';
@@ -7,7 +6,7 @@ import { seedData } from '~api/__tests__/fixtures';
 import { getPool } from '~api/modules/db';
 import * as pubsub from '~api/modules/graphql/pubsub';
 import type { NetWorthLoansRow } from '~api/queries';
-import { App, getTestApp } from '~api/test-utils/create-server';
+import { App, getTestApp, runMutation, runQuery } from '~api/test-utils';
 import {
   AsyncReturnType,
   CategoryRow,
@@ -16,15 +15,12 @@ import {
   CrudResponseDelete,
   CrudResponseUpdate,
   Maybe,
-  Mutation,
   MutationCreateNetWorthCategoryArgs,
-  MutationCreateNetWorthEntryArgs,
   MutationCreateNetWorthSubcategoryArgs,
   MutationDeleteNetWorthCategoryArgs,
   MutationDeleteNetWorthEntryArgs,
   MutationDeleteNetWorthSubcategoryArgs,
   MutationUpdateNetWorthCategoryArgs,
-  MutationUpdateNetWorthEntryArgs,
   MutationUpdateNetWorthSubcategoryArgs,
   NetWorthCashTotal,
   NetWorthCategory,
@@ -43,6 +39,10 @@ import {
   SubcategoryRow,
   ValueRowSelect,
 } from '~api/types';
+import type {
+  MutationCreateNetWorthEntryArgs,
+  MutationUpdateNetWorthEntryArgs,
+} from '~client/types/gql';
 import type { Create, RawDate, RawDateDeep, RequiredNotNull } from '~shared/types';
 
 describe('net worth resolver', () => {
@@ -70,8 +70,9 @@ describe('net worth resolver', () => {
   const createCategories = async (inputs: NetWorthCategoryInput[]): Promise<number[]> => {
     const results = await Promise.all(
       inputs.map((input) =>
-        app.authGqlClient.mutate<Mutation, MutationCreateNetWorthCategoryArgs>({
-          mutation: gql`
+        runMutation<MutationCreateNetWorthCategoryArgs>(
+          app,
+          gql`
             mutation CreateNetWorthCategory($input: NetWorthCategoryInput!) {
               createNetWorthCategory(input: $input) {
                 id
@@ -79,23 +80,22 @@ describe('net worth resolver', () => {
               }
             }
           `,
-          variables: {
-            input,
-          },
-        }),
+          { input },
+        ),
       ),
     );
-    if (!results.every((res) => res.data?.createNetWorthCategory?.id)) {
+    if (!results.every((res) => res?.createNetWorthCategory?.id)) {
       throw new Error('Error creating categories for test');
     }
-    return results.map((res) => res.data?.createNetWorthCategory?.id as number);
+    return results.map((res) => res?.createNetWorthCategory?.id as number);
   };
 
   const createSubcategories = async (inputs: NetWorthSubcategoryInput[]): Promise<number[]> => {
     const results = await Promise.all(
       inputs.map((input) =>
-        app.authGqlClient.mutate<Mutation, MutationCreateNetWorthSubcategoryArgs>({
-          mutation: gql`
+        runMutation<MutationCreateNetWorthSubcategoryArgs>(
+          app,
+          gql`
             mutation CreateNetWorthSubcategory($input: NetWorthSubcategoryInput!) {
               createNetWorthSubcategory(input: $input) {
                 id
@@ -103,13 +103,11 @@ describe('net worth resolver', () => {
               }
             }
           `,
-          variables: {
-            input,
-          },
-        }),
+          { input },
+        ),
       ),
     );
-    return results.map((res) => res.data?.createNetWorthSubcategory?.id as number);
+    return results.map((res) => res?.createNetWorthSubcategory?.id as number);
   };
 
   describe('categories', () => {
@@ -124,13 +122,8 @@ describe('net worth resolver', () => {
       `;
 
       const setup = async (input = category): Promise<Maybe<CrudResponseCreate>> => {
-        const res = await app.authGqlClient.mutate<Mutation, MutationCreateNetWorthCategoryArgs>({
-          mutation,
-          variables: {
-            input,
-          },
-        });
-        return res.data?.createNetWorthCategory ?? null;
+        const res = await runMutation<MutationCreateNetWorthCategoryArgs>(app, mutation, { input });
+        return res?.createNetWorthCategory ?? null;
       };
 
       it('should respond with the created category ID', async () => {
@@ -201,12 +194,8 @@ describe('net worth resolver', () => {
       `;
 
       const setup = async (id?: Maybe<number>): Promise<Maybe<NetWorthCategory[]>> => {
-        const res = await app.authGqlClient.query<Query, QueryReadNetWorthCategoriesArgs>({
-          query,
-          variables: { id },
-        });
-
-        return res.data.readNetWorthCategories ?? null;
+        const res = await runQuery<QueryReadNetWorthCategoriesArgs>(app, query, { id });
+        return res?.readNetWorthCategories ?? null;
       };
 
       describe('when passing an id', () => {
@@ -281,14 +270,11 @@ describe('net worth resolver', () => {
         const [id] = await createCategories([category]);
 
         pubsubSpy.mockClear();
-        const res = await app.authGqlClient.mutate<Mutation, MutationUpdateNetWorthCategoryArgs>({
-          mutation,
-          variables: {
-            id,
-            input: modifiedCategory,
-          },
+        const res = await runMutation<MutationUpdateNetWorthCategoryArgs>(app, mutation, {
+          id,
+          input: modifiedCategory,
         });
-        return { id, res: res.data?.updateNetWorthCategory ?? null };
+        return { id, res: res?.updateNetWorthCategory ?? null };
       };
 
       it('should return a null error', async () => {
@@ -342,13 +328,8 @@ describe('net worth resolver', () => {
         const [id] = await createCategories([category]);
 
         pubsubSpy.mockClear();
-        const res = await app.authGqlClient.mutate<Mutation, MutationDeleteNetWorthCategoryArgs>({
-          mutation,
-          variables: {
-            id,
-          },
-        });
-        return { id, res: res.data?.deleteNetWorthCategory ?? null };
+        const res = await runMutation<MutationDeleteNetWorthCategoryArgs>(app, mutation, { id });
+        return { id, res: res?.deleteNetWorthCategory ?? null };
       };
 
       it('should return a null error', async () => {
@@ -407,19 +388,14 @@ describe('net worth resolver', () => {
         const [postedCategoryId] = await createCategories([category]);
 
         pubsubSpy.mockClear();
-        const res = await app.authGqlClient.mutate<Mutation, MutationCreateNetWorthSubcategoryArgs>(
-          {
-            mutation,
-            variables: {
-              input: {
-                ...subcategory,
-                categoryId: categoryId ?? postedCategoryId,
-              },
-            },
+        const res = await runMutation<MutationCreateNetWorthSubcategoryArgs>(app, mutation, {
+          input: {
+            ...subcategory,
+            categoryId: categoryId ?? postedCategoryId,
           },
-        );
+        });
 
-        return { categoryId: postedCategoryId, res: res.data?.createNetWorthSubcategory ?? null };
+        return { categoryId: postedCategoryId, res: res?.createNetWorthSubcategory ?? null };
       };
 
       it('should respond with the created subcategory ID', async () => {
@@ -495,21 +471,14 @@ describe('net worth resolver', () => {
             },
           ]);
 
-          const res = await app.authGqlClient.mutate<
-            Mutation,
-            MutationCreateNetWorthSubcategoryArgs
-          >({
-            mutation,
-            variables: {
-              input: {
-                ...subcategory,
-                categoryId: postedCategoryId,
-                isSAYE: true,
-              },
+          const res = await runMutation<MutationCreateNetWorthSubcategoryArgs>(app, mutation, {
+            input: {
+              ...subcategory,
+              categoryId: postedCategoryId,
+              isSAYE: true,
             },
           });
-
-          return res.data?.createNetWorthSubcategory ?? null;
+          return res?.createNetWorthSubcategory ?? null;
         };
 
         it('should accept an isSAYE value', async () => {
@@ -548,12 +517,8 @@ describe('net worth resolver', () => {
       `;
 
       const setup = async (id?: Maybe<number>): Promise<Maybe<NetWorthSubcategory[]>> => {
-        const res = await app.authGqlClient.query<Query, QueryReadNetWorthSubcategoriesArgs>({
-          query,
-          variables: { id },
-        });
-
-        return res.data.readNetWorthSubcategories ?? null;
+        const res = await runQuery<QueryReadNetWorthSubcategoriesArgs>(app, query, { id });
+        return res?.readNetWorthSubcategories ?? null;
       };
 
       describe('when passing an id', () => {
@@ -672,23 +637,18 @@ describe('net worth resolver', () => {
         ]);
 
         pubsubSpy.mockClear();
-        const res = await app.authGqlClient.mutate<Mutation, MutationUpdateNetWorthSubcategoryArgs>(
-          {
-            mutation,
-            variables: {
-              id,
-              input: {
-                categoryId: categoryId ?? postedCategoryId,
-                ...modifiedSubcategory,
-              },
-            },
+        const res = await runMutation<MutationUpdateNetWorthSubcategoryArgs>(app, mutation, {
+          id,
+          input: {
+            categoryId: categoryId ?? postedCategoryId,
+            ...modifiedSubcategory,
           },
-        );
+        });
 
         return {
           id,
           categoryId: postedCategoryId,
-          res: res.data?.updateNetWorthSubcategory ?? null,
+          res: res?.updateNetWorthSubcategory ?? null,
         };
       };
 
@@ -766,14 +726,9 @@ describe('net worth resolver', () => {
         ]);
 
         pubsubSpy.mockClear();
-        const res = await app.authGqlClient.mutate<Mutation, MutationDeleteNetWorthSubcategoryArgs>(
-          {
-            mutation,
-            variables: { id },
-          },
-        );
+        const res = await runMutation<MutationDeleteNetWorthSubcategoryArgs>(app, mutation, { id });
 
-        return { id, res: res.data?.deleteNetWorthSubcategory ?? null };
+        return { id, res: res?.deleteNetWorthSubcategory ?? null };
       };
 
       it('should return a null error', async () => {
@@ -1038,8 +993,9 @@ describe('net worth resolver', () => {
     ): Promise<number[]> => {
       const results = await Promise.all(
         inputs.map((variables) =>
-          app.authGqlClient.mutate<Mutation, RawDateDeep<MutationCreateNetWorthEntryArgs>>({
-            mutation: gql`
+          runMutation<MutationCreateNetWorthEntryArgs>(
+            app,
+            gql`
               mutation CreateNetWorthEntry($input: NetWorthEntryInput!) {
                 createNetWorthEntry(input: $input) {
                   id
@@ -1047,10 +1003,10 @@ describe('net worth resolver', () => {
               }
             `,
             variables,
-          }),
+          ),
         ),
       );
-      return results.map((res) => res.data?.createNetWorthEntry?.id as number);
+      return results.map((res) => res?.createNetWorthEntry?.id as number);
     };
     describe('createNetWorthEntry', () => {
       const mutation = gql`
@@ -1070,17 +1026,11 @@ describe('net worth resolver', () => {
         const { parents, entryInput } = await setupParents();
 
         pubsubSpy.mockClear();
-        const res = await app.authGqlClient.mutate<
-          Mutation,
-          RawDateDeep<MutationCreateNetWorthEntryArgs>
-        >({
-          mutation,
-          variables: {
-            input: entryInput,
-          },
+        const res = await runMutation<MutationCreateNetWorthEntryArgs>(app, mutation, {
+          input: entryInput,
         });
         return {
-          res: res.data?.createNetWorthEntry ?? null,
+          res: res?.createNetWorthEntry ?? null,
           parents,
           entryInput,
         };
@@ -1265,24 +1215,18 @@ describe('net worth resolver', () => {
           expect.assertions(3);
           const { parents, entryWithOption } = await setupOption();
 
-          const res = await app.authGqlClient.mutate<
-            Mutation,
-            RawDateDeep<MutationCreateNetWorthEntryArgs>
-          >({
-            mutation,
-            variables: {
-              input: entryWithOption,
-            },
+          const res = await runMutation<MutationCreateNetWorthEntryArgs>(app, mutation, {
+            input: entryWithOption,
           });
 
-          expect(res.data?.createNetWorthEntry).toStrictEqual(
+          expect(res?.createNetWorthEntry).toStrictEqual(
             expect.objectContaining({
               id: expect.any(Number),
               error: null,
             }),
           );
 
-          const id = res.data?.createNetWorthEntry?.id as number;
+          const id = res?.createNetWorthEntry?.id as number;
 
           const [{ rows: rowValues }, { rows: rowOptionValues }] = await getPool().connect(
             async (db) =>
@@ -1350,24 +1294,18 @@ describe('net worth resolver', () => {
           expect.assertions(3);
           const { parents, entryWithLoan } = await setupLoan();
 
-          const res = await app.authGqlClient.mutate<
-            Mutation,
-            RawDateDeep<MutationCreateNetWorthEntryArgs>
-          >({
-            mutation,
-            variables: {
-              input: entryWithLoan,
-            },
+          const res = await runMutation<MutationCreateNetWorthEntryArgs>(app, mutation, {
+            input: entryWithLoan,
           });
 
-          expect(res.data?.createNetWorthEntry).toStrictEqual(
+          expect(res?.createNetWorthEntry).toStrictEqual(
             expect.objectContaining({
               id: expect.any(Number),
               error: null,
             }),
           );
 
-          const id = res.data?.createNetWorthEntry?.id as number;
+          const id = res?.createNetWorthEntry?.id as number;
 
           const [{ rows: rowValues }, { rows: rowLoanValues }] = await getPool().connect(
             async (db) =>
@@ -1561,10 +1499,9 @@ describe('net worth resolver', () => {
           })),
         );
 
-        await app.authGqlClient.clearStore();
-        const res = await app.authGqlClient.query<Query>({ query });
+        const res = await runQuery(app, query);
 
-        return { ids, res: res.data.readNetWorthEntries ?? null, expectedEntryTemplate };
+        return { ids, res: res?.readNetWorthEntries ?? null, expectedEntryTemplate };
       };
 
       it('should return all current entries', async () => {
@@ -1654,10 +1591,9 @@ describe('net worth resolver', () => {
           },
         ]);
 
-        await app.authGqlClient.clearStore();
-        const res = await app.authGqlClient.query<Query>({ query });
+        const res = await runQuery(app, query);
 
-        expect(res.data.readNetWorthEntries?.current).toStrictEqual(
+        expect(res?.readNetWorthEntries?.current).toStrictEqual(
           expect.arrayContaining([
             expect.objectContaining({
               date: '2020-02-03',
@@ -1715,18 +1651,12 @@ describe('net worth resolver', () => {
           date: '2020-04-15',
         };
 
-        const res = await app.authGqlClient.mutate<
-          Mutation,
-          RawDateDeep<MutationUpdateNetWorthEntryArgs>
-        >({
-          mutation,
-          variables: {
-            id,
-            input: updatedEntry,
-          },
+        const res = await runMutation<MutationUpdateNetWorthEntryArgs>(app, mutation, {
+          id,
+          input: updatedEntry,
         });
 
-        expect(res.data?.updateNetWorthEntry?.error).toBeNull();
+        expect(res?.updateNetWorthEntry?.error).toBeNull();
 
         const { rows } = await getPool().query<NetWorthEntryRow>(sql`
         SELECT * FROM net_worth WHERE id = ${id}
@@ -1748,18 +1678,12 @@ describe('net worth resolver', () => {
           ],
         };
 
-        const res = await app.authGqlClient.mutate<
-          Mutation,
-          RawDateDeep<MutationUpdateNetWorthEntryArgs>
-        >({
-          mutation,
-          variables: {
-            id,
-            input: updatedEntry,
-          },
+        const res = await runMutation<MutationUpdateNetWorthEntryArgs>(app, mutation, {
+          id,
+          input: updatedEntry,
         });
 
-        expect(res.data?.updateNetWorthEntry?.error).toBeNull();
+        expect(res?.updateNetWorthEntry?.error).toBeNull();
 
         const { rows: valueRows } = await getPool().query(sql`
         SELECT * FROM net_worth_values WHERE net_worth_id = ${id}
@@ -1786,18 +1710,12 @@ describe('net worth resolver', () => {
           ],
         };
 
-        const res = await app.authGqlClient.mutate<
-          Mutation,
-          RawDateDeep<MutationUpdateNetWorthEntryArgs>
-        >({
-          mutation,
-          variables: {
-            id,
-            input: updatedEntry,
-          },
+        const res = await runMutation<MutationUpdateNetWorthEntryArgs>(app, mutation, {
+          id,
+          input: updatedEntry,
         });
 
-        expect(res.data?.updateNetWorthEntry?.error).toBeNull();
+        expect(res?.updateNetWorthEntry?.error).toBeNull();
 
         const { rows: creditLimitRows } = await getPool().query(sql`
         SELECT * FROM net_worth_credit_limit WHERE net_worth_id = ${id}
@@ -1824,18 +1742,12 @@ describe('net worth resolver', () => {
           ],
         };
 
-        const res = await app.authGqlClient.mutate<
-          Mutation,
-          RawDateDeep<MutationUpdateNetWorthEntryArgs>
-        >({
-          mutation,
-          variables: {
-            id,
-            input: updatedEntry,
-          },
+        const res = await runMutation<MutationUpdateNetWorthEntryArgs>(app, mutation, {
+          id,
+          input: updatedEntry,
         });
 
-        expect(res.data?.updateNetWorthEntry?.error).toBeNull();
+        expect(res?.updateNetWorthEntry?.error).toBeNull();
 
         const { rows: currencyRows } = await getPool().query(sql`
         SELECT * FROM net_worth_currencies WHERE net_worth_id = ${id}
@@ -1871,18 +1783,12 @@ describe('net worth resolver', () => {
           ],
         };
 
-        const res = await app.authGqlClient.mutate<
-          Mutation,
-          RawDateDeep<MutationUpdateNetWorthEntryArgs>
-        >({
-          mutation,
-          variables: {
-            id,
-            input: updatedEntry,
-          },
+        const res = await runMutation<MutationUpdateNetWorthEntryArgs>(app, mutation, {
+          id,
+          input: updatedEntry,
         });
 
-        expect(res.data?.updateNetWorthEntry?.error).toBeNull();
+        expect(res?.updateNetWorthEntry?.error).toBeNull();
 
         const { rows: valuesRows } = await getPool().query(sql`
         SELECT * FROM net_worth_values WHERE net_worth_id = ${id}
@@ -1939,12 +1845,9 @@ describe('net worth resolver', () => {
         };
 
         pubsubSpy.mockClear();
-        await app.authGqlClient.mutate<Mutation, RawDateDeep<MutationUpdateNetWorthEntryArgs>>({
-          mutation,
-          variables: {
-            id,
-            input: updatedEntry,
-          },
+        await runMutation<MutationUpdateNetWorthEntryArgs>(app, mutation, {
+          id,
+          input: updatedEntry,
         });
 
         expect(pubsubSpy).toHaveBeenCalledTimes(2);
@@ -2004,29 +1907,17 @@ describe('net worth resolver', () => {
           ],
         };
 
-        const resA = await app.authGqlClient.mutate<
-          Mutation,
-          RawDateDeep<MutationUpdateNetWorthEntryArgs>
-        >({
-          mutation,
-          variables: {
-            id,
-            input: updateOptionA,
-          },
+        const resA = await runMutation<MutationUpdateNetWorthEntryArgs>(app, mutation, {
+          id,
+          input: updateOptionA,
         });
-        const resB = await app.authGqlClient.mutate<
-          Mutation,
-          RawDateDeep<MutationUpdateNetWorthEntryArgs>
-        >({
-          mutation,
-          variables: {
-            id,
-            input: updateOptionB,
-          },
+        const resB = await runMutation<MutationUpdateNetWorthEntryArgs>(app, mutation, {
+          id,
+          input: updateOptionB,
         });
 
-        expect(resA.data?.updateNetWorthEntry?.error).toBeNull();
-        expect(resB.data?.updateNetWorthEntry?.error).toBeNull();
+        expect(resA?.updateNetWorthEntry?.error).toBeNull();
+        expect(resB?.updateNetWorthEntry?.error).toBeNull();
 
         const { rows: optionValuesRows } = await getPool().query(sql`
         SELECT ov.* FROM net_worth_values v
@@ -2067,12 +1958,9 @@ describe('net worth resolver', () => {
         `);
         expect(countBefore).toBe(1);
 
-        const res = await app.authGqlClient.mutate<Mutation, MutationDeleteNetWorthEntryArgs>({
-          mutation,
-          variables: { id },
-        });
+        const res = await runMutation<MutationDeleteNetWorthEntryArgs>(app, mutation, { id });
 
-        expect(res.data?.deleteNetWorthEntry?.error).toBeNull();
+        expect(res?.deleteNetWorthEntry?.error).toBeNull();
 
         const { rowCount: countAfter } = await getPool().query(sql`
         SELECT * FROM net_worth WHERE id = ${id}
@@ -2087,10 +1975,7 @@ describe('net worth resolver', () => {
         const [id] = await createEntries([{ input: entryInput }]);
 
         pubsubSpy.mockClear();
-        await app.authGqlClient.mutate<Mutation, MutationDeleteNetWorthEntryArgs>({
-          mutation,
-          variables: { id },
-        });
+        await runMutation<MutationDeleteNetWorthEntryArgs>(app, mutation, { id });
 
         expect(pubsubSpy).toHaveBeenCalledTimes(2);
         expect(pubsubSpy).toHaveBeenCalledWith(
@@ -2131,19 +2016,18 @@ describe('net worth resolver', () => {
       }
     `;
 
-    let res: ApolloQueryResult<Query>;
+    let res: Maybe<Query>;
 
     beforeAll(async () => {
       await seedData(app.uid);
       const clock = sinon.useFakeTimers(new Date('2020-04-10'));
-      await app.authGqlClient.clearStore();
-      res = await app.authGqlClient.query<Query>({ query });
+      res = await runQuery(app, query);
       clock.restore();
     });
 
     it('should return the date of the net worth entry where values are calculated from', () => {
       expect.assertions(1);
-      expect(res.data.netWorthCashTotal?.date).toBe('2020-03-31');
+      expect(res?.netWorthCashTotal?.date).toBe('2020-03-31');
     });
 
     // check fixtures data to verify the expected values here
@@ -2170,7 +2054,7 @@ describe('net worth resolver', () => {
       'should return the $thing',
       ({ key, expectedValue }: { key: keyof NetWorthCashTotal; expectedValue: number }) => {
         expect.assertions(1);
-        expect(res.data.netWorthCashTotal?.[key]).toBeCloseTo(expectedValue);
+        expect(res?.netWorthCashTotal?.[key]).toBeCloseTo(expectedValue);
       },
     );
   });
@@ -2198,8 +2082,8 @@ describe('net worth resolver', () => {
     it('should return the list of historical and current loans, grouped by subcategory', async () => {
       expect.assertions(1);
       await seedData(app.uid);
-      const res = await app.authGqlClient.query<Query>({ query });
-      expect(res.data.netWorthLoans).toMatchInlineSnapshot(`
+      const res = await runQuery(app, query);
+      expect(res?.netWorthLoans).toMatchInlineSnapshot(`
         Object {
           "__typename": "NetWorthLoansResponse",
           "loans": Array [
