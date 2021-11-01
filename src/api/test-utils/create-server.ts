@@ -79,6 +79,7 @@ export const makeTestApp = async ({
 
   const anonymousGqlClient = createClient({
     url: graphqlUrl,
+    requestPolicy: 'network-only',
     exchanges: [
       dedupExchange,
       cacheExchange,
@@ -112,6 +113,7 @@ export const makeTestApp = async ({
         Authorization: apiKey,
       },
     },
+    requestPolicy: 'network-only',
     exchanges: [
       dedupExchange,
       cacheExchange,
