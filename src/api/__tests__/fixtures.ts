@@ -8,6 +8,7 @@ export const generateFunds = async (
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<void> => {
+  await db.query(sql`DELETE FROM funds`);
   await db.query(sql`DELETE FROM fund_scrape`);
   await db.query(sql`DELETE FROM fund_cache_time`);
 
