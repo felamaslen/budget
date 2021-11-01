@@ -4,6 +4,8 @@ import { getServer } from './create-server';
 import { seedUser } from '~api/__tests__/fixtures';
 import { migrator } from '~api/migrate';
 import { getPool } from '~api/modules/db';
+import { redisClientSubscriber } from '~api/modules/graphql';
+import { redisClient } from '~api/modules/redis';
 
 const hasRunMap = new Map<'run', boolean>();
 
@@ -24,6 +26,8 @@ beforeAll(async () => {
 afterAll(async () => {
   global.server?.close();
   await getPool().end();
+  await redisClient.quit();
+  await redisClientSubscriber.quit();
 
   nock.enableNetConnect();
 });

@@ -2,6 +2,7 @@ import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
 
 import config from '~api/config';
+import { redisClient } from '~api/modules/redis';
 
 const dateReviver = <T>(_: string, value: T): T | Date => {
   const isISO8601Z = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/;
@@ -14,9 +15,11 @@ const dateReviver = <T>(_: string, value: T): T | Date => {
   return value;
 };
 
+export const redisClientSubscriber = new Redis(config.redis);
+
 export const pubsub = new RedisPubSub({
-  publisher: new Redis(config.redis),
-  subscriber: new Redis(config.redis),
+  publisher: redisClient,
+  subscriber: redisClientSubscriber,
   reviver: dateReviver,
 });
 
