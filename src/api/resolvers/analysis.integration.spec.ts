@@ -6,6 +6,7 @@ import { sql } from 'slonik';
 import { seedData } from '~api/__tests__/fixtures';
 import { getPool } from '~api/modules/db';
 import { App, getTestApp } from '~api/test-utils/create-server';
+import { runQuery } from '~api/test-utils/gql';
 import {
   AnalysisGroupBy,
   AnalysisPage,
@@ -13,7 +14,6 @@ import {
   AnalysisResponse,
   CategoryCostTreeDeep,
   Maybe,
-  Query,
   QueryAnalysisArgs,
   QueryAnalysisDeepArgs,
 } from '~api/types';
@@ -48,16 +48,13 @@ describe('analysis resolvers', () => {
   `;
 
   describe('grouping by year / category', () => {
-    const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
-      const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
-        query,
-        variables: {
-          period: AnalysisPeriod.Year,
-          groupBy: AnalysisGroupBy.Category,
-        },
+    const setup = async (): Promise<Maybe<AnalysisResponse>> => {
+      const res = await runQuery<QueryAnalysisArgs>(app, query, {
+        period: AnalysisPeriod.Year,
+        groupBy: AnalysisGroupBy.Category,
       });
-      return res.data?.analysis ?? null;
-    });
+      return res?.analysis ?? null;
+    };
 
     it('should return cost data', async () => {
       expect.assertions(1);
@@ -135,18 +132,15 @@ describe('analysis resolvers', () => {
     });
 
     describe('on leap years', () => {
-      const setupLeapYear = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
-        const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
-          query,
-          variables: {
-            period: AnalysisPeriod.Year,
-            groupBy: AnalysisGroupBy.Category,
-            page: 2,
-          },
+      const setupLeapYear = async (): Promise<Maybe<AnalysisResponse>> => {
+        const res = await runQuery<QueryAnalysisArgs>(app, query, {
+          period: AnalysisPeriod.Year,
+          groupBy: AnalysisGroupBy.Category,
+          page: 2,
         });
 
-        return res.data?.analysis ?? null;
-      });
+        return res?.analysis ?? null;
+      };
 
       it('should return data from the given year', async () => {
         expect.assertions(2);
@@ -230,15 +224,12 @@ describe('analysis resolvers', () => {
 
   describe('grouping by month / shop / second page', () => {
     const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
-      const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
-        query,
-        variables: {
-          period: AnalysisPeriod.Month,
-          groupBy: AnalysisGroupBy.Shop,
-          page: 1,
-        },
+      const res = await runQuery<QueryAnalysisArgs>(app, query, {
+        period: AnalysisPeriod.Month,
+        groupBy: AnalysisGroupBy.Shop,
+        page: 1,
       });
-      return res.data?.analysis ?? null;
+      return res?.analysis ?? null;
     });
 
     it('should return cost data for the month', async () => {
@@ -319,14 +310,11 @@ describe('analysis resolvers', () => {
 
   describe('grouping by week / category', () => {
     const setup = moize.promise(async (): Promise<Maybe<AnalysisResponse>> => {
-      const res = await app.authGqlClient.query<Query, QueryAnalysisArgs>({
-        query,
-        variables: {
-          period: AnalysisPeriod.Week,
-          groupBy: AnalysisGroupBy.Category,
-        },
+      const res = await runQuery<QueryAnalysisArgs>(app, query, {
+        period: AnalysisPeriod.Week,
+        groupBy: AnalysisGroupBy.Category,
       });
-      return res.data?.analysis ?? null;
+      return res?.analysis ?? null;
     });
 
     it('should return cost data for the week', async () => {
@@ -404,18 +392,15 @@ describe('analysis resolvers', () => {
       }
     `;
 
-    const setup = moize.promise(async (): Promise<Maybe<CategoryCostTreeDeep[]>> => {
-      const res = await app.authGqlClient.query<Query, QueryAnalysisDeepArgs>({
-        query: queryDeep,
-        variables: {
-          category: AnalysisPage.Food,
-          period: AnalysisPeriod.Month,
-          groupBy: AnalysisGroupBy.Category,
-          page: 1,
-        },
+    const setup = async (): Promise<Maybe<CategoryCostTreeDeep[]>> => {
+      const res = await runQuery<QueryAnalysisDeepArgs>(app, queryDeep, {
+        category: AnalysisPage.Food,
+        period: AnalysisPeriod.Month,
+        groupBy: AnalysisGroupBy.Category,
+        page: 1,
       });
-      return res.data?.analysisDeep ?? null;
-    });
+      return res?.analysisDeep ?? null;
+    };
 
     it('should return grouped cost data for the category in the given period', async () => {
       expect.assertions(1);

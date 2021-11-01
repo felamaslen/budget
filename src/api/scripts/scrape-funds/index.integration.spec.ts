@@ -12,6 +12,7 @@ import { nockCurrencies } from '~api/__tests__/nocks';
 import { getPool } from '~api/modules/db';
 import * as pubsub from '~api/modules/graphql/pubsub';
 import { App, getTestApp } from '~api/test-utils/create-server';
+import { runSubscription } from '~api/test-utils/gql';
 import { FundHistory, Maybe } from '~api/types';
 import {
   FundPeriod,
@@ -259,22 +260,14 @@ describe('fund scraper - integration tests', () => {
         await setupNocks();
 
         const [subscriptionResult] = await Promise.all([
-          new Promise<Maybe<FundPricesUpdatedSubscription>>((resolve) => {
-            const { unsubscribe } = w.pipe(
-              app.authGqlClient.subscription<
-                FundPricesUpdatedSubscription,
-                FundPricesUpdatedSubscriptionVariables
-              >(pricesSubscription, {
-                period: FundPeriod.Year,
-                length: 4,
-              }),
-              w.subscribe((result) => {
-                unsubscribe();
-                resolve(result.data ?? null);
-              }),
-            );
-          }),
-
+          runSubscription<FundPricesUpdatedSubscription, FundPricesUpdatedSubscriptionVariables>(
+            app,
+            pricesSubscription,
+            {
+              period: FundPeriod.Year,
+              length: 4,
+            },
+          ),
           run(),
         ]);
 
