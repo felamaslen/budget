@@ -5,8 +5,7 @@ import { sql } from 'slonik';
 
 import { seedData } from '~api/__tests__/fixtures';
 import { getPool } from '~api/modules/db';
-import { App, getTestApp } from '~api/test-utils/create-server';
-import { runQuery } from '~api/test-utils/gql';
+import { App, getTestApp, runQuery } from '~api/test-utils';
 import {
   AnalysisGroupBy,
   AnalysisPage,

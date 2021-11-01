@@ -2,7 +2,7 @@ import type { DocumentNode } from 'graphql';
 import * as w from 'wonka';
 
 import type { App } from './create-server';
-import type { Maybe, Query } from '~api/types';
+import type { Maybe, Mutation, Query } from '~api/types';
 
 export async function runQuery<Args extends Record<string, unknown>>(
   app: App,
@@ -10,6 +10,15 @@ export async function runQuery<Args extends Record<string, unknown>>(
   args?: Args,
 ): Promise<Maybe<Query>> {
   const res = await app.authGqlClient.query<Query, Args>(query, args).toPromise();
+  return res.data ?? null;
+}
+
+export async function runMutation<Args extends Record<string, unknown>>(
+  app: App,
+  query: DocumentNode,
+  args?: Args,
+): Promise<Maybe<Mutation>> {
+  const res = await app.authGqlClient.mutation<Mutation, Args>(query, args).toPromise();
   return res.data ?? null;
 }
 
