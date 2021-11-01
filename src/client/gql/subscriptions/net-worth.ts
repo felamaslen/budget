@@ -94,7 +94,8 @@ export const NetWorthCashTotalUpdated = gql`
   subscription NetWorthCashTotalUpdated {
     netWorthCashTotalUpdated {
       cashInBank
-      stockValue
+      nonPensionStockValue
+      pensionStockValue
       stocksIncludingCash
       date
       incomeSince

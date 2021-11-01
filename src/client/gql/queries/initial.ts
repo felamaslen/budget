@@ -43,7 +43,8 @@ export const Initial = gql`
 
     netWorthCashTotal {
       cashInBank
-      stockValue
+      nonPensionStockValue
+      pensionStockValue
       stocksIncludingCash
       date
       incomeSince
