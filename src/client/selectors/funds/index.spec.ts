@@ -350,7 +350,8 @@ describe('funds selectors', () => {
         ...state.netWorth,
         cashTotal: {
           cashInBank: 1886691,
-          stockValue: 7765614,
+          nonPensionStockValue: 7765614,
+          pensionStockValue: 0,
           stocksIncludingCash: 7765614 + 2996287,
           date: new Date('2018-02-27'),
           incomeSince: 165583,
@@ -452,7 +453,7 @@ describe('funds selectors', () => {
               ...stateWithTransactions.netWorth.cashTotal,
               cashInBank: 100667,
               stocksIncludingCash:
-                stateWithTransactions.netWorth.cashTotal.stockValue +
+                stateWithTransactions.netWorth.cashTotal.nonPensionStockValue +
                 123 * 473 +
                 165 +
                 9965 +

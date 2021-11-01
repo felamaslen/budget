@@ -594,7 +594,8 @@ describe('net worth reducer', () => {
       },
       netWorthCashTotal: {
         cashInBank: 123,
-        stockValue: 456,
+        nonPensionStockValue: 456,
+        pensionStockValue: 654,
         stocksIncludingCash: 789,
         date: '2020-04-20',
         incomeSince: 213,
@@ -736,7 +737,8 @@ describe('net worth reducer', () => {
 
       expect(result.cashTotal).toStrictEqual<NativeDate<NetWorthCashTotal, 'date'>>({
         cashInBank: 123,
-        stockValue: 456,
+        nonPensionStockValue: 456,
+        pensionStockValue: 654,
         stocksIncludingCash: 789,
         date: new Date('2020-04-20'),
         incomeSince: 213,

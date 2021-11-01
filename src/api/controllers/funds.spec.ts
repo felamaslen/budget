@@ -289,7 +289,8 @@ describe('funds controller', () => {
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          stockValue: expect.any(Number),
+          nonPensionStockValue: expect.any(Number),
+          pensionStockValue: expect.any(Number),
           stocksIncludingCash: expect.any(Number),
           date: null,
           incomeSince: expect.any(Number),
@@ -361,7 +362,8 @@ describe('funds controller', () => {
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          stockValue: expect.any(Number),
+          nonPensionStockValue: expect.any(Number),
+          pensionStockValue: expect.any(Number),
           stocksIncludingCash: expect.any(Number),
           date: null,
           incomeSince: expect.any(Number),
@@ -400,7 +402,8 @@ describe('funds controller', () => {
         `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${uid}`,
         {
           cashInBank: expect.any(Number),
-          stockValue: expect.any(Number),
+          nonPensionStockValue: expect.any(Number),
+          pensionStockValue: expect.any(Number),
           stocksIncludingCash: expect.any(Number),
           date: null,
           incomeSince: expect.any(Number),

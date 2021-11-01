@@ -37,9 +37,28 @@ const selectSingleDate = (date: Date): TaggedTemplateLiteralInvocationType => sq
   limit 1
 `;
 
+export enum PensionTransactionOpts {
+  OnlyPension = 'ONLY_PENSION',
+  NotPension = 'NOT_PENSION',
+  Both = 'BOTH',
+}
+
+function getPensionCondition(
+  pensionTransactionOpts: PensionTransactionOpts,
+): TaggedTemplateLiteralInvocationType | undefined {
+  switch (pensionTransactionOpts) {
+    case PensionTransactionOpts.NotPension:
+      return sql`not ft.is_pension`;
+    case PensionTransactionOpts.OnlyPension:
+      return sql`ft.is_pension`;
+    default:
+      return undefined;
+  }
+}
+
 const joinFundPrices = (
   uid: number,
-  includePension = false,
+  pensionTransactionOpts: PensionTransactionOpts = PensionTransactionOpts.NotPension,
 ): TaggedTemplateLiteralInvocationType => sql`
   from cache_at_date c 
   inner join fund_cache fc on fc.cid = c.cid
@@ -50,7 +69,7 @@ const joinFundPrices = (
     [
       sql`ft.fund_id = f.id`,
       sql`ft.date <= c.time`,
-      includePension ? undefined : sql`not ft.is_pension`,
+      getPensionCondition(pensionTransactionOpts),
     ].filter((condition): condition is TaggedTemplateLiteralInvocationType => !!condition),
     sql` and `,
   )}
@@ -62,7 +81,7 @@ const joinFundPrices = (
 
 const selectRebasedFundValues = (
   uid: number,
-  includePension?: boolean,
+  pensionTransactionOpts: PensionTransactionOpts,
 ): TaggedTemplateLiteralInvocationType => sql`
   select ${sql.join(
     [
@@ -72,7 +91,7 @@ const selectRebasedFundValues = (
     ],
     sql`, `,
   )}
-  ${joinFundPrices(uid, includePension)}
+  ${joinFundPrices(uid, pensionTransactionOpts)}
   group by ft.fund_id, ft.units, fc.price, c.time
 `;
 
@@ -86,7 +105,7 @@ export async function getMonthlyTotalFundValues(
     [
       sql`dates as (${getEndOfMonthUnion(monthEnds)})`,
       sql`cache_at_date AS (${selectAllDatesInRange(monthEnds)})`,
-      sql`funds_rebased as (${selectRebasedFundValues(uid, false)})`,
+      sql`funds_rebased as (${selectRebasedFundValues(uid, PensionTransactionOpts.NotPension)})`,
     ],
     sql`, `,
   )}
@@ -110,12 +129,13 @@ export async function getTotalFundValue(
   db: DatabaseTransactionConnectionType,
   uid: number,
   atDate: Date,
+  pensionTransactionOpts: PensionTransactionOpts = PensionTransactionOpts.Both,
 ): Promise<number> {
   const result = await db.query<{ value: number }>(sql`
   WITH ${sql.join(
     [
       sql`cache_at_date as (${selectSingleDate(atDate)})`,
-      sql`funds_rebased as (${selectRebasedFundValues(uid, true)})`,
+      sql`funds_rebased as (${selectRebasedFundValues(uid, pensionTransactionOpts)})`,
     ],
     sql`, `,
   )}
@@ -150,7 +170,7 @@ export async function selectUnitsWithPrice(
           ],
           sql`, `,
         )}
-        ${joinFundPrices(uid, true)}
+        ${joinFundPrices(uid, PensionTransactionOpts.Both)}
         group by f.item, ft.units, fc.price
       )`,
     ],

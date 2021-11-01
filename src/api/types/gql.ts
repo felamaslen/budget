@@ -535,9 +535,10 @@ export type NetWorthCashTotal = {
   cashInBank: Scalars['Int'];
   date?: Maybe<Scalars['Date']>;
   incomeSince: Scalars['Int'];
+  nonPensionStockValue: Scalars['Int'];
+  pensionStockValue: Scalars['Int'];
   spendingSince: Scalars['Int'];
   stocksIncludingCash: Scalars['Int'];
-  stockValue: Scalars['Int'];
 };
 
 export type NetWorthCategory = {
@@ -1810,9 +1811,10 @@ export type NetWorthCashTotalResolvers<ContextType = Context, ParentType extends
   cashInBank?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   date?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   incomeSince?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  nonPensionStockValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  pensionStockValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   spendingSince?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stocksIncludingCash?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  stockValue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
