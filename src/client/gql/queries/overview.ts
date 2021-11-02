@@ -20,12 +20,3 @@ export const overviewOld = gql`
     }
   }
 `;
-
-export const overviewPreview = gql`
-  query OverviewPreview($category: MonthlyCategory!, $date: Date!) {
-    overviewPreview(category: $category, date: $date) {
-      startDate
-      values
-    }
-  }
-`;

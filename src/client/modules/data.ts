@@ -214,14 +214,6 @@ export const withRawDate =
       item as RawDate<T, K>,
     );
 
-export const withRawDateTime =
-  <K extends string, T extends Record<K, Date>>(...keys: K[]) =>
-  (item: T): RawDate<T, K> =>
-    keys.reduce<RawDate<T, K>>(
-      (last, key) => ({ ...last, [key]: item[key].toISOString() }),
-      item as RawDate<T, K>,
-    );
-
 export const toNativeFund = <F extends GQLShallow<Omit<Fund, 'id'>>>(input: F): NativeFund<F> => ({
   ...omitTypeName(input),
   transactions: input.transactions.map(compose(omitTypeName, withNativeDate('date'))),

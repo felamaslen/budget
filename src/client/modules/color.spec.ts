@@ -1,9 +1,14 @@
 import { rgb, rgba } from 'polished';
 
-import { getOverviewScoreColor, colorKey, averageColor } from './color';
+import {
+  getOverviewScoreColor,
+  colorKey,
+  averageColor,
+  getOverviewCategoryKeyColor,
+} from './color';
 
 describe('color module', () => {
-  describe('getOverviewScoreColor', () => {
+  describe(getOverviewScoreColor.name, () => {
     describe.each`
       case                                      | value | range
       ${'the range is zero'}                    | ${10} | ${{ min: 1, max: 1 }}
@@ -96,7 +101,16 @@ describe('color module', () => {
     );
   });
 
-  describe('colorKey', () => {
+  describe(getOverviewCategoryKeyColor.name, () => {
+    it('should throw an error for an unknown key', () => {
+      expect.assertions(1);
+      expect(() => getOverviewCategoryKeyColor('unknown')).toThrowErrorMatchingInlineSnapshot(
+        `"Unknown overview column: unknown"`,
+      );
+    });
+  });
+
+  describe(colorKey.name, () => {
     it('should return a colour from a string', () => {
       expect.assertions(1);
       expect(colorKey('foo')).toMatchInlineSnapshot(`"#922807"`);
@@ -108,7 +122,7 @@ describe('color module', () => {
     });
   });
 
-  describe('averageColor', () => {
+  describe(averageColor.name, () => {
     it('should return an average colour', () => {
       expect.assertions(1);
       expect(

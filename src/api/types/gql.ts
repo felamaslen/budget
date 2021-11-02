@@ -709,11 +709,6 @@ export type OverviewOld = {
   stocks: Array<Scalars['Int']>;
 };
 
-export type OverviewPreview = {
-  startDate: Scalars['Date'];
-  values: Array<Scalars['Int']>;
-};
-
 export enum PageListStandard {
   Bills = 'bills',
   Food = 'food',
@@ -867,7 +862,6 @@ export type Query = {
   netWorthLoans?: Maybe<NetWorthLoansResponse>;
   overview?: Maybe<Overview>;
   overviewOld?: Maybe<OverviewOld>;
-  overviewPreview?: Maybe<OverviewPreview>;
   readFunds?: Maybe<ReadFundsResponse>;
   readIncome?: Maybe<IncomeReadResponse>;
   readList?: Maybe<ListReadResponse>;
@@ -921,12 +915,6 @@ export type QueryOverviewArgs = {
 
 export type QueryOverviewOldArgs = {
   now?: Maybe<Scalars['Date']>;
-};
-
-
-export type QueryOverviewPreviewArgs = {
-  category: MonthlyCategory;
-  date: Scalars['Date'];
 };
 
 
@@ -1319,7 +1307,6 @@ export type ResolversTypes = {
   OptionValueInput: OptionValueInput;
   Overview: ResolverTypeWrapper<Overview>;
   OverviewOld: ResolverTypeWrapper<OverviewOld>;
-  OverviewPreview: ResolverTypeWrapper<OverviewPreview>;
   PageListStandard: PageListStandard;
   PlanningAccount: ResolverTypeWrapper<PlanningAccount>;
   PlanningAccountInput: PlanningAccountInput;
@@ -1450,7 +1437,6 @@ export type ResolversParentTypes = {
   OptionValueInput: OptionValueInput;
   Overview: Overview;
   OverviewOld: OverviewOld;
-  OverviewPreview: OverviewPreview;
   PlanningAccount: PlanningAccount;
   PlanningAccountInput: PlanningAccountInput;
   PlanningComputedValue: PlanningComputedValue;
@@ -1966,12 +1952,6 @@ export type OverviewOldResolvers<ContextType = Context, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type OverviewPreviewResolvers<ContextType = Context, ParentType extends ResolversParentTypes['OverviewPreview'] = ResolversParentTypes['OverviewPreview']> = {
-  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  values?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type PlanningAccountResolvers<ContextType = Context, ParentType extends ResolversParentTypes['PlanningAccount'] = ResolversParentTypes['PlanningAccount']> = {
   account?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   computedStartValue?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -2064,7 +2044,6 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   netWorthLoans?: Resolver<Maybe<ResolversTypes['NetWorthLoansResponse']>, ParentType, ContextType>;
   overview?: Resolver<Maybe<ResolversTypes['Overview']>, ParentType, ContextType, RequireFields<QueryOverviewArgs, never>>;
   overviewOld?: Resolver<Maybe<ResolversTypes['OverviewOld']>, ParentType, ContextType, RequireFields<QueryOverviewOldArgs, never>>;
-  overviewPreview?: Resolver<Maybe<ResolversTypes['OverviewPreview']>, ParentType, ContextType, RequireFields<QueryOverviewPreviewArgs, 'category' | 'date'>>;
   readFunds?: Resolver<Maybe<ResolversTypes['ReadFundsResponse']>, ParentType, ContextType>;
   readIncome?: Resolver<Maybe<ResolversTypes['IncomeReadResponse']>, ParentType, ContextType, RequireFields<QueryReadIncomeArgs, never>>;
   readList?: Resolver<Maybe<ResolversTypes['ListReadResponse']>, ParentType, ContextType, RequireFields<QueryReadListArgs, 'page'>>;
@@ -2279,7 +2258,6 @@ export type Resolvers<ContextType = Context> = {
   OptionValue?: OptionValueResolvers<ContextType>;
   Overview?: OverviewResolvers<ContextType>;
   OverviewOld?: OverviewOldResolvers<ContextType>;
-  OverviewPreview?: OverviewPreviewResolvers<ContextType>;
   PlanningAccount?: PlanningAccountResolvers<ContextType>;
   PlanningComputedValue?: PlanningComputedValueResolvers<ContextType>;
   PlanningCreditCard?: PlanningCreditCardResolvers<ContextType>;

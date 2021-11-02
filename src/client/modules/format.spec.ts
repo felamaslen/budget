@@ -1,5 +1,4 @@
 import {
-  capitalise,
   numberFormat,
   sigFigs,
   formatCurrency,
@@ -9,14 +8,6 @@ import {
 } from '~client/modules/format';
 
 describe('format module', () => {
-  describe('capitalise', () => {
-    it('should capitalise a word', () => {
-      expect.assertions(2);
-      expect(capitalise('foobar')).toBe('Foobar');
-      expect(capitalise('fOoBaR')).toBe('Foobar');
-    });
-  });
-
   describe('numberFormat', () => {
     it('should add comma separators to a long number', () => {
       expect.assertions(3);

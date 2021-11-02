@@ -1,4 +1,5 @@
 import startOfDay from 'date-fns/startOfDay';
+import capitalize from 'lodash/capitalize';
 import React, { CSSProperties, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -30,7 +31,7 @@ import {
 } from '~client/components/form-field';
 import { ModalFields, makeField } from '~client/components/modal-dialog';
 import { useListCrudStandard, useToday } from '~client/hooks';
-import { formatCurrency, formatItem, capitalise } from '~client/modules/format';
+import { formatCurrency, formatItem } from '~client/modules/format';
 import type {
   ListItemStandardNative as ListItemStandard,
   StandardInput,
@@ -106,7 +107,7 @@ export const StandardHeader = <T extends GQL<ListItemStandard>>({
     <Styled.StandardHeader data-testid="header">
       {fieldKeys.map((field) => (
         <Styled.HeaderColumn key={field as string} column={field as string}>
-          {capitalise(labels ? Reflect.get(labels, field) ?? field : field)}
+          {capitalize(labels ? Reflect.get(labels, field) ?? field : field)}
         </Styled.HeaderColumn>
       ))}
       {children}

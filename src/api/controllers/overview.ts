@@ -79,17 +79,13 @@ export const getDisplayedMonths = (now: Date, withFuture = true): Date[] =>
 const getOldMonths = (now: Date): Date[] =>
   mapMonths(subMonths(getStartTime(now), 1), minStartTime, false);
 
-export async function getFundValues(
+async function getFundValues(
   db: DatabaseTransactionConnectionType,
   uid: number,
   monthEnds: Date[],
-  withFuture = false,
 ): Promise<number[]> {
   const monthlyValues = await getMonthlyTotalFundValues(db, uid, monthEnds);
-  if (!withFuture) {
-    return monthlyValues;
-  }
-  return [...monthlyValues, ...Array(futureMonths).fill(monthlyValues[monthlyValues.length - 1])];
+  return monthlyValues;
 }
 
 export const getDisplayedFundValues = (

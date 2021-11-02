@@ -6,7 +6,7 @@ export type PeriodCondition = {
 
 export type AnalysisGroupColumn = 'item' | 'category' | 'shop';
 
-export type GetPeriodCondition = (now: Date, pageIndex?: number) => PeriodCondition;
+export type GetPeriodCondition = (now: Date, pageIndex: number) => PeriodCondition;
 
 export type PeriodCost = {
   itemCol: string;
