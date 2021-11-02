@@ -60,12 +60,13 @@ node {
               sh "cd /app && CI=true yarn test:visual"
             }
           }
-        }
-      }
 
-      stage('Coverage') {
-        sh "yarn ts-node-script ./scripts/merge-coverage.ts --report ${COVERAGE_DIRECTORY}/api/unit/coverage-final.json ${COVERAGE_DIRECTORY}/api/integration/coverage-final.json ${COVERAGE_DIRECTORY}/client/coverage-final.json ${COVERAGE_DIRECTORY}/visual/coverage-final.json"
-        sh "mv -v coverage/* ${COVERAGE_DIRECTORY}"
+          budgetImage.inside("-v ${COVERAGE_DIRECTORY}:/app/coverage") {
+            stage('Coverage') {
+              sh "cd /app && yarn coverage"
+            }
+          }
+        }
       }
     }
 
