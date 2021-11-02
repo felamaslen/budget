@@ -13,43 +13,50 @@ node {
     stage('Build and push image') {
       script {
         docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
-          sh 'rm -rf node_modules'
           sh 'make build_linux_amd64 push'
         }
       }
     }
 
     docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
-      docker.image('postgres:10-alpine').withRun('-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker') { pg ->
+      def dbImage = docker.image('postgres:10-alpine')
+      def redisImage = docker.image('redis:6.2-alpine')
+      def budgetImage = docker.image("${IMAGE}")
 
-        docker.image('postgres:10-alpine').inside("--link ${pg.id}:db") {
+      dbImage.withRun('-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker') { pg ->
+        dbImage.inside("--link ${pg.id}:db") {
           sh 'while ! psql postgres://docker:docker@db/postgres -c "select 1" > /dev/null 2>&1; do sleep 1; done'
 
           sh 'psql postgres://docker:docker@db/postgres -c "create database budget_test;"'
         }
 
-        stage('Lint') {
-          sh "docker run --rm ${IMAGE} sh -c 'yarn lint && yarn prettier'"
-        }
+        redisImage.withRun() { redis ->
+          budgetImage.inside("--link ${pg.id}:db --link ${redis.id}:redis -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' -e 'REDIS_HOST=redis' -e 'REDIS_PORT=6379' -v /var/local/codecov/budget:/app/coverage") {
 
-        stage('API unit tests') {
-          sh "docker run --rm ${IMAGE} sh -c 'yarn test:api:unit:ci'"
-        }
+            stage('Lint') {
+              sh "cd /app && yarn lint"
+              sh "cd /app && yarn prettier"
+            }
 
-        stage('Client unit tests') {
-          sh "docker run --rm --privileged ${IMAGE} sh -c 'yarn test:client:ci'"
-        }
-
-        stage('Visual regression tests') {
-          unstable('Visual regression tests are disabled')
-        }
-
-        stage('API integration tests') {
-          docker.image('redis:6.2-alpine').withRun() { redis ->
-            sh "docker run --rm --link ${pg.id}:db --link ${redis.id}:redis -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' -e 'REDIS_HOST=redis' -e 'REDIS_PORT=6379' ${IMAGE} sh -c 'yarn test:api:integration'"
+            stage('API unit tests') {
+              sh "cd /app && CI=true yarn test:api:unit:ci"
+            }
+            stage('API integration tests') {
+              sh "cd /app && CI=true yarn test:api:integration"
+            }
+            stage('Client unit tests') {
+              sh "cd /app && CI=true yarn test:client:ci"
+            }
+            stage('Visual regression tests') {
+              unstable('Visual regression tests are disabled')
+            }
+            stage('Coverage') {
+              sh "cd /app && yarn coverage"
+            }
           }
         }
       }
+
     }
 
     if (env.BRANCH_NAME == "master") {
