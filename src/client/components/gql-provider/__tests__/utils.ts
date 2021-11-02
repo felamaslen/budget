@@ -88,9 +88,25 @@ export class MockServer {
     });
   }
 
-  teardown(): void {
-    this.wsServer?.close();
-    this.server?.close();
+  async teardown(): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
+      this.wsServer?.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+    await new Promise<void>((resolve, reject) => {
+      this.server?.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
   }
 
   async reconnectAfterDelay(delayMs = 50): Promise<void> {

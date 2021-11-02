@@ -26,8 +26,8 @@ describe('gql provider', () => {
     await mockServer.setup();
   });
 
-  afterAll(() => {
-    mockServer.teardown();
+  afterAll(async () => {
+    await mockServer.teardown();
     global.fetch = mockFetch;
   });
 

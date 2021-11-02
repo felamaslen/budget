@@ -23,8 +23,6 @@ const testUSDGBP = 0.771546;
 const testPriceSMTGeneric = 1453.0; // regularMarketPrice
 const testPriceRELXGeneric = 2260.0; // regularMarketPrice
 
-jest.mock('~api/modules/graphql/pubsub');
-
 describe('fund scraper - integration tests', () => {
   const now = new Date('2020-02-22T20:35Z');
   let clock: sinon.SinonFakeTimers;

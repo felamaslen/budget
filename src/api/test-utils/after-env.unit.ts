@@ -1,7 +1,6 @@
 import nock from 'nock';
 
-// eslint-disable-next-line global-require
-jest.mock('ioredis', () => require('ioredis-mock/jest'));
+jest.mock('ioredis', () => require('ioredis-mock/jest')); // eslint-disable-line global-require
 
 beforeAll(() => {
   nock.disableNetConnect();
