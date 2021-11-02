@@ -3,12 +3,10 @@ import { debounce } from 'throttle-debounce';
 
 import { isServerSide } from '~client/modules/ssr';
 
-const initialWindowWidth = isServerSide ? 0 : window.innerWidth;
-
-export const ResizeContext = createContext(initialWindowWidth);
+export const ResizeContext = createContext(0);
 
 export function useDebouncedResize(): number {
-  const [windowWidth, setWindowWidth] = useState<number>(initialWindowWidth);
+  const [windowWidth, setWindowWidth] = useState<number>(isServerSide ? 0 : window.innerWidth);
 
   useEffect(() => {
     if (isServerSide) {
