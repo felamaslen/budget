@@ -4,11 +4,12 @@ import sinon from 'sinon';
 import { sql } from 'slonik';
 
 import { getPool } from '~api/modules/db';
-import { App, getTestApp, runMutation, runQuery } from '~api/test-utils';
+import { App, getTestApp, runMutation, runQuery, runSubscription } from '~api/test-utils';
 import {
   CrudResponseCreate,
   CrudResponseUpdate,
   CrudResponseDelete,
+  SubscriptionListChangedArgs,
   ListItemStandard,
   ListItemStandardInput,
   ListReadResponse,
@@ -22,8 +23,9 @@ import {
   ReceiptCreated,
   ReceiptPage,
   PageListStandard,
+  ListSubscription,
 } from '~api/types';
-import { MutationCreateReceiptArgs } from '~client/types/gql';
+import { MutationCreateReceiptArgs, Subscription } from '~client/types/gql';
 import type { RawDate } from '~shared/types';
 
 describe('standard list resolvers', () => {
@@ -31,7 +33,7 @@ describe('standard list resolvers', () => {
   let clock: sinon.SinonFakeTimers;
   beforeAll(async () => {
     clock = sinon.useFakeTimers(new Date('2020-04-20'));
-    app = await getTestApp();
+    app = await getTestApp({ subscriptions: true });
   });
   afterAll(async () => {
     clock.restore();
@@ -453,6 +455,76 @@ describe('standard list resolvers', () => {
       });
     },
   );
+
+  describe('list subscriptions', () => {
+    const listChangedSubscription = gql`
+      subscription ListChanged($pages: [PageListStandard!]!) {
+        listChanged(pages: $pages) {
+          page
+          created {
+            fakeId
+            item {
+              id
+              date
+              item
+              category
+              cost
+              shop
+            }
+          }
+          updated {
+            id
+            date
+            item
+            category
+            cost
+            shop
+          }
+          deleted
+
+          overviewCost
+          total
+          weekly
+        }
+      }
+    `;
+
+    it('should listen to mutations against the given lists', async () => {
+      expect.assertions(1);
+      const [subscriptionResult, mutationResult] = await Promise.all([
+        runSubscription<ListSubscription, SubscriptionListChangedArgs>(
+          app,
+          listChangedSubscription,
+          { pages: [PageListStandard.General, PageListStandard.Food] },
+        ),
+        runMutation<MutationCreateListItemArgs>(app, createMutation, {
+          page: PageListStandard.General,
+          fakeId: -157,
+          input: {
+            ...general,
+          },
+        }),
+      ]);
+
+      expect(subscriptionResult).toStrictEqual<Partial<Subscription>>({
+        listChanged: {
+          page: PageListStandard.General,
+          created: {
+            fakeId: -157,
+            item: {
+              id: mutationResult?.createListItem?.id as number,
+              ...general,
+            },
+          },
+          updated: null,
+          deleted: null,
+          overviewCost: expect.arrayContaining([expect.any(Number)]),
+          total: expect.any(Number),
+          weekly: expect.any(Number),
+        },
+      });
+    });
+  });
 
   describe('createReceipt', () => {
     const mutation = gql`
