@@ -1246,7 +1246,7 @@ describe('planning resolver', () => {
       });
 
       it('should include value data associated with the account at the given year', async () => {
-        expect.assertions(2);
+        expect.assertions(3);
         const resCreate = await setupCreate();
         const createdAccount = resCreate.data?.syncPlanning?.accounts?.find(
           (compare) => compare.account === 'My test account',
@@ -1267,24 +1267,27 @@ describe('planning resolver', () => {
 
         expect(accountWithoutValues?.values).toHaveLength(0);
 
-        expect(accountWithValues?.values).toStrictEqual<PlanningValue[]>([
-          expect.objectContaining<PlanningValue>({
-            id: expect.any(Number),
-            month: 2,
-            name: 'Some random expense',
-            value: -80000,
-            formula: null,
-            transferToAccountId: null,
-          }),
-          expect.objectContaining<PlanningValue>({
-            id: expect.any(Number),
-            month: 9,
-            name: 'Expected income',
-            value: null,
-            formula: '75 * 29.3',
-            transferToAccountId: null,
-          }),
-        ]);
+        expect(accountWithValues?.values).toHaveLength(2);
+        expect(accountWithValues?.values).toStrictEqual(
+          expect.arrayContaining<PlanningValue>([
+            expect.objectContaining<PlanningValue>({
+              id: expect.any(Number),
+              month: 2,
+              name: 'Some random expense',
+              value: -80000,
+              formula: null,
+              transferToAccountId: null,
+            }),
+            expect.objectContaining<PlanningValue>({
+              id: expect.any(Number),
+              month: 9,
+              name: 'Expected income',
+              value: null,
+              formula: '75 * 29.3',
+              transferToAccountId: null,
+            }),
+          ]),
+        );
       });
 
       it('should compute previous income values with deductions', async () => {
