@@ -15,7 +15,7 @@ import { FundMode } from '~client/types/enum';
 import { useStockPricesQuery } from '~client/types/gql';
 import { getGenericFullSymbol } from '~shared/abbreviation';
 
-const worker = isServerSide ? undefined : new PricesWorker();
+const worker = isServerSide || process.env.NODE_ENV === 'test' ? undefined : new PricesWorker();
 
 const fetchIntervalMs = (5 * 60 + 3) * 1000;
 const minTimeBetweenFetchMs = 30 * 1000;
