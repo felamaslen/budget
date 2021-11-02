@@ -1,3 +1,4 @@
+import { formatISO } from 'date-fns';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
 import { formatDate } from '../shared';
@@ -163,7 +164,9 @@ export async function createNetWorthEntry(
     fetchById(db, uid, netWorthId),
     readNetWorthCashTotal(db, uid),
   ]);
-  await pubsub.publish(`${PubSubTopic.NetWorthEntryCreated}.${uid}`, { item });
+  await pubsub.publish(`${PubSubTopic.NetWorthEntryCreated}.${uid}`, {
+    item: { ...item, date: formatISO(item.date, { representation: 'date' }) },
+  });
   await pubsub.publish(`${PubSubTopic.NetWorthCashTotalUpdated}.${uid}`, cashTotal);
 
   return { id: netWorthId };

@@ -18,6 +18,8 @@ node {
       }
     }
 
+    sh "mkdir -p /var/local/codecov/budget/${env.BRANCH_NAME}"
+
     docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
       def dbImage = docker.image('postgres:10-alpine')
       def redisImage = docker.image('redis:6.2-alpine')
@@ -31,7 +33,7 @@ node {
         }
 
         redisImage.withRun() { redis ->
-          budgetImage.inside("--link ${pg.id}:db --link ${redis.id}:redis -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' -e 'REDIS_HOST=redis' -e 'REDIS_PORT=6379' -v /var/local/codecov/budget:/app/coverage") {
+          budgetImage.inside("--link ${pg.id}:db --link ${redis.id}:redis -e 'DATABASE_URL_TEST=postgres://docker:docker@db/budget_test' -e 'REDIS_HOST=redis' -e 'REDIS_PORT=6379' -v /var/local/codecov/budget/${env.BRANCH_NAME}:/app/coverage") {
 
             stage('Lint') {
               sh "cd /app && yarn lint"

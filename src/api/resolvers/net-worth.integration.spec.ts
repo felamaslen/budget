@@ -5,6 +5,7 @@ import { sql } from 'slonik';
 
 import { seedData } from '~api/__tests__/fixtures';
 import { getPool } from '~api/modules/db';
+import * as pubsub from '~api/modules/graphql/pubsub';
 import type { NetWorthLoansRow } from '~api/queries';
 import { App, getTestApp } from '~api/test-utils/create-server';
 import {
@@ -50,7 +51,9 @@ describe('net worth resolver', () => {
     app = await getTestApp();
   });
 
+  let pubsubSpy: jest.SpyInstance;
   beforeEach(async () => {
+    pubsubSpy = jest.spyOn(pubsub.pubsub, 'publish').mockImplementation();
     await getPool().connect(async (db) => {
       await db.query(sql`DELETE FROM net_worth_categories`);
       await db.query(sql`DELETE FROM net_worth`);
@@ -169,6 +172,19 @@ describe('net worth resolver', () => {
 
         expect(rows[0].is_option).toBe(true);
       });
+
+      it('should publish an event to pubsub', async () => {
+        expect.assertions(2);
+        const res = await setup();
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(1);
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthCategoryCreated}.${app.uid}`,
+          {
+            item: { ...category, id: res?.id },
+          },
+        );
+      });
     });
 
     describe('readNetWorthCategories', () => {
@@ -264,6 +280,7 @@ describe('net worth resolver', () => {
       const setup = async (): Promise<{ id: number; res: Maybe<CrudResponseUpdate> }> => {
         const [id] = await createCategories([category]);
 
+        pubsubSpy.mockClear();
         const res = await app.authGqlClient.mutate<Mutation, MutationUpdateNetWorthCategoryArgs>({
           mutation,
           variables: {
@@ -297,6 +314,19 @@ describe('net worth resolver', () => {
           }),
         );
       });
+
+      it('should publish an event to pubsub', async () => {
+        expect.assertions(2);
+        const { id } = await setup();
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(1);
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthCategoryUpdated}.${app.uid}`,
+          {
+            item: { ...modifiedCategory, id },
+          },
+        );
+      });
     });
 
     describe('deleteNetWorthCategory', () => {
@@ -311,6 +341,7 @@ describe('net worth resolver', () => {
       const setup = async (): Promise<{ id: number; res: Maybe<CrudResponseDelete> }> => {
         const [id] = await createCategories([category]);
 
+        pubsubSpy.mockClear();
         const res = await app.authGqlClient.mutate<Mutation, MutationDeleteNetWorthCategoryArgs>({
           mutation,
           variables: {
@@ -335,6 +366,19 @@ describe('net worth resolver', () => {
         `);
         expect(rowCount).toBe(0);
       });
+
+      it('should publish an event to pubsub', async () => {
+        expect.assertions(2);
+        const { id } = await setup();
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(1);
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthCategoryDeleted}.${app.uid}`,
+          {
+            id,
+          },
+        );
+      });
     });
   });
 
@@ -357,9 +401,12 @@ describe('net worth resolver', () => {
         }
       `;
 
-      const setup = async (categoryId?: number): Promise<Maybe<CrudResponseCreate>> => {
+      const setup = async (
+        categoryId?: number,
+      ): Promise<{ categoryId: number; res: Maybe<CrudResponseCreate> }> => {
         const [postedCategoryId] = await createCategories([category]);
 
+        pubsubSpy.mockClear();
         const res = await app.authGqlClient.mutate<Mutation, MutationCreateNetWorthSubcategoryArgs>(
           {
             mutation,
@@ -372,12 +419,12 @@ describe('net worth resolver', () => {
           },
         );
 
-        return res.data?.createNetWorthSubcategory ?? null;
+        return { categoryId: postedCategoryId, res: res.data?.createNetWorthSubcategory ?? null };
       };
 
       it('should respond with the created subcategory ID', async () => {
         expect.assertions(1);
-        const res = await setup();
+        const { res } = await setup();
 
         expect(res).toStrictEqual(
           expect.objectContaining({
@@ -389,7 +436,7 @@ describe('net worth resolver', () => {
 
       it('should create the subcategory in the database', async () => {
         expect.assertions(1);
-        const res = await setup();
+        const { res } = await setup();
 
         const { rowCount } = await getPool().query<RequiredNotNull<SubcategoryRow>>(sql`
         SELECT * FROM net_worth_subcategories
@@ -398,12 +445,29 @@ describe('net worth resolver', () => {
         expect(rowCount).toBe(1);
       });
 
+      it('should publish an event to pubsub', async () => {
+        expect.assertions(2);
+        const { categoryId, res } = await setup();
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(1);
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthSubcategoryCreated}.${app.uid}`,
+          {
+            item: {
+              ...subcategory,
+              id: res?.id,
+              categoryId,
+            },
+          },
+        );
+      });
+
       describe('when the category does not exist', () => {
         const nonexistentCategoryId = 88664915;
 
         it('should return an error with no created ID', async () => {
           expect.assertions(2);
-          const res = await setup(nonexistentCategoryId);
+          const { res } = await setup(nonexistentCategoryId);
           expect(res?.id).toBeNull();
           expect(res?.error).toMatchInlineSnapshot(`"Category not found"`);
         });
@@ -598,7 +662,7 @@ describe('net worth resolver', () => {
 
       const setup = async (
         categoryId?: number,
-      ): Promise<{ id: number; res: Maybe<CrudResponseUpdate> }> => {
+      ): Promise<{ id: number; categoryId: number; res: Maybe<CrudResponseUpdate> }> => {
         const [postedCategoryId] = await createCategories([category]);
         const [id] = await createSubcategories([
           {
@@ -607,6 +671,7 @@ describe('net worth resolver', () => {
           },
         ]);
 
+        pubsubSpy.mockClear();
         const res = await app.authGqlClient.mutate<Mutation, MutationUpdateNetWorthSubcategoryArgs>(
           {
             mutation,
@@ -620,7 +685,11 @@ describe('net worth resolver', () => {
           },
         );
 
-        return { id, res: res.data?.updateNetWorthSubcategory ?? null };
+        return {
+          id,
+          categoryId: postedCategoryId,
+          res: res.data?.updateNetWorthSubcategory ?? null,
+        };
       };
 
       it('should return a null error', async () => {
@@ -644,6 +713,23 @@ describe('net worth resolver', () => {
             subcategory: 'Savings account',
             appreciation_rate: 6.5,
           }),
+        );
+      });
+
+      it('should publish an event to pubsub', async () => {
+        expect.assertions(2);
+        const { id, categoryId } = await setup();
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(1);
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthSubcategoryUpdated}.${app.uid}`,
+          {
+            item: {
+              ...modifiedSubcategory,
+              categoryId,
+              id,
+            },
+          },
         );
       });
 
@@ -679,6 +765,7 @@ describe('net worth resolver', () => {
           },
         ]);
 
+        pubsubSpy.mockClear();
         const res = await app.authGqlClient.mutate<Mutation, MutationDeleteNetWorthSubcategoryArgs>(
           {
             mutation,
@@ -703,6 +790,19 @@ describe('net worth resolver', () => {
         WHERE id = ${id}
         `);
         expect(rowCount).toBe(0);
+      });
+
+      it('should publish an event to pubsub', async () => {
+        expect.assertions(2);
+        const { id } = await setup();
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(1);
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthSubcategoryDeleted}.${app.uid}`,
+          {
+            id,
+          },
+        );
       });
     });
   });
@@ -969,6 +1069,7 @@ describe('net worth resolver', () => {
       > => {
         const { parents, entryInput } = await setupParents();
 
+        pubsubSpy.mockClear();
         const res = await app.authGqlClient.mutate<
           Mutation,
           RawDateDeep<MutationCreateNetWorthEntryArgs>
@@ -1101,6 +1202,36 @@ describe('net worth resolver', () => {
             rate: 0.113,
           }),
         ]);
+      });
+
+      it('should publish the created item and cash total', async () => {
+        expect.assertions(3);
+
+        const { res } = await setup();
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(2);
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthEntryCreated}.${app.uid}`,
+          {
+            item: expect.objectContaining({
+              id: res?.id,
+              date: '2020-04-14',
+            }),
+          },
+        );
+
+        expect(pubsubSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
+          `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${app.uid}`,
+          {
+            cashInBank: expect.any(Number),
+            nonPensionStockValue: expect.any(Number),
+            pensionStockValue: expect.any(Number),
+            stocksIncludingCash: expect.any(Number),
+            date: null,
+            incomeSince: expect.any(Number),
+            spendingSince: expect.any(Number),
+          },
+        );
       });
 
       describe('sending entry with option values', () => {
@@ -1797,6 +1928,51 @@ describe('net worth resolver', () => {
         ]);
       });
 
+      it('should publish the updated item and cash total', async () => {
+        expect.assertions(3);
+
+        const { id, entryInput } = await setup();
+
+        const updatedEntry: Create<RawDate<NetWorthEntryInput, 'date'>> = {
+          ...entryInput,
+          date: '2020-04-15',
+        };
+
+        pubsubSpy.mockClear();
+        await app.authGqlClient.mutate<Mutation, RawDateDeep<MutationUpdateNetWorthEntryArgs>>({
+          mutation,
+          variables: {
+            id,
+            input: updatedEntry,
+          },
+        });
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(2);
+
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthEntryUpdated}.${app.uid}`,
+          {
+            item: expect.objectContaining({
+              id,
+              date: '2020-04-15',
+            }),
+          },
+        );
+
+        expect(pubsubSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
+          `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${app.uid}`,
+          {
+            cashInBank: expect.any(Number),
+            nonPensionStockValue: expect.any(Number),
+            pensionStockValue: expect.any(Number),
+            stocksIncludingCash: expect.any(Number),
+            date: null,
+            incomeSince: expect.any(Number),
+            spendingSince: expect.any(Number),
+          },
+        );
+      });
+
       it('should not duplicate options', async () => {
         expect.assertions(3);
         const { id, entryInput, parents } = await setup();
@@ -1902,6 +2078,40 @@ describe('net worth resolver', () => {
         SELECT * FROM net_worth WHERE id = ${id}
         `);
         expect(countAfter).toBe(0);
+      });
+
+      it('should publish the deleted item and cash total', async () => {
+        expect.assertions(3);
+
+        const { entryInput } = await setupParents();
+        const [id] = await createEntries([{ input: entryInput }]);
+
+        pubsubSpy.mockClear();
+        await app.authGqlClient.mutate<Mutation, MutationDeleteNetWorthEntryArgs>({
+          mutation,
+          variables: { id },
+        });
+
+        expect(pubsubSpy).toHaveBeenCalledTimes(2);
+        expect(pubsubSpy).toHaveBeenCalledWith(
+          `${pubsub.PubSubTopic.NetWorthEntryDeleted}.${app.uid}`,
+          {
+            id,
+          },
+        );
+
+        expect(pubsubSpy).toHaveBeenCalledWith<[string, NetWorthCashTotal]>(
+          `${pubsub.PubSubTopic.NetWorthCashTotalUpdated}.${app.uid}`,
+          {
+            cashInBank: expect.any(Number),
+            nonPensionStockValue: expect.any(Number),
+            pensionStockValue: expect.any(Number),
+            stocksIncludingCash: expect.any(Number),
+            date: null,
+            incomeSince: expect.any(Number),
+            spendingSince: expect.any(Number),
+          },
+        );
       });
     });
   });

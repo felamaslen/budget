@@ -1,4 +1,4 @@
-import { addYears, addMonths, getUnixTime, startOfYear } from 'date-fns';
+import { addYears, addMonths, getUnixTime, startOfYear, formatISO } from 'date-fns';
 import { omit, uniqBy } from 'lodash';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
@@ -37,9 +37,9 @@ import {
   Fund,
   FundHistory,
   FundHistoryIndividual,
+  FundInput,
   FundPeriod,
   FundPrices,
-  FundSubscription,
   Maybe,
   MutationCreateFundArgs,
   MutationDeleteFundArgs,
@@ -54,6 +54,7 @@ import {
   Transaction,
   UpdatedFundAllocationTargets,
 } from '~api/types';
+import { FundSubscription } from '~client/types/gql';
 import { PageNonStandard } from '~shared/constants';
 
 const baseController = makeCrudController<FundListRow, FundMain>({
@@ -76,6 +77,23 @@ export function getMaxAge(now: Date, period?: Maybe<FundPeriod>, length?: Maybe<
     return addMonths(now, -length);
   }
   return addYears(now, -length);
+}
+
+function getPublishedFund(
+  input: FundInput,
+): Omit<NonNullable<Required<FundSubscription>['created']>['item'], 'id'> {
+  return {
+    item: input.item,
+    allocationTarget: input.allocationTarget,
+    transactions: input.transactions.map((transaction) => ({
+      ...transaction,
+      date: formatISO(transaction.date, { representation: 'date' }),
+    })),
+    stockSplits: (input.stockSplits ?? []).map((stockSplit) => ({
+      ...stockSplit,
+      date: formatISO(stockSplit.date, { representation: 'date' }),
+    })),
+  };
 }
 
 export function processFundHistory(
@@ -212,10 +230,7 @@ export async function createFund(
       fakeId,
       item: {
         id,
-        item: input.item,
-        allocationTarget: input.allocationTarget,
-        transactions: input.transactions,
-        stockSplits: input.stockSplits ?? [],
+        ...getPublishedFund(input),
       },
     },
     overviewCost,
@@ -301,10 +316,7 @@ export async function updateFund(
   pubsub.publish<FundSubscription>(`${PubSubTopic.FundsChanged}.${uid}`, {
     updated: {
       id,
-      item: input.item,
-      allocationTarget: input.allocationTarget,
-      transactions: input.transactions,
-      stockSplits: input.stockSplits ?? [],
+      ...getPublishedFund(input),
     },
     overviewCost,
   });
