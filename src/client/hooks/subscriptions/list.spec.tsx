@@ -82,28 +82,28 @@ describe(useListSubscriptions.name, () => {
     const { store } = renderHookWithStore(useListSubscriptions);
 
     await waitFor(() => {
-      const actions = store.getActions();
-      expect(actions).toStrictEqual(
-        expect.arrayContaining([
-          listItemCreated(
-            PageListStandard.Food,
-            {
-              id: 8912,
-              date: new Date('2020-04-03'),
-              item: 'my item',
-              category: 'my category',
-              cost: 1866,
-              shop: 'my shop',
-            },
-            true,
-            8912,
-            -7712,
-          ),
-          listOverviewUpdated(PageListStandard.Food, [1, 2, 3], 1005, 86),
-        ]),
-      );
-      expect(actions).toHaveLength(2);
+      expect(store.getActions()).toHaveLength(2);
     });
+
+    expect(store.getActions()).toStrictEqual(
+      expect.arrayContaining([
+        listItemCreated(
+          PageListStandard.Food,
+          {
+            id: 8912,
+            date: new Date('2020-04-03'),
+            item: 'my item',
+            category: 'my category',
+            cost: 1866,
+            shop: 'my shop',
+          },
+          true,
+          8912,
+          -7712,
+        ),
+        listOverviewUpdated(PageListStandard.Food, [1, 2, 3], 1005, 86),
+      ]),
+    );
   });
 
   it('should subscribe to standard list item updates', async () => {

@@ -21,6 +21,8 @@ import * as gql from '~client/hooks/gql';
 import { composeWithoutArgs } from '~client/modules/compose-without-args';
 import type { Id, Item, NetWorthEntryRead } from '~client/types';
 import type { Maybe, NetWorthCategory, NetWorthSubcategory } from '~client/types/gql';
+import type { GQLShallow } from '~shared/types';
+import { omitTypeName } from '~shared/utils';
 
 type ResponseKeys = {
   created: 'netWorthCategoryCreated' | 'netWorthSubcategoryCreated' | 'netWorthEntryCreated';
@@ -39,15 +41,15 @@ type SubscriptionCreateUpdate<T extends Item> = Partial<{
 type SubscriptionDelete = Partial<{ [key in ResponseKeys['deleted']]: { id: Id } }>;
 
 type CrudOptions<
-  T extends Item,
+  T extends Record<string, unknown> & Item,
   ActionCreate extends Action = Action,
   ActionUpdate extends Action = Action,
   ActionDelete extends Action = Action,
 > = {
   responseKeys: ResponseKeys;
   actions: {
-    onCreate: (item: T) => ActionCreate;
-    onUpdate: (item: T) => ActionUpdate;
+    onCreate: (item: GQLShallow<T>) => ActionCreate;
+    onUpdate: (item: GQLShallow<T>) => ActionUpdate;
     onDelete: (id: Id) => ActionDelete;
   };
   subscriptions: {
@@ -67,7 +69,7 @@ type CrudOptions<
 };
 
 function useNetWorthCrud<
-  T extends Item,
+  T extends Record<string, unknown> & Item,
   ActionCreate extends Action = Action,
   ActionUpdate extends Action = Action,
   ActionDelete extends Action = Action,
@@ -85,13 +87,13 @@ function useNetWorthCrud<
   useEffect(() => {
     const item = created.data?.[responseKeys.created]?.item;
     if (item) {
-      dispatch(actions.onCreate(item));
+      dispatch(actions.onCreate(omitTypeName(item)));
     }
   }, [created, dispatch, responseKeys.created, actions]);
   useEffect(() => {
     const item = updated.data?.[responseKeys.updated]?.item;
     if (item) {
-      dispatch(actions.onUpdate(item));
+      dispatch(actions.onUpdate(omitTypeName(item)));
     }
   }, [updated, dispatch, responseKeys.updated, actions]);
   useEffect(() => {
