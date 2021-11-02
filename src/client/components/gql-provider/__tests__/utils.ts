@@ -1,4 +1,5 @@
 import { Server } from 'http';
+import { Socket } from 'net';
 import { addResolversToSchema } from '@graphql-tools/schema';
 import express, { Express } from 'express';
 import { graphqlHTTP } from 'express-graphql';
@@ -59,6 +60,8 @@ export class MockServer {
 
   wsServer: ws.Server | undefined;
 
+  sockets: Socket[] = [];
+
   constructor() {
     this.app = express();
     this.app.use((_, res, next) => {
@@ -74,6 +77,7 @@ export class MockServer {
   }
 
   async setup(): Promise<void> {
+    this.sockets = [];
     return new Promise<void>((resolve, reject) => {
       this.server = this.app.listen(4000, () => {
         this.wsServer = new ws.Server({
@@ -83,34 +87,45 @@ export class MockServer {
         useServer({ schema, execute, subscribe }, this.wsServer);
       });
 
+      this.server.on('connection', (socket) => {
+        this.sockets.push(socket);
+      });
+
       this.server.on('error', reject);
       this.server.on('listening', resolve);
     });
   }
 
   async teardown(): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      this.wsServer?.close((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-    await new Promise<void>((resolve, reject) => {
-      this.server?.close((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+    await new Promise<void>(
+      (resolve, reject) =>
+        this.wsServer?.close((err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        }) ?? resolve(),
+    );
+
+    await Promise.all(
+      this.sockets.map((socket) => new Promise<void>((resolve) => socket.end(resolve))),
+    );
+
+    await new Promise<void>(
+      (resolve, reject) =>
+        this.server?.close((err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        }) ?? resolve(),
+    );
   }
 
   async reconnectAfterDelay(delayMs = 50): Promise<void> {
-    this.teardown();
+    await this.teardown();
     await new Promise((resolve) => setTimeout(resolve, delayMs));
     await this.setup();
   }

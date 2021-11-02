@@ -1,4 +1,3 @@
-import { FetchResult } from 'apollo-boost';
 import gql from 'graphql-tag';
 import { omit } from 'lodash';
 import sinon from 'sinon';
@@ -14,9 +13,10 @@ import {
   RateRow,
   ThresholdRow,
 } from '~api/queries/planning';
-import { App, getTestApp } from '~api/test-utils/create-server';
-import { Maybe, MutationSyncPlanningArgs, PageListStandard } from '~api/types';
+import { App, getTestApp, runMutation } from '~api/test-utils';
+import { Maybe, Mutation, PageListStandard } from '~api/types';
 import {
+  MutationSyncPlanningArgs,
   PlanningAccount,
   PlanningAccountInput,
   PlanningComputedValue,
@@ -29,7 +29,6 @@ import {
   TaxRate,
   TaxThreshold,
 } from '~client/types/gql';
-import type { RawDateDeep } from '~shared/types';
 import { omitTypeName } from '~shared/utils';
 
 describe('planning resolver', () => {
@@ -50,11 +49,6 @@ describe('planning resolver', () => {
 
   const myBankValueJan2020 = 300000;
   const myOtherBankValueJan2020 = 500000;
-
-  type MutationSyncPlanningArgsRawDate = RawDateDeep<
-    MutationSyncPlanningArgs,
-    'startDate' | 'endDate'
-  >;
 
   const setupInitialData = async (db: DatabasePoolConnectionType): Promise<void> => {
     await db.query(sql`DELETE FROM planning_accounts`);
@@ -271,16 +265,16 @@ describe('planning resolver', () => {
             netWorthSubcategoryId: myBankId,
             income: [
               {
-                startDate: '2020-01-20' as unknown as Date,
-                endDate: '2021-01-01' as unknown as Date,
+                startDate: '2020-01-20',
+                endDate: '2021-01-01',
                 salary: 6000000,
                 taxCode: '1250L',
                 studentLoan: true,
                 pensionContrib: 0.03,
               },
               {
-                startDate: '2025-05-03' as unknown as Date,
-                endDate: '2026-01-01' as unknown as Date,
+                startDate: '2025-05-03',
+                endDate: '2026-01-01',
                 salary: 8500000,
                 taxCode: '1257L',
                 studentLoan: true,
@@ -307,19 +301,12 @@ describe('planning resolver', () => {
       },
     });
 
-    const setupCreate = async (): Promise<FetchResult<{ syncPlanning: PlanningSyncResponse }>> => {
+    const setupCreate = async (): Promise<Maybe<Mutation>> => {
       await getPool().connect(async (db) => {
         await setupInitialData(db);
       });
 
-      await app.authGqlClient.clearStore();
-      const res = await app.authGqlClient.mutate<
-        { syncPlanning: PlanningSyncResponse },
-        MutationSyncPlanningArgs
-      >({
-        mutation,
-        variables: variablesCreate(),
-      });
+      const res = await runMutation<MutationSyncPlanningArgs>(app, mutation, variablesCreate());
       return res;
     };
 
@@ -562,7 +549,7 @@ describe('planning resolver', () => {
       it('should return the parameters and accounts data', async () => {
         expect.assertions(1);
         const res = await setup();
-        expect(res.data?.syncPlanning).toStrictEqual(
+        expect(res?.syncPlanning).toStrictEqual(
           expect.objectContaining<PlanningSyncResponse>({
             error: null,
             year: myYear,
@@ -608,8 +595,8 @@ describe('planning resolver', () => {
                 income: expect.arrayContaining([
                   expect.objectContaining({
                     id: expect.any(Number),
-                    startDate: '2020-01-20' as unknown as Date,
-                    endDate: '2021-01-01' as unknown as Date,
+                    startDate: '2020-01-20',
+                    endDate: '2021-01-01',
                     salary: 6000000,
                     taxCode: '1250L',
                     studentLoan: true,
@@ -617,8 +604,8 @@ describe('planning resolver', () => {
                   }),
                   expect.objectContaining({
                     id: expect.any(Number),
-                    startDate: '2025-05-03' as unknown as Date,
-                    endDate: '2026-01-01' as unknown as Date,
+                    startDate: '2025-05-03',
+                    endDate: '2026-01-01',
                     salary: 8500000,
                     taxCode: '1257L',
                     studentLoan: true,
@@ -667,9 +654,7 @@ describe('planning resolver', () => {
     });
 
     describe('updating existing planning data', () => {
-      const variablesUpdate = (
-        createRes: PlanningSyncResponse,
-      ): MutationSyncPlanningArgsRawDate => {
+      const variablesUpdate = (createRes: PlanningSyncResponse): MutationSyncPlanningArgs => {
         const threshold0 = createRes.parameters?.thresholds.find(
           (compare) => compare.name === 'IncomeTaxBasicAllowance',
         ) as TaxThreshold;
@@ -756,16 +741,13 @@ describe('planning resolver', () => {
 
       const setupUpdate = async (
         createRes: PlanningSyncResponse,
-      ): Promise<Maybe<PlanningSyncResponse> | undefined> => {
-        await app.authGqlClient.clearStore();
-        const res = await app.authGqlClient.mutate<
-          { syncPlanning: PlanningSyncResponse },
-          MutationSyncPlanningArgsRawDate
-        >({
+      ): Promise<Maybe<PlanningSyncResponse>> => {
+        const res = await runMutation<MutationSyncPlanningArgs>(
+          app,
           mutation,
-          variables: variablesUpdate(createRes),
-        });
-        return res.data?.syncPlanning;
+          variablesUpdate(createRes),
+        );
+        return (res?.syncPlanning as PlanningSyncResponse | undefined) ?? null;
       };
 
       it('should create, delete and update threshold rows as necessary', async () => {
@@ -775,7 +757,7 @@ describe('planning resolver', () => {
           sql`SELECT * FROM planning_thresholds ORDER BY name, year`,
         );
 
-        await setupUpdate(resCreate.data?.syncPlanning as PlanningSyncResponse);
+        await setupUpdate(resCreate?.syncPlanning as PlanningSyncResponse);
         const rowsAfterUpdate = await getPool().query<ThresholdRow>(
           sql`SELECT * FROM planning_thresholds ORDER BY name, year`,
         );
@@ -809,7 +791,7 @@ describe('planning resolver', () => {
           sql`SELECT * FROM planning_rates ORDER BY name, year`,
         );
 
-        await setupUpdate(resCreate.data?.syncPlanning as PlanningSyncResponse);
+        await setupUpdate(resCreate?.syncPlanning as PlanningSyncResponse);
         const rowsAfterUpdate = await getPool().query<RateRow>(
           sql`SELECT * FROM planning_rates ORDER BY name, year`,
         );
@@ -848,7 +830,7 @@ describe('planning resolver', () => {
           sql`SELECT * FROM planning_accounts ORDER BY account`,
         );
 
-        await setupUpdate(resCreate.data?.syncPlanning as PlanningSyncResponse);
+        await setupUpdate(resCreate?.syncPlanning as PlanningSyncResponse);
         const rowsAfterUpdate = await getPool().query<AccountRow>(
           sql`SELECT * FROM planning_accounts ORDER BY account`,
         );
@@ -882,7 +864,7 @@ describe('planning resolver', () => {
           sql`SELECT * FROM planning_income ORDER BY account_id`,
         );
 
-        await setupUpdate(resCreate.data?.syncPlanning as PlanningSyncResponse);
+        await setupUpdate(resCreate?.syncPlanning as PlanningSyncResponse);
         const rowsAfterUpdate = await getPool().query<AccountRow>(
           sql`SELECT * FROM planning_income ORDER BY account_id`,
         );
@@ -913,7 +895,7 @@ describe('planning resolver', () => {
           sql`SELECT * FROM planning_credit_card_payments ORDER BY year, month`,
         );
 
-        await setupUpdate(resCreate.data?.syncPlanning as PlanningSyncResponse);
+        await setupUpdate(resCreate?.syncPlanning as PlanningSyncResponse);
         const creditCardRowsAfterUpdate = await getPool().query<AccountRow>(
           sql`SELECT * FROM planning_credit_cards ORDER BY account_id`,
         );
@@ -941,9 +923,7 @@ describe('planning resolver', () => {
     describe('adding new data for a different year', () => {
       const otherYear = myYear + 3;
 
-      const variablesNewYear = (
-        createRes: PlanningSyncResponse,
-      ): MutationSyncPlanningArgsRawDate => ({
+      const variablesNewYear = (createRes: PlanningSyncResponse): MutationSyncPlanningArgs => ({
         year: otherYear,
         input: {
           parameters: {
@@ -978,22 +958,19 @@ describe('planning resolver', () => {
 
       const setupNewYear = async (
         createRes: PlanningSyncResponse,
-      ): Promise<Maybe<PlanningSyncResponse> | undefined> => {
-        await app.authGqlClient.clearStore();
-        const res = await app.authGqlClient.mutate<
-          { syncPlanning: PlanningSyncResponse },
-          MutationSyncPlanningArgsRawDate
-        >({
+      ): Promise<Maybe<PlanningSyncResponse>> => {
+        const res = await runMutation<MutationSyncPlanningArgs>(
+          app,
           mutation,
-          variables: variablesNewYear(createRes),
-        });
-        return res.data?.syncPlanning;
+          variablesNewYear(createRes),
+        );
+        return (res?.syncPlanning as PlanningSyncResponse | undefined) ?? null;
       };
 
       it('should add new threshold rows while keeping the existing ones', async () => {
         expect.assertions(2);
         const createRes = await setupCreate();
-        await setupNewYear(createRes.data?.syncPlanning as PlanningSyncResponse);
+        await setupNewYear(createRes?.syncPlanning as PlanningSyncResponse);
 
         const { rows } = await getPool().query<ThresholdRow>(
           sql`SELECT * FROM planning_thresholds ORDER BY name, year`,
@@ -1035,7 +1012,7 @@ describe('planning resolver', () => {
       it('should add new rate rows while keeping the existing ones', async () => {
         expect.assertions(2);
         const createRes = await setupCreate();
-        await setupNewYear(createRes.data?.syncPlanning as PlanningSyncResponse);
+        await setupNewYear(createRes?.syncPlanning as PlanningSyncResponse);
 
         const { rows } = await getPool().query<ThresholdRow>(
           sql`SELECT * FROM planning_rates ORDER BY name, year`,
@@ -1077,7 +1054,7 @@ describe('planning resolver', () => {
       it('should add new value rows while keeping the existing ones', async () => {
         expect.assertions(2);
         const createRes = await setupCreate();
-        await setupNewYear(createRes.data?.syncPlanning as PlanningSyncResponse);
+        await setupNewYear(createRes?.syncPlanning as PlanningSyncResponse);
 
         const valueRows = await getPool().query<PlanningValueRow>(sql`
         SELECT planning_values.*
@@ -1113,17 +1090,13 @@ describe('planning resolver', () => {
         clock?.restore();
       });
 
-      const setupRead = async (year = myYear): Promise<PlanningSyncResponse | undefined> => {
-        app.authGqlClient.clearStore();
+      const setupRead = async (year = myYear): Promise<Maybe<PlanningSyncResponse>> => {
         clock = sinon.useFakeTimers(new Date('2020-05-11T15:30:20+0100'));
-        const res = await app.authGqlClient.mutate<
-          { syncPlanning: PlanningSyncResponse },
-          MutationSyncPlanningArgs
-        >({
-          mutation,
-          variables: { year, input: null },
+        const res = await runMutation<MutationSyncPlanningArgs>(app, mutation, {
+          year,
+          input: null,
         });
-        return res.data?.syncPlanning;
+        return (res?.syncPlanning as PlanningSyncResponse | undefined) ?? null;
       };
 
       it('should return the current planning state for the given year', async () => {
@@ -1248,9 +1221,9 @@ describe('planning resolver', () => {
       it('should include value data associated with the account at the given year', async () => {
         expect.assertions(3);
         const resCreate = await setupCreate();
-        const createdAccount = resCreate.data?.syncPlanning?.accounts?.find(
+        const createdAccount = resCreate?.syncPlanning?.accounts?.find(
           (compare) => compare.account === 'My test account',
-        ) as PlanningAccount;
+        ) as unknown as PlanningAccount;
         await getPool().query(sql`
         INSERT INTO planning_values (year, month, account_id, name, value)
         VALUES (${myYear - 1}, ${3}, ${createdAccount.id}, ${'Some old value'}, ${-1560})
@@ -1470,11 +1443,11 @@ describe('planning resolver', () => {
         expect.assertions(1);
         const resCreate = await setupCreate();
 
-        const accountWithSalary = resCreate.data?.syncPlanning.accounts?.find(
+        const accountWithSalary = resCreate?.syncPlanning?.accounts?.find(
           (compare) => compare.account === 'My test account',
         );
 
-        const accountToTransferTo = resCreate.data?.syncPlanning.accounts?.find(
+        const accountToTransferTo = resCreate?.syncPlanning?.accounts?.find(
           (compare) => compare.account === 'Something account',
         );
 
@@ -1609,9 +1582,9 @@ describe('planning resolver', () => {
         it('should compute the tax relief from pension contributions in the previous year', async () => {
           expect.assertions(1);
           const resCreate = await setupCreate();
-          const accountWithIncome = resCreate.data?.syncPlanning.accounts?.find(
+          const accountWithIncome = resCreate?.syncPlanning?.accounts?.find(
             (compare) => compare.account === 'Something account',
-          ) as PlanningAccount;
+          ) as unknown as PlanningAccount;
           await getPool().connect(async (db) => {
             await db.query(sql`
           INSERT INTO planning_values (account_id, year, month, name, value) VALUES
@@ -1663,21 +1636,17 @@ describe('planning resolver', () => {
       });
 
       describe('when the current month already has a net worth entry defined', () => {
-        const setupPreciousNetWorth = async (): Promise<PlanningSyncResponse | undefined> => {
+        const setupPreciousNetWorth = async (): Promise<Maybe<PlanningSyncResponse>> => {
           await setupCreate();
-          app.authGqlClient.clearStore();
           await getPool().query(
             sql`UPDATE net_worth SET date = ${'2020-05-20'} WHERE uid = ${app.uid}`,
           );
           clock = sinon.useFakeTimers(new Date('2020-05-23T20:39:10+0100'));
-          const res = await app.authGqlClient.mutate<
-            { syncPlanning: PlanningSyncResponse },
-            MutationSyncPlanningArgs
-          >({
-            mutation,
-            variables: { year: 2021, input: null },
+          const res = await runMutation<MutationSyncPlanningArgs>(app, mutation, {
+            year: 2021,
+            input: null,
           });
-          return res.data?.syncPlanning;
+          return (res?.syncPlanning as PlanningSyncResponse | undefined) ?? null;
         };
 
         it('should assume the net worth value relates to the end of the month when computing boundary', async () => {
@@ -1723,11 +1692,11 @@ describe('planning resolver', () => {
       });
 
       describe('when includeBills is true', () => {
-        const setupIncludeBills = async (): Promise<PlanningSyncResponse | undefined> => {
+        const setupIncludeBills = async (): Promise<Maybe<PlanningSyncResponse>> => {
           const resCreate = await setupCreate();
-          const myAccount = resCreate.data?.syncPlanning?.accounts?.find(
+          const myAccount = resCreate?.syncPlanning?.accounts?.find(
             (compare) => compare.account === 'Something account',
-          ) as PlanningAccount;
+          ) as unknown as PlanningAccount;
           await getPool().connect(async (db) => {
             await db.query(sql`
             UPDATE planning_accounts SET include_bills = ${true} WHERE id = ${myAccount.id}

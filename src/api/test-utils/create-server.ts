@@ -1,16 +1,26 @@
 import { Server } from 'http';
-import ApolloClient, { InMemoryCache, PresetConfig } from 'apollo-boost';
+import {
+  cacheExchange,
+  Client,
+  createClient,
+  dedupExchange,
+  Exchange,
+  fetchExchange,
+  subscriptionExchange,
+} from '@urql/core';
 import axios from 'axios';
 import 'cross-fetch/polyfill';
+import { Client as WSClient, createClient as createWSClient, Sink } from 'graphql-ws';
 import moize from 'moize';
 import request, { SuperTest, Test } from 'supertest';
+import ws from 'ws';
 
 import { run } from '~api/index';
 
 export type App = {
   agent: SuperTest<Test>;
-  gqlClient: ApolloClient<unknown>;
-  authGqlClient: ApolloClient<unknown>;
+  gqlClient: Client;
+  authGqlClient: Client;
   uid: number;
 };
 
@@ -18,7 +28,13 @@ export const testPort = 4000;
 
 export const getServer = (): Promise<Server> => run(testPort);
 
-export const makeTestApp = async (): Promise<App> => {
+type TestAppOptions = {
+  subscriptions: boolean;
+};
+
+export const makeTestApp = async ({
+  subscriptions = false,
+}: Partial<TestAppOptions> = {}): Promise<App> => {
   if (!global.server) {
     throw new Error('getTestApp called with server uninitialised!');
   }
@@ -26,36 +42,12 @@ export const makeTestApp = async (): Promise<App> => {
   const agent = request.agent(global.server);
 
   const graphqlUrl = `http://127.0.0.1:${testPort}/graphql`;
-
-  const gqlClientOptions: PresetConfig = {
-    uri: graphqlUrl,
-    onError: (err): void => {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    },
-  };
-
-  const gqlClient = new ApolloClient(gqlClientOptions);
-
-  let cookie = '';
-
-  const authGqlClient = new ApolloClient({
-    ...gqlClientOptions,
-    request: (operation): void => {
-      operation.setContext({
-        headers: {
-          Cookie: cookie,
-        },
-      });
-    },
-    cache: new InMemoryCache({
-      dataIdFromObject: (o): string | null => (o.id ? o.id : null),
-    }),
-  });
+  const websocketUrl = `ws://127.0.0.1:${testPort}/subscriptions`;
 
   const loginRes = await axios.post<{
     data?: {
       login: {
+        apiKey: string;
         uid: number;
       };
     };
@@ -63,23 +55,86 @@ export const makeTestApp = async (): Promise<App> => {
     query: `
       mutation {
         login(pin: 1234) {
+          apiKey
           uid
         }
       }
     `,
   });
 
-  cookie = loginRes.headers['set-cookie']?.[0] ?? '';
-
   const uid = loginRes.data.data?.login.uid;
+  const cookie = loginRes.headers['set-cookie']?.[0] ?? '';
+  const apiKey = loginRes.data.data?.login.apiKey ?? '';
 
-  if (!uid) {
+  if (!(uid && cookie && apiKey)) {
     throw new Error("Couldn't log in prior to integration test");
   }
 
+  const anonymousWSClient = subscriptions
+    ? createWSClient({
+        webSocketImpl: ws,
+        url: websocketUrl,
+      })
+    : undefined;
+
+  const anonymousGqlClient = createClient({
+    url: graphqlUrl,
+    requestPolicy: 'network-only',
+    exchanges: [
+      dedupExchange,
+      cacheExchange,
+      fetchExchange,
+      subscriptions &&
+        subscriptionExchange({
+          forwardSubscription: (operation) => ({
+            subscribe: (sink): { unsubscribe: () => void } => {
+              const dispose = (anonymousWSClient as WSClient).subscribe(operation, sink as Sink);
+              return {
+                unsubscribe: dispose,
+              };
+            },
+          }),
+        }),
+    ].filter((s): s is Exchange => !!s),
+  });
+
+  const authWSClient = subscriptions
+    ? createWSClient({
+        webSocketImpl: ws,
+        url: websocketUrl,
+        connectionParams: { apiKey },
+      })
+    : undefined;
+
+  const authGqlClient = createClient({
+    url: graphqlUrl,
+    fetchOptions: {
+      headers: {
+        Authorization: apiKey,
+      },
+    },
+    requestPolicy: 'network-only',
+    exchanges: [
+      dedupExchange,
+      cacheExchange,
+      fetchExchange,
+      subscriptions &&
+        subscriptionExchange({
+          forwardSubscription: (operation) => ({
+            subscribe: (sink): { unsubscribe: () => void } => {
+              const dispose = (authWSClient as WSClient).subscribe(operation, sink as Sink);
+              return {
+                unsubscribe: dispose,
+              };
+            },
+          }),
+        }),
+    ].filter((s): s is Exchange => !!s),
+  });
+
   return {
     agent,
-    gqlClient,
+    gqlClient: anonymousGqlClient,
     authGqlClient,
     uid,
   };

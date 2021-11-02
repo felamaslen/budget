@@ -1,9 +1,15 @@
 import gql from 'graphql-tag';
-import moize from 'moize';
 import sinon from 'sinon';
 
-import { App, getTestApp, makeTestApp } from '~api/test-utils/create-server';
-import { AppConfig, AppConfigInput, Query, Maybe, Mutation, FundMode } from '~api/types';
+import { App, getTestApp, makeTestApp, runMutation, runQuery } from '~api/test-utils';
+import {
+  AppConfig,
+  AppConfigInput,
+  Query,
+  Maybe,
+  FundMode,
+  MutationSetConfigArgs,
+} from '~api/types';
 
 describe('config resolver', () => {
   let clock: sinon.SinonFakeTimers;
@@ -33,20 +39,15 @@ describe('config resolver', () => {
     describe('when not logged in', () => {
       it('should return null', async () => {
         expect.assertions(1);
-        const res = await app.gqlClient.query<Query>({
-          query: getConfig,
-        });
-        expect(res.data?.config).toBeNull();
+        const res = await app.gqlClient.query<Query>(getConfig).toPromise();
+        expect(res?.data?.config).toBeNull();
       });
     });
 
-    const setup = moize(
-      async (): Promise<AppConfig | null | undefined> => {
-        const res = await app.authGqlClient.query<Query>({ query: getConfig });
-        return res.data?.config;
-      },
-      { isPromise: true },
-    );
+    const setup = async (): Promise<Maybe<AppConfig>> => {
+      const res = await runQuery(app, getConfig);
+      return res?.config ?? null;
+    };
 
     it.each`
       description           | prop                | value
@@ -91,12 +92,8 @@ describe('config resolver', () => {
       ${'birthDate'}      | ${'1992-10-13'}
     `('setting $prop', ({ prop, nextValue }) => {
       const setup = async (config: AppConfigInput): Promise<Maybe<AppConfig>> => {
-        app.authGqlClient.clearStore();
-        const res = await app.authGqlClient.mutate<Mutation>({
-          mutation,
-          variables: { config },
-        });
-        return res.data?.setConfig?.config ?? null;
+        const res = await runMutation<MutationSetConfigArgs>(app, mutation, { config });
+        return res?.setConfig?.config ?? null;
       };
 
       it('should return the updated config', async () => {
@@ -115,9 +112,9 @@ describe('config resolver', () => {
           [prop]: nextValue,
         });
 
-        const res = await app.authGqlClient.query<Query>({ query: getConfig });
+        const res = await runQuery(app, getConfig);
 
-        expect(res.data.config).toStrictEqual(expect.objectContaining({ [prop]: nextValue }));
+        expect(res?.config).toStrictEqual(expect.objectContaining({ [prop]: nextValue }));
       });
 
       it('should persist the config from a different session, logged in as the same user', async () => {
@@ -127,9 +124,9 @@ describe('config resolver', () => {
 
         const separateApp = await makeTestApp();
 
-        const res = await separateApp.authGqlClient.query<Query>({ query: getConfig });
+        const res = await runQuery(separateApp, getConfig);
 
-        expect(res.data.config).toStrictEqual(expect.objectContaining({ [prop]: nextValue }));
+        expect(res?.config).toStrictEqual(expect.objectContaining({ [prop]: nextValue }));
       });
     });
   });

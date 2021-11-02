@@ -1,4 +1,3 @@
-import type { ApolloQueryResult } from 'apollo-boost';
 import gql from 'graphql-tag';
 import nock, { Scope } from 'nock';
 
@@ -6,7 +5,8 @@ import mockOpenExchangeRatesResponse from '../vendor/currencies.json';
 
 import { nockCurrencies } from '~api/__tests__/nocks';
 import { redisClient } from '~api/modules/redis';
-import { App, getTestApp } from '~api/test-utils/create-server';
+import { App, getTestApp, runQuery } from '~api/test-utils';
+import { AsyncReturnType } from '~api/types';
 import type { ExchangeRatesResponse, Query, QueryExchangeRatesArgs, Maybe } from '~api/types/gql';
 
 describe('exchange rates resolvers', () => {
@@ -34,14 +34,13 @@ describe('exchange rates resolvers', () => {
   `;
 
   describe('when not logged in', () => {
-    const setupNotLoggedIn = async (): Promise<Maybe<ExchangeRatesResponse> | undefined> => {
-      const res = await app.gqlClient.query<Query, QueryExchangeRatesArgs>({
-        query,
-        variables: {
+    const setupNotLoggedIn = async (): Promise<Maybe<ExchangeRatesResponse>> => {
+      const res = await app.gqlClient
+        .query<Query, QueryExchangeRatesArgs>(query, {
           base: 'GBP',
-        },
-      });
-      return res.data.exchangeRates;
+        })
+        .toPromise();
+      return res?.data?.exchangeRates ?? null;
     };
 
     it('should return null', async () => {
@@ -115,13 +114,9 @@ describe('exchange rates resolvers', () => {
     },
   ];
 
-  const getResponse = async (base: string): Promise<ApolloQueryResult<Query>> => {
-    await app.authGqlClient.clearStore();
-    const res = await app.authGqlClient.query<Query, QueryExchangeRatesArgs>({
-      query,
-      variables: {
-        base,
-      },
+  const getResponse = async (base: string): Promise<Maybe<Query>> => {
+    const res = await runQuery<QueryExchangeRatesArgs>(app, query, {
+      base,
     });
     return res;
   };
@@ -140,10 +135,8 @@ describe('exchange rates resolvers', () => {
       expect.assertions(2);
       const res = await getResponse(base);
 
-      expect(res.data.exchangeRates?.error).toBeNull();
-      expect(res.data.exchangeRates?.rates).toStrictEqual(
-        expectedRates.map(expect.objectContaining),
-      );
+      expect(res?.exchangeRates?.error).toBeNull();
+      expect(res?.exchangeRates?.rates).toStrictEqual(expectedRates.map(expect.objectContaining));
     });
 
     it('should cache results', async () => {
@@ -154,15 +147,13 @@ describe('exchange rates resolvers', () => {
 
       // this would throw an error if it made another request
       await expect(getResponse('USD')).resolves.toStrictEqual(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            exchangeRates: expect.objectContaining({
-              error: null,
-              rates: expect.arrayContaining([
-                expect.objectContaining({ currency: 'GBP', rate: expect.any(Number) }),
-                expect.objectContaining({ currency: 'USD', rate: expect.any(Number) }),
-              ]),
-            }),
+        expect.objectContaining<AsyncReturnType<typeof getResponse>>({
+          exchangeRates: expect.objectContaining({
+            error: null,
+            rates: expect.arrayContaining([
+              expect.objectContaining({ currency: 'GBP', rate: expect.any(Number) }),
+              expect.objectContaining({ currency: 'USD', rate: expect.any(Number) }),
+            ]),
           }),
         }),
       );
@@ -189,8 +180,8 @@ describe('exchange rates resolvers', () => {
       const resGBP = await getResponse('GBP');
       const resUSD = await getResponse('USD');
 
-      expect(resGBP.data.exchangeRates?.rates).toHaveLength(0);
-      expect(resUSD.data.exchangeRates?.rates).not.toHaveLength(0);
+      expect(resGBP?.exchangeRates?.rates).toHaveLength(0);
+      expect(resUSD?.exchangeRates?.rates).not.toHaveLength(0);
     });
   });
 
@@ -203,8 +194,8 @@ describe('exchange rates resolvers', () => {
       expect.assertions(2);
       const res = await getResponse('GBP');
 
-      expect(res.data.exchangeRates?.rates).toBeNull();
-      expect(res.data.exchangeRates?.error).toMatchInlineSnapshot(
+      expect(res?.exchangeRates?.rates).toBeNull();
+      expect(res?.exchangeRates?.error).toMatchInlineSnapshot(
         `"Request failed with status code 500"`,
       );
     });

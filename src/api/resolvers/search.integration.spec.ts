@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 import { sql } from 'slonik';
 import { getPool } from '~api/modules/db';
-import { App, getTestApp } from '~api/test-utils/create-server';
+import { App, getTestApp, runQuery } from '~api/test-utils';
 import {
   Query,
   QuerySearchArgs,
@@ -76,15 +76,14 @@ describe('search resolvers', () => {
   describe('when not logged in', () => {
     it('should return null', async () => {
       expect.assertions(1);
-      const res = await app.gqlClient.query<Query, QuerySearchArgs>({
-        query: search,
-        variables: {
+      const res = await app.gqlClient
+        .query<Query, QuerySearchArgs>(search, {
           page: SearchPage.Food,
           column: SearchItem.Item,
           searchTerm: 'f',
-        },
-      });
-      expect(res.data?.search).toBeNull();
+        })
+        .toPromise();
+      expect(res?.data?.search).toBeNull();
     });
   });
 
@@ -98,23 +97,20 @@ describe('search resolvers', () => {
   `('should return $case matches', async ({ page, column, searchTerm, results }) => {
     expect.assertions(2);
 
-    const res = await app.authGqlClient.query<Query, QuerySearchArgs>({
-      query: search,
-      variables: {
-        page,
-        column,
-        searchTerm,
-      },
+    const res = await runQuery<QuerySearchArgs>(app, search, {
+      page,
+      column,
+      searchTerm,
     });
 
-    expect(res.data.search).toStrictEqual(
+    expect(res?.search).toStrictEqual(
       expect.objectContaining({
         error: null,
         searchTerm,
         list: expect.arrayContaining(results),
       }),
     );
-    expect(res.data.search?.list).toHaveLength(results.length);
+    expect(res?.search?.list).toHaveLength(results.length);
   });
 
   it.each`
@@ -124,19 +120,20 @@ describe('search resolvers', () => {
     'should give next category matches $case',
     async ({ page, column, searchTerm, nextCategory }) => {
       expect.assertions(2);
-      const res = await app.authGqlClient.query<Query, QuerySearchArgs>({
-        query: search,
-        variables: { page, column, searchTerm },
+      const res = await runQuery<QuerySearchArgs>(app, search, {
+        page,
+        column,
+        searchTerm,
       });
 
-      expect(res.data.search).toStrictEqual(
+      expect(res?.search).toStrictEqual(
         expect.objectContaining({
           error: null,
           nextCategory: expect.arrayContaining(nextCategory),
           nextField: 'category',
         }),
       );
-      expect(res.data.search?.nextCategory).toHaveLength(nextCategory.length);
+      expect(res?.search?.nextCategory).toHaveLength(nextCategory.length);
     },
   );
 
@@ -147,12 +144,9 @@ describe('search resolvers', () => {
     'should not give next category matches for the $page page',
     async ({ page, column, searchTerm }) => {
       expect.assertions(1);
-      const res = await app.authGqlClient.query<Query, QuerySearchArgs>({
-        query: search,
-        variables: { page, column, searchTerm },
-      });
+      const res = await runQuery<QuerySearchArgs>(app, search, { page, column, searchTerm });
 
-      expect(res.data.search).toStrictEqual(
+      expect(res?.search).toStrictEqual(
         expect.objectContaining({
           error: null,
           nextCategory: ['Housing'],
@@ -164,12 +158,14 @@ describe('search resolvers', () => {
 
   it('should limit the number of results', async () => {
     expect.assertions(1);
-    const res = await app.authGqlClient.query<Query, QuerySearchArgs>({
-      query: search,
-      variables: { page: SearchPage.Food, column: SearchItem.Item, searchTerm: 'a', numResults: 2 },
+    const res = await runQuery<QuerySearchArgs>(app, search, {
+      page: SearchPage.Food,
+      column: SearchItem.Item,
+      searchTerm: 'a',
+      numResults: 2,
     });
 
-    expect(res.data.search?.list).toHaveLength(2);
+    expect(res?.search?.list).toHaveLength(2);
   });
 
   describe('receiptItem', () => {
@@ -182,26 +178,18 @@ describe('search resolvers', () => {
     describe('when not logged in', () => {
       it('should return null', async () => {
         expect.assertions(1);
-        const res = await app.gqlClient.query<Query, QueryReceiptItemArgs>({
-          query: receiptItem,
-          variables: {
-            item: 'foo',
-          },
-        });
-        expect(res.data?.receiptItem).toBeNull();
+        const res = await runQuery<QueryReceiptItemArgs>(app, receiptItem, { item: 'foo' });
+        expect(res?.receiptItem).toBeNull();
       });
     });
 
     it('should give the best matching item', async () => {
       expect.assertions(1);
-      const res = await app.authGqlClient.query<Query, QueryReceiptItemArgs>({
-        query: receiptItem,
-        variables: {
-          item: 'ch',
-        },
+      const res = await runQuery<QueryReceiptItemArgs>(app, receiptItem, {
+        item: 'ch',
       });
 
-      expect(res.data?.receiptItem).toBe('Chocolate fondue');
+      expect(res?.receiptItem).toBe('Chocolate fondue');
     });
 
     it('should only return item information relating to receipt pages', async () => {
@@ -213,28 +201,21 @@ describe('search resolvers', () => {
       }, ${'2020-04-20'}, ${'Road tax'}, ${'Tax'}, ${15100}, ${'DVLA'})
       `);
 
-      await app.authGqlClient.clearStore();
-      const res = await app.authGqlClient.query<Query, QueryReceiptItemArgs>({
-        query: receiptItem,
-        variables: {
-          item: 'roa',
-        },
+      const res = await runQuery<QueryReceiptItemArgs>(app, receiptItem, {
+        item: 'roa',
       });
 
-      expect(res.data?.receiptItem).not.toBe('Road tax');
+      expect(res?.receiptItem).not.toBe('Road tax');
     });
 
     describe('when no item matches', () => {
       it('should return null', async () => {
         expect.assertions(1);
-        const res = await app.authGqlClient.query<Query, QueryReceiptItemArgs>({
-          query: receiptItem,
-          variables: {
-            item: 'ch1234',
-          },
+        const res = await runQuery<QueryReceiptItemArgs>(app, receiptItem, {
+          item: 'ch1234',
         });
 
-        expect(res.data?.receiptItem).toBeNull();
+        expect(res?.receiptItem).toBeNull();
       });
     });
   });
@@ -253,27 +234,21 @@ describe('search resolvers', () => {
     describe('when not logged in', () => {
       it('should return null', async () => {
         expect.assertions(1);
-        const res = await app.gqlClient.query<Query, QueryReceiptItemsArgs>({
-          query: receiptItems,
-          variables: {
-            items: ['foo'],
-          },
-        });
-        expect(res.data?.receiptItems).toBeNull();
+        const res = await app.gqlClient
+          .query<Query, QueryReceiptItemsArgs>(receiptItems, { items: ['foo'] })
+          .toPromise();
+        expect(res?.data?.receiptItems).toBeNull();
       });
     });
 
     it('should return the category information for the list of items', async () => {
       expect.assertions(2);
-      const res = await app.authGqlClient.query<Query, QueryReceiptItemsArgs>({
-        query: receiptItems,
-        variables: {
-          items: ['Chocolate fondue', 'Apples', 'Something which should be ignored'],
-        },
+      const res = await runQuery<QueryReceiptItemsArgs>(app, receiptItems, {
+        items: ['Chocolate fondue', 'Apples', 'Something which should be ignored'],
       });
 
-      expect(res.data?.receiptItems).toHaveLength(2);
-      expect(res.data?.receiptItems).toStrictEqual(
+      expect(res?.receiptItems).toHaveLength(2);
+      expect(res?.receiptItems).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({
             item: 'Chocolate fondue',
@@ -298,15 +273,11 @@ describe('search resolvers', () => {
       }, ${'2020-04-20'}, ${'Apple'}, ${'Subscriptions'}, ${123}, ${'Some shop'})
       `);
 
-      await app.authGqlClient.clearStore();
-      const res = await app.authGqlClient.query<Query, QueryReceiptItemsArgs>({
-        query: receiptItems,
-        variables: {
-          items: ['Apple'],
-        },
+      const res = await runQuery<QueryReceiptItemsArgs>(app, receiptItems, {
+        items: ['Apple'],
       });
 
-      expect(res.data?.receiptItems).not.toStrictEqual(
+      expect(res?.receiptItems).not.toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({
             item: 'Apple',

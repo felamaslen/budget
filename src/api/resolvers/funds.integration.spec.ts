@@ -1,6 +1,5 @@
 import { addHours, getUnixTime } from 'date-fns';
 import gql from 'graphql-tag';
-import moize from 'moize';
 import sinon from 'sinon';
 import { sql } from 'slonik';
 import yahooFinance from 'yahoo-finance2';
@@ -9,7 +8,7 @@ import { seedData } from '~api/__tests__/fixtures';
 import config from '~api/config';
 import { getPool } from '~api/modules/db';
 import * as pubsub from '~api/modules/graphql/pubsub';
-import { App, getTestApp } from '~api/test-utils/create-server';
+import { App, getTestApp, runMutation, runQuery } from '~api/test-utils';
 import {
   CrudResponseCreate,
   CrudResponseDelete,
@@ -20,12 +19,9 @@ import {
   FundInput,
   FundPrices,
   Maybe,
-  Mutation,
   MutationUpdateCashAllocationTargetArgs,
   MutationUpdateFundAllocationTargetsArgs,
   MutationDeleteFundArgs,
-  Query,
-  QueryFundHistoryArgs,
   QueryFundHistoryIndividualArgs,
   StockSplit,
   Transaction,
@@ -36,7 +32,11 @@ import {
   StockValueResponse,
   NetWorthCashTotal,
 } from '~api/types';
-import { FundSubscription } from '~client/types/gql';
+import {
+  FundSubscription,
+  MutationCreateFundArgs,
+  MutationUpdateFundArgs,
+} from '~client/types/gql';
 import type { Create, NativeDate, RawDate } from '~shared/types';
 
 describe('funds resolver', () => {
@@ -115,17 +115,11 @@ describe('funds resolver', () => {
     `;
 
     const setup = async (): Promise<Maybe<CrudResponseCreate>> => {
-      const res = await app.authGqlClient.mutate<
-        Mutation,
-        { fakeId: number; input: RawDateFundInput }
-      >({
-        mutation,
-        variables: {
-          fakeId: 0,
-          input: fundInput,
-        },
+      const res = await runMutation<MutationCreateFundArgs>(app, mutation, {
+        fakeId: 0,
+        input: fundInput,
       });
-      return res.data?.createFund ?? null;
+      return res?.createFund ?? null;
     };
 
     it('should respond with a null error', async () => {
@@ -251,16 +245,10 @@ describe('funds resolver', () => {
 
     describe('setter', () => {
       const setup = async (): Promise<Maybe<CrudResponseUpdate>> => {
-        const res = await app.authGqlClient.mutate<
-          Mutation,
-          MutationUpdateCashAllocationTargetArgs
-        >({
-          mutation,
-          variables: {
-            target: 4500000,
-          },
+        const res = await runMutation<MutationUpdateCashAllocationTargetArgs>(app, mutation, {
+          target: 4500000,
         });
-        return res.data?.updateCashAllocationTarget ?? null;
+        return res?.updateCashAllocationTarget ?? null;
       };
 
       it('should set the cash target in the database', async () => {
@@ -297,21 +285,17 @@ describe('funds resolver', () => {
       it('should reply with the given cash target for the current user', async () => {
         expect.assertions(2);
 
-        const res0 = await app.authGqlClient.query<Query>({ query });
+        const res0 = await runQuery(app, query);
 
-        expect(res0.data.cashAllocationTarget).toBe(0);
+        expect(res0?.cashAllocationTarget).toBe(0);
 
-        await app.authGqlClient.mutate<Mutation, MutationUpdateCashAllocationTargetArgs>({
-          mutation,
-          variables: {
-            target: 1500000,
-          },
+        await runMutation<MutationUpdateCashAllocationTargetArgs>(app, mutation, {
+          target: 1500000,
         });
 
-        await app.authGqlClient.clearStore();
-        const res1 = await app.authGqlClient.query<Query>({ query });
+        const res1 = await runQuery(app, query);
 
-        expect(res1.data.cashAllocationTarget).toBe(1500000);
+        expect(res1?.cashAllocationTarget).toBe(1500000);
       });
     });
   });
@@ -355,18 +339,13 @@ describe('funds resolver', () => {
         return idRows.map((row) => row.id);
       });
 
-      const res = await app.authGqlClient.mutate<Mutation, MutationUpdateFundAllocationTargetsArgs>(
-        {
-          mutation,
-          variables: {
-            deltas: [
-              { id: id2, allocationTarget: secondAllocation },
-              { id: id3, allocationTarget: thirdAllocation },
-            ],
-          },
-        },
-      );
-      return { id2, id3, res: res.data?.updateFundAllocationTargets ?? null };
+      const res = await runMutation<MutationUpdateFundAllocationTargetsArgs>(app, mutation, {
+        deltas: [
+          { id: id2, allocationTarget: secondAllocation },
+          { id: id3, allocationTarget: thirdAllocation },
+        ],
+      });
+      return { id2, id3, res: res?.updateFundAllocationTargets ?? null };
     };
 
     describe.each`
@@ -482,8 +461,9 @@ describe('funds resolver', () => {
   const createFunds = async (fundInputs: RawDateFundInput[]): Promise<number[]> => {
     const res = await Promise.all(
       fundInputs.map((input) =>
-        app.authGqlClient.mutate<Mutation, { fakeId: number; input: RawDateFundInput }>({
-          mutation: gql`
+        runMutation<MutationCreateFundArgs>(
+          app,
+          gql`
             mutation CreateFund($fakeId: Int!, $input: FundInput!) {
               createFund(fakeId: $fakeId, input: $input) {
                 id
@@ -491,14 +471,14 @@ describe('funds resolver', () => {
               }
             }
           `,
-          variables: {
+          {
             fakeId: 0,
             input,
           },
-        }),
+        ),
       ),
     );
-    return res.map((r) => r.data?.createFund?.id as number);
+    return res.map((r) => r?.createFund?.id as number);
   };
 
   describe('readFunds', () => {
@@ -535,12 +515,8 @@ describe('funds resolver', () => {
     }> => {
       const [id] = await createFunds([fund]);
 
-      await app.authGqlClient.clearStore();
-      const res = await app.authGqlClient.query<Query>({
-        query,
-      });
-
-      return { res: res.data.readFunds?.items ?? null, id };
+      const res = await runQuery(app, query);
+      return { res: res?.readFunds?.items ?? null, id };
     };
 
     it('should get a list of funds with their transactions and splits', async () => {
@@ -665,10 +641,7 @@ describe('funds resolver', () => {
 
       const clock = sinon.useFakeTimers(new Date('2020-04-26T13:20:03Z'));
 
-      await app.authGqlClient.clearStore();
-      const res = await app.authGqlClient.query<Query, QueryFundHistoryArgs>({
-        query,
-      });
+      const res = await runQuery(app, query);
 
       clock.restore();
 
@@ -681,7 +654,7 @@ describe('funds resolver', () => {
 
       return {
         fundId: fundId as number,
-        res: res.data.fundHistory ?? null,
+        res: res?.fundHistory ?? null,
       };
     };
 
@@ -763,14 +736,11 @@ describe('funds resolver', () => {
 
       const clock = sinon.useFakeTimers(new Date('2018-04-20'));
 
-      await app.authGqlClient.clearStore();
-      const res = await app.authGqlClient.query<Query, QueryFundHistoryArgs>({
-        query,
-      });
+      const res = await runQuery(app, query);
 
       clock.restore();
 
-      expect(res?.data.fundHistory?.overviewCost).toStrictEqual([
+      expect(res?.fundHistory?.overviewCost).toStrictEqual([
         /* Mar-16 */ 0,
         /* Apr-16 */ 0,
         /* May-16 */ 0,
@@ -807,10 +777,7 @@ describe('funds resolver', () => {
 
       const clock = sinon.useFakeTimers(new Date('2018-04-20'));
 
-      await app.authGqlClient.clearStore();
-      const resPrevious = await app.authGqlClient.query<Query, QueryFundHistoryArgs>({
-        query,
-      });
+      const resPrevious = await runQuery(app, query);
 
       await getPool().connect(async (db) => {
         const fundIdRows = await db.query<{ id: number }>(sql`
@@ -825,17 +792,12 @@ describe('funds resolver', () => {
         `);
       });
 
-      await app.authGqlClient.clearStore();
-      const res = await app.authGqlClient.query<Query, QueryFundHistoryArgs>({
-        query,
-      });
+      const res = await runQuery(app, query);
 
       clock.restore();
 
-      expect(res?.data.fundHistory?.overviewCost).toStrictEqual(
-        resPrevious?.data.fundHistory?.overviewCost,
-      );
-      expect(res?.data.fundHistory?.overviewCost).toMatchInlineSnapshot(`
+      expect(res?.fundHistory?.overviewCost).toStrictEqual(resPrevious?.fundHistory?.overviewCost);
+      expect(res?.fundHistory?.overviewCost).toMatchInlineSnapshot(`
         Array [
           0,
           0,
@@ -926,11 +888,8 @@ describe('funds resolver', () => {
         `);
       });
 
-      const res = await app.authGqlClient.query<Query, QueryFundHistoryIndividualArgs>({
-        query,
-        variables: { id: fundId },
-      });
-      return res.data.fundHistoryIndividual ?? null;
+      const res = await runQuery<QueryFundHistoryIndividualArgs>(app, query, { id: fundId });
+      return res?.fundHistoryIndividual ?? null;
     };
 
     it('should return the full list of prices with UNIX timestamps', async () => {
@@ -964,21 +923,15 @@ describe('funds resolver', () => {
       }
     `;
 
-    const setup = moize.promise(
-      async (): Promise<Maybe<NativeDate<StockPricesResponse, 'refreshTime'>>> => {
-        await seedData(app.uid);
-        const clock = sinon.useFakeTimers(new Date('2020-04-26T13:20:03Z'));
-        await app.authGqlClient.clearStore();
-        const res = await app.authGqlClient.query<Query, QueryStockPricesArgs>({
-          query,
-          variables: {
-            codes: ['FCSS.L', 'SMT.L'],
-          },
-        });
-        clock.restore();
-        return res.data?.stockPrices ?? null;
-      },
-    );
+    const setup = async (): Promise<Maybe<NativeDate<StockPricesResponse, 'refreshTime'>>> => {
+      await seedData(app.uid);
+      const clock = sinon.useFakeTimers(new Date('2020-04-26T13:20:03Z'));
+      const res = await runQuery<QueryStockPricesArgs>(app, query, {
+        codes: ['FCSS.L', 'SMT.L'],
+      });
+      clock.restore();
+      return res?.stockPrices ?? null;
+    };
 
     it('should return the latest prices', async () => {
       expect.assertions(2);
@@ -1012,18 +965,13 @@ describe('funds resolver', () => {
       }
     `;
 
-    const setup = moize.promise(
-      async (): Promise<Maybe<NativeDate<StockValueResponse, 'refreshTime'>>> => {
-        await seedData(app.uid);
-        const clock = sinon.useFakeTimers(new Date('2020-04-26T13:20:03Z'));
-        await app.authGqlClient.clearStore();
-        const res = await app.authGqlClient.query<Query>({
-          query,
-        });
-        clock.restore();
-        return res.data?.stockValue ?? null;
-      },
-    );
+    const setup = async (): Promise<Maybe<NativeDate<StockValueResponse, 'refreshTime'>>> => {
+      await seedData(app.uid);
+      const clock = sinon.useFakeTimers(new Date('2020-04-26T13:20:03Z'));
+      const res = await runQuery(app, query);
+      clock.restore();
+      return res?.stockValue ?? null;
+    };
 
     it('should return the latest value (including pension)', async () => {
       expect.assertions(2);
@@ -1105,19 +1053,14 @@ describe('funds resolver', () => {
       const [fundId] = id ? [id] : await createFunds([data]);
 
       publishSpy.mockClear();
-      const res = await app.authGqlClient.mutate<Mutation, { id: number; input: RawDateFundInput }>(
-        {
-          mutation,
-          variables: {
-            id: fundId,
-            input: data,
-          },
-        },
-      );
+      const res = await runMutation<MutationUpdateFundArgs>(app, mutation, {
+        id: fundId,
+        input: data,
+      });
 
       return {
         id: fundId,
-        res: res.data?.updateFund ?? null,
+        res: res?.updateFund ?? null,
       };
     };
 
@@ -1289,12 +1232,9 @@ describe('funds resolver', () => {
       const [id] = await createFunds([fundInput]);
 
       publishSpy.mockClear();
-      const res = await app.authGqlClient.mutate<Mutation, MutationDeleteFundArgs>({
-        mutation,
-        variables: { id },
-      });
+      const res = await runMutation<MutationDeleteFundArgs>(app, mutation, { id });
 
-      return { id, res: res.data?.deleteFund ?? null };
+      return { id, res: res?.deleteFund ?? null };
     };
 
     it('should respond with a null error', async () => {

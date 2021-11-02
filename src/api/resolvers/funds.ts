@@ -47,12 +47,8 @@ export const fundsResolvers: Resolvers = {
     fundPricesUpdated: {
       subscribe: (): AsyncIterator<void> => pubsub.asyncIterator(PubSubTopic.FundPricesUpdated),
       resolve: withSlonik(
-        async (db, _: unknown, args: SubscriptionFundPricesUpdatedArgs, context: Context) => {
-          if (!context.user?.uid) {
-            return null;
-          }
-          return readFundHistory(db, context.user.uid, args);
-        },
+        async (db, _: unknown, args: SubscriptionFundPricesUpdatedArgs, context: Context) =>
+          context.user?.uid ? readFundHistory(db, context.user.uid, args) : null,
       ),
     },
 
