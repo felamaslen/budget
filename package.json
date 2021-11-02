@@ -30,7 +30,7 @@
     "test": "yarn build:api:ssr && yarn test:api:unit && yarn test:api:integration && yarn test:client",
     "visual:check-snapshots": "docker-compose up --build --exit-code-from visual visual",
     "visual:update-snapshots": "docker-compose up --build --exit-code-from visual_update_snapshots visual_update_snapshots",
-    "coverage": "yarn ts-node-script ./scripts/merge-coverage.ts --report ./coverage/api/unit/coverage-final.json --report ./coverage/api/integration/coverage-final.json --report ./coverage/client/coverage-final.json",
+    "coverage": "yarn ts-node-script ./scripts/merge-coverage.ts --report ./coverage/api/unit/coverage-final.json --report ./coverage/api/integration/coverage-final.json --report ./coverage/client/coverage-final.json ./coverage/visual/coverage-final.json",
     "lint": "eslint webpack.*config.js \"src/**/*.ts\" \"src/**/*.tsx\"",
     "prettier": "prettier -c src",
     "format": "prettier -w src",
