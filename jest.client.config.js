@@ -17,6 +17,7 @@ module.exports = {
   coverageDirectory: 'coverage/client',
   collectCoverageFrom: [
     'src/client/**/*.{ts,tsx}',
+    '!src/client/**/*.spec.{ts,tsx}',
     '!node_modules/**',
     '!src/client/test-data/**',
     '!src/client/test-utils/**',

@@ -1,6 +1,8 @@
 import React from 'react';
 import numericHash from 'string-hash';
 
+import { testState } from '../__tests__/fixtures';
+
 import { PlanningContext } from '../context';
 import type { AccountValue } from '../month-end';
 import type {
@@ -17,7 +19,6 @@ import type { State as ReduxState } from '~client/reducers';
 import { testState as testReduxState } from '~client/test-data/state';
 import { renderHookWithStore } from '~client/test-utils';
 import { NetWorthEntryNative } from '~client/types';
-import { StandardRates, StandardThresholds } from '~shared/planning';
 
 describe(usePlanningTableData.name, () => {
   const now = new Date('2020-09-10T15:03:11+0100');
@@ -56,144 +57,6 @@ describe(usePlanningTableData.name, () => {
     },
   };
 
-  const testState: State = {
-    year: 2020,
-    parameters: {
-      rates: [
-        { name: StandardRates.IncomeTaxBasicRate, value: 0.2 },
-        { name: StandardRates.IncomeTaxHigherRate, value: 0.4 },
-        { name: StandardRates.IncomeTaxAdditionalRate, value: 0.45 },
-        { name: StandardRates.NILowerRate, value: 0.12 },
-        { name: StandardRates.NIHigherRate, value: 0.02 },
-        { name: StandardRates.StudentLoanRate, value: 0.09 },
-      ],
-      thresholds: [
-        { name: StandardThresholds.IncomeTaxBasicAllowance, value: 3750000 },
-        { name: StandardThresholds.IncomeTaxAdditionalThreshold, value: 15000000 },
-        { name: StandardThresholds.NIPT, value: 79700 },
-        { name: StandardThresholds.NIUEL, value: 418900 },
-        { name: StandardThresholds.StudentLoanThreshold, value: 2729500 },
-      ],
-    },
-    accounts: [
-      {
-        id: numericHash('account-savings'),
-        account: 'Savings',
-        netWorthSubcategoryId: numericHash('real-locked-cash-subcategory-id'),
-        values: [],
-        income: [],
-        creditCards: [],
-        computedValues: [
-          {
-            key: 'transfer-2020-9-savings',
-            month: 9,
-            name: 'Checking transfer',
-            value: 120500,
-            isVerified: false,
-            isTransfer: true,
-          },
-        ],
-        computedStartValue: 966720,
-      },
-      {
-        id: numericHash('account-checking'),
-        account: 'Checking',
-        netWorthSubcategoryId: numericHash('real-bank-subcategory-id'),
-        values: [
-          {
-            id: numericHash('value-0'),
-            month: 9,
-            name: 'Transfer to savings',
-            value: -120500,
-            transferToAccountId: numericHash('account-savings'),
-          },
-          {
-            id: numericHash('value-1'),
-            month: 1,
-            name: 'Car payment',
-            value: -56293,
-          },
-          {
-            id: numericHash('value-2'),
-            month: 3,
-            name: 'Transfer to savings',
-            value: -150000,
-            transferToAccountId: numericHash('account-savings'),
-          },
-          {
-            id: numericHash('value-3'),
-            month: 7,
-            name: 'Pension (SIPP)',
-            value: -50000,
-          },
-          {
-            id: numericHash('value-4'),
-            month: 7,
-            name: 'My zero value',
-            value: 0,
-          },
-        ],
-        income: [
-          {
-            salary: 8500000,
-            taxCode: '818L',
-            startDate: '2020-08-11',
-            endDate: '2022-03-31',
-            pensionContrib: 0.03,
-            studentLoan: true,
-          },
-        ],
-        creditCards: [
-          {
-            netWorthSubcategoryId: numericHash('real-credit-card-subcategory-id'),
-            payments: [
-              { id: numericHash('credit-card-payment-01'), month: 5, value: -15628 },
-              { id: numericHash('credit-card-payment-02'), month: 7, value: -14892 },
-              { id: numericHash('credit-card-payment-03'), month: 8, value: -39923 },
-            ],
-            predictedPayment: -20156,
-          },
-        ],
-        computedValues: [
-          {
-            key: `salary-2020-07-30`,
-            month: 6,
-            name: 'Salary',
-            value: 500000,
-            isVerified: true,
-            isTransfer: false,
-          },
-          {
-            key: `salary-2020-09-30`,
-            month: 8,
-            name: 'Salary',
-            value: 550000,
-            isVerified: true,
-            isTransfer: false,
-          },
-          {
-            key: `deduction-2020-09-30-Tax`,
-            month: 8,
-            name: 'Tax',
-            value: -105603,
-            isVerified: true,
-            isTransfer: false,
-          },
-          {
-            key: `salary-2020-12-predicted`,
-            month: 11,
-            name: 'Salary',
-            value: 708333,
-            isVerified: false,
-            isTransfer: false,
-          },
-        ],
-        computedStartValue: 195562,
-      },
-    ],
-    taxReliefFromPreviousYear: 48872,
-  };
-
   const testContext: PlanningContextState = {
     localYear: 2020,
     state: testState,
@@ -230,14 +93,14 @@ describe(usePlanningTableData.name, () => {
     expect(result.current[0].numRows).toMatchInlineSnapshot(`3`); // April
     expect(result.current[1].numRows).toMatchInlineSnapshot(`3`); // May
     expect(result.current[2].numRows).toMatchInlineSnapshot(`3`); // June
-    expect(result.current[3].numRows).toMatchInlineSnapshot(`3`); // July
+    expect(result.current[3].numRows).toMatchInlineSnapshot(`4`); // July
     expect(result.current[4].numRows).toMatchInlineSnapshot(`4`); // August
-    expect(result.current[5].numRows).toMatchInlineSnapshot(`4`); // September
-    expect(result.current[6].numRows).toMatchInlineSnapshot(`3`); // October
+    expect(result.current[5].numRows).toMatchInlineSnapshot(`5`); // September
+    expect(result.current[6].numRows).toMatchInlineSnapshot(`4`); // October
     expect(result.current[7].numRows).toMatchInlineSnapshot(`3`); // November
-    expect(result.current[8].numRows).toMatchInlineSnapshot(`3`); // December
+    expect(result.current[8].numRows).toMatchInlineSnapshot(`4`); // December
     expect(result.current[9].numRows).toMatchInlineSnapshot(`3`); // January
-    expect(result.current[10].numRows).toMatchInlineSnapshot(`3`); // March
+    expect(result.current[10].numRows).toMatchInlineSnapshot(`4`); // March
     expect(result.current[11].numRows).toMatchInlineSnapshot(`3`); // April
   });
 
@@ -366,7 +229,7 @@ describe(usePlanningTableData.name, () => {
           }),
           expect.objectContaining<AccountTransaction>({
             key: `deduction-2020-09-30-Tax`,
-            name: 'Tax',
+            name: 'Income tax',
             computedValue: -105603,
             isComputed: true,
             isVerified: true,
@@ -598,7 +461,7 @@ describe(usePlanningTableData.name, () => {
         expect(result.current[5].accounts[1].endValue).toStrictEqual<AccountValue>({
           key: `${numericHash('account-checking')}_end`,
           name: 'Checking',
-          computedValue: 196650 - 100 * 5 + 550000 - 105603 - 39923,
+          computedValue: 196650 - 100 * 5 + 550000 - 105603 - 39923 - 15623,
           isComputed: true,
           isVerified: false,
         });
