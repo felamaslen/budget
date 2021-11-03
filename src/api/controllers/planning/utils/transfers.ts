@@ -1,9 +1,9 @@
-import { isAfter } from 'date-fns';
+import { isAfter, startOfMonth } from 'date-fns';
 
 import { CalculationRows } from '../types';
 
 import type { PlanningComputedValue } from '~api/types';
-import { evaluatePlanningValue } from '~shared/planning';
+import { evaluatePlanningValue, getDateFromYearAndMonth } from '~shared/planning';
 
 export type IntermediateTransfersReduction = {
   year: number;
@@ -25,7 +25,10 @@ export function reduceTransfers(
       month: row.value_month,
       name: `${accountsWithIncome[row.id]?.[0].account ?? 'Unknown'} transfer`,
       value: -(evaluatePlanningValue(row.value_value, row.value_formula) ?? 0),
-      isVerified: !isAfter(new Date(row.value_year, row.value_month), now),
+      isVerified: !isAfter(
+        startOfMonth(getDateFromYearAndMonth(row.value_year, row.value_month)),
+        now,
+      ),
     }));
 }
 
