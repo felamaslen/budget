@@ -10,6 +10,10 @@ node {
       IMAGE_VISUAL = sh(returnStdout: true, script: "make get_image_visual").trim()
 
       COVERAGE_DIRECTORY = "/var/local/codecov/budget/${env.BRANCH_NAME}"
+
+      GIT_REV = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
+      DATE = sh(returnStdout: true, script: "date -u +%s").trim()
+      DB_TEMP_DIR = "/tmp/postgres-test-budget-${GIT_REV}-${DATE}"
     }
 
     stage('Build and push image') {
@@ -22,6 +26,7 @@ node {
     }
 
     sh "mkdir -p ${COVERAGE_DIRECTORY}"
+    sh "mkdir -p ${DB_TEMP_DIR}"
 
     docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
       def dbImage = docker.image('postgres:10-alpine')
@@ -29,7 +34,7 @@ node {
       def budgetImage = docker.image("${IMAGE}")
       def visualImage = docker.image("${IMAGE_VISUAL}")
 
-      dbImage.withRun('-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker') { pg ->
+      dbImage.withRun("-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker -v ${DB_TEMP_DIR}:/var/lib/postgresql") { pg ->
         dbImage.inside("--link ${pg.id}:db") {
           sh 'while ! psql postgres://docker:docker@db/postgres -c "select 1" > /dev/null 2>&1; do sleep 1; done'
 
@@ -69,6 +74,8 @@ node {
         }
       }
     }
+
+    sh "rm -rf ${DB_TEMP_DIR}"
 
     if (env.BRANCH_NAME == "master") {
       stage('Deploy') {
