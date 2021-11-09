@@ -1,5 +1,9 @@
+import { formatISO } from 'date-fns';
 import { DatabaseTransactionConnectionType, sql } from 'slonik';
+
+import { sankeySpecialNames } from '~api/controllers/sankey.constants';
 import { PageListStandard } from '~api/types';
+import { investmentPurchaseCategories } from '~shared/constants';
 
 export type SankeyIncomeRow = {
   item: string;
@@ -18,10 +22,10 @@ export async function selectSankeyIncome(
       SELECT ${sql.join(
         [
           sql`
-        CASE
-          WHEN date_part('month', list_standard.date) <= 3 THEN date_part('year', list_standard.date) - 1
-          ELSE date_part('year', list_standard.date)
-        END AS fin_year`,
+          CASE
+            WHEN date_part('month', list_standard.date) <= 3 THEN date_part('year', list_standard.date) - 1
+            ELSE date_part('year', list_standard.date)
+          END AS fin_year`,
           sql`item`,
           sql`category`,
           sql`value`,
@@ -29,7 +33,14 @@ export async function selectSankeyIncome(
         sql`, `,
       )}
       FROM list_standard
-      WHERE uid = ${uid} AND page = ${PageListStandard.Income}
+      WHERE ${sql.join(
+        [
+          sql`uid = ${uid}`,
+          sql`page = ${PageListStandard.Income}`,
+          sql`item != ANY(${sql.array(sankeySpecialNames, 'text')})`,
+        ],
+        sql` AND `,
+      )}
     )`,
       sql`items_named AS (
       SELECT ${sql.join(
@@ -50,7 +61,7 @@ export async function selectSankeyIncome(
     ],
     sql`, `,
   )}
-  SELECT item_name AS item, is_wages, (SUM(value))::int4 AS weight
+  SELECT item_name AS item, is_wages, (SUM(value) / 100)::int4 AS weight
   FROM items_named
   GROUP BY fin_year, item_name, is_wages
   `);
@@ -67,11 +78,48 @@ export async function selectSankeyDeductions(
   uid: number,
 ): Promise<readonly SankeyIncomeDeductionRow[]> {
   const { rows } = await db.query<SankeyIncomeDeductionRow>(sql`
-  SELECT d.name, SUM(d.value)::int4 AS weight
+  SELECT d.name, (SUM(d.value) / 100)::int4 AS weight
   FROM list_standard l
   INNER JOIN income_deductions d ON d.list_id = l.id
-  WHERE l.uid = ${uid} AND l.page = ${PageListStandard.Income}
+  WHERE ${sql.join(
+    [
+      sql`l.uid = ${uid}`,
+      sql`l.page = ${PageListStandard.Income}`,
+      sql`d.name != ANY(${sql.array(sankeySpecialNames, 'text')})`,
+    ],
+    sql` AND `,
+  )}
   GROUP BY d.name
+  `);
+  return rows;
+}
+
+export type SankeyExpenseRow = {
+  page: PageListStandard;
+  category: string;
+  weight: number;
+};
+
+export async function selectExpenses(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  endOfFinancialYear: Date,
+): Promise<readonly SankeyExpenseRow[]> {
+  const { rows } = await db.query<SankeyExpenseRow>(sql`
+  SELECT l.page, l.category, (SUM(l.value) / 100)::int4 AS weight
+  FROM list_standard l
+  WHERE ${sql.join(
+    [
+      sql`uid = ${uid}`,
+      sql`date < ${formatISO(endOfFinancialYear, { representation: 'date' })}`,
+      sql`page != ${PageListStandard.Income}`,
+      sql`value > 0`,
+      sql`category != ANY(${sql.array(investmentPurchaseCategories, 'text')})`,
+      sql`category != ANY(${sql.array(sankeySpecialNames, 'text')})`,
+    ],
+    sql` AND `,
+  )}
+  GROUP BY l.page, l.category
   `);
   return rows;
 }

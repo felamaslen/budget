@@ -10,7 +10,8 @@ import { useReadSankeyQuery } from '~client/types/gql';
 
 const SankeyBox = styled.div`
   background: ${colors.white};
-  width: ${rem(640)};
+  overflow: auto;
+  width: ${rem(720)};
 `;
 
 export const Sankey: React.FC<RouteComponentProps> = ({ history }) => {
@@ -22,7 +23,8 @@ export const Sankey: React.FC<RouteComponentProps> = ({ history }) => {
       <SankeyBox>
         {data?.sankey ? (
           <Chart
-            height={480}
+            height={600}
+            width={960}
             chartType="Sankey"
             loader={<span>Loading chart</span>}
             data={[

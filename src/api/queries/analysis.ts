@@ -1,7 +1,6 @@
 import { format } from 'date-fns';
 import { sql, DatabaseTransactionConnectionType, ListSqlTokenType } from 'slonik';
 
-import config from '~api/config';
 import {
   AnalysisPage,
   PageListStandard,
@@ -9,6 +8,7 @@ import {
   PeriodCost,
   PeriodCostDeep,
 } from '~api/types';
+import { investmentPurchaseCategories } from '~shared/constants';
 
 const getAnalysisConditions = (
   uid: number,
@@ -23,13 +23,9 @@ const getAnalysisConditions = (
       sql`date >= ${format(startTime, 'yyyy-MM-dd')}`,
       sql`date <= ${format(endTime, 'yyyy-MM-dd')}`,
       sql`list_standard.value > 0`,
-      page === AnalysisPage.General
-        ? sql`category != ALL(${sql.array(
-            config.data.overview.investmentPurchaseCategories,
-            'text',
-          )})`
-        : sql`1=1`,
-    ],
+      page === AnalysisPage.General &&
+        sql`category != ALL(${sql.array(investmentPurchaseCategories, 'text')})`,
+    ].filter(Boolean),
     sql` AND `,
   );
 

@@ -3,8 +3,8 @@ import { sql, DatabaseTransactionConnectionType } from 'slonik';
 import { getMonthRangeUnion } from './date-union';
 import { pageCostCTE, standardListPages } from './list';
 
-import config from '~api/config';
 import { PageListCost, PageListStandard } from '~api/types';
+import { investmentPurchaseCategories } from '~shared/constants';
 
 export async function selectSinglePageListSummary(
   db: DatabaseTransactionConnectionType,
@@ -100,10 +100,7 @@ export async function selectCategorisedListSummary(
         CASE WHEN
           page != ${PageListStandard.Income}
           AND page = ${PageListStandard.General}
-          AND category = ANY(${sql.array(
-            config.data.overview.investmentPurchaseCategories,
-            'text',
-          )})
+          AND category = ANY(${sql.array(investmentPurchaseCategories, 'text')})
         THEN list_deducted.value
         ELSE 0 END
       ), 0)::int4 AS investment_purchases`,

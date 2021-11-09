@@ -1,18 +1,18 @@
 import { compose } from '@typed/compose';
-import { groupBy } from 'lodash';
+import { capitalize, groupBy } from 'lodash';
 import { DatabaseTransactionConnectionType } from 'slonik';
+
+import { Links } from './sankey.constants';
 import {
+  SankeyExpenseRow,
   SankeyIncomeDeductionRow,
   SankeyIncomeRow,
+  selectExpenses,
   selectSankeyDeductions,
   selectSankeyIncome,
 } from '~api/queries/sankey';
-import { SankeyLink, SankeyResponse } from '~api/types';
-
-const enum Links {
-  Budget = 'Budget',
-  Deductions = 'Deductions',
-}
+import { PageListStandard, SankeyLink, SankeyResponse } from '~api/types';
+import { getDateFromYearAndMonth, getFinancialYear, startMonth } from '~shared/planning';
 
 function aggregateSmallValues<T extends { weight: number }>(
   items: T[],
@@ -126,16 +126,58 @@ const withIncomeDeductions =
     ];
   };
 
+const withExpenses =
+  (expenses: readonly SankeyExpenseRow[]) =>
+  (links: SankeyLink[]): SankeyLink[] =>
+    Object.values(PageListStandard).reduce<SankeyLink[]>((prev, page) => {
+      const link = capitalize(page);
+      const filtered = expenses.filter((compare) => compare.page === page);
+      const filteredWeight = filtered.reduce<number>((sum, { weight }) => sum + weight, 0);
+
+      if (!filteredWeight) {
+        return prev;
+      }
+
+      const { explicit, aggregatedWeight } = aggregateSmallValues(filtered);
+
+      return [
+        ...prev,
+        {
+          from: Links.Budget,
+          to: link,
+          weight: filteredWeight,
+        },
+        ...explicit.map<SankeyLink>((row) => ({
+          from: link,
+          to: row.category,
+          weight: row.weight,
+        })),
+        {
+          from: link,
+          to: `Miscellaneous (${page})`,
+          weight: aggregatedWeight,
+        },
+      ];
+    }, links);
+
 export async function getSankeyDiagram(
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<SankeyResponse> {
-  const [income, incomeDeductions] = await Promise.all([
+  const financialYear = getFinancialYear(new Date());
+  const endOfFinancialYear = getDateFromYearAndMonth(financialYear, startMonth);
+
+  const [income, incomeDeductions, expenses] = await Promise.all([
     selectSankeyIncome(db, uid),
     selectSankeyDeductions(db, uid),
+    selectExpenses(db, uid, endOfFinancialYear),
   ]);
 
-  const links = compose(withIncomeDeductions(incomeDeductions), withIncome(income))([]);
+  const links = compose(
+    withExpenses(expenses),
+    withIncomeDeductions(incomeDeductions),
+    withIncome(income),
+  )([]);
 
   return {
     links,
