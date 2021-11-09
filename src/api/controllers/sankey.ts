@@ -7,7 +7,9 @@ import {
   SankeyExpenseRow,
   SankeyIncomeDeductionRow,
   SankeyIncomeRow,
+  SankeyInvestmentsRow,
   selectExpenses,
+  selectInvestments,
   selectSankeyDeductions,
   selectSankeyIncome,
 } from '~api/queries/sankey';
@@ -160,20 +162,41 @@ const withExpenses =
       ];
     }, links);
 
+const withInvestments =
+  (investments: readonly SankeyInvestmentsRow[]) =>
+  (links: SankeyLink[]): SankeyLink[] => {
+    const totalWeight = investments.reduce<number>((sum, { weight }) => sum + weight, 0);
+    return [
+      ...links,
+      {
+        from: Links.Budget,
+        to: Links.Investments,
+        weight: totalWeight,
+      },
+      ...investments.map<SankeyLink>((row) => ({
+        from: Links.Investments,
+        to: row.name,
+        weight: row.weight,
+      })),
+    ];
+  };
+
 export async function getSankeyDiagram(
   db: DatabaseTransactionConnectionType,
   uid: number,
 ): Promise<SankeyResponse> {
   const financialYear = getFinancialYear(new Date());
-  const endOfFinancialYear = getDateFromYearAndMonth(financialYear, startMonth);
+  const endOfFinancialYear = getDateFromYearAndMonth(financialYear + 1, (startMonth + 1) % 12);
 
-  const [income, incomeDeductions, expenses] = await Promise.all([
+  const [income, incomeDeductions, expenses, investments] = await Promise.all([
     selectSankeyIncome(db, uid),
     selectSankeyDeductions(db, uid),
     selectExpenses(db, uid, endOfFinancialYear),
+    selectInvestments(db, uid, endOfFinancialYear),
   ]);
 
   const links = compose(
+    withInvestments(investments),
     withExpenses(expenses),
     withIncomeDeductions(incomeDeductions),
     withIncome(income),

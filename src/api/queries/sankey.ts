@@ -111,7 +111,7 @@ export async function selectExpenses(
   WHERE ${sql.join(
     [
       sql`uid = ${uid}`,
-      sql`date < ${formatISO(endOfFinancialYear, { representation: 'date' })}`,
+      sql`date <= ${formatISO(endOfFinancialYear, { representation: 'date' })}`,
       sql`page != ${PageListStandard.Income}`,
       sql`value > 0`,
       sql`category != ANY(${sql.array(investmentPurchaseCategories, 'text')})`,
@@ -120,6 +120,50 @@ export async function selectExpenses(
     sql` AND `,
   )}
   GROUP BY l.page, l.category
+  `);
+  return rows;
+}
+
+export type SankeyInvestmentsRow = SankeyIncomeDeductionRow;
+
+export async function selectInvestments(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+  endOfFinancialYear: Date,
+): Promise<readonly SankeyInvestmentsRow[]> {
+  const { rows } = await db.query<SankeyInvestmentsRow>(sql`
+  WITH ${sql.join(
+    [
+      sql`stocks AS (
+        SELECT SUM((ft.units * ft.price + ft.fees + ft.taxes) / 100)::int4 AS weight
+        FROM funds f
+        INNER JOIN funds_transactions ft ON ft.fund_id = f.id
+        WHERE ${sql.join(
+          [
+            sql`f.uid = ${uid}`,
+            sql`ft.date <= ${formatISO(endOfFinancialYear, { representation: 'date' })}`,
+          ],
+          sql` AND `,
+        )}
+      )`,
+      sql`investment_purchases AS (
+        SELECT (SUM(l.value) / 100)::int4 AS weight
+        FROM list_standard l
+        WHERE ${sql.join(
+          [
+            sql`uid = ${uid}`,
+            sql`date <= ${formatISO(endOfFinancialYear, { representation: 'date' })}`,
+            sql`value > 0`,
+            sql`category = ANY(${sql.array(investmentPurchaseCategories, 'text')})`,
+          ],
+          sql` AND `,
+        )}
+      )`,
+    ],
+    sql`, `,
+  )}
+  SELECT ${'Stocks'} AS name, weight FROM stocks
+  UNION SELECT ${'Investment purchases'} AS name, weight FROM investment_purchases
   `);
   return rows;
 }
