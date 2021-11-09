@@ -140,6 +140,17 @@ export type ExchangeRatesResponse = {
   rates?: Maybe<Array<ExchangeRate>>;
 };
 
+export type FxValue = {
+  __typename?: 'FXValue';
+  currency: Scalars['String'];
+  value: Scalars['Float'];
+};
+
+export type FxValueInput = {
+  currency: Scalars['String'];
+  value: Scalars['Float'];
+};
+
 export type Fund = {
   __typename?: 'Fund';
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
@@ -215,17 +226,6 @@ export type FundValueIndividual = {
   __typename?: 'FundValueIndividual';
   date: Scalars['Int'];
   price: Scalars['NonNegativeFloat'];
-};
-
-export type FxValue = {
-  __typename?: 'FXValue';
-  currency: Scalars['String'];
-  value: Scalars['Float'];
-};
-
-export type FxValueInput = {
-  currency: Scalars['String'];
-  value: Scalars['Float'];
 };
 
 export type Income = {
@@ -659,16 +659,16 @@ export type NetWorthLoan = {
   values: Array<NetWorthLoanValue>;
 };
 
-export type NetWorthLoansResponse = {
-  __typename?: 'NetWorthLoansResponse';
-  error?: Maybe<Scalars['String']>;
-  loans?: Maybe<Array<NetWorthLoan>>;
-};
-
 export type NetWorthLoanValue = {
   __typename?: 'NetWorthLoanValue';
   date: Scalars['Date'];
   value: LoanValue;
+};
+
+export type NetWorthLoansResponse = {
+  __typename?: 'NetWorthLoansResponse';
+  error?: Maybe<Scalars['String']>;
+  loans?: Maybe<Array<NetWorthLoan>>;
 };
 
 export type NetWorthSubcategory = {
@@ -937,6 +937,7 @@ export type Query = {
   readNetWorthSubcategories?: Maybe<Array<NetWorthSubcategory>>;
   receiptItem?: Maybe<Scalars['String']>;
   receiptItems?: Maybe<Array<ReceiptCategory>>;
+  sankey?: Maybe<SankeyResponse>;
   search?: Maybe<SearchResult>;
   stockPrices?: Maybe<StockPricesResponse>;
   stockValue?: Maybe<StockValueResponse>;
@@ -1071,6 +1072,18 @@ export enum ReceiptPage {
   General = 'general',
   Social = 'social'
 }
+
+export type SankeyLink = {
+  __typename?: 'SankeyLink';
+  from: Scalars['String'];
+  to: Scalars['String'];
+  weight: Scalars['NonNegativeInt'];
+};
+
+export type SankeyResponse = {
+  __typename?: 'SankeyResponse';
+  links: Array<SankeyLink>;
+};
 
 export enum SearchItem {
   Category = 'category',
@@ -1937,6 +1950,20 @@ export type OverviewOldQuery = (
   & { overviewOld?: Maybe<(
     { __typename?: 'OverviewOld' }
     & Pick<OverviewOld, 'startDate' | 'stocks' | 'investmentPurchases' | 'pension' | 'cashLiquid' | 'cashOther' | 'investments' | 'illiquidEquity' | 'assets' | 'liabilities' | 'options' | 'netWorth' | 'income' | 'spending'>
+  )> }
+);
+
+export type ReadSankeyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ReadSankeyQuery = (
+  { __typename?: 'Query' }
+  & { sankey?: Maybe<(
+    { __typename?: 'SankeyResponse' }
+    & { links: Array<(
+      { __typename?: 'SankeyLink' }
+      & Pick<SankeyLink, 'from' | 'to' | 'weight'>
+    )> }
   )> }
 );
 
@@ -2990,6 +3017,21 @@ export const OverviewOldDocument = gql`
 
 export function useOverviewOldQuery(options: Omit<Urql.UseQueryArgs<OverviewOldQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<OverviewOldQuery>({ query: OverviewOldDocument, ...options });
+};
+export const ReadSankeyDocument = gql`
+    query ReadSankey {
+  sankey {
+    links {
+      from
+      to
+      weight
+    }
+  }
+}
+    `;
+
+export function useReadSankeyQuery(options: Omit<Urql.UseQueryArgs<ReadSankeyQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ReadSankeyQuery>({ query: ReadSankeyDocument, ...options });
 };
 export const SearchSuggestionsDocument = gql`
     query SearchSuggestions($page: SearchPage!, $column: SearchItem!, $searchTerm: String!, $numResults: Int) {
