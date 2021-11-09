@@ -56,3 +56,22 @@ export async function selectSankeyIncome(
   `);
   return rows;
 }
+
+export type SankeyIncomeDeductionRow = {
+  name: string;
+  weight: number;
+};
+
+export async function selectSankeyDeductions(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<readonly SankeyIncomeDeductionRow[]> {
+  const { rows } = await db.query<SankeyIncomeDeductionRow>(sql`
+  SELECT d.name, SUM(d.value)::int4 AS weight
+  FROM list_standard l
+  INNER JOIN income_deductions d ON d.list_id = l.id
+  WHERE l.uid = ${uid} AND l.page = ${PageListStandard.Income}
+  GROUP BY d.name
+  `);
+  return rows;
+}

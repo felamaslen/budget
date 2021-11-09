@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { rem } from 'polished';
 import React from 'react';
 import { Chart } from 'react-google-charts';
 import type { RouteComponentProps } from 'react-router';
@@ -9,6 +10,7 @@ import { useReadSankeyQuery } from '~client/types/gql';
 
 const SankeyBox = styled.div`
   background: ${colors.white};
+  width: ${rem(640)};
 `;
 
 export const Sankey: React.FC<RouteComponentProps> = ({ history }) => {
