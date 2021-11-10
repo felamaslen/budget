@@ -1,7 +1,7 @@
 module.exports = {
   plugins: [
-    'const-enum',
     ['@emotion', { sourceMap: false }],
+    'const-enum',
     '@loadable/babel-plugin',
     [
       'module-resolver',
