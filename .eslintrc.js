@@ -95,6 +95,8 @@ module.exports = {
           'src/api/test-utils/**/*.js',
           'src/api/global.d.ts',
           'src/api/**/__tests__/*',
+          'src/stories/**/*.ts',
+          'src/stories/**/*.tsx',
           'scripts/**/*.ts',
           'types/**/*.ts',
           'webpack.*config.js',
