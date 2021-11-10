@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { replaceAtIndex, removeAtIndex } from 'replace-array';
 
 import { FormFieldCost } from './cost';

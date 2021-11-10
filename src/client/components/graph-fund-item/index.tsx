@@ -1,6 +1,6 @@
 import loadable from '@loadable/component';
 import { flatten } from 'array-flatten';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Loader from 'react-spinners/PuffLoader';
 
 import { graphColor } from './color';

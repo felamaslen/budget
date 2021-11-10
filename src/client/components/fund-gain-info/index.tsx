@@ -1,5 +1,3 @@
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
 import { FC } from 'react';
 
 import * as Styled from './styles';

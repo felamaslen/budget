@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { defaultPadding, getTimeScale } from '~client/components/graph/helpers';
 import { FONT_AXIS_LABEL } from '~client/constants/graph';
 import { getTickSize, formatCurrency } from '~client/modules/format';

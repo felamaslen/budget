@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { makeInlineField } from './shared';
 import { Split } from '~client/hooks';
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
 import { usePlanningContext, usePlanningDispatch } from './context';

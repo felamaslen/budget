@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect } from 'react';
 
 import { LoginForm } from '~client/components/login-form';
 import { useLogin } from '~client/hooks';
@@ -10,7 +10,7 @@ export type Props = {
 export const Anonymous: React.FC<Props> = ({ onLogin }) => {
   const { login, loading, loggedIn, apiKey } = useLogin();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!loading && loggedIn && apiKey) {
       onLogin(apiKey);
     }

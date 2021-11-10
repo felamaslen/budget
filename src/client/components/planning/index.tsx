@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { RouteComponentProps } from 'react-router';
 
 import { PlanningContext, PlanningContextDispatch } from './context';

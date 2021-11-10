@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { Route } from 'react-router-dom';

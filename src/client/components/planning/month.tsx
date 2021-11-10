@@ -1,6 +1,6 @@
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { useTransactionForm } from './form/hooks';
 import { MonthAccount } from './month-account';

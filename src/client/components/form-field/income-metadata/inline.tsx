@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { FormFieldCostInline } from '../cost';
 import { useModalFocus } from '../metadata/hooks';
 import * as StyledCommon from '../metadata/styles';

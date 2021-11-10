@@ -9,7 +9,7 @@ import {
   subscriptionExchange,
 } from '@urql/core';
 import { createClient as createWSClient, Sink } from 'graphql-ws';
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef } from 'react';
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef } from 'react';
 import { Provider } from 'urql';
 
 import { isServerSide } from '~client/modules/ssr';

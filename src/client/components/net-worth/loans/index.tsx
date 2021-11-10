@@ -4,7 +4,7 @@ import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths';
 import endOfMonth from 'date-fns/endOfMonth';
 import getUnixTime from 'date-fns/getUnixTime';
 import isBefore from 'date-fns/isBefore';
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { LoansGraph } from './graph';
 import { LoansSidebar } from './sidebar';

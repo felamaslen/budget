@@ -1,5 +1,4 @@
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 
 import { AppLogo } from '.';
 import { GlobalStylesProvider } from '~client/styled/global';

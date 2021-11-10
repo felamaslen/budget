@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { ButtonCancel, ButtonDelete, H3 } from '~client/styled/shared';
 import * as Styled from '~client/styled/shared/confirm';
 

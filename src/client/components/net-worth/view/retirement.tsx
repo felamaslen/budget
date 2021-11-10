@@ -1,6 +1,5 @@
 import numWords from 'num-words';
 import pluralize from 'pluralize';
-import React from 'react';
 
 import { exponentialRegression } from '~client/modules/data';
 import type { Data } from '~client/types';

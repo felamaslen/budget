@@ -1,5 +1,5 @@
 import { rgba } from 'polished';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { CrudList } from '~client/components/crud-list';

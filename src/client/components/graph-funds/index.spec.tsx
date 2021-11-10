@@ -1,7 +1,6 @@
 import userEvent from '@testing-library/user-event';
 import getUnixTime from 'date-fns/getUnixTime';
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 import numericHash from 'string-hash';
 
 import { GraphFunds, Props } from '.';

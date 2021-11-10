@@ -4,7 +4,7 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import nock from 'nock';
 import fetch from 'node-fetch';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useSubscription } from 'urql';
 
 import { MockServer, myApiKey, pubsub } from './__tests__/utils';

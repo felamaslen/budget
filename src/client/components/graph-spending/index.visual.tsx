@@ -1,6 +1,5 @@
 import { render, RenderResult } from '@testing-library/react';
 import endOfDay from 'date-fns/endOfDay';
-import React from 'react';
 
 import { GraphSpending, Props } from '.';
 import { ResizeContext, TodayProvider } from '~client/hooks';

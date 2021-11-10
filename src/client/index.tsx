@@ -1,5 +1,4 @@
 import { loadableReady } from '@loadable/component';
-import React from 'react';
 import { hydrate, render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { Provider } from 'react-redux';

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { PlanningOverviewRow, useOverviewData } from '../hooks/overview';
 import * as Styled from './styles';
 

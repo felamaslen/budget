@@ -1,5 +1,5 @@
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import React, { RefObject } from 'react';
+import { RefObject } from 'react';
 import { useHover, HookResult, HLPoint, HoverEffect, HoverProps } from './hover';
 import { genPixelCompute } from '~client/components/graph/helpers';
 

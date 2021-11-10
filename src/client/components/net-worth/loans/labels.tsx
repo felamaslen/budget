@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import formatDate from 'date-fns/format';
 import fromUnixTime from 'date-fns/fromUnixTime';
 import { rem } from 'polished';
-import React from 'react';
 
 import { LabelProps } from '~client/components/graph';
 import { useSelfAdjustingLabel } from '~client/components/highlight-point';

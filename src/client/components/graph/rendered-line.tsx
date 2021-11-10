@@ -1,4 +1,4 @@
-import React, { memo, SVGProps, useMemo } from 'react';
+import { memo, SVGProps, useMemo } from 'react';
 
 import { DynamicColorLine } from './dynamic-color-line';
 import {

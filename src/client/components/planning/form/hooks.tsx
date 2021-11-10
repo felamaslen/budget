@@ -1,5 +1,5 @@
 import { evaluateInfix } from 'calculator-lib';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
 import { usePlanningDispatch } from '../context';

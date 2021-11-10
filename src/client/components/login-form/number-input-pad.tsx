@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Digit } from './digit';
 
 import * as Styled from './styles';

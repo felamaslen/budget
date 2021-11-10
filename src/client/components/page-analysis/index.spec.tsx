@@ -1,5 +1,4 @@
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 import { MemoryRouter, Route } from 'react-router';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';

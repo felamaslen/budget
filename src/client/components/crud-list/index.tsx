@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import CrudListItem, { Props as ItemProps } from './item';
 

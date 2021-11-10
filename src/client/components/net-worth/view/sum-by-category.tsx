@@ -1,5 +1,3 @@
-import React from 'react';
-
 import * as Styled from './styles';
 import { formatCurrency } from '~client/modules/format';
 import type { NetWorthAggregateSums } from '~client/types';

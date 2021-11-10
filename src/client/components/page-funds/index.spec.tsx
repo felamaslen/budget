@@ -5,7 +5,6 @@ import addSeconds from 'date-fns/addSeconds';
 import getUnixTime from 'date-fns/getUnixTime';
 import startOfDay from 'date-fns/startOfDay';
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 import { MemoryRouter, Route } from 'react-router';
 import numericHash from 'string-hash';
 

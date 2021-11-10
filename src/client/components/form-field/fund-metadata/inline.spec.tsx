@@ -1,7 +1,6 @@
 import { render, act, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import format from 'date-fns/format';
-import React from 'react';
 import { removeAtIndex } from 'replace-array';
 
 import { FormFieldFundMetadata, PropsComposite } from './inline';

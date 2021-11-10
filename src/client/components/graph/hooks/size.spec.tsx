@@ -1,5 +1,4 @@
 import { render, RenderResult } from '@testing-library/react';
-import React from 'react';
 
 import { useGraphWidth } from './size';
 import { GRAPH_WIDTH } from '~client/constants/graph';

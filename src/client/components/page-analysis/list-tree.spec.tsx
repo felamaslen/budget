@@ -1,8 +1,7 @@
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
-import ListTree, { Props } from './list-tree';
+import { ListTree, Props } from './list-tree';
 import { AnalysisPage } from '~client/types/enum';
 
 describe('<PageAnalysis /> / <ListTree />', () => {

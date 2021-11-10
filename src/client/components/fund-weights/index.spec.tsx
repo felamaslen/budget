@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { FundWeights } from '.';
 import { renderWithStore } from '~client/test-utils';
 

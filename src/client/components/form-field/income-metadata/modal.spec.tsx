@@ -1,6 +1,5 @@
 import { render, RenderResult, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { removeAtIndex } from 'replace-array';
 
 import { FormFieldIncomeDeductions } from './modal';

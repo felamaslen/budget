@@ -1,5 +1,5 @@
 import { rgba } from 'polished';
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import * as Styled from './styles';

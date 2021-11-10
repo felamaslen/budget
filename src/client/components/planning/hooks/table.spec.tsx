@@ -1,4 +1,3 @@
-import React from 'react';
 import numericHash from 'string-hash';
 
 import { testState } from '../__tests__/fixtures';

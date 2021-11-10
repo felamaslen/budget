@@ -1,5 +1,4 @@
 import getUnixTime from 'date-fns/getUnixTime';
-import React from 'react';
 
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';

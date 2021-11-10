@@ -1,5 +1,5 @@
 import deepEqual from 'fast-deep-equal';
-import React, { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect } from 'react';
 
 import { Wrapper } from './shared';
 

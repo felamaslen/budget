@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { replaceAtIndex } from 'replace-array';
 import * as Styled from './styles';
 import {

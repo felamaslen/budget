@@ -1,5 +1,5 @@
 import capitalize from 'lodash/capitalize';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
 

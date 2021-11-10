@@ -2,7 +2,6 @@ import { act, render, RenderResult, within, RenderOptions } from '@testing-libra
 import userEvent from '@testing-library/user-event';
 import format from 'date-fns/format';
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';

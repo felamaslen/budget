@@ -1,7 +1,7 @@
 import format from 'date-fns/format';
 import getMonth from 'date-fns/getMonth';
 import getYear from 'date-fns/getYear';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import * as Styled from './styles';
 

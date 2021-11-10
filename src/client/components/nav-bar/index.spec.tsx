@@ -1,7 +1,6 @@
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
 import { Navbar } from '.';

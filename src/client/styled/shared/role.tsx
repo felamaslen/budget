@@ -1,4 +1,4 @@
-import React, { HTMLAttributes } from 'react';
+import { HTMLAttributes } from 'react';
 
 const asA11yRole = (role: string, tabIndex: number | undefined) =>
   function asRole<P extends HTMLAttributes<E>, E extends HTMLElement>(

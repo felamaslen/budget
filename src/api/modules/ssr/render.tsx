@@ -10,7 +10,6 @@ import {
 } from '@urql/core';
 import type { Request } from 'express';
 import 'isomorphic-unfetch';
-import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { Provider as ReduxProvider } from 'react-redux';
 import { StaticRouter } from 'react-router-dom';

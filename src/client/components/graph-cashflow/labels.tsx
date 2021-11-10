@@ -1,5 +1,4 @@
-/* @jsx jsx */
-import { css, jsx } from '@emotion/react';
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import format from 'date-fns/format';
 import fromUnixTime from 'date-fns/fromUnixTime';

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { ModalDialogField } from './field';
 import { emptyFields, useModalState, useModalSubmit } from './hooks';
 import * as Styled from './styles';

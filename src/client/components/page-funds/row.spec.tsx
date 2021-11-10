@@ -1,5 +1,4 @@
 import { RenderResult, act, fireEvent, waitFor } from '@testing-library/react';
-import React from 'react';
 import numericHash from 'string-hash';
 
 import { FundRow, Props } from './row';

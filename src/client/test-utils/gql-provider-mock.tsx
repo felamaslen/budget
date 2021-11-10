@@ -1,4 +1,3 @@
-import React from 'react';
 import { Client, Provider } from 'urql';
 import 'isomorphic-unfetch';
 import { never } from 'wonka';

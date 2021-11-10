@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useState } from 'react';
 
 import * as Styled from './styles';
 import { FundGainInfo } from '~client/components/fund-gain-info';
@@ -6,11 +6,11 @@ import { GainsForRow } from '~client/selectors';
 import { abbreviateFundName, extractLongName } from '~shared/abbreviation';
 
 export const FundNameMobile: React.FC<{ value: string }> = ({ value }) => {
-  const [showLongName, setShowLongName] = React.useState<boolean>(false);
-  const onShow = React.useCallback(() => {
+  const [showLongName, setShowLongName] = useState<boolean>(false);
+  const onShow = useCallback(() => {
     setShowLongName(true);
   }, []);
-  const onHide = React.useCallback(() => {
+  const onHide = useCallback(() => {
     setShowLongName(false);
   }, []);
 

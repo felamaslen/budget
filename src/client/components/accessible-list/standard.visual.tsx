@@ -1,5 +1,4 @@
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 
 import { AccessibleListStandard } from './standard';
 

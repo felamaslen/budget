@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { setValueInline } from './number';
 import { makeInlineField } from './shared';
 import { SYMBOL_CURRENCY_RAW } from '~client/constants';

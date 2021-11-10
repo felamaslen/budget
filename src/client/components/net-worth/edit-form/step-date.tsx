@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { Step } from './constants';
 import { FormContainer, Props as ContainerProps } from './form-container';

@@ -1,7 +1,6 @@
 import { act, render } from '@testing-library/react';
 import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 import { CTAEvents, useCTA } from './cta';
 

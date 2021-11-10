@@ -1,4 +1,4 @@
-import React, { ReactEventHandler, useMemo } from 'react';
+import { ReactEventHandler, useMemo } from 'react';
 import { debounce } from 'throttle-debounce';
 import { isEnter } from '~client/modules/nav';
 

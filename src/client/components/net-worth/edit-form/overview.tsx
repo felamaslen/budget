@@ -1,5 +1,5 @@
 import formatDate from 'date-fns/format';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { Step } from './constants';
 import type { Props as ContainerProps } from './form-container';

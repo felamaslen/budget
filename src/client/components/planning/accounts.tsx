@@ -1,5 +1,5 @@
 import { compose } from '@typed/compose';
-import React, { SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { usePlanningDispatch, usePlanningState } from './context';

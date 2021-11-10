@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 import * as Styled from './styles';
 import type { FieldsMobile, ComponentType } from './types';

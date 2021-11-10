@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
-import React, { SetStateAction } from 'react';
+import { SetStateAction } from 'react';
 import numericHash from 'string-hash';
 
 import { PlanningContextDispatch } from '../context';

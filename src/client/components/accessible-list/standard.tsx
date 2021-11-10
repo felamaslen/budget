@@ -1,6 +1,6 @@
 import startOfDay from 'date-fns/startOfDay';
 import capitalize from 'lodash/capitalize';
-import React, { CSSProperties, useMemo } from 'react';
+import { CSSProperties, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AccessibleList } from './base';

@@ -1,5 +1,5 @@
 import format from 'date-fns/format';
-import React, { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 
 import { NetWorthEditForm } from '../edit-form';
 import * as Styled from './styles';

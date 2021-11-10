@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 
 import { createListContext } from './context';
 import { useSortedItems, useMobileEditModal } from './hooks';

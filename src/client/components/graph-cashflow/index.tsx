@@ -1,5 +1,5 @@
 import getUnixTime from 'date-fns/getUnixTime';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { hoverEffect } from './labels';
 import { LineGraph, LineGraphProps, TimeAxes, useGraphWidth } from '~client/components/graph';

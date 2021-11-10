@@ -1,5 +1,5 @@
 import type { History } from 'history';
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 import * as Styled from './styles';
 

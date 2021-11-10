@@ -1,6 +1,5 @@
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 import { SubTree } from './sub-tree';
 import type { MainBlockName } from '~client/types';

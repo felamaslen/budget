@@ -1,6 +1,5 @@
 import { render, RenderResult } from '@testing-library/react';
 import { renderHook, RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
-import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router';
 import createStore, { MockStore } from 'redux-mock-store';

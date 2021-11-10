@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { NetWorthAddForm } from '../edit-form';
 import * as Styled from './styles';

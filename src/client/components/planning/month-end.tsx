@@ -1,5 +1,3 @@
-import React from 'react';
-
 import * as Styled from './styles';
 import type { AccountTransaction } from './types';
 
