@@ -1,4 +1,3 @@
-import capitalize from 'lodash/capitalize';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
@@ -12,6 +11,7 @@ import {
   useAnalysisData,
   useAnalysisDeepBlock,
   useBlockDimensions,
+  useStatus,
   useTreeToggle,
 } from './hooks';
 import ListTree from './list-tree';
@@ -20,11 +20,8 @@ import Upper from './upper';
 
 import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { isAnalysisPage } from '~client/constants/data';
-import { formatCurrency } from '~client/modules/format';
 import { getInvestmentsBetweenDates } from '~client/selectors';
 import { PageNonStandard } from '~client/types/enum';
-import { CategoryCostTree, CategoryCostTreeDeep } from '~client/types/gql';
-import type { GQL } from '~shared/types';
 
 export type RouteParams = {
   groupBy?: string;
@@ -62,7 +59,7 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
     [forest, treeVisible, width, height],
   );
 
-  const [, setCategoryDeep, costDeep, loadingDeep] = useAnalysisDeepBlock(query);
+  const [setCategoryDeep, costDeep, loadingDeep] = useAnalysisDeepBlock(query);
   const onBlockClick = useCallback(
     (name: string | null): void => {
       setCategoryDeep(name && isAnalysisPage(name) ? name : null);
@@ -80,34 +77,7 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
 
   const [treeOpen, setTreeOpen] = useState({});
 
-  const activeMain = activeBlocks?.[0];
-  const activeSub = activeBlocks?.[1];
-
-  const status = useMemo(() => {
-    const activeCost: (GQL<CategoryCostTree> | GQL<CategoryCostTreeDeep>)[] = costDeep ?? cost;
-    if (!(activeCost && activeMain)) {
-      return '';
-    }
-    if (activeMain === 'saved') {
-      return `Saved: ${formatCurrency(saved, { raw: true })}`;
-    }
-
-    const main = activeCost.find(({ item }) => item === activeMain);
-    if (!main) {
-      return '';
-    }
-    if (activeSub) {
-      const total = main?.tree?.find(({ category }) => category === activeSub)?.sum ?? 0;
-
-      return `${capitalize(activeMain)}: ${activeSub} (${formatCurrency(total, { raw: true })})`;
-    }
-
-    const total = main.tree.reduce<number>((last, { sum }) => last + sum, 0);
-
-    return `${capitalize(activeMain)} (${formatCurrency(total, {
-      raw: true,
-    })})`;
-  }, [cost, costDeep, saved, activeMain, activeSub]);
+  const status = useStatus(activeBlocks, cost, costDeep, saved);
 
   return (
     <Styled.Page page={PageNonStandard.Analysis}>
