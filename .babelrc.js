@@ -14,7 +14,7 @@ module.exports = {
       },
     ],
   ],
-  presets: ['@babel/preset-typescript', '@babel/preset-react'],
+  presets: ['@babel/preset-typescript', ['@babel/preset-react', { runtime: 'automatic' }]],
   env: {
     production: {
       plugins: ['babel-plugin-react-remove-properties'],
@@ -32,8 +32,6 @@ module.exports = {
     },
     node: {
       presets: [
-        '@babel/preset-typescript',
-        '@babel/preset-react',
         [
           '@babel/preset-env',
           {

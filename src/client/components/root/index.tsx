@@ -4,7 +4,6 @@ import { hot } from 'react-hot-loader/root';
 import { useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import BarLoader from 'react-spinners/BarLoader';
-import { compose } from 'redux';
 
 import { loggedOut } from '~client/actions';
 import { Anonymous, Props as AnonymousProps } from '~client/components/anonymous';
@@ -130,28 +129,28 @@ const ClientAppReloader: React.FC = () => {
 
 const maxTimeUnfocusedBeforeReloadMs = 1000 * 60 * 60 * 2;
 
-export const ClientApp = compose(
-  hot,
-  withRouter,
-)(() => {
-  const [shouldReload, setShouldReload] = useState<boolean>(false);
-  const reloadTimer = useRef<number>(0);
+export const ClientApp = hot(
+  withRouter(() => {
+    const [shouldReload, setShouldReload] = useState<boolean>(false);
+    const reloadTimer = useRef<number>(0);
 
-  const onFocus = useCallback((timeSinceLastFocusedMs: number): void => {
-    if (timeSinceLastFocusedMs > maxTimeUnfocusedBeforeReloadMs) {
-      setShouldReload(true);
-    }
-  }, []);
+    const onFocus = useCallback((timeSinceLastFocusedMs: number): void => {
+      if (timeSinceLastFocusedMs > maxTimeUnfocusedBeforeReloadMs) {
+        setShouldReload(true);
+      }
+    }, []);
 
-  useWindowFocus(onFocus);
+    useWindowFocus(onFocus);
 
-  useEffect(() => {
-    if (shouldReload) {
-      reloadTimer.current = window.setTimeout(() => {
-        setShouldReload(false);
-      }, 100);
-    }
-  }, [shouldReload]);
+    useEffect(() => {
+      if (shouldReload) {
+        reloadTimer.current = window.setTimeout(() => {
+          setShouldReload(false);
+        }, 100);
+      }
+    }, [shouldReload]);
 
-  return shouldReload ? <SpinnerInit /> : <ClientAppReloader />;
-});
+    return shouldReload ? <SpinnerInit /> : <ClientAppReloader />;
+  }),
+);
+ClientApp.displayName = 'ClientApp';
