@@ -90,7 +90,7 @@ export const Link = styled.span<LinkProps>`
     &::before {
       background-image: url(${nav1x});
       background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
-      content: '';
+      content: ${({ page }): string => (page === 'overview' ? 'none' : "''")};
       display: block;
       margin: 0 auto;
       height: ${rem(28)};
@@ -123,6 +123,14 @@ export const Link = styled.span<LinkProps>`
       text-align: center;
       text-decoration: none;
       text-transform: capitalize;
+
+      display: flex;
+      height: ${rem(30)};
+      padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
+
+      &::before {
+        margin: ${rem(2)};
+      }
 
       ${({ isActive }): SerializedStyles =>
         isActive

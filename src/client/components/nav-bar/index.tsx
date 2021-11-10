@@ -1,15 +1,30 @@
+import type { ComponentType } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-
 import { NavLink } from 'react-router-dom';
+
+import * as Logos from './logos';
 import * as Styled from './styles';
+import { colors } from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 type Props = RouteComponentProps & {
   onLogout: () => void;
 };
 
-const pages: { page: Styled.NavPage; path?: string; paths?: string[] }[] = [
-  { page: PageNonStandard.Overview, path: '/', paths: ['/', '/net-worth'] },
+type PageDefinition = {
+  page: Styled.NavPage;
+  path?: string;
+  paths?: string[];
+  Logo?: ComponentType<Logos.Props>;
+};
+
+const pages: PageDefinition[] = [
+  {
+    page: PageNonStandard.Overview,
+    Logo: Logos.LogoOverview,
+    path: '/',
+    paths: ['/', '/net-worth'],
+  },
   { page: PageNonStandard.Planning },
   { page: PageNonStandard.Analysis },
   { page: PageNonStandard.Funds },
@@ -35,9 +50,10 @@ function doesPathMatch(
 
 const Navbar: React.FC<Props> = ({ location, onLogout }) => (
   <Styled.NavList>
-    {pages.map(({ page, path, paths }) => (
+    {pages.map(({ page, Logo, path, paths }) => (
       <Styled.Link key={page} page={page} isActive={doesPathMatch(location.pathname, page, paths)}>
         <NavLink to={path ?? `/${page}`} tabIndex={-1}>
+          {Logo ? <Logo color={colors.white} /> : null}
           <Styled.LinkText>{page}</Styled.LinkText>
         </NavLink>
       </Styled.Link>
