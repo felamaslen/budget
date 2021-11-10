@@ -4,13 +4,18 @@ import React from 'react';
 import { Chart } from 'react-google-charts';
 
 import { ModalWindow } from '~client/components/modal-window';
-import { colors } from '~client/styled/variables';
+import { breakpoint } from '~client/styled/mixins';
+import { breakpoints, colors } from '~client/styled/variables';
 import { useReadSankeyQuery } from '~client/types/gql';
 
 const SankeyBox = styled.div`
   background: ${colors.white};
   overflow: auto;
-  width: ${rem(720)};
+  width: 100%;
+
+  ${breakpoint(breakpoints.mobile)} {
+    width: ${rem(720)};
+  }
 `;
 
 export type Props = {

@@ -220,7 +220,7 @@ export const SubTree = styled.ul`
 `;
 
 export const Tree = styled.div`
-  flex: 0 0 ${rem(200)};
+  flex: 1 0 ${rem(200)};
   overflow-y: auto;
   padding: ${rem(4)};
 
