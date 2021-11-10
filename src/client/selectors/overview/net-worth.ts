@@ -17,7 +17,6 @@ import { getCategories, getEntries, getMonthlyValues, getSubcategories } from '.
 import { getSpendingColumn, longTermOptionsDisabled, roundedNumbers } from './utils';
 
 import { getText } from '~client/components/net-worth/breakdown.blocks';
-import { blockPacker } from '~client/modules/block-packer';
 import { lastInArray } from '~client/modules/data';
 import { forecastCompoundedReturns } from '~client/modules/finance';
 import { formatCurrency, formatPercent } from '~client/modules/format';
@@ -25,7 +24,6 @@ import { getAppConfig } from '~client/selectors/config';
 import { colors } from '~client/styled/variables';
 import type {
   BlockItem,
-  FlexBlocks,
   LongTermOptions,
   NetWorthAggregateSums as AggregateSums,
   NetWorthEntryInputNative,
@@ -35,6 +33,7 @@ import type {
   NetWorthValueObjectRead,
   OverviewGraphDate,
   WithSubTree,
+  WithSubTreeRecursive,
 } from '~client/types';
 import { NetWorthCategoryType } from '~client/types/enum';
 import type {
@@ -550,10 +549,10 @@ export const getIlliquidEquity = moize(
   { maxSize: 1 },
 );
 
-type ValueInfo = {
+type ValueInfo = Partial<{
   category: NetWorthCategory;
   subcategory: NetWorthSubcategory;
-};
+}>;
 
 type ValueWithInfo = NetWorthValueObjectNative & { info: ValueInfo };
 
@@ -562,17 +561,9 @@ function addInfoToValues(
   subcategories: NetWorthSubcategory[],
   values: NetWorthValueObjectNative[],
 ): ValueWithInfo[] {
-  return values.map<
-    NetWorthValueObjectNative & {
-      info: { category: NetWorthCategory; subcategory: NetWorthSubcategory };
-    }
-  >((value) => {
-    const subcategory = subcategories.find(
-      (compare) => compare.id === value.subcategory,
-    ) as NetWorthSubcategory;
-    const category = categories.find(
-      (compare) => compare.id === subcategory?.categoryId,
-    ) as NetWorthCategory;
+  return values.map<ValueWithInfo>((value) => {
+    const subcategory = subcategories.find((compare) => compare.id === value.subcategory);
+    const category = categories.find((compare) => compare.id === subcategory?.categoryId);
 
     return {
       ...value,
@@ -621,28 +612,30 @@ const categoryTreeBuilder =
       ({ name, color, factor, groups, sumTotal }) => ({
         name: `${name} (${formatCurrency(sumTotal, { abbreviate: true })})`,
         text: getText(name, 0),
-        total: normalise ? maxSumTotal : sumTotal,
+        total: Math.round(normalise ? maxSumTotal : sumTotal),
         color,
         subTree: Object.entries(groups).map<WithSubTree<BlockItem>>(([category, group]) => {
           const subTotal = factor * sumValues(currencies, subcategories, group, true);
           const ratio = subTotal / sumTotal;
 
           return {
-            name: `${category} (${formatCurrency(subTotal, {
-              abbreviate: true,
-            })}) [${formatPercent(ratio, { precision: 1 })}]`,
+            name: `${category} (${formatCurrency(subTotal, { abbreviate: true })}) [${formatPercent(
+              ratio,
+              { precision: 1 },
+            )}]`,
             text: getText(category, 1),
             total: subTotal * (normalise ? maxSumTotal / sumTotal : 1),
-            color: group[0]?.info.category.color ?? colors.white,
+            color: group[0]?.info.category?.color ?? colors.white,
             subTree: group.map<BlockItem>((value) => {
               const itemValue = factor * sumValues(currencies, subcategories, [value], true);
               return {
-                name: `${value.info.subcategory.subcategory} (${formatCurrency(itemValue, {
-                  abbreviate: true,
-                })})`,
+                name: `${value.info.subcategory?.subcategory ?? '<Unknown>'} (${formatCurrency(
+                  itemValue,
+                  { abbreviate: true },
+                )})`,
                 total: itemValue * (normalise ? maxSumTotal / sumTotal : 1),
-                text: getText(value.info.subcategory.subcategory, 2),
-                color: rgba(colors.white, (value.info.subcategory.opacity ?? 1) / 2),
+                text: getText(value.info.subcategory?.subcategory ?? '<Unknown>', 2),
+                color: rgba(colors.white, (value.info.subcategory?.opacity ?? 1) / 2),
               };
             }),
           };
@@ -658,7 +651,7 @@ export const getNetWorthBreakdown = moize(
     createSelector(
       getCategories,
       getSubcategories,
-      (categories, subcategories): FlexBlocks<BlockItem> | null => {
+      (categories, subcategories): WithSubTreeRecursive<BlockItem>[] | null => {
         if (!(width && height)) {
           return null;
         }
@@ -676,7 +669,7 @@ export const getNetWorthBreakdown = moize(
           valuesWithInfo,
         );
 
-        const tree: WithSubTree<BlockItem>[] = buildCategoryTree([
+        return buildCategoryTree([
           {
             name: 'Assets',
             categoryType: NetWorthCategoryType.Asset,
@@ -690,8 +683,6 @@ export const getNetWorthBreakdown = moize(
             factor: -1,
           },
         ]);
-
-        return blockPacker(width, height, tree);
       },
     ),
   { maxSize: 1 },

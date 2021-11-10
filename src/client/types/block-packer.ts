@@ -10,6 +10,7 @@ export type Box = {
 type WithBlockDimensions<T> = T & { box: Box };
 type WithFlex<T> = T & { flex: number };
 export type WithSubTree<T> = T & { subTree?: T[] };
+export type WithSubTreeRecursive<T> = T & { subTree?: WithSubTreeRecursive<T>[] };
 export type WithArea<T> = T & { area: number };
 
 export type FlexBlocks<T> = WithBlockDimensions<{

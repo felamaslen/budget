@@ -1,4 +1,3 @@
-import React from 'react';
 import numericHash from 'string-hash';
 
 import {
@@ -9,7 +8,6 @@ import {
   getNetWorthTable,
   getSubcategories,
 } from './net-worth';
-import * as breakdownBlocks from '~client/components/net-worth/breakdown.blocks';
 import { State } from '~client/reducers';
 import { testState } from '~client/test-data';
 import { NetWorthCategoryType } from '~client/types/enum';
@@ -408,14 +406,89 @@ describe('overview selectors (net worth)', () => {
   });
 
   describe('getNetWorthBreakdown', () => {
-    it('should return blocks', () => {
+    describe.each`
+      dimension   | width  | height
+      ${'width'}  | ${0}   | ${100}
+      ${'height'} | ${100} | ${0}
+    `('when the $dimension is zero', ({ width, height }) => {
+      it('should return null', () => {
+        expect.assertions(1);
+        expect(getNetWorthBreakdown(state.netWorth.entries[0], width, height)(state)).toBeNull();
+      });
+    });
+
+    it('should have a top level assets/liabilities split', () => {
+      expect.assertions(3);
+      const resultJan18 = getNetWorthBreakdown(state.netWorth.entries[0], 84, 120)(state);
+      const resultFeb18 = getNetWorthBreakdown(state.netWorth.entries[1], 84, 120)(state);
+      const resultMar18 = getNetWorthBreakdown(state.netWorth.entries[2], 84, 120)(state);
+
+      expect(resultJan18).toStrictEqual([
+        expect.objectContaining({ name: 'Assets (£210k)', total: 21000000 }),
+        expect.objectContaining({ name: 'Liabilities (£193k)', total: 19319500 }),
+      ]);
+
+      expect(resultFeb18).toStrictEqual([
+        expect.objectContaining({ name: 'Assets (£233k)', total: 23289360 }),
+        expect.objectContaining({ name: 'Liabilities (£188k)', total: 18752951 }),
+      ]);
+
+      expect(resultMar18).toStrictEqual([
+        expect.objectContaining({ name: 'Assets (£227k)', total: 22734469 }),
+        expect.objectContaining({ name: 'Liabilities (£184k)', total: 18442839 }),
+      ]);
+    });
+
+    it('should set the overall assets color', () => {
       expect.assertions(1);
-      jest.spyOn(breakdownBlocks, 'getText').mockImplementation((name, level) => (
-        <span>
-          {name} - {level}
-        </span>
-      ));
-      expect(getNetWorthBreakdown(state.netWorth.entries[0], 100, 100)(state)).toMatchSnapshot();
+      const resultFeb18 = getNetWorthBreakdown(state.netWorth.entries[1], 84, 120)(state);
+
+      expect(
+        resultFeb18?.find((compare) => compare.name.startsWith('Assets'))?.color,
+      ).toMatchInlineSnapshot(`"#d8e9d3"`);
+    });
+
+    it('should set the overall liabilities color', () => {
+      expect.assertions(1);
+      const resultFeb18 = getNetWorthBreakdown(state.netWorth.entries[1], 84, 120)(state);
+
+      expect(
+        resultFeb18?.find((compare) => compare.name.startsWith('Liabilities'))?.color,
+      ).toMatchInlineSnapshot(`"#f5cacb"`);
+    });
+
+    it('should set individual colors based on the category color', () => {
+      expect.assertions(2);
+      const resultFeb18 = getNetWorthBreakdown(state.netWorth.entries[1], 84, 120)(state);
+
+      const cashEasyAccessBlock = resultFeb18
+        ?.find((compare) => compare.name.startsWith('Assets'))
+        ?.subTree?.find((compare) => compare.name.startsWith('Cash (easy access)'));
+
+      const creditCardBlock = resultFeb18
+        ?.find((compare) => compare.name.startsWith('Liabilities'))
+        ?.subTree?.find((compare) => compare.name.startsWith('Credit cards'));
+
+      expect(cashEasyAccessBlock?.color).toBe('#00ff00'); // check test state
+      expect(creditCardBlock?.color).toBe('#fc0000');
+    });
+
+    it('should set the opacity of individual values at the subcategory level', () => {
+      expect.assertions(2);
+      const resultFeb18 = getNetWorthBreakdown(state.netWorth.entries[1], 84, 120)(state);
+
+      const bankBlock = resultFeb18
+        ?.find((compare) => compare.name.startsWith('Assets'))
+        ?.subTree?.find((compare) => compare.name.startsWith('Cash (easy access)'))
+        ?.subTree?.find((compare) => compare.name.startsWith('My bank'));
+
+      const creditCardBlock = resultFeb18
+        ?.find((compare) => compare.name.startsWith('Liabilities'))
+        ?.subTree?.find((compare) => compare.name.startsWith('Credit card'))
+        ?.subTree?.find((compare) => compare.name.startsWith('My credit card'));
+
+      expect(bankBlock?.color).toBe('rgba(255,255,255,0.125)');
+      expect(creditCardBlock?.color).toBe('rgba(255,255,255,0.15)');
     });
   });
 });
