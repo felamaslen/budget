@@ -31,6 +31,7 @@
   },
   "include": [
     "types",
+    ".storybook",
     "src"
   ],
   "exclude": [
