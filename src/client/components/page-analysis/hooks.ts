@@ -1,11 +1,12 @@
 import endOfDay from 'date-fns/endOfDay';
 import startOfDay from 'date-fns/startOfDay';
-import { Dispatch, SetStateAction, useCallback, useContext, useState } from 'react';
+import capitalize from 'lodash/capitalize';
+import { Dispatch, SetStateAction, useCallback, useContext, useMemo, useState } from 'react';
 
 import type { Props as PropsListTree } from './list-tree';
 import * as Styled from './styles';
 
-import { statusHeight } from '~client/components/block-packer';
+import { BlockName, statusHeight } from '~client/components/block-packer';
 import { ANALYSIS_VIEW_HEIGHT, ANALYSIS_VIEW_WIDTH } from '~client/constants/analysis';
 import { isStandardListPage } from '~client/constants/data';
 import {
@@ -17,6 +18,7 @@ import {
 import * as gql from '~client/hooks/gql';
 import { blockPacker } from '~client/modules/block-packer';
 import { sortByTotal } from '~client/modules/data';
+import { formatCurrency } from '~client/modules/format';
 import { breakpointBase } from '~client/styled/mixins';
 import { breakpoints, colors } from '~client/styled/variables';
 import type {
@@ -35,6 +37,7 @@ import type {
   CategoryCostTreeDeep,
 } from '~client/types/gql';
 import type { GQL, NativeDate } from '~shared/types';
+import { omitDeep } from '~shared/utils';
 
 const getTreeColor = (name: string): string | undefined => {
   if (isStandardListPage(name)) {
@@ -158,7 +161,10 @@ const defaultQuery: Query = {
   page: 0,
 };
 
-export type State = NativeDate<NonNullable<AnalysisQuery['analysis']>, 'startDate' | 'endDate'> & {
+export type State = NativeDate<
+  NonNullable<GQL<AnalysisQuery>['analysis']>,
+  'startDate' | 'endDate'
+> & {
   income: number;
   saved: number;
 };
@@ -198,7 +204,7 @@ export function useAnalysisData(params: unknown): [Query, State, boolean] {
 
   const stateWithoutSaved: Omit<State, 'income' | 'saved'> = data?.analysis
     ? {
-        ...data.analysis,
+        ...omitDeep(data.analysis, '__typename'),
         startDate: startOfDay(new Date(data.analysis.startDate)),
         endDate: endOfDay(new Date(data.analysis.endDate)),
       }
@@ -228,21 +234,18 @@ export function useAnalysisData(params: unknown): [Query, State, boolean] {
   return [query, state, fetching];
 }
 
+export type DeepBlock = NonNullable<AnalysisDeepQuery['analysisDeep']>;
+
 export function useAnalysisDeepBlock(
   mainQuery: Query,
-): [
-  AnalysisPage | null,
-  Dispatch<SetStateAction<AnalysisPage | null>>,
-  NonNullable<AnalysisDeepQuery['analysisDeep']> | null,
-  boolean,
-] {
+): [Dispatch<SetStateAction<AnalysisPage | null>>, DeepBlock | null, boolean] {
   const [category, setCategory] = useState<AnalysisPage | null>(null);
   const [{ data, fetching }] = gql.useAnalysisDeepQuery({
     variables: { ...mainQuery, category: category as AnalysisPage },
     pause: !category,
   });
 
-  return [category, setCategory, category ? data?.analysisDeep ?? null : null, fetching];
+  return [setCategory, category ? data?.analysisDeep ?? null : null, fetching];
 }
 
 export function useBlockDimensions(): { width: number; height: number } {
@@ -260,4 +263,40 @@ export function useBlockDimensions(): { width: number; height: number } {
   }
 
   return { width: ANALYSIS_VIEW_WIDTH, height: ANALYSIS_VIEW_HEIGHT - statusHeight };
+}
+
+export function useStatus(
+  activeBlocks: BlockName[],
+  cost: State['cost'],
+  costDeep: DeepBlock | null,
+  saved: number,
+): string {
+  const activeMain = activeBlocks?.[0];
+  const activeSub = activeBlocks?.[1];
+
+  return useMemo(() => {
+    const activeCost: (GQL<CategoryCostTree> | GQL<CategoryCostTreeDeep>)[] = costDeep ?? cost;
+    if (!(activeCost && activeMain)) {
+      return '';
+    }
+    if (activeMain === 'saved') {
+      return `Saved: ${formatCurrency(saved, { raw: true })}`;
+    }
+
+    const main = activeCost.find(({ item }) => item === activeMain);
+    if (!main) {
+      return '';
+    }
+    if (activeSub) {
+      const total = main?.tree?.find(({ category }) => category === activeSub)?.sum ?? 0;
+
+      return `${capitalize(activeMain)}: ${activeSub} (${formatCurrency(total, { raw: true })})`;
+    }
+
+    const total = main.tree.reduce<number>((last, { sum }) => last + sum, 0);
+
+    return `${capitalize(activeMain)} (${formatCurrency(total, {
+      raw: true,
+    })})`;
+  }, [cost, costDeep, saved, activeMain, activeSub]);
 }

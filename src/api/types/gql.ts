@@ -127,6 +127,16 @@ export type ExchangeRatesResponse = {
   rates?: Maybe<Array<ExchangeRate>>;
 };
 
+export type FxValue = {
+  currency: Scalars['String'];
+  value: Scalars['Float'];
+};
+
+export type FxValueInput = {
+  currency: Scalars['String'];
+  value: Scalars['Float'];
+};
+
 export type Fund = {
   allocationTarget?: Maybe<Scalars['NonNegativeInt']>;
   id: Scalars['Int'];
@@ -194,16 +204,6 @@ export type FundSubscription = {
 export type FundValueIndividual = {
   date: Scalars['Int'];
   price: Scalars['NonNegativeFloat'];
-};
-
-export type FxValue = {
-  currency: Scalars['String'];
-  value: Scalars['Float'];
-};
-
-export type FxValueInput = {
-  currency: Scalars['String'];
-  value: Scalars['Float'];
 };
 
 export type Income = {
@@ -610,14 +610,14 @@ export type NetWorthLoan = {
   values: Array<NetWorthLoanValue>;
 };
 
-export type NetWorthLoansResponse = {
-  error?: Maybe<Scalars['String']>;
-  loans?: Maybe<Array<NetWorthLoan>>;
-};
-
 export type NetWorthLoanValue = {
   date: Scalars['Date'];
   value: LoanValue;
+};
+
+export type NetWorthLoansResponse = {
+  error?: Maybe<Scalars['String']>;
+  loans?: Maybe<Array<NetWorthLoan>>;
 };
 
 export type NetWorthSubcategory = {
@@ -870,6 +870,7 @@ export type Query = {
   readNetWorthSubcategories?: Maybe<Array<NetWorthSubcategory>>;
   receiptItem?: Maybe<Scalars['String']>;
   receiptItems?: Maybe<Array<ReceiptCategory>>;
+  sankey?: Maybe<SankeyResponse>;
   search?: Maybe<SearchResult>;
   stockPrices?: Maybe<StockPricesResponse>;
   stockValue?: Maybe<StockValueResponse>;
@@ -1000,6 +1001,16 @@ export enum ReceiptPage {
   General = 'general',
   Social = 'social'
 }
+
+export type SankeyLink = {
+  from: Scalars['String'];
+  to: Scalars['String'];
+  weight: Scalars['NonNegativeInt'];
+};
+
+export type SankeyResponse = {
+  links: Array<SankeyLink>;
+};
 
 export enum SearchItem {
   Category = 'category',
@@ -1242,6 +1253,8 @@ export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   ExchangeRate: ResolverTypeWrapper<ExchangeRate>;
   ExchangeRatesResponse: ResolverTypeWrapper<ExchangeRatesResponse>;
+  FXValue: ResolverTypeWrapper<FxValue>;
+  FXValueInput: FxValueInput;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   Fund: ResolverTypeWrapper<Fund>;
   FundCreatedSubscription: ResolverTypeWrapper<FundCreatedSubscription>;
@@ -1254,8 +1267,6 @@ export type ResolversTypes = {
   FundPrices: ResolverTypeWrapper<FundPrices>;
   FundSubscription: ResolverTypeWrapper<FundSubscription>;
   FundValueIndividual: ResolverTypeWrapper<FundValueIndividual>;
-  FXValue: ResolverTypeWrapper<FxValue>;
-  FXValueInput: FxValueInput;
   Income: ResolverTypeWrapper<Income>;
   IncomeCreatedSubscription: ResolverTypeWrapper<IncomeCreatedSubscription>;
   IncomeDeduction: ResolverTypeWrapper<IncomeDeduction>;
@@ -1293,8 +1304,8 @@ export type ResolversTypes = {
   NetWorthEntryOverview: ResolverTypeWrapper<NetWorthEntryOverview>;
   NetWorthEntryUpdated: ResolverTypeWrapper<NetWorthEntryUpdated>;
   NetWorthLoan: ResolverTypeWrapper<NetWorthLoan>;
-  NetWorthLoansResponse: ResolverTypeWrapper<NetWorthLoansResponse>;
   NetWorthLoanValue: ResolverTypeWrapper<NetWorthLoanValue>;
+  NetWorthLoansResponse: ResolverTypeWrapper<NetWorthLoansResponse>;
   NetWorthSubcategory: ResolverTypeWrapper<NetWorthSubcategory>;
   NetWorthSubcategoryCreated: ResolverTypeWrapper<NetWorthSubcategoryCreated>;
   NetWorthSubcategoryInput: NetWorthSubcategoryInput;
@@ -1333,6 +1344,8 @@ export type ResolversTypes = {
   ReceiptInput: ReceiptInput;
   ReceiptItem: ResolverTypeWrapper<ReceiptItem>;
   ReceiptPage: ReceiptPage;
+  SankeyLink: ResolverTypeWrapper<SankeyLink>;
+  SankeyResponse: ResolverTypeWrapper<SankeyResponse>;
   SearchItem: SearchItem;
   SearchPage: SearchPage;
   SearchResult: ResolverTypeWrapper<SearchResult>;
@@ -1376,6 +1389,8 @@ export type ResolversParentTypes = {
   DateTime: Scalars['DateTime'];
   ExchangeRate: ExchangeRate;
   ExchangeRatesResponse: ExchangeRatesResponse;
+  FXValue: FxValue;
+  FXValueInput: FxValueInput;
   Float: Scalars['Float'];
   Fund: Fund;
   FundCreatedSubscription: FundCreatedSubscription;
@@ -1386,8 +1401,6 @@ export type ResolversParentTypes = {
   FundPrices: FundPrices;
   FundSubscription: FundSubscription;
   FundValueIndividual: FundValueIndividual;
-  FXValue: FxValue;
-  FXValueInput: FxValueInput;
   Income: Income;
   IncomeCreatedSubscription: IncomeCreatedSubscription;
   IncomeDeduction: IncomeDeduction;
@@ -1423,8 +1436,8 @@ export type ResolversParentTypes = {
   NetWorthEntryOverview: NetWorthEntryOverview;
   NetWorthEntryUpdated: NetWorthEntryUpdated;
   NetWorthLoan: NetWorthLoan;
-  NetWorthLoansResponse: NetWorthLoansResponse;
   NetWorthLoanValue: NetWorthLoanValue;
+  NetWorthLoansResponse: NetWorthLoansResponse;
   NetWorthSubcategory: NetWorthSubcategory;
   NetWorthSubcategoryCreated: NetWorthSubcategoryCreated;
   NetWorthSubcategoryInput: NetWorthSubcategoryInput;
@@ -1461,6 +1474,8 @@ export type ResolversParentTypes = {
   ReceiptCreated: ReceiptCreated;
   ReceiptInput: ReceiptInput;
   ReceiptItem: ReceiptItem;
+  SankeyLink: SankeyLink;
+  SankeyResponse: SankeyResponse;
   SearchResult: SearchResult;
   SimpleValue: SimpleValue;
   StockPrice: StockPrice;
@@ -1571,6 +1586,12 @@ export type ExchangeRatesResponseResolvers<ContextType = Context, ParentType ext
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type FxValueResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FXValue'] = ResolversParentTypes['FXValue']> = {
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  value?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type FundResolvers<ContextType = Context, ParentType extends ResolversParentTypes['Fund'] = ResolversParentTypes['Fund']> = {
   allocationTarget?: Resolver<Maybe<ResolversTypes['NonNegativeInt']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -1623,12 +1644,6 @@ export type FundSubscriptionResolvers<ContextType = Context, ParentType extends 
 export type FundValueIndividualResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundValueIndividual'] = ResolversParentTypes['FundValueIndividual']> = {
   date?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   price?: Resolver<ResolversTypes['NonNegativeFloat'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type FxValueResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FXValue'] = ResolversParentTypes['FXValue']> = {
-  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  value?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1863,15 +1878,15 @@ export type NetWorthLoanResolvers<ContextType = Context, ParentType extends Reso
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type NetWorthLoansResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['NetWorthLoansResponse'] = ResolversParentTypes['NetWorthLoansResponse']> = {
-  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  loans?: Resolver<Maybe<Array<ResolversTypes['NetWorthLoan']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type NetWorthLoanValueResolvers<ContextType = Context, ParentType extends ResolversParentTypes['NetWorthLoanValue'] = ResolversParentTypes['NetWorthLoanValue']> = {
   date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   value?: Resolver<ResolversTypes['LoanValue'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type NetWorthLoansResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['NetWorthLoansResponse'] = ResolversParentTypes['NetWorthLoansResponse']> = {
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  loans?: Resolver<Maybe<Array<ResolversTypes['NetWorthLoan']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2052,6 +2067,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   readNetWorthSubcategories?: Resolver<Maybe<Array<ResolversTypes['NetWorthSubcategory']>>, ParentType, ContextType, RequireFields<QueryReadNetWorthSubcategoriesArgs, never>>;
   receiptItem?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<QueryReceiptItemArgs, 'item'>>;
   receiptItems?: Resolver<Maybe<Array<ResolversTypes['ReceiptCategory']>>, ParentType, ContextType, RequireFields<QueryReceiptItemsArgs, 'items'>>;
+  sankey?: Resolver<Maybe<ResolversTypes['SankeyResponse']>, ParentType, ContextType>;
   search?: Resolver<Maybe<ResolversTypes['SearchResult']>, ParentType, ContextType, RequireFields<QuerySearchArgs, 'column' | 'page' | 'searchTerm'>>;
   stockPrices?: Resolver<Maybe<ResolversTypes['StockPricesResponse']>, ParentType, ContextType, RequireFields<QueryStockPricesArgs, 'codes'>>;
   stockValue?: Resolver<Maybe<ResolversTypes['StockValueResponse']>, ParentType, ContextType>;
@@ -2084,6 +2100,18 @@ export type ReceiptItemResolvers<ContextType = Context, ParentType extends Resol
   item?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   page?: Resolver<ResolversTypes['ReceiptPage'], ParentType, ContextType>;
   shop?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SankeyLinkResolvers<ContextType = Context, ParentType extends ResolversParentTypes['SankeyLink'] = ResolversParentTypes['SankeyLink']> = {
+  from?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  to?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  weight?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SankeyResponseResolvers<ContextType = Context, ParentType extends ResolversParentTypes['SankeyResponse'] = ResolversParentTypes['SankeyResponse']> = {
+  links?: Resolver<Array<ResolversTypes['SankeyLink']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2211,6 +2239,7 @@ export type Resolvers<ContextType = Context> = {
   DateTime?: GraphQLScalarType;
   ExchangeRate?: ExchangeRateResolvers<ContextType>;
   ExchangeRatesResponse?: ExchangeRatesResponseResolvers<ContextType>;
+  FXValue?: FxValueResolvers<ContextType>;
   Fund?: FundResolvers<ContextType>;
   FundCreatedSubscription?: FundCreatedSubscriptionResolvers<ContextType>;
   FundHistory?: FundHistoryResolvers<ContextType>;
@@ -2219,7 +2248,6 @@ export type Resolvers<ContextType = Context> = {
   FundPrices?: FundPricesResolvers<ContextType>;
   FundSubscription?: FundSubscriptionResolvers<ContextType>;
   FundValueIndividual?: FundValueIndividualResolvers<ContextType>;
-  FXValue?: FxValueResolvers<ContextType>;
   Income?: IncomeResolvers<ContextType>;
   IncomeCreatedSubscription?: IncomeCreatedSubscriptionResolvers<ContextType>;
   IncomeDeduction?: IncomeDeductionResolvers<ContextType>;
@@ -2247,8 +2275,8 @@ export type Resolvers<ContextType = Context> = {
   NetWorthEntryOverview?: NetWorthEntryOverviewResolvers<ContextType>;
   NetWorthEntryUpdated?: NetWorthEntryUpdatedResolvers<ContextType>;
   NetWorthLoan?: NetWorthLoanResolvers<ContextType>;
-  NetWorthLoansResponse?: NetWorthLoansResponseResolvers<ContextType>;
   NetWorthLoanValue?: NetWorthLoanValueResolvers<ContextType>;
+  NetWorthLoansResponse?: NetWorthLoansResponseResolvers<ContextType>;
   NetWorthSubcategory?: NetWorthSubcategoryResolvers<ContextType>;
   NetWorthSubcategoryCreated?: NetWorthSubcategoryCreatedResolvers<ContextType>;
   NetWorthSubcategoryUpdated?: NetWorthSubcategoryUpdatedResolvers<ContextType>;
@@ -2272,6 +2300,8 @@ export type Resolvers<ContextType = Context> = {
   ReceiptCategory?: ReceiptCategoryResolvers<ContextType>;
   ReceiptCreated?: ReceiptCreatedResolvers<ContextType>;
   ReceiptItem?: ReceiptItemResolvers<ContextType>;
+  SankeyLink?: SankeyLinkResolvers<ContextType>;
+  SankeyResponse?: SankeyResponseResolvers<ContextType>;
   SearchResult?: SearchResultResolvers<ContextType>;
   SimpleValue?: SimpleValueResolvers<ContextType>;
   StockPrice?: StockPriceResolvers<ContextType>;

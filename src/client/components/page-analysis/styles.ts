@@ -52,6 +52,14 @@ export const Buttons = styled.div`
   }
 `;
 
+export const ButtonSankey = styled.button`
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+`;
+
 export const PeriodTitle = styled(H3)`
   width: 100%;
   margin: 0;
@@ -212,7 +220,7 @@ export const SubTree = styled.ul`
 `;
 
 export const Tree = styled.div`
-  flex: 0 0 ${rem(200)};
+  flex: 1 0 ${rem(200)};
   overflow-y: auto;
   padding: ${rem(4)};
 

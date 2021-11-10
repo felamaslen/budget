@@ -4,13 +4,13 @@ import {
   TaggedTemplateLiteralInvocationType,
 } from 'slonik';
 
-import config from '~api/config';
 import {
   ListItemStandard,
   ListItemStandardInput,
   PageListCost,
   PageListStandard,
 } from '~api/types';
+import { investmentPurchaseCategories } from '~shared/constants';
 import type { GQL, NativeDate, RawDate } from '~shared/types';
 
 export const pageCostCTE = (
@@ -18,7 +18,7 @@ export const pageCostCTE = (
 ): TaggedTemplateLiteralInvocationType => sql`
 CASE
   WHEN page = ${PageListStandard.General} AND category = ANY(${sql.array(
-  config.data.overview.investmentPurchaseCategories,
+  investmentPurchaseCategories,
   'text',
 )}) THEN 0
   ELSE ${sql.identifier([listStandardTableName, 'value'])}

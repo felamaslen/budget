@@ -1,4 +1,6 @@
-import { getForest, getBlocks, getDeepBlocks, getDeepForest, State } from './hooks';
+import { renderHook } from '@testing-library/react-hooks';
+
+import { getForest, getBlocks, getDeepBlocks, getDeepForest, State, useStatus } from './hooks';
 
 import { ANALYSIS_VIEW_WIDTH, ANALYSIS_VIEW_HEIGHT } from '~client/constants/analysis';
 import { blockPacker } from '~client/modules/block-packer';
@@ -382,6 +384,104 @@ describe('analysis hooks', () => {
       const result = getDeepBlocks(forestDeep, 3, 4);
 
       expect(result).toStrictEqual(blockPacker<BlockItem>(3, 4, forestDeepProcessed));
+    });
+  });
+
+  describe(useStatus.name, () => {
+    const cost: State['cost'] = [
+      {
+        item: AnalysisPage.Bills,
+        tree: [
+          {
+            category: 'Housing',
+            sum: 1701920,
+          },
+          {
+            category: 'Car',
+            sum: 82901,
+          },
+        ],
+      },
+      {
+        item: AnalysisPage.Food,
+        tree: [
+          {
+            category: 'Fruit',
+            sum: 48694,
+          },
+          {
+            category: 'Meat',
+            sum: 33792,
+          },
+        ],
+      },
+    ];
+
+    const saved = 1638557;
+
+    describe('when there are no active blocks', () => {
+      it('should return an empty string', () => {
+        expect.assertions(1);
+        const { result } = renderHook(() => useStatus([], cost, null, saved));
+        expect(result.current).toBe('');
+      });
+    });
+
+    describe('when there is a main active block', () => {
+      describe.each`
+        subBlock        | activeBlocks
+        ${'not active'} | ${['saved']}
+        ${'active'}     | ${['saved', 'Invested']}
+      `('when the main active block is saved and a sub-block is $subBlock', ({ activeBlocks }) => {
+        it('should return the saved value', () => {
+          expect.assertions(1);
+          const { result } = renderHook(() => useStatus(activeBlocks, cost, null, saved));
+          expect(result.current).toBe('Saved: £16,385.57');
+        });
+      });
+
+      describe('when there is not an active sub-block', () => {
+        it('should sum the total of the selected tree and set the status using that', () => {
+          expect.assertions(2);
+          const { rerender, result } = renderHook<{ page: AnalysisPage }, string>(
+            ({ page }) => useStatus([page], cost, null, saved),
+            { initialProps: { page: AnalysisPage.Bills } },
+          );
+
+          expect(result.current).toBe('Bills (£17,848.21)');
+
+          rerender({ page: AnalysisPage.Food });
+
+          expect(result.current).toBe('Food (£824.86)');
+        });
+      });
+
+      describe('when there is an active sub-block', () => {
+        it('should add the sub-block to the status and use the total from the sub-block', () => {
+          expect.assertions(2);
+          const { rerender, result } = renderHook<{ subBlock: string }, string>(
+            ({ subBlock }) => useStatus([AnalysisPage.Bills, subBlock], cost, null, saved),
+            { initialProps: { subBlock: 'Housing' } },
+          );
+
+          expect(result.current).toBe('Bills: Housing (£17,019.20)');
+
+          rerender({ subBlock: 'Car' });
+
+          expect(result.current).toBe('Bills: Car (£829.01)');
+        });
+
+        describe('when the sub-block does not exist', () => {
+          it('should use 0 as the total', () => {
+            expect.assertions(1);
+            const { result } = renderHook(() =>
+              useStatus([AnalysisPage.Bills, 'NOT-Car'], cost, null, saved),
+            );
+
+            expect(result.current).toBe('Bills: NOT-Car (£0.00)');
+          });
+        });
+      });
     });
   });
 });

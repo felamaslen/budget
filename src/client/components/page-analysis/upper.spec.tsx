@@ -8,6 +8,7 @@ import { AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
 
 describe('pageAnalysis / <Upper />', () => {
   const onRequest = jest.fn();
+  const onOpenSankey = jest.fn();
 
   const props: Props = {
     period: AnalysisPeriod.Year,
@@ -16,6 +17,7 @@ describe('pageAnalysis / <Upper />', () => {
     description: 'foo',
     loading: false,
     onRequest,
+    onOpenSankey,
   };
 
   describe('period switcher', () => {
