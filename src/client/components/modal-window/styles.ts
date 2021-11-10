@@ -5,6 +5,8 @@ import { breakpoint } from '~client/styled/mixins';
 import { asLink, H2 } from '~client/styled/shared';
 import { colors, breakpoints } from '~client/styled/variables';
 
+export const closeTransitionTimeMs = 300;
+
 export type ModalWindowProps = { visible: boolean; width?: number; fullSize?: boolean };
 const modalWindowStyles = ({
   visible,
@@ -17,7 +19,7 @@ const modalWindowStyles = ({
   height: 100%;
   opacity: ${visible ? 1 : 0};
   position: absolute !important;
-  transition: opacity 0.3s ease-out;
+  transition: opacity ${closeTransitionTimeMs}ms ease-out;
   width: 100% !important;
   z-index: 100;
 

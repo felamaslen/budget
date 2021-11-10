@@ -2,26 +2,19 @@ import type { History } from 'history';
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 
 import * as Styled from './styles';
-import { NULL } from '~client/modules/data';
 
 type Props = {
   title: string;
   onClosed?: () => void;
 } & Pick<Styled.ModalWindowProps, 'width' | 'fullSize'>;
 
-export const ModalWindow: React.FC<Props> = ({
-  title,
-  onClosed = NULL,
-  width,
-  fullSize,
-  children,
-}) => {
+export const ModalWindow: React.FC<Props> = ({ title, onClosed, width, fullSize, children }) => {
   const timer = useRef<number>();
   const [visible, setVisible] = useState(false);
   const onClose = useCallback(() => {
     setVisible(false);
     clearTimeout(timer.current);
-    timer.current = window.setTimeout(onClosed, 300);
+    timer.current = window.setTimeout(() => onClosed?.(), Styled.closeTransitionTimeMs);
   }, [onClosed]);
 
   useEffect(() => {

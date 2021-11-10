@@ -4,6 +4,7 @@ import React from 'react';
 import DotLoader from 'react-spinners/DotLoader';
 
 import { Query } from './hooks';
+import { SankeyIcon } from './sankey-icon';
 import * as Styled from './styles';
 
 import { AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
@@ -15,6 +16,7 @@ export type Props = {
   description: string;
   loading: boolean;
   onRequest: (request: Partial<Query>) => void;
+  onOpenSankey: () => void;
 };
 
 const spinnerOverride = css`
@@ -23,7 +25,15 @@ const spinnerOverride = css`
   top: ${rem(4)};
 `;
 
-const Upper: React.FC<Props> = ({ period, groupBy, page, description, loading, onRequest }) => (
+const Upper: React.FC<Props> = ({
+  period,
+  groupBy,
+  page,
+  description,
+  loading,
+  onOpenSankey,
+  onRequest,
+}) => (
   <Styled.Upper>
     <Styled.Input>
       <span>{'Period:'}</span>
@@ -60,7 +70,12 @@ const Upper: React.FC<Props> = ({ period, groupBy, page, description, loading, o
       </Styled.Button>
     </Styled.Buttons>
     <DotLoader loading={loading} size={22} css={spinnerOverride} />
-    <Styled.PeriodTitle>{description}</Styled.PeriodTitle>
+    <Styled.PeriodTitle>
+      {description}{' '}
+      <Styled.ButtonSankey onClick={onOpenSankey}>
+        <SankeyIcon />
+      </Styled.ButtonSankey>
+    </Styled.PeriodTitle>
   </Styled.Upper>
 );
 

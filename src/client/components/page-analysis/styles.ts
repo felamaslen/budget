@@ -52,6 +52,14 @@ export const Buttons = styled.div`
   }
 `;
 
+export const ButtonSankey = styled.button`
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+`;
+
 export const PeriodTitle = styled(H3)`
   width: 100%;
   margin: 0;

@@ -72,7 +72,6 @@ const singlePageAppRoutes: string[] = [
   '/net-worth/*',
   '/planning',
   '/planning/*',
-  '/sankey',
   '/analysis/:groupBy?/:period?/:page?',
   '/funds',
   '/income',

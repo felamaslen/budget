@@ -19,6 +19,7 @@ import * as Styled from './styles';
 import Upper from './upper';
 
 import { BlockName, BlockPacker } from '~client/components/block-packer';
+import { Sankey } from '~client/components/sankey';
 import { isAnalysisPage } from '~client/constants/data';
 import { getInvestmentsBetweenDates } from '~client/selectors';
 import { PageNonStandard } from '~client/types/enum';
@@ -79,8 +80,13 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
 
   const status = useStatus(activeBlocks, cost, costDeep, saved);
 
+  const [showSankey, setShowSankey] = useState<boolean>(false);
+  const onOpenSankey = useCallback(() => setShowSankey(true), []);
+  const onCloseSankey = useCallback(() => setShowSankey(false), []);
+
   return (
     <Styled.Page page={PageNonStandard.Analysis}>
+      {showSankey && <Sankey onClosed={onCloseSankey} />}
       <Upper
         period={query.period}
         groupBy={query.groupBy}
@@ -88,6 +94,7 @@ export const PageAnalysis: React.FC<RouteComponentProps<RouteParams>> = ({ match
         description={description ?? ''}
         loading={loading || loadingDeep}
         onRequest={onRequest}
+        onOpenSankey={onOpenSankey}
       />
       <Styled.Outer>
         <ListTree

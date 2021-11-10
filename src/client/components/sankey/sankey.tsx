@@ -2,9 +2,8 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 import React from 'react';
 import { Chart } from 'react-google-charts';
-import type { RouteComponentProps } from 'react-router';
 
-import { ModalWindow, useCloseModal } from '~client/components/modal-window';
+import { ModalWindow } from '~client/components/modal-window';
 import { colors } from '~client/styled/variables';
 import { useReadSankeyQuery } from '~client/types/gql';
 
@@ -14,9 +13,12 @@ const SankeyBox = styled.div`
   width: ${rem(720)};
 `;
 
-export const Sankey: React.FC<RouteComponentProps> = ({ history }) => {
-  const onClosed = useCloseModal(history);
-  const [{ data }] = useReadSankeyQuery();
+export type Props = {
+  onClosed: () => void;
+};
+
+export const Sankey: React.FC<Props> = ({ onClosed }) => {
+  const [{ data }] = useReadSankeyQuery({ requestPolicy: 'cache-and-network' });
 
   return (
     <ModalWindow title="Sankey diagram" onClosed={onClosed}>
