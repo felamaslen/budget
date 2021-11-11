@@ -120,3 +120,13 @@ export const LogoGeneral = LogoGeneralTemplate.bind({});
 LogoGeneral.args = {
   color: 'white',
 };
+
+const LogoHolidayTemplate: ComponentStory<typeof Logos.LogoHoliday> = (args) => (
+  <LogoStoryWrapper>
+    <Logos.LogoHoliday {...args} />
+  </LogoStoryWrapper>
+);
+export const LogoHoliday = LogoHolidayTemplate.bind({});
+LogoHoliday.args = {
+  color: 'white',
+};

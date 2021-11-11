@@ -100,6 +100,7 @@ export const Link = styled.span<LinkProps>`
           'bills',
           'food',
           'general',
+          'holiday',
         ].includes(page)
           ? 'none'
           : "''"};
