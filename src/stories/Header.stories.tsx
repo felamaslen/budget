@@ -29,16 +29,22 @@ Anonymous.args = {
   },
 };
 
-const LogoIncomeTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => (
+const LogoStoryWrapper: React.FC = ({ children }) => (
   <div
     style={{
-      background: rgb(100, 0, 0),
+      background: rgb(150, 150, 150),
       height: rem(240),
       width: rem(240),
     }}
   >
-    <Logos.LogoIncome {...args} />
+    {children}
   </div>
+);
+
+const LogoIncomeTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => (
+  <LogoStoryWrapper>
+    <Logos.LogoIncome {...args} />
+  </LogoStoryWrapper>
 );
 export const LogoIncome = LogoIncomeTemplate.bind({});
 LogoIncome.args = {
@@ -46,15 +52,9 @@ LogoIncome.args = {
 };
 
 const LogoBillsTemplate: ComponentStory<typeof Logos.LogoBills> = (args) => (
-  <div
-    style={{
-      background: rgb(100, 0, 0),
-      height: rem(240),
-      width: rem(240),
-    }}
-  >
+  <LogoStoryWrapper>
     <Logos.LogoBills {...args} />
-  </div>
+  </LogoStoryWrapper>
 );
 export const LogoBills = LogoBillsTemplate.bind({});
 LogoBills.args = {
