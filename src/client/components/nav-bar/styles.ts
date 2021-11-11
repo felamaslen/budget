@@ -91,7 +91,16 @@ export const Link = styled.span<LinkProps>`
       background-image: url(${nav1x});
       background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
       content: ${({ page }): string =>
-        ['overview', 'planning', 'analysis', 'funds', 'income', 'bills', 'food'].includes(page)
+        [
+          'overview',
+          'planning',
+          'analysis',
+          'funds',
+          'income',
+          'bills',
+          'food',
+          'general',
+        ].includes(page)
           ? 'none'
           : "''"};
       display: block;

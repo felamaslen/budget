@@ -110,3 +110,13 @@ export const LogoFood = LogoFoodTemplate.bind({});
 LogoFood.args = {
   color: 'white',
 };
+
+const LogoGeneralTemplate: ComponentStory<typeof Logos.LogoGeneral> = (args) => (
+  <LogoStoryWrapper>
+    <Logos.LogoGeneral {...args} />
+  </LogoStoryWrapper>
+);
+export const LogoGeneral = LogoGeneralTemplate.bind({});
+LogoGeneral.args = {
+  color: 'white',
+};
