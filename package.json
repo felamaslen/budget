@@ -46,7 +46,9 @@
     "scrape_holdings": "yarn scrape --holdings",
     "scrape:dev": "NODE_ENV=development ts-node -r tsconfig-paths/register ./src/api/scripts/scrape-funds",
     "scrape_funds:dev": "yarn scrape:dev --prices",
-    "scrape_holdings:dev": "yarn scrape:dev --holdings"
+    "scrape_holdings:dev": "yarn scrape:dev --holdings",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "repository": {
     "type": "git",
@@ -175,6 +177,10 @@
     "@loadable/babel-plugin": "^5.13.2",
     "@roarr/cli": "^3.2.0",
     "@slonik/migrator": "^0.7.0",
+    "@storybook/addon-actions": "^6.3.12",
+    "@storybook/addon-essentials": "^6.3.12",
+    "@storybook/addon-links": "^6.3.12",
+    "@storybook/react": "^6.3.12",
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/react": "^11.2.2",
     "@testing-library/react-hooks": "^7.0.2",

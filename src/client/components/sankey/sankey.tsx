@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import { rem } from 'polished';
-import React from 'react';
 import { Chart } from 'react-google-charts';
 
 import { ModalWindow } from '~client/components/modal-window';

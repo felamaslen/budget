@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import { forwardRef, ForwardRefRenderFunction } from 'react';
 
 import type { HoverEffect, HLPoint } from './hooks';
 import { RenderedLineGroup } from './rendered-line';
@@ -35,7 +35,7 @@ const LineSibling: React.FC<SiblingWrapperProps> = ({ Sibling, dimensions, calc,
   return <Sibling {...dimensions} {...calc} hlPoint={hlPoint} />;
 };
 
-const LineGraphDumbWithoutRef: React.RefForwardingComponent<HTMLDivElement, Props> = (
+const LineGraphDumbWithoutRef: ForwardRefRenderFunction<HTMLDivElement, Props> = (
   {
     Before,
     After,

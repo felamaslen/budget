@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { CrudProps } from '~client/hooks';
 import type { Id, SetActiveId, WithIds } from '~client/types';

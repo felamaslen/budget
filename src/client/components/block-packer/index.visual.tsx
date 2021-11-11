@@ -1,5 +1,4 @@
 import { render } from '@testing-library/react';
-import React from 'react';
 
 import * as stubs from './__tests__/stubs';
 import { BlockPacker } from '.';

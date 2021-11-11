@@ -1,4 +1,4 @@
-import React, { HTMLAttributes, useMemo, useRef } from 'react';
+import { HTMLAttributes, useMemo, useRef } from 'react';
 
 import { genPixelCompute, defaultPadding } from './helpers';
 import { useHover } from './hooks';

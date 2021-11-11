@@ -1,5 +1,4 @@
 import { rgba } from 'polished';
-import React from 'react';
 import { BaseKey, Props } from '~client/components/graph-cashflow/base-key';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
 import { colors } from '~client/styled/variables';

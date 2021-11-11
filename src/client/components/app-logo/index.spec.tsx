@@ -1,5 +1,4 @@
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 import { AppLogo, Props } from '.';
 import { settingsToggled } from '~client/actions';

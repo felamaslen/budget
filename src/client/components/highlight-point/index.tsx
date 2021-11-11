@@ -1,5 +1,5 @@
 import { readableColor } from 'polished';
-import React, { CSSProperties, RefObject, useLayoutEffect, useRef, useState } from 'react';
+import { CSSProperties, RefObject, useLayoutEffect, useRef, useState } from 'react';
 
 import * as Styled from './styles';
 

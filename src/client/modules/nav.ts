@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const enum ActionType {
   ValueSet = 'VALUE_SET',
   Cancelled = 'CANCELLED',

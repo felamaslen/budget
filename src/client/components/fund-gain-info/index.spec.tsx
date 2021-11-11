@@ -1,6 +1,5 @@
 import { render, RenderResult } from '@testing-library/react';
 import { rgb } from 'polished';
-import React from 'react';
 import { FundGainInfo } from '.';
 
 describe('<FundGainInfo />', () => {

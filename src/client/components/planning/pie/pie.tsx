@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Chart } from 'react-google-charts';
 import type { ReactGoogleChartProps } from 'react-google-charts/dist/types';
 

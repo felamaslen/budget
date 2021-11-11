@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 import { NetWorthSubcategoryList } from '../subcategory-list';
 import * as Styled from './styles';

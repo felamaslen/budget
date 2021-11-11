@@ -1,6 +1,5 @@
 import { RenderResult, fireEvent, within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
 

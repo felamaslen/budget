@@ -2,22 +2,14 @@ import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
-import nav1x from '../../images/nav.png';
-import nav2x from '../../images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
-import {
-  sizes,
-  colors,
-  breakpoints,
-  navSpriteWidth,
-  navSpriteHeight,
-} from '~client/styled/variables';
+import { colors, breakpoints } from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 export const NavList = styled.nav`
   align-items: center;
   display: flex;
-  flex: 0 0 ${rem(sizes.heightNavMobile)};
+  flex: 0 0 ${rem(28)};
   margin: 0;
   padding: 0;
   width: 100%;
@@ -26,6 +18,10 @@ export const NavList = styled.nav`
   box-shadow: 0 3px 9px ${colors.shadow.light as string},
     0 -2px 6px ${colors.shadow.light as string};
   transition: 0.2s opacity;
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 0 0 ${rem(32)};
+  }
 
   ${breakpoint(breakpoints.mobile)} {
     align-items: flex-end;
@@ -41,85 +37,57 @@ type LinkProps = {
   page: NavPage;
 };
 
-type PageBackgroundPosition = Record<NavPage, string>;
-
-const pageBackgroundPositionMobile: PageBackgroundPosition = {
-  logout: '-30px -59px',
-  [PageNonStandard.Overview]: '-1px -1px',
-  [PageNonStandard.Planning]: '-263px -1px',
-  [PageNonStandard.Analysis]: '-30px -1px',
-  [PageNonStandard.Funds]: '-59px -1px',
-  [PageListStandard.Income]: '-88px -1px',
-  [PageListStandard.Bills]: '-117px -1px',
-  [PageListStandard.Food]: '-146px 0px',
-  [PageListStandard.General]: '-175px -1px',
-  [PageListStandard.Holiday]: '-204px -1px',
-  [PageListStandard.Social]: '-233px -1px',
-};
-
-const pageBackgroundPositionDesktop: PageBackgroundPosition = {
-  logout: '-58px -59px',
-  [PageNonStandard.Overview]: '-1px -30px',
-  [PageNonStandard.Planning]: '-263px -30px',
-  [PageNonStandard.Analysis]: '-30px -30px',
-  [PageNonStandard.Funds]: '-59px -30px',
-  [PageListStandard.Income]: '-88px -30px',
-  [PageListStandard.Bills]: '-117px -30px',
-  [PageListStandard.Food]: '-146px -30px',
-  [PageListStandard.General]: '-175px -30px',
-  [PageListStandard.Holiday]: '-204px -30px',
-  [PageListStandard.Social]: '-233px -30px',
-};
-
 export const Link = styled.span<LinkProps>`
   border-bottom: ${rem(4)} solid
     ${({ isActive }): string => (isActive ? colors.accent : colors.transparent)};
   display: block;
   flex: 1 0 0;
-  height: 100%;
-  padding-top: ${rem(3)};
+  height: ${rem(30)};
 
   a {
     cursor: pointer;
     display: block;
-    line-height: ${rem(30)};
+    height: inherit;
+    padding-top: ${rem(2)};
     text-align: center;
     &:focus {
       outline: none;
     }
-    &::before {
-      background-image: url(${nav1x});
-      background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
-      content: '';
-      display: block;
-      margin: 0 auto;
-      height: ${rem(28)};
-      width: ${rem(28)};
+  }
 
-      @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-        background-image: url(${nav2x});
-        background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
-      }
+  svg {
+    height: ${rem(24)};
+    width: ${rem(24)};
+  }
+
+  ${breakpoint(breakpoints.mobileSmall)} {
+    height: ${rem(36)};
+
+    a {
+      padding-top: 0;
+    }
+
+    svg {
+      height: ${rem(32)};
+      width: ${rem(32)};
     }
   }
 
   ${breakpoint(breakpoints.mobile)} {
     border-bottom: none;
     flex: 0 0 auto;
-    height: ${rem(sizes.heightNavMobile)};
+    height: ${rem(36)};
     margin: 0 ${rem(2)};
-    padding-top: 0;
 
     a {
       border-bottom: ${rem(4)} solid transparent;
       border-bottom-color: ${({ page }): string =>
         page === 'logout' ? colors.light.mediumLight : colors[page].main};
       border-radius: 3px 3px 0 0;
-      box-sizing: content-box;
       color: ${colors.white};
-      display: block;
-      height: ${rem(28)};
-      padding: ${rem(2)} ${rem(10)};
+      display: flex;
+      height: 100%;
+      padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
       text-align: center;
       text-decoration: none;
       text-transform: capitalize;
@@ -143,27 +111,26 @@ export const Link = styled.span<LinkProps>`
                 background: ${colors.shadow.mediumLight};
               }
             `}
+    }
 
-      &::before {
-        background-position: ${({ page }): string => pageBackgroundPositionDesktop[page]};
-      }
+    svg {
+      height: ${rem(30)};
+      width: ${rem(30)};
     }
   }
 
   ${breakpoint(breakpoints.tablet)} {
     margin: 0 ${rem(8)} 0 0;
-    padding: 0;
 
     a {
       display: flex;
       flex: 0 0 auto;
-      height: ${rem(30)};
-      padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
+      line-height: ${rem(32)};
       text-align: left;
+    }
 
-      &::before {
-        margin: ${rem(2)};
-      }
+    svg {
+      padding-right: ${rem(2)};
     }
   }
 `;

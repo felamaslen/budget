@@ -1,6 +1,3 @@
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
-
 import * as Styled from './styles';
 import HoverCost from '~client/components/hover-cost';
 import type { OverviewTableRow, OverviewTableColumn } from '~client/types';

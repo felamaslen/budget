@@ -1,5 +1,4 @@
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 import * as stubs from './__tests__/stubs';
 import { GraphFundItem } from '.';

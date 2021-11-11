@@ -1,4 +1,3 @@
-import React from 'react';
 import type { RouteComponentProps } from 'react-router';
 
 import { AccessibleListStandard } from '~client/components/accessible-list';

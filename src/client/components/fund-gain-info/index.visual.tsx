@@ -1,6 +1,5 @@
 import { render } from '@testing-library/react';
 import { rgb } from 'polished';
-import React from 'react';
 
 import { FundGainInfo } from '.';
 import { renderVisualTest } from '~client/test-utils';

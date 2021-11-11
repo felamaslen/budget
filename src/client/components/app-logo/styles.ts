@@ -15,7 +15,7 @@ import {
 
 export const AppLogo = styled.div`
   display: flex;
-  flex: 0 0 ${rem(sizes.heightHeaderMobile)};
+  flex: 0 0 ${rem(32)};
   flex-flow: row-reverse;
   align-items: center;
   justify-content: flex-end;
@@ -57,7 +57,7 @@ export const Logo = styled.span`
   position: relative;
   &::before {
     background-image: url(${nav1x});
-    background-position: -1px -59px;
+    background-position: 0 0;
     content: '';
     display: inline-block;
     flex: 0 0 ${rem(sizes.logo)};

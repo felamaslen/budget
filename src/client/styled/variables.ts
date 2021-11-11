@@ -13,8 +13,8 @@ export const breakpoints = {
   desktop: 1325,
 };
 
-export const navSpriteWidth = 292;
-export const navSpriteHeight = 88;
+export const navSpriteWidth = 59;
+export const navSpriteHeight = 30;
 
 export const graphOverviewHeightMobile = 240;
 export const graphFundsHeightMobile = 125;
@@ -199,13 +199,7 @@ export const colors = {
   },
 };
 
-const heightHeaderMobile = 32;
-const heightNavMobile = 36;
-
 export const sizes = {
-  heightHeaderMobile,
-  heightNavMobile,
   navbarHeight: 49,
-  navbarHeightMobile: heightHeaderMobile + heightNavMobile,
-  logo: 28,
+  logo: 30,
 };

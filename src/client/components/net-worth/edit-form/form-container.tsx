@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Step } from './constants';
 
 import * as Styled from './styles';

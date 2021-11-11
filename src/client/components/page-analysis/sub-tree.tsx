@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import * as Styled from './styles';
 import type { Props as BlockPackerProps } from '~client/components/block-packer';

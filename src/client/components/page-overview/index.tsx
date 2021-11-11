@@ -1,8 +1,7 @@
-/* @jsx jsx */
-import { css, jsx } from '@emotion/react';
+import { css } from '@emotion/react';
 import loadable from '@loadable/component';
 import { rem } from 'polished';
-import React, { useState, useCallback, Fragment } from 'react';
+import { useState, useCallback, Fragment } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import PuffLoader from 'react-spinners/PuffLoader';

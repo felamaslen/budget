@@ -2,7 +2,6 @@ import { waitFor } from '@testing-library/react';
 import 'cross-fetch/polyfill';
 import { createMemoryHistory } from 'history';
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 import { Router } from 'react-router-dom';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';

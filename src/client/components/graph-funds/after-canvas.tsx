@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useCallback } from 'react';
+import { Dispatch, SetStateAction, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';

@@ -1,6 +1,5 @@
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { ModalDialogField, makeField } from './field';
 import { FormFieldText } from '~client/components/form-field';
 

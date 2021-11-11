@@ -1,5 +1,5 @@
 import { rgba } from 'polished';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { Key } from './key';
 import { LongTermSettings, Props as LongTermSettingsProps } from './long-term';

@@ -1,7 +1,6 @@
 import { within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MatchMediaMock from 'jest-matchmedia-mock';
-import React from 'react';
 import numericHash from 'string-hash';
 
 import { AccessibleListStandard, StandardLabels } from './standard';

@@ -1,9 +1,8 @@
-import React from 'react';
-
+import { forwardRef } from 'react';
 import { usePlanningState } from './context';
 import * as Styled from './styles';
 
-export const Header = React.forwardRef<HTMLDivElement>((_, ref) => {
+export const Header = forwardRef<HTMLDivElement>((_, ref) => {
   const state = usePlanningState();
   return (
     <Styled.Header ref={ref}>

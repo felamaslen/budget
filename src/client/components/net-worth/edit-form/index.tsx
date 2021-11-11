@@ -1,6 +1,6 @@
 import addMonths from 'date-fns/addMonths';
 import endOfMonth from 'date-fns/endOfMonth';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 
 import { Step } from './constants';
 import { Props as ContainerProps } from './form-container';

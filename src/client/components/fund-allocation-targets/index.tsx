@@ -1,5 +1,3 @@
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
 import { rem, rgba } from 'polished';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { NetWorthListCreateItem } from './net-worth-list-create-item';
 import { NetWorthListItem } from './net-worth-list-item';
 import * as Styled from './styles';

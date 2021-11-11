@@ -1,7 +1,7 @@
 import endOfDay from 'date-fns/endOfDay';
 import isSameSecond from 'date-fns/isSameSecond';
 import startOfSecond from 'date-fns/startOfSecond';
-import React, { createContext, Context, FC, useState, useRef, useEffect, useContext } from 'react';
+import { createContext, Context, FC, useState, useRef, useEffect, useContext } from 'react';
 
 import { IDENTITY } from '~client/modules/data';
 

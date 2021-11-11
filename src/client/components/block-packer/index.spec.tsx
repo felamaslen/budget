@@ -1,6 +1,5 @@
 import { render, fireEvent, RenderResult, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 import * as stubs from './__tests__/stubs';
 import { BlockPacker, Props } from '.';

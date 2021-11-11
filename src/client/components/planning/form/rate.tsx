@@ -1,5 +1,3 @@
-import React from 'react';
-
 import * as Styled from '../styles';
 
 import { FormFieldCost } from '~client/components/form-field';

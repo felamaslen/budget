@@ -1,7 +1,6 @@
 import { act, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { startOfSecond, subSeconds } from 'date-fns';
-import React from 'react';
 
 import { ListHeadFunds, ListHeadFundsMobile, Props, PropsMobile } from '.';
 import { FundsContext } from '~client/components/page-funds/context';

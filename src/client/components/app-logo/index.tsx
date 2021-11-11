@@ -1,6 +1,6 @@
 import { css, SerializedStyles } from '@emotion/react';
 import { rem } from 'polished';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import DotLoader from 'react-spinners/DotLoader';
 

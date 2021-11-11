@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { AccountGroupItem, Props as AccountGroupItemProps } from './account-group-item';
 import { CreditGroupItem } from './credit-group-item';

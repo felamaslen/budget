@@ -199,7 +199,7 @@ export const HeaderLinkButton = styled(ButtonUnStyled)`
 
 export const AddReceiptButton = styled.span`
   background-image: url(${nav1x});
-  background-position: -92px -62px;
+  background-position: -32px -4px;
   display: block;
   height: ${rem(22)};
   width: ${rem(22)};

@@ -1,6 +1,6 @@
 import flatten from 'lodash/flatten';
 import groupBy from 'lodash/groupBy';
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
 import { getFundLineName } from './name';

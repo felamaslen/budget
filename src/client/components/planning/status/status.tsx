@@ -1,6 +1,5 @@
 import { css, SerializedStyles } from '@emotion/react';
 import { rem } from 'polished';
-import React from 'react';
 import { Link } from 'react-router-dom';
 import DotLoader from 'react-spinners/DotLoader';
 

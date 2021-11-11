@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import type { RouteComponentProps } from 'react-router';
 

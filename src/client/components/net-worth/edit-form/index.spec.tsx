@@ -1,7 +1,6 @@
 import { render, act, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { DocumentNode } from 'graphql';
-import React from 'react';
 import numericHash from 'string-hash';
 import { Client } from 'urql';
 import { fromValue } from 'wonka';

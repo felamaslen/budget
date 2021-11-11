@@ -1,5 +1,3 @@
-/* @jsx jsx */
-import { jsx } from '@emotion/react';
 import loadable, { LoadableComponent } from '@loadable/component';
 import { Fragment, useEffect, useRef } from 'react';
 import { hot } from 'react-hot-loader/root';

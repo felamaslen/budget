@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import * as Styled from './styles';

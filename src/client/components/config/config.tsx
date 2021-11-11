@@ -1,5 +1,3 @@
-/* @jsx jsx */
-import { jsx } from '@emotion/react';
 import formatISO from 'date-fns/formatISO';
 import { FC, Fragment, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';

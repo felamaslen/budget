@@ -1,4 +1,5 @@
-import React from 'react';
+import { Fragment } from 'react';
+
 import { BaseKey } from '~client/components/graph-cashflow/base-key';
 import type { GraphCashFlowTitle } from '~client/components/graph-cashflow/types';
 import { FONT_GRAPH_KEY } from '~client/constants/graph';
@@ -35,7 +36,7 @@ export const Key: React.FC<Props> = ({ isCumulative, title, setMobileGraph }) =>
   return (
     <BaseKey title={title} setMobileGraph={setMobileGraph}>
       {keys.map(({ text, color }, index) => (
-        <React.Fragment key={text}>
+        <Fragment key={text}>
           <line
             x1={50}
             y1={40 + 18 * index}
@@ -54,7 +55,7 @@ export const Key: React.FC<Props> = ({ isCumulative, title, setMobileGraph }) =>
           >
             {text}
           </text>
-        </React.Fragment>
+        </Fragment>
       ))}
     </BaseKey>
   );

@@ -1,4 +1,4 @@
-import React, { ComponentType, FC } from 'react';
+import { ComponentType, FC } from 'react';
 
 function loadable<Props extends Record<string, unknown> = Record<string, unknown>>(load: {
   importAsync: () => Promise<{ default: ComponentType<Props> }>;

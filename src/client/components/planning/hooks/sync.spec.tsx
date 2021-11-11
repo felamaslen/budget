@@ -1,6 +1,5 @@
 import { waitFor } from '@testing-library/react';
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import React from 'react';
 import { GraphQLRequest, makeOperation, OperationContext, OperationResult } from 'urql';
 import { delay, fromValue, pipe } from 'wonka';
 

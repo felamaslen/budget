@@ -1,6 +1,6 @@
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { SetStateAction } from 'react';
+import { SetStateAction } from 'react';
 import numericHash from 'string-hash';
 
 import { FormFieldNetWorthValue, Props } from './net-worth-value';

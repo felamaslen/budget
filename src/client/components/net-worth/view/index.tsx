@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { NetWorthBreakdown } from '../breakdown';
 import { NetWorthViewRow } from './net-worth-view-row';

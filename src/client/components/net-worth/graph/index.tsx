@@ -1,5 +1,5 @@
 import getUnixTime from 'date-fns/getUnixTime';
-import React from 'react';
+import { useMemo } from 'react';
 
 import * as Styled from './styles';
 import { LineGraph, TimeAxes, useGraphWidth } from '~client/components/graph';
@@ -114,8 +114,8 @@ const getDataNetWorth = (table: GraphProps['table']): Line[] => [
 ];
 
 export const NetWorthGraph: React.FC<GraphProps> = ({ isMobile, table }) => {
-  const dataFti = React.useMemo<Line[]>(() => getDataFti(table), [table]);
-  const dataNetWorth = React.useMemo<Line[]>(() => getDataNetWorth(table), [table]);
+  const dataFti = useMemo<Line[]>(() => getDataFti(table), [table]);
+  const dataNetWorth = useMemo<Line[]>(() => getDataNetWorth(table), [table]);
 
   const dimensionsNetWorthLeft = dimensions(dataNetWorth.filter(({ secondary }) => secondary));
   const dimensionsNetWorthRight = dimensions(dataNetWorth.filter(({ secondary }) => !secondary));

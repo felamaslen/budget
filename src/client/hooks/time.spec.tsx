@@ -2,7 +2,7 @@ import { render, RenderResult, act } from '@testing-library/react';
 import endOfDay from 'date-fns/endOfDay';
 import endOfSecond from 'date-fns/endOfSecond';
 import startOfSecond from 'date-fns/startOfSecond';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { NowProvider, TodayProvider, useNow, useToday } from './time';
 

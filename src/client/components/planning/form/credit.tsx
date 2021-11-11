@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useCreditCards } from '../hooks';
 import type { Account } from '../types';

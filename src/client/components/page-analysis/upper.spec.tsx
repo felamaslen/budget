@@ -1,8 +1,7 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
-import Upper, { Props } from './upper';
+import { Props, Upper } from './upper';
 
 import { AnalysisPeriod, AnalysisGroupBy } from '~client/types/enum';
 

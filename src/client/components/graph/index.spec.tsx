@@ -1,5 +1,4 @@
 import { render, RenderResult } from '@testing-library/react';
-import React from 'react';
 import { Graph, Props } from '.';
 import { Padding } from '~client/types/graph';
 

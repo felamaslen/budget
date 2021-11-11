@@ -1,7 +1,7 @@
 import groupBy from 'lodash/groupBy';
 import moize from 'moize';
 import { rgba } from 'polished';
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas, ToggleList } from './after-canvas';

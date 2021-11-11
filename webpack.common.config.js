@@ -50,15 +50,7 @@ function getPlugins(__DEV__, suffix) {
   ].filter(Boolean);
 
   if (__DEV__) {
-    return [
-      ...common,
-      new webpack.DefinePlugin({
-        'process.env': {
-          SKIP_LOG_ACTIONS: JSON.stringify(process.env.SKIP_LOG_ACTIONS || ''),
-        },
-      }),
-      new webpack.HotModuleReplacementPlugin(),
-    ];
+    return [...common, new webpack.HotModuleReplacementPlugin()];
   }
 
   return [
@@ -102,6 +94,8 @@ const babelOptionsProd = {
         },
       },
     ],
+    '@babel/preset-typescript',
+    ['@babel/preset-react', { runtime: 'automatic' }],
   ],
   plugins: ['@babel/plugin-transform-runtime'],
 };
@@ -126,6 +120,8 @@ const babelOptionsDev = {
         },
       },
     ],
+    '@babel/preset-typescript',
+    ['@babel/preset-react', { runtime: 'automatic' }],
   ],
   plugins: ['react-hot-loader/babel'],
 };

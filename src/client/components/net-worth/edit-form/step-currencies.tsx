@@ -1,5 +1,5 @@
 import format from 'date-fns/format';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
 import { Step } from './constants';

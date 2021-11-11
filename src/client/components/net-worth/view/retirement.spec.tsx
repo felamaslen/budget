@@ -1,6 +1,5 @@
 import { render } from '@testing-library/react';
 import { getUnixTime, subMonths } from 'date-fns';
-import React from 'react';
 
 import { Props, Retirement } from './retirement';
 

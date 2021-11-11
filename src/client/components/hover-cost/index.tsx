@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import * as Styled from './styles';
 import { formatCurrency } from '~client/modules/format';
@@ -8,7 +8,7 @@ type Props = {
 };
 
 const HoverCost: React.FC<Props> = ({ value }) => {
-  const [hover, setHover] = React.useState<boolean>(false);
+  const [hover, setHover] = useState<boolean>(false);
   const onActivate = useCallback(() => setHover(true), []);
   const onDeactivate = useCallback(() => setHover(false), []);
 

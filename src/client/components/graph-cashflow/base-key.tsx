@@ -1,5 +1,3 @@
-import React from 'react';
-
 import type { GraphCashFlowTitle } from './types';
 
 import { FONT_GRAPH_TITLE } from '~client/constants/graph';

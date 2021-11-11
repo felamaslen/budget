@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { FieldComponent } from '~client/components/form-field';
 

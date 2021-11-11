@@ -1,5 +1,3 @@
-/* @jsx jsx */
-import { jsx } from '@emotion/react';
 import fromUnixTime from 'date-fns/fromUnixTime';
 import { FC, useCallback, useMemo } from 'react';
 

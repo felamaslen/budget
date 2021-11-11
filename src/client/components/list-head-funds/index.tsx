@@ -1,6 +1,6 @@
 import humanizeDuration from 'humanize-duration';
 import { mix } from 'polished';
-import React, { FC, useContext } from 'react';
+import { FC, useContext } from 'react';
 
 import { useSelector } from 'react-redux';
 import * as Styled from './styles';

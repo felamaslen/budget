@@ -1,5 +1,3 @@
-/* @jsx jsx */
-import { jsx } from '@emotion/react';
 import { createContext, Dispatch, SetStateAction, useContext, useEffect } from 'react';
 import PuffLoader from 'react-spinners/PuffLoader';
 

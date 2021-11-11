@@ -1,5 +1,3 @@
-import React from 'react';
-
 type ChildProps = { height: number; width: number };
 
 type Props = {

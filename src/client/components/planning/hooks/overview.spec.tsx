@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { testState } from '../__tests__/fixtures';
 import { PlanningContext } from '../context';
 import { PlanningOverviewRow, useOverviewData } from './overview';

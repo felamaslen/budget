@@ -1,5 +1,4 @@
 import { RenderResult } from '@testing-library/react';
-import React from 'react';
 
 import * as stubs from './__tests__/stubs';
 import { GraphFundItem, Popout, Props } from '.';

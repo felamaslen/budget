@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { LOGIN_INPUT_LENGTH } from '~client/constants/data';

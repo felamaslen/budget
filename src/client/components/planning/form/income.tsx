@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
 import * as Styled from '../styles';

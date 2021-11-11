@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import * as Styled from './styles';
 import { useCTA } from '~client/hooks';

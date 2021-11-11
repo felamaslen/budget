@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { LoansGraphLabel } from './labels';
 import { graphHeight, graphHeightMobile } from './styles';

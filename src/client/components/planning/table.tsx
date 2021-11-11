@@ -1,4 +1,4 @@
-import React, { RefObject, useCallback, useEffect, useRef } from 'react';
+import { RefObject, useCallback, useEffect, useRef } from 'react';
 import { usePlanningContext } from './context';
 
 import { Header } from './header';

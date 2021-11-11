@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { OnChangeCreditCard, useEditMode, useEnterKeyDown } from './form/hooks';
 import * as Styled from './styles';

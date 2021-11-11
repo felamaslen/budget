@@ -1,4 +1,4 @@
-import React from 'react';
+import type { FC } from 'react';
 import { useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 
@@ -12,14 +12,15 @@ export type Props = {
   onLogout: () => void;
 };
 
-const Header: React.FC<RouteComponentProps & Props> = ({ loggedIn, onLogout }) => {
-  const loadingApi = useSelector(getApiLoading);
-  return (
-    <Styled.Header role="heading">
-      <AppLogo loading={loadingApi} />
-      {loggedIn && <Navbar onLogout={onLogout} />}
-    </Styled.Header>
-  );
-};
-const RoutedHeader = withRouter(Header);
-export { RoutedHeader as Header };
+export const Header = withRouter<RouteComponentProps & Props, FC<RouteComponentProps & Props>>(
+  ({ loggedIn, onLogout }) => {
+    const loadingApi = useSelector(getApiLoading);
+    return (
+      <Styled.Header role="heading">
+        <AppLogo loading={loadingApi} />
+        {loggedIn && <Navbar onLogout={onLogout} />}
+      </Styled.Header>
+    );
+  },
+);
+Header.displayName = 'Header';

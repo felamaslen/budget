@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { replaceAtIndex } from 'replace-array';
 
 import { Key } from './key';

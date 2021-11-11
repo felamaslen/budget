@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import { render, RenderResult, within, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import numericHash from 'string-hash';
 
 import { NetWorthCategoryList, Props } from '.';

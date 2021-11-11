@@ -1,4 +1,3 @@
-import React from 'react';
 import type { PixX, SVGPathProps } from '~client/types';
 
 export type Props = {

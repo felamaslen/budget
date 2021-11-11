@@ -1,4 +1,3 @@
-import React from 'react';
 import { colors } from '~client/styled/variables';
 
 export const SankeyIcon: React.FC = () => (

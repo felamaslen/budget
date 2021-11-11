@@ -1,4 +1,3 @@
-import React from 'react';
 import { useYear, useYearOptions } from './years';
 import { TodayProvider } from '~client/hooks';
 import { testState } from '~client/test-data';

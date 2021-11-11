@@ -1,5 +1,4 @@
-/* @jsx jsx */
-import { Global, jsx } from '@emotion/react';
+import { Global } from '@emotion/react';
 import { Fragment } from 'react';
 
 import { reset } from './reset';

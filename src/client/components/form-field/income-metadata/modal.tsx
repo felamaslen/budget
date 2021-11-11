@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import shortid from 'shortid';
 
 import { FormFieldCost } from '../cost';

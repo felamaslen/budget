@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 
 import { ADD_BUTTON } from '../constants';
 import { AccessibleListItemField } from '../field';

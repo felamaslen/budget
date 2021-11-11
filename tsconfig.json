@@ -4,7 +4,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
     "allowJs": true,
     "noEmit": true,
     "strict": true,
@@ -30,6 +31,7 @@
   },
   "include": [
     "types",
+    ".storybook",
     "src"
   ],
   "exclude": [
