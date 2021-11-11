@@ -17,8 +17,8 @@ export const LogoAnalysis: React.FC<Props> = ({ color }) => (
     <path
       d={[
         'M',
-        cx + (r + 2) * Math.cos(handleAngle),
-        cy + (r + 2) * Math.sin(handleAngle),
+        cx + r * 1.1 * Math.cos(handleAngle),
+        cy + r * 1.1 * Math.sin(handleAngle),
         'l',
         30 * Math.cos(handleAngle),
         30 * Math.sin(handleAngle),

@@ -30,7 +30,7 @@ const pages: PageDefinition[] = [
   { page: PageNonStandard.Funds, Logo: Logos.LogoFunds },
   { page: PageListStandard.Income, Logo: Logos.LogoIncome },
   { page: PageListStandard.Bills, Logo: Logos.LogoBills },
-  { page: PageListStandard.Food },
+  { page: PageListStandard.Food, Logo: Logos.LogoFood },
   { page: PageListStandard.General },
   { page: PageListStandard.Holiday },
   { page: PageListStandard.Social },
