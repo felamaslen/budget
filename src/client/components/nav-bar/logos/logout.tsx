@@ -1,8 +1,8 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
-export const LogoLogout: React.FC<Props> = ({ color }) => (
+export const LogoLogout: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <path
+    <Styled.FilledPath
       d={[
         'M15,50',
         'l16,-24',
@@ -28,8 +28,7 @@ export const LogoLogout: React.FC<Props> = ({ color }) => (
         'h-17',
         'l-14,20',
       ].join(' ')}
-      fill={color}
     />
-    <circle cx={73} cy={22} r={10} fill={color} />
+    <Styled.FilledPath as="circle" cx={73} cy={22} r={10} />
   </svg>
 );

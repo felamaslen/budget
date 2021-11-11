@@ -1,8 +1,8 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
-export const LogoHoliday: React.FC<Props> = ({ color }) => (
+export const LogoHoliday: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <path
+    <Styled.FilledPath
       d={[
         'M5,58',
         'a2,2 0,0,1 3,-2',
@@ -15,10 +15,9 @@ export const LogoHoliday: React.FC<Props> = ({ color }) => (
         'l5,-2',
         'l36,11',
       ].join(' ')}
-      fill={color}
     />
-    <path d="M10,90 h48" fill="none" stroke={color} strokeLinecap="round" strokeWidth={6} />
-    <circle cx={47} cy={69} r={5} fill={color} />
-    <circle cx={61} cy={62} r={5} fill={color} />
+    <Styled.StrokedPath d="M10,90 h48" fill="none" strokeLinecap="round" strokeWidth={6} />
+    <Styled.FilledPath as="circle" cx={47} cy={69} r={5} />
+    <Styled.FilledPath as="circle" cx={61} cy={62} r={5} />
   </svg>
 );

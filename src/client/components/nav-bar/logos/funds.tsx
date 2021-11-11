@@ -1,8 +1,8 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
-export const LogoFunds: React.FC<Props> = ({ color }) => (
+export const LogoFunds: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <path
+    <Styled.StrokedPath
       d={[
         'M',
         10,
@@ -32,9 +32,7 @@ export const LogoFunds: React.FC<Props> = ({ color }) => (
         90,
         25,
       ].join(' ')}
-      stroke={color}
       strokeWidth={8}
-      fill="none"
     />
   </svg>
 );

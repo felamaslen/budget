@@ -47,9 +47,6 @@ const LogoOverviewTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => 
   </LogoStoryWrapper>
 );
 export const LogoOverview = LogoOverviewTemplate.bind({});
-LogoOverview.args = {
-  color: 'white',
-};
 
 const LogoPlanningTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => (
   <LogoStoryWrapper>
@@ -57,9 +54,6 @@ const LogoPlanningTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => 
   </LogoStoryWrapper>
 );
 export const LogoPlanning = LogoPlanningTemplate.bind({});
-LogoPlanning.args = {
-  color: 'white',
-};
 
 const LogoAnalysisTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => (
   <LogoStoryWrapper>
@@ -67,9 +61,6 @@ const LogoAnalysisTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => 
   </LogoStoryWrapper>
 );
 export const LogoAnalysis = LogoAnalysisTemplate.bind({});
-LogoAnalysis.args = {
-  color: 'white',
-};
 
 const LogoFundsTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => (
   <LogoStoryWrapper>
@@ -77,9 +68,6 @@ const LogoFundsTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => (
   </LogoStoryWrapper>
 );
 export const LogoFunds = LogoFundsTemplate.bind({});
-LogoFunds.args = {
-  color: 'white',
-};
 
 const LogoIncomeTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => (
   <LogoStoryWrapper>
@@ -87,9 +75,6 @@ const LogoIncomeTemplate: ComponentStory<typeof Logos.LogoIncome> = (args) => (
   </LogoStoryWrapper>
 );
 export const LogoIncome = LogoIncomeTemplate.bind({});
-LogoIncome.args = {
-  color: 'white',
-};
 
 const LogoBillsTemplate: ComponentStory<typeof Logos.LogoBills> = (args) => (
   <LogoStoryWrapper>
@@ -97,9 +82,6 @@ const LogoBillsTemplate: ComponentStory<typeof Logos.LogoBills> = (args) => (
   </LogoStoryWrapper>
 );
 export const LogoBills = LogoBillsTemplate.bind({});
-LogoBills.args = {
-  color: 'white',
-};
 
 const LogoFoodTemplate: ComponentStory<typeof Logos.LogoFood> = (args) => (
   <LogoStoryWrapper>
@@ -107,9 +89,6 @@ const LogoFoodTemplate: ComponentStory<typeof Logos.LogoFood> = (args) => (
   </LogoStoryWrapper>
 );
 export const LogoFood = LogoFoodTemplate.bind({});
-LogoFood.args = {
-  color: 'white',
-};
 
 const LogoGeneralTemplate: ComponentStory<typeof Logos.LogoGeneral> = (args) => (
   <LogoStoryWrapper>
@@ -117,9 +96,6 @@ const LogoGeneralTemplate: ComponentStory<typeof Logos.LogoGeneral> = (args) => 
   </LogoStoryWrapper>
 );
 export const LogoGeneral = LogoGeneralTemplate.bind({});
-LogoGeneral.args = {
-  color: 'white',
-};
 
 const LogoHolidayTemplate: ComponentStory<typeof Logos.LogoHoliday> = (args) => (
   <LogoStoryWrapper>
@@ -127,9 +103,6 @@ const LogoHolidayTemplate: ComponentStory<typeof Logos.LogoHoliday> = (args) => 
   </LogoStoryWrapper>
 );
 export const LogoHoliday = LogoHolidayTemplate.bind({});
-LogoHoliday.args = {
-  color: 'white',
-};
 
 const LogoSocialTemplate: ComponentStory<typeof Logos.LogoSocial> = (args) => (
   <LogoStoryWrapper>
@@ -137,9 +110,6 @@ const LogoSocialTemplate: ComponentStory<typeof Logos.LogoSocial> = (args) => (
   </LogoStoryWrapper>
 );
 export const LogoSocial = LogoSocialTemplate.bind({});
-LogoSocial.args = {
-  color: 'white',
-};
 
 const LogoLogoutTemplate: ComponentStory<typeof Logos.LogoLogout> = (args) => (
   <LogoStoryWrapper>
@@ -147,6 +117,3 @@ const LogoLogoutTemplate: ComponentStory<typeof Logos.LogoLogout> = (args) => (
   </LogoStoryWrapper>
 );
 export const LogoLogout = LogoLogoutTemplate.bind({});
-LogoLogout.args = {
-  color: 'white',
-};

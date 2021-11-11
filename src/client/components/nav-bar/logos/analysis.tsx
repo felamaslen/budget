@@ -1,4 +1,4 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
 const handleAngle = (18 * Math.PI) / 24;
 
@@ -11,10 +11,10 @@ const shineAngleEnd = (5 * Math.PI) / 3;
 
 const shineRadius = r * 0.6;
 
-export const LogoAnalysis: React.FC<Props> = ({ color }) => (
+export const LogoAnalysis: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <circle cx={cx} cy={cy} r={r} stroke={color} strokeWidth={10} fill="none" />
-    <path
+    <Styled.StrokedPath as="circle" cx={cx} cy={cy} r={r} strokeWidth={10} />
+    <Styled.StrokedPath
       d={[
         'M',
         cx + r * 1.1 * Math.cos(handleAngle),
@@ -23,12 +23,10 @@ export const LogoAnalysis: React.FC<Props> = ({ color }) => (
         30 * Math.cos(handleAngle),
         30 * Math.sin(handleAngle),
       ].join(' ')}
-      stroke={color}
       strokeLinecap="round"
       strokeWidth={16}
-      fill="none"
     />
-    <path
+    <Styled.StrokedPath
       d={[
         'M',
         cx + shineRadius * Math.cos(shineAngleStart),
@@ -40,10 +38,8 @@ export const LogoAnalysis: React.FC<Props> = ({ color }) => (
         cx + shineRadius * Math.cos(shineAngleEnd),
         cy + shineRadius * Math.sin(shineAngleEnd),
       ].join(' ')}
-      stroke={color}
       strokeLinecap="round"
       strokeWidth={8}
-      fill="none"
     />
   </svg>
 );
