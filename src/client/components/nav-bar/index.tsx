@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 
 import * as Logos from './logos';
 import * as Styled from './styles';
+import { useIsMobile } from '~client/hooks';
 import { colors } from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
@@ -47,24 +48,32 @@ function doesPathMatch(
   );
 }
 
-const Navbar: React.FC<Props> = ({ location, onLogout }) => (
-  <Styled.NavList>
-    {pages.map(({ page, Logo, path, paths }) => (
-      <Styled.Link key={page} page={page} isActive={doesPathMatch(location.pathname, page, paths)}>
-        <NavLink to={path ?? `/${page}`} tabIndex={-1}>
-          <Logo color={colors.white} />
-          <Styled.LinkText>{page}</Styled.LinkText>
+const Navbar: React.FC<Props> = ({ location, onLogout }) => {
+  const isMobile = useIsMobile();
+  const logoColor = isMobile ? colors.black : colors.white;
+  return (
+    <Styled.NavList>
+      {pages.map(({ page, Logo, path, paths }) => (
+        <Styled.Link
+          key={page}
+          page={page}
+          isActive={doesPathMatch(location.pathname, page, paths)}
+        >
+          <NavLink to={path ?? `/${page}`} tabIndex={-1}>
+            <Logo color={logoColor} />
+            <Styled.LinkText>{page}</Styled.LinkText>
+          </NavLink>
+        </Styled.Link>
+      ))}
+      <Styled.Link isActive={false} page="logout">
+        <NavLink to="/" tabIndex={-1} onClick={onLogout}>
+          <Logos.LogoLogout color={logoColor} />
+          <Styled.LinkText>Log out</Styled.LinkText>
         </NavLink>
       </Styled.Link>
-    ))}
-    <Styled.Link isActive={false} page="logout">
-      <NavLink to="/" tabIndex={-1} onClick={onLogout}>
-        <Logos.LogoLogout color={colors.white} />
-        <Styled.LinkText>Log out</Styled.LinkText>
-      </NavLink>
-    </Styled.Link>
-  </Styled.NavList>
-);
+    </Styled.NavList>
+  );
+};
 
 const NavbarRouted = withRouter(Navbar);
 export { NavbarRouted as Navbar };

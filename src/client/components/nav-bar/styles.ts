@@ -38,17 +38,21 @@ export const Link = styled.span<LinkProps>`
     ${({ isActive }): string => (isActive ? colors.accent : colors.transparent)};
   display: block;
   flex: 1 0 0;
-  height: 100%;
-  padding-top: ${rem(3)};
+  height: ${rem(sizes.heightNavMobile)};
 
   a {
     cursor: pointer;
     display: block;
-    line-height: ${rem(30)};
+    height: inherit;
     text-align: center;
     &:focus {
       outline: none;
     }
+  }
+
+  svg {
+    height: ${rem(sizes.heightNavMobile - 4)};
+    width: ${rem(sizes.heightNavMobile - 4)};
   }
 
   ${breakpoint(breakpoints.mobile)} {
