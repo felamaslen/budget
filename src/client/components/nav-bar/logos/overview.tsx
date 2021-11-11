@@ -2,7 +2,7 @@ import type { Props } from './types';
 
 export const LogoOverview: React.FC<Props> = ({ color }) => (
   <svg viewBox="0 0 100 100">
-    <path stroke={color} strokeWidth={5} d={`M8,45 L30,57 L52,33 L72,17`} />
+    <path stroke={color} strokeWidth={5} fill="none" d={`M8,45 L30,57 L52,33 L72,17`} />
     <path fill={color} d={`M0,100 L16,100 L16,64 L0,64`} />
     <circle cx={8} cy={45} r={8} fill={color} />
     <path fill={color} d={`M22,100 L38,100 L38,76 L22,76`} />
