@@ -33,7 +33,7 @@ const pages: PageDefinition[] = [
   { page: PageListStandard.Food, Logo: Logos.LogoFood },
   { page: PageListStandard.General, Logo: Logos.LogoGeneral },
   { page: PageListStandard.Holiday, Logo: Logos.LogoHoliday },
-  { page: PageListStandard.Social },
+  { page: PageListStandard.Social, Logo: Logos.LogoSocial },
 ];
 
 function doesPathMatch(
