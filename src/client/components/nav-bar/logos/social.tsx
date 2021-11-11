@@ -1,8 +1,8 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
-export const LogoSocial: React.FC<Props> = ({ color }) => (
+export const LogoSocial: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <path
+    <Styled.FilledPath
       d={[
         'M28,40',
         'a30,30 0,0,0 10,0',
@@ -35,9 +35,8 @@ export const LogoSocial: React.FC<Props> = ({ color }) => (
         'a8,8 0,0,0 8,8',
         'h5',
       ].join(' ')}
-      fill={color}
     />
-    <path
+    <Styled.StrokedPath
       d={[
         'M36,33',
         'a10,10 0,1,1 -4,-18',
@@ -48,8 +47,6 @@ export const LogoSocial: React.FC<Props> = ({ color }) => (
         'a20,20 0,0,1 -16,0',
         'a20,20 0,0,1 -22,0',
       ].join(' ')}
-      fill="none"
-      stroke={color}
       strokeWidth={4}
     />
   </svg>

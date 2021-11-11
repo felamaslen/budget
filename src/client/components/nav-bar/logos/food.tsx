@@ -1,15 +1,14 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
-export const LogoFood: React.FC<Props> = ({ color }) => (
+export const LogoFood: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <path
+    <Styled.FilledPath
       d={['M14,10', 'l75,75', 'a10,10 0,0,1 -10,10', 'l-36,-36', 'c -50,-30 -31,-49 -29,-49'].join(
         ' ',
       )}
-      fill={color}
     />
     <g transform="rotate(45 58 42)">
-      <path
+      <Styled.FilledPath
         d={[
           'M45,12',
           'a2,2 0,0,1 5,0',
@@ -30,7 +29,6 @@ export const LogoFood: React.FC<Props> = ({ color }) => (
           'a6,6 0,0,1 -15,0',
           'v-25',
         ].join(' ')}
-        fill={color}
       />
     </g>
   </svg>

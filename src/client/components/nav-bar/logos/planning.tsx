@@ -1,4 +1,4 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
 const radius = 38;
 const arcInitialAngle = (5 * Math.PI) / 7;
@@ -11,33 +11,33 @@ function rotatePoint(x: number, y: number, theta: number): [number, number] {
   return [x * cos - y * sin, x * sin + y * cos];
 }
 
-export const LogoPlanning: React.FC<Props> = ({ color }) => (
+export const LogoPlanning: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <circle
+    <Styled.FilledPath
+      as="circle"
       cx={50 + radius * Math.cos(Math.PI / 7)}
       cy={50 + radius * Math.sin(Math.PI / 7)}
       r={5}
-      fill={color}
     />
-    <circle
+    <Styled.FilledPath
+      as="circle"
       cx={50 + radius * Math.cos((2 * Math.PI) / 7)}
       cy={50 + radius * Math.sin((2 * Math.PI) / 7)}
       r={5}
-      fill={color}
     />
-    <circle
+    <Styled.FilledPath
+      as="circle"
       cx={50 + radius * Math.cos((3 * Math.PI) / 7)}
       cy={50 + radius * Math.sin((3 * Math.PI) / 7)}
       r={5}
-      fill={color}
     />
-    <circle
+    <Styled.FilledPath
+      as="circle"
       cx={50 + radius * Math.cos((4 * Math.PI) / 7)}
       cy={50 + radius * Math.sin((4 * Math.PI) / 7)}
       r={5}
-      fill={color}
     />
-    <path
+    <Styled.StrokedPath
       d={[
         'M',
         50 + radius * Math.cos(arcInitialAngle),
@@ -50,10 +50,8 @@ export const LogoPlanning: React.FC<Props> = ({ color }) => (
         50 + radius * Math.sin(arcFinalAngle),
       ].join(' ')}
       strokeWidth={10}
-      stroke={color}
-      fill="none"
     />
-    <path
+    <Styled.FilledPath
       d={[
         'M',
         50 + radius * Math.cos(arcFinalAngle),
@@ -67,9 +65,8 @@ export const LogoPlanning: React.FC<Props> = ({ color }) => (
         'l',
         ...rotatePoint(0, 15, arcFinalAngle - Math.PI / 2),
       ].join(' ')}
-      fill={color}
     />
-    <path
+    <Styled.StrokedPath
       d={[
         'M',
         50 + radius * 0.5 * Math.cos((3 * Math.PI) / 2),
@@ -79,10 +76,8 @@ export const LogoPlanning: React.FC<Props> = ({ color }) => (
         radius * 0.4 * Math.cos(Math.PI / 5),
         radius * 0.4 * Math.sin(Math.PI / 5),
       ].join(' ')}
-      stroke={color}
       strokeLinecap="round"
       strokeWidth={8}
-      fill="none"
     />
   </svg>
 );

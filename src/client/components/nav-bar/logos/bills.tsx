@@ -1,8 +1,8 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
-export const LogoBills: React.FC<Props> = ({ color }) => (
+export const LogoBills: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <g fillRule="evenodd" fill={color}>
+    <Styled.FilledPath as="g" fillRule="evenodd">
       <path
         d={[
           'M',
@@ -53,6 +53,6 @@ export const LogoBills: React.FC<Props> = ({ color }) => (
           'z',
         ].join(' ')}
       />
-    </g>
+    </Styled.FilledPath>
   </svg>
 );

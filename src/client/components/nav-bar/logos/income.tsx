@@ -1,8 +1,8 @@
-import type { Props } from './types';
+import * as Styled from './styles';
 
-export const LogoIncome: React.FC<Props> = ({ color }) => (
+export const LogoIncome: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <path
+    <Styled.StrokedPath
       d={[
         'M 6,50',
         'h11',
@@ -15,11 +15,9 @@ export const LogoIncome: React.FC<Props> = ({ color }) => (
         'a2,2 0,0,1 2,-2',
         'z',
       ].join(' ')}
-      fill="none"
-      stroke={color}
       strokeWidth={4}
     />
-    <path
+    <Styled.StrokedPath
       d={[
         'M 19,64',
         'A 40,40 0,0,1 45,72',
@@ -31,12 +29,10 @@ export const LogoIncome: React.FC<Props> = ({ color }) => (
         'C 90,80 84,92 55,95',
         'C 45,95 24,88 19,84',
       ].join(' ')}
-      fill="none"
-      stroke={color}
       strokeLinecap="round"
       strokeWidth={4}
     />
-    <path
+    <Styled.StrokedPath
       d={[
         'M 28,58',
         'A 28,30 0,1,1 80,65',
@@ -46,12 +42,10 @@ export const LogoIncome: React.FC<Props> = ({ color }) => (
         'c 6,2 14,-4 20,0',
         'l -6,15',
       ].join(' ')}
-      fill="none"
-      stroke={color}
       strokeLinecap="round"
       strokeWidth={4}
     />
-    <path
+    <Styled.StrokedPath
       d={[
         'M 62,38',
         'a 4,4 0,1,0 -12,4',
@@ -60,8 +54,6 @@ export const LogoIncome: React.FC<Props> = ({ color }) => (
         'm -15,-12',
         'h10',
       ].join(' ')}
-      fill="none"
-      stroke={color}
       strokeLinecap="round"
       strokeWidth={5}
     />
