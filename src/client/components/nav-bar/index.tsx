@@ -27,7 +27,7 @@ const pages: PageDefinition[] = [
   },
   { page: PageNonStandard.Planning, Logo: Logos.LogoPlanning },
   { page: PageNonStandard.Analysis, Logo: Logos.LogoAnalysis },
-  { page: PageNonStandard.Funds },
+  { page: PageNonStandard.Funds, Logo: Logos.LogoFunds },
   { page: PageListStandard.Income },
   { page: PageListStandard.Bills },
   { page: PageListStandard.Food },
