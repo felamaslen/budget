@@ -8,6 +8,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -17,6 +18,7 @@ import * as Styled from './breakdown.styles';
 
 import { BlockName, BlockPacker } from '~client/components/block-packer';
 import { ResizeContext } from '~client/hooks';
+import { blockPacker } from '~client/modules/block-packer';
 import { toISO } from '~client/modules/format';
 import { getNetWorthBreakdown } from '~client/selectors';
 import { Button } from '~client/styled/shared';
@@ -30,7 +32,7 @@ export type Props = {
 export const NetWorthBreakdown: FC<Props> = ({ entry, switchEntry }) => {
   const container = useRef<HTMLDivElement>(null);
 
-  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
+  const [{ width, height }, setDimensions] = useState<{ width: number; height: number }>({
     width: 0,
     height: 0,
   });
@@ -43,7 +45,11 @@ export const NetWorthBreakdown: FC<Props> = ({ entry, switchEntry }) => {
     });
   }, [windowWidth]);
 
-  const blocks = useSelector(getNetWorthBreakdown(entry, dimensions.width, dimensions.height));
+  const blocks = useSelector(getNetWorthBreakdown(entry, width, height));
+  const blockTree = useMemo(
+    () => (blocks ? blockPacker(width, height, blocks) : null),
+    [width, height, blocks],
+  );
 
   const nextEntry = useCallback(() => switchEntry(1), [switchEntry]);
   const prevEntry = useCallback(() => switchEntry(-1), [switchEntry]);
@@ -79,7 +85,7 @@ export const NetWorthBreakdown: FC<Props> = ({ entry, switchEntry }) => {
           <Styled.NavNext />
         </Button>
       </Styled.TitleContainer>
-      {blocks && <BlockPacker blocks={blocks} status={status} onHover={onHover} />}
+      {blockTree && <BlockPacker blocks={blockTree} status={status} onHover={onHover} />}
     </Styled.BreakdownContainer>
   );
 };
