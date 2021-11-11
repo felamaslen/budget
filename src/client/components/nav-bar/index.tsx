@@ -13,11 +13,10 @@ type Props = RouteComponentProps & {
 
 type PageDefinition = {
   page: Styled.NavPage;
+  Logo: ComponentType<Logos.Props>;
   path?: string;
   paths?: string[];
-  Logo?: ComponentType<Logos.Props>;
 };
-
 const pages: PageDefinition[] = [
   {
     page: PageNonStandard.Overview,
@@ -53,13 +52,14 @@ const Navbar: React.FC<Props> = ({ location, onLogout }) => (
     {pages.map(({ page, Logo, path, paths }) => (
       <Styled.Link key={page} page={page} isActive={doesPathMatch(location.pathname, page, paths)}>
         <NavLink to={path ?? `/${page}`} tabIndex={-1}>
-          {Logo ? <Logo color={colors.white} /> : null}
+          <Logo color={colors.white} />
           <Styled.LinkText>{page}</Styled.LinkText>
         </NavLink>
       </Styled.Link>
     ))}
     <Styled.Link isActive={false} page="logout">
       <NavLink to="/" tabIndex={-1} onClick={onLogout}>
+        <Logos.LogoLogout color={colors.white} />
         <Styled.LinkText>Log out</Styled.LinkText>
       </NavLink>
     </Styled.Link>

@@ -2,16 +2,8 @@ import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
-import nav1x from '../../images/nav.png';
-import nav2x from '../../images/nav@2x.png';
 import { breakpoint } from '~client/styled/mixins';
-import {
-  sizes,
-  colors,
-  breakpoints,
-  navSpriteWidth,
-  navSpriteHeight,
-} from '~client/styled/variables';
+import { sizes, colors, breakpoints } from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 export const NavList = styled.nav`
@@ -41,36 +33,6 @@ type LinkProps = {
   page: NavPage;
 };
 
-type PageBackgroundPosition = Record<NavPage, string>;
-
-const pageBackgroundPositionMobile: PageBackgroundPosition = {
-  logout: '-30px -59px',
-  [PageNonStandard.Overview]: '-1px -1px',
-  [PageNonStandard.Planning]: '-263px -1px',
-  [PageNonStandard.Analysis]: '-30px -1px',
-  [PageNonStandard.Funds]: '-59px -1px',
-  [PageListStandard.Income]: '-88px -1px',
-  [PageListStandard.Bills]: '-117px -1px',
-  [PageListStandard.Food]: '-146px 0px',
-  [PageListStandard.General]: '-175px -1px',
-  [PageListStandard.Holiday]: '-204px -1px',
-  [PageListStandard.Social]: '-233px -1px',
-};
-
-const pageBackgroundPositionDesktop: PageBackgroundPosition = {
-  logout: '-58px -59px',
-  [PageNonStandard.Overview]: '-1px -30px',
-  [PageNonStandard.Planning]: '-263px -30px',
-  [PageNonStandard.Analysis]: '-30px -30px',
-  [PageNonStandard.Funds]: '-59px -30px',
-  [PageListStandard.Income]: '-88px -30px',
-  [PageListStandard.Bills]: '-117px -30px',
-  [PageListStandard.Food]: '-146px -30px',
-  [PageListStandard.General]: '-175px -30px',
-  [PageListStandard.Holiday]: '-204px -30px',
-  [PageListStandard.Social]: '-233px -30px',
-};
-
 export const Link = styled.span<LinkProps>`
   border-bottom: ${rem(4)} solid
     ${({ isActive }): string => (isActive ? colors.accent : colors.transparent)};
@@ -86,34 +48,6 @@ export const Link = styled.span<LinkProps>`
     text-align: center;
     &:focus {
       outline: none;
-    }
-    &::before {
-      background-image: url(${nav1x});
-      background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
-      content: ${({ page }): string =>
-        [
-          'overview',
-          'planning',
-          'analysis',
-          'funds',
-          'income',
-          'bills',
-          'food',
-          'general',
-          'holiday',
-          'social',
-        ].includes(page)
-          ? 'none'
-          : "''"};
-      display: block;
-      margin: 0 auto;
-      height: ${rem(28)};
-      width: ${rem(28)};
-
-      @media (min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-        background-image: url(${nav2x});
-        background-size: ${navSpriteWidth}px ${navSpriteHeight}px;
-      }
     }
   }
 
@@ -142,10 +76,6 @@ export const Link = styled.span<LinkProps>`
       height: ${rem(30)};
       padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
 
-      &::before {
-        margin: ${rem(2)};
-      }
-
       ${({ isActive }): SerializedStyles =>
         isActive
           ? css`
@@ -165,10 +95,6 @@ export const Link = styled.span<LinkProps>`
                 background: ${colors.shadow.mediumLight};
               }
             `}
-
-      &::before {
-        background-position: ${({ page }): string => pageBackgroundPositionDesktop[page]};
-      }
     }
   }
 
@@ -182,10 +108,6 @@ export const Link = styled.span<LinkProps>`
       height: ${rem(30)};
       padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
       text-align: left;
-
-      &::before {
-        margin: ${rem(2)};
-      }
     }
   }
 `;

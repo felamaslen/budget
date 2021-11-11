@@ -140,3 +140,13 @@ export const LogoSocial = LogoSocialTemplate.bind({});
 LogoSocial.args = {
   color: 'white',
 };
+
+const LogoLogoutTemplate: ComponentStory<typeof Logos.LogoLogout> = (args) => (
+  <LogoStoryWrapper>
+    <Logos.LogoLogout {...args} />
+  </LogoStoryWrapper>
+);
+export const LogoLogout = LogoLogoutTemplate.bind({});
+LogoLogout.args = {
+  color: 'white',
+};
