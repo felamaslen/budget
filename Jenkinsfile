@@ -62,7 +62,11 @@ node {
 
           visualImage.inside("-v ${COVERAGE_DIRECTORY}:/app/coverage") {
             stage('Visual regression tests') {
-              sh "cd /app && CI=true yarn test:visual"
+              try {
+                sh "cd /app && CI=true yarn test:visual"
+              } catch (err) {
+                unstable('Visual regression test failed')
+              }
             }
           }
 
