@@ -44,3 +44,19 @@ export const LogoIncome = LogoIncomeTemplate.bind({});
 LogoIncome.args = {
   color: 'white',
 };
+
+const LogoBillsTemplate: ComponentStory<typeof Logos.LogoBills> = (args) => (
+  <div
+    style={{
+      background: rgb(100, 0, 0),
+      height: rem(240),
+      width: rem(240),
+    }}
+  >
+    <Logos.LogoBills {...args} />
+  </div>
+);
+export const LogoBills = LogoBillsTemplate.bind({});
+LogoBills.args = {
+  color: 'white',
+};
