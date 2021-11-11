@@ -90,7 +90,8 @@ export const Link = styled.span<LinkProps>`
     &::before {
       background-image: url(${nav1x});
       background-position: ${({ page }): string => pageBackgroundPositionMobile[page]};
-      content: ${({ page }): string => (['overview', 'planning'].includes(page) ? 'none' : "''")};
+      content: ${({ page }): string =>
+        ['overview', 'planning', 'analysis'].includes(page) ? 'none' : "''"};
       display: block;
       margin: 0 auto;
       height: ${rem(28)};

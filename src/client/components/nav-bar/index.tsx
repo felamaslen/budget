@@ -26,7 +26,7 @@ const pages: PageDefinition[] = [
     paths: ['/', '/net-worth'],
   },
   { page: PageNonStandard.Planning, Logo: Logos.LogoPlanning },
-  { page: PageNonStandard.Analysis },
+  { page: PageNonStandard.Analysis, Logo: Logos.LogoAnalysis },
   { page: PageNonStandard.Funds },
   { page: PageListStandard.Income },
   { page: PageListStandard.Bills },
