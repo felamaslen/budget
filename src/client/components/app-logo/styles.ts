@@ -15,7 +15,7 @@ import {
 
 export const AppLogo = styled.div`
   display: flex;
-  flex: 0 0 ${rem(sizes.heightHeaderMobile)};
+  flex: 0 0 ${rem(32)};
   flex-flow: row-reverse;
   align-items: center;
   justify-content: flex-end;

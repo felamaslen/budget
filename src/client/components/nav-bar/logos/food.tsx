@@ -3,10 +3,12 @@ import type { Props } from './types';
 export const LogoFood: React.FC<Props> = ({ color }) => (
   <svg viewBox="0 0 100 100">
     <path
-      d={['M10,10', 'l75,75', 'a10,10 0,0,1 -10,10', 'l-36,-36', 'C 14,50 -6,26 10,10'].join(' ')}
+      d={['M14,10', 'l75,75', 'a10,10 0,0,1 -10,10', 'l-36,-36', 'c -50,-30 -31,-49 -29,-49'].join(
+        ' ',
+      )}
       fill={color}
     />
-    <g transform="rotate(45 54 38)">
+    <g transform="rotate(45 58 42)">
       <path
         d={[
           'M45,12',

@@ -13,7 +13,7 @@ export const Outer = styled.div`
   justify-content: center;
   left: 0;
   position: fixed;
-  top: ${rem(sizes.navbarHeightMobile)};
+  top: ${rem(36)};
   width: 100%;
   z-index: 500;
 

@@ -6,8 +6,8 @@ export const LogoBills: React.FC<Props> = ({ color }) => (
       <path
         d={[
           'M',
-          10,
-          8,
+          12,
+          4,
           'l',
           12,
           10,
@@ -47,9 +47,9 @@ export const LogoBills: React.FC<Props> = ({ color }) => (
           'l',
           -12,
           10,
-          'M 20,40 L53,40 L53,44 L20,44 L20,40',
-          'M 20,52 L64,52 L64,56 L20,56 L20,52',
-          'M 20,64 L64,64 L64,68 L20,68 L20,64',
+          'M 24,34 h33 v4 h-33 v-4',
+          'M 24,46 h44 v4 h-44 v-4',
+          'M 24,58 h44 v4 h-44 v-4',
           'z',
         ].join(' ')}
       />

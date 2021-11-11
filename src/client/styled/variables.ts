@@ -199,13 +199,7 @@ export const colors = {
   },
 };
 
-const heightHeaderMobile = 32;
-const heightNavMobile = 36;
-
 export const sizes = {
-  heightHeaderMobile,
-  heightNavMobile,
   navbarHeight: 49,
-  navbarHeightMobile: heightHeaderMobile + heightNavMobile,
   logo: 30,
 };

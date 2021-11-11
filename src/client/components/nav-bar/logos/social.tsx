@@ -4,7 +4,7 @@ export const LogoSocial: React.FC<Props> = ({ color }) => (
   <svg viewBox="0 0 100 100">
     <path
       d={[
-        'M20,40',
+        'M28,40',
         'a30,30 0,0,0 10,0',
         'v40',
         'a3,3 0,0,0 5,0',
@@ -39,7 +39,7 @@ export const LogoSocial: React.FC<Props> = ({ color }) => (
     />
     <path
       d={[
-        'M30,33',
+        'M36,33',
         'a10,10 0,1,1 -4,-18',
         'a10,10 0,0,1 18,-3',
         'a12,12 0,0,1 16,2',

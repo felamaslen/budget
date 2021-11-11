@@ -3,13 +3,13 @@ import styled from '@emotion/styled';
 import { rem } from 'polished';
 
 import { breakpoint } from '~client/styled/mixins';
-import { sizes, colors, breakpoints } from '~client/styled/variables';
+import { colors, breakpoints } from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 export const NavList = styled.nav`
   align-items: center;
   display: flex;
-  flex: 0 0 ${rem(sizes.heightNavMobile)};
+  flex: 0 0 ${rem(28)};
   margin: 0;
   padding: 0;
   width: 100%;
@@ -18,6 +18,10 @@ export const NavList = styled.nav`
   box-shadow: 0 3px 9px ${colors.shadow.light as string},
     0 -2px 6px ${colors.shadow.light as string};
   transition: 0.2s opacity;
+
+  ${breakpoint(breakpoints.mobile)} {
+    flex: 0 0 ${rem(32)};
+  }
 
   ${breakpoint(breakpoints.mobile)} {
     align-items: flex-end;
@@ -38,12 +42,13 @@ export const Link = styled.span<LinkProps>`
     ${({ isActive }): string => (isActive ? colors.accent : colors.transparent)};
   display: block;
   flex: 1 0 0;
-  height: ${rem(sizes.heightNavMobile)};
+  height: ${rem(30)};
 
   a {
     cursor: pointer;
     display: block;
     height: inherit;
+    padding-top: ${rem(2)};
     text-align: center;
     &:focus {
       outline: none;
@@ -51,34 +56,41 @@ export const Link = styled.span<LinkProps>`
   }
 
   svg {
-    height: ${rem(sizes.heightNavMobile - 4)};
-    width: ${rem(sizes.heightNavMobile - 4)};
+    height: ${rem(24)};
+    width: ${rem(24)};
+  }
+
+  ${breakpoint(breakpoints.mobileSmall)} {
+    height: ${rem(36)};
+
+    a {
+      padding-top: 0;
+    }
+
+    svg {
+      height: ${rem(32)};
+      width: ${rem(32)};
+    }
   }
 
   ${breakpoint(breakpoints.mobile)} {
     border-bottom: none;
     flex: 0 0 auto;
-    height: ${rem(sizes.heightNavMobile)};
+    height: ${rem(36)};
     margin: 0 ${rem(2)};
-    padding-top: 0;
 
     a {
       border-bottom: ${rem(4)} solid transparent;
       border-bottom-color: ${({ page }): string =>
         page === 'logout' ? colors.light.mediumLight : colors[page].main};
       border-radius: 3px 3px 0 0;
-      box-sizing: content-box;
       color: ${colors.white};
-      display: block;
-      height: ${rem(28)};
-      padding: ${rem(2)} ${rem(10)};
+      display: flex;
+      height: 100%;
+      padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
       text-align: center;
       text-decoration: none;
       text-transform: capitalize;
-
-      display: flex;
-      height: ${rem(30)};
-      padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
 
       ${({ isActive }): SerializedStyles =>
         isActive
@@ -100,18 +112,25 @@ export const Link = styled.span<LinkProps>`
               }
             `}
     }
+
+    svg {
+      height: ${rem(30)};
+      width: ${rem(30)};
+    }
   }
 
   ${breakpoint(breakpoints.tablet)} {
     margin: 0 ${rem(8)} 0 0;
-    padding: 0;
 
     a {
       display: flex;
       flex: 0 0 auto;
-      height: ${rem(30)};
-      padding: 0 ${rem(4)} ${rem(2)} ${rem(4)};
+      line-height: ${rem(32)};
       text-align: left;
+    }
+
+    svg {
+      padding-right: ${rem(2)};
     }
   }
 `;
