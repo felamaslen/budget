@@ -1,23 +1,11 @@
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MatchMediaMock from 'jest-matchmedia-mock';
 import { MemoryRouter } from 'react-router-dom';
 
 import { Navbar } from '.';
-import { breakpoints } from '~client/styled/variables';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
 
 describe('<Navbar />', () => {
-  let matchMedia: MatchMediaMock;
-  const mobileQuery = `(max-width: ${breakpoints.mobile - 1}px)`;
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-    matchMedia.useMediaQuery(mobileQuery);
-  });
-  afterEach(() => {
-    matchMedia.clear();
-  });
-
   const props = {
     onLogout: jest.fn(),
   };

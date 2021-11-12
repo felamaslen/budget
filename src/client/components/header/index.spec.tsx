@@ -1,5 +1,4 @@
 import userEvent from '@testing-library/user-event';
-import MatchMediaMock from 'jest-matchmedia-mock';
 import { MemoryRouter as Router } from 'react-router-dom';
 
 import { Header, Props } from '.';
@@ -7,14 +6,6 @@ import { State } from '~client/reducers';
 import { renderWithStore } from '~client/test-utils';
 
 describe('<Header />', () => {
-  let matchMedia: MatchMediaMock;
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
-  afterEach(() => {
-    matchMedia.clear();
-  });
-
   const props: Props = {
     loggedIn: true,
     onLogout: jest.fn(),

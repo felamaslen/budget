@@ -1,6 +1,5 @@
 import { act, waitFor, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MatchMediaMock from 'jest-matchmedia-mock';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
 
@@ -19,11 +18,6 @@ describe('<AddReceipt />', () => {
   const props: Props = {
     setAddingReceipt: jest.fn(),
   };
-
-  let matchMedia: MatchMediaMock;
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
 
   let mutateSpy: jest.SpyInstance;
 
@@ -89,7 +83,6 @@ describe('<AddReceipt />', () => {
       jest.runAllTimers();
     });
 
-    matchMedia.clear();
     mutateSpy.mockRestore();
   });
 

@@ -1,4 +1,3 @@
-import MatchMediaMock from 'jest-matchmedia-mock';
 import { MemoryRouter, Route } from 'react-router';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
@@ -12,19 +11,13 @@ import { AnalysisGroupBy, AnalysisPage, AnalysisPeriod } from '~client/types/enu
 import type { AnalysisQuery } from '~client/types/gql';
 
 describe('<PageAnalysis />', () => {
-  let matchMedia: MatchMediaMock;
   let querySpy: jest.SpyInstance;
 
   beforeEach(() => {
     querySpy = jest.spyOn(mockClient, 'executeQuery');
   });
 
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
-
   afterEach(async () => {
-    matchMedia.clear();
     querySpy?.mockRestore();
   });
 

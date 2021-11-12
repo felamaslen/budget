@@ -4,7 +4,6 @@ import addDays from 'date-fns/addDays';
 import addSeconds from 'date-fns/addSeconds';
 import getUnixTime from 'date-fns/getUnixTime';
 import startOfDay from 'date-fns/startOfDay';
-import MatchMediaMock from 'jest-matchmedia-mock';
 import { MemoryRouter, Route } from 'react-router';
 import numericHash from 'string-hash';
 
@@ -101,15 +100,8 @@ describe('<PageFunds />', () => {
       { customState },
     );
 
-  let matchMedia: MatchMediaMock;
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
   beforeEach(() => {
     jest.useFakeTimers();
-  });
-  afterEach(() => {
-    matchMedia.clear();
   });
 
   it('should render', () => {

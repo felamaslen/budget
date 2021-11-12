@@ -1,6 +1,6 @@
 import { within, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import MatchMediaMock from 'jest-matchmedia-mock';
+import { Context as ResponsiveContext } from 'react-responsive';
 import numericHash from 'string-hash';
 
 import { AccessibleListStandard, StandardLabels } from './standard';
@@ -30,16 +30,6 @@ describe(AccessibleListStandard.name, () => {
   });
 
   const page: PageListStandard = PageListStandard.Bills;
-
-  let matchMedia: MatchMediaMock;
-
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
-
-  afterEach(() => {
-    matchMedia.clear();
-  });
 
   const state: State = {
     ...testState,
@@ -249,13 +239,13 @@ describe(AccessibleListStandard.name, () => {
   });
 
   describe('when rendering on mobiles', () => {
-    const mobileQuery = `(max-width: ${breakpoints.mobile - 1}px)`;
-    const setupMobile = (): ReturnType<typeof renderWithStore> => {
-      matchMedia.useMediaQuery(mobileQuery);
-      const renderResult = setup();
-
-      return renderResult;
-    };
+    const setupMobile = (): ReturnType<typeof renderWithStore> =>
+      renderWithStore(
+        <ResponsiveContext.Provider value={{ width: breakpoints.mobile - 1 }}>
+          <AccessibleListStandard {...props} />
+        </ResponsiveContext.Provider>,
+        { customState: state },
+      );
 
     it.each`
       field     | example
@@ -519,12 +509,10 @@ describe(AccessibleListStandard.name, () => {
         },
       };
 
-      const setupCustom = (): ReturnType<typeof renderWithStore> => {
-        matchMedia.useMediaQuery(`(min-width: ${breakpoints.mobile}px)`);
-        return renderWithStore(<AccessibleListStandard page={customPage} labels={labels} />, {
+      const setupCustom = (): ReturnType<typeof renderWithStore> =>
+        renderWithStore(<AccessibleListStandard page={customPage} labels={labels} />, {
           customState,
         });
-      };
 
       it('should render the field', () => {
         expect.assertions(1);
