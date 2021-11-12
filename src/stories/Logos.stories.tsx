@@ -2,6 +2,7 @@ import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { rem, rgb } from 'polished';
 
 import * as NavBarLogos from '~client/components/nav-bar/logos';
+import { Receipt as ReceiptIcon } from '~client/components/page-overview/receipt';
 
 const LogoStoryWrapper: React.FC = ({ children }) => (
   <div
@@ -98,3 +99,7 @@ const LogoutTemplate: ComponentStory<typeof NavBarLogos.LogoLogout> = (args) => 
   </LogoStoryWrapper>
 );
 export const Logout = LogoutTemplate.bind({});
+
+const ReceiptTemplate: ComponentStory<typeof ReceiptIcon> = (args) => <ReceiptIcon {...args} />;
+
+export const Receipt = ReceiptTemplate.bind({});

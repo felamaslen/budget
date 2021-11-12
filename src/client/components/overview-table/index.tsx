@@ -5,6 +5,7 @@ import { NavLink } from 'react-router-dom';
 
 import { OverviewTableCells as Cells } from './cells';
 import * as Styled from './styles';
+import { Receipt } from '~client/components/page-overview/receipt';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
 import { useToday } from '~client/hooks';
 import { getOverviewTable } from '~client/selectors';
@@ -64,7 +65,7 @@ const Header: React.FC<Props & ColumnsProps> = ({ columns, addReceipt }) => (
     <Styled.HeaderLink column="month" key="month">
       <Styled.HeaderText>Month</Styled.HeaderText>
       <Styled.HeaderLinkButton onClick={addReceipt}>
-        <Styled.AddReceiptButton />
+        <Receipt />
       </Styled.HeaderLinkButton>
     </Styled.HeaderLink>
     {columns.map(([column, { name, link }]) => (
