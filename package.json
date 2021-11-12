@@ -27,7 +27,7 @@
     "test:client": "TZ=UTC jest -w 4 -c jest.client.config.js --detectOpenHandles --forceExit",
     "test:client:ci": "TZ=UTC NODE_ENV=test jest -w 1 -c jest.client.config.js --detectOpenHandles --forceExit",
     "test": "yarn build:api:ssr && yarn test:api:unit && yarn test:api:integration && yarn test:client",
-    "coverage": "yarn ts-node-script ./scripts/merge-coverage.ts --report ./coverage/api/unit/coverage-final.json --report ./coverage/api/integration/coverage-final.json --report ./coverage/client/coverage-final.json ./coverage/visual/coverage-final.json",
+    "coverage": "yarn ts-node-script ./scripts/merge-coverage.ts --report ./coverage/api/unit/coverage-final.json --report ./coverage/api/integration/coverage-final.json --report ./coverage/client/coverage-final.json coverage-final.json",
     "lint": "eslint webpack.*config.js \"src/**/*.ts\" \"src/**/*.tsx\"",
     "prettier": "prettier -c src",
     "format": "prettier -w src",
