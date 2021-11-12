@@ -1,6 +1,5 @@
 import userEvent from '@testing-library/user-event';
 import getUnixTime from 'date-fns/getUnixTime';
-import MatchMediaMock from 'jest-matchmedia-mock';
 import numericHash from 'string-hash';
 
 import { GraphFunds, Props } from '.';
@@ -10,14 +9,6 @@ import { renderWithStore } from '~client/test-utils';
 import { PageNonStandard } from '~client/types/enum';
 
 describe('<GraphFunds />', () => {
-  let matchMedia: MatchMediaMock;
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
-  afterEach(() => {
-    matchMedia.clear();
-  });
-
   const getContainer = (props: Partial<Props> = {}): ReturnType<typeof renderWithStore> =>
     renderWithStore(<GraphFunds isMobile={false} {...props} />, {
       customState: {

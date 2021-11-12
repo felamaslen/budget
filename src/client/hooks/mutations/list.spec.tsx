@@ -71,8 +71,9 @@ describe('list mutations', () => {
       it('should dispatch an optimistic create action', async () => {
         expect.hasAssertions();
 
-        (mockClient.executeMutation as jest.Mock).mockReturnValueOnce(
+        jest.spyOn(mockClient, 'executeMutation').mockImplementationOnce((request) =>
           fromValue({
+            operation: makeOperation('mutation', request, {} as OperationContext),
             data: {
               createListItem: {
                 error: null,

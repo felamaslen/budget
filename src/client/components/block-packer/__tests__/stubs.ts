@@ -1,6 +1,7 @@
 import type { Props } from '..';
 
 import { blockPacker } from '~client/modules/block-packer';
+import { VOID } from '~client/modules/data';
 import { BlockItem } from '~client/types';
 
 export const blocks = blockPacker<BlockItem>(10, 6, [
@@ -35,6 +36,6 @@ export const props: Props = {
   blocks,
   activeBlocks: ['not_foo', 'not_bar'],
   status: 'some-status bar',
-  onClick: jest.fn(),
-  onHover: jest.fn(),
+  onClick: VOID,
+  onHover: VOID,
 };

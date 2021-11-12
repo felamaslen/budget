@@ -1,7 +1,6 @@
 import { waitFor } from '@testing-library/react';
 import 'cross-fetch/polyfill';
 import { createMemoryHistory } from 'history';
-import MatchMediaMock from 'jest-matchmedia-mock';
 import { Router } from 'react-router-dom';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
@@ -11,14 +10,6 @@ import * as LoginMutations from '~client/gql/mutations/login';
 import { mockClient, renderWithStore } from '~client/test-utils';
 
 describe('<Root />', () => {
-  let matchMedia: MatchMediaMock;
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
-  afterEach(async () => {
-    matchMedia.clear();
-  });
-
   beforeEach(() => {
     jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) => {
       if (request.query === LoginMutations.login) {

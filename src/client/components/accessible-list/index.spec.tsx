@@ -1,7 +1,6 @@
 import { act, render, RenderResult, within, RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import format from 'date-fns/format';
-import MatchMediaMock from 'jest-matchmedia-mock';
 import { Provider } from 'react-redux';
 import createStore, { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
@@ -58,12 +57,6 @@ describe('<AccessibleList />', () => {
     },
   };
 
-  let matchMedia: MatchMediaMock;
-
-  beforeAll(() => {
-    matchMedia = new MatchMediaMock();
-  });
-
   const onCreate = jest.fn();
   const onUpdate = jest.fn();
   const onDelete = jest.fn();
@@ -79,7 +72,6 @@ describe('<AccessibleList />', () => {
   });
 
   afterEach(() => {
-    matchMedia.clear();
     act(() => {
       jest.runAllTimers();
     });

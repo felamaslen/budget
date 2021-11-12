@@ -1,11 +1,13 @@
 import { memo } from 'react';
 import { useSelector } from 'react-redux';
+import { useMediaQuery } from 'react-responsive';
 import { NavLink } from 'react-router-dom';
 
 import { OverviewTableCells as Cells } from './cells';
 import * as Styled from './styles';
+import { Receipt } from '~client/components/page-overview/receipt';
 import { OVERVIEW_COLUMNS } from '~client/constants/data';
-import { useMediaQuery, useToday } from '~client/hooks';
+import { useToday } from '~client/hooks';
 import { getOverviewTable } from '~client/selectors';
 import { breakpointBase } from '~client/styled/mixins';
 import { breakpoints } from '~client/styled/variables';
@@ -63,7 +65,7 @@ const Header: React.FC<Props & ColumnsProps> = ({ columns, addReceipt }) => (
     <Styled.HeaderLink column="month" key="month">
       <Styled.HeaderText>Month</Styled.HeaderText>
       <Styled.HeaderLinkButton onClick={addReceipt}>
-        <Styled.AddReceiptButton />
+        <Receipt />
       </Styled.HeaderLinkButton>
     </Styled.HeaderLink>
     {columns.map(([column, { name, link }]) => (
@@ -97,10 +99,10 @@ export const OverviewTable: React.FC<Props> = ({ addReceipt }) => {
   const today = useToday();
   const rows = useSelector(getOverviewTable(today));
 
-  const isTablet = useMediaQuery(breakpointBase(breakpoints.mobile));
-  const isLargeTablet = useMediaQuery(breakpointBase(breakpoints.tabletSmall));
-  const isDesktop = useMediaQuery(breakpointBase(breakpoints.tablet));
-  const isLargeDesktop = useMediaQuery(breakpointBase(breakpoints.desktop));
+  const isTablet = useMediaQuery({ query: breakpointBase(breakpoints.mobile) });
+  const isLargeTablet = useMediaQuery({ query: breakpointBase(breakpoints.tabletSmall) });
+  const isDesktop = useMediaQuery({ query: breakpointBase(breakpoints.tablet) });
+  const isLargeDesktop = useMediaQuery({ query: breakpointBase(breakpoints.desktop) });
 
   const isMobile = !isTablet;
   const isLarge = (!isDesktop && isLargeTablet) || isLargeDesktop;

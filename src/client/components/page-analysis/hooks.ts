@@ -2,6 +2,7 @@ import endOfDay from 'date-fns/endOfDay';
 import startOfDay from 'date-fns/startOfDay';
 import capitalize from 'lodash/capitalize';
 import { Dispatch, SetStateAction, useCallback, useContext, useMemo, useState } from 'react';
+import { useMediaQuery } from 'react-responsive';
 
 import type { Props as PropsListTree } from './list-tree';
 import * as Styled from './styles';
@@ -9,12 +10,7 @@ import * as Styled from './styles';
 import { BlockName, statusHeight } from '~client/components/block-packer';
 import { ANALYSIS_VIEW_HEIGHT, ANALYSIS_VIEW_WIDTH } from '~client/constants/analysis';
 import { isStandardListPage } from '~client/constants/data';
-import {
-  PersistentStateValidator,
-  ResizeContext,
-  useMediaQuery,
-  usePersistentState,
-} from '~client/hooks';
+import { PersistentStateValidator, ResizeContext, usePersistentState } from '~client/hooks';
 import * as gql from '~client/hooks/gql';
 import { blockPacker } from '~client/modules/block-packer';
 import { sortByTotal } from '~client/modules/data';
@@ -250,8 +246,8 @@ export function useAnalysisDeepBlock(
 
 export function useBlockDimensions(): { width: number; height: number } {
   const windowWidth = useContext(ResizeContext);
-  const largerThanSmallMobile = useMediaQuery(breakpointBase(breakpoints.mobileSmall));
-  const isDesktop = useMediaQuery(breakpointBase(breakpoints.tablet));
+  const largerThanSmallMobile = useMediaQuery({ query: breakpointBase(breakpoints.mobileSmall) });
+  const isDesktop = useMediaQuery({ query: breakpointBase(breakpoints.tablet) });
 
   if (!isDesktop) {
     return {

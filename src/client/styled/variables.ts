@@ -13,9 +13,6 @@ export const breakpoints = {
   desktop: 1325,
 };
 
-export const navSpriteWidth = 59;
-export const navSpriteHeight = 30;
-
 export const graphOverviewHeightMobile = 240;
 export const graphFundsHeightMobile = 125;
 
