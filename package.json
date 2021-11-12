@@ -131,6 +131,7 @@
     "react-google-charts": "^3.0.15",
     "react-hot-loader": "^4.13.0",
     "react-redux": "^7.2.2",
+    "react-responsive": "^9.0.0-beta.4",
     "react-router": "^5.0.1",
     "react-router-dom": "^5.0.1",
     "react-spinners": "https://github.com/felamaslen/react-spinners#release",
