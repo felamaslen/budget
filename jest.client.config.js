@@ -23,7 +23,6 @@ module.exports = {
     '!src/client/test-utils/**',
     '!src/client/__tests__/**',
     '!src/client/gql/**',
-    '!src/client/**/*.visual.tsx',
   ],
   snapshotSerializers: ['@emotion/jest/serializer'],
 };
