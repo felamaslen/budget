@@ -1,4 +1,5 @@
 import { DecoratorFn } from '@storybook/react';
+import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router';
 
@@ -33,5 +34,8 @@ export const parameters = {
       color: /(background|color)$/i,
       date: /Date$/,
     },
+  },
+  viewport: {
+    viewports: INITIAL_VIEWPORTS,
   },
 };
