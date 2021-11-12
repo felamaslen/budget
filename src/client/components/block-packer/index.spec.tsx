@@ -7,6 +7,11 @@ import { blockPacker } from '~client/modules/block-packer';
 import type { BlockItem, WithSubTree } from '~client/types';
 
 describe('<BlockPacker />', () => {
+  let onHoverSpy: jest.SpyInstance;
+  beforeEach(() => {
+    onHoverSpy = jest.spyOn(stubs.props, 'onHover');
+  });
+
   const getContainer = (customProps = {}): RenderResult =>
     render(<BlockPacker {...stubs.props} {...customProps} />);
 
@@ -32,8 +37,8 @@ describe('<BlockPacker />', () => {
     it('should call onHover with null', () => {
       expect.assertions(2);
       setup();
-      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
-      expect(stubs.props.onHover).toHaveBeenCalledWith(null);
+      expect(onHoverSpy).toHaveBeenCalledTimes(1);
+      expect(onHoverSpy).toHaveBeenCalledWith(null);
     });
   });
 
@@ -57,8 +62,8 @@ describe('<BlockPacker />', () => {
     `('should call onHover with the name', ({ id }) => {
       expect.assertions(2);
       interact(handler, id);
-      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
-      expect(stubs.props.onHover).toHaveBeenCalledWith(id);
+      expect(onHoverSpy).toHaveBeenCalledTimes(1);
+      expect(onHoverSpy).toHaveBeenCalledWith(id);
     });
   });
 
@@ -76,8 +81,8 @@ describe('<BlockPacker />', () => {
     `('should call onHover with the name and sub-name', ({ parent, id }) => {
       expect.assertions(2);
       interact(handler, id);
-      expect(stubs.props.onHover).toHaveBeenCalledTimes(1);
-      expect(stubs.props.onHover).toHaveBeenCalledWith(parent, id);
+      expect(onHoverSpy).toHaveBeenCalledTimes(1);
+      expect(onHoverSpy).toHaveBeenCalledWith(parent, id);
     });
   });
 
