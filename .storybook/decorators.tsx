@@ -1,0 +1,45 @@
+import { DecoratorFn } from '@storybook/react';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router';
+
+import { RootContainer } from '~client/components/root/container';
+import { VOID } from '~client/modules/data';
+import { createStore } from '~client/store/configureStore.prod';
+import { GlobalStylesProvider } from '~client/styled/global';
+import { testState } from '~client/test-data';
+import { GQLProviderMock } from '~client/test-utils';
+
+export const router =
+  (initialEntries: string[] = ['/']): DecoratorFn =>
+  (Story) =>
+    (
+      <MemoryRouter initialEntries={initialEntries}>
+        <Story />
+      </MemoryRouter>
+    );
+
+const store = createStore(testState);
+
+export const gql: DecoratorFn = (Story) => (
+  <GQLProviderMock>
+    <Story />
+  </GQLProviderMock>
+);
+
+export const redux: DecoratorFn = (Story) => (
+  <Provider store={store}>
+    <Story />
+  </Provider>
+);
+
+export const styles: DecoratorFn = (Story) => (
+  <GlobalStylesProvider>
+    <Story />
+  </GlobalStylesProvider>
+);
+
+export const fullVisual: DecoratorFn = (Story) => (
+  <RootContainer loggedIn={true} onLogout={VOID}>
+    <Story />
+  </RootContainer>
+);
