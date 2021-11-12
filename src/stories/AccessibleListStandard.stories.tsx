@@ -13,7 +13,7 @@ const componentMeta: ComponentMeta<typeof AccessibleListStandard> = {
     decorators.fullVisual,
     decorators.redux,
     decorators.router(['/food']),
-    decorators.gql,
+    decorators.gql(),
   ],
 };
 

@@ -2,6 +2,7 @@ import { DecoratorFn } from '@storybook/react';
 import { endOfDay } from 'date-fns';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router';
+import { Client } from 'urql';
 
 import { RootContainer } from '~client/components/root/container';
 import { ResizeContext, TodayContext } from '~client/hooks';
@@ -22,11 +23,14 @@ export const router =
 
 const store = createStore(testState);
 
-export const gql: DecoratorFn = (Story) => (
-  <GQLProviderMock>
-    <Story />
-  </GQLProviderMock>
-);
+export const gql =
+  (client?: Client): DecoratorFn =>
+  (Story) =>
+    (
+      <GQLProviderMock client={client}>
+        <Story />
+      </GQLProviderMock>
+    );
 
 export const redux: DecoratorFn = (Story) => (
   <Provider store={store}>
