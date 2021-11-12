@@ -7,7 +7,6 @@ node {
   } else {
     script {
       IMAGE = sh(returnStdout: true, script: "make get_image").trim()
-      IMAGE_VISUAL = sh(returnStdout: true, script: "make get_image_visual").trim()
 
       COVERAGE_DIRECTORY = "/var/local/codecov/budget/${env.BRANCH_NAME}"
 
@@ -20,7 +19,6 @@ node {
       script {
         docker.withRegistry('https://docker.fela.space', 'docker.fela.space-registry') {
           sh 'make build_linux_amd64 push'
-          sh 'make build_visual'
         }
       }
     }
@@ -32,7 +30,6 @@ node {
       def dbImage = docker.image('postgres:10-alpine')
       def redisImage = docker.image('redis:6.2-alpine')
       def budgetImage = docker.image("${IMAGE}")
-      def visualImage = docker.image("${IMAGE_VISUAL}")
 
       dbImage.withRun("-e POSTGRES_USER=docker -e POSTGRES_PASSWORD=docker -v ${DB_TEMP_DIR}:/var/lib/postgresql") { pg ->
         dbImage.inside("--link ${pg.id}:db") {
@@ -57,16 +54,6 @@ node {
             }
             stage('Client unit tests') {
               sh "cd /app && CI=true yarn test:client:ci"
-            }
-          }
-
-          visualImage.inside("-v ${COVERAGE_DIRECTORY}:/app/coverage") {
-            stage('Visual regression tests') {
-              try {
-                sh "cd /app && CI=true yarn test:visual"
-              } catch (err) {
-                unstable('Visual regression test failed')
-              }
             }
           }
 
