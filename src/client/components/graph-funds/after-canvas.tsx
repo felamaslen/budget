@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useCallback } from 'react';
 
 import * as Styled from './styles';
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
-import { useFundModeSelectOptions } from '~client/components/page-funds/hooks';
+import { useFundModeSelectOptions } from '~client/components/page-funds/hooks/ui';
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { useCTA } from '~client/hooks';
 import { SettingsGroup, SettingsInput, SettingsLabel } from '~client/styled/shared/settings';

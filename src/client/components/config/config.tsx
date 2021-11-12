@@ -5,7 +5,7 @@ import { configUpdatedFromLocal, settingsToggled } from '~client/actions';
 
 import { FormFieldDate, FormFieldSelect, FormFieldTickbox } from '~client/components/form-field';
 import { periodSelectOptions } from '~client/components/graph-funds/after-canvas';
-import { useFundModeSelectOptions } from '~client/components/page-funds/hooks';
+import { useFundModeSelectOptions } from '~client/components/page-funds/hooks/ui';
 import { useIsMobile } from '~client/hooks';
 import type { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors';

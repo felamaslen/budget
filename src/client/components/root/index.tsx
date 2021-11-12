@@ -5,21 +5,17 @@ import { useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import BarLoader from 'react-spinners/BarLoader';
 
+import { RootContainer } from './container';
 import { loggedOut } from '~client/actions';
 import { Anonymous, Props as AnonymousProps } from '~client/components/anonymous';
-import { Config } from '~client/components/config';
-import { ErrorMessages } from '~client/components/error-messages';
 import { GQLProvider } from '~client/components/gql-provider';
-import { Header, Props as HeaderProps } from '~client/components/header';
 import type { ContentProps } from '~client/components/logged-in';
 import { Spinner, SpinnerInit, SpinnerContext } from '~client/components/spinner';
 import { Outer } from '~client/components/spinner/styles';
-import { ResizeContext, TodayProvider, useDebouncedResize, useOffline } from '~client/hooks';
+import { useOffline } from '~client/hooks';
 import { useWindowFocus } from '~client/hooks/focus';
 import { VOID } from '~client/modules/data';
-import { GlobalStylesProvider } from '~client/styled/global';
-import { H2, H3, PageWrapper } from '~client/styled/shared';
-import { useLogoutMutation } from '~client/types/gql';
+import { H2, H3 } from '~client/styled/shared';
 
 const LoggedIn = hot(
   loadable(() => import(/* webpackPrefetch: true */ '~client/components/logged-in'), {
@@ -33,35 +29,6 @@ export type Props = {
   onLogout?: () => void;
   offline?: boolean;
 } & ContentProps;
-
-export const RootContainer: React.FC<Omit<HeaderProps, 'setSettingsOpen'>> = ({
-  onLogout,
-  children,
-  ...props
-}) => {
-  const windowWidth = useDebouncedResize();
-
-  const [, logoutFromServer] = useLogoutMutation();
-  const logout = useCallback(() => {
-    logoutFromServer();
-    onLogout();
-  }, [onLogout, logoutFromServer]);
-
-  return (
-    <ResizeContext.Provider value={windowWidth}>
-      <TodayProvider>
-        <GlobalStylesProvider>
-          <Header {...props} onLogout={logout} />
-          <ErrorMessages />
-          <PageWrapper>
-            {children}
-            <Config />
-          </PageWrapper>
-        </GlobalStylesProvider>
-      </TodayProvider>
-    </ResizeContext.Provider>
-  );
-};
 
 const Offline: React.FC = () => (
   <Outer>

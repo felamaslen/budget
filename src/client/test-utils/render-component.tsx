@@ -7,7 +7,7 @@ import { Client } from 'urql';
 
 import { GQLProviderMock, mockClient } from './gql-provider-mock';
 
-import { RootContainer } from '~client/components/root';
+import { RootContainer } from '~client/components/root/container';
 import { VOID } from '~client/modules/data';
 import type { State } from '~client/reducers';
 import { testState } from '~client/test-data';
@@ -44,13 +44,9 @@ export function renderWithStore(
   const renderResult = render(
     <Provider store={store}>
       <GQLProviderMock client={customClient}>
-        {includeGlobalStyles ? (
-          <MemoryRouter initialEntries={initialRouterEntries}>
-            <VisualProvider>{component}</VisualProvider>
-          </MemoryRouter>
-        ) : (
-          component
-        )}
+        <MemoryRouter initialEntries={initialRouterEntries}>
+          {includeGlobalStyles ? <VisualProvider>{component}</VisualProvider> : component}
+        </MemoryRouter>
       </GQLProviderMock>
     </Provider>,
     renderOptions,
