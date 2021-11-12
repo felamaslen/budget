@@ -5,12 +5,13 @@ import { createContext, Context, FC, useState, useRef, useEffect, useContext } f
 
 import { IDENTITY } from '~client/modules/data';
 
-function timeHookFactory(roundFn: (date: Date) => Date = IDENTITY): [FC, () => Date] {
+function timeHookFactory(
+  roundFn: (date: Date) => Date = IDENTITY,
+): [FC, () => Date, Context<Date>] {
   const useTimeInit = (): Date => {
     const [time, setTime] = useState<Date>(roundFn(new Date()));
     const timer = useRef<number>(0);
     useEffect(() => {
-      clearInterval(timer.current);
       timer.current = window.setInterval(() => {
         setTime((last) => {
           const nextTime = roundFn(new Date());
@@ -32,11 +33,11 @@ function timeHookFactory(roundFn: (date: Date) => Date = IDENTITY): [FC, () => D
     return <TimeContext.Provider value={time}>{children}</TimeContext.Provider>;
   };
 
-  return [Provider, useTime];
+  return [Provider, useTime, TimeContext];
 }
 
-const [TodayProvider, useToday] = timeHookFactory(endOfDay);
-export { useToday, TodayProvider };
+const [TodayProvider, useToday, TodayContext] = timeHookFactory(endOfDay);
+export { useToday, TodayProvider, TodayContext };
 
-const [NowProvider, useNow] = timeHookFactory(startOfSecond);
-export { useNow, NowProvider };
+const [NowProvider, useNow, NowContext] = timeHookFactory(startOfSecond);
+export { useNow, NowProvider, NowContext };
