@@ -1,5 +1,6 @@
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { rem, rgb } from 'polished';
+import { AppLogoIcon } from '~client/components/app-logo';
 
 import * as NavBarLogos from '~client/components/nav-bar/logos';
 import { Receipt as ReceiptIcon } from '~client/components/page-overview/receipt';
@@ -103,3 +104,7 @@ export const Logout = LogoutTemplate.bind({});
 const ReceiptTemplate: ComponentStory<typeof ReceiptIcon> = (args) => <ReceiptIcon {...args} />;
 
 export const Receipt = ReceiptTemplate.bind({});
+
+const AppLogoIconTemplate: ComponentStory<typeof AppLogoIcon> = (args) => <AppLogoIcon {...args} />;
+
+export const AppLogo = AppLogoIconTemplate.bind({});
