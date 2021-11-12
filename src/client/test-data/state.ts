@@ -1,3 +1,5 @@
+import { endOfMonth } from 'date-fns';
+
 import numericHash from 'string-hash';
 import * as funds from './funds';
 
@@ -30,8 +32,8 @@ export const testState: State = {
   },
   error: [],
   overview: {
-    startDate: new Date('2018-01-31T23:59:59.999Z'),
-    endDate: new Date('2018-07-31T23:59:59.999Z'),
+    startDate: endOfMonth(new Date('2018-01-01')),
+    endDate: endOfMonth(new Date('2018-07-01')),
     annualisedFundReturns: 0.143,
     stocks: [100779, 101459, 102981],
     monthly: {
