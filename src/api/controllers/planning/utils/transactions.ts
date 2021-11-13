@@ -9,6 +9,7 @@ import {
   reducePredictedIncome,
   reducePreviousIncomeForAccount,
 } from './income';
+import { getComputedTaxReliefRebateTransactions } from './tax';
 import { getComputedTransferValuesForAccount, reduceTransfers } from './transfers';
 
 import type { AccountRow, AccountRowIncomeJoins } from '~api/queries/planning';
@@ -41,6 +42,13 @@ export function getComputedTransactionsForAccount(
   );
   const predictedIncome = getComputedPredictedIncomeForAccount(year, predictedIncomeReduction);
 
+  const taxReliefRebate = getComputedTaxReliefRebateTransactions(
+    year,
+    now,
+    calculationRows,
+    incomeGroup,
+  );
+
   const transfersReduction = reduceTransfers(calculationRows, accountId, now);
   const transfersValues = getComputedTransferValuesForAccount(year, transfersReduction);
 
@@ -50,6 +58,7 @@ export function getComputedTransactionsForAccount(
   const computedValues: PlanningComputedValue[] = [
     ...previousIncome,
     ...predictedIncome,
+    ...taxReliefRebate,
     ...billsValues,
     ...transfersValues,
   ].map((row) => ({

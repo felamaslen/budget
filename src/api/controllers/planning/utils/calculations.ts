@@ -72,7 +72,10 @@ export function calculateYearlyTaxRelief(
   basicRate: number,
   higherRate: number,
   additionalRate: number,
-): number {
+): {
+  basic: number;
+  extra: number;
+} {
   const taxFreeAllowance = getTaxFreeAllowance(taxCode);
 
   const basic = Math.min(basicAllowance, Math.max(0, taxableIncome - taxFreeAllowance));
@@ -82,12 +85,14 @@ export function calculateYearlyTaxRelief(
   );
   const additional = Math.max(0, taxableIncome - additionalThreshold);
 
-  const additionalTaxRelief = Math.min(additional, taxDeductions) * additionalRate;
-  const higherTaxRelief = Math.min(higher, Math.max(0, taxDeductions - additional)) * higherRate;
-  const basicTaxRelief =
-    Math.min(basic, Math.max(0, taxDeductions - higher - additional)) * basicRate;
+  const additionalTaxRelief = Math.min(additional, taxDeductions) * (additionalRate - higherRate);
+  const higherTaxRelief = Math.min(higher, Math.max(0, taxDeductions)) * (higherRate - basicRate);
+  const basicTaxRelief = Math.min(basic, Math.max(0, taxDeductions)) * basicRate;
 
-  return basicTaxRelief + higherTaxRelief + additionalTaxRelief;
+  return {
+    basic: basicTaxRelief,
+    extra: higherTaxRelief + additionalTaxRelief,
+  };
 }
 
 export function calculateMonthlyNIContributions(

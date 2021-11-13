@@ -59,18 +59,46 @@ describe('planning utils (calculations)', () => {
       'should calculate tax relief for a $taxpayer tax payer',
       ({ taxableIncome, taxCode, taxDeduction, expected }) => {
         expect.assertions(1);
-        expect(
-          calculateYearlyTaxRelief(
-            taxableIncome,
-            taxCode,
-            taxDeduction,
-            basicAllowance,
-            additionalThreshold,
-            basicRate,
-            higherRate,
-            additionalRate,
-          ),
-        ).toBeCloseTo(expected);
+        const { basic, extra } = calculateYearlyTaxRelief(
+          taxableIncome,
+          taxCode,
+          taxDeduction,
+          basicAllowance,
+          additionalThreshold,
+          basicRate,
+          higherRate,
+          additionalRate,
+        );
+        expect(basic + extra).toBeCloseTo(expected);
+      },
+    );
+
+    it.each`
+      taxpayer                    | taxableIncome | taxCode    | taxDeduction | expected
+      ${'low income'}             | ${950004}     | ${'1250L'} | ${187740}    | ${0}
+      ${'basic rate'}             | ${2700000}    | ${'1250L'} | ${360000}    | ${72000}
+      ${'basic rate (maxed)'}     | ${2700000}    | ${'1250L'} | ${1450000}   | ${290000}
+      ${'basic rate (over max)'}  | ${2700000}    | ${'1250L'} | ${1560000}   | ${290000}
+      ${'higher rate'}            | ${8500000}    | ${'1257L'} | ${360000}    | ${72000}
+      ${'higher rate (maxed)'}    | ${8500000}    | ${'1257L'} | ${3493000}   | ${698600}
+      ${'higher rate (over max)'} | ${8500000}    | ${'1257L'} | ${3600000}   | ${720000}
+      ${'additional rate'}        | ${15800000}   | ${'OT'}    | ${360000}    | ${72000}
+      ${'non-standard allowance'} | ${8500000}    | ${'818L'}  | ${3600000}   | ${720000}
+    `(
+      'should calculate basic (automatic) tax relief for a $taxpayer tax payer',
+      ({ taxableIncome, taxCode, taxDeduction, expected }) => {
+        expect.assertions(1);
+        const { basic } = calculateYearlyTaxRelief(
+          taxableIncome,
+          taxCode,
+          taxDeduction,
+          basicAllowance,
+          additionalThreshold,
+          basicRate,
+          higherRate,
+          additionalRate,
+        );
+        expect(basic).toBeCloseTo(expected);
       },
     );
   });
