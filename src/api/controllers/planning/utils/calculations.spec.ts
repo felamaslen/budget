@@ -1,7 +1,7 @@
 import {
   calculateMonthlyIncomeTax,
   calculateMonthlyNIContributions,
-  calculateMonthlyTaxRelief,
+  calculateYearlyTaxRelief,
 } from './calculations';
 
 describe('planning utils (calculations)', () => {
@@ -36,7 +36,7 @@ describe('planning utils (calculations)', () => {
     });
   });
 
-  describe(calculateMonthlyTaxRelief.name, () => {
+  describe(calculateYearlyTaxRelief.name, () => {
     const basicRate = 0.2;
     const higherRate = 0.4;
     const additionalRate = 0.45;
@@ -46,21 +46,21 @@ describe('planning utils (calculations)', () => {
 
     it.each`
       taxpayer                    | taxableIncome | taxCode    | taxDeduction | expected
-      ${'low income'}             | ${79167}      | ${'1250L'} | ${15645}     | ${0}
-      ${'basic rate'}             | ${225000}     | ${'1250L'} | ${30000}     | ${6000}
-      ${'basic rate (maxed)'}     | ${225000}     | ${'1250L'} | ${120833}    | ${24167}
-      ${'basic rate (over max)'}  | ${225000}     | ${'1250L'} | ${130000}    | ${24167}
-      ${'higher rate'}            | ${708333}     | ${'1257L'} | ${30000}     | ${12000}
-      ${'higher rate (maxed)'}    | ${708333}     | ${'1257L'} | ${291083}    | ${116433}
-      ${'higher rate (over max)'} | ${708333}     | ${'1257L'} | ${300000}    | ${118217}
-      ${'additional rate'}        | ${1316667}    | ${'OT'}    | ${30000}     | ${13500}
-      ${'non-standard allowance'} | ${708333}     | ${'818L'}  | ${300000}    | ${120000}
+      ${'low income'}             | ${950004}     | ${'1250L'} | ${187740}    | ${0}
+      ${'basic rate'}             | ${2700000}    | ${'1250L'} | ${360000}    | ${72000}
+      ${'basic rate (maxed)'}     | ${2700000}    | ${'1250L'} | ${1450000}   | ${290000}
+      ${'basic rate (over max)'}  | ${2700000}    | ${'1250L'} | ${1560000}   | ${290000}
+      ${'higher rate'}            | ${8500000}    | ${'1257L'} | ${360000}    | ${144000}
+      ${'higher rate (maxed)'}    | ${8500000}    | ${'1257L'} | ${3493000}   | ${1397200}
+      ${'higher rate (over max)'} | ${8500000}    | ${'1257L'} | ${3600000}   | ${1418600}
+      ${'additional rate'}        | ${15800000}   | ${'OT'}    | ${360000}    | ${162000}
+      ${'non-standard allowance'} | ${8500000}    | ${'818L'}  | ${3600000}   | ${1440000}
     `(
       'should calculate tax relief for a $taxpayer tax payer',
       ({ taxableIncome, taxCode, taxDeduction, expected }) => {
         expect.assertions(1);
         expect(
-          calculateMonthlyTaxRelief(
+          calculateYearlyTaxRelief(
             taxableIncome,
             taxCode,
             taxDeduction,

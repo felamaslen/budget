@@ -63,7 +63,7 @@ export function calculateMonthlyIncomeTax(
   return Math.round(basicTaxPaid + higherTaxPaid + additionalTaxPaid);
 }
 
-export function calculateMonthlyTaxRelief(
+export function calculateYearlyTaxRelief(
   taxableIncome: number,
   taxCode: string,
   taxDeductions: number, // i.e. private pension contribution
@@ -73,19 +73,21 @@ export function calculateMonthlyTaxRelief(
   higherRate: number,
   additionalRate: number,
 ): number {
-  const { basic, higher, additional } = calculateTaxCalculationValues(
-    taxableIncome,
-    taxCode,
-    basicAllowance,
-    additionalThreshold,
+  const taxFreeAllowance = getTaxFreeAllowance(taxCode);
+
+  const basic = Math.min(basicAllowance, Math.max(0, taxableIncome - taxFreeAllowance));
+  const higher = Math.max(
+    0,
+    Math.min(additionalThreshold, taxableIncome) - (taxFreeAllowance + basicAllowance),
   );
+  const additional = Math.max(0, taxableIncome - additionalThreshold);
 
   const additionalTaxRelief = Math.min(additional, taxDeductions) * additionalRate;
   const higherTaxRelief = Math.min(higher, Math.max(0, taxDeductions - additional)) * higherRate;
   const basicTaxRelief =
     Math.min(basic, Math.max(0, taxDeductions - higher - additional)) * basicRate;
 
-  return Math.round(basicTaxRelief + higherTaxRelief + additionalTaxRelief);
+  return basicTaxRelief + higherTaxRelief + additionalTaxRelief;
 }
 
 export function calculateMonthlyNIContributions(
