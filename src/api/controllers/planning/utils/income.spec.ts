@@ -1,3 +1,4 @@
+import * as stubs from './__tests__/stubs';
 import {
   getComputedPreviousIncomeForAccount,
   IntermediatePredictedIncomeReduction,
@@ -150,19 +151,8 @@ describe(getComputedPreviousIncomeForAccount.name, () => {
 describe(reducePredictedIncome, () => {
   const args: Parameters<typeof reducePredictedIncome> = [
     {
-      rateRows: [
-        { id: 1, uid: 1, year: 2022, name: 'IncomeTaxBasicRate', value: 0.2 },
-        { id: 2, uid: 1, year: 2022, name: 'IncomeTaxHigherRate', value: 0.4 },
-        { id: 3, uid: 1, year: 2022, name: 'IncomeTaxAdditionalRate', value: 0.45 },
-        { id: 4, uid: 1, year: 2022, name: 'NILowerRate', value: 0.12 },
-        { id: 5, uid: 1, year: 2022, name: 'NIHigherRate', value: 0.02 },
-      ],
-      thresholdRows: [
-        { id: 1, uid: 1, year: 2022, name: 'IncomeTaxBasicThreshold', value: 3750000 },
-        { id: 2, uid: 1, year: 2022, name: 'IncomeTaxAdditionalThreshold', value: 15000000 },
-        { id: 3, uid: 1, year: 2022, name: 'NIPT', value: 79700 },
-        { id: 4, uid: 1, year: 2022, name: 'NIUEL', value: 418900 },
-      ],
+      rateRows: stubs.rateRows(2022),
+      thresholdRows: stubs.thresholdRows(2022),
       previousIncome: [],
     },
     2022,
