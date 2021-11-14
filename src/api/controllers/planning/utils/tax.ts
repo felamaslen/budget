@@ -17,7 +17,6 @@ import type {
 import type { AsyncReturnType, PlanningComputedValue, WithRequiredJoin } from '~api/types';
 import {
   evaluatePlanningValue,
-  getDateFromYearAndMonth,
   getFinancialYear,
   getIncomeRatesForYear,
   IncomeRates,
@@ -124,33 +123,57 @@ function computeTaxReliefForAccount(
   return taxReliefFromThisAccount;
 }
 
-export function getComputedTaxReliefRebateTransactions(
-  year: number,
-  now: Date,
+export type TaxReliefRebateReduction = {
+  year: number;
+  taxRelief: number;
+};
+
+export function reduceTaxReliefRebate(
   { valueRows, previousIncome, rateRows, thresholdRows }: CalculationRows,
+  viewedYear: number,
+  predictFromDate: Date,
   incomeGroup: (AccountRow & AccountRowIncomeJoins)[],
-): PlanningComputedValue[] {
-  if (isAfter(now, getDateFromYearAndMonth(year, startMonth))) {
+): TaxReliefRebateReduction[] {
+  const firstYear = getFinancialYear(predictFromDate);
+  const numYears = viewedYear - firstYear + 1;
+  if (numYears <= 0) {
     return [];
   }
-  const previousYear = year - 1;
-  const rates = getIncomeRatesForYear({
-    rates: rateRows.filter((row) => row.year === previousYear),
-    thresholds: thresholdRows.filter((row) => row.year === previousYear),
-  });
-  const { extra } = computeTaxReliefForAccount(
-    previousYear,
-    rates,
-    valueRows,
-    previousIncome,
-    incomeGroup.filter(accountRowHasIncome),
-  );
+  return Array(numYears)
+    .fill(0)
+    .map<TaxReliefRebateReduction>((_, index) => {
+      const previousYear = firstYear + index - 1;
+      const rates = getIncomeRatesForYear({
+        rates: rateRows.filter((row) => row.year === previousYear),
+        thresholds: thresholdRows.filter((row) => row.year === previousYear),
+      });
+      const { extra } = computeTaxReliefForAccount(
+        previousYear,
+        rates,
+        valueRows,
+        previousIncome,
+        incomeGroup.filter(accountRowHasIncome),
+      );
+      return { year: firstYear + index, taxRelief: extra };
+    });
+}
+
+export function getComputedTaxReliefRebateForAccount(
+  year: number,
+  taxReliefRebateReduction: TaxReliefRebateReduction[],
+  accountId: number,
+): PlanningComputedValue[] {
+  const rebateInYear = taxReliefRebateReduction.find((compare) => compare.year === year);
+  if (!rebateInYear) {
+    return [];
+  }
+
   return [
     {
-      key: `tax-relief-${year}-${startMonth}-${incomeGroup[0].id}`,
+      key: `tax-relief-${year}-${startMonth}-${accountId}`,
       month: startMonth,
       name: 'Tax relief',
-      value: extra,
+      value: rebateInYear.taxRelief,
       isTransfer: false,
       isVerified: false,
     },

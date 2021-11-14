@@ -6,6 +6,7 @@ import {
   IntermediatePredictedIncomeReduction,
   IntermediatePreviousIncomeReduction,
 } from './income';
+import { TaxReliefRebateReduction } from './tax';
 import { IntermediateTransfersReduction } from './transfers';
 import type { LatestPlanningAccountValueRow, PreviousIncomeRow } from '~api/queries/planning';
 
@@ -139,6 +140,7 @@ describe(getComputedYearStartAccountValue.name, () => {
   const predictedIncomeReduction: IntermediatePredictedIncomeReduction[] = [];
   const predictedCreditCardPayments: Record<number, number> = {};
   const transfersTo: IntermediateTransfersReduction[] = [];
+  const taxReliefRebateReduction: TaxReliefRebateReduction[] = [];
 
   describe('when there is previous income', () => {
     const previousIncomeExample: IntermediatePreviousIncomeReduction[] = [
@@ -173,6 +175,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         predictedIncomeReduction,
         predictedCreditCardPayments,
         transfersTo,
+        taxReliefRebateReduction,
       );
 
       expect(result).toBeCloseTo(154420 + (550000 - 130500) + (708333 - 150000));
@@ -200,6 +203,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         predictedIncomeReduction,
         predictedCreditCardPayments,
         transfersTo,
+        taxReliefRebateReduction,
       );
 
       expect(result).toBeCloseTo(154420 + (550000 - 130500) + (708333 - 150000));
@@ -236,6 +240,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         predictedIncomeExample,
         predictedCreditCardPayments,
         transfersTo,
+        taxReliefRebateReduction,
       );
 
       expect(result).toBeCloseTo(
@@ -313,6 +318,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         predictedIncomeReduction,
         predictedCreditCardPayments,
         transfersTo,
+        taxReliefRebateReduction,
       );
 
       expect(result).toBeCloseTo(154420 - 142203);
@@ -345,6 +351,7 @@ describe(getComputedYearStartAccountValue.name, () => {
         predictedIncomeReduction,
         predictedCreditCardPayments,
         transfersTo,
+        taxReliefRebateReduction,
       );
 
       expect(result).toBeCloseTo(154420 - 44523);
@@ -378,6 +385,7 @@ describe(getComputedYearStartAccountValue.name, () => {
           [numericHash('my-credit-card')]: 0,
         },
         transfersTo,
+        taxReliefRebateReduction,
       );
 
       expect(result).toBeCloseTo(154420 - 15540);
@@ -406,10 +414,34 @@ describe(getComputedYearStartAccountValue.name, () => {
             [numericHash('my-credit-card')]: 0,
           },
           transfersTo,
+          taxReliefRebateReduction,
         );
 
         expect(result).toBeCloseTo(154420 - (15540 + 61923));
       });
+    });
+  });
+
+  describe('when there are tax relief rebates', () => {
+    it('should add the tax relief rebates to each successive year prior to the current year', () => {
+      expect.assertions(1);
+
+      const result = getComputedYearStartAccountValue(
+        accountId,
+        now,
+        year,
+        { latestActualValues, creditCards, valueRows, billsRows },
+        previousIncomeReduction,
+        predictedIncomeReduction,
+        predictedCreditCardPayments,
+        transfersTo,
+        [
+          { year: 2020, taxRelief: 400000 },
+          { year: 2020, taxRelief: 250000 },
+        ],
+      );
+
+      expect(result).toBe(154420 + 400000 + 250000);
     });
   });
 });

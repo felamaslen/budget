@@ -13,6 +13,7 @@ import {
   IntermediatePreviousIncomeReduction,
 } from './income';
 import { accountRowHasCreditCardPayment } from './rows';
+import { TaxReliefRebateReduction } from './tax';
 import { IntermediateTransfersReduction } from './transfers';
 
 import type { PreviousIncomeRow } from '~api/queries';
@@ -62,6 +63,7 @@ export function getComputedYearStartAccountValue(
   predictedIncomeReduction: IntermediatePredictedIncomeReduction[],
   predictedCreditCardPayments: Record<number, number>,
   transfersTo: IntermediateTransfersReduction[],
+  taxReliefRebateReduction: TaxReliefRebateReduction[],
 ): number {
   const latestActualValue = latestActualValues.find((compare) => compare.account_id === accountId);
   if (!latestActualValue) {
@@ -147,6 +149,10 @@ export function getComputedYearStartAccountValue(
     )
     .reduce<number>((sum, row) => sum + row.value, 0);
 
+  const taxReliefRebateContribution = taxReliefRebateReduction
+    .filter((row) => row.year < year)
+    .reduce<number>((sum, row) => sum + row.taxRelief, 0);
+
   return (
     latestActualValue.value +
     previousIncomeContribution +
@@ -154,6 +160,7 @@ export function getComputedYearStartAccountValue(
     explicitValuesContribution +
     billsContribution +
     creditCardPaymentContribution +
-    transfersToContribution
+    transfersToContribution +
+    taxReliefRebateContribution
   );
 }

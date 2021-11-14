@@ -11,7 +11,7 @@ import {
   financialDateCTE,
   financialYearStart,
   planningStartDateCTE,
-  planningStartDateIncludingPreviousYearCTE,
+  planningStartDateIncludingWholePreviousYearCTE,
 } from './utils';
 import { PageListStandard } from '~api/types';
 
@@ -109,7 +109,7 @@ export async function selectPlanningAccountsWithValues(
       sql`${financialDateCTE(
         sql.identifier(['v', 'year']),
         sql.identifier(['v', 'month']),
-      )} >= ${planningStartDateIncludingPreviousYearCTE(year)}`,
+      )} >= ${planningStartDateIncludingWholePreviousYearCTE()}`,
     ],
     sql` AND `,
   )}

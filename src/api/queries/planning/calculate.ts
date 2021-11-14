@@ -7,7 +7,7 @@ import type {
   PlanningOverviewIncomeRow,
   PreviousIncomeRow,
 } from './types';
-import { planningStartDateCTE, planningStartDateIncludingPreviousYearCTE } from './utils';
+import { planningStartDateCTE, planningStartDateIncludingWholePreviousYearCTE } from './utils';
 
 import { PageListStandard } from '~api/types';
 
@@ -85,7 +85,7 @@ export async function selectPlanningPreviousIncome(
         'text',
       )})`,
       sql`list_standard.value > 0`,
-      sql`list_standard.date >= ${planningStartDateIncludingPreviousYearCTE(year)}`,
+      sql`list_standard.date >= ${planningStartDateIncludingWholePreviousYearCTE()}`,
       sql`list_standard.date <= ${formatISO(endOfMonth(now), {
         representation: 'date',
       })}`,

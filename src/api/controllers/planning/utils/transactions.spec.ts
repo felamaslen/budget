@@ -84,4 +84,27 @@ describe(getComputedTransactionsForAccount.name, () => {
       ]),
     );
   });
+
+  it('should include tax relief rebates in the computed start value calculation', () => {
+    expect.assertions(1);
+    const { computedStartValue } = getComputedTransactionsForAccount(
+      {
+        ...calculationRows,
+        latestActualValues: [
+          { account_id: numericHash('my-account'), date: new Date('2021-07-31'), value: 0 },
+        ],
+      },
+      year + 1,
+      now,
+      predictFromDate,
+      incomeGroup,
+    );
+
+    const expectedIncome = 4204070;
+    const expectedTaxReliefRebateInPreviousYear = manualPensionContributions * 0.2;
+
+    expect(computedStartValue).toBe(
+      expectedIncome - manualPensionContributions + expectedTaxReliefRebateInPreviousYear,
+    );
+  });
 });

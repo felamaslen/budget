@@ -62,14 +62,15 @@ export const planningStartDateCTE = (
   WHERE uid = ${uid} AND date < ${financialYearStart(year)}
 )`;
 
-export const planningStartDateIncludingPreviousYearCTE = (
-  year: number,
+export const planningStartDateIncludingWholePreviousYearCTE = (
   startDateCteName = 'start_date',
-): TaggedTemplateLiteralInvocationType => sql`(
-  CASE WHEN ${sql.identifier([startDateCteName, 'date'])} < ${financialYearStart(year - 1)}
-  THEN ${sql.identifier([startDateCteName, 'date'])}
-  ELSE ${financialYearStart(year - 1)}
-  END
+): TaggedTemplateLiteralInvocationType => sql`make_date(
+  (CASE WHEN date_part('month', ${sql.identifier([startDateCteName, 'date'])}) - 1 < ${startMonth}
+   THEN date_part('year', ${sql.identifier([startDateCteName, 'date'])}) - 1
+   ELSE date_part('year', ${sql.identifier([startDateCteName, 'date'])})
+   END)::int4,
+  ${startMonth + 1},
+  1
 )`;
 
 export const financialDateCTE = (
