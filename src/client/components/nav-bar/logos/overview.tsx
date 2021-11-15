@@ -2,14 +2,17 @@ import * as Styled from './styles';
 
 export const LogoOverview: React.FC = () => (
   <svg viewBox="0 0 100 100">
-    <Styled.StrokedPath strokeWidth={5} d={`M16,45 l22,12 l22,-24 l20,-16`} />
-    <Styled.FilledPath as="circle" cx={16} cy={45} r={8} />
-    <Styled.FilledPath as="circle" cx={38} cy={57} r={8} />
-    <Styled.FilledPath as="circle" cx={60} cy={33} r={8} />
-    <Styled.FilledPath as="circle" cx={80} cy={17} r={8} />
-    <Styled.FilledPath d={`M8,100 h16 v-36 h-16`} />
-    <Styled.FilledPath d={`M30,100 h16 v-32 h-16`} />
-    <Styled.FilledPath d={`M52,100 h16 v-48 h-16`} />
-    <Styled.FilledPath d={`M74,100 h16 v-64 h-16`} />
+    <Styled.StrokedPath d={['M5,29', 'l45,-20', 'l45,20', 'h-90', 'z'].join(' ')} strokeWidth={5} />
+    <Styled.StrokedPath
+      d={['M12,29', 'v14', 'h76', 'v-14', 'm0,56', 'h-76', 'l-5,10', 'h86', 'l-5,-10', 'z'].join(
+        ' ',
+      )}
+      strokeWidth={5}
+    />
+    <Styled.FilledPath x={14} y={43} width={8} height={42} as="rect" />
+    <Styled.FilledPath x={30} y={43} width={8} height={42} as="rect" />
+    <Styled.FilledPath x={46} y={43} width={8} height={42} as="rect" />
+    <Styled.FilledPath x={62} y={43} width={8} height={42} as="rect" />
+    <Styled.FilledPath x={78} y={43} width={8} height={42} as="rect" />
   </svg>
 );
