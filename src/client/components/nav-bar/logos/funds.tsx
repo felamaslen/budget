@@ -5,14 +5,30 @@ export const LogoFunds: React.FC = () => (
     <Styled.StrokedPath
       d={[
         'M5,95',
-        'c0,-20 0,-35 20,-32',
-        'c10,0 60,10 50,-30',
-        'c-3,-20 5,-26 20,-28',
-        'a30,30 0,0,1 -20,30',
-        'a40,40 0,0,0 -32,-24',
-        'a28,28 0,0,0 32,24',
+        'h90',
+        'm-45,0',
+        'v-34',
+        'm0,34',
+        'c0,-24 12,-24 36,-24',
+        'c0,24 -12,24 -36,24',
+        'c0,-24 -12,-24 -36,-24',
+        'c0,24 12,24 36,24',
       ].join(' ')}
-      strokeWidth={6}
+      strokeLinecap="round"
+      strokeWidth={4}
+    />
+    <Styled.StrokedPath as="circle" cx={50} cy={32} r={28} strokeWidth={5} />
+    <Styled.StrokedPath
+      d={[
+        'M 56,21',
+        'a 4,4 0,1,0 -12,4',
+        'c 5,9 2,16 -4,20',
+        'c 6,-5 10,5 17,-1',
+        'm -15,-12',
+        'h10',
+      ].join(' ')}
+      strokeLinecap="round"
+      strokeWidth={5}
     />
   </svg>
 );
