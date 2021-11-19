@@ -26,7 +26,10 @@ export const FundGainInfo: FC<Props> = ({ rowGains, isSold, highlight }) => {
   return (
     <Styled.FundGainInfo gain={gain} isSold={isSold} isRow highlight={highlight}>
       <Styled.Text style={{ backgroundColor: color }}>
-        <Styled.Value isRow>{formatCurrency(value, formatOptionsAbsolute)}</Styled.Value>
+        <Styled.Main>
+          <Styled.Value isRow>{formatCurrency(value, formatOptionsAbsolute)}</Styled.Value>
+          {!isSold && <Styled.Price>{rowGains.price.toFixed(2)}p</Styled.Price>}
+        </Styled.Main>
         <Styled.Breakdown isRow>
           <Styled.Overall isSold={isSold}>
             <Styled.GainAbs gain={gain}>

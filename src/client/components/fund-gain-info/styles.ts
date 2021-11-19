@@ -5,7 +5,7 @@ import { desaturate, rem } from 'polished';
 import { FundRow } from '~client/components/page-funds/styles';
 import { IDENTITY } from '~client/modules/data';
 import { breakpoint } from '~client/styled/mixins';
-import { InlineFlex } from '~client/styled/shared';
+import { FlexColumn, InlineFlex } from '~client/styled/shared';
 import {
   breakpoints,
   upArrow,
@@ -35,16 +35,29 @@ export const Value = styled.span<{ isRow?: boolean }>`
   color: ${colors.dark.light};
   flex: 1;
   font-weight: bold;
-  margin-right: ${rem(4)};
+  margin: 0 ${rem(4)} 0 0;
   text-align: ${({ isRow }): 'left' | 'right' => (isRow ? 'right' : 'left')};
 
   ${breakpoint(breakpoints.mobile)} {
-    width: 68px;
     text-align: left;
-    flex: 1 1 0;
     font-size: ${rem(18)};
-    margin-right: ${rem(0)};
+    margin: ${({ isRow }): string | 0 => (isRow ? `${rem(8)} 0 ${rem(8)} 0` : 0)};
     overflow: visible !important;
+  }
+`;
+
+export const Price = styled.span`
+  color: ${colors.dark.mediumLight};
+  flex: 0 0 auto;
+  font-size: ${rem(10)};
+`;
+
+export const Main = styled(FlexColumn)`
+  align-items: center;
+  height: 100%;
+
+  ${breakpoint(breakpoints.mobile)} {
+    width: ${rem(68)};
   }
 `;
 
@@ -146,7 +159,7 @@ export const DayGain = styled(BreakdownValue)<DayGainProps>(
   `,
 );
 
-export const Text = styled.span`
+export const Text = styled.div`
   align-items: center;
   display: flex;
   height: 100%;

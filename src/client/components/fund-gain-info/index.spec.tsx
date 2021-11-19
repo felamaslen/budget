@@ -22,6 +22,7 @@ describe('<FundGainInfo />', () => {
   it.each`
     thing                        | value
     ${'current value'}           | ${'£5.6k'}
+    ${'current price'}           | ${'1023.00p'}
     ${'overall (absolute) gain'} | ${'£40'}
     ${'overall (relative) gain'} | ${'30.00%'}
     ${'daily (absolute) gain'}   | ${'(£3)'}
