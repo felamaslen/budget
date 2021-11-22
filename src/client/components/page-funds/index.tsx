@@ -23,7 +23,13 @@ import { makeField, ModalFields } from '~client/components/modal-dialog';
 import { NowProvider, useIsMobile, useListCrudFunds, usePersistentState } from '~client/hooks';
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
-import { getFundsCache, getGainsForRow, getPricesForRow, getRowGains } from '~client/selectors';
+import {
+  getFundsCache,
+  getGainsForRow,
+  getPricesForRow,
+  getRowGains,
+  getTodayPrices,
+} from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { Delta, FundInputNative as FundInput, FundNative as Fund } from '~client/types';
 import { PageNonStandard } from '~shared/constants';
@@ -59,7 +65,7 @@ const deltaSeed = (): Delta<Fund> => ({
 });
 
 type ComposedProps = {
-  [id: number]: Pick<FundProps, 'gain' | 'prices'>;
+  [id: number]: Pick<FundProps, 'gain' | 'latestPrice' | 'prices'>;
 };
 
 const itemProcessor = (fund: FundInput): Pick<FundProps, 'isSold'> => ({
@@ -80,6 +86,7 @@ export const Funds: React.FC<RouteComponentProps> = () => {
   const isMobile = useIsMobile();
   const lastScraped = useTodayPrices();
   const cache = useSelector(getFundsCache);
+  const todayPrices = useSelector(getTodayPrices);
   const composedSelector = useCallback(
     (items: Fund[]): ComposedProps => {
       const { startTime, cacheTimes, prices } = cache;
@@ -89,13 +96,14 @@ export const Funds: React.FC<RouteComponentProps> = () => {
           ...last,
           [item.id]: {
             gain: getGainsForRow(rowGains, item.id),
+            latestPrice: todayPrices[item.id] ?? rowGains[item.id]?.price ?? null,
             prices: getPricesForRow(prices, item.id, startTime, cacheTimes),
           },
         }),
         {},
       );
     },
-    [cache],
+    [cache, todayPrices],
   );
   const [sort, setSort] = usePersistentState<Sort>(defaultSort, 'funds_sort', isSort);
   const sortItems = useMemo(() => makeSortItems(sort), [sort]);

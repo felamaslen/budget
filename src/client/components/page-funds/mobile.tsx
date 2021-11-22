@@ -23,17 +23,18 @@ export const FundNameMobile: React.FC<{ value: string }> = ({ value }) => {
 
 type Props = {
   gain?: GainsForRow;
+  latestPrice?: number | null;
   isSold?: boolean;
 };
 
-export const FundDetailMobile: React.FC<Props> = ({ gain, isSold = false }) => {
+export const FundDetailMobile: React.FC<Props> = ({ gain, latestPrice, isSold = false }) => {
   if (!gain) {
     return null;
   }
 
   return (
     <Styled.FundValueMobile>
-      {!isSold && <FundGainInfo isSold={false} rowGains={gain} />}
+      {!isSold && <FundGainInfo isSold={false} rowGains={gain} latestPrice={latestPrice} />}
     </Styled.FundValueMobile>
   );
 };

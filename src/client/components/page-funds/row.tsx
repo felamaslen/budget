@@ -10,12 +10,7 @@ import { FundGainInfo } from '~client/components/fund-gain-info';
 import { GraphFundItem } from '~client/components/graph-fund-item';
 import { Pie } from '~client/components/pie';
 import { useDebouncedState, useListCrudFunds, useToday } from '~client/hooks';
-import {
-  getViewSoldFunds,
-  getFundsCachedValue,
-  getMaxAllocationTarget,
-  getTodayPrices,
-} from '~client/selectors';
+import { getViewSoldFunds, getFundsCachedValue, getMaxAllocationTarget } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import type { FundNative as Fund } from '~client/types';
 
@@ -27,6 +22,7 @@ export const FundRow: React.FC<Props> = ({
   children,
   isSold = false,
   prices,
+  latestPrice,
   gain,
 }) => {
   const today = useToday();
@@ -34,9 +30,8 @@ export const FundRow: React.FC<Props> = ({
   const latestValue = useSelector(getFundsCachedValue.today(today));
 
   const scrapedPrice = gain?.price ?? 0;
-  const latestPrice = useSelector(getTodayPrices)[item.id] ?? 0;
 
-  const highlight = usePriceChangeHighlight(latestPrice, scrapedPrice);
+  const highlight = usePriceChangeHighlight(latestPrice ?? scrapedPrice, scrapedPrice);
 
   const { onUpdate } = useListCrudFunds();
 
@@ -134,7 +129,12 @@ export const FundRow: React.FC<Props> = ({
           stockSplits={item.stockSplits}
         />
       )}
-      <FundGainInfo isSold={isSold} rowGains={gain} highlight={highlight} />
+      <FundGainInfo
+        isSold={isSold}
+        rowGains={gain}
+        latestPrice={latestPrice}
+        highlight={highlight}
+      />
     </Styled.FundRow>
   );
 };

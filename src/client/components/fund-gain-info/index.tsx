@@ -13,12 +13,13 @@ export const formatOptionsAbsolute = {
 
 export const formatOptionsRelative = { brackets: true, precision: 2 };
 
-type Props = {
+export type Props = {
   rowGains?: GainsForRow;
+  latestPrice?: number | null;
   isSold: boolean;
 } & Styled.HighlightProps;
 
-export const FundGainInfo: FC<Props> = ({ rowGains, isSold, highlight }) => {
+export const FundGainInfo: FC<Props> = ({ rowGains, latestPrice, isSold, highlight }) => {
   if (!rowGains) {
     return null;
   }
@@ -28,7 +29,7 @@ export const FundGainInfo: FC<Props> = ({ rowGains, isSold, highlight }) => {
       <Styled.Text style={{ backgroundColor: color }}>
         <Styled.Main>
           <Styled.Value isRow>{formatCurrency(value, formatOptionsAbsolute)}</Styled.Value>
-          {!isSold && <Styled.Price>{rowGains.price.toFixed(2)}p</Styled.Price>}
+          {!isSold && !!latestPrice && <Styled.Price>{latestPrice.toFixed(2)}p</Styled.Price>}
         </Styled.Main>
         <Styled.Breakdown isRow>
           <Styled.Overall isSold={isSold}>

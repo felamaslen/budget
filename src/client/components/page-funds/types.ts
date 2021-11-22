@@ -4,6 +4,7 @@ import type { RowPrices } from '~client/types';
 export type FundProps = {
   isSold: boolean;
   gain: GainsForRow;
+  latestPrice: number | null;
   prices: RowPrices;
 };
 

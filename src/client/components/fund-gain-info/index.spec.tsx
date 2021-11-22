@@ -1,11 +1,11 @@
 import { render, RenderResult } from '@testing-library/react';
 import { rgb } from 'polished';
-import { FundGainInfo } from '.';
+import { FundGainInfo, Props } from '.';
 
 describe('<FundGainInfo />', () => {
-  const props = {
+  const props: Props = {
     rowGains: {
-      price: 1023,
+      price: 1022.3,
       value: 561932,
       gain: 0.3,
       gainAbs: 4030,
@@ -13,6 +13,7 @@ describe('<FundGainInfo />', () => {
       dayGainAbs: -341,
       color: rgb(255, 128, 30),
     },
+    latestPrice: 1023,
     isSold: false,
   };
 
