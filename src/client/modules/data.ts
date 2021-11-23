@@ -26,8 +26,8 @@ import type {
   NetWorthEntryInput,
 } from '~client/types/gql';
 import { calculateTransactionCost } from '~shared/funds';
-import type { Create, GQL, GQLShallow, NativeDate, RawDate } from '~shared/types';
-import { omitTypeName } from '~shared/utils';
+import type { Create, GQL, GQLShallow, NativeDate } from '~shared/types';
+import { omitTypeName, withNativeDate, withRawDate } from '~shared/utils';
 
 export type Identity<I, O = I> = (state: I) => O;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -197,22 +197,6 @@ export const rightPad = <T>(array: T[], length: number, fill?: T): T[] =>
 export const withoutId = <T extends Partial<Item>>({ id, ...rest }: T): Omit<T, 'id'> => rest;
 export const withoutIds = <T extends Partial<ListItem>>(items: T[]): Omit<T, 'id'>[] =>
   items.map(withoutId);
-
-export const withNativeDate =
-  <K extends string, T extends Record<K, string>>(...keys: K[]) =>
-  (item: T): NativeDate<T, K> =>
-    keys.reduce<NativeDate<T, K>>(
-      (last, key) => ({ ...last, [key]: new Date(item[key]) }),
-      item as NativeDate<T, K>,
-    );
-
-export const withRawDate =
-  <K extends string, T extends Record<K, Date>>(...keys: K[]) =>
-  (item: T): RawDate<T, K> =>
-    keys.reduce<RawDate<T, K>>(
-      (last, key) => ({ ...last, [key]: toISO(item[key]) }),
-      item as RawDate<T, K>,
-    );
 
 export const toNativeFund = <F extends GQLShallow<Omit<Fund, 'id'>>>(input: F): NativeFund<F> => ({
   ...omitTypeName(input),

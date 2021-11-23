@@ -13,7 +13,7 @@ import {
 import { ErrorLevel } from '~client/constants/error';
 import * as gql from '~client/hooks/gql';
 import { composeWithoutArgs } from '~client/modules/compose-without-args';
-import { toNativeFund, withNativeDate } from '~client/modules/data';
+import { toNativeFund } from '~client/modules/data';
 import { IncomeExtraState } from '~client/reducers/types';
 import type { Id, NativeFund, PageList, StandardInput } from '~client/types';
 import { PageListStandard, PageNonStandard } from '~client/types/enum';
@@ -30,6 +30,7 @@ import {
   useFundsChangedSubscription,
 } from '~client/types/gql';
 import { GQLShallow, NativeDate } from '~shared/types';
+import { withNativeDate } from '~shared/utils';
 
 export type SubscriptionArgs = Omit<
   UseSubscriptionArgs<Exact<{ [key: string]: never }>, unknown>,

@@ -2,7 +2,6 @@ import omit from 'lodash/omit';
 import { Reducer } from 'redux';
 
 import * as Actions from '~client/actions';
-import { withNativeDate } from '~client/modules/data';
 import {
   onCreateOptimistic,
   onUpdateOptimistic,
@@ -13,6 +12,7 @@ import type { Id, ListItemStandardNative, PageList, StandardInput } from '~clien
 import { PageListStandard, ReceiptPage } from '~client/types/enum';
 import type { ListItem, ListItemInput, ListItemStandard } from '~client/types/gql';
 import type { GQL, NativeDate } from '~shared/types';
+import { withNativeDate } from '~shared/utils';
 
 type FullReducer<S, A> = (state: S, action: A) => S;
 

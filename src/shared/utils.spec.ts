@@ -1,4 +1,11 @@
-import { arrayAverage, Average, omitDeep, optionalDeep } from './utils';
+import {
+  arrayAverage,
+  Average,
+  omitDeep,
+  optionalDeep,
+  withNativeDate,
+  withRawDate,
+} from './utils';
 
 describe('shared utils', () => {
   describe(omitDeep.name, () => {
@@ -78,6 +85,72 @@ describe('shared utils', () => {
     it('should handle the case when the array is empty', () => {
       expect.assertions(1);
       expect(arrayAverage([])).toBeNaN();
+    });
+  });
+
+  describe(withNativeDate.name, () => {
+    it('should convert all the given keys to native dates', () => {
+      expect.assertions(1);
+      expect(
+        withNativeDate<
+          'a' | 'keyb',
+          {
+            a: string;
+            keyb: string;
+            c: string;
+            d: string;
+            e: number;
+          }
+        >(
+          'a',
+          'keyb',
+        )({
+          a: '2020-04-20',
+          keyb: '2020-04-30',
+          c: '2020-04-02',
+          d: 'not a date',
+          e: 25,
+        }),
+      ).toStrictEqual({
+        a: new Date('2020-04-20'),
+        keyb: new Date('2020-04-30'),
+        c: '2020-04-02',
+        d: 'not a date',
+        e: 25,
+      });
+    });
+  });
+
+  describe(withRawDate.name, () => {
+    it('should convert all the given keys to raw dates', () => {
+      expect.assertions(1);
+      expect(
+        withRawDate<
+          'a' | 'keyb',
+          {
+            a: Date;
+            keyb: Date;
+            c: Date;
+            d: string;
+            e: number;
+          }
+        >(
+          'a',
+          'keyb',
+        )({
+          a: new Date('2020-04-20'),
+          keyb: new Date('2020-04-30'),
+          c: new Date('2020-04-02'),
+          d: 'not a date',
+          e: 25,
+        }),
+      ).toStrictEqual({
+        a: '2020-04-20',
+        keyb: '2020-04-30',
+        c: new Date('2020-04-02'),
+        d: 'not a date',
+        e: 25,
+      });
     });
   });
 });

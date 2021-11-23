@@ -1,5 +1,6 @@
+import { formatISO } from 'date-fns';
 import omit from 'lodash/omit';
-import type { OptionalDeep } from './types';
+import type { NativeDate, OptionalDeep, RawDate } from './types';
 
 export const omitTypeName = <T extends Record<string, unknown>>(item: T): Omit<T, '__typename'> =>
   omit(item, '__typename');
@@ -92,3 +93,19 @@ export const roundObject = <T extends Record<string, number>>(obj: T): T =>
     (last, [key, value]) => ({ ...last, [key]: Math.round(value) }),
     obj,
   );
+
+export const withNativeDate =
+  <K extends string, T extends Record<K, string>>(...keys: K[]) =>
+  (item: T): NativeDate<T, K> =>
+    keys.reduce<NativeDate<T, K>>(
+      (last, key) => ({ ...last, [key]: new Date(item[key]) }),
+      item as NativeDate<T, K>,
+    );
+
+export const withRawDate =
+  <K extends string, T extends Record<K, Date>>(...keys: K[]) =>
+  (item: T): RawDate<T, K> =>
+    keys.reduce<RawDate<T, K>>(
+      (last, key) => ({ ...last, [key]: formatISO(item[key], { representation: 'date' }) }),
+      item as RawDate<T, K>,
+    );
