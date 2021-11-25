@@ -1,4 +1,3 @@
-import { getUnixTime } from 'date-fns';
 import numericHash from 'string-hash';
 
 import reducer, { State, initialState } from './funds';
@@ -235,7 +234,7 @@ describe('funds reducer', () => {
     it('should set the fetch time', () => {
       expect.assertions(1);
       const result = reducer(stateWithExistingTodayPrices, action);
-      expect(result.todayPriceFetchTime).toBe(getUnixTime(new Date('2020-04-20T13:11:20Z')));
+      expect(result.todayPriceFetchTime).toStrictEqual(new Date('2020-04-20T13:11:20Z'));
     });
 
     describe('when every price is the same as the latest existing price', () => {

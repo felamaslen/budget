@@ -105,7 +105,7 @@ describe('getFundsCache', () => {
         17: [{ startIndex: 1, values: [989, 1054] }],
       },
       todayPrices: quotes,
-      todayPriceFetchTime: 8876,
+      todayPriceFetchTime: new Date(8876000),
     },
   };
 

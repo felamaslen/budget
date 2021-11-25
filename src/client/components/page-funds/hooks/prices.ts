@@ -12,16 +12,16 @@ import type { FundQuotes } from '~client/types';
 import { useStockPricesQuery } from '~client/types/gql';
 import { getGenericFullSymbol } from '~shared/abbreviation';
 
-const worker = isServerSide || process.env.NODE_ENV === 'test' ? undefined : new PricesWorker();
+export const worker =
+  isServerSide && process.env.NODE_ENV !== 'test' ? undefined : new PricesWorker();
 
 const fetchIntervalMs = (5 * 60 + 3) * 1000;
 const minTimeBetweenFetchMs = 30 * 1000;
 
-export function useTodayPrices(): Date {
+export function useTodayPrices(): void {
   const dispatch = useDispatch();
   const { realTimePrices } = useSelector(getAppConfig);
-  const lastScrapedTimestamp = useSelector(getTodayPriceTime);
-  const lastScraped = useMemo(() => fromUnixTime(lastScrapedTimestamp), [lastScrapedTimestamp]);
+  const todayPriceTime = useSelector(getTodayPriceTime);
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
   const paused = !realTimePrices;
 
@@ -53,13 +53,13 @@ export function useTodayPrices(): Date {
   const fetchIfNecessary = useCallback(() => {
     const now = Date.now();
     if (
-      now - lastScraped.getTime() >= fetchIntervalMs &&
+      now - todayPriceTime.getTime() >= fetchIntervalMs &&
       now - lastFetchTime >= minTimeBetweenFetchMs
     ) {
       fetchPrices();
       setLastFetchTime(now);
     }
-  }, [fetchPrices, lastScraped, lastFetchTime]);
+  }, [fetchPrices, todayPriceTime, lastFetchTime]);
 
   const haveCodes = codes.length > 0;
   useEffect(() => {
@@ -97,6 +97,4 @@ export function useTodayPrices(): Date {
       fetchIfNecessary();
     }
   }, [dispatch, paused, fetchIfNecessary]);
-
-  return lastScraped;
 }

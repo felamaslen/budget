@@ -24,7 +24,7 @@ type ExtraState = {
     [fundId: number]: FundPriceGroup[];
   };
   todayPrices: FundQuotes;
-  todayPriceFetchTime: number | null;
+  todayPriceFetchTime: Date | null;
 };
 
 export type State = ListState<GQL<FundNative>, ExtraState>;
@@ -111,9 +111,7 @@ function onTodayPricesFetched(state: State, action: TodayPricesFetched): State {
   return {
     ...state,
     todayPrices: { ...state.todayPrices, ...action.quotes },
-    todayPriceFetchTime: getUnixTime(
-      action.refreshTime ? new Date(action.refreshTime) : new Date(),
-    ),
+    todayPriceFetchTime: action.refreshTime ? new Date(action.refreshTime) : null,
   };
 }
 

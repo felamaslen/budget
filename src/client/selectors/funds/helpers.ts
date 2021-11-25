@@ -47,8 +47,8 @@ const getFundsScrapedCache = (state: StateSliced): PriceCache => ({
 
 export const getTodayPrices = (state: StateSliced): FundQuotes =>
   state[PageNonStandard.Funds].todayPrices;
-export const getTodayPriceTime = (state: StateSliced): number =>
-  state[PageNonStandard.Funds].todayPriceFetchTime ?? 0;
+export const getTodayPriceTime = (state: StateSliced): Date =>
+  state[PageNonStandard.Funds].todayPriceFetchTime ?? new Date(0);
 
 const combineRealTimeQuotesWithScrapedCache =
   (quotes: FundQuotes, latestTime: number) =>
@@ -123,7 +123,7 @@ const rebaseStockSplitsIntoPastPrices =
           ({ startIndex, values }) => ({
             startIndex,
             values,
-            rebasePriceRatio: values.map<number>((price, index) =>
+            rebasePriceRatio: values.map<number>((_, index) =>
               combineStockSplits(
                 splitsWithTimeIndex.filter(
                   ({ appliesBeforeTimeIndex }) =>
@@ -152,6 +152,6 @@ export const getFundsCache = createSelector(
   (funds, cache, quotes, latestTime): PriceCacheRebased =>
     compose(
       rebaseStockSplitsIntoPastPrices(funds),
-      combineRealTimeQuotesWithScrapedCache(quotes, latestTime),
+      combineRealTimeQuotesWithScrapedCache(quotes, getUnixTime(latestTime)),
     )(cache),
 );

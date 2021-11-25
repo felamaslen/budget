@@ -29,6 +29,7 @@ import {
   getPricesForRow,
   getRowGains,
   getTodayPrices,
+  getTodayPriceTime,
 } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import { Delta, FundInputNative as FundInput, FundNative as Fund } from '~client/types';
@@ -84,7 +85,8 @@ const makeSortItems =
 
 export const Funds: React.FC<RouteComponentProps> = () => {
   const isMobile = useIsMobile();
-  const lastScraped = useTodayPrices();
+  useTodayPrices();
+  const lastScraped = useSelector(getTodayPriceTime);
   const cache = useSelector(getFundsCache);
   const todayPrices = useSelector(getTodayPrices);
   const composedSelector = useCallback(
