@@ -7,7 +7,14 @@ import { Anonymous } from '.';
 
 import { configUpdatedFromApi } from '~client/actions';
 import { mockClient, renderWithStore } from '~client/test-utils';
-import { ConfigDocument, ConfigQuery, LoginDocument, LoginMutation } from '~client/types/gql';
+import {
+  ConfigDocument,
+  ConfigQuery,
+  FundMode,
+  FundPeriod,
+  LoginDocument,
+  LoginMutation,
+} from '~client/types/gql';
 
 describe('anonymous wrapper', () => {
   const onLogin = jest.fn();
@@ -19,6 +26,9 @@ describe('anonymous wrapper', () => {
       birthDate: '1992-03-15',
       realTimePrices: true,
       futureMonths: 5,
+      fundMode: FundMode.Roi,
+      fundPeriod: FundPeriod.Year,
+      fundLength: 1,
     },
   };
 
