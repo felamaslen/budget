@@ -1,5 +1,5 @@
 import addYears from 'date-fns/addYears';
-import differenceInMonths from 'date-fns/differenceInMonths';
+import differenceInCalendarMonths from 'date-fns/differenceInCalendarMonths';
 import endOfMonth from 'date-fns/endOfMonth';
 import endOfYear from 'date-fns/endOfYear';
 import getMonth from 'date-fns/getMonth';
@@ -21,7 +21,7 @@ export const getNumMonths = createSelector(getStartDate, getEndDate, inclusiveMo
 
 export const getFutureMonths = moize(
   (today: Date): ((state: State) => number) =>
-    createSelector(getEndDate, (endDate) => differenceInMonths(endDate, today)),
+    createSelector(getEndDate, (endDate) => differenceInCalendarMonths(endDate, today)),
   { maxSize: 1 },
 );
 
@@ -55,7 +55,7 @@ export const getGraphDates = moize(
       const lastDate = presentGraphDates[presentGraphDates.length - 1].date;
       const longTermStartDate = endOfYear(addYears(lastDate, getMonth(lastDate) === 11 ? 1 : 0));
       const initialMonthIndex =
-        differenceInMonths(longTermStartDate, lastDate) + presentGraphDates.length - 1;
+        differenceInCalendarMonths(longTermStartDate, lastDate) + presentGraphDates.length - 1;
 
       return Array(longTermOptions.rates.years ?? GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS)
         .fill(0)

@@ -68,6 +68,13 @@ export const testState: State = {
         isOption: false,
       },
       {
+        id: numericHash('real-stocks-category-id'),
+        type: NetWorthCategoryType.Asset,
+        category: 'Stocks',
+        color: 'grey',
+        isOption: false,
+      },
+      {
         id: numericHash('real-option-category-id'),
         type: NetWorthCategoryType.Asset,
         category: 'Options',
@@ -117,6 +124,13 @@ export const testState: State = {
         subcategory: 'My money market fund',
         hasCreditLimit: null,
         opacity: 0.4,
+      },
+      {
+        id: numericHash('real-stocks-subcategory-id'),
+        categoryId: numericHash('real-stocks-category-id'),
+        subcategory: 'My ISA',
+        hasCreditLimit: null,
+        opacity: 1,
       },
       {
         id: numericHash('real-option-subcategory-id'),

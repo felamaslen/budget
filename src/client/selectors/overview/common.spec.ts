@@ -1,4 +1,5 @@
-import endOfDay from 'date-fns/endOfDay';
+import { endOfDay } from 'date-fns';
+import numericHash from 'string-hash';
 import timezoneMock from 'timezone-mock';
 
 import { State } from '~client/reducers';
@@ -9,8 +10,9 @@ import {
   getFutureMonths,
   getMonthDates,
   getGraphDates,
+  getStartPredictionIndex,
 } from '~client/selectors/overview/common';
-import { testState as state } from '~client/test-data/state';
+import { testState } from '~client/test-data/state';
 import { OverviewGraphDate } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 
@@ -18,21 +20,21 @@ describe('overview selectors (common)', () => {
   describe('getStartDate', () => {
     it('should get the start date', () => {
       expect.assertions(1);
-      expect(getStartDate(state)).toStrictEqual(new Date('2018-01-31T23:59:59.999Z'));
+      expect(getStartDate(testState)).toStrictEqual(new Date('2018-01-31T23:59:59.999Z'));
     });
   });
 
   describe('getEndDate', () => {
     it('should get the end date', () => {
       expect.assertions(1);
-      expect(getEndDate(state)).toStrictEqual(new Date('2018-07-31T23:59:59.999Z'));
+      expect(getEndDate(testState)).toStrictEqual(new Date('2018-07-31T23:59:59.999Z'));
     });
   });
 
   describe('getNumMonths', () => {
     it('should get the number of months in overview views, given the start and end date', () => {
       expect.assertions(1);
-      expect(getNumMonths(state)).toBe(7);
+      expect(getNumMonths(testState)).toBe(7);
     });
 
     describe.each`
@@ -58,9 +60,9 @@ describe('overview selectors (common)', () => {
         expect.assertions(1);
 
         const stateWithStartEndTime: State = {
-          ...state,
+          ...testState,
           [PageNonStandard.Overview]: {
-            ...state[PageNonStandard.Overview],
+            ...testState[PageNonStandard.Overview],
             startDate: endOfDay(new Date(startTime)),
             endDate: endOfDay(new Date(endTime)),
           },
@@ -75,19 +77,19 @@ describe('overview selectors (common)', () => {
   describe('getFutureMonths', () => {
     it('should calculate the number of months in the future there are, based on the current date', () => {
       expect.assertions(5);
-      expect(getFutureMonths(new Date('2018-03-23T11:45:20Z'))(state)).toBe(4);
+      expect(getFutureMonths(new Date('2018-03-23T11:45:20Z'))(testState)).toBe(4);
 
-      expect(getFutureMonths(new Date('2018-03-31T15:20Z'))(state)).toBe(4);
+      expect(getFutureMonths(new Date('2018-03-31T15:20Z'))(testState)).toBe(4);
 
-      expect(getFutureMonths(new Date('2018-03-31T22:59Z'))(state)).toBe(4);
+      expect(getFutureMonths(new Date('2018-03-31T22:59Z'))(testState)).toBe(4);
 
-      expect(getFutureMonths(new Date('2018-04-01T00:00Z'))(state)).toBe(3);
+      expect(getFutureMonths(new Date('2018-04-01T00:00Z'))(testState)).toBe(3);
 
       expect(
         getFutureMonths(new Date('2019-07-28T12:01:32Z'))({
-          ...state,
+          ...testState,
           overview: {
-            ...state.overview,
+            ...testState.overview,
             endDate: new Date('2020-07-31T23:59:59.999Z'),
           },
         }),
@@ -98,7 +100,7 @@ describe('overview selectors (common)', () => {
   describe('getMonthDates', () => {
     it('should get a list of dates at the end of each month', () => {
       expect.assertions(1);
-      expect(getMonthDates(state)).toStrictEqual([
+      expect(getMonthDates(testState)).toStrictEqual([
         new Date('2018-01-31T23:59:59.999Z'),
         new Date('2018-02-28T23:59:59.999Z'),
         new Date('2018-03-31T23:59:59.999Z'),
@@ -107,6 +109,81 @@ describe('overview selectors (common)', () => {
         new Date('2018-06-30T23:59:59.999Z'),
         new Date('2018-07-31T23:59:59.999Z'),
       ]);
+    });
+  });
+
+  describe('getStartPredictionIndex', () => {
+    describe.each`
+      case                                  | today
+      ${'today is the start of the month'}  | ${endOfDay(new Date('2018-03-01'))}
+      ${'today is the middle of the month'} | ${endOfDay(new Date('2018-03-13'))}
+    `('when $case', ({ today }) => {
+      describe('when there does not exist a net worth entry for the given month', () => {
+        it('should return the month index of the current month', () => {
+          expect.assertions(1);
+          const result = getStartPredictionIndex(today)({
+            ...testState,
+            overview: {
+              ...testState.overview,
+              startDate: new Date('2017-11-30'),
+              endDate: new Date('2018-07-31'),
+            },
+            netWorth: {
+              ...testState.netWorth,
+              entries: [],
+            },
+          });
+          expect(result).toBe(4); // Nov-17, Dec-17, Jan-18, Feb-18, Mar-18
+        });
+      });
+
+      describe('when there exists a net worth entry for the current month', () => {
+        it('should return the month index of the next month', () => {
+          expect.assertions(1);
+          const result = getStartPredictionIndex(endOfDay(new Date('2018-03-31')))({
+            ...testState,
+            overview: {
+              ...testState.overview,
+              startDate: new Date('2017-11-30'),
+              endDate: new Date('2018-07-31'),
+            },
+            netWorth: {
+              ...testState.netWorth,
+              entries: [
+                {
+                  id: numericHash('entry-id-A'),
+                  date: new Date('2018-03-28'),
+                  values: [],
+                  creditLimit: [],
+                  currencies: [],
+                },
+              ],
+            },
+          });
+          expect(result).toBe(5); // Nov-17, Dec-17, Jan-18, Feb-18, Mar-18, Apr-18
+        });
+      });
+    });
+
+    describe('when today is the last day of the month', () => {
+      const today = endOfDay(new Date('2018-03-31'));
+
+      it('should return the month index of the next month', () => {
+        expect.assertions(1);
+        const result = getStartPredictionIndex(today)({
+          ...testState,
+          overview: {
+            ...testState.overview,
+            startDate: new Date('2017-11-30'),
+            endDate: new Date('2018-07-31'),
+          },
+          netWorth: {
+            ...testState.netWorth,
+            entries: [],
+          },
+        });
+        expect(result).toBe(5); // Nov-17, Dec-17, Jan-18, Feb-18, Mar-18, Apr-18
+      });
     });
   });
 
@@ -121,9 +198,9 @@ describe('overview selectors (common)', () => {
             years: 5,
           },
         })({
-          ...state,
+          ...testState,
           overview: {
-            ...state.overview,
+            ...testState.overview,
             startDate: new Date('2021-04-30'),
             endDate: new Date('2021-08-31'),
           },
@@ -152,9 +229,9 @@ describe('overview selectors (common)', () => {
             years: 5,
           },
         })({
-          ...state,
+          ...testState,
           overview: {
-            ...state.overview,
+            ...testState.overview,
             startDate: new Date('2021-08-31'),
             endDate: new Date('2022-02-28'),
           },

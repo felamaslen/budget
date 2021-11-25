@@ -277,8 +277,8 @@ describe('funds reducer', () => {
 
   describe(ActionTypeFunds.AllocationTargetsUpdated, () => {
     const action = allocationTargetsUpdated([
-      { id: 10, allocationTarget: 13 },
-      { id: 1, allocationTarget: 77 },
+      { id: numericHash('some-fund-1'), allocationTarget: 13 },
+      { id: numericHash('some-fund-3'), allocationTarget: 77 },
     ]);
 
     it('should update the allocation targets in state', () => {
@@ -288,19 +288,19 @@ describe('funds reducer', () => {
       expect(result.items).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            id: 10,
+            id: numericHash('some-fund-1'),
             allocationTarget: 13,
           }),
           expect.objectContaining({
-            id: 3,
+            id: numericHash('some-fund-2'),
             allocationTarget: 0,
           }),
           expect.objectContaining({
-            id: 1,
+            id: numericHash('some-fund-3'),
             allocationTarget: 77,
           }),
           expect.objectContaining({
-            id: 5,
+            id: numericHash('some-fund-4'),
             allocationTarget: 0,
           }),
         ]),
