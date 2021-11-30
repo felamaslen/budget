@@ -1,3 +1,4 @@
+import moize from 'moize';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { replaceAtIndex } from 'replace-array';
 import * as Styled from './styles';
@@ -239,7 +240,7 @@ const EntryForm: React.FC<EntryProps> = ({
   const [itemSuggestion, setItemSuggestion] = useState<string | null>(null);
 
   return (
-    <FlexCenter>
+    <FlexCenter data-testid={`receipt-entry-${id}`}>
       <Styled.ItemCategory>
         <EntryFormItemField
           error={errors?.item}
@@ -280,13 +281,16 @@ const EntryForm: React.FC<EntryProps> = ({
   );
 };
 
-const defaultEntry: Entry = {
-  id: 0,
-  item: '',
-  category: '',
-  cost: 0,
-  page: ReceiptPage.Food,
-};
+export const getDefaultEntry = moize(
+  (): Entry => ({
+    id: -Date.now(),
+    item: '',
+    category: '',
+    cost: 0,
+    page: ReceiptPage.Food,
+  }),
+  { maxAge: 1000 },
+);
 
 export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
   const isMobile = useIsMobile();
@@ -299,7 +303,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
   const onChangeDate = useCallback((value?: Date) => setDate((last) => value ?? last), []);
   const [shop, setShop] = useState<string | undefined>('');
 
-  const [entries, setEntries] = useState<Entry[]>([defaultEntry]);
+  const [entries, setEntries] = useState<Entry[]>([getDefaultEntry()]);
 
   const createNewEntry = useCallback(() => {
     setEntries((last) => {
@@ -379,7 +383,7 @@ export const AddReceipt: React.FC<Props> = ({ setAddingReceipt }) => {
             cost: entry.cost,
           })),
         });
-        setEntries([defaultEntry]);
+        setEntries([getDefaultEntry()]);
         setTimeout(() => {
           setFocus(Focus.date);
         }, 0);

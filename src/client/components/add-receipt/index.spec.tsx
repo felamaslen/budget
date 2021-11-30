@@ -1,14 +1,20 @@
-import { act, waitFor, RenderResult } from '@testing-library/react';
+import { act, waitFor, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
 
-import { AddReceipt, Props } from '.';
+import { AddReceipt, getDefaultEntry, Props } from '.';
 import * as ListMutations from '~client/gql/mutations/list';
 import * as SearchQueries from '~client/gql/queries/search';
 import { mockClient, renderWithStore } from '~client/test-utils';
 import { ReceiptPage } from '~client/types/enum';
-import type { QueryReceiptItemArgs, QueryReceiptItemsArgs } from '~client/types/gql';
+import {
+  MutationCreateReceiptArgs,
+  QueryReceiptItemArgs,
+  QueryReceiptItemsArgs,
+  ReceiptItemQuery,
+  ReceiptItemsQuery,
+} from '~client/types/gql';
 
 jest.mock('shortid', () => ({
   generate: (): string => 'some-short-id',
@@ -22,40 +28,62 @@ describe('<AddReceipt />', () => {
   let mutateSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    function mockReceiptItem(query: QueryReceiptItemArgs['item']): ReceiptItemQuery['receiptItem'] {
+      if (query.startsWith('cri')) {
+        return 'Crisps';
+      }
+      if (query.startsWith('ban')) {
+        return 'Bananas';
+      }
+      if (query.startsWith('net')) {
+        return 'Netflix';
+      }
+      return null;
+    }
+
+    function mockReceiptItems(
+      query: QueryReceiptItemsArgs['items'],
+    ): ReceiptItemsQuery['receiptItems'] {
+      if (query[0] === 'Some food item' && query[1] === 'Other general item') {
+        return [
+          {
+            item: 'Some food item',
+            page: ReceiptPage.Food,
+            category: 'Fruit',
+          },
+        ];
+      }
+      if (query[0] === 'Bananas') {
+        return [{ item: 'Bananas', page: ReceiptPage.Food, category: 'Fruit' }];
+      }
+      if (query[0] === 'Netflix') {
+        return [{ item: 'Netflix', page: ReceiptPage.General, category: 'Subscriptions' }];
+      }
+      return null;
+    }
+
     jest.spyOn(mockClient, 'executeQuery').mockImplementation((request) => {
-      if (
-        request.query === SearchQueries.ReceiptItem &&
-        (request.variables as QueryReceiptItemArgs).item === 'cri'
-      ) {
-        return fromValue({
-          operation: makeOperation('query', request, {} as OperationContext),
-          data: {
-            receiptItem: 'Crisps',
-          },
-        });
+      switch (request.query) {
+        case SearchQueries.ReceiptItem:
+          return fromValue({
+            operation: makeOperation('query', request, {} as OperationContext),
+            data: {
+              receiptItem: mockReceiptItem((request.variables as QueryReceiptItemArgs).item),
+            },
+          });
+        case SearchQueries.ReceiptItems:
+          return fromValue({
+            operation: makeOperation('query', request, {} as OperationContext),
+            data: {
+              receiptItems: mockReceiptItems((request.variables as QueryReceiptItemsArgs).items),
+            },
+          });
+        default:
+          return fromValue({
+            operation: makeOperation('query', request, {} as OperationContext),
+            data: null,
+          });
       }
-      if (
-        request.query === SearchQueries.ReceiptItems &&
-        (request.variables as QueryReceiptItemsArgs).items[0] === 'Some food item' &&
-        (request.variables as QueryReceiptItemsArgs).items[1] === 'Other general item'
-      ) {
-        return fromValue({
-          operation: makeOperation('query', request, {} as OperationContext),
-          data: {
-            receiptItems: [
-              {
-                item: 'Some food item',
-                page: ReceiptPage.Food,
-                category: 'Fruit',
-              },
-            ],
-          },
-        });
-      }
-      return fromValue({
-        operation: makeOperation('query', request, {} as OperationContext),
-        data: null,
-      });
     });
 
     mutateSpy = jest.spyOn(mockClient, 'executeMutation').mockImplementation((request) => {
@@ -75,6 +103,7 @@ describe('<AddReceipt />', () => {
       });
     });
 
+    getDefaultEntry.clear();
     jest.useFakeTimers();
   });
 
@@ -244,6 +273,92 @@ describe('<AddReceipt />', () => {
 
       expect(result.getByText('Total: £5.79')).toBeInTheDocument();
     });
+  });
+
+  it('should clear the first cost input when adding a new receipt', async () => {
+    expect.hasAssertions();
+    jest.setSystemTime(new Date(177623));
+    const { getByLabelText, getByTestId, getByText, queryByTestId } = setup();
+
+    const inputDate = getByLabelText('Date');
+    const inputShop = getByLabelText('Shop');
+    let firstEntry = getByTestId('receipt-entry--177623');
+
+    userEvent.type(inputDate, '{selectall}{backspace}4/7/21');
+    userEvent.type(inputShop, 'Some shop');
+
+    let withinFirstEntry = within(firstEntry);
+    let [inputItem] = withinFirstEntry.getAllByRole('textbox');
+    let inputCost = withinFirstEntry.getByRole('spinbutton');
+
+    // Enter first entry
+    userEvent.type(inputItem, 'ban');
+    await waitFor(() => expect(withinFirstEntry.getByText('Bananas')).toBeInTheDocument());
+    userEvent.type(inputItem, '{arrowRight}');
+
+    userEvent.type(inputCost, '{selectall}{backspace}3{delete}');
+
+    userEvent.click(getByText('Autocomplete'));
+    await waitFor(() => expect(withinFirstEntry.getByDisplayValue('Fruit')).toBeInTheDocument());
+
+    jest.advanceTimersByTime(1001);
+
+    await act(async () => {
+      userEvent.click(getByText('Finish'));
+    });
+    await waitFor(() => expect(queryByTestId('receipt-entry--178624')).toBeInTheDocument());
+
+    firstEntry = getByTestId('receipt-entry--178624');
+    withinFirstEntry = within(firstEntry);
+    [inputItem] = withinFirstEntry.getAllByRole('textbox');
+    inputCost = withinFirstEntry.getByRole('spinbutton');
+
+    expect(withinFirstEntry.queryByDisplayValue('Bananas')).not.toBeInTheDocument();
+
+    // Enter second entry with same cost
+    userEvent.type(inputItem, 'net');
+    await waitFor(() => expect(withinFirstEntry.getByText('Netflix')).toBeInTheDocument());
+    userEvent.type(inputItem, '{arrowRight}');
+
+    userEvent.type(inputCost, '{selectall}{backspace}3{delete}');
+
+    userEvent.click(getByText('Autocomplete'));
+    await waitFor(() =>
+      expect(withinFirstEntry.getByDisplayValue('Subscriptions')).toBeInTheDocument(),
+    );
+
+    userEvent.click(getByText('Finish'));
+    await waitFor(() =>
+      expect(withinFirstEntry.queryByDisplayValue('Netflix')).not.toBeInTheDocument(),
+    );
+
+    expect(mutateSpy).toHaveBeenCalledTimes(2);
+    expect(mutateSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        query: ListMutations.CreateReceipt,
+        variables: expect.objectContaining<MutationCreateReceiptArgs>({
+          date: '2021-07-04',
+          shop: 'Some shop',
+          items: [{ item: 'Bananas', category: 'Fruit', cost: 300, page: ReceiptPage.Food }],
+        }),
+      }),
+      {},
+    );
+    expect(mutateSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        query: ListMutations.CreateReceipt,
+        variables: expect.objectContaining<MutationCreateReceiptArgs>({
+          date: '2021-07-04',
+          shop: 'Some shop',
+          items: [
+            { item: 'Netflix', category: 'Subscriptions', cost: 300, page: ReceiptPage.General },
+          ],
+        }),
+      }),
+      {},
+    );
   });
 
   describe('when autocompleting an item field', () => {
