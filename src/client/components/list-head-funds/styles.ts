@@ -109,6 +109,7 @@ export const Value = styled(GainStyles.Value)`
 export const XIRR = styled(GainStyles.BreakdownValue)`
   font-size: ${rem(12)};
   line-height: ${rem(12)};
+  white-space: nowrap;
   ${breakpoint(breakpoints.mobile)} {
     font-size: ${rem(10)};
     font-weight: bold;
