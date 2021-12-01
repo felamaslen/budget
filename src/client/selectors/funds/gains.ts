@@ -57,6 +57,7 @@ export const getBuyCost = (transactions: Transaction[]): number =>
 
 export type RowGain = Omit<CostValue, 'cost'> & {
   price: number;
+  previousPrice: number | null;
   gain: number;
   gainAbs: number;
 };
@@ -98,7 +99,8 @@ export const getRowGains = (rows: Fund[], cache: PriceCacheRebased): RowGains =>
     const dayGain = dayGainAbs / cost;
 
     const rowGain: RowGain = {
-      price: yesterdayPrice,
+      price: latestPrice,
+      previousPrice: yesterdayPrice,
       value: isSold(transactions) ? paperValue + realisedValue : paperValue,
       gain: roundGain(gain),
       gainAbs: roundAbs(gainAbs),
@@ -123,9 +125,9 @@ const getMinMax = moize(
   { maxSize: 1 },
 );
 
-export type GainsForRow = null | (RowGain & { color: string });
+export type FundMetadata = null | (RowGain & { color: string });
 
-export function getGainsForRow(rowGains: RowGains, id: Id): GainsForRow {
+export function getFundMetadata(rowGains: RowGains, id: Id): FundMetadata {
   const rowGain = rowGains[id];
   if (!rowGainExists(rowGain)) {
     return null;

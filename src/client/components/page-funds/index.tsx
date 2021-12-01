@@ -24,8 +24,8 @@ import { NowProvider, useIsMobile, useListCrudFunds, usePersistentState } from '
 import { pageColor } from '~client/modules/color';
 import { isSold } from '~client/modules/data';
 import {
+  getFundMetadata,
   getFundsCache,
-  getGainsForRow,
   getPricesForRow,
   getRowGains,
   getTodayPrices,
@@ -97,7 +97,7 @@ export const Funds: React.FC<RouteComponentProps> = () => {
         (last, item) => ({
           ...last,
           [item.id]: {
-            gain: getGainsForRow(rowGains, item.id),
+            gain: getFundMetadata(rowGains, item.id),
             latestPrice: todayPrices[item.id] ?? rowGains[item.id]?.price ?? null,
             prices: getPricesForRow(prices, item.id, startTime, cacheTimes),
           },

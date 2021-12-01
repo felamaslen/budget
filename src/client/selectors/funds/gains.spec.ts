@@ -1,21 +1,16 @@
-import getUnixTime from 'date-fns/getUnixTime';
+import { getUnixTime } from 'date-fns';
 import { rgb } from 'polished';
 import numericHash from 'string-hash';
 
-import { getRowGains, getGainsForRow, getDayGain, getDayGainAbs, RowGains } from './gains';
-import { getFundsCache, PriceCache } from './helpers';
+import { getRowGains, getFundMetadata, getDayGain, getDayGainAbs, RowGains } from './gains';
+import { PriceCacheRebased } from './helpers';
 
 import { State } from '~client/reducers';
-import { testState, testRows, testPrices, testStartTime, testCacheTimes } from '~client/test-data';
+import { testState } from '~client/test-data';
+import { FundNative } from '~client/types';
 import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
 describe('funds selectors / gains', () => {
-  const testCache: PriceCache = {
-    startTime: testStartTime,
-    cacheTimes: testCacheTimes,
-    prices: testPrices,
-  };
-
   const stateWithGains: State = {
     ...testState,
     api: {
@@ -96,54 +91,125 @@ describe('funds selectors / gains', () => {
   };
 
   describe('getRowGains', () => {
-    it('should return the correct values', () => {
-      expect.assertions(14);
-      const result = getRowGains(testRows, getFundsCache(testState));
+    it("should calculate the present value, gain and day-gain with today and yesterday's price", () => {
+      expect.assertions(8);
+      const result = getRowGains(
+        [
+          {
+            id: numericHash('my-fund'),
+            item: 'My fund',
+            stockSplits: [],
+            transactions: [
+              {
+                date: new Date('2014-05-11'),
+                units: 104,
+                price: 52.39,
+                fees: 15,
+                taxes: 35,
+                drip: false,
+                pension: false,
+              },
+            ],
+          },
+        ],
+        {
+          startTime: getUnixTime(new Date('2019-05-03T11:04:30Z')),
+          cacheTimes: [0, 86400 * 1.5],
+          prices: {
+            [numericHash('my-fund')]: [
+              { startIndex: 0, values: [56.23, 56.19], rebasePriceRatio: [1, 1] },
+            ],
+          },
+        },
+      );
 
-      expect(result[10]?.value).toBeCloseTo(399098.2);
-      expect(result[10]?.gain).toBeCloseTo(-0.0023);
-      expect(result[10]?.gainAbs).toBeCloseTo(-902);
-      expect(result[10]?.dayGain).toBeCloseTo(0.0075);
-      expect(result[10]?.dayGainAbs).toBeCloseTo(2989);
+      expect(result[numericHash('my-fund')]?.value).toBeCloseTo(104 * 56.19);
+      expect(result[numericHash('my-fund')]?.gainAbs).toBeCloseTo(
+        104 * (56.19 - 52.39) - (15 + 35),
+        0,
+      );
+      expect(result[numericHash('my-fund')]?.dayGainAbs).toBeCloseTo(104 * (56.19 - 56.23), 0);
 
-      expect(result[3]?.value).toBeCloseTo(50300);
-      expect(result[3]?.gain).toBeCloseTo(0.1178);
-      expect(result[3]?.gainAbs).toBeCloseTo(5300);
+      expect(result[numericHash('my-fund')]?.gain).toBeCloseTo(
+        (104 * (56.19 - 52.39) - (15 + 35)) / (104 * 52.39 + 15 + 35),
+        0,
+      );
+      expect(result[numericHash('my-fund')]?.dayGain).toBeCloseTo(
+        (104 * (56.19 - 56.23)) / (104 * 52.39 + 15 + 35),
+        0,
+      );
 
-      expect(result[1]?.value).toBeCloseTo(80760);
-      expect(result[1]?.gain).toBeCloseTo(-0.1027);
-      expect(result[1]?.gainAbs).toBeCloseTo(-9240);
+      expect(result[numericHash('my-fund')]?.price).toBe(56.19);
+      expect(result[numericHash('my-fund')]?.previousPrice).toBe(56.23);
 
-      expect(result[5]?.value).toBeCloseTo(265622);
-      expect(result[5]?.gain).toBeCloseTo(0.3281);
-      expect(result[5]?.gainAbs).toBeCloseTo(65622);
+      expect(result[numericHash('my-fund')]).toMatchInlineSnapshot(`
+        Object {
+          "dayGain": -0.0008,
+          "dayGainAbs": -4,
+          "gain": 0.0628,
+          "gainAbs": 345,
+          "previousPrice": 56.23,
+          "price": 56.19,
+          "value": 5843.76,
+        }
+      `);
     });
 
-    const emptyRows = [{ id: '10', item: 'some fund', transactions: [] }];
-    const noCache = {
-      ...testCache,
+    const fullRows: FundNative[] = [
+      {
+        id: numericHash('my-fund'),
+        item: 'some fund',
+        transactions: [
+          {
+            date: new Date('2014-03-10'),
+            units: 104,
+            price: 11.52,
+            fees: 0,
+            taxes: 0,
+            drip: false,
+            pension: false,
+          },
+        ],
+        stockSplits: [],
+      },
+    ];
+    const emptyRows: FundNative[] = [
+      { id: numericHash('my-fund'), item: 'some fund', transactions: [], stockSplits: [] },
+    ];
+
+    const fullCache: PriceCacheRebased = {
+      startTime: 0,
+      cacheTimes: [0],
+      prices: {
+        [numericHash('my-fund')]: [{ startIndex: 0, values: [10.3], rebasePriceRatio: [] }],
+      },
+    };
+    const noCache: PriceCacheRebased = {
+      startTime: 0,
+      cacheTimes: [],
       prices: {},
     };
-    const emptyCache = {
-      ...testCache,
+    const emptyCache: PriceCacheRebased = {
+      startTime: 0,
+      cacheTimes: [0, 100],
       prices: {
-        10: { values: [] },
+        [numericHash('my-fund')]: [{ startIndex: 0, values: [], rebasePriceRatio: [] }],
       },
     };
 
     describe.each`
       case              | rows         | cache
-      ${'transactions'} | ${emptyRows} | ${undefined}
-      ${'cache'}        | ${undefined} | ${noCache}
-      ${'cache values'} | ${undefined} | ${emptyCache}
-    `('for funds with no $case data', ({ rows = testRows, cache = testCache }) => {
+      ${'transactions'} | ${emptyRows} | ${fullCache}
+      ${'cache'}        | ${fullRows}  | ${noCache}
+      ${'cache values'} | ${fullRows}  | ${emptyCache}
+    `('for funds with no $case data', ({ rows, cache }) => {
       it('should return null', () => {
         expect.assertions(1);
         const result = getRowGains(rows, cache);
 
         expect(result).toStrictEqual(
           expect.objectContaining({
-            10: null,
+            [numericHash('my-fund')]: null,
           }),
         );
       });
@@ -154,7 +220,7 @@ describe('funds selectors / gains', () => {
       const result = getRowGains(
         [
           {
-            id: 10,
+            id: numericHash('some-fund'),
             item: 'some fund',
             transactions: [
               {
@@ -217,7 +283,7 @@ describe('funds selectors / gains', () => {
             86400 * 13, // 2017-07-21
           ],
           prices: {
-            10: [
+            [numericHash('some-fund')]: [
               {
                 startIndex: 0,
                 values: [
@@ -242,7 +308,8 @@ describe('funds selectors / gains', () => {
         },
       );
 
-      const expectedPrice = 483.0 / 5 / 2;
+      const expectedPrice = 476.4 / 5 / 2;
+      const expectedPreviousPrice = 483.0 / 5 / 2;
       const expectedValue = (476.4 / 5 / 2) * (220 + 117 * 2 + 934 * 5 * 2);
       const expectedCost =
         428 * 934 +
@@ -255,8 +322,9 @@ describe('funds selectors / gains', () => {
       const expectedGain = Number((expectedGainAbs / expectedCost).toFixed(4));
 
       expect(result).toStrictEqual({
-        10: expect.objectContaining({
+        [numericHash('some-fund')]: expect.objectContaining<Partial<RowGains[string]>>({
           price: expectedPrice,
+          previousPrice: expectedPreviousPrice,
           gainAbs: expectedGainAbs,
           value: expectedValue,
           gain: expectedGain,
@@ -269,7 +337,7 @@ describe('funds selectors / gains', () => {
       const result = getRowGains(
         [
           {
-            id: 103,
+            id: numericHash('some-fund'),
             item: 'some fund',
             transactions: [
               {
@@ -299,7 +367,7 @@ describe('funds selectors / gains', () => {
           startTime: 0,
           cacheTimes: [10],
           prices: {
-            103: [
+            [numericHash('some-fund')]: [
               {
                 startIndex: 0,
                 values: [1.05, 1.8],
@@ -310,42 +378,49 @@ describe('funds selectors / gains', () => {
         },
       );
 
-      expect(result[103]?.value).toBeCloseTo((100 - 65) * 1.8);
-      expect(result[103]?.gainAbs).toBeCloseTo((100 - 65) * 1.8 + 117 - 105);
-      expect(result[103]?.gain).toBeCloseTo(((100 - 65) * 1.8 + 117 - 105) / 105);
+      expect(result[numericHash('some-fund')]?.value).toBeCloseTo((100 - 65) * 1.8);
+      expect(result[numericHash('some-fund')]?.gainAbs).toBeCloseTo((100 - 65) * 1.8 + 117 - 105);
+      expect(result[numericHash('some-fund')]?.gain).toBeCloseTo(
+        ((100 - 65) * 1.8 + 117 - 105) / 105,
+      );
     });
   });
 
-  describe('getGainsForRow', () => {
+  describe('getFundMetadata', () => {
     const rowGains: RowGains = {
-      10: {
+      [numericHash('some-fund-1')]: {
         price: 452,
+        previousPrice: 451.3,
         value: 399098.2,
         gain: -0.0023,
         gainAbs: -902,
         dayGain: 0.0075,
         dayGainAbs: 2989,
       },
-      3: {
+      [numericHash('some-fund-2')]: {
         price: 193,
+        previousPrice: 192.9,
         value: 50300,
         gain: 0.1178,
         gainAbs: 5300,
       },
-      1: {
+      [numericHash('some-fund-3')]: {
         price: 671,
+        previousPrice: 682.9,
         value: 80760,
         gain: -0.1027,
         gainAbs: -9240,
       },
-      5: {
+      [numericHash('some-fund-4')]: {
         price: 172,
+        previousPrice: 177.39,
         value: 265622,
         gain: 0.3281,
         gainAbs: 65622,
       },
-      6: {
+      [numericHash('some-fund-5')]: {
         price: 88,
+        previousPrice: 87.98,
         value: 2600,
         gain: 0,
         gainAbs: 0,
@@ -354,25 +429,25 @@ describe('funds selectors / gains', () => {
     };
 
     it.each`
-      id    | expected
-      ${10} | ${rgb(255, 250, 250)}
-      ${3}  | ${rgb(163, 246, 170)}
-      ${1}  | ${rgb(255, 44, 44)}
-      ${5}  | ${rgb(0, 230, 18)}
-      ${6}  | ${rgb(255, 255, 255)}
+      id                            | expected
+      ${numericHash('some-fund-1')} | ${rgb(255, 250, 250)}
+      ${numericHash('some-fund-2')} | ${rgb(163, 246, 170)}
+      ${numericHash('some-fund-3')} | ${rgb(255, 44, 44)}
+      ${numericHash('some-fund-4')} | ${rgb(0, 230, 18)}
+      ${numericHash('some-fund-5')} | ${rgb(255, 255, 255)}
     `('should set the colour for fund ID $id to $expected', ({ id, expected }) => {
       expect.assertions(1);
-      expect(getGainsForRow(rowGains, id)?.color).toBe(expected);
+      expect(getFundMetadata(rowGains, id)?.color).toBe(expected);
     });
 
     it('should return null for a fund ID which does not exist', () => {
       expect.assertions(1);
-      expect(getGainsForRow(rowGains, numericHash('NOEXIST'))).toBeNull();
+      expect(getFundMetadata(rowGains, numericHash('NOEXIST'))).toBeNull();
     });
 
     it('should return null if there are no gain data for the fund', () => {
       expect.assertions(1);
-      expect(getGainsForRow(rowGains, numericHash('some-id'))).toBeNull();
+      expect(getFundMetadata(rowGains, numericHash('some-id'))).toBeNull();
     });
   });
 
