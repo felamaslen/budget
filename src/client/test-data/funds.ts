@@ -106,7 +106,7 @@ export const testPrices: State['prices'] = {
   [numericHash('some-fund-1')]: [
     {
       startIndex: 1,
-      values: [176.3, 175],
+      values: [476.3, 475],
     },
   ],
   [numericHash('some-fund-2')]: [
@@ -121,7 +121,7 @@ export const testPrices: State['prices'] = {
       values: [8152.18],
     },
     {
-      startIndex: 3,
+      startIndex: 2,
       values: [8114.39],
     },
   ],
@@ -139,5 +139,4 @@ export const testCacheTimes = [
   0,
   getUnixTime(new Date('2020-04-20T18:15:39Z')) - testStartTime,
   getUnixTime(new Date('2020-04-20T18:43:19Z')) - testStartTime,
-  getUnixTime(new Date('2020-04-26T18:43:19Z')) - testStartTime,
 ];
