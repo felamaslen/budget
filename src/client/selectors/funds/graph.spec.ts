@@ -1,4 +1,4 @@
-import { getUnixTime } from 'date-fns';
+import { endOfDay, getUnixTime } from 'date-fns';
 import { round } from 'lodash';
 import { replaceAtIndex } from 'replace-array';
 import numericHash from 'string-hash';
@@ -8,13 +8,13 @@ import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
 import { colorKey } from '~client/modules/color';
 import { State } from '~client/reducers';
 import { colors } from '~client/styled/variables';
-import { testState } from '~client/test-data';
+import { testStartTime, testState } from '~client/test-data';
 import type { Data, FundItem } from '~client/types';
 import { FundMode, FundPeriod, PageNonStandard } from '~client/types/enum';
 import { abbreviateFundName } from '~shared/abbreviation';
 
 describe('fund selectors / graph', () => {
-  const today = new Date('2020-04-20');
+  const today = endOfDay(new Date('2020-04-20'));
   const state: State = {
     ...testState,
     api: {
@@ -91,7 +91,7 @@ describe('fund selectors / graph', () => {
           ],
         },
         {
-          id: 10,
+          id: numericHash('some-fund-1'),
           item: 'some fund 1',
           color: colorKey(abbreviateFundName('some fund 1')),
           orders: [
@@ -104,7 +104,7 @@ describe('fund selectors / graph', () => {
           ],
         },
         {
-          id: 3,
+          id: numericHash('some-fund-2'),
           item: 'some fund 2',
           color: colorKey(abbreviateFundName('some fund 2')),
           orders: [
@@ -123,7 +123,7 @@ describe('fund selectors / graph', () => {
           ],
         },
         {
-          id: 1,
+          id: numericHash('some-fund-3'),
           item: 'some fund 3',
           color: colorKey(abbreviateFundName('some fund 3')),
           orders: [
@@ -142,7 +142,7 @@ describe('fund selectors / graph', () => {
           ],
         },
         {
-          id: 5,
+          id: numericHash('some-fund-4'),
           item: 'test fund 4',
           color: colorKey(abbreviateFundName('test fund 4')),
           orders: [
@@ -180,7 +180,7 @@ describe('fund selectors / graph', () => {
           color: colors.black,
         }),
         expect.objectContaining({
-          id: 10,
+          id: numericHash('some-fund-1'),
           item: 'some fund 1',
           color: colorKey(abbreviateFundName('some fund 1')),
         }),
@@ -272,13 +272,15 @@ describe('fund selectors / graph', () => {
     });
 
     describe('when stocks are split', () => {
+      const startTime = getUnixTime(new Date('2017-04-10Z'));
+
       const stateWithStockSplit: State = {
         ...testState,
         [PageNonStandard.Funds]: {
           ...testState[PageNonStandard.Funds],
           items: [
             {
-              id: 10,
+              id: numericHash('some-fund-1'),
               item: 'some fund 1',
               transactions: [
                 {
@@ -286,60 +288,87 @@ describe('fund selectors / graph', () => {
                   units: 934 / (2 * 5),
                   fees: 148,
                   taxes: 100,
-                  date: new Date('2017-05-09'),
+                  date: new Date('2017-05-09Z'),
                   drip: false,
                   pension: false,
                 },
               ],
               stockSplits: [
                 {
-                  date: new Date('2017-07-04'),
+                  date: new Date('2017-07-04Z'),
                   ratio: 5,
                 },
                 {
-                  date: new Date('2017-07-19'),
+                  date: new Date('2017-07-19Z'),
                   ratio: 2,
                 },
               ],
             },
           ],
+          startTime: getUnixTime(new Date('2017-04-10Z')),
+          cacheTimes: [
+            0,
+            getUnixTime(new Date('2017-06-10Z')) - startTime,
+            getUnixTime(new Date('2017-06-11Z')) - startTime,
+            getUnixTime(new Date('2017-06-12Z')) - startTime,
+            getUnixTime(new Date('2017-06-13Z')) - startTime,
+            getUnixTime(new Date('2017-06-14Z')) - startTime,
+            getUnixTime(new Date('2017-06-15Z')) - startTime,
+            getUnixTime(new Date('2017-06-16Z')) - startTime,
+            getUnixTime(new Date('2017-06-17Z')) - startTime,
+            getUnixTime(new Date('2017-06-18Z')) - startTime,
+            getUnixTime(new Date('2017-06-19Z')) - startTime,
+            getUnixTime(new Date('2017-06-20Z')) - startTime,
+            getUnixTime(new Date('2017-06-21T11:25:10Z')) - startTime,
+            getUnixTime(new Date('2017-06-21T18:30:11Z')) - startTime,
+            getUnixTime(new Date('2017-06-22Z')) - startTime,
+            getUnixTime(new Date('2017-06-23Z')) - startTime,
+            getUnixTime(new Date('2017-06-24Z')) - startTime,
+            getUnixTime(new Date('2017-06-25Z')) - startTime,
+            getUnixTime(new Date('2017-06-26Z')) - startTime,
+            getUnixTime(new Date('2017-06-27Z')) - startTime,
+            getUnixTime(new Date('2017-06-28Z')) - startTime,
+            getUnixTime(new Date('2017-06-29Z')) - startTime,
+            getUnixTime(new Date('2017-06-30Z')) - startTime,
+            getUnixTime(new Date('2017-07-01Z')) - startTime,
+            getUnixTime(new Date('2017-07-02Z')) - startTime,
+            getUnixTime(new Date('2017-07-03T10:05:20Z')) - startTime,
+            getUnixTime(new Date('2017-07-03T15:29:33Z')) - startTime,
+            getUnixTime(new Date('2017-07-04T09:20:01Z')) - startTime,
+            getUnixTime(new Date('2017-07-05Z')) - startTime,
+            getUnixTime(new Date('2017-07-06Z')) - startTime,
+            getUnixTime(new Date('2017-07-18Z')) - startTime,
+            getUnixTime(new Date('2017-07-19T00:01:30Z')) - startTime,
+            getUnixTime(new Date('2017-07-21Z')) - startTime,
+            getUnixTime(new Date('2017-07-24Z')) - startTime,
+          ],
           prices: {
-            10: [
+            [numericHash('some-fund-1')]: [
               {
                 values: [
-                  429.5 * 2 * 5,
-                  429.5 * 2 * 5,
-                  432.3 * 2 * 5,
-                  434.9 * 2 * 5,
-                  435.7 * 2 * 5,
-                  437.9 * 2 * 5,
-                  439.6 * 2 * 5,
-                  436.0 * 2 * 5,
-                  434.9 * 2 * 5,
-                  432.8 * 2 * 5,
-                  438.4 * 2 * 5,
-                  435.5 * 2 * 5,
-                  434.9 * 2 * 5,
-                  427.9 * 2 * 5,
-                  426.3 * 2, // 2017-07-04
-                  424.3 * 2,
-                  423.1 * 2,
-                  427.0 * 2,
-                  427.9, // 2017-07-19
+                  429.5 * 2 * 5, // 13: 2017-06-21
+                  429.5 * 2 * 5, // 14: 2017-06-22
+                  432.3 * 2 * 5, // 15: 2017-06-23
+                  434.9 * 2 * 5, // 16: 2017-06-24
+                  435.7 * 2 * 5, // 17: 2017-06-25
+                  437.9 * 2 * 5, // 18: 2017-06-26
+                  439.6 * 2 * 5, // 19: 2017-06-27
+                  436.0 * 2 * 5, // 20: 2017-06-28
+                  434.9 * 2 * 5, // 21: 2017-06-29
+                  432.8 * 2 * 5, // 22: 2017-06-30
+                  438.4 * 2 * 5, // 23: 2017-07-01
+                  435.5 * 2 * 5, // 24: 2017-07-02
+                  434.9 * 2 * 5, // 25: 2017-07-03 (10:05)
+                  427.9 * 2 * 5, // 26: 2017-07-03 (15:29)
+                  426.3 * 2, // 27: 2017-07-04
+                  424.3 * 2, // 28: 2017-07-05
+                  423.1 * 2, // 29: 2017-07-06
+                  427.0 * 2, // 30: 2017-07-18
+                  427.9, // 31: 2017-07-19
                   430.8,
                   431.6,
-                  425.9,
-                  425.4,
-                  432.8,
-                  426.7,
-                  424.2,
-                  428.1,
-                  426.5,
-                  426.1,
-                  424.1,
-                  427.3,
                 ],
-                startIndex: 69,
+                startIndex: 13,
               },
             ],
           },
@@ -351,83 +380,95 @@ describe('fund selectors / graph', () => {
 
         const fundLines = getFundLines.today(today)(stateWithStockSplit);
 
-        const splitLinePrice = fundLines[FundMode.Price].find((line) => line.id === 10);
+        const splitLinePrice = fundLines[FundMode.Price].find(
+          (line) => line.id === numericHash('some-fund-1'),
+        );
 
         expect(splitLinePrice?.data).toStrictEqual([
-          [18860400, 429.5],
-          [19033200, 429.5],
-          [19378800, 432.3],
-          [19810801, 434.9],
-          [19983601, 435.7],
-          [20415601, 437.9],
-          [20674800, 439.6],
-          [21020401, 436.0],
-          [21625201, 434.9],
-          [21884401, 432.8],
-          [22230000, 438.4],
-          [22489200, 435.5],
-          [22921201, 434.9],
-          [23094000, 427.9],
-          [23526000, 426.3], // 2017-07-04
-          [23785201, 424.3],
-          [24130800, 423.1],
-          [24390000, 427.0],
-          [24822000, 427.9], // 2017-07-19
-          [24994800, 430.8],
-          [25426800, 431.6],
-          [25858801, 425.9],
-          [26031600, 425.4],
-          [26463600, 432.8],
-          [26722800, 426.7],
-          [27068400, 424.2],
-          [27327601, 428.1],
-          [27759601, 426.5],
-          [27932400, 426.1],
-          [28364400, 424.1],
-          [28623600, 427.3],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[13], 429.5],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[14], 429.5],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[15], 432.3],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[16], 434.9],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[17], 435.7],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[18], 437.9],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[19], 439.6],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[20], 436.0],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[21], 434.9],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[22], 432.8],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[23], 438.4],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[24], 435.5],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[25], 434.9],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[26], 427.9],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[27], 426.3], // 2017-07-04
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[28], 424.3],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[29], 423.1],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[30], 427.0],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[31], 427.9], // 2017-07-19
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[32], 430.8],
+          [stateWithStockSplit[PageNonStandard.Funds].cacheTimes[33], 431.6],
         ]);
       });
 
       it('should use rebased prices to calculate ROI', () => {
-        expect.assertions(1);
+        expect.assertions(2);
 
         const fundLines = getFundLines.today(today)(stateWithStockSplit);
 
-        const splitLineROI = fundLines[FundMode.Roi].find((line) => line.id === 10);
+        const splitLineROI = fundLines[FundMode.Roi].find(
+          (line) => line.id === numericHash('some-fund-1'),
+        );
 
-        expect(splitLineROI?.data).toStrictEqual([
-          [18860400, 0.29],
-          [19033200, 0.29],
-          [19378800, 0.94],
-          [19810801, 1.55],
-          [19983601, 1.74],
-          [20415601, 2.25],
-          [20674800, 2.65],
-          [21020401, 1.81],
-          [21625201, 1.55],
-          [21884401, 1.06],
-          [22230000, 2.37],
-          [22489200, 1.69],
-          [22921201, 1.55],
-          [23094000, -0.09],
-          [23526000, -0.46], // 2017-07-04
-          [23785201, -0.93],
-          [24130800, -1.21],
-          [24390000, -0.3],
-          [24822000, -0.09], // 2017-07-19
-          [24994800, 0.59],
-          [25426800, 0.78],
-          [25858801, -0.55],
-          [26031600, -0.67],
-          [26463600, 1.06],
-          [26722800, -0.37],
-          [27068400, -0.95],
-          [27327601, -0.04],
-          [27759601, -0.41],
-          [27932400, -0.51],
-          [28364400, -0.97],
-          [28623600, -0.23],
+        const timeValues = splitLineROI?.data.map(([x]) => x);
+        const roiValues = splitLineROI?.data.map(([, y]) => y);
+
+        expect(timeValues).toStrictEqual([
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[13],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[14],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[15],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[16],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[17],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[18],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[19],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[20],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[21],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[22],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[23],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[24],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[25],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[26],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[27],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[28],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[29],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[30],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[31],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[32],
+          stateWithStockSplit[PageNonStandard.Funds].cacheTimes[33],
         ]);
+        expect(roiValues).toMatchInlineSnapshot(`
+          Array [
+            0.29,
+            0.29,
+            0.94,
+            1.55,
+            1.74,
+            2.25,
+            2.65,
+            1.81,
+            1.55,
+            1.06,
+            2.37,
+            1.69,
+            1.55,
+            -0.09,
+            -0.46,
+            -0.93,
+            -1.21,
+            -0.3,
+            -0.09,
+            0.59,
+            0.78,
+          ]
+        `);
       });
     });
 
@@ -443,7 +484,7 @@ describe('fund selectors / graph', () => {
           ],
           items: [
             {
-              id: 10,
+              id: numericHash('some-fund-1'),
               item: 'some fund 1',
               transactions: [
                 {
@@ -469,7 +510,7 @@ describe('fund selectors / graph', () => {
             },
           ],
           prices: {
-            10: [
+            [numericHash('some-fund-1')]: [
               {
                 values: [411, 413],
                 startIndex: 0,
@@ -480,11 +521,13 @@ describe('fund selectors / graph', () => {
       };
 
       it('should omit the unit price of the transaction from the cost', () => {
-        expect.assertions(1);
+        expect.assertions(2);
 
         const fundLines = getFundLines.today(today)(stateWithDRIP);
 
-        const dripLineROI = fundLines[FundMode.Roi].find((line) => line.id === 10);
+        const dripLineROI = fundLines[FundMode.Roi].find(
+          (line) => line.id === numericHash('some-fund-1'),
+        );
 
         // note we don't include the units here for the DRIP transaction
         const expectedCost = 428 * 934 + 148 + 100 + 152 + 53;
@@ -496,6 +539,13 @@ describe('fund selectors / graph', () => {
           [0, round((100 * (value0 - expectedCost)) / expectedCost, 2)],
           [86400, round((100 * (value1 - expectedCost)) / expectedCost, 2)],
         ]);
+
+        expect(dripLineROI?.data.map(([, y]) => y)).toMatchInlineSnapshot(`
+          Array [
+            -1.51,
+            -1.03,
+          ]
+        `);
       });
     });
 
@@ -535,7 +585,7 @@ describe('fund selectors / graph', () => {
     });
 
     it('should include all past transactions of a sold fund on the last datapoint', () => {
-      expect.assertions(1);
+      expect.assertions(2);
       const stateWithSold: State = {
         ...state,
         [PageNonStandard.Funds]: {
@@ -582,9 +632,15 @@ describe('fund selectors / graph', () => {
 
       const overallLine = result[FundMode.Roi].find(({ id }) => id === GRAPH_FUNDS_OVERALL_ID);
 
-      expect(overallLine?.data[overallLine?.data.length - 1]).toMatchInlineSnapshot(`
+      const lastOverallItem = overallLine?.data[overallLine?.data.length - 1];
+
+      expect(lastOverallItem?.[0]).toBe(
+        getUnixTime(new Date('2020-04-20T18:43:19Z')) - testStartTime,
+      );
+
+      expect(lastOverallItem).toMatchInlineSnapshot(`
         Array [
-          28623600,
+          94264060,
           65.32,
         ]
       `);
