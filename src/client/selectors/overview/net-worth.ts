@@ -100,7 +100,7 @@ const optionValue = (
   (option.vested ?? 0) * Math.max(0, option.marketPrice - option.strikePrice) +
   (withSAYEResidual && isSAYE ? residualSAYEValue(option) : 0);
 
-function sumComplexValue(
+export function sumComplexValue(
   value: NetWorthValueObjectNative | NetWorthValueInput,
   currencies: Currency[],
   subcategories: NetWorthSubcategory[],

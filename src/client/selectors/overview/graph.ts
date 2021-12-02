@@ -22,6 +22,7 @@ import {
   getDerivedNetWorthEntries,
   getIlliquidEquity,
   IlliquidEquity,
+  sumComplexValue,
 } from './net-worth';
 import { longTermOptionsDisabled, reduceDates, roundedArrays, withSpendingColumn } from './utils';
 
@@ -123,24 +124,52 @@ type GraphWithNetWorth<G extends GraphForNetWorth> = G & Pick<OverviewGraphValue
 function predictLiquidCash<G extends GraphForNetWorth>(ctx: NetWorthContext, graph: G): number[] {
   const monthlyStockPurchase = getMonthlyStockPurchase(ctx.longTermOptions, ctx.longTermRates);
 
-  return ctx.dates.reduce<number[]>((last, { date, monthIndex }, index) => {
-    if (index < ctx.startPredictionIndex) {
-      return [...last, ctx.netWorth[index].aggregate[NetWorthAggregate.cashEasyAccess]];
-    }
+  return ctx.dates.reduce<{
+    liquidCash: number[];
+    creditCardDebt: number;
+  }>(
+    (reduction, { date, monthIndex }, index) => {
+      if (index < ctx.startPredictionIndex) {
+        const creditCardDebt = ctx.netWorth[index].values
+          .filter(
+            (value) => ctx.subcategories.find(({ id }) => id === value.subcategory)?.hasCreditLimit,
+          )
+          .reduce<number>(
+            (sum, value) =>
+              sum + sumComplexValue(value, ctx.netWorth[index].currencies, ctx.subcategories),
+            0,
+          );
 
-    const fundCostsPredicted =
-      monthlyStockPurchase * (monthIndex - ctx.dates[index - 1].monthIndex);
-    const fundCostsActual =
-      getFundsCostToDate(date, ctx.funds) -
-      (index > 0 ? getFundsCostToDate(ctx.dates[index - 1].date, ctx.funds) : 0);
+        return {
+          creditCardDebt,
+          liquidCash: [
+            ...reduction.liquidCash,
+            ctx.netWorth[index].aggregate[NetWorthAggregate.cashEasyAccess] + creditCardDebt,
+          ],
+        };
+      }
 
-    const spending = graph.spending[index] + fundCostsPredicted + fundCostsActual;
-    const income = graph.income[index];
+      const fundCostsPredicted =
+        monthlyStockPurchase * (monthIndex - ctx.dates[index - 1].monthIndex);
+      const fundCostsActual =
+        getFundsCostToDate(date, ctx.funds) -
+        (index > 0 ? getFundsCostToDate(ctx.dates[index - 1].date, ctx.funds) : 0);
 
-    const netChange = income - spending;
+      const spending = graph.spending[index] + fundCostsPredicted + fundCostsActual;
+      const income = graph.income[index];
 
-    return [...last, Math.max(0, last[last.length - 1] + netChange)];
-  }, []);
+      const netChange = income - spending;
+
+      return {
+        creditCardDebt: reduction.creditCardDebt,
+        liquidCash: [
+          ...reduction.liquidCash,
+          Math.max(0, reduction.liquidCash[reduction.liquidCash.length - 1] + netChange),
+        ],
+      };
+    },
+    { liquidCash: [], creditCardDebt: 0 },
+  ).liquidCash;
 }
 
 function predictOtherCash(

@@ -629,6 +629,43 @@ describe('getOverviewGraphValues', () => {
       ]);
     });
 
+    it('should remove credit card debt', () => {
+      expect.assertions(1);
+      const result = getOverviewGraphValues(today)({
+        ...stateForLiquidCash,
+        netWorth: {
+          ...stateForLiquidCash.netWorth,
+          entries: [
+            {
+              id: numericHash('entry-A'),
+              date: new Date('2018-03-31'),
+              values: [
+                {
+                  subcategory: numericHash('real-bank-subcategory-id'),
+                  simple: 125000,
+                },
+                {
+                  subcategory: numericHash('real-credit-card-subcategory-id'),
+                  simple: -56132,
+                },
+              ],
+              currencies: [],
+              creditLimit: [],
+            },
+          ],
+        },
+      });
+
+      expect(result.values.cashLiquid).toStrictEqual([
+        expect.any(Number), // Jan-18
+        expect.any(Number), // Feb-18
+        125000 - 56132, // Mar-18
+        125000 - 56132, // Apr-18
+        125000 - 56132, // May-18
+        125000 - 56132, // Jun-18
+      ]);
+    });
+
     it.each<
       [
         PageListStandard,
