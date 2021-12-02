@@ -10,7 +10,7 @@ import { FundGainInfo } from '~client/components/fund-gain-info';
 import { GraphFundItem } from '~client/components/graph-fund-item';
 import { Pie } from '~client/components/pie';
 import { useDebouncedState, useListCrudFunds, useToday } from '~client/hooks';
-import { getViewSoldFunds, getFundsCachedValue, getMaxAllocationTarget } from '~client/selectors';
+import { getFundsCachedValue, getMaxAllocationTarget, getViewSoldFunds } from '~client/selectors';
 import { colors } from '~client/styled/variables';
 import type { FundNative as Fund } from '~client/types';
 
@@ -21,17 +21,17 @@ export const FundRow: React.FC<Props> = ({
   item,
   children,
   isSold = false,
+  metadata,
   prices,
-  latestPrice,
-  gain,
 }) => {
   const today = useToday();
   const viewSoldFunds = useSelector(getViewSoldFunds);
-  const latestValue = useSelector(getFundsCachedValue.today(today));
+  const { value: overallValue } = useSelector(getFundsCachedValue.today(today));
 
-  const scrapedPrice = gain?.price ?? 0;
+  const latestPrice = metadata?.price;
+  const previousPrice = metadata?.previousPrice;
 
-  const highlight = usePriceChangeHighlight(latestPrice ?? scrapedPrice, scrapedPrice);
+  const highlight = usePriceChangeHighlight(latestPrice ?? previousPrice ?? 0, previousPrice ?? 0);
 
   const { onUpdate } = useListCrudFunds();
 
@@ -94,7 +94,7 @@ export const FundRow: React.FC<Props> = ({
   }
 
   if (isMobile) {
-    const valueFrac = (gain?.value ?? 0) / latestValue.value;
+    const valueFrac = (metadata?.value ?? 0) / overallValue;
     const valueSlice = 2 * Math.PI * valueFrac;
 
     return (
@@ -129,12 +129,7 @@ export const FundRow: React.FC<Props> = ({
           stockSplits={item.stockSplits}
         />
       )}
-      <FundGainInfo
-        isSold={isSold}
-        rowGains={gain}
-        latestPrice={latestPrice}
-        highlight={highlight}
-      />
+      <FundGainInfo isSold={isSold} metadata={metadata} highlight={highlight} />
     </Styled.FundRow>
   );
 };

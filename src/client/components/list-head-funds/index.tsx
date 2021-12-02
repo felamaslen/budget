@@ -15,12 +15,12 @@ import { useNow } from '~client/hooks';
 import { formatCurrency, formatPercent } from '~client/modules/format';
 import { getAppConfig } from '~client/selectors';
 import { colors } from '~client/styled/variables';
-import type { CachedValue, HistoryOptions } from '~client/types';
+import type { FundsCachedValue, HistoryOptions } from '~client/types';
 
 export type PropsCommon = {
   totalCost: number;
   annualisedFundReturns: number;
-  cachedValue: CachedValue;
+  cachedValue: FundsCachedValue;
 };
 
 export type Props = PropsCommon & {

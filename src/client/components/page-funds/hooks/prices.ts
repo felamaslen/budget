@@ -1,4 +1,3 @@
-import fromUnixTime from 'date-fns/fromUnixTime';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PricesWorker from 'worker-loader!../../../workers/prices'; // eslint-disable-line import/no-unresolved

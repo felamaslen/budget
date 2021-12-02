@@ -14,24 +14,6 @@ import { mockClient, renderHookWithStore } from '~client/test-utils';
 import { StockPricesQuery } from '~client/types/gql';
 import { PageNonStandard } from '~shared/constants';
 
-jest.mock('worker-loader!../../../workers/prices', () => {
-  class MyMockWorker {
-    onmessage: (_: unknown) => void = () => {
-      /* pass */
-    };
-
-    postMessage(data: { type: 'start' | 'stop' }): void {
-      // eslint-disable-line
-      if (data.type === 'start') {
-        setTimeout(() => {
-          this.onmessage('Fetch!');
-        }, 5);
-      }
-    }
-  }
-  return MyMockWorker;
-});
-
 describe(prices.useTodayPrices.name, () => {
   const mockStockPrices: StockPricesQuery = {
     __typename: 'Query',

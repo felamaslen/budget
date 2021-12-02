@@ -2,7 +2,7 @@ import { render, act, fireEvent } from '@testing-library/react';
 import { FundNameMobile } from './mobile';
 
 describe('<FundNameMobile />', () => {
-  const props = {
+  const props: Parameters<typeof FundNameMobile>[0] = {
     value: 'Monks Investment Trust Ordinary 5p (share)',
   };
 

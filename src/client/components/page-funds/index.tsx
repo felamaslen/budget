@@ -28,7 +28,6 @@ import {
   getFundsCache,
   getPricesForRow,
   getRowGains,
-  getTodayPrices,
   getTodayPriceTime,
 } from '~client/selectors';
 import { colors } from '~client/styled/variables';
@@ -66,7 +65,7 @@ const deltaSeed = (): Delta<Fund> => ({
 });
 
 type ComposedProps = {
-  [id: number]: Pick<FundProps, 'gain' | 'latestPrice' | 'prices'>;
+  [id: number]: Pick<FundProps, 'metadata' | 'prices'>;
 };
 
 const itemProcessor = (fund: FundInput): Pick<FundProps, 'isSold'> => ({
@@ -80,7 +79,8 @@ const makeSortItems =
   (funds, props): Fund[] =>
     [...funds].sort(
       ({ id: idA }, { id: idB }) =>
-        direction * ((props[idB]?.gain?.[criteria] ?? 0) - (props[idA]?.gain?.[criteria] ?? 0)),
+        direction *
+        ((props[idB]?.metadata?.[criteria] ?? 0) - (props[idA]?.metadata?.[criteria] ?? 0)),
     );
 
 export const Funds: React.FC<RouteComponentProps> = () => {
@@ -88,7 +88,6 @@ export const Funds: React.FC<RouteComponentProps> = () => {
   useTodayPrices();
   const lastScraped = useSelector(getTodayPriceTime);
   const cache = useSelector(getFundsCache);
-  const todayPrices = useSelector(getTodayPrices);
   const composedSelector = useCallback(
     (items: Fund[]): ComposedProps => {
       const { startTime, cacheTimes, prices } = cache;
@@ -97,15 +96,14 @@ export const Funds: React.FC<RouteComponentProps> = () => {
         (last, item) => ({
           ...last,
           [item.id]: {
-            gain: getFundMetadata(rowGains, item.id),
-            latestPrice: todayPrices[item.id] ?? rowGains[item.id]?.price ?? null,
+            metadata: getFundMetadata(rowGains, item.id),
             prices: getPricesForRow(prices, item.id, startTime, cacheTimes),
           },
         }),
         {},
       );
     },
-    [cache, todayPrices],
+    [cache],
   );
   const [sort, setSort] = usePersistentState<Sort>(defaultSort, 'funds_sort', isSort);
   const sortItems = useMemo(() => makeSortItems(sort), [sort]);

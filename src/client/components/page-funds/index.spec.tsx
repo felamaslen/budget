@@ -1,19 +1,13 @@
 import { within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import addDays from 'date-fns/addDays';
-import addSeconds from 'date-fns/addSeconds';
-import getUnixTime from 'date-fns/getUnixTime';
-import startOfDay from 'date-fns/startOfDay';
+import { addSeconds, getUnixTime, startOfDay } from 'date-fns';
 import { MemoryRouter, Route } from 'react-router';
 import numericHash from 'string-hash';
 
 import { Funds } from '.';
-import { generateFakeId } from '~client/modules/data';
-import { State } from '~client/reducers';
-import { PriceCache } from '~client/selectors';
+import type { State } from '~client/reducers';
 import { testState } from '~client/test-data/state';
 import { renderWithStore } from '~client/test-utils';
-import type { FundNative as Fund } from '~client/types';
 import { FundPeriod, PageNonStandard } from '~client/types/enum';
 
 describe('<PageFunds />', () => {
@@ -73,22 +67,13 @@ describe('<PageFunds />', () => {
         },
       ],
       viewSoldFunds: true,
-      startTime: getUnixTime(new Date('2019-04-10')),
+      startTime: getUnixTime(new Date('2019-04-10T11:05:03Z')),
       cacheTimes: [0, 86400, 86400 * 3.5],
       prices: {
-        [numericHash('fund-id-some-sold-fund')]: [
-          {
-            values: [7992.13, 7421.97],
-            startIndex: 0,
-          },
-        ],
-        [numericHash('fund-id-some-active-fund')]: [
-          {
-            values: [6081.9, 6213.7],
-            startIndex: 1,
-          },
-        ],
+        [numericHash('fund-id-some-sold-fund')]: [{ startIndex: 0, values: [7992.13, 7421.97] }],
+        [numericHash('fund-id-some-active-fund')]: [{ startIndex: 1, values: [6081.9, 6213.7] }],
       },
+      todayPrices: {},
     },
   };
 
@@ -133,11 +118,12 @@ describe('<PageFunds />', () => {
     const { getByTestId } = setup();
     const header = getByTestId('fund-header');
     const { getByText } = within(header);
-    // overall cost is £(69*60.869+.1+.03+130.0312*76.225+.05+.11)
-    //  = £(4200.091 + 9911.78822) = £14111.87922
-    // paper value is £4287.453 (see above)
-    // realised value is £(130.0312*84.828-1.65-1.43) = 11027.2066336
-    // => overall gain is £(4287.453 + 11027.20... - 14111.87922) = £1202.780416 or 8.5231768%
+
+    // expectedPaperValue = 69 * 6213.7;
+    // expectedRealisedValue = 130.0312 * 8482.8 - (165 + 143);
+    // expectedCost = 130.0312 * 7622.5 + 5 + 11 + 69 * 6086.9 + 10 + 3;
+    // expectedGainAbs = expectedPaperValue + expectedRealisedValue - expectedCost ~ 1200;
+
     expect(getByText('£1.2k')).toBeInTheDocument();
     expect(getByText('8.52%')).toBeInTheDocument();
   });
@@ -145,8 +131,10 @@ describe('<PageFunds />', () => {
   it('should show the daily gain, including percentage', () => {
     expect.assertions(2);
     const { getByTestId } = setup();
+
     const header = getByTestId('fund-header');
     const { getByText } = within(header);
+
     // previous cost was £(4200.091 + 9911.78822) = £14111.87922 (see above)
     // previous value was 6081.9 * 69 + 7421.97 * 130.0312 = 1384738.765464p = £13847.38765464
     // latest cost is £(14111.87922 - 130.0312*84.828 + 1.65+1.43) = £3084.6725864
@@ -209,152 +197,196 @@ describe('<PageFunds />', () => {
     });
   });
 
-  describe.each`
-    case                            | selectValue       | order
-    ${'[default] value-descending'} | ${undefined}      | ${['FH', 'FLL', 'FL', 'HH', 'HL', 'HLL', 'TL', 'TH', 'TLL']}
-    ${'value-ascending'}            | ${'Value ↑'}      | ${['TLL', 'TH', 'TL', 'HLL', 'HL', 'HH', 'FL', 'FLL', 'FH']}
-    ${'gain-descending'}            | ${'Gain ↓'}       | ${['FH', 'HH', 'TH', 'TL', 'FL', 'HL', 'FLL', 'HLL', 'TLL']}
-    ${'gain-ascending'}             | ${'Gain ↑'}       | ${['TLL', 'HLL', 'FLL', 'HL', 'FL', 'TL', 'TH', 'HH', 'FH']}
-    ${'gain-abs-descending'}        | ${'Gain (abs) ↓'} | ${['FH', 'HH', 'FL', 'TH', 'HL', 'TL', 'TLL', 'HLL', 'FLL']}
-    ${'gain-abs-ascending'}         | ${'Gain (abs) ↑'} | ${['FLL', 'HLL', 'TLL', 'TL', 'HL', 'TH', 'FL', 'HH', 'FH']}
-  `('$case sort order', ({ selectValue, order }) => {
-    const makeContrivedFund = ({
-      name,
+  const generateTestFund =
+    ({
+      key,
       value,
-      price,
-      fees = 0,
-      taxes = 0,
+      gainPercent,
+      gainAbs,
     }: {
-      name: string;
+      key: string;
       value: number;
-      price: number;
-      fees?: number;
-      taxes?: number;
-    }): {
-      fund: Fund;
-      prices: { [id: string]: { values: number[]; startIndex: number }[] };
-    } => {
-      const id = generateFakeId();
+      gainAbs?: number;
+      gainPercent?: number;
+    }) =>
+    (prevState: Pick<State, PageNonStandard.Funds>): Pick<State, PageNonStandard.Funds> => {
+      const units = 100;
+      const scrapedPrice = value / units;
+      const valueAtPurchase = gainAbs ? value - gainAbs : value / (1 + (gainPercent ?? 0));
+      const priceAtPurchase = valueAtPurchase / units;
 
       return {
-        fund: {
-          id,
-          item: name,
-          transactions: [
+        ...prevState,
+        [PageNonStandard.Funds]: {
+          ...prevState[PageNonStandard.Funds],
+          items: [
+            ...prevState[PageNonStandard.Funds].items,
             {
-              date: addDays(new Date('2020-04-20'), -Math.floor(Math.random() * 100)),
-              units: 420,
-              price,
-              fees,
-              taxes,
-              drip: false,
-              pension: false,
+              id: numericHash(key),
+              item: key,
+              transactions: [
+                {
+                  date: new Date('2010-04-20'),
+                  units,
+                  price: priceAtPurchase,
+                  fees: 0,
+                  taxes: 0,
+                  pension: false,
+                  drip: false,
+                },
+              ],
+              stockSplits: [],
             },
           ],
-          stockSplits: [],
-          allocationTarget: 0,
-        },
-        prices: {
-          [id]: [
-            {
-              values: [value / 420],
-              startIndex: 0,
-            },
-          ],
+          prices: {
+            ...prevState[PageNonStandard.Funds].prices,
+            [numericHash(key)]: [{ startIndex: 2, values: [scrapedPrice] }],
+          },
         },
       };
     };
 
-    const contrivedFunds = [
-      {
-        name: 'FH', // gainAbs: 0.559
-        value: 150000 * 1.05,
-        price: (150000 * 1.05) / 1.55 / 420,
-      },
-      {
-        name: 'FLL', // gainAbs: -0.265
-        value: 150000 * 1,
-        price: (150000 * 1) / 0.85 / 420,
-      },
-      {
-        name: 'HLL', // gainAbs: -0.238
-        value: 100000 * 0.95,
-        price: (100000 * 0.95) / 0.8 / 420,
-      },
-      {
-        name: 'HH', // gainAbs: 0.350
-        value: 100000 * 1.05,
-        price: (100000 * 1.05) / 1.5 / 420,
-      },
-      {
-        name: 'TL', // gainAbs: 0.105
-        value: 50000 * 1.05,
-        price: (50000 * 1.05) / 1.25 / 420,
-      },
-      {
-        name: 'FL', // gainAbs: 0.238
-        value: 150000 * 0.95,
-        price: (150000 * 0.95) / 1.2 / 420,
-      },
-      {
-        name: 'HL', // gainAbs: 0.130
-        value: 100000 * 1,
-        price: (100000 * 1) / 1.15 / 420,
-      },
-      {
-        name: 'TH', // gainAbs: 0.155
-        value: 50000 * 1,
-        price: (50000 * 1) / 1.45 / 420,
-      },
-      {
-        name: 'TLL', // gainAbs: -0.158
-        value: 50000 * 0.95,
-        price: (50000 * 0.95) / 0.75 / 420,
-      },
-    ].map(makeContrivedFund);
-
-    const items = contrivedFunds.map(({ fund }) => fund);
-    const prices = contrivedFunds.reduce<PriceCache['prices']>(
-      (last, next) => ({ ...last, ...next.prices }),
-      {},
-    );
-
-    const testStateWithMany: State = {
-      ...testState,
-      api: {
-        ...testState.api,
-        appConfig: {
-          ...testState.api.appConfig,
-          historyOptions: { period: FundPeriod.Month, length: 3 },
-        },
-      },
+  const stateWithGeneratedFunds = [
+    generateTestFund({
+      key: 'highest-value',
+      value: 10000000,
+      gainAbs: 2000,
+    }),
+    generateTestFund({
+      key: 'lowest-value',
+      value: 10000,
+      gainAbs: 2500,
+    }),
+    generateTestFund({
+      key: 'highest-gain-abs',
+      value: 5000000,
+      gainAbs: 2000000,
+    }),
+    generateTestFund({
+      key: 'lowest-gain-abs',
+      value: 2800000,
+      gainAbs: -1500000,
+    }),
+    generateTestFund({
+      key: 'highest-gain-rel',
+      value: 2900000,
+      gainPercent: 0.7,
+    }),
+    generateTestFund({
+      key: 'lowest-gain-rel',
+      value: 260000,
+      gainPercent: -0.55,
+    }),
+  ].reduce<Pick<typeof state, PageNonStandard.Funds>>(
+    (reduction, composer) => composer(reduction),
+    {
       [PageNonStandard.Funds]: {
-        ...testState[PageNonStandard.Funds],
-        items,
-        startTime: getUnixTime(new Date('2020-05-01')),
+        ...state[PageNonStandard.Funds],
+        items: [],
+        startTime: getUnixTime(new Date('2020-04-20')),
         cacheTimes: [0],
-        prices,
+        prices: {},
       },
-    };
+    },
+  );
 
-    const setupForSort = (): ReturnType<typeof renderWithStore> => {
-      const renderResult = setup(testStateWithMany);
-
-      if (selectValue) {
-        const select = renderResult.getByDisplayValue('Value ↓') as HTMLSelectElement;
-        userEvent.selectOptions(select, selectValue);
-      }
-
-      return renderResult;
-    };
-
+  describe.each<[string, { option: string; expectedOrder: string[] }]>([
+    [
+      'value-descending (default)',
+      {
+        option: 'Value ↓',
+        expectedOrder: [
+          'highest-value', // 10000000
+          'highest-gain-abs', // 5000000
+          'highest-gain-rel', // 2900000
+          'lowest-gain-abs', // 2800000
+          'lowest-gain-rel', // 260000
+          'lowest-value', // 10000
+        ],
+      },
+    ],
+    [
+      'value-ascending',
+      {
+        option: 'Value ↑',
+        expectedOrder: [
+          'lowest-value', // 10000
+          'lowest-gain-rel', // 260000
+          'lowest-gain-abs', // 2800000
+          'highest-gain-rel', // 2900000
+          'highest-gain-abs', // 5000000
+          'highest-value', // 10000000
+        ],
+      },
+    ],
+    [
+      'gain (absolute)-descending',
+      {
+        option: 'Gain (abs) ↓',
+        expectedOrder: [
+          'highest-gain-abs', // 2000000
+          'highest-gain-rel', // 843262
+          'lowest-value', // 2500
+          'highest-value', // 2000
+          'lowest-gain-rel', // -317778
+          'lowest-gain-abs', // -1500000
+        ],
+      },
+    ],
+    [
+      'gain (absolute)-ascending',
+      {
+        option: 'Gain (abs) ↑',
+        expectedOrder: [
+          'lowest-gain-abs', // -1500000
+          'lowest-gain-rel', // -317778
+          'highest-value', // 2000
+          'lowest-value', // 2500
+          'highest-gain-rel', // 843262
+          'highest-gain-abs', // 2000000
+        ],
+      },
+    ],
+    [
+      'gain (relative)-descending',
+      {
+        option: 'Gain ↓',
+        expectedOrder: [
+          'highest-gain-rel', // 0.7
+          'highest-gain-abs', // 0.6667
+          'lowest-value', // 0.25
+          'highest-value', // 0.02
+          'lowest-gain-abs', // -0.3488
+          'lowest-gain-rel', // -0.55
+        ],
+      },
+    ],
+    [
+      'gain (relative)-ascending',
+      {
+        option: 'Gain ↑',
+        expectedOrder: [
+          'lowest-gain-rel', // -0.55
+          'lowest-gain-abs', // -0.3488
+          'highest-value', // 0.02
+          'lowest-value', // 0.25
+          'highest-gain-abs', // 0.6667
+          'highest-gain-rel', // 0.7
+        ],
+      },
+    ],
+  ])('when sorting by %s', (_, { expectedOrder, option }) => {
     it('should render the funds in the desired order', () => {
-      expect.assertions(1);
-      const { getAllByRole } = setupForSort();
+      expect.hasAssertions();
+      const { getAllByRole, getByDisplayValue } = setup(stateWithGeneratedFunds);
+
+      const select = getByDisplayValue('Value ↓') as HTMLSelectElement;
+      userEvent.selectOptions(select, option);
+
       const inputs = getAllByRole('textbox') as HTMLInputElement[];
       const values = inputs.map((input) => input.value);
 
-      expect(values).toStrictEqual(order);
+      expect(values).toStrictEqual(expectedOrder);
     });
   });
 });
