@@ -2,7 +2,7 @@ import { FC } from 'react';
 
 import * as Styled from './styles';
 import { formatCurrency, formatPercent } from '~client/modules/format';
-import { GainsForRow } from '~client/selectors';
+import { FundMetadata } from '~client/selectors';
 
 export const formatOptionsAbsolute = {
   brackets: true,
@@ -14,22 +14,21 @@ export const formatOptionsAbsolute = {
 export const formatOptionsRelative = { brackets: true, precision: 2 };
 
 export type Props = {
-  rowGains?: GainsForRow;
-  latestPrice?: number | null;
+  metadata?: FundMetadata;
   isSold: boolean;
 } & Styled.HighlightProps;
 
-export const FundGainInfo: FC<Props> = ({ rowGains, latestPrice, isSold, highlight }) => {
-  if (!rowGains) {
+export const FundGainInfo: FC<Props> = ({ metadata, isSold, highlight }) => {
+  if (!metadata) {
     return null;
   }
-  const { value, gain, gainAbs, dayGain, dayGainAbs, color } = rowGains;
+  const { price, value, gain, gainAbs, dayGain, dayGainAbs, color } = metadata;
   return (
     <Styled.FundGainInfo gain={gain} isSold={isSold} isRow highlight={highlight}>
       <Styled.Text style={{ backgroundColor: color }}>
         <Styled.Main>
           <Styled.Value isRow>{formatCurrency(value, formatOptionsAbsolute)}</Styled.Value>
-          {!isSold && !!latestPrice && <Styled.Price>{latestPrice.toFixed(2)}p</Styled.Price>}
+          {!isSold && !!price && <Styled.Price>{price.toFixed(2)}p</Styled.Price>}
         </Styled.Main>
         <Styled.Breakdown isRow>
           <Styled.Overall isSold={isSold}>

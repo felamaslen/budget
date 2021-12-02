@@ -22,8 +22,9 @@ const Template: ComponentStory<typeof FundGainInfo> = (args) => (
 
 export const Main = Template.bind({});
 Main.args = {
-  rowGains: {
-    price: 1429,
+  metadata: {
+    price: 1460.396,
+    previousPrice: 1429,
     value: 8714423,
     gain: 0.381,
     gainAbs: 2344203,
@@ -31,6 +32,5 @@ Main.args = {
     dayGainAbs: 55842,
     color: rgb(30, 255, 128),
   },
-  latestPrice: 1460.396,
   isSold: false,
 };

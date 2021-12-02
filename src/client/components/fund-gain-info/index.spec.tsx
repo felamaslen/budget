@@ -4,8 +4,9 @@ import { FundGainInfo, Props } from '.';
 
 describe('<FundGainInfo />', () => {
   const props: Props = {
-    rowGains: {
-      price: 1022.3,
+    metadata: {
+      price: 1023,
+      previousPrice: 1022.3,
       value: 561932,
       gain: 0.3,
       gainAbs: 4030,
@@ -13,11 +14,10 @@ describe('<FundGainInfo />', () => {
       dayGainAbs: -341,
       color: rgb(255, 128, 30),
     },
-    latestPrice: 1023,
     isSold: false,
   };
 
-  const setup = (extraProps = {}): RenderResult =>
+  const setup = (extraProps: Partial<Props> = {}): RenderResult =>
     render(<FundGainInfo {...props} {...extraProps} />);
 
   it.each`
@@ -36,7 +36,7 @@ describe('<FundGainInfo />', () => {
 
   it('should not render anything if there are no gain info', () => {
     expect.assertions(1);
-    const { container } = setup({ rowGains: null });
+    const { container } = setup({ metadata: null });
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 
