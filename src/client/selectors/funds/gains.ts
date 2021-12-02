@@ -1,4 +1,5 @@
 import { flatten } from 'array-flatten';
+import fromUnixTime from 'date-fns/fromUnixTime';
 import getUnixTime from 'date-fns/getUnixTime';
 import isAfter from 'date-fns/isAfter';
 import moize from 'moize';
@@ -155,8 +156,8 @@ const getLatestTimes = createSelector(getFundsCache, (cache) => {
 
   const { cacheTimes, startTime } = cache;
 
-  const timeLatest = new Date(1000 * (startTime + cacheTimes[cacheTimes.length - 1]));
-  const timePrev = new Date(1000 * (startTime + cacheTimes[cacheTimes.length - 2]));
+  const timeLatest = fromUnixTime(startTime + cacheTimes[cacheTimes.length - 1]);
+  const timePrev = fromUnixTime(startTime + cacheTimes[cacheTimes.length - 2]);
 
   return { timeLatest, timePrev };
 });

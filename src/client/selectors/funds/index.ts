@@ -23,6 +23,7 @@ import type {
   TransactionNative,
   StockSplitNative,
   PortfolioItem,
+  FundsCachedValue,
 } from '~client/types';
 import { PageNonStandard } from '~client/types/enum';
 import type { Maybe } from '~client/types/gql';
@@ -222,14 +223,6 @@ export const getCashBreakdown = moize(
     })),
   { maxSize: 1 },
 );
-
-export type FundsCachedValue = {
-  value: number;
-  gain: number;
-  gainAbs: number;
-  dayGain: number;
-  dayGainAbs: number;
-};
 
 export const getFundsCachedValue = memoiseNowAndToday<Selector<State, FundsCachedValue>>(
   (time, key) =>
