@@ -60,7 +60,7 @@ export type PortfolioItem = {
 };
 export type Portfolio = PortfolioItem[];
 
-export type CachedValue = {
+export type FundsCachedValue = {
   value: number;
   gain: number;
   gainAbs: number;
