@@ -1,4 +1,3 @@
-import getUnixTime from 'date-fns/getUnixTime';
 import { replaceAtIndex } from 'replace-array';
 import {
   Action,
