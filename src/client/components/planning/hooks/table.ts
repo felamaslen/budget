@@ -29,7 +29,11 @@ import { colors } from '~client/styled/variables';
 import type { NetWorthEntryNative } from '~client/types';
 import { PageListStandard } from '~client/types/enum';
 import { NetWorthAggregate, PageNonStandard } from '~shared/constants';
-import { ComputedTransactionName, StandardTransactions } from '~shared/planning';
+import {
+  ComputedTransactionName,
+  getDateFromYearAndMonth,
+  StandardTransactions,
+} from '~shared/planning';
 
 function getNetWorthValueForSubcategoryId(
   entry: NetWorthEntryNative | undefined,
@@ -190,7 +194,10 @@ export function usePlanningTableData(state: State): PlanningData[] {
             ...planningMonth,
             accounts,
             numRows,
-            isCurrentMonth: isSameMonth(new Date(planningMonth.year, planningMonth.month), today),
+            isCurrentMonth: isSameMonth(
+              getDateFromYearAndMonth(planningMonth.year, planningMonth.month),
+              today,
+            ),
           },
         ];
       },

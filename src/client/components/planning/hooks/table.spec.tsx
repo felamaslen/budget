@@ -121,6 +121,24 @@ describe(usePlanningTableData.name, () => {
     expect(result.current[11].isCurrentMonth).toBe(false); // March
   });
 
+  it('should set the current month when prior to the FY start', () => {
+    expect.assertions(12);
+    jest.setSystemTime(new Date('2021-01-04T11:32:10Z'));
+    const { result } = setup();
+    expect(result.current[0].isCurrentMonth).toBe(false); // April
+    expect(result.current[1].isCurrentMonth).toBe(false); // May
+    expect(result.current[2].isCurrentMonth).toBe(false); // June
+    expect(result.current[3].isCurrentMonth).toBe(false); // July
+    expect(result.current[4].isCurrentMonth).toBe(false); // August
+    expect(result.current[5].isCurrentMonth).toBe(false); // September
+    expect(result.current[6].isCurrentMonth).toBe(false); // October
+    expect(result.current[7].isCurrentMonth).toBe(false); // November
+    expect(result.current[8].isCurrentMonth).toBe(false); // December
+    expect(result.current[9].isCurrentMonth).toBe(true); // January
+    expect(result.current[10].isCurrentMonth).toBe(false); // February
+    expect(result.current[11].isCurrentMonth).toBe(false); // March
+  });
+
   describe('accounts', () => {
     it('should each be present on every group', () => {
       expect.assertions(24);
