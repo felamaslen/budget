@@ -57,19 +57,36 @@ export * from './net-worth';
 
 type Category = keyof GQL<Monthly>;
 
+type LongTermOptionsCombined = LongTermRates & { enabled: boolean };
+
 export const getLongTermRates = moize(
-  (today: Date) =>
+  (today: Date, longTermOptions: LongTermOptions | undefined) =>
     createSelector(
       getMonthlyValues,
       getAnnualisedFundReturns,
       getStartPredictionIndex(today),
-      (monthly, xirr, startPredictionIndex): LongTermRates => ({
-        years: GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS,
-        income: arrayAverage(monthly.income.slice(0, startPredictionIndex), Average.Exp),
-        stockPurchase:
-          arrayAverage(monthly.investmentPurchases.slice(0, startPredictionIndex)) || 0,
-        xirr,
-      }),
+      (monthly, xirr, startPredictionIndex): LongTermOptionsCombined => {
+        const defaultOptions: LongTermRates = {
+          years: GRAPH_CASHFLOW_LONG_TERM_PREDICTION_YEARS,
+          income: arrayAverage(monthly.income.slice(0, startPredictionIndex), Average.Exp),
+          stockPurchase:
+            arrayAverage(monthly.investmentPurchases.slice(0, startPredictionIndex)) ?? 0,
+          xirr,
+        };
+
+        return longTermOptions?.enabled
+          ? {
+              enabled: true,
+              years: longTermOptions?.rates.years ?? defaultOptions.years,
+              income: longTermOptions?.rates.income ?? defaultOptions.income,
+              stockPurchase: longTermOptions?.rates.stockPurchase ?? defaultOptions.stockPurchase,
+              xirr: longTermOptions?.rates.xirr ?? defaultOptions.xirr,
+            }
+          : {
+              enabled: false,
+              ...defaultOptions,
+            };
+      },
     ),
   { maxSize: 1 },
 );
@@ -86,14 +103,6 @@ const extrapolateCurrentMonthCategories: Category[] = [
   PageListStandard.Social,
 ];
 
-const getMonthlyStockPurchase = (
-  longTermOptions: LongTermOptions,
-  longTermRates: LongTermRates,
-): number =>
-  longTermOptions.enabled
-    ? longTermOptions.rates.stockPurchase ?? longTermRates.stockPurchase
-    : longTermRates.stockPurchase;
-
 type NetWorthContext = {
   dates: OverviewGraphDate[];
   startPredictionIndex: number;
@@ -101,8 +110,7 @@ type NetWorthContext = {
   netWorth: EntryWithFTI[];
   funds: Fund[];
   illiquidEquity: IlliquidEquity[];
-  longTermOptions: LongTermOptions;
-  longTermRates: LongTermRates;
+  longTermOptions: LongTermOptionsCombined;
 };
 
 type GraphForNetWorth = Partial<OverviewGraphValues> &
@@ -122,7 +130,7 @@ type NetWorthKey =
 type GraphWithNetWorth<G extends GraphForNetWorth> = G & Pick<OverviewGraphValues, NetWorthKey>;
 
 function predictLiquidCash<G extends GraphForNetWorth>(ctx: NetWorthContext, graph: G): number[] {
-  const monthlyStockPurchase = getMonthlyStockPurchase(ctx.longTermOptions, ctx.longTermRates);
+  const monthlyStockPurchase = ctx.longTermOptions.stockPurchase;
 
   return ctx.dates.reduce<{
     liquidCash: number[];
@@ -328,9 +336,9 @@ function predictIncome(
   startPredictionIndex: number,
   currentIncome: number[],
   futureIncome: number[],
-  longTermOptions: LongTermOptions,
+  longTermRates: LongTermOptionsCombined,
 ): number[] {
-  if (!longTermOptions.enabled || typeof longTermOptions.rates.income === 'undefined') {
+  if (!longTermRates.enabled) {
     return reduceDates(
       dates.slice(startPredictionIndex),
       (last, _, __, index) => [
@@ -348,7 +356,7 @@ function predictIncome(
       ...last,
       index === 0 && startPredictionIndex === currentIndex
         ? futureIncome[0]
-        : (longTermOptions.rates.income as number) * (nextDate.monthIndex - prevDate.monthIndex),
+        : longTermRates.income * (nextDate.monthIndex - prevDate.monthIndex),
     ],
     dates[currentIndex],
     currentIncome.slice(0, startPredictionIndex),
@@ -360,7 +368,7 @@ function calculateFutures<G extends OverviewGraphPartial>(
   today: Date,
   startPredictionIndex: number,
   futureIncome: number[],
-  longTermOptions: LongTermOptions,
+  longTermRates: LongTermOptionsCombined,
 ): (graph: G) => G {
   const currentMonthRatio = getDaysInMonth(today) / getDate(today);
   const currentIndex = dates.findIndex(({ date }) => isSameMonth(date, today));
@@ -385,9 +393,9 @@ function calculateFutures<G extends OverviewGraphPartial>(
           startPredictionIndex,
           graph.income,
           futureIncome,
-          longTermOptions,
+          longTermRates,
         ),
-        bills: longTermOptions.enabled
+        bills: longTermRates.enabled
           ? predictByPastAverages(dates, currentIndex, currentMonthRatio, 'bills', graph.bills)
           : graph.bills,
         investmentPurchases: rightPad(graph.investmentPurchases, dates.length, 0),
@@ -407,12 +415,12 @@ const withPredictedSpending = <G extends OverviewGraphPartial>(
   today: Date,
   startPredictionIndex: number,
   futureIncome: number[],
-  longTermOptions: LongTermOptions,
+  longTermRates: LongTermOptionsCombined,
 ): ((graph: G) => OverviewGraphRequired<'spending' | 'net', G>) =>
   compose<G, G, OverviewGraphRequired<'spending', G>, OverviewGraphRequired<'spending' | 'net', G>>(
     withNetChange(),
     withSpendingColumn(dates.length),
-    calculateFutures(dates, today, startPredictionIndex, futureIncome, longTermOptions),
+    calculateFutures(dates, today, startPredictionIndex, futureIncome, longTermRates),
   );
 
 const predictStockReturns =
@@ -467,29 +475,22 @@ const getStockCostBasis = (
     );
 
 const withStocks =
-  <G extends OverviewGraphPartial>(numOldMonths: number, longTermOptions: LongTermOptions) =>
+  <G extends OverviewGraphPartial>(numOldMonths: number) =>
   (
-    longTermRates: LongTermRates,
+    longTermRates: LongTermOptionsCombined,
     startPredictionIndex: number,
     dates: OverviewGraphDate[],
     stocks: number[],
     funds: Fund[],
     currentStockValue: number,
-    annualisedFundReturns: number,
   ) =>
   (graph: G): OverviewGraphRequired<'stocks' | 'stockCostBasis', G> => {
-    const monthlyStockPurchase = getMonthlyStockPurchase(longTermOptions, longTermRates);
+    const monthlyStockPurchase = longTermRates.stockPurchase;
 
     return {
       ...graph,
       stocks: compose(
-        predictStockReturns(
-          dates,
-          longTermOptions.enabled
-            ? longTermOptions.rates.xirr ?? annualisedFundReturns
-            : annualisedFundReturns,
-          monthlyStockPurchase,
-        ),
+        predictStockReturns(dates, longTermRates.xirr, monthlyStockPurchase),
         withCurrentStockValue(currentStockValue),
       )(stocks),
       stockCostBasis: getStockCostBasis(
@@ -508,7 +509,7 @@ const getNetWorthMonthlyComposer = moize(
     longTermOptions: LongTermOptions,
   ) =>
     createSelector(
-      getLongTermRates(today),
+      getLongTermRates(today, longTermOptions),
       getGraphDates(today, longTermOptions),
       getStartPredictionIndex(today),
       getDerivedNetWorthEntries,
@@ -516,7 +517,7 @@ const getNetWorthMonthlyComposer = moize(
       getSubcategories,
       getIlliquidEquity(today, longTermOptions),
       (
-        longTermRates,
+        longTermOptionsCombined,
         dates,
         startPredictionIndex,
         netWorth,
@@ -531,8 +532,7 @@ const getNetWorthMonthlyComposer = moize(
           netWorth,
           funds,
           illiquidEquity,
-          longTermOptions,
-          longTermRates,
+          longTermOptions: longTermOptionsCombined,
         }),
     ),
   { maxSize: 1 },
@@ -545,14 +545,13 @@ const getFundsMonthlyComposer = moize(
     longTermOptions: LongTermOptions,
   ): ((state: State) => (graph: G) => OverviewGraphRequired<'stocks' | 'stockCostBasis', G>) =>
     createSelector(
-      getLongTermRates(today),
+      getLongTermRates(today, longTermOptions),
       getStartPredictionIndex(today),
       getGraphDates(today, longTermOptions),
       getStockValues,
       getFundsRows,
       getFundsValueTodayWithoutPension(today),
-      getAnnualisedFundReturns,
-      withStocks(numOldMonths, longTermOptions),
+      withStocks(numOldMonths),
     ),
   { maxSize: 1 },
 );
@@ -564,6 +563,7 @@ export const getOverviewGraphValues = moize(
     longTermOptions: LongTermOptions = longTermOptionsDisabled,
   ): ((state: State) => OverviewGraph) =>
     createSelector(
+      getLongTermRates(today, longTermOptions),
       getNetWorthMonthlyComposer(today, longTermOptions),
       getFundsMonthlyComposer<OverviewGraphRequired<'investmentPurchases'>>(
         today,
@@ -575,6 +575,7 @@ export const getOverviewGraphValues = moize(
       getFutureIncome,
       getMonthlyValues,
       (
+        longTermRates,
         netWorthMonthlyComposer,
         fundsMonthlyComposer,
         startPredictionIndex,
@@ -590,7 +591,7 @@ export const getOverviewGraphValues = moize(
           OverviewGraphValues
         >(
           netWorthMonthlyComposer,
-          withPredictedSpending(dates, today, startPredictionIndex, futureIncome, longTermOptions),
+          withPredictedSpending(dates, today, startPredictionIndex, futureIncome, longTermRates),
           fundsMonthlyComposer,
           omitTypeName,
         )(monthly);

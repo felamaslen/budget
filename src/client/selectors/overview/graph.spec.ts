@@ -75,11 +75,9 @@ describe('getOverviewGraphValues', () => {
       },
     };
 
-    describe.each`
-      case                     | longTermOptions
-      ${'are not enabled'}     | ${undefined}
-      ${'have no income rate'} | ${{ enabled: true, rates: { years: 3 } }}
-    `('when long-term predictions $case', ({ longTermOptions }) => {
+    describe('when long-term predictions are not enabled', () => {
+      const longTermOptions = undefined;
+
       it('should use server-side predictions', () => {
         expect.assertions(1);
         const result = getOverviewGraphValues(today, 0, longTermOptions)(stateForIncomeFutures);
@@ -115,49 +113,84 @@ describe('getOverviewGraphValues', () => {
       });
     });
 
-    describe('when long-term predictions are enabled with income', () => {
-      const longTermOptions: LongTermOptions = {
-        enabled: true,
-        rates: {
-          years: 3,
-          income: 1280,
+    describe.each<
+      [
+        string,
+        {
+          longTermOptions: LongTermOptions;
+          expectedValues: number[];
+          expectedValuesEndOfMonth: number[];
         },
-      };
+      ]
+    >([
+      [
+        'with income',
+        {
+          longTermOptions: { enabled: true, rates: { years: 3, income: 1280 } },
+          expectedValues: [
+            1280 * 9, // Dec-18 (predicted)
+            1280 * 12, // Dec-19 (predicted)
+            1280 * 12, // Dec-20 (predicted)
+          ],
+          expectedValuesEndOfMonth: [
+            1280 * 9, // Dec-18 (predicted)
+            1280 * 12, // Dec-19 (predicted)
+            1280 * 12, // Dec-20 (predicted)
+          ],
+        },
+      ],
+      [
+        'without income',
+        {
+          longTermOptions: { enabled: true, rates: { years: 3, income: undefined } },
+          expectedValues: [
+            // exponential average of existing values
+            Math.round(6948.2857142857 * 9), // Dec-18 (predicted)
+            Math.round(6948.2857142857 * 12), // Dec-19 (predicted)
+            Math.round(6948.2857142857 * 12), // Dec-20 (predicted)
+          ],
+          expectedValuesEndOfMonth: [
+            // exponential average of existing values (including present month)
+            Math.round(5083.0666666 * 9), // Dec-18 (predicted)
+            Math.round(5083.0666666 * 12), // Dec-19 (predicted)
+            Math.round(5083.0666666 * 12), // Dec-20 (predicted)
+          ],
+        },
+      ],
+    ])(
+      'when long-term predictions are enabled %s',
+      (_, { longTermOptions, expectedValues, expectedValuesEndOfMonth }) => {
+        it('should use the income rate to predict income', () => {
+          expect.assertions(1);
+          const result = getOverviewGraphValues(today, 0, longTermOptions)(stateForIncomeFutures);
 
-      it('should use the income rate to predict income', () => {
-        expect.assertions(1);
-        const result = getOverviewGraphValues(today, 0, longTermOptions)(stateForIncomeFutures);
+          expect(result.values[PageListStandard.Income]).toStrictEqual([
+            1234, // Dec-17
+            5678, // Jan-18
+            9012, // Feb-18
+            7890, // Mar-18 (predicted - current month)
+            ...expectedValues,
+          ]);
+        });
 
-        expect(result.values[PageListStandard.Income]).toStrictEqual([
-          1234, // Dec-17
-          5678, // Jan-18
-          9012, // Feb-18
-          7890, // Mar-18 (predicted - current month)
-          1280 * 9, // Dec-18 (predicted)
-          1280 * 12, // Dec-19 (predicted)
-          1280 * 12, // Dec-20 (predicted)
-        ]);
-      });
+        it('should use the actual present value when at the end of the month', () => {
+          expect.assertions(1);
+          const result = getOverviewGraphValues(
+            endOfMonth(today),
+            0,
+            longTermOptions,
+          )(stateForIncomeFutures);
 
-      it('should use the actual present value when at the end of the month', () => {
-        expect.assertions(1);
-        const result = getOverviewGraphValues(
-          endOfMonth(today),
-          0,
-          longTermOptions,
-        )(stateForIncomeFutures);
-
-        expect(result.values[PageListStandard.Income]).toStrictEqual([
-          1234, // Dec-17
-          5678, // Jan-18
-          9012, // Feb-18
-          3451, // Mar-18 (actual - current month)
-          1280 * 9, // Dec-18 (predicted)
-          1280 * 12, // Dec-19 (predicted)
-          1280 * 12, // Dec-20 (predicted)
-        ]);
-      });
-    });
+          expect(result.values[PageListStandard.Income]).toStrictEqual([
+            1234, // Dec-17
+            5678, // Jan-18
+            9012, // Feb-18
+            3451, // Mar-18 (actual - current month)
+            ...expectedValuesEndOfMonth,
+          ]);
+        });
+      },
+    );
   });
 
   describe('bills values', () => {
@@ -2149,7 +2182,38 @@ describe('getLongTermRates', () => {
     ${'stockPurchase'} | ${expectedStockPurchase}
   `('should return the calculated average for $thing', ({ thing, value }) => {
     expect.assertions(1);
-    const result = getLongTermRates(now)(testState);
+    const result = getLongTermRates(now, undefined)(testState);
     expect(result[thing as keyof LongTermOptions['rates']]).toBeCloseTo(value);
+  });
+
+  it('should combine given options with the rates', () => {
+    expect.assertions(1);
+    const result = getLongTermRates(now, {
+      enabled: true,
+      rates: {
+        income: 1540,
+      },
+    })(testState);
+
+    expect(result.income).toBe(1540);
+  });
+
+  it('should use default rates when the long term options are disabled', () => {
+    expect.assertions(1);
+    const result = getLongTermRates(now, {
+      enabled: false,
+      rates: {
+        income: 1540,
+      },
+    })(testState);
+
+    expect(result.income).toBeCloseTo(expectedIncome);
+  });
+
+  it('should return the enabled status', () => {
+    expect.assertions(3);
+    expect(getLongTermRates(now, undefined)(testState).enabled).toBe(false);
+    expect(getLongTermRates(now, { enabled: true, rates: {} })(testState).enabled).toBe(true);
+    expect(getLongTermRates(now, { enabled: false, rates: {} })(testState).enabled).toBe(false);
   });
 });

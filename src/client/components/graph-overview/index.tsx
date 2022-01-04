@@ -30,7 +30,7 @@ export const GraphOverview: React.FC = () => {
     longTermOptionsDisabled,
     'long-term-options',
   );
-  const defaultRates = useSelector(getLongTermRates(today));
+  const defaultRates = useSelector(getLongTermRates(today, undefined));
   const [{ data: oldData, fetching, error }, fetchOld] = useOverviewOldQuery({
     pause: true,
   });
