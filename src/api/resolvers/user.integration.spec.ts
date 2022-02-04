@@ -1,4 +1,5 @@
 import addDays from 'date-fns/addDays';
+import { MemoryStore } from 'express-session';
 import gql from 'graphql-tag';
 import sinon from 'sinon';
 import { sql } from 'slonik';
@@ -243,6 +244,23 @@ describe('user resolver', () => {
         expect(resGoodPostBan0.data?.login.error).toMatchInlineSnapshot(`"Banned"`);
         expect(resGoodPostBan0.data?.login.apiKey).toBeNull();
         expect(resGoodPostBan1.data?.login.error).toBeNull();
+      });
+    });
+
+    describe('when there is an error saving the session', () => {
+      beforeEach(() => {
+        jest.spyOn(MemoryStore.prototype, 'set').mockImplementation((_, __, callback) => {
+          callback?.(new Error('some redis error'));
+        });
+      });
+
+      it('should return an internal error', async () => {
+        expect.assertions(1);
+        const res = await app.gqlClient
+          .mutation<Mutation, MutationLoginArgs>(login, { pin: 1234 })
+          .toPromise();
+
+        expect(res.data?.login.error).toBe('Error saving session: some redis error');
       });
     });
   });

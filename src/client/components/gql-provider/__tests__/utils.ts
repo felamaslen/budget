@@ -8,6 +8,8 @@ import { PubSub } from 'graphql-subscriptions';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import ws from 'ws';
 
+import { testPort } from '~api/test-utils';
+
 export const myApiKey = 'my-api-key';
 
 const TEST_PUBSUB_TOPIC = 'TEST_PUBSUB_TOPIC';
@@ -79,7 +81,7 @@ export class MockServer {
   async setup(): Promise<void> {
     this.sockets = [];
     return new Promise<void>((resolve, reject) => {
-      this.server = this.app.listen(4000, () => {
+      this.server = this.app.listen(testPort, () => {
         this.wsServer = new ws.Server({
           server: this.server,
           path: '/subscriptions',
