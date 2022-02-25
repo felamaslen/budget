@@ -15,6 +15,7 @@ import moize from 'moize';
 import request, { SuperTest, Test } from 'supertest';
 import ws from 'ws';
 
+import config from '~api/config';
 import { run } from '~api/index';
 
 export type App = {
@@ -24,9 +25,7 @@ export type App = {
   uid: number;
 };
 
-export const testPort = 4000;
-
-export const getServer = (): Promise<Server> => run(testPort);
+export const getServer = (): Promise<Server> => run(config.app.port);
 
 type TestAppOptions = {
   subscriptions: boolean;
@@ -41,8 +40,8 @@ export const makeTestApp = async ({
 
   const agent = request.agent(global.server);
 
-  const graphqlUrl = `http://127.0.0.1:${testPort}/graphql`;
-  const websocketUrl = `ws://127.0.0.1:${testPort}/subscriptions`;
+  const graphqlUrl = `http://127.0.0.1:${config.app.port}/graphql`;
+  const websocketUrl = `ws://127.0.0.1:${config.app.port}/subscriptions`;
 
   const loginRes = await axios.post<{
     data?: {

@@ -10,7 +10,7 @@ import { useQuery, useSubscription } from 'urql';
 import { MockServer, myApiKey, pubsub } from './__tests__/utils';
 import { GQLProvider } from '.';
 
-import { testPort } from '~api/test-utils';
+import config from '~api/config';
 
 jest.mock('~client/modules/ssr', () => ({
   isServerSide: false,
@@ -21,7 +21,7 @@ describe('gql provider', () => {
   const mockServer = new MockServer();
 
   beforeAll(async () => {
-    nock.enableNetConnect(`localhost:${testPort}`);
+    nock.enableNetConnect(`localhost:${config.app.port}`);
     mockFetch = global.fetch;
     global.fetch = fetch as unknown as typeof global.fetch;
 
@@ -42,7 +42,7 @@ describe('gql provider', () => {
     });
     Object.defineProperty(window, 'location', {
       value: {
-        host: `localhost:${testPort}`,
+        host: `localhost:${config.app.port}`,
         protocol: 'http:',
       },
     });
@@ -121,7 +121,7 @@ describe('gql provider', () => {
     expect(JSON.parse(getByTestId('test-subscription-data').innerHTML)).toBeNull();
 
     await axios.post(
-      `http://localhost:${testPort}/graphql?query=${encodeURIComponent(
+      `http://localhost:${config.app.port}/graphql?query=${encodeURIComponent(
         `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
       )}&variables=${encodeURIComponent(JSON.stringify({ index: 1 }))}`,
     );
@@ -133,7 +133,7 @@ describe('gql provider', () => {
     });
 
     await axios.post(
-      `http://localhost:${testPort}/graphql?query=${encodeURIComponent(
+      `http://localhost:${config.app.port}/graphql?query=${encodeURIComponent(
         `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
       )}&variables=${encodeURIComponent(JSON.stringify({ index: 3 }))}`,
     );
@@ -248,7 +248,7 @@ describe('gql provider', () => {
       });
 
       await axios.post(
-        `http://localhost:${testPort}/graphql?query=${encodeURIComponent(
+        `http://localhost:${config.app.port}/graphql?query=${encodeURIComponent(
           `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
         )}&variables=${encodeURIComponent(JSON.stringify({ index: 0 }))}`,
       );
@@ -282,7 +282,7 @@ describe('gql provider', () => {
       });
 
       await axios.post(
-        `http://localhost:${testPort}/graphql?query=${encodeURIComponent(
+        `http://localhost:${config.app.port}/graphql?query=${encodeURIComponent(
           `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
         )}&variables=${encodeURIComponent(JSON.stringify({ index: 0 }))}`,
       );
@@ -304,7 +304,7 @@ describe('gql provider', () => {
 
       // trigger second subscription update through external mutation
       await axios.post(
-        `http://localhost:${testPort}/graphql?query=${encodeURIComponent(
+        `http://localhost:${config.app.port}/graphql?query=${encodeURIComponent(
           `mutation TestMutation($index: Int!) { broadcastGreeting(index: $index) { ok } }`,
         )}&variables=${encodeURIComponent(JSON.stringify({ index: 1 }))}`,
       );
