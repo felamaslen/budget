@@ -10,7 +10,11 @@ export async function getMultipleStockQuotes(
   return symbols.reduce<Record<string, number | null>>(
     (last, symbol) => ({
       ...last,
-      [symbol]: quotes.find((compare) => compare.symbol === symbol)?.regularMarketPrice ?? null,
+      [symbol]:
+        Reflect.get(
+          quotes.find((compare) => compare.symbol === symbol) ?? {},
+          'regularMarketPrice',
+        ) ?? null,
     }),
     {},
   );
