@@ -52,7 +52,7 @@ export function useTodayPrices(): void {
   const fetchIfNecessary = useCallback(() => {
     const now = Date.now();
     if (
-      now - todayPriceTime.getTime() >= fetchIntervalMs &&
+      now - (todayPriceTime?.getTime() ?? 0) >= fetchIntervalMs &&
       now - lastFetchTime >= minTimeBetweenFetchMs
     ) {
       fetchPrices();

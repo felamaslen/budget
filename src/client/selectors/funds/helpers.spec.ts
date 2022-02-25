@@ -1,12 +1,27 @@
 import getUnixTime from 'date-fns/getUnixTime';
 import numericHash from 'string-hash';
 
-import { getFundsCache, getFundsRows } from './helpers';
+import { getFundsCache, getFundsRows, getTodayPriceTime } from './helpers';
 import type { State } from '~client/reducers/types';
 import { testState as state } from '~client/test-data';
 import type { FundQuotes } from '~client/types';
 import { PageNonStandard, RequestType } from '~client/types/enum';
 import type { Fund } from '~client/types/gql';
+
+describe('getTodayPriceTime', () => {
+  it('should return null if the price fetch time does not exist', () => {
+    expect.assertions(1);
+    expect(
+      getTodayPriceTime({
+        ...state,
+        [PageNonStandard.Funds]: {
+          ...state[PageNonStandard.Funds],
+          todayPriceFetchTime: null,
+        },
+      }),
+    ).toBeNull();
+  });
+});
 
 describe('getFundsRows', () => {
   it('should exclude optimistically deleted items', () => {

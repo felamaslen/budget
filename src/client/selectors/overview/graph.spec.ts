@@ -1,4 +1,4 @@
-import { endOfDay, endOfMonth, getUnixTime } from 'date-fns';
+import { endOfDay, endOfMonth, getUnixTime, subSeconds } from 'date-fns';
 import numericHash from 'string-hash';
 
 import { getLongTermRates, getOverviewGraphValues } from './graph';
@@ -43,6 +43,7 @@ describe('getOverviewGraphValues', () => {
       cacheTimes: [],
       prices: {},
       todayPrices: {},
+      todayPriceFetchTime: subSeconds(now, 4),
     },
   };
 

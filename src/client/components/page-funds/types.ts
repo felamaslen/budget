@@ -23,5 +23,5 @@ export const defaultSort: Sort = { criteria: SortCriteria.Value, direction: 1 };
 export type PageFundsContext = {
   sort?: Sort;
   setSort: React.Dispatch<React.SetStateAction<Sort>>;
-  lastScraped: Date;
+  lastScraped: Date | null;
 };

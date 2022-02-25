@@ -1,7 +1,6 @@
 import yahooFinance from 'yahoo-finance2';
 
 import { getMultipleStockQuotes } from './finance';
-import { AsyncReturnType } from '~api/types';
 
 describe('api finance module', () => {
   describe(getMultipleStockQuotes.name, () => {
@@ -16,7 +15,7 @@ describe('api finance module', () => {
           regularMarketPrice: 137.72,
           symbol: 'AAPL',
         },
-      ] as AsyncReturnType<typeof yahooFinance.quote>);
+      ]);
     });
 
     it('should return the market price of the given stocks', async () => {
