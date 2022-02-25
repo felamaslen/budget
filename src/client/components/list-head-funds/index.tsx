@@ -42,10 +42,10 @@ const formatOptionsXIRR = { brackets: false, precision: 1 };
 
 function getAgeText(ageMs: number | null): string {
   if (ageMs === null) {
-    return 'no values';
+    return 'No values';
   }
   if (ageMs < 0) {
-    return 'in the future!';
+    return 'In the future!';
   }
   return `${humanizeDuration(ageMs, { round: true, largest: 1 })} ago`;
 }
@@ -71,7 +71,7 @@ const Arc: FC<{ sliceAngle: number; color: string }> = ({ sliceAngle, color }) =
 
 export type PropsGainValues = PropsCommon &
   HighlightProps & {
-    cacheAgeMs: number;
+    cacheAgeMs: number | null;
     isMobile: boolean;
   };
 
@@ -83,7 +83,7 @@ const GainValues: FC<PropsGainValues> = ({
   cacheAgeMs,
   highlight,
 }) => {
-  const ageSlice = Math.min(0.999, cacheAgeMs / maxAgeMs);
+  const ageSlice = cacheAgeMs ? Math.min(0.999, cacheAgeMs / maxAgeMs) : 0.999;
   const { realTimePrices } = useSelector(getAppConfig);
   return (
     <Styled.OverallGain profit={value > totalCost} loss={value < totalCost} highlight={highlight}>
@@ -116,9 +116,9 @@ const GainValues: FC<PropsGainValues> = ({
   );
 };
 
-function useCacheAgeMs(lastScraped: Date): number {
+function useCacheAgeMs(lastScraped: Date | null): number | null {
   const now = useNow();
-  return now.getTime() - lastScraped.getTime();
+  return lastScraped ? now.getTime() - lastScraped.getTime() : null;
 }
 
 export const ListHeadFunds: FC<Props> = ({
