@@ -150,7 +150,7 @@
     "urql": "^2.0.5",
     "winston": "^3.2.1",
     "ws": "^7.4.0",
-    "yahoo-finance2": "^2.1.6",
+    "yahoo-finance2": "^2.3.0",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
