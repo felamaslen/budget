@@ -86,15 +86,6 @@ export const attemptLogin = async (
 
   ctx.session.uid = result.response.uid;
   ctx.session.apiKey = result.response.apiKey;
-  await new Promise<void>((resolve, reject) => {
-    ctx.session.save((err) => {
-      if (err) {
-        reject(boom.internal(`Error saving session: ${err.message}`));
-      } else {
-        resolve();
-      }
-    });
-  });
 
   return result.response;
 };
