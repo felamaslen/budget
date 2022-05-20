@@ -145,7 +145,6 @@ export function setupAuth(app: Express): void {
           process.env.NODE_ENV === 'test'
             ? undefined
             : config.user.sessionExpiryDays * 86400 * 1000,
-        secure: process.env.NODE_ENV === 'production',
       },
       secret: config.user.tokenSecret,
       resave: false,
