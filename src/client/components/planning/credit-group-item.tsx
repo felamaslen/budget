@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 
+import { AccountGroupItemWrapper } from './account-group-item';
 import { OnChangeCreditCard, useEditMode, useEnterKeyDown } from './form/hooks';
-import * as Styled from './styles';
 import { AccountCreditCardPayment } from './types';
 
-import { FormFieldCostInline } from '~client/components/form-field';
+import { FormFieldTextInline } from '~client/components/form-field';
 import { formatCurrency } from '~client/modules/format';
 import { ButtonUnStyled } from '~client/styled/shared/reset';
 
@@ -20,34 +20,39 @@ export const CreditGroupItem: React.FC<Props> = ({
   onChangeValue,
 }) => {
   const [isEditing, onEdit, onCancelEdit] = useEditMode();
-  const [tempValue, setTempValue] = useState<number | undefined>(creditCard.value);
+  const [rawValue, setRawValue] = useState<string | undefined>(
+    ((creditCard.value ?? 0) / 100).toFixed(2),
+  );
 
-  const onFinishEditing = useCallback(() => {
-    onChangeValue(netWorthSubcategoryId, { ...creditCard, value: tempValue });
-    onCancelEdit();
-  }, [netWorthSubcategoryId, creditCard, onCancelEdit, onChangeValue, tempValue]);
+  const onUpdate = useCallback(() => {
+    setTimeout(onCancelEdit, 0);
 
-  const onKeyDown = useEnterKeyDown(onFinishEditing);
+    const parsedValue = Math.round((Number(rawValue) || 0) * 100);
+    if (!rawValue?.length) {
+      onChangeValue(netWorthSubcategoryId, { ...creditCard, value: undefined });
+    } else if (!Number.isNaN(parsedValue)) {
+      onChangeValue(netWorthSubcategoryId, { ...creditCard, value: parsedValue });
+    }
+  }, [creditCard, netWorthSubcategoryId, onCancelEdit, onChangeValue, rawValue]);
+
+  const onKeyDown = useEnterKeyDown(onUpdate);
 
   return (
-    <Styled.AccountGroup isVerified={creditCard.isVerified} onClick={onEdit}>
-      <Styled.AccountGroupItem>{creditCard.name}</Styled.AccountGroupItem>
-      <Styled.AccountGroupValue>
-        {isEditing ? (
-          <FormFieldCostInline
-            value={creditCard.value}
-            onChange={onFinishEditing}
-            onType={setTempValue}
-            inputProps={{ onKeyDown }}
-          />
-        ) : (
-          <ButtonUnStyled>
-            {typeof creditCard.value === 'undefined'
-              ? ''
-              : formatCurrency(creditCard.value, { brackets: true })}
-          </ButtonUnStyled>
-        )}
-      </Styled.AccountGroupValue>
-    </Styled.AccountGroup>
+    <AccountGroupItemWrapper transaction={creditCard} onClick={onEdit} name={creditCard.name}>
+      {isEditing ? (
+        <FormFieldTextInline
+          value={rawValue}
+          onChange={setRawValue}
+          onType={setRawValue}
+          inputProps={{ onKeyDown }}
+        />
+      ) : (
+        <ButtonUnStyled>
+          {typeof creditCard.value === 'undefined'
+            ? ''
+            : formatCurrency(creditCard.value, { brackets: true })}
+        </ButtonUnStyled>
+      )}
+    </AccountGroupItemWrapper>
   );
 };

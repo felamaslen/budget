@@ -23,23 +23,23 @@ export type Props = {
   onRemoveTransaction: OnRemoveTransaction;
 };
 
-type AccountGroupItemWrapperProps = Pick<Props, 'transaction'> & {
+type AccountGroupItemWrapperProps = {
   onClick?: () => void;
-  name: React.ReactElement;
-  value: React.ReactElement;
+  name: string | React.ReactElement;
+  transaction: Pick<Props['transaction'], 'color' | 'isVerified'>;
 };
 
-const AccountGroupItemWrapper: React.FC<AccountGroupItemWrapperProps> = ({
-  transaction,
+export const AccountGroupItemWrapper: React.FC<AccountGroupItemWrapperProps> = ({
+  children,
   onClick = VOID,
   name,
-  value,
+  transaction,
 }) => {
   const onActivate = useCTA(onClick);
   return (
     <Styled.AccountGroup isVerified={transaction.isVerified} {...onActivate}>
       <Styled.AccountGroupItem>{name}</Styled.AccountGroupItem>
-      <Styled.AccountGroupValue color={transaction.color}>{value}</Styled.AccountGroupValue>
+      <Styled.AccountGroupValue color={transaction.color}>{children}</Styled.AccountGroupValue>
     </Styled.AccountGroup>
   );
 };
@@ -81,8 +81,9 @@ const AccountGroupItemEditable: React.FC<AccountGroupItemEditableProps> = ({
           </ButtonDelete>
         </>
       }
-      value={elements.value}
-    />
+    >
+      {elements.value}
+    </AccountGroupItemWrapper>
   );
 };
 
@@ -98,13 +99,10 @@ export const AccountGroupItem: React.FC<Props> = (props) => {
       {...props}
       onClick={onEdit}
       name={<Styled.AccountGroupItemText>{props.transaction.name}</Styled.AccountGroupItemText>}
-      value={
-        <>
-          {typeof props.transaction.computedValue === 'undefined'
-            ? ''
-            : formatCurrency(props.transaction.computedValue, { brackets: true })}
-        </>
-      }
-    />
+    >
+      {typeof props.transaction.computedValue === 'undefined'
+        ? ''
+        : formatCurrency(props.transaction.computedValue, { brackets: true })}
+    </AccountGroupItemWrapper>
   );
 };
