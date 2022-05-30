@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import {
   OnAddTransaction,
@@ -25,6 +25,7 @@ export type Props = {
 
 type AccountGroupItemWrapperProps = {
   onClick?: () => void;
+  onSave?: () => void;
   name: string | React.ReactElement;
   transaction: Pick<Props['transaction'], 'color' | 'isVerified'>;
 };
@@ -32,12 +33,27 @@ type AccountGroupItemWrapperProps = {
 export const AccountGroupItemWrapper: React.FC<AccountGroupItemWrapperProps> = ({
   children,
   onClick = VOID,
+  onSave,
   name,
   transaction,
 }) => {
   const onActivate = useCTA(onClick);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!onSave) {
+      return undefined;
+    }
+    const onClickOutside = (e: TouchEvent): void => {
+      if (!ref.current?.contains(e.target as Node | null)) {
+        onSave();
+      }
+    };
+    document.addEventListener('touchstart', onClickOutside);
+    return (): void => document.removeEventListener('touchstart', onClickOutside);
+  }, [onSave]);
+
   return (
-    <Styled.AccountGroup isVerified={transaction.isVerified} {...onActivate}>
+    <Styled.AccountGroup ref={ref} isVerified={transaction.isVerified} {...onActivate}>
       <Styled.AccountGroupItem>{name}</Styled.AccountGroupItem>
       <Styled.AccountGroupValue color={transaction.color}>{children}</Styled.AccountGroupValue>
     </Styled.AccountGroup>
@@ -58,7 +74,7 @@ const AccountGroupItemEditable: React.FC<AccountGroupItemEditableProps> = ({
   const onChange = useCallback(
     (delta: Pick<AccountTransaction, 'name' | 'value' | 'formula'>): void => {
       onChangeTransaction(accountGroup.netWorthSubcategoryId, transaction.name, delta);
-      onCancelEdit();
+      setTimeout(onCancelEdit, 0);
     },
     [accountGroup.netWorthSubcategoryId, onCancelEdit, transaction.name, onChangeTransaction],
   );
@@ -81,6 +97,7 @@ const AccountGroupItemEditable: React.FC<AccountGroupItemEditableProps> = ({
           </ButtonDelete>
         </>
       }
+      onSave={elements.onUpdate}
     >
       {elements.value}
     </AccountGroupItemWrapper>

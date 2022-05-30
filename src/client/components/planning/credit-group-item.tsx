@@ -25,20 +25,24 @@ export const CreditGroupItem: React.FC<Props> = ({
   );
 
   const onUpdate = useCallback(() => {
-    setTimeout(onCancelEdit, 0);
-
     const parsedValue = Math.round((Number(rawValue) || 0) * 100);
     if (!rawValue?.length) {
       onChangeValue(netWorthSubcategoryId, { ...creditCard, value: undefined });
     } else if (!Number.isNaN(parsedValue)) {
       onChangeValue(netWorthSubcategoryId, { ...creditCard, value: parsedValue });
     }
+    setTimeout(onCancelEdit, 0);
   }, [creditCard, netWorthSubcategoryId, onCancelEdit, onChangeValue, rawValue]);
 
   const onKeyDown = useEnterKeyDown(onUpdate);
 
   return (
-    <AccountGroupItemWrapper transaction={creditCard} onClick={onEdit} name={creditCard.name}>
+    <AccountGroupItemWrapper
+      transaction={creditCard}
+      onClick={onEdit}
+      onSave={isEditing ? onUpdate : undefined}
+      name={creditCard.name}
+    >
       {isEditing ? (
         <FormFieldTextInline
           value={rawValue}
