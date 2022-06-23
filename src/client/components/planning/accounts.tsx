@@ -73,7 +73,6 @@ export const AddAccount: React.FC = () => {
               upperLimit,
               lowerLimit,
               income: [],
-              pastIncome: [],
               creditCards: [],
               values: [],
               computedValues: [],
