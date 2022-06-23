@@ -2,7 +2,7 @@ FROM node:14-alpine
 
 RUN apk update && apk add --no-cache \
   bash \
-  python2 \
+  python3 \
   git \
   build-base \
   gcc \
