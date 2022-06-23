@@ -85,6 +85,24 @@ describe(getComputedTransactionsForAccount.name, () => {
     );
   });
 
+  it('should not compute tax relief rebates for months in the past', () => {
+    expect.assertions(1);
+    const { computedValues } = getComputedTransactionsForAccount(
+      calculationRows,
+      year,
+      new Date('2022-05-03'),
+      predictFromDate,
+      incomeGroup,
+    );
+    expect(computedValues).not.toStrictEqual(
+      expect.arrayContaining<PlanningComputedValue>([
+        expect.objectContaining({
+          name: 'Tax relief',
+        }),
+      ]),
+    );
+  });
+
   it('should include tax relief rebates in the computed start value calculation', () => {
     expect.assertions(1);
     const { computedStartValue } = getComputedTransactionsForAccount(

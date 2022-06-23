@@ -45,6 +45,7 @@ export function getComputedTransactionsForAccount(
   const taxReliefRebateReduction = reduceTaxReliefRebate(
     calculationRows,
     year,
+    now,
     predictFromDate,
     incomeGroup,
   );

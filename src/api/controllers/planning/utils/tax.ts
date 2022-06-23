@@ -131,6 +131,7 @@ export type TaxReliefRebateReduction = {
 export function reduceTaxReliefRebate(
   { valueRows, previousIncome, rateRows, thresholdRows }: CalculationRows,
   viewedYear: number,
+  now: Date,
   predictFromDate: Date,
   incomeGroup: (AccountRow & AccountRowIncomeJoins)[],
 ): TaxReliefRebateReduction[] {
@@ -155,7 +156,8 @@ export function reduceTaxReliefRebate(
         incomeGroup.filter(accountRowHasIncome),
       );
       return { year: firstYear + index, taxRelief: extra };
-    });
+    })
+    .filter(({ year }) => isAfter(endOfMonth(new Date(year, startMonth)), now));
 }
 
 export function getComputedTaxReliefRebateForAccount(
