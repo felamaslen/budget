@@ -5,9 +5,8 @@ import logger from '~api/modules/logger';
 export async function getMultipleStockQuotes(
   symbols: string[],
 ): Promise<Record<string, number | null>> {
-  logger.verbose('[stock-prices] Fetching new prices: %s', symbols.join(','));
   const quotes = await yahooFinance.quote(symbols);
-  return symbols.reduce<Record<string, number | null>>(
+  const prices = symbols.reduce<Record<string, number | null>>(
     (last, symbol) => ({
       ...last,
       [symbol]:
@@ -18,4 +17,9 @@ export async function getMultipleStockQuotes(
     }),
     {},
   );
+  logger.info('[stock-prices] Fetched new prices', {
+    symbols,
+    prices,
+  });
+  return prices;
 }
