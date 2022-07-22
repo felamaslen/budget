@@ -5,7 +5,7 @@
   "main": "lib/api/index.js",
   "sideEffects": false,
   "engines": {
-    "node": "14"
+    "node": ">=16"
   },
   "scripts": {
     "prepare": "husky install",
