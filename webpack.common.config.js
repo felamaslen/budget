@@ -41,6 +41,9 @@ function getPlugins(__DEV__, suffix) {
         },
       ],
     }),
+    new webpack.ProvidePlugin({
+      React: 'react',
+    }),
     analyzerMode !== 'disabled' &&
       new BundleAnalyzerPlugin({
         analyzerMode,

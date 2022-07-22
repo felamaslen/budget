@@ -1,6 +1,11 @@
+const basePresets = [
+  '@babel/preset-react',
+  '@babel/preset-typescript',
+  ['@emotion/babel-preset-css-prop'],
+];
+
 module.exports = {
   plugins: [
-    ['@emotion', { sourceMap: false }],
     'const-enum',
     '@loadable/babel-plugin',
     [
@@ -14,7 +19,6 @@ module.exports = {
       },
     ],
   ],
-  presets: ['@babel/preset-typescript', ['@babel/preset-react', { runtime: 'automatic' }]],
   env: {
     production: {
       plugins: ['babel-plugin-react-remove-properties'],
@@ -28,6 +32,21 @@ module.exports = {
             },
           },
         ],
+        ...basePresets,
+      ],
+    },
+    development: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            modules: true,
+            targets: {
+              browsers: ['last 2 Chrome versions'],
+            },
+          },
+        ],
+        ...basePresets,
       ],
     },
     node: {
@@ -40,6 +59,7 @@ module.exports = {
             },
           },
         ],
+        ...basePresets,
       ],
     },
     test: {
@@ -52,6 +72,7 @@ module.exports = {
             },
           },
         ],
+        ...basePresets,
       ],
       plugins: ['dynamic-import-node'],
     },
