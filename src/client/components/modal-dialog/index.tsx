@@ -38,7 +38,7 @@ export const ModalDialog = <I extends ListItemInput>(
           {(Object.keys(fields) as FieldKey<I>[]).map((field: FieldKey<I>) => (
             <ModalDialogField
               key={field as string}
-              id={`${id}-${field}`}
+              id={`${id}-${String(field)}`}
               field={field}
               Field={fields[field]}
               value={tempFields[field]}
