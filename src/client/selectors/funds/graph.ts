@@ -160,7 +160,7 @@ export const getFundLines = memoiseNowAndToday((time, key) =>
       { cacheTimes },
       hiddenBecauseSold,
       fundsWithReturns,
-    ): Record<FundMode, FundLine[]> => {
+    ): Record<Exclude<FundMode, FundMode.Calendar>, FundLine[]> => {
       const getFundLinesByMode = (mode: FundMode): FundLine[] =>
         fundItems
           .filter(({ id }) => !hiddenBecauseSold[id])

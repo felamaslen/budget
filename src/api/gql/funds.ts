@@ -67,6 +67,7 @@ export const fundsSchema = gql`
     Allocation
     Price
     PriceNormalised
+    Calendar
   }
 
   type ReadFundsResponse {

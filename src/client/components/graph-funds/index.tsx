@@ -1,7 +1,7 @@
 import groupBy from 'lodash/groupBy';
 import moize from 'moize';
 import { rgba } from 'polished';
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo, Dispatch } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas, ToggleList } from './after-canvas';
@@ -315,7 +315,7 @@ function useGraphProps({
   width: number;
   height: number;
   isMobile: boolean;
-  mode: FundMode;
+  mode: Exclude<FundMode, FundMode.Calendar>;
   today: Date;
   toggleList: ToggleList;
 }): LineGraphProps {
@@ -371,6 +371,30 @@ function useGraphProps({
 
 export type Props = { isMobile?: boolean };
 
+const GraphFundsAsLines: React.FC<{
+  height: number;
+  isMobile: boolean;
+  mode: Exclude<FundMode, FundMode.Calendar>;
+  sidebarOpen: boolean;
+  today: Date;
+  toggleList: ToggleList;
+  width: number;
+}> = (props) => {
+  const { isMobile, sidebarOpen } = props;
+  const graphProps = useGraphProps(props);
+
+  if (graphProps.minX === graphProps.maxX) {
+    return null;
+  }
+
+  return <LineGraph {...graphProps} padding={getPadding(isMobile, sidebarOpen)} />;
+};
+
+const GraphFundsAsCalendar: React.FC<{
+  height: number;
+  width: number;
+}> = () => <div>Calendar</div>;
+
 export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
   const today = useToday();
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
@@ -383,8 +407,8 @@ export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
 
   const [historyOptions, setHistoryOptions] = useDynamicPrices();
   const modeList = useFundModeList(isMobile);
-  const changeMode = useCallback(
-    (newMode: FundMode) => {
+  const changeMode = useCallback<Dispatch<FundMode>>(
+    (newMode) => {
       dispatch(configUpdatedFromLocal({ fundMode: newMode }));
     },
     [dispatch],
@@ -394,14 +418,6 @@ export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
 
   const [sidebarOpen, setSidebarOpen] = usePersistentState<boolean>(false, 'funds_sidebar_open');
   const [toggleList, setToggleList] = useToggleList(fundItems);
-  const graphProps = useGraphProps({
-    width,
-    height,
-    isMobile,
-    mode: validMode,
-    today,
-    toggleList,
-  });
 
   const onContainerClick = useMemo(
     () =>
@@ -416,8 +432,18 @@ export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
   return (
     <Styled.Container onClick={onContainerClick}>
       <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
-        {graphProps.minX !== graphProps.maxX && (
-          <LineGraph {...graphProps} padding={getPadding(isMobile, sidebarOpen)} />
+        {validMode === FundMode.Calendar ? (
+          <GraphFundsAsCalendar height={height} width={width} />
+        ) : (
+          <GraphFundsAsLines
+            height={height}
+            isMobile={isMobile}
+            mode={validMode}
+            sidebarOpen={sidebarOpen}
+            today={today}
+            toggleList={toggleList}
+            width={width}
+          />
         )}
         {!isMobile && (
           <AfterCanvas

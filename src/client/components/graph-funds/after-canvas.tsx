@@ -15,7 +15,7 @@ export type ToggleList = Record<string, boolean | null>;
 export type Props = Pick<ItemProps, 'toggleList' | 'setToggleList'> & {
   historyOptions: HistoryOptions;
   mode: FundMode;
-  changeMode: (newMode: FundMode) => void;
+  changeMode: Dispatch<FundMode>;
   fundItems: FundItem[];
   sidebarOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
