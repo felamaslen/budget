@@ -39,59 +39,75 @@ const StockHelp: React.FC<{ item: PortfolioItem }> = ({
       currentPrice,
     },
   },
-}) => (
-  <>
-    <H4>
-      Summary for <em>{item}</em>
-    </H4>
-    <table>
-      <tbody>
-        <tr>
-          <th>Units bought</th>
-          <td>
-            {unitsBought} @ {buyPriceSplitAdj ? formatCurrency(buyPriceSplitAdj) : 'N/A'}
-          </td>
-        </tr>
-        <tr>
-          <th>Units sold</th>
-          <td>
-            {unitsSold} @ {sellPriceSplitAdj ? formatCurrency(sellPriceSplitAdj) : 'N/A'}
-          </td>
-        </tr>
-        <tr>
-          <th>Units reinvested from dividends</th>
-          <td>
-            {unitsReinvested} @{' '}
-            {reinvestmentPriceSplitAdj ? formatCurrency(reinvestmentPriceSplitAdj) : 'N/A'}
-          </td>
-        </tr>
-        <tr>
-          <th>Total fees paid</th>
-          <td>{formatCurrency(feesPaid)}</td>
-        </tr>
-        <tr>
-          <th>Total taxes paid</th>
-          <td>{formatCurrency(taxesPaid)}</td>
-        </tr>
-        <tr>
-          <th>Current price</th>
-          <td>{formatCurrency(currentPrice)}</td>
-        </tr>
-        <tr>
-          <th>Current value of holding</th>
-          <td>{formatCurrency(value)}</td>
-        </tr>
-        <tr>
-          <th>PnL</th>
-          <td>
-            {formatCurrency(pnl, { brackets: true })} {pnl > 0 ? '☝' : '☟'}{' '}
-            {formatPercent(pnl / totalCostOfHolding)}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </>
-);
+}) => {
+  const totalUnits = unitsBought - unitsSold + unitsReinvested;
+  const weightedCost = unitsBought * buyPriceSplitAdj - unitsSold * sellPriceSplitAdj;
+  const costBasisSplitAdjIncFees = totalUnits
+    ? (weightedCost + feesPaid + taxesPaid) / totalUnits
+    : 0;
+  const costBasisSplitAdjExFees = totalUnits ? weightedCost / totalUnits : 0;
+
+  return (
+    <>
+      <H4>
+        Summary for <em>{item}</em>
+      </H4>
+      <table>
+        <tbody>
+          <tr>
+            <th>Units bought</th>
+            <td>
+              {unitsBought} @ {buyPriceSplitAdj ? formatCurrency(buyPriceSplitAdj) : 'N/A'}
+            </td>
+          </tr>
+          <tr>
+            <th>Units sold</th>
+            <td>
+              {unitsSold} @ {sellPriceSplitAdj ? formatCurrency(sellPriceSplitAdj) : 'N/A'}
+            </td>
+          </tr>
+          <tr>
+            <th>Units reinvested from dividends</th>
+            <td>
+              {unitsReinvested} @{' '}
+              {reinvestmentPriceSplitAdj ? formatCurrency(reinvestmentPriceSplitAdj) : 'N/A'}
+            </td>
+          </tr>
+          <tr>
+            <th>Total fees paid</th>
+            <td>{formatCurrency(feesPaid)}</td>
+          </tr>
+          <tr>
+            <th>Total taxes paid</th>
+            <td>{formatCurrency(taxesPaid)}</td>
+          </tr>
+          <tr>
+            <th>Cost basis</th>
+            <td>
+              {totalUnits} @ {formatCurrency(costBasisSplitAdjIncFees)} [
+              {formatCurrency(costBasisSplitAdjExFees)} ex fees]
+            </td>
+          </tr>
+          <tr>
+            <th>Current price</th>
+            <td>{formatCurrency(currentPrice)}</td>
+          </tr>
+          <tr>
+            <th>Current value of holding</th>
+            <td>{formatCurrency(value)}</td>
+          </tr>
+          <tr>
+            <th>PnL</th>
+            <td>
+              {formatCurrency(pnl, { brackets: true })} {pnl > 0 ? '☝' : '☟'}{' '}
+              {formatPercent(pnl / totalCostOfHolding)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </>
+  );
+};
 
 const CashHelp: React.FC<{
   cashBreakdown: ReturnType<ReturnType<typeof getCashBreakdown>>;
