@@ -1,5 +1,4 @@
-import { waitFor } from '@testing-library/react';
-import { act, RenderHookResult } from '@testing-library/react-hooks';
+import { act, RenderHookResult, waitFor } from '@testing-library/react';
 import type { DocumentNode } from 'graphql';
 import { CombinedError, makeOperation, OperationContext } from 'urql';
 import { fromValue } from 'wonka';
@@ -203,8 +202,8 @@ describe('generic crud hooks', () => {
     ${useNetWorthEntryCrud.name}       | ${testCaseNetWorthEntry}
   `('$name', ({ testCase }: { testCase: TestCase<Record<string, unknown>> }) => {
     const setup = (): RenderHookResult<
-      Partial<HookCallOptions>,
-      CrudProps<Record<string, unknown>>
+      CrudProps<Record<string, unknown>>,
+      Partial<HookCallOptions>
     > => renderHookWithStore(() => testCase.useHook({ onError }));
 
     describe('creating', () => {

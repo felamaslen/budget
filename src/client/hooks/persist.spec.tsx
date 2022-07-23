@@ -1,4 +1,4 @@
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook, RenderHookResult } from '@testing-library/react';
 import type { Dispatch, SetStateAction } from 'react';
 
 import { usePersistentState, PersistentStateValidator as Validator } from './persist';
@@ -37,8 +37,8 @@ describe('usePersistentState', () => {
   const setup = (
     validator?: Validator<MyState> | null,
   ): RenderHookResult<
-    Parameters<typeof usePersistentState>,
-    [MyState, Dispatch<SetStateAction<MyState>>]
+    [MyState, Dispatch<SetStateAction<MyState>>],
+    Parameters<typeof usePersistentState>
   > => renderHook(() => usePersistentState(defaultState, 'my-persistent-state-key', validator));
 
   it('should return the current state', () => {

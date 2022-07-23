@@ -106,7 +106,7 @@ const LabelPriceNormalised: React.FC<LabelProps> = (props) => (
   <LabelBaseFunds {...props} mode={FundMode.PriceNormalised} showChange={true} />
 );
 
-export const hoverEffectByMode: Record<FundMode, HoverEffect> = {
+export const hoverEffectByMode: Record<Exclude<FundMode, FundMode.Calendar>, HoverEffect> = {
   [FundMode.Roi]: { Label: LabelROI },
   [FundMode.Value]: { Label: LabelValue },
   [FundMode.Stacked]: { Label: LabelValue },

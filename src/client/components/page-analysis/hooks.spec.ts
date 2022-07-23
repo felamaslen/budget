@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { getForest, getBlocks, getDeepBlocks, getDeepForest, State, useStatus } from './hooks';
 
@@ -443,7 +443,7 @@ describe('analysis hooks', () => {
       describe('when there is not an active sub-block', () => {
         it('should sum the total of the selected tree and set the status using that', () => {
           expect.assertions(2);
-          const { rerender, result } = renderHook<{ page: AnalysisPage }, string>(
+          const { rerender, result } = renderHook<string, { page: AnalysisPage }>(
             ({ page }) => useStatus([page], cost, null, saved),
             { initialProps: { page: AnalysisPage.Bills } },
           );
@@ -459,7 +459,7 @@ describe('analysis hooks', () => {
       describe('when there is an active sub-block', () => {
         it('should add the sub-block to the status and use the total from the sub-block', () => {
           expect.assertions(2);
-          const { rerender, result } = renderHook<{ subBlock: string }, string>(
+          const { rerender, result } = renderHook<string, { subBlock: string }>(
             ({ subBlock }) => useStatus([AnalysisPage.Bills, subBlock], cost, null, saved),
             { initialProps: { subBlock: 'Housing' } },
           );

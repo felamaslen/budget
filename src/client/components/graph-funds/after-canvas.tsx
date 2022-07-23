@@ -15,7 +15,7 @@ export type ToggleList = Record<string, boolean | null>;
 export type Props = Pick<ItemProps, 'toggleList' | 'setToggleList'> & {
   historyOptions: HistoryOptions;
   mode: FundMode;
-  changeMode: (newMode: FundMode) => void;
+  changeMode: Dispatch<FundMode>;
   fundItems: FundItem[];
   sidebarOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
@@ -120,23 +120,25 @@ export const AfterCanvas: React.FC<Props> = ({
           </SettingsInput>
         </SettingsGroup>
       </Styled.FundModeSwitch>
-      <Styled.FundSidebar
-        tabIndex={-1}
-        isOpen={sidebarOpen}
-        onClick={(): void => setSidebarOpen((last) => !last)}
-      >
-        {fundItems &&
-          fundItems.map((item: FundItem) => (
-            <Item
-              key={item.id}
-              numItems={fundItems.length}
-              {...item}
-              abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
-              toggleList={toggleList}
-              setToggleList={setToggleList}
-            />
-          ))}
-      </Styled.FundSidebar>
+      {mode !== FundMode.Calendar && (
+        <Styled.FundSidebar
+          tabIndex={-1}
+          isOpen={sidebarOpen}
+          onClick={(): void => setSidebarOpen((last) => !last)}
+        >
+          {fundItems &&
+            fundItems.map((item: FundItem) => (
+              <Item
+                key={item.id}
+                numItems={fundItems.length}
+                {...item}
+                abbreviate={item.id !== GRAPH_FUNDS_OVERALL_ID}
+                toggleList={toggleList}
+                setToggleList={setToggleList}
+              />
+            ))}
+        </Styled.FundSidebar>
+      )}
     </>
   );
 };

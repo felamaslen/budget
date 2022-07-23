@@ -14,7 +14,7 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
-    "lib": ["es2015", "dom"],
+    "lib": ["es2019", "dom"],
     "baseUrl": ".",
     "typeRoots": ["./types", "./node_modules/@types"],
     "outDir": "./lib",

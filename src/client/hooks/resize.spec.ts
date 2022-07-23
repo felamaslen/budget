@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useDebouncedResize } from './resize';
 
 jest.mock('~client/modules/ssr', () => ({

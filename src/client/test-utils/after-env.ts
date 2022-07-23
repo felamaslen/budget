@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom';
 import jestFetchMock from 'jest-fetch-mock';
 import nock from 'nock';
+import React from 'react';
+
+global.React = React;
 
 jest.mock('worker-loader!../../../workers/prices', () => {
   class MyMockWorker {

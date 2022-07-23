@@ -59,6 +59,7 @@ export function useFundModeList(isMobile: boolean): FundMode[] {
 }
 
 const fundModeText: Partial<Record<FundMode, string>> = {
+  [FundMode.Calendar]: 'Calendar',
   [FundMode.Stacked]: 'Value (stacked)',
   [FundMode.PriceNormalised]: 'Price (normalised)',
 };

@@ -171,6 +171,7 @@ export type FundInput = {
 
 export enum FundMode {
   Allocation = 'Allocation',
+  Calendar = 'Calendar',
   Price = 'Price',
   PriceNormalised = 'PriceNormalised',
   Roi = 'ROI',

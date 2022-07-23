@@ -1,5 +1,4 @@
-import { waitFor } from '@testing-library/react';
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook, RenderHookResult, waitFor } from '@testing-library/react';
 import { GraphQLRequest, makeOperation, OperationContext, OperationResult } from 'urql';
 import { delay, fromValue, pipe } from 'wonka';
 
@@ -105,31 +104,32 @@ describe(usePlanning.name, () => {
     );
   });
 
-  it('should return the initial state', () => {
-    expect.assertions(1);
-    const { result, unmount } = renderHook(usePlanningWithYear, { wrapper: Wrapper });
+  it('should return the initial state', async () => {
+    expect.hasAssertions();
+    const { result } = renderHook(usePlanningWithYear, { wrapper: Wrapper });
     expect(result.current.state).toStrictEqual(initialState);
 
-    unmount();
+    await waitFor(() => expect(result.current.state.accounts).not.toHaveLength(0));
   });
 
-  it('should initially set isSynced=false, isLoading=true', () => {
-    expect.assertions(2);
-    const { result, unmount } = renderHook(usePlanningWithYear, { wrapper: Wrapper });
-
+  it('should initially set isSynced=false, isLoading=true', async () => {
+    expect.hasAssertions();
+    const { result } = renderHook(usePlanningWithYear, { wrapper: Wrapper });
     expect(result.current.isSynced).toBe(false);
     expect(result.current.isLoading).toBe(true);
 
-    unmount();
+    await waitFor(() => expect(result.current.state.accounts).not.toHaveLength(0));
   });
 
   it('should sync state on render', async () => {
-    expect.assertions(15);
+    expect.hasAssertions();
 
-    const { result, waitForNextUpdate } = renderHook(usePlanningWithYear, { wrapper: Wrapper });
-    await waitForNextUpdate();
+    const { result } = renderHook(usePlanningWithYear, { wrapper: Wrapper });
 
-    expect(mutateSpy).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mutateSpy).toHaveBeenCalledTimes(1);
+    });
+
     expect(mutateSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         query: SyncPlanningDocument,
@@ -140,7 +140,9 @@ describe(usePlanning.name, () => {
       {},
     );
 
-    expect(result.current.state.accounts).not.toHaveLength(0);
+    await waitFor(() => {
+      expect(result.current.state.accounts).not.toHaveLength(0);
+    });
     expect(result.current.state.parameters.rates).not.toHaveLength(0);
     expect(result.current.state.parameters.thresholds).not.toHaveLength(0);
 
@@ -225,12 +227,15 @@ describe(usePlanning.name, () => {
 
   describe('when calling setState', () => {
     const renderAndUpdateState = async (): Promise<
-      RenderHookResult<never, ReturnType<typeof usePlanning>>
+      RenderHookResult<ReturnType<typeof usePlanning>, never>
     > => {
       const renderHookResult = renderHook(usePlanningWithYear, { wrapper: Wrapper });
-      await renderHookResult.waitForNextUpdate();
 
       jest.useFakeTimers();
+
+      await waitFor(() => {
+        expect(renderHookResult.result.current.state.accounts).not.toHaveLength(0);
+      });
 
       act(() => {
         renderHookResult.result.current.setState((last) => ({
@@ -300,13 +305,17 @@ describe(usePlanning.name, () => {
     };
 
     it('should run a debounced mutation with the updated state', async () => {
-      expect.assertions(3);
-      const { unmount } = await renderAndUpdateState();
+      expect.hasAssertions();
+      const { result } = await renderAndUpdateState();
 
       expect(mutateSpy).not.toHaveBeenCalled();
 
       act(() => {
         jest.runAllTimers();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state.accounts).not.toHaveLength(0);
       });
 
       expect(mutateSpy).toHaveBeenCalledTimes(1);
@@ -377,13 +386,11 @@ describe(usePlanning.name, () => {
       );
 
       jest.useRealTimers();
-      unmount();
     });
 
     it('should set the synced and loading statuses before, during and after loading', async () => {
-      expect.assertions(5);
-
-      const { result, waitForNextUpdate, unmount } = await renderAndUpdateState();
+      expect.hasAssertions();
+      const { result } = await renderAndUpdateState();
 
       expect(result.current.isSynced).toBe(false);
       expect(result.current.isLoading).toBe(false);
@@ -394,17 +401,17 @@ describe(usePlanning.name, () => {
 
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
-      expect(result.current.isLoading).toBe(false);
       expect(result.current.isSynced).toBe(true);
 
       jest.useRealTimers();
-      unmount();
     });
 
     it('should update the state optimistically', async () => {
-      expect.assertions(5);
+      expect.hasAssertions();
       const { result } = await renderAndUpdateState();
 
       expect(result.current.state.accounts).toHaveLength(2);
@@ -428,45 +435,44 @@ describe(usePlanning.name, () => {
     });
 
     it('should backfill the state after syncing', async () => {
-      expect.assertions(3);
-      const { result, unmount, waitForNextUpdate } = await renderAndUpdateState();
-      act(() => {
-        jest.runAllTimers();
-      });
-      await waitForNextUpdate();
+      expect.hasAssertions();
+      const { result } = await renderAndUpdateState();
 
       expect(result.current.state.accounts).toHaveLength(2);
-      expect(result.current.state.accounts[1].id).toBe(8881);
+
+      expect(result.current.state.accounts[1].id).toBeUndefined();
+
+      await waitFor(() => {
+        expect(result.current.state.accounts[1].id).toBe(8881);
+      });
 
       expect(result.current.state.parameters.rates).toHaveLength(2);
 
       jest.useRealTimers();
-      unmount();
     });
   });
 
   describe('when changing the year', () => {
     const renderAndChangeYear = async (): Promise<
-      RenderHookResult<{ year: number }, ReturnType<typeof usePlanning>>
+      RenderHookResult<ReturnType<typeof usePlanning>, { year: number }>
     > => {
-      const hookResult = renderHook<{ year: number }, ReturnType<typeof usePlanning>>(
+      const hookResult = renderHook<ReturnType<typeof usePlanning>, { year: number }>(
         (props) => usePlanning(props.year),
         { wrapper: Wrapper, initialProps: { year: 2020 } },
       );
-
-      await hookResult.waitForNextUpdate();
+      await waitFor(() => {
+        expect(hookResult.result.current.state.accounts).not.toHaveLength(0);
+      });
 
       await act(async () => {
         hookResult.rerender({ year: 2023 });
-        await hookResult.waitForNextUpdate();
       });
 
       return hookResult;
     };
 
     it('should sync the latest state', async () => {
-      expect.assertions(3);
-
+      expect.hasAssertions();
       await renderAndChangeYear();
 
       expect(mutateSpy).toHaveBeenCalledTimes(2);
@@ -495,8 +501,8 @@ describe(usePlanning.name, () => {
     });
 
     it('should not initiate a sync of the local state until it changes', async () => {
-      expect.assertions(3);
-      const { result, waitForNextUpdate } = await renderAndChangeYear();
+      expect.hasAssertions();
+      const { result } = await renderAndChangeYear();
       expect(mutateSpy).toHaveBeenCalledTimes(2);
 
       act(() => {
@@ -512,9 +518,10 @@ describe(usePlanning.name, () => {
         }));
       });
 
-      await waitForNextUpdate();
+      await waitFor(() => {
+        expect(mutateSpy).toHaveBeenCalledTimes(3);
+      });
 
-      expect(mutateSpy).toHaveBeenCalledTimes(3);
       expect(mutateSpy).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
@@ -538,12 +545,13 @@ describe(usePlanning.name, () => {
     it('should not accept synced data from a previous sync with a different year', async () => {
       expect.hasAssertions();
       // Render hook in old year (2020)
-      const { rerender, result, waitForNextUpdate } = renderHook<
-        { year: number },
-        ReturnType<typeof usePlanning>
-      >((props) => usePlanning(props.year), { wrapper: Wrapper, initialProps: { year: 2020 } });
-
-      await waitForNextUpdate();
+      const { rerender, result } = renderHook<ReturnType<typeof usePlanning>, { year: number }>(
+        (props) => usePlanning(props.year),
+        { wrapper: Wrapper, initialProps: { year: 2020 } },
+      );
+      await waitFor(() => {
+        expect(result.current.state.accounts).not.toHaveLength(0);
+      });
 
       // Mock responses in order
       mutateSpy.mockImplementation(
@@ -633,7 +641,6 @@ describe(usePlanning.name, () => {
       // Rerender hook with new year (2023)
       await act(async () => {
         rerender({ year: 2023 });
-        await waitForNextUpdate();
       });
 
       await waitFor(() => {
@@ -653,10 +660,12 @@ describe(usePlanning.name, () => {
 
   describe('when an error occurs', () => {
     const renderAndUpdateWithError = async (): Promise<
-      RenderHookResult<never, ReturnType<typeof usePlanning>>
+      RenderHookResult<ReturnType<typeof usePlanning>, never>
     > => {
       const renderHookResult = renderHook(usePlanningWithYear, { wrapper: Wrapper });
-      await renderHookResult.waitForNextUpdate();
+      await waitFor(() => {
+        expect(renderHookResult.result.current.state.accounts).not.toHaveLength(0);
+      });
 
       jest.useFakeTimers();
 
@@ -690,58 +699,44 @@ describe(usePlanning.name, () => {
     };
 
     it('should set the error property', async () => {
-      expect.assertions(1);
-      const { result, unmount, waitForNextUpdate } = await renderAndUpdateWithError();
+      expect.hasAssertions();
+      const { result } = await renderAndUpdateWithError();
 
-      act(() => {
-        jest.runAllTimers();
+      await waitFor(() => {
+        expect(result.current.error).toBe('Some error occurred');
       });
-      await waitForNextUpdate();
-
-      expect(result.current.error).toBe('Some error occurred');
-      unmount();
     });
 
     it('should reset to the previous synced state', async () => {
-      expect.assertions(2);
-      const { result, unmount, waitForNextUpdate } = await renderAndUpdateWithError();
+      expect.hasAssertions();
+      const { result } = await renderAndUpdateWithError();
 
       expect(result.current.state.accounts[0].account).toBe('My modified account');
 
-      act(() => {
-        jest.runAllTimers();
+      await waitFor(() => {
+        expect(result.current.state.accounts[0].account).toBe('My account');
       });
-      await waitForNextUpdate();
-
-      expect(result.current.state.accounts[0].account).toBe('My account');
-      unmount();
     });
 
     it('should set isSynced=true, isLoading=false', async () => {
-      expect.assertions(2);
-      const { result, unmount, waitForNextUpdate } = await renderAndUpdateWithError();
+      expect.hasAssertions();
+      const { result } = await renderAndUpdateWithError();
 
-      act(() => {
-        jest.runAllTimers();
+      await waitFor(() => {
+        expect(result.current.isSynced).toBe(true);
+        expect(result.current.isLoading).toBe(false);
       });
-      await waitForNextUpdate();
-
-      expect(result.current.isSynced).toBe(true);
-      expect(result.current.isLoading).toBe(false);
-      unmount();
     });
 
     it('should resend a request when the state changes again', async () => {
-      expect.assertions(4);
-      const { result, unmount, waitForNextUpdate } = await renderAndUpdateWithError();
-      act(() => {
-        jest.runAllTimers();
+      expect.hasAssertions();
+      const { result } = await renderAndUpdateWithError();
+
+      await waitFor(() => {
+        expect(result.current.error).not.toBeNull();
       });
-      await waitForNextUpdate();
 
       mutateSpy.mockClear();
-
-      expect(result.current.error).not.toBeNull();
 
       act(() => {
         result.current.setState((last) => ({
@@ -753,12 +748,9 @@ describe(usePlanning.name, () => {
       expect(mutateSpy).not.toHaveBeenCalled();
       expect(result.current.error).toBeNull();
 
-      act(() => {
-        jest.runAllTimers();
+      await waitFor(() => {
+        expect(mutateSpy).toHaveBeenCalledTimes(1);
       });
-      expect(mutateSpy).toHaveBeenCalledTimes(1);
-
-      unmount();
     });
   });
 });

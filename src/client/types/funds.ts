@@ -16,7 +16,16 @@ export type NativeFund<F extends FundInput> = Omit<
 export type FundNative = NativeFund<Fund>;
 export type FundInputNative = NativeFund<FundInput>;
 
-export type FundOrder = { time: number; isSell: boolean; isReinvestment: boolean; size: number };
+export type FundOrder = {
+  time: number;
+  isSell: boolean;
+  isReinvestment: boolean;
+  isPension: boolean;
+  fees: number;
+  price: number;
+  units: number;
+  size: number;
+};
 
 export type FundItem = {
   id: Id;

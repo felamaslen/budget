@@ -111,10 +111,22 @@ const getReturnsById = memoiseNowAndToday((time, key) =>
   ),
 );
 
-const mapFundOrder = ({ date, units, price, drip }: Transaction): FundOrder => ({
+const mapFundOrder = ({
+  date,
+  drip,
+  fees,
+  taxes,
+  units,
+  pension,
+  price,
+}: Transaction): FundOrder => ({
   time: getUnixTime(date),
   isSell: units < 0,
   isReinvestment: drip,
+  isPension: pension,
+  fees: fees + taxes,
+  units: Math.abs(units),
+  price,
   size: Math.abs(units * price),
 });
 
@@ -160,7 +172,7 @@ export const getFundLines = memoiseNowAndToday((time, key) =>
       { cacheTimes },
       hiddenBecauseSold,
       fundsWithReturns,
-    ): Record<FundMode, FundLine[]> => {
+    ): Record<Exclude<FundMode, FundMode.Calendar>, FundLine[]> => {
       const getFundLinesByMode = (mode: FundMode): FundLine[] =>
         fundItems
           .filter(({ id }) => !hiddenBecauseSold[id])

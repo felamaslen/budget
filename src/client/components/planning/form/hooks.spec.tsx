@@ -1,5 +1,4 @@
-import { render } from '@testing-library/react';
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { render, renderHook, RenderHookResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SetStateAction } from 'react';
 import numericHash from 'string-hash';
@@ -130,8 +129,8 @@ describe(useTransactionForm.name, () => {
   );
 
   const setup = (): RenderHookResult<
-    Record<string, unknown>,
-    ReturnType<typeof useTransactionForm>
+    ReturnType<typeof useTransactionForm>,
+    Record<string, unknown>
   > =>
     renderHook(() => useTransactionForm(2020, 7), {
       wrapper: Wrapper,

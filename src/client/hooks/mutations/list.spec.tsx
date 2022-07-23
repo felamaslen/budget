@@ -1,5 +1,4 @@
-import { waitFor } from '@testing-library/react';
-import { act, RenderHookResult } from '@testing-library/react-hooks';
+import { act, RenderHookResult, waitFor } from '@testing-library/react';
 import type { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 import { makeOperation, OperationContext } from 'urql';
@@ -63,7 +62,7 @@ describe('list mutations', () => {
   };
 
   describe(useListCrudStandard.name, () => {
-    const setup = (): RenderHookResult<{ page: PageListStandard }, ListCrud<StandardInput>> & {
+    const setup = (): RenderHookResult<ListCrud<StandardInput>, { page: PageListStandard }> & {
       store: MockStore;
     } => renderHookWithStore(() => useListCrudStandard(page));
 
@@ -254,8 +253,8 @@ describe('list mutations', () => {
 
   describe(useListCrudIncome.name, () => {
     const setup = (): RenderHookResult<
-      Record<string, unknown>,
-      ListCrud<NativeDate<Income, 'date'>>
+      ListCrud<NativeDate<Income, 'date'>>,
+      Record<string, unknown>
     > & {
       store: MockStore;
     } => renderHookWithStore(useListCrudIncome);
@@ -434,7 +433,7 @@ describe('list mutations', () => {
   });
 
   describe(useListCrudFunds.name, () => {
-    const setup = (): RenderHookResult<Record<string, unknown>, ListCrud<FundInputNative>> & {
+    const setup = (): RenderHookResult<ListCrud<FundInputNative>, Record<string, unknown>> & {
       store: MockStore;
     } => renderHookWithStore(useListCrudFunds);
 

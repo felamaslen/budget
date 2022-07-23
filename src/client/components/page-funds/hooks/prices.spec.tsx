@@ -1,4 +1,4 @@
-import { RenderHookResult } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
 import { MockStore } from 'redux-mock-store';
 import numericHash from 'string-hash';
 import { makeOperation, OperationContext } from 'urql';
@@ -59,7 +59,7 @@ describe(prices.useTodayPrices.name, () => {
     <ApiContext.Provider value="my-api-key">{children}</ApiContext.Provider>
   );
 
-  const renderHookTest = (): RenderHookResult<Record<string, unknown>, void> & {
+  const renderHookTest = (): RenderHookResult<void, Record<string, unknown>> & {
     store: MockStore<typeof testState>;
   } =>
     renderHookWithStore(prices.useTodayPrices, {
