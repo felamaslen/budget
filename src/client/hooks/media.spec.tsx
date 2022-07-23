@@ -1,5 +1,5 @@
-import { renderHook } from '@testing-library/react-hooks';
-import { FC } from 'react';
+import { renderHook } from '@testing-library/react';
+import type { FC } from 'react';
 import { Context as ResponsiveContext } from 'react-responsive';
 
 import { useIsMobile } from './media';

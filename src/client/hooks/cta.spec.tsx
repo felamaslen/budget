@@ -1,5 +1,4 @@
-import { act, render } from '@testing-library/react';
-import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, render, renderHook, RenderHookResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { CTAEvents, useCTA } from './cta';
@@ -7,7 +6,7 @@ import { CTAEvents, useCTA } from './cta';
 describe(useCTA.name, () => {
   const onActivate = jest.fn();
 
-  const setup = (): RenderHookResult<unknown, CTAEvents<HTMLElement>> =>
+  const setup = (): RenderHookResult<CTAEvents<HTMLElement>, unknown> =>
     renderHook(() => useCTA(onActivate));
 
   beforeEach(() => {

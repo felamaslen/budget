@@ -1,5 +1,10 @@
-import { render, RenderResult } from '@testing-library/react';
-import { renderHook, RenderHookOptions, RenderHookResult } from '@testing-library/react-hooks';
+import {
+  render,
+  renderHook,
+  RenderHookOptions,
+  RenderHookResult,
+  RenderResult,
+} from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router';
 import createStore, { MockStore } from 'redux-mock-store';
@@ -66,7 +71,7 @@ export function renderHookWithStore<TProps, TResult>(
       renderHookOptions: RenderHookOptions<TProps>;
     }
   > = {},
-): RenderHookResult<TProps, TResult> & { store: MockStore<State> } {
+): RenderHookResult<TResult, TProps> & { store: MockStore<State> } {
   const store = createStore<State>()({ ...testState, ...customState });
 
   const CustomWrapper = renderHookOptions?.wrapper as React.FC | undefined;
@@ -98,7 +103,7 @@ export function hookRendererWithStore<TProps, TResult>(
     }
   > = {},
 ): {
-  render: (customState?: Partial<State>) => RenderHookResult<TProps, TResult>;
+  render: (customState?: Partial<State>) => RenderHookResult<TResult, TProps>;
   getStore: () => MockStore<State>;
 } {
   let store: MockStore<State>;
@@ -112,10 +117,10 @@ export function hookRendererWithStore<TProps, TResult>(
     </Provider>
   );
 
-  let renderHookResult: RenderHookResult<TProps, TResult> | undefined;
+  let renderHookResult: RenderHookResult<TResult, TProps> | undefined;
 
   return {
-    render: (customState): RenderHookResult<TProps, TResult> => {
+    render: (customState): RenderHookResult<TResult, TProps> => {
       store = createStore<State>()({ ...testState, ...customState });
       if (renderHookResult) {
         renderHookResult.rerender();

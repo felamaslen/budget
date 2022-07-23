@@ -166,7 +166,7 @@ export const AccessibleListCreateItem = <
       timer.current = window.setTimeout(() => {
         setActiveField(firstField);
         setDelta(initialDelta);
-      }, 0);
+      }, 5);
     }
   }, [onCreate, delta, initialDelta, setActiveField, firstField]);
 

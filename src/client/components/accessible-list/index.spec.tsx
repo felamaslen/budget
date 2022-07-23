@@ -1,4 +1,4 @@
-import { act, render, RenderResult, within, RenderOptions } from '@testing-library/react';
+import { act, render, RenderResult, within, RenderOptions, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import format from 'date-fns/format';
 import { Provider } from 'react-redux';
@@ -417,36 +417,40 @@ describe('<AccessibleList />', () => {
         const { getByText } = within(createForm);
         const addButton = getByText('Add') as HTMLButtonElement;
 
-        userEvent.clear(dateInput);
-        userEvent.type(dateInput, '5/6');
+        act(() => {
+          userEvent.clear(dateInput);
+          userEvent.type(dateInput, '5/6');
 
-        userEvent.clear(itemInput);
-        userEvent.type(itemInput, 'Different item innit');
+          userEvent.clear(itemInput);
+          userEvent.type(itemInput, 'Different item innit');
 
-        userEvent.clear(categoryInput);
-        userEvent.type(categoryInput, 'Different category innit');
+          userEvent.clear(categoryInput);
+          userEvent.type(categoryInput, 'Different category innit');
 
-        userEvent.clear(costInput);
-        userEvent.type(costInput, '10.65');
+          userEvent.clear(costInput);
+          userEvent.type(costInput, '10.65');
 
-        userEvent.clear(shopInput);
-        userEvent.type(shopInput, 'Different shop innit');
+          userEvent.clear(shopInput);
+          userEvent.type(shopInput, 'Different shop innit');
 
-        userEvent.click(addButton);
+          userEvent.tab();
+        });
+
+        act(() => {
+          userEvent.click(addButton);
+        });
 
         return { renderResult, dateInput, itemInput, costInput, addButton };
       };
 
-      it('should call onCreate after pressing the add button', () => {
-        expect.assertions(3);
+      it('should call onCreate after pressing the add button', async () => {
+        expect.hasAssertions();
         expect(onCreate).not.toHaveBeenCalled();
-        const { renderResult } = setup();
+        setup();
 
-        act(() => {
-          jest.runAllTimers();
+        await waitFor(() => {
+          expect(onCreate).toHaveBeenCalledTimes(1);
         });
-
-        expect(onCreate).toHaveBeenCalledTimes(1);
 
         expect(onCreate).toHaveBeenCalledWith({
           date: new Date('2020-06-05'),
@@ -455,36 +459,27 @@ describe('<AccessibleList />', () => {
           cost: 1065,
           shop: 'Different shop innit',
         });
-
-        renderResult.unmount();
       });
 
-      it('should focus the first input field so that another item can be created quickly', () => {
-        expect.assertions(1);
-        act(() => {
-          jest.runAllTimers();
-        });
-        const { dateInput, renderResult } = setup();
+      it('should focus the first input field so that another item can be created quickly', async () => {
+        expect.hasAssertions();
+        const { dateInput } = setup();
 
-        act(() => {
-          jest.runAllTimers();
+        await waitFor(() => {
+          expect(dateInput).toHaveFocus();
         });
-        expect(document.activeElement).toBe(dateInput);
-        renderResult.unmount();
       });
 
-      it('should reset the input values after creating an item', () => {
-        expect.assertions(3);
+      it('should reset the input values after creating an item', async () => {
+        expect.hasAssertions();
         jest.useFakeTimers();
-        const { dateInput, itemInput, costInput, renderResult } = setup();
+        const { dateInput, itemInput, costInput } = setup();
 
-        act(() => {
-          jest.runAllTimers();
+        await waitFor(() => {
+          expect(dateInput.value).toBe('03/05/2020');
         });
-        expect(dateInput.value).toBe('03/05/2020');
         expect(itemInput.value).toBe('');
         expect(costInput.value).toBe('');
-        renderResult.unmount();
       });
     });
   });

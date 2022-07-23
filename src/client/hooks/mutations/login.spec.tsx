@@ -1,5 +1,4 @@
-import { waitFor } from '@testing-library/react';
-import { act, RenderHookResult } from '@testing-library/react-hooks';
+import { act, RenderHookResult, waitFor } from '@testing-library/react';
 import type { MockStore } from 'redux-mock-store';
 import { makeOperation, OperationContext } from 'urql';
 import { delay, fromValue, pipe } from 'wonka';
@@ -102,7 +101,7 @@ describe(useLogin.name, () => {
   describe('when logging in', () => {
     const setupLogin = (
       pin: number,
-    ): RenderHookResult<never, ReturnType<typeof useLogin>> & { store: MockStore } => {
+    ): RenderHookResult<ReturnType<typeof useLogin>, never> & { store: MockStore } => {
       const renderHookResult = renderHookWithStore(useLogin);
 
       act(() => {

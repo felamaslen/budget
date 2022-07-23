@@ -1,4 +1,4 @@
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import numericHash from 'string-hash';
 import { makeOperation, OperationContext } from 'urql';
 import { fromValue, interval, map, pipe } from 'wonka';

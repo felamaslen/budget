@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { endOfMonth } from 'date-fns';
 
 import type { PlanningMonth } from '../types';

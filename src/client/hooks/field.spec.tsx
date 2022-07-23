@@ -1,5 +1,4 @@
-import { waitFor } from '@testing-library/react';
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook, RenderHookResult, waitFor } from '@testing-library/react';
 
 import { FieldOptions, Result, useField } from './field';
 
@@ -26,12 +25,12 @@ describe(useField.name, () => {
     const setup = (
       extraFieldOptions: Partial<FieldOptions<string, React.ChangeEvent<HTMLInputElement>>> = {},
     ): RenderHookResult<
-      FieldOptions<string, React.ChangeEvent<HTMLInputElement>>,
-      Result<string, React.ChangeEvent<HTMLInputElement>>
+      Result<string, React.ChangeEvent<HTMLInputElement>>,
+      FieldOptions<string, React.ChangeEvent<HTMLInputElement>>
     > => {
       const hookResult = renderHook<
-        FieldOptions<string, React.ChangeEvent<HTMLInputElement>>,
-        Result<string, React.ChangeEvent<HTMLInputElement>>
+        Result<string, React.ChangeEvent<HTMLInputElement>>,
+        FieldOptions<string, React.ChangeEvent<HTMLInputElement>>
       >((props) => useField(props), { initialProps: { ...myFieldOptions, ...extraFieldOptions } });
 
       act(() => {
@@ -86,8 +85,8 @@ describe(useField.name, () => {
         expect.assertions(3);
 
         const { rerender, result } = renderHook<
-          FieldOptions<string, React.ChangeEvent<HTMLInputElement>>,
-          Result<string, React.ChangeEvent<HTMLInputElement>>
+          Result<string, React.ChangeEvent<HTMLInputElement>>,
+          FieldOptions<string, React.ChangeEvent<HTMLInputElement>>
         >((props) => useField(props), {
           initialProps: { ...myFieldOptions, immediate: true, value: 'old-value' },
         });
@@ -117,8 +116,8 @@ describe(useField.name, () => {
       const newValue: MyGeneralValue = { complex: 1983, field: 'new-field' };
 
       const { result } = renderHook<
-        FieldOptions<MyGeneralValue, MyGeneralChangeEvent>,
-        Result<MyGeneralValue, MyGeneralChangeEvent>
+        Result<MyGeneralValue, MyGeneralChangeEvent>,
+        FieldOptions<MyGeneralValue, MyGeneralChangeEvent>
       >((props) => useField(props), {
         initialProps: {
           value: oldValue,
@@ -152,12 +151,12 @@ describe(useField.name, () => {
 
   describe('when cancelling the input', () => {
     const setup = (): RenderHookResult<
-      FieldOptions<string>,
-      Result<string, React.ChangeEvent<HTMLInputElement>>
+      Result<string, React.ChangeEvent<HTMLInputElement>>,
+      FieldOptions<string>
     > => {
       const hookResult = renderHook<
-        FieldOptions<string>,
-        Result<string, React.ChangeEvent<HTMLInputElement>>
+        Result<string, React.ChangeEvent<HTMLInputElement>>,
+        FieldOptions<string>
       >(useField, {
         initialProps: {
           ...myFieldOptions,
@@ -196,8 +195,8 @@ describe(useField.name, () => {
       it('should focus and select the input ref', async () => {
         expect.hasAssertions();
         const { rerender, result } = renderHook<
-          FieldOptions<string>,
-          Result<string, React.ChangeEvent<HTMLInputElement>>
+          Result<string, React.ChangeEvent<HTMLInputElement>>,
+          FieldOptions<string>
         >(useField, {
           initialProps: {
             ...myFieldOptions,
@@ -232,12 +231,12 @@ describe(useField.name, () => {
       const setup = (
         newValue = myFieldOptions.value,
       ): RenderHookResult<
-        FieldOptions<string>,
-        Result<string, React.ChangeEvent<HTMLInputElement>>
+        Result<string, React.ChangeEvent<HTMLInputElement>>,
+        FieldOptions<string>
       > => {
         const hookResult = renderHook<
-          FieldOptions<string>,
-          Result<string, React.ChangeEvent<HTMLInputElement>>
+          Result<string, React.ChangeEvent<HTMLInputElement>>,
+          FieldOptions<string>
         >(useField, {
           initialProps: {
             ...myFieldOptions,
@@ -291,12 +290,12 @@ describe(useField.name, () => {
       const setup = (
         newValue = myFieldOptions.value,
       ): RenderHookResult<
-        FieldOptions<string>,
-        Result<string, React.ChangeEvent<HTMLInputElement>>
+        Result<string, React.ChangeEvent<HTMLInputElement>>,
+        FieldOptions<string>
       > => {
         const hookResult = renderHook<
-          FieldOptions<string>,
-          Result<string, React.ChangeEvent<HTMLInputElement>>
+          Result<string, React.ChangeEvent<HTMLInputElement>>,
+          FieldOptions<string>
         >(useField, {
           initialProps: {
             ...myFieldOptions,
@@ -337,11 +336,11 @@ describe(useField.name, () => {
 
     describe('when the value of the field was updated externally', () => {
       const setup = async (): Promise<
-        RenderHookResult<FieldOptions<string>, Result<string, React.ChangeEvent<HTMLInputElement>>>
+        RenderHookResult<Result<string, React.ChangeEvent<HTMLInputElement>>, FieldOptions<string>>
       > => {
         const hookResult = renderHook<
-          FieldOptions<string>,
-          Result<string, React.ChangeEvent<HTMLInputElement>>
+          Result<string, React.ChangeEvent<HTMLInputElement>>,
+          FieldOptions<string>
         >(useField, {
           initialProps: {
             ...myFieldOptions,

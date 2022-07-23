@@ -1,4 +1,4 @@
-import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook, RenderHookResult } from '@testing-library/react';
 import { RefObject } from 'react';
 import { useHover, HookResult, HLPoint, HoverEffect, HoverProps } from './hover';
 import { genPixelCompute } from '~client/components/graph/helpers';
@@ -20,7 +20,7 @@ describe('hover hook', () => {
     } as HTMLDivElement,
   };
 
-  let hookResult: RenderHookResult<unknown, HookResult | null>;
+  let hookResult: RenderHookResult<HookResult | null, unknown>;
   beforeEach(() => {
     const hookProps: HoverProps = {
       lines: [
