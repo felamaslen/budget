@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { AfterCanvas, ToggleList } from './after-canvas';
 import { BuySellDots } from './buy-sell-dots';
+import { GraphFundsAsCalendar } from './calendar';
 import { hoverEffectByMode } from './labels';
 import { getFundLineName } from './name';
 import * as Styled from './styles';
@@ -45,7 +46,7 @@ import {
   getFundsCache,
   getHistoryOptions,
 } from '~client/selectors';
-import { graphFundsHeightMobile } from '~client/styled/variables';
+import { graphFundsHeightMobile } from '~client/styled';
 import type {
   Data,
   DrawProps,
@@ -390,11 +391,6 @@ const GraphFundsAsLines: React.FC<{
   return <LineGraph {...graphProps} padding={getPadding(isMobile, sidebarOpen)} />;
 };
 
-const GraphFundsAsCalendar: React.FC<{
-  height: number;
-  width: number;
-}> = () => <div>Calendar</div>;
-
 export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
   const today = useToday();
   const width = useGraphWidth(GRAPH_FUNDS_WIDTH);
@@ -433,7 +429,7 @@ export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
     <Styled.Container onClick={onContainerClick}>
       <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
         {validMode === FundMode.Calendar ? (
-          <GraphFundsAsCalendar height={height} width={width} />
+          <GraphFundsAsCalendar fundItems={fundItems} height={height} width={width} />
         ) : (
           <GraphFundsAsLines
             height={height}

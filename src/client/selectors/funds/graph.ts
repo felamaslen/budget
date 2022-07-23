@@ -125,6 +125,8 @@ const mapFundOrder = ({
   isReinvestment: drip,
   isPension: pension,
   fees: fees + taxes,
+  units: Math.abs(units),
+  price,
   size: Math.abs(units * price),
 });
 
