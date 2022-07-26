@@ -1,5 +1,3 @@
-import { css, SerializedStyles } from '@emotion/react';
-import { rem } from 'polished';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import DotLoader from 'react-spinners/DotLoader';
@@ -11,14 +9,6 @@ import { useCTA } from '~client/hooks';
 import { colors } from '~client/styled/variables';
 
 export type Props = { loading: boolean };
-
-const spinnerOverride = (loading: boolean): SerializedStyles => css`
-  flex: 0 0 ${rem(22)};
-  opacity: ${loading ? 1 : 0};
-  position: absolute;
-  right: 0;
-  transition: opacity 0.5s ease;
-`;
 
 export const AppLogoIcon: React.FC = () => (
   <svg viewBox="0 0 100 100">
@@ -70,13 +60,8 @@ export const AppLogo: React.FC<Props> = ({ loading }) => {
 
   return (
     <Styled.AppLogo>
-      <Styled.Loader>
-        <DotLoader
-          loading={loading || showLoading}
-          color={colors.amber}
-          css={spinnerOverride(loading)}
-          size={22}
-        />
+      <Styled.Loader isLoading={loading}>
+        <DotLoader loading={loading || showLoading} color={colors.amber} size={22} />
       </Styled.Loader>
       <Styled.Logo>
         <Styled.TitleContainer>

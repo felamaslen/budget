@@ -1,3 +1,4 @@
+import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
@@ -75,9 +76,21 @@ export const Title = styled(H1)`
   }
 `;
 
-export const Loader = styled.div`
+const spinnerOverride = (loading: boolean): SerializedStyles => css`
+  flex: 0 0 ${rem(22)};
+  opacity: ${loading ? 1 : 0};
+  position: absolute;
+  right: 0;
+  transition: opacity 0.5s ease;
+`;
+
+export const Loader = styled.div<{ isLoading: boolean }>`
   height: ${rem(22)};
   position: relative;
+
+  & > span {
+    ${({ isLoading }): SerializedStyles => spinnerOverride(isLoading)};
+  }
 
   ${breakpoint(breakpoints.mobile)} {
     flex: 0 0 ${rem(22)};
