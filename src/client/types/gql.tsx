@@ -175,6 +175,34 @@ export type FundHistory = {
   startTime: Scalars['Int'];
 };
 
+export type FundHistoryCandle = {
+  __typename?: 'FundHistoryCandle';
+  end: Scalars['Float'];
+  id: Scalars['Int'];
+  max: Scalars['Float'];
+  min: Scalars['Float'];
+  start: Scalars['Float'];
+};
+
+export type FundHistoryCandlestick = {
+  __typename?: 'FundHistoryCandlestick';
+  candles: Array<FundHistoryCandlestickGroup>;
+  length: Scalars['NonNegativeInt'];
+  mode: FundHistoryCandlestickMode;
+  period: FundPeriod;
+};
+
+export type FundHistoryCandlestickGroup = {
+  __typename?: 'FundHistoryCandlestickGroup';
+  items: Array<FundHistoryCandle>;
+  t0: Scalars['Int'];
+  t1: Scalars['Int'];
+};
+
+export enum FundHistoryCandlestickMode {
+  Value = 'Value'
+}
+
 export type FundHistoryIndividual = {
   __typename?: 'FundHistoryIndividual';
   values: Array<FundValueIndividual>;
