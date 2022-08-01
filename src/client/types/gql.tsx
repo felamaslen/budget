@@ -188,7 +188,6 @@ export type FundHistoryCandlestick = {
   __typename?: 'FundHistoryCandlestick';
   candles: Array<FundHistoryCandlestickGroup>;
   length: Scalars['NonNegativeInt'];
-  mode: FundHistoryCandlestickMode;
   period: FundPeriod;
 };
 
@@ -198,10 +197,6 @@ export type FundHistoryCandlestickGroup = {
   t0: Scalars['Int'];
   t1: Scalars['Int'];
 };
-
-export enum FundHistoryCandlestickMode {
-  Value = 'Value'
-}
 
 export type FundHistoryIndividual = {
   __typename?: 'FundHistoryIndividual';
@@ -218,6 +213,7 @@ export type FundInput = {
 export enum FundMode {
   Allocation = 'Allocation',
   Calendar = 'Calendar',
+  Candlestick = 'Candlestick',
   Price = 'Price',
   PriceNormalised = 'PriceNormalised',
   Roi = 'ROI',
@@ -953,6 +949,7 @@ export type Query = {
   config?: Maybe<AppConfig>;
   exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
+  fundHistoryCandlestick?: Maybe<FundHistoryCandlestick>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   netWorthLoans?: Maybe<NetWorthLoansResponse>;
@@ -995,6 +992,12 @@ export type QueryExchangeRatesArgs = {
 
 
 export type QueryFundHistoryArgs = {
+  length?: Maybe<Scalars['NonNegativeInt']>;
+  period?: Maybe<FundPeriod>;
+};
+
+
+export type QueryFundHistoryCandlestickArgs = {
   length?: Maybe<Scalars['NonNegativeInt']>;
   period?: Maybe<FundPeriod>;
 };

@@ -68,6 +68,7 @@ export const fundsSchema = gql`
     Price
     PriceNormalised
     Calendar
+    Candlestick
   }
 
   type ReadFundsResponse {
@@ -96,12 +97,7 @@ export const fundsSchema = gql`
     items: [FundHistoryCandle!]!
   }
 
-  enum FundHistoryCandlestickMode {
-    Value
-  }
-
   type FundHistoryCandlestick {
-    mode: FundHistoryCandlestickMode!
     period: FundPeriod!
     length: NonNegativeInt!
     candles: [FundHistoryCandlestickGroup!]!
@@ -154,6 +150,7 @@ export const fundsSchema = gql`
     cashAllocationTarget: NonNegativeInt
     fundHistory(period: FundPeriod, length: NonNegativeInt): FundHistory
     fundHistoryIndividual(id: NonNegativeInt!): FundHistoryIndividual
+    fundHistoryCandlestick(period: FundPeriod, length: NonNegativeInt): FundHistoryCandlestick
 
     stockPrices(codes: [String!]!): StockPricesResponse
     stockValue: StockValueResponse
