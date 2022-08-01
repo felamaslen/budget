@@ -83,18 +83,14 @@ export const fundsSchema = gql`
     overviewCost: [Int!]!
   }
 
-  type FundHistoryCandle {
+  type FundHistoryCandlestickGroup {
     id: Int!
+    t0: Int!
+    t1: Int!
     min: Float!
     max: Float!
     start: Float!
     end: Float!
-  }
-
-  type FundHistoryCandlestickGroup {
-    t0: Int!
-    t1: Int!
-    items: [FundHistoryCandle!]!
   }
 
   type FundHistoryCandlestick {

@@ -158,14 +158,6 @@ export type FundHistory = {
   startTime: Scalars['Int'];
 };
 
-export type FundHistoryCandle = {
-  end: Scalars['Float'];
-  id: Scalars['Int'];
-  max: Scalars['Float'];
-  min: Scalars['Float'];
-  start: Scalars['Float'];
-};
-
 export type FundHistoryCandlestick = {
   candles: Array<FundHistoryCandlestickGroup>;
   length: Scalars['NonNegativeInt'];
@@ -173,7 +165,11 @@ export type FundHistoryCandlestick = {
 };
 
 export type FundHistoryCandlestickGroup = {
-  items: Array<FundHistoryCandle>;
+  end: Scalars['Float'];
+  id: Scalars['Int'];
+  max: Scalars['Float'];
+  min: Scalars['Float'];
+  start: Scalars['Float'];
   t0: Scalars['Int'];
   t1: Scalars['Int'];
 };
@@ -1288,7 +1284,6 @@ export type ResolversTypes = {
   Fund: ResolverTypeWrapper<Fund>;
   FundCreatedSubscription: ResolverTypeWrapper<FundCreatedSubscription>;
   FundHistory: ResolverTypeWrapper<FundHistory>;
-  FundHistoryCandle: ResolverTypeWrapper<FundHistoryCandle>;
   FundHistoryCandlestick: ResolverTypeWrapper<FundHistoryCandlestick>;
   FundHistoryCandlestickGroup: ResolverTypeWrapper<FundHistoryCandlestickGroup>;
   FundHistoryIndividual: ResolverTypeWrapper<FundHistoryIndividual>;
@@ -1427,7 +1422,6 @@ export type ResolversParentTypes = {
   Fund: Fund;
   FundCreatedSubscription: FundCreatedSubscription;
   FundHistory: FundHistory;
-  FundHistoryCandle: FundHistoryCandle;
   FundHistoryCandlestick: FundHistoryCandlestick;
   FundHistoryCandlestickGroup: FundHistoryCandlestickGroup;
   FundHistoryIndividual: FundHistoryIndividual;
@@ -1651,15 +1645,6 @@ export type FundHistoryResolvers<ContextType = Context, ParentType extends Resol
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type FundHistoryCandleResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundHistoryCandle'] = ResolversParentTypes['FundHistoryCandle']> = {
-  end?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  max?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  min?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  start?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type FundHistoryCandlestickResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundHistoryCandlestick'] = ResolversParentTypes['FundHistoryCandlestick']> = {
   candles?: Resolver<Array<ResolversTypes['FundHistoryCandlestickGroup']>, ParentType, ContextType>;
   length?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
@@ -1668,7 +1653,11 @@ export type FundHistoryCandlestickResolvers<ContextType = Context, ParentType ex
 };
 
 export type FundHistoryCandlestickGroupResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundHistoryCandlestickGroup'] = ResolversParentTypes['FundHistoryCandlestickGroup']> = {
-  items?: Resolver<Array<ResolversTypes['FundHistoryCandle']>, ParentType, ContextType>;
+  end?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  max?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  min?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  start?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   t0?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   t1?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -2302,7 +2291,6 @@ export type Resolvers<ContextType = Context> = {
   Fund?: FundResolvers<ContextType>;
   FundCreatedSubscription?: FundCreatedSubscriptionResolvers<ContextType>;
   FundHistory?: FundHistoryResolvers<ContextType>;
-  FundHistoryCandle?: FundHistoryCandleResolvers<ContextType>;
   FundHistoryCandlestick?: FundHistoryCandlestickResolvers<ContextType>;
   FundHistoryCandlestickGroup?: FundHistoryCandlestickGroupResolvers<ContextType>;
   FundHistoryIndividual?: FundHistoryIndividualResolvers<ContextType>;

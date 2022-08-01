@@ -175,15 +175,6 @@ export type FundHistory = {
   startTime: Scalars['Int'];
 };
 
-export type FundHistoryCandle = {
-  __typename?: 'FundHistoryCandle';
-  end: Scalars['Float'];
-  id: Scalars['Int'];
-  max: Scalars['Float'];
-  min: Scalars['Float'];
-  start: Scalars['Float'];
-};
-
 export type FundHistoryCandlestick = {
   __typename?: 'FundHistoryCandlestick';
   candles: Array<FundHistoryCandlestickGroup>;
@@ -193,7 +184,11 @@ export type FundHistoryCandlestick = {
 
 export type FundHistoryCandlestickGroup = {
   __typename?: 'FundHistoryCandlestickGroup';
-  items: Array<FundHistoryCandle>;
+  end: Scalars['Float'];
+  id: Scalars['Int'];
+  max: Scalars['Float'];
+  min: Scalars['Float'];
+  start: Scalars['Float'];
   t0: Scalars['Int'];
   t1: Scalars['Int'];
 };
@@ -1838,6 +1833,24 @@ export type StockPricesQuery = (
   )> }
 );
 
+export type FundHistoryCandlestickQueryVariables = Exact<{
+  period?: Maybe<FundPeriod>;
+  length?: Maybe<Scalars['NonNegativeInt']>;
+}>;
+
+
+export type FundHistoryCandlestickQuery = (
+  { __typename?: 'Query' }
+  & { fundHistoryCandlestick?: Maybe<(
+    { __typename?: 'FundHistoryCandlestick' }
+    & Pick<FundHistoryCandlestick, 'period' | 'length'>
+    & { candles: Array<(
+      { __typename?: 'FundHistoryCandlestickGroup' }
+      & Pick<FundHistoryCandlestickGroup, 'id' | 't0' | 't1' | 'min' | 'max' | 'start' | 'end'>
+    )> }
+  )> }
+);
+
 export type FundHistoryIndividualQueryVariables = Exact<{
   id: Scalars['NonNegativeInt'];
 }>;
@@ -2873,6 +2886,27 @@ export const StockPricesDocument = gql`
 
 export function useStockPricesQuery(options: Omit<Urql.UseQueryArgs<StockPricesQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<StockPricesQuery>({ query: StockPricesDocument, ...options });
+};
+export const FundHistoryCandlestickDocument = gql`
+    query FundHistoryCandlestick($period: FundPeriod, $length: NonNegativeInt) {
+  fundHistoryCandlestick(period: $period, length: $length) {
+    period
+    length
+    candles {
+      id
+      t0
+      t1
+      min
+      max
+      start
+      end
+    }
+  }
+}
+    `;
+
+export function useFundHistoryCandlestickQuery(options: Omit<Urql.UseQueryArgs<FundHistoryCandlestickQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<FundHistoryCandlestickQuery>({ query: FundHistoryCandlestickDocument, ...options });
 };
 export const FundHistoryIndividualDocument = gql`
     query FundHistoryIndividual($id: NonNegativeInt!) {
