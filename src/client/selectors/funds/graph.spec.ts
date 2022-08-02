@@ -45,6 +45,7 @@ describe('fund selectors / graph', () => {
           id: GRAPH_FUNDS_OVERALL_ID,
           item: 'Overall',
           color: colors.black,
+          transactions: expect.any(Array),
           orders: [
             {
               time: getUnixTime(new Date('2016-09-21')),
@@ -122,6 +123,7 @@ describe('fund selectors / graph', () => {
           id: numericHash('some-fund-1'),
           item: 'some fund 1',
           color: colorKey(abbreviateFundName('some fund 1')),
+          transactions: expect.any(Array),
           orders: [
             {
               time: getUnixTime(new Date('2017-05-09')),
@@ -139,6 +141,7 @@ describe('fund selectors / graph', () => {
           id: numericHash('some-fund-2'),
           item: 'some fund 2',
           color: colorKey(abbreviateFundName('some fund 2')),
+          transactions: expect.any(Array),
           orders: [
             {
               time: getUnixTime(new Date('2017-03-03')),
@@ -166,6 +169,7 @@ describe('fund selectors / graph', () => {
           id: numericHash('some-fund-3'),
           item: 'some fund 3',
           color: colorKey(abbreviateFundName('some fund 3')),
+          transactions: expect.any(Array),
           orders: [
             {
               time: getUnixTime(new Date('2017-01-11')),
@@ -193,6 +197,7 @@ describe('fund selectors / graph', () => {
           id: numericHash('some-fund-4'),
           item: 'test fund 4',
           color: colorKey(abbreviateFundName('test fund 4')),
+          transactions: expect.any(Array),
           orders: [
             {
               time: getUnixTime(new Date('2016-09-21')),

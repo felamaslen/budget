@@ -7,9 +7,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { AfterCanvas, ToggleList } from './after-canvas';
 import { BuySellDots } from './buy-sell-dots';
 import { GraphFundsAsCalendar } from './calendar';
+import { GraphFundsAsCandlestick } from './candlestick';
 import { hoverEffectByMode } from './labels';
 import { getFundLineName } from './name';
 import * as Styled from './styles';
+import { isLineMode, useLabelY } from './utils';
 
 import {
   configUpdatedFromLocal,
@@ -38,7 +40,6 @@ import { usePersistentState, useToday } from '~client/hooks';
 import { useFundPricesUpdateQuery } from '~client/hooks/gql';
 import { lastInArray } from '~client/modules/data';
 import { getTickSize } from '~client/modules/format';
-import { formatValue } from '~client/modules/funds';
 import {
   getAppConfig,
   getFundItems,
@@ -52,6 +53,7 @@ import type {
   DrawProps,
   FundItem,
   FundLine,
+  FundModeLine,
   GraphStack,
   HistoryOptions,
   Line,
@@ -64,6 +66,7 @@ import { FundMode } from '~client/types/enum';
 const PADDING_DESKTOP: Padding = [20, 3, 0, 12];
 const PADDING_DESKTOP_WITH_SIDEBAR: Padding = [20, 3, 0, 60];
 const PADDING_MOBILE: Padding = [0, 0, 0, 0];
+const PADDING_CANDLESTICK: Padding = [20, 0, 0, 0];
 
 function useDynamicPrices(): [HistoryOptions, (nextQuery: HistoryOptions) => void] {
   const query = useSelector(getHistoryOptions);
@@ -316,7 +319,7 @@ function useGraphProps({
   width: number;
   height: number;
   isMobile: boolean;
-  mode: Exclude<FundMode, FundMode.Calendar>;
+  mode: FundModeLine;
   today: Date;
   toggleList: ToggleList;
 }): LineGraphProps {
@@ -334,7 +337,7 @@ function useGraphProps({
 
   const [ranges, tickSizeY] = getRanges(lines, cacheTimes, mode);
 
-  const labelY = useCallback((value) => formatValue(value, mode), [mode]);
+  const labelY = useLabelY(mode);
 
   const BeforeLines = useCallback<React.FC<DrawProps>>(
     (props) => (
@@ -375,20 +378,21 @@ export type Props = { isMobile?: boolean };
 const GraphFundsAsLines: React.FC<{
   height: number;
   isMobile: boolean;
-  mode: Exclude<FundMode, FundMode.Calendar>;
+  mode: FundModeLine;
+  padding: Padding;
   sidebarOpen: boolean;
   today: Date;
   toggleList: ToggleList;
   width: number;
 }> = (props) => {
-  const { isMobile, sidebarOpen } = props;
+  const { padding } = props;
   const graphProps = useGraphProps(props);
 
   if (graphProps.minX === graphProps.maxX) {
     return null;
   }
 
-  return <LineGraph {...graphProps} padding={getPadding(isMobile, sidebarOpen)} />;
+  return <LineGraph {...graphProps} padding={padding} />;
 };
 
 export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
@@ -425,16 +429,28 @@ export const GraphFunds: React.FC<Props> = ({ isMobile = false }) => {
     [isMobile, dispatch],
   );
 
+  const padding = getPadding(isMobile, sidebarOpen);
+
   return (
     <Styled.Container onClick={onContainerClick}>
       <Styled.GraphFunds data-testid="graph-funds" width={width} height={height}>
-        {validMode === FundMode.Calendar ? (
+        {validMode === FundMode.Calendar && (
           <GraphFundsAsCalendar fundItems={fundItems} height={height} width={width} />
-        ) : (
+        )}
+        {validMode === FundMode.Candlestick && (
+          <GraphFundsAsCandlestick
+            height={height}
+            historyOptions={historyOptions}
+            padding={PADDING_CANDLESTICK}
+            width={width}
+          />
+        )}
+        {isLineMode(validMode) && (
           <GraphFundsAsLines
             height={height}
             isMobile={isMobile}
             mode={validMode}
+            padding={padding}
             sidebarOpen={sidebarOpen}
             today={today}
             toggleList={toggleList}

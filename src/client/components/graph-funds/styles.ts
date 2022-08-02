@@ -2,11 +2,13 @@ import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 import { rem } from 'polished';
 
-import { breakpoint } from '~client/styled/mixins';
+import { breakpoint, breakpoints, colors } from '~client/styled';
 import { HamburgerButton } from '~client/styled/shared/hamburger';
 import { Flex, FlexColumn } from '~client/styled/shared/layout';
 import { SettingsDialog } from '~client/styled/shared/settings';
-import { breakpoints, colors } from '~client/styled/variables';
+
+const sidebarWidthOpen = 60;
+const sidebarWidthClosed = 12;
 
 export const Container = styled(Flex)`
   flex: 0 0 auto;
@@ -16,6 +18,23 @@ export const Container = styled(Flex)`
   ${breakpoint(breakpoints.desktop)} {
     flex: 1;
     flex-flow: column;
+  }
+`;
+
+export const GraphContainer = styled.div<{ sidebarOpen?: boolean; withSidebar?: boolean }>`
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  overflow: hidden;
+
+  ${breakpoint(breakpoints.mobile)} {
+    padding: ${rem(20)} 0 0
+      ${({ sidebarOpen = false, withSidebar = false }): number | string => {
+        if (!withSidebar) {
+          return 0;
+        }
+        return rem(sidebarOpen ? sidebarWidthOpen : sidebarWidthClosed);
+      }};
   }
 `;
 
@@ -103,7 +122,7 @@ const fundSidebarStyles = ({ isOpen }: FundSidebarProps): SerializedStyles => cs
   top: ${rem(20)};
   transition: 0.3s width ease-in-out;
   user-select: none;
-  width: ${rem(isOpen ? 60 : 12)};
+  width: ${rem(isOpen ? sidebarWidthOpen : sidebarWidthClosed)};
   z-index: 3;
 
   &:hover {

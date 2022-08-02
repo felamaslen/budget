@@ -13,6 +13,7 @@ import { colors } from '~client/styled/variables';
 import type {
   FundItem,
   FundLine,
+  FundModeLine,
   FundNative as Fund,
   FundOrder,
   TransactionNative as Transaction,
@@ -148,6 +149,7 @@ export const getFundItems = memoiseNowAndToday((time, key) =>
             [],
           ),
         ),
+        transactions: [],
       },
       ...items
         .filter(({ id }) => !hiddenBecauseSold[id])
@@ -156,6 +158,7 @@ export const getFundItems = memoiseNowAndToday((time, key) =>
           item,
           color: colorKey(abbreviateFundName(item)),
           orders: sortFundOrders(transactions.map(mapFundOrder)),
+          transactions,
         })),
     ],
   ),
@@ -172,7 +175,7 @@ export const getFundLines = memoiseNowAndToday((time, key) =>
       { cacheTimes },
       hiddenBecauseSold,
       fundsWithReturns,
-    ): Record<Exclude<FundMode, FundMode.Calendar>, FundLine[]> => {
+    ): Record<FundModeLine, FundLine[]> => {
       const getFundLinesByMode = (mode: FundMode): FundLine[] =>
         fundItems
           .filter(({ id }) => !hiddenBecauseSold[id])
