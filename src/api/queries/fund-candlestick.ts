@@ -41,17 +41,31 @@ export async function selectCandlestickRows(
         from dates_idx d0
         left join dates_idx d1 on d1.idx = d0.idx + 1
       )`,
+      sql`transactions as (
+        select ft.fund_id, ft.date, ft.units * exp(sum(ln(coalesce(fss.ratio, 1)))) as units_rebased
+        from funds f
+        inner join funds_transactions ft on ft.fund_id = f.id
+        left join funds_stock_splits fss on fss.fund_id = ft.fund_id and fss.date > ft.date
+        where f.uid = ${uid}
+        group by ft.fund_id, ft.date, ft.units
+      )`,
       sql`total_values as (
         select ${sql.join(
-          [sql`d.id`, sql`d.t0`, sql`d.t1`, sql`fct.time`, sql`sum(ft.units * fc.price) as value`],
+          [
+            sql`d.id`,
+            sql`d.t0`,
+            sql`d.t1`,
+            sql`fct.time`,
+            sql`sum(ft.units_rebased * fc.price) as value`,
+          ],
           sql`, `,
         )}
         from date_groups d
-        inner join fund_cache_time fct on fct.time >= d.t0 and fct.time < d.t1
+        inner join fund_cache_time fct on fct.time >= d.t0 and fct.time <= d.t1
         inner join fund_cache fc on fc.cid = fct.cid
         inner join fund_scrape fs on fs.fid = fc.fid
         inner join funds f on f.uid = ${uid} and f.item = fs.item
-        inner join funds_transactions ft on ft.fund_id = f.id and ft.date <= fct.time
+        inner join transactions ft on ft.fund_id = f.id and ft.date <= fct.time
         group by d.id, d.t0, d.t1, fct.cid
         order by d.id desc, fct.cid
       )`,
