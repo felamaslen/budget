@@ -11,6 +11,7 @@ import { formatPercent } from '~client/modules/format';
 import { formatValue } from '~client/modules/funds';
 import { getFundsCache } from '~client/selectors';
 import { CenterNoWrap } from '~client/styled/shared';
+import { FundModeLine } from '~client/types';
 import { FundMode } from '~client/types/enum';
 
 const NoWrap = styled.span`
@@ -106,7 +107,7 @@ const LabelPriceNormalised: React.FC<LabelProps> = (props) => (
   <LabelBaseFunds {...props} mode={FundMode.PriceNormalised} showChange={true} />
 );
 
-export const hoverEffectByMode: Record<Exclude<FundMode, FundMode.Calendar>, HoverEffect> = {
+export const hoverEffectByMode: Record<FundModeLine, HoverEffect> = {
   [FundMode.Roi]: { Label: LabelROI },
   [FundMode.Value]: { Label: LabelValue },
   [FundMode.Stacked]: { Label: LabelValue },

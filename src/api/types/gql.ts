@@ -158,6 +158,22 @@ export type FundHistory = {
   startTime: Scalars['Int'];
 };
 
+export type FundHistoryCandlestick = {
+  candles: Array<FundHistoryCandlestickGroup>;
+  length: Scalars['NonNegativeInt'];
+  period: FundPeriod;
+};
+
+export type FundHistoryCandlestickGroup = {
+  end: Scalars['Float'];
+  id: Scalars['Int'];
+  max: Scalars['Float'];
+  min: Scalars['Float'];
+  start: Scalars['Float'];
+  t0: Scalars['Int'];
+  t1: Scalars['Int'];
+};
+
 export type FundHistoryIndividual = {
   values: Array<FundValueIndividual>;
 };
@@ -172,6 +188,7 @@ export type FundInput = {
 export enum FundMode {
   Allocation = 'Allocation',
   Calendar = 'Calendar',
+  Candlestick = 'Candlestick',
   Price = 'Price',
   PriceNormalised = 'PriceNormalised',
   Roi = 'ROI',
@@ -858,6 +875,7 @@ export type Query = {
   config?: Maybe<AppConfig>;
   exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
+  fundHistoryCandlestick?: Maybe<FundHistoryCandlestick>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   netWorthLoans?: Maybe<NetWorthLoansResponse>;
@@ -900,6 +918,12 @@ export type QueryExchangeRatesArgs = {
 
 
 export type QueryFundHistoryArgs = {
+  length?: Maybe<Scalars['NonNegativeInt']>;
+  period?: Maybe<FundPeriod>;
+};
+
+
+export type QueryFundHistoryCandlestickArgs = {
   length?: Maybe<Scalars['NonNegativeInt']>;
   period?: Maybe<FundPeriod>;
 };
@@ -1260,6 +1284,8 @@ export type ResolversTypes = {
   Fund: ResolverTypeWrapper<Fund>;
   FundCreatedSubscription: ResolverTypeWrapper<FundCreatedSubscription>;
   FundHistory: ResolverTypeWrapper<FundHistory>;
+  FundHistoryCandlestick: ResolverTypeWrapper<FundHistoryCandlestick>;
+  FundHistoryCandlestickGroup: ResolverTypeWrapper<FundHistoryCandlestickGroup>;
   FundHistoryIndividual: ResolverTypeWrapper<FundHistoryIndividual>;
   FundInput: FundInput;
   FundMode: FundMode;
@@ -1396,6 +1422,8 @@ export type ResolversParentTypes = {
   Fund: Fund;
   FundCreatedSubscription: FundCreatedSubscription;
   FundHistory: FundHistory;
+  FundHistoryCandlestick: FundHistoryCandlestick;
+  FundHistoryCandlestickGroup: FundHistoryCandlestickGroup;
   FundHistoryIndividual: FundHistoryIndividual;
   FundInput: FundInput;
   FundPriceGroup: FundPriceGroup;
@@ -1614,6 +1642,24 @@ export type FundHistoryResolvers<ContextType = Context, ParentType extends Resol
   overviewCost?: Resolver<Array<ResolversTypes['Int']>, ParentType, ContextType>;
   prices?: Resolver<Array<ResolversTypes['FundPrices']>, ParentType, ContextType>;
   startTime?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FundHistoryCandlestickResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundHistoryCandlestick'] = ResolversParentTypes['FundHistoryCandlestick']> = {
+  candles?: Resolver<Array<ResolversTypes['FundHistoryCandlestickGroup']>, ParentType, ContextType>;
+  length?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
+  period?: Resolver<ResolversTypes['FundPeriod'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FundHistoryCandlestickGroupResolvers<ContextType = Context, ParentType extends ResolversParentTypes['FundHistoryCandlestickGroup'] = ResolversParentTypes['FundHistoryCandlestickGroup']> = {
+  end?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  max?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  min?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  start?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  t0?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  t1?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2055,6 +2101,7 @@ export type QueryResolvers<ContextType = Context, ParentType extends ResolversPa
   config?: Resolver<Maybe<ResolversTypes['AppConfig']>, ParentType, ContextType>;
   exchangeRates?: Resolver<Maybe<ResolversTypes['ExchangeRatesResponse']>, ParentType, ContextType, RequireFields<QueryExchangeRatesArgs, 'base'>>;
   fundHistory?: Resolver<Maybe<ResolversTypes['FundHistory']>, ParentType, ContextType, RequireFields<QueryFundHistoryArgs, never>>;
+  fundHistoryCandlestick?: Resolver<Maybe<ResolversTypes['FundHistoryCandlestick']>, ParentType, ContextType, RequireFields<QueryFundHistoryCandlestickArgs, never>>;
   fundHistoryIndividual?: Resolver<Maybe<ResolversTypes['FundHistoryIndividual']>, ParentType, ContextType, RequireFields<QueryFundHistoryIndividualArgs, 'id'>>;
   netWorthCashTotal?: Resolver<Maybe<ResolversTypes['NetWorthCashTotal']>, ParentType, ContextType>;
   netWorthLoans?: Resolver<Maybe<ResolversTypes['NetWorthLoansResponse']>, ParentType, ContextType>;
@@ -2244,6 +2291,8 @@ export type Resolvers<ContextType = Context> = {
   Fund?: FundResolvers<ContextType>;
   FundCreatedSubscription?: FundCreatedSubscriptionResolvers<ContextType>;
   FundHistory?: FundHistoryResolvers<ContextType>;
+  FundHistoryCandlestick?: FundHistoryCandlestickResolvers<ContextType>;
+  FundHistoryCandlestickGroup?: FundHistoryCandlestickGroupResolvers<ContextType>;
   FundHistoryIndividual?: FundHistoryIndividualResolvers<ContextType>;
   FundPriceGroup?: FundPriceGroupResolvers<ContextType>;
   FundPrices?: FundPricesResolvers<ContextType>;

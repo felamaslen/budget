@@ -68,6 +68,7 @@ export const fundsSchema = gql`
     Price
     PriceNormalised
     Calendar
+    Candlestick
   }
 
   type ReadFundsResponse {
@@ -80,6 +81,22 @@ export const fundsSchema = gql`
     prices: [FundPrices!]!
     annualisedFundReturns: Float!
     overviewCost: [Int!]!
+  }
+
+  type FundHistoryCandlestickGroup {
+    id: Int!
+    t0: Int!
+    t1: Int!
+    min: Float!
+    max: Float!
+    start: Float!
+    end: Float!
+  }
+
+  type FundHistoryCandlestick {
+    period: FundPeriod!
+    length: NonNegativeInt!
+    candles: [FundHistoryCandlestickGroup!]!
   }
 
   type FundValueIndividual {
@@ -129,6 +146,7 @@ export const fundsSchema = gql`
     cashAllocationTarget: NonNegativeInt
     fundHistory(period: FundPeriod, length: NonNegativeInt): FundHistory
     fundHistoryIndividual(id: NonNegativeInt!): FundHistoryIndividual
+    fundHistoryCandlestick(period: FundPeriod, length: NonNegativeInt): FundHistoryCandlestick
 
     stockPrices(codes: [String!]!): StockPricesResponse
     stockValue: StockValueResponse

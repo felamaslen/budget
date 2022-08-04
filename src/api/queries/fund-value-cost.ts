@@ -73,10 +73,6 @@ const joinFundPrices = (
     ].filter((condition): condition is TaggedTemplateLiteralInvocationType => !!condition),
     sql` and `,
   )}
-
-  left join funds_stock_splits fss on fss.fund_id = f.id
-    and fss.date > ft.date
-    and fss.date <= c.time
 `;
 
 const selectRebasedFundValues = (
@@ -86,13 +82,12 @@ const selectRebasedFundValues = (
   select ${sql.join(
     [
       sql`ft.fund_id`,
-      sql`(fc.price * ft.units * exp(sum(ln(coalesce(fss.ratio, 1))))) as present_value_rebased`,
+      sql`(fc.price_split_adj * ft.units_split_adj) as present_value_rebased`,
       sql`c.time`,
     ],
     sql`, `,
   )}
   ${joinFundPrices(uid, pensionTransactionOpts)}
-  group by ft.fund_id, ft.units, fc.price, c.time
 `;
 
 export async function getMonthlyTotalFundValues(
@@ -165,13 +160,13 @@ export async function selectUnitsWithPrice(
         select ${sql.join(
           [
             sql`f.item`,
-            sql`sum(ft.units * exp(ln(coalesce(fss.ratio, 1)))) as units_rebased`,
-            sql`fc.price as scraped_price`,
+            sql`sum(ft.units_split_adj) as units_rebased`,
+            sql`fc.price_split_adj as scraped_price`,
           ],
           sql`, `,
         )}
         ${joinFundPrices(uid, PensionTransactionOpts.Both)}
-        group by f.item, ft.units, fc.price
+        group by f.item, fc.price_split_adj
       )`,
     ],
     sql`, `,

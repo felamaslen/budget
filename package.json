@@ -20,7 +20,7 @@
     "start": "node lib/api",
     "start:dev": "NODE_ENV=development nodemon | roarr pretty-print",
     "dev": "docker-compose up",
-    "dev:api": "SKIP_APP=true yarn dev",
+    "dev:api": "SKIP_APP=true yarn start:dev",
     "test:api:unit": "TZ=UTC jest -w 4 -c jest.api.unit.config.js --detectOpenHandles --forceExit",
     "test:api:unit:ci": "TZ=UTC NODE_ENV=test jest -w 1 -c jest.api.unit.config.js --detectOpenHandles --forceExit",
     "test:api:integration": "TZ=UTC NODE_ENV=test jest -w 1 -c jest.api.integration.config.js --detectOpenHandles --forceExit",

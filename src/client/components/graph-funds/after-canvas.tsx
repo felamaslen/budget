@@ -1,6 +1,8 @@
 import { Dispatch, SetStateAction, useCallback } from 'react';
 
 import * as Styled from './styles';
+import { isLineMode } from './utils';
+
 import { FormFieldSelect, SelectOptions } from '~client/components/form-field';
 import { useFundModeSelectOptions } from '~client/components/page-funds/hooks/ui';
 import { GRAPH_FUNDS_OVERALL_ID } from '~client/constants/graph';
@@ -120,7 +122,7 @@ export const AfterCanvas: React.FC<Props> = ({
           </SettingsInput>
         </SettingsGroup>
       </Styled.FundModeSwitch>
-      {mode !== FundMode.Calendar && (
+      {isLineMode(mode) && (
         <Styled.FundSidebar
           tabIndex={-1}
           isOpen={sidebarOpen}

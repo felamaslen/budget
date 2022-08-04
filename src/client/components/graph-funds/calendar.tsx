@@ -6,8 +6,9 @@ import { rem } from 'polished';
 import { useMemo } from 'react';
 
 import HoverCost from '../hover-cost';
+import { GraphContainer } from './styles';
 
-import { breakpoint, breakpoints, colors } from '~client/styled';
+import { colors } from '~client/styled';
 import type { FundItem, FundOrder } from '~client/types';
 import { abbreviateFundName } from '~shared/abbreviation';
 import { NetWorthAggregate } from '~shared/constants';
@@ -25,17 +26,6 @@ function arrowColor(order: Pick<FundOrder, 'isReinvestment' | 'isSell'>): string
   }
   return order.isSell ? colors.loss.dark : colors.profit.dark;
 }
-
-const CalendarContainer = styled.div`
-  display: flex;
-  flex-flow: column;
-  height: 100%;
-  overflow: hidden;
-
-  ${breakpoint(breakpoints.mobile)} {
-    padding: ${rem(20)} 0 0 0;
-  }
-`;
 
 const CalendarList = styled.ul`
   display: grid;
@@ -103,7 +93,7 @@ const ItemValue = styled.span`
   position: relative;
 `;
 
-export const GraphFundsAsCalendar: React.FC<{
+export const GraphFundsAsCalendar: React.ComponentType<{
   fundItems: FundItem[];
   height: number;
   width: number;
@@ -124,7 +114,7 @@ export const GraphFundsAsCalendar: React.FC<{
   );
 
   return (
-    <CalendarContainer>
+    <GraphContainer>
       <CalendarList>
         {orderInfo.map((order) => (
           <CalendarItem
@@ -153,6 +143,6 @@ export const GraphFundsAsCalendar: React.FC<{
           </CalendarItem>
         ))}
       </CalendarList>
-    </CalendarContainer>
+    </GraphContainer>
   );
 };

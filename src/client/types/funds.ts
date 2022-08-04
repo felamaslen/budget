@@ -1,4 +1,4 @@
-import type { Fund, FundInput, FundPeriod, StockSplit, Transaction } from './gql';
+import type { Fund, FundInput, FundMode, FundPeriod, StockSplit, Transaction } from './gql';
 import type { Data } from './graph';
 import type { Id } from './shared';
 import type { GQL, GQLShallow, NativeDate } from '~shared/types';
@@ -32,9 +32,12 @@ export type FundItem = {
   item: string;
   color: string;
   orders: FundOrder[];
+  transactions: TransactionNative[];
 };
 
 export type FundLine = FundItem & { data: Data };
+
+export type FundModeLine = Exclude<FundMode, FundMode.Calendar | FundMode.Candlestick>;
 
 export type Stock = {
   code: string;

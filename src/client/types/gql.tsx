@@ -175,6 +175,24 @@ export type FundHistory = {
   startTime: Scalars['Int'];
 };
 
+export type FundHistoryCandlestick = {
+  __typename?: 'FundHistoryCandlestick';
+  candles: Array<FundHistoryCandlestickGroup>;
+  length: Scalars['NonNegativeInt'];
+  period: FundPeriod;
+};
+
+export type FundHistoryCandlestickGroup = {
+  __typename?: 'FundHistoryCandlestickGroup';
+  end: Scalars['Float'];
+  id: Scalars['Int'];
+  max: Scalars['Float'];
+  min: Scalars['Float'];
+  start: Scalars['Float'];
+  t0: Scalars['Int'];
+  t1: Scalars['Int'];
+};
+
 export type FundHistoryIndividual = {
   __typename?: 'FundHistoryIndividual';
   values: Array<FundValueIndividual>;
@@ -190,6 +208,7 @@ export type FundInput = {
 export enum FundMode {
   Allocation = 'Allocation',
   Calendar = 'Calendar',
+  Candlestick = 'Candlestick',
   Price = 'Price',
   PriceNormalised = 'PriceNormalised',
   Roi = 'ROI',
@@ -925,6 +944,7 @@ export type Query = {
   config?: Maybe<AppConfig>;
   exchangeRates?: Maybe<ExchangeRatesResponse>;
   fundHistory?: Maybe<FundHistory>;
+  fundHistoryCandlestick?: Maybe<FundHistoryCandlestick>;
   fundHistoryIndividual?: Maybe<FundHistoryIndividual>;
   netWorthCashTotal?: Maybe<NetWorthCashTotal>;
   netWorthLoans?: Maybe<NetWorthLoansResponse>;
@@ -967,6 +987,12 @@ export type QueryExchangeRatesArgs = {
 
 
 export type QueryFundHistoryArgs = {
+  length?: Maybe<Scalars['NonNegativeInt']>;
+  period?: Maybe<FundPeriod>;
+};
+
+
+export type QueryFundHistoryCandlestickArgs = {
   length?: Maybe<Scalars['NonNegativeInt']>;
   period?: Maybe<FundPeriod>;
 };
@@ -1803,6 +1829,24 @@ export type StockPricesQuery = (
     & { prices: Array<(
       { __typename?: 'StockPrice' }
       & Pick<StockPrice, 'code' | 'price'>
+    )> }
+  )> }
+);
+
+export type FundHistoryCandlestickQueryVariables = Exact<{
+  period?: Maybe<FundPeriod>;
+  length?: Maybe<Scalars['NonNegativeInt']>;
+}>;
+
+
+export type FundHistoryCandlestickQuery = (
+  { __typename?: 'Query' }
+  & { fundHistoryCandlestick?: Maybe<(
+    { __typename?: 'FundHistoryCandlestick' }
+    & Pick<FundHistoryCandlestick, 'period' | 'length'>
+    & { candles: Array<(
+      { __typename?: 'FundHistoryCandlestickGroup' }
+      & Pick<FundHistoryCandlestickGroup, 'id' | 't0' | 't1' | 'min' | 'max' | 'start' | 'end'>
     )> }
   )> }
 );
@@ -2842,6 +2886,27 @@ export const StockPricesDocument = gql`
 
 export function useStockPricesQuery(options: Omit<Urql.UseQueryArgs<StockPricesQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<StockPricesQuery>({ query: StockPricesDocument, ...options });
+};
+export const FundHistoryCandlestickDocument = gql`
+    query FundHistoryCandlestick($period: FundPeriod, $length: NonNegativeInt) {
+  fundHistoryCandlestick(period: $period, length: $length) {
+    period
+    length
+    candles {
+      id
+      t0
+      t1
+      min
+      max
+      start
+      end
+    }
+  }
+}
+    `;
+
+export function useFundHistoryCandlestickQuery(options: Omit<Urql.UseQueryArgs<FundHistoryCandlestickQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<FundHistoryCandlestickQuery>({ query: FundHistoryCandlestickDocument, ...options });
 };
 export const FundHistoryIndividualDocument = gql`
     query FundHistoryIndividual($id: NonNegativeInt!) {

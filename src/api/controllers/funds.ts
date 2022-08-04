@@ -1,8 +1,9 @@
-import { addYears, addMonths, getUnixTime, startOfYear, formatISO } from 'date-fns';
+import { getUnixTime, formatISO } from 'date-fns';
 import { omit, uniqBy } from 'lodash';
 import { replaceAtIndex } from 'replace-array';
 import { DatabaseTransactionConnectionType } from 'slonik';
 
+import { getMaxAge } from './funds.utils';
 import { readNetWorthCashTotal } from './net-worth';
 import { getAnnualisedFundReturns, getDisplayedFundValues } from './overview';
 
@@ -57,6 +58,9 @@ import {
 import { FundSubscription } from '~client/types/gql';
 import { PageNonStandard } from '~shared/constants';
 
+export * from './funds.candlestick';
+export * from './funds.utils';
+
 const baseController = makeCrudController<FundListRow, FundMain>({
   table: PageNonStandard.Funds,
   item: 'Funds',
@@ -65,19 +69,6 @@ const baseController = makeCrudController<FundListRow, FundMain>({
 });
 
 export { baseController as fundsControllerBase };
-
-export function getMaxAge(now: Date, period?: Maybe<FundPeriod>, length?: Maybe<number>): Date {
-  if (period === FundPeriod.Ytd) {
-    return startOfYear(now);
-  }
-  if (!length) {
-    return new Date(0);
-  }
-  if (period === FundPeriod.Month) {
-    return addMonths(now, -length);
-  }
-  return addYears(now, -length);
-}
 
 function getPublishedFund(
   input: FundInput,
@@ -155,7 +146,7 @@ async function getFundPriceHistory(
   period: Maybe<FundPeriod> | undefined,
   length: Maybe<number> | undefined,
 ): Promise<Pick<FundHistory, 'startTime' | 'cacheTimes' | 'prices'>> {
-  const maxAge = getMaxAge(now, period, length);
+  const maxAge = getMaxAge(now, new Date(0), period, length);
   const numResults = await selectFundHistoryNumResults(db, uid, maxAge);
   if (numResults < 3) {
     return {

@@ -20,6 +20,24 @@ export const StockPrices = gql`
   }
 `;
 
+export const FundHistoryCandlestick = gql`
+  query FundHistoryCandlestick($period: FundPeriod, $length: NonNegativeInt) {
+    fundHistoryCandlestick(period: $period, length: $length) {
+      period
+      length
+      candles {
+        id
+        t0
+        t1
+        min
+        max
+        start
+        end
+      }
+    }
+  }
+`;
+
 export const FundHistoryIndividual = gql`
   query FundHistoryIndividual($id: NonNegativeInt!) {
     fundHistoryIndividual(id: $id) {
