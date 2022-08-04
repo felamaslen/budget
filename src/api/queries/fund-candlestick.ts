@@ -1,15 +1,52 @@
 import { formatISO } from 'date-fns';
-import { DatabaseTransactionConnectionType, sql } from 'slonik';
+import { DatabaseTransactionConnectionType, sql, SqlTokenType } from 'slonik';
 
 export type CandleStickRow = {
-  id: number;
+  idx: number;
   t0: Date;
   t1: Date;
-  max: number;
   min: number;
+  max: number;
   start: number;
   end: number;
 };
+
+function ageInPeriodsCTE(
+  resolutionNum: number,
+  resolutionPeriod: string,
+  minDate: string,
+  time: SqlTokenType,
+): SqlTokenType {
+  const age = sql`age(${time}, ${minDate})`;
+
+  switch (resolutionPeriod) {
+    case 'month':
+      return sql`floor((${sql.join(
+        [sql`extract(month from ${age})`, sql`extract(year from ${age}) * 12`],
+        sql` + `,
+      )}) / ${resolutionNum})`;
+    case 'week':
+      return sql`floor((extract(epoch from ${age})) / 604800)`;
+    default:
+      throw new Error(`Unhandled resolution period ${resolutionPeriod}`);
+  }
+}
+
+export async function selectCandlestickMaxAge(
+  db: DatabaseTransactionConnectionType,
+  uid: number,
+): Promise<Date | null> {
+  const { rows } = await db.query<{ min_time: Date | null }>(sql`
+  select min(fct.time) as min_time
+  from fund_cache_time fct
+  inner join fund_cache fc on fc.cid = fct.cid
+  inner join fund_scrape fs on fs.fid = fc.fid
+  inner join funds f on f.uid = ${uid} and f.item = fs.item
+  inner join funds_transactions ft on ft.fund_id = f.id and ft.date <= fct.time
+  having count(ft.id) > 0
+  `);
+  return rows[0]?.min_time ?? null;
+}
 
 export async function selectCandlestickRows(
   db: DatabaseTransactionConnectionType,
@@ -19,67 +56,39 @@ export async function selectCandlestickRows(
   resolutionNum: number,
   resolutionPeriod: string,
 ): Promise<readonly CandleStickRow[]> {
+  const minDate = formatISO(minTime, { representation: 'date' });
+
   const { rows } = await db.query<CandleStickRow>(sql`
   with ${sql.join(
     [
-      sql`dates as (
-        select generate_series(
-          (${formatISO(minTime, { representation: 'date' })})::timestamptz,
-          now()::timestamptz,
-          (${`'${resolutionNum} ${resolutionPeriod}'`})::interval
-        ) as date
-      )`,
-      sql`dates_idx as (
-        select d.date, row_number() over() as idx
-        from dates d
-      )`,
-      sql`date_groups as (
-        select ${sql.join(
-          [sql`d0.idx as id`, sql`d0.date as t0`, sql`coalesce(d1.date, now()) as t1`],
-          sql`, `,
-        )}
-        from dates_idx d0
-        left join dates_idx d1 on d1.idx = d0.idx + 1
-      )`,
-      sql`transactions as (
-        select ft.fund_id, ft.date, ft.units * exp(sum(ln(coalesce(fss.ratio, 1)))) as units_rebased
-        from funds f
-        inner join funds_transactions ft on ft.fund_id = f.id
-        left join funds_stock_splits fss on fss.fund_id = ft.fund_id and fss.date > ft.date
-        where f.uid = ${uid}
-        group by ft.fund_id, ft.date, ft.units
-      )`,
       sql`total_values as (
         select ${sql.join(
           [
-            sql`d.id`,
-            sql`d.t0`,
-            sql`d.t1`,
             sql`fct.time`,
-            sql`sum(ft.units_rebased * fc.price) as value`,
+            sql`${ageInPeriodsCTE(resolutionNum, resolutionPeriod, minDate, sql`fct.time`)} as idx`,
+            sql`sum(ft.units_split_adj * fc.price_split_adj)::int as value`,
           ],
           sql`, `,
         )}
-        from date_groups d
-        inner join fund_cache_time fct on fct.time >= d.t0 and fct.time <= d.t1
+        from fund_cache_time fct
         inner join fund_cache fc on fc.cid = fct.cid
         inner join fund_scrape fs on fs.fid = fc.fid
         inner join funds f on f.uid = ${uid} and f.item = fs.item
-        inner join transactions ft on ft.fund_id = f.id and ft.date <= fct.time
-        group by d.id, d.t0, d.t1, fct.cid
-        order by d.id desc, fct.cid
+        inner join funds_transactions ft on ft.fund_id = f.id and ft.date <= fct.time
+        where fct.time >= ${minDate}
+        group by fct.cid
       )`,
       sql`value_groups as (
         select ${sql.join(
           [
-            sql`v.id`,
-            sql`v.t0`,
-            sql`v.t1`,
-            sql`row_number() over (partition by v.id) as idx`,
-            sql`max(v.value) over (partition by v.id) as max`,
-            sql`min(v.value) over (partition by v.id) as min`,
-            sql`first_value(v.value) over (partition by v.id order by v.time asc) as start`,
-            sql`first_value(v.value) over (partition by v.id order by v.time desc) as end`,
+            sql`v.idx`,
+            sql`row_number() over (partition by v.idx) as id`,
+            sql`min(v.time) over (partition by v.idx) as t0`,
+            sql`max(v.time) over (partition by v.idx) as t1`,
+            sql`min(v.value) over (partition by v.idx) as min`,
+            sql`max(v.value) over (partition by v.idx) as max`,
+            sql`first_value(v.value) over (partition by v.idx order by v.time asc) as start`,
+            sql`first_value(v.value) over (partition by v.idx order by v.time desc) as end`,
           ],
           sql`, `,
         )}
@@ -88,7 +97,9 @@ export async function selectCandlestickRows(
     ],
     sql`, `,
   )}
-  select id, t0, t1, "max", "min", "start", "end" from value_groups where idx = 1
+  select idx, t0, t1, "min", "max", "start", "end"
+  from value_groups
+  where id = 1
   `);
   return rows;
 }

@@ -146,7 +146,7 @@ async function getFundPriceHistory(
   period: Maybe<FundPeriod> | undefined,
   length: Maybe<number> | undefined,
 ): Promise<Pick<FundHistory, 'startTime' | 'cacheTimes' | 'prices'>> {
-  const maxAge = getMaxAge(now, period, length);
+  const maxAge = getMaxAge(now, new Date(0), period, length);
   const numResults = await selectFundHistoryNumResults(db, uid, maxAge);
   if (numResults < 3) {
     return {

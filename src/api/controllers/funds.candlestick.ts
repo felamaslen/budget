@@ -1,10 +1,10 @@
-import { differenceInYears, getUnixTime } from 'date-fns';
+import { addMonths, addWeeks, differenceInYears, getUnixTime } from 'date-fns';
 import round from 'lodash/round';
 import type { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getMaxAge } from './funds.utils';
 
-import { selectCandlestickRows } from '~api/queries/fund-candlestick';
+import { selectCandlestickMaxAge, selectCandlestickRows } from '~api/queries/fund-candlestick';
 import {
   FundHistoryCandlestick,
   FundHistoryCandlestickGroup,
@@ -12,12 +12,15 @@ import {
   QueryFundHistoryCandlestickArgs,
 } from '~api/types';
 
-function getResolution(now: Date, minTime: Date): { num: number; period: string } {
+function getResolution(
+  now: Date,
+  minTime: Date,
+): { addPeriod: (date: Date, num: number) => Date; num: number; period: string } {
   const numYears = differenceInYears(now, minTime);
   if (numYears >= 3) {
-    return { num: 1, period: 'month' };
+    return { addPeriod: addMonths, num: numYears >= 10 ? 3 : 1, period: 'month' };
   }
-  return { num: 1, period: 'week' };
+  return { addPeriod: addWeeks, num: 1, period: 'week' };
 }
 
 export async function readFundHistoryCandlestick(
@@ -29,7 +32,12 @@ export async function readFundHistoryCandlestick(
   const length = args.length ?? 1;
   const now = new Date();
 
-  const minTime = getMaxAge(now, period, length);
+  const minPossibleTime = await selectCandlestickMaxAge(db, uid);
+  if (!minPossibleTime) {
+    return { candles: [], length, period };
+  }
+
+  const minTime = getMaxAge(now, minPossibleTime, period, length);
   const resolution = getResolution(now, minTime);
 
   const candles = await selectCandlestickRows(
@@ -43,11 +51,11 @@ export async function readFundHistoryCandlestick(
 
   return {
     candles: candles.map<FundHistoryCandlestickGroup>((row) => ({
-      ...row,
+      id: row.idx,
       t0: getUnixTime(row.t0),
       t1: getUnixTime(row.t1),
-      max: round(row.max, 2),
       min: round(row.min, 2),
+      max: round(row.max, 2),
       start: round(row.start, 2),
       end: round(row.end, 2),
     })),
