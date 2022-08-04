@@ -17,8 +17,11 @@ function getResolution(
   minTime: Date,
 ): { addPeriod: (date: Date, num: number) => Date; num: number; period: string } {
   const numYears = differenceInYears(now, minTime);
-  if (numYears >= 3) {
+  if (numYears >= 5) {
     return { addPeriod: addMonths, num: numYears >= 10 ? 3 : 1, period: 'month' };
+  }
+  if (numYears >= 2) {
+    return { addPeriod: addWeeks, num: 2, period: 'week' };
   }
   return { addPeriod: addWeeks, num: 1, period: 'week' };
 }

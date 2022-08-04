@@ -26,7 +26,7 @@ function ageInPeriodsCTE(
         sql` + `,
       )}) / ${resolutionNum})`;
     case 'week':
-      return sql`floor((extract(epoch from ${age})) / 604800)`;
+      return sql`floor((extract(epoch from ${age})) / 604800 / ${resolutionNum})`;
     default:
       throw new Error(`Unhandled resolution period ${resolutionPeriod}`);
   }
