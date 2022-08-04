@@ -10,22 +10,21 @@ describe('funds controller', () => {
   describe(getMaxAge.name, () => {
     const now = new Date('2017-09-05');
 
-    it.each`
-      period              | length  | expectedDate
-      ${FundPeriod.Year}  | ${1}    | ${'2016-09-05'}
-      ${FundPeriod.Year}  | ${3}    | ${'2014-09-05'}
-      ${FundPeriod.Month} | ${6}    | ${'2017-03-05'}
-      ${FundPeriod.Ytd}   | ${null} | ${'2017-01-01'}
-    `('should return the correct timestamp', ({ period, length, expectedDate }) => {
+    it.each<[string, { period: FundPeriod; length?: number; expectedDate: Date }]>([
+      ['1 year', { period: FundPeriod.Year, length: 1, expectedDate: new Date('2016-09-05') }],
+      ['3 years', { period: FundPeriod.Year, length: 3, expectedDate: new Date('2014-09-05') }],
+      ['6 months', { period: FundPeriod.Month, length: 6, expectedDate: new Date('2017-03-05') }],
+      ['YTD', { period: FundPeriod.Ytd, expectedDate: new Date('2017-01-01') }],
+    ])('should return the correct timestamp for %s', (_, { period, length, expectedDate }) => {
       expect.assertions(1);
-      expect(getMaxAge(now, period, length)).toStrictEqual(new Date(expectedDate));
+      expect(getMaxAge(now, new Date(0), period, length)).toStrictEqual(new Date(expectedDate));
     });
 
     it('should handle a zero length', () => {
-      expect.assertions(1);
-      expect(getMaxAge(now, new Date(0), FundPeriod.Year, 0).getTime()).toBe(0);
-      expect(getMaxAge(now, new Date('1987-05-02'), FundPeriod.Year, 0).getTime()).toBe(
-        getUnixTime(new Date('1987-05-02')),
+      expect.assertions(2);
+      expect(getMaxAge(now, new Date(0), FundPeriod.Year, 0)).toStrictEqual(new Date(0));
+      expect(getMaxAge(now, new Date('1987-05-02'), FundPeriod.Year, 0)).toStrictEqual(
+        new Date('1987-05-02'),
       );
     });
   });
