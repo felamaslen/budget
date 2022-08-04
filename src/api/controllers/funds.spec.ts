@@ -23,7 +23,10 @@ describe('funds controller', () => {
 
     it('should handle a zero length', () => {
       expect.assertions(1);
-      expect(getMaxAge(now, FundPeriod.Year, 0).getTime()).toBe(0);
+      expect(getMaxAge(now, new Date(0), FundPeriod.Year, 0).getTime()).toBe(0);
+      expect(getMaxAge(now, new Date('1987-05-02'), FundPeriod.Year, 0).getTime()).toBe(
+        getUnixTime(new Date('1987-05-02')),
+      );
     });
   });
 
