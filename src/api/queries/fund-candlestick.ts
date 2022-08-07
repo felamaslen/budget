@@ -1,8 +1,8 @@
 import { formatISO } from 'date-fns';
 import { DatabaseTransactionConnectionType, sql, SqlTokenType } from 'slonik';
 
-export type CandleStickRow = {
-  idx: number;
+export type CandlestickRow = {
+  id: number;
   t0: Date;
   t1: Date;
   min: number;
@@ -55,12 +55,22 @@ export async function selectCandlestickRows(
   now: Date,
   resolutionNum: number,
   resolutionPeriod: string,
-): Promise<readonly CandleStickRow[]> {
+): Promise<readonly CandlestickRow[]> {
   const minDate = formatISO(minTime, { representation: 'date' });
+  const interval = sql`(${`'${resolutionNum} ${resolutionPeriod}'`})::interval`;
 
-  const { rows } = await db.query<CandleStickRow>(sql`
+  const { rows } = await db.query<CandlestickRow>(sql`
   with ${sql.join(
     [
+      sql`dates as (
+        select generate_series(${minDate}, now(), ${interval}) as date
+      )`,
+      sql`dates_idx as (select date, row_number() over() as id from dates)`,
+      sql`date_groups as (
+        select d0.id, d0.date as t0, coalesce(d1.date, d0.date + ${interval}) as t1
+        from dates_idx d0
+        left join dates_idx d1 on d1.id = d0.id + 1
+      )`,
       sql`total_values as (
         select ${sql.join(
           [
@@ -81,25 +91,26 @@ export async function selectCandlestickRows(
       sql`value_groups as (
         select ${sql.join(
           [
-            sql`v.idx`,
-            sql`row_number() over (partition by v.idx) as id`,
-            sql`min(v.time) over (partition by v.idx) as t0`,
-            sql`max(v.time) over (partition by v.idx) as t1`,
-            sql`min(v.value) over (partition by v.idx) as min`,
-            sql`max(v.value) over (partition by v.idx) as max`,
-            sql`first_value(v.value) over (partition by v.idx order by v.time asc) as start`,
-            sql`first_value(v.value) over (partition by v.idx order by v.time desc) as end`,
+            sql`d.id`,
+            sql`d.t0`,
+            sql`d.t1`,
+            sql`row_number() over (partition by d.id) as idx`,
+            sql`min(v.value) over (partition by d.id) as min`,
+            sql`max(v.value) over (partition by d.id) as max`,
+            sql`first_value(v.value) over (partition by d.id order by v.time asc) as start`,
+            sql`first_value(v.value) over (partition by d.id order by v.time desc) as end`,
           ],
           sql`, `,
         )}
-        from total_values v
+        from date_groups d
+        inner join total_values v on v.time >= d.t0 and v.time <= d.t1
       )`,
     ],
     sql`, `,
   )}
-  select idx, t0, t1, "min", "max", "start", "end"
-  from value_groups
-  where id = 1
+  select id, t0, t1, "min", "max", "start", "end"
+  from value_groups v
+  where idx = 1
   `);
   return rows;
 }

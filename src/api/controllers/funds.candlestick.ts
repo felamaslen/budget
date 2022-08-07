@@ -53,14 +53,14 @@ export async function readFundHistoryCandlestick(
   );
 
   return {
-    candles: candles.map<FundHistoryCandlestickGroup>((row) => ({
-      id: row.idx,
+    candles: candles.map<FundHistoryCandlestickGroup>((row, index) => ({
+      id: row.id,
       t0: getUnixTime(row.t0),
       t1: getUnixTime(row.t1),
       min: round(row.min, 2),
       max: round(row.max, 2),
       start: round(row.start, 2),
-      end: round(row.end, 2),
+      end: round(index < candles.length - 1 ? candles[index + 1].start : row.end, 2),
     })),
     length,
     period,
