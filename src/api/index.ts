@@ -202,6 +202,10 @@ export async function run(port = config.app.port): Promise<Server> {
 
   setupErrorHandling(app);
 
+  process.on('beforeExit', () => {
+    server.close();
+  });
+
   return new Promise((resolve, reject) => {
     server.listen(port, (err?: Error) => {
       if (err) {
