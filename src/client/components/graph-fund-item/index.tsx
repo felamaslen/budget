@@ -1,21 +1,22 @@
 import loadable from '@loadable/component';
-import { flatten } from 'array-flatten';
+import getUnixTime from 'date-fns/getUnixTime';
 import { useCallback, useMemo, useState } from 'react';
 import Loader from 'react-spinners/PuffLoader';
 
 import { graphColor } from './color';
+import { processPoints, TransactionsSplitAdj } from './process-data';
 import * as Styled from './styles';
+
 import { LineGraph } from '~client/components/graph';
 import type { LineGraphProps } from '~client/components/graph/line-graph';
 import { GRAPH_FUND_ITEM_WIDTH, GRAPH_FUND_ITEM_HEIGHT } from '~client/constants/graph';
-import type { Data, Id, Line, Range, RowPrices, Size, StockSplitNative } from '~client/types';
+import { getUnitRebase } from '~client/modules/data';
+import { FundNative, Line, Point, Range, RowPrices, Size } from '~client/types';
 
 export type Props = {
-  id: Id;
-  item: string;
+  fund: FundNative;
   sold: boolean;
   values: RowPrices;
-  stockSplits: StockSplitNative[];
 };
 
 export const Popout = loadable(() => import('./popout'), { fallback: <Loader size={24} /> });
@@ -36,18 +37,22 @@ const getRange = (data: number[]): { min: number; max: number } =>
     { min: Infinity, max: -Infinity },
   );
 
-function processData(item: string, data: Data[]): Range & Pick<LineGraphProps, 'lines'> {
-  const dataX = flatten(data.map((line) => line.map(([xValue]) => xValue)));
-  const dataY = flatten(data.map((line) => line.map(([, yValue]) => yValue)));
+function processData(
+  fund: FundNative,
+  transactions: TransactionsSplitAdj,
+  prices: NonNullable<RowPrices>,
+): Range & Pick<LineGraphProps, 'lines'> {
+  const dataX = prices.map((line) => line.map(({ date }) => getUnixTime(date)));
+  const dataY = prices.map((line) => line.map(({ priceSplitAdj }) => priceSplitAdj));
 
   let minX = 0;
   let maxX = 0;
   let minY = 0;
   let maxY = 0;
 
-  if (data.length) {
-    ({ min: minX, max: maxX } = getRange(dataX));
-    ({ min: minY, max: maxY } = getRange(dataY));
+  if (prices.length) {
+    ({ min: minX, max: maxX } = getRange(dataX.flat()));
+    ({ min: minY, max: maxY } = getRange(dataY.flat()));
 
     if (minY === maxY) {
       const range = minY / 100;
@@ -57,14 +62,18 @@ function processData(item: string, data: Data[]): Range & Pick<LineGraphProps, '
     }
   }
 
-  const lines = data.map<Line>((points, index) => ({
-    key: String(index),
-    name: item,
-    data: points,
-    strokeWidth: 1,
-    smooth: true,
-    color: graphColor(points),
-  }));
+  const lines = prices.map<Line>((line, index) => {
+    const points = processPoints(fund.stockSplits, transactions, line);
+
+    return {
+      key: `${fund.id}-${line[0].date}`,
+      name: fund.item,
+      data: dataX[index].map<Point>((x, pointIndex) => [x, dataY[index][pointIndex]]),
+      strokeWidth: 1,
+      smooth: true,
+      color: graphColor(points),
+    };
+  });
 
   return {
     lines,
@@ -75,11 +84,28 @@ function processData(item: string, data: Data[]): Range & Pick<LineGraphProps, '
   };
 }
 
-export const GraphFundItem: React.FC<Props> = ({ id, item, sold, values, stockSplits }) => {
+export const GraphFundItem: React.FC<Props> = ({ fund, sold, values }) => {
+  const transactionsSplitAdj = useMemo(
+    () =>
+      fund.transactions.map((transaction) => {
+        const unitRebase = getUnitRebase(fund.stockSplits, transaction.date);
+
+        return {
+          date: transaction.date,
+          price: transaction.price / unitRebase,
+          units: transaction.units * unitRebase,
+        };
+      }),
+    [fund.stockSplits, fund.transactions],
+  );
+
   const [popout, setPopout] = useState<boolean>(false);
   const onFocus = useCallback(() => setPopout(!sold), [sold]);
   const onBlur = useCallback(() => setPopout(false), []);
-  const processedData = useMemo(() => processData(item, values ?? []), [item, values]);
+  const processedData = useMemo(
+    () => processData(fund, transactionsSplitAdj, values ?? []),
+    [fund, transactionsSplitAdj, values],
+  );
 
   if (!values?.length) {
     return null;
@@ -95,7 +121,7 @@ export const GraphFundItem: React.FC<Props> = ({ id, item, sold, values, stockSp
       sold={sold}
       popout={popout}
     >
-      {popout && <Popout id={id} stockSplits={stockSplits} />}
+      {popout && <Popout {...fund} transactions={transactionsSplitAdj} />}
       {!popout && <LineGraph {...processedData} {...getDimensions(sold)} />}
     </Styled.FundGraph>
   );

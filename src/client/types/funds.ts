@@ -80,7 +80,7 @@ export type FundsCachedValue = {
   dayGainAbs: number;
 };
 
-export type RowPrices = Data[] | null;
+export type RowPrices = { date: number; priceSplitAdj: number }[][] | null;
 
 export type HistoryOptions = {
   period: FundPeriod;

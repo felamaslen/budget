@@ -7,22 +7,42 @@ import { mockClient } from '~client/test-utils';
 import type { FundHistoryIndividualQueryVariables } from '~client/types/gql';
 
 export const props: Props = {
-  id: 123,
-  item: 'My fund',
+  fund: {
+    id: 123,
+    item: 'My fund',
+    transactions: [
+      {
+        date: new Date('2020-06-03'),
+        units: 10,
+        price: 992.35 * 3,
+        drip: false,
+        pension: false,
+        fees: 0,
+        taxes: 0,
+      },
+      {
+        date: new Date('2022-11-05'),
+        units: 48,
+        price: 790.29,
+        drip: false,
+        pension: false,
+        fees: 0,
+        taxes: 0,
+      },
+    ],
+    stockSplits: [{ date: new Date('2022-11-02'), ratio: 3 }],
+  },
   values: [
     [
-      [100, 42.3],
-      [101, 41.2],
-      [102, 45.9],
-      [102.5, 46.9],
+      { date: 1667247661, priceSplitAdj: 809.67 },
+      { date: 1667301239, priceSplitAdj: 765.18 },
     ],
     [
-      [104, 47.1],
-      [105, 46.9],
-      [106, 42.5],
+      { date: 1667476991, priceSplitAdj: 814.77 }, // 2022-11-03
+      { date: 1667615662, priceSplitAdj: 817.42 },
+      { date: 1667649184, priceSplitAdj: 862.17 },
     ],
   ],
-  stockSplits: [{ date: new Date('2022-11-02'), ratio: 3 }],
   sold: false,
 };
 

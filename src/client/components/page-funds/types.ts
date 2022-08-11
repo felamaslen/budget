@@ -1,10 +1,10 @@
 import { FundMetadata } from '~client/selectors';
-import type { Data } from '~client/types';
+import type { RowPrices } from '~client/types';
 
 export type FundProps = {
   isSold: boolean;
   metadata: FundMetadata;
-  prices: Data[] | null;
+  prices: RowPrices;
 };
 
 export enum SortCriteria {

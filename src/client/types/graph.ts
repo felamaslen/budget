@@ -63,7 +63,7 @@ export type SVGPathProps = Pick<PathProps, 'strokeWidth'> & {
   strokeDasharray?: string;
 };
 
-type ColorFunction = (point: Point, index?: number) => string;
+type ColorFunction = (point: Point, index: number) => string;
 
 export type ColorSwitcher = {
   changes: number[];

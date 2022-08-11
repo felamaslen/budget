@@ -14,7 +14,6 @@ import { State } from '~client/reducers';
 import { getAppConfig } from '~client/selectors/api';
 import { getCashTotal } from '~client/selectors/overview/common';
 import type {
-  Data,
   Id,
   TransactionNative as Transaction,
   Portfolio,
@@ -284,15 +283,13 @@ export function getPricesForRow(
   startTime: number,
   cacheTimes: number[],
 ): RowPrices {
-  if (!prices[id]) {
-    return null;
-  }
-
-  return prices[id].map<Data>(({ startIndex, values, rebasePriceRatio }) =>
-    values.map((price, index) => [
-      startTime + cacheTimes[index + startIndex],
-      price / rebasePriceRatio[index],
-    ]),
+  return (
+    prices[id]?.map<NonNullable<RowPrices>[0]>(({ startIndex, values, rebasePriceRatio }) =>
+      values.map((price, index) => ({
+        date: startTime + cacheTimes[index + startIndex],
+        priceSplitAdj: price / rebasePriceRatio[index],
+      })),
+    ) ?? null
   );
 }
 
