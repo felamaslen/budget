@@ -40,7 +40,7 @@ module.exports = {
         [
           '@babel/preset-env',
           {
-            modules: true,
+            modules: 'auto',
             targets: {
               browsers: ['last 2 Chrome versions'],
             },
