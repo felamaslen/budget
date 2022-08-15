@@ -52,7 +52,7 @@ export function usePriceChangeHighlight(
 }
 
 const modeListDesktop = Object.values(FundMode);
-const modeListMobile = [FundMode.Roi, FundMode.Value];
+const modeListMobile = [FundMode.Roi, FundMode.Value, FundMode.Candlestick];
 
 export function useFundModeList(isMobile: boolean): FundMode[] {
   return isMobile ? modeListMobile : modeListDesktop;
