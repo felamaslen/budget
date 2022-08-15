@@ -40,6 +40,7 @@ export const GraphContainer = styled.div<{ sidebarOpen?: boolean; withSidebar?: 
 
 export const GraphFunds = styled.div<{ width: number; height: number }>`
   background-color: ${colors.white};
+  overflow-y: hidden;
   position: relative;
   user-select: none;
 
