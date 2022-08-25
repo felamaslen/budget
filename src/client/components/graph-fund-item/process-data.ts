@@ -10,7 +10,7 @@ type DatedPriceSplitAdj = { date: number; priceSplitAdj: number };
 const isSplitAdj = (points: DatedPrice[] | DatedPriceSplitAdj[]): points is DatedPriceSplitAdj[] =>
   !points.length || Reflect.has(points[0], 'priceSplitAdj');
 
-export type ProfitPoint = { profit: boolean | null; point: Point };
+export type ProfitPoint = { costBasis: number; point: Point; profit: boolean | null };
 
 export type TransactionsSplitAdj = { date: Date; price: number; units: number }[];
 
@@ -34,15 +34,23 @@ export function processPoints(
       (transaction) => !isAfter(transaction.date, dateObj),
     );
 
+    const totalUnits = transactionsToDate.reduce<number>(
+      (prev, transaction) => prev + transaction.units,
+      0,
+    );
+
     const averagePrice =
-      transactionsToDate.reduce<number>(
-        (prev, transaction) => prev + transaction.price * transaction.units,
-        0,
-      ) / transactionsToDate.reduce<number>((prev, transaction) => prev + transaction.units, 0);
+      totalUnits > 0
+        ? transactionsToDate.reduce<number>(
+            (prev, transaction) => prev + transaction.price * transaction.units,
+            0,
+          ) / totalUnits
+        : 0;
 
     return {
-      profit: transactionsToDate.length > 0 ? priceSplitAdj >= averagePrice : null,
+      costBasis: averagePrice,
       point: [date, priceSplitAdj],
+      profit: transactionsToDate.length > 0 ? priceSplitAdj >= averagePrice : null,
     };
   });
 }

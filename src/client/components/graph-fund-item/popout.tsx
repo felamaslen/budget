@@ -1,6 +1,7 @@
 import { FC, useCallback, useMemo } from 'react';
 
 import { graphColor } from './color';
+import { costBasisLine } from './cost-basis';
 import { processPoints, TransactionsSplitAdj } from './process-data';
 import * as Styled from './styles.popout';
 
@@ -40,12 +41,22 @@ function processData(
   const minX = values[0]?.date ?? 0;
   const maxX = lastInArray(values)?.date ?? minX;
   const minY = points.reduce<number>(
-    (last, { point: [, price] }) => Math.min(last, price),
+    (last, { costBasis, point: [, price] }) =>
+      costBasis > 0 ? Math.min(last, costBasis, price) : Math.min(last, price),
     Infinity,
   );
-  const maxY = points.reduce<number>((last, { point: [, price] }) => Math.max(last, price), 0);
+  const maxY = points.reduce<number>(
+    (last, { costBasis, point: [, price] }) =>
+      costBasis > 0 ? Math.max(last, costBasis, price) : Math.max(last, price),
+    0,
+  );
 
   const lines: Line[] = [
+    costBasisLine({
+      key: `fund-history-popout-cost-basis-${id}`,
+      name: 'Fund history cost basis',
+      data: points.map(({ costBasis, point }) => [point[0], costBasis]),
+    }),
     {
       key: `fund-history-popout-${id}`,
       name: 'Fund history',
