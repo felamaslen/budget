@@ -1,4 +1,5 @@
-import { ComponentProps, useMemo } from 'react';
+import { setLightness } from 'polished';
+import { ComponentProps, memo, useCallback, useMemo, useState } from 'react';
 
 import { genPixelCompute } from '../graph/helpers';
 import { Graph } from '../graph/shared';
@@ -6,7 +7,7 @@ import { TimeAxes } from '../graph/time-axes';
 import { useLabelY } from './utils';
 
 import { GRAPH_FUNDS_NUM_TICKS } from '~client/constants';
-import { getTickSize } from '~client/modules/format';
+import { formatCurrency, getTickSize } from '~client/modules/format';
 import { colors } from '~client/styled';
 import type { Calc, Dimensions, DrawProps, HistoryOptions, Padding, Range } from '~client/types';
 import {
@@ -17,8 +18,11 @@ import {
 
 const Candlestick: React.ComponentType<{
   calc: Calc;
+  ranges: Range;
   stick: FundHistoryCandlestickGroup;
-}> = ({ calc, stick }) => {
+}> = ({ calc, ranges, stick }) => {
+  const bottom = calc.pixY1(ranges.minY);
+
   const x0 = calc.pixX(stick.t0) + 1;
   const candleWidth = calc.pixX(stick.t1) - x0 - 2;
 
@@ -31,14 +35,24 @@ const Candlestick: React.ComponentType<{
   const maxY = calc.pixY1(stick.max);
   const minY = calc.pixY1(stick.min);
 
+  const fillColor = stick.end >= stick.start ? colors.income.main : colors.loss.dark;
+
+  const [highlight, setHighlight] = useState(false);
+
+  const onMouseOver = useCallback(() => setHighlight(true), []);
+  const onMouseOut = useCallback(() => setHighlight(false), []);
+
+  const labelWidth = 100;
+  const labelX = Math.min(calc.pixX(ranges.maxX) - labelWidth / 2, Math.max(labelWidth / 2, x0));
+
   return (
-    <g>
+    <g onMouseOver={onMouseOver} onMouseOut={onMouseOut}>
       <rect
         x={x0}
         y={rectY}
         height={rectHeight}
         width={candleWidth}
-        fill={stick.end >= stick.start ? colors.income.main : colors.loss.dark}
+        fill={highlight ? setLightness(0.3, fillColor) : fillColor}
       />
       {stick.max > rectMax && (
         <path
@@ -57,6 +71,41 @@ const Candlestick: React.ComponentType<{
           strokeWidth={1}
           stroke={colors.dark.mediumDark}
         />
+      )}
+      {highlight && (
+        <g>
+          <rect
+            fill={colors.translucent.light.light}
+            height={40}
+            stroke={colors.translucent.dark.dark}
+            strokeWidth={2}
+            width={labelWidth}
+            x={labelX - labelWidth / 2}
+            y={bottom - 40}
+          />
+          <text
+            alignmentBaseline="hanging"
+            color={colors.black}
+            fontSize={12}
+            textAnchor="middle"
+            x={labelX}
+            y={bottom - 32}
+          >
+            {formatCurrency(stick.start, { abbreviate: true })} &rarr;{' '}
+            {formatCurrency(stick.end, { abbreviate: true })}
+          </text>
+          <text
+            alignmentBaseline="hanging"
+            color={colors.black}
+            fontSize={12}
+            textAnchor="middle"
+            x={labelX}
+            y={bottom - 16}
+          >
+            &darr; {formatCurrency(stick.min, { abbreviate: true })} &uarr;{' '}
+            {formatCurrency(stick.max, { abbreviate: true })}
+          </text>
+        </g>
       )}
     </g>
   );
@@ -113,22 +162,23 @@ const GraphWithData: React.ComponentType<{
       <BeforeLines height={height} padding={padding} width={width} {...ranges} {...calc} />
       <g>
         {candles.map((stick) => (
-          <Candlestick key={stick.id} calc={calc} stick={stick} />
+          <Candlestick key={stick.id} calc={calc} ranges={ranges} stick={stick} />
         ))}
       </g>
     </Graph>
   );
 };
 
-export const GraphFundsAsCandlestick: React.ComponentType<
+export const GraphFundsAsCandlestick = memo<
   {
     historyOptions: HistoryOptions;
   } & Omit<ComponentProps<typeof GraphWithData>, 'candles'>
-> = ({ historyOptions, ...props }) => {
+>(({ historyOptions, ...props }) => {
   const [{ data }] = useFundHistoryCandlestickQuery({
     variables: historyOptions,
   });
 
   const candles = data?.fundHistoryCandlestick?.candles;
   return candles?.length ? <GraphWithData {...props} candles={candles} /> : null;
-};
+});
+GraphFundsAsCandlestick.displayName = 'GraphFundsAsCandlestick';
