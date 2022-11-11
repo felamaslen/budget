@@ -1,5 +1,8 @@
+import getUnixTime from 'date-fns/getUnixTime';
 import { setLightness } from 'polished';
-import { ComponentProps, memo, useCallback, useMemo, useState } from 'react';
+import { ComponentProps, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { replaceAtIndex } from 'replace-array';
 
 import { genPixelCompute } from '../graph/helpers';
 import { Graph } from '../graph/shared';
@@ -7,7 +10,9 @@ import { TimeAxes } from '../graph/time-axes';
 import { useLabelY } from './utils';
 
 import { GRAPH_FUNDS_NUM_TICKS } from '~client/constants';
+import { useNow } from '~client/hooks';
 import { formatCurrency, getTickSize } from '~client/modules/format';
+import { getFundsCachedValue } from '~client/selectors';
 import { colors } from '~client/styled';
 import type { Calc, Dimensions, DrawProps, HistoryOptions, Padding, Range } from '~client/types';
 import {
@@ -178,7 +183,50 @@ export const GraphFundsAsCandlestick = memo<
     variables: historyOptions,
   });
 
-  const candles = data?.fundHistoryCandlestick?.candles;
-  return candles?.length ? <GraphWithData {...props} candles={candles} /> : null;
+  const now = useNow();
+  const { value } = useSelector(getFundsCachedValue.now(now));
+  const [scrapedCandle, setScrapedCandle] = useState<
+    Omit<FundHistoryCandlestickGroup, 't0' | 't1'>
+  >({ id: -1, start: value, end: value, max: value, min: value });
+
+  useEffect(() => {
+    setScrapedCandle((prev) => ({
+      ...prev,
+      end: value,
+      max: Math.max(prev.max, value),
+      min: Math.min(prev.min, value),
+    }));
+  }, [value]);
+
+  const candles = useMemo<FundHistoryCandlestickGroup[]>(() => {
+    const originalCandles = data?.fundHistoryCandlestick?.candles ?? [];
+
+    if (!originalCandles.length) {
+      return [];
+    }
+
+    const nowTimestamp = getUnixTime(now);
+    const nowIndex = originalCandles.findIndex(
+      (candle) => candle.t0 <= nowTimestamp && candle.t1 >= nowTimestamp,
+    );
+
+    return nowIndex > -1
+      ? replaceAtIndex(originalCandles, nowIndex, (prev) => ({
+          ...prev,
+          end: scrapedCandle.end,
+          max: Math.max(prev.max, scrapedCandle.max),
+          min: Math.min(prev.min, scrapedCandle.min),
+        }))
+      : [
+          ...originalCandles,
+          {
+            t0: nowTimestamp - (originalCandles[0].t1 - originalCandles[0].t0),
+            t1: nowTimestamp,
+            ...scrapedCandle,
+          },
+        ];
+  }, [data, now, scrapedCandle]);
+
+  return candles.length ? <GraphWithData {...props} candles={candles} /> : null;
 });
 GraphFundsAsCandlestick.displayName = 'GraphFundsAsCandlestick';
