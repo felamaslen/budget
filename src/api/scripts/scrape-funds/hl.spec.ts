@@ -215,7 +215,7 @@ describe('fund scraper - HL', () => {
 
       const url =
         // eslint-disable-next-line max-len
-        'http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/c/cf-lindsell-train-uk-equity-class-d-accumulation';
+        'https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/c/cf-lindsell-train-uk-equity-class-d-accumulation';
 
       expect(getFundUrlHL(fund)).toBe(url);
     });
@@ -228,7 +228,7 @@ describe('fund scraper - HL', () => {
 
       const url =
         // eslint-disable-next-line max-len
-        'http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/t/threadneedle-uk-equity-income-class-1-accumulation-inclusive';
+        'https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/t/threadneedle-uk-equity-income-class-1-accumulation-inclusive';
 
       expect(getFundUrlHL(fund)).toBe(url);
     });
@@ -240,7 +240,7 @@ describe('fund scraper - HL', () => {
       };
 
       const url =
-        'http://www.hl.co.uk/shares/shares-search-results/c/city-of-london-investment-trust-ord-25p';
+        'https://www.hl.co.uk/shares/shares-search-results/c/city-of-london-investment-trust-ord-25p';
 
       expect(getFundUrlHL(fund)).toBe(url);
     });
@@ -251,7 +251,7 @@ describe('fund scraper - HL', () => {
         name: 'Apple Inc Com Stk NPV (share)',
       };
 
-      const url = 'http://www.hl.co.uk/shares/shares-search-results/a/apple-inc-com-stk-npv';
+      const url = 'https://www.hl.co.uk/shares/shares-search-results/a/apple-inc-com-stk-npv';
 
       expect(getFundUrlHL(fund)).toBe(url);
     });

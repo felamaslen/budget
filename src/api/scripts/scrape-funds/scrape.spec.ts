@@ -9,7 +9,7 @@ describe('getFundUrl', () => {
       name: 'foo (accum.)',
     };
 
-    expect(getFundUrl(fund)).toMatch(/http:\/\/www\.hl\.co\.uk/);
+    expect(getFundUrl(fund)).toMatch(/https:\/\/www\.hl\.co\.uk/);
   });
 
   it('should return null for generic broker', () => {

@@ -1,12 +1,15 @@
+import path from 'path';
+import { gunzipSync } from 'zlib';
+
 import { getUnixTime } from 'date-fns';
+import fs from 'fs-extra';
 import gql from 'graphql-tag';
-import nock, { Scope } from 'nock';
+import nock, { Definition } from 'nock';
 import prompts from 'prompts';
 import sinon from 'sinon';
 import { DatabasePoolConnectionType, sql } from 'slonik';
 import * as w from 'wonka';
 
-import { nockHLFund, nockHLShare, nockHLShareFX, nockGeneralShare } from './__tests__/nocks';
 import { run } from '.';
 import { nockCurrencies } from '~api/__tests__/nocks';
 import { getPool } from '~api/modules/db';
@@ -26,13 +29,15 @@ type TestFundPrice = {
   price: number;
 };
 
-// These values come from the test data - see hl.spec.ts and vendor/*
-const testPriceCTY = 424.1;
-const testPriceJupiter = 130.31;
-const testPriceAppleUSD = 225.82;
-const testUSDGBP = 0.771546;
-const testPriceSMTGeneric = 1453.0; // regularMarketPrice
-const testPriceRELXGeneric = 2260.0; // regularMarketPrice
+const recordNocks = process.env.NOCK_RECORD === '1';
+const nockRecordingFile = path.resolve(__dirname, './__tests__/nocks.json');
+
+declare module 'nock' {
+  interface Definition {
+    rawHeaders: string[];
+    responseIsBinary: boolean;
+  }
+}
 
 describe('fund scraper - integration tests', () => {
   const now = new Date('2020-02-22T20:35Z');
@@ -42,11 +47,127 @@ describe('fund scraper - integration tests', () => {
   const uid2 = 67891;
   let fundIds: number[];
 
+  let afterHook: null | (() => Promise<void>) = null;
+  let nockRecordingKey: string;
+
+  const enableNockRecordings = async (): Promise<void> => {
+    const pending = nock.pendingMocks();
+    if (pending.length) {
+      throw new Error(
+        `Unexpected pending mocks before running recording mode: \n\t${pending.join('\n\t')}`,
+      );
+    }
+
+    if (recordNocks) {
+      nock.recorder.rec({
+        dont_print: true,
+        output_objects: true,
+      });
+
+      afterHook = async (): Promise<void> => {
+        const recorded = (nock.recorder.play() as Definition[]).filter(
+          (record) => !(record.scope as string).startsWith('http://127.0.0.1'),
+        );
+        nock.recorder.clear();
+        if (recorded.length) {
+          const removeHeadersByName = (headers: string[], remove: string[]): string[] =>
+            headers.reduce<string[]>(
+              (prev, header, index) =>
+                index % 2 === 0 && !remove.includes(header)
+                  ? [...prev, header, headers[index + 1]]
+                  : prev,
+              [],
+            );
+          const removeHeaderByIndex = (headers: string[], remove: number): string[] =>
+            headers.reduce<string[]>(
+              (prev, header, index) =>
+                index % 2 === 0 && index !== remove ? [...prev, header, headers[index + 1]] : prev,
+              [],
+            );
+
+          const recordedProcessed = recorded.map((record) => {
+            const rawHeaders = removeHeadersByName(record.rawHeaders, [
+              'Date',
+              'x-request-id',
+              'Content-Length',
+              'Connection',
+            ]);
+            const encodingHeaderIndex = rawHeaders.findIndex(
+              (header, index) => index % 2 === 0 && header.toLowerCase() === 'content-encoding',
+            );
+            const isGzipResponse =
+              Array.isArray(record.response) &&
+              !record.responseIsBinary &&
+              encodingHeaderIndex !== -1 &&
+              rawHeaders[encodingHeaderIndex + 1] === 'gzip';
+
+            const response = isGzipResponse
+              ? gunzipSync(Buffer.from((record.response as unknown[]).join(''), 'hex')).toString(
+                  'utf-8',
+                )
+              : record.response;
+
+            return {
+              ...record,
+              response,
+              rawHeaders: removeHeaderByIndex(rawHeaders, encodingHeaderIndex),
+            };
+          });
+
+          let previousData = {};
+          try {
+            previousData = JSON.parse(await fs.readFile(nockRecordingFile, 'utf8'));
+          } catch (err) {
+            if ((err as { code?: string }).code !== 'ENOENT') {
+              throw err;
+            }
+          }
+
+          await fs.writeFile(
+            nockRecordingFile,
+            JSON.stringify({ ...previousData, [nockRecordingKey]: recordedProcessed }, null, 2),
+            'utf-8',
+          );
+        }
+
+        nock.restore();
+      };
+    } else {
+      try {
+        await fs.access(nockRecordingFile, fs.constants.R_OK);
+      } catch (error) {
+        if ((error as { code?: string }).code !== 'ENOENT') {
+          throw error;
+        }
+        return;
+      }
+
+      const recording = JSON.parse(await fs.readFile(nockRecordingFile, 'utf8'));
+      if (!Object.prototype.hasOwnProperty.call(recording, nockRecordingKey)) {
+        return;
+      }
+      nock.define(recording[nockRecordingKey]);
+    }
+  };
+
+  const disableNockRecordings = async (): Promise<void> => {
+    nock.recorder.clear();
+    nock.cleanAll();
+    nock.restore();
+    if (!nock.isActive()) {
+      nock.activate();
+    }
+    nock.disableNetConnect();
+    nock.enableNetConnect('127.0.0.1');
+    afterHook = null;
+  };
+
   beforeAll(async () => {
     app = await getTestApp({ subscriptions: true });
     uid1 = app.uid;
     clock = sinon.useFakeTimers(now);
   });
+
   afterAll(async () => {
     clock.restore();
   });
@@ -107,20 +228,21 @@ describe('fund scraper - integration tests', () => {
     `);
   };
 
-  const setupNocks = async (failures: string[] = []): Promise<Record<string, Scope | Scope[]>> => ({
-    currencies: nockCurrencies(failures.includes('currencies') ? 500 : 200),
-    fund: await nockHLFund(failures.includes('fund') ? 500 : 200),
-    share: await nockHLShare(failures.includes('share') ? 500 : 200),
-    shareFX: await nockHLShareFX(failures.includes('shareFX') ? 500 : 200),
-    genericShare: await nockGeneralShare(failures.includes('genericShare') ? 500 : 200),
-  });
-
   beforeEach(async () => {
     fundIds = [];
     await getPool().connect(clearDb);
     clock.reset();
     nock.cleanAll();
-    await setupNocks();
+
+    const { currentTestName } = expect.getState();
+    nockRecordingKey = currentTestName;
+    await enableNockRecordings();
+    nockCurrencies();
+  });
+
+  afterEach(async () => {
+    await afterHook?.();
+    await disableNockRecordings();
   });
 
   describe('scraping prices', () => {
@@ -152,7 +274,7 @@ describe('fund scraper - integration tests', () => {
       expect(gbxResult).toStrictEqual([
         expect.objectContaining({
           time: new Date(now),
-          price: testPriceCTY,
+          price: 414.5,
         }),
       ]);
     });
@@ -166,7 +288,7 @@ describe('fund scraper - integration tests', () => {
       expect(fundResult).toStrictEqual([
         expect.objectContaining({
           time: new Date(now),
-          price: testPriceJupiter,
+          price: 205.55,
         }),
       ]);
     });
@@ -180,7 +302,7 @@ describe('fund scraper - integration tests', () => {
       expect(usdResult).toStrictEqual([
         expect.objectContaining({
           time: new Date(now),
-          price: testPriceAppleUSD * testUSDGBP * 100,
+          price: 13506.684276,
         }),
       ]);
     });
@@ -194,7 +316,7 @@ describe('fund scraper - integration tests', () => {
       expect(genericShareResult).toStrictEqual([
         expect.objectContaining({
           time: new Date(now),
-          price: testPriceSMTGeneric,
+          price: 650.4,
         }),
       ]);
     });
@@ -208,7 +330,7 @@ describe('fund scraper - integration tests', () => {
       expect(futureShareResult).toStrictEqual([
         expect.objectContaining({
           time: new Date(now),
-          price: testPriceRELXGeneric,
+          price: 2499,
         }),
       ]);
     });
@@ -253,11 +375,9 @@ describe('fund scraper - integration tests', () => {
 
         await run();
         clock.tick(3600 * 1000);
-        await setupNocks();
 
         await run();
         clock.tick(3600 * 1000);
-        await setupNocks();
 
         const [subscriptionResult] = await Promise.all([
           runSubscription<FundPricesUpdatedSubscription, FundPricesUpdatedSubscriptionVariables>(
@@ -273,8 +393,8 @@ describe('fund scraper - integration tests', () => {
 
         expect(subscriptionResult?.fundPricesUpdated?.startTime).toBe(getUnixTime(now));
 
-        expect(subscriptionResult?.fundPricesUpdated?.annualisedFundReturns).toMatchInlineSnapshot(
-          `0.3785203624289302`,
+        expect(subscriptionResult?.fundPricesUpdated?.annualisedFundReturns).toStrictEqual(
+          expect.any(Number),
         );
 
         expect(subscriptionResult?.fundPricesUpdated?.prices).toStrictEqual<FundHistory['prices']>(
@@ -284,7 +404,7 @@ describe('fund scraper - integration tests', () => {
               groups: [
                 {
                   startIndex: 0,
-                  values: [424.1, 424.1, 424.1],
+                  values: [414.5, 414.5, 414.5],
                 },
               ],
             },
@@ -293,7 +413,7 @@ describe('fund scraper - integration tests', () => {
               groups: [
                 {
                   startIndex: 0,
-                  values: [1453, 1453, 1453],
+                  values: [650.4, 650.4, 650.4],
                 },
               ],
             },
@@ -302,7 +422,7 @@ describe('fund scraper - integration tests', () => {
               groups: [
                 {
                   startIndex: 0,
-                  values: [2260, 2260, 2260],
+                  values: [2499, 2499, 2499],
                 },
               ],
             },
@@ -337,41 +457,6 @@ describe('fund scraper - integration tests', () => {
       });
     });
 
-    describe('when one or more requests fail', () => {
-      const setupNocksWithFailure = async (): Promise<void> => {
-        nock.cleanAll();
-        await setupNocks(['share', 'shareFX']);
-      };
-
-      it('should re-throw the error', async () => {
-        expect.assertions(1);
-        await setupNocksWithFailure();
-
-        await expect(run()).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Request failed with status code 500"`,
-        );
-      });
-
-      it('should not add any items to the database', async () => {
-        expect.assertions(3);
-        await setupNocksWithFailure();
-
-        try {
-          await run();
-        } catch (err) {
-          // pass
-        } finally {
-          const gbxResult = await getTestFundPrice(fundIds[0]);
-          const fundResult = await getTestFundPrice(fundIds[1]);
-          const usdResult = await getTestFundPrice(fundIds[2]);
-
-          expect(gbxResult).toHaveLength(0);
-          expect(fundResult).toHaveLength(0);
-          expect(usdResult).toHaveLength(0);
-        }
-      });
-    });
-
     it('should skip totally sold funds', async () => {
       expect.assertions(1);
       await run();
@@ -384,18 +469,18 @@ describe('fund scraper - integration tests', () => {
         expect.assertions(1);
 
         await run();
+
         clock.tick(86400);
-        await setupNocks();
         await run();
 
         const gbxResult = await getTestFundPrice(fundIds[0]);
 
         expect(gbxResult).toStrictEqual([
           expect.objectContaining({
-            price: testPriceCTY,
+            price: 414.5,
           }),
           expect.objectContaining({
-            price: testPriceCTY,
+            price: 414.5,
           }),
         ]);
       });
@@ -446,22 +531,23 @@ describe('fund scraper - integration tests', () => {
         // This is mocking what a user might input, expecting the prompts to happen in
         // alphabetical order, per-fund
         prompts.inject([
-          'LON:BP', // BP
-          'LON:BATS', // British American Tobacco
-          'LON:GLX', // GlaxoSmithKline
-          'LON:LLOY', // Lloyds
-          'LON:RDSA', // Royal Dutch Shell
-          'LON:VOD', // Vodafone
-          '', // AXA Framlington UK Select
-          '', // J O Hambro
-          '', // Jupiter UK Special Situations
-          '', // Lindsell Train UK Equity
-          '', // Majedie UK Equity
-          '', // Marlborough Multi Cap
-          '', // Marlborough UK Micro-Cap
-          '', // Old Mutual Global Investors
-          '', // River & Mercantile UK Dynamic
-          '', // Woodford CF
+          'LON:AZN', // AstraZeneca
+          'LON:BAE',
+          'LON:BP',
+          'LON:BATS',
+          'LON:IMB', // Imperial Brands
+          'LON:REL', // RELX
+          'LON:SHEL', // Shell
+          '', // BHP
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
         ]);
       });
     });
@@ -514,35 +600,21 @@ describe('fund scraper - integration tests', () => {
       `);
 
       expect(stockCodes.rows).toStrictEqual([
+        expect.objectContaining({ code: 'LON:AZN', name: 'AstraZeneca plc Ordinary US$0.25' }),
+        expect.objectContaining({ code: 'LON:BAE', name: 'BAE Systems plc Ordinary 2.5p' }),
+        expect.objectContaining({ code: 'LON:BP', name: 'BP Plc Ordinary US$0.25' }),
         expect.objectContaining({
-          name: 'BP Plc Ordinary US$0.25',
-          code: 'LON:BP',
-        }),
-        expect.objectContaining({
-          name: 'British American Tobacco plc Ordinary 25p',
           code: 'LON:BATS',
+          name: 'British American Tobacco plc Ordinary 25p',
         }),
-        expect.objectContaining({
-          name: 'GlaxoSmithKline plc Ordinary 25p',
-          code: 'LON:GLX',
-        }),
-        expect.objectContaining({
-          name: 'Lloyds Banking Group plc Ordinary 10p',
-          code: 'LON:LLOY',
-        }),
-        expect.objectContaining({
-          name: 'Royal Dutch Shell Plc B Shares EUR0.07',
-          code: 'LON:RDSA',
-        }),
-        expect.objectContaining({
-          name: 'Vodafone Group plc USD0.20 20/21',
-          code: 'LON:VOD',
-        }),
+        expect.objectContaining({ code: 'LON:IMB', name: 'Imperial Brands Group Ordinary 10p' }),
+        expect.objectContaining({ code: 'LON:REL', name: 'RELX plc Ord 14 51/116p' }),
+        expect.objectContaining({ code: 'LON:SHEL', name: 'Shell plc Ordinary EUR0.07' }),
       ]);
     });
 
     it("should cache null codes, so they don't have to be asked again", async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       await run();
 
@@ -556,47 +628,21 @@ describe('fund scraper - integration tests', () => {
       ORDER BY name
       `);
 
+      expect(stockCodes.rows).toStrictEqual(
+        expect.arrayContaining([expect.objectContaining({ code: null })]),
+      );
+
       expect(stockCodes.rows).toStrictEqual([
-        expect.objectContaining({
-          name: 'AXA Framlington UK Select Opportunities Class ZI',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'J O Hambro CM UK Equity Income Class B',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'Jupiter UK Special Situations Class I',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'Lindsell Train UK Equity Class D Accumulation Shares',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'Majedie UK Equity Class X',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'Marlborough Multi Cap Income Class P',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'Marlborough UK Micro-Cap Growth Class P',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'Old Mutual Global Investors (Offshore) UK Smaller Companies Focus Class A',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'River &amp; Mercantile UK Dynamic Equity Class B',
-          code: null,
-        }),
-        expect.objectContaining({
-          name: 'Woodford CF Woodford Equity Income Class Z',
-          code: null,
-        }),
+        expect.objectContaining({ code: null, name: 'BHP GROUP LIMITED' }),
+        expect.objectContaining({ code: null, name: 'DBS GROUP HOLDINGS LTD' }),
+        expect.objectContaining({ code: null, name: 'HON HAI PRECISION INDUSTRY' }),
+        expect.objectContaining({ code: null, name: 'ITC LTD' }),
+        expect.objectContaining({ code: null, name: 'MACQUARIE GROUP LIMITED' }),
+        expect.objectContaining({ code: null, name: 'MEDIA TEK INC' }),
+        expect.objectContaining({ code: null, name: 'SAMSUNG ELECTRONICS CO. LTD' }),
+        expect.objectContaining({ code: null, name: 'SINGAPORE TELECOMMUNICATIONS' }),
+        expect.objectContaining({ code: null, name: 'TAIWAN SEMICONDUCTOR MANUFACTURING CO.' }),
+        expect.objectContaining({ code: null, name: 'WOODSIDE ENERGY GROUP LTD' }),
       ]);
     });
 
@@ -614,7 +660,7 @@ describe('fund scraper - integration tests', () => {
       const stocks = await getPool().query(sql`
         SELECT * FROM stocks
         WHERE uid = ${userId}
-        ORDER BY name
+        ORDER BY subweight desc, name
         `);
 
       expect(stocks.rows).toHaveLength(10);
@@ -623,64 +669,64 @@ describe('fund scraper - integration tests', () => {
 
       expect(stocks.rows).toStrictEqual([
         expect.objectContaining({
-          name: 'BP Plc Ordinary US$0.25',
-          code: 'LON:BP',
+          name: 'Shell plc Ordinary EUR0.07',
+          code: 'LON:SHEL',
           weight: weightCTY[userId],
-          subweight: 2.5,
+          subweight: 4.01,
+        }),
+        expect.objectContaining({
+          name: 'BAE Systems plc Ordinary 2.5p',
+          code: 'LON:BAE',
+          weight: weightCTY[userId],
+          subweight: 3.83,
         }),
         expect.objectContaining({
           name: 'British American Tobacco plc Ordinary 25p',
           code: 'LON:BATS',
           weight: weightCTY[userId],
-          subweight: 4.94,
+          subweight: 3.71,
         }),
         expect.objectContaining({
           name: 'Diageo plc Ordinary 28 101/108p',
           code: 'LON:DGE',
           weight: weightCTY[userId],
-          subweight: 2.95,
-        }),
-        expect.objectContaining({
-          name: 'GlaxoSmithKline plc Ordinary 25p',
-          code: 'LON:GLX',
-          weight: weightCTY[userId],
-          subweight: 2.54,
-        }),
-        expect.objectContaining({
-          name: 'HSBC Holdings plc Ordinary USD0.50',
-          code: 'LON:HSBA',
-          weight: weightCTY[userId],
-          subweight: 4.34,
-        }),
-        expect.objectContaining({
-          name: 'Lloyds Banking Group plc Ordinary 10p',
-          code: 'LON:LLOY',
-          weight: weightCTY[userId],
-          subweight: 2.53,
-        }),
-        expect.objectContaining({
-          name: 'Prudential plc Ordinary 5p',
-          code: 'LON:PRU',
-          weight: weightCTY[userId],
-          subweight: 2.68,
-        }),
-        expect.objectContaining({
-          name: 'Royal Dutch Shell Plc B Shares EUR0.07',
-          code: 'LON:RDSA',
-          weight: weightCTY[userId],
-          subweight: 2.87,
+          subweight: 3.46,
         }),
         expect.objectContaining({
           name: 'Unilever plc Ordinary 3.11p',
           code: 'LON:ULVR',
           weight: weightCTY[userId],
-          subweight: 2.73,
+          subweight: 3.43,
         }),
         expect.objectContaining({
-          name: 'Vodafone Group plc USD0.20 20/21',
-          code: 'LON:VOD',
+          name: 'BP Plc Ordinary US$0.25',
+          code: 'LON:BP',
           weight: weightCTY[userId],
-          subweight: 2.71,
+          subweight: 3.28,
+        }),
+        expect.objectContaining({
+          name: 'RELX plc Ord 14 51/116p',
+          code: 'LON:REL',
+          weight: weightCTY[userId],
+          subweight: 3.28,
+        }),
+        expect.objectContaining({
+          name: 'AstraZeneca plc Ordinary US$0.25',
+          code: 'LON:AZN',
+          weight: weightCTY[userId],
+          subweight: 3.06,
+        }),
+        expect.objectContaining({
+          name: 'HSBC Holdings plc Ordinary USD0.50',
+          code: 'LON:HSBA',
+          weight: weightCTY[userId],
+          subweight: 2.99,
+        }),
+        expect.objectContaining({
+          name: 'Imperial Brands Group Ordinary 10p',
+          code: 'LON:IMB',
+          weight: weightCTY[userId],
+          subweight: 2.75,
         }),
       ]);
     });

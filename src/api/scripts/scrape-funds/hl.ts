@@ -33,7 +33,7 @@ export function getHoldingsFromDataHL(fund: Pick<Fund, 'name'>, data: string): H
   const regexCells = /<td[^>]*>(.*?)<\/td>/g;
 
   return matchRows.reduce((last: Holding[], row: string): Holding[] => {
-    const rowMatch = row.match(regexCells) || [];
+    const rowMatch = row.match(regexCells);
     if (!rowMatch) {
       return last;
     }
@@ -100,7 +100,7 @@ function getSystemType(humanType: ShortFundType): LongFundType | null {
 export function getFundUrlHL(fund: Pick<Fund, 'name'>): string {
   // returns a URL like:
   // eslint-disable-next-line max-len
-  // http://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation
+  // https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hl-multi-manager-uk-growth-accumulation
   const [, humanName, humanTypeRaw] = fund.name.match(config.data.funds.scraper.regex) || [];
 
   const humanType = humanTypeRaw.toLowerCase() as ShortFundType;
@@ -113,7 +113,7 @@ export function getFundUrlHL(fund: Pick<Fund, 'name'>): string {
 
   const firstLetter = systemName[0];
 
-  let urlParts = ['http://www.hl.co.uk'];
+  let urlParts = ['https://www.hl.co.uk'];
 
   if (isShare) {
     urlParts = [...urlParts, 'shares/shares-search-results', firstLetter, systemName];

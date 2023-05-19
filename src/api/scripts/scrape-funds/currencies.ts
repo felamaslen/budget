@@ -20,6 +20,7 @@ export async function getCurrencyPrices(): Promise<CurrencyPrices> {
       GBP: poundRate,
     };
   } catch (err) {
+    logger.warn('Error fetching currency prices', err);
     return {};
   }
 }
