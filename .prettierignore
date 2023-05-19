@@ -2,3 +2,4 @@ src/client/types/gql.tsx
 src/api/types/gql.ts
 src/api/introspection.json
 src/api/scripts/scrape-funds/vendor
+src/api/**/nocks.json
