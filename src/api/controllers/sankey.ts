@@ -18,18 +18,32 @@ import { getDateFromYearAndMonth, getFinancialYear, startMonth } from '~shared/p
 
 function aggregateSmallValues<T extends { weight: number }>(
   items: T[],
-  minWeight = 0.05,
-  totalWeightExplicit?: number,
+  {
+    parent,
+    minWeight = 0.05,
+    nameKey,
+    totalWeightExplicit,
+  }: {
+    parent?: string;
+    minWeight?: number;
+    nameKey?: keyof T;
+    totalWeightExplicit?: number;
+  } = {},
 ): {
   explicit: T[];
   aggregatedWeight: number;
 } {
   const totalWeight =
     totalWeightExplicit ?? items.reduce<number>((sum, { weight }) => sum + weight, 0);
-  const explicit = items.filter((item) => item.weight / totalWeight >= minWeight);
+
+  const isExplicit = (item: T): boolean =>
+    !(nameKey && item[nameKey] === parent) && item.weight / totalWeight >= minWeight;
+
+  const explicit = items.filter(isExplicit);
   const aggregatedWeight = items
-    .filter((item) => item.weight / totalWeight < minWeight)
+    .filter((item) => !isExplicit(item))
     .reduce<number>((sum, { weight }) => sum + weight, 0);
+
   return { explicit, aggregatedWeight };
 }
 
@@ -100,8 +114,7 @@ const withIncomeDeductions =
         ],
         [],
       ),
-      0.05,
-      totalWeight,
+      { minWeight: 0.05, totalWeightExplicit: totalWeight },
     );
 
     const negativeLinks = aggregateSmallValues(
@@ -116,8 +129,7 @@ const withIncomeDeductions =
         ],
         [],
       ),
-      0.05,
-      totalWeight,
+      { minWeight: 0.05, totalWeightExplicit: totalWeight },
     );
 
     return [
@@ -140,7 +152,10 @@ const withExpenses =
         return prev;
       }
 
-      const { explicit, aggregatedWeight } = aggregateSmallValues(filtered);
+      const { explicit, aggregatedWeight } = aggregateSmallValues(filtered, {
+        nameKey: 'category',
+        parent: link,
+      });
 
       return [
         ...prev,
