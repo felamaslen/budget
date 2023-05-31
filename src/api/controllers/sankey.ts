@@ -16,7 +16,7 @@ import {
 import { PageListStandard, SankeyLink, SankeyResponse } from '~api/types';
 import { getDateFromYearAndMonth, getFinancialYear, startMonth } from '~shared/planning';
 
-function aggregateSmallValues<T extends { weight: number }>(
+function aggregateSmallValues<T extends { weight: number }, NameKey extends keyof T = never>(
   items: T[],
   {
     parent,
@@ -24,9 +24,9 @@ function aggregateSmallValues<T extends { weight: number }>(
     nameKey,
     totalWeightExplicit,
   }: {
-    parent?: string;
+    parent?: T[NameKey];
     minWeight?: number;
-    nameKey?: keyof T;
+    nameKey?: NameKey;
     totalWeightExplicit?: number;
   } = {},
 ): {
