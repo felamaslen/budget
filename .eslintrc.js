@@ -44,7 +44,6 @@ module.exports = {
   },
   rules: {
     '@typescript-eslint/camelcase': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': [
       'error',
       {
@@ -141,7 +140,6 @@ module.exports = {
       rules: {
         'no-undef-init': 'off',
         'prefer-destructuring': 'off',
-        '@typescript-eslint/explicit-function-return-type': ['error'],
         '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
         '@typescript-eslint/no-var-requires': ['error'],
       },
