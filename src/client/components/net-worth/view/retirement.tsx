@@ -21,7 +21,7 @@ export const Retirement: React.FC<Props> = ({ ftiSeries }) => {
 
   const line = positiveValues.map(([, fti]) => fti);
   const { slope, intercept } = exponentialRegression(line);
-  if (!slope) {
+  if (slope < 0) {
     return <NeverRetire />;
   }
   const indexRequired = (Math.log(ftiRequiredForRetirement) - intercept) / slope;

@@ -27,4 +27,22 @@ describe('<Retirement />', () => {
     const { getByText } = render(<Retirement {...props} />);
     expect(getByText('Retire in two years')).toBeInTheDocument();
   });
+
+  it('should say never retire if the slope is negative', () => {
+    expect.assertions(1);
+    const { getByText } = render(
+      <Retirement
+        ftiSeries={[
+          [getUnixTime(subMonths(new Date(), 6)), 13],
+          [getUnixTime(subMonths(new Date(), 5)), 17],
+          [getUnixTime(subMonths(new Date(), 4)), 16.4],
+          [getUnixTime(subMonths(new Date(), 3)), 9],
+          [getUnixTime(subMonths(new Date(), 2)), 12],
+          [getUnixTime(subMonths(new Date(), 1)), 11],
+          [getUnixTime(subMonths(new Date(), 0)), 5],
+        ]}
+      />,
+    );
+    expect(getByText('Never retire!')).toBeInTheDocument();
+  });
 });
