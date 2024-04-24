@@ -17847,6 +17847,13 @@ touch@^3.1.0:
   dependencies:
     nopt "~1.0.10"
 
+tough-cookie-file-store@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/tough-cookie-file-store/-/tough-cookie-file-store-2.0.3.tgz#788f7a6fe5cd8f61a1afb71b2f0b964ebf914b80"
+  integrity sha512-sMpZVcmFf6EYFHFFl+SYH4W1/OnXBYMGDsv2IlbQ2caHyFElW/UR/gpj/KYU1JwmP4dE9xqwv2+vWcmlXHojSw==
+  dependencies:
+    tough-cookie "^4.0.0"
+
 tough-cookie@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-4.0.0.tgz#d822234eeca882f991f0f908824ad2622ddbece4"
@@ -19278,16 +19285,17 @@ y18n@^5.0.5:
   resolved "https://registry.yarnpkg.com/y18n/-/y18n-5.0.8.tgz#7f4934d0f7ca8c56f95314939ddcd2dd91ce1d55"
   integrity sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==
 
-yahoo-finance2@^2.3.0:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/yahoo-finance2/-/yahoo-finance2-2.4.1.tgz#2ccd422e33228fc34d42e919b0d2fdd8d3f76bbf"
-  integrity sha512-jl5oHr25RC24nOmoIiDqjnc/Iiy3MZAB+dIPCyUR+o5uz72xHfTZDM9tPeheggmlAGV+KftPP6smZ6L6lNgkSQ==
+yahoo-finance2@^2.11.2:
+  version "2.11.2"
+  resolved "https://registry.yarnpkg.com/yahoo-finance2/-/yahoo-finance2-2.11.2.tgz#44f35105a2500fd1da22ac4f4393106f2bfec6d1"
+  integrity sha512-S5lHKqneMXMKN/rxowqErEfkvXJE6s/SPuekT7UkOVbsSyRcptea/U3Mud+ikOEXEbKXPiZrU0Jy+iF51ITuSw==
   dependencies:
     "@types/tough-cookie" "^4.0.2"
     ajv "8.10.0"
     ajv-formats "2.1.1"
     node-fetch "^2.6.1"
     tough-cookie "^4.1.2"
+    tough-cookie-file-store "^2.0.3"
 
 yallist@^3.0.2:
   version "3.1.1"
