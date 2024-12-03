@@ -52,7 +52,6 @@ export async function selectCandlestickRows(
   db: DatabaseTransactionConnectionType,
   uid: number,
   minTime: Date,
-  now: Date,
   resolutionNum: number,
   resolutionPeriod: string,
 ): Promise<readonly CandlestickRow[]> {
