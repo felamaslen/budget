@@ -1,8 +1,4 @@
 import {
-  addDays,
-  addMonths,
-  addWeeks,
-  addYears,
   differenceInDays,
   differenceInMonths,
   differenceInWeeks,
@@ -28,7 +24,6 @@ function getResolution(
   now: Date,
   minTime: Date,
 ): {
-  addPeriod: (date: Date, num: number) => Date;
   num: number;
   period: 'day' | 'week' | 'month' | 'year';
 } {
@@ -36,28 +31,24 @@ function getResolution(
   if (numYears < 2) {
     const period = 'day';
     const numDays = differenceInDays(now, minTime);
-    const addPeriod = addDays;
     const num = Math.min(1, Math.ceil(numDays / MAX_CANDLES));
-    return { addPeriod, num, period };
+    return { num, period };
   }
   if (numYears < 5) {
     const period = 'week';
     const numWeeks = differenceInWeeks(now, minTime);
-    const addPeriod = addWeeks;
     const num = Math.min(1, Math.ceil(numWeeks / MAX_CANDLES));
-    return { addPeriod, num, period };
+    return { num, period };
   }
   if (numYears < MAX_CANDLES) {
     const period = 'month';
     const numMonths = differenceInMonths(now, minTime);
-    const addPeriod = addMonths;
     const num = Math.min(1, Math.ceil(numMonths / MAX_CANDLES));
-    return { addPeriod, num, period };
+    return { num, period };
   }
   const period = 'year';
-  const addPeriod = addYears;
   const num = Math.min(1, Math.ceil(numYears / MAX_CANDLES));
-  return { addPeriod, num, period };
+  return { num, period };
 }
 
 export async function readFundHistoryCandlestick(
@@ -65,19 +56,19 @@ export async function readFundHistoryCandlestick(
   uid: number,
   args: QueryFundHistoryCandlestickArgs,
 ): Promise<FundHistoryCandlestick> {
-  const period = args.period ?? FundPeriod.Year;
+  const periodArg = args.period ?? FundPeriod.Year;
   const length = args.length ?? 1;
   const now = new Date();
 
   const minPossibleTime = await selectCandlestickMaxAge(db, uid);
   if (!minPossibleTime) {
-    return { candles: [], length, period };
+    return { candles: [], length, period: periodArg };
   }
 
-  const minTime = getMaxAge(now, minPossibleTime, period, length);
-  const resolution = getResolution(now, minTime);
+  const minTime = getMaxAge(now, minPossibleTime, periodArg, length);
+  const { num, period } = getResolution(now, minTime);
 
-  const candles = await selectCandlestickRows(db, uid, minTime, resolution.num, resolution.period);
+  const candles = await selectCandlestickRows(db, uid, minTime, num, period);
 
   return {
     candles: candles.map<FundHistoryCandlestickGroup>((row, index) => ({
@@ -90,6 +81,6 @@ export async function readFundHistoryCandlestick(
       end: round(index < candles.length - 1 ? candles[index + 1].start : row.end, 2),
     })),
     length,
-    period,
+    period: periodArg,
   };
 }
