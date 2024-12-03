@@ -11,20 +11,26 @@ export type CandlestickRow = {
   end: number;
 };
 
+export type ResolutionPeriod = 'day' | 'week' | 'month' | 'year';
+
 function ageInPeriodsCTE(
   resolutionNum: number,
-  resolutionPeriod: string,
+  resolutionPeriod: ResolutionPeriod,
   minDate: string,
   time: SqlTokenType,
 ): SqlTokenType {
   const age = sql`age(${time}, ${minDate})`;
 
   switch (resolutionPeriod) {
+    case 'day':
+      return sql`floor((extract(epoch from ${age})) / 86400 / ${resolutionNum})`;
     case 'month':
       return sql`floor((${sql.join(
         [sql`extract(month from ${age})`, sql`extract(year from ${age}) * 12`],
         sql` + `,
       )}) / ${resolutionNum})`;
+    case 'year':
+      return sql`floor((extract(year from ${age})) / ${resolutionNum})`;
     case 'week':
       return sql`floor((extract(epoch from ${age})) / 604800 / ${resolutionNum})`;
     default:
@@ -53,7 +59,7 @@ export async function selectCandlestickRows(
   uid: number,
   minTime: Date,
   resolutionNum: number,
-  resolutionPeriod: string,
+  resolutionPeriod: ResolutionPeriod,
 ): Promise<readonly CandlestickRow[]> {
   const minDate = formatISO(minTime, { representation: 'date' });
   const interval = sql`(${`'${resolutionNum} ${resolutionPeriod}'`})::interval`;

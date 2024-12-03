@@ -10,7 +10,11 @@ import type { DatabaseTransactionConnectionType } from 'slonik';
 
 import { getMaxAge } from './funds.utils';
 
-import { selectCandlestickMaxAge, selectCandlestickRows } from '~api/queries/fund-candlestick';
+import {
+  ResolutionPeriod,
+  selectCandlestickMaxAge,
+  selectCandlestickRows,
+} from '~api/queries/fund-candlestick';
 import {
   FundHistoryCandlestick,
   FundHistoryCandlestickGroup,
@@ -25,7 +29,7 @@ function getResolution(
   minTime: Date,
 ): {
   num: number;
-  period: 'day' | 'week' | 'month' | 'year';
+  period: ResolutionPeriod;
 } {
   const numYears = differenceInYears(now, minTime);
   if (numYears < 2) {
