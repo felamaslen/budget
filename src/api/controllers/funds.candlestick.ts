@@ -31,23 +31,23 @@ function getResolution(
   if (numYears < 2) {
     const period = 'day';
     const numDays = differenceInDays(now, minTime);
-    const num = Math.min(1, Math.ceil(numDays / MAX_CANDLES));
+    const num = Math.max(1, Math.ceil(numDays / MAX_CANDLES));
     return { num, period };
   }
   if (numYears < 5) {
     const period = 'week';
     const numWeeks = differenceInWeeks(now, minTime);
-    const num = Math.min(1, Math.ceil(numWeeks / MAX_CANDLES));
+    const num = Math.max(1, Math.ceil(numWeeks / MAX_CANDLES));
     return { num, period };
   }
   if (numYears < MAX_CANDLES) {
     const period = 'month';
     const numMonths = differenceInMonths(now, minTime);
-    const num = Math.min(1, Math.ceil(numMonths / MAX_CANDLES));
+    const num = Math.max(1, Math.ceil(numMonths / MAX_CANDLES));
     return { num, period };
   }
   const period = 'year';
-  const num = Math.min(1, Math.ceil(numYears / MAX_CANDLES));
+  const num = Math.max(1, Math.ceil(numYears / MAX_CANDLES));
   return { num, period };
 }
 
