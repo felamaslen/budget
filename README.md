@@ -1,3 +1,5 @@
+> Superseded by [fire](https://github.com/felamaslen/fire)
+
 # Budget
 
 Personal finance app for web, cli and android [![Build Status](https://travis-ci.org/felamaslen/budget.svg?branch=master)](https://travis-ci.org/felamaslen/budget)
